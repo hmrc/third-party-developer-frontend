@@ -22,6 +22,7 @@ import play.api.data.Forms._
 import play.api.data.validation.{Constraint, Invalid, Valid, ValidationError}
 import play.api.data.format.Formatter
 import play.api.data.FormError
+import domain.models.controllers.SandboxApplicationSummary
 
 trait ConfirmPassword {
   val password: String
@@ -223,6 +224,17 @@ object AddTeamMemberForm {
     )(AddTeamMemberForm.apply)(AddTeamMemberForm.unapply)
   )
 }
+
+case class ChooseApplicationToUpliftForm(applicationId: ApplicationId)
+
+object ChooseApplicationToUpliftForm {
+  val form: Form[ChooseApplicationToUpliftForm] = Form(
+    mapping(
+      "applicationId" -> nonEmptyText.transform[ApplicationId](ApplicationId(_), id => id.value)
+    )(ChooseApplicationToUpliftForm.apply)(ChooseApplicationToUpliftForm.unapply)
+  )
+}
+
 
 case class AddApplicationNameForm(applicationName: String)
 

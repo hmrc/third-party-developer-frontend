@@ -50,6 +50,7 @@ GET         /applications/add/production/10-days                                
 GET         /applications/add/sandbox                                                                    controllers.AddApplication.addApplicationSubordinate
 GET         /applications/add/production                                                                 controllers.AddApplication.addApplicationPrincipal
 GET         /applications/add/switch                                                                     controllers.AddApplication.addApplicationProductionSwitch
+POST        /applications/add/switch                                                                     controllers.AddApplication.chooseApplicationToUpliftAction
 
 GET         /applications/add/:environment/name                                                          controllers.AddApplication.addApplicationName(environment: domain.models.applications.Environment)
 POST        /applications/add/:environment/name                                                          controllers.AddApplication.editApplicationNameAction(environment: domain.models.applications.Environment)

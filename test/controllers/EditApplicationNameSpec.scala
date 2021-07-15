@@ -82,6 +82,7 @@ class EditApplicationNameSpec
     val addApplicationStartPrincipalView = app.injector.instanceOf[AddApplicationStartPrincipalView]
     val addApplicationSubordinateSuccessView = app.injector.instanceOf[AddApplicationSubordinateSuccessView]
     val addApplicationNameView = app.injector.instanceOf[AddApplicationNameView]
+    val chooseApplicationToUpliftView = app.injector.instanceOf[ChooseApplicationToUpliftView]
     implicit val environmentNameService = new EnvironmentNameService(appConfig)
 
     val underTest = new AddApplication(
@@ -101,7 +102,8 @@ class EditApplicationNameSpec
       addApplicationStartSubordinateView,
       addApplicationStartPrincipalView,
       addApplicationSubordinateSuccessView,
-      addApplicationNameView
+      addApplicationNameView,
+      chooseApplicationToUpliftView
     )
 
     implicit val hc: HeaderCarrier = HeaderCarrier()

@@ -35,6 +35,10 @@ import scala.concurrent.{ExecutionContext, Future}
 import scala.concurrent.Future.successful
 import uk.gov.hmrc.http.HeaderCarrier
 import domain.models.controllers.ManageApplicationsViewModel
+import play.api.libs.json.Json
+import domain.Error._
+import domain.models.controllers.SandboxApplicationSummary
+import domain.models.developers.DeveloperSession
 
 @Singleton
 class AddApplication @Inject() (
@@ -54,7 +58,8 @@ class AddApplication @Inject() (
     addApplicationStartSubordinateView: AddApplicationStartSubordinateView,
     addApplicationStartPrincipalView: AddApplicationStartPrincipalView,
     addApplicationSubordinateSuccessView: AddApplicationSubordinateSuccessView,
-    addApplicationNameView: AddApplicationNameView
+    addApplicationNameView: AddApplicationNameView,
+    chooseApplicationToUpliftView: ChooseApplicationToUpliftView
 )(implicit val ec: ExecutionContext, val appConfig: ApplicationConfig, val environmentNameService: EnvironmentNameService)
     extends ApplicationController(mcc) {
 
@@ -90,19 +95,70 @@ class AddApplication @Inject() (
   def tenDaysWarning(): Action[AnyContent] = loggedInAction { implicit request => 
     successful(Ok(tenDaysWarningView())) 
   }
-
-  def addApplicationProductionSwitch(): Action[AnyContent] = loggedInAction { implicit request =>
-    addApplicationName(Environment.PRODUCTION)(request)
-  }
-
-  // def addApplicationChooseWhichAppToUplift():  Action[AnyContent] = loggedInAction { implicit request =>
-  //   ???
-  // }
-
+  
   def addApplicationName(environment: Environment): Action[AnyContent] = loggedInAction { implicit request =>
     val form = AddApplicationNameForm.form.fill(AddApplicationNameForm(""))
     successful(Ok(addApplicationNameView(form, environment)))
   }
+
+  private def getUpliftData(loggedIn: DeveloperSession)(implicit hc: HeaderCarrier): Future[(Seq[SandboxApplicationSummary], Boolean)] =
+    applicationService.fetchSandboxSummariesByTeamMember(loggedIn.developer.userId, loggedIn.email) flatMap { 
+      case Nil              => throw new IllegalStateException("Should not be requesting with this data")
+      case sandboxSummaries => 
+        val appIds = sandboxSummaries.map(_.id)
+        applicationService.identifyUpliftableSandboxAppIds(appIds).map { upliftableApplicationIds =>
+          val countOfUpliftable = upliftableApplicationIds.size
+          val upliftableSummaries = sandboxSummaries.filter(s => upliftableApplicationIds.contains(s.id))
+          val haveAppsThatCannotBeUplifted = countOfUpliftable < sandboxSummaries.size
+
+          (upliftableSummaries, haveAppsThatCannotBeUplifted)
+        }
+      }
+
+  def addApplicationProductionSwitch(): Action[AnyContent] = loggedInAction { implicit request =>
+    def chooseApplicationToUplift(upliftableSummaries: Seq[SandboxApplicationSummary], showFluff: Boolean): Action[AnyContent] = loggedInAction { implicit request =>
+      val form = 
+        if(upliftableSummaries.size == 1)
+          ChooseApplicationToUpliftForm.form.fill(ChooseApplicationToUpliftForm(upliftableSummaries.head.id))
+        else
+          ChooseApplicationToUpliftForm.form
+
+      successful(Ok(chooseApplicationToUpliftView(form, upliftableSummaries, showFluff)))
+    }
+
+    getUpliftData(loggedIn).flatMap { data =>
+      val (upliftableSummaries, haveAppsThatCannotBeUplifted) = data
+      (upliftableSummaries.size, haveAppsThatCannotBeUplifted) match {
+        case (0, _)     => successful(BadRequest(Json.toJson(BadRequestError)))
+        case (1, false) => addApplicationName(PRODUCTION)(request)
+        case _  => chooseApplicationToUplift(upliftableSummaries, haveAppsThatCannotBeUplifted)(request)
+      }
+    }
+  }
+  
+
+  def chooseApplicationToUpliftAction(): Action[AnyContent] = loggedInAction { implicit request =>
+
+    def handleValidForm(validForm: ChooseApplicationToUpliftForm) = {
+      // TODO - when ready we should go to the check page directly (after copying app)
+      // successful(Redirect(controllers.checkpages.routes.ApplicationCheck.requestCheckPage(validForm.applicationId)))
+      addApplicationName(PRODUCTION)(request)
+    }      
+
+    def handleInvalidForm(formWithErrors: Form[ChooseApplicationToUpliftForm]) = {
+      getUpliftData(loggedIn).flatMap { data =>
+        val (upliftableSummaries, haveAppsThatCannotBeUplifted) = data
+        (upliftableSummaries.size, haveAppsThatCannotBeUplifted) match {
+          case (0, _)     => successful(BadRequest(Json.toJson(BadRequestError)))
+          case (1, false) => addApplicationName(PRODUCTION)(request)
+          case _  => successful(BadRequest(chooseApplicationToUpliftView(formWithErrors, upliftableSummaries, haveAppsThatCannotBeUplifted)))
+        }
+      }
+    }      
+
+    ChooseApplicationToUpliftForm.form.bindFromRequest().fold(handleInvalidForm, handleValidForm)
+  }
+  
 
   def editApplicationNameAction(environment: Environment): Action[AnyContent] = loggedInAction { implicit request =>
     val requestForm: Form[AddApplicationNameForm] = AddApplicationNameForm.form.bindFromRequest

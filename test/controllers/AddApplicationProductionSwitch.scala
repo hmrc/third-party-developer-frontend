@@ -16,37 +16,34 @@
 
 package controllers
 
-import java.util.UUID.randomUUID
-
 import builder.DeveloperBuilder
 import config.ErrorHandler
 import domain.models.applications._
 import domain.models.developers.{DeveloperSession, LoggedInState, Session}
 import mocks.service._
-import org.joda.time.DateTimeZone
 import play.api.mvc.AnyContentAsEmpty
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
-import play.filters.csrf.CSRF.TokenProvider
 import service.AuditService
+import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.time.DateTimeUtils
-import utils.WithCSRFAddToken
+import utils._
 import utils.WithLoggedInSession._
 import views.helper.EnvironmentNameService
 import views.html._
-import domain.models.controllers.ProductionApplicationSummary
 
 import scala.concurrent.ExecutionContext.Implicits.global
-import service.EmailPreferencesService
 import utils.LocalUserIdTracker
-
-class ManageApplicationsSpec 
+import domain.models.controllers.SandboxApplicationSummary
+import domain.models.apidefinitions.AccessType
+import builder.ApplicationBuilder
+class AddApplicationProductionSwitchSpec
     extends BaseControllerSpec 
-    with ApplicationActionServiceMock 
     with SubscriptionTestHelperSugar 
     with WithCSRFAddToken 
     with DeveloperBuilder
-    with LocalUserIdTracker {
+    with LocalUserIdTracker
+    with ApplicationBuilder {
 
   val developer = buildDeveloper()
   val sessionId = "sessionId"
@@ -57,25 +54,14 @@ class ManageApplicationsSpec
   val partLoggedInSessionId = "partLoggedInSessionId"
   val partLoggedInSession = Session(partLoggedInSessionId, developer, LoggedInState.PART_LOGGED_IN_ENABLING_MFA)
 
-  val application = Application(
-    appId,
-    clientId,
-    "App name 1",
-    DateTimeUtils.now,
-    DateTimeUtils.now,
-    None,
-    Environment.PRODUCTION,
-    Some("Description 1"),
-    Set(loggedInUser.email.asAdministratorCollaborator),
-    state = ApplicationState.production(loggedInUser.email, ""),
-    access = Standard(redirectUris = List("https://red1", "https://red2"), termsAndConditionsUrl = Some("http://tnc-url.com"))
-  )
+  val collaborator: Collaborator = loggedInUser.email.asAdministratorCollaborator
 
-  val tokens = ApplicationToken(List(aClientSecret(), aClientSecret()), "token")
+  val appCreatedOn = DateTimeUtils.now.minusDays(1)
+  val appLastAccess = appCreatedOn
 
-  private val sessionParams = Seq("csrfToken" -> app.injector.instanceOf[TokenProvider].generateToken)
+  val sandboxAppSummaries = (1 to 5).map(_ => buildApplication(loggedInUser.email)).map(SandboxApplicationSummary.from(_, loggedInUser.email))
 
-  trait Setup extends ApplicationServiceMock with SessionServiceMock {
+  trait Setup extends ApplicationServiceMock with ApplicationActionServiceMock with SessionServiceMock with EmailPreferencesServiceMock {
     val addApplicationSubordinateEmptyNestView = app.injector.instanceOf[AddApplicationSubordinateEmptyNestView]
     val manageApplicationsView = app.injector.instanceOf[ManageApplicationsView]
     val accessTokenSwitchView = app.injector.instanceOf[AccessTokenSwitchView]
@@ -86,13 +72,14 @@ class ManageApplicationsSpec
     val addApplicationSubordinateSuccessView = app.injector.instanceOf[AddApplicationSubordinateSuccessView]
     val addApplicationNameView = app.injector.instanceOf[AddApplicationNameView]
     val chooseApplicationToUpliftView = app.injector.instanceOf[ChooseApplicationToUpliftView]
+
     implicit val environmentNameService = new EnvironmentNameService(appConfig)
 
-    val addApplicationController = new AddApplication(
+    val underTest = new AddApplication(
       mock[ErrorHandler],
       applicationServiceMock,
       applicationActionServiceMock,
-      mock[EmailPreferencesService],
+      emailPreferencesServiceMock,
       sessionServiceMock,
       mock[AuditService],
       mcc,
@@ -109,63 +96,79 @@ class ManageApplicationsSpec
       chooseApplicationToUpliftView
     )
 
+    val hc = HeaderCarrier()
+
     fetchSessionByIdReturns(sessionId, session)
     updateUserFlowSessionsReturnsSuccessfully(sessionId)
 
+    fetchSessionByIdReturns(partLoggedInSessionId, partLoggedInSession)
+
     val loggedInRequest: FakeRequest[AnyContentAsEmpty.type] = FakeRequest()
-      .withLoggedIn(addApplicationController, implicitly)(sessionId)
-      .withSession(sessionParams: _*)
+      .withLoggedIn(underTest, implicitly)(sessionId)
+      .withCSRFToken
 
     val partLoggedInRequest: FakeRequest[AnyContentAsEmpty.type] = FakeRequest()
-      .withLoggedIn(addApplicationController, implicitly)(partLoggedInSessionId)
-      .withSession(sessionParams: _*)
+      .withLoggedIn(underTest, implicitly)(partLoggedInSessionId)
+
+    when(appConfig.nameOfPrincipalEnvironment).thenReturn("Production")
+    when(appConfig.nameOfSubordinateEnvironment).thenReturn("Sandbox")
+
   }
 
-  "manageApps" should {
+  "addApplicationProductionSwitch" should {
+    "return bad request when no apps are upliftable" in new Setup {
+      fetchSandoxSummariesByTeamMemberReturns(Seq.empty[SandboxApplicationSummary])
 
-    "return the manage Applications page with the user logged in" in new Setup {
-      val prodSummary = ProductionApplicationSummary.from(application, loggedInUser.email)
-      identifyUpliftableSandboxAppIdsReturns(Set.empty)
-      fetchSummariesByTeamMemberReturns(Nil, List(prodSummary))
-
-      private val result = addApplicationController.manageApps()(loggedInRequest)
+      intercept[IllegalStateException] {
+        await(underTest.addApplicationProductionSwitch()(loggedInRequest))
+      }.getMessage() shouldBe "Should not be requesting with this data"
+    }
+    
+    "go to next stage in journey when one app is upliftable and no other apps are present" in new Setup {
+      val summaries = sandboxAppSummaries.take(1)
+      fetchSandoxSummariesByTeamMemberReturns(summaries)
+      identifyUpliftableSandboxAppIdsReturns(summaries.map(_.id).toSet)
+      
+      val result = underTest.addApplicationProductionSwitch()(loggedInRequest)
 
       status(result) shouldBe OK
-      contentAsString(result) should include(loggedInUser.displayedName)
-      contentAsString(result) should include("Sign out")
-      contentAsString(result) should include("App name 1")
-      contentAsString(result) should not include "Sign in"
+
+      // Gone to addApplicationPage
+      // TODO - will go to check page once ready
+      contentAsString(result) should include("What&#x27;s the name of your application?")
     }
-
-    "return to the login page when the user is not logged in" in new Setup {
-      val request = FakeRequest()
-
-      private val result = addApplicationController.manageApps()(request)
-
-      status(result) shouldBe SEE_OTHER
-      redirectLocation(result) shouldBe Some("/developer/login")
-    }
-  }
-
-  "tenDaysWarning" should {
-    "return the 10 days warning interrupt page when the user is logged in" in new Setup {
-      private val result = addApplicationController.tenDaysWarning()(loggedInRequest)
+    
+    "return ok when all apps are upliftable" in new Setup {
+      val summaries = sandboxAppSummaries
+      fetchSandoxSummariesByTeamMemberReturns(summaries)
+      identifyUpliftableSandboxAppIdsReturns(summaries.map(_.id).toSet)
+      
+      val result = underTest.addApplicationProductionSwitch()(loggedInRequest)
 
       status(result) shouldBe OK
-      contentAsString(result) should include("We will check your application")
-      contentAsString(result) should include("This takes up to 10 working days, and we may ask you to demonstrate it.")
-      contentAsString(result) should not include "Sign in"
+
+      contentAsString(result) should include("Which application do you want production credentials for?")
+      summaries.map { summary =>
+        contentAsString(result) should include(summary.name)
+      }
     }
+    
+    "return ok when some apps are upliftable" in new Setup {
+      val summaries = sandboxAppSummaries
+      fetchSandoxSummariesByTeamMemberReturns(summaries)
+      identifyUpliftableSandboxAppIdsReturns(summaries.drop(1).map(_.id).toSet)
+      
+      val result = underTest.addApplicationProductionSwitch()(loggedInRequest)
 
-    "return to the login page when the user is not logged in" in new Setup {
-      val request = FakeRequest()
+      status(result) shouldBe OK
 
-      private val result = addApplicationController.tenDaysWarning()(request)
-
-      status(result) shouldBe SEE_OTHER
-      redirectLocation(result) shouldBe Some("/developer/login")
+      contentAsString(result) should include("Which application do you want production credentials for?")
+      summaries.drop(1).map { summary =>
+        contentAsString(result) should include(summary.name)
+      }
+      summaries.take(1).map { summary =>
+        contentAsString(result) should not include(summary.name)
+      }
     }
   }
-
-  private def aClientSecret() = ClientSecret(randomUUID.toString, randomUUID.toString, DateTimeUtils.now.withZone(DateTimeZone.getDefault))
 }
