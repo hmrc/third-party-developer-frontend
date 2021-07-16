@@ -158,7 +158,7 @@ class AddApplication @Inject() (
 
     ChooseApplicationToUpliftForm.form.bindFromRequest().fold(handleInvalidForm, handleValidForm)
   }
-  
+
 
   def editApplicationNameAction(environment: Environment): Action[AnyContent] = loggedInAction { implicit request =>
     val requestForm: Form[AddApplicationNameForm] = AddApplicationNameForm.form.bindFromRequest

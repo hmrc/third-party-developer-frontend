@@ -35,8 +35,10 @@ import views.html._
 import scala.concurrent.ExecutionContext.Implicits.global
 import utils.LocalUserIdTracker
 import domain.models.controllers.SandboxApplicationSummary
-import domain.models.apidefinitions.AccessType
 import builder.ApplicationBuilder
+import scala.concurrent.Future
+import play.api.mvc.Result
+
 class AddApplicationProductionSwitchSpec
     extends BaseControllerSpec 
     with SubscriptionTestHelperSugar 
@@ -113,6 +115,28 @@ class AddApplicationProductionSwitchSpec
     when(appConfig.nameOfPrincipalEnvironment).thenReturn("Production")
     when(appConfig.nameOfSubordinateEnvironment).thenReturn("Sandbox")
 
+    def shouldShowWhichAppMessage()(implicit results: Future[Result]) = {
+      contentAsString(results) should include("Which application do you want production credentials for?")
+    }
+
+    def shouldShowAppNamesFor(summaries: Seq[SandboxApplicationSummary])(implicit results: Future[Result]) = {
+      summaries.map { summary =>
+        contentAsString(results) should include(summary.name)
+      }
+    }
+
+    def shouldNotShowAppNamesFor(summaries: Seq[SandboxApplicationSummary])(implicit results: Future[Result]) = {
+      summaries.map { summary =>
+        contentAsString(results) should not include(summary.name)
+      }
+    }
+
+    def shouldShowMessageAboutNotNeedingProdCreds()(implicit results: Future[Result]) = {
+      contentAsString(results) should include("You do not need production credentials")
+    }
+    def shouldNotShowMessageAboutNotNeedingProdCreds()(implicit results: Future[Result]) = {
+      contentAsString(results) should not include("You do not need production credentials")
+    }
   }
 
   "addApplicationProductionSwitch" should {
@@ -143,32 +167,49 @@ class AddApplicationProductionSwitchSpec
       fetchSandoxSummariesByTeamMemberReturns(summaries)
       identifyUpliftableSandboxAppIdsReturns(summaries.map(_.id).toSet)
       
-      val result = underTest.addApplicationProductionSwitch()(loggedInRequest)
+      implicit val result = underTest.addApplicationProductionSwitch()(loggedInRequest)
 
       status(result) shouldBe OK
 
-      contentAsString(result) should include("Which application do you want production credentials for?")
-      summaries.map { summary =>
-        contentAsString(result) should include(summary.name)
-      }
+      shouldShowWhichAppMessage()
+      shouldShowAppNamesFor(summaries)
+      shouldNotShowMessageAboutNotNeedingProdCreds()
     }
     
-    "return ok when some apps are upliftable" in new Setup {
+    "return ok when one app is upliftable out of 5" in new Setup {
       val summaries = sandboxAppSummaries
+      val upliftable = summaries.take(1)
+      val notUpliftable = summaries.drop(1)
+
       fetchSandoxSummariesByTeamMemberReturns(summaries)
-      identifyUpliftableSandboxAppIdsReturns(summaries.drop(1).map(_.id).toSet)
+      identifyUpliftableSandboxAppIdsReturns(upliftable.map(_.id).toSet)
       
-      val result = underTest.addApplicationProductionSwitch()(loggedInRequest)
+      implicit val result = underTest.addApplicationProductionSwitch()(loggedInRequest)
 
       status(result) shouldBe OK
 
-      contentAsString(result) should include("Which application do you want production credentials for?")
-      summaries.drop(1).map { summary =>
-        contentAsString(result) should include(summary.name)
-      }
-      summaries.take(1).map { summary =>
-        contentAsString(result) should not include(summary.name)
-      }
+      shouldShowWhichAppMessage()
+      shouldShowAppNamesFor(upliftable)
+      shouldNotShowAppNamesFor(notUpliftable)
+      shouldShowMessageAboutNotNeedingProdCreds()
+    }
+
+    "return ok when some apps are upliftable" in new Setup {
+      val summaries = sandboxAppSummaries
+      val upliftable = summaries.drop(1)
+      val notUpliftable = summaries.take(1)
+
+      fetchSandoxSummariesByTeamMemberReturns(summaries)
+      identifyUpliftableSandboxAppIdsReturns(upliftable.map(_.id).toSet)
+      
+      implicit val result = underTest.addApplicationProductionSwitch()(loggedInRequest)
+
+      status(result) shouldBe OK
+
+      shouldShowWhichAppMessage()
+      shouldShowAppNamesFor(upliftable)
+      shouldNotShowAppNamesFor(notUpliftable)
+      shouldShowMessageAboutNotNeedingProdCreds()
     }
   }
 }
