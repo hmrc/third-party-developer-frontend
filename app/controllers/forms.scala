@@ -22,7 +22,6 @@ import play.api.data.Forms._
 import play.api.data.validation.{Constraint, Invalid, Valid, ValidationError}
 import play.api.data.format.Formatter
 import play.api.data.FormError
-import domain.models.controllers.SandboxApplicationSummary
 
 trait ConfirmPassword {
   val password: String

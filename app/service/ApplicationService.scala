@@ -144,8 +144,6 @@ class ApplicationService @Inject() (
   private def roleForApplication(application: Application, email: String) =
     application.role(email).getOrElse(throw new ApplicationNotFound)
 
-  def applicationConnectorFor(application: Application): ThirdPartyApplicationConnector =
-    if (application.deployedTo == PRODUCTION) productionApplicationConnector else sandboxApplicationConnector
 
   def verify(verificationCode: String)(implicit hc: HeaderCarrier): Future[ApplicationVerificationResponse] = {
     connectorWrapper.productionApplicationConnector.verify(verificationCode)
@@ -260,6 +258,8 @@ class ApplicationService @Inject() (
       )
     )
   }
+
+  def applicationConnectorFor(application: Application): ThirdPartyApplicationConnector = applicationConnectorFor(Some(application.deployedTo))
 
   def applicationConnectorFor(environment: Option[Environment]): ThirdPartyApplicationConnector =
     if (environment.contains(PRODUCTION)) {

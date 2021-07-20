@@ -153,14 +153,13 @@ class AddApplicationProductionSwitchSpec
       val summaries = sandboxAppSummaries.take(1)
       fetchSandoxSummariesByTeamMemberReturns(summaries)
       identifyUpliftableSandboxAppIdsReturns(summaries.map(_.id).toSet)
-      
+      val prodAppId = ApplicationId.random
+      ApmConnectorMock.UpliftApplication.willReturn(prodAppId)
+
       val result = underTest.addApplicationProductionSwitch()(loggedInRequest)
 
-      status(result) shouldBe OK
-
-      // Gone to addApplicationPage
-      // TODO - will go to check page once ready
-      contentAsString(result) should include("What&#x27;s the name of your application?")
+      status(result) shouldBe SEE_OTHER
+      redirectLocation(result).value shouldBe controllers.checkpages.routes.ApplicationCheck.requestCheckPage(prodAppId).toString()
     }
     
     "return ok when all apps are upliftable" in new Setup {

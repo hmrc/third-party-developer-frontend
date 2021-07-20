@@ -132,20 +132,22 @@ class AddApplication @Inject() (
       val (upliftableSummaries, haveAppsThatCannotBeUplifted) = data
       (upliftableSummaries.size, haveAppsThatCannotBeUplifted) match {
         case (0, _)     => successful(BadRequest(Json.toJson(BadRequestError)))
-        case (1, false) => addApplicationName(PRODUCTION)(request)
+        case (1, false) => upliftApplicationAndShowRequestCheckPage(upliftableSummaries.head.id)
         case _  => chooseApplicationToUplift(upliftableSummaries, haveAppsThatCannotBeUplifted)(request)
       }
     }
   }
   
+  private def upliftApplicationAndShowRequestCheckPage(sandboxAppId: ApplicationId)(implicit hc: HeaderCarrier) = {
+    for {
+      newAppId <- apmConnector.upliftApplication(sandboxAppId)
+    } yield Redirect(controllers.checkpages.routes.ApplicationCheck.requestCheckPage(newAppId))
+  }
 
   def chooseApplicationToUpliftAction(): Action[AnyContent] = loggedInAction { implicit request =>
 
-    def handleValidForm(validForm: ChooseApplicationToUpliftForm) = {
-      for {
-        newAppId <- apmConnector.upliftApplication(validForm.applicationId)
-      } yield Redirect(controllers.checkpages.routes.ApplicationCheck.requestCheckPage(newAppId))
-    }      
+    def handleValidForm(validForm: ChooseApplicationToUpliftForm) =
+      upliftApplicationAndShowRequestCheckPage(validForm.applicationId)
 
     def handleInvalidForm(formWithErrors: Form[ChooseApplicationToUpliftForm]) = {
       getUpliftData(loggedIn).flatMap { data =>
