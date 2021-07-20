@@ -35,6 +35,7 @@ import utils.WithCSRFAddToken
 import utils.WithLoggedInSession._
 import views.helper.EnvironmentNameService
 import views.html._
+import mocks.connector.ApmConnectorMockModule
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import utils.LocalUserIdTracker
@@ -72,7 +73,7 @@ class EditApplicationNameSpec
 
   val tokens: ApplicationToken = ApplicationToken(List(aClientSecret(), aClientSecret()), "token")
 
-  trait Setup extends ApplicationServiceMock with SessionServiceMock with EmailPreferencesServiceMock {
+  trait Setup extends ApplicationServiceMock with ApmConnectorMockModule with SessionServiceMock with EmailPreferencesServiceMock {
     val addApplicationSubordinateEmptyNestView = app.injector.instanceOf[AddApplicationSubordinateEmptyNestView]
     val manageApplicationsView = app.injector.instanceOf[ManageApplicationsView]
     val accessTokenSwitchView = app.injector.instanceOf[AccessTokenSwitchView]
@@ -90,6 +91,7 @@ class EditApplicationNameSpec
       applicationServiceMock,
       applicationActionServiceMock,
       emailPreferencesServiceMock,
+      ApmConnectorMock.aMock,
       sessionServiceMock,
       mock[AuditService],
       mcc,

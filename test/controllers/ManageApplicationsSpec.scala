@@ -39,6 +39,7 @@ import domain.models.controllers.ProductionApplicationSummary
 import scala.concurrent.ExecutionContext.Implicits.global
 import service.EmailPreferencesService
 import utils.LocalUserIdTracker
+import mocks.connector.ApmConnectorMockModule
 
 class ManageApplicationsSpec 
     extends BaseControllerSpec 
@@ -75,7 +76,7 @@ class ManageApplicationsSpec
 
   private val sessionParams = Seq("csrfToken" -> app.injector.instanceOf[TokenProvider].generateToken)
 
-  trait Setup extends ApplicationServiceMock with SessionServiceMock {
+  trait Setup extends ApplicationServiceMock with ApmConnectorMockModule with SessionServiceMock {
     val addApplicationSubordinateEmptyNestView = app.injector.instanceOf[AddApplicationSubordinateEmptyNestView]
     val manageApplicationsView = app.injector.instanceOf[ManageApplicationsView]
     val accessTokenSwitchView = app.injector.instanceOf[AccessTokenSwitchView]
@@ -93,6 +94,7 @@ class ManageApplicationsSpec
       applicationServiceMock,
       applicationActionServiceMock,
       mock[EmailPreferencesService],
+      ApmConnectorMock.aMock,
       sessionServiceMock,
       mock[AuditService],
       mcc,

@@ -105,6 +105,10 @@ with CommonResponseHandlers {
     metrics.record(api) {
       http.GET[Map[ApiContext, ApiData]](s"${config.serviceBaseUrl}/api-definitions/all", Seq("environment" -> environment.toString()))
     }
+
+  def upliftApplication(applicationId: ApplicationId)(implicit hc: HeaderCarrier): Future[ApplicationId] = metrics.record(api) {
+    http.POST[ApplicationId, ApplicationId](s"${config.serviceBaseUrl}/applications/${applicationId.value}/uplift", applicationId)
+  }
 }
 
 object ApmConnector {

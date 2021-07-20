@@ -40,7 +40,7 @@ import scala.concurrent.Future
 import play.api.mvc.Result
 import mocks.connector.ApmConnectorMockModule
 
-class AddApplicationProductionSwitchSpec
+class ChooseApplicationToUpliftActionSpec
     extends BaseControllerSpec 
     with SubscriptionTestHelperSugar 
     with WithCSRFAddToken 
@@ -140,77 +140,31 @@ class AddApplicationProductionSwitchSpec
     }
   }
 
-  "addApplicationProductionSwitch" should {
-    "return bad request when no apps are upliftable" in new Setup {
-      fetchSandoxSummariesByTeamMemberReturns(Seq.empty[SandboxApplicationSummary])
-
-      intercept[IllegalStateException] {
-        await(underTest.addApplicationProductionSwitch()(loggedInRequest))
-      }.getMessage() shouldBe "Should not be requesting with this data"
-    }
-    
-    "go to next stage in journey when one app is upliftable and no other apps are present" in new Setup {
-      val summaries = sandboxAppSummaries.take(1)
-      fetchSandoxSummariesByTeamMemberReturns(summaries)
-      identifyUpliftableSandboxAppIdsReturns(summaries.map(_.id).toSet)
-      
-      val result = underTest.addApplicationProductionSwitch()(loggedInRequest)
-
-      status(result) shouldBe OK
-
-      // Gone to addApplicationPage
-      // TODO - will go to check page once ready
-      contentAsString(result) should include("What&#x27;s the name of your application?")
-    }
-    
-    "return ok when all apps are upliftable" in new Setup {
+  "chooseApplicationToUpliftAction" should {
+    "go back to the form when no app is selected" in new Setup {
       val summaries = sandboxAppSummaries
       fetchSandoxSummariesByTeamMemberReturns(summaries)
       identifyUpliftableSandboxAppIdsReturns(summaries.map(_.id).toSet)
-      
-      implicit val result = underTest.addApplicationProductionSwitch()(loggedInRequest)
 
-      status(result) shouldBe OK
+      val result = underTest.chooseApplicationToUpliftAction()(loggedInRequest.withFormUrlEncodedBody(("applicationId" -> "")))
 
-      shouldShowWhichAppMessage()
-      shouldShowAppNamesFor(summaries)
-      shouldNotShowMessageAboutNotNeedingProdCreds()
+      status(result) shouldBe BAD_REQUEST
+      contentAsString(result) should include("Which application do you want production credentials for?")
     }
     
-    "return ok when one app is upliftable out of 5" in new Setup {
+    "go to next stage in journey when one app is selected and uplifted" in new Setup {
       val summaries = sandboxAppSummaries
-      val upliftable = summaries.take(1)
-      val notUpliftable = summaries.drop(1)
+      val sandboxAppId = summaries.head.id
+      val prodAppId = ApplicationId.random
 
       fetchSandoxSummariesByTeamMemberReturns(summaries)
-      identifyUpliftableSandboxAppIdsReturns(upliftable.map(_.id).toSet)
-      
-      implicit val result = underTest.addApplicationProductionSwitch()(loggedInRequest)
+      identifyUpliftableSandboxAppIdsReturns(summaries.map(_.id).toSet)
+      ApmConnectorMock.UpliftApplication.willReturn(prodAppId)
 
-      status(result) shouldBe OK
+      val result = underTest.chooseApplicationToUpliftAction()(loggedInRequest.withFormUrlEncodedBody(("applicationId" -> sandboxAppId.value)))
 
-      shouldShowWhichAppMessage()
-      shouldShowAppNamesFor(upliftable)
-      shouldNotShowAppNamesFor(notUpliftable)
-      shouldShowMessageAboutNotNeedingProdCreds()
-    }
-
-    "return ok when some apps are upliftable" in new Setup {
-      val summaries = sandboxAppSummaries
-      val upliftable = summaries.drop(1)
-      val notUpliftable = summaries.take(1)
-
-      fetchSandoxSummariesByTeamMemberReturns(summaries)
-      identifyUpliftableSandboxAppIdsReturns(upliftable.map(_.id).toSet)
-      
-      implicit val result = underTest.addApplicationProductionSwitch()(loggedInRequest)
-
-      status(result) shouldBe OK
-
-      shouldShowWhichAppMessage()
-      shouldShowAppNamesFor(upliftable)
-      shouldNotShowAppNamesFor(notUpliftable)
-      shouldShowMessageAboutNotNeedingProdCreds()
+      status(result) shouldBe SEE_OTHER
+      redirectLocation(result).value shouldBe controllers.checkpages.routes.ApplicationCheck.requestCheckPage(prodAppId).toString()
     }
   }
 }

@@ -39,6 +39,7 @@ import play.api.libs.json.Json
 import domain.Error._
 import domain.models.controllers.SandboxApplicationSummary
 import domain.models.developers.DeveloperSession
+import connectors.ApmConnector
 
 @Singleton
 class AddApplication @Inject() (
@@ -46,6 +47,7 @@ class AddApplication @Inject() (
     val applicationService: ApplicationService,
     val applicationActionService: ApplicationActionService,
     val emailPreferencesService: EmailPreferencesService,
+    val apmConnector: ApmConnector,
     val sessionService: SessionService,
     val auditService: AuditService,
     mcc: MessagesControllerComponents,
@@ -140,9 +142,9 @@ class AddApplication @Inject() (
   def chooseApplicationToUpliftAction(): Action[AnyContent] = loggedInAction { implicit request =>
 
     def handleValidForm(validForm: ChooseApplicationToUpliftForm) = {
-      // TODO - when ready we should go to the check page directly (after copying app)
-      // successful(Redirect(controllers.checkpages.routes.ApplicationCheck.requestCheckPage(validForm.applicationId)))
-      addApplicationName(PRODUCTION)(request)
+      for {
+        newAppId <- apmConnector.upliftApplication(validForm.applicationId)
+      } yield Redirect(controllers.checkpages.routes.ApplicationCheck.requestCheckPage(newAppId))
     }      
 
     def handleInvalidForm(formWithErrors: Form[ChooseApplicationToUpliftForm]) = {
@@ -150,7 +152,7 @@ class AddApplication @Inject() (
         val (upliftableSummaries, haveAppsThatCannotBeUplifted) = data
         (upliftableSummaries.size, haveAppsThatCannotBeUplifted) match {
           case (0, _)     => successful(BadRequest(Json.toJson(BadRequestError)))
-          case (1, false) => addApplicationName(PRODUCTION)(request)
+          case (1, false) => successful(BadRequest(Json.toJson(BadRequestError)))
           case _  => successful(BadRequest(chooseApplicationToUpliftView(formWithErrors, upliftableSummaries, haveAppsThatCannotBeUplifted)))
         }
       }
