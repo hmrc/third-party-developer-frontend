@@ -279,7 +279,10 @@ object ApplicationService {
       .keySet
 
   val isTestSupportOrExample: (Map[ApiContext, ApiData]) => (ApiIdentifier) => Boolean = 
-    (apis) => (id) => apis(id.context).isTestSupport || apis(id.context).categories.contains(ApiCategory.EXAMPLE)
+    (apis) => (id) => apis.get(id.context) match {
+      case None => false
+      case Some(api) => api.isTestSupport || api.categories.contains(ApiCategory.EXAMPLE)
+    }
 
   val filterSubscriptionsToRemoveTestAndExampleApis: (Map[ApiContext, ApiData]) => (Map[ApplicationId, Set[ApiIdentifier]]) => Map[ApplicationId, Set[ApiIdentifier]] =
     (apis) => (subscriptionsByApplication) => {
