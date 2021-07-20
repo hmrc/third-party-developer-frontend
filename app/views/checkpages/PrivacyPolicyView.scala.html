@@ -21,7 +21,7 @@
 @import domain.models.applications.Application
 @import domain.models.developers.DeveloperSession
 
-@this(devMain: DevMain)
+@this(devMain: DevMain2)
 
 @(app: Application, form: Form[PrivacyPolicyForm], submitAction: Call)(implicit request: play.api.mvc.Request[Any], loggedIn: DeveloperSession, messages: Messages, applicationConfig: ApplicationConfig)
 

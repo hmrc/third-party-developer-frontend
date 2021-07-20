@@ -19,10 +19,10 @@
 @import views.html.include.teamMembers.addTeamMemberPartial
 @import domain.models.views.BackButtonWithJavaScript
 @import model.ApplicationViewModel
-@import views.html.include.DevMain
+@import views.html.include.DevMain2
 @import domain.models.controllers.AddTeamMemberPageMode.ApplicationCheck
 
-@this(devMain: DevMain)
+@this(devMain: DevMain2)
 
 @(applicationViewModel: ApplicationViewModel, form: Form[AddTeamMemberForm], loggedIn: DeveloperSession)(
         implicit request: play.api.mvc.Request[Any], messages: Messages,applicationConfig: ApplicationConfig)
