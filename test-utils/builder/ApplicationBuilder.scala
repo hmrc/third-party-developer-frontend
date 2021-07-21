@@ -36,7 +36,7 @@ trait ApplicationBuilder extends CollaboratorTracker {
     Application(
       appId,
       clientId,
-      s"$appId-name",
+      s"${appId.value}-name",
       DateTimeUtils.now,
       DateTimeUtils.now,
       None,

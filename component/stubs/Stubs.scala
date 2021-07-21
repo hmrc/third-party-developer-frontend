@@ -16,8 +16,6 @@
 
 package stubs
 
-import java.net.URLEncoder
-
 import com.github.tomakehurst.wiremock.client.WireMock._
 import connectors.EncryptedJson
 import domain.models.applications.ApplicationNameValidationJson.ApplicationNameValidationResult
@@ -232,6 +230,26 @@ object ApplicationStub {
 
     stubResponse(Environment.PRODUCTION, prodApps)
     stubResponse(Environment.SANDBOX, sandboxApps)
+
+    stubFor(
+      get(urlPathEqualTo("/api-definitions/all"))
+      .withQueryParam("environment", equalTo("SANDBOX"))
+      .willReturn(
+        aResponse()
+        .withStatus(OK)
+        .withBody("{}")
+      )
+    )
+
+    val apisUpliftable = Set.empty[ApiIdentifier]
+
+    stubFor(
+      get(urlPathEqualTo("/api-definitions/upliftable"))
+      .willReturn(
+        aResponse()
+        .withBody(Json.toJson(apisUpliftable).toString)
+      )
+    )
   }
 
   def configureApplicationCredentials(tokens: Map[String, ApplicationToken], status: Int = OK) = {

@@ -21,7 +21,7 @@ import domain.models.apidefinitions.{ApiContext, ApiVersion}
 import domain.models.applications._
 import domain.models.developers.LoggedInState
 import domain.models.views.SubscriptionRedirect
-import model.ApplicationViewModel
+import controllers.model.ApplicationViewModel
 import org.jsoup.Jsoup
 import play.api.data.Form
 import play.api.test.FakeRequest

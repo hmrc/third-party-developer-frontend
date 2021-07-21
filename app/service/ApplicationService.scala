@@ -32,6 +32,7 @@ import uk.gov.hmrc.time.DateTimeUtils
 
 import scala.concurrent.{ExecutionContext, Future}
 import domain.models.connectors.AddTeamMemberRequest
+import domain.models.controllers.{ProductionApplicationSummary, SandboxApplicationSummary}
 
 @Singleton
 class ApplicationService @Inject() (
@@ -143,8 +144,6 @@ class ApplicationService @Inject() (
   private def roleForApplication(application: Application, email: String) =
     application.role(email).getOrElse(throw new ApplicationNotFound)
 
-  def applicationConnectorFor(application: Application): ThirdPartyApplicationConnector =
-    if (application.deployedTo == PRODUCTION) productionApplicationConnector else sandboxApplicationConnector
 
   def verify(verificationCode: String)(implicit hc: HeaderCarrier): Future[ApplicationVerificationResponse] = {
     connectorWrapper.productionApplicationConnector.verify(verificationCode)
@@ -170,22 +169,55 @@ class ApplicationService @Inject() (
     } yield response
   }
 
-  def fetchByTeamMemberUserId(userId: UserId)(implicit hc: HeaderCarrier): Future[Seq[Application]] = {
-    def fetchProductionApplications = connectorWrapper.productionApplicationConnector.fetchByTeamMemberUserId(userId)
 
-    def fetchSandboxApplications: Future[Seq[Application]] = {
-      connectorWrapper.sandboxApplicationConnector.fetchByTeamMemberUserId(userId) recover {
-        case _ => Seq.empty
-      }
-    }
-
-    val productionApplicationsFuture = fetchProductionApplications
-    val sandboxApplicationsFuture = fetchSandboxApplications
+  def identifyUpliftableSandboxAppIds(sandboxApplicationIds: Seq[ApplicationId])(implicit hc: HeaderCarrier): Future[Set[ApplicationId]] = {
+    val fUpliftableApiIdentifiers = apmConnector.fetchUpliftableApiIdentifiers
+    val fApis = apmConnector.fetchAllApis(SANDBOX)
+    val fMapOfAppIdsToApiIds = Future.sequence(
+        sandboxApplicationIds.map( id => 
+          sandboxApplicationConnector.fetchSubscription(id)
+          .map(
+            subs => (id,subs)
+          )
+        )
+      ).map(_.toMap)
 
     for {
-      productionApplications <- productionApplicationsFuture
-      sandboxApplications <- sandboxApplicationsFuture
-    } yield (productionApplications ++ sandboxApplications).sorted
+      upliftableApiIdentifiers    <- fUpliftableApiIdentifiers
+      apis                        <- fApis
+      mapOfAppIdsToApiIds         <- fMapOfAppIdsToApiIds
+      filteredSubs1 = ApplicationService.filterSubscriptionsToRemoveTestAndExampleApis(apis)(mapOfAppIdsToApiIds)
+      filteredSubs2 = ApplicationService.filterSubscriptionsForUplift(upliftableApiIdentifiers)(filteredSubs1)
+    } yield filteredSubs2
+  }
+ 
+  def fetchAllSummariesByTeamMember(userId: UserId, email: String)(implicit hc: HeaderCarrier): Future[(Seq[SandboxApplicationSummary], Seq[ProductionApplicationSummary])] = {
+    for {
+      productionSummaries <- fetchProductionSummariesByTeamMember(userId, email)
+      sandboxSummaries <- fetchSandboxSummariesByTeamMember(userId, email)
+    } yield (sandboxSummaries, productionSummaries)
+  }
+
+  def fetchProductionSummariesByTeamMember(userId: UserId, email: String)(implicit hc: HeaderCarrier): Future[Seq[ProductionApplicationSummary]] = {
+    fetchProductionAppsByTeamMember(userId).map( apps =>
+      apps.sorted.map(ProductionApplicationSummary.from(_, email))
+    )
+  }
+  
+  def fetchSandboxSummariesByTeamMember(userId: UserId, email: String)(implicit hc: HeaderCarrier): Future[Seq[SandboxApplicationSummary]] = {
+    fetchSandboxAppsByTeamMember(userId).map( apps =>
+      apps.sorted.map(SandboxApplicationSummary.from(_, email))
+    )
+  }
+
+  def fetchProductionAppsByTeamMember(userId: UserId)(implicit hc: HeaderCarrier): Future[Seq[Application]] = {
+    connectorWrapper.productionApplicationConnector.fetchByTeamMember(userId) // TODO - Should use fetchById from this file which brings back subs as well as app
+  }
+
+  def fetchSandboxAppsByTeamMember(userId: UserId)(implicit hc: HeaderCarrier): Future[Seq[Application]] = {
+    connectorWrapper.sandboxApplicationConnector.fetchByTeamMember(userId) recover {
+        case _ => Seq.empty
+    }
   }
 
   def requestDeveloperAccountDeletion(name: String, email: String)(implicit hc: HeaderCarrier): Future[TicketResult] = {
@@ -227,6 +259,8 @@ class ApplicationService @Inject() (
     )
   }
 
+  def applicationConnectorFor(application: Application): ThirdPartyApplicationConnector = applicationConnectorFor(Some(application.deployedTo))
+
   def applicationConnectorFor(environment: Option[Environment]): ThirdPartyApplicationConnector =
     if (environment.contains(PRODUCTION)) {
       productionApplicationConnector
@@ -236,10 +270,33 @@ class ApplicationService @Inject() (
 }
 
 object ApplicationService {
+  val filterSubscriptionsForUplift: (Set[ApiIdentifier]) => (Map[ApplicationId, Set[ApiIdentifier]]) => Set[ApplicationId] = 
+    (upliftableApiIdentifiers) => (appSubscriptions) =>
+      appSubscriptions
+      // All non-test non-example subscribed apis are upliftable AND at least one subscribed apis is present
+      .mapValues(apis => apis.subsetOf(upliftableApiIdentifiers) && apis.nonEmpty)
+      .filter{ case (_, isUpliftable) => isUpliftable}
+      .keySet
+
+  val isTestSupportOrExample: (Map[ApiContext, ApiData]) => (ApiIdentifier) => Boolean = 
+    (apis) => (id) => apis.get(id.context) match {
+      case None => false
+      case Some(api) => api.isTestSupport || api.categories.contains(ApiCategory.EXAMPLE)
+    }
+
+  val filterSubscriptionsToRemoveTestAndExampleApis: (Map[ApiContext, ApiData]) => (Map[ApplicationId, Set[ApiIdentifier]]) => Map[ApplicationId, Set[ApiIdentifier]] =
+    (apis) => (subscriptionsByApplication) => {
+      subscriptionsByApplication.flatMap { 
+        case (id, subs) =>
+          val filteredSubs = subs.filterNot(isTestSupportOrExample(apis))
+          if(filteredSubs.isEmpty) Map.empty[ApplicationId, Set[ApiIdentifier]] else Map(id -> filteredSubs)
+      }
+    }
+
   trait ApplicationConnector {
     def create(request: CreateApplicationRequest)(implicit hc: HeaderCarrier): Future[ApplicationCreatedResponse]
     def update(applicationId: ApplicationId, request: UpdateApplicationRequest)(implicit hc: HeaderCarrier): Future[ApplicationUpdateSuccessful]
-    def fetchByTeamMemberUserId(userId: UserId)(implicit hc: HeaderCarrier): Future[Seq[Application]]
+    def fetchByTeamMember(userId: UserId)(implicit hc: HeaderCarrier): Future[Seq[Application]]
     def removeTeamMember(applicationId: ApplicationId, teamMemberToDelete: String, requestingEmail: String, adminsToEmail: Set[String])(
         implicit hc: HeaderCarrier
     ): Future[ApplicationUpdateSuccessful]
@@ -252,8 +309,6 @@ object ApplicationService {
     def deleteClientSecret(applicationId: ApplicationId, clientSecretId: String, actorEmailAddress: String)(implicit hc: HeaderCarrier): Future[ApplicationUpdateSuccessful]
     def validateName(name: String, selfApplicationId: Option[ApplicationId])(implicit hc: HeaderCarrier): Future[ApplicationNameValidation]
     def deleteApplication(applicationId: ApplicationId)(implicit hc: HeaderCarrier): Future[Unit]
-
     def unsubscribeFromApi(applicationId: ApplicationId, apiIdentifier: ApiIdentifier)(implicit hc: HeaderCarrier): Future[ApplicationUpdateSuccessful]
-
   }
 }

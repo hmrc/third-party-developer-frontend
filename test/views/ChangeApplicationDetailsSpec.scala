@@ -19,7 +19,7 @@ package views
 import controllers.EditApplicationForm
 import domain.models.applications._
 import domain.models.developers.LoggedInState
-import model.ApplicationViewModel
+import controllers.model.ApplicationViewModel
 import org.jsoup.Jsoup
 import org.jsoup.nodes.Document
 import play.api.test.FakeRequest

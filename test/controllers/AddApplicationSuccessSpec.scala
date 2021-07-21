@@ -32,6 +32,7 @@ import utils.WithCSRFAddToken
 import utils.WithLoggedInSession._
 import views.helper.EnvironmentNameService
 import views.html._
+import mocks.connector.ApmConnectorMockModule
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
@@ -82,7 +83,7 @@ class AddApplicationSuccessSpec
     access = Standard(redirectUris = List("https://red3", "https://red4"), termsAndConditionsUrl = Some("http://tnc-url.com"))
   )
 
-  trait Setup extends ApplicationServiceMock with ApplicationActionServiceMock with SessionServiceMock with EmailPreferencesServiceMock with ExtendedApiDefinitionTestDataHelper {
+  trait Setup extends ApplicationServiceMock with ApmConnectorMockModule with ApplicationActionServiceMock with SessionServiceMock with EmailPreferencesServiceMock with ExtendedApiDefinitionTestDataHelper {
     val addApplicationSubordinateEmptyNestView = app.injector.instanceOf[AddApplicationSubordinateEmptyNestView]
     val manageApplicationsView = app.injector.instanceOf[ManageApplicationsView]
     val accessTokenSwitchView = app.injector.instanceOf[AccessTokenSwitchView]
@@ -92,6 +93,7 @@ class AddApplicationSuccessSpec
     val addApplicationStartPrincipalView = app.injector.instanceOf[AddApplicationStartPrincipalView]
     val addApplicationSubordinateSuccessView = app.injector.instanceOf[AddApplicationSubordinateSuccessView]
     val addApplicationNameView = app.injector.instanceOf[AddApplicationNameView]
+    val chooseApplicationToUpliftView = app.injector.instanceOf[ChooseApplicationToUpliftView]
     implicit val environmentNameService = new EnvironmentNameService(appConfig)
 
     val underTest = new AddApplication(
@@ -99,6 +101,7 @@ class AddApplicationSuccessSpec
       applicationServiceMock,
       applicationActionServiceMock,
       emailPreferencesServiceMock,
+      ApmConnectorMock.aMock,
       sessionServiceMock,
       mock[AuditService],
       mcc,
@@ -111,7 +114,8 @@ class AddApplicationSuccessSpec
       addApplicationStartSubordinateView,
       addApplicationStartPrincipalView,
       addApplicationSubordinateSuccessView,
-      addApplicationNameView
+      addApplicationNameView,
+      chooseApplicationToUpliftView
     )
 
     implicit val hc = HeaderCarrier()

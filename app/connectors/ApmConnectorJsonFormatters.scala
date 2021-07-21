@@ -23,6 +23,7 @@ private[connectors] object ApmConnectorJsonFormatters extends ApplicationsJsonFo
   import domain.models.subscriptions._
   import play.api.libs.json._
 
+  implicit val readsApiCategory: Reads[ApiCategory] = Json.valueReads[ApiCategory]
   implicit val readsVersionData: Reads[VersionData] = Json.reads[VersionData]
   implicit val readsApiData: Reads[ApiData] = Json.reads[ApiData]
 }

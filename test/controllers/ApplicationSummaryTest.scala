@@ -16,72 +16,42 @@
 
 package controllers
 
-import domain.models.apidefinitions.AccessType
 import domain.models.applications._
-import domain.models.applications.CollaboratorRole.DEVELOPER
-import domain.models.applications.State.TESTING
 import org.joda.time.DateTime
 import org.scalatest.{Matchers, WordSpec}
 import utils._
+import domain.models.applications.Environment.{PRODUCTION, SANDBOX}
+import domain.models.controllers.{ProductionApplicationSummary, SandboxApplicationSummary}
 
 class ApplicationSummaryTest extends WordSpec with Matchers with CollaboratorTracker with LocalUserIdTracker {
-
-  "noProductionApplications" should {
-    val sandboxApp =
-      ApplicationSummary(
-        ApplicationId(""),
-        "",
-        "Sandbox",
-        DEVELOPER,
-        TermsOfUseStatus.AGREED,
-        TESTING,
-        new DateTime(),
-        serverTokenUsed = false,
-        new DateTime(),
-        AccessType.STANDARD
-      )
-    val productionApp =
-      ApplicationSummary(
-        ApplicationId(""),
-        "",
-        "Production",
-        DEVELOPER,
-        TermsOfUseStatus.AGREED,
-        TESTING,
-        new DateTime(),
-        serverTokenUsed = false,
-        new DateTime(),
-        AccessType.STANDARD
-      )
-
-    "return true if only sandbox apps" in {
-      val apps = Seq(sandboxApp)
-
-      ApplicationSummary.noProductionApplications(apps) shouldBe true
-    }
-
-    "return false if there is a production app" in {
-      val apps = Seq(productionApp, sandboxApp)
-
-      ApplicationSummary.noProductionApplications(apps) shouldBe false
-    }
-  }
 
   "from" should {
     val user = "foo@bar.com".asDeveloperCollaborator
 
     val serverTokenApplication =
-      new Application(ApplicationId(""), ClientId(""), "", DateTime.now, DateTime.now, Some(DateTime.now), Environment.PRODUCTION, collaborators = Set(user))
-    val noServerTokenApplication = new Application(ApplicationId(""), ClientId(""), "", DateTime.now, DateTime.now, None, Environment.PRODUCTION, collaborators = Set(user))
+      new Application(ApplicationId(""), ClientId(""), "", DateTime.now, DateTime.now, Some(DateTime.now), PRODUCTION, collaborators = Set(user))
+    val noServerTokenApplication = new Application(ApplicationId(""), ClientId(""), "", DateTime.now, DateTime.now, None, PRODUCTION, collaborators = Set(user))
 
-    "set serverTokenUsed if Application has a date set for lastAccessTokenUsage" in {
-      val summary = ApplicationSummary.from(serverTokenApplication, user.emailAddress)
+    "set serverTokenUsed if SandboxApplication has a date set for lastAccessTokenUsage" in {
+      val summary = SandboxApplicationSummary.from(serverTokenApplication.copy(deployedTo = SANDBOX), user.emailAddress)
 
       summary.serverTokenUsed should be(true)
     }
 
-    "not set serverTokenUsed if Application does not have a date set for lastAccessTokenUsage" in {
-      val summary = ApplicationSummary.from(noServerTokenApplication, user.emailAddress)
+    "not set serverTokenUsed if SandboxApplication does not have a date set for lastAccessTokenUsage" in {
+      val summary = SandboxApplicationSummary.from(noServerTokenApplication.copy(deployedTo = SANDBOX), user.emailAddress)
+
+      summary.serverTokenUsed should be(false)
+    }
+
+    "set serverTokenUsed if ProductionApplication has a date set for lastAccessTokenUsage" in {
+      val summary = ProductionApplicationSummary.from(serverTokenApplication, user.emailAddress)
+
+      summary.serverTokenUsed should be(true)
+    }
+
+    "not set serverTokenUsed if ProductionApplication does not have a date set for lastAccessTokenUsage" in {
+      val summary = ProductionApplicationSummary.from(noServerTokenApplication, user.emailAddress)
 
       summary.serverTokenUsed should be(false)
     }

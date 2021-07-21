@@ -19,7 +19,7 @@ package views
 import controllers.{EditApplicationForm, GroupedSubscriptions, PageData}
 import domain.models.applications._
 import domain.models.developers.LoggedInState
-import model.ApplicationViewModel
+import controllers.model.ApplicationViewModel
 import org.joda.time.DateTime
 import org.jsoup.Jsoup
 import org.jsoup.nodes.Document

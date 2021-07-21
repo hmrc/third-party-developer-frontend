@@ -17,50 +17,15 @@
 package controllers
 
 import controllers.APISubscriptions.subscriptionNumberLabel
-import domain.models.apidefinitions.{AccessType, ApiContext, APISubscriptionStatus, ApiVersion}
-import domain.models.apidefinitions.APIGroup._
-import domain.models.applications._
-import org.joda.time.DateTime
 import play.api.libs.json.Json
-import uk.gov.hmrc.http.NotFoundException
 
 import scala.collection.SortedMap
-import domain.models.subscriptions.ApiData
+import domain.models.subscriptions._
+import domain.models.apidefinitions._
+import domain.models.apidefinitions.APIGroup._
+import domain.models.applications._
 
 case class PageData(app: Application, subscriptions: Option[GroupedSubscriptions], openAccessApis: Map[ApiContext, ApiData])
-
-case class ApplicationSummary(
-    id: ApplicationId,
-    name: String,
-    environment: String,
-    role: CollaboratorRole,
-    termsOfUseStatus: TermsOfUseStatus,
-    state: State,
-    lastAccess: DateTime,
-    serverTokenUsed: Boolean = false,
-    createdOn: DateTime,
-    accessType: AccessType
-)
-
-object ApplicationSummary {
-  def from(app: Application, email: String) =
-    ApplicationSummary(
-      app.id,
-      app.name,
-      app.deployedTo.toString.toLowerCase.capitalize,
-      app.role(email).getOrElse(throw new NotFoundException("Role not found")),
-      app.termsOfUseStatus,
-      app.state.name,
-      app.lastAccess,
-      app.lastAccessTokenUsage.isDefined,
-      app.createdOn,
-      app.access.accessType
-    )
-
-  def noProductionApplications(applications: Seq[controllers.ApplicationSummary]): Boolean = {
-    !applications.exists(_.environment == "Production")
-  }
-}
 
 case class GroupedSubscriptions(testApis: Seq[APISubscriptions], apis: Seq[APISubscriptions], exampleApi: Option[APISubscriptions] = None)
 

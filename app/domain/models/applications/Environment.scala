@@ -31,4 +31,6 @@ object Environment extends PlayEnum[Environment] {
   final case object SANDBOX     extends Environment
 
   def from(env: String) = values.find(e => e.toString == env.toUpperCase)
+
+  def prettyPrint() = this.toString().toLowerCase().capitalize
 }

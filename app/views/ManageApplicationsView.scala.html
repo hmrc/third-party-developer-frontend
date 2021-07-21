@@ -17,13 +17,20 @@
 @import helpers.DateFormatter.formatLastAccessDate
 @import include._
 @import model.Crumb
-@import controllers.ApplicationSummary.noProductionApplications
 @import domain.models.developers.DeveloperSession
 @import views.helper.EnvironmentNameService
+@import domain.models.controllers.{ManageApplicationsViewModel, ApplicationSummary, ProductionApplicationSummary, SandboxApplicationSummary}
+@import controllers.model.LeftHandNavFlags
 
 @this(devMain: DevMain2, leftHandNav: LeftHandNav)
 
-@(applications: Seq[controllers.ApplicationSummary])(implicit request: play.api.mvc.Request[Any], loggedIn: DeveloperSession, messagesProvider: MessagesProvider, appConfig: config.ApplicationConfig, navSection: String = "manage-applications", environmentNameService: EnvironmentNameService)
+@(model: ManageApplicationsViewModel)(implicit request: play.api.mvc.Request[Any], loggedIn: DeveloperSession, messagesProvider: MessagesProvider, appConfig: config.ApplicationConfig, navSection: String = "manage-applications", environmentNameService: EnvironmentNameService)
+
+@principalWording = @{appConfig.nameOfPrincipalEnvironment.toLowerCase}
+@subordinateWording = @{appConfig.nameOfSubordinateEnvironment.toLowerCase}
+@theSubordinateWording = @{environmentNameService.subordinateWording}
+
+@flags = @{ Map(LeftHandNavFlags.keyForIsGetProductionCredentialsEnabled -> (model.countOfAppsThatCanBeUplifted > 0)) }
 
 @devMain(
   title = "View all applications",
@@ -32,37 +39,47 @@
     Crumb("View all applications", "", Some("data-breadcrumb-manage-app")),
     Crumb.home
   ),
-  leftNav = Some(leftHandNav(None, Option(navSection))),
+  leftNav = Some(leftHandNav(None, Option(navSection), flags)),
   developerSession = Some(loggedIn)
 ) {
   <h1 class="govuk-heading-l">View all applications</h1>
 
-  @applicationList(applications)
-  @if(noProductionApplications(applications)) {
-    </br>
-    <p class="govuk-body">
-      After testing in @environmentNameService.subordinateWording, you can apply for @appConfig.nameOfPrincipalEnvironment.toLowerCase credentials.
-    </p>
-    <a class="govuk-button" href="@routes.AddApplication.addApplicationPrincipal">
-      Get @appConfig.nameOfPrincipalEnvironment.toLowerCase credentials
-    </a>
-  }
-  @if(!applications.filter(_.accessType.isPriviledged).isEmpty) {
+  @applicationList(model)
+
+  @if(model.hasPriviledgedApplications) {
     <h2 class="govuk-heading-m">Using privileged application credentials</h2>
     <p class="govuk-body">Check <a class="govuk-link"href="@controllers.routes.AddApplication.usingPrivilegedApplicationCredentialsPage()">
       how to use privileged application credentials</a>.
     </p>
   }
-}
 
-@applicationList(applications: Seq[controllers.ApplicationSummary]) = {
-  @defining(applications.partition(_.environment == "Production")) { case (productionApps, sandboxApps) =>
-    @applicationTable(productionApps, appConfig.nameOfPrincipalEnvironment)
-    @applicationTable(sandboxApps, appConfig.nameOfSubordinateEnvironment)
+  @if(model.hasNoProductionApplications) {
+    @if(model.countOfAppsThatCanBeUplifted == 0) {
+      <h2 class="govuk-heading-m">Getting production credentials</h2>
+      <p class="govuk-body">
+        Make sure your @subordinateWording application is subscribed to an API that accesses secure data and requires authentication. You will need to test your application before 
+        requesting @principalWording credentials.
+      </p>
+      <p class="govuk-body">You do not need @principalWording credentials for APIs with only open access endpoints or:</p>
+      <ul class="govuk-list govuk-list--bullet">
+        <li>APIs for testing your service</li>
+        <li>Hello World API</li>
+      </ul>
+    } else {
+      <p class="govuk-body">After testing in @theSubordinateWording, you can apply for @appConfig.nameOfPrincipalEnvironment.toLowerCase credentials.</p>
+      <a class="govuk-button" data-module="govuk-button" href="@routes.AddApplication.addApplicationPrincipal">
+        Get production credentials
+      </a>
+    }
   }
 }
 
-@applicationTable(applications: Seq[controllers.ApplicationSummary], environmentName: String) = {
+@applicationList(model: ManageApplicationsViewModel) = {
+  @applicationTable(model.productionApplicationSummaries, appConfig.nameOfPrincipalEnvironment)
+  @applicationTable(model.sandboxApplicationSummaries, appConfig.nameOfSubordinateEnvironment)
+}
+
+@applicationTable(applications: Seq[ApplicationSummary], environmentName: String) = {
   @if(applications.nonEmpty) {
     <table class="govuk-table">
       <caption class="govuk-visually-hidden">Applications</caption>
@@ -96,7 +113,6 @@
       </tbody>
     </table>
     <br>
+
   }
 }
-
-

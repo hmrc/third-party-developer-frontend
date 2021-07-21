@@ -35,6 +35,7 @@ import utils.WithCSRFAddToken
 import utils.WithLoggedInSession._
 import views.helper.EnvironmentNameService
 import views.html._
+import mocks.connector.ApmConnectorMockModule
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import utils.LocalUserIdTracker
@@ -72,7 +73,7 @@ class EditApplicationNameSpec
 
   val tokens: ApplicationToken = ApplicationToken(List(aClientSecret(), aClientSecret()), "token")
 
-  trait Setup extends ApplicationServiceMock with SessionServiceMock with EmailPreferencesServiceMock {
+  trait Setup extends ApplicationServiceMock with ApmConnectorMockModule with SessionServiceMock with EmailPreferencesServiceMock {
     val addApplicationSubordinateEmptyNestView = app.injector.instanceOf[AddApplicationSubordinateEmptyNestView]
     val manageApplicationsView = app.injector.instanceOf[ManageApplicationsView]
     val accessTokenSwitchView = app.injector.instanceOf[AccessTokenSwitchView]
@@ -82,6 +83,7 @@ class EditApplicationNameSpec
     val addApplicationStartPrincipalView = app.injector.instanceOf[AddApplicationStartPrincipalView]
     val addApplicationSubordinateSuccessView = app.injector.instanceOf[AddApplicationSubordinateSuccessView]
     val addApplicationNameView = app.injector.instanceOf[AddApplicationNameView]
+    val chooseApplicationToUpliftView = app.injector.instanceOf[ChooseApplicationToUpliftView]
     implicit val environmentNameService = new EnvironmentNameService(appConfig)
 
     val underTest = new AddApplication(
@@ -89,6 +91,7 @@ class EditApplicationNameSpec
       applicationServiceMock,
       applicationActionServiceMock,
       emailPreferencesServiceMock,
+      ApmConnectorMock.aMock,
       sessionServiceMock,
       mock[AuditService],
       mcc,
@@ -101,7 +104,8 @@ class EditApplicationNameSpec
       addApplicationStartSubordinateView,
       addApplicationStartPrincipalView,
       addApplicationSubordinateSuccessView,
-      addApplicationNameView
+      addApplicationNameView,
+      chooseApplicationToUpliftView
     )
 
     implicit val hc: HeaderCarrier = HeaderCarrier()
@@ -128,7 +132,7 @@ class EditApplicationNameSpec
     "return the Edit Applications Name Page with user logged in" in new Setup {
       givenApplicationAction(application, loggedInUser)
 
-      fetchByTeamMemberUserIdReturns(loggedInUser.developer.userId, List(application))
+      fetchProductionAppsByTeamMemberReturns(List(application))
 
       private val result = underTest.addApplicationName(Environment.SANDBOX)(loggedInRequest.withCSRFToken)
 
@@ -185,7 +189,7 @@ class EditApplicationNameSpec
 
     "return the Edit Applications Name Page with user logged in" in new Setup {
 
-      fetchByTeamMemberUserIdReturns(loggedInUser.developer.userId, List(application))
+      fetchProductionAppsByTeamMemberReturns(List(application))
 
       private val result = underTest.addApplicationName(Environment.PRODUCTION)(loggedInRequest.withCSRFToken)
 

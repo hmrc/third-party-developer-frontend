@@ -224,6 +224,17 @@ object AddTeamMemberForm {
   )
 }
 
+case class ChooseApplicationToUpliftForm(applicationId: ApplicationId)
+
+object ChooseApplicationToUpliftForm {
+  val form: Form[ChooseApplicationToUpliftForm] = Form(
+    mapping(
+      "applicationId" -> nonEmptyText.transform[ApplicationId](ApplicationId(_), id => id.value)
+    )(ChooseApplicationToUpliftForm.apply)(ChooseApplicationToUpliftForm.unapply)
+  )
+}
+
+
 case class AddApplicationNameForm(applicationName: String)
 
 object AddApplicationNameForm {

@@ -137,7 +137,7 @@ class ManageSubscriptionsSpec
     fetchSessionByIdReturns(sessionId, session)
     updateUserFlowSessionsReturnsSuccessfully(sessionId)
 
-    fetchByTeamMemberUserIdReturns(List(application))
+    fetchProductionAppsByTeamMemberReturns(List(application))
 
     val loggedInRequest: FakeRequest[AnyContentAsEmpty.type] = FakeRequest()
       .withLoggedIn(manageSubscriptionController, implicitly)(sessionId)

@@ -24,7 +24,7 @@ import domain.models.applications._
 import domain.models.applications.Capabilities.SupportsDetails
 import domain.models.applications.Permissions.SandboxOrAdmin
 import javax.inject.{Inject, Singleton}
-import model.ApplicationViewModel
+import controllers.model.ApplicationViewModel
 import play.api.data.Form
 import play.api.libs.crypto.CookieSigner
 import play.api.mvc._

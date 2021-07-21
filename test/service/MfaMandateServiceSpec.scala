@@ -24,6 +24,7 @@ import domain.models.developers.UserId
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
+import scala.concurrent.Future.successful
 import utils._
 
 class MfaMandateServiceSpec extends AsyncHmrcSpec with CollaboratorTracker with LocalUserIdTracker {
@@ -89,28 +90,13 @@ class MfaMandateServiceSpec extends AsyncHmrcSpec with CollaboratorTracker with 
         )
       )
     )
-
-    val applicationsWhereUserIsAdminInSandbox = Future.successful(
-      Seq(
-        Application(
-          applicationId,
-          clientId,
-          "myName",
-          new DateTime(),
-          new DateTime(),
-          None,
-          Environment.SANDBOX,
-          collaborators = Set(Collaborator(email, CollaboratorRole.ADMINISTRATOR, userId))
-        )
-      )
-    )
   }
 
   "showAdminMfaMandateMessage" when {
     "Mfa mandate date has passed" should {
       "be false" in new Setup {
         when(mockAppConfig.dateOfAdminMfaMandate).thenReturn(Some(dateAFewDaysAgo))
-        when(mockApplicationService.fetchByTeamMemberUserId(*[UserId])(*)).thenReturn(applicationsWhereUserIsAdminInProduction)
+        when(mockApplicationService.fetchProductionAppsByTeamMember(*[UserId])(*)).thenReturn(applicationsWhereUserIsAdminInProduction)
 
         await(service.showAdminMfaMandatedMessage(userId)) shouldBe false
       }
@@ -118,7 +104,7 @@ class MfaMandateServiceSpec extends AsyncHmrcSpec with CollaboratorTracker with 
       "Mfa mandate date was today" should {
         "be false" in new Setup {
           when(mockAppConfig.dateOfAdminMfaMandate).thenReturn(Some(dateToday))
-          when(mockApplicationService.fetchByTeamMemberUserId(*[UserId])(*)).thenReturn(applicationsWhereUserIsAdminInProduction)
+          when(mockApplicationService.fetchProductionAppsByTeamMember(*[UserId])(*)).thenReturn(applicationsWhereUserIsAdminInProduction)
 
           await(service.showAdminMfaMandatedMessage(userId)) shouldBe false
         }
@@ -128,50 +114,50 @@ class MfaMandateServiceSpec extends AsyncHmrcSpec with CollaboratorTracker with 
     "Mfa mandate date has not passed and they are an admin on a principal application" should {
       "be true" in new Setup {
         when(mockAppConfig.dateOfAdminMfaMandate).thenReturn(Some(dateInTheFuture))
-        when(mockApplicationService.fetchByTeamMemberUserId(*[UserId])(*)).thenReturn(applicationsWhereUserIsAdminInProduction)
+        when(mockApplicationService.fetchProductionAppsByTeamMember(*[UserId])(*)).thenReturn(applicationsWhereUserIsAdminInProduction)
 
         await(service.showAdminMfaMandatedMessage(userId)) shouldBe true
 
-        verify(mockApplicationService).fetchByTeamMemberUserId(eqTo(userId))(*)
+        verify(mockApplicationService).fetchProductionAppsByTeamMember(eqTo(userId))(*)
       }
     }
 
     "Mfa mandate date has not passed and they are not an admin on a principle application" should {
       "be false" in new Setup {
         when(mockAppConfig.dateOfAdminMfaMandate).thenReturn(Some(dateInTheFuture))
-        when(mockApplicationService.fetchByTeamMemberUserId(*[UserId])(*)).thenReturn(applicationsWhereUserIsAdminInSandbox)
+        when(mockApplicationService.fetchProductionAppsByTeamMember(*[UserId])(*)).thenReturn(successful(Nil))
 
         await(service.showAdminMfaMandatedMessage(userId)) shouldBe false
 
-        verify(mockApplicationService).fetchByTeamMemberUserId(eqTo(userId))(*)
+        verify(mockApplicationService).fetchProductionAppsByTeamMember(eqTo(userId))(*)
       }
     }
 
     "Mfa mandate date has not passed and they are a developer on a principle application" should {
       "be false" in new Setup {
         when(mockAppConfig.dateOfAdminMfaMandate).thenReturn(Some(dateInTheFuture))
-        when(mockApplicationService.fetchByTeamMemberUserId(*[UserId])(*)).thenReturn(applicationsWhereUserIsDeveloperInProduction)
+        when(mockApplicationService.fetchProductionAppsByTeamMember(*[UserId])(*)).thenReturn(applicationsWhereUserIsDeveloperInProduction)
 
         await(service.showAdminMfaMandatedMessage(userId)) shouldBe false
 
-        verify(mockApplicationService).fetchByTeamMemberUserId(eqTo(userId))(*)
+        verify(mockApplicationService).fetchProductionAppsByTeamMember(eqTo(userId))(*)
       }
     }
 
     "Mfa mandate date has not passed and they are are not a collaborator on a principle application" should {
       "be false" in new Setup {
         when(mockAppConfig.dateOfAdminMfaMandate).thenReturn(Some(dateInTheFuture))
-        when(mockApplicationService.fetchByTeamMemberUserId(*[UserId])(*)).thenReturn(applicationsWhereUserIsNotACollaboratorInProduction)
+        when(mockApplicationService.fetchProductionAppsByTeamMember(*[UserId])(*)).thenReturn(applicationsWhereUserIsNotACollaboratorInProduction)
 
         await(service.showAdminMfaMandatedMessage(userId)) shouldBe false
 
-        verify(mockApplicationService).fetchByTeamMemberUserId(eqTo(userId))(*)
+        verify(mockApplicationService).fetchProductionAppsByTeamMember(eqTo(userId))(*)
       }
     }
 
     "Mfa mandate date is not set" should {
       "be false" in new Setup {
-        when(mockApplicationService.fetchByTeamMemberUserId(*[UserId])(*)).thenReturn(applicationsWhereUserIsAdminInProduction)
+        when(mockApplicationService.fetchProductionAppsByTeamMember(*[UserId])(*)).thenReturn(applicationsWhereUserIsAdminInProduction)
         when(mockAppConfig.dateOfAdminMfaMandate).thenReturn(None)
 
         await(service.showAdminMfaMandatedMessage(userId)) shouldBe false
@@ -183,7 +169,7 @@ class MfaMandateServiceSpec extends AsyncHmrcSpec with CollaboratorTracker with 
     "Mfa mandate date has passed" should {
       "be true" in new Setup {
         when(mockAppConfig.dateOfAdminMfaMandate).thenReturn(Some(dateAFewDaysAgo))
-        when(mockApplicationService.fetchByTeamMemberUserId(*[UserId])(*)).thenReturn(applicationsWhereUserIsAdminInProduction)
+        when(mockApplicationService.fetchProductionAppsByTeamMember(*[UserId])(*)).thenReturn(applicationsWhereUserIsAdminInProduction)
 
         await(service.isMfaMandatedForUser(userId)) shouldBe true
       }
@@ -192,7 +178,7 @@ class MfaMandateServiceSpec extends AsyncHmrcSpec with CollaboratorTracker with 
     "Mfa mandate date was today" should {
       "be true" in new Setup {
         when(mockAppConfig.dateOfAdminMfaMandate).thenReturn(Some(dateToday))
-        when(mockApplicationService.fetchByTeamMemberUserId(*[UserId])(*)).thenReturn(applicationsWhereUserIsAdminInProduction)
+        when(mockApplicationService.fetchProductionAppsByTeamMember(*[UserId])(*)).thenReturn(applicationsWhereUserIsAdminInProduction)
 
         await(service.isMfaMandatedForUser(userId)) shouldBe true
       }
@@ -201,50 +187,50 @@ class MfaMandateServiceSpec extends AsyncHmrcSpec with CollaboratorTracker with 
     "Mfa mandate date has not passed and they are an admin on a principal application" should {
       "be false" in new Setup {
         when(mockAppConfig.dateOfAdminMfaMandate).thenReturn(Some(dateInTheFuture))
-        when(mockApplicationService.fetchByTeamMemberUserId(*[UserId])(*)).thenReturn(applicationsWhereUserIsAdminInProduction)
+        when(mockApplicationService.fetchProductionAppsByTeamMember(*[UserId])(*)).thenReturn(applicationsWhereUserIsAdminInProduction)
 
         await(service.isMfaMandatedForUser(userId)) shouldBe false
 
-        verify(mockApplicationService).fetchByTeamMemberUserId(eqTo(userId))(*)
+        verify(mockApplicationService).fetchProductionAppsByTeamMember(eqTo(userId))(*)
       }
     }
 
     "Mfa mandate date has passed and they are not an admin on a principle application" should {
       "be false" in new Setup {
         when(mockAppConfig.dateOfAdminMfaMandate).thenReturn(Some(dateAFewDaysAgo))
-        when(mockApplicationService.fetchByTeamMemberUserId(*[UserId])(*)).thenReturn(applicationsWhereUserIsAdminInSandbox)
+        when(mockApplicationService.fetchProductionAppsByTeamMember(*[UserId])(*)).thenReturn(successful(Nil))
 
         await(service.isMfaMandatedForUser(userId)) shouldBe false
 
-        verify(mockApplicationService).fetchByTeamMemberUserId(eqTo(userId))(*)
+        verify(mockApplicationService).fetchProductionAppsByTeamMember(eqTo(userId))(*)
       }
     }
 
     "Mfa mandate date has passed and they are a developer on a principle application" should {
       "be false" in new Setup {
         when(mockAppConfig.dateOfAdminMfaMandate).thenReturn(Some(dateAFewDaysAgo))
-        when(mockApplicationService.fetchByTeamMemberUserId(*[UserId])(*)).thenReturn(applicationsWhereUserIsDeveloperInProduction)
+        when(mockApplicationService.fetchProductionAppsByTeamMember(*[UserId])(*)).thenReturn(applicationsWhereUserIsDeveloperInProduction)
 
         await(service.isMfaMandatedForUser(userId)) shouldBe false
 
-        verify(mockApplicationService).fetchByTeamMemberUserId(eqTo(userId))(*)
+        verify(mockApplicationService).fetchProductionAppsByTeamMember(eqTo(userId))(*)
       }
     }
 
     "Mfa mandate date has passed and they are are not a collaborator on a principle application" should {
       "be false" in new Setup {
         when(mockAppConfig.dateOfAdminMfaMandate).thenReturn(Some(dateAFewDaysAgo))
-        when(mockApplicationService.fetchByTeamMemberUserId(*[UserId])(*)).thenReturn(applicationsWhereUserIsNotACollaboratorInProduction)
+        when(mockApplicationService.fetchProductionAppsByTeamMember(*[UserId])(*)).thenReturn(applicationsWhereUserIsNotACollaboratorInProduction)
 
         await(service.isMfaMandatedForUser(userId)) shouldBe false
 
-        verify(mockApplicationService).fetchByTeamMemberUserId(eqTo(userId))(*)
+        verify(mockApplicationService).fetchProductionAppsByTeamMember(eqTo(userId))(*)
       }
     }
 
     "Mfa mandate date is not set" should {
       "be false" in new Setup {
-        when(mockApplicationService.fetchByTeamMemberUserId(*[UserId])(*)).thenReturn(applicationsWhereUserIsAdminInProduction)
+        when(mockApplicationService.fetchProductionAppsByTeamMember(*[UserId])(*)).thenReturn(applicationsWhereUserIsAdminInProduction)
         when(mockAppConfig.dateOfAdminMfaMandate).thenReturn(None)
 
         await(service.isMfaMandatedForUser(userId)) shouldBe false

@@ -22,7 +22,7 @@ import controllers.ManageSubscriptions.toDetails
 import domain.models.apidefinitions.{ApiContext, APISubscriptionStatusWithSubscriptionFields,APISubscriptionStatusWithWritableSubscriptionField, ApiVersion}
 import domain.models.applications.{ApplicationId, Capability, Permission, State}
 import domain.models.developers.DeveloperSession
-import model.NoSubscriptionFieldsRefinerBehaviour
+import controllers.model.NoSubscriptionFieldsRefinerBehaviour
 import play.api.mvc._
 import play.api.mvc.Results._
 import uk.gov.hmrc.http.HeaderCarrier

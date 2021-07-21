@@ -64,7 +64,7 @@ class ApplicationConfig @Inject()(config: Configuration, runMode: RunMode) exten
   lazy val nameOfPrincipalEnvironment: String = getConfigDefaulted("features.nameOfPrincipalEnvironment", "Production")
   lazy val nameOfSubordinateEnvironment: String = getConfigDefaulted("features.nameOfSubordinateEnvironment", "Sandbox")
 
-  lazy val platformFrontendHost : String = getConfigDefaulted("platform.frontend.host", "http://localhost:9685")
+  lazy val platformFrontendHost: String = getConfigDefaulted("platform.frontend.host", "http://localhost:9685")
 
   lazy val reportProblemHost: String =
     config.underlying.getString("report-a-problem.base.url") + config.underlying.getString("urls.report-a-problem.problem")

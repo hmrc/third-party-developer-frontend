@@ -14,23 +14,8 @@
  * limitations under the License.
  */
 
-package domain.models.subscriptions
+package controllers.model
 
-import domain.models.apidefinitions.{ApiVersion, APIStatus, APIAccess, ApiVersionDefinition}
-
-case class ApiCategory(value: String) extends AnyVal
-
-object ApiCategory {
-  val EXAMPLE = ApiCategory("EXAMPLE")
+object LeftHandNavFlags {
+  val keyForIsGetProductionCredentialsEnabled = "IS_GET_PRODUCTION_CREDENTIALS_ENABLED"
 }
-
-case class VersionSubscription(version: ApiVersionDefinition, subscribed: Boolean)
-
-case class VersionData(status: APIStatus, access: APIAccess)
-
-case class ApiData(
-    serviceName: String,
-    name: String,
-    isTestSupport: Boolean,
-    versions: Map[ApiVersion, VersionData],
-    categories: List[ApiCategory])

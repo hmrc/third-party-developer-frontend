@@ -20,7 +20,7 @@ import controllers.AddTeamMemberForm
 import domain.models.applications._
 import domain.models.developers.LoggedInState
 import helpers.string._
-import model.ApplicationViewModel
+import controllers.model.ApplicationViewModel
 import org.jsoup.Jsoup
 import play.api.data.Form
 import play.api.test.FakeRequest

@@ -1,0 +1,97 @@
+@*
+ * Copyright 2021 HM Revenue & Customs
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ *@
+
+@import domain.models.developers.DeveloperSession
+@import domain.models.applications.Environment
+@import domain.models.controllers.SandboxApplicationSummary
+@import include._
+@import model.Crumb
+
+@this(devMain: DevMain2)
+
+@(form: Form[controllers.ChooseApplicationToUpliftForm], upliftableApps: Seq[SandboxApplicationSummary], showFluff: Boolean)(implicit request: play.api.mvc.Request[Any], loggedIn: DeveloperSession, messagesProvider: MessagesProvider, appConfig: config.ApplicationConfig)
+
+@pageHeading = @{ "Which application do you want production credentials for?" }
+
+@needToChoose = @{upliftableApps.size > 1}
+
+@invalidAppsSignpost = {
+  @if(needToChoose) {
+    <p class="govuk-body">
+      You can only get production credentials for applications subscribed to APIs that access secure data and require authentication.
+    </p>
+  }
+  <p class="govuk-body">You do not need production credentials for applications that only subscribe to:</p>
+  <ul class="govuk-list govuk-list--bullet">
+    <li>APIs for testing your service</li>
+    <li>APIs with only open access endpoints</li>
+    <li>Hello World API</li>
+  </ul>
+}
+
+@devMain(
+  title = pageHeading,
+  userFullName = loggedIn.loggedInName,
+  breadcrumbs = Seq(
+    Crumb(pageHeading),
+    Crumb.viewAllApplications,
+    Crumb.home
+  ),
+  developerSession = Some(loggedIn)
+) {
+
+  @errorSummary2(form)
+
+  @if(needToChoose) {
+
+    @helper.form(action = controllers.routes.AddApplication.chooseApplicationToUpliftAction()) {
+      @helper.CSRF.formField
+
+      <div class="govuk-form-group @if(form.errors("applicationId").nonEmpty) {govuk-form-group--error}">
+        <fieldset class="govuk-fieldset">
+          <legend class="govuk-fieldset__legend govuk-fieldset__legend--2">
+            <h1 class="heading-large">
+              @pageHeading
+            </h1>
+          </legend>
+          <div class="govuk-radios">
+          @for(app <- upliftableApps) {
+            <div class="govuk-radios__item">
+              <input class="govuk-radios__input" id="@{app.id.value}" name="applicationId" type="radio" value="@{app.id.value}">
+              <label class="govuk-label govuk-radios__label" for="@{app.id.value}">
+                @{app.name}
+              </label>
+            </div>
+          }
+        </fieldset>
+      </div>
+
+      <button id="submit" class="govuk-button" type="submit">Continue</button>
+    }
+  } else {
+    <h1 class="govuk-heading-l">You are requesting production credentials for</h1>
+
+    <p class="govuk-body-l">@{upliftableApps.head.name}</p>
+
+    <p class="govuk-body">
+      <a id="continue" href="@controllers.routes.AddApplication.addApplicationName(Environment.PRODUCTION)" class="govuk-button">Continue</a>
+    </p>    
+  }
+
+  @if(showFluff == true) {
+    @invalidAppsSignpost
+  }
+}

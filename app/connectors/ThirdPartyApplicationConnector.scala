@@ -65,20 +65,20 @@ abstract class ThirdPartyApplicationConnector(config: ApplicationConfig, metrics
     http.POST[UpdateApplicationRequest,ErrorOrUnit](s"$serviceBaseUrl/application/${applicationId.value}", request).map(throwOr(ApplicationUpdateSuccessful))
   }
   
-  def fetchByTeamMemberUserId(userId: UserId)(implicit hc: HeaderCarrier): Future[Seq[Application]] =
+  def fetchByTeamMember(userId: UserId)(implicit hc: HeaderCarrier): Future[Seq[Application]] =
     if (isEnabled) {
       metrics.record(api) {
         val url = s"$serviceBaseUrl/developer/applications"
 
-        Logger.debug(s"fetchByTeamMemberUserId() - About to call $url for $userId in ${environment.toString}")
+        Logger.debug(s"fetchByTeamMember() - About to call $url for $userId in ${environment.toString}")
 
         http
           .GET[Seq[Application]](url, Seq("userId" -> userId.asText, "environment" -> environment.toString))
           .andThen {
             case Success(_) =>
-              Logger.debug(s"fetchByTeamMemberUserId() - done call to $url for $userId in ${environment.toString}")
+              Logger.debug(s"fetchByTeamMember() - done call to $url for $userId in ${environment.toString}")
             case _ =>
-              Logger.debug(s"fetchByTeamMemberUserId() - done errored call to $url for $userId in ${environment.toString}")
+              Logger.debug(s"fetchByTeamMember() - done errored call to $url for $userId in ${environment.toString}")
           }
       }
     } else {
@@ -207,6 +207,10 @@ abstract class ThirdPartyApplicationConnector(config: ApplicationConfig, metrics
           case _          => throw new Exception("error deleting subordinate application")
         }
       )
+  }
+
+  def fetchSubscription(applicationId: ApplicationId)(implicit hc: HeaderCarrier): Future[Set[ApiIdentifier]] = {
+    http.GET[Set[ApiIdentifier]](s"$serviceBaseUrl/application/${applicationId.value}/subscription")
   }
 }
 
