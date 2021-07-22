@@ -258,6 +258,10 @@ a.interrupt-button, a.interrupt-button:visited, a.interrupt-button:link {
   width: 75%;
 }
 
+.govuk-visually-hidden {
+  display: none;
+}
+
 .grid-row {
   margin: 0 -15px;
 }
@@ -436,6 +440,11 @@ tr.teamMembers, th {
 }
 
 .redirect-table-buttons {
+  display: flex;
+  justify-content: flex-end;
+}
+
+.align-right {
   display: flex;
   justify-content: flex-end;
 }

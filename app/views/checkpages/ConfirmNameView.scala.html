@@ -28,40 +28,42 @@
 @pageHeading = @{ "Confirm the name of your application" }
 
 @devMain(
-    title = pageHeading,
-    userFullName = loggedIn.loggedInName,
-    back = BackButtonWithJavaScript,
-    developerSession = Some(loggedIn)
+  title = pageHeading,
+  userFullName = loggedIn.loggedInName,
+  back = BackButtonWithJavaScript,
+  developerSession = Some(loggedIn)
 ) {
 
-    @errorSummary(form)
+  @errorSummary2(form)
 
-    <Header>
-        <h1 class="heading-xlarge">@pageHeading</h1>
-    </Header>
+  <h1 class="govuk-heading-l">@pageHeading</h1>
 
-    <p>We show this name to your users when they authorise your software to interact with HMRC.</p>
-    <p>It must comply with our
-        <a data-naming-guidelines href="@applicationConfig.apiDocumentationFrontendUrl/api-documentation/docs/using-the-hub/name-guidelines" target="_blank" rel="noopener noreferrer">naming guidelines (opens in a new tab).</a></p>
-    <br>
+  <p class="govuk-body">We show this name to your users when they authorise your software to interact with HMRC.</p>
+  <p class="govuk-body">
+    It must comply with our
+    <a data-naming-guidelines href="@applicationConfig.apiDocumentationFrontendUrl/api-documentation/docs/using-the-hub/name-guidelines" target="_blank" class="govuk-link" rel="noopener noreferrer">
+      naming guidelines (opens in a new tab).
+    </a>
+  </p>
+  <br>
 
-    @helper.form(action = submitAction, 'class -> "form") {
-        @helper.CSRF.formField
+  @helper.form(action = submitAction, 'class -> "form") {
+    @helper.CSRF.formField
 
-        <div class="form-group @if(form.errors("applicationName").nonEmpty){form-group-error}">
-            @fieldError(form.errors, "applicationName", true)
-            <label class="form-label-bold" for="applicationName">Application name</label>
-            <input type="text"
-                   id="applicationName"
-                   name="applicationName"
-                   value="@form.data.getOrElse("applicationName", "")"
-                   class="form-control @if(form.errors("applicationName").nonEmpty){form-control-error}"
-                   aria-labelledby="applicationName-label"
-                   aria-required="true"/>
-        </div>
+    <div class="govuk-form-group @if(form.errors("applicationName").nonEmpty){govuk-form-group--error}">
+      @fieldError2(form.errors, "applicationName", true)
+      <label class="govuk-label" for="applicationName">Application name</label>
+      <input
+        type="text"
+        id="applicationName"
+        name="applicationName"
+        value="@form.data.getOrElse("applicationName", "")"
+        class="govuk-input @if(form.errors("applicationName").nonEmpty){govuk-input--error}"
+        aria-labelledby="applicationName-label"
+        aria-required="true"
+      />
+    </div>
 
-        <div class="form-group">
-            <button id="submit" class="button" type="submit">Save and continue</button>
-        </div>
-    }
+    <button id="submit" class="govuk-button" type="submit">Save and continue</button>
+  }
 }

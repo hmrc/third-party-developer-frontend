@@ -19,7 +19,7 @@
 @import domain.models.applications.Application
 @import domain.models.developers.DeveloperSession
 @import views.html.include.DevMain2
-@import views.html.include.editApiMetadataPartial
+@import views.html.include.editApiMetadataPartial2
 @import views.html.include.errorSummaryForFormErrors
 
 @this(devMain: DevMain2)
@@ -41,12 +41,9 @@
 
   @errorSummaryForFormErrors(viewModel.errors)
 
+  <h1 class="govuk-heading-l">@pageHeading</h1>
 
-  <header>
-    <h2 class="heading-large">@pageHeading</h2>
-  </header>
-
-  @editApiMetadataPartial(app,
+  @editApiMetadataPartial2(app,
     viewModel,
     routes.ManageSubscriptions.subscriptionConfigurationPagePost(app.id, pageNumber),
     Some(routes.ManageSubscriptions.subscriptionConfigurationStepPage(app.id, pageNumber))

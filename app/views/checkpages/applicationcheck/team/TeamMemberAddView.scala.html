@@ -29,18 +29,16 @@
 
 @app = @{applicationViewModel.application}
 
- @pageHeading = @{ "Add a team member" }
+@pageHeading = @{ "Add a team member" }
 
- @devMain(
+@devMain(
   title = pageHeading,
   userFullName = loggedIn.loggedInName,
   back = BackButtonWithJavaScript,
   developerSession = Some(loggedIn)
- ) {
+) {
 
-  <header>
-   <h1 class="heading-xlarge">@pageHeading</h1>
-  </header>
+  <h1 class="govuk-heading-l">@pageHeading</h1>
 
   @addTeamMemberPartial(app, form, loggedIn, "Add team member", false, ApplicationCheck)
- }
+}

@@ -79,6 +79,6 @@
 </table>
 <br>
 @if(role.isAdministrator) {
-  <a href="@addTeamMemberUrl" @if(addMemberStyle == Button) { class="govuk-button" } >Add a team member</a><br/>
+  <a href="@addTeamMemberUrl" @if(addMemberStyle == Button) { class="govuk-button" } else { class="govuk-link" } >Add a team member</a><br/>
 }
 

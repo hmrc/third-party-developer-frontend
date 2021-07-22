@@ -30,192 +30,192 @@
 @pageHeading = @{if(applicationConfig.nameOfPrincipalEnvironment == "Production") {getProductionCredentials} else addApplicationToEnv}
 
 @devMain(
-    title = pageHeading,
-    userFullName = loggedIn.loggedInName,
-    breadcrumbs = Seq(
-        Crumb(pageHeading),
-        Crumb.viewAllApplications,
-        Crumb.home
-    ),
-    developerSession = Some(loggedIn)
+  title = pageHeading,
+  userFullName = loggedIn.loggedInName,
+  breadcrumbs = Seq(
+    Crumb(pageHeading),
+    Crumb.viewAllApplications,
+    Crumb.home
+  ),
+  developerSession = Some(loggedIn)
 ) {
+  @errorSummary2(form)
 
-    @errorSummary(form)
-    <heading>
-        <h1 class="heading-xlarge">
-            @pageHeading
-        </h1>
-    </heading>
+  <h1 class="govuk-heading-l">
+    @pageHeading
+  </h1>
 
-    @helper.form(action = controllers.checkpages.routes.ApplicationCheck.requestCheckAction(app.id), 'class -> "form") {
-        @helper.CSRF.formField
-        <section class="section">
-            <div class="form-group">
-                <h2 class="step-heading-1" style="margin-bottom: 0px">About your application</h2>
-                <table class="task-list">
-                    <thead>
-                        <tr>
-                            <th scope="col"><span class="visuallyhidden">Step</span></th>
-                            <th class="numeric" scope="col"><span class="visuallyhidden">Status</span></th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <tr class="@if(form.errors("apiSubscriptionsConfirmed").nonEmpty) {form-group-error}">
-                            <td id="apiSubscriptions" scope="row" class="step-description">
-                                @include.fieldError(form.errors, "apiSubscriptions")
-                                <a id="apiSubscriptionsCompleted" href="@controllers.checkpages.routes.ApplicationCheck.apiSubscriptionsPage(app.id)">
-                                    Confirm the APIs your application uses
-                                </a>
-                            </td>
-                            <td class="numeric">
-                            @if(form("apiSubscriptionsCompleted").value.contains("true")) {
-                                <div id="api-subscriptions-status" class="step-status status-completed">Complete</div>
-                            } else {
-                                <div id="api-subscriptions-status" class="step-status status-incomplete">To do</div>
-                            }
-                            </td>
-                        </tr>
+  @helper.form(action = controllers.checkpages.routes.ApplicationCheck.requestCheckAction(app.id), 'class -> "form") {
+    @helper.CSRF.formField
+    <div class="form-group">
+      <h2 class="govuk-heading-m govuk-!-margin-bottom-0">About your application</h2>
+      <table class="govuk-table">
+        <caption class="govuk-visually-hidden">About your application checklist table</caption>
+        <thead class="govuk-table__head">
+          <tr class="govuk-table__row">
+            <th scope="col" class="govuk-table__header">
+              <span class="govuk-visually-hidden">Step</span>
+            </th>
+            <th scope="col" class="govuk-table__header">
+              <span class="govuk-visually-hidden">Status</span>
+            </th>
+          </tr>
+        </thead>
+        <tbody class="govuk-table__body">
+          <tr class="govuk-table__row @if(form.errors("apiSubscriptionsConfirmed").nonEmpty) {form-group-error}">
+            <td id="apiSubscriptions" class="govuk-table__cell">
+              @include.fieldError(form.errors, "apiSubscriptions")
+              <a class="govuk-link govuk-link--no-visited-state" id="apiSubscriptionsCompleted" href="@controllers.checkpages.routes.ApplicationCheck.apiSubscriptionsPage(app.id)">
+                Confirm the APIs your application uses
+              </a>
+            </td>
+            <td class="govuk-table__cell align-right">
+              @if(form("apiSubscriptionsCompleted").value.contains("true")) {
+                <div id="api-subscriptions-status" class="step-status status-completed">Complete</div>
+              } else {
+                <div id="api-subscriptions-status" class="step-status status-incomplete">To do</div>
+              }
+            </td>
+          </tr>
 
-                        @if(applicationView.hasSubscriptionsFields){
-                            <tr class="@if(form.errors("apiSubscriptionConfigurationsConfirmed").nonEmpty) {form-group-error}">
-                                <td id="apiSubscriptionConfigurations" scope="row" class="step-description">
-                                    @include.fieldError(form.errors, "apiSubscriptionConfigurations")
-                                    <a id="apiSubscriptionConfigurationsCompleted" href="@controllers.routes.ManageSubscriptions.subscriptionConfigurationStart(app.id)">
-                                        Configure your API subscriptions
-                                    </a>
-                                </td>
-                                <td class="numeric">
-                                @if(form("apiSubscriptionConfigurationsCompleted").value.contains("true")) {
-                                    <div id="api-subscription-configurations-status" class="step-status status-completed">Complete</div>
-                                } else {
-                                    <div id="api-subscription-configurations-status" class="step-status status-incomplete">To do</div>
-                                }
-                                </td>
-                            </tr>
-                        }
+          @if(applicationView.hasSubscriptionsFields){
+            <tr class="govuk-table__row @if(form.errors("apiSubscriptionConfigurationsConfirmed").nonEmpty) {form-group-error}">
+              <td id="apiSubscriptionConfigurations" class="govuk-table__cell">
+                @include.fieldError(form.errors, "apiSubscriptionConfigurations")
+                <a class="govuk-link govuk-link--no-visited-state" id="apiSubscriptionConfigurationsCompleted" href="@controllers.routes.ManageSubscriptions.subscriptionConfigurationStart(app.id)">
+                  Configure your API subscriptions
+                </a>
+              </td>
+              <td class="govuk-table__cell align-right">
+                @if(form("apiSubscriptionConfigurationsCompleted").value.contains("true")) {
+                  <div id="api-subscription-configurations-status" class="step-status status-completed">Complete</div>
+                } else {
+                  <div id="api-subscription-configurations-status" class="step-status status-incomplete">To do</div>
+                }
+              </td>
+            </tr>
+          }
 
-                        <tr class="@if(form.errors("contactDetails").nonEmpty){form-group-error}">
-                            <td id="contactDetails" scope="row" class="step-description">
-                                @include.fieldError(form.errors,"contactDetails")
-                                <a id="contactDetailsCompleted" href="@controllers.checkpages.routes.ApplicationCheck.contactPage(app.id)">
-                                    Who to contact about your application
-                                </a>
-                            </td>
-                            <td class="numeric">
-                            @if(form("contactDetailsCompleted").value.contains("true")) {
-                                <div id="contact-details-status" class="step-status status-completed">Complete</div>
-                            } else {
-                                <div id="contact-details-status" class="step-status status-incomplete">To do</div>
-                            }
-                            </td>
-                        </tr>
+          <tr class="govuk-table__row @if(form.errors("contactDetails").nonEmpty){form-group-error}">
+            <td id="contactDetails" class="govuk-table__cell">
+              @include.fieldError(form.errors,"contactDetails")
+              <a class="govuk-link govuk-link--no-visited-state" id="contactDetailsCompleted" href="@controllers.checkpages.routes.ApplicationCheck.contactPage(app.id)">
+                Who to contact about your application
+              </a>
+            </td>
+            <td class="govuk-table__cell align-right">
+              @if(form("contactDetailsCompleted").value.contains("true")) {
+                <div id="contact-details-status" class="step-status status-completed">Complete</div>
+              } else {
+                <div id="contact-details-status" class="step-status status-incomplete">To do</div>
+              }
+            </td>
+          </tr>
 
-                        <tr class="@if(form.errors("teamConfirmed").nonEmpty){form-group-error}">
-                            <td id="teamConfirmed" scope="row" class="step-description">
-                                @include.fieldError(form.errors,"teamConfirmed")
-                                <a id="teamConfirmedCompleted" href="@controllers.checkpages.routes.ApplicationCheck.team(app.id)">
-                                    Tell us your team members
-                                </a>
-                            </td>
-                            <td class="numeric">
-                            @if(form("teamConfirmedCompleted").value.contains("true")) {
-                                <div id="app-name-status" class="step-status status-completed">Complete</div>
-                            } else {
-                                <div id="app-name-status" class="step-status status-incomplete">To do</div>
-                            }
-                            </td>
-                        </tr>
+          <tr class="govuk-table__row @if(form.errors("teamConfirmed").nonEmpty){form-group-error}">
+            <td id="teamConfirmed" class="govuk-table__cell">
+              @include.fieldError(form.errors,"teamConfirmed")
+              <a class="govuk-link govuk-link--no-visited-state" id="teamConfirmedCompleted" href="@controllers.checkpages.routes.ApplicationCheck.team(app.id)">
+                Tell us your team members
+              </a>
+            </td>
+            <td class="govuk-table__cell align-right">
+              @if(form("teamConfirmedCompleted").value.contains("true")) {
+                <div id="app-name-status" class="step-status status-completed">Complete</div>
+              } else {
+                <div id="app-name-status" class="step-status status-incomplete">To do</div>
+              }
+            </td>
+          </tr>
 
-                        <tr class="@if(form.errors("confirmedName").nonEmpty){form-group-error}">
-                            <td id="confirmedName" scope="row" class="step-description">
-                                @include.fieldError(form.errors,"confirmedName")
-                                <a id="confirmedNameCompleted" href="@controllers.checkpages.routes.ApplicationCheck.namePage(app.id)">
-                                    Confirm the name of your software
-                                </a>
-                            </td>
-                            <td class="numeric">
-                            @if(form("confirmedNameCompleted").value.contains("true")) {
-                                <div id="app-name-status" class="step-status status-completed">Complete</div>
-                            } else {
-                                <div id="app-name-status" class="step-status status-incomplete">To do</div>
-                            }
-                            </td>
-                        </tr>
-                    </tbody>
-                </table>
+          <tr class="govuk-table__row @if(form.errors("confirmedName").nonEmpty){form-group-error}">
+            <td id="confirmedName" class="govuk-table__cell">
+              @include.fieldError(form.errors,"confirmedName")
+              <a class="govuk-link govuk-link--no-visited-state" id="confirmedNameCompleted" href="@controllers.checkpages.routes.ApplicationCheck.namePage(app.id)">
+                Confirm the name of your software
+              </a>
+            </td>
+            <td class="govuk-table__cell align-right">
+              @if(form("confirmedNameCompleted").value.contains("true")) {
+                <div id="app-name-status" class="step-status status-completed">Complete</div>
+              } else {
+                <div id="app-name-status" class="step-status status-incomplete">To do</div>
+              }
+            </td>
+          </tr>
+        </tbody>
+      </table>
 
+      </br>
+      </br>
 
+      <h2 class="govuk-heading-m govuk-!-margin-bottom-0">Your responsibilities</h2>
+      <table class="govuk-table">
+        <caption class="govuk-visually-hidden">Your responsibilities checklist table</caption>
+        <thead class="govuk-table__head">
+          <tr class="govuk-table__row">
+            <th scope="col" class="govuk-table__header">
+              <span class="govuk-visually-hidden">Step</span>
+            </th>
+            <th cscope="col" class="govuk-table__header">
+              <span class="govuk-visually-hidden">Status</span>
+            </th>
+          </tr>
+        </thead>
+        <tbody class="govuk-table__body">
+          <tr class="govuk-table__row @if(form.errors("providedPolicyURL").nonEmpty){form-group-error}">
+            <td id="providedPolicyURL" class="govuk-table__cell">
+              @include.fieldError(form.errors,"providedPolicyURL")
+              <a class="govuk-link govuk-link--no-visited-state" id="providedPolicyURLCompleted" href="@controllers.checkpages.routes.ApplicationCheck.privacyPolicyPage(app.id)">
+                Tell us if your application has a privacy policy
+              </a>
+            </td>
+            <td class="govuk-table__cell align-right">
+              @if(form("providedPolicyURLCompleted").value.contains("true")) {
+                <div id="urls-status" class="step-status status-completed">Complete</div>
+              } else {
+                <div id="urls-status" class="step-status status-incomplete">To do</div>
+              }
+            </td>
+          </tr>
 
-                </br>
-                </br>
+          <tr class="govuk-table__row @if(form.errors("providedTermsAndConditionsURL").nonEmpty){form-group-error}">
+            <td id="providedTermsAndConditionsURL" class="govuk-table__cell">
+              @include.fieldError(form.errors,"providedTermsAndConditionsURL")
+              <a class="govuk-link govuk-link--no-visited-state" id="providedTermsAndConditionsURLCompleted" href="@controllers.checkpages.routes.ApplicationCheck.termsAndConditionsPage(app.id)">
+                Tell us if your application has terms and conditions
+              </a>
+            </td>
+            <td class="govuk-table__cell align-right">
+              @if(form("providedTermsAndConditionsURLCompleted").value.contains("true")) {
+                <div id="urls-status" class="step-status status-completed">Complete</div>
+              } else {
+                <div id="urls-status" class="step-status status-incomplete">To do</div>
+              }
+            </td>
+          </tr>
 
-                <h2 class="step-heading-1" style="margin-bottom: 0px">Your responsibilities</h2>
-                        <table class="task-list">
-                            <thead>
-                                <tr>
-                                    <th scope="col"><span class="visuallyhidden">Step</span></th>
-                                    <th class="numeric" scope="col"><span class="visuallyhidden">Status</span></th>
-                                </tr>
-                            </thead>
-                        <tbody>
-
-                        <tr class="@if(form.errors("providedPolicyURL").nonEmpty){form-group-error}">
-
-                            <td id="providedPolicyURL" scope="row" class="step-description">
-                                @include.fieldError(form.errors,"providedPolicyURL")
-                                <a id="providedPolicyURLCompleted" href="@controllers.checkpages.routes.ApplicationCheck.privacyPolicyPage(app.id)">
-                                    Tell us if your application has a privacy policy
-                                </a>
-                            </td>
-                            <td class="numeric">
-                            @if(form("providedPolicyURLCompleted").value.contains("true")) {
-                                <div id="urls-status" class="step-status status-completed">Complete</div>
-                            } else {
-                                <div id="urls-status" class="step-status status-incomplete">To do</div>
-                            }
-                            </td>
-                        </tr>
-
-                        <tr class="@if(form.errors("providedTermsAndConditionsURL").nonEmpty){form-group-error}">
-                        <td id="providedTermsAndConditionsURL" scope="row" class="step-description">
-                            @include.fieldError(form.errors,"providedTermsAndConditionsURL")
-                            <a id="providedTermsAndConditionsURLCompleted" href="@controllers.checkpages.routes.ApplicationCheck.termsAndConditionsPage(app.id)">
-                                Tell us if your application has terms and conditions
-                            </a>
-                        </td>
-                        <td class="numeric">
-                            @if(form("providedTermsAndConditionsURLCompleted").value.contains("true")) {
-                            <div id="urls-status" class="step-status status-completed">Complete</div>
-                            } else {
-                            <div id="urls-status" class="step-status status-incomplete">To do</div>
-                            }
-                        </td>
-                        </tr>
-
-                        <tr class="@if(form.errors("agreeTermsOfUse").nonEmpty){form-group-error}">
-                        <td id="agreeTermsOfUse" scope="row" class="step-description">
-                            @include.fieldError(form.errors,"agreeTermsOfUse")
-                            <a id="termsOfUseAgreementsCompleted" href="@controllers.checkpages.routes.ApplicationCheck.termsOfUsePage(app.id)">
-                                Agree to our terms of use
-                            </a>
-                        </td>
-                        <td class="numeric">
-                            @if(form("termsOfUseAgreementsCompleted").value.contains("true")) {
-                            <div id="agree-terms-status" class="step-status status-completed">Complete</div>
-                            } else {
-                            <div id="agree-terms-status" class="step-status status-incomplete">To do</div>
-                            }
-                        </td>
-                        </tr>
-                    </tbody>
-                </table>
-            </div>
-            <div class="form-group">
-                <br>
-                <br>
-                <button id="submit" class="button" type="submit">Check Your Answers</button>
-                <a href="@routes.AddApplication.manageApps" id="cancel" class="secondary-button">Save and come back later</a>
-            </div>
-        </section>
-    }
+          <tr class="govuk-table__row @if(form.errors("agreeTermsOfUse").nonEmpty){form-group-error}">
+            <td id="agreeTermsOfUse" class="govuk-table__cell">
+              @include.fieldError(form.errors,"agreeTermsOfUse")
+              <a class="govuk-link govuk-link--no-visited-state" id="termsOfUseAgreementsCompleted" href="@controllers.checkpages.routes.ApplicationCheck.termsOfUsePage(app.id)">
+                Agree to our terms of use
+              </a>
+            </td>
+            <td class="govuk-table__cell align-right">
+              @if(form("termsOfUseAgreementsCompleted").value.contains("true")) {
+                <div id="agree-terms-status" class="step-status status-completed">Complete</div>
+              } else {
+                <div id="agree-terms-status" class="step-status status-incomplete">To do</div>
+              }
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="govuk-button-group">
+      <button id="submit" class="govuk-button" type="submit">Check Your Answers</button>
+      <a href="@routes.AddApplication.manageApps" id="cancel" class="govuk-link govuk-link--no-visited-state">Save and come back later</a>
+    </div>
+  }
 }

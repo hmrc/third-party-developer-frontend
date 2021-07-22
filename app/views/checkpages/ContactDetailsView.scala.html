@@ -30,75 +30,84 @@
 @pageHeading = @{ "Who to contact about your application" }
 
 @devMain(
-    title = titleError + pageHeading,
-    userFullName = loggedIn.loggedInName,
-    back = BackButtonWithJavaScript,
-    developerSession = Some(loggedIn)
+  title = titleError + pageHeading,
+  userFullName = loggedIn.loggedInName,
+  back = BackButtonWithJavaScript,
+  developerSession = Some(loggedIn)
 ) {
+  @errorSummary2(form)
 
-    @errorSummary(form)
+  <h1 class="govuk-heading-l">@pageHeading</h1>
 
-    <heading>
-        <h1 class="heading-xlarge">@pageHeading</h1>
-    </heading>
+  @helper.form(action = action, 'class -> "form") {
+    @helper.CSRF.formField
 
-    @helper.form(action = action, 'class -> "form") {
-        @helper.CSRF.formField
-        <p>This should be the person in your organisation who can answer questions about how your software is built.</p>
-        <fieldset>
-        <div class="form-group">
-            <div class="multiple-choice">
-                <input id="useregistered" type="checkbox" name="useregistered" value="useregistered" onchange="checkboxChange()">
-                <label class="block-label selection-button-checkbox" for="useregistered">Use my details</label>
-            </div>
-        </div>
-        <div class="form-group @if(form.errors("fullname").nonEmpty){form-group-error}">
-            <label class="form-label-bold" for="fullname" id="fullname-label">Full name</label>
-            @fieldError(form.errors, "fullname", true)
-            <input type="text"
-                   id="fullname"
-                   name="fullname"
-                   value="@form.data.getOrElse("fullname", "")"
-                   class="form-control @if(form.errors("fullname").nonEmpty){form-control-error}"
-                   aria-labelledby="fullname-label"
-                   aria-required="true"/>
-        </div>
-        <div class="form-group @if(form.errors("email").nonEmpty){form-group-error}">
-            <label class="form-label-bold" for="email" id="email-label">Email address</label>
-            @fieldError(form.errors, "email", true)
-            <input type="text"
-                   id="email"
-                   name="email"
-                   value="@form.data.getOrElse("email", "")"
-                   class="form-control @if(form.errors("email").nonEmpty){form-control-error}"
-                   aria-labelledby="email-label"
-                   aria-required="true"/>
-        </div>
-        <div class="form-group @if(form.errors("telephone").nonEmpty){form-group-error}">
-            <label class="form-label-bold" for="telephone" id="telephone-label">Telephone number</label>
-            @fieldError(form.errors, "telephone", true)
-            <input type="text"
-                   id="telephone"
-                   name="telephone"
-                   value="@form.data.getOrElse("telephone", "")"
-                   class="form-control @if(form.errors("telephone").nonEmpty){form-control-error}"
-                   aria-labelledby="telephone-label"
-                   aria-required="true"/>
-        </div>
-        </fieldset>
+    <p class="govuk-body">This should be the person in your organisation who can answer questions about how your software is built.</p>
 
-        <div class="form-group">
-            <button id="submit" class="button" type="submit">Save and continue</button>
+    <div class="govuk-form-group">
+      <fieldset class="govuk-fieldset" aria-describedby="useregistered-hint">
+        <div id="useregistered-hint" class="govuk-visually-hidden">
+          Select if you want to fill the form with your current details
         </div>
+        <div class="govuk-checkboxes" data-module="govuk-checkboxes">
+          <div class="govuk-checkboxes__item">
+            <input class="govuk-checkboxes__input" id="useregistered" type="checkbox" name="useregistered" value="useregistered" onchange="checkboxChange()">
+            <label class="govuk-label govuk-checkboxes__label" for="useregistered">Use my details</label>
+          </div>
+        </div>
+      </fieldset>
+    </div>
+    
+    <div class="govuk-form-group @if(form.errors("fullname").nonEmpty){govuk-form-group--error}">
+      <label class="govuk-label" for="fullname" id="fullname-label">Full name</label>
+        @fieldError2(form.errors, "fullname", true)
+      <input
+        type="text"
+        id="fullname"
+        name="fullname"
+        value="@form.data.getOrElse("fullname", "")"
+        class="govuk-input @if(form.errors("fullname").nonEmpty){govuk-input--error}"
+        aria-labelledby="fullname-label"
+        aria-required="true"
+      />
+    </div>
+    <div class="govuk-form-group @if(form.errors("email").nonEmpty){govuk-form-group--error}">
+      <label class="govuk-label" for="email" id="email-label">Email address</label>
+      @fieldError2(form.errors, "email", true)
+      <input
+        type="text"
+        id="email"
+        name="email"
+        value="@form.data.getOrElse("email", "")"
+        class="govuk-input @if(form.errors("email").nonEmpty){govuk-input--error}"
+        aria-labelledby="email-label"
+        aria-required="true"
+      />
+    </div>
+    <div class="govuk-form-group @if(form.errors("telephone").nonEmpty){govuk-form-group--error}">
+      <label class="govuk-label" for="telephone" id="telephone-label">Telephone number</label>
+      @fieldError2(form.errors, "telephone", true)
+      <input
+        type="text"
+        id="telephone"
+        name="telephone"
+        value="@form.data.getOrElse("telephone", "")"
+        class="govuk-input @if(form.errors("telephone").nonEmpty){govuk-input--error}"
+        aria-labelledby="telephone-label"
+        aria-required="true"
+      />
+    </div>
 
-        <script type="text/javascript">
-            function checkboxChange(){
-            let checkbox = document.getElementById('useregistered')
-            if (checkbox.checked){
-                document.getElementById("fullname").value = "@loggedIn.loggedInName";
-                document.getElementById("email").value = "@loggedIn.email";
-            }
+    <button id="submit" class="govuk-button" type="submit">Save and continue</button>
+
+    <script type="text/javascript">
+      function checkboxChange(){
+        let checkbox = document.getElementById('useregistered')
+        if (checkbox.checked){
+          document.getElementById("fullname").value = "@loggedIn.loggedInName";
+          document.getElementById("email").value = "@loggedIn.email";
         }
-        </script>
-    }
+      }
+    </script>
+  }
 }
