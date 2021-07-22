@@ -52,7 +52,7 @@
 
     <div class="govuk-form-group @if(form.errors("applicationName").nonEmpty){govuk-form-group--error}">
       @fieldError2(form.errors, "applicationName", true)
-      <label class="govuk-label" for="applicationName">Application name</label>
+      <label id="applicationName-label" class="govuk-label" for="applicationName">Application name</label>
       <input
         type="text"
         id="applicationName"
