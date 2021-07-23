@@ -64,9 +64,7 @@ class ChooseApplicationToUpliftActionSpec
 
   val sandboxAppSummaries = (1 to 5).map(_ => buildApplication(loggedInUser.email)).map(SandboxApplicationSummary.from(_, loggedInUser.email))
 
-  trait Setup extends ApplicationServiceMock with ApmConnectorMockModule with ApplicationActionServiceMock with SessionServiceMock with EmailPreferencesServiceMock {
-    val addApplicationSubordinateEmptyNestView = app.injector.instanceOf[AddApplicationSubordinateEmptyNestView]
-    val manageApplicationsView = app.injector.instanceOf[ManageApplicationsView]
+  trait Setup extends UpliftDataServiceMock with AppsByTeamMemberServiceMock with ApplicationServiceMock with ApmConnectorMockModule with ApplicationActionServiceMock with SessionServiceMock with EmailPreferencesServiceMock {
     val accessTokenSwitchView = app.injector.instanceOf[AccessTokenSwitchView]
     val usingPrivilegedApplicationCredentialsView = app.injector.instanceOf[UsingPrivilegedApplicationCredentialsView]
     val tenDaysWarningView = app.injector.instanceOf[TenDaysWarningView]
@@ -86,10 +84,9 @@ class ChooseApplicationToUpliftActionSpec
       ApmConnectorMock.aMock,
       sessionServiceMock,
       mock[AuditService],
+      upliftDataServiceMock,
       mcc,
       cookieSigner,
-      addApplicationSubordinateEmptyNestView,
-      manageApplicationsView,
       accessTokenSwitchView,
       usingPrivilegedApplicationCredentialsView,
       tenDaysWarningView,
@@ -143,8 +140,7 @@ class ChooseApplicationToUpliftActionSpec
   "chooseApplicationToUpliftAction" should {
     "go back to the form when no app is selected" in new Setup {
       val summaries = sandboxAppSummaries
-      fetchSandoxSummariesByTeamMemberReturns(summaries)
-      identifyUpliftableSandboxAppIdsReturns(summaries.map(_.id).toSet)
+      getUpliftDataReturns(summaries, false)
 
       val result = underTest.chooseApplicationToUpliftAction()(loggedInRequest.withFormUrlEncodedBody(("applicationId" -> "")))
 
@@ -157,7 +153,7 @@ class ChooseApplicationToUpliftActionSpec
       val sandboxAppId = summaries.head.id
       val prodAppId = ApplicationId.random
 
-      fetchSandoxSummariesByTeamMemberReturns(summaries)
+      fetchSandboxSummariesByTeamMemberReturns(summaries)
       identifyUpliftableSandboxAppIdsReturns(summaries.map(_.id).toSet)
       ApmConnectorMock.UpliftApplication.willReturn(prodAppId)
 

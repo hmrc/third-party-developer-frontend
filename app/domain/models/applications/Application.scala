@@ -26,6 +26,7 @@ import domain.models.developers.Developer
 import helpers.string.Digest
 import org.joda.time.DateTime
 import java.util.UUID
+import domain.models.developers.UserId
 
 case class ApplicationId(value: String) extends AnyVal
 
@@ -60,7 +61,11 @@ case class Application(
 ) {
 
   def role(email: String): Option[CollaboratorRole] = collaborators.find(_.emailAddress == email).map(_.role)
+  def roleForCollaborator(userId: UserId): Option[CollaboratorRole] = collaborators.find(_.userId == userId).map(_.role)
 
+  def isUserACollaboratorOfRole(userId: UserId, requiredRole: CollaboratorRole): Boolean = roleForCollaborator(userId).fold(false)(_ == requiredRole)
+
+  
   def adminEmails: Set[String] = collaborators.filter(_.role.isAdministrator).map(_.emailAddress)
 
   def termsOfUseAgreements: List[TermsOfUseAgreement] = checkInformation.map(_.termsOfUseAgreements).getOrElse(List.empty)

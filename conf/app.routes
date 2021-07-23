@@ -40,7 +40,7 @@ GET         /reset-password                                                     
 POST        /reset-password                                                                              controllers.Password.resetPassword
 GET         /reset-password/error                                                                        controllers.Password.resetPasswordError
 
-GET         /applications                                                                                controllers.AddApplication.manageApps
+GET         /applications                                                                                controllers.ManageApplications.manageApps
 
 GET         /applications/using-privileged-application-credentials                                       controllers.AddApplication.usingPrivilegedApplicationCredentialsPage()
 GET         /applications/access-token                                                                   controllers.AddApplication.accessTokenSwitchPage()
@@ -50,6 +50,7 @@ GET         /applications/add/production/10-days                                
 GET         /applications/add/sandbox                                                                    controllers.AddApplication.addApplicationSubordinate
 GET         /applications/add/production                                                                 controllers.AddApplication.addApplicationPrincipal
 GET         /applications/add/switch                                                                     controllers.AddApplication.addApplicationProductionSwitch
+GET         /applications/add/:id                                                                        controllers.AddApplication.soleApplicationToUpliftAction(id: domain.models.applications.ApplicationId)
 POST        /applications/add/switch                                                                     controllers.AddApplication.chooseApplicationToUpliftAction
 
 GET         /applications/add/:environment/name                                                          controllers.AddApplication.addApplicationName(environment: domain.models.applications.Environment)

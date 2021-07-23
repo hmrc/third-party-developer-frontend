@@ -21,6 +21,7 @@ import enumeratum.{EnumEntry, PlayEnum}
 sealed trait CollaboratorRole extends EnumEntry {
   def isDeveloper: Boolean = this == CollaboratorRole.DEVELOPER
   def isAdministrator: Boolean = this == CollaboratorRole.ADMINISTRATOR
+  def is(other: CollaboratorRole) = this == other
 }
 
 object CollaboratorRole extends PlayEnum[CollaboratorRole] {

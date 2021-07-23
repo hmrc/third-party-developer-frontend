@@ -99,7 +99,7 @@ trait ExtendedDevHubAuthorization extends DevHubAuthorization {
 
   def loginSucceeded(request: RequestHeader): Future[Result] = {
     Logger.info(s"loginSucceeded - access_uri ${request.session.get("access_uri")}")
-    val uri = request.session.get("access_uri").getOrElse(routes.AddApplication.manageApps().url)
+    val uri = request.session.get("access_uri").getOrElse(routes.ManageApplications.manageApps().url)
     Future.successful(Redirect(uri).withNewSession)
   }
 

@@ -64,9 +64,7 @@ class AddApplicationProductionSwitchSpec
 
   val sandboxAppSummaries = (1 to 5).map(_ => buildApplication(loggedInUser.email)).map(SandboxApplicationSummary.from(_, loggedInUser.email))
 
-  trait Setup extends ApplicationServiceMock with ApmConnectorMockModule with ApplicationActionServiceMock with SessionServiceMock with EmailPreferencesServiceMock {
-    val addApplicationSubordinateEmptyNestView = app.injector.instanceOf[AddApplicationSubordinateEmptyNestView]
-    val manageApplicationsView = app.injector.instanceOf[ManageApplicationsView]
+  trait Setup extends UpliftDataServiceMock with AppsByTeamMemberServiceMock with ApplicationServiceMock with ApmConnectorMockModule with ApplicationActionServiceMock with SessionServiceMock with EmailPreferencesServiceMock {
     val accessTokenSwitchView = app.injector.instanceOf[AccessTokenSwitchView]
     val usingPrivilegedApplicationCredentialsView = app.injector.instanceOf[UsingPrivilegedApplicationCredentialsView]
     val tenDaysWarningView = app.injector.instanceOf[TenDaysWarningView]
@@ -86,10 +84,9 @@ class AddApplicationProductionSwitchSpec
       ApmConnectorMock.aMock,
       sessionServiceMock,
       mock[AuditService],
+      upliftDataServiceMock,
       mcc,
       cookieSigner,
-      addApplicationSubordinateEmptyNestView,
-      manageApplicationsView,
       accessTokenSwitchView,
       usingPrivilegedApplicationCredentialsView,
       tenDaysWarningView,
@@ -142,17 +139,17 @@ class AddApplicationProductionSwitchSpec
 
   "addApplicationProductionSwitch" should {
     "return bad request when no apps are upliftable" in new Setup {
-      fetchSandoxSummariesByTeamMemberReturns(Seq.empty[SandboxApplicationSummary])
+      getUpliftDataReturns(Nil, false)
 
-      intercept[IllegalStateException] {
-        await(underTest.addApplicationProductionSwitch()(loggedInRequest))
-      }.getMessage() shouldBe "Should not be requesting with this data"
+      val result = underTest.addApplicationProductionSwitch()(loggedInRequest)
+
+      status(result) shouldBe BAD_REQUEST
     }
     
     "go to next stage in journey when one app is upliftable and no other apps are present" in new Setup {
       val summaries = sandboxAppSummaries.take(1)
-      fetchSandoxSummariesByTeamMemberReturns(summaries)
-      identifyUpliftableSandboxAppIdsReturns(summaries.map(_.id).toSet)
+      getUpliftDataReturns(summaries, false)
+
       val prodAppId = ApplicationId.random
       ApmConnectorMock.UpliftApplication.willReturn(prodAppId)
 
@@ -164,7 +161,7 @@ class AddApplicationProductionSwitchSpec
     
     "return ok when all apps are upliftable" in new Setup {
       val summaries = sandboxAppSummaries
-      fetchSandoxSummariesByTeamMemberReturns(summaries)
+      getUpliftDataReturns(summaries, false)
       identifyUpliftableSandboxAppIdsReturns(summaries.map(_.id).toSet)
       
       implicit val result = underTest.addApplicationProductionSwitch()(loggedInRequest)
@@ -181,8 +178,7 @@ class AddApplicationProductionSwitchSpec
       val upliftable = summaries.take(1)
       val notUpliftable = summaries.drop(1)
 
-      fetchSandoxSummariesByTeamMemberReturns(summaries)
-      identifyUpliftableSandboxAppIdsReturns(upliftable.map(_.id).toSet)
+      getUpliftDataReturns(upliftable, true)
       
       implicit val result = underTest.addApplicationProductionSwitch()(loggedInRequest)
 
@@ -199,8 +195,7 @@ class AddApplicationProductionSwitchSpec
       val upliftable = summaries.drop(1)
       val notUpliftable = summaries.take(1)
 
-      fetchSandoxSummariesByTeamMemberReturns(summaries)
-      identifyUpliftableSandboxAppIdsReturns(upliftable.map(_.id).toSet)
+      getUpliftDataReturns(upliftable,false)
       
       implicit val result = underTest.addApplicationProductionSwitch()(loggedInRequest)
 
@@ -209,6 +204,20 @@ class AddApplicationProductionSwitchSpec
       shouldShowWhichAppMessage()
       shouldShowAppNamesFor(upliftable)
       shouldNotShowAppNamesFor(notUpliftable)
+      // TODO - work out why
+      // shouldShowMessageAboutNotNeedingProdCreds()
+    }
+    "return ok when some apps are upliftable after showing fluff" in new Setup {
+      val summaries = sandboxAppSummaries
+      val upliftable = summaries.drop(1)
+      val notUpliftable = summaries.take(1)
+
+      getUpliftDataReturns(upliftable,true)
+      
+      implicit val result = underTest.addApplicationProductionSwitch()(loggedInRequest)
+
+      status(result) shouldBe OK
+
       shouldShowMessageAboutNotNeedingProdCreds()
     }
   }

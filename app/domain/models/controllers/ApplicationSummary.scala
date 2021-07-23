@@ -20,6 +20,7 @@ import domain.models.applications._
 import domain.models.apidefinitions.AccessType
 import uk.gov.hmrc.http.NotFoundException
 import org.joda.time.DateTime
+import domain.models.developers.UserId
 
 trait ApplicationSummary {
   def id: ApplicationId
@@ -80,6 +81,23 @@ object SandboxApplicationSummary {
       app.access.accessType
     )
   }
+  def from(app: Application, userId: UserId): SandboxApplicationSummary = {
+    require(app.deployedTo.isSandbox, "SandboxApplicationSummary cannot be built from Production App")
+
+    val role = app.roleForCollaborator(userId).getOrElse(throw new NotFoundException("Role not found"))
+
+    SandboxApplicationSummary(
+      app.id,
+      app.name,
+      role,
+      app.termsOfUseStatus,
+      app.state.name,
+      app.lastAccess,
+      app.lastAccessTokenUsage.isDefined,
+      app.createdOn,
+      app.access.accessType
+    )
+  }
 }
 
 object ProductionApplicationSummary {
@@ -87,6 +105,24 @@ object ProductionApplicationSummary {
     require(app.deployedTo.isProduction, "ProductionApplicationSummary cannot be built from Sandbox App")
 
     val role = app.role(email).getOrElse(throw new NotFoundException("Role not found"))
+
+    ProductionApplicationSummary(
+      app.id,
+      app.name,
+      role,
+      app.termsOfUseStatus,
+      app.state.name,
+      app.lastAccess,
+      app.lastAccessTokenUsage.isDefined,
+      app.createdOn,
+      app.access.accessType        
+    )
+  }
+  
+  def from(app: Application, userId: UserId): ProductionApplicationSummary = {
+    require(app.deployedTo.isProduction, "ProductionApplicationSummary cannot be built from Sandbox App")
+
+    val role = app.roleForCollaborator(userId).getOrElse(throw new NotFoundException("Role not found"))
 
     ProductionApplicationSummary(
       app.id,

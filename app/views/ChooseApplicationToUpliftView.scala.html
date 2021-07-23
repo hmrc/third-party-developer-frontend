@@ -83,11 +83,12 @@
     }
   } else {
     <h1 class="govuk-heading-l">You are requesting production credentials for</h1>
-
+    
     <p class="govuk-body-l">@{upliftableApps.head.name}</p>
-
+    
     <p class="govuk-body">
-      <a id="continue" href="@controllers.routes.AddApplication.addApplicationName(Environment.PRODUCTION)" class="govuk-button">Continue</a>
+      // TODO - fix where this goes
+      <a id="continue" href="@controllers.routes.AddApplication.soleApplicationToUpliftAction(upliftableApps.head.id)" class="govuk-button">Continue</a>
     </p>    
   }
 

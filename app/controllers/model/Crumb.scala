@@ -28,7 +28,7 @@ object Crumb {
     Crumb("Home", s"${applicationConfig.apiDocumentationFrontendUrl}/api-documentation", Some("data-breadcrumb-home"))
 
   val viewAllApplications =
-    Crumb("View all applications",s"${controllers.routes.AddApplication.manageApps}", Some("data-breadcrumb-manage-app"))
+    Crumb("View all applications",s"${controllers.routes.ManageApplications.manageApps}", Some("data-breadcrumb-manage-app"))
 
   val protectAccount =
     Crumb("Protect account",s"${controllers.profile.routes.ProtectAccount.getProtectAccount}", Some("data-breadcrumb-protect-account"))

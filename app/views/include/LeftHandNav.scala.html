@@ -126,7 +126,7 @@
     <div class="side-nav" role="navigation" aria-labelledby="nav2">
       <span class="govuk-heading-s govuk-!-margin-bottom-1 govuk-!-margin-top-2" id="nav2">Manage applications</span>
       <ul class="side-nav__component">
-        <li class="side-nav__list @if(section == "manage-applications") { side-nav__list--selected }"><a class="side-nav__link" href="@routes.AddApplication.manageApps">View all applications</a></li>
+        <li class="side-nav__list @if(section == "manage-applications") { side-nav__list--selected }"><a class="side-nav__link" href="@routes.ManageApplications.manageApps">View all applications</a></li>
         <li class="side-nav__list"><a class="side-nav__link" href="@routes.AddApplication.addApplicationSubordinate">Add an application to @subordinateWording</a></li>
         @if(appConfig.nameOfPrincipalEnvironment == "Production") {
             @if(isGetProductionCredentialsEnabled) {

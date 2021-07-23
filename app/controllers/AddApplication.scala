@@ -34,11 +34,9 @@ import views.html._
 import scala.concurrent.{ExecutionContext, Future}
 import scala.concurrent.Future.successful
 import uk.gov.hmrc.http.HeaderCarrier
-import domain.models.controllers.ManageApplicationsViewModel
 import play.api.libs.json.Json
 import domain.Error._
 import domain.models.controllers.SandboxApplicationSummary
-import domain.models.developers.DeveloperSession
 import connectors.ApmConnector
 
 @Singleton
@@ -50,10 +48,9 @@ class AddApplication @Inject() (
     val apmConnector: ApmConnector,
     val sessionService: SessionService,
     val auditService: AuditService,
+    upliftDataService: UpliftDataService,
     mcc: MessagesControllerComponents,
     val cookieSigner: CookieSigner,
-    addApplicationSubordinateEmptyNestView: AddApplicationSubordinateEmptyNestView,
-    manageApplicationsView: ManageApplicationsView,
     accessTokenSwitchView: AccessTokenSwitchView,
     usingPrivilegedApplicationCredentialsView: UsingPrivilegedApplicationCredentialsView,
     tenDaysWarningView: TenDaysWarningView,
@@ -64,19 +61,6 @@ class AddApplication @Inject() (
     chooseApplicationToUpliftView: ChooseApplicationToUpliftView
 )(implicit val ec: ExecutionContext, val appConfig: ApplicationConfig, val environmentNameService: EnvironmentNameService)
     extends ApplicationController(mcc) {
-
-  def manageApps: Action[AnyContent] = loggedInAction { implicit request =>
-    applicationService.fetchAllSummariesByTeamMember(loggedIn.developer.userId, loggedIn.email) flatMap { 
-      case (Nil, Nil)                                                    => successful(Ok(addApplicationSubordinateEmptyNestView()))
-      case (sandboxApplicationSummaries, productionApplicationSummaries) => 
-        val appIds = sandboxApplicationSummaries.map(_.id)
-        applicationService.identifyUpliftableSandboxAppIds(appIds).map { upliftableApplicationIds =>
-          Ok(manageApplicationsView(
-            ManageApplicationsViewModel(sandboxApplicationSummaries, productionApplicationSummaries, upliftableApplicationIds)
-          ))
-        }
-    }
-  }
 
   def accessTokenSwitchPage(): Action[AnyContent] = loggedInAction { implicit request => 
     successful(Ok(accessTokenSwitchView())) 
@@ -103,24 +87,20 @@ class AddApplication @Inject() (
     successful(Ok(addApplicationNameView(form, environment)))
   }
 
-  private def getUpliftData(loggedIn: DeveloperSession)(implicit hc: HeaderCarrier): Future[(Seq[SandboxApplicationSummary], Boolean)] =
-    applicationService.fetchSandboxSummariesByTeamMember(loggedIn.developer.userId, loggedIn.email) flatMap { 
-      case Nil              => throw new IllegalStateException("Should not be requesting with this data")
-      case sandboxSummaries => 
-        val appIds = sandboxSummaries.map(_.id)
-        applicationService.identifyUpliftableSandboxAppIds(appIds).map { upliftableApplicationIds =>
-          val countOfUpliftable = upliftableApplicationIds.size
-          val upliftableSummaries = sandboxSummaries.filter(s => upliftableApplicationIds.contains(s.id))
-          val haveAppsThatCannotBeUplifted = countOfUpliftable < sandboxSummaries.size
-
-          (upliftableSummaries, haveAppsThatCannotBeUplifted)
-        }
+  def soleApplicationToUpliftAction(appId: ApplicationId): Action[AnyContent] = loggedInAction { implicit request =>
+    upliftDataService.getUpliftData(loggedIn.developer.userId).flatMap { data =>
+      val (upliftableSummaries, haveAppsThatCannotBeUplifted) = data
+      upliftableSummaries.headOption match {
+        case Some(appId) => upliftApplicationAndShowRequestCheckPage(upliftableSummaries.head.id)
+        case _           => successful(BadRequest(Json.toJson(BadRequestError)))
       }
+    }
+  }
 
   def addApplicationProductionSwitch(): Action[AnyContent] = loggedInAction { implicit request =>
     def chooseApplicationToUplift(upliftableSummaries: Seq[SandboxApplicationSummary], showFluff: Boolean): Action[AnyContent] = loggedInAction { implicit request =>
       val form = 
-        if(upliftableSummaries.size == 1)
+        if(upliftableSummaries.size == 1) // TODO - and only one API sub
           ChooseApplicationToUpliftForm.form.fill(ChooseApplicationToUpliftForm(upliftableSummaries.head.id))
         else
           ChooseApplicationToUpliftForm.form
@@ -128,7 +108,7 @@ class AddApplication @Inject() (
       successful(Ok(chooseApplicationToUpliftView(form, upliftableSummaries, showFluff)))
     }
 
-    getUpliftData(loggedIn).flatMap { data =>
+    upliftDataService.getUpliftData(loggedIn.developer.userId).flatMap { data =>
       val (upliftableSummaries, haveAppsThatCannotBeUplifted) = data
       (upliftableSummaries.size, haveAppsThatCannotBeUplifted) match {
         case (0, _)     => successful(BadRequest(Json.toJson(BadRequestError)))
@@ -150,7 +130,7 @@ class AddApplication @Inject() (
       upliftApplicationAndShowRequestCheckPage(validForm.applicationId)
 
     def handleInvalidForm(formWithErrors: Form[ChooseApplicationToUpliftForm]) = {
-      getUpliftData(loggedIn).flatMap { data =>
+      upliftDataService.getUpliftData(loggedIn.developer.userId).flatMap { data =>
         val (upliftableSummaries, haveAppsThatCannotBeUplifted) = data
         (upliftableSummaries.size, haveAppsThatCannotBeUplifted) match {
           case (0, _)     => successful(BadRequest(Json.toJson(BadRequestError)))
@@ -159,7 +139,6 @@ class AddApplication @Inject() (
         }
       }
     }      
-
     ChooseApplicationToUpliftForm.form.bindFromRequest().fold(handleInvalidForm, handleValidForm)
   }
 

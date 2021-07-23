@@ -104,11 +104,12 @@ class ManageSubscriptionsSpec
     "csrfToken" -> app.injector.instanceOf[TokenProvider].generateToken
   )
 
-  trait ManageSubscriptionsSetup extends ApplicationServiceMock with ApplicationActionServiceMock with SessionServiceMock {
+  trait ManageSubscriptionsSetup extends AppsByTeamMemberServiceMock with ApplicationServiceMock with ApplicationActionServiceMock with SessionServiceMock {
     val mockAuditService: AuditService = mock[AuditService]
     val mockSubscriptionFieldsService: SubscriptionFieldsService = mock[SubscriptionFieldsService]
     val mockErrorHandler: ErrorHandler = app.injector.instanceOf[ErrorHandler]
 
+    // Views from Guice
     val listApiSubscriptionsView = app.injector.instanceOf[ListApiSubscriptionsView]
     val editApiMetadataView = app.injector.instanceOf[EditApiMetadataView]
     val editApiMetadataFieldView =app.injector.instanceOf[EditApiMetadataFieldView]
@@ -137,7 +138,7 @@ class ManageSubscriptionsSpec
     fetchSessionByIdReturns(sessionId, session)
     updateUserFlowSessionsReturnsSuccessfully(sessionId)
 
-    fetchProductionAppsByTeamMemberReturns(List(application))
+    fetchAppsByTeamMemberReturns(Environment.PRODUCTION)(Seq(application))
 
     val loggedInRequest: FakeRequest[AnyContentAsEmpty.type] = FakeRequest()
       .withLoggedIn(manageSubscriptionController, implicitly)(sessionId)
