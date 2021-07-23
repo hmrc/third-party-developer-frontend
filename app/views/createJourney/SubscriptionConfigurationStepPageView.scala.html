@@ -19,7 +19,7 @@
 @import domain.models.applications.Application
 @import domain.models.developers.DeveloperSession
 
-@this(devMain: DevMain)
+@this(devMain: DevMain2)
 
 @(application: Application, pageNumber: Int, ofPages: Int)(
         implicit request: play.api.mvc.Request[Any],
@@ -37,15 +37,11 @@
   developerSession = Some(loggedIn),
   back = BackButtonWithJavaScript
 ) {
-  <header>
-    <h2 class="heading-large">@pageHeading</h2>
-  </header>
+  <h1 class="govuk-heading-l">@pageHeading</h1>
 
-  <p>
-    You have completed step @pageNumber of @ofPages.
-  </p>
+  <p class="govuk-body">You have completed step @pageNumber of @ofPages.</p>
   <br/>
-  <p>
-    <a href="@{controllers.routes.ManageSubscriptions.subscriptionConfigurationPage(application.id, pageNumber + 1)}" class="button">Continue</a>
+  <p class="govuk-body">
+    <a href="@{controllers.routes.ManageSubscriptions.subscriptionConfigurationPage(application.id, pageNumber + 1)}" class="govuk-button">Continue</a>
   </p>
 }

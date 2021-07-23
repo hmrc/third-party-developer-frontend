@@ -16,11 +16,11 @@
 
 @import config.ApplicationConfig
 @import domain.models.views.BackButtonWithJavaScript
-@import views.html.include.DevMain
+@import views.html.include.DevMain2
 @import domain.models.applications.Application
 @import domain.models.developers.DeveloperSession
 
-@this(devMain: DevMain)
+@this(devMain: DevMain2)
 
 @(app: Application, loggedIn: DeveloperSession, email: String)(
         implicit request: play.api.mvc.Request[Any], messages: Messages,applicationConfig: ApplicationConfig)
@@ -34,25 +34,18 @@
   developerSession = Some(loggedIn)
  ) {
 
-  <header>
-   <h1 class="heading-xlarge">@pageHeading</h1>
-  </header>
+  <h1 class="govuk-heading-l">@pageHeading</h1>
 
-  <section>
-
-  <div>
-   <strong class="bold">Team member:</strong> @email
-  </div>
+  <p class="govuk-body"><span class="govuk-body govuk-!-font-weight-bold">Team member: </span>@email</p>
 
   <br/>
 
   @helper.form(action = controllers.checkpages.routes.ApplicationCheck.teamMemberRemoveAction(app.id)) {
-   @helper.CSRF.formField
-   <input type="hidden" name="email" value="@email">
-
-    <button id="submit" class="button button--padded" type="submit">Delete team member</button>
-    <a href="@controllers.checkpages.routes.ApplicationCheck.team(app.id)" class="secondary-button">Cancel</a>
+    @helper.CSRF.formField
+    <input type="hidden" name="email" value="@email">
+    <div class="govuk-button-group">
+      <button id="submit" class="govuk-button" type="submit">Delete team member</button>
+      <a class="govuk-link" href="@controllers.checkpages.routes.ApplicationCheck.team(app.id)">Cancel</a>
+    </div>
   }
-  </section>
-
  }

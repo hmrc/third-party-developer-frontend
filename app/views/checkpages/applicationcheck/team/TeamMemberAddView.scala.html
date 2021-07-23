@@ -19,28 +19,26 @@
 @import views.html.include.teamMembers.addTeamMemberPartial
 @import domain.models.views.BackButtonWithJavaScript
 @import model.ApplicationViewModel
-@import views.html.include.DevMain
+@import views.html.include.DevMain2
 @import domain.models.controllers.AddTeamMemberPageMode.ApplicationCheck
 
-@this(devMain: DevMain)
+@this(devMain: DevMain2)
 
 @(applicationViewModel: ApplicationViewModel, form: Form[AddTeamMemberForm], loggedIn: DeveloperSession)(
         implicit request: play.api.mvc.Request[Any], messages: Messages,applicationConfig: ApplicationConfig)
 
 @app = @{applicationViewModel.application}
 
- @pageHeading = @{ "Add a team member" }
+@pageHeading = @{ "Add a team member" }
 
- @devMain(
+@devMain(
   title = pageHeading,
   userFullName = loggedIn.loggedInName,
   back = BackButtonWithJavaScript,
   developerSession = Some(loggedIn)
- ) {
+) {
 
-  <header>
-   <h1 class="heading-xlarge">@pageHeading</h1>
-  </header>
+  <h1 class="govuk-heading-l">@pageHeading</h1>
 
   @addTeamMemberPartial(app, form, loggedIn, "Add team member", false, ApplicationCheck)
- }
+}
