@@ -38,6 +38,7 @@ import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 import domain.models.apidefinitions.ExtendedApiDefinitionTestDataHelper
 import utils.LocalUserIdTracker
+import controllers.addapplication.AddApplication
 
 class AddApplicationSuccessSpec 
     extends BaseControllerSpec 

@@ -23,8 +23,8 @@ import domain.models.applications.{Application, ApplicationId, CheckInformation}
 import domain.models.controllers.SaveSubsFieldsPageMode
 import domain.models.subscriptions.ApiSubscriptionFields._
 import domain.models.subscriptions.{FieldName, FieldValue}
-import controllers.model.EditManageSubscription._
-import model.NoSubscriptionFieldsRefinerBehaviour
+import domain.models.controllers.EditManageSubscription._
+import domain.models.controllers.NoSubscriptionFieldsRefinerBehaviour
 import play.api.data.FormError
 import play.api.libs.crypto.CookieSigner
 import play.api.mvc._
@@ -230,7 +230,7 @@ class ManageSubscriptions @Inject() (
   }
 
   def subscriptionConfigurationStart(applicationId: ApplicationId): Action[AnyContent] =
-    subFieldsDefinitionsExistAction(applicationId, NoSubscriptionFieldsRefinerBehaviour.Redirect(routes.AddApplication.addApplicationSuccess(applicationId))) {
+    subFieldsDefinitionsExistAction(applicationId, NoSubscriptionFieldsRefinerBehaviour.Redirect(addapplication.routes.AddApplication.addApplicationSuccess(applicationId))) {
 
       definitionsRequest: ApplicationWithFieldDefinitionsRequest[AnyContent] =>
         {
@@ -279,7 +279,7 @@ class ManageSubscriptions @Inject() (
   def subscriptionConfigurationStepPage(applicationId: ApplicationId, pageNumber: Int): Action[AnyContent] = {
     def doEndOfJourneyRedirect(application: Application)(implicit hc: HeaderCarrier) = {
       if (application.deployedTo.isSandbox) {
-        Future.successful(Redirect(routes.AddApplication.addApplicationSuccess(application.id)))
+        Future.successful(Redirect(addapplication.routes.AddApplication.addApplicationSuccess(application.id)))
       } else {
         val information = application.checkInformation.getOrElse(CheckInformation()).copy(apiSubscriptionConfigurationsConfirmed = true)
         applicationService.updateCheckInformation(application, information) map { _ => Redirect(checkpages.routes.ApplicationCheck.requestCheckPage(application.id)) }

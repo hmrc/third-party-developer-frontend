@@ -31,7 +31,7 @@
   <h1 class="govuk-heading-l">Enter your access code</h1>
   @errorSummary2(form)
 
-  @helper.form(action = controllers.routes.UserLoginAccount.authenticateTotp()){
+  @helper.form(action = routes.UserLoginAccount.authenticateTotp()){
     @helper.CSRF.formField
     <p class="govuk-body">This is the 6 digit code from your authentication app.</p>
     <div class="govuk-form-group @if(form.errors("accessCode").nonEmpty){form-group-error govuk-form-group--error}">
@@ -49,7 +49,7 @@
       />
 
       <p class="govuk-body">
-        <a class="govuk-link" href="@controllers.routes.UserLoginAccount.get2SVHelpConfirmationPage">I cannot get an access code</a>
+        <a class="govuk-link" href="@routes.UserLoginAccount.get2SVHelpConfirmationPage">I cannot get an access code</a>
       </p>
     </div>
 

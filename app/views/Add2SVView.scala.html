@@ -16,7 +16,7 @@
 
 @import config.ApplicationConfig
 @import include._
-@import model.MfaMandateDetails
+@import domain.models.controllers.MfaMandateDetails
 @import domain.models.developers.DeveloperSession
 @import domain.models.views.BackButtonWithJavaScript
 
@@ -50,6 +50,6 @@
   <br/>
 
   <p class="govuk-body">
-    <a class="govuk-link" id="skip" href="@controllers.routes.UserLoginAccount.get2SVNotSetPage()">I can't do this right now</a>
+    <a class="govuk-link" id="skip" href="@routes.UserLoginAccount.get2SVNotSetPage()">I can't do this right now</a>
   </p>
 }

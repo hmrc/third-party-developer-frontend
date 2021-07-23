@@ -18,8 +18,8 @@
 @import domain.models.developers.DeveloperSession
 @import domain.models.apidefinitions.ApiVersion
 @import include._
-@import model.Crumb
-@import model.ApplicationViewModel
+@import domain.models.controllers.Crumb
+@import domain.models.controllers.ApplicationViewModel
 
 @this(devMain: DevMain, leftHandNav: LeftHandNav)
 
@@ -50,5 +50,5 @@ implicit request: play.api.mvc.Request[Any], loggedIn: DeveloperSession, message
     <p>We will review your request and respond within 2 working days.</p>
     <p>You will not see changes to your API subscriptions until we have approved them.</p>
 
-    <a href="@controllers.routes.Subscriptions.manageSubscriptions(app.id)" id="submit" class="button">Finish</a>
+    <a href="@routes.Subscriptions.manageSubscriptions(app.id)" id="submit" class="button">Finish</a>
 }

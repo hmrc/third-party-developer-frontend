@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package controllers.model
+package domain.models.controllers
 
 import domain.models.apidefinitions.{APISubscriptionStatusWithSubscriptionFields, APISubscriptionStatusWithWritableSubscriptionField, ApiContext, ApiVersion}
 import domain.models.applications.CollaboratorRole

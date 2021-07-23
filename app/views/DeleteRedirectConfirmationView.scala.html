@@ -16,8 +16,8 @@
 
 @import config.ApplicationConfig
 @import include._
-@import model.Crumb
-@import model.ApplicationViewModel
+@import domain.models.controllers.Crumb
+@import domain.models.controllers.ApplicationViewModel
 @import domain.models.developers.DeveloperSession
 
 @this(devMain: DevMain2, leftHandNav: LeftHandNav)
@@ -50,7 +50,7 @@
   <h2 class="govuk-heading-m">Redirect URI</h2>
   <p id="redirectUriToDelete" class="govuk-body">@redirectUri</p>
 
-  @helper.form(action = controllers.routes.Redirects.deleteRedirectAction(application.id), 'class -> "form") {
+  @helper.form(action = routes.Redirects.deleteRedirectAction(application.id), 'class -> "form") {
     <div class="govuk-form-group @if(form.errors("deleteRedirectConfirm").nonEmpty) {govuk-form-group--error}">
       <fieldset id="deleteRedirectConfirm" class="govuk-fieldset" aria-describedby="deleteRedirectConfirm-error">
         <legend class="govuk-fieldset__legend govuk-fieldset__legend--l">

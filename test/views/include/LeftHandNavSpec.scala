@@ -19,7 +19,7 @@ package views.include
 import controllers.Credentials.serverTokenCutoffDate
 import domain.models.applications._
 import domain.models.developers.LoggedInState
-import controllers.model.ApplicationViewModel
+import domain.models.controllers.ApplicationViewModel
 import org.jsoup.Jsoup
 import org.jsoup.nodes.Document
 import play.api.test.FakeRequest
@@ -28,7 +28,7 @@ import utils.ViewHelpers.elementExistsByText
 import utils._
 import views.helper.CommonViewSpec
 import views.html.include.LeftHandNav
-import controllers.model.LeftHandNavFlags
+import domain.models.controllers.LeftHandNavFlags
 
 class LeftHandNavSpec extends CommonViewSpec with WithCSRFAddToken with CollaboratorTracker with LocalUserIdTracker {
 

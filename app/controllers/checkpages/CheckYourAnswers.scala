@@ -24,7 +24,7 @@ import domain.{ApplicationAlreadyExists, DeskproTicketCreationFailed}
 import domain.models.apidefinitions.{APISubscriptionStatus, _}
 import domain.models.applications._
 import javax.inject.{Inject, Singleton}
-import controllers.model.ApplicationViewModel
+import domain.models.controllers.ApplicationViewModel
 import play.api.data.Form
 import play.api.libs.crypto.CookieSigner
 import play.api.mvc._

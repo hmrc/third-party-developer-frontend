@@ -16,7 +16,7 @@
 
 @import config.ApplicationConfig
 @import include._
-@import model.{ApplicationViewModel, Crumb}
+@import domain.models.controllers.{ApplicationViewModel, Crumb}
 @import domain.models.developers.DeveloperSession
 @import domain.models.views.CheckInformationForm
 
@@ -80,7 +80,7 @@
                             <tr class="@if(form.errors("apiSubscriptionConfigurationsConfirmed").nonEmpty) {form-group-error}">
                                 <td id="apiSubscriptionConfigurations" scope="row" class="step-description">
                                     @include.fieldError(form.errors, "apiSubscriptionConfigurations")
-                                    <a id="apiSubscriptionConfigurationsCompleted" href="@controllers.routes.ManageSubscriptions.subscriptionConfigurationStart(app.id)">
+                                    <a id="apiSubscriptionConfigurationsCompleted" href="@routes.ManageSubscriptions.subscriptionConfigurationStart(app.id)">
                                         Configure your API subscriptions
                                     </a>
                                 </td>

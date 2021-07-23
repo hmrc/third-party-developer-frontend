@@ -15,7 +15,7 @@
  *@
 
 @import include._
-@import model.Crumb
+@import domain.models.controllers.Crumb
 
 @this(devMain: DevMain)
 
@@ -48,7 +48,7 @@
     for answers.</p>
 
     <section class="subsection">
-        @helper.form(action = controllers.routes.Support.submitSupportEnquiry) {
+        @helper.form(action = routes.Support.submitSupportEnquiry) {
 
             <fieldset>
                 <div class="form-field-group">

@@ -35,6 +35,7 @@ import mocks.connector.ApmConnectorMockModule
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import utils.LocalUserIdTracker
+import controllers.addapplication.AddApplication
 
 class AddApplicationStartSpec 
     extends BaseControllerSpec 

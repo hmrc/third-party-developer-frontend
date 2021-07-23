@@ -39,6 +39,7 @@ import builder.ApplicationBuilder
 import scala.concurrent.Future
 import play.api.mvc.Result
 import mocks.connector.ApmConnectorMockModule
+import controllers.addapplication.AddApplication
 
 class AddApplicationProductionSwitchSpec
     extends BaseControllerSpec 
@@ -210,7 +211,6 @@ class AddApplicationProductionSwitchSpec
     "return ok when some apps are upliftable after showing fluff" in new Setup {
       val summaries = sandboxAppSummaries
       val upliftable = summaries.drop(1)
-      val notUpliftable = summaries.take(1)
 
       getUpliftDataReturns(upliftable,true)
       

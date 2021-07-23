@@ -21,7 +21,7 @@
 @import domain.models.flows.IpAllowlistFlow
 @import domain.models.developers.DeveloperSession
 @import domain.models.applications.Application
-@import model.Crumb
+@import domain.models.controllers.Crumb
 
 @this(devMain: DevMain2)
 
@@ -111,7 +111,7 @@
         </tbody>
       </table>
 
-      @helper.form(action = controllers.routes.IpAllowlist.editIpAllowlistAction(app.id)) {
+      @helper.form(action = routes.IpAllowlist.editIpAllowlistAction(app.id)) {
         @helper.CSRF.formField
         <div class="govuk-form-group @if(form.errors("confirm").nonEmpty) {govuk-form-group--error}">
           <fieldset id="confirm" class="govuk-fieldset" aria-describedby="add-ip-error">

@@ -55,7 +55,7 @@ trait DevHubAuthorization extends Results with FrontendHeaderCarrierProvider wit
                                       (implicit ec: ExecutionContext): Action[AnyContent] =
     Action.async {
 
-      val loginRedirect = Redirect(controllers.routes.UserLoginAccount.login())
+      val loginRedirect = Redirect(routes.UserLoginAccount.login())
 
       implicit request: MessagesRequest[AnyContent] =>
         loadSession.flatMap(maybeSession => {

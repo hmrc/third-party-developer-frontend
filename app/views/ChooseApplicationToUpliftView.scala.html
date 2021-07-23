@@ -18,7 +18,7 @@
 @import domain.models.applications.Environment
 @import domain.models.controllers.SandboxApplicationSummary
 @import include._
-@import model.Crumb
+@import domain.models.controllers.Crumb
 
 @this(devMain: DevMain2)
 
@@ -57,7 +57,7 @@
 
   @if(needToChoose) {
 
-    @helper.form(action = controllers.routes.AddApplication.chooseApplicationToUpliftAction()) {
+    @helper.form(action = controllers.addapplication.routes.AddApplication.chooseApplicationToUpliftAction()) {
       @helper.CSRF.formField
 
       <div class="govuk-form-group @if(form.errors("applicationId").nonEmpty) {govuk-form-group--error}">
@@ -88,7 +88,7 @@
     
     <p class="govuk-body">
       // TODO - fix where this goes
-      <a id="continue" href="@controllers.routes.AddApplication.soleApplicationToUpliftAction(upliftableApps.head.id)" class="govuk-button">Continue</a>
+      <a id="continue" href="@controllers.addapplication.routes.AddApplication.soleApplicationToUpliftAction(upliftableApps.head.id)" class="govuk-button">Continue</a>
     </p>    
   }
 

@@ -39,6 +39,7 @@ import builder.ApplicationBuilder
 import scala.concurrent.Future
 import play.api.mvc.Result
 import mocks.connector.ApmConnectorMockModule
+import controllers.addapplication.AddApplication
 
 class ChooseApplicationToUpliftActionSpec
     extends BaseControllerSpec 

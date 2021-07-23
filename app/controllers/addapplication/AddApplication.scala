@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package controllers
+package controllers.addapplication
 
 import config.{ApplicationConfig, ErrorHandler}
 import controllers.FormKeys.appNameField
@@ -38,6 +38,9 @@ import play.api.libs.json.Json
 import domain.Error._
 import domain.models.controllers.SandboxApplicationSummary
 import connectors.ApmConnector
+import controllers.ApplicationController
+import controllers.ChooseApplicationToUpliftForm
+import controllers.AddApplicationNameForm
 
 @Singleton
 class AddApplication @Inject() (
@@ -162,7 +165,7 @@ class AddApplication @Inject() (
             addApplication(formThatPassesSimpleValidation).map(applicationCreatedResponse =>
               environment match {
                 case PRODUCTION => Redirect(controllers.checkpages.routes.ApplicationCheck.requestCheckPage(applicationCreatedResponse.id))
-                case SANDBOX    => Redirect(routes.Subscriptions.addAppSubscriptions(applicationCreatedResponse.id))
+                case SANDBOX    => Redirect(controllers.routes.Subscriptions.addAppSubscriptions(applicationCreatedResponse.id))
               }
             )
 

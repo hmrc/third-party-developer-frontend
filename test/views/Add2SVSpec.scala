@@ -18,7 +18,7 @@ package views
 
 import builder.DeveloperBuilder
 import domain.models.developers.{DeveloperSession, LoggedInState, Session}
-import controllers.model.MfaMandateDetails
+import domain.models.controllers.MfaMandateDetails
 import org.joda.time.LocalDate
 import play.api.test.FakeRequest
 import play.twirl.api.Html

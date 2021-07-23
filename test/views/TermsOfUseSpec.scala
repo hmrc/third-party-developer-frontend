@@ -19,7 +19,7 @@ package views
 import controllers.TermsOfUseForm
 import domain.models.applications._
 import domain.models.developers.LoggedInState
-import controllers.model.ApplicationViewModel
+import domain.models.controllers.ApplicationViewModel
 import org.joda.time.format.DateTimeFormat
 import org.jsoup.Jsoup
 import play.api.test.FakeRequest

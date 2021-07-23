@@ -21,7 +21,7 @@
 @import domain.models.developers.DeveloperSession
 @import domain.models.applications.Application
 @import domain.models.views.IpAllowlistFeedbackBanner
-@import model.Crumb
+@import domain.models.controllers.Crumb
 
 @this(devMain: DevMain2)
 
@@ -76,7 +76,7 @@ implicit request: play.api.mvc.Request[Any], loggedIn: DeveloperSession, message
 
     @if(sandboxOrAdmin) {
       <p class="govuk-body">
-        <a class="govuk-link govuk-link--no-visited-state" href="@controllers.routes.IpAllowlist.editIpAllowlist(app.id)">
+        <a class="govuk-link govuk-link--no-visited-state" href="@routes.IpAllowlist.editIpAllowlist(app.id)">
           Edit IP allow list
         </a>
       </p>

@@ -33,7 +33,7 @@ import helpers.DateFormatter
 
 class ViewAllApplicationsPageSpec extends CommonViewSpec with WithCSRFAddToken {
   def isGreenAddProductionApplicationButtonVisible(document: Document): Boolean = {
-    val href = controllers.routes.AddApplication.addApplicationPrincipal().url
+    val href = controllers.addapplication.routes.AddApplication.addApplicationPrincipal().url
 
     val greenButtons = document.select(s"a[href=$href][class=govuk-button]")
 

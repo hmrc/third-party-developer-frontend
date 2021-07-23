@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package controllers.model
+package domain.models.controllers
 
 object LeftHandNavFlags {
   val keyForIsGetProductionCredentialsEnabled = "IS_GET_PRODUCTION_CREDENTIALS_ENABLED"

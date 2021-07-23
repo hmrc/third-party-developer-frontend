@@ -82,7 +82,7 @@ class Credentials @Inject() (
   def addClientSecret(applicationId: ApplicationId): Action[AnyContent] =
     canChangeClientSecrets(applicationId) { implicit request =>
       applicationService.addClientSecret(request.application, request.user.email).map { response =>
-        Redirect(controllers.routes.Credentials.clientSecrets(applicationId))
+        Redirect(routes.Credentials.clientSecrets(applicationId))
           .flashing("newSecretId" -> response._1, "newSecret" -> response._2)
       } recover {
         case _: ApplicationNotFound       => NotFound(errorHandler.notFoundTemplate)
@@ -104,7 +104,7 @@ class Credentials @Inject() (
     canChangeClientSecrets(applicationId) { implicit request =>
       applicationService
         .deleteClientSecret(request.application, clientSecretId, request.user.email)
-        .map(_ => Redirect(controllers.routes.Credentials.clientSecrets(applicationId)))
+        .map(_ => Redirect(routes.Credentials.clientSecrets(applicationId)))
     }
 }
 
