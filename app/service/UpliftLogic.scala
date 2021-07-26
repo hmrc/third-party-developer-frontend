@@ -18,7 +18,7 @@ package services
 
 import service.AppsByTeamMemberService
 import domain.models.applications.ApplicationId
-import domain.models.apidefinitions.{ApiContext, ApiVersion}
+import domain.models.apidefinitions.ApiContext
 import domain.models.developers.UserId
 import connectors.ApmConnector
 import javax.inject.{Inject, Singleton}

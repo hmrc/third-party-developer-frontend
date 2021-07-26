@@ -20,13 +20,14 @@
 @import domain.models.applications.Application
 @import domain.models.developers.DeveloperSession
 
-@this(devMain: DevMain)
+@this(devMain: DevMain2)
 
 @(application: Application, apis: Seq[ApiDetails])(
-        implicit request: play.api.mvc.Request[Any],
-        loggedIn: DeveloperSession,
-        messages: Messages,
-        applicationConfig: config.ApplicationConfig)
+  implicit request: play.api.mvc.Request[Any],
+  loggedIn: DeveloperSession,
+  messages: Messages,
+  applicationConfig: config.ApplicationConfig
+)
 
 @pageHeading = @{
   "Configure your API subscriptions"
@@ -38,21 +39,18 @@
   developerSession = Some(loggedIn),
   back = BackButtonWithJavaScript
 ) {
-  <header>
-    <h1 class="heading-xlarge">@pageHeading</h1>
-  </header>
+  <h1 class="govuk-heading-l">@pageHeading</h1>
 
-  <p>These APIs you have subscribed to require additional configuration.
-  </p>
-  <ul class="list list-bullet">
+  <p class="govuk-body">These APIs you have subscribed to require additional configuration.</p>
+
+  <ul class="govuk-list govuk-list--bullet">
     @for(api <- apis) {
       <li>
         @{api.name} @{api.version.value} @{api.displayedStatus}
       </li>
     }
   </ul>
-  <p>
-    <a href="@{routes.ManageSubscriptions.subscriptionConfigurationPage(application.id, 1)}" class="button">Continue</a>
+  <p class="govuk-body">
+    <a href="@{routes.ManageSubscriptions.subscriptionConfigurationPage(application.id, 1)}" class="govuk-button">Continue</a>
   </p>
-
 }
