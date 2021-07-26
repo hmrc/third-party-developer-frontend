@@ -34,7 +34,7 @@ import views.html._
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import utils.LocalUserIdTracker
-import domain.models.controllers.SandboxApplicationSummary
+import domain.models.controllers.ApplicationSummary
 import builder.ApplicationBuilder
 import scala.concurrent.Future
 import play.api.mvc.Result
@@ -63,9 +63,9 @@ class AddApplicationProductionSwitchSpec
   val appCreatedOn = DateTimeUtils.now.minusDays(1)
   val appLastAccess = appCreatedOn
 
-  val sandboxAppSummaries = (1 to 5).map(_ => buildApplication(loggedInUser.email)).map(SandboxApplicationSummary.from(_, loggedInUser.email))
+  val sandboxAppSummaries = (1 to 5).map(_ => buildApplication(loggedInUser.email)).map(ApplicationSummary.from(_, loggedInUser.developer.userId)).toList
 
-  trait Setup extends UpliftDataServiceMock with AppsByTeamMemberServiceMock with ApplicationServiceMock with ApmConnectorMockModule with ApplicationActionServiceMock with SessionServiceMock with EmailPreferencesServiceMock {
+  trait Setup extends UpliftLogicMock with AppsByTeamMemberServiceMock with ApplicationServiceMock with ApmConnectorMockModule with ApplicationActionServiceMock with SessionServiceMock with EmailPreferencesServiceMock {
     val accessTokenSwitchView = app.injector.instanceOf[AccessTokenSwitchView]
     val usingPrivilegedApplicationCredentialsView = app.injector.instanceOf[UsingPrivilegedApplicationCredentialsView]
     val tenDaysWarningView = app.injector.instanceOf[TenDaysWarningView]
@@ -85,7 +85,7 @@ class AddApplicationProductionSwitchSpec
       ApmConnectorMock.aMock,
       sessionServiceMock,
       mock[AuditService],
-      upliftDataServiceMock,
+      upliftLogicMock,
       mcc,
       cookieSigner,
       accessTokenSwitchView,
@@ -118,13 +118,13 @@ class AddApplicationProductionSwitchSpec
       contentAsString(results) should include("Which application do you want production credentials for?")
     }
 
-    def shouldShowAppNamesFor(summaries: Seq[SandboxApplicationSummary])(implicit results: Future[Result]) = {
+    def shouldShowAppNamesFor(summaries: Seq[ApplicationSummary])(implicit results: Future[Result]) = {
       summaries.map { summary =>
         contentAsString(results) should include(summary.name)
       }
     }
 
-    def shouldNotShowAppNamesFor(summaries: Seq[SandboxApplicationSummary])(implicit results: Future[Result]) = {
+    def shouldNotShowAppNamesFor(summaries: Seq[ApplicationSummary])(implicit results: Future[Result]) = {
       summaries.map { summary =>
         contentAsString(results) should not include(summary.name)
       }
@@ -140,7 +140,7 @@ class AddApplicationProductionSwitchSpec
 
   "addApplicationProductionSwitch" should {
     "return bad request when no apps are upliftable" in new Setup {
-      getUpliftDataReturns(Nil, false)
+      aUsersUplfitableAndNotUpliftableAppsReturns(Nil, List.empty)
 
       val result = underTest.addApplicationProductionSwitch()(loggedInRequest)
 
@@ -149,7 +149,7 @@ class AddApplicationProductionSwitchSpec
     
     "go to next stage in journey when one app is upliftable and no other apps are present" in new Setup {
       val summaries = sandboxAppSummaries.take(1)
-      getUpliftDataReturns(summaries, false)
+      aUsersUplfitableAndNotUpliftableAppsReturns(summaries, summaries.map(_.id))
 
       val prodAppId = ApplicationId.random
       ApmConnectorMock.UpliftApplication.willReturn(prodAppId)
@@ -162,8 +162,7 @@ class AddApplicationProductionSwitchSpec
     
     "return ok when all apps are upliftable" in new Setup {
       val summaries = sandboxAppSummaries
-      getUpliftDataReturns(summaries, false)
-      identifyUpliftableSandboxAppIdsReturns(summaries.map(_.id).toSet)
+      aUsersUplfitableAndNotUpliftableAppsReturns(summaries, summaries.map(_.id))
       
       implicit val result = underTest.addApplicationProductionSwitch()(loggedInRequest)
 
@@ -179,7 +178,11 @@ class AddApplicationProductionSwitchSpec
       val upliftable = summaries.take(1)
       val notUpliftable = summaries.drop(1)
 
-      getUpliftDataReturns(upliftable, true)
+      val prodAppId = ApplicationId.random
+
+      ApmConnectorMock.UpliftApplication.willReturn(prodAppId)
+
+      aUsersUplfitableAndNotUpliftableAppsReturns(summaries, upliftable.map(_.id))
       
       implicit val result = underTest.addApplicationProductionSwitch()(loggedInRequest)
 
@@ -196,7 +199,7 @@ class AddApplicationProductionSwitchSpec
       val upliftable = summaries.drop(1)
       val notUpliftable = summaries.take(1)
 
-      getUpliftDataReturns(upliftable,false)
+      aUsersUplfitableAndNotUpliftableAppsReturns(summaries, upliftable.map(_.id))
       
       implicit val result = underTest.addApplicationProductionSwitch()(loggedInRequest)
 
@@ -212,7 +215,7 @@ class AddApplicationProductionSwitchSpec
       val summaries = sandboxAppSummaries
       val upliftable = summaries.drop(1)
 
-      getUpliftDataReturns(upliftable,true)
+      aUsersUplfitableAndNotUpliftableAppsReturns(summaries, upliftable.map(_.id))
       
       implicit val result = underTest.addApplicationProductionSwitch()(loggedInRequest)
 

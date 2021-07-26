@@ -33,7 +33,7 @@ import utils.WithCSRFAddToken
 import utils.WithLoggedInSession._
 import views.helper.EnvironmentNameService
 import views.html._
-import domain.models.controllers.ProductionApplicationSummary
+import domain.models.controllers.ApplicationSummary
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import utils.LocalUserIdTracker
@@ -74,7 +74,7 @@ class ManageApplicationsSpec
 
   private val sessionParams = Seq("csrfToken" -> app.injector.instanceOf[TokenProvider].generateToken)
 
-  trait Setup extends UpliftDataServiceMock with AppsByTeamMemberServiceMock with ApplicationServiceMock with ApmConnectorMockModule with SessionServiceMock {
+  trait Setup extends UpliftLogicMock with AppsByTeamMemberServiceMock with ApplicationServiceMock with ApmConnectorMockModule with SessionServiceMock {
     val addApplicationSubordinateEmptyNestView = app.injector.instanceOf[AddApplicationSubordinateEmptyNestView]
     val manageApplicationsView = app.injector.instanceOf[ManageApplicationsView]
 
@@ -86,7 +86,7 @@ class ManageApplicationsSpec
       cookieSigner,
 
       appsByTeamMemberServiceMock,
-      upliftDataServiceMock,
+      upliftLogicMock,
       
       manageApplicationsView,
       addApplicationSubordinateEmptyNestView,
@@ -109,9 +109,9 @@ class ManageApplicationsSpec
   "manageApps" should {
 
     "return the manage Applications page with the user logged in" in new Setup {
-      val prodSummary = ProductionApplicationSummary.from(application, loggedInUser.developer.userId)
-      identifyUpliftableSandboxAppIdsReturns(Set.empty)
-      fetchAllSummariesByTeamMemberReturns(Nil, List(prodSummary))
+      val prodSummary = ApplicationSummary.from(application, loggedInUser.developer.userId)
+      aUsersUplfitableAndNotUpliftableAppsReturns(List.empty, List.empty)
+      fetchProductionSummariesByTeamMemberReturns(List(prodSummary))
 
       private val result = manageApplicationsController.manageApps()(loggedInRequest)
 

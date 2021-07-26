@@ -19,8 +19,8 @@ package domain.models.controllers
 import domain.models.applications.ApplicationId
 
 case class ManageApplicationsViewModel(
-    sandboxApplicationSummaries: Seq[SandboxApplicationSummary],
-    productionApplicationSummaries: Seq[ProductionApplicationSummary],
+    sandboxApplicationSummaries: Seq[ApplicationSummary],
+    productionApplicationSummaries: Seq[ApplicationSummary],
     upliftableApplicationIds: Set[ApplicationId]
 ) {
   lazy val hasNoProductionApplications = productionApplicationSummaries.isEmpty

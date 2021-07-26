@@ -16,7 +16,7 @@
 
 package views
 
-import domain.models.controllers.{ManageApplicationsViewModel, ProductionApplicationSummary, SandboxApplicationSummary, ApplicationSummary}
+import domain.models.controllers.{ManageApplicationsViewModel, ApplicationSummary}
 import domain.models.apidefinitions.AccessType
 import domain.models.applications.{ApplicationId, CollaboratorRole, State, TermsOfUseStatus}
 import domain.models.developers.LoggedInState
@@ -30,6 +30,7 @@ import views.helper.CommonViewSpec
 import views.html.{AddApplicationSubordinateEmptyNestView, ManageApplicationsView}
 import views.helper.EnvironmentNameService
 import helpers.DateFormatter
+import domain.models.applications.Environment
 
 class ViewAllApplicationsPageSpec extends CommonViewSpec with WithCSRFAddToken {
   def isGreenAddProductionApplicationButtonVisible(document: Document): Boolean = {
@@ -107,7 +108,7 @@ class ViewAllApplicationsPageSpec extends CommonViewSpec with WithCSRFAddToken {
 
   "view all applications page" can {
 
-    def renderPage(sandboxAppSummaries: Seq[SandboxApplicationSummary], productionAppSummaries: Seq[ProductionApplicationSummary], upliftableApplicationIds: Set[ApplicationId]) = {
+    def renderPage(sandboxAppSummaries: Seq[ApplicationSummary], productionAppSummaries: Seq[ApplicationSummary], upliftableApplicationIds: Set[ApplicationId]) = {
       val request = FakeRequest()
       val loggedIn = utils.DeveloperSession("developer@example.com", "firstName", "lastname", loggedInState = LoggedInState.LOGGED_IN)
       val manageApplicationsView = app.injector.instanceOf[ManageApplicationsView]
@@ -122,7 +123,7 @@ class ViewAllApplicationsPageSpec extends CommonViewSpec with WithCSRFAddToken {
     val appLastAccess = appCreatedOn
 
     val sandboxAppSummaries = Seq(
-        SandboxApplicationSummary(
+        ApplicationSummary(
           applicationId, 
           appName, 
           appUserRole,
@@ -131,11 +132,12 @@ class ViewAllApplicationsPageSpec extends CommonViewSpec with WithCSRFAddToken {
           appLastAccess,
           false,
           appCreatedOn,
-          AccessType.STANDARD
+          AccessType.STANDARD,
+          Environment.SANDBOX
         ))
 
     val productionAppSummaries = Seq(
-      ProductionApplicationSummary(
+      ApplicationSummary(
         applicationId,
         appName,
         appUserRole,
@@ -144,7 +146,8 @@ class ViewAllApplicationsPageSpec extends CommonViewSpec with WithCSRFAddToken {
         appLastAccess,
         false,
         appCreatedOn,
-        AccessType.STANDARD
+        AccessType.STANDARD,
+        Environment.PRODUCTION
       )
     )
 

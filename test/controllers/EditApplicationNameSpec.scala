@@ -74,7 +74,7 @@ class EditApplicationNameSpec
 
   val tokens: ApplicationToken = ApplicationToken(List(aClientSecret(), aClientSecret()), "token")
 
-  trait Setup extends UpliftDataServiceMock with ApplicationServiceMock with ApmConnectorMockModule with SessionServiceMock with EmailPreferencesServiceMock {
+  trait Setup extends UpliftLogicMock with ApplicationServiceMock with ApmConnectorMockModule with SessionServiceMock with EmailPreferencesServiceMock {
     val accessTokenSwitchView = app.injector.instanceOf[AccessTokenSwitchView]
     val usingPrivilegedApplicationCredentialsView = app.injector.instanceOf[UsingPrivilegedApplicationCredentialsView]
     val tenDaysWarningView = app.injector.instanceOf[TenDaysWarningView]
@@ -93,7 +93,7 @@ class EditApplicationNameSpec
       ApmConnectorMock.aMock,
       sessionServiceMock,
       mock[AuditService],
-      upliftDataServiceMock,
+      upliftLogicMock,
       mcc,
       cookieSigner,
       accessTokenSwitchView,

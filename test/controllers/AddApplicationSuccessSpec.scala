@@ -84,7 +84,7 @@ class AddApplicationSuccessSpec
     access = Standard(redirectUris = List("https://red3", "https://red4"), termsAndConditionsUrl = Some("http://tnc-url.com"))
   )
 
-  trait Setup extends UpliftDataServiceMock with ApplicationServiceMock with ApmConnectorMockModule with ApplicationActionServiceMock with SessionServiceMock with EmailPreferencesServiceMock with ExtendedApiDefinitionTestDataHelper {
+  trait Setup extends UpliftLogicMock with ApplicationServiceMock with ApmConnectorMockModule with ApplicationActionServiceMock with SessionServiceMock with EmailPreferencesServiceMock with ExtendedApiDefinitionTestDataHelper {
     val accessTokenSwitchView = app.injector.instanceOf[AccessTokenSwitchView]
     val usingPrivilegedApplicationCredentialsView = app.injector.instanceOf[UsingPrivilegedApplicationCredentialsView]
     val tenDaysWarningView = app.injector.instanceOf[TenDaysWarningView]
@@ -103,7 +103,7 @@ class AddApplicationSuccessSpec
       ApmConnectorMock.aMock,
       sessionServiceMock,
       mock[AuditService],
-      upliftDataServiceMock,
+      upliftLogicMock,
       mcc,
       cookieSigner,
       accessTokenSwitchView,

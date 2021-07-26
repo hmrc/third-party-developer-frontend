@@ -26,8 +26,8 @@ import views.helper.EnvironmentNameService
 import views.html._
 
 import scala.concurrent.ExecutionContext
-import scala.concurrent.Future.successful
 import domain.models.controllers.ManageApplicationsViewModel
+import services.UpliftLogic
 
 @Singleton
 class ManageApplications @Inject() (
@@ -36,7 +36,7 @@ class ManageApplications @Inject() (
     val cookieSigner: CookieSigner,
 
     appsByTeamMember: AppsByTeamMemberService,
-    upliftDataService: UpliftDataService,
+    upliftLogic: UpliftLogic,
     
     manageApplicationsView: ManageApplicationsView,
     addApplicationSubordinateEmptyNestView: AddApplicationSubordinateEmptyNestView,
@@ -45,15 +45,15 @@ class ManageApplications @Inject() (
    extends LoggedInController(mcc) {
 
   def manageApps: Action[AnyContent] = loggedInAction { implicit request =>
-    appsByTeamMember.fetchAllSummariesByTeamMember(loggedIn.developer.userId) flatMap { 
-      case (Nil, Nil)                                                    => successful(Ok(addApplicationSubordinateEmptyNestView()))
-      case (sandboxApplicationSummaries, productionApplicationSummaries) => 
-        val appIds = sandboxApplicationSummaries.filter(_.role.isAdministrator).map(_.id)
-        upliftDataService.identifyUpliftableSandboxAppIds(appIds).map { upliftableApplicationIds =>
-          Ok(manageApplicationsView(
-            ManageApplicationsViewModel(sandboxApplicationSummaries, productionApplicationSummaries, upliftableApplicationIds)
-          ))
-        }
+    for {
+      (sandboxAppSummaries, upliftableApplicationIds) <- upliftLogic.aUsersSandboxAdminSummariesAndUpliftIds(loggedIn.developer.userId)
+      productionAppSummaries <- appsByTeamMember.fetchProductionSummariesByTeamMember(loggedIn.developer.userId)
+    } yield (sandboxAppSummaries, productionAppSummaries) match {
+      case (Nil, Nil) => Ok(addApplicationSubordinateEmptyNestView())
+      case _ => 
+        Ok(manageApplicationsView(
+          ManageApplicationsViewModel(sandboxAppSummaries, productionAppSummaries, upliftableApplicationIds)
+        ))
     }
   }
 

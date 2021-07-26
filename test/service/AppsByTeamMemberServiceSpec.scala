@@ -32,7 +32,7 @@ import scala.concurrent.Future.{failed, successful}
 import service.PushPullNotificationsService.PushPullNotificationsConnector
 import uk.gov.hmrc.http.UpstreamErrorResponse
 import utils.LocalUserIdTracker
-import domain.models.controllers.{ProductionApplicationSummary, SandboxApplicationSummary}
+import domain.models.controllers.ApplicationSummary
 
 class AppsByTeamMemberServiceSpec extends AsyncHmrcSpec with SubscriptionsBuilder with ApplicationBuilder with LocalUserIdTracker {
 
@@ -71,8 +71,8 @@ class AppsByTeamMemberServiceSpec extends AsyncHmrcSpec with SubscriptionsBuilde
     val sandboxApps = Seq(sandboxApp1)
 
     implicit class SummaryImpl(application: Application) {
-      def asProdSummary: ProductionApplicationSummary = ProductionApplicationSummary.from(application, email)
-      def asSandboxSummary: SandboxApplicationSummary = SandboxApplicationSummary.from(application, email)
+      def asProdSummary: ApplicationSummary = ApplicationSummary.from(application, userId)
+      def asSandboxSummary: ApplicationSummary = ApplicationSummary.from(application, userId)
     }
 
     "sort the returned applications by name" in new Setup {

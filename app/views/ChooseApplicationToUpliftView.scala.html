@@ -16,13 +16,13 @@
 
 @import domain.models.developers.DeveloperSession
 @import domain.models.applications.Environment
-@import domain.models.controllers.SandboxApplicationSummary
+@import domain.models.controllers.ApplicationSummary
 @import include._
 @import domain.models.controllers.Crumb
 
 @this(devMain: DevMain2)
 
-@(form: Form[controllers.ChooseApplicationToUpliftForm], upliftableApps: Seq[SandboxApplicationSummary], showFluff: Boolean)(implicit request: play.api.mvc.Request[Any], loggedIn: DeveloperSession, messagesProvider: MessagesProvider, appConfig: config.ApplicationConfig)
+@(form: Form[controllers.ChooseApplicationToUpliftForm], upliftableApps: Seq[ApplicationSummary], showFluff: Boolean)(implicit request: play.api.mvc.Request[Any], loggedIn: DeveloperSession, messagesProvider: MessagesProvider, appConfig: config.ApplicationConfig)
 
 @pageHeading = @{ "Which application do you want production credentials for?" }
 

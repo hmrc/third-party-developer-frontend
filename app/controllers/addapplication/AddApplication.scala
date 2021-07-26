@@ -36,11 +36,12 @@ import scala.concurrent.Future.successful
 import uk.gov.hmrc.http.HeaderCarrier
 import play.api.libs.json.Json
 import domain.Error._
-import domain.models.controllers.SandboxApplicationSummary
+import domain.models.controllers.ApplicationSummary
 import connectors.ApmConnector
 import controllers.ApplicationController
 import controllers.ChooseApplicationToUpliftForm
 import controllers.AddApplicationNameForm
+import services.UpliftLogic
 
 @Singleton
 class AddApplication @Inject() (
@@ -51,7 +52,7 @@ class AddApplication @Inject() (
     val apmConnector: ApmConnector,
     val sessionService: SessionService,
     val auditService: AuditService,
-    upliftDataService: UpliftDataService,
+    upliftLogic: UpliftLogic,
     mcc: MessagesControllerComponents,
     val cookieSigner: CookieSigner,
     accessTokenSwitchView: AccessTokenSwitchView,
@@ -91,17 +92,17 @@ class AddApplication @Inject() (
   }
 
   def soleApplicationToUpliftAction(appId: ApplicationId): Action[AnyContent] = loggedInAction { implicit request =>
-    upliftDataService.getUpliftData(loggedIn.developer.userId).flatMap { data =>
-      val (upliftableSummaries, haveAppsThatCannotBeUplifted) = data
-      upliftableSummaries.headOption match {
-        case Some(appId) => upliftApplicationAndShowRequestCheckPage(upliftableSummaries.head.id)
-        case _           => successful(BadRequest(Json.toJson(BadRequestError)))
-      }
-    }
+   (for {
+      (sandboxAppSummaries, upliftableAppIds) <- upliftLogic.aUsersSandboxAdminSummariesAndUpliftIds(loggedIn.developer.userId)
+      upliftableSummaries = sandboxAppSummaries.filter(s => upliftableAppIds.contains(s.id))
+    } yield upliftableSummaries match {
+      case summary :: Nil => upliftApplicationAndShowRequestCheckPage(upliftableSummaries.head.id)
+      case _              => successful(BadRequest(Json.toJson(BadRequestError)))
+    }).flatten
   }
 
   def addApplicationProductionSwitch(): Action[AnyContent] = loggedInAction { implicit request =>
-    def chooseApplicationToUplift(upliftableSummaries: Seq[SandboxApplicationSummary], showFluff: Boolean): Action[AnyContent] = loggedInAction { implicit request =>
+    def chooseApplicationToUplift(upliftableSummaries: Seq[ApplicationSummary], showFluff: Boolean): Action[AnyContent] = loggedInAction { implicit request =>
       val form = 
         if(upliftableSummaries.size == 1) // TODO - and only one API sub
           ChooseApplicationToUpliftForm.form.fill(ChooseApplicationToUpliftForm(upliftableSummaries.head.id))
@@ -111,12 +112,15 @@ class AddApplication @Inject() (
       successful(Ok(chooseApplicationToUpliftView(form, upliftableSummaries, showFluff)))
     }
 
-    upliftDataService.getUpliftData(loggedIn.developer.userId).flatMap { data =>
-      val (upliftableSummaries, haveAppsThatCannotBeUplifted) = data
-      (upliftableSummaries.size, haveAppsThatCannotBeUplifted) match {
-        case (0, _)     => successful(BadRequest(Json.toJson(BadRequestError)))
-        case (1, false) => upliftApplicationAndShowRequestCheckPage(upliftableSummaries.head.id)
-        case _  => chooseApplicationToUplift(upliftableSummaries, haveAppsThatCannotBeUplifted)(request)
+    upliftLogic.aUsersSandboxAdminSummariesAndUpliftIds(loggedIn.developer.userId).flatMap { data =>
+      val (summaries, upliftableAppIds) = data
+      val upliftableSummaries = summaries.filter(s => upliftableAppIds.contains(s.id))
+      val hasAppsThatCannotBeUplifted = upliftableSummaries.size < summaries.size
+
+      upliftableAppIds.toList match {
+        case Nil          => successful(BadRequest(Json.toJson(BadRequestError)))
+        case appId :: Nil if !hasAppsThatCannotBeUplifted =>  upliftApplicationAndShowRequestCheckPage(appId)
+        case _ => chooseApplicationToUplift(upliftableSummaries, hasAppsThatCannotBeUplifted)(request)
       }
     }
   }
@@ -133,12 +137,15 @@ class AddApplication @Inject() (
       upliftApplicationAndShowRequestCheckPage(validForm.applicationId)
 
     def handleInvalidForm(formWithErrors: Form[ChooseApplicationToUpliftForm]) = {
-      upliftDataService.getUpliftData(loggedIn.developer.userId).flatMap { data =>
-        val (upliftableSummaries, haveAppsThatCannotBeUplifted) = data
-        (upliftableSummaries.size, haveAppsThatCannotBeUplifted) match {
+      upliftLogic.aUsersSandboxAdminSummariesAndUpliftIds(loggedIn.developer.userId) flatMap { data =>
+      val (summaries, upliftableAppIds) = data
+      val upliftableSummaries = summaries.filter(s => upliftableAppIds.contains(s.id))
+      val haveAppsThatCannotBeUplifted = upliftableSummaries.size < summaries.size
+
+      (upliftableSummaries.size, haveAppsThatCannotBeUplifted) match {
           case (0, _)     => successful(BadRequest(Json.toJson(BadRequestError)))
           case (1, false) => successful(BadRequest(Json.toJson(BadRequestError)))
-          case _  => successful(BadRequest(chooseApplicationToUpliftView(formWithErrors, upliftableSummaries, haveAppsThatCannotBeUplifted)))
+          case _  => successful(BadRequest(chooseApplicationToUpliftView(formWithErrors, upliftableSummaries.toSeq, haveAppsThatCannotBeUplifted)))
         }
       }
     }      
