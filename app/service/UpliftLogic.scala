@@ -32,6 +32,7 @@ import domain.models.subscriptions.ApiCategory
 import domain.models.apidefinitions.ApiIdentifier
 import domain.models.applications.Environment
 import domain.models.controllers.ApplicationSummary
+import scala.collection.parallel.ForkJoinTaskSupport
 
 @Singleton
 class UpliftLogic @Inject()(
@@ -40,15 +41,22 @@ class UpliftLogic @Inject()(
   appsByTeamMember: AppsByTeamMemberService
 )( implicit ec: ExecutionContext ) {
 
+  private val forkJoinPool = new java.util.concurrent.ForkJoinPool(5)
+
+  private val taskSupport = new ForkJoinTaskSupport(forkJoinPool)
+  
   import UpliftLogic._
 
   private def fetchSubscriptionsForApps(appIds: Seq[ApplicationId])(implicit hc: HeaderCarrier): Future[Map[ApplicationId, Set[ApiIdentifier]]] = {
+    val parallelAppIds = appIds.par
+    parallelAppIds.tasksupport = taskSupport
+
     Future.sequence(
-      appIds.map( appId => 
+      parallelAppIds.map( appId => 
         sandboxApplicationConnector.fetchSubscription(appId).map(
             subs => (appId,subs)
         )
-      )
+      ).seq
     ).map( _.toMap )
   }
 
