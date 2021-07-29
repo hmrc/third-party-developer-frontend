@@ -187,3 +187,4 @@ GET         /assets/*file                                                       
 GET         /keep-alive                                                                                  controllers.SessionController.keepAlive()
 
 GET         /applications/:id/confirm-subscription                                                       controllers.SR20.confirmApiSubscription(id: domain.models.applications.ApplicationId)
+POST        /applications/:id/uplift                                                                     controllers.SR20.upliftSandboxApplication(id: domain.models.applications.ApplicationId)

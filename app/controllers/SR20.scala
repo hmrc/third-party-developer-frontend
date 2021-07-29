@@ -33,9 +33,10 @@
 package controllers
 
 import config.{ApplicationConfig, ErrorHandler}
+import controllers.{APISubscriptions, ApplicationController, ApplicationRequest}
 import controllers.checkpages.{ApiSubscriptionsPartialController, CanUseCheckActions, DummySubscriptionsForm, routes}
 import domain.models
-import domain.models.apidefinitions.ApiContext
+import domain.models.apidefinitions.{ApiContext, ApiIdentifier, ApiVersion}
 import domain.models.applications.{Application, ApplicationId, TermsOfUseStatus}
 import domain.models.controllers.SubscriptionData
 import domain.models.subscriptions.ApiData
@@ -48,6 +49,10 @@ import views.html.checkpages.ApiSubscriptionsView
 import views.html.{ConfirmApisView, TurnOffApisView}
 
 import scala.concurrent.{ExecutionContext, Future}
+import uk.gov.hmrc.http.HeaderCarrier
+import connectors.ApmConnector
+
+
 
 @Singleton
 class SR20 @Inject() (
@@ -57,8 +62,9 @@ class SR20 @Inject() (
                              val applicationService: ApplicationService,
                              mcc: MessagesControllerComponents,
                              turnOffApisView: TurnOffApisView,
-                             confirmApiSubscriptionView: ConfirmApisView,
-                             val cookieSigner: CookieSigner
+                             confirmApisView: ConfirmApisView,
+                             val cookieSigner: CookieSigner,
+                             val apmConnector: ApmConnector
                            )(implicit val ec: ExecutionContext, val appConfig: ApplicationConfig)
   extends ApplicationController(mcc)
      with CanUseCheckActions{
@@ -66,27 +72,45 @@ class SR20 @Inject() (
   private def asSubscriptionData(applicationRequest: ApplicationRequest[AnyContent]) =
     models.controllers.SubscriptionData(applicationRequest.role, applicationRequest.application, APISubscriptions.groupSubscriptions(applicationRequest.subscriptions))
 
-  def confirmApiSubscription(appId: ApplicationId): Action[AnyContent] = canUseChecksAction(appId) { implicit request =>
-    val app = request.application
-    Future.successful(Ok(confirmApiSubscriptionView(app, asSubscriptionData(request), request.openAccessApis)))
+  def confirmApiSubscription(sandboxAppId: ApplicationId): Action[AnyContent] = canUseChecksAction(sandboxAppId) { implicit request =>
+  // val app = request.application
+    // Future.successful(Ok(renderConfirmApiSubscriptionView(app, asSubscriptionData(request), request.openAccessApis)))
+    val subscriptionData = asSubscriptionData(request)
+    println("***** request: " + request.subscriptions)
+    Future.successful(Ok(confirmApisView(sandboxAppId, 
+    List(
+      ApiIdentifier(ApiContext("test-api-1"), ApiVersion("1.0")),
+      ApiIdentifier(ApiContext("test-api-2"), ApiVersion("1.1"))
+      )
+    )))
   }
 
   protected def confirmApiSubscriptionRoute(appId: ApplicationId): Call = routes.SR20.confirmApiSubscription(appId)
-  private def confirmApiSubscriptionView(
-                                          app: Application,
-                                          subscriptionData: SubscriptionData,
-                                          openAccessApis: Map[ApiContext, ApiData],
-                                          form: Option[Form[DummySubscriptionsForm]] = None
-                                        )(implicit request: ApplicationRequest[AnyContent]) = {
-    confirmApiSubscriptionView(
-      app,
-      subscriptionData.role,
-      subscriptionData.subscriptions,
-      openAccessApis,
-      app.id,
-      confirmApiSubscriptionRoute(app.id),
-      form
-    )
+  
+  // private def renderConfirmApiSubscriptionView(
+  //                                         app: Application,
+  //                                         subscriptionData: SubscriptionData,
+  //                                         openAccessApis: Map[ApiContext, ApiData],
+  //                                         form: Option[Form[DummySubscriptionsForm]] = None
+  //                                       )(implicit request: ApplicationRequest[AnyContent]) = {
+  //   confirmApiSubscriptionView(
+  //     app,
+  //     subscriptionData.role,
+  //     subscriptionData.subscriptions,
+  //     openAccessApis,
+  //     app.id,
+  //     confirmApiSubscriptionRoute(app.id),
+  //     form
+  //   )
+  // }
+
+  def upliftSandboxApplication(sandboxAppId: ApplicationId): Action[AnyContent] = loggedInAction { implicit request =>
+    upliftApplicationAndShowRequestCheckPage(sandboxAppId)
   }
 
+  private def upliftApplicationAndShowRequestCheckPage(sandboxAppId: ApplicationId)(implicit hc: HeaderCarrier) = {
+    for {
+      newAppId <- apmConnector.upliftApplication(sandboxAppId)
+    } yield Redirect(controllers.checkpages.routes.ApplicationCheck.requestCheckPage(newAppId))
+  }
 }

@@ -96,7 +96,7 @@ class AddApplication @Inject() (
       (sandboxAppSummaries, upliftableAppIds) <- upliftLogic.aUsersSandboxAdminSummariesAndUpliftIds(loggedIn.developer.userId)
       upliftableSummaries = sandboxAppSummaries.filter(s => upliftableAppIds.contains(s.id))
     } yield upliftableSummaries match {
-      case summary :: Nil => upliftApplicationAndShowRequestCheckPage(upliftableSummaries.head.id)
+      case summary :: Nil => showConfirmSubscriptionsPage(upliftableSummaries.head.id)
       case _              => successful(BadRequest(Json.toJson(BadRequestError)))
     }).flatten
   }
@@ -119,22 +119,20 @@ class AddApplication @Inject() (
 
       upliftableAppIds.toList match {
         case Nil          => successful(BadRequest(Json.toJson(BadRequestError)))
-        case appId :: Nil if !hasAppsThatCannotBeUplifted =>  upliftApplicationAndShowRequestCheckPage(appId)
+        case appId :: Nil if !hasAppsThatCannotBeUplifted =>  showConfirmSubscriptionsPage(appId)
         case _ => chooseApplicationToUplift(upliftableSummaries, hasAppsThatCannotBeUplifted)(request)
       }
     }
   }
   
-  private def upliftApplicationAndShowRequestCheckPage(sandboxAppId: ApplicationId)(implicit hc: HeaderCarrier) = {
-    for {
-      newAppId <- apmConnector.upliftApplication(sandboxAppId)
-    } yield Redirect(controllers.checkpages.routes.ApplicationCheck.requestCheckPage(newAppId))
+  private def showConfirmSubscriptionsPage(sandboxAppId: ApplicationId)(implicit hc: HeaderCarrier) = {
+    successful(Redirect(controllers.routes.SR20.confirmApiSubscription(sandboxAppId)))
   }
 
   def chooseApplicationToUpliftAction(): Action[AnyContent] = loggedInAction { implicit request =>
 
     def handleValidForm(validForm: ChooseApplicationToUpliftForm) =
-      upliftApplicationAndShowRequestCheckPage(validForm.applicationId)
+      showConfirmSubscriptionsPage(validForm.applicationId)
 
     def handleInvalidForm(formWithErrors: Form[ChooseApplicationToUpliftForm]) = {
       upliftLogic.aUsersSandboxAdminSummariesAndUpliftIds(loggedIn.developer.userId) flatMap { data =>

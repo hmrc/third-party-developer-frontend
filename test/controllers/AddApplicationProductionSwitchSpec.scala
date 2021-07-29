@@ -151,13 +151,13 @@ class AddApplicationProductionSwitchSpec
       val summaries = sandboxAppSummaries.take(1)
       aUsersUplfitableAndNotUpliftableAppsReturns(summaries, summaries.map(_.id))
 
-      val prodAppId = ApplicationId.random
-      ApmConnectorMock.UpliftApplication.willReturn(prodAppId)
+      // val prodAppId = ApplicationId.random
+      // ApmConnectorMock.UpliftApplication.willReturn(prodAppId)
 
       val result = underTest.addApplicationProductionSwitch()(loggedInRequest)
 
       status(result) shouldBe SEE_OTHER
-      redirectLocation(result).value shouldBe controllers.checkpages.routes.ApplicationCheck.requestCheckPage(prodAppId).toString()
+      redirectLocation(result).value shouldBe controllers.routes.SR20.confirmApiSubscription(summaries.head.id).toString()
     }
     
     "return ok when all apps are upliftable" in new Setup {

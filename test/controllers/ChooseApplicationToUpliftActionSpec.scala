@@ -151,15 +151,13 @@ class ChooseApplicationToUpliftActionSpec
     "go to next stage in journey when one app is selected and uplifted" in new Setup {
       val summaries = sandboxAppSummaries
       val sandboxAppId = summaries.head.id
-      val prodAppId = ApplicationId.random
 
       aUsersUplfitableAndNotUpliftableAppsReturns(summaries, summaries.map(_.id))
-      ApmConnectorMock.UpliftApplication.willReturn(prodAppId)
 
       val result = underTest.chooseApplicationToUpliftAction()(loggedInRequest.withFormUrlEncodedBody(("applicationId" -> sandboxAppId.value)))
 
       status(result) shouldBe SEE_OTHER
-      redirectLocation(result).value shouldBe controllers.checkpages.routes.ApplicationCheck.requestCheckPage(prodAppId).toString()
+      redirectLocation(result).value shouldBe controllers.routes.SR20.confirmApiSubscription(sandboxAppId).toString()
     }
   }
 }
