@@ -22,22 +22,22 @@ import domain.models.applications.Environment
 import domain.models.developers.UserId
 import uk.gov.hmrc.http.HeaderCarrier
 import scala.concurrent.Future
-import domain.models.applications.Application
 import domain.models.applications.CollaboratorRole
 import domain.models.applications.Environment._
 import scala.util.control.NonFatal
 import domain.models.controllers.ApplicationSummary
+import domain.models.applications.ApplicationWithSubscriptionIds
 
 @Singleton
 class AppsByTeamMemberService @Inject() (
     connectorWrapper: ConnectorsWrapper
 )(implicit val ec: ExecutionContext) {
 
-  def fetchAppsByTeamMember(environment: Environment)(userId: UserId)(implicit hc: HeaderCarrier): Future[Seq[Application]] = {
+  def fetchAppsByTeamMember(environment: Environment)(userId: UserId)(implicit hc: HeaderCarrier): Future[Seq[ApplicationWithSubscriptionIds]] = {
     connectorWrapper.forEnvironment(environment).thirdPartyApplicationConnector.fetchByTeamMember(userId).map(_.sorted)
   }
 
-  def fetchByTeamMemberWithRole(environment: Environment)(requiredRole: CollaboratorRole)(userId: UserId)(implicit hc: HeaderCarrier): Future[Seq[Application]] = 
+  def fetchByTeamMemberWithRole(environment: Environment)(requiredRole: CollaboratorRole)(userId: UserId)(implicit hc: HeaderCarrier): Future[Seq[ApplicationWithSubscriptionIds]] = 
     fetchAppsByTeamMember(environment)(userId).map { apps =>
       apps.filter(_.isUserACollaboratorOfRole(userId, requiredRole))
     }
@@ -45,7 +45,7 @@ class AppsByTeamMemberService @Inject() (
   def fetchProductionSummariesByTeamMember(userId: UserId)(implicit hc: HeaderCarrier): Future[Seq[ApplicationSummary]] =
     fetchAppsByTeamMember(PRODUCTION)(userId).map(_.sorted.map(ApplicationSummary.from(_, userId)))
   
-  def fetchSandboxAppsByTeamMember(userId: UserId)(implicit hc: HeaderCarrier): Future[Seq[Application]] = fetchAppsByTeamMember(SANDBOX)(userId) recover { case NonFatal(_) => Seq.empty }
+  def fetchSandboxAppsByTeamMember(userId: UserId)(implicit hc: HeaderCarrier): Future[Seq[ApplicationWithSubscriptionIds]] = fetchAppsByTeamMember(SANDBOX)(userId) recover { case NonFatal(_) => Seq.empty }
 
   def fetchSandboxSummariesByTeamMember(userId: UserId)(implicit hc: HeaderCarrier): Future[Seq[ApplicationSummary]] =
     fetchSandboxAppsByTeamMember(userId).map(_.sorted.map(ApplicationSummary.from(_, userId)))

@@ -17,44 +17,44 @@
 package domain.models.applications
 
 sealed trait Capability {
-  def hasCapability(app: Application): Boolean
+  def hasCapability(app: BaseApplication): Boolean
 }
 
 object Capabilities {
   trait StandardAppCapability extends Capability {
-    final def hasCapability(app: Application): Boolean = app.access.accessType.isStandard
+    final def hasCapability(app: BaseApplication): Boolean = app.access.accessType.isStandard
   }
 
   case object Guaranteed extends Capability {
-    def hasCapability(app: Application) = true
+    def hasCapability(app: BaseApplication) = true
   }
 
   case object SupportsTermsOfUse extends Capability {
-    def hasCapability(app: Application) = true
+    def hasCapability(app: BaseApplication) = true
   }
 
   case object ViewCredentials extends Capability {
-    def hasCapability(app: Application) = true
+    def hasCapability(app: BaseApplication) = true
   }
 
   case object ChangeClientSecret extends Capability {
-    def hasCapability(app: Application) = app.state.name.isApproved
+    def hasCapability(app: BaseApplication) = app.state.name.isApproved
   }
 
   case object SupportsTeamMembers extends Capability {
-    def hasCapability(app: Application) = true
+    def hasCapability(app: BaseApplication) = true
   }
 
   case object SupportsSubscriptions extends StandardAppCapability
 
   case object EditSubscriptionFields extends Capability {
-    override def hasCapability(app: Application): Boolean = !app.state.name.isPendingApproval
+    override def hasCapability(app: BaseApplication): Boolean = !app.state.name.isPendingApproval
   }
 
   case object SupportsDetails extends StandardAppCapability
 
   case object ManageLockedSubscriptions extends Capability {
-    def hasCapability(app: Application) = app.hasLockedSubscriptions
+    def hasCapability(app: BaseApplication) = app.hasLockedSubscriptions
   }
 
   case object SupportsRedirects extends StandardAppCapability
@@ -62,18 +62,18 @@ object Capabilities {
   case object SupportsDeletion extends StandardAppCapability
 
   case object SupportsAppChecks extends Capability {
-    def hasCapability(app: Application): Boolean = app.state.name.isInTesting
+    def hasCapability(app: BaseApplication): Boolean = app.state.name.isInTesting
   }
 
   case object SupportChangingAppDetails extends Capability {
-    def hasCapability(app: Application): Boolean = app.state.name.isInTesting || app.deployedTo.isSandbox
+    def hasCapability(app: BaseApplication): Boolean = app.state.name.isInTesting || app.deployedTo.isSandbox
   }
 
   case object SupportsIpAllowlist extends Capability {
-    def hasCapability(app: Application): Boolean = true
+    def hasCapability(app: BaseApplication): Boolean = true
   }
 
   case object ViewPushSecret extends Capability {
-    def hasCapability(app: Application) = true
+    def hasCapability(app: BaseApplication) = true
   }
 }

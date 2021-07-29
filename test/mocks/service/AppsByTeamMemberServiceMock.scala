@@ -27,11 +27,11 @@ import service.AppsByTeamMemberService
 trait AppsByTeamMemberServiceMock extends MockitoSugar with ArgumentMatchersSugar {
   val appsByTeamMemberServiceMock = mock[AppsByTeamMemberService]
 
-  def fetchAppsByTeamMemberReturns(environment: Environment)(apps: Seq[Application]) = 
+  def fetchAppsByTeamMemberReturns(environment: Environment)(apps: Seq[ApplicationWithSubscriptionIds]) = 
     when(appsByTeamMemberServiceMock.fetchAppsByTeamMember(eqTo(environment))(*[UserId])(*))
     .thenReturn(successful(apps.map(_.copy(deployedTo = environment))))
     
-  def fetchByTeamMembersWithRoleReturns(apps: Seq[Application]) = 
+  def fetchByTeamMembersWithRoleReturns(apps: Seq[ApplicationWithSubscriptionIds]) = 
     when(appsByTeamMemberServiceMock.fetchByTeamMemberWithRole(*)(*)(*[UserId])(*)).thenReturn(successful(apps))
 
   def fetchProductionSummariesByTeamMemberReturns(summaries: Seq[ApplicationSummary]) = 
@@ -39,10 +39,6 @@ trait AppsByTeamMemberServiceMock extends MockitoSugar with ArgumentMatchersSuga
 
   def fetchSandboxSummariesByTeamMemberReturns(summaries: Seq[ApplicationSummary]) = 
     when(appsByTeamMemberServiceMock.fetchSandboxSummariesByTeamMember(*[UserId])(*)).thenReturn(successful(summaries))
-
-  def fetchSandboxAppsByTeamMemberReturns(apps: Seq[Application]) = ???
-
-  def fetchSandboxSummariesByAdminReturns = ???
 
   def fetchAllSummariesByTeamMemberReturns(sandbox: Seq[ApplicationSummary], production: Seq[ApplicationSummary]) =
     when(appsByTeamMemberServiceMock.fetchAllSummariesByTeamMember(*[UserId])(*)).thenReturn(successful((sandbox, production)))

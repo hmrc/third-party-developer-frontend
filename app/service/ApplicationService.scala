@@ -244,7 +244,7 @@ object ApplicationService {
   trait ApplicationConnector {
     def create(request: CreateApplicationRequest)(implicit hc: HeaderCarrier): Future[ApplicationCreatedResponse]
     def update(applicationId: ApplicationId, request: UpdateApplicationRequest)(implicit hc: HeaderCarrier): Future[ApplicationUpdateSuccessful]
-    def fetchByTeamMember(userId: UserId)(implicit hc: HeaderCarrier): Future[Seq[Application]]
+    def fetchByTeamMember(userId: UserId)(implicit hc: HeaderCarrier): Future[Seq[ApplicationWithSubscriptionIds]]
     def removeTeamMember(applicationId: ApplicationId, teamMemberToDelete: String, requestingEmail: String, adminsToEmail: Set[String])(
         implicit hc: HeaderCarrier
     ): Future[ApplicationUpdateSuccessful]

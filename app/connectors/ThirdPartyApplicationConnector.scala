@@ -65,7 +65,7 @@ abstract class ThirdPartyApplicationConnector(config: ApplicationConfig, metrics
     http.POST[UpdateApplicationRequest,ErrorOrUnit](s"$serviceBaseUrl/application/${applicationId.value}", request).map(throwOr(ApplicationUpdateSuccessful))
   }
   
-  def fetchByTeamMember(userId: UserId)(implicit hc: HeaderCarrier): Future[Seq[Application]] =
+  def fetchByTeamMember(userId: UserId)(implicit hc: HeaderCarrier): Future[Seq[ApplicationWithSubscriptionIds]] =
     if (isEnabled) {
       metrics.record(api) {
         val url = s"$serviceBaseUrl/developer/applications"
@@ -73,7 +73,7 @@ abstract class ThirdPartyApplicationConnector(config: ApplicationConfig, metrics
         Logger.debug(s"fetchByTeamMember() - About to call $url for $userId in ${environment.toString}")
 
         http
-          .GET[Seq[Application]](url, Seq("userId" -> userId.asText, "environment" -> environment.toString))
+          .GET[Seq[ApplicationWithSubscriptionIds]](url, Seq("userId" -> userId.asText, "environment" -> environment.toString))
           .andThen {
             case Success(_) =>
               Logger.debug(s"fetchByTeamMember() - done call to $url for $userId in ${environment.toString}")

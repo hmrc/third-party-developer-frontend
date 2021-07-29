@@ -133,7 +133,8 @@ class ViewAllApplicationsPageSpec extends CommonViewSpec with WithCSRFAddToken {
           false,
           appCreatedOn,
           AccessType.STANDARD,
-          Environment.SANDBOX
+          Environment.SANDBOX,
+          Set.empty
         ))
 
     val productionAppSummaries = Seq(
@@ -147,7 +148,8 @@ class ViewAllApplicationsPageSpec extends CommonViewSpec with WithCSRFAddToken {
         false,
         appCreatedOn,
         AccessType.STANDARD,
-        Environment.PRODUCTION
+        Environment.PRODUCTION,
+        Set.empty
       )
     )
 

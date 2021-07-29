@@ -36,7 +36,8 @@ class ManageApplicationsViewModelSpec extends WordSpec with Matchers {
         serverTokenUsed = false,
         new DateTime(),
         AccessType.STANDARD,
-        Environment.SANDBOX
+        Environment.SANDBOX,
+        Set.empty
       )
       
     val productionApp =
@@ -50,7 +51,8 @@ class ManageApplicationsViewModelSpec extends WordSpec with Matchers {
         serverTokenUsed = false,
         new DateTime(),
         AccessType.STANDARD,
-        Environment.PRODUCTION
+        Environment.PRODUCTION,
+        Set.empty
       )
 
     "return true if only sandbox apps" in {

@@ -19,12 +19,12 @@ package domain.models.applications
 import domain.models.developers.Developer
 
 sealed trait Permission {
-  def hasPermissions(app: Application, developer: Developer): Boolean
+  def hasPermissions(app: BaseApplication, developer: Developer): Boolean
 }
 
 object Permissions {
   case object SandboxOrAdmin extends Permission {
-    override def hasPermissions(app: Application, developer: Developer): Boolean =
+    override def hasPermissions(app: BaseApplication, developer: Developer): Boolean =
       (app.deployedTo, app.role(developer.email)) match {
         case (Environment.SANDBOX, _) => true
         case (_, Some(CollaboratorRole.ADMINISTRATOR)) => true
@@ -33,15 +33,15 @@ object Permissions {
   }
 
   case object AdministratorOnly extends Permission {
-    override def hasPermissions(app: Application, developer: Developer): Boolean =
+    override def hasPermissions(app: BaseApplication, developer: Developer): Boolean =
       app.role(developer.email).contains(CollaboratorRole.ADMINISTRATOR)
   }
 
   case object TeamMembersOnly extends Permission {
-    override def hasPermissions(app: Application, developer: Developer): Boolean =
+    override def hasPermissions(app: BaseApplication, developer: Developer): Boolean =
       app.role(developer.email).isDefined
   }
   case object Unrestricted extends Permission {
-    override def hasPermissions(app: Application, developer: Developer): Boolean = true
+    override def hasPermissions(app: BaseApplication, developer: Developer): Boolean = true
   }
 }
