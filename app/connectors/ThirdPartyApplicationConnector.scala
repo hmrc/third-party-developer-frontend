@@ -70,7 +70,7 @@ abstract class ThirdPartyApplicationConnector(config: ApplicationConfig, metrics
       metrics.record(api) {
         val url = s"$serviceBaseUrl/developer/applications"
 
-        Logger.debug(s"fetchByTeamMember() - About to call $url for $userId in ${environment.toString}")
+        Logger.info(s"fetchByTeamMember() - About to call $url for $userId in ${environment.toString}")
 
         http
           .GET[Seq[ApplicationWithSubscriptionIds]](url, Seq("userId" -> userId.asText, "environment" -> environment.toString))
