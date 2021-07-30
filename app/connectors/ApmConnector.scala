@@ -101,6 +101,13 @@ with CommonResponseHandlers {
       http.GET[Set[ApiIdentifier]](s"${config.serviceBaseUrl}/api-definitions/upliftable")
     }
 
+  def fetchUpliftableSubscriptions(applicationId: ApplicationId)(implicit hc: HeaderCarrier): Future[Set[ApiIdentifier]] = 
+    metrics.record(api) {
+      val response = http.GET[Set[ApiIdentifier]](s"${config.serviceBaseUrl}/applications/${applicationId.value}/upliftableSubscriptions")
+      println("***** response from APM: " + response)
+      response
+    }
+
   def fetchAllApis(environment: Environment)(implicit hc: HeaderCarrier): Future[Map[ApiContext,ApiData]] = 
     metrics.record(api) {
       http.GET[Map[ApiContext, ApiData]](s"${config.serviceBaseUrl}/api-definitions/all", Seq("environment" -> environment.toString()))

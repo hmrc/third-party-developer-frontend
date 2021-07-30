@@ -31,7 +31,7 @@
 @this(devMain: DevMain2)
 @(
   applicationId: ApplicationId,
-  subscriptions: List[ApiIdentifier]
+  subscriptions: Set[(String, String)]
 )(
     implicit request: play.api.mvc.Request[Any],
     loggedIn: DeveloperSession,
@@ -51,7 +51,7 @@
     <p class="govuk-body">Your production application will be subscribed to the following APIs:</p>
     <ul class="govuk-list govuk-list--bullet">
       @for(subscription <- subscriptions) {
-      <li>@{subscription.context.value} - @{subscription.version.value}</li>
+      <li>@{subscription._1} - @{subscription._2}</li>
       }
     </ul>
 

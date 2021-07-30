@@ -68,21 +68,28 @@ class SR20 @Inject() (
                            )(implicit val ec: ExecutionContext, val appConfig: ApplicationConfig)
   extends ApplicationController(mcc)
      with CanUseCheckActions{
+       
+  def confirmApiSubscription(sandboxAppId: ApplicationId): Action[AnyContent] = loggedInAction { implicit request =>
 
-  private def asSubscriptionData(applicationRequest: ApplicationRequest[AnyContent]) =
-    models.controllers.SubscriptionData(applicationRequest.role, applicationRequest.application, APISubscriptions.groupSubscriptions(applicationRequest.subscriptions))
+    val stuff = for {
+      allApis <- apmConnector.fetchAllApis(models.applications.Environment.SANDBOX)
+      upliftableSubscriptions <- apmConnector.fetchUpliftableSubscriptions(sandboxAppId)
+    }
+    yield upliftableSubscriptions.flatMap(upliftableSubscription => allApis
+      .get(upliftableSubscription.context)
+      .map{ x => (x.name, upliftableSubscription.version.value)})
+    
+    stuff.map(s => Ok(confirmApisView(sandboxAppId, s)))
 
-  def confirmApiSubscription(sandboxAppId: ApplicationId): Action[AnyContent] = canUseChecksAction(sandboxAppId) { implicit request =>
-  // val app = request.application
-    // Future.successful(Ok(renderConfirmApiSubscriptionView(app, asSubscriptionData(request), request.openAccessApis)))
-    val subscriptionData = asSubscriptionData(request)
-    println("***** request: " + request.subscriptions)
-    Future.successful(Ok(confirmApisView(sandboxAppId, 
-    List(
-      ApiIdentifier(ApiContext("test-api-1"), ApiVersion("1.0")),
-      ApiIdentifier(ApiContext("test-api-2"), ApiVersion("1.1"))
-      )
-    )))
+    /// upliftableSubscriptions.map(upliftableSubscription => allApis  .fold(None){ x => Some((upliftableSubscription.context)) }
+
+    // val allApis: Future[Map[ApiContext,ApiData]] = apmConnector.fetchAllApis(models.applications.Environment.SANDBOX)
+    
+    // apmConnector
+    // .fetchUpliftableSubscriptions(sandboxAppId)
+    // .map { upliftableSubscriptions =>
+    //   Ok(confirmApisView(sandboxAppId, Set(name, version)))
+    // }
   }
 
   protected def confirmApiSubscriptionRoute(appId: ApplicationId): Call = routes.SR20.confirmApiSubscription(appId)
