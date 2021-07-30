@@ -46,7 +46,7 @@ with OpenAccessApisConnector
 with CommonResponseHandlers {
   import ApmConnectorJsonFormatters._
 
-  val api = API("api-platform-microservice")X
+  val api = API("api-platform-microservice")
 
   def fetchApplicationById(applicationId: ApplicationId)(implicit hc: HeaderCarrier): Future[Option[ApplicationWithSubscriptionData]] =
     http.GET[Option[ApplicationWithSubscriptionData]](s"${config.serviceBaseUrl}/applications/${applicationId.value}")
