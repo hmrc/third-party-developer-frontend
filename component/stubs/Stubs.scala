@@ -35,6 +35,7 @@ import domain.models.connectors.PasswordResetRequest
 
 import connectors.ThirdPartyDeveloperConnector.{FindUserIdRequest, FindUserIdResponse}
 import connectors.ThirdPartyDeveloperConnector.JsonFormatters.FindUserIdRequestWrites
+import domain.models.applications.ApplicationWithSubscriptionIds
 
 object Stubs {
 
@@ -212,8 +213,14 @@ object ApplicationStub {
     )
   }
 
-  def configureUserApplications(userId: UserId, applications: List[Application] = Nil, status: Int = OK) = {
-    def stubResponse(environment: Environment, applications: List[Application]) = {
+  def configureUserApplications(userId: UserId, applications: List[ApplicationWithSubscriptionIds] = Nil, status: Int = OK) = {
+    import play.api.libs.json.Json
+    import play.api.libs.json.JodaWrites._
+    import domain.services.ApiDefinitionsJsonFormatters._
+
+    implicit val writes = Json.writes[ApplicationWithSubscriptionIds]
+
+    def stubResponse(environment: Environment, applications: List[ApplicationWithSubscriptionIds]) = {
       stubFor(
         get(urlPathEqualTo("/developer/applications"))
           .withQueryParam("userId", equalTo(userId.asText))

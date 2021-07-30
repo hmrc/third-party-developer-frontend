@@ -45,7 +45,7 @@ class MfaMandateServiceSpec extends AsyncHmrcSpec with CollaboratorTracker with 
 
     val applicationsWhereUserIsAdminInProduction = 
       Seq(
-        Application(
+        ApplicationWithSubscriptionIds(
           applicationId,
           clientId,
           "myName",
@@ -53,13 +53,14 @@ class MfaMandateServiceSpec extends AsyncHmrcSpec with CollaboratorTracker with 
           new DateTime(),
           None,
           Environment.PRODUCTION,
-          collaborators = Set(email.asAdministratorCollaborator)
+          collaborators = Set(email.asAdministratorCollaborator),
+          subscriptions = Set.empty
         )
       )
 
     val applicationsWhereUserIsDeveloperInProduction = 
       Seq(
-        Application(
+        ApplicationWithSubscriptionIds(
           applicationId,
           clientId,
           "myName",
@@ -67,20 +68,22 @@ class MfaMandateServiceSpec extends AsyncHmrcSpec with CollaboratorTracker with 
           new DateTime(),
           None,
           Environment.PRODUCTION,
-          collaborators = Set(email.asDeveloperCollaborator)
+          collaborators = Set(email.asDeveloperCollaborator),
+          subscriptions = Set.empty
         )
       )
 
     val applicationsWhereUserIsNotACollaboratorInProduction =
       Seq(
-        Application(
+        ApplicationWithSubscriptionIds(
           applicationId,
           clientId,
           "myName",
           new DateTime(),
           new DateTime(),
           None,
-          Environment.PRODUCTION
+          Environment.PRODUCTION,
+          subscriptions = Set.empty          
         )
       )
   }

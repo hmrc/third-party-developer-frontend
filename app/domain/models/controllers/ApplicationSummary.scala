@@ -21,6 +21,7 @@ import domain.models.apidefinitions.AccessType
 import uk.gov.hmrc.http.NotFoundException
 import org.joda.time.DateTime
 import domain.models.developers.UserId
+import domain.models.apidefinitions.ApiIdentifier
 
 case class ApplicationSummary(
   id: ApplicationId,
@@ -32,35 +33,8 @@ case class ApplicationSummary(
   serverTokenUsed: Boolean = false,
   createdOn: DateTime,
   accessType: AccessType,
-  environment: Environment)
-
-// case class ProductionApplicationSummary(
-//   id: ApplicationId,
-//   name: String,
-//   role: CollaboratorRole,
-//   termsOfUseStatus: TermsOfUseStatus,
-//   state: State,
-//   lastAccess: DateTime,
-//   serverTokenUsed: Boolean = false,
-//   createdOn: DateTime,
-//   accessType: AccessType
-// ) extends ApplicationSummary {
-//   val environment = Environment.PRODUCTION
-// }
-
-// case class SandboxApplicationSummary(
-//   id: ApplicationId,
-//   name: String,
-//   role: CollaboratorRole,
-//   termsOfUseStatus: TermsOfUseStatus,
-//   state: State,
-//   lastAccess: DateTime,
-//   serverTokenUsed: Boolean = false,
-//   createdOn: DateTime,
-//   accessType: AccessType
-// ) extends ApplicationSummary {
-//   val environment = Environment.SANDBOX
-// }
+  environment: Environment,
+  subscriptionIds: Set[ApiIdentifier])
 
 object ApplicationSummary {
   def from(app: Application, userId: UserId): ApplicationSummary = {
@@ -77,27 +51,27 @@ object ApplicationSummary {
       app.lastAccessTokenUsage.isDefined,
       app.createdOn,
       app.access.accessType,
-      app.deployedTo
+      app.deployedTo,
+      Set.empty
+    )
+  }
+
+  def from(app: ApplicationWithSubscriptionIds, userId: UserId): ApplicationSummary = {
+
+    val role = app.roleForCollaborator(userId).getOrElse(throw new NotFoundException("Role not found"))
+
+    ApplicationSummary(
+      app.id,
+      app.name,
+      role,
+      app.termsOfUseStatus,
+      app.state.name,
+      app.lastAccess,
+      app.lastAccessTokenUsage.isDefined,
+      app.createdOn,
+      app.access.accessType,
+      app.deployedTo,
+      app.subscriptions
     )
   }
 }
-
-// object ProductionApplicationSummary {
-//   def from(app: Application, userId: UserId): ProductionApplicationSummary = {
-//     require(app.deployedTo.isProduction, "ProductionApplicationSummary cannot be built from Sandbox App")
-
-//     val role = app.roleForCollaborator(userId).getOrElse(throw new NotFoundException("Role not found"))
-
-//     ProductionApplicationSummary(
-//       app.id,
-//       app.name,
-//       role,
-//       app.termsOfUseStatus,
-//       app.state.name,
-//       app.lastAccess,
-//       app.lastAccessTokenUsage.isDefined,
-//       app.createdOn,
-//       app.access.accessType        
-//     )
-//   }
-// }

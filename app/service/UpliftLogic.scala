@@ -42,28 +42,24 @@ class UpliftLogic @Inject()(
 
   import UpliftLogic._
 
-  private def fetchSubscriptionsForApps(appIds: Seq[ApplicationId])(implicit hc: HeaderCarrier): Future[Map[ApplicationId, Set[ApiIdentifier]]] = {
-    Future.sequence(
-      appIds.map( appId => 
-        sandboxApplicationConnector.fetchSubscription(appId).map(
-            subs => (appId,subs)
-        )
-      )
-    ).map( _.toMap )
+  private def getSubscriptionsByApp(summaries: Seq[ApplicationSummary])(implicit hc: HeaderCarrier): Map[ApplicationId, Set[ApiIdentifier]] = {
+    summaries.map(s => s.id -> s.subscriptionIds).toMap
   }
 
   def aUsersSandboxAdminSummariesAndUpliftIds(userId: UserId)(implicit hc: HeaderCarrier): Future[(List[ApplicationSummary], Set[ApplicationId])] = {
     // Concurrent requests
     val fApisAvailableInProd = apmConnector.fetchUpliftableApiIdentifiers
     val fAllSandboxApiDetails = apmConnector.fetchAllApis(Environment.SANDBOX)
-    val fAllSummaries = appsByTeamMember.fetchSandboxSummariesByAdmin(userId)
-
+    val fAllSummaries = appsByTeamMember.fetchSandboxSummariesByTeamMember(userId)
+    val fAdminSummaries = fAllSummaries.map(_.filter(_.role.isAdministrator))
+    
     for {
       apisAvailableInProd <- fApisAvailableInProd
       excludedContexts <- fAllSandboxApiDetails.map(contextsOfTestSupportAndExampleApis)
       allSummaries <- fAllSummaries
-
-      subscriptionsForApps <- fetchSubscriptionsForApps(allSummaries.map(_.id))
+      adminSummaries <- fAdminSummaries
+      
+      subscriptionsForApps = getSubscriptionsByApp(adminSummaries)
 
       upliftableAppIds = filterAppsHavingRealAndAvailableSubscriptions(apisAvailableInProd, excludedContexts, subscriptionsForApps).keySet
     } yield (allSummaries.toList, upliftableAppIds)

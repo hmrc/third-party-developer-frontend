@@ -36,6 +36,10 @@ import domain.models.controllers.ApplicationSummary
 
 class AppsByTeamMemberServiceSpec extends AsyncHmrcSpec with SubscriptionsBuilder with ApplicationBuilder with LocalUserIdTracker {
 
+  implicit class AppWithSubIdsSyntax(val application: Application) {
+    def asAppWithSubIds(apis: ApiIdentifier*): ApplicationWithSubscriptionIds = ApplicationWithSubscriptionIds.from(application).copy(subscriptions = apis.toSet)
+    def asAppWithSubIds(): ApplicationWithSubscriptionIds = ApplicationWithSubscriptionIds.from(application)
+  }
   val versionOne = ApiVersion("1.0")
   val versionTwo = ApiVersion("2.0")
 
@@ -63,14 +67,14 @@ class AppsByTeamMemberServiceSpec extends AsyncHmrcSpec with SubscriptionsBuilde
   "Fetch by teamMember" should {
     val userId = UserId.random
     val email = "bob@example.com"
-    val productionApp1 = Application(ApplicationId("id1"), ClientId("cl-id1"), "zapplication", DateTime.now, DateTime.now, None, Environment.PRODUCTION, collaborators = Set(Collaborator(email, CollaboratorRole.ADMINISTRATOR, userId)))
-    val sandboxApp1 = Application(ApplicationId("id2"), ClientId("cl-id2"), "application", DateTime.now, DateTime.now, None, Environment.SANDBOX, collaborators = Set(Collaborator(email, CollaboratorRole.ADMINISTRATOR, userId)))
-    val productionApp2 = Application(ApplicationId("id3"), ClientId("cl-id3"), "4pplication", DateTime.now, DateTime.now, None, Environment.PRODUCTION, collaborators = Set(Collaborator(email, CollaboratorRole.ADMINISTRATOR, userId)))
+    val productionApp1 = ApplicationWithSubscriptionIds(ApplicationId("id1"), ClientId("cl-id1"), "zapplication", DateTime.now, DateTime.now, None, Environment.PRODUCTION, collaborators = Set(Collaborator(email, CollaboratorRole.ADMINISTRATOR, userId)))
+    val sandboxApp1 = ApplicationWithSubscriptionIds(ApplicationId("id2"), ClientId("cl-id2"), "application", DateTime.now, DateTime.now, None, Environment.SANDBOX, collaborators = Set(Collaborator(email, CollaboratorRole.ADMINISTRATOR, userId)))
+    val productionApp2 = ApplicationWithSubscriptionIds(ApplicationId("id3"), ClientId("cl-id3"), "4pplication", DateTime.now, DateTime.now, None, Environment.PRODUCTION, collaborators = Set(Collaborator(email, CollaboratorRole.ADMINISTRATOR, userId)))
 
     val productionApps = Seq(productionApp1, productionApp2)
     val sandboxApps = Seq(sandboxApp1)
 
-    implicit class SummaryImpl(application: Application) {
+    implicit class ApplicationwithSubIdsSummarySyntax(application: ApplicationWithSubscriptionIds) {
       def asProdSummary: ApplicationSummary = ApplicationSummary.from(application, userId)
       def asSandboxSummary: ApplicationSummary = ApplicationSummary.from(application, userId)
     }
