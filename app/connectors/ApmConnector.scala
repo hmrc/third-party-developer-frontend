@@ -16,28 +16,26 @@
 
 package connectors
 
-import domain.{ApplicationNotFound, ApplicationUpdateSuccessful, TeamMemberAlreadyExists}
 import domain.models.apidefinitions.{ApiContext, ApiIdentifier, ApiVersion}
 import domain.models.applications._
 import domain.models.connectors.{AddTeamMemberRequest, ApiDefinition, ExtendedApiDefinition}
+import domain.models.developers.UserId
 import domain.models.emailpreferences.APICategoryDetails
 import domain.models.subscriptions.ApiSubscriptionFields.SubscriptionFieldDefinition
 import domain.models.subscriptions.{ApiData, FieldName}
-import javax.inject.{Inject, Singleton}
+import domain.{ApplicationNotFound, ApplicationUpdateSuccessful, TeamMemberAlreadyExists}
 import play.api.http.ContentTypes.JSON
 import play.api.http.HeaderNames.CONTENT_TYPE
+import play.api.http.Status.{CONFLICT, NOT_FOUND}
+import service.OpenAccessApiService.OpenAccessApisConnector
 import service.SubscriptionsService.SubscriptionsConnector
-import uk.gov.hmrc.http.HeaderCarrier
+import uk.gov.hmrc.http.HttpReads.Implicits._
+import uk.gov.hmrc.http.{HeaderCarrier, UpstreamErrorResponse}
 import uk.gov.hmrc.play.bootstrap.http.HttpClient
 import uk.gov.hmrc.play.http.metrics.API
-import play.api.http.Status.{NOT_FOUND, CONFLICT}
 
+import javax.inject.{Inject, Singleton}
 import scala.concurrent.{ExecutionContext, Future}
-import uk.gov.hmrc.play.http.metrics.API
-import service.OpenAccessApiService.OpenAccessApisConnector
-import uk.gov.hmrc.http.UpstreamErrorResponse
-import uk.gov.hmrc.http.HttpReads.Implicits._
-import domain.models.developers.UserId
 
 @Singleton
 class ApmConnector @Inject() (http: HttpClient, config: ApmConnector.Config, metrics: ConnectorMetrics)(implicit ec: ExecutionContext) 
@@ -103,9 +101,7 @@ with CommonResponseHandlers {
 
   def fetchUpliftableSubscriptions(applicationId: ApplicationId)(implicit hc: HeaderCarrier): Future[Set[ApiIdentifier]] = 
     metrics.record(api) {
-      val response = http.GET[Set[ApiIdentifier]](s"${config.serviceBaseUrl}/applications/${applicationId.value}/upliftableSubscriptions")
-      println("***** response from APM: " + response)
-      response
+      http.GET[Set[ApiIdentifier]](s"${config.serviceBaseUrl}/applications/${applicationId.value}/upliftableSubscriptions")
     }
 
   def fetchAllApis(environment: Environment)(implicit hc: HeaderCarrier): Future[Map[ApiContext,ApiData]] = 
