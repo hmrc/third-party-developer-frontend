@@ -28,7 +28,7 @@ import play.filters.csrf.CSRF.TokenProvider
 import uk.gov.hmrc.http.HeaderCarrier
 import utils.WithLoggedInSession._
 import utils.{LocalUserIdTracker, WithCSRFAddToken}
-import views.html.ConfirmApisView
+import views.html.{ConfirmApisView, TurnOffApisView}
 
 import scala.concurrent.ExecutionContext.Implicits.global
 
@@ -44,6 +44,7 @@ class SR20Spec extends BaseControllerSpec
     implicit val hc = HeaderCarrier()
 
     val confirmApisView = app.injector.instanceOf[ConfirmApisView]
+    val turnOffApisView = app.injector.instanceOf[TurnOffApisView]
 
     val controller = new SR20(
       mockErrorHandler,
@@ -53,6 +54,7 @@ class SR20Spec extends BaseControllerSpec
       mcc,
       cookieSigner,
       confirmApisView,
+      turnOffApisView,
       ApmConnectorMock.aMock
     )
     val appName: String = "app"

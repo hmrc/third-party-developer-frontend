@@ -30,32 +30,40 @@
     openAccessApis: Map[ApiContext, ApiData],
     app: Application,
     afterUnsubscribeRedirectTo: SubscriptionRedirect,
-    showSubscriptionFields: Boolean
+    showSubscriptionFields: Boolean,
+    showSectionHeadings: Boolean = true
 )(
     implicit request: play.api.mvc.Request[Any], messages: Messages, applicationConfig: config.ApplicationConfig
 )
 
 @if(subscriptions.exampleApi.nonEmpty) {
-    <h2 class="heading-large">Example API</h2>
-    <p class="form-hint">Use Hello World to test your software connects to HMRC</p>
+    @if(showSectionHeadings) {
+        <h2 class="heading-large">Example API</h2>
+        <p class="form-hint">Use Hello World to test your software connects to HMRC</p>
+    }
     @subscriptionsGroup(role, app, Seq(subscriptions.exampleApi.get), "EXAMPLE", afterUnsubscribeRedirectTo,showSubscriptionFields)
 }
 
 @if(subscriptions.apis.nonEmpty) {
-    <h2 class="heading-large">APIs for accessing secure data</h2>
-    <p class="form-hint">APIs that access secure data and require authentication</p>
+    @if(showSectionHeadings) {
+        <h2 class="heading-large">APIs for accessing secure data</h2>
+        <p class="form-hint">APIs that access secure data and require authentication</p>
+    }
     @subscriptionsGroup(role, app, subscriptions.apis, "API", afterUnsubscribeRedirectTo,showSubscriptionFields)
 }
 
 @if(openAccessApis.nonEmpty) {
-    <h2 class="heading-large">APIs with only open access endpoints</h2>
-    <p class="form-hint">You do not need an application or subscription to use open access endpoints</p>
+    @if(showSectionHeadings) {
+        <h2 class="heading-large">APIs with only open access endpoints</h2>
+        <p class="form-hint">You do not need an application or subscription to use open access endpoints</p>
+    }
     @openAccessApisGroup(role, app, openAccessApis)
 }
 
 @if(subscriptions.testApis.nonEmpty) {
-    <h2 class="heading-large">APIs for testing your service</h2>
-    <p class="form-hint">Set up test data to accept or reject requests or check your fraud prevention headers</p>
-
+    @if(showSectionHeadings) {
+        <h2 class="heading-large">APIs for testing your service</h2>
+        <p class="form-hint">Set up test data to accept or reject requests or check your fraud prevention headers</p>
+    }
     @subscriptionsGroup(role, app, subscriptions.testApis, "TEST_API", afterUnsubscribeRedirectTo,showSubscriptionFields)
 }

@@ -14,26 +14,19 @@
  * limitations under the License.
  *@
 
-@import controllers.checkpages.DummySubscriptionsForm
-@import domain.models.views.SubscriptionRedirect._
-@import domain.models.applications._
-@import domain.models.subscriptions._
-@import include._
 @import config.ApplicationConfig
 @import controllers.checkpages.DummySubscriptionsForm
-@import domain.models.views.BackButtonWithJavaScript
+@import domain.models.applications._
 @import domain.models.developers.DeveloperSession
-@import domain.models.apidefinitions.ApiContext
-@import domain.models.subscriptions.ApiData
+@import domain.models.views.BackButtonWithJavaScript
+@import domain.models.views.SubscriptionRedirect._
+@import include._
 
-@this(devMain: DevMain2, subscriptionGroups: SubscriptionGroups)
+@this(devMain: DevMain, subscriptionGroups: TurnOffApis_SubscriptionGroups)
 @(
-    app: Application, 
+    app: Application,
     role: CollaboratorRole,
-    subscriptions: Option[GroupedSubscriptions], 
-    openAccessApis: Map[ApiContext, ApiData],
-    id: ApplicationId, 
-    submitAction: Call, 
+    subscriptions: Option[GroupedSubscriptions],
     errorForm: Option[Form[DummySubscriptionsForm]] = None
 )(
     implicit request: play.api.mvc.Request[Any],
@@ -43,7 +36,7 @@
 )
 
 @import domain.models.applications.CollaboratorRole
-    @pageHeading = @{ "Turn off API subscriptions you don’t need" }
+@pageHeading = @{ "Turn off API subscriptions you don’t need" }
 
 @devMain(
     title = pageHeading,
@@ -53,28 +46,19 @@
 ) {
 
     @if(errorForm.isDefined) { @errorSummary(errorForm.get) }
-
-    <h1 class="govuk-heading-l">@pageHeading</h1>
-
-    <!-- NOTE: Below needs to only show APIs that have been selected for that application -->
+    <h1 class="heading-xlarge">@pageHeading</h1>
     @subscriptions match {
         case Some(groupedSubscriptions) => {
-            @subscriptionGroups(role: CollaboratorRole, groupedSubscriptions, openAccessApis, app, APPLICATION_CHECK_PAGE, true)
+            @subscriptionGroups(role: CollaboratorRole, groupedSubscriptions, app, APPLICATION_CHECK_PAGE, true)
             <br/>
-            <p class="govuk-body">
-                If you want to use an API in production that you haven't already tested in sandbox, you'll need to 
-                <a class="govuk-link" href="#">add it to your sandbox application</a> 
-                and test it first.
-            </p>
-            <br/>
-            @helper.form(action = submitAction, 'class -> "form") {
+            @helper.form(action = controllers.routes.SR20.changeApiSubscriptionsAction(app.id), 'class -> "form") {
                 @helper.CSRF.formField
-                <button id="submit" class="govuk-button" type="submit">Save and continue</button>
+                <button id="submit" class="button" type="submit">Save and continue</button>
             }
         }
         case _ => {
-            <div class="govuk-inset-text">We can’t load your API subscriptions at the moment. Please 
-                <a class="govuk-link govuk-link--no-visited-state" href="@{controllers.checkpages.routes.ApplicationCheck.apiSubscriptionsPage(app.id)}">try again</a> 
+            <div class="govuk-inset-text">We can’t load your API subscriptions at the moment. Please
+                <a class="govuk-link govuk-link--no-visited-state" href="@{controllers.checkpages.routes.ApplicationCheck.apiSubscriptionsPage(app.id)}">try again</a>
                 later
             </div>
         }

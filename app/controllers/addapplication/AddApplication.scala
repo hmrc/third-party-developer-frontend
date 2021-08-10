@@ -126,7 +126,10 @@ class AddApplication @Inject() (
   }
   
   private def showConfirmSubscriptionsPage(sandboxAppId: ApplicationId)(implicit hc: HeaderCarrier) = {
-    successful(Redirect(controllers.routes.SR20.confirmApiSubscription(sandboxAppId)))
+    // TODO - Uplifting here for now as a temp workaround...not great :( Intend to add session and uplift at a later point.
+    for {
+      upliftedAppId <- apmConnector.upliftApplication(sandboxAppId)
+    } yield Redirect(controllers.routes.SR20.confirmApiSubscriptions(upliftedAppId))
   }
 
   def chooseApplicationToUpliftAction(): Action[AnyContent] = loggedInAction { implicit request =>

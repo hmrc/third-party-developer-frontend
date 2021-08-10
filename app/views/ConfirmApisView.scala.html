@@ -64,14 +64,14 @@
             If you subscribe to APIs your software does not use, you will not get production credentials.
         </strong>
     </div>
-    @helper.form(action = controllers.routes.SR20.upliftSandboxApplication(applicationId), 'class -> "form") {
+    @helper.form(action = controllers.routes.SR20.confirmApiSubscriptionsAction(applicationId), 'class -> "form") {
         @helper.CSRF.formField
         <div class="govuk-button-group">
-            <button class="govuk-button" id="submit" type="submit" href="@controllers.routes.SR20.upliftSandboxApplication(applicationId)">
+            <button class="govuk-button" id="submit" type="submit" href="@controllers.routes.SR20.confirmApiSubscriptionsAction(applicationId)">
                 Save and continue
             </button>
             @if(subscriptions.size > 1) {
-                <a class="govuk-link govuk-link--no-visited-state" href="#">
+                <a class="govuk-link govuk-link--no-visited-state" href="@controllers.routes.SR20.changeApiSubscriptions(applicationId)">
                     Change my API subscriptions
                 </a>
             }
