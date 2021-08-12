@@ -32,7 +32,7 @@
 
     <h1 class="heading-xlarge">Create a new password</h1>
 
-    @helper.form(action = controllers.routes.Password.resetPassword) {
+    @helper.form(action = routes.Password.resetPassword) {
 
         <div class="form-group">
             @helper.CSRF.formField

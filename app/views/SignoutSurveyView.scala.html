@@ -40,7 +40,7 @@
 
     <h2 class="heading-large">Feedback survey</h2>
 
-    @helper.form(action = controllers.routes.UserLogoutAccount.logoutSurveyAction(),
+    @helper.form(action = routes.UserLogoutAccount.logoutSurveyAction(),
         'class -> "form", 'id -> "feedbackForm") {
         @helper.CSRF.formField
 

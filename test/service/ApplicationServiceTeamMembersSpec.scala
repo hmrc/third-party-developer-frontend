@@ -28,21 +28,17 @@ import domain.models.applications._
 import domain.models.connectors.{DeskproTicket, TicketCreated}
 import domain.models.subscriptions.ApiSubscriptionFields
 import domain.models.subscriptions.ApiSubscriptionFields._
-import org.joda.time.DateTime
 import service.SubscriptionFieldsService.{DefinitionsByApiVersion, SubscriptionFieldsConnector}
 import uk.gov.hmrc.http.{HeaderCarrier}
 import uk.gov.hmrc.play.audit.http.connector.AuditResult.Success
 import uk.gov.hmrc.time.DateTimeUtils
 import utils.AsyncHmrcSpec
-import domain.models.developers.UserId
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future.{failed, successful}
 import domain.models.subscriptions.VersionSubscription
 import service.PushPullNotificationsService.PushPullNotificationsConnector
-import uk.gov.hmrc.http.UpstreamErrorResponse
 import utils.LocalUserIdTracker
-import domain.models.controllers.{ProductionApplicationSummary, SandboxApplicationSummary}
 import domain.models.developers.User
 
 class ApplicationServiceTeamMembersSpec extends AsyncHmrcSpec with SubscriptionsBuilder with ApplicationBuilder with LocalUserIdTracker {
@@ -53,17 +49,10 @@ class ApplicationServiceTeamMembersSpec extends AsyncHmrcSpec with Subscriptions
   trait Setup {
     implicit val hc: HeaderCarrier = HeaderCarrier()
 
-    private val mockAppConfig = mock[ApplicationConfig]
-
     val mockProductionApplicationConnector: ThirdPartyApplicationProductionConnector =
       mock[ThirdPartyApplicationProductionConnector]
     val mockSandboxApplicationConnector: ThirdPartyApplicationSandboxConnector =
       mock[ThirdPartyApplicationSandboxConnector]
-    val mockSubscriptionsService: SubscriptionsService = mock[SubscriptionsService]
-
-    val mockProductionSubscriptionFieldsConnector: SubscriptionFieldsConnector = mock[SubscriptionFieldsConnector]
-    val mockSandboxSubscriptionFieldsConnector: SubscriptionFieldsConnector = mock[SubscriptionFieldsConnector]
-    val mockPushPullNotificationsConnector: PushPullNotificationsConnector = mock[PushPullNotificationsConnector]
 
     val mockDeveloperConnector: ThirdPartyDeveloperConnector = mock[ThirdPartyDeveloperConnector]
 
@@ -72,22 +61,21 @@ class ApplicationServiceTeamMembersSpec extends AsyncHmrcSpec with Subscriptions
     val connectorsWrapper = new ConnectorsWrapper(
       mockSandboxApplicationConnector,
       mockProductionApplicationConnector,
-      mockSandboxSubscriptionFieldsConnector,
-      mockProductionSubscriptionFieldsConnector,
-      mockPushPullNotificationsConnector,
-      mockPushPullNotificationsConnector,
-      mockAppConfig
+      mock[SubscriptionFieldsConnector],
+      mock[SubscriptionFieldsConnector],
+      mock[PushPullNotificationsConnector],
+      mock[PushPullNotificationsConnector],
+      mock[ApplicationConfig]
     )
 
     val mockSubscriptionFieldsService: SubscriptionFieldsService = mock[SubscriptionFieldsService]
     val mockDeskproConnector: DeskproConnector = mock[DeskproConnector]
-    val mockApmConnector: ApmConnector = mock[ApmConnector]
 
     val applicationService = new ApplicationService(
-      mockApmConnector,
+      mock[ApmConnector],
       connectorsWrapper,
       mockSubscriptionFieldsService,
-      mockSubscriptionsService,
+      mock[SubscriptionsService],
       mockDeskproConnector,
       mockDeveloperConnector,
       mockSandboxApplicationConnector,
@@ -172,54 +160,6 @@ class ApplicationServiceTeamMembersSpec extends AsyncHmrcSpec with Subscriptions
       requiresTrust = requiresTrust,
       fields = SubscriptionFieldsWrapper(appId, clientId, ApiContext(context), version, subscriptionFieldWithValues)
     )
-  }
-
-  "Fetch by teamMember userId" should {
-    val userId = UserId.random
-    val email = "bob@example.com"
-    val productionApp1 = Application(ApplicationId("id1"), ClientId("cl-id1"), "zapplication", DateTime.now, DateTime.now, None, Environment.PRODUCTION, collaborators = Set(Collaborator(email, CollaboratorRole.ADMINISTRATOR, userId)))
-    val sandboxApp1 = Application(ApplicationId("id2"), ClientId("cl-id2"), "application", DateTime.now, DateTime.now, None, Environment.SANDBOX, collaborators = Set(Collaborator(email, CollaboratorRole.ADMINISTRATOR, userId)))
-    val productionApp2 = Application(ApplicationId("id3"), ClientId("cl-id3"), "4pplication", DateTime.now, DateTime.now, None, Environment.PRODUCTION, collaborators = Set(Collaborator(email, CollaboratorRole.ADMINISTRATOR, userId)))
-
-    val productionApps = Seq(productionApp1, productionApp2)
-    val sandboxApps = Seq(sandboxApp1)
-
-    implicit class SummaryImpl(application: Application) {
-      def asProdSummary: ProductionApplicationSummary = ProductionApplicationSummary.from(application, email)
-      def asSandboxSummary: SandboxApplicationSummary = SandboxApplicationSummary.from(application, email)
-    }
-
-    "sort the returned applications by name" in new Setup {
-      when(mockProductionApplicationConnector.fetchByTeamMember(userId))
-        .thenReturn(successful(productionApps))
-
-      when(mockSandboxApplicationConnector.fetchByTeamMember(userId))
-        .thenReturn(successful(sandboxApps))
-
-      private val result = await(applicationService.fetchAllSummariesByTeamMember(userId, email))
-      result shouldBe ((List(sandboxApp1.asSandboxSummary), List(productionApp2.asProdSummary, productionApp1.asProdSummary)))
-    }
-
-    "tolerate the sandbox connector failing with a 5xx error" in new Setup {
-      when(mockProductionApplicationConnector.fetchByTeamMember(userId))
-        .thenReturn(successful(productionApps))
-      when(mockSandboxApplicationConnector.fetchByTeamMember(userId))
-        .thenReturn(failed(UpstreamErrorResponse("Expected exception", 504, 504)))
-
-      private val result = await(applicationService.fetchAllSummariesByTeamMember(userId, email))
-      result shouldBe ((Nil, List(productionApp2.asProdSummary, productionApp1.asProdSummary)))
-    }
-
-    "not tolerate the sandbox connector failing with a 5xx error" in new Setup {
-      when(mockProductionApplicationConnector.fetchByTeamMember(userId))
-        .thenReturn(failed(UpstreamErrorResponse("Expected exception", 504, 504)))
-      when(mockSandboxApplicationConnector.fetchByTeamMember(userId))
-        .thenReturn(successful(sandboxApps))
-
-      intercept[UpstreamErrorResponse] {
-        await(applicationService.fetchAllSummariesByTeamMember(userId, email))
-      }
-    }
   }
 
   "remove teamMember" should {

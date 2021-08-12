@@ -20,21 +20,10 @@ import domain.models.applications._
 import domain.models.apidefinitions.AccessType
 import uk.gov.hmrc.http.NotFoundException
 import org.joda.time.DateTime
+import domain.models.developers.UserId
+import domain.models.apidefinitions.ApiIdentifier
 
-trait ApplicationSummary {
-  def id: ApplicationId
-  def name: String
-  def environment: Environment
-  def role: CollaboratorRole
-  def termsOfUseStatus: TermsOfUseStatus
-  def state: State
-  def lastAccess: DateTime
-  def serverTokenUsed: Boolean
-  def createdOn: DateTime
-  def accessType: AccessType
-}
-
-case class ProductionApplicationSummary(
+case class ApplicationSummary(
   id: ApplicationId,
   name: String,
   role: CollaboratorRole,
@@ -43,32 +32,16 @@ case class ProductionApplicationSummary(
   lastAccess: DateTime,
   serverTokenUsed: Boolean = false,
   createdOn: DateTime,
-  accessType: AccessType
-) extends ApplicationSummary {
-  val environment = Environment.PRODUCTION
-}
+  accessType: AccessType,
+  environment: Environment,
+  subscriptionIds: Set[ApiIdentifier])
 
-case class SandboxApplicationSummary(
-  id: ApplicationId,
-  name: String,
-  role: CollaboratorRole,
-  termsOfUseStatus: TermsOfUseStatus,
-  state: State,
-  lastAccess: DateTime,
-  serverTokenUsed: Boolean = false,
-  createdOn: DateTime,
-  accessType: AccessType
-) extends ApplicationSummary {
-  val environment = Environment.SANDBOX
-}
+object ApplicationSummary {
+  def from(app: Application, userId: UserId): ApplicationSummary = {
 
-object SandboxApplicationSummary {
-  def from(app: Application, email: String): SandboxApplicationSummary = {
-    require(app.deployedTo.isSandbox, "SandboxApplicationSummary cannot be built from Production App")
+    val role = app.roleForCollaborator(userId).getOrElse(throw new NotFoundException("Role not found"))
 
-    val role = app.role(email).getOrElse(throw new NotFoundException("Role not found"))
-
-    SandboxApplicationSummary(
+    ApplicationSummary(
       app.id,
       app.name,
       role,
@@ -77,18 +50,17 @@ object SandboxApplicationSummary {
       app.lastAccess,
       app.lastAccessTokenUsage.isDefined,
       app.createdOn,
-      app.access.accessType
+      app.access.accessType,
+      app.deployedTo,
+      Set.empty
     )
   }
-}
 
-object ProductionApplicationSummary {
-  def from(app: Application, email: String): ProductionApplicationSummary = {
-    require(app.deployedTo.isProduction, "ProductionApplicationSummary cannot be built from Sandbox App")
+  def from(app: ApplicationWithSubscriptionIds, userId: UserId): ApplicationSummary = {
 
-    val role = app.role(email).getOrElse(throw new NotFoundException("Role not found"))
+    val role = app.roleForCollaborator(userId).getOrElse(throw new NotFoundException("Role not found"))
 
-    ProductionApplicationSummary(
+    ApplicationSummary(
       app.id,
       app.name,
       role,
@@ -97,7 +69,9 @@ object ProductionApplicationSummary {
       app.lastAccess,
       app.lastAccessTokenUsage.isDefined,
       app.createdOn,
-      app.access.accessType        
+      app.access.accessType,
+      app.deployedTo,
+      app.subscriptions
     )
   }
 }

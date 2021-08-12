@@ -14,10 +14,10 @@
  * limitations under the License.
  */
 
-package controllers.model
+package domain.models.controllers
 
-import config.ApplicationConfig
 import controllers.routes
+import config.ApplicationConfig
 import domain.models.applications.Application
 
 case class Crumb(name: String, url: String = "", dataAttribute: Option[String] = None)
@@ -28,7 +28,7 @@ object Crumb {
     Crumb("Home", s"${applicationConfig.apiDocumentationFrontendUrl}/api-documentation", Some("data-breadcrumb-home"))
 
   val viewAllApplications =
-    Crumb("View all applications",s"${controllers.routes.AddApplication.manageApps}", Some("data-breadcrumb-manage-app"))
+    Crumb("View all applications",s"${routes.ManageApplications.manageApps}", Some("data-breadcrumb-manage-app"))
 
   val protectAccount =
     Crumb("Protect account",s"${controllers.profile.routes.ProtectAccount.getProtectAccount}", Some("data-breadcrumb-protect-account"))

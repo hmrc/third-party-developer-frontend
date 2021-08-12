@@ -21,7 +21,7 @@
 @import domain.models.developers.DeveloperSession
 @import domain.models.applications.Application
 @import domain.models.flows.IpAllowlistFlow
-@import model.Crumb
+@import domain.models.controllers.Crumb
 
 @this(devMain: DevMain2)
 
@@ -92,7 +92,7 @@
       </div>
     </details>
 
-    @helper.form(action = controllers.routes.IpAllowlist.addCidrBlockAction(app.id), 'class -> "form") {
+    @helper.form(action = routes.IpAllowlist.addCidrBlockAction(app.id), 'class -> "form") {
       @helper.CSRF.formField
       <div class="govuk-form-group @if(form.errors("ipAddress").nonEmpty) {govuk-form-group--error}">
         <label class="govuk-label" for="ipAddress">IP address</label>

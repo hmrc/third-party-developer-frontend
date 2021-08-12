@@ -50,7 +50,7 @@
 
   <tbody
     data-teamMember-list
-    data-teamMember-remove-url="@SpliceCSRFToken(controllers.routes.ManageTeam.removeTeamMemberAction(app.id))"
+    data-teamMember-remove-url="@SpliceCSRFToken(routes.ManageTeam.removeTeamMemberAction(app.id))"
     class="govuk-table__body"
   >
     @for((teamMember, index) <- app.collaborators.toSeq.sortBy(_.emailAddress).zipWithIndex) {

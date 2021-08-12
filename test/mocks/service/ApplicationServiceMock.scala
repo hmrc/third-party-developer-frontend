@@ -26,9 +26,9 @@ import service.ApplicationService
 
 import scala.concurrent.Future.{failed, successful}
 import domain.models.apidefinitions.ApiIdentifier
-import domain.models.developers.UserId
-import utils._
-import domain.models.controllers.{SandboxApplicationSummary,ProductionApplicationSummary}
+import utils.TestApplications
+import utils.CollaboratorTracker
+import utils.LocalUserIdTracker
 
 trait ApplicationServiceMock extends MockitoSugar with ArgumentMatchersSugar with TestApplications with CollaboratorTracker with LocalUserIdTracker {
   val applicationServiceMock = mock[ApplicationService]
@@ -48,28 +48,6 @@ trait ApplicationServiceMock extends MockitoSugar with ArgumentMatchersSugar wit
   def fetchByApplicationIdReturnsNone(id: ApplicationId) =
     when(applicationServiceMock.fetchByApplicationId(eqTo(id))(*)).thenReturn(successful(None))
 
-  def fetchProductionAppsByTeamMemberReturns(apps: Seq[Application]) =
-    when(applicationServiceMock.fetchProductionAppsByTeamMember(*[UserId])(*))
-      .thenReturn(successful(apps.map(_.copy(deployedTo = Environment.PRODUCTION))))
-
-  def fetchSandboxAppsByTeamMemberReturns(apps: Seq[Application]) =
-    when(applicationServiceMock.fetchSandboxAppsByTeamMember(*[UserId])(*))
-    .thenReturn(successful(apps.map(_.copy(deployedTo = Environment.SANDBOX))))
-
-  def fetchSummariesByTeamMemberReturns(sandboxApps: Seq[SandboxApplicationSummary], productionApps: Seq[ProductionApplicationSummary]) =
-    when(applicationServiceMock.fetchAllSummariesByTeamMember(*[UserId], *)(*))
-      .thenReturn(successful((sandboxApps, productionApps)))
-
-  def fetchSummariesByTeamMemberReturns(userId: UserId, sandboxApps: Seq[SandboxApplicationSummary], productionApps: Seq[ProductionApplicationSummary]) =
-    when(applicationServiceMock.fetchAllSummariesByTeamMember(eqTo(userId), *)(*))
-      .thenReturn(successful((sandboxApps, productionApps)))
-
-  def fetchSandoxSummariesByTeamMemberReturns(sandboxApps: Seq[SandboxApplicationSummary]) =
-    when(applicationServiceMock.fetchSandboxSummariesByTeamMember(*[UserId], *)(*))
-      .thenReturn(successful(sandboxApps))
-
-  def identifyUpliftableSandboxAppIdsReturns(sandboxApplicationIds: Set[ApplicationId]) = 
-    when(applicationServiceMock.identifyUpliftableSandboxAppIds(*)(*)).thenReturn(successful(sandboxApplicationIds))
 
   def fetchCredentialsReturns(application: Application, tokens: ApplicationToken): Unit =
     when(applicationServiceMock.fetchCredentials(eqTo(application))(*)).thenReturn(successful(tokens))
@@ -144,3 +122,5 @@ trait ApplicationServiceMock extends MockitoSugar with ArgumentMatchersSugar wit
 
   }
 }
+
+object ApplicationServiceMock extends ApplicationServiceMock

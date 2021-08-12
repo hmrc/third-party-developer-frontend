@@ -20,7 +20,7 @@
 @import views.html.include.DevMain
 @import domain.models.developers.DeveloperSession
 @import domain.models.applications.Application
-@import model.Crumb
+@import domain.models.controllers.Crumb
 
 @this(devMain: DevMain2)
 
@@ -67,7 +67,7 @@ implicit request: play.api.mvc.Request[Any], loggedIn: DeveloperSession, message
 
     <br>
 
-    @helper.form(action = controllers.routes.IpAllowlist.removeCidrBlockAction(app.id, cidrBlock)) {
+    @helper.form(action = routes.IpAllowlist.removeCidrBlockAction(app.id, cidrBlock)) {
       @helper.CSRF.formField
       <div class="govuk-button-group">
         <button id="submit" class="govuk-button govuk-button--warning" type="submit">Remove IP address</button>

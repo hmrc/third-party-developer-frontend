@@ -31,7 +31,7 @@
 
   <h1 class="govuk-heading-l">@heading</h1>
 
-  @helper.form(action = controllers.routes.UserLoginAccount.authenticate) {
+  @helper.form(action = routes.UserLoginAccount.authenticate) {
     @helper.CSRF.formField
     <div @if(form.errors("invalidCredentials").nonEmpty){class="govuk-form-group--error"}>
       <span class="govuk-error-message">
@@ -71,7 +71,7 @@
           aria-labelledby="login-password-error"
         />
         <p class="govuk-body">
-          <a id="forgottenPassword" class="govuk-link govuk-link--no-visited-state" href="@controllers.routes.Password.showForgotPassword">
+          <a id="forgottenPassword" class="govuk-link govuk-link--no-visited-state" href="@routes.Password.showForgotPassword">
             I've forgotten my password
           </a>
         </p>
@@ -82,7 +82,7 @@
   @if(!endOfJourney) {
     <p class="govuk-body">
       Not registered yet? 
-      <a class="govuk-link govuk-link--no-visited-state" href="@controllers.routes.Registration.registration">
+      <a class="govuk-link govuk-link--no-visited-state" href="@routes.Registration.registration">
         Register for an account
       </a>
     </p>

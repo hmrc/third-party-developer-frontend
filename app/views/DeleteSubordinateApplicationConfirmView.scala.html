@@ -36,7 +36,7 @@
 
   @appEnvironment2(app)
 
-  @helper.form(action = controllers.routes.DeleteApplication.deleteSubordinateApplicationAction(app.id), 'class -> "form") {
+  @helper.form(action = routes.DeleteApplication.deleteSubordinateApplicationAction(app.id), 'class -> "form") {
     <br>
 
     <p class="govuk-body">This will be deleted immediately. We cannot restore applications once they have been deleted.</p>

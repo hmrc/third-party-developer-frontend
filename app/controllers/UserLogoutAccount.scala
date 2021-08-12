@@ -61,11 +61,11 @@ class UserLogoutAccount @Inject() (
         applicationService
           .userLogoutSurveyCompleted(form.email, form.name, form.rating.getOrElse("").toString, form.improvementSuggestions)
           .flatMap(_ => {
-            Future.successful(Redirect(controllers.routes.UserLogoutAccount.logout()))
+            Future.successful(Redirect(routes.UserLogoutAccount.logout()))
           })
       case None =>
         Logger.error("Survey form invalid.")
-        Future.successful(Redirect(controllers.routes.UserLogoutAccount.logout()))
+        Future.successful(Redirect(routes.UserLogoutAccount.logout()))
     }
   }
 

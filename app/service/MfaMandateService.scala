@@ -23,9 +23,11 @@ import uk.gov.hmrc.http.HeaderCarrier
 import domain.models.developers.UserId
 
 import scala.concurrent.{ExecutionContext, Future}
+import domain.models.applications.CollaboratorRole._
+import domain.models.applications.Environment._
 
 @Singleton
-class MfaMandateService @Inject()(val appConfig: ApplicationConfig, val applicationService: ApplicationService)(implicit val ec: ExecutionContext) {
+class MfaMandateService @Inject()(val appConfig: ApplicationConfig, val appsByTeamMember: AppsByTeamMemberService)(implicit val ec: ExecutionContext) {
 
   def showAdminMfaMandatedMessage(userId: UserId)(implicit hc: HeaderCarrier): Future[Boolean] = {
     mfaMandateCheck(userId, mandatedDate => mandatedDate.isAfter(new LocalDate()))
@@ -43,14 +45,8 @@ class MfaMandateService @Inject()(val appConfig: ApplicationConfig, val applicat
     )
   }
 
-  private def isAdminOnProductionApplication(userId: UserId)(implicit hc: HeaderCarrier): Future[Boolean] = {
-    applicationService.fetchProductionAppsByTeamMember(userId).map(applications => {
-      applications
-        .flatMap(app => app.collaborators)
-        .filter(collaborators => collaborators.userId == userId)
-        .exists(collaborator => collaborator.role.isAdministrator)
-    })
-  }
+  private def isAdminOnProductionApplication(userId: UserId)(implicit hc: HeaderCarrier): Future[Boolean] =
+    appsByTeamMember.fetchByTeamMemberWithRole(PRODUCTION)(ADMINISTRATOR)(userId).map(_.nonEmpty)
 
   def daysTillAdminMfaMandate: Option[Int] = {
 

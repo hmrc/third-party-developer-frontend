@@ -121,7 +121,7 @@
                           <td>
                               @if(editable) {
                                   <div align="right">
-                                      <a href="@controllers.routes.ManageSubscriptions.editApiMetadataPage(data.appId, sub.apiContext, sub.apiVersion, SaveSubsFieldsPageMode.CheckYourAnswers)">Change<span class="visually-hidden">Edit Subscription</span></a>
+                                      <a href="@routes.ManageSubscriptions.editApiMetadataPage(data.appId, sub.apiContext, sub.apiVersion, SaveSubsFieldsPageMode.CheckYourAnswers)">Change<span class="visually-hidden">Edit Subscription</span></a>
                                   </div>
                               }
                           </td>
@@ -199,7 +199,7 @@
             <h2>Now request @principalWording </h2>
             <p>By submitting your request you are confirming that, to the best your knowledge, the details you are providing are correct.</p>
             <button id="submit" class="button" type="submit">Accept and send</button>
-            <a href="@routes.AddApplication.manageApps" id="cancel" class="secondary-button">Save and come back later</a>
+            <a href="@routes.ManageApplications.manageApps" id="cancel" class="secondary-button">Save and come back later</a>
         </div>
       }
   </section>

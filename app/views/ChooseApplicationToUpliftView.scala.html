@@ -16,13 +16,13 @@
 
 @import domain.models.developers.DeveloperSession
 @import domain.models.applications.Environment
-@import domain.models.controllers.SandboxApplicationSummary
+@import domain.models.controllers.ApplicationSummary
 @import include._
-@import model.Crumb
+@import domain.models.controllers.Crumb
 
 @this(devMain: DevMain2)
 
-@(form: Form[controllers.ChooseApplicationToUpliftForm], upliftableApps: Seq[SandboxApplicationSummary], showFluff: Boolean)(implicit request: play.api.mvc.Request[Any], loggedIn: DeveloperSession, messagesProvider: MessagesProvider, appConfig: config.ApplicationConfig)
+@(form: Form[controllers.ChooseApplicationToUpliftForm], upliftableApps: Seq[ApplicationSummary], showFluff: Boolean)(implicit request: play.api.mvc.Request[Any], loggedIn: DeveloperSession, messagesProvider: MessagesProvider, appConfig: config.ApplicationConfig)
 
 @pageHeading = @{ "Which application do you want production credentials for?" }
 
@@ -57,7 +57,7 @@
 
   @if(needToChoose) {
 
-    @helper.form(action = controllers.routes.AddApplication.chooseApplicationToUpliftAction()) {
+    @helper.form(action = controllers.addapplication.routes.AddApplication.chooseApplicationToUpliftAction()) {
       @helper.CSRF.formField
 
       <div class="govuk-form-group @if(form.errors("applicationId").nonEmpty) {govuk-form-group--error}">
@@ -83,11 +83,11 @@
     }
   } else {
     <h1 class="govuk-heading-l">You are requesting production credentials for</h1>
-
+    
     <p class="govuk-body-l">@{upliftableApps.head.name}</p>
-
+    
     <p class="govuk-body">
-      <a id="continue" href="@controllers.routes.AddApplication.addApplicationName(Environment.PRODUCTION)" class="govuk-button">Continue</a>
+      <a id="continue" href="@controllers.addapplication.routes.AddApplication.soleApplicationToUpliftAction(upliftableApps.head.id)" class="govuk-button">Continue</a>
     </p>    
   }
 

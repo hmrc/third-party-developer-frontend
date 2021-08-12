@@ -39,6 +39,7 @@ import mocks.connector.ApmConnectorMockModule
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import utils.LocalUserIdTracker
+import controllers.addapplication.AddApplication
 
 class EditApplicationNameSpec 
     extends BaseControllerSpec 
@@ -73,9 +74,7 @@ class EditApplicationNameSpec
 
   val tokens: ApplicationToken = ApplicationToken(List(aClientSecret(), aClientSecret()), "token")
 
-  trait Setup extends ApplicationServiceMock with ApmConnectorMockModule with SessionServiceMock with EmailPreferencesServiceMock {
-    val addApplicationSubordinateEmptyNestView = app.injector.instanceOf[AddApplicationSubordinateEmptyNestView]
-    val manageApplicationsView = app.injector.instanceOf[ManageApplicationsView]
+  trait Setup extends UpliftLogicMock with ApplicationServiceMock with ApmConnectorMockModule with SessionServiceMock with EmailPreferencesServiceMock {
     val accessTokenSwitchView = app.injector.instanceOf[AccessTokenSwitchView]
     val usingPrivilegedApplicationCredentialsView = app.injector.instanceOf[UsingPrivilegedApplicationCredentialsView]
     val tenDaysWarningView = app.injector.instanceOf[TenDaysWarningView]
@@ -94,10 +93,9 @@ class EditApplicationNameSpec
       ApmConnectorMock.aMock,
       sessionServiceMock,
       mock[AuditService],
+      upliftLogicMock,
       mcc,
       cookieSigner,
-      addApplicationSubordinateEmptyNestView,
-      manageApplicationsView,
       accessTokenSwitchView,
       usingPrivilegedApplicationCredentialsView,
       tenDaysWarningView,
@@ -131,8 +129,6 @@ class EditApplicationNameSpec
 
     "return the Edit Applications Name Page with user logged in" in new Setup {
       givenApplicationAction(application, loggedInUser)
-
-      fetchProductionAppsByTeamMemberReturns(List(application))
 
       private val result = underTest.addApplicationName(Environment.SANDBOX)(loggedInRequest.withCSRFToken)
 
@@ -188,8 +184,6 @@ class EditApplicationNameSpec
   "NameApplicationPage in principal" should {
 
     "return the Edit Applications Name Page with user logged in" in new Setup {
-
-      fetchProductionAppsByTeamMemberReturns(List(application))
 
       private val result = underTest.addApplicationName(Environment.PRODUCTION)(loggedInRequest.withCSRFToken)
 

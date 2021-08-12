@@ -55,7 +55,7 @@ trait DevHubAuthorization extends Results with FrontendHeaderCarrierProvider wit
                                       (implicit ec: ExecutionContext): Action[AnyContent] =
     Action.async {
 
-      val loginRedirect = Redirect(controllers.routes.UserLoginAccount.login())
+      val loginRedirect = Redirect(routes.UserLoginAccount.login())
 
       implicit request: MessagesRequest[AnyContent] =>
         loadSession.flatMap(maybeSession => {
@@ -99,7 +99,7 @@ trait ExtendedDevHubAuthorization extends DevHubAuthorization {
 
   def loginSucceeded(request: RequestHeader): Future[Result] = {
     Logger.info(s"loginSucceeded - access_uri ${request.session.get("access_uri")}")
-    val uri = request.session.get("access_uri").getOrElse(routes.AddApplication.manageApps().url)
+    val uri = request.session.get("access_uri").getOrElse(routes.ManageApplications.manageApps().url)
     Future.successful(Redirect(uri).withNewSession)
   }
 

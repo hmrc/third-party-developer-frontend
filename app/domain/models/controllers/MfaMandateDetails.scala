@@ -14,6 +14,6 @@
  * limitations under the License.
  */
 
-package controllers.model
+package domain.models.controllers
 
 case class MfaMandateDetails(showAdminMfaMandatedMessage: Boolean, daysTillAdminMfaMandate: Int)

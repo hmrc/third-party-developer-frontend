@@ -34,11 +34,12 @@ import views.html._
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import utils.LocalUserIdTracker
-import domain.models.controllers.SandboxApplicationSummary
+import domain.models.controllers.ApplicationSummary
 import builder.ApplicationBuilder
 import scala.concurrent.Future
 import play.api.mvc.Result
 import mocks.connector.ApmConnectorMockModule
+import controllers.addapplication.AddApplication
 
 class ChooseApplicationToUpliftActionSpec
     extends BaseControllerSpec 
@@ -62,11 +63,9 @@ class ChooseApplicationToUpliftActionSpec
   val appCreatedOn = DateTimeUtils.now.minusDays(1)
   val appLastAccess = appCreatedOn
 
-  val sandboxAppSummaries = (1 to 5).map(_ => buildApplication(loggedInUser.email)).map(SandboxApplicationSummary.from(_, loggedInUser.email))
+  val sandboxAppSummaries = (1 to 5).map(_ => buildApplication(loggedInUser.email)).map(ApplicationSummary.from(_, loggedInUser.developer.userId)).toList
 
-  trait Setup extends ApplicationServiceMock with ApmConnectorMockModule with ApplicationActionServiceMock with SessionServiceMock with EmailPreferencesServiceMock {
-    val addApplicationSubordinateEmptyNestView = app.injector.instanceOf[AddApplicationSubordinateEmptyNestView]
-    val manageApplicationsView = app.injector.instanceOf[ManageApplicationsView]
+  trait Setup extends UpliftLogicMock with AppsByTeamMemberServiceMock with ApplicationServiceMock with ApmConnectorMockModule with ApplicationActionServiceMock with SessionServiceMock with EmailPreferencesServiceMock {
     val accessTokenSwitchView = app.injector.instanceOf[AccessTokenSwitchView]
     val usingPrivilegedApplicationCredentialsView = app.injector.instanceOf[UsingPrivilegedApplicationCredentialsView]
     val tenDaysWarningView = app.injector.instanceOf[TenDaysWarningView]
@@ -86,10 +85,9 @@ class ChooseApplicationToUpliftActionSpec
       ApmConnectorMock.aMock,
       sessionServiceMock,
       mock[AuditService],
+      upliftLogicMock,
       mcc,
       cookieSigner,
-      addApplicationSubordinateEmptyNestView,
-      manageApplicationsView,
       accessTokenSwitchView,
       usingPrivilegedApplicationCredentialsView,
       tenDaysWarningView,
@@ -120,13 +118,13 @@ class ChooseApplicationToUpliftActionSpec
       contentAsString(results) should include("Which application do you want production credentials for?")
     }
 
-    def shouldShowAppNamesFor(summaries: Seq[SandboxApplicationSummary])(implicit results: Future[Result]) = {
+    def shouldShowAppNamesFor(summaries: Seq[ApplicationSummary])(implicit results: Future[Result]) = {
       summaries.map { summary =>
         contentAsString(results) should include(summary.name)
       }
     }
 
-    def shouldNotShowAppNamesFor(summaries: Seq[SandboxApplicationSummary])(implicit results: Future[Result]) = {
+    def shouldNotShowAppNamesFor(summaries: Seq[ApplicationSummary])(implicit results: Future[Result]) = {
       summaries.map { summary =>
         contentAsString(results) should not include(summary.name)
       }
@@ -143,13 +141,11 @@ class ChooseApplicationToUpliftActionSpec
   "chooseApplicationToUpliftAction" should {
     "go back to the form when no app is selected" in new Setup {
       val summaries = sandboxAppSummaries
-      fetchSandoxSummariesByTeamMemberReturns(summaries)
-      identifyUpliftableSandboxAppIdsReturns(summaries.map(_.id).toSet)
+      aUsersUplfitableAndNotUpliftableAppsReturns(summaries, List.empty)
 
       val result = underTest.chooseApplicationToUpliftAction()(loggedInRequest.withFormUrlEncodedBody(("applicationId" -> "")))
 
       status(result) shouldBe BAD_REQUEST
-      contentAsString(result) should include("Which application do you want production credentials for?")
     }
     
     "go to next stage in journey when one app is selected and uplifted" in new Setup {
@@ -157,8 +153,7 @@ class ChooseApplicationToUpliftActionSpec
       val sandboxAppId = summaries.head.id
       val prodAppId = ApplicationId.random
 
-      fetchSandoxSummariesByTeamMemberReturns(summaries)
-      identifyUpliftableSandboxAppIdsReturns(summaries.map(_.id).toSet)
+      aUsersUplfitableAndNotUpliftableAppsReturns(summaries, summaries.map(_.id))
       ApmConnectorMock.UpliftApplication.willReturn(prodAppId)
 
       val result = underTest.chooseApplicationToUpliftAction()(loggedInRequest.withFormUrlEncodedBody(("applicationId" -> sandboxAppId.value)))

@@ -40,22 +40,23 @@ GET         /reset-password                                                     
 POST        /reset-password                                                                              controllers.Password.resetPassword
 GET         /reset-password/error                                                                        controllers.Password.resetPasswordError
 
-GET         /applications                                                                                controllers.AddApplication.manageApps
+GET         /applications                                                                                controllers.ManageApplications.manageApps
 
-GET         /applications/using-privileged-application-credentials                                       controllers.AddApplication.usingPrivilegedApplicationCredentialsPage()
-GET         /applications/access-token                                                                   controllers.AddApplication.accessTokenSwitchPage()
+GET         /applications/using-privileged-application-credentials                                       controllers.addapplication.AddApplication.usingPrivilegedApplicationCredentialsPage()
+GET         /applications/access-token                                                                   controllers.addapplication.AddApplication.accessTokenSwitchPage()
 
-GET         /applications/add/production/10-days                                                         controllers.AddApplication.tenDaysWarning
+GET         /applications/add/production/10-days                                                         controllers.addapplication.AddApplication.tenDaysWarning
 
-GET         /applications/add/sandbox                                                                    controllers.AddApplication.addApplicationSubordinate
-GET         /applications/add/production                                                                 controllers.AddApplication.addApplicationPrincipal
-GET         /applications/add/switch                                                                     controllers.AddApplication.addApplicationProductionSwitch
-POST        /applications/add/switch                                                                     controllers.AddApplication.chooseApplicationToUpliftAction
+GET         /applications/add/sandbox                                                                    controllers.addapplication.AddApplication.addApplicationSubordinate
+GET         /applications/add/production                                                                 controllers.addapplication.AddApplication.addApplicationPrincipal
+GET         /applications/add/switch                                                                     controllers.addapplication.AddApplication.addApplicationProductionSwitch
+GET         /applications/add/:id                                                                        controllers.addapplication.AddApplication.soleApplicationToUpliftAction(id: domain.models.applications.ApplicationId)
+POST        /applications/add/switch                                                                     controllers.addapplication.AddApplication.chooseApplicationToUpliftAction
 
-GET         /applications/add/:environment/name                                                          controllers.AddApplication.addApplicationName(environment: domain.models.applications.Environment)
-POST        /applications/add/:environment/name                                                          controllers.AddApplication.editApplicationNameAction(environment: domain.models.applications.Environment)
+GET         /applications/add/:environment/name                                                          controllers.addapplication.AddApplication.addApplicationName(environment: domain.models.applications.Environment)
+POST        /applications/add/:environment/name                                                          controllers.addapplication.AddApplication.editApplicationNameAction(environment: domain.models.applications.Environment)
 
-GET         /applications/:id/add/success                                                                controllers.AddApplication.addApplicationSuccess(id: domain.models.applications.ApplicationId)
+GET         /applications/:id/add/success                                                                controllers.addapplication.AddApplication.addApplicationSuccess(id: domain.models.applications.ApplicationId)
 
 GET         /applications/:id/team-members                                                               controllers.ManageTeam.manageTeam(id: domain.models.applications.ApplicationId, error: Option[String])
 GET         /applications/:id/team-members/add                                                           controllers.ManageTeam.addTeamMember(id: domain.models.applications.ApplicationId)

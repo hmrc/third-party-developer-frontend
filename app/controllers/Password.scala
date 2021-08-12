@@ -143,7 +143,7 @@ trait PasswordChange {
           case _: InvalidCredentials =>
             auditService.audit(PasswordChangeFailedDueToInvalidCredentials(email))
             Unauthorized(error(ChangePasswordForm.invalidCredentials(ChangePasswordForm.form)))
-          case _: LockedAccount => Redirect(controllers.routes.UserLoginAccount.accountLocked())
+          case _: LockedAccount => Redirect(routes.UserLoginAccount.accountLocked())
         }
       }
     )

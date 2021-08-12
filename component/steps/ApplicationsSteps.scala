@@ -35,6 +35,7 @@ import uk.gov.hmrc.time.DateTimeUtils
 import domain.models.applications.ApplicationId
 import domain.models.applications.ClientId
 import domain.models.developers.UserId
+import domain.models.applications.ApplicationWithSubscriptionIds
 
 object AppWorld {
   var userApplicationsOnBackend: List[Application] = Nil
@@ -72,7 +73,7 @@ class ApplicationsSteps extends ScalaDsl with EN with Matchers with NavigationSu
 
     ApplicationStub.setUpFetchApplication(applicationId, OK, Json.toJson(app).toString())
 
-    configureUserApplications(app.collaborators.head.userId, List(app))
+    configureUserApplications(app.collaborators.head.userId, List(ApplicationWithSubscriptionIds.from(app)))
   }
 
   Then("""^a deskpro ticket is generated with subject '(.*)'$""") { (subject: String) => DeskproStub.verifyTicketCreationWithSubject(subject) }
@@ -142,7 +143,7 @@ class ApplicationsSteps extends ScalaDsl with EN with Matchers with NavigationSu
 
   def configureStubsForApplications(email: String, applications: List[Application]) = {
     val userId = idOf(email)
-    ApplicationStub.configureUserApplications(userId, applications)
+    ApplicationStub.configureUserApplications(userId, applications.map(ApplicationWithSubscriptionIds.from))
     for (app <- applications) {
       // configure to be able to fetch apps and Subscriptions
       ApplicationStub.setUpFetchApplication(app.id, OK, Json.toJson(app).toString())

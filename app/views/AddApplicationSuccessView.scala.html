@@ -17,7 +17,7 @@
 @import config.ApplicationConfig
 @import domain.models.applications.Environment
 @import include._
-@import model.Crumb
+@import domain.models.controllers.Crumb
 @import domain.models.developers.DeveloperSession
 @import domain.models.applications.ApplicationId
 
@@ -30,7 +30,7 @@
     title = "Application added",
     userFullName = loggedIn.loggedInName,
     breadcrumbs = Seq(
-        Crumb("Add an application",s"${routes.AddApplication.manageApps}", Some("data-breadcrumb-application-added")),
+        Crumb("Add an application",s"${routes.ManageApplications.manageApps}", Some("data-breadcrumb-application-added")),
         Crumb.home
     ),
     leftNav = Some(leftHandNav(None, Option(navSection))),

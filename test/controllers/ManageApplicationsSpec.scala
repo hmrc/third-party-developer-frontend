@@ -28,16 +28,14 @@ import play.api.mvc.AnyContentAsEmpty
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
 import play.filters.csrf.CSRF.TokenProvider
-import service.AuditService
 import uk.gov.hmrc.time.DateTimeUtils
 import utils.WithCSRFAddToken
 import utils.WithLoggedInSession._
 import views.helper.EnvironmentNameService
 import views.html._
-import domain.models.controllers.ProductionApplicationSummary
+import domain.models.controllers.ApplicationSummary
 
 import scala.concurrent.ExecutionContext.Implicits.global
-import service.EmailPreferencesService
 import utils.LocalUserIdTracker
 import mocks.connector.ApmConnectorMockModule
 
@@ -76,61 +74,46 @@ class ManageApplicationsSpec
 
   private val sessionParams = Seq("csrfToken" -> app.injector.instanceOf[TokenProvider].generateToken)
 
-  trait Setup extends ApplicationServiceMock with ApmConnectorMockModule with SessionServiceMock {
+  trait Setup extends UpliftLogicMock with AppsByTeamMemberServiceMock with ApplicationServiceMock with ApmConnectorMockModule with SessionServiceMock {
     val addApplicationSubordinateEmptyNestView = app.injector.instanceOf[AddApplicationSubordinateEmptyNestView]
     val manageApplicationsView = app.injector.instanceOf[ManageApplicationsView]
-    val accessTokenSwitchView = app.injector.instanceOf[AccessTokenSwitchView]
-    val usingPrivilegedApplicationCredentialsView = app.injector.instanceOf[UsingPrivilegedApplicationCredentialsView]
-    val tenDaysWarningView = app.injector.instanceOf[TenDaysWarningView]
-    val addApplicationStartSubordinateView = app.injector.instanceOf[AddApplicationStartSubordinateView]
-    val addApplicationStartPrincipalView = app.injector.instanceOf[AddApplicationStartPrincipalView]
-    val addApplicationSubordinateSuccessView = app.injector.instanceOf[AddApplicationSubordinateSuccessView]
-    val addApplicationNameView = app.injector.instanceOf[AddApplicationNameView]
-    val chooseApplicationToUpliftView = app.injector.instanceOf[ChooseApplicationToUpliftView]
+
     implicit val environmentNameService = new EnvironmentNameService(appConfig)
 
-    val addApplicationController = new AddApplication(
+    val manageApplicationsController = new ManageApplications(
       mock[ErrorHandler],
-      applicationServiceMock,
-      applicationActionServiceMock,
-      mock[EmailPreferencesService],
-      ApmConnectorMock.aMock,
       sessionServiceMock,
-      mock[AuditService],
-      mcc,
       cookieSigner,
-      addApplicationSubordinateEmptyNestView,
+
+      appsByTeamMemberServiceMock,
+      upliftLogicMock,
+      
       manageApplicationsView,
-      accessTokenSwitchView,
-      usingPrivilegedApplicationCredentialsView,
-      tenDaysWarningView,
-      addApplicationStartSubordinateView,
-      addApplicationStartPrincipalView,
-      addApplicationSubordinateSuccessView,
-      addApplicationNameView,
-      chooseApplicationToUpliftView
+      addApplicationSubordinateEmptyNestView,
+
+      mcc
     )
 
     fetchSessionByIdReturns(sessionId, session)
     updateUserFlowSessionsReturnsSuccessfully(sessionId)
 
     val loggedInRequest: FakeRequest[AnyContentAsEmpty.type] = FakeRequest()
-      .withLoggedIn(addApplicationController, implicitly)(sessionId)
+      .withLoggedIn(manageApplicationsController, implicitly)(sessionId)
       .withSession(sessionParams: _*)
 
     val partLoggedInRequest: FakeRequest[AnyContentAsEmpty.type] = FakeRequest()
-      .withLoggedIn(addApplicationController, implicitly)(partLoggedInSessionId)
+      .withLoggedIn(manageApplicationsController, implicitly)(partLoggedInSessionId)
       .withSession(sessionParams: _*)
   }
 
   "manageApps" should {
 
     "return the manage Applications page with the user logged in" in new Setup {
-      val prodSummary = ProductionApplicationSummary.from(application, loggedInUser.email)
-      identifyUpliftableSandboxAppIdsReturns(Set.empty)
-      fetchSummariesByTeamMemberReturns(Nil, List(prodSummary))
+      val prodSummary = ApplicationSummary.from(application, loggedInUser.developer.userId)
+      aUsersUplfitableAndNotUpliftableAppsReturns(List.empty, List.empty)
+      fetchProductionSummariesByTeamMemberReturns(List(prodSummary))
 
-      private val result = addApplicationController.manageApps()(loggedInRequest)
+      private val result = manageApplicationsController.manageApps()(loggedInRequest)
 
       status(result) shouldBe OK
       contentAsString(result) should include(loggedInUser.displayedName)
@@ -142,27 +125,7 @@ class ManageApplicationsSpec
     "return to the login page when the user is not logged in" in new Setup {
       val request = FakeRequest()
 
-      private val result = addApplicationController.manageApps()(request)
-
-      status(result) shouldBe SEE_OTHER
-      redirectLocation(result) shouldBe Some("/developer/login")
-    }
-  }
-
-  "tenDaysWarning" should {
-    "return the 10 days warning interrupt page when the user is logged in" in new Setup {
-      private val result = addApplicationController.tenDaysWarning()(loggedInRequest)
-
-      status(result) shouldBe OK
-      contentAsString(result) should include("We will check your application")
-      contentAsString(result) should include("This takes up to 10 working days, and we may ask you to demonstrate it.")
-      contentAsString(result) should not include "Sign in"
-    }
-
-    "return to the login page when the user is not logged in" in new Setup {
-      val request = FakeRequest()
-
-      private val result = addApplicationController.tenDaysWarning()(request)
+      private val result = manageApplicationsController.manageApps()(request)
 
       status(result) shouldBe SEE_OTHER
       redirectLocation(result) shouldBe Some("/developer/login")

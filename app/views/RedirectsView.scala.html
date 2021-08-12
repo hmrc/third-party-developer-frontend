@@ -16,10 +16,10 @@
 
 @import config.ApplicationConfig
 @import include._
-@import model.Crumb
+@import domain.models.controllers.Crumb
 @import uk.gov.hmrc.urls.Link
 @import domain.models.applications.Permissions.SandboxOrAdmin
-@import model.ApplicationViewModel
+@import domain.models.controllers.ApplicationViewModel
 @import domain.models.developers.DeveloperSession
 
 @this(devMain: DevMain2, leftHandNav: LeftHandNav)
@@ -82,7 +82,7 @@
               <td class="govuk-table__cell center-table-text redirect-table-buttons">
               @if(application.permits(loggedIn.developer, SandboxOrAdmin)){
                 <div class="govuk-!-margin-right-6">
-                  @helper.form(action = controllers.routes.Redirects.changeRedirect(application.id)) {
+                  @helper.form(action = routes.Redirects.changeRedirect(application.id)) {
                     @helper.CSRF.formField
                     <label class="govuk-visually-hidden" for="originalRedirectUri">Original Redirect Uri</label>
                     <input id="originalRedirectUri" name="originalRedirectUri" class="govuk-input" hidden aria-hidden="true" type="text" value="@uri">
@@ -92,7 +92,7 @@
                   }
                 </div>
                 <div>
-                  @helper.form(action = controllers.routes.Redirects.deleteRedirect(application.id)) {
+                  @helper.form(action = routes.Redirects.deleteRedirect(application.id)) {
                     @helper.CSRF.formField
                     <label class="govuk-visually-hidden" for="redirectUri">Redirect Uri</label>
                     <input id="redirectUri" name="redirectUri" class="govuk-input" hidden aria-hidden="true" type="text" value="@uri">

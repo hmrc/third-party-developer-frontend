@@ -24,7 +24,7 @@ import domain.models.applications._
 import domain.models.applications.Capabilities.SupportsDetails
 import domain.models.applications.Permissions.SandboxOrAdmin
 import javax.inject.{Inject, Singleton}
-import controllers.model.ApplicationViewModel
+import domain.models.controllers.ApplicationViewModel
 import play.api.data.Form
 import play.api.libs.crypto.CookieSigner
 import play.api.mvc._
@@ -132,7 +132,7 @@ class Details @Inject() (
               for {
                 _ <- updateApplication(updateRequest)
                 _ <- updateCheckInformation(updateRequest)
-              } yield Redirect(controllers.routes.Details.details(applicationId))
+              } yield Redirect(routes.Details.details(applicationId))
 
             case invalid: Invalid =>
               def invalidNameCheckForm: Form[EditApplicationForm] =

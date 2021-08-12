@@ -23,7 +23,7 @@
   implicit request: play.api.mvc.Request[Any], messages: Messages
 )
 
-@helper.form(action = controllers.routes.ManageTeam.addTeamMemberAction(app.id, addTeamMemberPageMode)) {
+@helper.form(action = routes.ManageTeam.addTeamMemberAction(app.id, addTeamMemberPageMode)) {
   @helper.CSRF.formField
 
   <div class="govuk-form-group @if(form.errors("email").nonEmpty) {govuk-form-group--error}">

@@ -26,6 +26,8 @@ import domain.models.developers.Developer
 import helpers.string.Digest
 import org.joda.time.DateTime
 import java.util.UUID
+import domain.models.developers.UserId
+import domain.models.apidefinitions.ApiIdentifier
 
 case class ApplicationId(value: String) extends AnyVal
 
@@ -43,24 +45,27 @@ object ClientId {
   implicit val clientIdFormat = Json.valueFormat[ClientId]
 }
 
-case class Application(
-    id: ApplicationId,
-    clientId: ClientId,
-    name: String,
-    createdOn: DateTime,
-    lastAccess: DateTime,
-    lastAccessTokenUsage: Option[DateTime] = None, // API-4376: Temporary inclusion whilst Server Token functionality is retired
-    deployedTo: Environment,
-    description: Option[String] = None,
-    collaborators: Set[Collaborator] = Set.empty,
-    access: Access = Standard(),
-    state: ApplicationState = ApplicationState.testing,
-    checkInformation: Option[CheckInformation] = None,
-    ipAllowlist: IpAllowlist = IpAllowlist()
-) {
+trait BaseApplication {
+  def id: ApplicationId
+  def clientId: ClientId
+  def name: String
+  def createdOn: DateTime
+  def lastAccess: DateTime
+  def lastAccessTokenUsage: Option[DateTime]
+  def deployedTo: Environment
+  def description: Option[String]
+  def collaborators: Set[Collaborator]
+  def access: Access
+  def state: ApplicationState
+  def checkInformation: Option[CheckInformation]
+  def ipAllowlist: IpAllowlist
 
   def role(email: String): Option[CollaboratorRole] = collaborators.find(_.emailAddress == email).map(_.role)
+  def roleForCollaborator(userId: UserId): Option[CollaboratorRole] = collaborators.find(_.userId == userId).map(_.role)
 
+  def isUserACollaboratorOfRole(userId: UserId, requiredRole: CollaboratorRole): Boolean = roleForCollaborator(userId).fold(false)(_ == requiredRole)
+
+  
   def adminEmails: Set[String] = collaborators.filter(_.role.isAdministrator).map(_.emailAddress)
 
   def termsOfUseAgreements: List[TermsOfUseAgreement] = checkInformation.map(_.termsOfUseAgreements).getOrElse(List.empty)
@@ -143,6 +148,24 @@ case class Application(
   }
 }
 
+
+case class Application(
+    val id: ApplicationId,
+    val clientId: ClientId,
+    val name: String,
+    val createdOn: DateTime,
+    val lastAccess: DateTime,
+    val lastAccessTokenUsage: Option[DateTime] = None, // API-4376: Temporary inclusion whilst Server Token functionality is retired
+    val deployedTo: Environment,
+    val description: Option[String] = None,
+    val collaborators: Set[Collaborator] = Set.empty,
+    val access: Access = Standard(),
+    val state: ApplicationState = ApplicationState.testing,
+    val checkInformation: Option[CheckInformation] = None,
+    val ipAllowlist: IpAllowlist = IpAllowlist()
+) extends BaseApplication
+
+
 object Application {
   import play.api.libs.json.Json
   import play.api.libs.json.JodaReads._
@@ -151,4 +174,50 @@ object Application {
   implicit val applicationFormat = Json.format[Application]
 
   implicit val ordering: Ordering[Application] = Ordering.by(_.name)
+}
+
+
+case class ApplicationWithSubscriptionIds(
+  val id: ApplicationId,
+  val clientId: ClientId,
+  val name: String,
+  val createdOn: DateTime,
+  val lastAccess: DateTime,
+  val lastAccessTokenUsage: Option[DateTime] = None,
+  val deployedTo: Environment,
+  val description: Option[String] = None,
+  val collaborators: Set[Collaborator] = Set.empty,
+  val access: Access = Standard(),
+  val state: ApplicationState = ApplicationState.testing,
+  val checkInformation: Option[CheckInformation] = None,
+  val ipAllowlist: IpAllowlist = IpAllowlist(),
+  val subscriptions: Set[ApiIdentifier] = Set.empty
+) extends BaseApplication
+
+object ApplicationWithSubscriptionIds {
+  import play.api.libs.json.Json
+  import play.api.libs.json.JodaReads._
+  import domain.services.ApiDefinitionsJsonFormatters._
+
+  implicit val applicationWithSubsIdsReads = Json.reads[ApplicationWithSubscriptionIds]
+
+  implicit val ordering: Ordering[ApplicationWithSubscriptionIds] = Ordering.by(_.name)
+
+  def from(app: Application) =
+    ApplicationWithSubscriptionIds(
+      app.id,
+      app.clientId,
+      app.name,
+      app.createdOn,
+      app.lastAccess,
+      app.lastAccessTokenUsage,
+      app.deployedTo,
+      app.description,
+      app.collaborators,
+      app.access,
+      app.state,
+      app.checkInformation,
+      app.ipAllowlist,
+      Set.empty
+    )
 }

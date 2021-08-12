@@ -20,7 +20,7 @@ import controllers.routes
 import domain.models.applications
 import domain.models.applications._
 import domain.models.developers.{DeveloperSession, LoggedInState}
-import controllers.model.ApplicationViewModel
+import domain.models.controllers.ApplicationViewModel
 import org.joda.time.format.DateTimeFormat
 import org.jsoup.Jsoup
 import org.jsoup.nodes.{Document, Element}

@@ -16,7 +16,7 @@
 
 @import domain.models.applications.Environment
 @import include._
-@import model.Crumb
+@import domain.models.controllers.Crumb
 @import domain.models.developers.DeveloperSession
 @import views.helper.EnvironmentNameService
 
@@ -76,6 +76,6 @@
   </p>
 
   <p class="govuk-body">
-    <a id="add" href="@controllers.routes.AddApplication.addApplicationName(Environment.SANDBOX)" class="govuk-button">Continue</a>
+    <a id="add" href="@controllers.addapplication.routes.AddApplication.addApplicationName(Environment.SANDBOX)" class="govuk-button">Continue</a>
   </p>
 }

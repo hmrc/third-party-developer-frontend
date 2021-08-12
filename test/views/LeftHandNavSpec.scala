@@ -19,7 +19,7 @@ package views
 import domain.models.applications._
 import domain.models.applications.Environment.PRODUCTION
 import domain.models.developers.LoggedInState
-import controllers.model.ApplicationViewModel
+import domain.models.controllers.ApplicationViewModel
 import org.jsoup.Jsoup
 import org.jsoup.nodes.Document
 import play.api.test.FakeRequest

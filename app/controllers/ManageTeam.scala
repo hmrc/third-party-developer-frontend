@@ -25,7 +25,7 @@ import domain.models.controllers.AddTeamMemberPageMode
 import domain.models.controllers.AddTeamMemberPageMode._
 import domain.models.developers.DeveloperSession
 import javax.inject.{Inject, Singleton}
-import model.ApplicationViewModel
+import domain.models.controllers.ApplicationViewModel
 import play.api.data.Form
 import play.api.libs.crypto.CookieSigner
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents, Result}
@@ -74,7 +74,7 @@ class ManageTeam @Inject() (
   def addTeamMemberAction(applicationId: ApplicationId, addTeamMemberPageMode: AddTeamMemberPageMode) =
     canEditTeamMembers(applicationId, alsoAllowTestingState = true) { implicit request =>
       val successRedirect = addTeamMemberPageMode match {
-        case ManageTeamMembers => controllers.routes.ManageTeam.manageTeam(applicationId, None)
+        case ManageTeamMembers => routes.ManageTeam.manageTeam(applicationId, None)
         case ApplicationCheck  => controllers.checkpages.routes.ApplicationCheck.team(applicationId)
         case CheckYourAnswers  => controllers.checkpages.routes.CheckYourAnswers.team(applicationId)
       }

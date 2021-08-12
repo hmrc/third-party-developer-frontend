@@ -30,7 +30,7 @@ import uk.gov.hmrc.play.audit.http.connector.AuditResult
 import views.html._
 import views.html.protectaccount._
 import controllers.profile.ProtectAccountForm
-import controllers.model.MfaMandateDetails
+import domain.models.controllers.MfaMandateDetails
 
 import scala.concurrent.{ExecutionContext, Future}
 import scala.concurrent.Future.successful

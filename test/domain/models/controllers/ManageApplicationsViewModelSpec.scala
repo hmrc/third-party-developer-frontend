@@ -26,7 +26,7 @@ import org.scalatest.{Matchers, WordSpec}
 class ManageApplicationsViewModelSpec extends WordSpec with Matchers {
   "noProductionApplications" should {
     val sandboxApp =
-      SandboxApplicationSummary(
+      ApplicationSummary(
         ApplicationId(""),
         "",
         CollaboratorRole.DEVELOPER,
@@ -35,11 +35,13 @@ class ManageApplicationsViewModelSpec extends WordSpec with Matchers {
         new DateTime(),
         serverTokenUsed = false,
         new DateTime(),
-        AccessType.STANDARD
+        AccessType.STANDARD,
+        Environment.SANDBOX,
+        Set.empty
       )
       
     val productionApp =
-      ProductionApplicationSummary(
+      ApplicationSummary(
         ApplicationId(""),
         "",
         DEVELOPER,
@@ -48,7 +50,9 @@ class ManageApplicationsViewModelSpec extends WordSpec with Matchers {
         new DateTime(),
         serverTokenUsed = false,
         new DateTime(),
-        AccessType.STANDARD
+        AccessType.STANDARD,
+        Environment.PRODUCTION,
+        Set.empty
       )
 
     "return true if only sandbox apps" in {

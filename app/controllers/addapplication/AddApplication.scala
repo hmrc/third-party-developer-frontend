@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package controllers
+package controllers.addapplication
 
 import config.{ApplicationConfig, ErrorHandler}
 import controllers.FormKeys.appNameField
@@ -34,12 +34,14 @@ import views.html._
 import scala.concurrent.{ExecutionContext, Future}
 import scala.concurrent.Future.successful
 import uk.gov.hmrc.http.HeaderCarrier
-import domain.models.controllers.ManageApplicationsViewModel
 import play.api.libs.json.Json
 import domain.Error._
-import domain.models.controllers.SandboxApplicationSummary
-import domain.models.developers.DeveloperSession
+import domain.models.controllers.ApplicationSummary
 import connectors.ApmConnector
+import controllers.ApplicationController
+import controllers.ChooseApplicationToUpliftForm
+import controllers.AddApplicationNameForm
+import services.UpliftLogic
 
 @Singleton
 class AddApplication @Inject() (
@@ -50,10 +52,9 @@ class AddApplication @Inject() (
     val apmConnector: ApmConnector,
     val sessionService: SessionService,
     val auditService: AuditService,
+    upliftLogic: UpliftLogic,
     mcc: MessagesControllerComponents,
     val cookieSigner: CookieSigner,
-    addApplicationSubordinateEmptyNestView: AddApplicationSubordinateEmptyNestView,
-    manageApplicationsView: ManageApplicationsView,
     accessTokenSwitchView: AccessTokenSwitchView,
     usingPrivilegedApplicationCredentialsView: UsingPrivilegedApplicationCredentialsView,
     tenDaysWarningView: TenDaysWarningView,
@@ -64,19 +65,6 @@ class AddApplication @Inject() (
     chooseApplicationToUpliftView: ChooseApplicationToUpliftView
 )(implicit val ec: ExecutionContext, val appConfig: ApplicationConfig, val environmentNameService: EnvironmentNameService)
     extends ApplicationController(mcc) {
-
-  def manageApps: Action[AnyContent] = loggedInAction { implicit request =>
-    applicationService.fetchAllSummariesByTeamMember(loggedIn.developer.userId, loggedIn.email) flatMap { 
-      case (Nil, Nil)                                                    => successful(Ok(addApplicationSubordinateEmptyNestView()))
-      case (sandboxApplicationSummaries, productionApplicationSummaries) => 
-        val appIds = sandboxApplicationSummaries.map(_.id)
-        applicationService.identifyUpliftableSandboxAppIds(appIds).map { upliftableApplicationIds =>
-          Ok(manageApplicationsView(
-            ManageApplicationsViewModel(sandboxApplicationSummaries, productionApplicationSummaries, upliftableApplicationIds)
-          ))
-        }
-    }
-  }
 
   def accessTokenSwitchPage(): Action[AnyContent] = loggedInAction { implicit request => 
     successful(Ok(accessTokenSwitchView())) 
@@ -103,24 +91,20 @@ class AddApplication @Inject() (
     successful(Ok(addApplicationNameView(form, environment)))
   }
 
-  private def getUpliftData(loggedIn: DeveloperSession)(implicit hc: HeaderCarrier): Future[(Seq[SandboxApplicationSummary], Boolean)] =
-    applicationService.fetchSandboxSummariesByTeamMember(loggedIn.developer.userId, loggedIn.email) flatMap { 
-      case Nil              => throw new IllegalStateException("Should not be requesting with this data")
-      case sandboxSummaries => 
-        val appIds = sandboxSummaries.map(_.id)
-        applicationService.identifyUpliftableSandboxAppIds(appIds).map { upliftableApplicationIds =>
-          val countOfUpliftable = upliftableApplicationIds.size
-          val upliftableSummaries = sandboxSummaries.filter(s => upliftableApplicationIds.contains(s.id))
-          val haveAppsThatCannotBeUplifted = countOfUpliftable < sandboxSummaries.size
-
-          (upliftableSummaries, haveAppsThatCannotBeUplifted)
-        }
-      }
+  def soleApplicationToUpliftAction(appId: ApplicationId): Action[AnyContent] = loggedInAction { implicit request =>
+   (for {
+      (sandboxAppSummaries, upliftableAppIds) <- upliftLogic.aUsersSandboxAdminSummariesAndUpliftIds(loggedIn.developer.userId)
+      upliftableSummaries = sandboxAppSummaries.filter(s => upliftableAppIds.contains(s.id))
+    } yield upliftableSummaries match {
+      case summary :: Nil => upliftApplicationAndShowRequestCheckPage(upliftableSummaries.head.id)
+      case _              => successful(BadRequest(Json.toJson(BadRequestError)))
+    }).flatten
+  }
 
   def addApplicationProductionSwitch(): Action[AnyContent] = loggedInAction { implicit request =>
-    def chooseApplicationToUplift(upliftableSummaries: Seq[SandboxApplicationSummary], showFluff: Boolean): Action[AnyContent] = loggedInAction { implicit request =>
+    def chooseApplicationToUplift(upliftableSummaries: Seq[ApplicationSummary], showFluff: Boolean): Action[AnyContent] = loggedInAction { implicit request =>
       val form = 
-        if(upliftableSummaries.size == 1)
+        if(upliftableSummaries.size == 1) // TODO - and only one API sub
           ChooseApplicationToUpliftForm.form.fill(ChooseApplicationToUpliftForm(upliftableSummaries.head.id))
         else
           ChooseApplicationToUpliftForm.form
@@ -128,12 +112,15 @@ class AddApplication @Inject() (
       successful(Ok(chooseApplicationToUpliftView(form, upliftableSummaries, showFluff)))
     }
 
-    getUpliftData(loggedIn).flatMap { data =>
-      val (upliftableSummaries, haveAppsThatCannotBeUplifted) = data
-      (upliftableSummaries.size, haveAppsThatCannotBeUplifted) match {
-        case (0, _)     => successful(BadRequest(Json.toJson(BadRequestError)))
-        case (1, false) => upliftApplicationAndShowRequestCheckPage(upliftableSummaries.head.id)
-        case _  => chooseApplicationToUplift(upliftableSummaries, haveAppsThatCannotBeUplifted)(request)
+    upliftLogic.aUsersSandboxAdminSummariesAndUpliftIds(loggedIn.developer.userId).flatMap { data =>
+      val (summaries, upliftableAppIds) = data
+      val upliftableSummaries = summaries.filter(s => upliftableAppIds.contains(s.id))
+      val hasAppsThatCannotBeUplifted = upliftableSummaries.size < summaries.size
+
+      upliftableAppIds.toList match {
+        case Nil          => successful(BadRequest(Json.toJson(BadRequestError)))
+        case appId :: Nil if !hasAppsThatCannotBeUplifted =>  upliftApplicationAndShowRequestCheckPage(appId)
+        case _ => chooseApplicationToUplift(upliftableSummaries, hasAppsThatCannotBeUplifted)(request)
       }
     }
   }
@@ -150,16 +137,18 @@ class AddApplication @Inject() (
       upliftApplicationAndShowRequestCheckPage(validForm.applicationId)
 
     def handleInvalidForm(formWithErrors: Form[ChooseApplicationToUpliftForm]) = {
-      getUpliftData(loggedIn).flatMap { data =>
-        val (upliftableSummaries, haveAppsThatCannotBeUplifted) = data
-        (upliftableSummaries.size, haveAppsThatCannotBeUplifted) match {
+      upliftLogic.aUsersSandboxAdminSummariesAndUpliftIds(loggedIn.developer.userId) flatMap { data =>
+      val (summaries, upliftableAppIds) = data
+      val upliftableSummaries = summaries.filter(s => upliftableAppIds.contains(s.id))
+      val haveAppsThatCannotBeUplifted = upliftableSummaries.size < summaries.size
+
+      (upliftableSummaries.size, haveAppsThatCannotBeUplifted) match {
           case (0, _)     => successful(BadRequest(Json.toJson(BadRequestError)))
           case (1, false) => successful(BadRequest(Json.toJson(BadRequestError)))
-          case _  => successful(BadRequest(chooseApplicationToUpliftView(formWithErrors, upliftableSummaries, haveAppsThatCannotBeUplifted)))
+          case _  => successful(BadRequest(chooseApplicationToUpliftView(formWithErrors, upliftableSummaries.toSeq, haveAppsThatCannotBeUplifted)))
         }
       }
     }      
-
     ChooseApplicationToUpliftForm.form.bindFromRequest().fold(handleInvalidForm, handleValidForm)
   }
 
@@ -183,7 +172,7 @@ class AddApplication @Inject() (
             addApplication(formThatPassesSimpleValidation).map(applicationCreatedResponse =>
               environment match {
                 case PRODUCTION => Redirect(controllers.checkpages.routes.ApplicationCheck.requestCheckPage(applicationCreatedResponse.id))
-                case SANDBOX    => Redirect(routes.Subscriptions.addAppSubscriptions(applicationCreatedResponse.id))
+                case SANDBOX    => Redirect(controllers.routes.Subscriptions.addAppSubscriptions(applicationCreatedResponse.id))
               }
             )
 

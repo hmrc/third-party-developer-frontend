@@ -18,9 +18,9 @@
 @import domain.models.views.Button
 @import helpers.string._
 @import include._
-@import model.Crumb
+@import domain.models.controllers.Crumb
 @import include.teamMembers._
-@import model.ApplicationViewModel
+@import domain.models.controllers.ApplicationViewModel
 @import views.html.include.DevMain
 @import domain.models.applications.{ApplicationId, CollaboratorRole}
 @import domain.models.developers.DeveloperSession
@@ -57,7 +57,7 @@
   <h2 class="govuk-heading-m">Team members</h2>
   @{
     def createRemoveLink(appId: ApplicationId, emailAddress: String) = {
-      controllers.routes.ManageTeam.removeTeamMember(appId, emailAddress.toSha256)
+      routes.ManageTeam.removeTeamMember(appId, emailAddress.toSha256)
     }
     teamList(app, role, loggedIn, routes.ManageTeam.addTeamMember(app.id), Button, createRemoveLink)
   }
