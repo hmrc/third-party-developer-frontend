@@ -51,10 +51,8 @@
         case Some(groupedSubscriptions) => {
             @subscriptionGroups(role: CollaboratorRole, groupedSubscriptions, app, APPLICATION_CHECK_PAGE, true)
             <br/>
-            @helper.form(action = controllers.routes.SR20.changeApiSubscriptionsAction(app.id), 'class -> "form") {
-                @helper.CSRF.formField
                 <button id="submit" class="button" type="submit">Save and continue</button>
-            }
+
         }
         case _ => {
             <div class="govuk-inset-text">We can’t load your API subscriptions at the moment. Please

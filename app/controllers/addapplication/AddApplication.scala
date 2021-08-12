@@ -17,31 +17,29 @@
 package controllers.addapplication
 
 import config.{ApplicationConfig, ErrorHandler}
+import connectors.ApmConnector
+import controllers.{AddApplicationNameForm, ApplicationController, ChooseApplicationToUpliftForm}
 import controllers.FormKeys.appNameField
-import domain.models.applications._
-import domain.models.applications.Environment.{PRODUCTION, SANDBOX}
 import domain.ApplicationCreatedResponse
+import domain.Error._
 import domain.models.apidefinitions.APISubscriptionStatus
+import domain.models.applications.Environment.{PRODUCTION, SANDBOX}
+import domain.models.applications._
+import domain.models.controllers.ApplicationSummary
 import domain.models.emailpreferences.EmailPreferences
-import javax.inject.{Inject, Singleton}
 import play.api.data.Form
 import play.api.libs.crypto.CookieSigner
-import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
+import play.api.libs.json.Json
+import play.api.mvc.{Action, AnyContent, MessagesControllerComponents, Request}
 import service._
+import services.UpliftLogic
+import uk.gov.hmrc.http.HeaderCarrier
 import views.helper.EnvironmentNameService
 import views.html._
 
-import scala.concurrent.{ExecutionContext, Future}
+import javax.inject.{Inject, Singleton}
 import scala.concurrent.Future.successful
-import uk.gov.hmrc.http.HeaderCarrier
-import play.api.libs.json.Json
-import domain.Error._
-import domain.models.controllers.ApplicationSummary
-import connectors.ApmConnector
-import controllers.ApplicationController
-import controllers.ChooseApplicationToUpliftForm
-import controllers.AddApplicationNameForm
-import services.UpliftLogic
+import scala.concurrent.{ExecutionContext, Future}
 
 @Singleton
 class AddApplication @Inject() (
@@ -92,7 +90,7 @@ class AddApplication @Inject() (
   }
 
   def soleApplicationToUpliftAction(appId: ApplicationId): Action[AnyContent] = loggedInAction { implicit request =>
-   (for {
+    (for {
       (sandboxAppSummaries, upliftableAppIds) <- upliftLogic.aUsersSandboxAdminSummariesAndUpliftIds(loggedIn.developer.userId)
       upliftableSummaries = sandboxAppSummaries.filter(s => upliftableAppIds.contains(s.id))
     } yield upliftableSummaries match {
@@ -125,11 +123,14 @@ class AddApplication @Inject() (
     }
   }
   
-  private def showConfirmSubscriptionsPage(sandboxAppId: ApplicationId)(implicit hc: HeaderCarrier) = {
-    // TODO - Uplifting here for now as a temp workaround...not great :( Intend to add session and uplift at a later point.
+  private def showConfirmSubscriptionsPage(sandboxAppId: ApplicationId)(implicit request: Request[_]) = {
     for {
-      upliftedAppId <- apmConnector.upliftApplication(sandboxAppId)
-    } yield Redirect(controllers.routes.SR20.confirmApiSubscriptions(upliftedAppId))
+      upliftableSubscriptions <- apmConnector.fetchUpliftableSubscriptions(sandboxAppId)
+    }
+    yield {
+      val sessionSubscriptions = upliftableSubscriptions.map {(_, true)}.toList.mkString("[", ",", "]")
+      Redirect(controllers.routes.SR20.confirmApiSubscriptions(sandboxAppId)).withSession(request.session + ("subscriptions" -> sessionSubscriptions))
+    }
   }
 
   def chooseApplicationToUpliftAction(): Action[AnyContent] = loggedInAction { implicit request =>
