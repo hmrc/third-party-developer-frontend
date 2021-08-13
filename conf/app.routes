@@ -186,9 +186,8 @@ GET         /assets/*file                                                       
 
 GET         /keep-alive                                                                                  controllers.SessionController.keepAlive()
 
-GET         /applications/:id/confirm-subscriptions                                                       controllers.SR20.confirmApiSubscriptions(id: domain.models.applications.ApplicationId)
+GET         /applications/:id/confirm-subscriptions                                                       controllers.SR20.confirmApiSubscriptionsPage(id: domain.models.applications.ApplicationId)
 POST        /applications/:id/confirm-subscriptions                                                       controllers.SR20.confirmApiSubscriptionsAction(id: domain.models.applications.ApplicationId)
 
 GET         /applications/:id/change-api-subscriptions                                                   controllers.SR20.changeApiSubscriptions(id: domain.models.applications.ApplicationId)
-POST        /applications/:id/change-api-subscriptions                                                   controllers.SR20.saveApiSubscriptions(id: domain.models.applications.ApplicationId)
-POST        /applications/:id/change-api-subscription                                                    controllers.SR20.changeApiSubscription(id: domain.models.applications.ApplicationId, apiContext: domain.models.apidefinitions.ApiContext, apiVersion: domain.models.apidefinitions.ApiVersion)
+POST        /applications/:id/change-api-subscriptions                                                   controllers.SR20.saveApiSubscriptionsSubmit(id: domain.models.applications.ApplicationId)

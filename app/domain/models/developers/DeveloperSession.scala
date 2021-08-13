@@ -54,7 +54,7 @@ object DeveloperSession {
 
 sealed trait UserStatus
 
-case object LoggedInUser extends UserStatus
+case object loggedInDeveloper extends UserStatus
 
 case object AtLeastPartLoggedInEnablingMfa extends UserStatus
 

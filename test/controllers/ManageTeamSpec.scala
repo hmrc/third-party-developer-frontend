@@ -41,9 +41,12 @@ import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 import scala.concurrent.Future.{failed, successful}
 import utils.LocalUserIdTracker
+import builder._
 
 class ManageTeamSpec 
     extends BaseControllerSpec 
+    with SampleSession
+    with SampleApplication
     with SubscriptionTestHelperSugar 
     with WithCSRFAddToken
     with TestApplications 
@@ -75,13 +78,13 @@ class ManageTeamSpec
     val sessionId = "sessionId"
     val session = Session(sessionId, developer, LoggedInState.LOGGED_IN)
 
-    val loggedInUser = DeveloperSession(session)
+    val loggedInDeveloper = DeveloperSession(session)
 
     fetchSessionByIdReturns(sessionId, session)
     updateUserFlowSessionsReturnsSuccessfully(sessionId)
     when(applicationServiceMock.addTeamMember(*,*,*)(*))
       .thenReturn(successful(()))
-    when(applicationServiceMock.removeTeamMember(*,*, eqTo(loggedInUser.email))(*))
+    when(applicationServiceMock.removeTeamMember(*,*, eqTo(loggedInDeveloper.email))(*))
       .thenReturn(successful(ApplicationUpdateSuccessful))
 
     val sessionParams = Seq("csrfToken" -> app.injector.instanceOf[TokenProvider].generateToken)
@@ -166,7 +169,7 @@ class ManageTeamSpec
 
       status(result) shouldBe SEE_OTHER
       redirectLocation(result) shouldBe Some(routes.ManageTeam.manageTeam(appId, None).url)
-      verify(applicationServiceMock).addTeamMember(eqTo(application), eqTo(loggedInUser.email), *)(*)
+      verify(applicationServiceMock).addTeamMember(eqTo(application), eqTo(loggedInDeveloper.email), *)(*)
     }
 
     "check if team member already exists on the application" in new Setup {
@@ -176,7 +179,7 @@ class ManageTeamSpec
       val result = underTest.addTeamMemberAction(appId, ManageTeamMembers)(loggedInRequest.withCSRFToken.withFormUrlEncodedBody("email" -> email, "role" -> role.toString))
 
       status(result) shouldBe BAD_REQUEST
-      verify(applicationServiceMock).addTeamMember(eqTo(application), eqTo(loggedInUser.email), *)(*)
+      verify(applicationServiceMock).addTeamMember(eqTo(application), eqTo(loggedInDeveloper.email), *)(*)
 
     }
 
@@ -187,7 +190,7 @@ class ManageTeamSpec
       val result = underTest.addTeamMemberAction(appId, ManageTeamMembers)(loggedInRequest.withCSRFToken.withFormUrlEncodedBody("email" -> email, "role" -> role.toString))
 
       status(result) shouldBe NOT_FOUND
-      verify(applicationServiceMock).addTeamMember(eqTo(application), eqTo(loggedInUser.email), *)(*)
+      verify(applicationServiceMock).addTeamMember(eqTo(application), eqTo(loggedInDeveloper.email), *)(*)
 
     }
 
@@ -199,7 +202,7 @@ class ManageTeamSpec
         underTest.addTeamMemberAction(appId, ManageTeamMembers)(loggedInRequest.withCSRFToken.withFormUrlEncodedBody("email" -> "notAnEmailAddress", "role" -> role.toString))
 
       status(result) shouldBe BAD_REQUEST
-      verify(applicationServiceMock, never).addTeamMember(eqTo(application), eqTo(loggedInUser.email), *)(*)
+      verify(applicationServiceMock, never).addTeamMember(eqTo(application), eqTo(loggedInDeveloper.email), *)(*)
 
     }
 
@@ -279,7 +282,7 @@ class ManageTeamSpec
 
         status(result) shouldBe SEE_OTHER
         redirectLocation(result) shouldBe Some(routes.ManageTeam.manageTeam(appId, None).url)
-        verify(applicationServiceMock).removeTeamMember(eqTo(application), eqTo(teamMemberEmail), eqTo(loggedInUser.email))(*)
+        verify(applicationServiceMock).removeTeamMember(eqTo(application), eqTo(teamMemberEmail), eqTo(loggedInDeveloper.email))(*)
       }
 
       "redirect to the team members page without removing a team member when the confirmation in 'No'" in new Setup {
@@ -289,7 +292,7 @@ class ManageTeamSpec
 
         status(result) shouldBe SEE_OTHER
         redirectLocation(result) shouldBe Some(routes.ManageTeam.manageTeam(appId, None).url)
-        verify(applicationServiceMock, never).removeTeamMember(eqTo(application), eqTo(teamMemberEmail), eqTo(loggedInUser.email))(*)
+        verify(applicationServiceMock, never).removeTeamMember(eqTo(application), eqTo(teamMemberEmail), eqTo(loggedInDeveloper.email))(*)
       }
 
       "return 400 Bad Request when no confirmation is given" in new Setup {
@@ -297,7 +300,7 @@ class ManageTeamSpec
         val result = underTest.removeTeamMemberAction(appId)(loggedInRequest.withCSRFToken.withFormUrlEncodedBody("email" -> teamMemberEmail))
 
         status(result) shouldBe BAD_REQUEST
-        verify(applicationServiceMock, never).removeTeamMember(eqTo(application), eqTo(teamMemberEmail), eqTo(loggedInUser.email))(*)
+        verify(applicationServiceMock, never).removeTeamMember(eqTo(application), eqTo(teamMemberEmail), eqTo(loggedInDeveloper.email))(*)
       }
 
       "show 400 Bad Request when no email is given" in new Setup {
@@ -305,7 +308,7 @@ class ManageTeamSpec
         val result = underTest.removeTeamMemberAction(appId)(loggedInRequest.withCSRFToken.withFormUrlEncodedBody("confirm" -> "Yes"))
 
         status(result) shouldBe BAD_REQUEST
-        verify(applicationServiceMock, never).removeTeamMember(eqTo(application), eqTo(teamMemberEmail), eqTo(loggedInUser.email))(*)
+        verify(applicationServiceMock, never).removeTeamMember(eqTo(application), eqTo(teamMemberEmail), eqTo(loggedInDeveloper.email))(*)
       }
     }
 
@@ -349,7 +352,7 @@ class ManageTeamSpec
 
         val app = aStandardPendingApprovalApplication(developer.email)
 
-        givenApplicationAction(app, loggedInUser)
+        givenApplicationAction(app, loggedInDeveloper)
 
         val result = executeAction
 

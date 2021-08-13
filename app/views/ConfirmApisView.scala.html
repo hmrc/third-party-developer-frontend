@@ -31,7 +31,8 @@
 @this(devMain: DevMain2)
 @(
   applicationId: ApplicationId,
-  subscriptions: Set[(String, String)]
+  subscriptionLabels: Set[String],
+  canChangeSubscriptions: Boolean
 )(
     implicit request: play.api.mvc.Request[Any],
     loggedIn: DeveloperSession,
@@ -50,8 +51,8 @@
     <h1 class="govuk-heading-l">@pageHeading</h1>
     <p class="govuk-body">Your software will subscribe to APIs which access secure data and require authentication, these are:</p>
     <ul class="govuk-list govuk-list--bullet">
-      @for(subscription <- subscriptions) {
-      <li>@{subscription._1} - @{subscription._2}</li>
+      @for(label <- subscriptionLabels) {
+      <li>@label</li>
       }
     </ul>
     <p class="govuk-body">
@@ -70,7 +71,7 @@
             <button class="govuk-button" id="submit" type="submit" href="@controllers.routes.SR20.confirmApiSubscriptionsAction(applicationId)">
                 Save and continue
             </button>
-            @if(subscriptions.size > 1) {
+            @if(canChangeSubscriptions) {
                 <a class="govuk-link govuk-link--no-visited-state" href="@controllers.routes.SR20.changeApiSubscriptions(applicationId)">
                     Change my API subscriptions
                 </a>

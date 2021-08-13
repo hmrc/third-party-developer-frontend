@@ -24,7 +24,6 @@ import domain.{ApplicationAlreadyExists, ApplicationUpliftSuccessful, DeskproTic
 import domain.models.apidefinitions._
 import domain.models.applications._
 import domain.models.applications.CollaboratorRole.{ADMINISTRATOR, DEVELOPER}
-import domain.models.developers.{DeveloperSession, LoggedInState, Session}
 import helpers.string._
 import mocks.service._
 import org.joda.time.DateTimeZone
@@ -47,25 +46,23 @@ import views.html.checkpages.checkyouranswers.team.TeamView
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future.{failed, successful}
 import utils.LocalUserIdTracker
+import domain.models.developers.DeveloperSession
 
 class CheckYourAnswersSpec 
     extends BaseControllerSpec 
+    with LocalUserIdTracker 
+    with DeveloperBuilder
+    with SampleSession
+    with SampleApplication
     with SubscriptionTestHelperSugar 
     with WithCSRFAddToken 
     with SubscriptionsBuilder 
-    with DeveloperBuilder
-    with LocalUserIdTracker {
+{
 
   private def aClientSecret() = ClientSecret(randomUUID.toString, randomUUID.toString, DateTimeUtils.now.withZone(DateTimeZone.getDefault))
 
   val appName: String = "app"
-  val sessionId = "sessionId"
   val apiVersion = ApiVersion("version")
-
-  val developerDto = buildDeveloper()
-  val session = Session(sessionId, developerDto, LoggedInState.LOGGED_IN)
-
-  val loggedInUser = DeveloperSession(session)
 
   val anotherCollaboratorEmail = "collaborator@example.com"
   val hashedAnotherCollaboratorEmail: String = anotherCollaboratorEmail.toSha256
@@ -73,19 +70,6 @@ class CheckYourAnswersSpec
   val testing: ApplicationState = ApplicationState.testing.copy(updatedOn = DateTimeUtils.now.minusMinutes(1))
   val production: ApplicationState = ApplicationState.production("thirdpartydeveloper@example.com", "ABCD")
   val pendingApproval: ApplicationState = ApplicationState.pendingGatekeeperApproval("thirdpartydeveloper@example.com")
-  val application = Application(
-    appId,
-    clientId,
-    "App name 1",
-    DateTimeUtils.now,
-    DateTimeUtils.now,
-    None,
-    Environment.PRODUCTION,
-    Some("Description 1"),
-    Set(loggedInUser.email.asAdministratorCollaborator),
-    state = ApplicationState.production(loggedInUser.email, ""),
-    access = Standard(redirectUris = List("https://red1", "https://red2"), termsAndConditionsUrl = Some("http://tnc-url.com"))
-  )
 
   val appTokens = ApplicationToken(List(aClientSecret(), aClientSecret()), "token")
 
@@ -175,13 +159,13 @@ class CheckYourAnswersSpec
 
     updateApplicationSuccessful()
 
-    fetchByApplicationIdReturns(application.id, application)
+    fetchByApplicationIdReturns(sampleApp.id, sampleApp)
 
-    fetchCredentialsReturns(application, appTokens)
+    fetchCredentialsReturns(sampleApp, appTokens)
 
-    givenRemoveTeamMemberSucceeds(loggedInUser)
+    givenRemoveTeamMemberSucceeds(loggedInDeveloper)
 
-    givenUpdateCheckInformationSucceeds(application)
+    givenUpdateCheckInformationSucceeds(sampleApp)
 
     val context = ApiContext("apiContent")
     val emptyFields = emptySubscriptionFieldsWrapper(appId, clientId, context, apiVersion)
@@ -228,7 +212,7 @@ class CheckYourAnswersSpec
     ): Application = {
 
       val collaborators = Set(
-        loggedInUser.email.asCollaborator(userRole),
+        loggedInDeveloper.email.asCollaborator(userRole),
         anotherCollaboratorEmail.asDeveloperCollaborator
       )
 
@@ -246,7 +230,7 @@ class CheckYourAnswersSpec
         checkInformation = checkInformation
       )
 
-      givenApplicationAction(application, loggedInUser)
+      givenApplicationAction(application, loggedInDeveloper)
       fetchCredentialsReturns(application, appTokens)
       givenUpdateCheckInformationSucceeds(application)
 
@@ -283,7 +267,7 @@ class CheckYourAnswersSpec
 
     val expectedCheckInformation: CheckInformation = application.checkInformation.getOrElse(CheckInformation()).copy(confirmedName = false)
 
-    when(underTest.applicationService.requestUplift(eqTo(appId), eqTo(application.name), eqTo(loggedInUser))(*))
+    when(underTest.applicationService.requestUplift(eqTo(appId), eqTo(application.name), eqTo(loggedInDeveloper))(*))
       .thenAnswer((i: InvocationOnMock) => {
         failed(new ApplicationAlreadyExists)
       })
@@ -425,7 +409,7 @@ class CheckYourAnswersSpec
       status(result) shouldBe OK
 
       contentAsString(result) should include("Add members of your organisation and give them permissions to access this application")
-      contentAsString(result) should include(developerDto.email)
+      contentAsString(result) should include(developer.email)
     }
 
     "not return the manage team list page when not logged in" in new Setup {
@@ -509,7 +493,7 @@ class CheckYourAnswersSpec
 
       redirectLocation(result) shouldBe Some(s"/developer/applications/${appId.value}/check-your-answers/team")
 
-      verify(underTest.applicationService).removeTeamMember(eqTo(application), eqTo(anotherCollaboratorEmail), eqTo(loggedInUser.email))(*)
+      verify(underTest.applicationService).removeTeamMember(eqTo(application), eqTo(anotherCollaboratorEmail), eqTo(loggedInDeveloper.email))(*)
     }
 
     "team post redirect to check landing page when no check information on application" in new Setup {

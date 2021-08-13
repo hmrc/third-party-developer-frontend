@@ -19,14 +19,12 @@ package controllers
 import builder.DeveloperBuilder
 import config.ErrorHandler
 import domain.models.applications._
-import domain.models.developers.{DeveloperSession, LoggedInState, Session}
 import mocks.service._
 import play.api.mvc.AnyContentAsEmpty
 import play.api.test.FakeRequest
 import play.api.test.Helpers.{redirectLocation, _}
 import service.AuditService
 import uk.gov.hmrc.http.HeaderCarrier
-import uk.gov.hmrc.time.DateTimeUtils
 import utils.WithCSRFAddToken
 import utils.WithLoggedInSession._
 import views.helper.EnvironmentNameService
@@ -36,38 +34,18 @@ import mocks.connector.ApmConnectorMockModule
 import scala.concurrent.ExecutionContext.Implicits.global
 import utils.LocalUserIdTracker
 import controllers.addapplication.AddApplication
+import builder._
 
 class AddApplicationStartSpec 
     extends BaseControllerSpec 
+    with SampleSession
+    with SampleApplication
     with SubscriptionTestHelperSugar 
     with WithCSRFAddToken 
     with DeveloperBuilder
     with LocalUserIdTracker {
 
-  val developer = buildDeveloper()
-  val sessionId = "sessionId"
-  val session = Session(sessionId, developer, LoggedInState.LOGGED_IN)
-
-  val loggedInUser = DeveloperSession(session)
-
-  val partLoggedInSessionId = "partLoggedInSessionId"
-  val partLoggedInSession = Session(partLoggedInSessionId, developer, LoggedInState.PART_LOGGED_IN_ENABLING_MFA)
-
-  val collaborator: Collaborator = loggedInUser.email.asAdministratorCollaborator
-
-  val application = Application(
-    appId,
-    clientId,
-    "App name 1",
-    DateTimeUtils.now,
-    DateTimeUtils.now,
-    None,
-    Environment.PRODUCTION,
-    Some("Description 1"),
-    Set(collaborator),
-    state = ApplicationState.production(loggedInUser.email, ""),
-    access = Standard(redirectUris = List("https://red1", "https://red2"), termsAndConditionsUrl = Some("http://tnc-url.com"))
-  )
+  val collaborator: Collaborator = loggedInDeveloper.email.asAdministratorCollaborator
 
   trait Setup extends UpliftLogicMock with ApplicationServiceMock with ApmConnectorMockModule with ApplicationActionServiceMock with SessionServiceMock with EmailPreferencesServiceMock {
     val accessTokenSwitchView = app.injector.instanceOf[AccessTokenSwitchView]
@@ -126,7 +104,7 @@ class AddApplicationStartSpec
 
       status(result) shouldBe OK
       contentAsString(result) should include("Add an application to the sandbox")
-      contentAsString(result) should include(loggedInUser.displayedName)
+      contentAsString(result) should include(loggedInDeveloper.displayedName)
       contentAsString(result) should include("Sign out")
       contentAsString(result) should not include "Sign in"
     }
@@ -138,7 +116,7 @@ class AddApplicationStartSpec
 
       status(result) shouldBe OK
       contentAsString(result) should include("Add an application to development")
-      contentAsString(result) should include(loggedInUser.displayedName)
+      contentAsString(result) should include(loggedInDeveloper.displayedName)
       contentAsString(result) should not include "Sign in"
     }
 
@@ -167,7 +145,7 @@ class AddApplicationStartSpec
 
       status(result) shouldBe OK
       contentAsString(result) should include("Get production credentials")
-      contentAsString(result) should include(loggedInUser.displayedName)
+      contentAsString(result) should include(loggedInDeveloper.displayedName)
       contentAsString(result) should include("Sign out")
       contentAsString(result) should include("Now that you've tested your software you can request production credentials to use live data.")
       contentAsString(result) should not include "Sign in"
@@ -180,7 +158,7 @@ class AddApplicationStartSpec
 
       status(result) shouldBe OK
       contentAsString(result) should include("Add an application to QA")
-      contentAsString(result) should include(loggedInUser.displayedName)
+      contentAsString(result) should include(loggedInDeveloper.displayedName)
       contentAsString(result) should include("Sign out")
       contentAsString(result) should include("Now that you've tested your software you can request to add your application to QA.")
       contentAsString(result) should not include "Sign in"

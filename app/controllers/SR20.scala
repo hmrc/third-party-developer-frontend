@@ -19,17 +19,19 @@ package controllers
 import config.{ApplicationConfig, ErrorHandler}
 import connectors.ApmConnector
 import controllers.checkpages.{CanUseCheckActions, DummySubscriptionsForm}
-import domain.models.apidefinitions.{APISubscriptionStatus, ApiContext, ApiIdentifier, ApiVersion}
+import domain.models.apidefinitions.ApiContext
 import domain.models.applications.ApplicationId
 import play.api.libs.crypto.CookieSigner
-import play.api.mvc.{Action, AnyContent, MessagesControllerComponents, Session}
+import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
 import service.{ApplicationActionService, ApplicationService, SessionService}
 import views.helper.IdFormatter
-import views.html.{ConfirmApisView, TurnOffApisView}
+import views.html.{ConfirmApisView, TurnOffApisMasterView}
 
 import javax.inject.{Inject, Singleton}
-import scala.concurrent.Future.successful
-import scala.concurrent.{ExecutionContext, Future}
+import scala.concurrent.ExecutionContext
+import controllers.models.ApiSubscriptionsFlow
+import scala.concurrent.Future
+import domain.models.apidefinitions.APISubscriptionStatus
 
 @Singleton
 class SR20 @Inject() (val errorHandler: ErrorHandler,
@@ -39,93 +41,98 @@ class SR20 @Inject() (val errorHandler: ErrorHandler,
                       mcc: MessagesControllerComponents,
                       val cookieSigner: CookieSigner,
                       confirmApisView: ConfirmApisView,
-                      turnOffApisView: TurnOffApisView,
+                      turnOffApisMasterView:TurnOffApisMasterView,
                       val apmConnector: ApmConnector)
                      (implicit val ec: ExecutionContext, val appConfig: ApplicationConfig)
   extends ApplicationController(mcc)
      with CanUseCheckActions{
        
-  def confirmApiSubscriptions(sandboxAppId: ApplicationId): Action[AnyContent] = whenTeamMemberOnApp(sandboxAppId) { implicit request =>
+def confirmApiSubscriptionsPage(sandboxAppId: ApplicationId): Action[AnyContent] = whenTeamMemberOnApp(sandboxAppId) { implicit request =>
 
-    val stuff = request.session
+    val flow = ApiSubscriptionsFlow.fromSessionString(request.session.get("subscriptions").getOrElse(""))
 
-    def getApiNameForContext(apiContext: ApiContext) = {
-      request.subscriptions.find(_.context == apiContext ).map(_.name)
-    }
+    def getApiNameForContext(apiContext: ApiContext) =
+      request.subscriptions
+      .find(_.context == apiContext )
+      .map(_.name)
 
     for {
-      upliftableSubscriptions <- apmConnector.fetchUpliftableSubscriptions(sandboxAppId)
+      upliftableApiIds <- apmConnector.fetchUpliftableSubscriptions(sandboxAppId)
     }
     yield {
-      val upliftableSubscriptionsWithData = upliftableSubscriptions
-        .flatMap(upliftableSubscription => getApiNameForContext(upliftableSubscription.context)
-          .map { (_, upliftableSubscription.version.value) })
-
-      Ok(confirmApisView(sandboxAppId, upliftableSubscriptionsWithData)).withNewSession
+      val data = (for {
+        subscription <- upliftableApiIds.filter(flow.isSelected)
+        name <- getApiNameForContext(subscription.context)
+      }
+      yield {
+        s"$name - ${subscription.version.value}"
+      })
+      Ok(confirmApisView(sandboxAppId, data, upliftableApiIds.size > 1))
     }
   }
 
-  def confirmApiSubscriptionsAction(sandboxAppId: ApplicationId): Action[AnyContent] = loggedInAction { implicit request =>
-    Future.successful(Redirect(controllers.checkpages.routes.ApplicationCheck.requestCheckPage(sandboxAppId)))
+  def confirmApiSubscriptionsAction(sandboxAppId: ApplicationId): Action[AnyContent] = whenTeamMemberOnApp(sandboxAppId) { implicit request =>
+    val flow = ApiSubscriptionsFlow.fromSessionString(request.session.get("subscriptions").getOrElse(""))
+    
+    for {
+      apiIdsToUnsubscribeFrom <- apmConnector.fetchUpliftableSubscriptions(sandboxAppId).map(_.filterNot(flow.isSelected))
+      // TODO - make upliftApplication take subscription Ids
+      upliftedAppId <- apmConnector.upliftApplication(sandboxAppId)
+      upliftedApplication <- apmConnector.fetchApplicationById(upliftedAppId).map(_.get)  // NB - we really should find this app
+      unsubscribing <- Future.sequence(apiIdsToUnsubscribeFrom.map(id => applicationService.unsubscribeFromApi(upliftedApplication.application, id)))
+    } yield {
+      Redirect(controllers.checkpages.routes.ApplicationCheck.requestCheckPage(upliftedAppId)).withSession(request.session - "subscriptions")
+    }
+  }
+
+  def setSubscribedStatusFromFlow(flow: ApiSubscriptionsFlow)(apiSubscription: APISubscriptionStatus): APISubscriptionStatus = {
+    apiSubscription.copy(subscribed = flow.isSelected(apiSubscription.apiIdentifier))
   }
 
   def changeApiSubscriptions(sandboxAppId: ApplicationId): Action[AnyContent] = whenTeamMemberOnApp(sandboxAppId) { implicit request =>
-    val subscribedApis = request.subscriptions.filter(_.subscribed)
-    Future.successful(Ok(turnOffApisView(request.application, request.role, APISubscriptions.groupSubscriptions(subscribedApis))))
+    val flow = ApiSubscriptionsFlow.fromSessionString(request.session.get("subscriptions").getOrElse(""))
+    
+    for {
+      upliftableApiIds <- apmConnector.fetchUpliftableSubscriptions(sandboxAppId)
+      selectedApiIds = upliftableApiIds.filter(flow.isSelected)
+      subscriptionsWithFlowAdjusted = request.subscriptions
+        .filter(s => upliftableApiIds.contains(s.apiIdentifier))
+        .map(setSubscribedStatusFromFlow(flow))
+    } yield {
+      Ok(turnOffApisMasterView(request.application.id, request.role, APISubscriptions.groupSubscriptionsByServiceName(subscriptionsWithFlowAdjusted)))
+    }
   }
 
-  def changeApiSubscription(applicationId: ApplicationId, apiContext: ApiContext, apiVersion: ApiVersion): Action[AnyContent] =
-    whenTeamMemberOnApp(applicationId) { implicit request =>
+  def saveApiSubscriptionsSubmit(sandboxAppId: ApplicationId): Action[AnyContent] = whenTeamMemberOnApp(sandboxAppId) { implicit request =>
+    lazy val flow = ApiSubscriptionsFlow.fromSessionString(request.session.get("subscriptions").getOrElse(""))
 
-      val apiIdentifier = ApiIdentifier(apiContext, apiVersion)
-      val subscribedApis = request.subscriptions.filter(_.subscribed)
-
-      val session: Session = request.session.get(apiIdentifier.toString) match {
-        case Some(_) => request.session - apiIdentifier.toString
-        case None => request.session + (apiIdentifier.toString -> "false")
-      }
-
-      Future.successful(Ok(turnOffApisView(request.application, request.role, APISubscriptions.groupSubscriptions(subscribedApis), None))
-        .withSession(session)
-      )
-  }
-
-  def saveApiSubscriptions(sandboxAppId: ApplicationId): Action[AnyContent] = whenTeamMemberOnApp(sandboxAppId) { implicit request =>
-
-    val formSubmittedSubscriptions: Map[String, Boolean] = request.body.asFormUrlEncoded.get.mapValues(_.head == "true")
+    lazy val formSubmittedSubscriptions: Map[String, Boolean] = 
+      request.body.asFormUrlEncoded.get
       .filter(_._1.contains("subscribed"))
-      .map(apiSubscription => { (apiSubscription._1.replace("-subscribed", "") -> apiSubscription._2 ) })
+      .mapValues(_.head == "true")
+      .map {
+        case (name, isSubscribed) => (name.replace("-subscribed", "") -> isSubscribed)
+      }
 
-    val sandboxSubscribedApis = request.subscriptions.filter(_.subscribed)
+    apmConnector.fetchUpliftableSubscriptions(sandboxAppId).map { upliftableApiIds =>
+      val apiLookups = upliftableApiIds.map( id => IdFormatter.identifier(id) -> id ).toMap
+      val newFlow = ApiSubscriptionsFlow(formSubmittedSubscriptions.map {
+        case (id, onOff) => apiLookups(id) -> onOff
+      })
 
-    val sandboxSubscribedApiIds = sandboxSubscribedApis
-      .map(sandboxSubscribedApi => ApiIdentifier(sandboxSubscribedApi.context, sandboxSubscribedApi.apiVersion.version))
+      if (formSubmittedSubscriptions.exists(_._2 == true)) {
+        Redirect(controllers.routes.SR20.confirmApiSubscriptionsPage(sandboxAppId))
+          .withSession(request.session + ("subscriptions" -> ApiSubscriptionsFlow.toSessionString(newFlow)))
+      }
+      else {
+        val errorForm = DummySubscriptionsForm.form.bind(Map("hasNonExampleSubscription" -> "false"))
+        val sandboxSubscribedApis = request.subscriptions
+            .filter(s => upliftableApiIds.contains(s.apiIdentifier))
+            .map(setSubscribedStatusFromFlow(newFlow))
 
-    val apiIdLookup = sandboxSubscribedApiIds.map( sandboxSubscribedApiId => { IdFormatter.identifier(sandboxSubscribedApiId) -> sandboxSubscribedApiId } ).toMap
-
-    val things = formSubmittedSubscriptions.map {
-      case (k, v) => apiIdLookup(k).toString -> v.toString
-    }.toList.mkString("[", ",", "]")
-
-    if (formSubmittedSubscriptions.exists(_._2 == true)) {
-      successful(Redirect(controllers.routes.SR20.confirmApiSubscriptions(sandboxAppId)).withSession(request.session + ("subscriptions" -> things)))
-      //      val sessionSubscribedApis = getSessionApis(request.session, sandboxSubscribedApis, false)
-      //      val unsubscribeRequests = sessionSubscribedApis map (sa => {
-      //        applicationService.unsubscribeFromApi(request.application, ApiIdentifier(sa.context, sa.apiVersion.version))
-      //      })
-      //      Future.sequence(unsubscribeRequests).map( _ => Redirect(controllers.routes.SR20.confirmApiSubscriptions(sandboxAppId)) )
-    }
-    else {
-      val errorForm = DummySubscriptionsForm.form.bind(Map("hasNonExampleSubscription" -> "false"))
-      successful(Ok(turnOffApisView(request.application, request.role, APISubscriptions.groupSubscriptions(sandboxSubscribedApis), Some(errorForm))))
+        Ok(turnOffApisMasterView(request.application.id, request.role, APISubscriptions.groupSubscriptionsByServiceName(sandboxSubscribedApis), Some(errorForm)))
+        .withSession(request.session + ("subscriptions" -> ApiSubscriptionsFlow.toSessionString(flow)))
+      }
     }
   }
-
-  private def getSessionApis(session: Session, subscribedApis: List[APISubscriptionStatus], subscribed: Boolean = true) =
-    subscribedApis.map(sa =>
-      session.data.get(ApiIdentifier(sa.context, sa.apiVersion.version).toString) match {
-        case Some(_) => sa.copy(subscribed = false)
-        case None => sa.copy(subscribed = true)
-      }
-    ).filter(_.subscribed == subscribed)
 }

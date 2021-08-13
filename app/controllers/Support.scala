@@ -41,28 +41,28 @@ class Support @Inject()(val deskproService: DeskproService,
 
   val supportForm: Form[SupportEnquiryForm] = SupportEnquiryForm.form
 
-  private def fullyLoggedInUser(implicit request: MaybeUserRequest[AnyContent]): Option[DeveloperSession] =
+  private def fullyloggedInDeveloper(implicit request: MaybeUserRequest[AnyContent]): Option[DeveloperSession] =
     request.developerSession.filter(_.loggedInState.isLoggedIn)
 
   def raiseSupportEnquiry: Action[AnyContent] = maybeAtLeastPartLoggedInEnablingMfa { implicit request =>
-    val prefilledForm = fullyLoggedInUser
+    val prefilledForm = fullyloggedInDeveloper
       .fold(supportForm) { user =>
         supportForm.bind(Map("fullname" -> user.displayedName, "emailaddress" -> user.email)).discardingErrors
       }
-    Future.successful(Ok(supportEnquiryView(fullyLoggedInUser.map(_.displayedName), prefilledForm)))
+    Future.successful(Ok(supportEnquiryView(fullyloggedInDeveloper.map(_.displayedName), prefilledForm)))
 
   }
 
   def submitSupportEnquiry = maybeAtLeastPartLoggedInEnablingMfa { implicit request =>
     val requestForm = supportForm.bindFromRequest
-    val displayName = fullyLoggedInUser.map(_.displayedName)
+    val displayName = fullyloggedInDeveloper.map(_.displayedName)
     requestForm.fold(
       formWithErrors => Future.successful(BadRequest(supportEnquiryView(displayName, formWithErrors))),
       formData => deskproService.submitSupportEnquiry(formData).map { _ => Redirect(routes.Support.thankyou().url, SEE_OTHER) })
   }
 
   def thankyou = maybeAtLeastPartLoggedInEnablingMfa { implicit request =>
-    val displayName = fullyLoggedInUser.map(_.displayedName)
+    val displayName = fullyloggedInDeveloper.map(_.displayedName)
     Future.successful(Ok(supportThankyouView("Thank you", displayName)))
   }
 }

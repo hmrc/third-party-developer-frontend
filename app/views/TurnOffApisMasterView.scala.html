@@ -22,11 +22,11 @@
 @import domain.models.views.SubscriptionRedirect._
 @import include._
 
-@this(devMain: DevMain, subscriptionGroups: TurnOffApis_SubscriptionGroups)
+@this(devMain: DevMain, innerView: TurnOffApisView)
 @(
-    app: Application,
+    applicationId: ApplicationId,
     role: CollaboratorRole,
-    subscriptions: Option[GroupedSubscriptions],
+    subscriptions: List[APISubscriptions],
     errorForm: Option[Form[DummySubscriptionsForm]] = None
 )(
     implicit request: play.api.mvc.Request[Any],
@@ -48,17 +48,14 @@
     @if(errorForm.isDefined) { @errorSummary(errorForm.get) }
     <h1 class="heading-xlarge">@pageHeading</h1>
     @subscriptions match {
-        case Some(groupedSubscriptions) => {
-            @subscriptionGroups(role: CollaboratorRole, groupedSubscriptions, app, APPLICATION_CHECK_PAGE, true)
-            <br/>
-                <button id="submit" class="button" type="submit">Save and continue</button>
-
-        }
-        case _ => {
+        case Nil => {
             <div class="govuk-inset-text">We can’t load your API subscriptions at the moment. Please
-                <a class="govuk-link govuk-link--no-visited-state" href="@{controllers.checkpages.routes.ApplicationCheck.apiSubscriptionsPage(app.id)}">try again</a>
+                <a class="govuk-link govuk-link--no-visited-state" href="@{controllers.checkpages.routes.ApplicationCheck.apiSubscriptionsPage(applicationId)}">try again</a>
                 later
             </div>
+        }
+        case _ => {
+            @innerView(role: CollaboratorRole, applicationId, subscriptions)
         }
     }
 }

@@ -43,7 +43,7 @@ class ChangeSubscriptionConfirmationSpec extends CommonViewSpec with WithCSRFAdd
   val apiVersion = ApiVersion("1.0")
   val callMock = mock[Call]
 
-  val loggedInUser = utils.DeveloperSession("givenname.familyname@example.com", "Givenname", "Familyname", loggedInState = LoggedInState.LOGGED_IN)
+  val loggedInDeveloper = utils.DeveloperSession("givenname.familyname@example.com", "Givenname", "Familyname", loggedInState = LoggedInState.LOGGED_IN)
 
   val application = Application(
     applicationId,
@@ -54,8 +54,8 @@ class ChangeSubscriptionConfirmationSpec extends CommonViewSpec with WithCSRFAdd
     None,
     Environment.PRODUCTION,
     Some("Description 1"),
-    Set(loggedInUser.email.asAdministratorCollaborator),
-    state = ApplicationState.production(loggedInUser.email, ""),
+    Set(loggedInDeveloper.email.asAdministratorCollaborator),
+    state = ApplicationState.production(loggedInDeveloper.email, ""),
     access = Standard(redirectUris = List("https://red1", "https://red2"), termsAndConditionsUrl = Some("http://tnc-url.com"))
   )
 
@@ -72,7 +72,7 @@ class ChangeSubscriptionConfirmationSpec extends CommonViewSpec with WithCSRFAdd
       SubscriptionRedirect.API_SUBSCRIPTIONS_PAGE.toString,
       callMock,
       request,
-      loggedInUser,
+      loggedInDeveloper,
       messagesProvider,
       appConfig,
       "details"

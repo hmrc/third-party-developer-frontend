@@ -50,7 +50,7 @@ import utils.LocalUserIdTracker
    with LoggedInRequestTestHelper {
 
    trait Setup {
-     val loggedInUser = DeveloperSession(session)
+     val loggedInDeveloper = DeveloperSession(session)
 
      val errorHandler: ErrorHandler = app.injector.instanceOf[ErrorHandler]
 
@@ -80,25 +80,25 @@ import utils.LocalUserIdTracker
 
    "subFieldsDefinitionsExistActionByApi" should {
      "Found one" in new Setup {
-       givenApplicationAction(applicationWithSubscriptionData, loggedInUser, List(subscriptionWithSubFields))
+       givenApplicationAction(applicationWithSubscriptionData, loggedInDeveloper, List(subscriptionWithSubFields))
 
        runTestAction(subscriptionWithSubFields.context, subscriptionWithSubFields.apiVersion.version, OK)
      }
 
      "Wrong context" in new Setup {
-       givenApplicationAction(applicationWithSubscriptionData, loggedInUser, List(subscriptionWithSubFields))
+       givenApplicationAction(applicationWithSubscriptionData, loggedInDeveloper, List(subscriptionWithSubFields))
 
        runTestAction(ApiContext("wrong-context"), subscriptionWithSubFields.apiVersion.version, NOT_FOUND)
      }
 
      "Wrong version" in new Setup {
-       givenApplicationAction(applicationWithSubscriptionData, loggedInUser, List(subscriptionWithSubFields))
+       givenApplicationAction(applicationWithSubscriptionData, loggedInDeveloper, List(subscriptionWithSubFields))
 
        runTestAction(subscriptionWithSubFields.context, ApiVersion("wrong-version"), NOT_FOUND)
      }
 
      "Subscription with no fields" in new Setup {
-       givenApplicationAction(applicationWithSubscriptionData, loggedInUser, List(subscriptionWithoutSubFields))
+       givenApplicationAction(applicationWithSubscriptionData, loggedInDeveloper, List(subscriptionWithoutSubFields))
 
        runTestAction(subscriptionWithSubFields.context, subscriptionWithSubFields.apiVersion.version, NOT_FOUND)
      }

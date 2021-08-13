@@ -29,7 +29,7 @@ import views.html.SignInView
 class SignInSpec extends CommonViewSpec with WithCSRFAddToken {
   val signInView = app.injector.instanceOf[SignInView]
 
-  val loggedInUser = utils.DeveloperSession("admin@example.com", "firstName1", "lastName1", loggedInState = LoggedInState.LOGGED_IN)
+  val loggedInDeveloper = utils.DeveloperSession("admin@example.com", "firstName1", "lastName1", loggedInState = LoggedInState.LOGGED_IN)
 
   "Sign in page" should {
     def renderPage(form: Form[LoginForm]) = {

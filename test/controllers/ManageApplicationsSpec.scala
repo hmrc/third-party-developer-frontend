@@ -21,7 +21,6 @@ import java.util.UUID.randomUUID
 import builder.DeveloperBuilder
 import config.ErrorHandler
 import domain.models.applications._
-import domain.models.developers.{DeveloperSession, LoggedInState, Session}
 import mocks.service._
 import org.joda.time.DateTimeZone
 import play.api.mvc.AnyContentAsEmpty
@@ -38,37 +37,17 @@ import domain.models.controllers.ApplicationSummary
 import scala.concurrent.ExecutionContext.Implicits.global
 import utils.LocalUserIdTracker
 import mocks.connector.ApmConnectorMockModule
+import builder._
 
 class ManageApplicationsSpec 
     extends BaseControllerSpec 
     with ApplicationActionServiceMock 
+    with SampleSession
+    with SampleApplication
     with SubscriptionTestHelperSugar 
     with WithCSRFAddToken 
     with DeveloperBuilder
     with LocalUserIdTracker {
-
-  val developer = buildDeveloper()
-  val sessionId = "sessionId"
-  val session = Session(sessionId, developer, LoggedInState.LOGGED_IN)
-
-  val loggedInUser = DeveloperSession(session)
-
-  val partLoggedInSessionId = "partLoggedInSessionId"
-  val partLoggedInSession = Session(partLoggedInSessionId, developer, LoggedInState.PART_LOGGED_IN_ENABLING_MFA)
-
-  val application = Application(
-    appId,
-    clientId,
-    "App name 1",
-    DateTimeUtils.now,
-    DateTimeUtils.now,
-    None,
-    Environment.PRODUCTION,
-    Some("Description 1"),
-    Set(loggedInUser.email.asAdministratorCollaborator),
-    state = ApplicationState.production(loggedInUser.email, ""),
-    access = Standard(redirectUris = List("https://red1", "https://red2"), termsAndConditionsUrl = Some("http://tnc-url.com"))
-  )
 
   val tokens = ApplicationToken(List(aClientSecret(), aClientSecret()), "token")
 
@@ -109,14 +88,14 @@ class ManageApplicationsSpec
   "manageApps" should {
 
     "return the manage Applications page with the user logged in" in new Setup {
-      val prodSummary = ApplicationSummary.from(application, loggedInUser.developer.userId)
+      val prodSummary = ApplicationSummary.from(sampleApp, loggedInDeveloper.developer.userId)
       aUsersUplfitableAndNotUpliftableAppsReturns(List.empty, List.empty)
       fetchProductionSummariesByTeamMemberReturns(List(prodSummary))
 
       private val result = manageApplicationsController.manageApps()(loggedInRequest)
 
       status(result) shouldBe OK
-      contentAsString(result) should include(loggedInUser.displayedName)
+      contentAsString(result) should include(loggedInDeveloper.displayedName)
       contentAsString(result) should include("Sign out")
       contentAsString(result) should include("App name 1")
       contentAsString(result) should not include "Sign in"

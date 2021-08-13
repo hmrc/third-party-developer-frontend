@@ -23,7 +23,6 @@ import builder.DeveloperBuilder
 import connectors.ThirdPartyDeveloperConnector
 import domain.models.applications.ApplicationState._
 import domain.models.applications.CollaboratorRole.{ADMINISTRATOR, DEVELOPER}
-import domain.models.developers.{DeveloperSession, LoggedInState, Session}
 import domain.ClientSecretLimitExceeded
 import domain.models.applications._
 import mocks.service._
@@ -42,18 +41,15 @@ import views.html.editapplication.DeleteClientSecretView
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import utils.LocalUserIdTracker
+import builder._
 
 class CredentialsSpec 
     extends BaseControllerSpec 
+    with SampleSession
+    with SampleApplication
     with SubscriptionTestHelperSugar 
     with DeveloperBuilder 
     with LocalUserIdTracker {
-
-  val developer = buildDeveloper()
-  val sessionId = "sessionId"
-  val session = Session(sessionId, developer, LoggedInState.LOGGED_IN)
-
-  val loggedInUser = DeveloperSession(session)
 
   val applicationId = ApplicationId(UUID.randomUUID().toString())
   val appTokens = ApplicationToken(List(aClientSecret("secret1"), aClientSecret("secret2")), "token")
@@ -73,8 +69,8 @@ class CredentialsSpec
         None,
         Environment.PRODUCTION,
         Some("Description 1"),
-        Set(loggedInUser.email.asAdministratorCollaborator),
-        state = ApplicationState.production(loggedInUser.email, ""),
+        Set(loggedInDeveloper.email.asAdministratorCollaborator),
+        state = ApplicationState.production(loggedInDeveloper.email, ""),
         access = Standard(
           redirectUris = List("https://red1", "https://red2"),
           termsAndConditionsUrl = Some("http://tnc-url.com")
@@ -98,7 +94,7 @@ class CredentialsSpec
       DateTimeUtils.now,
       None,
       environment,
-      collaborators = Set(loggedInUser.email.asCollaborator(userRole)),
+      collaborators = Set(loggedInDeveloper.email.asCollaborator(userRole)),
       state = state,
       access = access
     )
@@ -131,7 +127,7 @@ class CredentialsSpec
 
     implicit val hc = HeaderCarrier()
 
-    givenApplicationAction(applicationWithSubscriptionData, loggedInUser)
+    givenApplicationAction(applicationWithSubscriptionData, loggedInDeveloper)
     fetchCredentialsReturns(application, appTokens)
     fetchSessionByIdReturns(sessionId, session)
     updateUserFlowSessionsReturnsSuccessfully(sessionId)
@@ -258,18 +254,18 @@ class CredentialsSpec
   "addClientSecret" should {
     "add the client secret" in new Setup {
       def createApplication() = createConfiguredApplication(applicationId, ADMINISTRATOR)
-      givenAddClientSecretReturns(application, loggedInUser.email)
+      givenAddClientSecretReturns(application, loggedInDeveloper.email)
 
       val result = underTest.addClientSecret(applicationId)(loggedInRequest)
 
       status(result) shouldBe SEE_OTHER
       redirectLocation(result) shouldBe Some(s"/developer/applications/${applicationId.value}/client-secrets")
-      verify(underTest.applicationService).addClientSecret(eqTo(application), eqTo(loggedInUser.email))(*)
+      verify(underTest.applicationService).addClientSecret(eqTo(application), eqTo(loggedInDeveloper.email))(*)
     }
 
     "display the error when the maximum limit of secret has been exceeded in a production app" in new Setup {
       def createApplication() = createConfiguredApplication(applicationId, ADMINISTRATOR, environment = Environment.PRODUCTION)
-      givenAddClientSecretFailsWith(application, loggedInUser.email, new ClientSecretLimitExceeded)
+      givenAddClientSecretFailsWith(application, loggedInDeveloper.email, new ClientSecretLimitExceeded)
 
       val result = underTest.addClientSecret(applicationId)(loggedInRequest)
 
@@ -278,7 +274,7 @@ class CredentialsSpec
 
     "display the error when the maximum limit of secret has been exceeded for sandbox app" in new Setup {
       def createApplication() = createConfiguredApplication(applicationId, ADMINISTRATOR, environment = Environment.SANDBOX)
-      givenAddClientSecretFailsWith(application, loggedInUser.email, new ClientSecretLimitExceeded)
+      givenAddClientSecretFailsWith(application, loggedInDeveloper.email, new ClientSecretLimitExceeded)
 
       val result = underTest.addClientSecret(applicationId)(loggedInRequest)
 
@@ -362,7 +358,7 @@ class CredentialsSpec
     "delete the selected client secret" in new Setup {
       def createApplication() = createConfiguredApplication(applicationId, ADMINISTRATOR)
 
-      givenDeleteClientSecretSucceeds(application, clientSecretId, loggedInUser.email)
+      givenDeleteClientSecretSucceeds(application, clientSecretId, loggedInDeveloper.email)
 
       val result = underTest.deleteClientSecretAction(applicationId, clientSecretId)(loggedInRequest)
 

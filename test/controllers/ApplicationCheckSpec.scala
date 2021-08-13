@@ -21,7 +21,6 @@ import java.util.UUID.randomUUID
 import builder._
 import controllers.checkpages.ApplicationCheck
 import domain.models.applications.CollaboratorRole.{ADMINISTRATOR, DEVELOPER}
-import domain.models.developers.{Developer, DeveloperSession, LoggedInState, Session}
 import domain.ApplicationUpliftSuccessful
 import domain.models.apidefinitions._
 import domain.models.applications.{ApplicationId, _}
@@ -46,29 +45,27 @@ import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 import scala.concurrent.Future.successful
 import utils.LocalUserIdTracker
+import domain.models.developers.DeveloperSession
 
 class ApplicationCheckSpec 
     extends BaseControllerSpec 
     with WithCSRFAddToken 
-    with SubscriptionTestHelperSugar 
-    with SubscriptionsBuilder
+    with LocalUserIdTracker
     with DeveloperBuilder 
-    with LocalUserIdTracker {
+    with SampleSession
+    with SampleApplication
+    with SubscriptionTestHelperSugar 
+    with SubscriptionsBuilder {
 
   override val appId = ApplicationId("1234")
 
   val appName: String = "app"
-  val sessionId = "sessionId"
 
   val exampleContext = ApiContext("exampleContext")
   val version = ApiVersion("version")
 
-  val developerDto: Developer = buildDeveloper()
-  val session: Session = Session(sessionId, developerDto, LoggedInState.LOGGED_IN)
   val anotherCollaboratorEmail = "collaborator@example.com"
   val yetAnotherCollaboratorEmail = "collaborator2@example.com"
-
-  val loggedInUser: DeveloperSession = DeveloperSession(session)
 
   val testing: ApplicationState = ApplicationState.testing.copy(updatedOn = DateTimeUtils.now.minusMinutes(1))
   val production: ApplicationState = ApplicationState.production("thirdpartydeveloper@example.com", "ABCD")
@@ -118,8 +115,8 @@ class ApplicationCheckSpec
         None,
         Environment.PRODUCTION,
         Some("Description 1"),
-        Set(loggedInUser.email.asAdministratorCollaborator),
-        state = ApplicationState.production(loggedInUser.email, ""),
+        Set(loggedInDeveloper.email.asAdministratorCollaborator),
+        state = ApplicationState.production(loggedInDeveloper.email, ""),
         access = Standard(
           redirectUris = List("https://red1", "https://red2"),
           termsAndConditionsUrl = Some("http://tnc-url.com")
@@ -164,7 +161,7 @@ class ApplicationCheckSpec
     val anotherRole = if (userRole.isAdministrator) DEVELOPER else ADMINISTRATOR
 
     val collaborators = Set(
-      loggedInUser.email.asCollaborator(userRole),
+      loggedInDeveloper.email.asCollaborator(userRole),
       anotherCollaboratorEmail.asCollaborator(anotherRole)
     )
 
@@ -219,7 +216,7 @@ class ApplicationCheckSpec
 
     fetchCredentialsReturns(application, appTokens)
 
-    givenRemoveTeamMemberSucceeds(loggedInUser)
+    givenRemoveTeamMemberSucceeds(loggedInDeveloper)
 
     givenUpdateCheckInformationSucceeds(application)
 
@@ -235,12 +232,12 @@ class ApplicationCheckSpec
   }
 
   trait Setup extends BaseSetup {
-    givenApplicationAction(application, loggedInUser)
+    givenApplicationAction(application, loggedInDeveloper)
   }
 
   trait SetupWithSubs extends BaseSetup {
     def setupApplicationWithSubs(a: Application, s: List[APISubscriptionStatus]): Unit = {
-      givenApplicationAction(ApplicationWithSubscriptionData(application, asSubscriptions(s), asFields((s))), loggedInUser, s)
+      givenApplicationAction(ApplicationWithSubscriptionData(application, asSubscriptions(s), asFields((s))), loggedInDeveloper, s)
     }
   }
 
@@ -1215,7 +1212,7 @@ class ApplicationCheckSpec
       status(result) shouldBe OK
 
       contentAsString(result) should include("Add members of your organisation and give them permissions to access this application")
-      contentAsString(result) should include(developerDto.email)
+      contentAsString(result) should include(developer.email)
     }
 
     "not return the manage team list page when not logged in" in new Setup {
@@ -1301,7 +1298,7 @@ class ApplicationCheckSpec
 
       redirectLocation(result) shouldBe Some(s"/developer/applications/${appId.value}/request-check/team")
 
-      verify(underTest.applicationService).removeTeamMember(eqTo(application), eqTo(anotherCollaboratorEmail), eqTo(loggedInUser.email))(*)
+      verify(underTest.applicationService).removeTeamMember(eqTo(application), eqTo(anotherCollaboratorEmail), eqTo(loggedInDeveloper.email))(*)
     }
 
     "team post redirect to check landing page when no check information on application" in new Setup {
@@ -1343,7 +1340,7 @@ class ApplicationCheckSpec
 
     "return unauthorised App details page with 2 Admins " in new Setup {
       lazy val collaborators = Set(
-        loggedInUser.email.asDeveloperCollaborator,
+        loggedInDeveloper.email.asDeveloperCollaborator,
         anotherCollaboratorEmail.asAdministratorCollaborator,
         yetAnotherCollaboratorEmail.asAdministratorCollaborator
       )

@@ -31,7 +31,7 @@ import controllers.AddApplicationNameForm
 class AddApplicationNameSpec extends CommonViewSpec with WithCSRFAddToken {
 
   val addApplicationNameView = app.injector.instanceOf[AddApplicationNameView]
-  val loggedInUser = utils.DeveloperSession("admin@example.com", "firstName1", "lastName1", loggedInState = LoggedInState.LOGGED_IN)
+  val loggedInDeveloper = utils.DeveloperSession("admin@example.com", "firstName1", "lastName1", loggedInState = LoggedInState.LOGGED_IN)
   val subordinateEnvironment = Environment.SANDBOX
   val appId = ApplicationId("1234")
   val principalEnvironment = Environment.PRODUCTION
@@ -40,7 +40,7 @@ class AddApplicationNameSpec extends CommonViewSpec with WithCSRFAddToken {
 
     def renderPage(form: Form[AddApplicationNameForm]) = {
       val request = FakeRequest().withCSRFToken
-      addApplicationNameView.render(form, subordinateEnvironment, request, loggedInUser, messagesProvider, appConfig)
+      addApplicationNameView.render(form, subordinateEnvironment, request, loggedInDeveloper, messagesProvider, appConfig)
     }
 
     "show an error when application name is invalid" in {
@@ -54,7 +54,7 @@ class AddApplicationNameSpec extends CommonViewSpec with WithCSRFAddToken {
 
     def renderPage(form: Form[AddApplicationNameForm]) = {
       val request = FakeRequest().withCSRFToken
-      addApplicationNameView.render(form, principalEnvironment, request, loggedInUser, messagesProvider, appConfig)
+      addApplicationNameView.render(form, principalEnvironment, request, loggedInDeveloper, messagesProvider, appConfig)
     }
 
     "show an error when application name is invalid" in {

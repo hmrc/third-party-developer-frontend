@@ -43,7 +43,7 @@ object MfaSecret {
 object TestContext {
   var developer: Developer = _
 
-  var sessionIdForLoggedInUser: String = ""
+  var sessionIdForloggedInDeveloper: String = ""
   var sessionIdForMfaMandatingUser: String = ""
 }
 
@@ -78,7 +78,7 @@ class LoginSteps extends ScalaDsl with EN with Matchers with NavigationSugar wit
     
     TestContext.developer = developer
 
-    TestContext.sessionIdForLoggedInUser = setupLoggedOrPartLoggedInDeveloper(developer, password, LoggedInState.LOGGED_IN)
+    TestContext.sessionIdForloggedInDeveloper = setupLoggedOrPartLoggedInDeveloper(developer, password, LoggedInState.LOGGED_IN)
     TestContext.sessionIdForMfaMandatingUser = setupLoggedOrPartLoggedInDeveloper(developer, password, LoggedInState.PART_LOGGED_IN_ENABLING_MFA)
 
     setupGettingDeveloperByEmail(developer)

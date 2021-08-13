@@ -28,11 +28,16 @@ import play.filters.csrf.CSRF.TokenProvider
 import uk.gov.hmrc.http.HeaderCarrier
 import utils.WithLoggedInSession._
 import utils.{LocalUserIdTracker, WithCSRFAddToken}
-import views.html.{ConfirmApisView, TurnOffApisView}
+import views.html.{ConfirmApisView, TurnOffApisMasterView}
 
 import scala.concurrent.ExecutionContext.Implicits.global
+import domain.models.applications.Application
+import domain.models.applications.ApplicationWithSubscriptionData
+import builder._
 
 class SR20Spec extends BaseControllerSpec
+                with SampleSession
+                with SampleApplication
                 with SubscriptionTestHelperSugar
                 with WithCSRFAddToken
                 with SubscriptionsBuilder
@@ -44,7 +49,7 @@ class SR20Spec extends BaseControllerSpec
     implicit val hc = HeaderCarrier()
 
     val confirmApisView = app.injector.instanceOf[ConfirmApisView]
-    val turnOffApisView = app.injector.instanceOf[TurnOffApisView]
+    val turnOffApisMasterView = app.injector.instanceOf[TurnOffApisMasterView]
 
     val controller = new SR20(
       mockErrorHandler,
@@ -54,7 +59,7 @@ class SR20Spec extends BaseControllerSpec
       mcc,
       cookieSigner,
       confirmApisView,
-      turnOffApisView,
+      turnOffApisMasterView,
       ApmConnectorMock.aMock
     )
     val appName: String = "app"
@@ -64,7 +69,7 @@ class SR20Spec extends BaseControllerSpec
     val sessionId = "sessionId"
     val session = Session(sessionId, developer, LoggedInState.LOGGED_IN)
 
-    val loggedInUser = DeveloperSession(session)
+    val loggedInDeveloper = DeveloperSession(session)
 
     fetchSessionByIdReturns(sessionId, session)
     updateUserFlowSessionsReturnsSuccessfully(sessionId)
@@ -88,10 +93,15 @@ class SR20Spec extends BaseControllerSpec
             VersionData(APIStatus.STABLE, APIAccess(APIAccessType.PUBLIC))), List(ApiCategory.EXAMPLE))
       )
 
+      val application = mock[Application]
+
+      fetchByApplicationIdReturns(appId, application)
+      givenApplicationAction(ApplicationWithSubscriptionData(application, asSubscriptions(List.empty), asFields(List.empty)), loggedInDeveloper, List.empty)
+
       ApmConnectorMock.FetchAllApis.willReturn(apis)
       ApmConnectorMock.FetchUpliftableSubscriptions.willReturn(apiIdentifiers)
 
-      private val result = controller.confirmApiSubscription(appId)(loggedInRequest.withCSRFToken)
+      private val result = controller.confirmApiSubscriptionsPage(appId)(loggedInRequest.withCSRFToken)
 
       status(result) shouldBe OK
 
@@ -113,7 +123,7 @@ class SR20Spec extends BaseControllerSpec
       ApmConnectorMock.FetchAllApis.willReturn(apis)
       ApmConnectorMock.FetchUpliftableSubscriptions.willReturn(apiIdentifiers)
 
-      private val result = controller.confirmApiSubscription(appId)(loggedInRequest.withCSRFToken)
+      private val result = controller.confirmApiSubscriptionsPage(appId)(loggedInRequest.withCSRFToken)
 
       status(result) shouldBe OK
 
@@ -139,7 +149,7 @@ class SR20Spec extends BaseControllerSpec
       ApmConnectorMock.FetchAllApis.willReturn(apis)
       ApmConnectorMock.FetchUpliftableSubscriptions.willReturn(apiIdentifiers)
 
-      private val result = controller.confirmApiSubscription(appId)(loggedInRequest.withCSRFToken)
+      private val result = controller.confirmApiSubscriptionsPage(appId)(loggedInRequest.withCSRFToken)
 
       status(result) shouldBe OK
 

@@ -32,7 +32,7 @@ class RedirectsSpec extends CommonViewSpec with WithCSRFAddToken with Collaborat
 
   val appId = ApplicationId("1234")
   val clientId = ClientId("clientId123")
-  val loggedInUser = utils.DeveloperSession("developer@example.com", "John", "Doe", loggedInState = LoggedInState.LOGGED_IN)
+  val loggedInDeveloper = utils.DeveloperSession("developer@example.com", "John", "Doe", loggedInState = LoggedInState.LOGGED_IN)
   val loggedInDev = utils.DeveloperSession("developer2@example.com", "Billy", "Fontaine", loggedInState = LoggedInState.LOGGED_IN)
   val application = Application(
     appId,
@@ -43,8 +43,8 @@ class RedirectsSpec extends CommonViewSpec with WithCSRFAddToken with Collaborat
     None,
     Environment.PRODUCTION,
     Some("Description 1"),
-    Set(loggedInUser.email.asAdministratorCollaborator, loggedInDev.email.asDeveloperCollaborator),
-    state = ApplicationState.production(loggedInUser.email, ""),
+    Set(loggedInDeveloper.email.asAdministratorCollaborator, loggedInDev.email.asDeveloperCollaborator),
+    state = ApplicationState.production(loggedInDeveloper.email, ""),
     access = Standard(redirectUris = List.empty, termsAndConditionsUrl = None)
   )
 
@@ -58,7 +58,7 @@ class RedirectsSpec extends CommonViewSpec with WithCSRFAddToken with Collaborat
 
       val applicationWithRedirects = application.copy(access = standardAccess)
       val user = if (role.isAdministrator) {
-        loggedInUser
+        loggedInDeveloper
       } else {
         loggedInDev
       }

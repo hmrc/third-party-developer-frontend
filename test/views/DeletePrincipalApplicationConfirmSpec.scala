@@ -38,7 +38,7 @@ class DeletePrincipalApplicationConfirmSpec extends CommonViewSpec with WithCSRF
     val request = FakeRequest().withCSRFToken
     val appId = ApplicationId("1234")
     val clientId = ClientId("clientId123")
-    val loggedInUser = utils.DeveloperSession("developer@example.com", "John", "Doe", loggedInState = LoggedInState.LOGGED_IN)
+    val loggedInDeveloper = utils.DeveloperSession("developer@example.com", "John", "Doe", loggedInState = LoggedInState.LOGGED_IN)
     val application = Application(
       appId,
       clientId,
@@ -48,14 +48,14 @@ class DeletePrincipalApplicationConfirmSpec extends CommonViewSpec with WithCSRF
       None,
       Environment.PRODUCTION,
       Some("Description 1"),
-      Set(loggedInUser.email.asAdministratorCollaborator),
-      state = ApplicationState.production(loggedInUser.email, ""),
+      Set(loggedInDeveloper.email.asAdministratorCollaborator),
+      state = ApplicationState.production(loggedInDeveloper.email, ""),
       access = Standard(redirectUris = List("https://red1", "https://red2"), termsAndConditionsUrl = Some("http://tnc-url.com"))
     )
 
     "render with no errors" in {
 
-      val page = deletePrincipalApplicationConfirmView.render(application, DeletePrincipalApplicationForm.form, request, loggedInUser, messagesProvider, appConfig)
+      val page = deletePrincipalApplicationConfirmView.render(application, DeletePrincipalApplicationForm.form, request, loggedInDeveloper, messagesProvider, appConfig)
       page.contentType should include("text/html")
 
       val document = Jsoup.parse(page.body)
@@ -69,7 +69,7 @@ class DeletePrincipalApplicationConfirmSpec extends CommonViewSpec with WithCSRF
 
       val formWithErrors = DeletePrincipalApplicationForm.form.withError("confirmation", "Confirmation error message")
 
-      val page = deletePrincipalApplicationConfirmView.render(application, formWithErrors, request, loggedInUser, messagesProvider, appConfig)
+      val page = deletePrincipalApplicationConfirmView.render(application, formWithErrors, request, loggedInDeveloper, messagesProvider, appConfig)
       page.contentType should include("text/html")
 
       val document = Jsoup.parse(page.body)

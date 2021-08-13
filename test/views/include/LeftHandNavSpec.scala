@@ -41,7 +41,7 @@ class LeftHandNavSpec extends CommonViewSpec with WithCSRFAddToken with Collabor
     val clientId = ClientId("clientId123")
     val applicationName = "Test Application"
 
-    val loggedInUser = utils.DeveloperSession("givenname.familyname@example.com", "Givenname", "Familyname", loggedInState = LoggedInState.LOGGED_IN)
+    val loggedInDeveloper = utils.DeveloperSession("givenname.familyname@example.com", "Givenname", "Familyname", loggedInState = LoggedInState.LOGGED_IN)
 
     val application = Application(
       applicationId,
@@ -52,8 +52,8 @@ class LeftHandNavSpec extends CommonViewSpec with WithCSRFAddToken with Collabor
       None,
       Environment.PRODUCTION,
       Some("Description 1"),
-      Set(loggedInUser.email.asAdministratorCollaborator),
-      state = ApplicationState.production(loggedInUser.email, ""),
+      Set(loggedInDeveloper.email.asAdministratorCollaborator),
+      state = ApplicationState.production(loggedInDeveloper.email, ""),
       access = Standard(redirectUris = List("https://red1", "https://red2"), termsAndConditionsUrl = Some("http://tnc-url.com"))
     )
 
@@ -61,7 +61,7 @@ class LeftHandNavSpec extends CommonViewSpec with WithCSRFAddToken with Collabor
     val applicationViewModelWithNoApiSubscriptions = ApplicationViewModel(application, hasSubscriptionsFields = false, hasPpnsFields = false)
 
     def leftHandNavRender(viewModel: Option[ApplicationViewModel], navSection: Option[String], flags: Map[String, Boolean] = Map.empty) = {
-      leftHandNavView.render(viewModel, navSection, flags, request, loggedInUser, appConfig)
+      leftHandNavView.render(viewModel, navSection, flags, request, loggedInDeveloper, appConfig)
     }
   }
 

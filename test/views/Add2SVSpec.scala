@@ -31,7 +31,7 @@ class Add2SVSpec extends CommonViewSpec with WithCSRFAddToken with DeveloperBuil
 
   val add2SVView = app.injector.instanceOf[Add2SVView]
 
-  implicit val loggedInUser = utils.DeveloperSession("admin@example.com", "firstName1", "lastName1", loggedInState = LoggedInState.LOGGED_IN)
+  implicit val loggedInDeveloper = utils.DeveloperSession("admin@example.com", "firstName1", "lastName1", loggedInState = LoggedInState.LOGGED_IN)
   implicit val request = FakeRequest().withCSRFToken
 
   val developer = buildDeveloper()

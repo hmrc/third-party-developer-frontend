@@ -40,6 +40,7 @@ import views.html._
 import javax.inject.{Inject, Singleton}
 import scala.concurrent.Future.successful
 import scala.concurrent.{ExecutionContext, Future}
+import controllers.models.ApiSubscriptionsFlow
 
 @Singleton
 class AddApplication @Inject() (
@@ -128,8 +129,9 @@ class AddApplication @Inject() (
       upliftableSubscriptions <- apmConnector.fetchUpliftableSubscriptions(sandboxAppId)
     }
     yield {
-      val sessionSubscriptions = upliftableSubscriptions.map {(_, true)}.toList.mkString("[", ",", "]")
-      Redirect(controllers.routes.SR20.confirmApiSubscriptions(sandboxAppId)).withSession(request.session + ("subscriptions" -> sessionSubscriptions))
+      val sessionSubscriptions = ApiSubscriptionsFlow.allOf(upliftableSubscriptions)
+      Redirect(controllers.routes.SR20.confirmApiSubscriptionsPage(sandboxAppId))
+      .withSession(request.session + ("subscriptions" -> ApiSubscriptionsFlow.toSessionString(sessionSubscriptions)))
     }
   }
 
