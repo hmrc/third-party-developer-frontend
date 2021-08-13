@@ -16,12 +16,16 @@
 
 package controllers
 
-import builder.{DeveloperBuilder, SubscriptionsBuilder}
+import builder.{DeveloperBuilder, SubscriptionsBuilder, _}
+import controllers.models.ApiSubscriptionsFlow
 import domain.models.apidefinitions._
+import domain.models.applications.ApplicationWithSubscriptionData
 import domain.models.developers.{DeveloperSession, LoggedInState, Session}
 import domain.models.subscriptions.{ApiCategory, ApiData, VersionData}
 import mocks.connector.ApmConnectorMockModule
 import mocks.service.{ApplicationActionServiceMock, ApplicationServiceMock, SessionServiceMock}
+import play.api.i18n.DefaultMessagesApi
+import play.api.mvc.MessagesRequest
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
 import play.filters.csrf.CSRF.TokenProvider
@@ -31,9 +35,6 @@ import utils.{LocalUserIdTracker, WithCSRFAddToken}
 import views.html.{ConfirmApisView, TurnOffApisMasterView}
 
 import scala.concurrent.ExecutionContext.Implicits.global
-import domain.models.applications.Application
-import domain.models.applications.ApplicationWithSubscriptionData
-import builder._
 
 class SR20Spec extends BaseControllerSpec
                 with SampleSession
@@ -77,53 +78,106 @@ class SR20Spec extends BaseControllerSpec
     val sessionParams = Seq("csrfToken" -> app.injector.instanceOf[TokenProvider].generateToken)
     val loggedOutRequest = FakeRequest().withSession(sessionParams: _*)
     val loggedInRequest = FakeRequest().withLoggedIn(controller, implicitly)(sessionId).withSession(sessionParams: _*)
+
+    val apiIdentifier1 = ApiIdentifier(ApiContext("test-api-context-1"), ApiVersion("1.0"))
+    val apiIdentifier2 = ApiIdentifier(ApiContext("test-api-context-2"), ApiVersion("1.0"))
+
+    val emptyFields = emptySubscriptionFieldsWrapper(appId, clientId, apiIdentifier1.context, apiIdentifier1.version)
+
+    val testAPISubscriptionStatus1 = APISubscriptionStatus(
+      "test-api-1",
+      "api-example-microservice",
+      apiIdentifier1.context,
+      ApiVersionDefinition(apiIdentifier1.version, APIStatus.STABLE),
+      subscribed = true,
+      requiresTrust = false,
+      fields = emptyFields
+    )
+
+    val testAPISubscriptionStatus2 = APISubscriptionStatus(
+      "test-api-2",
+      "api-example-microservice",
+      apiIdentifier2.context,
+      ApiVersionDefinition(apiIdentifier2.version, APIStatus.STABLE),
+      subscribed = true,
+      requiresTrust = false,
+      fields = emptyFields
+    )
+
+    val singleApi: Map[ApiContext,ApiData] = Map(
+      ApiContext("test-api-context-1") ->
+        ApiData("test-api-context-1", "test-api-context-1", true, Map(ApiVersion("1.0") ->
+          VersionData(APIStatus.STABLE, APIAccess(APIAccessType.PUBLIC))), List(ApiCategory.EXAMPLE))
+    )
+
+    val multipleApis: Map[ApiContext,ApiData] = Map(
+      ApiContext("test-api-context-1") ->
+        ApiData("test-api-context-1", "test-api-context-1", true, Map(ApiVersion("1.0") ->
+          VersionData(APIStatus.STABLE, APIAccess(APIAccessType.PUBLIC))), List(ApiCategory.EXAMPLE)),
+      ApiContext("test-api-context-2") ->
+        ApiData("test-api-context-2", "test-api-context-2", true, Map(ApiVersion("1.0") ->
+          VersionData(APIStatus.STABLE, APIAccess(APIAccessType.PUBLIC))), List(ApiCategory.EXAMPLE))
+    )
   }
 
   "confirmApiSubscription" should {
 
     "render the confirm apis view containing 1 upliftable api as there is only 1 upliftable api available to the application" in new Setup {
 
-      val apiIdentifiers = Set(
-        ApiIdentifier(ApiContext("test-api-context-1"), ApiVersion("1.0"))
-      )
+      val testFlow = ApiSubscriptionsFlow(Map(apiIdentifier1 -> true))
+      val sessionSubscriptions = "subscriptions" -> ApiSubscriptionsFlow.toSessionString(testFlow)
 
-      val apis: Map[ApiContext,ApiData] = Map(
-        ApiContext("test-api-context-1") ->
-          ApiData("test-api-context-1", "test-api-context-1", true, Map(ApiVersion("1.0") ->
-            VersionData(APIStatus.STABLE, APIAccess(APIAccessType.PUBLIC))), List(ApiCategory.EXAMPLE))
-      )
+      val applicationRequest = ApplicationRequest(
+        sampleApp,
+        sampleApp.deployedTo,
+        List(testAPISubscriptionStatus1),
+        Map.empty,
+        loggedInDeveloper.email.asAdministratorCollaborator.role,
+        loggedInDeveloper,
+        new MessagesRequest(loggedInRequest.withCSRFToken.withSession(sessionSubscriptions), new DefaultMessagesApi))
 
-      val application = mock[Application]
+      fetchByApplicationIdReturns(appId, sampleApp)
+      givenApplicationAction(ApplicationWithSubscriptionData(sampleApp,
+        asSubscriptions(List(testAPISubscriptionStatus1)),
+        asFields(List.empty)),
+        loggedInDeveloper,
+        List(testAPISubscriptionStatus1))
 
-      fetchByApplicationIdReturns(appId, application)
-      givenApplicationAction(ApplicationWithSubscriptionData(application, asSubscriptions(List.empty), asFields(List.empty)), loggedInDeveloper, List.empty)
+      ApmConnectorMock.FetchAllApis.willReturn(singleApi)
+      ApmConnectorMock.FetchUpliftableSubscriptions.willReturn(Set(apiIdentifier1))
 
-      ApmConnectorMock.FetchAllApis.willReturn(apis)
-      ApmConnectorMock.FetchUpliftableSubscriptions.willReturn(apiIdentifiers)
-
-      private val result = controller.confirmApiSubscriptionsPage(appId)(loggedInRequest.withCSRFToken)
+      private val result = controller.confirmApiSubscriptionsPage(appId)(applicationRequest)
 
       status(result) shouldBe OK
 
-      contentAsString(result) should include("test-api-context-1 - 1.0")
+      contentAsString(result) should include("test-api-1 - 1.0")
     }
 
     "render the confirm apis view without the 'Change my API subscriptions' link as there is only 1 upliftable api available to the application" in new Setup {
 
-      val apiIdentifiers = Set(
-        ApiIdentifier(ApiContext("test-api-context-1"), ApiVersion("1.0"))
-      )
+      val testFlow = ApiSubscriptionsFlow(Map(apiIdentifier1 -> true))
+      val sessionSubscriptions = "subscriptions" -> ApiSubscriptionsFlow.toSessionString(testFlow)
 
-      val apis: Map[ApiContext,ApiData] = Map(
-        ApiContext("test-api-context-1") ->
-          ApiData("test-api-context-1", "test-api-context-1", true, Map(ApiVersion("1.0") ->
-            VersionData(APIStatus.STABLE, APIAccess(APIAccessType.PUBLIC))), List(ApiCategory.EXAMPLE))
-      )
+      val applicationRequest = ApplicationRequest(
+        sampleApp,
+        sampleApp.deployedTo,
+        List(testAPISubscriptionStatus1),
+        Map.empty,
+        loggedInDeveloper.email.asAdministratorCollaborator.role,
+        loggedInDeveloper,
+        new MessagesRequest(loggedInRequest.withCSRFToken.withSession(sessionSubscriptions), new DefaultMessagesApi))
 
-      ApmConnectorMock.FetchAllApis.willReturn(apis)
-      ApmConnectorMock.FetchUpliftableSubscriptions.willReturn(apiIdentifiers)
+      fetchByApplicationIdReturns(appId, sampleApp)
+      givenApplicationAction(ApplicationWithSubscriptionData(sampleApp,
+        asSubscriptions(List(testAPISubscriptionStatus1)),
+        asFields(List.empty)),
+        loggedInDeveloper,
+        List(testAPISubscriptionStatus1))
 
-      private val result = controller.confirmApiSubscriptionsPage(appId)(loggedInRequest.withCSRFToken)
+      ApmConnectorMock.FetchAllApis.willReturn(singleApi)
+      ApmConnectorMock.FetchUpliftableSubscriptions.willReturn(Set(apiIdentifier1))
+
+      private val result = controller.confirmApiSubscriptionsPage(appId)(applicationRequest)
 
       status(result) shouldBe OK
 
@@ -132,24 +186,33 @@ class SR20Spec extends BaseControllerSpec
 
     "render the confirm apis view with the 'Change my API subscriptions' link as there is more than 1 upliftable api available to the application" in new Setup {
 
+      val testFlow = ApiSubscriptionsFlow(Map(apiIdentifier1 -> true, apiIdentifier2 -> true))
+      val sessionSubscriptions = "subscriptions" -> ApiSubscriptionsFlow.toSessionString(testFlow)
+
+      val applicationRequest = ApplicationRequest(
+        sampleApp,
+        sampleApp.deployedTo,
+        List(testAPISubscriptionStatus1, testAPISubscriptionStatus2),
+        Map.empty,
+        loggedInDeveloper.email.asAdministratorCollaborator.role,
+        loggedInDeveloper,
+        new MessagesRequest(loggedInRequest.withCSRFToken.withSession(sessionSubscriptions), new DefaultMessagesApi))
+
       val apiIdentifiers = Set(
         ApiIdentifier(ApiContext("test-api-context-1"), ApiVersion("1.0")),
         ApiIdentifier(ApiContext("test-api-context-2"), ApiVersion("1.0"))
       )
 
-      val apis: Map[ApiContext,ApiData] = Map(
-        ApiContext("test-api-context-1") ->
-          ApiData("test-api-context-1", "test-api-context-1", true, Map(ApiVersion("1.0") ->
-            VersionData(APIStatus.STABLE, APIAccess(APIAccessType.PUBLIC))), List(ApiCategory.EXAMPLE)),
-        ApiContext("test-api-context-2") ->
-          ApiData("test-api-context-2", "test-api-context-2", true, Map(ApiVersion("1.0") ->
-            VersionData(APIStatus.STABLE, APIAccess(APIAccessType.PUBLIC))), List(ApiCategory.EXAMPLE))
-      )
+      fetchByApplicationIdReturns(appId, sampleApp)
+      givenApplicationAction(ApplicationWithSubscriptionData(sampleApp,
+        asSubscriptions(List(testAPISubscriptionStatus1, testAPISubscriptionStatus2)),
+        asFields(List.empty)), loggedInDeveloper,
+        List(testAPISubscriptionStatus1, testAPISubscriptionStatus2))
 
-      ApmConnectorMock.FetchAllApis.willReturn(apis)
+      ApmConnectorMock.FetchAllApis.willReturn(multipleApis)
       ApmConnectorMock.FetchUpliftableSubscriptions.willReturn(apiIdentifiers)
 
-      private val result = controller.confirmApiSubscriptionsPage(appId)(loggedInRequest.withCSRFToken)
+      private val result = controller.confirmApiSubscriptionsPage(appId)(applicationRequest)
 
       status(result) shouldBe OK
 
