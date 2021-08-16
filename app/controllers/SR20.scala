@@ -32,6 +32,11 @@ import scala.concurrent.ExecutionContext
 import controllers.models.ApiSubscriptionsFlow
 import scala.concurrent.Future
 import domain.models.apidefinitions.APISubscriptionStatus
+import play.api.data.Form
+import play.api.data.validation.ValidationError
+import play.api.data.FormError
+
+
 
 @Singleton
 class SR20 @Inject() (val errorHandler: ErrorHandler,
@@ -99,7 +104,7 @@ def confirmApiSubscriptionsPage(sandboxAppId: ApplicationId): Action[AnyContent]
         .filter(s => upliftableApiIds.contains(s.apiIdentifier))
         .map(setSubscribedStatusFromFlow(flow))
     } yield {
-      Ok(turnOffApisMasterView(request.application.id, request.role, APISubscriptions.groupSubscriptionsByServiceName(subscriptionsWithFlowAdjusted)))
+      Ok(turnOffApisMasterView(request.application.id, request.role, APISubscriptions.groupSubscriptionsByServiceName(subscriptionsWithFlowAdjusted), DummySubscriptionsForm.form))
     }
   }
 
@@ -125,12 +130,13 @@ def confirmApiSubscriptionsPage(sandboxAppId: ApplicationId): Action[AnyContent]
           .withSession(request.session + ("subscriptions" -> ApiSubscriptionsFlow.toSessionString(newFlow)))
       }
       else {
-        val errorForm = DummySubscriptionsForm.form.bind(Map("hasNonExampleSubscription" -> "false"))
+        val errorForm = DummySubscriptionsForm.form.withError(FormError("apiSubscriptions", "error.turnoffapis.requires.at.least.one"))
+
         val sandboxSubscribedApis = request.subscriptions
             .filter(s => upliftableApiIds.contains(s.apiIdentifier))
             .map(setSubscribedStatusFromFlow(newFlow))
 
-        Ok(turnOffApisMasterView(request.application.id, request.role, APISubscriptions.groupSubscriptionsByServiceName(sandboxSubscribedApis), Some(errorForm)))
+        Ok(turnOffApisMasterView(request.application.id, request.role, APISubscriptions.groupSubscriptionsByServiceName(sandboxSubscribedApis), errorForm))
         .withSession(request.session + ("subscriptions" -> ApiSubscriptionsFlow.toSessionString(flow)))
       }
     }

@@ -228,4 +228,11 @@ object DummySubscriptionsForm {
     )(DummySubscriptionsForm.apply)(DummySubscriptionsForm.unapply)
       .verifying("error.must.subscribe", x => x.hasNonExampleSubscription)
   )
+
+  def form2: Form[DummySubscriptionsForm] = Form(
+    mapping(
+      "hasNonExampleSubscription" -> boolean
+    )(DummySubscriptionsForm.apply)(DummySubscriptionsForm.unapply)
+      .verifying("error.turnoffapis.requires.at.least.one", x => x.hasNonExampleSubscription)
+  )
 }
