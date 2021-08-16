@@ -144,7 +144,9 @@ class ChooseApplicationToUpliftActionSpec
     "go to next stage in journey when one app is selected and uplifted" in new Setup {
       val summaries = sandboxAppSummaries
       val sandboxAppId = summaries.head.id
-
+      
+      val subsetOfSubscriptions = summaries.head.subscriptionIds.take(1)
+      ApmConnectorMock.FetchUpliftableSubscriptions.willReturn(subsetOfSubscriptions)
       aUsersUplfitableAndNotUpliftableAppsReturns(summaries, summaries.map(_.id))
 
       val result = underTest.chooseApplicationToUpliftAction()(loggedInRequest.withFormUrlEncodedBody(("applicationId" -> sandboxAppId.value)))

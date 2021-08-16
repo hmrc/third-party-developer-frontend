@@ -141,6 +141,8 @@ class AddApplicationProductionSwitchSpec
     
     "go to next stage in journey when one app is upliftable and no other apps are present" in new Setup {
       val summaries = sandboxAppSummaries.take(1)
+      val subsetOfSubscriptions = summaries.head.subscriptionIds.take(1)
+      ApmConnectorMock.FetchUpliftableSubscriptions.willReturn(subsetOfSubscriptions)
       aUsersUplfitableAndNotUpliftableAppsReturns(summaries, summaries.map(_.id))
 
       // val prodAppId = ApplicationId.random
