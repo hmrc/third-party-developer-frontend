@@ -62,6 +62,7 @@ object APICategory {
   implicit val formatApiCategory = Json.valueFormat[APICategory]
 }
 
+// TODO - make category an APICategory
 case class APICategoryDetails(category: String, name: String) {
   def toAPICategory(): APICategory = {
     APICategory(category)
