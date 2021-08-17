@@ -153,6 +153,7 @@ subscription.confirmation.no.choice.field = Tell us if you want to subscribe to 
 unsubscribe.confirmation.no.choice.field = Tell us if you want to unsubscribe from this API
 subscription.change.no.choice.field = Choose a subscription status
 error.must.subscribe = You must subscribe to at least one API, in addition to optionally subscribing to Hello World
+error.turnoffapis.requires.at.least.one = You need at least 1 API subscription
 
 delete.redirect.confirmation.no.choice.field = Tell us if you want to delete this redirect URI
 
