@@ -31,10 +31,10 @@ trait ApmConnectorMockModule extends MockitoSugar with ArgumentMatchersSugar {
 
     object UpliftApplication {
       def willReturn(newAppId: ApplicationId) =
-        when(aMock.upliftApplication(*[ApplicationId])(*)).thenReturn(successful(newAppId))
+        when(aMock.upliftApplication(*[ApplicationId],*)(*)).thenReturn(successful(newAppId))
         
       def willFailWith(exception: Exception) =
-        when(aMock.upliftApplication(*[ApplicationId])(*)).thenReturn(failed(exception))
+        when(aMock.upliftApplication(*[ApplicationId],*)(*)).thenReturn(failed(exception))
     }
 
     object FetchAllApis {

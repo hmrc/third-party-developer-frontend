@@ -30,7 +30,6 @@ import views.html.{ConfirmApisView, TurnOffApisMasterView}
 import javax.inject.{Inject, Singleton}
 import scala.concurrent.ExecutionContext
 import controllers.models.ApiSubscriptionsFlow
-import scala.concurrent.Future
 import domain.models.apidefinitions.APISubscriptionStatus
 
 @Singleton
@@ -75,11 +74,8 @@ def confirmApiSubscriptionsPage(sandboxAppId: ApplicationId): Action[AnyContent]
     val flow = ApiSubscriptionsFlow.fromSessionString(request.session.get("subscriptions").getOrElse(""))
     
     for {
-      apiIdsToUnsubscribeFrom <- apmConnector.fetchUpliftableSubscriptions(sandboxAppId).map(_.filterNot(flow.isSelected))
-      // TODO - make upliftApplication take subscription Ids
-      upliftedAppId <- apmConnector.upliftApplication(sandboxAppId)
-      upliftedApplication <- apmConnector.fetchApplicationById(upliftedAppId).map(_.get)  // NB - we really should find this app
-      unsubscribing <- Future.sequence(apiIdsToUnsubscribeFrom.map(id => applicationService.unsubscribeFromApi(upliftedApplication.application, id)))
+      apiIdsToSubscribeTo <- apmConnector.fetchUpliftableSubscriptions(sandboxAppId).map(_.filter(flow.isSelected))
+      upliftedAppId <- apmConnector.upliftApplication(sandboxAppId,apiIdsToSubscribeTo)
     } yield {
       Redirect(controllers.checkpages.routes.ApplicationCheck.requestCheckPage(upliftedAppId)).withSession(request.session - "subscriptions")
     }
