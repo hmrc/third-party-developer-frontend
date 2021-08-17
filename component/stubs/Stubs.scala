@@ -47,6 +47,7 @@ object Stubs {
     )
   }
 
+  
   def setupDeleteRequest(path: String, status: Int) =
     stubFor(delete(urlEqualTo(path)).willReturn(aResponse().withStatus(status)))
 
