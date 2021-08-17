@@ -145,9 +145,6 @@ class AddApplicationProductionSwitchSpec
       ApmConnectorMock.FetchUpliftableSubscriptions.willReturn(subsetOfSubscriptions)
       aUsersUplfitableAndNotUpliftableAppsReturns(summaries, summaries.map(_.id))
 
-      // val prodAppId = ApplicationId.random
-      // ApmConnectorMock.UpliftApplication.willReturn(prodAppId)
-
       val result = underTest.addApplicationProductionSwitch()(loggedInRequest)
 
       status(result) shouldBe SEE_OTHER
