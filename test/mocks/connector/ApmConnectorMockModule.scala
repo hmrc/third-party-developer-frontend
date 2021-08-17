@@ -17,10 +17,12 @@
 package mocks.connector
 
 import org.mockito.{ArgumentMatchersSugar, MockitoSugar}
-import scala.concurrent.Future.{failed, successful}
 
+import scala.concurrent.Future.{failed, successful}
 import connectors.ApmConnector
+import domain.models.apidefinitions.{ApiContext, ApiIdentifier}
 import domain.models.applications.ApplicationId
+import domain.models.subscriptions.ApiData
 
 trait ApmConnectorMockModule extends MockitoSugar with ArgumentMatchersSugar {
 
@@ -29,10 +31,26 @@ trait ApmConnectorMockModule extends MockitoSugar with ArgumentMatchersSugar {
 
     object UpliftApplication {
       def willReturn(newAppId: ApplicationId) =
-        when(aMock.upliftApplication(*[ApplicationId])(*)).thenReturn(successful(newAppId))
+        when(aMock.upliftApplication(*[ApplicationId],*)(*)).thenReturn(successful(newAppId))
         
       def willFailWith(exception: Exception) =
-        when(aMock.upliftApplication(*[ApplicationId])(*)).thenReturn(failed(exception))
+        when(aMock.upliftApplication(*[ApplicationId],*)(*)).thenReturn(failed(exception))
+    }
+
+    object FetchAllApis {
+      def willReturn(apis: Map[ApiContext,ApiData]) =
+        when(aMock.fetchAllApis(*)(*)).thenReturn(successful(apis))
+
+      def willFailWith(exception: Exception) =
+        when(aMock.fetchAllApis(*)(*)).thenReturn(failed(exception))
+    }
+
+    object FetchUpliftableSubscriptions {
+      def willReturn(apiIds: Set[ApiIdentifier]) =
+        when(aMock.fetchUpliftableSubscriptions(*[ApplicationId])(*)).thenReturn(successful(apiIds))
+
+      def willFailWith(exception: Exception) =
+        when(aMock.fetchUpliftableSubscriptions(*)(*)).thenReturn(failed(exception))
     }
   }
 }

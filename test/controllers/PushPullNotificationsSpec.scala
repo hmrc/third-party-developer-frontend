@@ -41,10 +41,13 @@ import utils.LocalUserIdTracker
 import utils.TestApplications
 import utils.CollaboratorTracker
 import org.scalatestplus.play.guice.GuiceOneAppPerSuite
+import builder._
 
 class PushPullNotificationsSpec 
     extends BaseControllerSpec 
     with WithCSRFAddToken 
+    with SampleSession
+    with SampleApplication
     with SubscriptionTestHelperSugar 
     with TestApplications
     with CollaboratorTracker
@@ -55,8 +58,8 @@ class PushPullNotificationsSpec
   "showPushSecrets" when {
     "logged in as a Developer on an application" should {
       "return 403 for a prod app" in new Setup {
-        val application: Application = anApplication(developerEmail = loggedInUser.email)
-        givenApplicationAction(application, loggedInUser)
+        val application: Application = anApplication(developerEmail = loggedInDeveloper.email)
+        givenApplicationAction(application, loggedInDeveloper)
 
         val result: Future[Result] = underTest.showPushSecrets(application.id)(loggedInRequest)
 
@@ -64,12 +67,12 @@ class PushPullNotificationsSpec
       }
 
       "return the push secret for a sandbox app" in new Setup {
-        showPushSecretsShouldRenderThePage(aSandboxApplication(developerEmail = loggedInUser.email))
+        showPushSecretsShouldRenderThePage(aSandboxApplication(developerEmail = loggedInDeveloper.email))
       }
 
       "return 404 when the application is not subscribed to an API with PPNS fields" in new Setup {
-        val application: Application = aSandboxApplication(developerEmail = loggedInUser.email)
-        givenApplicationAction(application, loggedInUser)
+        val application: Application = aSandboxApplication(developerEmail = loggedInDeveloper.email)
+        givenApplicationAction(application, loggedInDeveloper)
 
         val result: Future[Result] = underTest.showPushSecrets(application.id)(loggedInRequest)
 
@@ -79,16 +82,16 @@ class PushPullNotificationsSpec
 
     "logged in as an Administrator on an application" should {
       "return the push secret for a production app" in new Setup {
-        showPushSecretsShouldRenderThePage(anApplication(adminEmail = loggedInUser.email))
+        showPushSecretsShouldRenderThePage(anApplication(adminEmail = loggedInDeveloper.email))
       }
 
       "return the push secret for a sandbox app" in new Setup {
-        showPushSecretsShouldRenderThePage(aSandboxApplication(adminEmail = loggedInUser.email))
+        showPushSecretsShouldRenderThePage(aSandboxApplication(adminEmail = loggedInDeveloper.email))
       }
 
       "return 404 when the application is not subscribed to an API with PPNS fields" in new Setup {
-        val application: Application = anApplication(adminEmail = loggedInUser.email)
-        givenApplicationAction(application, loggedInUser)
+        val application: Application = anApplication(adminEmail = loggedInDeveloper.email)
+        givenApplicationAction(application, loggedInDeveloper)
 
         val result: Future[Result] = underTest.showPushSecrets(application.id)(loggedInRequest)
 
@@ -99,7 +102,7 @@ class PushPullNotificationsSpec
     "not a team member on an application" should {
       "return not found" in new Setup {
         val application: Application = aStandardApplication
-        givenApplicationAction(application, loggedInUser)
+        givenApplicationAction(application, loggedInDeveloper)
 
         val result: Future[Result] = underTest.showPushSecrets(application.id)(loggedInRequest)
 
@@ -110,7 +113,7 @@ class PushPullNotificationsSpec
     "not logged in" should {
       "redirect to login" in new Setup {
         val application: Application = aStandardApplication
-        givenApplicationAction(application, loggedInUser)
+        givenApplicationAction(application, loggedInDeveloper)
 
         val result: Future[Result] = underTest.showPushSecrets(application.id)(loggedOutRequest)
 
@@ -140,7 +143,7 @@ class PushPullNotificationsSpec
     val sessionId = "sessionId"
     val session = Session(sessionId, developer, LoggedInState.LOGGED_IN)
 
-    val loggedInUser = DeveloperSession(session)
+    val loggedInDeveloper = DeveloperSession(session)
 
     when(underTest.sessionService.fetch(eqTo(sessionId))(*))
       .thenReturn(successful(Some(session)))
@@ -161,7 +164,7 @@ class PushPullNotificationsSpec
         .map(fieldValue => fieldValue.copy(definition = fieldValue.definition.copy(`type` = "PPNSField")))
       val subsData = List(subscriptionStatus.copy(fields = subscriptionStatus.fields.copy(fields = newFields)))
 
-      givenApplicationAction(ApplicationWithSubscriptionData(application, asSubscriptions(subsData), asFields(subsData)), loggedInUser, subsData)
+      givenApplicationAction(ApplicationWithSubscriptionData(application, asSubscriptions(subsData), asFields(subsData)), loggedInDeveloper, subsData)
 
       val expectedSecrets = Seq("some secret")
       when(pushPullNotificationsServiceMock.fetchPushSecrets(eqTo(application))(*)).thenReturn(successful(expectedSecrets))

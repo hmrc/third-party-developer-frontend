@@ -39,7 +39,7 @@ class DeleteSubordinateApplicationCompleteSpec extends CommonViewSpec with WithC
 
       val appId = ApplicationId("1234")
       val clientId = ClientId("clientId123")
-      val loggedInUser = utils.DeveloperSession("developer@example.com", "John", "Doe", loggedInState = LoggedInState.LOGGED_IN)
+      val loggedInDeveloper = utils.DeveloperSession("developer@example.com", "John", "Doe", loggedInState = LoggedInState.LOGGED_IN)
       val application = Application(
         appId,
         clientId,
@@ -49,12 +49,12 @@ class DeleteSubordinateApplicationCompleteSpec extends CommonViewSpec with WithC
         None,
         Environment.SANDBOX,
         Some("Description 1"),
-        Set(loggedInUser.email.asAdministratorCollaborator),
-        state = ApplicationState.production(loggedInUser.email, ""),
+        Set(loggedInDeveloper.email.asAdministratorCollaborator),
+        state = ApplicationState.production(loggedInDeveloper.email, ""),
         access = Standard(redirectUris = List("https://red1", "https://red2"), termsAndConditionsUrl = Some("http://tnc-url.com"))
       )
 
-      val page = deleteSubordinateApplicationCompleteView.render(application, request, loggedInUser, messagesProvider, appConfig)
+      val page = deleteSubordinateApplicationCompleteView.render(application, request, loggedInDeveloper, messagesProvider, appConfig)
       page.contentType should include("text/html")
 
       val document = Jsoup.parse(page.body)

@@ -71,7 +71,7 @@ class DeletePrincipalApplicationSpec
     val sessionId = "sessionId"
     val session = Session(sessionId, developer, LoggedInState.LOGGED_IN)
 
-    val loggedInUser = DeveloperSession(session)
+    val loggedInDeveloper = DeveloperSession(session)
 
     implicit val hc = HeaderCarrier()
 
@@ -84,12 +84,12 @@ class DeletePrincipalApplicationSpec
       None,
       Environment.PRODUCTION,
       Some("Description 1"),
-      Set(loggedInUser.email.asAdministratorCollaborator),
-      state = ApplicationState.production(loggedInUser.email, ""),
+      Set(loggedInDeveloper.email.asAdministratorCollaborator),
+      state = ApplicationState.production(loggedInDeveloper.email, ""),
       access = Standard(redirectUris = List("https://red1", "https://red2"), termsAndConditionsUrl = Some("http://tnc-url.com"))
     )
 
-    givenApplicationAction(application, loggedInUser)
+    givenApplicationAction(application, loggedInDeveloper)
     fetchSessionByIdReturns(sessionId, session)
     updateUserFlowSessionsReturnsSuccessfully(sessionId)
 
@@ -129,7 +129,7 @@ class DeletePrincipalApplicationSpec
 
       val requestWithFormBody = loggedInRequest.withFormUrlEncodedBody(("deleteConfirm", "Yes"))
 
-      when(underTest.applicationService.requestPrincipalApplicationDeletion(eqTo(loggedInUser), eqTo(application))(*))
+      when(underTest.applicationService.requestPrincipalApplicationDeletion(eqTo(loggedInDeveloper), eqTo(application))(*))
         .thenReturn(Future.successful(TicketCreated))
 
       val result = addToken(underTest.deletePrincipalApplicationAction(application.id))(requestWithFormBody)
@@ -139,7 +139,7 @@ class DeletePrincipalApplicationSpec
 
       body should include("Delete application")
       body should include("Request submitted")
-      verify(underTest.applicationService).requestPrincipalApplicationDeletion(eqTo(loggedInUser), eqTo(application))(*)
+      verify(underTest.applicationService).requestPrincipalApplicationDeletion(eqTo(loggedInDeveloper), eqTo(application))(*)
     }
 
     "redirect to 'Manage details' page when not-to-confirm selected" in new Setup {
@@ -156,9 +156,9 @@ class DeletePrincipalApplicationSpec
 
   "return not found if non-approved app" when {
     trait UnapprovedApplicationSetup extends Setup {
-      val nonApprovedApplication = aStandardNonApprovedApplication(loggedInUser.email)
+      val nonApprovedApplication = aStandardNonApprovedApplication(loggedInDeveloper.email)
 
-      givenApplicationAction(nonApprovedApplication, loggedInUser)
+      givenApplicationAction(nonApprovedApplication, loggedInDeveloper)
 
       when(underTest.applicationService.requestPrincipalApplicationDeletion(*, *)(*))
         .thenReturn(Future.successful(TicketCreated))

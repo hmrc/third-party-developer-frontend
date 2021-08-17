@@ -51,7 +51,7 @@ class ProtectAccountSpec extends BaseControllerSpec with WithCSRFAddToken with D
     val secret = "ABCDEFGH"
     val issuer = "HMRC Developer Hub"
     val sessionId = "sessionId"
-    val loggedInUser = buildDeveloper()
+    val loggedInDeveloper = buildDeveloper()
     val qrImage = "qrImage"
     val otpUri = new URI("OTPURI")
     val correctCode = "123123"
@@ -88,7 +88,7 @@ class ProtectAccountSpec extends BaseControllerSpec with WithCSRFAddToken with D
       override val qrCode: QRCode = mock[QRCode]
     }
 
-    fetchSessionByIdReturns(sessionId, Session(sessionId, loggedInUser, loggedInState))
+    fetchSessionByIdReturns(sessionId, Session(sessionId, loggedInDeveloper, loggedInState))
     updateUserFlowSessionsReturnsSuccessfully(sessionId)
 
     def protectAccountRequest(code: String): FakeRequest[AnyContentAsFormUrlEncoded] = {
@@ -100,19 +100,19 @@ class ProtectAccountSpec extends BaseControllerSpec with WithCSRFAddToken with D
   }
 
   trait SetupUnprotectedAccount extends Setup {
-    when(underTest.thirdPartyDeveloperConnector.fetchDeveloper(eqTo(loggedInUser.userId))(*))
-      .thenReturn(successful(Some(buildDeveloper(emailAddress = loggedInUser.email, organisation = None))))
+    when(underTest.thirdPartyDeveloperConnector.fetchDeveloper(eqTo(loggedInDeveloper.userId))(*))
+      .thenReturn(successful(Some(buildDeveloper(emailAddress = loggedInDeveloper.email, organisation = None))))
   }
 
   trait SetupProtectedAccount extends Setup {
-    when(underTest.thirdPartyDeveloperConnector.fetchDeveloper(eqTo(loggedInUser.userId))(*))
-      .thenReturn(successful(Some(buildDeveloper(emailAddress = loggedInUser.email, organisation = None, mfaEnabled = Some(true)))))
+    when(underTest.thirdPartyDeveloperConnector.fetchDeveloper(eqTo(loggedInDeveloper.userId))(*))
+      .thenReturn(successful(Some(buildDeveloper(emailAddress = loggedInDeveloper.email, organisation = None, mfaEnabled = Some(true)))))
   }
 
   trait SetupSuccessfulStart2SV extends Setup {
-    when(underTest.otpAuthUri.apply(secret.toLowerCase(), issuer, loggedInUser.email)).thenReturn(otpUri)
+    when(underTest.otpAuthUri.apply(secret.toLowerCase(), issuer, loggedInDeveloper.email)).thenReturn(otpUri)
     when(underTest.qrCode.generateDataImageBase64(otpUri.toString)).thenReturn(qrImage)
-    when(underTest.thirdPartyDeveloperConnector.createMfaSecret(eqTo(loggedInUser.userId))(*))
+    when(underTest.thirdPartyDeveloperConnector.createMfaSecret(eqTo(loggedInDeveloper.userId))(*))
       .thenReturn(successful(secret))
   }
 
@@ -129,7 +129,7 @@ class ProtectAccountSpec extends BaseControllerSpec with WithCSRFAddToken with D
   }
 
   trait SetupSuccessfulVerification extends Setup {
-    when(underTest.mfaService.enableMfa(eqTo(loggedInUser.userId), eqTo(correctCode))(*)).thenReturn(Future.successful(MFAResponse(true)))
+    when(underTest.mfaService.enableMfa(eqTo(loggedInDeveloper.userId), eqTo(correctCode))(*)).thenReturn(Future.successful(MFAResponse(true)))
   }
 
   trait SetupFailedRemoval extends Setup {
@@ -137,7 +137,7 @@ class ProtectAccountSpec extends BaseControllerSpec with WithCSRFAddToken with D
   }
 
   trait SetupSuccessfulRemoval extends Setup {
-    when(underTest.mfaService.removeMfa(eqTo(loggedInUser.userId), eqTo(loggedInUser.email), eqTo(correctCode))(*)).thenReturn(Future.successful(MFAResponse(true)))
+    when(underTest.mfaService.removeMfa(eqTo(loggedInDeveloper.userId), eqTo(loggedInDeveloper.email), eqTo(correctCode))(*)).thenReturn(Future.successful(MFAResponse(true)))
   }
 
   "Given a user is not logged in" when {

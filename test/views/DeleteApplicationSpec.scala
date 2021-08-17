@@ -32,7 +32,7 @@ class DeleteApplicationSpec extends CommonViewSpec with WithCSRFAddToken with Co
   val deleteApplicationView = app.injector.instanceOf[DeleteApplicationView]
   val appId = ApplicationId("1234")
   val clientId = ClientId("clientId123")
-  val loggedInUser = utils.DeveloperSession("developer@example.com", "John", "Doe", loggedInState = LoggedInState.LOGGED_IN)
+  val loggedInDeveloper = utils.DeveloperSession("developer@example.com", "John", "Doe", loggedInState = LoggedInState.LOGGED_IN)
   val application = Application(
     appId,
     clientId,
@@ -42,8 +42,8 @@ class DeleteApplicationSpec extends CommonViewSpec with WithCSRFAddToken with Co
     None,
     Environment.PRODUCTION,
     Some("Description 1"),
-    Set(loggedInUser.email.asAdministratorCollaborator),
-    state = ApplicationState.production(loggedInUser.email, ""),
+    Set(loggedInDeveloper.email.asAdministratorCollaborator),
+    state = ApplicationState.production(loggedInDeveloper.email, ""),
     access = Standard(redirectUris = List("https://red1", "https://red2"), termsAndConditionsUrl = Some("http://tnc-url.com"))
   )
   val prodAppId = ApplicationId("prod123")
@@ -56,7 +56,7 @@ class DeleteApplicationSpec extends CommonViewSpec with WithCSRFAddToken with Co
       "on Production" in {
         val request = FakeRequest().withCSRFToken
 
-        val page = deleteApplicationView.render(prodApp, ADMINISTRATOR, request, loggedInUser, messagesProvider, appConfig)
+        val page = deleteApplicationView.render(prodApp, ADMINISTRATOR, request, loggedInDeveloper, messagesProvider, appConfig)
 
         page.contentType should include("text/html")
         val document = Jsoup.parse(page.body)
@@ -68,7 +68,7 @@ class DeleteApplicationSpec extends CommonViewSpec with WithCSRFAddToken with Co
       "on Sandbox" in {
         val request = FakeRequest().withCSRFToken
 
-        val page = deleteApplicationView.render(sandboxApp, ADMINISTRATOR, request, loggedInUser, messagesProvider, appConfig)
+        val page = deleteApplicationView.render(sandboxApp, ADMINISTRATOR, request, loggedInDeveloper, messagesProvider, appConfig)
 
         page.contentType should include("text/html")
         val document = Jsoup.parse(page.body)
@@ -82,7 +82,7 @@ class DeleteApplicationSpec extends CommonViewSpec with WithCSRFAddToken with Co
         Seq(prodApp, sandboxApp) foreach { application =>
           val request = FakeRequest().withCSRFToken
 
-          val page = deleteApplicationView.render(application, DEVELOPER, request, loggedInUser, messagesProvider, appConfig)
+          val page = deleteApplicationView.render(application, DEVELOPER, request, loggedInDeveloper, messagesProvider, appConfig)
 
           page.contentType should include("text/html")
           val document = Jsoup.parse(page.body)
@@ -90,7 +90,7 @@ class DeleteApplicationSpec extends CommonViewSpec with WithCSRFAddToken with Co
           elementIdentifiedByAttrWithValueContainsText(document, "a", "class", "button", "Request deletion") shouldBe false
           elementIdentifiedByAttrWithValueContainsText(document, "a", "class", "button", "Continue") shouldBe false
           elementExistsByText(document, "div", "You cannot delete this application because you're not an administrator.") shouldBe true
-          elementExistsByText(document, "p", s"Ask the administrator ${loggedInUser.email} to delete it.") shouldBe true
+          elementExistsByText(document, "p", s"Ask the administrator ${loggedInDeveloper.email} to delete it.") shouldBe true
         }
       }
 
@@ -100,7 +100,7 @@ class DeleteApplicationSpec extends CommonViewSpec with WithCSRFAddToken with Co
           .foreach { application =>
             val request = FakeRequest().withCSRFToken
 
-            val page = deleteApplicationView.render(application, DEVELOPER, request, loggedInUser, messagesProvider, appConfig)
+            val page = deleteApplicationView.render(application, DEVELOPER, request, loggedInDeveloper, messagesProvider, appConfig)
 
             page.contentType should include("text/html")
             val document = Jsoup.parse(page.body)

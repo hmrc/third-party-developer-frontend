@@ -43,7 +43,7 @@ class NavigationSpec extends BaseControllerSpec with DeveloperBuilder with Local
     val developer = buildDeveloper()
     val sessionId = "sessionId"
     val session = Session(sessionId, developer, LoggedInState.LOGGED_IN)
-    val loggedInUser = DeveloperSession(session)
+    val loggedInDeveloper = DeveloperSession(session)
 
     var userPassword = "Password1!"
 

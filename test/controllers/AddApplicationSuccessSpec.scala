@@ -19,7 +19,6 @@ package controllers
 import builder.DeveloperBuilder
 import config.ErrorHandler
 import domain.models.applications._
-import domain.models.developers.{DeveloperSession, LoggedInState, Session}
 import mocks.service._
 import play.api.mvc.{AnyContentAsEmpty, Result}
 import play.api.test.FakeRequest
@@ -39,22 +38,16 @@ import scala.concurrent.Future
 import domain.models.apidefinitions.ExtendedApiDefinitionTestDataHelper
 import utils.LocalUserIdTracker
 import controllers.addapplication.AddApplication
+import builder._
 
 class AddApplicationSuccessSpec 
     extends BaseControllerSpec 
+    with SampleSession
+    with SampleApplication
     with SubscriptionTestHelperSugar 
     with WithCSRFAddToken 
     with DeveloperBuilder
     with LocalUserIdTracker {
-
-  val developer = buildDeveloper()
-  val sessionId = "sessionId"
-  val session = Session(sessionId, developer, LoggedInState.LOGGED_IN)
-
-  val loggedInUser = DeveloperSession(session)
-
-  val partLoggedInSessionId = "partLoggedInSessionId"
-  val partLoggedInSession = Session(partLoggedInSessionId, developer, LoggedInState.PART_LOGGED_IN_ENABLING_MFA)
 
   val principalApp = Application(
     appId,
@@ -65,8 +58,8 @@ class AddApplicationSuccessSpec
     None,
     Environment.PRODUCTION,
     Some("Description 1"),
-    Set(loggedInUser.email.asAdministratorCollaborator),
-    state = ApplicationState.production(loggedInUser.email, ""),
+    Set(loggedInDeveloper.email.asAdministratorCollaborator),
+    state = ApplicationState.production(loggedInDeveloper.email, ""),
     access = Standard(redirectUris = List("https://red1", "https://red2"), termsAndConditionsUrl = Some("http://tnc-url.com"))
   )
 
@@ -79,8 +72,8 @@ class AddApplicationSuccessSpec
     None,
     Environment.SANDBOX,
     Some("Description 2"),
-    Set(loggedInUser.email.asAdministratorCollaborator),
-    state = ApplicationState.production(loggedInUser.email, ""),
+    Set(loggedInDeveloper.email.asAdministratorCollaborator),
+    state = ApplicationState.production(loggedInDeveloper.email, ""),
     access = Standard(redirectUris = List("https://red3", "https://red4"), termsAndConditionsUrl = Some("http://tnc-url.com"))
   )
 
@@ -143,7 +136,7 @@ class AddApplicationSuccessSpec
       // Have the lookup for subscribed apis not already in email preferences return an List containing some api definitions
       // so that we follow the new email preferences route through this journey.
       fetchAPIDetailsReturns(List(extendedApiDefinition("Test Api Definition")))
-      givenApplicationAction(subordinateApp, loggedInUser)
+      givenApplicationAction(subordinateApp, loggedInDeveloper)
 
       private val result = underTest.addApplicationSuccess(appId)(loggedInRequest)
 
@@ -157,13 +150,13 @@ class AddApplicationSuccessSpec
       // Have the lookup for subscribed apis not already in email preferences return an empty List so that we follow
       // the original route through this journey.
       fetchAPIDetailsReturns(List.empty)
-      givenApplicationAction(subordinateApp, loggedInUser)
+      givenApplicationAction(subordinateApp, loggedInDeveloper)
 
       private val result = underTest.addApplicationSuccess(appId)(loggedInRequest)
 
       status(result) shouldBe OK
       titleOf(result) shouldBe "Application added to the sandbox - HMRC Developer Hub - GOV.UK"
-      contentAsString(result) should include(loggedInUser.displayedName)
+      contentAsString(result) should include(loggedInDeveloper.displayedName)
       contentAsString(result) should include("You can now use its credentials to test with sandbox APIs.")
       contentAsString(result) should include("Read the guidance on")
       contentAsString(result) should include("to find out which endpoints to use, creating a test user and types of test data.")
@@ -177,13 +170,13 @@ class AddApplicationSuccessSpec
       // Have the lookup for subscribed apis not already in email preferences return an empty List so that we follow
       // the original route through this journey.
       fetchAPIDetailsReturns(List.empty)
-      givenApplicationAction(subordinateApp, loggedInUser)
+      givenApplicationAction(subordinateApp, loggedInDeveloper)
 
       private val result = underTest.addApplicationSuccess(appId)(loggedInRequest)
 
       status(result) shouldBe OK
       titleOf(result) shouldBe "Application added to development - HMRC Developer Hub - GOV.UK"
-      contentAsString(result) should include(loggedInUser.displayedName)
+      contentAsString(result) should include(loggedInDeveloper.displayedName)
       contentAsString(result) should include("You can now use its credentials to test with development APIs.")
       contentAsString(result) should include("Read the guidance on")
       contentAsString(result) should include("to find out which endpoints to use, creating a test user and types of test data.")

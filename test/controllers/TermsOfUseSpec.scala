@@ -62,9 +62,9 @@ class TermsOfUseSpec
       termsOfUseView
     )
 
-    val loggedInUser = buildDeveloper()
+    val loggedInDeveloper = buildDeveloper()
     val sessionId = "sessionId"
-    val session = Session(sessionId, loggedInUser, LoggedInState.LOGGED_IN)
+    val session = Session(sessionId, loggedInDeveloper, LoggedInState.LOGGED_IN)
     val sessionParams = Seq("csrfToken" -> app.injector.instanceOf[TokenProvider].generateToken)
     val developerSession = DeveloperSession(session)
 
@@ -89,7 +89,7 @@ class TermsOfUseSpec
         DateTimeUtils.now,
         None,
         environment,
-        collaborators = Set(loggedInUser.email.asCollaborator(userRole)),
+        collaborators = Set(loggedInDeveloper.email.asCollaborator(userRole)),
         access = access,
         state = ApplicationState.production("dont-care", "dont-care"),
         checkInformation = checkInformation
@@ -185,7 +185,7 @@ class TermsOfUseSpec
       redirectLocation(result) shouldBe Some("/developer/applications/1234/details")
 
       val termsOfUseAgreement = captor.getValue.termsOfUseAgreements.head
-      termsOfUseAgreement.emailAddress shouldBe loggedInUser.email
+      termsOfUseAgreement.emailAddress shouldBe loggedInDeveloper.email
       termsOfUseAgreement.version shouldBe version
     }
 

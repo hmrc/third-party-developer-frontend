@@ -17,31 +17,30 @@
 package controllers.addapplication
 
 import config.{ApplicationConfig, ErrorHandler}
+import connectors.ApmConnector
+import controllers.{AddApplicationNameForm, ApplicationController, ChooseApplicationToUpliftForm}
 import controllers.FormKeys.appNameField
-import domain.models.applications._
-import domain.models.applications.Environment.{PRODUCTION, SANDBOX}
 import domain.ApplicationCreatedResponse
+import domain.Error._
 import domain.models.apidefinitions.APISubscriptionStatus
+import domain.models.applications.Environment.{PRODUCTION, SANDBOX}
+import domain.models.applications._
+import domain.models.controllers.ApplicationSummary
 import domain.models.emailpreferences.EmailPreferences
-import javax.inject.{Inject, Singleton}
 import play.api.data.Form
 import play.api.libs.crypto.CookieSigner
-import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
+import play.api.libs.json.Json
+import play.api.mvc.{Action, AnyContent, MessagesControllerComponents, Request}
 import service._
+import services.UpliftLogic
+import uk.gov.hmrc.http.HeaderCarrier
 import views.helper.EnvironmentNameService
 import views.html._
 
-import scala.concurrent.{ExecutionContext, Future}
+import javax.inject.{Inject, Singleton}
 import scala.concurrent.Future.successful
-import uk.gov.hmrc.http.HeaderCarrier
-import play.api.libs.json.Json
-import domain.Error._
-import domain.models.controllers.ApplicationSummary
-import connectors.ApmConnector
-import controllers.ApplicationController
-import controllers.ChooseApplicationToUpliftForm
-import controllers.AddApplicationNameForm
-import services.UpliftLogic
+import scala.concurrent.{ExecutionContext, Future}
+import controllers.models.ApiSubscriptionsFlow
 
 @Singleton
 class AddApplication @Inject() (
@@ -92,11 +91,11 @@ class AddApplication @Inject() (
   }
 
   def soleApplicationToUpliftAction(appId: ApplicationId): Action[AnyContent] = loggedInAction { implicit request =>
-   (for {
+    (for {
       (sandboxAppSummaries, upliftableAppIds) <- upliftLogic.aUsersSandboxAdminSummariesAndUpliftIds(loggedIn.developer.userId)
       upliftableSummaries = sandboxAppSummaries.filter(s => upliftableAppIds.contains(s.id))
     } yield upliftableSummaries match {
-      case summary :: Nil => upliftApplicationAndShowRequestCheckPage(upliftableSummaries.head.id)
+      case summary :: Nil => showConfirmSubscriptionsPage(upliftableSummaries.head.id)
       case _              => successful(BadRequest(Json.toJson(BadRequestError)))
     }).flatten
   }
@@ -119,22 +118,27 @@ class AddApplication @Inject() (
 
       upliftableAppIds.toList match {
         case Nil          => successful(BadRequest(Json.toJson(BadRequestError)))
-        case appId :: Nil if !hasAppsThatCannotBeUplifted =>  upliftApplicationAndShowRequestCheckPage(appId)
+        case appId :: Nil if !hasAppsThatCannotBeUplifted =>  showConfirmSubscriptionsPage(appId)
         case _ => chooseApplicationToUplift(upliftableSummaries, hasAppsThatCannotBeUplifted)(request)
       }
     }
   }
   
-  private def upliftApplicationAndShowRequestCheckPage(sandboxAppId: ApplicationId)(implicit hc: HeaderCarrier) = {
+  private def showConfirmSubscriptionsPage(sandboxAppId: ApplicationId)(implicit request: Request[_]) = {
     for {
-      newAppId <- apmConnector.upliftApplication(sandboxAppId)
-    } yield Redirect(controllers.checkpages.routes.ApplicationCheck.requestCheckPage(newAppId))
+      upliftableSubscriptions <- apmConnector.fetchUpliftableSubscriptions(sandboxAppId)
+    }
+    yield {
+      val sessionSubscriptions = ApiSubscriptionsFlow.allOf(upliftableSubscriptions)
+      Redirect(controllers.routes.SR20.confirmApiSubscriptionsPage(sandboxAppId))
+      .withSession(request.session + ("subscriptions" -> ApiSubscriptionsFlow.toSessionString(sessionSubscriptions)))
+    }
   }
 
   def chooseApplicationToUpliftAction(): Action[AnyContent] = loggedInAction { implicit request =>
 
     def handleValidForm(validForm: ChooseApplicationToUpliftForm) =
-      upliftApplicationAndShowRequestCheckPage(validForm.applicationId)
+      showConfirmSubscriptionsPage(validForm.applicationId)
 
     def handleInvalidForm(formWithErrors: Form[ChooseApplicationToUpliftForm]) = {
       upliftLogic.aUsersSandboxAdminSummariesAndUpliftIds(loggedIn.developer.userId) flatMap { data =>

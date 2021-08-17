@@ -26,11 +26,8 @@ import domain.models.subscriptions.FieldValue
 import domain.models.subscriptions.FieldName
 
 trait SubscriptionTestHelperSugar extends SubscriptionsBuilder {
+  self: AsyncHmrcSpec with SampleApplication =>
 
-  self: AsyncHmrcSpec =>
-
-  val appId = ApplicationId("myAppId")
-  val clientId = ClientId("myClientId")
   val employmentContext = ApiContext("individual-employment-context")
   val taxContext = ApiContext("individual-tax-context")
   val versionOne = ApiVersion("1.0")

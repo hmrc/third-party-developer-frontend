@@ -81,6 +81,10 @@ object ApiVersion {
   def random = ApiVersion(Random.nextDouble().toString)
 }
 
+trait HasApiIdentifier {
+  def apiIdentifier: ApiIdentifier
+}
+
 case class ApiIdentifier(context: ApiContext, version: ApiVersion)
 
 // TODO - 5090 - Add new open access class
@@ -93,13 +97,15 @@ case class APISubscriptionStatus(
     requiresTrust: Boolean,
     fields: SubscriptionFieldsWrapper,
     isTestSupport: Boolean = false
-) {
+) extends HasApiIdentifier {
   def isPrivate: Boolean = {
     apiVersion.accessType match {
       case PRIVATE => true
       case PUBLIC => false
     }
   }
+
+  lazy val apiIdentifier = ApiIdentifier(context, apiVersion.version)
 }
 
 case class APISubscriptionStatusWithSubscriptionFields(name: String, context: ApiContext, apiVersion: ApiVersionDefinition, fields: SubscriptionFieldsWrapper)

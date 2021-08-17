@@ -19,7 +19,6 @@ package controllers
 import builder.DeveloperBuilder
 import config.ErrorHandler
 import domain.models.applications._
-import domain.models.developers.{DeveloperSession, LoggedInState, Session}
 import mocks.service._
 import play.api.mvc.AnyContentAsEmpty
 import play.api.test.FakeRequest
@@ -35,35 +34,28 @@ import views.html._
 import scala.concurrent.ExecutionContext.Implicits.global
 import utils.LocalUserIdTracker
 import domain.models.controllers.ApplicationSummary
-import builder.ApplicationBuilder
+import builder._
 import scala.concurrent.Future
 import play.api.mvc.Result
 import mocks.connector.ApmConnectorMockModule
 import controllers.addapplication.AddApplication
 
 class AddApplicationProductionSwitchSpec
-    extends BaseControllerSpec 
+    extends BaseControllerSpec
+    with SampleSession
+    with SampleApplication 
     with SubscriptionTestHelperSugar 
     with WithCSRFAddToken 
     with DeveloperBuilder
     with LocalUserIdTracker
     with ApplicationBuilder {
 
-  val developer = buildDeveloper()
-  val sessionId = "sessionId"
-  val session = Session(sessionId, developer, LoggedInState.LOGGED_IN)
-
-  val loggedInUser = DeveloperSession(session)
-
-  val partLoggedInSessionId = "partLoggedInSessionId"
-  val partLoggedInSession = Session(partLoggedInSessionId, developer, LoggedInState.PART_LOGGED_IN_ENABLING_MFA)
-
-  val collaborator: Collaborator = loggedInUser.email.asAdministratorCollaborator
+  val collaborator: Collaborator = loggedInDeveloper.email.asAdministratorCollaborator
 
   val appCreatedOn = DateTimeUtils.now.minusDays(1)
   val appLastAccess = appCreatedOn
 
-  val sandboxAppSummaries = (1 to 5).map(_ => buildApplication(loggedInUser.email)).map(ApplicationSummary.from(_, loggedInUser.developer.userId)).toList
+  val sandboxAppSummaries = (1 to 5).map(_ => buildApplication(loggedInDeveloper.email)).map(ApplicationSummary.from(_, loggedInDeveloper.developer.userId)).toList
 
   trait Setup extends UpliftLogicMock with AppsByTeamMemberServiceMock with ApplicationServiceMock with ApmConnectorMockModule with ApplicationActionServiceMock with SessionServiceMock with EmailPreferencesServiceMock {
     val accessTokenSwitchView = app.injector.instanceOf[AccessTokenSwitchView]
@@ -149,15 +141,14 @@ class AddApplicationProductionSwitchSpec
     
     "go to next stage in journey when one app is upliftable and no other apps are present" in new Setup {
       val summaries = sandboxAppSummaries.take(1)
+      val subsetOfSubscriptions = summaries.head.subscriptionIds.take(1)
+      ApmConnectorMock.FetchUpliftableSubscriptions.willReturn(subsetOfSubscriptions)
       aUsersUplfitableAndNotUpliftableAppsReturns(summaries, summaries.map(_.id))
-
-      val prodAppId = ApplicationId.random
-      ApmConnectorMock.UpliftApplication.willReturn(prodAppId)
 
       val result = underTest.addApplicationProductionSwitch()(loggedInRequest)
 
       status(result) shouldBe SEE_OTHER
-      redirectLocation(result).value shouldBe controllers.checkpages.routes.ApplicationCheck.requestCheckPage(prodAppId).toString()
+      redirectLocation(result).value shouldBe controllers.routes.SR20.confirmApiSubscriptionsAction(summaries.head.id).toString()
     }
     
     "return ok when all apps are upliftable" in new Setup {

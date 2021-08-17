@@ -57,7 +57,7 @@ class UserLoginAccountSpec extends BaseControllerSpec with WithCSRFAddToken with
     private val daysRemaining = 10
 
     val sessionId = "sessionId"
-    val loggedInUser = buildDeveloper()
+    val loggedInDeveloper = buildDeveloper()
 
     val mfaMandateService: MfaMandateService = mock[MfaMandateService]
 
@@ -141,12 +141,12 @@ class UserLoginAccountSpec extends BaseControllerSpec with WithCSRFAddToken with
 
   trait PartLogged extends Setup {
     def loggedInState: LoggedInState = LoggedInState.PART_LOGGED_IN_ENABLING_MFA
-    fetchSessionByIdReturns(sessionId, Session(sessionId, loggedInUser, loggedInState))
+    fetchSessionByIdReturns(sessionId, Session(sessionId, loggedInDeveloper, loggedInState))
   }
 
   trait LoggedIn extends Setup {
     def loggedInState: LoggedInState = LoggedInState.LOGGED_IN
-    fetchSessionByIdReturns(sessionId, Session(sessionId, loggedInUser, loggedInState))
+    fetchSessionByIdReturns(sessionId, Session(sessionId, loggedInDeveloper, loggedInState))
   }
   
   "authenticate" should {
@@ -435,7 +435,7 @@ class UserLoginAccountSpec extends BaseControllerSpec with WithCSRFAddToken with
           contentAsString(result) should include("Add 2-step verification")
           contentAsString(result) should include("If you are the Administrator of an application you have 10 days until 2-step verification is mandatory")
 
-          verify(underTest.mfaMandateService).showAdminMfaMandatedMessage(eqTo(loggedInUser.userId))(*)
+          verify(underTest.mfaMandateService).showAdminMfaMandatedMessage(eqTo(loggedInDeveloper.userId))(*)
         }
       }
     }
@@ -458,7 +458,7 @@ class UserLoginAccountSpec extends BaseControllerSpec with WithCSRFAddToken with
         contentAsString(result) should include("Add 2-step verification")
         contentAsString(result) should include("Use 2-step verification to protect your Developer Hub account and application details from being compromised.")
 
-        verify(underTest.mfaMandateService).showAdminMfaMandatedMessage(eqTo(loggedInUser.userId))(*)
+        verify(underTest.mfaMandateService).showAdminMfaMandatedMessage(eqTo(loggedInDeveloper.userId))(*)
       }
     }
   }

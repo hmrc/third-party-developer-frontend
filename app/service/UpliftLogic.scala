@@ -42,7 +42,7 @@ class UpliftLogic @Inject()(
 
   import UpliftLogic._
 
-  private def getSubscriptionsByApp(summaries: Seq[ApplicationSummary])(implicit hc: HeaderCarrier): Map[ApplicationId, Set[ApiIdentifier]] = {
+  private def getSubscriptionsByApp(summaries: Seq[ApplicationSummary]): Map[ApplicationId, Set[ApiIdentifier]] = {
     summaries.map(s => s.id -> s.subscriptionIds).toMap
   }
 

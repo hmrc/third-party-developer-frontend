@@ -55,29 +55,29 @@ class DetailsSpec
   "details" when {
     "logged in as a Developer on an application" should {
       "return the view for a standard production app with no change link" in new Setup {
-        val approvedApplication = anApplication(developerEmail = loggedInUser.email)
+        val approvedApplication = anApplication(developerEmail = loggedInDeveloper.email)
         detailsShouldRenderThePage(approvedApplication, hasChangeButton = false)
       }
 
       "return the view for a developer on a sandbox app" in new Setup {
-        detailsShouldRenderThePage(aSandboxApplication(developerEmail = loggedInUser.email))
+        detailsShouldRenderThePage(aSandboxApplication(developerEmail = loggedInDeveloper.email))
       }
     }
 
     "logged in as an Administrator on an application" should {
       "return the view for a standard production app" in new Setup {
-        val approvedApplication = anApplication(adminEmail = loggedInUser.email)
+        val approvedApplication = anApplication(adminEmail = loggedInDeveloper.email)
         detailsShouldRenderThePage(approvedApplication)
       }
 
       "return the view for an admin on a sandbox app" in new Setup {
-        detailsShouldRenderThePage(aSandboxApplication(adminEmail = loggedInUser.email))
+        detailsShouldRenderThePage(aSandboxApplication(adminEmail = loggedInDeveloper.email))
       }
 
       "return a redirect when using an application in testing state" in new Setup {
-        val testingApplication = anApplication(adminEmail = loggedInUser.email, state = ApplicationState.testing)
+        val testingApplication = anApplication(adminEmail = loggedInDeveloper.email, state = ApplicationState.testing)
 
-        givenApplicationAction(testingApplication, loggedInUser)
+        givenApplicationAction(testingApplication, loggedInDeveloper)
 
         val result = testingApplication.callDetails
 
@@ -86,9 +86,9 @@ class DetailsSpec
       }
 
       "return the credentials requested page on an application pending approval" in new Setup {
-        val pendingApprovalApplication = anApplication(adminEmail = loggedInUser.email, state = ApplicationState.pendingGatekeeperApproval("dont-care"))
+        val pendingApprovalApplication = anApplication(adminEmail = loggedInDeveloper.email, state = ApplicationState.pendingGatekeeperApproval("dont-care"))
 
-        givenApplicationAction(pendingApprovalApplication, loggedInUser)
+        givenApplicationAction(pendingApprovalApplication, loggedInDeveloper)
 
         val result = addToken(underTest.details(pendingApprovalApplication.id))(loggedInRequest)
 
@@ -100,9 +100,9 @@ class DetailsSpec
       }
 
       "return the credentials requested page on an application pending verification" in new Setup {
-        val pendingVerificationApplication = anApplication(adminEmail = loggedInUser.email, state = ApplicationState.pendingRequesterVerification("dont-care", "dont-care"))
+        val pendingVerificationApplication = anApplication(adminEmail = loggedInDeveloper.email, state = ApplicationState.pendingRequesterVerification("dont-care", "dont-care"))
 
-        givenApplicationAction(pendingVerificationApplication, loggedInUser)
+        givenApplicationAction(pendingVerificationApplication, loggedInDeveloper)
 
         val result = addToken(underTest.details(pendingVerificationApplication.id))(loggedInRequest)
 
@@ -117,7 +117,7 @@ class DetailsSpec
     "not a team member on an application" should {
       "return not found" in new Setup {
         val application = aStandardApplication
-        givenApplicationAction(application, loggedInUser)
+        givenApplicationAction(application, loggedInDeveloper)
 
         val result = application.callDetails
 
@@ -128,7 +128,7 @@ class DetailsSpec
     "not logged in" should {
       "redirect to login" in new Setup {
         val application = aStandardApplication
-        givenApplicationAction(application, loggedInUser)
+        givenApplicationAction(application, loggedInDeveloper)
 
         val result = application.callDetailsNotLoggedIn
 
@@ -140,25 +140,25 @@ class DetailsSpec
   "changeDetails" should {
     "return the view for an admin on a standard production app" in new Setup {
       changeDetailsShouldRenderThePage(
-        anApplication(adminEmail = loggedInUser.email)
+        anApplication(adminEmail = loggedInDeveloper.email)
       )
     }
 
     "return the view for a developer on a sandbox app" in new Setup {
       changeDetailsShouldRenderThePage(
-        aSandboxApplication(developerEmail = loggedInUser.email)
+        aSandboxApplication(developerEmail = loggedInDeveloper.email)
       )
     }
 
     "return the view for an admin on a sandbox app" in new Setup {
       changeDetailsShouldRenderThePage(
-        aSandboxApplication(adminEmail = loggedInUser.email)
+        aSandboxApplication(adminEmail = loggedInDeveloper.email)
       )
     }
 
     "return forbidden for a developer on a standard production app" in new Setup {
-      val application = anApplication(developerEmail = loggedInUser.email)
-      givenApplicationAction(application, loggedInUser)
+      val application = anApplication(developerEmail = loggedInDeveloper.email)
+      givenApplicationAction(application, loggedInDeveloper)
 
       val result = application.callChangeDetails
 
@@ -167,7 +167,7 @@ class DetailsSpec
 
     "return not found when not a teamMember on the app" in new Setup {
       val application = aStandardApprovedApplication
-      givenApplicationAction(application, loggedInUser)
+      givenApplicationAction(application, loggedInDeveloper)
 
       val result = application.callChangeDetails
 
@@ -176,7 +176,7 @@ class DetailsSpec
 
     "redirect to login when not logged in" in new Setup {
       val application = aStandardApprovedApplication
-      givenApplicationAction(application, loggedInUser)
+      givenApplicationAction(application, loggedInDeveloper)
 
       val result = application.callDetailsNotLoggedIn
 
@@ -185,7 +185,7 @@ class DetailsSpec
 
     "return not found for an ROPC application" in new Setup {
       val application = anROPCApplication()
-      givenApplicationAction(application, loggedInUser)
+      givenApplicationAction(application, loggedInDeveloper)
 
       val result = underTest.details(application.id)(loggedInRequest)
 
@@ -194,7 +194,7 @@ class DetailsSpec
 
     "return not found for a privileged application" in new Setup {
       val application = aPrivilegedApplication()
-      givenApplicationAction(application, loggedInUser)
+      givenApplicationAction(application, loggedInDeveloper)
 
       val result = underTest.details(application.id)(loggedInRequest)
 
@@ -204,8 +204,8 @@ class DetailsSpec
 
   "changeDetailsAction validation" should {
     "not pass when application is updated with empty name" in new Setup {
-      val application = anApplication(adminEmail = loggedInUser.email)
-      givenApplicationAction(application, loggedInUser)
+      val application = anApplication(adminEmail = loggedInDeveloper.email)
+      givenApplicationAction(application, loggedInDeveloper)
 
       val result = application.withName("").callChangeDetailsAction
 
@@ -213,8 +213,8 @@ class DetailsSpec
     }
 
     "not pass when application is updated with invalid name" in new Setup {
-      val application = anApplication(adminEmail = loggedInUser.email)
-      givenApplicationAction(application, loggedInUser)
+      val application = anApplication(adminEmail = loggedInDeveloper.email)
+      givenApplicationAction(application, loggedInDeveloper)
 
       val result = application.withName("a").callChangeDetailsAction
 
@@ -225,8 +225,8 @@ class DetailsSpec
       when(underTest.applicationService.isApplicationNameValid(*, *, *)(*))
         .thenReturn(Future.successful(Invalid.invalidName))
 
-      val application = anApplication(adminEmail = loggedInUser.email)
-      givenApplicationAction(application, loggedInUser)
+      val application = anApplication(adminEmail = loggedInDeveloper.email)
+      givenApplicationAction(application, loggedInDeveloper)
 
       val result = application.withName("my invalid HMRC application name").callChangeDetailsAction
 
@@ -242,7 +242,7 @@ class DetailsSpec
 
     "return not found" in new Setup {
       val application = aStandardNonApprovedApplication()
-      givenApplicationAction(application, loggedInUser)
+      givenApplicationAction(application, loggedInDeveloper)
 
       val result = application.callChangeDetails
 
@@ -251,7 +251,7 @@ class DetailsSpec
 
     "return not found when not a teamMember on the app" in new Setup {
       val application = aStandardApprovedApplication
-      givenApplicationAction(application, loggedInUser)
+      givenApplicationAction(application, loggedInDeveloper)
 
       val result = application.withDescription(newDescription).callChangeDetailsAction
 
@@ -260,7 +260,7 @@ class DetailsSpec
 
     "redirect to login when not logged in" in new Setup {
       val application = aStandardApprovedApplication
-      givenApplicationAction(application, loggedInUser)
+      givenApplicationAction(application, loggedInDeveloper)
 
       val result = application.withDescription(newDescription).callChangeDetailsActionNotLoggedIn
 
@@ -271,15 +271,15 @@ class DetailsSpec
   "changeDetailsAction for production app in uplifted state" should {
 
     "redirect to the details page on success for an admin" in new Setup {
-      val application = anApplication(adminEmail = loggedInUser.email)
+      val application = anApplication(adminEmail = loggedInDeveloper.email)
 
       changeDetailsShouldRedirectOnSuccess(application)
     }
 
     "return forbidden for a developer" in new Setup {
-      val application = anApplication(developerEmail = loggedInUser.email)
+      val application = anApplication(developerEmail = loggedInDeveloper.email)
 
-      givenApplicationAction(application, loggedInUser)
+      givenApplicationAction(application, loggedInDeveloper)
 
       val result = application.withDescription(newDescription).callChangeDetailsAction
 
@@ -287,9 +287,9 @@ class DetailsSpec
     }
 
     "keep original application name when administrator does an update" in new Setup {
-      val application = anApplication(adminEmail = loggedInUser.email)
+      val application = anApplication(adminEmail = loggedInDeveloper.email)
 
-      givenApplicationAction(application, loggedInUser)
+      givenApplicationAction(application, loggedInDeveloper)
 
       application.withName(newName).callChangeDetailsAction
 
@@ -301,24 +301,24 @@ class DetailsSpec
   "changeDetailsAction for sandbox app" should {
 
     "redirect to the details page on success for an admin" in new Setup {
-      changeDetailsShouldRedirectOnSuccess(aSandboxApplication(adminEmail = loggedInUser.email))
+      changeDetailsShouldRedirectOnSuccess(aSandboxApplication(adminEmail = loggedInDeveloper.email))
     }
 
     "redirect to the details page on success for a developer" in new Setup {
-      changeDetailsShouldRedirectOnSuccess(aSandboxApplication(developerEmail = loggedInUser.email))
+      changeDetailsShouldRedirectOnSuccess(aSandboxApplication(developerEmail = loggedInDeveloper.email))
     }
 
     "update all fields for an admin" in new Setup {
-      changeDetailsShouldUpdateTheApplication(aSandboxApplication(adminEmail = loggedInUser.email))
+      changeDetailsShouldUpdateTheApplication(aSandboxApplication(adminEmail = loggedInDeveloper.email))
     }
 
     "update all fields for a developer" in new Setup {
-      changeDetailsShouldUpdateTheApplication(aSandboxApplication(adminEmail = loggedInUser.email))
+      changeDetailsShouldUpdateTheApplication(aSandboxApplication(adminEmail = loggedInDeveloper.email))
     }
 
     "update the app but not the check information" in new Setup {
-      val application = aSandboxApplication(adminEmail = loggedInUser.email)
-      givenApplicationAction(application, loggedInUser)
+      val application = aSandboxApplication(adminEmail = loggedInDeveloper.email)
+      givenApplicationAction(application, loggedInDeveloper)
 
       await(application.withName(newName).callChangeDetailsAction)
 
@@ -352,7 +352,7 @@ class DetailsSpec
     val sessionId = "sessionId"
     val session = Session(sessionId, developer, LoggedInState.LOGGED_IN)
 
-    val loggedInUser = DeveloperSession(session)
+    val loggedInDeveloper = DeveloperSession(session)
 
     val newName = "new name"
     val newDescription = Some("new description")
@@ -389,7 +389,7 @@ class DetailsSpec
     }
 
     def detailsShouldRenderThePage(application: Application, hasChangeButton: Boolean = true) = {
-      givenApplicationAction(application, loggedInUser)
+      givenApplicationAction(application, loggedInDeveloper)
 
       val result = application.callDetails
 
@@ -404,7 +404,7 @@ class DetailsSpec
     }
 
     def changeDetailsShouldRenderThePage(application: Application) = {
-      givenApplicationAction(application, loggedInUser)
+      givenApplicationAction(application, loggedInDeveloper)
 
       val result = application.callChangeDetails
 
@@ -424,7 +424,7 @@ class DetailsSpec
     }
 
     def changeDetailsShouldRedirectOnSuccess(application: Application) = {
-      givenApplicationAction(application, loggedInUser)
+      givenApplicationAction(application, loggedInDeveloper)
 
       val result = application.withDescription(newDescription).callChangeDetailsAction
 
@@ -433,7 +433,7 @@ class DetailsSpec
     }
 
     def changeDetailsShouldUpdateTheApplication(application: Application) = {
-      givenApplicationAction(application, loggedInUser)
+      givenApplicationAction(application, loggedInDeveloper)
 
       await(
         application

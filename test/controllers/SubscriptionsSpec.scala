@@ -23,7 +23,6 @@ import connectors.ThirdPartyDeveloperConnector
 import domain.models.apidefinitions.{ApiContext, ApiVersion,ApiIdentifier}
 import domain.models.applications._
 import domain.models.connectors.TicketResult
-import domain.models.developers.{Developer, DeveloperSession, LoggedInState, Session}
 import mocks.service.{ApplicationActionServiceMock, ApplicationServiceMock, SessionServiceMock}
 import org.joda.time.DateTimeZone
 import play.api.mvc.{AnyContentAsEmpty, AnyContentAsFormUrlEncoded, Result}
@@ -42,62 +41,18 @@ import views.html.include.ChangeSubscriptionConfirmationView
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 import scala.concurrent.Future.successful
-import utils.LocalUserIdTracker
+import utils._
+import builder._
 
-class SubscriptionsSpec extends BaseControllerSpec with SubscriptionTestHelperSugar with WithCSRFAddToken with DeveloperBuilder with LocalUserIdTracker {
+
+
+class SubscriptionsSpec extends BaseControllerSpec with WithCSRFAddToken with LocalUserIdTracker with DeveloperBuilder with SampleSession with SampleApplications with SubscriptionTestHelperSugar {
 
   val apiName = "api-1"
   val apiVersion = ApiVersion("1.0")
   val apiContext = ApiContext("Context")
   val apiIdentifier = ApiIdentifier(apiContext, apiVersion)
   val displayStatus = "Status"
-
-  val developer: Developer = buildDeveloper()
-  val sessionId = "sessionId"
-  val session: Session = Session(sessionId, developer, LoggedInState.LOGGED_IN)
-
-  val loggedInDeveloper: DeveloperSession = DeveloperSession(session)
-
-  val anApplication: Application = Application(
-    appId,
-    clientId,
-    "App name 1",
-    DateTimeUtils.now,
-    DateTimeUtils.now,
-    None,
-    Environment.PRODUCTION,
-    Some("Description 1"),
-    Set(loggedInDeveloper.email.asAdministratorCollaborator),
-    state = ApplicationState.production(loggedInDeveloper.email, ""),
-    access = Standard(redirectUris = List("https://red1", "https://red2"), termsAndConditionsUrl = Some("http://tnc-url.com"))
-  )
-
-  val activeApplication: Application = anApplication
-
-  val activeDeveloperApplication: Application = anApplication.copy(collaborators = Set(loggedInDeveloper.email.asDeveloperCollaborator))
-
-  val ropcApplication: Application = anApplication.copy(access = ROPC())
-
-  val privilegedApplication: Application = anApplication.copy(access = Privileged())
-
-  val newApplication: Application = anApplication.copy(state = ApplicationState.testing)
-
-  val newSandboxApplication: Application = anApplication.copy(deployedTo = Environment.SANDBOX, state = ApplicationState.testing)
-
-  val adminApplication: Application = anApplication.copy(collaborators = Set(loggedInDeveloper.email.asAdministratorCollaborator))
-  val developerApplication: Application = anApplication.copy(collaborators = Set(loggedInDeveloper.email.asDeveloperCollaborator))
-
-  val adminSubmittedProductionApplication: Application =
-    adminApplication.copy(deployedTo = Environment.PRODUCTION, state = ApplicationState.production(loggedInDeveloper.email, ""))
-  val adminCreatedProductionApplication: Application = adminApplication.copy(deployedTo = Environment.PRODUCTION, state = ApplicationState.testing)
-  val adminSubmittedSandboxApplication: Application = adminApplication.copy(deployedTo = Environment.SANDBOX, state = ApplicationState.production(loggedInDeveloper.email, ""))
-  val adminCreatedSandboxApplication: Application = adminApplication.copy(deployedTo = Environment.SANDBOX, state = ApplicationState.testing)
-  val developerSubmittedProductionApplication: Application =
-    developerApplication.copy(deployedTo = Environment.PRODUCTION, state = ApplicationState.production(loggedInDeveloper.email, ""))
-  val developerCreatedProductionApplication: Application = developerApplication.copy(deployedTo = Environment.PRODUCTION, state = ApplicationState.testing)
-  val developerSubmittedSandboxApplication: Application =
-    developerApplication.copy(deployedTo = Environment.SANDBOX, state = ApplicationState.production(loggedInDeveloper.email, ""))
-  val devloperCreatedSandboxApplication: Application = developerApplication.copy(deployedTo = Environment.SANDBOX, state = ApplicationState.testing)
 
   val tokens: ApplicationToken = ApplicationToken(List(aClientSecret(), aClientSecret()), "token")
 

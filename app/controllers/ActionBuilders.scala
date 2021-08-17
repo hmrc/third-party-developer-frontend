@@ -42,7 +42,7 @@ trait ActionBuilders {
   private implicit def hc(implicit request: Request[_]): HeaderCarrier =
     HeaderCarrierConverter.fromRequestAndSession(request, request.session)
 
-  def applicationAction(applicationId: ApplicationId, developerSession: DeveloperSession)(implicit ec: ExecutionContext): ActionRefiner[MessagesRequest, ApplicationRequest] =
+  def  applicationAction(applicationId: ApplicationId, developerSession: DeveloperSession)(implicit ec: ExecutionContext): ActionRefiner[MessagesRequest, ApplicationRequest] =
     new ActionRefiner[MessagesRequest, ApplicationRequest] {
       override protected def executionContext: ExecutionContext = ec
 
@@ -107,7 +107,7 @@ trait ActionBuilders {
       }
     }
 
-  def subscriptionFieldsRefiner(context: ApiContext, version: ApiVersion)(
+def subscriptionFieldsRefiner(context: ApiContext, version: ApiVersion)(
       implicit ec: ExecutionContext
   ): ActionRefiner[ApplicationWithFieldDefinitionsRequest, ApplicationWithSubscriptionFields] =
     new ActionRefiner[ApplicationWithFieldDefinitionsRequest, ApplicationWithSubscriptionFields] {

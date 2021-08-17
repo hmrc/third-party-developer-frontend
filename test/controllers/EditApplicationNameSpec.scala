@@ -21,7 +21,6 @@ import java.util.UUID.randomUUID
 import builder.DeveloperBuilder
 import config.ErrorHandler
 import domain.models.applications._
-import domain.models.developers.{Developer, DeveloperSession, LoggedInState, Session}
 import mocks.service._
 import org.joda.time.DateTimeZone
 import org.mockito.Mockito
@@ -39,38 +38,18 @@ import mocks.connector.ApmConnectorMockModule
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import utils.LocalUserIdTracker
+import builder._
 import controllers.addapplication.AddApplication
 
 class EditApplicationNameSpec 
     extends BaseControllerSpec 
-    with ApplicationActionServiceMock 
+    with ApplicationActionServiceMock
+    with SampleSession
+    with SampleApplication 
     with SubscriptionTestHelperSugar 
     with WithCSRFAddToken
     with DeveloperBuilder
     with LocalUserIdTracker {
-
-  val developer: Developer = buildDeveloper()
-  val sessionId = "sessionId"
-  val session: Session = Session(sessionId, developer, LoggedInState.LOGGED_IN)
-
-  val loggedInUser: DeveloperSession = DeveloperSession(session)
-
-  val partLoggedInSessionId = "partLoggedInSessionId"
-  val partLoggedInSession: Session = Session(partLoggedInSessionId, developer, LoggedInState.PART_LOGGED_IN_ENABLING_MFA)
-
-  val application: Application = Application(
-    appId,
-    clientId,
-    "App name 1",
-    DateTimeUtils.now,
-    DateTimeUtils.now,
-    None,
-    Environment.PRODUCTION,
-    Some("Description 1"),
-    Set(loggedInUser.email.asAdministratorCollaborator),
-    state = ApplicationState.production(loggedInUser.email, ""),
-    access = Standard(redirectUris = List("https://red1", "https://red2"), termsAndConditionsUrl = Some("http://tnc-url.com"))
-  )
 
   val tokens: ApplicationToken = ApplicationToken(List(aClientSecret(), aClientSecret()), "token")
 
@@ -128,13 +107,13 @@ class EditApplicationNameSpec
   "NameApplicationPage in subordinate" should {
 
     "return the Edit Applications Name Page with user logged in" in new Setup {
-      givenApplicationAction(application, loggedInUser)
+      givenApplicationAction(sampleApp, loggedInDeveloper)
 
       private val result = underTest.addApplicationName(Environment.SANDBOX)(loggedInRequest.withCSRFToken)
 
       status(result) shouldBe OK
       contentAsString(result) should include("What&#x27;s the name of your application?")
-      contentAsString(result) should include(loggedInUser.displayedName)
+      contentAsString(result) should include(loggedInDeveloper.displayedName)
       contentAsString(result) should include("Continue")
       contentAsString(result) should include("Application name")
       contentAsString(result) should not include "Sign in"
@@ -189,7 +168,7 @@ class EditApplicationNameSpec
 
       status(result) shouldBe OK
       contentAsString(result) should include("What&#x27;s the name of your application?")
-      contentAsString(result) should include(loggedInUser.displayedName)
+      contentAsString(result) should include(loggedInDeveloper.displayedName)
       contentAsString(result) should include("We show this name to your users when they authorise your software to interact with HMRC.")
       contentAsString(result) should include("It must comply with our")
       contentAsString(result) should not include "Sign in"

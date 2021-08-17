@@ -36,9 +36,9 @@ class ManageTeamViewSpec extends CommonViewSpec with WithCSRFAddToken with Devel
 
   val appId = ApplicationId("1234")
   val clientId = ClientId("clientId123")
-  val loggedInUser = utils.DeveloperSession("admin@example.com", "firstName1", "lastName1", loggedInState = LoggedInState.LOGGED_IN)
+  val loggedInDeveloper = utils.DeveloperSession("admin@example.com", "firstName1", "lastName1", loggedInState = LoggedInState.LOGGED_IN)
   val collaborator = utils.DeveloperSession("developer@example.com", "firstName2", "lastName2", loggedInState = LoggedInState.LOGGED_IN)
-  val collaborators = Set(loggedInUser.email.asAdministratorCollaborator, collaborator.email.asDeveloperCollaborator)
+  val collaborators = Set(loggedInDeveloper.email.asAdministratorCollaborator, collaborator.email.asDeveloperCollaborator)
   val application = Application(
     appId,
     clientId,
@@ -49,7 +49,7 @@ class ManageTeamViewSpec extends CommonViewSpec with WithCSRFAddToken with Devel
     Environment.PRODUCTION,
     Some("Description 1"),
     collaborators,
-    state = ApplicationState.production(loggedInUser.email, ""),
+    state = ApplicationState.production(loggedInDeveloper.email, ""),
     access = Standard(redirectUris = List("https://red1", "https://red2"), termsAndConditionsUrl = Some("http://tnc-url.com"))
   )
 
@@ -59,7 +59,7 @@ class ManageTeamViewSpec extends CommonViewSpec with WithCSRFAddToken with Devel
     def renderPage(role: CollaboratorRole, form: Form[AddTeamMemberForm] = AddTeamMemberForm.form) = {
       val request = FakeRequest().withCSRFToken
 
-      manageTeamView.render(ApplicationViewModel(application, hasSubscriptionsFields = false, hasPpnsFields = false), role, form, request, messagesProvider, appConfig, "nav-section", loggedInUser)
+      manageTeamView.render(ApplicationViewModel(application, hasSubscriptionsFields = false, hasPpnsFields = false), role, form, request, messagesProvider, appConfig, "nav-section", loggedInDeveloper)
     }
 
     "show Add and Remove buttons for Admin" in {
@@ -68,7 +68,7 @@ class ManageTeamViewSpec extends CommonViewSpec with WithCSRFAddToken with Devel
       elementExistsByText(document, "h1", "Manage team members") shouldBe true
       elementExistsByText(document, "a", "Add a team member") shouldBe true
       elementExistsByText(document, "strong", "Warning You need admin rights to add or remove team members.") shouldBe false
-      elementExistsByText(document, "td", loggedInUser.email) shouldBe true
+      elementExistsByText(document, "td", loggedInDeveloper.email) shouldBe true
       elementExistsByText(document, "td", collaborator.email) shouldBe true
       linkExistsWithHref(document, controllers.routes.ManageTeam.removeTeamMember(appId, collaborator.email.toSha256).url) shouldBe true
     }
@@ -79,7 +79,7 @@ class ManageTeamViewSpec extends CommonViewSpec with WithCSRFAddToken with Devel
       elementExistsByText(document, "h1", "Manage team members") shouldBe true
       elementExistsByText(document, "a", "Add a team member") shouldBe false
       elementExistsByText(document, "strong", "Warning You need admin rights to add or remove team members.") shouldBe true
-      elementExistsByText(document, "td", loggedInUser.email) shouldBe true
+      elementExistsByText(document, "td", loggedInDeveloper.email) shouldBe true
       elementExistsByText(document, "td", collaborator.email) shouldBe true
       linkExistsWithHref(document, controllers.routes.ManageTeam.removeTeamMember(appId, collaborator.email.toSha256).url) shouldBe false
     }

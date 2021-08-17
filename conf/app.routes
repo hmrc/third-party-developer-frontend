@@ -185,3 +185,9 @@ GET         /partials/terms-of-use                                              
 GET         /assets/*file                                                                                @controllers.Assets.versioned(path="/public", file: Asset)
 
 GET         /keep-alive                                                                                  controllers.SessionController.keepAlive()
+
+GET         /applications/:id/confirm-subscriptions                                                       controllers.SR20.confirmApiSubscriptionsPage(id: domain.models.applications.ApplicationId)
+POST        /applications/:id/confirm-subscriptions                                                       controllers.SR20.confirmApiSubscriptionsAction(id: domain.models.applications.ApplicationId)
+
+GET         /applications/:id/change-api-subscriptions                                                   controllers.SR20.changeApiSubscriptions(id: domain.models.applications.ApplicationId)
+POST        /applications/:id/change-api-subscriptions                                                   controllers.SR20.saveApiSubscriptionsSubmit(id: domain.models.applications.ApplicationId)

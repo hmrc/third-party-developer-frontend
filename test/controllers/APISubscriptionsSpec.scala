@@ -18,9 +18,16 @@ package controllers
 
 import domain.models.apidefinitions._
 import domain.models.apidefinitions.APIStatus.{BETA, STABLE}
-import utils.AsyncHmrcSpec
+import utils._
+import builder._
 
-class APISubscriptionsSpec extends AsyncHmrcSpec with SubscriptionTestHelperSugar {
+class APISubscriptionsSpec
+  extends AsyncHmrcSpec
+  with LocalUserIdTracker
+  with DeveloperBuilder
+  with SampleSession
+  with SampleApplication
+  with SubscriptionTestHelperSugar {
 
   "groupSubscriptions" should {
     val publicAccess = Some(APIAccess(APIAccessType.PUBLIC))
