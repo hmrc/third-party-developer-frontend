@@ -16,7 +16,7 @@
 
 package controllers
 
-import config.{ApplicationConfig, ErrorHandler}
+import config.{ApplicationConfig, ErrorHandler, UpliftJourneyConfigProvider}
 import connectors.ApmConnector
 import controllers.checkpages.{CanUseCheckActions, DummySubscriptionsForm}
 import domain.models.apidefinitions.ApiContext
@@ -44,7 +44,8 @@ class SR20 @Inject() (val errorHandler: ErrorHandler,
                       val cookieSigner: CookieSigner,
                       confirmApisView: ConfirmApisView,
                       turnOffApisMasterView:TurnOffApisMasterView,
-                      val apmConnector: ApmConnector)
+                      val apmConnector: ApmConnector,
+                      val upliftJourneyConfigProvider: UpliftJourneyConfigProvider)
                      (implicit val ec: ExecutionContext, val appConfig: ApplicationConfig)
   extends ApplicationController(mcc)
      with CanUseCheckActions{
@@ -52,6 +53,8 @@ class SR20 @Inject() (val errorHandler: ErrorHandler,
 def confirmApiSubscriptionsPage(sandboxAppId: ApplicationId): Action[AnyContent] = whenTeamMemberOnApp(sandboxAppId) { implicit request =>
 
     val flow = ApiSubscriptionsFlow.fromSessionString(request.session.get("subscriptions").getOrElse(""))
+
+    println(s"********** upliftJourneyConfigProvider is ${upliftJourneyConfigProvider.status} **********")
 
     def getApiNameForContext(apiContext: ApiContext) =
       request.subscriptions

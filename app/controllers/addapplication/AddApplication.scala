@@ -16,7 +16,7 @@
 
 package controllers.addapplication
 
-import config.{ApplicationConfig, ErrorHandler}
+import config.{ApplicationConfig, ErrorHandler, UpliftJourneyConfigProvider, Off}
 import connectors.ApmConnector
 import controllers.{AddApplicationNameForm, ApplicationController, ChooseApplicationToUpliftForm}
 import controllers.FormKeys.appNameField
@@ -61,7 +61,9 @@ class AddApplication @Inject() (
     addApplicationStartPrincipalView: AddApplicationStartPrincipalView,
     addApplicationSubordinateSuccessView: AddApplicationSubordinateSuccessView,
     addApplicationNameView: AddApplicationNameView,
-    chooseApplicationToUpliftView: ChooseApplicationToUpliftView
+    chooseApplicationToUpliftView: ChooseApplicationToUpliftView,
+    upliftJourneyConfigProvider: UpliftJourneyConfigProvider,
+    upliftJourneyTermsOfUseView: UpliftJourneyTermsOfUseView
 )(implicit val ec: ExecutionContext, val appConfig: ApplicationConfig, val environmentNameService: EnvironmentNameService)
     extends ApplicationController(mcc) {
 
@@ -78,7 +80,10 @@ class AddApplication @Inject() (
   }
   
   def addApplicationPrincipal(): Action[AnyContent] = loggedInAction { implicit request => 
-    successful(Ok(addApplicationStartPrincipalView())) 
+    upliftJourneyConfigProvider.status match { 
+      case Off => successful(Ok(addApplicationStartPrincipalView()))
+      case _ => successful(Ok(upliftJourneyTermsOfUseView()))
+    }
   }
   
   def tenDaysWarning(): Action[AnyContent] = loggedInAction { implicit request => 
