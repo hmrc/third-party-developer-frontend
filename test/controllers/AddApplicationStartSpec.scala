@@ -39,6 +39,7 @@ import config.UpliftJourneyConfigProvider
 import config.On
 import config.OnDemand
 import play.api.mvc.Headers
+import config.Off
 
 class AddApplicationStartSpec 
     extends BaseControllerSpec 
@@ -229,7 +230,7 @@ class AddApplicationStartSpec
       contentAsString(result) should include("Agree to our terms of use")
     }
 
-    "return the uplift journey terms of use view when the UpliftJourneyConfigProvider " +
+    "return the add applications page when the UpliftJourneyConfigProvider " +
           "returns Off and request header contains the uplift journey flag set to true" in new Setup {
       when(appConfig.nameOfPrincipalEnvironment).thenReturn("QA")
       when(appConfig.nameOfSubordinateEnvironment).thenReturn("Development")
@@ -241,8 +242,23 @@ class AddApplicationStartSpec
       private val result = underTest.addApplicationPrincipal()(loggedInRequestWithFlag)
 
       status(result) shouldBe OK
-      contentAsString(result) should include("Agree to our terms of use")
+      contentAsString(result) should include("Add an application to QA")
     }
+
+    "return the uplift journey terms of use page  when the UpliftJourneyConfigProvider " +
+              "returns On and request header contains the uplift journey flag set to false" in new Setup {
+          when(appConfig.nameOfPrincipalEnvironment).thenReturn("QA")
+          when(appConfig.nameOfSubordinateEnvironment).thenReturn("Development")
+
+          when(upliftJourneyConfigProviderMock.status).thenReturn(On)
+
+          val loggedInRequestWithFlag = loggedInRequest.copy(headers = Headers("useNewUpliftJourney" -> "false"))
+
+          private val result = underTest.addApplicationPrincipal()(loggedInRequestWithFlag)
+
+          status(result) shouldBe OK
+          contentAsString(result) should include("Agree to our terms of use")
+        }
 
     "return to the login page when the user is not logged in" in new Setup {
       val request = FakeRequest()
