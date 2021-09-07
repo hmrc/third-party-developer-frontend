@@ -16,7 +16,7 @@
 
 package controllers.addapplication
 
-import config.{ApplicationConfig, ErrorHandler, UpliftJourneyConfigProvider, Off}
+import config.{ApplicationConfig, ErrorHandler, UpliftJourneyConfigProvider, Off, On}
 import connectors.ApmConnector
 import controllers.{AddApplicationNameForm, ApplicationController, ChooseApplicationToUpliftForm}
 import controllers.FormKeys.appNameField
@@ -41,6 +41,8 @@ import javax.inject.{Inject, Singleton}
 import scala.concurrent.Future.successful
 import scala.concurrent.{ExecutionContext, Future}
 import controllers.models.ApiSubscriptionsFlow
+import scala.util.Try
+import config.OnDemand
 
 @Singleton
 class AddApplication @Inject() (
@@ -80,9 +82,15 @@ class AddApplication @Inject() (
   }
   
   def addApplicationPrincipal(): Action[AnyContent] = loggedInAction { implicit request => 
+    
+    val useNewUpliftJourney: Boolean = request.headers.get("useNewUpliftJourney").fold(false) { setting =>
+      Try(setting.toBoolean).getOrElse(false) 
+    }
+
     upliftJourneyConfigProvider.status match { 
-      case Off => successful(Ok(addApplicationStartPrincipalView()))
-      case _ => successful(Ok(upliftJourneyTermsOfUseView()))
+      case On => successful(Ok(upliftJourneyTermsOfUseView()))
+      case OnDemand if useNewUpliftJourney => successful(Ok(upliftJourneyTermsOfUseView()))
+      case _ => successful(Ok(addApplicationStartPrincipalView()))
     }
   }
   
