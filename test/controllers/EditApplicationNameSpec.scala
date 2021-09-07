@@ -40,6 +40,7 @@ import scala.concurrent.ExecutionContext.Implicits.global
 import utils.LocalUserIdTracker
 import builder._
 import controllers.addapplication.AddApplication
+import config.UpliftJourneyConfigProvider
 
 class EditApplicationNameSpec 
     extends BaseControllerSpec 
@@ -62,6 +63,10 @@ class EditApplicationNameSpec
     val addApplicationSubordinateSuccessView = app.injector.instanceOf[AddApplicationSubordinateSuccessView]
     val addApplicationNameView = app.injector.instanceOf[AddApplicationNameView]
     val chooseApplicationToUpliftView = app.injector.instanceOf[ChooseApplicationToUpliftView]
+
+    val upliftJourneyTermsOfUseView: UpliftJourneyTermsOfUseView = app.injector.instanceOf[UpliftJourneyTermsOfUseView]
+    val upliftJourneyConfigProviderMock = mock[UpliftJourneyConfigProvider]
+
     implicit val environmentNameService = new EnvironmentNameService(appConfig)
 
     val underTest = new AddApplication(
@@ -82,7 +87,9 @@ class EditApplicationNameSpec
       addApplicationStartPrincipalView,
       addApplicationSubordinateSuccessView,
       addApplicationNameView,
-      chooseApplicationToUpliftView
+      chooseApplicationToUpliftView,
+      upliftJourneyConfigProviderMock,
+      upliftJourneyTermsOfUseView
     )
 
     implicit val hc: HeaderCarrier = HeaderCarrier()

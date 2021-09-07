@@ -40,6 +40,7 @@ import play.api.mvc.Result
 import mocks.connector.ApmConnectorMockModule
 import controllers.addapplication.AddApplication
 import builder._
+import config.UpliftJourneyConfigProvider
 
 class ChooseApplicationToUpliftActionSpec
     extends BaseControllerSpec 
@@ -67,6 +68,8 @@ class ChooseApplicationToUpliftActionSpec
     val addApplicationSubordinateSuccessView = app.injector.instanceOf[AddApplicationSubordinateSuccessView]
     val addApplicationNameView = app.injector.instanceOf[AddApplicationNameView]
     val chooseApplicationToUpliftView = app.injector.instanceOf[ChooseApplicationToUpliftView]
+    val upliftJourneyTermsOfUseView: UpliftJourneyTermsOfUseView = app.injector.instanceOf[UpliftJourneyTermsOfUseView]
+    val upliftJourneyConfigProviderMock = mock[UpliftJourneyConfigProvider]
     
     implicit val environmentNameService = new EnvironmentNameService(appConfig)
 
@@ -88,7 +91,9 @@ class ChooseApplicationToUpliftActionSpec
       addApplicationStartPrincipalView,
       addApplicationSubordinateSuccessView,
       addApplicationNameView,
-      chooseApplicationToUpliftView
+      chooseApplicationToUpliftView,
+      upliftJourneyConfigProviderMock,
+      upliftJourneyTermsOfUseView
     )
     val hc = HeaderCarrier()
 
