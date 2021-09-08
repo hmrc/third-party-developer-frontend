@@ -16,8 +16,10 @@
 
 package config
 
-import javax.inject.{Inject, Singleton}
 import play.api.Configuration
+
+import javax.inject.Inject
+import javax.inject.Singleton
 
 sealed trait NewJourneyFeature
 final case object Off extends NewJourneyFeature
@@ -25,16 +27,10 @@ final case object On extends NewJourneyFeature
 final case object OnDemand extends NewJourneyFeature
 
 @Singleton
-class UpliftJourneyConfigProvider @Inject()(configuration: Configuration) {
-
-    private def configNotFoundError(key: String) =
-        throw new RuntimeException(s"Could not find config key '$key'")
-
-    private def getString(key: String) =
-        configuration.getOptional[String](key).getOrElse(configNotFoundError(key))
+class UpliftJourneyConfigProvider @Inject()(config: Configuration) {
 
     def status: NewJourneyFeature = 
-        getString("applicationCheck.canUseNewUpliftJourney") match {
+        config.get[String]("applicationCheck.canUseNewUpliftJourney") match {
             case "On" => On
             case "OnDemand" => OnDemand
             case _ => Off

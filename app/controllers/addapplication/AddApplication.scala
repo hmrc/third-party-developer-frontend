@@ -83,13 +83,14 @@ class AddApplication @Inject() (
   
   def addApplicationPrincipal(): Action[AnyContent] = loggedInAction { implicit request => 
     
-    val useNewUpliftJourney: Boolean = request.headers.get("useNewUpliftJourney").fold(false) { setting =>
-      Try(setting.toBoolean).getOrElse(false) 
-    }
+    def upliftJourneyTurnedOnInRequestHeader: Boolean = 
+      request.headers.get("useNewUpliftJourney").fold(false) { setting =>
+        Try(setting.toBoolean).getOrElse(false) 
+      }
 
     upliftJourneyConfigProvider.status match { 
       case On => successful(Ok(upliftJourneyTermsOfUseView()))
-      case OnDemand if useNewUpliftJourney => successful(Ok(upliftJourneyTermsOfUseView()))
+      case OnDemand if upliftJourneyTurnedOnInRequestHeader => successful(Ok(upliftJourneyTermsOfUseView()))
       case _ => successful(Ok(addApplicationStartPrincipalView()))
     }
   }
