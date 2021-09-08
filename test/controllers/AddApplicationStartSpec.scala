@@ -35,6 +35,11 @@ import scala.concurrent.ExecutionContext.Implicits.global
 import utils.LocalUserIdTracker
 import controllers.addapplication.AddApplication
 import builder._
+import config.UpliftJourneyConfigProvider
+import config.On
+import config.OnDemand
+import play.api.mvc.Headers
+import config.Off
 
 class AddApplicationStartSpec 
     extends BaseControllerSpec 
@@ -57,6 +62,9 @@ class AddApplicationStartSpec
     val addApplicationNameView = app.injector.instanceOf[AddApplicationNameView]
     val chooseApplicationToUpliftView = app.injector.instanceOf[ChooseApplicationToUpliftView]
 
+    val upliftJourneyTermsOfUseView: UpliftJourneyTermsOfUseView = app.injector.instanceOf[UpliftJourneyTermsOfUseView]
+    val upliftJourneyConfigProviderMock = mock[UpliftJourneyConfigProvider]
+
     implicit val environmentNameService = new EnvironmentNameService(appConfig)
 
     val underTest = new AddApplication(
@@ -77,7 +85,9 @@ class AddApplicationStartSpec
       addApplicationStartPrincipalView,
       addApplicationSubordinateSuccessView,
       addApplicationNameView,
-      chooseApplicationToUpliftView
+      chooseApplicationToUpliftView,
+      upliftJourneyConfigProviderMock,
+      upliftJourneyTermsOfUseView
     )
 
     val hc = HeaderCarrier()
@@ -138,6 +148,7 @@ class AddApplicationStartSpec
   }
 
   "Add principal applications start page" should {
+
     "return the add applications page with the user logged in when the environment is Production" in new Setup {
       when(appConfig.nameOfPrincipalEnvironment).thenReturn("Production")
       when(appConfig.nameOfSubordinateEnvironment).thenReturn("Sandbox")
@@ -163,6 +174,91 @@ class AddApplicationStartSpec
       contentAsString(result) should include("Now that you've tested your software you can request to add your application to QA.")
       contentAsString(result) should not include "Sign in"
     }
+
+    "return the uplift journey terms of use page when the UpliftJourneyConfigProvider returns On" in new Setup {
+      when(appConfig.nameOfPrincipalEnvironment).thenReturn("QA")
+      when(appConfig.nameOfSubordinateEnvironment).thenReturn("Development")
+
+      when(upliftJourneyConfigProviderMock.status).thenReturn(On)
+      
+      private val result = underTest.addApplicationPrincipal()(loggedInRequest)
+
+      status(result) shouldBe OK
+      contentAsString(result) should include("Agree to our terms of use")
+    }
+
+    "return the add applications page when the UpliftJourneyConfigProvider " +
+      "returns OnDemand and request header does not contain the uplift journey flag" in new Setup {
+      when(appConfig.nameOfPrincipalEnvironment).thenReturn("QA")
+      when(appConfig.nameOfSubordinateEnvironment).thenReturn("Development")
+
+      when(upliftJourneyConfigProviderMock.status).thenReturn(OnDemand)
+
+      private val result = underTest.addApplicationPrincipal()(loggedInRequest)
+
+      status(result) shouldBe OK
+      contentAsString(result) should include("Add an application to QA")
+    }
+
+    "return the add applications page when the UpliftJourneyConfigProvider " +
+      "returns OnDemand and request header contains the uplift journey flag set to false" in new Setup {
+      when(appConfig.nameOfPrincipalEnvironment).thenReturn("QA")
+      when(appConfig.nameOfSubordinateEnvironment).thenReturn("Development")
+
+      when(upliftJourneyConfigProviderMock.status).thenReturn(OnDemand)
+
+      val loggedInRequestWithFlag = loggedInRequest.copy(headers = Headers("useNewUpliftJourney" -> "false"))
+
+      private val result = underTest.addApplicationPrincipal()(loggedInRequestWithFlag)
+
+      status(result) shouldBe OK
+      contentAsString(result) should include("Add an application to QA")
+    }
+
+    "return the uplift journey terms of use page when the UpliftJourneyConfigProvider " +
+        "returns OnDemand and request header contains the uplift journey flag set to true" in new Setup {
+      when(appConfig.nameOfPrincipalEnvironment).thenReturn("QA")
+      when(appConfig.nameOfSubordinateEnvironment).thenReturn("Development")
+
+      when(upliftJourneyConfigProviderMock.status).thenReturn(OnDemand)
+
+      val loggedInRequestWithFlag = loggedInRequest.copy(headers = Headers("useNewUpliftJourney" -> "true"))
+
+      private val result = underTest.addApplicationPrincipal()(loggedInRequestWithFlag)
+
+      status(result) shouldBe OK
+      contentAsString(result) should include("Agree to our terms of use")
+    }
+
+    "return the add applications page when the UpliftJourneyConfigProvider " +
+          "returns Off and request header contains the uplift journey flag set to true" in new Setup {
+      when(appConfig.nameOfPrincipalEnvironment).thenReturn("QA")
+      when(appConfig.nameOfSubordinateEnvironment).thenReturn("Development")
+
+      when(upliftJourneyConfigProviderMock.status).thenReturn(Off)
+
+      val loggedInRequestWithFlag = loggedInRequest.copy(headers = Headers("useNewUpliftJourney" -> "true"))
+
+      private val result = underTest.addApplicationPrincipal()(loggedInRequestWithFlag)
+
+      status(result) shouldBe OK
+      contentAsString(result) should include("Add an application to QA")
+    }
+
+    "return the uplift journey terms of use page  when the UpliftJourneyConfigProvider " +
+              "returns On and request header contains the uplift journey flag set to false" in new Setup {
+          when(appConfig.nameOfPrincipalEnvironment).thenReturn("QA")
+          when(appConfig.nameOfSubordinateEnvironment).thenReturn("Development")
+
+          when(upliftJourneyConfigProviderMock.status).thenReturn(On)
+
+          val loggedInRequestWithFlag = loggedInRequest.copy(headers = Headers("useNewUpliftJourney" -> "false"))
+
+          private val result = underTest.addApplicationPrincipal()(loggedInRequestWithFlag)
+
+          status(result) shouldBe OK
+          contentAsString(result) should include("Agree to our terms of use")
+        }
 
     "return to the login page when the user is not logged in" in new Setup {
       val request = FakeRequest()

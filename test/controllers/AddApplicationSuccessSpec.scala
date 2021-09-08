@@ -39,6 +39,7 @@ import domain.models.apidefinitions.ExtendedApiDefinitionTestDataHelper
 import utils.LocalUserIdTracker
 import controllers.addapplication.AddApplication
 import builder._
+import config.UpliftJourneyConfigProvider
 
 class AddApplicationSuccessSpec 
     extends BaseControllerSpec 
@@ -87,6 +88,8 @@ class AddApplicationSuccessSpec
     val addApplicationNameView = app.injector.instanceOf[AddApplicationNameView]
     val chooseApplicationToUpliftView = app.injector.instanceOf[ChooseApplicationToUpliftView]
     implicit val environmentNameService = new EnvironmentNameService(appConfig)
+    val upliftJourneyTermsOfUseView: UpliftJourneyTermsOfUseView = app.injector.instanceOf[UpliftJourneyTermsOfUseView]
+    val upliftJourneyConfigProviderMock = mock[UpliftJourneyConfigProvider]
 
     val underTest = new AddApplication(
       mock[ErrorHandler],
@@ -106,7 +109,10 @@ class AddApplicationSuccessSpec
       addApplicationStartPrincipalView,
       addApplicationSubordinateSuccessView,
       addApplicationNameView,
-      chooseApplicationToUpliftView
+      chooseApplicationToUpliftView,
+      upliftJourneyConfigProviderMock,
+      upliftJourneyTermsOfUseView
+      
     )
 
     implicit val hc = HeaderCarrier()

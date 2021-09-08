@@ -39,6 +39,7 @@ import scala.concurrent.Future
 import play.api.mvc.Result
 import mocks.connector.ApmConnectorMockModule
 import controllers.addapplication.AddApplication
+import config.UpliftJourneyConfigProvider
 
 class AddApplicationProductionSwitchSpec
     extends BaseControllerSpec
@@ -67,6 +68,9 @@ class AddApplicationProductionSwitchSpec
     val addApplicationNameView = app.injector.instanceOf[AddApplicationNameView]
     val chooseApplicationToUpliftView = app.injector.instanceOf[ChooseApplicationToUpliftView]
     
+    val upliftJourneyTermsOfUseView: UpliftJourneyTermsOfUseView = app.injector.instanceOf[UpliftJourneyTermsOfUseView]
+    val upliftJourneyConfigProviderMock = mock[UpliftJourneyConfigProvider]
+
     implicit val environmentNameService = new EnvironmentNameService(appConfig)
 
     val underTest = new AddApplication(
@@ -87,7 +91,9 @@ class AddApplicationProductionSwitchSpec
       addApplicationStartPrincipalView,
       addApplicationSubordinateSuccessView,
       addApplicationNameView,
-      chooseApplicationToUpliftView
+      chooseApplicationToUpliftView,
+      upliftJourneyConfigProviderMock,
+      upliftJourneyTermsOfUseView
     )
     val hc = HeaderCarrier()
 

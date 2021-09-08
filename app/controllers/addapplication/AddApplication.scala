@@ -16,7 +16,7 @@
 
 package controllers.addapplication
 
-import config.{ApplicationConfig, ErrorHandler}
+import config.{ApplicationConfig, ErrorHandler, UpliftJourneyConfigProvider, Off, On}
 import connectors.ApmConnector
 import controllers.{AddApplicationNameForm, ApplicationController, ChooseApplicationToUpliftForm}
 import controllers.FormKeys.appNameField
@@ -41,6 +41,8 @@ import javax.inject.{Inject, Singleton}
 import scala.concurrent.Future.successful
 import scala.concurrent.{ExecutionContext, Future}
 import controllers.models.ApiSubscriptionsFlow
+import scala.util.Try
+import config.OnDemand
 
 @Singleton
 class AddApplication @Inject() (
@@ -61,7 +63,9 @@ class AddApplication @Inject() (
     addApplicationStartPrincipalView: AddApplicationStartPrincipalView,
     addApplicationSubordinateSuccessView: AddApplicationSubordinateSuccessView,
     addApplicationNameView: AddApplicationNameView,
-    chooseApplicationToUpliftView: ChooseApplicationToUpliftView
+    chooseApplicationToUpliftView: ChooseApplicationToUpliftView,
+    upliftJourneyConfigProvider: UpliftJourneyConfigProvider,
+    upliftJourneyTermsOfUseView: UpliftJourneyTermsOfUseView
 )(implicit val ec: ExecutionContext, val appConfig: ApplicationConfig, val environmentNameService: EnvironmentNameService)
     extends ApplicationController(mcc) {
 
@@ -78,7 +82,17 @@ class AddApplication @Inject() (
   }
   
   def addApplicationPrincipal(): Action[AnyContent] = loggedInAction { implicit request => 
-    successful(Ok(addApplicationStartPrincipalView())) 
+    
+    def upliftJourneyTurnedOnInRequestHeader: Boolean = 
+      request.headers.get("useNewUpliftJourney").fold(false) { setting =>
+        Try(setting.toBoolean).getOrElse(false) 
+      }
+
+    upliftJourneyConfigProvider.status match { 
+      case On => successful(Ok(upliftJourneyTermsOfUseView()))
+      case OnDemand if upliftJourneyTurnedOnInRequestHeader => successful(Ok(upliftJourneyTermsOfUseView()))
+      case _ => successful(Ok(addApplicationStartPrincipalView()))
+    }
   }
   
   def tenDaysWarning(): Action[AnyContent] = loggedInAction { implicit request => 
