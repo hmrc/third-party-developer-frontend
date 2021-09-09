@@ -88,7 +88,8 @@ class AddApplicationSuccessSpec
     val addApplicationNameView = app.injector.instanceOf[AddApplicationNameView]
     val chooseApplicationToUpliftView = app.injector.instanceOf[ChooseApplicationToUpliftView]
     implicit val environmentNameService = new EnvironmentNameService(appConfig)
-    val upliftJourneyTermsOfUseView: UpliftJourneyTermsOfUseView = app.injector.instanceOf[UpliftJourneyTermsOfUseView]
+
+    val beforeYouStartView: BeforeYouStartView = app.injector.instanceOf[BeforeYouStartView]
     val upliftJourneyConfigProviderMock = mock[UpliftJourneyConfigProvider]
 
     val underTest = new AddApplication(
@@ -111,8 +112,7 @@ class AddApplicationSuccessSpec
       addApplicationNameView,
       chooseApplicationToUpliftView,
       upliftJourneyConfigProviderMock,
-      upliftJourneyTermsOfUseView
-      
+      beforeYouStartView
     )
 
     implicit val hc = HeaderCarrier()
