@@ -103,7 +103,7 @@ abstract class ApplicationController(mcc: MessagesControllerComponents) extends 
   implicit def userFromRequest(implicit request: ApplicationRequest[_]): DeveloperSession = request.user
 
   def applicationViewModelFromApplicationRequest()(implicit request: ApplicationRequest[_]): ApplicationViewModel =
-    ApplicationViewModel(request.application, request.hasSubscriptionFields, hasPpnsFields(request))
+    ApplicationViewModel(request.application, request.hasSubscriptionFields, hasPpnsFields(request), hasFraudPreventionHeaders(request))
 
   def whenTeamMemberOnApp(applicationId: ApplicationId)(fun: ApplicationRequest[AnyContent] => Future[Result]): Action[AnyContent] =
     loggedInAction { implicit request =>

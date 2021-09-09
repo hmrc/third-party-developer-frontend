@@ -90,6 +90,14 @@
               IP allow list
             </a>
           </li>
+          @if(appConfig.fraudPreventionLinkVisible && applicationView.hasFraudPreventionHeaders){
+            <li class="side-nav__list @if(section == "fraud-prevention") { side-nav__list--selected }">
+              <a id="nav-fraud-prevention" class="side-nav__link" href="http://stackoverflow.com/questions/10962694">
+                Fraud Prevention
+              </a>
+            </li>
+
+          }
           <li class="side-nav__list @if(section == "manage-team") { side-nav__list--selected }">
             <a id="nav-manage-team" class="side-nav__link" href="@routes.ManageTeam.manageTeam(app.id, None)">
               Team members

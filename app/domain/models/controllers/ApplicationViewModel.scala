@@ -18,4 +18,4 @@ package domain.models.controllers
 
 import domain.models.applications.Application
 
-case class ApplicationViewModel(application: Application, hasSubscriptionsFields: Boolean, hasPpnsFields: Boolean)
+case class ApplicationViewModel(application: Application, hasSubscriptionsFields: Boolean, hasPpnsFields: Boolean, hasFraudPreventionHeaders: Boolean)

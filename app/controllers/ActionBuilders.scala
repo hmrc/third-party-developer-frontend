@@ -31,6 +31,7 @@ import uk.gov.hmrc.play.http.HeaderCarrierConverter
 import scala.concurrent.{ExecutionContext, Future}
 import service.ApplicationActionService
 import domain.models.subscriptions.DevhubAccessLevel
+import domain.models.applications.Environment
 
 trait ActionBuilders {
 
@@ -184,6 +185,13 @@ def subscriptionFieldsRefiner(context: ApiContext, version: ApiVersion)(
   def hasPpnsFields(request: ApplicationRequest[_]): Boolean = {
     request.subscriptions.exists(s => s.subscribed && s.fields.fields.exists(field => field.definition.`type` == "PPNSField"))
   }
+
+  def hasFraudPreventionHeaders(request: ApplicationRequest[_]): Boolean = {
+    val apis = appConfig.fraudPreventionApis
+     val isProduction = request.application.deployedTo == Environment.PRODUCTION
+     request.subscriptions.exists(x => apis.contains(x.serviceName) && x.subscribed && isProduction)
+
+   }
 
   private def forbiddenWhenNot[A](cond: Boolean)(implicit applicationRequest: ApplicationRequest[A]): Option[Result] = {
     if (cond) {
