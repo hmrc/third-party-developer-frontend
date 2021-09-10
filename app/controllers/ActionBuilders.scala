@@ -186,13 +186,6 @@ def subscriptionFieldsRefiner(context: ApiContext, version: ApiVersion)(
     request.subscriptions.exists(s => s.subscribed && s.fields.fields.exists(field => field.definition.`type` == "PPNSField"))
   }
 
-  def hasFraudPreventionHeaders(request: ApplicationRequest[_]): Boolean = {
-    val apis = appConfig.fraudPreventionApis
-     val isProduction = request.application.deployedTo == Environment.PRODUCTION
-     request.subscriptions.exists(x => apis.contains(x.serviceName) && x.subscribed && isProduction)
-
-   }
-
   private def forbiddenWhenNot[A](cond: Boolean)(implicit applicationRequest: ApplicationRequest[A]): Option[Result] = {
     if (cond) {
       None

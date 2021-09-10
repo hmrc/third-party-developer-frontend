@@ -57,8 +57,8 @@ class LeftHandNavSpec extends CommonViewSpec with WithCSRFAddToken with Collabor
       access = Standard(redirectUris = List("https://red1", "https://red2"), termsAndConditionsUrl = Some("http://tnc-url.com"))
     )
 
-    val applicationViewModelWithApiSubscriptions = ApplicationViewModel(application, hasSubscriptionsFields = true, hasPpnsFields = false)
-    val applicationViewModelWithNoApiSubscriptions = ApplicationViewModel(application, hasSubscriptionsFields = false, hasPpnsFields = false)
+    val applicationViewModelWithApiSubscriptions = ApplicationViewModel(application, hasSubscriptionsFields = true, hasPpnsFields = false, hasFraudPreventionHeaders = false)
+    val applicationViewModelWithNoApiSubscriptions = ApplicationViewModel(application, hasSubscriptionsFields = false, hasPpnsFields = false, hasFraudPreventionHeaders = false)
 
     def leftHandNavRender(viewModel: Option[ApplicationViewModel], navSection: Option[String], flags: Map[String, Boolean] = Map.empty) = {
       leftHandNavView.render(viewModel, navSection, flags, request, loggedInDeveloper, appConfig)
@@ -86,7 +86,7 @@ class LeftHandNavSpec extends CommonViewSpec with WithCSRFAddToken with Collabor
 
       "NOT display server token link for old apps" in new Setup {
         val oldAppWithoutSubsFields =
-          ApplicationViewModel(application.copy(createdOn = serverTokenCutoffDate.minusDays(1)), hasSubscriptionsFields = false, hasPpnsFields = false)
+          ApplicationViewModel(application.copy(createdOn = serverTokenCutoffDate.minusDays(1)), hasSubscriptionsFields = false, hasPpnsFields = false, hasFraudPreventionHeaders = false)
         val page = leftHandNavRender(Some(oldAppWithoutSubsFields), Some("details"))
 
         page.contentType should include("text/html")
@@ -115,7 +115,7 @@ class LeftHandNavSpec extends CommonViewSpec with WithCSRFAddToken with Collabor
 
       "NOT display server token link for old apps" in new Setup {
         val oldAppWithSubsFields =
-          ApplicationViewModel(application.copy(createdOn = serverTokenCutoffDate.minusDays(1)), hasSubscriptionsFields = true, hasPpnsFields = false)
+          ApplicationViewModel(application.copy(createdOn = serverTokenCutoffDate.minusDays(1)), hasSubscriptionsFields = true, hasPpnsFields = false, hasFraudPreventionHeaders = false)
         val page = leftHandNavRender(Some(oldAppWithSubsFields), Some("details"))
 
         page.contentType should include("text/html")

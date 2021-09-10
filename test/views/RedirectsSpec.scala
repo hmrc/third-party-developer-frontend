@@ -65,7 +65,7 @@ class RedirectsSpec extends CommonViewSpec with WithCSRFAddToken with Collaborat
 
       val redirectsView = app.injector.instanceOf[RedirectsView]
 
-      redirectsView.render(ApplicationViewModel(applicationWithRedirects, hasSubscriptionsFields = false, hasPpnsFields = false), redirects, request, user, messagesProvider, appConfig, "redirects")
+      redirectsView.render(ApplicationViewModel(applicationWithRedirects, hasSubscriptionsFields = false, hasPpnsFields = false, hasFraudPreventionHeaders = false), redirects, request, user, messagesProvider, appConfig, "redirects")
     }
 
     def renderPageForStandardApplicationAsAdminWithRedirectUris(numberOfRedirectUris: Int) = {

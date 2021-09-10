@@ -57,7 +57,7 @@ class SubscribeRequestSubmittedSpec extends CommonViewSpec with WithCSRFAddToken
       val subscribeRequestSubmittedView = app.injector.instanceOf[SubscribeRequestSubmittedView]
 
       val page = subscribeRequestSubmittedView.render(
-        ApplicationViewModel(application, hasSubscriptionsFields = false, hasPpnsFields = false),
+        ApplicationViewModel(application, hasSubscriptionsFields = false, hasPpnsFields = false, hasFraudPreventionHeaders = false),
         apiName,
         apiVersion,
         request,

@@ -28,6 +28,7 @@
 @subordinateWording = @{ if(appConfig.nameOfSubordinateEnvironment == "Sandbox") {theSandbox} else {appConfig.nameOfSubordinateEnvironment}}
 @getProductionCredentials = @{"Get production credentials"}
 @isGetProductionCredentialsEnabled = @{flags.getOrElse(LeftHandNavFlags.keyForIsGetProductionCredentialsEnabled, false)}
+@getFraudPreventionUrl(appId: String) = @{s"${appConfig.fraudPreventionUrl}/${appId}"}
 
 @(application, navSection) match {
   case (Some(applicationView), Some(section)) => {
@@ -92,8 +93,8 @@
           </li>
           @if(appConfig.fraudPreventionLinkVisible && applicationView.hasFraudPreventionHeaders){
             <li class="side-nav__list @if(section == "fraud-prevention") { side-nav__list--selected }">
-              <a id="nav-fraud-prevention" class="side-nav__link" href="http://stackoverflow.com/questions/10962694">
-                Fraud Prevention
+              <a id="nav-fraud-prevention" class="side-nav__link" href="@getFraudPreventionUrl(app.id.value)">
+                Fraud prevention
               </a>
             </li>
 

@@ -74,7 +74,7 @@ class SubscriptionsSpec extends CommonViewSpec with WithCSRFAddToken {
         role,
         pageData,
         EditApplicationForm.withData(productionApplicationTesting),
-        ApplicationViewModel(application, false, false),
+        ApplicationViewModel(application, false, false, hasFraudPreventionHeaders = false),
         Some(GroupedSubscriptions(Seq.empty, Seq.empty)),
         Map.empty,
         ApplicationId(""),

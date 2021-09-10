@@ -65,6 +65,7 @@ case class ApplicationRequest[A](
   def hasSubscriptionFields: Boolean = {
     subscriptions.exists(s => s.subscribed && s.fields.fields.nonEmpty)
   }
+
 }
 
 case class ApplicationWithFieldDefinitionsRequest[A](fieldDefinitions: NonEmptyList[APISubscriptionStatusWithSubscriptionFields], applicationRequest: ApplicationRequest[A])
@@ -101,6 +102,12 @@ abstract class ApplicationController(mcc: MessagesControllerComponents) extends 
   val applicationService: ApplicationService
 
   implicit def userFromRequest(implicit request: ApplicationRequest[_]): DeveloperSession = request.user
+
+  def hasFraudPreventionHeaders(request: ApplicationRequest[_]): Boolean = {
+    val apis = appConfig.fraudPreventionApis
+     val isProduction = request.application.deployedTo == Environment.PRODUCTION
+     request.subscriptions.exists(x => apis.contains(x.serviceName) && x.subscribed && isProduction)
+   }
 
   def applicationViewModelFromApplicationRequest()(implicit request: ApplicationRequest[_]): ApplicationViewModel =
     ApplicationViewModel(request.application, request.hasSubscriptionFields, hasPpnsFields(request), hasFraudPreventionHeaders(request))
