@@ -93,7 +93,7 @@ class LeftHandNavSpec extends CommonViewSpec with WithCSRFAddToken with Collabor
         page.contentType should include("text/html")
 
         val document = Jsoup.parse(page.body)
-        elementExistsById(document, "nav-fraud-prevention") shouldBe true 
+        elementExistsById(document, "nav-fraud-prevention") shouldBe true
         elementIdentifiedByAttrContainsText(document, "nav-fraud-prevention", "href", s"${appConfig.fraudPreventionUrl}/${applicationViewModelWithNoApiSubscriptions.application.id.value}")
       }
 
@@ -105,7 +105,7 @@ class LeftHandNavSpec extends CommonViewSpec with WithCSRFAddToken with Collabor
         page.contentType should include("text/html")
 
         val document = Jsoup.parse(page.body)
-        elementExistsById(document, "nav-fraud-prevention") shouldBe false 
+        elementExistsById(document, "nav-fraud-prevention") shouldBe false
         
       }
 
@@ -117,7 +117,7 @@ class LeftHandNavSpec extends CommonViewSpec with WithCSRFAddToken with Collabor
         page.contentType should include("text/html")
 
         val document = Jsoup.parse(page.body)
-        elementExistsById(document, "nav-fraud-prevention") shouldBe false 
+        elementExistsById(document, "nav-fraud-prevention") shouldBe false
 
       }
 
@@ -129,7 +129,7 @@ class LeftHandNavSpec extends CommonViewSpec with WithCSRFAddToken with Collabor
         page.contentType should include("text/html")
 
         val document = Jsoup.parse(page.body)
-        elementExistsById(document, "nav-fraud-prevention") shouldBe false 
+        elementExistsById(document, "nav-fraud-prevention") shouldBe false
 
       }
 
