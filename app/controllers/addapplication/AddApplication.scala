@@ -89,8 +89,8 @@ class AddApplication @Inject() (
       }
 
     upliftJourneyConfigProvider.status match { 
-      case On => successful(Ok(beforeYouStartView()))
-      case OnDemand if upliftJourneyTurnedOnInRequestHeader => successful(Ok(beforeYouStartView()))
+      case On => successful(Ok(beforeYouStartView(domain.models.applications.ApplicationId.random)))
+      case OnDemand if upliftJourneyTurnedOnInRequestHeader => successful(Ok(beforeYouStartView(domain.models.applications.ApplicationId.random)))
       case _ => successful(Ok(addApplicationStartPrincipalView()))
     }
   }

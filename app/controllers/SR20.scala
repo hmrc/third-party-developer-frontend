@@ -32,6 +32,8 @@ import scala.concurrent.ExecutionContext
 import controllers.models.ApiSubscriptionsFlow
 import domain.models.apidefinitions.APISubscriptionStatus
 import play.api.data.FormError
+import views.html.ResponsibleIndividualView
+import scala.concurrent.{ExecutionContext, Future}
 
 
 
@@ -44,7 +46,8 @@ class SR20 @Inject() (val errorHandler: ErrorHandler,
                       val cookieSigner: CookieSigner,
                       confirmApisView: ConfirmApisView,
                       turnOffApisMasterView:TurnOffApisMasterView,
-                      val apmConnector: ApmConnector)
+                      val apmConnector: ApmConnector,
+                      responsibleIndividualView: ResponsibleIndividualView)
                      (implicit val ec: ExecutionContext, val appConfig: ApplicationConfig)
   extends ApplicationController(mcc)
      with CanUseCheckActions{
@@ -134,5 +137,9 @@ def confirmApiSubscriptionsPage(sandboxAppId: ApplicationId): Action[AnyContent]
         .withSession(request.session + ("subscriptions" -> ApiSubscriptionsFlow.toSessionString(flow)))
       }
     }
+  }
+
+  def responsibleIndividual(sandboxAppId: ApplicationId): Action[AnyContent] = whenTeamMemberOnApp(sandboxAppId) { implicit request =>
+     Future.successful(Ok(responsibleIndividualView()))
   }
 }
