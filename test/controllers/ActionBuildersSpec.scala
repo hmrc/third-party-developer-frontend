@@ -69,6 +69,7 @@ class ActionBuildersSpec
     val applicationWithSubscriptionData = buildApplicationWithSubscriptionData(
       developer.email
     )
+
     val subscriptionWithoutSubFields = buildAPISubscriptionStatus("api name")
 
     val subscriptionWithSubFields =
@@ -119,7 +120,7 @@ class ActionBuildersSpec
 
   trait FraudPreventionSetup extends Setup {
 
-    val fraudPreventionApp = applicationWithSubscriptionData.application
+    val fraudPreventionProdApp = applicationWithSubscriptionData.application.copy(deployedTo = Environment.PRODUCTION)
     val fraudPreventionSandboxApp = applicationWithSubscriptionData.application.copy(deployedTo = Environment.SANDBOX)
 
     def buildApplicationRequest(application: Application, subscriptions: List[APISubscriptionStatus] = List.empty): ApplicationRequest[AnyContent] = {
@@ -145,8 +146,8 @@ class ActionBuildersSpec
       ApiIdentifier(ApiContext("test-api-context-2"), ApiVersion("1.0"))
 
     val emptyFields = emptySubscriptionFieldsWrapper(
-      fraudPreventionApp.id,
-      fraudPreventionApp.clientId,
+      fraudPreventionProdApp.id,
+      fraudPreventionProdApp.clientId,
       apiIdentifier1.context,
       apiIdentifier1.version
     )
@@ -166,8 +167,9 @@ class ActionBuildersSpec
     val sessionSubscriptions =
       "subscriptions" -> ApiSubscriptionsFlow.toSessionString(testFlow)
 
-    val applicationRequestWithSubs: ApplicationRequest[AnyContent] = buildApplicationRequest(fraudPreventionApp, List(testAPISubscriptionStatus1))
-    val applicationRequestWithoutSubs: ApplicationRequest[AnyContent] = buildApplicationRequest(fraudPreventionApp)
+    val applicationRequestWithSubs: ApplicationRequest[AnyContent] = buildApplicationRequest(fraudPreventionProdApp, List(testAPISubscriptionStatus1))
+     val applicationRequestWithSubsNotSubscribed: ApplicationRequest[AnyContent] = buildApplicationRequest(fraudPreventionProdApp.copy(), List(testAPISubscriptionStatus1.copy(subscribed = false)))
+    val applicationRequestWithoutSubs: ApplicationRequest[AnyContent] = buildApplicationRequest(fraudPreventionProdApp)
     val applicationRequestForSandboxApp: ApplicationRequest[AnyContent] = buildApplicationRequest(fraudPreventionSandboxApp, List(testAPISubscriptionStatus1))
 
   }
@@ -200,6 +202,11 @@ class ActionBuildersSpec
 
   "hasFraudPreventionHeaders" should {
 
+    // prod app where subscription dont match
+    // sandbox app with matching subscriptions
+    
+
+
     "return false when appConfig.fraudPreventionApis has no apis" in new FraudPreventionSetup {
       when(appConfig.fraudPreventionApis).thenReturn(List.empty)
       givenApplicationAction(applicationWithSubscriptionData, loggedInDeveloper, List(subscriptionWithSubFields))
@@ -217,6 +224,27 @@ class ActionBuildersSpec
       when(appConfig.fraudPreventionApis).thenReturn(List("api-example-microservice"))
       givenApplicationAction(applicationWithSubscriptionData, loggedInDeveloper, List(subscriptionWithSubFields))
       underTest.hasFraudPreventionHeaders(applicationRequestWithSubs) shouldBe true
+
+    }
+
+    "return false when production application has fraud prevention subscriptions but is unsubcribed" in new FraudPreventionSetup {
+      when(appConfig.fraudPreventionApis).thenReturn(List("api-example-microservice"))
+      givenApplicationAction(applicationWithSubscriptionData, loggedInDeveloper, List(subscriptionWithSubFields))
+      underTest.hasFraudPreventionHeaders(applicationRequestWithSubsNotSubscribed) shouldBe false
+
+    }
+
+    "return false when production application has no fraud prevention subscriptions" in new FraudPreventionSetup {
+      when(appConfig.fraudPreventionApis).thenReturn(List("api-1", "api-2"))
+      givenApplicationAction(applicationWithSubscriptionData, loggedInDeveloper, List(subscriptionWithSubFields))
+      underTest.hasFraudPreventionHeaders(applicationRequestWithSubs) shouldBe false
+
+    }
+
+    "return false when sandbox application has fraud prevention subscriptions " in new FraudPreventionSetup {
+      when(appConfig.fraudPreventionApis).thenReturn(List("api-example-microservice"))
+      givenApplicationAction(applicationWithSubscriptionData, loggedInDeveloper, List(subscriptionWithSubFields))
+      underTest.hasFraudPreventionHeaders(applicationRequestForSandboxApp) shouldBe false
 
     }
   }

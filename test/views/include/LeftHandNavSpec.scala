@@ -24,7 +24,7 @@ import org.jsoup.Jsoup
 import org.jsoup.nodes.Document
 import play.api.test.FakeRequest
 import uk.gov.hmrc.time.DateTimeUtils
-import utils.ViewHelpers.elementExistsByText
+import utils.ViewHelpers._
 import utils._
 import views.helper.CommonViewSpec
 import views.html.include.LeftHandNav
@@ -80,8 +80,57 @@ class LeftHandNavSpec extends CommonViewSpec with WithCSRFAddToken with Collabor
         elementExistsByText(document, "a", "Client secrets") shouldBe true
         elementExistsByText(document, "a", "Server token") shouldBe false
         elementExistsByText(document, "a", "Redirect URIs") shouldBe true
+        elementExistsById(document, "nav-fraud-prevention") shouldBe false
         elementExistsByText(document, "a", "Team members") shouldBe true
         elementExistsByText(document, "a", "Delete application") shouldBe true
+      }
+
+      "render Fraud prevention link when feature switch is enabled and hasFraudPrevention is true" in new Setup {
+        when(appConfig.fraudPreventionLinkVisible).thenReturn(true)
+        val applicationViewModelWithFraudPrevention = applicationViewModelWithNoApiSubscriptions.copy(hasFraudPreventionHeaders = true)
+        val page = leftHandNavRender(Some(applicationViewModelWithFraudPrevention), Some("details"))
+
+        page.contentType should include("text/html")
+
+        val document = Jsoup.parse(page.body)
+        elementExistsById(document, "nav-fraud-prevention") shouldBe true 
+        elementIdentifiedByAttrContainsText(document, "nav-fraud-prevention", "href", s"${appConfig.fraudPreventionUrl}/${applicationViewModelWithNoApiSubscriptions.application.id.value}")
+      }
+
+      "do not render Fraud prevention link when feature switch is disabled and hasFraudPrevention is true" in new Setup {
+        when(appConfig.fraudPreventionLinkVisible).thenReturn(false)
+        val applicationViewModelWithFraudPrevention = applicationViewModelWithNoApiSubscriptions.copy(hasFraudPreventionHeaders = true)
+        val page = leftHandNavRender(Some(applicationViewModelWithFraudPrevention), Some("details"))
+
+        page.contentType should include("text/html")
+
+        val document = Jsoup.parse(page.body)
+        elementExistsById(document, "nav-fraud-prevention") shouldBe false 
+        
+      }
+
+      "do not render Fraud prevention link when feature switch is enabled and hasFraudPrevention is false" in new Setup {
+        when(appConfig.fraudPreventionLinkVisible).thenReturn(true)
+        val applicationViewModelWithFraudPrevention = applicationViewModelWithNoApiSubscriptions.copy(hasFraudPreventionHeaders = false)
+        val page = leftHandNavRender(Some(applicationViewModelWithFraudPrevention), Some("details"))
+
+        page.contentType should include("text/html")
+
+        val document = Jsoup.parse(page.body)
+        elementExistsById(document, "nav-fraud-prevention") shouldBe false 
+
+      }
+
+      "do not render Fraud prevention link when feature switch is disabled and hasFraudPrevention is false" in new Setup {
+        when(appConfig.fraudPreventionLinkVisible).thenReturn(false)
+        val applicationViewModelWithFraudPrevention = applicationViewModelWithNoApiSubscriptions.copy(hasFraudPreventionHeaders = false)
+        val page = leftHandNavRender(Some(applicationViewModelWithFraudPrevention), Some("details"))
+
+        page.contentType should include("text/html")
+
+        val document = Jsoup.parse(page.body)
+        elementExistsById(document, "nav-fraud-prevention") shouldBe false 
+
       }
 
       "NOT display server token link for old apps" in new Setup {
@@ -109,6 +158,7 @@ class LeftHandNavSpec extends CommonViewSpec with WithCSRFAddToken with Collabor
         elementExistsByText(document, "a", "Client secrets") shouldBe true
         elementExistsByText(document, "a", "Server token") shouldBe false
         elementExistsByText(document, "a", "Redirect URIs") shouldBe true
+        elementExistsByText(document, "a", "Fraud prevention") shouldBe false
         elementExistsByText(document, "a", "Team members") shouldBe true
         elementExistsByText(document, "a", "Delete application") shouldBe true
       }
