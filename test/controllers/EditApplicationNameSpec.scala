@@ -64,7 +64,7 @@ class EditApplicationNameSpec
     val addApplicationNameView = app.injector.instanceOf[AddApplicationNameView]
     val chooseApplicationToUpliftView = app.injector.instanceOf[ChooseApplicationToUpliftView]
 
-    val upliftJourneyTermsOfUseView: UpliftJourneyTermsOfUseView = app.injector.instanceOf[UpliftJourneyTermsOfUseView]
+    val beforeYouStartView: BeforeYouStartView = app.injector.instanceOf[BeforeYouStartView]
     val upliftJourneyConfigProviderMock = mock[UpliftJourneyConfigProvider]
 
     implicit val environmentNameService = new EnvironmentNameService(appConfig)
@@ -89,7 +89,7 @@ class EditApplicationNameSpec
       addApplicationNameView,
       chooseApplicationToUpliftView,
       upliftJourneyConfigProviderMock,
-      upliftJourneyTermsOfUseView
+      beforeYouStartView
     )
 
     implicit val hc: HeaderCarrier = HeaderCarrier()

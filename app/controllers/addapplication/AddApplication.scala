@@ -65,7 +65,7 @@ class AddApplication @Inject() (
     addApplicationNameView: AddApplicationNameView,
     chooseApplicationToUpliftView: ChooseApplicationToUpliftView,
     upliftJourneyConfigProvider: UpliftJourneyConfigProvider,
-    upliftJourneyTermsOfUseView: UpliftJourneyTermsOfUseView
+    beforeYouStartView: BeforeYouStartView
 )(implicit val ec: ExecutionContext, val appConfig: ApplicationConfig, val environmentNameService: EnvironmentNameService)
     extends ApplicationController(mcc) {
 
@@ -89,8 +89,8 @@ class AddApplication @Inject() (
       }
 
     upliftJourneyConfigProvider.status match { 
-      case On => successful(Ok(upliftJourneyTermsOfUseView()))
-      case OnDemand if upliftJourneyTurnedOnInRequestHeader => successful(Ok(upliftJourneyTermsOfUseView()))
+      case On => successful(Ok(beforeYouStartView()))
+      case OnDemand if upliftJourneyTurnedOnInRequestHeader => successful(Ok(beforeYouStartView()))
       case _ => successful(Ok(addApplicationStartPrincipalView()))
     }
   }
