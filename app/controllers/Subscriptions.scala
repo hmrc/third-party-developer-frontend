@@ -16,7 +16,7 @@
 
 package controllers
 
-import config.{ApplicationConfig, ErrorHandler, FraudPreventionConfigProvider}
+import config.{ApplicationConfig, ErrorHandler, FraudPreventionConfig}
 import connectors.ThirdPartyDeveloperConnector
 import domain.models.apidefinitions.{ApiContext, ApiVersion}
 import domain.models.applications._
@@ -57,7 +57,7 @@ class Subscriptions @Inject()(val developerConnector: ThirdPartyDeveloperConnect
                               changeSubscriptionConfirmationView: ChangeSubscriptionConfirmationView,
                               unsubscribeRequestSubmittedView: UnsubscribeRequestSubmittedView,
                               subscribeRequestSubmittedView: SubscribeRequestSubmittedView,
-                              val fraudPreventionConfigProvider: FraudPreventionConfigProvider)
+                              val fraudPreventionConfig: FraudPreventionConfig)
                              (implicit val ec: ExecutionContext, val appConfig: ApplicationConfig, val environmentNameService: EnvironmentNameService)
   extends ApplicationController(mcc)
     with ApplicationHelper {

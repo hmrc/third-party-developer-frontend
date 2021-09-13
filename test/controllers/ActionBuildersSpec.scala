@@ -16,23 +16,33 @@
 
 package controllers
 
-import config.{ApplicationConfig, ErrorHandler, FraudPreventionConfigProvider}
-import controllers.models.ApiSubscriptionsFlow
-import domain.models.apidefinitions._
-import domain.models.applications.{Application, Environment}
+import config.{ApplicationConfig, ErrorHandler}
+import domain.models.apidefinitions.{ApiContext, ApiVersion}
 import domain.models.developers.DeveloperSession
 import helpers.LoggedInRequestTestHelper
 import mocks.service._
 import play.api.http.Status.{NOT_FOUND, OK}
-import play.api.i18n.DefaultMessagesApi
 import play.api.libs.crypto.CookieSigner
-import play.api.mvc.{AnyContent, MessagesControllerComponents, MessagesRequest}
+import play.api.mvc.{AnyContent, MessagesControllerComponents}
 import play.api.test.Helpers._
 import service.{ApplicationActionService, ApplicationService, SessionService}
-import utils.LocalUserIdTracker
 
-import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.{ExecutionContext, Future}
+import scala.concurrent.ExecutionContext.Implicits.global
+import utils.LocalUserIdTracker
+import domain.models.applications.CollaboratorRole
+import domain.models.apidefinitions.APISubscriptionStatus
+import domain.models.apidefinitions.ApiVersionDefinition
+import controllers.models.ApiSubscriptionsFlow
+import play.api.mvc.MessagesRequest
+import play.api.i18n.DefaultMessagesApi
+import domain.models.apidefinitions.ApiIdentifier
+import domain.models.apidefinitions.APIStatus
+import domain.models.applications.Application
+import domain.models.applications.Environment
+import config.FraudPreventionConfigProvider
+import config.FraudPreventionConfig
+import domain.models.controllers.FraudPreventionLink
 
 class TestController(
     val cookieSigner: CookieSigner,
@@ -41,7 +51,7 @@ class TestController(
     val errorHandler: ErrorHandler,
     val applicationService: ApplicationService,
     val applicationActionService: ApplicationActionService,
-    val fraudPreventionConfigProvider: FraudPreventionConfigProvider
+    val fraudPreventionConfig: FraudPreventionConfig
   )(implicit val ec: ExecutionContext,
     val appConfig: ApplicationConfig)
     extends ApplicationController(mcc) {}
@@ -57,6 +67,7 @@ class ActionBuildersSpec
 
   trait Setup {
     val loggedInDeveloper = DeveloperSession(session)
+    def fraudPreventionConfig = FraudPreventionConfig(false, List.empty, "")
 
     val errorHandler: ErrorHandler = app.injector.instanceOf[ErrorHandler]
 
@@ -77,14 +88,14 @@ class ActionBuildersSpec
         )
       )
 
-    val underTest = new TestController(
+    lazy val underTest = new TestController(
       cookieSigner,
       mcc,
       sessionServiceMock,
       errorHandler,
       applicationServiceMock,
       applicationActionServiceMock,
-      mockFraudPreventionConfigProvider
+      fraudPreventionConfig
     )
 
     fetchByApplicationIdReturns(applicationWithSubscriptionData)
@@ -114,8 +125,6 @@ class ActionBuildersSpec
   }
 
   trait FraudPreventionSetup extends Setup {
-
-    when(mockFraudPreventionConfigProvider.enabled).thenReturn(false)
     val fraudPreventionProdApp = applicationWithSubscriptionData.application.copy(deployedTo = Environment.PRODUCTION)
     val fraudPreventionSandboxApp = applicationWithSubscriptionData.application.copy(deployedTo = Environment.SANDBOX)
 
@@ -198,64 +207,55 @@ class ActionBuildersSpec
 
   "hasFraudPreventionHeaders" should {
 
-    // prod app where subscription dont match
-    // sandbox app with matching subscriptions
-    def primeFraudConfigProvider(apisWithFraudHeaders : List[String] = List.empty, linkEnabled: Boolean = false)={
-          when(mockFraudPreventionConfigProvider.enabled).thenReturn(linkEnabled)
-          when(mockFraudPreventionConfigProvider.apisWithFraudPrevention).thenReturn(apisWithFraudHeaders)
-    }
-
     val apis = List("api-1", "api-2")
 
-
     "return false when link is enabled but fraudPreventionApis is empty in config" in new FraudPreventionSetup {
-      primeFraudConfigProvider(linkEnabled = true)
+      val fraudPreventionConfig = FraudPreventionConfig(true, List.empty, "")
       givenApplicationAction(applicationWithSubscriptionData, loggedInDeveloper, List(subscriptionWithSubFields))
-      underTest.hasFraudPreventionHeaders(applicationRequestWithSubs).isVisible shouldBe false
+      underTest.createFraudPreventionLink(applicationRequestWithSubs).isVisible shouldBe false
     }
 
     "return false when link is enabled, config has fraudprevention api list but application has no subscriptions" in new FraudPreventionSetup {
-      primeFraudConfigProvider(apis, linkEnabled = true)
+      val fraudPreventionConfig = FraudPreventionConfig(true, apis, "")
       givenApplicationAction(applicationWithSubscriptionData, loggedInDeveloper, List(subscriptionWithoutSubFields))
-      underTest.hasFraudPreventionHeaders(applicationRequestWithoutSubs).isVisible shouldBe false
+      underTest.createFraudPreventionLink(applicationRequestWithoutSubs).isVisible shouldBe false
 
     }    
     
     "return true when production application has fraud prevention subscriptions" in new FraudPreventionSetup {
-      primeFraudConfigProvider(List("api-example-microservice"), linkEnabled = true)
+      val fraudPreventionConfig = FraudPreventionConfig(true, List("api-example-microservice"), "")
      
       givenApplicationAction(applicationWithSubscriptionData, loggedInDeveloper, List(subscriptionWithSubFields))
-      underTest.hasFraudPreventionHeaders(applicationRequestWithSubs).isVisible shouldBe true
+      underTest.createFraudPreventionLink(applicationRequestWithSubs).isVisible shouldBe true
 
     }
 
     "return false when Link criteria is met but is disabled in config" in new FraudPreventionSetup {
-      primeFraudConfigProvider(List("api-example-microservice"), linkEnabled = false)
+      val fraudPreventionConfig = FraudPreventionConfig(false, List("api-example-microservice"), "")
 
       givenApplicationAction(applicationWithSubscriptionData, loggedInDeveloper, List(subscriptionWithSubFields))
-      underTest.hasFraudPreventionHeaders(applicationRequestWithSubs).isVisible shouldBe false
+      underTest.createFraudPreventionLink(applicationRequestWithSubs).isVisible shouldBe false
 
     }
 
     "return false when production application has fraud prevention subscriptions but is unsubcribed" in new FraudPreventionSetup {
-      primeFraudConfigProvider(List("api-example-microservice"), linkEnabled = true)
+      val fraudPreventionConfig = FraudPreventionConfig(true, List("api-example-microservice"), "")
       givenApplicationAction(applicationWithSubscriptionData, loggedInDeveloper, List(subscriptionWithSubFields))
-      underTest.hasFraudPreventionHeaders(applicationRequestWithSubsNotSubscribed).isVisible shouldBe false
+      underTest.createFraudPreventionLink(applicationRequestWithSubsNotSubscribed).isVisible shouldBe false
 
     }
 
     "return false when production application has no fraud prevention subscriptions" in new FraudPreventionSetup {
-      primeFraudConfigProvider(List("api-1", "api-2"), linkEnabled = true)
+      val fraudPreventionConfig = FraudPreventionConfig(true, List("api-1", "api-2"), "")
       givenApplicationAction(applicationWithSubscriptionData, loggedInDeveloper, List(subscriptionWithSubFields))
-      underTest.hasFraudPreventionHeaders(applicationRequestWithSubs).isVisible shouldBe false
+      underTest.createFraudPreventionLink(applicationRequestWithSubs).isVisible shouldBe false
 
     }
 
     "return false when sandbox application has fraud prevention subscriptions " in new FraudPreventionSetup {
-           primeFraudConfigProvider(List("api-example-microservice"), linkEnabled = true)
+      val fraudPreventionConfig = FraudPreventionConfig(true, List("api-example-microservice"), "")
       givenApplicationAction(applicationWithSubscriptionData, loggedInDeveloper, List(subscriptionWithSubFields))
-      underTest.hasFraudPreventionHeaders(applicationRequestForSandboxApp).isVisible shouldBe false
-
+      underTest.createFraudPreventionLink(applicationRequestForSandboxApp).isVisible shouldBe false
     }
   }
 }

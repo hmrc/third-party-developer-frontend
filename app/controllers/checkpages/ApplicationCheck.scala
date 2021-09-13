@@ -16,7 +16,7 @@
 
 package controllers.checkpages
 
-import config.{ApplicationConfig, ErrorHandler, FraudPreventionConfigProvider}
+import config.{ApplicationConfig, ErrorHandler, FraudPreventionConfig}
 import controllers._
 import controllers.FormKeys._
 import domain.models.applications.{ApplicationId, CheckInformation}
@@ -58,7 +58,7 @@ class ApplicationCheck @Inject() (
     val apiSubscriptionsViewTemplate: ApiSubscriptionsView,
     val privacyPolicyView: PrivacyPolicyView,
     val termsAndConditionsView: TermsAndConditionsView,
-    val fraudPreventionConfigProvider: FraudPreventionConfigProvider
+    val fraudPreventionConfig: FraudPreventionConfig
 )(implicit val ec: ExecutionContext, val appConfig: ApplicationConfig)
     extends ApplicationController(mcc)
     with ApplicationHelper

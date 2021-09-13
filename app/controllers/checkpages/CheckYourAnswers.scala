@@ -16,7 +16,7 @@
 
 package controllers.checkpages
 
-import config.{ApplicationConfig, ErrorHandler, FraudPreventionConfigProvider}
+import config.{ApplicationConfig, ErrorHandler, FraudPreventionConfig}
 import controllers._
 import controllers.FormKeys.applicationNameAlreadyExistsKey
 import controllers.ManageSubscriptions.Field
@@ -60,7 +60,7 @@ class CheckYourAnswers @Inject() (
     val privacyPolicyView: PrivacyPolicyView,
     val apiSubscriptionsViewTemplate: ApiSubscriptionsView,
     val contactDetailsView: ContactDetailsView,
-    val fraudPreventionConfigProvider: FraudPreventionConfigProvider
+    val fraudPreventionConfig: FraudPreventionConfig
 )(implicit val ec: ExecutionContext, val appConfig: ApplicationConfig)
     extends ApplicationController(mcc)
     with ApplicationHelper

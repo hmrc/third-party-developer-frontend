@@ -98,15 +98,15 @@ abstract class LoggedInController(mcc: MessagesControllerComponents) extends Bas
 
 abstract class ApplicationController(mcc: MessagesControllerComponents) extends LoggedInController(mcc) with ActionBuilders {
   val applicationService: ApplicationService
-  val fraudPreventionConfigProvider: FraudPreventionConfigProvider
+  val fraudPreventionConfig: config.FraudPreventionConfig
 
   implicit def userFromRequest(implicit request: ApplicationRequest[_]): DeveloperSession = request.user
 
   def hasFraudPreventionHeaders(request: ApplicationRequest[_]): FraudPreventionLink = {
-    val apis = fraudPreventionConfigProvider.apisWithFraudPrevention
+    val apis = fraudPreventionConfig.apisWithFraudPrevention
     val isProduction = request.application.deployedTo == Environment.PRODUCTION
     val shouldBeVisible = request.subscriptions.exists(x => apis.contains(x.serviceName) && x.subscribed && isProduction)
-    FraudPreventionLink(shouldBeVisible&&fraudPreventionConfigProvider.enabled, fraudPreventionConfigProvider.uri)
+    FraudPreventionLink(shouldBeVisible&&fraudPreventionConfig.enabled, fraudPreventionConfig.uri)
   }
 
   def applicationViewModelFromApplicationRequest()

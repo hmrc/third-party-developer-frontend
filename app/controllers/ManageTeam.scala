@@ -16,7 +16,7 @@
 
 package controllers
 
-import config.{ApplicationConfig, ErrorHandler, FraudPreventionConfigProvider}
+import config.{ApplicationConfig, ErrorHandler, FraudPreventionConfig}
 import domain._
 import domain.models.applications.{AddCollaborator, ApplicationId, CollaboratorRole}
 import domain.models.applications.Capabilities.SupportsTeamMembers
@@ -51,7 +51,7 @@ class ManageTeam @Inject() (
     addTeamMemberView: AddTeamMemberView,
     teamMemberAddView: TeamMemberAddView,
     removeTeamMemberView: RemoveTeamMemberView,
-    val fraudPreventionConfigProvider: FraudPreventionConfigProvider
+    val fraudPreventionConfig: FraudPreventionConfig
 )(implicit val ec: ExecutionContext, val appConfig: ApplicationConfig)
     extends ApplicationController(mcc) {
 

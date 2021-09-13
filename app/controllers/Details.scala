@@ -16,7 +16,7 @@
 
 package controllers
 
-import config.{ApplicationConfig, ErrorHandler, FraudPreventionConfigProvider}
+import config.{ApplicationConfig, ErrorHandler, FraudPreventionConfig}
 import controllers.FormKeys.appNameField
 import controllers.checkpages.{CheckYourAnswersData, CheckYourAnswersForm, DummyCheckYourAnswersForm}
 import domain._
@@ -48,7 +48,7 @@ class Details @Inject() (
     pendingApprovalView: PendingApprovalView,
     detailsView: DetailsView,
     changeDetailsView: ChangeDetailsView,
-    val fraudPreventionConfigProvider: FraudPreventionConfigProvider
+    val fraudPreventionConfig: FraudPreventionConfig
 )(implicit val ec: ExecutionContext, val appConfig: ApplicationConfig)
     extends ApplicationController(mcc) {
 

@@ -64,8 +64,8 @@ class AddApplication @Inject() (
     addApplicationNameView: AddApplicationNameView,
     chooseApplicationToUpliftView: ChooseApplicationToUpliftView,
     upliftJourneyConfigProvider: UpliftJourneyConfigProvider,
-    beforeYouStartView: BeforeYouStartView, 
-    val fraudPreventionConfigProvider: FraudPreventionConfigProvider
+    beforeYouStartView: BeforeYouStartView,
+    val fraudPreventionConfig: FraudPreventionConfig
 )(implicit val ec: ExecutionContext, val appConfig: ApplicationConfig, val environmentNameService: EnvironmentNameService)
     extends ApplicationController(mcc) {
 

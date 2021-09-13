@@ -21,10 +21,21 @@ import play.api.Configuration
 import javax.inject.Inject
 import javax.inject.Singleton
 import scala.collection.JavaConverters._
+import com.google.inject.Provider
+
+case class FraudPreventionConfig(enabled: Boolean, apisWithFraudPrevention: List[String], uri: String)
 
 @Singleton
-class FraudPreventionConfigProvider @Inject()(config: Configuration) {
-    def enabled:Boolean = config.get[Boolean]("fraudPreventionLink.enabled")
-    def apisWithFraudPrevention: List[String] = config.underlying.getStringList("fraudPreventionLink.apisWithFraudPrevention").asScala.toList
-    def uri: String = config.get[String]("fraudPreventionLink.uri")
+class FraudPreventionConfigProvider @Inject()(config: Configuration) extends Provider[FraudPreventionConfig] {
+
+    override def get(): FraudPreventionConfig = {
+
+      val enabled:Boolean = config.underlying.getBoolean("fraudPreventionLink.enabled")
+      val apisWithFraudPrevention: List[String] = config.underlying.getStringList("fraudPreventionLink.apisWithFraudPrevention").asScala.toList
+      val uri: String = config.underlying.getString("fraudPreventionLink.uri")
+
+      val result = FraudPreventionConfig(enabled, apisWithFraudPrevention, uri)
+      println(result)
+      result
+    }
 }

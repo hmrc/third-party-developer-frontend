@@ -16,7 +16,7 @@
 
 package controllers
 
-import config.{ApplicationConfig, ErrorHandler, FraudPreventionConfigProvider}
+import config.{ApplicationConfig, ErrorHandler, FraudPreventionConfig}
 import domain.models.applications._
 import domain.models.applications.Capabilities.SupportsTermsOfUse
 import domain.models.applications.Permissions.SandboxOrAdmin
@@ -41,7 +41,7 @@ class TermsOfUse @Inject() (
     mcc: MessagesControllerComponents,
     val cookieSigner: CookieSigner,
     termsOfUseView: TermsOfUseView,
-    val fraudPreventionConfigProvider: FraudPreventionConfigProvider
+    val fraudPreventionConfig: FraudPreventionConfig
 )(implicit val ec: ExecutionContext, val appConfig: ApplicationConfig)
     extends ApplicationController(mcc)
     with ApplicationHelper {

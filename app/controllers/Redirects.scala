@@ -16,7 +16,7 @@
 
 package controllers
 
-import config.{ApplicationConfig, ErrorHandler, FraudPreventionConfigProvider}
+import config.{ApplicationConfig, ErrorHandler, FraudPreventionConfig}
 import domain.models.applications.{ApplicationId, Standard, UpdateApplicationRequest}
 import domain.models.applications.Capabilities.SupportsRedirects
 import domain.models.applications.Permissions.{SandboxOrAdmin, TeamMembersOnly}
@@ -43,7 +43,7 @@ class Redirects @Inject() (
     addRedirectView: AddRedirectView,
     deleteRedirectConfirmationView: DeleteRedirectConfirmationView,
     changeRedirectView: ChangeRedirectView,
-    val fraudPreventionConfigProvider: FraudPreventionConfigProvider
+    val fraudPreventionConfig: FraudPreventionConfig
 )(implicit val ec: ExecutionContext, val appConfig: ApplicationConfig)
     extends ApplicationController(mcc) {
 

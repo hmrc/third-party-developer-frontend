@@ -16,7 +16,7 @@
 
 package controllers
 
-import config.{ApplicationConfig, ErrorHandler, FraudPreventionConfigProvider}
+import config.{ApplicationConfig, ErrorHandler, FraudPreventionConfig}
 import domain.models.applications.ApplicationId
 import domain.models.applications.Capabilities.SupportsDeletion
 import domain.models.applications.Permissions.{AdministratorOnly, TeamMembersOnly}
@@ -42,7 +42,7 @@ class DeleteApplication @Inject() (
     deletePrincipalApplicationCompleteView: DeletePrincipalApplicationCompleteView,
     deleteSubordinateApplicationConfirmView: DeleteSubordinateApplicationConfirmView,
     deleteSubordinateApplicationCompleteView: DeleteSubordinateApplicationCompleteView,
-    val fraudPreventionConfigProvider: FraudPreventionConfigProvider
+    val fraudPreventionConfig: FraudPreventionConfig
 )(implicit val ec: ExecutionContext, val appConfig: ApplicationConfig)
     extends ApplicationController(mcc) {
 
