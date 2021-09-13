@@ -53,14 +53,14 @@ case class UserRequest[A](developerSession: DeveloperSession, request: MessagesR
 case class MaybeUserRequest[A](developerSession: Option[DeveloperSession], request: MessagesRequest[A]) extends MessagesRequest[A](request, request.messagesApi)
 
 case class ApplicationRequest[A](
-                                  application: Application,
-                                  deployedTo: Environment,
-                                  subscriptions: List[APISubscriptionStatus],
-                                  openAccessApis: Map[ApiContext, ApiData],
-                                  role: CollaboratorRole,
-                                  user: DeveloperSession,
-                                  request: MessagesRequest[A]
-                                ) extends MessagesRequest[A](request, request.messagesApi) {
+    application: Application,
+    deployedTo: Environment,
+    subscriptions: List[APISubscriptionStatus],
+    openAccessApis: Map[ApiContext,ApiData],
+    role: CollaboratorRole,
+    user: DeveloperSession,
+    request: MessagesRequest[A]
+) extends MessagesRequest[A](request, request.messagesApi) {
   def hasSubscriptionFields: Boolean = {
     subscriptions.exists(s => s.subscribed && s.fields.fields.nonEmpty)
   }
