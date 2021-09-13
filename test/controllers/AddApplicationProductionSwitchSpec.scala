@@ -93,7 +93,8 @@ class AddApplicationProductionSwitchSpec
       addApplicationNameView,
       chooseApplicationToUpliftView,
       upliftJourneyConfigProviderMock,
-      beforeYouStartView
+      beforeYouStartView,
+      mockFraudPreventionConfigProvider
     )
     val hc = HeaderCarrier()
 

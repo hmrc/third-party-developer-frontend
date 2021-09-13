@@ -91,7 +91,8 @@ class AddApplicationStartSpec
       addApplicationNameView,
       chooseApplicationToUpliftView,
       upliftJourneyConfigProviderMock,
-      beforeYouStartView
+      beforeYouStartView,
+      mockFraudPreventionConfigProvider
     )
 
     val hc = HeaderCarrier()

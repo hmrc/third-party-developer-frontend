@@ -40,6 +40,7 @@ import domain.models.apidefinitions.ApiIdentifier
 import domain.models.apidefinitions.APIStatus
 import domain.models.applications.Application
 import domain.models.applications.Environment
+import config.FraudPreventionConfigProvider
 
 class TestController(
     val cookieSigner: CookieSigner,
@@ -47,7 +48,8 @@ class TestController(
     val sessionService: SessionService,
     val errorHandler: ErrorHandler,
     val applicationService: ApplicationService,
-    val applicationActionService: ApplicationActionService
+    val applicationActionService: ApplicationActionService,
+    val fraudPreventionConfigProvider: FraudPreventionConfigProvider
   )(implicit val ec: ExecutionContext,
     val appConfig: ApplicationConfig)
     extends ApplicationController(mcc) {}
@@ -89,7 +91,8 @@ class ActionBuildersSpec
       sessionServiceMock,
       errorHandler,
       applicationServiceMock,
-      applicationActionServiceMock
+      applicationActionServiceMock,
+      mockFraudPreventionConfigProvider
     )
 
     fetchByApplicationIdReturns(applicationWithSubscriptionData)
@@ -208,41 +211,41 @@ class ActionBuildersSpec
 
 
     "return false when appConfig.fraudPreventionApis has no apis" in new FraudPreventionSetup {
-      when(appConfig.fraudPreventionApis).thenReturn(List.empty)
+      when(mockFraudPreventionConfigProvider.apisWithFraudPrevention).thenReturn(List.empty)
       givenApplicationAction(applicationWithSubscriptionData, loggedInDeveloper, List(subscriptionWithSubFields))
       underTest.hasFraudPreventionHeaders(applicationRequestWithSubs) shouldBe false
 
     }
     "return false when application has no subscriptions" in new FraudPreventionSetup {
-      when(appConfig.fraudPreventionApis).thenReturn(List("api-1", "api-2"))
+      when(mockFraudPreventionConfigProvider.apisWithFraudPrevention).thenReturn(List("api-1", "api-2"))
       givenApplicationAction(applicationWithSubscriptionData, loggedInDeveloper, List(subscriptionWithSubFields))
       underTest.hasFraudPreventionHeaders(applicationRequestWithoutSubs) shouldBe false
 
     }    
     
     "return true when production application has fraud prevention subscriptions" in new FraudPreventionSetup {
-      when(appConfig.fraudPreventionApis).thenReturn(List("api-example-microservice"))
+      when(mockFraudPreventionConfigProvider.apisWithFraudPrevention).thenReturn(List("api-example-microservice"))
       givenApplicationAction(applicationWithSubscriptionData, loggedInDeveloper, List(subscriptionWithSubFields))
       underTest.hasFraudPreventionHeaders(applicationRequestWithSubs) shouldBe true
 
     }
 
     "return false when production application has fraud prevention subscriptions but is unsubcribed" in new FraudPreventionSetup {
-      when(appConfig.fraudPreventionApis).thenReturn(List("api-example-microservice"))
+      when(mockFraudPreventionConfigProvider.apisWithFraudPrevention).thenReturn(List("api-example-microservice"))
       givenApplicationAction(applicationWithSubscriptionData, loggedInDeveloper, List(subscriptionWithSubFields))
       underTest.hasFraudPreventionHeaders(applicationRequestWithSubsNotSubscribed) shouldBe false
 
     }
 
     "return false when production application has no fraud prevention subscriptions" in new FraudPreventionSetup {
-      when(appConfig.fraudPreventionApis).thenReturn(List("api-1", "api-2"))
+      when(mockFraudPreventionConfigProvider.apisWithFraudPrevention).thenReturn(List("api-1", "api-2"))
       givenApplicationAction(applicationWithSubscriptionData, loggedInDeveloper, List(subscriptionWithSubFields))
       underTest.hasFraudPreventionHeaders(applicationRequestWithSubs) shouldBe false
 
     }
 
     "return false when sandbox application has fraud prevention subscriptions " in new FraudPreventionSetup {
-      when(appConfig.fraudPreventionApis).thenReturn(List("api-example-microservice"))
+      when(mockFraudPreventionConfigProvider.apisWithFraudPrevention).thenReturn(List("api-example-microservice"))
       givenApplicationAction(applicationWithSubscriptionData, loggedInDeveloper, List(subscriptionWithSubFields))
       underTest.hasFraudPreventionHeaders(applicationRequestForSandboxApp) shouldBe false
 

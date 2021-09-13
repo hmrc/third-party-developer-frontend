@@ -29,6 +29,7 @@ import utils._
 import views.helper.CommonViewSpec
 import views.html.include.LeftHandNav
 import domain.models.controllers.LeftHandNavFlags
+import domain.models.controllers.FraudPreventionLink
 
 class LeftHandNavSpec extends CommonViewSpec with WithCSRFAddToken with CollaboratorTracker with LocalUserIdTracker {
 
@@ -56,9 +57,9 @@ class LeftHandNavSpec extends CommonViewSpec with WithCSRFAddToken with Collabor
       state = ApplicationState.production(loggedInDeveloper.email, ""),
       access = Standard(redirectUris = List("https://red1", "https://red2"), termsAndConditionsUrl = Some("http://tnc-url.com"))
     )
-
-    val applicationViewModelWithApiSubscriptions = ApplicationViewModel(application, hasSubscriptionsFields = true, hasPpnsFields = false, hasFraudPreventionHeaders = false)
-    val applicationViewModelWithNoApiSubscriptions = ApplicationViewModel(application, hasSubscriptionsFields = false, hasPpnsFields = false, hasFraudPreventionHeaders = false)
+  val expectedFraudUrl = "12222"
+      val applicationViewModelWithFraudLinkVisible = createApplicationViewModel(application, hasSubscriptionsFields = true, hasPpnsFields = false, createFraudPreventionViewModel(true, expectedFraudUrl))
+    val applicationViewModelWithFraudLinkHidden = createApplicationViewModel(application, hasSubscriptionsFields = false, hasPpnsFields = false)
 
     def leftHandNavRender(viewModel: Option[ApplicationViewModel], navSection: Option[String], flags: Map[String, Boolean] = Map.empty) = {
       leftHandNavView.render(viewModel, navSection, flags, request, loggedInDeveloper, appConfig)
@@ -66,9 +67,9 @@ class LeftHandNavSpec extends CommonViewSpec with WithCSRFAddToken with Collabor
   }
 
   "Left Hand Nav" when {
-    "working with an application with no api subscriptions" should {
+    "working with an application with fraud link hidden" should {
       "render correctly" in new Setup {
-        val page = leftHandNavRender(Some(applicationViewModelWithNoApiSubscriptions), Some("details"))
+        val page = leftHandNavRender(Some(applicationViewModelWithFraudLinkHidden), Some("details"))
 
         page.contentType should include("text/html")
 
@@ -86,56 +87,23 @@ class LeftHandNavSpec extends CommonViewSpec with WithCSRFAddToken with Collabor
       }
 
       "render Fraud prevention link when feature switch is enabled and hasFraudPrevention is true" in new Setup {
-        when(appConfig.fraudPreventionLinkVisible).thenReturn(true)
-        val applicationViewModelWithFraudPrevention = applicationViewModelWithNoApiSubscriptions.copy(hasFraudPreventionHeaders = true)
-        val page = leftHandNavRender(Some(applicationViewModelWithFraudPrevention), Some("details"))
+       
+        val page = leftHandNavRender(Some(applicationViewModelWithFraudLinkVisible), Some("details"))
 
         page.contentType should include("text/html")
 
         val document = Jsoup.parse(page.body)
         elementExistsById(document, "nav-fraud-prevention") shouldBe true
-        elementIdentifiedByAttrContainsText(document, "nav-fraud-prevention", "href", s"${appConfig.fraudPreventionUrl}/${applicationViewModelWithNoApiSubscriptions.application.id.value}")
+        elementIdentifiedByAttrContainsText(document, "nav-fraud-prevention", "href", s"fraudprevention url")
       }
 
-      "do not render Fraud prevention link when feature switch is disabled and hasFraudPrevention is true" in new Setup {
-        when(appConfig.fraudPreventionLinkVisible).thenReturn(false)
-        val applicationViewModelWithFraudPrevention = applicationViewModelWithNoApiSubscriptions.copy(hasFraudPreventionHeaders = true)
-        val page = leftHandNavRender(Some(applicationViewModelWithFraudPrevention), Some("details"))
 
-        page.contentType should include("text/html")
 
-        val document = Jsoup.parse(page.body)
-        elementExistsById(document, "nav-fraud-prevention") shouldBe false
-        
-      }
 
-      "do not render Fraud prevention link when feature switch is enabled and hasFraudPrevention is false" in new Setup {
-        when(appConfig.fraudPreventionLinkVisible).thenReturn(true)
-        val applicationViewModelWithFraudPrevention = applicationViewModelWithNoApiSubscriptions.copy(hasFraudPreventionHeaders = false)
-        val page = leftHandNavRender(Some(applicationViewModelWithFraudPrevention), Some("details"))
-
-        page.contentType should include("text/html")
-
-        val document = Jsoup.parse(page.body)
-        elementExistsById(document, "nav-fraud-prevention") shouldBe false
-
-      }
-
-      "do not render Fraud prevention link when feature switch is disabled and hasFraudPrevention is false" in new Setup {
-        when(appConfig.fraudPreventionLinkVisible).thenReturn(false)
-        val applicationViewModelWithFraudPrevention = applicationViewModelWithNoApiSubscriptions.copy(hasFraudPreventionHeaders = false)
-        val page = leftHandNavRender(Some(applicationViewModelWithFraudPrevention), Some("details"))
-
-        page.contentType should include("text/html")
-
-        val document = Jsoup.parse(page.body)
-        elementExistsById(document, "nav-fraud-prevention") shouldBe false
-
-      }
 
       "NOT display server token link for old apps" in new Setup {
         val oldAppWithoutSubsFields =
-          ApplicationViewModel(application.copy(createdOn = serverTokenCutoffDate.minusDays(1)), hasSubscriptionsFields = false, hasPpnsFields = false, hasFraudPreventionHeaders = false)
+                   createApplicationViewModel(application.copy(createdOn = serverTokenCutoffDate.minusDays(1)), hasSubscriptionsFields = false, hasPpnsFields = false)
         val page = leftHandNavRender(Some(oldAppWithoutSubsFields), Some("details"))
 
         page.contentType should include("text/html")
@@ -147,7 +115,7 @@ class LeftHandNavSpec extends CommonViewSpec with WithCSRFAddToken with Collabor
 
     "working with an application with api subscriptions" should {
       "render correctly" in new Setup {
-        val page = leftHandNavRender(Some(applicationViewModelWithApiSubscriptions), Some("details"))
+        val page = leftHandNavRender(Some(applicationViewModelWithFraudLinkHidden), Some("details"))
         page.contentType should include("text/html")
 
         val document = Jsoup.parse(page.body)
@@ -165,7 +133,7 @@ class LeftHandNavSpec extends CommonViewSpec with WithCSRFAddToken with Collabor
 
       "NOT display server token link for old apps" in new Setup {
         val oldAppWithSubsFields =
-          ApplicationViewModel(application.copy(createdOn = serverTokenCutoffDate.minusDays(1)), hasSubscriptionsFields = true, hasPpnsFields = false, hasFraudPreventionHeaders = false)
+                   createApplicationViewModel(application.copy(createdOn = serverTokenCutoffDate.minusDays(1)), hasSubscriptionsFields = true, hasPpnsFields = false)
         val page = leftHandNavRender(Some(oldAppWithSubsFields), Some("details"))
 
         page.contentType should include("text/html")

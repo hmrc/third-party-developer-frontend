@@ -21,17 +21,28 @@ import java.util.Locale
 import config.ApplicationConfig
 import org.scalatest.Matchers
 import org.scalatestplus.play.guice.GuiceOneAppPerSuite
-import play.api.Application
+
 import play.api.i18n.{Lang, MessagesImpl, MessagesProvider}
 import play.api.inject.guice.GuiceApplicationBuilder
 import play.api.mvc.MessagesControllerComponents
 import utils.{AsyncHmrcSpec, SharedMetricsClearDown}
+import domain.models.controllers.{FraudPreventionLink, ApplicationViewModel}
+import domain.models.applications.{Application => TPDFEApp}
+import play.api.Application
 
 trait CommonViewSpec extends AsyncHmrcSpec with GuiceOneAppPerSuite with SharedMetricsClearDown with Matchers {
   val mcc = app.injector.instanceOf[MessagesControllerComponents]
   val messagesApi = mcc.messagesApi
   implicit val messagesProvider: MessagesProvider = MessagesImpl(Lang(Locale.ENGLISH), messagesApi)
   implicit val appConfig: ApplicationConfig = mock[ApplicationConfig]
+
+
+  def createFraudPreventionViewModel(isVisible: Boolean, url: String) = FraudPreventionLink(isVisible, url)
+  def createApplicationViewModel(application: TPDFEApp,
+   hasSubscriptionsFields: Boolean,
+   hasPpnsFields: Boolean,
+   fraudPreventionLink: FraudPreventionLink = createFraudPreventionViewModel(false, "")) = 
+    ApplicationViewModel(application, hasSubscriptionsFields, hasPpnsFields, fraudPreventionLink)
 
   when(appConfig.nameOfPrincipalEnvironment).thenReturn("Production")
   when(appConfig.nameOfSubordinateEnvironment).thenReturn("Sandbox")

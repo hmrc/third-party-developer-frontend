@@ -78,7 +78,8 @@ class SubscriptionsSpec extends BaseControllerSpec with WithCSRFAddToken with Lo
       addAppSubscriptionsView,
       changeSubscriptionConfirmationView,
       unsubscribeRequestSubmittedView,
-      subscribeRequestSubmittedView
+      subscribeRequestSubmittedView,
+      mockFraudPreventionConfigProvider
     )
 
     implicit val hc: HeaderCarrier = HeaderCarrier()

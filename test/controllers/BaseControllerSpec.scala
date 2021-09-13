@@ -27,6 +27,7 @@ import play.api.libs.crypto.CookieSigner
 import play.api.mvc.MessagesControllerComponents
 import utils.{AsyncHmrcSpec, SharedMetricsClearDown}
 import mocks.service.SessionServiceMock
+import config.FraudPreventionConfigProvider
 
 class BaseControllerSpec 
     extends AsyncHmrcSpec 
@@ -38,7 +39,12 @@ class BaseControllerSpec
   implicit val appConfig: ApplicationConfig = mock[ApplicationConfig]
   when(appConfig.nameOfPrincipalEnvironment).thenReturn("Production")
   when(appConfig.nameOfSubordinateEnvironment).thenReturn("Sandbox")
-  when(appConfig.fraudPreventionApis).thenReturn(List.empty)
+
+  val mockFraudPreventionConfigProvider = mock[FraudPreventionConfigProvider]
+
+  when(mockFraudPreventionConfigProvider.linkEnabled).thenReturn(false)
+  when(mockFraudPreventionConfigProvider.apisWithFraudPrevention).thenReturn(List.empty)
+  when(mockFraudPreventionConfigProvider.linkUrl).thenReturn("")
 
   implicit val cookieSigner: CookieSigner = app.injector.instanceOf[CookieSigner]
 

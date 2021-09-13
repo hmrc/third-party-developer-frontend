@@ -119,7 +119,8 @@ class CredentialsSpec
       clientIdView,
       clientSecretsView,
       serverTokenView,
-      deleteClientSecretView
+      deleteClientSecretView,
+      mockFraudPreventionConfigProvider
     )
 
     val application = createApplication()

@@ -89,7 +89,8 @@ class EditApplicationNameSpec
       addApplicationNameView,
       chooseApplicationToUpliftView,
       upliftJourneyConfigProviderMock,
-      beforeYouStartView
+      beforeYouStartView,
+      mockFraudPreventionConfigProvider
     )
 
     implicit val hc: HeaderCarrier = HeaderCarrier()

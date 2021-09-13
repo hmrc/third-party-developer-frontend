@@ -56,7 +56,7 @@ class UnsubscribeRequestSubmittedSpec extends CommonViewSpec with WithCSRFAddTok
       val unsubscribeRequestSubmittedView = app.injector.instanceOf[UnsubscribeRequestSubmittedView]
 
       val page =
-        unsubscribeRequestSubmittedView.render(ApplicationViewModel(application, false, false, hasFraudPreventionHeaders = false), apiName, apiVersion, request, developer, messagesProvider, appConfig, "subscriptions")
+        unsubscribeRequestSubmittedView.render(createApplicationViewModel(application, false, false), apiName, apiVersion, request, developer, messagesProvider, appConfig, "subscriptions")
       page.contentType should include("text/html")
 
       val document = Jsoup.parse(page.body)

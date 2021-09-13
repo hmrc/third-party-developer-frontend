@@ -31,6 +31,7 @@ import utils._
 import views.helper.CommonViewSpec
 import views.html.include.ChangeSubscriptionConfirmationView
 import play.api.mvc.Call
+import domain.models.controllers.FraudPreventionLink
 
 class ChangeSubscriptionConfirmationSpec extends CommonViewSpec with WithCSRFAddToken with CollaboratorTracker with LocalUserIdTracker {
   val request = FakeRequest().withCSRFToken
@@ -63,7 +64,7 @@ class ChangeSubscriptionConfirmationSpec extends CommonViewSpec with WithCSRFAdd
     val changeSubscriptionConfirmationView = app.injector.instanceOf[ChangeSubscriptionConfirmationView]
 
     changeSubscriptionConfirmationView.render(
-      ApplicationViewModel(application, hasSubscriptionsFields = false, hasPpnsFields = false, hasFraudPreventionHeaders = false),
+          createApplicationViewModel(application, hasSubscriptionsFields = false, hasPpnsFields = false),
       form,
       apiName,
       apiContext,

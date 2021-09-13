@@ -59,7 +59,8 @@ class TermsOfUseSpec
       sessionServiceMock,
       mcc,
       cookieSigner,
-      termsOfUseView
+      termsOfUseView,
+      mockFraudPreventionConfigProvider
     )
 
     val loggedInDeveloper = buildDeveloper()

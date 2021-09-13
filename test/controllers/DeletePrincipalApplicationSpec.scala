@@ -60,7 +60,8 @@ class DeletePrincipalApplicationSpec
       deletePrincipalApplicationConfirmView,
       deletePrincipalApplicationCompleteView,
       deleteSubordinateApplicationConfirmView,
-      deleteSubordinateApplicationCompleteView
+      deleteSubordinateApplicationCompleteView,
+      mockFraudPreventionConfigProvider
     )
 
     val appId = ApplicationId("1234")

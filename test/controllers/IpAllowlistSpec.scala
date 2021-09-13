@@ -67,7 +67,9 @@ class IpAllowlistSpec
       app.injector.instanceOf[SettingUpAllowlistView],
       app.injector.instanceOf[RemoveIpAllowlistView],
       app.injector.instanceOf[RemoveIpAllowlistSuccessView],
-      app.injector.instanceOf[RemoveCidrBlockView]
+      app.injector.instanceOf[RemoveCidrBlockView],
+      mockFraudPreventionConfigProvider
+      
     )
 
     val sessionId = "sessionId"

@@ -151,7 +151,8 @@ class CheckYourAnswersSpec
       termsAndConditionsView,
       privacyPolicyView,
       apiSubscriptionsViewTemplate,
-      contactDetailsView
+      contactDetailsView,
+      mockFraudPreventionConfigProvider
     )
 
     fetchSessionByIdReturns(sessionId, session)

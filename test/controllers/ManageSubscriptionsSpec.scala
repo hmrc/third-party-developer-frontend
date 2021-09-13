@@ -124,7 +124,8 @@ class ManageSubscriptionsSpec
       editApiMetadataFieldView,
       subscriptionConfigurationStartView,
       subscriptionConfigurationPageView,
-      subscriptionConfigurationStepPageView
+      subscriptionConfigurationStepPageView,
+      mockFraudPreventionConfigProvider
     )
 
     fetchSessionByIdReturns(sessionId, session)
