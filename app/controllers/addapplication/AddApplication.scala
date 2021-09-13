@@ -89,8 +89,8 @@ class AddApplication @Inject() (
       }
 
     upliftJourneyConfigProvider.status match { 
-      case On => successful(Ok(beforeYouStartView()))
-      case OnDemand if upliftJourneyTurnedOnInRequestHeader => successful(Ok(beforeYouStartView()))
+      case On => addApplicationProductionSwitch()(request)
+      case OnDemand if upliftJourneyTurnedOnInRequestHeader => addApplicationProductionSwitch()(request)
       case _ => successful(Ok(addApplicationStartPrincipalView()))
     }
   }
@@ -150,7 +150,6 @@ class AddApplication @Inject() (
   }
 
   def chooseApplicationToUpliftAction(): Action[AnyContent] = loggedInAction { implicit request =>
-
     def handleValidForm(validForm: ChooseApplicationToUpliftForm) =
       showConfirmSubscriptionsPage(validForm.applicationId)
 
