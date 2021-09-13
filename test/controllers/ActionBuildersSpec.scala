@@ -123,6 +123,7 @@ class ActionBuildersSpec
 
   trait FraudPreventionSetup extends Setup {
 
+    when(mockFraudPreventionConfigProvider.linkEnabled).thenReturn(false)
     val fraudPreventionProdApp = applicationWithSubscriptionData.application.copy(deployedTo = Environment.PRODUCTION)
     val fraudPreventionSandboxApp = applicationWithSubscriptionData.application.copy(deployedTo = Environment.SANDBOX)
 
@@ -207,47 +208,61 @@ class ActionBuildersSpec
 
     // prod app where subscription dont match
     // sandbox app with matching subscriptions
-    
-
-
-    "return false when appConfig.fraudPreventionApis has no apis" in new FraudPreventionSetup {
-      when(mockFraudPreventionConfigProvider.apisWithFraudPrevention).thenReturn(List.empty)
-      givenApplicationAction(applicationWithSubscriptionData, loggedInDeveloper, List(subscriptionWithSubFields))
-      underTest.hasFraudPreventionHeaders(applicationRequestWithSubs) shouldBe false
-
+    def primeFraudConfigProvider(apisWithFraudHeaders : List[String] = List.empty, linkEnabled: Boolean = false)={
+          when(mockFraudPreventionConfigProvider.linkEnabled).thenReturn(linkEnabled)
+          when(mockFraudPreventionConfigProvider.apisWithFraudPrevention).thenReturn(apisWithFraudHeaders)
     }
-    "return false when application has no subscriptions" in new FraudPreventionSetup {
-      when(mockFraudPreventionConfigProvider.apisWithFraudPrevention).thenReturn(List("api-1", "api-2"))
+
+    val apis = List("api-1", "api-2")
+
+
+    "return false when link is enabled but fraudPreventionApis is empty in config" in new FraudPreventionSetup {
+      primeFraudConfigProvider(linkEnabled = true)
       givenApplicationAction(applicationWithSubscriptionData, loggedInDeveloper, List(subscriptionWithSubFields))
-      underTest.hasFraudPreventionHeaders(applicationRequestWithoutSubs) shouldBe false
+      underTest.hasFraudPreventionHeaders(applicationRequestWithSubs).isVisible shouldBe false
+    }
+
+    "return false when link is enabled, config has fraudprevention api list but application has no subscriptions" in new FraudPreventionSetup {
+      primeFraudConfigProvider(apis, linkEnabled = true)
+      givenApplicationAction(applicationWithSubscriptionData, loggedInDeveloper, List(subscriptionWithoutSubFields))
+      underTest.hasFraudPreventionHeaders(applicationRequestWithoutSubs).isVisible shouldBe false
 
     }    
     
     "return true when production application has fraud prevention subscriptions" in new FraudPreventionSetup {
-      when(mockFraudPreventionConfigProvider.apisWithFraudPrevention).thenReturn(List("api-example-microservice"))
+      primeFraudConfigProvider(List("api-example-microservice"), linkEnabled = true)
+     
       givenApplicationAction(applicationWithSubscriptionData, loggedInDeveloper, List(subscriptionWithSubFields))
-      underTest.hasFraudPreventionHeaders(applicationRequestWithSubs) shouldBe true
+      underTest.hasFraudPreventionHeaders(applicationRequestWithSubs).isVisible shouldBe true
+
+    }
+
+    "return false when Link criteria is met but is disabled in config" in new FraudPreventionSetup {
+      primeFraudConfigProvider(List("api-example-microservice"), linkEnabled = false)
+
+      givenApplicationAction(applicationWithSubscriptionData, loggedInDeveloper, List(subscriptionWithSubFields))
+      underTest.hasFraudPreventionHeaders(applicationRequestWithSubs).isVisible shouldBe false
 
     }
 
     "return false when production application has fraud prevention subscriptions but is unsubcribed" in new FraudPreventionSetup {
-      when(mockFraudPreventionConfigProvider.apisWithFraudPrevention).thenReturn(List("api-example-microservice"))
+      primeFraudConfigProvider(List("api-example-microservice"), linkEnabled = true)
       givenApplicationAction(applicationWithSubscriptionData, loggedInDeveloper, List(subscriptionWithSubFields))
-      underTest.hasFraudPreventionHeaders(applicationRequestWithSubsNotSubscribed) shouldBe false
+      underTest.hasFraudPreventionHeaders(applicationRequestWithSubsNotSubscribed).isVisible shouldBe false
 
     }
 
     "return false when production application has no fraud prevention subscriptions" in new FraudPreventionSetup {
-      when(mockFraudPreventionConfigProvider.apisWithFraudPrevention).thenReturn(List("api-1", "api-2"))
+      primeFraudConfigProvider(List("api-1", "api-2"), linkEnabled = true)
       givenApplicationAction(applicationWithSubscriptionData, loggedInDeveloper, List(subscriptionWithSubFields))
-      underTest.hasFraudPreventionHeaders(applicationRequestWithSubs) shouldBe false
+      underTest.hasFraudPreventionHeaders(applicationRequestWithSubs).isVisible shouldBe false
 
     }
 
     "return false when sandbox application has fraud prevention subscriptions " in new FraudPreventionSetup {
-      when(mockFraudPreventionConfigProvider.apisWithFraudPrevention).thenReturn(List("api-example-microservice"))
+           primeFraudConfigProvider(List("api-example-microservice"), linkEnabled = true)
       givenApplicationAction(applicationWithSubscriptionData, loggedInDeveloper, List(subscriptionWithSubFields))
-      underTest.hasFraudPreventionHeaders(applicationRequestForSandboxApp) shouldBe false
+      underTest.hasFraudPreventionHeaders(applicationRequestForSandboxApp).isVisible shouldBe false
 
     }
   }
