@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
-package controllers
+package config
 
-import config.FraudPreventionConfigProvider
+import controllers.BaseControllerSpec
 import play.api.Configuration
 
 class FraudPreventionConfigProviderSpec extends BaseControllerSpec {
@@ -27,20 +27,20 @@ class FraudPreventionConfigProviderSpec extends BaseControllerSpec {
 
       val testConfig = Configuration.from(Map("fraudPreventionLink.linkEnabled" -> "testval"))
 
-      intercept[RuntimeException]{
-        new FraudPreventionConfigProvider(testConfig).linkEnabled
-      }.getMessage() contains "No configuration setting found for key 'applicationCheck"
+      intercept[RuntimeException] {
+        new FraudPreventionConfigProvider(testConfig).enabled
+      }.getMessage contains "No configuration setting found for key 'applicationCheck"
 
     }
 
     "be false when fraudPreventionLink.linkEnabled is false" in {
 
-      val testConfig = Configuration.from(Map("fraudPreventionLink.linkEnabled" -> "false"))
+      val testConfig = Configuration.from(Map("fraudPreventionLink.enabled" -> "false"))
 
       val underTest = new FraudPreventionConfigProvider(testConfig)
 
-      underTest.linkEnabled shouldBe false
-    } 
+      underTest.enabled shouldBe false
+    }
 
     "return a list of strings when fraudPreventionLink.apisWithFraudPrevention is [vat-api]" in {
       val fraudPreventionApis = List("vat-api")
@@ -50,16 +50,16 @@ class FraudPreventionConfigProviderSpec extends BaseControllerSpec {
       val underTest = new FraudPreventionConfigProvider(testConfig)
 
       underTest.apisWithFraudPrevention shouldBe fraudPreventionApis
-    } 
+    }
 
     "return url when fraudPreventionLink.linkUrl is correct" in {
       val url = "url"
 
-      val testConfig = Configuration.from(Map("fraudPreventionLink.linkUrl" -> url))
+      val testConfig = Configuration.from(Map("fraudPreventionLink.uri" -> url))
 
       val underTest = new FraudPreventionConfigProvider(testConfig)
 
-      underTest.linkUrl shouldBe url
-    } 
-  }   
+      underTest.uri shouldBe url
+    }
+  }
 }

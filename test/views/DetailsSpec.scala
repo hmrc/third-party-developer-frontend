@@ -20,7 +20,6 @@ import controllers.routes
 import domain.models.applications
 import domain.models.applications._
 import domain.models.developers.{DeveloperSession, LoggedInState}
-import domain.models.controllers.ApplicationViewModel
 import org.joda.time.format.DateTimeFormat
 import org.jsoup.Jsoup
 import org.jsoup.nodes.{Document, Element}
@@ -28,11 +27,9 @@ import play.api.mvc.AnyContentAsEmpty
 import play.api.test.FakeRequest
 import play.twirl.api.HtmlFormat.Appendable
 import uk.gov.hmrc.time.DateTimeUtils
-import utils.{TestApplications, WithCSRFAddToken}
+import utils.{CollaboratorTracker, LocalUserIdTracker, TestApplications, WithCSRFAddToken}
 import views.helper.CommonViewSpec
 import views.html.DetailsView
-import utils.LocalUserIdTracker
-import utils.CollaboratorTracker
 
 class DetailsSpec 
     extends CommonViewSpec 

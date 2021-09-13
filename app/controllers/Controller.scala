@@ -106,7 +106,7 @@ abstract class ApplicationController(mcc: MessagesControllerComponents) extends 
     val apis = fraudPreventionConfigProvider.apisWithFraudPrevention
     val isProduction = request.application.deployedTo == Environment.PRODUCTION
     val shouldBeVisible = request.subscriptions.exists(x => apis.contains(x.serviceName) && x.subscribed && isProduction)
-    FraudPreventionLink(shouldBeVisible&&fraudPreventionConfigProvider.linkEnabled, fraudPreventionConfigProvider.linkUrl)
+    FraudPreventionLink(shouldBeVisible&&fraudPreventionConfigProvider.enabled, fraudPreventionConfigProvider.uri)
   }
 
   def applicationViewModelFromApplicationRequest()

@@ -16,31 +16,23 @@
 
 package controllers
 
-import config.{ApplicationConfig, ErrorHandler}
-import domain.models.apidefinitions.{ApiContext, ApiVersion}
+import config.{ApplicationConfig, ErrorHandler, FraudPreventionConfigProvider}
+import controllers.models.ApiSubscriptionsFlow
+import domain.models.apidefinitions._
+import domain.models.applications.{Application, Environment}
 import domain.models.developers.DeveloperSession
 import helpers.LoggedInRequestTestHelper
 import mocks.service._
 import play.api.http.Status.{NOT_FOUND, OK}
+import play.api.i18n.DefaultMessagesApi
 import play.api.libs.crypto.CookieSigner
-import play.api.mvc.{AnyContent, MessagesControllerComponents}
+import play.api.mvc.{AnyContent, MessagesControllerComponents, MessagesRequest}
 import play.api.test.Helpers._
 import service.{ApplicationActionService, ApplicationService, SessionService}
-
-import scala.concurrent.{ExecutionContext, Future}
-import scala.concurrent.ExecutionContext.Implicits.global
 import utils.LocalUserIdTracker
-import domain.models.applications.CollaboratorRole
-import domain.models.apidefinitions.APISubscriptionStatus
-import domain.models.apidefinitions.ApiVersionDefinition
-import controllers.models.ApiSubscriptionsFlow
-import play.api.mvc.MessagesRequest
-import play.api.i18n.DefaultMessagesApi
-import domain.models.apidefinitions.ApiIdentifier
-import domain.models.apidefinitions.APIStatus
-import domain.models.applications.Application
-import domain.models.applications.Environment
-import config.FraudPreventionConfigProvider
+
+import scala.concurrent.ExecutionContext.Implicits.global
+import scala.concurrent.{ExecutionContext, Future}
 
 class TestController(
     val cookieSigner: CookieSigner,
@@ -123,7 +115,7 @@ class ActionBuildersSpec
 
   trait FraudPreventionSetup extends Setup {
 
-    when(mockFraudPreventionConfigProvider.linkEnabled).thenReturn(false)
+    when(mockFraudPreventionConfigProvider.enabled).thenReturn(false)
     val fraudPreventionProdApp = applicationWithSubscriptionData.application.copy(deployedTo = Environment.PRODUCTION)
     val fraudPreventionSandboxApp = applicationWithSubscriptionData.application.copy(deployedTo = Environment.SANDBOX)
 
@@ -209,7 +201,7 @@ class ActionBuildersSpec
     // prod app where subscription dont match
     // sandbox app with matching subscriptions
     def primeFraudConfigProvider(apisWithFraudHeaders : List[String] = List.empty, linkEnabled: Boolean = false)={
-          when(mockFraudPreventionConfigProvider.linkEnabled).thenReturn(linkEnabled)
+          when(mockFraudPreventionConfigProvider.enabled).thenReturn(linkEnabled)
           when(mockFraudPreventionConfigProvider.apisWithFraudPrevention).thenReturn(apisWithFraudHeaders)
     }
 

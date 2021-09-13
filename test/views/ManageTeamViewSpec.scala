@@ -16,21 +16,19 @@
 
 package views
 
+import builder.DeveloperBuilder
 import controllers.AddTeamMemberForm
 import domain.models.applications._
 import domain.models.developers.LoggedInState
 import helpers.string._
-import domain.models.controllers.ApplicationViewModel
 import org.jsoup.Jsoup
 import play.api.data.Form
 import play.api.test.FakeRequest
 import uk.gov.hmrc.time.DateTimeUtils
 import utils.ViewHelpers.{elementExistsByText, linkExistsWithHref}
-import utils.WithCSRFAddToken
+import utils.{LocalUserIdTracker, WithCSRFAddToken}
 import views.helper.CommonViewSpec
 import views.html.manageTeamViews.ManageTeamView
-import builder.DeveloperBuilder
-import utils.LocalUserIdTracker
 
 class ManageTeamViewSpec extends CommonViewSpec with WithCSRFAddToken with DeveloperBuilder with LocalUserIdTracker {
 

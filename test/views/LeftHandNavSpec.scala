@@ -16,20 +16,18 @@
 
 package views
 
-import domain.models.applications._
 import domain.models.applications.Environment.PRODUCTION
+import domain.models.applications._
 import domain.models.developers.LoggedInState
-import domain.models.controllers.ApplicationViewModel
 import org.jsoup.Jsoup
 import org.jsoup.nodes.Document
 import play.api.test.FakeRequest
 import uk.gov.hmrc.time.DateTimeUtils.now
+import utils.{CollaboratorTracker, LocalUserIdTracker}
 import views.helper.CommonViewSpec
 import views.html.include.LeftHandNav
 
 import scala.collection.JavaConverters._
-import utils.CollaboratorTracker
-import utils.LocalUserIdTracker
 
 class LeftHandNavSpec extends CommonViewSpec with CollaboratorTracker with LocalUserIdTracker {
 

@@ -24,7 +24,7 @@ import scala.collection.JavaConverters._
 
 @Singleton
 class FraudPreventionConfigProvider @Inject()(config: Configuration) {
-    def linkEnabled:Boolean = config.get[Boolean]("fraudPreventionLink.linkEnabled")
+    def enabled:Boolean = config.get[Boolean]("fraudPreventionLink.enabled")
     def apisWithFraudPrevention: List[String] = config.underlying.getStringList("fraudPreventionLink.apisWithFraudPrevention").asScala.toList
-    def linkUrl: String = config.get[String]("fraudPreventionLink.linkUrl")
+    def uri: String = config.get[String]("fraudPreventionLink.uri")
 }

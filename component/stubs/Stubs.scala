@@ -19,7 +19,7 @@ package stubs
 import com.github.tomakehurst.wiremock.client.WireMock._
 import connectors.EncryptedJson
 import domain.models.applications.ApplicationNameValidationJson.ApplicationNameValidationResult
-import domain.models.applications.{Application, ApplicationToken, Environment}
+import domain.models.applications.{ ApplicationToken, Environment}
 import domain.models.developers.{Registration, UpdateProfileRequest}
 import domain.services.ApiDefinitionsJsonFormatters._
 import org.scalatest.Matchers
@@ -215,6 +215,7 @@ object ApplicationStub {
   }
 
   def configureUserApplications(userId: UserId, applications: List[ApplicationWithSubscriptionIds] = Nil, status: Int = OK) = {
+    import domain.services.ApiDefinitionsJsonFormatters._
     import play.api.libs.json.Json
     import play.api.libs.json.JodaWrites._
     import domain.services.ApiDefinitionsJsonFormatters._

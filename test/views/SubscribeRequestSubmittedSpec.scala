@@ -20,7 +20,6 @@ import config.ApplicationConfig
 import domain.models.apidefinitions.ApiVersion
 import domain.models.applications._
 import domain.models.developers.LoggedInState
-import domain.models.controllers.ApplicationViewModel
 import org.jsoup.Jsoup
 import play.api.test.FakeRequest
 import uk.gov.hmrc.time.DateTimeUtils

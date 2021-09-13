@@ -21,17 +21,15 @@ import domain.models.apidefinitions.{ApiContext, ApiVersion}
 import domain.models.applications._
 import domain.models.developers.LoggedInState
 import domain.models.views.SubscriptionRedirect
-import domain.models.controllers.ApplicationViewModel
 import org.jsoup.Jsoup
 import play.api.data.Form
+import play.api.mvc.Call
 import play.api.test.FakeRequest
 import uk.gov.hmrc.time.DateTimeUtils
 import utils.ViewHelpers.elementExistsByText
 import utils._
 import views.helper.CommonViewSpec
 import views.html.include.ChangeSubscriptionConfirmationView
-import play.api.mvc.Call
-import domain.models.controllers.FraudPreventionLink
 
 class ChangeSubscriptionConfirmationSpec extends CommonViewSpec with WithCSRFAddToken with CollaboratorTracker with LocalUserIdTracker {
   val request = FakeRequest().withCSRFToken

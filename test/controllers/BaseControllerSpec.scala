@@ -42,9 +42,9 @@ class BaseControllerSpec
 
   val mockFraudPreventionConfigProvider = mock[FraudPreventionConfigProvider]
 
-  when(mockFraudPreventionConfigProvider.linkEnabled).thenReturn(false)
+  when(mockFraudPreventionConfigProvider.enabled).thenReturn(false)
   when(mockFraudPreventionConfigProvider.apisWithFraudPrevention).thenReturn(List.empty)
-  when(mockFraudPreventionConfigProvider.linkUrl).thenReturn("")
+  when(mockFraudPreventionConfigProvider.uri).thenReturn("")
 
   implicit val cookieSigner: CookieSigner = app.injector.instanceOf[CookieSigner]
 
