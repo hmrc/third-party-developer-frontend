@@ -16,7 +16,7 @@
 
 package controllers
 
-import config.{ApplicationConfig, ErrorHandler}
+import config.{ApplicationConfig, ErrorHandler, FraudPreventionConfigProvider}
 import connectors.ThirdPartyDeveloperConnector
 import controllers.Credentials.serverTokenCutoffDate
 import domain._
@@ -49,7 +49,8 @@ class Credentials @Inject() (
     clientIdView: ClientIdView,
     clientSecretsView: ClientSecretsView,
     serverTokenView: ServerTokenView,
-    deleteClientSecretView: DeleteClientSecretView
+    deleteClientSecretView: DeleteClientSecretView,
+    val fraudPreventionConfigProvider: FraudPreventionConfigProvider
 )(implicit val ec: ExecutionContext, val appConfig: ApplicationConfig)
     extends ApplicationController(mcc) {
 

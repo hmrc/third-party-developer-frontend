@@ -16,14 +16,15 @@
 
 package controllers
 
-import config.{ApplicationConfig, ErrorHandler}
+import config.{ApplicationConfig, ErrorHandler, FraudPreventionConfigProvider}
 import domain._
-import domain.models.applications.{ApplicationId, AddCollaborator, CollaboratorRole}
+import domain.models.applications.{AddCollaborator, ApplicationId, CollaboratorRole}
 import domain.models.applications.Capabilities.SupportsTeamMembers
 import domain.models.applications.Permissions.{AdministratorOnly, TeamMembersOnly}
 import domain.models.controllers.AddTeamMemberPageMode
 import domain.models.controllers.AddTeamMemberPageMode._
 import domain.models.developers.DeveloperSession
+
 import javax.inject.{Inject, Singleton}
 import domain.models.controllers.ApplicationViewModel
 import play.api.data.Form
@@ -49,7 +50,8 @@ class ManageTeam @Inject() (
     manageTeamView: ManageTeamView,
     addTeamMemberView: AddTeamMemberView,
     teamMemberAddView: TeamMemberAddView,
-    removeTeamMemberView: RemoveTeamMemberView
+    removeTeamMemberView: RemoveTeamMemberView,
+    val fraudPreventionConfigProvider: FraudPreventionConfigProvider
 )(implicit val ec: ExecutionContext, val appConfig: ApplicationConfig)
     extends ApplicationController(mcc) {
 

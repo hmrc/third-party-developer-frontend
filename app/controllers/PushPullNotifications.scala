@@ -17,7 +17,7 @@
 package controllers
 
 import cats.data.NonEmptyList
-import config.{ApplicationConfig, ErrorHandler}
+import config.{ApplicationConfig, ErrorHandler, FraudPreventionConfigProvider}
 import domain.models.applications.ApplicationId
 import domain.models.applications.Capabilities.ViewPushSecret
 import domain.models.applications.Permissions.SandboxOrAdmin
@@ -38,7 +38,8 @@ class PushPullNotifications @Inject() (
                                         override val applicationActionService: ApplicationActionService,
                                         mcc: MessagesControllerComponents,
                                         pushSecretsView: PushSecretsView,
-                                        pushPullNotificationsService: PushPullNotificationsService
+                                        pushPullNotificationsService: PushPullNotificationsService,
+                                        val fraudPreventionConfigProvider: FraudPreventionConfigProvider
                                       )(implicit override val ec: ExecutionContext, override val appConfig: ApplicationConfig)
   extends ApplicationController(mcc) {
 

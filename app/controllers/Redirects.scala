@@ -16,15 +16,16 @@
 
 package controllers
 
-import config.{ApplicationConfig, ErrorHandler}
+import config.{ApplicationConfig, ErrorHandler, FraudPreventionConfigProvider}
 import domain.models.applications.{ApplicationId, Standard, UpdateApplicationRequest}
 import domain.models.applications.Capabilities.SupportsRedirects
 import domain.models.applications.Permissions.{SandboxOrAdmin, TeamMembersOnly}
+
 import javax.inject.{Inject, Singleton}
 import play.api.data.Form
 import play.api.libs.crypto.CookieSigner
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents, Result}
-import service.{ApplicationService, SessionService, ApplicationActionService}
+import service.{ApplicationActionService, ApplicationService, SessionService}
 import views.html.{AddRedirectView, ChangeRedirectView, DeleteRedirectConfirmationView, RedirectsView}
 
 import scala.concurrent.{ExecutionContext, Future}
@@ -41,7 +42,8 @@ class Redirects @Inject() (
     redirectsView: RedirectsView,
     addRedirectView: AddRedirectView,
     deleteRedirectConfirmationView: DeleteRedirectConfirmationView,
-    changeRedirectView: ChangeRedirectView
+    changeRedirectView: ChangeRedirectView,
+    val fraudPreventionConfigProvider: FraudPreventionConfigProvider
 )(implicit val ec: ExecutionContext, val appConfig: ApplicationConfig)
     extends ApplicationController(mcc) {
 

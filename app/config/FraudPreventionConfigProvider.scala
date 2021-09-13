@@ -14,13 +14,17 @@
  * limitations under the License.
  */
 
-package domain.models.controllers
+package config
 
-import domain.models.applications.Application
+import play.api.Configuration
 
-case class ApplicationViewModel(application: Application, hasSubscriptionsFields: Boolean, hasPpnsFields: Boolean, fraudPreventionLink: FraudPreventionLink)
-case class FraudPreventionLink(isVisible: Boolean, fraudPreventionUrl: String){
-  def generateLink(applicationId: String): String = {
-    fraudPreventionUrl + "/" + applicationId
-  }
+import javax.inject.Inject
+import javax.inject.Singleton
+import scala.collection.JavaConverters._
+
+@Singleton
+class FraudPreventionConfigProvider @Inject()(config: Configuration) {
+    def linkEnabled:Boolean = config.get[Boolean]("fraudPreventionLink.linkEnabled")
+    def apisWithFraudPrevention: List[String] = config.underlying.getStringList("fraudPreventionLink.apisWithFraudPrevention").asScala.toList
+    def linkUrl: String = config.get[String]("fraudPreventionLink.linkUrl")
 }

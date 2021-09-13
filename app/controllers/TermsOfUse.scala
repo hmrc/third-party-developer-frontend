@@ -16,16 +16,17 @@
 
 package controllers
 
-import config.{ApplicationConfig, ErrorHandler}
+import config.{ApplicationConfig, ErrorHandler, FraudPreventionConfigProvider}
 import domain.models.applications._
 import domain.models.applications.Capabilities.SupportsTermsOfUse
 import domain.models.applications.Permissions.SandboxOrAdmin
+
 import javax.inject.{Inject, Singleton}
 import domain.models.controllers.ApplicationViewModel
 import play.api.data.Form
 import play.api.libs.crypto.CookieSigner
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents, Result}
-import service.{ApplicationService, SessionService, ApplicationActionService}
+import service.{ApplicationActionService, ApplicationService, SessionService}
 import uk.gov.hmrc.time.DateTimeUtils
 import views.html.{TermsOfUseView, partials}
 
@@ -39,7 +40,8 @@ class TermsOfUse @Inject() (
     val sessionService: SessionService,
     mcc: MessagesControllerComponents,
     val cookieSigner: CookieSigner,
-    termsOfUseView: TermsOfUseView
+    termsOfUseView: TermsOfUseView,
+    val fraudPreventionConfigProvider: FraudPreventionConfigProvider
 )(implicit val ec: ExecutionContext, val appConfig: ApplicationConfig)
     extends ApplicationController(mcc)
     with ApplicationHelper {

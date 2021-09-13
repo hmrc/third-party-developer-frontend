@@ -16,7 +16,7 @@
 
 package controllers
 
-import config.{ApplicationConfig, ErrorHandler}
+import config.{ApplicationConfig, ErrorHandler, FraudPreventionConfigProvider}
 import domain.models.views.UserNavLinks
 import javax.inject.{Inject, Singleton}
 import play.api.libs.crypto.CookieSigner
@@ -33,7 +33,8 @@ class Navigation @Inject()(
     val applicationService: ApplicationService,
     val applicationActionService: ApplicationActionService,
     mcc: MessagesControllerComponents,
-    val cookieSigner : CookieSigner)
+    val cookieSigner : CookieSigner,
+    val fraudPreventionConfigProvider: FraudPreventionConfigProvider)
     (implicit val ec: ExecutionContext, val appConfig: ApplicationConfig)
     extends ApplicationController(mcc) {
 

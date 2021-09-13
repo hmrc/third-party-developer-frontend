@@ -28,7 +28,7 @@
 @subordinateWording = @{ if(appConfig.nameOfSubordinateEnvironment == "Sandbox") {theSandbox} else {appConfig.nameOfSubordinateEnvironment}}
 @getProductionCredentials = @{"Get production credentials"}
 @isGetProductionCredentialsEnabled = @{flags.getOrElse(LeftHandNavFlags.keyForIsGetProductionCredentialsEnabled, false)}
-@getFraudPreventionUrl(appId: String) = @{s"${appConfig.fraudPreventionUrl}/${appId}"}
+
 
 @(application, navSection) match {
   case (Some(applicationView), Some(section)) => {
@@ -91,9 +91,9 @@
               IP allow list
             </a>
           </li>
-          @if(appConfig.fraudPreventionLinkVisible && applicationView.hasFraudPreventionHeaders){
+          @if(applicationView.fraudPreventionLink.isVisible){
             <li class="side-nav__list @if(section == "fraud-prevention") { side-nav__list--selected }">
-              <a id="nav-fraud-prevention" class="side-nav__link" href="@getFraudPreventionUrl(app.id.value)">
+              <a id="nav-fraud-prevention" class="side-nav__link" href="@applicationView.fraudPreventionLink.generateLink(app.id.value)">
                 Fraud prevention
               </a>
             </li>

@@ -16,7 +16,7 @@
 
 package controllers
 
-import config.{ApplicationConfig, ErrorHandler}
+import config.{ApplicationConfig, ErrorHandler, FraudPreventionConfigProvider}
 import connectors.ThirdPartyDeveloperConnector
 import domain.models.apidefinitions.{ApiContext, ApiVersion}
 import domain.models.applications._
@@ -25,6 +25,7 @@ import domain.models.applications.Permissions.{AdministratorOnly, TeamMembersOnl
 import domain.models.developers.DeveloperSession
 import domain.models.views.SubscriptionRedirect
 import domain.models.views.SubscriptionRedirect._
+
 import javax.inject.{Inject, Singleton}
 import play.api.data.Form
 import play.api.libs.crypto.CookieSigner
@@ -55,7 +56,8 @@ class Subscriptions @Inject()(val developerConnector: ThirdPartyDeveloperConnect
                               addAppSubscriptionsView: AddAppSubscriptionsView,
                               changeSubscriptionConfirmationView: ChangeSubscriptionConfirmationView,
                               unsubscribeRequestSubmittedView: UnsubscribeRequestSubmittedView,
-                              subscribeRequestSubmittedView: SubscribeRequestSubmittedView)
+                              subscribeRequestSubmittedView: SubscribeRequestSubmittedView,
+                              val fraudPreventionConfigProvider: FraudPreventionConfigProvider)
                              (implicit val ec: ExecutionContext, val appConfig: ApplicationConfig, val environmentNameService: EnvironmentNameService)
   extends ApplicationController(mcc)
     with ApplicationHelper {

@@ -16,7 +16,7 @@
 
 package controllers.addapplication
 
-import config.{ApplicationConfig, ErrorHandler, UpliftJourneyConfigProvider, Off, On}
+import config.{ApplicationConfig, ErrorHandler, UpliftJourneyConfigProvider, Off, On, FraudPreventionConfigProvider}
 import connectors.ApmConnector
 import controllers.{AddApplicationNameForm, ApplicationController, ChooseApplicationToUpliftForm}
 import controllers.FormKeys.appNameField
@@ -65,7 +65,8 @@ class AddApplication @Inject() (
     addApplicationNameView: AddApplicationNameView,
     chooseApplicationToUpliftView: ChooseApplicationToUpliftView,
     upliftJourneyConfigProvider: UpliftJourneyConfigProvider,
-    beforeYouStartView: BeforeYouStartView
+    beforeYouStartView: BeforeYouStartView, 
+    val fraudPreventionConfigProvider: FraudPreventionConfigProvider
 )(implicit val ec: ExecutionContext, val appConfig: ApplicationConfig, val environmentNameService: EnvironmentNameService)
     extends ApplicationController(mcc) {
 

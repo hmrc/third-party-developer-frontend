@@ -17,13 +17,12 @@
 package controllers
 
 import cats.data.NonEmptyList
-import config.{ApplicationConfig, ErrorHandler}
+import config.{ApplicationConfig, ErrorHandler, FraudPreventionConfigProvider}
 import controllers.ManageSubscriptions.ApiDetails
-import domain.models.apidefinitions.{ApiContext, APISubscriptionStatus, APISubscriptionStatusWithSubscriptionFields, APISubscriptionStatusWithWritableSubscriptionField, ApiVersion}
+import domain.models.apidefinitions.{APISubscriptionStatus, APISubscriptionStatusWithSubscriptionFields, APISubscriptionStatusWithWritableSubscriptionField, ApiContext, ApiVersion}
 import domain.models.applications._
 import domain.models.developers.DeveloperSession
-import domain.models.controllers.ApplicationViewModel
-import domain.models.controllers.NoSubscriptionFieldsRefinerBehaviour
+import domain.models.controllers.{ApplicationViewModel, FraudPreventionLink, NoSubscriptionFieldsRefinerBehaviour}
 import play.api.mvc._
 import security.{DevHubAuthorization, ExtendedDevHubAuthorization}
 import service.SessionService
@@ -38,7 +37,7 @@ trait HeaderEnricher {
   def enrichHeaders(hc: HeaderCarrier, user: Option[DeveloperSession]): HeaderCarrier =
     user match {
       case Some(dev) => enrichHeaders(hc, dev)
-      case _         => hc
+      case _ => hc
     }
 
   def enrichHeaders(hc: HeaderCarrier, user: DeveloperSession): HeaderCarrier =
@@ -54,36 +53,36 @@ case class UserRequest[A](developerSession: DeveloperSession, request: MessagesR
 case class MaybeUserRequest[A](developerSession: Option[DeveloperSession], request: MessagesRequest[A]) extends MessagesRequest[A](request, request.messagesApi)
 
 case class ApplicationRequest[A](
-    application: Application,
-    deployedTo: Environment,
-    subscriptions: List[APISubscriptionStatus],
-    openAccessApis: Map[ApiContext,ApiData],
-    role: CollaboratorRole,
-    user: DeveloperSession,
-    request: MessagesRequest[A]
-) extends MessagesRequest[A](request, request.messagesApi) {
+                                  application: Application,
+                                  deployedTo: Environment,
+                                  subscriptions: List[APISubscriptionStatus],
+                                  openAccessApis: Map[ApiContext, ApiData],
+                                  role: CollaboratorRole,
+                                  user: DeveloperSession,
+                                  request: MessagesRequest[A]
+                                ) extends MessagesRequest[A](request, request.messagesApi) {
   def hasSubscriptionFields: Boolean = {
     subscriptions.exists(s => s.subscribed && s.fields.fields.nonEmpty)
   }
 }
 
 case class ApplicationWithFieldDefinitionsRequest[A](fieldDefinitions: NonEmptyList[APISubscriptionStatusWithSubscriptionFields], applicationRequest: ApplicationRequest[A])
-    extends MessagesRequest[A](applicationRequest, applicationRequest.messagesApi)
+  extends MessagesRequest[A](applicationRequest, applicationRequest.messagesApi)
 
 case class ApplicationWithSubscriptionFieldPage[A](
-    pageIndex: Int,
-    totalPages: Int,
-    apiSubscriptionStatus: APISubscriptionStatusWithSubscriptionFields,
-    apiDetails: ApiDetails,
-    applicationRequest: ApplicationRequest[A]
-) extends MessagesRequest[A](applicationRequest, applicationRequest.messagesApi)
+                                                    pageIndex: Int,
+                                                    totalPages: Int,
+                                                    apiSubscriptionStatus: APISubscriptionStatusWithSubscriptionFields,
+                                                    apiDetails: ApiDetails,
+                                                    applicationRequest: ApplicationRequest[A]
+                                                  ) extends MessagesRequest[A](applicationRequest, applicationRequest.messagesApi)
 
 case class ApplicationWithSubscriptionFields[A](apiSubscription: APISubscriptionStatusWithSubscriptionFields, applicationRequest: ApplicationRequest[A])
-    extends MessagesRequest[A](applicationRequest, applicationRequest.messagesApi)
+  extends MessagesRequest[A](applicationRequest, applicationRequest.messagesApi)
 
 case class ApplicationWithWritableSubscriptionField[A](
-  subscriptionWithSubscriptionField: APISubscriptionStatusWithWritableSubscriptionField,
-  applicationRequest: ApplicationRequest[A])
+                                                        subscriptionWithSubscriptionField: APISubscriptionStatusWithWritableSubscriptionField,
+                                                        applicationRequest: ApplicationRequest[A])
   extends MessagesRequest[A](applicationRequest, applicationRequest.messagesApi)
 
 abstract class BaseController(mcc: MessagesControllerComponents) extends FrontendController(mcc) with DevHubAuthorization with HeaderEnricher {
@@ -99,17 +98,23 @@ abstract class LoggedInController(mcc: MessagesControllerComponents) extends Bas
 
 abstract class ApplicationController(mcc: MessagesControllerComponents) extends LoggedInController(mcc) with ActionBuilders {
   val applicationService: ApplicationService
+  val fraudPreventionConfigProvider: FraudPreventionConfigProvider
 
   implicit def userFromRequest(implicit request: ApplicationRequest[_]): DeveloperSession = request.user
 
-  def hasFraudPreventionHeaders(request: ApplicationRequest[_]): Boolean = {
-    val apis = appConfig.fraudPreventionApis
-     val isProduction = request.application.deployedTo == Environment.PRODUCTION
-     request.subscriptions.exists(x => apis.contains(x.serviceName) && x.subscribed && isProduction)
-   }
+  def hasFraudPreventionHeaders(request: ApplicationRequest[_]): FraudPreventionLink = {
+    val apis = fraudPreventionConfigProvider.apisWithFraudPrevention
+    val isProduction = request.application.deployedTo == Environment.PRODUCTION
+    val shouldBeVisible = request.subscriptions.exists(x => apis.contains(x.serviceName) && x.subscribed && isProduction)
+    FraudPreventionLink(shouldBeVisible&&fraudPreventionConfigProvider.linkEnabled, fraudPreventionConfigProvider.linkUrl)
+  }
 
-  def applicationViewModelFromApplicationRequest()(implicit request: ApplicationRequest[_]): ApplicationViewModel =
-    ApplicationViewModel(request.application, request.hasSubscriptionFields, hasPpnsFields(request), hasFraudPreventionHeaders(request))
+  def applicationViewModelFromApplicationRequest()
+                                                (implicit request: ApplicationRequest[_]): ApplicationViewModel =
+    ApplicationViewModel(request.application,
+      request.hasSubscriptionFields,
+      hasPpnsFields(request),
+      hasFraudPreventionHeaders(request))
 
   def whenTeamMemberOnApp(applicationId: ApplicationId)(fun: ApplicationRequest[AnyContent] => Future[Result]): Action[AnyContent] =
     loggedInAction { implicit request =>
@@ -118,8 +123,8 @@ abstract class ApplicationController(mcc: MessagesControllerComponents) extends 
     }
 
   private def checkActionWithStateCheck(
-      stateCheck: State => Boolean
-  )(capability: Capability, permissions: Permission)(applicationId: ApplicationId)(fun: ApplicationRequest[AnyContent] => Future[Result]): Action[AnyContent] = {
+                                         stateCheck: State => Boolean
+                                       )(capability: Capability, permissions: Permission)(applicationId: ApplicationId)(fun: ApplicationRequest[AnyContent] => Future[Result]): Action[AnyContent] = {
     loggedInAction { implicit request =>
       val composedActions = Action andThen
         applicationAction(applicationId, loggedIn) andThen
@@ -148,7 +153,7 @@ abstract class ApplicationController(mcc: MessagesControllerComponents) extends 
   }
 
   def subFieldsDefinitionsExistAction(applicationId: ApplicationId, noFieldsBehaviour: NoSubscriptionFieldsRefinerBehaviour = NoSubscriptionFieldsRefinerBehaviour.BadRequest)(
-      fun: ApplicationWithFieldDefinitionsRequest[AnyContent] => Future[Result]
+    fun: ApplicationWithFieldDefinitionsRequest[AnyContent] => Future[Result]
   ): Action[AnyContent] = {
     loggedInAction { implicit request: UserRequest[AnyContent] =>
       ManageSubscriptionsActions
@@ -158,7 +163,7 @@ abstract class ApplicationController(mcc: MessagesControllerComponents) extends 
   }
 
   def subFieldsDefinitionsExistActionWithPageNumber(applicationId: ApplicationId, pageNumber: Int)(
-      fun: ApplicationWithSubscriptionFieldPage[AnyContent] => Future[Result]
+    fun: ApplicationWithSubscriptionFieldPage[AnyContent] => Future[Result]
   ): Action[AnyContent] = {
     loggedInAction { implicit request =>
       (ManageSubscriptionsActions
@@ -168,7 +173,7 @@ abstract class ApplicationController(mcc: MessagesControllerComponents) extends 
   }
 
   def subFieldsDefinitionsExistActionByApi(applicationId: ApplicationId, context: ApiContext, version: ApiVersion)(
-      fun: ApplicationWithSubscriptionFields[AnyContent] => Future[Result]
+    fun: ApplicationWithSubscriptionFields[AnyContent] => Future[Result]
   ): Action[AnyContent] = {
     loggedInAction { implicit request =>
       (ManageSubscriptionsActions
@@ -178,14 +183,14 @@ abstract class ApplicationController(mcc: MessagesControllerComponents) extends 
   }
 
   def singleSubFieldsWritableDefinitionActionByApi(applicationId: ApplicationId, context: ApiContext, version: ApiVersion, fieldName: String)(
-      fun: ApplicationWithWritableSubscriptionField[AnyContent] => Future[Result]
+    fun: ApplicationWithWritableSubscriptionField[AnyContent] => Future[Result]
   ): Action[AnyContent] = {
     loggedInAction { implicit request =>
       (ManageSubscriptionsActions
         .subscriptionsComposedActions(applicationId, NoSubscriptionFieldsRefinerBehaviour.BadRequest)
-          andThen subscriptionFieldsRefiner(context, version)
-          andThen writeableSubscriptionFieldRefiner(fieldName)
-      ).async(fun)(request)
+        andThen subscriptionFieldsRefiner(context, version)
+        andThen writeableSubscriptionFieldRefiner(fieldName)
+        ).async(fun)(request)
     }
   }
 
@@ -208,8 +213,8 @@ abstract class LoggedOutController(mcc: MessagesControllerComponents) extends Ba
     val carrier = super.hc
     request match {
       case x: MaybeUserRequest[_] => enrichHeaders(carrier, x.developerSession)
-      case x: UserRequest[_]      => enrichHeaders(carrier, x.developerSession)
-      case _                      => carrier
+      case x: UserRequest[_] => enrichHeaders(carrier, x.developerSession)
+      case _ => carrier
     }
   }
 }

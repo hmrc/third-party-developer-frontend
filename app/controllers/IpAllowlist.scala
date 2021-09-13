@@ -16,7 +16,7 @@
 
 package controllers
 
-import config.{ApplicationConfig, ErrorHandler}
+import config.{ApplicationConfig, ErrorHandler, FraudPreventionConfigProvider}
 import domain.models.applications.ApplicationId
 import domain.models.applications.Capabilities.SupportsIpAllowlist
 import domain.models.applications.Permissions.{SandboxOrAdmin, TeamMembersOnly}
@@ -50,7 +50,8 @@ class IpAllowlist @Inject()(
     settingUpAllowlistView: SettingUpAllowlistView,
     removeIpAllowlistView: RemoveIpAllowlistView,
     removeIpAllowlistSuccessView: RemoveIpAllowlistSuccessView,
-    removeCidrBlockView: RemoveCidrBlockView
+    removeCidrBlockView: RemoveCidrBlockView,
+    val fraudPreventionConfigProvider: FraudPreventionConfigProvider
 )(implicit val ec: ExecutionContext, val appConfig: ApplicationConfig)
     extends ApplicationController(mcc) {
 
