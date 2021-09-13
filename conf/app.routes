@@ -50,10 +50,8 @@ GET         /applications/add/production/10-days                                
 GET         /applications/add/sandbox                                                                    controllers.addapplication.AddApplication.addApplicationSubordinate
 GET         /applications/add/production                                                                 controllers.addapplication.AddApplication.addApplicationPrincipal
 GET         /applications/add/switch                                                                     controllers.addapplication.AddApplication.addApplicationProductionSwitch
-#GET         /applications/add/switch2                                                                    controllers.addapplication.AddApplication.addApplicationProductionSwitch2
 GET         /applications/add/:id                                                                        controllers.addapplication.AddApplication.soleApplicationToUpliftAction(id: domain.models.applications.ApplicationId)
 POST        /applications/add/switch                                                                     controllers.addapplication.AddApplication.chooseApplicationToUpliftAction
-#POST        /applications/add/switch2                                                                    controllers.addapplication.AddApplication.chooseApplicationToUpliftAction2
 
 
 GET         /applications/add/:environment/name                                                          controllers.addapplication.AddApplication.addApplicationName(environment: domain.models.applications.Environment)

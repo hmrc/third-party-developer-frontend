@@ -22,10 +22,11 @@
 @import controllers.TermsOfUseForm
 @import domain.models.controllers.ApplicationViewModel
 @import domain.models.views.BackButtonWithJavaScript
+@import domain.models.applications.ApplicationId
 
 @this(devMain: DevMain2)
 
-@()(implicit request: play.api.mvc.Request[Any], loggedIn: DeveloperSession, messagesProvider: MessagesProvider, appConfig: config.ApplicationConfig)
+@(applicationId: ApplicationId)(implicit request: play.api.mvc.Request[Any], loggedIn: DeveloperSession, messagesProvider: MessagesProvider, appConfig: config.ApplicationConfig)
 
 @title = @{ "Before you start" }
 

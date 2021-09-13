@@ -104,12 +104,26 @@ class AddApplication @Inject() (
     successful(Ok(addApplicationNameView(form, environment)))
   }
 
+  def progressOnUpliftJourney(sandboxAppId: ApplicationId): Action[AnyContent] = loggedInAction { implicit request =>
+
+    def upliftJourneyTurnedOnInRequestHeader: Boolean = 
+      request.headers.get("useNewUpliftJourney").fold(false) { setting =>
+        Try(setting.toBoolean).getOrElse(false) 
+      }
+
+    upliftJourneyConfigProvider.status match { 
+      case On => successful(Ok(beforeYouStartView(sandboxAppId)))
+      case OnDemand if upliftJourneyTurnedOnInRequestHeader => successful(Ok(beforeYouStartView(sandboxAppId)))
+      case _ => showConfirmSubscriptionsPage(sandboxAppId)
+    }
+  }
+
   def soleApplicationToUpliftAction(appId: ApplicationId): Action[AnyContent] = loggedInAction { implicit request =>
     (for {
       (sandboxAppSummaries, upliftableAppIds) <- upliftLogic.aUsersSandboxAdminSummariesAndUpliftIds(loggedIn.developer.userId)
       upliftableSummaries = sandboxAppSummaries.filter(s => upliftableAppIds.contains(s.id))
     } yield upliftableSummaries match {
-      case summary :: Nil => showConfirmSubscriptionsPage(upliftableSummaries.head.id)
+      case summary :: Nil => progressOnUpliftJourney(upliftableSummaries.head.id)(request)
       case _              => successful(BadRequest(Json.toJson(BadRequestError)))
     }).flatten
   }
@@ -132,7 +146,7 @@ class AddApplication @Inject() (
 
       upliftableAppIds.toList match {
         case Nil          => successful(BadRequest(Json.toJson(BadRequestError)))
-        case appId :: Nil if !hasAppsThatCannotBeUplifted =>  showConfirmSubscriptionsPage(appId)
+        case appId :: Nil if !hasAppsThatCannotBeUplifted => progressOnUpliftJourney(appId)(request)
         case _ => chooseApplicationToUplift(upliftableSummaries, hasAppsThatCannotBeUplifted)(request)
       }
     }
@@ -151,7 +165,7 @@ class AddApplication @Inject() (
 
   def chooseApplicationToUpliftAction(): Action[AnyContent] = loggedInAction { implicit request =>
     def handleValidForm(validForm: ChooseApplicationToUpliftForm) =
-      showConfirmSubscriptionsPage(validForm.applicationId)
+      progressOnUpliftJourney(validForm.applicationId)(request)
 
     def handleInvalidForm(formWithErrors: Form[ChooseApplicationToUpliftForm]) = {
       upliftLogic.aUsersSandboxAdminSummariesAndUpliftIds(loggedIn.developer.userId) flatMap { data =>
