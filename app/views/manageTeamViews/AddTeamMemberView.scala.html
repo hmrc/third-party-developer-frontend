@@ -22,11 +22,13 @@
 
 @import domain.models.controllers.AddTeamMemberPageMode.ManageTeamMembers
 @import domain.models.controllers.ApplicationViewModel
+@import domain.models.controllers.FraudPreventionNavLinkViewModel
 @import views.html.include.DevMain
 
 @this(devMain: DevMain2, leftHandNav: LeftHandNav)
 
-@(applicationView: ApplicationViewModel, form: Form[controllers.AddTeamMemberForm], loggedIn: DeveloperSession)(
+
+@(applicationView: ApplicationViewModel, form: Form[controllers.AddTeamMemberForm], loggedIn: DeveloperSession, fraudPreventionNavLinkViewModel: Option[FraudPreventionNavLinkViewModel])(
 implicit request: play.api.mvc.Request[Any], messages: Messages, applicationConfig: ApplicationConfig, navSection: String = "manage-team")
 
 
@@ -43,7 +45,7 @@ implicit request: play.api.mvc.Request[Any], messages: Messages, applicationConf
     Crumb.viewAllApplications,
     Crumb.home
   ),
-  leftNav = Some(leftHandNav(Option(applicationView), Option(navSection))(request, loggedIn, applicationConfig)),
+  leftNav = Some(leftHandNav(Option(applicationView), Option(navSection), Map.empty, fraudPreventionNavLinkViewModel)(request, loggedIn, applicationConfig)),
   developerSession = Some(loggedIn)
 ) {
 

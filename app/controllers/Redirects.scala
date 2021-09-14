@@ -17,6 +17,7 @@
 package controllers
 
 import config.{ApplicationConfig, ErrorHandler, FraudPreventionConfig}
+import controllers.fraudprevention.FraudPreventionNavLinkHelper
 import domain.models.applications.{ApplicationId, Standard, UpdateApplicationRequest}
 import domain.models.applications.Capabilities.SupportsRedirects
 import domain.models.applications.Permissions.{SandboxOrAdmin, TeamMembersOnly}
@@ -45,14 +46,14 @@ class Redirects @Inject() (
     changeRedirectView: ChangeRedirectView,
     val fraudPreventionConfig: FraudPreventionConfig
 )(implicit val ec: ExecutionContext, val appConfig: ApplicationConfig)
-    extends ApplicationController(mcc) {
+    extends ApplicationController(mcc) with FraudPreventionNavLinkHelper{
 
   def canChangeRedirectInformationAction(applicationId: ApplicationId)(fun: ApplicationRequest[AnyContent] => Future[Result]): Action[AnyContent] =
     checkActionForApprovedApps(SupportsRedirects, SandboxOrAdmin)(applicationId)(fun)
 
   def redirects(applicationId: ApplicationId) = checkActionForApprovedApps(SupportsRedirects, TeamMembersOnly)(applicationId) { implicit request =>
     val appAccess = request.application.access.asInstanceOf[Standard]
-    successful(Ok(redirectsView(applicationViewModelFromApplicationRequest, appAccess.redirectUris)))
+    successful(Ok(redirectsView(applicationViewModelFromApplicationRequest, appAccess.redirectUris, createOptionalFraudPreventionNavLinkViewModel(request.application, request.subscriptions, fraudPreventionConfig))))
   }
 
   def addRedirect(applicationId: ApplicationId) = canChangeRedirectInformationAction(applicationId) { implicit request =>

@@ -17,10 +17,9 @@
 package controllers
 
 import java.util.UUID.randomUUID
-
 import builder.DeveloperBuilder
 import connectors.ThirdPartyDeveloperConnector
-import domain.models.apidefinitions.{ApiContext, ApiVersion,ApiIdentifier}
+import domain.models.apidefinitions.{ApiContext, ApiIdentifier, ApiVersion}
 import domain.models.applications._
 import domain.models.connectors.TicketResult
 import mocks.service.{ApplicationActionServiceMock, ApplicationServiceMock, SessionServiceMock}
@@ -43,6 +42,7 @@ import scala.concurrent.Future
 import scala.concurrent.Future.successful
 import utils._
 import builder._
+import config.FraudPreventionConfig
 
 
 
@@ -78,7 +78,8 @@ class SubscriptionsSpec extends BaseControllerSpec with WithCSRFAddToken with Lo
       addAppSubscriptionsView,
       changeSubscriptionConfirmationView,
       unsubscribeRequestSubmittedView,
-      subscribeRequestSubmittedView
+      subscribeRequestSubmittedView,
+      FraudPreventionConfig(true, List.empty, "some/uri")
     )
 
     implicit val hc: HeaderCarrier = HeaderCarrier()

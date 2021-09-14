@@ -16,8 +16,9 @@
 
 package controllers
 
-import config.{ApplicationConfig, ErrorHandler}
+import config.{ApplicationConfig, ErrorHandler, FraudPreventionConfig}
 import connectors.ThirdPartyDeveloperConnector
+import controllers.fraudprevention.FraudPreventionNavLinkHelper
 import domain.models.apidefinitions.{ApiContext, ApiIdentifier, ApiVersion}
 import domain.models.applications.Capabilities.{ManageLockedSubscriptions, SupportsSubscriptions}
 import domain.models.applications.Permissions.{AdministratorOnly, TeamMembersOnly}
@@ -53,10 +54,11 @@ class Subscriptions @Inject()(val developerConnector: ThirdPartyDeveloperConnect
                               addAppSubscriptionsView: AddAppSubscriptionsView,
                               changeSubscriptionConfirmationView: ChangeSubscriptionConfirmationView,
                               unsubscribeRequestSubmittedView: UnsubscribeRequestSubmittedView,
-                              subscribeRequestSubmittedView: SubscribeRequestSubmittedView)
+                              subscribeRequestSubmittedView: SubscribeRequestSubmittedView,
+                              fraudPreventionConfig: FraudPreventionConfig)
                              (implicit val ec: ExecutionContext, val appConfig: ApplicationConfig, val environmentNameService: EnvironmentNameService)
   extends ApplicationController(mcc)
-    with ApplicationHelper {
+    with ApplicationHelper with FraudPreventionNavLinkHelper {
 
   private def canManagePrivateApiSubscriptionsAction(applicationId: ApplicationId)(fun: ApplicationRequest[AnyContent] => Future[Result]) =
     checkActionForAllStates(SupportsSubscriptions, AdministratorOnly)(applicationId)(fun)
@@ -72,7 +74,7 @@ class Subscriptions @Inject()(val developerConnector: ThirdPartyDeveloperConnect
       request.application,
       request.user,
       (role: CollaboratorRole, data: PageData, form: Form[EditApplicationForm]) => {
-        manageSubscriptionsView(role, data, form, applicationViewModelFromApplicationRequest, data.subscriptions, data.openAccessApis ,data.app.id)
+        manageSubscriptionsView(role, data, form, applicationViewModelFromApplicationRequest, data.subscriptions, data.openAccessApis ,data.app.id, createOptionalFraudPreventionNavLinkViewModel(request.application, request.subscriptions, fraudPreventionConfig))
       }
     )
   }

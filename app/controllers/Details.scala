@@ -73,7 +73,7 @@ class Details @Inject() (
 
       case State.PRODUCTION =>
         Ok(detailsView(applicationViewModelFromApplicationRequest,
-          Some(createFraudPreventionNavLinkViewModel(request.application, request.subscriptions, fraudPreventionConfig))))
+          createOptionalFraudPreventionNavLinkViewModel(request.application, request.subscriptions, fraudPreventionConfig)))
     })
   }
 

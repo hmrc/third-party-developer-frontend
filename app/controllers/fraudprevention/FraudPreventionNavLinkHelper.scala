@@ -18,19 +18,29 @@ package controllers.fraudprevention
 
 import domain.models.controllers.FraudPreventionNavLinkViewModel
 import config.FraudPreventionConfig
+import controllers.ApplicationRequest
 import domain.models.applications.Environment
 import domain.models.applications.Application
 import domain.models.apidefinitions.APISubscriptionStatus
 
 trait FraudPreventionNavLinkHelper {
 
+
+  def createFraudNavModel(fraudPreventionConfig: FraudPreventionConfig)(implicit request: ApplicationRequest[_])= {
+    createOptionalFraudPreventionNavLinkViewModel(request.application, request.subscriptions, fraudPreventionConfig)
+  }
     
-    def createFraudPreventionNavLinkViewModel(application: Application,
-                                              subscriptions: List[APISubscriptionStatus],
-                                              fraudPreventionConfig: FraudPreventionConfig): FraudPreventionNavLinkViewModel= {
-      val apis = fraudPreventionConfig.apisWithFraudPrevention
-      val isProduction = application.deployedTo == Environment.PRODUCTION
-      val shouldBeVisible = subscriptions.exists(x => apis.contains(x.serviceName) && x.subscribed && isProduction)
-      FraudPreventionNavLinkViewModel(shouldBeVisible&&fraudPreventionConfig.enabled, fraudPreventionConfig.uri)
+    def createOptionalFraudPreventionNavLinkViewModel(application: Application,
+                                                      subscriptions: List[APISubscriptionStatus],
+                                                      fraudPreventionConfig: FraudPreventionConfig): Option[FraudPreventionNavLinkViewModel]= {
+      if(fraudPreventionConfig.enabled) {
+        val apis = fraudPreventionConfig.apisWithFraudPrevention
+        val isProduction = application.deployedTo == Environment.PRODUCTION
+        val shouldBeVisible = subscriptions.exists(x => apis.contains(x.serviceName) && x.subscribed && isProduction)
+        Some(FraudPreventionNavLinkViewModel(shouldBeVisible, fraudPreventionConfig.uri))
+      }else{
+        None
+      }
+
     }
 }
