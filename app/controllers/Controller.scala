@@ -17,7 +17,7 @@
 package controllers
 
 import cats.data.NonEmptyList
-import config.{ApplicationConfig, ErrorHandler}
+import config.{ApplicationConfig, ErrorHandler, FraudPreventionConfig}
 import controllers.ManageSubscriptions.ApiDetails
 import domain.models.apidefinitions.{APISubscriptionStatus, APISubscriptionStatusWithSubscriptionFields, APISubscriptionStatusWithWritableSubscriptionField, ApiContext, ApiVersion}
 import domain.models.applications._
@@ -98,7 +98,7 @@ abstract class LoggedInController(mcc: MessagesControllerComponents) extends Bas
 
 abstract class ApplicationController(mcc: MessagesControllerComponents) extends LoggedInController(mcc) with ActionBuilders {
   val applicationService: ApplicationService
-  val fraudPreventionConfig: config.FraudPreventionConfig
+  val fraudPreventionConfig: FraudPreventionConfig
 
   implicit def userFromRequest(implicit request: ApplicationRequest[_]): DeveloperSession = request.user
 
