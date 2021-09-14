@@ -31,11 +31,21 @@ import javax.inject.{Inject, Singleton}
 import scala.concurrent.ExecutionContext
 import controllers.models.ApiSubscriptionsFlow
 import domain.models.apidefinitions.APISubscriptionStatus
+import play.api.data.Form
+import play.api.data.Forms._
 import play.api.data.FormError
 import views.html.ResponsibleIndividualView
 import scala.concurrent.{ExecutionContext, Future}
+import domain.models.applicationuplift.ResponsibleIndividual
 
-
+object ResponsibleIndividualForm {
+  def form: Form[ResponsibleIndividual] = Form(
+    mapping(
+      "fullName" -> fullnameValidator,
+      "emailAddress" -> emailValidator()
+    )(ResponsibleIndividual.apply)(ResponsibleIndividual.unapply)
+  )
+}
 
 @Singleton
 class SR20 @Inject() (val errorHandler: ErrorHandler,
@@ -140,6 +150,6 @@ def confirmApiSubscriptionsPage(sandboxAppId: ApplicationId): Action[AnyContent]
   }
 
   def responsibleIndividual(sandboxAppId: ApplicationId): Action[AnyContent] = whenTeamMemberOnApp(sandboxAppId) { implicit request =>
-     Future.successful(Ok(responsibleIndividualView()))
+     Future.successful(Ok(responsibleIndividualView(sandboxAppId)))
   }
 }

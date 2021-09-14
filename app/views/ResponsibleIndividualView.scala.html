@@ -22,10 +22,11 @@
 @import controllers.TermsOfUseForm
 @import domain.models.controllers.ApplicationViewModel
 @import domain.models.views.BackButtonWithJavaScript
+@import domain.models.applications.ApplicationId
 
 @this(devMain: DevMain2)
 
-@()(implicit request: play.api.mvc.Request[Any], loggedIn: DeveloperSession, messagesProvider: MessagesProvider, appConfig: config.ApplicationConfig)
+@(applicationId: ApplicationId)(implicit request: play.api.mvc.Request[Any], loggedIn: DeveloperSession, messagesProvider: MessagesProvider, appConfig: config.ApplicationConfig)
 
 @title = @{ "Before you start" }
 
@@ -38,6 +39,7 @@
 
   <h1 class="govuk-heading-l">Provide details for a responsible individual in your organisation</h1>
 
+  @applicationId
       <p class="govuk-body">The responsible individual:</p>
       <ul class="govuk-list govuk-list--bullet">
         <li>ensures your software meets our terms of use <a href="/api-documentation/docs/terms-of-use" class="govuk-link">terms of use</a></li>
