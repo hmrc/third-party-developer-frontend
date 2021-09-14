@@ -151,8 +151,7 @@ class CheckYourAnswersSpec
       termsAndConditionsView,
       privacyPolicyView,
       apiSubscriptionsViewTemplate,
-      contactDetailsView,
-      fraudPreventionConfig
+      contactDetailsView
     )
 
     fetchSessionByIdReturns(sessionId, session)

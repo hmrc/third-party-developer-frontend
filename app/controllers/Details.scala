@@ -35,6 +35,7 @@ import views.html.checkpages.applicationcheck.UnauthorisedAppDetailsView
 
 import scala.concurrent.{ExecutionContext, Future}
 import domain.models.subscriptions.DevhubAccessLevel
+import controllers.fraudprevention.FraudPreventionNavLinkHelper
 
 @Singleton
 class Details @Inject() (
@@ -50,7 +51,7 @@ class Details @Inject() (
     changeDetailsView: ChangeDetailsView,
     val fraudPreventionConfig: FraudPreventionConfig
 )(implicit val ec: ExecutionContext, val appConfig: ApplicationConfig)
-    extends ApplicationController(mcc) {
+    extends ApplicationController(mcc) with FraudPreventionNavLinkHelper {
 
   def canChangeDetailsAndIsApprovedAction(applicationId: ApplicationId)(fun: ApplicationRequest[AnyContent] => Future[Result]): Action[AnyContent] =
     checkActionForApprovedApps(SupportsDetails, SandboxOrAdmin)(applicationId)(fun)
@@ -71,7 +72,8 @@ class Details @Inject() (
         Ok(pendingApprovalView(checkYourAnswersData, CheckYourAnswersForm.form.fillAndValidate(DummyCheckYourAnswersForm("dummy"))))
 
       case State.PRODUCTION =>
-        Ok(detailsView(applicationViewModelFromApplicationRequest))
+        Ok(detailsView(applicationViewModelFromApplicationRequest,
+          Some(createFraudPreventionNavLinkViewModel(request.application, request.subscriptions, fraudPreventionConfig))))
     })
   }
 
@@ -105,7 +107,8 @@ class Details @Inject() (
     )
   }
 
-  private def updateApplication(updateRequest: UpdateApplicationRequest)(implicit request: ApplicationRequest[AnyContent]): Future[ApplicationUpdateSuccessful] = {
+  private def updateApplication(updateRequest: UpdateApplicationRequest)
+                               (implicit request: ApplicationRequest[AnyContent]): Future[ApplicationUpdateSuccessful] = {
     applicationService.update(updateRequest)
   }
 
@@ -144,11 +147,12 @@ class Details @Inject() (
       }
 
       def handleInvalidForm(formWithErrors: Form[EditApplicationForm]): Future[Result] =
-        errorView(application.id, formWithErrors, applicationViewModelFromApplicationRequest)
+        errorView(formWithErrors, applicationViewModelFromApplicationRequest)
 
       EditApplicationForm.form.bindFromRequest.fold(handleInvalidForm, handleValidForm)
     }
 
-  private def errorView(id: ApplicationId, form: Form[EditApplicationForm], applicationViewModel: ApplicationViewModel)(implicit request: ApplicationRequest[_]): Future[Result] =
+  private def errorView(form: Form[EditApplicationForm], applicationViewModel: ApplicationViewModel)
+                       (implicit request: ApplicationRequest[_]): Future[Result] =
     Future.successful(BadRequest(changeDetailsView(form, applicationViewModel)))
 }

@@ -16,7 +16,7 @@
 
 package controllers
 
-import config.{ApplicationConfig, ErrorHandler, FraudPreventionConfig}
+import config.{ApplicationConfig, ErrorHandler}
 import connectors.ApmConnector
 import controllers.checkpages.{CanUseCheckActions, DummySubscriptionsForm}
 import domain.models.apidefinitions.ApiContext
@@ -44,8 +44,7 @@ class SR20 @Inject() (val errorHandler: ErrorHandler,
                       val cookieSigner: CookieSigner,
                       confirmApisView: ConfirmApisView,
                       turnOffApisMasterView:TurnOffApisMasterView,
-                      val apmConnector: ApmConnector,
-                      val fraudPreventionConfig: FraudPreventionConfig)
+                      val apmConnector: ApmConnector)
                      (implicit val ec: ExecutionContext, val appConfig: ApplicationConfig)
   extends ApplicationController(mcc)
      with CanUseCheckActions{

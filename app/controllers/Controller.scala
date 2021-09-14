@@ -17,21 +17,20 @@
 package controllers
 
 import cats.data.NonEmptyList
-import config.{ApplicationConfig, ErrorHandler, FraudPreventionConfig}
+import config.{ApplicationConfig, ErrorHandler}
 import controllers.ManageSubscriptions.ApiDetails
-import domain.models.apidefinitions.{APISubscriptionStatus, APISubscriptionStatusWithSubscriptionFields, APISubscriptionStatusWithWritableSubscriptionField, ApiContext, ApiVersion}
+import domain.models.apidefinitions._
 import domain.models.applications._
+import domain.models.controllers.{ApplicationViewModel, NoSubscriptionFieldsRefinerBehaviour}
 import domain.models.developers.DeveloperSession
-import domain.models.controllers.{ApplicationViewModel, FraudPreventionLink, NoSubscriptionFieldsRefinerBehaviour}
+import domain.models.subscriptions.ApiData
 import play.api.mvc._
 import security.{DevHubAuthorization, ExtendedDevHubAuthorization}
-import service.SessionService
+import service.{ApplicationService, SessionService}
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.play.bootstrap.controller.FrontendController
 
 import scala.concurrent.{ExecutionContext, Future}
-import service.ApplicationService
-import domain.models.subscriptions.ApiData
 
 trait HeaderEnricher {
   def enrichHeaders(hc: HeaderCarrier, user: Option[DeveloperSession]): HeaderCarrier =
@@ -98,23 +97,15 @@ abstract class LoggedInController(mcc: MessagesControllerComponents) extends Bas
 
 abstract class ApplicationController(mcc: MessagesControllerComponents) extends LoggedInController(mcc) with ActionBuilders {
   val applicationService: ApplicationService
-  val fraudPreventionConfig: FraudPreventionConfig
 
   implicit def userFromRequest(implicit request: ApplicationRequest[_]): DeveloperSession = request.user
 
-  def createFraudPreventionLink(request: ApplicationRequest[_]): FraudPreventionLink = {
-    val apis = fraudPreventionConfig.apisWithFraudPrevention
-    val isProduction = request.application.deployedTo == Environment.PRODUCTION
-    val shouldBeVisible = request.subscriptions.exists(x => apis.contains(x.serviceName) && x.subscribed && isProduction)
-    FraudPreventionLink(shouldBeVisible&&fraudPreventionConfig.enabled, fraudPreventionConfig.uri)
-  }
 
   def applicationViewModelFromApplicationRequest()
                                                 (implicit request: ApplicationRequest[_]): ApplicationViewModel =
     ApplicationViewModel(request.application,
       request.hasSubscriptionFields,
-      hasPpnsFields(request),
-      createFraudPreventionLink(request))
+      hasPpnsFields(request))
 
   def whenTeamMemberOnApp(applicationId: ApplicationId)(fun: ApplicationRequest[AnyContent] => Future[Result]): Action[AnyContent] =
     loggedInAction { implicit request =>

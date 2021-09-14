@@ -16,6 +16,8 @@
 
 package domain.models.controllers
 
-import domain.models.applications.Application
-
-case class ApplicationViewModel(application: Application, hasSubscriptionsFields: Boolean, hasPpnsFields: Boolean)
+case class FraudPreventionNavLinkViewModel(isVisible: Boolean, fraudPreventionUrl: String){
+  def generateLink(applicationId: String): String = {
+    fraudPreventionUrl + "/" + applicationId
+  }
+}

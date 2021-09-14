@@ -61,8 +61,7 @@ class SR20Spec extends BaseControllerSpec
       cookieSigner,
       confirmApisView,
       turnOffApisMasterView,
-      ApmConnectorMock.aMock,
-      fraudPreventionConfig
+      ApmConnectorMock.aMock
     )
     val appName: String = "app"
     val apiVersion = ApiVersion("version")

@@ -16,7 +16,7 @@
 
 package controllers.checkpages
 
-import config.{ApplicationConfig, ErrorHandler, FraudPreventionConfig}
+import config.{ApplicationConfig, ErrorHandler}
 import controllers._
 import controllers.FormKeys.applicationNameAlreadyExistsKey
 import controllers.ManageSubscriptions.Field
@@ -59,8 +59,7 @@ class CheckYourAnswers @Inject() (
     val termsAndConditionsView: TermsAndConditionsView,
     val privacyPolicyView: PrivacyPolicyView,
     val apiSubscriptionsViewTemplate: ApiSubscriptionsView,
-    val contactDetailsView: ContactDetailsView,
-    val fraudPreventionConfig: FraudPreventionConfig
+    val contactDetailsView: ContactDetailsView
 )(implicit val ec: ExecutionContext, val appConfig: ApplicationConfig)
     extends ApplicationController(mcc)
     with ApplicationHelper
@@ -104,7 +103,7 @@ class CheckYourAnswers @Inject() (
 
           val requestForm = validateCheckFormForApplication(request)
 
-          val applicationViewModel = ApplicationViewModel(application.copy(checkInformation = Some(information)), request.hasSubscriptionFields, hasPpnsFields(request), createFraudPreventionLink(request))
+          val applicationViewModel = ApplicationViewModel(application.copy(checkInformation = Some(information)), request.hasSubscriptionFields, hasPpnsFields(request))
           Conflict(landingPageView(applicationViewModel, requestForm.withError("confirmedName", applicationNameAlreadyExistsKey)))
       }
   }
