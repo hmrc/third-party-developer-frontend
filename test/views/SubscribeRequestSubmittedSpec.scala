@@ -20,6 +20,7 @@ import config.ApplicationConfig
 import domain.models.apidefinitions.ApiVersion
 import domain.models.applications._
 import domain.models.developers.LoggedInState
+import domain.models.controllers.ApplicationViewModel
 import org.jsoup.Jsoup
 import play.api.test.FakeRequest
 import uk.gov.hmrc.time.DateTimeUtils
@@ -56,7 +57,7 @@ class SubscribeRequestSubmittedSpec extends CommonViewSpec with WithCSRFAddToken
       val subscribeRequestSubmittedView = app.injector.instanceOf[SubscribeRequestSubmittedView]
 
       val page = subscribeRequestSubmittedView.render(
-              createApplicationViewModel(application, hasSubscriptionsFields = false, hasPpnsFields = false),
+        ApplicationViewModel(application, hasSubscriptionsFields = false, hasPpnsFields = false),
         apiName,
         apiVersion,
         request,

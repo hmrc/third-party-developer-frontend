@@ -19,26 +19,28 @@ package controllers
 import config.{ApplicationConfig, ErrorHandler, FraudPreventionConfig}
 import connectors.ThirdPartyDeveloperConnector
 import controllers.fraudprevention.FraudPreventionNavLinkHelper
-import domain.models.apidefinitions.{ApiContext, ApiIdentifier, ApiVersion}
+import domain.models.apidefinitions.{ApiContext, ApiVersion}
+import domain.models.applications._
 import domain.models.applications.Capabilities.{ManageLockedSubscriptions, SupportsSubscriptions}
 import domain.models.applications.Permissions.{AdministratorOnly, TeamMembersOnly}
-import domain.models.applications._
 import domain.models.developers.DeveloperSession
 import domain.models.views.SubscriptionRedirect
 import domain.models.views.SubscriptionRedirect._
+import javax.inject.{Inject, Singleton}
 import play.api.data.Form
 import play.api.libs.crypto.CookieSigner
 import play.api.libs.json.Json
-import play.api.mvc._
+import play.api.mvc.{Action, AnyContent, MessagesControllerComponents, Result}
 import play.twirl.api.Html
 import service._
 import uk.gov.hmrc.http.HeaderCarrier
 import views.helper.EnvironmentNameService
-import views.html.include.ChangeSubscriptionConfirmationView
 import views.html.{AddAppSubscriptionsView, ManageSubscriptionsView, SubscribeRequestSubmittedView, UnsubscribeRequestSubmittedView}
+import views.html.include.ChangeSubscriptionConfirmationView
 
-import javax.inject.{Inject, Singleton}
 import scala.concurrent.{ExecutionContext, Future}
+import domain.models.apidefinitions.ApiIdentifier
+import play.api.mvc.Call
 
 @Singleton
 class Subscriptions @Inject()(val developerConnector: ThirdPartyDeveloperConnector,

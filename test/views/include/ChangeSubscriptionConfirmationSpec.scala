@@ -21,15 +21,16 @@ import domain.models.apidefinitions.{ApiContext, ApiVersion}
 import domain.models.applications._
 import domain.models.developers.LoggedInState
 import domain.models.views.SubscriptionRedirect
+import domain.models.controllers.ApplicationViewModel
 import org.jsoup.Jsoup
 import play.api.data.Form
-import play.api.mvc.Call
 import play.api.test.FakeRequest
 import uk.gov.hmrc.time.DateTimeUtils
 import utils.ViewHelpers.elementExistsByText
 import utils._
 import views.helper.CommonViewSpec
 import views.html.include.ChangeSubscriptionConfirmationView
+import play.api.mvc.Call
 
 class ChangeSubscriptionConfirmationSpec extends CommonViewSpec with WithCSRFAddToken with CollaboratorTracker with LocalUserIdTracker {
   val request = FakeRequest().withCSRFToken
@@ -62,7 +63,7 @@ class ChangeSubscriptionConfirmationSpec extends CommonViewSpec with WithCSRFAdd
     val changeSubscriptionConfirmationView = app.injector.instanceOf[ChangeSubscriptionConfirmationView]
 
     changeSubscriptionConfirmationView.render(
-          createApplicationViewModel(application, hasSubscriptionsFields = false, hasPpnsFields = false),
+      ApplicationViewModel(application, hasSubscriptionsFields = false, hasPpnsFields = false),
       form,
       apiName,
       apiContext,

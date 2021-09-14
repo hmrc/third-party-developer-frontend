@@ -19,6 +19,7 @@ package views
 import domain.models.apidefinitions.ApiVersion
 import domain.models.applications._
 import domain.models.developers.LoggedInState
+import domain.models.controllers.ApplicationViewModel
 import org.jsoup.Jsoup
 import play.api.test.FakeRequest
 import uk.gov.hmrc.time.DateTimeUtils
@@ -55,7 +56,7 @@ class UnsubscribeRequestSubmittedSpec extends CommonViewSpec with WithCSRFAddTok
       val unsubscribeRequestSubmittedView = app.injector.instanceOf[UnsubscribeRequestSubmittedView]
 
       val page =
-        unsubscribeRequestSubmittedView.render(createApplicationViewModel(application, false, false), apiName, apiVersion, request, developer, messagesProvider, appConfig, "subscriptions")
+        unsubscribeRequestSubmittedView.render(ApplicationViewModel(application, false, false), apiName, apiVersion, request, developer, messagesProvider, appConfig, "subscriptions")
       page.contentType should include("text/html")
 
       val document = Jsoup.parse(page.body)

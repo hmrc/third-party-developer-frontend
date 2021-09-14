@@ -61,6 +61,7 @@ import domain.models.apidefinitions.{ApiContext, ApiVersion, ApiIdentifier}
     }
 
     def fromSessionString(in: String): ApiSubscriptionsFlow = {
+      println(in)
       ApiSubscriptionsFlow(
         in
         .drop(1)

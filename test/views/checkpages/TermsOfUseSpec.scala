@@ -20,6 +20,7 @@ import config.ApplicationConfig
 import controllers.TermsOfUseForm
 import domain.models.applications._
 import domain.models.developers.LoggedInState
+import domain.models.controllers.ApplicationViewModel
 import org.jsoup.Jsoup
 import play.api.mvc.{AnyContentAsEmpty, Call}
 import play.api.test.FakeRequest
@@ -57,7 +58,7 @@ class TermsOfUseSpec extends CommonViewSpec with WithCSRFAddToken with Collabora
       val developer = utils.DeveloperSession("email@example.com", "First Name", "Last Name", None, loggedInState = LoggedInState.LOGGED_IN)
 
       val page = termsOfUse.render(
-              createApplicationViewModel(thirdPartyApplication, false, false),
+        ApplicationViewModel(thirdPartyApplication, false, false),
         form = TermsOfUseForm.form.fill(termsOfUseForm),
         submitButtonLabel = "A Label",
         submitAction = mock[Call],
@@ -86,7 +87,7 @@ class TermsOfUseSpec extends CommonViewSpec with WithCSRFAddToken with Collabora
       val developer = utils.DeveloperSession("email@example.com", "First Name", "Last Name", None, loggedInState = LoggedInState.LOGGED_IN)
 
       val page = termsOfUse.render(
-              createApplicationViewModel(thirdPartyApplication.copy(checkInformation = Some(checkInformation)), false, false),
+        ApplicationViewModel(thirdPartyApplication.copy(checkInformation = Some(checkInformation)), false, false),
         form = TermsOfUseForm.form.fill(termsOfUseForm),
         submitButtonLabel = "A Label",
         submitAction = mock[Call],

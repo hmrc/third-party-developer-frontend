@@ -16,11 +16,10 @@
 
 package controllers.addapplication
 
-import config._
+import config.{ApplicationConfig, ErrorHandler, UpliftJourneyConfigProvider, Off, On}
 import connectors.ApmConnector
-import controllers.FormKeys.appNameField
-import controllers.models.ApiSubscriptionsFlow
 import controllers.{AddApplicationNameForm, ApplicationController, ChooseApplicationToUpliftForm}
+import controllers.FormKeys.appNameField
 import domain.ApplicationCreatedResponse
 import domain.Error._
 import domain.models.apidefinitions.APISubscriptionStatus
@@ -41,7 +40,9 @@ import views.html._
 import javax.inject.{Inject, Singleton}
 import scala.concurrent.Future.successful
 import scala.concurrent.{ExecutionContext, Future}
+import controllers.models.ApiSubscriptionsFlow
 import scala.util.Try
+import config.OnDemand
 
 @Singleton
 class AddApplication @Inject() (

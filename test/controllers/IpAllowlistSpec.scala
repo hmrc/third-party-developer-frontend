@@ -37,11 +37,11 @@ import scala.concurrent.Future
 import scala.concurrent.Future.{failed, successful}
 import utils.LocalUserIdTracker
 
-class IpAllowlistSpec 
-    extends BaseControllerSpec 
-    with ApplicationActionServiceMock 
-    with TestApplications 
-    with WithCSRFAddToken 
+class IpAllowlistSpec
+    extends BaseControllerSpec
+    with ApplicationActionServiceMock
+    with TestApplications
+    with WithCSRFAddToken
     with DeveloperBuilder
     with LocalUserIdTracker {
 
@@ -67,9 +67,7 @@ class IpAllowlistSpec
       app.injector.instanceOf[SettingUpAllowlistView],
       app.injector.instanceOf[RemoveIpAllowlistView],
       app.injector.instanceOf[RemoveIpAllowlistSuccessView],
-      app.injector.instanceOf[RemoveCidrBlockView],
-      fraudPreventionConfig
-      
+      app.injector.instanceOf[RemoveCidrBlockView]
     )
 
     val sessionId = "sessionId"

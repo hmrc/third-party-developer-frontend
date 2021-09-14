@@ -20,6 +20,7 @@ import controllers.routes
 import domain.models.applications
 import domain.models.applications._
 import domain.models.developers.{DeveloperSession, LoggedInState}
+import domain.models.controllers.ApplicationViewModel
 import org.joda.time.format.DateTimeFormat
 import org.jsoup.Jsoup
 import org.jsoup.nodes.{Document, Element}
@@ -27,9 +28,11 @@ import play.api.mvc.AnyContentAsEmpty
 import play.api.test.FakeRequest
 import play.twirl.api.HtmlFormat.Appendable
 import uk.gov.hmrc.time.DateTimeUtils
-import utils.{CollaboratorTracker, LocalUserIdTracker, TestApplications, WithCSRFAddToken}
+import utils.{TestApplications, WithCSRFAddToken}
 import views.helper.CommonViewSpec
 import views.html.DetailsView
+import utils.LocalUserIdTracker
+import utils.CollaboratorTracker
 
 class DetailsSpec 
     extends CommonViewSpec 
@@ -63,13 +66,13 @@ class DetailsSpec
         "Show Production when environment is Production" in {
           when(appConfig.nameOfPrincipalEnvironment).thenReturn("Production")
           when(appConfig.nameOfSubordinateEnvironment).thenReturn("Sandbox")
-          val page = Page(detailsView(createApplicationViewModel(application, hasSubscriptionsFields = false, hasPpnsFields = false)))
+          val page = Page(detailsView(ApplicationViewModel(application, hasSubscriptionsFields = false, hasPpnsFields = false)))
           page.environmentName.text shouldBe "Production"
         }
         "Show QA when environment is QA" in {
           when(appConfig.nameOfPrincipalEnvironment).thenReturn("QA")
           when(appConfig.nameOfSubordinateEnvironment).thenReturn("Development")
-          val page = Page(detailsView(createApplicationViewModel(application, hasSubscriptionsFields = false, hasPpnsFields = false)))
+          val page = Page(detailsView(ApplicationViewModel(application, hasSubscriptionsFields = false, hasPpnsFields = false)))
           page.environmentName.text shouldBe "QA"
         }
       }
@@ -82,13 +85,13 @@ class DetailsSpec
         "Show Sandbox when environment is Sandbox" in {
           when(appConfig.nameOfPrincipalEnvironment).thenReturn("Production")
           when(appConfig.nameOfSubordinateEnvironment).thenReturn("Sandbox")
-          val page = Page(detailsView(createApplicationViewModel(application, hasSubscriptionsFields = false, hasPpnsFields = false)))
+          val page = Page(detailsView(ApplicationViewModel(application, hasSubscriptionsFields = false, hasPpnsFields = false)))
           page.environmentName.text shouldBe "Sandbox"
         }
         "Show Development when environment is Development" in {
           when(appConfig.nameOfPrincipalEnvironment).thenReturn("QA")
           when(appConfig.nameOfSubordinateEnvironment).thenReturn("Development")
-          val page = Page(detailsView(createApplicationViewModel(application, hasSubscriptionsFields = false, hasPpnsFields = false)))
+          val page = Page(detailsView(ApplicationViewModel(application, hasSubscriptionsFields = false, hasPpnsFields = false)))
           page.environmentName.text shouldBe "Development"
         }
       }
@@ -102,7 +105,7 @@ class DetailsSpec
           val application = anApplication(environment = deployedTo)
             .withTeamMember(loggedIn.developer.email, CollaboratorRole.DEVELOPER)
 
-                      val page = Page(detailsView(createApplicationViewModel(application, hasSubscriptionsFields = false, hasPpnsFields = false)))
+          val page = Page(detailsView(ApplicationViewModel(application, hasSubscriptionsFields = false, hasPpnsFields = false)))
 
           page.termsOfUse shouldBe null
         }
@@ -111,7 +114,7 @@ class DetailsSpec
           val application = anApplication(environment = deployedTo)
             .withTeamMember(loggedIn.developer.email, CollaboratorRole.ADMINISTRATOR)
 
-                      val page = Page(detailsView(createApplicationViewModel(application, hasSubscriptionsFields = false, hasPpnsFields = false)))
+          val page = Page(detailsView(ApplicationViewModel(application, hasSubscriptionsFields = false, hasPpnsFields = false)))
 
           page.termsOfUse shouldBe null
         }
@@ -128,7 +131,7 @@ class DetailsSpec
             val application = anApplication(environment = deployedTo, access = access)
               .withTeamMember(loggedIn.developer.email, CollaboratorRole.DEVELOPER)
 
-                          val page = Page(detailsView(createApplicationViewModel(application, hasSubscriptionsFields = false, hasPpnsFields = false)))
+            val page = Page(detailsView(ApplicationViewModel(application, hasSubscriptionsFields = false, hasPpnsFields = false)))
 
             page.termsOfUse shouldBe null
           }
@@ -137,7 +140,7 @@ class DetailsSpec
             val application = anApplication(environment = deployedTo, access = access)
               .withTeamMember(loggedIn.developer.email, CollaboratorRole.ADMINISTRATOR)
 
-                          val page = Page(detailsView(createApplicationViewModel(application, hasSubscriptionsFields = false, hasPpnsFields = false)))
+            val page = Page(detailsView(ApplicationViewModel(application, hasSubscriptionsFields = false, hasPpnsFields = false)))
 
             page.termsOfUse shouldBe null
           }
@@ -150,7 +153,7 @@ class DetailsSpec
             val application = anApplication(environment = deployedTo, access = access)
               .withTeamMember(loggedIn.developer.email, CollaboratorRole.DEVELOPER)
 
-                          val page = Page(detailsView(createApplicationViewModel(application, hasSubscriptionsFields = false, hasPpnsFields = false)))
+            val page = Page(detailsView(ApplicationViewModel(application, hasSubscriptionsFields = false, hasPpnsFields = false)))
 
             page.termsOfUse shouldBe null
           }
@@ -159,7 +162,7 @@ class DetailsSpec
             val application = anApplication(environment = deployedTo, access = access)
               .withTeamMember(loggedIn.developer.email, CollaboratorRole.ADMINISTRATOR)
 
-                          val page = Page(detailsView(createApplicationViewModel(application, hasSubscriptionsFields = false, hasPpnsFields = false)))
+            val page = Page(detailsView(ApplicationViewModel(application, hasSubscriptionsFields = false, hasPpnsFields = false)))
 
             page.termsOfUse shouldBe null
           }
@@ -176,7 +179,7 @@ class DetailsSpec
                 .withTeamMember(loggedIn.developer.email, CollaboratorRole.ADMINISTRATOR)
                 .withCheckInformation(checkInformation)
 
-                              val page = Page(detailsView(createApplicationViewModel(application, hasSubscriptionsFields = false, hasPpnsFields = false)))
+              val page = Page(detailsView(ApplicationViewModel(application, hasSubscriptionsFields = false, hasPpnsFields = false)))
 
               page.agreementDetails.text shouldBe "Not agreed"
               page.readLink shouldBe null
@@ -193,7 +196,7 @@ class DetailsSpec
                 .withTeamMember(loggedIn.developer.email, CollaboratorRole.ADMINISTRATOR)
                 .withCheckInformation(checkInformation)
 
-                              val page = Page(detailsView(createApplicationViewModel(application, hasSubscriptionsFields = false, hasPpnsFields = false)))
+              val page = Page(detailsView(ApplicationViewModel(application, hasSubscriptionsFields = false, hasPpnsFields = false)))
 
               page.agreementDetails.text shouldBe s"Agreed by $emailAddress on $expectedTimeStamp"
               page.readLink shouldBe null
@@ -211,7 +214,7 @@ class DetailsSpec
                 .withTeamMembers(collaborators)
                 .withCheckInformation(checkInformation)
 
-                              val page = Page(detailsView(createApplicationViewModel(application, hasSubscriptionsFields = false, hasPpnsFields = false)))
+              val page = Page(detailsView(ApplicationViewModel(application, hasSubscriptionsFields = false, hasPpnsFields = false)))
 
               page.agreementDetails.text shouldBe "Not agreed"
               page.readLink.text shouldBe "Read and agree"
@@ -230,7 +233,7 @@ class DetailsSpec
                 .withTeamMembers(collaborators)
                 .withCheckInformation(checkInformation)
 
-                              val page = Page(detailsView(createApplicationViewModel(application, hasSubscriptionsFields = false, hasPpnsFields = false)))
+              val page = Page(detailsView(ApplicationViewModel(application, hasSubscriptionsFields = false, hasPpnsFields = false)))
 
               page.agreementDetails.text shouldBe s"Agreed by $emailAddress on $expectedTimeStamp"
               page.readLink.text shouldBe "Read"

@@ -94,7 +94,6 @@ class ApplicationConfig @Inject()(config: Configuration, runMode: RunMode) exten
   val ppnsSandboxApiKey = getConfString("push-pull-notifications-api-sandbox.api-key", "")
   val ppnsSandboxAuthorizationKey = getConfString("push-pull-notifications-api-sandbox.authorizationKey", "")
 
-
   private def buildUrl(key: String) = {
     (getConfigDefaulted(s"$env.$key.protocol", ""), getConfigDefaulted(s"$env.$key.host", "")) match {
       case (p, h) if !p.isEmpty && !h.isEmpty => Some(s"$p://$h")

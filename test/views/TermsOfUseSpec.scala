@@ -19,6 +19,7 @@ package views
 import controllers.TermsOfUseForm
 import domain.models.applications._
 import domain.models.developers.LoggedInState
+import domain.models.controllers.ApplicationViewModel
 import org.joda.time.format.DateTimeFormat
 import org.jsoup.Jsoup
 import play.api.test.FakeRequest
@@ -60,7 +61,7 @@ class TermsOfUseSpec extends CommonViewSpec with WithCSRFAddToken {
         val version = "1.0"
         val checkInformation = CheckInformation(termsOfUseAgreements = List(TermsOfUseAgreement(emailAddress, timeStamp, version)))
         val application = Application(id, clientId, appName, createdOn, lastAccess, None, deployedTo, checkInformation = Some(checkInformation))
-        val page: Page = Page(termsOfUseView(createApplicationViewModel(application, hasSubscriptionsFields = false, hasPpnsFields = false), TermsOfUseForm.form))
+        val page: Page = Page(termsOfUseView(ApplicationViewModel(application, hasSubscriptionsFields = false, hasPpnsFields = false), TermsOfUseForm.form))
       }
 
       "set the title and header to 'Terms of use'" in new Setup {
@@ -85,7 +86,7 @@ class TermsOfUseSpec extends CommonViewSpec with WithCSRFAddToken {
       trait Setup {
         val checkInformation = CheckInformation(termsOfUseAgreements = List.empty)
         val application = Application(id, clientId, appName, createdOn, lastAccess, None, deployedTo, checkInformation = Some(checkInformation))
-        val page: Page = Page(termsOfUseView(createApplicationViewModel(application, hasSubscriptionsFields = false, hasPpnsFields = false), TermsOfUseForm.form))
+        val page: Page = Page(termsOfUseView(ApplicationViewModel(application, hasSubscriptionsFields = false, hasPpnsFields = false), TermsOfUseForm.form))
       }
 
       "set the title and header to 'Terms of use'" in new Setup {

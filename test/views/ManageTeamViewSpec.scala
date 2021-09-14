@@ -16,19 +16,21 @@
 
 package views
 
-import builder.DeveloperBuilder
 import controllers.AddTeamMemberForm
 import domain.models.applications._
 import domain.models.developers.LoggedInState
 import helpers.string._
+import domain.models.controllers.ApplicationViewModel
 import org.jsoup.Jsoup
 import play.api.data.Form
 import play.api.test.FakeRequest
 import uk.gov.hmrc.time.DateTimeUtils
 import utils.ViewHelpers.{elementExistsByText, linkExistsWithHref}
-import utils.{LocalUserIdTracker, WithCSRFAddToken}
+import utils.WithCSRFAddToken
 import views.helper.CommonViewSpec
 import views.html.manageTeamViews.ManageTeamView
+import builder.DeveloperBuilder
+import utils.LocalUserIdTracker
 
 class ManageTeamViewSpec extends CommonViewSpec with WithCSRFAddToken with DeveloperBuilder with LocalUserIdTracker {
 
@@ -57,7 +59,7 @@ class ManageTeamViewSpec extends CommonViewSpec with WithCSRFAddToken with Devel
     def renderPage(role: CollaboratorRole, form: Form[AddTeamMemberForm] = AddTeamMemberForm.form) = {
       val request = FakeRequest().withCSRFToken
 
-      manageTeamView.render(createApplicationViewModel(application, hasSubscriptionsFields = false, hasPpnsFields = false),
+      manageTeamView.render(ApplicationViewModel(application, hasSubscriptionsFields = false, hasPpnsFields = false),
         role,
         form,
         Some(createFraudPreventionNavLinkViewModel(isVisible = true, "some/url")),

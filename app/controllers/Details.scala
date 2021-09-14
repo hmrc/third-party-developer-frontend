@@ -147,12 +147,11 @@ class Details @Inject() (
       }
 
       def handleInvalidForm(formWithErrors: Form[EditApplicationForm]): Future[Result] =
-        errorView(formWithErrors, applicationViewModelFromApplicationRequest)
+        errorView(application.id, formWithErrors, applicationViewModelFromApplicationRequest)
 
       EditApplicationForm.form.bindFromRequest.fold(handleInvalidForm, handleValidForm)
     }
 
-  private def errorView(form: Form[EditApplicationForm], applicationViewModel: ApplicationViewModel)
-                       (implicit request: ApplicationRequest[_]): Future[Result] =
+  private def errorView(id: ApplicationId, form: Form[EditApplicationForm], applicationViewModel: ApplicationViewModel)(implicit request: ApplicationRequest[_]): Future[Result] =
     Future.successful(BadRequest(changeDetailsView(form, applicationViewModel)))
 }

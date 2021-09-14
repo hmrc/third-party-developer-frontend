@@ -16,9 +16,10 @@
 
 package views
 
-import domain.models.applications.CollaboratorRole.{ADMINISTRATOR, DEVELOPER}
 import domain.models.applications._
+import domain.models.applications.CollaboratorRole.{ADMINISTRATOR, DEVELOPER}
 import domain.models.developers.LoggedInState
+import domain.models.controllers.ApplicationViewModel
 import org.jsoup.Jsoup
 import play.api.test.FakeRequest
 import uk.gov.hmrc.time.DateTimeUtils
@@ -65,7 +66,7 @@ class RedirectsSpec extends CommonViewSpec with WithCSRFAddToken with Collaborat
       val redirectsView = app.injector.instanceOf[RedirectsView]
 
       redirectsView.render(
-        createApplicationViewModel(applicationWithRedirects, hasSubscriptionsFields = false, hasPpnsFields = false),
+        ApplicationViewModel(applicationWithRedirects, hasSubscriptionsFields = false, hasPpnsFields = false),
         redirects,
         Some(createFraudPreventionNavLinkViewModel(isVisible = true, "some/url")),
         request, user, messagesProvider, appConfig, "redirects")

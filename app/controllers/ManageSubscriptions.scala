@@ -17,7 +17,7 @@
 package controllers
 
 import com.google.inject.{Inject, Singleton}
-import config.{ApplicationConfig, ErrorHandler, FraudPreventionConfig}
+import config.{ApplicationConfig, ErrorHandler}
 import domain.models.apidefinitions.{APISubscriptionStatusWithSubscriptionFields, APISubscriptionStatusWithWritableSubscriptionField, ApiContext, ApiVersion}
 import domain.models.applications.{Application, ApplicationId, CheckInformation}
 import domain.models.controllers.SaveSubsFieldsPageMode
@@ -78,8 +78,7 @@ class ManageSubscriptions @Inject() (
     editApiMetadataFieldView: EditApiMetadataFieldView,
     subscriptionConfigurationStartView: SubscriptionConfigurationStartView,
     subscriptionConfigurationPageView: SubscriptionConfigurationPageView,
-    subscriptionConfigurationStepPageView: SubscriptionConfigurationStepPageView,
-    val fraudPreventionConfig: FraudPreventionConfig
+    subscriptionConfigurationStepPageView: SubscriptionConfigurationStepPageView
 )(implicit val ec: ExecutionContext, val appConfig: ApplicationConfig)
     extends ApplicationController(mcc)
     with ApplicationHelper {

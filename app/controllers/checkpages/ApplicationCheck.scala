@@ -16,12 +16,11 @@
 
 package controllers.checkpages
 
-import config.{ApplicationConfig, ErrorHandler, FraudPreventionConfig}
+import config.{ApplicationConfig, ErrorHandler}
 import controllers._
 import controllers.FormKeys._
 import domain.models.applications.{ApplicationId, CheckInformation}
 import domain.models.views.CheckInformationForm
-
 import javax.inject.{Inject, Singleton}
 import play.api.data.Form
 import play.api.data.Forms.{boolean, mapping, optional, text}
@@ -57,8 +56,7 @@ class ApplicationCheck @Inject() (
     val contactDetailsView: ContactDetailsView,
     val apiSubscriptionsViewTemplate: ApiSubscriptionsView,
     val privacyPolicyView: PrivacyPolicyView,
-    val termsAndConditionsView: TermsAndConditionsView,
-    val fraudPreventionConfig: FraudPreventionConfig
+    val termsAndConditionsView: TermsAndConditionsView
 )(implicit val ec: ExecutionContext, val appConfig: ApplicationConfig)
     extends ApplicationController(mcc)
     with ApplicationHelper

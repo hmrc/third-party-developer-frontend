@@ -19,14 +19,14 @@ package controllers
 import config.{ApplicationConfig, ErrorHandler, FraudPreventionConfig}
 import controllers.fraudprevention.FraudPreventionNavLinkHelper
 import domain._
-import domain.models.applications.{AddCollaborator, ApplicationId, CollaboratorRole}
+import domain.models.applications.{ApplicationId, AddCollaborator, CollaboratorRole}
 import domain.models.applications.Capabilities.SupportsTeamMembers
 import domain.models.applications.Permissions.{AdministratorOnly, TeamMembersOnly}
-import domain.models.controllers.{AddTeamMemberPageMode, ApplicationViewModel}
+import domain.models.controllers.AddTeamMemberPageMode
 import domain.models.controllers.AddTeamMemberPageMode._
 import domain.models.developers.DeveloperSession
-
 import javax.inject.{Inject, Singleton}
+import domain.models.controllers.ApplicationViewModel
 import play.api.data.Form
 import play.api.libs.crypto.CookieSigner
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents, Result}

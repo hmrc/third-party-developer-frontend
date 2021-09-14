@@ -19,6 +19,7 @@ package views
 import controllers.{EditApplicationForm, GroupedSubscriptions, PageData}
 import domain.models.applications._
 import domain.models.developers.LoggedInState
+import domain.models.controllers.ApplicationViewModel
 import org.joda.time.DateTime
 import org.jsoup.Jsoup
 import org.jsoup.nodes.Document
@@ -73,9 +74,9 @@ class SubscriptionsSpec extends CommonViewSpec with WithCSRFAddToken {
         role,
         pageData,
         EditApplicationForm.withData(productionApplicationTesting),
-        createApplicationViewModel(application, hasSubscriptionsFields = false, hasPpnsFields = false),
+        ApplicationViewModel(application, false, false),
         Some(GroupedSubscriptions(Seq.empty, Seq.empty)),
-       Map.empty,
+        Map.empty,
         ApplicationId(""),
         Some(createFraudPreventionNavLinkViewModel(isVisible = true, "some/url")),
         request,

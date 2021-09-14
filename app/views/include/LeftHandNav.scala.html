@@ -30,7 +30,6 @@
 @getProductionCredentials = @{"Get production credentials"}
 @isGetProductionCredentialsEnabled = @{flags.getOrElse(LeftHandNavFlags.keyForIsGetProductionCredentialsEnabled, false)}
 
-
 @(application, navSection) match {
   case (Some(applicationView), Some(section)) => {
     @defining(applicationView.application) { app =>

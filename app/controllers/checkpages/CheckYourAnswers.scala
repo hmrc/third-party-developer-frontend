@@ -23,13 +23,12 @@ import controllers.ManageSubscriptions.Field
 import domain.{ApplicationAlreadyExists, DeskproTicketCreationFailed}
 import domain.models.apidefinitions.{APISubscriptionStatus, _}
 import domain.models.applications._
-
 import javax.inject.{Inject, Singleton}
 import domain.models.controllers.ApplicationViewModel
 import play.api.data.Form
 import play.api.libs.crypto.CookieSigner
 import play.api.mvc._
-import service.{ApplicationActionService, ApplicationService, SessionService}
+import service.{ApplicationService, SessionService, ApplicationActionService}
 import views.html.checkpages._
 import views.html.checkpages.applicationcheck.LandingPageView
 import views.html.checkpages.applicationcheck.team.{TeamMemberAddView, TeamMemberRemoveConfirmationView}

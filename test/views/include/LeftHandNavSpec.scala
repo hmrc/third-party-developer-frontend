@@ -29,6 +29,7 @@ import utils.ViewHelpers._
 import utils._
 import views.helper.CommonViewSpec
 import views.html.include.LeftHandNav
+import domain.models.controllers.LeftHandNavFlags
 
 class LeftHandNavSpec extends CommonViewSpec with WithCSRFAddToken with CollaboratorTracker with LocalUserIdTracker {
 
@@ -56,10 +57,9 @@ class LeftHandNavSpec extends CommonViewSpec with WithCSRFAddToken with Collabor
       state = ApplicationState.production(loggedInDeveloper.email, ""),
       access = Standard(redirectUris = List("https://red1", "https://red2"), termsAndConditionsUrl = Some("http://tnc-url.com"))
     )
-  val expectedFraudUrl = "12222"
-      val applicationViewModelWithSubscriptions = createApplicationViewModel(application, hasSubscriptionsFields = true, hasPpnsFields = false)
-      val applicationViewModelWithoutSubscriptions = createApplicationViewModel(application, hasSubscriptionsFields = false, hasPpnsFields = false)
 
+    val applicationViewModelWithApiSubscriptions = ApplicationViewModel(application, hasSubscriptionsFields = true, hasPpnsFields = false)
+    val applicationViewModelWithNoApiSubscriptions = ApplicationViewModel(application, hasSubscriptionsFields = false, hasPpnsFields = false)
 
     def leftHandNavRender(viewModel: Option[ApplicationViewModel],
                           navSection: Option[String],
@@ -72,7 +72,7 @@ class LeftHandNavSpec extends CommonViewSpec with WithCSRFAddToken with Collabor
   "Left Hand Nav" when {
     "working with an application with fraud link hidden" should {
       "render correctly" in new Setup {
-        val page = leftHandNavRender(Some(applicationViewModelWithoutSubscriptions), Some("details"))
+        val page = leftHandNavRender(Some(applicationViewModelWithNoApiSubscriptions), Some("details"))
 
         page.contentType should include("text/html")
 
@@ -89,9 +89,9 @@ class LeftHandNavSpec extends CommonViewSpec with WithCSRFAddToken with Collabor
         elementExistsByText(document, "a", "Delete application") shouldBe true
       }
 
-      "render Fraud prevention link when feature switch is enabled and hasFraudPrevention is true" in new Setup {
+      "render Fraud prevention link when isVisible is true" in new Setup {
         val uri = "some/link"
-        val page: Html = leftHandNavRender(Some(applicationViewModelWithSubscriptions),
+        val page: Html = leftHandNavRender(Some(applicationViewModelWithApiSubscriptions),
           Some("details"),
           Map.empty,
           Some(createFraudPreventionNavLinkViewModel(isVisible = true, uri)))
@@ -109,7 +109,7 @@ class LeftHandNavSpec extends CommonViewSpec with WithCSRFAddToken with Collabor
 
       "NOT display server token link for old apps" in new Setup {
         val oldAppWithoutSubsFields =
-                   createApplicationViewModel(application.copy(createdOn = serverTokenCutoffDate.minusDays(1)), hasSubscriptionsFields = false, hasPpnsFields = false)
+          ApplicationViewModel(application.copy(createdOn = serverTokenCutoffDate.minusDays(1)), hasSubscriptionsFields = false, hasPpnsFields = false)
         val page = leftHandNavRender(Some(oldAppWithoutSubsFields), Some("details"))
 
         page.contentType should include("text/html")
@@ -121,7 +121,7 @@ class LeftHandNavSpec extends CommonViewSpec with WithCSRFAddToken with Collabor
 
     "working with an application with api subscriptions" should {
       "render correctly" in new Setup {
-        val page = leftHandNavRender(Some(applicationViewModelWithSubscriptions), Some("details"))
+        val page = leftHandNavRender(Some(applicationViewModelWithApiSubscriptions), Some("details"))
         page.contentType should include("text/html")
 
         val document = Jsoup.parse(page.body)
@@ -139,7 +139,7 @@ class LeftHandNavSpec extends CommonViewSpec with WithCSRFAddToken with Collabor
 
       "NOT display server token link for old apps" in new Setup {
         val oldAppWithSubsFields =
-                   createApplicationViewModel(application.copy(createdOn = serverTokenCutoffDate.minusDays(1)), hasSubscriptionsFields = true, hasPpnsFields = false)
+          ApplicationViewModel(application.copy(createdOn = serverTokenCutoffDate.minusDays(1)), hasSubscriptionsFields = true, hasPpnsFields = false)
         val page = leftHandNavRender(Some(oldAppWithSubsFields), Some("details"))
 
         page.contentType should include("text/html")
