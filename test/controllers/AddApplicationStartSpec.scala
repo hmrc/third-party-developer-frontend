@@ -40,6 +40,7 @@ import config.On
 import config.OnDemand
 import play.api.mvc.Headers
 import config.Off
+import domain.models.controllers.ApplicationSummary
 
 class AddApplicationStartSpec 
     extends BaseControllerSpec 
@@ -48,9 +49,12 @@ class AddApplicationStartSpec
     with SubscriptionTestHelperSugar 
     with WithCSRFAddToken 
     with DeveloperBuilder
-    with LocalUserIdTracker {
+    with LocalUserIdTracker
+    with ApplicationBuilder {
 
   val collaborator: Collaborator = loggedInDeveloper.email.asAdministratorCollaborator
+
+  val sandboxAppSummaries = (1 to 5).map(_ => buildApplication(loggedInDeveloper.email)).map(ApplicationSummary.from(_, loggedInDeveloper.developer.userId)).toList
 
   trait Setup extends UpliftLogicMock with ApplicationServiceMock with ApmConnectorMockModule with ApplicationActionServiceMock with SessionServiceMock with EmailPreferencesServiceMock {
     val accessTokenSwitchView = app.injector.instanceOf[AccessTokenSwitchView]
@@ -175,9 +179,13 @@ class AddApplicationStartSpec
       contentAsString(result) should not include "Sign in"
     }
 
-    "return the uplift journey before you start page when the UpliftJourneyConfigProvider returns On" in new Setup {
+    "return the uplift journey 'before you start' page when the UpliftJourneyConfigProvider returns On" +
+      "and we have only 1 application" in new Setup {
       when(appConfig.nameOfPrincipalEnvironment).thenReturn("QA")
       when(appConfig.nameOfSubordinateEnvironment).thenReturn("Development")
+
+      val summaries = sandboxAppSummaries.take(1)
+      aUsersUplfitableAndNotUpliftableAppsReturns(summaries, summaries.map(_.id))
 
       when(upliftJourneyConfigProviderMock.status).thenReturn(On)
       
@@ -185,6 +193,22 @@ class AddApplicationStartSpec
 
       status(result) shouldBe OK
       contentAsString(result) should include("Before you start")
+    }
+
+    "return the uplift journey 'Which application do you want production credentials for?' page when the UpliftJourneyConfigProvider returns On" +
+      "and we have more than 1 application" in new Setup {
+      when(appConfig.nameOfPrincipalEnvironment).thenReturn("QA")
+      when(appConfig.nameOfSubordinateEnvironment).thenReturn("Development")
+
+      val summaries = sandboxAppSummaries.take(2)
+      aUsersUplfitableAndNotUpliftableAppsReturns(summaries, summaries.map(_.id))
+
+      when(upliftJourneyConfigProviderMock.status).thenReturn(On)
+
+      private val result = underTest.addApplicationPrincipal()(loggedInRequest)
+
+      status(result) shouldBe OK
+      contentAsString(result) should include("Which application do you want production credentials for")
     }
 
     "return the add applications page when the UpliftJourneyConfigProvider " +
@@ -215,10 +239,13 @@ class AddApplicationStartSpec
       contentAsString(result) should include("Add an application to QA")
     }
 
-    "return the uplift journey before you start page when the UpliftJourneyConfigProvider " +
+    "return the uplift journey 'before you start' page when the UpliftJourneyConfigProvider " +
         "returns OnDemand and request header contains the uplift journey flag set to true" in new Setup {
       when(appConfig.nameOfPrincipalEnvironment).thenReturn("QA")
       when(appConfig.nameOfSubordinateEnvironment).thenReturn("Development")
+
+      val summaries = sandboxAppSummaries.take(1)
+      aUsersUplfitableAndNotUpliftableAppsReturns(summaries, summaries.map(_.id))
 
       when(upliftJourneyConfigProviderMock.status).thenReturn(OnDemand)
 
@@ -245,10 +272,13 @@ class AddApplicationStartSpec
       contentAsString(result) should include("Add an application to QA")
     }
 
-    "return the uplift journey before you start page when the UpliftJourneyConfigProvider " +
-              "returns On and request header contains the uplift journey flag set to false" in new Setup {
+    "return the uplift journey 'before you start' page when the UpliftJourneyConfigProvider " +
+      "returns On and request header contains the uplift journey flag set to false" in new Setup {
           when(appConfig.nameOfPrincipalEnvironment).thenReturn("QA")
           when(appConfig.nameOfSubordinateEnvironment).thenReturn("Development")
+
+          val summaries = sandboxAppSummaries.take(1)
+          aUsersUplfitableAndNotUpliftableAppsReturns(summaries, summaries.map(_.id))
 
           when(upliftJourneyConfigProviderMock.status).thenReturn(On)
 
