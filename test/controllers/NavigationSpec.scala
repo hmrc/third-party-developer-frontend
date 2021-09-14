@@ -38,7 +38,7 @@ class NavigationSpec extends BaseControllerSpec with DeveloperBuilder with Local
       applicationActionServiceMock,
       mcc,
       cookieSigner,
-      mockFraudPreventionConfigProvider
+      fraudPreventionConfig
     )
 
     val developer = buildDeveloper()

@@ -135,7 +135,7 @@ class PushPullNotificationsSpec
       mcc,
       pushSecretsView,
       pushPullNotificationsServiceMock,
-      mockFraudPreventionConfigProvider
+      fraudPreventionConfig
     )
 
     implicit val hc: HeaderCarrier = HeaderCarrier()

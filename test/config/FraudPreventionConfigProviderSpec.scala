@@ -25,41 +25,27 @@ class FraudPreventionConfigProviderSpec extends BaseControllerSpec {
 
     "throw exception when there is no app config setting present" in {
 
-      val testConfig = Configuration.from(Map("fraudPreventionLink.linkEnabled" -> "testval"))
+      val testConfig = Configuration.from(Map("fraudPreventionLink.enabled" -> "testval" ))
 
       intercept[RuntimeException] {
-        new FraudPreventionConfigProvider(testConfig).enabled
+        new FraudPreventionConfigProvider(testConfig).get().enabled
       }.getMessage contains "No configuration setting found for key 'applicationCheck"
 
     }
 
     "be false when fraudPreventionLink.linkEnabled is false" in {
+      val fraudPreventionApis = List("vat-api")
+      val uri = "uri"
+      val testConfig = Configuration.from(Map("fraudPreventionLink.enabled" -> "false",
+        "fraudPreventionLink.apisWithFraudPrevention" -> fraudPreventionApis,
+        "fraudPreventionLink.uri" -> uri))
 
-      val testConfig = Configuration.from(Map("fraudPreventionLink.enabled" -> "false"))
-
-      val underTest = new FraudPreventionConfigProvider(testConfig)
+      val underTest = new FraudPreventionConfigProvider(testConfig).get()
 
       underTest.enabled shouldBe false
-    }
-
-    "return a list of strings when fraudPreventionLink.apisWithFraudPrevention is [vat-api]" in {
-      val fraudPreventionApis = List("vat-api")
-
-      val testConfig = Configuration.from(Map("fraudPreventionLink.apisWithFraudPrevention" -> List("vat-api")))
-
-      val underTest = new FraudPreventionConfigProvider(testConfig)
-
       underTest.apisWithFraudPrevention shouldBe fraudPreventionApis
+      underTest.uri shouldBe uri
     }
 
-    "return url when fraudPreventionLink.linkUrl is correct" in {
-      val url = "url"
-
-      val testConfig = Configuration.from(Map("fraudPreventionLink.uri" -> url))
-
-      val underTest = new FraudPreventionConfigProvider(testConfig)
-
-      underTest.uri shouldBe url
-    }
   }
 }

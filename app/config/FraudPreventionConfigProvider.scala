@@ -35,7 +35,6 @@ class FraudPreventionConfigProvider @Inject()(config: Configuration) extends Pro
       val uri: String = config.underlying.getString("fraudPreventionLink.uri")
 
       val result = FraudPreventionConfig(enabled, apisWithFraudPrevention, uri)
-      println(result)
       result
     }
 }

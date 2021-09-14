@@ -203,7 +203,7 @@ class ApplicationCheckSpec
       apiSubscriptionsViewTemplate,
       privacyPolicyView,
       termsAndConditionsView,
-      mockFraudPreventionConfigProvider
+      fraudPreventionConfig
     )
 
     val application = createApplication()

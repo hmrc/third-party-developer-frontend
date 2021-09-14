@@ -17,7 +17,7 @@
 package controllers
 
 import cats.data.NonEmptyList
-import config.{ApplicationConfig, ErrorHandler, FraudPreventionConfigProvider}
+import config.{ApplicationConfig, ErrorHandler}
 import controllers.ManageSubscriptions.ApiDetails
 import domain.models.apidefinitions.{APISubscriptionStatus, APISubscriptionStatusWithSubscriptionFields, APISubscriptionStatusWithWritableSubscriptionField, ApiContext, ApiVersion}
 import domain.models.applications._
@@ -102,7 +102,7 @@ abstract class ApplicationController(mcc: MessagesControllerComponents) extends 
 
   implicit def userFromRequest(implicit request: ApplicationRequest[_]): DeveloperSession = request.user
 
-  def hasFraudPreventionHeaders(request: ApplicationRequest[_]): FraudPreventionLink = {
+  def createFraudPreventionLink(request: ApplicationRequest[_]): FraudPreventionLink = {
     val apis = fraudPreventionConfig.apisWithFraudPrevention
     val isProduction = request.application.deployedTo == Environment.PRODUCTION
     val shouldBeVisible = request.subscriptions.exists(x => apis.contains(x.serviceName) && x.subscribed && isProduction)
@@ -114,7 +114,7 @@ abstract class ApplicationController(mcc: MessagesControllerComponents) extends 
     ApplicationViewModel(request.application,
       request.hasSubscriptionFields,
       hasPpnsFields(request),
-      hasFraudPreventionHeaders(request))
+      createFraudPreventionLink(request))
 
   def whenTeamMemberOnApp(applicationId: ApplicationId)(fun: ApplicationRequest[AnyContent] => Future[Result]): Action[AnyContent] =
     loggedInAction { implicit request =>

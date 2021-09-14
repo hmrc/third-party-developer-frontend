@@ -73,7 +73,6 @@ class LeftHandNavSpec extends CommonViewSpec with WithCSRFAddToken with Collabor
         val page = leftHandNavRender(Some(applicationViewModelWithFraudLinkHiddenWithoutSubscriptions), Some("details"))
 
         page.contentType should include("text/html")
-        println(page.body)
 
         val document = Jsoup.parse(page.body)
         elementExistsByText(document, "a", "API subscriptions") shouldBe true

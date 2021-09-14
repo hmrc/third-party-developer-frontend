@@ -70,7 +70,7 @@ class ManageTeamSpec
       addTeamMemberView,
       teamMemberAddView,
       removeTeamMemberView,
-      mockFraudPreventionConfigProvider
+      fraudPreventionConfig
     )
 
     implicit val hc = HeaderCarrier()

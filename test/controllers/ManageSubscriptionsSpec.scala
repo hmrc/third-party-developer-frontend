@@ -125,7 +125,7 @@ class ManageSubscriptionsSpec
       subscriptionConfigurationStartView,
       subscriptionConfigurationPageView,
       subscriptionConfigurationStepPageView,
-      mockFraudPreventionConfigProvider
+      fraudPreventionConfig
     )
 
     fetchSessionByIdReturns(sessionId, session)

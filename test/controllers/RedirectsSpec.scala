@@ -71,7 +71,7 @@ class RedirectsSpec
       addRedirectView,
       deleteRedirectConfirmationView,
       changeRedirectView,
-      mockFraudPreventionConfigProvider
+      fraudPreventionConfig
     )
 
     implicit val hc = HeaderCarrier()

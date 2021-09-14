@@ -16,33 +16,25 @@
 
 package controllers
 
-import config.{ApplicationConfig, ErrorHandler}
-import domain.models.apidefinitions.{ApiContext, ApiVersion}
+import config.{ApplicationConfig, ErrorHandler, FraudPreventionConfig}
+import controllers.models.ApiSubscriptionsFlow
+import domain.models.apidefinitions._
+import domain.models.applications.{Application, ApplicationWithSubscriptionData, Environment}
 import domain.models.developers.DeveloperSession
+import domain.models.subscriptions.ApiSubscriptionFields
 import helpers.LoggedInRequestTestHelper
 import mocks.service._
+import org.scalatest.Assertion
 import play.api.http.Status.{NOT_FOUND, OK}
+import play.api.i18n.DefaultMessagesApi
 import play.api.libs.crypto.CookieSigner
-import play.api.mvc.{AnyContent, MessagesControllerComponents}
+import play.api.mvc.{AnyContent, MessagesControllerComponents, MessagesRequest}
 import play.api.test.Helpers._
 import service.{ApplicationActionService, ApplicationService, SessionService}
-
-import scala.concurrent.{ExecutionContext, Future}
-import scala.concurrent.ExecutionContext.Implicits.global
 import utils.LocalUserIdTracker
-import domain.models.applications.CollaboratorRole
-import domain.models.apidefinitions.APISubscriptionStatus
-import domain.models.apidefinitions.ApiVersionDefinition
-import controllers.models.ApiSubscriptionsFlow
-import play.api.mvc.MessagesRequest
-import play.api.i18n.DefaultMessagesApi
-import domain.models.apidefinitions.ApiIdentifier
-import domain.models.apidefinitions.APIStatus
-import domain.models.applications.Application
-import domain.models.applications.Environment
-import config.FraudPreventionConfigProvider
-import config.FraudPreventionConfig
-import domain.models.controllers.FraudPreventionLink
+
+import scala.concurrent.ExecutionContext.Implicits.global
+import scala.concurrent.{ExecutionContext, Future}
 
 class TestController(
     val cookieSigner: CookieSigner,
@@ -66,18 +58,17 @@ class ActionBuildersSpec
     with LoggedInRequestTestHelper {
 
   trait Setup {
-    val loggedInDeveloper = DeveloperSession(session)
-    def fraudPreventionConfig = FraudPreventionConfig(false, List.empty, "")
-
+    val loggedInDeveloper: DeveloperSession = DeveloperSession(session)
     val errorHandler: ErrorHandler = app.injector.instanceOf[ErrorHandler]
+    def fraudPreventionConfig: FraudPreventionConfig = FraudPreventionConfig(enabled = false, List.empty, "")
 
-    val applicationWithSubscriptionData = buildApplicationWithSubscriptionData(
+    val applicationWithSubscriptionData: ApplicationWithSubscriptionData = buildApplicationWithSubscriptionData(
       developer.email
     )
 
-    val subscriptionWithoutSubFields = buildAPISubscriptionStatus("api name")
+    val subscriptionWithoutSubFields: APISubscriptionStatus = buildAPISubscriptionStatus("api name")
 
-    val subscriptionWithSubFields =
+    val subscriptionWithSubFields: APISubscriptionStatus =
       buildAPISubscriptionStatus(
         "api name",
         fields = Some(
@@ -104,7 +95,7 @@ class ActionBuildersSpec
         context: ApiContext,
         version: ApiVersion,
         expectedStatus: Int
-      ) = {
+      ): Assertion = {
       val testResultBody = "was called"
 
       val result = underTest.subFieldsDefinitionsExistActionByApi(
@@ -125,8 +116,8 @@ class ActionBuildersSpec
   }
 
   trait FraudPreventionSetup extends Setup {
-    val fraudPreventionProdApp = applicationWithSubscriptionData.application.copy(deployedTo = Environment.PRODUCTION)
-    val fraudPreventionSandboxApp = applicationWithSubscriptionData.application.copy(deployedTo = Environment.SANDBOX)
+    val fraudPreventionProdApp: Application = applicationWithSubscriptionData.application.copy(deployedTo = Environment.PRODUCTION)
+    val fraudPreventionSandboxApp: Application = applicationWithSubscriptionData.application.copy(deployedTo = Environment.SANDBOX)
 
     def buildApplicationRequest(application: Application, subscriptions: List[APISubscriptionStatus] = List.empty): ApplicationRequest[AnyContent] = {
 
@@ -144,20 +135,20 @@ class ActionBuildersSpec
       )
     }
 
-    val apiIdentifier1 =
+    val apiIdentifier1: ApiIdentifier =
       ApiIdentifier(ApiContext("test-api-context-1"), ApiVersion("1.0"))
 
-    val apiIdentifier2 =
+    val apiIdentifier2: ApiIdentifier =
       ApiIdentifier(ApiContext("test-api-context-2"), ApiVersion("1.0"))
 
-    val emptyFields = emptySubscriptionFieldsWrapper(
+    val emptyFields: ApiSubscriptionFields.SubscriptionFieldsWrapper = emptySubscriptionFieldsWrapper(
       fraudPreventionProdApp.id,
       fraudPreventionProdApp.clientId,
       apiIdentifier1.context,
       apiIdentifier1.version
     )
 
-    val testAPISubscriptionStatus1 = APISubscriptionStatus(
+    val testAPISubscriptionStatus1: APISubscriptionStatus = APISubscriptionStatus(
       "test-api-1",
       "api-example-microservice",
       apiIdentifier1.context,
@@ -167,9 +158,9 @@ class ActionBuildersSpec
       fields = emptyFields
     )
 
-    val testFlow = ApiSubscriptionsFlow(Map(apiIdentifier1 -> true))
+    val testFlow: ApiSubscriptionsFlow = ApiSubscriptionsFlow(Map(apiIdentifier1 -> true))
 
-    val sessionSubscriptions =
+    val sessionSubscriptions: (String, String) =
       "subscriptions" -> ApiSubscriptionsFlow.toSessionString(testFlow)
 
     val applicationRequestWithSubs: ApplicationRequest[AnyContent] = buildApplicationRequest(fraudPreventionProdApp, List(testAPISubscriptionStatus1))
@@ -205,25 +196,25 @@ class ActionBuildersSpec
     }
   }
 
-  "hasFraudPreventionHeaders" should {
+  "createFraudPreventionLink" should {
 
     val apis = List("api-1", "api-2")
 
     "return false when link is enabled but fraudPreventionApis is empty in config" in new FraudPreventionSetup {
-      val fraudPreventionConfig = FraudPreventionConfig(true, List.empty, "")
+      override val fraudPreventionConfig: FraudPreventionConfig = FraudPreventionConfig(enabled = true, List.empty, "")
       givenApplicationAction(applicationWithSubscriptionData, loggedInDeveloper, List(subscriptionWithSubFields))
       underTest.createFraudPreventionLink(applicationRequestWithSubs).isVisible shouldBe false
     }
 
     "return false when link is enabled, config has fraudprevention api list but application has no subscriptions" in new FraudPreventionSetup {
-      val fraudPreventionConfig = FraudPreventionConfig(true, apis, "")
+      override val fraudPreventionConfig: FraudPreventionConfig = FraudPreventionConfig(enabled = true, apis, "")
       givenApplicationAction(applicationWithSubscriptionData, loggedInDeveloper, List(subscriptionWithoutSubFields))
       underTest.createFraudPreventionLink(applicationRequestWithoutSubs).isVisible shouldBe false
 
-    }    
+    }
     
     "return true when production application has fraud prevention subscriptions" in new FraudPreventionSetup {
-      val fraudPreventionConfig = FraudPreventionConfig(true, List("api-example-microservice"), "")
+      override val fraudPreventionConfig: FraudPreventionConfig = FraudPreventionConfig(enabled = true, List("api-example-microservice"), "")
      
       givenApplicationAction(applicationWithSubscriptionData, loggedInDeveloper, List(subscriptionWithSubFields))
       underTest.createFraudPreventionLink(applicationRequestWithSubs).isVisible shouldBe true
@@ -231,7 +222,7 @@ class ActionBuildersSpec
     }
 
     "return false when Link criteria is met but is disabled in config" in new FraudPreventionSetup {
-      val fraudPreventionConfig = FraudPreventionConfig(false, List("api-example-microservice"), "")
+      override val fraudPreventionConfig: FraudPreventionConfig = FraudPreventionConfig(enabled = false, List("api-example-microservice"), "")
 
       givenApplicationAction(applicationWithSubscriptionData, loggedInDeveloper, List(subscriptionWithSubFields))
       underTest.createFraudPreventionLink(applicationRequestWithSubs).isVisible shouldBe false
@@ -239,21 +230,21 @@ class ActionBuildersSpec
     }
 
     "return false when production application has fraud prevention subscriptions but is unsubcribed" in new FraudPreventionSetup {
-      val fraudPreventionConfig = FraudPreventionConfig(true, List("api-example-microservice"), "")
+      override val fraudPreventionConfig: FraudPreventionConfig = FraudPreventionConfig(enabled = true, List("api-example-microservice"), "")
       givenApplicationAction(applicationWithSubscriptionData, loggedInDeveloper, List(subscriptionWithSubFields))
       underTest.createFraudPreventionLink(applicationRequestWithSubsNotSubscribed).isVisible shouldBe false
 
     }
 
     "return false when production application has no fraud prevention subscriptions" in new FraudPreventionSetup {
-      val fraudPreventionConfig = FraudPreventionConfig(true, List("api-1", "api-2"), "")
+      override val fraudPreventionConfig: FraudPreventionConfig = FraudPreventionConfig(enabled = true, List("api-1", "api-2"), "")
       givenApplicationAction(applicationWithSubscriptionData, loggedInDeveloper, List(subscriptionWithSubFields))
       underTest.createFraudPreventionLink(applicationRequestWithSubs).isVisible shouldBe false
 
     }
 
     "return false when sandbox application has fraud prevention subscriptions " in new FraudPreventionSetup {
-      val fraudPreventionConfig = FraudPreventionConfig(true, List("api-example-microservice"), "")
+      override val fraudPreventionConfig: FraudPreventionConfig = FraudPreventionConfig(enabled = true, List("api-example-microservice"), "")
       givenApplicationAction(applicationWithSubscriptionData, loggedInDeveloper, List(subscriptionWithSubFields))
       underTest.createFraudPreventionLink(applicationRequestForSandboxApp).isVisible shouldBe false
     }

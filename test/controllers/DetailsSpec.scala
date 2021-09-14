@@ -344,7 +344,7 @@ class DetailsSpec
       pendingApprovalView,
       detailsView,
       changeDetailsView,
-      mockFraudPreventionConfigProvider
+      fraudPreventionConfig
     )
 
     implicit val hc: HeaderCarrier = HeaderCarrier()

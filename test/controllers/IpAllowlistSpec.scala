@@ -68,7 +68,7 @@ class IpAllowlistSpec
       app.injector.instanceOf[RemoveIpAllowlistView],
       app.injector.instanceOf[RemoveIpAllowlistSuccessView],
       app.injector.instanceOf[RemoveCidrBlockView],
-      mockFraudPreventionConfigProvider
+      fraudPreventionConfig
       
     )
 

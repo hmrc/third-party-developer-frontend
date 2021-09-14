@@ -152,7 +152,7 @@ class CheckYourAnswersSpec
       privacyPolicyView,
       apiSubscriptionsViewTemplate,
       contactDetailsView,
-      mockFraudPreventionConfigProvider
+      fraudPreventionConfig
     )
 
     fetchSessionByIdReturns(sessionId, session)
