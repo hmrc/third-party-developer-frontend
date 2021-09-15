@@ -17,7 +17,7 @@
 package controllers
 
 import akka.stream.Materializer
-import config.ApplicationConfig
+import config.{ApplicationConfig, FraudPreventionConfig}
 import mocks.service.ErrorHandlerMock
 import org.scalatestplus.play.guice.GuiceOneAppPerSuite
 import play.api.Application
@@ -28,16 +28,18 @@ import play.api.mvc.MessagesControllerComponents
 import utils.{AsyncHmrcSpec, SharedMetricsClearDown}
 import mocks.service.SessionServiceMock
 
-class BaseControllerSpec 
-    extends AsyncHmrcSpec 
-    with GuiceOneAppPerSuite 
-    with SharedMetricsClearDown 
-    with ErrorHandlerMock 
+class BaseControllerSpec
+    extends AsyncHmrcSpec
+    with GuiceOneAppPerSuite
+    with SharedMetricsClearDown
+    with ErrorHandlerMock
     with SessionServiceMock {
 
   implicit val appConfig: ApplicationConfig = mock[ApplicationConfig]
   when(appConfig.nameOfPrincipalEnvironment).thenReturn("Production")
   when(appConfig.nameOfSubordinateEnvironment).thenReturn("Sandbox")
+
+  def fraudPreventionConfig: FraudPreventionConfig = FraudPreventionConfig(enabled = false, List.empty, "")
 
   implicit val cookieSigner: CookieSigner = app.injector.instanceOf[CookieSigner]
 

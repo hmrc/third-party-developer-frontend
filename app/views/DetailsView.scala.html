@@ -20,12 +20,13 @@
 @import domain.models.controllers.Crumb
 @import org.joda.time.format.DateTimeFormat
 @import domain.models.controllers.ApplicationViewModel
+@import domain.models.controllers.FraudPreventionNavLinkViewModel
 @import domain.models.developers.DeveloperSession
 @import domain.models.applications.TermsOfUseStatus
 
 @this(devMain: DevMain2, leftHandNav: LeftHandNav)
 
-@(applicationViewModel: ApplicationViewModel)(
+@(applicationViewModel: ApplicationViewModel, fraudPreventionViewModel: Option[FraudPreventionNavLinkViewModel] = None)(
         implicit request: play.api.mvc.Request[Any],
         loggedIn: DeveloperSession,
         messagesProvider: MessagesProvider,
@@ -46,7 +47,7 @@
     Crumb.viewAllApplications,
     Crumb.home
   ),
-  leftNav = Some(leftHandNav(Option(applicationViewModel), Option(navSection))),
+  leftNav = Some(leftHandNav(Option(applicationViewModel), Option(navSection), Map.empty, fraudPreventionViewModel)),
   developerSession = Some(loggedIn)
 ) {
   <h1 class="govuk-heading-l">@title</h1>

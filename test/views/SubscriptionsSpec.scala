@@ -78,6 +78,7 @@ class SubscriptionsSpec extends CommonViewSpec with WithCSRFAddToken {
         Some(GroupedSubscriptions(Seq.empty, Seq.empty)),
         Map.empty,
         ApplicationId(""),
+        Some(createFraudPreventionNavLinkViewModel(isVisible = true, "some/url")),
         request,
         developer,
         messagesProvider,

@@ -42,12 +42,12 @@ import play.api.mvc.Headers
 import config.Off
 import domain.models.controllers.ApplicationSummary
 
-class AddApplicationStartSpec 
-    extends BaseControllerSpec 
+class AddApplicationStartSpec
+    extends BaseControllerSpec
     with SampleSession
     with SampleApplication
-    with SubscriptionTestHelperSugar 
-    with WithCSRFAddToken 
+    with SubscriptionTestHelperSugar
+    with WithCSRFAddToken
     with DeveloperBuilder
     with LocalUserIdTracker
     with ApplicationBuilder {
