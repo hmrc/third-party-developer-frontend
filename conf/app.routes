@@ -194,4 +194,4 @@ GET         /applications/:id/change-api-subscriptions                          
 POST        /applications/:id/change-api-subscriptions                                                   controllers.SR20.saveApiSubscriptionsSubmit(id: domain.models.applications.ApplicationId)
 
 GET         /applications/:id/responsible-individual                                                     controllers.SR20.responsibleIndividual(id: domain.models.applications.ApplicationId)
-#POST        /applications/:id/responsible-individual                                                     controllers.SR20.responsibleIndividualAction(id: domain.models.applications.ApplicationId)
+POST        /applications/:id/responsible-individual                                                     controllers.SR20.responsibleIndividualAction(id: domain.models.applications.ApplicationId)

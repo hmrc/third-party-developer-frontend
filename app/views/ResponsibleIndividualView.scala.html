@@ -14,53 +14,71 @@
  * limitations under the License.
  *@
 
-@import config.ApplicationConfig
-@import domain.models.developers.DeveloperSession
-@import include._
-@import domain.models.controllers.Crumb
-@import org.joda.time.format.DateTimeFormat
-@import controllers.TermsOfUseForm
-@import domain.models.controllers.ApplicationViewModel
-@import domain.models.views.BackButtonWithJavaScript
+@import controllers.ResponsibleIndividualForm
 @import domain.models.applications.ApplicationId
+@import domain.models.developers.DeveloperSession
+@import domain.models.views.BackButtonWithJavaScript
+@import include._
 
 @this(devMain: DevMain2)
 
-@(applicationId: ApplicationId)(implicit request: play.api.mvc.Request[Any], loggedIn: DeveloperSession, messagesProvider: MessagesProvider, appConfig: config.ApplicationConfig)
+@(applicationId: ApplicationId, form: Form[ResponsibleIndividualForm])(implicit request: play.api.mvc.Request[Any], loggedIn: DeveloperSession, messagesProvider: MessagesProvider, appConfig: config.ApplicationConfig)
 
+@titleError = { @if(form.errors.nonEmpty) {Error: } else {}}
 @title = @{ "Before you start" }
 
 @devMain(
-  title = title,
+  title = titleError + title,
   userFullName = loggedIn.loggedInName,
   back = BackButtonWithJavaScript,
   developerSession = Some(loggedIn)
 ) {
+    @errorSummary2(form)
 
-  <h1 class="govuk-heading-l">Provide details for a responsible individual in your organisation</h1>
+    <h1 class="govuk-heading-l">Provide details for a responsible individual in your organisation</h1>
 
-  @applicationId
-      <p class="govuk-body">The responsible individual:</p>
-      <ul class="govuk-list govuk-list--bullet">
+    <p class="govuk-body">The responsible individual:</p>
+    <ul class="govuk-list govuk-list--bullet">
         <li>ensures your software meets our terms of use <a href="/api-documentation/docs/terms-of-use" class="govuk-link">terms of use</a></li>
         <li>understands the <a href="/api-documentation/docs/terms-of-use" class="govuk-link">consequences of not meeting the terms of use</a></li>
-      </ul>
+    </ul>
 
-      <div class="govuk-form-group">
-        <label class="govuk-label" for="individual-name">
-          Full name
-        </label>
-        <input class="govuk-input govuk-input--width-20" id="individual-name" name="individual-name" type="text">
-      </div>
+    @helper.form(action = controllers.routes.SR20.responsibleIndividualAction(applicationId), 'class -> "form") {
+        <div class="form-field-group">
+        @helper.CSRF.formField
 
-      <div class="govuk-form-group">
-        <label class="govuk-label" for="individual-email">
-          Email address
-        </label>
-        <input class="govuk-input" id="individual-email" name="individual-email" type="text">
-      </div>
+            <div class="govuk-form-group @if(form.errors("fullName").nonEmpty){govuk-form-group--error}">
+                <label class="govuk-label govuk-!-font-weight-bold" for="fullName">Full name</label>
 
-      <a class="govuk-button" href="./sell_resell_distribute_software.html">Save and continue</a>
-    
-    
+                <span id="fullName-error" class="govuk-error-message">
+                    <span class="govuk-visually-hidden">Error:</span> @fieldError2(form.errors, "fullName", true)
+                </span>
+
+                <input class="govuk-input @if(form.errors("fullName").nonEmpty){form-control-error}"
+                id="fullName"
+                type="text"
+                name="fullName"
+                value="@form.data.getOrElse("fullName", "")"
+                aria-required="true">
+            </div>
+
+            <div class="govuk-form-group @if(form.errors("emailAddress").nonEmpty){govuk-form-group--error}">
+                <label class="govuk-label govuk-!-font-weight-bold" for="emailAddress">Email address</label>
+
+                <span id="emailAddress-error" class="govuk-error-message">
+                    <span class="govuk-visually-hidden">Error:</span> @fieldError2(form.errors, "emailAddress", true)
+                </span>
+
+                <input class="govuk-input @if(form.errors("emailAddress").nonEmpty){form-control-error}"
+                id="emailAddress"
+                type="text"
+                name="emailAddress"
+                value="@form.data.getOrElse("emailAddress", "")"
+                aria-required="true">
+            </div>
+
+            <button class="govuk-button" id="submit" type="submit">Save and continue</button>
+
+        </div>
+    }
 }

@@ -19,31 +19,30 @@ package controllers
 import config.{ApplicationConfig, ErrorHandler}
 import connectors.ApmConnector
 import controllers.checkpages.{CanUseCheckActions, DummySubscriptionsForm}
-import domain.models.apidefinitions.ApiContext
+import controllers.models.ApiSubscriptionsFlow
+import domain.models.apidefinitions.{APISubscriptionStatus, ApiContext}
 import domain.models.applications.ApplicationId
+import domain.models.applicationuplift.ResponsibleIndividual
+import play.api.data.{Form, FormError}
+import play.api.data.Forms._
 import play.api.libs.crypto.CookieSigner
+import play.api.libs.json.Json
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
 import service.{ApplicationActionService, ApplicationService, SessionService}
 import views.helper.IdFormatter
-import views.html.{ConfirmApisView, TurnOffApisMasterView}
+import views.html.{ConfirmApisView, ResponsibleIndividualView, TurnOffApisMasterView}
 
 import javax.inject.{Inject, Singleton}
-import scala.concurrent.ExecutionContext
-import controllers.models.ApiSubscriptionsFlow
-import domain.models.apidefinitions.APISubscriptionStatus
-import play.api.data.Form
-import play.api.data.Forms._
-import play.api.data.FormError
-import views.html.ResponsibleIndividualView
 import scala.concurrent.{ExecutionContext, Future}
-import domain.models.applicationuplift.ResponsibleIndividual
+
+case class ResponsibleIndividualForm(fullName: String, emailAddress: String)
 
 object ResponsibleIndividualForm {
-  def form: Form[ResponsibleIndividual] = Form(
+  def form: Form[ResponsibleIndividualForm] = Form(
     mapping(
-      "fullName" -> fullnameValidator,
-      "emailAddress" -> emailValidator()
-    )(ResponsibleIndividual.apply)(ResponsibleIndividual.unapply)
+      "fullName" -> requiredIndividualFullnameValidator,
+      "emailAddress" -> requiredIndividualEmailValidator()
+    )(ResponsibleIndividualForm.apply)(ResponsibleIndividualForm.unapply)
   )
 }
 
@@ -61,8 +60,10 @@ class SR20 @Inject() (val errorHandler: ErrorHandler,
                      (implicit val ec: ExecutionContext, val appConfig: ApplicationConfig)
   extends ApplicationController(mcc)
      with CanUseCheckActions{
-       
-def confirmApiSubscriptionsPage(sandboxAppId: ApplicationId): Action[AnyContent] = whenTeamMemberOnApp(sandboxAppId) { implicit request =>
+
+  val responsibleIndividualForm: Form[ResponsibleIndividualForm] = ResponsibleIndividualForm.form
+
+  def confirmApiSubscriptionsPage(sandboxAppId: ApplicationId): Action[AnyContent] = whenTeamMemberOnApp(sandboxAppId) { implicit request =>
 
     val flow = ApiSubscriptionsFlow.fromSessionString(request.session.get("subscriptions").getOrElse(""))
 
@@ -150,6 +151,15 @@ def confirmApiSubscriptionsPage(sandboxAppId: ApplicationId): Action[AnyContent]
   }
 
   def responsibleIndividual(sandboxAppId: ApplicationId): Action[AnyContent] = whenTeamMemberOnApp(sandboxAppId) { implicit request =>
-     Future.successful(Ok(responsibleIndividualView(sandboxAppId)))
+    Future.successful(Ok(responsibleIndividualView(sandboxAppId, responsibleIndividualForm)))
+  }
+
+  def responsibleIndividualAction(sandboxAppId: ApplicationId): Action[AnyContent] = whenTeamMemberOnApp(sandboxAppId) { implicit request =>
+
+    val requestForm = responsibleIndividualForm.bindFromRequest
+
+    requestForm.fold(
+      formWithErrors => Future.successful(BadRequest(responsibleIndividualView(sandboxAppId, formWithErrors))),
+      formData => Future.successful(Ok(Json.toJson(ResponsibleIndividual(formData.fullName, formData.emailAddress)))))
   }
 }
