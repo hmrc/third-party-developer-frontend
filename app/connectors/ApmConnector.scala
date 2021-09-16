@@ -36,6 +36,7 @@ import uk.gov.hmrc.play.http.metrics.API
 
 import javax.inject.{Inject, Singleton}
 import scala.concurrent.{ExecutionContext, Future}
+import domain.models.subscriptions.VersionData
 
 @Singleton
 class ApmConnector @Inject() (http: HttpClient, config: ApmConnector.Config, metrics: ConnectorMetrics)(implicit ec: ExecutionContext) 

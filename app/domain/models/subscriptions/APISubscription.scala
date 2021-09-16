@@ -16,7 +16,8 @@
 
 package domain.models.subscriptions
 
-import domain.models.apidefinitions.{ApiVersion, APIStatus, APIAccess, ApiVersionDefinition}
+import domain.models.apidefinitions.{ApiVersion, APIStatus, APIAccess, ApiVersionDefinition, ApiContext}
+import domain.models.apidefinitions.ApiIdentifier
 
 case class ApiCategory(value: String) extends AnyVal
 
@@ -34,3 +35,37 @@ case class ApiData(
     isTestSupport: Boolean,
     versions: Map[ApiVersion, VersionData],
     categories: List[ApiCategory])
+
+object ApiData {
+  def filterApis(contextFilter: ApiData => Boolean)(in: Map[ApiContext,ApiData]): Map[ApiContext,ApiData] = {
+    in.filter {
+      case (c,d) => contextFilter(d)
+    }
+  }
+
+  def filterApis(contextFilter: ApiData => Boolean, versionFilter: VersionData => Boolean)(in: Map[ApiContext,ApiData]): Map[ApiContext,ApiData] = {
+    def filterVersions(in: Map[ApiVersion,VersionData]): Map[ApiVersion,VersionData] = {
+      in.filter {
+        case (v,d) => versionFilter(d)
+      }
+    }
+
+    val empty = Map.empty[ApiContext, ApiData]
+
+    in.flatMap {
+      case (c,d) =>
+        val filteredVersions = filterVersions(d.versions)
+        if(contextFilter(d) && filteredVersions.nonEmpty) {
+          Map(c -> d.copy(versions = filteredVersions))
+        } else {
+          empty
+        }
+    }
+  }
+
+  def toApiIdentifiers(in: Map[ApiContext,ApiData]): Set[ApiIdentifier] = {
+    in.flatMap {
+      case (c,d) => d.versions.keySet.map(v => ApiIdentifier(c,v))
+    }.toSet
+  }
+}
