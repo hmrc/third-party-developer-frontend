@@ -32,6 +32,7 @@ import domain.models.subscriptions.ApiCategory
 import domain.models.apidefinitions.ApiIdentifier
 import domain.models.applications.Environment
 import domain.models.controllers.ApplicationSummary
+import domain.models.apidefinitions.APIStatus
 
 @Singleton
 class UpliftLogic @Inject()(
@@ -55,36 +56,44 @@ class UpliftLogic @Inject()(
     
     for {
       apisAvailableInProd <- fApisAvailableInProd
-      excludedContexts <- fAllSandboxApiDetails.map(contextsOfTestSupportAndExampleApis)
+      sandboxApis <- fAllSandboxApiDetails
       allSummaries <- fAllSummaries
       adminSummaries <- fAdminSummaries
       
       subscriptionsForApps = getSubscriptionsByApp(adminSummaries)
 
-      upliftableAppIds = filterAppsHavingRealAndAvailableSubscriptions(apisAvailableInProd, excludedContexts, subscriptionsForApps).keySet
+      upliftableAppIds = filterAppsHavingRealAndAvailableSubscriptions(sandboxApis, apisAvailableInProd, subscriptionsForApps).keySet
     } yield (allSummaries.toList, upliftableAppIds)
   }
 }
 
 object UpliftLogic {
   def contextsOfTestSupportAndExampleApis(apis: Map[ApiContext, ApiData]): Set[ApiContext] = {
-    apis.toSet[(ApiContext,ApiData)].flatMap {
-      case (k: ApiContext, d: ApiData) =>
-        if(d.isTestSupport || d.categories.contains(ApiCategory.EXAMPLE)) 
-          Set(k)
-        else
-          Set.empty[ApiContext]
-    }
+    ApiData.filterApis(d => d.isTestSupport || d.categories.contains(ApiCategory.EXAMPLE))(apis)
+    .keySet
   }
 
-  def filterAppsHavingRealAndAvailableSubscriptions(apisAvailableInProd: Set[ApiIdentifier], excludedContexts: Set[ApiContext], subscriptionsByApplication: Map[ApplicationId, Set[ApiIdentifier]]): Map[ApplicationId, Set[ApiIdentifier]] =
+  def apiIdentifiersOfRetiredApis(apis: Map[ApiContext, ApiData]): Set[ApiIdentifier] = {
+    (ApiData.filterApis(_ => true, v => v.status == APIStatus.RETIRED) _ andThen ApiData.toApiIdentifiers)(apis)
+  }
+
+  def filterAppsHavingRealAndAvailableSubscriptions(
+    sandboxApis: Map[ApiContext, ApiData],
+    apisAvailableInProd: Set[ApiIdentifier], 
+    subscriptionsByApplication: Map[ApplicationId, Set[ApiIdentifier]]
+  ): Map[ApplicationId, Set[ApiIdentifier]] = {
+  
+    val excludedContexts = contextsOfTestSupportAndExampleApis(sandboxApis)
+    val retiredVersions = apiIdentifiersOfRetiredApis(sandboxApis)
+    
     subscriptionsByApplication.flatMap { 
       case (id, subs) =>
-        val realApis = subs.filterNot(id => excludedContexts.contains(id.context))
+        val realApis = subs.filterNot(id => excludedContexts.contains(id.context) || retiredVersions.contains(id))
         
         if(realApis.nonEmpty && realApis.subsetOf(apisAvailableInProd) )
           Map(id -> realApis) 
         else
           Map.empty[ApplicationId, Set[ApiIdentifier]] 
     }
+  }
 }
