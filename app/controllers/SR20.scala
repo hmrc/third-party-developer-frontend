@@ -34,6 +34,9 @@ import views.html.{ConfirmApisView, ResponsibleIndividualView, TurnOffApisMaster
 
 import javax.inject.{Inject, Singleton}
 import scala.concurrent.{ExecutionContext, Future}
+import play.api.mvc.Result
+import service.GetProductionCredentialsFlowService
+import play.api.libs.json.JsNull
 
 case class ResponsibleIndividualForm(fullName: String, emailAddress: String)
 
@@ -56,7 +59,8 @@ class SR20 @Inject() (val errorHandler: ErrorHandler,
                       confirmApisView: ConfirmApisView,
                       turnOffApisMasterView:TurnOffApisMasterView,
                       val apmConnector: ApmConnector,
-                      responsibleIndividualView: ResponsibleIndividualView)
+                      responsibleIndividualView: ResponsibleIndividualView,
+                      flowService: GetProductionCredentialsFlowService)
                      (implicit val ec: ExecutionContext, val appConfig: ApplicationConfig)
   extends ApplicationController(mcc)
      with CanUseCheckActions{
@@ -151,15 +155,24 @@ class SR20 @Inject() (val errorHandler: ErrorHandler,
   }
 
   def responsibleIndividual(sandboxAppId: ApplicationId): Action[AnyContent] = whenTeamMemberOnApp(sandboxAppId) { implicit request =>
-    Future.successful(Ok(responsibleIndividualView(sandboxAppId, responsibleIndividualForm)))
+    for {
+      flow <- flowService.fetchFlow(request.user)
+      form = flow.responsibleIndividual.fold[Form[ResponsibleIndividualForm]](ResponsibleIndividualForm.form)(x => ResponsibleIndividualForm.form.fill(ResponsibleIndividualForm(x.fullName, x.emailAddress)))
+    } yield Ok(responsibleIndividualView(sandboxAppId, form))
   }
 
   def responsibleIndividualAction(sandboxAppId: ApplicationId): Action[AnyContent] = whenTeamMemberOnApp(sandboxAppId) { implicit request =>
 
-    val requestForm = responsibleIndividualForm.bindFromRequest
+    def handleValidForm(form: ResponsibleIndividualForm): Future[Result] = {
+      val responsibleIndividual = ResponsibleIndividual(form.fullName, form.emailAddress)
+      flowService.storeResponsibleIndividual(responsibleIndividual, request.user)
+      .map(_ => Ok(Json.toJson("WORKING")))
+    }
+    
+    def handleInvalidForm(form: Form[ResponsibleIndividualForm]): Future[Result] = {
+      Future.successful(BadRequest(responsibleIndividualView(sandboxAppId, form)))
+    }
 
-    requestForm.fold(
-      formWithErrors => Future.successful(BadRequest(responsibleIndividualView(sandboxAppId, formWithErrors))),
-      formData => Future.successful(Ok(Json.toJson(ResponsibleIndividual(formData.fullName, formData.emailAddress)))))
+    ResponsibleIndividualForm.form.bindFromRequest.fold(handleInvalidForm, handleValidForm)
   }
 }

@@ -30,15 +30,16 @@ sealed trait FlowType extends EnumEntry
 
 object FlowType extends Enum[FlowType] with PlayJsonEnum[FlowType] {
   val values: immutable.IndexedSeq[FlowType] = findValues
-
+  
   case object IP_ALLOW_LIST extends FlowType
   case object EMAIL_PREFERENCES extends FlowType
   case object NEW_APPLICATION_EMAIL_PREFERENCES extends FlowType
+  case object GET_PRODUCTION_CREDENTIALS extends FlowType
 }
 
 trait Flow {
-  val sessionId: String
-  val flowType: FlowType
+  def sessionId: String
+  def flowType: FlowType
 }
 
 /**
