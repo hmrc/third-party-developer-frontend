@@ -192,3 +192,5 @@ POST        /applications/:id/confirm-subscriptions                             
 
 GET         /applications/:id/change-api-subscriptions                                                   controllers.SR20.changeApiSubscriptions(id: domain.models.applications.ApplicationId)
 POST        /applications/:id/change-api-subscriptions                                                   controllers.SR20.saveApiSubscriptionsSubmit(id: domain.models.applications.ApplicationId)
+
+->         /hmrc-frontend        hmrcfrontend.Routes
