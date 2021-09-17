@@ -27,7 +27,6 @@
 
 @theSandbox = @{"the sandbox"}
 @subordinateWording = @{ if(appConfig.nameOfSubordinateEnvironment == "Sandbox") {theSandbox} else {appConfig.nameOfSubordinateEnvironment}}
-@getProductionCredentials = @{"Get production credentials"}
 @isGetProductionCredentialsEnabled = @{flags.getOrElse(LeftHandNavFlags.keyForIsGetProductionCredentialsEnabled, false)}
 
 @(application, navSection) match {
@@ -141,12 +140,12 @@
       <ul class="side-nav__component">
         <li class="side-nav__list @if(section == "manage-applications") { side-nav__list--selected }"><a class="side-nav__link" href="@routes.ManageApplications.manageApps">View all applications</a></li>
         <li class="side-nav__list"><a class="side-nav__link" href="@addapplication.routes.AddApplication.addApplicationSubordinate">Add an application to @subordinateWording</a></li>
-        @if(appConfig.nameOfPrincipalEnvironment == "Production") {
-            @if(isGetProductionCredentialsEnabled) {
-              <li class="side-nav__list"><a class="side-nav__link" href="@addapplication.routes.AddApplication.addApplicationPrincipal">@getProductionCredentials</a></li>
-            }
-        } else {
-          <li class="side-nav__list"><a class="side-nav__link" href="@addapplication.routes.AddApplication.addApplicationPrincipal">Add an application to @{appConfig.nameOfPrincipalEnvironment}</a></li>
+        @if(isGetProductionCredentialsEnabled) {
+          @if(appConfig.nameOfPrincipalEnvironment == "Production") {
+            <li class="side-nav__list"><a class="side-nav__link" href="@addapplication.routes.AddApplication.addApplicationPrincipal">Get production credentials</a></li>
+          } else {
+            <li class="side-nav__list"><a class="side-nav__link" href="@addapplication.routes.AddApplication.addApplicationPrincipal">Add an application to @{appConfig.nameOfPrincipalEnvironment}</a></li>
+          }
         }
       </ul>
       <br>
