@@ -191,6 +191,21 @@ class LeftHandNavSpec extends CommonViewSpec with WithCSRFAddToken with Collabor
         userProfileSectionCorrectlyDisplayed(document) shouldBe true
       }
 
+      "do not render wording for QA and Development when flag is clear" in new Setup {
+        reset(appConfig)
+        when(appConfig.nameOfPrincipalEnvironment).thenReturn("QA")
+        when(appConfig.nameOfSubordinateEnvironment).thenReturn("Development")
+
+        val page = leftHandNavRender(None, Some("manage-applications"), Map(LeftHandNavFlags.keyForIsGetProductionCredentialsEnabled -> false))
+        page.contentType should include("text/html")
+
+        val document = Jsoup.parse(page.body)
+        elementExistsByText(document, "a", "Add an application to Development") shouldBe true
+        elementExistsByText(document, "a", "Add an application to QA") shouldBe false
+
+        userProfileSectionCorrectlyDisplayed(document) shouldBe true
+      }
+
       "render correct wording for Staging" in new Setup {
         when(appConfig.nameOfPrincipalEnvironment).thenReturn("Staging")
         when(appConfig.nameOfSubordinateEnvironment).thenReturn("Staging")

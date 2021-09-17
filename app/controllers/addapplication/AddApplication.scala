@@ -16,7 +16,7 @@
 
 package controllers.addapplication
 
-import config.{ApplicationConfig, ErrorHandler, UpliftJourneyConfigProvider, Off, On}
+import config.{ApplicationConfig, ErrorHandler, UpliftJourneyConfigProvider, On}
 import connectors.ApmConnector
 import controllers.{AddApplicationNameForm, ApplicationController, ChooseApplicationToUpliftForm}
 import controllers.FormKeys.appNameField
