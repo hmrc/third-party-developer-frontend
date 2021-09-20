@@ -25,6 +25,7 @@ import domain.models.applications.State.{PENDING_GATEKEEPER_APPROVAL, PENDING_RE
 import domain.models.developers.Developer
 import helpers.string.Digest
 import org.joda.time.DateTime
+
 import java.util.UUID
 import domain.models.developers.UserId
 import domain.models.apidefinitions.ApiIdentifier
@@ -51,6 +52,7 @@ trait BaseApplication {
   def name: String
   def createdOn: DateTime
   def lastAccess: DateTime
+  def grantLength: Int
   def lastAccessTokenUsage: Option[DateTime]
   def deployedTo: Environment
   def description: Option[String]
@@ -156,6 +158,7 @@ case class Application(
     val createdOn: DateTime,
     val lastAccess: DateTime,
     val lastAccessTokenUsage: Option[DateTime] = None, // API-4376: Temporary inclusion whilst Server Token functionality is retired
+    val grantLength: Int = 547,
     val deployedTo: Environment,
     val description: Option[String] = None,
     val collaborators: Set[Collaborator] = Set.empty,
@@ -184,6 +187,7 @@ case class ApplicationWithSubscriptionIds(
   val createdOn: DateTime,
   val lastAccess: DateTime,
   val lastAccessTokenUsage: Option[DateTime] = None,
+  val grantLength: Int = 547,
   val deployedTo: Environment,
   val description: Option[String] = None,
   val collaborators: Set[Collaborator] = Set.empty,
@@ -211,6 +215,7 @@ object ApplicationWithSubscriptionIds {
       app.createdOn,
       app.lastAccess,
       app.lastAccessTokenUsage,
+      app.grantLength,
       app.deployedTo,
       app.description,
       app.collaborators,
