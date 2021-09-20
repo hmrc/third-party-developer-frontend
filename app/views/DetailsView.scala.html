@@ -104,8 +104,8 @@
         <td class="govuk-table__cell" id="applicationName">@{app.name}</td>
       </tr>
       <tr class="govuk-table__row">
-        <th scope="row" class="govuk-table__header">Application Grant Length In Days</th>
-        <td class="govuk-table__cell" id="applicationGrantLength">@{app.grantLength}</td>
+        <th scope="row" class="govuk-table__header">Application Grant Length</th>
+        <td class="govuk-table__cell" id="applicationGrantLength">@{app.grantLength.prettyGrantLength}</td>
       </tr>
       <tr class="govuk-table__row">
         <th scope="row" class="govuk-table__header">Application description</th>

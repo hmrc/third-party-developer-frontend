@@ -40,6 +40,13 @@ object ApplicationId {
 }
 
 case class ClientId(value: String) extends AnyVal
+case class GrantLength(grantLengthInDays: Int, prettyGrantLength: String)
+
+object GrantLength {
+  import play.api.libs.json.Json
+
+  implicit val format = Json.format[GrantLength]
+}
 
 object ClientId {
   import play.api.libs.json.Json
@@ -52,7 +59,7 @@ trait BaseApplication {
   def name: String
   def createdOn: DateTime
   def lastAccess: DateTime
-  def grantLength: Int
+  def grantLength: GrantLength
   def lastAccessTokenUsage: Option[DateTime]
   def deployedTo: Environment
   def description: Option[String]
@@ -158,7 +165,7 @@ case class Application(
     val createdOn: DateTime,
     val lastAccess: DateTime,
     val lastAccessTokenUsage: Option[DateTime] = None, // API-4376: Temporary inclusion whilst Server Token functionality is retired
-    val grantLength: Int = 547,
+    val grantLength: GrantLength = GrantLength(547, "18 Months"),
     val deployedTo: Environment,
     val description: Option[String] = None,
     val collaborators: Set[Collaborator] = Set.empty,
@@ -187,7 +194,7 @@ case class ApplicationWithSubscriptionIds(
   val createdOn: DateTime,
   val lastAccess: DateTime,
   val lastAccessTokenUsage: Option[DateTime] = None,
-  val grantLength: Int = 547,
+  val grantLength: GrantLength = GrantLength(547, "18 Months"),
   val deployedTo: Environment,
   val description: Option[String] = None,
   val collaborators: Set[Collaborator] = Set.empty,
