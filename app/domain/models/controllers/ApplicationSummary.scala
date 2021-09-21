@@ -30,7 +30,7 @@ case class ApplicationSummary(
   termsOfUseStatus: TermsOfUseStatus,
   state: State,
   lastAccess: DateTime,
-  grantLength: GrantLength = GrantLength(547, "18 Months"),
+  grantLength: Int = 547,
   serverTokenUsed: Boolean = false,
   createdOn: DateTime,
   accessType: AccessType,
