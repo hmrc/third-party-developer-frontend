@@ -195,3 +195,6 @@ POST        /applications/:id/change-api-subscriptions                          
 
 GET         /applications/:id/responsible-individual                                                     controllers.SR20.responsibleIndividual(id: domain.models.applications.ApplicationId)
 POST        /applications/:id/responsible-individual                                                     controllers.SR20.responsibleIndividualAction(id: domain.models.applications.ApplicationId)
+
+->         /govuk-frontend       govuk.Routes
+->         /hmrc-frontend        hmrcfrontend.Routes

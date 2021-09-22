@@ -43,12 +43,12 @@ import scala.concurrent.ExecutionContext.Implicits.global
 import utils.LocalUserIdTracker
 import builder._
 
-class CredentialsSpec 
-    extends BaseControllerSpec 
+class CredentialsSpec
+    extends BaseControllerSpec
     with SampleSession
     with SampleApplication
-    with SubscriptionTestHelperSugar 
-    with DeveloperBuilder 
+    with SubscriptionTestHelperSugar
+    with DeveloperBuilder
     with LocalUserIdTracker {
 
   val applicationId = ApplicationId(UUID.randomUUID().toString())

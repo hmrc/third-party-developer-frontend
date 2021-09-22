@@ -16,7 +16,8 @@
 
 package controllers
 
-import config.{ApplicationConfig, ErrorHandler}
+import config.{ApplicationConfig, ErrorHandler, FraudPreventionConfig}
+import controllers.fraudprevention.FraudPreventionNavLinkHelper
 import domain._
 import domain.models.applications.{ApplicationId, AddCollaborator, CollaboratorRole}
 import domain.models.applications.Capabilities.SupportsTeamMembers
@@ -49,9 +50,10 @@ class ManageTeam @Inject() (
     manageTeamView: ManageTeamView,
     addTeamMemberView: AddTeamMemberView,
     teamMemberAddView: TeamMemberAddView,
-    removeTeamMemberView: RemoveTeamMemberView
+    removeTeamMemberView: RemoveTeamMemberView,
+    val fraudPreventionConfig: FraudPreventionConfig
 )(implicit val ec: ExecutionContext, val appConfig: ApplicationConfig)
-    extends ApplicationController(mcc) {
+    extends ApplicationController(mcc) with FraudPreventionNavLinkHelper {
 
   private def whenAppSupportsTeamMembers(applicationId: ApplicationId)(fun: ApplicationRequest[AnyContent] => Future[Result]): Action[AnyContent] =
     checkActionForApprovedApps(SupportsTeamMembers, TeamMembersOnly)(applicationId)(fun)
@@ -62,13 +64,14 @@ class ManageTeam @Inject() (
     else
       checkActionForApprovedApps(SupportsTeamMembers, AdministratorOnly)(applicationId)(fun)
 
+
   def manageTeam(applicationId: ApplicationId, error: Option[String] = None) = whenAppSupportsTeamMembers(applicationId) { implicit request =>
-    val view = manageTeamView(applicationViewModelFromApplicationRequest, request.role, AddTeamMemberForm.form)
+    val view = manageTeamView(applicationViewModelFromApplicationRequest, request.role, AddTeamMemberForm.form, createFraudNavModel(fraudPreventionConfig))
     Future.successful(error.map(_ => BadRequest(view)).getOrElse(Ok(view)))
   }
 
   def addTeamMember(applicationId: ApplicationId) = whenAppSupportsTeamMembers(applicationId) { implicit request =>
-    Future.successful(Ok(addTeamMemberView(applicationViewModelFromApplicationRequest, AddTeamMemberForm.form, request.user)))
+    Future.successful(Ok(addTeamMemberView(applicationViewModelFromApplicationRequest, AddTeamMemberForm.form, request.user, createFraudNavModel(fraudPreventionConfig))))
   }
 
   def addTeamMemberAction(applicationId: ApplicationId, addTeamMemberPageMode: AddTeamMemberPageMode) =
@@ -79,9 +82,12 @@ class ManageTeam @Inject() (
         case CheckYourAnswers  => controllers.checkpages.routes.CheckYourAnswers.team(applicationId)
       }
 
+      def handleAddTeamMemberView(a: ApplicationViewModel, f: Form[AddTeamMemberForm], ds:DeveloperSession)={
+        addTeamMemberView.apply(a,f,ds, createFraudNavModel(fraudPreventionConfig))
+      }
       def createBadRequestResult(formWithErrors: Form[AddTeamMemberForm]): Result = {
         val viewFunction: (ApplicationViewModel, Form[AddTeamMemberForm], DeveloperSession) => Html = addTeamMemberPageMode match {
-          case ManageTeamMembers => addTeamMemberView.apply
+          case ManageTeamMembers => handleAddTeamMemberView
           case ApplicationCheck  => teamMemberAddView.apply
           case CheckYourAnswers  => teamMemberAddView.apply
 

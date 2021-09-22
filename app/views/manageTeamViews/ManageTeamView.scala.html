@@ -21,6 +21,7 @@
 @import domain.models.controllers.Crumb
 @import include.teamMembers._
 @import domain.models.controllers.ApplicationViewModel
+@import domain.models.controllers.FraudPreventionNavLinkViewModel
 @import views.html.include.DevMain
 @import domain.models.applications.{ApplicationId, CollaboratorRole}
 @import domain.models.developers.DeveloperSession
@@ -28,7 +29,7 @@
 
 @this(devMain: DevMain2, leftHandNav: LeftHandNav)
 
-@(applicationView: ApplicationViewModel, role: CollaboratorRole, form: Form[controllers.AddTeamMemberForm])(
+@(applicationView: ApplicationViewModel, role: CollaboratorRole, form: Form[controllers.AddTeamMemberForm], fraudPreventionNavLinkViewModel: Option[FraudPreventionNavLinkViewModel])(
         implicit request: play.api.mvc.Request[Any], messagesProvider: MessagesProvider, applicationConfig: ApplicationConfig, navSection: String = "manage-team", loggedIn: DeveloperSession)
 
 @titleError = { @if(form.errors.nonEmpty) {Error: } else {}}
@@ -44,7 +45,7 @@
     Crumb.viewAllApplications,
     Crumb.home
   ),
-  leftNav = Some(leftHandNav(Option(applicationView), Option(navSection))),
+  leftNav = Some(leftHandNav(Option(applicationView), Option(navSection), Map.empty, fraudPreventionNavLinkViewModel)),
   developerSession = Some(loggedIn)
 ) {
   @errorSummary(form)

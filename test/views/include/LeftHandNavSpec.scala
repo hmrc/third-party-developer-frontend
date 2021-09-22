@@ -18,13 +18,14 @@ package views.include
 
 import controllers.Credentials.serverTokenCutoffDate
 import domain.models.applications._
+import domain.models.controllers.{ApplicationViewModel, FraudPreventionNavLinkViewModel, LeftHandNavFlags}
 import domain.models.developers.LoggedInState
-import domain.models.controllers.ApplicationViewModel
 import org.jsoup.Jsoup
 import org.jsoup.nodes.Document
 import play.api.test.FakeRequest
+import play.twirl.api.Html
 import uk.gov.hmrc.time.DateTimeUtils
-import utils.ViewHelpers.elementExistsByText
+import utils.ViewHelpers._
 import utils._
 import views.helper.CommonViewSpec
 import views.html.include.LeftHandNav
@@ -60,13 +61,16 @@ class LeftHandNavSpec extends CommonViewSpec with WithCSRFAddToken with Collabor
     val applicationViewModelWithApiSubscriptions = ApplicationViewModel(application, hasSubscriptionsFields = true, hasPpnsFields = false)
     val applicationViewModelWithNoApiSubscriptions = ApplicationViewModel(application, hasSubscriptionsFields = false, hasPpnsFields = false)
 
-    def leftHandNavRender(viewModel: Option[ApplicationViewModel], navSection: Option[String], flags: Map[String, Boolean] = Map.empty) = {
-      leftHandNavView.render(viewModel, navSection, flags, request, loggedInDeveloper, appConfig)
+    def leftHandNavRender(viewModel: Option[ApplicationViewModel],
+                          navSection: Option[String],
+                          flags: Map[String, Boolean] = Map.empty,
+                          fraudPreventionNavLinkViewModel: Option[FraudPreventionNavLinkViewModel] = None) = {
+      leftHandNavView.render(viewModel, navSection, flags, fraudPreventionNavLinkViewModel, request, loggedInDeveloper, appConfig)
     }
   }
 
   "Left Hand Nav" when {
-    "working with an application with no api subscriptions" should {
+    "working with an application with fraud link hidden" should {
       "render correctly" in new Setup {
         val page = leftHandNavRender(Some(applicationViewModelWithNoApiSubscriptions), Some("details"))
 
@@ -80,9 +84,28 @@ class LeftHandNavSpec extends CommonViewSpec with WithCSRFAddToken with Collabor
         elementExistsByText(document, "a", "Client secrets") shouldBe true
         elementExistsByText(document, "a", "Server token") shouldBe false
         elementExistsByText(document, "a", "Redirect URIs") shouldBe true
+        elementExistsById(document, "nav-fraud-prevention") shouldBe false
         elementExistsByText(document, "a", "Team members") shouldBe true
         elementExistsByText(document, "a", "Delete application") shouldBe true
       }
+
+      "render Fraud prevention link when isVisible is true" in new Setup {
+        val uri = "some/link"
+        val page: Html = leftHandNavRender(Some(applicationViewModelWithApiSubscriptions),
+          Some("details"),
+          Map.empty,
+          Some(createFraudPreventionNavLinkViewModel(isVisible = true, uri)))
+
+        page.contentType should include("text/html")
+
+        val document: Document = Jsoup.parse(page.body)
+        elementExistsById(document, "nav-fraud-prevention") shouldBe true
+        elementIdentifiedByAttrContainsText(document, "nav-fraud-prevention", "href", uri)
+      }
+
+
+
+
 
       "NOT display server token link for old apps" in new Setup {
         val oldAppWithoutSubsFields =
@@ -109,6 +132,7 @@ class LeftHandNavSpec extends CommonViewSpec with WithCSRFAddToken with Collabor
         elementExistsByText(document, "a", "Client secrets") shouldBe true
         elementExistsByText(document, "a", "Server token") shouldBe false
         elementExistsByText(document, "a", "Redirect URIs") shouldBe true
+        elementExistsByText(document, "a", "Fraud prevention") shouldBe false
         elementExistsByText(document, "a", "Team members") shouldBe true
         elementExistsByText(document, "a", "Delete application") shouldBe true
       }
@@ -163,6 +187,21 @@ class LeftHandNavSpec extends CommonViewSpec with WithCSRFAddToken with Collabor
         val document = Jsoup.parse(page.body)
         elementExistsByText(document, "a", "Add an application to Development") shouldBe true
         elementExistsByText(document, "a", "Add an application to QA") shouldBe true
+
+        userProfileSectionCorrectlyDisplayed(document) shouldBe true
+      }
+
+      "do not render wording for QA and Development when flag is clear" in new Setup {
+        reset(appConfig)
+        when(appConfig.nameOfPrincipalEnvironment).thenReturn("QA")
+        when(appConfig.nameOfSubordinateEnvironment).thenReturn("Development")
+
+        val page = leftHandNavRender(None, Some("manage-applications"), Map(LeftHandNavFlags.keyForIsGetProductionCredentialsEnabled -> false))
+        page.contentType should include("text/html")
+
+        val document = Jsoup.parse(page.body)
+        elementExistsByText(document, "a", "Add an application to Development") shouldBe true
+        elementExistsByText(document, "a", "Add an application to QA") shouldBe false
 
         userProfileSectionCorrectlyDisplayed(document) shouldBe true
       }

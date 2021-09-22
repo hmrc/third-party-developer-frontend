@@ -41,7 +41,7 @@ class ManageApplications @Inject() (
     manageApplicationsView: ManageApplicationsView,
     addApplicationSubordinateEmptyNestView: AddApplicationSubordinateEmptyNestView,
     mcc: MessagesControllerComponents
-)(implicit val ec: ExecutionContext, val appConfig: ApplicationConfig, val environmentNameService: EnvironmentNameService) 
+)(implicit val ec: ExecutionContext, val appConfig: ApplicationConfig, val environmentNameService: EnvironmentNameService)
    extends LoggedInController(mcc) {
 
   def manageApps: Action[AnyContent] = loggedInAction { implicit request =>

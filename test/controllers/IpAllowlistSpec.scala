@@ -37,11 +37,11 @@ import scala.concurrent.Future
 import scala.concurrent.Future.{failed, successful}
 import utils.LocalUserIdTracker
 
-class IpAllowlistSpec 
-    extends BaseControllerSpec 
-    with ApplicationActionServiceMock 
-    with TestApplications 
-    with WithCSRFAddToken 
+class IpAllowlistSpec
+    extends BaseControllerSpec
+    with ApplicationActionServiceMock
+    with TestApplications
+    with WithCSRFAddToken
     with DeveloperBuilder
     with LocalUserIdTracker {
 

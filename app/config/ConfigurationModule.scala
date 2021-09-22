@@ -47,5 +47,8 @@ class ConfigurationModule extends AbstractModule {
 
     bind(classOf[ApmConnector.Config])
       .toProvider(classOf[LiveApmConnectorConfigProvider])
+
+    bind(classOf[FraudPreventionConfig])
+      .toProvider(classOf[FraudPreventionConfigProvider])
   }
 }

@@ -343,7 +343,8 @@ class DetailsSpec
       unauthorisedAppDetailsView,
       pendingApprovalView,
       detailsView,
-      changeDetailsView
+      changeDetailsView,
+      fraudPreventionConfig
     )
 
     implicit val hc: HeaderCarrier = HeaderCarrier()
