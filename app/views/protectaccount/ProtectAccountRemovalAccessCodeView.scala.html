@@ -17,48 +17,39 @@
 @import include._
 @import config.ApplicationConfig
 @import domain.models.views.BackButtonWithJavaScript
-@import views.html.include.DevMain
+@import views.html.include.DevMain2
 @import domain.models.developers.DeveloperSession
 
-@this(devMain: DevMain)
+@this(devMain: DevMain2)
 
 @(form: Form[controllers.profile.ProtectAccountForm])(implicit messages: Messages, request: play.api.mvc.Request[Any], loggedIn: DeveloperSession, applicationConfig: ApplicationConfig)
 
 @devMain(
-    title = "Enter your access code",
-    userFullName = loggedIn.loggedInName,
-    back = BackButtonWithJavaScript,
-    developerSession = Some(loggedIn)
+  title = "Enter your access code",
+  userFullName = loggedIn.loggedInName,
+  back = BackButtonWithJavaScript,
+  developerSession = Some(loggedIn)
 ) {
+  <h1 class="govuk-heading-l">Enter your access code</h1>
+  @errorSummary2(form)
 
-    <header>
-        <h1 class="heading-xlarge">Enter your access code</h1>
-    </header>
-    <div>
-        @errorSummary(form)
-
-        @helper.form(action = controllers.profile.routes.ProtectAccount.remove2SV()) {
-            @helper.CSRF.formField
-            @fieldError(form.errors, "invalidCredentials", true)
-            <div>
-                <p>This is the 6 digit code from your authentication app.</p>
-                <div class="form-group @if(form.errors("accessCode").nonEmpty){form-group-error form-field--error}">
-                    <label class="form-label-bold" for="accessCode" id="access-code-label">Access code</label>
-
-                    @fieldError(form.errors, "accessCode", true)
-                    <input type="text" autocomplete="off" id="accessCode"
-                    name="accessCode"
-                    value="@form.data.getOrElse("accessCode", "")"
-                    class="form-control @if(form.errors("accessCode").nonEmpty){form-control-error}"
-                    aria-required="true"/>
-                </div>
-            </div>
-
-            <div class="form-group">
-                <button id="submit" class="button" type="submit">Continue</button>
-            </div>
-
-        }
+  @helper.form(action = controllers.profile.routes.ProtectAccount.remove2SV()) {
+    @helper.CSRF.formField
+    @fieldError2(form.errors, "invalidCredentials", true)
+    <p class="govuk-body">This is the 6 digit code from your authentication app.</p>
+    <div class="govuk-form-group @if(form.errors("accessCode").nonEmpty){govuk-form-group--error}">
+      <label class="govuk-label govuk-!-font-weight-bold" for="accessCode" id="access-code-label">Access code</label>
+      @fieldError2(form.errors, "accessCode", true)
+      <input
+        type="text"
+        autocomplete="off"
+        id="accessCode"
+        name="accessCode"
+        value="@form.data.getOrElse("accessCode", "")"
+        class="govuk-input @if(form.errors("accessCode").nonEmpty){govuk-input--error}"
+        aria-required="true"
+      />
     </div>
-
+    <button id="submit" class="govuk-button" type="submit">Continue</button>
+  }
 }
