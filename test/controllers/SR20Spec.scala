@@ -16,10 +16,11 @@
 
 package controllers
 
-import builder.{DeveloperBuilder, SubscriptionsBuilder, _}
+import builder._
 import controllers.models.ApiSubscriptionsFlow
 import domain.models.apidefinitions._
 import domain.models.applications.ApplicationWithSubscriptionData
+import domain.models.applicationuplift.ResponsibleIndividual
 import domain.models.developers.{DeveloperSession, LoggedInState, Session}
 import domain.models.subscriptions.{ApiCategory, ApiData, VersionData}
 import mocks.connector.ApmConnectorMockModule
@@ -27,15 +28,13 @@ import mocks.service.{ApplicationActionServiceMock, ApplicationServiceMock, Sess
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
 import play.filters.csrf.CSRF.TokenProvider
+import service.{GetProductionCredentialsFlow, GetProductionCredentialsFlowService}
 import uk.gov.hmrc.http.HeaderCarrier
 import utils.WithLoggedInSession._
 import utils.{LocalUserIdTracker, WithCSRFAddToken}
 import views.html.{ConfirmApisView, ResponsibleIndividualView, TurnOffApisMasterView}
 
 import scala.concurrent.ExecutionContext.Implicits.global
-import service.GetProductionCredentialsFlowService
-import service.GetProductionCredentialsFlow
-import domain.models.applicationuplift.ResponsibleIndividual
 import scala.concurrent.Future
 
 class SR20Spec extends BaseControllerSpec
@@ -54,7 +53,7 @@ class SR20Spec extends BaseControllerSpec
     val confirmApisView = app.injector.instanceOf[ConfirmApisView]
     val turnOffApisMasterView = app.injector.instanceOf[TurnOffApisMasterView]
     val responsibleIndividualView = app.injector.instanceOf[ResponsibleIndividualView]
-    
+
     val flowServiceMock = mock[GetProductionCredentialsFlowService]
 
     val controller = new SR20(
@@ -238,7 +237,7 @@ class SR20Spec extends BaseControllerSpec
 
         private val result = controller.responsibleIndividualAction(appId)(loggedInRequest.withCSRFToken.withFormUrlEncodedBody(
           "fullName" -> "",
-          "emailAddress" -> "test@example.com"
+          "emailAddress" -> "test.user@example.com"
         ))
 
         status(result) shouldBe BAD_REQUEST
@@ -253,7 +252,7 @@ class SR20Spec extends BaseControllerSpec
         ApmConnectorMock.FetchUpliftableSubscriptions.willReturn(Set(apiIdentifier1))
 
         private val result = controller.responsibleIndividualAction(appId)(loggedInRequest.withCSRFToken.withFormUrlEncodedBody(
-          "fullName" -> "testuser",
+          "fullName" -> "test user",
           "emailAddress" -> ""
         ))
 
@@ -269,7 +268,7 @@ class SR20Spec extends BaseControllerSpec
         ApmConnectorMock.FetchUpliftableSubscriptions.willReturn(Set(apiIdentifier1))
 
         private val result = controller.responsibleIndividualAction(appId)(loggedInRequest.withCSRFToken.withFormUrlEncodedBody(
-          "fullName" -> "testuser",
+          "fullName" -> "test user",
           "emailAddress" -> "invalidemailaddress"
         ))
 
@@ -279,5 +278,23 @@ class SR20Spec extends BaseControllerSpec
         contentAsString(result) shouldNot include("Provide a full name")
         contentAsString(result) should include("Provide a valid email address")
       }
+
+    "store the full name and email address from the 'responsible individual view' and redirect to next page" in new Setup {
+
+      val testResponsibleIndividual = ResponsibleIndividual("test user", "test.user@example.com")
+
+      when(flowServiceMock.storeResponsibleIndividual(*, *)).thenReturn(Future.successful(GetProductionCredentialsFlow("1234", Some(ResponsibleIndividual("test full name", "test email address")))))
+
+      ApmConnectorMock.FetchUpliftableSubscriptions.willReturn(Set(apiIdentifier1))
+
+      private val result = controller.responsibleIndividualAction(appId)(loggedInRequest.withCSRFToken.withFormUrlEncodedBody(
+        "fullName" -> testResponsibleIndividual.fullName,
+        "emailAddress" -> testResponsibleIndividual.emailAddress
+      ))
+
+      status(result) shouldBe OK
+
+      verify(flowServiceMock).storeResponsibleIndividual(eqTo(testResponsibleIndividual), any[DeveloperSession])
+    }
   }
 }
