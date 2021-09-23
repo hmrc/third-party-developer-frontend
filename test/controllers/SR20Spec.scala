@@ -19,7 +19,7 @@ package controllers
 import builder._
 import controllers.models.ApiSubscriptionsFlow
 import domain.models.apidefinitions._
-import domain.models.applications.ApplicationWithSubscriptionData
+import domain.models.applications.{Application, ApplicationState, ApplicationWithSubscriptionData, Environment}
 import domain.models.applicationuplift.ResponsibleIndividual
 import domain.models.developers.{DeveloperSession, LoggedInState, Session}
 import domain.models.subscriptions.{ApiCategory, ApiData, VersionData}
@@ -126,8 +126,10 @@ class SR20Spec extends BaseControllerSpec
           VersionData(APIStatus.STABLE, APIAccess(APIAccessType.PUBLIC))), List(ApiCategory.EXAMPLE))
     )
 
-    fetchByApplicationIdReturns(appId, sampleApp)
-    givenApplicationAction(ApplicationWithSubscriptionData(sampleApp,
+    val sandboxApp: Application = sampleApp.copy(deployedTo = Environment.SANDBOX, state = ApplicationState.testing)
+
+    fetchByApplicationIdReturns(appId, sandboxApp)
+    givenApplicationAction(ApplicationWithSubscriptionData(sandboxApp,
       asSubscriptions(List(testAPISubscriptionStatus1)),
       asFields(List.empty)),
       loggedInDeveloper,

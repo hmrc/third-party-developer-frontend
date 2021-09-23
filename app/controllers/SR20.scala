@@ -23,20 +23,17 @@ import controllers.models.ApiSubscriptionsFlow
 import domain.models.apidefinitions.{APISubscriptionStatus, ApiContext}
 import domain.models.applications.ApplicationId
 import domain.models.applicationuplift.ResponsibleIndividual
-import play.api.data.{Form, FormError}
 import play.api.data.Forms._
+import play.api.data.{Form, FormError}
 import play.api.libs.crypto.CookieSigner
 import play.api.libs.json.Json
-import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
-import service.{ApplicationActionService, ApplicationService, SessionService}
+import play.api.mvc.{Action, AnyContent, MessagesControllerComponents, Result}
+import service.{ApplicationActionService, ApplicationService, GetProductionCredentialsFlowService, SessionService}
 import views.helper.IdFormatter
 import views.html.{ConfirmApisView, ResponsibleIndividualView, TurnOffApisMasterView}
 
 import javax.inject.{Inject, Singleton}
 import scala.concurrent.{ExecutionContext, Future}
-import play.api.mvc.Result
-import service.GetProductionCredentialsFlowService
-import play.api.libs.json.JsNull
 
 case class ResponsibleIndividualForm(fullName: String, emailAddress: String)
 
@@ -67,7 +64,7 @@ class SR20 @Inject() (val errorHandler: ErrorHandler,
 
   val responsibleIndividualForm: Form[ResponsibleIndividualForm] = ResponsibleIndividualForm.form
 
-  def confirmApiSubscriptionsPage(sandboxAppId: ApplicationId): Action[AnyContent] = whenTeamMemberOnApp(sandboxAppId) { implicit request =>
+  def confirmApiSubscriptionsPage(sandboxAppId: ApplicationId): Action[AnyContent] = canUseChecksAction(sandboxAppId) { implicit request =>
 
     val flow = ApiSubscriptionsFlow.fromSessionString(request.session.get("subscriptions").getOrElse(""))
 
@@ -91,7 +88,7 @@ class SR20 @Inject() (val errorHandler: ErrorHandler,
     }
   }
 
-  def confirmApiSubscriptionsAction(sandboxAppId: ApplicationId): Action[AnyContent] = whenTeamMemberOnApp(sandboxAppId) { implicit request =>
+  def confirmApiSubscriptionsAction(sandboxAppId: ApplicationId): Action[AnyContent] = canUseChecksAction(sandboxAppId) { implicit request =>
     val flow = ApiSubscriptionsFlow.fromSessionString(request.session.get("subscriptions").getOrElse(""))
     
     for {
@@ -106,7 +103,7 @@ class SR20 @Inject() (val errorHandler: ErrorHandler,
     apiSubscription.copy(subscribed = flow.isSelected(apiSubscription.apiIdentifier))
   }
 
-  def changeApiSubscriptions(sandboxAppId: ApplicationId): Action[AnyContent] = whenTeamMemberOnApp(sandboxAppId) { implicit request =>
+  def changeApiSubscriptions(sandboxAppId: ApplicationId): Action[AnyContent] = canUseChecksAction(sandboxAppId) { implicit request =>
     val flow = ApiSubscriptionsFlow.fromSessionString(request.session.get("subscriptions").getOrElse(""))
     
     for {
@@ -120,7 +117,7 @@ class SR20 @Inject() (val errorHandler: ErrorHandler,
     }
   }
 
-  def saveApiSubscriptionsSubmit(sandboxAppId: ApplicationId): Action[AnyContent] = whenTeamMemberOnApp(sandboxAppId) { implicit request =>
+  def saveApiSubscriptionsSubmit(sandboxAppId: ApplicationId): Action[AnyContent] = canUseChecksAction(sandboxAppId) { implicit request =>
     lazy val flow = ApiSubscriptionsFlow.fromSessionString(request.session.get("subscriptions").getOrElse(""))
 
     lazy val formSubmittedSubscriptions: Map[String, Boolean] = 
@@ -154,14 +151,14 @@ class SR20 @Inject() (val errorHandler: ErrorHandler,
     }
   }
 
-  def responsibleIndividual(sandboxAppId: ApplicationId): Action[AnyContent] = whenTeamMemberOnApp(sandboxAppId) { implicit request =>
+  def responsibleIndividual(sandboxAppId: ApplicationId): Action[AnyContent] = canUseChecksAction(sandboxAppId) { implicit request =>
     for {
       flow <- flowService.fetchFlow(request.user)
       form = flow.responsibleIndividual.fold[Form[ResponsibleIndividualForm]](ResponsibleIndividualForm.form)(x => ResponsibleIndividualForm.form.fill(ResponsibleIndividualForm(x.fullName, x.emailAddress)))
     } yield Ok(responsibleIndividualView(sandboxAppId, form))
   }
 
-  def responsibleIndividualAction(sandboxAppId: ApplicationId): Action[AnyContent] = whenTeamMemberOnApp(sandboxAppId) { implicit request =>
+  def responsibleIndividualAction(sandboxAppId: ApplicationId): Action[AnyContent] = canUseChecksAction(sandboxAppId) { implicit request =>
 
     def handleValidForm(form: ResponsibleIndividualForm): Future[Result] = {
       val responsibleIndividual = ResponsibleIndividual(form.fullName, form.emailAddress)
