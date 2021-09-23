@@ -231,7 +231,7 @@ class AddApplicationStartSpec
 
       when(upliftJourneyConfigProviderMock.status).thenReturn(OnDemand)
 
-      val loggedInRequestWithFlag = loggedInRequest.copy(headers = Headers("useNewUpliftJourney" -> "false"))
+      val loggedInRequestWithFlag = loggedInRequest.withHeaders(Headers("useNewUpliftJourney" -> "false"))
 
       private val result = underTest.addApplicationPrincipal()(loggedInRequestWithFlag)
 
@@ -249,7 +249,7 @@ class AddApplicationStartSpec
 
       when(upliftJourneyConfigProviderMock.status).thenReturn(OnDemand)
 
-      val loggedInRequestWithFlag = loggedInRequest.copy(headers = Headers("useNewUpliftJourney" -> "true"))
+      val loggedInRequestWithFlag = loggedInRequest.withHeaders(Headers("useNewUpliftJourney" -> "true"))
 
       private val result = underTest.addApplicationPrincipal()(loggedInRequestWithFlag)
 
@@ -264,7 +264,7 @@ class AddApplicationStartSpec
 
       when(upliftJourneyConfigProviderMock.status).thenReturn(Off)
 
-      val loggedInRequestWithFlag = loggedInRequest.copy(headers = Headers("useNewUpliftJourney" -> "true"))
+      val loggedInRequestWithFlag = loggedInRequest.withHeaders(Headers("useNewUpliftJourney" -> "true"))
 
       private val result = underTest.addApplicationPrincipal()(loggedInRequestWithFlag)
 
@@ -282,7 +282,7 @@ class AddApplicationStartSpec
 
           when(upliftJourneyConfigProviderMock.status).thenReturn(On)
 
-          val loggedInRequestWithFlag = loggedInRequest.copy(headers = Headers("useNewUpliftJourney" -> "false"))
+          val loggedInRequestWithFlag = loggedInRequest.withHeaders(Headers("useNewUpliftJourney" -> "false"))
 
           private val result = underTest.addApplicationPrincipal()(loggedInRequestWithFlag)
 

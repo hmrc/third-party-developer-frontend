@@ -177,3 +177,6 @@ footer.links.privacy_policy.text = Privacy Policy
 footer.links.terms_and_conditions.text = Terms and conditions
 footer.links.help_page.text = Help using GOV.UK
 footer.links.accessibility.text = Accessibility statement
+
+responsible_individual_fullname.error.required.field=Provide a full name
+responsible_individual_emailaddress.error.required.field=Provide an email address

@@ -19,21 +19,32 @@ package controllers
 import config.{ApplicationConfig, ErrorHandler}
 import connectors.ApmConnector
 import controllers.checkpages.{CanUseCheckActions, DummySubscriptionsForm}
-import domain.models.apidefinitions.ApiContext
+import controllers.models.ApiSubscriptionsFlow
+import domain.models.apidefinitions.{APISubscriptionStatus, ApiContext}
 import domain.models.applications.ApplicationId
+import domain.models.applicationuplift.ResponsibleIndividual
+import play.api.data.Forms._
+import play.api.data.{Form, FormError}
 import play.api.libs.crypto.CookieSigner
-import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
-import service.{ApplicationActionService, ApplicationService, SessionService}
+import play.api.libs.json.Json
+import play.api.mvc.{Action, AnyContent, MessagesControllerComponents, Result}
+import service.{ApplicationActionService, ApplicationService, GetProductionCredentialsFlowService, SessionService}
 import views.helper.IdFormatter
-import views.html.{ConfirmApisView, TurnOffApisMasterView}
+import views.html.{ConfirmApisView, ResponsibleIndividualView, TurnOffApisMasterView}
 
 import javax.inject.{Inject, Singleton}
-import scala.concurrent.ExecutionContext
-import controllers.models.ApiSubscriptionsFlow
-import domain.models.apidefinitions.APISubscriptionStatus
-import play.api.data.FormError
+import scala.concurrent.{ExecutionContext, Future}
 
+case class ResponsibleIndividualForm(fullName: String, emailAddress: String)
 
+object ResponsibleIndividualForm {
+  def form: Form[ResponsibleIndividualForm] = Form(
+    mapping(
+      "fullName" -> requiredIndividualFullnameValidator,
+      "emailAddress" -> requiredIndividualEmailValidator()
+    )(ResponsibleIndividualForm.apply)(ResponsibleIndividualForm.unapply)
+  )
+}
 
 @Singleton
 class SR20 @Inject() (val errorHandler: ErrorHandler,
@@ -44,12 +55,16 @@ class SR20 @Inject() (val errorHandler: ErrorHandler,
                       val cookieSigner: CookieSigner,
                       confirmApisView: ConfirmApisView,
                       turnOffApisMasterView:TurnOffApisMasterView,
-                      val apmConnector: ApmConnector)
+                      val apmConnector: ApmConnector,
+                      responsibleIndividualView: ResponsibleIndividualView,
+                      flowService: GetProductionCredentialsFlowService)
                      (implicit val ec: ExecutionContext, val appConfig: ApplicationConfig)
   extends ApplicationController(mcc)
      with CanUseCheckActions{
-       
-def confirmApiSubscriptionsPage(sandboxAppId: ApplicationId): Action[AnyContent] = whenTeamMemberOnApp(sandboxAppId) { implicit request =>
+
+  val responsibleIndividualForm: Form[ResponsibleIndividualForm] = ResponsibleIndividualForm.form
+
+  def confirmApiSubscriptionsPage(sandboxAppId: ApplicationId): Action[AnyContent] = canUseChecksAction(sandboxAppId) { implicit request =>
 
     val flow = ApiSubscriptionsFlow.fromSessionString(request.session.get("subscriptions").getOrElse(""))
 
@@ -73,7 +88,7 @@ def confirmApiSubscriptionsPage(sandboxAppId: ApplicationId): Action[AnyContent]
     }
   }
 
-  def confirmApiSubscriptionsAction(sandboxAppId: ApplicationId): Action[AnyContent] = whenTeamMemberOnApp(sandboxAppId) { implicit request =>
+  def confirmApiSubscriptionsAction(sandboxAppId: ApplicationId): Action[AnyContent] = canUseChecksAction(sandboxAppId) { implicit request =>
     val flow = ApiSubscriptionsFlow.fromSessionString(request.session.get("subscriptions").getOrElse(""))
     
     for {
@@ -88,7 +103,7 @@ def confirmApiSubscriptionsPage(sandboxAppId: ApplicationId): Action[AnyContent]
     apiSubscription.copy(subscribed = flow.isSelected(apiSubscription.apiIdentifier))
   }
 
-  def changeApiSubscriptions(sandboxAppId: ApplicationId): Action[AnyContent] = whenTeamMemberOnApp(sandboxAppId) { implicit request =>
+  def changeApiSubscriptions(sandboxAppId: ApplicationId): Action[AnyContent] = canUseChecksAction(sandboxAppId) { implicit request =>
     val flow = ApiSubscriptionsFlow.fromSessionString(request.session.get("subscriptions").getOrElse(""))
     
     for {
@@ -102,7 +117,7 @@ def confirmApiSubscriptionsPage(sandboxAppId: ApplicationId): Action[AnyContent]
     }
   }
 
-  def saveApiSubscriptionsSubmit(sandboxAppId: ApplicationId): Action[AnyContent] = whenTeamMemberOnApp(sandboxAppId) { implicit request =>
+  def saveApiSubscriptionsSubmit(sandboxAppId: ApplicationId): Action[AnyContent] = canUseChecksAction(sandboxAppId) { implicit request =>
     lazy val flow = ApiSubscriptionsFlow.fromSessionString(request.session.get("subscriptions").getOrElse(""))
 
     lazy val formSubmittedSubscriptions: Map[String, Boolean] = 
@@ -134,5 +149,27 @@ def confirmApiSubscriptionsPage(sandboxAppId: ApplicationId): Action[AnyContent]
         .withSession(request.session + ("subscriptions" -> ApiSubscriptionsFlow.toSessionString(flow)))
       }
     }
+  }
+
+  def responsibleIndividual(sandboxAppId: ApplicationId): Action[AnyContent] = canUseChecksAction(sandboxAppId) { implicit request =>
+    for {
+      flow <- flowService.fetchFlow(request.user)
+      form = flow.responsibleIndividual.fold[Form[ResponsibleIndividualForm]](ResponsibleIndividualForm.form)(x => ResponsibleIndividualForm.form.fill(ResponsibleIndividualForm(x.fullName, x.emailAddress)))
+    } yield Ok(responsibleIndividualView(sandboxAppId, form))
+  }
+
+  def responsibleIndividualAction(sandboxAppId: ApplicationId): Action[AnyContent] = canUseChecksAction(sandboxAppId) { implicit request =>
+
+    def handleValidForm(form: ResponsibleIndividualForm): Future[Result] = {
+      val responsibleIndividual = ResponsibleIndividual(form.fullName, form.emailAddress)
+      flowService.storeResponsibleIndividual(responsibleIndividual, request.user)
+      .map(_ => Ok(Json.toJson("WORKING")))
+    }
+    
+    def handleInvalidForm(form: Form[ResponsibleIndividualForm]): Future[Result] = {
+      Future.successful(BadRequest(responsibleIndividualView(sandboxAppId, form)))
+    }
+
+    ResponsibleIndividualForm.form.bindFromRequest.fold(handleInvalidForm, handleValidForm)
   }
 }

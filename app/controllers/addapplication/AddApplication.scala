@@ -106,12 +106,12 @@ class AddApplication @Inject() (
 
   def progressOnUpliftJourney(sandboxAppId: ApplicationId): Action[AnyContent] = loggedInAction { implicit request =>
 
-    def upliftJourneyTurnedOnInRequestHeader: Boolean = 
+    def upliftJourneyTurnedOnInRequestHeader: Boolean =
       request.headers.get("useNewUpliftJourney").fold(false) { setting =>
-        Try(setting.toBoolean).getOrElse(false) 
+        Try(setting.toBoolean).getOrElse(false)
       }
 
-    upliftJourneyConfigProvider.status match { 
+    upliftJourneyConfigProvider.status match {
       case On => successful(Ok(beforeYouStartView(sandboxAppId)))
       case OnDemand if upliftJourneyTurnedOnInRequestHeader => successful(Ok(beforeYouStartView(sandboxAppId)))
       case _ => showConfirmSubscriptionsPage(sandboxAppId)
@@ -164,6 +164,7 @@ class AddApplication @Inject() (
   }
 
   def chooseApplicationToUpliftAction(): Action[AnyContent] = loggedInAction { implicit request =>
+
     def handleValidForm(validForm: ChooseApplicationToUpliftForm) =
       progressOnUpliftJourney(validForm.applicationId)(request)
 
