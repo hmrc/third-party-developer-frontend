@@ -276,6 +276,6 @@ class ProtectAccountSpec extends BaseControllerSpec with WithCSRFAddToken with D
     val body = contentAsString(result)
 
     body should include(message)
-    assert(Jsoup.parse(body).getElementsByClass("form-field--error").size == 1)
+    assert(Jsoup.parse(body).getElementsByClass("govuk-form-group--error").size == 1)
   }
 }
