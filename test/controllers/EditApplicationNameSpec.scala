@@ -17,7 +17,6 @@
 package controllers
 
 import java.util.UUID.randomUUID
-
 import builder.DeveloperBuilder
 import config.ErrorHandler
 import domain.models.applications._
@@ -41,6 +40,7 @@ import utils.LocalUserIdTracker
 import builder._
 import controllers.addapplication.AddApplication
 import config.UpliftJourneyConfigProvider
+import views.html.upliftJourney.BeforeYouStartView
 
 class EditApplicationNameSpec 
     extends BaseControllerSpec 

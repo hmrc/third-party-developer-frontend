@@ -32,7 +32,7 @@ import service.{GetProductionCredentialsFlow, GetProductionCredentialsFlowServic
 import uk.gov.hmrc.http.HeaderCarrier
 import utils.WithLoggedInSession._
 import utils.{LocalUserIdTracker, WithCSRFAddToken}
-import views.html.{ConfirmApisView, ResponsibleIndividualView, TurnOffApisMasterView}
+import views.html.upliftJourney.{ConfirmApisView, ResponsibleIndividualView, TurnOffApisMasterView}
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future

@@ -35,12 +35,14 @@ import scala.concurrent.ExecutionContext.Implicits.global
 import utils.LocalUserIdTracker
 import domain.models.controllers.ApplicationSummary
 import builder.ApplicationBuilder
+
 import scala.concurrent.Future
 import play.api.mvc.Result
 import mocks.connector.ApmConnectorMockModule
 import controllers.addapplication.AddApplication
 import builder._
 import config.UpliftJourneyConfigProvider
+import views.html.upliftJourney.BeforeYouStartView
 
 class ChooseApplicationToUpliftActionSpec
     extends BaseControllerSpec 

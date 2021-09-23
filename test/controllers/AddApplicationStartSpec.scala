@@ -41,6 +41,7 @@ import config.OnDemand
 import play.api.mvc.Headers
 import config.Off
 import domain.models.controllers.ApplicationSummary
+import views.html.upliftJourney.BeforeYouStartView
 
 class AddApplicationStartSpec
     extends BaseControllerSpec

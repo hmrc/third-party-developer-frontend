@@ -30,7 +30,7 @@ import play.api.libs.json.Json
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents, Result}
 import service.{ApplicationActionService, ApplicationService, GetProductionCredentialsFlowService, SessionService}
 import views.helper.IdFormatter
-import views.html.{ConfirmApisView, ResponsibleIndividualView, TurnOffApisMasterView}
+import views.html.upliftJourney._
 
 import javax.inject.{Inject, Singleton}
 import scala.concurrent.{ExecutionContext, Future}

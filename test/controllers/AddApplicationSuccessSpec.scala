@@ -40,6 +40,7 @@ import utils.LocalUserIdTracker
 import controllers.addapplication.AddApplication
 import builder._
 import config.UpliftJourneyConfigProvider
+import views.html.upliftJourney.BeforeYouStartView
 
 class AddApplicationSuccessSpec 
     extends BaseControllerSpec 

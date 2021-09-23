@@ -43,6 +43,7 @@ import scala.concurrent.{ExecutionContext, Future}
 import controllers.models.ApiSubscriptionsFlow
 import scala.util.Try
 import config.OnDemand
+import views.html.upliftJourney.BeforeYouStartView
 
 @Singleton
 class AddApplication @Inject() (
