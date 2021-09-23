@@ -15,39 +15,28 @@
  *@
 
 @import domain.models.views.BackButtonWithJavaScript
-@import views.html.include.DevMain
+@import views.html.include.DevMain2
 @import domain.models.developers.DeveloperSession
 
-@this(devMain: DevMain)
+@this(devMain: DevMain2)
 
 @()(implicit request: play.api.mvc.Request[Any], loggedIn: DeveloperSession, appConfig: config.ApplicationConfig, messages: Messages)
 
 @devMain(
-    title = "Protect account",
-    userFullName = loggedIn.loggedInName,
-    back = BackButtonWithJavaScript,
-    isRegistering = true,
-    developerSession = Some(loggedIn)
+  title = "Protect account",
+  userFullName = loggedIn.loggedInName,
+  back = BackButtonWithJavaScript,
+  isRegistering = true,
+  developerSession = Some(loggedIn)
 ) {
-
-    <header>
-        <h1 class="heading-xlarge">Protect your account</h1>
-    </header>
-    <div>
-        @if(loggedIn.session.loggedInState.isPartLoggedInEnablingMFA){
-          <p>Your account has access to sensitive information, for example client secrets.</p>
-        }
-
-        <p>Set up 2-step verification to protect your Developer Hub account and application details from being compromised.</p>
-        <p>You’ll need a new access code every time you sign in.</p>
-        <p>You can get an access code on your smartphone or tablet with an authentication app, even with no mobile reception.</p>
-    </div>
-
-    <div class="form-field-group">
-        <h2 class="heading-large">Before you start</h2>
-        <p>You will need your smartphone or tablet to hand.</p>
-    </div>
-    <div>
-        <a id="submit" class="button" type="submit" href="@controllers.profile.routes.ProtectAccount.getQrCode()">Continue</a>
-    </div>
+  <h1 class="govuk-heading-l">Protect your account</h1>
+  @if(loggedIn.session.loggedInState.isPartLoggedInEnablingMFA){
+    <p class="govuk-body">Your account has access to sensitive information, for example client secrets.</p>
+  }
+  <p class="govuk-body">Set up 2-step verification to protect your Developer Hub account and application details from being compromised.</p>
+  <p class="govuk-body">You’ll need a new access code every time you sign in.</p>
+  <p class="govuk-body">You can get an access code on your smartphone or tablet with an authentication app, even with no mobile reception.</p>
+  <h2 class="govuk-heading-m">Before you start</h2>
+  <p class="govuk-body">You will need your smartphone or tablet to hand.</p>
+  <a id="submit" class="govuk-button" type="submit" href="@controllers.profile.routes.ProtectAccount.getQrCode()">Continue</a>
 }

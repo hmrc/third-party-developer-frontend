@@ -15,45 +15,40 @@
  *@
 
 @import domain.models.views.BackButtonWithJavaScript
-@import views.html.include.DevMain
+@import views.html.include.DevMain2
 @import domain.models.developers.DeveloperSession
 
-@this(devMain: DevMain)
+@this(devMain: DevMain2)
 
 @(secret: String, qrImg: String)(implicit request: play.api.mvc.Request[Any], loggedIn: DeveloperSession, appConfig: config.ApplicationConfig, messages: Messages)
 
 @devMain(
-    title = "Set up your device",
-    userFullName = loggedIn.loggedInName,
-    back = BackButtonWithJavaScript,
-    isRegistering = true,
-    developerSession = Some(loggedIn)
+  title = "Set up your device",
+  userFullName = loggedIn.loggedInName,
+  back = BackButtonWithJavaScript,
+  isRegistering = true,
+  developerSession = Some(loggedIn)
 ) {
-    <header>
-        <h1 class="heading-xlarge">Set up 2-step verification</h1>
-    </header>
-    <div>
-        <ol class="list list-number">
-            <li>On your smartphone or tablet, download an authenticator app from your app store
-            <li>Using the app, scan this code
-            <p><img id="qrCode" alt="QR Code" src="@qrImg"></p>
-            <p>
-                <details>
-                    <summary aria-describedby="setupDevice" aria-label="I cannot scan the QR code" role="button" aria-expanded="false" aria-controls="details-content-0"><u>I cannot scan the QR code</u></summary>
-                    <div class="panel panel-border-narrow" id="details-content-0">
-                        Enter this key into your authenticator app instead
-                        <h1 class="heading-medium" id="secret">@secret</h1>
-                    </div>
-                </details>
-            </p>
-            </li>
-
-            <li>Check the app for your 6 digit access code</li>
-        </ol>
-    </div>
-
-    <div>
-        <a id="submit" class="button" type="submit" href="@controllers.profile.routes.ProtectAccount.getAccessCodePage()">Continue</a>
-    </div>
+  <h1 class="govuk-heading-l">Set up 2-step verification</h1>
+  <ol class="govuk-list govuk-list--number">
+    <li>On your smartphone or tablet, download an authenticator app from your app store
+    <li>
+      Using the app, scan this code
+    </li>
+    <br />
+    <img id="qrCode" alt="QR Code" src="@qrImg">
+    <br />
+    <details class="govuk-details" data-module="govuk-details">
+      <summary class="govuk-details__summary" aria-expanded="false">
+        <span class="govuk-details__summary-text">I cannot scan the QR code</span>
+      </summary>
+      <div class="govuk-details__text">
+        Enter this key into your authenticator app instead
+        <p class="govuk-body-l govuk-!-font-weight-bold" id="secret">@secret</p>
+      </div>
+    </details>
+    <li>Check the app for your 6 digit access code</li>
+  </ol>
+  <a id="submit" class="govuk-button" type="submit" href="@controllers.profile.routes.ProtectAccount.getAccessCodePage()">Continue</a>
 }
 

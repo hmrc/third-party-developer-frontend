@@ -17,24 +17,21 @@
 @import config.ApplicationConfig
 @import domain.models.developers.DeveloperSession
 @import domain.models.views.BackButtonWithJavaScript
-@import views.html.include.DevMain
+@import views.html.include.DevMain2
 
-@this(devMain: DevMain)
+@this(devMain: DevMain2)
 
 @()(implicit request: play.api.mvc.Request[Any], loggedIn: DeveloperSession, messages: Messages, applicationConfig: ApplicationConfig)
 
 @devMain(
-    title = "2-step verification removed",
-    userFullName = loggedIn.loggedInName,
-    back = BackButtonWithJavaScript,
-    developerSession = Some(loggedIn)
+  title = "2-step verification removed",
+  userFullName = loggedIn.loggedInName,
+  back = BackButtonWithJavaScript,
+  developerSession = Some(loggedIn)
 ) {
+  <h1 class="govuk-heading-l">2-step verification removed</h1>
 
-    <h1 class="heading-xlarge">2-step verification removed</h1>
-
-    <p>You can <a href="@controllers.profile.routes.ProtectAccount.getQrCode()">set up 2-step verification</a> at any time.</p>
-
-    <div>
-        <a id="view-all-apps" class="button" type="submit" href="@routes.ManageApplications.manageApps">View all applications</a>
-    </div>
+  <p class="govuk-body">You can <a class="govuk-link" href="@controllers.profile.routes.ProtectAccount.getQrCode()">set up 2-step verification</a> at any time.</p>
+  <br />
+  <a id="view-all-apps" class="govuk-button" type="submit" href="@routes.ManageApplications.manageApps">View all applications</a>
 }
