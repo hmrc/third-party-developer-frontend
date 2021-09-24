@@ -22,17 +22,17 @@ import controllers.checkpages.{CanUseCheckActions, DummySubscriptionsForm}
 import controllers.models.ApiSubscriptionsFlow
 import domain.models.apidefinitions.{APISubscriptionStatus, ApiContext}
 import domain.models.applications.ApplicationId
-import domain.models.applicationuplift.ResponsibleIndividual
+import domain.models.applicationuplift.{ResponsibleIndividual, SellResellOrDistribute}
 import play.api.data.Forms._
 import play.api.data.{Form, FormError}
 import play.api.libs.crypto.CookieSigner
-import play.api.libs.json.Json
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents, Result}
 import service.{ApplicationActionService, ApplicationService, GetProductionCredentialsFlowService, SessionService}
 import views.helper.IdFormatter
 import views.html.upliftJourney._
 
 import javax.inject.{Inject, Singleton}
+import scala.concurrent.Future.successful
 import scala.concurrent.{ExecutionContext, Future}
 
 case class ResponsibleIndividualForm(fullName: String, emailAddress: String)
@@ -43,6 +43,18 @@ object ResponsibleIndividualForm {
       "fullName" -> requiredIndividualFullnameValidator,
       "emailAddress" -> requiredIndividualEmailValidator()
     )(ResponsibleIndividualForm.apply)(ResponsibleIndividualForm.unapply)
+  )
+}
+
+final case class SellResellOrDistributeForm(answer: Option[String] = Some(""))
+
+object SellResellOrDistributeForm {
+
+  def form: Form[SellResellOrDistributeForm] = Form(
+    mapping(
+      "answer" -> optional(text)
+        .verifying(FormKeys.sellResellOrDistributeConfirmNoChoiceKey, s => s.isDefined)
+    )(SellResellOrDistributeForm.apply)(SellResellOrDistributeForm.unapply)
   )
 }
 
@@ -57,14 +69,16 @@ class SR20 @Inject() (val errorHandler: ErrorHandler,
                       turnOffApisMasterView:TurnOffApisMasterView,
                       val apmConnector: ApmConnector,
                       responsibleIndividualView: ResponsibleIndividualView,
-                      flowService: GetProductionCredentialsFlowService)
+                      flowService: GetProductionCredentialsFlowService,
+                      sellResellOrDistributeSoftwareView: SellResellOrDistributeSoftwareView)
                      (implicit val ec: ExecutionContext, val appConfig: ApplicationConfig)
   extends ApplicationController(mcc)
      with CanUseCheckActions{
 
   val responsibleIndividualForm: Form[ResponsibleIndividualForm] = ResponsibleIndividualForm.form
+  val sellResellOrDistributeForm: Form[SellResellOrDistributeForm] = SellResellOrDistributeForm.form
 
-  def confirmApiSubscriptionsPage(sandboxAppId: ApplicationId): Action[AnyContent] = canUseChecksAction(sandboxAppId) { implicit request =>
+  def confirmApiSubscriptionsPage(sandboxAppId: ApplicationId): Action[AnyContent] = whenTeamMemberOnApp(sandboxAppId) { implicit request =>
 
     val flow = ApiSubscriptionsFlow.fromSessionString(request.session.get("subscriptions").getOrElse(""))
 
@@ -88,7 +102,7 @@ class SR20 @Inject() (val errorHandler: ErrorHandler,
     }
   }
 
-  def confirmApiSubscriptionsAction(sandboxAppId: ApplicationId): Action[AnyContent] = canUseChecksAction(sandboxAppId) { implicit request =>
+  def confirmApiSubscriptionsAction(sandboxAppId: ApplicationId): Action[AnyContent] = whenTeamMemberOnApp(sandboxAppId) { implicit request =>
     val flow = ApiSubscriptionsFlow.fromSessionString(request.session.get("subscriptions").getOrElse(""))
     
     for {
@@ -103,12 +117,11 @@ class SR20 @Inject() (val errorHandler: ErrorHandler,
     apiSubscription.copy(subscribed = flow.isSelected(apiSubscription.apiIdentifier))
   }
 
-  def changeApiSubscriptions(sandboxAppId: ApplicationId): Action[AnyContent] = canUseChecksAction(sandboxAppId) { implicit request =>
+  def changeApiSubscriptions(sandboxAppId: ApplicationId): Action[AnyContent] = whenTeamMemberOnApp(sandboxAppId) { implicit request =>
     val flow = ApiSubscriptionsFlow.fromSessionString(request.session.get("subscriptions").getOrElse(""))
     
     for {
       upliftableApiIds <- apmConnector.fetchUpliftableSubscriptions(sandboxAppId)
-      selectedApiIds = upliftableApiIds.filter(flow.isSelected)
       subscriptionsWithFlowAdjusted = request.subscriptions
         .filter(s => upliftableApiIds.contains(s.apiIdentifier))
         .map(setSubscribedStatusFromFlow(flow))
@@ -117,7 +130,7 @@ class SR20 @Inject() (val errorHandler: ErrorHandler,
     }
   }
 
-  def saveApiSubscriptionsSubmit(sandboxAppId: ApplicationId): Action[AnyContent] = canUseChecksAction(sandboxAppId) { implicit request =>
+  def saveApiSubscriptionsSubmit(sandboxAppId: ApplicationId): Action[AnyContent] = whenTeamMemberOnApp(sandboxAppId) { implicit request =>
     lazy val flow = ApiSubscriptionsFlow.fromSessionString(request.session.get("subscriptions").getOrElse(""))
 
     lazy val formSubmittedSubscriptions: Map[String, Boolean] = 
@@ -151,25 +164,53 @@ class SR20 @Inject() (val errorHandler: ErrorHandler,
     }
   }
 
-  def responsibleIndividual(sandboxAppId: ApplicationId): Action[AnyContent] = canUseChecksAction(sandboxAppId) { implicit request =>
+  def responsibleIndividual(sandboxAppId: ApplicationId): Action[AnyContent] = whenTeamMemberOnApp(sandboxAppId) { implicit request =>
     for {
       flow <- flowService.fetchFlow(request.user)
-      form = flow.responsibleIndividual.fold[Form[ResponsibleIndividualForm]](ResponsibleIndividualForm.form)(x => ResponsibleIndividualForm.form.fill(ResponsibleIndividualForm(x.fullName, x.emailAddress)))
+      form = flow.responsibleIndividual.fold[Form[ResponsibleIndividualForm]](responsibleIndividualForm)(x => responsibleIndividualForm.fill(ResponsibleIndividualForm(x.fullName, x.emailAddress)))
     } yield Ok(responsibleIndividualView(sandboxAppId, form))
   }
 
-  def responsibleIndividualAction(sandboxAppId: ApplicationId): Action[AnyContent] = canUseChecksAction(sandboxAppId) { implicit request =>
+  def responsibleIndividualAction(sandboxAppId: ApplicationId): Action[AnyContent] = whenTeamMemberOnApp(sandboxAppId) { implicit request =>
 
     def handleValidForm(form: ResponsibleIndividualForm): Future[Result] = {
       val responsibleIndividual = ResponsibleIndividual(form.fullName, form.emailAddress)
       flowService.storeResponsibleIndividual(responsibleIndividual, request.user)
-      .map(_ => Ok(Json.toJson("WORKING")))
+      .map(_ => Redirect(controllers.routes.SR20.sellResellOrDistributeYourSoftware(sandboxAppId)))
     }
     
     def handleInvalidForm(form: Form[ResponsibleIndividualForm]): Future[Result] = {
-      Future.successful(BadRequest(responsibleIndividualView(sandboxAppId, form)))
+      successful(BadRequest(responsibleIndividualView(sandboxAppId, form)))
     }
 
-    ResponsibleIndividualForm.form.bindFromRequest.fold(handleInvalidForm, handleValidForm)
+    responsibleIndividualForm.bindFromRequest.fold(handleInvalidForm, handleValidForm)
+  }
+
+  def sellResellOrDistributeYourSoftware(sandboxAppId: ApplicationId): Action[AnyContent] = whenTeamMemberOnApp(sandboxAppId) { implicit request =>
+    successful(Ok(sellResellOrDistributeSoftwareView(sandboxAppId, sellResellOrDistributeForm)))
+  }
+
+  def sellResellOrDistributeYourSoftwareAction(sandboxAppId: ApplicationId): Action[AnyContent] = whenTeamMemberOnApp(sandboxAppId) { implicit request =>
+
+    def handleInvalidForm(formWithErrors: Form[SellResellOrDistributeForm]) =
+      Future(BadRequest(sellResellOrDistributeSoftwareView(sandboxAppId, formWithErrors)))
+
+    def handleValidForm(validForm: SellResellOrDistributeForm) = {
+      validForm.answer match {
+        case Some(answer) =>
+          flowService.storeSellResellOrDistribute(SellResellOrDistribute(answer), request.user)
+            .flatMap(_ =>
+                for {
+                  upliftableSubscriptions <- apmConnector.fetchUpliftableSubscriptions(sandboxAppId)
+                }
+                yield {
+                  val sessionSubscriptions = ApiSubscriptionsFlow.allOf(upliftableSubscriptions)
+                  Redirect(controllers.routes.SR20.confirmApiSubscriptionsPage(sandboxAppId))
+                    .withSession(request.session + ("subscriptions" -> ApiSubscriptionsFlow.toSessionString(sessionSubscriptions)))
+                }
+            )
+      }
+    }
+    sellResellOrDistributeForm.bindFromRequest.fold(handleInvalidForm, handleValidForm)
   }
 }

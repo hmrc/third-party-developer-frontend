@@ -21,13 +21,14 @@ import javax.inject.{Inject, Singleton}
 import repositories.FlowRepository
 
 import scala.concurrent.{ExecutionContext, Future}
-import domain.models.applicationuplift.ResponsibleIndividual
+import domain.models.applicationuplift._
 import domain.models.flows.{Flow, FlowType}
 import cats.implicits._
 
 case class GetProductionCredentialsFlow(
   val sessionId: String,
-  responsibleIndividual: Option[ResponsibleIndividual]
+  responsibleIndividual: Option[ResponsibleIndividual],
+  sellResellOrDistribute: Option[SellResellOrDistribute]
 ) extends Flow {
   val flowType: FlowType = FlowType.GET_PRODUCTION_CREDENTIALS
 }
@@ -36,7 +37,7 @@ object GetProductionCredentialsFlow {
   import play.api.libs.json.Json
   implicit val format = Json.format[GetProductionCredentialsFlow]
 
-  def create(sessionId: String): GetProductionCredentialsFlow = GetProductionCredentialsFlow(sessionId, None)
+  def create(sessionId: String): GetProductionCredentialsFlow = GetProductionCredentialsFlow(sessionId, None, None)
 }
 
 @Singleton
@@ -55,6 +56,13 @@ class GetProductionCredentialsFlowService @Inject()(
     for {
       existingFlow <- fetchFlow(developerSession)
       savedFlow    <- flowRepository.saveFlow[GetProductionCredentialsFlow](existingFlow.copy(responsibleIndividual = Some(newResponsibleIndividual)))
+    } yield savedFlow
+  }
+
+  def storeSellResellOrDistribute(sellResellOrDistribute: SellResellOrDistribute, developerSession: DeveloperSession): Future[GetProductionCredentialsFlow] = {
+    for {
+      existingFlow <- fetchFlow(developerSession)
+      savedFlow    <- flowRepository.saveFlow[GetProductionCredentialsFlow](existingFlow.copy(sellResellOrDistribute = Some(sellResellOrDistribute)))
     } yield savedFlow
   }
 }
