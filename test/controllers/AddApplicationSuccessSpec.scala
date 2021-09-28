@@ -41,6 +41,7 @@ import controllers.addapplication.AddApplication
 import builder._
 import config.UpliftJourneyConfigProvider
 import views.html.upliftJourney.BeforeYouStartView
+import service.GetProductionCredentialsFlowService
 
 class AddApplicationSuccessSpec 
     extends BaseControllerSpec 
@@ -93,6 +94,8 @@ class AddApplicationSuccessSpec
     val beforeYouStartView: BeforeYouStartView = app.injector.instanceOf[BeforeYouStartView]
     val upliftJourneyConfigProviderMock = mock[UpliftJourneyConfigProvider]
 
+    val flowServiceMock = mock[GetProductionCredentialsFlowService]
+
     val underTest = new AddApplication(
       mock[ErrorHandler],
       applicationServiceMock,
@@ -113,7 +116,8 @@ class AddApplicationSuccessSpec
       addApplicationNameView,
       chooseApplicationToUpliftView,
       upliftJourneyConfigProviderMock,
-      beforeYouStartView
+      beforeYouStartView,
+      flowServiceMock
     )
 
     implicit val hc = HeaderCarrier()

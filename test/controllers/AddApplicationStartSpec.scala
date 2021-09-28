@@ -42,6 +42,7 @@ import play.api.mvc.Headers
 import config.Off
 import domain.models.controllers.ApplicationSummary
 import views.html.upliftJourney.BeforeYouStartView
+import service.GetProductionCredentialsFlowService
 
 class AddApplicationStartSpec
     extends BaseControllerSpec
@@ -70,6 +71,8 @@ class AddApplicationStartSpec
     val beforeYouStartView: BeforeYouStartView = app.injector.instanceOf[BeforeYouStartView]
     val upliftJourneyConfigProviderMock = mock[UpliftJourneyConfigProvider]
 
+    val flowServiceMock = mock[GetProductionCredentialsFlowService]
+
     implicit val environmentNameService = new EnvironmentNameService(appConfig)
 
     val underTest = new AddApplication(
@@ -92,7 +95,8 @@ class AddApplicationStartSpec
       addApplicationNameView,
       chooseApplicationToUpliftView,
       upliftJourneyConfigProviderMock,
-      beforeYouStartView
+      beforeYouStartView,
+      flowServiceMock
     )
 
     val hc = HeaderCarrier()

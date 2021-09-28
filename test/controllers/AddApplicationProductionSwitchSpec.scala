@@ -23,7 +23,7 @@ import mocks.service._
 import play.api.mvc.AnyContentAsEmpty
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
-import service.AuditService
+import service.{AuditService, GetProductionCredentialsFlow, GetProductionCredentialsFlowService}
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.time.DateTimeUtils
 import utils._
@@ -73,6 +73,8 @@ class AddApplicationProductionSwitchSpec
     val beforeYouStartView: BeforeYouStartView = app.injector.instanceOf[BeforeYouStartView]
     val upliftJourneyConfigProviderMock = mock[UpliftJourneyConfigProvider]
 
+    val flowServiceMock = mock[GetProductionCredentialsFlowService]
+
     implicit val environmentNameService = new EnvironmentNameService(appConfig)
 
     val underTest = new AddApplication(
@@ -95,7 +97,8 @@ class AddApplicationProductionSwitchSpec
       addApplicationNameView,
       chooseApplicationToUpliftView,
       upliftJourneyConfigProviderMock,
-      beforeYouStartView
+      beforeYouStartView,
+      flowServiceMock
     )
     val hc = HeaderCarrier()
 
@@ -152,6 +155,8 @@ class AddApplicationProductionSwitchSpec
       val subsetOfSubscriptions = summaries.head.subscriptionIds.take(1)
       ApmConnectorMock.FetchUpliftableSubscriptions.willReturn(subsetOfSubscriptions)
       aUsersUplfitableAndNotUpliftableAppsReturns(summaries, summaries.map(_.id))
+      when(flowServiceMock.storeApiSubscriptions(*, *)).thenReturn(Future.successful(GetProductionCredentialsFlow("", None, None, None)))
+
 
       val result = underTest.addApplicationProductionSwitch()(loggedInRequest)
 

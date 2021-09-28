@@ -17,10 +17,9 @@
 package controllers
 
 import builder._
-import controllers.models.ApiSubscriptionsFlow
 import domain.models.apidefinitions._
 import domain.models.applications.{Application, ApplicationState, ApplicationWithSubscriptionData, Environment}
-import domain.models.applicationuplift.{ResponsibleIndividual, SellResellOrDistribute}
+import domain.models.applicationuplift.{ApiSubscriptions, ResponsibleIndividual, SellResellOrDistribute}
 import domain.models.developers.{DeveloperSession, LoggedInState, Session}
 import domain.models.subscriptions.{ApiCategory, ApiData, VersionData}
 import mocks.connector.ApmConnectorMockModule
@@ -144,11 +143,14 @@ class SR20Spec extends BaseControllerSpec
 
     "render the confirm apis view containing 1 upliftable api as there is only 1 upliftable api available to the application" in new Setup {
 
-      val testFlow = ApiSubscriptionsFlow(Map(apiIdentifier1 -> true))
-      val sessionSubscriptions = "subscriptions" -> ApiSubscriptionsFlow.toSessionString(testFlow)
+      val testFlow = ApiSubscriptions(Map(apiIdentifier1 -> true))
+
+      when(flowServiceMock.fetchFlow(*)).thenReturn(Future.successful(GetProductionCredentialsFlow("", None, None,
+        Some(testFlow))))
+
       ApmConnectorMock.FetchUpliftableSubscriptions.willReturn(Set(apiIdentifier1))
 
-      private val result = controller.confirmApiSubscriptionsPage(appId)(loggedInRequest.withCSRFToken.withSession(sessionSubscriptions))
+      private val result = controller.confirmApiSubscriptionsPage(appId)(loggedInRequest.withCSRFToken)
 
       status(result) shouldBe OK
 
@@ -157,11 +159,14 @@ class SR20Spec extends BaseControllerSpec
 
     "render the confirm apis view without the 'Change my API subscriptions' link as there is only 1 upliftable api available to the application" in new Setup {
 
-      val testFlow = ApiSubscriptionsFlow(Map(apiIdentifier1 -> true))
-      val sessionSubscriptions = "subscriptions" -> ApiSubscriptionsFlow.toSessionString(testFlow)
+      val testFlow = ApiSubscriptions(Map(apiIdentifier1 -> true))
+
+      when(flowServiceMock.fetchFlow(*)).thenReturn(Future.successful(GetProductionCredentialsFlow("", None, None,
+        Some(testFlow))))
+
       ApmConnectorMock.FetchUpliftableSubscriptions.willReturn(Set(apiIdentifier1))
 
-      private val result = controller.confirmApiSubscriptionsPage(appId)(loggedInRequest.withCSRFToken.withSession(sessionSubscriptions))
+      private val result = controller.confirmApiSubscriptionsPage(appId)(loggedInRequest.withCSRFToken)
 
       status(result) shouldBe OK
 
@@ -170,8 +175,10 @@ class SR20Spec extends BaseControllerSpec
 
     "render the confirm apis view with the 'Change my API subscriptions' link as there is more than 1 upliftable api available to the application" in new Setup {
 
-      val testFlow = ApiSubscriptionsFlow(Map(apiIdentifier1 -> true, apiIdentifier2 -> true))
-      val sessionSubscriptions = "subscriptions" -> ApiSubscriptionsFlow.toSessionString(testFlow)
+      val testFlow = ApiSubscriptions(Map(apiIdentifier1 -> true, apiIdentifier2 -> true))
+
+      when(flowServiceMock.fetchFlow(*)).thenReturn(Future.successful(GetProductionCredentialsFlow("", None, None,
+        Some(testFlow))))
 
       val apiIdentifiers = Set(
         ApiIdentifier(ApiContext("test-api-context-1"), ApiVersion("1.0")),
@@ -179,7 +186,7 @@ class SR20Spec extends BaseControllerSpec
       )
       ApmConnectorMock.FetchUpliftableSubscriptions.willReturn(apiIdentifiers)
 
-      private val result = controller.confirmApiSubscriptionsPage(appId)(loggedInRequest.withCSRFToken.withSession(sessionSubscriptions))
+      private val result = controller.confirmApiSubscriptionsPage(appId)(loggedInRequest.withCSRFToken)
 
       status(result) shouldBe OK
 
@@ -207,7 +214,7 @@ class SR20Spec extends BaseControllerSpec
 
       when(flowServiceMock.fetchFlow(*)).thenReturn(
         Future.successful(GetProductionCredentialsFlow("",
-          Some(ResponsibleIndividual("test full name", "test email address")), None, None, None)))
+          Some(ResponsibleIndividual("test full name", "test email address")), None, None)))
 
       ApmConnectorMock.FetchUpliftableSubscriptions.willReturn(Set(apiIdentifier1))
 
@@ -357,6 +364,7 @@ class SR20Spec extends BaseControllerSpec
       val testSellResellOrDistribute = SellResellOrDistribute("Yes")
 
       when(flowServiceMock.storeSellResellOrDistribute(*, *)).thenReturn(Future.successful(GetProductionCredentialsFlow("", None, None, None)))
+      when(flowServiceMock.storeApiSubscriptions(*, *)).thenReturn(Future.successful(GetProductionCredentialsFlow("", None, None, None)))
 
       ApmConnectorMock.FetchUpliftableSubscriptions.willReturn(Set(apiIdentifier1))
 
@@ -375,6 +383,7 @@ class SR20Spec extends BaseControllerSpec
       val testSellResellOrDistribute = SellResellOrDistribute("No")
 
       when(flowServiceMock.storeSellResellOrDistribute(*, *)).thenReturn(Future.successful(GetProductionCredentialsFlow("", None, None, None)))
+      when(flowServiceMock.storeApiSubscriptions(*, *)).thenReturn(Future.successful(GetProductionCredentialsFlow("", None, None, None)))
 
       ApmConnectorMock.FetchUpliftableSubscriptions.willReturn(Set(apiIdentifier1))
 

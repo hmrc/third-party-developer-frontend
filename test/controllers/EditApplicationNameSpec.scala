@@ -41,6 +41,7 @@ import builder._
 import controllers.addapplication.AddApplication
 import config.UpliftJourneyConfigProvider
 import views.html.upliftJourney.BeforeYouStartView
+import service.GetProductionCredentialsFlowService
 
 class EditApplicationNameSpec 
     extends BaseControllerSpec 
@@ -67,6 +68,8 @@ class EditApplicationNameSpec
     val beforeYouStartView: BeforeYouStartView = app.injector.instanceOf[BeforeYouStartView]
     val upliftJourneyConfigProviderMock = mock[UpliftJourneyConfigProvider]
 
+    val flowServiceMock = mock[GetProductionCredentialsFlowService]
+
     implicit val environmentNameService = new EnvironmentNameService(appConfig)
 
     val underTest = new AddApplication(
@@ -89,7 +92,8 @@ class EditApplicationNameSpec
       addApplicationNameView,
       chooseApplicationToUpliftView,
       upliftJourneyConfigProviderMock,
-      beforeYouStartView
+      beforeYouStartView,
+      flowServiceMock
     )
 
     implicit val hc: HeaderCarrier = HeaderCarrier()
