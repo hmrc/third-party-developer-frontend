@@ -191,7 +191,7 @@ class SR20Spec extends BaseControllerSpec
 
     "initially render the 'responsible individual view' unpopulated" in new Setup {
 
-      when(flowServiceMock.fetchFlow(*)).thenReturn(Future.successful(GetProductionCredentialsFlow("", None, None)))
+      when(flowServiceMock.fetchFlow(*)).thenReturn(Future.successful(GetProductionCredentialsFlow("", None, None, None)))
       ApmConnectorMock.FetchUpliftableSubscriptions.willReturn(Set(apiIdentifier1))
 
       private val result = controller.responsibleIndividual(appId)(loggedInRequest.withCSRFToken)
@@ -207,7 +207,7 @@ class SR20Spec extends BaseControllerSpec
 
       when(flowServiceMock.fetchFlow(*)).thenReturn(
         Future.successful(GetProductionCredentialsFlow("",
-          Some(ResponsibleIndividual("test full name", "test email address")), None)))
+          Some(ResponsibleIndividual("test full name", "test email address")), None, None, None)))
 
       ApmConnectorMock.FetchUpliftableSubscriptions.willReturn(Set(apiIdentifier1))
 
@@ -288,7 +288,7 @@ class SR20Spec extends BaseControllerSpec
 
       val testResponsibleIndividual = ResponsibleIndividual("test user", "test.user@example.com")
 
-      when(flowServiceMock.storeResponsibleIndividual(*, *)).thenReturn(Future.successful(GetProductionCredentialsFlow("", None, None)))
+      when(flowServiceMock.storeResponsibleIndividual(*, *)).thenReturn(Future.successful(GetProductionCredentialsFlow("", None, None, None)))
 
       ApmConnectorMock.FetchUpliftableSubscriptions.willReturn(Set(apiIdentifier1))
 
@@ -356,7 +356,7 @@ class SR20Spec extends BaseControllerSpec
 
       val testSellResellOrDistribute = SellResellOrDistribute("Yes")
 
-      when(flowServiceMock.storeSellResellOrDistribute(*, *)).thenReturn(Future.successful(GetProductionCredentialsFlow("", None, None)))
+      when(flowServiceMock.storeSellResellOrDistribute(*, *)).thenReturn(Future.successful(GetProductionCredentialsFlow("", None, None, None)))
 
       ApmConnectorMock.FetchUpliftableSubscriptions.willReturn(Set(apiIdentifier1))
 
@@ -374,7 +374,7 @@ class SR20Spec extends BaseControllerSpec
 
       val testSellResellOrDistribute = SellResellOrDistribute("No")
 
-      when(flowServiceMock.storeSellResellOrDistribute(*, *)).thenReturn(Future.successful(GetProductionCredentialsFlow("", None, None)))
+      when(flowServiceMock.storeSellResellOrDistribute(*, *)).thenReturn(Future.successful(GetProductionCredentialsFlow("", None, None, None)))
 
       ApmConnectorMock.FetchUpliftableSubscriptions.willReturn(Set(apiIdentifier1))
 

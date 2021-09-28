@@ -20,9 +20,11 @@ import config.{ApplicationConfig, ErrorHandler, UpliftJourneyConfigProvider, On}
 import connectors.ApmConnector
 import controllers.{AddApplicationNameForm, ApplicationController, ChooseApplicationToUpliftForm}
 import controllers.FormKeys.appNameField
+import controllers.UserRequest
 import domain.ApplicationCreatedResponse
 import domain.Error._
 import domain.models.apidefinitions.APISubscriptionStatus
+import domain.models.applicationuplift._
 import domain.models.applications.Environment.{PRODUCTION, SANDBOX}
 import domain.models.applications._
 import domain.models.controllers.ApplicationSummary
@@ -30,7 +32,7 @@ import domain.models.emailpreferences.EmailPreferences
 import play.api.data.Form
 import play.api.libs.crypto.CookieSigner
 import play.api.libs.json.Json
-import play.api.mvc.{Action, AnyContent, MessagesControllerComponents, Request}
+import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
 import service._
 import services.UpliftLogic
 import uk.gov.hmrc.http.HeaderCarrier
@@ -40,10 +42,10 @@ import views.html._
 import javax.inject.{Inject, Singleton}
 import scala.concurrent.Future.successful
 import scala.concurrent.{ExecutionContext, Future}
-import controllers.models.ApiSubscriptionsFlow
 import scala.util.Try
 import config.OnDemand
 import views.html.upliftJourney.BeforeYouStartView
+import controllers.UserRequest
 
 @Singleton
 class AddApplication @Inject() (
@@ -66,7 +68,8 @@ class AddApplication @Inject() (
     addApplicationNameView: AddApplicationNameView,
     chooseApplicationToUpliftView: ChooseApplicationToUpliftView,
     upliftJourneyConfigProvider: UpliftJourneyConfigProvider,
-    beforeYouStartView: BeforeYouStartView
+    beforeYouStartView: BeforeYouStartView,
+    flowService: GetProductionCredentialsFlowService
 )(implicit val ec: ExecutionContext, val appConfig: ApplicationConfig, val environmentNameService: EnvironmentNameService)
     extends ApplicationController(mcc) {
 
@@ -110,12 +113,12 @@ class AddApplication @Inject() (
     def upliftJourneyTurnedOnInRequestHeader: Boolean =
       request.headers.get("useNewUpliftJourney").fold(false) { setting =>
         Try(setting.toBoolean).getOrElse(false)
-      }
+        }
 
     upliftJourneyConfigProvider.status match {
       case On => successful(Ok(beforeYouStartView(sandboxAppId)))
       case OnDemand if upliftJourneyTurnedOnInRequestHeader => successful(Ok(beforeYouStartView(sandboxAppId)))
-      case _ => showConfirmSubscriptionsPage(sandboxAppId)
+      case _ => showConfirmSubscriptionsPage(sandboxAppId)(request)
     }
   }
 
@@ -153,14 +156,14 @@ class AddApplication @Inject() (
     }
   }
   
-  private def showConfirmSubscriptionsPage(sandboxAppId: ApplicationId)(implicit request: Request[_]) = {
+  private def showConfirmSubscriptionsPage(sandboxAppId: ApplicationId)(implicit request: UserRequest[_]) = {
     for {
       upliftableSubscriptions <- apmConnector.fetchUpliftableSubscriptions(sandboxAppId)
+      apiSubscriptions         = ApiSubscriptions(upliftableSubscriptions.map(id => (id, true)).toMap)
+      _ <- flowService.storeApiSubscriptions(apiSubscriptions, request.developerSession)
     }
     yield {
-      val sessionSubscriptions = ApiSubscriptionsFlow.allOf(upliftableSubscriptions)
       Redirect(controllers.routes.SR20.confirmApiSubscriptionsPage(sandboxAppId))
-      .withSession(request.session + ("subscriptions" -> ApiSubscriptionsFlow.toSessionString(sessionSubscriptions)))
     }
   }
 

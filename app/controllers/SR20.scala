@@ -19,10 +19,9 @@ package controllers
 import config.{ApplicationConfig, ErrorHandler}
 import connectors.ApmConnector
 import controllers.checkpages.{CanUseCheckActions, DummySubscriptionsForm}
-import controllers.models.ApiSubscriptionsFlow
 import domain.models.apidefinitions.{APISubscriptionStatus, ApiContext}
 import domain.models.applications.ApplicationId
-import domain.models.applicationuplift.{ResponsibleIndividual, SellResellOrDistribute}
+import domain.models.applicationuplift.{ApiSubscriptions, ResponsibleIndividual, SellResellOrDistribute}
 import play.api.data.Forms._
 import play.api.data.{Form, FormError}
 import play.api.libs.crypto.CookieSigner
@@ -80,8 +79,6 @@ class SR20 @Inject() (val errorHandler: ErrorHandler,
 
   def confirmApiSubscriptionsPage(sandboxAppId: ApplicationId): Action[AnyContent] = whenTeamMemberOnApp(sandboxAppId) { implicit request =>
 
-    val flow = ApiSubscriptionsFlow.fromSessionString(request.session.get("subscriptions").getOrElse(""))
-
     def getApiNameForContext(apiContext: ApiContext) =
       request.subscriptions
       .find(_.context == apiContext )
@@ -89,10 +86,12 @@ class SR20 @Inject() (val errorHandler: ErrorHandler,
 
     for {
       upliftableApiIds <- apmConnector.fetchUpliftableSubscriptions(sandboxAppId)
+      flow <- flowService.fetchFlow(request.user)
+      subscriptionFlow = flow.apiSubscriptions.getOrElse(ApiSubscriptions())
     }
     yield {
-      val data = (for {
-        subscription <- upliftableApiIds.filter(flow.isSelected)
+      val data: Set[String] = (for {
+        subscription <- upliftableApiIds.filter(subscriptionFlow.isSelected)
         name <- getApiNameForContext(subscription.context)
       }
       yield {
@@ -103,36 +102,34 @@ class SR20 @Inject() (val errorHandler: ErrorHandler,
   }
 
   def confirmApiSubscriptionsAction(sandboxAppId: ApplicationId): Action[AnyContent] = whenTeamMemberOnApp(sandboxAppId) { implicit request =>
-    val flow = ApiSubscriptionsFlow.fromSessionString(request.session.get("subscriptions").getOrElse(""))
-    
     for {
-      apiIdsToSubscribeTo <- apmConnector.fetchUpliftableSubscriptions(sandboxAppId).map(_.filter(flow.isSelected))
+      flow <- flowService.fetchFlow(request.user)
+      subscriptionFlow = flow.apiSubscriptions.getOrElse(ApiSubscriptions())
+      apiIdsToSubscribeTo <- apmConnector.fetchUpliftableSubscriptions(sandboxAppId).map(_.filter(subscriptionFlow.isSelected))
       upliftedAppId <- apmConnector.upliftApplication(sandboxAppId,apiIdsToSubscribeTo)
     } yield {
       Redirect(controllers.checkpages.routes.ApplicationCheck.requestCheckPage(upliftedAppId)).withSession(request.session - "subscriptions")
     }
   }
 
-  def setSubscribedStatusFromFlow(flow: ApiSubscriptionsFlow)(apiSubscription: APISubscriptionStatus): APISubscriptionStatus = {
-    apiSubscription.copy(subscribed = flow.isSelected(apiSubscription.apiIdentifier))
+  def setSubscribedStatusFromFlow(apiSubscriptions: ApiSubscriptions)(apiSubscription: APISubscriptionStatus): APISubscriptionStatus = {
+    apiSubscription.copy(subscribed = apiSubscriptions.isSelected(apiSubscription.apiIdentifier))
   }
 
-  def changeApiSubscriptions(sandboxAppId: ApplicationId): Action[AnyContent] = whenTeamMemberOnApp(sandboxAppId) { implicit request =>
-    val flow = ApiSubscriptionsFlow.fromSessionString(request.session.get("subscriptions").getOrElse(""))
-    
+  def changeApiSubscriptions(sandboxAppId: ApplicationId): Action[AnyContent] = whenTeamMemberOnApp(sandboxAppId) { implicit request =>    
     for {
+      flow <- flowService.fetchFlow(request.user)
+      subscriptionFlow = flow.apiSubscriptions.getOrElse(ApiSubscriptions())
       upliftableApiIds <- apmConnector.fetchUpliftableSubscriptions(sandboxAppId)
       subscriptionsWithFlowAdjusted = request.subscriptions
         .filter(s => upliftableApiIds.contains(s.apiIdentifier))
-        .map(setSubscribedStatusFromFlow(flow))
+        .map(setSubscribedStatusFromFlow(subscriptionFlow))
     } yield {
       Ok(turnOffApisMasterView(request.application.id, request.role, APISubscriptions.groupSubscriptionsByServiceName(subscriptionsWithFlowAdjusted), DummySubscriptionsForm.form))
     }
   }
 
-  def saveApiSubscriptionsSubmit(sandboxAppId: ApplicationId): Action[AnyContent] = whenTeamMemberOnApp(sandboxAppId) { implicit request =>
-    lazy val flow = ApiSubscriptionsFlow.fromSessionString(request.session.get("subscriptions").getOrElse(""))
-
+  def saveApiSubscriptionsSubmit(sandboxAppId: ApplicationId) = whenTeamMemberOnApp(sandboxAppId) { implicit request =>
     lazy val formSubmittedSubscriptions: Map[String, Boolean] = 
       request.body.asFormUrlEncoded.get
       .filter(_._1.contains("subscribed"))
@@ -141,25 +138,25 @@ class SR20 @Inject() (val errorHandler: ErrorHandler,
         case (name, isSubscribed) => (name.replace("-subscribed", "") -> isSubscribed)
       }
 
-    apmConnector.fetchUpliftableSubscriptions(sandboxAppId).map { upliftableApiIds =>
+    apmConnector.fetchUpliftableSubscriptions(sandboxAppId).flatMap { upliftableApiIds =>
       val apiLookups = upliftableApiIds.map( id => IdFormatter.identifier(id) -> id ).toMap
-      val newFlow = ApiSubscriptionsFlow(formSubmittedSubscriptions.map {
+      val newFlow = ApiSubscriptions(formSubmittedSubscriptions.map {
         case (id, onOff) => apiLookups(id) -> onOff
       })
 
       if (formSubmittedSubscriptions.exists(_._2 == true)) {
-        Redirect(controllers.routes.SR20.confirmApiSubscriptionsPage(sandboxAppId))
-          .withSession(request.session + ("subscriptions" -> ApiSubscriptionsFlow.toSessionString(newFlow)))
+        flowService.storeApiSubscriptions(newFlow, request.user)
+        .map(_ => Redirect(controllers.routes.SR20.confirmApiSubscriptionsPage(sandboxAppId)))
       }
       else {
         val errorForm = DummySubscriptionsForm.form.withError(FormError("apiSubscriptions", "error.turnoffapis.requires.at.least.one"))
-
-        val sandboxSubscribedApis = request.subscriptions
-            .filter(s => upliftableApiIds.contains(s.apiIdentifier))
-            .map(setSubscribedStatusFromFlow(newFlow))
-
-        Ok(turnOffApisMasterView(request.application.id, request.role, APISubscriptions.groupSubscriptionsByServiceName(sandboxSubscribedApis), errorForm))
-        .withSession(request.session + ("subscriptions" -> ApiSubscriptionsFlow.toSessionString(flow)))
+        for {
+          flow                  <- flowService.fetchFlow(request.user)
+          subscriptionFlow       = flow.apiSubscriptions.getOrElse(ApiSubscriptions())
+          sandboxSubscribedApis  = request.subscriptions.filter(s => upliftableApiIds.contains(s.apiIdentifier))
+                                   .map(setSubscribedStatusFromFlow(subscriptionFlow))
+        } yield            
+          Ok(turnOffApisMasterView(request.application.id, request.role, APISubscriptions.groupSubscriptionsByServiceName(sandboxSubscribedApis), errorForm))
       }
     }
   }
@@ -202,13 +199,14 @@ class SR20 @Inject() (val errorHandler: ErrorHandler,
             .flatMap(_ =>
                 for {
                   upliftableSubscriptions <- apmConnector.fetchUpliftableSubscriptions(sandboxAppId)
+                  apiSubscriptions         = ApiSubscriptions(upliftableSubscriptions.map(id => (id, true)).toMap)
+                  _ <- flowService.storeApiSubscriptions(apiSubscriptions, request.user)
                 }
                 yield {
-                  val sessionSubscriptions = ApiSubscriptionsFlow.allOf(upliftableSubscriptions)
                   Redirect(controllers.routes.SR20.confirmApiSubscriptionsPage(sandboxAppId))
-                    .withSession(request.session + ("subscriptions" -> ApiSubscriptionsFlow.toSessionString(sessionSubscriptions)))
                 }
             )
+        case None => throw new IllegalStateException("Should never get here")
       }
     }
     sellResellOrDistributeForm.bindFromRequest.fold(handleInvalidForm, handleValidForm)
