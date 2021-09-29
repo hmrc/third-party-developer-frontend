@@ -116,7 +116,7 @@ class SR20 @Inject() (val errorHandler: ErrorHandler,
     apiSubscription.copy(subscribed = apiSubscriptions.isSelected(apiSubscription.apiIdentifier))
   }
 
-  def changeApiSubscriptions(sandboxAppId: ApplicationId): Action[AnyContent] = whenTeamMemberOnApp(sandboxAppId) { implicit request =>    
+  def changeApiSubscriptions(sandboxAppId: ApplicationId): Action[AnyContent] = whenTeamMemberOnApp(sandboxAppId) { implicit request =>
     for {
       flow <- flowService.fetchFlow(request.user)
       subscriptionFlow = flow.apiSubscriptions.getOrElse(ApiSubscriptions())
@@ -130,6 +130,7 @@ class SR20 @Inject() (val errorHandler: ErrorHandler,
   }
 
   def saveApiSubscriptionsSubmit(sandboxAppId: ApplicationId) = whenTeamMemberOnApp(sandboxAppId) { implicit request =>
+
     lazy val formSubmittedSubscriptions: Map[String, Boolean] = 
       request.body.asFormUrlEncoded.get
       .filter(_._1.contains("subscribed"))
