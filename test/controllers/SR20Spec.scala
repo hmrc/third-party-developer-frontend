@@ -35,6 +35,7 @@ import views.html.upliftJourney.{ConfirmApisView, ResponsibleIndividualView, Sel
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
+import org.jsoup.Jsoup
 
 class SR20Spec extends BaseControllerSpec
                 with SampleSession
@@ -314,6 +315,8 @@ class SR20Spec extends BaseControllerSpec
 
     "initially render the 'sell resell or distribute your software view' with choices unselected" in new Setup {
 
+      when(flowServiceMock.fetchFlow(*)).thenReturn(Future.successful(GetProductionCredentialsFlow("", None, None, None)))
+
       private val result = controller.sellResellOrDistributeYourSoftware(appId)(loggedInRequest.withCSRFToken)
 
       status(result) shouldBe OK
@@ -321,31 +324,35 @@ class SR20Spec extends BaseControllerSpec
       contentAsString(result) should include("Will you sell, resell or distribute your software?")
     }
 
-//    "render the 'sell resell or distribute your software view' with the answer 'Yes' selected" in new Setup {
-//
-//      when(flowServiceMock.fetchFlow(*)).thenReturn(
-//        Future.successful(GetProductionCredentialsFlow("1234", None,
-//          Some(SellResellOrDistribute("Yes")))))
-//
-//      private val result = controller.sellResellOrDistributeYourSoftware(appId)(loggedInRequest.withCSRFToken)
-//
-//      status(result) shouldBe OK
-//
-//      contentAsString(result) should include("Will you sell, resell or distribute your software?")
-//    }
+   "render the 'sell resell or distribute your software view' with the answer 'Yes' selected" in new Setup {
 
-//    "render the 'sell resell or distribute your software view' with the answer 'No' selected" in new Setup {
-//
-//      when(flowServiceMock.fetchFlow(*)).thenReturn(
-//        Future.successful(GetProductionCredentialsFlow("1234", None,
-//          Some(SellResellOrDistribute("No")))))
-//
-//      private val result = controller.sellResellOrDistributeYourSoftware(appId)(loggedInRequest.withCSRFToken)
-//
-//      status(result) shouldBe OK
-//
-//      contentAsString(result) should include("Will you sell, resell or distribute your software?")
-//    }
+     when(flowServiceMock.fetchFlow(*)).thenReturn(Future.successful(GetProductionCredentialsFlow("", None, Some(SellResellOrDistribute("Yes")), None)))
+
+     private val result = controller.sellResellOrDistributeYourSoftware(appId)(loggedInRequest.withCSRFToken)
+
+     status(result) shouldBe OK
+
+     contentAsString(result) should include("Will you sell, resell or distribute your software?")
+
+     val document = Jsoup.parse(contentAsString(result))
+     document.getElementById("distribute-question-yes") shouldNot be(null)
+     document.getElementById("distribute-question-yes").hasAttr("checked") shouldBe true
+   }
+
+   "render the 'sell resell or distribute your software view' with the answer 'No' selected" in new Setup {
+
+     when(flowServiceMock.fetchFlow(*)).thenReturn(Future.successful(GetProductionCredentialsFlow("", None, Some(SellResellOrDistribute("No")), None)))
+
+     private val result = controller.sellResellOrDistributeYourSoftware(appId)(loggedInRequest.withCSRFToken)
+
+     status(result) shouldBe OK
+
+     contentAsString(result) should include("Will you sell, resell or distribute your software?")
+
+     val document = Jsoup.parse(contentAsString(result))
+     document.getElementById("distribute-question-no") shouldNot be(null)
+     document.getElementById("distribute-question-no").hasAttr("checked") shouldBe true
+   }
 
     "render the 'sell resell or distribute your software view' with an error when no selection has been made" in new Setup {
 

@@ -49,13 +49,13 @@
             <div class="govuk-radios govuk-radios--inline">
                 @helper.CSRF.formField
                 <div class="govuk-radios__item">
-                    <input class="govuk-radios__input" id="distribute-question-yes" name="answer" type="radio" value="Yes">
+                    <input class="govuk-radios__input" id="distribute-question-yes" name="answer" type="radio" value="Yes" @if(form.data.get("answer") == Some("Yes")) {checked}>
                     <label class="govuk-label govuk-radios__label" for="distribute-question-yes">
                         Yes
                     </label>
                 </div>
                 <div class="govuk-radios__item">
-                    <input class="govuk-radios__input" id="distribute-question-no" name="answer" type="radio" value="No">
+                    <input class="govuk-radios__input" id="distribute-question-no" name="answer" type="radio" value="No" @if(form.data.get("answer") == Some("No")) {checked}>
                     <label class="govuk-label govuk-radios__label" for="distribute-question-no">
                         No
                     </label>

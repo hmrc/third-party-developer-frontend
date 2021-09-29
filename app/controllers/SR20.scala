@@ -184,7 +184,10 @@ class SR20 @Inject() (val errorHandler: ErrorHandler,
   }
 
   def sellResellOrDistributeYourSoftware(sandboxAppId: ApplicationId): Action[AnyContent] = whenTeamMemberOnApp(sandboxAppId) { implicit request =>
-    successful(Ok(sellResellOrDistributeSoftwareView(sandboxAppId, sellResellOrDistributeForm)))
+    for {
+      flow <- flowService.fetchFlow(request.user)
+      form = flow.sellResellOrDistribute.fold[Form[SellResellOrDistributeForm]](sellResellOrDistributeForm)(x => sellResellOrDistributeForm.fill(SellResellOrDistributeForm(Some(x.answer))))
+    } yield Ok(sellResellOrDistributeSoftwareView(sandboxAppId, form))
   }
 
   def sellResellOrDistributeYourSoftwareAction(sandboxAppId: ApplicationId): Action[AnyContent] = whenTeamMemberOnApp(sandboxAppId) { implicit request =>
