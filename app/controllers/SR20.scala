@@ -69,7 +69,8 @@ class SR20 @Inject() (val errorHandler: ErrorHandler,
                       val apmConnector: ApmConnector,
                       responsibleIndividualView: ResponsibleIndividualView,
                       flowService: GetProductionCredentialsFlowService,
-                      sellResellOrDistributeSoftwareView: SellResellOrDistributeSoftwareView)
+                      sellResellOrDistributeSoftwareView: SellResellOrDistributeSoftwareView,
+                      productionCredentialsChecklistView: ProductionCredentialsChecklistView)
                      (implicit val ec: ExecutionContext, val appConfig: ApplicationConfig)
   extends ApplicationController(mcc)
      with CanUseCheckActions{
@@ -108,7 +109,7 @@ class SR20 @Inject() (val errorHandler: ErrorHandler,
       apiIdsToSubscribeTo <- apmConnector.fetchUpliftableSubscriptions(sandboxAppId).map(_.filter(subscriptionFlow.isSelected))
       upliftedAppId <- apmConnector.upliftApplication(sandboxAppId,apiIdsToSubscribeTo)
     } yield {
-      Redirect(controllers.checkpages.routes.ApplicationCheck.requestCheckPage(upliftedAppId)).withSession(request.session - "subscriptions")
+      Redirect(controllers.routes.SR20.productionCredentialsChecklist(upliftedAppId))
     }
   }
 
@@ -214,5 +215,9 @@ class SR20 @Inject() (val errorHandler: ErrorHandler,
       }
     }
     sellResellOrDistributeForm.bindFromRequest.fold(handleInvalidForm, handleValidForm)
+  }
+
+  def productionCredentialsChecklist(sandboxAppId: ApplicationId): Action[AnyContent] = whenTeamMemberOnApp(sandboxAppId) { implicit request =>
+    successful(Ok(productionCredentialsChecklistView(request.application.name)))
   }
 }

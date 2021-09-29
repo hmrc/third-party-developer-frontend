@@ -32,7 +32,7 @@ import service.{GetProductionCredentialsFlow, GetProductionCredentialsFlowServic
 import uk.gov.hmrc.http.HeaderCarrier
 import utils.WithLoggedInSession._
 import utils.{LocalUserIdTracker, WithCSRFAddToken}
-import views.html.upliftJourney.{ConfirmApisView, ResponsibleIndividualView, SellResellOrDistributeSoftwareView, TurnOffApisMasterView}
+import views.html.upliftJourney.{ConfirmApisView, ProductionCredentialsChecklistView, ResponsibleIndividualView, SellResellOrDistributeSoftwareView, TurnOffApisMasterView}
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
@@ -54,6 +54,7 @@ class SR20Spec extends BaseControllerSpec
     val turnOffApisMasterView = app.injector.instanceOf[TurnOffApisMasterView]
     val responsibleIndividualView = app.injector.instanceOf[ResponsibleIndividualView]
     val sellResellOrDistributeSoftwareView = app.injector.instanceOf[SellResellOrDistributeSoftwareView]
+    val productionCredentialsChecklistView = app.injector.instanceOf[ProductionCredentialsChecklistView]
 
     val flowServiceMock = mock[GetProductionCredentialsFlowService]
 
@@ -69,7 +70,8 @@ class SR20Spec extends BaseControllerSpec
       ApmConnectorMock.aMock,
       responsibleIndividualView,
       flowServiceMock,
-      sellResellOrDistributeSoftwareView
+      sellResellOrDistributeSoftwareView,
+      productionCredentialsChecklistView
     )
 
     val appName: String = "app"

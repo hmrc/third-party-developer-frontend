@@ -199,5 +199,7 @@ POST        /applications/:id/responsible-individual                            
 GET         /applications/:id/sell-resell-or-distribute-your-software                                    controllers.SR20.sellResellOrDistributeYourSoftware(id: domain.models.applications.ApplicationId)
 POST        /applications/:id/sell-resell-or-distribute-your-software                                    controllers.SR20.sellResellOrDistributeYourSoftwareAction(id: domain.models.applications.ApplicationId)
 
+GET         /applications/:id/production-credentials-checklist                                           controllers.SR20.productionCredentialsChecklist(id: domain.models.applications.ApplicationId)
+
 ->         /govuk-frontend       govuk.Routes
 ->         /hmrc-frontend        hmrcfrontend.Routes
