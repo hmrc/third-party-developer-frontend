@@ -26,6 +26,7 @@ import utils.CollaboratorTracker
 import utils.UserIdTracker
 
 trait ApplicationBuilder extends CollaboratorTracker {
+
   self: UserIdTracker =>
 
   def buildApplication(appOwnerEmail: String): Application = {
@@ -40,6 +41,7 @@ trait ApplicationBuilder extends CollaboratorTracker {
       DateTimeUtils.now,
       DateTimeUtils.now,
       None,
+      grantLength = 547,
       Environment.SANDBOX,
       Some(s"$appId-description"),
       buildCollaborators(Seq(appOwnerEmail)),

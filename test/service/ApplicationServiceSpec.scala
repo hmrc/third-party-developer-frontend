@@ -48,6 +48,7 @@ class ApplicationServiceSpec extends AsyncHmrcSpec with SubscriptionsBuilder wit
 
   val versionOne = ApiVersion("1.0")
   val versionTwo = ApiVersion("2.0")
+  val grantLength = 547
 
   trait Setup {
     implicit val hc: HeaderCarrier = HeaderCarrier()
@@ -125,11 +126,11 @@ class ApplicationServiceSpec extends AsyncHmrcSpec with SubscriptionsBuilder wit
   val productionApplicationId = ApplicationId("Application ID")
   val productionClientId = ClientId(s"client-id-${randomUUID().toString}")
   val productionApplication: Application =
-    Application(productionApplicationId, productionClientId, "name", DateTimeUtils.now, DateTimeUtils.now, None, Environment.PRODUCTION, Some("description"), Set())
+    Application(productionApplicationId, productionClientId, "name", DateTimeUtils.now, DateTimeUtils.now, None, grantLength, Environment.PRODUCTION, Some("description"), Set())
   val sandboxApplicationId = ApplicationId("Application ID")
   val sandboxClientId = ClientId("Client ID")
   val sandboxApplication: Application =
-    Application(sandboxApplicationId, sandboxClientId, "name", DateTimeUtils.now, DateTimeUtils.now, None, Environment.SANDBOX, Some("description"))
+    Application(sandboxApplicationId, sandboxClientId, "name", DateTimeUtils.now, DateTimeUtils.now, None, grantLength, Environment.SANDBOX, Some("description"))
 
   def subStatusWithoutFieldValues(
       appId: ApplicationId,
@@ -193,17 +194,17 @@ class ApplicationServiceSpec extends AsyncHmrcSpec with SubscriptionsBuilder wit
     val applicationId = ApplicationId("applicationId")
     val clientId = ClientId("clientId")
     val applicationName = "applicationName"
-    val application = Application(applicationId, clientId, applicationName, DateTimeUtils.now, DateTimeUtils.now, None, Environment.PRODUCTION, None)
+    val application = Application(applicationId, clientId, applicationName, DateTimeUtils.now, DateTimeUtils.now, None, grantLength, Environment.PRODUCTION, None)
 
     "truncate the description to 250 characters on update request" in new Setup {
       private val longDescription = "abcde" * 100
-      private val editApplicationForm = EditApplicationForm(applicationId, "name", Some(longDescription))
+      private val editApplicationForm = EditApplicationForm(applicationId, "name", Some(longDescription), grantLength = "12 months")
 
       UpdateApplicationRequest.from(editApplicationForm, application).description.get.length shouldBe 250
     }
 
     "update application" in new Setup {
-      private val editApplicationForm = EditApplicationForm(applicationId, "name")
+      private val editApplicationForm = EditApplicationForm(applicationId, "name", grantLength = "12 months")
       when(mockProductionApplicationConnector.update(eqTo(applicationId), any[UpdateApplicationRequest])(*))
         .thenReturn(successful(ApplicationUpdateSuccessful))
 

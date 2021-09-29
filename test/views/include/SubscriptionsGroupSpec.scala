@@ -66,6 +66,7 @@ class SubscriptionsGroupSpec
         DateTimeUtils.now,
         DateTimeUtils.now,
         None,
+        grantLength,
         environment,
         Some("Description 1"),
         Set(loggedInDeveloper.email.asCollaborator(role)),

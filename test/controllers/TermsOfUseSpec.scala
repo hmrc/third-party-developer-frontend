@@ -88,6 +88,7 @@ class TermsOfUseSpec
         DateTimeUtils.now,
         DateTimeUtils.now,
         None,
+        grantLength,
         environment,
         collaborators = Set(loggedInDeveloper.email.asCollaborator(userRole)),
         access = access,

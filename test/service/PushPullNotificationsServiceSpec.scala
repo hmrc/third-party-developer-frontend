@@ -35,12 +35,16 @@ class PushPullNotificationsServiceSpec extends AsyncHmrcSpec {
   trait Setup {
     implicit val hc: HeaderCarrier = HeaderCarrier()
     val clientId: ClientId = ClientId(UUID.randomUUID.toString)
+    val grantLength: Int = 547
+
     val anApplication: Application = Application(
       ApplicationId("appId"),
       clientId,
       "App name 1",
       DateTimeUtils.now,
       DateTimeUtils.now,
+      None,
+      grantLength,
       deployedTo = PRODUCTION
     )
     val pushPullNotificationsConnector: PushPullNotificationsConnector = mock[PushPullNotificationsConnector]

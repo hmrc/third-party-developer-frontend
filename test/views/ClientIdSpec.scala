@@ -49,6 +49,7 @@ class ClientIdSpec extends CommonViewSpec with WithCSRFAddToken with Collaborato
       DateTime.now(),
       DateTime.now(),
       None,
+      547,
       Environment.PRODUCTION,
       Some("Test Application"),
       collaborators = Set(developer.email.asAdministratorCollaborator),

@@ -41,6 +41,7 @@ class ApplicationServiceClientSecretSpec extends AsyncHmrcSpec with Subscription
 
   val versionOne = ApiVersion("1.0")
   val versionTwo = ApiVersion("2.0")
+  val grantLength = 547
 
   trait Setup {
     implicit val hc: HeaderCarrier = HeaderCarrier()
@@ -118,7 +119,8 @@ class ApplicationServiceClientSecretSpec extends AsyncHmrcSpec with Subscription
   val productionApplicationId = ApplicationId("Application ID")
   val productionClientId = ClientId(s"client-id-${randomUUID().toString}")
   val productionApplication: Application =
-    Application(productionApplicationId, productionClientId, "name", DateTimeUtils.now, DateTimeUtils.now, None, Environment.PRODUCTION, Some("description"), Set())
+    Application(productionApplicationId, productionClientId, "name", DateTimeUtils.now, DateTimeUtils.now, None, grantLength,
+      Environment.PRODUCTION, Some("description"), Set())
 
   "addClientSecret" should {
     val newClientSecretId = UUID.randomUUID().toString

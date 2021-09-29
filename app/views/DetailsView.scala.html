@@ -105,10 +105,6 @@
         <td class="govuk-table__cell" id="applicationName">@{app.name}</td>
       </tr>
       <tr class="govuk-table__row">
-        <th scope="row" class="govuk-table__header">Application Grant Length</th>
-        <td class="govuk-table__cell" id="applicationGrantLength">@{app.getGrantLengthDisplayValue(app)}</td>
-      </tr>
-      <tr class="govuk-table__row">
         <th scope="row" class="govuk-table__header">Application description</th>
         <td class="govuk-table__cell" id="description">@if(app.description.nonEmpty) {@{app.description}} else {None}</td>
       </tr>
@@ -119,6 +115,10 @@
       <tr class="govuk-table__row">
         <th scope="row" class="govuk-table__header">Terms and conditions URL</th>
         <td class="govuk-table__cell" id="termsAndConditionsUrl">@{app.termsAndConditionsUrl.getOrElse("None")}</td>
+      </tr>
+      <tr class="govuk-table__row">
+        <th scope="row" class="govuk-table__header">Application grant length</th>
+        <td class="govuk-table__cell" id="applicationGrantLength">@{app.grantLengthDisplayValue}</td>
       </tr>
     </tbody>
   </table>

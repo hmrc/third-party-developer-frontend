@@ -75,6 +75,7 @@ class ManageSubscriptionsSpec
     DateTimeUtils.now,
     DateTimeUtils.now,
     None,
+    grantLength,
     Environment.SANDBOX,
     Some("Description 1"),
     Set(loggedInDeveloper.email.asCollaborator(role)),

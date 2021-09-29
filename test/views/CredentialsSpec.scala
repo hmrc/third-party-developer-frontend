@@ -49,6 +49,7 @@ class CredentialsSpec extends CommonViewSpec with WithCSRFAddToken with Collabor
       DateTime.now(),
       DateTime.now(),
       None,
+      547,
       Environment.PRODUCTION,
       Some("Test Application"),
       collaborators = Set(developer.email.asAdministratorCollaborator),

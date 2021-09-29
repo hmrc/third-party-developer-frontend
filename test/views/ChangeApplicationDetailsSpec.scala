@@ -42,7 +42,7 @@ class ChangeApplicationDetailsSpec extends CommonViewSpec with WithCSRFAddToken 
       val loggedIn = utils.DeveloperSession("admin@example.com", "firstName1", "lastName1", loggedInState = LoggedInState.LOGGED_IN)
       val request = FakeRequest().withCSRFToken
       val form = EditApplicationForm.form.fill(
-        EditApplicationForm(application.id, application.name, application.description, application.privacyPolicyUrl, application.termsAndConditionsUrl)
+        EditApplicationForm(application.id, application.name, application.description, application.privacyPolicyUrl, application.termsAndConditionsUrl, "12 months")
       )
 
       changeDetails.render(form, ApplicationViewModel(application, hasSubscriptionsFields = false, hasPpnsFields = false), request, loggedIn, messagesProvider, appConfig, "nav-section")
@@ -58,7 +58,7 @@ class ChangeApplicationDetailsSpec extends CommonViewSpec with WithCSRFAddToken 
 
     "render" in {
 
-      val application = Application(applicationId, clientId, "An App Name", DateTimeUtils.now, DateTimeUtils.now, None, Environment.SANDBOX)
+      val application = Application(applicationId, clientId, "An App Name", DateTimeUtils.now, DateTimeUtils.now, None, 547, Environment.SANDBOX)
       val document = Jsoup.parse(renderPage(application).body)
 
       elementExistsByText(document, "h1", "Change application details") shouldBe true
@@ -75,7 +75,7 @@ class ChangeApplicationDetailsSpec extends CommonViewSpec with WithCSRFAddToken 
       val aTermsAndConditionsURL = Some("a terms and conditions url")
       val standardAccess = Standard(privacyPolicyUrl = aPrivacyPolicyURL, termsAndConditionsUrl = aTermsAndConditionsURL)
       val application =
-        Application(applicationId, clientId, "An App Name", DateTimeUtils.now, DateTimeUtils.now, None, Environment.SANDBOX, description = aDescription, access = standardAccess)
+        Application(applicationId, clientId, "An App Name", DateTimeUtils.now, DateTimeUtils.now, None, grantLength, Environment.SANDBOX, description = aDescription, access = standardAccess)
       val document = Jsoup.parse(renderPage(application).body)
 
       formGroupWithLabelIsPrepopulated(document, "Application name", "An App Name") shouldBe true
@@ -93,6 +93,7 @@ class ChangeApplicationDetailsSpec extends CommonViewSpec with WithCSRFAddToken 
         DateTimeUtils.now,
         DateTimeUtils.now,
         None,
+           grantLength,
         Environment.PRODUCTION,
         state = ApplicationState(State.PENDING_GATEKEEPER_APPROVAL, None)
       )
@@ -110,6 +111,7 @@ class ChangeApplicationDetailsSpec extends CommonViewSpec with WithCSRFAddToken 
         DateTimeUtils.now,
         DateTimeUtils.now,
         None,
+           grantLength,
         Environment.PRODUCTION,
         state = ApplicationState(State.PENDING_REQUESTER_VERIFICATION, None)
       )
@@ -121,7 +123,7 @@ class ChangeApplicationDetailsSpec extends CommonViewSpec with WithCSRFAddToken 
     "not display the option to change the app name if in prod with state production" in {
 
       val application =
-        Application(applicationId, clientId, "An App Name", DateTimeUtils.now, DateTimeUtils.now, None, Environment.PRODUCTION, state = ApplicationState(State.PRODUCTION, None))
+        Application(applicationId, clientId, "An App Name", DateTimeUtils.now, DateTimeUtils.now, None, grantLength, Environment.PRODUCTION, state = ApplicationState(State.PRODUCTION, None))
       val document = Jsoup.parse(renderPage(application).body)
 
       elementExistsByText(document, "label", "Application name") shouldBe false

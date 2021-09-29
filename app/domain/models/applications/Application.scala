@@ -30,8 +30,6 @@ import java.util.UUID
 import domain.models.developers.UserId
 import domain.models.apidefinitions.ApiIdentifier
 
-import java.time.LocalDate
-
 case class ApplicationId(value: String) extends AnyVal
 
 object ApplicationId {
@@ -152,18 +150,7 @@ trait BaseApplication {
     collaborators.find(c => c.emailAddress.toSha256 == teamMemberHash)
   }
 
-  def getGrantLengthDisplayValue(app: BaseApplication) : String = {
-    import java.time.Period
-
-    val today = LocalDate.now
-    val grantDays = today.plusDays(app.grantLength)
-
-
-    val pYears = Period.between(today, grantDays).getYears
-    val pMonths = Period.between(today, grantDays).getMonths
-    val grantInMonths = (pYears * 12) +  pMonths
-    s"$grantInMonths Months"
-  }
+  def grantLengthDisplayValue: String = s"${Math.round(grantLength/30)} months"
 }
 
 
@@ -190,30 +177,10 @@ object Application {
   import play.api.libs.json.JodaReads._
   import play.api.libs.json.JodaWrites._
 
-//  def apply( id: ApplicationId,
-//   clientId: ClientId,
-//   name: String,
-//   createdOn: DateTime,
-//   lastAccess: DateTime,
-//   lastAccessTokenUsage: Option[DateTime], // API-4376: Temporary inclusion whilst Server Token functionality is retired
-//   grantLength: Int,
-//   deployedTo: Environment,
-//   description: Option[String],
-//   collaborators: Set[Collaborator],
-//   access: Access ,
-//   state: ApplicationState ,
-//   checkInformation: Option[CheckInformation] ,
-//   ipAllowlist: IpAllowlist ) = {
-//    val prettygrant = Some("18 Months")
-//    new Application(id, clientId, name, createdOn, lastAccess, lastAccessTokenUsage, grantLength,
-//      prettygrant, deployedTo, description, collaborators, access, state, checkInformation, ipAllowlist)
-//  }
-
   implicit val applicationFormat = Json.format[Application]
 
   implicit val ordering: Ordering[Application] = Ordering.by(_.name)
 }
-
 
 case class ApplicationWithSubscriptionIds(
   val id: ApplicationId,

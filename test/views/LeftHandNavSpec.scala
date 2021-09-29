@@ -40,9 +40,9 @@ class LeftHandNavSpec extends CommonViewSpec with CollaboratorTracker with Local
     val clientId = ClientId("std-client-id")
     implicit val request = FakeRequest()
     implicit val loggedIn = utils.DeveloperSession("user@example.com", "Test", "Test", None, loggedInState = LoggedInState.LOGGED_IN)
-    val standardApplication = Application(applicationId, clientId, "name", now, now, None, PRODUCTION, access = Standard())
-    val privilegedApplication = Application(applicationId, clientId, "name", now, now, None, PRODUCTION, access = Privileged())
-    val ropcApplication = Application(applicationId, clientId, "name", now, now, None, PRODUCTION, access = ROPC())
+    val standardApplication = Application(applicationId, clientId, "name", now, now, None, 547, PRODUCTION, access = Standard())
+    val privilegedApplication = Application(applicationId, clientId, "name", now, now, None, 547, PRODUCTION, access = Privileged())
+    val ropcApplication = Application(applicationId, clientId, "name", now, now, None, 547, PRODUCTION, access = ROPC())
 
     def elementExistsById(doc: Document, id: String) = doc.select(s"#$id").asScala.nonEmpty
   }

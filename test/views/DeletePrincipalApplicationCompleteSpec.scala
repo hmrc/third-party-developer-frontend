@@ -47,6 +47,7 @@ class DeletePrincipalApplicationCompleteSpec extends CommonViewSpec with WithCSR
         DateTimeUtils.now,
         DateTimeUtils.now,
         None,
+        grantLength,
         Environment.PRODUCTION,
         Some("Description 1"),
         Set(loggedInDeveloper.email.asAdministratorCollaborator),

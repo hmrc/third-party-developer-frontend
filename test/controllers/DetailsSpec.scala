@@ -462,7 +462,7 @@ class DetailsSpec
     implicit class ChangeDetailsAppAugment(val app: Application) {
       private val appAccess = app.access.asInstanceOf[Standard]
 
-      final def toForm = EditApplicationForm(app.id, app.name, app.description, appAccess.privacyPolicyUrl, appAccess.termsAndConditionsUrl)
+      final def toForm = EditApplicationForm(app.id, app.name, app.description, appAccess.privacyPolicyUrl, appAccess.termsAndConditionsUrl, app.grantLengthDisplayValue)
 
       final def callDetails: Future[Result] = underTest.details(app.id)(loggedInRequest)
 

@@ -52,6 +52,7 @@ class ServerTokenSpec extends CommonViewSpec with WithCSRFAddToken with Collabor
       DateTime.now(),
       DateTime.now(),
       None,
+      grantLength,
       Environment.PRODUCTION,
       Some("Test Application"),
       collaborators = Set(developer.email.asAdministratorCollaborator),

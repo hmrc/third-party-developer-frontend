@@ -155,6 +155,7 @@ class ApplicationSpec extends FunSpec with Matchers with DeveloperBuilder with L
       DateTime.now(),
       DateTime.now(),
       None,
+      grantLength = 547,
       environment,
       description = None,
       collaborators = collaborators,

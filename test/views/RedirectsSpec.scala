@@ -41,6 +41,7 @@ class RedirectsSpec extends CommonViewSpec with WithCSRFAddToken with Collaborat
     DateTimeUtils.now,
     DateTimeUtils.now,
     None,
+    547,
     Environment.PRODUCTION,
     Some("Description 1"),
     Set(loggedInDeveloper.email.asAdministratorCollaborator, loggedInDev.email.asDeveloperCollaborator),

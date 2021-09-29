@@ -82,6 +82,7 @@ class DeletePrincipalApplicationSpec
       DateTime.now.withTimeAtStartOfDay(),
       DateTime.now.withTimeAtStartOfDay(),
       None,
+      grantLength,
       Environment.PRODUCTION,
       Some("Description 1"),
       Set(loggedInDeveloper.email.asAdministratorCollaborator),

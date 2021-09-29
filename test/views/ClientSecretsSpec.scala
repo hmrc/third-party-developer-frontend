@@ -65,6 +65,7 @@ class ClientSecretsSpec extends CommonViewSpec with WithCSRFAddToken with Collab
       DateTime.now(),
       DateTime.now(),
       None,
+      547,
       Environment.PRODUCTION,
       Some("Test Application"),
       collaborators = Set(developer.email.asAdministratorCollaborator),

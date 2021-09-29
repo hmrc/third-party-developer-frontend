@@ -41,7 +41,7 @@ class SubscriptionFieldsServiceSpec extends AsyncHmrcSpec with SubscriptionsBuil
   val applicationId: ApplicationId = ApplicationId("application-id")
   val clientId = ClientId("clientId")
   val application =
-    Application(applicationId, clientId, applicationName, DateTime.now(), DateTime.now(), None, Environment.PRODUCTION)
+    Application(applicationId, clientId, applicationName, DateTime.now(), DateTime.now(), None, grantLength = 547, Environment.PRODUCTION)
 
   trait Setup extends SubscriptionFieldsConnectorMock {
 
@@ -65,7 +65,7 @@ class SubscriptionFieldsServiceSpec extends AsyncHmrcSpec with SubscriptionsBuil
     ).thenReturn(
       Future.successful(
         Some(
-          Application(applicationId, clientId, "name", DateTime.now(), DateTime.now(), None, Environment.PRODUCTION)
+          Application(applicationId, clientId, "name", DateTime.now(), DateTime.now(), None, grantLength = 547, Environment.PRODUCTION)
         )
       )
     )

@@ -44,9 +44,9 @@ import config.UpliftJourneyConfigProvider
 class AddApplicationProductionSwitchSpec
     extends BaseControllerSpec
     with SampleSession
-    with SampleApplication 
-    with SubscriptionTestHelperSugar 
-    with WithCSRFAddToken 
+    with SampleApplication
+    with SubscriptionTestHelperSugar
+    with WithCSRFAddToken
     with DeveloperBuilder
     with LocalUserIdTracker
     with ApplicationBuilder {

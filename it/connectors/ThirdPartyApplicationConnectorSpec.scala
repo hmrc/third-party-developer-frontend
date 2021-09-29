@@ -101,6 +101,7 @@ class ThirdPartyApplicationConnectorSpec extends BaseConnectorIntegrationSpec wi
       DateTimeUtils.now,
       DateTimeUtils.now,
       None,
+      547,
       connector.environment,
       Some("Description"),
       Set("john@example.com".asAdministratorCollaborator),

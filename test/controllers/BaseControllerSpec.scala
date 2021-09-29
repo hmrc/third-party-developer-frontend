@@ -48,6 +48,7 @@ class BaseControllerSpec
   lazy val messagesApi: MessagesApi = app.injector.instanceOf[MessagesApi]
 
   val mcc: MessagesControllerComponents = app.injector.instanceOf[MessagesControllerComponents]
+  val grantLength = 547
 
   override def fakeApplication(): Application =
     GuiceApplicationBuilder()

@@ -33,6 +33,7 @@ trait SampleApplication {
     DateTimeUtils.now,
     DateTimeUtils.now,
     None,
+    grantLength = 547,
     Environment.PRODUCTION,
     Some("Description 1"),
     Set(loggedInDeveloper.email.asAdministratorCollaborator),

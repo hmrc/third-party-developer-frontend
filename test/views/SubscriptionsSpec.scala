@@ -51,6 +51,7 @@ class SubscriptionsSpec extends CommonViewSpec with WithCSRFAddToken {
     DateTime.now(),
     DateTime.now(),
     None,
+    grantLength,
     environment,
     Some("Test Application"),
     Set.empty,
