@@ -19,6 +19,7 @@ package views.helper
 import java.util.Locale
 
 import config.ApplicationConfig
+import domain.models.controllers.FraudPreventionNavLinkViewModel
 import org.scalatest.Matchers
 import org.scalatestplus.play.guice.GuiceOneAppPerSuite
 import play.api.Application
@@ -32,6 +33,8 @@ trait CommonViewSpec extends AsyncHmrcSpec with GuiceOneAppPerSuite with SharedM
   val messagesApi = mcc.messagesApi
   implicit val messagesProvider: MessagesProvider = MessagesImpl(Lang(Locale.ENGLISH), messagesApi)
   implicit val appConfig: ApplicationConfig = mock[ApplicationConfig]
+
+  def createFraudPreventionNavLinkViewModel(isVisible: Boolean, url: String) = FraudPreventionNavLinkViewModel(isVisible, url)
 
   when(appConfig.nameOfPrincipalEnvironment).thenReturn("Production")
   when(appConfig.nameOfSubordinateEnvironment).thenReturn("Sandbox")

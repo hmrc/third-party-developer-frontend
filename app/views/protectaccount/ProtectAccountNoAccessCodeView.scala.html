@@ -37,7 +37,7 @@
 
   @helper.form(action = routes.UserLoginAccount.confirm2SVHelp(), 'class -> "form") {
     @helper.CSRF.formField
-    <div class="form-group">
+    <div class="govuk-button-group">
       <button id="submit" class="govuk-button" type="submit">Continue</button>
       <a id="cancel" class="govuk-button govuk-button--secondary" href="@routes.UserLoginAccount.login()">Cancel</a>
     </div>

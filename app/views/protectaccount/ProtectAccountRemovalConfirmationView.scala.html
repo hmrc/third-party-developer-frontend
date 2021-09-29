@@ -17,39 +17,41 @@
 @import config.ApplicationConfig
 @import domain.models.views.BackButtonWithJavaScript
 @import include._
-@import views.html.include.DevMain
+@import views.html.include.DevMain2
 @import domain.models.developers.DeveloperSession
 
-@this(devMain: DevMain)
+@this(devMain: DevMain2)
 
 @(form: Form[Remove2SVConfirmForm])(implicit request: play.api.mvc.Request[Any], loggedIn: DeveloperSession, messages: Messages, applicationConfig: ApplicationConfig)
 
 @devMain(
-    title = "Remove 2-step verification",
-    userFullName = loggedIn.loggedInName,
-    back = BackButtonWithJavaScript,
-    developerSession = Some(loggedIn)
+  title = "Remove 2-step verification",
+  userFullName = loggedIn.loggedInName,
+  back = BackButtonWithJavaScript,
+  developerSession = Some(loggedIn)
 ) {
-    @errorSummary(form)
+  @errorSummary2(form)
 
-    @helper.form(action = controllers.profile.routes.ProtectAccount.confirm2SVRemoval(), 'class -> "form") {
-        <div class="form-group @if(form.errors("removeConfirm").nonEmpty) {form-group-error}">
-            <fieldset id="removeConfirm" class="inline">
-                <legend><h1 class="heading-xlarge">Are you sure you want to remove 2-step verification?</h1></legend>
-                @helper.CSRF.formField
-                @fieldError(form.errors, "removeConfirm")
-                <div class="multiple-choice">
-                    <input id="confirm-remove-2sv-yes" type="radio" name="removeConfirm" value="Yes">
-                    <label for="confirm-remove-2sv-yes">Yes</label>
-                </div>
-                <div class="multiple-choice">
-                    <input id="confirm-remove-2sv-no" type="radio" name="removeConfirm" value="No">
-                    <label for="confirm-remove-2sv-no">No</label>
-                </div>
-            </fieldset>
+  @helper.form(action = controllers.profile.routes.ProtectAccount.confirm2SVRemoval(), 'class -> "form") {
+    <div class="govuk-form-group @if(form.errors("removeConfirm").nonEmpty) {govuk-form-group--error}">
+      <fieldset class="govuk-fieldset" id="removeConfirm" class="inline">
+        <legend class="govuk-fieldset__legend govuk-fieldset__legend--l">
+          <h1 class="govuk-fieldset__heading">Are you sure you want to remove 2-step verification?</h1>
+        </legend>
+        @helper.CSRF.formField
+        @fieldError2(form.errors, "removeConfirm")
+        <div class="govuk-radios">
+          <div class="govuk-radios__item">
+            <input class="govuk-radios__input" id="confirm-remove-2sv-yes" type="radio" name="removeConfirm" value="Yes">
+            <label class="govuk-label govuk-radios__label" for="confirm-remove-2sv-yes">Yes</label>
+          </div>
+          <div class="govuk-radios__item">
+            <input class="govuk-radios__input" id="confirm-remove-2sv-no" type="radio" name="removeConfirm" value="No">
+            <label class="govuk-label govuk-radios__label" for="confirm-remove-2sv-no">No</label>
+          </div>
         </div>
-        <div class="form-group">
-            <button id="submit" class="button" type="submit">Continue</button>
-        </div>
-    }
+      </fieldset>
+    </div>
+    <button id="submit" class="govuk-button" type="submit">Continue</button>
+  }
 }

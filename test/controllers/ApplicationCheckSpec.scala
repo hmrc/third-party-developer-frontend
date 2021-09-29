@@ -47,14 +47,14 @@ import scala.concurrent.Future.successful
 import utils.LocalUserIdTracker
 import domain.models.developers.DeveloperSession
 
-class ApplicationCheckSpec 
-    extends BaseControllerSpec 
-    with WithCSRFAddToken 
+class ApplicationCheckSpec
+    extends BaseControllerSpec
+    with WithCSRFAddToken
     with LocalUserIdTracker
-    with DeveloperBuilder 
+    with DeveloperBuilder
     with SampleSession
     with SampleApplication
-    with SubscriptionTestHelperSugar 
+    with SubscriptionTestHelperSugar
     with SubscriptionsBuilder {
 
   override val appId = ApplicationId("1234")
