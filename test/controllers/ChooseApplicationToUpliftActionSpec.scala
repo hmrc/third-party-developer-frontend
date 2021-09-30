@@ -23,7 +23,7 @@ import mocks.service._
 import play.api.mvc.AnyContentAsEmpty
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
-import service.AuditService
+import service.{AuditService, GetProductionCredentialsFlow, GetProductionCredentialsFlowService}
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.time.DateTimeUtils
 import utils._
@@ -35,12 +35,14 @@ import scala.concurrent.ExecutionContext.Implicits.global
 import utils.LocalUserIdTracker
 import domain.models.controllers.ApplicationSummary
 import builder.ApplicationBuilder
+
 import scala.concurrent.Future
 import play.api.mvc.Result
 import mocks.connector.ApmConnectorMockModule
 import controllers.addapplication.AddApplication
 import builder._
 import config.UpliftJourneyConfigProvider
+import views.html.upliftJourney.BeforeYouStartView
 
 class ChooseApplicationToUpliftActionSpec
     extends BaseControllerSpec 
@@ -71,6 +73,8 @@ class ChooseApplicationToUpliftActionSpec
 
     val beforeYouStartView: BeforeYouStartView = app.injector.instanceOf[BeforeYouStartView]
     val upliftJourneyConfigProviderMock = mock[UpliftJourneyConfigProvider]
+
+    val flowServiceMock = mock[GetProductionCredentialsFlowService]
     
     implicit val environmentNameService = new EnvironmentNameService(appConfig)
 
@@ -94,8 +98,10 @@ class ChooseApplicationToUpliftActionSpec
       addApplicationNameView,
       chooseApplicationToUpliftView,
       upliftJourneyConfigProviderMock,
-      beforeYouStartView
+      beforeYouStartView,
+      flowServiceMock
     )
+    
     val hc = HeaderCarrier()
 
     fetchSessionByIdReturns(sessionId, session)
@@ -142,6 +148,8 @@ class ChooseApplicationToUpliftActionSpec
       val summaries = sandboxAppSummaries
       aUsersUplfitableAndNotUpliftableAppsReturns(summaries, List.empty)
 
+      when(flowServiceMock.storeApiSubscriptions(*, *)).thenReturn(Future.successful(GetProductionCredentialsFlow("", None, None, None)))
+
       val result = underTest.chooseApplicationToUpliftAction()(loggedInRequest.withFormUrlEncodedBody(("applicationId" -> "")))
 
       status(result) shouldBe BAD_REQUEST
@@ -154,6 +162,7 @@ class ChooseApplicationToUpliftActionSpec
       val subsetOfSubscriptions = summaries.head.subscriptionIds.take(1)
       ApmConnectorMock.FetchUpliftableSubscriptions.willReturn(subsetOfSubscriptions)
       aUsersUplfitableAndNotUpliftableAppsReturns(summaries, summaries.map(_.id))
+      when(flowServiceMock.storeApiSubscriptions(*, *)).thenReturn(Future.successful(GetProductionCredentialsFlow("", None, None, None)))
 
       val result = underTest.chooseApplicationToUpliftAction()(loggedInRequest.withFormUrlEncodedBody(("applicationId" -> sandboxAppId.value)))
 

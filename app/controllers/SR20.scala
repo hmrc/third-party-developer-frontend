@@ -19,20 +19,19 @@ package controllers
 import config.{ApplicationConfig, ErrorHandler}
 import connectors.ApmConnector
 import controllers.checkpages.{CanUseCheckActions, DummySubscriptionsForm}
-import controllers.models.ApiSubscriptionsFlow
 import domain.models.apidefinitions.{APISubscriptionStatus, ApiContext}
 import domain.models.applications.ApplicationId
-import domain.models.applicationuplift.ResponsibleIndividual
+import domain.models.applicationuplift.{ApiSubscriptions, ResponsibleIndividual, SellResellOrDistribute}
 import play.api.data.Forms._
 import play.api.data.{Form, FormError}
 import play.api.libs.crypto.CookieSigner
-import play.api.libs.json.Json
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents, Result}
 import service.{ApplicationActionService, ApplicationService, GetProductionCredentialsFlowService, SessionService}
 import views.helper.IdFormatter
-import views.html.{ConfirmApisView, ResponsibleIndividualView, TurnOffApisMasterView}
+import views.html.upliftJourney._
 
 import javax.inject.{Inject, Singleton}
+import scala.concurrent.Future.successful
 import scala.concurrent.{ExecutionContext, Future}
 
 case class ResponsibleIndividualForm(fullName: String, emailAddress: String)
@@ -43,6 +42,18 @@ object ResponsibleIndividualForm {
       "fullName" -> requiredIndividualFullnameValidator,
       "emailAddress" -> requiredIndividualEmailValidator()
     )(ResponsibleIndividualForm.apply)(ResponsibleIndividualForm.unapply)
+  )
+}
+
+final case class SellResellOrDistributeForm(answer: Option[String] = Some(""))
+
+object SellResellOrDistributeForm {
+
+  def form: Form[SellResellOrDistributeForm] = Form(
+    mapping(
+      "answer" -> optional(text)
+        .verifying(FormKeys.sellResellOrDistributeConfirmNoChoiceKey, s => s.isDefined)
+    )(SellResellOrDistributeForm.apply)(SellResellOrDistributeForm.unapply)
   )
 }
 
@@ -57,16 +68,16 @@ class SR20 @Inject() (val errorHandler: ErrorHandler,
                       turnOffApisMasterView:TurnOffApisMasterView,
                       val apmConnector: ApmConnector,
                       responsibleIndividualView: ResponsibleIndividualView,
-                      flowService: GetProductionCredentialsFlowService)
+                      flowService: GetProductionCredentialsFlowService,
+                      sellResellOrDistributeSoftwareView: SellResellOrDistributeSoftwareView)
                      (implicit val ec: ExecutionContext, val appConfig: ApplicationConfig)
   extends ApplicationController(mcc)
      with CanUseCheckActions{
 
   val responsibleIndividualForm: Form[ResponsibleIndividualForm] = ResponsibleIndividualForm.form
+  val sellResellOrDistributeForm: Form[SellResellOrDistributeForm] = SellResellOrDistributeForm.form
 
   def confirmApiSubscriptionsPage(sandboxAppId: ApplicationId): Action[AnyContent] = whenTeamMemberOnApp(sandboxAppId) { implicit request =>
-
-    val flow = ApiSubscriptionsFlow.fromSessionString(request.session.get("subscriptions").getOrElse(""))
 
     def getApiNameForContext(apiContext: ApiContext) =
       request.subscriptions
@@ -75,10 +86,12 @@ class SR20 @Inject() (val errorHandler: ErrorHandler,
 
     for {
       upliftableApiIds <- apmConnector.fetchUpliftableSubscriptions(sandboxAppId)
+      flow <- flowService.fetchFlow(request.user)
+      subscriptionFlow = flow.apiSubscriptions.getOrElse(ApiSubscriptions())
     }
     yield {
-      val data = (for {
-        subscription <- upliftableApiIds.filter(flow.isSelected)
+      val data: Set[String] = (for {
+        subscription <- upliftableApiIds.filter(subscriptionFlow.isSelected)
         name <- getApiNameForContext(subscription.context)
       }
       yield {
@@ -89,36 +102,34 @@ class SR20 @Inject() (val errorHandler: ErrorHandler,
   }
 
   def confirmApiSubscriptionsAction(sandboxAppId: ApplicationId): Action[AnyContent] = whenTeamMemberOnApp(sandboxAppId) { implicit request =>
-    val flow = ApiSubscriptionsFlow.fromSessionString(request.session.get("subscriptions").getOrElse(""))
-    
     for {
-      apiIdsToSubscribeTo <- apmConnector.fetchUpliftableSubscriptions(sandboxAppId).map(_.filter(flow.isSelected))
+      flow <- flowService.fetchFlow(request.user)
+      subscriptionFlow = flow.apiSubscriptions.getOrElse(ApiSubscriptions())
+      apiIdsToSubscribeTo <- apmConnector.fetchUpliftableSubscriptions(sandboxAppId).map(_.filter(subscriptionFlow.isSelected))
       upliftedAppId <- apmConnector.upliftApplication(sandboxAppId,apiIdsToSubscribeTo)
     } yield {
       Redirect(controllers.checkpages.routes.ApplicationCheck.requestCheckPage(upliftedAppId)).withSession(request.session - "subscriptions")
     }
   }
 
-  def setSubscribedStatusFromFlow(flow: ApiSubscriptionsFlow)(apiSubscription: APISubscriptionStatus): APISubscriptionStatus = {
-    apiSubscription.copy(subscribed = flow.isSelected(apiSubscription.apiIdentifier))
+  def setSubscribedStatusFromFlow(apiSubscriptions: ApiSubscriptions)(apiSubscription: APISubscriptionStatus): APISubscriptionStatus = {
+    apiSubscription.copy(subscribed = apiSubscriptions.isSelected(apiSubscription.apiIdentifier))
   }
 
   def changeApiSubscriptions(sandboxAppId: ApplicationId): Action[AnyContent] = whenTeamMemberOnApp(sandboxAppId) { implicit request =>
-    val flow = ApiSubscriptionsFlow.fromSessionString(request.session.get("subscriptions").getOrElse(""))
-    
     for {
+      flow <- flowService.fetchFlow(request.user)
+      subscriptionFlow = flow.apiSubscriptions.getOrElse(ApiSubscriptions())
       upliftableApiIds <- apmConnector.fetchUpliftableSubscriptions(sandboxAppId)
-      selectedApiIds = upliftableApiIds.filter(flow.isSelected)
       subscriptionsWithFlowAdjusted = request.subscriptions
         .filter(s => upliftableApiIds.contains(s.apiIdentifier))
-        .map(setSubscribedStatusFromFlow(flow))
+        .map(setSubscribedStatusFromFlow(subscriptionFlow))
     } yield {
       Ok(turnOffApisMasterView(request.application.id, request.role, APISubscriptions.groupSubscriptionsByServiceName(subscriptionsWithFlowAdjusted), DummySubscriptionsForm.form))
     }
   }
 
-  def saveApiSubscriptionsSubmit(sandboxAppId: ApplicationId): Action[AnyContent] = whenTeamMemberOnApp(sandboxAppId) { implicit request =>
-    lazy val flow = ApiSubscriptionsFlow.fromSessionString(request.session.get("subscriptions").getOrElse(""))
+  def saveApiSubscriptionsSubmit(sandboxAppId: ApplicationId) = whenTeamMemberOnApp(sandboxAppId) { implicit request =>
 
     lazy val formSubmittedSubscriptions: Map[String, Boolean] = 
       request.body.asFormUrlEncoded.get
@@ -128,25 +139,25 @@ class SR20 @Inject() (val errorHandler: ErrorHandler,
         case (name, isSubscribed) => (name.replace("-subscribed", "") -> isSubscribed)
       }
 
-    apmConnector.fetchUpliftableSubscriptions(sandboxAppId).map { upliftableApiIds =>
+    apmConnector.fetchUpliftableSubscriptions(sandboxAppId).flatMap { upliftableApiIds =>
       val apiLookups = upliftableApiIds.map( id => IdFormatter.identifier(id) -> id ).toMap
-      val newFlow = ApiSubscriptionsFlow(formSubmittedSubscriptions.map {
+      val newFlow = ApiSubscriptions(formSubmittedSubscriptions.map {
         case (id, onOff) => apiLookups(id) -> onOff
       })
 
       if (formSubmittedSubscriptions.exists(_._2 == true)) {
-        Redirect(controllers.routes.SR20.confirmApiSubscriptionsPage(sandboxAppId))
-          .withSession(request.session + ("subscriptions" -> ApiSubscriptionsFlow.toSessionString(newFlow)))
+        flowService.storeApiSubscriptions(newFlow, request.user)
+        .map(_ => Redirect(controllers.routes.SR20.confirmApiSubscriptionsPage(sandboxAppId)))
       }
       else {
         val errorForm = DummySubscriptionsForm.form.withError(FormError("apiSubscriptions", "error.turnoffapis.requires.at.least.one"))
-
-        val sandboxSubscribedApis = request.subscriptions
-            .filter(s => upliftableApiIds.contains(s.apiIdentifier))
-            .map(setSubscribedStatusFromFlow(newFlow))
-
-        Ok(turnOffApisMasterView(request.application.id, request.role, APISubscriptions.groupSubscriptionsByServiceName(sandboxSubscribedApis), errorForm))
-        .withSession(request.session + ("subscriptions" -> ApiSubscriptionsFlow.toSessionString(flow)))
+        for {
+          flow                  <- flowService.fetchFlow(request.user)
+          subscriptionFlow       = flow.apiSubscriptions.getOrElse(ApiSubscriptions())
+          sandboxSubscribedApis  = request.subscriptions.filter(s => upliftableApiIds.contains(s.apiIdentifier))
+                                   .map(setSubscribedStatusFromFlow(subscriptionFlow))
+        } yield            
+          Ok(turnOffApisMasterView(request.application.id, request.role, APISubscriptions.groupSubscriptionsByServiceName(sandboxSubscribedApis), errorForm))
       }
     }
   }
@@ -154,7 +165,7 @@ class SR20 @Inject() (val errorHandler: ErrorHandler,
   def responsibleIndividual(sandboxAppId: ApplicationId): Action[AnyContent] = whenTeamMemberOnApp(sandboxAppId) { implicit request =>
     for {
       flow <- flowService.fetchFlow(request.user)
-      form = flow.responsibleIndividual.fold[Form[ResponsibleIndividualForm]](ResponsibleIndividualForm.form)(x => ResponsibleIndividualForm.form.fill(ResponsibleIndividualForm(x.fullName, x.emailAddress)))
+      form = flow.responsibleIndividual.fold[Form[ResponsibleIndividualForm]](responsibleIndividualForm)(x => responsibleIndividualForm.fill(ResponsibleIndividualForm(x.fullName, x.emailAddress)))
     } yield Ok(responsibleIndividualView(sandboxAppId, form))
   }
 
@@ -163,13 +174,45 @@ class SR20 @Inject() (val errorHandler: ErrorHandler,
     def handleValidForm(form: ResponsibleIndividualForm): Future[Result] = {
       val responsibleIndividual = ResponsibleIndividual(form.fullName, form.emailAddress)
       flowService.storeResponsibleIndividual(responsibleIndividual, request.user)
-      .map(_ => Ok(Json.toJson("WORKING")))
+      .map(_ => Redirect(controllers.routes.SR20.sellResellOrDistributeYourSoftware(sandboxAppId)))
     }
     
     def handleInvalidForm(form: Form[ResponsibleIndividualForm]): Future[Result] = {
-      Future.successful(BadRequest(responsibleIndividualView(sandboxAppId, form)))
+      successful(BadRequest(responsibleIndividualView(sandboxAppId, form)))
     }
 
-    ResponsibleIndividualForm.form.bindFromRequest.fold(handleInvalidForm, handleValidForm)
+    responsibleIndividualForm.bindFromRequest.fold(handleInvalidForm, handleValidForm)
+  }
+
+  def sellResellOrDistributeYourSoftware(sandboxAppId: ApplicationId): Action[AnyContent] = whenTeamMemberOnApp(sandboxAppId) { implicit request =>
+    for {
+      flow <- flowService.fetchFlow(request.user)
+      form = flow.sellResellOrDistribute.fold[Form[SellResellOrDistributeForm]](sellResellOrDistributeForm)(x => sellResellOrDistributeForm.fill(SellResellOrDistributeForm(Some(x.answer))))
+    } yield Ok(sellResellOrDistributeSoftwareView(sandboxAppId, form))
+  }
+
+  def sellResellOrDistributeYourSoftwareAction(sandboxAppId: ApplicationId): Action[AnyContent] = whenTeamMemberOnApp(sandboxAppId) { implicit request =>
+
+    def handleInvalidForm(formWithErrors: Form[SellResellOrDistributeForm]) =
+      Future(BadRequest(sellResellOrDistributeSoftwareView(sandboxAppId, formWithErrors)))
+
+    def handleValidForm(validForm: SellResellOrDistributeForm) = {
+      validForm.answer match {
+        case Some(answer) =>
+          flowService.storeSellResellOrDistribute(SellResellOrDistribute(answer), request.user)
+            .flatMap(_ =>
+                for {
+                  upliftableSubscriptions <- apmConnector.fetchUpliftableSubscriptions(sandboxAppId)
+                  apiSubscriptions         = ApiSubscriptions(upliftableSubscriptions.map(id => (id, true)).toMap)
+                  _ <- flowService.storeApiSubscriptions(apiSubscriptions, request.user)
+                }
+                yield {
+                  Redirect(controllers.routes.SR20.confirmApiSubscriptionsPage(sandboxAppId))
+                }
+            )
+        case None => throw new IllegalStateException("Should never get here")
+      }
+    }
+    sellResellOrDistributeForm.bindFromRequest.fold(handleInvalidForm, handleValidForm)
   }
 }

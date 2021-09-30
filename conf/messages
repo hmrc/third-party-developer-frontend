@@ -137,6 +137,8 @@ agree.terms.of.use.required.field=Agree to our terms of use
 delete.application.confirmation.no.choice.field = Tell us if you want us to delete this application
 delete.client.secrets.confirmation.no.choice.field = Tell us if you want us to delete your client secrets
 
+sell.resell.distribute.confirmation.no.choice.field = Tell us if you will sell, resell or distribute your software
+
 developer.delete.error.required.field=Tell us if you want us to delete your account
 
 remove.team.member.confirmation.no.choice.field = Tell us if you want to delete this team member
