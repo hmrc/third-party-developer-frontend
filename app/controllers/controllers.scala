@@ -135,6 +135,8 @@ package object controllers {
 
     val deleteRedirectConfirmationNoChoiceKey = "delete.redirect.confirmation.no.choice.field"
 
+    val sellResellOrDistributeConfirmNoChoiceKey = "sell.resell.distribute.confirmation.no.choice.field"
+
     val verifyPasswordInvalidKey = "verify.password.error.required.field"
     val verifyPasswordInvalidGlobalKey = "verify.password.error.required.global"
 
