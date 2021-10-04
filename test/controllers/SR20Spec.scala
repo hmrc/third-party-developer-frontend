@@ -24,6 +24,7 @@ import domain.models.developers.{DeveloperSession, LoggedInState, Session}
 import domain.models.subscriptions.{ApiCategory, ApiData, VersionData}
 import mocks.connector.ApmConnectorMockModule
 import mocks.service.{ApplicationActionServiceMock, ApplicationServiceMock, SessionServiceMock}
+import org.jsoup.Jsoup
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
 import play.filters.csrf.CSRF.TokenProvider
@@ -35,7 +36,6 @@ import views.html.upliftJourney.{ConfirmApisView, ResponsibleIndividualView, Sel
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
-import org.jsoup.Jsoup
 
 class SR20Spec extends BaseControllerSpec
                 with SampleSession
@@ -190,6 +190,60 @@ class SR20Spec extends BaseControllerSpec
       status(result) shouldBe OK
 
       contentAsString(result) should include("Change my API subscriptions")
+    }
+
+    "The selected apis are saved on the 'Turn off API subscriptions you don’t need' view and 'save and continue' clicked" in new Setup {
+
+      val apiIdentifiers = Set(
+        ApiIdentifier(ApiContext("test-api-context-1"), ApiVersion("1.0"))
+      )
+
+      ApmConnectorMock.FetchUpliftableSubscriptions.willReturn(apiIdentifiers)
+      when(flowServiceMock.storeApiSubscriptions(*, *)).thenReturn(Future.successful(GetProductionCredentialsFlow("", None, None, None)))
+
+      private val result = controller.saveApiSubscriptionsSubmit(appId)(loggedInRequest.withCSRFToken.withFormUrlEncodedBody(
+        "test_api_context_1-1_0-subscribed" -> "true")
+      )
+
+      status(result) shouldBe SEE_OTHER
+      redirectLocation(result) shouldBe Some(s"/developer/applications/${appId.value}/confirm-subscriptions")
+    }
+
+    "An error screen is shown when all APIs are turned off on the 'Turn off API subscriptions you don’t need' view and 'save and continue' clicked" in new Setup {
+
+      ApmConnectorMock.FetchUpliftableSubscriptions.willReturn(Set(apiIdentifier1))
+
+      val testFlow = ApiSubscriptions(Map(apiIdentifier1 -> true))
+      when(flowServiceMock.fetchFlow(*)).thenReturn(Future.successful(GetProductionCredentialsFlow("", None, None, Some(testFlow))))
+      when(flowServiceMock.storeApiSubscriptions(*, *)).thenReturn(Future.successful(GetProductionCredentialsFlow("", None, None, None)))
+
+      private val result = controller.saveApiSubscriptionsSubmit(appId)(loggedInRequest.withCSRFToken.withFormUrlEncodedBody(
+        "test_api_context_1-1_0-subscribed" -> "false")
+      )
+
+      status(result) shouldBe OK
+      contentAsString(result) should include("You need at least 1 API subscription")
+    }
+
+    "The selected apis are saved when 'save and continue' clicked" in new Setup {
+
+      val testFlow = ApiSubscriptions(Map(apiIdentifier1 -> true, apiIdentifier2 -> true))
+
+      when(flowServiceMock.fetchFlow(*)).thenReturn(Future.successful(GetProductionCredentialsFlow("", None, None,
+        Some(testFlow))))
+
+      val apiIdentifiers = Set(
+        ApiIdentifier(ApiContext("test-api-context-1"), ApiVersion("1.0")),
+        ApiIdentifier(ApiContext("test-api-context-2"), ApiVersion("1.0"))
+      )
+
+      ApmConnectorMock.FetchUpliftableSubscriptions.willReturn(apiIdentifiers)
+      ApmConnectorMock.UpliftApplication.willReturn(appId)
+
+      private val result = controller.confirmApiSubscriptionsAction(appId)(loggedInRequest.withCSRFToken)
+
+      status(result) shouldBe SEE_OTHER
+      redirectLocation(result) shouldBe Some(s"/developer/applications/${appId.value}/request-check")
     }
   }
 
