@@ -26,7 +26,6 @@ import utils.CollaboratorTracker
 import utils.UserIdTracker
 
 trait ApplicationBuilder extends CollaboratorTracker {
-
   self: UserIdTracker =>
 
   def buildApplication(appOwnerEmail: String): Application = {
