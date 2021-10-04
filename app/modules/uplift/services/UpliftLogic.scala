@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package services
+package modules.uplift.services
 
 import service.AppsByTeamMemberService
 import domain.models.applications.ApplicationId
@@ -39,7 +39,7 @@ class UpliftLogic @Inject()(
   apmConnector: ApmConnector,
   sandboxApplicationConnector: ThirdPartyApplicationSandboxConnector,
   appsByTeamMember: AppsByTeamMemberService
-)( implicit ec: ExecutionContext ) {
+)(implicit ec: ExecutionContext) {
 
   import UpliftLogic._
 

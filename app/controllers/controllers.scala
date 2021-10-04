@@ -228,7 +228,6 @@ package object controllers {
 
   def fullnameValidator = textValidator(fullnameRequiredKey, fullnameMaxLengthKey, 100)
 
-  def requiredIndividualFullnameValidator = textValidator(responsibleIndividualFullnameRequiredKey, fullnameMaxLengthKey, 100)
 
   def telephoneValidator = Forms.text.verifying(telephoneRequiredKey, telephone => telephone.length > 0)
 
@@ -307,12 +306,6 @@ package object controllers {
 
   def environmentValidator = optional(text).verifying(environmentInvalidKey, s => s.fold(false)(isValidEnvironment))
 
-  def requiredIndividualEmailValidator(emailRequiredMessage: String = responsibleIndividualEmailAddressRequiredKey, maxLength: Int = 320) = {
-    Forms.text
-      .verifying(emailaddressNotValidKey, email => EmailAddress.isValid(email) || email.length == 0)
-      .verifying(emailMaxLengthKey, email => email.length <= maxLength)
-      .verifying(emailRequiredMessage, email => email.length > 0)
-  }
 
   private def isNotBlankString: String => Boolean = s => s.trim.length > 0
 

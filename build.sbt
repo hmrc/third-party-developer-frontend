@@ -56,8 +56,7 @@ lazy val microservice = Project(appName, file("."))
 
     retrieveManaged := true,
     routesGenerator := InjectedRoutesGenerator,
-    scalaVersion := "2.12.12",
-    routesImport += "controllers.binders._"
+    scalaVersion := "2.12.12"
   )
   .settings(
     resolvers += Resolver.typesafeRepo("releases")
@@ -93,6 +92,16 @@ lazy val microservice = Project(appName, file("."))
   )
   .settings(majorVersion := 0)
   .settings(scalacOptions ++= Seq("-Ypartial-unification"))
+  .settings(
+      routesImport ++= Seq(
+        // "controllers._",
+        "controllers.binders._",
+        "modules.uplift.controllers._",
+        "domain.models.controllers._",
+        "domain.models.applications._",
+        "domain.models.apidefinitions._"
+    )
+  )
   .settings(
     TwirlKeys.templateImports ++= Seq(
       "play.twirl.api.HtmlFormat",

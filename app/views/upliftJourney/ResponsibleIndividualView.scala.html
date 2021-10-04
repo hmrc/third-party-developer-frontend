@@ -14,7 +14,7 @@
  * limitations under the License.
  *@
 
-@import controllers.ResponsibleIndividualForm
+@import modules.uplift.controllers.UpliftJourneyController.ResponsibleIndividualForm
 @import domain.models.applications.ApplicationId
 @import domain.models.developers.DeveloperSession
 @import domain.models.views.BackButtonWithJavaScript
@@ -43,7 +43,7 @@
         <li>understands the <a href="/api-documentation/docs/terms-of-use" class="govuk-link">consequences of not meeting the terms of use</a></li>
     </ul>
 
-    @helper.form(action = controllers.routes.SR20.responsibleIndividualAction(applicationId), 'class -> "form") {
+    @helper.form(action = modules.uplift.controllers.routes.UpliftJourneyController.responsibleIndividualAction(applicationId), 'class -> "form") {
         <div class="form-field-group">
         @helper.CSRF.formField
 

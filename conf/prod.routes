@@ -1,4 +1,5 @@
 # Add all the application routes to the app.routes file
+->         /developer/profile    profile.Routes
 ->         /developer            app.Routes
 ->         /                     health.Routes
 ->         /template             template.Routes

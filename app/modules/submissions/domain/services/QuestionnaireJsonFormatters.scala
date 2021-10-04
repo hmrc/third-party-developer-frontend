@@ -14,17 +14,16 @@
  * limitations under the License.
  */
 
-package domain.models.applicationuplift
+package modules.questionnaires.domain.services
 
-import play.api.libs.json.{Format, Json}
+trait QuestionnaireJsonFormatters extends QuestionJsonFormatters with AskWhenJsonFormatters {
+  import play.api.libs.json._
+  import modules.questionnaires.domain.models._
 
-final case class SellResellOrDistribute(answer: String)
+  implicit val jsonFormatQuestionItem = Json.format[QuestionItem]
 
-object SellResellOrDistribute {
-  implicit val format: Format[SellResellOrDistribute] = Json.format[SellResellOrDistribute]
+  implicit val jsonFormatquestionnaireId = Json.valueFormat[QuestionnaireId]
+  implicit val jsonFormatquestionnaire = Json.format[Questionnaire]
 }
 
-
-
-
-
+object QuestionnaireJsonFormatters extends QuestionnaireJsonFormatters

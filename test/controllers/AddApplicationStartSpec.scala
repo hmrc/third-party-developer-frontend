@@ -42,7 +42,8 @@ import play.api.mvc.Headers
 import config.Off
 import domain.models.controllers.ApplicationSummary
 import views.html.upliftJourney.BeforeYouStartView
-import service.GetProductionCredentialsFlowService
+import modules.uplift.services.GetProductionCredentialsFlowService
+import modules.uplift.services.UpliftLogicMock
 
 class AddApplicationStartSpec
     extends BaseControllerSpec

@@ -41,7 +41,8 @@ import controllers.addapplication.AddApplication
 import builder._
 import config.UpliftJourneyConfigProvider
 import views.html.upliftJourney.BeforeYouStartView
-import service.GetProductionCredentialsFlowService
+import modules.uplift.services.GetProductionCredentialsFlowService
+import modules.uplift.services.UpliftLogicMock
 
 class AddApplicationSuccessSpec 
     extends BaseControllerSpec 

@@ -24,7 +24,8 @@ import controllers.UserRequest
 import domain.ApplicationCreatedResponse
 import domain.Error._
 import domain.models.apidefinitions.APISubscriptionStatus
-import domain.models.applicationuplift._
+import modules.uplift.services._
+import modules.uplift.domain.models._
 import domain.models.applications.Environment.{PRODUCTION, SANDBOX}
 import domain.models.applications._
 import domain.models.controllers.ApplicationSummary
@@ -34,7 +35,6 @@ import play.api.libs.crypto.CookieSigner
 import play.api.libs.json.Json
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
 import service._
-import services.UpliftLogic
 import uk.gov.hmrc.http.HeaderCarrier
 import views.helper.EnvironmentNameService
 import views.html._
@@ -163,7 +163,7 @@ class AddApplication @Inject() (
       _ <- flowService.storeApiSubscriptions(apiSubscriptions, request.developerSession)
     }
     yield {
-      Redirect(controllers.routes.SR20.confirmApiSubscriptionsPage(sandboxAppId))
+      Redirect( modules.uplift.controllers.routes.UpliftJourneyController.confirmApiSubscriptionsPage(sandboxAppId))
     }
   }
 

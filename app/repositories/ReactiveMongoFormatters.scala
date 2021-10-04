@@ -23,7 +23,7 @@ import uk.gov.hmrc.mongo.json.ReactiveMongoFormats
 import uk.gov.hmrc.play.json.Union
 import domain.models.flows.{EmailPreferencesFlow, NewApplicationEmailPreferencesFlow}
 import domain.models.flows.FlowType
-import service.GetProductionCredentialsFlow
+import modules.uplift.domain.models.GetProductionCredentialsFlow
 
 object ReactiveMongoFormatters {
   implicit val dateFormat: Format[DateTime] = ReactiveMongoFormats.dateTimeFormats

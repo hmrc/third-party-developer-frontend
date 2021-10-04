@@ -14,11 +14,11 @@
  * limitations under the License.
  */
 
-package mocks.service
+package modules.uplift.services
+
 
 import org.mockito.MockitoSugar
 import org.mockito.ArgumentMatchersSugar
-import services.UpliftLogic
 import domain.models.developers.UserId
 import scala.concurrent.Future._
 import domain.models.controllers.ApplicationSummary

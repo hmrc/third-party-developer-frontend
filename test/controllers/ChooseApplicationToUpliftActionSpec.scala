@@ -23,7 +23,9 @@ import mocks.service._
 import play.api.mvc.AnyContentAsEmpty
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
-import service.{AuditService, GetProductionCredentialsFlow, GetProductionCredentialsFlowService}
+import service.AuditService
+import modules.uplift.domain.models.GetProductionCredentialsFlow
+import modules.uplift.services._
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.time.DateTimeUtils
 import utils._
@@ -167,7 +169,7 @@ class ChooseApplicationToUpliftActionSpec
       val result = underTest.chooseApplicationToUpliftAction()(loggedInRequest.withFormUrlEncodedBody(("applicationId" -> sandboxAppId.value)))
 
       status(result) shouldBe SEE_OTHER
-      redirectLocation(result).value shouldBe controllers.routes.SR20.confirmApiSubscriptionsAction(sandboxAppId).toString()
+      redirectLocation(result).value shouldBe modules.uplift.controllers.routes.UpliftJourneyController.confirmApiSubscriptionsAction(sandboxAppId).toString()
     }
   }
 }

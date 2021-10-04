@@ -19,7 +19,7 @@ object AppDependencies {
     "uk.gov.hmrc" %% "govuk-template" % "5.61.0-play-26",
     "uk.gov.hmrc" %% "play-ui" % "8.21.0-play-26",
     "uk.gov.hmrc" %% "url-builder" % "3.4.0-play-26",
-    "uk.gov.hmrc" %% "play-json-union-formatter" % "1.11.0",
+    "uk.gov.hmrc" %% "play-json-union-formatter" % "1.15.0-play-26",
     "uk.gov.hmrc" %% "http-metrics" % "1.10.0",
     "uk.gov.hmrc" %% "json-encryption" % "4.8.0-play-26",
     "uk.gov.hmrc" %% "emailaddress" % "3.4.0",

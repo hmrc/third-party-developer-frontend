@@ -19,10 +19,10 @@
 @import include._
 @import domain.models.controllers.Crumb
 @import org.joda.time.format.DateTimeFormat
-@import controllers.TermsOfUseForm
 @import domain.models.controllers.ApplicationViewModel
 @import domain.models.views.BackButtonWithJavaScript
 @import domain.models.applications.ApplicationId
+@import modules.uplift.controllers.UpliftJourneyController.SellResellOrDistributeForm
 
 @this(devMain: DevMain2)
 
@@ -37,7 +37,7 @@
     back = BackButtonWithJavaScript,
     developerSession = Some(loggedIn)
 ) {
-    @helper.form(action = controllers.routes.SR20.sellResellOrDistributeYourSoftwareAction(applicationId), 'class -> "form") {
+    @helper.form(action = modules.uplift.controllers.routes.UpliftJourneyController.sellResellOrDistributeYourSoftwareAction(applicationId), 'class -> "form") {
     <div class="govuk-form-group @if(form.errors("answer").nonEmpty) {govuk-form-group--erro}">
         <fieldset id="answer" class="govuk-fieldset" role="group" aria-describedby="answer-error">
             <legend class="govuk-fieldset__legend govuk-fieldset__legend--l">

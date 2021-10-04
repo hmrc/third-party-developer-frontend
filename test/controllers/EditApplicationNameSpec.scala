@@ -41,7 +41,7 @@ import builder._
 import controllers.addapplication.AddApplication
 import config.UpliftJourneyConfigProvider
 import views.html.upliftJourney.BeforeYouStartView
-import service.GetProductionCredentialsFlowService
+import modules.uplift.services._
 
 class EditApplicationNameSpec 
     extends BaseControllerSpec 

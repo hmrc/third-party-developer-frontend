@@ -14,12 +14,13 @@
  * limitations under the License.
  */
 
-package controllers
+package modules.uplift.controllers
 
 import builder._
+import controllers.{BaseControllerSpec, SubscriptionTestHelperSugar}
 import domain.models.apidefinitions._
 import domain.models.applications.ApplicationWithSubscriptionData
-import domain.models.applicationuplift.{ApiSubscriptions, ResponsibleIndividual, SellResellOrDistribute}
+import modules.uplift.domain.models._
 import domain.models.developers.{DeveloperSession, LoggedInState, Session}
 import domain.models.subscriptions.{ApiCategory, ApiData, VersionData}
 import mocks.connector.ApmConnectorMockModule
@@ -28,16 +29,15 @@ import org.jsoup.Jsoup
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
 import play.filters.csrf.CSRF.TokenProvider
-import service.{GetProductionCredentialsFlow, GetProductionCredentialsFlowService}
 import uk.gov.hmrc.http.HeaderCarrier
 import utils.WithLoggedInSession._
 import utils.{LocalUserIdTracker, WithCSRFAddToken}
 import views.html.upliftJourney.{ConfirmApisView, ProductionCredentialsChecklistView, ResponsibleIndividualView, SellResellOrDistributeSoftwareView, TurnOffApisMasterView}
 
 import scala.concurrent.ExecutionContext.Implicits.global
-import scala.concurrent.Future
+import modules.uplift.services._
 
-class SR20Spec extends BaseControllerSpec
+class UpliftJourneyControllerSpec extends BaseControllerSpec
                 with SampleSession
                 with SampleApplication
                 with SubscriptionTestHelperSugar
@@ -46,7 +46,13 @@ class SR20Spec extends BaseControllerSpec
                 with DeveloperBuilder
                 with LocalUserIdTracker {
 
-  trait Setup extends ApplicationServiceMock with ApplicationActionServiceMock with ApmConnectorMockModule with SessionServiceMock {
+  trait Setup
+    extends ApplicationServiceMock 
+    with ApplicationActionServiceMock 
+    with ApmConnectorMockModule 
+    with GetProductionCredentialsFlowServiceMockModule
+    with UpliftJourneyServiceMockModule
+    with SessionServiceMock {
 
     implicit val hc = HeaderCarrier()
 
@@ -56,20 +62,19 @@ class SR20Spec extends BaseControllerSpec
     val sellResellOrDistributeSoftwareView = app.injector.instanceOf[SellResellOrDistributeSoftwareView]
     val productionCredentialsChecklistView = app.injector.instanceOf[ProductionCredentialsChecklistView]
 
-    val flowServiceMock = mock[GetProductionCredentialsFlowService]
-
-    val controller = new SR20(
+    val controller = new UpliftJourneyController(
       mockErrorHandler,
       sessionServiceMock,
       applicationActionServiceMock,
       applicationServiceMock,
+      UpliftJourneyServiceMock.aMock,
       mcc,
       cookieSigner,
       confirmApisView,
       turnOffApisMasterView,
       ApmConnectorMock.aMock,
       responsibleIndividualView,
-      flowServiceMock,
+      GPCFlowServiceMock.aMock,
       sellResellOrDistributeSoftwareView,
       productionCredentialsChecklistView
     )
@@ -144,12 +149,7 @@ class SR20Spec extends BaseControllerSpec
 
     "render the confirm apis view containing 1 upliftable api as there is only 1 upliftable api available to the application" in new Setup {
 
-      val testFlow = ApiSubscriptions(Map(apiIdentifier1 -> true))
-
-      when(flowServiceMock.fetchFlow(*)).thenReturn(Future.successful(GetProductionCredentialsFlow("", None, None,
-        Some(testFlow))))
-
-      ApmConnectorMock.FetchUpliftableSubscriptions.willReturn(Set(apiIdentifier1))
+      UpliftJourneyServiceMock.ApiSubscriptionData.thenReturns(Set("test-api-1 - 1.0"), false) 
 
       private val result = controller.confirmApiSubscriptionsPage(appId)(loggedInRequest.withCSRFToken)
 
@@ -160,12 +160,7 @@ class SR20Spec extends BaseControllerSpec
 
     "render the confirm apis view without the 'Change my API subscriptions' link as there is only 1 upliftable api available to the application" in new Setup {
 
-      val testFlow = ApiSubscriptions(Map(apiIdentifier1 -> true))
-
-      when(flowServiceMock.fetchFlow(*)).thenReturn(Future.successful(GetProductionCredentialsFlow("", None, None,
-        Some(testFlow))))
-
-      ApmConnectorMock.FetchUpliftableSubscriptions.willReturn(Set(apiIdentifier1))
+      UpliftJourneyServiceMock.ApiSubscriptionData.thenReturns(Set("test-api-1 - 1.0"), false)
 
       private val result = controller.confirmApiSubscriptionsPage(appId)(loggedInRequest.withCSRFToken)
 
@@ -176,16 +171,7 @@ class SR20Spec extends BaseControllerSpec
 
     "render the confirm apis view with the 'Change my API subscriptions' link as there is more than 1 upliftable api available to the application" in new Setup {
 
-      val testFlow = ApiSubscriptions(Map(apiIdentifier1 -> true, apiIdentifier2 -> true))
-
-      when(flowServiceMock.fetchFlow(*)).thenReturn(Future.successful(GetProductionCredentialsFlow("", None, None,
-        Some(testFlow))))
-
-      val apiIdentifiers = Set(
-        ApiIdentifier(ApiContext("test-api-context-1"), ApiVersion("1.0")),
-        ApiIdentifier(ApiContext("test-api-context-2"), ApiVersion("1.0"))
-      )
-      ApmConnectorMock.FetchUpliftableSubscriptions.willReturn(apiIdentifiers)
+      UpliftJourneyServiceMock.ApiSubscriptionData.thenReturns(Set("test-api-context-1", "test-api-context-2"), true)
 
       private val result = controller.confirmApiSubscriptionsPage(appId)(loggedInRequest.withCSRFToken)
 
@@ -200,8 +186,10 @@ class SR20Spec extends BaseControllerSpec
         ApiIdentifier(ApiContext("test-api-context-1"), ApiVersion("1.0"))
       )
 
+      UpliftJourneyServiceMock.ConfirmAndUplift.thenReturns(appId)
+
       ApmConnectorMock.FetchUpliftableSubscriptions.willReturn(apiIdentifiers)
-      when(flowServiceMock.storeApiSubscriptions(*, *)).thenReturn(Future.successful(GetProductionCredentialsFlow("", None, None, None)))
+      GPCFlowServiceMock.StoreApiSubscriptions.thenReturns(GetProductionCredentialsFlow("", None, None, None))
 
       private val result = controller.saveApiSubscriptionsSubmit(appId)(loggedInRequest.withCSRFToken.withFormUrlEncodedBody(
         "test_api_context_1-1_0-subscribed" -> "true")
@@ -216,8 +204,8 @@ class SR20Spec extends BaseControllerSpec
       ApmConnectorMock.FetchUpliftableSubscriptions.willReturn(Set(apiIdentifier1))
 
       val testFlow = ApiSubscriptions(Map(apiIdentifier1 -> true))
-      when(flowServiceMock.fetchFlow(*)).thenReturn(Future.successful(GetProductionCredentialsFlow("", None, None, Some(testFlow))))
-      when(flowServiceMock.storeApiSubscriptions(*, *)).thenReturn(Future.successful(GetProductionCredentialsFlow("", None, None, None)))
+      GPCFlowServiceMock.FetchFlow.thenReturns(GetProductionCredentialsFlow("", None, None, Some(testFlow)))
+      GPCFlowServiceMock.StoreApiSubscriptions.thenReturns(GetProductionCredentialsFlow("", None, None, None))
 
       private val result = controller.saveApiSubscriptionsSubmit(appId)(loggedInRequest.withCSRFToken.withFormUrlEncodedBody(
         "test_api_context_1-1_0-subscribed" -> "false")
@@ -229,23 +217,12 @@ class SR20Spec extends BaseControllerSpec
 
     "The selected apis are saved when 'save and continue' clicked" in new Setup {
 
-      val testFlow = ApiSubscriptions(Map(apiIdentifier1 -> true, apiIdentifier2 -> true))
-
-      when(flowServiceMock.fetchFlow(*)).thenReturn(Future.successful(GetProductionCredentialsFlow("", None, None,
-        Some(testFlow))))
-
-      val apiIdentifiers = Set(
-        ApiIdentifier(ApiContext("test-api-context-1"), ApiVersion("1.0")),
-        ApiIdentifier(ApiContext("test-api-context-2"), ApiVersion("1.0"))
-      )
-
-      ApmConnectorMock.FetchUpliftableSubscriptions.willReturn(apiIdentifiers)
-      ApmConnectorMock.UpliftApplication.willReturn(appId)
+      UpliftJourneyServiceMock.ConfirmAndUplift.thenReturns(appId)
 
       private val result = controller.confirmApiSubscriptionsAction(appId)(loggedInRequest.withCSRFToken)
 
       status(result) shouldBe SEE_OTHER
-      redirectLocation(result) shouldBe Some(s"/developer/applications/${appId.value}/request-check")
+      redirectLocation(result) shouldBe Some(s"/developer/applications/${appId.value}/production-credentials-checklist")
     }
   }
 
@@ -253,8 +230,7 @@ class SR20Spec extends BaseControllerSpec
 
     "initially render the 'responsible individual view' unpopulated" in new Setup {
 
-      when(flowServiceMock.fetchFlow(*)).thenReturn(Future.successful(GetProductionCredentialsFlow("", None, None, None)))
-      ApmConnectorMock.FetchUpliftableSubscriptions.willReturn(Set(apiIdentifier1))
+      UpliftJourneyServiceMock.ResponsibleIndividual.thenReturnsNone()
 
       private val result = controller.responsibleIndividual(appId)(loggedInRequest.withCSRFToken)
 
@@ -267,11 +243,7 @@ class SR20Spec extends BaseControllerSpec
 
     "render the 'responsible individual view' populated with a responsible individual" in new Setup {
 
-      when(flowServiceMock.fetchFlow(*)).thenReturn(
-        Future.successful(GetProductionCredentialsFlow("",
-          Some(ResponsibleIndividual("test full name", "test email address")), None, None)))
-
-      ApmConnectorMock.FetchUpliftableSubscriptions.willReturn(Set(apiIdentifier1))
+      UpliftJourneyServiceMock.ResponsibleIndividual.thenReturns(ResponsibleIndividual("test full name", "test email address"))
 
       private val result = controller.responsibleIndividual(appId)(loggedInRequest.withCSRFToken)
 
@@ -284,74 +256,72 @@ class SR20Spec extends BaseControllerSpec
 
     "render the 'responsible individual view' with errors when fullName and emailAddress are missing" in new Setup {
 
-        ApmConnectorMock.FetchUpliftableSubscriptions.willReturn(Set(apiIdentifier1))
+      UpliftJourneyServiceMock.ResponsibleIndividual.thenReturnsNone()
 
-        private val result = controller.responsibleIndividualAction(appId)(loggedInRequest.withCSRFToken.withFormUrlEncodedBody(
-          "fullName" -> "",
-          "emailAddress" -> ""
-        ))
+      private val result = controller.responsibleIndividualAction(appId)(loggedInRequest.withCSRFToken.withFormUrlEncodedBody(
+        "fullName" -> "",
+        "emailAddress" -> ""
+      ))
 
-        status(result) shouldBe BAD_REQUEST
+      status(result) shouldBe BAD_REQUEST
 
-        contentAsString(result) should include("Provide details for a responsible individual in your organisation")
-        contentAsString(result) should include("Provide a full name")
-        contentAsString(result) should include("Provide an email address")
-      }
+      contentAsString(result) should include("Provide details for a responsible individual in your organisation")
+      contentAsString(result) should include("Provide a full name")
+      contentAsString(result) should include("Provide an email address")
+    }
 
-      "render the 'responsible individual view' with errors when fullName is missing" in new Setup {
+    "render the 'responsible individual view' with errors when fullName is missing" in new Setup {
 
-        ApmConnectorMock.FetchUpliftableSubscriptions.willReturn(Set(apiIdentifier1))
+      UpliftJourneyServiceMock.ResponsibleIndividual.thenReturnsNone()
 
-        private val result = controller.responsibleIndividualAction(appId)(loggedInRequest.withCSRFToken.withFormUrlEncodedBody(
-          "fullName" -> "",
-          "emailAddress" -> "test.user@example.com"
-        ))
+      private val result = controller.responsibleIndividualAction(appId)(loggedInRequest.withCSRFToken.withFormUrlEncodedBody(
+        "fullName" -> "",
+        "emailAddress" -> "test.user@example.com"
+      ))
 
-        status(result) shouldBe BAD_REQUEST
+      status(result) shouldBe BAD_REQUEST
 
-        contentAsString(result) should include("Provide details for a responsible individual in your organisation")
-        contentAsString(result) should include("Provide a full name")
-        contentAsString(result) shouldNot include("Provide an email address")
-      }
+      contentAsString(result) should include("Provide details for a responsible individual in your organisation")
+      contentAsString(result) should include("Provide a full name")
+      contentAsString(result) shouldNot include("Provide an email address")
+    }
 
-      "render the 'responsible individual view' with errors when emailAddress is missing" in new Setup {
+    "render the 'responsible individual view' with errors when emailAddress is missing" in new Setup {
 
-        ApmConnectorMock.FetchUpliftableSubscriptions.willReturn(Set(apiIdentifier1))
+      ApmConnectorMock.FetchUpliftableSubscriptions.willReturn(Set(apiIdentifier1))
 
-        private val result = controller.responsibleIndividualAction(appId)(loggedInRequest.withCSRFToken.withFormUrlEncodedBody(
-          "fullName" -> "test user",
-          "emailAddress" -> ""
-        ))
+      private val result = controller.responsibleIndividualAction(appId)(loggedInRequest.withCSRFToken.withFormUrlEncodedBody(
+        "fullName" -> "test user",
+        "emailAddress" -> ""
+      ))
 
-        status(result) shouldBe BAD_REQUEST
+      status(result) shouldBe BAD_REQUEST
 
-        contentAsString(result) should include("Provide details for a responsible individual in your organisation")
-        contentAsString(result) shouldNot include("Provide a full name")
-        contentAsString(result) should include("Provide an email address")
-      }
+      contentAsString(result) should include("Provide details for a responsible individual in your organisation")
+      contentAsString(result) shouldNot include("Provide a full name")
+      contentAsString(result) should include("Provide an email address")
+    }
 
-      "render the 'responsible individual view' with errors when emailAddress is not valid" in new Setup {
+    "render the 'responsible individual view' with errors when emailAddress is not valid" in new Setup {
 
-        ApmConnectorMock.FetchUpliftableSubscriptions.willReturn(Set(apiIdentifier1))
+      ApmConnectorMock.FetchUpliftableSubscriptions.willReturn(Set(apiIdentifier1))
 
-        private val result = controller.responsibleIndividualAction(appId)(loggedInRequest.withCSRFToken.withFormUrlEncodedBody(
-          "fullName" -> "test user",
-          "emailAddress" -> "invalidemailaddress"
-        ))
+      private val result = controller.responsibleIndividualAction(appId)(loggedInRequest.withCSRFToken.withFormUrlEncodedBody(
+        "fullName" -> "test user",
+        "emailAddress" -> "invalidemailaddress"
+      ))
 
-        status(result) shouldBe BAD_REQUEST
+      status(result) shouldBe BAD_REQUEST
 
-        contentAsString(result) should include("Provide details for a responsible individual in your organisation")
-        contentAsString(result) shouldNot include("Provide a full name")
-        contentAsString(result) should include("Provide a valid email address")
-      }
+      contentAsString(result) should include("Provide details for a responsible individual in your organisation")
+      contentAsString(result) shouldNot include("Provide a full name")
+      contentAsString(result) should include("Provide a valid email address")
+    }
 
     "store the full name and email address from the 'responsible individual view' and redirect to next page" in new Setup {
 
       val testResponsibleIndividual = ResponsibleIndividual("test user", "test.user@example.com")
-
-      when(flowServiceMock.storeResponsibleIndividual(*, *)).thenReturn(Future.successful(GetProductionCredentialsFlow("", None, None, None)))
-
+      GPCFlowServiceMock.StoreResponsibleIndividual.thenReturns(testResponsibleIndividual, GetProductionCredentialsFlow("", Some(testResponsibleIndividual), None, None))
       ApmConnectorMock.FetchUpliftableSubscriptions.willReturn(Set(apiIdentifier1))
 
       private val result = controller.responsibleIndividualAction(appId)(loggedInRequest.withCSRFToken.withFormUrlEncodedBody(
@@ -360,16 +330,13 @@ class SR20Spec extends BaseControllerSpec
       ))
 
       status(result) shouldBe SEE_OTHER
-
-      verify(flowServiceMock).storeResponsibleIndividual(eqTo(testResponsibleIndividual), any[DeveloperSession])
     }
   }
 
   "sellResellOrDistributeYourSoftware" should {
 
     "initially render the 'sell resell or distribute your software view' with choices unselected" in new Setup {
-
-      when(flowServiceMock.fetchFlow(*)).thenReturn(Future.successful(GetProductionCredentialsFlow("", None, None, None)))
+      UpliftJourneyServiceMock.SellResellOrDistribute.thenReturnsNone()
 
       private val result = controller.sellResellOrDistributeYourSoftware(appId)(loggedInRequest.withCSRFToken)
 
@@ -378,39 +345,37 @@ class SR20Spec extends BaseControllerSpec
       contentAsString(result) should include("Will you sell, resell or distribute your software?")
     }
 
-   "render the 'sell resell or distribute your software view' with the answer 'Yes' selected" in new Setup {
+    "render the 'sell resell or distribute your software view' with the answer 'Yes' selected" in new Setup {
+      UpliftJourneyServiceMock.SellResellOrDistribute.thenReturns(SellResellOrDistribute("Yes"))
 
-     when(flowServiceMock.fetchFlow(*)).thenReturn(Future.successful(GetProductionCredentialsFlow("", None, Some(SellResellOrDistribute("Yes")), None)))
+      private val result = controller.sellResellOrDistributeYourSoftware(appId)(loggedInRequest.withCSRFToken)
 
-     private val result = controller.sellResellOrDistributeYourSoftware(appId)(loggedInRequest.withCSRFToken)
+      status(result) shouldBe OK
 
-     status(result) shouldBe OK
+      contentAsString(result) should include("Will you sell, resell or distribute your software?")
 
-     contentAsString(result) should include("Will you sell, resell or distribute your software?")
+      val document = Jsoup.parse(contentAsString(result))
+      document.getElementById("distribute-question-yes") shouldNot be(null)
+      document.getElementById("distribute-question-yes").hasAttr("checked") shouldBe true
+    }
 
-     val document = Jsoup.parse(contentAsString(result))
-     document.getElementById("distribute-question-yes") shouldNot be(null)
-     document.getElementById("distribute-question-yes").hasAttr("checked") shouldBe true
-   }
+    "render the 'sell resell or distribute your software view' with the answer 'No' selected" in new Setup {
+      UpliftJourneyServiceMock.SellResellOrDistribute.thenReturns(SellResellOrDistribute("No"))
 
-   "render the 'sell resell or distribute your software view' with the answer 'No' selected" in new Setup {
+      private val result = controller.sellResellOrDistributeYourSoftware(appId)(loggedInRequest.withCSRFToken)
 
-     when(flowServiceMock.fetchFlow(*)).thenReturn(Future.successful(GetProductionCredentialsFlow("", None, Some(SellResellOrDistribute("No")), None)))
+      status(result) shouldBe OK
 
-     private val result = controller.sellResellOrDistributeYourSoftware(appId)(loggedInRequest.withCSRFToken)
+      contentAsString(result) should include("Will you sell, resell or distribute your software?")
 
-     status(result) shouldBe OK
-
-     contentAsString(result) should include("Will you sell, resell or distribute your software?")
-
-     val document = Jsoup.parse(contentAsString(result))
-     document.getElementById("distribute-question-no") shouldNot be(null)
-     document.getElementById("distribute-question-no").hasAttr("checked") shouldBe true
-   }
+      val document = Jsoup.parse(contentAsString(result))
+      document.getElementById("distribute-question-no") shouldNot be(null)
+      document.getElementById("distribute-question-no").hasAttr("checked") shouldBe true
+    }
 
     "render the 'sell resell or distribute your software view' with an error when no selection has been made" in new Setup {
 
-      ApmConnectorMock.FetchUpliftableSubscriptions.willReturn(Set(apiIdentifier1))
+      UpliftJourneyServiceMock.SellResellOrDistribute.thenReturnsNone()
 
       private val result = controller.sellResellOrDistributeYourSoftwareAction(appId)(loggedInRequest.withCSRFToken)
 
@@ -424,38 +389,30 @@ class SR20Spec extends BaseControllerSpec
 
       val testSellResellOrDistribute = SellResellOrDistribute("Yes")
 
-      when(flowServiceMock.storeSellResellOrDistribute(*, *)).thenReturn(Future.successful(GetProductionCredentialsFlow("", None, None, None)))
-      when(flowServiceMock.storeApiSubscriptions(*, *)).thenReturn(Future.successful(GetProductionCredentialsFlow("", None, None, None)))
-
-      ApmConnectorMock.FetchUpliftableSubscriptions.willReturn(Set(apiIdentifier1))
+      GPCFlowServiceMock.StoreSellResellOrDistribute.thenReturns(testSellResellOrDistribute,GetProductionCredentialsFlow("", None, Some(testSellResellOrDistribute), None))
+      UpliftJourneyServiceMock.StoreDefaultSubscriptionsInFlow.thenReturns()
 
       private val result = controller.sellResellOrDistributeYourSoftwareAction(appId)(loggedInRequest.withCSRFToken.withFormUrlEncodedBody(
         "answer" -> testSellResellOrDistribute.answer
       ))
 
       status(result) shouldBe SEE_OTHER
-      redirectLocation(result) shouldBe Some(s"/developer/applications/myAppId/confirm-subscriptions")
-
-      verify(flowServiceMock).storeSellResellOrDistribute(eqTo(testSellResellOrDistribute), any[DeveloperSession])
+      redirectLocation(result) shouldBe Some("/developer/applications/myAppId/confirm-subscriptions")
     }
 
     "store the answer 'No' from the 'sell resell or distribute your software view' and redirect to next page" in new Setup {
 
       val testSellResellOrDistribute = SellResellOrDistribute("No")
-
-      when(flowServiceMock.storeSellResellOrDistribute(*, *)).thenReturn(Future.successful(GetProductionCredentialsFlow("", None, None, None)))
-      when(flowServiceMock.storeApiSubscriptions(*, *)).thenReturn(Future.successful(GetProductionCredentialsFlow("", None, None, None)))
-
-      ApmConnectorMock.FetchUpliftableSubscriptions.willReturn(Set(apiIdentifier1))
+      
+      GPCFlowServiceMock.StoreSellResellOrDistribute.thenReturns(testSellResellOrDistribute,GetProductionCredentialsFlow("", None, Some(testSellResellOrDistribute), None))
+      UpliftJourneyServiceMock.StoreDefaultSubscriptionsInFlow.thenReturns()
 
       private val result = controller.sellResellOrDistributeYourSoftwareAction(appId)(loggedInRequest.withCSRFToken.withFormUrlEncodedBody(
         "answer" -> testSellResellOrDistribute.answer
       ))
 
       status(result) shouldBe SEE_OTHER
-      redirectLocation(result) shouldBe Some(s"/developer/applications/myAppId/confirm-subscriptions")
-
-      verify(flowServiceMock).storeSellResellOrDistribute(eqTo(testSellResellOrDistribute), any[DeveloperSession])
+      redirectLocation(result) shouldBe Some("/developer/applications/myAppId/confirm-subscriptions")
     }
   }
 }
