@@ -23,6 +23,7 @@ import scala.concurrent.Future.{successful, failed}
 import domain.models.applications.ApplicationId
 import modules.uplift.domain.models._
 import modules.uplift
+import domain.models.apidefinitions.APISubscriptionStatus
 
 trait UpliftJourneyServiceMockModule extends MockitoSugar with ArgumentMatchersSugar {
   protected trait BaseUpliftJourneyServiceMock {
@@ -65,6 +66,10 @@ trait UpliftJourneyServiceMockModule extends MockitoSugar with ArgumentMatchersS
       def thenReturns(appId: ApplicationId) = when(aMock.confirmAndUplift(*[ApplicationId], *)(*)).thenReturn(successful(Right(appId)))
 
       def thenLeft(err: String) = when(aMock.confirmAndUplift(*[ApplicationId], *)(*)).thenReturn(successful(Left(err)))
+    }
+
+    object ChangeApiSubscriptions {
+      def thenReturns(out: List[APISubscriptionStatus]) = when(aMock.changeApiSubscriptions(*[ApplicationId], *, *)(*)).thenReturn(successful(out))
     }
   }
   

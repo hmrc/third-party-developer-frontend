@@ -36,6 +36,8 @@ import views.html.upliftJourney.{ConfirmApisView, ProductionCredentialsChecklist
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import modules.uplift.services._
+import controllers.SubscriptionTestHelperSugar
+
 
 class UpliftJourneyControllerSpec extends BaseControllerSpec
                 with SampleSession
@@ -224,6 +226,29 @@ class UpliftJourneyControllerSpec extends BaseControllerSpec
       status(result) shouldBe SEE_OTHER
       redirectLocation(result) shouldBe Some(s"/developer/applications/${appId.value}/production-credentials-checklist")
     }
+
+    "The selected apis are not save when 'save and continue' clicked but uplift fails" in new Setup {
+
+      UpliftJourneyServiceMock.ConfirmAndUplift.thenLeft("bang")
+
+      private val result = controller.confirmApiSubscriptionsAction(appId)(loggedInRequest.withCSRFToken)
+
+      status(result) shouldBe BAD_REQUEST
+    }
+  }
+
+  "changeApiSubscriptions" should {
+
+    "initially render the 'change api subscrptions view'" in new Setup {
+      UpliftJourneyServiceMock.ChangeApiSubscriptions.thenReturns(sampleSubscriptions)
+
+      private val result = controller.changeApiSubscriptions(appId)(loggedInRequest.withCSRFToken)
+
+      status(result) shouldBe OK
+
+      contentAsString(result) should include("Turn off API subscriptions you don’t need")
+    }
+    
   }
 
   "responsibleIndividual" should {

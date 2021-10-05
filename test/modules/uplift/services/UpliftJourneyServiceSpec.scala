@@ -17,7 +17,7 @@
 package modules.uplift.controllers
 
 import builder._
-import controllers.{BaseControllerSpec, SubscriptionTestHelperSugar}
+import controllers.SubscriptionTestHelperSugar
 import domain.models.apidefinitions._
 import domain.models.applications.ApplicationWithSubscriptionData
 import modules.uplift.domain.models._
@@ -26,19 +26,13 @@ import domain.models.developers.{DeveloperSession, LoggedInState, Session}
 import domain.models.subscriptions.{ApiCategory, ApiData, VersionData}
 import mocks.connector.ApmConnectorMockModule
 import mocks.service.{ApplicationActionServiceMock, ApplicationServiceMock, SessionServiceMock}
-import org.jsoup.Jsoup
-import play.api.test.FakeRequest
-import play.api.test.Helpers._
-import play.filters.csrf.CSRF.TokenProvider
 import uk.gov.hmrc.http.HeaderCarrier
-import utils.WithLoggedInSession._
-import utils.{LocalUserIdTracker, WithCSRFAddToken}
-import views.html.upliftJourney.{ConfirmApisView, ProductionCredentialsChecklistView, ResponsibleIndividualView, SellResellOrDistributeSoftwareView, TurnOffApisMasterView}
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 import modules.uplift.services.UpliftJourneyService
 import utils.AsyncHmrcSpec
+import utils.LocalUserIdTracker
 
 class UpliftJourneyServiceSpec
                 extends AsyncHmrcSpec
