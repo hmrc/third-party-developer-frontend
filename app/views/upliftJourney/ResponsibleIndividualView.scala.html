@@ -24,8 +24,8 @@
 
 @(applicationId: ApplicationId, form: Form[ResponsibleIndividualForm])(implicit request: play.api.mvc.Request[Any], loggedIn: DeveloperSession, messagesProvider: MessagesProvider, appConfig: config.ApplicationConfig)
 
-@titleError = { @if(form.errors.nonEmpty) {Error: } else {}}
-@title = @{ "Before you start" }
+@titleError = {@if(form.errors.nonEmpty) {Error: } else {}}
+@title = @{ "Responsible individual details" }
 
 @devMain(
   title = titleError + title,

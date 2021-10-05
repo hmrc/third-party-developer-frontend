@@ -28,7 +28,7 @@
 
 @(applicationId: ApplicationId, form: Form[SellResellOrDistributeForm])(implicit request: play.api.mvc.Request[Any], loggedIn: DeveloperSession, messagesProvider: MessagesProvider, appConfig: config.ApplicationConfig)
 
-@titleError = { @if(form.errors.nonEmpty) {Error: } else {}}
+@titleError = {@if(form.errors.nonEmpty) {Error: } else {}}
 @title = @{ "Will you sell, resell or distribute your software?" }
 
 @devMain(
@@ -37,8 +37,10 @@
     back = BackButtonWithJavaScript,
     developerSession = Some(loggedIn)
 ) {
+    @errorSummary2(form)
+
     @helper.form(action = controllers.routes.SR20.sellResellOrDistributeYourSoftwareAction(applicationId), 'class -> "form") {
-    <div class="govuk-form-group @if(form.errors("answer").nonEmpty) {govuk-form-group--erro}">
+    <div class="govuk-form-group @if(form.errors("answer").nonEmpty) {govuk-form-group--error}">
         <fieldset id="answer" class="govuk-fieldset" role="group" aria-describedby="answer-error">
             <legend class="govuk-fieldset__legend govuk-fieldset__legend--l">
                 <h1 class="govuk-fieldset__heading">
