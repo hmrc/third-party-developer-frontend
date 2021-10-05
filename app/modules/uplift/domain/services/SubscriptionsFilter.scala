@@ -14,14 +14,14 @@
  * limitations under the License.
  */
 
-package utils
+package modules.uplift.domain.services
 
-import org.mockito.{ArgumentMatchersSugar, MockitoSugar}
-import org.scalatest.{Matchers, OptionValues, WordSpec}
-import org.scalatestplus.play.WsScalaTestClient
-import play.api.test.{DefaultAwaitTimeout, FutureAwaits}
-import org.scalatest.EitherValues
+import domain.models.apidefinitions.ApiIdentifier
+import modules.uplift.domain.models.ApiSubscriptions
+import domain.models.apidefinitions.APISubscriptionStatus
 
-abstract class HmrcSpec extends WordSpec with Matchers with OptionValues with EitherValues with WsScalaTestClient with MockitoSugar with ArgumentMatchersSugar
-
-abstract class AsyncHmrcSpec extends HmrcSpec with DefaultAwaitTimeout with FutureAwaits {}
+object SubscriptionsFilter {
+    def apply(upliftableApiIds: Set[ApiIdentifier], subscriptionsFromFlow: ApiSubscriptions): (APISubscriptionStatus) => Boolean = (s) => {
+    upliftableApiIds.contains(s.apiIdentifier) && subscriptionsFromFlow.subscriptions.applyOrElse[ApiIdentifier, Boolean](s.apiIdentifier, _ => false)
+  }
+}

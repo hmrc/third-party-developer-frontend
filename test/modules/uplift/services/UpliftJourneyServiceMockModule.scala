@@ -47,8 +47,11 @@ trait UpliftJourneyServiceMockModule extends MockitoSugar with ArgumentMatchersS
     }
 
     object SellResellOrDistribute {
-      def thenReturns(out: uplift.domain.models.SellResellOrDistribute) = 
-        when(aMock.sellResellOrDistribute(*)).thenReturn(successful(Some(out)))
+      def thenReturnsYes() = 
+        when(aMock.sellResellOrDistribute(*)).thenReturn(successful(Some(uplift.domain.models.SellResellOrDistribute("Yes"))))
+        
+      def thenReturnsNo() = 
+        when(aMock.sellResellOrDistribute(*)).thenReturn(successful(Some(uplift.domain.models.SellResellOrDistribute("No"))))
         
       def thenReturnsNone() = 
         when(aMock.sellResellOrDistribute(*)).thenReturn(successful(None))

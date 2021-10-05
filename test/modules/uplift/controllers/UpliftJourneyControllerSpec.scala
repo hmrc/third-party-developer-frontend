@@ -361,7 +361,7 @@ class UpliftJourneyControllerSpec extends BaseControllerSpec
   "sellResellOrDistributeYourSoftware" should {
 
     "initially render the 'sell resell or distribute your software view' with choices unselected" in new Setup {
-      UpliftJourneyServiceMock.SellResellOrDistribute.thenReturnsNone()
+      UpliftJourneyServiceMock.SellResellOrDistribute.thenReturnsNone
 
       private val result = controller.sellResellOrDistributeYourSoftware(appId)(loggedInRequest.withCSRFToken)
 
@@ -371,7 +371,7 @@ class UpliftJourneyControllerSpec extends BaseControllerSpec
     }
 
     "render the 'sell resell or distribute your software view' with the answer 'Yes' selected" in new Setup {
-      UpliftJourneyServiceMock.SellResellOrDistribute.thenReturns(SellResellOrDistribute("Yes"))
+      UpliftJourneyServiceMock.SellResellOrDistribute.thenReturnsYes
 
       private val result = controller.sellResellOrDistributeYourSoftware(appId)(loggedInRequest.withCSRFToken)
 
@@ -385,7 +385,7 @@ class UpliftJourneyControllerSpec extends BaseControllerSpec
     }
 
     "render the 'sell resell or distribute your software view' with the answer 'No' selected" in new Setup {
-      UpliftJourneyServiceMock.SellResellOrDistribute.thenReturns(SellResellOrDistribute("No"))
+      UpliftJourneyServiceMock.SellResellOrDistribute.thenReturnsNo
 
       private val result = controller.sellResellOrDistributeYourSoftware(appId)(loggedInRequest.withCSRFToken)
 
