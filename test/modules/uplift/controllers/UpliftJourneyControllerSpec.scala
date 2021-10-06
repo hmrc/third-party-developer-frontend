@@ -64,6 +64,8 @@ class UpliftJourneyControllerSpec extends BaseControllerSpec
     val sellResellOrDistributeSoftwareView = app.injector.instanceOf[SellResellOrDistributeSoftwareView]
     val productionCredentialsChecklistView = app.injector.instanceOf[ProductionCredentialsChecklistView]
 
+    val sr20UpliftJourneySwitchMock = mock[SR20UpliftJourneySwitch]
+
     val controller = new UpliftJourneyController(
       mockErrorHandler,
       sessionServiceMock,
@@ -78,7 +80,8 @@ class UpliftJourneyControllerSpec extends BaseControllerSpec
       responsibleIndividualView,
       GPCFlowServiceMock.aMock,
       sellResellOrDistributeSoftwareView,
-      productionCredentialsChecklistView
+      productionCredentialsChecklistView,
+      sr20UpliftJourneySwitchMock
     )
 
     val appName: String = "app"

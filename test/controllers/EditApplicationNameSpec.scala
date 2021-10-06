@@ -39,9 +39,9 @@ import scala.concurrent.ExecutionContext.Implicits.global
 import utils.LocalUserIdTracker
 import builder._
 import controllers.addapplication.AddApplication
-import config.UpliftJourneyConfigProvider
 import views.html.upliftJourney.BeforeYouStartView
 import modules.uplift.services._
+import modules.uplift.controllers.SR20UpliftJourneySwitch
 
 class EditApplicationNameSpec 
     extends BaseControllerSpec 
@@ -66,7 +66,7 @@ class EditApplicationNameSpec
     val chooseApplicationToUpliftView = app.injector.instanceOf[ChooseApplicationToUpliftView]
 
     val beforeYouStartView: BeforeYouStartView = app.injector.instanceOf[BeforeYouStartView]
-    val upliftJourneyConfigProviderMock = mock[UpliftJourneyConfigProvider]
+    val sr20UpliftJourneySwitchMock = mock[SR20UpliftJourneySwitch]
 
     val flowServiceMock = mock[GetProductionCredentialsFlowService]
 
@@ -91,7 +91,7 @@ class EditApplicationNameSpec
       addApplicationSubordinateSuccessView,
       addApplicationNameView,
       chooseApplicationToUpliftView,
-      upliftJourneyConfigProviderMock,
+      sr20UpliftJourneySwitchMock,
       beforeYouStartView,
       flowServiceMock
     )

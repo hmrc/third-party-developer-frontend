@@ -16,7 +16,7 @@
 
 package controllers.addapplication
 
-import config.{ApplicationConfig, ErrorHandler, UpliftJourneyConfigProvider, On}
+import config.{ApplicationConfig, ErrorHandler}
 import connectors.ApmConnector
 import controllers.{AddApplicationNameForm, ApplicationController, ChooseApplicationToUpliftForm}
 import controllers.FormKeys.appNameField
@@ -42,10 +42,9 @@ import views.html._
 import javax.inject.{Inject, Singleton}
 import scala.concurrent.Future.successful
 import scala.concurrent.{ExecutionContext, Future}
-import scala.util.Try
-import config.OnDemand
 import views.html.upliftJourney.BeforeYouStartView
 import controllers.UserRequest
+import modules.uplift.controllers.SR20UpliftJourneySwitch
 
 @Singleton
 class AddApplication @Inject() (
@@ -67,7 +66,7 @@ class AddApplication @Inject() (
     addApplicationSubordinateSuccessView: AddApplicationSubordinateSuccessView,
     addApplicationNameView: AddApplicationNameView,
     chooseApplicationToUpliftView: ChooseApplicationToUpliftView,
-    upliftJourneyConfigProvider: UpliftJourneyConfigProvider,
+    sr20UpliftJourneySwitch: SR20UpliftJourneySwitch,
     beforeYouStartView: BeforeYouStartView,
     flowService: GetProductionCredentialsFlowService
 )(implicit val ec: ExecutionContext, val appConfig: ApplicationConfig, val environmentNameService: EnvironmentNameService)
@@ -86,17 +85,10 @@ class AddApplication @Inject() (
   }
   
   def addApplicationPrincipal(): Action[AnyContent] = loggedInAction { implicit request => 
-    
-    def upliftJourneyTurnedOnInRequestHeader: Boolean = 
-      request.headers.get("useNewUpliftJourney").fold(false) { setting =>
-        Try(setting.toBoolean).getOrElse(false) 
-      }
-
-    upliftJourneyConfigProvider.status match { 
-      case On => addApplicationProductionSwitch()(request)
-      case OnDemand if upliftJourneyTurnedOnInRequestHeader => addApplicationProductionSwitch()(request)
-      case _ => successful(Ok(addApplicationStartPrincipalView()))
-    }
+    sr20UpliftJourneySwitch.performSwitch(
+      addApplicationProductionSwitch()(request),              // new uplift path
+      successful(Ok(addApplicationStartPrincipalView()))      // existing uplift path
+    )
   }
   
   def tenDaysWarning(): Action[AnyContent] = loggedInAction { implicit request => 
@@ -109,17 +101,10 @@ class AddApplication @Inject() (
   }
 
   def progressOnUpliftJourney(sandboxAppId: ApplicationId): Action[AnyContent] = loggedInAction { implicit request =>
-
-    def upliftJourneyTurnedOnInRequestHeader: Boolean =
-      request.headers.get("useNewUpliftJourney").fold(false) { setting =>
-        Try(setting.toBoolean).getOrElse(false)
-        }
-
-    upliftJourneyConfigProvider.status match {
-      case On => successful(Ok(beforeYouStartView(sandboxAppId)))
-      case OnDemand if upliftJourneyTurnedOnInRequestHeader => successful(Ok(beforeYouStartView(sandboxAppId)))
-      case _ => showConfirmSubscriptionsPage(sandboxAppId)(request)
-    }
+    sr20UpliftJourneySwitch.performSwitch(
+      successful(Ok(beforeYouStartView(sandboxAppId))),        // new uplift path
+      showConfirmSubscriptionsPage(sandboxAppId)(request)      // existing uplift path
+    )
   }
 
   def soleApplicationToUpliftAction(appId: ApplicationId): Action[AnyContent] = loggedInAction { implicit request =>

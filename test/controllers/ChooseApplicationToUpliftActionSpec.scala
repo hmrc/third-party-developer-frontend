@@ -43,8 +43,8 @@ import play.api.mvc.Result
 import mocks.connector.ApmConnectorMockModule
 import controllers.addapplication.AddApplication
 import builder._
-import config.UpliftJourneyConfigProvider
 import views.html.upliftJourney.BeforeYouStartView
+import modules.uplift.controllers.SR20UpliftJourneySwitch
 
 class ChooseApplicationToUpliftActionSpec
     extends BaseControllerSpec 
@@ -74,7 +74,7 @@ class ChooseApplicationToUpliftActionSpec
     val chooseApplicationToUpliftView = app.injector.instanceOf[ChooseApplicationToUpliftView]
 
     val beforeYouStartView: BeforeYouStartView = app.injector.instanceOf[BeforeYouStartView]
-    val upliftJourneyConfigProviderMock = mock[UpliftJourneyConfigProvider]
+    val sr20UpliftJourneySwitchMock = mock[SR20UpliftJourneySwitch]
 
     val flowServiceMock = mock[GetProductionCredentialsFlowService]
     
@@ -99,7 +99,7 @@ class ChooseApplicationToUpliftActionSpec
       addApplicationSubordinateSuccessView,
       addApplicationNameView,
       chooseApplicationToUpliftView,
-      upliftJourneyConfigProviderMock,
+      sr20UpliftJourneySwitchMock,
       beforeYouStartView,
       flowServiceMock
     )

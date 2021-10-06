@@ -29,6 +29,7 @@ import domain.models.apidefinitions.APISubscriptionStatus
 import modules.uplift.domain.models._
 import modules.uplift.domain.services._
 import domain.models.apidefinitions.ApiContext
+import domain.models.applications.UpliftData
 
 @Singleton
 class UpliftJourneyService @Inject()(
@@ -47,11 +48,11 @@ class UpliftJourneyService @Inject()(
 
         apiIdsToSubscribeTo     <- liftF(apmConnector.fetchUpliftableSubscriptions(sandboxAppId).map(_.filter(subscriptionFlow.isSelected)))
         _                       <- cond(apiIdsToSubscribeTo.nonEmpty, (), "No apis found to subscribe to")
-        upliftedAppId           <- liftF(apmConnector.upliftApplication(sandboxAppId,apiIdsToSubscribeTo))
+        upliftData               = UpliftData(responsibleIndividual, sellResellOrDistribute, apiIdsToSubscribeTo)
+        upliftedAppId           <- liftF(apmConnector.upliftApplication(sandboxAppId, upliftData))
       } yield upliftedAppId
     )
     .value
-
 
   def changeApiSubscriptions(sandboxAppId: ApplicationId, developerSession: DeveloperSession, subscriptions: List[APISubscriptionStatus])(implicit hc: HeaderCarrier): Future[List[APISubscriptionStatus]] = 
     (

@@ -43,9 +43,9 @@ import scala.concurrent.Future
 import play.api.mvc.Result
 import mocks.connector.ApmConnectorMockModule
 import controllers.addapplication.AddApplication
-import config.UpliftJourneyConfigProvider
 import views.html.upliftJourney.BeforeYouStartView
 import modules.uplift.services.UpliftLogicMock
+import modules.uplift.controllers.SR20UpliftJourneySwitch
 
 class AddApplicationProductionSwitchSpec
     extends BaseControllerSpec
@@ -75,7 +75,7 @@ class AddApplicationProductionSwitchSpec
     val chooseApplicationToUpliftView = app.injector.instanceOf[ChooseApplicationToUpliftView]
     
     val beforeYouStartView: BeforeYouStartView = app.injector.instanceOf[BeforeYouStartView]
-    val upliftJourneyConfigProviderMock = mock[UpliftJourneyConfigProvider]
+    val sr20UpliftJourneySwitchMock = mock[SR20UpliftJourneySwitch]
 
     val flowServiceMock = mock[GetProductionCredentialsFlowService]
 
@@ -100,7 +100,7 @@ class AddApplicationProductionSwitchSpec
       addApplicationSubordinateSuccessView,
       addApplicationNameView,
       chooseApplicationToUpliftView,
-      upliftJourneyConfigProviderMock,
+      sr20UpliftJourneySwitchMock,
       beforeYouStartView,
       flowServiceMock
     )

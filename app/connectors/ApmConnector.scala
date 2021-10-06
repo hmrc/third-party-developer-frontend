@@ -109,8 +109,8 @@ with CommonResponseHandlers {
       http.GET[Map[ApiContext, ApiData]](s"${config.serviceBaseUrl}/api-definitions/all", Seq("environment" -> environment.toString()))
     }
 
-  def upliftApplication(applicationId: ApplicationId, subscriptions: Set[ApiIdentifier])(implicit hc: HeaderCarrier): Future[ApplicationId] = metrics.record(api) {
-    http.POST[Set[ApiIdentifier], ApplicationId](s"${config.serviceBaseUrl}/applications/${applicationId.value}/uplift", subscriptions)
+  def upliftApplication(applicationId: ApplicationId, upliftData: UpliftData)(implicit hc: HeaderCarrier): Future[ApplicationId] = metrics.record(api) {
+    http.POST[UpliftData, ApplicationId](s"${config.serviceBaseUrl}/applications/${applicationId.value}/uplift", upliftData)
   }
 }
 
