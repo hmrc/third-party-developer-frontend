@@ -16,6 +16,7 @@
 
 package views
 
+import java.time.Period
 import domain.models.applications._
 import domain.models.applications.Environment.PRODUCTION
 import domain.models.developers.LoggedInState
@@ -40,9 +41,9 @@ class LeftHandNavSpec extends CommonViewSpec with CollaboratorTracker with Local
     val clientId = ClientId("std-client-id")
     implicit val request = FakeRequest()
     implicit val loggedIn = utils.DeveloperSession("user@example.com", "Test", "Test", None, loggedInState = LoggedInState.LOGGED_IN)
-    val standardApplication = Application(applicationId, clientId, "name", now, now, None, 547, PRODUCTION, access = Standard())
-    val privilegedApplication = Application(applicationId, clientId, "name", now, now, None, 547, PRODUCTION, access = Privileged())
-    val ropcApplication = Application(applicationId, clientId, "name", now, now, None, 547, PRODUCTION, access = ROPC())
+    val standardApplication = Application(applicationId, clientId, "name", now, now, None, Period.ofDays(547), PRODUCTION, access = Standard())
+    val privilegedApplication = Application(applicationId, clientId, "name", now, now, None, Period.ofDays(547), PRODUCTION, access = Privileged())
+    val ropcApplication = Application(applicationId, clientId, "name", now, now, None, Period.ofDays(547), PRODUCTION, access = ROPC())
 
     def elementExistsById(doc: Document, id: String) = doc.select(s"#$id").asScala.nonEmpty
   }

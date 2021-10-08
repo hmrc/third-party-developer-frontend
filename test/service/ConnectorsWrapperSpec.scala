@@ -16,6 +16,7 @@
 
 package service
 
+import java.time.Period
 import config.ApplicationConfig
 import connectors._
 import domain.models.applications.{Application, ApplicationId, ClientId, Environment}
@@ -69,7 +70,7 @@ class ConnectorsWrapperSpec extends AsyncHmrcSpec {
 
   val productionApplicationId = ApplicationId("Application ID")
   val productionClientId = ClientId("hBnFo14C0y4SckYUbcoL2PbFA40a")
-  val grantLength = 547
+  val grantLength = Period.ofDays(547)
   val productionApplication =
     Application(productionApplicationId, productionClientId, "name", DateTimeUtils.now, DateTimeUtils.now, None, grantLength, Environment.PRODUCTION, Some("description"))
   val sandboxApplicationId = ApplicationId("Application ID")

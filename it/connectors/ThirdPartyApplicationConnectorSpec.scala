@@ -16,6 +16,7 @@
 
 package connectors
 
+import java.time.Period
 import java.util.UUID
 import java.util.UUID.randomUUID
 import com.github.tomakehurst.wiremock.client.WireMock._
@@ -42,13 +43,12 @@ import domain.models.apidefinitions.ApiContext
 import domain.models.apidefinitions.ApiVersion
 import domain.models.apidefinitions.ApiIdentifier
 
+
 class ThirdPartyApplicationConnectorSpec extends BaseConnectorIntegrationSpec with GuiceOneAppPerSuite with WireMockExtensions with CollaboratorTracker with LocalUserIdTracker {
   private val apiKey: String = UUID.randomUUID().toString
   private val clientId = ClientId(UUID.randomUUID().toString)
   private val applicationId = ApplicationId("applicationId")
   
-  // override val isEnabled = appConfig.hasSandbox;
-
   private val stubConfig = Configuration(
     "microservice.services.third-party-application-production.port" -> stubPort,
     "microservice.services.third-party-application-production.use-proxy" -> false,
@@ -101,7 +101,7 @@ class ThirdPartyApplicationConnectorSpec extends BaseConnectorIntegrationSpec wi
       DateTimeUtils.now,
       DateTimeUtils.now,
       None,
-      547,
+      Period.ofDays(547),
       connector.environment,
       Some("Description"),
       Set("john@example.com".asAdministratorCollaborator),

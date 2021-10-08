@@ -16,6 +16,8 @@
 
 package domain.models.controllers
 
+import java.time.Period
+
 import domain.models.applications._
 import domain.models.apidefinitions.AccessType
 import uk.gov.hmrc.http.NotFoundException
@@ -30,7 +32,7 @@ case class ApplicationSummary(
   termsOfUseStatus: TermsOfUseStatus,
   state: State,
   lastAccess: DateTime,
-  grantLength: Int,
+  grantLength: Period,
   serverTokenUsed: Boolean = false,
   createdOn: DateTime,
   accessType: AccessType,

@@ -16,6 +16,7 @@
 
 package service
 
+import java.time.Period
 import java.util.UUID
 import java.util.UUID.randomUUID
 
@@ -41,7 +42,7 @@ class ApplicationServiceClientSecretSpec extends AsyncHmrcSpec with Subscription
 
   val versionOne = ApiVersion("1.0")
   val versionTwo = ApiVersion("2.0")
-  val grantLength = 547
+  val grantLength = Period.ofDays(547)
 
   trait Setup {
     implicit val hc: HeaderCarrier = HeaderCarrier()

@@ -16,6 +16,7 @@
 
 package domain
 
+import java.time.Period
 import builder.DeveloperBuilder
 import domain.models.applications.Capabilities.{ChangeClientSecret, ViewCredentials}
 import domain.models.applications._
@@ -155,7 +156,7 @@ class ApplicationSpec extends FunSpec with Matchers with DeveloperBuilder with L
       DateTime.now(),
       DateTime.now(),
       None,
-      grantLength = 547,
+      grantLength = Period.ofDays(547),
       environment,
       description = None,
       collaborators = collaborators,

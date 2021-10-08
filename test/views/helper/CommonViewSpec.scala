@@ -16,6 +16,7 @@
 
 package views.helper
 
+import java.time.Period
 import java.util.Locale
 
 import config.ApplicationConfig
@@ -31,7 +32,7 @@ import utils.{AsyncHmrcSpec, SharedMetricsClearDown}
 trait CommonViewSpec extends AsyncHmrcSpec with GuiceOneAppPerSuite with SharedMetricsClearDown with Matchers {
   val mcc = app.injector.instanceOf[MessagesControllerComponents]
   val messagesApi = mcc.messagesApi
-  val grantLength = 547
+  val grantLength: Period = Period.ofDays(547)
   implicit val messagesProvider: MessagesProvider = MessagesImpl(Lang(Locale.ENGLISH), messagesApi)
   implicit val appConfig: ApplicationConfig = mock[ApplicationConfig]
 

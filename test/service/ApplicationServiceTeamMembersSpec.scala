@@ -16,6 +16,7 @@
 
 package service
 
+import java.time.Period
 import java.util.UUID.randomUUID
 
 import builder._
@@ -29,7 +30,7 @@ import domain.models.connectors.{DeskproTicket, TicketCreated}
 import domain.models.subscriptions.ApiSubscriptionFields
 import domain.models.subscriptions.ApiSubscriptionFields._
 import service.SubscriptionFieldsService.{DefinitionsByApiVersion, SubscriptionFieldsConnector}
-import uk.gov.hmrc.http.{HeaderCarrier}
+import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.play.audit.http.connector.AuditResult.Success
 import uk.gov.hmrc.time.DateTimeUtils
 import utils.AsyncHmrcSpec
@@ -114,11 +115,11 @@ class ApplicationServiceTeamMembersSpec extends AsyncHmrcSpec with Subscriptions
   val productionApplicationId = ApplicationId("Application ID")
   val productionClientId = ClientId(s"client-id-${randomUUID().toString}")
   val productionApplication: Application =
-    Application(productionApplicationId, productionClientId, "name", DateTimeUtils.now, DateTimeUtils.now, None, grantLength = 547, Environment.PRODUCTION, Some("description"), Set())
+    Application(productionApplicationId, productionClientId, "name", DateTimeUtils.now, DateTimeUtils.now, None, grantLength = Period.ofDays(547), Environment.PRODUCTION, Some("description"), Set())
   val sandboxApplicationId = ApplicationId("Application ID")
   val sandboxClientId = ClientId("Client ID")
   val sandboxApplication: Application =
-    Application(sandboxApplicationId, sandboxClientId, "name", DateTimeUtils.now, DateTimeUtils.now, None, grantLength = 547, Environment.SANDBOX, Some("description"))
+    Application(sandboxApplicationId, sandboxClientId, "name", DateTimeUtils.now, DateTimeUtils.now, None, grantLength = Period.ofDays(547), Environment.SANDBOX, Some("description"))
 
   def subStatusWithoutFieldValues(
       appId: ApplicationId,

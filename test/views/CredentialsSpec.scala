@@ -16,6 +16,7 @@
 
 package views
 
+import java.time.Period
 import domain.models.applications._
 import domain.models.developers.LoggedInState
 import org.joda.time.DateTime
@@ -49,7 +50,7 @@ class CredentialsSpec extends CommonViewSpec with WithCSRFAddToken with Collabor
       DateTime.now(),
       DateTime.now(),
       None,
-      547,
+      Period.ofDays(547),
       Environment.PRODUCTION,
       Some("Test Application"),
       collaborators = Set(developer.email.asAdministratorCollaborator),

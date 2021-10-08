@@ -16,6 +16,7 @@
 
 package utils
 
+import java.time.Period
 import java.util.UUID.randomUUID
 
 import domain.models.apidefinitions.AccessType
@@ -44,7 +45,7 @@ trait TestApplications {
   def anApplication(
       appId: ApplicationId = ApplicationId(randomUUID().toString),
       clientId: ClientId = ClientId(randomString(28)),
-      grantLength: Int = 547,
+      grantLength: Period = Period.ofDays(547),
       environment: Environment = Environment.PRODUCTION,
       state: ApplicationState = ApplicationState.production("test", "test"),
       adminEmail: String = "admin@example.com",
@@ -59,7 +60,7 @@ trait TestApplications {
       name = "App name 1",
       createdOn = DateTimeUtils.now,
       lastAccess = DateTimeUtils.now,
-      grantLength = 547,
+      grantLength = Period.ofDays(547),
       deployedTo = environment,
       description = Some("Description 1"),
       collaborators = Set(adminEmail.asAdministratorCollaborator, developerEmail.asDeveloperCollaborator),

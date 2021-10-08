@@ -16,6 +16,7 @@
 
 package builder
 
+import java.time.Period
 import java.util.UUID.randomUUID
 
 import uk.gov.hmrc.time.DateTimeUtils
@@ -41,7 +42,7 @@ trait ApplicationBuilder extends CollaboratorTracker {
       DateTimeUtils.now,
       DateTimeUtils.now,
       None,
-      grantLength = 547,
+      grantLength = Period.ofDays(547),
       Environment.SANDBOX,
       Some(s"$appId-description"),
       buildCollaborators(Seq(appOwnerEmail)),

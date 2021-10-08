@@ -16,6 +16,7 @@
 
 package controllers
 
+import java.time.Period
 import domain.models.applications._
 import org.joda.time.DateTime
 import org.scalatest.{Matchers, WordSpec}
@@ -29,8 +30,8 @@ class ApplicationSummaryTest extends WordSpec with Matchers with CollaboratorTra
     val user = "foo@bar.com".asDeveloperCollaborator
 
     val serverTokenApplication =
-      new Application(ApplicationId(""), ClientId(""), "", DateTime.now, DateTime.now, Some(DateTime.now), grantLength = 547, PRODUCTION, collaborators = Set(user))
-    val noServerTokenApplication = new Application(ApplicationId(""), ClientId(""), "", DateTime.now, DateTime.now, None, grantLength = 547, PRODUCTION, collaborators = Set(user))
+      new Application(ApplicationId(""), ClientId(""), "", DateTime.now, DateTime.now, Some(DateTime.now), grantLength = Period.ofDays(547), PRODUCTION, collaborators = Set(user))
+    val noServerTokenApplication = new Application(ApplicationId(""), ClientId(""), "", DateTime.now, DateTime.now, None, grantLength = Period.ofDays(547), PRODUCTION, collaborators = Set(user))
 
     "set serverTokenUsed if application has a date set for lastAccessTokenUsage" in {
       val summary = ApplicationSummary.from(serverTokenApplication.copy(deployedTo = SANDBOX), user.userId)

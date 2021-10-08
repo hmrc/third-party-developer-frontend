@@ -16,6 +16,8 @@
 
 package views
 
+import java.time.Period
+
 import controllers.TermsOfUseForm
 import domain.models.applications._
 import domain.models.developers.LoggedInState
@@ -51,7 +53,7 @@ class TermsOfUseSpec extends CommonViewSpec with WithCSRFAddToken {
     val appName = "an application"
     val createdOn = DateTimeUtils.now
     val lastAccess = DateTimeUtils.now
-    val grantLength = 550
+    val grantLength = Period.ofDays(547)
     val deployedTo = Environment.PRODUCTION
 
     "viewing an agreed application" should {

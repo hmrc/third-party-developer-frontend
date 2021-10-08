@@ -16,6 +16,7 @@
 
 package views
 
+import java.time.Period
 import domain.models.applications._
 import domain.models.developers.LoggedInState
 import org.jsoup.Jsoup
@@ -45,7 +46,7 @@ class DeleteSubordinateApplicationConfirmSpec extends CommonViewSpec with WithCS
       DateTimeUtils.now,
       DateTimeUtils.now,
       None,
-      547,
+      Period.ofDays(547),
       Environment.SANDBOX,
       Some("Description 1"),
       Set(loggedInDeveloper.email.asAdministratorCollaborator),

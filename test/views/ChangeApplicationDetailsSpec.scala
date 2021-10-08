@@ -16,6 +16,7 @@
 
 package views
 
+import java.time.Period
 import controllers.EditApplicationForm
 import domain.models.applications._
 import domain.models.developers.LoggedInState
@@ -58,7 +59,7 @@ class ChangeApplicationDetailsSpec extends CommonViewSpec with WithCSRFAddToken 
 
     "render" in {
 
-      val application = Application(applicationId, clientId, "An App Name", DateTimeUtils.now, DateTimeUtils.now, None, 547, Environment.SANDBOX)
+      val application = Application(applicationId, clientId, "An App Name", DateTimeUtils.now, DateTimeUtils.now, None, Period.ofDays(547), Environment.SANDBOX)
       val document = Jsoup.parse(renderPage(application).body)
 
       elementExistsByText(document, "h1", "Change application details") shouldBe true

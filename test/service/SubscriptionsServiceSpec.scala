@@ -16,6 +16,7 @@
 
 package service
 
+import java.time.Period
 import java.util.UUID.randomUUID
 
 import builder._
@@ -25,6 +26,7 @@ import domain.models.apidefinitions._
 import domain.models.applications._
 import uk.gov.hmrc.time.DateTimeUtils
 import utils.AsyncHmrcSpec
+
 import scala.concurrent.Future.successful
 import scala.concurrent.ExecutionContext.Implicits.global
 import service.PushPullNotificationsService.PushPullNotificationsConnector
@@ -40,7 +42,7 @@ class SubscriptionsServiceSpec extends AsyncHmrcSpec with SubscriptionsBuilder w
 
   val versionOne = ApiVersion("1.0")
   val versionTwo = ApiVersion("2.0")
-  val grantLength = 547
+  val grantLength: Period = Period.ofDays(547)
 
   trait Setup {
     implicit val hc: HeaderCarrier = HeaderCarrier()
