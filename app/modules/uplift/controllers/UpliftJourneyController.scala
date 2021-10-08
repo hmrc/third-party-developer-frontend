@@ -126,7 +126,7 @@ class UpliftJourneyController @Inject() (val errorHandler: ErrorHandler,
       )
     }
     
-    upliftJourneyService.confirmAndUplift(sandboxAppId, request.user).flatMap(_.fold(failed, success))
+    upliftJourneyService.confirmAndUplift(sandboxAppId, request.user, sr20UpliftJourneySwitch.shouldUseV2).flatMap(_.fold(failed, success))
   }
 
   def changeApiSubscriptions(sandboxAppId: ApplicationId): Action[AnyContent] = whenTeamMemberOnApp(sandboxAppId) { implicit request =>
@@ -238,10 +238,13 @@ class SR20UpliftJourneySwitch @Inject() (upliftJourneyConfigProvider: UpliftJour
       Try(setting.toBoolean).getOrElse(false)
     }
 
-  def performSwitch(newUpliftPath: Future[Result], existingUpliftPath: Future[Result])(implicit request: Request[_]): Future[Result] =
+  def shouldUseV2(implicit request: Request[_]): Boolean = 
     upliftJourneyConfigProvider.status match {
-      case On => newUpliftPath
-      case OnDemand if upliftJourneyTurnedOnInRequestHeader => newUpliftPath
-      case _ => existingUpliftPath
+      case On => true
+      case OnDemand if upliftJourneyTurnedOnInRequestHeader => true
+      case _ => false
     }
+
+  def performSwitch(newUpliftPath: => Future[Result], existingUpliftPath: => Future[Result])(implicit request: Request[_]): Future[Result] =
+    if(shouldUseV2) newUpliftPath else existingUpliftPath
 }

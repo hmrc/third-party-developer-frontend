@@ -23,7 +23,3 @@ final case class SellResellOrDistribute(answer: String) extends AnyVal
 object SellResellOrDistribute {
   implicit val format: Format[SellResellOrDistribute] = Json.valueFormat[SellResellOrDistribute]
 }
-
-
-
-

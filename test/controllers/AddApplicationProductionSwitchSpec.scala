@@ -46,6 +46,7 @@ import controllers.addapplication.AddApplication
 import views.html.upliftJourney.BeforeYouStartView
 import modules.uplift.services.UpliftLogicMock
 import modules.uplift.controllers.SR20UpliftJourneySwitch
+import config.UpliftJourneyConfigProvider
 
 class AddApplicationProductionSwitchSpec
     extends BaseControllerSpec
@@ -75,7 +76,8 @@ class AddApplicationProductionSwitchSpec
     val chooseApplicationToUpliftView = app.injector.instanceOf[ChooseApplicationToUpliftView]
     
     val beforeYouStartView: BeforeYouStartView = app.injector.instanceOf[BeforeYouStartView]
-    val sr20UpliftJourneySwitchMock = mock[SR20UpliftJourneySwitch]
+    val mockUpliftJourneyConfig = mock[UpliftJourneyConfigProvider]
+    val sr20UpliftJourneySwitchMock = new SR20UpliftJourneySwitch(mockUpliftJourneyConfig)
 
     val flowServiceMock = mock[GetProductionCredentialsFlowService]
 
@@ -188,7 +190,7 @@ class AddApplicationProductionSwitchSpec
 
       val prodAppId = ApplicationId.random
 
-      ApmConnectorMock.UpliftApplication.willReturn(prodAppId)
+      ApmConnectorMock.UpliftApplicationV1.willReturn(prodAppId)
 
       aUsersUplfitableAndNotUpliftableAppsReturns(summaries, upliftable.map(_.id))
       

@@ -185,7 +185,7 @@ class AddApplicationStartSpec
       contentAsString(result) should not include "Sign in"
     }
 
-    "return the uplift journey 'before you start' page when the UpliftJourneyConfigProvider returns On" +
+    "return the uplift journey 'before you start' page when the UpliftJourneyConfigProvider returns On " +
       "and we have only 1 application" in new Setup {
       when(appConfig.nameOfPrincipalEnvironment).thenReturn("QA")
       when(appConfig.nameOfSubordinateEnvironment).thenReturn("Development")

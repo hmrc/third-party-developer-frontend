@@ -38,7 +38,28 @@ class UpliftJourneyService @Inject()(
 )( implicit val ec: ExecutionContext ) extends EitherTHelper[String] {
   import cats.instances.future.catsStdInstancesForFuture
 
-  def confirmAndUplift(sandboxAppId: ApplicationId, developerSession: DeveloperSession)(implicit hc: HeaderCarrier): Future[Either[String, ApplicationId]] =
+  def confirmAndUplift(sandboxAppId: ApplicationId, developerSession: DeveloperSession, useV2: Boolean)(implicit hc: HeaderCarrier): Future[Either[String, ApplicationId]] =
+    if(useV2) 
+      confirmAndUpliftV2(sandboxAppId, developerSession)
+    else
+      confirmAndUpliftV1(sandboxAppId, developerSession)
+
+
+  def confirmAndUpliftV1(sandboxAppId: ApplicationId, developerSession: DeveloperSession)(implicit hc: HeaderCarrier): Future[Either[String, ApplicationId]] =
+    (
+      for {
+        flow                    <- liftF(flowService.fetchFlow(developerSession))
+        subscriptionFlow        <- fromOption(flow.apiSubscriptions, "No subscriptions set")
+
+        apiIdsToSubscribeTo     <- liftF(apmConnector.fetchUpliftableSubscriptions(sandboxAppId).map(_.filter(subscriptionFlow.isSelected)))
+        _                       <- cond(apiIdsToSubscribeTo.nonEmpty, (), "No apis found to subscribe to")
+        upliftedAppId           <- liftF(apmConnector.upliftApplicationV1(sandboxAppId, apiIdsToSubscribeTo))
+      } yield upliftedAppId
+    )
+    .value
+
+
+  def confirmAndUpliftV2(sandboxAppId: ApplicationId, developerSession: DeveloperSession)(implicit hc: HeaderCarrier): Future[Either[String, ApplicationId]] =
     (
       for {
         flow                    <- liftF(flowService.fetchFlow(developerSession))
@@ -49,7 +70,7 @@ class UpliftJourneyService @Inject()(
         apiIdsToSubscribeTo     <- liftF(apmConnector.fetchUpliftableSubscriptions(sandboxAppId).map(_.filter(subscriptionFlow.isSelected)))
         _                       <- cond(apiIdsToSubscribeTo.nonEmpty, (), "No apis found to subscribe to")
         upliftData               = UpliftData(responsibleIndividual, sellResellOrDistribute, apiIdsToSubscribeTo)
-        upliftedAppId           <- liftF(apmConnector.upliftApplication(sandboxAppId, upliftData))
+        upliftedAppId           <- liftF(apmConnector.upliftApplicationV2(sandboxAppId, upliftData))
       } yield upliftedAppId
     )
     .value

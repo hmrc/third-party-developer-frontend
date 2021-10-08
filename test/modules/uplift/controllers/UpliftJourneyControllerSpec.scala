@@ -37,7 +37,7 @@ import views.html.upliftJourney.{ConfirmApisView, ProductionCredentialsChecklist
 import scala.concurrent.ExecutionContext.Implicits.global
 import modules.uplift.services._
 import controllers.SubscriptionTestHelperSugar
-
+import config._
 
 class UpliftJourneyControllerSpec extends BaseControllerSpec
                 with SampleSession
@@ -64,7 +64,8 @@ class UpliftJourneyControllerSpec extends BaseControllerSpec
     val sellResellOrDistributeSoftwareView = app.injector.instanceOf[SellResellOrDistributeSoftwareView]
     val productionCredentialsChecklistView = app.injector.instanceOf[ProductionCredentialsChecklistView]
 
-    val sr20UpliftJourneySwitchMock = mock[SR20UpliftJourneySwitch]
+    val mockUpliftJourneyConfig = mock[UpliftJourneyConfigProvider]
+    val sr20UpliftJourneySwitchMock = new SR20UpliftJourneySwitch(mockUpliftJourneyConfig)
 
     val controller = new UpliftJourneyController(
       mockErrorHandler,
@@ -221,7 +222,7 @@ class UpliftJourneyControllerSpec extends BaseControllerSpec
     }
 
     "The selected apis are saved when 'save and continue' clicked" in new Setup {
-
+      when(mockUpliftJourneyConfig.status).thenReturn(On)
       UpliftJourneyServiceMock.ConfirmAndUplift.thenReturns(appId)
 
       private val result = controller.confirmApiSubscriptionsAction(appId)(loggedInRequest.withCSRFToken)

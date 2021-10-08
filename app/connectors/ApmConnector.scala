@@ -37,12 +37,22 @@ import uk.gov.hmrc.play.http.metrics.API
 import javax.inject.{Inject, Singleton}
 import scala.concurrent.{ExecutionContext, Future}
 
+object ApmConnector {
+  case class Config(serviceBaseUrl: String)
+
+  case class UpliftRequestV1(subscriptions: Set[ApiIdentifier])
+
+  import domain.services.ApiDefinitionsJsonFormatters._
+  implicit val writes = play.api.libs.json.Json.writes[UpliftRequestV1]
+}
+
 @Singleton
 class ApmConnector @Inject() (http: HttpClient, config: ApmConnector.Config, metrics: ConnectorMetrics)(implicit ec: ExecutionContext) 
 extends SubscriptionsConnector 
 with OpenAccessApisConnector 
 with CommonResponseHandlers {
   import ApmConnectorJsonFormatters._
+  import ApmConnector._
 
   val api = API("api-platform-microservice")
 
@@ -109,13 +119,11 @@ with CommonResponseHandlers {
       http.GET[Map[ApiContext, ApiData]](s"${config.serviceBaseUrl}/api-definitions/all", Seq("environment" -> environment.toString()))
     }
 
-  def upliftApplication(applicationId: ApplicationId, upliftData: UpliftData)(implicit hc: HeaderCarrier): Future[ApplicationId] = metrics.record(api) {
+  def upliftApplicationV1(applicationId: ApplicationId, subs: Set[ApiIdentifier])(implicit hc: HeaderCarrier): Future[ApplicationId] = metrics.record(api) {
+    http.POST[UpliftRequestV1, ApplicationId](s"${config.serviceBaseUrl}/applications/${applicationId.value}/uplift", UpliftRequestV1(subs))
+  }
+
+  def upliftApplicationV2(applicationId: ApplicationId, upliftData: UpliftData)(implicit hc: HeaderCarrier): Future[ApplicationId] = metrics.record(api) {
     http.POST[UpliftData, ApplicationId](s"${config.serviceBaseUrl}/applications/${applicationId.value}/uplift", upliftData)
   }
-}
-
-object ApmConnector {
-  case class Config(
-      serviceBaseUrl: String
-  )
 }

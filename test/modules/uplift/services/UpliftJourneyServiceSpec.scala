@@ -138,9 +138,9 @@ class UpliftJourneyServiceSpec
       val productionAppId = ApplicationId.random
       GPCFlowServiceMock.FetchFlow.thenReturns(GetProductionCredentialsFlow("", Some(aResponsibleIndividual), Some(sellResellOrDistribute), Some(aListOfSubscriptions)))
       ApmConnectorMock.FetchUpliftableSubscriptions.willReturn(Set(apiIdentifier1))
-      ApmConnectorMock.UpliftApplication.willReturn(productionAppId)
+      ApmConnectorMock.UpliftApplicationV1.willReturn(productionAppId)
 
-      private val result = await(underTest.confirmAndUplift(sandboxAppId, loggedInDeveloper))
+      private val result = await(underTest.confirmAndUplift(sandboxAppId, loggedInDeveloper, false))
 
       result.right.value shouldBe productionAppId
     }
@@ -148,7 +148,7 @@ class UpliftJourneyServiceSpec
     "fail when missing responsible individual" in new Setup {
       GPCFlowServiceMock.FetchFlow.thenReturns(GetProductionCredentialsFlow("", None, None, None))
 
-      private val result = await(underTest.confirmAndUplift(sandboxAppId, loggedInDeveloper))
+      private val result = await(underTest.confirmAndUplift(sandboxAppId, loggedInDeveloper, true))
 
       result.left.value shouldBe "No responsible individual set"
     }
@@ -156,7 +156,7 @@ class UpliftJourneyServiceSpec
     "fail when missing sell resell..." in new Setup {
       GPCFlowServiceMock.FetchFlow.thenReturns(GetProductionCredentialsFlow("", Some(aResponsibleIndividual), None, None))
 
-      private val result = await(underTest.confirmAndUplift(sandboxAppId, loggedInDeveloper))
+      private val result = await(underTest.confirmAndUplift(sandboxAppId, loggedInDeveloper, true))
 
       result.left.value shouldBe "No sell or resell or distribute set"
     }
@@ -164,7 +164,7 @@ class UpliftJourneyServiceSpec
     "fail when missing subscriptions" in new Setup {
       GPCFlowServiceMock.FetchFlow.thenReturns(GetProductionCredentialsFlow("", Some(aResponsibleIndividual), Some(sellResellOrDistribute), None))
 
-      private val result = await(underTest.confirmAndUplift(sandboxAppId, loggedInDeveloper))
+      private val result = await(underTest.confirmAndUplift(sandboxAppId, loggedInDeveloper, true))
 
       result.left.value shouldBe "No subscriptions set"
     }
@@ -173,7 +173,7 @@ class UpliftJourneyServiceSpec
       GPCFlowServiceMock.FetchFlow.thenReturns(GetProductionCredentialsFlow("", Some(aResponsibleIndividual), Some(sellResellOrDistribute), Some(aListOfSubscriptions)))
       ApmConnectorMock.FetchUpliftableSubscriptions.willReturn(Set())
 
-      private val result = await(underTest.confirmAndUplift(sandboxAppId, loggedInDeveloper))
+      private val result = await(underTest.confirmAndUplift(sandboxAppId, loggedInDeveloper, false))
 
       result.left.value shouldBe "No apis found to subscribe to"
     }

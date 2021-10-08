@@ -19,7 +19,7 @@ package modules.uplift.services
 import org.mockito.MockitoSugar
 import org.mockito.ArgumentMatchersSugar
 import org.mockito.verification.VerificationMode
-import scala.concurrent.Future.{successful, failed}
+import scala.concurrent.Future.successful
 import domain.models.applications.ApplicationId
 import modules.uplift.domain.models._
 import modules.uplift
@@ -66,9 +66,9 @@ trait UpliftJourneyServiceMockModule extends MockitoSugar with ArgumentMatchersS
     }
 
     object ConfirmAndUplift {
-      def thenReturns(appId: ApplicationId) = when(aMock.confirmAndUplift(*[ApplicationId], *)(*)).thenReturn(successful(Right(appId)))
+      def thenReturns(appId: ApplicationId) = when(aMock.confirmAndUplift(*[ApplicationId], *, *)(*)).thenReturn(successful(Right(appId)))
 
-      def thenLeft(err: String) = when(aMock.confirmAndUplift(*[ApplicationId], *)(*)).thenReturn(successful(Left(err)))
+      def thenLeft(err: String) = when(aMock.confirmAndUplift(*[ApplicationId], *, *)(*)).thenReturn(successful(Left(err)))
     }
 
     object ChangeApiSubscriptions {
