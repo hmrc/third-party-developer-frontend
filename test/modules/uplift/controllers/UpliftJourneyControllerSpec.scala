@@ -26,6 +26,7 @@ import domain.models.subscriptions.{ApiCategory, ApiData, VersionData}
 import mocks.connector.ApmConnectorMockModule
 import mocks.service.{ApplicationActionServiceMock, ApplicationServiceMock, SessionServiceMock}
 import org.jsoup.Jsoup
+import play.api.mvc.Result
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
 import play.filters.csrf.CSRF.TokenProvider
@@ -38,6 +39,7 @@ import scala.concurrent.ExecutionContext.Implicits.global
 import modules.uplift.services._
 import controllers.SubscriptionTestHelperSugar
 import config._
+import scala.concurrent.Future
 
 class UpliftJourneyControllerSpec extends BaseControllerSpec
                 with SampleSession
@@ -55,6 +57,13 @@ class UpliftJourneyControllerSpec extends BaseControllerSpec
     with GetProductionCredentialsFlowServiceMockModule
     with UpliftJourneyServiceMockModule
     with SessionServiceMock {
+
+    def titleOf(result: Future[Result]) = {
+      val titleRegEx = """<title[^>]*>(.*)</title>""".r
+      val title = titleRegEx.findFirstMatchIn(contentAsString(result)).map(_.group(1))
+      title.isDefined shouldBe true
+      title.get
+    }
 
     implicit val hc = HeaderCarrier()
 
@@ -265,6 +274,8 @@ class UpliftJourneyControllerSpec extends BaseControllerSpec
 
       status(result) shouldBe OK
 
+      titleOf(result) shouldBe "Responsible individual details - HMRC Developer Hub - GOV.UK"
+
       contentAsString(result) should include("Provide details for a responsible individual in your organisation")
       contentAsString(result) shouldNot include("test full name")
       contentAsString(result) shouldNot include("test email address")
@@ -294,6 +305,7 @@ class UpliftJourneyControllerSpec extends BaseControllerSpec
 
       status(result) shouldBe BAD_REQUEST
 
+      titleOf(result) shouldBe "Error: Responsible individual details - HMRC Developer Hub - GOV.UK"
       contentAsString(result) should include("Provide details for a responsible individual in your organisation")
       contentAsString(result) should include("Provide a full name")
       contentAsString(result) should include("Provide an email address")
@@ -310,6 +322,7 @@ class UpliftJourneyControllerSpec extends BaseControllerSpec
 
       status(result) shouldBe BAD_REQUEST
 
+      titleOf(result) shouldBe "Error: Responsible individual details - HMRC Developer Hub - GOV.UK"
       contentAsString(result) should include("Provide details for a responsible individual in your organisation")
       contentAsString(result) should include("Provide a full name")
       contentAsString(result) shouldNot include("Provide an email address")
@@ -326,6 +339,7 @@ class UpliftJourneyControllerSpec extends BaseControllerSpec
 
       status(result) shouldBe BAD_REQUEST
 
+      titleOf(result) shouldBe "Error: Responsible individual details - HMRC Developer Hub - GOV.UK"
       contentAsString(result) should include("Provide details for a responsible individual in your organisation")
       contentAsString(result) shouldNot include("Provide a full name")
       contentAsString(result) should include("Provide an email address")
@@ -342,6 +356,7 @@ class UpliftJourneyControllerSpec extends BaseControllerSpec
 
       status(result) shouldBe BAD_REQUEST
 
+      titleOf(result) shouldBe "Error: Responsible individual details - HMRC Developer Hub - GOV.UK"
       contentAsString(result) should include("Provide details for a responsible individual in your organisation")
       contentAsString(result) shouldNot include("Provide a full name")
       contentAsString(result) should include("Provide a valid email address")
@@ -370,6 +385,8 @@ class UpliftJourneyControllerSpec extends BaseControllerSpec
       private val result = controller.sellResellOrDistributeYourSoftware(appId)(loggedInRequest.withCSRFToken)
 
       status(result) shouldBe OK
+
+      titleOf(result) shouldBe "Will you sell, resell or distribute your software? - HMRC Developer Hub - GOV.UK"
 
       contentAsString(result) should include("Will you sell, resell or distribute your software?")
     }
@@ -409,6 +426,8 @@ class UpliftJourneyControllerSpec extends BaseControllerSpec
       private val result = controller.sellResellOrDistributeYourSoftwareAction(appId)(loggedInRequest.withCSRFToken)
 
       status(result) shouldBe BAD_REQUEST
+
+      titleOf(result) shouldBe "Error: Will you sell, resell or distribute your software? - HMRC Developer Hub - GOV.UK"
 
       contentAsString(result) should include("Will you sell, resell or distribute your software?")
       contentAsString(result) should include("Tell us if you will sell, resell or distribute your software")
