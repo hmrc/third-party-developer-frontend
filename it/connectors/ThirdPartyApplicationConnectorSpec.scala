@@ -91,8 +91,7 @@ class ThirdPartyApplicationConnectorSpec extends BaseConnectorIntegrationSpec wi
       connector.environment,
       Some("Description"),
       List("admin@example.com".asAdministratorCollaborator),
-      Standard(List("http://example.com/redirect"), Some("http://example.com/terms"), Some("http://example.com/privacy")),
-      None
+      Standard(List("http://example.com/redirect"), Some("http://example.com/terms"), Some("http://example.com/privacy"))
     )
 
     def applicationResponse(appId: ApplicationId, clientId: ClientId, appName: String = "My Application") = new Application(

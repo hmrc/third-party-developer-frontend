@@ -43,8 +43,7 @@ case class CreateApplicationRequest(
     environment: Environment,
     description: Option[String],
     collaborators: List[Collaborator],
-    access: Access = Standard(List.empty, None, None, Set.empty),
-    upliftData: Option[UpliftData]
+    access: Access = Standard(List.empty, None, None, Set.empty)
 )
 
 object CreateApplicationRequest extends ApplicationRequest {
@@ -54,8 +53,7 @@ object CreateApplicationRequest extends ApplicationRequest {
     name = form.applicationName.trim,
     environment = environment,
     description = None,
-    collaborators = List(Collaborator(user.email, CollaboratorRole.ADMINISTRATOR, user.developer.userId)),
-    upliftData = None
+    collaborators = List(Collaborator(user.email, CollaboratorRole.ADMINISTRATOR, user.developer.userId))
   )
 }
 

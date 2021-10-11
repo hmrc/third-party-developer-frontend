@@ -40,10 +40,12 @@ import scala.concurrent.{ExecutionContext, Future}
 object ApmConnector {
   case class Config(serviceBaseUrl: String)
 
-  case class UpliftRequestV1(subscriptions: Set[ApiIdentifier])
+  case class RequestUpliftV1(subscriptions: Set[ApiIdentifier])
+  case class RequestUpliftV2(upliftRequest: UpliftData)
 
   import domain.services.ApiDefinitionsJsonFormatters._
-  implicit val writes = play.api.libs.json.Json.writes[UpliftRequestV1]
+  implicit val writesV1 = play.api.libs.json.Json.writes[RequestUpliftV1]
+  implicit val writesV2 = play.api.libs.json.Json.writes[RequestUpliftV2]
 }
 
 @Singleton
@@ -120,10 +122,10 @@ with CommonResponseHandlers {
     }
 
   def upliftApplicationV1(applicationId: ApplicationId, subs: Set[ApiIdentifier])(implicit hc: HeaderCarrier): Future[ApplicationId] = metrics.record(api) {
-    http.POST[UpliftRequestV1, ApplicationId](s"${config.serviceBaseUrl}/applications/${applicationId.value}/uplift", UpliftRequestV1(subs))
+    http.POST[RequestUpliftV1, ApplicationId](s"${config.serviceBaseUrl}/applications/${applicationId.value}/uplift", RequestUpliftV1(subs))
   }
 
   def upliftApplicationV2(applicationId: ApplicationId, upliftData: UpliftData)(implicit hc: HeaderCarrier): Future[ApplicationId] = metrics.record(api) {
-    http.POST[UpliftData, ApplicationId](s"${config.serviceBaseUrl}/applications/${applicationId.value}/uplift", upliftData)
+    http.POST[RequestUpliftV2, ApplicationId](s"${config.serviceBaseUrl}/applications/${applicationId.value}/uplift", RequestUpliftV2(upliftData))
   }
 }
