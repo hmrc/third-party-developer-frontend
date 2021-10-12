@@ -33,7 +33,7 @@ import play.filters.csrf.CSRF.TokenProvider
 import uk.gov.hmrc.http.HeaderCarrier
 import utils.WithLoggedInSession._
 import utils.{LocalUserIdTracker, WithCSRFAddToken}
-import views.html.upliftJourney.{ConfirmApisView, ProductionCredentialsChecklistView, ResponsibleIndividualView, SellResellOrDistributeSoftwareView, TurnOffApisMasterView}
+import modules.uplift.views.html.{ConfirmApisView, ProductionCredentialsChecklistView, ResponsibleIndividualView, SellResellOrDistributeSoftwareView, TurnOffApisMasterView}
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import modules.uplift.services._

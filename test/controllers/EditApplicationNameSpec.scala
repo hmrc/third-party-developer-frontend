@@ -39,7 +39,7 @@ import scala.concurrent.ExecutionContext.Implicits.global
 import utils.LocalUserIdTracker
 import builder._
 import controllers.addapplication.AddApplication
-import views.html.upliftJourney.BeforeYouStartView
+import modules.uplift.views.html.BeforeYouStartView
 import modules.uplift.services._
 import modules.uplift.controllers.UpliftJourneySwitch
 

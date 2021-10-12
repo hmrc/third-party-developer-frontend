@@ -28,7 +28,7 @@ import play.api.libs.crypto.CookieSigner
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents, Result}
 import service.{ApplicationActionService, ApplicationService, SessionService}
 import views.helper.IdFormatter
-import views.html.upliftJourney._
+import modules.uplift.views.html._
 import modules.uplift.services.GetProductionCredentialsFlowService
 
 import javax.inject.{Inject, Singleton}
@@ -225,7 +225,7 @@ class UpliftJourneyController @Inject() (val errorHandler: ErrorHandler,
     sellResellOrDistributeForm.bindFromRequest.fold(handleInvalidForm, handleValidForm)
   }
 
-  def productionCredentialsChecklist(sandboxAppId: ApplicationId): Action[AnyContent] = whenTeamMemberOnApp(sandboxAppId) { implicit request =>
+  def productionCredentialsChecklist(productionAppId: ApplicationId): Action[AnyContent] = whenTeamMemberOnApp(productionAppId) { implicit request =>
     successful(Ok(productionCredentialsChecklistView(request.application.name)))
   }
 }
