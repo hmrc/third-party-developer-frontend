@@ -16,6 +16,8 @@
 
 package domain.models.applications
 
+import java.time.Period
+
 import domain.models.apidefinitions.AccessType.STANDARD
 import domain.models.applications.Capabilities.{ChangeClientSecret, SupportsDetails, ViewPushSecret}
 import domain.models.applications.Environment._
@@ -26,6 +28,7 @@ import domain.models.developers.Developer
 import helpers.string.Digest
 import org.joda.time.DateTime
 import java.util.UUID
+
 import domain.models.developers.UserId
 import domain.models.apidefinitions.ApiIdentifier
 
@@ -40,17 +43,20 @@ object ApplicationId {
 
 case class ClientId(value: String) extends AnyVal
 
+
 object ClientId {
   import play.api.libs.json.Json
   implicit val clientIdFormat = Json.valueFormat[ClientId]
 }
 
 trait BaseApplication {
+  val defaultGrantLengthDays = 547
   def id: ApplicationId
   def clientId: ClientId
   def name: String
   def createdOn: DateTime
   def lastAccess: DateTime
+  def grantLength: Period
   def lastAccessTokenUsage: Option[DateTime]
   def deployedTo: Environment
   def description: Option[String]
@@ -146,23 +152,26 @@ trait BaseApplication {
   def findCollaboratorByHash(teamMemberHash: String): Option[Collaborator] = {
     collaborators.find(c => c.emailAddress.toSha256 == teamMemberHash)
   }
+
+  def grantLengthDisplayValue: String = s"${Math.round(grantLength.getDays/30)} months"
 }
 
 
 case class Application(
-    val id: ApplicationId,
-    val clientId: ClientId,
-    val name: String,
-    val createdOn: DateTime,
-    val lastAccess: DateTime,
-    val lastAccessTokenUsage: Option[DateTime] = None, // API-4376: Temporary inclusion whilst Server Token functionality is retired
-    val deployedTo: Environment,
-    val description: Option[String] = None,
-    val collaborators: Set[Collaborator] = Set.empty,
-    val access: Access = Standard(),
-    val state: ApplicationState = ApplicationState.testing,
-    val checkInformation: Option[CheckInformation] = None,
-    val ipAllowlist: IpAllowlist = IpAllowlist()
+  val id: ApplicationId,
+  val clientId: ClientId,
+  val name: String,
+  val createdOn: DateTime,
+  val lastAccess: DateTime,
+  val lastAccessTokenUsage: Option[DateTime] = None, // API-4376: Temporary inclusion whilst Server Token functionality is retired
+  val grantLength: Period,
+  val deployedTo: Environment,
+  val description: Option[String] = None,
+  val collaborators: Set[Collaborator] = Set.empty,
+  val access: Access = Standard(),
+  val state: ApplicationState = ApplicationState.testing,
+  val checkInformation: Option[CheckInformation] = None,
+  val ipAllowlist: IpAllowlist = IpAllowlist()
 ) extends BaseApplication
 
 
@@ -176,7 +185,6 @@ object Application {
   implicit val ordering: Ordering[Application] = Ordering.by(_.name)
 }
 
-
 case class ApplicationWithSubscriptionIds(
   val id: ApplicationId,
   val clientId: ClientId,
@@ -184,6 +192,7 @@ case class ApplicationWithSubscriptionIds(
   val createdOn: DateTime,
   val lastAccess: DateTime,
   val lastAccessTokenUsage: Option[DateTime] = None,
+  val grantLength: Period = Period.ofDays(547),
   val deployedTo: Environment,
   val description: Option[String] = None,
   val collaborators: Set[Collaborator] = Set.empty,
@@ -211,6 +220,7 @@ object ApplicationWithSubscriptionIds {
       app.createdOn,
       app.lastAccess,
       app.lastAccessTokenUsage,
+      app.grantLength,
       app.deployedTo,
       app.description,
       app.collaborators,

@@ -223,6 +223,7 @@ class CheckYourAnswersSpec
         DateTimeUtils.now,
         DateTimeUtils.now,
         None,
+        grantLength,
         Environment.PRODUCTION,
         collaborators = collaborators,
         access = access,

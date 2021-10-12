@@ -16,11 +16,14 @@
 
 package service
 
+import java.time.Period
+
 import config.ApplicationConfig
 import domain.models.applications._
 import org.joda.time.{DateTime, Duration, Instant, LocalDate}
 import uk.gov.hmrc.http.HeaderCarrier
 import mocks.service._
+
 import scala.concurrent.ExecutionContext.Implicits.global
 import utils._
 
@@ -42,6 +45,7 @@ class MfaMandateServiceSpec extends AsyncHmrcSpec with CollaboratorTracker with 
 
     val applicationId = ApplicationId("myId")
     val clientId = ClientId("myClientId")
+    val grantLength: Period = Period.ofDays(547)
 
     val applicationsWhereUserIsAdminInProduction = 
       Seq(
@@ -52,6 +56,7 @@ class MfaMandateServiceSpec extends AsyncHmrcSpec with CollaboratorTracker with 
           new DateTime(),
           new DateTime(),
           None,
+          grantLength,
           Environment.PRODUCTION,
           collaborators = Set(email.asAdministratorCollaborator),
           subscriptions = Set.empty
@@ -67,6 +72,7 @@ class MfaMandateServiceSpec extends AsyncHmrcSpec with CollaboratorTracker with 
           new DateTime(),
           new DateTime(),
           None,
+          grantLength,
           Environment.PRODUCTION,
           collaborators = Set(email.asDeveloperCollaborator),
           subscriptions = Set.empty
@@ -82,6 +88,7 @@ class MfaMandateServiceSpec extends AsyncHmrcSpec with CollaboratorTracker with 
           new DateTime(),
           new DateTime(),
           None,
+          grantLength,
           Environment.PRODUCTION,
           subscriptions = Set.empty          
         )

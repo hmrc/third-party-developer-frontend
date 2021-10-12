@@ -42,6 +42,7 @@ class TermsOfUseSpec extends CommonViewSpec with WithCSRFAddToken with Collabora
         DateTimeUtils.now,
         DateTimeUtils.now,
         None,
+        grantLength,
         Environment.PRODUCTION,
         Some("APPLICATION DESCRIPTION"),
         Set("sample@example.com".asAdministratorCollaborator, "someone@example.com".asDeveloperCollaborator),

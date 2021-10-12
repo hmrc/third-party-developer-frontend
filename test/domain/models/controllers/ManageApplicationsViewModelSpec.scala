@@ -16,6 +16,7 @@
 
 package domain.models.controllers
 
+import java.time.Period
 import domain.models.applications._
 import org.joda.time.DateTime
 import domain.models.apidefinitions.AccessType
@@ -24,6 +25,7 @@ import domain.models.applications.CollaboratorRole.DEVELOPER
 import org.scalatest.{Matchers, WordSpec}
 
 class ManageApplicationsViewModelSpec extends WordSpec with Matchers {
+  val grantLength = Period.ofDays(547)
   "noProductionApplications" should {
     val sandboxApp =
       ApplicationSummary(
@@ -33,6 +35,7 @@ class ManageApplicationsViewModelSpec extends WordSpec with Matchers {
         TermsOfUseStatus.AGREED,
         TESTING,
         new DateTime(),
+        grantLength,
         serverTokenUsed = false,
         new DateTime(),
         AccessType.STANDARD,
@@ -48,6 +51,7 @@ class ManageApplicationsViewModelSpec extends WordSpec with Matchers {
         TermsOfUseStatus.AGREED,
         TESTING,
         new DateTime(),
+        grantLength,
         serverTokenUsed = false,
         new DateTime(),
         AccessType.STANDARD,

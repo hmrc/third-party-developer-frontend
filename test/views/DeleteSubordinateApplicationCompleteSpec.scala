@@ -47,6 +47,7 @@ class DeleteSubordinateApplicationCompleteSpec extends CommonViewSpec with WithC
         DateTimeUtils.now,
         DateTimeUtils.now,
         None,
+        grantLength,
         Environment.SANDBOX,
         Some("Description 1"),
         Set(loggedInDeveloper.email.asAdministratorCollaborator),

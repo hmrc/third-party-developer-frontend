@@ -16,6 +16,7 @@
 
 package views
 
+import java.time.Period
 import domain.models.applications._
 import domain.models.applications.CollaboratorRole.{ADMINISTRATOR, DEVELOPER}
 import domain.models.developers.LoggedInState
@@ -41,6 +42,7 @@ class RedirectsSpec extends CommonViewSpec with WithCSRFAddToken with Collaborat
     DateTimeUtils.now,
     DateTimeUtils.now,
     None,
+    Period.ofDays(547),
     Environment.PRODUCTION,
     Some("Description 1"),
     Set(loggedInDeveloper.email.asAdministratorCollaborator, loggedInDev.email.asDeveloperCollaborator),

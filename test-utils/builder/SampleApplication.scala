@@ -16,6 +16,7 @@
 
 package builder
 
+import java.time.Period
 import domain.models.applications._
 import uk.gov.hmrc.time.DateTimeUtils
 import utils.CollaboratorTracker
@@ -33,6 +34,7 @@ trait SampleApplication {
     DateTimeUtils.now,
     DateTimeUtils.now,
     None,
+    grantLength = Period.ofDays(547),
     Environment.PRODUCTION,
     Some("Description 1"),
     Set(loggedInDeveloper.email.asAdministratorCollaborator),

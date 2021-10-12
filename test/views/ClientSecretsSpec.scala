@@ -16,6 +16,7 @@
 
 package views
 
+import java.time.Period
 import java.util.UUID
 import java.util.UUID.randomUUID
 
@@ -65,6 +66,7 @@ class ClientSecretsSpec extends CommonViewSpec with WithCSRFAddToken with Collab
       DateTime.now(),
       DateTime.now(),
       None,
+      Period.ofDays(547),
       Environment.PRODUCTION,
       Some("Test Application"),
       collaborators = Set(developer.email.asAdministratorCollaborator),

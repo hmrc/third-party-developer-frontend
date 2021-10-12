@@ -47,6 +47,7 @@ class SubscribeRequestSubmittedSpec extends CommonViewSpec with WithCSRFAddToken
         DateTimeUtils.now,
         DateTimeUtils.now,
         None,
+        grantLength,
         Environment.PRODUCTION,
         Some("Test Application Description"),
         Set(developer.email.asAdministratorCollaborator),

@@ -223,7 +223,8 @@ class FormValidationSpec extends AsyncHmrcSpec {
       "description" -> "Application description",
       "redirectUris[0]" -> "https://redirect-url.gov.uk",
       "privacyPolicyUrl" -> "http://redirectprivacy-policy.gov.uk",
-      "termsAndConditionsUrl" -> "http://termsandconditions.gov.uk"
+      "termsAndConditionsUrl" -> "http://termsandconditions.gov.uk",
+      "grantLength" -> "12 months"
     )
 
     "validate a valid form" in {

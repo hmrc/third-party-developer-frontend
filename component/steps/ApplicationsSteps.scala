@@ -44,6 +44,7 @@ object AppWorld {
 
 class ApplicationsSteps extends ScalaDsl with EN with Matchers with NavigationSugar with CustomMatchers with PageSugar {
   import utils.GlobalUserIdTracker.idOf
+  import java.time.Period
 
   implicit val webDriver = Env.driver
 
@@ -59,6 +60,7 @@ class ApplicationsSteps extends ScalaDsl with EN with Matchers with NavigationSu
     createdOn = DateTimeUtils.now,
     lastAccess = DateTimeUtils.now,
     lastAccessTokenUsage = None,
+    Period.ofDays(547),
     Environment.from(environment).getOrElse(PRODUCTION),
     description = None,
     collaborators = Set(Collaborator(collaboratorEmail, CollaboratorRole.ADMINISTRATOR, idOf(collaboratorEmail)))
@@ -130,6 +132,7 @@ class ApplicationsSteps extends ScalaDsl with EN with Matchers with NavigationSu
         DateTimeUtils.now,
         DateTimeUtils.now,
         None,
+        Period.ofDays(547),
         environment,
         app.get("description"),
         Set(Collaborator(email, CollaboratorRole.withName(app.getOrElse("role", "ADMINISTRATOR")), UserId.random)),
