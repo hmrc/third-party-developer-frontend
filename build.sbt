@@ -94,7 +94,6 @@ lazy val microservice = Project(appName, file("."))
   .settings(scalacOptions ++= Seq("-Ypartial-unification"))
   .settings(
       routesImport ++= Seq(
-        // "controllers._",
         "controllers.binders._",
         "modules.uplift.controllers._",
         "domain.models.controllers._",

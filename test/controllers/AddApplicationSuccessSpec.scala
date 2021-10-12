@@ -43,7 +43,7 @@ import builder._
 import views.html.upliftJourney.BeforeYouStartView
 import modules.uplift.services.GetProductionCredentialsFlowService
 import modules.uplift.services.UpliftLogicMock
-import modules.uplift.controllers.SR20UpliftJourneySwitch
+import modules.uplift.controllers.UpliftJourneySwitch
 
 class AddApplicationSuccessSpec 
     extends BaseControllerSpec 
@@ -94,7 +94,7 @@ class AddApplicationSuccessSpec
     implicit val environmentNameService = new EnvironmentNameService(appConfig)
 
     val beforeYouStartView: BeforeYouStartView = app.injector.instanceOf[BeforeYouStartView]
-    val sr20UpliftJourneySwitchMock = mock[SR20UpliftJourneySwitch]
+    val sr20UpliftJourneySwitchMock = mock[UpliftJourneySwitch]
 
     val flowServiceMock = mock[GetProductionCredentialsFlowService]
 

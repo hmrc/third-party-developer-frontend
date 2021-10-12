@@ -27,13 +27,13 @@ trait StatementJsonFormatters {
   implicit val jsonFormatStatementLink = Json.format[StatementLink]
 
   implicit lazy val readsStatementBullets: Reads[StatementBullets] = (
-      ( __ \ "bullets" ).read(Reads.seq[NonBulletStatementFragment](jsonFormatNonBulletStatementFragment)
+    ( __ \ "bullets" ).read(Reads.seq[NonBulletStatementFragment](jsonFormatNonBulletStatementFragment)
     .map(_.toList).map(StatementBullets(_)))
   )
 
   implicit lazy val writesStatementBullets: OWrites[StatementBullets] = (
     (
-              (__ \ "bullets").write(Writes.seq[NonBulletStatementFragment](jsonFormatNonBulletStatementFragment.writes))
+      (__ \ "bullets").write(Writes.seq[NonBulletStatementFragment](jsonFormatNonBulletStatementFragment.writes))
     )
     .contramap (unlift(StatementBullets.unapply))
   )
@@ -41,13 +41,13 @@ trait StatementJsonFormatters {
   implicit lazy val jsonFormatStatementBullets: OFormat[StatementBullets] = OFormat(readsStatementBullets, writesStatementBullets)
 
   implicit lazy val readsCompoundFragment: Reads[CompoundFragment] = (
-      ( __ \ "bullets" ).read(Reads.seq[SimpleStatementFragment](jsonFormatSimpleStatementFragment)
+    ( __ \ "bullets" ).read(Reads.seq[SimpleStatementFragment](jsonFormatSimpleStatementFragment)
     .map(_.toList).map(CompoundFragment(_)))
   )
 
   implicit lazy val writesCompoundFragment: OWrites[CompoundFragment] = (
     (
-              (__ \ "bullets").write(Writes.seq[SimpleStatementFragment](jsonFormatSimpleStatementFragment.writes))
+      (__ \ "bullets").write(Writes.seq[SimpleStatementFragment](jsonFormatSimpleStatementFragment.writes))
     )
     .contramap (unlift(CompoundFragment.unapply))
   )

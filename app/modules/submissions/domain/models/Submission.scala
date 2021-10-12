@@ -26,12 +26,6 @@ case class SingleChoiceAnswer(value: String) extends ActualAnswer
 case class MultipleChoiceAnswer(values: Set[String]) extends ActualAnswer
 case class TextAnswer(value: String) extends ActualAnswer
 
-@Deprecated
-case class AnswersToQuestionnaire(
-  questionnaireId: QuestionnaireId, 
-  answers: ListMap[QuestionId, ActualAnswer]
-)
-
 case class SubmissionId(value: String) extends AnyVal
 object SubmissionId {
   implicit val format = play.api.libs.json.Json.valueFormat[SubmissionId]

@@ -40,10 +40,11 @@ import play.api.data.Forms
 import controllers.FormKeys
 import modules.uplift.services.UpliftJourneyService
 import play.api.libs.json.Json
-import config.UpliftJourneyConfigProvider
+import config.UpliftJourneyConfig
 import play.api.mvc.Request
 import scala.util.Try
 import config.{On, OnDemand}
+
 object UpliftJourneyController {
   case class ErrorMessage(message: String)
   implicit val writesErrorMessage = Json.writes[ErrorMessage]
@@ -76,8 +77,7 @@ object UpliftJourneyController {
   object SellResellOrDistributeForm {
     def form: Form[SellResellOrDistributeForm] = Form(
       mapping(
-        "answer" -> optional(text)
-          .verifying(FormKeys.sellResellOrDistributeConfirmNoChoiceKey, s => s.isDefined)
+        "answer" -> optional(text).verifying(FormKeys.sellResellOrDistributeConfirmNoChoiceKey, s => s.isDefined)
       )(SellResellOrDistributeForm.apply)(SellResellOrDistributeForm.unapply)
     )
   }
@@ -97,7 +97,7 @@ class UpliftJourneyController @Inject() (val errorHandler: ErrorHandler,
                       flowService: GetProductionCredentialsFlowService,
                       sellResellOrDistributeSoftwareView: SellResellOrDistributeSoftwareView,
                       productionCredentialsChecklistView: ProductionCredentialsChecklistView,
-                      sr20UpliftJourneySwitch: SR20UpliftJourneySwitch)
+                      upliftJourneySwitch: UpliftJourneySwitch)
                      (implicit val ec: ExecutionContext, val appConfig: ApplicationConfig)
   extends ApplicationController(mcc)
      with CanUseCheckActions {
@@ -119,14 +119,14 @@ class UpliftJourneyController @Inject() (val errorHandler: ErrorHandler,
     val failed = (msg: String) => successful(BadRequest(Json.toJson(UpliftJourneyController.ErrorMessage(msg))))
 
     val success = (upliftedAppId: ApplicationId) => {
-      sr20UpliftJourneySwitch.performSwitch(
+      upliftJourneySwitch.performSwitch(
             successful(Redirect(modules.uplift.controllers.routes.UpliftJourneyController.productionCredentialsChecklist(upliftedAppId))),  // new uplift path
             successful(Redirect(controllers.checkpages.routes.ApplicationCheck.requestCheckPage(upliftedAppId))                             // existing uplift path
               .withSession(request.session - "subscriptions"))   
       )
     }
     
-    upliftJourneyService.confirmAndUplift(sandboxAppId, request.user, sr20UpliftJourneySwitch.shouldUseV2).flatMap(_.fold(failed, success))
+    upliftJourneyService.confirmAndUplift(sandboxAppId, request.user, upliftJourneySwitch.shouldUseV2).flatMap(_.fold(failed, success))
   }
 
   def changeApiSubscriptions(sandboxAppId: ApplicationId): Action[AnyContent] = whenTeamMemberOnApp(sandboxAppId) { implicit request =>
@@ -231,7 +231,7 @@ class UpliftJourneyController @Inject() (val errorHandler: ErrorHandler,
 }
 
 @Singleton
-class SR20UpliftJourneySwitch @Inject() (upliftJourneyConfigProvider: UpliftJourneyConfigProvider) {
+class UpliftJourneySwitch @Inject() (upliftJourneyConfig: UpliftJourneyConfig) {
 
   private def upliftJourneyTurnedOnInRequestHeader(implicit request: Request[_]): Boolean =
     request.headers.get("useNewUpliftJourney").fold(false) { setting =>
@@ -239,7 +239,7 @@ class SR20UpliftJourneySwitch @Inject() (upliftJourneyConfigProvider: UpliftJour
     }
 
   def shouldUseV2(implicit request: Request[_]): Boolean = 
-    upliftJourneyConfigProvider.status match {
+    upliftJourneyConfig.status match {
       case On => true
       case OnDemand if upliftJourneyTurnedOnInRequestHeader => true
       case _ => false

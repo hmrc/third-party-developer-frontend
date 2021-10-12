@@ -40,13 +40,11 @@ trait SubmissionsJsonFormatters extends GroupOfQuestionnairesJsonFormatters with
 object SubmissionsJsonFormatters extends SubmissionsJsonFormatters {
   import uk.gov.hmrc.mongo.json.ReactiveMongoFormats
   implicit val dateFormat = ReactiveMongoFormats.dateTimeFormats
-  implicit val answerFormat = Json.format[AnswersToQuestionnaire]
   implicit val submissionFormat = Json.format[Submission]
 }
 
 object SubmissionsFrontendJsonFormatters extends SubmissionsJsonFormatters {
   import JodaWrites.JodaDateTimeWrites
   implicit val utcReads = JodaReads.DefaultJodaDateTimeReads.map(dt => dt.withZone(DateTimeZone.UTC))
-  implicit val answerFormat = Json.format[AnswersToQuestionnaire]
   implicit val submissionFormat = Json.format[Submission]
 }

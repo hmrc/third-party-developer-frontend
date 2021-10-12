@@ -73,8 +73,8 @@ class UpliftJourneyControllerSpec extends BaseControllerSpec
     val sellResellOrDistributeSoftwareView = app.injector.instanceOf[SellResellOrDistributeSoftwareView]
     val productionCredentialsChecklistView = app.injector.instanceOf[ProductionCredentialsChecklistView]
 
-    val mockUpliftJourneyConfig = mock[UpliftJourneyConfigProvider]
-    val sr20UpliftJourneySwitchMock = new SR20UpliftJourneySwitch(mockUpliftJourneyConfig)
+    val mockUpliftJourneyConfig = mock[UpliftJourneyConfig]
+    val sr20UpliftJourneySwitchMock = new UpliftJourneySwitch(mockUpliftJourneyConfig)
 
     val controller = new UpliftJourneyController(
       mockErrorHandler,

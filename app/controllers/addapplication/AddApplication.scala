@@ -44,7 +44,7 @@ import scala.concurrent.Future.successful
 import scala.concurrent.{ExecutionContext, Future}
 import views.html.upliftJourney.BeforeYouStartView
 import controllers.UserRequest
-import modules.uplift.controllers.SR20UpliftJourneySwitch
+import modules.uplift.controllers.UpliftJourneySwitch
 
 @Singleton
 class AddApplication @Inject() (
@@ -66,7 +66,7 @@ class AddApplication @Inject() (
     addApplicationSubordinateSuccessView: AddApplicationSubordinateSuccessView,
     addApplicationNameView: AddApplicationNameView,
     chooseApplicationToUpliftView: ChooseApplicationToUpliftView,
-    sr20UpliftJourneySwitch: SR20UpliftJourneySwitch,
+    upliftJourneySwitch: UpliftJourneySwitch,
     beforeYouStartView: BeforeYouStartView,
     flowService: GetProductionCredentialsFlowService
 )(implicit val ec: ExecutionContext, val appConfig: ApplicationConfig, val environmentNameService: EnvironmentNameService)
@@ -85,7 +85,7 @@ class AddApplication @Inject() (
   }
   
   def addApplicationPrincipal(): Action[AnyContent] = loggedInAction { implicit request => 
-    sr20UpliftJourneySwitch.performSwitch(
+    upliftJourneySwitch.performSwitch(
       addApplicationProductionSwitch()(request),              // new uplift path
       successful(Ok(addApplicationStartPrincipalView()))      // existing uplift path
     )
@@ -101,7 +101,7 @@ class AddApplication @Inject() (
   }
 
   def progressOnUpliftJourney(sandboxAppId: ApplicationId): Action[AnyContent] = loggedInAction { implicit request =>
-    sr20UpliftJourneySwitch.performSwitch(
+    upliftJourneySwitch.performSwitch(
       successful(Ok(beforeYouStartView(sandboxAppId))),        // new uplift path
       showConfirmSubscriptionsPage(sandboxAppId)(request)      // existing uplift path
     )
