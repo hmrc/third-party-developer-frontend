@@ -96,7 +96,6 @@ class UpliftJourneyController @Inject() (val errorHandler: ErrorHandler,
                       responsibleIndividualView: ResponsibleIndividualView,
                       flowService: GetProductionCredentialsFlowService,
                       sellResellOrDistributeSoftwareView: SellResellOrDistributeSoftwareView,
-                      productionCredentialsChecklistView: ProductionCredentialsChecklistView,
                       upliftJourneySwitch: UpliftJourneySwitch)
                      (implicit val ec: ExecutionContext, val appConfig: ApplicationConfig)
   extends ApplicationController(mcc)
@@ -120,7 +119,7 @@ class UpliftJourneyController @Inject() (val errorHandler: ErrorHandler,
 
     val success = (upliftedAppId: ApplicationId) => {
       upliftJourneySwitch.performSwitch(
-            successful(Redirect(modules.uplift.controllers.routes.UpliftJourneyController.productionCredentialsChecklist(upliftedAppId))),  // new uplift path
+            successful(Redirect(modules.submissions.controllers.routes.ProdCredsChecklistController.productionCredentialsChecklist(upliftedAppId))),  // new uplift path
             successful(Redirect(controllers.checkpages.routes.ApplicationCheck.requestCheckPage(upliftedAppId))                             // existing uplift path
               .withSession(request.session - "subscriptions"))   
       )
@@ -223,10 +222,6 @@ class UpliftJourneyController @Inject() (val errorHandler: ErrorHandler,
       }
     }
     sellResellOrDistributeForm.bindFromRequest.fold(handleInvalidForm, handleValidForm)
-  }
-
-  def productionCredentialsChecklist(productionAppId: ApplicationId): Action[AnyContent] = whenTeamMemberOnApp(productionAppId) { implicit request =>
-    successful(Ok(productionCredentialsChecklistView(request.application.name)))
   }
 }
 
