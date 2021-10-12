@@ -37,12 +37,24 @@ import uk.gov.hmrc.play.http.metrics.API
 import javax.inject.{Inject, Singleton}
 import scala.concurrent.{ExecutionContext, Future}
 
+object ApmConnector {
+  case class Config(serviceBaseUrl: String)
+
+  case class RequestUpliftV1(subscriptions: Set[ApiIdentifier])
+  case class RequestUpliftV2(upliftRequest: UpliftData)
+
+  import domain.services.ApiDefinitionsJsonFormatters._
+  implicit val writesV1 = play.api.libs.json.Json.writes[RequestUpliftV1]
+  implicit val writesV2 = play.api.libs.json.Json.writes[RequestUpliftV2]
+}
+
 @Singleton
 class ApmConnector @Inject() (http: HttpClient, config: ApmConnector.Config, metrics: ConnectorMetrics)(implicit ec: ExecutionContext) 
 extends SubscriptionsConnector 
 with OpenAccessApisConnector 
 with CommonResponseHandlers {
   import ApmConnectorJsonFormatters._
+  import ApmConnector._
 
   val api = API("api-platform-microservice")
 
@@ -109,13 +121,11 @@ with CommonResponseHandlers {
       http.GET[Map[ApiContext, ApiData]](s"${config.serviceBaseUrl}/api-definitions/all", Seq("environment" -> environment.toString()))
     }
 
-  def upliftApplication(applicationId: ApplicationId, subscriptions: Set[ApiIdentifier])(implicit hc: HeaderCarrier): Future[ApplicationId] = metrics.record(api) {
-    http.POST[Set[ApiIdentifier], ApplicationId](s"${config.serviceBaseUrl}/applications/${applicationId.value}/uplift", subscriptions)
+  def upliftApplicationV1(applicationId: ApplicationId, subs: Set[ApiIdentifier])(implicit hc: HeaderCarrier): Future[ApplicationId] = metrics.record(api) {
+    http.POST[RequestUpliftV1, ApplicationId](s"${config.serviceBaseUrl}/applications/${applicationId.value}/uplift", RequestUpliftV1(subs))
   }
-}
 
-object ApmConnector {
-  case class Config(
-      serviceBaseUrl: String
-  )
+  def upliftApplicationV2(applicationId: ApplicationId, upliftData: UpliftData)(implicit hc: HeaderCarrier): Future[ApplicationId] = metrics.record(api) {
+    http.POST[RequestUpliftV2, ApplicationId](s"${config.serviceBaseUrl}/applications/${applicationId.value}/uplift", RequestUpliftV2(upliftData))
+  }
 }

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package domain.models.applicationuplift
+package modules.uplift.domain.models
 
 import domain.models.apidefinitions.ApiIdentifier
 import play.api.libs.json.{Format, Json}

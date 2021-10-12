@@ -14,32 +14,17 @@
  * limitations under the License.
  */
 
-package service
+package modules.uplift.services
 
 import domain.models.developers.DeveloperSession
 import javax.inject.{Inject, Singleton}
 import repositories.FlowRepository
 
 import scala.concurrent.{ExecutionContext, Future}
-import domain.models.applicationuplift._
-import domain.models.flows.{Flow, FlowType}
+import modules.uplift.domain.models._
 import cats.implicits._
+import domain.models.flows.FlowType
 
-case class GetProductionCredentialsFlow(
-  val sessionId: String,
-  responsibleIndividual: Option[ResponsibleIndividual],
-  sellResellOrDistribute: Option[SellResellOrDistribute],
-  apiSubscriptions: Option[ApiSubscriptions]
-) extends Flow {
-  val flowType: FlowType = FlowType.GET_PRODUCTION_CREDENTIALS
-}
-
-object GetProductionCredentialsFlow {
-  import play.api.libs.json.Json
-  implicit val format = Json.format[GetProductionCredentialsFlow]
-
-  def create(sessionId: String): GetProductionCredentialsFlow = GetProductionCredentialsFlow(sessionId, None, None, None)
-}
 
 @Singleton
 class GetProductionCredentialsFlowService @Inject()(

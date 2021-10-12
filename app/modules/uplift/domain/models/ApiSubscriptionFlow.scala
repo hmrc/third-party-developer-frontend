@@ -14,8 +14,11 @@
  * limitations under the License.
  */
 
-package controllers
+package controllers.models
 
-class UpliftJourneyController {
+import domain.models.apidefinitions.ApiIdentifier
 
-}
+  case class ApiSubscriptionsFlow(subscriptions: Map[ApiIdentifier, Boolean]) {
+    def isSelected(id: ApiIdentifier): Boolean = 
+      subscriptions.get(id).getOrElse(false)
+  }

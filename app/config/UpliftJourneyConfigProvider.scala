@@ -27,7 +27,7 @@ final case object On extends NewJourneyFeature
 final case object OnDemand extends NewJourneyFeature
 
 @Singleton
-class UpliftJourneyConfigProvider @Inject()(config: Configuration) {
+class UpliftJourneyConfig @Inject()(config: Configuration) {
 
     def status: NewJourneyFeature = 
         config.get[String]("applicationCheck.canUseNewUpliftJourney") match {

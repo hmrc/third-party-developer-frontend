@@ -57,7 +57,7 @@
       </div>
     }
     case _ => {
-      @helper.form(action = controllers.routes.SR20.saveApiSubscriptionsSubmit(applicationId), 'class -> "form") {
+      @helper.form(action = modules.uplift.controllers.routes.UpliftJourneyController.saveApiSubscriptionsSubmit(applicationId), 'class -> "form") {
         @helper.CSRF.formField
         <div class="form-group @if(errorForm.errors("apiSubscriptions").nonEmpty){form-group-error}">
           <h1 class="heading-xlarge">@pageHeading</h1>
@@ -133,7 +133,7 @@
 
         <div>
           <button id="submit" class="button" type="submit">Save and continue</button>
-          <a href="@controllers.routes.SR20.confirmApiSubscriptionsPage(applicationId)" class="secondary-button">
+          <a href="@modules.uplift.controllers.routes.UpliftJourneyController.confirmApiSubscriptionsPage(applicationId)" class="secondary-button">
             Cancel
           </a>
         </div>

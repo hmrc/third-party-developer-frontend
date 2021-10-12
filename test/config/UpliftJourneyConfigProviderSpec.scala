@@ -16,22 +16,22 @@
 
 package controllers
 
-import config.UpliftJourneyConfigProvider
+import config.UpliftJourneyConfig
 import config.On
 import config.OnDemand
 import config.Off
 import play.api.Configuration
 
-class UpliftJourneyConfigProviderSpec extends BaseControllerSpec {
+class UpliftJourneyConfigSpec extends BaseControllerSpec {
 
-  "UpliftJourneyConfigProvider status" should {
+  "UpliftJourneyConfig status" should {
 
     "throw exception when there is no app config setting present" in {
 
         val testConfig = Configuration.from(Map("test.key" -> "testval"))
 
         intercept[RuntimeException]{
-          new UpliftJourneyConfigProvider(testConfig).status 
+          new UpliftJourneyConfig(testConfig).status 
         }.getMessage() contains "No configuration setting found for key 'applicationCheck"
 
     }
@@ -40,7 +40,7 @@ class UpliftJourneyConfigProviderSpec extends BaseControllerSpec {
 
         val testConfig = Configuration.from(Map("applicationCheck.canUseNewUpliftJourney" -> "Unmatched"))
 
-        val underTest = new UpliftJourneyConfigProvider(testConfig)  
+        val underTest = new UpliftJourneyConfig(testConfig)  
         
         underTest.status shouldBe Off
     } 
@@ -49,7 +49,7 @@ class UpliftJourneyConfigProviderSpec extends BaseControllerSpec {
 
         val testConfig = Configuration.from(Map("applicationCheck.canUseNewUpliftJourney" -> "Off"))
 
-        val underTest = new UpliftJourneyConfigProvider(testConfig)
+        val underTest = new UpliftJourneyConfig(testConfig)
 
         underTest.status shouldBe Off
     } 
@@ -58,7 +58,7 @@ class UpliftJourneyConfigProviderSpec extends BaseControllerSpec {
 
       val testConfig = Configuration.from(Map("applicationCheck.canUseNewUpliftJourney" -> "On"))
 
-      val underTest = new UpliftJourneyConfigProvider(testConfig)
+      val underTest = new UpliftJourneyConfig(testConfig)
 
       underTest.status shouldBe On
     } 
@@ -67,7 +67,7 @@ class UpliftJourneyConfigProviderSpec extends BaseControllerSpec {
 
       val testConfig = Configuration.from(Map("applicationCheck.canUseNewUpliftJourney" -> "OnDemand"))
 
-      val underTest = new UpliftJourneyConfigProvider(testConfig)
+      val underTest = new UpliftJourneyConfig(testConfig)
 
       underTest.status shouldBe OnDemand
     } 
