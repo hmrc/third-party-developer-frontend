@@ -153,7 +153,7 @@ trait BaseApplication {
     collaborators.find(c => c.emailAddress.toSha256 == teamMemberHash)
   }
 
-  def grantLengthDisplayValue: String = s"${Math.round(grantLength.getDays/30)} months"
+  def grantLengthDisplayValue: String = GrantLengthDisplay.withValue(grantLength.getDays).name
 }
 
 
