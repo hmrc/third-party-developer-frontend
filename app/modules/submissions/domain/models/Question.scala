@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package modules.questionnaires.domain.models
+package modules.submissions.domain.models
 
 import scala.collection.immutable.ListSet
 

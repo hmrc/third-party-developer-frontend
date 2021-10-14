@@ -14,7 +14,9 @@
  * limitations under the License.
  */
 
-package modules.questionnaires.domain.models
+package modules.submissions.domain.models
+
+import cats.data.NonEmptyList
 
 sealed trait AskWhen
 case class AskWhenContext(contextKey: String, expectedValue: String) extends AskWhen
@@ -45,7 +47,7 @@ object QuestionnaireId {
 case class Questionnaire(
   id: QuestionnaireId,
   label: Label,
-  questions: List[QuestionItem]
+  questions: NonEmptyList[QuestionItem]
 ) {
   def hasQuestion(qid: QuestionId): Boolean = question(qid).isDefined
   def question(qid: QuestionId): Option[Question] = questions.find(_.question.id == qid).map(_.question)

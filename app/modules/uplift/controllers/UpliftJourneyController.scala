@@ -39,15 +39,13 @@ import controllers.APISubscriptions
 import play.api.data.Forms
 import controllers.FormKeys
 import modules.uplift.services.UpliftJourneyService
-import play.api.libs.json.Json
 import config.UpliftJourneyConfig
 import play.api.mvc.Request
 import scala.util.Try
 import config.{On, OnDemand}
+import domain.models.controllers.BadRequestWithErrorMessage
 
 object UpliftJourneyController {
-  case class ErrorMessage(message: String)
-  implicit val writesErrorMessage = Json.writes[ErrorMessage]
 
   case class ResponsibleIndividualForm(fullName: String, emailAddress: String)
 
@@ -115,7 +113,7 @@ class UpliftJourneyController @Inject() (val errorHandler: ErrorHandler,
 
   def confirmApiSubscriptionsAction(sandboxAppId: ApplicationId): Action[AnyContent] = whenTeamMemberOnApp(sandboxAppId) { implicit request =>
 
-    val failed = (msg: String) => successful(BadRequest(Json.toJson(UpliftJourneyController.ErrorMessage(msg))))
+    val failed = (msg: String) => successful(BadRequestWithErrorMessage(msg))
 
     val success = (upliftedAppId: ApplicationId) => {
       upliftJourneySwitch.performSwitch(

@@ -14,10 +14,10 @@
  * limitations under the License.
  */
 
-package modules.questionnaires.domain.services
+package modules.submissions.domain.services
 
 trait AskWhenJsonFormatters extends AnswersJsonFormatters {
-  import modules.questionnaires.domain.models._
+  import modules.submissions.domain.models._
   import play.api.libs.json._
   import uk.gov.hmrc.play.json.Union
 

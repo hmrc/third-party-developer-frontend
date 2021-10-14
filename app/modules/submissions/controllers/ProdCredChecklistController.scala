@@ -25,60 +25,76 @@ import service.{ApplicationActionService, ApplicationService, SessionService}
 import modules.submissions.views.html._
 
 import javax.inject.{Inject, Singleton}
-import scala.concurrent.Future.successful
 import scala.concurrent.ExecutionContext
 import controllers.ApplicationController
 import controllers.checkpages.CanUseCheckActions
 import cats.data.NonEmptyList
-import modules.questionnaires.domain.models.QuestionnaireId
+import modules.submissions.domain.models._
+import modules.submissions.services.SubmissionService
+import helpers.EitherTHelper
+import domain.models.controllers.BadRequestWithErrorMessage
 
 object ProdCredsChecklistController {
   case class ViewQuestionnaireSummary(label: String, state: String, id: QuestionnaireId = QuestionnaireId.random)
   case class ViewGrouping(label: String, questionnaireSummaries: NonEmptyList[ViewQuestionnaireSummary])
   case class ViewModel(appName: String, groupings: NonEmptyList[ViewGrouping])
+
+  def deriveState(extendedSubmission: ExtendedSubmission)(questionnaire: Questionnaire): String = {
+    extendedSubmission.nextQuestions.get(questionnaire.id) match {
+      case None => "Completed"
+      case Some(qId) if qId == questionnaire.questions.head.question.id => "Not Started"
+      case Some(qId) => "In Progress"
+    }
+  }
+
+  def convertToSummary(extendedSubmission: ExtendedSubmission)(questionnaire: Questionnaire): ViewQuestionnaireSummary = {
+    val state = deriveState(extendedSubmission)(questionnaire)
+    ViewQuestionnaireSummary(questionnaire.label.value, state, questionnaire.id)
+  }
+
+  def convertToViewGrouping(extendedSubmission: ExtendedSubmission)(groupOfQuestionnaires: GroupOfQuestionnaires): ViewGrouping = {
+    ViewGrouping(
+      label = groupOfQuestionnaires.heading,
+      questionnaireSummaries = groupOfQuestionnaires.links.map(convertToSummary(extendedSubmission))
+    )
+  }
+
+  def convertSubmissionToViewModel(extendedSubmission: ExtendedSubmission)(appName: String): ViewModel = {
+    val groupings = extendedSubmission.submission.groups.map(convertToViewGrouping(extendedSubmission))
+    ViewModel(appName, groupings)
+  }
 }
 
 @Singleton
-class ProdCredsChecklistController @Inject() (val errorHandler: ErrorHandler,
-                      val sessionService: SessionService,
-                      val applicationActionService: ApplicationActionService,
-                      val applicationService: ApplicationService,
-                      mcc: MessagesControllerComponents,
-                      val cookieSigner: CookieSigner,
-                      val apmConnector: ApmConnector,
-                      productionCredentialsChecklistView: ProductionCredentialsChecklistView)
-                     (implicit val ec: ExecutionContext, val appConfig: ApplicationConfig)
+class ProdCredsChecklistController @Inject() (
+    val errorHandler: ErrorHandler,
+    val sessionService: SessionService,
+    val applicationActionService: ApplicationActionService,
+    val applicationService: ApplicationService,
+    mcc: MessagesControllerComponents,
+    val cookieSigner: CookieSigner,
+    val apmConnector: ApmConnector,
+    submissionService: SubmissionService,
+    productionCredentialsChecklistView: ProductionCredentialsChecklistView)
+    (implicit val ec: ExecutionContext, val appConfig: ApplicationConfig)
   extends ApplicationController(mcc)
-     with CanUseCheckActions {
+     with CanUseCheckActions
+     with EitherTHelper[String] {
 
+  import cats.implicits._
+  import cats.instances.future.catsStdInstancesForFuture
   import ProdCredsChecklistController._
 
   def productionCredentialsChecklist(productionAppId: ApplicationId): Action[AnyContent] = whenTeamMemberOnApp(productionAppId) { implicit request =>
-    val fixedViewModel = 
-      ViewModel(
-        request.application.name,
-        NonEmptyList.of(
-          ViewGrouping("About your processes", 
-            NonEmptyList.of(
-              ViewQuestionnaireSummary("Development practices", "In Progress"),
-              ViewQuestionnaireSummary("Service management practices", "Not Started")
-            )
-          ),
-          ViewGrouping("About your software", 
-            NonEmptyList.of(
-              ViewQuestionnaireSummary("Handling personal data", "Not Started"),
-              ViewQuestionnaireSummary("Customers authorising your software", "Not Started"),
-              ViewQuestionnaireSummary("Software security", "Not Started")
-            )
-          ),
-          ViewGrouping("About your organisation", 
-            NonEmptyList.of(
-              ViewQuestionnaireSummary("Organisation details", "Not Started"),
-              ViewQuestionnaireSummary("Marketing your software", "Not Started")            
-            )
-          ),
-        )
-      )
-    successful(Ok(productionCredentialsChecklistView(fixedViewModel)))
+    val failed = (err: String) => BadRequestWithErrorMessage(err)
+
+    val success = (viewModel: ViewModel) => Ok(productionCredentialsChecklistView(viewModel))
+    
+    val res = for {
+        extendedSubmission <- fromOptionF(submissionService.fetchLatestSubmission(productionAppId), "No subsmission and/or application found")
+        viewModel           = convertSubmissionToViewModel(extendedSubmission)(request.application.name)
+      } yield viewModel
+
+    res.fold[Result](failed, success)
   }
 }

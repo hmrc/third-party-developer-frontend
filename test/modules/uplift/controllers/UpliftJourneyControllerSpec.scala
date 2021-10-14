@@ -33,7 +33,7 @@ import play.filters.csrf.CSRF.TokenProvider
 import uk.gov.hmrc.http.HeaderCarrier
 import utils.WithLoggedInSession._
 import utils.{LocalUserIdTracker, WithCSRFAddToken}
-import modules.uplift.views.html.{ConfirmApisView, ProductionCredentialsChecklistView, ResponsibleIndividualView, SellResellOrDistributeSoftwareView, TurnOffApisMasterView}
+import modules.uplift.views.html._
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import modules.uplift.services._
@@ -71,7 +71,6 @@ class UpliftJourneyControllerSpec extends BaseControllerSpec
     val turnOffApisMasterView = app.injector.instanceOf[TurnOffApisMasterView]
     val responsibleIndividualView = app.injector.instanceOf[ResponsibleIndividualView]
     val sellResellOrDistributeSoftwareView = app.injector.instanceOf[SellResellOrDistributeSoftwareView]
-    val productionCredentialsChecklistView = app.injector.instanceOf[ProductionCredentialsChecklistView]
 
     val mockUpliftJourneyConfig = mock[UpliftJourneyConfig]
     val sr20UpliftJourneySwitchMock = new UpliftJourneySwitch(mockUpliftJourneyConfig)
@@ -90,7 +89,6 @@ class UpliftJourneyControllerSpec extends BaseControllerSpec
       responsibleIndividualView,
       GPCFlowServiceMock.aMock,
       sellResellOrDistributeSoftwareView,
-      productionCredentialsChecklistView,
       sr20UpliftJourneySwitchMock
     )
 

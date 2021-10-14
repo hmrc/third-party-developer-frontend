@@ -20,7 +20,9 @@ import connectors.ThirdPartyApplicationConnectorDomain.{AddClientSecretResponse,
 import domain.services.{ApiDefinitionsJsonFormatters, SubscriptionsJsonFormatters}
 import play.api.libs.json.{Format, Json}
 
-private[connectors] object ThirdPartyApplicationConnectorJsonFormatters extends SubscriptionsJsonFormatters with ApiDefinitionsJsonFormatters {
+private[connectors] object ThirdPartyApplicationConnectorJsonFormatters
+    extends SubscriptionsJsonFormatters 
+    with ApiDefinitionsJsonFormatters {
   import play.api.libs.json.JodaReads._
   import play.api.libs.json.JodaWrites._
 

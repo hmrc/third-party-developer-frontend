@@ -17,8 +17,9 @@
 package connectors
 
 import domain.services.{ApiDefinitionsJsonFormatters, ApplicationsJsonFormatters}
+import domain.services.SubscriptionsJsonFormatters
 
-private[connectors] object ApmConnectorJsonFormatters extends ApplicationsJsonFormatters with ApiDefinitionsJsonFormatters {
+trait ApmConnectorJsonFormatters extends ApiDefinitionsJsonFormatters with ApplicationsJsonFormatters with SubscriptionsJsonFormatters {
 
   import domain.models.subscriptions._
   import play.api.libs.json._
@@ -27,3 +28,5 @@ private[connectors] object ApmConnectorJsonFormatters extends ApplicationsJsonFo
   implicit val readsVersionData: Reads[VersionData] = Json.reads[VersionData]
   implicit val readsApiData: Reads[ApiData] = Json.reads[ApiData]
 }
+
+object ApmConnectorJsonFormatters extends ApmConnectorJsonFormatters

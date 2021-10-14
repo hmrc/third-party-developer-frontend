@@ -14,14 +14,15 @@
  * limitations under the License.
  */
 
-package modules.submissions.domain.services
+package domain.models.controllers
 
+import play.api.mvc.Result
+import play.api.mvc.Results._
 import play.api.libs.json.Json
 
-import modules.submissions.domain.models._
-
-trait GroupOfQuestionnairesJsonFormatters extends QuestionnaireJsonFormatters {
-  implicit val groupOfQuestionnairesJsonFormat = Json.format[GroupOfQuestionnaires]
+object BadRequestWithErrorMessage {
+  private case class ErrorMessage(errorMessage: String)
+  private implicit val writes = Json.writes[ErrorMessage]
+  
+  def apply(message: String): Result = BadRequest(Json.toJson(ErrorMessage(message)))
 }
-
-object GroupOfQuestionnairesJsonFormatters extends GroupOfQuestionnairesJsonFormatters

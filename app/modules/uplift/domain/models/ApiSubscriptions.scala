@@ -20,27 +20,23 @@ import domain.models.apidefinitions.ApiIdentifier
 import play.api.libs.json.{Format, Json}
 import domain.models.apidefinitions.ApiContext
 import domain.models.apidefinitions.ApiVersion
-import play.api.libs.json.Reads
-import play.api.libs.json.Writes
+import play.api.libs.json._
 
 case class ApiSubscriptions(subscriptions: Map[ApiIdentifier, Boolean] = Map.empty[ApiIdentifier, Boolean]) {
   def isSelected(id: ApiIdentifier): Boolean = subscriptions.get(id).getOrElse(false)
 }
 
 object ApiSubscriptions {
-  import domain.services.MapJsonFormatters._
-  implicit val fromString: (String) => ApiIdentifier = (s) => {
-    s.split("###").toList match {
-      case c :: v :: tail => ApiIdentifier(ApiContext(c), ApiVersion(v.replace("_", ".")))
-      case _ => throw new IllegalArgumentException(s"$s is not a valid api identifer")
+  implicit val keyReadsApiIdentifier: KeyReads[ApiIdentifier] = key => 
+    key.split("###").toList match {
+      case c :: v :: tail => JsSuccess(ApiIdentifier(ApiContext(c), ApiVersion(v.replace("_", "."))))
+      case _ => JsError(s"Cannot raise $key to an ApiIdentifier")
     }
-  }
-  implicit val idToString: (ApiIdentifier) => String = id => s"${id.context.value}###${id.version.value.replace(".", "_")}"
-  implicit val readsMap: Reads[Map[ApiIdentifier, Boolean]] = mapReads(fromString, implicitly)
-  implicit val writesMap: Writes[Map[ApiIdentifier, Boolean]] = mapWrites(idToString, implicitly)
+
+  implicit val keyWritesApiIdentifier: KeyWrites[ApiIdentifier] = { id => s"${id.context.value}###${id.version.value.replace(".", "_")}" }
+
   implicit val format: Format[ApiSubscriptions] = Json.format[ApiSubscriptions]
 }
-
 
 
 
