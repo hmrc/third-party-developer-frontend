@@ -176,7 +176,7 @@ class ApplicationSpec extends FunSpec with Matchers with DeveloperBuilder with L
       app.copy(grantLength = Period.ofDays(36500)).grantLengthDisplayValue() shouldBe "100 years"
     }
     it ("should return '33 months' display value for 1000 days grant length") {
-      app.copy(grantLength = Period.ofDays(1000)).grantLengthDisplayValue() shouldBe "33 months"
+      app.copy(grantLength = Period.ofDays(thousandDays)).grantLengthDisplayValue() shouldBe "33 months"
     }
   }
 
