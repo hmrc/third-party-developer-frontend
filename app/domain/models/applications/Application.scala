@@ -153,7 +153,20 @@ trait BaseApplication {
     collaborators.find(c => c.emailAddress.toSha256 == teamMemberHash)
   }
 
-  def grantLengthDisplayValue: String = GrantLengthDisplay.withValue(grantLength.getDays).name
+  def grantLengthDisplayValue() : String = {
+    grantLength match {
+      case GrantLength.MONTH =>  "1 month"
+      case GrantLength.THREE_MONTHS =>  "3 months"
+      case GrantLength.SIX_MONTHS =>  "6 months"
+      case GrantLength.ONE_YEAR =>  "1 year"
+      case GrantLength.EIGHTEEN_MONTHS =>  "18 months"
+      case GrantLength.THREE_YEARS =>  "3 years"
+      case GrantLength.FIVE_YEARS =>  "5 years"
+      case GrantLength.TEN_YEARS =>  "10 years"
+      case GrantLength.HUNDRED_YEARS =>  "100 years"
+      case _ => s"${Math.round(grantLength.getDays/30)} months"
+    }
+  }
 }
 
 
