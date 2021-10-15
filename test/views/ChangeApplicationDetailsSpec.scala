@@ -17,6 +17,7 @@
 package views
 
 import java.time.Period
+
 import controllers.EditApplicationForm
 import domain.models.applications._
 import domain.models.developers.LoggedInState
@@ -94,7 +95,7 @@ class ChangeApplicationDetailsSpec extends CommonViewSpec with WithCSRFAddToken 
         DateTimeUtils.now,
         DateTimeUtils.now,
         None,
-           grantLength,
+        grantLength,
         Environment.PRODUCTION,
         state = ApplicationState(State.PENDING_GATEKEEPER_APPROVAL, None)
       )
@@ -112,7 +113,7 @@ class ChangeApplicationDetailsSpec extends CommonViewSpec with WithCSRFAddToken 
         DateTimeUtils.now,
         DateTimeUtils.now,
         None,
-           grantLength,
+        grantLength,
         Environment.PRODUCTION,
         state = ApplicationState(State.PENDING_REQUESTER_VERIFICATION, None)
       )
