@@ -43,7 +43,7 @@ import scala.concurrent.Future
 import play.api.mvc.Result
 import mocks.connector.ApmConnectorMockModule
 import controllers.addapplication.AddApplication
-import views.html.upliftJourney.BeforeYouStartView
+import modules.uplift.views.html.BeforeYouStartView
 import modules.uplift.services.UpliftLogicMock
 import modules.uplift.controllers.UpliftJourneySwitch
 import config.UpliftJourneyConfig

@@ -14,11 +14,13 @@
  * limitations under the License.
  */
 
-package modules.questionnaires.domain.services
+package modules.submissions.domain.services
 
-trait QuestionnaireJsonFormatters extends QuestionJsonFormatters with AskWhenJsonFormatters {
+import uk.gov.hmrc.thirdpartyapplication.domain.services.NonEmptyListFormatters
+
+trait QuestionnaireJsonFormatters extends QuestionJsonFormatters with AskWhenJsonFormatters with NonEmptyListFormatters {
   import play.api.libs.json._
-  import modules.questionnaires.domain.models._
+  import modules.submissions.domain.models._
 
   implicit val jsonFormatQuestionItem = Json.format[QuestionItem]
 

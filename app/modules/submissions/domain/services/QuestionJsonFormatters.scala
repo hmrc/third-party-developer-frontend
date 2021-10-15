@@ -14,16 +14,15 @@
  * limitations under the License.
  */
 
-package modules.questionnaires.domain.services
+package modules.submissions.domain.services
 
-trait QuestionJsonFormatters extends StatementJsonFormatters {
-  import modules.questionnaires.domain.models._
+trait QuestionJsonFormatters extends StatementJsonFormatters with AnswersJsonFormatters {
+  import modules.submissions.domain.models._
   import play.api.libs.json._
   import uk.gov.hmrc.play.json.Union
 
   implicit val jsonFormatWording = Json.valueFormat[Wording]
   implicit val jsonFormatLabel = Json.valueFormat[Label]
-
 
   implicit val jsonFormatPossibleAnswer = Json.valueFormat[PossibleAnswer]
   implicit val jsonFormatTextQuestion = Json.format[TextQuestion]

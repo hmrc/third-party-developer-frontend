@@ -18,8 +18,7 @@ package domain.services
 
 import domain.models.subscriptions.{FieldValue, FieldName}
 
-trait ApplicationsJsonFormatters
-{
+trait ApplicationsJsonFormatters extends ApiDefinitionsJsonFormatters {
   import play.api.libs.json._
   import play.api.libs.json.JodaReads._
   import play.api.libs.json.JodaWrites._
@@ -30,6 +29,7 @@ trait ApplicationsJsonFormatters
 
   implicit val formatFieldValue = Json.valueFormat[FieldValue]
   implicit val formatFieldName = Json.valueFormat[FieldName]
+  
   implicit val keyReadsFieldName: KeyReads[FieldName] = key => JsSuccess(FieldName(key))
   implicit val keyWritesFieldName: KeyWrites[FieldName] = _.value
 
@@ -69,17 +69,10 @@ trait ApplicationsJsonFormatters
     .and[ROPC](AccessType.ROPC.toString)
     .format
 
-  implicit val keyReadsApiContext: KeyReads[ApiContext] = key => JsSuccess(ApiContext(key))
-  implicit val keyWritesApiContext: KeyWrites[ApiContext] = _.value
-
-  implicit val keyReadsApiVersion: KeyReads[ApiVersion] = key => JsSuccess(ApiVersion(key))
-  implicit val keyWritesApiVersion: KeyWrites[ApiVersion] = _.value
-
   implicit val formatIpAllowlist = Json.format[IpAllowlist]
 
   implicit val formatApplication = Json.format[Application]
 
-  import ApiDefinitionsJsonFormatters.formatApiIdentifier
   implicit val format = Json.format[ApplicationWithSubscriptionData]
 }
 

@@ -14,8 +14,7 @@
  * limitations under the License.
  */
 
-package modules.questionnaires.domain.models
-
+package modules.submissions.domain.models
 
 sealed trait StatementFragment
 sealed trait NonBulletStatementFragment extends StatementFragment

@@ -50,12 +50,13 @@ object ApmConnector {
 
 @Singleton
 class ApmConnector @Inject() (http: HttpClient, config: ApmConnector.Config, metrics: ConnectorMetrics)(implicit ec: ExecutionContext) 
-extends SubscriptionsConnector 
-with OpenAccessApisConnector 
-with CommonResponseHandlers {
-  import ApmConnectorJsonFormatters._
+    extends SubscriptionsConnector 
+    with OpenAccessApisConnector 
+    with CommonResponseHandlers 
+    {
   import ApmConnector._
-
+  import ApmConnectorJsonFormatters._
+  
   val api = API("api-platform-microservice")
 
   def fetchApplicationById(applicationId: ApplicationId)(implicit hc: HeaderCarrier): Future[Option[ApplicationWithSubscriptionData]] =
@@ -63,8 +64,6 @@ with CommonResponseHandlers {
 
   def getAllFieldDefinitions(environment: Environment)
                             (implicit hc: HeaderCarrier): Future[Map[ApiContext,Map[ApiVersion, Map[FieldName, SubscriptionFieldDefinition]]]] = {
-    import domain.services.ApplicationsJsonFormatters._
-    import domain.services.SubscriptionsJsonFormatters._
 
     http.GET[Map[ApiContext, Map[ApiVersion, Map[FieldName, SubscriptionFieldDefinition]]]](s"${config.serviceBaseUrl}/subscription-fields", Seq("environment" -> environment.toString))
   }

@@ -42,7 +42,7 @@ import views.html._
 import javax.inject.{Inject, Singleton}
 import scala.concurrent.Future.successful
 import scala.concurrent.{ExecutionContext, Future}
-import views.html.upliftJourney.BeforeYouStartView
+import modules.uplift.views.html.BeforeYouStartView
 import controllers.UserRequest
 import modules.uplift.controllers.UpliftJourneySwitch
 

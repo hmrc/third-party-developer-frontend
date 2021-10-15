@@ -41,7 +41,7 @@ import config.OnDemand
 import play.api.mvc.Headers
 import config.Off
 import domain.models.controllers.ApplicationSummary
-import views.html.upliftJourney.BeforeYouStartView
+import modules.uplift.views.html.BeforeYouStartView
 import modules.uplift.services.GetProductionCredentialsFlowService
 import modules.uplift.services.UpliftLogicMock
 import modules.uplift.controllers.UpliftJourneySwitch

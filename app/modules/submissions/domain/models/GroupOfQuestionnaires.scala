@@ -14,9 +14,11 @@
  * limitations under the License.
  */
 
-package modules.questionnaires.domain.models
+package modules.submissions.domain.models
+
+import cats.data.NonEmptyList
 
 case class GroupOfQuestionnaires(
   heading: String,
-  links: List[Questionnaire]
+  links: NonEmptyList[Questionnaire]
 )

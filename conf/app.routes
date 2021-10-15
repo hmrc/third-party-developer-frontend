@@ -197,7 +197,7 @@ POST        /applications/:id/responsible-individual                            
 GET         /applications/:id/sell-resell-or-distribute-your-software                                    modules.uplift.controllers.UpliftJourneyController.sellResellOrDistributeYourSoftware(id: ApplicationId)
 POST        /applications/:id/sell-resell-or-distribute-your-software                                    modules.uplift.controllers.UpliftJourneyController.sellResellOrDistributeYourSoftwareAction(id: ApplicationId)
 
-GET         /applications/:id/production-credentials-checklist                                           modules.uplift.controllers.UpliftJourneyController.productionCredentialsChecklist(id: ApplicationId)
+GET         /applications/:id/production-credentials-checklist                                           modules.submissions.controllers.ProdCredsChecklistController.productionCredentialsChecklist(id: ApplicationId)
 
 ->         /govuk-frontend       govuk.Routes
 ->         /hmrc-frontend        hmrcfrontend.Routes

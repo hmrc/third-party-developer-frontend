@@ -14,11 +14,11 @@
  * limitations under the License.
  */
 
-package modules.questionnaires.domain.services
+package modules.submissions.domain.services
 
 
 trait StatementJsonFormatters {
-  import modules.questionnaires.domain.models._
+  import modules.submissions.domain.models._
   import play.api.libs.json._
   import play.api.libs.functional.syntax._
   import uk.gov.hmrc.play.json.Union

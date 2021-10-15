@@ -19,10 +19,11 @@ package helpers
 import scala.concurrent.ExecutionContext
 import scala.concurrent.Future
 import cats.data.EitherT
-import cats.instances.future.catsStdInstancesForFuture
 
 trait EitherTHelper[E] {
   implicit val ec: ExecutionContext
+
+  import cats.instances.future.catsStdInstancesForFuture
 
   def fromOptionF[A](in: Future[Option[A]], error: => E): EitherT[Future,E,A] = EitherT.fromOptionF(in, error)
   def liftF[A](in: Future[A]): EitherT[Future,E,A]                            = EitherT.liftF(in)

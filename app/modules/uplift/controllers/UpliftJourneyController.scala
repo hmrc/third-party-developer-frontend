@@ -28,7 +28,7 @@ import play.api.libs.crypto.CookieSigner
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents, Result}
 import service.{ApplicationActionService, ApplicationService, SessionService}
 import views.helper.IdFormatter
-import views.html.upliftJourney._
+import modules.uplift.views.html._
 import modules.uplift.services.GetProductionCredentialsFlowService
 
 import javax.inject.{Inject, Singleton}
@@ -39,15 +39,13 @@ import controllers.APISubscriptions
 import play.api.data.Forms
 import controllers.FormKeys
 import modules.uplift.services.UpliftJourneyService
-import play.api.libs.json.Json
 import config.UpliftJourneyConfig
 import play.api.mvc.Request
 import scala.util.Try
 import config.{On, OnDemand}
+import domain.models.controllers.BadRequestWithErrorMessage
 
 object UpliftJourneyController {
-  case class ErrorMessage(message: String)
-  implicit val writesErrorMessage = Json.writes[ErrorMessage]
 
   case class ResponsibleIndividualForm(fullName: String, emailAddress: String)
 
@@ -96,7 +94,6 @@ class UpliftJourneyController @Inject() (val errorHandler: ErrorHandler,
                       responsibleIndividualView: ResponsibleIndividualView,
                       flowService: GetProductionCredentialsFlowService,
                       sellResellOrDistributeSoftwareView: SellResellOrDistributeSoftwareView,
-                      productionCredentialsChecklistView: ProductionCredentialsChecklistView,
                       upliftJourneySwitch: UpliftJourneySwitch)
                      (implicit val ec: ExecutionContext, val appConfig: ApplicationConfig)
   extends ApplicationController(mcc)
@@ -116,11 +113,11 @@ class UpliftJourneyController @Inject() (val errorHandler: ErrorHandler,
 
   def confirmApiSubscriptionsAction(sandboxAppId: ApplicationId): Action[AnyContent] = whenTeamMemberOnApp(sandboxAppId) { implicit request =>
 
-    val failed = (msg: String) => successful(BadRequest(Json.toJson(UpliftJourneyController.ErrorMessage(msg))))
+    val failed = (msg: String) => successful(BadRequestWithErrorMessage(msg))
 
     val success = (upliftedAppId: ApplicationId) => {
       upliftJourneySwitch.performSwitch(
-            successful(Redirect(modules.uplift.controllers.routes.UpliftJourneyController.productionCredentialsChecklist(upliftedAppId))),  // new uplift path
+            successful(Redirect(modules.submissions.controllers.routes.ProdCredsChecklistController.productionCredentialsChecklist(upliftedAppId))),  // new uplift path
             successful(Redirect(controllers.checkpages.routes.ApplicationCheck.requestCheckPage(upliftedAppId))                             // existing uplift path
               .withSession(request.session - "subscriptions"))   
       )
@@ -223,10 +220,6 @@ class UpliftJourneyController @Inject() (val errorHandler: ErrorHandler,
       }
     }
     sellResellOrDistributeForm.bindFromRequest.fold(handleInvalidForm, handleValidForm)
-  }
-
-  def productionCredentialsChecklist(sandboxAppId: ApplicationId): Action[AnyContent] = whenTeamMemberOnApp(sandboxAppId) { implicit request =>
-    successful(Ok(productionCredentialsChecklistView(request.application.name)))
   }
 }
 
