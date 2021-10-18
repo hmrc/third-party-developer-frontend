@@ -62,7 +62,7 @@ class QuestionsController @Inject()(
         flowItem      <- fromOption(oQuestion, "Question not found in questionnaire")
         question       = oQuestion.get
       } yield {
-        val submitAction: Call = ???
+        val submitAction: Call = controllers.checkpages.routes.ApplicationCheck.requestCheckPage(applicationId)
         Ok(questionView(question, applicationId, "12345", submitAction))
       }
     )
