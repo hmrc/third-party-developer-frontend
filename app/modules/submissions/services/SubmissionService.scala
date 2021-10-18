@@ -21,9 +21,11 @@ import domain.models.applications.ApplicationId
 import scala.concurrent.Future
 import connectors.ThirdPartyApplicationProductionConnector
 import uk.gov.hmrc.http.HeaderCarrier
-import modules.submissions.domain.models.ExtendedSubmission
+import modules.submissions.domain.models._
 
 @Singleton
 class SubmissionService @Inject() (productionApplicationConnector: ThirdPartyApplicationProductionConnector) {
   def fetchLatestSubmission(appId: ApplicationId)(implicit hc: HeaderCarrier): Future[Option[ExtendedSubmission]] = productionApplicationConnector.fetchLatestSubmission(appId)
+
+  def fetch(id: SubmissionId)(implicit hc: HeaderCarrier): Future[Option[ExtendedSubmission]] = productionApplicationConnector.fetchSubmission(id)
 }

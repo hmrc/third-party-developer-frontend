@@ -38,6 +38,7 @@ import domain.models.apidefinitions.ApiIdentifier
 import uk.gov.hmrc.http.HttpReads.Implicits._
 import modules.submissions.domain.models.ExtendedSubmission
 import modules.submissions.domain.services.SubmissionsFrontendJsonFormatters
+import modules.submissions.domain.models.SubmissionId
 
 abstract class ThirdPartyApplicationConnector(config: ApplicationConfig, metrics: ConnectorMetrics) extends ApplicationConnector with CommonResponseHandlers {
 
@@ -218,6 +219,10 @@ abstract class ThirdPartyApplicationConnector(config: ApplicationConfig, metrics
 
   def fetchLatestSubmission(applicationId: ApplicationId)(implicit hc: HeaderCarrier): Future[Option[ExtendedSubmission]] = {
     http.GET[Option[ExtendedSubmission]](s"$serviceBaseUrl/submissions/application/${applicationId.value}")
+  }
+  
+  def fetchSubmission(id: SubmissionId)(implicit hc: HeaderCarrier): Future[Option[ExtendedSubmission]] = {
+    http.GET[Option[ExtendedSubmission]](s"$serviceBaseUrl/submissions/${id.value}")
   }
 }
 

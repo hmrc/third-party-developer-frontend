@@ -1,0 +1,171 @@
+@*
+ * Copyright 2021 HM Revenue & Customs
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ *@
+
+@import config.ApplicationConfig
+@import include._
+@import domain.models.applications.ApplicationId
+@import domain.models.developers.DeveloperSession
+@import modules.submissions.domain.models._
+@import domain.models.views.BackButtonWithJavaScript
+@import play.api.mvc.Call
+@import play.api.mvc.Request
+
+@this(devMain: DevMain2)(implicit applicationConfig: ApplicationConfig)
+
+@(question: Question, applicationId: ApplicationId, reference: String, submitAction: Call)(implicit request: Request[Any], messages: Messages, loggedIn: DeveloperSession)
+
+@pageHeading = @{ question.wording.value }
+
+@renderStatementText(st: StatementText) = @{st.text}
+
+@renderStatementLink(sl: StatementLink) = {
+  <a class="govuk-link" href="@{sl.url}" target="_blank">@{sl.text}</a>
+}
+
+@renderCompoundFragment(cs: CompoundFragment) = @{
+  cs.fragments.map( fragment =>
+    fragment match {
+      case st: StatementText => renderStatementText(st)
+      case sl: StatementLink => renderStatementLink(sl)
+      case _ => Html("<p />")
+    }
+  )
+}
+
+@renderBulletItem(bullet: StatementFragment) = @{
+  bullet match {
+    case st: StatementText => renderStatementText(st)
+    case sl: StatementLink => renderStatementLink(sl)
+    case cs: CompoundFragment => renderCompoundFragment(cs)
+    case _ => ""
+  }
+}
+
+@renderStatementBullets(cs: StatementBullets) = {
+  <ul class="govuk-list govuk-list--bullet">
+    @for( bullet <- cs.bullets ) { <li>@renderBulletItem(bullet)</li>
+      }
+  </ul>
+}
+
+@renderParagraphStatementText(st: StatementText) = { <p class="govuk-body">@renderStatementText(st)</p> }
+
+@renderParagraphStatementLink(sl: StatementLink) = { <p class="govuk-body">@renderStatementLink(sl)</p> }
+
+@renderParagraphCompoundFragment(cs: CompoundFragment) = { <p class="govuk-body">@renderCompoundFragment(cs)</p> }
+
+
+@renderRadioQuestionChoice(choice: PossibleAnswer) = {
+  <div class="govuk-radios__item">
+    <input class="govuk-radios__input" type="radio" id="question-@{choice.value}-id" name="answer" value="@{choice.value}"
+      data-journey-val="@{choice.value}">
+    <label class="govuk-label govuk-radios__label" for="question-@{choice.value}-id">@{choice.value}</label>
+  </div>
+}
+
+@renderCheckboxChoice(choice: PossibleAnswer) = {
+  <div class="govuk-checkboxes__item">
+    <input class="govuk-checkboxes__input" id="question-@{choice.value}-id" name="answer" type="checkbox"
+      value="@{choice.value}">
+    <label class="govuk-label govuk-checkboxes__label" for="question-@{choice.value}-id">@{choice.value}</label>
+  </div>
+}
+
+@renderMultiChoiceQuestion(question: MultiChoiceQuestion) = {
+  <div class="govuk-form-group">
+    <fieldset class="govuk-fieldset">
+      <legend class="govuk-visually-hidden">
+        <h1 class="govuk-fieldset__heading">
+          @pageHeading
+        </h1>
+      </legend>
+      <div class="govuk-checkboxes" data-module="govuk-checkboxes">
+        @{
+        question.choices.map(choice => renderCheckboxChoice(choice))
+        }
+      </div>
+    </fieldset>
+  </div>
+}
+
+@renderSingleChoiceQuestion(question: SingleChoiceQuestion, inline: Boolean) = {
+  <div class="govuk-form-group">
+    <fieldset class="govuk-fieldset">
+      <legend class="govuk-visually-hidden">
+        <h1 class="govuk-fieldset__heading">
+          @pageHeading
+        </h1>
+      </legend>
+      <div class="govuk-radios @{if(inline) " govuk-radios--inline" else "" }">
+        @{
+        question.choices.map(choice => renderRadioQuestionChoice(choice))
+        }
+      </div>
+    </fieldset>
+  </div>
+}
+
+@renderTextInputQuestion(question: TextQuestion) = {
+  <div class="govuk-form-group">
+    <!-- Below is needed for accessibility, it is hidden visually -->
+    <h1 class="govuk-visually-hidden">
+      <label class="govuk-label govuk-label--l" for="question-@{question.id.value}-id">
+        @pageHeading
+      </label>
+    </h1>
+    <input class="govuk-input" id="question-@{question.id.value}-id" name="answer" type="text">
+  </div>
+}
+
+@renderChoices(question: Question) = @{
+  question match {
+    case q: YesNoQuestion => renderSingleChoiceQuestion(q, true)
+    case q: SingleChoiceQuestion => renderSingleChoiceQuestion(q, false)
+    case q: MultiChoiceQuestion => renderMultiChoiceQuestion(q)
+    case q: TextQuestion => renderTextInputQuestion(q)
+    case _ => <p>TODO</p>
+  }
+}
+
+@devMain(
+  title = pageHeading,
+  userFullName = loggedIn.loggedInName,
+  back = BackButtonWithJavaScript,
+  developerSession = Some(loggedIn)
+) {
+  <h1 class="govuk-heading-l">@pageHeading</h1>
+
+  <p class="govuk-body">
+    @{
+    question.statement.fragments.map( fragment => fragment match {
+    case st: StatementText => renderParagraphStatementText(st)
+    case sl: StatementLink => renderParagraphStatementLink(sl)
+    case cs: CompoundFragment => renderParagraphCompoundFragment(cs)
+    case sb: StatementBullets => renderStatementBullets(sb)
+    })
+    }
+  </p>
+
+  @helper.form(action = submitAction, 'class -> "form") {
+    @helper.CSRF.formField
+
+    @renderChoices(question)
+
+    <input type="hidden" id="reference-id" name="reference" value="@reference" />
+
+    <button id="submit" class="govuk-button" type="submit">Save and continue</button>
+  }
+}

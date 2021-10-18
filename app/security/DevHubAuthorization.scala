@@ -28,6 +28,8 @@ import play.api.mvc._
 import service.SessionService
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.play.bootstrap.controller.FrontendHeaderCarrierProvider
+import cats.data.OptionT
+import cats.data.EitherT
 
 import scala.concurrent.{ExecutionContext, Future}
 
@@ -35,7 +37,7 @@ trait DevHubAuthorization extends Results with FrontendHeaderCarrierProvider wit
   self: BaseController =>
 
   private val alwaysTrueFilter: DeveloperSession => Boolean = _ => true
-  private val onlyTrueIfLoggedInFilter: DeveloperSession => Boolean = _.loggedInState == LoggedInState.LOGGED_IN
+  protected val onlyTrueIfLoggedInFilter: DeveloperSession => Boolean = _.loggedInState == LoggedInState.LOGGED_IN
 
   implicit val appConfig: ApplicationConfig
 
@@ -45,6 +47,27 @@ trait DevHubAuthorization extends Results with FrontendHeaderCarrierProvider wit
     req.developerSession
   }
 
+  def loggedInActionRefiner(filter: DeveloperSession => Boolean): ActionRefiner[MessagesRequest, UserRequest] = 
+    new ActionRefiner[MessagesRequest, UserRequest] {
+      def executionContext = ec
+      def refine[A](input: MessagesRequest[A]): Future[Either[Result, UserRequest[A]]] = {
+        lazy val loginRedirect = Redirect(routes.UserLoginAccount.login())
+
+        implicit val request = input
+
+        OptionT(loadSession)
+        .filter(filter)
+        .toRight(loginRedirect)
+        .flatMap(ds => {
+          EitherT.liftF[Future, Result, UserRequest[A]](
+            sessionService.updateUserFlowSessions(ds.session.sessionId)
+            .map(_ => UserRequest(ds, request))
+          )
+        })
+        .value
+      }
+    }   
+      
   def atLeastPartLoggedInEnablingMfaAction(body: UserRequest[AnyContent] => Future[Result])(implicit ec: ExecutionContext): Action[AnyContent] =
     loggedInActionWithFilter(body)(alwaysTrueFilter)
 

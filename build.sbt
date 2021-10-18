@@ -56,7 +56,7 @@ lazy val microservice = Project(appName, file("."))
 
     retrieveManaged := true,
     routesGenerator := InjectedRoutesGenerator,
-    scalaVersion := "2.12.12"
+    scalaVersion := "2.12.13"
   )
   .settings(
     resolvers += Resolver.typesafeRepo("releases")
