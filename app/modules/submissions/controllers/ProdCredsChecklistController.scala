@@ -34,7 +34,7 @@ import modules.submissions.services.SubmissionService
 import helpers.EitherTHelper
 import domain.models.controllers.BadRequestWithErrorMessage
 
-object ProdCredsChecklistController {
+object ProdCredsChecklistControllerXYZ {
   case class ViewQuestionnaireSummary(label: String, state: String, id: QuestionnaireId = QuestionnaireId.random)
   case class ViewGrouping(label: String, questionnaireSummaries: NonEmptyList[ViewQuestionnaireSummary])
   case class ViewModel(appName: String, groupings: NonEmptyList[ViewGrouping])
@@ -83,7 +83,7 @@ class ProdCredsChecklistController @Inject() (
 
   import cats.implicits._
   import cats.instances.future.catsStdInstancesForFuture
-  import ProdCredsChecklistController._
+  import ProdCredsChecklistControllerXYZ._
 
   def productionCredentialsChecklist(productionAppId: ApplicationId): Action[AnyContent] = whenTeamMemberOnApp(productionAppId) { implicit request =>
     val failed = (err: String) => BadRequestWithErrorMessage(err)

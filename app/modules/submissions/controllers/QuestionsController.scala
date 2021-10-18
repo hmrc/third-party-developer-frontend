@@ -34,7 +34,7 @@ import helpers.EitherTHelper
 import play.api.mvc._
 
 @Singleton
-class QuestionnaireController @Inject()(
+class QuestionsController @Inject()(
   val errorHandler: ErrorHandler,
   val sessionService: SessionService,
   val applicationService: ApplicationService,

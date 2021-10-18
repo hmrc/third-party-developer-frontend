@@ -56,7 +56,7 @@ lazy val microservice = Project(appName, file("."))
 
     retrieveManaged := true,
     routesGenerator := InjectedRoutesGenerator,
-    scalaVersion := "2.12.13"
+    scalaVersion := "2.12.12"
   )
   .settings(
     resolvers += Resolver.typesafeRepo("releases")
@@ -96,6 +96,8 @@ lazy val microservice = Project(appName, file("."))
       routesImport ++= Seq(
         "controllers.binders._",
         "modules.uplift.controllers._",
+        "modules.submissions.controllers.binders._",
+        "modules.submissions.domain.models._",
         "domain.models.controllers._",
         "domain.models.applications._",
         "domain.models.apidefinitions._"

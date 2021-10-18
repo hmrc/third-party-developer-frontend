@@ -1,0 +1,2 @@
+GET         /application/:aid/production-credentials-checklist                    modules.submissions.controllers.ProdCredsChecklistController.productionCredentialsChecklist(aid: ApplicationId)
+GET         /:sid/question/:qid                                                   modules.submissions.controllers.QuestionsController.showQuestion(sid: SubmissionId, qid: QuestionId)

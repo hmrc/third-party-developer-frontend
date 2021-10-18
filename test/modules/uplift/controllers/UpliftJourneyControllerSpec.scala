@@ -235,7 +235,7 @@ class UpliftJourneyControllerSpec extends BaseControllerSpec
       private val result = controller.confirmApiSubscriptionsAction(appId)(loggedInRequest.withCSRFToken)
 
       status(result) shouldBe SEE_OTHER
-      redirectLocation(result) shouldBe Some(s"/developer/applications/${appId.value}/production-credentials-checklist")
+      redirectLocation(result) shouldBe Some(s"/developer/submissions/application/${appId.value}/production-credentials-checklist")
     }
 
     "The selected apis are not save when 'save and continue' clicked but uplift fails" in new Setup {
