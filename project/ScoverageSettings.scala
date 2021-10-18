@@ -16,7 +16,8 @@ object ScoverageSettings {
       ".*definition.*",
       ".*BuildInfo.*",
       ".*javascript",
-      "controllers.binders"
+      "controllers.binders",
+      "modules.submisssions.controllers.binders"
     ).mkString(";")
   )
 }

@@ -44,10 +44,8 @@ import play.api.mvc._
 import helpers.EitherTHelper
 
 import cats.implicits._
-import cats.data.EitherT
 import cats.instances.future.catsStdInstancesForFuture
 import domain.models.applications.Application
-import domain.models.developers.DeveloperSession
 import modules.submissions.services.SubmissionService
 
 case class SubmissionRequest[A](extendedSubmission: ExtendedSubmission , userRequest: UserRequest[A]) extends MessagesRequest[A](userRequest, userRequest.messagesApi) {

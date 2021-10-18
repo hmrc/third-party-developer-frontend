@@ -18,16 +18,13 @@ package modules.submissions.controllers
 
 import javax.inject.{Inject, Singleton}
 import play.api.mvc.MessagesControllerComponents
-import scala.concurrent.Future
 import scala.concurrent.ExecutionContext
 import config.{ApplicationConfig, ErrorHandler}
 import service.{ApplicationService, ApplicationActionService, SessionService}
 import play.api.libs.crypto.CookieSigner
 import controllers.ApplicationController
-import domain.models.applications.ApplicationId
 import modules.submissions.views.html.QuestionView
 import modules.submissions.domain.models._
-import modules.submissions.controllers.SubmissionActionBuilders
 import modules.submissions.services.SubmissionService
 
 import helpers.EitherTHelper
