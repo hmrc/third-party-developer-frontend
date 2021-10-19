@@ -39,6 +39,10 @@ import uk.gov.hmrc.http.HttpReads.Implicits._
 import modules.submissions.domain.models.ExtendedSubmission
 import modules.submissions.domain.services.SubmissionsFrontendJsonFormatters
 import modules.submissions.domain.models.SubmissionId
+import modules.submissions.domain.models.QuestionId
+import cats.data.NonEmptyList
+import play.api.libs.json.Json
+import uk.gov.hmrc.thirdpartyapplication.domain.services.NonEmptyListFormatters
 
 abstract class ThirdPartyApplicationConnector(config: ApplicationConfig, metrics: ConnectorMetrics) extends ApplicationConnector with CommonResponseHandlers {
 
@@ -261,6 +265,13 @@ class ThirdPartyApplicationSandboxConnector @Inject() (
   override val isEnabled = appConfig.hasSandbox;
 }
 
+object ThirdPartyApplicationProductionConnector {
+  import uk.gov.hmrc.thirdpartyapplication.domain.services.NonEmptyListFormatters._
+
+  case class RecordAnswersRequest(answers: NonEmptyList[String])
+  implicit val writes = Json.writes[RecordAnswersRequest]
+}
+
 @Singleton
 class ThirdPartyApplicationProductionConnector @Inject() (
     val httpClient: HttpClient,
@@ -270,9 +281,9 @@ class ThirdPartyApplicationProductionConnector @Inject() (
     val appConfig: ApplicationConfig,
     val metrics: ConnectorMetrics
 )(implicit val ec: ExecutionContext)
-    extends ThirdPartyApplicationConnector(appConfig, metrics) {
-
-
+    extends ThirdPartyApplicationConnector(appConfig, metrics)
+    with SubmissionsFrontendJsonFormatters
+    with NonEmptyListFormatters {
 
   val environment = Environment.PRODUCTION
   val serviceBaseUrl = appConfig.thirdPartyApplicationProductionUrl
@@ -280,4 +291,17 @@ class ThirdPartyApplicationProductionConnector @Inject() (
   val apiKey = appConfig.thirdPartyApplicationProductionApiKey
 
   override val isEnabled = true
+ 
+  import ThirdPartyApplicationProductionConnector._
+
+  def recordAnswer(submissionId: SubmissionId, questionId: QuestionId, rawAnswers: NonEmptyList[String])(implicit hc: HeaderCarrier): Future[Either[String, ExtendedSubmission]] = {
+    import cats.implicits._
+    val failed = (err: UpstreamErrorResponse) => s"Failed to record answer for submission ${submissionId.value} and question ${questionId.value}"
+
+    metrics.record(api) {
+      http.POST[RecordAnswersRequest, Either[UpstreamErrorResponse, ExtendedSubmission]](s"$serviceBaseUrl/submissions/${submissionId.value}/question/${questionId.value}", RecordAnswersRequest(rawAnswers))
+      .map(_.leftMap(failed))
+    }
+  }
+
 }

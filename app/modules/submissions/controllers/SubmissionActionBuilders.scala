@@ -47,6 +47,7 @@ import cats.implicits._
 import cats.instances.future.catsStdInstancesForFuture
 import domain.models.applications.Application
 import modules.submissions.services.SubmissionService
+import play.api.libs.json.JsValue
 
 case class SubmissionRequest[A](extendedSubmission: ExtendedSubmission , userRequest: UserRequest[A]) extends MessagesRequest[A](userRequest, userRequest.messagesApi) {
   lazy val submission = extendedSubmission.submission
@@ -64,7 +65,7 @@ trait SubmissionActionBuilders extends SimpleApplicationActionBuilders {
   self: BaseController =>
 
   val errorHandler: ErrorHandler
-  val submissionSerivce: SubmissionService
+  val submissionService: SubmissionService
   private[this] val ecPassThru = ec
 
   val E = new EitherTHelper[Result] {
@@ -78,7 +79,7 @@ trait SubmissionActionBuilders extends SimpleApplicationActionBuilders {
         implicit val implicitRequest: MessagesRequest[A] = input
         (
           for {
-            submission <- E.fromOptionF(submissionSerivce.fetch(submissionId), NotFound(errorHandler.notFoundTemplate(Request(input, input.developerSession))) )
+            submission <- E.fromOptionF(submissionService.fetch(submissionId), NotFound(errorHandler.notFoundTemplate(Request(input, input.developerSession))) )
           } yield SubmissionRequest(submission, input)
         )
         .value
@@ -97,6 +98,23 @@ trait SubmissionActionBuilders extends SimpleApplicationActionBuilders {
         .value
       }
     }
+
+  // def SubmissionAction(submissionId: SubmissionId)(implicit ec: ExecutionContext): ActionBuilder[SubmissionApplicationRequest, AnyContent] =
+  //   Action andThen
+  //     loggedInActionRefiner(onlyTrueIfLoggedInFilter) andThen
+  //     submissionRefiner(submissionId) andThen
+  //     submissionApplicationRefiner
+
+  def withSubmissionJson(submissionId: SubmissionId)(fun: SubmissionApplicationRequest[JsValue] => Future[Result])(implicit ec: ExecutionContext): Action[JsValue] = {
+    Action.async(parse.json) { implicit request => 
+      val composedActions = 
+        loggedInActionRefiner(onlyTrueIfLoggedInFilter) andThen
+        submissionRefiner(submissionId) andThen
+        submissionApplicationRefiner
+
+        composedActions.invokeBlock(request, fun)
+    }
+  }
 
   def withSubmission(submissionId: SubmissionId)(fun: SubmissionApplicationRequest[AnyContent] => Future[Result])(implicit ec: ExecutionContext): Action[AnyContent] = {
     Action.async { implicit request =>

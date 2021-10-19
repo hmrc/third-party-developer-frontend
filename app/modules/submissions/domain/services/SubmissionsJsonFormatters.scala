@@ -37,9 +37,11 @@ object SubmissionsJsonFormatters extends SubmissionsJsonFormatters {
   implicit val extendedSubmissionFormat = Json.format[ExtendedSubmission]
 }
 
-object SubmissionsFrontendJsonFormatters extends SubmissionsJsonFormatters {
+trait SubmissionsFrontendJsonFormatters extends SubmissionsJsonFormatters {
   import JodaWrites.JodaDateTimeWrites
   implicit val utcReads = JodaReads.DefaultJodaDateTimeReads.map(dt => dt.withZone(DateTimeZone.UTC))
   implicit val submissionFormat = Json.format[Submission]
   implicit val extendedSubmissionFormat = Json.format[ExtendedSubmission]
 }
+
+object SubmissionsFrontendJsonFormatters extends SubmissionsFrontendJsonFormatters

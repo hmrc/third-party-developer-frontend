@@ -26,9 +26,20 @@ import controllers.ApplicationController
 import modules.submissions.views.html.QuestionView
 import modules.submissions.domain.models._
 import modules.submissions.services.SubmissionService
+import modules.submissions.domain.services.SubmissionsFrontendJsonFormatters._
 
 import helpers.EitherTHelper
 import play.api.mvc._
+import play.api.libs.json.Json
+import cats.data.NonEmptyList
+
+object QuestionsController {
+  case class ErrorMessage(message: String)
+  implicit val writesErrorMessage = Json.writes[ErrorMessage]
+
+  case class RecordAnswersRequest(answers: NonEmptyList[String])
+  implicit val readsRecordAnswersRequest = Json.reads[RecordAnswersRequest]
+}
 
 @Singleton
 class QuestionsController @Inject()(
@@ -36,7 +47,7 @@ class QuestionsController @Inject()(
   val sessionService: SessionService,
   val applicationService: ApplicationService,
   val applicationActionService: ApplicationActionService,
-  override val submissionSerivce: SubmissionService,
+  override val submissionService: SubmissionService,
   val cookieSigner: CookieSigner,
   questionView: QuestionView,
   mcc: MessagesControllerComponents
@@ -48,8 +59,9 @@ class QuestionsController @Inject()(
   with EitherTHelper[String] {
 
   import cats.instances.future.catsStdInstancesForFuture
+  import QuestionsController._
 
-  def showQuestion(submissionId: SubmissionId, questionId: QuestionId) =  withSubmission(submissionId) { implicit request => 
+  def showQuestion(submissionId: SubmissionId, questionId: QuestionId) = withSubmission(submissionId) { implicit request => 
     val answers = request.submission.answersToQuestions
     val submission = request.submission
     val oQuestion = submission.findQuestion(questionId)
@@ -68,4 +80,32 @@ class QuestionsController @Inject()(
     )
     .fold[Result](BadRequest(_), identity(_))
   }
+
+  def recordAnswer(submissionId: SubmissionId, questionId: QuestionId) = withSubmissionJson(submissionId) { implicit request => 
+    withJsonBody[RecordAnswersRequest] { recordAnswersRequest =>
+      val failed = (msg: String) => BadRequest(Json.toJson(ErrorMessage(msg)))
+      val success = (s: ExtendedSubmission) => Ok(Json.toJson(s))
+
+      submissionService.recordAnswer(submissionId, questionId, recordAnswersRequest.answers).map(_.fold(failed, success))
+    }
+  }
+
+  // def recordAnswer(submissionId: SubmissionId, questionId: QuestionId) = withSubmission(submissionId) { implicit request => 
+  //   val previousAnswers = request.submission.answersToQuestions
+  //   val submission = request.submission
+  //   val oQuestion = submission.findQuestion(questionId)
+  //   val applicationId = request.application.id
+
+  //   implicit val developerSession = request.developerSession
+    
+  //   val failed = (msg: String) => BadRequest(Json.toJson(ErrorMessage(msg)))
+
+  //   val success = (s: ExtendedSubmission) => Ok(Json.toJson(s))
+
+  //   withJsonBody[RecordAnswersRequest] { answersRequest =>
+  //     submissionSerivce.recordAnswer(submissionId, questionId, answersRequest.answers).map(_.fold(failed, success))
+  //   }
+    
+  //   ???
+  // }
 }
