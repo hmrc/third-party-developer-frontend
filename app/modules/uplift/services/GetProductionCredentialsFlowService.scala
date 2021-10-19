@@ -58,4 +58,8 @@ class GetProductionCredentialsFlowService @Inject()(
       savedFlow    <- flowRepository.saveFlow[GetProductionCredentialsFlow](existingFlow.copy(apiSubscriptions = Some(apiSubscriptions)))
     } yield savedFlow
   }
+
+  def resetFlow(developerSession: DeveloperSession): Future[GetProductionCredentialsFlow] =
+    flowRepository.deleteBySessionIdAndFlowType(developerSession.session.sessionId, FlowType.GET_PRODUCTION_CREDENTIALS)
+    .flatMap(_ => fetchFlow(developerSession))
 }

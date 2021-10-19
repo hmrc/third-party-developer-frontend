@@ -28,6 +28,8 @@ import modules.submissions.domain.models._
 import modules.submissions.services.SubmissionService
 import modules.submissions.domain.services.SubmissionsFrontendJsonFormatters._
 
+import scala.concurrent.Future.successful
+
 import helpers.EitherTHelper
 import play.api.mvc._
 import play.api.libs.json.Json
@@ -61,28 +63,33 @@ class QuestionsController @Inject()(
   import cats.instances.future.catsStdInstancesForFuture
   import QuestionsController._
 
-  def showQuestion(submissionId: SubmissionId, questionId: QuestionId) = withSubmission(submissionId) { implicit request => 
-    val answers = request.submission.answersToQuestions
+  def showQuestion(submissionId: SubmissionId, questionId: QuestionId, answers: Option[ActualAnswer] = None, errors: Option[String] = None) = withSubmission(submissionId) { implicit request => 
+    val currentAnswer = request.submission.answersToQuestions.get(questionId)
     val submission = request.submission
     val oQuestion = submission.findQuestion(questionId)
     val applicationId = request.application.id
 
     implicit val developerSession = request.developerSession
-
     (
       for {
         flowItem      <- fromOption(oQuestion, "Question not found in questionnaire")
         question       = oQuestion.get
       } yield {
         val submitAction: Call = modules.submissions.controllers.routes.QuestionsController.recordAnswer(submissionId, questionId)
-        Ok(questionView(question, applicationId, "12345", submitAction))
+        errors.fold(
+          Ok(questionView(question, applicationId, submitAction, currentAnswer, None))
+        )(
+          _ => BadRequest(questionView(question, applicationId, submitAction, currentAnswer, errors))
+        )
       }
     )
     .fold[Result](BadRequest(_), identity(_))
   }
 
   def recordAnswer(submissionId: SubmissionId, questionId: QuestionId) = withSubmission(submissionId) { implicit request => 
-    val failed = (msg: String) => BadRequest(Json.toJson(ErrorMessage(msg)))
+
+    val failed = (msg: String) => showQuestion(submissionId, questionId, None, Some("Please provide an answer to the question"))(request)
+
     val success = (e: ExtendedSubmission) => { 
       val questionnaire = e.submission.findQuestionnaireContaining(questionId).get
       val nextQuestion = e.nextQuestions.get(questionnaire.id)
@@ -90,7 +97,7 @@ class QuestionsController @Inject()(
       lazy val toProdChecklist = modules.submissions.controllers.routes.ProdCredsChecklistController.productionCredentialsChecklist(e.submission.applicationId)
       lazy val toNextQuestion = (nextQuestionId) => modules.submissions.controllers.routes.QuestionsController.showQuestion(submissionId, nextQuestionId)
 
-      Redirect(nextQuestion.fold(toProdChecklist)(toNextQuestion))
+      successful(Redirect(nextQuestion.fold(toProdChecklist)(toNextQuestion)))
     }
   
     val formValues = request.body.asFormUrlEncoded.get.filterNot(_._1 == "csrfToken")
@@ -102,5 +109,6 @@ class QuestionsController @Inject()(
       } yield newSubmission
     )
     .fold(failed, success)
+    .flatten
   }
 }

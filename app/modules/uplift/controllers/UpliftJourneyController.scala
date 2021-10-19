@@ -47,6 +47,16 @@ import domain.models.controllers.BadRequestWithErrorMessage
 
 object UpliftJourneyController {
 
+  case class ChooseApplicationToUpliftForm(applicationId: ApplicationId)
+
+  object ChooseApplicationToUpliftForm {
+    val form: Form[ChooseApplicationToUpliftForm] = Form(
+      mapping(
+        "applicationId" -> nonEmptyText.transform[ApplicationId](ApplicationId(_), id => id.value)
+      )(ChooseApplicationToUpliftForm.apply)(ChooseApplicationToUpliftForm.unapply)
+    )
+  }
+
   case class ResponsibleIndividualForm(fullName: String, emailAddress: String)
 
   object ResponsibleIndividualForm {

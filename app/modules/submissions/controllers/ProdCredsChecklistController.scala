@@ -39,9 +39,18 @@ object ProdCredsChecklistController {
   case class ViewGrouping(label: String, questionnaireSummaries: NonEmptyList[ViewQuestionnaireSummary])
   case class ViewModel(appName: String, groupings: NonEmptyList[ViewGrouping])
 
+  def hasAnyAnswersForQuestionnaire(extendedSubmission: ExtendedSubmission)(questionnaireId: QuestionnaireId): Boolean = {
+    // for {
+    //   submission <- fromOption(extendedSubmission.submission.allQuestionnaires.find(_.id == questionnaireId), "No such questionnaire")
+    // } yield ???
+
+    true
+  }
+
   def deriveState(extendedSubmission: ExtendedSubmission)(questionnaire: Questionnaire): String = {
     extendedSubmission.nextQuestions.get(questionnaire.id) match {
-      case None => "Completed"
+      case None if hasAnyAnswersForQuestionnaire(extendedSubmission)(questionnaire.id) => "Completed"
+      case None => "Not Applicable"
       case Some(qId) if qId == questionnaire.questions.head.question.id => "Not Started"
       case Some(qId) => "In Progress"
     }

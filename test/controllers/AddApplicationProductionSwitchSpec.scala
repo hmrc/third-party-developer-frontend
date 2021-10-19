@@ -150,6 +150,7 @@ class AddApplicationProductionSwitchSpec
   "addApplicationProductionSwitch" should {
     "return bad request when no apps are upliftable" in new Setup {
       aUsersUplfitableAndNotUpliftableAppsReturns(Nil, List.empty)
+      when(flowServiceMock.resetFlow(*)).thenReturn(Future.successful(GetProductionCredentialsFlow("", None, None, None)))
 
       val result = underTest.addApplicationProductionSwitch()(loggedInRequest)
 
@@ -162,6 +163,7 @@ class AddApplicationProductionSwitchSpec
       ApmConnectorMock.FetchUpliftableSubscriptions.willReturn(subsetOfSubscriptions)
       aUsersUplfitableAndNotUpliftableAppsReturns(summaries, summaries.map(_.id))
       when(flowServiceMock.storeApiSubscriptions(*, *)).thenReturn(Future.successful(GetProductionCredentialsFlow("", None, None, None)))
+      when(flowServiceMock.resetFlow(*)).thenReturn(Future.successful(GetProductionCredentialsFlow("", None, None, None)))
 
 
       val result = underTest.addApplicationProductionSwitch()(loggedInRequest)
@@ -175,6 +177,7 @@ class AddApplicationProductionSwitchSpec
       aUsersUplfitableAndNotUpliftableAppsReturns(summaries, summaries.map(_.id))
       
       implicit val result = underTest.addApplicationProductionSwitch()(loggedInRequest)
+      when(flowServiceMock.resetFlow(*)).thenReturn(Future.successful(GetProductionCredentialsFlow("", None, None, None)))
 
       status(result) shouldBe OK
 
@@ -191,6 +194,7 @@ class AddApplicationProductionSwitchSpec
       val prodAppId = ApplicationId.random
 
       ApmConnectorMock.UpliftApplicationV1.willReturn(prodAppId)
+      when(flowServiceMock.resetFlow(*)).thenReturn(Future.successful(GetProductionCredentialsFlow("", None, None, None)))
 
       aUsersUplfitableAndNotUpliftableAppsReturns(summaries, upliftable.map(_.id))
       
@@ -212,6 +216,7 @@ class AddApplicationProductionSwitchSpec
       aUsersUplfitableAndNotUpliftableAppsReturns(summaries, upliftable.map(_.id))
       
       implicit val result = underTest.addApplicationProductionSwitch()(loggedInRequest)
+      when(flowServiceMock.resetFlow(*)).thenReturn(Future.successful(GetProductionCredentialsFlow("", None, None, None)))
 
       status(result) shouldBe OK
 
@@ -228,6 +233,8 @@ class AddApplicationProductionSwitchSpec
       aUsersUplfitableAndNotUpliftableAppsReturns(summaries, upliftable.map(_.id))
       
       implicit val result = underTest.addApplicationProductionSwitch()(loggedInRequest)
+
+      when(flowServiceMock.resetFlow(*)).thenReturn(Future.successful(GetProductionCredentialsFlow("", None, None, None)))
 
       status(result) shouldBe OK
 
