@@ -25,9 +25,10 @@ trait EitherTHelper[E] {
 
   import cats.instances.future.catsStdInstancesForFuture
 
+  def fromOption[A](in: Option[A], error: => E): EitherT[Future,E,A]          = EitherT.fromOption(in, error)
   def fromOptionF[A](in: Future[Option[A]], error: => E): EitherT[Future,E,A] = EitherT.fromOptionF(in, error)
   def liftF[A](in: Future[A]): EitherT[Future,E,A]                            = EitherT.liftF(in)
-  def fromOption[A](in: Option[A], error: => E): EitherT[Future,E,A]          = EitherT.fromOption(in, error)
   def fromEither[A](in: Either[E,A]): EitherT[Future,E,A]                     = EitherT.fromEither(in)
+  def fromEitherF[A](in: Future[Either[E,A]]): EitherT[Future,E,A]            = EitherT(in)
   def cond[A](in: => Boolean, right: => A, left: => E)                        = EitherT.cond[Future](in, right, left)
 }

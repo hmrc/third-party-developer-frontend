@@ -74,38 +74,33 @@ class QuestionsController @Inject()(
         flowItem      <- fromOption(oQuestion, "Question not found in questionnaire")
         question       = oQuestion.get
       } yield {
-        val submitAction: Call = controllers.checkpages.routes.ApplicationCheck.requestCheckPage(applicationId)
+        val submitAction: Call = modules.submissions.controllers.routes.QuestionsController.recordAnswer(submissionId, questionId)
         Ok(questionView(question, applicationId, "12345", submitAction))
       }
     )
     .fold[Result](BadRequest(_), identity(_))
   }
 
-  def recordAnswer(submissionId: SubmissionId, questionId: QuestionId) = withSubmissionJson(submissionId) { implicit request => 
-    withJsonBody[RecordAnswersRequest] { recordAnswersRequest =>
-      val failed = (msg: String) => BadRequest(Json.toJson(ErrorMessage(msg)))
-      val success = (s: ExtendedSubmission) => Ok(Json.toJson(s))
+  def recordAnswer(submissionId: SubmissionId, questionId: QuestionId) = withSubmission(submissionId) { implicit request => 
+    val failed = (msg: String) => BadRequest(Json.toJson(ErrorMessage(msg)))
+    val success = (e: ExtendedSubmission) => { 
+      val questionnaire = e.submission.findQuestionnaireContaining(questionId).get
+      val nextQuestion = e.nextQuestions.get(questionnaire.id)
+      
+      lazy val toProdChecklist = modules.submissions.controllers.routes.ProdCredsChecklistController.productionCredentialsChecklist(e.submission.applicationId)
+      lazy val toNextQuestion = (nextQuestionId) => modules.submissions.controllers.routes.QuestionsController.showQuestion(submissionId, nextQuestionId)
 
-      submissionService.recordAnswer(submissionId, questionId, recordAnswersRequest.answers).map(_.fold(failed, success))
+      Redirect(nextQuestion.fold(toProdChecklist)(toNextQuestion))
     }
+  
+    val formValues = request.body.asFormUrlEncoded.get.filterNot(_._1 == "csrfToken")
+    (
+      for {
+        formValue <- fromOption(formValues.get("answer"), "Submission found no answer")
+        answers   <- fromOption(NonEmptyList.fromList(formValue.toList), "Answer was empty")
+        newSubmission <- fromEitherF(submissionService.recordAnswer(submissionId, questionId, answers))
+      } yield newSubmission
+    )
+    .fold(failed, success)
   }
-
-  // def recordAnswer(submissionId: SubmissionId, questionId: QuestionId) = withSubmission(submissionId) { implicit request => 
-  //   val previousAnswers = request.submission.answersToQuestions
-  //   val submission = request.submission
-  //   val oQuestion = submission.findQuestion(questionId)
-  //   val applicationId = request.application.id
-
-  //   implicit val developerSession = request.developerSession
-    
-  //   val failed = (msg: String) => BadRequest(Json.toJson(ErrorMessage(msg)))
-
-  //   val success = (s: ExtendedSubmission) => Ok(Json.toJson(s))
-
-  //   withJsonBody[RecordAnswersRequest] { answersRequest =>
-  //     submissionSerivce.recordAnswer(submissionId, questionId, answersRequest.answers).map(_.fold(failed, success))
-  //   }
-    
-  //   ???
-  // }
 }
