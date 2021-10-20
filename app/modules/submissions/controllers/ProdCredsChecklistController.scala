@@ -39,38 +39,22 @@ object ProdCredsChecklistController {
   case class ViewGrouping(label: String, questionnaireSummaries: NonEmptyList[ViewQuestionnaireSummary])
   case class ViewModel(appName: String, groupings: NonEmptyList[ViewGrouping])
 
-  def hasAnyAnswersForQuestionnaire(extendedSubmission: ExtendedSubmission)(questionnaireId: QuestionnaireId): Boolean = {
-    // for {
-    //   submission <- fromOption(extendedSubmission.submission.allQuestionnaires.find(_.id == questionnaireId), "No such questionnaire")
-    // } yield ???
-
-    true
-  }
-
-  def deriveState(extendedSubmission: ExtendedSubmission)(questionnaire: Questionnaire): String = {
-    extendedSubmission.nextQuestions.get(questionnaire.id) match {
-      case None if hasAnyAnswersForQuestionnaire(extendedSubmission)(questionnaire.id) => "Completed"
-      case None => "Not Applicable"
-      case Some(qId) if qId == questionnaire.questions.head.question.id => "Not Started"
-      case Some(qId) => "In Progress"
-    }
-  }
-
-  def convertToSummary(extendedSubmission: ExtendedSubmission)(questionnaire: Questionnaire): ViewQuestionnaireSummary = {
-    val state = deriveState(extendedSubmission)(questionnaire)
-    val url = extendedSubmission.nextQuestions.get(questionnaire.id).map(qid => modules.submissions.controllers.routes.QuestionsController.showQuestion(extendedSubmission.submission.id, qid).url)
+  def convertToSummary(submission: Submission)(questionnaire: Questionnaire): ViewQuestionnaireSummary = {
+    val progress = submission.questionnaireProgress.get(questionnaire.id).get
+    val state = progress.state.toString
+    val url = progress.nextQuestion.map(qid => modules.submissions.controllers.routes.QuestionsController.showQuestion(submission.id, qid).url)
     ViewQuestionnaireSummary(questionnaire.label.value, state, questionnaire.id, url)
   }
 
-  def convertToViewGrouping(extendedSubmission: ExtendedSubmission)(groupOfQuestionnaires: GroupOfQuestionnaires): ViewGrouping = {
+  def convertToViewGrouping(extendedSubmission: Submission)(groupOfQuestionnaires: GroupOfQuestionnaires): ViewGrouping = {
     ViewGrouping(
       label = groupOfQuestionnaires.heading,
       questionnaireSummaries = groupOfQuestionnaires.links.map(convertToSummary(extendedSubmission))
     )
   }
 
-  def convertSubmissionToViewModel(extendedSubmission: ExtendedSubmission)(appName: String): ViewModel = {
-    val groupings = extendedSubmission.submission.groups.map(convertToViewGrouping(extendedSubmission))
+  def convertSubmissionToViewModel(submission: Submission)(appName: String): ViewModel = {
+    val groupings = submission.groups.map(convertToViewGrouping(submission))
     ViewModel(appName, groupings)
   }
 }

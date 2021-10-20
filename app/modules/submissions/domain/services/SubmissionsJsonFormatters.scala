@@ -20,6 +20,7 @@ import modules.submissions.domain.models._
 import play.api.libs.json._
 import org.joda.time.DateTimeZone
 import uk.gov.hmrc.thirdpartyapplication.domain.services.NonEmptyListFormatters
+import uk.gov.hmrc.play.json.Union
 
 trait SubmissionsJsonFormatters extends GroupOfQuestionnairesJsonFormatters with NonEmptyListFormatters {
   
@@ -28,20 +29,31 @@ trait SubmissionsJsonFormatters extends GroupOfQuestionnairesJsonFormatters with
 
   implicit val keyReadsQuestionnaireId: KeyReads[QuestionnaireId] = key => JsSuccess(QuestionnaireId(key))
   implicit val keyWritesQuestionnaireId: KeyWrites[QuestionnaireId] = _.value
+  implicit val notStartedFormat = Json.format[NotStarted.type]
+  implicit val inProgressFormat = Json.format[InProgress.type]
+  implicit val notApplicableFormat = Json.format[NotApplicable.type]
+  implicit val completedFormat = Json.format[Completed.type]
+  
+  implicit val questionnaireStateFormat = Union.from[QuestionnaireState]("state")
+    .and[NotStarted.type]("NotStarted")
+    .and[InProgress.type]("InProgress")
+    .and[NotApplicable.type]("NotApplicable")
+    .and[Completed.type]("Completed")
+    .format
+
+  implicit val questionnaireProgressFormat = Json.format[QuestionnaireProgress]
 }
 
 object SubmissionsJsonFormatters extends SubmissionsJsonFormatters {
   import uk.gov.hmrc.mongo.json.ReactiveMongoFormats
   implicit val dateFormat = ReactiveMongoFormats.dateTimeFormats
   implicit val submissionFormat = Json.format[Submission]
-  implicit val extendedSubmissionFormat = Json.format[ExtendedSubmission]
 }
 
 trait SubmissionsFrontendJsonFormatters extends SubmissionsJsonFormatters {
   import JodaWrites.JodaDateTimeWrites
   implicit val utcReads = JodaReads.DefaultJodaDateTimeReads.map(dt => dt.withZone(DateTimeZone.UTC))
   implicit val submissionFormat = Json.format[Submission]
-  implicit val extendedSubmissionFormat = Json.format[ExtendedSubmission]
 }
 
 object SubmissionsFrontendJsonFormatters extends SubmissionsFrontendJsonFormatters

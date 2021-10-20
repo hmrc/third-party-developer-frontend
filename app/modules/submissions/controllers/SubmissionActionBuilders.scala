@@ -49,14 +49,13 @@ import domain.models.applications.Application
 import modules.submissions.services.SubmissionService
 import play.api.libs.json.JsValue
 
-case class SubmissionRequest[A](extendedSubmission: ExtendedSubmission , userRequest: UserRequest[A]) extends MessagesRequest[A](userRequest, userRequest.messagesApi) {
-  lazy val submission = extendedSubmission.submission
+case class SubmissionRequest[A](submission: Submission , userRequest: UserRequest[A]) extends MessagesRequest[A](userRequest, userRequest.messagesApi) {
   lazy val answersToQuestions = submission.answersToQuestions
   lazy val developerSession = userRequest.developerSession
 }
 
 case class SubmissionApplicationRequest[A](application: Application, submissionRequest: SubmissionRequest[A]) extends MessagesRequest[A](submissionRequest, submissionRequest.messagesApi) {
-  lazy val submission = submissionRequest.extendedSubmission.submission
+  lazy val submission = submissionRequest.submission
   lazy val answersToQuestions = submission.answersToQuestions
   lazy val developerSession = submissionRequest.userRequest.developerSession
 }
@@ -92,7 +91,7 @@ trait SubmissionActionBuilders extends SimpleApplicationActionBuilders {
       override def refine[A](request: SubmissionRequest[A]): Future[Either[Result, SubmissionApplicationRequest[A]]] = {
         implicit val implicitRequest: MessagesRequest[A] = request
 
-        applicationActionService.process(request.extendedSubmission.submission.applicationId, request.userRequest.developerSession)
+        applicationActionService.process(request.submission.applicationId, request.userRequest.developerSession)
         .toRight(NotFound(errorHandler.notFoundTemplate(Request(request, request.userRequest.developerSession))))
         .map(r => SubmissionApplicationRequest(r.application, request))
         .value

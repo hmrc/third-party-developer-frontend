@@ -165,7 +165,6 @@ class AddApplicationProductionSwitchSpec
       when(flowServiceMock.storeApiSubscriptions(*, *)).thenReturn(Future.successful(GetProductionCredentialsFlow("", None, None, None)))
       when(flowServiceMock.resetFlow(*)).thenReturn(Future.successful(GetProductionCredentialsFlow("", None, None, None)))
 
-
       val result = underTest.addApplicationProductionSwitch()(loggedInRequest)
 
       status(result) shouldBe SEE_OTHER
@@ -176,8 +175,8 @@ class AddApplicationProductionSwitchSpec
       val summaries = sandboxAppSummaries
       aUsersUplfitableAndNotUpliftableAppsReturns(summaries, summaries.map(_.id))
       
-      implicit val result = underTest.addApplicationProductionSwitch()(loggedInRequest)
       when(flowServiceMock.resetFlow(*)).thenReturn(Future.successful(GetProductionCredentialsFlow("", None, None, None)))
+      implicit val result = underTest.addApplicationProductionSwitch()(loggedInRequest)
 
       status(result) shouldBe OK
 
@@ -215,8 +214,8 @@ class AddApplicationProductionSwitchSpec
 
       aUsersUplfitableAndNotUpliftableAppsReturns(summaries, upliftable.map(_.id))
       
-      implicit val result = underTest.addApplicationProductionSwitch()(loggedInRequest)
       when(flowServiceMock.resetFlow(*)).thenReturn(Future.successful(GetProductionCredentialsFlow("", None, None, None)))
+      implicit val result = underTest.addApplicationProductionSwitch()(loggedInRequest)
 
       status(result) shouldBe OK
 
@@ -226,15 +225,15 @@ class AddApplicationProductionSwitchSpec
       // TODO - work out why
       // shouldShowMessageAboutNotNeedingProdCreds()
     }
+
     "return ok when some apps are upliftable after showing fluff" in new Setup {
       val summaries = sandboxAppSummaries
       val upliftable = summaries.drop(1)
 
       aUsersUplfitableAndNotUpliftableAppsReturns(summaries, upliftable.map(_.id))
+      when(flowServiceMock.resetFlow(*)).thenReturn(Future.successful(GetProductionCredentialsFlow("", None, None, None)))
       
       implicit val result = underTest.addApplicationProductionSwitch()(loggedInRequest)
-
-      when(flowServiceMock.resetFlow(*)).thenReturn(Future.successful(GetProductionCredentialsFlow("", None, None, None)))
 
       status(result) shouldBe OK
 

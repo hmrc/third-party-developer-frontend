@@ -36,13 +36,13 @@ import scala.concurrent.{ExecutionContext, Future}
 import scala.util.Success
 import domain.models.apidefinitions.ApiIdentifier
 import uk.gov.hmrc.http.HttpReads.Implicits._
-import modules.submissions.domain.models.ExtendedSubmission
 import modules.submissions.domain.services.SubmissionsFrontendJsonFormatters
 import modules.submissions.domain.models.SubmissionId
 import modules.submissions.domain.models.QuestionId
 import cats.data.NonEmptyList
 import play.api.libs.json.Json
 import uk.gov.hmrc.thirdpartyapplication.domain.services.NonEmptyListFormatters
+import modules.submissions.domain.models.Submission
 
 abstract class ThirdPartyApplicationConnector(config: ApplicationConfig, metrics: ConnectorMetrics) extends ApplicationConnector with CommonResponseHandlers {
 
@@ -221,12 +221,12 @@ abstract class ThirdPartyApplicationConnector(config: ApplicationConfig, metrics
     http.GET[Set[ApiIdentifier]](s"$serviceBaseUrl/application/${applicationId.value}/subscription")
   }
 
-  def fetchLatestSubmission(applicationId: ApplicationId)(implicit hc: HeaderCarrier): Future[Option[ExtendedSubmission]] = {
-    http.GET[Option[ExtendedSubmission]](s"$serviceBaseUrl/submissions/application/${applicationId.value}")
+  def fetchLatestSubmission(applicationId: ApplicationId)(implicit hc: HeaderCarrier): Future[Option[Submission]] = {
+    http.GET[Option[Submission]](s"$serviceBaseUrl/submissions/application/${applicationId.value}")
   }
   
-  def fetchSubmission(id: SubmissionId)(implicit hc: HeaderCarrier): Future[Option[ExtendedSubmission]] = {
-    http.GET[Option[ExtendedSubmission]](s"$serviceBaseUrl/submissions/${id.value}")
+  def fetchSubmission(id: SubmissionId)(implicit hc: HeaderCarrier): Future[Option[Submission]] = {
+    http.GET[Option[Submission]](s"$serviceBaseUrl/submissions/${id.value}")
   }
 }
 
@@ -294,12 +294,12 @@ class ThirdPartyApplicationProductionConnector @Inject() (
  
   import ThirdPartyApplicationProductionConnector._
 
-  def recordAnswer(submissionId: SubmissionId, questionId: QuestionId, rawAnswers: NonEmptyList[String])(implicit hc: HeaderCarrier): Future[Either[String, ExtendedSubmission]] = {
+  def recordAnswer(submissionId: SubmissionId, questionId: QuestionId, rawAnswers: NonEmptyList[String])(implicit hc: HeaderCarrier): Future[Either[String, Submission]] = {
     import cats.implicits._
     val failed = (err: UpstreamErrorResponse) => s"Failed to record answer for submission ${submissionId.value} and question ${questionId.value}"
 
     metrics.record(api) {
-      http.POST[RecordAnswersRequest, Either[UpstreamErrorResponse, ExtendedSubmission]](s"$serviceBaseUrl/submissions/${submissionId.value}/question/${questionId.value}", RecordAnswersRequest(rawAnswers))
+      http.POST[RecordAnswersRequest, Either[UpstreamErrorResponse, Submission]](s"$serviceBaseUrl/submissions/${submissionId.value}/question/${questionId.value}", RecordAnswersRequest(rawAnswers))
       .map(_.leftMap(failed))
     }
   }

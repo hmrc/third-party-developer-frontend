@@ -61,7 +61,6 @@ class QuestionsController @Inject()(
   with EitherTHelper[String] {
 
   import cats.instances.future.catsStdInstancesForFuture
-  import QuestionsController._
 
   def showQuestion(submissionId: SubmissionId, questionId: QuestionId, answers: Option[ActualAnswer] = None, errors: Option[String] = None) = withSubmission(submissionId) { implicit request => 
     val currentAnswer = request.submission.answersToQuestions.get(questionId)
@@ -90,11 +89,11 @@ class QuestionsController @Inject()(
 
     val failed = (msg: String) => showQuestion(submissionId, questionId, None, Some("Please provide an answer to the question"))(request)
 
-    val success = (e: ExtendedSubmission) => { 
-      val questionnaire = e.submission.findQuestionnaireContaining(questionId).get
-      val nextQuestion = e.nextQuestions.get(questionnaire.id)
+    val success = (submission: Submission) => { 
+      val questionnaire = submission.findQuestionnaireContaining(questionId).get
+      val nextQuestion = submission.questionnaireProgress.get(questionnaire.id).flatMap(_.nextQuestion)
       
-      lazy val toProdChecklist = modules.submissions.controllers.routes.ProdCredsChecklistController.productionCredentialsChecklist(e.submission.applicationId)
+      lazy val toProdChecklist = modules.submissions.controllers.routes.ProdCredsChecklistController.productionCredentialsChecklist(submission.applicationId)
       lazy val toNextQuestion = (nextQuestionId) => modules.submissions.controllers.routes.QuestionsController.showQuestion(submissionId, nextQuestionId)
 
       successful(Redirect(nextQuestion.fold(toProdChecklist)(toNextQuestion)))
