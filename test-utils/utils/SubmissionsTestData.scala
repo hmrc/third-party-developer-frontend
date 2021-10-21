@@ -20,6 +20,7 @@ import modules.submissions.domain.models._
 import uk.gov.hmrc.time.DateTimeUtils
 import cats.data.NonEmptyList
 import domain.models.applications.ApplicationId
+import builder.SampleApplication
 
 trait SubmissionsTestData {
   object DevelopmentPractices {
@@ -115,7 +116,6 @@ trait SubmissionsTestData {
   val questionnaireAlt = BusinessDetails.questionnaire
   val questionnaireAltId = questionnaireAlt.id
   val questionAltId = questionnaireAlt.questions.head.question.id
-
 
   val submissionId = SubmissionId.random
   val applicationId = ApplicationId.random

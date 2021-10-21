@@ -90,24 +90,13 @@ trait SubmissionActionBuilders extends SimpleApplicationActionBuilders {
       override def executionContext = ec
       override def refine[A](request: SubmissionRequest[A]): Future[Either[Result, SubmissionApplicationRequest[A]]] = {
         implicit val implicitRequest: MessagesRequest[A] = request
-
+        
         applicationActionService.process(request.submission.applicationId, request.userRequest.developerSession)
         .toRight(NotFound(errorHandler.notFoundTemplate(Request(request, request.userRequest.developerSession))))
         .map(r => SubmissionApplicationRequest(r.application, request))
         .value
       }
     }
-
-  def withSubmissionJson(submissionId: SubmissionId)(fun: SubmissionApplicationRequest[JsValue] => Future[Result])(implicit ec: ExecutionContext): Action[JsValue] = {
-    Action.async(parse.json) { implicit request => 
-      val composedActions = 
-        loggedInActionRefiner(onlyTrueIfLoggedInFilter) andThen
-        submissionRefiner(submissionId) andThen
-        submissionApplicationRefiner
-
-        composedActions.invokeBlock(request, fun)
-    }
-  }
 
   def withSubmission(submissionId: SubmissionId)(fun: SubmissionApplicationRequest[AnyContent] => Future[Result])(implicit ec: ExecutionContext): Action[AnyContent] = {
     Action.async { implicit request =>

@@ -46,10 +46,10 @@ object ProdCredsChecklistController {
     ViewQuestionnaireSummary(questionnaire.label.value, state, questionnaire.id, url)
   }
 
-  def convertToViewGrouping(extendedSubmission: Submission)(groupOfQuestionnaires: GroupOfQuestionnaires): ViewGrouping = {
+  def convertToViewGrouping(submission: Submission)(groupOfQuestionnaires: GroupOfQuestionnaires): ViewGrouping = {
     ViewGrouping(
       label = groupOfQuestionnaires.heading,
-      questionnaireSummaries = groupOfQuestionnaires.links.map(convertToSummary(extendedSubmission))
+      questionnaireSummaries = groupOfQuestionnaires.links.map(convertToSummary(submission))
     )
   }
 
@@ -85,8 +85,8 @@ class ProdCredsChecklistController @Inject() (
     val success = (viewModel: ViewModel) => Ok(productionCredentialsChecklistView(viewModel))
     
     val res = for {
-        extendedSubmission <- fromOptionF(submissionService.fetchLatestSubmission(productionAppId), "No subsmission and/or application found")
-        viewModel           = convertSubmissionToViewModel(extendedSubmission)(request.application.name)
+        submission          <- fromOptionF(submissionService.fetchLatestSubmission(productionAppId), "No subsmission and/or application found")
+        viewModel           = convertSubmissionToViewModel(submission)(request.application.name)
       } yield viewModel
 
     res.fold[Result](failed, success)

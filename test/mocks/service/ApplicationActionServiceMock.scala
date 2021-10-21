@@ -60,7 +60,7 @@ trait ApplicationActionServiceMock extends MockitoSugar with ArgumentMatchersSug
       }
 
     when(applicationActionServiceMock.process[A](eqTo(appData.application.id), eqTo(developerSession))(*,*))
-    .thenAnswer( (a:ApplicationId,b:DeveloperSession,request: MessagesRequest[A],d:HeaderCarrier) => returns(request))
+    .thenAnswer( (a:ApplicationId, b:DeveloperSession, request: MessagesRequest[A], d:HeaderCarrier) => returns(request))
   }
 
 }
