@@ -18,7 +18,7 @@ package modules.uplift.domain.models
 
 import play.api.libs.json.{Format, Json}
 
-final case class SellResellOrDistribute(answer: String) extends AnyVal
+case class SellResellOrDistribute(answer: String) extends AnyVal
 
 object SellResellOrDistribute {
   implicit val format: Format[SellResellOrDistribute] = Json.valueFormat[SellResellOrDistribute]

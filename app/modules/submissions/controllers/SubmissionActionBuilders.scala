@@ -98,12 +98,6 @@ trait SubmissionActionBuilders extends SimpleApplicationActionBuilders {
       }
     }
 
-  // def SubmissionAction(submissionId: SubmissionId)(implicit ec: ExecutionContext): ActionBuilder[SubmissionApplicationRequest, AnyContent] =
-  //   Action andThen
-  //     loggedInActionRefiner(onlyTrueIfLoggedInFilter) andThen
-  //     submissionRefiner(submissionId) andThen
-  //     submissionApplicationRefiner
-
   def withSubmissionJson(submissionId: SubmissionId)(fun: SubmissionApplicationRequest[JsValue] => Future[Result])(implicit ec: ExecutionContext): Action[JsValue] = {
     Action.async(parse.json) { implicit request => 
       val composedActions = 

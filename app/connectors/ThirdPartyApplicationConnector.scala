@@ -36,19 +36,11 @@ import scala.concurrent.{ExecutionContext, Future}
 import scala.util.Success
 import domain.models.apidefinitions.ApiIdentifier
 import uk.gov.hmrc.http.HttpReads.Implicits._
-import modules.submissions.domain.services.SubmissionsFrontendJsonFormatters
-import modules.submissions.domain.models.SubmissionId
-import modules.submissions.domain.models.QuestionId
-import cats.data.NonEmptyList
-import play.api.libs.json.Json
-import uk.gov.hmrc.thirdpartyapplication.domain.services.NonEmptyListFormatters
-import modules.submissions.domain.models.Submission
 
 abstract class ThirdPartyApplicationConnector(config: ApplicationConfig, metrics: ConnectorMetrics) extends ApplicationConnector with CommonResponseHandlers {
 
   import ThirdPartyApplicationConnectorDomain._
   import ThirdPartyApplicationConnectorJsonFormatters._
-  import SubmissionsFrontendJsonFormatters._
 
   protected val httpClient: HttpClient
   protected val proxiedHttpClient: ProxiedHttpClient
@@ -220,14 +212,6 @@ abstract class ThirdPartyApplicationConnector(config: ApplicationConfig, metrics
   def fetchSubscription(applicationId: ApplicationId)(implicit hc: HeaderCarrier): Future[Set[ApiIdentifier]] = {
     http.GET[Set[ApiIdentifier]](s"$serviceBaseUrl/application/${applicationId.value}/subscription")
   }
-
-  def fetchLatestSubmission(applicationId: ApplicationId)(implicit hc: HeaderCarrier): Future[Option[Submission]] = {
-    http.GET[Option[Submission]](s"$serviceBaseUrl/submissions/application/${applicationId.value}")
-  }
-  
-  def fetchSubmission(id: SubmissionId)(implicit hc: HeaderCarrier): Future[Option[Submission]] = {
-    http.GET[Option[Submission]](s"$serviceBaseUrl/submissions/${id.value}")
-  }
 }
 
 private[connectors] object ThirdPartyApplicationConnectorDomain {
@@ -265,13 +249,6 @@ class ThirdPartyApplicationSandboxConnector @Inject() (
   override val isEnabled = appConfig.hasSandbox;
 }
 
-object ThirdPartyApplicationProductionConnector {
-  import uk.gov.hmrc.thirdpartyapplication.domain.services.NonEmptyListFormatters._
-
-  case class RecordAnswersRequest(answers: NonEmptyList[String])
-  implicit val writes = Json.writes[RecordAnswersRequest]
-}
-
 @Singleton
 class ThirdPartyApplicationProductionConnector @Inject() (
     val httpClient: HttpClient,
@@ -282,26 +259,11 @@ class ThirdPartyApplicationProductionConnector @Inject() (
     val metrics: ConnectorMetrics
 )(implicit val ec: ExecutionContext)
     extends ThirdPartyApplicationConnector(appConfig, metrics)
-    with SubmissionsFrontendJsonFormatters
-    with NonEmptyListFormatters {
-
+{
   val environment = Environment.PRODUCTION
   val serviceBaseUrl = appConfig.thirdPartyApplicationProductionUrl
   val useProxy = appConfig.thirdPartyApplicationProductionUseProxy
   val apiKey = appConfig.thirdPartyApplicationProductionApiKey
 
   override val isEnabled = true
- 
-  import ThirdPartyApplicationProductionConnector._
-
-  def recordAnswer(submissionId: SubmissionId, questionId: QuestionId, rawAnswers: NonEmptyList[String])(implicit hc: HeaderCarrier): Future[Either[String, Submission]] = {
-    import cats.implicits._
-    val failed = (err: UpstreamErrorResponse) => s"Failed to record answer for submission ${submissionId.value} and question ${questionId.value}"
-
-    metrics.record(api) {
-      http.POST[RecordAnswersRequest, Either[UpstreamErrorResponse, Submission]](s"$serviceBaseUrl/submissions/${submissionId.value}/question/${questionId.value}", RecordAnswersRequest(rawAnswers))
-      .map(_.leftMap(failed))
-    }
-  }
-
 }

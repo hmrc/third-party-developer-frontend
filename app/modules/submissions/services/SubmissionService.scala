@@ -19,13 +19,13 @@ package modules.submissions.services
 import javax.inject.{Inject, Singleton}
 import domain.models.applications.ApplicationId
 import scala.concurrent.Future
-import connectors.ThirdPartyApplicationProductionConnector
 import uk.gov.hmrc.http.HeaderCarrier
 import modules.submissions.domain.models._
+import modules.submissions.connectors.ThirdPartyApplicationSubmissionsConnector
 import cats.data.NonEmptyList
 
 @Singleton
-class SubmissionService @Inject() (productionApplicationConnector: ThirdPartyApplicationProductionConnector) {
+class SubmissionService @Inject() (productionApplicationConnector: ThirdPartyApplicationSubmissionsConnector) {
   def fetchLatestSubmission(appId: ApplicationId)(implicit hc: HeaderCarrier): Future[Option[Submission]] = productionApplicationConnector.fetchLatestSubmission(appId)
 
   def fetch(id: SubmissionId)(implicit hc: HeaderCarrier): Future[Option[Submission]] = productionApplicationConnector.fetchSubmission(id)

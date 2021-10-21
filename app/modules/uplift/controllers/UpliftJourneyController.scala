@@ -186,7 +186,7 @@ class UpliftJourneyController @Inject() (val errorHandler: ErrorHandler,
 
   def responsibleIndividual(sandboxAppId: ApplicationId): Action[AnyContent] = whenTeamMemberOnApp(sandboxAppId) { implicit request =>
     for {
-      responsibleIndividual <- upliftJourneyService.responsibleIndividual(request.user)
+      responsibleIndividual <- flowService.findResponsibleIndividual(request.user)
       form = responsibleIndividual.fold[Form[ResponsibleIndividualForm]](responsibleIndividualForm)(x => responsibleIndividualForm.fill(ResponsibleIndividualForm(x.fullName, x.emailAddress)))
     } yield Ok(responsibleIndividualView(sandboxAppId, form))
   }
@@ -209,7 +209,7 @@ class UpliftJourneyController @Inject() (val errorHandler: ErrorHandler,
 
   def sellResellOrDistributeYourSoftware(sandboxAppId: ApplicationId): Action[AnyContent] = whenTeamMemberOnApp(sandboxAppId) { implicit request =>
     for {
-      sellResellOrDistribute <- upliftJourneyService.sellResellOrDistribute(request.user)
+      sellResellOrDistribute <- flowService.findSellResellOrDistribute(request.user)
       form                    = sellResellOrDistribute.fold[Form[SellResellOrDistributeForm]](sellResellOrDistributeForm)(x => sellResellOrDistributeForm.fill(SellResellOrDistributeForm(Some(x.answer))))
     } yield Ok(sellResellOrDistributeSoftwareView(sandboxAppId, form))
   }

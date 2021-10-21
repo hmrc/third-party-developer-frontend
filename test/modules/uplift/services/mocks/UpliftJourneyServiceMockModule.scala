@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package modules.uplift.services
+package modules.uplift.services.mocks
 
 import org.mockito.MockitoSugar
 import org.mockito.ArgumentMatchersSugar
@@ -22,8 +22,8 @@ import org.mockito.verification.VerificationMode
 import scala.concurrent.Future.successful
 import domain.models.applications.ApplicationId
 import modules.uplift.domain.models._
-import modules.uplift
 import domain.models.apidefinitions.APISubscriptionStatus
+import modules.uplift.services.UpliftJourneyService
 
 trait UpliftJourneyServiceMockModule extends MockitoSugar with ArgumentMatchersSugar {
   protected trait BaseUpliftJourneyServiceMock {
@@ -44,25 +44,6 @@ trait UpliftJourneyServiceMockModule extends MockitoSugar with ArgumentMatchersS
     object StoreDefaultSubscriptionsInFlow {
       def thenReturns() =
         when(aMock.storeDefaultSubscriptionsInFlow(*[ApplicationId], *)(*)).thenReturn(successful(mock[ApiSubscriptions]))
-    }
-
-    object SellResellOrDistribute {
-      def thenReturnsYes() = 
-        when(aMock.sellResellOrDistribute(*)).thenReturn(successful(Some(uplift.domain.models.SellResellOrDistribute("Yes"))))
-        
-      def thenReturnsNo() = 
-        when(aMock.sellResellOrDistribute(*)).thenReturn(successful(Some(uplift.domain.models.SellResellOrDistribute("No"))))
-        
-      def thenReturnsNone() = 
-        when(aMock.sellResellOrDistribute(*)).thenReturn(successful(None))
-    }
-     
-    object ResponsibleIndividual {
-      def thenReturns(out: uplift.domain.models.ResponsibleIndividual) = 
-        when(aMock.responsibleIndividual(*)).thenReturn(successful(Some(out)))
-        
-      def thenReturnsNone() = 
-        when(aMock.responsibleIndividual(*)).thenReturn(successful(None))
     }
 
     object ConfirmAndUplift {

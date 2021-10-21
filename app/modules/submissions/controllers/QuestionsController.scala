@@ -26,7 +26,7 @@ import controllers.ApplicationController
 import modules.submissions.views.html.QuestionView
 import modules.submissions.domain.models._
 import modules.submissions.services.SubmissionService
-import modules.submissions.domain.services.SubmissionsFrontendJsonFormatters._
+import modules.submissions.domain.services.SubmissionsJsonFormatters._
 
 import scala.concurrent.Future.successful
 
@@ -39,8 +39,8 @@ object QuestionsController {
   case class ErrorMessage(message: String)
   implicit val writesErrorMessage = Json.writes[ErrorMessage]
 
-  case class RecordAnswersRequest(answers: NonEmptyList[String])
-  implicit val readsRecordAnswersRequest = Json.reads[RecordAnswersRequest]
+  case class InboundRecordAnswersRequest(answers: NonEmptyList[String])
+  implicit val readsInboundRecordAnswersRequest = Json.reads[InboundRecordAnswersRequest]
 }
 
 @Singleton

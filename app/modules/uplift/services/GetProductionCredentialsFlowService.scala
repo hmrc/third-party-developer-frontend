@@ -45,12 +45,18 @@ class GetProductionCredentialsFlowService @Inject()(
     } yield savedFlow
   }
 
+  def findResponsibleIndividual(developerSession: DeveloperSession): Future[Option[ResponsibleIndividual]] = 
+    fetchFlow(developerSession).map(_.responsibleIndividual)
+
   def storeSellResellOrDistribute(sellResellOrDistribute: SellResellOrDistribute, developerSession: DeveloperSession): Future[GetProductionCredentialsFlow] = {
     for {
       existingFlow <- fetchFlow(developerSession)
       savedFlow    <- flowRepository.saveFlow[GetProductionCredentialsFlow](existingFlow.copy(sellResellOrDistribute = Some(sellResellOrDistribute)))
     } yield savedFlow
   }
+
+  def findSellResellOrDistribute(developerSession: DeveloperSession): Future[Option[SellResellOrDistribute]] = 
+    fetchFlow(developerSession).map(_.sellResellOrDistribute)
 
   def storeApiSubscriptions(apiSubscriptions: ApiSubscriptions, developerSession: DeveloperSession): Future[GetProductionCredentialsFlow] = {
     for {

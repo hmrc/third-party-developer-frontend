@@ -40,8 +40,9 @@ import utils.LocalUserIdTracker
 import builder._
 import controllers.addapplication.AddApplication
 import modules.uplift.views.html.BeforeYouStartView
-import modules.uplift.services._
+import modules.uplift.services.mocks._
 import modules.uplift.controllers.UpliftJourneySwitch
+import modules.uplift.services.GetProductionCredentialsFlowService
 
 class EditApplicationNameSpec 
     extends BaseControllerSpec 

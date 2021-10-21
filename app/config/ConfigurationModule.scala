@@ -24,6 +24,8 @@ import helpers.FutureTimeoutSupportImpl
 import service.PushPullNotificationsService.PushPullNotificationsConnector
 import service.SubscriptionFieldsService.SubscriptionFieldsConnector
 import uk.gov.hmrc.play.bootstrap.filters.frontend.SessionTimeoutFilter
+import modules.submissions.connectors.ThirdPartyApplicationSubmissionsConnector
+import modules.submissions.config.ThirdPartyApplicationSubmissionsConnectorConfigProvider
 
 class ConfigurationModule extends AbstractModule {
   override def configure(): Unit = {
@@ -50,5 +52,8 @@ class ConfigurationModule extends AbstractModule {
 
     bind(classOf[FraudPreventionConfig])
       .toProvider(classOf[FraudPreventionConfigProvider])
+
+    bind(classOf[ThirdPartyApplicationSubmissionsConnector.Config])
+      .toProvider(classOf[ThirdPartyApplicationSubmissionsConnectorConfigProvider])
   }
 }

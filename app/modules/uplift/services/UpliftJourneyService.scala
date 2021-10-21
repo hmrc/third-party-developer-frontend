@@ -85,13 +85,7 @@ class UpliftJourneyService @Inject()(
       } yield subscriptionsWithFlowAdjusted
     )
 
-  def responsibleIndividual(developerSession: DeveloperSession): Future[Option[ResponsibleIndividual]] = 
-    flowService.fetchFlow(developerSession)
-    .map(_.responsibleIndividual)
 
-  def sellResellOrDistribute(developerSession: DeveloperSession): Future[Option[SellResellOrDistribute]] = 
-    flowService.fetchFlow(developerSession)
-    .map(_.sellResellOrDistribute)
 
   def storeDefaultSubscriptionsInFlow(sandboxAppId: ApplicationId, developerSession: DeveloperSession)(implicit hc: HeaderCarrier): Future[ApiSubscriptions] = 
     for {

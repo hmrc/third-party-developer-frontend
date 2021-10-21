@@ -14,12 +14,13 @@
  * limitations under the License.
  */
 
-package modules.uplift.services
+package modules.uplift.services.mocks
 
 import org.mockito.{ArgumentMatchersSugar, MockitoSugar}
 import org.mockito.verification.VerificationMode
 import scala.concurrent.Future.{successful, failed}
 import modules.uplift.domain.models._
+import modules.uplift.services.GetProductionCredentialsFlowService
 
 trait GetProductionCredentialsFlowServiceMockModule extends MockitoSugar with ArgumentMatchersSugar {
 
@@ -50,6 +51,15 @@ trait GetProductionCredentialsFlowServiceMockModule extends MockitoSugar with Ar
       }
     }
 
+     
+    object FindResponsibleIndividual {
+      def thenReturns(out: ResponsibleIndividual) = 
+        when(aMock.findResponsibleIndividual(*)).thenReturn(successful(Some(out)))
+        
+      def thenReturnsNone() = 
+        when(aMock.findResponsibleIndividual(*)).thenReturn(successful(None))
+    }
+
     object StoreSellResellOrDistribute {
       def thenReturns(in: SellResellOrDistribute, out: GetProductionCredentialsFlow) = {
         when(aMock.storeSellResellOrDistribute(eqTo(in), *)).thenReturn(successful(out))
@@ -58,6 +68,17 @@ trait GetProductionCredentialsFlowServiceMockModule extends MockitoSugar with Ar
       def thenFail(ex: Exception) = {
         when(aMock.storeSellResellOrDistribute(*, *)).thenReturn(failed(ex))
       }
+    }
+
+    object FindSellResellOrDistribute {
+      def thenReturnsYes() = 
+        when(aMock.findSellResellOrDistribute(*)).thenReturn(successful(Some(SellResellOrDistribute("Yes"))))
+        
+      def thenReturnsNo() = 
+        when(aMock.findSellResellOrDistribute(*)).thenReturn(successful(Some(SellResellOrDistribute("No"))))
+        
+      def thenReturnsNone() = 
+        when(aMock.findSellResellOrDistribute(*)).thenReturn(successful(None))
     }
 
     object StoreApiSubscriptions {

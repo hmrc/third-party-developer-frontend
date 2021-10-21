@@ -36,7 +36,7 @@ import utils.{LocalUserIdTracker, WithCSRFAddToken}
 import modules.uplift.views.html._
 
 import scala.concurrent.ExecutionContext.Implicits.global
-import modules.uplift.services._
+import modules.uplift.services.mocks._
 import controllers.SubscriptionTestHelperSugar
 import config._
 import scala.concurrent.Future
@@ -266,7 +266,7 @@ class UpliftJourneyControllerSpec extends BaseControllerSpec
 
     "initially render the 'responsible individual view' unpopulated" in new Setup {
 
-      UpliftJourneyServiceMock.ResponsibleIndividual.thenReturnsNone()
+      GPCFlowServiceMock.FindResponsibleIndividual.thenReturnsNone()
 
       private val result = controller.responsibleIndividual(appId)(loggedInRequest.withCSRFToken)
 
@@ -281,7 +281,7 @@ class UpliftJourneyControllerSpec extends BaseControllerSpec
 
     "render the 'responsible individual view' populated with a responsible individual" in new Setup {
 
-      UpliftJourneyServiceMock.ResponsibleIndividual.thenReturns(ResponsibleIndividual("test full name", "test email address"))
+      GPCFlowServiceMock.FindResponsibleIndividual.thenReturns(ResponsibleIndividual("test full name", "test email address"))
 
       private val result = controller.responsibleIndividual(appId)(loggedInRequest.withCSRFToken)
 
@@ -294,7 +294,7 @@ class UpliftJourneyControllerSpec extends BaseControllerSpec
 
     "render the 'responsible individual view' with errors when fullName and emailAddress are missing" in new Setup {
 
-      UpliftJourneyServiceMock.ResponsibleIndividual.thenReturnsNone()
+      GPCFlowServiceMock.FindResponsibleIndividual.thenReturnsNone()
 
       private val result = controller.responsibleIndividualAction(appId)(loggedInRequest.withCSRFToken.withFormUrlEncodedBody(
         "fullName" -> "",
@@ -311,7 +311,7 @@ class UpliftJourneyControllerSpec extends BaseControllerSpec
 
     "render the 'responsible individual view' with errors when fullName is missing" in new Setup {
 
-      UpliftJourneyServiceMock.ResponsibleIndividual.thenReturnsNone()
+      GPCFlowServiceMock.FindResponsibleIndividual.thenReturnsNone()
 
       private val result = controller.responsibleIndividualAction(appId)(loggedInRequest.withCSRFToken.withFormUrlEncodedBody(
         "fullName" -> "",
@@ -378,7 +378,7 @@ class UpliftJourneyControllerSpec extends BaseControllerSpec
   "sellResellOrDistributeYourSoftware" should {
 
     "initially render the 'sell resell or distribute your software view' with choices unselected" in new Setup {
-      UpliftJourneyServiceMock.SellResellOrDistribute.thenReturnsNone
+      GPCFlowServiceMock.FindSellResellOrDistribute.thenReturnsNone
 
       private val result = controller.sellResellOrDistributeYourSoftware(appId)(loggedInRequest.withCSRFToken)
 
@@ -390,7 +390,7 @@ class UpliftJourneyControllerSpec extends BaseControllerSpec
     }
 
     "render the 'sell resell or distribute your software view' with the answer 'Yes' selected" in new Setup {
-      UpliftJourneyServiceMock.SellResellOrDistribute.thenReturnsYes
+      GPCFlowServiceMock.FindSellResellOrDistribute.thenReturnsYes
 
       private val result = controller.sellResellOrDistributeYourSoftware(appId)(loggedInRequest.withCSRFToken)
 
@@ -404,7 +404,7 @@ class UpliftJourneyControllerSpec extends BaseControllerSpec
     }
 
     "render the 'sell resell or distribute your software view' with the answer 'No' selected" in new Setup {
-      UpliftJourneyServiceMock.SellResellOrDistribute.thenReturnsNo
+      GPCFlowServiceMock.FindSellResellOrDistribute.thenReturnsNo
 
       private val result = controller.sellResellOrDistributeYourSoftware(appId)(loggedInRequest.withCSRFToken)
 
@@ -419,7 +419,7 @@ class UpliftJourneyControllerSpec extends BaseControllerSpec
 
     "render the 'sell resell or distribute your software view' with an error when no selection has been made" in new Setup {
 
-      UpliftJourneyServiceMock.SellResellOrDistribute.thenReturnsNone()
+      GPCFlowServiceMock.FindSellResellOrDistribute.thenReturnsNone()
 
       private val result = controller.sellResellOrDistributeYourSoftwareAction(appId)(loggedInRequest.withCSRFToken)
 

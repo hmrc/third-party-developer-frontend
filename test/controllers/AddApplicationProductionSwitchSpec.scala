@@ -20,7 +20,7 @@ import builder.DeveloperBuilder
 import config.ErrorHandler
 import domain.models.applications._
 import mocks.service._
-import modules.uplift.services.UpliftLogicMock
+import modules.uplift.services.mocks.UpliftLogicMock
 import play.api.mvc.AnyContentAsEmpty
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
@@ -44,7 +44,6 @@ import play.api.mvc.Result
 import mocks.connector.ApmConnectorMockModule
 import controllers.addapplication.AddApplication
 import modules.uplift.views.html.BeforeYouStartView
-import modules.uplift.services.UpliftLogicMock
 import modules.uplift.controllers.UpliftJourneySwitch
 import config.UpliftJourneyConfig
 

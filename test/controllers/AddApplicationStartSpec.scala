@@ -43,7 +43,7 @@ import config.Off
 import domain.models.controllers.ApplicationSummary
 import modules.uplift.views.html.BeforeYouStartView
 import modules.uplift.services.GetProductionCredentialsFlowService
-import modules.uplift.services.UpliftLogicMock
+import modules.uplift.services.mocks.UpliftLogicMock
 import modules.uplift.controllers.UpliftJourneySwitch
 import modules.uplift.domain.models.GetProductionCredentialsFlow
 import scala.concurrent.Future
