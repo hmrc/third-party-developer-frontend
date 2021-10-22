@@ -20,7 +20,6 @@ import modules.submissions.domain.models._
 import uk.gov.hmrc.time.DateTimeUtils
 import cats.data.NonEmptyList
 import domain.models.applications.ApplicationId
-import builder.SampleApplication
 
 trait SubmissionsTestData {
   object DevelopmentPractices {

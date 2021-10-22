@@ -24,6 +24,7 @@ import scala.concurrent.Future.successful
 import modules.submissions.domain.models.Submission
 import domain.models.applications.ApplicationId
 import modules.submissions.domain.models.SubmissionId
+import modules.submissions.domain.models.QuestionId
 
 trait SubmissionServiceMockModule extends MockitoSugar with ArgumentMatchersSugar {
   
@@ -46,6 +47,16 @@ trait SubmissionServiceMockModule extends MockitoSugar with ArgumentMatchersSuga
 
       def thenReturnsNone() = {
         when(aMock.fetch(*[SubmissionId])(*)).thenReturn(successful(None))
+      }
+    }
+
+    object RecordAnswer {
+      def thenReturns(out: Submission) = {
+        when(aMock.recordAnswer(*[SubmissionId], *[QuestionId], *)(*)).thenReturn(successful(Right(out)))
+      }
+
+      def thenReturnsNone() = {
+        when(aMock.recordAnswer(*[SubmissionId], *[QuestionId], *)(*)).thenReturn(successful(Left("Failed to record answer for submission")))
       }
     }
   }

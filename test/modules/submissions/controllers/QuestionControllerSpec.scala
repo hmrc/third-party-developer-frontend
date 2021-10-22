@@ -30,7 +30,6 @@ import modules.submissions.views.html.QuestionView
 import utils.WithLoggedInSession._
 
 import scala.concurrent.ExecutionContext.Implicits.global
-import modules.submissions.domain.models.SubmissionId
 import domain.models.developers.Session
 import domain.models.developers.LoggedInState
 import domain.models.developers.DeveloperSession
@@ -149,6 +148,42 @@ class QuestionControllerSpec
       SubmissionServiceMock.Fetch.thenReturns(submission)
 
       val result = controller.showQuestion(submission.id, QuestionId("BAD_ID"))(loggedInRequest.withCSRFToken)
+
+      status(result) shouldBe BAD_REQUEST
+    }
+  }
+
+  "recordAnswer" should {
+    "succeed when answer given" in new Setup {
+      SubmissionServiceMock.Fetch.thenReturns(submission)
+      SubmissionServiceMock.RecordAnswer.thenReturns(submission)
+      private val answer1 = "answer to question"
+      private val request = loggedInRequest.withFormUrlEncodedBody("answer" -> answer1)
+
+      val result = controller.recordAnswer(submission.id, questionId)(request.withCSRFToken)
+
+      status(result) shouldBe SEE_OTHER
+      redirectLocation(result) shouldBe Some(s"/developer/submissions/${submission.id.value}/question/${questionId.value}")
+    }
+    
+    "return when no answer given" in new Setup {
+      SubmissionServiceMock.Fetch.thenReturns(submission)
+      SubmissionServiceMock.RecordAnswer.thenReturns(submission)
+      private val answer1 = ""
+      private val request = loggedInRequest.withFormUrlEncodedBody("answer" -> answer1)
+
+      val result = controller.recordAnswer(submission.id, questionId)(request.withCSRFToken)
+
+      status(result) shouldBe SEE_OTHER
+      redirectLocation(result) shouldBe Some(s"/developer/submissions/${submission.id.value}/question/${questionId.value}")
+    }
+
+    "fail if no answer field in form" in new Setup {
+      SubmissionServiceMock.Fetch.thenReturns(submission)
+      SubmissionServiceMock.RecordAnswer.thenReturns(submission)
+      private val request = loggedInRequest.withFormUrlEncodedBody("answer1" -> "adesdfd")
+
+      val result = controller.recordAnswer(submission.id, questionId)(request.withCSRFToken)
 
       status(result) shouldBe BAD_REQUEST
     }
