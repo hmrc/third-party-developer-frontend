@@ -33,6 +33,7 @@ import modules.submissions.domain.models._
 import modules.submissions.services.SubmissionService
 import helpers.EitherTHelper
 import domain.models.controllers.BadRequestWithErrorMessage
+import modules.submissions.domain.models.NotApplicable
 
 object ProdCredsChecklistController {
   case class ViewQuestionnaireSummary(label: String, state: String, id: QuestionnaireId = QuestionnaireId.random, nextQuestionUrl: Option[String] = None)
@@ -82,13 +83,30 @@ class ProdCredsChecklistController @Inject() (
   def productionCredentialsChecklist(productionAppId: ApplicationId): Action[AnyContent] = whenTeamMemberOnApp(productionAppId) { implicit request =>
     val failed = (err: String) => BadRequestWithErrorMessage(err)
 
-    val success = (viewModel: ViewModel) => Ok(productionCredentialsChecklistView(viewModel))
-    
-    val res = for {
-        submission          <- fromOptionF(submissionService.fetchLatestSubmission(productionAppId), "No subsmission and/or application found")
-        viewModel           = convertSubmissionToViewModel(submission)(request.application.name)
-      } yield viewModel
+    val success = (viewModel: ViewModel) => {
+      def filterNotApplicableQuestionnaireSummaries(questionnaireSummaries: NonEmptyList[ViewQuestionnaireSummary]): Option[NonEmptyList[ViewQuestionnaireSummary]] = {
+        questionnaireSummaries.filterNot(_.state == NotApplicable.toString).toNel
+      }
 
-    res.fold[Result](failed, success)
+      def filterGroupingsForEmptyQuestionnaireSummaries(groupings: NonEmptyList[ViewGrouping]): Option[NonEmptyList[ViewGrouping]] = {
+        groupings
+          .filterNot(g => filterNotApplicableQuestionnaireSummaries(g.questionnaireSummaries).isEmpty)
+          .map(g => g.copy(questionnaireSummaries = filterNotApplicableQuestionnaireSummaries(g.questionnaireSummaries).get)) // TODO: Is there a way to do both of these lines in one?
+          .toNel
+      }
+
+      filterGroupingsForEmptyQuestionnaireSummaries(viewModel.groupings).fold(
+        BadRequest("") // TODO: Make better or redirect to summary page
+      )(vg =>
+        Ok(productionCredentialsChecklistView(viewModel.copy(groupings = vg)))
+      )
+    }
+    
+    val vm = for {
+      submission          <- fromOptionF(submissionService.fetchLatestSubmission(productionAppId), "No subsmission and/or application found")
+      viewModel           = convertSubmissionToViewModel(submission)(request.application.name)
+    } yield viewModel
+
+    vm.fold[Result](failed, success)
   }
 }
