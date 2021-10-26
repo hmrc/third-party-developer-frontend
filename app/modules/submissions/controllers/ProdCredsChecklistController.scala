@@ -43,7 +43,7 @@ object ProdCredsChecklistController {
   def convertToSummary(submission: Submission)(questionnaire: Questionnaire): ViewQuestionnaireSummary = {
     val progress = submission.questionnaireProgress.get(questionnaire.id).get
     val state = progress.state.toString
-    val url = progress.nextQuestion.map(qid => modules.submissions.controllers.routes.QuestionsController.showQuestion(submission.id, qid).url)
+    val url = progress.firstQuestion.map(qid => modules.submissions.controllers.routes.QuestionsController.showQuestion(submission.id, qid).url)
     ViewQuestionnaireSummary(questionnaire.label.value, state, questionnaire.id, url)
   }
 

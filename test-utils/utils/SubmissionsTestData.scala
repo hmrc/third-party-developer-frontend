@@ -121,7 +121,7 @@ trait SubmissionsTestData {
 
   def firstQuestion(questionnaire: Questionnaire) = questionnaire.questions.head.question.id
 
-  val initialProgress = List(DevelopmentPractices.questionnaire, BusinessDetails.questionnaire).map(q => q.id -> QuestionnaireProgress(NotStarted, Some(firstQuestion(q)))).toMap
+  val initialProgress = List(DevelopmentPractices.questionnaire, BusinessDetails.questionnaire).map(q => q.id -> QuestionnaireProgress(NotStarted, Some(firstQuestion(q)), Some(firstQuestion(q)))).toMap
 
   val submission = Submission(submissionId, applicationId, DateTimeUtils.now, activeQuestionnaireGroupings, Map.empty, initialProgress)
   
