@@ -121,13 +121,18 @@ trait SubmissionsTestData {
 
   def firstQuestion(questionnaire: Questionnaire) = questionnaire.questions.head.question.id
 
-  val initialProgress = List(DevelopmentPractices.questionnaire, BusinessDetails.questionnaire).map(q => q.id -> QuestionnaireProgress(NotStarted, Some(firstQuestion(q)), Some(firstQuestion(q)))).toMap
+  import AsIdsHelpers._
+  val initialProgress = List(DevelopmentPractices.questionnaire, BusinessDetails.questionnaire).map(q => q.id -> QuestionnaireProgress(NotStarted, q.questions.asIds)).toMap
 
-  val submission = Submission(submissionId, applicationId, DateTimeUtils.now, activeQuestionnaireGroupings, Map.empty, initialProgress)
+  val submission = Submission(submissionId, applicationId, DateTimeUtils.now, activeQuestionnaireGroupings, Map.empty)
+
+  val extendedSubmission = ExtendedSubmission(submission, initialProgress)
   
   val altSubmissionId = SubmissionId.random
   require(altSubmissionId != submissionId)
-  val altSubmission = Submission(altSubmissionId, applicationId, DateTimeUtils.now.plusMillis(100), activeQuestionnaireGroupings, Map.empty, initialProgress)
+  val altSubmission = Submission(altSubmissionId, applicationId, DateTimeUtils.now.plusMillis(100), activeQuestionnaireGroupings, Map.empty)
+
+  val altExtendedSubmission = ExtendedSubmission(altSubmission, initialProgress)
 
   def allFirstQuestions(questionnaires: NonEmptyList[Questionnaire]): Map[QuestionnaireId, QuestionId] =
     questionnaires.map { qn =>

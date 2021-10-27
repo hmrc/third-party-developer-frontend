@@ -18,13 +18,10 @@ package modules.submissions.services.mocks
 
 import org.mockito.{ArgumentMatchersSugar, MockitoSugar}
 import modules.submissions.services.SubmissionService
-import modules.submissions.services.SubmissionService
 
 import scala.concurrent.Future.successful
-import modules.submissions.domain.models.Submission
+import modules.submissions.domain.models._
 import domain.models.applications.ApplicationId
-import modules.submissions.domain.models.SubmissionId
-import modules.submissions.domain.models.QuestionId
 
 trait SubmissionServiceMockModule extends MockitoSugar with ArgumentMatchersSugar {
   
@@ -32,7 +29,7 @@ trait SubmissionServiceMockModule extends MockitoSugar with ArgumentMatchersSuga
     def aMock: SubmissionService
 
     object FetchLatestSubmission {
-      def thenReturns(out: Submission) =
+      def thenReturns(out: ExtendedSubmission) =
         when(aMock.fetchLatestSubmission(*[ApplicationId])(*)).thenReturn(successful(Some(out)))
         
       def thenReturnsNone() = {
@@ -41,7 +38,7 @@ trait SubmissionServiceMockModule extends MockitoSugar with ArgumentMatchersSuga
     }
 
     object Fetch {
-      def thenReturns(out: Submission) = {
+      def thenReturns(out: ExtendedSubmission) = {
         when(aMock.fetch(*[SubmissionId])(*)).thenReturn(successful(Some(out)))
       }
 
@@ -51,7 +48,7 @@ trait SubmissionServiceMockModule extends MockitoSugar with ArgumentMatchersSuga
     }
 
     object RecordAnswer {
-      def thenReturns(out: Submission) = {
+      def thenReturns(out: ExtendedSubmission) = {
         when(aMock.recordAnswer(*[SubmissionId], *[QuestionId], *)(*)).thenReturn(successful(Right(out)))
       }
 

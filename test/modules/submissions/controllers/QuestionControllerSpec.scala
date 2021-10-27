@@ -36,15 +36,10 @@ import domain.models.developers.DeveloperSession
 import play.filters.csrf.CSRF
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
-import utils.SubmissionsTestData.{applicationId, questionId, submission}
+import utils.SubmissionsTestData.{applicationId, questionId, question2Id, submission, extendedSubmission}
 import modules.submissions.domain.models.QuestionId
-import domain.models.apidefinitions.ApiIdentifier
-import domain.models.apidefinitions.ApiContext
-import domain.models.apidefinitions.ApiVersion
-import domain.models.apidefinitions.APISubscriptionStatus
-import domain.models.apidefinitions.APIStatus
+import domain.models.apidefinitions._
 import domain.models.applications.ApplicationWithSubscriptionData
-import domain.models.apidefinitions.ApiVersionDefinition
 import domain.models.applications.Application
 import uk.gov.hmrc.time.DateTimeUtils
 import java.time.Period
@@ -137,7 +132,7 @@ class QuestionControllerSpec
 
   "showQuestion" should {
     "succeed" in new Setup {
-      SubmissionServiceMock.Fetch.thenReturns(submission)
+      SubmissionServiceMock.Fetch.thenReturns(extendedSubmission)
 
       val result = controller.showQuestion(submission.id, questionId)(loggedInRequest.withCSRFToken)
 
@@ -145,7 +140,7 @@ class QuestionControllerSpec
     }
 
     "fail with a BAD REQUEST for an invalid questionId" in new Setup {
-      SubmissionServiceMock.Fetch.thenReturns(submission)
+      SubmissionServiceMock.Fetch.thenReturns(extendedSubmission)
 
       val result = controller.showQuestion(submission.id, QuestionId("BAD_ID"))(loggedInRequest.withCSRFToken)
 
@@ -155,33 +150,36 @@ class QuestionControllerSpec
 
   "recordAnswer" should {
     "succeed when answer given" in new Setup {
-      SubmissionServiceMock.Fetch.thenReturns(submission)
-      SubmissionServiceMock.RecordAnswer.thenReturns(submission)
+      SubmissionServiceMock.Fetch.thenReturns(extendedSubmission)
+      SubmissionServiceMock.RecordAnswer.thenReturns(extendedSubmission)
       private val answer1 = "answer to question"
       private val request = loggedInRequest.withFormUrlEncodedBody("answer" -> answer1)
 
       val result = controller.recordAnswer(submission.id, questionId)(request.withCSRFToken)
 
       status(result) shouldBe SEE_OTHER
-      redirectLocation(result) shouldBe Some(s"/developer/submissions/${submission.id.value}/question/${questionId.value}")
+      redirectLocation(result) shouldBe Some(s"/developer/submissions/${submission.id.value}/question/${question2Id.value}")
     }
     
-    "return when no answer given" in new Setup {
-      SubmissionServiceMock.Fetch.thenReturns(submission)
-      SubmissionServiceMock.RecordAnswer.thenReturns(submission)
+    "return when no valid answer given" in new Setup {
+      SubmissionServiceMock.Fetch.thenReturns(extendedSubmission)
+      SubmissionServiceMock.RecordAnswer.thenReturnsNone()
       private val answer1 = ""
       private val request = loggedInRequest.withFormUrlEncodedBody("answer" -> answer1)
 
       val result = controller.recordAnswer(submission.id, questionId)(request.withCSRFToken)
 
-      status(result) shouldBe SEE_OTHER
-      redirectLocation(result) shouldBe Some(s"/developer/submissions/${submission.id.value}/question/${questionId.value}")
+      status(result) shouldBe BAD_REQUEST
+
+      val body = contentAsString(result)
+
+      body should include("Please provide an answer to the question")
     }
 
     "fail if no answer field in form" in new Setup {
-      SubmissionServiceMock.Fetch.thenReturns(submission)
-      SubmissionServiceMock.RecordAnswer.thenReturns(submission)
-      private val request = loggedInRequest.withFormUrlEncodedBody("answer1" -> "adesdfd")
+      SubmissionServiceMock.Fetch.thenReturns(extendedSubmission)
+      // SubmissionServiceMock.RecordAnswer.thenReturns(extendedSubmission)
+      private val request = loggedInRequest.withFormUrlEncodedBody()
 
       val result = controller.recordAnswer(submission.id, questionId)(request.withCSRFToken)
 

@@ -126,9 +126,9 @@ class ProdCredsChecklistControllerSpec
     }
 
     "succeed" in new Setup {
-      import utils.SubmissionsTestData.submission
+      import utils.SubmissionsTestData.extendedSubmission
 
-      SubmissionServiceMock.FetchLatestSubmission.thenReturns(submission)
+      SubmissionServiceMock.FetchLatestSubmission.thenReturns(extendedSubmission)
 
       val result = controller.productionCredentialsChecklist(appId)(loggedInRequest.withCSRFToken)
 

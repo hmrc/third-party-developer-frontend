@@ -47,7 +47,6 @@ import cats.implicits._
 import cats.instances.future.catsStdInstancesForFuture
 import domain.models.applications.Application
 import modules.submissions.services.SubmissionService
-import play.api.libs.json.JsValue
 
 case class SubmissionRequest[A](submission: Submission , userRequest: UserRequest[A]) extends MessagesRequest[A](userRequest, userRequest.messagesApi) {
   lazy val answersToQuestions = submission.answersToQuestions
@@ -79,7 +78,7 @@ trait SubmissionActionBuilders extends SimpleApplicationActionBuilders {
         (
           for {
             submission <- E.fromOptionF(submissionService.fetch(submissionId), NotFound(errorHandler.notFoundTemplate(Request(input, input.developerSession))) )
-          } yield SubmissionRequest(submission, input)
+          } yield SubmissionRequest(submission.submission, input)
         )
         .value
       }

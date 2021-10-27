@@ -57,25 +57,25 @@ class ThirdPartyApplicationSubmissionsConnector @Inject() (
 
   val environment = Environment.PRODUCTION
 
-  def recordAnswer(submissionId: SubmissionId, questionId: QuestionId, rawAnswers: NonEmptyList[String])(implicit hc: HeaderCarrier): Future[Either[String, Submission]] = {
+  def recordAnswer(submissionId: SubmissionId, questionId: QuestionId, rawAnswers: NonEmptyList[String])(implicit hc: HeaderCarrier): Future[Either[String, ExtendedSubmission]] = {
     import cats.implicits._
     val failed = (err: UpstreamErrorResponse) => s"Failed to record answer for submission ${submissionId.value} and question ${questionId.value}"
 
     metrics.record(api) {
-      http.POST[OutboundRecordAnswersRequest, Either[UpstreamErrorResponse, Submission]](s"$serviceBaseUrl/submissions/${submissionId.value}/question/${questionId.value}", OutboundRecordAnswersRequest(rawAnswers))
+      http.POST[OutboundRecordAnswersRequest, Either[UpstreamErrorResponse, ExtendedSubmission]](s"$serviceBaseUrl/submissions/${submissionId.value}/question/${questionId.value}", OutboundRecordAnswersRequest(rawAnswers))
       .map(_.leftMap(failed))
     }
   }
 
-  def fetchLatestSubmission(applicationId: ApplicationId)(implicit hc: HeaderCarrier): Future[Option[Submission]] = {
+  def fetchLatestSubmission(applicationId: ApplicationId)(implicit hc: HeaderCarrier): Future[Option[ExtendedSubmission]] = {
     metrics.record(api) {
-      http.GET[Option[Submission]](s"$serviceBaseUrl/submissions/application/${applicationId.value}")
+      http.GET[Option[ExtendedSubmission]](s"$serviceBaseUrl/submissions/application/${applicationId.value}")
     }
   }
   
-  def fetchSubmission(id: SubmissionId)(implicit hc: HeaderCarrier): Future[Option[Submission]] = {
+  def fetchSubmission(id: SubmissionId)(implicit hc: HeaderCarrier): Future[Option[ExtendedSubmission]] = {
     metrics.record(api) {
-      http.GET[Option[Submission]](s"$serviceBaseUrl/submissions/${id.value}")
+      http.GET[Option[ExtendedSubmission]](s"$serviceBaseUrl/submissions/${id.value}")
     }
   }
 }

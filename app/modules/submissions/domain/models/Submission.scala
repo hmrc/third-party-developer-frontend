@@ -49,8 +49,7 @@ case object InProgress extends QuestionnaireState
 case object NotApplicable extends QuestionnaireState
 case object Completed extends QuestionnaireState
 
-
-case class QuestionnaireProgress(state: QuestionnaireState, firstQuestion: Option[QuestionId], nextQuestion: Option[QuestionId])
+case class QuestionnaireProgress(state: QuestionnaireState, questionsToAsk: List[QuestionId])
 
 object Submission {
   type AnswersToQuestions = Map[QuestionId, ActualAnswer]
@@ -61,8 +60,7 @@ case class Submission(
   applicationId: ApplicationId,
   startedOn: DateTime,
   groups: NonEmptyList[GroupOfQuestionnaires],
-  answersToQuestions: Submission.AnswersToQuestions,
-  questionnaireProgress: Map[QuestionnaireId, QuestionnaireProgress]
+  answersToQuestions: Submission.AnswersToQuestions
 ) {
   def allQuestionnaires: NonEmptyList[Questionnaire] = groups.flatMap(g => g.links)
 
@@ -77,3 +75,8 @@ case class Submission(
       )
     )
 }
+
+case class ExtendedSubmission(
+  submission: Submission,
+  questionnaireProgress: Map[QuestionnaireId, QuestionnaireProgress]
+)

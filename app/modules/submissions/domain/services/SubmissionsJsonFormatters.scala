@@ -46,6 +46,7 @@ trait SubmissionsJsonFormatters extends GroupOfQuestionnairesJsonFormatters with
   import JodaWrites.JodaDateTimeWrites
   implicit val utcReads = JodaReads.DefaultJodaDateTimeReads.map(dt => dt.withZone(DateTimeZone.UTC))
   implicit val submissionFormat = Json.format[Submission]
+  implicit val extendedSubmissionFormat = Json.format[ExtendedSubmission]
 }
 
 object SubmissionsJsonFormatters extends SubmissionsJsonFormatters

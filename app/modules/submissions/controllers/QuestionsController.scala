@@ -89,11 +89,12 @@ class QuestionsController @Inject()(
 
     val failed = (msg: String) => showQuestion(submissionId, questionId, None, Some("Please provide an answer to the question"))(request)
 
-    val success = (submission: Submission) => { 
-      val questionnaire = submission.findQuestionnaireContaining(questionId).get
-      val nextQuestion = submission.questionnaireProgress.get(questionnaire.id).flatMap(_.nextQuestion)
+    val success = (extSubmission: ExtendedSubmission) => { 
+      val questionnaire = extSubmission.submission.findQuestionnaireContaining(questionId).get
+      val nextQuestion = extSubmission.questionnaireProgress.get(questionnaire.id)
+                        .flatMap(_.questionsToAsk.dropWhile(_ != questionId).tail.headOption)
       
-      lazy val toProdChecklist = modules.submissions.controllers.routes.ProdCredsChecklistController.productionCredentialsChecklist(submission.applicationId)
+      lazy val toProdChecklist = modules.submissions.controllers.routes.ProdCredsChecklistController.productionCredentialsChecklist(extSubmission.submission.applicationId)
       lazy val toNextQuestion = (nextQuestionId) => modules.submissions.controllers.routes.QuestionsController.showQuestion(submissionId, nextQuestionId)
 
       successful(Redirect(nextQuestion.fold(toProdChecklist)(toNextQuestion)))

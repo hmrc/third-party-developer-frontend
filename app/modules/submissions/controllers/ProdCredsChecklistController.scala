@@ -40,22 +40,22 @@ object ProdCredsChecklistController {
   case class ViewGrouping(label: String, questionnaireSummaries: NonEmptyList[ViewQuestionnaireSummary])
   case class ViewModel(appName: String, groupings: NonEmptyList[ViewGrouping])
 
-  def convertToSummary(submission: Submission)(questionnaire: Questionnaire): ViewQuestionnaireSummary = {
-    val progress = submission.questionnaireProgress.get(questionnaire.id).get
+  def convertToSummary(extSubmission: ExtendedSubmission)(questionnaire: Questionnaire): ViewQuestionnaireSummary = {
+    val progress = extSubmission.questionnaireProgress.get(questionnaire.id).get
     val state = progress.state.toString
-    val url = progress.firstQuestion.map(qid => modules.submissions.controllers.routes.QuestionsController.showQuestion(submission.id, qid).url)
+    val url = progress.questionsToAsk.headOption.map(q => modules.submissions.controllers.routes.QuestionsController.showQuestion(extSubmission.submission.id, q).url)
     ViewQuestionnaireSummary(questionnaire.label.value, state, questionnaire.id, url)
   }
 
-  def convertToViewGrouping(submission: Submission)(groupOfQuestionnaires: GroupOfQuestionnaires): ViewGrouping = {
+  def convertToViewGrouping(extSubmission: ExtendedSubmission)(groupOfQuestionnaires: GroupOfQuestionnaires): ViewGrouping = {
     ViewGrouping(
       label = groupOfQuestionnaires.heading,
-      questionnaireSummaries = groupOfQuestionnaires.links.map(convertToSummary(submission))
+      questionnaireSummaries = groupOfQuestionnaires.links.map(convertToSummary(extSubmission))
     )
   }
 
-  def convertSubmissionToViewModel(submission: Submission)(appName: String): ViewModel = {
-    val groupings = submission.groups.map(convertToViewGrouping(submission))
+  def convertSubmissionToViewModel(extSubmission: ExtendedSubmission)(appName: String): ViewModel = {
+    val groupings = extSubmission.submission.groups.map(convertToViewGrouping(extSubmission))
     ViewModel(appName, groupings)
   }
 }

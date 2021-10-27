@@ -71,7 +71,7 @@ class ThirdPartyApplicationSubmissionsConnectorSpec
         .willReturn(
           aResponse()
             .withStatus(OK)
-            .withJsonBody(submission)
+            .withJsonBody(extendedSubmission)
         )
       )
 
@@ -79,7 +79,7 @@ class ThirdPartyApplicationSubmissionsConnectorSpec
 
       result shouldBe 'Right
 
-      result.right.get shouldBe submission
+      result.right.get shouldBe extendedSubmission
     }
   }
 
@@ -106,13 +106,13 @@ class ThirdPartyApplicationSubmissionsConnectorSpec
         .willReturn(
             aResponse()
             .withStatus(OK)
-            .withJsonBody(submission)
+            .withJsonBody(extendedSubmission)
         )
       )
 
       val result = await(connector.fetchSubmission(submissionId))
 
-      result.value shouldBe submission
+      result.value shouldBe extendedSubmission
     }
   }
 
@@ -139,13 +139,13 @@ class ThirdPartyApplicationSubmissionsConnectorSpec
         .willReturn(
             aResponse()
             .withStatus(OK)
-            .withJsonBody(submission)
+            .withJsonBody(extendedSubmission)
         )
       )
 
       val result = await(connector.fetchLatestSubmission(applicationId))
 
-      result.value shouldBe submission
+      result.value shouldBe extendedSubmission
     }
   }
 }
