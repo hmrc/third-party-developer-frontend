@@ -84,19 +84,23 @@ class ProdCredsChecklistController @Inject() (
     val failed = (err: String) => BadRequestWithErrorMessage(err)
 
     val success = (viewModel: ViewModel) => {
-      def filterNotApplicableQuestionnaireSummaries(questionnaireSummaries: NonEmptyList[ViewQuestionnaireSummary]): Option[NonEmptyList[ViewQuestionnaireSummary]] = {
-        questionnaireSummaries.filterNot(_.state == NotApplicable.toString).toNel
-      }
 
       def filterGroupingsForEmptyQuestionnaireSummaries(groupings: NonEmptyList[ViewGrouping]): Option[NonEmptyList[ViewGrouping]] = {
+        val filterFn: ViewQuestionnaireSummary => Boolean = _.state == NotApplicable.toString
+        
         groupings
-          .filterNot(g => filterNotApplicableQuestionnaireSummaries(g.questionnaireSummaries).isEmpty)
-          .map(g => g.copy(questionnaireSummaries = filterNotApplicableQuestionnaireSummaries(g.questionnaireSummaries).get)) // TODO: Is there a way to do both of these lines in one?
+          .map(g => {
+            val qs = g.questionnaireSummaries.filterNot(filterFn).toNel
+            (g.label, qs)
+          })
+          .collect {
+            case (label, Some(qs)) => ViewGrouping(label, qs)
+          }
           .toNel
       }
 
       filterGroupingsForEmptyQuestionnaireSummaries(viewModel.groupings).fold(
-        BadRequest("") // TODO: Make better or redirect to summary page
+        BadRequest("No questionnaires applicable") 
       )(vg =>
         Ok(productionCredentialsChecklistView(viewModel.copy(groupings = vg)))
       )
