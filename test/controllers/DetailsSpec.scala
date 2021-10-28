@@ -43,6 +43,7 @@ import scala.concurrent.Future._
 import utils.LocalUserIdTracker
 import utils.TestApplications
 import utils.CollaboratorTracker
+import modules.submissions.services.SubmissionService
 
 class DetailsSpec 
     extends BaseControllerSpec 
@@ -332,6 +333,7 @@ class DetailsSpec
     val pendingApprovalView = app.injector.instanceOf[PendingApprovalView]
     val detailsView = app.injector.instanceOf[DetailsView]
     val changeDetailsView = app.injector.instanceOf[ChangeDetailsView]
+    val submissionService = app.injector.instanceOf[SubmissionService]
 
     val underTest = new Details(
       mockErrorHandler,
@@ -344,7 +346,8 @@ class DetailsSpec
       pendingApprovalView,
       detailsView,
       changeDetailsView,
-      fraudPreventionConfig
+      fraudPreventionConfig,
+      submissionService
     )
 
     implicit val hc: HeaderCarrier = HeaderCarrier()
