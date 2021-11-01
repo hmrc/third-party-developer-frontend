@@ -43,8 +43,10 @@ import config.Off
 import domain.models.controllers.ApplicationSummary
 import modules.uplift.views.html.BeforeYouStartView
 import modules.uplift.services.GetProductionCredentialsFlowService
-import modules.uplift.services.UpliftLogicMock
+import modules.uplift.services.mocks.UpliftLogicMock
 import modules.uplift.controllers.UpliftJourneySwitch
+import modules.uplift.domain.models.GetProductionCredentialsFlow
+import scala.concurrent.Future
 
 class AddApplicationStartSpec
     extends BaseControllerSpec
@@ -189,6 +191,7 @@ class AddApplicationStartSpec
       "and we have only 1 application" in new Setup {
       when(appConfig.nameOfPrincipalEnvironment).thenReturn("QA")
       when(appConfig.nameOfSubordinateEnvironment).thenReturn("Development")
+      when(flowServiceMock.resetFlow(*)).thenReturn(Future.successful(GetProductionCredentialsFlow("", None, None, None)))
 
       val summaries = sandboxAppSummaries.take(1)
       aUsersUplfitableAndNotUpliftableAppsReturns(summaries, summaries.map(_.id))
@@ -205,6 +208,7 @@ class AddApplicationStartSpec
       "and we have more than 1 application" in new Setup {
       when(appConfig.nameOfPrincipalEnvironment).thenReturn("QA")
       when(appConfig.nameOfSubordinateEnvironment).thenReturn("Development")
+      when(flowServiceMock.resetFlow(*)).thenReturn(Future.successful(GetProductionCredentialsFlow("", None, None, None)))
 
       val summaries = sandboxAppSummaries.take(2)
       aUsersUplfitableAndNotUpliftableAppsReturns(summaries, summaries.map(_.id))
@@ -249,6 +253,7 @@ class AddApplicationStartSpec
         "returns OnDemand and request header contains the uplift journey flag set to true" in new Setup {
       when(appConfig.nameOfPrincipalEnvironment).thenReturn("QA")
       when(appConfig.nameOfSubordinateEnvironment).thenReturn("Development")
+      when(flowServiceMock.resetFlow(*)).thenReturn(Future.successful(GetProductionCredentialsFlow("", None, None, None)))
 
       val summaries = sandboxAppSummaries.take(1)
       aUsersUplfitableAndNotUpliftableAppsReturns(summaries, summaries.map(_.id))
@@ -282,6 +287,7 @@ class AddApplicationStartSpec
       "returns On and request header contains the uplift journey flag set to false" in new Setup {
           when(appConfig.nameOfPrincipalEnvironment).thenReturn("QA")
           when(appConfig.nameOfSubordinateEnvironment).thenReturn("Development")
+       when(flowServiceMock.resetFlow(*)).thenReturn(Future.successful(GetProductionCredentialsFlow("", None, None, None)))
 
           val summaries = sandboxAppSummaries.take(1)
           aUsersUplfitableAndNotUpliftableAppsReturns(summaries, summaries.map(_.id))

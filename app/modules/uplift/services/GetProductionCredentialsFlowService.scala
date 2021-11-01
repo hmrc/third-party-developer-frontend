@@ -45,6 +45,9 @@ class GetProductionCredentialsFlowService @Inject()(
     } yield savedFlow
   }
 
+  def findResponsibleIndividual(developerSession: DeveloperSession): Future[Option[ResponsibleIndividual]] = 
+    fetchFlow(developerSession).map(_.responsibleIndividual)
+
   def storeSellResellOrDistribute(sellResellOrDistribute: SellResellOrDistribute, developerSession: DeveloperSession): Future[GetProductionCredentialsFlow] = {
     for {
       existingFlow <- fetchFlow(developerSession)
@@ -52,10 +55,17 @@ class GetProductionCredentialsFlowService @Inject()(
     } yield savedFlow
   }
 
+  def findSellResellOrDistribute(developerSession: DeveloperSession): Future[Option[SellResellOrDistribute]] = 
+    fetchFlow(developerSession).map(_.sellResellOrDistribute)
+
   def storeApiSubscriptions(apiSubscriptions: ApiSubscriptions, developerSession: DeveloperSession): Future[GetProductionCredentialsFlow] = {
     for {
       existingFlow <- fetchFlow(developerSession)
       savedFlow    <- flowRepository.saveFlow[GetProductionCredentialsFlow](existingFlow.copy(apiSubscriptions = Some(apiSubscriptions)))
     } yield savedFlow
   }
+
+  def resetFlow(developerSession: DeveloperSession): Future[GetProductionCredentialsFlow] =
+    flowRepository.deleteBySessionIdAndFlowType(developerSession.session.sessionId, FlowType.GET_PRODUCTION_CREDENTIALS)
+    .flatMap(_ => fetchFlow(developerSession))
 }

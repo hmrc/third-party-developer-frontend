@@ -43,6 +43,7 @@ import scala.concurrent.Future._
 import utils.LocalUserIdTracker
 import utils.TestApplications
 import utils.CollaboratorTracker
+import modules.submissions.services.mocks.SubmissionServiceMockModule
 
 class DetailsSpec 
     extends BaseControllerSpec 
@@ -50,7 +51,8 @@ class DetailsSpec
     with TestApplications 
     with DeveloperBuilder 
     with CollaboratorTracker 
-    with LocalUserIdTracker {
+    with LocalUserIdTracker
+    with SubmissionServiceMockModule {
 
   "details" when {
     "logged in as a Developer on an application" should {
@@ -76,7 +78,7 @@ class DetailsSpec
 
       "return a redirect when using an application in testing state" in new Setup {
         val testingApplication = anApplication(adminEmail = loggedInDeveloper.email, state = ApplicationState.testing)
-
+        SubmissionServiceMock.FetchLatestSubmission.thenReturnsNone()
         givenApplicationAction(testingApplication, loggedInDeveloper)
 
         val result = testingApplication.callDetails
@@ -344,7 +346,8 @@ class DetailsSpec
       pendingApprovalView,
       detailsView,
       changeDetailsView,
-      fraudPreventionConfig
+      fraudPreventionConfig,
+      SubmissionServiceMock.aMock
     )
 
     implicit val hc: HeaderCarrier = HeaderCarrier()

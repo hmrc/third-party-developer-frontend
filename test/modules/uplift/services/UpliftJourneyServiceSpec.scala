@@ -31,8 +31,7 @@ import modules.uplift.services.UpliftJourneyService
 import utils.AsyncHmrcSpec
 import utils.LocalUserIdTracker
 import domain.models.applications.ApplicationId
-import modules.uplift.services.GetProductionCredentialsFlowServiceMockModule
-import modules.uplift.services.UpliftJourneyServiceMockModule
+import modules.uplift.services.mocks._
 
 class UpliftJourneyServiceSpec
                 extends AsyncHmrcSpec

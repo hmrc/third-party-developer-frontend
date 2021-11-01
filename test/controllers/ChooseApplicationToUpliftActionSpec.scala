@@ -25,7 +25,6 @@ import play.api.test.FakeRequest
 import play.api.test.Helpers._
 import service.AuditService
 import modules.uplift.domain.models.GetProductionCredentialsFlow
-import modules.uplift.services._
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.time.DateTimeUtils
 import utils._
@@ -40,12 +39,14 @@ import builder.ApplicationBuilder
 
 import scala.concurrent.Future
 import play.api.mvc.Result
+import modules.uplift.services.mocks._
 import mocks.connector.ApmConnectorMockModule
 import controllers.addapplication.AddApplication
 import builder._
 import modules.uplift.views.html.BeforeYouStartView
 import modules.uplift.controllers.UpliftJourneySwitch
 import config.UpliftJourneyConfig
+import modules.uplift.services.GetProductionCredentialsFlowService
 
 class ChooseApplicationToUpliftActionSpec
     extends BaseControllerSpec 

@@ -32,7 +32,7 @@ import scala.concurrent.{ExecutionContext, Future}
 import service.ApplicationActionService
 import domain.models.subscriptions.DevhubAccessLevel
 
-trait ActionBuilders {
+trait SimpleApplicationActionBuilders {
 
   val errorHandler: ErrorHandler
   val applicationActionService: ApplicationActionService
@@ -55,6 +55,10 @@ trait ActionBuilders {
       }
     }
 
+}
+
+trait ActionBuilders extends SimpleApplicationActionBuilders {
+  
   def fieldDefinitionsExistRefiner(noFieldsBehaviour: NoSubscriptionFieldsRefinerBehaviour)(
       implicit ec: ExecutionContext
   ): ActionRefiner[ApplicationRequest, ApplicationWithFieldDefinitionsRequest] = new ActionRefiner[ApplicationRequest, ApplicationWithFieldDefinitionsRequest] {

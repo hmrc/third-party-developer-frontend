@@ -47,6 +47,16 @@ import domain.models.controllers.BadRequestWithErrorMessage
 
 object UpliftJourneyController {
 
+  case class ChooseApplicationToUpliftForm(applicationId: ApplicationId)
+
+  object ChooseApplicationToUpliftForm {
+    val form: Form[ChooseApplicationToUpliftForm] = Form(
+      mapping(
+        "applicationId" -> nonEmptyText.transform[ApplicationId](ApplicationId(_), id => id.value)
+      )(ChooseApplicationToUpliftForm.apply)(ChooseApplicationToUpliftForm.unapply)
+    )
+  }
+
   case class ResponsibleIndividualForm(fullName: String, emailAddress: String)
 
   object ResponsibleIndividualForm {
@@ -80,6 +90,7 @@ object UpliftJourneyController {
     )
   }
 }
+
 @Singleton
 class UpliftJourneyController @Inject() (val errorHandler: ErrorHandler,
                       val sessionService: SessionService,
@@ -118,7 +129,7 @@ class UpliftJourneyController @Inject() (val errorHandler: ErrorHandler,
     val success = (upliftedAppId: ApplicationId) => {
       upliftJourneySwitch.performSwitch(
             successful(Redirect(modules.submissions.controllers.routes.ProdCredsChecklistController.productionCredentialsChecklist(upliftedAppId))),  // new uplift path
-            successful(Redirect(controllers.checkpages.routes.ApplicationCheck.requestCheckPage(upliftedAppId))                             // existing uplift path
+            successful(Redirect(controllers.checkpages.routes.ApplicationCheck.requestCheckPage(upliftedAppId))                                       // existing uplift path
               .withSession(request.session - "subscriptions"))   
       )
     }
@@ -175,7 +186,7 @@ class UpliftJourneyController @Inject() (val errorHandler: ErrorHandler,
 
   def responsibleIndividual(sandboxAppId: ApplicationId): Action[AnyContent] = whenTeamMemberOnApp(sandboxAppId) { implicit request =>
     for {
-      responsibleIndividual <- upliftJourneyService.responsibleIndividual(request.user)
+      responsibleIndividual <- flowService.findResponsibleIndividual(request.user)
       form = responsibleIndividual.fold[Form[ResponsibleIndividualForm]](responsibleIndividualForm)(x => responsibleIndividualForm.fill(ResponsibleIndividualForm(x.fullName, x.emailAddress)))
     } yield Ok(responsibleIndividualView(sandboxAppId, form))
   }
@@ -198,7 +209,7 @@ class UpliftJourneyController @Inject() (val errorHandler: ErrorHandler,
 
   def sellResellOrDistributeYourSoftware(sandboxAppId: ApplicationId): Action[AnyContent] = whenTeamMemberOnApp(sandboxAppId) { implicit request =>
     for {
-      sellResellOrDistribute <- upliftJourneyService.sellResellOrDistribute(request.user)
+      sellResellOrDistribute <- flowService.findSellResellOrDistribute(request.user)
       form                    = sellResellOrDistribute.fold[Form[SellResellOrDistributeForm]](sellResellOrDistributeForm)(x => sellResellOrDistributeForm.fill(SellResellOrDistributeForm(Some(x.answer))))
     } yield Ok(sellResellOrDistributeSoftwareView(sandboxAppId, form))
   }

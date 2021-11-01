@@ -33,34 +33,29 @@ import modules.submissions.domain.models._
 import modules.submissions.services.SubmissionService
 import helpers.EitherTHelper
 import domain.models.controllers.BadRequestWithErrorMessage
+import modules.submissions.domain.models.NotApplicable
 
 object ProdCredsChecklistController {
-  case class ViewQuestionnaireSummary(label: String, state: String, id: QuestionnaireId = QuestionnaireId.random)
+  case class ViewQuestionnaireSummary(label: String, state: String, id: QuestionnaireId = QuestionnaireId.random, nextQuestionUrl: Option[String] = None)
   case class ViewGrouping(label: String, questionnaireSummaries: NonEmptyList[ViewQuestionnaireSummary])
   case class ViewModel(appName: String, groupings: NonEmptyList[ViewGrouping])
 
-  def deriveState(extendedSubmission: ExtendedSubmission)(questionnaire: Questionnaire): String = {
-    extendedSubmission.nextQuestions.get(questionnaire.id) match {
-      case None => "Completed"
-      case Some(qId) if qId == questionnaire.questions.head.question.id => "Not Started"
-      case Some(qId) => "In Progress"
-    }
+  def convertToSummary(extSubmission: ExtendedSubmission)(questionnaire: Questionnaire): ViewQuestionnaireSummary = {
+    val progress = extSubmission.questionnaireProgress.get(questionnaire.id).get
+    val state = progress.state.toString
+    val url = progress.questionsToAsk.headOption.map(q => modules.submissions.controllers.routes.QuestionsController.showQuestion(extSubmission.submission.id, q).url)
+    ViewQuestionnaireSummary(questionnaire.label.value, state, questionnaire.id, url)
   }
 
-  def convertToSummary(extendedSubmission: ExtendedSubmission)(questionnaire: Questionnaire): ViewQuestionnaireSummary = {
-    val state = deriveState(extendedSubmission)(questionnaire)
-    ViewQuestionnaireSummary(questionnaire.label.value, state, questionnaire.id)
-  }
-
-  def convertToViewGrouping(extendedSubmission: ExtendedSubmission)(groupOfQuestionnaires: GroupOfQuestionnaires): ViewGrouping = {
+  def convertToViewGrouping(extSubmission: ExtendedSubmission)(groupOfQuestionnaires: GroupOfQuestionnaires): ViewGrouping = {
     ViewGrouping(
       label = groupOfQuestionnaires.heading,
-      questionnaireSummaries = groupOfQuestionnaires.links.map(convertToSummary(extendedSubmission))
+      questionnaireSummaries = groupOfQuestionnaires.links.map(convertToSummary(extSubmission))
     )
   }
 
-  def convertSubmissionToViewModel(extendedSubmission: ExtendedSubmission)(appName: String): ViewModel = {
-    val groupings = extendedSubmission.submission.groups.map(convertToViewGrouping(extendedSubmission))
+  def convertSubmissionToViewModel(extSubmission: ExtendedSubmission)(appName: String): ViewModel = {
+    val groupings = extSubmission.submission.groups.map(convertToViewGrouping(extSubmission))
     ViewModel(appName, groupings)
   }
 }
@@ -88,13 +83,34 @@ class ProdCredsChecklistController @Inject() (
   def productionCredentialsChecklist(productionAppId: ApplicationId): Action[AnyContent] = whenTeamMemberOnApp(productionAppId) { implicit request =>
     val failed = (err: String) => BadRequestWithErrorMessage(err)
 
-    val success = (viewModel: ViewModel) => Ok(productionCredentialsChecklistView(viewModel))
-    
-    val res = for {
-        extendedSubmission <- fromOptionF(submissionService.fetchLatestSubmission(productionAppId), "No subsmission and/or application found")
-        viewModel           = convertSubmissionToViewModel(extendedSubmission)(request.application.name)
-      } yield viewModel
+    val success = (viewModel: ViewModel) => {
 
-    res.fold[Result](failed, success)
+      def filterGroupingsForEmptyQuestionnaireSummaries(groupings: NonEmptyList[ViewGrouping]): Option[NonEmptyList[ViewGrouping]] = {
+        val filterFn: ViewQuestionnaireSummary => Boolean = _.state == NotApplicable.toString
+        
+        groupings
+          .map(g => {
+            val qs = g.questionnaireSummaries.filterNot(filterFn).toNel
+            (g.label, qs)
+          })
+          .collect {
+            case (label, Some(qs)) => ViewGrouping(label, qs)
+          }
+          .toNel
+      }
+
+      filterGroupingsForEmptyQuestionnaireSummaries(viewModel.groupings).fold(
+        BadRequest("No questionnaires applicable") 
+      )(vg =>
+        Ok(productionCredentialsChecklistView(viewModel.copy(groupings = vg)))
+      )
+    }
+    
+    val vm = for {
+      submission          <- fromOptionF(submissionService.fetchLatestSubmission(productionAppId), "No subsmission and/or application found")
+      viewModel           = convertSubmissionToViewModel(submission)(request.application.name)
+    } yield viewModel
+
+    vm.fold[Result](failed, success)
   }
 }

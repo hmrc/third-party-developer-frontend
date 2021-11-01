@@ -36,14 +36,11 @@ import scala.concurrent.{ExecutionContext, Future}
 import scala.util.Success
 import domain.models.apidefinitions.ApiIdentifier
 import uk.gov.hmrc.http.HttpReads.Implicits._
-import modules.submissions.domain.models.ExtendedSubmission
-import modules.submissions.domain.services.SubmissionsFrontendJsonFormatters
 
 abstract class ThirdPartyApplicationConnector(config: ApplicationConfig, metrics: ConnectorMetrics) extends ApplicationConnector with CommonResponseHandlers {
 
   import ThirdPartyApplicationConnectorDomain._
   import ThirdPartyApplicationConnectorJsonFormatters._
-  import SubmissionsFrontendJsonFormatters._
 
   protected val httpClient: HttpClient
   protected val proxiedHttpClient: ProxiedHttpClient
@@ -215,10 +212,6 @@ abstract class ThirdPartyApplicationConnector(config: ApplicationConfig, metrics
   def fetchSubscription(applicationId: ApplicationId)(implicit hc: HeaderCarrier): Future[Set[ApiIdentifier]] = {
     http.GET[Set[ApiIdentifier]](s"$serviceBaseUrl/application/${applicationId.value}/subscription")
   }
-
-  def fetchLatestSubmission(applicationId: ApplicationId)(implicit hc: HeaderCarrier): Future[Option[ExtendedSubmission]] = {
-    http.GET[Option[ExtendedSubmission]](s"$serviceBaseUrl/submissions/application/${applicationId.value}")
-  }
 }
 
 private[connectors] object ThirdPartyApplicationConnectorDomain {
@@ -265,10 +258,8 @@ class ThirdPartyApplicationProductionConnector @Inject() (
     val appConfig: ApplicationConfig,
     val metrics: ConnectorMetrics
 )(implicit val ec: ExecutionContext)
-    extends ThirdPartyApplicationConnector(appConfig, metrics) {
-
-
-
+    extends ThirdPartyApplicationConnector(appConfig, metrics)
+{
   val environment = Environment.PRODUCTION
   val serviceBaseUrl = appConfig.thirdPartyApplicationProductionUrl
   val useProxy = appConfig.thirdPartyApplicationProductionUseProxy

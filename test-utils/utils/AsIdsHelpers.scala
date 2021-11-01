@@ -14,12 +14,23 @@
  * limitations under the License.
  */
 
-package modules.uplift.domain.models
+package utils
 
-import play.api.libs.json.{Format, Json}
+import modules.submissions.domain.models.{QuestionId, QuestionItem}
+import cats.data.NonEmptyList
 
-case class SellResellOrDistribute(answer: String) extends AnyVal
+trait AsIdsHelpers {
+  implicit class ListQIdSyntax(questionItems: List[QuestionItem]) {
+    def asIds(): List[QuestionId] = {
+      questionItems.map(_.question.id)
+    }
+  }
 
-object SellResellOrDistribute {
-  implicit val format: Format[SellResellOrDistribute] = Json.valueFormat[SellResellOrDistribute]
+  implicit class NELQIdSyntax(questionItems: NonEmptyList[QuestionItem]) {
+    def asIds(): List[QuestionId] = {
+      questionItems.toList.map(_.question.id)
+    }
+  }
 }
+
+object AsIdsHelpers extends AsIdsHelpers

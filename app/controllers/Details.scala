@@ -36,6 +36,12 @@ import views.html.checkpages.applicationcheck.UnauthorisedAppDetailsView
 import scala.concurrent.{ExecutionContext, Future}
 import domain.models.subscriptions.DevhubAccessLevel
 import controllers.fraudprevention.FraudPreventionNavLinkHelper
+import modules.submissions.services.SubmissionService
+import cats.data.OptionT
+import cats.instances.future.catsStdInstancesForFuture
+import modules.submissions.domain.models.ExtendedSubmission
+import scala.concurrent.Future.successful
+import modules.submissions.views.html.ProductionCredentialsChecklistView
 
 @Singleton
 class Details @Inject() (
@@ -49,7 +55,8 @@ class Details @Inject() (
     pendingApprovalView: PendingApprovalView,
     detailsView: DetailsView,
     changeDetailsView: ChangeDetailsView,
-    val fraudPreventionConfig: FraudPreventionConfig
+    val fraudPreventionConfig: FraudPreventionConfig,
+    submissionService: SubmissionService
 )(implicit val ec: ExecutionContext, val appConfig: ApplicationConfig)
     extends ApplicationController(mcc) with FraudPreventionNavLinkHelper {
 
@@ -58,23 +65,46 @@ class Details @Inject() (
 
   def details(applicationId: ApplicationId): Action[AnyContent] = whenTeamMemberOnApp(applicationId) { implicit request =>
     val accessLevel = DevhubAccessLevel.fromRole(request.role)
-
     val checkYourAnswersData = CheckYourAnswersData(accessLevel, request.application, request.subscriptions)
 
-    Future.successful(request.application.state.name match {
-      case State.TESTING if request.role.isAdministrator =>
-        Redirect(controllers.checkpages.routes.ApplicationCheck.requestCheckPage(request.application.id))
+    
+    request.application.state.name match {
+      case State.TESTING =>
+        lazy val oldJourney =
+          if (request.role.isAdministrator)
+            Redirect(controllers.checkpages.routes.ApplicationCheck.requestCheckPage(request.application.id))
+          else
+            Ok(unauthorisedAppDetailsView(request.application.name, request.application.adminEmails))
 
-      case State.TESTING if request.role.isDeveloper =>
-        Ok(unauthorisedAppDetailsView(request.application.name, request.application.adminEmails))
+        val newUpliftJourney = (e: ExtendedSubmission) =>
+          Redirect(modules.submissions.controllers.routes.ProdCredsChecklistController.productionCredentialsChecklist(applicationId))
+
+        OptionT(submissionService.fetchLatestSubmission(applicationId)).fold(oldJourney)(newUpliftJourney)
 
       case State.PENDING_GATEKEEPER_APPROVAL | State.PENDING_REQUESTER_VERIFICATION =>
-        Ok(pendingApprovalView(checkYourAnswersData, CheckYourAnswersForm.form.fillAndValidate(DummyCheckYourAnswersForm("dummy"))))
+        successful(
+          Ok(
+            pendingApprovalView(
+              checkYourAnswersData,
+              CheckYourAnswersForm.form.fillAndValidate(DummyCheckYourAnswersForm("dummy"))
+            )
+          )
+        )
 
       case State.PRODUCTION =>
-        Ok(detailsView(applicationViewModelFromApplicationRequest,
-          createOptionalFraudPreventionNavLinkViewModel(request.application, request.subscriptions, fraudPreventionConfig)))
-    })
+        successful(
+          Ok(
+            detailsView(
+              applicationViewModelFromApplicationRequest,
+              createOptionalFraudPreventionNavLinkViewModel(
+                request.application,
+                request.subscriptions,
+                fraudPreventionConfig
+              )
+            )
+          )
+        )
+    }
   }
 
   def changeDetails(applicationId: ApplicationId): Action[AnyContent] = canChangeDetailsAndIsApprovedAction(applicationId) { implicit request =>

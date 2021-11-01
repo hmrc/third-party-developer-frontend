@@ -128,15 +128,18 @@ class AddApplication @Inject() (
       successful(Ok(chooseApplicationToUpliftView(form, upliftableSummaries, showFluff)))
     }
 
+    // TODO - tidy as for comp
     upliftLogic.aUsersSandboxAdminSummariesAndUpliftIds(loggedIn.developer.userId).flatMap { data =>
-      val (summaries, upliftableAppIds) = data
-      val upliftableSummaries = summaries.filter(s => upliftableAppIds.contains(s.id))
-      val hasAppsThatCannotBeUplifted = upliftableSummaries.size < summaries.size
+      flowService.resetFlow(loggedIn).flatMap { _ =>
+        val (summaries, upliftableAppIds) = data
+        val upliftableSummaries = summaries.filter(s => upliftableAppIds.contains(s.id))
+        val hasAppsThatCannotBeUplifted = upliftableSummaries.size < summaries.size
 
-      upliftableAppIds.toList match {
-        case Nil          => successful(BadRequest(Json.toJson(BadRequestError)))
-        case appId :: Nil if !hasAppsThatCannotBeUplifted => progressOnUpliftJourney(appId)(request)
-        case _ => chooseApplicationToUplift(upliftableSummaries, hasAppsThatCannotBeUplifted)(request)
+        upliftableAppIds.toList match {
+          case Nil          => successful(BadRequest(Json.toJson(BadRequestError)))
+          case appId :: Nil if !hasAppsThatCannotBeUplifted => progressOnUpliftJourney(appId)(request)
+          case _ => chooseApplicationToUplift(upliftableSummaries, hasAppsThatCannotBeUplifted)(request)
+        }
       }
     }
   }

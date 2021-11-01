@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package modules.uplift.services
+package modules.uplift.services.mocks
 
 
 import org.mockito.MockitoSugar
@@ -23,6 +23,7 @@ import domain.models.developers.UserId
 import scala.concurrent.Future._
 import domain.models.controllers.ApplicationSummary
 import domain.models.applications.ApplicationId
+import modules.uplift.services.UpliftLogic
 
 class UpliftLogicMock extends MockitoSugar with ArgumentMatchersSugar {
 

@@ -42,7 +42,7 @@ import builder._
 
 import modules.uplift.views.html.BeforeYouStartView
 import modules.uplift.services.GetProductionCredentialsFlowService
-import modules.uplift.services.UpliftLogicMock
+import modules.uplift.services.mocks.UpliftLogicMock
 import modules.uplift.controllers.UpliftJourneySwitch
 
 class AddApplicationSuccessSpec 
