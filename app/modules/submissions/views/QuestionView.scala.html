@@ -88,6 +88,21 @@
   }
 }
 
+@renderButtonOrButtons(absenceText: Option[String]) = {
+  @{
+    val html = absenceText match {
+      case Some(text) =>
+      <div class="govuk-button-group">
+        <button id="submit" class="govuk-button" type="submit" name="submit-action" value="save">Save and continue</button>
+        <button id="submit" class="govuk-button govuk-button--secondary" type="submit" name="submit-action" value="no-answer">{text}</button>
+      </div>
+      case None =>
+        <button id="submit" class="govuk-button" type="submit" name="submit-action" value="save">Save and continue</button>
+    }
+    html
+  }
+}
+
 @renderMultiChoiceQuestion(question: MultiChoiceQuestion) = {
   <div class="govuk-form-group">
     <fieldset class="govuk-fieldset">
@@ -107,6 +122,8 @@
       </div>
     </fieldset>
   </div>
+
+  @renderButtonOrButtons(question.absenceText)
 }
 
 @renderSingleChoiceQuestion(question: SingleChoiceQuestion, inline: Boolean) = {
@@ -128,6 +145,9 @@
       </div>
     </fieldset>
   </div>
+
+  @renderButtonOrButtons(question.absenceText)
+
 }
 
 @renderTextInputQuestion(question: TextQuestion) = {
@@ -147,14 +167,21 @@
       <input class="govuk-input" id="question-@{question.id.value}-id" name="answer" type="text" value="@actualValue">
     </div>
   }
+
+  @renderButtonOrButtons(question.absenceText)
 }
 
-@renderChoices(question: Question) = @{
+@renderAcknowledgementOnly(question: AcknowledgementOnly) = {
+    <button id="submit" class="govuk-button" type="submit" name="submit-action" value="acknowledgement">Continue</button>  
+}
+
+@renderQuestionType(question: Question) = @{
   question match {
     case q: YesNoQuestion => renderSingleChoiceQuestion(q, true)
     case q: SingleChoiceQuestion => renderSingleChoiceQuestion(q, false)
     case q: MultiChoiceQuestion => renderMultiChoiceQuestion(q)
     case q: TextQuestion => renderTextInputQuestion(q)
+    case q: AcknowledgementOnly => renderAcknowledgementOnly(q)
     case _ => <p>TODO</p>
   }
 }
@@ -197,8 +224,6 @@
   @helper.form(action = submitAction, 'class -> "form") {
     @helper.CSRF.formField
 
-    @renderChoices(question)
-
-    <button id="submit" class="govuk-button" type="submit">Save and continue</button>
+    @renderQuestionType(question)
   }
 }

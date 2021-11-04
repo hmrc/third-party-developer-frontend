@@ -87,7 +87,7 @@ class QuestionsController @Inject()(
 
   def recordAnswer(submissionId: SubmissionId, questionId: QuestionId) = withSubmission(submissionId) { implicit request => 
 
-    val failed = (msg: String) => showQuestion(submissionId, questionId, None, Some("Please provide an answer to the question"))(request)
+    lazy val failed = (msg: String) => showQuestion(submissionId, questionId, None, Some("Please provide an answer to the question"))(request)
 
     val success = (extSubmission: ExtendedSubmission) => { 
       val questionnaire = extSubmission.submission.findQuestionnaireContaining(questionId).get
@@ -101,12 +101,26 @@ class QuestionsController @Inject()(
     }
   
     val formValues = request.body.asFormUrlEncoded.get.filterNot(_._1 == "csrfToken")
+    val submitAction = formValues.get("submit-action").flatMap(_.headOption)
+    val answers = formValues.get("answer").fold(List.empty[String])(_.toList.filter(_.nonEmpty))
+
+    import cats.implicits._
+    import cats.instances.future.catsStdInstancesForFuture
+
+    def validateAnswers(submitAction: Option[String], answers: List[String]): Either[String, List[String]] = (submitAction, answers) match {
+      case (None, _) => Either.left("Bad request")
+      case (Some("acknowledgement"), Nil) => Either.right(Nil)
+      case (Some("acknowledgement"), _) => Either.left("Bad request")
+      case (Some("save"), Nil) => Either.left("Need values on save")
+      case (Some("save"), _) => Either.right(answers)
+      case (Some("no-answer"), _) => Either.right(Nil)
+    }
+
     (
       for {
-        formValue <- fromOption(formValues.get("answer"), "Submission found no answer")
-        answers   <- fromOption(NonEmptyList.fromList(formValue.toList), "Answer was empty")
-        newSubmission <- fromEitherF(submissionService.recordAnswer(submissionId, questionId, answers))
-      } yield newSubmission
+        effectiveAnswers  <- fromEither(validateAnswers(submitAction, answers))
+        result            <- fromEitherF(submissionService.recordAnswer(submissionId, questionId, effectiveAnswers))
+      } yield result
     )
     .fold(failed, success)
     .flatten

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package uk.gov.hmrc.thirdpartyapplication.domain.services
+package domain.services
 
 import play.api.libs.json._
 import cats.data.{NonEmptyList => NEL}

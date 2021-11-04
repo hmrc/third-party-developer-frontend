@@ -20,10 +20,8 @@ import javax.inject.{Inject, Singleton}
 import connectors.ConnectorMetrics
 import uk.gov.hmrc.play.bootstrap.http.HttpClient
 import scala.concurrent.ExecutionContext
-import modules.submissions.domain.services.SubmissionsJsonFormatters
-import uk.gov.hmrc.thirdpartyapplication.domain.services.NonEmptyListFormatters
+import modules.submissions.domain.services._
 import modules.submissions.domain.models._
-import cats.data.NonEmptyList
 import uk.gov.hmrc.http.HeaderCarrier
 import scala.concurrent.Future
 import domain.models.applications._
@@ -33,11 +31,9 @@ import play.api.libs.json.Json
 import uk.gov.hmrc.play.http.metrics.API
 
 object ThirdPartyApplicationSubmissionsConnector {
-  import NonEmptyListFormatters._
-
   case class Config(serviceBaseUrl: String, apiKey: String)
 
-  case class OutboundRecordAnswersRequest(answers: NonEmptyList[String])
+  case class OutboundRecordAnswersRequest(answers: List[String])
   implicit val writes = Json.writes[OutboundRecordAnswersRequest]
 }
 
@@ -47,8 +43,7 @@ class ThirdPartyApplicationSubmissionsConnector @Inject() (
     val config: ThirdPartyApplicationSubmissionsConnector.Config,
     val metrics: ConnectorMetrics
 )(implicit val ec: ExecutionContext)
-    extends SubmissionsJsonFormatters
-    with NonEmptyListFormatters {
+    extends SubmissionsJsonFormatters {
 
   import ThirdPartyApplicationSubmissionsConnector._
   import config._
@@ -57,7 +52,7 @@ class ThirdPartyApplicationSubmissionsConnector @Inject() (
 
   val environment = Environment.PRODUCTION
 
-  def recordAnswer(submissionId: SubmissionId, questionId: QuestionId, rawAnswers: NonEmptyList[String])(implicit hc: HeaderCarrier): Future[Either[String, ExtendedSubmission]] = {
+  def recordAnswer(submissionId: SubmissionId, questionId: QuestionId, rawAnswers: List[String])(implicit hc: HeaderCarrier): Future[Either[String, ExtendedSubmission]] = {
     import cats.implicits._
     val failed = (err: UpstreamErrorResponse) => s"Failed to record answer for submission ${submissionId.value} and question ${questionId.value}"
 
