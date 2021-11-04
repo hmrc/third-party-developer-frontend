@@ -34,6 +34,7 @@ import helpers.EitherTHelper
 import play.api.mvc._
 import play.api.libs.json.Json
 import cats.data.NonEmptyList
+import play.api.Logger
 
 object QuestionsController {
   case class ErrorMessage(message: String)
@@ -87,7 +88,10 @@ class QuestionsController @Inject()(
 
   def recordAnswer(submissionId: SubmissionId, questionId: QuestionId) = withSubmission(submissionId) { implicit request => 
 
-    lazy val failed = (msg: String) => showQuestion(submissionId, questionId, None, Some("Please provide an answer to the question"))(request)
+    lazy val failed = (msg: String) => {
+      Logger.info(s"Failed to recordAnswer - $msg")
+      showQuestion(submissionId, questionId, None, Some("Please provide an answer to the question"))(request)
+    }
 
     val success = (extSubmission: ExtendedSubmission) => { 
       val questionnaire = extSubmission.submission.findQuestionnaireContaining(questionId).get
@@ -108,12 +112,13 @@ class QuestionsController @Inject()(
     import cats.instances.future.catsStdInstancesForFuture
 
     def validateAnswers(submitAction: Option[String], answers: List[String]): Either[String, List[String]] = (submitAction, answers) match {
-      case (None, _) => Either.left("Bad request")
       case (Some("acknowledgement"), Nil) => Either.right(Nil)
-      case (Some("acknowledgement"), _) => Either.left("Bad request")
-      case (Some("save"), Nil) => Either.left("Need values on save")
+      case (Some("acknowledgement"), _) => Either.left("Bad request - values for acknowledgement")
+      case (Some("save"), Nil) => Either.left("save action requires values")
       case (Some("save"), _) => Either.right(answers)
       case (Some("no-answer"), _) => Either.right(Nil)
+      case (None, _) => Either.left("Bad request - no action")
+      case (Some(_), _) => Either.left("Bad request - no such action")
     }
 
     (
