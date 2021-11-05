@@ -40,9 +40,16 @@ object ProdCredsChecklistController {
   case class ViewGrouping(label: String, questionnaireSummaries: NonEmptyList[ViewQuestionnaireSummary])
   case class ViewModel(appName: String, groupings: NonEmptyList[ViewGrouping])
 
+  def asText(state: QuestionnaireState): String = state match {
+    case NotStarted => "Not Started"
+    case InProgress => "In Progress"
+    case NotApplicable => "Not Applicable"
+    case Completed => "Completed"
+  }
+  
   def convertToSummary(extSubmission: ExtendedSubmission)(questionnaire: Questionnaire): ViewQuestionnaireSummary = {
     val progress = extSubmission.questionnaireProgress.get(questionnaire.id).get
-    val state = progress.state.toString
+    val state = asText(progress.state)
     val url = progress.questionsToAsk.headOption.map(q => modules.submissions.controllers.routes.QuestionsController.showQuestion(extSubmission.submission.id, q).url)
     ViewQuestionnaireSummary(questionnaire.label.value, state, questionnaire.id, url)
   }
@@ -86,7 +93,7 @@ class ProdCredsChecklistController @Inject() (
     val success = (viewModel: ViewModel) => {
 
       def filterGroupingsForEmptyQuestionnaireSummaries(groupings: NonEmptyList[ViewGrouping]): Option[NonEmptyList[ViewGrouping]] = {
-        val filterFn: ViewQuestionnaireSummary => Boolean = _.state == NotApplicable.toString
+        val filterFn: ViewQuestionnaireSummary => Boolean = _.state == asText(NotApplicable)
         
         groupings
           .map(g => {
