@@ -32,19 +32,29 @@ sealed trait Question {
   def id: QuestionId
   def wording: Wording
   def statement: Statement
+
+  def absenceText: Option[String]
+  final def isOptional: Boolean = absenceText.isDefined
 }
 
-case class TextQuestion(id: QuestionId, wording: Wording, statement: Statement) extends Question
+case class TextQuestion(id: QuestionId, wording: Wording, statement: Statement, absenceText: Option[String] = None) extends Question
 
+case class AcknowledgementOnly(id: QuestionId, wording: Wording, statement: Statement) extends Question {
+  val absenceText = None
+}
+
+
+case class PossibleAnswer(value: String) extends AnyVal
 sealed trait ChoiceQuestion extends Question {
   def choices: ListSet[PossibleAnswer]
 }
 
 sealed trait SingleChoiceQuestion extends ChoiceQuestion
-case class MultiChoiceQuestion(id: QuestionId, wording: Wording, statement: Statement, choices: ListSet[PossibleAnswer]) extends ChoiceQuestion
-case class ChooseOneOfQuestion(id: QuestionId, wording: Wording, statement: Statement, choices: ListSet[PossibleAnswer]) extends SingleChoiceQuestion
-case class YesNoQuestion(id: QuestionId, wording: Wording, statement: Statement) extends SingleChoiceQuestion {
+
+case class MultiChoiceQuestion(id: QuestionId, wording: Wording, statement: Statement, choices: ListSet[PossibleAnswer], absenceText: Option[String] = None) extends ChoiceQuestion
+
+case class ChooseOneOfQuestion(id: QuestionId, wording: Wording, statement: Statement, choices: ListSet[PossibleAnswer], absenceText: Option[String] = None) extends SingleChoiceQuestion
+case class YesNoQuestion(id: QuestionId, wording: Wording, statement: Statement, absenceText: Option[String] = None) extends SingleChoiceQuestion {
   lazy val choices = ListSet(PossibleAnswer("Yes"), PossibleAnswer("No"))
 }
 
-case class PossibleAnswer(value: String) extends AnyVal

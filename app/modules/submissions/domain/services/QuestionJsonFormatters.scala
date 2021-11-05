@@ -16,7 +16,7 @@
 
 package modules.submissions.domain.services
 
-trait QuestionJsonFormatters extends StatementJsonFormatters with AnswersJsonFormatters {
+trait QuestionJsonFormatters extends StatementJsonFormatters {
   import modules.submissions.domain.models._
   import play.api.libs.json._
   import uk.gov.hmrc.play.json.Union
@@ -24,19 +24,20 @@ trait QuestionJsonFormatters extends StatementJsonFormatters with AnswersJsonFor
   implicit val jsonFormatWording = Json.valueFormat[Wording]
   implicit val jsonFormatLabel = Json.valueFormat[Label]
 
+
   implicit val jsonFormatPossibleAnswer = Json.valueFormat[PossibleAnswer]
   implicit val jsonFormatTextQuestion = Json.format[TextQuestion]
   implicit val jsonFormatYesNoQuestion = Json.format[YesNoQuestion]
   implicit val jsonFormatChooseOneOfQuestion = Json.format[ChooseOneOfQuestion]
   implicit val jsonFormatMultiChoiceQuestion = Json.format[MultiChoiceQuestion]
-  implicit val jsonFormatSingleChoiceQuestion = Json.format[SingleChoiceQuestion]
+  implicit val jsonFormatAcknowledgementOnly = Json.format[AcknowledgementOnly]
 
   implicit val jsonFormatQuestion: Format[Question] = Union.from[Question]("questionType")
-    .and[ChooseOneOfQuestion]("choose")
     .and[MultiChoiceQuestion]("multi")
     .and[YesNoQuestion]("yesNo")
-    .and[SingleChoiceQuestion]("single")
+    .and[ChooseOneOfQuestion]("choose")
     .and[TextQuestion]("text")
+    .and[AcknowledgementOnly]("acknowledgement")
     .format
 }
 

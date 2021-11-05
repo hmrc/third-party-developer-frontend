@@ -152,8 +152,8 @@ class QuestionControllerSpec
     "succeed when answer given" in new Setup {
       SubmissionServiceMock.Fetch.thenReturns(extendedSubmission)
       SubmissionServiceMock.RecordAnswer.thenReturns(extendedSubmission)
-      private val answer1 = "answer to question"
-      private val request = loggedInRequest.withFormUrlEncodedBody("answer" -> answer1)
+      private val answer1 = "Yes"
+      private val request = loggedInRequest.withFormUrlEncodedBody("answer" -> answer1, "submit-action" -> "save")
 
       val result = controller.recordAnswer(submission.id, questionId)(request.withCSRFToken)
 
@@ -165,7 +165,7 @@ class QuestionControllerSpec
       SubmissionServiceMock.Fetch.thenReturns(extendedSubmission)
       SubmissionServiceMock.RecordAnswer.thenReturnsNone()
       private val answer1 = ""
-      private val request = loggedInRequest.withFormUrlEncodedBody("answer" -> answer1)
+      private val request = loggedInRequest.withFormUrlEncodedBody("answer" -> answer1, "submit-action" -> "save")
 
       val result = controller.recordAnswer(submission.id, questionId)(request.withCSRFToken)
 
@@ -178,8 +178,7 @@ class QuestionControllerSpec
 
     "fail if no answer field in form" in new Setup {
       SubmissionServiceMock.Fetch.thenReturns(extendedSubmission)
-      // SubmissionServiceMock.RecordAnswer.thenReturns(extendedSubmission)
-      private val request = loggedInRequest.withFormUrlEncodedBody()
+      private val request = loggedInRequest.withFormUrlEncodedBody("submit-action" -> "save")
 
       val result = controller.recordAnswer(submission.id, questionId)(request.withCSRFToken)
 

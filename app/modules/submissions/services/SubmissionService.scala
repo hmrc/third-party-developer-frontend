@@ -22,7 +22,6 @@ import scala.concurrent.Future
 import uk.gov.hmrc.http.HeaderCarrier
 import modules.submissions.domain.models._
 import modules.submissions.connectors.ThirdPartyApplicationSubmissionsConnector
-import cats.data.NonEmptyList
 
 @Singleton
 class SubmissionService @Inject() (productionApplicationConnector: ThirdPartyApplicationSubmissionsConnector) {
@@ -30,5 +29,5 @@ class SubmissionService @Inject() (productionApplicationConnector: ThirdPartyApp
 
   def fetch(id: SubmissionId)(implicit hc: HeaderCarrier): Future[Option[ExtendedSubmission]] = productionApplicationConnector.fetchSubmission(id)
 
-  def recordAnswer(submissionId: SubmissionId, questionId: QuestionId, rawAnswers: NonEmptyList[String])(implicit hc: HeaderCarrier): Future[Either[String, ExtendedSubmission]] = productionApplicationConnector.recordAnswer(submissionId, questionId, rawAnswers)
+  def recordAnswer(submissionId: SubmissionId, questionId: QuestionId, rawAnswers: List[String])(implicit hc: HeaderCarrier): Future[Either[String, ExtendedSubmission]] = productionApplicationConnector.recordAnswer(submissionId, questionId, rawAnswers)
 }

@@ -19,7 +19,6 @@ package stubs
 import com.github.tomakehurst.wiremock.client.WireMock._
 import connectors.EncryptedJson
 import domain.models.applications.ApplicationNameValidationJson.ApplicationNameValidationResult
-import domain.models.applications.{Application, ApplicationToken, Environment}
 import domain.models.developers.{Registration, UpdateProfileRequest}
 import domain.services.ApiDefinitionsJsonFormatters._
 import org.scalatest.Matchers
@@ -29,13 +28,12 @@ import play.api.http.Status._
 import domain.models.apidefinitions.ApiIdentifier
 import domain.models.apidefinitions.{ApiContext, ApiVersion}
 import domain.models.applications.ClientId
-import domain.models.applications.ApplicationId
 import domain.models.developers.UserId
 import domain.models.connectors.PasswordResetRequest
 
 import connectors.ThirdPartyDeveloperConnector.{FindUserIdRequest, FindUserIdResponse}
 import connectors.ThirdPartyDeveloperConnector.JsonFormatters.FindUserIdRequestWrites
-import domain.models.applications.ApplicationWithSubscriptionIds
+import domain.models.applications._
 
 object Stubs {
 

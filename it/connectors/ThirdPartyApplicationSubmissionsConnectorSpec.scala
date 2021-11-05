@@ -14,7 +14,6 @@ import modules.submissions.connectors.ThirdPartyApplicationSubmissionsConnector
 import modules.submissions.connectors.ThirdPartyApplicationSubmissionsConnector._
 import uk.gov.hmrc.http.HeaderCarrier
 import modules.submissions.domain.services.SubmissionsJsonFormatters
-import cats.data.NonEmptyList
 
 class ThirdPartyApplicationSubmissionsConnectorSpec 
     extends BaseConnectorIntegrationSpec 
@@ -47,7 +46,7 @@ class ThirdPartyApplicationSubmissionsConnectorSpec
     
   "recordAnswer" should {
     val url = s"/submissions/${submissionId.value}/question/${questionId.value}"
-    val answers = NonEmptyList.of("Yes")
+    val answers = List("Yes")
 
     "return with an error" in new Setup {
       stubFor(

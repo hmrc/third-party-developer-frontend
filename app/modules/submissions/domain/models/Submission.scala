@@ -16,15 +16,10 @@
 
 package modules.submissions.domain.models
 
-import domain.models.applications.ApplicationId
 import org.joda.time.DateTime
 import java.util.UUID
 import cats.data.NonEmptyList
-
-sealed trait ActualAnswer
-case class SingleChoiceAnswer(value: String) extends ActualAnswer
-case class MultipleChoiceAnswer(values: Set[String]) extends ActualAnswer
-case class TextAnswer(value: String) extends ActualAnswer
+import domain.models.applications.ApplicationId
 
 case class SubmissionId(value: String) extends AnyVal
 
@@ -34,16 +29,7 @@ object SubmissionId {
   def random: SubmissionId = SubmissionId(UUID.randomUUID().toString())
 }
 
-sealed trait QuestionnaireState {
-  override def toString(): String = {
-    this match {
-      case NotStarted => "Not Started"
-      case InProgress => "In Progress"
-      case NotApplicable => "Not Applicable"
-      case Completed => "Completed"
-    }
-  }
-}
+sealed trait QuestionnaireState
 case object NotStarted extends QuestionnaireState
 case object InProgress extends QuestionnaireState
 case object NotApplicable extends QuestionnaireState
@@ -51,7 +37,7 @@ case object Completed extends QuestionnaireState
 
 case class QuestionnaireProgress(state: QuestionnaireState, questionsToAsk: List[QuestionId])
 
-object Submission {
+object Submissions {
   type AnswersToQuestions = Map[QuestionId, ActualAnswer]
 }
 
@@ -60,7 +46,7 @@ case class Submission(
   applicationId: ApplicationId,
   startedOn: DateTime,
   groups: NonEmptyList[GroupOfQuestionnaires],
-  answersToQuestions: Submission.AnswersToQuestions
+  answersToQuestions: Submissions.AnswersToQuestions
 ) {
   def allQuestionnaires: NonEmptyList[Questionnaire] = groups.flatMap(g => g.links)
 

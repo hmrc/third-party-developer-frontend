@@ -14,18 +14,11 @@
  * limitations under the License.
  */
 
-package modules.submissions.domain.services
+package modules.submissions.domain.models
 
-import domain.services.NonEmptyListFormatters
-
-trait QuestionnaireJsonFormatters extends QuestionJsonFormatters with AskWhenJsonFormatters with NonEmptyListFormatters {
-  import play.api.libs.json._
-  import modules.submissions.domain.models._
-
-  implicit val jsonFormatQuestionItem = Json.format[QuestionItem]
-
-  implicit val jsonFormatquestionnaireId = Json.valueFormat[QuestionnaireId]
-  implicit val jsonFormatquestionnaire = Json.format[Questionnaire]
-}
-
-object QuestionnaireJsonFormatters extends QuestionnaireJsonFormatters
+sealed trait ActualAnswer
+case class MultipleChoiceAnswer(values: Set[String]) extends ActualAnswer
+case class SingleChoiceAnswer(value: String) extends ActualAnswer
+case class TextAnswer(value: String) extends ActualAnswer
+case object AcknowledgedAnswer extends ActualAnswer
+case object NoAnswer extends ActualAnswer

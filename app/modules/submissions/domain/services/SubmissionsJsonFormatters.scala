@@ -19,16 +19,16 @@ package modules.submissions.domain.services
 import modules.submissions.domain.models._
 import play.api.libs.json._
 import org.joda.time.DateTimeZone
-import uk.gov.hmrc.thirdpartyapplication.domain.services.NonEmptyListFormatters
 import uk.gov.hmrc.play.json.Union
 
-trait SubmissionsJsonFormatters extends GroupOfQuestionnairesJsonFormatters with NonEmptyListFormatters {
+trait SubmissionsJsonFormatters extends GroupOfQuestionnairesJsonFormatters {
   
   implicit val keyReadsQuestionId: KeyReads[QuestionId] = key => JsSuccess(QuestionId(key))
   implicit val keyWritesQuestionId: KeyWrites[QuestionId] = _.value
 
   implicit val keyReadsQuestionnaireId: KeyReads[QuestionnaireId] = key => JsSuccess(QuestionnaireId(key))
   implicit val keyWritesQuestionnaireId: KeyWrites[QuestionnaireId] = _.value
+
   implicit val notStartedFormat = Json.format[NotStarted.type]
   implicit val inProgressFormat = Json.format[InProgress.type]
   implicit val notApplicableFormat = Json.format[NotApplicable.type]
@@ -42,7 +42,9 @@ trait SubmissionsJsonFormatters extends GroupOfQuestionnairesJsonFormatters with
     .format
 
   implicit val questionnaireProgressFormat = Json.format[QuestionnaireProgress]
- 
+
+  implicit val answersToQuestionsFormat: OFormat[Map[QuestionId, Option[ActualAnswer]]] = implicitly
+
   import JodaWrites.JodaDateTimeWrites
   implicit val utcReads = JodaReads.DefaultJodaDateTimeReads.map(dt => dt.withZone(DateTimeZone.UTC))
   implicit val submissionFormat = Json.format[Submission]
