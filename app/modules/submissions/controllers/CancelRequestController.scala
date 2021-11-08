@@ -74,7 +74,7 @@ class CancelRequestController @Inject() (
 
   def cancelRequestForProductionCredentialsPage(appId: ApplicationId) = whenTeamMemberOnApp(appId) { implicit request =>
     val failed = (err: String) => BadRequestWithErrorMessage(err)
-    val success = (id: SubmissionId) => Ok("")
+    val success = (id: SubmissionId) => Ok(confirmCancelRequestForProductionCredentialsView(appId, CancelRequestController.DummyForm.form))
     (
       for {
         extSubmission          <- fromOptionF(submissionService.fetchLatestSubmission(appId), "No subsmission and/or application found")
