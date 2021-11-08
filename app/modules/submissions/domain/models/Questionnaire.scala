@@ -29,6 +29,7 @@ object AskWhenAnswer {
     AskWhenAnswer(question.id, SingleChoiceAnswer(expectedValue))
   }
 }
+
 case class QuestionItem(question: Question, askWhen: AskWhen)
 
 case class Label(value: String) extends AnyVal

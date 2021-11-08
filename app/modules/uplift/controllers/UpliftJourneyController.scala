@@ -111,7 +111,7 @@ class UpliftJourneyController @Inject() (val errorHandler: ErrorHandler,
      with CanUseCheckActions {
 
   import UpliftJourneyController._
-  
+
   val responsibleIndividualForm: Form[ResponsibleIndividualForm] = ResponsibleIndividualForm.form
   val sellResellOrDistributeForm: Form[SellResellOrDistributeForm] = SellResellOrDistributeForm.form
 
@@ -130,10 +130,10 @@ class UpliftJourneyController @Inject() (val errorHandler: ErrorHandler,
       upliftJourneySwitch.performSwitch(
             successful(Redirect(modules.submissions.controllers.routes.ProdCredsChecklistController.productionCredentialsChecklist(upliftedAppId))),  // new uplift path
             successful(Redirect(controllers.checkpages.routes.ApplicationCheck.requestCheckPage(upliftedAppId))                                       // existing uplift path
-              .withSession(request.session - "subscriptions"))   
+              .withSession(request.session - "subscriptions"))
       )
     }
-    
+
     upliftJourneyService.confirmAndUplift(sandboxAppId, request.user, upliftJourneySwitch.shouldUseV2).flatMap(_.fold(failed, success))
   }
 
@@ -144,12 +144,12 @@ class UpliftJourneyController @Inject() (val errorHandler: ErrorHandler,
   }
 
   def saveApiSubscriptionsSubmit(sandboxAppId: ApplicationId) = whenTeamMemberOnApp(sandboxAppId) { implicit request =>
-   // TODO - already elsewhere 
+   // TODO - already elsewhere
     def setSubscribedStatusFromFlow(apiSubscriptions: ApiSubscriptions)(apiSubscription: APISubscriptionStatus): APISubscriptionStatus = {
       apiSubscription.copy(subscribed = apiSubscriptions.isSelected(apiSubscription.apiIdentifier))
     }
 
-    lazy val formSubmittedSubscriptions: Map[String, Boolean] = 
+    lazy val formSubmittedSubscriptions: Map[String, Boolean] =
       request.body.asFormUrlEncoded.get
       .filter(_._1.contains("subscribed"))
       .mapValues(_.head == "true")
@@ -199,7 +199,7 @@ class UpliftJourneyController @Inject() (val errorHandler: ErrorHandler,
         _ <- flowService.storeResponsibleIndividual(responsibleIndividual, request.user)
       } yield Redirect(modules.uplift.controllers.routes.UpliftJourneyController.sellResellOrDistributeYourSoftware(sandboxAppId))
     }
-    
+  
     def handleInvalidForm(form: Form[ResponsibleIndividualForm]): Future[Result] = {
       successful(BadRequest(responsibleIndividualView(sandboxAppId, form)))
     }
@@ -242,7 +242,7 @@ class UpliftJourneySwitch @Inject() (upliftJourneyConfig: UpliftJourneyConfig) {
       Try(setting.toBoolean).getOrElse(false)
     }
 
-  def shouldUseV2(implicit request: Request[_]): Boolean = 
+  def shouldUseV2(implicit request: Request[_]): Boolean =
     upliftJourneyConfig.status match {
       case On => true
       case OnDemand if upliftJourneyTurnedOnInRequestHeader => true

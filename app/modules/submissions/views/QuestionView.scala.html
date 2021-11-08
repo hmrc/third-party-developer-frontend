@@ -93,8 +93,8 @@
     val html = absenceText match {
       case Some(text) =>
       <div class="govuk-button-group">
-        <button id="submit" class="govuk-button" type="submit" name="submit-action" value="save">Save and continue</button>
-        <button id="submit" class="govuk-button govuk-button--secondary" type="submit" name="submit-action" value="no-answer">{text}</button>
+        <button id="submit-save" class="govuk-button" type="submit" name="submit-action" value="save">Save and continue</button>
+        <button id="submit-noanswer" class="govuk-button govuk-button--secondary" type="submit" name="submit-action" value="no-answer">{text}</button>
       </div>
       case None =>
         <button id="submit" class="govuk-button" type="submit" name="submit-action" value="save">Save and continue</button>
