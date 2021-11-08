@@ -46,7 +46,7 @@ object ProdCredsChecklistController {
     case NotApplicable => "Not Applicable"
     case Completed => "Completed"
   }
-  
+
   def convertToSummary(extSubmission: ExtendedSubmission)(questionnaire: Questionnaire): ViewQuestionnaireSummary = {
     val progress = extSubmission.questionnaireProgress.get(questionnaire.id).get
     val state = asText(progress.state)

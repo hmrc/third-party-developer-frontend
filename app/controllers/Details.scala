@@ -41,7 +41,6 @@ import cats.data.OptionT
 import cats.instances.future.catsStdInstancesForFuture
 import modules.submissions.domain.models.ExtendedSubmission
 import scala.concurrent.Future.successful
-import modules.submissions.views.html.ProductionCredentialsChecklistView
 
 @Singleton
 class Details @Inject() (

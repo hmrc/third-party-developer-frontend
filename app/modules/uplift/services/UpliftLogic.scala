@@ -53,7 +53,7 @@ class UpliftLogic @Inject()(
     val fAllSandboxApiDetails = apmConnector.fetchAllApis(Environment.SANDBOX)
     val fAllSummaries = appsByTeamMember.fetchSandboxSummariesByTeamMember(userId)
     val fAdminSummaries = fAllSummaries.map(_.filter(_.role.isAdministrator))
-    
+
     for {
       apisAvailableInProd <- fApisAvailableInProd
       sandboxApis <- fAllSandboxApiDetails
