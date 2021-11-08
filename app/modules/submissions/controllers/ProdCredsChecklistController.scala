@@ -38,7 +38,7 @@ import modules.submissions.domain.models.NotApplicable
 object ProdCredsChecklistController {
   case class ViewQuestionnaireSummary(label: String, state: String, id: QuestionnaireId = QuestionnaireId.random, nextQuestionUrl: Option[String] = None)
   case class ViewGrouping(label: String, questionnaireSummaries: NonEmptyList[ViewQuestionnaireSummary])
-  case class ViewModel(appName: String, groupings: NonEmptyList[ViewGrouping])
+  case class ViewModel(appId: ApplicationId, appName: String, groupings: NonEmptyList[ViewGrouping])
 
   def asText(state: QuestionnaireState): String = state match {
     case NotStarted => "Not Started"
@@ -61,9 +61,9 @@ object ProdCredsChecklistController {
     )
   }
 
-  def convertSubmissionToViewModel(extSubmission: ExtendedSubmission)(appName: String): ViewModel = {
+  def convertSubmissionToViewModel(extSubmission: ExtendedSubmission)(appId: ApplicationId, appName: String): ViewModel = {
     val groupings = extSubmission.submission.groups.map(convertToViewGrouping(extSubmission))
-    ViewModel(appName, groupings)
+    ViewModel(appId, appName, groupings)
   }
 }
 
@@ -115,7 +115,7 @@ class ProdCredsChecklistController @Inject() (
     
     val vm = for {
       submission          <- fromOptionF(submissionService.fetchLatestSubmission(productionAppId), "No subsmission and/or application found")
-      viewModel           = convertSubmissionToViewModel(submission)(request.application.name)
+      viewModel           = convertSubmissionToViewModel(submission)(request.application.id, request.application.name)
     } yield viewModel
 
     vm.fold[Result](failed, success)

@@ -80,8 +80,8 @@ POST        /applications/:id/redirect-uris/change                              
 POST        /applications/:id/redirect-uris/change-confirmation                                          controllers.Redirects.changeRedirectAction(id: ApplicationId)
 
 GET         /applications/:id/delete                                                                     controllers.DeleteApplication.deleteApplication(id: ApplicationId, error: Option[String])
-GET         /applications/:id/delete-principal-confirm                                                   controllers.DeleteApplication.deletePrincipalApplicationConfirm(id: ApplicationId, error: Option[String])
-POST        /applications/:id/delete-principal                                                           controllers.DeleteApplication.deletePrincipalApplicationAction(id: ApplicationId)
+GET         /applications/:id/delete-principal-confirm                                                   controllers.DeleteApplication.confirmRequestDeletePrincipalApplication(id: ApplicationId, error: Option[String])
+POST        /applications/:id/delete-principal                                                           controllers.DeleteApplication.requestDeletePrincipalApplicationAction(id: ApplicationId)
 GET         /applications/:id/delete-subordinate-confirm                                                 controllers.DeleteApplication.deleteSubordinateApplicationConfirm(id: ApplicationId)
 POST        /applications/:id/delete-subordinate                                                         controllers.DeleteApplication.deleteSubordinateApplicationAction(id: ApplicationId)
 
