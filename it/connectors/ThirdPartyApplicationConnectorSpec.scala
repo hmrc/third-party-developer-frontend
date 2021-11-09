@@ -626,7 +626,7 @@ class ThirdPartyApplicationConnectorSpec extends BaseConnectorIntegrationSpec wi
     }
   }
 
-   "deleteSubordinateApplication" should {
+   "deleteApplication" should {
     val url = s"/application/${applicationId.value}/delete"
 
     "successfully delete the application" in new Setup {
@@ -651,7 +651,7 @@ class ThirdPartyApplicationConnectorSpec extends BaseConnectorIntegrationSpec wi
       )
       intercept[Exception] {
         await(connector.deleteApplication(applicationId))
-      }.getMessage shouldBe "error deleting subordinate application"
+      }.getMessage shouldBe "error deleting application"
     }
   }
 

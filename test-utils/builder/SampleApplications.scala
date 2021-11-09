@@ -21,7 +21,6 @@ import utils.CollaboratorTracker
 
 trait SampleApplications extends SampleApplication {
   self: SampleSession with CollaboratorTracker =>
-
     
   val activeApplication: Application = sampleApp
 

@@ -22,9 +22,7 @@ import scala.concurrent.ExecutionContext
 import config.ApplicationConfig
 import controllers.ApplicationController
 import domain.models.applications.ApplicationId
-import modules.submissions.domain.models.SubmissionId
 import play.api.data.Form
-import scala.concurrent.Future.successful
 import helpers.EitherTHelper
 import modules.submissions.services.SubmissionService
 import play.api.mvc.Result
@@ -35,6 +33,8 @@ import service.ApplicationService
 import play.api.libs.crypto.CookieSigner
 import config.ErrorHandler
 import modules.submissions.views.html.{CancelledRequestForProductionCredentialsView, ConfirmCancelRequestForProductionCredentialsView}
+import connectors.ThirdPartyApplicationProductionConnector
+import domain.models.applications.State
 
 object CancelRequestController {
   case class DummyForm(dummy: String = "dummy")
@@ -61,8 +61,9 @@ class CancelRequestController @Inject() (
   val applicationService: ApplicationService,
   mcc: MessagesControllerComponents,
   submissionService: SubmissionService,
+  productionApplicationConnector: ThirdPartyApplicationProductionConnector,
   confirmCancelRequestForProductionCredentialsView: ConfirmCancelRequestForProductionCredentialsView,
-  cancelledRequestForProductionCredentialsView: CancelledRequestForProductionCredentialsView,
+  cancelledRequestForProductionCredentialsView: CancelledRequestForProductionCredentialsView
 )
 (
   implicit val ec: ExecutionContext,
@@ -72,35 +73,40 @@ class CancelRequestController @Inject() (
   import cats.implicits._
   import cats.instances.future.catsStdInstancesForFuture
 
+  private val exec = ec
+  private val ET = new EitherTHelper[Result] { implicit val ec: ExecutionContext = exec}
+  private val failed = (err: String) => BadRequestWithErrorMessage(err)
+
   def cancelRequestForProductionCredentialsPage(appId: ApplicationId) = whenTeamMemberOnApp(appId) { implicit request =>
-    val failed = (err: String) => BadRequestWithErrorMessage(err)
-    val success = (id: SubmissionId) => Ok(confirmCancelRequestForProductionCredentialsView(appId, CancelRequestController.DummyForm.form))
-    
     (
       for {
-        extSubmission          <- fromOptionF(submissionService.fetchLatestSubmission(appId), "No subsmission and/or application found")
-      } yield extSubmission.submission.id
+        extSubmission          <- ET.fromOptionF(submissionService.fetchLatestSubmission(appId), failed("No subsmission and/or application found"))
+        _                      <- ET.cond(request.application.state.name != State.PRODUCTION, (), failed("Application submissions can only be cancelled when not already in production."))
+      } yield Ok(confirmCancelRequestForProductionCredentialsView(appId, CancelRequestController.DummyForm.form))
     )
-    .fold[Result](failed, success)
+    .fold[Result](identity, identity)
   }
 
   def cancelRequestForProductionCredentialsAction(appId: ApplicationId) = whenTeamMemberOnApp(appId) { implicit request =>
-    val failed = (err: String) => BadRequestWithErrorMessage(err)
-    
-    def success(id: SubmissionId, action: String) = action match {
-      case "cancel-request" => Ok(cancelledRequestForProductionCredentialsView(request.application.name))
-      case "dont-cancel-request" => Redirect(modules.submissions.controllers.routes.ProdCredsChecklistController.productionCredentialsChecklist(appId))
-    }
+    lazy val goBackToProdCredsChecklist = Redirect(modules.submissions.controllers.routes.ProdCredsChecklistController.productionCredentialsChecklist(appId))
 
     val isValidSubmit: (String) => Boolean = (s) => s == "cancel-request" || s == "dont-cancel-request"
 
-    (
+    val x = (
       for {
-        extSubmission          <- fromOptionF(submissionService.fetchLatestSubmission(appId), "No subsmission and/or application found")
+        extSubmission          <- ET.fromOptionF(submissionService.fetchLatestSubmission(appId), failed("No subsmission and/or application found"))
+        _                      <- ET.cond(request.application.state.name != State.PRODUCTION, (), failed("Application submissions can only be cancelled when not already in production."))
         formValues              = request.body.asFormUrlEncoded.get.filterNot(_._1 == "csrfToken")
-        submitAction           <- fromOption(formValues.get("submit-action").flatMap(_.headOption).filter(isValidSubmit), "Bad form data")
-      } yield (extSubmission.submission.id, submitAction)
+        submitAction           <- ET.fromOption(
+                                    formValues.get("submit-action")
+                                      .flatMap(_.headOption)
+                                      .filter(isValidSubmit), 
+                                    failed("Bad form data")
+                                  )
+        cancelAction           <- ET.cond(submitAction == "cancel-request", submitAction, goBackToProdCredsChecklist )
+        _                      <- ET.liftF(productionApplicationConnector.deleteApplication(appId))
+      } yield Ok(cancelledRequestForProductionCredentialsView(request.application.name))
     )
-    .fold[Result](failed, (success _).tupled)
+    x.fold[Result](identity, identity)
   }
 }

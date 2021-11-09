@@ -204,7 +204,7 @@ abstract class ThirdPartyApplicationConnector(config: ApplicationConfig, metrics
       .POSTEmpty[HttpResponse](s"$serviceBaseUrl/application/${applicationId.value}/delete")
       .map(_.status match {
           case NO_CONTENT => ()
-          case _          => throw new Exception("error deleting subordinate application")
+          case _          => throw new Exception("error deleting application")
         }
       )
   }
