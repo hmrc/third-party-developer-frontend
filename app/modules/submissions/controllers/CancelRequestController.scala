@@ -21,7 +21,6 @@ import play.api.mvc.MessagesControllerComponents
 import scala.concurrent.ExecutionContext
 import config.ApplicationConfig
 import controllers.ApplicationController
-import controllers.checkpages.CanUseCheckActions
 import domain.models.applications.ApplicationId
 import modules.submissions.domain.models.SubmissionId
 import play.api.data.Form
@@ -35,7 +34,7 @@ import service.ApplicationActionService
 import service.ApplicationService
 import play.api.libs.crypto.CookieSigner
 import config.ErrorHandler
-import modules.submissions.views.html.ConfirmCancelRequestForProductionCredentialsView
+import modules.submissions.views.html.{CancelledRequestForProductionCredentialsView, ConfirmCancelRequestForProductionCredentialsView}
 
 object CancelRequestController {
   case class DummyForm(dummy: String = "dummy")
@@ -62,7 +61,8 @@ class CancelRequestController @Inject() (
   val applicationService: ApplicationService,
   mcc: MessagesControllerComponents,
   submissionService: SubmissionService,
-  confirmCancelRequestForProductionCredentialsView: ConfirmCancelRequestForProductionCredentialsView
+  confirmCancelRequestForProductionCredentialsView: ConfirmCancelRequestForProductionCredentialsView,
+  cancelledRequestForProductionCredentialsView: CancelledRequestForProductionCredentialsView,
 )
 (
   implicit val ec: ExecutionContext,
@@ -75,6 +75,7 @@ class CancelRequestController @Inject() (
   def cancelRequestForProductionCredentialsPage(appId: ApplicationId) = whenTeamMemberOnApp(appId) { implicit request =>
     val failed = (err: String) => BadRequestWithErrorMessage(err)
     val success = (id: SubmissionId) => Ok(confirmCancelRequestForProductionCredentialsView(appId, CancelRequestController.DummyForm.form))
+    
     (
       for {
         extSubmission          <- fromOptionF(submissionService.fetchLatestSubmission(appId), "No subsmission and/or application found")
@@ -84,6 +85,22 @@ class CancelRequestController @Inject() (
   }
 
   def cancelRequestForProductionCredentialsAction(appId: ApplicationId) = whenTeamMemberOnApp(appId) { implicit request =>
-    successful(Ok(""))
+    val failed = (err: String) => BadRequestWithErrorMessage(err)
+    
+    def success(id: SubmissionId, action: String) = action match {
+      case "cancel-request" => Ok(cancelledRequestForProductionCredentialsView(request.application.name))
+      case "dont-cancel-request" => Redirect(modules.submissions.controllers.routes.ProdCredsChecklistController.productionCredentialsChecklist(appId))
+    }
+
+    val isValidSubmit: (String) => Boolean = (s) => s == "cancel-request" || s == "dont-cancel-request"
+
+    (
+      for {
+        extSubmission          <- fromOptionF(submissionService.fetchLatestSubmission(appId), "No subsmission and/or application found")
+        formValues              = request.body.asFormUrlEncoded.get.filterNot(_._1 == "csrfToken")
+        submitAction           <- fromOption(formValues.get("submit-action").flatMap(_.headOption).filter(isValidSubmit), "Bad form data")
+      } yield (extSubmission.submission.id, submitAction)
+    )
+    .fold[Result](failed, (success _).tupled)
   }
 }
