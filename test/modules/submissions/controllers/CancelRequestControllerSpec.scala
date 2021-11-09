@@ -167,6 +167,7 @@ class CancelRequestControllerSpec
       val result = controller.cancelRequestForProductionCredentialsAction(appId)(request.withCSRFToken)
 
       status(result) shouldBe OK
+      contentAsString(result) should include("We have cancelled your request to get production credentials")
     }
 
     "cancelRequestForProductionCredentialsAction fails when app is not in testing state" in new Setup with HasSubscriptions with HasAppInProductionState {

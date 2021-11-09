@@ -24,28 +24,17 @@ import mocks.service.ApplicationServiceMock
 import mocks.service.ApplicationActionServiceMock
 import mocks.connector.ApmConnectorMockModule
 import modules.submissions.services.mocks.SubmissionServiceMockModule
-import mocks.service.SessionServiceMock
 import uk.gov.hmrc.http.HeaderCarrier
 import modules.submissions.views.html.QuestionView
 import utils.WithLoggedInSession._
 
 import scala.concurrent.ExecutionContext.Implicits.global
-import domain.models.developers.Session
-import domain.models.developers.LoggedInState
-import domain.models.developers.DeveloperSession
-import play.filters.csrf.CSRF
-import play.api.test.FakeRequest
-import play.api.test.Helpers._
 import utils.SubmissionsTestData.{applicationId, questionId, question2Id, submission, extendedSubmission}
 import modules.submissions.domain.models.QuestionId
-import domain.models.apidefinitions._
 import domain.models.applications.ApplicationWithSubscriptionData
-import domain.models.applications.Application
-import uk.gov.hmrc.time.DateTimeUtils
-import java.time.Period
-import domain.models.applications.Environment
-import domain.models.applications.ApplicationState
-import domain.models.applications.Standard
+import play.api.test.FakeRequest
+import play.api.test.Helpers._
+import play.filters.csrf.CSRF
 
 class QuestionControllerSpec 
   extends BaseControllerSpec
@@ -56,12 +45,42 @@ class QuestionControllerSpec
     with DeveloperBuilder
     with LocalUserIdTracker {
 
+  trait HasSubscriptions {
+    val aSubscription = exampleSubscriptionWithoutFields("prefix")
+  }
+
+  trait HasSessionDeveloperFlow {
+    val sessionParams = Seq("csrfToken" -> app.injector.instanceOf[CSRF.TokenProvider].generateToken)
+
+    fetchSessionByIdReturns(sessionId, session)
+    
+    updateUserFlowSessionsReturnsSuccessfully(sessionId)
+  }
+
+  trait HasAppInTestingState {
+    self: HasSubscriptions with ApplicationActionServiceMock with ApplicationServiceMock =>
+      
+    givenApplicationAction(
+      ApplicationWithSubscriptionData(
+        testingApp.copy(id = applicationId),
+        asSubscriptions(List(aSubscription)),
+        asFields(List.empty)
+      ),
+      loggedInDeveloper,
+      List(aSubscription)
+    )
+    
+    fetchByApplicationIdReturns(applicationId, sampleApp)
+  }
+
   trait Setup 
     extends ApplicationServiceMock
     with ApplicationActionServiceMock
     with ApmConnectorMockModule
     with SubmissionServiceMockModule
-    with SessionServiceMock {
+    with HasSubscriptions
+    with HasSessionDeveloperFlow
+    with HasAppInTestingState {
 
     implicit val hc = HeaderCarrier()
 
@@ -78,56 +97,7 @@ class QuestionControllerSpec
       mcc
     )
 
-    val developer = buildDeveloper()
-    val sessionId = "sessionId"
-    val session = Session(sessionId, developer, LoggedInState.LOGGED_IN)
-    val loggedInDeveloper = DeveloperSession(session)
-    val sessionParams = Seq("csrfToken" -> app.injector.instanceOf[CSRF.TokenProvider].generateToken)
     val loggedInRequest = FakeRequest().withLoggedIn(controller, implicitly)(sessionId).withSession(sessionParams: _*)
-    
-    fetchSessionByIdReturns(sessionId, session)
-    updateUserFlowSessionsReturnsSuccessfully(sessionId)
-
-    val apiIdentifier1 = ApiIdentifier(ApiContext("test-api-context-1"), ApiVersion("1.0"))
-
-    val emptyFields = emptySubscriptionFieldsWrapper(applicationId, clientId, apiIdentifier1.context, apiIdentifier1.version)
-
-    val testAPISubscriptionStatus1 = APISubscriptionStatus(
-      "test-api-1",
-      "api-example-microservice",
-      apiIdentifier1.context,
-      ApiVersionDefinition(apiIdentifier1.version, APIStatus.STABLE),
-      subscribed = true,
-      requiresTrust = false,
-      fields = emptyFields
-    )
-
-    val application = Application(
-      applicationId,
-      clientId,
-      "App name 1",
-      DateTimeUtils.now,
-      DateTimeUtils.now,
-      None,
-      grantLength = Period.ofDays(547),
-      Environment.PRODUCTION,
-      Some("Description 1"),
-      Set(loggedInDeveloper.email.asAdministratorCollaborator),
-      state = ApplicationState.production(loggedInDeveloper.email, ""),
-      access = Standard(redirectUris = List("https://red1", "https://red2"), termsAndConditionsUrl = Some("http://tnc-url.com"))
-    )
-
-    fetchByApplicationIdReturns(applicationId, application)
-
-    givenApplicationAction(
-      ApplicationWithSubscriptionData(
-        application,
-        asSubscriptions(List(testAPISubscriptionStatus1)),
-        asFields(List.empty)
-      ),
-      loggedInDeveloper,
-      List(testAPISubscriptionStatus1)
-    )
   }
 
   "showQuestion" should {
