@@ -20,89 +20,103 @@
 @import domain.models.controllers.Crumb
 @import uk.gov.hmrc.urls.Link
 @import views.emailpreferences.EmailPreferencesSummaryViewData
+@import views.html.include.DevMain2
 
-@this(devMain: DevMain)
+@this(devMain: DevMain2)
 
 @(viewData: EmailPreferencesSummaryViewData)(implicit messages: Messages, loggedIn: DeveloperSession, request: play.api.mvc.Request[Any], appConfig: ApplicationConfig)
 
 @pageHeading = @{
-    if(viewData.unsubscribed) "You are unsubscribed" else "Email preferences"
+  if(viewData.unsubscribed) "You are unsubscribed" else "Email preferences"
 }
 
 @userHasEmailPreferences = @{
-    loggedIn.developer.emailPreferences.interests.nonEmpty || loggedIn.developer.emailPreferences.topics.nonEmpty
+  loggedIn.developer.emailPreferences.interests.nonEmpty || loggedIn.developer.emailPreferences.topics.nonEmpty
 }
 
 @devMain(
-    title = pageHeading,
-    userFullName = loggedIn.loggedInName,
-    breadcrumbs = Seq(Crumb.emailPreferences, Crumb.viewAllApplications, Crumb.home),
-    developerSession = Some(loggedIn)
+  title = pageHeading,
+  userFullName = loggedIn.loggedInName,
+  breadcrumbs = Seq(Crumb.emailPreferences, Crumb.viewAllApplications, Crumb.home),
+  developerSession = Some(loggedIn)
 ) {
-
-    @if(viewData.unsubscribed) {
-        <div class="govuk-box-highlight">
-            <h1 id="page-heading" class="heading-xlarge">@pageHeading</h1>
-            <p id="first-line" class="font-large">You can change your email preferences at any time</p>
-        </div>
-    } else {
-        <h1 id="page-heading" class="heading-xlarge">@pageHeading</h1>
-    }
-
-    @if(userHasEmailPreferences) {
-        <p id="first-line">You will receive emails about these APIs and topics.</p>
-        @for(taxRegimeInterest <- loggedIn.developer.emailPreferences.interests.sortBy(_.regime).zipWithIndex) {
-            <div>
-
-                <p> <h3 id="category-heading-@taxRegimeInterest._1.regime">@viewData.taxRegimeDisplayName(taxRegimeInterest._1.regime)</h3>
-
-                @if(taxRegimeInterest._1.services.isEmpty) {
-                    <span id="all-api-@taxRegimeInterest._1.regime">
-                        All @viewData.taxRegimeDisplayName(taxRegimeInterest._1.regime) APIs</span>
-                } else {
-                    @for(selectedAPI <- taxRegimeInterest._1.services.toList.sorted) {
-                        <span id="@selectedAPI">@viewData.apiDisplayName(selectedAPI)</span>
-                        <br />
-                    }
-                }
-            </p>
-            }
-
-        <a id="change-apis-link" href="@controllers.profile.routes.EmailPreferences.flowSelectCategoriesPage">Edit your preferences or get emails about other APIs</a>
+  @if(viewData.unsubscribed) {
+    <div class="govuk-panel govuk-panel--confirmation">
+      <h1 class="govuk-panel__title">
+        @pageHeading
+      </h1>
+      <div class="govuk-panel__body">
+        You can change your email preferences at any time
+      </div>
     </div>
+  } else {
+    <h1 id="page-heading" class="govuk-heading-l">@pageHeading</h1>
+  }
 
-        <hr />
-        <div>
-            <p>
-        <h3 id="topics-heading">Topics</h3>
+  @if(userHasEmailPreferences) {
+    <p class="govuk-body" id="first-line">You will receive emails about these APIs and topics.</p>
 
-            @for(topic <- loggedIn.developer.emailPreferences.topics.toList.sortBy(_.displayOrder)) {
-                <span id="@topic.value">@topic.displayName</span>
-                <br />
-            }
-            </p>
+    @for(taxRegimeInterest <- loggedIn.developer.emailPreferences.interests.sortBy(_.regime).zipWithIndex) {
+      <h2 class="govuk-heading-m" id="category-heading-@taxRegimeInterest._1.regime">@viewData.taxRegimeDisplayName(taxRegimeInterest._1.regime)</h3>
 
-            <a id="change-topics-link" href="@controllers.profile.routes.EmailPreferences.flowSelectTopicsPage">
-                Change the topics you are interested in</a>
-
-        </div>
-        <hr />
-
-    } else {
-        @if(!viewData.unsubscribed) {
-            <p id="first-line">You have selected no email preferences.</p>
+      @if(taxRegimeInterest._1.services.isEmpty) {
+        <p class="govuk-body" id="all-api-@taxRegimeInterest._1.regime">
+          All @viewData.taxRegimeDisplayName(taxRegimeInterest._1.regime) APIs
+        </p>
+      } else {
+        @for(selectedAPI <- taxRegimeInterest._1.services.toList.sorted) {
+          <p class="govuk-body" id="@selectedAPI">@viewData.apiDisplayName(selectedAPI)</p>
+          <br />
         }
-        @EmailPrefsBulletInfoView()
-        <p><a id="setup-emailpreferences-link" href="@controllers.profile.routes.EmailPreferences.flowStartPage()">Set up email preferences</a></p>
+      }
     }
 
-    <p>Check the @{
-        Link.toExternalPage(id = Some("status-page-link"), url = "https://api-platform-status.production.tax.service.gov.uk/", value = Some("service availability page for information about live incidents")).toHtml
-    }.</p>
+    <a class="govuk-link" id="change-apis-link" href="@controllers.profile.routes.EmailPreferences.flowSelectCategoriesPage">Edit your preferences or get emails about other APIs</a>
 
-    @if(userHasEmailPreferences) {
-        <p><a id="unsubscribe-link" href="@controllers.profile.routes.EmailPreferences.unsubscribeAllPage">Unsubscribe from Developer Hub emails</a></p>
+    <hr class="govuk-section-break govuk-section-break--m govuk-section-break--visible" />
+
+    <h2 class="govuk-heading-m" id="topics-heading">Topics</h3>
+
+    @for(topic <- loggedIn.developer.emailPreferences.topics.toList.sortBy(_.displayOrder)) {
+      <p class="govuk-body" id="@topic.value">@topic.displayName</p>
+      <br />
     }
 
-    <p><a id="view-all-applications-link" href="@routes.ManageApplications.manageApps">View all applications</a></p>
+    <a class="govuk-link" id="change-topics-link" href="@controllers.profile.routes.EmailPreferences.flowSelectTopicsPage">
+      Change the topics you are interested in
+    </a>
+
+    <hr class="govuk-section-break govuk-section-break--m govuk-section-break--visible" />
+
+  } else {
+    @if(!viewData.unsubscribed) {
+      <p class="govuk-body" id="first-line">You have selected no email preferences.</p>
+    }
+    @EmailPrefsBulletInfoView()
+    <p class="govuk-body">
+      <a class="govuk-link" id="setup-emailpreferences-link" href="@controllers.profile.routes.EmailPreferences.flowStartPage()">
+        Set up email preferences
+      </a>
+    </p>
+  }
+
+  <p class="govuk-body">
+    Check the @{
+      Link.toExternalPage(id = Some("status-page-link"), url = "https://api-platform-status.production.tax.service.gov.uk/", value = Some("service availability page for information about live incidents")).toHtml
+    }.
+  </p>
+
+  @if(userHasEmailPreferences) {
+    <p class="govuk-body">
+      <a class="govuk-link" id="unsubscribe-link" href="@controllers.profile.routes.EmailPreferences.unsubscribeAllPage">
+        Unsubscribe from Developer Hub emails
+      </a>
+    </p>
+  }
+
+  <p class="govuk-body">
+    <a class="govuk-link" id="view-all-applications-link" href="@routes.ManageApplications.manageApps">
+      View all applications
+    </a>
+  </p>
 }

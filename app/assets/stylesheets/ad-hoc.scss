@@ -448,3 +448,23 @@ tr.teamMembers, th {
   display: flex;
   justify-content: flex-end;
 }
+
+.link-button {
+  border: none;
+  background: none;
+  font-size: 16px;
+  color: #1d70b8;
+  &:hover {
+    color: #003078;
+  }
+  &:active {
+    color: #0b0c0c;
+  }
+  &:focus {
+    outline: 3px solid transparent;
+    color: #0b0c0c;
+    background-color: #fd0;
+    box-shadow: 0 -2px #fd0,0 4px #0b0c0c;
+    text-decoration: none;
+  }
+}

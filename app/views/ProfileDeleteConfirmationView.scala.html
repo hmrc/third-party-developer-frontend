@@ -17,51 +17,54 @@
 @import include._
 @import domain.models.controllers.Crumb
 @import domain.models.developers.DeveloperSession
+@import views.html.include.DevMain2
 
-@this(devMain: DevMain, leftHandNav: LeftHandNav)
+@this(devMain: DevMain2, leftHandNav: LeftHandNav)
 
 @(form: Form[DeleteProfileForm])(implicit request: play.api.mvc.Request[Any], loggedIn: DeveloperSession, appConfig: config.ApplicationConfig, messagesProvider: MessagesProvider, navSection: String = "manage-profile")
 
 @titleError = { @if(form.errors.nonEmpty) {Error: } else {}}
 
 @devMain(
-    title = titleError + "Delete account",
-    userFullName = loggedIn.loggedInName,
-    breadcrumbs = Seq(
-        Crumb("Delete account"),
-        Crumb.home
-    ),
-    leftNav = Some(leftHandNav(None, Option(navSection))),
-    developerSession = Some(loggedIn)
+  title = titleError + "Delete account",
+  userFullName = loggedIn.loggedInName,
+  breadcrumbs = Seq(
+    Crumb("Delete account"),
+    Crumb.home
+  ),
+  leftNav = Some(leftHandNav(None, Option(navSection))),
+  developerSession = Some(loggedIn)
 ) {
 
-    @errorSummary(form)
+  @errorSummary2(form)
 
-    <h1 class="heading-xlarge">Delete account</h1>
+  <h1 class="govuk-heading-l">Delete account</h1>
 
-    @helper.form(action = controllers.profile.routes.Profile.deleteAccount) {
-        @helper.CSRF.formField
+  @helper.form(action = controllers.profile.routes.Profile.deleteAccount) {
+    @helper.CSRF.formField
 
-        <div class="form-group @if(form.errors("confirmation").nonEmpty) {form-group-error}">
-            <fieldset class="inline">
-                <legend id="confirmation">
-                    <h2 class="heading-large">Are you sure you want us to delete your account?</h2>
-                </legend>
-                    @fieldError(form.errors, "confirmation", form.error("confirmation").isEmpty)
-                <div class="multiple-choice">
-                    <input type="radio" class="top-aligned-input" name="confirmation" id="deleteAccountYes" value="true"/>
-                    <label for="deleteAccountYes">Yes</label>
-                </div>
-                <div class="multiple-choice">
-                    <input type="radio" class="top-aligned-input" name="confirmation" id="deleteAccountNo" value="false"/>
-                    <label for="deleteAccountNo">No</label>
-                </div>
-            </fieldset>
+    <div class="govuk-form-group @if(form.errors("confirmation").nonEmpty) {govuk-form-group--error}">
+      <fieldset class="govuk-fieldset">
+        <legend id="confirmation" class="govuk-fieldset__legend">
+          Are you sure you want us to delete your account?
+        </legend>
+        @fieldError2(form.errors, "confirmation", form.error("confirmation").isEmpty)
+        <div class="govuk-radios govuk-radios--inline">
+          <div class="govuk-radios__item">
+            <input type="radio" class="govuk-radios__input" name="confirmation" id="deleteAccountYes" value="true"/>
+            <label class="govuk-label govuk-radios__label" for="deleteAccountYes">Yes</label>
+          </div>
+          <div class="govuk-radios__item">
+            <input type="radio" class="govuk-radios__input" name="confirmation" id="deleteAccountNo" value="false"/>
+            <label class="govuk-label govuk-radios__label" for="deleteAccountNo">No</label>
+          </div>
         </div>
+      </fieldset>
+    </div>
 
-        <div class="form-group">
-            <button id="submit" class="button" type="submit">Continue</button>
-            <a id="cancel" href="@controllers.profile.routes.Profile.showProfile" class="secondary-button">Cancel</a>
-        </div>
-    }
+    <div class="govuk-button-group">
+      <button id="submit" class="govuk-button" type="submit">Continue</button>
+      <a id="cancel" href="@controllers.profile.routes.Profile.showProfile" class="govuk-link govuk-link--no-visited-state">Cancel</a>
+    </div>
+  }
 }

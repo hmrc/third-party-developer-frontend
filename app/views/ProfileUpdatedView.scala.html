@@ -17,27 +17,27 @@
 @import domain.models.developers.DeveloperSession
 @import include._
 @import domain.models.controllers.Crumb
+@import views.html.include.DevMain2
 
-@this(devMain: DevMain, leftHandNav: LeftHandNav)
+@this(devMain: DevMain2, leftHandNav: LeftHandNav)
 
 @(title:String, heading: String, navSection: String, loggedIn: DeveloperSession
 )(implicit request: play.api.mvc.Request[Any], messages: Messages, appConfig: config.ApplicationConfig)
 
 @devMain(
-    title = "Profile updated",
-    userFullName = loggedIn.loggedInName,
-    breadcrumbs = Seq(
-        Crumb("Manage profile"),
-        Crumb.home
-    ),
-    leftNav = Some(leftHandNav(None, Option(navSection))(request, loggedIn, appConfig)),
-    developerSession = Some(loggedIn)
+  title = "Profile updated",
+  userFullName = loggedIn.loggedInName,
+  breadcrumbs = Seq(
+    Crumb("Manage profile"),
+    Crumb.home
+  ),
+  leftNav = Some(leftHandNav(None, Option(navSection))(request, loggedIn, appConfig)),
+  developerSession = Some(loggedIn)
 ) {
+  <h1 class="govuk-heading-l">@heading</h1>
+  <p class="govuk-body">You have updated your profile.</p>
 
-    <header>
-        <h1 class="heading-xlarge">@heading</h1>
-    </header>
-    <p>You have updated your profile.</p>
-
-    <p><a href="@controllers.profile.routes.Profile.showProfile">Continue to your profile</a></p>
+  <p class="govuk-body">
+    <a class="govuk-link govuk-link--no-visited-state" href="@controllers.profile.routes.Profile.showProfile">Continue to your profile</a>
+  </p>
 }
