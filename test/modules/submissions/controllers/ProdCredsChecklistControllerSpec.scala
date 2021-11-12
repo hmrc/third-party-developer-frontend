@@ -17,8 +17,6 @@
 package modules.submissions.controllers
 
 import controllers.BaseControllerSpec
-import mocks.service.SessionServiceMock
-import mocks.service.ApplicationActionServiceMock
 import mocks.service.ApplicationServiceMock
 import mocks.connector.ApmConnectorMockModule
 import modules.submissions.services.mocks.SubmissionServiceMockModule
@@ -27,8 +25,6 @@ import utils.WithLoggedInSession._
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import modules.submissions.views.html.ProductionCredentialsChecklistView
-import domain.models.developers.Session
-import domain.models.developers.LoggedInState
 import builder.DeveloperBuilder
 import utils.LocalUserIdTracker
 import play.api.test.FakeRequest
@@ -37,15 +33,8 @@ import utils.WithCSRFAddToken
 import domain.models.applications.ApplicationWithSubscriptionData
 import builder.SampleApplication
 import controllers.SubscriptionTestHelperSugar
-import domain.models.apidefinitions.APISubscriptionStatus
-import domain.models.apidefinitions.ApiIdentifier
-import domain.models.apidefinitions.ApiContext
-import domain.models.apidefinitions.ApiVersion
-import domain.models.apidefinitions.ApiVersionDefinition
-import domain.models.apidefinitions.APIStatus
-import domain.models.developers.DeveloperSession
 import builder.SampleSession
-import uk.gov.hmrc.http.HeaderCarrier
+import mocks.service.ApplicationActionServiceMock
 
 class ProdCredsChecklistControllerSpec
   extends BaseControllerSpec
@@ -56,14 +45,42 @@ class ProdCredsChecklistControllerSpec
     with DeveloperBuilder
     with LocalUserIdTracker {
 
+  trait HasSubscriptions {
+    val aSubscription = exampleSubscriptionWithoutFields("prefix")
+  }
+
+  trait HasSessionDeveloperFlow {
+    val sessionParams = Seq("csrfToken" -> app.injector.instanceOf[CSRF.TokenProvider].generateToken)
+
+    fetchSessionByIdReturns(sessionId, session)
+    
+    updateUserFlowSessionsReturnsSuccessfully(sessionId)
+  }
+
+  trait HasAppInTestingState {
+    self: HasSubscriptions with ApplicationActionServiceMock with ApplicationServiceMock =>
+      
+    givenApplicationAction(
+      ApplicationWithSubscriptionData(
+        testingApp,
+        asSubscriptions(List(aSubscription)),
+        asFields(List.empty)
+      ),
+      loggedInDeveloper,
+      List(aSubscription)
+    )
+
+    fetchByApplicationIdReturns(appId, testingApp)
+  }
+
   trait Setup 
     extends ApplicationServiceMock
     with ApplicationActionServiceMock
     with ApmConnectorMockModule
     with SubmissionServiceMockModule
-    with SessionServiceMock {
-
-    implicit val hc = HeaderCarrier()
+    with HasSessionDeveloperFlow
+    with HasSubscriptions
+    with HasAppInTestingState {
 
     val productionCredentialsChecklistView = app.injector.instanceOf[ProductionCredentialsChecklistView]
 
@@ -79,42 +96,25 @@ class ProdCredsChecklistControllerSpec
       productionCredentialsChecklistView
     )
 
-    val developer = buildDeveloper()
-    val sessionId = "sessionId"
-    val session = Session(sessionId, developer, LoggedInState.LOGGED_IN)
-    val loggedInDeveloper = DeveloperSession(session)
-    val sessionParams = Seq("csrfToken" -> app.injector.instanceOf[CSRF.TokenProvider].generateToken)
     val loggedInRequest = FakeRequest().withLoggedIn(controller, implicitly)(sessionId).withSession(sessionParams: _*)
+  }
 
-    fetchSessionByIdReturns(sessionId, session)
-    updateUserFlowSessionsReturnsSuccessfully(sessionId)
-
-    val apiIdentifier1 = ApiIdentifier(ApiContext("test-api-context-1"), ApiVersion("1.0"))
-
-    val emptyFields = emptySubscriptionFieldsWrapper(appId, clientId, apiIdentifier1.context, apiIdentifier1.version)
-
-    val testAPISubscriptionStatus1 = APISubscriptionStatus(
-      "test-api-1",
-      "api-example-microservice",
-      apiIdentifier1.context,
-      ApiVersionDefinition(apiIdentifier1.version, APIStatus.STABLE),
-      subscribed = true,
-      requiresTrust = false,
-      fields = emptyFields
-    )
-
-    fetchByApplicationIdReturns(appId, sampleApp)
-
+  trait HasAppInProductionState {
+    self: Setup with ApplicationActionServiceMock with ApplicationServiceMock =>
+      
     givenApplicationAction(
       ApplicationWithSubscriptionData(
         sampleApp,
-        asSubscriptions(List(testAPISubscriptionStatus1)),
+        asSubscriptions(List(aSubscription)),
         asFields(List.empty)
       ),
       loggedInDeveloper,
-      List(testAPISubscriptionStatus1)
+      List(aSubscription)
     )
+    
+    fetchByApplicationIdReturns(appId, sampleApp)
   }
+
 
   "productionCredentialsChecklist" should {
     "fail with a BAD REQUEST" in new Setup {

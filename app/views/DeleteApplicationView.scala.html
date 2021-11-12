@@ -63,7 +63,7 @@ implicit request: play.api.mvc.Request[Any], loggedIn: DeveloperSession, message
         We'll respond to your request within 2 working days.
       </p>
 
-      <a class="govuk-button govuk-button--warning" href="@routes.DeleteApplication.deletePrincipalApplicationConfirm(app.id, None)">
+      <a class="govuk-button govuk-button--warning" href="@routes.DeleteApplication.confirmRequestDeletePrincipalApplication(app.id, None)">
         Request deletion
       </a>
     }

@@ -41,4 +41,6 @@ trait SampleApplication {
     state = ApplicationState.production(loggedInDeveloper.email, ""),
     access = Standard(redirectUris = List("https://red1", "https://red2"), termsAndConditionsUrl = Some("http://tnc-url.com"))
   )
+
+  val testingApp = sampleApp.copy(state = ApplicationState.testing)
 }
