@@ -38,7 +38,21 @@ import connectors.ThirdPartyDeveloperConnector.JsonFormatters.FindUserIdRequestW
 import play.api.libs.json.Json
 
 class LoginCSRFIntegrationSpec extends BaseConnectorIntegrationSpec with GuiceOneAppPerSuite with BeforeAndAfterEach {
-  private val config = Configuration("play.filters.csrf.token.sign" -> false)
+  private lazy val config = Configuration(
+    "play.filters.csrf.token.sign" -> false,
+    "microservice.services.third-party-developer.port" -> stubPort,
+    "microservice.services.third-party-application-production.port" -> stubPort,
+    "microservice.services.third-party-application-sandbox.port" -> stubPort,
+    "microservice.services.api-definition.port" -> stubPort,
+    "microservice.services.api-documentation-frontend.port" -> stubPort,
+    "microservice.services.third-party-developer-frontend.port" -> 9685,
+    "microservice.services.hmrc-deskpro.port" -> stubPort,
+    "microservice.services.api-subscription-fields-production.port" -> stubPort,
+    "microservice.services.api-subscription-fields-sandbox.port" -> stubPort,
+    "microservice.services.api-platform-microservice.port" -> stubPort,
+    "microservice.services.push-pull-notifications-api-production.port" -> stubPort,
+    "microservice.services.push-pull-notifications-api-sandbox.port" -> stubPort
+  )
 
   override def fakeApplication(): Application =
     GuiceApplicationBuilder()
