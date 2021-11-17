@@ -29,7 +29,7 @@ import play.api.http.Status._
 import service.ApplicationService.ApplicationConnector
 import uk.gov.hmrc.http._
 import uk.gov.hmrc.http.HttpClient
-import uk.gov.hmrc.play.http.metrics.API
+import uk.gov.hmrc.play.http.metrics.common.API
 
 import domain.models.developers.UserId
 import scala.concurrent.{ExecutionContext, Future}

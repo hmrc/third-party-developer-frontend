@@ -27,7 +27,7 @@ import play.api.libs.json.{Json, Reads}
 import service.PushPullNotificationsService.PushPullNotificationsConnector
 import uk.gov.hmrc.http.{HeaderCarrier, HttpReads}
 import uk.gov.hmrc.http.HttpClient
-import uk.gov.hmrc.play.http.metrics.API
+import uk.gov.hmrc.play.http.metrics.common.API
 
 import scala.concurrent.{ExecutionContext, Future}
 import cats.data.OptionT

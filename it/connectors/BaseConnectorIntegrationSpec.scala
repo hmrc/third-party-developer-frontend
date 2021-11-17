@@ -32,6 +32,7 @@ trait BaseConnectorIntegrationSpec
 
   override def beforeEach() {
     wireMockServer.resetMappings()
+    wireMockServer.resetRequests()
   }
 
 }
