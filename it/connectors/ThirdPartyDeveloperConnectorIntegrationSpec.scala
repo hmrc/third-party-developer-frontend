@@ -41,7 +41,7 @@ import domain.models.connectors.VerifyMfaRequest
 
 class ThirdPartyDeveloperConnectorIntegrationSpec extends BaseConnectorIntegrationSpec with GuiceOneAppPerSuite with DeveloperBuilder with LocalUserIdTracker with WireMockExtensions {
   private val stubConfig = Configuration(
-    "Test.microservice.services.third-party-developer.port" -> stubPort,
+    "microservice.services.third-party-developer.port" -> stubPort,
     "json.encryption.key" -> "czV2OHkvQj9FKEgrTWJQZVNoVm1ZcTN0Nnc5eiRDJkY="
   )
 
