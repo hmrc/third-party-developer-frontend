@@ -35,27 +35,31 @@ object AppDependencies {
     "com.typesafe.play" %% "play-json-joda" % "2.8.1"
   )
 
-  lazy val test = Seq(
-    "uk.gov.hmrc" %% "reactivemongo-test" % "4.21.0-play-26" % testScope,
-    "io.cucumber" %% "cucumber-scala" % cucumberVersion % testScope,
-    "io.cucumber" % "cucumber-junit" % cucumberVersion % testScope,
-    "io.cucumber" % "cucumber-java8" % cucumberVersion % testScope,
-    "junit" % "junit" % "4.12" % testScope,
-    "org.jsoup" % "jsoup" % "1.10.2" % testScope,
-    "org.pegdown" % "pegdown" % "1.6.0" % testScope,
-    "com.typesafe.play" %% "play-test" % PlayVersion.current % testScope,
-    "org.scalatestplus.play" %% "scalatestplus-play" % "3.1.3" % testScope,
-    "org.seleniumhq.selenium" % "selenium-java" % seleniumVersion % testScope,
-    "com.github.tomakehurst" % "wiremock" % "1.58" % testScope,
-    "org.mockito" %% "mockito-scala-scalatest" % "1.7.1" % testScope,
-    "org.scalaj" %% "scalaj-http" % "2.3.0" % testScope,
-    "org.scalacheck" %% "scalacheck" % "1.13.5" % testScope,
-    "com.assertthat" % "selenium-shutterbug" % "0.2" % testScope
-  )
+  lazy val test = 
+    Seq(
+      "uk.gov.hmrc" %% "reactivemongo-test" % "4.21.0-play-26",
+      "org.jsoup" % "jsoup" % "1.10.2",
+      "org.pegdown" % "pegdown" % "1.6.0",
+      "com.typesafe.play" %% "play-test" % PlayVersion.current,
+      "org.scalatestplus.play" %% "scalatestplus-play" % "3.1.3",
+      "com.github.tomakehurst" % "wiremock" % "1.58",
+      "org.mockito" %% "mockito-scala-scalatest" % "1.7.1",
+      "org.scalaj" %% "scalaj-http" % "2.3.0",
+      "org.scalacheck" %% "scalacheck" % "1.13.5"
+    )
+    .map(_ % testScope) ++ 
+    Seq(
+      "io.cucumber" %% "cucumber-scala" % cucumberVersion,
+      "io.cucumber" % "cucumber-junit" % cucumberVersion,
+      "io.cucumber" % "cucumber-java8" % cucumberVersion,
+      "org.seleniumhq.selenium" % "selenium-java" % seleniumVersion,
+      "com.assertthat" % "selenium-shutterbug" % "0.2"
+    )
+    .map(_ % "component")
 
   lazy val overrideDependencies = Seq(
-    "org.seleniumhq.selenium" % "selenium-java" % seleniumVersion % testScope,
-    "org.seleniumhq.selenium" % "selenium-htmlunit-driver" % seleniumVersion % testScope,
+    "org.seleniumhq.selenium" % "selenium-java" % seleniumVersion % "component",
+    "org.seleniumhq.selenium" % "selenium-htmlunit-driver" % seleniumVersion % "component",
     "com.typesafe.play" %% "play-json" % "2.8.1",
     "com.typesafe.play" %% "play-json-joda" % "2.8.1"
   )
