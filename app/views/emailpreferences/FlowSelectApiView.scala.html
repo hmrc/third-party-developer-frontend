@@ -50,6 +50,7 @@
         <p id="select-all-description" class="govuk-hint">Select all that apply.</p>
 
         @fieldError2(form.errors, "apiRadio")
+        @fieldError2(form.errors, "selectedApi")
 
         <div class="govuk-radios">
           <div class="govuk-radios__item">
@@ -64,7 +65,7 @@
           <a name="error.selectedapis.nonselected.field"></a>
 
           <div class="govuk-radios__item">
-            <input class="govuk-radios__input" id="individual-apis" type="radio" name="apiRadio" value="SOME_APIS"  @if(selectedApis.contains("SOME_APIS")) {checked}/>
+            <input class="govuk-radios__input" id="individual-apis" type="radio" name="apiRadio" value="SOME_APIS"  @if(!selectedApis.contains("ALL_APIS") && !selectedApis.isEmpty) {checked}/>
             <label class="govuk-label govuk-radios__label" for="individual-apis">Specific @currentCategory.name APIs
               <span id="individual-api-description" class="govuk-hint">
                 Select specific APIs. You will not get emails about new Income Tax APIs
