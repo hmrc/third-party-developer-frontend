@@ -30,7 +30,7 @@ object AppDependencies {
     "com.beachape"                %% "enumeratum"                     % enumeratumVersion,
     "com.beachape"                %% "enumeratum-play"                % enumeratumVersion,
     "com.google.zxing"            %  "core"                           % "3.2.1",
-    "org.typelevel"               %% "cats-core"                      % "2.0.0",
+    "org.typelevel"               %% "cats-core"                      % "2.6.1",
     "com.typesafe.play"           %% "play-json"                      % "2.9.2",
     "com.typesafe.play"           %% "play-json-joda"                 % "2.9.2"
   )
@@ -38,10 +38,9 @@ object AppDependencies {
   lazy val test =  Seq(
     "uk.gov.hmrc"                 %% "bootstrap-test-play-28"         % "5.16.0",
     "uk.gov.hmrc"                 %% "reactivemongo-test"             % "5.0.0-play-28",
-    "org.mockito"                 %% "mockito-scala-scalatest"        % "1.7.1", // "1.16.42",
+    "org.mockito"                 %% "mockito-scala-scalatest"        % "1.16.46",
     "org.jsoup"                   %  "jsoup"                          % "1.10.2",
-    "org.pegdown"                 %  "pegdown"                        % "1.6.0",
-    "org.scalaj"                  %% "scalaj-http"                    % "2.3.0",
+    "org.scalaj"                  %% "scalaj-http"                    % "2.4.2",
     "com.github.tomakehurst"      %  "wiremock-jre8-standalone"       % "2.31.0",
     "org.scalacheck"              %% "scalacheck"                     % "1.15.4",
     "org.scalatestplus"           %% "scalacheck-1-15"                % "3.2.10.0"
