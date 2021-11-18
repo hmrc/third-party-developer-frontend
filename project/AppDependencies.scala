@@ -13,50 +13,43 @@ object AppDependencies {
 
   lazy val compile = Seq(
     ws,
-    "uk.gov.hmrc" %% "bootstrap-play-26" % "4.0.0",
-    "uk.gov.hmrc" %% "time" % "3.11.0",
-    "uk.gov.hmrc" %% "simple-reactivemongo" % "7.31.0-play-26",
-    "uk.gov.hmrc" %% "govuk-template" % "5.61.0-play-26",
-    "uk.gov.hmrc" %% "play-ui" % "8.21.0-play-26",
-    "uk.gov.hmrc" %% "url-builder" % "3.4.0-play-26",
-    "uk.gov.hmrc" %% "play-json-union-formatter" % "1.15.0-play-26",
-    "uk.gov.hmrc" %% "http-metrics" % "1.10.0",
-    "uk.gov.hmrc" %% "json-encryption" % "4.8.0-play-26",
-    "uk.gov.hmrc" %% "emailaddress" % "3.4.0",
-    "uk.gov.hmrc" %% "play-conditional-form-mapping" % "1.4.0-play-26",
-    "uk.gov.hmrc" %% "play-frontend-govuk" % "0.63.0-play-26",
-    "uk.gov.hmrc" %% "play-frontend-hmrc" % "1.9.0-play-26",
-    "commons-net" % "commons-net" % "3.6",
-    "com.beachape" %% "enumeratum" % enumeratumVersion,
-    "com.beachape" %% "enumeratum-play" % enumeratumVersion,
-    "com.google.zxing" % "core" % "3.2.1",
-    "org.typelevel" %% "cats-core" % "2.0.0",
-    "com.typesafe.play" %% "play-json" % "2.8.1",
-    "com.typesafe.play" %% "play-json-joda" % "2.8.1"
+    "uk.gov.hmrc"                 %% "bootstrap-frontend-play-26"     % "5.16.0",
+    "uk.gov.hmrc"                 %% "time"                           % "3.25.0",
+    "uk.gov.hmrc"                 %% "simple-reactivemongo"           % "7.31.0-play-26",
+    "uk.gov.hmrc"                 %% "govuk-template"                 % "5.72.0-play-26",
+    "uk.gov.hmrc"                 %% "play-ui"                        % "9.7.0-play-26",
+    "uk.gov.hmrc"                 %% "url-builder"                    % "3.4.0-play-26",
+    "uk.gov.hmrc"                 %% "play-json-union-formatter"      % "1.15.0-play-26",
+    "uk.gov.hmrc"                 %% "http-metrics"                   % "2.3.0-play-26",
+    "uk.gov.hmrc"                 %% "json-encryption"                % "4.8.0-play-26",
+    "uk.gov.hmrc"                 %% "emailaddress"                   % "3.4.0",
+    "uk.gov.hmrc"                 %% "play-conditional-form-mapping"  % "1.4.0-play-26",
+    "uk.gov.hmrc"                 %% "play-frontend-govuk"            % "0.63.0-play-26",
+    "uk.gov.hmrc"                 %% "play-frontend-hmrc"             % "1.9.0-play-26",
+    "commons-net"                 %  "commons-net"                    % "3.6",
+    "com.beachape"                %% "enumeratum"                     % enumeratumVersion,
+    "com.beachape"                %% "enumeratum-play"                % enumeratumVersion,
+    "com.google.zxing"            %  "core"                           % "3.2.1",
+    "org.typelevel"               %% "cats-core"                      % "2.0.0",
+    "com.typesafe.play"           %% "play-json"                      % "2.9.2",
+    "com.typesafe.play"           %% "play-json-joda"                 % "2.9.2"
   )
 
-  lazy val test = Seq(
-    "uk.gov.hmrc" %% "reactivemongo-test" % "4.21.0-play-26" % testScope,
-    "io.cucumber" %% "cucumber-scala" % cucumberVersion % testScope,
-    "io.cucumber" % "cucumber-junit" % cucumberVersion % testScope,
-    "io.cucumber" % "cucumber-java8" % cucumberVersion % testScope,
-    "junit" % "junit" % "4.12" % testScope,
-    "org.jsoup" % "jsoup" % "1.10.2" % testScope,
-    "org.pegdown" % "pegdown" % "1.6.0" % testScope,
-    "com.typesafe.play" %% "play-test" % PlayVersion.current % testScope,
-    "org.scalatestplus.play" %% "scalatestplus-play" % "3.1.3" % testScope,
-    "org.seleniumhq.selenium" % "selenium-java" % seleniumVersion % testScope,
-    "com.github.tomakehurst" % "wiremock" % "1.58" % testScope,
-    "org.mockito" %% "mockito-scala-scalatest" % "1.7.1" % testScope,
-    "org.scalaj" %% "scalaj-http" % "2.3.0" % testScope,
-    "org.scalacheck" %% "scalacheck" % "1.13.5" % testScope,
-    "com.assertthat" % "selenium-shutterbug" % "0.2" % testScope
-  )
-
-  lazy val overrideDependencies = Seq(
-    "org.seleniumhq.selenium" % "selenium-java" % seleniumVersion % testScope,
-    "org.seleniumhq.selenium" % "selenium-htmlunit-driver" % seleniumVersion % testScope,
-    "com.typesafe.play" %% "play-json" % "2.8.1",
-    "com.typesafe.play" %% "play-json-joda" % "2.8.1"
-  )
+  lazy val test =  Seq(
+    "uk.gov.hmrc"                 %% "bootstrap-test-play-26"         % "5.16.0",
+    "uk.gov.hmrc"                 %% "reactivemongo-test"             % "4.21.0-play-26",
+    "org.mockito"                 %% "mockito-scala-scalatest"        % "1.7.1", // "1.16.42",
+    "org.jsoup"                   %  "jsoup"                          % "1.10.2",
+    "org.pegdown"                 %  "pegdown"                        % "1.6.0",
+    "org.scalaj"                  %% "scalaj-http"                    % "2.3.0",
+    "com.github.tomakehurst"      %  "wiremock-jre8-standalone"       % "2.31.0",
+    "org.scalacheck"              %% "scalacheck"                     % "1.13.5"
+  ).map(_ % testScope) ++
+  Seq(
+    "io.cucumber"                 %% "cucumber-scala"                 % cucumberVersion,
+    "io.cucumber"                 %  "cucumber-junit"                 % cucumberVersion,
+    "io.cucumber"                 %  "cucumber-java8"                 % cucumberVersion,
+    "org.seleniumhq.selenium"     %  "selenium-java"                  % seleniumVersion,
+    "com.assertthat"              %  "selenium-shutterbug"            % "0.2"
+  ).map(_ % "component")
 }

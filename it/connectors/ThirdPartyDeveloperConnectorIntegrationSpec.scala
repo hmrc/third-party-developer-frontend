@@ -69,6 +69,7 @@ class ThirdPartyDeveloperConnectorIntegrationSpec extends BaseConnectorIntegrati
     val encryptedLoginRequest: JsValue = Json.toJson(SecretRequest(payloadEncryption.encrypt(loginRequest).as[String]))
     val encryptedTotpAuthenticationRequest: JsValue = Json.toJson(SecretRequest(payloadEncryption.encrypt(totpAuthenticationRequest).as[String]))
     val underTest: ThirdPartyDeveloperConnector = app.injector.instanceOf[ThirdPartyDeveloperConnector]
+
   }
 
   
@@ -574,7 +575,7 @@ class ThirdPartyDeveloperConnectorIntegrationSpec extends BaseConnectorIntegrati
 
       val result: UserAuthenticationResponse = await(underTest.authenticate(loginRequest))
 
-      verify(1, postRequestedFor(urlMatching("/authenticate")).withRequestBody(equalToJson(encryptedLoginRequest.toString)))
+      verify(1, postRequestedFor(urlEqualTo("/authenticate")).withRequestBody(equalToJson(encryptedLoginRequest.toString)))
       result shouldBe UserAuthenticationResponse(accessCodeRequired = true, Some(nonce))
     }
 

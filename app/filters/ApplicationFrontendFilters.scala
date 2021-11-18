@@ -24,9 +24,9 @@ import play.api.mvc.EssentialFilter
 import play.filters.csrf.CSRFFilter
 import play.filters.headers.SecurityHeadersFilter
 import uk.gov.hmrc.play.bootstrap.filters.{CacheControlFilter, LoggingFilter, MDCFilter}
-import uk.gov.hmrc.play.bootstrap.filters.frontend._
-import uk.gov.hmrc.play.bootstrap.filters.frontend.crypto.SessionCookieCryptoFilter
-import uk.gov.hmrc.play.bootstrap.filters.frontend.deviceid.DeviceIdFilter
+import uk.gov.hmrc.play.bootstrap.frontend.filters._
+import uk.gov.hmrc.play.bootstrap.frontend.filters.crypto.SessionCookieCryptoFilter
+import uk.gov.hmrc.play.bootstrap.frontend.filters.deviceid.DeviceIdFilter
 
 @Singleton
 class ApplicationFrontendFilters @Inject()(

@@ -26,7 +26,7 @@ import domain.models.applications._
 import org.joda.time.DateTimeZone
 import play.api.http.Status._
 import uk.gov.hmrc.http._
-import uk.gov.hmrc.play.http.metrics.API
+import uk.gov.hmrc.play.http.metrics.common.API
 import uk.gov.hmrc.time.DateTimeUtils
 import ThirdPartyApplicationConnectorJsonFormatters._
 
@@ -294,7 +294,6 @@ class ThirdPartyApplicationConnectorSpec extends BaseConnectorIntegrationSpec wi
     "return success response in case of a 204 NO CONTENT on backend" in new Setup {
       stubFor(
         post(urlEqualTo(url))
-        .withRequestBody(equalTo(""))
         .willReturn(
             aResponse()
             .withStatus(OK)
@@ -308,7 +307,6 @@ class ThirdPartyApplicationConnectorSpec extends BaseConnectorIntegrationSpec wi
     "return failure response in case of a 400 on backend" in new Setup {
       stubFor(
         post(urlEqualTo(url))
-        .withRequestBody(equalTo(""))
         .willReturn(
             aResponse()
             .withStatus(BAD_REQUEST)

@@ -9,7 +9,6 @@ import sbt.Keys._
 import sbt.Tests.{Group, SubProcess}
 import sbt.{Resolver, _}
 import uk.gov.hmrc.DefaultBuildSettings._
-import uk.gov.hmrc.PublishingSettings._
 import uk.gov.hmrc.SbtAutoBuildPlugin
 import uk.gov.hmrc.sbtdistributables.SbtDistributablesPlugin
 import uk.gov.hmrc.sbtdistributables.SbtDistributablesPlugin._
@@ -22,7 +21,7 @@ import scala.util.Properties
 
 lazy val appName = "third-party-developer-frontend"
 
-lazy val plugins: Seq[Plugins] = Seq(PlayScala, SbtAutoBuildPlugin, SbtGitVersioning, SbtDistributablesPlugin, SbtArtifactory)
+lazy val plugins: Seq[Plugins] = Seq(PlayScala, SbtAutoBuildPlugin, SbtDistributablesPlugin)
 lazy val playSettings: Seq[Setting[_]] = Seq.empty
 
 lazy val microservice = Project(appName, file("."))
@@ -52,8 +51,6 @@ lazy val microservice = Project(appName, file("."))
   .settings(
     targetJvm := "jvm-1.8",
     libraryDependencies ++= AppDependencies(),
-    dependencyOverrides ++= AppDependencies.overrideDependencies,
-
     retrieveManaged := true,
     routesGenerator := InjectedRoutesGenerator,
     scalaVersion := "2.12.12"
@@ -62,7 +59,6 @@ lazy val microservice = Project(appName, file("."))
     resolvers += Resolver.typesafeRepo("releases")
   )
   .settings(SilencerSettings())
-  .settings(playPublishingSettings: _*)
   .settings(
     Test / parallelExecution := false,
     Test / fork := false,
@@ -113,12 +109,6 @@ lazy val microservice = Project(appName, file("."))
 
 lazy val ComponentTest = config("component") extend Test
 lazy val TemplateTest = config("tt") extend Test
-lazy val playPublishingSettings: Seq[sbt.Setting[_]] = Seq(
-  credentials += SbtCredentials,
-  publishArtifact in (Compile, packageDoc) := false,
-  publishArtifact in (Compile, packageSrc) := false
-) ++
-  publishAllArtefacts
 
 def oneForkedJvmPerTest(tests: Seq[TestDefinition]): Seq[Group] =
   tests map { test =>

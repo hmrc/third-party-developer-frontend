@@ -27,7 +27,7 @@ import play.api.libs.crypto.CookieSigner
 import play.api.mvc._
 import service.SessionService
 import uk.gov.hmrc.http.HeaderCarrier
-import uk.gov.hmrc.play.bootstrap.controller.FrontendHeaderCarrierProvider
+import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendHeaderCarrierProvider
 import cats.data.OptionT
 import cats.data.EitherT
 

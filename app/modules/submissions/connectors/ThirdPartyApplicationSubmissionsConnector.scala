@@ -18,7 +18,7 @@ package modules.submissions.connectors
 
 import javax.inject.{Inject, Singleton}
 import connectors.ConnectorMetrics
-import uk.gov.hmrc.play.bootstrap.http.HttpClient
+import uk.gov.hmrc.http.HttpClient
 import scala.concurrent.ExecutionContext
 import modules.submissions.domain.services._
 import modules.submissions.domain.models._
@@ -28,7 +28,7 @@ import domain.models.applications._
 import uk.gov.hmrc.http.HttpReads.Implicits._
 import uk.gov.hmrc.http.UpstreamErrorResponse
 import play.api.libs.json.Json
-import uk.gov.hmrc.play.http.metrics.API
+import uk.gov.hmrc.play.http.metrics.common.API
 
 object ThirdPartyApplicationSubmissionsConnector {
   case class Config(serviceBaseUrl: String, apiKey: String)

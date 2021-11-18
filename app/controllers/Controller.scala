@@ -28,7 +28,7 @@ import play.api.mvc._
 import security.{DevHubAuthorization, ExtendedDevHubAuthorization}
 import service.SessionService
 import uk.gov.hmrc.http.HeaderCarrier
-import uk.gov.hmrc.play.bootstrap.controller.FrontendController
+import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendController
 
 import scala.concurrent.{ExecutionContext, Future}
 import service.ApplicationService

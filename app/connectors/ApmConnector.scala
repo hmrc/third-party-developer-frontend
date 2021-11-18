@@ -31,8 +31,8 @@ import service.OpenAccessApiService.OpenAccessApisConnector
 import service.SubscriptionsService.SubscriptionsConnector
 import uk.gov.hmrc.http.HttpReads.Implicits._
 import uk.gov.hmrc.http.{HeaderCarrier, UpstreamErrorResponse}
-import uk.gov.hmrc.play.bootstrap.http.HttpClient
-import uk.gov.hmrc.play.http.metrics.API
+import uk.gov.hmrc.http.HttpClient
+import uk.gov.hmrc.play.http.metrics.common.API
 
 import javax.inject.{Inject, Singleton}
 import scala.concurrent.{ExecutionContext, Future}

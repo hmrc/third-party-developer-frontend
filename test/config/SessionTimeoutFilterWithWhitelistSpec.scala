@@ -16,23 +16,24 @@
 
 package config
 
-import org.joda.time.{DateTime, DateTimeZone, Duration}
+import org.joda.time.{DateTime, DateTimeZone}
 import org.mockito.invocation.InvocationOnMock
 import org.scalatest.concurrent.ScalaFutures.whenReady
 import org.scalatestplus.play.guice.GuiceOneAppPerSuite
+import uk.gov.hmrc.play.bootstrap.frontend.filters.SessionTimeoutFilterConfig
 import play.api.mvc._
 import play.api.test.FakeRequest
-import uk.gov.hmrc.play.bootstrap.filters.frontend.SessionTimeoutFilterConfig
 import utils.{AsyncHmrcSpec, SharedMetricsClearDown}
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
+import java.time.Duration
 
 class SessionTimeoutFilterWithWhitelistSpec extends AsyncHmrcSpec with GuiceOneAppPerSuite with SharedMetricsClearDown {
 
   trait Setup {
     implicit val m = app.materializer
-    val config = SessionTimeoutFilterConfig(timeoutDuration = Duration.standardSeconds(1), onlyWipeAuthToken = false)
+    val config = SessionTimeoutFilterConfig(timeoutDuration = Duration.ofSeconds(1), onlyWipeAuthToken = false)
 
     val nextOperationFunction = mock[RequestHeader => Future[Result]]
     val whitelistedUrl = controllers.routes.UserLoginAccount.login().url

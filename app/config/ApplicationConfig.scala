@@ -20,10 +20,10 @@ import javax.inject.{Inject, Singleton}
 import org.joda.time._
 import play.api.{ConfigLoader, Configuration}
 import service.MfaMandateService
-import uk.gov.hmrc.play.bootstrap.config.{RunMode, ServicesConfig}
+import uk.gov.hmrc.play.bootstrap.config.ServicesConfig
 
 @Singleton
-class ApplicationConfig @Inject()(config: Configuration, runMode: RunMode) extends ServicesConfig(config, runMode) {
+class ApplicationConfig @Inject()(config: Configuration) extends ServicesConfig(config) {
   def getConfigDefaulted[A](key: String, default: A)(implicit loader: ConfigLoader[A]) = config.getOptional[A](key)(loader).getOrElse(default)
 
   val contactFormServiceIdentifier = "API"
