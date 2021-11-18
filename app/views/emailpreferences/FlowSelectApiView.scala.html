@@ -42,7 +42,7 @@
     @helper.CSRF.formField
     <a name="apiRadio"></a>
     <div class="govuk-form-group @if(form.errors("apiRadio").nonEmpty || form.errors.map(_.message).contains(FormKeys.selectedApisNonSelectedGlobalKey)) {govuk-form-group--error}">
-      <fieldset class="govuk-fieldset" aria-describedby="select-all-description">
+      <fieldset class="govuk-fieldset" aria-describedby="select-all-description specific-api-error">
         <legend class="govuk-fieldset__legend govuk-fieldset__legend--l">
           <h1 id="pageHeading" class="govuk-fieldset__heading">@pageHeading</h1>
         </legend>
@@ -50,7 +50,12 @@
         <p id="select-all-description" class="govuk-hint">Select all that apply.</p>
 
         @fieldError2(form.errors, "apiRadio")
-        @fieldError2(form.errors, "selectedApi")
+        @if(form.errors.map(_.message).contains(FormKeys.selectedApisNonSelectedGlobalKey)) {
+            <span id="specific-api-error" class="govuk-error-message">
+                <span class="govuk-visually-hidden">Error:</span> Select at least 1 specific API
+            </span>
+        }
+
 
         <div class="govuk-radios">
           <div class="govuk-radios__item">
