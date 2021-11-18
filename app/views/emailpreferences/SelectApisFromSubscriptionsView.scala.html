@@ -42,13 +42,13 @@
       <legend class="govuk-fieldset__legend govuk-fieldset__legend--l">
         <h1 id="pageHeading" class="govuk-fieldset__heading">@pageHeading</h1>
       </legend>
-      <div id="select-all-description" class="govuk-hint">
+      <div id="select-all-description" class="govuk-hint @if(form.errors("topic").nonEmpty){govuk-form-group--error}">
         Select all that apply.
       </div>
-      <!-- NEEDS ERROR MSG COMPONENT @FIELDERROR2 -->
       @helper.form(action = controllers.profile.routes.EmailPreferences.selectApisFromSubscriptionsAction(applicationId), 'class -> "form", 'id -> "emailPreferencesApisForm") {
         @helper.CSRF.formField
         <a name="error.selectedapis.nonselected.field"></a>
+        @fieldError2(form.errors, "category")
         <div class="govuk-checkboxes" data-module="govuk-checkboxes">
           @for(api <- apis) {
             <div class="govuk-checkboxes__item">

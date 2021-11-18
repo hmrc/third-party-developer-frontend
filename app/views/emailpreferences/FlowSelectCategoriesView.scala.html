@@ -37,36 +37,35 @@
   developerSession = Some(loggedIn)
 ) {
   @errorSummary2(form)
-  <!-- NEEDS ERROR LOGIC ON BELOW DIV'S CLASS TO GIVE IT THE ERROR CSS -->
-  <div class="govuk-form-group">
-    <fieldset class="govuk-fieldset" aria-describedby="which-api-cat-hint">
-      <legend class="govuk-fieldset__legend govuk-fieldset__legend--l">
-        <h1 id="pageHeading" class="govuk-fieldset__heading">
-          @pageHeading
-        </h1>
-      </legend>
-      <div id="which-api-cat-hint" class="govuk-hint">
-        Select all that apply.
-      </div>
-      <!-- NEEDS ERROR MSG COMPONENT @FIELDERROR2 -->
-      @helper.form(action = controllers.profile.routes.EmailPreferences.flowSelectCategoriesAction(), 'class -> "form", 'id -> "emailPreferencesCategoriesForm") {
+    @helper.form(action = controllers.profile.routes.EmailPreferences.flowSelectCategoriesAction(), 'class -> "form", 'id -> "emailPreferencesCategoriesForm") {
         @helper.CSRF.formField
         <a name="taxRegime"></a>
-        <div class="govuk-checkboxes" data-module="govuk-checkboxes">
-          @for(category <- categories){
-            <div class="govuk-checkboxes__item">
-              <input class="govuk-checkboxes__input" id="@category.category" type="checkbox" name="taxRegime[]" value="@category.category" @if(selectedCategories.contains(category.category)){checked}>
-              <label class="govuk-label govuk-checkboxes__label" for="@category.category">
-                @category.name
-              </label>
+        <div class="govuk-form-group @if(form.errors("category").nonEmpty){govuk-form-group--error}">
+        <fieldset class="govuk-fieldset" aria-describedby="which-api-cat-hint">
+            <legend class="govuk-fieldset__legend govuk-fieldset__legend--l">
+                <h1 id="pageHeading" class="govuk-fieldset__heading">
+                    @pageHeading
+                </h1>
+            </legend>
+            <div id="which-api-cat-hint" class="govuk-hint">
+                Select all that apply.
             </div>
-          }
+        </fieldset>
+        </div>
+        @fieldError2(form.errors, "category")
+        <div class="govuk-checkboxes" data-module="govuk-checkboxes">
+            @for(category <- categories){
+            <div class="govuk-checkboxes__item">
+                <input class="govuk-checkboxes__input" id="@category.category" type="checkbox" name="taxRegime[]" value="@category.category" @if(selectedCategories.contains(category.category)){checked}>
+                <label class="govuk-label govuk-checkboxes__label" for="@category.category">
+                    @category.name
+                </label>
+            </div>
+            }
         </div>
         <br />
         <button id="selectCategories" class="govuk-button" type="submit">Continue</button>
-      }
-    </fieldset>
-  </div>
+    }
 
   @helper.form(action = controllers.profile.routes.EmailPreferences.flowSelectNoCategoriesAction(), 'class -> "form", 'id -> "emailPreferencesNoCategoriesForm") {
     @helper.CSRF.formField
