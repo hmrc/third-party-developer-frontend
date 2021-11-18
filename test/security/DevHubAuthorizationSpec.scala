@@ -20,7 +20,6 @@ import cats.implicits._
 import config.{ApplicationConfig, ErrorHandler}
 import controllers.{routes, BaseController, BaseControllerSpec}
 import domain.models.developers.{DeveloperSession, LoggedInState}
-import org.scalatest.Matchers
 import play.api.libs.crypto.CookieSigner
 import play.api.mvc.{Cookie, MessagesControllerComponents}
 import play.api.mvc.Results.{EmptyContent, _}
@@ -32,6 +31,7 @@ import utils.{DeveloperSession => DeveloperSessionBuilder}
 import scala.concurrent.{ExecutionContext, Future}
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future.successful
+import org.scalatest.matchers.should.Matchers
 
 class DevHubAuthorizationSpec extends BaseControllerSpec with Matchers {
   class TestDevHubAuthorization(mcc: MessagesControllerComponents)(implicit val appConfig: ApplicationConfig, val ec: ExecutionContext)

@@ -22,7 +22,6 @@ import cats.implicits._
 import config.ApplicationConfig
 import controllers.{routes, BaseController, MaybeUserRequest, UserRequest}
 import domain.models.developers.{DeveloperSession, LoggedInState}
-import play.api.Logger
 import play.api.libs.crypto.CookieSigner
 import play.api.mvc._
 import service.SessionService
@@ -30,10 +29,11 @@ import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendHeaderCarrierProvider
 import cats.data.OptionT
 import cats.data.EitherT
+import util.ApplicationLogger
 
 import scala.concurrent.{ExecutionContext, Future}
 
-trait DevHubAuthorization extends Results with FrontendHeaderCarrierProvider with CookieEncoding {
+trait DevHubAuthorization extends Results with FrontendHeaderCarrierProvider with CookieEncoding with ApplicationLogger {
   self: BaseController =>
 
   private val alwaysTrueFilter: DeveloperSession => Boolean = _ => true
@@ -121,7 +121,7 @@ trait ExtendedDevHubAuthorization extends DevHubAuthorization {
   }
 
   def loginSucceeded(request: RequestHeader): Future[Result] = {
-    Logger.info(s"loginSucceeded - access_uri ${request.session.get("access_uri")}")
+    logger.info(s"loginSucceeded - access_uri ${request.session.get("access_uri")}")
     val uri = request.session.get("access_uri").getOrElse(routes.ManageApplications.manageApps().url)
     Future.successful(Redirect(uri).withNewSession)
   }

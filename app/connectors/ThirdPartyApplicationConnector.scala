@@ -24,7 +24,6 @@ import domain.models.applications.ApplicationNameValidationJson.{ApplicationName
 import domain.models.applications._
 import domain.models.connectors.DeleteCollaboratorRequest
 import javax.inject.{Inject, Singleton}
-import play.api.Logger
 import play.api.http.Status._
 import service.ApplicationService.ApplicationConnector
 import uk.gov.hmrc.http._
@@ -36,8 +35,9 @@ import scala.concurrent.{ExecutionContext, Future}
 import scala.util.Success
 import domain.models.apidefinitions.ApiIdentifier
 import uk.gov.hmrc.http.HttpReads.Implicits._
+import util.ApplicationLogger
 
-abstract class ThirdPartyApplicationConnector(config: ApplicationConfig, metrics: ConnectorMetrics) extends ApplicationConnector with CommonResponseHandlers {
+abstract class ThirdPartyApplicationConnector(config: ApplicationConfig, metrics: ConnectorMetrics) extends ApplicationConnector with CommonResponseHandlers with ApplicationLogger {
 
   import ThirdPartyApplicationConnectorDomain._
   import ThirdPartyApplicationConnectorJsonFormatters._
@@ -70,15 +70,15 @@ abstract class ThirdPartyApplicationConnector(config: ApplicationConfig, metrics
       metrics.record(api) {
         val url = s"$serviceBaseUrl/developer/applications"
 
-        Logger.info(s"fetchByTeamMember() - About to call $url for $userId in ${environment.toString}")
+        logger.info(s"fetchByTeamMember() - About to call $url for $userId in ${environment.toString}")
 
         http
           .GET[Seq[ApplicationWithSubscriptionIds]](url, Seq("userId" -> userId.asText, "environment" -> environment.toString))
           .andThen {
             case Success(_) =>
-              Logger.debug(s"fetchByTeamMember() - done call to $url for $userId in ${environment.toString}")
+              logger.debug(s"fetchByTeamMember() - done call to $url for $userId in ${environment.toString}")
             case _ =>
-              Logger.debug(s"fetchByTeamMember() - done errored call to $url for $userId in ${environment.toString}")
+              logger.debug(s"fetchByTeamMember() - done errored call to $url for $userId in ${environment.toString}")
           }
       }
     } else {

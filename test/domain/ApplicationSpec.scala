@@ -25,10 +25,11 @@ import domain.models.applications.Permissions.SandboxOrAdmin
 import domain.models.developers.Developer
 import helpers.string._
 import org.joda.time.DateTime
-import org.scalatest.{FunSpec, Matchers}
 import utils.LocalUserIdTracker
+import org.scalatest.matchers.should.Matchers
+import org.scalatest.funspec.AnyFunSpec
 
-class ApplicationSpec extends FunSpec with Matchers with DeveloperBuilder with LocalUserIdTracker {
+class ApplicationSpec extends AnyFunSpec with Matchers with DeveloperBuilder with LocalUserIdTracker {
 
   val developer = buildDeveloper(emailAddress = "developerEmail", firstName = "DEVELOPER    ", lastName = "developerLast")
   val developerCollaborator = developer.email.asDeveloperCollaborator

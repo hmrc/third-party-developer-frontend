@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 HM Revenue & Customs
+ * Copyright 2021 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,25 +14,10 @@
  * limitations under the License.
  */
 
-package pages
+package util
 
-import org.openqa.selenium.WebDriver
-import org.scalatestplus.selenium.{Page, WebBrowser}
-import steps.Env
-import org.scalatest.matchers.should.Matchers
+import play.api.Logger
 
-case class Link(href: String, text: String)
-
-trait WebLink extends Page with WebBrowser with Matchers {
-  implicit val webDriver: WebDriver = Env.driver
-
-  override def toString = this.getClass.getSimpleName
-}
-
-trait WebPage extends WebLink {
-  def isCurrentPage: Boolean
-
-  def heading = tagName("h1").element.text
-
-  def bodyText = tagName("body").element.text
+trait ApplicationLogger {
+  val logger = Logger("application")
 }

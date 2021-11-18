@@ -19,12 +19,13 @@ package controllers
 import java.time.Period
 import domain.models.applications._
 import org.joda.time.DateTime
-import org.scalatest.{Matchers, WordSpec}
 import utils._
 import domain.models.applications.Environment.{PRODUCTION, SANDBOX}
 import domain.models.controllers.ApplicationSummary
+import org.scalatest.matchers.should.Matchers
+import org.scalatest.wordspec.AnyWordSpec
 
-class ApplicationSummaryTest extends WordSpec with Matchers with CollaboratorTracker with LocalUserIdTracker {
+class ApplicationSummaryTest extends AnyWordSpec with Matchers with CollaboratorTracker with LocalUserIdTracker {
 
   "from" should {
     val user = "foo@bar.com".asDeveloperCollaborator
@@ -36,13 +37,13 @@ class ApplicationSummaryTest extends WordSpec with Matchers with CollaboratorTra
     "set serverTokenUsed if application has a date set for lastAccessTokenUsage" in {
       val summary = ApplicationSummary.from(serverTokenApplication.copy(deployedTo = SANDBOX), user.userId)
 
-      summary.serverTokenUsed should be(true)
+      summary.serverTokenUsed shouldBe(true)
     }
 
     "not set serverTokenUsed if application does not have a date set for lastAccessTokenUsage" in {
       val summary = ApplicationSummary.from(noServerTokenApplication.copy(deployedTo = SANDBOX), user.userId)
 
-      summary.serverTokenUsed should be(false)
+      summary.serverTokenUsed shouldBe(false)
     }
   }
 }

@@ -17,10 +17,11 @@
 package domain.models
 
 import org.scalatest.Matchers
-import org.scalatest.WordSpec
 import domain.models.emailpreferences.TaxRegimeInterests
+import org.scalatest.wordspec.AnyWordSpec
+import org.scalatest.matchers.should.Matchers
 
-class TaxRegimeInterestsSpec extends WordSpec with Matchers {
+class TaxRegimeInterestsSpec extends AnyWordSpec with Matchers {
   val regime = "A Regime"
 
   "tax regime interests add works" in {

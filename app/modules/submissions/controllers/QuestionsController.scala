@@ -34,7 +34,6 @@ import helpers.EitherTHelper
 import play.api.mvc._
 import play.api.libs.json.Json
 import cats.data.NonEmptyList
-import play.api.Logger
 
 object QuestionsController {
   case class ErrorMessage(message: String)
@@ -89,7 +88,7 @@ class QuestionsController @Inject()(
   def recordAnswer(submissionId: SubmissionId, questionId: QuestionId) = withSubmission(submissionId) { implicit request => 
 
     lazy val failed = (msg: String) => {
-      Logger.info(s"Failed to recordAnswer - $msg")
+      logger.info(s"Failed to recordAnswer - $msg")
       showQuestion(submissionId, questionId, None, Some("Please provide an answer to the question"))(request)
     }
 

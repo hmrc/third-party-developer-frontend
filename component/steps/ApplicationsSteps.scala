@@ -25,7 +25,6 @@ import io.cucumber.scala.{EN, ScalaDsl}
 import io.cucumber.scala.Implicits._
 import matchers.CustomMatchers
 import org.openqa.selenium.By
-import org.scalatest.Matchers
 import pages._
 import play.api.http.Status._
 import play.api.libs.json.Json
@@ -36,6 +35,7 @@ import domain.models.applications.ApplicationId
 import domain.models.applications.ClientId
 import domain.models.developers.UserId
 import domain.models.applications.ApplicationWithSubscriptionIds
+import org.scalatest.matchers.should.Matchers
 
 object AppWorld {
   var userApplicationsOnBackend: List[Application] = Nil

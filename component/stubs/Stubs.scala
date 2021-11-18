@@ -21,8 +21,6 @@ import connectors.EncryptedJson
 import domain.models.applications.ApplicationNameValidationJson.ApplicationNameValidationResult
 import domain.models.developers.{Registration, UpdateProfileRequest}
 import domain.services.ApiDefinitionsJsonFormatters._
-import org.scalatest.Matchers
-import play.api.Logger
 import play.api.libs.json.{Json, Writes}
 import play.api.http.Status._
 import domain.models.apidefinitions.ApiIdentifier
@@ -34,11 +32,13 @@ import domain.models.connectors.PasswordResetRequest
 import connectors.ThirdPartyDeveloperConnector.{FindUserIdRequest, FindUserIdResponse}
 import connectors.ThirdPartyDeveloperConnector.JsonFormatters.FindUserIdRequestWrites
 import domain.models.applications._
+import util.ApplicationLogger
+import org.scalatest.matchers.should.Matchers
 
-object Stubs {
+object Stubs extends ApplicationLogger {
 
   def setupRequest(path: String, status: Int, response: String) = {
-    Logger.info(s"Stubbing $path with $response")
+    logger.info(s"Stubbing $path with $response")
     stubFor(
       get(urlEqualTo(path))
         .willReturn(aResponse().withStatus(status).withBody(response).withHeader("Content-type", "application/json"))
