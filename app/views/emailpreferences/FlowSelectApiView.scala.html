@@ -38,6 +38,7 @@
   developerSession = Some(loggedIn)
 ) {
   @errorSummary2(form)
+  @fieldError2(form.errors, "apiRadio")
   <div class="govuk-form-group @if(form.errors("apiRadio").nonEmpty || form.errors.map(_.message).contains(FormKeys.selectedApisNonSelectedGlobalKey)) {govuk-form-group--error}">
     <fieldset class="govuk-fieldset" aria-describedby="select-all-description">
 
@@ -51,9 +52,8 @@
 
       @helper.form(action = controllers.profile.routes.EmailPreferences.flowSelectApisAction(), 'class -> "form", 'id -> "emailPreferencesApisForm") {
         @helper.CSRF.formField
-        @fieldError2(form.errors, "radios")
         <a name="apiRadio"></a>
-        <div class="govuk-radios @if(form.errors("radios").nonEmpty){govuk-form-group--error}">
+        <div class="govuk-radios">
 
           <div class="govuk-radios__item">
             <input class="govuk-radios__input" id="all-apis" type="radio" name="apiRadio" value="ALL_APIS" @if(selectedApis.contains("ALL_APIS")) {checked}/>
