@@ -39,22 +39,20 @@
 ) {
   @errorSummary2(form)
   @fieldError2(form.errors, "apiRadio")
-  <div class="govuk-form-group @if(form.errors("apiRadio").nonEmpty || form.errors.map(_.message).contains(FormKeys.selectedApisNonSelectedGlobalKey)) {govuk-form-group--error}">
-    <fieldset class="govuk-fieldset" aria-describedby="select-all-description">
+  @helper.form(action = controllers.profile.routes.EmailPreferences.flowSelectApisAction(), 'class -> "form", 'id -> "emailPreferencesApisForm") {
+    @helper.CSRF.formField
+    <a name="apiRadio"></a>
+    <div class="govuk-form-group @if(form.errors("apiRadio").nonEmpty || form.errors.map(_.message).contains(FormKeys.selectedApisNonSelectedGlobalKey)) {govuk-form-group--error}">
+      <fieldset class="govuk-fieldset" aria-describedby="select-all-description">
+        <legend class="govuk-fieldset__legend govuk-fieldset__legend--l">
+          <h1 id="pageHeading" class="govuk-fieldset__heading">@pageHeading</h1>
+        </legend>
 
-      <legend class="govuk-fieldset__legend govuk-fieldset__legend--l">
-        <h1 id="pageHeading" class="govuk-fieldset__heading">@pageHeading</h1>
-      </legend>
+        <p id="select-all-description" class="govuk-hint">Select all that apply.</p>
 
-      <p id="select-all-description" class="govuk-hint">Select all that apply.</p>
+        @fieldError2(form.errors, "apiRadio")
 
-
-
-      @helper.form(action = controllers.profile.routes.EmailPreferences.flowSelectApisAction(), 'class -> "form", 'id -> "emailPreferencesApisForm") {
-        @helper.CSRF.formField
-        <a name="apiRadio"></a>
         <div class="govuk-radios">
-
           <div class="govuk-radios__item">
             <input class="govuk-radios__input" id="all-apis" type="radio" name="apiRadio" value="ALL_APIS" @if(selectedApis.contains("ALL_APIS")) {checked}/>
             <label class="govuk-label govuk-radios__label" for="all-apis">All @currentCategory.name APIs
@@ -67,7 +65,7 @@
           <a name="error.selectedapis.nonselected.field"></a>
 
           <div class="govuk-radios__item">
-            <input class="govuk-radios__input" id="individual-apis" type="radio" name="apiRadio" value="SOME_APIS"  @if(!selectedApis.contains("ALL_APIS") &&  !selectedApis.isEmpty) {checked}/>
+            <input class="govuk-radios__input" id="individual-apis" type="radio" name="apiRadio" value="SOME_APIS"  @if(!selectedApis.contains("ALL_APIS")) {checked}/>
             <label class="govuk-label govuk-radios__label" for="individual-apis">Specific @currentCategory.name APIs
               <span id="individual-api-description" class="govuk-hint">
                 Select specific APIs. You will not get emails about new Income Tax APIs
@@ -84,14 +82,10 @@
               }
             </div>
           </div>
-
         </div>
-        <div>
-          <br/>
-          <input id="current-category" type="hidden" name="currentCategory" value="@currentCategory.category" />
-          <button id="submit" class="govuk-button" type="submit">Continue</button>
-        </div>
-      }
-    </fieldset>
-  </div>
+      </fieldset>
+    </div>
+    <input id="current-category" type="hidden" name="currentCategory" value="@currentCategory.category" />
+    <button id="submit" class="govuk-button" type="submit">Continue</button>
+  }
 }

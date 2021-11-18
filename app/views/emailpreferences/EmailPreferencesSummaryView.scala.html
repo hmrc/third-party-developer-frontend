@@ -71,7 +71,9 @@
       }
     }
 
-    <a class="govuk-link" id="change-apis-link" href="@controllers.profile.routes.EmailPreferences.flowSelectCategoriesPage">Edit your preferences or get emails about other APIs</a>
+    <p class="govuk-body">
+      <a class="govuk-link govuk-link--no-visited-state" id="change-apis-link" href="@controllers.profile.routes.EmailPreferences.flowSelectCategoriesPage">Edit your preferences or get emails about other APIs</a>
+    </p>
 
     <hr class="govuk-section-break govuk-section-break--m govuk-section-break--visible" />
 
@@ -82,9 +84,11 @@
       <br />
     }
 
-    <a class="govuk-link" id="change-topics-link" href="@controllers.profile.routes.EmailPreferences.flowSelectTopicsPage">
-      Change the topics you are interested in
-    </a>
+    <p class="govuk-body">
+      <a class="govuk-link govuk-link--no-visited-state" id="change-topics-link" href="@controllers.profile.routes.EmailPreferences.flowSelectTopicsPage">
+        Change the topics you are interested in
+      </a>
+    </p>
 
     <hr class="govuk-section-break govuk-section-break--m govuk-section-break--visible" />
 
@@ -94,7 +98,7 @@
     }
     @EmailPrefsBulletInfoView()
     <p class="govuk-body">
-      <a class="govuk-link" id="setup-emailpreferences-link" href="@controllers.profile.routes.EmailPreferences.flowStartPage()">
+      <a class="govuk-link govuk-link--no-visited-state" id="setup-emailpreferences-link" href="@controllers.profile.routes.EmailPreferences.flowStartPage()">
         Set up email preferences
       </a>
     </p>
@@ -108,14 +112,14 @@
 
   @if(userHasEmailPreferences) {
     <p class="govuk-body">
-      <a class="govuk-link" id="unsubscribe-link" href="@controllers.profile.routes.EmailPreferences.unsubscribeAllPage">
+      <a class="govuk-link govuk-link--no-visited-state" id="unsubscribe-link" href="@controllers.profile.routes.EmailPreferences.unsubscribeAllPage">
         Unsubscribe from Developer Hub emails
       </a>
     </p>
   }
 
   <p class="govuk-body">
-    <a class="govuk-link" id="view-all-applications-link" href="@routes.ManageApplications.manageApps">
+    <a class="govuk-link govuk-link--no-visited-state" id="view-all-applications-link" href="@routes.ManageApplications.manageApps">
       View all applications
     </a>
   </p>
