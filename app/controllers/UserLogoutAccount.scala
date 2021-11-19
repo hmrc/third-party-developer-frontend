@@ -19,12 +19,12 @@ package controllers
 import config.{ApplicationConfig, ErrorHandler}
 import domain.models.connectors.TicketId
 import javax.inject.{Inject, Singleton}
-import play.api.Logger
 import play.api.libs.crypto.CookieSigner
 import play.api.mvc.{AnyContent, MessagesControllerComponents, MessagesRequest}
 import security.ExtendedDevHubAuthorization
 import service.{ApplicationService, DeskproService, SessionService}
 import views.html.{LogoutConfirmationView, SignoutSurveyView}
+import util.ApplicationLogger
 
 import scala.concurrent.{ExecutionContext, Future}
 import scala.util.Failure
@@ -41,7 +41,8 @@ class UserLogoutAccount @Inject() (
     logoutConfirmationView: LogoutConfirmationView
 )(implicit val ec: ExecutionContext, val appConfig: ApplicationConfig)
     extends LoggedInController(mcc)
-    with ExtendedDevHubAuthorization {
+    with ExtendedDevHubAuthorization
+    with ApplicationLogger {
 
   def logoutSurvey = atLeastPartLoggedInEnablingMfaAction { implicit request =>
     val page = signoutSurveyView("Are you sure you want to sign out?", SignOutSurveyForm.form)
@@ -54,7 +55,7 @@ class UserLogoutAccount @Inject() (
       case Some(form) =>
         val res: Future[TicketId] = deskproService.submitSurvey(form)
         res.onComplete {
-          case Failure(_) => Logger.error("Failed to create deskpro ticket")
+          case Failure(_) => logger.error("Failed to create deskpro ticket")
           case _ => ()
         }
 
@@ -64,7 +65,7 @@ class UserLogoutAccount @Inject() (
             Future.successful(Redirect(routes.UserLogoutAccount.logout()))
           })
       case None =>
-        Logger.error("Survey form invalid.")
+        logger.error("Survey form invalid.")
         Future.successful(Redirect(routes.UserLogoutAccount.logout()))
     }
   }

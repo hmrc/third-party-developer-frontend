@@ -85,6 +85,7 @@ class ManageTeam @Inject() (
       def handleAddTeamMemberView(a: ApplicationViewModel, f: Form[AddTeamMemberForm], ds:DeveloperSession)={
         addTeamMemberView.apply(a,f,ds, createFraudNavModel(fraudPreventionConfig))
       }
+      
       def createBadRequestResult(formWithErrors: Form[AddTeamMemberForm]): Result = {
         val viewFunction: (ApplicationViewModel, Form[AddTeamMemberForm], DeveloperSession) => Html = addTeamMemberPageMode match {
           case ManageTeamMembers => handleAddTeamMemberView

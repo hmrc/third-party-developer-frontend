@@ -25,7 +25,6 @@ import io.cucumber.scala.{EN, ScalaDsl}
 import io.cucumber.scala.Implicits._
 import matchers.CustomMatchers
 import org.openqa.selenium.{By, WebDriver}
-import org.scalatest.Matchers
 import pages._
 import play.api.http.Status._
 import play.api.libs.json.{Format, Json}
@@ -33,6 +32,7 @@ import stubs.{DeveloperStub, Stubs}
 import domain.models.connectors.PasswordResetRequest
 import utils.GlobalUserIdTracker
 import utils.UserIdTracker
+import org.scalatest.matchers.should.Matchers
 
 case class MfaSecret(secret: String)
 

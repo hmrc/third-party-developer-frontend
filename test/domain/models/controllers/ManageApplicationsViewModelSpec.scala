@@ -22,9 +22,10 @@ import org.joda.time.DateTime
 import domain.models.apidefinitions.AccessType
 import domain.models.applications.State.TESTING
 import domain.models.applications.CollaboratorRole.DEVELOPER
-import org.scalatest.{Matchers, WordSpec}
+import org.scalatest.wordspec.AnyWordSpec
+import org.scalatest.matchers.should.Matchers
 
-class ManageApplicationsViewModelSpec extends WordSpec with Matchers {
+class ManageApplicationsViewModelSpec extends AnyWordSpec with Matchers {
   val grantLength = Period.ofDays(547)
   "noProductionApplications" should {
     val sandboxApp =

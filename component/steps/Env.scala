@@ -28,10 +28,8 @@ import io.cucumber.scala.{EN, ScalaDsl, Scenario}
 import org.apache.commons.io.FileUtils
 import org.openqa.selenium.{Dimension, OutputType, TakesScreenshot, WebDriver}
 import org.openqa.selenium.chrome.{ChromeOptions, ChromeDriver}
-import org.openqa.selenium.firefox.{FirefoxDriver, FirefoxProfile}
 import org.openqa.selenium.remote.{DesiredCapabilities, RemoteWebDriver}
-import org.scalatest.Matchers
-import play.api.{Logger, Mode}
+import play.api.Mode
 import play.api.inject.guice.GuiceApplicationBuilder
 import play.api.test.TestServer
 import play.core.server.ServerConfig
@@ -39,9 +37,13 @@ import stubs.AuditStub
 import utils.BrowserStackCaps
 
 import scala.util.{Properties, Try}
+import util.ApplicationLogger
+import org.openqa.selenium.firefox.FirefoxOptions
+import org.openqa.selenium.firefox.FirefoxDriver
+import org.scalatest.matchers.should.Matchers
 
 
-trait Env extends ScalaDsl with EN with Matchers with BrowserStackCaps {
+trait Env extends ScalaDsl with EN with Matchers with BrowserStackCaps with ApplicationLogger {
   var passedTestCount: Int = 0
   var failedTestCount: Int = 0
   // please do not change this port as it is used for acceptance tests
@@ -97,9 +99,9 @@ trait Env extends ScalaDsl with EN with Matchers with BrowserStackCaps {
   }
 
   def createFirefoxDriver(): WebDriver = {
-    val profile = new FirefoxProfile
-    profile.setAcceptUntrustedCertificates(true)
-    new FirefoxDriver(profile)
+    val options = new FirefoxOptions()
+    .setAcceptInsecureCerts(true)
+    new FirefoxDriver(options)
   }
 
   def javascriptEnabled: Boolean = {
@@ -149,11 +151,11 @@ trait Env extends ScalaDsl with EN with Matchers with BrowserStackCaps {
     else if (scenario.getStatus.equals("failed")) {
       failedTestCount = failedTestCount + 1
     }
-    Logger.info("\n*******************************************************************************************************")
-    Logger.info("Test -->" + scenario.getName + " is ---> " + scenario.getStatus)
-    Logger.info("Passed Test Count ------------>" + passedTestCount)
-    Logger.info("Failed Test Count ------------>" + failedTestCount)
-    Logger.info("*******************************************************************************************************\n")
+    logger.info("\n*******************************************************************************************************")
+    logger.info("Test -->" + scenario.getName + " is ---> " + scenario.getStatus)
+    logger.info("Passed Test Count ------------>" + passedTestCount)
+    logger.info("Failed Test Count ------------>" + failedTestCount)
+    logger.info("*******************************************************************************************************\n")
   }
 
   def startServer() {

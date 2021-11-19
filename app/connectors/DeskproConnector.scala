@@ -20,7 +20,6 @@ import config.ApplicationConfig
 import domain._
 import domain.models.connectors._
 import javax.inject.{Inject, Singleton}
-import play.api.Logger
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.http.HttpClient
 import uk.gov.hmrc.play.http.metrics.common.API
@@ -29,10 +28,11 @@ import scala.concurrent.{ExecutionContext, Future}
 import scala.util.control.NonFatal
 import uk.gov.hmrc.http.UpstreamErrorResponse
 import uk.gov.hmrc.http.HttpReads.Implicits._
+import util.ApplicationLogger
 
 @Singleton
 class DeskproConnector @Inject()(http: HttpClient, config: ApplicationConfig, metrics: ConnectorMetrics)(implicit val ec: ExecutionContext) 
-extends CommonResponseHandlers {
+extends CommonResponseHandlers with ApplicationLogger {
 
   lazy val serviceBaseUrl: String = config.deskproUrl
   val api = API("deskpro")
@@ -43,7 +43,7 @@ extends CommonResponseHandlers {
     .map(throwOr(TicketCreated))
     .recover {
       case NonFatal(e) =>
-        Logger.error(s"Deskpro ticket creation failed for: $deskproTicket", e)
+        logger.error(s"Deskpro ticket creation failed for: $deskproTicket", e)
         throw new DeskproTicketCreationFailed(e.getMessage)
     }
   }

@@ -19,9 +19,10 @@ package domain
 import domain.models.subscriptions.{AccessRequirements, DevhubAccessLevel, DevhubAccessRequirement, DevhubAccessRequirements}
 import domain.models.subscriptions.DevhubAccessLevel._
 import domain.models.subscriptions.DevhubAccessRequirement._
-import org.scalatest.{Matchers, WordSpec}
+import org.scalatest.wordspec.AnyWordSpec
+import org.scalatest.matchers.should.Matchers
 
-class AccessRequirementsSpec extends WordSpec with Matchers {
+class AccessRequirementsSpec extends AnyWordSpec with Matchers {
 
   "DevhubRequirement" should {
 

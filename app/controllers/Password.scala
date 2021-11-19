@@ -21,7 +21,6 @@ import connectors.ThirdPartyDeveloperConnector
 import domain._
 import domain.models.connectors.{ChangePassword, PasswordReset}
 import javax.inject.{Inject, Singleton}
-import play.api.Logger
 import play.api.data.Form
 import play.api.libs.crypto.CookieSigner
 import play.api.mvc._
@@ -33,6 +32,8 @@ import views.html._
 
 import scala.concurrent.{ExecutionContext, Future}
 import uk.gov.hmrc.http.UpstreamErrorResponse
+import util.ApplicationLogger
+import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendBaseController
 
 @Singleton
 class Password @Inject()(val auditService: AuditService,
@@ -49,7 +50,7 @@ class Password @Inject()(val auditService: AuditService,
                          signInView: SignInView
                         )
                         (implicit val ec: ExecutionContext, val appConfig: ApplicationConfig)
-  extends LoggedOutController(mcc) with PasswordChange {
+  extends LoggedOutController(mcc) with PasswordChange with ApplicationLogger {
 
   import ErrorFormBuilder.GlobalError
 
@@ -87,7 +88,7 @@ class Password @Inject()(val auditService: AuditService,
 
   def resetPasswordChange = Action.async { implicit request =>
     request.session.get("email") match {
-      case None => Logger.warn("email not found in session")
+      case None => logger.warn("email not found in session")
         Future.successful(Redirect(routes.Password.resetPasswordError()).flashing("error" -> "Error"))
       case Some(_) => Future.successful(Ok(resetView(PasswordResetForm.form)))
     }
@@ -123,12 +124,13 @@ class Password @Inject()(val auditService: AuditService,
 }
 
 trait PasswordChange {
+  self: FrontendBaseController =>
+
   import ErrorFormBuilder.GlobalError
-  import Results._
 
   val connector: ThirdPartyDeveloperConnector
   val auditService: AuditService
-
+  
   def processPasswordChange(email: String, success: Result, error: Form[ChangePasswordForm] => HtmlFormat.Appendable)
                            (implicit request: Request[_], hc: HeaderCarrier, ec: ExecutionContext) = {
     ChangePasswordForm.form.bindFromRequest.fold(

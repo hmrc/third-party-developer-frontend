@@ -23,8 +23,8 @@ import org.scalatest.concurrent.Eventually
 import org.scalatest.time.{Millis, Seconds, Span}
 import org.scalatestplus.selenium.WebBrowser
 import org.scalatest.Assertions
-import org.scalatest.Matchers
 import org.mockito.MockitoSugar
+import org.scalatest.matchers.should.Matchers
 
 trait NavigationSugar extends WebBrowser with Eventually with Assertions with Matchers with MockitoSugar {
   private val mockAppConfig = mock[ApplicationConfig]

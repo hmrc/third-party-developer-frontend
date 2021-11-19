@@ -23,7 +23,6 @@ import domain.ApplicationUpdateSuccessful
 import domain.models.applications.{Application, IpAllowlist}
 import domain.models.flows.FlowType.IP_ALLOW_LIST
 import domain.models.flows.IpAllowlistFlow
-import org.scalatest.Matchers
 import repositories.FlowRepository
 import repositories.ReactiveMongoFormatters.formatIpAllowlistFlow
 import service.PushPullNotificationsService.PushPullNotificationsConnector
@@ -33,6 +32,7 @@ import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future.successful
 import utils._
 import builder.DeveloperBuilder
+import org.scalatest.matchers.should.Matchers
 
 class IpAllowlistServiceSpec
     extends AsyncHmrcSpec 
