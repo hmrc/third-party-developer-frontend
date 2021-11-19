@@ -70,7 +70,7 @@ class SelectTopicsFromSubscriptionsViewSpec extends CommonViewSpec with WithCSRF
       checkbox.attr("name") shouldBe "topic[]"
       checkbox.`val`() shouldBe topic.value
       document.select(s"label[for=${topic.value}]").text.startsWith(topic.displayName) shouldBe true
-      document.select(s"label[for=${topic.value}] > span[class=form-hint] > p").text() shouldBe topic.description
+      document.select(s"label[for=${topic.value}] > span[class=govuk-hint]").text() shouldBe topic.description
     })
   }
 

@@ -56,9 +56,9 @@
                             <input class="govuk-checkboxes__input" id="@topic.value" type="checkbox" name="topic[]" value="@topic.value" @if(selectedTopics.contains(topic.value)) {checked} >
                             <label class="govuk-label govuk-checkboxes__label govuk-!-padding-top-0" for="@topic.value">
                                 @topic.displayName
-                                <p class="govuk-hint govuk-!-margin-top-0">
+                                <span class="govuk-hint govuk-!-margin-top-0">
                                     @topic.description
-                                </p>
+                                </span>
                             </label>
                         </div>
                     }
@@ -76,9 +76,9 @@
                         <input class="govuk-checkboxes__input" id="@EVENT_INVITES.value" type="checkbox" name="topic[]" value="@EVENT_INVITES.value" @if(selectedTopics.contains(EVENT_INVITES.value)) {checked} >
                         <label class="govuk-label govuk-checkboxes__label govuk-!-padding-top-0" for="@EVENT_INVITES.value">
                             @EVENT_INVITES.displayName
-                            <p class="govuk-hint govuk-!-margin-top-0">
+                            <span class="govuk-hint govuk-!-margin-top-0">
                                 @EVENT_INVITES.description
-                            </p>
+                            </span>
                         </label>
                     </div>
                 </div>

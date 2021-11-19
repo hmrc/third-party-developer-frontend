@@ -1,18 +1,18 @@
 @*
-* Copyright 2021 HM Revenue & Customs
-*
-* Licensed under the Apache License, Version 2.0 (the "License");
-* you may not use this file except in compliance with the License.
-* You may obtain a copy of the License at
-*
-*     http://www.apache.org/licenses/LICENSE-2.0
-*
-* Unless required by applicable law or agreed to in writing, software
-* distributed under the License is distributed on an "AS IS" BASIS,
-* WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-* See the License for the specific language governing permissions and
-* limitations under the License.
-*@
+ * Copyright 2021 HM Revenue & Customs
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ *@
 
 @import config.ApplicationConfig
 @import domain.models.developers.DeveloperSession
@@ -27,49 +27,49 @@
 @(form: Form[TaxRegimeEmailPreferencesForm], categories: List[APICategoryDetails], selectedCategories: Set[String])(implicit messages: Messages, loggedIn: DeveloperSession, request: play.api.mvc.Request[Any], appConfig: ApplicationConfig)
 
 @pageHeading = @{
-    "Which API categories are you interested in?"
+  "Which API categories are you interested in?"
 }
 
 @devMain(
-    title = pageHeading,
-    userFullName = loggedIn.loggedInName,
-    back = BackButtonWithJavaScript,
-    developerSession = Some(loggedIn)
+  title = pageHeading,
+  userFullName = loggedIn.loggedInName,
+  back = BackButtonWithJavaScript,
+  developerSession = Some(loggedIn)
 ) {
-    @errorSummary2(form)
-    @helper.form(action = controllers.profile.routes.EmailPreferences.flowSelectCategoriesAction(), 'class -> "form", 'id -> "emailPreferencesCategoriesForm") {
+  @errorSummary2(form)
+  @helper.form(action = controllers.profile.routes.EmailPreferences.flowSelectCategoriesAction(), 'class -> "form", 'id -> "emailPreferencesCategoriesForm") {
     @helper.CSRF.formField
-<a name="taxRegime"></a>
-<div class="govuk-form-group @if(form.errors("taxRegime").nonEmpty){govuk-form-group--error}">
-<fieldset class="govuk-fieldset" aria-describedby="which-api-cat-hint">
-    <legend class="govuk-fieldset__legend govuk-fieldset__legend--l">
-        <h1 id="pageHeading" class="govuk-fieldset__heading">
+    <a name="taxRegime"></a>
+    <div class="govuk-form-group @if(form.errors("taxRegime").nonEmpty){govuk-form-group--error}">
+      <fieldset class="govuk-fieldset" aria-describedby="which-api-cat-hint">
+        <legend class="govuk-fieldset__legend govuk-fieldset__legend--l">
+          <h1 id="pageHeading" class="govuk-fieldset__heading">
             @pageHeading
-        </h1>
-    </legend>
-    <div id="which-api-cat-hint" class="govuk-hint">
-        Select all that apply.
-    </div>
-    @fieldError2(form.errors, "taxRegime")
-    <div class="govuk-checkboxes" data-module="govuk-checkboxes">
-        @for(category <- categories){
-        <div class="govuk-checkboxes__item">
-            <input class="govuk-checkboxes__input" id="@category.category" type="checkbox" name="taxRegime[]" value="@category.category" @if(selectedCategories.contains(category.category)){checked}>
-            <label class="govuk-label govuk-checkboxes__label" for="@category.category">
-                @category.name
-            </label>
+          </h1>
+        </legend>
+        <div id="which-api-cat-hint" class="govuk-hint">
+          Select all that apply.
         </div>
-        }
+        @fieldError2(form.errors, "taxRegime")
+        <div class="govuk-checkboxes" data-module="govuk-checkboxes">
+          @for(category <- categories){
+            <div class="govuk-checkboxes__item">
+              <input class="govuk-checkboxes__input" id="@category.category" type="checkbox" name="taxRegime[]" value="@category.category" @if(selectedCategories.contains(category.category)){checked}>
+              <label class="govuk-label govuk-checkboxes__label" for="@category.category">
+                @category.name
+              </label>
+            </div>
+          }
+        </div>
+      </fieldset>
     </div>
-</fieldset>
-</div>
 
-<br />
-<button id="selectCategories" class="govuk-button" type="submit">Continue</button>
-}
+    <br />
+    <button id="selectCategories" class="govuk-button" type="submit">Continue</button>
+  }
 
-    @helper.form(action = controllers.profile.routes.EmailPreferences.flowSelectNoCategoriesAction(), 'class -> "form", 'id -> "emailPreferencesNoCategoriesForm") {
+  @helper.form(action = controllers.profile.routes.EmailPreferences.flowSelectNoCategoriesAction(), 'class -> "form", 'id -> "emailPreferencesNoCategoriesForm") {
     @helper.CSRF.formField
-        <button id="noSelectCategories" class="govuk-link govuk-link--no-visited-state link-button govuk-!-font-size-19" type="submit" style="padding-left: 0">I'm not interested in any of these categories</button>
-    }
+    <button id="noSelectCategories" class="govuk-link govuk-link--no-visited-state link-button govuk-!-font-size-19" type="submit" style="padding-left: 0">I'm not interested in any of these categories</button>
+  }
 }
