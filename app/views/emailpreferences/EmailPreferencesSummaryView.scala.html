@@ -57,7 +57,7 @@
     <p class="govuk-body" id="first-line">You will receive emails about these APIs and topics.</p>
 
     @for(taxRegimeInterest <- loggedIn.developer.emailPreferences.interests.sortBy(_.regime).zipWithIndex) {
-      <h2 class="govuk-heading-m" id="category-heading-@taxRegimeInterest._1.regime">@viewData.taxRegimeDisplayName(taxRegimeInterest._1.regime)</h3>
+      <h2 class="govuk-heading-m govuk-!-margin-bottom-2" id="category-heading-@taxRegimeInterest._1.regime">@viewData.taxRegimeDisplayName(taxRegimeInterest._1.regime)</h3>
 
       @if(taxRegimeInterest._1.services.isEmpty) {
         <p class="govuk-body" id="all-api-@taxRegimeInterest._1.regime">
@@ -77,12 +77,12 @@
 
     <hr class="govuk-section-break govuk-section-break--m govuk-section-break--visible" />
 
-    <h2 class="govuk-heading-m" id="topics-heading">Topics</h3>
+    <h2 class="govuk-heading-m govuk-!-margin-bottom-2" id="topics-heading">Topics</h3>
 
     @for(topic <- loggedIn.developer.emailPreferences.topics.toList.sortBy(_.displayOrder)) {
-      <p class="govuk-body" id="@topic.value">@topic.displayName</p>
-      <br />
+      <p class="govuk-body govuk-!-margin-bottom-1" id="@topic.value">@topic.displayName</p>
     }
+    <br />
 
     <p class="govuk-body">
       <a class="govuk-link govuk-link--no-visited-state" id="change-topics-link" href="@controllers.profile.routes.EmailPreferences.flowSelectTopicsPage">
@@ -105,9 +105,8 @@
   }
 
   <p class="govuk-body">
-    Check the @{
-      Link.toExternalPage(id = Some("status-page-link"), url = "https://api-platform-status.production.tax.service.gov.uk/", value = Some("service availability page for information about live incidents")).toHtml
-    }.
+    Check the 
+    <a id="status-page-link" href="https://api-platform-status.production.tax.service.gov.uk/" target="_blank">service availability page for information about live incidents (opens in new tab)</a>.
   </p>
 
   @if(userHasEmailPreferences) {
