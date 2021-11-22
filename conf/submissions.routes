@@ -4,3 +4,5 @@ POST        /:sid/question/:qid                                                 
 
 GET         /application/:aid/cancel-request                                      modules.submissions.controllers.CancelRequestController.cancelRequestForProductionCredentialsPage(aid: ApplicationId)
 POST        /application/:aid/cancel-request                                      modules.submissions.controllers.CancelRequestController.cancelRequestForProductionCredentialsAction(aid: ApplicationId)
+
+GET         /application/:aid/check-answers                                       modules.submissions.controllers.CheckAnswersController.checkAnswers(aid: ApplicationId)

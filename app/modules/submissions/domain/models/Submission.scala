@@ -37,6 +37,14 @@ case object Completed extends QuestionnaireState
 
 case class QuestionnaireProgress(state: QuestionnaireState, questionsToAsk: List[QuestionId])
 
+object QuestionnaireState {
+  def describe(state: QuestionnaireState): String = state match {
+    case NotStarted => "Not Started"
+    case InProgress => "In Progress"
+    case NotApplicable => "Not Applicable"
+    case Completed => "Completed"
+  }
+}
 object Submissions {
   type AnswersToQuestions = Map[QuestionId, ActualAnswer]
 }

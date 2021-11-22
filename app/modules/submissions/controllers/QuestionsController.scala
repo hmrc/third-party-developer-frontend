@@ -23,7 +23,7 @@ import config.{ApplicationConfig, ErrorHandler}
 import service.{ApplicationService, ApplicationActionService, SessionService}
 import play.api.libs.crypto.CookieSigner
 import controllers.ApplicationController
-import modules.submissions.views.html.QuestionView
+import modules.submissions.views.html._
 import modules.submissions.domain.models._
 import modules.submissions.services.SubmissionService
 import modules.submissions.domain.services.SubmissionsJsonFormatters._
@@ -52,6 +52,7 @@ class QuestionsController @Inject()(
   override val submissionService: SubmissionService,
   val cookieSigner: CookieSigner,
   questionView: QuestionView,
+  checkAnswersView: CheckAnswersView,
   mcc: MessagesControllerComponents
 )(
   implicit override val ec: ExecutionContext,
@@ -129,4 +130,5 @@ class QuestionsController @Inject()(
     .fold(failed, success)
     .flatten
   }
+
 }
