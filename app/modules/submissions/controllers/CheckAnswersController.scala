@@ -101,7 +101,7 @@ class CheckAnswersController @Inject() (
   import cats.implicits._
   import cats.instances.future.catsStdInstancesForFuture
   
-  def checkAnswers(productionAppId: ApplicationId) = withApplicationSubmission(inTesting)(productionAppId) { implicit request =>
+  def checkAnswers(productionAppId: ApplicationId) = withApplicationSubmission(StateFilter.inTesting)(productionAppId) { implicit request =>
     val failed = (err: String) => BadRequestWithErrorMessage(err)
 
     val success = (viewModel: ViewModel) => {
@@ -116,7 +116,7 @@ class CheckAnswersController @Inject() (
     vm.fold[Result](failed, success)
   }
 
-  def checkAnswersAction(productionAppId: ApplicationId) = withApplicationSubmission(inTesting)(productionAppId) { implicit request =>
+  def checkAnswersAction(productionAppId: ApplicationId) = withApplicationSubmission(StateFilter.inTesting)(productionAppId) { implicit request =>
     requestProductionCredentials
       .requestProductionCredentials(productionAppId, request.application.name, request.developerSession)
       .map(_ => Ok(prodCredsRequestReceivedView()))

@@ -68,18 +68,19 @@ class ProdCredsChecklistController @Inject() (
     mcc: MessagesControllerComponents,
     val cookieSigner: CookieSigner,
     val apmConnector: ApmConnector,
-    submissionService: SubmissionService,
+    val submissionService: SubmissionService,
     productionCredentialsChecklistView: ProductionCredentialsChecklistView)
     (implicit val ec: ExecutionContext, val appConfig: ApplicationConfig)
   extends ApplicationController(mcc)
      with CanUseCheckActions
-     with EitherTHelper[String] {
+     with EitherTHelper[String]
+     with SubmissionActionBuilders {
 
   import cats.implicits._
   import cats.instances.future.catsStdInstancesForFuture
   import ProdCredsChecklistController._
 
-  def productionCredentialsChecklist(productionAppId: ApplicationId): Action[AnyContent] = whenTeamMemberOnApp(productionAppId) { implicit request =>
+  def productionCredentialsChecklist(productionAppId: ApplicationId): Action[AnyContent] = withApplicationSubmission(StateFilter.inTesting)(productionAppId) { implicit request =>
     val failed = (err: String) => BadRequestWithErrorMessage(err)
 
     val success = (viewModel: ViewModel) => {

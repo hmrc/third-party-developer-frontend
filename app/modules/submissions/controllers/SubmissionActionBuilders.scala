@@ -36,6 +36,7 @@ import controllers.ApplicationRequest
 import scala.concurrent.Future.successful
 import domain.models.applications.State
 import domain.models.developers.DeveloperSession
+import domain.models.applications.CollaboratorRole
 
 case class SubmissionRequest[A](submission: Submission , userRequest: UserRequest[A]) extends MessagesRequest[A](userRequest, userRequest.messagesApi) {
   lazy val answersToQuestions = submission.answersToQuestions
@@ -68,7 +69,7 @@ trait SubmissionActionBuilders extends SimpleApplicationActionBuilders {
         implicit val implicitRequest: MessagesRequest[A] = input
         (
           for {
-            submission <- E.fromOptionF(submissionService.fetch(submissionId), NotFound(errorHandler.notFoundTemplate(Request(input, input.developerSession))) )
+            submission <- E.fromOptionF(submissionService.fetch(submissionId), NotFound(errorHandler.notFoundTemplate(input)) )
           } yield SubmissionRequest(submission.submission, input)
         )
         .value
@@ -82,7 +83,7 @@ trait SubmissionActionBuilders extends SimpleApplicationActionBuilders {
         implicit val implicitRequest: MessagesRequest[A] = request
         
         applicationActionService.process(request.submission.applicationId, request.userRequest.developerSession)
-        .toRight(NotFound(errorHandler.notFoundTemplate(Request(request, request.userRequest.developerSession))))
+        .toRight(NotFound(errorHandler.notFoundTemplate(request)))
         .map(r => SubmissionApplicationRequest(r.application, request))
         .value
       }
@@ -96,10 +97,37 @@ trait SubmissionActionBuilders extends SimpleApplicationActionBuilders {
         
         (
           for {
-            submission <- E.fromOptionF(submissionService.fetchLatestSubmission(request.application.id), NotFound(errorHandler.notFoundTemplate(Request(request, request.user))) )
+            submission <- E.fromOptionF(submissionService.fetchLatestSubmission(request.application.id), NotFound(errorHandler.notFoundTemplate(request)) )
           } yield SubmissionApplicationRequest(request.application, SubmissionRequest(submission.submission, UserRequest(request.user, request.request)))
         )
         .value
+      }
+    }
+
+  object RoleFilter {
+    type Type = CollaboratorRole => Boolean
+    val isAdminRole: Type = _.isAdministrator
+    val isTeamMember: Type = _ => true
+  }
+
+  def collaboratorFilter(allowedRoleFilter: RoleFilter.Type = RoleFilter.isTeamMember): ActionFilter[ApplicationRequest] = 
+    new ActionFilter[ApplicationRequest] {
+
+      override protected def executionContext: ExecutionContext = ec
+
+      override protected def filter[A](request: ApplicationRequest[A]): Future[Option[Result]] = {
+        val thisUserId = request.user.developer.userId
+        val thisCollaboratorRole = request.application.collaborators.find(_.userId == thisUserId).map(_.role)
+
+        successful(
+          thisCollaboratorRole
+          .filter(allowedRoleFilter)
+          .fold[Option[Result]](
+            Some(BadRequest("User is not authorised for this action"))
+          )(
+            _ => None
+          )
+        )
       }
     }
 
@@ -142,16 +170,20 @@ trait SubmissionActionBuilders extends SimpleApplicationActionBuilders {
     }
   }
 
-  val notProduction: State => Boolean = _ != State.PRODUCTION
-  val inTesting: State => Boolean = _ == State.TESTING
-  val allAllowed: State => Boolean = _ => true
+  object StateFilter {
+    type Type = State => Boolean
+    val notProduction: Type = _ != State.PRODUCTION
+    val inTesting: Type = _ == State.TESTING
+    val allAllowed: Type = _ => true
+  }
 
-  def withApplicationSubmission(allowedStateFilter: State => Boolean = allAllowed)(applicationId: ApplicationId)(fun: SubmissionApplicationRequest[AnyContent] => Future[Result])(implicit ec: ExecutionContext): Action[AnyContent] = {
+  def withApplicationSubmission(allowedStateFilter: StateFilter.Type = StateFilter.allAllowed, allowedRoleFilter: RoleFilter.Type = RoleFilter.isTeamMember)(applicationId: ApplicationId)(fun: SubmissionApplicationRequest[AnyContent] => Future[Result])(implicit ec: ExecutionContext): Action[AnyContent] = {
     Action.async { implicit request =>
       val composedActions =
         Action andThen
         loggedInActionRefiner(onlyTrueIfLoggedInFilter) andThen
         applicationRequestRefiner(applicationId) andThen
+        collaboratorFilter(allowedRoleFilter) andThen
         applicationSubmissionRefiner andThen
         applicationStateFilter(allowedStateFilter)
 
