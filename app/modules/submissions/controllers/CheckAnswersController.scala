@@ -35,6 +35,8 @@ import modules.submissions.services.SubmissionService
 import helpers.EitherTHelper
 import domain.models.controllers.BadRequestWithErrorMessage
 
+import scala.concurrent.Future.successful
+
 object CheckAnswersController {
   case class ViewQuestion(id: QuestionId, text: String, answer: String)
   case class ViewQuestionnaire(label: String, state: String, id: QuestionnaireId, questions: NonEmptyList[ViewQuestion])
@@ -86,7 +88,8 @@ class CheckAnswersController @Inject() (
     val cookieSigner: CookieSigner,
     val apmConnector: ApmConnector,
     submissionService: SubmissionService,
-    checkAnswersView: CheckAnswersView)
+    checkAnswersView: CheckAnswersView,
+    prodCredsRequestReceivedView: ProductionCredentialsRequestReceivedView)
     (implicit val ec: ExecutionContext, val appConfig: ApplicationConfig)
   extends ApplicationController(mcc)
      with CanUseCheckActions
@@ -109,5 +112,9 @@ class CheckAnswersController @Inject() (
     } yield viewModel
 
     vm.fold[Result](failed, success)
+  }
+
+  def checkAnswersAction(productionAppId: ApplicationId) = whenTeamMemberOnApp(productionAppId) { implicit request =>
+    successful(Ok(prodCredsRequestReceivedView()))
   }
 }
