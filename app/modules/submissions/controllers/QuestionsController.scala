@@ -69,7 +69,6 @@ class QuestionsController @Inject()(
     val oQuestion = submission.findQuestion(questionId)
     val applicationId = request.application.id
 
-    implicit val developerSession = request.developerSession
     (
       for {
         flowItem      <- fromOption(oQuestion, "Question not found in questionnaire")

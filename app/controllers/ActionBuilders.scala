@@ -55,6 +55,18 @@ trait SimpleApplicationActionBuilders {
       }
     }
 
+  def applicationRequestRefiner(applicationId: ApplicationId)(implicit ec: ExecutionContext): ActionRefiner[UserRequest, ApplicationRequest] =
+    new ActionRefiner[UserRequest, ApplicationRequest] {
+      override protected def executionContext: ExecutionContext = ec
+
+      override def refine[A](request: UserRequest[A]): Future[Either[Result, ApplicationRequest[A]]] = {
+        implicit val implicitRequest: UserRequest[A] = request
+        import cats.implicits._
+
+        applicationActionService.process(applicationId, request.developerSession)
+        .toRight(NotFound(errorHandler.notFoundTemplate(Request(request, request.developerSession)))).value
+      }
+    }
 }
 
 trait ActionBuilders extends SimpleApplicationActionBuilders {

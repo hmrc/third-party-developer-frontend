@@ -34,8 +34,7 @@ import modules.submissions.domain.models._
 import modules.submissions.services.SubmissionService
 import helpers.EitherTHelper
 import domain.models.controllers.BadRequestWithErrorMessage
-
-import scala.concurrent.Future.successful
+import modules.submissions.services.RequestProductionCredentials
 
 object CheckAnswersController {
   case class ViewQuestion(id: QuestionId, text: String, answer: String)
@@ -87,19 +86,22 @@ class CheckAnswersController @Inject() (
     mcc: MessagesControllerComponents,
     val cookieSigner: CookieSigner,
     val apmConnector: ApmConnector,
-    submissionService: SubmissionService,
+    val submissionService: SubmissionService,
+    requestProductionCredentials: RequestProductionCredentials,
     checkAnswersView: CheckAnswersView,
     prodCredsRequestReceivedView: ProductionCredentialsRequestReceivedView)
     (implicit val ec: ExecutionContext, val appConfig: ApplicationConfig)
   extends ApplicationController(mcc)
      with CanUseCheckActions
-     with EitherTHelper[String] {
+     with EitherTHelper[String]
+     with SubmissionActionBuilders {
+
 
   import CheckAnswersController._
   import cats.implicits._
   import cats.instances.future.catsStdInstancesForFuture
   
-  def checkAnswers(productionAppId: ApplicationId) = whenTeamMemberOnApp(productionAppId) { implicit request =>
+  def checkAnswers(productionAppId: ApplicationId) = withApplicationSubmission(inTesting)(productionAppId) { implicit request =>
     val failed = (err: String) => BadRequestWithErrorMessage(err)
 
     val success = (viewModel: ViewModel) => {
@@ -114,7 +116,9 @@ class CheckAnswersController @Inject() (
     vm.fold[Result](failed, success)
   }
 
-  def checkAnswersAction(productionAppId: ApplicationId) = whenTeamMemberOnApp(productionAppId) { implicit request =>
-    successful(Ok(prodCredsRequestReceivedView()))
+  def checkAnswersAction(productionAppId: ApplicationId) = withApplicationSubmission(inTesting)(productionAppId) { implicit request =>
+    requestProductionCredentials
+      .requestProductionCredentials(productionAppId, request.application.name, request.developerSession)
+      .map(_ => Ok(prodCredsRequestReceivedView()))
   }
 }
