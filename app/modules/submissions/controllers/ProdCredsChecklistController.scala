@@ -137,7 +137,7 @@ class ProdCredsChecklistController @Inject() (
     }
 
     def handleInvalidForm(formWithErrors: Form[DummyProductionCredentialsChecklistForm]) =
-      Future(
+      successful(
         BadRequest(
           productionCredentialsChecklistView(
             convertSubmissionToViewModel(request.extSubmission)(request.application.id, request.application.name),
