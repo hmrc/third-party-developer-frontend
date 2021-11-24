@@ -128,7 +128,7 @@ class UpliftJourneyController @Inject() (val errorHandler: ErrorHandler,
 
     val success = (upliftedAppId: ApplicationId) => {
       upliftJourneySwitch.performSwitch(
-            successful(Redirect(modules.submissions.controllers.routes.ProdCredsChecklistController.productionCredentialsChecklist(upliftedAppId))),  // new uplift path
+            successful(Redirect(modules.submissions.controllers.routes.ProdCredsChecklistController.productionCredentialsChecklistPage(upliftedAppId))),  // new uplift path
             successful(Redirect(controllers.checkpages.routes.ApplicationCheck.requestCheckPage(upliftedAppId))                                       // existing uplift path
               .withSession(request.session - "subscriptions"))
       )

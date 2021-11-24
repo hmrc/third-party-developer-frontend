@@ -76,7 +76,7 @@ class Details @Inject() (
             Ok(unauthorisedAppDetailsView(request.application.name, request.application.adminEmails))
 
         val newUpliftJourney = (e: ExtendedSubmission) =>
-          Redirect(modules.submissions.controllers.routes.ProdCredsChecklistController.productionCredentialsChecklist(applicationId))
+          Redirect(modules.submissions.controllers.routes.ProdCredsChecklistController.productionCredentialsChecklistPage(applicationId))
 
         OptionT(submissionService.fetchLatestSubmission(applicationId)).fold(oldJourney)(newUpliftJourney)
 

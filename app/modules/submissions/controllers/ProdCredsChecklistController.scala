@@ -35,6 +35,8 @@ import helpers.EitherTHelper
 import domain.models.controllers.BadRequestWithErrorMessage
 import modules.submissions.domain.models.NotApplicable
 
+import scala.concurrent.Future.successful
+
 object ProdCredsChecklistController {
   case class ViewQuestionnaireSummary(label: String, state: String, id: QuestionnaireId = QuestionnaireId.random, nextQuestionUrl: Option[String] = None)
   case class ViewGrouping(label: String, questionnaireSummaries: NonEmptyList[ViewQuestionnaireSummary])
@@ -80,7 +82,7 @@ class ProdCredsChecklistController @Inject() (
   import cats.instances.future.catsStdInstancesForFuture
   import ProdCredsChecklistController._
 
-  def productionCredentialsChecklist(productionAppId: ApplicationId): Action[AnyContent] = withApplicationSubmission(StateFilter.inTesting)(productionAppId) { implicit request =>
+  def productionCredentialsChecklistPage(productionAppId: ApplicationId): Action[AnyContent] = withApplicationSubmission(StateFilter.inTesting)(productionAppId) { implicit request =>
     val failed = (err: String) => BadRequestWithErrorMessage(err)
 
     val success = (viewModel: ViewModel) => {
@@ -112,5 +114,9 @@ class ProdCredsChecklistController @Inject() (
     } yield viewModel
 
     vm.fold[Result](failed, success)
+  }
+
+  def productionCredentialsChecklistAction() = Action.async { implicit request =>
+    successful(Ok(""))
   }
 }

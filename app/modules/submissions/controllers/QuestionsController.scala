@@ -97,7 +97,7 @@ class QuestionsController @Inject()(
       val nextQuestion = extSubmission.questionnaireProgress.get(questionnaire.id)
                         .flatMap(_.questionsToAsk.dropWhile(_ != questionId).tail.headOption)
       
-      lazy val toProdChecklist = modules.submissions.controllers.routes.ProdCredsChecklistController.productionCredentialsChecklist(extSubmission.submission.applicationId)
+      lazy val toProdChecklist = modules.submissions.controllers.routes.ProdCredsChecklistController.productionCredentialsChecklistPage(extSubmission.submission.applicationId)
       lazy val toNextQuestion = (nextQuestionId) => modules.submissions.controllers.routes.QuestionsController.showQuestion(submissionId, nextQuestionId)
 
       successful(Redirect(nextQuestion.fold(toProdChecklist)(toNextQuestion)))

@@ -101,7 +101,7 @@ class CheckAnswersController @Inject() (
   import cats.implicits._
   import cats.instances.future.catsStdInstancesForFuture
   
-  def checkAnswers(productionAppId: ApplicationId) = withApplicationAndCompletedSubmission(StateFilter.inTesting)(productionAppId) { implicit request =>
+  def checkAnswersPage(productionAppId: ApplicationId) = withApplicationAndCompletedSubmission(StateFilter.inTesting)(productionAppId) { implicit request =>
     val failed = (err: String) => BadRequestWithErrorMessage(err)
 
     val success = (viewModel: ViewModel) => {

@@ -1,9 +1,10 @@
-GET         /application/:aid/production-credentials-checklist                    modules.submissions.controllers.ProdCredsChecklistController.productionCredentialsChecklist(aid: ApplicationId)
+GET         /application/:aid/production-credentials-checklist                    modules.submissions.controllers.ProdCredsChecklistController.productionCredentialsChecklistPage(aid: ApplicationId)
+
 GET         /:sid/question/:qid                                                   modules.submissions.controllers.QuestionsController.showQuestion(sid: SubmissionId, qid: QuestionId)
 POST        /:sid/question/:qid                                                   modules.submissions.controllers.QuestionsController.recordAnswer(sid: SubmissionId, qid: QuestionId)
 
 GET         /application/:aid/cancel-request                                      modules.submissions.controllers.CancelRequestController.cancelRequestForProductionCredentialsPage(aid: ApplicationId)
 POST        /application/:aid/cancel-request                                      modules.submissions.controllers.CancelRequestController.cancelRequestForProductionCredentialsAction(aid: ApplicationId)
 
-GET         /application/:aid/check-answers                                       modules.submissions.controllers.CheckAnswersController.checkAnswers(aid: ApplicationId)
+GET         /application/:aid/check-answers                                       modules.submissions.controllers.CheckAnswersController.checkAnswersPage(aid: ApplicationId)
 GET         /application/:aid/submit-request                                      modules.submissions.controllers.CheckAnswersController.checkAnswersAction(aid: ApplicationId)
