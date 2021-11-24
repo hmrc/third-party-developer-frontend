@@ -20,7 +20,41 @@ import org.scalatest.wordspec.AnyWordSpec
 import org.scalatest.matchers.should.Matchers
 
 class SubmissionSpec extends AnyWordSpec with Matchers {
-    "my first test" in {
-        true shouldBe true
+    private def extendedSubmissionWithStates(states: QuestionnaireState*) = {
+        import utils.SubmissionsTestData.submission
+        
+        val questionnaireProgress = states.zipWithIndex map {
+            case(state, index) => QuestionnaireId(s"q$index") -> QuestionnaireProgress(state, List())
+        } toMap
+
+        ExtendedSubmission(submission, questionnaireProgress)
+    }
+
+    "empty questionnaire is complete" in {
+        extendedSubmissionWithStates().isCompleted shouldBe true
+    }
+
+    "questionnaire with single Completed question is complete" in {
+        extendedSubmissionWithStates(Completed).isCompleted shouldBe true
+    }
+
+    "questionnaire with single NotApplicable question is complete" in {
+        extendedSubmissionWithStates(NotApplicable).isCompleted shouldBe true
+    }
+
+    "questionnaire with single InProgress question is incomplete" in {
+        extendedSubmissionWithStates(InProgress).isCompleted shouldBe false
+    }
+
+    "questionnaire with single NotStarted question is incomplete" in {
+        extendedSubmissionWithStates(NotStarted).isCompleted shouldBe false
+    }
+
+    "questionnaire with multiple Completed/NotApplicable questions is complete" in {
+        extendedSubmissionWithStates(Completed, NotApplicable, Completed, NotApplicable).isCompleted shouldBe true
+    }
+
+    "questionnaire with one InProgress question among many is incomplete" in {
+        extendedSubmissionWithStates(Completed, NotApplicable, Completed, InProgress, NotApplicable).isCompleted shouldBe false
     }
 }

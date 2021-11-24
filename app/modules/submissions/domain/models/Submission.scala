@@ -82,5 +82,5 @@ case class ExtendedSubmission(
   lazy val isCompleted = 
     questionnaireProgress.values
     .map(_.state)
-    .exists(s => false == QuestionnaireState.isCompleted(s))
+    .forall(QuestionnaireState.isCompleted(_))
 }
