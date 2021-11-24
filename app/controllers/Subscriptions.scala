@@ -74,7 +74,7 @@ class Subscriptions @Inject()(val developerConnector: ThirdPartyDeveloperConnect
   def manageSubscriptions(applicationId: ApplicationId): Action[AnyContent] = canViewSubscriptionsInDevHubAction(applicationId) { implicit request =>
     renderSubscriptions(
       request.application,
-      request.user,
+      request.developerSession,
       (role: CollaboratorRole, data: PageData, form: Form[EditApplicationForm]) => {
         manageSubscriptionsView(role, data, form, applicationViewModelFromApplicationRequest, data.subscriptions, data.openAccessApis ,data.app.id, createOptionalFraudPreventionNavLinkViewModel(request.application, request.subscriptions, fraudPreventionConfig))
       }
@@ -84,7 +84,7 @@ class Subscriptions @Inject()(val developerConnector: ThirdPartyDeveloperConnect
   def addAppSubscriptions(applicationId: ApplicationId): Action[AnyContent] = canViewSubscriptionsInDevHubAction(applicationId) { implicit request =>
     renderSubscriptions(
       request.application,
-      request.user,
+      request.developerSession,
       (role: CollaboratorRole, data: PageData, form: Form[EditApplicationForm]) => {
         addAppSubscriptionsView(role, data, form, request.application, request.application.deployedTo, data.subscriptions, data.openAccessApis)
       }
@@ -197,11 +197,11 @@ class Subscriptions @Inject()(val developerConnector: ThirdPartyDeveloperConnect
       def requestChangeSubscription(subscribed: Boolean) = {
         if (subscribed) {
           subscriptionsService
-            .requestApiUnsubscribe(request.user, request.application, apiName, apiVersion)
+            .requestApiUnsubscribe(request.developerSession, request.application, apiName, apiVersion)
             .map(_ => Ok(unsubscribeRequestSubmittedView(applicationViewModelFromApplicationRequest, apiName, apiVersion)))
         } else {
           subscriptionsService
-            .requestApiSubscription(request.user, request.application, apiName, apiVersion)
+            .requestApiSubscription(request.developerSession, request.application, apiName, apiVersion)
             .map(_ => Ok(subscribeRequestSubmittedView(applicationViewModelFromApplicationRequest, apiName, apiVersion)))
         }
       }

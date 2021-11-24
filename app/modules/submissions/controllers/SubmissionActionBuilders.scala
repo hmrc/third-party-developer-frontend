@@ -35,26 +35,24 @@ import domain.models.applications.ApplicationId
 import controllers.ApplicationRequest
 import scala.concurrent.Future.successful
 import domain.models.applications.State
-import domain.models.developers.DeveloperSession
 import domain.models.applications.CollaboratorRole
 
-case class SubmissionRequest[A](extSubmission: ExtendedSubmission, userRequest: UserRequest[A]) extends MessagesRequest[A](userRequest, userRequest.messagesApi) {
-  lazy val submission = extSubmission.submission
-  lazy val answersToQuestions = submission.answersToQuestions
-  lazy val developerSession = userRequest.developerSession
+trait HasSubmission {
+  def extSubmission: ExtendedSubmission
+}
+trait HasApplication {
+  def application: Application
 }
 
-case class SubmissionApplicationRequest[A](application: Application, submissionRequest: SubmissionRequest[A]) extends MessagesRequest[A](submissionRequest, submissionRequest.messagesApi) {
-  lazy val extSubmission = submissionRequest.extSubmission
-  lazy val submission = submissionRequest.submission
+class SubmissionRequest[A](val extSubmission: ExtendedSubmission, val userRequest: UserRequest[A]) extends UserRequest[A](userRequest.developerSession, userRequest.msgRequest) with HasSubmission {
+  lazy val submission = extSubmission.submission
   lazy val answersToQuestions = submission.answersToQuestions
-  lazy val developerSession = submissionRequest.userRequest.developerSession
 }
+
+class SubmissionApplicationRequest[A](val application: Application, val submissionRequest: SubmissionRequest[A]) extends SubmissionRequest[A](submissionRequest.extSubmission, submissionRequest.userRequest) with HasApplication
 
 trait SubmissionActionBuilders extends SimpleApplicationActionBuilders {
   self: BaseController =>
-
-  implicit def userFromSubmissionApplicationRequest(implicit request: SubmissionApplicationRequest[_]): DeveloperSession = request.developerSession
 
   val errorHandler: ErrorHandler
   val submissionService: SubmissionService
@@ -72,7 +70,7 @@ trait SubmissionActionBuilders extends SimpleApplicationActionBuilders {
         (
           for {
             submission <- E.fromOptionF(submissionService.fetch(submissionId), NotFound(errorHandler.notFoundTemplate(input)) )
-          } yield SubmissionRequest(submission, input)
+          } yield new SubmissionRequest(submission, input)
         )
         .value
       }
@@ -86,7 +84,7 @@ trait SubmissionActionBuilders extends SimpleApplicationActionBuilders {
         
         applicationActionService.process(request.submission.applicationId, request.userRequest.developerSession)
         .toRight(NotFound(errorHandler.notFoundTemplate(request)))
-        .map(r => SubmissionApplicationRequest(r.application, request))
+        .map(r => new SubmissionApplicationRequest(r.application, request))
         .value
       }
     }
@@ -100,7 +98,7 @@ trait SubmissionActionBuilders extends SimpleApplicationActionBuilders {
         (
           for {
             submission <- E.fromOptionF(submissionService.fetchLatestSubmission(request.application.id), NotFound(errorHandler.notFoundTemplate(request)) )
-          } yield SubmissionApplicationRequest(request.application, SubmissionRequest(submission, UserRequest(request.user, request.request)))
+          } yield new SubmissionApplicationRequest(request.application, new SubmissionRequest(submission, request.userRequest))
         )
         .value
       }
@@ -118,8 +116,7 @@ trait SubmissionActionBuilders extends SimpleApplicationActionBuilders {
       override protected def executionContext: ExecutionContext = ec
 
       override protected def filter[A](request: ApplicationRequest[A]): Future[Option[Result]] = {
-        val thisUserId = request.user.developer.userId
-        val thisCollaboratorRole = request.application.collaborators.find(_.userId == thisUserId).map(_.role)
+        val thisCollaboratorRole = request.application.collaborators.find(_.userId == request.userId).map(_.role)
 
         successful(
           thisCollaboratorRole
@@ -133,12 +130,12 @@ trait SubmissionActionBuilders extends SimpleApplicationActionBuilders {
       }
     }
 
-  def completedSubmissionFilter: ActionFilter[SubmissionApplicationRequest] = 
-    new ActionFilter[SubmissionApplicationRequest] {
+  def completedSubmissionFilter[AR[_] <: MessagesRequest[_] with HasSubmission]: ActionFilter[AR] = 
+    new ActionFilter[AR] {
 
       override protected def executionContext: ExecutionContext = ec
 
-      override protected def filter[A](request: SubmissionApplicationRequest[A]): Future[Option[Result]] =
+      override protected def filter[A](request: AR[A]): Future[Option[Result]] =
         if(request.extSubmission.isCompleted) {
           successful(None)
         } else {
@@ -146,12 +143,12 @@ trait SubmissionActionBuilders extends SimpleApplicationActionBuilders {
         }
     }
 
-  def applicationStateFilter(allowedStateFilter: State => Boolean): ActionFilter[SubmissionApplicationRequest] = 
-    new ActionFilter[SubmissionApplicationRequest] {
+  def applicationStateFilter[AR[_] <: MessagesRequest[_] with HasApplication](allowedStateFilter: State => Boolean): ActionFilter[AR] = 
+    new ActionFilter[AR] {
 
       override protected def executionContext: ExecutionContext = ec
 
-      override protected def filter[A](request: SubmissionApplicationRequest[A]): Future[Option[Result]] =
+      override protected def filter[A](request: AR[A]): Future[Option[Result]] =
         if(allowedStateFilter(request.application.state.name)) {
           successful(None)
         } else {
@@ -209,8 +206,8 @@ trait SubmissionActionBuilders extends SimpleApplicationActionBuilders {
         applicationRequestRefiner(applicationId) andThen
         collaboratorFilter(allowedRoleFilter) andThen
         applicationSubmissionRefiner andThen
-        completedSubmissionFilter andThen
-        applicationStateFilter(allowedStateFilter)
+        applicationStateFilter(allowedStateFilter) andThen
+        completedSubmissionFilter
       ).invokeBlock(request, block)
     }
   }

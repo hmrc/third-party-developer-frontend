@@ -92,7 +92,7 @@ class UserLoginAccount @Inject()(val auditService: AuditService,
   def get2svRecommendationPage(): Action[AnyContent] = loggedInAction {
     implicit request => {
       for {
-        showAdminMfaMandateMessage <- mfaMandateService.showAdminMfaMandatedMessage(loggedIn.developer.userId)
+        showAdminMfaMandateMessage <- mfaMandateService.showAdminMfaMandatedMessage(request.userId)
         mfaMandateDetails = MfaMandateDetails(showAdminMfaMandateMessage, mfaMandateService.daysTillAdminMfaMandate.getOrElse(0))
       }  yield (Ok(add2SVView(mfaMandateDetails)))
     }

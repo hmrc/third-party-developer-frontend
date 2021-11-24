@@ -46,8 +46,8 @@ class ManageApplications @Inject() (
 
   def manageApps: Action[AnyContent] = loggedInAction { implicit request =>
     for {
-      (sandboxAppSummaries, upliftableApplicationIds) <- upliftLogic.aUsersSandboxAdminSummariesAndUpliftIds(loggedIn.developer.userId)
-      productionAppSummaries <- appsByTeamMember.fetchProductionSummariesByTeamMember(loggedIn.developer.userId)
+      (sandboxAppSummaries, upliftableApplicationIds) <- upliftLogic.aUsersSandboxAdminSummariesAndUpliftIds(request.userId)
+      productionAppSummaries <- appsByTeamMember.fetchProductionSummariesByTeamMember(request.userId)
     } yield (sandboxAppSummaries, productionAppSummaries) match {
       case (Nil, Nil) => Ok(addApplicationSubordinateEmptyNestView())
       case _ => 

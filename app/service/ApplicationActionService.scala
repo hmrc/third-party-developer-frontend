@@ -29,6 +29,7 @@ import domain.models.applications._
 import domain.models.apidefinitions._
 import domain.models.subscriptions._
 import domain.models.subscriptions.ApiSubscriptionFields._
+import controllers.UserRequest
 
 @Singleton
 class ApplicationActionService @Inject()(
@@ -50,7 +51,7 @@ class ApplicationActionService @Inject()(
         subs = toApiSubscriptionStatusList(applicationWithSubs, fieldDefinitions, subscriptionData)
         role <- OptionT.fromOption[Future](application.role(developerSession.developer.email))
       } yield {
-        ApplicationRequest(application, environment, subs, openAccessApis, role, developerSession, request)
+        new ApplicationRequest(application, environment, subs, openAccessApis, role, new UserRequest(developerSession, request))
       }
   }
 

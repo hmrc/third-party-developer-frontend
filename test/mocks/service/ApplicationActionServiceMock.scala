@@ -31,6 +31,7 @@ import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 import domain.models.apidefinitions.ApiContext
 import domain.models.subscriptions.ApiData
+import controllers.UserRequest
 
 trait ApplicationActionServiceMock extends MockitoSugar with ArgumentMatchersSugar {
   val applicationActionServiceMock = mock[ApplicationActionService]
@@ -48,14 +49,14 @@ trait ApplicationActionServiceMock extends MockitoSugar with ArgumentMatchersSug
       appData.application.role(developerSession.developer.email) match {
         case None => OptionT.none[Future, ApplicationRequest[A]]
         case Some(role) => OptionT.pure[Future](
-          ApplicationRequest(
+          new ApplicationRequest(
             application = appData.application,
             deployedTo = appData.application.deployedTo,
             subscriptions,
             openAccessApis,
             role,
-            user = developerSession,
-            request = req)
+            userRequest = new UserRequest(developerSession,req)
+          )
         )
       }
 

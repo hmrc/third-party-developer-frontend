@@ -59,15 +59,15 @@ class ProtectAccount @Inject()(val thirdPartyDeveloperConnector: ThirdPartyDevel
   val qrCode = QRCode(scale)
 
   def getQrCode: Action[AnyContent] = atLeastPartLoggedInEnablingMfaAction { implicit request =>
-    thirdPartyDeveloperConnector.createMfaSecret(loggedIn.developer.userId).map(secret => {
-      val uri = otpAuthUri(secret.toLowerCase, "HMRC Developer Hub", loggedIn.email)
+    thirdPartyDeveloperConnector.createMfaSecret(request.userId).map(secret => {
+      val uri = otpAuthUri(secret.toLowerCase, "HMRC Developer Hub", request.developerSession.email)
       val qrImg = qrCode.generateDataImageBase64(uri.toString)
       Ok(protectAccountSetupView(secret.toLowerCase().grouped(4).mkString(" "), qrImg))
     })
   }
 
   def getProtectAccount: Action[AnyContent] = atLeastPartLoggedInEnablingMfaAction { implicit request =>
-    thirdPartyDeveloperConnector.fetchDeveloper(loggedIn.developer.userId).map(dev => {
+    thirdPartyDeveloperConnector.fetchDeveloper(request.userId).map(dev => {
       dev.getOrElse(throw new RuntimeException).mfaEnabled.getOrElse(false) match {
         case true => Ok(protectedAccountView())
         case false => Ok(protectAccountView())
@@ -86,7 +86,7 @@ class ProtectAccount @Inject()(val thirdPartyDeveloperConnector: ThirdPartyDevel
   def protectAccount: Action[AnyContent] = atLeastPartLoggedInEnablingMfaAction { implicit request =>
 
     def logonAndComplete(): Result = {
-      thirdPartyDeveloperConnector.updateSessionLoggedInState(loggedIn.session.sessionId, UpdateLoggedInStateRequest(LoggedInState.LOGGED_IN))
+      thirdPartyDeveloperConnector.updateSessionLoggedInState(request.developerSession.session.sessionId, UpdateLoggedInStateRequest(LoggedInState.LOGGED_IN))
       Redirect(controllers.profile.routes.ProtectAccount.getProtectAccountCompletedPage())
     }
 
@@ -104,7 +104,7 @@ class ProtectAccount @Inject()(val thirdPartyDeveloperConnector: ThirdPartyDevel
   },
       (form: ProtectAccountForm) => {
         for {
-          mfaResponse <- mfaService.enableMfa(loggedIn.developer.userId, form.accessCode)
+          mfaResponse <- mfaService.enableMfa(request.userId, form.accessCode)
           result = {
             if (mfaResponse.totpVerified) logonAndComplete()
             else invalidCode(form)
@@ -138,7 +138,7 @@ class ProtectAccount @Inject()(val thirdPartyDeveloperConnector: ThirdPartyDevel
       Future.successful(BadRequest(protectAccountRemovalAccessCodeView(form)))
     },
       form => {
-        mfaService.removeMfa(loggedIn.developer.userId, loggedIn.email, form.accessCode).map(r =>
+        mfaService.removeMfa(request.userId, request.developerSession.email, form.accessCode).map(r =>
           r.totpVerified match {
             case true => Redirect(controllers.profile.routes.ProtectAccount.get2SVRemovalCompletePage())
             case _ =>

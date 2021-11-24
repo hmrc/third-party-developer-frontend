@@ -49,26 +49,36 @@ trait HeaderEnricher {
   }
 }
 
-case class UserRequest[A](developerSession: DeveloperSession, request: MessagesRequest[A]) extends MessagesRequest[A](request, request.messagesApi)
+class UserRequest[A](val developerSession: DeveloperSession, val msgRequest: MessagesRequest[A]) extends MessagesRequest[A](msgRequest, msgRequest.messagesApi) {
+  lazy val userId = developerSession.developer.userId
+}
 
-case class MaybeUserRequest[A](developerSession: Option[DeveloperSession], request: MessagesRequest[A]) extends MessagesRequest[A](request, request.messagesApi)
+class MaybeUserRequest[A](val developerSession: Option[DeveloperSession], request: MessagesRequest[A]) extends MessagesRequest[A](request, request.messagesApi)
 
-case class ApplicationRequest[A](
-    application: Application,
-    deployedTo: Environment,
-    subscriptions: List[APISubscriptionStatus],
-    openAccessApis: Map[ApiContext,ApiData],
-    role: CollaboratorRole,
-    user: DeveloperSession,
-    request: MessagesRequest[A]
-) extends MessagesRequest[A](request, request.messagesApi) {
+class ApplicationRequest[A](
+    val application: Application,
+    val deployedTo: Environment,
+    val subscriptions: List[APISubscriptionStatus],
+    val openAccessApis: Map[ApiContext,ApiData],
+    val role: CollaboratorRole,
+    val userRequest: UserRequest[A]
+) extends UserRequest[A](userRequest.developerSession, userRequest.msgRequest) with modules.submissions.controllers.HasApplication {
   def hasSubscriptionFields: Boolean = {
     subscriptions.exists(s => s.subscribed && s.fields.fields.nonEmpty)
   }
 }
 
-case class ApplicationWithFieldDefinitionsRequest[A](fieldDefinitions: NonEmptyList[APISubscriptionStatusWithSubscriptionFields], applicationRequest: ApplicationRequest[A])
-    extends MessagesRequest[A](applicationRequest, applicationRequest.messagesApi)
+class ApplicationWithFieldDefinitionsRequest[A](
+  val fieldDefinitions: NonEmptyList[APISubscriptionStatusWithSubscriptionFields],
+  val applicationRequest: ApplicationRequest[A]
+) extends ApplicationRequest[A](
+  applicationRequest.application,
+  applicationRequest.deployedTo,
+  applicationRequest.subscriptions,
+  applicationRequest.openAccessApis,
+  applicationRequest.role,
+  applicationRequest.userRequest
+)
 
 case class ApplicationWithSubscriptionFieldPage[A](
     pageIndex: Int,
@@ -95,19 +105,19 @@ abstract class BaseController(mcc: MessagesControllerComponents) extends Fronten
   implicit val appConfig: ApplicationConfig
 }
 
-abstract class LoggedInController(mcc: MessagesControllerComponents) extends BaseController(mcc)
+abstract class LoggedInController(mcc: MessagesControllerComponents) extends BaseController(mcc) {
+  implicit def developerSessionFromRequest(implicit request: UserRequest[_]): DeveloperSession = request.developerSession
+}
 
 abstract class ApplicationController(mcc: MessagesControllerComponents) extends LoggedInController(mcc) with ActionBuilders {
   val applicationService: ApplicationService
-
-  implicit def userFromRequest(implicit request: ApplicationRequest[_]): DeveloperSession = request.user
 
   def applicationViewModelFromApplicationRequest()(implicit request: ApplicationRequest[_]): ApplicationViewModel =
     ApplicationViewModel(request.application, request.hasSubscriptionFields, hasPpnsFields(request))
 
   def whenTeamMemberOnApp(applicationId: ApplicationId)(fun: ApplicationRequest[AnyContent] => Future[Result]): Action[AnyContent] =
     loggedInAction { implicit request =>
-      val composedActions = Action andThen applicationAction(applicationId, loggedIn)
+      val composedActions = Action andThen applicationAction(applicationId, request.developerSession)
       composedActions.async(fun)(request)
     }
 
@@ -116,7 +126,7 @@ abstract class ApplicationController(mcc: MessagesControllerComponents) extends 
   )(capability: Capability, permissions: Permission)(applicationId: ApplicationId)(fun: ApplicationRequest[AnyContent] => Future[Result]): Action[AnyContent] = {
     loggedInAction { implicit request =>
       val composedActions = Action andThen
-        applicationAction(applicationId, loggedIn) andThen
+        applicationAction(applicationId, request.developerSession) andThen
         capabilityFilter(capability) andThen
         permissionFilter(permissions) andThen
         approvalFilter(stateCheck)
@@ -136,7 +146,7 @@ abstract class ApplicationController(mcc: MessagesControllerComponents) extends 
   private object ManageSubscriptionsActions {
     def subscriptionsComposedActions(applicationId: ApplicationId, noFieldsBehaviour: NoSubscriptionFieldsRefinerBehaviour)(implicit request: UserRequest[AnyContent]) =
       Action andThen
-        applicationAction(applicationId, loggedIn) andThen
+        applicationAction(applicationId, request.developerSession) andThen
         capabilityFilter(Capabilities.EditSubscriptionFields) andThen
         fieldDefinitionsExistRefiner(noFieldsBehaviour)
   }
@@ -187,7 +197,7 @@ abstract class ApplicationController(mcc: MessagesControllerComponents) extends 
                                         (fun: ApplicationRequest[AnyContent] => Future[Result]): Action[AnyContent] = {
     loggedInAction { implicit request =>
       val composedActions = Action andThen
-        applicationAction(applicationId, loggedIn) andThen
+        applicationAction(applicationId, request.developerSession) andThen
         capabilityFilter(capability) andThen
         permissionFilter(permissions) andThen
         subscribedToApiWithPpnsFieldFilter
@@ -197,6 +207,8 @@ abstract class ApplicationController(mcc: MessagesControllerComponents) extends 
 }
 
 abstract class LoggedOutController(mcc: MessagesControllerComponents) extends BaseController(mcc) with ExtendedDevHubAuthorization {
+
+  implicit def developerSessionFromRequest(implicit request: UserRequest[_]): DeveloperSession = request.developerSession
 
   implicit def hc(implicit request: Request[_]): HeaderCarrier = {
     val carrier = super.hc
