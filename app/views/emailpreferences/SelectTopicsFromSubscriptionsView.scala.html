@@ -58,7 +58,7 @@
               <input id="@topic.value" class="govuk-checkboxes__input" type="checkbox" name="topic[]" value="@topic.value" @if(selectedTopics.contains(topic.value)) {checked} >
               <label class="govuk-label govuk-checkboxes__label" for="@topic.value">
                 @topic.displayName
-                <div class="form-hint">
+                <div class="govuk-hint">
                   @topic.description
                 </div>
               </label>

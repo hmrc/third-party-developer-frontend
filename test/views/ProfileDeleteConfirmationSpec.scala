@@ -39,7 +39,7 @@ class ProfileDeleteConfirmationSpec extends CommonViewSpec with WithCSRFAddToken
       page.contentType should include("text/html")
 
       val document = Jsoup.parse(page.body)
-      elementExistsByText(document, "h2", "Are you sure you want us to delete your account?") shouldBe true
+      elementExistsByText(document, "legend", "Are you sure you want us to delete your account?") shouldBe true
       elementIdentifiedByAttrWithValueContainsText(document, "label", "for", "deleteAccountYes", "Yes") shouldBe true
       elementIdentifiedByAttrWithValueContainsText(document, "label", "for", "deleteAccountNo", "No") shouldBe true
     }
@@ -56,7 +56,7 @@ class ProfileDeleteConfirmationSpec extends CommonViewSpec with WithCSRFAddToken
 
       val document = Jsoup.parse(page.body)
       elementIdentifiedByAttrWithValueContainsText(document, "a", "href", "#confirmation", "Tell us if you want us to delete your account") shouldBe true
-      elementIdentifiedByAttrWithValueContainsText(document, "span", "class", "error-message", "Tell us if you want us to delete your account") shouldBe true
+      elementIdentifiedByAttrWithValueContainsText(document, "span", "class", "govuk-error-message", "Tell us if you want us to delete your account") shouldBe true
     }
   }
 }
