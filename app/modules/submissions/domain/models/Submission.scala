@@ -44,6 +44,11 @@ object QuestionnaireState {
     case NotApplicable => "Not Applicable"
     case Completed => "Completed"
   }
+
+  def isCompleted(state: QuestionnaireState): Boolean = state match {
+    case NotStarted | InProgress => false
+    case _ => true
+  }
 }
 object Submissions {
   type AnswersToQuestions = Map[QuestionId, ActualAnswer]
@@ -73,4 +78,9 @@ case class Submission(
 case class ExtendedSubmission(
   submission: Submission,
   questionnaireProgress: Map[QuestionnaireId, QuestionnaireProgress]
-)
+) {
+  lazy val isCompleted = 
+    questionnaireProgress.values
+    .map(_.state)
+    .exists(s => false == QuestionnaireState.isCompleted(s))
+}

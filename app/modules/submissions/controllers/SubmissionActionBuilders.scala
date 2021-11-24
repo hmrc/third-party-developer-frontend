@@ -38,12 +38,14 @@ import domain.models.applications.State
 import domain.models.developers.DeveloperSession
 import domain.models.applications.CollaboratorRole
 
-case class SubmissionRequest[A](submission: Submission , userRequest: UserRequest[A]) extends MessagesRequest[A](userRequest, userRequest.messagesApi) {
+case class SubmissionRequest[A](extSubmission: ExtendedSubmission, userRequest: UserRequest[A]) extends MessagesRequest[A](userRequest, userRequest.messagesApi) {
+  lazy val submission = extSubmission.submission
   lazy val answersToQuestions = submission.answersToQuestions
   lazy val developerSession = userRequest.developerSession
 }
 
 case class SubmissionApplicationRequest[A](application: Application, submissionRequest: SubmissionRequest[A]) extends MessagesRequest[A](submissionRequest, submissionRequest.messagesApi) {
+  lazy val extSubmission = submissionRequest.extSubmission
   lazy val submission = submissionRequest.submission
   lazy val answersToQuestions = submission.answersToQuestions
   lazy val developerSession = submissionRequest.userRequest.developerSession
@@ -70,7 +72,7 @@ trait SubmissionActionBuilders extends SimpleApplicationActionBuilders {
         (
           for {
             submission <- E.fromOptionF(submissionService.fetch(submissionId), NotFound(errorHandler.notFoundTemplate(input)) )
-          } yield SubmissionRequest(submission.submission, input)
+          } yield SubmissionRequest(submission, input)
         )
         .value
       }
@@ -98,7 +100,7 @@ trait SubmissionActionBuilders extends SimpleApplicationActionBuilders {
         (
           for {
             submission <- E.fromOptionF(submissionService.fetchLatestSubmission(request.application.id), NotFound(errorHandler.notFoundTemplate(request)) )
-          } yield SubmissionApplicationRequest(request.application, SubmissionRequest(submission.submission, UserRequest(request.user, request.request)))
+          } yield SubmissionApplicationRequest(request.application, SubmissionRequest(submission, UserRequest(request.user, request.request)))
         )
         .value
       }
@@ -131,6 +133,19 @@ trait SubmissionActionBuilders extends SimpleApplicationActionBuilders {
       }
     }
 
+  def completedSubmissionFilter: ActionFilter[SubmissionApplicationRequest] = 
+    new ActionFilter[SubmissionApplicationRequest] {
+
+      override protected def executionContext: ExecutionContext = ec
+
+      override protected def filter[A](request: SubmissionApplicationRequest[A]): Future[Option[Result]] =
+        if(request.extSubmission.isCompleted) {
+          successful(None)
+        } else {
+          successful(Some(BadRequest("Submission is not yet completed")))
+        }
+    }
+
   def applicationStateFilter(allowedStateFilter: State => Boolean): ActionFilter[SubmissionApplicationRequest] = 
     new ActionFilter[SubmissionApplicationRequest] {
 
@@ -144,17 +159,13 @@ trait SubmissionActionBuilders extends SimpleApplicationActionBuilders {
         }
     }
 
-
-
-  def withSubmission(submissionId: SubmissionId)(fun: SubmissionApplicationRequest[AnyContent] => Future[Result])(implicit ec: ExecutionContext): Action[AnyContent] = {
+  def withSubmission(submissionId: SubmissionId)(block: SubmissionApplicationRequest[AnyContent] => Future[Result])(implicit ec: ExecutionContext): Action[AnyContent] = {
     Action.async { implicit request =>
-      val composedActions =
-        Action andThen
+      (
         loggedInActionRefiner(onlyTrueIfLoggedInFilter) andThen
         submissionRefiner(submissionId) andThen
         submissionApplicationRefiner
-
-      composedActions.async(fun)(request)
+      ).invokeBlock(request, block)
     }
   }
 
@@ -188,6 +199,19 @@ trait SubmissionActionBuilders extends SimpleApplicationActionBuilders {
         applicationStateFilter(allowedStateFilter)
 
       composedActions.async(fun)(request)
+    }
+  }
+
+  def withApplicationAndCompletedSubmission(allowedStateFilter: StateFilter.Type = StateFilter.allAllowed, allowedRoleFilter: RoleFilter.Type = RoleFilter.isTeamMember)(applicationId: ApplicationId)(block: SubmissionApplicationRequest[AnyContent] => Future[Result])(implicit ec: ExecutionContext): Action[AnyContent] = {
+    Action.async { implicit request =>
+      (
+        loggedInActionRefiner(onlyTrueIfLoggedInFilter) andThen
+        applicationRequestRefiner(applicationId) andThen
+        collaboratorFilter(allowedRoleFilter) andThen
+        applicationSubmissionRefiner andThen
+        completedSubmissionFilter andThen
+        applicationStateFilter(allowedStateFilter)
+      ).invokeBlock(request, block)
     }
   }
 }
