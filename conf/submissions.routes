@@ -1,4 +1,5 @@
 GET         /application/:aid/production-credentials-checklist                    modules.submissions.controllers.ProdCredsChecklistController.productionCredentialsChecklistPage(aid: ApplicationId)
+POST        /application/:aid/production-credentials-checklist                    modules.submissions.controllers.ProdCredsChecklistController.productionCredentialsChecklistAction(aid: ApplicationId)
 
 GET         /:sid/question/:qid                                                   modules.submissions.controllers.QuestionsController.showQuestion(sid: SubmissionId, qid: QuestionId)
 POST        /:sid/question/:qid                                                   modules.submissions.controllers.QuestionsController.recordAnswer(sid: SubmissionId, qid: QuestionId)

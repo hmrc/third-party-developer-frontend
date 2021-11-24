@@ -35,7 +35,9 @@ import helpers.EitherTHelper
 import domain.models.controllers.BadRequestWithErrorMessage
 import modules.submissions.domain.models.NotApplicable
 
+import scala.concurrent.Future
 import scala.concurrent.Future.successful
+import play.api.data.Form
 
 object ProdCredsChecklistController {
   case class ViewQuestionnaireSummary(label: String, state: String, id: QuestionnaireId = QuestionnaireId.random, nextQuestionUrl: Option[String] = None)
@@ -61,6 +63,7 @@ object ProdCredsChecklistController {
     ViewModel(appId, appName, groupings)
   }
 }
+
 @Singleton
 class ProdCredsChecklistController @Inject() (
     val errorHandler: ErrorHandler,
@@ -104,19 +107,59 @@ class ProdCredsChecklistController @Inject() (
       filterGroupingsForEmptyQuestionnaireSummaries(viewModel.groupings).fold(
         BadRequest("No questionnaires applicable") 
       )(vg =>
-        Ok(productionCredentialsChecklistView(viewModel.copy(groupings = vg)))
+        Ok(productionCredentialsChecklistView(viewModel.copy(groupings = vg), DummyProductionCredentialsChecklistForm.form.fillAndValidate(DummyProductionCredentialsChecklistForm("dummy"))))
       )
     }
     
     val vm = for {
-      submission          <- fromOptionF(submissionService.fetchLatestSubmission(productionAppId), "No subsmission and/or application found")
+      submission          <- fromOptionF(submissionService.fetchLatestSubmission(productionAppId), "No submission and/or application found")
       viewModel           = convertSubmissionToViewModel(submission)(request.application.id, request.application.name)
     } yield viewModel
 
     vm.fold[Result](failed, success)
   }
 
-  def productionCredentialsChecklistAction() = Action.async { implicit request =>
-    successful(Ok(""))
+  def productionCredentialsChecklistAction(productionAppId: ApplicationId) = withApplicationSubmission(StateFilter.inTesting)(productionAppId) { implicit request =>
+    def handleValidForm(validForm: DummyProductionCredentialsChecklistForm) = {
+      if(request.extSubmission.isCompleted) {
+        successful(Redirect(modules.submissions.controllers.routes.CheckAnswersController.checkAnswersPage(productionAppId)))
+      }
+      else {
+        successful(
+          Ok(
+            productionCredentialsChecklistView(
+              convertSubmissionToViewModel(request.extSubmission)(request.application.id, request.application.name),
+              DummyProductionCredentialsChecklistForm.form.fill(validForm).withError("something", "something")
+            )
+          )
+        )
+      }
+    }
+
+    def handleInvalidForm(formWithErrors: Form[DummyProductionCredentialsChecklistForm]) =
+      Future(
+        BadRequest(
+          productionCredentialsChecklistView(
+            convertSubmissionToViewModel(request.extSubmission)(request.application.id, request.application.name),
+            formWithErrors
+          )
+        )
+      )
+
+    DummyProductionCredentialsChecklistForm.form.bindFromRequest.fold(handleInvalidForm, handleValidForm)
+  }
+}
+
+case class DummyProductionCredentialsChecklistForm(dummy: String = "dummy")
+
+object DummyProductionCredentialsChecklistForm {
+  import play.api.data.Forms.{ignored, mapping}
+
+  def form: Form[DummyProductionCredentialsChecklistForm] = {
+    Form(
+      mapping(
+        "dummy" -> ignored("dummy")
+      )(DummyProductionCredentialsChecklistForm.apply)(DummyProductionCredentialsChecklistForm.unapply)
+    )
   }
 }
