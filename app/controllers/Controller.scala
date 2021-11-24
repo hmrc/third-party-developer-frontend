@@ -115,23 +115,25 @@ abstract class ApplicationController(mcc: MessagesControllerComponents) extends 
   def applicationViewModelFromApplicationRequest()(implicit request: ApplicationRequest[_]): ApplicationViewModel =
     ApplicationViewModel(request.application, request.hasSubscriptionFields, hasPpnsFields(request))
 
-  def whenTeamMemberOnApp(applicationId: ApplicationId)(fun: ApplicationRequest[AnyContent] => Future[Result]): Action[AnyContent] =
-    loggedInAction { implicit request =>
-      val composedActions = Action andThen applicationAction(applicationId, request.developerSession)
-      composedActions.async(fun)(request)
+  def whenTeamMemberOnApp(applicationId: ApplicationId)(block: ApplicationRequest[AnyContent] => Future[Result]): Action[AnyContent] =
+    Action.async { implicit request =>
+      (
+        loggedInActionRefiner() andThen
+        applicationRequestRefiner(applicationId)
+      ).invokeBlock(request, block)
     }
-
+    
   private def checkActionWithStateCheck(
       stateCheck: State => Boolean
-  )(capability: Capability, permissions: Permission)(applicationId: ApplicationId)(fun: ApplicationRequest[AnyContent] => Future[Result]): Action[AnyContent] = {
-    loggedInAction { implicit request =>
-      val composedActions = Action andThen
-        applicationAction(applicationId, request.developerSession) andThen
+  )(capability: Capability, permissions: Permission)(applicationId: ApplicationId)(block: ApplicationRequest[AnyContent] => Future[Result]): Action[AnyContent] = {
+    Action.async { implicit request =>
+      (
+        loggedInActionRefiner() andThen
+        applicationRequestRefiner(applicationId) andThen
         capabilityFilter(capability) andThen
         permissionFilter(permissions) andThen
         approvalFilter(stateCheck)
-
-      composedActions.async(fun)(request)
+      ).invokeBlock(request, block)
     }
   }
 
@@ -143,65 +145,74 @@ abstract class ApplicationController(mcc: MessagesControllerComponents) extends 
 
   def checkActionForTesting = checkActionWithStateCheck(_.isInTesting) _
 
-  private object ManageSubscriptionsActions {
-    def subscriptionsComposedActions(applicationId: ApplicationId, noFieldsBehaviour: NoSubscriptionFieldsRefinerBehaviour)(implicit request: UserRequest[AnyContent]) =
-      Action andThen
-        applicationAction(applicationId, request.developerSession) andThen
-        capabilityFilter(Capabilities.EditSubscriptionFields) andThen
-        fieldDefinitionsExistRefiner(noFieldsBehaviour)
-  }
 
-  def subFieldsDefinitionsExistAction(applicationId: ApplicationId, noFieldsBehaviour: NoSubscriptionFieldsRefinerBehaviour = NoSubscriptionFieldsRefinerBehaviour.BadRequest)(
-      fun: ApplicationWithFieldDefinitionsRequest[AnyContent] => Future[Result]
-  ): Action[AnyContent] = {
-    loggedInAction { implicit request: UserRequest[AnyContent] =>
-      ManageSubscriptionsActions
-        .subscriptionsComposedActions(applicationId, noFieldsBehaviour)
-        .async(fun)(request)
+  private def subscriptionsBaseActions(applicationId: ApplicationId, noFieldsBehaviour: NoSubscriptionFieldsRefinerBehaviour) = 
+    loggedInActionRefiner() andThen
+    applicationRequestRefiner(applicationId) andThen
+    capabilityFilter(Capabilities.EditSubscriptionFields) andThen
+    fieldDefinitionsExistRefiner(noFieldsBehaviour)
+
+  def subFieldsDefinitionsExistAction(
+    applicationId: ApplicationId,
+    noFieldsBehaviour: NoSubscriptionFieldsRefinerBehaviour = NoSubscriptionFieldsRefinerBehaviour.BadRequest
+  )(block: ApplicationWithFieldDefinitionsRequest[AnyContent] => Future[Result]): Action[AnyContent] = {
+    Action.async { implicit request =>
+      (
+        subscriptionsBaseActions(applicationId, noFieldsBehaviour)
+      )
+      .invokeBlock(request, block)
     }
   }
 
-  def subFieldsDefinitionsExistActionWithPageNumber(applicationId: ApplicationId, pageNumber: Int)(
-      fun: ApplicationWithSubscriptionFieldPage[AnyContent] => Future[Result]
-  ): Action[AnyContent] = {
-    loggedInAction { implicit request =>
-      (ManageSubscriptionsActions
-        .subscriptionsComposedActions(applicationId, NoSubscriptionFieldsRefinerBehaviour.BadRequest) andThen subscriptionFieldPageRefiner(pageNumber))
-        .async(fun)(request)
+  def subFieldsDefinitionsExistActionWithPageNumber(
+    applicationId: ApplicationId,
+    pageNumber: Int
+  )(block: ApplicationWithSubscriptionFieldPage[AnyContent] => Future[Result]): Action[AnyContent] = {
+    Action.async { implicit request =>
+      (
+        subscriptionsBaseActions(applicationId, NoSubscriptionFieldsRefinerBehaviour.BadRequest) andThen
+        subscriptionFieldPageRefiner(pageNumber)
+      )
+      .invokeBlock(request, block)
     }
   }
 
   def subFieldsDefinitionsExistActionByApi(applicationId: ApplicationId, context: ApiContext, version: ApiVersion)(
-      fun: ApplicationWithSubscriptionFields[AnyContent] => Future[Result]
+      block: ApplicationWithSubscriptionFields[AnyContent] => Future[Result]
   ): Action[AnyContent] = {
-    loggedInAction { implicit request =>
-      (ManageSubscriptionsActions
-        .subscriptionsComposedActions(applicationId, NoSubscriptionFieldsRefinerBehaviour.BadRequest) andThen subscriptionFieldsRefiner(context, version))
-        .async(fun)(request)
+    Action.async { implicit request =>
+      (
+        subscriptionsBaseActions(applicationId, NoSubscriptionFieldsRefinerBehaviour.BadRequest) andThen
+        subscriptionFieldsRefiner(context, version)
+      )
+      .invokeBlock(request, block)
     }
   }
 
   def singleSubFieldsWritableDefinitionActionByApi(applicationId: ApplicationId, context: ApiContext, version: ApiVersion, fieldName: String)(
-      fun: ApplicationWithWritableSubscriptionField[AnyContent] => Future[Result]
+      block: ApplicationWithWritableSubscriptionField[AnyContent] => Future[Result]
   ): Action[AnyContent] = {
-    loggedInAction { implicit request =>
-      (ManageSubscriptionsActions
-        .subscriptionsComposedActions(applicationId, NoSubscriptionFieldsRefinerBehaviour.BadRequest)
-          andThen subscriptionFieldsRefiner(context, version)
-          andThen writeableSubscriptionFieldRefiner(fieldName)
-      ).async(fun)(request)
+    Action.async { implicit request =>
+      (
+        subscriptionsBaseActions(applicationId, NoSubscriptionFieldsRefinerBehaviour.BadRequest) andThen
+        subscriptionFieldsRefiner(context, version) andThen
+        writeableSubscriptionFieldRefiner(fieldName)
+      )
+      .invokeBlock(request, block)
     }
   }
 
   def subscribedToApiWithPpnsFieldAction(applicationId: ApplicationId, capability: Capability, permissions: Permission)
-                                        (fun: ApplicationRequest[AnyContent] => Future[Result]): Action[AnyContent] = {
-    loggedInAction { implicit request =>
-      val composedActions = Action andThen
-        applicationAction(applicationId, request.developerSession) andThen
+                                        (block: ApplicationRequest[AnyContent] => Future[Result]): Action[AnyContent] = {
+    Action.async { implicit request =>
+      (
+        loggedInActionRefiner() andThen
+        applicationRequestRefiner(applicationId) andThen
         capabilityFilter(capability) andThen
         permissionFilter(permissions) andThen
         subscribedToApiWithPpnsFieldFilter
-      composedActions.async(fun)(request)
+      )
+      .invokeBlock(request, block)  
     }
   }
 }

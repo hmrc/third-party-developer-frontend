@@ -21,7 +21,6 @@ import config.{ApplicationConfig, ErrorHandler}
 import controllers.ManageSubscriptions.toDetails
 import domain.models.apidefinitions.{ApiContext, APISubscriptionStatusWithSubscriptionFields,APISubscriptionStatusWithWritableSubscriptionField, ApiVersion}
 import domain.models.applications.{ApplicationId, Capability, Permission, State}
-import domain.models.developers.DeveloperSession
 import domain.models.controllers.NoSubscriptionFieldsRefinerBehaviour
 import play.api.mvc._
 import play.api.mvc.Results._
@@ -41,19 +40,6 @@ trait SimpleApplicationActionBuilders {
 
   private implicit def hc(implicit request: Request[_]): HeaderCarrier =
     HeaderCarrierConverter.fromRequestAndSession(request, request.session)
-
-  def applicationAction(applicationId: ApplicationId, developerSession: DeveloperSession)(implicit ec: ExecutionContext): ActionRefiner[MessagesRequest, ApplicationRequest] =
-    new ActionRefiner[MessagesRequest, ApplicationRequest] {
-      override protected def executionContext: ExecutionContext = ec
-
-      override def refine[A](request: MessagesRequest[A]): Future[Either[Result, ApplicationRequest[A]]] = {
-        implicit val implicitRequest: MessagesRequest[A] = request
-        import cats.implicits._
-
-        applicationActionService.process(applicationId, developerSession)
-        .toRight(NotFound(errorHandler.notFoundTemplate(Request(request, developerSession)))).value
-      }
-    }
 
   def applicationRequestRefiner(applicationId: ApplicationId)(implicit ec: ExecutionContext): ActionRefiner[UserRequest, ApplicationRequest] =
     new ActionRefiner[UserRequest, ApplicationRequest] {

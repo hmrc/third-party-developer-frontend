@@ -159,7 +159,7 @@ trait SubmissionActionBuilders extends SimpleApplicationActionBuilders {
   def withSubmission(submissionId: SubmissionId)(block: SubmissionApplicationRequest[AnyContent] => Future[Result])(implicit ec: ExecutionContext): Action[AnyContent] = {
     Action.async { implicit request =>
       (
-        loggedInActionRefiner(onlyTrueIfLoggedInFilter) andThen
+        loggedInActionRefiner() andThen
         submissionRefiner(submissionId) andThen
         submissionApplicationRefiner
       ).invokeBlock(request, block)
@@ -170,7 +170,7 @@ trait SubmissionActionBuilders extends SimpleApplicationActionBuilders {
     Action.async { implicit request =>
       val composedActions =
         Action andThen
-        loggedInActionRefiner(onlyTrueIfLoggedInFilter) andThen
+        loggedInActionRefiner() andThen
         applicationRequestRefiner(applicationId) andThen
         applicationSubmissionRefiner
 
@@ -189,7 +189,7 @@ trait SubmissionActionBuilders extends SimpleApplicationActionBuilders {
     Action.async { implicit request =>
       val composedActions =
         Action andThen
-        loggedInActionRefiner(onlyTrueIfLoggedInFilter) andThen
+        loggedInActionRefiner() andThen
         applicationRequestRefiner(applicationId) andThen
         collaboratorFilter(allowedRoleFilter) andThen
         applicationSubmissionRefiner andThen
@@ -202,7 +202,7 @@ trait SubmissionActionBuilders extends SimpleApplicationActionBuilders {
   def withApplicationAndCompletedSubmission(allowedStateFilter: StateFilter.Type = StateFilter.allAllowed, allowedRoleFilter: RoleFilter.Type = RoleFilter.isTeamMember)(applicationId: ApplicationId)(block: SubmissionApplicationRequest[AnyContent] => Future[Result])(implicit ec: ExecutionContext): Action[AnyContent] = {
     Action.async { implicit request =>
       (
-        loggedInActionRefiner(onlyTrueIfLoggedInFilter) andThen
+        loggedInActionRefiner() andThen
         applicationRequestRefiner(applicationId) andThen
         collaboratorFilter(allowedRoleFilter) andThen
         applicationSubmissionRefiner andThen
