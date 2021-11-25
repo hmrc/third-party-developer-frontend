@@ -80,7 +80,7 @@ class ProdCredsChecklistController @Inject() (
   import cats.instances.future.catsStdInstancesForFuture
   import ProdCredsChecklistController._
 
-  def productionCredentialsChecklist(productionAppId: ApplicationId): Action[AnyContent] = withApplicationSubmission(StateFilter.inTesting)(productionAppId) { implicit request =>
+  def productionCredentialsChecklist(productionAppId: ApplicationId): Action[AnyContent] = withApplicationSubmission(StateFilter.inTesting, RoleFilter.isAdminRole)(productionAppId) { implicit request =>
     val failed = (err: String) => BadRequestWithErrorMessage(err)
 
     val success = (viewModel: ViewModel) => {
