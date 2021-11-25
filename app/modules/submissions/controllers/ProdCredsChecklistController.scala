@@ -75,6 +75,22 @@ object ProdCredsChecklistController {
     val groupings = extSubmission.submission.groups.map(convertToViewGrouping(extSubmission))
     ViewModel(appId, appName, groupings)
   }
+
+  def filterGroupingsForEmptyQuestionnaireSummaries(groupings: NonEmptyList[ViewGrouping]): Option[NonEmptyList[ViewGrouping]] = {
+    import cats.implicits._
+    
+    val filterFn: ViewQuestionnaireSummary => Boolean = _.state == QuestionnaireState.describe(NotApplicable)
+    
+    groupings
+      .map(g => {
+        val qs = g.questionnaireSummaries.filterNot(filterFn).toNel
+        (g.label, qs)
+      })
+      .collect {
+        case (label, Some(qs)) => ViewGrouping(label, qs)
+      }
+      .toNel
+  }
 }
 
 @Singleton
@@ -102,21 +118,6 @@ class ProdCredsChecklistController @Inject() (
     val failed = (err: String) => BadRequestWithErrorMessage(err)
 
     val success = (viewModel: ViewModel) => {
-
-      def filterGroupingsForEmptyQuestionnaireSummaries(groupings: NonEmptyList[ViewGrouping]): Option[NonEmptyList[ViewGrouping]] = {
-        val filterFn: ViewQuestionnaireSummary => Boolean = _.state == QuestionnaireState.describe(NotApplicable)
-        
-        groupings
-          .map(g => {
-            val qs = g.questionnaireSummaries.filterNot(filterFn).toNel
-            (g.label, qs)
-          })
-          .collect {
-            case (label, Some(qs)) => ViewGrouping(label, qs)
-          }
-          .toNel
-      }
-
       filterGroupingsForEmptyQuestionnaireSummaries(viewModel.groupings).fold(
         BadRequest("No questionnaires applicable") 
       )(vg =>
@@ -138,12 +139,13 @@ class ProdCredsChecklistController @Inject() (
         successful(Redirect(modules.submissions.controllers.routes.CheckAnswersController.checkAnswersPage(productionAppId)))
       }
       else {
+        val viewModel = convertSubmissionToViewModel(request.extSubmission)(request.application.id, request.application.name)
+        
         successful(
-          Ok(
-            productionCredentialsChecklistView(
-              convertSubmissionToViewModel(request.extSubmission)(request.application.id, request.application.name),
-              DummyForm.form.fill(validForm).withError("something", "something")
-            )
+          filterGroupingsForEmptyQuestionnaireSummaries(viewModel.groupings).fold(
+            BadRequest("No questionnaires applicable") 
+          )(vg =>
+            Ok(productionCredentialsChecklistView(viewModel.copy(groupings = vg), DummyForm.form.fill(validForm).withError("something", "something")))
           )
         )
       }
