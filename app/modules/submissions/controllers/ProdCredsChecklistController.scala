@@ -35,7 +35,6 @@ import helpers.EitherTHelper
 import domain.models.controllers.BadRequestWithErrorMessage
 import modules.submissions.domain.models.NotApplicable
 
-import scala.concurrent.Future
 import scala.concurrent.Future.successful
 import play.api.data.Form
 
