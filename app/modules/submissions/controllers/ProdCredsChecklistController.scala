@@ -39,6 +39,20 @@ import scala.concurrent.Future.successful
 import play.api.data.Form
 
 object ProdCredsChecklistController {
+  case class DummyForm(dummy: String = "dummy")
+
+  object DummyForm {
+    import play.api.data.Forms.{ignored, mapping}
+
+    def form: Form[DummyForm] = {
+      Form(
+        mapping(
+          "dummy" -> ignored("dummy")
+        )(DummyForm.apply)(DummyForm.unapply)
+      )
+    }
+  }
+
   case class ViewQuestionnaireSummary(label: String, state: String, id: QuestionnaireId = QuestionnaireId.random, nextQuestionUrl: Option[String] = None)
   case class ViewGrouping(label: String, questionnaireSummaries: NonEmptyList[ViewQuestionnaireSummary])
   case class ViewModel(appId: ApplicationId, appName: String, groupings: NonEmptyList[ViewGrouping])
@@ -106,7 +120,7 @@ class ProdCredsChecklistController @Inject() (
       filterGroupingsForEmptyQuestionnaireSummaries(viewModel.groupings).fold(
         BadRequest("No questionnaires applicable") 
       )(vg =>
-        Ok(productionCredentialsChecklistView(viewModel.copy(groupings = vg), DummyProductionCredentialsChecklistForm.form.fillAndValidate(DummyProductionCredentialsChecklistForm("dummy"))))
+        Ok(productionCredentialsChecklistView(viewModel.copy(groupings = vg), DummyForm.form.fillAndValidate(DummyForm("dummy"))))
       )
     }
     
@@ -119,7 +133,7 @@ class ProdCredsChecklistController @Inject() (
   }
 
   def productionCredentialsChecklistAction(productionAppId: ApplicationId) = withApplicationSubmission(StateFilter.inTesting)(productionAppId) { implicit request =>
-    def handleValidForm(validForm: DummyProductionCredentialsChecklistForm) = {
+    def handleValidForm(validForm: DummyForm) = {
       if(request.extSubmission.isCompleted) {
         successful(Redirect(modules.submissions.controllers.routes.CheckAnswersController.checkAnswersPage(productionAppId)))
       }
@@ -128,14 +142,14 @@ class ProdCredsChecklistController @Inject() (
           Ok(
             productionCredentialsChecklistView(
               convertSubmissionToViewModel(request.extSubmission)(request.application.id, request.application.name),
-              DummyProductionCredentialsChecklistForm.form.fill(validForm).withError("something", "something")
+              DummyForm.form.fill(validForm).withError("something", "something")
             )
           )
         )
       }
     }
 
-    def handleInvalidForm(formWithErrors: Form[DummyProductionCredentialsChecklistForm]) =
+    def handleInvalidForm(formWithErrors: Form[DummyForm]) =
       successful(
         BadRequest(
           productionCredentialsChecklistView(
@@ -145,20 +159,6 @@ class ProdCredsChecklistController @Inject() (
         )
       )
 
-    DummyProductionCredentialsChecklistForm.form.bindFromRequest.fold(handleInvalidForm, handleValidForm)
-  }
-}
-
-case class DummyProductionCredentialsChecklistForm(dummy: String = "dummy")
-
-object DummyProductionCredentialsChecklistForm {
-  import play.api.data.Forms.{ignored, mapping}
-
-  def form: Form[DummyProductionCredentialsChecklistForm] = {
-    Form(
-      mapping(
-        "dummy" -> ignored("dummy")
-      )(DummyProductionCredentialsChecklistForm.apply)(DummyProductionCredentialsChecklistForm.unapply)
-    )
+    DummyForm.form.bindFromRequest.fold(handleInvalidForm, handleValidForm)
   }
 }
