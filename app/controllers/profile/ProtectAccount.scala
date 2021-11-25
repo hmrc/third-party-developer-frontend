@@ -86,7 +86,7 @@ class ProtectAccount @Inject()(val thirdPartyDeveloperConnector: ThirdPartyDevel
   def protectAccount: Action[AnyContent] = atLeastPartLoggedInEnablingMfaAction { implicit request =>
 
     def logonAndComplete(): Result = {
-      thirdPartyDeveloperConnector.updateSessionLoggedInState(request.developerSession.session.sessionId, UpdateLoggedInStateRequest(LoggedInState.LOGGED_IN))
+      thirdPartyDeveloperConnector.updateSessionLoggedInState(request.sessionId, UpdateLoggedInStateRequest(LoggedInState.LOGGED_IN))
       Redirect(controllers.profile.routes.ProtectAccount.getProtectAccountCompletedPage())
     }
 

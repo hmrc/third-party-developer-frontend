@@ -16,12 +16,8 @@
 
 package controllers
 
-import cats.data.NonEmptyList
 import config.{ApplicationConfig, ErrorHandler}
-import controllers.ManageSubscriptions.toDetails
-import domain.models.apidefinitions.{ApiContext, APISubscriptionStatusWithSubscriptionFields,APISubscriptionStatusWithWritableSubscriptionField, ApiVersion}
 import domain.models.applications.{ApplicationId, Capability, Permission, State}
-import domain.models.controllers.NoSubscriptionFieldsRefinerBehaviour
 import play.api.mvc._
 import play.api.mvc.Results._
 import uk.gov.hmrc.http.HeaderCarrier
@@ -29,11 +25,13 @@ import uk.gov.hmrc.play.http.HeaderCarrierConverter
 
 import scala.concurrent.{ExecutionContext, Future}
 import service.ApplicationActionService
-import domain.models.subscriptions.DevhubAccessLevel
 
-trait SimpleApplicationActionBuilders {
+trait BaseActionBuilders {
 
   val errorHandler: ErrorHandler
+}
+
+trait ApplicationActionBuilders extends BaseActionBuilders {
   val applicationActionService: ApplicationActionService
 
   implicit val appConfig: ApplicationConfig
@@ -53,131 +51,6 @@ trait SimpleApplicationActionBuilders {
         .toRight(NotFound(errorHandler.notFoundTemplate(Request(request, request.developerSession)))).value
       }
     }
-}
-
-trait ActionBuilders extends SimpleApplicationActionBuilders {
-  
-  def fieldDefinitionsExistRefiner(noFieldsBehaviour: NoSubscriptionFieldsRefinerBehaviour)(
-      implicit ec: ExecutionContext
-  ): ActionRefiner[ApplicationRequest, ApplicationWithFieldDefinitionsRequest] = new ActionRefiner[ApplicationRequest, ApplicationWithFieldDefinitionsRequest] {
-    override protected def executionContext: ExecutionContext = ec
-
-    def refine[A](appRequest: ApplicationRequest[A]): Future[Either[Result, ApplicationWithFieldDefinitionsRequest[A]]] = {
-      val noFieldsResult = noFieldsBehaviour match {
-        case NoSubscriptionFieldsRefinerBehaviour.BadRequest    => play.api.mvc.Results.NotFound(errorHandler.notFoundTemplate(appRequest))
-        case NoSubscriptionFieldsRefinerBehaviour.Redirect(url) => play.api.mvc.Results.Redirect(url)
-      }
-
-      val apiSubscriptionStatuses = appRequest.subscriptions.filter(s => s.subscribed)
-
-      val apiSubStatusesWithFieldDefinitions = NonEmptyList
-        .fromList(APISubscriptionStatusWithSubscriptionFields(apiSubscriptionStatuses).toList)
-
-      Future.successful(
-        apiSubStatusesWithFieldDefinitions
-          .fold[Either[Result, ApplicationWithFieldDefinitionsRequest[A]]](Left(noFieldsResult))(withDefinitions =>
-            Right(new ApplicationWithFieldDefinitionsRequest(withDefinitions, appRequest))
-          )
-      )
-    }
-  }
-
-  def subscriptionFieldPageRefiner(pageNumber: Int)(implicit ec: ExecutionContext): ActionRefiner[ApplicationWithFieldDefinitionsRequest, ApplicationWithSubscriptionFieldPage] =
-    new ActionRefiner[ApplicationWithFieldDefinitionsRequest, ApplicationWithSubscriptionFieldPage] {
-      override protected def executionContext: ExecutionContext = ec
-
-      def refine[A](request: ApplicationWithFieldDefinitionsRequest[A]): Future[Either[Result, ApplicationWithSubscriptionFieldPage[A]]] = {
-        val accessLevel = DevhubAccessLevel.fromRole(request.role)
-
-        val details = request.fieldDefinitions.map(toDetails(accessLevel)).toList
-
-        Future.successful(
-          if (pageNumber >= 1 && pageNumber <= details.size) {
-            val apiDetails = details(pageNumber - 1)
-            val apiSubscriptionStatus = request.fieldDefinitions.toList(pageNumber - 1)
-
-            Right(ApplicationWithSubscriptionFieldPage(pageNumber, details.size, apiSubscriptionStatus, apiDetails, request.applicationRequest))
-          } else {
-            Left(NotFound(errorHandler.notFoundTemplate(request)))
-          }
-        )
-      }
-    }
-
-def subscriptionFieldsRefiner(context: ApiContext, version: ApiVersion)(
-      implicit ec: ExecutionContext
-  ): ActionRefiner[ApplicationWithFieldDefinitionsRequest, ApplicationWithSubscriptionFields] =
-    new ActionRefiner[ApplicationWithFieldDefinitionsRequest, ApplicationWithSubscriptionFields] {
-      override protected def executionContext: ExecutionContext = ec
-
-      def refine[A](request: ApplicationWithFieldDefinitionsRequest[A]): Future[Either[Result, ApplicationWithSubscriptionFields[A]]] = {
-
-        Future.successful({
-          val apiSubscription = request.fieldDefinitions.filter(d => { d.context == context && d.apiVersion.version == version })
-
-          apiSubscription match {
-            case Nil               => Left(NotFound(errorHandler.notFoundTemplate(request)))
-            case apiDetails :: Nil => Right(ApplicationWithSubscriptionFields(apiDetails, request.applicationRequest))
-            case _                 => throw new RuntimeException(s"Too many APIs match for; context: ${context.value} version: ${version.value}")
-          }
-        })
-      }
-    }
-
-  def writeableSubscriptionFieldRefiner(fieldName: String)(
-      implicit ec: ExecutionContext
-  ): ActionRefiner[ApplicationWithSubscriptionFields, ApplicationWithWritableSubscriptionField] =
-    new ActionRefiner[ApplicationWithSubscriptionFields, ApplicationWithWritableSubscriptionField] {
-      override protected def executionContext: ExecutionContext = ec
-
-      def refine[A](request: ApplicationWithSubscriptionFields[A]): Future[Either[Result, ApplicationWithWritableSubscriptionField[A]]] = {
-
-        Future.successful({
-          val subscriptionFieldValues = request.apiSubscription.fields.fields
-            .filter(d => d.definition.name.value == fieldName)
-
-          subscriptionFieldValues match {
-            case Nil => Left(NotFound(errorHandler.notFoundTemplate(request)))
-            case subscriptionFieldValue :: Nil => {
-              val accessLevel = DevhubAccessLevel.fromRole(request.applicationRequest.role)
-              val canWrite = subscriptionFieldValue.definition.access.devhub.satisfiesWrite(accessLevel)
-
-              if (canWrite){
-                Right(ApplicationWithWritableSubscriptionField(APISubscriptionStatusWithWritableSubscriptionField(
-                  request.apiSubscription.name,
-                  request.apiSubscription.context,
-                  request.apiSubscription.apiVersion,
-                  subscriptionFieldValue,
-                  request.apiSubscription.fields), request.applicationRequest))
-              } else {
-                Left(Forbidden(errorHandler.badRequestTemplate(request)))
-              }
-            }
-            case _ => throw new RuntimeException(s"Too many APIs match for; fieldName: ${fieldName}")
-          }
-        })
-      }
-    }
-
-  def subscribedToApiWithPpnsFieldFilter(
-    implicit ec: ExecutionContext
-  ): ActionFilter[ApplicationRequest] = new ActionFilter[ApplicationRequest] {
-    override protected def executionContext: ExecutionContext = ec
-
-    override protected def filter[A](request: ApplicationRequest[A]): Future[Option[Result]] = {
-      implicit val implicitRequest: ApplicationRequest[A] = request
-
-      if (hasPpnsFields(request)) {
-        Future.successful(None)
-      } else {
-        Future.successful(Some(NotFound(errorHandler.notFoundTemplate)))
-      }
-    }
-  }
-
-  def hasPpnsFields(request: ApplicationRequest[_]): Boolean = {
-    request.subscriptions.exists(s => s.subscribed && s.fields.fields.exists(field => field.definition.`type` == "PPNSField"))
-  }
 
   private def forbiddenWhenNot[A](cond: Boolean)(implicit applicationRequest: ApplicationRequest[A]): Option[Result] = {
     if (cond) {
@@ -236,3 +109,4 @@ def subscriptionFieldsRefiner(context: ApiContext, version: ApiVersion)(
   def permissionFilter(permission: Permission)(implicit ec: ExecutionContext) =
     forbiddenWhenNotFilter(req => permission.hasPermissions(req.application, req.developerSession.developer))
 }
+

@@ -33,7 +33,7 @@ import util.ApplicationLogger
 
 import scala.concurrent.{ExecutionContext, Future}
 
-trait DevHubAuthorization extends Results with FrontendHeaderCarrierProvider with CookieEncoding with ApplicationLogger {
+trait DevHubAuthorization extends FrontendHeaderCarrierProvider with CookieEncoding with ApplicationLogger {
   self: BaseController =>
     
   implicit val appConfig: ApplicationConfig

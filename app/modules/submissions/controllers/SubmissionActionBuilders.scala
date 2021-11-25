@@ -18,9 +18,9 @@ package modules.submissions.controllers
 
 import controllers.UserRequest
 import controllers.BaseController
-import controllers.SimpleApplicationActionBuilders
+import controllers.ApplicationActionBuilders
+import controllers.HasApplication
 import modules.submissions.domain.models._
-import config.ErrorHandler
 import scala.concurrent.ExecutionContext
 import play.api.mvc.ActionRefiner
 import scala.concurrent.Future
@@ -40,9 +40,6 @@ import domain.models.applications.CollaboratorRole
 trait HasSubmission {
   def extSubmission: ExtendedSubmission
 }
-trait HasApplication {
-  def application: Application
-}
 
 class SubmissionRequest[A](val extSubmission: ExtendedSubmission, val userRequest: UserRequest[A]) extends UserRequest[A](userRequest.developerSession, userRequest.msgRequest) with HasSubmission {
   lazy val submission = extSubmission.submission
@@ -51,11 +48,11 @@ class SubmissionRequest[A](val extSubmission: ExtendedSubmission, val userReques
 
 class SubmissionApplicationRequest[A](val application: Application, val submissionRequest: SubmissionRequest[A]) extends SubmissionRequest[A](submissionRequest.extSubmission, submissionRequest.userRequest) with HasApplication
 
-trait SubmissionActionBuilders extends SimpleApplicationActionBuilders {
-  self: BaseController =>
+trait SubmissionActionBuilders {
+  self: BaseController with ApplicationActionBuilders =>
 
-  val errorHandler: ErrorHandler
   val submissionService: SubmissionService
+  
   private[this] val ecPassThru = ec
 
   val E = new EitherTHelper[Result] {
@@ -142,6 +139,7 @@ trait SubmissionActionBuilders extends SimpleApplicationActionBuilders {
           successful(Some(BadRequest("Submission is not yet completed")))
         }
     }
+    
 
   def applicationStateFilter[AR[_] <: MessagesRequest[_] with HasApplication](allowedStateFilter: State => Boolean): ActionFilter[AR] = 
     new ActionFilter[AR] {
