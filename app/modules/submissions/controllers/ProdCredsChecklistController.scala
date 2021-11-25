@@ -145,7 +145,7 @@ class ProdCredsChecklistController @Inject() (
           filterGroupingsForEmptyQuestionnaireSummaries(viewModel.groupings).fold(
             BadRequest("No questionnaires applicable") 
           )(vg =>
-            Ok(productionCredentialsChecklistView(viewModel.copy(groupings = vg), DummyForm.form.fill(validForm).withError("something", "something")))
+            Ok(productionCredentialsChecklistView(viewModel.copy(groupings = vg), DummyForm.form.fill(validForm).withGlobalError("production.credentials.checklist.error.global")))
           )
         )
       }
