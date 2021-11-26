@@ -38,7 +38,7 @@ class ApplicationActionService @Inject()(
   openAccessApisService: OpenAccessApiService
 )(implicit ec: ExecutionContext)  {
 
-  def process[A](applicationId: ApplicationId, developerSession: DeveloperSession)(implicit request: MessagesRequest[A], hc: HeaderCarrier): OptionT[Future, ApplicationRequest[A]] = {
+  def process[A](applicationId: ApplicationId, userRequest: UserRequest[A])(implicit hc: HeaderCarrier): OptionT[Future, ApplicationRequest[A]] = {
     import cats.implicits._
 
     for {
@@ -49,10 +49,9 @@ class ApplicationActionService @Inject()(
         openAccessApis <- OptionT.liftF(openAccessApisService.fetchAllOpenAccessApis(environment))
         subscriptionData <- OptionT.liftF(subscriptionFieldsService.fetchAllPossibleSubscriptions(applicationId))
         subs = toApiSubscriptionStatusList(applicationWithSubs, fieldDefinitions, subscriptionData)
-        role <- OptionT.fromOption[Future](application.role(developerSession.developer.email))
-      } yield {
-        new ApplicationRequest(application, environment, subs, openAccessApis, role, new UserRequest(developerSession, request))
-      }
+        role <- OptionT.fromOption[Future](application.role(userRequest.developerSession.developer.email))
+      } yield
+        new ApplicationRequest(application, environment, subs, openAccessApis, role, userRequest)
   }
 
   def toApiSubscriptionStatusList(

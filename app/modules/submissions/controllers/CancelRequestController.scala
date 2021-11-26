@@ -74,6 +74,7 @@ class CancelRequestController @Inject() (
   
   import cats.implicits._
   import cats.instances.future.catsStdInstancesForFuture
+  import SubmissionActionBuilders.StateFilter
 
   private val exec = ec
   private val ET = new EitherTHelper[Result] { implicit val ec: ExecutionContext = exec }

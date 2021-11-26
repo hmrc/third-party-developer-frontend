@@ -98,10 +98,13 @@ class CheckAnswersController @Inject() (
 
 
   import CheckAnswersController._
+  import SubmissionActionBuilders.StateFilter
   import cats.implicits._
   import cats.instances.future.catsStdInstancesForFuture
   
-  def checkAnswers(productionAppId: ApplicationId) = withApplicationAndCompletedSubmission(StateFilter.inTesting)(productionAppId) { implicit request =>
+  val redirectToGetProdCreds = (applicationId: ApplicationId) => Redirect(routes.ProdCredsChecklistController.productionCredentialsChecklist(applicationId))
+
+  def checkAnswers(productionAppId: ApplicationId) = withApplicationAndCompletedSubmission(StateFilter.inTesting)(redirectToGetProdCreds(productionAppId))(productionAppId) { implicit request =>
     val failed = (err: String) => BadRequestWithErrorMessage(err)
 
     val success = (viewModel: ViewModel) => {
@@ -116,7 +119,7 @@ class CheckAnswersController @Inject() (
     vm.fold[Result](failed, success)
   }
 
-  def checkAnswersAction(productionAppId: ApplicationId) = withApplicationAndCompletedSubmission(StateFilter.inTesting)(productionAppId) { implicit request =>
+  def checkAnswersAction(productionAppId: ApplicationId) = withApplicationAndCompletedSubmission(StateFilter.inTesting)(redirectToGetProdCreds(productionAppId))(productionAppId) { implicit request =>
     requestProductionCredentials
       .requestProductionCredentials(productionAppId, request.application.name, request.developerSession)
       .map(_ => Ok(prodCredsRequestReceivedView()))
