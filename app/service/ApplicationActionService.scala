@@ -18,7 +18,6 @@ package service
 
 import cats.data.OptionT
 import domain.models.applications.ApplicationId
-import domain.models.developers.DeveloperSession
 import play.api.mvc._
 import uk.gov.hmrc.http.HeaderCarrier
 import javax.inject.{Inject, Singleton}

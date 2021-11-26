@@ -284,9 +284,10 @@ class CredentialsSpec
     }
 
     "display the NotFound page when the application does not exist" in new Setup with BasicApplicationProvider {
+      reset(applicationActionServiceMock) // Wipe givenApplicationActionReturns
       givenApplicationActionReturnsNotFound(applicationId)
 
-      val result = (underTest.addClientSecret(applicationId)(loggedInRequest))
+      val result = underTest.addClientSecret(applicationId)(loggedInRequest)
 
       status(result) shouldBe NOT_FOUND
     }

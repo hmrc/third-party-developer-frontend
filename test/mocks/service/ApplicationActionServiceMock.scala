@@ -23,7 +23,6 @@ import domain.models.apidefinitions.APISubscriptionStatus
 import domain.models.applications.{Application, ApplicationId, ApplicationWithSubscriptionData}
 import domain.models.developers.DeveloperSession
 import org.mockito.{ArgumentMatchersSugar, MockitoSugar}
-import play.api.mvc.MessagesRequest
 import service.ApplicationActionService
 import uk.gov.hmrc.http.HeaderCarrier
 
@@ -37,7 +36,7 @@ trait ApplicationActionServiceMock extends MockitoSugar with ArgumentMatchersSug
   val applicationActionServiceMock = mock[ApplicationActionService]
 
   def givenApplicationActionReturnsNotFound[A](applicationId: ApplicationId): Unit =
-    when(applicationActionServiceMock.process[A](eqTo(applicationId), *)(*,*))
+    when(applicationActionServiceMock.process[A](eqTo(applicationId), *)(*))
     .thenReturn(OptionT.none[Future, ApplicationRequest[A]])
 
   def givenApplicationAction[A](application: Application, developerSession: DeveloperSession): Unit =
@@ -45,7 +44,7 @@ trait ApplicationActionServiceMock extends MockitoSugar with ArgumentMatchersSug
 
   def givenApplicationAction[A](appData: ApplicationWithSubscriptionData, developerSession: DeveloperSession, subscriptions: List[APISubscriptionStatus] = List.empty, openAccessApis: Map[ApiContext, ApiData] = Map.empty): Unit = {
 
-    def returns(req: MessagesRequest[A]): OptionT[Future,ApplicationRequest[A]] =
+    def createReturn(req: UserRequest[A]): OptionT[Future,ApplicationRequest[A]] = {
       appData.application.role(developerSession.developer.email) match {
         case None => OptionT.none[Future, ApplicationRequest[A]]
         case Some(role) => OptionT.pure[Future](
@@ -55,13 +54,13 @@ trait ApplicationActionServiceMock extends MockitoSugar with ArgumentMatchersSug
             subscriptions,
             openAccessApis,
             role,
-            userRequest = new UserRequest(developerSession,req)
+            userRequest = req
           )
         )
       }
-
-    when(applicationActionServiceMock.process[A](eqTo(appData.application.id), eqTo(developerSession))(*,*))
-    .thenAnswer( (a:ApplicationId, b:DeveloperSession, request: MessagesRequest[A], d:HeaderCarrier) => returns(request))
+    }
+    when(applicationActionServiceMock.process[A](eqTo(appData.application.id), *)(*))
+    .thenAnswer( (a:ApplicationId, request:UserRequest[A], c:HeaderCarrier) => createReturn(request))
   }
 
 }

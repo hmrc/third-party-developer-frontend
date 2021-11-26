@@ -116,7 +116,7 @@ trait SubmissionActionBuilders {
       }
     }
 
-  private def collaboratorFilter(allowedRoleFilter: RoleFilter.Type = RoleFilter.isTeamMember): ActionFilter[ApplicationRequest] = 
+  private def collaboratorFilter(allowedRoleFilter: RoleFilter.Type): ActionFilter[ApplicationRequest] = 
     new ActionFilter[ApplicationRequest] {
 
       override protected def executionContext: ExecutionContext = ec

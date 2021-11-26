@@ -91,7 +91,7 @@ class CancelRequestController @Inject() (
   }
 
   def cancelRequestForProductionCredentialsAction(appId: ApplicationId) = withApplicationSubmission(StateFilter.notProduction)(appId) { implicit request =>
-    lazy val goBackToProdCredsChecklist = Redirect(modules.submissions.controllers.routes.ProdCredsChecklistController.productionCredentialsChecklist(appId))
+    lazy val goBackToProdCredsChecklist = Redirect(modules.submissions.controllers.routes.ProdCredsChecklistController.productionCredentialsChecklistPage(appId))
 
     val isValidSubmit: (String) => Boolean = (s) => s == "cancel-request" || s == "dont-cancel-request"
 
