@@ -125,7 +125,17 @@ abstract class ThirdPartyApplicationConnector(config: ApplicationConfig, metrics
         case None     => throw new ApplicationNotFound
       })
   }
-  
+
+  def requestApproval(applicationId: ApplicationId, upliftRequest: UpliftRequest)(implicit hc: HeaderCarrier): Future[ApplicationUpliftSuccessful] = metrics.record(api) {
+    http.POST[UpliftRequest, ErrorOrUnit](s"$serviceBaseUrl/application/${applicationId.value}/request-approval", upliftRequest)
+    .map(_ match {
+      case Right(_) => ApplicationUpliftSuccessful
+      case Left(UpstreamErrorResponse(_, CONFLICT, _, _))   => throw new ApplicationAlreadyExists
+      case Left(UpstreamErrorResponse(_, NOT_FOUND, _, _))  => throw new ApplicationNotFound
+      case Left(err) => throw err
+    })
+  }
+
   def requestUplift(applicationId: ApplicationId, upliftRequest: UpliftRequest)(implicit hc: HeaderCarrier): Future[ApplicationUpliftSuccessful] = metrics.record(api) {
     http.POST[UpliftRequest, ErrorOrUnit](s"$serviceBaseUrl/application/${applicationId.value}/request-uplift", upliftRequest)
     .map(_ match {

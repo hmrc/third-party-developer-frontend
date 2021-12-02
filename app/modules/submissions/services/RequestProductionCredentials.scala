@@ -38,7 +38,7 @@ class RequestProductionCredentials @Inject()(
 ) {
   def requestProductionCredentials(applicationId: ApplicationId, applicationName: String, requestedBy: DeveloperSession)(implicit hc: HeaderCarrier): Future[HasSuceeded] = {
     for {
-      _ <- connectorWrapper.productionApplicationConnector.requestUplift(applicationId, UpliftRequest(applicationName, requestedBy.email))
+      _ <- connectorWrapper.productionApplicationConnector.requestApproval(applicationId, UpliftRequest(applicationName, requestedBy.email))
       upliftTicket = DeskproTicket.createForUplift(requestedBy.displayedName, requestedBy.email, applicationName, applicationId)
       _ = deskproConnector.createTicket(upliftTicket)
     } yield HasSuceeded
