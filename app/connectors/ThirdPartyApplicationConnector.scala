@@ -37,10 +37,18 @@ import domain.models.apidefinitions.ApiIdentifier
 import uk.gov.hmrc.http.HttpReads.Implicits._
 import util.ApplicationLogger
 
+object ThirdPartyApplicationConnector {
+  import play.api.libs.json.Json
+  case class ApprovalsRequest(requestedByEmailAddress: String) 
+
+  implicit val formatApprovalsRequest = Json.format[ApprovalsRequest]
+}
+
 abstract class ThirdPartyApplicationConnector(config: ApplicationConfig, metrics: ConnectorMetrics) extends ApplicationConnector with CommonResponseHandlers with ApplicationLogger {
 
   import ThirdPartyApplicationConnectorDomain._
   import ThirdPartyApplicationConnectorJsonFormatters._
+  import ThirdPartyApplicationConnector._
 
   protected val httpClient: HttpClient
   protected val proxiedHttpClient: ProxiedHttpClient
@@ -126,8 +134,8 @@ abstract class ThirdPartyApplicationConnector(config: ApplicationConfig, metrics
       })
   }
 
-  def requestApproval(applicationId: ApplicationId, upliftRequest: UpliftRequest)(implicit hc: HeaderCarrier): Future[ApplicationUpliftSuccessful] = metrics.record(api) {
-    http.POST[UpliftRequest, ErrorOrUnit](s"$serviceBaseUrl/application/${applicationId.value}/request-approval", upliftRequest)
+  def requestApproval(applicationId: ApplicationId, requestedByEmailAddress: String)(implicit hc: HeaderCarrier): Future[ApplicationUpliftSuccessful] = metrics.record(api) {
+    http.POST[ApprovalsRequest, ErrorOrUnit](s"$serviceBaseUrl/application/${applicationId.value}/request-approval", ApprovalsRequest(requestedByEmailAddress))
     .map(_ match {
       case Right(_) => ApplicationUpliftSuccessful
       case Left(UpstreamErrorResponse(_, CONFLICT, _, _))   => throw new ApplicationAlreadyExists
