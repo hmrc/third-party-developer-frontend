@@ -134,10 +134,10 @@ abstract class ThirdPartyApplicationConnector(config: ApplicationConfig, metrics
       })
   }
 
-  def requestApproval(applicationId: ApplicationId, requestedByEmailAddress: String)(implicit hc: HeaderCarrier): Future[ApplicationUpliftSuccessful] = metrics.record(api) {
-    http.POST[ApprovalsRequest, ErrorOrUnit](s"$serviceBaseUrl/application/${applicationId.value}/request-approval", ApprovalsRequest(requestedByEmailAddress))
+  def requestApproval(applicationId: ApplicationId, requestedByEmailAddress: String)(implicit hc: HeaderCarrier): Future[Application] = metrics.record(api) {
+    http.POST[ApprovalsRequest, ErrorOr[Application]](s"$serviceBaseUrl/application/${applicationId.value}/request-approval", ApprovalsRequest(requestedByEmailAddress))
     .map(_ match {
-      case Right(_) => ApplicationUpliftSuccessful
+      case Right(application) => application
       case Left(UpstreamErrorResponse(_, CONFLICT, _, _))   => throw new ApplicationAlreadyExists
       case Left(UpstreamErrorResponse(_, NOT_FOUND, _, _))  => throw new ApplicationNotFound
       case Left(err) => throw err

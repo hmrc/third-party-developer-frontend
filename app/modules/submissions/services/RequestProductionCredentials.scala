@@ -21,23 +21,22 @@ import domain.models.applications.ApplicationId
 import domain.models.developers.DeveloperSession
 import uk.gov.hmrc.http.HeaderCarrier
 import domain.models.connectors.DeskproTicket
-import service.ConnectorsWrapper
 import connectors.DeskproConnector
 import scala.concurrent.Future
 import scala.concurrent.ExecutionContext
 import domain.models.HasSuceeded
+import connectors.ThirdPartyApplicationProductionConnector
 
 @Singleton
 class RequestProductionCredentials @Inject()(
-  connectorWrapper: ConnectorsWrapper,
+  productionApplicationConnector: ThirdPartyApplicationProductionConnector,
   deskproConnector: DeskproConnector
 )(
   implicit val ec: ExecutionContext
 ) {
   def requestProductionCredentials(applicationId: ApplicationId, requestedBy: DeveloperSession)(implicit hc: HeaderCarrier): Future[HasSuceeded] = {
     for {
-      _             <- connectorWrapper.productionApplicationConnector.requestApproval(applicationId, requestedBy.email)
-      app           <- connectorWrapper.productionApplicationConnector.fetchApplicationById(applicationId).map(_.get)
+      app           <- productionApplicationConnector.requestApproval(applicationId, requestedBy.email)
       upliftTicket   = DeskproTicket.createForUplift(requestedBy.displayedName, requestedBy.email, app.name, applicationId)
       _              = deskproConnector.createTicket(upliftTicket)
     } yield HasSuceeded
