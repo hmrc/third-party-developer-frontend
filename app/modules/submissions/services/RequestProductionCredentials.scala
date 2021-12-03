@@ -26,6 +26,7 @@ import scala.concurrent.Future
 import scala.concurrent.ExecutionContext
 import domain.models.HasSuceeded
 import connectors.ThirdPartyApplicationProductionConnector
+import domain.models.applications.Application
 
 @Singleton
 class RequestProductionCredentials @Inject()(
@@ -34,11 +35,11 @@ class RequestProductionCredentials @Inject()(
 )(
   implicit val ec: ExecutionContext
 ) {
-  def requestProductionCredentials(applicationId: ApplicationId, requestedBy: DeveloperSession)(implicit hc: HeaderCarrier): Future[HasSuceeded] = {
+  def requestProductionCredentials(applicationId: ApplicationId, requestedBy: DeveloperSession)(implicit hc: HeaderCarrier): Future[Application] = {
     for {
       app           <- productionApplicationConnector.requestApproval(applicationId, requestedBy.email)
       upliftTicket   = DeskproTicket.createForUplift(requestedBy.displayedName, requestedBy.email, app.name, applicationId)
       _              = deskproConnector.createTicket(upliftTicket)
-    } yield HasSuceeded
+    } yield app
   }
 }

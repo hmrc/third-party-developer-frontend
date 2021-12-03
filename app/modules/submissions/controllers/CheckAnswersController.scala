@@ -122,6 +122,6 @@ class CheckAnswersController @Inject() (
   def checkAnswersAction(productionAppId: ApplicationId) = withApplicationAndCompletedSubmission(StateFilter.inTesting, RoleFilter.isAdminRole)(redirectToGetProdCreds(productionAppId))(productionAppId) { implicit request =>
     requestProductionCredentials
       .requestProductionCredentials(productionAppId, request.developerSession)
-      .map(_ => Ok(prodCredsRequestReceivedView()))
+      .map(app => Ok(prodCredsRequestReceivedView(app.name)))
   }
 }
