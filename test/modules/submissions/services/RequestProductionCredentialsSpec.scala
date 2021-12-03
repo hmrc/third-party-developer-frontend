@@ -52,11 +52,12 @@ class RequestProductionCredentialsSpec extends AsyncHmrcSpec
 
   "requestProductionCredentials" should {
     "successfully create a ticket" in new Setup {
-      when(mockProductionApplicationConnector.requestApproval(eqTo(applicationId), eqTo(email))(*)).thenReturn(successful(anApplication(developerEmail = email)))
+      val app = anApplication(developerEmail = email)
+      when(mockProductionApplicationConnector.requestApproval(eqTo(applicationId), eqTo(email))(*)).thenReturn(successful(app))
       when(mockDeskproConnector.createTicket(*)(*)).thenReturn(successful(TicketCreated))
       val result = await(underTest.requestProductionCredentials(applicationId, developerSession))
       
-      result shouldBe HasSuceeded
+      result shouldBe app
       verify(mockDeskproConnector).createTicket(*)(*)
     }
 
