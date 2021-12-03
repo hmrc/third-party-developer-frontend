@@ -20,7 +20,7 @@
 @import domain.models.applications.{ApplicationId, Application}
 @import domain.models.developers.DeveloperSession
 
-@this(devMain: DevMain)
+@this(devMain: DevMain2)
 
 @(applicationId: ApplicationId, app: Application)(
         implicit request: Request[_], loggedIn: DeveloperSession, messages: Messages, appConfig: ApplicationConfig)
