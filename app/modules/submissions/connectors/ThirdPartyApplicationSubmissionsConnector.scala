@@ -29,7 +29,7 @@ import uk.gov.hmrc.http.HttpReads.Implicits._
 import uk.gov.hmrc.http.UpstreamErrorResponse
 import play.api.libs.json.Json
 import uk.gov.hmrc.play.http.metrics.common.API
-import scala.util.{Failure, Success, Try}
+import scala.util.{Success, Try}
 import uk.gov.hmrc.http.HttpResponse
 import play.api.libs.json.JsValue
 
