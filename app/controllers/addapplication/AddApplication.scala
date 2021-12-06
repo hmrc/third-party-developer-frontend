@@ -109,7 +109,7 @@ class AddApplication @Inject() (
 
   def soleApplicationToUpliftAction(appId: ApplicationId): Action[AnyContent] = loggedInAction { implicit request =>
     (for {
-      (sandboxAppSummaries, upliftableAppIds) <- upliftLogic.aUsersSandboxAdminSummariesAndUpliftIds(loggedIn.developer.userId)
+      (sandboxAppSummaries, upliftableAppIds) <- upliftLogic.aUsersSandboxAdminSummariesAndUpliftIds(request.userId)
       upliftableSummaries = sandboxAppSummaries.filter(s => upliftableAppIds.contains(s.id))
     } yield upliftableSummaries match {
       case summary :: Nil => progressOnUpliftJourney(upliftableSummaries.head.id)(request)
@@ -129,8 +129,8 @@ class AddApplication @Inject() (
     }
 
     // TODO - tidy as for comp
-    upliftLogic.aUsersSandboxAdminSummariesAndUpliftIds(loggedIn.developer.userId).flatMap { data =>
-      flowService.resetFlow(loggedIn).flatMap { _ =>
+    upliftLogic.aUsersSandboxAdminSummariesAndUpliftIds(request.userId).flatMap { data =>
+      flowService.resetFlow(request.developerSession).flatMap { _ =>
         val (summaries, upliftableAppIds) = data
         val upliftableSummaries = summaries.filter(s => upliftableAppIds.contains(s.id))
         val hasAppsThatCannotBeUplifted = upliftableSummaries.size < summaries.size
@@ -161,7 +161,7 @@ class AddApplication @Inject() (
       progressOnUpliftJourney(validForm.applicationId)(request)
 
     def handleInvalidForm(formWithErrors: Form[ChooseApplicationToUpliftForm]) = {
-      upliftLogic.aUsersSandboxAdminSummariesAndUpliftIds(loggedIn.developer.userId) flatMap { data =>
+      upliftLogic.aUsersSandboxAdminSummariesAndUpliftIds(request.userId) flatMap { data =>
       val (summaries, upliftableAppIds) = data
       val upliftableSummaries = summaries.filter(s => upliftableAppIds.contains(s.id))
       val haveAppsThatCannotBeUplifted = upliftableSummaries.size < summaries.size
@@ -184,8 +184,7 @@ class AddApplication @Inject() (
       successful(Ok(addApplicationNameView(errors, environment)))
 
     def addApplication(form: AddApplicationNameForm): Future[ApplicationCreatedResponse] = {
-      applicationService
-        .createForUser(CreateApplicationRequest.fromAddApplicationJourney(loggedIn, form, environment))
+      applicationService.createForUser(CreateApplicationRequest.fromAddApplicationJourney(request.developerSession, form, environment))
     }
 
     def nameApplicationWithValidForm(formThatPassesSimpleValidation: AddApplicationNameForm) =
@@ -225,8 +224,8 @@ class AddApplication @Inject() (
 
       deployedTo match {
         case SANDBOX    => {
-          val alreadySelectedEmailPreferences: Boolean = request.flash.get("emailPreferencesSelected").contains("true")
-          subscriptionsNotInUserEmailPreferences(subscriptions.filter(_.subscribed), user.developer.emailPreferences) map { missingSubscriptions =>
+          val alreadySelectedEmailPreferences: Boolean = appRequest.flash.get("emailPreferencesSelected").contains("true")
+          subscriptionsNotInUserEmailPreferences(subscriptions.filter(_.subscribed), developerSession.developer.emailPreferences) map { missingSubscriptions =>
 
             if(alreadySelectedEmailPreferences || missingSubscriptions.isEmpty) {
               Ok(addApplicationSubordinateSuccessView(application.name, applicationId))
@@ -236,7 +235,7 @@ class AddApplication @Inject() (
             }
           }
         }
-        case PRODUCTION => successful(NotFound(errorHandler.notFoundTemplate(request)))
+        case PRODUCTION => successful(NotFound(errorHandler.notFoundTemplate(appRequest)))
       }
     }
   }

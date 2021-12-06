@@ -25,6 +25,7 @@ import mocks.service.ApplicationActionServiceMock
 import mocks.connector.ApmConnectorMockModule
 import modules.submissions.services.mocks.SubmissionServiceMockModule
 import uk.gov.hmrc.http.HeaderCarrier
+import modules.submissions.views.html.CheckAnswersView
 import modules.submissions.views.html.QuestionView
 import utils.WithLoggedInSession._
 
@@ -85,6 +86,7 @@ class QuestionControllerSpec
     implicit val hc = HeaderCarrier()
 
     val questionView = app.injector.instanceOf[QuestionView]
+    val checkAnswersView = app.injector.instanceOf[CheckAnswersView]
 
     val controller = new QuestionsController(
       mockErrorHandler,
@@ -94,6 +96,7 @@ class QuestionControllerSpec
       SubmissionServiceMock.aMock,
       cookieSigner,
       questionView,
+      checkAnswersView,
       mcc
     )
 

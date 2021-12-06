@@ -117,12 +117,12 @@ class ProdCredsChecklistControllerSpec
 
 
   "productionCredentialsChecklist" should {
-    "fail with a BAD REQUEST" in new Setup {
+    "fail with NOT FOUND" in new Setup {
       SubmissionServiceMock.FetchLatestSubmission.thenReturnsNone()
 
-      val result = controller.productionCredentialsChecklist(appId)(loggedInRequest.withCSRFToken)
+      val result = controller.productionCredentialsChecklistPage(appId)(loggedInRequest.withCSRFToken)
 
-      status(result) shouldBe BAD_REQUEST
+      status(result) shouldBe NOT_FOUND
     }
 
     "succeed" in new Setup {
@@ -130,7 +130,7 @@ class ProdCredsChecklistControllerSpec
 
       SubmissionServiceMock.FetchLatestSubmission.thenReturns(extendedSubmission)
 
-      val result = controller.productionCredentialsChecklist(appId)(loggedInRequest.withCSRFToken)
+      val result = controller.productionCredentialsChecklistPage(appId)(loggedInRequest.withCSRFToken)
 
       status(result) shouldBe OK
     }

@@ -29,12 +29,18 @@ import uk.gov.hmrc.http.HttpReads.Implicits._
 import uk.gov.hmrc.http.UpstreamErrorResponse
 import play.api.libs.json.Json
 import uk.gov.hmrc.play.http.metrics.common.API
+import scala.util.{Failure, Success, Try}
+import uk.gov.hmrc.http.HttpResponse
+import play.api.libs.json.JsValue
 
 object ThirdPartyApplicationSubmissionsConnector {
   case class Config(serviceBaseUrl: String, apiKey: String)
 
   case class OutboundRecordAnswersRequest(answers: List[String])
-  implicit val writes = Json.writes[OutboundRecordAnswersRequest]
+  implicit val writesOutboundRecordAnswersRequest = Json.writes[OutboundRecordAnswersRequest]
+
+  case class ApprovalsRequest(requestedByEmailAddress: String) 
+  implicit val writesApprovalsRequest = Json.writes[ApprovalsRequest]
 }
 
 @Singleton
@@ -71,6 +77,25 @@ class ThirdPartyApplicationSubmissionsConnector @Inject() (
   def fetchSubmission(id: SubmissionId)(implicit hc: HeaderCarrier): Future[Option[ExtendedSubmission]] = {
     metrics.record(api) {
       http.GET[Option[ExtendedSubmission]](s"$serviceBaseUrl/submissions/${id.value}")
+    }
+  }
+
+  
+  def requestApproval(applicationId: ApplicationId, requestedByEmailAddress: String)(implicit hc: HeaderCarrier): Future[Either[ErrorDetails, Application]] = metrics.record(api) {
+    import play.api.http.Status._
+    
+    val url = s"$serviceBaseUrl/application/${applicationId.value}/request-approval"
+    
+    http.POST[ApprovalsRequest, HttpResponse](url, ApprovalsRequest(requestedByEmailAddress)).map { response =>
+      val jsValue: Try[JsValue] = Try(response.json)
+      lazy val badResponse = new RuntimeException("Something went wrong in the response")
+
+      (response.status, jsValue) match {
+        case (OK, Success(value))                   => Right(value.asOpt[Application].getOrElse(throw badResponse))
+        case (PRECONDITION_FAILED, Success(value))  => Left(value.asOpt[ErrorDetails].getOrElse(throw badResponse))
+        case (CONFLICT, Success(value))             => Left(value.asOpt[ErrorDetails].getOrElse(throw badResponse))
+        case (_, _)                                 => throw badResponse
+      }
     }
   }
 }

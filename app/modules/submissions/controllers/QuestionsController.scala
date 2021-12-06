@@ -23,7 +23,7 @@ import config.{ApplicationConfig, ErrorHandler}
 import service.{ApplicationService, ApplicationActionService, SessionService}
 import play.api.libs.crypto.CookieSigner
 import controllers.ApplicationController
-import modules.submissions.views.html.QuestionView
+import modules.submissions.views.html._
 import modules.submissions.domain.models._
 import modules.submissions.services.SubmissionService
 import modules.submissions.domain.services.SubmissionsJsonFormatters._
@@ -52,6 +52,7 @@ class QuestionsController @Inject()(
   override val submissionService: SubmissionService,
   val cookieSigner: CookieSigner,
   questionView: QuestionView,
+  checkAnswersView: CheckAnswersView,
   mcc: MessagesControllerComponents
 )(
   implicit override val ec: ExecutionContext,
@@ -68,7 +69,6 @@ class QuestionsController @Inject()(
     val oQuestion = submission.findQuestion(questionId)
     val applicationId = request.application.id
 
-    implicit val developerSession = request.developerSession
     (
       for {
         flowItem      <- fromOption(oQuestion, "Question not found in questionnaire")
@@ -97,7 +97,7 @@ class QuestionsController @Inject()(
       val nextQuestion = extSubmission.questionnaireProgress.get(questionnaire.id)
                         .flatMap(_.questionsToAsk.dropWhile(_ != questionId).tail.headOption)
       
-      lazy val toProdChecklist = modules.submissions.controllers.routes.ProdCredsChecklistController.productionCredentialsChecklist(extSubmission.submission.applicationId)
+      lazy val toProdChecklist = modules.submissions.controllers.routes.ProdCredsChecklistController.productionCredentialsChecklistPage(extSubmission.submission.applicationId)
       lazy val toNextQuestion = (nextQuestionId) => modules.submissions.controllers.routes.QuestionsController.showQuestion(submissionId, nextQuestionId)
 
       successful(Redirect(nextQuestion.fold(toProdChecklist)(toNextQuestion)))
@@ -129,4 +129,5 @@ class QuestionsController @Inject()(
     .fold(failed, success)
     .flatten
   }
+
 }
