@@ -35,6 +35,8 @@ import modules.submissions.services.SubmissionService
 import helpers.EitherTHelper
 import domain.models.controllers.BadRequestWithErrorMessage
 import modules.submissions.services.RequestProductionCredentials
+import domain.ApplicationNotFound
+import domain.ApplicationAlreadyExists
 
 object CheckAnswersController {
   case class ViewQuestion(id: QuestionId, text: String, answer: String)
@@ -112,7 +114,7 @@ class CheckAnswersController @Inject() (
     }
 
     val vm = for {
-      submission          <- fromOptionF(submissionService.fetchLatestSubmission(productionAppId), "No subsmission and/or application found")
+      submission          <- fromOptionF(submissionService.fetchLatestSubmission(productionAppId), "No submission and/or application found")
       viewModel           =  convertSubmissionToViewModel(submission)(request.application.id, request.application.name)
     } yield viewModel
 
@@ -123,5 +125,13 @@ class CheckAnswersController @Inject() (
     requestProductionCredentials
       .requestProductionCredentials(productionAppId, request.developerSession)
       .map(app => Ok(prodCredsRequestReceivedView(app.name)))
+      .recover {
+        case e: ApplicationNotFound =>
+          Redirect(routes.CheckAnswersController.checkAnswersPage(productionAppId)).flashing("error" -> "Application Not Found")
+        case e: ApplicationAlreadyExists =>
+          Redirect(routes.CheckAnswersController.checkAnswersPage(productionAppId)).flashing("error" -> "Application Already Exists")
+        case _ =>
+          Redirect(routes.CheckAnswersController.checkAnswersPage(productionAppId)).flashing("error" -> "Unexpected Error")
+      }
   }
 }
