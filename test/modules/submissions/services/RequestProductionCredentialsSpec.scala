@@ -19,7 +19,6 @@ package modules.submissions.services
 import connectors.DeskproConnector
 import domain.models.applications.ApplicationId
 import domain.models.developers.DeveloperSession
-import connectors.ThirdPartyApplicationProductionConnector
 import uk.gov.hmrc.http.HeaderCarrier
 import utils.AsyncHmrcSpec
 import scala.concurrent.ExecutionContext.Implicits.global
@@ -28,9 +27,9 @@ import utils.TestApplications
 import utils.CollaboratorTracker
 import utils.LocalUserIdTracker
 import domain.models.connectors.TicketCreated
-import domain.models.HasSuceeded
 import domain.ApplicationNotFound
 import domain.ApplicationAlreadyExists
+import modules.submissions.connectors.ThirdPartyApplicationSubmissionsConnector
 
 class RequestProductionCredentialsSpec extends AsyncHmrcSpec 
   with CollaboratorTracker 
@@ -40,29 +39,29 @@ class RequestProductionCredentialsSpec extends AsyncHmrcSpec
   trait Setup {
     implicit val hc = HeaderCarrier()
     val applicationId = ApplicationId.random
-    val mockProductionApplicationConnector: ThirdPartyApplicationProductionConnector = mock[ThirdPartyApplicationProductionConnector]
+    val mockSubmissionsConnector: ThirdPartyApplicationSubmissionsConnector = mock[ThirdPartyApplicationSubmissionsConnector]
 
     val email: String = "test@example.com"
     val developerSession = mock[DeveloperSession]
     when(developerSession.email).thenReturn(email)
 
     val mockDeskproConnector = mock[DeskproConnector]
-    val underTest = new RequestProductionCredentials(mockProductionApplicationConnector, mockDeskproConnector)
+    val underTest = new RequestProductionCredentials(mockSubmissionsConnector, mockDeskproConnector)
   }
 
   "requestProductionCredentials" should {
     "successfully create a ticket" in new Setup {
       val app = anApplication(developerEmail = email)
-      when(mockProductionApplicationConnector.requestApproval(eqTo(applicationId), eqTo(email))(*)).thenReturn(successful(app))
+      when(mockSubmissionsConnector.requestApproval(eqTo(applicationId), eqTo(email))(*)).thenReturn(successful(Right(app)))
       when(mockDeskproConnector.createTicket(*)(*)).thenReturn(successful(TicketCreated))
       val result = await(underTest.requestProductionCredentials(applicationId, developerSession))
       
-      result shouldBe app
+      result.right.value shouldBe app
       verify(mockDeskproConnector).createTicket(*)(*)
     }
 
     "fails to create a ticket if the application is not found" in new Setup {
-      when(mockProductionApplicationConnector.requestApproval(eqTo(applicationId), eqTo(email))(*)).thenThrow(new ApplicationNotFound())
+      when(mockSubmissionsConnector.requestApproval(eqTo(applicationId), eqTo(email))(*)).thenThrow(new ApplicationNotFound())
       
       intercept[ApplicationNotFound] {
         await(underTest.requestProductionCredentials(applicationId, developerSession))
@@ -71,7 +70,7 @@ class RequestProductionCredentialsSpec extends AsyncHmrcSpec
     }
 
     "fails to create a ticket if application already exists" in new Setup {
-      when(mockProductionApplicationConnector.requestApproval(eqTo(applicationId), eqTo(email))(*)).thenThrow(new ApplicationAlreadyExists())
+      when(mockSubmissionsConnector.requestApproval(eqTo(applicationId), eqTo(email))(*)).thenThrow(new ApplicationAlreadyExists())
       
       intercept[ApplicationAlreadyExists] {
         await(underTest.requestProductionCredentials(applicationId, developerSession))

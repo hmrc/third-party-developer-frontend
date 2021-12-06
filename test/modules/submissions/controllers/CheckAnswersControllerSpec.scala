@@ -145,7 +145,7 @@ class CheckAnswersControllerSpec
 
   "checkAnswersAction" should {
     "succeed when production credentials are requested successfully" in new Setup {
-      when(mockRequestProdCreds.requestProductionCredentials(eqTo(applicationId), *[DeveloperSession])(*)).thenReturn(successful(sampleApp))
+      when(mockRequestProdCreds.requestProductionCredentials(eqTo(applicationId), *[DeveloperSession])(*)).thenReturn(successful(Right(sampleApp)))
       SubmissionServiceMock.FetchLatestSubmission.thenReturns(completedExtendedSubmission)
 
       val result = underTest.checkAnswersAction(applicationId)(loggedInRequest.withCSRFToken)
