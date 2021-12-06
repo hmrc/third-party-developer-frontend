@@ -24,22 +24,29 @@ import domain.models.connectors.DeskproTicket
 import connectors.DeskproConnector
 import scala.concurrent.Future
 import scala.concurrent.ExecutionContext
-import domain.models.HasSuceeded
-import connectors.ThirdPartyApplicationProductionConnector
 import domain.models.applications.Application
+import modules.submissions.domain.models.ErrorDetails
+import helpers.EitherTHelper
+import modules.submissions.connectors.ThirdPartyApplicationSubmissionsConnector
 
 @Singleton
 class RequestProductionCredentials @Inject()(
-  productionApplicationConnector: ThirdPartyApplicationProductionConnector,
+  tpaConnector: ThirdPartyApplicationSubmissionsConnector,
   deskproConnector: DeskproConnector
 )(
   implicit val ec: ExecutionContext
 ) {
-  def requestProductionCredentials(applicationId: ApplicationId, requestedBy: DeveloperSession)(implicit hc: HeaderCarrier): Future[Application] = {
-    for {
-      app           <- productionApplicationConnector.requestApproval(applicationId, requestedBy.email)
-      upliftTicket   = DeskproTicket.createForUplift(requestedBy.displayedName, requestedBy.email, app.name, applicationId)
-      _              = deskproConnector.createTicket(upliftTicket)
-    } yield app
+
+  private val ET = EitherTHelper.make[ErrorDetails]
+
+  def requestProductionCredentials(applicationId: ApplicationId, requestedBy: DeveloperSession)(implicit hc: HeaderCarrier): Future[Either[ErrorDetails, Application]] = {
+    (
+      for {
+        app           <- ET.fromEitherF(tpaConnector.requestApproval(applicationId, requestedBy.email))
+        upliftTicket   = DeskproTicket.createForUplift(requestedBy.displayedName, requestedBy.email, app.name, applicationId)
+        _              = deskproConnector.createTicket(upliftTicket)
+      } yield app
+    )
+    .value
   }
 }

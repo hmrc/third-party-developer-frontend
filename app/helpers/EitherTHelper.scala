@@ -23,12 +23,17 @@ import cats.data.EitherT
 trait EitherTHelper[E] {
   implicit val ec: ExecutionContext
 
-  import cats.instances.future.catsStdInstancesForFuture
+  def fromOptionF[A](in: Future[Option[A]], error: E): EitherT[Future,E,A] = EitherT.fromOptionF(in, error)
+  def liftF[A](in: Future[A]): EitherT[Future,E,A]                         = EitherT.liftF(in)
+  def fromOption[A](in: Option[A], error: E): EitherT[Future,E,A]          = EitherT.fromOption(in, error)
+  def fromEither[A](in: Either[E,A]): EitherT[Future,E,A]                  = EitherT.fromEither(in)
+  def fromEitherF[A](in: Future[Either[E,A]]): EitherT[Future,E,A]         = EitherT.apply(in)
+  def cond[A](in: => Boolean, right: => A, left: => E)                     = EitherT.cond[Future](in, right,left)
+  def pure[A](in: A)                                                       = EitherT.pure[Future, String](in)
+}
 
-  def fromOption[A](in: Option[A], error: => E): EitherT[Future,E,A]          = EitherT.fromOption(in, error)
-  def fromOptionF[A](in: Future[Option[A]], error: => E): EitherT[Future,E,A] = EitherT.fromOptionF(in, error)
-  def liftF[A](in: Future[A]): EitherT[Future,E,A]                            = EitherT.liftF(in)
-  def fromEither[A](in: Either[E,A]): EitherT[Future,E,A]                     = EitherT.fromEither(in)
-  def fromEitherF[A](in: Future[Either[E,A]]): EitherT[Future,E,A]            = EitherT(in)
-  def cond[A](in: => Boolean, right: => A, left: => E)                        = EitherT.cond[Future](in, right, left)
+object EitherTHelper {
+  def make[E](implicit outerEC: ExecutionContext) = new EitherTHelper[E] {
+    implicit val ec = outerEC
+  }
 }

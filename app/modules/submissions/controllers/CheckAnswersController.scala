@@ -35,8 +35,6 @@ import modules.submissions.services.SubmissionService
 import helpers.EitherTHelper
 import domain.models.controllers.BadRequestWithErrorMessage
 import modules.submissions.services.RequestProductionCredentials
-import domain.ApplicationNotFound
-import domain.ApplicationAlreadyExists
 
 object CheckAnswersController {
   case class ViewQuestion(id: QuestionId, text: String, answer: String)
@@ -109,8 +107,10 @@ class CheckAnswersController @Inject() (
   def checkAnswersPage(productionAppId: ApplicationId) = withApplicationAndCompletedSubmission(StateFilter.inTesting, RoleFilter.isAdminRole)(redirectToGetProdCreds(productionAppId))(productionAppId) { implicit request =>
     val failed = (err: String) => BadRequestWithErrorMessage(err)
 
+    
     val success = (viewModel: ViewModel) => {
-      Ok(checkAnswersView(viewModel))
+      val err = request.msgRequest.flash.get("error")
+      Ok(checkAnswersView(viewModel, err))
     }
 
     val vm = for {
@@ -124,14 +124,9 @@ class CheckAnswersController @Inject() (
   def checkAnswersAction(productionAppId: ApplicationId) = withApplicationAndCompletedSubmission(StateFilter.inTesting, RoleFilter.isAdminRole)(redirectToGetProdCreds(productionAppId))(productionAppId) { implicit request =>
     requestProductionCredentials
       .requestProductionCredentials(productionAppId, request.developerSession)
-      .map(app => Ok(prodCredsRequestReceivedView(app.name)))
-      .recover {
-        case e: ApplicationNotFound =>
-          Redirect(routes.CheckAnswersController.checkAnswersPage(productionAppId)).flashing("error" -> "Application Not Found")
-        case e: ApplicationAlreadyExists =>
-          Redirect(routes.CheckAnswersController.checkAnswersPage(productionAppId)).flashing("error" -> "Application Already Exists")
-        case _ =>
-          Redirect(routes.CheckAnswersController.checkAnswersPage(productionAppId)).flashing("error" -> "Unexpected Error")
-      }
+      .map(_ match {
+        case Right(app) => Ok(prodCredsRequestReceivedView(app.name))
+        case Left(ErrorDetails(_, msg)) => Redirect(routes.CheckAnswersController.checkAnswersPage(productionAppId)).flashing("error" -> msg)
+      })
   }
 }

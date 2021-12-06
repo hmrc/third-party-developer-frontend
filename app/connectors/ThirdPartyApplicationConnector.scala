@@ -37,18 +37,10 @@ import domain.models.apidefinitions.ApiIdentifier
 import uk.gov.hmrc.http.HttpReads.Implicits._
 import util.ApplicationLogger
 
-object ThirdPartyApplicationConnector {
-  import play.api.libs.json.Json
-  case class ApprovalsRequest(requestedByEmailAddress: String) 
-
-  implicit val formatApprovalsRequest = Json.format[ApprovalsRequest]
-}
-
-abstract class ThirdPartyApplicationConnector(config: ApplicationConfig, metrics: ConnectorMetrics) extends ApplicationConnector with CommonResponseHandlers with ApplicationLogger {
+abstract class ThirdPartyApplicationConnector(config: ApplicationConfig, metrics: ConnectorMetrics) extends ApplicationConnector with CommonResponseHandlers with ApplicationLogger with HttpErrorFunctions {
 
   import ThirdPartyApplicationConnectorDomain._
   import ThirdPartyApplicationConnectorJsonFormatters._
-  import ThirdPartyApplicationConnector._
 
   protected val httpClient: HttpClient
   protected val proxiedHttpClient: ProxiedHttpClient
@@ -134,15 +126,6 @@ abstract class ThirdPartyApplicationConnector(config: ApplicationConfig, metrics
       })
   }
 
-  def requestApproval(applicationId: ApplicationId, requestedByEmailAddress: String)(implicit hc: HeaderCarrier): Future[Application] = metrics.record(api) {
-    http.POST[ApprovalsRequest, ErrorOr[Application]](s"$serviceBaseUrl/application/${applicationId.value}/request-approval", ApprovalsRequest(requestedByEmailAddress))
-    .map(_ match {
-      case Right(application) => application
-      case Left(UpstreamErrorResponse(_, CONFLICT, _, _))   => throw new ApplicationAlreadyExists
-      case Left(UpstreamErrorResponse(_, NOT_FOUND, _, _))  => throw new ApplicationNotFound
-      case Left(err) => throw err
-    })
-  }
 
   def requestUplift(applicationId: ApplicationId, upliftRequest: UpliftRequest)(implicit hc: HeaderCarrier): Future[ApplicationUpliftSuccessful] = metrics.record(api) {
     http.POST[UpliftRequest, ErrorOrUnit](s"$serviceBaseUrl/application/${applicationId.value}/request-uplift", upliftRequest)

@@ -22,7 +22,7 @@
 
 @this(devMain: DevMain2)
 
-@(model: ViewModel)(implicit request: play.api.mvc.Request[Any], loggedIn: DeveloperSession, messagesProvider: MessagesProvider, appConfig: config.ApplicationConfig, flash: Flash)
+@(model: ViewModel, error: Option[String])(implicit request: play.api.mvc.Request[Any], loggedIn: DeveloperSession, messagesProvider: MessagesProvider, appConfig: config.ApplicationConfig)
 
 @title = @{ "Check your answers before requesting production credentials" }
 
@@ -37,7 +37,7 @@
 ) {
     <span class="govuk-caption-xl">@model.appName</span>
 
-    @if(flash.get("error")) {
+    @if(error.isDefined) {
       <div id="error-summary-display" class="govuk-error-summary" aria-labelledby="error-summary-title" role="alert" tabindex="-1" data-module="govuk-error-summary">
         <h2 id="error-summary-title" class="govuk-error-summary__title">
           There is a problem
@@ -45,7 +45,7 @@
         <div class="govuk-error-summary__body">
           <ul class="govuk-list govuk-error-summary__list">
             <li>
-              <a href="">@flash.get("error")</a>
+              <a href="">@error.get</a>
             </li>
           </ul>
         </div>
