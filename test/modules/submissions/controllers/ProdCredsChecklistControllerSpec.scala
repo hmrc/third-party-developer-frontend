@@ -35,6 +35,7 @@ import builder.SampleApplication
 import controllers.SubscriptionTestHelperSugar
 import builder.SampleSession
 import mocks.service.ApplicationActionServiceMock
+import modules.submissions.domain.models.ExtendedSubmission
 
 class ProdCredsChecklistControllerSpec
   extends BaseControllerSpec
@@ -133,6 +134,41 @@ class ProdCredsChecklistControllerSpec
       val result = controller.productionCredentialsChecklistPage(appId)(loggedInRequest.withCSRFToken)
 
       status(result) shouldBe OK
+    }
+  }
+
+  "productionCredentialsChecklistAction" should {
+    "return success when form is valid and incomplete" in new Setup {
+      import utils.SubmissionsTestData.extendedSubmission
+
+      SubmissionServiceMock.FetchLatestSubmission.thenReturns(extendedSubmission)
+
+      val result = controller.productionCredentialsChecklistAction(appId)(loggedInRequest.withCSRFToken)
+
+      status(result) shouldBe OK
+    }
+
+    "redirect when when form is valid and complete" in new Setup {
+      import utils.SubmissionsTestData.{submission,completedProgress}
+      val completedSubmission = ExtendedSubmission(submission, completedProgress)
+
+      SubmissionServiceMock.FetchLatestSubmission.thenReturns(completedSubmission)
+
+      val result = controller.productionCredentialsChecklistAction(appId)(loggedInRequest.withCSRFToken)
+
+      status(result) shouldBe SEE_OTHER
+      redirectLocation(result) shouldBe Some(modules.submissions.controllers.routes.CheckAnswersController.checkAnswersPage(appId).url)
+    }
+
+    "return bad request when form is valid and n/a" in new Setup {
+      import utils.SubmissionsTestData.{submission,notApplicableProgress}
+      val naSubmission = ExtendedSubmission(submission, notApplicableProgress)
+
+      SubmissionServiceMock.FetchLatestSubmission.thenReturns(naSubmission)
+
+      val result = controller.productionCredentialsChecklistAction(appId)(loggedInRequest.withCSRFToken)
+
+      status(result) shouldBe BAD_REQUEST
     }
   }
 }
