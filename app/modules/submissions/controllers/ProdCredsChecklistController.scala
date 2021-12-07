@@ -53,15 +53,16 @@ object ProdCredsChecklistController {
     }
   }
 
-  case class ViewQuestionnaireSummary(label: String, state: String, id: QuestionnaireId = QuestionnaireId.random, nextQuestionUrl: Option[String] = None)
+  case class ViewQuestionnaireSummary(label: String, state: String, isComplete: Boolean, id: QuestionnaireId = QuestionnaireId.random, nextQuestionUrl: Option[String] = None)
   case class ViewGrouping(label: String, questionnaireSummaries: NonEmptyList[ViewQuestionnaireSummary])
   case class ViewModel(appId: ApplicationId, appName: String, groupings: NonEmptyList[ViewGrouping])
 
   def convertToSummary(extSubmission: ExtendedSubmission)(questionnaire: Questionnaire): ViewQuestionnaireSummary = {
     val progress = extSubmission.questionnaireProgress.get(questionnaire.id).get
     val state = QuestionnaireState.describe(progress.state)
+    val isComplete = QuestionnaireState.isCompleted(progress.state)
     val url = progress.questionsToAsk.headOption.map(q => modules.submissions.controllers.routes.QuestionsController.showQuestion(extSubmission.submission.id, q).url)
-    ViewQuestionnaireSummary(questionnaire.label.value, state, questionnaire.id, url)
+    ViewQuestionnaireSummary(questionnaire.label.value, state, isComplete, questionnaire.id, url)
   }
 
   def convertToViewGrouping(extSubmission: ExtendedSubmission)(groupOfQuestionnaires: GroupOfQuestionnaires): ViewGrouping = {
