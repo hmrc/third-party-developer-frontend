@@ -160,15 +160,5 @@ class ProdCredsChecklistControllerSpec
       redirectLocation(result) shouldBe Some(modules.submissions.controllers.routes.CheckAnswersController.checkAnswersPage(appId).url)
     }
 
-    "return bad request when form is valid and n/a" in new Setup {
-      import utils.SubmissionsTestData.{submission,notApplicableProgress}
-      val naSubmission = ExtendedSubmission(submission, notApplicableProgress)
-
-      SubmissionServiceMock.FetchLatestSubmission.thenReturns(naSubmission)
-
-      val result = controller.productionCredentialsChecklistAction(appId)(loggedInRequest.withCSRFToken)
-
-      status(result) shouldBe BAD_REQUEST
-    }
   }
 }

@@ -144,7 +144,7 @@ class ProdCredsChecklistController @Inject() (
         
         successful(
           filterGroupingsForEmptyQuestionnaireSummaries(viewModel.groupings).fold(
-            BadRequest("No questionnaires applicable") 
+            throw new AssertionError("submissions with only n/a questionnaires will be marked as complete")
           )(vg =>
             Ok(productionCredentialsChecklistView(viewModel.copy(groupings = vg), DummyForm.form.fill(validForm).withGlobalError("production.credentials.checklist.error.global")))
           )
@@ -152,15 +152,8 @@ class ProdCredsChecklistController @Inject() (
       }
     }
 
-    def handleInvalidForm(formWithErrors: Form[DummyForm]) =
-      successful(
-        BadRequest(
-          productionCredentialsChecklistView(
-            convertSubmissionToViewModel(request.extSubmission)(request.application.id, request.application.name),
-            formWithErrors
-          )
-        )
-      )
+    def handleInvalidForm(formWithErrors: Form[DummyForm]) = 
+      throw new AssertionError("DummyForm has no validation rules and so can never be invalid")
 
     DummyForm.form.bindFromRequest.fold(handleInvalidForm, handleValidForm)
   }
