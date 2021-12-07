@@ -125,7 +125,7 @@ class CheckAnswersController @Inject() (
     requestProductionCredentials
       .requestProductionCredentials(productionAppId, request.developerSession)
       .map(_ match {
-        case Right(app) => Ok(prodCredsRequestReceivedView(app.name))
+        case Right(app) => Ok(prodCredsRequestReceivedView(app.name, app.id))
         case Left(ErrorDetails(_, msg)) => Redirect(routes.CheckAnswersController.checkAnswersPage(productionAppId)).flashing("error" -> msg)
       })
   }
