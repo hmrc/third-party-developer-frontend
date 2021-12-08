@@ -16,10 +16,17 @@
 
 package domain.models.apidefinitions
 
-import domain.models.connectors.ExtendedApiDefinition
+import domain.models.connectors.ApiType.REST_API
+import domain.models.connectors.{CombinedApi, CombinedApiCategory, ExtendedApiDefinition}
 
 trait ExtendedApiDefinitionTestDataHelper {
   def extendedApiDefinition(name: String): ExtendedApiDefinition = extendedApiDefinition(name, List("category"))
 
   def extendedApiDefinition(name: String, categories: List[String]) = ExtendedApiDefinition(name, name, name, ApiContext(name), categories)
+}
+
+trait CombinedApiTestDataHelper {
+  def combinedApi(name: String): CombinedApi = combinedApi(name, List(CombinedApiCategory("category")))
+
+  def combinedApi(name: String, categories: List[CombinedApiCategory]) = CombinedApi(name, name, categories, REST_API)
 }

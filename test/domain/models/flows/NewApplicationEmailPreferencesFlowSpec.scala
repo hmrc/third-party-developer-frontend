@@ -17,16 +17,16 @@
 package domain.models.flows
 
 import builder.DeveloperBuilder
+import domain.models.apidefinitions.CombinedApiTestDataHelper
+import domain.models.applications.ApplicationId
+import domain.models.connectors.{CombinedApi, CombinedApiCategory}
 import domain.models.developers.{Developer, DeveloperSession, LoggedInState, Session}
 import domain.models.emailpreferences.{EmailPreferences, EmailTopic, TaxRegimeInterests}
-import domain.models.applications.ApplicationId
-import domain.models.apidefinitions.ExtendedApiDefinitionTestDataHelper
-import domain.models.connectors.ExtendedApiDefinition
-import utils.LocalUserIdTracker
-import org.scalatest.wordspec.AnyWordSpec
 import org.scalatest.matchers.should.Matchers
+import org.scalatest.wordspec.AnyWordSpec
+import utils.LocalUserIdTracker
 
-class NewApplicationEmailPreferencesFlowSpec extends AnyWordSpec with Matchers with ExtendedApiDefinitionTestDataHelper with DeveloperBuilder with LocalUserIdTracker {
+class NewApplicationEmailPreferencesFlowSpec extends AnyWordSpec with Matchers with CombinedApiTestDataHelper with DeveloperBuilder with LocalUserIdTracker {
 
     val category1 = "CATEGORY_1"
     val category2 = "CATEGORY_2"
@@ -43,15 +43,15 @@ class NewApplicationEmailPreferencesFlowSpec extends AnyWordSpec with Matchers w
         DeveloperSession(session)
     }
 
-    def newApplicationEmailPreferencesFlow(selectedApis: Set[ExtendedApiDefinition], selectedTopics: Set[String]): NewApplicationEmailPreferencesFlow = {
+    def newApplicationEmailPreferencesFlow(selectedApis: Set[CombinedApi], selectedTopics: Set[String]): NewApplicationEmailPreferencesFlow = {
         NewApplicationEmailPreferencesFlow(sessionId, emailPreferences, applicationId, Set.empty, selectedApis, selectedTopics)
     }
 
     "NewApplicationEmailPreferencesFlow" when {
         "toEmailPreferences" should {
             "map to email preferences correctly" in {
-                val newApiInExistingCategory = extendedApiDefinition("new-api", List(category1))
-                val newApiInNewCategory = extendedApiDefinition("new-api-2", List("CATEGORY_3"))
+                val newApiInExistingCategory = combinedApi("new-api", List(CombinedApiCategory(category1)))
+                val newApiInNewCategory = combinedApi("new-api-2", List(CombinedApiCategory("CATEGORY_3")))
 
                 val selectedTopics = Set(EmailTopic.TECHNICAL, EmailTopic.BUSINESS_AND_POLICY)
 

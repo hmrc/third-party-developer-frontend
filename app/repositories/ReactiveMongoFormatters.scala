@@ -16,18 +16,18 @@
 
 package repositories
 
-import domain.models.flows.{Flow, IpAllowlistFlow}
+import domain.models.flows._
+import domain.services.CombinedApiJsonFormatters
+import modules.uplift.domain.models.GetProductionCredentialsFlow
 import org.joda.time.DateTime
 import play.api.libs.json.{Format, Json, OFormat}
 import uk.gov.hmrc.mongo.json.ReactiveMongoFormats
 import uk.gov.hmrc.play.json.Union
-import domain.models.flows.{EmailPreferencesFlow, NewApplicationEmailPreferencesFlow}
-import domain.models.flows.FlowType
-import modules.uplift.domain.models.GetProductionCredentialsFlow
 
-object ReactiveMongoFormatters {
+object ReactiveMongoFormatters extends CombinedApiJsonFormatters {
   implicit val dateFormat: Format[DateTime] = ReactiveMongoFormats.dateTimeFormats
   implicit val formatIpAllowlistFlow: OFormat[IpAllowlistFlow] = Json.format[IpAllowlistFlow]
+
   implicit val formatEmailPreferencesFlow: OFormat[EmailPreferencesFlow] = Json.format[EmailPreferencesFlow]
   implicit val formatNewApplicationEmailPreferencesFlow: OFormat[NewApplicationEmailPreferencesFlow] = Json.format[NewApplicationEmailPreferencesFlow]
   implicit val formatGetProdCredsFlow: OFormat[GetProductionCredentialsFlow] = Json.format[GetProductionCredentialsFlow]

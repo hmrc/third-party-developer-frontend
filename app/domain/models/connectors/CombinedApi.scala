@@ -14,18 +14,22 @@
  * limitations under the License.
  */
 
-package mocks.service
+package domain.models.connectors
 
-import domain.models.connectors.CombinedApi
-import org.mockito.{ArgumentMatchersSugar, MockitoSugar}
-import service.EmailPreferencesService
 
-import scala.concurrent.Future.successful
+import enumeratum.{Enum, EnumEntry, PlayJsonEnum}
 
-trait EmailPreferencesServiceMock extends MockitoSugar with ArgumentMatchersSugar {
-  val emailPreferencesServiceMock = mock[EmailPreferencesService]
+case class CombinedApiCategory(value: String) extends AnyVal
 
-  def fetchAPIDetailsReturns(apis: List[CombinedApi]) = {
-    when(emailPreferencesServiceMock.fetchAPIDetails(*)(*)).thenReturn(successful(apis))
-  }
+sealed trait ApiType extends EnumEntry
+
+object ApiType extends Enum[ApiType] with PlayJsonEnum[ApiType] {
+  val values = findValues
+  case object REST_API extends ApiType
+  case object XML_API extends ApiType
 }
+
+case class CombinedApi(serviceName: String,
+                        displayName: String,
+                       categories: List[CombinedApiCategory],
+                       apiType: ApiType)

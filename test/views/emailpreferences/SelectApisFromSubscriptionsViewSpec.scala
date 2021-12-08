@@ -17,9 +17,9 @@
 package views.emailpreferences
 
 import controllers.{FormKeys, SelectApisFromSubscriptionsForm}
-import domain.models.apidefinitions.ApiContext
 import domain.models.applications.ApplicationId
-import domain.models.connectors.ExtendedApiDefinition
+import domain.models.connectors.ApiType.REST_API
+import domain.models.connectors.{CombinedApi, CombinedApiCategory}
 import domain.models.developers.{DeveloperSession, LoggedInState}
 import domain.models.flows.NewApplicationEmailPreferencesFlow
 import org.jsoup.Jsoup
@@ -56,13 +56,13 @@ class SelectApisFromSubscriptionsViewSpec extends CommonViewSpec with WithCSRFAd
     val viewUnderTest: SelectApisFromSubscriptionsView = app.injector.instanceOf[SelectApisFromSubscriptionsView]
   }
 
-  private def validateCheckboxItemsAgainstApis(document: Document, apis: List[ExtendedApiDefinition]) = {
+  private def validateCheckboxItemsAgainstApis(document: Document, apis: List[CombinedApi]) = {
     apis.foreach(api => {
       val checkbox = document.getElementById(api.serviceName)
       checkbox.attr("name") shouldBe "selectedApi[]"
       checkbox.`val`() shouldBe api.serviceName
 
-      document.select(s"label[for=${api.serviceName}]").text shouldBe api.name
+      document.select(s"label[for=${api.serviceName}]").text shouldBe api.displayName
 
       withClue("Expected number of checkboxes differs from number of apis sent to view") {
         document.select("input[type=checkbox]").size shouldBe (apis.size) // Include ALL_APIS checkbox
@@ -70,7 +70,7 @@ class SelectApisFromSubscriptionsViewSpec extends CommonViewSpec with WithCSRFAd
     })
   }
 
-  def validateStaticElements(document: Document, apis: List[ExtendedApiDefinition], applicationId: ApplicationId) {
+  def validateStaticElements(document: Document, apis: List[CombinedApi], applicationId: ApplicationId) {
     document.getElementById("pageHeading").text() should be("Do you want to receive emails about the APIs you have subscribed to?")
     document.getElementById("select-all-description").text() should be("Select all that apply.")
 
@@ -89,9 +89,9 @@ class SelectApisFromSubscriptionsViewSpec extends CommonViewSpec with WithCSRFAd
   }
 
   "New Application Email Preferences Select Api view page" should {
-    val missingAPIs = List(ExtendedApiDefinition("api1", "Api One", "api1Desc", ApiContext("api1context"), List("category1", "category2")),
-      ExtendedApiDefinition("api2", "Api Two", "api2Desc", ApiContext("api2context"), List("category2", "category4")),
-      ExtendedApiDefinition("api3", "Api Three", "api3Desc", ApiContext("api3context"), List("category3", "category2")))
+    val missingAPIs = List(CombinedApi("api1", "Api One",   List(CombinedApiCategory("category1"), CombinedApiCategory("category2")), REST_API),
+      CombinedApi("api2", "Api Two", List(CombinedApiCategory("category2"), CombinedApiCategory("category4")), REST_API),
+      CombinedApi("api3", "Api Three", List(CombinedApiCategory("category3"), CombinedApiCategory("category2")), REST_API))
 
     "render the api selection page with APIs that are missing from user's email preferences" in new Setup {
       // Missing APIs = some, Selected APIs = none

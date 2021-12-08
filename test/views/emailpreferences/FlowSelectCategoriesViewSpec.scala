@@ -17,7 +17,7 @@
 package views.emailpreferences
 
 import domain.models.developers.LoggedInState
-import domain.models.emailpreferences.APICategoryDetails
+import domain.models.emailpreferences.APICategoryDisplayDetails
 import domain.models.flows.EmailPreferencesFlow
 import org.jsoup.Jsoup
 import org.jsoup.nodes.Document
@@ -53,7 +53,7 @@ class FlowSelectCategoriesViewSpec extends CommonViewSpec with WithCSRFAddToken 
     document.getElementById(id).attr("href") shouldBe linkVal
   }
 
-  def validateCheckboxItemsAgainstCategories(document: Document, categories: List[APICategoryDetails]) = {
+  def validateCheckboxItemsAgainstCategories(document: Document, categories: List[APICategoryDisplayDetails]) = {
     categories.foreach(category => {
       val checkbox = document.getElementById(category.category)
       checkbox.attr("name") shouldBe "taxRegime[]"
@@ -67,7 +67,7 @@ class FlowSelectCategoriesViewSpec extends CommonViewSpec with WithCSRFAddToken 
     })
   }
 
-  def validateStaticElements(document: Document, categories: List[APICategoryDetails]) {
+  def validateStaticElements(document: Document, categories: List[APICategoryDisplayDetails]) {
 
     document.getElementById("pageHeading").text() should be("Which API categories are you interested in?")
     // Check form is configured correctly
@@ -83,7 +83,7 @@ class FlowSelectCategoriesViewSpec extends CommonViewSpec with WithCSRFAddToken 
   }
 
   "Email Preferences Select Categories view page" should {
-    val categoriesFromAPM = List(APICategoryDetails("api1", "Api One"), APICategoryDetails("api2", "Api Two"), APICategoryDetails("api3", "Api Three"))
+    val categoriesFromAPM = List(APICategoryDisplayDetails("api1", "Api One"), APICategoryDisplayDetails("api2", "Api Two"), APICategoryDisplayDetails("api3", "Api Three"))
     val usersCategories = Set("api1", "api2")
 
     "render the api categories selection Page with no check boxes selected when no user selected categories passed into the view" in new Setup {

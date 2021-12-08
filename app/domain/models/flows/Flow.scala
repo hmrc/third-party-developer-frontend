@@ -16,15 +16,15 @@
 
 package domain.models.flows
 
-import domain.models.connectors.{ApiDefinition, ExtendedApiDefinition}
+import cats.Semigroup
+import cats.implicits._
+import domain.models.applications.ApplicationId
+import domain.models.connectors.{CombinedApi, CombinedApiCategory}
 import domain.models.developers.DeveloperSession
 import domain.models.emailpreferences.{EmailPreferences, EmailTopic, TaxRegimeInterests}
 import enumeratum.{Enum, EnumEntry, PlayJsonEnum}
 
 import scala.collection.immutable
-import domain.models.applications.ApplicationId
-import cats.Semigroup
-import cats.implicits._
 
 sealed trait FlowType extends EnumEntry
 
@@ -54,12 +54,12 @@ case class EmailPreferencesFlow(override val sessionId: String,
                                 selectedCategories: Set[String],
                                 selectedAPIs: Map[String, Set[String]],
                                 selectedTopics: Set[String],
-                                visibleApis: List[ApiDefinition]) extends Flow with EmailPreferencesProducer {
+                                visibleApis: List[CombinedApi]) extends Flow with EmailPreferencesProducer {
   override val flowType: FlowType = FlowType.EMAIL_PREFERENCES
 
   def categoriesInOrder: List[String] = selectedCategories.toList.sorted
 
-  def visibleApisByCategory(category: String): List[ApiDefinition] = visibleApis.filter(_.categories.contains(category)).toList.sortBy(_.name)
+  def visibleApisByCategory(category: String): List[CombinedApi] = visibleApis.filter(_.categories.contains(CombinedApiCategory(category))).sortBy(_.displayName)
 
   def selectedApisByCategory(category: String): Set[String] = selectedAPIs.getOrElse(category, Set.empty)
 
@@ -102,8 +102,8 @@ object EmailPreferencesFlow {
 case class NewApplicationEmailPreferencesFlow(override val sessionId: String,
                                               existingEmailPreferences: EmailPreferences,
                                               applicationId: ApplicationId,
-                                              missingSubscriptions: Set[ExtendedApiDefinition],
-                                              selectedApis: Set[ExtendedApiDefinition],
+                                              missingSubscriptions: Set[CombinedApi],
+                                              selectedApis: Set[CombinedApi],
                                               selectedTopics: Set[String]) extends Flow with EmailPreferencesProducer {
   override val flowType: FlowType = FlowType.NEW_APPLICATION_EMAIL_PREFERENCES
 
@@ -121,7 +121,7 @@ case class NewApplicationEmailPreferencesFlow(override val sessionId: String,
         .foldLeft(Map.empty[String, Set[String]])(_ ++ _)
 
     // Map[ServiceName -> Set[Category]]
-    val selectedApisCategories: Map[String, Set[String]] = selectedApis.map(api => (api.serviceName -> api.categories.toSet)).toMap
+    val selectedApisCategories: Map[String, Set[String]] = selectedApis.map(api => (api.serviceName -> api.categories.map(_.value).toSet)).toMap
 
     // Map[Category -> Set.empty[ServiceName]]
     val invertedSelectedApisCategories: Map[String, Set[String]] = selectedApisCategories.values.flatten.map(c => c -> Set.empty[String]).toMap

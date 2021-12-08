@@ -16,6 +16,7 @@
 
 package domain.models.emailpreferences
 
+import domain.models.subscriptions.ApiCategory
 import enumeratum.values.{StringEnum, StringEnumEntry, StringPlayJsonValueEnum}
 import play.api.libs.json.Json
 
@@ -56,19 +57,19 @@ object EmailTopic extends StringEnum[EmailTopic] with StringPlayJsonValueEnum[Em
 
 }
 
-case class APICategory(value: String) extends AnyVal
-
-object APICategory {
-  implicit val formatApiCategory = Json.valueFormat[APICategory]
-}
+//case class APICategory(value: String) extends AnyVal
+//
+//object APICategory {
+//  implicit val formatApiCategory = Json.valueFormat[APICategory]
+//}
 
 // TODO - make category an APICategory
-case class APICategoryDetails(category: String, name: String) {
-  def toAPICategory(): APICategory = {
-    APICategory(category)
+case class APICategoryDisplayDetails(category: String, name: String) {
+  def toAPICategory(): ApiCategory = {
+    ApiCategory(category)
   }
 }
 
-object APICategoryDetails {
-  implicit val formatApiCategory = Json.format[APICategoryDetails]
+object APICategoryDisplayDetails {
+  implicit val formatApiCategory = Json.format[APICategoryDisplayDetails]
 }

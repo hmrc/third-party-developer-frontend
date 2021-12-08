@@ -20,7 +20,7 @@ import views.helper.CommonViewSpec
 import org.jsoup.Jsoup
 import org.jsoup.nodes.Document
 import domain.models.developers.LoggedInState
-import domain.models.emailpreferences.{APICategoryDetails, EmailPreferences, EmailTopic, TaxRegimeInterests}
+import domain.models.emailpreferences.{APICategoryDisplayDetails, EmailPreferences, EmailTopic, TaxRegimeInterests}
 import play.api.mvc.AnyContentAsEmpty
 import play.api.test.FakeRequest
 import utils.WithCSRFAddToken
@@ -29,8 +29,8 @@ import views.html.emailpreferences.EmailPreferencesSummaryView
 class EmailPreferencesSummaryViewSpec extends CommonViewSpec with WithCSRFAddToken {
 
   trait Setup {
-    val apiCategoryDetails: Seq[APICategoryDetails] =
-      Seq(APICategoryDetails("VAT", "VAT"), APICategoryDetails("INCOME_TAX_MTD", "Income Tax (Making Tax Digital)"))
+    val apiCategoryDetails: Seq[APICategoryDisplayDetails] =
+      Seq(APICategoryDisplayDetails("VAT", "VAT"), APICategoryDisplayDetails("INCOME_TAX_MTD", "Income Tax (Making Tax Digital)"))
     val apiCategoryDetailsMap = Map("VAT" -> "VAT", "INCOME_TAX_MTD" -> "Income Tax (Making Tax Digital)")
 
     val api1 = "income-tax-mtd-api-1"
@@ -74,7 +74,7 @@ class EmailPreferencesSummaryViewSpec extends CommonViewSpec with WithCSRFAddTok
 
   def checkEmailPreferencesApisSection(document: Document,
                                        emailPreferences: EmailPreferences,
-                                       apiCategoryDetails: Seq[APICategoryDetails],
+                                       apiCategoryDetails: Seq[APICategoryDisplayDetails],
                                        extendedServiceDetails: Map[String, String]): Unit = {
 
     for (interest <- emailPreferences.interests.sortBy(_.regime)) {
@@ -109,7 +109,7 @@ class EmailPreferencesSummaryViewSpec extends CommonViewSpec with WithCSRFAddTok
     checkLink(document, "unsubscribe-link", "Unsubscribe from Developer Hub emails", "/developer/profile/email-preferences/unsubscribe")
   }
 
-  def taxRegimeDisplayName(apiCategoryDetails: Seq[APICategoryDetails], taxRegime: String): String = {
+  def taxRegimeDisplayName(apiCategoryDetails: Seq[APICategoryDisplayDetails], taxRegime: String): String = {
     apiCategoryDetails.find(_.category == taxRegime).fold("Unknown")(_.name)
   }
 

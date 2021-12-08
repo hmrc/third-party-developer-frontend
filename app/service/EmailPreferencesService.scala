@@ -19,17 +19,16 @@ package service
 import cats.data.NonEmptyList
 import connectors.{ApmConnector, ThirdPartyDeveloperConnector}
 import domain.models.applications.ApplicationId
-import domain.models.connectors.{ApiDefinition, ExtendedApiDefinition}
-import domain.models.developers.DeveloperSession
-import domain.models.emailpreferences.APICategoryDetails
+import domain.models.connectors.CombinedApi
+import domain.models.developers.{DeveloperSession, UserId}
+import domain.models.emailpreferences.APICategoryDisplayDetails
 import domain.models.flows.{EmailPreferencesFlow, EmailPreferencesProducer, FlowType, NewApplicationEmailPreferencesFlow}
-import javax.inject.{Inject, Singleton}
 import repositories.FlowRepository
 import repositories.ReactiveMongoFormatters.{formatEmailPreferencesFlow, formatNewApplicationEmailPreferencesFlow}
 import uk.gov.hmrc.http.HeaderCarrier
 
+import javax.inject.{Inject, Singleton}
 import scala.concurrent.{ExecutionContext, Future}
-import domain.models.developers.UserId
 
 
 @Singleton
@@ -37,33 +36,33 @@ class EmailPreferencesService @Inject()(val apmConnector: ApmConnector,
                                         val thirdPartyDeveloperConnector: ThirdPartyDeveloperConnector,
                                         val flowRepository: FlowRepository)(implicit val ec: ExecutionContext) {
 
-  def fetchCategoriesVisibleToUser(developerSession: DeveloperSession)(implicit hc: HeaderCarrier): Future[List[APICategoryDetails]] =
+  def fetchCategoriesVisibleToUser(developerSession: DeveloperSession, existingFlow: EmailPreferencesFlow)
+                                  (implicit hc: HeaderCarrier): Future[List[APICategoryDisplayDetails]] =
     for {
-      existingFlow      <- fetchEmailPreferencesFlow(developerSession)
       apis              <- getOrUpdateFlowWithVisibleApis(existingFlow, developerSession)
-      visibleCategories = apis.map(_.categories).reduce(_ ++ _).distinct.sorted
-      categories        <- fetchAllAPICategoryDetails().map(_.filter(x => visibleCategories.contains(x.category)))
-    } yield categories
+      visibleCategoryNames = apis.map(_.categories).reduce(_ ++ _).distinct.map(_.value).sorted
+      categories        <- fetchAllAPICategoryDetails().map(_.filter(x => visibleCategoryNames.contains(x.category)))
+    } yield categories.distinct.sortBy(_.category)
 
 
   private def getOrUpdateFlowWithVisibleApis(existingFlow: EmailPreferencesFlow, developerSession: DeveloperSession)
-                                            (implicit hc: HeaderCarrier): Future[List[ApiDefinition]] = {
+                                            (implicit hc: HeaderCarrier): Future[List[CombinedApi]] = {
     NonEmptyList.fromList(existingFlow.visibleApis.toList).fold({
-      val visibleApis = apmConnector.fetchApiDefinitionsVisibleToUser(developerSession.developer.userId)
-      updateVisibleApis(developerSession, apmConnector.fetchApiDefinitionsVisibleToUser(developerSession.developer.userId))
+      val visibleApis = apmConnector.fetchCombinedApisVisibleToUser(developerSession.developer.userId)
+      updateVisibleApis(developerSession, apmConnector.fetchCombinedApisVisibleToUser(developerSession.developer.userId))
       visibleApis
     }) { x => Future.successful(x.toList) }
   }
 
-  def fetchAllAPICategoryDetails()(implicit hc: HeaderCarrier): Future[List[APICategoryDetails]] = apmConnector.fetchAllAPICategories()
+  def fetchAllAPICategoryDetails()(implicit hc: HeaderCarrier): Future[List[APICategoryDisplayDetails]] = apmConnector.fetchAllAPICategories()
 
-  def apiCategoryDetails(category: String)(implicit hc: HeaderCarrier): Future[Option[APICategoryDetails]] =
+  def apiCategoryDetails(category: String)(implicit hc: HeaderCarrier): Future[Option[APICategoryDisplayDetails]] =
     fetchAllAPICategoryDetails().map(_.find(_.category == category))
 
-  def fetchAPIDetails(apiServiceNames: Set[String])(implicit hc: HeaderCarrier): Future[List[ExtendedApiDefinition]] =
+  def fetchAPIDetails(apiServiceNames: Set[String])(implicit hc: HeaderCarrier): Future[List[CombinedApi]] =
     Future.sequence(
       apiServiceNames
-        .map(apmConnector.fetchAPIDefinition(_))
+        .map(apmConnector.fetchCombinedApi(_))
         .toList)
   
   def fetchEmailPreferencesFlow(developerSession: DeveloperSession) =
@@ -92,7 +91,7 @@ class EmailPreferencesService @Inject()(val apmConnector: ApmConnector,
     } yield savedFlow
   }
 
-  def updateVisibleApis(developerSession: DeveloperSession, visibleApisF: Future[List[ApiDefinition]]): Future[EmailPreferencesFlow] = {
+  def updateVisibleApis(developerSession: DeveloperSession, visibleApisF: Future[List[CombinedApi]]): Future[EmailPreferencesFlow] = {
     for {
       visibleApis  <- visibleApisF
       existingFlow <- fetchEmailPreferencesFlow(developerSession)
@@ -110,7 +109,7 @@ class EmailPreferencesService @Inject()(val apmConnector: ApmConnector,
 
   def updateMissingSubscriptions(developerSession: DeveloperSession,
                                  applicationId: ApplicationId,
-                                 missingSubscriptions: Set[ExtendedApiDefinition]): Future[NewApplicationEmailPreferencesFlow] = {
+                                 missingSubscriptions: Set[CombinedApi]): Future[NewApplicationEmailPreferencesFlow] = {
     for {
       existingFlow  <- fetchNewApplicationEmailPreferencesFlow(developerSession, applicationId)
       savedFlow     <- flowRepository.saveFlow[NewApplicationEmailPreferencesFlow](existingFlow.copy(missingSubscriptions = missingSubscriptions))

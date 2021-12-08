@@ -35,22 +35,21 @@ import mocks.connector.ApmConnectorMockModule
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
-import domain.models.apidefinitions.ExtendedApiDefinitionTestDataHelper
+import domain.models.apidefinitions.CombinedApiTestDataHelper
 import utils.LocalUserIdTracker
 import controllers.addapplication.AddApplication
 import builder._
-
 import modules.uplift.views.html.BeforeYouStartView
 import modules.uplift.services.GetProductionCredentialsFlowService
 import modules.uplift.services.mocks.UpliftLogicMock
 import modules.uplift.controllers.UpliftJourneySwitch
 
-class AddApplicationSuccessSpec 
-    extends BaseControllerSpec 
+class AddApplicationSuccessSpec
+    extends BaseControllerSpec
     with SampleSession
     with SampleApplication
-    with SubscriptionTestHelperSugar 
-    with WithCSRFAddToken 
+    with SubscriptionTestHelperSugar
+    with WithCSRFAddToken
     with DeveloperBuilder
     with LocalUserIdTracker {
 
@@ -84,7 +83,7 @@ class AddApplicationSuccessSpec
     access = Standard(redirectUris = List("https://red3", "https://red4"), termsAndConditionsUrl = Some("http://tnc-url.com"))
   )
 
-  trait Setup extends UpliftLogicMock with ApplicationServiceMock with ApmConnectorMockModule with ApplicationActionServiceMock with SessionServiceMock with EmailPreferencesServiceMock with ExtendedApiDefinitionTestDataHelper {
+  trait Setup extends UpliftLogicMock with ApplicationServiceMock with ApmConnectorMockModule with ApplicationActionServiceMock with SessionServiceMock with EmailPreferencesServiceMock with CombinedApiTestDataHelper {
     val accessTokenSwitchView = app.injector.instanceOf[AccessTokenSwitchView]
     val usingPrivilegedApplicationCredentialsView = app.injector.instanceOf[UsingPrivilegedApplicationCredentialsView]
     val tenDaysWarningView = app.injector.instanceOf[TenDaysWarningView]
@@ -150,7 +149,7 @@ class AddApplicationSuccessSpec
 
       // Have the lookup for subscribed apis not already in email preferences return an List containing some api definitions
       // so that we follow the new email preferences route through this journey.
-      fetchAPIDetailsReturns(List(extendedApiDefinition("Test Api Definition")))
+      fetchAPIDetailsReturns(List(combinedApi("Test Api Definition")))
       givenApplicationAction(subordinateApp, loggedInDeveloper)
 
       private val result = underTest.addApplicationSuccess(appId)(loggedInRequest)

@@ -18,14 +18,15 @@
 @import domain.models.developers.DeveloperSession
 @import include._
 @import domain.models.controllers.Crumb
-@import domain.models.connectors.ApiDefinition
-@import domain.models.emailpreferences.APICategoryDetails
+@import domain.models.connectors.CombinedApi
+@import domain.models.emailpreferences.APICategoryDisplayDetails
 @import domain.models.views.BackButtonWithJavaScript
+@import domain.models.connectors.ApiType.XML_API
 
 @this(devMain: DevMain)
 
 
-@(form: Form[SelectedApisEmailPreferencesForm], currentCategory: APICategoryDetails, apis: List[ApiDefinition], selectedApis: Set[String])(implicit messages: Messages, loggedIn: DeveloperSession, request: play.api.mvc.Request[Any], appConfig: ApplicationConfig)
+@(form: Form[SelectedApisEmailPreferencesForm], currentCategory: APICategoryDisplayDetails, apis: List[CombinedApi], selectedApis: Set[String])(implicit messages: Messages, loggedIn: DeveloperSession, request: play.api.mvc.Request[Any], appConfig: ApplicationConfig)
 
 @pageHeading = @{
     s"Which ${currentCategory.name} APIs are you interested in?"
@@ -74,7 +75,7 @@
                         <div class="multiple-choice">
                             <input id="@api.serviceName" type="checkbox" name="selectedApi[]" value="@api.serviceName"
                             @if(selectedApis.contains(api.serviceName)) {checked}/>
-                            <label for="@api.serviceName">@api.name</label>
+                            <label for="@api.serviceName">@api.displayName @if(api.apiType == XML_API){-XML API}</label>
                         </div>
                     }
                     </div>

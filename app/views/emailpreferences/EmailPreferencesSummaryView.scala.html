@@ -61,7 +61,7 @@
                         All @viewData.taxRegimeDisplayName(taxRegimeInterest._1.regime) APIs</span>
                 } else {
                     @for(selectedAPI <- taxRegimeInterest._1.services.toList.sorted) {
-                        <span id="@selectedAPI">@viewData.apiDisplayName(selectedAPI)</span>
+                        <span id="@selectedAPI">@viewData.apiDisplayName(selectedAPI) </span>
                         <br />
                     }
                 }

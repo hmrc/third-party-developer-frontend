@@ -2,21 +2,22 @@ package repositories
 
 import akka.stream.Materializer
 import config.ApplicationConfig
-import domain.models.apidefinitions.ApiContext
-import domain.models.connectors.ApiDefinition
+import domain.models.connectors.ApiType.REST_API
+import domain.models.connectors.{CombinedApi, CombinedApiCategory}
 import domain.models.emailpreferences.EmailTopic
+import domain.models.flows.FlowType._
 import domain.models.flows.{EmailPreferencesFlow, Flow, FlowType, IpAllowlistFlow}
+import domain.models.subscriptions.ApiCategory
 import org.joda.time.DateTime
 import org.scalatestplus.play.guice.GuiceOneAppPerSuite
 import play.api.libs.json.{JsObject, Json}
 import play.modules.reactivemongo.ReactiveMongoComponent
+import reactivemongo.bson.BSONLong
 import reactivemongo.play.json.ImplicitBSONHandlers.JsObjectDocumentWriter
 import repositories.ReactiveMongoFormatters._
 import uk.gov.hmrc.mongo.{MongoConnector, MongoSpecSupport}
 
 import scala.concurrent.ExecutionContext.Implicits.global
-import domain.models.flows.FlowType._
-import reactivemongo.bson.BSONLong
 
 class FlowRepositoryISpec extends BaseRepositoryIntegrationSpec with MongoSpecSupport with GuiceOneAppPerSuite {
 
@@ -48,7 +49,7 @@ class FlowRepositoryISpec extends BaseRepositoryIntegrationSpec with MongoSpecSu
       selectedCategories = Set("category1", "category2"),
       selectedAPIs = Map("category1" -> Set("qwqw", "asass")),
       selectedTopics = Set("BUSINESS_AND_POLICY"),
-      visibleApis = List(ApiDefinition("api1ServiceName", "api1Name", "api1Desc", ApiContext("api1Context"), List("VAT", "AGENT"))))
+      visibleApis = List(CombinedApi("api1ServiceName", "api1Name",  List(CombinedApiCategory("VAT"), CombinedApiCategory("AGENT")), REST_API)))
     await(repository.saveFlow(currentFlow))
     await(repository.saveFlow(flowInDifferentSession))
     await(repository.saveFlow(flowOfDifferentType))
@@ -91,16 +92,16 @@ class FlowRepositoryISpec extends BaseRepositoryIntegrationSpec with MongoSpecSu
           selectedCategories= Set("category1", "category2"),
           selectedAPIs = Map("category1" -> Set("qwqw", "asass")),
           selectedTopics = Set("BUSINESS_AND_POLICY",  "EVENT_INVITES"),
-        visibleApis = List(ApiDefinition("api1ServiceName", "api1Name", "api1Desc", ApiContext("api1Context"), List("VAT", "AGENT"))))
+        visibleApis = List(CombinedApi("api1ServiceName", "api1DisplayName",  List(CombinedApiCategory("VAT"), CombinedApiCategory("AGENT")), REST_API)))
 
         await(repository.saveFlow(flow))
 
         val Some(result) = await(repository.collection.find[JsObject, JsObject](Json.obj("sessionId" -> currentSession)).one[JsObject])
         (result \ "sessionId").as[String] shouldBe currentSession
-        (result \ "flowType").as[String] shouldBe EMAIL_PREFERENCES.toString()
+        (result \ "flowType").as[String] shouldBe EMAIL_PREFERENCES.toString
         (result \ "lastUpdated").asOpt[DateTime] should not be empty
         (result \ "selectedTopics").as[Set[EmailTopic]] should contain only (EmailTopic.BUSINESS_AND_POLICY, EmailTopic.EVENT_INVITES)
-        (result \ "visibleApis").as[List[ApiDefinition]] should contain only (ApiDefinition("api1ServiceName", "api1Name", "api1Desc", ApiContext("api1Context"), List("VAT", "AGENT")))
+        (result \ "visibleApis").as[List[CombinedApi]] should contain only (CombinedApi("api1ServiceName", "api1DisplayName",   List(CombinedApiCategory("VAT"), CombinedApiCategory("AGENT")), REST_API))
       }
 
       "update the flow when it already exists" in new PopulatedSetup {
