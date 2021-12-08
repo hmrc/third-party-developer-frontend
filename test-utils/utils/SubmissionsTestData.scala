@@ -123,6 +123,11 @@ trait SubmissionsTestData {
 
   import AsIdsHelpers._
   val initialProgress = List(DevelopmentPractices.questionnaire, BusinessDetails.questionnaire).map(q => q.id -> QuestionnaireProgress(NotStarted, q.questions.asIds)).toMap
+  val completedProgress = List(DevelopmentPractices.questionnaire, BusinessDetails.questionnaire).map(q => q.id -> QuestionnaireProgress(Completed, q.questions.asIds)).toMap
+  val notApplicableProgress = (
+    List(BusinessDetails.questionnaire).map(q => q.id -> QuestionnaireProgress(NotStarted, q.questions.asIds)) ++ 
+    List(DevelopmentPractices.questionnaire).map(q => q.id -> QuestionnaireProgress(NotApplicable, q.questions.asIds))
+  ).toMap
 
   val submission = Submission(submissionId, applicationId, DateTimeUtils.now, activeQuestionnaireGroupings, Map.empty)
 

@@ -35,6 +35,7 @@ import builder.SampleApplication
 import controllers.SubscriptionTestHelperSugar
 import builder.SampleSession
 import mocks.service.ApplicationActionServiceMock
+import modules.submissions.domain.models.ExtendedSubmission
 
 class ProdCredsChecklistControllerSpec
   extends BaseControllerSpec
@@ -134,5 +135,30 @@ class ProdCredsChecklistControllerSpec
 
       status(result) shouldBe OK
     }
+  }
+
+  "productionCredentialsChecklistAction" should {
+    "return success when form is valid and incomplete" in new Setup {
+      import utils.SubmissionsTestData.extendedSubmission
+
+      SubmissionServiceMock.FetchLatestSubmission.thenReturns(extendedSubmission)
+
+      val result = controller.productionCredentialsChecklistAction(appId)(loggedInRequest.withCSRFToken)
+
+      status(result) shouldBe OK
+    }
+
+    "redirect when when form is valid and complete" in new Setup {
+      import utils.SubmissionsTestData.{submission,completedProgress}
+      val completedSubmission = ExtendedSubmission(submission, completedProgress)
+
+      SubmissionServiceMock.FetchLatestSubmission.thenReturns(completedSubmission)
+
+      val result = controller.productionCredentialsChecklistAction(appId)(loggedInRequest.withCSRFToken)
+
+      status(result) shouldBe SEE_OTHER
+      redirectLocation(result) shouldBe Some(modules.submissions.controllers.routes.CheckAnswersController.checkAnswersPage(appId).url)
+    }
+
   }
 }
