@@ -104,6 +104,7 @@ class CheckAnswersController @Inject() (
   
   val redirectToGetProdCreds = (applicationId: ApplicationId) => Redirect(routes.ProdCredsChecklistController.productionCredentialsChecklistPage(applicationId))
 
+   /*, Read/Write and State details */ 
   def checkAnswersPage(productionAppId: ApplicationId) = withApplicationAndCompletedSubmission(StateFilter.inTesting, RoleFilter.isAdminRole)(redirectToGetProdCreds(productionAppId))(productionAppId) { implicit request =>
     val failed = (err: String) => BadRequestWithErrorMessage(err)
 

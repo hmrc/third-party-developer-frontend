@@ -19,6 +19,7 @@
 @import domain.models.views.BackButtonWithJavaScript
 @import modules.submissions.controllers.CheckAnswersController._
 @import include._
+@import includes._
 
 @this(devMain: DevMain2)
 
@@ -29,6 +30,7 @@
 @labelAsId(label: String) = @{
   label.toLowerCase.replaceAll(" ", "-") + "-link"
 }
+
 @devMain(
     title = title,
     userFullName = loggedIn.loggedInName,
@@ -56,23 +58,26 @@
         @title
     </h1>
 
-    @for(questionnaire <- model.questionnaires.toList) {
-      <h2 class="app-task-list__section">
-          @questionnaire.label
-      </h2>
-
-      <dl class="govuk-summary-list govuk-!-margin-bottom-9">
-        @for(question <- questionnaire.questions.toList) {
-          <div class="govuk-summary-list__row">
-            <dt class="govuk-summary-list__key no-bold width-50">@question.text</dt>
-            <dd class="govuk-summary-list__value width-20">@question.answer</dd>
-            <dd class="govuk-summary-list__actions width-10">
-              <a href="">Change</a>
-            </dd>
-          </div>
-        }
-      </dl>
-    }
+    @answersFragment(model)
+@*
+*     @for(questionnaire <- model.questionnaires.toList) {
+*       <h2 class="app-task-list__section">
+*           @questionnaire.label
+*       </h2>
+* 
+*       <dl class="govuk-summary-list govuk-!-margin-bottom-9">
+*         @for(question <- questionnaire.questions.toList) {
+*           <div class="govuk-summary-list__row">
+*             <dt class="govuk-summary-list__key no-bold width-50">@question.text</dt>
+*             <dd class="govuk-summary-list__value width-20">@question.answer</dd>
+*             <dd class="govuk-summary-list__actions width-10">
+*               <a href="">Change</a>
+*             </dd>
+*           </div>
+*         }
+*       </dl>
+*     }
+*@
 
     <div class="govuk-button-group">
         <a href="@modules.submissions.controllers.routes.CheckAnswersController.checkAnswersAction(model.appId)" class="govuk-button" data-module="govuk-button">
