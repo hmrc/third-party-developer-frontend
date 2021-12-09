@@ -42,9 +42,10 @@ import views.html.UserDidNotAdd2SVView
 import views.html.Add2SVView
 import domain.models.developers.UserId
 import utils.LocalUserIdTracker
+import mocks.connector.ThirdPartyDeveloperConnectorMockModule
 
 class UserLoginAccountSpec extends BaseControllerSpec with WithCSRFAddToken with DeveloperBuilder with LocalUserIdTracker {
-  trait Setup extends SessionServiceMock {
+  trait Setup extends SessionServiceMock with ThirdPartyDeveloperConnectorMockModule {
     val developer = buildDeveloper()
     val session = Session(UUID.randomUUID().toString, developer, LoggedInState.LOGGED_IN)
     val user = DeveloperSession(session)
@@ -74,6 +75,7 @@ class UserLoginAccountSpec extends BaseControllerSpec with WithCSRFAddToken with
       mock[ErrorHandler],
       mock[ApplicationService],
       mock[SubscriptionFieldsService],
+      TPDMock.aMock,
       sessionServiceMock,
       mcc,
       mfaMandateService,
@@ -350,7 +352,10 @@ class UserLoginAccountSpec extends BaseControllerSpec with WithCSRFAddToken with
 
       private val request = FakeRequest().withSession(sessionParams :+ "emailAddress" -> user.email: _*)
 
-      when(underTest.applicationService.request2SVRemoval(eqTo(user.email))(*))
+      val userId = UserId.random
+      TPDMock.FindUserId.thenReturn(user.email)(userId)
+      TPDMock.FetchDeveloper.thenReturn(userId)(developer)
+      when(underTest.applicationService.request2SVRemoval(*, eqTo(user.email))(*))
         .thenReturn(Future.successful(TicketCreated))
 
       private val result = addToken(underTest.confirm2SVHelp())(request)
@@ -360,7 +365,7 @@ class UserLoginAccountSpec extends BaseControllerSpec with WithCSRFAddToken with
 
       body should include("We have received your request to remove 2-step verification from your account")
       body should include("Request submitted")
-      verify(underTest.applicationService).request2SVRemoval(eqTo(user.email))(*)
+      verify(underTest.applicationService).request2SVRemoval(*, eqTo(user.email))(*)
 
     }
   }

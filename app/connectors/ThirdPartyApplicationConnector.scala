@@ -37,7 +37,7 @@ import domain.models.apidefinitions.ApiIdentifier
 import uk.gov.hmrc.http.HttpReads.Implicits._
 import util.ApplicationLogger
 
-abstract class ThirdPartyApplicationConnector(config: ApplicationConfig, metrics: ConnectorMetrics) extends ApplicationConnector with CommonResponseHandlers with ApplicationLogger {
+abstract class ThirdPartyApplicationConnector(config: ApplicationConfig, metrics: ConnectorMetrics) extends ApplicationConnector with CommonResponseHandlers with ApplicationLogger with HttpErrorFunctions {
 
   import ThirdPartyApplicationConnectorDomain._
   import ThirdPartyApplicationConnectorJsonFormatters._
@@ -125,7 +125,8 @@ abstract class ThirdPartyApplicationConnector(config: ApplicationConfig, metrics
         case None     => throw new ApplicationNotFound
       })
   }
-  
+
+
   def requestUplift(applicationId: ApplicationId, upliftRequest: UpliftRequest)(implicit hc: HeaderCarrier): Future[ApplicationUpliftSuccessful] = metrics.record(api) {
     http.POST[UpliftRequest, ErrorOrUnit](s"$serviceBaseUrl/application/${applicationId.value}/request-uplift", upliftRequest)
     .map(_ match {

@@ -87,7 +87,7 @@ class CheckYourAnswers @Inject() (
     val accessLevel = DevhubAccessLevel.fromRole(request.role)
 
     (for {
-      _ <- applicationService.requestUplift(appId, application.name, request.user)
+      _ <- applicationService.requestUplift(appId, application.name, request.developerSession)
     } yield Redirect(routes.ApplicationCheck.credentialsRequested(appId)))
       .recover {
         case e: DeskproTicketCreationFailed =>
@@ -108,7 +108,7 @@ class CheckYourAnswers @Inject() (
   }
 
   def team(appId: ApplicationId): Action[AnyContent] = canUseChecksAction(appId) { implicit request =>
-    Future.successful(Ok(teamView(request.application, request.role, request.user)))
+    Future.successful(Ok(teamView(request.application, request.role, request.developerSession)))
   }
 
   def teamAction(appId: ApplicationId): Action[AnyContent] = canUseChecksAction(appId) { implicit request =>
@@ -119,14 +119,14 @@ class CheckYourAnswers @Inject() (
   }
 
   def teamAddMember(appId: ApplicationId): Action[AnyContent] = canUseChecksAction(appId) { implicit request =>
-    Future.successful(Ok(teamMemberAddView(applicationViewModelFromApplicationRequest, AddTeamMemberForm.form, request.user)))
+    Future.successful(Ok(teamMemberAddView(applicationViewModelFromApplicationRequest, AddTeamMemberForm.form, request.developerSession)))
   }
 
   def teamMemberRemoveConfirmation(appId: ApplicationId, teamMemberHash: String): Action[AnyContent] = canUseChecksAction(appId) { implicit request =>
     successful(
       request.application
         .findCollaboratorByHash(teamMemberHash)
-        .map(collaborator => Ok(teamMemberRemoveConfirmationView(request.application, request.user, collaborator.emailAddress)))
+        .map(collaborator => Ok(teamMemberRemoveConfirmationView(request.application, request.developerSession, collaborator.emailAddress)))
         .getOrElse(Redirect(routes.CheckYourAnswers.team(appId)))
     )
   }
@@ -134,7 +134,7 @@ class CheckYourAnswers @Inject() (
   def teamMemberRemoveAction(appId: ApplicationId): Action[AnyContent] = canUseChecksAction(appId) { implicit request =>
     def handleValidForm(form: RemoveTeamMemberCheckPageConfirmationForm): Future[Result] = {
       applicationService
-        .removeTeamMember(request.application, form.email, request.user.email)
+        .removeTeamMember(request.application, form.email, request.developerSession.email)
         .map(_ => Redirect(routes.CheckYourAnswers.team(appId)))
     }
 

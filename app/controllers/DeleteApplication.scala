@@ -73,7 +73,7 @@ class DeleteApplication @Inject() (
       validForm.deleteConfirm match {
         case Some("Yes") =>
           applicationService
-            .requestPrincipalApplicationDeletion(request.user, application)
+            .requestPrincipalApplicationDeletion(request.developerSession, application)
             .map(_ => Ok(deletePrincipalApplicationCompleteView(application)))
         case _ => Future(Redirect(routes.Details.details(applicationId)))
       }
@@ -90,7 +90,7 @@ class DeleteApplication @Inject() (
     val application = request.application
 
     applicationService
-      .deleteSubordinateApplication(request.user, application)
+      .deleteSubordinateApplication(request.developerSession, application)
       .map(_ => Ok(deleteSubordinateApplicationCompleteView(application)))
 
   }

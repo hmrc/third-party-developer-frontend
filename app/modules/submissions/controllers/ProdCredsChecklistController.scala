@@ -35,23 +35,34 @@ import helpers.EitherTHelper
 import domain.models.controllers.BadRequestWithErrorMessage
 import modules.submissions.domain.models.NotApplicable
 
+import scala.concurrent.Future.successful
+import play.api.data.Form
+
 object ProdCredsChecklistController {
-  case class ViewQuestionnaireSummary(label: String, state: String, id: QuestionnaireId = QuestionnaireId.random, nextQuestionUrl: Option[String] = None)
+  case class DummyForm(dummy: String = "dummy")
+
+  object DummyForm {
+    import play.api.data.Forms.{ignored, mapping}
+
+    def form: Form[DummyForm] = {
+      Form(
+        mapping(
+          "dummy" -> ignored("dummy")
+        )(DummyForm.apply)(DummyForm.unapply)
+      )
+    }
+  }
+
+  case class ViewQuestionnaireSummary(label: String, state: String, isComplete: Boolean, id: QuestionnaireId = QuestionnaireId.random, nextQuestionUrl: Option[String] = None)
   case class ViewGrouping(label: String, questionnaireSummaries: NonEmptyList[ViewQuestionnaireSummary])
   case class ViewModel(appId: ApplicationId, appName: String, groupings: NonEmptyList[ViewGrouping])
 
-  def asText(state: QuestionnaireState): String = state match {
-    case NotStarted => "Not Started"
-    case InProgress => "In Progress"
-    case NotApplicable => "Not Applicable"
-    case Completed => "Completed"
-  }
-
   def convertToSummary(extSubmission: ExtendedSubmission)(questionnaire: Questionnaire): ViewQuestionnaireSummary = {
     val progress = extSubmission.questionnaireProgress.get(questionnaire.id).get
-    val state = asText(progress.state)
+    val state = QuestionnaireState.describe(progress.state)
+    val isComplete = QuestionnaireState.isCompleted(progress.state)
     val url = progress.questionsToAsk.headOption.map(q => modules.submissions.controllers.routes.QuestionsController.showQuestion(extSubmission.submission.id, q).url)
-    ViewQuestionnaireSummary(questionnaire.label.value, state, questionnaire.id, url)
+    ViewQuestionnaireSummary(questionnaire.label.value, state, isComplete, questionnaire.id, url)
   }
 
   def convertToViewGrouping(extSubmission: ExtendedSubmission)(groupOfQuestionnaires: GroupOfQuestionnaires): ViewGrouping = {
@@ -65,6 +76,22 @@ object ProdCredsChecklistController {
     val groupings = extSubmission.submission.groups.map(convertToViewGrouping(extSubmission))
     ViewModel(appId, appName, groupings)
   }
+
+  def filterGroupingsForEmptyQuestionnaireSummaries(groupings: NonEmptyList[ViewGrouping]): Option[NonEmptyList[ViewGrouping]] = {
+    import cats.implicits._
+    
+    val filterFn: ViewQuestionnaireSummary => Boolean = _.state == QuestionnaireState.describe(NotApplicable)
+    
+    groupings
+      .map(g => {
+        val qs = g.questionnaireSummaries.filterNot(filterFn).toNel
+        (g.label, qs)
+      })
+      .collect {
+        case (label, Some(qs)) => ViewGrouping(label, qs)
+      }
+      .toNel
+  }
 }
 
 @Singleton
@@ -76,48 +103,59 @@ class ProdCredsChecklistController @Inject() (
     mcc: MessagesControllerComponents,
     val cookieSigner: CookieSigner,
     val apmConnector: ApmConnector,
-    submissionService: SubmissionService,
+    val submissionService: SubmissionService,
     productionCredentialsChecklistView: ProductionCredentialsChecklistView)
     (implicit val ec: ExecutionContext, val appConfig: ApplicationConfig)
   extends ApplicationController(mcc)
      with CanUseCheckActions
-     with EitherTHelper[String] {
+     with EitherTHelper[String]
+     with SubmissionActionBuilders {
 
   import cats.implicits._
   import cats.instances.future.catsStdInstancesForFuture
   import ProdCredsChecklistController._
+  import SubmissionActionBuilders.{StateFilter, RoleFilter}
 
-  def productionCredentialsChecklist(productionAppId: ApplicationId): Action[AnyContent] = whenTeamMemberOnApp(productionAppId) { implicit request =>
+  def productionCredentialsChecklistPage(productionAppId: ApplicationId): Action[AnyContent] = withApplicationSubmission(StateFilter.inTesting, RoleFilter.isAdminRole)(productionAppId) { implicit request =>
     val failed = (err: String) => BadRequestWithErrorMessage(err)
 
     val success = (viewModel: ViewModel) => {
-
-      def filterGroupingsForEmptyQuestionnaireSummaries(groupings: NonEmptyList[ViewGrouping]): Option[NonEmptyList[ViewGrouping]] = {
-        val filterFn: ViewQuestionnaireSummary => Boolean = _.state == asText(NotApplicable)
-        
-        groupings
-          .map(g => {
-            val qs = g.questionnaireSummaries.filterNot(filterFn).toNel
-            (g.label, qs)
-          })
-          .collect {
-            case (label, Some(qs)) => ViewGrouping(label, qs)
-          }
-          .toNel
-      }
-
       filterGroupingsForEmptyQuestionnaireSummaries(viewModel.groupings).fold(
         BadRequest("No questionnaires applicable") 
       )(vg =>
-        Ok(productionCredentialsChecklistView(viewModel.copy(groupings = vg)))
+        Ok(productionCredentialsChecklistView(viewModel.copy(groupings = vg), DummyForm.form.fillAndValidate(DummyForm("dummy"))))
       )
     }
     
     val vm = for {
-      submission          <- fromOptionF(submissionService.fetchLatestSubmission(productionAppId), "No subsmission and/or application found")
+      submission          <- fromOptionF(submissionService.fetchLatestSubmission(productionAppId), "No submission and/or application found")
       viewModel           = convertSubmissionToViewModel(submission)(request.application.id, request.application.name)
     } yield viewModel
 
     vm.fold[Result](failed, success)
+  }
+
+  def productionCredentialsChecklistAction(productionAppId: ApplicationId) = withApplicationSubmission(StateFilter.inTesting)(productionAppId) { implicit request =>
+    def handleValidForm(validForm: DummyForm) = {
+      if(request.extSubmission.isCompleted) {
+        successful(Redirect(modules.submissions.controllers.routes.CheckAnswersController.checkAnswersPage(productionAppId)))
+      }
+      else {
+        val viewModel = convertSubmissionToViewModel(request.extSubmission)(request.application.id, request.application.name)
+        
+        successful(
+          filterGroupingsForEmptyQuestionnaireSummaries(viewModel.groupings).fold(
+            throw new AssertionError("submissions with only n/a questionnaires will be marked as complete")
+          )(vg =>
+            Ok(productionCredentialsChecklistView(viewModel.copy(groupings = vg), DummyForm.form.fill(validForm).withGlobalError("production.credentials.checklist.error.global")))
+          )
+        )
+      }
+    }
+
+    def handleInvalidForm(formWithErrors: Form[DummyForm]) = 
+      throw new AssertionError("DummyForm has no validation rules and so can never be invalid")
+
+    DummyForm.form.bindFromRequest.fold(handleInvalidForm, handleValidForm)
   }
 }

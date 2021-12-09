@@ -154,7 +154,7 @@ class CancelRequestControllerSpec
       SubmissionServiceMock.FetchLatestSubmission.thenReturnsNone()
 
       val result = controller.cancelRequestForProductionCredentialsPage(appId)(loggedInRequest.withCSRFToken)
-      status(result) shouldBe BAD_REQUEST
+      status(result) shouldBe NOT_FOUND
     }
     
     "cancelRequestForProductionCredentialsAction when cancelling the request" in new Setup with HasSubscriptions with HasAppInTestingState {
