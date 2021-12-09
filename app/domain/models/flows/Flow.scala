@@ -35,6 +35,7 @@ object FlowType extends Enum[FlowType] with PlayJsonEnum[FlowType] {
   case object EMAIL_PREFERENCES extends FlowType
   case object EMAIL_PREFERENCES_V2 extends FlowType
   case object NEW_APPLICATION_EMAIL_PREFERENCES extends FlowType
+  case object NEW_APPLICATION_EMAIL_PREFERENCES_V2 extends FlowType
   case object GET_PRODUCTION_CREDENTIALS extends FlowType
 }
 
@@ -106,7 +107,7 @@ case class NewApplicationEmailPreferencesFlowV2(override val sessionId: String,
                                                 missingSubscriptions: Set[CombinedApi],
                                                 selectedApis: Set[CombinedApi],
                                                 selectedTopics: Set[String]) extends Flow with EmailPreferencesProducer {
-  override val flowType: FlowType = FlowType.NEW_APPLICATION_EMAIL_PREFERENCES
+  override val flowType: FlowType = FlowType.NEW_APPLICATION_EMAIL_PREFERENCES_V2
 
   def optionCombine[A: Semigroup](a: A, opt: Option[A]): A = opt.map(a combine _).getOrElse(a)
 
