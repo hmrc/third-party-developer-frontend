@@ -34,7 +34,8 @@ object ReactiveMongoFormatters extends CombinedApiJsonFormatters {
 
   implicit val formatFlow: Format[Flow] = Union.from[Flow]("flowType")
     .and[IpAllowlistFlow](FlowType.IP_ALLOW_LIST.toString())
-    .and[EmailPreferencesFlowV2](FlowType.EMAIL_PREFERENCES.toString())
+//    .and[EmailPreferencesFlowV2](FlowType.EMAIL_PREFERENCES.toString())
+    .and[EmailPreferencesFlowV2](FlowType.EMAIL_PREFERENCES_V2.toString())
     .and[NewApplicationEmailPreferencesFlowV2](FlowType.NEW_APPLICATION_EMAIL_PREFERENCES.toString())
     .and[GetProductionCredentialsFlow](FlowType.GET_PRODUCTION_CREDENTIALS.toString())
     .format

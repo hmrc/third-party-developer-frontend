@@ -160,7 +160,7 @@ class EmailPreferences @Inject()(val sessionService: SessionService,
             flow <- emailPreferencesService.fetchEmailPreferencesFlow(request.developerSession)
             updateResult <- emailPreferencesService
               .updateEmailPreferences(request.userId, flow.copy(selectedTopics = selectedTopicsForm.topic.toSet))
-            _ = if (updateResult) emailPreferencesService.deleteFlow(request.sessionId, FlowType.EMAIL_PREFERENCES)
+            _ = if (updateResult) emailPreferencesService.deleteFlow(request.sessionId, FlowType.EMAIL_PREFERENCES_V2)
           } yield if (updateResult) Redirect(controllers.profile.routes.EmailPreferences.emailPreferencesSummaryPage())
           else Redirect(controllers.profile.routes.EmailPreferences.flowSelectTopicsPage())
       }

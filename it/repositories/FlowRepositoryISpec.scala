@@ -98,7 +98,7 @@ class FlowRepositoryISpec extends BaseRepositoryIntegrationSpec with MongoSpecSu
 
         val Some(result) = await(repository.collection.find[JsObject, JsObject](Json.obj("sessionId" -> currentSession)).one[JsObject])
         (result \ "sessionId").as[String] shouldBe currentSession
-        (result \ "flowType").as[String] shouldBe EMAIL_PREFERENCES.toString
+        (result \ "flowType").as[String] shouldBe EMAIL_PREFERENCES_V2.toString
         (result \ "lastUpdated").asOpt[DateTime] should not be empty
         (result \ "selectedTopics").as[Set[EmailTopic]] should contain only (EmailTopic.BUSINESS_AND_POLICY, EmailTopic.EVENT_INVITES)
         (result \ "visibleApis").as[List[CombinedApi]] should contain only (CombinedApi("api1ServiceName", "api1DisplayName",   List(CombinedApiCategory("VAT"), CombinedApiCategory("AGENT")), REST_API))
