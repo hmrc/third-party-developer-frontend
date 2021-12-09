@@ -6,7 +6,7 @@ import domain.models.connectors.ApiType.REST_API
 import domain.models.connectors.{CombinedApi, CombinedApiCategory}
 import domain.models.emailpreferences.EmailTopic
 import domain.models.flows.FlowType._
-import domain.models.flows.{EmailPreferencesFlow, Flow, FlowType, IpAllowlistFlow}
+import domain.models.flows.{EmailPreferencesFlowV2, Flow, FlowType, IpAllowlistFlow}
 import domain.models.subscriptions.ApiCategory
 import org.joda.time.DateTime
 import org.scalatestplus.play.guice.GuiceOneAppPerSuite
@@ -45,7 +45,7 @@ class FlowRepositoryISpec extends BaseRepositoryIntegrationSpec with MongoSpecSu
 
     val currentFlow: IpAllowlistFlow = IpAllowlistFlow(currentSession, Set("ip1", "ip2"))
     val flowInDifferentSession: IpAllowlistFlow = IpAllowlistFlow(anotherSession, Set("ip3", "ip4"))
-    val flowOfDifferentType: EmailPreferencesFlow = EmailPreferencesFlow(currentSession,
+    val flowOfDifferentType: EmailPreferencesFlowV2 = EmailPreferencesFlowV2(currentSession,
       selectedCategories = Set("category1", "category2"),
       selectedAPIs = Map("category1" -> Set("qwqw", "asass")),
       selectedTopics = Set("BUSINESS_AND_POLICY"),
@@ -88,7 +88,7 @@ class FlowRepositoryISpec extends BaseRepositoryIntegrationSpec with MongoSpecSu
       }
 
       "save email preferences" in {
-        val flow =  EmailPreferencesFlow(currentSession,
+        val flow =  EmailPreferencesFlowV2(currentSession,
           selectedCategories= Set("category1", "category2"),
           selectedAPIs = Map("category1" -> Set("qwqw", "asass")),
           selectedTopics = Set("BUSINESS_AND_POLICY",  "EVENT_INVITES"),

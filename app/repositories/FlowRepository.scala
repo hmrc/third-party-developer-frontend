@@ -35,7 +35,7 @@ import scala.concurrent.{ExecutionContext, Future}
 
 @Singleton
 class FlowRepository @Inject()(mongo: ReactiveMongoComponent, appConfig: ApplicationConfig)(implicit val mat: Materializer, val ec: ExecutionContext)
-  extends ReactiveRepository[Flow, BSONObjectID]("flowsv2", mongo.mongoConnector.db,
+  extends ReactiveRepository[Flow, BSONObjectID]("flows", mongo.mongoConnector.db,
     ReactiveMongoFormatters.formatFlow, ReactiveMongoFormats.objectIdFormats) {
 
   private lazy val lastUpdatedIndexName = "last_updated_ttl_idx"

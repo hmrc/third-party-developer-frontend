@@ -21,7 +21,7 @@ import controllers._
 import domain.models.applications.ApplicationId
 import domain.models.connectors.CombinedApi
 import domain.models.emailpreferences.APICategoryDisplayDetails
-import domain.models.flows.{FlowType, NewApplicationEmailPreferencesFlow}
+import domain.models.flows.{FlowType, NewApplicationEmailPreferencesFlowV2}
 import play.api.data.Form
 import play.api.libs.crypto.CookieSigner
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents, Result}
@@ -241,7 +241,7 @@ class EmailPreferences @Inject()(val sessionService: SessionService,
   }
 
   def renderSelectApisFromSubscriptionsPage(form: Form[SelectApisFromSubscriptionsForm] = SelectApisFromSubscriptionsForm.form,
-                                            flow: NewApplicationEmailPreferencesFlow)(implicit request: UserRequest[AnyContent]): Html =
+                                            flow: NewApplicationEmailPreferencesFlowV2)(implicit request: UserRequest[AnyContent]): Html =
     selectApisFromSubscriptionsView(form, flow.missingSubscriptions.toList.sortBy(_.serviceName), flow.applicationId, flow.selectedApis.map(_.serviceName))
 
   def selectApisFromSubscriptionsAction(applicationId: ApplicationId): Action[AnyContent] = loggedInAction { implicit request =>
@@ -271,7 +271,7 @@ class EmailPreferences @Inject()(val sessionService: SessionService,
   }
 
   private def renderSelectTopicsFromSubscriptionsView(form: Form[SelectTopicsFromSubscriptionsForm] = SelectTopicsFromSubscriptionsForm.form,
-                                                      flow: NewApplicationEmailPreferencesFlow)(implicit request: UserRequest[AnyContent]): Html =
+                                                      flow: NewApplicationEmailPreferencesFlowV2)(implicit request: UserRequest[AnyContent]): Html =
     selectTopicsFromSubscriptionsView.apply(form, flow.selectedTopics, flow.applicationId)
 
   def selectTopicsFromSubscriptionsAction(applicationId: ApplicationId): Action[AnyContent] = loggedInAction { implicit request =>

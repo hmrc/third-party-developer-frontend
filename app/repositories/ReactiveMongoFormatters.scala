@@ -28,14 +28,14 @@ object ReactiveMongoFormatters extends CombinedApiJsonFormatters {
   implicit val dateFormat: Format[DateTime] = ReactiveMongoFormats.dateTimeFormats
   implicit val formatIpAllowlistFlow: OFormat[IpAllowlistFlow] = Json.format[IpAllowlistFlow]
 
-  implicit val formatEmailPreferencesFlow: OFormat[EmailPreferencesFlow] = Json.format[EmailPreferencesFlow]
-  implicit val formatNewApplicationEmailPreferencesFlow: OFormat[NewApplicationEmailPreferencesFlow] = Json.format[NewApplicationEmailPreferencesFlow]
+  implicit val formatEmailPreferencesFlow: OFormat[EmailPreferencesFlowV2] = Json.format[EmailPreferencesFlowV2]
+  implicit val formatNewApplicationEmailPreferencesFlow: OFormat[NewApplicationEmailPreferencesFlowV2] = Json.format[NewApplicationEmailPreferencesFlowV2]
   implicit val formatGetProdCredsFlow: OFormat[GetProductionCredentialsFlow] = Json.format[GetProductionCredentialsFlow]
 
   implicit val formatFlow: Format[Flow] = Union.from[Flow]("flowType")
     .and[IpAllowlistFlow](FlowType.IP_ALLOW_LIST.toString())
-    .and[EmailPreferencesFlow](FlowType.EMAIL_PREFERENCES.toString())
-    .and[NewApplicationEmailPreferencesFlow](FlowType.NEW_APPLICATION_EMAIL_PREFERENCES.toString())
+    .and[EmailPreferencesFlowV2](FlowType.EMAIL_PREFERENCES.toString())
+    .and[NewApplicationEmailPreferencesFlowV2](FlowType.NEW_APPLICATION_EMAIL_PREFERENCES.toString())
     .and[GetProductionCredentialsFlow](FlowType.GET_PRODUCTION_CREDENTIALS.toString())
     .format
 }

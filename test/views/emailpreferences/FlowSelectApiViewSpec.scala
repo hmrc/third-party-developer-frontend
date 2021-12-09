@@ -21,7 +21,7 @@ import domain.models.connectors.ApiType.REST_API
 import domain.models.connectors.{CombinedApi, CombinedApiCategory}
 import domain.models.developers.{DeveloperSession, LoggedInState}
 import domain.models.emailpreferences.APICategoryDisplayDetails
-import domain.models.flows.EmailPreferencesFlow
+import domain.models.flows.EmailPreferencesFlowV2
 import org.jsoup.Jsoup
 import org.jsoup.nodes.{Document, Element}
 import play.api.data.{Form, FormError}
@@ -44,7 +44,7 @@ class FlowSelectApiViewSpec extends CommonViewSpec with WithCSRFAddToken {
     val form = mock[Form[SelectedApisEmailPreferencesForm]]
     val currentCategory = APICategoryDisplayDetails("CATEGORY1", "Category 1")
     val apis = Set("api1", "api2")
-    val emailpreferencesFlow: EmailPreferencesFlow = EmailPreferencesFlow(developerSessionWithoutEmailPreferences.session.sessionId, apis, Map(currentCategory.category -> apis), Set.empty, List.empty)
+    val emailpreferencesFlow: EmailPreferencesFlowV2 = EmailPreferencesFlowV2(developerSessionWithoutEmailPreferences.session.sessionId, apis, Map(currentCategory.category -> apis), Set.empty, List.empty)
     implicit val request: FakeRequest[AnyContentAsEmpty.type] = FakeRequest().withCSRFToken
 
     val flowSelectApiView: FlowSelectApiView = app.injector.instanceOf[FlowSelectApiView]

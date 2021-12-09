@@ -22,7 +22,7 @@ import domain.models.applications.ApplicationId
 import domain.models.connectors.CombinedApi
 import domain.models.developers.{DeveloperSession, UserId}
 import domain.models.emailpreferences.APICategoryDisplayDetails
-import domain.models.flows.{EmailPreferencesFlow, EmailPreferencesProducer, FlowType, NewApplicationEmailPreferencesFlow}
+import domain.models.flows.{EmailPreferencesFlowV2, EmailPreferencesProducer, FlowType, NewApplicationEmailPreferencesFlowV2}
 import repositories.FlowRepository
 import repositories.ReactiveMongoFormatters.{formatEmailPreferencesFlow, formatNewApplicationEmailPreferencesFlow}
 import uk.gov.hmrc.http.HeaderCarrier
@@ -36,7 +36,7 @@ class EmailPreferencesService @Inject()(val apmConnector: ApmConnector,
                                         val thirdPartyDeveloperConnector: ThirdPartyDeveloperConnector,
                                         val flowRepository: FlowRepository)(implicit val ec: ExecutionContext) {
 
-  def fetchCategoriesVisibleToUser(developerSession: DeveloperSession, existingFlow: EmailPreferencesFlow)
+  def fetchCategoriesVisibleToUser(developerSession: DeveloperSession, existingFlow: EmailPreferencesFlowV2)
                                   (implicit hc: HeaderCarrier): Future[List[APICategoryDisplayDetails]] =
     for {
       apis              <- getOrUpdateFlowWithVisibleApis(existingFlow, developerSession)
@@ -45,7 +45,7 @@ class EmailPreferencesService @Inject()(val apmConnector: ApmConnector,
     } yield categories.distinct.sortBy(_.category)
 
 
-  private def getOrUpdateFlowWithVisibleApis(existingFlow: EmailPreferencesFlow, developerSession: DeveloperSession)
+  private def getOrUpdateFlowWithVisibleApis(existingFlow: EmailPreferencesFlowV2, developerSession: DeveloperSession)
                                             (implicit hc: HeaderCarrier): Future[List[CombinedApi]] = {
     NonEmptyList.fromList(existingFlow.visibleApis.toList).fold({
       val visibleApis = apmConnector.fetchCombinedApisVisibleToUser(developerSession.developer.userId)
@@ -66,53 +66,53 @@ class EmailPreferencesService @Inject()(val apmConnector: ApmConnector,
         .toList)
   
   def fetchEmailPreferencesFlow(developerSession: DeveloperSession) =
-    flowRepository.fetchBySessionIdAndFlowType[EmailPreferencesFlow](developerSession.session.sessionId, FlowType.EMAIL_PREFERENCES) map {
+    flowRepository.fetchBySessionIdAndFlowType[EmailPreferencesFlowV2](developerSession.session.sessionId, FlowType.EMAIL_PREFERENCES) map {
       case Some(flow) => flow
-      case None       => val newFlowObject = EmailPreferencesFlow.fromDeveloperSession(developerSession)
-                          flowRepository.saveFlow[EmailPreferencesFlow](newFlowObject)
+      case None       => val newFlowObject = EmailPreferencesFlowV2.fromDeveloperSession(developerSession)
+                          flowRepository.saveFlow[EmailPreferencesFlowV2](newFlowObject)
                           newFlowObject
     }
 
-  def fetchNewApplicationEmailPreferencesFlow(developerSession: DeveloperSession, applicationId: ApplicationId): Future[NewApplicationEmailPreferencesFlow] =
-    flowRepository.fetchBySessionIdAndFlowType[NewApplicationEmailPreferencesFlow](developerSession.session.sessionId, FlowType.NEW_APPLICATION_EMAIL_PREFERENCES) map {
+  def fetchNewApplicationEmailPreferencesFlow(developerSession: DeveloperSession, applicationId: ApplicationId): Future[NewApplicationEmailPreferencesFlowV2] =
+    flowRepository.fetchBySessionIdAndFlowType[NewApplicationEmailPreferencesFlowV2](developerSession.session.sessionId, FlowType.NEW_APPLICATION_EMAIL_PREFERENCES) map {
       case Some(flow) => flow
-      case None       => val newFlowObject = NewApplicationEmailPreferencesFlow(developerSession.session.sessionId, developerSession.developer.emailPreferences, applicationId, Set.empty, Set.empty, developerSession.developer.emailPreferences.topics.map(_.value))
-                          flowRepository.saveFlow[NewApplicationEmailPreferencesFlow](newFlowObject)
+      case None       => val newFlowObject = NewApplicationEmailPreferencesFlowV2(developerSession.session.sessionId, developerSession.developer.emailPreferences, applicationId, Set.empty, Set.empty, developerSession.developer.emailPreferences.topics.map(_.value))
+                          flowRepository.saveFlow[NewApplicationEmailPreferencesFlowV2](newFlowObject)
                           newFlowObject
     }
 
   def deleteFlow(sessionId: String, flowType: FlowType): Future[Boolean] = flowRepository.deleteBySessionIdAndFlowType(sessionId, flowType)
 
-  def updateCategories(developerSession: DeveloperSession, categoriesToAdd: List[String]): Future[EmailPreferencesFlow] = {
+  def updateCategories(developerSession: DeveloperSession, categoriesToAdd: List[String]): Future[EmailPreferencesFlowV2] = {
     for {
       existingFlow <- fetchEmailPreferencesFlow(developerSession)
-      savedFlow    <- flowRepository.saveFlow[EmailPreferencesFlow](existingFlow.copy(selectedCategories = categoriesToAdd.toSet,
+      savedFlow    <- flowRepository.saveFlow[EmailPreferencesFlowV2](existingFlow.copy(selectedCategories = categoriesToAdd.toSet,
       selectedAPIs  = existingFlow.selectedAPIs.filter(api => categoriesToAdd.contains(api._1))))
     } yield savedFlow
   }
 
-  def updateVisibleApis(developerSession: DeveloperSession, visibleApisF: Future[List[CombinedApi]]): Future[EmailPreferencesFlow] = {
+  def updateVisibleApis(developerSession: DeveloperSession, visibleApisF: Future[List[CombinedApi]]): Future[EmailPreferencesFlowV2] = {
     for {
       visibleApis  <- visibleApisF
       existingFlow <- fetchEmailPreferencesFlow(developerSession)
-      savedFlow    <- flowRepository.saveFlow[EmailPreferencesFlow](existingFlow.copy(visibleApis = visibleApis))
+      savedFlow    <- flowRepository.saveFlow[EmailPreferencesFlowV2](existingFlow.copy(visibleApis = visibleApis))
     } yield savedFlow
   }
 
-  def updateSelectedApis(developerSession: DeveloperSession, currentCategory: String, selectedApis: List[String]): Future[EmailPreferencesFlow] = {
+  def updateSelectedApis(developerSession: DeveloperSession, currentCategory: String, selectedApis: List[String]): Future[EmailPreferencesFlowV2] = {
     for {
       existingFlow <- fetchEmailPreferencesFlow(developerSession)
       updatedApis   = existingFlow.selectedAPIs ++ Map(currentCategory -> selectedApis.toSet)
-      savedFlow    <- flowRepository.saveFlow[EmailPreferencesFlow](existingFlow.copy(selectedAPIs = updatedApis))
+      savedFlow    <- flowRepository.saveFlow[EmailPreferencesFlowV2](existingFlow.copy(selectedAPIs = updatedApis))
     } yield savedFlow
   }
 
   def updateMissingSubscriptions(developerSession: DeveloperSession,
                                  applicationId: ApplicationId,
-                                 missingSubscriptions: Set[CombinedApi]): Future[NewApplicationEmailPreferencesFlow] = {
+                                 missingSubscriptions: Set[CombinedApi]): Future[NewApplicationEmailPreferencesFlowV2] = {
     for {
       existingFlow  <- fetchNewApplicationEmailPreferencesFlow(developerSession, applicationId)
-      savedFlow     <- flowRepository.saveFlow[NewApplicationEmailPreferencesFlow](existingFlow.copy(missingSubscriptions = missingSubscriptions))
+      savedFlow     <- flowRepository.saveFlow[NewApplicationEmailPreferencesFlowV2](existingFlow.copy(missingSubscriptions = missingSubscriptions))
     } yield savedFlow
   }
 
@@ -122,7 +122,7 @@ class EmailPreferencesService @Inject()(val apmConnector: ApmConnector,
     for {
       apis <- fetchAPIDetails(selectedApis)
       existingFlow  <- fetchNewApplicationEmailPreferencesFlow(developerSession, applicationId)
-      savedFlow     <- flowRepository.saveFlow[NewApplicationEmailPreferencesFlow](existingFlow.copy(selectedApis = apis.toSet))
+      savedFlow     <- flowRepository.saveFlow[NewApplicationEmailPreferencesFlowV2](existingFlow.copy(selectedApis = apis.toSet))
     } yield savedFlow
   }
 

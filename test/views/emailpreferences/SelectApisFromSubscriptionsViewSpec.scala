@@ -21,7 +21,7 @@ import domain.models.applications.ApplicationId
 import domain.models.connectors.ApiType.REST_API
 import domain.models.connectors.{CombinedApi, CombinedApiCategory}
 import domain.models.developers.{DeveloperSession, LoggedInState}
-import domain.models.flows.NewApplicationEmailPreferencesFlow
+import domain.models.flows.NewApplicationEmailPreferencesFlowV2
 import org.jsoup.Jsoup
 import org.jsoup.nodes.{Document, Element}
 import play.api.data.{Form, FormError}
@@ -43,7 +43,7 @@ class SelectApisFromSubscriptionsViewSpec extends CommonViewSpec with WithCSRFAd
     val form = mock[Form[SelectApisFromSubscriptionsForm]]
     val apis = Set("api1", "api2")
     val applicationId = ApplicationId.random
-    val newApplicationEmailPreferencesFlow = NewApplicationEmailPreferencesFlow(
+    val newApplicationEmailPreferencesFlow = NewApplicationEmailPreferencesFlowV2(
         developerSessionWithoutEmailPreferences.session.sessionId,
         developerSessionWithoutEmailPreferences.developer.emailPreferences,
         applicationId,
