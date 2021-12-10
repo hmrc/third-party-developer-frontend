@@ -34,7 +34,6 @@ import modules.submissions.domain.models._
 import modules.submissions.services.SubmissionService
 import helpers.EitherTHelper
 import domain.models.controllers.BadRequestWithErrorMessage
-import modules.submissions.services.RequestProductionCredentials
 import modules.submissions.controllers.models.AnswersViewModel._
 
 object CredentialsRequestedController {

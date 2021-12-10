@@ -69,7 +69,5 @@
             Save and come back later
         </a>
     </div>
-    <div>
-      <a href="@modules.submissions.controllers.routes.CancelRequestController.cancelRequestForProductionCredentialsPage(model.appId)" class="govuk-link">Cancel your request for production credentials</a>
-    </div>
+    @cancelRequestFragment(model.appId)
 }
