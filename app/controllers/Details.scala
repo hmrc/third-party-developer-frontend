@@ -97,8 +97,9 @@ class Details @Inject() (
             )
           )
 
+          
         lazy val newUpliftJourney = (e: ExtendedSubmission) =>
-          Redirect(modules.submissions.controllers.routes.CheckAnswersController.checkAnswersPage(applicationId))
+          Redirect(modules.submissions.controllers.routes.CredentialsRequestedController.credentialsRequestedPage(applicationId))
 
         OptionT(submissionService.fetchLatestSubmission(applicationId)).fold(oldJourney)(newUpliftJourney)    
     }

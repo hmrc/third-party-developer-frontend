@@ -14,9 +14,9 @@
  * limitations under the License.
  *@
 
-@import modules.submissions.controllers.CheckAnswersController._
+@import modules.submissions.controllers.models.AnswersViewModel._
 
-@(model: ViewModel)
+@(model: ViewModel, canChange: Boolean)
 
   @for(questionnaire <- model.questionnaires.toList) {
     <h2 class="app-task-list__section">
@@ -29,7 +29,9 @@
           <dt class="govuk-summary-list__key no-bold width-50">@question.text</dt>
           <dd class="govuk-summary-list__value width-20">@question.answer</dd>
           <dd class="govuk-summary-list__actions width-10">
-            <a href="">Change</a>
+            @if(canChange) {
+              <a href="">Change</a>
+            }
           </dd>
         </div>
       }
