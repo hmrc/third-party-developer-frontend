@@ -29,15 +29,56 @@ import javax.inject.{Inject, Singleton}
 import scala.concurrent.ExecutionContext
 import controllers.ApplicationController
 import controllers.checkpages.CanUseCheckActions
+import cats.data.NonEmptyList
 import modules.submissions.domain.models._
 import modules.submissions.services.SubmissionService
 import helpers.EitherTHelper
 import domain.models.controllers.BadRequestWithErrorMessage
-import modules.submissions.services.RequestProductionCredentials
 import modules.submissions.controllers.models.AnswersViewModel._
 
+object CredentialsRequestedController {
+  case class ViewQuestion(id: QuestionId, text: String, answer: String)
+  case class ViewQuestionnaire(label: String, state: String, id: QuestionnaireId, questions: NonEmptyList[ViewQuestion])
+  case class ViewModel(appId: ApplicationId, appName: String, questionnaires: List[ViewQuestionnaire])
+
+  def convertAnswer(answer: ActualAnswer): Option[String] = answer match {
+    case SingleChoiceAnswer(value) => Some(value)
+    case TextAnswer(value) => Some(value)
+    case MultipleChoiceAnswer(values) => Some(values.mkString)
+    case NoAnswer => Some("n/a")
+    case AcknowledgedAnswer => None
+  }
+  
+  def convertQuestion(extSubmission: ExtendedSubmission)(item: QuestionItem): Option[ViewQuestion] = {
+    val id = item.question.id
+    
+    extSubmission.submission.answersToQuestions.get(id).flatMap(convertAnswer).map(answer =>
+      ViewQuestion(id, item.question.wording.value, answer)
+    )
+  }
+  
+  def convertQuestionnaire(extSubmission: ExtendedSubmission)(questionnaire: Questionnaire): Option[ViewQuestionnaire] = {
+    val progress = extSubmission.questionnaireProgress.get(questionnaire.id).get
+    val state = QuestionnaireState.describe(progress.state)
+    
+    val questions = questionnaire.questions
+      .map(convertQuestion(extSubmission))
+      .collect { case Some(x) => x }
+    NonEmptyList.fromList(questions)
+      .map(ViewQuestionnaire(questionnaire.label.value, state, questionnaire.id, _))
+  }
+
+  def convertSubmissionToViewModel(extSubmission: ExtendedSubmission)(appId: ApplicationId, appName: String): ViewModel = {
+    val questionnaires = extSubmission.submission.groups.flatMap(g => g.links)
+      .map(convertQuestionnaire(extSubmission))
+      .collect { case Some(x) => x }
+
+    ViewModel(appId, appName, questionnaires)
+  }
+}
+
 @Singleton
-class CheckAnswersController @Inject() (
+class CredentialsRequestedController @Inject() (
     val errorHandler: ErrorHandler,
     val sessionService: SessionService,
     val applicationActionService: ApplicationActionService,
@@ -46,14 +87,13 @@ class CheckAnswersController @Inject() (
     val cookieSigner: CookieSigner,
     val apmConnector: ApmConnector,
     val submissionService: SubmissionService,
-    requestProductionCredentials: RequestProductionCredentials,
-    checkAnswersView: CheckAnswersView,
-    prodCredsRequestReceivedView: ProductionCredentialsRequestReceivedView)
+    credentialsRequestedView: CredentialsRequestedView)
     (implicit val ec: ExecutionContext, val appConfig: ApplicationConfig)
   extends ApplicationController(mcc)
      with CanUseCheckActions
      with EitherTHelper[String]
      with SubmissionActionBuilders {
+
 
   import SubmissionActionBuilders.{StateFilter,RoleFilter}
   import cats.implicits._
@@ -62,13 +102,12 @@ class CheckAnswersController @Inject() (
   val redirectToGetProdCreds = (applicationId: ApplicationId) => Redirect(routes.ProdCredsChecklistController.productionCredentialsChecklistPage(applicationId))
 
    /*, Read/Write and State details */ 
-  def checkAnswersPage(productionAppId: ApplicationId) = withApplicationAndCompletedSubmission(StateFilter.inTesting, RoleFilter.isAdminRole)(redirectToGetProdCreds(productionAppId))(productionAppId) { implicit request =>
+  def credentialsRequestedPage(productionAppId: ApplicationId) = withApplicationAndCompletedSubmission(StateFilter.pendingApproval, RoleFilter.isTeamMember)(redirectToGetProdCreds(productionAppId))(productionAppId) { implicit request =>
     val failed = (err: String) => BadRequestWithErrorMessage(err)
-
     
     val success = (viewModel: ViewModel) => {
       val err = request.msgRequest.flash.get("error")
-      Ok(checkAnswersView(viewModel, err))
+      Ok(credentialsRequestedView(viewModel, err))
     }
 
     val vm = for {
@@ -77,14 +116,5 @@ class CheckAnswersController @Inject() (
     } yield viewModel
 
     vm.fold[Result](failed, success)
-  }
-
-  def checkAnswersAction(productionAppId: ApplicationId) = withApplicationAndCompletedSubmission(StateFilter.inTesting, RoleFilter.isAdminRole)(redirectToGetProdCreds(productionAppId))(productionAppId) { implicit request =>
-    requestProductionCredentials
-      .requestProductionCredentials(productionAppId, request.developerSession)
-      .map(_ match {
-        case Right(app) => Ok(prodCredsRequestReceivedView(app.name, app.id))
-        case Left(ErrorDetails(_, msg)) => Redirect(routes.CheckAnswersController.checkAnswersPage(productionAppId)).flashing("error" -> msg)
-      })
   }
 }

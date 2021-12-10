@@ -8,4 +8,5 @@ GET         /application/:aid/cancel-request                                    
 POST        /application/:aid/cancel-request                                      modules.submissions.controllers.CancelRequestController.cancelRequestForProductionCredentialsAction(aid: ApplicationId)
 
 GET         /application/:aid/check-answers                                       modules.submissions.controllers.CheckAnswersController.checkAnswersPage(aid: ApplicationId)
+GET         /application/:aid/view-answers                                        modules.submissions.controllers.CredentialsRequestedController.credentialsRequestedPage(aid: ApplicationId)
 GET         /application/:aid/submit-request                                      modules.submissions.controllers.CheckAnswersController.checkAnswersAction(aid: ApplicationId)
