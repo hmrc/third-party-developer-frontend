@@ -43,4 +43,5 @@ trait AppsByTeamMemberServiceMock extends MockitoSugar with ArgumentMatchersSuga
   def fetchAllSummariesByTeamMemberReturns(sandbox: Seq[ApplicationSummary], production: Seq[ApplicationSummary]) =
     when(appsByTeamMemberServiceMock.fetchAllSummariesByTeamMember(*[UserId])(*)).thenReturn(successful((sandbox, production)))
 }
+
 object AppsByTeamMemberServiceMock extends AppsByTeamMemberServiceMock

@@ -22,13 +22,14 @@ import akka.actor.ActorSystem
 import akka.pattern.FutureTimeoutSupport
 import config.ApplicationConfig
 import javax.inject.Inject
-import play.api.Logger
 import uk.gov.hmrc.http.BadRequestException
+
+import util.ApplicationLogger
 
 import scala.concurrent.{ExecutionContext, Future}
 import scala.concurrent.duration._
 
-trait Retries {
+trait Retries extends ApplicationLogger {
 
   protected def actorSystem: ActorSystem
 
@@ -44,7 +45,7 @@ trait Retries {
         case ex: BadRequestException if previousRetryAttempts < appConfig.retryCount => {
           val retryAttempt = previousRetryAttempts + 1
           val delay = FiniteDuration(appConfig.retryDelayMilliseconds, TimeUnit.MILLISECONDS)
-          Logger.warn(s"Retry attempt $retryAttempt of ${appConfig.retryCount} in $delay due to '${ex.getMessage}'")
+          logger.warn(s"Retry attempt $retryAttempt of ${appConfig.retryCount} in $delay due to '${ex.getMessage}'")
           futureTimeout.after(delay, actorSystem.scheduler)(loop(retryAttempt)(block))
         }
       }

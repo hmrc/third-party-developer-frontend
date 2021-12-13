@@ -20,7 +20,7 @@ import com.kenshoo.play.metrics.MetricsImpl
 import javax.inject.{Inject, Singleton}
 import play.api.Configuration
 import play.api.inject.ApplicationLifecycle
-import uk.gov.hmrc.play.http.metrics.API
+import uk.gov.hmrc.play.http.metrics.common.API
 
 import scala.concurrent.{ExecutionContext, Future}
 import scala.util.{Failure, Success}

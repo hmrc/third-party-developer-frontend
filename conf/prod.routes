@@ -1,6 +1,8 @@
 # Add all the application routes to the app.routes file
-->         /developer            app.Routes
-->         /                     health.Routes
-->         /template             template.Routes
-GET        /admin/metrics        @com.kenshoo.play.metrics.MetricsController.metrics
+->          /developer/profile        profile.Routes
+->          /developer/submissions    submissions.Routes
+->          /developer                app.Routes
+->          /                         health.Routes
+->          /template                 template.Routes
+GET         /admin/metrics            @com.kenshoo.play.metrics.MetricsController.metrics
 

@@ -2,7 +2,7 @@ import scoverage.ScoverageKeys._
 
 object ScoverageSettings {
   def apply() = Seq(
-    coverageMinimum := 84.5,
+    coverageMinimum := 84,
     coverageFailOnMinimum := true,
     coverageHighlighting := true,
     coverageExcludedPackages :=  Seq(
@@ -16,7 +16,8 @@ object ScoverageSettings {
       ".*definition.*",
       ".*BuildInfo.*",
       ".*javascript",
-      "controllers.binders"
+      "controllers.binders",
+      "modules.submissions.controllers.binders"
     ).mkString(";")
   )
 }

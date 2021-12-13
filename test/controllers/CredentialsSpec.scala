@@ -67,6 +67,7 @@ class CredentialsSpec
         DateTimeUtils.now,
         DateTimeUtils.now,
         None,
+        grantLength,
         Environment.PRODUCTION,
         Some("Description 1"),
         Set(loggedInDeveloper.email.asAdministratorCollaborator),
@@ -93,6 +94,7 @@ class CredentialsSpec
       createdOn,
       DateTimeUtils.now,
       None,
+      grantLength,
       environment,
       collaborators = Set(loggedInDeveloper.email.asCollaborator(userRole)),
       state = state,
@@ -282,9 +284,10 @@ class CredentialsSpec
     }
 
     "display the NotFound page when the application does not exist" in new Setup with BasicApplicationProvider {
+      reset(applicationActionServiceMock) // Wipe givenApplicationActionReturns
       givenApplicationActionReturnsNotFound(applicationId)
 
-      val result = (underTest.addClientSecret(applicationId)(loggedInRequest))
+      val result = underTest.addClientSecret(applicationId)(loggedInRequest)
 
       status(result) shouldBe NOT_FOUND
     }

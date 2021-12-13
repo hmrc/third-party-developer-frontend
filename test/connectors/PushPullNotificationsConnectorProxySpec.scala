@@ -25,7 +25,7 @@ import helpers.FutureTimeoutSupportImpl
 import org.scalatest.BeforeAndAfterEach
 import org.scalatestplus.play.guice.GuiceOneAppPerSuite
 import uk.gov.hmrc.http._
-import uk.gov.hmrc.play.bootstrap.http.HttpClient
+import uk.gov.hmrc.http.HttpClient
 import utils.AsyncHmrcSpec
 
 import scala.concurrent.ExecutionContext

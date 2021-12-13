@@ -16,6 +16,7 @@
 
 package views
 
+import java.time.Period
 import controllers.DeletePrincipalApplicationForm
 import domain.models.applications._
 import domain.models.developers.LoggedInState
@@ -46,6 +47,7 @@ class DeletePrincipalApplicationConfirmSpec extends CommonViewSpec with WithCSRF
       DateTimeUtils.now,
       DateTimeUtils.now,
       None,
+      Period.ofDays(547),
       Environment.PRODUCTION,
       Some("Description 1"),
       Set(loggedInDeveloper.email.asAdministratorCollaborator),

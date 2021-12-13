@@ -18,7 +18,6 @@ package connectors
 
 import java.net.URLEncoder.encode
 import java.util.UUID
-
 import akka.actor.ActorSystem
 import akka.pattern.FutureTimeoutSupport
 import config.ApplicationConfig
@@ -27,19 +26,19 @@ import domain.models.applications.{ClientId, Environment}
 import domain.models.subscriptions.ApiSubscriptionFields._
 import helpers.Retries
 import javax.inject.{Inject, Singleton}
-import play.api.Logger
 import play.api.http.Status.{BAD_REQUEST, CREATED, NO_CONTENT, OK, NOT_FOUND}
 import play.api.libs.json.{JsSuccess, Json}
 import service.SubscriptionFieldsService.{DefinitionsByApiVersion, SubscriptionFieldsConnector}
 import uk.gov.hmrc.http.{HeaderCarrier, HttpResponse}
-import uk.gov.hmrc.play.bootstrap.http.HttpClient
+import uk.gov.hmrc.http.HttpClient
+import util.ApplicationLogger
 
 import scala.concurrent.{ExecutionContext, Future}
 import domain.models.subscriptions._
 import SubscriptionFieldsConnectorDomain._
 import uk.gov.hmrc.http.UpstreamErrorResponse
 
-abstract class AbstractSubscriptionFieldsConnector(implicit ec: ExecutionContext) extends SubscriptionFieldsConnector with Retries {
+abstract class AbstractSubscriptionFieldsConnector(implicit ec: ExecutionContext) extends SubscriptionFieldsConnector with Retries with ApplicationLogger {
   protected val httpClient: HttpClient
   protected val proxiedHttpClient: ProxiedHttpClient
   val environment: Environment
@@ -108,7 +107,7 @@ abstract class AbstractSubscriptionFieldsConnector(implicit ec: ExecutionContext
       implicit hc: HeaderCarrier
   ): Future[Seq[SubscriptionFieldDefinition]] = {
     val url = urlSubscriptionFieldDefinition(apiContext, apiVersion)
-    Logger.debug(s"fetchFieldDefinitions() - About to call $url in ${environment.toString}")
+    logger.debug(s"fetchFieldDefinitions() - About to call $url in ${environment.toString}")
     http.GET[Option[ApiFieldDefinitions]](url)
     .map {
       case Some(x) => x.fieldDefinitions.map(toDomain)

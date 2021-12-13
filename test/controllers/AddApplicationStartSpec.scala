@@ -35,12 +35,18 @@ import scala.concurrent.ExecutionContext.Implicits.global
 import utils.LocalUserIdTracker
 import controllers.addapplication.AddApplication
 import builder._
-import config.UpliftJourneyConfigProvider
+import config.UpliftJourneyConfig
 import config.On
 import config.OnDemand
 import play.api.mvc.Headers
 import config.Off
 import domain.models.controllers.ApplicationSummary
+import modules.uplift.views.html.BeforeYouStartView
+import modules.uplift.services.GetProductionCredentialsFlowService
+import modules.uplift.services.mocks.UpliftLogicMock
+import modules.uplift.controllers.UpliftJourneySwitch
+import modules.uplift.domain.models.GetProductionCredentialsFlow
+import scala.concurrent.Future
 
 class AddApplicationStartSpec
     extends BaseControllerSpec
@@ -67,7 +73,8 @@ class AddApplicationStartSpec
     val chooseApplicationToUpliftView = app.injector.instanceOf[ChooseApplicationToUpliftView]
 
     val beforeYouStartView: BeforeYouStartView = app.injector.instanceOf[BeforeYouStartView]
-    val upliftJourneyConfigProviderMock = mock[UpliftJourneyConfigProvider]
+    val upliftJourneyConfigMock = mock[UpliftJourneyConfig]
+    val flowServiceMock = mock[GetProductionCredentialsFlowService]
 
     implicit val environmentNameService = new EnvironmentNameService(appConfig)
 
@@ -90,8 +97,9 @@ class AddApplicationStartSpec
       addApplicationSubordinateSuccessView,
       addApplicationNameView,
       chooseApplicationToUpliftView,
-      upliftJourneyConfigProviderMock,
-      beforeYouStartView
+      new UpliftJourneySwitch(upliftJourneyConfigMock),
+      beforeYouStartView,
+      flowServiceMock
     )
 
     val hc = HeaderCarrier()
@@ -179,15 +187,16 @@ class AddApplicationStartSpec
       contentAsString(result) should not include "Sign in"
     }
 
-    "return the uplift journey 'before you start' page when the UpliftJourneyConfigProvider returns On" +
+    "return the uplift journey 'before you start' page when the UpliftJourneyConfig returns On " +
       "and we have only 1 application" in new Setup {
       when(appConfig.nameOfPrincipalEnvironment).thenReturn("QA")
       when(appConfig.nameOfSubordinateEnvironment).thenReturn("Development")
+      when(flowServiceMock.resetFlow(*)).thenReturn(Future.successful(GetProductionCredentialsFlow("", None, None, None)))
 
       val summaries = sandboxAppSummaries.take(1)
       aUsersUplfitableAndNotUpliftableAppsReturns(summaries, summaries.map(_.id))
 
-      when(upliftJourneyConfigProviderMock.status).thenReturn(On)
+      when(upliftJourneyConfigMock.status).thenReturn(On)
       
       private val result = underTest.addApplicationPrincipal()(loggedInRequest)
 
@@ -195,15 +204,16 @@ class AddApplicationStartSpec
       contentAsString(result) should include("Before you start")
     }
 
-    "return the uplift journey 'Which application do you want production credentials for?' page when the UpliftJourneyConfigProvider returns On" +
+    "return the uplift journey 'Which application do you want production credentials for?' page when the UpliftJourneyConfig returns On" +
       "and we have more than 1 application" in new Setup {
       when(appConfig.nameOfPrincipalEnvironment).thenReturn("QA")
       when(appConfig.nameOfSubordinateEnvironment).thenReturn("Development")
+      when(flowServiceMock.resetFlow(*)).thenReturn(Future.successful(GetProductionCredentialsFlow("", None, None, None)))
 
       val summaries = sandboxAppSummaries.take(2)
       aUsersUplfitableAndNotUpliftableAppsReturns(summaries, summaries.map(_.id))
 
-      when(upliftJourneyConfigProviderMock.status).thenReturn(On)
+      when(upliftJourneyConfigMock.status).thenReturn(On)
 
       private val result = underTest.addApplicationPrincipal()(loggedInRequest)
 
@@ -211,12 +221,12 @@ class AddApplicationStartSpec
       contentAsString(result) should include("Which application do you want production credentials for")
     }
 
-    "return the add applications page when the UpliftJourneyConfigProvider " +
+    "return the add applications page when the UpliftJourneyConfig " +
       "returns OnDemand and request header does not contain the uplift journey flag" in new Setup {
       when(appConfig.nameOfPrincipalEnvironment).thenReturn("QA")
       when(appConfig.nameOfSubordinateEnvironment).thenReturn("Development")
 
-      when(upliftJourneyConfigProviderMock.status).thenReturn(OnDemand)
+      when(upliftJourneyConfigMock.status).thenReturn(OnDemand)
 
       private val result = underTest.addApplicationPrincipal()(loggedInRequest)
 
@@ -224,12 +234,12 @@ class AddApplicationStartSpec
       contentAsString(result) should include("Add an application to QA")
     }
 
-    "return the add applications page when the UpliftJourneyConfigProvider " +
+    "return the add applications page when the UpliftJourneyConfig " +
       "returns OnDemand and request header contains the uplift journey flag set to false" in new Setup {
       when(appConfig.nameOfPrincipalEnvironment).thenReturn("QA")
       when(appConfig.nameOfSubordinateEnvironment).thenReturn("Development")
 
-      when(upliftJourneyConfigProviderMock.status).thenReturn(OnDemand)
+      when(upliftJourneyConfigMock.status).thenReturn(OnDemand)
 
       val loggedInRequestWithFlag = loggedInRequest.withHeaders(Headers("useNewUpliftJourney" -> "false"))
 
@@ -239,15 +249,16 @@ class AddApplicationStartSpec
       contentAsString(result) should include("Add an application to QA")
     }
 
-    "return the uplift journey 'before you start' page when the UpliftJourneyConfigProvider " +
+    "return the uplift journey 'before you start' page when the UpliftJourneyConfig " +
         "returns OnDemand and request header contains the uplift journey flag set to true" in new Setup {
       when(appConfig.nameOfPrincipalEnvironment).thenReturn("QA")
       when(appConfig.nameOfSubordinateEnvironment).thenReturn("Development")
+      when(flowServiceMock.resetFlow(*)).thenReturn(Future.successful(GetProductionCredentialsFlow("", None, None, None)))
 
       val summaries = sandboxAppSummaries.take(1)
       aUsersUplfitableAndNotUpliftableAppsReturns(summaries, summaries.map(_.id))
 
-      when(upliftJourneyConfigProviderMock.status).thenReturn(OnDemand)
+      when(upliftJourneyConfigMock.status).thenReturn(OnDemand)
 
       val loggedInRequestWithFlag = loggedInRequest.withHeaders(Headers("useNewUpliftJourney" -> "true"))
 
@@ -257,12 +268,12 @@ class AddApplicationStartSpec
       contentAsString(result) should include("Before you start")
     }
 
-    "return the add applications page when the UpliftJourneyConfigProvider " +
+    "return the add applications page when the UpliftJourneyConfig " +
           "returns Off and request header contains the uplift journey flag set to true" in new Setup {
       when(appConfig.nameOfPrincipalEnvironment).thenReturn("QA")
       when(appConfig.nameOfSubordinateEnvironment).thenReturn("Development")
 
-      when(upliftJourneyConfigProviderMock.status).thenReturn(Off)
+      when(upliftJourneyConfigMock.status).thenReturn(Off)
 
       val loggedInRequestWithFlag = loggedInRequest.withHeaders(Headers("useNewUpliftJourney" -> "true"))
 
@@ -272,15 +283,16 @@ class AddApplicationStartSpec
       contentAsString(result) should include("Add an application to QA")
     }
 
-    "return the uplift journey 'before you start' page when the UpliftJourneyConfigProvider " +
+    "return the uplift journey 'before you start' page when the UpliftJourneyConfig " +
       "returns On and request header contains the uplift journey flag set to false" in new Setup {
           when(appConfig.nameOfPrincipalEnvironment).thenReturn("QA")
           when(appConfig.nameOfSubordinateEnvironment).thenReturn("Development")
+       when(flowServiceMock.resetFlow(*)).thenReturn(Future.successful(GetProductionCredentialsFlow("", None, None, None)))
 
           val summaries = sandboxAppSummaries.take(1)
           aUsersUplfitableAndNotUpliftableAppsReturns(summaries, summaries.map(_.id))
 
-          when(upliftJourneyConfigProviderMock.status).thenReturn(On)
+          when(upliftJourneyConfigMock.status).thenReturn(On)
 
           val loggedInRequestWithFlag = loggedInRequest.withHeaders(Headers("useNewUpliftJourney" -> "false"))
 

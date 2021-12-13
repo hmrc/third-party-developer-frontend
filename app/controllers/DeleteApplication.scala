@@ -57,13 +57,13 @@ class DeleteApplication @Inject() (
       Future(error.map(_ => BadRequest(view)).getOrElse(Ok(view)))
     }
 
-  def deletePrincipalApplicationConfirm(applicationId: ApplicationId, error: Option[String] = None) =
+  def confirmRequestDeletePrincipalApplication(applicationId: ApplicationId, error: Option[String] = None) =
     canDeleteApplicationAction(applicationId) { implicit request =>
       val view = deletePrincipalApplicationConfirmView(request.application, DeletePrincipalApplicationForm.form.fill(DeletePrincipalApplicationForm(None)))
       Future(error.map(_ => BadRequest(view)).getOrElse(Ok(view)))
     }
 
-  def deletePrincipalApplicationAction(applicationId: ApplicationId) = canDeleteApplicationAction(applicationId) { implicit request =>
+  def requestDeletePrincipalApplicationAction(applicationId: ApplicationId) = canDeleteApplicationAction(applicationId) { implicit request =>
     val application = request.application
 
     def handleInvalidForm(formWithErrors: Form[DeletePrincipalApplicationForm]) =
@@ -73,7 +73,7 @@ class DeleteApplication @Inject() (
       validForm.deleteConfirm match {
         case Some("Yes") =>
           applicationService
-            .requestPrincipalApplicationDeletion(request.user, application)
+            .requestPrincipalApplicationDeletion(request.developerSession, application)
             .map(_ => Ok(deletePrincipalApplicationCompleteView(application)))
         case _ => Future(Redirect(routes.Details.details(applicationId)))
       }
@@ -90,9 +90,8 @@ class DeleteApplication @Inject() (
     val application = request.application
 
     applicationService
-      .deleteSubordinateApplication(request.user, application)
+      .deleteSubordinateApplication(request.developerSession, application)
       .map(_ => Ok(deleteSubordinateApplicationCompleteView(application)))
 
   }
-
 }

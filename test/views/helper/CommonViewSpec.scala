@@ -16,21 +16,23 @@
 
 package views.helper
 
+import java.time.Period
 import java.util.Locale
 
 import config.ApplicationConfig
 import domain.models.controllers.FraudPreventionNavLinkViewModel
-import org.scalatest.Matchers
 import org.scalatestplus.play.guice.GuiceOneAppPerSuite
 import play.api.Application
 import play.api.i18n.{Lang, MessagesImpl, MessagesProvider}
 import play.api.inject.guice.GuiceApplicationBuilder
 import play.api.mvc.MessagesControllerComponents
 import utils.{AsyncHmrcSpec, SharedMetricsClearDown}
+import org.scalatest.matchers.should.Matchers
 
 trait CommonViewSpec extends AsyncHmrcSpec with GuiceOneAppPerSuite with SharedMetricsClearDown with Matchers {
   val mcc = app.injector.instanceOf[MessagesControllerComponents]
   val messagesApi = mcc.messagesApi
+  val grantLength: Period = Period.ofDays(547)
   implicit val messagesProvider: MessagesProvider = MessagesImpl(Lang(Locale.ENGLISH), messagesApi)
   implicit val appConfig: ApplicationConfig = mock[ApplicationConfig]
 

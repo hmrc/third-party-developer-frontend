@@ -71,7 +71,7 @@ class ManageTeam @Inject() (
   }
 
   def addTeamMember(applicationId: ApplicationId) = whenAppSupportsTeamMembers(applicationId) { implicit request =>
-    Future.successful(Ok(addTeamMemberView(applicationViewModelFromApplicationRequest, AddTeamMemberForm.form, request.user, createFraudNavModel(fraudPreventionConfig))))
+    Future.successful(Ok(addTeamMemberView(applicationViewModelFromApplicationRequest, AddTeamMemberForm.form, request.developerSession, createFraudNavModel(fraudPreventionConfig))))
   }
 
   def addTeamMemberAction(applicationId: ApplicationId, addTeamMemberPageMode: AddTeamMemberPageMode) =
@@ -85,6 +85,7 @@ class ManageTeam @Inject() (
       def handleAddTeamMemberView(a: ApplicationViewModel, f: Form[AddTeamMemberForm], ds:DeveloperSession)={
         addTeamMemberView.apply(a,f,ds, createFraudNavModel(fraudPreventionConfig))
       }
+      
       def createBadRequestResult(formWithErrors: Form[AddTeamMemberForm]): Result = {
         val viewFunction: (ApplicationViewModel, Form[AddTeamMemberForm], DeveloperSession) => Html = addTeamMemberPageMode match {
           case ManageTeamMembers => handleAddTeamMemberView
@@ -97,14 +98,14 @@ class ManageTeam @Inject() (
           viewFunction(
             applicationViewModelFromApplicationRequest,
             formWithErrors,
-            request.user
+            request.developerSession
           )
         )
       }
 
       def handleValidForm(form: AddTeamMemberForm) = {
         applicationService
-          .addTeamMember(request.application, request.user.email, AddCollaborator(form.email, CollaboratorRole.from(form.role).getOrElse(CollaboratorRole.DEVELOPER)))
+          .addTeamMember(request.application, request.developerSession.email, AddCollaborator(form.email, CollaboratorRole.from(form.role).getOrElse(CollaboratorRole.DEVELOPER)))
           .map(_ => Redirect(successRedirect)) recover {
           case _: ApplicationNotFound     => NotFound(errorHandler.notFoundTemplate)
           case _: TeamMemberAlreadyExists => createBadRequestResult(AddTeamMemberForm.form.fill(form).withError("email", "team.member.error.emailAddress.already.exists.field"))
@@ -133,7 +134,7 @@ class ManageTeam @Inject() (
       form.confirm match {
         case Some("Yes") =>
           applicationService
-            .removeTeamMember(request.application, form.email, request.user.email)
+            .removeTeamMember(request.application, form.email, request.developerSession.email)
             .map(_ => Redirect(routes.ManageTeam.manageTeam(applicationId, None)))
         case _ => successful(Redirect(routes.ManageTeam.manageTeam(applicationId, None)))
       }

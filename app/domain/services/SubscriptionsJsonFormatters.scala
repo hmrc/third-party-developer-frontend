@@ -68,14 +68,10 @@ trait AccessRequirementsJsonFormatters {
 
 object AccessRequirementsJsonFormatters extends AccessRequirementsJsonFormatters
 
-trait SubscriptionsJsonFormatters {
+trait SubscriptionsJsonFormatters extends ApiDefinitionsJsonFormatters with ApplicationsJsonFormatters with AccessRequirementsJsonFormatters {
   import domain.models.subscriptions._
   import play.api.libs.json._
   import play.api.libs.functional.syntax._
-
-  import ApiDefinitionsJsonFormatters._
-  import ApplicationsJsonFormatters._
-  import AccessRequirementsJsonFormatters._
 
   implicit val readsSubscriptionFieldDefinition: Reads[SubscriptionFieldDefinition] = (
     (JsPath \ "name").read[FieldName] and

@@ -46,6 +46,7 @@ class UnsubscribeRequestSubmittedSpec extends CommonViewSpec with WithCSRFAddTok
         DateTimeUtils.now,
         DateTimeUtils.now,
         None,
+        grantLength,
         Environment.PRODUCTION,
         Some("Test Application Description"),
         Set(developer.email.asAdministratorCollaborator),

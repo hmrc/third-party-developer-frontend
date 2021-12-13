@@ -17,9 +17,9 @@
 package pages
 
 import org.openqa.selenium.WebDriver
-import org.scalatest._
 import org.scalatestplus.selenium.{Page, WebBrowser}
 import steps.Env
+import org.scalatest.matchers.should.Matchers
 
 case class Link(href: String, text: String)
 

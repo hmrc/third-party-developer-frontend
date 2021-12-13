@@ -16,20 +16,21 @@
 
 package controllers
 
- import config.{ApplicationConfig, ErrorHandler}
- import domain.models.apidefinitions.{ApiContext, ApiVersion}
- import domain.models.developers.DeveloperSession
- import helpers.LoggedInRequestTestHelper
- import mocks.service._
- import play.api.http.Status.{NOT_FOUND, OK}
- import play.api.libs.crypto.CookieSigner
- import play.api.mvc.{AnyContent, MessagesControllerComponents}
- import play.api.test.Helpers._
- import service.{ApplicationActionService, ApplicationService, SessionService}
+import config.{ApplicationConfig, ErrorHandler}
+import domain.models.apidefinitions.{ApiContext, ApiVersion}
+import domain.models.developers.DeveloperSession
+import helpers.LoggedInRequestTestHelper
+import mocks.service._
+import play.api.http.Status.{NOT_FOUND, OK}
+import play.api.libs.crypto.CookieSigner
+import play.api.mvc.{AnyContent, MessagesControllerComponents}
+import play.api.test.Helpers._
+import service.{ApplicationActionService, ApplicationService, SessionService}
 
- import scala.concurrent.{ExecutionContext, Future}
- import scala.concurrent.ExecutionContext.Implicits.global
+import scala.concurrent.{ExecutionContext, Future}
+import scala.concurrent.ExecutionContext.Implicits.global
 import utils.LocalUserIdTracker
+import controllers.actions.SubscriptionFieldsActions
 
  class TestController(
      val cookieSigner: CookieSigner,
@@ -39,7 +40,8 @@ import utils.LocalUserIdTracker
      val applicationService: ApplicationService,
      val applicationActionService: ApplicationActionService
  )(implicit val ec: ExecutionContext, val appConfig: ApplicationConfig)
-     extends ApplicationController(mcc) {}
+     extends ApplicationController(mcc)
+     with SubscriptionFieldsActions {}
 
  class ActionBuildersSpec extends BaseControllerSpec
    with ApplicationServiceMock
@@ -47,7 +49,8 @@ import utils.LocalUserIdTracker
    with builder.ApplicationBuilder
    with LocalUserIdTracker
    with builder.SubscriptionsBuilder
-   with LoggedInRequestTestHelper {
+   with LoggedInRequestTestHelper
+ {
 
    trait Setup {
      val loggedInDeveloper = DeveloperSession(session)
@@ -60,6 +63,7 @@ import utils.LocalUserIdTracker
        buildAPISubscriptionStatus("api name", fields = Some(buildSubscriptionFieldsWrapper(applicationWithSubscriptionData.application, List(buildSubscriptionFieldValue("field1")))))
 
      val underTest = new TestController(cookieSigner, mcc, sessionServiceMock, errorHandler, applicationServiceMock, applicationActionServiceMock)
+                        
 
      fetchByApplicationIdReturns(applicationWithSubscriptionData)
 
@@ -67,7 +71,7 @@ import utils.LocalUserIdTracker
        val testResultBody = "was called"
 
        val result = underTest.subFieldsDefinitionsExistActionByApi(applicationWithSubscriptionData.application.id, context, version) {
-         definitionsRequest: ApplicationWithSubscriptionFields[AnyContent] => Future.successful(underTest.Ok(testResultBody))
+         definitionsRequest: ApplicationWithSubscriptionFieldsRequest[AnyContent] => Future.successful(underTest.Ok(testResultBody))
        }(loggedInRequest)
        status(result) shouldBe expectedStatus
        if (expectedStatus == OK) {

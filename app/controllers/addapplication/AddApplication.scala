@@ -16,13 +16,16 @@
 
 package controllers.addapplication
 
-import config.{ApplicationConfig, ErrorHandler, UpliftJourneyConfigProvider, On}
+import config.{ApplicationConfig, ErrorHandler}
 import connectors.ApmConnector
 import controllers.{AddApplicationNameForm, ApplicationController, ChooseApplicationToUpliftForm}
 import controllers.FormKeys.appNameField
+import controllers.UserRequest
 import domain.ApplicationCreatedResponse
 import domain.Error._
 import domain.models.apidefinitions.APISubscriptionStatus
+import modules.uplift.services._
+import modules.uplift.domain.models._
 import domain.models.applications.Environment.{PRODUCTION, SANDBOX}
 import domain.models.applications._
 import domain.models.controllers.ApplicationSummary
@@ -30,9 +33,8 @@ import domain.models.emailpreferences.EmailPreferences
 import play.api.data.Form
 import play.api.libs.crypto.CookieSigner
 import play.api.libs.json.Json
-import play.api.mvc.{Action, AnyContent, MessagesControllerComponents, Request}
+import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
 import service._
-import services.UpliftLogic
 import uk.gov.hmrc.http.HeaderCarrier
 import views.helper.EnvironmentNameService
 import views.html._
@@ -40,9 +42,9 @@ import views.html._
 import javax.inject.{Inject, Singleton}
 import scala.concurrent.Future.successful
 import scala.concurrent.{ExecutionContext, Future}
-import controllers.models.ApiSubscriptionsFlow
-import scala.util.Try
-import config.OnDemand
+import modules.uplift.views.html.BeforeYouStartView
+import controllers.UserRequest
+import modules.uplift.controllers.UpliftJourneySwitch
 
 @Singleton
 class AddApplication @Inject() (
@@ -64,8 +66,9 @@ class AddApplication @Inject() (
     addApplicationSubordinateSuccessView: AddApplicationSubordinateSuccessView,
     addApplicationNameView: AddApplicationNameView,
     chooseApplicationToUpliftView: ChooseApplicationToUpliftView,
-    upliftJourneyConfigProvider: UpliftJourneyConfigProvider,
-    beforeYouStartView: BeforeYouStartView
+    upliftJourneySwitch: UpliftJourneySwitch,
+    beforeYouStartView: BeforeYouStartView,
+    flowService: GetProductionCredentialsFlowService
 )(implicit val ec: ExecutionContext, val appConfig: ApplicationConfig, val environmentNameService: EnvironmentNameService)
     extends ApplicationController(mcc) {
 
@@ -82,17 +85,10 @@ class AddApplication @Inject() (
   }
   
   def addApplicationPrincipal(): Action[AnyContent] = loggedInAction { implicit request => 
-    
-    def upliftJourneyTurnedOnInRequestHeader: Boolean = 
-      request.headers.get("useNewUpliftJourney").fold(false) { setting =>
-        Try(setting.toBoolean).getOrElse(false) 
-      }
-
-    upliftJourneyConfigProvider.status match { 
-      case On => addApplicationProductionSwitch()(request)
-      case OnDemand if upliftJourneyTurnedOnInRequestHeader => addApplicationProductionSwitch()(request)
-      case _ => successful(Ok(addApplicationStartPrincipalView()))
-    }
+    upliftJourneySwitch.performSwitch(
+      addApplicationProductionSwitch()(request),              // new uplift path
+      successful(Ok(addApplicationStartPrincipalView()))      // existing uplift path
+    )
   }
   
   def tenDaysWarning(): Action[AnyContent] = loggedInAction { implicit request => 
@@ -105,22 +101,15 @@ class AddApplication @Inject() (
   }
 
   def progressOnUpliftJourney(sandboxAppId: ApplicationId): Action[AnyContent] = loggedInAction { implicit request =>
-
-    def upliftJourneyTurnedOnInRequestHeader: Boolean =
-      request.headers.get("useNewUpliftJourney").fold(false) { setting =>
-        Try(setting.toBoolean).getOrElse(false)
-      }
-
-    upliftJourneyConfigProvider.status match {
-      case On => successful(Ok(beforeYouStartView(sandboxAppId)))
-      case OnDemand if upliftJourneyTurnedOnInRequestHeader => successful(Ok(beforeYouStartView(sandboxAppId)))
-      case _ => showConfirmSubscriptionsPage(sandboxAppId)
-    }
+    upliftJourneySwitch.performSwitch(
+      successful(Ok(beforeYouStartView(sandboxAppId))),        // new uplift path
+      showConfirmSubscriptionsPage(sandboxAppId)(request)      // existing uplift path
+    )
   }
 
   def soleApplicationToUpliftAction(appId: ApplicationId): Action[AnyContent] = loggedInAction { implicit request =>
     (for {
-      (sandboxAppSummaries, upliftableAppIds) <- upliftLogic.aUsersSandboxAdminSummariesAndUpliftIds(loggedIn.developer.userId)
+      (sandboxAppSummaries, upliftableAppIds) <- upliftLogic.aUsersSandboxAdminSummariesAndUpliftIds(request.userId)
       upliftableSummaries = sandboxAppSummaries.filter(s => upliftableAppIds.contains(s.id))
     } yield upliftableSummaries match {
       case summary :: Nil => progressOnUpliftJourney(upliftableSummaries.head.id)(request)
@@ -139,27 +128,30 @@ class AddApplication @Inject() (
       successful(Ok(chooseApplicationToUpliftView(form, upliftableSummaries, showFluff)))
     }
 
-    upliftLogic.aUsersSandboxAdminSummariesAndUpliftIds(loggedIn.developer.userId).flatMap { data =>
-      val (summaries, upliftableAppIds) = data
-      val upliftableSummaries = summaries.filter(s => upliftableAppIds.contains(s.id))
-      val hasAppsThatCannotBeUplifted = upliftableSummaries.size < summaries.size
+    // TODO - tidy as for comp
+    upliftLogic.aUsersSandboxAdminSummariesAndUpliftIds(request.userId).flatMap { data =>
+      flowService.resetFlow(request.developerSession).flatMap { _ =>
+        val (summaries, upliftableAppIds) = data
+        val upliftableSummaries = summaries.filter(s => upliftableAppIds.contains(s.id))
+        val hasAppsThatCannotBeUplifted = upliftableSummaries.size < summaries.size
 
-      upliftableAppIds.toList match {
-        case Nil          => successful(BadRequest(Json.toJson(BadRequestError)))
-        case appId :: Nil if !hasAppsThatCannotBeUplifted => progressOnUpliftJourney(appId)(request)
-        case _ => chooseApplicationToUplift(upliftableSummaries, hasAppsThatCannotBeUplifted)(request)
+        upliftableAppIds.toList match {
+          case Nil          => successful(BadRequest(Json.toJson(BadRequestError)))
+          case appId :: Nil if !hasAppsThatCannotBeUplifted => progressOnUpliftJourney(appId)(request)
+          case _ => chooseApplicationToUplift(upliftableSummaries, hasAppsThatCannotBeUplifted)(request)
+        }
       }
     }
   }
   
-  private def showConfirmSubscriptionsPage(sandboxAppId: ApplicationId)(implicit request: Request[_]) = {
+  private def showConfirmSubscriptionsPage(sandboxAppId: ApplicationId)(implicit request: UserRequest[_]) = {
     for {
       upliftableSubscriptions <- apmConnector.fetchUpliftableSubscriptions(sandboxAppId)
+      apiSubscriptions         = ApiSubscriptions(upliftableSubscriptions.map(id => (id, true)).toMap)
+      _ <- flowService.storeApiSubscriptions(apiSubscriptions, request.developerSession)
     }
     yield {
-      val sessionSubscriptions = ApiSubscriptionsFlow.allOf(upliftableSubscriptions)
-      Redirect(controllers.routes.SR20.confirmApiSubscriptionsPage(sandboxAppId))
-      .withSession(request.session + ("subscriptions" -> ApiSubscriptionsFlow.toSessionString(sessionSubscriptions)))
+      Redirect( modules.uplift.controllers.routes.UpliftJourneyController.confirmApiSubscriptionsPage(sandboxAppId))
     }
   }
 
@@ -169,7 +161,7 @@ class AddApplication @Inject() (
       progressOnUpliftJourney(validForm.applicationId)(request)
 
     def handleInvalidForm(formWithErrors: Form[ChooseApplicationToUpliftForm]) = {
-      upliftLogic.aUsersSandboxAdminSummariesAndUpliftIds(loggedIn.developer.userId) flatMap { data =>
+      upliftLogic.aUsersSandboxAdminSummariesAndUpliftIds(request.userId) flatMap { data =>
       val (summaries, upliftableAppIds) = data
       val upliftableSummaries = summaries.filter(s => upliftableAppIds.contains(s.id))
       val haveAppsThatCannotBeUplifted = upliftableSummaries.size < summaries.size
@@ -192,8 +184,7 @@ class AddApplication @Inject() (
       successful(Ok(addApplicationNameView(errors, environment)))
 
     def addApplication(form: AddApplicationNameForm): Future[ApplicationCreatedResponse] = {
-      applicationService
-        .createForUser(CreateApplicationRequest.fromAddApplicationJourney(loggedIn, form, environment))
+      applicationService.createForUser(CreateApplicationRequest.fromAddApplicationJourney(request.developerSession, form, environment))
     }
 
     def nameApplicationWithValidForm(formThatPassesSimpleValidation: AddApplicationNameForm) =
@@ -233,8 +224,8 @@ class AddApplication @Inject() (
 
       deployedTo match {
         case SANDBOX    => {
-          val alreadySelectedEmailPreferences: Boolean = request.flash.get("emailPreferencesSelected").contains("true")
-          subscriptionsNotInUserEmailPreferences(subscriptions.filter(_.subscribed), user.developer.emailPreferences) map { missingSubscriptions =>
+          val alreadySelectedEmailPreferences: Boolean = appRequest.flash.get("emailPreferencesSelected").contains("true")
+          subscriptionsNotInUserEmailPreferences(subscriptions.filter(_.subscribed), developerSession.developer.emailPreferences) map { missingSubscriptions =>
 
             if(alreadySelectedEmailPreferences || missingSubscriptions.isEmpty) {
               Ok(addApplicationSubordinateSuccessView(application.name, applicationId))
@@ -244,7 +235,7 @@ class AddApplication @Inject() (
             }
           }
         }
-        case PRODUCTION => successful(NotFound(errorHandler.notFoundTemplate(request)))
+        case PRODUCTION => successful(NotFound(errorHandler.notFoundTemplate(appRequest)))
       }
     }
   }

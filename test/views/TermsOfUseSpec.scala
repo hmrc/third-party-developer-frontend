@@ -16,6 +16,8 @@
 
 package views
 
+import java.time.Period
+
 import controllers.TermsOfUseForm
 import domain.models.applications._
 import domain.models.developers.LoggedInState
@@ -51,6 +53,7 @@ class TermsOfUseSpec extends CommonViewSpec with WithCSRFAddToken {
     val appName = "an application"
     val createdOn = DateTimeUtils.now
     val lastAccess = DateTimeUtils.now
+    val grantLength = Period.ofDays(547)
     val deployedTo = Environment.PRODUCTION
 
     "viewing an agreed application" should {
@@ -60,7 +63,7 @@ class TermsOfUseSpec extends CommonViewSpec with WithCSRFAddToken {
         val expectedTimeStamp = DateTimeFormat.forPattern("dd MMMM yyyy").print(timeStamp)
         val version = "1.0"
         val checkInformation = CheckInformation(termsOfUseAgreements = List(TermsOfUseAgreement(emailAddress, timeStamp, version)))
-        val application = Application(id, clientId, appName, createdOn, lastAccess, None, deployedTo, checkInformation = Some(checkInformation))
+        val application = Application(id, clientId, appName, createdOn, lastAccess, None, grantLength, deployedTo, checkInformation = Some(checkInformation))
         val page: Page = Page(termsOfUseView(ApplicationViewModel(application, hasSubscriptionsFields = false, hasPpnsFields = false), TermsOfUseForm.form))
       }
 
@@ -85,7 +88,7 @@ class TermsOfUseSpec extends CommonViewSpec with WithCSRFAddToken {
     "viewing an unagreed application" should {
       trait Setup {
         val checkInformation = CheckInformation(termsOfUseAgreements = List.empty)
-        val application = Application(id, clientId, appName, createdOn, lastAccess, None, deployedTo, checkInformation = Some(checkInformation))
+        val application = Application(id, clientId, appName, createdOn, lastAccess, None, grantLength, deployedTo, checkInformation = Some(checkInformation))
         val page: Page = Page(termsOfUseView(ApplicationViewModel(application, hasSubscriptionsFields = false, hasPpnsFields = false), TermsOfUseForm.form))
       }
 

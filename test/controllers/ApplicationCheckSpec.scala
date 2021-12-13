@@ -113,6 +113,7 @@ class ApplicationCheckSpec
         DateTimeUtils.now,
         DateTimeUtils.now,
         None,
+        grantLength,
         Environment.PRODUCTION,
         Some("Description 1"),
         Set(loggedInDeveloper.email.asAdministratorCollaborator),
@@ -140,6 +141,7 @@ class ApplicationCheckSpec
       DateTimeUtils.now,
       DateTimeUtils.now,
       None,
+      grantLength,
       Environment.PRODUCTION,
       collaborators = collaborators,
       access = access,
@@ -745,7 +747,7 @@ class ApplicationCheckSpec
       when(underTest.applicationService.isApplicationNameValid(*, *, *)(*))
         .thenReturn(Future.successful(Invalid.invalidName))
 
-      private val applicationName = "Blacklisted HMRC"
+      private val applicationName = "Deny Listed HMRC"
 
       private val requestWithFormBody = loggedInRequest.withFormUrlEncodedBody("applicationName" -> applicationName)
 

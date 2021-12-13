@@ -103,7 +103,7 @@ class ApplicationCheck @Inject() (
   }
 
   def team(appId: ApplicationId): Action[AnyContent] = canUseChecksAction(appId) { implicit request =>
-    Future.successful(Ok(teamView(request.application, request.role, request.user)))
+    Future.successful(Ok(teamView(request.application, request.role, request.developerSession)))
   }
 
   def teamAction(appId: ApplicationId): Action[AnyContent] = canUseChecksAction(appId) { implicit request =>
@@ -114,14 +114,14 @@ class ApplicationCheck @Inject() (
   }
 
   def teamAddMember(appId: ApplicationId): Action[AnyContent] = canUseChecksAction(appId) { implicit request =>
-    Future.successful(Ok(teamMemberAddView(applicationViewModelFromApplicationRequest, AddTeamMemberForm.form, request.user)))
+    Future.successful(Ok(teamMemberAddView(applicationViewModelFromApplicationRequest, AddTeamMemberForm.form, request.developerSession)))
   }
 
   def teamMemberRemoveConfirmation(appId: ApplicationId, teamMemberHash: String): Action[AnyContent] = canUseChecksAction(appId) { implicit request =>
     successful(
       request.application
         .findCollaboratorByHash(teamMemberHash)
-        .map(collaborator => Ok(teamMemberRemoveConfirmationView(request.application, request.user, collaborator.emailAddress)))
+        .map(collaborator => Ok(teamMemberRemoveConfirmationView(request.application, request.developerSession, collaborator.emailAddress)))
         .getOrElse(Redirect(routes.ApplicationCheck.team(appId)))
     )
   }
@@ -129,7 +129,7 @@ class ApplicationCheck @Inject() (
   def teamMemberRemoveAction(appId: ApplicationId): Action[AnyContent] = canUseChecksAction(appId) { implicit request =>
     def handleValidForm(form: RemoveTeamMemberCheckPageConfirmationForm): Future[Result] = {
       applicationService
-        .removeTeamMember(request.application, form.email, request.user.email)
+        .removeTeamMember(request.application, form.email, request.developerSession.email)
         .map(_ => Redirect(routes.ApplicationCheck.team(appId)))
     }
 

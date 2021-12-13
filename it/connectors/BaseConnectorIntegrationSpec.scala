@@ -3,12 +3,14 @@ package connectors
 import com.github.tomakehurst.wiremock.WireMockServer
 import com.github.tomakehurst.wiremock.client.WireMock
 import com.github.tomakehurst.wiremock.core.WireMockConfiguration.wireMockConfig
-import org.scalatest._
 import org.scalatestplus.play.WsScalaTestClient
 import play.api.test.{DefaultAwaitTimeout, FutureAwaits}
+import org.scalatest.wordspec.AnyWordSpec
+import org.scalatest.matchers.should.Matchers
+import org.scalatest.{OptionValues, BeforeAndAfterAll, BeforeAndAfterEach}
 
 trait BaseConnectorIntegrationSpec
-  extends WordSpec
+  extends AnyWordSpec
     with Matchers
     with OptionValues
     with WsScalaTestClient
@@ -32,6 +34,7 @@ trait BaseConnectorIntegrationSpec
 
   override def beforeEach() {
     wireMockServer.resetMappings()
+    wireMockServer.resetRequests()
   }
 
 }

@@ -41,7 +41,7 @@ import domain.models.connectors.VerifyMfaRequest
 
 class ThirdPartyDeveloperConnectorIntegrationSpec extends BaseConnectorIntegrationSpec with GuiceOneAppPerSuite with DeveloperBuilder with LocalUserIdTracker with WireMockExtensions {
   private val stubConfig = Configuration(
-    "Test.microservice.services.third-party-developer.port" -> stubPort,
+    "microservice.services.third-party-developer.port" -> stubPort,
     "json.encryption.key" -> "czV2OHkvQj9FKEgrTWJQZVNoVm1ZcTN0Nnc5eiRDJkY="
   )
 
@@ -69,6 +69,7 @@ class ThirdPartyDeveloperConnectorIntegrationSpec extends BaseConnectorIntegrati
     val encryptedLoginRequest: JsValue = Json.toJson(SecretRequest(payloadEncryption.encrypt(loginRequest).as[String]))
     val encryptedTotpAuthenticationRequest: JsValue = Json.toJson(SecretRequest(payloadEncryption.encrypt(totpAuthenticationRequest).as[String]))
     val underTest: ThirdPartyDeveloperConnector = app.injector.instanceOf[ThirdPartyDeveloperConnector]
+
   }
 
   
@@ -574,7 +575,7 @@ class ThirdPartyDeveloperConnectorIntegrationSpec extends BaseConnectorIntegrati
 
       val result: UserAuthenticationResponse = await(underTest.authenticate(loginRequest))
 
-      verify(1, postRequestedFor(urlMatching("/authenticate")).withRequestBody(equalToJson(encryptedLoginRequest.toString)))
+      verify(1, postRequestedFor(urlEqualTo("/authenticate")).withRequestBody(equalToJson(encryptedLoginRequest.toString)))
       result shouldBe UserAuthenticationResponse(accessCodeRequired = true, Some(nonce))
     }
 

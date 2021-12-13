@@ -50,6 +50,7 @@ class PushSecretsViewSpec extends CommonViewSpec with WithCSRFAddToken with Coll
       DateTime.now(),
       DateTime.now(),
       None,
+      grantLength,
       Environment.PRODUCTION,
       Some("Test Application"),
       collaborators = Set(developer.email.asAdministratorCollaborator),

@@ -26,16 +26,17 @@ import domain.models.applications.{Application, ApplicationToken, ClientId, Envi
 import domain.models.connectors.UserAuthenticationResponse
 import domain.models.developers.{Registration, Session, UpdateProfileRequest}
 import domain.services.ApiDefinitionsJsonFormatters._
-import org.scalatest.Matchers
-import play.api.Logger
+
 import play.api.http.Status._
 import play.api.libs.json.{Json, Writes}
 import domain.models.connectors.PasswordResetRequest
+import util.ApplicationLogger
+import org.scalatest.matchers.should.Matchers
 
-object Stubs {
+object Stubs extends ApplicationLogger {
 
   def setupRequest(path: String, status: Int, response: String) = {
-    Logger.info(s"Stubbing $path with $response")
+    logger.info(s"Stubbing $path with $response")
     stubFor(
       get(urlEqualTo(path))
         .willReturn(aResponse().withStatus(status).withBody(response).withHeader("Content-type", "application/json"))

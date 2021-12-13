@@ -24,20 +24,20 @@ import domain.models.applications.ApplicationNameValidationJson.{ApplicationName
 import domain.models.applications._
 import domain.models.connectors.DeleteCollaboratorRequest
 import javax.inject.{Inject, Singleton}
-import play.api.Logger
 import play.api.http.Status._
 import service.ApplicationService.ApplicationConnector
 import uk.gov.hmrc.http._
-import uk.gov.hmrc.play.bootstrap.http.HttpClient
-import uk.gov.hmrc.play.http.metrics.API
+import uk.gov.hmrc.http.HttpClient
+import uk.gov.hmrc.play.http.metrics.common.API
 
 import domain.models.developers.UserId
 import scala.concurrent.{ExecutionContext, Future}
 import scala.util.Success
 import domain.models.apidefinitions.ApiIdentifier
 import uk.gov.hmrc.http.HttpReads.Implicits._
+import util.ApplicationLogger
 
-abstract class ThirdPartyApplicationConnector(config: ApplicationConfig, metrics: ConnectorMetrics) extends ApplicationConnector with CommonResponseHandlers {
+abstract class ThirdPartyApplicationConnector(config: ApplicationConfig, metrics: ConnectorMetrics) extends ApplicationConnector with CommonResponseHandlers with ApplicationLogger with HttpErrorFunctions {
 
   import ThirdPartyApplicationConnectorDomain._
   import ThirdPartyApplicationConnectorJsonFormatters._
@@ -62,7 +62,7 @@ abstract class ThirdPartyApplicationConnector(config: ApplicationConfig, metrics
     }
 
   def update(applicationId: ApplicationId, request: UpdateApplicationRequest)(implicit hc: HeaderCarrier): Future[ApplicationUpdateSuccessful] = metrics.record(api) {
-    http.POST[UpdateApplicationRequest,ErrorOrUnit](s"$serviceBaseUrl/application/${applicationId.value}", request).map(throwOr(ApplicationUpdateSuccessful))
+    http.POST[UpdateApplicationRequest, ErrorOrUnit](s"$serviceBaseUrl/application/${applicationId.value}", request).map(throwOr(ApplicationUpdateSuccessful))
   }
   
   def fetchByTeamMember(userId: UserId)(implicit hc: HeaderCarrier): Future[Seq[ApplicationWithSubscriptionIds]] =
@@ -70,15 +70,15 @@ abstract class ThirdPartyApplicationConnector(config: ApplicationConfig, metrics
       metrics.record(api) {
         val url = s"$serviceBaseUrl/developer/applications"
 
-        Logger.info(s"fetchByTeamMember() - About to call $url for $userId in ${environment.toString}")
+        logger.info(s"fetchByTeamMember() - About to call $url for $userId in ${environment.toString}")
 
         http
           .GET[Seq[ApplicationWithSubscriptionIds]](url, Seq("userId" -> userId.asText, "environment" -> environment.toString))
           .andThen {
             case Success(_) =>
-              Logger.debug(s"fetchByTeamMember() - done call to $url for $userId in ${environment.toString}")
+              logger.debug(s"fetchByTeamMember() - done call to $url for $userId in ${environment.toString}")
             case _ =>
-              Logger.debug(s"fetchByTeamMember() - done errored call to $url for $userId in ${environment.toString}")
+              logger.debug(s"fetchByTeamMember() - done errored call to $url for $userId in ${environment.toString}")
           }
       }
     } else {
@@ -125,7 +125,8 @@ abstract class ThirdPartyApplicationConnector(config: ApplicationConfig, metrics
         case None     => throw new ApplicationNotFound
       })
   }
-  
+
+
   def requestUplift(applicationId: ApplicationId, upliftRequest: UpliftRequest)(implicit hc: HeaderCarrier): Future[ApplicationUpliftSuccessful] = metrics.record(api) {
     http.POST[UpliftRequest, ErrorOrUnit](s"$serviceBaseUrl/application/${applicationId.value}/request-uplift", upliftRequest)
     .map(_ match {
@@ -204,7 +205,7 @@ abstract class ThirdPartyApplicationConnector(config: ApplicationConfig, metrics
       .POSTEmpty[HttpResponse](s"$serviceBaseUrl/application/${applicationId.value}/delete")
       .map(_.status match {
           case NO_CONTENT => ()
-          case _          => throw new Exception("error deleting subordinate application")
+          case _          => throw new Exception("error deleting application")
         }
       )
   }
@@ -258,8 +259,8 @@ class ThirdPartyApplicationProductionConnector @Inject() (
     val appConfig: ApplicationConfig,
     val metrics: ConnectorMetrics
 )(implicit val ec: ExecutionContext)
-    extends ThirdPartyApplicationConnector(appConfig, metrics) {
-
+    extends ThirdPartyApplicationConnector(appConfig, metrics)
+{
   val environment = Environment.PRODUCTION
   val serviceBaseUrl = appConfig.thirdPartyApplicationProductionUrl
   val useProxy = appConfig.thirdPartyApplicationProductionUseProxy

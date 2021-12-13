@@ -27,13 +27,13 @@ import play.api.inject.bind
 import play.api.inject.guice.GuiceApplicationBuilder
 import play.api.{Application, Configuration, Mode}
 import uk.gov.hmrc.http.{HeaderCarrier, UpstreamErrorResponse}
-import uk.gov.hmrc.play.http.metrics.API
+import uk.gov.hmrc.play.http.metrics.common.API
 
 class PushPullNotificationsConnectorIntegrationSpec extends BaseConnectorIntegrationSpec with GuiceOneAppPerSuite {
   private val authorizationKey = randomUUID.toString
   private val stubConfig = Configuration(
-    "Test.microservice.services.push-pull-notifications-api-production.port" -> stubPort,
-    "Test.microservice.services.push-pull-notifications-api-production.authorizationKey" -> authorizationKey
+    "microservice.services.push-pull-notifications-api-production.port" -> stubPort,
+    "microservice.services.push-pull-notifications-api-production.authorizationKey" -> authorizationKey
   )
 
   override def fakeApplication(): Application =

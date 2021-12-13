@@ -39,7 +39,11 @@ import domain.models.apidefinitions.ExtendedApiDefinitionTestDataHelper
 import utils.LocalUserIdTracker
 import controllers.addapplication.AddApplication
 import builder._
-import config.UpliftJourneyConfigProvider
+
+import modules.uplift.views.html.BeforeYouStartView
+import modules.uplift.services.GetProductionCredentialsFlowService
+import modules.uplift.services.mocks.UpliftLogicMock
+import modules.uplift.controllers.UpliftJourneySwitch
 
 class AddApplicationSuccessSpec 
     extends BaseControllerSpec 
@@ -57,6 +61,7 @@ class AddApplicationSuccessSpec
     DateTimeUtils.now,
     DateTimeUtils.now,
     None,
+    grantLength,
     Environment.PRODUCTION,
     Some("Description 1"),
     Set(loggedInDeveloper.email.asAdministratorCollaborator),
@@ -71,6 +76,7 @@ class AddApplicationSuccessSpec
     DateTimeUtils.now,
     DateTimeUtils.now,
     None,
+    grantLength,
     Environment.SANDBOX,
     Some("Description 2"),
     Set(loggedInDeveloper.email.asAdministratorCollaborator),
@@ -90,7 +96,9 @@ class AddApplicationSuccessSpec
     implicit val environmentNameService = new EnvironmentNameService(appConfig)
 
     val beforeYouStartView: BeforeYouStartView = app.injector.instanceOf[BeforeYouStartView]
-    val upliftJourneyConfigProviderMock = mock[UpliftJourneyConfigProvider]
+    val sr20UpliftJourneySwitchMock = mock[UpliftJourneySwitch]
+
+    val flowServiceMock = mock[GetProductionCredentialsFlowService]
 
     val underTest = new AddApplication(
       mock[ErrorHandler],
@@ -111,8 +119,9 @@ class AddApplicationSuccessSpec
       addApplicationSubordinateSuccessView,
       addApplicationNameView,
       chooseApplicationToUpliftView,
-      upliftJourneyConfigProviderMock,
-      beforeYouStartView
+      sr20UpliftJourneySwitchMock,
+      beforeYouStartView,
+      flowServiceMock
     )
 
     implicit val hc = HeaderCarrier()

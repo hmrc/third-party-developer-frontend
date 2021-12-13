@@ -20,13 +20,11 @@ import javax.inject.{Inject, Singleton}
 import org.joda.time._
 import play.api.{ConfigLoader, Configuration}
 import service.MfaMandateService
-import uk.gov.hmrc.play.bootstrap.config.{RunMode, ServicesConfig}
+import uk.gov.hmrc.play.bootstrap.config.ServicesConfig
 
 @Singleton
-class ApplicationConfig @Inject()(config: Configuration, runMode: RunMode) extends ServicesConfig(config, runMode) {
+class ApplicationConfig @Inject()(config: Configuration) extends ServicesConfig(config) {
   def getConfigDefaulted[A](key: String, default: A)(implicit loader: ConfigLoader[A]) = config.getOptional[A](key)(loader).getOrElse(default)
-
-  val env = runMode.env
 
   val contactFormServiceIdentifier = "API"
   val betaFeedbackUrl = "/contact/beta-feedback"
@@ -40,19 +38,19 @@ class ApplicationConfig @Inject()(config: Configuration, runMode: RunMode) exten
   val thirdPartyApplicationSandboxApiKey = getConfString("third-party-application-sandbox.api-key", "")
   val deskproUrl = baseUrl("hmrc-deskpro")
 
-  lazy val contactPath = getConfigDefaulted(s"$env.contactPath", "")
+  lazy val contactPath = getConfigDefaulted("contactPath", "")
 
   lazy val reportAProblemPartialUrl = s"$contactPath/contact/problem_reports_ajax?service=$contactFormServiceIdentifier"
   lazy val reportAProblemNonJSUrl = s"$contactPath/contact/problem_reports_nonjs?service=$contactFormServiceIdentifier"
-  lazy val apiDocumentationFrontendUrl = buildUrl("platform.frontend").getOrElse(baseUrl("api-documentation-frontend"))
-  lazy val thirdPartyDeveloperFrontendUrl = buildUrl("platform.frontend").getOrElse(baseUrl("third-party-developer-frontend"))
+  lazy val apiDocumentationFrontendUrl = buildUrl("platform.internal.frontend").getOrElse(baseUrl("api-documentation-frontend"))
+  lazy val thirdPartyDeveloperFrontendUrl = buildUrl("platform.internal.frontend").getOrElse(baseUrl("third-party-developer-frontend"))
   lazy val productionApiBaseUrl = buildUrl("platform.api.production")
   lazy val sandboxApiBaseUrl = buildUrl("platform.api.sandbox")
 
   lazy val sessionTimeoutInSeconds = getInt("session.timeoutSeconds")
-  lazy val analyticsToken = config.getOptional[String](s"$env.google-analytics.token").filterNot(_ == "")
-  lazy val analyticsHost = getConfigDefaulted(s"$env.google-analytics.host", "auto")
-  lazy val securedCookie = getConfigDefaulted(s"$env.cookie.secure", true)
+  lazy val analyticsToken = config.getOptional[String]("google-analytics.token").filterNot(_ == "")
+  lazy val analyticsHost = getConfigDefaulted("google-analytics.host", "auto")
+  lazy val securedCookie = getConfigDefaulted("cookie.secure", true)
   lazy val title = "Developer Hub"
   lazy val jsonEncryptionKey = getString("json.encryption.key")
   lazy val hasSandbox = getConfigDefaulted("hasSandbox", false)
@@ -95,7 +93,7 @@ class ApplicationConfig @Inject()(config: Configuration, runMode: RunMode) exten
   val ppnsSandboxAuthorizationKey = getConfString("push-pull-notifications-api-sandbox.authorizationKey", "")
 
   private def buildUrl(key: String) = {
-    (getConfigDefaulted(s"$env.$key.protocol", ""), getConfigDefaulted(s"$env.$key.host", "")) match {
+    (getConfigDefaulted(s"$key.protocol", ""), getConfigDefaulted(s"$key.host", "")) match {
       case (p, h) if !p.isEmpty && !h.isEmpty => Some(s"$p://$h")
       case (p, h) if p.isEmpty => Some(s"https://$h")
       case _ => None

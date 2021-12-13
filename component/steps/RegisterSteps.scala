@@ -22,11 +22,11 @@ import io.cucumber.scala.{EN, ScalaDsl}
 import matchers.CustomMatchers
 import org.openqa.selenium.{By, WebDriver}
 import org.openqa.selenium.interactions.Actions
-import org.scalatest.Matchers
 import org.scalatestplus.selenium.WebBrowser
 import pages._
 import play.api.http.Status
 import stubs.DeveloperStub
+import org.scalatest.matchers.should.Matchers
 
 object Form extends WebBrowser {
   def populate(a: Map[String, String])(implicit driver: WebDriver) = a.foreach {

@@ -19,7 +19,7 @@ package config
 import akka.stream.Materializer
 import javax.inject.Inject
 import play.api.mvc._
-import uk.gov.hmrc.play.bootstrap.filters.frontend.{SessionTimeoutFilter, SessionTimeoutFilterConfig}
+import uk.gov.hmrc.play.bootstrap.frontend.filters.{SessionTimeoutFilter, SessionTimeoutFilterConfig}
 
 import scala.concurrent.{ExecutionContext, Future}
 

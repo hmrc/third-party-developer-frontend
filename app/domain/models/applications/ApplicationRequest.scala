@@ -19,6 +19,20 @@ package domain.models.applications
 import controllers._
 import domain.models.developers.DeveloperSession
 import play.api.libs.json.Json
+import modules.uplift.domain.models._
+import domain.models.apidefinitions.ApiIdentifier
+
+case class UpliftData(
+  responsibleIndividual: ResponsibleIndividual,
+  sellResellOrDistribute: SellResellOrDistribute,
+  subscriptions: Set[ApiIdentifier]
+)
+
+object UpliftData {
+  import play.api.libs.json.{Format, Json}
+  import domain.services.ApiDefinitionsJsonFormatters._
+  implicit val format: Format[UpliftData] = Json.format[UpliftData]
+}
 
 trait ApplicationRequest {
   protected def normalizeDescription(description: Option[String]): Option[String] = description.map(_.trim.take(250))
@@ -36,10 +50,10 @@ object CreateApplicationRequest extends ApplicationRequest {
   implicit val format = Json.format[CreateApplicationRequest]
 
   def fromAddApplicationJourney(user: DeveloperSession, form: AddApplicationNameForm, environment: Environment) = CreateApplicationRequest(
-    form.applicationName.trim,
-    environment,
-    None,
-    List(Collaborator(user.email, CollaboratorRole.ADMINISTRATOR, user.developer.userId))
+    name = form.applicationName.trim,
+    environment = environment,
+    description = None,
+    collaborators = List(Collaborator(user.email, CollaboratorRole.ADMINISTRATOR, user.developer.userId))
   )
 }
 

@@ -20,7 +20,6 @@ import akka.stream.Materializer
 import config.ApplicationConfig
 import domain.models.flows.{Flow, FlowType}
 import javax.inject.{Inject, Singleton}
-import play.api.Logger
 import play.api.libs.json._
 import play.modules.reactivemongo.ReactiveMongoComponent
 import reactivemongo.api.Cursor.FailOnError
@@ -79,7 +78,7 @@ class FlowRepository @Inject()(mongo: ReactiveMongoComponent, appConfig: Applica
 
     indexes.map(_.exists(checkIfTTLChanged))
       .map(hasTTLIndexChanged => if (hasTTLIndexChanged) {
-        Logger.info(s"Dropping time to live index for entries in ${collection.name}")
+        logger.info(s"Dropping time to live index for entries in ${collection.name}")
         Future.sequence(Seq(collection.indexesManager.drop(lastUpdatedIndexName).map(_ > 0),
           ensureLocalIndexes))
       })
@@ -87,7 +86,7 @@ class FlowRepository @Inject()(mongo: ReactiveMongoComponent, appConfig: Applica
 
   private def ensureLocalIndexes()(implicit ec: ExecutionContext): Future[Seq[Boolean]] = {
     Future.sequence(indexes.map(index => {
-      Logger.info(s"ensuring index ${index.eventualName}")
+      logger.info(s"ensuring index ${index.eventualName}")
       collection.indexesManager.ensure(index)
     }))
   }

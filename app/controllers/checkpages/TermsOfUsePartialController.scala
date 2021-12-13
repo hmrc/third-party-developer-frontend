@@ -64,7 +64,7 @@ trait TermsOfUsePartialController {
       val updatedInformation = if (information.termsOfUseAgreements.exists(terms => terms.version == version)) {
         information
       } else {
-        information.copy(termsOfUseAgreements = information.termsOfUseAgreements :+ TermsOfUseAgreement(request.user.email, DateTimeUtils.now, version))
+        information.copy(termsOfUseAgreements = information.termsOfUseAgreements :+ TermsOfUseAgreement(request.developerSession.email, DateTimeUtils.now, version))
       }
 
       for {

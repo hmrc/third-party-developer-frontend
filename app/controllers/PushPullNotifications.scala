@@ -26,7 +26,7 @@ import play.api.libs.crypto.CookieSigner
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
 import service.{ApplicationActionService, ApplicationService, PushPullNotificationsService, SessionService}
 import views.html.ppns.PushSecretsView
-
+import controllers.actions.PpnsActions
 import scala.concurrent.ExecutionContext
 
 @Singleton
@@ -40,9 +40,9 @@ class PushPullNotifications @Inject() (
                                         pushSecretsView: PushSecretsView,
                                         pushPullNotificationsService: PushPullNotificationsService
                                       )(implicit override val ec: ExecutionContext, override val appConfig: ApplicationConfig)
-  extends ApplicationController(mcc) {
+  extends ApplicationController(mcc) with PpnsActions {
 
-  def showPushSecrets(applicationId: ApplicationId): Action[AnyContent] = subscribedToApiWithPpnsFieldAction(applicationId, ViewPushSecret, SandboxOrAdmin) {
+    def showPushSecrets(applicationId: ApplicationId): Action[AnyContent] = subscribedToApiWithPpnsFieldAction(applicationId, ViewPushSecret, SandboxOrAdmin) {
     implicit request: ApplicationRequest[AnyContent] =>
       pushPullNotificationsService.fetchPushSecrets(request.application) map { pushSecrets =>
         NonEmptyList.fromList(pushSecrets.toList)

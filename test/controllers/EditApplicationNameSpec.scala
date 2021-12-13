@@ -17,7 +17,6 @@
 package controllers
 
 import java.util.UUID.randomUUID
-
 import builder.DeveloperBuilder
 import config.ErrorHandler
 import domain.models.applications._
@@ -40,7 +39,10 @@ import scala.concurrent.ExecutionContext.Implicits.global
 import utils.LocalUserIdTracker
 import builder._
 import controllers.addapplication.AddApplication
-import config.UpliftJourneyConfigProvider
+import modules.uplift.views.html.BeforeYouStartView
+import modules.uplift.services.mocks._
+import modules.uplift.controllers.UpliftJourneySwitch
+import modules.uplift.services.GetProductionCredentialsFlowService
 
 class EditApplicationNameSpec 
     extends BaseControllerSpec 
@@ -65,7 +67,9 @@ class EditApplicationNameSpec
     val chooseApplicationToUpliftView = app.injector.instanceOf[ChooseApplicationToUpliftView]
 
     val beforeYouStartView: BeforeYouStartView = app.injector.instanceOf[BeforeYouStartView]
-    val upliftJourneyConfigProviderMock = mock[UpliftJourneyConfigProvider]
+    val sr20UpliftJourneySwitchMock = mock[UpliftJourneySwitch]
+
+    val flowServiceMock = mock[GetProductionCredentialsFlowService]
 
     implicit val environmentNameService = new EnvironmentNameService(appConfig)
 
@@ -88,8 +92,9 @@ class EditApplicationNameSpec
       addApplicationSubordinateSuccessView,
       addApplicationNameView,
       chooseApplicationToUpliftView,
-      upliftJourneyConfigProviderMock,
-      beforeYouStartView
+      sr20UpliftJourneySwitchMock,
+      beforeYouStartView,
+      flowServiceMock
     )
 
     implicit val hc: HeaderCarrier = HeaderCarrier()

@@ -27,7 +27,7 @@ import uk.gov.hmrc.http.{BadRequestException, HeaderCarrier}
 import views.html._
 import scala.concurrent.{ExecutionContext, Future}
 import scala.util.control.NonFatal
-import play.api.Logger
+import util.ApplicationLogger
 
 @Singleton
 class Registration @Inject()(override val sessionService: SessionService,
@@ -43,13 +43,11 @@ class Registration @Inject()(override val sessionService: SessionService,
                              resendConfirmationView: ResendConfirmationView
                              )
                             (implicit val ec: ExecutionContext, val appConfig: ApplicationConfig)
-  extends LoggedOutController(mcc) {
+  extends LoggedOutController(mcc) with ApplicationLogger {
 
   import ErrorFormBuilder.GlobalError
   import play.api.data._
 
-  val logger = Logger("application")
-  
   val regForm: Form[RegisterForm] = RegistrationForm.form
 
   def registration() = loggedOutAction { implicit request =>

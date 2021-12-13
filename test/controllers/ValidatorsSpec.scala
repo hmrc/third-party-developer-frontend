@@ -17,8 +17,6 @@
 package controllers
 
 import org.scalacheck.Gen
-import org.scalatest.Matchers
-import org.scalatestplus.scalacheck.ScalaCheckPropertyChecks
 import play.api.data._
 import play.api.data.Forms._
 import play.api.data.validation.{Invalid, ValidationError, ValidationResult}
@@ -26,6 +24,8 @@ import utils.AsyncHmrcSpec
 import utils.Generators._
 
 import scala.collection.JavaConverters._
+import org.scalatestplus.scalacheck.ScalaCheckPropertyChecks
+import org.scalatest.matchers.should.Matchers
 
 class ValidatorsSpec extends AsyncHmrcSpec with ScalaCheckPropertyChecks with Matchers {
 
@@ -97,19 +97,16 @@ class ValidatorsSpec extends AsyncHmrcSpec with ScalaCheckPropertyChecks with Ma
     def passwordPaddedToLength(n: Int) =
       for {
         required <- requiredCharacters
-        padding <- Gen.listOfN(n - required.length, asciiPrintable)
+        padding <- Gen.listOfN(Math.max(0, n - required.length), asciiPrintable)
         padded = required ++ padding
         shuffled <- shuffle(padded)
       } yield shuffled.mkString
 
-    val password =
-      Gen.choose(12, 1000).flatMap(passwordPaddedToLength)
+    val password = Gen.choose(12, 1000).flatMap(passwordPaddedToLength)
 
-    val shortPassword =
-      Gen.choose(0, 11).flatMap(passwordPaddedToLength)
+    val shortPassword = Gen.choose(0, 11).flatMap(passwordPaddedToLength)
 
-    val blank =
-      Gen.listOf(" ").map(_.mkString)
+    val blank = Gen.listOf(" ").map(_.mkString)
 
     val passwordNotValidError = FormError("password", "password.error.not.valid.field")
     val passwordRequiredError = FormError("password", "password.error.required.field")

@@ -25,7 +25,6 @@ import io.cucumber.scala.{EN, ScalaDsl}
 import io.cucumber.scala.Implicits._
 import matchers.CustomMatchers
 import org.openqa.selenium.By
-import org.scalatest.Matchers
 import pages._
 import play.api.http.Status._
 import play.api.libs.json.Json
@@ -36,6 +35,7 @@ import domain.models.applications.ApplicationId
 import domain.models.applications.ClientId
 import domain.models.developers.UserId
 import domain.models.applications.ApplicationWithSubscriptionIds
+import org.scalatest.matchers.should.Matchers
 
 object AppWorld {
   var userApplicationsOnBackend: List[Application] = Nil
@@ -44,6 +44,7 @@ object AppWorld {
 
 class ApplicationsSteps extends ScalaDsl with EN with Matchers with NavigationSugar with CustomMatchers with PageSugar {
   import utils.GlobalUserIdTracker.idOf
+  import java.time.Period
 
   implicit val webDriver = Env.driver
 
@@ -59,6 +60,7 @@ class ApplicationsSteps extends ScalaDsl with EN with Matchers with NavigationSu
     createdOn = DateTimeUtils.now,
     lastAccess = DateTimeUtils.now,
     lastAccessTokenUsage = None,
+    Period.ofDays(547),
     Environment.from(environment).getOrElse(PRODUCTION),
     description = None,
     collaborators = Set(Collaborator(collaboratorEmail, CollaboratorRole.ADMINISTRATOR, idOf(collaboratorEmail)))
@@ -130,6 +132,7 @@ class ApplicationsSteps extends ScalaDsl with EN with Matchers with NavigationSu
         DateTimeUtils.now,
         DateTimeUtils.now,
         None,
+        Period.ofDays(547),
         environment,
         app.get("description"),
         Set(Collaborator(email, CollaboratorRole.withName(app.getOrElse("role", "ADMINISTRATOR")), UserId.random)),

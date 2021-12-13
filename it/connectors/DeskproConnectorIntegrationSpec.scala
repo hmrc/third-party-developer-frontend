@@ -25,10 +25,10 @@ import play.api.inject.guice.GuiceApplicationBuilder
 import play.api.libs.json.Json
 import play.api.{Application, Configuration, Mode}
 import uk.gov.hmrc.http.{HeaderCarrier, UpstreamErrorResponse}
-import uk.gov.hmrc.play.http.metrics.API
+import uk.gov.hmrc.play.http.metrics.common.API
 
 class DeskproConnectorIntegrationSpec extends BaseConnectorIntegrationSpec with GuiceOneAppPerSuite {
-  private val stubConfig = Configuration("Test.microservice.services.hmrc-deskpro.port" -> stubPort)
+  private val stubConfig = Configuration("microservice.services.hmrc-deskpro.port" -> stubPort)
 
   override def fakeApplication(): Application =
     GuiceApplicationBuilder()

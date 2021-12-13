@@ -82,6 +82,7 @@ class DeletePrincipalApplicationSpec
       DateTime.now.withTimeAtStartOfDay(),
       DateTime.now.withTimeAtStartOfDay(),
       None,
+      grantLength,
       Environment.PRODUCTION,
       Some("Description 1"),
       Set(loggedInDeveloper.email.asAdministratorCollaborator),
@@ -113,7 +114,7 @@ class DeletePrincipalApplicationSpec
   "delete application confirm page" should {
     "return delete application confirm page" in new Setup {
 
-      val result = addToken(underTest.deletePrincipalApplicationConfirm(application.id, None))(loggedInRequest)
+      val result = addToken(underTest.confirmRequestDeletePrincipalApplication(application.id, None))(loggedInRequest)
 
       status(result) shouldBe OK
       val body = contentAsString(result)
@@ -132,7 +133,7 @@ class DeletePrincipalApplicationSpec
       when(underTest.applicationService.requestPrincipalApplicationDeletion(eqTo(loggedInDeveloper), eqTo(application))(*))
         .thenReturn(Future.successful(TicketCreated))
 
-      val result = addToken(underTest.deletePrincipalApplicationAction(application.id))(requestWithFormBody)
+      val result = addToken(underTest.requestDeletePrincipalApplicationAction(application.id))(requestWithFormBody)
 
       status(result) shouldBe OK
       val body = contentAsString(result)
@@ -146,7 +147,7 @@ class DeletePrincipalApplicationSpec
 
       val requestWithFormBody = loggedInRequest.withFormUrlEncodedBody(("deleteConfirm", "No"))
 
-      val result = addToken(underTest.deletePrincipalApplicationAction(application.id))(requestWithFormBody)
+      val result = addToken(underTest.requestDeletePrincipalApplicationAction(application.id))(requestWithFormBody)
 
       status(result) shouldBe SEE_OTHER
 
@@ -169,13 +170,13 @@ class DeletePrincipalApplicationSpec
       status(result) shouldBe NOT_FOUND
     }
 
-    "deletePrincipalApplicationConfirm action is called" in new UnapprovedApplicationSetup {
-      val result = addToken(underTest.deletePrincipalApplicationConfirm(nonApprovedApplication.id, None))(loggedInRequest)
+    "confirmRequestDeletePrincipalApplication action is called" in new UnapprovedApplicationSetup {
+      val result = addToken(underTest.confirmRequestDeletePrincipalApplication(nonApprovedApplication.id, None))(loggedInRequest)
       status(result) shouldBe NOT_FOUND
     }
 
-    "deletePrincipalApplicationAction action is called" in new UnapprovedApplicationSetup {
-      val result = addToken(underTest.deletePrincipalApplicationAction(nonApprovedApplication.id))(loggedInRequest)
+    "requestDeletePrincipalApplicationAction action is called" in new UnapprovedApplicationSetup {
+      val result = addToken(underTest.requestDeletePrincipalApplicationAction(nonApprovedApplication.id))(loggedInRequest)
       status(result) shouldBe NOT_FOUND
     }
 

@@ -16,6 +16,8 @@
 
 package controllers
 
+import java.time.Period
+
 import akka.stream.Materializer
 import config.{ApplicationConfig, FraudPreventionConfig}
 import mocks.service.ErrorHandlerMock
@@ -48,6 +50,7 @@ class BaseControllerSpec
   lazy val messagesApi: MessagesApi = app.injector.instanceOf[MessagesApi]
 
   val mcc: MessagesControllerComponents = app.injector.instanceOf[MessagesControllerComponents]
+  val grantLength: Period = Period.ofDays(547)
 
   override def fakeApplication(): Application =
     GuiceApplicationBuilder()

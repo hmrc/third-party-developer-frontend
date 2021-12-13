@@ -250,7 +250,8 @@ case class EditApplicationForm(applicationId: ApplicationId,
                                 applicationName: String,
                                 description: Option[String] = None,
                                 privacyPolicyUrl: Option[String] = None,
-                                termsAndConditionsUrl: Option[String] = None)
+                                termsAndConditionsUrl: Option[String] = None,
+                                grantLength: String)
 
 object EditApplicationForm {
 
@@ -260,7 +261,8 @@ object EditApplicationForm {
       "applicationName" -> applicationNameValidator,
       "description" -> optional(text),
       "privacyPolicyUrl" -> optional(privacyPolicyUrlValidator),
-      "termsAndConditionsUrl" -> optional(tNcUrlValidator)
+      "termsAndConditionsUrl" -> optional(tNcUrlValidator),
+      "grantLength" -> text
     )(EditApplicationForm.apply)(EditApplicationForm.unapply)
   )
 
@@ -272,7 +274,8 @@ object EditApplicationForm {
         app.name,
         app.description,
         appAccess.privacyPolicyUrl,
-        appAccess.termsAndConditionsUrl
+        appAccess.termsAndConditionsUrl,
+        app.grantLengthDisplayValue
       )
     )
   }

@@ -16,6 +16,7 @@
 
 package connectors
 
+import java.time.Period
 import java.util.UUID
 import java.util.UUID.randomUUID
 import com.github.tomakehurst.wiremock.client.WireMock._
@@ -25,7 +26,7 @@ import domain.models.applications._
 import org.joda.time.DateTimeZone
 import play.api.http.Status._
 import uk.gov.hmrc.http._
-import uk.gov.hmrc.play.http.metrics.API
+import uk.gov.hmrc.play.http.metrics.common.API
 import uk.gov.hmrc.time.DateTimeUtils
 import ThirdPartyApplicationConnectorJsonFormatters._
 
@@ -42,13 +43,12 @@ import domain.models.apidefinitions.ApiContext
 import domain.models.apidefinitions.ApiVersion
 import domain.models.apidefinitions.ApiIdentifier
 
+
 class ThirdPartyApplicationConnectorSpec extends BaseConnectorIntegrationSpec with GuiceOneAppPerSuite with WireMockExtensions with CollaboratorTracker with LocalUserIdTracker {
   private val apiKey: String = UUID.randomUUID().toString
   private val clientId = ClientId(UUID.randomUUID().toString)
   private val applicationId = ApplicationId("applicationId")
   
-  // override val isEnabled = appConfig.hasSandbox;
-
   private val stubConfig = Configuration(
     "microservice.services.third-party-application-production.port" -> stubPort,
     "microservice.services.third-party-application-production.use-proxy" -> false,
@@ -101,6 +101,7 @@ class ThirdPartyApplicationConnectorSpec extends BaseConnectorIntegrationSpec wi
       DateTimeUtils.now,
       DateTimeUtils.now,
       None,
+      Period.ofDays(547),
       connector.environment,
       Some("Description"),
       Set("john@example.com".asAdministratorCollaborator),
@@ -293,7 +294,6 @@ class ThirdPartyApplicationConnectorSpec extends BaseConnectorIntegrationSpec wi
     "return success response in case of a 204 NO CONTENT on backend" in new Setup {
       stubFor(
         post(urlEqualTo(url))
-        .withRequestBody(equalTo(""))
         .willReturn(
             aResponse()
             .withStatus(OK)
@@ -307,7 +307,6 @@ class ThirdPartyApplicationConnectorSpec extends BaseConnectorIntegrationSpec wi
     "return failure response in case of a 400 on backend" in new Setup {
       stubFor(
         post(urlEqualTo(url))
-        .withRequestBody(equalTo(""))
         .willReturn(
             aResponse()
             .withStatus(BAD_REQUEST)
@@ -625,7 +624,7 @@ class ThirdPartyApplicationConnectorSpec extends BaseConnectorIntegrationSpec wi
     }
   }
 
-   "deleteSubordinateApplication" should {
+   "deleteApplication" should {
     val url = s"/application/${applicationId.value}/delete"
 
     "successfully delete the application" in new Setup {
@@ -650,7 +649,7 @@ class ThirdPartyApplicationConnectorSpec extends BaseConnectorIntegrationSpec wi
       )
       intercept[Exception] {
         await(connector.deleteApplication(applicationId))
-      }.getMessage shouldBe "error deleting subordinate application"
+      }.getMessage shouldBe "error deleting application"
     }
   }
 

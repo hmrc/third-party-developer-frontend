@@ -20,10 +20,13 @@ import builder.DeveloperBuilder
 import config.ErrorHandler
 import domain.models.applications._
 import mocks.service._
+import modules.uplift.services.mocks.UpliftLogicMock
 import play.api.mvc.AnyContentAsEmpty
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
 import service.AuditService
+import modules.uplift.domain.models.GetProductionCredentialsFlow
+import modules.uplift.services.GetProductionCredentialsFlowService
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.time.DateTimeUtils
 import utils._
@@ -35,18 +38,21 @@ import scala.concurrent.ExecutionContext.Implicits.global
 import utils.LocalUserIdTracker
 import domain.models.controllers.ApplicationSummary
 import builder._
+
 import scala.concurrent.Future
 import play.api.mvc.Result
 import mocks.connector.ApmConnectorMockModule
 import controllers.addapplication.AddApplication
-import config.UpliftJourneyConfigProvider
+import modules.uplift.views.html.BeforeYouStartView
+import modules.uplift.controllers.UpliftJourneySwitch
+import config.UpliftJourneyConfig
 
 class AddApplicationProductionSwitchSpec
     extends BaseControllerSpec
     with SampleSession
-    with SampleApplication 
-    with SubscriptionTestHelperSugar 
-    with WithCSRFAddToken 
+    with SampleApplication
+    with SubscriptionTestHelperSugar
+    with WithCSRFAddToken
     with DeveloperBuilder
     with LocalUserIdTracker
     with ApplicationBuilder {
@@ -69,7 +75,10 @@ class AddApplicationProductionSwitchSpec
     val chooseApplicationToUpliftView = app.injector.instanceOf[ChooseApplicationToUpliftView]
     
     val beforeYouStartView: BeforeYouStartView = app.injector.instanceOf[BeforeYouStartView]
-    val upliftJourneyConfigProviderMock = mock[UpliftJourneyConfigProvider]
+    val mockUpliftJourneyConfig = mock[UpliftJourneyConfig]
+    val sr20UpliftJourneySwitchMock = new UpliftJourneySwitch(mockUpliftJourneyConfig)
+
+    val flowServiceMock = mock[GetProductionCredentialsFlowService]
 
     implicit val environmentNameService = new EnvironmentNameService(appConfig)
 
@@ -92,8 +101,9 @@ class AddApplicationProductionSwitchSpec
       addApplicationSubordinateSuccessView,
       addApplicationNameView,
       chooseApplicationToUpliftView,
-      upliftJourneyConfigProviderMock,
-      beforeYouStartView
+      sr20UpliftJourneySwitchMock,
+      beforeYouStartView,
+      flowServiceMock
     )
     val hc = HeaderCarrier()
 
@@ -139,6 +149,7 @@ class AddApplicationProductionSwitchSpec
   "addApplicationProductionSwitch" should {
     "return bad request when no apps are upliftable" in new Setup {
       aUsersUplfitableAndNotUpliftableAppsReturns(Nil, List.empty)
+      when(flowServiceMock.resetFlow(*)).thenReturn(Future.successful(GetProductionCredentialsFlow("", None, None, None)))
 
       val result = underTest.addApplicationProductionSwitch()(loggedInRequest)
 
@@ -150,17 +161,20 @@ class AddApplicationProductionSwitchSpec
       val subsetOfSubscriptions = summaries.head.subscriptionIds.take(1)
       ApmConnectorMock.FetchUpliftableSubscriptions.willReturn(subsetOfSubscriptions)
       aUsersUplfitableAndNotUpliftableAppsReturns(summaries, summaries.map(_.id))
+      when(flowServiceMock.storeApiSubscriptions(*, *)).thenReturn(Future.successful(GetProductionCredentialsFlow("", None, None, None)))
+      when(flowServiceMock.resetFlow(*)).thenReturn(Future.successful(GetProductionCredentialsFlow("", None, None, None)))
 
       val result = underTest.addApplicationProductionSwitch()(loggedInRequest)
 
       status(result) shouldBe SEE_OTHER
-      redirectLocation(result).value shouldBe controllers.routes.SR20.confirmApiSubscriptionsAction(summaries.head.id).toString()
+      redirectLocation(result).value shouldBe modules.uplift.controllers.routes.UpliftJourneyController.confirmApiSubscriptionsAction(summaries.head.id).toString()
     }
     
     "return ok when all apps are upliftable" in new Setup {
       val summaries = sandboxAppSummaries
       aUsersUplfitableAndNotUpliftableAppsReturns(summaries, summaries.map(_.id))
       
+      when(flowServiceMock.resetFlow(*)).thenReturn(Future.successful(GetProductionCredentialsFlow("", None, None, None)))
       implicit val result = underTest.addApplicationProductionSwitch()(loggedInRequest)
 
       status(result) shouldBe OK
@@ -177,7 +191,8 @@ class AddApplicationProductionSwitchSpec
 
       val prodAppId = ApplicationId.random
 
-      ApmConnectorMock.UpliftApplication.willReturn(prodAppId)
+      ApmConnectorMock.UpliftApplicationV1.willReturn(prodAppId)
+      when(flowServiceMock.resetFlow(*)).thenReturn(Future.successful(GetProductionCredentialsFlow("", None, None, None)))
 
       aUsersUplfitableAndNotUpliftableAppsReturns(summaries, upliftable.map(_.id))
       
@@ -198,6 +213,7 @@ class AddApplicationProductionSwitchSpec
 
       aUsersUplfitableAndNotUpliftableAppsReturns(summaries, upliftable.map(_.id))
       
+      when(flowServiceMock.resetFlow(*)).thenReturn(Future.successful(GetProductionCredentialsFlow("", None, None, None)))
       implicit val result = underTest.addApplicationProductionSwitch()(loggedInRequest)
 
       status(result) shouldBe OK
@@ -208,11 +224,13 @@ class AddApplicationProductionSwitchSpec
       // TODO - work out why
       // shouldShowMessageAboutNotNeedingProdCreds()
     }
+
     "return ok when some apps are upliftable after showing fluff" in new Setup {
       val summaries = sandboxAppSummaries
       val upliftable = summaries.drop(1)
 
       aUsersUplfitableAndNotUpliftableAppsReturns(summaries, upliftable.map(_.id))
+      when(flowServiceMock.resetFlow(*)).thenReturn(Future.successful(GetProductionCredentialsFlow("", None, None, None)))
       
       implicit val result = underTest.addApplicationProductionSwitch()(loggedInRequest)
 

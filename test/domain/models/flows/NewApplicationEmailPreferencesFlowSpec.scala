@@ -19,13 +19,14 @@ package domain.models.flows
 import builder.DeveloperBuilder
 import domain.models.developers.{Developer, DeveloperSession, LoggedInState, Session}
 import domain.models.emailpreferences.{EmailPreferences, EmailTopic, TaxRegimeInterests}
-import org.scalatest.{Matchers, WordSpec}
 import domain.models.applications.ApplicationId
 import domain.models.apidefinitions.ExtendedApiDefinitionTestDataHelper
 import domain.models.connectors.ExtendedApiDefinition
 import utils.LocalUserIdTracker
+import org.scalatest.wordspec.AnyWordSpec
+import org.scalatest.matchers.should.Matchers
 
-class NewApplicationEmailPreferencesFlowSpec extends WordSpec with Matchers with ExtendedApiDefinitionTestDataHelper with DeveloperBuilder with LocalUserIdTracker {
+class NewApplicationEmailPreferencesFlowSpec extends AnyWordSpec with Matchers with ExtendedApiDefinitionTestDataHelper with DeveloperBuilder with LocalUserIdTracker {
 
     val category1 = "CATEGORY_1"
     val category2 = "CATEGORY_2"

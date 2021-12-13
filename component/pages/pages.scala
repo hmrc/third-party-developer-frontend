@@ -17,15 +17,15 @@
 package pages
 
 import org.openqa.selenium.By
-import play.api.Logger
+import util.ApplicationLogger
 import steps.{Env, Form}
 
-trait FormPage extends WebPage {
+trait FormPage extends WebPage with ApplicationLogger {
   val pageHeading: String
 
   override def isCurrentPage: Boolean = find(tagName("h1")).fold(false)({
     e =>
-      Logger.info(s"HEADING: ${e.text}")
+      logger.info(s"HEADING: ${e.text}")
       e.text == pageHeading
   })
 
@@ -101,7 +101,7 @@ object AddApplicationSuccessPage extends FormPage {
 
   override def isCurrentPage: Boolean = find(tagName("h1")).fold(false)({
     e =>
-      Logger.info(s"HEADING: ${e.text}")
+      logger.info(s"HEADING: ${e.text}")
       e.text.startsWith(pageHeading)
   })
 }

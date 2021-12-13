@@ -22,7 +22,7 @@ import domain.ApplicationNotFound
 
 class ApmConnectorIntegrationSpec extends BaseConnectorIntegrationSpec with GuiceOneAppPerSuite with WireMockExtensions {
   private val stubConfig = Configuration(
-    "Test.microservice.services.api-platform-microservice.port" -> stubPort
+    "microservice.services.api-platform-microservice.port" -> stubPort
   )
 
   override def fakeApplication(): Application =
