@@ -88,15 +88,21 @@ class Details @Inject() (
 
         OptionT(submissionService.fetchLatestSubmission(applicationId)).fold(oldJourney)(newUpliftJourney)
 
-      case State.PENDING_GATEKEEPER_APPROVAL | State.PENDING_REQUESTER_VERIFICATION =>
-        successful(
+      case State.PENDING_GATEKEEPER_APPROVAL | State.PENDING_REQUESTER_VERIFICATION => {
+        lazy val oldJourney = 
           Ok(
             pendingApprovalView(
               checkYourAnswersData,
               CheckYourAnswersForm.form.fillAndValidate(DummyCheckYourAnswersForm("dummy"))
             )
           )
-        )
+
+
+        lazy val newUpliftJourney = (e: ExtendedSubmission) =>
+          Redirect(modules.submissions.controllers.routes.CredentialsRequestedController.credentialsRequestedPage(applicationId))
+
+        OptionT(submissionService.fetchLatestSubmission(applicationId)).fold(oldJourney)(newUpliftJourney)    
+      }
 
       case State.PRODUCTION =>
         successful(
