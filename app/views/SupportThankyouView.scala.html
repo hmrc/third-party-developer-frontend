@@ -22,19 +22,17 @@
 @(heading: String, loggedIn: Option[String])(implicit request: play.api.mvc.Request[Any], messages: Messages, appConfig: config.ApplicationConfig)
 
 @devMain(
-    title = heading,
-    userFullName = loggedIn,
-    breadcrumbs = Seq(
-        Crumb("API Support", "",Some("data-breadcrumb-manage-app")),
-        Crumb.home
-    ),
-    developerSession = None
+  title = heading,
+  userFullName = loggedIn,
+  breadcrumbs = Seq(
+    Crumb("API Support", "",Some("data-breadcrumb-manage-app")),
+    Crumb.home
+  ),
+  developerSession = None
 ) {
-    <header>
-        <h1 class="heading-xlarge">@heading</h1>
-    </header>
+  <h1 class="govuk-heading-l">@heading</h1>
 
-    <p>We will get back to you within 2 working days.</p>
+  <p class="govuk-body">We will get back to you within 2 working days.</p>
 
-    <p>Continue to the <a href="/api-documentation">home page</a>.</p>
+  <p class="govuk-body">Continue to the <a class="govuk-link" href="/api-documentation">home page</a>.</p>
 }

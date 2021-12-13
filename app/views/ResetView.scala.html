@@ -19,29 +19,25 @@
 @this(devMain: DevMain)
 
 @(form: Form[controllers.PasswordResetForm])(implicit request: play.api.mvc.Request[Any],
-        messages: Messages, applicationConfig: config.ApplicationConfig)
+  messages: Messages, applicationConfig: config.ApplicationConfig
+)
 
 @titleError = { @if(form.errors.nonEmpty) {Error: } else {}}
 
 @devMain(
-    title = titleError + "Create a new password",
-    developerSession = None
+  title = titleError + "Create a new password",
+  developerSession = None
 ) {
 
-    @errorSummary(form)
+  @errorSummary2(form)
 
-    <h1 class="heading-xlarge">Create a new password</h1>
+  <h1 class="govuk-heading-l">Create a new password</h1>
 
-    @helper.form(action = routes.Password.resetPassword) {
+  @helper.form(action = routes.Password.resetPassword) {
+    @helper.CSRF.formField
 
-        <div class="form-group">
-            @helper.CSRF.formField
+    @passwords("Enter new password", "Confirm new password", form)
 
-                @passwords("Enter new password", "Confirm new password", form)
-
-        </div>
-        <div class="form-group">
-            <button id="submit" class="button" type="submit">Save password</button>
-        </div>
-    }
+    <button id="submit" class="govuk-button" type="submit">Save password</button>
+  }
 }

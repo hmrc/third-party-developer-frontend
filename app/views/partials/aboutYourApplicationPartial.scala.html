@@ -26,181 +26,201 @@
 
 @helper.form(action = controllers.checkpages.routes.CheckYourAnswers.answersPageAction(data.appId), 'class -> "form") {
   @helper.CSRF.formField
-  <section class="section">
-      <div class="form-group">
-          <h2 class="step-heading-1" style="margin-bottom: 0px">About your application</h2>
-          <table class="task-list">
-              <thead>
-              <tr>
-                  <br/>
-              </tr>
-              </thead>
-              <tbody>
-                  <tr id="apiSubscriptions">
-                      <th class="col-40">
-                          <span strong class="bold-small">API subscriptions</span>
-                      </th>
-                      <td>
-                          @data.subscriptions.map { sub =>
-                          @sub.name<br/>
-                          }
-                      </td>
-                      @if(editable) {
-                        <td>
-                            <div align="right">
-                                <a href="@controllers.checkpages.routes.CheckYourAnswers.apiSubscriptionsPage(data.appId)">Change<span class="visually-hidden">Edit API subscription</span></a>
-                            </div>
-                        </td>
-                      }
-                  </tr>
-
-
-
-                  <tr id="contactDetails">
-                      <th><span strong class="bold-small">Contact details</span></th>
-                      <td>
-                          @data.fullName
-                          <br/>
-                          @data.email
-                          <br/>
-                          @data.telephoneNumber
-                          <br/>
-                      </td>
-                      @if(editable) {
-                        <td>
-                            <div align="right">
-                                <a href="@controllers.checkpages.routes.CheckYourAnswers.contactPage(data.appId)">Change<span class="visually-hidden">Edit Contact details</span></a>
-                            </div>
-                        </td>
-                      }
-                  </tr>
-
-                  <tr id="teamMembers">
-                      <th><span strong class="bold-small">Team members</span></th>
-                      <td>
-                          @data.teamMembers.map { teamMember =>
-                          @teamMember<br/>
-                          }
-                      </td>
-                      @if(editable) {
-                        <td>
-                            <div align="right">
-                                <a href="@controllers.checkpages.routes.CheckYourAnswers.team(data.appId)">Change<span class="visually-hidden">Edit Team Members</span></a>
-                            </div>
-                        </td>
-                      }
-                  </tr>
-
-                  <tr id="softwareName">
-                      <th><span strong class="bold-small">Software name</span></th>
-                      <td>
-                          @data.softwareName
-                      </td>
-                      @if(editable) {
-                        <td>
-                            <div align="right">
-                                <a href="@controllers.checkpages.routes.CheckYourAnswers.namePage(data.appId)">Change<span class="visually-hidden">Edit Software name</span></a>
-                            </div>
-                        </td>
-                      }
-                  </tr>
-              </tbody>
-          </table>
-
-          </br>
-          </br>
-
-          @if(data.subscriptions.exists(_.fields.nonEmpty)) {
-              <h2 id="configurations" class="step-heading-1">Your API subscription configuration</h2>
-
-              @data.subscriptions.filter(_.fields.nonEmpty).map { sub =>
-                <table class="task-list">
-                    <thead>
-                    <tr id="">
-                        <th class="col-80" colspan="2"><span strong class="bold-small">@sub.name @sub.apiVersion @sub.displayedStatus</span></th>
-                          <td>
-                              @if(editable) {
-                                  <div align="right">
-                                      <a href="@routes.ManageSubscriptions.editApiMetadataPage(data.appId, sub.apiContext, sub.apiVersion, SaveSubsFieldsPageMode.CheckYourAnswers)">Change<span class="visually-hidden">Edit Subscription</span></a>
-                                  </div>
-                              }
-                          </td>
-                    </tr>
-                    </thead>
-                    <tbody>
-                      @sub.fields.map{ field =>
-                        <tr>
-                          <th class="col-40"><span strong class="bold-small">@field.name</span></th>
-                          <td colspan="2">@field.value</td>
-                        </tr>
-                      }
-                    </tbody>
-                </table>
-
-                </br>
-
-              }
-
-              </br>
-
+  <h2 class="govuk-heading-m">About your application</h2>
+  <table class="govuk-table">
+    <thead class="govuk-table__head">
+      <tr class="govuk-table__row">
+        <br/>
+      </tr>
+    </thead>
+    <tbody class="govuk-table__body">
+      <tr class="govuk-table__row" id="apiSubscriptions">
+        <th scope="row" class="govuk-table__header col-40">
+          <span class="govuk-!-font-weight-bold">API subscriptions</span>
+        </th>
+        <td class="govuk-table__cell">
+          @data.subscriptions.map { sub =>
+            @sub.name<br/>
           }
+        </td>
+        @if(editable) {
+          <td class="govuk-table__cell">
+            <div align="right">
+              <a class="govuk-link" href="@controllers.checkpages.routes.CheckYourAnswers.apiSubscriptionsPage(data.appId)">
+                Change<span class="govuk-visually-hidden">Edit API subscription</span>
+              </a>
+            </div>
+          </td>
+        }
+      </tr>
 
-          <h2 class="step-heading-1">Your responsibilities</h2>
-          <table class="task-list">
-              <tbody>
+      <tr class="govuk-table__row" id="contactDetails">
+        <th scope="row" class="govuk-table__header">
+          <span class="govuk-!-font-weight-bold">Contact details</span>
+        </th>
+        <td class="govuk-table__cell">
+          @data.fullName
+          <br/>
+          @data.email
+          <br/>
+          @data.telephoneNumber
+          <br/>
+        </td>
+        @if(editable) {
+          <td class="govuk-table__cell">
+            <div align="right">
+              <a class="govuk-link" href="@controllers.checkpages.routes.CheckYourAnswers.contactPage(data.appId)">
+                Change<span class="govuk-visually-hidden">Edit Contact details</span>
+              </a>
+            </div>
+          </td>
+        }
+      </tr>
 
-              <tr id="providedPolicyURL">
-                  <th class="col-40"><span strong class="bold-small">Privacy policy</span></th>
-                  <td>
-                      @data.privacyPolicyUrl.getOrElse("None")
-                  </td>
-                  @if(editable) {
-                    <td>
-                        <div align="right">
-                            <a href="@controllers.checkpages.routes.CheckYourAnswers.privacyPolicyPage(data.appId)">Change<span class="visually-hidden">Edit Privacy policy</span></a>
-                        </div>
-                    </td>
-                  }
-              </tr>
+      <tr class="govuk-table__row" id="teamMembers">
+        <th scope="row" class="govuk-table__header">
+          <span class="govuk-!-font-weight-bold">
+            Team members
+          </span>
+        </th>
+        <td class="govuk-table__cell">
+          @data.teamMembers.map { teamMember =>
+            @teamMember<br/>
+          }
+        </td>
+        @if(editable) {
+          <td class="govuk-table__cell">
+            <div align="right">
+              <a class="govuk-link" href="@controllers.checkpages.routes.CheckYourAnswers.team(data.appId)">
+                Change<span class="govuk-visually-hidden">Edit Team Members</span>
+              </a>
+            </div>
+          </td>
+        }
+      </tr>
 
-              <tr id="providedTermsAndConditionsURL">
-                  <th><span strong class="bold-small">Terms and conditions</span></th>
-                  <td>
-                      @data.termsAndConditionsUrl.getOrElse("None")
-                  </td>
-                  @if(editable) {
-                    <td>
-                        <div align="right">
-                            <a href="@controllers.checkpages.routes.CheckYourAnswers.termsAndConditionsPage(data.appId)">Change<span class="visually-hidden">Edit Terms and conditions</span></a>
-                        </div>
-                    </td>
-                  }
-              </tr>
+      <tr class="govuk-table__row" id="softwareName">
+        <th scope="row" class="govuk-table__header">
+          <span class="govuk-!-font-weight-bold">
+            Software name
+          </span>
+        </th>
+        <td class="govuk-table__cell">
+          @data.softwareName
+        </td>
+        @if(editable) {
+          <td class="govuk-table__cell">
+            <div align="right">
+              <a class="govuk-link" href="@controllers.checkpages.routes.CheckYourAnswers.namePage(data.appId)">
+                Change<span class="govuk-visually-hidden">Edit Software name</span>
+              </a>
+            </div>
+          </td>
+        }
+      </tr>
+    </tbody>
+  </table>
 
-              <tr id="agreeTermsOfUse">
-                  <th><span strong class="bold-small">Terms of use</span></th>
-                  <td>
-                      @if(data.acceptedTermsOfUse) { Accepted } else { Not Accepted }
-                  </td>
-                  @if(editable) {
-                    <td>
-                        <div align="right">
-                            <a href="@controllers.checkpages.routes.CheckYourAnswers.termsOfUsePage(data.appId)">View<span class="visually-hidden">View Terms of use</span></a>
-                        </div>
-                    </td>
-                  }
-              </tr>
+  </br>
+  </br>
 
-              </tbody>
-          </table>
-      </div>
-      @if(editable) {
-        <div class="form-group">
-            <h2>Now request @principalWording </h2>
-            <p>By submitting your request you are confirming that, to the best your knowledge, the details you are providing are correct.</p>
-            <button id="submit" class="button" type="submit">Accept and send</button>
-            <a href="@routes.ManageApplications.manageApps" id="cancel" class="secondary-button">Save and come back later</a>
-        </div>
-      }
-  </section>
+  @if(data.subscriptions.exists(_.fields.nonEmpty)) {
+    <h2 id="configurations" class="govuk-heading-m">Your API subscription configuration</h2>
+
+    @data.subscriptions.filter(_.fields.nonEmpty).map { sub =>
+      <table class="govuk-table">
+        <thead class="govuk-table__head">
+          <tr class="govuk-table__row" id="">
+            <th scope="row" class="govuk-table__header col-80" colspan="2">
+              <span class="govuk-!-font-weight-bold">@sub.name @sub.apiVersion @sub.displayedStatus</span>
+            </th>
+            <td class="govuk-table__cell">
+              @if(editable) {
+                <div align="right">
+                  <a class="govuk-link" href="@routes.ManageSubscriptions.editApiMetadataPage(data.appId, sub.apiContext, sub.apiVersion, SaveSubsFieldsPageMode.CheckYourAnswers)">
+                    Change<span class="govuk-visually-hidden">Edit Subscription</span>
+                  </a>
+                </div>
+              }
+            </td>
+          </tr>
+        </thead>
+        <tbody class="govuk-table__body">
+          @sub.fields.map{ field =>
+            <tr class="govuk-table__row">
+              <th scope="row" class="govuk-table__header col-40">
+                <span class="govuk-!-font-weight-bold">@field.name</span>
+              </th>
+              <td colspan="2">@field.value</td>
+            </tr>
+          }
+        </tbody>
+      </table>
+      </br>
+    }
+    </br>
+  }
+
+  <h2 class="govuk-heading-m">Your responsibilities</h2>
+
+  <table class="govuk-table">
+    <tbody class="govuk-table__body">
+      <tr class="govuk-table__row" id="providedPolicyURL">
+        <th scope="row" class=" govuk-table__header col-40">
+          <span class="govuk-!-font-weight-bold">Privacy policy</span>
+        </th>
+        <td class="govuk-table__cell">
+          @data.privacyPolicyUrl.getOrElse("None")
+        </td>
+        @if(editable) {
+          <td class="govuk-table__cell">
+            <div align="right">
+              <a class="govuk-link" href="@controllers.checkpages.routes.CheckYourAnswers.privacyPolicyPage(data.appId)">Change<span class="govuk-visually-hidden">Edit Privacy policy</span></a>
+            </div>
+          </td>
+        }
+      </tr>
+
+      <tr class="govuk-table__row" id="providedTermsAndConditionsURL">
+        <th scope="row" class="govuk-table__header">
+          <span class="govuk-!-font-weight-bold">Terms and conditions</span>
+        </th>
+        <td class="govuk-table__cell">
+          @data.termsAndConditionsUrl.getOrElse("None")
+        </td>
+        @if(editable) {
+          <td class="govuk-table__cell">
+            <div align="right">
+              <a class="govuk-link" href="@controllers.checkpages.routes.CheckYourAnswers.termsAndConditionsPage(data.appId)">
+                Change<span class="govuk-visually-hidden">Edit Terms and conditions</span>
+              </a>
+            </div>
+          </td>
+        }
+      </tr>
+
+      <tr class="govuk-table__row" id="agreeTermsOfUse">
+        <th scope="row" class="govuk-table__header">
+          <span class="govuk-!-font-weight-bold">Terms of use</span>
+        </th>
+        <td class="govuk-table__cell">
+          @if(data.acceptedTermsOfUse) { Accepted } else { Not Accepted }
+        </td>
+        @if(editable) {
+          <td class="govuk-table__cell">
+            <div align="right">
+              <a class="govuk-link" href="@controllers.checkpages.routes.CheckYourAnswers.termsOfUsePage(data.appId)">View<span class="govuk-visually-hidden">View Terms of use</span></a>
+            </div>
+          </td>
+        }
+      </tr>
+    </tbody>
+  </table>
+
+  @if(editable) {
+    <h2 class="govuk-heading-m">Now request @principalWording </h2>
+    <p class="govuk-body">By submitting your request you are confirming that, to the best your knowledge, the details you are providing are correct.</p>
+    <button id="submit" class="govuk-button" type="submit">Accept and send</button>
+    <a class="govuk-link" href="@routes.ManageApplications.manageApps" id="cancel" class="govuk-button govuk-button--secondary">Save and come back later</a>
+  }
 }

@@ -21,11 +21,11 @@
 @()(implicit request: play.api.mvc.Request[Any], messages: Messages, appConfig: config.ApplicationConfig)
 
 @devMain(
-    title = "Logout",
-    developerSession = None
+  title = "Logout",
+  developerSession = None
 ) {
-    <h1>You are now signed out</h1>
-    <p>
-        <a href="@routes.UserLoginAccount.login">Sign in to the @(appConfig.title)</a>
-    </p>
+  <h1 class="govuk-heading-l">You are now signed out</h1>
+  <p class="govuk-body">
+    <a class="govuk-link" href="@routes.UserLoginAccount.login">Sign in to the @(appConfig.title)</a>
+  </p>
 }

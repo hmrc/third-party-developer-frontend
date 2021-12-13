@@ -22,80 +22,81 @@
 @(loggedIn: Option[String], form: Form[controllers.SupportEnquiryForm])(implicit request: play.api.mvc.Request[Any], messages: Messages, appConfig: config.ApplicationConfig)
 
 @devMain(
-    title = "Support",
-    userFullName = loggedIn,
-    breadcrumbs = Seq(
-        Crumb("Support", "",Some("data-breadcrumb-manage-app")),
-        Crumb.home
-    ),
-    developerSession = None
+  title = "Support",
+  userFullName = loggedIn,
+  breadcrumbs = Seq(
+    Crumb("Support", "",Some("data-breadcrumb-manage-app")),
+    Crumb.home
+  ),
+  developerSession = None
 ) {
-    @errorSummary(form)
+  @errorSummary2(form)
 
-    <header>
-        <h1 class="heading-xlarge">Support</h1>
-    </header>
+  <h1 class="govuk-heading-l">Support</h1>
 
-    <p>Complete this short form to ask a question, for example, about:</p>
-    <ul class="bullets">
-        <li><a href="/api-documentation/docs/using-the-hub">using the service</a></li>
-        <li><a href="/api-documentation/docs/testing">testing</a></li>
-        <li><a href="/api-documentation/docs/api">using our APIs</a></li>
-    </ul>
-    <br>
-    <p>and our Software Developers Support Team (SDST) will get back to you within
-    2 working days. You can also check our <a href="/api-documentation/docs/reference-guide">reference guide</a>
-    for answers.</p>
+  <p class="govuk-body">Complete this short form to ask a question, for example, about:</p>
 
-    <section class="subsection">
-        @helper.form(action = routes.Support.submitSupportEnquiry) {
+  <ul class="govuk-list govuk-list--bullet">
+    <li><a class="govuk-link" href="/api-documentation/docs/using-the-hub">using the service</a></li>
+    <li><a class="govuk-link" href="/api-documentation/docs/testing">testing</a></li>
+    <li><a class="govuk-link" href="/api-documentation/docs/api">using our APIs</a></li>
+  </ul>
 
-            <fieldset>
-                <div class="form-field-group">
-                    @helper.CSRF.formField
+  <br>
 
-                    <div id="fullname" class="form-group @if(form.errors("fullname").nonEmpty){form-group-error}">
-                        <label class="label--full-length" for="fullname-field" id="fullname-label">Full name</label>
+  <p class="govuk-body">
+    and our Software Developers Support Team (SDST) will get back to you within
+    2 working days. You can also check our <a class="govuk-link" href="/api-documentation/docs/reference-guide">reference guide</a>
+    for answers.
+  </p>
 
-                        @fieldError(form.errors, "fullname", true)
-                        <input id="fullname-field"
-                               type="text"
-                               name="fullname"
-                               class="form-control @if(form.errors("fullname").nonEmpty){form-control-error}"
-                               value="@form.data.getOrElse("fullname", "")"
-                               aria-required="true"/>
-                    </div>
+  @helper.form(action = routes.Support.submitSupportEnquiry) {
 
-                    <div id="emailaddress" class="form-group @if(form.errors("emailaddress").nonEmpty){form-group-error}">
-                        <label class="label--full-length" for="emailaddress-field" id="emailaddress-label">Email address</label>
-                            @fieldError(form.errors, "emailaddress", true)
-                            <input id="emailaddress-field"
-                                   type="text"
-                                   name="emailaddress"
-                                   class="form-control @if(form.errors("emailaddress").nonEmpty){form-control-error}"
-                                   value="@form.data.getOrElse("emailaddress", "")"
-                                   aria-required="true"/>
+    <fieldset class="govuk-fieldset">
+      @helper.CSRF.formField
 
-                        <p class="form-field--hint">We only use your email to respond to you</p>
-                    </div>
+      <div id="fullname" class="govuk-form-group @if(form.errors("fullname").nonEmpty){govuk-form-group--error}">
+        <label class="govuk-label" for="fullname-field" id="fullname-label">Full name</label>
+        @fieldError2(form.errors, "fullname", true)
+        <input
+          id="fullname-field"
+          type="text"
+          name="fullname"
+          class="govuk-input @if(form.errors("fullname").nonEmpty){govuk-input--error}"
+          value="@form.data.getOrElse("fullname", "")"
+          aria-required="true"
+        />
+      </div>
 
-                    <div id="comments" class="form-group @if(form.errors("comments").nonEmpty){form-group-error}">
-                        <label class="label--full-length" for="comments-field" id="comments-label">What do you need help with?</label>
-                        @fieldError(form.errors, "comments", true)
-                        <p class="form-field--hint">Don't include any personal or financial information. For example, National Insurance or credit card numbers.</p>
-                        <textarea id="comments-field"
-                                  class="js-char-count form-control @if(form.errors("comments").nonEmpty){form-control-error}"
-                                  name="comments"
-                                  cols="40"
-                                  rows="4"
-                                  maxlength="3000">@form.data.getOrElse("comments", "")</textarea>
-                    </div>
+      <div id="emailaddress" class="govuk-form-group @if(form.errors("emailaddress").nonEmpty){govuk-form-group--error}">
+        <label class="govuk-label" for="emailaddress-field" id="emailaddress-label">Email address</label>
+        @fieldError2(form.errors, "emailaddress", true)
+        <input
+          id="emailaddress-field"
+          type="text"
+          name="emailaddress"
+          class="govuk-input @if(form.errors("emailaddress").nonEmpty){govuk-input--error}"
+          value="@form.data.getOrElse("emailaddress", "")"
+          aria-required="true"
+          aria-describedby="email-hint"
+        />
 
-                    <div class="form-field form-field--submit">
-                        <button id="submit" class="button" type="submit">Submit</button>
-                    </div>
-                </div>
-            </fieldset>
-        }
-    </section>
+        <p id="email-hint" class="govuk-hint">We only use your email to respond to you</p>
+      </div>
+
+      <div id="comments" class="govuk-form-group @if(form.errors("comments").nonEmpty){govuk-form-group--error}">
+        <label class="govuk-label" for="comments-field" id="comments-label">What do you need help with?</label>
+        @fieldError2(form.errors, "comments", true)
+        <p id="help-input-hint" class="govuk-hint">Don't include any personal or financial information. For example, National Insurance or credit card numbers.</p>
+        <textarea id="comments-field"
+        class="js-char-count govuk-textarea @if(form.errors("comments").nonEmpty){govuk-input--error}"
+        name="comments"
+        cols="40"
+        rows="4"
+        aria-describedby="help-input-hint"
+        maxlength="3000">@form.data.getOrElse("comments", "")</textarea>
+      </div>
+    </fieldset>
+    <button id="submit" class="govuk-button" type="submit">Submit</button>
+  }
 }

@@ -24,45 +24,46 @@
 @this(devMain: DevMain, leftHandNav: LeftHandNav)
 
 @(applicationName: String, applicationId: ApplicationId, environment: Environment)(
-        implicit request: Request[_], loggedIn: DeveloperSession, messagesProvider: MessagesProvider, applicationConfig: ApplicationConfig, navSection: String = "add-application")
+  implicit request: Request[_], loggedIn: DeveloperSession, messagesProvider: MessagesProvider, applicationConfig: ApplicationConfig, navSection: String = "add-application"
+)
 
 @devMain(
-    title = "Application added",
-    userFullName = loggedIn.loggedInName,
-    breadcrumbs = Seq(
-        Crumb("Add an application",s"${routes.ManageApplications.manageApps}", Some("data-breadcrumb-application-added")),
-        Crumb.home
-    ),
-    leftNav = Some(leftHandNav(None, Option(navSection))),
-    developerSession = Some(loggedIn)
+  title = "Application added",
+  userFullName = loggedIn.loggedInName,
+  breadcrumbs = Seq(
+    Crumb("Add an application",s"${routes.ManageApplications.manageApps}", Some("data-breadcrumb-application-added")),
+    Crumb.home
+  ),
+  leftNav = Some(leftHandNav(None, Option(navSection))),
+  developerSession = Some(loggedIn)
 ){
-    <h1 class="heading-large" data-journey="application:added">You added @applicationName</h1>
-    @if(environment.isProduction) {
-        <p>You have admin rights over this production application.</p>
+  <h1 class="govuk-heading-l" data-journey="application:added">You added @applicationName</h1>
+  @if(environment.isProduction) {
+    <p class="govuk-body">You have admin rights over this production application.</p>
 
-        <h2 class="heading-medium">Before you can get production credentials</h2>
+    <h2 class="govuk-heading-m">Before you can get production credentials</h2>
 
-        <p>You must complete the checklist for your application and submit it for checking.</p>
-        <p>We take up to 10 working days to check applications and issue production credentials.</p>
+    <p class="govuk-body">You must complete the checklist for your application and submit it for checking.</p>
+    <p class="govuk-body">We take up to 10 working days to check applications and issue production credentials.</p>
 
-        <a class="button" href="@controllers.checkpages.routes.ApplicationCheck.requestCheckPage(applicationId).url" id="start">
-            Start the checklist
-        </a>
-    } else {
-        <p>You have admin rights over this sandbox application.</p>
+    <a class="govuk-button" href="@controllers.checkpages.routes.ApplicationCheck.requestCheckPage(applicationId).url" id="start">
+        Start the checklist
+    </a>
+  } else {
+    <p class="govuk-body">You have admin rights over this sandbox application.</p>
 
-        <h2 class="heading-medium">What happens next?</h2>
+    <h2 class="govuk-heading-m">What happens next?</h2>
 
-        <p>You can now get your sandbox credentials for testing.</p>
-        <p>However, to start testing you must tell us:</p>
+    <p class="govuk-body">You can now get your sandbox credentials for testing.</p>
+    <p class="govuk-body">However, to start testing you must tell us:</p>
 
-        <ul class="list list-bullet">
-            <li>Which APIs you want to subscribe to</li>
-            <li>Your redirect URIs, if using <a href="/api-documentation/docs/authorisation/user-restricted-endpoints">user-restricted endpoints</a></li>
-        </ul>
+    <ul class="govuk-list govuk-list--bullet">
+      <li>Which APIs you want to subscribe to</li>
+      <li>Your redirect URIs, if using <a class="govuk-link" href="/api-documentation/docs/authorisation/user-restricted-endpoints">user-restricted endpoints</a></li>
+    </ul>
 
-        <a class="button" href="@routes.Subscriptions.manageSubscriptions(applicationId)" id="manage-api-subscriptions">
-             Manage API subscriptions
-        </a>
-    }
+    <a class="govuk-button" href="@routes.Subscriptions.manageSubscriptions(applicationId)" id="manage-api-subscriptions">
+      Manage API subscriptions
+    </a>
+  }
 }

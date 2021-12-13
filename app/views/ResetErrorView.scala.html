@@ -21,12 +21,11 @@
 @()(implicit request: play.api.mvc.Request[Any], messages: Messages, applicationConfig: config.ApplicationConfig)
 
 @devMain(
-    title = "Reset password link no longer valid",
-    developerSession = None
+  title = "Reset password link no longer valid",
+  developerSession = None
 ){
+  <h1 class="govuk-heading-l">Error resetting password</h1>
 
-    <h1 class="heading-xlarge">Error resetting password</h1>
-
-    <p>There was a problem resetting your password. If the problem continues, please contact the Support team.</p>
-    <p><a href="@routes.Password.showForgotPassword" role="button" class="button">Reset password again</a></p>
+  <p class="govuk-body">There was a problem resetting your password. If the problem continues, please contact the Support team.</p>
+  <a href="@routes.Password.showForgotPassword" role="button" class="govuk-button">Reset password again</a>
 }

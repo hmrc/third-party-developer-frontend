@@ -22,10 +22,11 @@
 @import views.html.include.teamMembers.addTeamMemberPartial
 @import domain.models.controllers.AddTeamMemberPageMode.CheckYourAnswers
 
-@this(devMain: DevMain)
+@this(devMain: DevMain2)
 
 @(applicationView: ApplicationViewModel, form: Form[controllers.AddTeamMemberForm], loggedIn: DeveloperSession)(
-        implicit request: play.api.mvc.Request[Any], messages: Messages,applicationConfig: ApplicationConfig)
+  implicit request: play.api.mvc.Request[Any], messages: Messages,applicationConfig: ApplicationConfig
+)
 
 
 @app = @{applicationView.application}
@@ -39,9 +40,7 @@
   developerSession = Some(loggedIn)
  ) {
 
-  <header>
-   <h1 class="heading-xlarge">@pageHeading</h1>
-  </header>
+  <h1 class="govuk-heading-l">@pageHeading</h1>
 
   @addTeamMemberPartial(app, form, loggedIn, "Add team member", false, CheckYourAnswers)
- }
+}
