@@ -80,15 +80,44 @@ class ApmConnectorIntegrationSpec extends BaseConnectorIntegrationSpec with Guic
     }
   }
 
+  "fetchAllCombinedAPICategories" should {
+    val category1 = APICategoryDisplayDetails("CATEGORY_1", "Category 1")
+    val category2 = APICategoryDisplayDetails("CATEGORY_2", "Category 2")
+
+    "return all API Category details" in new Setup {
+      stubFor(
+        get(urlEqualTo("/api-categories/combined"))
+          .willReturn(
+            aResponse()
+              .withStatus(OK)
+              .withJsonBody(Seq(category1, category2))
+          )
+      )
+
+      val result: Either[Throwable, List[APICategoryDisplayDetails]] = await(underTest.fetchAllCombinedAPICategories())
+      result match {
+        case Right(x) =>   x.size should be (2)
+                           x should contain only (category1, category2)
+        case _ => fail()
+      }
+
+    }
+  }
+
+
   "fetchCombinedApi" should {
       "retrieve an CombinedApi based on a serviceName" in new Setup {
           val serviceName = "api1"
           val displayName = "API 1"
         val expectedApi = CombinedApi(serviceName, displayName, List(CombinedApiCategory("VAT")), REST_API)
          combinedApiByServiceName(serviceName, Json.toJson(expectedApi).toString())
-         val result: CombinedApi = await(underTest.fetchCombinedApi("api1"))
-         result.serviceName shouldBe serviceName
-         result.displayName shouldBe displayName
+         val result: Either[Throwable, CombinedApi] = await(underTest.fetchCombinedApi("api1"))
+        result match {
+          case Right(x) =>  x.serviceName shouldBe serviceName
+                            x.displayName shouldBe displayName
+          case _ => fail()
+        }
+
       }
 
     "fail on Upstream5xxResponse when the call return a 500" in new Setup {
@@ -101,9 +130,12 @@ class ApmConnectorIntegrationSpec extends BaseConnectorIntegrationSpec with Guic
           )
       )
 
-      intercept[UpstreamErrorResponse] {
-        await(underTest.fetchCombinedApi("api1"))
-      }
+        val result = await(underTest.fetchCombinedApi("api1"))
+        result match {
+          case Right(_) => fail()
+          case Left(_: UpstreamErrorResponse) => succeed
+          case _ => fail()
+        }
     }
 
       "throw notfound when the api is not found" in new Setup {
@@ -116,7 +148,14 @@ class ApmConnectorIntegrationSpec extends BaseConnectorIntegrationSpec with Guic
             )
         )
 
-        intercept[UpstreamErrorResponse](await(underTest.fetchCombinedApi("unknownapi"))).statusCode shouldBe NOT_FOUND
+        val result = await(underTest.fetchCombinedApi("unknownapi"))
+        result match {
+          case Right(_) => fail()
+          case Left(e: UpstreamErrorResponse) => e.statusCode shouldBe NOT_FOUND
+          case _ => fail()
+        }
+
+
       }
   }
 

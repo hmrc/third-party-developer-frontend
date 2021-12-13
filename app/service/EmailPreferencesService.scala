@@ -19,7 +19,8 @@ package service
 import cats.data.NonEmptyList
 import connectors.{ApmConnector, ThirdPartyDeveloperConnector}
 import domain.models.applications.ApplicationId
-import domain.models.connectors.CombinedApi
+import domain.models.connectors.ApiType.REST_API
+import domain.models.connectors.{CombinedApi, CombinedApiCategory}
 import domain.models.developers.{DeveloperSession, UserId}
 import domain.models.emailpreferences.APICategoryDisplayDetails
 import domain.models.flows.{EmailPreferencesFlowV2, EmailPreferencesProducer, FlowType, NewApplicationEmailPreferencesFlowV2}
@@ -28,6 +29,7 @@ import repositories.ReactiveMongoFormatters.{formatEmailPreferencesFlow, formatN
 import uk.gov.hmrc.http.HeaderCarrier
 
 import javax.inject.{Inject, Singleton}
+import scala.concurrent.Future.successful
 import scala.concurrent.{ExecutionContext, Future}
 
 
@@ -49,20 +51,36 @@ class EmailPreferencesService @Inject()(val apmConnector: ApmConnector,
                                             (implicit hc: HeaderCarrier): Future[List[CombinedApi]] = {
     NonEmptyList.fromList(existingFlow.visibleApis.toList).fold({
       val visibleApis = apmConnector.fetchCombinedApisVisibleToUser(developerSession.developer.userId)
-      updateVisibleApis(developerSession, apmConnector.fetchCombinedApisVisibleToUser(developerSession.developer.userId))
+      .flatMap {
+        case Right(x) => successful(x)
+        case Left(_) => apmConnector.fetchApiDefinitionsVisibleToUser(developerSession.developer.userId).map(_.map(y=> CombinedApi(y.serviceName, y.name, y.categories.map(CombinedApiCategory), REST_API)))
+      }
+      updateVisibleApis(developerSession,visibleApis)
       visibleApis
     }) { x => Future.successful(x.toList) }
   }
 
-  def fetchAllAPICategoryDetails()(implicit hc: HeaderCarrier): Future[List[APICategoryDisplayDetails]] = apmConnector.fetchAllAPICategories()
+  def fetchAllAPICategoryDetails()(implicit hc: HeaderCarrier): Future[List[APICategoryDisplayDetails]] = {
+    apmConnector.fetchAllCombinedAPICategories().flatMap{
+      case Right(x) => successful(x)
+      case Left(_) => apmConnector.fetchAllAPICategories()
+    }
+  }
 
   def apiCategoryDetails(category: String)(implicit hc: HeaderCarrier): Future[Option[APICategoryDisplayDetails]] =
     fetchAllAPICategoryDetails().map(_.find(_.category == category))
 
+  private def handleGettingApiDetails(serviceName: String)(implicit hc: HeaderCarrier): Future[CombinedApi]={
+    apmConnector.fetchCombinedApi(serviceName).flatMap {
+      case Right(x) => successful(x)
+      case Left(_) => apmConnector.fetchAPIDefinition(serviceName).map(y=> CombinedApi(y.serviceName, y.name, y.categories.map(CombinedApiCategory), REST_API))
+    }
+  }
+
   def fetchAPIDetails(apiServiceNames: Set[String])(implicit hc: HeaderCarrier): Future[List[CombinedApi]] =
     Future.sequence(
       apiServiceNames
-        .map(apmConnector.fetchCombinedApi(_))
+        .map(handleGettingApiDetails(_))
         .toList)
   
   def fetchEmailPreferencesFlow(developerSession: DeveloperSession) =

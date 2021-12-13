@@ -139,14 +139,14 @@ class EmailPreferencesServiceSpec extends AsyncHmrcSpec {
       val category2 = mock[APICategoryDisplayDetails]
 
       "return all APICategoryDetails objects from connector" in new SetUp {
-        when(mockApmConnector.fetchAllAPICategories()(*)).thenReturn(Future.successful(List(category1, category2)))
+        when(mockApmConnector.fetchAllCombinedAPICategories()(*)).thenReturn(Future.successful(Right(List(category1, category2))))
 
         val result = await(underTest.fetchAllAPICategoryDetails())
 
         result.size should be(2)
         result should contain only(category1, category2)
 
-        verify(mockApmConnector).fetchAllAPICategories()(*)
+        verify(mockApmConnector).fetchAllCombinedAPICategories()(*)
       }
     }
 
@@ -158,8 +158,8 @@ class EmailPreferencesServiceSpec extends AsyncHmrcSpec {
       val apiDetails2 = mock[CombinedApi]
 
       "return details of APIs by serviceName" in new SetUp {
-        when(mockApmConnector.fetchCombinedApi(eqTo(apiServiceName1))(*)).thenReturn(Future.successful(apiDetails1))
-        when(mockApmConnector.fetchCombinedApi(eqTo(apiServiceName2))(*)).thenReturn(Future.successful(apiDetails2))
+        when(mockApmConnector.fetchCombinedApi(eqTo(apiServiceName1))(*)).thenReturn(Future.successful(Right(apiDetails1)))
+        when(mockApmConnector.fetchCombinedApi(eqTo(apiServiceName2))(*)).thenReturn(Future.successful(Right(apiDetails2)))
 
         val result = await(underTest.fetchAPIDetails(Set(apiServiceName1, apiServiceName2)))
 
@@ -182,8 +182,8 @@ class EmailPreferencesServiceSpec extends AsyncHmrcSpec {
           NewApplicationEmailPreferencesFlowV2(sessionId, EmailPreferences.noPreferences, applicationId, Set(api1, api2), Set.empty, Set.empty)
         val expectedFlowObject = existingFlowObject.copy(selectedApis = Set(api1, api2))
 
-        when(mockApmConnector.fetchCombinedApi(api1Name)).thenReturn(Future.successful(api1))
-        when(mockApmConnector.fetchCombinedApi(api2Name)).thenReturn(Future.successful(api2))
+        when(mockApmConnector.fetchCombinedApi(api1Name)).thenReturn(Future.successful(Right(api1)))
+        when(mockApmConnector.fetchCombinedApi(api2Name)).thenReturn(Future.successful(Right(api2)))
 
         when(mockFlowRepository.fetchBySessionIdAndFlowType[NewApplicationEmailPreferencesFlowV2](eqTo(sessionId), eqTo(FlowType.NEW_APPLICATION_EMAIL_PREFERENCES))(*))
           .thenReturn(Future.successful(Some(existingFlowObject)))
