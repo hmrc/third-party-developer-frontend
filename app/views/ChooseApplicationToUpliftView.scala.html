@@ -19,6 +19,7 @@
 @import domain.models.controllers.ApplicationSummary
 @import include._
 @import domain.models.controllers.Crumb
+@import uk.gov.hmrc.urls.Link
 
 @this(devMain: DevMain2)
 
@@ -26,13 +27,23 @@
 
 @pageHeading = @{ "Which application do you want production credentials for?" }
 
+@principalWording = @{appConfig.nameOfPrincipalEnvironment.toLowerCase}
+
 @needToChoose = @{upliftableApps.size > 1}
 
 @invalidAppsSignpost = {
   @if(needToChoose) {
     <p class="govuk-body">
-      You can only get production credentials for applications subscribed to APIs that access secure data and require authentication.
+      Your other sandbox applications subscribe to APIs not available in production. 
     </p>
+    <p class="govuk-body">
+      If you want production credentials for a different sandbox application, you need to:
+    </p>
+    <ul class="govuk-list govuk-list--number">
+      <li>Review the API documentation and check which APIs are available in production.</li>
+      <li>Update the API subscriptions.</li>
+      <li>Request production credentials again.</li>
+    </ul>
   }
   <p class="govuk-body">You do not need production credentials for applications that only subscribe to:</p>
   <ul class="govuk-list govuk-list--bullet">
