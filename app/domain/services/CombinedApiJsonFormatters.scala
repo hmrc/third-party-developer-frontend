@@ -14,18 +14,13 @@
  * limitations under the License.
  */
 
-package mocks.service
+package domain.services
 
-import domain.models.connectors.CombinedApi
-import org.mockito.{ArgumentMatchersSugar, MockitoSugar}
-import service.EmailPreferencesService
+import domain.models.connectors.{CombinedApi, CombinedApiCategory}
+import play.api.libs.json.{Format, Json}
 
-import scala.concurrent.Future.successful
+trait CombinedApiJsonFormatters {
 
-trait EmailPreferencesServiceMock extends MockitoSugar with ArgumentMatchersSugar {
-  val emailPreferencesServiceMock = mock[EmailPreferencesService]
-
-  def fetchAPIDetailsReturns(apis: List[CombinedApi]) = {
-    when(emailPreferencesServiceMock.fetchAPIDetails(*)(*)).thenReturn(successful(apis))
-  }
+  implicit val categoryFormat: Format[CombinedApiCategory] = Json.format[CombinedApiCategory]
+  implicit val combinedApiFormat: Format[CombinedApi] = Json.format[CombinedApi]
 }

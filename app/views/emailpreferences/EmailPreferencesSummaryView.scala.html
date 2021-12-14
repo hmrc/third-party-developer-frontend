@@ -42,12 +42,8 @@
 ) {
   @if(viewData.unsubscribed) {
     <div class="govuk-panel govuk-panel--confirmation">
-      <h1 class="govuk-panel__title" id="page-heading">
-        @pageHeading
-      </h1>
-      <div class="govuk-panel__body" id="unsubscribed-body">
-        You can change your email preferences at any time
-      </div>
+      <h1 id="page-heading" class="govuk-panel__title">@pageHeading</h1>
+      <div id="first-line" class="govuk-panel__body">You can change your email preferences at any time</div>
     </div>
   } else {
     <h1 id="page-heading" class="govuk-heading-l">@pageHeading</h1>
@@ -55,9 +51,8 @@
 
   @if(userHasEmailPreferences) {
     <p class="govuk-body" id="first-line">You will receive emails about these APIs and topics.</p>
-
     @for(taxRegimeInterest <- loggedIn.developer.emailPreferences.interests.sortBy(_.regime).zipWithIndex) {
-      <h2 class="govuk-heading-m govuk-!-margin-bottom-2" id="category-heading-@taxRegimeInterest._1.regime">@viewData.taxRegimeDisplayName(taxRegimeInterest._1.regime)</h3>
+      <h2 class="govuk-heading-m govuk-!-margin-bottom-2" id="category-heading-@taxRegimeInterest._1.regime">@viewData.taxRegimeDisplayName(taxRegimeInterest._1.regime)</h2>
 
       @if(taxRegimeInterest._1.services.isEmpty) {
         <p class="govuk-body" id="all-api-@taxRegimeInterest._1.regime">
@@ -65,7 +60,7 @@
         </p>
       } else {
         @for(selectedAPI <- taxRegimeInterest._1.services.toList.sorted) {
-          <p class="govuk-body" id="@selectedAPI">@viewData.apiDisplayName(selectedAPI)</p>
+          <p class="govuk-body" id="@selectedAPI">@viewData.apiDisplayName(selectedAPI) </p>
           <br />
         }
       }
@@ -77,12 +72,12 @@
 
     <hr class="govuk-section-break govuk-section-break--m govuk-section-break--visible" />
 
-    <h2 class="govuk-heading-m govuk-!-margin-bottom-2" id="topics-heading">Topics</h3>
+    <h2 class="govuk-heading-m govuk-!-margin-bottom-2" id="topics-heading">Topics</h2>
 
     @for(topic <- loggedIn.developer.emailPreferences.topics.toList.sortBy(_.displayOrder)) {
       <p class="govuk-body govuk-!-margin-bottom-1" id="@topic.value">@topic.displayName</p>
+      <br />
     }
-    <br />
 
     <p class="govuk-body">
       <a class="govuk-link govuk-link--no-visited-state" id="change-topics-link" href="@controllers.profile.routes.EmailPreferences.flowSelectTopicsPage">
@@ -91,22 +86,20 @@
     </p>
 
     <hr class="govuk-section-break govuk-section-break--m govuk-section-break--visible" />
-
   } else {
     @if(!viewData.unsubscribed) {
       <p class="govuk-body" id="first-line">You have selected no email preferences.</p>
     }
     @EmailPrefsBulletInfoView()
     <p class="govuk-body">
-      <a class="govuk-link govuk-link--no-visited-state" id="setup-emailpreferences-link" href="@controllers.profile.routes.EmailPreferences.flowStartPage()">
-        Set up email preferences
-      </a>
+      <a class="govuk-link govuk-link--no-visited-state" id="setup-emailpreferences-link" href="@controllers.profile.routes.EmailPreferences.flowStartPage()">Set up email preferences</a>
     </p>
   }
 
   <p class="govuk-body">
-    Check the 
-    <a id="status-page-link" href="https://api-platform-status.production.tax.service.gov.uk/" target="_blank">service availability page for information about live incidents (opens in new tab)</a>.
+    Check the @{
+      <a class="govuk-link" id="status-page-link" href="https://api-platform-status.production.tax.service.gov.uk/" target="_blank">service availability page for information about live incidents (opens in new tab)</a>.
+    }.
   </p>
 
   @if(userHasEmailPreferences) {
@@ -118,8 +111,6 @@
   }
 
   <p class="govuk-body">
-    <a class="govuk-link govuk-link--no-visited-state" id="view-all-applications-link" href="@routes.ManageApplications.manageApps">
-      View all applications
-    </a>
+    <a class="govuk-link govuk-link--no-visited-state" id="view-all-applications-link" href="@routes.ManageApplications.manageApps">View all applications</a>
   </p>
 }

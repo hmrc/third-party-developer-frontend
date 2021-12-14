@@ -16,7 +16,7 @@
 
 @import domain.models.developers.DeveloperSession
 @import include._
-@import domain.models.connectors.{ApiDefinition, ExtendedApiDefinition}
+@import domain.models.connectors.{ApiDefinition, CombinedApi}
 @import domain.models.views.BackButtonWithJavaScript
 @import config.ApplicationConfig
 @import domain.models.applications.ApplicationId
@@ -24,7 +24,7 @@
 
 @this(devMain: DevMain2)
 
-@(form: Form[SelectApisFromSubscriptionsForm], apis: List[ExtendedApiDefinition], applicationId: ApplicationId, selectedApis: Set[String])(implicit messages: Messages, loggedIn: DeveloperSession, request: play.api.mvc.Request[Any], applicationConfig: ApplicationConfig)
+@(form: Form[SelectApisFromSubscriptionsForm], apis: List[CombinedApi], applicationId: ApplicationId, selectedApis: Set[String])(implicit messages: Messages, loggedIn: DeveloperSession, request: play.api.mvc.Request[Any], applicationConfig: ApplicationConfig)
 
 @pageHeading = @{
   "Do you want to receive emails about the APIs you have subscribed to?"
@@ -54,7 +54,7 @@
             <div class="govuk-checkboxes__item">
               <input class="govuk-checkboxes__input" id="@api.serviceName" type="checkbox" name="selectedApi[]" value="@api.serviceName"
               @if(selectedApis.contains(api.serviceName)) {checked} />
-              <label class="govuk-label govuk-checkboxes__label" for="@api.serviceName">@api.name</label>
+              <label class="govuk-label govuk-checkboxes__label" for="@api.serviceName">@api.displayName</label>
             </div>
           }
           <input type="hidden" class="govuk-visually-hidden" value="@applicationId.value" name="applicationId" id="applicationId"/>

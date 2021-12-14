@@ -19,10 +19,9 @@ package controllers.profile
 import config.{ApplicationConfig, ErrorHandler}
 import controllers._
 import domain.models.applications.ApplicationId
-import domain.models.connectors.ExtendedApiDefinition
-import domain.models.emailpreferences.APICategoryDetails
-import domain.models.flows.{FlowType, NewApplicationEmailPreferencesFlow}
-import javax.inject.Inject
+import domain.models.connectors.CombinedApi
+import domain.models.emailpreferences.APICategoryDisplayDetails
+import domain.models.flows.{FlowType, NewApplicationEmailPreferencesFlowV2}
 import play.api.data.Form
 import play.api.libs.crypto.CookieSigner
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents, Result}
@@ -31,8 +30,10 @@ import service.{EmailPreferencesService, SessionService}
 import views.emailpreferences.EmailPreferencesSummaryViewData
 import views.html.emailpreferences._
 
+import javax.inject.Inject
 import scala.concurrent.Future.successful
 import scala.concurrent.{ExecutionContext, Future}
+import domain.models.connectors.ApiType
 
 class EmailPreferences @Inject()(val sessionService: SessionService,
                                  mcc: MessagesControllerComponents,
@@ -61,7 +62,7 @@ class EmailPreferences @Inject()(val sessionService: SessionService,
   private def flowShowSelectCategoriesView(form: Form[TaxRegimeEmailPreferencesForm])(implicit request: UserRequest[AnyContent]) = {
     for {
       flow <- emailPreferencesService.fetchEmailPreferencesFlow(request.developerSession)
-      visibleCategories <- emailPreferencesService.fetchCategoriesVisibleToUser(request.developerSession)
+      visibleCategories <- emailPreferencesService.fetchCategoriesVisibleToUser(request.developerSession, flow)
       selectedCategories = if (form.hasErrors) Set.empty[String] else flow.selectedCategories
     } yield flowSelectCategoriesView(form, visibleCategories.toList, selectedCategories)
   }
@@ -97,7 +98,7 @@ class EmailPreferences @Inject()(val sessionService: SessionService,
     for {
       categoryDetails <- emailPreferencesService.apiCategoryDetails(category)
       flow <- emailPreferencesService.fetchEmailPreferencesFlow(request.developerSession)
-    } yield flowSelectApiView(form, categoryDetails.getOrElse(APICategoryDetails(category, category)), flow.visibleApisByCategory(category), flow.selectedApisByCategory(category))
+    } yield flowSelectApiView(form, categoryDetails.getOrElse(APICategoryDisplayDetails(category, category)), flow.visibleApisByCategory(category), flow.selectedApisByCategory(category))
   }
 
   def flowSelectApisAction: Action[AnyContent] = loggedInAction { implicit request =>
@@ -159,7 +160,7 @@ class EmailPreferences @Inject()(val sessionService: SessionService,
             flow <- emailPreferencesService.fetchEmailPreferencesFlow(request.developerSession)
             updateResult <- emailPreferencesService
               .updateEmailPreferences(request.userId, flow.copy(selectedTopics = selectedTopicsForm.topic.toSet))
-            _ = if (updateResult) emailPreferencesService.deleteFlow(request.sessionId, FlowType.EMAIL_PREFERENCES)
+            _ = if (updateResult) emailPreferencesService.deleteFlow(request.sessionId, FlowType.EMAIL_PREFERENCES_V2)
           } yield if (updateResult) Redirect(controllers.profile.routes.EmailPreferences.emailPreferencesSummaryPage())
           else Redirect(controllers.profile.routes.EmailPreferences.flowSelectTopicsPage())
       }
@@ -192,14 +193,21 @@ class EmailPreferences @Inject()(val sessionService: SessionService,
   }
 
   def toDataObject(emailPreferences: domain.models.emailpreferences.EmailPreferences,
-                   filteredAPIs: Seq[ExtendedApiDefinition],
-                   categories: Seq[APICategoryDetails],
-                   unsubscribed: Boolean): EmailPreferencesSummaryViewData =
+                   filteredAPIs: Seq[CombinedApi],
+                   categories: Seq[APICategoryDisplayDetails],
+                   unsubscribed: Boolean): EmailPreferencesSummaryViewData ={
+
+     def decorateXmlApiDisplayName(api: CombinedApi): String ={
+       if(api.apiType == ApiType.XML_API){ api.displayName + " - XML API"}
+       else api.displayName
+     }               
+
     EmailPreferencesSummaryViewData(
       createCategoryMap(categories, emailPreferences.interests.map(_.regime)),
-      filteredAPIs.map(a => (a.serviceName, a.name)).toMap, unsubscribed)
+      filteredAPIs.map(a => (a.serviceName,decorateXmlApiDisplayName(a))).toMap, unsubscribed)
+  }
 
-  def createCategoryMap(apisCategories: Seq[APICategoryDetails], usersCategories: Seq[String]): Map[String, String] = {
+  def createCategoryMap(apisCategories: Seq[APICategoryDisplayDetails], usersCategories: Seq[String]): Map[String, String] = {
     apisCategories
       .filter(category => usersCategories.contains(category.category))
       .map(c => (c.category, c.name))
@@ -211,8 +219,8 @@ class EmailPreferences @Inject()(val sessionService: SessionService,
    * have within their Email Preferences will not be shown.
    */
   def selectApisFromSubscriptionsPage(applicationId: ApplicationId): Action[AnyContent] = loggedInAction { implicit request =>
-    def missingAPIsFromFlash: Future[Seq[ExtendedApiDefinition]] = {
-      request.flash.data.get("missingSubscriptions").fold[Future[Seq[ExtendedApiDefinition]]](
+    def missingAPIsFromFlash: Future[Seq[CombinedApi]] = {
+      request.flash.data.get("missingSubscriptions").fold[Future[Seq[CombinedApi]]](
         successful(Seq.empty)
       )(missingSubscriptionsCSV =>
         emailPreferencesService.fetchAPIDetails(missingSubscriptionsCSV.split(",").toSet)
@@ -233,7 +241,7 @@ class EmailPreferences @Inject()(val sessionService: SessionService,
   }
 
   def renderSelectApisFromSubscriptionsPage(form: Form[SelectApisFromSubscriptionsForm] = SelectApisFromSubscriptionsForm.form,
-                                            flow: NewApplicationEmailPreferencesFlow)(implicit request: UserRequest[AnyContent]): Html =
+                                            flow: NewApplicationEmailPreferencesFlowV2)(implicit request: UserRequest[AnyContent]): Html =
     selectApisFromSubscriptionsView(form, flow.missingSubscriptions.toList.sortBy(_.serviceName), flow.applicationId, flow.selectedApis.map(_.serviceName))
 
   def selectApisFromSubscriptionsAction(applicationId: ApplicationId): Action[AnyContent] = loggedInAction { implicit request =>
@@ -263,7 +271,7 @@ class EmailPreferences @Inject()(val sessionService: SessionService,
   }
 
   private def renderSelectTopicsFromSubscriptionsView(form: Form[SelectTopicsFromSubscriptionsForm] = SelectTopicsFromSubscriptionsForm.form,
-                                                      flow: NewApplicationEmailPreferencesFlow)(implicit request: UserRequest[AnyContent]): Html =
+                                                      flow: NewApplicationEmailPreferencesFlowV2)(implicit request: UserRequest[AnyContent]): Html =
     selectTopicsFromSubscriptionsView.apply(form, flow.selectedTopics, flow.applicationId)
 
   def selectTopicsFromSubscriptionsAction(applicationId: ApplicationId): Action[AnyContent] = loggedInAction { implicit request =>

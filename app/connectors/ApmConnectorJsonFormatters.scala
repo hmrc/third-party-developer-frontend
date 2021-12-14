@@ -16,10 +16,10 @@
 
 package connectors
 
-import domain.services.{ApiDefinitionsJsonFormatters, ApplicationsJsonFormatters}
-import domain.services.SubscriptionsJsonFormatters
+import domain.services.{ApiDefinitionsJsonFormatters, ApplicationsJsonFormatters, CombinedApiJsonFormatters, SubscriptionsJsonFormatters}
 
-trait ApmConnectorJsonFormatters extends ApiDefinitionsJsonFormatters with ApplicationsJsonFormatters with SubscriptionsJsonFormatters {
+trait ApmConnectorJsonFormatters extends ApiDefinitionsJsonFormatters with ApplicationsJsonFormatters
+  with CombinedApiJsonFormatters with  SubscriptionsJsonFormatters {
 
   import domain.models.subscriptions._
   import play.api.libs.json._

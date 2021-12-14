@@ -18,14 +18,15 @@
 @import domain.models.developers.DeveloperSession
 @import include._
 @import domain.models.controllers.Crumb
-@import domain.models.connectors.ApiDefinition
-@import domain.models.emailpreferences.APICategoryDetails
+@import domain.models.connectors.CombinedApi
+@import domain.models.emailpreferences.APICategoryDisplayDetails
 @import domain.models.views.BackButtonWithJavaScript
+@import domain.models.connectors.ApiType.XML_API
 @import views.html.include.DevMain2
 
 @this(devMain: DevMain2)
 
-@(form: Form[SelectedApisEmailPreferencesForm], currentCategory: APICategoryDetails, apis: List[ApiDefinition], selectedApis: Set[String])(implicit messages: Messages, loggedIn: DeveloperSession, request: play.api.mvc.Request[Any], appConfig: ApplicationConfig)
+@(form: Form[SelectedApisEmailPreferencesForm], currentCategory: APICategoryDisplayDetails, apis: List[CombinedApi], selectedApis: Set[String])(implicit messages: Messages, loggedIn: DeveloperSession, request: play.api.mvc.Request[Any], appConfig: ApplicationConfig)
 
 @pageHeading = @{
   s"Which ${currentCategory.name} APIs are you interested in?"
@@ -49,18 +50,17 @@
 
         <p id="select-all-description" class="govuk-hint">Select all that apply.</p>
 
-        @fieldError2(form.errors, "apiRadio")
         @if(form.errors.map(_.message).contains(FormKeys.selectedApisNonSelectedGlobalKey)) {
-            <span id="specific-api-error" class="govuk-error-message">
-                <span class="govuk-visually-hidden">Error:</span> Select at least 1 specific API
-            </span>
+          <span id="specific-api-error" class="govuk-error-message">
+            <span class="govuk-visually-hidden">Error:</span> Select at least 1 specific API
+          </span>
         }
-
 
         <div class="govuk-radios">
           <div class="govuk-radios__item">
             <input class="govuk-radios__input" id="all-apis" type="radio" name="apiRadio" value="ALL_APIS" @if(selectedApis.contains("ALL_APIS")) {checked}/>
-            <label class="govuk-label govuk-radios__label" for="all-apis">All @currentCategory.name APIs
+            <label class="govuk-label govuk-radios__label" for="all-apis">
+              All @currentCategory.name APIs
               <span id="all-apis-description" class="govuk-hint">
                 You will be subscribed automatically to emails about new @currentCategory.name APIs
               </span>
@@ -70,27 +70,30 @@
           <a name="error.selectedapis.nonselected.field"></a>
 
           <div class="govuk-radios__item">
-            <input class="govuk-radios__input" id="individual-apis" type="radio" name="apiRadio" value="SOME_APIS"  @if(!selectedApis.contains("ALL_APIS") && !selectedApis.isEmpty) {checked}/>
-            <label class="govuk-label govuk-radios__label" for="individual-apis">Specific @currentCategory.name APIs
-              <span id="individual-api-description" class="govuk-hint">
-                Select specific APIs. You will not get emails about new Income Tax APIs
-              </span>
-            </label>
+          <input class="govuk-radios__input" id="individual-apis" type="radio" name="apiRadio" value="SOME_APIS" @if(!selectedApis.contains("ALL_APIS") &&  !selectedApis.isEmpty) {checked}/>
+          <label class="govuk-label govuk-radios__label" for="individual-apis">
+            Specific @currentCategory.name APIs
+            <span id="individual-api-description" class="govuk-hint">
+              Select specific APIs. You will not get emails about new Income Tax APIs
+            </span>
+          </label>
 
-            <div class="govuk-inset-text govuk-!-margin-top-3" id="apis-checklist">
-              @for(api <- apis) {
-                <div class="govuk-checkboxes__item">
-                  <input class="govuk-checkboxes__input" id="@api.serviceName" type="checkbox" name="selectedApi[]" value="@api.serviceName"
-                  @if(selectedApis.contains(api.serviceName)) {checked}/>
-                  <label class="govuk-label govuk-checkboxes__label" for="@api.serviceName">@api.name</label>
-                </div>
-              }
-            </div>
+          <div class="govuk-inset-text govuk-!-margin-top-3" id="apis-checklist">
+            @for(api <- apis) {
+              <div class="govuk-checkboxes__item">
+                <input class="govuk-checkboxes__input" id="@api.serviceName" type="checkbox" name="selectedApi[]" value="@api.serviceName"
+                @if(selectedApis.contains(api.serviceName)) {checked}/>
+                <label class="govuk-label govuk-checkboxes__label" for="@api.serviceName">@api.displayName @if(api.apiType == XML_API){-XML API}</label>
+              </div>
+            }
           </div>
         </div>
       </fieldset>
-    </div>
-    <input id="current-category" type="hidden" name="currentCategory" value="@currentCategory.category" />
+    <div>
+
+    <br/>
+
+    <input class="govuk-visually-hidden" id="current-category" type="hidden" name="currentCategory" value="@currentCategory.category" />
     <button id="submit" class="govuk-button" type="submit">Continue</button>
   }
 }
