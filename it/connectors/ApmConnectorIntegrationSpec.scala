@@ -1,17 +1,16 @@
 package connectors
 
 import com.github.tomakehurst.wiremock.client.WireMock._
-import domain.models.connectors.ApiDefinition
+import domain.models.connectors.{ApiDefinition, CombinedApi, CombinedApiCategory, ExtendedApiDefinition}
 import org.scalatestplus.play.guice.GuiceOneAppPerSuite
 import play.api.http.Status._
 import play.api.inject.bind
 import play.api.inject.guice.GuiceApplicationBuilder
 import play.api.{Application, Configuration, Mode}
 import uk.gov.hmrc.http.HeaderCarrier
-import domain.models.connectors.ExtendedApiDefinition
 import uk.gov.hmrc.http.UpstreamErrorResponse
 import domain.models.developers.UserId
-import domain.models.emailpreferences.APICategoryDetails
+import domain.models.emailpreferences.APICategoryDisplayDetails
 import utils.WireMockExtensions
 import domain.models.applications.ApplicationId
 import domain.models.apidefinitions.ApiIdentifier
@@ -19,8 +18,11 @@ import domain.models.apidefinitions.ApiContext
 import domain.models.apidefinitions.ApiVersion
 import domain.ApplicationUpdateSuccessful
 import domain.ApplicationNotFound
+import domain.models.connectors.ApiType.REST_API
+import domain.services.CombinedApiJsonFormatters
+import play.api.libs.json.Json
 
-class ApmConnectorIntegrationSpec extends BaseConnectorIntegrationSpec with GuiceOneAppPerSuite with WireMockExtensions {
+class ApmConnectorIntegrationSpec extends BaseConnectorIntegrationSpec with GuiceOneAppPerSuite with WireMockExtensions with CombinedApiJsonFormatters {
   private val stubConfig = Configuration(
     "microservice.services.api-platform-microservice.port" -> stubPort
   )
@@ -36,9 +38,9 @@ class ApmConnectorIntegrationSpec extends BaseConnectorIntegrationSpec with Guic
     implicit val hc = HeaderCarrier()
     val underTest = app.injector.instanceOf[ApmConnector]
 
-    def extendedAPIDefinitionByServiceName(serviceName: String, body: String) = {
+    def combinedApiByServiceName(serviceName: String, body: String) = {
         stubFor(
-            get(urlEqualTo(s"/combined-api-definitions/$serviceName"))
+            get(urlEqualTo(s"/combined-apis/$serviceName"))
         .willReturn(
             aResponse()
             .withStatus(OK)
@@ -58,8 +60,8 @@ class ApmConnectorIntegrationSpec extends BaseConnectorIntegrationSpec with Guic
   }
 
   "fetchAllAPICategories" should {
-    val category1 = APICategoryDetails("CATEGORY_1", "Category 1")
-    val category2 = APICategoryDetails("CATEGORY_2", "Category 2")
+    val category1 = APICategoryDisplayDetails("CATEGORY_1", "Category 1")
+    val category2 = APICategoryDisplayDetails("CATEGORY_2", "Category 2")
 
     "return all API Category details" in new Setup {
       stubFor(
@@ -70,42 +72,75 @@ class ApmConnectorIntegrationSpec extends BaseConnectorIntegrationSpec with Guic
               .withJsonBody(Seq(category1, category2))
           )
       )
-    
+
       val result = await(underTest.fetchAllAPICategories())
 
       result.size should be (2)
       result should contain only (category1, category2)
     }
   }
-  
-  "fetchAPIDefinition" should {
-      "retrieve an ApiDefinition based on a serviceName" in new Setup {
+
+  "fetchAllCombinedAPICategories" should {
+    val category1 = APICategoryDisplayDetails("CATEGORY_1", "Category 1")
+    val category2 = APICategoryDisplayDetails("CATEGORY_2", "Category 2")
+
+    "return all API Category details" in new Setup {
+      stubFor(
+        get(urlEqualTo("/api-categories/combined"))
+          .willReturn(
+            aResponse()
+              .withStatus(OK)
+              .withJsonBody(Seq(category1, category2))
+          )
+      )
+
+      val result: Either[Throwable, List[APICategoryDisplayDetails]] = await(underTest.fetchAllCombinedAPICategories())
+      result match {
+        case Right(x) =>   x.size should be (2)
+                           x should contain only (category1, category2)
+        case _ => fail()
+      }
+
+    }
+  }
+
+
+  "fetchCombinedApi" should {
+      "retrieve an CombinedApi based on a serviceName" in new Setup {
           val serviceName = "api1"
-          val name = "API 1"
-         extendedAPIDefinitionByServiceName(serviceName, s"""{ "serviceName": "$serviceName", "name": "$name", "description": "", "context": "context", "categories": [ "VAT" ] }""")
-         val result: ExtendedApiDefinition = await(underTest.fetchAPIDefinition("api1"))
-         result.serviceName shouldBe serviceName
-         result.name shouldBe name
+          val displayName = "API 1"
+        val expectedApi = CombinedApi(serviceName, displayName, List(CombinedApiCategory("VAT")), REST_API)
+         combinedApiByServiceName(serviceName, Json.toJson(expectedApi).toString())
+         val result: Either[Throwable, CombinedApi] = await(underTest.fetchCombinedApi("api1"))
+        result match {
+          case Right(x) =>  x.serviceName shouldBe serviceName
+                            x.displayName shouldBe displayName
+          case _ => fail()
+        }
+
       }
 
     "fail on Upstream5xxResponse when the call return a 500" in new Setup {
 
       stubFor(
-        get(urlEqualTo("/combined-api-definitions/api1"))
+        get(urlEqualTo("/combined-apis/api1"))
           .willReturn(
             aResponse()
               .withStatus(INTERNAL_SERVER_ERROR)
           )
       )
 
-      intercept[UpstreamErrorResponse] {
-        await(underTest.fetchAPIDefinition("api1"))
-      }
+        val result = await(underTest.fetchCombinedApi("api1"))
+        result match {
+          case Right(_) => fail()
+          case Left(_: UpstreamErrorResponse) => succeed
+          case _ => fail()
+        }
     }
 
       "throw notfound when the api is not found" in new Setup {
         stubFor(
-          post(urlEqualTo("/combined-api-definitions/unknownapi"))
+          get(urlEqualTo("/combined-apis/unknownapi"))
             .willReturn(
               aResponse()
                 .withStatus(NOT_FOUND)
@@ -113,7 +148,14 @@ class ApmConnectorIntegrationSpec extends BaseConnectorIntegrationSpec with Guic
             )
         )
 
-        intercept[UpstreamErrorResponse](await(underTest.fetchAPIDefinition("unknownapi"))).statusCode shouldBe NOT_FOUND
+        val result = await(underTest.fetchCombinedApi("unknownapi"))
+        result match {
+          case Right(_) => fail()
+          case Left(e: UpstreamErrorResponse) => e.statusCode shouldBe NOT_FOUND
+          case _ => fail()
+        }
+
+
       }
   }
 
@@ -160,7 +202,7 @@ class ApmConnectorIntegrationSpec extends BaseConnectorIntegrationSpec with Guic
             aResponse()
               .withStatus(OK)
           )
-      )      
+      )
 
       val result = await(underTest.subscribeToApi(applicationId, apiIdentifier))
 

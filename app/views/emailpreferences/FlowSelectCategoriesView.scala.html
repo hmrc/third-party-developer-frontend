@@ -16,14 +16,14 @@
 
 @import config.ApplicationConfig
 @import domain.models.developers.DeveloperSession
-@import domain.models.emailpreferences.APICategoryDetails
+@import domain.models.emailpreferences.APICategoryDisplayDetails
 @import include._
 @import domain.models.views.BackButtonWithJavaScript
-@import domain.models.flows.EmailPreferencesFlow
+@import domain.models.flows.EmailPreferencesFlowV2
 
 @this(devMain: DevMain)
 
-@(form: Form[TaxRegimeEmailPreferencesForm], categories: List[APICategoryDetails], selectedCategories: Set[String])(implicit messages: Messages, loggedIn: DeveloperSession, request: play.api.mvc.Request[Any], appConfig: ApplicationConfig)
+@(form: Form[TaxRegimeEmailPreferencesForm], categories: List[APICategoryDisplayDetails], selectedCategories: Set[String])(implicit messages: Messages, loggedIn: DeveloperSession, request: play.api.mvc.Request[Any], appConfig: ApplicationConfig)
 
     @pageHeading = @{
         "Which API categories are you interested in?"
