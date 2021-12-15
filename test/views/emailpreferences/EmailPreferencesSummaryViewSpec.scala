@@ -121,7 +121,7 @@ class EmailPreferencesSummaryViewSpec extends CommonViewSpec with WithCSRFAddTok
 
   def checkUnsubscribedPageElements(document: Document): Unit = {
     document.getElementById("page-heading").text shouldBe "You are unsubscribed"
-    document.getElementById("unsubscribed-body").text shouldBe "You can change your email preferences at any time"
+    document.getElementById("first-line").text shouldBe "You can change your email preferences at any time"
     checkLink(document, "setup-emailpreferences-link", "Set up email preferences", "/developer/profile/email-preferences/start")
     document.select("a#unsubscribe-link").isEmpty shouldBe true
   }
