@@ -17,61 +17,57 @@
 @import include._
 @import domain.models.controllers.Crumb
 @import domain.models.developers.DeveloperSession
+@import views.html.include.DevMain2
 
-@this(devMain: DevMain, leftHandNav: LeftHandNav)
+@this(devMain: DevMain2, leftHandNav: LeftHandNav)
 
 @()(implicit request: play.api.mvc.Request[Any], loggedIn: DeveloperSession, appConfig: config.ApplicationConfig, messagesProvider: MessagesProvider, navSection: String = "manage-profile")
 
 @devMain(
-    title = "Manage profile",
-    userFullName = loggedIn.loggedInName,
-    breadcrumbs = Seq(
-        Crumb("Manage profile"),
-        Crumb.viewAllApplications,
-        Crumb.home
-    ),
-    leftNav = Some(leftHandNav(None, Option(navSection))),
-    developerSession = Some(loggedIn)
+  title = "Manage profile",
+  userFullName = loggedIn.loggedInName,
+  breadcrumbs = Seq(
+    Crumb("Manage profile"),
+    Crumb.viewAllApplications,
+    Crumb.home
+  ),
+  leftNav = Some(leftHandNav(None, Option(navSection))),
+  developerSession = Some(loggedIn)
 ) {
 
-    <header>
-        <h1 class="heading-xlarge">Manage profile</h1>
-    </header>
+  <h1 class="govuk-heading-l">Manage profile</h1>
 
-    <table>
-        <colgroup>
-            <col width="40%">
-            <col width="60%">
-        </colgroup>
-        <thead>
-        <tr>
-            <th>Profile details</th>
-            <td class="numeric">
-                <a id="change" href="@controllers.profile.routes.Profile.changeProfile">Change <span class="visually-hidden">profile details</span></a>
-            </td>
-        </tr>
-        </thead>
-        <tbody>
-        <tr>
-            <th>Name</th>
-            <td id="name">@{loggedIn.displayedName}</td>
-        </tr>
-        <tr>
-            <th>Email address</th>
-            <td id="emailAddress">@{loggedIn.email}</td>
-        </tr>
-        <tr>
-            <th>Organisation</th>
-            <td id="organisation">@(loggedIn.developer.organisation.getOrElse("None"))</td>
-        </tr>
-        </tbody>
-    </table>
+  <table class="govuk-table">
+    <caption class="govuk-visually-hidden">Manage profile table</caption>
+    <thead class="govuk-table__head">
+      <tr class="govuk-table__row">
+        <th scope="col" class="govuk-table__header govuk-!-width-one-third">Profile details</th>
+        <th scope="col" class="govuk-table__header govuk-!-width-three-quarters">
+          <a class="govuk-link govuk-link--no-visited-state govuk-!-font-weight-regular" style="float:right;" id="change" href="@controllers.profile.routes.Profile.changeProfile">Change <span class="govuk-visually-hidden">profile details</span></a>
+        </th>
+      </tr>
+    </thead>
+    <tbody class="govuk-table__body">
+      <tr class="govuk-table__row">
+        <th scope="row" class="govuk-table__header">Name</th>
+        <td class="govuk-table__cell" id="name">@{loggedIn.displayedName}</td>
+      </tr>
+      <tr class="govuk-table__row">
+        <th scope="row" class="govuk-table__header">Email address</th>
+        <td class="govuk-table__cell" id="emailAddress">@{loggedIn.email}</td>
+      </tr>
+      <tr class="govuk-table__row">
+        <th scope="row" class="govuk-table__header">Organisation</th>
+        <td class="govuk-table__cell" id="organisation">@(loggedIn.developer.organisation.getOrElse("None"))</td>
+      </tr>
+    </tbody>
+  </table>
 
-    <div class="form-field-group">
-        <h2 class="heading-large">Delete account</h2>
-        <p>You can ask us to delete your account and we will respond within 2 working days.</p>
-        <p>
-            <a href="@controllers.profile.routes.Profile.requestDeletion" id="account-deletion">Request account deletion</a>
-        </p>
-    </div>
+  <h2 class="govuk-heading-m">Delete account</h2>
+  <p class="govuk-body">
+    You can ask us to delete your account and we will respond within 2 working days.
+  </p>
+  <p class="govuk-body">
+    <a class="govuk-link govuk-link--no-visited-state" href="@controllers.profile.routes.Profile.requestDeletion" id="account-deletion">Request account deletion</a>
+  </p>
 }

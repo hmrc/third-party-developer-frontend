@@ -17,60 +17,57 @@
 @import include._
 @import domain.models.controllers.Crumb
 @import domain.models.developers.DeveloperSession
+@import views.html.include.DevMain2
 
-@this(devMain: DevMain, leftHandNav: LeftHandNav)
+@this(devMain: DevMain2, leftHandNav: LeftHandNav)
 
 @(form: Form[controllers.ProfileForm])(implicit request: play.api.mvc.Request[Any], loggedIn: DeveloperSession, appConfig: config.ApplicationConfig, messagesProvider: MessagesProvider, navSection: String = "manage-profile")
 @titleError = { @if(form.errors.nonEmpty) {Error: } else {}}
 
 @devMain(
-    title = titleError + "Change profile details",
-    userFullName = loggedIn.loggedInName,
-    breadcrumbs = Seq(
-        Crumb("Manage profile"),
-        Crumb.home
-    ),
-    leftNav = Some(leftHandNav(None, Option(navSection))),
-    developerSession = Some(loggedIn)
+  title = titleError + "Change profile details",
+  userFullName = loggedIn.loggedInName,
+  breadcrumbs = Seq(
+    Crumb("Manage profile"),
+    Crumb.home
+  ),
+  leftNav = Some(leftHandNav(None, Option(navSection))),
+  developerSession = Some(loggedIn)
 ) {
 
-    @errorSummary(form)
+  @errorSummary2(form)
 
-    <header>
-        <h1 class="heading-xlarge">Change profile details</h1>
-    </header>
+  <h1 class="govuk-heading-l">Change profile details</h1>
 
-    @helper.form(action = controllers.profile.routes.Profile.updateProfile) {
-        @helper.CSRF.formField
-        <div class="form-group @if(form.errors("firstname").nonEmpty) {form-group-error form-field--error}">
-            <label class="form-label-bold" for="firstname" id="firstname-label">First name</label>
-            @fieldError(form.errors, "firstname")
-            <input type="text"
-                   id="firstname"
-                   name="firstname"
-                   aria-labelledby="firstname-label"
-                   value="@form.data.getOrElse("firstname", "")" class="form-control-2-3 input--medium @if(form.errors("firstname").nonEmpty) {error-field}"/>
-        </div>
-        <div class="form-group @if(form.errors("lastname").nonEmpty) {form-group-error form-field--error}">
-            <label class="form-label-bold" for="lastname" id="lastname-label">Last name</label>
-            @fieldError(form.errors, "lastname")
-            <input type="text"
-                   id="lastname"
-                   name="lastname"
-                   aria-labelledby="lastname-label"
-                   value="@form.data.getOrElse("lastname", "")" class="form-control-2-3 input--medium @if(form.errors("lastname").nonEmpty) {error-field}"/>
-        </div>
-        <div class="form-group @if(form.errors("organisation").nonEmpty) {form-group-error form-field--error}">
-            <label class="form-label-bold" for="organisation" id="organisation-label">Organisation (optional)</label>
-            @fieldError(form.errors, "organisation")
-            <input type="text"
-                   id="organisation"
-                   name="organisation"
-                   aria-labelledby="organisation-label"
-                   value="@form.data.getOrElse("organisation", "")" class="form-control-2-3 input--medium @if(form.errors("organisation").nonEmpty) {error-field}"/>
-        </div>
-        <div class="form-group">
-            <button id="submit" class="button" type="submit">Save changes</button>
-        </div>
-    }
+  @helper.form(action = controllers.profile.routes.Profile.updateProfile) {
+    @helper.CSRF.formField
+    <div class="govuk-form-group @if(form.errors("firstname").nonEmpty) {govuk-form-group--error}">
+        <label class="govuk-label govuk-!-font-weight-bold" for="firstname" id="firstname-label">First name</label>
+        @fieldError2(form.errors, "firstname")
+        <input type="text"
+                id="firstname"
+                name="firstname"
+                aria-labelledby="firstname-label"
+                value="@form.data.getOrElse("firstname", "")" class="govuk-input @if(form.errors("firstname").nonEmpty) {govuk-input--error}"/>
+    </div>
+    <div class="govuk-form-group @if(form.errors("lastname").nonEmpty) {govuk-form-group--error}">
+        <label class="govuk-label govuk-!-font-weight-bold" for="lastname" id="lastname-label">Last name</label>
+        @fieldError2(form.errors, "lastname")
+        <input type="text"
+                id="lastname"
+                name="lastname"
+                aria-labelledby="lastname-label"
+                value="@form.data.getOrElse("lastname", "")" class="govuk-input @if(form.errors("lastname").nonEmpty) {govuk-input--error}"/>
+    </div>
+    <div class="govuk-form-group @if(form.errors("organisation").nonEmpty) {govuk-form-group--error}">
+        <label class="govuk-label govuk-!-font-weight-bold" for="organisation" id="organisation-label">Organisation (optional)</label>
+        @fieldError2(form.errors, "organisation")
+        <input type="text"
+                id="organisation"
+                name="organisation"
+                aria-labelledby="organisation-label"
+                value="@form.data.getOrElse("organisation", "")" class="govuk-input @if(form.errors("organisation").nonEmpty) {govuk-input--error}"/>
+    </div>
+    <button id="submit" class="govuk-button" type="submit">Save changes</button>
+  }
 }

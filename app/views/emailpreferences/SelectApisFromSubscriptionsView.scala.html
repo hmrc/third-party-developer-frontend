@@ -20,54 +20,52 @@
 @import domain.models.views.BackButtonWithJavaScript
 @import config.ApplicationConfig
 @import domain.models.applications.ApplicationId
+@import views.html.include.DevMain2
 
-@this(devMain: DevMain)
+@this(devMain: DevMain2)
 
 @(form: Form[SelectApisFromSubscriptionsForm], apis: List[CombinedApi], applicationId: ApplicationId, selectedApis: Set[String])(implicit messages: Messages, loggedIn: DeveloperSession, request: play.api.mvc.Request[Any], applicationConfig: ApplicationConfig)
 
 @pageHeading = @{
-    "Do you want to receive emails about the APIs you have subscribed to?"
+  "Do you want to receive emails about the APIs you have subscribed to?"
 }
 
 @devMain(
-    title = pageHeading,
-    userFullName = loggedIn.loggedInName,
-    back = BackButtonWithJavaScript,
-    developerSession = Some(loggedIn)
+  title = pageHeading,
+  userFullName = loggedIn.loggedInName,
+  back = BackButtonWithJavaScript,
+  developerSession = Some(loggedIn)
 ) {
-    @errorSummary(form)
-    <fieldset>
-
-        <legend>
-            <h1 id="pageHeading" class="govuk-fieldset-heading">@pageHeading</h1>
-        </legend>
-
-        <p id="select-all-description" class="form-hint">Select all that apply.</p>
-        @helper.form(action = controllers.profile.routes.EmailPreferences.selectApisFromSubscriptionsAction(applicationId), 'class -> "form", 'id -> "emailPreferencesApisForm") {
-            @helper.CSRF.formField
-            <div class="form-group @if(form.errors("apiRadio").nonEmpty || form.errors.map(_.message).contains(FormKeys.selectedApisNonSelectedGlobalKey)) {form-group-error}">
-                <a name="error.selectedapis.nonselected.field"></a>
-                <div>
-                    @for(api <- apis) {
-                        <div class="multiple-choice">
-                            <input id="@api.serviceName" type="checkbox" name="selectedApi[]" value="@api.serviceName"
-                            @if(selectedApis.contains(api.serviceName)) {checked} />
-                            <label for="@api.serviceName">@api.displayName</label>
-                        </div>
-                    }
-                    <input type="hidden" value="@applicationId.value" name="applicationId" id="applicationId" />
-                </div>
-            </div>
-            <div>
-                <button id="submit" class="button" type="submit">Continue</button>
-            </div>
-
-        </fieldset>
-
-
-}
-    @helper.form(action = controllers.profile.routes.EmailPreferences.selectNoApisFromSubscriptionsAction(applicationId), 'class -> "form", 'id -> "selectNoApisFromSubscriptionsForm") {
+  @errorSummary2(form)
+  <div class="form-group @if(form.errors("apiRadio").nonEmpty || form.errors.map(_.message).contains(FormKeys.selectedApisNonSelectedGlobalKey)) {form-group-error}">
+    <fieldset class="govuk-fieldset" aria-describedby="select-all-description">
+      <legend class="govuk-fieldset__legend govuk-fieldset__legend--l">
+        <h1 id="pageHeading" class="govuk-fieldset__heading">@pageHeading</h1>
+      </legend>
+      <div id="select-all-description" class="govuk-hint @if(form.errors("topic").nonEmpty){govuk-form-group--error}">
+        Select all that apply.
+      </div>
+      @helper.form(action = controllers.profile.routes.EmailPreferences.selectApisFromSubscriptionsAction(applicationId), 'class -> "form", 'id -> "emailPreferencesApisForm") {
         @helper.CSRF.formField
-        <button id="noSelectAPIs" class="secondary-button" type="submit" style="padding-left: 0">I don't want emails about these APIs</button>
-    }
+        <a name="error.selectedapis.nonselected.field"></a>
+        @fieldError2(form.errors, "category")
+        <div class="govuk-checkboxes" data-module="govuk-checkboxes">
+          @for(api <- apis) {
+            <div class="govuk-checkboxes__item">
+              <input class="govuk-checkboxes__input" id="@api.serviceName" type="checkbox" name="selectedApi[]" value="@api.serviceName"
+              @if(selectedApis.contains(api.serviceName)) {checked} />
+              <label class="govuk-label govuk-checkboxes__label" for="@api.serviceName">@api.displayName</label>
+            </div>
+          }
+          <input type="hidden" class="govuk-visually-hidden" value="@applicationId.value" name="applicationId" id="applicationId"/>
+        </div>
+      }
+    </fieldset>
+  </div>
+  <button id="submit" class="govuk-button" type="submit">Continue</button>
+
+  @helper.form(action = controllers.profile.routes.EmailPreferences.selectNoApisFromSubscriptionsAction(applicationId), 'class -> "form", 'id -> "selectNoApisFromSubscriptionsForm") {
+    @helper.CSRF.formField
+    <button id="noSelectAPIs" class="govuk-link govuk-link--no-visited-state" type="submit">I don't want emails about these APIs</button>
+  }
 }

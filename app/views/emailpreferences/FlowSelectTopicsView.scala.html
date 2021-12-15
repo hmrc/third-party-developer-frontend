@@ -20,71 +20,70 @@
 @import include._
 @import domain.models.views.BackButtonWithJavaScript
 @import uk.gov.hmrc.urls.Link
+@import views.html.include.DevMain2
 
-@this(devMain: DevMain)
+@this(devMain: DevMain2)
 
 @(form: Form[SelectedTopicsEmailPreferencesForm], selectedTopics: Set[String])(implicit messages: Messages, loggedIn: DeveloperSession, request: play.api.mvc.Request[Any], appConfig: ApplicationConfig)
 
 @pageHeading = @{
-    "Which topics do you want to receive information about?"
+  "Which topics do you want to receive information about?"
 }
 
 @devMain(
-    title = pageHeading,
-    userFullName = loggedIn.loggedInName,
-    back = BackButtonWithJavaScript,
-    developerSession = Some(loggedIn)
+  title = pageHeading,
+  userFullName = loggedIn.loggedInName,
+  back = BackButtonWithJavaScript,
+  developerSession = Some(loggedIn)
 ) {
 
-    @errorSummary(form)
-    <div>
-        <legend>
-            <h1 id="pageHeading" class="govuk-fieldset-heading">@pageHeading</h1>
-        </legend>
-        <p>
-            We’ll only send you information about the APIs you are interested in.
-        </p>
-
-        <p class="form-hint">Select all that apply.</p>
-    </div>
-
+    @errorSummary2(form)
+    <h1 id="pageHeading" class="govuk-heading-l">@pageHeading</h1>
+    <p class="govuk-body">
+        We’ll only send you information about the APIs you are interested in.
+    </p>
+    <p id="topics-hint" class="govuk-hint">Select all that apply.</p>
     @helper.form(action = controllers.profile.routes.EmailPreferences.flowSelectTopicsAction(), 'class -> "form", 'id -> "emailPreferencesTopicsForm") {
         @helper.CSRF.formField
-        <a name="topic"></a>
-        @for(topic <- List(BUSINESS_AND_POLICY, TECHNICAL, RELEASE_SCHEDULES).sortBy(_.displayOrder)) {
-            <div class="multiple-choice">
-                <input id="@topic.value" type="checkbox" name="topic[]" value="@topic.value"
-                @if(selectedTopics.contains(topic.value)) {checked} >
-                <label for="@topic.value">@topic.displayName
-                <span class="form-hint">
-                    <p>@topic.description</p>
-                </span>
-                </label>
-            </div>
-        }
+        <div class="govuk-form-group @if(form.errors("topic").nonEmpty){govuk-form-group--error}">
+            <fieldset class="govuk-fieldset" aria-describedby="topics-hint">
 
-        <div style="clear: both;">
-            <p>Check the @{
-                Link.toExternalPage(id = Some("status-page-link"), url = "https://api-platform-status.production.tax.service.gov.uk/", value = Some("service availability page for information about live incidents")).toHtml
-            }.</p>
+                @fieldError2(form.errors, "topic")
+                <a name="topic"></a>
+                <div class="govuk-checkboxes" data-module="govuk-checkboxes">
+                    @for(topic <- List(BUSINESS_AND_POLICY, TECHNICAL, RELEASE_SCHEDULES).sortBy(_.displayOrder)) {
+                        <div class="govuk-checkboxes__item">
+                            <input class="govuk-checkboxes__input" id="@topic.value" type="checkbox" name="topic[]" value="@topic.value" @if(selectedTopics.contains(topic.value)) {checked} >
+                            <label class="govuk-label govuk-checkboxes__label govuk-!-padding-top-0" for="@topic.value">
+                                @topic.displayName
+                                <div class="govuk-hint govuk-!-margin-top-0">
+                                    @topic.description
+                                </div>
+                            </label>
+                        </div>
+                    }
+                </div>
 
-            <h2 class="heading-medium">Get involved in user research and events</h2>
-        </div>
-        <div class="multiple-choice">
-            <input id="@EVENT_INVITES.value" type="checkbox" name="topic[]" value="@EVENT_INVITES.value"
-            @if(selectedTopics.contains(EVENT_INVITES.value)) {checked} >
-            <label for="@EVENT_INVITES.value">@EVENT_INVITES.displayName
-                <span class="form-hint">
-                    <p>@EVENT_INVITES.description</p>
-                </span>
-            </label>
-        </div>
+                <p class="govuk-body">
+                    Check the 
+                    <a id="status-page-link" href="https://api-platform-status.production.tax.service.gov.uk/" target="_blank">service availability page for information about live incidents (opens in new tab)</a>.
+                </p>
 
-        <div class="form-group">
-            <button id="selectTopics" class="button" type="submit">Continue</button>
+                <h2 class="govuk-heading-m">Get involved in user research and events</h2>
+                <div class="govuk-checkboxes" data-module="govuk-checkboxes">
+                    <div class="govuk-checkboxes__item">
+                        <input class="govuk-checkboxes__input" id="@EVENT_INVITES.value" type="checkbox" name="topic[]" value="@EVENT_INVITES.value" @if(selectedTopics.contains(EVENT_INVITES.value)) {checked} >
+                        <label class="govuk-label govuk-checkboxes__label govuk-!-padding-top-0" for="@EVENT_INVITES.value">
+                            @EVENT_INVITES.displayName
+                            <div class="govuk-hint govuk-!-margin-top-0">
+                                @EVENT_INVITES.description
+                            </div>
+                        </label>
+                    </div>
+                </div>
+                <br />
+            </fieldset>
         </div>
-       
+        <button id="selectTopics" class="govuk-button" type="submit">Continue</button>
     }
-
-
 }
