@@ -55,17 +55,16 @@
       <h2 class="govuk-heading-m govuk-!-margin-bottom-2" id="category-heading-@taxRegimeInterest._1.regime">@viewData.taxRegimeDisplayName(taxRegimeInterest._1.regime)</h2>
 
       @if(taxRegimeInterest._1.services.isEmpty) {
-        <p class="govuk-body" id="all-api-@taxRegimeInterest._1.regime">
+        <p class="govuk-body govuk-!-margin-bottom-2" id="all-api-@taxRegimeInterest._1.regime">
           All @viewData.taxRegimeDisplayName(taxRegimeInterest._1.regime) APIs
         </p>
       } else {
         @for(selectedAPI <- taxRegimeInterest._1.services.toList.sorted) {
-          <p class="govuk-body" id="@selectedAPI">@viewData.apiDisplayName(selectedAPI) </p>
-          <br />
+          <p class="govuk-body govuk-!-margin-bottom-2" id="@selectedAPI">@viewData.apiDisplayName(selectedAPI) </p>
         }
       }
     }
-
+    <br />
     <p class="govuk-body">
       <a class="govuk-link govuk-link--no-visited-state" id="change-apis-link" href="@controllers.profile.routes.EmailPreferences.flowSelectCategoriesPage">Edit your preferences or get emails about other APIs</a>
     </p>
@@ -76,9 +75,8 @@
 
     @for(topic <- loggedIn.developer.emailPreferences.topics.toList.sortBy(_.displayOrder)) {
       <p class="govuk-body govuk-!-margin-bottom-1" id="@topic.value">@topic.displayName</p>
-      <br />
     }
-
+    <br />
     <p class="govuk-body">
       <a class="govuk-link govuk-link--no-visited-state" id="change-topics-link" href="@controllers.profile.routes.EmailPreferences.flowSelectTopicsPage">
         Change the topics you are interested in
