@@ -43,26 +43,24 @@
   fullWidthContent = true
 ) {
   <div class="govuk-grid-row">
-    <div class="govuk-grid-column-three-quarters">
-      <div class="govuk-box-highlight">
-        <h1 class="govuk-heading-l">
-          @pageHeading
-        </h1>
-        <p class="govuk-body-l">
-          We've sent you a confirmation email
-        </p>
+    <div class="govuk-panel govuk-panel--confirmation">
+      <h1 class="govuk-panel__title">
+        @pageHeading
+      </h1>
+      <div class="govuk-panel__body">
+        We've sent you a confirmation email
       </div>
-      <h2 class="govuk-heading-m">What happens next?</h2>
-      <p class="govuk-body">Before we can give you access to live data, we need to check the information you've provided and review your testing.<p/>
-      <p class="govuk-body">We may ask for a demonstration of your software.</p>
-      <p class="govuk-body">The checking process can take up to 10 working days.</p>
-
-      <h3 class="govuk-heading-s">New @principalEnv application</h3>
-      <p class="govuk-body">By requesting credentials you've created a new @principalEnv application called <span class="govuk-!-font-weight-bold">@{app.name}</span>.<p/>
-      <p class="govuk-body">Once your credentials are issued, you can access them in your application. You'll be notified by email.</p>
-      <br>
-
-      <a href="@routes.Details.details(app.id)" class="govuk-button">View new @principalEnv application</a>
     </div>
+    <h2 class="govuk-heading-m">What happens next?</h2>
+    <p class="govuk-body">Before we can give you access to live data, we need to check the information you've provided and review your testing.<p/>
+    <p class="govuk-body">We may ask for a demonstration of your software.</p>
+    <p class="govuk-body">The checking process can take up to 10 working days.</p>
+
+    <h3 class="govuk-heading-s">New @principalEnv application</h3>
+    <p class="govuk-body">By requesting credentials you've created a new @principalEnv application called <span class="govuk-!-font-weight-bold">@{app.name}</span>.<p/>
+    <p class="govuk-body">Once your credentials are issued, you can access them in your application. You'll be notified by email.</p>
+    <br>
+
+    <a href="@routes.Details.details(app.id)" class="govuk-button">View new @principalEnv application</a>
   </div>
 }
