@@ -36,8 +36,6 @@ trait QuestionJsonFormatters extends StatementJsonFormatters with MapJsonFormatt
     .and[Pass.type]("pass")
     .format
 
-  // implicit val jsonTuple = Json.format[Tuple2[String, Mark]]
-
   implicit val keyReadsPossibleAnswer: KeyReads[PossibleAnswer] = key => JsSuccess(PossibleAnswer(key))
   implicit val keyWritesPossibleAnswer: KeyWrites[PossibleAnswer] = _.value
   implicit val jsonListMapKV = listMapReads[PossibleAnswer, Mark]
