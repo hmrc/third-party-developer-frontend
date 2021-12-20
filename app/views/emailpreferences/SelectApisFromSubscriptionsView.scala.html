@@ -63,12 +63,12 @@
     </fieldset>
   </div>
 
-  <div class="govuk-button-group">
-    <button id="submit" class="govuk-button" type="submit">Continue</button>
+  <button id="submit" class="govuk-button" type="submit">Continue</button>
 
-    @helper.form(action = controllers.profile.routes.EmailPreferences.selectNoApisFromSubscriptionsAction(applicationId), 'class -> "form", 'id -> "selectNoApisFromSubscriptionsForm") {
-      @helper.CSRF.formField
-      <button id="noSelectAPIs" class="govuk-button govuk-button--secondary" type="submit">I don't want emails about these APIs</button>
-    }
-  </div>
+  <br />
+
+  @helper.form(action = controllers.profile.routes.EmailPreferences.selectNoApisFromSubscriptionsAction(applicationId), 'class -> "form", 'id -> "selectNoApisFromSubscriptionsForm") {
+    @helper.CSRF.formField
+    <button id="noSelectAPIs" class="govuk-button govuk-button--secondary" type="submit">I don't want emails about these APIs</button>
+  }
 }
