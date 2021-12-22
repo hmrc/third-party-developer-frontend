@@ -45,7 +45,7 @@ class ApplicationVerificationSpec extends CommonViewSpec with WithCSRFAddToken {
     "show link has expired message when link has expired" in {
       val document: Document = Jsoup.parse(renderPage(success = false).body)
       elementExistsByText(document, "h1", "Email verified") shouldBe false
-      elementExistsByText(document, "h1", "The link has expired") shouldBe true
+      elementExistsByText(document, "h2", "The link has expired") shouldBe true
     }
   }
 }
