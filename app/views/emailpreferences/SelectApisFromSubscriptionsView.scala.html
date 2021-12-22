@@ -59,12 +59,12 @@
           }
           <input type="hidden" class="govuk-visually-hidden" value="@applicationId.value" name="applicationId" id="applicationId"/>
         </div>
+        <br />
+        <br />
         <button id="submit" class="govuk-button" type="submit">Continue</button>
       }
     </fieldset>
   </div>
-
-  <br />
 
   @helper.form(action = controllers.profile.routes.EmailPreferences.selectNoApisFromSubscriptionsAction(applicationId), 'class -> "form", 'id -> "selectNoApisFromSubscriptionsForm") {
     @helper.CSRF.formField
