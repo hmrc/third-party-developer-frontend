@@ -34,6 +34,7 @@ import domain.models.controllers.MfaMandateDetails
 
 import scala.concurrent.{ExecutionContext, Future}
 import scala.concurrent.Future.successful
+import connectors.ThirdPartyDeveloperConnector
 
 trait Auditing {
   val auditService: AuditService
@@ -52,6 +53,7 @@ class UserLoginAccount @Inject()(val auditService: AuditService,
                                  val errorHandler: ErrorHandler,
                                  val applicationService: ApplicationService,
                                  val subscriptionFieldsService: SubscriptionFieldsService,
+                                 tpdService: ThirdPartyDeveloperConnector,
                                  val sessionService: SessionService,
                                  mcc: MessagesControllerComponents,
                                  val mfaMandateService: MfaMandateService,
@@ -92,7 +94,7 @@ class UserLoginAccount @Inject()(val auditService: AuditService,
   def get2svRecommendationPage(): Action[AnyContent] = loggedInAction {
     implicit request => {
       for {
-        showAdminMfaMandateMessage <- mfaMandateService.showAdminMfaMandatedMessage(loggedIn.developer.userId)
+        showAdminMfaMandateMessage <- mfaMandateService.showAdminMfaMandatedMessage(request.userId)
         mfaMandateDetails = MfaMandateDetails(showAdminMfaMandateMessage, mfaMandateService.daysTillAdminMfaMandate.getOrElse(0))
       }  yield (Ok(add2SVView(mfaMandateDetails)))
     }
@@ -191,6 +193,26 @@ class UserLoginAccount @Inject()(val auditService: AuditService,
   }
 
   def confirm2SVHelp(): Action[AnyContent] = loggedOutAction { implicit request =>
-    applicationService.request2SVRemoval(request.session.get("emailAddress").getOrElse("")).map(_ => Ok(protectAccountNoAccessCodeCompleteView()))
+    import cats.implicits._
+    import cats.data.OptionT
+
+    val email = request.session.get("emailAddress").getOrElse("")
+
+    def findName: Future[Option[String]] =
+      (
+        for {
+          details   <- OptionT(tpdService.findUserId(email))
+          developer <- OptionT(tpdService.fetchDeveloper(details.id))
+        } yield s"${developer.firstName } ${developer.lastName}"
+      )
+      .value
+
+    for {
+      oName <- findName
+      _     <- applicationService.request2SVRemoval(
+                 name = oName.getOrElse("Unknown"),
+                 email
+               )
+    } yield Ok(protectAccountNoAccessCodeCompleteView())
   }
 }

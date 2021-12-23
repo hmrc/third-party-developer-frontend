@@ -14,6 +14,8 @@ import modules.submissions.connectors.ThirdPartyApplicationSubmissionsConnector
 import modules.submissions.connectors.ThirdPartyApplicationSubmissionsConnector._
 import uk.gov.hmrc.http.HeaderCarrier
 import modules.submissions.domain.services.SubmissionsJsonFormatters
+import domain.services.ApplicationsJsonFormatters
+import modules.submissions.domain.models.ErrorDetails
 
 class ThirdPartyApplicationSubmissionsConnectorSpec 
     extends BaseConnectorIntegrationSpec 
@@ -22,7 +24,9 @@ class ThirdPartyApplicationSubmissionsConnectorSpec
     with CollaboratorTracker 
     with LocalUserIdTracker 
     with SubmissionsTestData
-    with SubmissionsJsonFormatters {
+    with SubmissionsJsonFormatters
+    with TestApplications
+    with ApplicationsJsonFormatters {
   private val apiKey = UUID.randomUUID().toString
 
   private val stubConfig = Configuration(
@@ -145,6 +149,82 @@ class ThirdPartyApplicationSubmissionsConnectorSpec
       val result = await(connector.fetchLatestSubmission(applicationId))
 
       result.value shouldBe extendedSubmission
+    }
+  }
+
+  "requestApproval" should {
+    val app = aStandardApplication
+    val url = s"/application/${app.id.value}/request-approval"
+    val email = "bob@spongepants.com"
+
+    "return OK with and return the application" in new Setup {
+      stubFor(
+        post(urlEqualTo(url))
+        .withJsonRequestBody(ApprovalsRequest(email))
+        .willReturn(
+          aResponse()
+            .withStatus(OK)
+            .withJsonBody(app)
+        )
+      )
+
+      val result = await(connector.requestApproval(app.id, email))
+
+      result shouldBe 'Right
+      result.right.get.name shouldBe app.name
+    }
+
+    "return with a PRECONDITION_FAILED error" in new Setup {
+      val msg = "The application name contains words that are prohibited"
+
+      stubFor(
+        post(urlEqualTo(url))
+        .withJsonRequestBody(ApprovalsRequest(email))
+        .willReturn(
+          aResponse()
+            .withStatus(PRECONDITION_FAILED)
+            .withJsonBody(ErrorDetails("code123", msg))
+        )
+      )
+
+      val result = await(connector.requestApproval(app.id, email))
+
+      result shouldBe 'Left
+      result.left.get.message shouldBe msg
+    }
+
+    "return with a CONFLICT error" in new Setup {
+      val msg = "An application already exists for the name"
+
+      stubFor(
+        post(urlEqualTo(url))
+        .withJsonRequestBody(ApprovalsRequest(email))
+        .willReturn(
+          aResponse()
+            .withStatus(CONFLICT)
+            .withJsonBody(ErrorDetails("code123", msg))
+        )
+      )
+
+      val result = await(connector.requestApproval(app.id, email))
+
+      result shouldBe 'Left
+      result.left.get.message shouldBe msg
+    }
+
+    "return with a BAD_REQUEST error" in new Setup {
+      stubFor(
+        post(urlEqualTo(url))
+        .withJsonRequestBody(ApprovalsRequest(email))
+        .willReturn(
+          aResponse()
+            .withStatus(BAD_REQUEST)
+        )
+      )
+
+      intercept[RuntimeException] {
+        await(connector.requestApproval(app.id, email))
+      }
     }
   }
 }

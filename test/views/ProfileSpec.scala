@@ -56,8 +56,8 @@ class ProfileSpec extends CommonViewSpec with WithCSRFAddToken {
       page.contentType should include("text/html")
 
       val document = Jsoup.parse(page.body)
-      elementIdentifiedByAttrContainsText(document, "span", "data-field-error-firstname", "First name error message") shouldBe true
-      elementIdentifiedByAttrContainsText(document, "span", "data-field-error-lastname", "Last name error message") shouldBe true
+      elementIdentifiedByAttrWithValueContainsText(document, "span", "id", "data-field-error-firstname", "Error: First name error message") shouldBe true
+      elementIdentifiedByAttrWithValueContainsText(document, "span", "id", "data-field-error-lastname", "Error: Last name error message") shouldBe true
 
     }
   }

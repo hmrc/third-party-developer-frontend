@@ -85,7 +85,7 @@ class CommonSteps extends ScalaDsl with EN with Matchers with NavigationSugar wi
   }
 
   Then( """^the user-nav header contains a '(.*)' link""") { (linkText: String) =>
-    val header = webDriver.findElement(By.id("user-nav-links"))
+    val header = webDriver.findElement(By.id("proposition-links"))
     header.findElement(By.linkText(linkText)).isDisplayed shouldBe true
   }
 

@@ -44,6 +44,7 @@ import scala.concurrent.Future.{failed, successful}
 import domain.models.subscriptions.VersionSubscription
 import service.PushPullNotificationsService.PushPullNotificationsConnector
 import utils.LocalUserIdTracker
+import org.mockito.captor.ArgCaptor
 
 class ApplicationServiceSpec extends AsyncHmrcSpec with SubscriptionsBuilder with ApplicationBuilder with LocalUserIdTracker {
 
@@ -335,16 +336,21 @@ class ApplicationServiceSpec extends AsyncHmrcSpec with SubscriptionsBuilder wit
   "request 2SV removal" should {
 
     val email = "testy@example.com"
+    val name = "Bob"
 
     "correctly create a deskpro ticket and audit record" in new Setup {
+      val ticketCaptor = ArgCaptor[DeskproTicket]
       when(mockDeskproConnector.createTicket(any[DeskproTicket])(eqTo(hc)))
         .thenReturn(successful(TicketCreated))
       when(mockAuditService.audit(eqTo(Remove2SVRequested), any[Map[String, String]])(eqTo(hc)))
         .thenReturn(successful(Success))
 
-      await(applicationService.request2SVRemoval(email))
+      await(applicationService.request2SVRemoval(name, email))
 
-      verify(mockDeskproConnector, times(1)).createTicket(any[DeskproTicket])(eqTo(hc))
+      verify(mockDeskproConnector, times(1)).createTicket(ticketCaptor )(eqTo(hc))
+      ticketCaptor.value.email shouldBe email
+      ticketCaptor.value.name shouldBe name
+
       verify(mockAuditService, times(1)).audit(eqTo(Remove2SVRequested), any[Map[String, String]])(eqTo(hc))
     }
   }

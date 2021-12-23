@@ -35,6 +35,7 @@ import builder.SampleApplication
 import controllers.SubscriptionTestHelperSugar
 import builder.SampleSession
 import mocks.service.ApplicationActionServiceMock
+import modules.submissions.domain.models.ExtendedSubmission
 
 class ProdCredsChecklistControllerSpec
   extends BaseControllerSpec
@@ -117,12 +118,12 @@ class ProdCredsChecklistControllerSpec
 
 
   "productionCredentialsChecklist" should {
-    "fail with a BAD REQUEST" in new Setup {
+    "fail with NOT FOUND" in new Setup {
       SubmissionServiceMock.FetchLatestSubmission.thenReturnsNone()
 
-      val result = controller.productionCredentialsChecklist(appId)(loggedInRequest.withCSRFToken)
+      val result = controller.productionCredentialsChecklistPage(appId)(loggedInRequest.withCSRFToken)
 
-      status(result) shouldBe BAD_REQUEST
+      status(result) shouldBe NOT_FOUND
     }
 
     "succeed" in new Setup {
@@ -130,9 +131,34 @@ class ProdCredsChecklistControllerSpec
 
       SubmissionServiceMock.FetchLatestSubmission.thenReturns(extendedSubmission)
 
-      val result = controller.productionCredentialsChecklist(appId)(loggedInRequest.withCSRFToken)
+      val result = controller.productionCredentialsChecklistPage(appId)(loggedInRequest.withCSRFToken)
 
       status(result) shouldBe OK
     }
+  }
+
+  "productionCredentialsChecklistAction" should {
+    "return success when form is valid and incomplete" in new Setup {
+      import utils.SubmissionsTestData.extendedSubmission
+
+      SubmissionServiceMock.FetchLatestSubmission.thenReturns(extendedSubmission)
+
+      val result = controller.productionCredentialsChecklistAction(appId)(loggedInRequest.withCSRFToken)
+
+      status(result) shouldBe OK
+    }
+
+    "redirect when when form is valid and complete" in new Setup {
+      import utils.SubmissionsTestData.{submission,completedProgress}
+      val completedSubmission = ExtendedSubmission(submission, completedProgress)
+
+      SubmissionServiceMock.FetchLatestSubmission.thenReturns(completedSubmission)
+
+      val result = controller.productionCredentialsChecklistAction(appId)(loggedInRequest.withCSRFToken)
+
+      status(result) shouldBe SEE_OTHER
+      redirectLocation(result) shouldBe Some(modules.submissions.controllers.routes.CheckAnswersController.checkAnswersPage(appId).url)
+    }
+
   }
 }

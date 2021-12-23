@@ -37,6 +37,7 @@ import views.html.managesubscriptions._
 import scala.concurrent.{ExecutionContext, Future}
 import scala.concurrent.Future.successful
 import domain.models.subscriptions.DevhubAccessLevel
+import controllers.actions.SubscriptionFieldsActions
 
 object ManageSubscriptions {
 
@@ -81,39 +82,36 @@ class ManageSubscriptions @Inject() (
     subscriptionConfigurationStepPageView: SubscriptionConfigurationStepPageView
 )(implicit val ec: ExecutionContext, val appConfig: ApplicationConfig)
     extends ApplicationController(mcc)
-    with ApplicationHelper {
+    with ApplicationHelper
+    with SubscriptionFieldsActions {
 
   import ManageSubscriptions._
 
   def listApiSubscriptions(applicationId: ApplicationId): Action[AnyContent] =
-    subFieldsDefinitionsExistAction(applicationId) { definitionsRequest: ApplicationWithFieldDefinitionsRequest[AnyContent] =>
-      implicit val appRQ: ApplicationRequest[AnyContent] = definitionsRequest.applicationRequest
+    subFieldsDefinitionsExistAction(applicationId) { implicit request: ApplicationWithFieldDefinitionsRequest[AnyContent] =>
+      val accessLevel = DevhubAccessLevel.fromRole(request.role)
 
-      val accessLevel = DevhubAccessLevel.fromRole(appRQ.role)
-
-      val details = definitionsRequest.fieldDefinitions
+      val details = request.fieldDefinitions
         .map(toDetails(accessLevel))
         .toList
 
-      successful(Ok(listApiSubscriptionsView(definitionsRequest.applicationRequest.application, details)))
+      successful(Ok(listApiSubscriptionsView(request.application, details)))
     }
 
   def editApiMetadataPage(applicationId: ApplicationId, context: ApiContext, version: ApiVersion, mode: SaveSubsFieldsPageMode): Action[AnyContent] =
-    subFieldsDefinitionsExistActionByApi(applicationId, context, version) { definitionsRequest: ApplicationWithSubscriptionFields[AnyContent] =>
-      implicit val appRQ: ApplicationRequest[AnyContent] = definitionsRequest.applicationRequest
+    subFieldsDefinitionsExistActionByApi(applicationId, context, version) { implicit request: ApplicationWithSubscriptionFieldsRequest[AnyContent] =>
 
-      val role = definitionsRequest.applicationRequest.role
+      val role = request.role
 
-      val apiSubscription: APISubscriptionStatusWithSubscriptionFields = definitionsRequest.apiSubscription
+      val apiSubscription: APISubscriptionStatusWithSubscriptionFields = request.apiSubscription
 
       val viewModel = EditApiConfigurationViewModel.toViewModel(apiSubscription, role, formErrors = Seq.empty, postedFormValues = Map.empty)
 
-      successful(Ok(editApiMetadataView(appRQ.application, viewModel, mode)))
+      successful(Ok(editApiMetadataView(request.application, viewModel, mode)))
     }
 
   def saveSubscriptionFields(applicationId: ApplicationId, apiContext: ApiContext, apiVersion: ApiVersion, mode: SaveSubsFieldsPageMode): Action[AnyContent] =
-    subFieldsDefinitionsExistActionByApi(applicationId, apiContext, apiVersion) { definitionsRequest: ApplicationWithSubscriptionFields[AnyContent] =>
-      implicit val appRQ: ApplicationRequest[AnyContent] = definitionsRequest.applicationRequest
+    subFieldsDefinitionsExistActionByApi(applicationId, apiContext, apiVersion) { implicit request: ApplicationWithSubscriptionFieldsRequest[AnyContent] =>
 
       import SaveSubsFieldsPageMode._
       val successRedirectUrl = mode match {
@@ -124,29 +122,28 @@ class ManageSubscriptions @Inject() (
       subscriptionConfigurationSave(
         apiContext,
         apiVersion,
-        definitionsRequest.apiSubscription,
+        request.apiSubscription,
         successRedirectUrl,
         viewModel => {
-          editApiMetadataView(definitionsRequest.applicationRequest.application, viewModel, mode)
+          editApiMetadataView(request.application, viewModel, mode)
         }
       )
     }
 
-  // TODO: Use value class for FieldNameParam
+  // TODO Use value class for FieldNameParam
   def editApiMetadataFieldPage(
       applicationId: ApplicationId,
       apiContext: ApiContext,
       apiVersion: ApiVersion,
       fieldNameParam: String,
       mode: SaveSubsFieldsPageMode) : Action[AnyContent] =    // TODO - make this FieldName type
-    singleSubFieldsWritableDefinitionActionByApi(applicationId, apiContext, apiVersion, fieldNameParam) { definitionRequest: ApplicationWithWritableSubscriptionField[AnyContent] =>
-      implicit val appRQ: ApplicationRequest[AnyContent] = definitionRequest.applicationRequest
+    singleSubFieldsWritableDefinitionActionByApi(applicationId, apiContext, apiVersion, fieldNameParam) { implicit definitionRequest: ApplicationWithWritableSubscriptionField[AnyContent] =>
 
       val fieldName = FieldName(fieldNameParam)
       val fieldValue = definitionRequest.subscriptionWithSubscriptionField.subscriptionFieldValue.value
-      val viewModel = EditApiConfigurationFieldViewModel.toViewModel(definitionRequest.subscriptionWithSubscriptionField, appRQ.role, Seq(), Map(fieldName -> fieldValue))
+      val viewModel = EditApiConfigurationFieldViewModel.toViewModel(definitionRequest.subscriptionWithSubscriptionField, definitionRequest.role, Seq(), Map(fieldName -> fieldValue))
 
-      successful(Ok(editApiMetadataFieldView(definitionRequest.applicationRequest.application, viewModel, mode)))
+      successful(Ok(editApiMetadataFieldView(definitionRequest.application, viewModel, mode)))
   }
 
    def saveApiMetadataFieldPage(
@@ -156,8 +153,7 @@ class ManageSubscriptions @Inject() (
       fieldNameParam: String,
       mode: SaveSubsFieldsPageMode) : Action[AnyContent] =
 
-      singleSubFieldsWritableDefinitionActionByApi(applicationId, apiContext, apiVersion, fieldNameParam) { definitionRequest: ApplicationWithWritableSubscriptionField[AnyContent] =>
-      implicit val appRQ: ApplicationRequest[AnyContent] = definitionRequest.applicationRequest
+      singleSubFieldsWritableDefinitionActionByApi(applicationId, apiContext, apiVersion, fieldNameParam) { implicit definitionRequest: ApplicationWithWritableSubscriptionField[AnyContent] =>
 
       import SaveSubsFieldsPageMode._
       val successRedirectUrl = mode match {
@@ -171,7 +167,7 @@ class ManageSubscriptions @Inject() (
         definitionRequest.subscriptionWithSubscriptionField,
         successRedirectUrl,
         viewModel => {
-          editApiMetadataFieldView(definitionRequest.applicationRequest.application, viewModel, mode)
+          editApiMetadataFieldView(definitionRequest.application, viewModel, mode)
         }
       )
   }
@@ -231,47 +227,40 @@ class ManageSubscriptions @Inject() (
 
   def subscriptionConfigurationStart(applicationId: ApplicationId): Action[AnyContent] =
     subFieldsDefinitionsExistAction(applicationId, NoSubscriptionFieldsRefinerBehaviour.Redirect(addapplication.routes.AddApplication.addApplicationSuccess(applicationId))) {
+      implicit request: ApplicationWithFieldDefinitionsRequest[AnyContent] => {
 
-      definitionsRequest: ApplicationWithFieldDefinitionsRequest[AnyContent] =>
-        {
+          val accessLevel = DevhubAccessLevel.fromRole(request.role)
 
-          implicit val appRQ: ApplicationRequest[AnyContent] = definitionsRequest.applicationRequest
-
-          val accessLevel = DevhubAccessLevel.fromRole(appRQ.role)
-
-          val details = definitionsRequest.fieldDefinitions
+          val details = request.fieldDefinitions
             .map(toDetails(accessLevel))
             .toList
 
-          Future.successful(Ok(subscriptionConfigurationStartView(definitionsRequest.applicationRequest.application, details)))
+          Future.successful(Ok(subscriptionConfigurationStartView(request.application, details)))
         }
     }
 
   def subscriptionConfigurationPage(applicationId: ApplicationId, pageNumber: Int): Action[AnyContent] =
-    subFieldsDefinitionsExistActionWithPageNumber(applicationId, pageNumber) { definitionsRequest: ApplicationWithSubscriptionFieldPage[AnyContent] =>
-      implicit val appRQ: ApplicationRequest[AnyContent] = definitionsRequest.applicationRequest
-
-      val apiSubscription = definitionsRequest.apiSubscriptionStatus
-      val role = definitionsRequest.applicationRequest.role
+    subFieldsDefinitionsExistActionWithPageNumber(applicationId, pageNumber) { implicit request: ApplicationWithSubscriptionFieldPageRequest[AnyContent] =>
+      val apiSubscription = request.apiSubscriptionStatus
+      val role = request.role
 
       val viewModel = EditApiConfigurationViewModel.toViewModel(apiSubscription, role, formErrors = Seq.empty, postedFormValues = Map.empty)
 
-      Future.successful(Ok(subscriptionConfigurationPageView(definitionsRequest.applicationRequest.application, pageNumber, viewModel)))
+      Future.successful(Ok(subscriptionConfigurationPageView(request.application, pageNumber, viewModel)))
     }
 
   def subscriptionConfigurationPagePost(applicationId: ApplicationId, pageNumber: Int): Action[AnyContent] =
-    subFieldsDefinitionsExistActionWithPageNumber(applicationId, pageNumber) { definitionsRequest: ApplicationWithSubscriptionFieldPage[AnyContent] =>
-      implicit val applicationRequest: ApplicationRequest[AnyContent] = definitionsRequest.applicationRequest
+    subFieldsDefinitionsExistActionWithPageNumber(applicationId, pageNumber) { implicit request: ApplicationWithSubscriptionFieldPageRequest[AnyContent] =>
 
       val successRedirectUrl = routes.ManageSubscriptions.subscriptionConfigurationStepPage(applicationId, pageNumber)
 
       subscriptionConfigurationSave(
-        definitionsRequest.apiDetails.context,
-        definitionsRequest.apiDetails.version,
-        definitionsRequest.apiSubscriptionStatus,
+        request.apiDetails.context,
+        request.apiDetails.version,
+        request.apiSubscriptionStatus,
         successRedirectUrl,
         viewModel => {
-          subscriptionConfigurationPageView(definitionsRequest.applicationRequest.application, pageNumber, viewModel)
+          subscriptionConfigurationPageView(request.application, pageNumber, viewModel)
         }
       )
     }
@@ -286,16 +275,13 @@ class ManageSubscriptions @Inject() (
       }
     }
 
-    subFieldsDefinitionsExistActionWithPageNumber(applicationId, pageNumber) { definitionsRequest: ApplicationWithSubscriptionFieldPage[AnyContent] =>
-      implicit val appRQ: ApplicationRequest[AnyContent] = definitionsRequest.applicationRequest
+    subFieldsDefinitionsExistActionWithPageNumber(applicationId, pageNumber) { implicit request: ApplicationWithSubscriptionFieldPageRequest[AnyContent] =>
 
-      val application = definitionsRequest.applicationRequest.application
-
-      if (pageNumber == definitionsRequest.totalPages) {
-        doEndOfJourneyRedirect(application)
+      if (pageNumber == request.totalPages) {
+        doEndOfJourneyRedirect(request.application)
 
       } else {
-        Future.successful(Ok(subscriptionConfigurationStepPageView(application, pageNumber, definitionsRequest.totalPages)))
+        Future.successful(Ok(subscriptionConfigurationStepPageView(request.application, pageNumber, request.totalPages)))
       }
     }
   }

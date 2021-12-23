@@ -64,7 +64,7 @@ class TermsOfUse @Inject() (
       if (app.termsOfUseStatus == TermsOfUseStatus.AGREEMENT_REQUIRED) {
         val information = app.checkInformation.getOrElse(CheckInformation())
         val updatedInformation = information.copy(
-          termsOfUseAgreements = information.termsOfUseAgreements :+ TermsOfUseAgreement(request.user.email, DateTimeUtils.now, appConfig.currentTermsOfUseVersion)
+          termsOfUseAgreements = information.termsOfUseAgreements :+ TermsOfUseAgreement(request.developerSession.email, DateTimeUtils.now, appConfig.currentTermsOfUseVersion)
         )
 
         applicationService

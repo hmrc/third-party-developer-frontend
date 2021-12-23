@@ -747,7 +747,7 @@ class ApplicationCheckSpec
       when(underTest.applicationService.isApplicationNameValid(*, *, *)(*))
         .thenReturn(Future.successful(Invalid.invalidName))
 
-      private val applicationName = "Blacklisted HMRC"
+      private val applicationName = "Deny Listed HMRC"
 
       private val requestWithFormBody = loggedInRequest.withFormUrlEncodedBody("applicationName" -> applicationName)
 

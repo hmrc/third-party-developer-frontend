@@ -177,8 +177,8 @@ class ApplicationService @Inject() (
     } yield ticketResponse
   }
 
-  def request2SVRemoval(email: String)(implicit hc: HeaderCarrier): Future[TicketResult] = {
-    val remove2SVTicket = DeskproTicket.removeDeveloper2SV(email)
+  def request2SVRemoval(name: String, email: String)(implicit hc: HeaderCarrier): Future[TicketResult] = {
+    val remove2SVTicket = DeskproTicket.removeDeveloper2SV(name, email)
 
     for {
       ticketResponse <- deskproConnector.createTicket(remove2SVTicket)

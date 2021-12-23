@@ -68,7 +68,7 @@ class FlowSelectTopicsViewSpec extends CommonViewSpec with WithCSRFAddToken {
       checkbox.attr("name") shouldBe "topic[]"
       checkbox.`val`() shouldBe topic.value
       document.select(s"label[for=${topic.value}]").text.startsWith(topic.displayName) shouldBe true
-      document.select(s"label[for=${topic.value}] > span[class=form-hint] > p").text() shouldBe topic.description
+      document.select(s"label[for=${topic.value}] > div[class=govuk-hint govuk-!-margin-top-0]").text() shouldBe topic.description
     })
   }
 

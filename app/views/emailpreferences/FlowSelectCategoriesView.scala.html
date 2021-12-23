@@ -16,54 +16,60 @@
 
 @import config.ApplicationConfig
 @import domain.models.developers.DeveloperSession
-@import domain.models.emailpreferences.APICategoryDetails
+@import domain.models.emailpreferences.APICategoryDisplayDetails
 @import include._
 @import domain.models.views.BackButtonWithJavaScript
-@import domain.models.flows.EmailPreferencesFlow
+@import views.html.include.DevMain2
+@import domain.models.flows.EmailPreferencesFlowV2
 
-@this(devMain: DevMain)
+@this(devMain: DevMain2)
 
-@(form: Form[TaxRegimeEmailPreferencesForm], categories: List[APICategoryDetails], selectedCategories: Set[String])(implicit messages: Messages, loggedIn: DeveloperSession, request: play.api.mvc.Request[Any], appConfig: ApplicationConfig)
+@(form: Form[TaxRegimeEmailPreferencesForm], categories: List[APICategoryDisplayDetails], selectedCategories: Set[String])(implicit messages: Messages, loggedIn: DeveloperSession, request: play.api.mvc.Request[Any], appConfig: ApplicationConfig)
 
-    @pageHeading = @{
-        "Which API categories are you interested in?"
-    }
+@pageHeading = @{
+  "Which API categories are you interested in?"
+}
 
-    @devMain(
-        title = pageHeading,
-        userFullName = loggedIn.loggedInName,
-        back = BackButtonWithJavaScript,
-        developerSession = Some(loggedIn)
-    ) {
-        @errorSummary(form)
-        <div>
-            <legend>
-                <h1 id="pageHeading"  class="govuk-fieldset-heading">@pageHeading</h1>
-            </legend>
-    
-            <p class="form-hint">Select all that apply.</p>
+@devMain(
+  title = pageHeading,
+  userFullName = loggedIn.loggedInName,
+  back = BackButtonWithJavaScript,
+  developerSession = Some(loggedIn)
+) {
+  @errorSummary2(form)
+  @helper.form(action = controllers.profile.routes.EmailPreferences.flowSelectCategoriesAction(), 'class -> "form", 'id -> "emailPreferencesCategoriesForm") {
+    @helper.CSRF.formField
+    <a name="taxRegime"></a>
+    <div class="govuk-form-group @if(form.errors("taxRegime").nonEmpty){govuk-form-group--error}">
+      <fieldset class="govuk-fieldset" aria-describedby="which-api-cat-hint">
+        <legend class="govuk-fieldset__legend govuk-fieldset__legend--l">
+          <h1 id="pageHeading" class="govuk-fieldset__heading">
+            @pageHeading
+          </h1>
+        </legend>
+        <div id="which-api-cat-hint" class="govuk-hint">
+          Select all that apply.
         </div>
-
-        @helper.form(action = controllers.profile.routes.EmailPreferences.flowSelectCategoriesAction(), 'class -> "form", 'id -> "emailPreferencesCategoriesForm") {
-            @helper.CSRF.formField
-            <a name="taxRegime"></a>
-        <div class="form-group">   
-            @for(category <- categories){
-              <div class="multiple-choice">
-                <input id="@category.category" type="checkbox" name="taxRegime[]" value="@category.category" @if(selectedCategories.contains(category.category)){checked}/>
-                <label for="@category.category">@category.name</label>
-              </div>
-            }
+        @fieldError2(form.errors, "taxRegime")
+        <div class="govuk-checkboxes" data-module="govuk-checkboxes">
+          @for(category <- categories){
+            <div class="govuk-checkboxes__item">
+              <input class="govuk-checkboxes__input" id="@category.category" type="checkbox" name="taxRegime[]" value="@category.category" @if(selectedCategories.contains(category.category)){checked}>
+              <label class="govuk-label govuk-checkboxes__label" for="@category.category">
+                @category.name
+              </label>
+            </div>
+          }
         </div>
+      </fieldset>
+    </div>
 
-        <div class="form-group">
-            <button id="selectCategories" class="button" type="submit">Continue</button>
-        </div>
+    <br />
+    <button id="selectCategories" class="govuk-button" type="submit">Continue</button>
+  }
 
-        }
-    
-        @helper.form(action = controllers.profile.routes.EmailPreferences.flowSelectNoCategoriesAction(), 'class -> "form", 'id -> "emailPreferencesNoCategoriesForm") {
-            @helper.CSRF.formField
-            <button id="noSelectCategories" class="secondary-button" type="submit" style="padding-left: 0">I'm not interested in any of these categories</button>
-        }
-    }
+  @helper.form(action = controllers.profile.routes.EmailPreferences.flowSelectNoCategoriesAction(), 'class -> "form", 'id -> "emailPreferencesNoCategoriesForm") {
+    @helper.CSRF.formField
+    <button id="noSelectCategories" class="govuk-link govuk-link--no-visited-state link-button govuk-!-font-size-19" type="submit" style="padding-left: 0">I'm not interested in any of these categories</button>
+  }
+}

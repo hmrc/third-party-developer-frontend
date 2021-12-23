@@ -33,27 +33,27 @@ import util.ApplicationLogger
 
 import scala.concurrent.{ExecutionContext, Future}
 
-trait DevHubAuthorization extends Results with FrontendHeaderCarrierProvider with CookieEncoding with ApplicationLogger {
+trait DevHubAuthorization extends FrontendHeaderCarrierProvider with CookieEncoding with ApplicationLogger {
   self: BaseController =>
-
-  private val alwaysTrueFilter: DeveloperSession => Boolean = _ => true
-  protected val onlyTrueIfLoggedInFilter: DeveloperSession => Boolean = _.loggedInState == LoggedInState.LOGGED_IN
-
+    
   implicit val appConfig: ApplicationConfig
 
   val sessionService: SessionService
 
-  implicit def loggedIn(implicit req: UserRequest[_]): DeveloperSession = {
-    req.developerSession
+  object DeveloperSessionFilter {
+    type Type = DeveloperSession => Boolean
+
+    val alwaysTrueFilter: DeveloperSessionFilter.Type = _ => true
+    val onlyTrueIfLoggedInFilter: DeveloperSessionFilter.Type = _.loggedInState == LoggedInState.LOGGED_IN
   }
 
-  def loggedInActionRefiner(filter: DeveloperSession => Boolean): ActionRefiner[MessagesRequest, UserRequest] = 
+  def loggedInActionRefiner(filter: DeveloperSessionFilter.Type = DeveloperSessionFilter.onlyTrueIfLoggedInFilter): ActionRefiner[MessagesRequest, UserRequest] = 
     new ActionRefiner[MessagesRequest, UserRequest] {
       def executionContext = ec
-      def refine[A](input: MessagesRequest[A]): Future[Either[Result, UserRequest[A]]] = {
+      def refine[A](msgRequest: MessagesRequest[A]): Future[Either[Result, UserRequest[A]]] = {
         lazy val loginRedirect = Redirect(routes.UserLoginAccount.login())
 
-        implicit val request = input
+        implicit val request = msgRequest
 
         OptionT(loadSession)
         .filter(filter)
@@ -61,38 +61,25 @@ trait DevHubAuthorization extends Results with FrontendHeaderCarrierProvider wit
         .flatMap(ds => {
           EitherT.liftF[Future, Result, UserRequest[A]](
             sessionService.updateUserFlowSessions(ds.session.sessionId)
-            .map(_ => UserRequest(ds, request))
+            .map(_ => new UserRequest(ds, msgRequest))
           )
         })
         .value
       }
     }   
       
-  def atLeastPartLoggedInEnablingMfaAction(body: UserRequest[AnyContent] => Future[Result])(implicit ec: ExecutionContext): Action[AnyContent] =
-    loggedInActionWithFilter(body)(alwaysTrueFilter)
+  def atLeastPartLoggedInEnablingMfaAction(block: UserRequest[AnyContent] => Future[Result]): Action[AnyContent] =
+    Action.async { implicit request =>
+      loggedInActionRefiner(DeveloperSessionFilter.alwaysTrueFilter).invokeBlock(request, block)
+    }
 
-  def loggedInAction(body: UserRequest[AnyContent] => Future[Result])(implicit ec: ExecutionContext): Action[AnyContent] =
-    loggedInActionWithFilter(body)(onlyTrueIfLoggedInFilter)
-
-  private def loggedInActionWithFilter(body: UserRequest[AnyContent] => Future[Result])(filter: DeveloperSession => Boolean)
-                                      (implicit ec: ExecutionContext): Action[AnyContent] =
-    Action.async {
-
-      val loginRedirect = Redirect(routes.UserLoginAccount.login())
-
-      implicit request: MessagesRequest[AnyContent] =>
-        loadSession.flatMap(maybeSession => {
-          maybeSession
-            .filter(filter)
-            .fold(Future.successful(loginRedirect)) { developerSession =>
-              sessionService.updateUserFlowSessions(developerSession.session.sessionId)
-                .flatMap(_ => body(UserRequest(developerSession, request)))
-            }
-        })
+  def loggedInAction(block: UserRequest[AnyContent] => Future[Result]): Action[AnyContent] =
+    Action.async { implicit request =>
+      loggedInActionRefiner(DeveloperSessionFilter.onlyTrueIfLoggedInFilter).invokeBlock(request, block)
     }
 
   def maybeAtLeastPartLoggedInEnablingMfa(body: MaybeUserRequest[AnyContent] => Future[Result])(implicit ec: ExecutionContext): Action[AnyContent] = Action.async {
-    implicit request: MessagesRequest[AnyContent] => loadSession.flatMap(maybeDeveloperSession => body(MaybeUserRequest(maybeDeveloperSession, request)))
+    implicit request: MessagesRequest[AnyContent] => loadSession.flatMap(maybeDeveloperSession => body(new MaybeUserRequest(maybeDeveloperSession, request)))
   }
 
   private[security] def loadSession[A](implicit ec: ExecutionContext, request: Request[A]): Future[Option[DeveloperSession]] = {

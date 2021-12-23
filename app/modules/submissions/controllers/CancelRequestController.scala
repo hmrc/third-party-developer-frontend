@@ -60,7 +60,7 @@ class CancelRequestController @Inject() (
   val applicationActionService: ApplicationActionService,
   val applicationService: ApplicationService,
   mcc: MessagesControllerComponents,
-  submissionService: SubmissionService,
+  val submissionService: SubmissionService,
   productionApplicationConnector: ThirdPartyApplicationProductionConnector,
   confirmCancelRequestForProductionCredentialsView: ConfirmCancelRequestForProductionCredentialsView,
   cancelledRequestForProductionCredentialsView: CancelledRequestForProductionCredentialsView
@@ -68,16 +68,19 @@ class CancelRequestController @Inject() (
 (
   implicit val ec: ExecutionContext,
   val appConfig: ApplicationConfig
-) extends ApplicationController(mcc) with EitherTHelper[String] {
+) extends ApplicationController(mcc)
+  with EitherTHelper[String]
+  with SubmissionActionBuilders {
   
   import cats.implicits._
   import cats.instances.future.catsStdInstancesForFuture
+  import SubmissionActionBuilders.StateFilter
 
   private val exec = ec
-  private val ET = new EitherTHelper[Result] { implicit val ec: ExecutionContext = exec}
+  private val ET = new EitherTHelper[Result] { implicit val ec: ExecutionContext = exec }
   private val failed = (err: String) => BadRequestWithErrorMessage(err)
 
-  def cancelRequestForProductionCredentialsPage(appId: ApplicationId) = whenTeamMemberOnApp(appId) { implicit request =>
+  def cancelRequestForProductionCredentialsPage(appId: ApplicationId) = withApplicationSubmission(StateFilter.notProduction)(appId) { implicit request =>
     (
       for {
         extSubmission          <- ET.fromOptionF(submissionService.fetchLatestSubmission(appId), failed("No subsmission and/or application found"))
@@ -87,8 +90,13 @@ class CancelRequestController @Inject() (
     .fold[Result](identity, identity)
   }
 
-  def cancelRequestForProductionCredentialsAction(appId: ApplicationId) = whenTeamMemberOnApp(appId) { implicit request =>
-    lazy val goBackToProdCredsChecklist = Redirect(modules.submissions.controllers.routes.ProdCredsChecklistController.productionCredentialsChecklist(appId))
+  def cancelRequestForProductionCredentialsAction(appId: ApplicationId) = withApplicationSubmission(StateFilter.notProduction)(appId) { implicit request =>
+    lazy val goBackToRegularPage =
+      if(request.submissionRequest.extSubmission.isCompleted) {
+        Redirect(modules.submissions.controllers.routes.CheckAnswersController.checkAnswersPage(appId))
+      } else {
+        Redirect(modules.submissions.controllers.routes.ProdCredsChecklistController.productionCredentialsChecklistPage(appId))
+      }
 
     val isValidSubmit: (String) => Boolean = (s) => s == "cancel-request" || s == "dont-cancel-request"
 
@@ -103,7 +111,7 @@ class CancelRequestController @Inject() (
                                       .filter(isValidSubmit), 
                                     failed("Bad form data")
                                   )
-        cancelAction           <- ET.cond(submitAction == "cancel-request", submitAction, goBackToProdCredsChecklist )
+        cancelAction           <- ET.cond(submitAction == "cancel-request", submitAction, goBackToRegularPage )
         _                      <- ET.liftF(productionApplicationConnector.deleteApplication(appId))
       } yield Ok(cancelledRequestForProductionCredentialsView(request.application.name))
     )

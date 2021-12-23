@@ -16,16 +16,16 @@
 
 package mocks.service
 
+import domain.models.connectors.CombinedApi
 import org.mockito.{ArgumentMatchersSugar, MockitoSugar}
 import service.EmailPreferencesService
 
 import scala.concurrent.Future.successful
-import domain.models.connectors.ExtendedApiDefinition
 
 trait EmailPreferencesServiceMock extends MockitoSugar with ArgumentMatchersSugar {
   val emailPreferencesServiceMock = mock[EmailPreferencesService]
 
-  def fetchAPIDetailsReturns(apis: List[ExtendedApiDefinition]) = {
+  def fetchAPIDetailsReturns(apis: List[CombinedApi]) = {
     when(emailPreferencesServiceMock.fetchAPIDetails(*)(*)).thenReturn(successful(apis))
   }
 }
