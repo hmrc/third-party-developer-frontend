@@ -22,9 +22,6 @@ import org.joda.time.DateTimeZone
 import uk.gov.hmrc.play.json.Union
 
 trait SubmissionsJsonFormatters extends GroupOfQuestionnairesJsonFormatters {
-  
-  implicit val keyReadsQuestionId: KeyReads[QuestionId] = key => JsSuccess(QuestionId(key))
-  implicit val keyWritesQuestionId: KeyWrites[QuestionId] = _.value
 
   implicit val keyReadsQuestionnaireId: KeyReads[QuestionnaireId] = key => JsSuccess(QuestionnaireId(key))
   implicit val keyWritesQuestionnaireId: KeyWrites[QuestionnaireId] = _.value

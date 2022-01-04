@@ -26,15 +26,23 @@ trait QuestionJsonFormatters extends StatementJsonFormatters with MapJsonFormatt
   implicit val jsonFormatWording = Json.valueFormat[Wording]
   implicit val jsonFormatLabel = Json.valueFormat[Label]
 
-  implicit val jsonFormatFailMarkAnswer = Json.format[Fail.type]
-  implicit val jsonFormatWarnMarkAnswer = Json.format[Warn.type]
-  implicit val jsonFormatPassMarkAnswer = Json.format[Pass.type]
+  implicit val markWrites : Writes[Mark] = new Writes[Mark] {
+    override def writes(o: Mark): JsValue = o match {
+      case Fail => JsString("fail")
+      case Warn => JsString("warn")
+      case Pass => JsString("pass")
+    }
+  }
   
-  implicit val jsonFormatMarkAnswer = Union.from[Mark]("markAnswer")
-    .and[Fail.type]("fail")
-    .and[Warn.type]("warn")
-    .and[Pass.type]("pass")
-    .format
+  implicit val markReads : Reads[Mark] = Reads {
+    case JsString("fail") => JsSuccess(Fail)
+    case JsString("warn") => JsSuccess(Warn)
+    case JsString("pass") => JsSuccess(Pass)
+    case _ => JsError("Failed to parse Mark value")
+  }
+
+  implicit val keyReadsQuestionId: KeyReads[QuestionId] = key => JsSuccess(QuestionId(key))
+  implicit val keyWritesQuestionId: KeyWrites[QuestionId] = _.value
 
   implicit val keyReadsPossibleAnswer: KeyReads[PossibleAnswer] = key => JsSuccess(PossibleAnswer(key))
   implicit val keyWritesPossibleAnswer: KeyWrites[PossibleAnswer] = _.value
