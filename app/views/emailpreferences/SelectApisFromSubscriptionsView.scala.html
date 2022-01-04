@@ -1,5 +1,5 @@
 @*
- * Copyright 2021 HM Revenue & Customs
+ * Copyright 2022 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -37,12 +37,12 @@
   developerSession = Some(loggedIn)
 ) {
   @errorSummary2(form)
-  <div class="form-group @if(form.errors("apiRadio").nonEmpty || form.errors.map(_.message).contains(FormKeys.selectedApisNonSelectedGlobalKey)) {form-group-error}">
+  <div class="govuk-form-group @if(form.errors("apiRadio").nonEmpty || form.errors.map(_.message).contains(FormKeys.selectedApisNonSelectedGlobalKey)) {govuk-form-group--error}">
     <fieldset class="govuk-fieldset" aria-describedby="select-all-description">
       <legend class="govuk-fieldset__legend govuk-fieldset__legend--l">
         <h1 id="pageHeading" class="govuk-fieldset__heading">@pageHeading</h1>
       </legend>
-      <div id="select-all-description" class="govuk-hint @if(form.errors("topic").nonEmpty){govuk-form-group--error}">
+      <div id="select-all-description" class="govuk-hint">
         Select all that apply.
       </div>
       @helper.form(action = controllers.profile.routes.EmailPreferences.selectApisFromSubscriptionsAction(applicationId), 'class -> "form", 'id -> "emailPreferencesApisForm") {
@@ -59,13 +59,15 @@
           }
           <input type="hidden" class="govuk-visually-hidden" value="@applicationId.value" name="applicationId" id="applicationId"/>
         </div>
+        <br />
+        <br />
+        <button id="submit" class="govuk-button" type="submit">Continue</button>
       }
     </fieldset>
   </div>
-  <button id="submit" class="govuk-button" type="submit">Continue</button>
 
   @helper.form(action = controllers.profile.routes.EmailPreferences.selectNoApisFromSubscriptionsAction(applicationId), 'class -> "form", 'id -> "selectNoApisFromSubscriptionsForm") {
     @helper.CSRF.formField
-    <button id="noSelectAPIs" class="govuk-link govuk-link--no-visited-state" type="submit">I don't want emails about these APIs</button>
+    <button id="noSelectAPIs" class="govuk-button govuk-button--secondary" type="submit">I don't want emails about these APIs</button>
   }
 }
