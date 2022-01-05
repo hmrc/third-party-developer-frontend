@@ -17,18 +17,15 @@
 package service
 
 import cats.data.OptionT
-import domain.models.applications.ApplicationId
-import play.api.mvc._
-import uk.gov.hmrc.http.HeaderCarrier
-import javax.inject.{Inject, Singleton}
-
-import scala.concurrent.{ExecutionContext, Future}
-import controllers.ApplicationRequest
-import domain.models.applications._
+import controllers.{ApplicationRequest, UserRequest}
 import domain.models.apidefinitions._
-import domain.models.subscriptions._
+import domain.models.applications._
 import domain.models.subscriptions.ApiSubscriptionFields._
-import controllers.UserRequest
+import domain.models.subscriptions._
+import uk.gov.hmrc.http.HeaderCarrier
+
+import javax.inject.{Inject, Singleton}
+import scala.concurrent.{ExecutionContext, Future}
 
 @Singleton
 class ApplicationActionService @Inject()(
@@ -95,7 +92,7 @@ class ApplicationActionService @Inject()(
 
       cdata.versions.toList.sortBy(_._1)(orderDescending).map {
         case (k,v) => handleVersion(k,v)
-      }.toList
+      }
     }
 
     summaryApiDefinitions.toList.flatMap {

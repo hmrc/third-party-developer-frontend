@@ -16,22 +16,22 @@
 
 package views.emailpreferences
 
+import controllers.TaxRegimeEmailPreferencesForm
 import domain.models.developers.LoggedInState
 import domain.models.emailpreferences.APICategoryDisplayDetails
 import domain.models.flows.EmailPreferencesFlowV2
 import org.jsoup.Jsoup
 import org.jsoup.nodes.Document
+import play.api.data.Form
 import play.api.mvc.AnyContentAsEmpty
-import play.api.data.{Form, FormError}
 import play.api.test.FakeRequest
+import play.twirl.api.Html
+import utils.ViewHelpers._
 import utils.WithCSRFAddToken
 import views.helper.CommonViewSpec
-import utils.ViewHelpers._
 import views.html.emailpreferences.FlowSelectCategoriesView
 
 import scala.collection.JavaConverters._
-import controllers.TaxRegimeEmailPreferencesForm
-import play.twirl.api.Html
 
 class FlowSelectCategoriesViewSpec extends CommonViewSpec with WithCSRFAddToken {
 
@@ -90,8 +90,6 @@ class FlowSelectCategoriesViewSpec extends CommonViewSpec with WithCSRFAddToken 
     "render the api categories selection Page with no check boxes selected when no user selected categories passed into the view" in new Setup {
       override val request = FakeRequest().withCSRFToken
 
-      val flowSelectCategory = app.injector.instanceOf[FlowSelectCategoriesView]
-
       val testForm = TaxRegimeEmailPreferencesForm.form
 
       val page: Html =
@@ -112,8 +110,6 @@ class FlowSelectCategoriesViewSpec extends CommonViewSpec with WithCSRFAddToken 
 
     "render the api categories selection Page with error summary displayed when form has errors" in new Setup {
       override val request = FakeRequest().withCSRFToken
-
-      val flowSelectCategory = app.injector.instanceOf[FlowSelectCategoriesView]
 
       val formWithErrors = TaxRegimeEmailPreferencesForm.form.withError("key", "message")
 
@@ -139,8 +135,6 @@ class FlowSelectCategoriesViewSpec extends CommonViewSpec with WithCSRFAddToken 
 
     "render the api categories selection Page with boxes selected when user selected categories passed to the view" in new Setup {
       override val request = FakeRequest().withCSRFToken
-
-      val flowSelectCategory = app.injector.instanceOf[FlowSelectCategoriesView]
 
       val testForm = TaxRegimeEmailPreferencesForm.form
 
