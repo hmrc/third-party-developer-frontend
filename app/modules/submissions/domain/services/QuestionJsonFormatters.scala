@@ -26,12 +26,10 @@ trait QuestionJsonFormatters extends StatementJsonFormatters with MapJsonFormatt
   implicit val jsonFormatWording = Json.valueFormat[Wording]
   implicit val jsonFormatLabel = Json.valueFormat[Label]
 
-  implicit val markWrites : Writes[Mark] = new Writes[Mark] {
-    override def writes(o: Mark): JsValue = o match {
-      case Fail => JsString("fail")
-      case Warn => JsString("warn")
-      case Pass => JsString("pass")
-    }
+  implicit val markWrites : Writes[Mark] = Writes {
+    case Fail => JsString("fail")
+    case Warn => JsString("warn")
+    case Pass => JsString("pass")
   }
   
   implicit val markReads : Reads[Mark] = Reads {
