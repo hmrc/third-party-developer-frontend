@@ -32,7 +32,9 @@ trait SubmissionsTestData {
           StatementLink("development practices (opens in a new tab)", "http://www.google.com"),
           StatementText(".")
         )
-      )
+      ),
+      yesMarking = Pass,
+      noMarking = Warn
     )
 
     val question2 = YesNoQuestion(
@@ -44,7 +46,9 @@ trait SubmissionsTestData {
           StatementLink("error handling specification (opens in new tab)", "http://www.google.com"),
           StatementText(".")
         )
-      )
+      ),
+      yesMarking = Pass,
+      noMarking = Fail
     )
       
     val question3 = YesNoQuestion(
@@ -56,7 +60,9 @@ trait SubmissionsTestData {
           StatementLink("Web Content Accessibility Guidelines (WCAG) (opens in new tab)", "http://www.google.com"),
           StatementText(". Desktop software should follow equivalent offline standards.")
         )
-      )
+      ),
+      yesMarking = Pass,
+      noMarking = Warn
     )
 
     val questionnaire = Questionnaire(
@@ -79,7 +85,9 @@ trait SubmissionsTestData {
           StatementText("You must develop software following our"),
           StatementLink("development practices (opens in a new tab)", "http://www.google.com")
         )
-      )
+      ),
+      yesMarking = Pass,
+      noMarking = Warn
     )
 
     val questionnaire = Questionnaire(

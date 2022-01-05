@@ -16,7 +16,9 @@
 
 package modules.submissions.domain.services
 
-trait QuestionJsonFormatters extends StatementJsonFormatters {
+import modules.services.MapJsonFormatters
+
+trait QuestionJsonFormatters extends StatementJsonFormatters with MapJsonFormatters {
   import modules.submissions.domain.models._
   import play.api.libs.json._
   import uk.gov.hmrc.play.json.Union
@@ -24,6 +26,25 @@ trait QuestionJsonFormatters extends StatementJsonFormatters {
   implicit val jsonFormatWording = Json.valueFormat[Wording]
   implicit val jsonFormatLabel = Json.valueFormat[Label]
 
+  implicit val markWrites : Writes[Mark] = Writes {
+    case Fail => JsString("fail")
+    case Warn => JsString("warn")
+    case Pass => JsString("pass")
+  }
+  
+  implicit val markReads : Reads[Mark] = Reads {
+    case JsString("fail") => JsSuccess(Fail)
+    case JsString("warn") => JsSuccess(Warn)
+    case JsString("pass") => JsSuccess(Pass)
+    case _ => JsError("Failed to parse Mark value")
+  }
+
+  implicit val keyReadsQuestionId: KeyReads[QuestionId] = key => JsSuccess(QuestionId(key))
+  implicit val keyWritesQuestionId: KeyWrites[QuestionId] = _.value
+
+  implicit val keyReadsPossibleAnswer: KeyReads[PossibleAnswer] = key => JsSuccess(PossibleAnswer(key))
+  implicit val keyWritesPossibleAnswer: KeyWrites[PossibleAnswer] = _.value
+  implicit val jsonListMapKV = listMapReads[PossibleAnswer, Mark]
 
   implicit val jsonFormatPossibleAnswer = Json.valueFormat[PossibleAnswer]
   implicit val jsonFormatTextQuestion = Json.format[TextQuestion]
@@ -42,3 +63,4 @@ trait QuestionJsonFormatters extends StatementJsonFormatters {
 }
 
 object QuestionJsonFormatters extends QuestionJsonFormatters
+
