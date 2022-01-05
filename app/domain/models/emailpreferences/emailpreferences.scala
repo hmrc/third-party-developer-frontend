@@ -57,12 +57,6 @@ object EmailTopic extends StringEnum[EmailTopic] with StringPlayJsonValueEnum[Em
 
 }
 
-//case class APICategory(value: String) extends AnyVal
-//
-//object APICategory {
-//  implicit val formatApiCategory = Json.valueFormat[APICategory]
-//}
-
 // TODO - make category an APICategory
 case class APICategoryDisplayDetails(category: String, name: String) {
   def toAPICategory(): ApiCategory = {
