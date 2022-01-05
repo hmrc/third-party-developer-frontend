@@ -16,12 +16,11 @@
 
 package mocks.connector
 
+import connectors.ThirdPartyDeveloperConnector
+import domain.models.developers.{Developer, UserId}
 import org.mockito.{ArgumentMatchersSugar, MockitoSugar}
 
-import scala.concurrent.Future.{failed, successful}
-import connectors.ThirdPartyDeveloperConnector
-import domain.models.developers.UserId
-import domain.models.developers.Developer
+import scala.concurrent.Future.successful
 
 trait ThirdPartyDeveloperConnectorMockModule extends MockitoSugar with ArgumentMatchersSugar {
   

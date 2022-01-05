@@ -107,20 +107,20 @@ class EmailPreferencesServiceSpec extends AsyncHmrcSpec {
       "call the flow repository correctly and return flow when repository returns data" in new SetUp {
         val flowObject =
           NewApplicationEmailPreferencesFlowV2(sessionId, emailPreferences, applicationId, Set(combinedApi("Test Api Definition")), Set.empty, Set("TECHNICAL"))
-        when(mockFlowRepository.fetchBySessionIdAndFlowType[NewApplicationEmailPreferencesFlowV2](eqTo(sessionId), eqTo(FlowType.NEW_APPLICATION_EMAIL_PREFERENCES))(*)).thenReturn(Future.successful(Some(flowObject)))
+        when(mockFlowRepository.fetchBySessionIdAndFlowType[NewApplicationEmailPreferencesFlowV2](eqTo(sessionId), eqTo(FlowType.NEW_APPLICATION_EMAIL_PREFERENCES_V2))(*)).thenReturn(Future.successful(Some(flowObject)))
         val result = await(underTest.fetchNewApplicationEmailPreferencesFlow(loggedInDeveloper, applicationId))
         result shouldBe flowObject
-        verify(mockFlowRepository).fetchBySessionIdAndFlowType(eqTo(sessionId), eqTo(FlowType.NEW_APPLICATION_EMAIL_PREFERENCES))(*)
+        verify(mockFlowRepository).fetchBySessionIdAndFlowType(eqTo(sessionId), eqTo(FlowType.NEW_APPLICATION_EMAIL_PREFERENCES_V2))(*)
       }
 
        "call the flow repository correctly and create a new flow object when nothing returned" in new SetUp {
          val expectedFlowObject =
            NewApplicationEmailPreferencesFlowV2(sessionId, emailPreferences, applicationId, Set.empty, Set.empty, Set("TECHNICAL"))
-         when(mockFlowRepository.fetchBySessionIdAndFlowType(eqTo(sessionId), eqTo(FlowType.NEW_APPLICATION_EMAIL_PREFERENCES))(*)).thenReturn(Future.successful(None))
+         when(mockFlowRepository.fetchBySessionIdAndFlowType(eqTo(sessionId), eqTo(FlowType.NEW_APPLICATION_EMAIL_PREFERENCES_V2))(*)).thenReturn(Future.successful(None))
          val result = await(underTest.fetchNewApplicationEmailPreferencesFlow(loggedInDeveloper, applicationId))
 
          result shouldBe expectedFlowObject
-         verify(mockFlowRepository).fetchBySessionIdAndFlowType(eqTo(sessionId), eqTo(FlowType.NEW_APPLICATION_EMAIL_PREFERENCES))(*)
+         verify(mockFlowRepository).fetchBySessionIdAndFlowType(eqTo(sessionId), eqTo(FlowType.NEW_APPLICATION_EMAIL_PREFERENCES_V2))(*)
        }
     }
 
@@ -185,7 +185,7 @@ class EmailPreferencesServiceSpec extends AsyncHmrcSpec {
         when(mockApmConnector.fetchCombinedApi(api1Name)).thenReturn(Future.successful(Right(api1)))
         when(mockApmConnector.fetchCombinedApi(api2Name)).thenReturn(Future.successful(Right(api2)))
 
-        when(mockFlowRepository.fetchBySessionIdAndFlowType[NewApplicationEmailPreferencesFlowV2](eqTo(sessionId), eqTo(FlowType.NEW_APPLICATION_EMAIL_PREFERENCES))(*))
+        when(mockFlowRepository.fetchBySessionIdAndFlowType[NewApplicationEmailPreferencesFlowV2](eqTo(sessionId), eqTo(FlowType.NEW_APPLICATION_EMAIL_PREFERENCES_V2))(*))
           .thenReturn(Future.successful(Some(existingFlowObject)))
 
         when(mockFlowRepository.saveFlow(eqTo(expectedFlowObject))(*)).thenReturn(Future.successful(expectedFlowObject))

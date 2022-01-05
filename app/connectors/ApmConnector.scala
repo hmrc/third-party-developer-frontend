@@ -78,7 +78,7 @@ class ApmConnector @Inject()(http: HttpClient, config: ApmConnector.Config, metr
     http.GET[Map[ApiContext, ApiData]](s"${config.serviceBaseUrl}/api-definitions/open", Seq("environment" -> environment.toString))
   }
 
-  @deprecated
+  @deprecated("This is no longer used, please use fetchAllCombinedAPICategories")
   def fetchAllAPICategories()(implicit hc: HeaderCarrier): Future[List[APICategoryDisplayDetails]] =
     http.GET[List[APICategoryDisplayDetails]](s"${config.serviceBaseUrl}/api-categories")
 
@@ -122,12 +122,12 @@ class ApmConnector @Inject()(http: HttpClient, config: ApmConnector.Config, metr
 
   def addTeamMember(applicationId: ApplicationId, addTeamMember: AddTeamMemberRequest)(implicit hc: HeaderCarrier): Future[Unit] = metrics.record(api) {
     http.POST[AddTeamMemberRequest, ErrorOrUnit](s"${config.serviceBaseUrl}/applications/${applicationId.value}/collaborators", addTeamMember)
-      .map(r => r match {
+      .map {
         case Left(UpstreamErrorResponse(_, CONFLICT, _, _)) => throw new TeamMemberAlreadyExists
         case Left(UpstreamErrorResponse(_, NOT_FOUND, _, _)) => throw new ApplicationNotFound
         case Left(err) => throw err
         case Right(_) => ()
-      })
+      }
   }
 
   def fetchUpliftableApiIdentifiers(implicit hc: HeaderCarrier): Future[Set[ApiIdentifier]] =
