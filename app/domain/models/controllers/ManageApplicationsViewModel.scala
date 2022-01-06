@@ -25,7 +25,8 @@ case class ManageApplicationsViewModel(
 ) {
   lazy val hasNoProductionApplications = productionApplicationSummaries.isEmpty
   lazy val hasPriviledgedApplications = sandboxApplicationSummaries.exists(_.accessType.isPriviledged) || productionApplicationSummaries.exists(_.accessType.isPriviledged)
-  lazy val sandboxApplicationsSummariesForUplift = sandboxApplicationSummaries.filter(s => upliftableApplicationIds.contains(s.id))
+  lazy val standardSandboxApplicationSummaries = sandboxApplicationSummaries.filter(s => s.accessType.isStandard)
+  lazy val sandboxApplicationsSummariesForUplift = standardSandboxApplicationSummaries.filter(s => upliftableApplicationIds.contains(s.id))
   lazy val countOfAppsThatCanBeUplifted = sandboxApplicationsSummariesForUplift.size
-  lazy val hasAppsThatCannotBeUplifted = countOfAppsThatCanBeUplifted < sandboxApplicationSummaries.size
+  lazy val hasAppsThatCannotBeUplifted = countOfAppsThatCanBeUplifted < standardSandboxApplicationSummaries.size
 }

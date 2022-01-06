@@ -25,12 +25,13 @@ import domain.models.controllers.ApplicationSummary
 import domain.models.applications.ApplicationId
 import modules.uplift.services.UpliftLogic
 
+
 class UpliftLogicMock extends MockitoSugar with ArgumentMatchersSugar {
 
   val upliftLogicMock = mock[UpliftLogic]
 
-  def aUsersUplfitableAndNotUpliftableAppsReturns(summaries : List[ApplicationSummary], upliftableAppIds : List[ApplicationId]) = {
-      when(upliftLogicMock.aUsersSandboxAdminSummariesAndUpliftIds(*[UserId])(*)).thenReturn(successful((summaries, upliftableAppIds.toSet)))
+  def aUsersUplfitableAndNotUpliftableAppsReturns(summaries : List[ApplicationSummary], upliftableAppIds : List[ApplicationId], nonUpliftableAppIds : List[ApplicationId]) = {
+      when(upliftLogicMock.aUsersSandboxAdminSummariesAndUpliftIds(*[UserId])(*)).thenReturn(successful(UpliftLogic.Data(summaries, upliftableAppIds.toSet, nonUpliftableAppIds.toSet)))
   }
 }
 

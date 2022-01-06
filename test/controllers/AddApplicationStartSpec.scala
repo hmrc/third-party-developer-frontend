@@ -194,7 +194,7 @@ class AddApplicationStartSpec
       when(flowServiceMock.resetFlow(*)).thenReturn(Future.successful(GetProductionCredentialsFlow("", None, None, None)))
 
       val summaries = sandboxAppSummaries.take(1)
-      aUsersUplfitableAndNotUpliftableAppsReturns(summaries, summaries.map(_.id))
+      aUsersUplfitableAndNotUpliftableAppsReturns(summaries, summaries.map(_.id), List.empty)
 
       when(upliftJourneyConfigMock.status).thenReturn(On)
       
@@ -211,7 +211,7 @@ class AddApplicationStartSpec
       when(flowServiceMock.resetFlow(*)).thenReturn(Future.successful(GetProductionCredentialsFlow("", None, None, None)))
 
       val summaries = sandboxAppSummaries.take(2)
-      aUsersUplfitableAndNotUpliftableAppsReturns(summaries, summaries.map(_.id))
+      aUsersUplfitableAndNotUpliftableAppsReturns(summaries, summaries.map(_.id), List.empty)
 
       when(upliftJourneyConfigMock.status).thenReturn(On)
 
@@ -256,7 +256,7 @@ class AddApplicationStartSpec
       when(flowServiceMock.resetFlow(*)).thenReturn(Future.successful(GetProductionCredentialsFlow("", None, None, None)))
 
       val summaries = sandboxAppSummaries.take(1)
-      aUsersUplfitableAndNotUpliftableAppsReturns(summaries, summaries.map(_.id))
+      aUsersUplfitableAndNotUpliftableAppsReturns(summaries, summaries.map(_.id), List.empty)
 
       when(upliftJourneyConfigMock.status).thenReturn(OnDemand)
 
@@ -290,7 +290,7 @@ class AddApplicationStartSpec
        when(flowServiceMock.resetFlow(*)).thenReturn(Future.successful(GetProductionCredentialsFlow("", None, None, None)))
 
           val summaries = sandboxAppSummaries.take(1)
-          aUsersUplfitableAndNotUpliftableAppsReturns(summaries, summaries.map(_.id))
+          aUsersUplfitableAndNotUpliftableAppsReturns(summaries, summaries.map(_.id), List.empty)
 
           when(upliftJourneyConfigMock.status).thenReturn(On)
 

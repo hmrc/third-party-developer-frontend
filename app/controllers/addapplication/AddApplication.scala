@@ -109,10 +109,9 @@ class AddApplication @Inject() (
 
   def soleApplicationToUpliftAction(appId: ApplicationId): Action[AnyContent] = loggedInAction { implicit request =>
     (for {
-      (sandboxAppSummaries, upliftableAppIds) <- upliftLogic.aUsersSandboxAdminSummariesAndUpliftIds(request.userId)
-      upliftableSummaries = sandboxAppSummaries.filter(s => upliftableAppIds.contains(s.id))
-    } yield upliftableSummaries match {
-      case summary :: Nil => progressOnUpliftJourney(upliftableSummaries.head.id)(request)
+      upliftData          <- upliftLogic.aUsersSandboxAdminSummariesAndUpliftIds(request.userId)
+    } yield upliftData.upliftableSummaries match {
+      case summary :: Nil => progressOnUpliftJourney(summary.id)(request)
       case _              => successful(BadRequest(Json.toJson(BadRequestError)))
     }).flatten
   }
@@ -129,16 +128,12 @@ class AddApplication @Inject() (
     }
 
     // TODO - tidy as for comp
-    upliftLogic.aUsersSandboxAdminSummariesAndUpliftIds(request.userId).flatMap { data =>
+    upliftLogic.aUsersSandboxAdminSummariesAndUpliftIds(request.userId).flatMap { upliftData =>
       flowService.resetFlow(request.developerSession).flatMap { _ =>
-        val (summaries, upliftableAppIds) = data
-        val upliftableSummaries = summaries.filter(s => upliftableAppIds.contains(s.id))
-        val hasAppsThatCannotBeUplifted = upliftableSummaries.size < summaries.size
-
-        upliftableAppIds.toList match {
+        upliftData.upliftableApplicationIds.toList match {
           case Nil          => successful(BadRequest(Json.toJson(BadRequestError)))
-          case appId :: Nil if !hasAppsThatCannotBeUplifted => progressOnUpliftJourney(appId)(request)
-          case _ => chooseApplicationToUplift(upliftableSummaries, hasAppsThatCannotBeUplifted)(request)
+          case appId :: Nil if !upliftData.hasAppsThatCannotBeUplifted => progressOnUpliftJourney(appId)(request)
+          case _ => chooseApplicationToUplift(upliftData.upliftableSummaries, upliftData.hasAppsThatCannotBeUplifted)(request)
         }
       }
     }
@@ -161,15 +156,12 @@ class AddApplication @Inject() (
       progressOnUpliftJourney(validForm.applicationId)(request)
 
     def handleInvalidForm(formWithErrors: Form[ChooseApplicationToUpliftForm]) = {
-      upliftLogic.aUsersSandboxAdminSummariesAndUpliftIds(request.userId) flatMap { data =>
-      val (summaries, upliftableAppIds) = data
-      val upliftableSummaries = summaries.filter(s => upliftableAppIds.contains(s.id))
-      val haveAppsThatCannotBeUplifted = upliftableSummaries.size < summaries.size
+      upliftLogic.aUsersSandboxAdminSummariesAndUpliftIds(request.userId) flatMap { upliftData =>
 
-      (upliftableSummaries.size, haveAppsThatCannotBeUplifted) match {
+      ( upliftData.upliftableApplicationIds.size, upliftData.hasAppsThatCannotBeUplifted) match {
           case (0, _)     => successful(BadRequest(Json.toJson(BadRequestError)))
           case (1, false) => successful(BadRequest(Json.toJson(BadRequestError)))
-          case _  => successful(BadRequest(chooseApplicationToUpliftView(formWithErrors, upliftableSummaries.toSeq, haveAppsThatCannotBeUplifted)))
+          case _  => successful(BadRequest(chooseApplicationToUpliftView(formWithErrors, upliftData.upliftableSummaries.toSeq, upliftData.hasAppsThatCannotBeUplifted)))
         }
       }
     }      

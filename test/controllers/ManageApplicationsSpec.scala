@@ -90,7 +90,7 @@ class ManageApplicationsSpec
 
     "return the manage Applications page with the user logged in" in new Setup {
       val prodSummary = ApplicationSummary.from(sampleApp, loggedInDeveloper.developer.userId)
-      aUsersUplfitableAndNotUpliftableAppsReturns(List.empty, List.empty)
+      aUsersUplfitableAndNotUpliftableAppsReturns(List.empty, List.empty, List.empty)
       fetchProductionSummariesByTeamMemberReturns(List(prodSummary))
 
       private val result = manageApplicationsController.manageApps()(loggedInRequest)
