@@ -54,7 +54,7 @@ class ManageApplications @Inject() (
     } yield (sandboxApplicationSummaries, productionAppSummaries) match {
       case (Nil, Nil) => Ok(addApplicationSubordinateEmptyNestView())
       case _ =>         Ok(manageApplicationsView(
-          ManageApplicationsViewModel(sandboxApplicationSummaries, productionAppSummaries, upliftableApplicationIds)
+          ManageApplicationsViewModel(sandboxApplicationSummaries, productionAppSummaries, upliftableApplicationIds, upliftData.hasAppsThatCannotBeUplifted)
         ))
     }
   }

@@ -61,13 +61,13 @@ class ManageApplicationsViewModelSpec extends AnyWordSpec with Matchers {
       )
 
     "return true if only sandbox apps" in {
-      val model = ManageApplicationsViewModel(Seq(sandboxApp), Seq.empty, Set.empty)
+      val model = ManageApplicationsViewModel(Seq(sandboxApp), Seq.empty, Set.empty, false)
 
       model.hasNoProductionApplications shouldBe true
     }
 
     "return false if there is a production app" in {
-      val model = ManageApplicationsViewModel(Seq(sandboxApp), Seq(productionApp), Set.empty)
+      val model = ManageApplicationsViewModel(Seq(sandboxApp), Seq(productionApp), Set.empty, false)
 
       model.hasNoProductionApplications shouldBe false
     }
