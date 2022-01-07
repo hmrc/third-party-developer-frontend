@@ -88,19 +88,23 @@
         </fieldset>
       </div>
 
+      @if(showFluff == true) {
+        @invalidAppsSignpost
+      }
+
       <button id="submit" class="govuk-button" type="submit">Continue</button>
     }
   } else {
     <h1 class="govuk-heading-l">You are requesting production credentials for</h1>
     
     <p class="govuk-body-l">@{upliftableApps.head.name}</p>
+
+    @if(showFluff == true) {
+      @invalidAppsSignpost
+    }
     
     <p class="govuk-body">
       <a id="continue" href="@controllers.addapplication.routes.AddApplication.soleApplicationToUpliftAction(upliftableApps.head.id)" class="govuk-button">Continue</a>
     </p>    
-  }
-
-  @if(showFluff == true) {
-    @invalidAppsSignpost
   }
 }
