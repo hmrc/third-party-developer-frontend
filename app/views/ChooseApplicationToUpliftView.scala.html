@@ -32,19 +32,17 @@
 @needToChoose = @{upliftableApps.size > 1}
 
 @invalidAppsSignpost = {
-  @if(needToChoose) {
-    <p class="govuk-body">
-      Your other sandbox applications subscribe to APIs not available in production. 
-    </p>
-    <p class="govuk-body">
-      If you want production credentials for a different sandbox application, you need to:
-    </p>
-    <ul class="govuk-list govuk-list--number">
-      <li>Review the API documentation and check which APIs are available in production.</li>
-      <li>Update the API subscriptions.</li>
-      <li>Request production credentials again.</li>
-    </ul>
-  }
+  <p class="govuk-body">
+    Your other sandbox applications subscribe to APIs not available in production. 
+  </p>
+  <p class="govuk-body">
+    If you want production credentials for a different sandbox application, you need to:
+  </p>
+  <ul class="govuk-list govuk-list--number">
+    <li>Review the API documentation and check which APIs are available in production.</li>
+    <li>Update the API subscriptions.</li>
+    <li>Request production credentials again.</li>
+  </ul>
   <p class="govuk-body">You do not need production credentials for applications that only subscribe to:</p>
   <ul class="govuk-list govuk-list--bullet">
     <li>APIs for testing your service</li>
@@ -90,19 +88,23 @@
         </fieldset>
       </div>
 
+      @if(showFluff == true) {
+        @invalidAppsSignpost
+      }
+
       <button id="submit" class="govuk-button" type="submit">Continue</button>
     }
   } else {
     <h1 class="govuk-heading-l">You are requesting production credentials for</h1>
     
     <p class="govuk-body-l">@{upliftableApps.head.name}</p>
+
+    @if(showFluff == true) {
+      @invalidAppsSignpost
+    }
     
     <p class="govuk-body">
       <a id="continue" href="@controllers.addapplication.routes.AddApplication.soleApplicationToUpliftAction(upliftableApps.head.id)" class="govuk-button">Continue</a>
     </p>    
-  }
-
-  @if(showFluff == true) {
-    @invalidAppsSignpost
   }
 }

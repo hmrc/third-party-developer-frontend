@@ -113,7 +113,7 @@ class ViewAllApplicationsPageSpec extends CommonViewSpec with WithCSRFAddToken {
       val loggedIn = utils.DeveloperSession("developer@example.com", "firstName", "lastname", loggedInState = LoggedInState.LOGGED_IN)
       val manageApplicationsView = app.injector.instanceOf[ManageApplicationsView]
 
-      manageApplicationsView.render(ManageApplicationsViewModel(sandboxAppSummaries, productionAppSummaries, upliftableApplicationIds), request, loggedIn, messagesProvider, appConfig, "nav-section", environmentNameService)
+      manageApplicationsView.render(ManageApplicationsViewModel(sandboxAppSummaries, productionAppSummaries, upliftableApplicationIds, false), request, loggedIn, messagesProvider, appConfig, "nav-section", environmentNameService)
     }
 
     val applicationId = ApplicationId("1111")

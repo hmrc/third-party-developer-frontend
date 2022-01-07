@@ -31,7 +31,7 @@
 @subordinateWording = @{appConfig.nameOfSubordinateEnvironment.toLowerCase}
 @theSubordinateWording = @{environmentNameService.subordinateWording}
 
-@flags = @{ Map(LeftHandNavFlags.keyForIsGetProductionCredentialsEnabled -> (model.countOfAppsThatCanBeUplifted > 0)) }
+@flags = @{ Map(LeftHandNavFlags.keyForIsGetProductionCredentialsEnabled -> (model.hasAppsThatCanBeUplifted)) }
 
 @devMain(
   title = "View all applications",
@@ -54,27 +54,28 @@
     </p>
   }
 
-  @if(model.hasNoProductionApplications) {
-    @if(model.countOfAppsThatCanBeUplifted == 0) {
-      <h2 class="govuk-heading-m">Getting production credentials</h2>
-      <p class="govuk-body">
-        If your application subscribes to an API only available in sandbox, you cannot request production credentials. @Link.toInternalPage(url = s"${appConfig.apiDocumentationFrontendUrl}/api-documentation/docs/api", value = Some("Review the  API documentation")).toHtml to check if an API is available in production
-      </p>
-      <p class="govuk-body">
-        You will need to test your application before requesting @principalWording credentials.
-      </p>
-      <p class="govuk-body">You do not need @principalWording credentials for APIs with only open access endpoints or:</p>
-      <ul class="govuk-list govuk-list--bullet">
-        <li>APIs for testing your service</li>
-        <li>Hello World API</li>
-      </ul>
-    } else {
-      <p class="govuk-body">After testing in @theSubordinateWording, you can apply for @appConfig.nameOfPrincipalEnvironment.toLowerCase credentials.</p>
-      <a class="govuk-button" data-module="govuk-button" href="@addapplication.routes.AddApplication.addApplicationPrincipal">
-        Get production credentials
-      </a>
-    }
+  @if(!model.hasAppsThatCanBeUplifted && model.hasAppsThatCannotBeUplifted) {
+    <h2 class="govuk-heading-m">Getting production credentials</h2>
+    <p class="govuk-body">
+      If your application subscribes to an API only available in sandbox, you cannot request production credentials. @Link.toInternalPage(url = s"${appConfig.apiDocumentationFrontendUrl}/api-documentation/docs/api", value = Some("Review the  API documentation")).toHtml to check if an API is available in production
+    </p>
+    <p class="govuk-body">
+      You will need to test your application before requesting @principalWording credentials.
+    </p>
+    <p class="govuk-body">You do not need @principalWording credentials for APIs with only open access endpoints or:</p>
+    <ul class="govuk-list govuk-list--bullet">
+      <li>APIs for testing your service</li>
+      <li>Hello World API</li>
+    </ul>  
   }
+
+  @if(model.hasNoProductionApplications && model.hasAppsThatCanBeUplifted ) {
+    <p class="govuk-body">After testing in @theSubordinateWording, you can apply for @appConfig.nameOfPrincipalEnvironment.toLowerCase credentials.</p>
+    <a class="govuk-button" data-module="govuk-button" href="@addapplication.routes.AddApplication.addApplicationPrincipal">
+      Get production credentials
+    </a>
+  }
+
 }
 
 @applicationList(model: ManageApplicationsViewModel) = {

@@ -151,7 +151,7 @@ class ChooseApplicationToUpliftActionSpec
   "chooseApplicationToUpliftAction" should {
     "go back to the form when no app is selected" in new Setup {
       val summaries = sandboxAppSummaries
-      aUsersUplfitableAndNotUpliftableAppsReturns(summaries, List.empty)
+      aUsersUplfitableAndNotUpliftableAppsReturns(summaries, List.empty, List.empty)
 
       when(flowServiceMock.storeApiSubscriptions(*, *)).thenReturn(Future.successful(GetProductionCredentialsFlow("", None, None, None)))
 
@@ -166,7 +166,7 @@ class ChooseApplicationToUpliftActionSpec
       
       val subsetOfSubscriptions = summaries.head.subscriptionIds.take(1)
       ApmConnectorMock.FetchUpliftableSubscriptions.willReturn(subsetOfSubscriptions)
-      aUsersUplfitableAndNotUpliftableAppsReturns(summaries, summaries.map(_.id))
+      aUsersUplfitableAndNotUpliftableAppsReturns(summaries, summaries.map(_.id), List.empty)
       when(flowServiceMock.storeApiSubscriptions(*, *)).thenReturn(Future.successful(GetProductionCredentialsFlow("", None, None, None)))
 
       val result = underTest.chooseApplicationToUpliftAction()(loggedInRequest.withFormUrlEncodedBody(("applicationId" -> sandboxAppId.value)))

@@ -21,11 +21,10 @@ import domain.models.applications.ApplicationId
 case class ManageApplicationsViewModel(
     sandboxApplicationSummaries: Seq[ApplicationSummary],
     productionApplicationSummaries: Seq[ApplicationSummary],
-    upliftableApplicationIds: Set[ApplicationId]
+    upliftableApplicationIds: Set[ApplicationId],
+    hasAppsThatCannotBeUplifted: Boolean
 ) {
   lazy val hasNoProductionApplications = productionApplicationSummaries.isEmpty
   lazy val hasPriviledgedApplications = sandboxApplicationSummaries.exists(_.accessType.isPriviledged) || productionApplicationSummaries.exists(_.accessType.isPriviledged)
-  lazy val sandboxApplicationsSummariesForUplift = sandboxApplicationSummaries.filter(s => upliftableApplicationIds.contains(s.id))
-  lazy val countOfAppsThatCanBeUplifted = sandboxApplicationsSummariesForUplift.size
-  lazy val hasAppsThatCannotBeUplifted = countOfAppsThatCanBeUplifted < sandboxApplicationSummaries.size
+  lazy val hasAppsThatCanBeUplifted = upliftableApplicationIds.nonEmpty
 }

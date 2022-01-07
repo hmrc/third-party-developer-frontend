@@ -47,27 +47,36 @@ class UpliftLogic @Inject()(
     summaries.map(s => s.id -> s.subscriptionIds).toMap
   }
 
-  def aUsersSandboxAdminSummariesAndUpliftIds(userId: UserId)(implicit hc: HeaderCarrier): Future[(List[ApplicationSummary], Set[ApplicationId])] = {
+  def aUsersSandboxAdminSummariesAndUpliftIds(userId: UserId)(implicit hc: HeaderCarrier): Future[UpliftLogic.Data] = {
     // Concurrent requests
     val fApisAvailableInProd = apmConnector.fetchUpliftableApiIdentifiers
     val fAllSandboxApiDetails = apmConnector.fetchAllApis(Environment.SANDBOX)
     val fAllSummaries = appsByTeamMember.fetchSandboxSummariesByTeamMember(userId)
-    val fAdminSummaries = fAllSummaries.map(_.filter(_.role.isAdministrator))
-
+    
     for {
-      apisAvailableInProd <- fApisAvailableInProd
-      sandboxApis <- fAllSandboxApiDetails
-      allSummaries <- fAllSummaries
-      adminSummaries <- fAdminSummaries
+      apisAvailableInProd     <- fApisAvailableInProd
+      sandboxApis             <- fAllSandboxApiDetails
+      allSummaries            <- fAllSummaries
+      possibleUpliftSummaries = allSummaries.filter(s => s.role.isAdministrator && s.accessType.isStandard)
       
-      subscriptionsForApps = getSubscriptionsByApp(adminSummaries)
+      subscriptionsForApps = getSubscriptionsByApp(possibleUpliftSummaries)
 
       upliftableAppIds = filterAppsHavingRealAndAvailableSubscriptions(sandboxApis, apisAvailableInProd, subscriptionsForApps).keySet
-    } yield (allSummaries.toList, upliftableAppIds)
+      invalidAppIds = possibleUpliftSummaries.map(_.id).toSet -- upliftableAppIds
+    } yield UpliftLogic.Data(allSummaries.toList, upliftableAppIds, invalidAppIds)
   }
 }
 
 object UpliftLogic {
+  case class Data(
+    sandboxApplicationSummaries: List[ApplicationSummary],
+    upliftableApplicationIds: Set[ApplicationId],
+    notUpliftableApplicationIds: Set[ApplicationId]
+  ) {
+    lazy val upliftableSummaries = sandboxApplicationSummaries.filter(s => upliftableApplicationIds.contains(s.id))
+    lazy val hasAppsThatCannotBeUplifted = notUpliftableApplicationIds.nonEmpty
+  }
+
   def contextsOfTestSupportAndExampleApis(apis: Map[ApiContext, ApiData]): Set[ApiContext] = {
     ApiData.filterApis(d => d.isTestSupport || d.categories.contains(ApiCategory.EXAMPLE))(apis)
     .keySet
