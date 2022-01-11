@@ -69,7 +69,7 @@
     </ul>  
   }
 
-  @if(model.hasNoProductionApplications && model.hasAppsThatCanBeUplifted ) {
+  @if(model.hasNoLiveProductionApplications && model.hasAppsThatCanBeUplifted ) {
     <p class="govuk-body">After testing in @theSubordinateWording, you can apply for @appConfig.nameOfPrincipalEnvironment.toLowerCase credentials.</p>
     <a class="govuk-button" data-module="govuk-button" href="@addapplication.routes.AddApplication.addApplicationPrincipal">
       Get production credentials
@@ -79,32 +79,29 @@
 }
 
 @applicationList(model: ManageApplicationsViewModel) = {
-  @applicationTable(model.productionApplicationSummaries, appConfig.nameOfPrincipalEnvironment)
-  @applicationTable(model.sandboxApplicationSummaries, appConfig.nameOfSubordinateEnvironment)
+  @applicationTable(model.notYetLiveProductionApplications, "Requests for production credentials")
+  @applicationTable(model.liveProductionApplications, s"${appConfig.nameOfPrincipalEnvironment} applications")
+  @applicationTable(model.sandboxApplicationSummaries, s"${appConfig.nameOfSubordinateEnvironment} applications")
 }
 
-@applicationTable(applications: Seq[ApplicationSummary], environmentName: String) = {
+@applicationTable(applications: Seq[ApplicationSummary], heading: String) = {
   @if(applications.nonEmpty) {
     <table class="govuk-table">
       <caption class="govuk-visually-hidden">Applications</caption>
       <thead class="govuk-table__head">
         <tr class="govuk-table__row">
-          <th scope="col" class="govuk-table__header">@environmentName applications</th>
-          <th scope="col" class="govuk-table__header">Your role</th>
-          <th scope="col" class="govuk-table__header">Last API call</th>
+          <th scope="col" class="govuk-table__header govuk-!-width-two-thirds">@heading</th>
+          <th scope="col" class="govuk-table__header ">Last API call</th>
+          <th scope="col" class="govuk-table__header ">Your role</th>
         </tr>
       </thead>
       <tbody class="govuk-table__body">
         @for(app <- applications) {
           <tr class="govuk-table__row">
-            <td class="govuk-table__cell">
+            <td class="govuk-table__cell govuk-!-width-two-thirds">
               <a class="govuk-link" href="@routes.Details.details(app.id)" data-app-name>@app.name</a>
             </td>
-            <td class="govuk-table__cell" data-app-user-role>
-              @if(app.role.isAdministrator) {Admin}
-              @if(app.role.isDeveloper) {Developer}
-            </td>
-            <td class="govuk-table__cell" data-app-lastAccess>
+            <td class="govuk-table__cell " data-app-lastAccess>
               @{
                 formatLastAccessDate(app.lastAccess, app.createdOn) match {
                   case Some(formattedDate) => formattedDate.capitalize
@@ -112,11 +109,14 @@
                 }
               }
             </td>
+            <td class="govuk-table__cell " data-app-user-role>
+              @if(app.role.isAdministrator) {Admin}
+              @if(app.role.isDeveloper) {Developer}
+            </td>
           </tr>
         }
       </tbody>
     </table>
     <br>
-
   }
 }

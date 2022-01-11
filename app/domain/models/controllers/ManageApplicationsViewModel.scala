@@ -24,7 +24,11 @@ case class ManageApplicationsViewModel(
     upliftableApplicationIds: Set[ApplicationId],
     hasAppsThatCannotBeUplifted: Boolean
 ) {
-  lazy val hasNoProductionApplications = productionApplicationSummaries.isEmpty
   lazy val hasPriviledgedApplications = sandboxApplicationSummaries.exists(_.accessType.isPriviledged) || productionApplicationSummaries.exists(_.accessType.isPriviledged)
   lazy val hasAppsThatCanBeUplifted = upliftableApplicationIds.nonEmpty
+
+  lazy val notYetLiveProductionApplications = productionApplicationSummaries.filterNot(_.state.isApproved)
+  lazy val liveProductionApplications = productionApplicationSummaries.filter(_.state.isApproved)
+  
+  lazy val hasNoLiveProductionApplications = liveProductionApplications.isEmpty
 }
