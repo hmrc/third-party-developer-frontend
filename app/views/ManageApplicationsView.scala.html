@@ -70,7 +70,7 @@
   }
 
   @if(model.hasNoLiveProductionApplications && model.hasAppsThatCanBeUplifted ) {
-    <p class="govuk-body">After testing in @theSubordinateWording, you can apply for @appConfig.nameOfPrincipalEnvironment.toLowerCase credentials.</p>
+    <p class="govuk-body">After testing in @theSubordinateWording, you can apply for @principalWording credentials.</p>
     <a class="govuk-button" data-module="govuk-button" href="@addapplication.routes.AddApplication.addApplicationPrincipal">
       Get production credentials
     </a>
@@ -79,19 +79,19 @@
 }
 
 @applicationList(model: ManageApplicationsViewModel) = {
-  @applicationTable(model.notYetLiveProductionApplications, "Requests for production credentials")
+  @applicationTable(model.notYetLiveProductionApplications, s"Requests for ${appConfig.nameOfPrincipalEnvironment} credentials", false)
   @applicationTable(model.liveProductionApplications, s"${appConfig.nameOfPrincipalEnvironment} applications")
   @applicationTable(model.sandboxApplicationSummaries, s"${appConfig.nameOfSubordinateEnvironment} applications")
 }
 
-@applicationTable(applications: Seq[ApplicationSummary], heading: String) = {
+@applicationTable(applications: Seq[ApplicationSummary], heading: String, showLastApiCall: Boolean = true) = {
   @if(applications.nonEmpty) {
     <table class="govuk-table">
       <caption class="govuk-visually-hidden">Applications</caption>
       <thead class="govuk-table__head">
         <tr class="govuk-table__row">
           <th scope="col" class="govuk-table__header govuk-!-width-two-thirds">@heading</th>
-          <th scope="col" class="govuk-table__header ">Last API call</th>
+          <th scope="col" class="govuk-table__header ">@if(showLastApiCall) {Last API call}</th>
           <th scope="col" class="govuk-table__header ">Your role</th>
         </tr>
       </thead>
@@ -102,10 +102,12 @@
               <a class="govuk-link" href="@routes.Details.details(app.id)" data-app-name>@app.name</a>
             </td>
             <td class="govuk-table__cell " data-app-lastAccess>
-              @{
-                formatLastAccessDate(app.lastAccess, app.createdOn) match {
-                  case Some(formattedDate) => formattedDate.capitalize
-                  case _ => "No API called"
+              @if(showLastApiCall) {
+                @{
+                  formatLastAccessDate(app.lastAccess, app.createdOn) match {
+                    case Some(formattedDate) => formattedDate.capitalize
+                    case _ => "No API called"
+                  }
                 }
               }
             </td>
