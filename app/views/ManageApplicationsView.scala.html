@@ -69,8 +69,8 @@
     </ul>  
   }
 
-  @if(model.hasNoProductionApplications && model.hasAppsThatCanBeUplifted ) {
-    <p class="govuk-body">After testing in @theSubordinateWording, you can apply for @appConfig.nameOfPrincipalEnvironment.toLowerCase credentials.</p>
+  @if(model.hasNoLiveProductionApplications && model.hasAppsThatCanBeUplifted ) {
+    <p class="govuk-body">After testing in @theSubordinateWording, you can apply for @principalWording credentials.</p>
     <a class="govuk-button" data-module="govuk-button" href="@addapplication.routes.AddApplication.addApplicationPrincipal">
       Get production credentials
     </a>
@@ -79,44 +79,54 @@
 }
 
 @applicationList(model: ManageApplicationsViewModel) = {
-  @applicationTable(model.productionApplicationSummaries, appConfig.nameOfPrincipalEnvironment)
-  @applicationTable(model.sandboxApplicationSummaries, appConfig.nameOfSubordinateEnvironment)
+  @applicationTable(model.notYetLiveProductionApplications, s"Requests for ${appConfig.nameOfPrincipalEnvironment} credentials", false)
+  @applicationTable(model.liveProductionApplications, s"${appConfig.nameOfPrincipalEnvironment} applications")
+  @applicationTable(model.sandboxApplicationSummaries, s"${appConfig.nameOfSubordinateEnvironment} applications")
 }
 
-@applicationTable(applications: Seq[ApplicationSummary], environmentName: String) = {
+@applicationTable(applications: Seq[ApplicationSummary], heading: String, showLastApiCall: Boolean = true) = {
   @if(applications.nonEmpty) {
     <table class="govuk-table">
       <caption class="govuk-visually-hidden">Applications</caption>
       <thead class="govuk-table__head">
         <tr class="govuk-table__row">
-          <th scope="col" class="govuk-table__header">@environmentName applications</th>
-          <th scope="col" class="govuk-table__header">Your role</th>
-          <th scope="col" class="govuk-table__header">Last API call</th>
+          @if(showLastApiCall){
+            <th scope="col" class="govuk-table__header govuk-!-width-one-half">@heading</th>
+            <th scope="col" class="govuk-table__header govuk-!-width-one-quarter">Last API call</th>
+          } else {
+            <th scope="col" class="govuk-table__header govuk-!-width-three-quarters">@heading</th>
+          }
+          <th scope="col" class="govuk-table__header your-role">Your role</th>
         </tr>
       </thead>
       <tbody class="govuk-table__body">
         @for(app <- applications) {
           <tr class="govuk-table__row">
-            <td class="govuk-table__cell">
-              <a class="govuk-link" href="@routes.Details.details(app.id)" data-app-name>@app.name</a>
-            </td>
-            <td class="govuk-table__cell" data-app-user-role>
+            @if(showLastApiCall) {
+              <td class="govuk-table__cell govuk-!-width-one-half">
+                <a class="govuk-link" href="@routes.Details.details(app.id)" data-app-name>@app.name</a>
+              </td>
+              <td class="govuk-table__cell govuk-!-width-one-quarter" data-app-lastAccess>
+                @{
+                  formatLastAccessDate(app.lastAccess, app.createdOn) match {
+                    case Some(formattedDate) => formattedDate.capitalize
+                    case _ => "No API called"
+                  }
+                }
+              </td>
+            } else {
+              <td class="govuk-table__cell govuk-!-width-three-quarters">
+                <a class="govuk-link" href="@routes.Details.details(app.id)" data-app-name>@app.name</a>
+              </td>
+            }
+            <td class="govuk-table__cell your-role" data-app-user-role>
               @if(app.role.isAdministrator) {Admin}
               @if(app.role.isDeveloper) {Developer}
-            </td>
-            <td class="govuk-table__cell" data-app-lastAccess>
-              @{
-                formatLastAccessDate(app.lastAccess, app.createdOn) match {
-                  case Some(formattedDate) => formattedDate.capitalize
-                  case _ => "No API called"
-                }
-              }
             </td>
           </tr>
         }
       </tbody>
     </table>
     <br>
-
   }
 }
