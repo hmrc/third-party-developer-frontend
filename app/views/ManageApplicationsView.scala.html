@@ -90,18 +90,18 @@
       <caption class="govuk-visually-hidden">Applications</caption>
       <thead class="govuk-table__head">
         <tr class="govuk-table__row">
-          <th scope="col" class="govuk-table__header govuk-!-width-two-thirds">@heading</th>
-          <th scope="col" class="govuk-table__header ">@if(showLastApiCall) {Last API call}</th>
-          <th scope="col" class="govuk-table__header ">Your role</th>
+          <th scope="col" class="govuk-table__header govuk-!-width-one-half">@heading</th>
+          <th scope="col" class="govuk-table__header govuk-!-width-one-quarter">@if(showLastApiCall) {Last API call}</th>
+          <th scope="col" class="govuk-table__header govuk-!-width-one-quarter">Your role</th>
         </tr>
       </thead>
       <tbody class="govuk-table__body">
         @for(app <- applications) {
           <tr class="govuk-table__row">
-            <td class="govuk-table__cell govuk-!-width-two-thirds">
+            <td class="govuk-table__cell govuk-!-width-one-half">
               <a class="govuk-link" href="@routes.Details.details(app.id)" data-app-name>@app.name</a>
             </td>
-            <td class="govuk-table__cell " data-app-lastAccess>
+            <td class="govuk-table__cell govuk-!-width-one-quarter" data-app-lastAccess>
               @if(showLastApiCall) {
                 @{
                   formatLastAccessDate(app.lastAccess, app.createdOn) match {
@@ -111,7 +111,7 @@
                 }
               }
             </td>
-            <td class="govuk-table__cell " data-app-user-role>
+            <td class="govuk-table__cell govuk-!-width-one-quarter" data-app-user-role>
               @if(app.role.isAdministrator) {Admin}
               @if(app.role.isDeveloper) {Developer}
             </td>
