@@ -57,7 +57,7 @@
   @if(!model.hasAppsThatCanBeUplifted && model.hasAppsThatCannotBeUplifted) {
     <h2 class="govuk-heading-m">Getting production credentials</h2>
     <p class="govuk-body">
-      If your application subscribes to an API only available in sandbox, you cannot request production credentials. @Link.toInternalPage(url = s"${appConfig.apiDocumentationFrontendUrl}/api-documentation/docs/api", value = Some("Review the  API documentation")).toHtml to check if an API is available in production
+      If your application subscribes to an API only available in sandbox, you cannot request production credentials. <a href="@appConfig.apiDocumentationFrontendUrl/api-documentation/docs/api" class="govuk-link">Review the  API documentation</a> to check if an API is available in production
     </p>
     <p class="govuk-body">
       You will need to test your application before requesting @principalWording credentials.
