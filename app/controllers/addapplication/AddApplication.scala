@@ -24,8 +24,8 @@ import controllers.UserRequest
 import domain.ApplicationCreatedResponse
 import domain.Error._
 import domain.models.apidefinitions.APISubscriptionStatus
-import modules.uplift.services._
-import modules.uplift.domain.models._
+import uk.gov.hmrc.modules.uplift.services._
+import uk.gov.hmrc.modules.uplift.domain.models._
 import domain.models.applications.Environment.{PRODUCTION, SANDBOX}
 import domain.models.applications._
 import domain.models.controllers.ApplicationSummary
@@ -42,9 +42,9 @@ import views.html._
 import javax.inject.{Inject, Singleton}
 import scala.concurrent.Future.successful
 import scala.concurrent.{ExecutionContext, Future}
-import modules.uplift.views.html.BeforeYouStartView
+import uk.gov.hmrc.modules.uplift.views.html.BeforeYouStartView
 import controllers.UserRequest
-import modules.uplift.controllers.UpliftJourneySwitch
+import uk.gov.hmrc.modules.uplift.controllers.UpliftJourneySwitch
 
 @Singleton
 class AddApplication @Inject() (
@@ -146,7 +146,7 @@ class AddApplication @Inject() (
       _ <- flowService.storeApiSubscriptions(apiSubscriptions, request.developerSession)
     }
     yield {
-      Redirect( modules.uplift.controllers.routes.UpliftJourneyController.confirmApiSubscriptionsPage(sandboxAppId))
+      Redirect( uk.gov.hmrc.modules.uplift.controllers.routes.UpliftJourneyController.confirmApiSubscriptionsPage(sandboxAppId))
     }
   }
 

@@ -32,7 +32,7 @@ import domain.models.connectors.PasswordResetRequest
 import connectors.ThirdPartyDeveloperConnector.{FindUserIdRequest, FindUserIdResponse}
 import connectors.ThirdPartyDeveloperConnector.JsonFormatters.FindUserIdRequestWrites
 import domain.models.applications._
-import util.ApplicationLogger
+import uk.gov.hmrc.modules.common.services.ApplicationLogger
 import org.scalatest.matchers.should.Matchers
 
 object Stubs extends ApplicationLogger {

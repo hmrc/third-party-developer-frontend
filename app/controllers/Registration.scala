@@ -27,7 +27,7 @@ import uk.gov.hmrc.http.{BadRequestException, HeaderCarrier}
 import views.html._
 import scala.concurrent.{ExecutionContext, Future}
 import scala.util.control.NonFatal
-import util.ApplicationLogger
+import uk.gov.hmrc.modules.common.services.ApplicationLogger
 
 @Singleton
 class Registration @Inject()(override val sessionService: SessionService,

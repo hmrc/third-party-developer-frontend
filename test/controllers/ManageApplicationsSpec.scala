@@ -38,7 +38,7 @@ import scala.concurrent.ExecutionContext.Implicits.global
 import utils.LocalUserIdTracker
 import mocks.connector.ApmConnectorMockModule
 import builder._
-import modules.uplift.services.mocks.UpliftLogicMock
+import uk.gov.hmrc.modules.uplift.services.mocks.UpliftLogicMock
 
 class ManageApplicationsSpec 
     extends BaseControllerSpec 

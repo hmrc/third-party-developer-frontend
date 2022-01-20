@@ -17,7 +17,7 @@
 package pages
 
 import org.openqa.selenium.By
-import util.ApplicationLogger
+import uk.gov.hmrc.modules.common.services.ApplicationLogger
 import steps.{Env, Form}
 
 trait FormPage extends WebPage with ApplicationLogger {

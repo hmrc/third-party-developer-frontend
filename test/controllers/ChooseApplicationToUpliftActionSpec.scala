@@ -24,7 +24,7 @@ import play.api.mvc.AnyContentAsEmpty
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
 import service.AuditService
-import modules.uplift.domain.models.GetProductionCredentialsFlow
+import uk.gov.hmrc.modules.uplift.domain.models.GetProductionCredentialsFlow
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.time.DateTimeUtils
 import utils._
@@ -39,14 +39,14 @@ import builder.ApplicationBuilder
 
 import scala.concurrent.Future
 import play.api.mvc.Result
-import modules.uplift.services.mocks._
+import uk.gov.hmrc.modules.uplift.services.mocks._
 import mocks.connector.ApmConnectorMockModule
 import controllers.addapplication.AddApplication
 import builder._
-import modules.uplift.views.html.BeforeYouStartView
-import modules.uplift.controllers.UpliftJourneySwitch
+import uk.gov.hmrc.modules.uplift.views.html.BeforeYouStartView
+import uk.gov.hmrc.modules.uplift.controllers.UpliftJourneySwitch
 import config.UpliftJourneyConfig
-import modules.uplift.services.GetProductionCredentialsFlowService
+import uk.gov.hmrc.modules.uplift.services.GetProductionCredentialsFlowService
 
 class ChooseApplicationToUpliftActionSpec
     extends BaseControllerSpec 
@@ -172,7 +172,7 @@ class ChooseApplicationToUpliftActionSpec
       val result = underTest.chooseApplicationToUpliftAction()(loggedInRequest.withFormUrlEncodedBody(("applicationId" -> sandboxAppId.value)))
 
       status(result) shouldBe SEE_OTHER
-      redirectLocation(result).value shouldBe modules.uplift.controllers.routes.UpliftJourneyController.confirmApiSubscriptionsAction(sandboxAppId).toString()
+      redirectLocation(result).value shouldBe uk.gov.hmrc.modules.uplift.controllers.routes.UpliftJourneyController.confirmApiSubscriptionsAction(sandboxAppId).toString()
     }
   }
 }

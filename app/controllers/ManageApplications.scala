@@ -27,7 +27,7 @@ import views.html._
 
 import scala.concurrent.ExecutionContext
 import domain.models.controllers.ManageApplicationsViewModel
-import modules.uplift.services.UpliftLogic
+import uk.gov.hmrc.modules.uplift.services.UpliftLogic
 
 @Singleton
 class ManageApplications @Inject() (

@@ -19,7 +19,7 @@ package domain.models.applications
 import controllers._
 import domain.models.developers.DeveloperSession
 import play.api.libs.json.Json
-import modules.uplift.domain.models._
+import uk.gov.hmrc.modules.uplift.domain.models._
 import domain.models.apidefinitions.ApiIdentifier
 
 case class UpliftData(

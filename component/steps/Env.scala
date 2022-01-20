@@ -37,7 +37,7 @@ import stubs.AuditStub
 import utils.BrowserStackCaps
 
 import scala.util.{Properties, Try}
-import util.ApplicationLogger
+import uk.gov.hmrc.modules.common.services.ApplicationLogger
 import org.openqa.selenium.firefox.FirefoxOptions
 import org.openqa.selenium.firefox.FirefoxDriver
 import org.scalatest.matchers.should.Matchers

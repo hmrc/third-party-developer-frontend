@@ -18,7 +18,7 @@ package repositories
 
 import domain.models.flows._
 import domain.services.CombinedApiJsonFormatters
-import modules.uplift.domain.models.GetProductionCredentialsFlow
+import uk.gov.hmrc.modules.uplift.domain.models.GetProductionCredentialsFlow
 import org.joda.time.DateTime
 import play.api.libs.json.{Format, Json, OFormat}
 import uk.gov.hmrc.mongo.json.ReactiveMongoFormats

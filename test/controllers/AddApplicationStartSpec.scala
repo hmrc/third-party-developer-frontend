@@ -41,11 +41,11 @@ import config.OnDemand
 import play.api.mvc.Headers
 import config.Off
 import domain.models.controllers.ApplicationSummary
-import modules.uplift.views.html.BeforeYouStartView
-import modules.uplift.services.GetProductionCredentialsFlowService
-import modules.uplift.services.mocks.UpliftLogicMock
-import modules.uplift.controllers.UpliftJourneySwitch
-import modules.uplift.domain.models.GetProductionCredentialsFlow
+import uk.gov.hmrc.modules.uplift.views.html.BeforeYouStartView
+import uk.gov.hmrc.modules.uplift.services.GetProductionCredentialsFlowService
+import uk.gov.hmrc.modules.uplift.services.mocks.UpliftLogicMock
+import uk.gov.hmrc.modules.uplift.controllers.UpliftJourneySwitch
+import uk.gov.hmrc.modules.uplift.domain.models.GetProductionCredentialsFlow
 import scala.concurrent.Future
 
 class AddApplicationStartSpec

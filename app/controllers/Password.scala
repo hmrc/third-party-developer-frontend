@@ -32,7 +32,7 @@ import views.html._
 
 import scala.concurrent.{ExecutionContext, Future}
 import uk.gov.hmrc.http.UpstreamErrorResponse
-import util.ApplicationLogger
+import uk.gov.hmrc.modules.common.services.ApplicationLogger
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendBaseController
 
 @Singleton

@@ -39,10 +39,10 @@ import domain.models.apidefinitions.CombinedApiTestDataHelper
 import utils.LocalUserIdTracker
 import controllers.addapplication.AddApplication
 import builder._
-import modules.uplift.views.html.BeforeYouStartView
-import modules.uplift.services.GetProductionCredentialsFlowService
-import modules.uplift.services.mocks.UpliftLogicMock
-import modules.uplift.controllers.UpliftJourneySwitch
+import uk.gov.hmrc.modules.uplift.views.html.BeforeYouStartView
+import uk.gov.hmrc.modules.uplift.services.GetProductionCredentialsFlowService
+import uk.gov.hmrc.modules.uplift.services.mocks.UpliftLogicMock
+import uk.gov.hmrc.modules.uplift.controllers.UpliftJourneySwitch
 
 class AddApplicationSuccessSpec
     extends BaseControllerSpec

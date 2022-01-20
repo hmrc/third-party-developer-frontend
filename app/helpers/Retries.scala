@@ -24,7 +24,7 @@ import config.ApplicationConfig
 import javax.inject.Inject
 import uk.gov.hmrc.http.BadRequestException
 
-import util.ApplicationLogger
+import uk.gov.hmrc.modules.common.services.ApplicationLogger
 
 import scala.concurrent.{ExecutionContext, Future}
 import scala.concurrent.duration._

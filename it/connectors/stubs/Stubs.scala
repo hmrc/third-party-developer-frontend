@@ -30,7 +30,7 @@ import domain.services.ApiDefinitionsJsonFormatters._
 import play.api.http.Status._
 import play.api.libs.json.{Json, Writes}
 import domain.models.connectors.PasswordResetRequest
-import util.ApplicationLogger
+import uk.gov.hmrc.modules.common.services.ApplicationLogger
 import org.scalatest.matchers.should.Matchers
 
 object Stubs extends ApplicationLogger {
