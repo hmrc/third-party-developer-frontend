@@ -14,22 +14,23 @@
  * limitations under the License.
  */
 
-package helpers
+package uk.gov.hmrc.modules.common.services
 
 import scala.concurrent.ExecutionContext
 import scala.concurrent.Future
 import cats.data.EitherT
+import cats.instances.future.catsStdInstancesForFuture
 
 trait EitherTHelper[E] {
   implicit val ec: ExecutionContext
 
-  def fromOptionF[A](in: Future[Option[A]], error: E): EitherT[Future,E,A] = EitherT.fromOptionF(in, error)
+  def pure[A](in: A)                                                       = EitherT.pure[Future, String](in)
   def liftF[A](in: Future[A]): EitherT[Future,E,A]                         = EitherT.liftF(in)
   def fromOption[A](in: Option[A], error: E): EitherT[Future,E,A]          = EitherT.fromOption(in, error)
+  def fromOptionF[A](in: Future[Option[A]], error: E): EitherT[Future,E,A] = EitherT.fromOptionF(in, error)
   def fromEither[A](in: Either[E,A]): EitherT[Future,E,A]                  = EitherT.fromEither(in)
   def fromEitherF[A](in: Future[Either[E,A]]): EitherT[Future,E,A]         = EitherT.apply(in)
   def cond[A](in: => Boolean, right: => A, left: => E)                     = EitherT.cond[Future](in, right,left)
-  def pure[A](in: A)                                                       = EitherT.pure[Future, String](in)
 }
 
 object EitherTHelper {

@@ -25,7 +25,7 @@ import scala.concurrent.ExecutionContext
 import play.api.mvc.ActionRefiner
 import scala.concurrent.Future
 import play.api.mvc._
-import helpers.EitherTHelper
+import uk.gov.hmrc.modules.common.services.EitherTHelper
 
 import cats.implicits._
 import cats.instances.future.catsStdInstancesForFuture

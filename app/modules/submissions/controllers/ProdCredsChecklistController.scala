@@ -31,7 +31,7 @@ import controllers.checkpages.CanUseCheckActions
 import cats.data.NonEmptyList
 import modules.submissions.domain.models._
 import modules.submissions.services.SubmissionService
-import helpers.EitherTHelper
+import uk.gov.hmrc.modules.common.services.EitherTHelper
 import domain.models.controllers.BadRequestWithErrorMessage
 import modules.submissions.domain.models.NotApplicable
 

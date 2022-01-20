@@ -22,7 +22,7 @@ import domain.models.applications.ApplicationId
 import modules.uplift.domain.models.ApiSubscriptions
 import connectors.ApmConnector
 import javax.inject.{Inject, Singleton}
-import helpers.EitherTHelper
+import uk.gov.hmrc.modules.common.services.EitherTHelper
 import uk.gov.hmrc.http.HeaderCarrier
 import scala.concurrent.ExecutionContext
 import domain.models.apidefinitions.APISubscriptionStatus

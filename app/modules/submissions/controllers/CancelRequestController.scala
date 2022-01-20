@@ -23,7 +23,7 @@ import config.ApplicationConfig
 import controllers.ApplicationController
 import domain.models.applications.ApplicationId
 import play.api.data.Form
-import helpers.EitherTHelper
+import uk.gov.hmrc.modules.common.services.EitherTHelper
 import modules.submissions.services.SubmissionService
 import play.api.mvc.Result
 import domain.models.controllers.BadRequestWithErrorMessage

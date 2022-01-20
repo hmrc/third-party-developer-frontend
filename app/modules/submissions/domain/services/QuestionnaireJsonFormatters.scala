@@ -16,7 +16,7 @@
 
 package modules.submissions.domain.services
 
-import domain.services.NonEmptyListFormatters
+import uk.gov.hmrc.modules.common.services.NonEmptyListFormatters
 
 trait QuestionnaireJsonFormatters extends QuestionJsonFormatters with AskWhenJsonFormatters with NonEmptyListFormatters {
   import play.api.libs.json._

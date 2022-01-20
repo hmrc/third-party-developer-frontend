@@ -26,7 +26,7 @@ import scala.concurrent.Future
 import scala.concurrent.ExecutionContext
 import domain.models.applications.Application
 import modules.submissions.domain.models.ErrorDetails
-import helpers.EitherTHelper
+import uk.gov.hmrc.modules.common.services.EitherTHelper
 import modules.submissions.connectors.ThirdPartyApplicationSubmissionsConnector
 
 @Singleton

@@ -16,9 +16,9 @@
 
 package modules.submissions.domain.services
 
-import modules.services.MapJsonFormatters
+import uk.gov.hmrc.modules.common.services
 
-trait QuestionJsonFormatters extends StatementJsonFormatters with MapJsonFormatters {
+trait QuestionJsonFormatters extends StatementJsonFormatters with services.MapJsonFormatters {
   import modules.submissions.domain.models._
   import play.api.libs.json._
   import uk.gov.hmrc.play.json.Union

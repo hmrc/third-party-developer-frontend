@@ -30,7 +30,7 @@ import modules.submissions.domain.services.SubmissionsJsonFormatters._
 
 import scala.concurrent.Future.successful
 
-import helpers.EitherTHelper
+import uk.gov.hmrc.modules.common.services.EitherTHelper
 import play.api.mvc._
 import play.api.libs.json.Json
 import cats.data.NonEmptyList

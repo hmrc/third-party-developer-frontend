@@ -24,6 +24,7 @@ import play.api.libs.crypto.CookieSigner
 import play.api.mvc.{MessagesControllerComponents, Result}
 import service.{ApplicationActionService, ApplicationService, SessionService}
 import modules.submissions.views.html._
+import uk.gov.hmrc.modules.common.services.EitherTHelper
 
 import javax.inject.{Inject, Singleton}
 import scala.concurrent.ExecutionContext
@@ -31,7 +32,6 @@ import controllers.ApplicationController
 import controllers.checkpages.CanUseCheckActions
 import modules.submissions.domain.models._
 import modules.submissions.services.SubmissionService
-import helpers.EitherTHelper
 import domain.models.controllers.BadRequestWithErrorMessage
 import modules.submissions.services.RequestProductionCredentials
 import modules.submissions.controllers.models.AnswersViewModel._
