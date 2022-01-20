@@ -14,10 +14,10 @@
  * limitations under the License.
  */
 
-package domain.models.subscriptions
+package uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.subscriptions
 
-import domain.models.apidefinitions.{ApiContext, ApiVersion}
-import domain.models.applications.{ApplicationId, ClientId}
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.apidefinitions.{ApiContext, ApiVersion}
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.{ApplicationId, ClientId}
 
 object ApiSubscriptionFields {
 

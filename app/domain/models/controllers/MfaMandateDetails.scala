@@ -14,6 +14,6 @@
  * limitations under the License.
  */
 
-package domain.models.controllers
+package uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.controllers
 
 case class MfaMandateDetails(showAdminMfaMandatedMessage: Boolean, daysTillAdminMfaMandate: Int)

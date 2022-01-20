@@ -16,14 +16,14 @@
 
 package uk.gov.hmrc.modules.uplift.services
 
-import domain.models.developers.DeveloperSession
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.DeveloperSession
 import javax.inject.{Inject, Singleton}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.repositories.FlowRepository
 
 import scala.concurrent.{ExecutionContext, Future}
 import uk.gov.hmrc.modules.uplift.domain.models._
 import cats.implicits._
-import domain.models.flows.FlowType
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.flows.FlowType
 
 
 @Singleton

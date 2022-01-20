@@ -19,7 +19,7 @@ package uk.gov.hmrc.thirdpartydeveloperfrontend.security
 import cats.implicits._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.config.ApplicationConfig
 import controllers.{routes, BaseController, MaybeUserRequest, UserRequest}
-import domain.models.developers.{DeveloperSession, LoggedInState}
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.{DeveloperSession, LoggedInState}
 import play.api.mvc._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.service.SessionService
 import uk.gov.hmrc.http.HeaderCarrier

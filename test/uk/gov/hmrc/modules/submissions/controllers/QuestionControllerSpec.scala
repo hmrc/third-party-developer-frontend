@@ -32,7 +32,7 @@ import utils.WithLoggedInSession._
 import scala.concurrent.ExecutionContext.Implicits.global
 import utils.SubmissionsTestData.{applicationId, questionId, question2Id, submission, extendedSubmission}
 import uk.gov.hmrc.modules.submissions.domain.models.QuestionId
-import domain.models.applications.ApplicationWithSubscriptionData
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.ApplicationWithSubscriptionData
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
 import play.filters.csrf.CSRF

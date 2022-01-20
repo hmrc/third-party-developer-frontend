@@ -16,7 +16,7 @@
 
 package mocks.service
 
-import domain.models.connectors.CombinedApi
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.connectors.CombinedApi
 import org.mockito.{ArgumentMatchersSugar, MockitoSugar}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.service.EmailPreferencesService
 

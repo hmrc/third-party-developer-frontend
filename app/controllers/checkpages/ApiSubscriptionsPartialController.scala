@@ -17,11 +17,11 @@
 package controllers.checkpages
 
 import controllers.{APISubscriptions, ApplicationController, ApplicationRequest}
-import domain.models
-import domain.models.applications.{Application, ApplicationId, CheckInformation}
-import domain.models.controllers.SubscriptionData
-import domain.models.apidefinitions.ApiContext
-import domain.models.subscriptions.ApiData
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.{Application, ApplicationId, CheckInformation}
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.controllers.SubscriptionData
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.apidefinitions.ApiContext
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.subscriptions.ApiData
 import play.api.data.Form
 import play.api.mvc.{Action, AnyContent, Call}
 import views.html.checkpages.ApiSubscriptionsView

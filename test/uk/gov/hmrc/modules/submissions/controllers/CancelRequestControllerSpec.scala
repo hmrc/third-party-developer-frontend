@@ -27,14 +27,14 @@ import org.mockito.ArgumentMatchersSugar
 import scala.concurrent.Future.successful
 import scala.concurrent.ExecutionContext.Implicits.global
 import uk.gov.hmrc.modules.submissions.services.mocks.SubmissionServiceMockModule
-import domain.models.applications.ApplicationId
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.ApplicationId
 import uk.gov.hmrc.modules.submissions.views.html._
 import play.api.test.FakeRequest
 import play.filters.csrf.CSRF
 import utils.WithCSRFAddToken
 import utils.WithLoggedInSession._
 import play.api.test.Helpers._
-import domain.models.applications._
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications._
 import controllers.SubscriptionTestHelperSugar
 
 trait TPAProductionConnectorMockModule extends MockitoSugar with ArgumentMatchersSugar {

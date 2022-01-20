@@ -17,11 +17,11 @@
 package controllers
 
 import java.time.Period
-import domain.models.applications._
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications._
 import org.joda.time.DateTime
 import utils._
-import domain.models.applications.Environment.{PRODUCTION, SANDBOX}
-import domain.models.controllers.ApplicationSummary
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.Environment.{PRODUCTION, SANDBOX}
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.controllers.ApplicationSummary
 import org.scalatest.matchers.should.Matchers
 import org.scalatest.wordspec.AnyWordSpec
 

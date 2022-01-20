@@ -16,21 +16,22 @@
 
 package views
 
-import domain.models.controllers.{ManageApplicationsViewModel, ApplicationSummary}
-import domain.models.apidefinitions.AccessType
-import domain.models.applications.{ApplicationId, CollaboratorRole, State, TermsOfUseStatus}
-import domain.models.developers.LoggedInState
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.controllers.{ManageApplicationsViewModel, ApplicationSummary}
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.apidefinitions.AccessType
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.{ApplicationId, CollaboratorRole, State, TermsOfUseStatus}
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.LoggedInState
 import org.jsoup.Jsoup
 import org.jsoup.nodes.Document
 import play.api.test.FakeRequest
 import uk.gov.hmrc.time.DateTimeUtils
 import utils.ViewHelpers.{elementExistsByText, elementIdentifiedByAttrContainsText}
 import utils.WithCSRFAddToken
+import utils.DeveloperSessionBuilder
 import views.helper.CommonViewSpec
 import views.html.{AddApplicationSubordinateEmptyNestView, ManageApplicationsView}
 import views.helper.EnvironmentNameService
 import uk.gov.hmrc.thirdpartydeveloperfrontend.helpers.DateFormatter
-import domain.models.applications.Environment
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.Environment
 
 class ViewAllApplicationsPageSpec extends CommonViewSpec with WithCSRFAddToken {
   def isGreenAddProductionApplicationButtonVisible(document: Document): Boolean = {
@@ -110,7 +111,7 @@ class ViewAllApplicationsPageSpec extends CommonViewSpec with WithCSRFAddToken {
 
     def renderPage(sandboxAppSummaries: Seq[ApplicationSummary], productionAppSummaries: Seq[ApplicationSummary], upliftableApplicationIds: Set[ApplicationId]) = {
       val request = FakeRequest()
-      val loggedIn = utils.DeveloperSession("developer@example.com", "firstName", "lastname", loggedInState = LoggedInState.LOGGED_IN)
+      val loggedIn = DeveloperSessionBuilder("developer@example.com", "firstName", "lastname", loggedInState = LoggedInState.LOGGED_IN)
       val manageApplicationsView = app.injector.instanceOf[ManageApplicationsView]
 
       manageApplicationsView.render(ManageApplicationsViewModel(sandboxAppSummaries, productionAppSummaries, upliftableApplicationIds, false), request, loggedIn, messagesProvider, appConfig, "nav-section", environmentNameService)
@@ -275,7 +276,7 @@ class ViewAllApplicationsPageSpec extends CommonViewSpec with WithCSRFAddToken {
 
     def renderPage(appSummaries: Seq[ApplicationSummary]) = {
       val request = FakeRequest().withCSRFToken
-      val loggedIn = utils.DeveloperSession("developer@example.com", "firstName", "lastname", loggedInState = LoggedInState.LOGGED_IN)
+      val loggedIn = DeveloperSessionBuilder("developer@example.com", "firstName", "lastname", loggedInState = LoggedInState.LOGGED_IN)
       val addApplicationSubordinateEmptyNestView = app.injector.instanceOf[AddApplicationSubordinateEmptyNestView]
 
       addApplicationSubordinateEmptyNestView.render(request, loggedIn, messagesProvider, appConfig, "nav-section", environmentNameService)

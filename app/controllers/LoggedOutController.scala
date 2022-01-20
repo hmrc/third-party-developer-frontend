@@ -18,7 +18,7 @@ package controllers
 
 import play.api.mvc.MessagesControllerComponents
 import uk.gov.hmrc.thirdpartydeveloperfrontend.security.ExtendedDevHubAuthorization
-import domain.models.developers.DeveloperSession
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.DeveloperSession
 import uk.gov.hmrc.http.HeaderCarrier
 import play.api.mvc.{Request, Headers}
 

@@ -15,9 +15,9 @@
  *@
 
 @import uk.gov.hmrc.thirdpartydeveloperfrontend.config.ApplicationConfig
-@import domain.models.applications.Application
+@import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.Application
 
-@import domain.models.apidefinitions.AccessType
+@import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.apidefinitions.AccessType
 @(app: Application)(implicit appConfig: ApplicationConfig)
 @principalEnvName = @{appConfig.nameOfPrincipalEnvironment}
 @subordinateEnvName = @{appConfig.nameOfSubordinateEnvironment}

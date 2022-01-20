@@ -16,14 +16,14 @@
 
 package uk.gov.hmrc.thirdpartydeveloperfrontend.connectors
 
-import domain.models.apidefinitions.{ApiContext, ApiIdentifier, ApiVersion}
-import domain.models.applications._
-import domain.models.connectors.{AddTeamMemberRequest, ApiDefinition, CombinedApi, ExtendedApiDefinition}
-import domain.models.developers.UserId
-import domain.models.emailpreferences.APICategoryDisplayDetails
-import domain.models.subscriptions.ApiSubscriptionFields.SubscriptionFieldDefinition
-import domain.models.subscriptions.{ApiData, FieldName}
-import domain.{ApplicationNotFound, ApplicationUpdateSuccessful, TeamMemberAlreadyExists}
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.apidefinitions.{ApiContext, ApiIdentifier, ApiVersion}
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications._
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.connectors.{AddTeamMemberRequest, ApiDefinition, CombinedApi, ExtendedApiDefinition}
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.UserId
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.emailpreferences.APICategoryDisplayDetails
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.subscriptions.ApiSubscriptionFields.SubscriptionFieldDefinition
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.subscriptions.{ApiData, FieldName}
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.{ApplicationNotFound, ApplicationUpdateSuccessful, TeamMemberAlreadyExists}
 import play.api.http.ContentTypes.JSON
 import play.api.http.HeaderNames.CONTENT_TYPE
 import play.api.http.Status.{CONFLICT, NOT_FOUND}
@@ -44,7 +44,7 @@ object ApmConnector {
 
   case class RequestUpliftV2(upliftRequest: UpliftData)
 
-  import domain.services.ApiDefinitionsJsonFormatters._
+  import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.services.ApiDefinitionsJsonFormatters._
 
   implicit val writesV1 = play.api.libs.json.Json.writes[RequestUpliftV1]
   implicit val writesV2 = play.api.libs.json.Json.writes[RequestUpliftV2]

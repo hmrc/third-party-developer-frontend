@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package domain.models.subscriptions
+package uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.subscriptions
 
 import scala.util.Random
 

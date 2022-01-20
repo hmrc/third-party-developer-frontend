@@ -17,12 +17,12 @@
 package controllers
 
 import builder.DeveloperBuilder
-import domain.ApplicationUpdateSuccessful
-import domain.models.applications
-import domain.models.applications._
-import domain.models.applications.Environment.{PRODUCTION, SANDBOX}
-import domain.models.applications.CollaboratorRole.ADMINISTRATOR
-import domain.models.developers.{LoggedInState, Session}
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.ApplicationUpdateSuccessful
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications._
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.Environment.{PRODUCTION, SANDBOX}
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.CollaboratorRole.ADMINISTRATOR
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.{LoggedInState, Session}
 import mocks.service.{ApplicationActionServiceMock, ApplicationServiceMock, SessionServiceMock}
 import org.joda.time.DateTime
 import org.joda.time.format.DateTimeFormat
@@ -39,7 +39,7 @@ import views.html.TermsOfUseView
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 import scala.concurrent.Future.successful
-import domain.models.developers.DeveloperSession
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.DeveloperSession
 import utils.LocalUserIdTracker
 
 class TermsOfUseSpec 

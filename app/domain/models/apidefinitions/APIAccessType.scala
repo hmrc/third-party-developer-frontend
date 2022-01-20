@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package domain.models.apidefinitions
+package uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.apidefinitions
 
 import enumeratum.{EnumEntry, PlayEnum}
 

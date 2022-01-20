@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
-package domain.services
+package uk.gov.hmrc.thirdpartydeveloperfrontend.domain.services
 
-import domain.models.connectors.{CombinedApi, CombinedApiCategory}
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.connectors.{CombinedApi, CombinedApiCategory}
 import play.api.libs.json.{Format, Json}
 
 trait CombinedApiJsonFormatters {

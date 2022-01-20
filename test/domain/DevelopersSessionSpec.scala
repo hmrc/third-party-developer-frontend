@@ -14,12 +14,12 @@
  * limitations under the License.
  */
 
-package domain
+package uk.gov.hmrc.thirdpartydeveloperfrontend.domain
 
 import java.util.UUID
 
 import builder.DeveloperBuilder
-import domain.models.developers.{DeveloperSession, LoggedInState, Session}
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.{DeveloperSession, LoggedInState, Session}
 import utils.AsyncHmrcSpec
 import utils.LocalUserIdTracker
 

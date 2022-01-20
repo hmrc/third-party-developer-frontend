@@ -21,8 +21,8 @@ import java.util.UUID
 import java.util.UUID.randomUUID
 import com.github.tomakehurst.wiremock.client.WireMock._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.connectors.ThirdPartyApplicationConnectorDomain._
-import domain._
-import domain.models.applications._
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain._
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications._
 import org.joda.time.DateTimeZone
 import play.api.http.Status._
 import uk.gov.hmrc.http._
@@ -39,9 +39,9 @@ import play.api.inject.guice.GuiceApplicationBuilder
 import play.api.inject.bind
 import play.api.Mode
 import play.api.{Application => PlayApplication}
-import domain.models.apidefinitions.ApiContext
-import domain.models.apidefinitions.ApiVersion
-import domain.models.apidefinitions.ApiIdentifier
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.apidefinitions.ApiContext
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.apidefinitions.ApiVersion
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.apidefinitions.ApiIdentifier
 
 
 class ThirdPartyApplicationConnectorSpec extends BaseConnectorIntegrationSpec with GuiceOneAppPerSuite with WireMockExtensions with CollaboratorTracker with LocalUserIdTracker {

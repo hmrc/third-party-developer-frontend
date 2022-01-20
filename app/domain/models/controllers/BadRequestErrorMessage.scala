@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package domain.models.controllers
+package uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.controllers
 
 import play.api.mvc.Result
 import play.api.mvc.Results._

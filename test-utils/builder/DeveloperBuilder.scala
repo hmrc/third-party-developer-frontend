@@ -16,8 +16,8 @@
 
 package builder
 
-import domain.models.developers.Developer
-import domain.models.emailpreferences.EmailPreferences
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.Developer
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.emailpreferences.EmailPreferences
 import utils.CollaboratorTracker
 import utils.UserIdTracker
 

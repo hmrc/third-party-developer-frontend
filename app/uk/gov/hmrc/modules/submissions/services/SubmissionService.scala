@@ -17,7 +17,7 @@
 package uk.gov.hmrc.modules.submissions.services
 
 import javax.inject.{Inject, Singleton}
-import domain.models.applications.ApplicationId
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.ApplicationId
 import scala.concurrent.Future
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.modules.submissions.domain.models._

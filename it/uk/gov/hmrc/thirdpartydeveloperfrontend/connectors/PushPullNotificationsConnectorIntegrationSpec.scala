@@ -19,7 +19,7 @@ package uk.gov.hmrc.thirdpartydeveloperfrontend.connectors
 import java.util.UUID.randomUUID
 
 import com.github.tomakehurst.wiremock.client.WireMock._
-import domain.models.applications.ClientId
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.ClientId
 import org.scalatestplus.play.guice.GuiceOneAppPerSuite
 import play.api.http.HeaderNames.AUTHORIZATION
 import play.api.http.Status.{INTERNAL_SERVER_ERROR, NOT_FOUND, OK}

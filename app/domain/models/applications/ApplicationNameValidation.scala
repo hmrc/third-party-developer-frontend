@@ -14,11 +14,11 @@
  * limitations under the License.
  */
 
-package domain.models.applications
+package uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications
 
 import controllers.FormKeys.{applicationNameAlreadyExistsKey, applicationNameInvalidKey}
 
-import domain.models.applications.ApplicationNameValidationJson.ApplicationNameValidationResult
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.ApplicationNameValidationJson.ApplicationNameValidationResult
 
 sealed trait ApplicationNameValidation
 

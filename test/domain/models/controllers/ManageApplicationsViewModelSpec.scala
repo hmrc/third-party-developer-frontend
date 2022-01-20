@@ -14,14 +14,14 @@
  * limitations under the License.
  */
 
-package domain.models.controllers
+package uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.controllers
 
 import java.time.Period
-import domain.models.applications._
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications._
 import org.joda.time.DateTime
-import domain.models.apidefinitions.AccessType
-import domain.models.applications.State._
-import domain.models.applications.CollaboratorRole.DEVELOPER
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.apidefinitions.AccessType
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.State._
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.CollaboratorRole.DEVELOPER
 import org.scalatest.wordspec.AnyWordSpec
 import org.scalatest.matchers.should.Matchers
 

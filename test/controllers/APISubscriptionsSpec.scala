@@ -16,8 +16,8 @@
 
 package controllers
 
-import domain.models.apidefinitions._
-import domain.models.apidefinitions.APIStatus.{BETA, STABLE}
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.apidefinitions._
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.apidefinitions.APIStatus.{BETA, STABLE}
 import utils._
 import builder._
 

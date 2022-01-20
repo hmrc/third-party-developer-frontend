@@ -29,13 +29,13 @@ import uk.gov.hmrc.modules.common.services.EitherTHelper
 
 import cats.implicits._
 import cats.instances.future.catsStdInstancesForFuture
-import domain.models.applications.Application
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.Application
 import uk.gov.hmrc.modules.submissions.services.SubmissionService
-import domain.models.applications.ApplicationId
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.ApplicationId
 import controllers.ApplicationRequest
 import scala.concurrent.Future.successful
-import domain.models.applications.State
-import domain.models.applications.CollaboratorRole
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.State
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.CollaboratorRole
 
 class SubmissionRequest[A](val extSubmission: ExtendedSubmission, val userRequest: UserRequest[A]) extends UserRequest[A](userRequest.developerSession, userRequest.msgRequest) {
   lazy val submission = extSubmission.submission

@@ -21,13 +21,13 @@ import uk.gov.hmrc.thirdpartydeveloperfrontend.config.ErrorHandler
 import uk.gov.hmrc.thirdpartydeveloperfrontend.config.FraudPreventionConfig
 import uk.gov.hmrc.thirdpartydeveloperfrontend.connectors.ThirdPartyDeveloperConnector
 import controllers.fraudprevention.FraudPreventionNavLinkHelper
-import domain.models.apidefinitions.{ApiContext, ApiVersion}
-import domain.models.applications._
-import domain.models.applications.Capabilities.{ManageLockedSubscriptions, SupportsSubscriptions}
-import domain.models.applications.Permissions.{AdministratorOnly, TeamMembersOnly}
-import domain.models.developers.DeveloperSession
-import domain.models.views.SubscriptionRedirect
-import domain.models.views.SubscriptionRedirect._
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.apidefinitions.{ApiContext, ApiVersion}
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications._
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.Capabilities.{ManageLockedSubscriptions, SupportsSubscriptions}
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.Permissions.{AdministratorOnly, TeamMembersOnly}
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.DeveloperSession
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.views.SubscriptionRedirect
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.views.SubscriptionRedirect._
 import javax.inject.{Inject, Singleton}
 import play.api.data.Form
 import play.api.libs.crypto.CookieSigner
@@ -41,7 +41,7 @@ import views.html.{AddAppSubscriptionsView, ManageSubscriptionsView, SubscribeRe
 import views.html.include.ChangeSubscriptionConfirmationView
 
 import scala.concurrent.{ExecutionContext, Future}
-import domain.models.apidefinitions.ApiIdentifier
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.apidefinitions.ApiIdentifier
 import play.api.mvc.Call
 
 @Singleton
@@ -126,7 +126,7 @@ class Subscriptions @Inject()(val developerConnector: ThirdPartyDeveloperConnect
 
       def handleValidForm(form: ChangeSubscriptionForm) =
         if (request.application.hasLockedSubscriptions) {
-          import domain.Error._
+          import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.Error._
           Future.successful(BadRequest(Json.toJson(BadRequestError)))
         } else {
           updateSubscription(form).map(_ => redirect(redirectTo, applicationId))

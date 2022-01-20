@@ -21,9 +21,9 @@ import java.util.UUID
 import akka.actor.ActorSystem
 import akka.pattern.FutureTimeoutSupport
 import uk.gov.hmrc.thirdpartydeveloperfrontend.config.ApplicationConfig
-import domain.models.apidefinitions.{ApiContext, ApiIdentifier, ApiVersion}
-import domain.models.applications.{ClientId, Environment}
-import domain.models.subscriptions.ApiSubscriptionFields._
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.apidefinitions.{ApiContext, ApiIdentifier, ApiVersion}
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.{ClientId, Environment}
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.subscriptions.ApiSubscriptionFields._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.helpers.Retries
 import javax.inject.{Inject, Singleton}
 import play.api.http.Status.{BAD_REQUEST, CREATED, NO_CONTENT, OK, NOT_FOUND}
@@ -34,7 +34,7 @@ import uk.gov.hmrc.http.HttpClient
 import uk.gov.hmrc.modules.common.services.ApplicationLogger
 
 import scala.concurrent.{ExecutionContext, Future}
-import domain.models.subscriptions._
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.subscriptions._
 import SubscriptionFieldsConnectorDomain._
 import uk.gov.hmrc.http.UpstreamErrorResponse
 

@@ -16,8 +16,8 @@
 
 package views
 
-import domain.models.applications.{ApplicationId, Environment}
-import domain.models.developers.LoggedInState
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.{ApplicationId, Environment}
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.LoggedInState
 import org.jsoup.Jsoup
 import org.jsoup.nodes.Document
 import play.api.test.FakeRequest
@@ -36,7 +36,7 @@ class AddApplicationSuccessSpec extends CommonViewSpec with WithCSRFAddToken {
 
     def testPage(applicationName: String, environment: Environment): Document = {
       val applicationId = ApplicationId("application-id")
-      val loggedIn = utils.DeveloperSession("", "", "", None, loggedInState = LoggedInState.LOGGED_IN)
+      val loggedIn = utils.DeveloperSessionBuilder("", "", "", None, loggedInState = LoggedInState.LOGGED_IN)
       val request = FakeRequest().withCSRFToken
       val page = addApplicationSuccess.render(applicationName, applicationId, environment, request, loggedIn, messagesProvider, appConfig, navSection = "nav-section")
       val document = Jsoup.parse(page.body)

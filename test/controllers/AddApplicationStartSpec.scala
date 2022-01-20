@@ -18,7 +18,7 @@ package controllers
 
 import builder.DeveloperBuilder
 import uk.gov.hmrc.thirdpartydeveloperfrontend.config.ErrorHandler
-import domain.models.applications._
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications._
 import mocks.service._
 import play.api.mvc.AnyContentAsEmpty
 import play.api.test.FakeRequest
@@ -38,7 +38,7 @@ import builder._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.config.UpliftJourneyConfig
 import uk.gov.hmrc.thirdpartydeveloperfrontend.config.{On, OnDemand, Off}
 import play.api.mvc.Headers
-import domain.models.controllers.ApplicationSummary
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.controllers.ApplicationSummary
 import uk.gov.hmrc.modules.uplift.views.html.BeforeYouStartView
 import uk.gov.hmrc.modules.uplift.services.GetProductionCredentialsFlowService
 import uk.gov.hmrc.modules.uplift.services.mocks.UpliftLogicMock

@@ -2,23 +2,23 @@ GET         /                                                                   
 GET         /change                                                                              controllers.profile.Profile.changeProfile
 POST        /                                                                                    controllers.profile.Profile.updateProfile
 
-GET         /email-preferences                                                                   controllers.profile.EmailPreferences.emailPreferencesSummaryPage
-GET         /email-preferences/unsubscribe                                                       controllers.profile.EmailPreferences.unsubscribeAllPage
-POST        /email-preferences/unsubscribe                                                       controllers.profile.EmailPreferences.unsubscribeAllAction
-GET         /email-preferences/start                                                             controllers.profile.EmailPreferences.flowStartPage
-GET         /email-preferences/categories                                                        controllers.profile.EmailPreferences.flowSelectCategoriesPage
-POST        /email-preferences/categories                                                        controllers.profile.EmailPreferences.flowSelectCategoriesAction
-POST        /email-preferences/no-categories                                                     controllers.profile.EmailPreferences.flowSelectNoCategoriesAction
-GET         /email-preferences/apis                                                              controllers.profile.EmailPreferences.flowSelectApisPage(category: String)
-POST        /email-preferences/apis                                                              controllers.profile.EmailPreferences.flowSelectApisAction
-GET         /email-preferences/topics                                                            controllers.profile.EmailPreferences.flowSelectTopicsPage
-POST        /email-preferences/topics                                                            controllers.profile.EmailPreferences.flowSelectTopicsAction
+GET         /email-preferences                                                                   controllers.profile.EmailPreferencesController.emailPreferencesSummaryPage
+GET         /email-preferences/unsubscribe                                                       controllers.profile.EmailPreferencesController.unsubscribeAllPage
+POST        /email-preferences/unsubscribe                                                       controllers.profile.EmailPreferencesController.unsubscribeAllAction
+GET         /email-preferences/start                                                             controllers.profile.EmailPreferencesController.flowStartPage
+GET         /email-preferences/categories                                                        controllers.profile.EmailPreferencesController.flowSelectCategoriesPage
+POST        /email-preferences/categories                                                        controllers.profile.EmailPreferencesController.flowSelectCategoriesAction
+POST        /email-preferences/no-categories                                                     controllers.profile.EmailPreferencesController.flowSelectNoCategoriesAction
+GET         /email-preferences/apis                                                              controllers.profile.EmailPreferencesController.flowSelectApisPage(category: String)
+POST        /email-preferences/apis                                                              controllers.profile.EmailPreferencesController.flowSelectApisAction
+GET         /email-preferences/topics                                                            controllers.profile.EmailPreferencesController.flowSelectTopicsPage
+POST        /email-preferences/topics                                                            controllers.profile.EmailPreferencesController.flowSelectTopicsAction
 
-GET         /email-preferences/apis-from-subscriptions                                           controllers.profile.EmailPreferences.selectApisFromSubscriptionsPage(applicationId: ApplicationId)
-POST        /email-preferences/apis-from-subscriptions                                           controllers.profile.EmailPreferences.selectApisFromSubscriptionsAction(applicationId: ApplicationId)
-POST        /email-preferences/no-apis-from-subscriptions                                        controllers.profile.EmailPreferences.selectNoApisFromSubscriptionsAction(applicationId: ApplicationId)
-GET         /email-preferences/topics-from-subscriptions                                         controllers.profile.EmailPreferences.selectTopicsFromSubscriptionsPage(applicationId: ApplicationId)
-POST        /email-preferences/topics-from-subscriptions                                         controllers.profile.EmailPreferences.selectTopicsFromSubscriptionsAction(applicationId: ApplicationId)
+GET         /email-preferences/apis-from-subscriptions                                           controllers.profile.EmailPreferencesController.selectApisFromSubscriptionsPage(applicationId: ApplicationId)
+POST        /email-preferences/apis-from-subscriptions                                           controllers.profile.EmailPreferencesController.selectApisFromSubscriptionsAction(applicationId: ApplicationId)
+POST        /email-preferences/no-apis-from-subscriptions                                        controllers.profile.EmailPreferencesController.selectNoApisFromSubscriptionsAction(applicationId: ApplicationId)
+GET         /email-preferences/topics-from-subscriptions                                         controllers.profile.EmailPreferencesController.selectTopicsFromSubscriptionsPage(applicationId: ApplicationId)
+POST        /email-preferences/topics-from-subscriptions                                         controllers.profile.EmailPreferencesController.selectTopicsFromSubscriptionsAction(applicationId: ApplicationId)
 
 GET         /protect-account                                                                     controllers.profile.ProtectAccount.getProtectAccount
 GET         /protect-account/setup                                                               controllers.profile.ProtectAccount.getQrCode

@@ -17,7 +17,7 @@
 package views
 
 import controllers.LoginForm
-import domain.models.developers.LoggedInState
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.LoggedInState
 import org.jsoup.Jsoup
 import play.api.data.Form
 import play.api.test.FakeRequest
@@ -29,7 +29,7 @@ import views.html.SignInView
 class SignInSpec extends CommonViewSpec with WithCSRFAddToken {
   val signInView = app.injector.instanceOf[SignInView]
 
-  val loggedInDeveloper = utils.DeveloperSession("admin@example.com", "firstName1", "lastName1", loggedInState = LoggedInState.LOGGED_IN)
+  val loggedInDeveloper = utils.DeveloperSessionBuilder("admin@example.com", "firstName1", "lastName1", loggedInState = LoggedInState.LOGGED_IN)
 
   "Sign in page" should {
     def renderPage(form: Form[LoginForm]) = {

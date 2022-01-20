@@ -16,7 +16,7 @@
 
 package views
 
-import domain.models.developers.LoggedInState
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.LoggedInState
 import org.jsoup.Jsoup
 import play.api.test.FakeRequest
 import utils.ViewHelpers._
@@ -31,7 +31,7 @@ class ProfileDeleteSubmittedSpec extends CommonViewSpec with WithCSRFAddToken {
     "render with no errors" in {
       val request = FakeRequest().withCSRFToken
 
-      val developer = utils.DeveloperSession("Test", "Test", "Test", None, loggedInState = LoggedInState.LOGGED_IN)
+      val developer = utils.DeveloperSessionBuilder("Test", "Test", "Test", None, loggedInState = LoggedInState.LOGGED_IN)
 
       val page = profileDeleteSubmittedView.render(request, developer, appConfig, messagesProvider, "details")
       page.contentType should include("text/html")

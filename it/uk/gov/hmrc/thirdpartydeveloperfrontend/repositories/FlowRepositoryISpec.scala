@@ -2,11 +2,11 @@ package uk.gov.hmrc.thirdpartydeveloperfrontend.repositories
 
 import akka.stream.Materializer
 import uk.gov.hmrc.thirdpartydeveloperfrontend.config.ApplicationConfig
-import domain.models.connectors.ApiType.REST_API
-import domain.models.connectors.{CombinedApi, CombinedApiCategory}
-import domain.models.emailpreferences.EmailTopic
-import domain.models.flows.FlowType._
-import domain.models.flows.{EmailPreferencesFlowV2, Flow, FlowType, IpAllowlistFlow}
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.connectors.ApiType.REST_API
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.connectors.{CombinedApi, CombinedApiCategory}
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.emailpreferences.EmailTopic
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.flows.FlowType._
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.flows.{EmailPreferencesFlowV2, Flow, FlowType, IpAllowlistFlow}
 import org.joda.time.DateTime
 import org.scalatestplus.play.guice.GuiceOneAppPerSuite
 import play.api.libs.json.{JsObject, Json}

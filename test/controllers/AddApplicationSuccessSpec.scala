@@ -18,7 +18,7 @@ package controllers
 
 import builder.DeveloperBuilder
 import uk.gov.hmrc.thirdpartydeveloperfrontend.config.ErrorHandler
-import domain.models.applications._
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications._
 import mocks.service._
 import play.api.mvc.{AnyContentAsEmpty, Result}
 import play.api.test.FakeRequest
@@ -35,7 +35,7 @@ import mocks.connector.ApmConnectorMockModule
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
-import domain.models.apidefinitions.CombinedApiTestDataHelper
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.apidefinitions.CombinedApiTestDataHelper
 import utils.LocalUserIdTracker
 import controllers.addapplication.AddApplication
 import builder._

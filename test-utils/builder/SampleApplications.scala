@@ -16,7 +16,7 @@
 
 package builder
 
-import domain.models.applications._
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications._
 import utils.CollaboratorTracker
 
 trait SampleApplications extends SampleApplication {

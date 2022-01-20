@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
-package domain.models.applications
+package uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications
 
-import domain.models.developers.Developer
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.Developer
 
 sealed trait Permission {
   def hasPermissions(app: BaseApplication, developer: Developer): Boolean

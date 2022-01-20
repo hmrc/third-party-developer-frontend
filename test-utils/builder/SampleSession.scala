@@ -16,7 +16,7 @@
 
 package builder
 
-import domain.models.developers.{Developer, DeveloperSession, Session, LoggedInState}
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.{Developer, DeveloperSession, Session, LoggedInState}
 
 trait SampleSession {
   self: DeveloperBuilder => 

@@ -17,11 +17,11 @@
 package views.emailpreferences
 
 import controllers.{FormKeys, SelectApisFromSubscriptionsForm}
-import domain.models.applications.ApplicationId
-import domain.models.connectors.ApiType.REST_API
-import domain.models.connectors.{CombinedApi, CombinedApiCategory}
-import domain.models.developers.{DeveloperSession, LoggedInState}
-import domain.models.flows.NewApplicationEmailPreferencesFlowV2
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.ApplicationId
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.connectors.ApiType.REST_API
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.connectors.{CombinedApi, CombinedApiCategory}
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.{DeveloperSession, LoggedInState}
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.flows.NewApplicationEmailPreferencesFlowV2
 import org.jsoup.Jsoup
 import org.jsoup.nodes.{Document, Element}
 import play.api.data.{Form, FormError}
@@ -38,7 +38,7 @@ class SelectApisFromSubscriptionsViewSpec extends CommonViewSpec with WithCSRFAd
 
   trait Setup {
     val developerSessionWithoutEmailPreferences: DeveloperSession = {
-      utils.DeveloperSession("email@example.com", "First Name", "Last Name", None, loggedInState = LoggedInState.LOGGED_IN)
+      utils.DeveloperSessionBuilder("email@example.com", "First Name", "Last Name", None, loggedInState = LoggedInState.LOGGED_IN)
     }
     val form = mock[Form[SelectApisFromSubscriptionsForm]]
     val apis = Set("api1", "api2")

@@ -20,11 +20,11 @@ import uk.gov.hmrc.thirdpartydeveloperfrontend.config.ApplicationConfig
 import javax.inject.{Inject, Singleton}
 import org.joda.time.{Days, LocalDate}
 import uk.gov.hmrc.http.HeaderCarrier
-import domain.models.developers.UserId
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.UserId
 
 import scala.concurrent.{ExecutionContext, Future}
-import domain.models.applications.CollaboratorRole._
-import domain.models.applications.Environment._
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.CollaboratorRole._
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.Environment._
 
 @Singleton
 class MfaMandateService @Inject()(val appConfig: ApplicationConfig, val appsByTeamMember: AppsByTeamMemberService)(implicit val ec: ExecutionContext) {

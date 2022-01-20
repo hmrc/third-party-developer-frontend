@@ -14,16 +14,16 @@
  * limitations under the License.
  */
 
-package domain.services
+package uk.gov.hmrc.thirdpartydeveloperfrontend.domain.services
 
-import domain.models.subscriptions.ApiSubscriptionFields._
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.subscriptions.ApiSubscriptionFields._
 
 trait AccessRequirementsJsonFormatters {
   import play.api.libs.json._
   import play.api.libs.functional.syntax._
   import play.api.libs.json.Json.JsValueWrapper
-  import domain.models.subscriptions._
-  import domain.models.subscriptions.DevhubAccessRequirement._
+  import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.subscriptions._
+  import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.subscriptions.DevhubAccessRequirement._
 
   def ignoreDefaultField[T](value: T, default: T, jsonFieldName: String)(implicit w: Writes[T]) =
     if (value == default) None else Some((jsonFieldName, Json.toJsFieldJsValueWrapper(value)))
@@ -69,7 +69,7 @@ trait AccessRequirementsJsonFormatters {
 object AccessRequirementsJsonFormatters extends AccessRequirementsJsonFormatters
 
 trait SubscriptionsJsonFormatters extends ApiDefinitionsJsonFormatters with ApplicationsJsonFormatters with AccessRequirementsJsonFormatters {
-  import domain.models.subscriptions._
+  import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.subscriptions._
   import play.api.libs.json._
   import play.api.libs.functional.syntax._
 

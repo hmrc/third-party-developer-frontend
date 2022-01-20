@@ -20,16 +20,16 @@ import java.net.URLEncoder
 
 import com.github.tomakehurst.wiremock.client.WireMock._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.connectors.EncryptedJson
-import domain.models.apidefinitions.{ApiContext, ApiIdentifier, ApiVersion}
-import domain.models.applications.ApplicationNameValidationJson.ApplicationNameValidationResult
-import domain.models.applications.{Application, ApplicationToken, ClientId, Environment}
-import domain.models.connectors.UserAuthenticationResponse
-import domain.models.developers.{Registration, Session, UpdateProfileRequest}
-import domain.services.ApiDefinitionsJsonFormatters._
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.apidefinitions.{ApiContext, ApiIdentifier, ApiVersion}
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.ApplicationNameValidationJson.ApplicationNameValidationResult
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.{Application, ApplicationToken, ClientId, Environment}
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.connectors.UserAuthenticationResponse
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.{Registration, Session, UpdateProfileRequest}
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.services.ApiDefinitionsJsonFormatters._
 
 import play.api.http.Status._
 import play.api.libs.json.{Json, Writes}
-import domain.models.connectors.PasswordResetRequest
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.connectors.PasswordResetRequest
 import uk.gov.hmrc.modules.common.services.ApplicationLogger
 import org.scalatest.matchers.should.Matchers
 

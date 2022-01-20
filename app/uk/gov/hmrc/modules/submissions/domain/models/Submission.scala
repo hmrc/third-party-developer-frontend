@@ -19,7 +19,7 @@ package uk.gov.hmrc.modules.submissions.domain.models
 import org.joda.time.DateTime
 import java.util.UUID
 import cats.data.NonEmptyList
-import domain.models.applications.ApplicationId
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.ApplicationId
 
 case class SubmissionId(value: String) extends AnyVal
 

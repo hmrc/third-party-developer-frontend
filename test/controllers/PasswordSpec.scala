@@ -18,8 +18,8 @@ package controllers
 
 import uk.gov.hmrc.thirdpartydeveloperfrontend.config.ApplicationConfig
 import uk.gov.hmrc.thirdpartydeveloperfrontend.connectors.ThirdPartyDeveloperConnector
-import domain.{InvalidResetCode, UnverifiedAccount}
-import domain.models.connectors.{ChangePassword, PasswordReset}
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.{InvalidResetCode, UnverifiedAccount}
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.connectors.{ChangePassword, PasswordReset}
 import mocks.service.SessionServiceMock
 import play.api.test.FakeRequest
 import play.api.test.Helpers._

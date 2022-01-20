@@ -20,9 +20,9 @@ import java.time.Period
 import java.util.UUID.randomUUID
 
 import uk.gov.hmrc.time.DateTimeUtils
-import domain.models.applications._
-import domain.models.apidefinitions._
-import domain.models.subscriptions.{Fields,FieldValue,FieldName}
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications._
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.apidefinitions._
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.subscriptions.{Fields,FieldValue,FieldName}
 import utils.CollaboratorTracker
 import utils.UserIdTracker
 

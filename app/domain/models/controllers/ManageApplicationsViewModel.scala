@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
-package domain.models.controllers
+package uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.controllers
 
-import domain.models.applications.ApplicationId
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.ApplicationId
 
 case class ManageApplicationsViewModel(
     sandboxApplicationSummaries: Seq[ApplicationSummary],

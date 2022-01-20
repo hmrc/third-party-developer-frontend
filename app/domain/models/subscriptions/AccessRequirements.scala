@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
-package domain.models.subscriptions
+package uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.subscriptions
 
-import domain.models.applications.CollaboratorRole
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.CollaboratorRole
 
 sealed trait DevhubAccessRequirement
 object DevhubAccessRequirement {

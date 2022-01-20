@@ -21,12 +21,12 @@ import play.api.mvc.MessagesControllerComponents
 import scala.concurrent.ExecutionContext
 import uk.gov.hmrc.thirdpartydeveloperfrontend.config.ApplicationConfig
 import controllers.ApplicationController
-import domain.models.applications.ApplicationId
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.ApplicationId
 import play.api.data.Form
 import uk.gov.hmrc.modules.common.services.EitherTHelper
 import uk.gov.hmrc.modules.submissions.services.SubmissionService
 import play.api.mvc.Result
-import domain.models.controllers.BadRequestWithErrorMessage
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.controllers.BadRequestWithErrorMessage
 import uk.gov.hmrc.thirdpartydeveloperfrontend.service.SessionService
 import uk.gov.hmrc.thirdpartydeveloperfrontend.service.ApplicationActionService
 import uk.gov.hmrc.thirdpartydeveloperfrontend.service.ApplicationService
@@ -34,7 +34,7 @@ import play.api.libs.crypto.CookieSigner
 import uk.gov.hmrc.thirdpartydeveloperfrontend.config.ErrorHandler
 import uk.gov.hmrc.modules.submissions.views.html.{CancelledRequestForProductionCredentialsView, ConfirmCancelRequestForProductionCredentialsView}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.connectors.ThirdPartyApplicationProductionConnector
-import domain.models.applications.State
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.State
 
 object CancelRequestController {
   case class DummyForm(dummy: String = "dummy")

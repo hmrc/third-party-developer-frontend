@@ -17,8 +17,8 @@
 package controllers.checkpages
 
 import controllers.{ApplicationController, ApplicationRequest}
-import domain.models.applications.CheckInformation
-import domain.models.views.CheckInformationForm
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.CheckInformation
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.views.CheckInformationForm
 import play.api.data.Form
 import play.api.data.Forms.{boolean, ignored, mapping}
 

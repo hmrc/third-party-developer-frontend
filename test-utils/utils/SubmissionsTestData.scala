@@ -19,7 +19,7 @@ package utils
 import uk.gov.hmrc.modules.submissions.domain.models._
 import uk.gov.hmrc.time.DateTimeUtils
 import cats.data.NonEmptyList
-import domain.models.applications.ApplicationId
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.ApplicationId
 
 trait SubmissionsTestData {
   object DevelopmentPractices {

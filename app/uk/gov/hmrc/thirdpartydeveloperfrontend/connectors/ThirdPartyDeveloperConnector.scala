@@ -18,9 +18,9 @@ package uk.gov.hmrc.thirdpartydeveloperfrontend.connectors
 
 import uk.gov.hmrc.thirdpartydeveloperfrontend.config.ApplicationConfig
 import uk.gov.hmrc.thirdpartydeveloperfrontend.connectors.ThirdPartyDeveloperConnector.UnregisteredUserCreationRequest
-import domain._
-import domain.models.connectors._
-import domain.models.developers._
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain._
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.connectors._
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers._
 import javax.inject.{Inject, Singleton}
 import play.api.http.Status._
 import play.api.libs.json.{Format, Json}
@@ -28,7 +28,7 @@ import uk.gov.hmrc.http._
 import uk.gov.hmrc.http.HttpClient
 import uk.gov.hmrc.play.http.metrics.common.API
 import scala.concurrent.{ExecutionContext, Future}
-import domain.models.emailpreferences.EmailPreferences
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.emailpreferences.EmailPreferences
 import uk.gov.hmrc.thirdpartydeveloperfrontend.connectors.ThirdPartyDeveloperConnector.RemoveMfaRequest
 
 import uk.gov.hmrc.http.HttpReads.Implicits._

@@ -16,12 +16,12 @@
 
 package uk.gov.hmrc.thirdpartydeveloperfrontend.connectors
 
-import domain.models.apidefinitions.{ApiContext, ApiVersion}
-import domain.models.subscriptions.{AccessRequirements, DevhubAccessRequirements}
-import domain.models.subscriptions.DevhubAccessRequirement.NoOne
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.apidefinitions.{ApiContext, ApiVersion}
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.subscriptions.{AccessRequirements, DevhubAccessRequirements}
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.subscriptions.DevhubAccessRequirement.NoOne
 import play.api.libs.json.{Json, JsSuccess}
 import utils.AsyncHmrcSpec
-import domain.models.subscriptions.FieldName
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.subscriptions.FieldName
 import uk.gov.hmrc.thirdpartydeveloperfrontend.connectors.SubscriptionFieldsConnectorDomain.ApiFieldDefinitions
 import uk.gov.hmrc.thirdpartydeveloperfrontend.connectors.SubscriptionFieldsConnectorDomain.FieldDefinition
 

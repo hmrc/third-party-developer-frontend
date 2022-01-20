@@ -17,11 +17,11 @@
 @import uk.gov.hmrc.thirdpartydeveloperfrontend.config.ApplicationConfig
 @import include._
 @import views.html.include.DevMain
-@import domain.models.applications.CollaboratorRole
-@import domain.models.developers.DeveloperSession
-@import domain.models.applications.Application
-@import domain.models.views.IpAllowlistFeedbackBanner
-@import domain.models.controllers.Crumb
+@import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.CollaboratorRole
+@import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.DeveloperSession
+@import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.Application
+@import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.views.IpAllowlistFeedbackBanner
+@import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.controllers.Crumb
 
 @this(devMain: DevMain2)
 
@@ -76,7 +76,7 @@ implicit request: play.api.mvc.Request[Any], loggedIn: DeveloperSession, message
 
     @if(sandboxOrAdmin) {
       <p class="govuk-body">
-        <a class="govuk-link govuk-link--no-visited-state" href="@routes.IpAllowlist.editIpAllowlist(app.id)">
+        <a class="govuk-link govuk-link--no-visited-state" href="@routes.IpAllowListController.editIpAllowlist(app.id)">
           Edit IP allow list
         </a>
       </p>
@@ -88,7 +88,7 @@ implicit request: play.api.mvc.Request[Any], loggedIn: DeveloperSession, message
       </p>
 
       @if(!app.ipAllowlist.required) {
-        <a class="govuk-button govuk-button--warning" href="@routes.IpAllowlist.removeIpAllowlist(app.id)">
+        <a class="govuk-button govuk-button--warning" href="@routes.IpAllowListController.removeIpAllowlist(app.id)">
           Remove your IP Allow list
         </a>
       }

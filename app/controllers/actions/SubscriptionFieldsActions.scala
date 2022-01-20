@@ -20,15 +20,15 @@ import controllers.ApplicationWithSubscriptionFieldsRequest
 import controllers.ApplicationWithSubscriptionFieldPageRequest
 import controllers.ApplicationWithFieldDefinitionsRequest
 import controllers.ApplicationWithWritableSubscriptionField
-import domain.models.controllers.NoSubscriptionFieldsRefinerBehaviour
-import domain.models.applications._
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.controllers.NoSubscriptionFieldsRefinerBehaviour
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications._
 import play.api.mvc.{Action, AnyContent, Result, ActionRefiner}
 import scala.concurrent.Future
 import controllers.ApplicationController
 import scala.concurrent.ExecutionContext
 import cats.data.NonEmptyList
-import domain.models.apidefinitions._
-import domain.models.subscriptions.DevhubAccessLevel
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.apidefinitions._
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.subscriptions.DevhubAccessLevel
 import controllers.ManageSubscriptions.toDetails
 import controllers.ApplicationRequest
 

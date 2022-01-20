@@ -14,10 +14,10 @@
  * limitations under the License.
  */
 
-package domain.models.developers
+package uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers
 
 import java.{util => ju}
-import domain.models.emailpreferences.EmailPreferences
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.emailpreferences.EmailPreferences
 import play.api.libs.json.{Format, Json}
 
 case class UserId(value: ju.UUID) extends AnyVal {

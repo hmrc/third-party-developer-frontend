@@ -17,7 +17,7 @@
 package builder
 
 import java.time.Period
-import domain.models.applications._
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications._
 import uk.gov.hmrc.time.DateTimeUtils
 import utils.CollaboratorTracker
 

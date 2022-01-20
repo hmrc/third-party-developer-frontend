@@ -20,10 +20,10 @@ import uk.gov.hmrc.thirdpartydeveloperfrontend.config.ApplicationConfig
 import uk.gov.hmrc.thirdpartydeveloperfrontend.config.ErrorHandler
 import uk.gov.hmrc.thirdpartydeveloperfrontend.connectors.ThirdPartyDeveloperConnector
 import controllers.Credentials.serverTokenCutoffDate
-import domain._
-import domain.models.applications.ApplicationId
-import domain.models.applications.Capabilities.{ChangeClientSecret, ViewCredentials}
-import domain.models.applications.Permissions.{SandboxOrAdmin, TeamMembersOnly}
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain._
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.ApplicationId
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.Capabilities.{ChangeClientSecret, ViewCredentials}
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.Permissions.{SandboxOrAdmin, TeamMembersOnly}
 import javax.inject.{Inject, Singleton}
 import org.joda.time.DateTime
 import play.api.libs.crypto.CookieSigner

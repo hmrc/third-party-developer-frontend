@@ -21,7 +21,7 @@ import org.mockito.ArgumentMatchersSugar
 import scala.concurrent.Future.successful
 import uk.gov.hmrc.modules.uplift.domain.models._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.repositories.FlowRepository
-import domain.models.flows.FlowType
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.flows.FlowType
 import play.api.libs.json.OFormat
 
 trait FlowRepositoryMockModule extends MockitoSugar with ArgumentMatchersSugar {

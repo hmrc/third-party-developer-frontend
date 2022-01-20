@@ -18,14 +18,14 @@ package mocks.service
 
 import java.util.UUID
 
-import domain._
-import domain.models.applications._
-import domain.models.developers.DeveloperSession
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain._
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications._
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.DeveloperSession
 import org.mockito.{ArgumentMatchersSugar, MockitoSugar}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.service.ApplicationService
 
 import scala.concurrent.Future.{failed, successful}
-import domain.models.apidefinitions.ApiIdentifier
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.apidefinitions.ApiIdentifier
 import utils.TestApplications
 import utils.CollaboratorTracker
 import utils.LocalUserIdTracker

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package domain.models.views
+package uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.views
 
 import play.api.libs.json.Json
 

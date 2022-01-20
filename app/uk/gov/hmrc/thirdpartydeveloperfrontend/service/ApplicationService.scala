@@ -17,13 +17,13 @@
 package uk.gov.hmrc.thirdpartydeveloperfrontend.service
 
 import uk.gov.hmrc.thirdpartydeveloperfrontend.connectors._
-import domain._
-import domain.models.apidefinitions._
-import domain.models.applications._
-import domain.models.applications.Environment.{PRODUCTION, SANDBOX}
-import domain.models.connectors.{DeskproTicket, TicketResult}
-import domain.models.developers.{DeveloperSession, UserId}
-import domain.models.subscriptions._
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain._
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.apidefinitions._
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications._
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.Environment.{PRODUCTION, SANDBOX}
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.connectors.{DeskproTicket, TicketResult}
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.{DeveloperSession, UserId}
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.subscriptions._
 import javax.inject.{Inject, Singleton}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.service.AuditAction.{AccountDeletionRequested, ApplicationDeletionRequested, Remove2SVRequested, UserLogoutSurveyCompleted}
 import uk.gov.hmrc.http.{ForbiddenException, HeaderCarrier}
@@ -31,7 +31,7 @@ import uk.gov.hmrc.play.audit.http.connector.AuditResult
 import uk.gov.hmrc.time.DateTimeUtils
 
 import scala.concurrent.{ExecutionContext, Future}
-import domain.models.connectors.AddTeamMemberRequest
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.connectors.AddTeamMemberRequest
 
 @Singleton
 class ApplicationService @Inject() (

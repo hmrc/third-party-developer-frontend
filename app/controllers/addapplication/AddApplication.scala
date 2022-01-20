@@ -22,15 +22,15 @@ import uk.gov.hmrc.thirdpartydeveloperfrontend.connectors.ApmConnector
 import controllers.{AddApplicationNameForm, ApplicationController, ChooseApplicationToUpliftForm}
 import controllers.FormKeys.appNameField
 import controllers.UserRequest
-import domain.ApplicationCreatedResponse
-import domain.Error._
-import domain.models.apidefinitions.APISubscriptionStatus
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.ApplicationCreatedResponse
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.Error._
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.apidefinitions.APISubscriptionStatus
 import uk.gov.hmrc.modules.uplift.services._
 import uk.gov.hmrc.modules.uplift.domain.models._
-import domain.models.applications.Environment.{PRODUCTION, SANDBOX}
-import domain.models.applications._
-import domain.models.controllers.ApplicationSummary
-import domain.models.emailpreferences.EmailPreferences
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.Environment.{PRODUCTION, SANDBOX}
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications._
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.controllers.ApplicationSummary
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.emailpreferences.EmailPreferences
 import play.api.data.Form
 import play.api.libs.crypto.CookieSigner
 import play.api.libs.json.Json
@@ -223,7 +223,7 @@ class AddApplication @Inject() (
             if(alreadySelectedEmailPreferences || missingSubscriptions.isEmpty) {
               Ok(addApplicationSubordinateSuccessView(application.name, applicationId))
             } else {
-              Redirect(controllers.profile.routes.EmailPreferences.selectApisFromSubscriptionsPage(applicationId))
+              Redirect(controllers.profile.routes.EmailPreferencesController.selectApisFromSubscriptionsPage(applicationId))
                 .flashing("missingSubscriptions" -> missingSubscriptions.mkString(","))
             }
           }

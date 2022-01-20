@@ -14,14 +14,14 @@
  * limitations under the License.
  */
 
-package domain.models.flows
+package uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.flows
 
 import cats.Semigroup
 import cats.implicits._
-import domain.models.applications.ApplicationId
-import domain.models.connectors.{CombinedApi, CombinedApiCategory}
-import domain.models.developers.DeveloperSession
-import domain.models.emailpreferences.{EmailPreferences, EmailTopic, TaxRegimeInterests}
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.ApplicationId
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.connectors.{CombinedApi, CombinedApiCategory}
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.DeveloperSession
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.emailpreferences.{EmailPreferences, EmailTopic, TaxRegimeInterests}
 import enumeratum.{Enum, EnumEntry, PlayJsonEnum}
 
 import scala.collection.immutable

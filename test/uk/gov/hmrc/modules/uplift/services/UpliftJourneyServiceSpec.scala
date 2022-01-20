@@ -18,10 +18,10 @@ package uk.gov.hmrc.modules.uplift.services
 
 import builder._
 import controllers.SubscriptionTestHelperSugar
-import domain.models.apidefinitions._
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.apidefinitions._
 import uk.gov.hmrc.modules.uplift.domain.models._
-import domain.models.developers.{DeveloperSession, LoggedInState, Session}
-import domain.models.subscriptions.{ApiCategory, ApiData, VersionData}
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.{DeveloperSession, LoggedInState, Session}
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.subscriptions.{ApiCategory, ApiData, VersionData}
 import _root_.mocks.connector.ApmConnectorMockModule
 import _root_.mocks.service.{ApplicationActionServiceMock, ApplicationServiceMock, SessionServiceMock}
 import uk.gov.hmrc.http.HeaderCarrier
@@ -29,7 +29,7 @@ import uk.gov.hmrc.http.HeaderCarrier
 import scala.concurrent.ExecutionContext.Implicits.global
 import utils.AsyncHmrcSpec
 import utils.LocalUserIdTracker
-import domain.models.applications.ApplicationId
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.ApplicationId
 import uk.gov.hmrc.modules.uplift.services.mocks._
 
 class UpliftJourneyServiceSpec

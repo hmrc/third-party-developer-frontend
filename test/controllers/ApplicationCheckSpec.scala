@@ -20,10 +20,10 @@ import java.util.UUID.randomUUID
 
 import builder._
 import controllers.checkpages.ApplicationCheck
-import domain.models.applications.CollaboratorRole.{ADMINISTRATOR, DEVELOPER}
-import domain.ApplicationUpliftSuccessful
-import domain.models.apidefinitions._
-import domain.models.applications.{ApplicationId, _}
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.CollaboratorRole.{ADMINISTRATOR, DEVELOPER}
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.ApplicationUpliftSuccessful
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.apidefinitions._
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.{ApplicationId, _}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.helpers.string._
 import mocks.service._
 import org.joda.time.DateTimeZone
@@ -45,7 +45,7 @@ import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 import scala.concurrent.Future.successful
 import utils.LocalUserIdTracker
-import domain.models.developers.DeveloperSession
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.DeveloperSession
 
 class ApplicationCheckSpec
     extends BaseControllerSpec

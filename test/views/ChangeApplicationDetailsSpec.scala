@@ -19,9 +19,9 @@ package views
 import java.time.Period
 
 import controllers.EditApplicationForm
-import domain.models.applications._
-import domain.models.developers.LoggedInState
-import domain.models.controllers.ApplicationViewModel
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications._
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.LoggedInState
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.controllers.ApplicationViewModel
 import org.jsoup.Jsoup
 import org.jsoup.nodes.Document
 import play.api.test.FakeRequest
@@ -41,7 +41,7 @@ class ChangeApplicationDetailsSpec extends CommonViewSpec with WithCSRFAddToken 
 
     def renderPage(application: Application) = {
 
-      val loggedIn = utils.DeveloperSession("admin@example.com", "firstName1", "lastName1", loggedInState = LoggedInState.LOGGED_IN)
+      val loggedIn = utils.DeveloperSessionBuilder("admin@example.com", "firstName1", "lastName1", loggedInState = LoggedInState.LOGGED_IN)
       val request = FakeRequest().withCSRFToken
       val form = EditApplicationForm.form.fill(
         EditApplicationForm(application.id, application.name, application.description, application.privacyPolicyUrl, application.termsAndConditionsUrl, "12 months")

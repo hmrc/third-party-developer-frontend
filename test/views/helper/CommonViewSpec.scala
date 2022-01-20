@@ -20,7 +20,7 @@ import java.time.Period
 import java.util.Locale
 
 import uk.gov.hmrc.thirdpartydeveloperfrontend.config.ApplicationConfig
-import domain.models.controllers.FraudPreventionNavLinkViewModel
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.controllers.FraudPreventionNavLinkViewModel
 import org.scalatestplus.play.guice.GuiceOneAppPerSuite
 import play.api.Application
 import play.api.i18n.{Lang, MessagesImpl, MessagesProvider}

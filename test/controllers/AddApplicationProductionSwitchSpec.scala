@@ -18,7 +18,7 @@ package controllers
 
 import builder.DeveloperBuilder
 import uk.gov.hmrc.thirdpartydeveloperfrontend.config.ErrorHandler
-import domain.models.applications._
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications._
 import mocks.service._
 import uk.gov.hmrc.modules.uplift.services.mocks.UpliftLogicMock
 import play.api.mvc.AnyContentAsEmpty
@@ -36,7 +36,7 @@ import views.html._
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import utils.LocalUserIdTracker
-import domain.models.controllers.ApplicationSummary
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.controllers.ApplicationSummary
 import builder._
 
 import scala.concurrent.Future

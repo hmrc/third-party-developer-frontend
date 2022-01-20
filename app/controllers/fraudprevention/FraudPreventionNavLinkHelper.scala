@@ -16,12 +16,12 @@
 
 package controllers.fraudprevention
 
-import domain.models.controllers.FraudPreventionNavLinkViewModel
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.controllers.FraudPreventionNavLinkViewModel
 import uk.gov.hmrc.thirdpartydeveloperfrontend.config.FraudPreventionConfig
 import controllers.ApplicationRequest
-import domain.models.applications.Environment
-import domain.models.applications.Application
-import domain.models.apidefinitions.APISubscriptionStatus
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.Environment
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.Application
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.apidefinitions.APISubscriptionStatus
 
 trait FraudPreventionNavLinkHelper {
 

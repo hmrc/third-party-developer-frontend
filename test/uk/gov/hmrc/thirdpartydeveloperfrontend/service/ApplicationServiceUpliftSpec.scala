@@ -27,20 +27,20 @@ import uk.gov.hmrc.thirdpartydeveloperfrontend.service.PushPullNotificationsServ
 import uk.gov.hmrc.thirdpartydeveloperfrontend.config.ApplicationConfig
 import uk.gov.hmrc.thirdpartydeveloperfrontend.connectors.DeskproConnector
 import uk.gov.hmrc.thirdpartydeveloperfrontend.connectors.ThirdPartyDeveloperConnector
-import domain.models.applications.ApplicationId
-import domain.models.developers.LoggedInState
-import domain.models.connectors.DeskproTicket
-import domain.models.applications.UpliftRequest
-import domain.ApplicationUpliftSuccessful
-import domain.models.connectors.TicketCreated
-import domain.ApplicationAlreadyExists
-import domain.ApplicationNotFound
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.ApplicationId
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.LoggedInState
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.connectors.DeskproTicket
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.UpliftRequest
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.ApplicationUpliftSuccessful
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.connectors.TicketCreated
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.ApplicationAlreadyExists
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.ApplicationNotFound
 import scala.concurrent.Future.{failed, successful}
-import domain.models.applications.ApplicationVerificationSuccessful
-import domain.models.applications.ApplicationVerificationFailed
-import domain.models.apidefinitions.ApiIdentifier
-import domain.models.apidefinitions.ApiVersion
-import domain.models.apidefinitions.ApiContext
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.ApplicationVerificationSuccessful
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.ApplicationVerificationFailed
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.apidefinitions.ApiIdentifier
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.apidefinitions.ApiVersion
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.apidefinitions.ApiContext
 
 class ApplicationServiceUpliftSpec extends AsyncHmrcSpec {
   trait Setup {
@@ -122,7 +122,7 @@ class ApplicationServiceUpliftSpec extends AsyncHmrcSpec {
     val applicationName = "applicationName"
 
     val user =
-      utils.DeveloperSession("Firstname", "Lastname", "email@example.com", loggedInState = LoggedInState.LOGGED_IN)
+      utils.DeveloperSessionBuilder("Firstname", "Lastname", "email@example.com", loggedInState = LoggedInState.LOGGED_IN)
 
     "request uplift" in new Setup {
       when(mockDeskproConnector.createTicket(any[DeskproTicket])(eqTo(hc))).thenReturn(successful(TicketCreated))

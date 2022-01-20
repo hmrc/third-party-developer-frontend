@@ -17,11 +17,11 @@
 package views.emailpreferences
 
 import controllers.{FormKeys, SelectedApisEmailPreferencesForm}
-import domain.models.connectors.ApiType.REST_API
-import domain.models.connectors.{CombinedApi, CombinedApiCategory}
-import domain.models.developers.{DeveloperSession, LoggedInState}
-import domain.models.emailpreferences.APICategoryDisplayDetails
-import domain.models.flows.EmailPreferencesFlowV2
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.connectors.ApiType.REST_API
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.connectors.{CombinedApi, CombinedApiCategory}
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.{DeveloperSession, LoggedInState}
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.emailpreferences.APICategoryDisplayDetails
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.flows.EmailPreferencesFlowV2
 import org.jsoup.Jsoup
 import org.jsoup.nodes.{Document, Element}
 import play.api.data.{Form, FormError}
@@ -33,13 +33,13 @@ import views.helper.CommonViewSpec
 import views.html.emailpreferences.FlowSelectApiView
 
 import scala.collection.JavaConverters._
-import domain.models.connectors.ApiType
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.connectors.ApiType
 
 class FlowSelectApiViewSpec extends CommonViewSpec with WithCSRFAddToken {
 
   trait Setup {
     val developerSessionWithoutEmailPreferences: DeveloperSession = {
-      utils.DeveloperSession("email@example.com", "First Name", "Last Name", None, loggedInState = LoggedInState.LOGGED_IN)
+      utils.DeveloperSessionBuilder("email@example.com", "First Name", "Last Name", None, loggedInState = LoggedInState.LOGGED_IN)
     }
     val form = mock[Form[SelectedApisEmailPreferencesForm]]
     val currentCategory = APICategoryDisplayDetails("CATEGORY1", "Category 1")

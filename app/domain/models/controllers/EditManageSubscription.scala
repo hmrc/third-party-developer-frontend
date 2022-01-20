@@ -14,12 +14,12 @@
  * limitations under the License.
  */
 
-package domain.models.controllers
+package uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.controllers
 
-import domain.models.apidefinitions.{APISubscriptionStatusWithSubscriptionFields, APISubscriptionStatusWithWritableSubscriptionField, ApiContext, ApiVersion}
-import domain.models.applications.CollaboratorRole
-import domain.models.subscriptions.{FieldName, FieldValue}
-import domain.models.subscriptions.DevhubAccessLevel
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.apidefinitions.{APISubscriptionStatusWithSubscriptionFields, APISubscriptionStatusWithWritableSubscriptionField, ApiContext, ApiVersion}
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.CollaboratorRole
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.subscriptions.{FieldName, FieldValue}
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.subscriptions.DevhubAccessLevel
 import play.api.data.FormError
 
 object EditManageSubscription {

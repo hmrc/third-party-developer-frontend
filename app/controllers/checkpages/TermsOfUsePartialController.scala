@@ -17,8 +17,8 @@
 package controllers.checkpages
 
 import controllers.{ApplicationController, TermsOfUseForm}
-import domain.models.applications.{ApplicationId, CheckInformation, TermsOfUseAgreement}
-import domain.models.controllers.ApplicationViewModel
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.{ApplicationId, CheckInformation, TermsOfUseAgreement}
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.controllers.ApplicationViewModel
 import play.api.data.Form
 import play.api.mvc.{Action, AnyContent, Call}
 import uk.gov.hmrc.time.DateTimeUtils

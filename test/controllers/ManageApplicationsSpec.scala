@@ -20,7 +20,7 @@ import java.util.UUID.randomUUID
 
 import builder.DeveloperBuilder
 import uk.gov.hmrc.thirdpartydeveloperfrontend.config.ErrorHandler
-import domain.models.applications._
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications._
 import mocks.service._
 import org.joda.time.DateTimeZone
 import play.api.mvc.AnyContentAsEmpty
@@ -32,7 +32,7 @@ import utils.WithCSRFAddToken
 import utils.WithLoggedInSession._
 import views.helper.EnvironmentNameService
 import views.html._
-import domain.models.controllers.ApplicationSummary
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.controllers.ApplicationSummary
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import utils.LocalUserIdTracker

@@ -19,7 +19,7 @@ package controllers
 import java.util.UUID.randomUUID
 import builder.DeveloperBuilder
 import uk.gov.hmrc.thirdpartydeveloperfrontend.config.ErrorHandler
-import domain.models.applications._
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications._
 import mocks.service._
 import org.joda.time.DateTimeZone
 import org.mockito.Mockito

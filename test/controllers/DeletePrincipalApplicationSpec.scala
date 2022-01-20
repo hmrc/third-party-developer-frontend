@@ -17,9 +17,9 @@
 package controllers
 
 import builder.DeveloperBuilder
-import domain.models.applications._
-import domain.models.connectors.TicketCreated
-import domain.models.developers.{DeveloperSession, LoggedInState, Session}
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications._
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.connectors.TicketCreated
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.{DeveloperSession, LoggedInState, Session}
 import mocks.service._
 import org.joda.time.DateTime
 import play.api.test.FakeRequest

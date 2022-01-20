@@ -18,15 +18,15 @@ package uk.gov.hmrc.thirdpartydeveloperfrontend.service
 
 import javax.inject.{Inject, Singleton}
 import scala.concurrent.ExecutionContext
-import domain.models.applications.Environment
-import domain.models.developers.UserId
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.Environment
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.UserId
 import uk.gov.hmrc.http.HeaderCarrier
 import scala.concurrent.Future
-import domain.models.applications.CollaboratorRole
-import domain.models.applications.Environment._
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.CollaboratorRole
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.Environment._
 import scala.util.control.NonFatal
-import domain.models.controllers.ApplicationSummary
-import domain.models.applications.ApplicationWithSubscriptionIds
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.controllers.ApplicationSummary
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.ApplicationWithSubscriptionIds
 
 @Singleton
 class AppsByTeamMemberService @Inject() (

@@ -14,13 +14,13 @@
  * limitations under the License.
  */
 
-package domain.models.applications
+package uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications
 
 import controllers._
-import domain.models.developers.DeveloperSession
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.DeveloperSession
 import play.api.libs.json.Json
 import uk.gov.hmrc.modules.uplift.domain.models._
-import domain.models.apidefinitions.ApiIdentifier
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.apidefinitions.ApiIdentifier
 
 case class UpliftData(
   responsibleIndividual: ResponsibleIndividual,
@@ -30,7 +30,7 @@ case class UpliftData(
 
 object UpliftData {
   import play.api.libs.json.{Format, Json}
-  import domain.services.ApiDefinitionsJsonFormatters._
+  import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.services.ApiDefinitionsJsonFormatters._
   implicit val format: Format[UpliftData] = Json.format[UpliftData]
 }
 

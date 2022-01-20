@@ -19,10 +19,10 @@ package uk.gov.hmrc.thirdpartydeveloperfrontend.connectors
 import akka.actor.ActorSystem
 import akka.pattern.FutureTimeoutSupport
 import uk.gov.hmrc.thirdpartydeveloperfrontend.config.ApplicationConfig
-import domain._
-import domain.models.applications.ApplicationNameValidationJson.{ApplicationNameValidationRequest, ApplicationNameValidationResult}
-import domain.models.applications._
-import domain.models.connectors.DeleteCollaboratorRequest
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain._
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.ApplicationNameValidationJson.{ApplicationNameValidationRequest, ApplicationNameValidationResult}
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications._
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.connectors.DeleteCollaboratorRequest
 import javax.inject.{Inject, Singleton}
 import play.api.http.Status._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.service.ApplicationService.ApplicationConnector
@@ -30,10 +30,10 @@ import uk.gov.hmrc.http._
 import uk.gov.hmrc.http.HttpClient
 import uk.gov.hmrc.play.http.metrics.common.API
 
-import domain.models.developers.UserId
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.UserId
 import scala.concurrent.{ExecutionContext, Future}
 import scala.util.Success
-import domain.models.apidefinitions.ApiIdentifier
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.apidefinitions.ApiIdentifier
 import uk.gov.hmrc.http.HttpReads.Implicits._
 import uk.gov.hmrc.modules.common.services.ApplicationLogger
 
@@ -216,7 +216,7 @@ abstract class ThirdPartyApplicationConnector(config: ApplicationConfig, metrics
 }
 
 private[connectors] object ThirdPartyApplicationConnectorDomain {
-  import domain.models.applications.{ClientId, ClientSecret}
+  import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.{ClientId, ClientSecret}
   import org.joda.time.DateTime
 
   def toDomain(tpaClientSecret: TPAClientSecret): ClientSecret =

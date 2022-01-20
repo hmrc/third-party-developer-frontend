@@ -18,11 +18,11 @@ package controllers.profile
 
 import uk.gov.hmrc.thirdpartydeveloperfrontend.config.ApplicationConfig
 import uk.gov.hmrc.thirdpartydeveloperfrontend.config.ErrorHandler
-import controllers._
-import domain.models.applications.ApplicationId
-import domain.models.connectors.CombinedApi
-import domain.models.emailpreferences.APICategoryDisplayDetails
-import domain.models.flows.{FlowType, NewApplicationEmailPreferencesFlowV2}
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.ApplicationId
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.connectors.CombinedApi
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.emailpreferences.APICategoryDisplayDetails
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.emailpreferences.EmailPreferences
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.flows.{FlowType, NewApplicationEmailPreferencesFlowV2}
 import play.api.data.Form
 import play.api.libs.crypto.CookieSigner
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents, Result}
@@ -30,25 +30,27 @@ import play.twirl.api.Html
 import uk.gov.hmrc.thirdpartydeveloperfrontend.service.{EmailPreferencesService, SessionService}
 import views.emailpreferences.EmailPreferencesSummaryViewData
 import views.html.emailpreferences._
+import controllers._
 
 import javax.inject.Inject
 import scala.concurrent.Future.successful
 import scala.concurrent.{ExecutionContext, Future}
-import domain.models.connectors.ApiType
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.connectors.ApiType
 
-class EmailPreferences @Inject()(val sessionService: SessionService,
-                                 mcc: MessagesControllerComponents,
-                                 val errorHandler: ErrorHandler,
-                                 val cookieSigner: CookieSigner,
-                                 emailPreferencesService: EmailPreferencesService,
-                                 emailPreferencesSummaryView: EmailPreferencesSummaryView,
-                                 emailPreferencesUnsubscribeAllView: EmailPreferencesUnsubscribeAllView,
-                                 flowStartView: FlowStartView,
-                                 flowSelectCategoriesView: FlowSelectCategoriesView,
-                                 flowSelectApiView: FlowSelectApiView,
-                                 flowSelectTopicsView: FlowSelectTopicsView,
-                                 selectApisFromSubscriptionsView: SelectApisFromSubscriptionsView,
-                                 selectTopicsFromSubscriptionsView: SelectTopicsFromSubscriptionsView)
+class EmailPreferencesController @Inject()(
+  val sessionService: SessionService,
+  mcc: MessagesControllerComponents,
+  val errorHandler: ErrorHandler,
+  val cookieSigner: CookieSigner,
+  emailPreferencesService: EmailPreferencesService,
+  emailPreferencesSummaryView: EmailPreferencesSummaryView,
+  emailPreferencesUnsubscribeAllView: EmailPreferencesUnsubscribeAllView,
+  flowStartView: FlowStartView,
+  flowSelectCategoriesView: FlowSelectCategoriesView,
+  flowSelectApiView: FlowSelectApiView,
+  flowSelectTopicsView: FlowSelectTopicsView,
+  selectApisFromSubscriptionsView: SelectApisFromSubscriptionsView,
+  selectTopicsFromSubscriptionsView: SelectTopicsFromSubscriptionsView)
                                 (implicit val ec: ExecutionContext, val appConfig: ApplicationConfig) extends LoggedInController(mcc) {
 
 
@@ -77,19 +79,19 @@ class EmailPreferences @Inject()(val sessionService: SessionService,
       },
       { form =>
         emailPreferencesService.updateCategories(request.developerSession, form.taxRegime)
-          .map(flow => Redirect(controllers.profile.routes.EmailPreferences.flowSelectApisPage(flow.categoriesInOrder.head)))
+          .map(flow => Redirect(controllers.profile.routes.EmailPreferencesController.flowSelectApisPage(flow.categoriesInOrder.head)))
       })
   }
 
   def flowSelectNoCategoriesAction: Action[AnyContent] = loggedInAction { implicit request =>
     emailPreferencesService.updateCategories(request.developerSession, List.empty[String])
-      .map(_ => Redirect(controllers.profile.routes.EmailPreferences.flowSelectTopicsPage()))
+      .map(_ => Redirect(controllers.profile.routes.EmailPreferencesController.flowSelectTopicsPage()))
   }
 
   def flowSelectApisPage(category: String): Action[AnyContent] = loggedInAction { implicit request =>
     val form = SelectedApisEmailPreferencesForm.form
     if (category.isEmpty) {
-      Future.successful(Redirect(controllers.profile.routes.EmailPreferences.emailPreferencesSummaryPage()))
+      Future.successful(Redirect(controllers.profile.routes.EmailPreferencesController.emailPreferencesSummaryPage()))
     } else {
       flowSelectApisView(form, category).map(Ok(_))
     }
@@ -107,9 +109,9 @@ class EmailPreferences @Inject()(val sessionService: SessionService,
     def handleNextPage(sortedCategories: List[String], currentCategory: String): Result = {
       val currentCategoryIndex = sortedCategories.indexOf(currentCategory)
       if (sortedCategories.size == currentCategoryIndex + 1) {
-        Redirect(controllers.profile.routes.EmailPreferences.flowSelectTopicsPage())
+        Redirect(controllers.profile.routes.EmailPreferencesController.flowSelectTopicsPage())
       } else {
-        Redirect(controllers.profile.routes.EmailPreferences.flowSelectApisPage(sortedCategories(currentCategoryIndex + 1)))
+        Redirect(controllers.profile.routes.EmailPreferencesController.flowSelectApisPage(sortedCategories(currentCategoryIndex + 1)))
       }
     }
 
@@ -162,8 +164,8 @@ class EmailPreferences @Inject()(val sessionService: SessionService,
             updateResult <- emailPreferencesService
               .updateEmailPreferences(request.userId, flow.copy(selectedTopics = selectedTopicsForm.topic.toSet))
             _ = if (updateResult) emailPreferencesService.deleteFlow(request.sessionId, FlowType.EMAIL_PREFERENCES_V2)
-          } yield if (updateResult) Redirect(controllers.profile.routes.EmailPreferences.emailPreferencesSummaryPage())
-          else Redirect(controllers.profile.routes.EmailPreferences.flowSelectTopicsPage())
+          } yield if (updateResult) Redirect(controllers.profile.routes.EmailPreferencesController.emailPreferencesSummaryPage())
+          else Redirect(controllers.profile.routes.EmailPreferencesController.flowSelectTopicsPage())
       }
     )
   }
@@ -188,12 +190,12 @@ class EmailPreferences @Inject()(val sessionService: SessionService,
 
   def unsubscribeAllAction: Action[AnyContent] = loggedInAction { implicit request =>
     emailPreferencesService.removeEmailPreferences(request.developerSession.developer.userId).map {
-      case true => Redirect(controllers.profile.routes.EmailPreferences.emailPreferencesSummaryPage()).flashing("unsubscribed" -> "true")
-      case false => Redirect(controllers.profile.routes.EmailPreferences.emailPreferencesSummaryPage())
+      case true => Redirect(controllers.profile.routes.EmailPreferencesController.emailPreferencesSummaryPage()).flashing("unsubscribed" -> "true")
+      case false => Redirect(controllers.profile.routes.EmailPreferencesController.emailPreferencesSummaryPage())
     }
   }
 
-  def toDataObject(emailPreferences: domain.models.emailpreferences.EmailPreferences,
+  def toDataObject(emailPreferences: EmailPreferences,
                    filteredAPIs: Seq[CombinedApi],
                    categories: Seq[APICategoryDisplayDetails],
                    unsubscribed: Boolean): EmailPreferencesSummaryViewData ={
@@ -257,13 +259,13 @@ class EmailPreferences @Inject()(val sessionService: SessionService,
       {
         selectedApisForm =>
           emailPreferencesService.updateNewApplicationSelectedApis(request.developerSession, applicationId, selectedApisForm.selectedApi.toSet)
-          .map(_ => Redirect(controllers.profile.routes.EmailPreferences.selectTopicsFromSubscriptionsPage(applicationId)))
+          .map(_ => Redirect(controllers.profile.routes.EmailPreferencesController.selectTopicsFromSubscriptionsPage(applicationId)))
       }
     )
   }
 
   def selectNoApisFromSubscriptionsAction(applicationId: ApplicationId): Action[AnyContent] = loggedInAction { _ =>
-    successful(Redirect(controllers.profile.routes.EmailPreferences.selectTopicsFromSubscriptionsPage(applicationId)))
+    successful(Redirect(controllers.profile.routes.EmailPreferencesController.selectTopicsFromSubscriptionsPage(applicationId)))
   }
 
   def selectTopicsFromSubscriptionsPage(applicationId: ApplicationId): Action[AnyContent] = loggedInAction { implicit request =>

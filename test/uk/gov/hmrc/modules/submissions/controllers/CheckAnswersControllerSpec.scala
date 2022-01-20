@@ -30,7 +30,7 @@ import utils.WithLoggedInSession._
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import utils.SubmissionsTestData.{applicationId, submission}
-import domain.models.applications.ApplicationWithSubscriptionData
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.ApplicationWithSubscriptionData
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
 import play.filters.csrf.CSRF
@@ -43,9 +43,9 @@ import utils.SubmissionsTestData
 import uk.gov.hmrc.modules.submissions.domain.models.Completed
 import utils.AsIdsHelpers._
 import uk.gov.hmrc.modules.submissions.domain.models.InProgress
-import domain.models.developers.DeveloperSession
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.DeveloperSession
 import scala.concurrent.Future.{successful,failed}
-import domain.ApplicationNotFound
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.ApplicationNotFound
 
 class CheckAnswersControllerSpec 
     extends BaseControllerSpec

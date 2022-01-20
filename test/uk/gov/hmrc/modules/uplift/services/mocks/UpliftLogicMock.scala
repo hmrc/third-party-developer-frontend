@@ -19,10 +19,10 @@ package uk.gov.hmrc.modules.uplift.services.mocks
 
 import org.mockito.MockitoSugar
 import org.mockito.ArgumentMatchersSugar
-import domain.models.developers.UserId
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.UserId
 import scala.concurrent.Future._
-import domain.models.controllers.ApplicationSummary
-import domain.models.applications.ApplicationId
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.controllers.ApplicationSummary
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.ApplicationId
 import uk.gov.hmrc.modules.uplift.services.UpliftLogic
 
 

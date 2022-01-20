@@ -18,8 +18,8 @@ package steps
 
 import java.util.UUID.randomUUID
 
-import domain.models.applications.Environment.PRODUCTION
-import domain.models.applications.{Application, ApplicationState, ApplicationToken, ClientSecret, Collaborator, Environment, Privileged, ROPC, CollaboratorRole, Standard}
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.Environment.PRODUCTION
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.{Application, ApplicationState, ApplicationToken, ClientSecret, Collaborator, Environment, Privileged, ROPC, CollaboratorRole, Standard}
 import io.cucumber.datatable.DataTable
 import io.cucumber.scala.{EN, ScalaDsl}
 import io.cucumber.scala.Implicits._
@@ -31,10 +31,10 @@ import play.api.libs.json.Json
 import stubs._
 import stubs.ApplicationStub.configureUserApplications
 import uk.gov.hmrc.time.DateTimeUtils
-import domain.models.applications.ApplicationId
-import domain.models.applications.ClientId
-import domain.models.developers.UserId
-import domain.models.applications.ApplicationWithSubscriptionIds
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.ApplicationId
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.ClientId
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.UserId
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.ApplicationWithSubscriptionIds
 import org.scalatest.matchers.should.Matchers
 
 object AppWorld {

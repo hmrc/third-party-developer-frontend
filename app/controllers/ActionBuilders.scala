@@ -18,7 +18,7 @@ package controllers
 
 import uk.gov.hmrc.thirdpartydeveloperfrontend.config.ApplicationConfig
 import uk.gov.hmrc.thirdpartydeveloperfrontend.config.ErrorHandler
-import domain.models.applications.{ApplicationId, Capability, Permission, State}
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.{ApplicationId, Capability, Permission, State}
 import play.api.mvc._
 import play.api.mvc.Results._
 import uk.gov.hmrc.http.HeaderCarrier

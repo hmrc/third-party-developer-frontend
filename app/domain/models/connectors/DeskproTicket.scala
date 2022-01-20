@@ -14,11 +14,11 @@
  * limitations under the License.
  */
 
-package domain.models.connectors
+package uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.connectors
 
 import controllers.{routes, SupportEnquiryForm}
-import domain.models.apidefinitions.ApiVersion
-import domain.models.applications.{ApplicationId, Environment, CollaboratorRole}
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.apidefinitions.ApiVersion
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.{ApplicationId, Environment, CollaboratorRole}
 import play.api.libs.json.Json
 import play.api.mvc.Request
 

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package domain.models.applications
+package uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications
 
 import org.joda.time.DateTime
 

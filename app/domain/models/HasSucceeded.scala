@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package domain.models
+package uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models
 
 /* Solely to help with Future where otherwise we might be tempted to use Unit */
 sealed trait HasSuceeded

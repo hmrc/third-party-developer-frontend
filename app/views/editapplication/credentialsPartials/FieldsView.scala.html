@@ -18,9 +18,9 @@
 @import uk.gov.hmrc.thirdpartydeveloperfrontend.helpers.DateFormatter.formatDateWithShortPattern
 @import java.util.UUID
 
-@import domain.models.applications.ClientSecret
-@import domain.models.applications.Application
-@import domain.models.developers.Developer
+@import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.ClientSecret
+@import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.Application
+@import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.Developer
 
 @(app: Application, developer: Developer, clientSecrets: Seq[ClientSecret])(
   implicit request: play.api.mvc.Request[Any], messages: Messages, applicationConfig: ApplicationConfig, flash: Flash

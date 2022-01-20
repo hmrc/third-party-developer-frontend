@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
-package domain.models.controllers
+package uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.controllers
 
 import controllers.GroupedSubscriptions
-import domain.models.applications.{Application, CollaboratorRole}
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.{Application, CollaboratorRole}
 
 case class SubscriptionData(role: CollaboratorRole, application: Application, subscriptions: Option[GroupedSubscriptions])

@@ -15,12 +15,12 @@
  *@
 
 @import uk.gov.hmrc.thirdpartydeveloperfrontend.config.ApplicationConfig
-@import domain.models.views.{BackButtonWithJavaScript, IpAllowlistFeedbackBanner}
+@import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.views.{BackButtonWithJavaScript, IpAllowlistFeedbackBanner}
 @import include._
 @import views.html.include.DevMain
-@import domain.models.applications.CollaboratorRole
-@import domain.models.developers.DeveloperSession
-@import domain.models.applications.Application
+@import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.CollaboratorRole
+@import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.DeveloperSession
+@import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.Application
 
 @this(devMain: DevMain2)
 
@@ -65,7 +65,7 @@ implicit request: play.api.mvc.Request[Any], loggedIn: DeveloperSession, message
         <li>one or more static IP addresses</li>
       </ul>
 
-      <a class="govuk-button" href="@routes.IpAllowlist.allowedIps(app.id)">Continue</a>
+      <a class="govuk-button" href="@routes.IpAllowListController.allowedIps(app.id)">Continue</a>
     } else {
       <div class="govuk-inset-text">
         You cannot set up the IP allow list because you are not an administrator.

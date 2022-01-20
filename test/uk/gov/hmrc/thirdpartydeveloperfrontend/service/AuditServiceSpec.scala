@@ -17,7 +17,7 @@
 package uk.gov.hmrc.thirdpartydeveloperfrontend.service
 
 import uk.gov.hmrc.thirdpartydeveloperfrontend.config.ApplicationConfig
-import domain.models.developers.LoggedInState
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.LoggedInState
 import org.mockito.ArgumentMatcher
 import uk.gov.hmrc.thirdpartydeveloperfrontend.service.AuditAction.{ApplicationUpliftRequestDeniedDueToInvalidCredentials, PasswordChangeFailedDueToInvalidCredentials}
 import uk.gov.hmrc.http.HeaderCarrier
@@ -30,7 +30,7 @@ import scala.concurrent.ExecutionContext.Implicits.global
 
 class AuditServiceSpec extends AsyncHmrcSpec {
 
-  val developer = utils.DeveloperSession("email@example.com", "Paul", "Smith", loggedInState = LoggedInState.LOGGED_IN)
+  val developer = utils.DeveloperSessionBuilder("email@example.com", "Paul", "Smith", loggedInState = LoggedInState.LOGGED_IN)
 
   trait Setup {
     implicit val hc = HeaderCarrier().withExtraHeaders(

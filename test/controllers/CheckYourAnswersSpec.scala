@@ -20,10 +20,10 @@ import java.util.UUID.randomUUID
 
 import builder._
 import controllers.checkpages.{ApplicationCheck, CheckYourAnswers}
-import domain.{ApplicationAlreadyExists, ApplicationUpliftSuccessful, DeskproTicketCreationFailed}
-import domain.models.apidefinitions._
-import domain.models.applications._
-import domain.models.applications.CollaboratorRole.{ADMINISTRATOR, DEVELOPER}
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.{ApplicationAlreadyExists, ApplicationUpliftSuccessful, DeskproTicketCreationFailed}
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.apidefinitions._
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications._
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.CollaboratorRole.{ADMINISTRATOR, DEVELOPER}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.helpers.string._
 import mocks.service._
 import org.joda.time.DateTimeZone
@@ -46,7 +46,7 @@ import views.html.checkpages.checkyouranswers.team.TeamView
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future.{failed, successful}
 import utils.LocalUserIdTracker
-import domain.models.developers.DeveloperSession
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.DeveloperSession
 
 class CheckYourAnswersSpec 
     extends BaseControllerSpec 

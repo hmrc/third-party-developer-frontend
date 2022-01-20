@@ -14,10 +14,10 @@
  * limitations under the License.
  */
 
-package domain.services
+package uk.gov.hmrc.thirdpartydeveloperfrontend.domain.services
 
 trait ApiDefinitionsJsonFormatters {
-  import domain.models.apidefinitions._
+  import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.apidefinitions._
   import play.api.libs.json._
   
   implicit val keyReadsApiContext: KeyReads[ApiContext] = key => JsSuccess(ApiContext(key))

@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
-package domain
+package uk.gov.hmrc.thirdpartydeveloperfrontend.domain
 
-import domain.models.applications.ApplicationId
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.ApplicationId
 
 class ApplicationAlreadyExists extends RuntimeException
 

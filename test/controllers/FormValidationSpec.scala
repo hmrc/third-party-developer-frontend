@@ -18,7 +18,7 @@ package controllers
 
 import play.api.data.FormError
 import utils.AsyncHmrcSpec
-import domain.models.applications.ApplicationId
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.ApplicationId
 
 class FormValidationSpec extends AsyncHmrcSpec {
   "ForgotPasswordForm " should {

@@ -20,10 +20,10 @@ import controllers.APISubscriptions.subscriptionNumberLabel
 import play.api.libs.json.Json
 
 import scala.collection.SortedMap
-import domain.models.subscriptions._
-import domain.models.apidefinitions._
-import domain.models.apidefinitions.APIGroup._
-import domain.models.applications._
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.subscriptions._
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.apidefinitions._
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.apidefinitions.APIGroup._
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications._
 
 case class PageData(app: Application, subscriptions: Option[GroupedSubscriptions], openAccessApis: Map[ApiContext, ApiData])
 

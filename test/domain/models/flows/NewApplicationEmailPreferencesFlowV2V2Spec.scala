@@ -14,14 +14,14 @@
  * limitations under the License.
  */
 
-package domain.models.flows
+package uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.flows
 
 import builder.DeveloperBuilder
-import domain.models.apidefinitions.CombinedApiTestDataHelper
-import domain.models.applications.ApplicationId
-import domain.models.connectors.{CombinedApi, CombinedApiCategory}
-import domain.models.developers.{Developer, DeveloperSession, LoggedInState, Session}
-import domain.models.emailpreferences.{EmailPreferences, EmailTopic, TaxRegimeInterests}
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.apidefinitions.CombinedApiTestDataHelper
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.ApplicationId
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.connectors.{CombinedApi, CombinedApiCategory}
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.{Developer, DeveloperSession, LoggedInState, Session}
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.emailpreferences.{EmailPreferences, EmailTopic, TaxRegimeInterests}
 import org.scalatest.matchers.should.Matchers
 import org.scalatest.wordspec.AnyWordSpec
 import utils.LocalUserIdTracker

@@ -14,7 +14,7 @@ import uk.gov.hmrc.modules.submissions.connectors.ThirdPartyApplicationSubmissio
 import uk.gov.hmrc.modules.submissions.connectors.ThirdPartyApplicationSubmissionsConnector._
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.modules.submissions.domain.services.SubmissionsJsonFormatters
-import domain.services.ApplicationsJsonFormatters
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.services.ApplicationsJsonFormatters
 import uk.gov.hmrc.modules.submissions.domain.models.ErrorDetails
 
 class ThirdPartyApplicationSubmissionsConnectorSpec 

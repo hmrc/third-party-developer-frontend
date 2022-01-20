@@ -19,9 +19,9 @@ package controllers
 import builder.DeveloperBuilder
 import uk.gov.hmrc.thirdpartydeveloperfrontend.config.ErrorHandler
 import uk.gov.hmrc.thirdpartydeveloperfrontend.connectors.ThirdPartyDeveloperConnector
-import domain.models.connectors.ChangePassword
-import domain.models.developers.{LoggedInState, Session, UpdateProfileRequest}
-import domain.InvalidCredentials
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.connectors.ChangePassword
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.{LoggedInState, Session, UpdateProfileRequest}
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.InvalidCredentials
 import mocks.service.{ApplicationServiceMock, SessionServiceMock}
 import org.jsoup.Jsoup
 import org.mockito.ArgumentCaptor

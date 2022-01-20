@@ -25,7 +25,7 @@ import utils.AsyncHmrcSpec
 import utils.LocalUserIdTracker
 import org.mockito.MockitoSugar
 import utils._
-import domain.models.developers.LoggedInState
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.LoggedInState
 import uk.gov.hmrc.modules.uplift.services.mocks.FlowRepositoryMockModule
 
 class GetProductionCredentialsFlowServiceSpec
@@ -39,7 +39,7 @@ class GetProductionCredentialsFlowServiceSpec
                 with LocalUserIdTracker {
 
   trait Setup extends MockitoSugar{
-    val loggedInDeveloper = utils.DeveloperSession("dev@example.com", "firstName", "lastName", loggedInState = LoggedInState.LOGGED_IN)
+    val loggedInDeveloper = utils.DeveloperSessionBuilder("dev@example.com", "firstName", "lastName", loggedInState = LoggedInState.LOGGED_IN)
     val underTest = new GetProductionCredentialsFlowService(FlowRepositoryMock.aMock)
     val sessionId = "sessionId"
     val sellResellOrDistribute = SellResellOrDistribute("answer")

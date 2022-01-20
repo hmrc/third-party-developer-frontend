@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
-package domain.models.views
+package uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.views
 
-import domain.models.applications.CheckInformation
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.CheckInformation
 
 case class CheckInformationForm(apiSubscriptionsComplete: Boolean = false,
                                 apiSubscriptionConfigurationsComplete: Boolean = false,

@@ -17,8 +17,8 @@
 package views
 
 import builder.DeveloperBuilder
-import domain.models.developers.{DeveloperSession, LoggedInState, Session}
-import domain.models.controllers.MfaMandateDetails
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.{DeveloperSession, LoggedInState, Session}
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.controllers.MfaMandateDetails
 import org.joda.time.LocalDate
 import play.api.test.FakeRequest
 import play.twirl.api.Html
@@ -31,7 +31,7 @@ class Add2SVSpec extends CommonViewSpec with WithCSRFAddToken with DeveloperBuil
 
   val add2SVView = app.injector.instanceOf[Add2SVView]
 
-  implicit val loggedInDeveloper = utils.DeveloperSession("admin@example.com", "firstName1", "lastName1", loggedInState = LoggedInState.LOGGED_IN)
+  implicit val loggedInDeveloper = utils.DeveloperSessionBuilder("admin@example.com", "firstName1", "lastName1", loggedInState = LoggedInState.LOGGED_IN)
   implicit val request = FakeRequest().withCSRFToken
 
   val developer = buildDeveloper()

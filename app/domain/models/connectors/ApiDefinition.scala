@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
-package domain.models.connectors
+package uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.connectors
 
-import domain.models.apidefinitions.ApiContext
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.apidefinitions.ApiContext
 import play.api.libs.json.Json
 
 /*

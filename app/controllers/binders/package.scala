@@ -16,9 +16,9 @@
 
 package controllers
 
-import domain.models.apidefinitions.{ApiContext, ApiVersion}
-import domain.models.applications.{ApplicationId, ClientId, Environment}
-import domain.models.controllers.{AddTeamMemberPageMode, SaveSubsFieldsPageMode}
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.apidefinitions.{ApiContext, ApiVersion}
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.{ApplicationId, ClientId, Environment}
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.controllers.{AddTeamMemberPageMode, SaveSubsFieldsPageMode}
 import play.api.mvc.{PathBindable, QueryStringBindable}
 
 package object binders {

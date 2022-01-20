@@ -17,7 +17,7 @@
 package mocks.connector
 
 import uk.gov.hmrc.thirdpartydeveloperfrontend.connectors.ThirdPartyDeveloperConnector
-import domain.models.developers.{Developer, UserId}
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.{Developer, UserId}
 import org.mockito.{ArgumentMatchersSugar, MockitoSugar}
 
 import scala.concurrent.Future.successful

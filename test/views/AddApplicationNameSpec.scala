@@ -17,8 +17,8 @@
 package views
 
 import controllers.AddApplicationNameForm
-import domain.models.applications.{ApplicationId, Environment}
-import domain.models.developers.LoggedInState
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.{ApplicationId, Environment}
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.LoggedInState
 import org.jsoup.Jsoup
 import play.api.data.Form
 import play.api.test.FakeRequest
@@ -31,7 +31,7 @@ import controllers.AddApplicationNameForm
 class AddApplicationNameSpec extends CommonViewSpec with WithCSRFAddToken {
 
   val addApplicationNameView = app.injector.instanceOf[AddApplicationNameView]
-  val loggedInDeveloper = utils.DeveloperSession("admin@example.com", "firstName1", "lastName1", loggedInState = LoggedInState.LOGGED_IN)
+  val loggedInDeveloper = utils.DeveloperSessionBuilder("admin@example.com", "firstName1", "lastName1", loggedInState = LoggedInState.LOGGED_IN)
   val subordinateEnvironment = Environment.SANDBOX
   val appId = ApplicationId("1234")
   val principalEnvironment = Environment.PRODUCTION

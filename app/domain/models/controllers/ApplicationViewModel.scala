@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-package domain.models.controllers
+package uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.controllers
 
-import domain.models.applications.Application
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.Application
 
 case class ApplicationViewModel(application: Application, hasSubscriptionsFields: Boolean, hasPpnsFields: Boolean)

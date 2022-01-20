@@ -14,11 +14,11 @@
  * limitations under the License.
  */
 
-package domain.models.controllers
+package uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.controllers
 
 import controllers.routes
 import uk.gov.hmrc.thirdpartydeveloperfrontend.config.ApplicationConfig
-import domain.models.applications.Application
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.Application
 
 case class Crumb(name: String, url: String = "", dataAttribute: Option[String] = None)
 
@@ -44,7 +44,7 @@ object Crumb {
 
   def manageProfile = Crumb("Manage profile", s"${controllers.profile.routes.Profile.showProfile()}", Some("data-breadcrumb-manage-profile"))
 
-  def emailPreferences = Crumb("Email preferences", s"${controllers.profile.routes.EmailPreferences.emailPreferencesSummaryPage()}", Some("data-breadcrumb-email-preferences"))
+  def emailPreferences = Crumb("Email preferences", s"${controllers.profile.routes.EmailPreferencesController.emailPreferencesSummaryPage()}", Some("data-breadcrumb-email-preferences"))
 
-  def ipAllowlist(application: Application) = Crumb("IP allow list", s"${routes.IpAllowlist.viewIpAllowlist(application.id)}", Some("data-breadcrumb-ip-allowlist"))
+  def ipAllowlist(application: Application) = Crumb("IP allow list", s"${routes.IpAllowListController.viewIpAllowlist(application.id)}", Some("data-breadcrumb-ip-allowlist"))
 }

@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
-package domain
+package uk.gov.hmrc.thirdpartydeveloperfrontend.domain
 
-import domain.models.applications.OverrideFlag
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.OverrideFlag
 import play.api.libs.json.{JsError, Json, JsString}
 import utils.AsyncHmrcSpec
 

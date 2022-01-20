@@ -16,7 +16,7 @@
 
 package mocks.service
 
-import domain.models.developers.Session
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.Session
 import org.mockito.{ArgumentMatchersSugar, MockitoSugar}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.service.SessionService
 

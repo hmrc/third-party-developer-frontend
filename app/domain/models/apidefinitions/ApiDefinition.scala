@@ -14,17 +14,17 @@
  * limitations under the License.
  */
 
-package domain.models.apidefinitions
+package uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.apidefinitions
 
-import domain.models.subscriptions.VersionSubscription
-import domain.models.subscriptions.ApiSubscriptionFields.SubscriptionFieldsWrapper
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.subscriptions.VersionSubscription
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.subscriptions.ApiSubscriptionFields.SubscriptionFieldsWrapper
 import play.api.libs.json.Json
 
 import scala.util.Try
-import domain.models.subscriptions.ApiSubscriptionFields.SubscriptionFieldValue
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.subscriptions.ApiSubscriptionFields.SubscriptionFieldValue
 import scala.util.Random
-import domain.models.apidefinitions.APIAccessType.PRIVATE
-import domain.models.apidefinitions.APIAccessType.PUBLIC
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.apidefinitions.APIAccessType.PRIVATE
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.apidefinitions.APIAccessType.PUBLIC
 
 object APIDefinition {
   private val nonNumericOrPeriodRegex = "[^\\d^.]*"

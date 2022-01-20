@@ -18,11 +18,11 @@ package uk.gov.hmrc.modules.uplift.controllers
 
 import builder._
 import controllers.{BaseControllerSpec, SubscriptionTestHelperSugar}
-import domain.models.apidefinitions._
-import domain.models.applications.ApplicationWithSubscriptionData
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.apidefinitions._
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.ApplicationWithSubscriptionData
 import uk.gov.hmrc.modules.uplift.domain.models._
-import domain.models.developers.{DeveloperSession, LoggedInState, Session}
-import domain.models.subscriptions.{ApiCategory, ApiData, VersionData}
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.{DeveloperSession, LoggedInState, Session}
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.subscriptions.{ApiCategory, ApiData, VersionData}
 import mocks.connector.ApmConnectorMockModule
 import mocks.service.{ApplicationActionServiceMock, ApplicationServiceMock, SessionServiceMock}
 import org.jsoup.Jsoup

@@ -17,8 +17,8 @@
 package uk.gov.hmrc.modules.submissions.services
 
 import uk.gov.hmrc.thirdpartydeveloperfrontend.connectors.DeskproConnector
-import domain.models.applications.ApplicationId
-import domain.models.developers.DeveloperSession
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.ApplicationId
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.DeveloperSession
 import uk.gov.hmrc.http.HeaderCarrier
 import utils.AsyncHmrcSpec
 import scala.concurrent.ExecutionContext.Implicits.global
@@ -26,9 +26,9 @@ import scala.concurrent.Future.successful
 import utils.TestApplications
 import utils.CollaboratorTracker
 import utils.LocalUserIdTracker
-import domain.models.connectors.TicketCreated
-import domain.ApplicationNotFound
-import domain.ApplicationAlreadyExists
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.connectors.TicketCreated
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.ApplicationNotFound
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.ApplicationAlreadyExists
 import uk.gov.hmrc.modules.submissions.connectors.ThirdPartyApplicationSubmissionsConnector
 
 class RequestProductionCredentialsSpec extends AsyncHmrcSpec 

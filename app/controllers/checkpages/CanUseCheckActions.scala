@@ -17,9 +17,9 @@
 package controllers.checkpages
 
 import controllers.{ApplicationController, ApplicationRequest}
-import domain.models.applications.ApplicationId
-import domain.models.applications.Capabilities.SupportsAppChecks
-import domain.models.applications.Permissions.AdministratorOnly
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.ApplicationId
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.Capabilities.SupportsAppChecks
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.Permissions.AdministratorOnly
 import play.api.mvc.{Action, AnyContent, Result}
 
 import scala.concurrent.Future

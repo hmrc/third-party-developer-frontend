@@ -1,7 +1,7 @@
 package uk.gov.hmrc.thirdpartydeveloperfrontend.connectors
 
 import com.github.tomakehurst.wiremock.client.WireMock._
-import domain.models.connectors.{ApiDefinition, CombinedApi, CombinedApiCategory, ExtendedApiDefinition}
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.connectors.{ApiDefinition, CombinedApi, CombinedApiCategory, ExtendedApiDefinition}
 import org.scalatestplus.play.guice.GuiceOneAppPerSuite
 import play.api.http.Status._
 import play.api.inject.bind
@@ -9,17 +9,17 @@ import play.api.inject.guice.GuiceApplicationBuilder
 import play.api.{Application, Configuration, Mode}
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.http.UpstreamErrorResponse
-import domain.models.developers.UserId
-import domain.models.emailpreferences.APICategoryDisplayDetails
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.UserId
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.emailpreferences.APICategoryDisplayDetails
 import utils.WireMockExtensions
-import domain.models.applications.ApplicationId
-import domain.models.apidefinitions.ApiIdentifier
-import domain.models.apidefinitions.ApiContext
-import domain.models.apidefinitions.ApiVersion
-import domain.ApplicationUpdateSuccessful
-import domain.ApplicationNotFound
-import domain.models.connectors.ApiType.REST_API
-import domain.services.CombinedApiJsonFormatters
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.ApplicationId
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.apidefinitions.ApiIdentifier
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.apidefinitions.ApiContext
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.apidefinitions.ApiVersion
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.ApplicationUpdateSuccessful
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.ApplicationNotFound
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.connectors.ApiType.REST_API
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.services.CombinedApiJsonFormatters
 import play.api.libs.json.Json
 
 class ApmConnectorIntegrationSpec extends BaseConnectorIntegrationSpec with GuiceOneAppPerSuite with WireMockExtensions with CombinedApiJsonFormatters {
@@ -191,7 +191,7 @@ class ApmConnectorIntegrationSpec extends BaseConnectorIntegrationSpec with Guic
   "subscribe to api" should {
     val applicationId = ApplicationId.random
     val apiIdentifier = ApiIdentifier(ApiContext("app1"), ApiVersion("2.0"))
-    import domain.services.ApiDefinitionsJsonFormatters._
+    import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.services.ApiDefinitionsJsonFormatters._
     val url = s"/applications/${applicationId.value}/subscriptions"
 
     "subscribe application to an api" in new Setup {

@@ -17,19 +17,19 @@
 package uk.gov.hmrc.thirdpartydeveloperfrontend.service
 
 import cats.implicits._
-import domain.models.apidefinitions.{ApiContext, ApiIdentifier, ApiVersion}
-import domain.models.applications.{Application, ClientId, Environment, CollaboratorRole}
-import domain.models.subscriptions.ApiSubscriptionFields._
-import domain.models.subscriptions.{DevhubAccessLevel, FieldValue, Fields}
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.apidefinitions.{ApiContext, ApiIdentifier, ApiVersion}
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.{Application, ClientId, Environment, CollaboratorRole}
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.subscriptions.ApiSubscriptionFields._
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.subscriptions.{DevhubAccessLevel, FieldValue, Fields}
 import javax.inject.{Inject, Singleton}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.service.SubscriptionFieldsService.DefinitionsByApiVersion
 import uk.gov.hmrc.http.HeaderCarrier
 
 import scala.concurrent.{ExecutionContext, Future}
-import domain.models.applications.ApplicationId
-import domain.models.subscriptions.ApiData
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.ApplicationId
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.subscriptions.ApiData
 import uk.gov.hmrc.thirdpartydeveloperfrontend.connectors.ApmConnector
-import domain.models.subscriptions.FieldName
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.subscriptions.FieldName
 
 @Singleton
 class SubscriptionFieldsService @Inject() (connectorsWrapper: ConnectorsWrapper, apmConnector: ApmConnector)(implicit val ec: ExecutionContext) {

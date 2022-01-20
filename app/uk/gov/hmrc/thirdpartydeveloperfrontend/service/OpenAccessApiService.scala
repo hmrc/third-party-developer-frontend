@@ -16,13 +16,13 @@
 
 package uk.gov.hmrc.thirdpartydeveloperfrontend.service
 
-import domain.models.apidefinitions._
-import domain.models.applications._
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.apidefinitions._
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications._
 import javax.inject.{Inject, Singleton}
 
 import scala.concurrent.{ExecutionContext, Future}
 import uk.gov.hmrc.http.HeaderCarrier
-import domain.models.subscriptions.ApiData
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.subscriptions.ApiData
 import uk.gov.hmrc.thirdpartydeveloperfrontend.connectors.ApmConnector
 
 @Singleton

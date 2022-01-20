@@ -17,10 +17,10 @@
 package controllers
 
 import builder.DeveloperBuilder
-import domain.ApplicationUpdateSuccessful
-import domain.models.applications.Application
-import domain.models.developers.{Developer, DeveloperSession, LoggedInState, Session}
-import domain.models.flows.IpAllowlistFlow
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.ApplicationUpdateSuccessful
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.Application
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.{Developer, DeveloperSession, LoggedInState, Session}
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.flows.IpAllowlistFlow
 import mocks.service._
 import org.scalatest.Assertion
 import play.api.mvc.Result
@@ -36,8 +36,9 @@ import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 import scala.concurrent.Future.{failed, successful}
 import utils.LocalUserIdTracker
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.IpAllowlist
 
-class IpAllowlistSpec
+class IpAllowListControllerSpec
     extends BaseControllerSpec
     with ApplicationActionServiceMock
     with TestApplications
@@ -49,7 +50,7 @@ class IpAllowlistSpec
     implicit val hc: HeaderCarrier = HeaderCarrier()
     val mockIpAllowlistService: IpAllowlistService = mock[IpAllowlistService]
 
-    val underTest = new IpAllowlist(
+    val underTest = new IpAllowListController(
       mockErrorHandler,
       applicationServiceMock,
       applicationActionServiceMock,
@@ -77,7 +78,7 @@ class IpAllowlistSpec
     val developer: Developer = buildDeveloper(emailAddress = "developer@example.com")
 
     val anApplicationWithoutIpAllowlist: Application = anApplication(adminEmail = admin.email, developerEmail = developer.email)
-    val anApplicationWithIpAllowlist: Application = anApplicationWithoutIpAllowlist.copy(ipAllowlist = domain.models.applications.IpAllowlist(allowlist = Set("1.1.1.0/24")))
+    val anApplicationWithIpAllowlist: Application = anApplicationWithoutIpAllowlist.copy(ipAllowlist = IpAllowlist(allowlist = Set("1.1.1.0/24")))
 
     def givenTheUserIsLoggedInAs(user: Developer): DeveloperSession = {
       val session = Session(sessionId, user, LoggedInState.LOGGED_IN)
@@ -220,7 +221,7 @@ class IpAllowlistSpec
     }
 
     "not show the remove allowlist link when the IP allowlist is required" in new Setup {
-      val application: Application = anApplicationWithIpAllowlist.copy(ipAllowlist = domain.models.applications.IpAllowlist(required = true, allowlist = Set("1.1.1.0/24")))
+      val application: Application = anApplicationWithIpAllowlist.copy(ipAllowlist = IpAllowlist(required = true, allowlist = Set("1.1.1.0/24")))
       givenApplicationAction(application, givenTheUserIsLoggedInAs(admin))
       when(mockIpAllowlistService.getIpAllowlistFlow(application, sessionId))
         .thenReturn(successful(IpAllowlistFlow(sessionId, Set("2.2.2.0/24"))))

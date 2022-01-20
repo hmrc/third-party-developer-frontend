@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
-package domain.services
+package uk.gov.hmrc.thirdpartydeveloperfrontend.domain.services
 
-import domain.models.subscriptions.{FieldValue, FieldName}
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.subscriptions.{FieldValue, FieldName}
 
 trait ApplicationsJsonFormatters extends ApiDefinitionsJsonFormatters {
   import play.api.libs.json._
@@ -24,8 +24,8 @@ trait ApplicationsJsonFormatters extends ApiDefinitionsJsonFormatters {
   import play.api.libs.json.JodaWrites._
   import play.api.libs.json.JodaWrites.JodaDateTimeNumberWrites
   import uk.gov.hmrc.play.json.Union
-  import domain.models.applications._
-  import domain.models.apidefinitions._
+  import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications._
+  import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.apidefinitions._
 
   implicit val formatFieldValue = Json.valueFormat[FieldValue]
   implicit val formatFieldName = Json.valueFormat[FieldName]

@@ -21,9 +21,9 @@ import java.util.UUID.randomUUID
 
 import builder._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.connectors._
-import domain._
-import domain.models.apidefinitions._
-import domain.models.applications._
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain._
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.apidefinitions._
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications._
 import uk.gov.hmrc.time.DateTimeUtils
 import utils.AsyncHmrcSpec
 
@@ -32,10 +32,10 @@ import scala.concurrent.ExecutionContext.Implicits.global
 import uk.gov.hmrc.thirdpartydeveloperfrontend.service.PushPullNotificationsService.PushPullNotificationsConnector
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.thirdpartydeveloperfrontend.service.SubscriptionFieldsService.SubscriptionFieldsConnector
-import domain.models.subscriptions.ApiSubscriptionFields.SubscriptionFieldValue
-import domain.models.subscriptions.FieldValue
-import domain.models.subscriptions.ApiSubscriptionFields.SaveSubscriptionFieldsFailureResponse
-import domain.models.subscriptions.ApiSubscriptionFields.SaveSubscriptionFieldsSuccessResponse
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.subscriptions.ApiSubscriptionFields.SubscriptionFieldValue
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.subscriptions.FieldValue
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.subscriptions.ApiSubscriptionFields.SaveSubscriptionFieldsFailureResponse
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.subscriptions.ApiSubscriptionFields.SaveSubscriptionFieldsSuccessResponse
 import utils.LocalUserIdTracker
 
 class SubscriptionsServiceSpec extends AsyncHmrcSpec with SubscriptionsBuilder with ApplicationBuilder with LocalUserIdTracker {

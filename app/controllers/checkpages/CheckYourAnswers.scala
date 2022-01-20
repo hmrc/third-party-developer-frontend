@@ -21,11 +21,11 @@ import uk.gov.hmrc.thirdpartydeveloperfrontend.config.ErrorHandler
 import controllers._
 import controllers.FormKeys.applicationNameAlreadyExistsKey
 import controllers.ManageSubscriptions.Field
-import domain.{ApplicationAlreadyExists, DeskproTicketCreationFailed}
-import domain.models.apidefinitions.{APISubscriptionStatus, _}
-import domain.models.applications._
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.{ApplicationAlreadyExists, DeskproTicketCreationFailed}
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.apidefinitions.{APISubscriptionStatus, _}
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications._
 import javax.inject.{Inject, Singleton}
-import domain.models.controllers.ApplicationViewModel
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.controllers.ApplicationViewModel
 import play.api.data.Form
 import play.api.libs.crypto.CookieSigner
 import play.api.mvc._
@@ -38,7 +38,7 @@ import views.html.checkpages.checkyouranswers.team.TeamView
 
 import scala.concurrent.{ExecutionContext, Future}
 import scala.concurrent.Future.successful
-import domain.models.subscriptions.DevhubAccessLevel
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.subscriptions.DevhubAccessLevel
 
 @Singleton
 class CheckYourAnswers @Inject() (

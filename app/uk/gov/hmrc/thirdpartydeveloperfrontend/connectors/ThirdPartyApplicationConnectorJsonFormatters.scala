@@ -17,7 +17,7 @@
 package uk.gov.hmrc.thirdpartydeveloperfrontend.connectors
 
 import uk.gov.hmrc.thirdpartydeveloperfrontend.connectors.ThirdPartyApplicationConnectorDomain.{AddClientSecretResponse, DeleteClientSecretRequest, TPAClientSecret, UpdateIpAllowlistRequest}
-import domain.services.{ApiDefinitionsJsonFormatters, SubscriptionsJsonFormatters}
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.services.{ApiDefinitionsJsonFormatters, SubscriptionsJsonFormatters}
 import play.api.libs.json.{Format, Json}
 
 private[connectors] object ThirdPartyApplicationConnectorJsonFormatters

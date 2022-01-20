@@ -17,7 +17,7 @@
 package uk.gov.hmrc.thirdpartydeveloperfrontend.connectors
 
 import com.github.tomakehurst.wiremock.client.WireMock._
-import domain.InvalidEmail
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.InvalidEmail
 import org.scalatestplus.play.guice.GuiceOneAppPerSuite
 import play.api.http.Status._
 import play.api.inject.bind
@@ -25,13 +25,13 @@ import play.api.inject.guice.GuiceApplicationBuilder
 import play.api.libs.json.{JsValue, Json}
 import play.api.{Application, Configuration, Mode}
 import uk.gov.hmrc.http.HeaderCarrier
-import domain.models.emailpreferences.EmailPreferences
-import domain.models.emailpreferences.TaxRegimeInterests
-import domain.models.emailpreferences.EmailTopic._
-import domain.models.connectors.LoginRequest
-import domain.models.connectors.TotpAuthenticationRequest
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.emailpreferences.EmailPreferences
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.emailpreferences.TaxRegimeInterests
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.emailpreferences.EmailTopic._
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.connectors.LoginRequest
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.connectors.TotpAuthenticationRequest
 import play.api.http.HeaderNames
-import domain.models.developers.UserId
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.UserId
 import uk.gov.hmrc.thirdpartydeveloperfrontend.connectors.ThirdPartyDeveloperConnector.FindUserIdResponse
 
 class ThirdPartyDeveloperConnectorEmailPreferencesSpec extends BaseConnectorIntegrationSpec with GuiceOneAppPerSuite {

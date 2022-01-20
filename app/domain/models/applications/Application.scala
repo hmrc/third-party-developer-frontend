@@ -14,23 +14,23 @@
  * limitations under the License.
  */
 
-package domain.models.applications
+package uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications
 
 import java.time.Period
 
-import domain.models.apidefinitions.AccessType.STANDARD
-import domain.models.applications.Capabilities.{ChangeClientSecret, SupportsDetails, ViewPushSecret}
-import domain.models.applications.Environment._
-import domain.models.applications.Permissions.SandboxOrAdmin
-import domain.models.applications.CollaboratorRole.ADMINISTRATOR
-import domain.models.applications.State.{PENDING_GATEKEEPER_APPROVAL, PENDING_REQUESTER_VERIFICATION, TESTING}
-import domain.models.developers.Developer
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.apidefinitions.AccessType.STANDARD
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.Capabilities.{ChangeClientSecret, SupportsDetails, ViewPushSecret}
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.Environment._
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.Permissions.SandboxOrAdmin
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.CollaboratorRole.ADMINISTRATOR
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.State.{PENDING_GATEKEEPER_APPROVAL, PENDING_REQUESTER_VERIFICATION, TESTING}
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.Developer
 import uk.gov.hmrc.thirdpartydeveloperfrontend.helpers.string.Digest
 import org.joda.time.DateTime
 import java.util.UUID
 
-import domain.models.developers.UserId
-import domain.models.apidefinitions.ApiIdentifier
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.UserId
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.apidefinitions.ApiIdentifier
 
 case class ApplicationId(value: String) extends AnyVal
 
@@ -219,7 +219,7 @@ case class ApplicationWithSubscriptionIds(
 object ApplicationWithSubscriptionIds {
   import play.api.libs.json.Json
   import play.api.libs.json.JodaReads._
-  import domain.services.ApiDefinitionsJsonFormatters._
+  import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.services.ApiDefinitionsJsonFormatters._
 
   implicit val applicationWithSubsIdsReads = Json.reads[ApplicationWithSubscriptionIds]
 

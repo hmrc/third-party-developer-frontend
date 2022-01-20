@@ -23,7 +23,7 @@ import play.api.mvc.{Request, RequestHeader, Result}
 import play.twirl.api.HtmlFormat
 import uk.gov.hmrc.play.bootstrap.frontend.http.FrontendErrorHandler
 import views.html.{ErrorTemplate, ForbiddenTemplate}
-
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.{ApplicationNotFound, ApiContextVersionNotFound}
 @Singleton
 class ErrorHandler @Inject()(val messagesApi: MessagesApi,
                              val configuration: Configuration,
@@ -44,8 +44,8 @@ class ErrorHandler @Inject()(val messagesApi: MessagesApi,
     implicit val r: Request[String] = Request(rh, "")
 
     ex match {
-      case _: domain.ApplicationNotFound => play.api.mvc.Results.NotFound(notFoundTemplate)
-      case _: domain.ApiContextVersionNotFound => play.api.mvc.Results.NotFound(notFoundTemplate)
+      case _: ApplicationNotFound => play.api.mvc.Results.NotFound(notFoundTemplate)
+      case _: ApiContextVersionNotFound => play.api.mvc.Results.NotFound(notFoundTemplate)
       case _ => super.resolveError(rh, ex)
     }
   }

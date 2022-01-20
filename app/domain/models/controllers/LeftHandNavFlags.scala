@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package domain.models.controllers
+package uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.controllers
 
 object LeftHandNavFlags {
   val keyForIsGetProductionCredentialsEnabled = "IS_GET_PRODUCTION_CREDENTIALS_ENABLED"

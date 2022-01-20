@@ -16,9 +16,9 @@
 
 package uk.gov.hmrc.modules.uplift.domain.services
 
-import domain.models.apidefinitions.ApiIdentifier
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.apidefinitions.ApiIdentifier
 import uk.gov.hmrc.modules.uplift.domain.models.ApiSubscriptions
-import domain.models.apidefinitions.APISubscriptionStatus
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.apidefinitions.APISubscriptionStatus
 
 object SubscriptionsFilter {
     def apply(upliftableApiIds: Set[ApiIdentifier], subscriptionsFromFlow: ApiSubscriptions): (APISubscriptionStatus) => Boolean = (s) => {

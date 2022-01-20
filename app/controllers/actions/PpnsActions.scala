@@ -21,7 +21,7 @@ import scala.concurrent.ExecutionContext
 import play.api.mvc.{Action, ActionFilter, AnyContent, Result}
 import controllers.ApplicationRequest
 import scala.concurrent.Future
-import domain.models.applications._
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications._
 
 trait PpnsActions {
   self: ApplicationController =>

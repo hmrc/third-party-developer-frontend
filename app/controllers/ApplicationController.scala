@@ -17,9 +17,9 @@
 package controllers
 
 import uk.gov.hmrc.thirdpartydeveloperfrontend.service.ApplicationService
-import domain.models.controllers.ApplicationViewModel
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.controllers.ApplicationViewModel
 import play.api.mvc.{Action, AnyContent, Result, MessagesControllerComponents}
-import domain.models.applications._
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications._
 import scala.concurrent.Future
 
 

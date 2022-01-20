@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package domain.models.connectors
+package uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.connectors
 
 import controllers.SignOutSurveyForm
 import play.api.libs.json.Json

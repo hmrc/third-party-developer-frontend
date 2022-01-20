@@ -17,13 +17,13 @@
 package controllers
 
 import builder._
-import domain.models.apidefinitions._
-import domain.models.apidefinitions.APIStatus._
-import domain.models.applications.{Application, ApplicationId, ClientId}
-import domain.models.subscriptions.ApiSubscriptionFields.{SubscriptionFieldDefinition, SubscriptionFieldsWrapper, SubscriptionFieldValue}
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.apidefinitions._
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.apidefinitions.APIStatus._
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.{Application, ApplicationId, ClientId}
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.subscriptions.ApiSubscriptionFields.{SubscriptionFieldDefinition, SubscriptionFieldsWrapper, SubscriptionFieldValue}
 import utils.AsyncHmrcSpec
-import domain.models.subscriptions.FieldValue
-import domain.models.subscriptions.FieldName
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.subscriptions.FieldValue
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.subscriptions.FieldName
 
 trait SubscriptionTestHelperSugar extends SubscriptionsBuilder {
   self: AsyncHmrcSpec with SampleApplication =>

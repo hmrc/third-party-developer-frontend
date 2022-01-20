@@ -16,7 +16,7 @@
 
 import java.net.URL
 
-import domain.models.applications.Environment
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.Environment
 import org.apache.commons.net.util.SubnetUtils
 import play.api.data.Forms
 import play.api.data.Forms.{optional, text}

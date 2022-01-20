@@ -30,7 +30,7 @@ import utils.LocalUserIdTracker
 import play.api.test.FakeRequest
 import play.filters.csrf.CSRF
 import utils.WithCSRFAddToken
-import domain.models.applications.ApplicationWithSubscriptionData
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.ApplicationWithSubscriptionData
 import builder.SampleApplication
 import controllers.SubscriptionTestHelperSugar
 import builder.SampleSession

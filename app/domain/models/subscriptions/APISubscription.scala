@@ -14,10 +14,10 @@
  * limitations under the License.
  */
 
-package domain.models.subscriptions
+package uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.subscriptions
 
-import domain.models.apidefinitions.{ApiVersion, APIStatus, APIAccess, ApiVersionDefinition, ApiContext}
-import domain.models.apidefinitions.ApiIdentifier
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.apidefinitions.{ApiVersion, APIStatus, APIAccess, ApiVersionDefinition, ApiContext}
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.apidefinitions.ApiIdentifier
 
 case class ApiCategory(value: String) extends AnyVal
 

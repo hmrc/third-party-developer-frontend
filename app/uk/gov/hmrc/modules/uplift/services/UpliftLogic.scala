@@ -17,22 +17,22 @@
 package uk.gov.hmrc.modules.uplift.services
 
 import uk.gov.hmrc.thirdpartydeveloperfrontend.service.AppsByTeamMemberService
-import domain.models.applications.ApplicationId
-import domain.models.apidefinitions.ApiContext
-import domain.models.developers.UserId
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.ApplicationId
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.apidefinitions.ApiContext
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.UserId
 import uk.gov.hmrc.thirdpartydeveloperfrontend.connectors.ApmConnector
 import javax.inject.{Inject, Singleton}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.connectors.ThirdPartyApplicationSandboxConnector
 import scala.concurrent.Future
 import uk.gov.hmrc.http.HeaderCarrier
 import scala.concurrent.ExecutionContext
-import domain.models.apidefinitions.ApiContext
-import domain.models.subscriptions.ApiData
-import domain.models.subscriptions.ApiCategory
-import domain.models.apidefinitions.ApiIdentifier
-import domain.models.applications.Environment
-import domain.models.controllers.ApplicationSummary
-import domain.models.apidefinitions.APIStatus
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.apidefinitions.ApiContext
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.subscriptions.ApiData
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.subscriptions.ApiCategory
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.apidefinitions.ApiIdentifier
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.Environment
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.controllers.ApplicationSummary
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.apidefinitions.APIStatus
 
 @Singleton
 class UpliftLogic @Inject()(

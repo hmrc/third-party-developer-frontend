@@ -16,7 +16,7 @@
 
 package uk.gov.hmrc.modules.uplift.domain.models
 
-import domain.models.flows.{Flow, FlowType}
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.flows.{Flow, FlowType}
 
 
 case class GetProductionCredentialsFlow(

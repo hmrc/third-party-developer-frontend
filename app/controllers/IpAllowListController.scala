@@ -18,9 +18,9 @@ package controllers
 
 import uk.gov.hmrc.thirdpartydeveloperfrontend.config.ApplicationConfig
 import uk.gov.hmrc.thirdpartydeveloperfrontend.config.ErrorHandler
-import domain.models.applications.ApplicationId
-import domain.models.applications.Capabilities.SupportsIpAllowlist
-import domain.models.applications.Permissions.{SandboxOrAdmin, TeamMembersOnly}
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.ApplicationId
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.Capabilities.SupportsIpAllowlist
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.Permissions.{SandboxOrAdmin, TeamMembersOnly}
 import javax.inject.{Inject, Singleton}
 import play.api.data.Form
 import play.api.libs.crypto.CookieSigner
@@ -33,7 +33,7 @@ import scala.concurrent.Future.successful
 import scala.concurrent.{ExecutionContext, Future}
 
 @Singleton
-class IpAllowlist @Inject()(
+class IpAllowListController @Inject()(
     val errorHandler: ErrorHandler,
     val applicationService: ApplicationService,
     val applicationActionService: ApplicationActionService,
@@ -88,8 +88,8 @@ class IpAllowlist @Inject()(
   def editIpAllowlistAction(applicationId: ApplicationId): Action[AnyContent] = canEditIpAllowlistAction(applicationId) { implicit request =>
     def handleValidForm(form: AddAnotherCidrBlockConfirmForm): Future[Result] = {
       form.confirm match {
-        case Some("Yes") => successful(Redirect(routes.IpAllowlist.addCidrBlock(applicationId)))
-        case _ => successful(Redirect(routes.IpAllowlist.reviewIpAllowlist(applicationId)))
+        case Some("Yes") => successful(Redirect(routes.IpAllowListController.addCidrBlock(applicationId)))
+        case _ => successful(Redirect(routes.IpAllowListController.reviewIpAllowlist(applicationId)))
       }
     }
 
@@ -111,7 +111,7 @@ class IpAllowlist @Inject()(
   def addCidrBlockAction(applicationId: ApplicationId): Action[AnyContent] = canEditIpAllowlistAction(applicationId) { implicit request =>
     def handleValidForm(form: AddCidrBlockForm): Future[Result] = {
       ipAllowlistService.addCidrBlock(form.ipAddress, request.application, request.sessionId) map { _ =>
-        Redirect(routes.IpAllowlist.editIpAllowlist(applicationId))
+        Redirect(routes.IpAllowListController.editIpAllowlist(applicationId))
       }
     }
 
@@ -131,9 +131,9 @@ class IpAllowlist @Inject()(
   def removeCidrBlockAction(applicationId: ApplicationId, cidrBlock: String): Action[AnyContent] = canEditIpAllowlistAction(applicationId) { implicit request =>
     ipAllowlistService.removeCidrBlock(cidrBlock, request.sessionId) map { updatedFlow =>
       if (updatedFlow.allowlist.isEmpty) {
-        Redirect(routes.IpAllowlist.settingUpAllowlist(applicationId))
+        Redirect(routes.IpAllowListController.settingUpAllowlist(applicationId))
       } else {
-        Redirect(routes.IpAllowlist.editIpAllowlist(applicationId))
+        Redirect(routes.IpAllowListController.editIpAllowlist(applicationId))
       }
     }
   }

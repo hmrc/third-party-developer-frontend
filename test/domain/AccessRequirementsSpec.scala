@@ -14,11 +14,11 @@
  * limitations under the License.
  */
 
-package domain
+package uk.gov.hmrc.thirdpartydeveloperfrontend.domain
 
-import domain.models.subscriptions.{AccessRequirements, DevhubAccessLevel, DevhubAccessRequirement, DevhubAccessRequirements}
-import domain.models.subscriptions.DevhubAccessLevel._
-import domain.models.subscriptions.DevhubAccessRequirement._
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.subscriptions.{AccessRequirements, DevhubAccessLevel, DevhubAccessRequirement, DevhubAccessRequirements}
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.subscriptions.DevhubAccessLevel._
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.subscriptions.DevhubAccessRequirement._
 import org.scalatest.wordspec.AnyWordSpec
 import org.scalatest.matchers.should.Matchers
 

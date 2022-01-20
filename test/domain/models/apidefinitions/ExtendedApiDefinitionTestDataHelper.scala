@@ -14,10 +14,10 @@
  * limitations under the License.
  */
 
-package domain.models.apidefinitions
+package uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.apidefinitions
 
-import domain.models.connectors.ApiType.REST_API
-import domain.models.connectors.{CombinedApi, CombinedApiCategory, ExtendedApiDefinition}
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.connectors.ApiType.REST_API
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.connectors.{CombinedApi, CombinedApiCategory, ExtendedApiDefinition}
 
 trait ExtendedApiDefinitionTestDataHelper {
   def extendedApiDefinition(name: String): ExtendedApiDefinition = extendedApiDefinition(name, List("category"))

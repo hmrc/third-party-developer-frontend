@@ -18,11 +18,10 @@ package utils
 
 import java.util.UUID
 
-import domain.models.developers.{Developer, LoggedInState}
-import domain.models.emailpreferences.EmailPreferences
-import domain.models.developers.UserId
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.{Developer, LoggedInState, DeveloperSession, UserId}
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.emailpreferences.EmailPreferences
 
-object DeveloperSession {
+object DeveloperSessionBuilder {
 
   def apply(email: String,
             firstName: String,
@@ -30,11 +29,11 @@ object DeveloperSession {
             organisation: Option[String] = None,
             mfaEnabled: Option[Boolean] = None,
             loggedInState: LoggedInState,
-            emailPreferences: EmailPreferences = EmailPreferences.noPreferences): domain.models.developers.DeveloperSession = {
+            emailPreferences: EmailPreferences = EmailPreferences.noPreferences): DeveloperSession = {
 
     val sessionId: String = UUID.randomUUID().toString
 
-    domain.models.developers.DeveloperSession(
+    DeveloperSession(
       loggedInState,
       sessionId,
       Developer(
@@ -44,6 +43,8 @@ object DeveloperSession {
         lastName,
         organisation,
         mfaEnabled,
-        emailPreferences))
+        emailPreferences
+      )
+    )
   }
 }

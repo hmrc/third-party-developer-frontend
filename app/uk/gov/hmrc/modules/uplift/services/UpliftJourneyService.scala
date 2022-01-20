@@ -16,20 +16,20 @@
 
 package uk.gov.hmrc.modules.uplift.services
 
-import domain.models.developers.DeveloperSession
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.DeveloperSession
 import scala.concurrent.Future
-import domain.models.applications.ApplicationId
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.ApplicationId
 import uk.gov.hmrc.modules.uplift.domain.models.ApiSubscriptions
 import uk.gov.hmrc.thirdpartydeveloperfrontend.connectors.ApmConnector
 import javax.inject.{Inject, Singleton}
 import uk.gov.hmrc.modules.common.services.EitherTHelper
 import uk.gov.hmrc.http.HeaderCarrier
 import scala.concurrent.ExecutionContext
-import domain.models.apidefinitions.APISubscriptionStatus
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.apidefinitions.APISubscriptionStatus
 import uk.gov.hmrc.modules.uplift.domain.models._
 import uk.gov.hmrc.modules.uplift.domain.services._
-import domain.models.apidefinitions.ApiContext
-import domain.models.applications.UpliftData
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.apidefinitions.ApiContext
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.UpliftData
 
 @Singleton
 class UpliftJourneyService @Inject()(

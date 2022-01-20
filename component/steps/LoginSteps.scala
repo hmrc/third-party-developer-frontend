@@ -18,8 +18,8 @@ package steps
 
 import builder.DeveloperBuilder
 import com.github.tomakehurst.wiremock.client.WireMock._
-import domain.models.connectors.{LoginRequest, UserAuthenticationResponse, VerifyMfaRequest}
-import domain.models.developers.{Developer, LoggedInState, Session}
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.connectors.{LoginRequest, UserAuthenticationResponse, VerifyMfaRequest}
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.{Developer, LoggedInState, Session}
 import io.cucumber.datatable.DataTable
 import io.cucumber.scala.{EN, ScalaDsl}
 import io.cucumber.scala.Implicits._
@@ -29,7 +29,7 @@ import pages._
 import play.api.http.Status._
 import play.api.libs.json.{Format, Json}
 import stubs.{DeveloperStub, Stubs}
-import domain.models.connectors.PasswordResetRequest
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.connectors.PasswordResetRequest
 import utils.GlobalUserIdTracker
 import utils.UserIdTracker
 import org.scalatest.matchers.should.Matchers

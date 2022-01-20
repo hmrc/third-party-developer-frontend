@@ -18,9 +18,9 @@ package uk.gov.hmrc.thirdpartydeveloperfrontend.connectors
 
 import builder.DeveloperBuilder
 import com.github.tomakehurst.wiremock.client.WireMock._
-import domain.models.connectors.{LoginRequest, TotpAuthenticationRequest, UserAuthenticationResponse}
-import domain.models.developers.{LoggedInState, Session, SessionInvalid}
-import domain.{InvalidCredentials, InvalidEmail, LockedAccount, UnverifiedAccount}
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.connectors.{LoginRequest, TotpAuthenticationRequest, UserAuthenticationResponse}
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.{LoggedInState, Session, SessionInvalid}
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.{InvalidCredentials, InvalidEmail, LockedAccount, UnverifiedAccount}
 import org.scalatestplus.play.guice.GuiceOneAppPerSuite
 import play.api.http.Status._
 import play.api.inject.bind
@@ -31,13 +31,13 @@ import uk.gov.hmrc.http.{HeaderCarrier, UpstreamErrorResponse}
 import uk.gov.hmrc.http.UpstreamErrorResponse
 import utils.LocalUserIdTracker
 import utils.WireMockExtensions
-import domain.models.connectors.UpdateLoggedInStateRequest
-import domain.models.developers.UpdateProfileRequest
-import domain.models.connectors.PasswordResetRequest
-import domain.models.connectors.PasswordReset
-import domain.models.connectors.AccountSetupRequest
-import domain.models.connectors.ChangePassword
-import domain.models.connectors.VerifyMfaRequest
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.connectors.UpdateLoggedInStateRequest
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.UpdateProfileRequest
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.connectors.PasswordResetRequest
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.connectors.PasswordReset
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.connectors.AccountSetupRequest
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.connectors.ChangePassword
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.connectors.VerifyMfaRequest
 
 class ThirdPartyDeveloperConnectorIntegrationSpec extends BaseConnectorIntegrationSpec with GuiceOneAppPerSuite with DeveloperBuilder with LocalUserIdTracker with WireMockExtensions {
   private val stubConfig = Configuration(

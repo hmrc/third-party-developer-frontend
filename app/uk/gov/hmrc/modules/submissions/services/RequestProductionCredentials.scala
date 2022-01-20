@@ -17,14 +17,14 @@
 package uk.gov.hmrc.modules.submissions.services
 
 import javax.inject.{Inject, Singleton}
-import domain.models.applications.ApplicationId
-import domain.models.developers.DeveloperSession
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.ApplicationId
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.DeveloperSession
 import uk.gov.hmrc.http.HeaderCarrier
-import domain.models.connectors.DeskproTicket
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.connectors.DeskproTicket
 import uk.gov.hmrc.thirdpartydeveloperfrontend.connectors.DeskproConnector
 import scala.concurrent.Future
 import scala.concurrent.ExecutionContext
-import domain.models.applications.Application
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.Application
 import uk.gov.hmrc.modules.submissions.domain.models.ErrorDetails
 import uk.gov.hmrc.modules.common.services.EitherTHelper
 import uk.gov.hmrc.modules.submissions.connectors.ThirdPartyApplicationSubmissionsConnector

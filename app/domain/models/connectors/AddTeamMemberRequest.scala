@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
-package domain.models.connectors
+package uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.connectors
 
-import domain.models.applications.CollaboratorRole
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.CollaboratorRole
 
 case class AddTeamMemberRequest(email: String, role: CollaboratorRole, requestingEmail: Option[String])
 

@@ -16,12 +16,12 @@
 
 package uk.gov.hmrc.thirdpartydeveloperfrontend.connectors
 
-import domain.services.{ApiDefinitionsJsonFormatters, ApplicationsJsonFormatters, CombinedApiJsonFormatters, SubscriptionsJsonFormatters}
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.services.{ApiDefinitionsJsonFormatters, ApplicationsJsonFormatters, CombinedApiJsonFormatters, SubscriptionsJsonFormatters}
 
 trait ApmConnectorJsonFormatters extends ApiDefinitionsJsonFormatters with ApplicationsJsonFormatters
   with CombinedApiJsonFormatters with  SubscriptionsJsonFormatters {
 
-  import domain.models.subscriptions._
+  import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.subscriptions._
   import play.api.libs.json._
 
   implicit val readsApiCategory: Reads[ApiCategory] = Json.valueReads[ApiCategory]

@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
-package domain.models.connectors
+package uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.connectors
 
-import domain.models.developers.Session
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.Session
 import play.api.libs.json.Json
 
 case class UserAuthenticationResponse(accessCodeRequired: Boolean,

@@ -19,11 +19,11 @@ package utils
 import java.time.Period
 import java.util.UUID.randomUUID
 
-import domain.models.apidefinitions.AccessType
-import domain.models.applications._
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.apidefinitions.AccessType
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications._
 import org.joda.time.DateTimeZone
 import uk.gov.hmrc.time.DateTimeUtils
-import domain.models.developers.UserId
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.UserId
 
 import scala.util.Random
 

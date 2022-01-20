@@ -16,7 +16,7 @@
 
 package uk.gov.hmrc.modules.uplift.domain.models
 
-import domain.models.apidefinitions.ApiIdentifier
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.apidefinitions.ApiIdentifier
 
   case class ApiSubscriptionsFlow(subscriptions: Map[ApiIdentifier, Boolean]) {
     def isSelected(id: ApiIdentifier): Boolean = 

@@ -20,7 +20,7 @@ import akka.actor.ActorSystem
 import akka.pattern.FutureTimeoutSupport
 import uk.gov.hmrc.thirdpartydeveloperfrontend.config.ApplicationConfig
 import uk.gov.hmrc.thirdpartydeveloperfrontend.connectors.PushPullNotificationsConnector.readsPushSecret
-import domain.models.applications.{ClientId, Environment}
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.{ClientId, Environment}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.helpers.Retries
 import javax.inject.{Inject, Singleton}
 import play.api.libs.json.{Json, Reads}

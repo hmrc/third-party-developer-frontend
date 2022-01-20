@@ -17,8 +17,8 @@
 package views
 
 import builder.DeveloperBuilder
-import domain.models.developers.{DeveloperSession, LoggedInState, Session}
-import domain.models.views.NoBackButton
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.{DeveloperSession, LoggedInState, Session}
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.views.NoBackButton
 import play.twirl.api.{Html, HtmlFormat}
 import play.api.test.FakeRequest
 import views.helper.CommonViewSpec

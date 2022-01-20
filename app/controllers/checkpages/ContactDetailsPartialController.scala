@@ -17,7 +17,7 @@
 package controllers.checkpages
 
 import controllers.ApplicationController
-import domain.models.applications.{ApplicationId, CheckInformation, ContactDetails}
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.{ApplicationId, CheckInformation, ContactDetails}
 import play.api.data.Form
 import play.api.mvc.{Action, AnyContent, Call}
 import views.html.checkpages.ContactDetailsView

@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
-package domain.models.connectors
+package uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.connectors
 
-import domain.models.developers.LoggedInState
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.LoggedInState
 import play.api.libs.json.Json
 
 case class UpdateLoggedInStateRequest(loggedInState: LoggedInState)

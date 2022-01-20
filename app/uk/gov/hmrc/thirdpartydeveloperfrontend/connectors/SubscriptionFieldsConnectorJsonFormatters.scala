@@ -16,10 +16,10 @@
 
 package uk.gov.hmrc.thirdpartydeveloperfrontend.connectors
 
-import domain.services.ApplicationsJsonFormatters
-import domain.services.AccessRequirementsJsonFormatters
-import domain.models.subscriptions.{AccessRequirements,FieldName}
-import domain.services.SubscriptionsJsonFormatters
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.services.ApplicationsJsonFormatters
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.services.AccessRequirementsJsonFormatters
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.subscriptions.{AccessRequirements,FieldName}
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.services.SubscriptionsJsonFormatters
 
 object SubscriptionFieldsConnectorJsonFormatters
     extends ApplicationsJsonFormatters

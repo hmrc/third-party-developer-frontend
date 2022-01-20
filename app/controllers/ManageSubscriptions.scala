@@ -19,13 +19,13 @@ package controllers
 import com.google.inject.{Inject, Singleton}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.config.ApplicationConfig
 import uk.gov.hmrc.thirdpartydeveloperfrontend.config.ErrorHandler
-import domain.models.apidefinitions.{APISubscriptionStatusWithSubscriptionFields, APISubscriptionStatusWithWritableSubscriptionField, ApiContext, ApiVersion}
-import domain.models.applications.{Application, ApplicationId, CheckInformation}
-import domain.models.controllers.SaveSubsFieldsPageMode
-import domain.models.subscriptions.ApiSubscriptionFields._
-import domain.models.subscriptions.{FieldName, FieldValue}
-import domain.models.controllers.EditManageSubscription._
-import domain.models.controllers.NoSubscriptionFieldsRefinerBehaviour
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.apidefinitions.{APISubscriptionStatusWithSubscriptionFields, APISubscriptionStatusWithWritableSubscriptionField, ApiContext, ApiVersion}
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.{Application, ApplicationId, CheckInformation}
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.controllers.SaveSubsFieldsPageMode
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.subscriptions.ApiSubscriptionFields._
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.subscriptions.{FieldName, FieldValue}
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.controllers.EditManageSubscription._
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.controllers.NoSubscriptionFieldsRefinerBehaviour
 import play.api.data.FormError
 import play.api.libs.crypto.CookieSigner
 import play.api.mvc._
@@ -37,7 +37,7 @@ import views.html.managesubscriptions._
 
 import scala.concurrent.{ExecutionContext, Future}
 import scala.concurrent.Future.successful
-import domain.models.subscriptions.DevhubAccessLevel
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.subscriptions.DevhubAccessLevel
 import controllers.actions.SubscriptionFieldsActions
 
 object ManageSubscriptions {

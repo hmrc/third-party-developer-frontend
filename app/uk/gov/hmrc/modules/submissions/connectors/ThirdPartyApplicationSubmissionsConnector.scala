@@ -17,7 +17,7 @@
 package uk.gov.hmrc.modules.submissions.connectors
 
 import uk.gov.hmrc.thirdpartydeveloperfrontend.connectors.ConnectorMetrics
-import domain.models.applications._
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications._
 import uk.gov.hmrc.modules.submissions.domain.models._
 import uk.gov.hmrc.modules.submissions.domain.services._
 import play.api.libs.json.{JsValue, Json}

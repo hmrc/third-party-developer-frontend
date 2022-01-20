@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package domain
+package uk.gov.hmrc.thirdpartydeveloperfrontend.domain
 
 import play.api.libs.json.Json
 
@@ -33,7 +33,7 @@ class DeskproTicketCreationFailed(reason: String) extends RuntimeException(s"Fai
 case class Error(code: ErrorCode, message: String)
 
 object Error {
-  implicit val formatError = Json.format[domain.Error]
+  implicit val formatError = Json.format[Error]
 
   object BadRequestError extends Error(ErrorCode.BAD_REQUEST, "Bad Request")
 

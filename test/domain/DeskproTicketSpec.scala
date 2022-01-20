@@ -14,10 +14,10 @@
  * limitations under the License.
  */
 
-package domain
+package uk.gov.hmrc.thirdpartydeveloperfrontend.domain
 
 import controllers.SupportEnquiryForm
-import domain.models.connectors.DeskproTicket
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.connectors.DeskproTicket
 import play.api.test.FakeRequest
 import utils.AsyncHmrcSpec
 

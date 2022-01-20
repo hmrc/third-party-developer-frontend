@@ -17,10 +17,10 @@
 package controllers
 
 import builder.DeveloperBuilder
-import domain.models.apidefinitions.APISubscriptionStatus
-import domain.models.applications._
-import domain.models.developers.{DeveloperSession, LoggedInState, Session}
-import domain.models.subscriptions.ApiSubscriptionFields
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.apidefinitions.APISubscriptionStatus
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications._
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.{DeveloperSession, LoggedInState, Session}
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.subscriptions.ApiSubscriptionFields
 import mocks.service._
 import org.jsoup.Jsoup
 import play.api.mvc.Result

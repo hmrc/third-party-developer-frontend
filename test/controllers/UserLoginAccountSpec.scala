@@ -20,9 +20,9 @@ import java.util.UUID
 
 import builder.DeveloperBuilder
 import uk.gov.hmrc.thirdpartydeveloperfrontend.config.ErrorHandler
-import domain._
-import domain.models.connectors.{TicketCreated, UserAuthenticationResponse}
-import domain.models.developers.{DeveloperSession, LoggedInState, Session}
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain._
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.connectors.{TicketCreated, UserAuthenticationResponse}
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.{DeveloperSession, LoggedInState, Session}
 import mocks.service.SessionServiceMock
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
@@ -40,7 +40,7 @@ import scala.concurrent.Future
 import scala.concurrent.Future._
 import views.html.UserDidNotAdd2SVView
 import views.html.Add2SVView
-import domain.models.developers.UserId
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.UserId
 import utils.LocalUserIdTracker
 import mocks.connector.ThirdPartyDeveloperConnectorMockModule
 

@@ -19,9 +19,9 @@ package views
 import java.time.Period
 
 import controllers.TermsOfUseForm
-import domain.models.applications._
-import domain.models.developers.LoggedInState
-import domain.models.controllers.ApplicationViewModel
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications._
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.LoggedInState
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.controllers.ApplicationViewModel
 import org.joda.time.format.DateTimeFormat
 import org.jsoup.Jsoup
 import play.api.test.FakeRequest
@@ -45,7 +45,7 @@ class TermsOfUseSpec extends CommonViewSpec with WithCSRFAddToken {
 
   "Terms of use view" when {
     implicit val request = FakeRequest().withCSRFToken
-    implicit val loggedIn = utils.DeveloperSession("developer@example.com", "Joe", "Bloggs", loggedInState = LoggedInState.LOGGED_IN)
+    implicit val loggedIn = utils.DeveloperSessionBuilder("developer@example.com", "Joe", "Bloggs", loggedInState = LoggedInState.LOGGED_IN)
     implicit val navSection = "details"
 
     val id = ApplicationId("id")

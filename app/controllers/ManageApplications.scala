@@ -27,7 +27,7 @@ import views.helper.EnvironmentNameService
 import views.html._
 
 import scala.concurrent.ExecutionContext
-import domain.models.controllers.ManageApplicationsViewModel
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.controllers.ManageApplicationsViewModel
 import uk.gov.hmrc.modules.uplift.services.UpliftLogic
 
 @Singleton

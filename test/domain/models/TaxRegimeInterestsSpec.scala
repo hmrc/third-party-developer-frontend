@@ -14,10 +14,10 @@
  * limitations under the License.
  */
 
-package domain.models
+package uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models
 
 import org.scalatest.Matchers
-import domain.models.emailpreferences.TaxRegimeInterests
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.emailpreferences.TaxRegimeInterests
 import org.scalatest.wordspec.AnyWordSpec
 import org.scalatest.matchers.should.Matchers
 

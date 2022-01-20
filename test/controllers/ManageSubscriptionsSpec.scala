@@ -20,13 +20,13 @@ import java.util.UUID.randomUUID
 
 import builder.DeveloperBuilder
 import uk.gov.hmrc.thirdpartydeveloperfrontend.config.ErrorHandler
-import domain.models.controllers.SaveSubsFieldsPageMode
-import domain.models.subscriptions.{AccessRequirements, DevhubAccessLevel, DevhubAccessRequirements}
-import domain.models.subscriptions.ApiSubscriptionFields._
-import domain.models.subscriptions.DevhubAccessRequirement._
-import domain.ApplicationNotFound
-import domain.models.apidefinitions.{APISubscriptionStatus, ApiContext, ApiVersion}
-import domain.models.applications.{CheckInformation, Privileged, Standard, _}
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.controllers.SaveSubsFieldsPageMode
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.subscriptions.{AccessRequirements, DevhubAccessLevel, DevhubAccessRequirements}
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.subscriptions.ApiSubscriptionFields._
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.subscriptions.DevhubAccessRequirement._
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.ApplicationNotFound
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.apidefinitions.{APISubscriptionStatus, ApiContext, ApiVersion}
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.{CheckInformation, Privileged, Standard, _}
 import mocks.service._
 import org.joda.time.DateTimeZone
 import play.api.mvc.{AnyContentAsEmpty, AnyContentAsFormUrlEncoded, Result}
@@ -44,8 +44,8 @@ import views.html.managesubscriptions.{EditApiMetadataFieldView, EditApiMetadata
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 import scala.concurrent.Future.{failed, successful}
-import domain.models.subscriptions.FieldValue
-import domain.models.subscriptions.FieldName
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.subscriptions.FieldValue
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.subscriptions.FieldName
 import utils.LocalUserIdTracker
 import builder._
 

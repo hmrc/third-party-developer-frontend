@@ -17,9 +17,9 @@
 package mocks.connector
 
 import uk.gov.hmrc.thirdpartydeveloperfrontend.connectors.AbstractSubscriptionFieldsConnector
-import domain.models.apidefinitions.{ApiContext, ApiVersion}
-import domain.models.applications.ClientId
-import domain.models.subscriptions.ApiSubscriptionFields.SubscriptionFieldValue
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.apidefinitions.{ApiContext, ApiVersion}
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.ClientId
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.subscriptions.ApiSubscriptionFields.SubscriptionFieldValue
 import org.mockito.{ArgumentMatchersSugar, MockitoSugar}
 
 import scala.concurrent.Future

@@ -17,7 +17,7 @@
 package views
 
 import controllers.DeleteProfileForm
-import domain.models.developers.LoggedInState
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.LoggedInState
 import org.jsoup.Jsoup
 import play.api.test.FakeRequest
 import utils.ViewHelpers._
@@ -33,7 +33,7 @@ class ProfileDeleteConfirmationSpec extends CommonViewSpec with WithCSRFAddToken
     "render with no errors" in {
       val request = FakeRequest().withCSRFToken
 
-      val developer = utils.DeveloperSession("Test", "Test", "Test", None, loggedInState = LoggedInState.LOGGED_IN)
+      val developer = utils.DeveloperSessionBuilder("Test", "Test", "Test", None, loggedInState = LoggedInState.LOGGED_IN)
 
       val page = profileDeleteConfirmation.render(DeleteProfileForm.form, request, developer, appConfig, messagesProvider, "details")
       page.contentType should include("text/html")
@@ -47,7 +47,7 @@ class ProfileDeleteConfirmationSpec extends CommonViewSpec with WithCSRFAddToken
     "render with error when no radio button has been selected" in {
       val request = FakeRequest().withCSRFToken
 
-      val developer = utils.DeveloperSession("Test", "Test", "Test", None, loggedInState = LoggedInState.LOGGED_IN)
+      val developer = utils.DeveloperSessionBuilder("Test", "Test", "Test", None, loggedInState = LoggedInState.LOGGED_IN)
 
       val formWithErrors = DeleteProfileForm.form.withError("confirmation", "Tell us if you want us to delete your account")
 

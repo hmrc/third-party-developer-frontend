@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package domain.models.views
+package uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.views
 
 sealed trait FeedbackBanner {
   val description: String

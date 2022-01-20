@@ -15,13 +15,13 @@
  *@
 
 @import uk.gov.hmrc.thirdpartydeveloperfrontend.config.ApplicationConfig
-@import domain.models.developers.DeveloperSession
+@import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.DeveloperSession
 @import include._
-@import domain.models.controllers.Crumb
-@import domain.models.connectors.CombinedApi
-@import domain.models.emailpreferences.APICategoryDisplayDetails
-@import domain.models.views.BackButtonWithJavaScript
-@import domain.models.connectors.ApiType.XML_API
+@import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.controllers.Crumb
+@import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.connectors.CombinedApi
+@import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.emailpreferences.APICategoryDisplayDetails
+@import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.views.BackButtonWithJavaScript
+@import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.connectors.ApiType.XML_API
 @import views.html.include.DevMain2
 
 @this(devMain: DevMain2)
@@ -39,7 +39,7 @@
   developerSession = Some(loggedIn)
 ) {
   @errorSummary2(form)
-  @helper.form(action = controllers.profile.routes.EmailPreferences.flowSelectApisAction(), 'class -> "form", 'id -> "emailPreferencesApisForm") {
+  @helper.form(action = controllers.profile.routes.EmailPreferencesController.flowSelectApisAction(), 'class -> "form", 'id -> "emailPreferencesApisForm") {
     @helper.CSRF.formField
     <a name="apiRadio"></a>
     <div class="govuk-form-group @if(form.errors("apiRadio").nonEmpty || form.errors.map(_.message).contains(FormKeys.selectedApisNonSelectedGlobalKey)) {govuk-form-group--error}">

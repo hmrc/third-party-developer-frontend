@@ -17,9 +17,9 @@
 package views
 
 import java.time.Period
-import domain.models.applications._
-import domain.models.applications.CollaboratorRole.{ADMINISTRATOR, DEVELOPER}
-import domain.models.developers.LoggedInState
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications._
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.CollaboratorRole.{ADMINISTRATOR, DEVELOPER}
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.LoggedInState
 import org.jsoup.Jsoup
 import play.api.test.FakeRequest
 import uk.gov.hmrc.time.DateTimeUtils
@@ -33,7 +33,7 @@ class DeleteApplicationSpec extends CommonViewSpec with WithCSRFAddToken with Co
   val deleteApplicationView = app.injector.instanceOf[DeleteApplicationView]
   val appId = ApplicationId("1234")
   val clientId = ClientId("clientId123")
-  val loggedInDeveloper = utils.DeveloperSession("developer@example.com", "John", "Doe", loggedInState = LoggedInState.LOGGED_IN)
+  val loggedInDeveloper = utils.DeveloperSessionBuilder("developer@example.com", "John", "Doe", loggedInState = LoggedInState.LOGGED_IN)
   val application = Application(
     appId,
     clientId,

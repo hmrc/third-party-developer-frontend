@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
-package domain
+package uk.gov.hmrc.thirdpartydeveloperfrontend.domain
 
-import domain.models.views.{NavLink, StaticNavLinks, UserNavLinks}
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.views.{NavLink, StaticNavLinks, UserNavLinks}
 import utils.AsyncHmrcSpec
 
 class NavLinkSpec extends AsyncHmrcSpec {

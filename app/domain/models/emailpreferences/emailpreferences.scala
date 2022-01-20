@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
-package domain.models.emailpreferences
+package uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.emailpreferences
 
-import domain.models.subscriptions.ApiCategory
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.subscriptions.ApiCategory
 import enumeratum.values.{StringEnum, StringEnumEntry, StringPlayJsonValueEnum}
 import play.api.libs.json.Json
 

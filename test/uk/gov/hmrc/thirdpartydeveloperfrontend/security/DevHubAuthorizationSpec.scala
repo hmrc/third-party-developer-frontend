@@ -20,14 +20,14 @@ import cats.implicits._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.config.ApplicationConfig
 import uk.gov.hmrc.thirdpartydeveloperfrontend.config.ErrorHandler
 import controllers.{routes, BaseController, BaseControllerSpec}
-import domain.models.developers.{DeveloperSession, LoggedInState}
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.{DeveloperSession, LoggedInState}
 import play.api.libs.crypto.CookieSigner
 import play.api.mvc.{Cookie, MessagesControllerComponents}
 import play.api.mvc.Results.{EmptyContent, _}
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.service.SessionService
-import utils.{DeveloperSession => DeveloperSessionBuilder}
+import utils.DeveloperSessionBuilder
 
 import scala.concurrent.{ExecutionContext, Future}
 import scala.concurrent.ExecutionContext.Implicits.global

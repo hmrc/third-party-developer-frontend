@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package domain.models.developers
+package uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers
 
 import java.net.URLEncoder
 import java.nio.charset.StandardCharsets
