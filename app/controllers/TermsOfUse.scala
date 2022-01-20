@@ -26,7 +26,7 @@ import domain.models.controllers.ApplicationViewModel
 import play.api.data.Form
 import play.api.libs.crypto.CookieSigner
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents, Result}
-import service.{ApplicationService, SessionService, ApplicationActionService}
+import uk.gov.hmrc.thirdpartydeveloperfrontend.service.{ApplicationService, SessionService, ApplicationActionService}
 import uk.gov.hmrc.time.DateTimeUtils
 import views.html.{TermsOfUseView, partials}
 

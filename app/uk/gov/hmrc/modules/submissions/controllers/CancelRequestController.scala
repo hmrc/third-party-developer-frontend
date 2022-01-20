@@ -27,9 +27,9 @@ import uk.gov.hmrc.modules.common.services.EitherTHelper
 import uk.gov.hmrc.modules.submissions.services.SubmissionService
 import play.api.mvc.Result
 import domain.models.controllers.BadRequestWithErrorMessage
-import service.SessionService
-import service.ApplicationActionService
-import service.ApplicationService
+import uk.gov.hmrc.thirdpartydeveloperfrontend.service.SessionService
+import uk.gov.hmrc.thirdpartydeveloperfrontend.service.ApplicationActionService
+import uk.gov.hmrc.thirdpartydeveloperfrontend.service.ApplicationService
 import play.api.libs.crypto.CookieSigner
 import uk.gov.hmrc.thirdpartydeveloperfrontend.config.ErrorHandler
 import uk.gov.hmrc.modules.submissions.views.html.{CancelledRequestForProductionCredentialsView, ConfirmCancelRequestForProductionCredentialsView}

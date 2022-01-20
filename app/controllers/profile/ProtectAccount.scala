@@ -27,7 +27,7 @@ import play.api.data.Forms._
 import play.api.libs.crypto.CookieSigner
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents, Result}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.qr.{OtpAuthUri, QRCode}
-import service.{MfaMandateService, MFAService, SessionService}
+import uk.gov.hmrc.thirdpartydeveloperfrontend.service.{MfaMandateService, MFAService, SessionService}
 import views.html.protectaccount._
 
 import scala.concurrent.{ExecutionContext, Future}

@@ -23,7 +23,7 @@ import domain.models.apidefinitions.APISubscriptionStatus
 import domain.models.applications.{Application, ApplicationId, ApplicationWithSubscriptionData}
 import domain.models.developers.DeveloperSession
 import org.mockito.{ArgumentMatchersSugar, MockitoSugar}
-import service.ApplicationActionService
+import uk.gov.hmrc.thirdpartydeveloperfrontend.service.ApplicationActionService
 import uk.gov.hmrc.http.HeaderCarrier
 
 import scala.concurrent.ExecutionContext.Implicits.global

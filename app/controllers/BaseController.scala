@@ -21,7 +21,7 @@ import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendController
 import uk.gov.hmrc.thirdpartydeveloperfrontend.security.DevHubAuthorization
 import uk.gov.hmrc.thirdpartydeveloperfrontend.config.ErrorHandler
 import uk.gov.hmrc.thirdpartydeveloperfrontend.config.ApplicationConfig
-import service.SessionService
+import uk.gov.hmrc.thirdpartydeveloperfrontend.service.SessionService
 import scala.concurrent.ExecutionContext
 
 abstract class BaseController(mcc: MessagesControllerComponents) extends FrontendController(mcc) with DevHubAuthorization with HeaderEnricher {

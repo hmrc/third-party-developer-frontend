@@ -18,7 +18,7 @@ package mocks.service
 
 import domain.models.developers.Session
 import org.mockito.{ArgumentMatchersSugar, MockitoSugar}
-import service.SessionService
+import uk.gov.hmrc.thirdpartydeveloperfrontend.service.SessionService
 
 import scala.concurrent.Future.successful
 

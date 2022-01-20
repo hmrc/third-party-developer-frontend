@@ -23,7 +23,7 @@ import javax.inject.{Inject, Singleton}
 import play.api.libs.crypto.CookieSigner
 import play.api.mvc.{AnyContent, MessagesControllerComponents, MessagesRequest}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.security.ExtendedDevHubAuthorization
-import service.{ApplicationService, DeskproService, SessionService}
+import uk.gov.hmrc.thirdpartydeveloperfrontend.service.{ApplicationService, DeskproService, SessionService}
 import views.html.{LogoutConfirmationView, SignoutSurveyView}
 import uk.gov.hmrc.modules.common.services.ApplicationLogger
 

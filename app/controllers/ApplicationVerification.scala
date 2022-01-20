@@ -22,7 +22,7 @@ import domain.models.applications.{ApplicationVerificationFailed, ApplicationVer
 import javax.inject.{Inject, Singleton}
 import play.api.libs.crypto.CookieSigner
 import play.api.mvc.MessagesControllerComponents
-import service.{ApplicationService, SessionService}
+import uk.gov.hmrc.thirdpartydeveloperfrontend.service.{ApplicationService, SessionService}
 import views.html.ApplicationVerificationView
 
 import scala.concurrent.ExecutionContext

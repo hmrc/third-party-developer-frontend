@@ -16,7 +16,7 @@
 
 package controllers
 
-import service.ApplicationService
+import uk.gov.hmrc.thirdpartydeveloperfrontend.service.ApplicationService
 
 trait ApplicationHelper {
   val applicationService: ApplicationService

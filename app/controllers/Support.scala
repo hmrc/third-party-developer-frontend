@@ -23,7 +23,7 @@ import javax.inject.{Inject, Singleton}
 import play.api.data.Form
 import play.api.libs.crypto.CookieSigner
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
-import service.{DeskproService, SessionService}
+import uk.gov.hmrc.thirdpartydeveloperfrontend.service.{DeskproService, SessionService}
 import views.html.{SupportEnquiryView, SupportThankyouView}
 
 import scala.concurrent.{ExecutionContext, Future}

@@ -22,7 +22,7 @@ import uk.gov.hmrc.thirdpartydeveloperfrontend.config.ErrorHandler
 import javax.inject.{Inject, Singleton}
 import play.api.libs.crypto.CookieSigner
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
-import service._
+import uk.gov.hmrc.thirdpartydeveloperfrontend.service._
 import views.helper.EnvironmentNameService
 import views.html._
 

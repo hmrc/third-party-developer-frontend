@@ -34,7 +34,7 @@ import play.api.libs.crypto.CookieSigner
 import play.api.libs.json.Json
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents, Result}
 import play.twirl.api.Html
-import service._
+import uk.gov.hmrc.thirdpartydeveloperfrontend.service._
 import uk.gov.hmrc.http.HeaderCarrier
 import views.helper.EnvironmentNameService
 import views.html.{AddAppSubscriptionsView, ManageSubscriptionsView, SubscribeRequestSubmittedView, UnsubscribeRequestSubmittedView}

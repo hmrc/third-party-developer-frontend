@@ -27,7 +27,7 @@ import play.api.data.Form
 import play.api.libs.crypto.CookieSigner
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents, Result}
 import play.twirl.api.Html
-import service.{EmailPreferencesService, SessionService}
+import uk.gov.hmrc.thirdpartydeveloperfrontend.service.{EmailPreferencesService, SessionService}
 import views.emailpreferences.EmailPreferencesSummaryViewData
 import views.html.emailpreferences._
 

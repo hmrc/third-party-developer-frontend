@@ -30,7 +30,7 @@ import domain.models.controllers.ApplicationViewModel
 import play.api.data.Form
 import play.api.libs.crypto.CookieSigner
 import play.api.mvc._
-import service._
+import uk.gov.hmrc.thirdpartydeveloperfrontend.service._
 import views.html.{ChangeDetailsView, DetailsView}
 import views.html.application.PendingApprovalView
 import views.html.checkpages.applicationcheck.UnauthorisedAppDetailsView

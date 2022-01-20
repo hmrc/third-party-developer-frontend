@@ -16,7 +16,7 @@
 
 package controllers
 
-import service.ApplicationService
+import uk.gov.hmrc.thirdpartydeveloperfrontend.service.ApplicationService
 import domain.models.controllers.ApplicationViewModel
 import play.api.mvc.{Action, AnyContent, Result, MessagesControllerComponents}
 import domain.models.applications._

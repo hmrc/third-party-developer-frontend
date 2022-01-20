@@ -18,7 +18,7 @@ package mocks.service
 
 import domain.models.connectors.CombinedApi
 import org.mockito.{ArgumentMatchersSugar, MockitoSugar}
-import service.EmailPreferencesService
+import uk.gov.hmrc.thirdpartydeveloperfrontend.service.EmailPreferencesService
 
 import scala.concurrent.Future.successful
 

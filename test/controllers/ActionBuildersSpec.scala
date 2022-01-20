@@ -26,7 +26,7 @@ import play.api.http.Status.{NOT_FOUND, OK}
 import play.api.libs.crypto.CookieSigner
 import play.api.mvc.{AnyContent, MessagesControllerComponents}
 import play.api.test.Helpers._
-import service.{ApplicationActionService, ApplicationService, SessionService}
+import uk.gov.hmrc.thirdpartydeveloperfrontend.service.{ApplicationActionService, ApplicationService, SessionService}
 
 import scala.concurrent.{ExecutionContext, Future}
 import scala.concurrent.ExecutionContext.Implicits.global

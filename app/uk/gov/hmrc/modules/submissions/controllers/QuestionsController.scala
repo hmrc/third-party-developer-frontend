@@ -21,7 +21,7 @@ import play.api.mvc.MessagesControllerComponents
 import scala.concurrent.ExecutionContext
 import uk.gov.hmrc.thirdpartydeveloperfrontend.config.ApplicationConfig
 import uk.gov.hmrc.thirdpartydeveloperfrontend.config.ErrorHandler
-import service.{ApplicationService, ApplicationActionService, SessionService}
+import uk.gov.hmrc.thirdpartydeveloperfrontend.service.{ApplicationService, ApplicationActionService, SessionService}
 import play.api.libs.crypto.CookieSigner
 import controllers.ApplicationController
 import uk.gov.hmrc.modules.submissions.views.html._

@@ -27,7 +27,7 @@ import play.api.mvc.{Request, Result}
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
 import play.filters.csrf.CSRF.TokenProvider
-import service.DeskproService
+import uk.gov.hmrc.thirdpartydeveloperfrontend.service.DeskproService
 import utils.WithCSRFAddToken
 import utils.WithLoggedInSession._
 import views.html.{SupportEnquiryView, SupportThankyouView}

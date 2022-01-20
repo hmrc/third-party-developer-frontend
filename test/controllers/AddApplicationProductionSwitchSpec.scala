@@ -24,7 +24,7 @@ import uk.gov.hmrc.modules.uplift.services.mocks.UpliftLogicMock
 import play.api.mvc.AnyContentAsEmpty
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
-import service.AuditService
+import uk.gov.hmrc.thirdpartydeveloperfrontend.service.AuditService
 import uk.gov.hmrc.modules.uplift.domain.models.GetProductionCredentialsFlow
 import uk.gov.hmrc.modules.uplift.services.GetProductionCredentialsFlowService
 import uk.gov.hmrc.http.HeaderCarrier

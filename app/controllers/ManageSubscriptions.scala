@@ -30,7 +30,7 @@ import play.api.data.FormError
 import play.api.libs.crypto.CookieSigner
 import play.api.mvc._
 import play.twirl.api.Html
-import service.{ApplicationService, AuditService, SessionService, ApplicationActionService, SubscriptionFieldsService}
+import uk.gov.hmrc.thirdpartydeveloperfrontend.service.{ApplicationService, AuditService, SessionService, ApplicationActionService, SubscriptionFieldsService}
 import uk.gov.hmrc.http.HeaderCarrier
 import views.html.createJourney.{SubscriptionConfigurationPageView, SubscriptionConfigurationStartView, SubscriptionConfigurationStepPageView}
 import views.html.managesubscriptions._

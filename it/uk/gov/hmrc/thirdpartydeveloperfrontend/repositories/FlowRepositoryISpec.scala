@@ -7,7 +7,6 @@ import domain.models.connectors.{CombinedApi, CombinedApiCategory}
 import domain.models.emailpreferences.EmailTopic
 import domain.models.flows.FlowType._
 import domain.models.flows.{EmailPreferencesFlowV2, Flow, FlowType, IpAllowlistFlow}
-import domain.models.subscriptions.ApiCategory
 import org.joda.time.DateTime
 import org.scalatestplus.play.guice.GuiceOneAppPerSuite
 import play.api.libs.json.{JsObject, Json}

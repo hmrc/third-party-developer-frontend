@@ -25,7 +25,7 @@ import domain.models.applications._
 import domain.models.connectors.DeleteCollaboratorRequest
 import javax.inject.{Inject, Singleton}
 import play.api.http.Status._
-import service.ApplicationService.ApplicationConnector
+import uk.gov.hmrc.thirdpartydeveloperfrontend.service.ApplicationService.ApplicationConnector
 import uk.gov.hmrc.http._
 import uk.gov.hmrc.http.HttpClient
 import uk.gov.hmrc.play.http.metrics.common.API

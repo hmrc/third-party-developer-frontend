@@ -27,8 +27,8 @@ import mocks.service.SessionServiceMock
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
 import play.filters.csrf.CSRF.TokenProvider
-import service._
-import service.AuditAction._
+import uk.gov.hmrc.thirdpartydeveloperfrontend.service._
+import uk.gov.hmrc.thirdpartydeveloperfrontend.service.AuditAction._
 import uk.gov.hmrc.play.audit.http.connector.AuditResult
 import utils.WithCSRFAddToken
 import utils.WithLoggedInSession._

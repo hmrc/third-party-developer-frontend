@@ -27,8 +27,8 @@ import domain.{ApplicationNotFound, ApplicationUpdateSuccessful, TeamMemberAlrea
 import play.api.http.ContentTypes.JSON
 import play.api.http.HeaderNames.CONTENT_TYPE
 import play.api.http.Status.{CONFLICT, NOT_FOUND}
-import service.OpenAccessApiService.OpenAccessApisConnector
-import service.SubscriptionsService.SubscriptionsConnector
+import uk.gov.hmrc.thirdpartydeveloperfrontend.service.OpenAccessApiService.OpenAccessApisConnector
+import uk.gov.hmrc.thirdpartydeveloperfrontend.service.SubscriptionsService.SubscriptionsConnector
 import uk.gov.hmrc.http.HttpReads.Implicits._
 import uk.gov.hmrc.http.{HeaderCarrier, HttpClient, UpstreamErrorResponse}
 import uk.gov.hmrc.play.http.metrics.common.API

@@ -29,7 +29,7 @@ import domain.models.controllers.ApplicationViewModel
 import play.api.data.Form
 import play.api.libs.crypto.CookieSigner
 import play.api.mvc._
-import service.{ApplicationService, SessionService, ApplicationActionService}
+import uk.gov.hmrc.thirdpartydeveloperfrontend.service.{ApplicationService, SessionService, ApplicationActionService}
 import views.html.checkpages._
 import views.html.checkpages.applicationcheck.LandingPageView
 import views.html.checkpages.applicationcheck.team.{TeamMemberAddView, TeamMemberRemoveConfirmationView}

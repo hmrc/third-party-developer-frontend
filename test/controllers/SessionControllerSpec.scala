@@ -26,7 +26,7 @@ import mocks.service.SessionServiceMock
 import play.api.test.FakeRequest
 import play.api.test.Helpers.{redirectLocation, _}
 import play.filters.csrf.CSRF.TokenProvider
-import service.AuditService
+import uk.gov.hmrc.thirdpartydeveloperfrontend.service.AuditService
 import utils.WithLoggedInSession._
 
 import scala.concurrent.ExecutionContext.Implicits.global

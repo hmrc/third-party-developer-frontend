@@ -23,7 +23,7 @@ import javax.inject.{Inject, Singleton}
 import play.api.libs.crypto.CookieSigner
 import play.api.libs.json._
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
-import service.{ApplicationService, SessionService, ApplicationActionService}
+import uk.gov.hmrc.thirdpartydeveloperfrontend.service.{ApplicationService, SessionService, ApplicationActionService}
 
 import scala.concurrent.{ExecutionContext, Future}
 

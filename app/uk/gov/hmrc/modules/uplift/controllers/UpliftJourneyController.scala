@@ -27,7 +27,7 @@ import play.api.data.Forms._
 import play.api.data.{Form, FormError}
 import play.api.libs.crypto.CookieSigner
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents, Result}
-import service.{ApplicationActionService, ApplicationService, SessionService}
+import uk.gov.hmrc.thirdpartydeveloperfrontend.service.{ApplicationActionService, ApplicationService, SessionService}
 import views.helper.IdFormatter
 import uk.gov.hmrc.modules.uplift.views.html._
 import uk.gov.hmrc.modules.uplift.services.GetProductionCredentialsFlowService

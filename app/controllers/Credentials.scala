@@ -28,7 +28,7 @@ import javax.inject.{Inject, Singleton}
 import org.joda.time.DateTime
 import play.api.libs.crypto.CookieSigner
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents, Result}
-import service._
+import uk.gov.hmrc.thirdpartydeveloperfrontend.service._
 import uk.gov.hmrc.http.ForbiddenException
 import views.html.{ClientIdView, ClientSecretsView, CredentialsView, ServerTokenView}
 import views.html.editapplication.DeleteClientSecretView

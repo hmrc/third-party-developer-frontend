@@ -27,7 +27,7 @@ import play.api.mvc.Result
 import play.api.test.Helpers._
 import play.api.test.FakeRequest
 import play.filters.csrf.CSRF.TokenProvider
-import service.{PushPullNotificationsService, SessionService}
+import uk.gov.hmrc.thirdpartydeveloperfrontend.service.{PushPullNotificationsService, SessionService}
 import uk.gov.hmrc.http.HeaderCarrier
 import utils.ViewHelpers._
 import utils.WithCSRFAddToken

@@ -26,7 +26,7 @@ import play.api.mvc.{Cookie, MessagesControllerComponents}
 import play.api.mvc.Results.{EmptyContent, _}
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
-import service.SessionService
+import uk.gov.hmrc.thirdpartydeveloperfrontend.service.SessionService
 import utils.{DeveloperSession => DeveloperSessionBuilder}
 
 import scala.concurrent.{ExecutionContext, Future}

@@ -23,7 +23,7 @@ import domain.models.developers.{EmailAlreadyInUse, Registration => Registration
 import javax.inject.{Inject, Singleton}
 import play.api.libs.crypto.CookieSigner
 import play.api.mvc.{MessagesControllerComponents, Request}
-import service.SessionService
+import uk.gov.hmrc.thirdpartydeveloperfrontend.service.SessionService
 import uk.gov.hmrc.http.{BadRequestException, HeaderCarrier}
 import views.html._
 import scala.concurrent.{ExecutionContext, Future}

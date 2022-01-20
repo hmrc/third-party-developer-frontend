@@ -28,7 +28,7 @@ import uk.gov.hmrc.thirdpartydeveloperfrontend.helpers.Retries
 import javax.inject.{Inject, Singleton}
 import play.api.http.Status.{BAD_REQUEST, CREATED, NO_CONTENT, OK, NOT_FOUND}
 import play.api.libs.json.{JsSuccess, Json}
-import service.SubscriptionFieldsService.{DefinitionsByApiVersion, SubscriptionFieldsConnector}
+import uk.gov.hmrc.thirdpartydeveloperfrontend.service.SubscriptionFieldsService.{DefinitionsByApiVersion, SubscriptionFieldsConnector}
 import uk.gov.hmrc.http.{HeaderCarrier, HttpResponse}
 import uk.gov.hmrc.http.HttpClient
 import uk.gov.hmrc.modules.common.services.ApplicationLogger

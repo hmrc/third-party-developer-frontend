@@ -26,7 +26,7 @@ import org.scalatest.Assertion
 import play.api.mvc.Result
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
-import service.IpAllowlistService
+import uk.gov.hmrc.thirdpartydeveloperfrontend.service.IpAllowlistService
 import uk.gov.hmrc.http.{ForbiddenException, HeaderCarrier}
 import utils.WithLoggedInSession._
 import utils.{TestApplications, WithCSRFAddToken}

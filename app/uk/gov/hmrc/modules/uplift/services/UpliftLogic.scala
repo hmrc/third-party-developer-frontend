@@ -16,7 +16,7 @@
 
 package uk.gov.hmrc.modules.uplift.services
 
-import service.AppsByTeamMemberService
+import uk.gov.hmrc.thirdpartydeveloperfrontend.service.AppsByTeamMemberService
 import domain.models.applications.ApplicationId
 import domain.models.apidefinitions.ApiContext
 import domain.models.developers.UserId

@@ -22,7 +22,7 @@ import uk.gov.hmrc.thirdpartydeveloperfrontend.connectors.ThirdPartyDeveloperCon
 import javax.inject.{Inject, Singleton}
 import play.api.libs.crypto.CookieSigner
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
-import service.{AuditService, SessionService}
+import uk.gov.hmrc.thirdpartydeveloperfrontend.service.{AuditService, SessionService}
 
 import scala.concurrent.ExecutionContext
 import scala.concurrent.Future.successful

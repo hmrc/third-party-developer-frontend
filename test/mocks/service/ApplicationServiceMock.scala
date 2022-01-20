@@ -22,7 +22,7 @@ import domain._
 import domain.models.applications._
 import domain.models.developers.DeveloperSession
 import org.mockito.{ArgumentMatchersSugar, MockitoSugar}
-import service.ApplicationService
+import uk.gov.hmrc.thirdpartydeveloperfrontend.service.ApplicationService
 
 import scala.concurrent.Future.{failed, successful}
 import domain.models.apidefinitions.ApiIdentifier

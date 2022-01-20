@@ -29,8 +29,8 @@ import play.api.http.Status.OK
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
 import play.filters.csrf.CSRF.TokenProvider
-import service.AuditAction.PasswordChangeFailedDueToInvalidCredentials
-import service.AuditService
+import uk.gov.hmrc.thirdpartydeveloperfrontend.service.AuditAction.PasswordChangeFailedDueToInvalidCredentials
+import uk.gov.hmrc.thirdpartydeveloperfrontend.service.AuditService
 import utils.WithCSRFAddToken
 import utils.WithLoggedInSession._
 import views.html._

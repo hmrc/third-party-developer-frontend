@@ -24,7 +24,7 @@ import domain.models.applications.{ClientId, Environment}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.helpers.Retries
 import javax.inject.{Inject, Singleton}
 import play.api.libs.json.{Json, Reads}
-import service.PushPullNotificationsService.PushPullNotificationsConnector
+import uk.gov.hmrc.thirdpartydeveloperfrontend.service.PushPullNotificationsService.PushPullNotificationsConnector
 import uk.gov.hmrc.http.{HeaderCarrier, HttpReads}
 import uk.gov.hmrc.http.HttpClient
 import uk.gov.hmrc.play.http.metrics.common.API

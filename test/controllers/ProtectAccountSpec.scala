@@ -33,7 +33,7 @@ import play.api.test.FakeRequest
 import play.api.test.Helpers._
 import play.filters.csrf.CSRF.TokenProvider
 import uk.gov.hmrc.thirdpartydeveloperfrontend.qr.{OtpAuthUri, QRCode}
-import service.{MfaMandateService, MFAResponse, MFAService}
+import uk.gov.hmrc.thirdpartydeveloperfrontend.service.{MfaMandateService, MFAResponse, MFAService}
 import utils.WithCSRFAddToken
 import utils.WithLoggedInSession._
 import views.html.protectaccount._

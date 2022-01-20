@@ -23,7 +23,7 @@ import mocks.service.SessionServiceMock
 import play.api.mvc.AnyContentAsEmpty
 import play.api.test.FakeRequest
 import play.filters.csrf.CSRF.TokenProvider
-import service.SessionService
+import uk.gov.hmrc.thirdpartydeveloperfrontend.service.SessionService
 import utils.WithLoggedInSession._
 import utils.LocalUserIdTracker
 import uk.gov.hmrc.thirdpartydeveloperfrontend.security.CookieEncoding

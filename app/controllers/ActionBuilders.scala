@@ -25,7 +25,7 @@ import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.play.http.HeaderCarrierConverter
 
 import scala.concurrent.{ExecutionContext, Future}
-import service.ApplicationActionService
+import uk.gov.hmrc.thirdpartydeveloperfrontend.service.ApplicationActionService
 
 trait BaseActionBuilders {
   val errorHandler: ErrorHandler

@@ -22,7 +22,7 @@ import org.mockito.{ArgumentMatchersSugar, MockitoSugar}
 import scala.concurrent.Future.successful
 import domain.models.developers.UserId
 import domain.models.controllers.ApplicationSummary
-import service.AppsByTeamMemberService
+import uk.gov.hmrc.thirdpartydeveloperfrontend.service.AppsByTeamMemberService
 
 trait AppsByTeamMemberServiceMock extends MockitoSugar with ArgumentMatchersSugar {
   val appsByTeamMemberServiceMock = mock[AppsByTeamMemberService]

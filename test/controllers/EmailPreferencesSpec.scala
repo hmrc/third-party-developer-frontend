@@ -37,7 +37,7 @@ import play.api.mvc.{AnyContentAsEmpty, AnyContentAsFormUrlEncoded, MessagesCont
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
 import play.filters.csrf.CSRF.TokenProvider
-import service.EmailPreferencesService
+import uk.gov.hmrc.thirdpartydeveloperfrontend.service.EmailPreferencesService
 import utils.LocalUserIdTracker
 import utils.WithLoggedInSession._
 import views.emailpreferences.EmailPreferencesSummaryViewData

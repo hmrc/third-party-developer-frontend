@@ -25,7 +25,7 @@ import domain.models.applications.Permissions.SandboxOrAdmin
 import javax.inject.{Inject, Singleton}
 import play.api.libs.crypto.CookieSigner
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
-import service.{ApplicationActionService, ApplicationService, PushPullNotificationsService, SessionService}
+import uk.gov.hmrc.thirdpartydeveloperfrontend.service.{ApplicationActionService, ApplicationService, PushPullNotificationsService, SessionService}
 import views.html.ppns.PushSecretsView
 import controllers.actions.PpnsActions
 import scala.concurrent.ExecutionContext

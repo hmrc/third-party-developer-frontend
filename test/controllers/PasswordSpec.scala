@@ -25,7 +25,7 @@ import play.api.test.FakeRequest
 import play.api.test.Helpers._
 import play.filters.csrf.CSRF.TokenProvider
 import play.twirl.api.HtmlFormat
-import service.AuditService
+import uk.gov.hmrc.thirdpartydeveloperfrontend.service.AuditService
 import uk.gov.hmrc.http.HeaderCarrier
 import utils.WithCSRFAddToken
 import views.html._

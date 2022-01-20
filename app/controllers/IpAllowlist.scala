@@ -25,7 +25,7 @@ import javax.inject.{Inject, Singleton}
 import play.api.data.Form
 import play.api.libs.crypto.CookieSigner
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents, Result}
-import service._
+import uk.gov.hmrc.thirdpartydeveloperfrontend.service._
 import uk.gov.hmrc.http.ForbiddenException
 import views.html.ipAllowlist._
 
