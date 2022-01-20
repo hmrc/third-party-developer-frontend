@@ -16,7 +16,7 @@
 
 package uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.controllers
 
-import controllers.routes
+import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.config.ApplicationConfig
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.Application
 
@@ -31,7 +31,7 @@ object Crumb {
     Crumb("View all applications",s"${routes.ManageApplications.manageApps}", Some("data-breadcrumb-manage-app"))
 
   val protectAccount =
-    Crumb("Protect account",s"${controllers.profile.routes.ProtectAccount.getProtectAccount}", Some("data-breadcrumb-protect-account"))
+    Crumb("Protect account",s"${profile.routes.ProtectAccount.getProtectAccount}", Some("data-breadcrumb-protect-account"))
 
   val signIn =
     Crumb("Sign in",s"${routes.UserLoginAccount.login()}", Some("data-breadcrumb-sign-in"))
@@ -42,9 +42,9 @@ object Crumb {
   def applicationMetadata(application: Application) =
     Crumb("Subscription configuration", s"${routes.ManageSubscriptions.listApiSubscriptions(application.id)}", Some("data-breadcrumb-app-metadata"))
 
-  def manageProfile = Crumb("Manage profile", s"${controllers.profile.routes.Profile.showProfile()}", Some("data-breadcrumb-manage-profile"))
+  def manageProfile = Crumb("Manage profile", s"${profile.routes.Profile.showProfile()}", Some("data-breadcrumb-manage-profile"))
 
-  def emailPreferences = Crumb("Email preferences", s"${controllers.profile.routes.EmailPreferencesController.emailPreferencesSummaryPage()}", Some("data-breadcrumb-email-preferences"))
+  def emailPreferences = Crumb("Email preferences", s"${profile.routes.EmailPreferencesController.emailPreferencesSummaryPage()}", Some("data-breadcrumb-email-preferences"))
 
   def ipAllowlist(application: Application) = Crumb("IP allow list", s"${routes.IpAllowListController.viewIpAllowlist(application.id)}", Some("data-breadcrumb-ip-allowlist"))
 }

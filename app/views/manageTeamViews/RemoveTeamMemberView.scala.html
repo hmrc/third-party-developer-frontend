@@ -17,14 +17,14 @@
 @import uk.gov.hmrc.thirdpartydeveloperfrontend.config.ApplicationConfig
 @import include._
 @import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.controllers.Crumb
-
 @import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.controllers.ApplicationViewModel
 @import views.html.include.DevMain2
 @import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.DeveloperSession
+@import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.routes
 
 @this(devMain: DevMain2, leftHandNav: LeftHandNav)
 
-@(applicationView: ApplicationViewModel, form: Form[controllers.RemoveTeamMemberConfirmationForm], email: String = "")(
+@(applicationView: ApplicationViewModel, form: Form[uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.RemoveTeamMemberConfirmationForm], email: String = "")(
         implicit request: play.api.mvc.Request[Any], messages: Messages, applicationConfig: ApplicationConfig, navSection: String = "manage-team", loggedIn: DeveloperSession)
 
 @titleError = { @if(form.errors.nonEmpty) {Error: } else {}}

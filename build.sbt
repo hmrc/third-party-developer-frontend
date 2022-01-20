@@ -90,7 +90,8 @@ lazy val microservice = Project(appName, file("."))
   .settings(scalacOptions ++= Seq("-Ypartial-unification"))
   .settings(
       routesImport ++= Seq(
-        "controllers.binders._",
+        "uk.gov.hmrc.thirdpartydeveloperfrontend.controllers._",
+        "uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.binders._",
         "uk.gov.hmrc.modules.uplift.controllers._",
         "uk.gov.hmrc.modules.submissions.controllers.binders._",
         "uk.gov.hmrc.modules.submissions.domain.models._",

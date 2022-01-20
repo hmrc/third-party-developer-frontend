@@ -21,6 +21,7 @@
 @import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.ClientSecret
 @import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.Application
 @import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.Developer
+@import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.routes
 
 @(app: Application, developer: Developer, clientSecrets: Seq[ClientSecret])(
   implicit request: play.api.mvc.Request[Any], messages: Messages, applicationConfig: ApplicationConfig, flash: Flash

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package controllers
+package uk.gov.hmrc.thirdpartydeveloperfrontend.controllers
 
 import uk.gov.hmrc.thirdpartydeveloperfrontend.config.ApplicationConfig
 import uk.gov.hmrc.thirdpartydeveloperfrontend.config.ErrorHandler
@@ -31,7 +31,7 @@ import uk.gov.hmrc.thirdpartydeveloperfrontend.service.{ApplicationActionService
 import scala.concurrent.{ExecutionContext, Future}
 import scala.concurrent.ExecutionContext.Implicits.global
 import utils.LocalUserIdTracker
-import controllers.actions.SubscriptionFieldsActions
+import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.actions.SubscriptionFieldsActions
 
  class TestController(
      val cookieSigner: CookieSigner,

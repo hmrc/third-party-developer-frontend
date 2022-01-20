@@ -16,7 +16,7 @@
 
 package views
 
-import controllers.AddTeamMemberForm
+import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.AddTeamMemberForm
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.LoggedInState
 import uk.gov.hmrc.thirdpartydeveloperfrontend.helpers.string._
@@ -79,7 +79,7 @@ class ManageTeamViewSpec extends CommonViewSpec with WithCSRFAddToken with Devel
       elementExistsByText(document, "strong", "Warning You need admin rights to add or remove team members.") shouldBe false
       elementExistsByText(document, "td", loggedInDeveloper.email) shouldBe true
       elementExistsByText(document, "td", collaborator.email) shouldBe true
-      linkExistsWithHref(document, controllers.routes.ManageTeam.removeTeamMember(appId, collaborator.email.toSha256).url) shouldBe true
+      linkExistsWithHref(document,uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.routes.ManageTeam.removeTeamMember(appId, collaborator.email.toSha256).url) shouldBe true
     }
 
     "not show Add and Remove buttons for Developer" in {
@@ -90,7 +90,7 @@ class ManageTeamViewSpec extends CommonViewSpec with WithCSRFAddToken with Devel
       elementExistsByText(document, "strong", "Warning You need admin rights to add or remove team members.") shouldBe true
       elementExistsByText(document, "td", loggedInDeveloper.email) shouldBe true
       elementExistsByText(document, "td", collaborator.email) shouldBe true
-      linkExistsWithHref(document, controllers.routes.ManageTeam.removeTeamMember(appId, collaborator.email.toSha256).url) shouldBe false
+      linkExistsWithHref(document,uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.routes.ManageTeam.removeTeamMember(appId, collaborator.email.toSha256).url) shouldBe false
     }
   }
 }

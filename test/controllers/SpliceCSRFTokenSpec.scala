@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package controllers
+package uk.gov.hmrc.thirdpartydeveloperfrontend.controllers
 
 import javax.inject.Inject
 import play.api.mvc.{Call, RequestHeader}

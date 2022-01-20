@@ -14,12 +14,13 @@
  * limitations under the License.
  */
 
-package controllers
+package uk.gov.hmrc.thirdpartydeveloperfrontend.controllers
 
 import uk.gov.hmrc.thirdpartydeveloperfrontend.config.ApplicationConfig
 import uk.gov.hmrc.thirdpartydeveloperfrontend.config.ErrorHandler
 import uk.gov.hmrc.thirdpartydeveloperfrontend.config.FraudPreventionConfig
-import controllers.fraudprevention.FraudPreventionNavLinkHelper
+import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers._
+import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.fraudprevention.FraudPreventionNavLinkHelper
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.{ApplicationId, AddCollaborator, CollaboratorRole}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.Capabilities.SupportsTeamMembers
@@ -80,8 +81,8 @@ class ManageTeam @Inject() (
     canEditTeamMembers(applicationId, alsoAllowTestingState = true) { implicit request =>
       val successRedirect = addTeamMemberPageMode match {
         case ManageTeamMembers => routes.ManageTeam.manageTeam(applicationId, None)
-        case ApplicationCheck  => controllers.checkpages.routes.ApplicationCheck.team(applicationId)
-        case CheckYourAnswers  => controllers.checkpages.routes.CheckYourAnswers.team(applicationId)
+        case ApplicationCheck  => checkpages.routes.ApplicationCheck.team(applicationId)
+        case CheckYourAnswers  => checkpages.routes.CheckYourAnswers.team(applicationId)
       }
 
       def handleAddTeamMemberView(a: ApplicationViewModel, f: Form[AddTeamMemberForm], ds:DeveloperSession)={

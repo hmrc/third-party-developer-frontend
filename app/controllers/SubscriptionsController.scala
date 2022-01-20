@@ -14,13 +14,14 @@
  * limitations under the License.
  */
 
-package controllers
+package uk.gov.hmrc.thirdpartydeveloperfrontend.controllers
 
 import uk.gov.hmrc.thirdpartydeveloperfrontend.config.ApplicationConfig
 import uk.gov.hmrc.thirdpartydeveloperfrontend.config.ErrorHandler
 import uk.gov.hmrc.thirdpartydeveloperfrontend.config.FraudPreventionConfig
 import uk.gov.hmrc.thirdpartydeveloperfrontend.connectors.ThirdPartyDeveloperConnector
-import controllers.fraudprevention.FraudPreventionNavLinkHelper
+import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.fraudprevention.FraudPreventionNavLinkHelper
+import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.apidefinitions.{ApiContext, ApiVersion}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.Capabilities.{ManageLockedSubscriptions, SupportsSubscriptions}
@@ -45,22 +46,23 @@ import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.apidefinitions.ApiI
 import play.api.mvc.Call
 
 @Singleton
-class Subscriptions @Inject()(val developerConnector: ThirdPartyDeveloperConnector,
-                              val auditService: AuditService,
-                              val errorHandler: ErrorHandler,
-                              val applicationService: ApplicationService,
-                              val subscriptionsService: SubscriptionsService,
-                              val applicationActionService: ApplicationActionService,
-                              val sessionService: SessionService,
-                              mcc: MessagesControllerComponents,
-                              val cookieSigner: CookieSigner,
-                              manageSubscriptionsView: ManageSubscriptionsView,
-                              addAppSubscriptionsView: AddAppSubscriptionsView,
-                              changeSubscriptionConfirmationView: ChangeSubscriptionConfirmationView,
-                              unsubscribeRequestSubmittedView: UnsubscribeRequestSubmittedView,
-                              subscribeRequestSubmittedView: SubscribeRequestSubmittedView,
-                              fraudPreventionConfig: FraudPreventionConfig)
-                             (implicit val ec: ExecutionContext, val appConfig: ApplicationConfig, val environmentNameService: EnvironmentNameService)
+class SubscriptionsController @Inject()(
+  val developerConnector: ThirdPartyDeveloperConnector,
+  val auditService: AuditService,
+  val errorHandler: ErrorHandler,
+  val applicationService: ApplicationService,
+  val subscriptionsService: SubscriptionsService,
+  val applicationActionService: ApplicationActionService,
+  val sessionService: SessionService,
+  mcc: MessagesControllerComponents,
+  val cookieSigner: CookieSigner,
+  manageSubscriptionsView: ManageSubscriptionsView,
+  addAppSubscriptionsView: AddAppSubscriptionsView,
+  changeSubscriptionConfirmationView: ChangeSubscriptionConfirmationView,
+  unsubscribeRequestSubmittedView: UnsubscribeRequestSubmittedView,
+  subscribeRequestSubmittedView: SubscribeRequestSubmittedView,
+  fraudPreventionConfig: FraudPreventionConfig
+)(implicit val ec: ExecutionContext, val appConfig: ApplicationConfig, val environmentNameService: EnvironmentNameService)
   extends ApplicationController(mcc)
     with ApplicationHelper with FraudPreventionNavLinkHelper {
 
@@ -106,8 +108,8 @@ class Subscriptions @Inject()(val developerConnector: ThirdPartyDeveloperConnect
 
   private def redirect(redirectTo: String, applicationId: ApplicationId) = SubscriptionRedirect.withNameOption(redirectTo) match {
     case Some(MANAGE_PAGE)            => Redirect(routes.Details.details(applicationId))
-    case Some(APPLICATION_CHECK_PAGE) => Redirect(controllers.checkpages.routes.ApplicationCheck.apiSubscriptionsPage(applicationId))
-    case Some(API_SUBSCRIPTIONS_PAGE) => Redirect(routes.Subscriptions.manageSubscriptions(applicationId))
+    case Some(APPLICATION_CHECK_PAGE) => Redirect(checkpages.routes.ApplicationCheck.apiSubscriptionsPage(applicationId))
+    case Some(API_SUBSCRIPTIONS_PAGE) => Redirect(routes.SubscriptionsController.manageSubscriptions(applicationId))
     case None                         => Redirect(routes.Details.details(applicationId))
   }
 
@@ -171,7 +173,7 @@ class Subscriptions @Inject()(val developerConnector: ThirdPartyDeveloperConnect
                                   apiVersion: ApiVersion,
                                   redirectTo: String): Action[AnyContent] =
     canManageLockedApiSubscriptionsAction(applicationId) {
-      val call: Call = routes.Subscriptions.changeLockedApiSubscriptionAction(applicationId, apiName, apiContext, apiVersion, redirectTo.toString)
+      val call: Call = routes.SubscriptionsController.changeLockedApiSubscriptionAction(applicationId, apiName, apiContext, apiVersion, redirectTo.toString)
       requestChangeApiSubscription(applicationId, apiName, apiContext, apiVersion, redirectTo, call)
     }
 
@@ -181,7 +183,7 @@ class Subscriptions @Inject()(val developerConnector: ThirdPartyDeveloperConnect
                                    apiVersion: ApiVersion,
                                    redirectTo: String): Action[AnyContent] =
     canManagePrivateApiSubscriptionsAction(applicationId) {
-      val call: Call = routes.Subscriptions.changePrivateApiSubscriptionAction(applicationId, apiName, apiContext, apiVersion, redirectTo)
+      val call: Call = routes.SubscriptionsController.changePrivateApiSubscriptionAction(applicationId, apiName, apiContext, apiVersion, redirectTo)
       requestChangeApiSubscription(applicationId, apiName, apiContext, apiVersion, redirectTo, call)
     }
 
@@ -231,7 +233,7 @@ class Subscriptions @Inject()(val developerConnector: ThirdPartyDeveloperConnect
                                         apiVersion: ApiVersion,
                                         redirectTo: String): Action[AnyContent] =
     canManageLockedApiSubscriptionsAction(applicationId) {
-      val call: Call = routes.Subscriptions.changeLockedApiSubscriptionAction(applicationId, apiName, apiContext, apiVersion, redirectTo)
+      val call: Call = routes.SubscriptionsController.changeLockedApiSubscriptionAction(applicationId, apiName, apiContext, apiVersion, redirectTo)
       requestChangeApiSubscriptionAction(applicationId, apiName, apiContext, apiVersion, redirectTo, call)
     }
 
@@ -241,7 +243,7 @@ class Subscriptions @Inject()(val developerConnector: ThirdPartyDeveloperConnect
                                          apiVersion: ApiVersion,
                                          redirectTo: String): Action[AnyContent] =
     canManagePrivateApiSubscriptionsAction(applicationId) {
-      val call: Call = routes.Subscriptions.changePrivateApiSubscriptionAction(applicationId, apiName, apiContext, apiVersion, redirectTo)
+      val call: Call = routes.SubscriptionsController.changePrivateApiSubscriptionAction(applicationId, apiName, apiContext, apiVersion, redirectTo)
       requestChangeApiSubscriptionAction(applicationId, apiName, apiContext, apiVersion, redirectTo, call)
     }
 

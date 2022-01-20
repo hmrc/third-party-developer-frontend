@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package controllers
+package uk.gov.hmrc.thirdpartydeveloperfrontend.controllers
 
 import play.api.mvc.{Call, RequestHeader}
 import play.filters.csrf.CSRF._

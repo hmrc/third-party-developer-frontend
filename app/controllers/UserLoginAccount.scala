@@ -14,10 +14,11 @@
  * limitations under the License.
  */
 
-package controllers
+package uk.gov.hmrc.thirdpartydeveloperfrontend.controllers
 
 import uk.gov.hmrc.thirdpartydeveloperfrontend.config.ApplicationConfig
 import uk.gov.hmrc.thirdpartydeveloperfrontend.config.ErrorHandler
+import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.connectors.UserAuthenticationResponse
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.DeveloperSession
@@ -30,7 +31,7 @@ import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.play.audit.http.connector.AuditResult
 import views.html._
 import views.html.protectaccount._
-import controllers.profile.ProtectAccountForm
+import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.profile.ProtectAccountForm
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.controllers.MfaMandateDetails
 
 import scala.concurrent.{ExecutionContext, Future}
@@ -128,7 +129,7 @@ class UserLoginAccount @Inject()(val auditService: AuditService,
       case Some(session) if session.loggedInState.isPartLoggedInEnablingMFA => {
         successful(
           withSessionCookie(
-            Redirect(controllers.profile.routes.ProtectAccount.getProtectAccount().url).withSession(playSession),
+            Redirect(profile.routes.ProtectAccount.getProtectAccount().url).withSession(playSession),
             session.sessionId
           )
         )

@@ -28,8 +28,8 @@ import uk.gov.hmrc.modules.submissions.views.html._
 
 import javax.inject.{Inject, Singleton}
 import scala.concurrent.ExecutionContext
-import controllers.ApplicationController
-import controllers.checkpages.CanUseCheckActions
+import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.ApplicationController
+import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.checkpages.CanUseCheckActions
 import cats.data.NonEmptyList
 import uk.gov.hmrc.modules.submissions.domain.models._
 import uk.gov.hmrc.modules.submissions.services.SubmissionService

@@ -16,7 +16,7 @@
 
 package uk.gov.hmrc.modules.submissions.controllers
 
-import controllers.BaseControllerSpec
+import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.BaseControllerSpec
 import mocks.service.ApplicationServiceMock
 import mocks.connector.ApmConnectorMockModule
 import uk.gov.hmrc.modules.submissions.services.mocks.SubmissionServiceMockModule
@@ -32,7 +32,7 @@ import play.filters.csrf.CSRF
 import utils.WithCSRFAddToken
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.ApplicationWithSubscriptionData
 import builder.SampleApplication
-import controllers.SubscriptionTestHelperSugar
+import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.SubscriptionTestHelperSugar
 import builder.SampleSession
 import mocks.service.ApplicationActionServiceMock
 import uk.gov.hmrc.modules.submissions.domain.models.ExtendedSubmission

@@ -14,11 +14,11 @@
  * limitations under the License.
  */
 
-package controllers.fraudprevention
+package uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.fraudprevention
 
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.controllers.FraudPreventionNavLinkViewModel
 import uk.gov.hmrc.thirdpartydeveloperfrontend.config.FraudPreventionConfig
-import controllers.ApplicationRequest
+import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.ApplicationRequest
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.Environment
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.Application
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.apidefinitions.APISubscriptionStatus

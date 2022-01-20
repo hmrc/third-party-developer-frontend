@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package controllers.profile
+package uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.profile
 
 import uk.gov.hmrc.thirdpartydeveloperfrontend.config.ApplicationConfig
 import uk.gov.hmrc.thirdpartydeveloperfrontend.config.ErrorHandler
@@ -27,13 +27,13 @@ import uk.gov.hmrc.thirdpartydeveloperfrontend.service.{ApplicationService, Audi
 import views.html._
 
 import scala.concurrent.{ExecutionContext, Future}
-import controllers.LoggedInController
-import controllers.PasswordChange
-import controllers.ProfileForm
-import controllers.DeleteProfileForm
-import controllers.ChangePasswordForm
-import controllers.UserRequest
-import controllers.ErrorFormBuilder
+import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.LoggedInController
+import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.PasswordChange
+import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.ProfileForm
+import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.DeleteProfileForm
+import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.ChangePasswordForm
+import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.UserRequest
+import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.ErrorFormBuilder
 
 @Singleton
 class Profile @Inject()(

@@ -14,12 +14,12 @@
  * limitations under the License.
  */
 
-package controllers.actions
+package uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.actions
 
-import controllers.ApplicationController
+import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.ApplicationController
 import scala.concurrent.ExecutionContext
 import play.api.mvc.{Action, ActionFilter, AnyContent, Result}
-import controllers.ApplicationRequest
+import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.ApplicationRequest
 import scala.concurrent.Future
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications._
 

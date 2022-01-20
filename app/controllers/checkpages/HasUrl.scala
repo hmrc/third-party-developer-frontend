@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package controllers.checkpages
+package uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.checkpages
 
 object HasUrl {
   def hasUrl(url: Option[String], hasCheckedUrl: Option[Boolean]) = {

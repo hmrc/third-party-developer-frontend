@@ -22,6 +22,8 @@
 @import uk.gov.hmrc.urls.Link
 @import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.ApplicationId
 @import views.html.include.DevMain2
+@import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.SelectTopicsFromSubscriptionsForm
+@import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.profile.routes
 
 @this(devMain: DevMain2)
 
@@ -48,7 +50,7 @@
       </p>
         @fieldError2(form.errors, "category")
       <div id="select-topic-hint" class="govuk-hint">Select all that apply.</div>
-      @helper.form(action = controllers.profile.routes.EmailPreferencesController.selectTopicsFromSubscriptionsAction(applicationId), 'class -> "form", 'id -> "emailPreferencesTopicsForm") {
+      @helper.form(action = routes.EmailPreferencesController.selectTopicsFromSubscriptionsAction(applicationId), 'class -> "form", 'id -> "emailPreferencesTopicsForm") {
         @helper.CSRF.formField
         <input type="hidden" class="govuk-visually-hidden" value="@applicationId.value" name="applicationId" />
         <a name="topic"></a>

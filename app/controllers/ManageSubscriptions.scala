@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package controllers
+package uk.gov.hmrc.thirdpartydeveloperfrontend.controllers
 
 import com.google.inject.{Inject, Singleton}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.config.ApplicationConfig
@@ -38,7 +38,7 @@ import views.html.managesubscriptions._
 import scala.concurrent.{ExecutionContext, Future}
 import scala.concurrent.Future.successful
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.subscriptions.DevhubAccessLevel
-import controllers.actions.SubscriptionFieldsActions
+import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.actions.SubscriptionFieldsActions
 
 object ManageSubscriptions {
 

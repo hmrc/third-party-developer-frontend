@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
-package controllers.checkpages
+package uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.checkpages
 
-import controllers.{ApplicationController, ApplicationRequest}
+import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.{ApplicationController, ApplicationRequest}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.ApplicationId
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.Capabilities.SupportsAppChecks
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.Permissions.AdministratorOnly

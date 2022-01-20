@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package controllers
+package uk.gov.hmrc.thirdpartydeveloperfrontend.controllers
 
 import java.util.UUID.randomUUID
 import builder.DeveloperBuilder
@@ -38,7 +38,7 @@ import mocks.connector.ApmConnectorMockModule
 import scala.concurrent.ExecutionContext.Implicits.global
 import utils.LocalUserIdTracker
 import builder._
-import controllers.addapplication.AddApplication
+import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.addapplication.AddApplication
 import uk.gov.hmrc.modules.uplift.views.html.BeforeYouStartView
 import uk.gov.hmrc.modules.uplift.services.mocks._
 import uk.gov.hmrc.modules.uplift.controllers.UpliftJourneySwitch

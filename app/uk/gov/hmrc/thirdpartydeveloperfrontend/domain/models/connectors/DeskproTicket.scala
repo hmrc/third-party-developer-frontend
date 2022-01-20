@@ -16,7 +16,7 @@
 
 package uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.connectors
 
-import controllers.{routes, SupportEnquiryForm}
+import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.apidefinitions.ApiVersion
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.{ApplicationId, Environment, CollaboratorRole}
 import play.api.libs.json.Json
@@ -51,7 +51,7 @@ object DeskproTicket extends FieldTransformer {
       requestorEmail,
       "New application submitted for checking",
       message,
-      controllers.checkpages.routes.ApplicationCheck.requestCheckPage(applicationId).url
+      uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.checkpages.routes.ApplicationCheck.requestCheckPage(applicationId).url
     )
   }
 
@@ -68,7 +68,7 @@ object DeskproTicket extends FieldTransformer {
                   |to be subscribed to the API '$apiName'
                   |with version '${apiVersion.value}'""".stripMargin
 
-    DeskproTicket(requestorName, requestorEmail, "Request to subscribe to an API", message, routes.Subscriptions.manageSubscriptions(applicationId).url)
+    DeskproTicket(requestorName, requestorEmail, "Request to subscribe to an API", message, routes.SubscriptionsController.manageSubscriptions(applicationId).url)
   }
 
   def createForApiUnsubscribe(
@@ -84,7 +84,7 @@ object DeskproTicket extends FieldTransformer {
                   |to be unsubscribed from the API '$apiName'
                   |with version '${apiVersion.value}'""".stripMargin
 
-    DeskproTicket(requestorName, requestorEmail, "Request to unsubscribe from an API", message, routes.Subscriptions.manageSubscriptions(applicationId).url)
+    DeskproTicket(requestorName, requestorEmail, "Request to unsubscribe from an API", message, routes.SubscriptionsController.manageSubscriptions(applicationId).url)
   }
 
   def createForPrincipalApplicationDeletion(
@@ -131,7 +131,7 @@ object DeskproTicket extends FieldTransformer {
     val message =
       s"""I '$email' want my Developer Hub account to be deleted"""
 
-    DeskproTicket(name, email, "Request for developer account to be deleted", message, controllers.profile.routes.Profile.deleteAccount().url)
+    DeskproTicket(name, email, "Request for developer account to be deleted", message, profile.routes.Profile.deleteAccount().url)
   }
   def removeDeveloper2SV(name: String, email: String): DeskproTicket = {
     val message =

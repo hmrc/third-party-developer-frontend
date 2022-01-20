@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
-package controllers
+package uk.gov.hmrc.thirdpartydeveloperfrontend.controllers
 
-import controllers.APISubscriptions.subscriptionNumberLabel
+import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.APISubscriptions.subscriptionNumberLabel
 import play.api.libs.json.Json
 
 import scala.collection.SortedMap

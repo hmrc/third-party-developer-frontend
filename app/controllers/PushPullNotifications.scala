@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package controllers
+package uk.gov.hmrc.thirdpartydeveloperfrontend.controllers
 
 import cats.data.NonEmptyList
 import uk.gov.hmrc.thirdpartydeveloperfrontend.config.ApplicationConfig
@@ -27,7 +27,7 @@ import play.api.libs.crypto.CookieSigner
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.service.{ApplicationActionService, ApplicationService, PushPullNotificationsService, SessionService}
 import views.html.ppns.PushSecretsView
-import controllers.actions.PpnsActions
+import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.actions.PpnsActions
 import scala.concurrent.ExecutionContext
 
 @Singleton

@@ -19,6 +19,7 @@
 @import views.html.include.DevMain
 @import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.Application
 @import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.DeveloperSession
+@import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.checkpages.routes
 
 @this(devMain: DevMain)
 
@@ -45,12 +46,12 @@
 
   <br/>
 
-  @helper.form(action = controllers.checkpages.routes.CheckYourAnswers.teamMemberRemoveAction(app.id)) {
+  @helper.form(action = routes.CheckYourAnswers.teamMemberRemoveAction(app.id)) {
    @helper.CSRF.formField
    <input type="hidden" name="email" value="@email">
 
     <button id="submit" class="button button--padded" type="submit">Delete team member</button>
-    <a href="@controllers.checkpages.routes.CheckYourAnswers.team(app.id)" class="secondary-button">Cancel</a>
+    <a href="@routes.CheckYourAnswers.team(app.id)" class="secondary-button">Cancel</a>
   }
   </section>
 

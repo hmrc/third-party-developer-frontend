@@ -14,6 +14,8 @@
  * limitations under the License.
  */
 
+package uk.gov.hmrc.thirdpartydeveloperfrontend
+
 import java.net.URL
 
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.Environment

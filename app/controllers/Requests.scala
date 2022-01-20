@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package controllers
+package uk.gov.hmrc.thirdpartydeveloperfrontend.controllers
 
 import cats.data.NonEmptyList
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.apidefinitions.{ApiContext, APISubscriptionStatus, APISubscriptionStatusWithSubscriptionFields, APISubscriptionStatusWithWritableSubscriptionField}
@@ -64,7 +64,7 @@ class ApplicationWithSubscriptionFieldPageRequest[A](
     val pageIndex: Int,
     val totalPages: Int,
     val apiSubscriptionStatus: APISubscriptionStatusWithSubscriptionFields,
-    val apiDetails: controllers.ManageSubscriptions.ApiDetails,
+    val apiDetails: uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.ManageSubscriptions.ApiDetails,
     applicationRequest: ApplicationRequest[A]
 ) extends ApplicationRequest[A](
   applicationRequest.application,

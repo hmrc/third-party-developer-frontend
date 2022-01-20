@@ -18,7 +18,7 @@ package uk.gov.hmrc.thirdpartydeveloperfrontend.service
 
 import uk.gov.hmrc.thirdpartydeveloperfrontend.config.ApplicationConfig
 import uk.gov.hmrc.thirdpartydeveloperfrontend.connectors.DeskproConnector
-import controllers.{SignOutSurveyForm, SupportEnquiryForm}
+import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.{SignOutSurveyForm, SupportEnquiryForm}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.connectors.{DeskproTicket, Feedback, TicketId, TicketResult}
 import javax.inject.{Inject, Singleton}
 import play.api.mvc.Request

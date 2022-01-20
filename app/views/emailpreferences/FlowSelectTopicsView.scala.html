@@ -21,6 +21,8 @@
 @import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.views.BackButtonWithJavaScript
 @import uk.gov.hmrc.urls.Link
 @import views.html.include.DevMain2
+@import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.profile.routes
+@import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.SelectedTopicsEmailPreferencesForm
 
 @this(devMain: DevMain2)
 
@@ -43,7 +45,7 @@
         We’ll only send you information about the APIs you are interested in.
     </p>
     <p id="topics-hint" class="govuk-hint">Select all that apply.</p>
-    @helper.form(action = controllers.profile.routes.EmailPreferencesController.flowSelectTopicsAction(), 'class -> "form", 'id -> "emailPreferencesTopicsForm") {
+    @helper.form(action = routes.EmailPreferencesController.flowSelectTopicsAction(), 'class -> "form", 'id -> "emailPreferencesTopicsForm") {
         @helper.CSRF.formField
         <div class="govuk-form-group @if(form.errors("topic").nonEmpty){govuk-form-group--error}">
             <fieldset class="govuk-fieldset" aria-describedby="topics-hint">

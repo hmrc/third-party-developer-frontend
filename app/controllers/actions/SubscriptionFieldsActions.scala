@@ -14,23 +14,23 @@
  * limitations under the License.
  */
 
-package controllers.actions
+package uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.actions
 
-import controllers.ApplicationWithSubscriptionFieldsRequest
-import controllers.ApplicationWithSubscriptionFieldPageRequest
-import controllers.ApplicationWithFieldDefinitionsRequest
-import controllers.ApplicationWithWritableSubscriptionField
+import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.ApplicationWithSubscriptionFieldsRequest
+import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.ApplicationWithSubscriptionFieldPageRequest
+import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.ApplicationWithFieldDefinitionsRequest
+import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.ApplicationWithWritableSubscriptionField
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.controllers.NoSubscriptionFieldsRefinerBehaviour
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications._
 import play.api.mvc.{Action, AnyContent, Result, ActionRefiner}
 import scala.concurrent.Future
-import controllers.ApplicationController
+import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.ApplicationController
 import scala.concurrent.ExecutionContext
 import cats.data.NonEmptyList
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.apidefinitions._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.subscriptions.DevhubAccessLevel
-import controllers.ManageSubscriptions.toDetails
-import controllers.ApplicationRequest
+import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.ManageSubscriptions.toDetails
+import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.ApplicationRequest
 
 trait SubscriptionFieldsActions {
   self: ApplicationController => 

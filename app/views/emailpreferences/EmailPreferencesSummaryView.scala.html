@@ -21,6 +21,7 @@
 @import uk.gov.hmrc.urls.Link
 @import views.emailpreferences.EmailPreferencesSummaryViewData
 @import views.html.include.DevMain2
+@import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers
 
 @this(devMain: DevMain2)
 
@@ -107,6 +108,6 @@
   }
 
   <p class="govuk-body">
-    <a class="govuk-link govuk-link--no-visited-state" id="view-all-applications-link" href="@routes.ManageApplications.manageApps">View all applications</a>
+    <a class="govuk-link govuk-link--no-visited-state" id="view-all-applications-link" href="@controllers.routes.ManageApplications.manageApps">View all applications</a>
   </p>
 }

@@ -16,7 +16,7 @@
 
 package views
 
-import controllers.RegistrationForm
+import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.RegistrationForm
 import org.jsoup.Jsoup
 import play.api.test.FakeRequest
 import utils.ViewHelpers._

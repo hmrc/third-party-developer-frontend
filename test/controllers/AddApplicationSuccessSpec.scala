@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package controllers
+package uk.gov.hmrc.thirdpartydeveloperfrontend.controllers
 
 import builder.DeveloperBuilder
 import uk.gov.hmrc.thirdpartydeveloperfrontend.config.ErrorHandler
@@ -37,7 +37,7 @@ import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.apidefinitions.CombinedApiTestDataHelper
 import utils.LocalUserIdTracker
-import controllers.addapplication.AddApplication
+import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.addapplication.AddApplication
 import builder._
 import uk.gov.hmrc.modules.uplift.views.html.BeforeYouStartView
 import uk.gov.hmrc.modules.uplift.services.GetProductionCredentialsFlowService

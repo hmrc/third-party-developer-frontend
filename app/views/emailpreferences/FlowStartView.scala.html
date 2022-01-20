@@ -19,6 +19,7 @@
 @import include._
 @import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.views.BackButtonWithJavaScript
 @import views.html.include.DevMain2
+@import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.profile.routes
 
 @this(devMain: DevMain2)
 
@@ -43,7 +44,7 @@
 
   @EmailPrefsBulletInfoView()
 
-  <form id="emailPreferencesStartForm" method="GET" action="@controllers.profile.routes.EmailPreferencesController.flowSelectCategoriesPage()">
+  <form id="emailPreferencesStartForm" method="GET" action="@routes.EmailPreferencesController.flowSelectCategoriesPage()">
     <button id="submit" class="govuk-button" type="submit">Continue</button>
   </form>
 }

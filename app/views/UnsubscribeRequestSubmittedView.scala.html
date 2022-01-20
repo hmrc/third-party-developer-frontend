@@ -20,6 +20,7 @@
 @import include._
 @import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.controllers.Crumb
 @import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.controllers.ApplicationViewModel
+@import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.routes
 
 @this(devMain: DevMain, leftHandNav: LeftHandNav)
 
@@ -50,5 +51,5 @@ implicit request: play.api.mvc.Request[Any], loggedIn: DeveloperSession, message
     <p>We will review your request and respond within 2 working days.</p>
     <p>You will not see changes to your API subscriptions until we have approved them.</p>
 
-    <a href="@routes.Subscriptions.manageSubscriptions(app.id)" id="submit" class="button">Finish</a>
+    <a href="@routes.SubscriptionsController.manageSubscriptions(app.id)" id="submit" class="button">Finish</a>
 }

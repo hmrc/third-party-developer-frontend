@@ -19,7 +19,7 @@ package uk.gov.hmrc.thirdpartydeveloperfrontend.security
 import cats.implicits._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.config.ApplicationConfig
 import uk.gov.hmrc.thirdpartydeveloperfrontend.config.ErrorHandler
-import controllers.{routes, BaseController, BaseControllerSpec}
+import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.{routes, BaseController, BaseControllerSpec}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.{DeveloperSession, LoggedInState}
 import play.api.libs.crypto.CookieSigner
 import play.api.mvc.{Cookie, MessagesControllerComponents}

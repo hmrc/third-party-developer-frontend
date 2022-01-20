@@ -22,10 +22,11 @@
 @import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.Application
 @import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.flows.IpAllowlistFlow
 @import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.controllers.Crumb
+@import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.routes
 
 @this(devMain: DevMain2)
 
-@(app: Application, ipAllowlistFlow: IpAllowlistFlow, form: Form[controllers.AddCidrBlockForm])(
+@(app: Application, ipAllowlistFlow: IpAllowlistFlow, form: Form[uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.AddCidrBlockForm])(
   implicit request: play.api.mvc.Request[Any], loggedIn: DeveloperSession, messages: Messages, applicationConfig: ApplicationConfig
 )
 

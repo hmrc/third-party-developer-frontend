@@ -16,7 +16,7 @@
 
 package views
 
-import controllers.DeleteProfileForm
+import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.DeleteProfileForm
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.LoggedInState
 import org.jsoup.Jsoup
 import play.api.test.FakeRequest

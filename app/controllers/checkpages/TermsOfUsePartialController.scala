@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
-package controllers.checkpages
+package uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.checkpages
 
-import controllers.{ApplicationController, TermsOfUseForm}
+import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.{ApplicationController, TermsOfUseForm, ApplicationRequest}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.{ApplicationId, CheckInformation, TermsOfUseAgreement}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.controllers.ApplicationViewModel
 import play.api.data.Form
@@ -30,7 +30,7 @@ trait TermsOfUsePartialController {
   self: ApplicationController with CanUseCheckActions =>
   val termsOfUseView: TermsOfUseView
 
-  private def createTermsOfUse(applicationViewModel: ApplicationViewModel, form: Form[TermsOfUseForm])(implicit request: controllers.ApplicationRequest[AnyContent]) = {
+  private def createTermsOfUse(applicationViewModel: ApplicationViewModel, form: Form[TermsOfUseForm])(implicit request: ApplicationRequest[AnyContent]) = {
     termsOfUseView(
       applicationViewModel,
       form,

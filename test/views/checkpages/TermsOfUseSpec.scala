@@ -17,7 +17,7 @@
 package views.checkpages
 
 import uk.gov.hmrc.thirdpartydeveloperfrontend.config.ApplicationConfig
-import controllers.TermsOfUseForm
+import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.TermsOfUseForm
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.LoggedInState
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.controllers.ApplicationViewModel

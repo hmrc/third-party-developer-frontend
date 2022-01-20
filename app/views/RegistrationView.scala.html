@@ -17,10 +17,11 @@
 @import include._
 @import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.controllers.Crumb
 @import uk.gov.hmrc.thirdpartydeveloperfrontend.config.ApplicationConfig
+@import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.routes
 
 @this(devMain: DevMain2)
 
-@(form: Form[controllers.RegisterForm])(implicit request: play.api.mvc.Request[Any], messagesProvider: MessagesProvider, appConfig: ApplicationConfig)
+@(form: Form[uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.RegisterForm])(implicit request: play.api.mvc.Request[Any], messagesProvider: MessagesProvider, appConfig: ApplicationConfig)
 
 @titleError = { @if(form.errors.nonEmpty) {Error: } else {}}
 @devMain(

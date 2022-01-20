@@ -17,7 +17,7 @@
 package uk.gov.hmrc.modules.uplift.controllers
 
 import builder._
-import controllers.{BaseControllerSpec, SubscriptionTestHelperSugar}
+import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.{BaseControllerSpec, SubscriptionTestHelperSugar}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.apidefinitions._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.ApplicationWithSubscriptionData
 import uk.gov.hmrc.modules.uplift.domain.models._
@@ -37,7 +37,7 @@ import uk.gov.hmrc.modules.uplift.views.html._
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import uk.gov.hmrc.modules.uplift.services.mocks._
-import controllers.SubscriptionTestHelperSugar
+import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.SubscriptionTestHelperSugar
 import scala.concurrent.Future
 import uk.gov.hmrc.thirdpartydeveloperfrontend.config.{UpliftJourneyConfig, On}
 

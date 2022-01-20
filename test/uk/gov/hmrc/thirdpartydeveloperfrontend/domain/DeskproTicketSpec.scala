@@ -16,7 +16,7 @@
 
 package uk.gov.hmrc.thirdpartydeveloperfrontend.domain
 
-import controllers.SupportEnquiryForm
+import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.SupportEnquiryForm
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.connectors.DeskproTicket
 import play.api.test.FakeRequest
 import utils.AsyncHmrcSpec

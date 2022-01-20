@@ -14,12 +14,12 @@
  * limitations under the License.
  */
 
-package controllers.checkpages
+package uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.checkpages
 
 import uk.gov.hmrc.thirdpartydeveloperfrontend.config.ApplicationConfig
 import uk.gov.hmrc.thirdpartydeveloperfrontend.config.ErrorHandler
-import controllers._
-import controllers.FormKeys._
+import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers._
+import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.FormKeys._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.{ApplicationId, CheckInformation}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.views.CheckInformationForm
 import javax.inject.{Inject, Singleton}
@@ -154,7 +154,7 @@ class ApplicationCheck @Inject() (
 case class TermsAndConditionsForm(urlPresent: Option[String], termsAndConditionsURL: Option[String])
 
 object TermsAndConditionsForm {
-  import controllers._
+  import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers._
 
   def form: Form[TermsAndConditionsForm] = Form(
     mapping(
@@ -170,7 +170,7 @@ object TermsAndConditionsForm {
 case class PrivacyPolicyForm(urlPresent: Option[String], privacyPolicyURL: Option[String])
 
 object PrivacyPolicyForm {
-  import controllers._
+  import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers._
 
   def form: Form[PrivacyPolicyForm] = Form(
     mapping(
@@ -186,7 +186,7 @@ object PrivacyPolicyForm {
 case class NameForm(applicationName: String)
 
 object NameForm {
-  import controllers._
+  import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers._
 
   def form: Form[NameForm] = Form(
     mapping(
@@ -198,7 +198,7 @@ object NameForm {
 case class DetailsForm(applicationDetails: String)
 
 object DetailsForm {
-  import controllers._
+  import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers._
 
   def form: Form[DetailsForm] = Form(
     mapping(
@@ -210,7 +210,7 @@ object DetailsForm {
 case class ContactForm(fullname: String, email: String, telephone: String)
 
 object ContactForm {
-  import controllers._
+  import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers._
   def form: Form[ContactForm] = Form(
     mapping(
       "fullname" -> fullnameValidator,

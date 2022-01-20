@@ -29,13 +29,14 @@
 @import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.apidefinitions.ApiContext
 @import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.subscriptions.ApiData
 @import uk.gov.hmrc.thirdpartydeveloperfrontend.config.ApplicationConfig
+@import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.routes
 
 @this(devMain: DevMain, subscriptionGroups: SubscriptionGroups, leftHandNav: LeftHandNav)
 
 @(
     role: CollaboratorRole, 
     data: PageData, 
-    form: Form[controllers.EditApplicationForm], 
+    form: Form[uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.EditApplicationForm], 
     applicationView: ApplicationViewModel, 
     subscriptions: Option[GroupedSubscriptions], 
     openAccessApis: Map[ApiContext, ApiData],
@@ -92,7 +93,7 @@
         case _ => {
             <p class="panel panel-border-wide">We can’t load your API subscriptions at the moment.<br>
             Please <a href="@{
-                              routes.Subscriptions.manageSubscriptions(id)
+                              routes.SubscriptionsController.manageSubscriptions(id)
                               }">try again</a> later</p>
         }
     }

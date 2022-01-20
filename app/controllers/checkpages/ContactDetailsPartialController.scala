@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
-package controllers.checkpages
+package uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.checkpages
 
-import controllers.ApplicationController
+import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.ApplicationController
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.{ApplicationId, CheckInformation, ContactDetails}
 import play.api.data.Form
 import play.api.mvc.{Action, AnyContent, Call}

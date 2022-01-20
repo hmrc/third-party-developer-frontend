@@ -16,7 +16,7 @@
 
 package uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.connectors
 
-import controllers.SignOutSurveyForm
+import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.SignOutSurveyForm
 import play.api.libs.json.Json
 import play.api.mvc.Request
 import play.mvc.Http.HeaderNames.REFERER

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package controllers
+package uk.gov.hmrc.thirdpartydeveloperfrontend.controllers
 
 import builder.DeveloperBuilder
 import uk.gov.hmrc.thirdpartydeveloperfrontend.config.ErrorHandler
@@ -33,7 +33,7 @@ import mocks.connector.ApmConnectorMockModule
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import utils.LocalUserIdTracker
-import controllers.addapplication.AddApplication
+import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.addapplication.AddApplication
 import builder._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.config.UpliftJourneyConfig
 import uk.gov.hmrc.thirdpartydeveloperfrontend.config.{On, OnDemand, Off}

@@ -24,6 +24,7 @@
 @import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.Application
 @import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.DeveloperSession
 @import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.ApplicationId
+@import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.checkpages.routes
 
 @this(devMain: DevMain2)
 
@@ -46,14 +47,14 @@
 
   @{
     def createRemoveLink(appId: ApplicationId, emailAddress: String) = {
-      controllers.checkpages.routes.ApplicationCheck.teamMemberRemoveConfirmation(appId, emailAddress.toSha256)
+      routes.ApplicationCheck.teamMemberRemoveConfirmation(appId, emailAddress.toSha256)
     }
-    teamList(app, role, loggedIn, controllers.checkpages.routes.ApplicationCheck.teamAddMember(app.id), Link, createRemoveLink)
+    teamList(app, role, loggedIn, routes.ApplicationCheck.teamAddMember(app.id), Link, createRemoveLink)
   }
 
   </br>
 
-  @helper.form(action = controllers.checkpages.routes.ApplicationCheck.teamAction(app.id), 'class -> "form") {
+  @helper.form(action = routes.ApplicationCheck.teamAction(app.id), 'class -> "form") {
   @helper.CSRF.formField
 
   <button id="submit" class="govuk-button" type="submit">Save and return</button>

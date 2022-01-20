@@ -16,7 +16,7 @@
 
 package uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications
 
-import controllers.FormKeys.{applicationNameAlreadyExistsKey, applicationNameInvalidKey}
+import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.FormKeys.{applicationNameAlreadyExistsKey, applicationNameInvalidKey}
 
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.ApplicationNameValidationJson.ApplicationNameValidationResult
 

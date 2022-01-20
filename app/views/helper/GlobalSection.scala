@@ -18,7 +18,7 @@ package views.helper
 
 object GlobalSection {
 
-  import controllers.FormKeys._
+  import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.FormKeys._
 
   private def a(em: String)(found: String => String, notFound: () => String) = {
     (globalKeys.contains(em), globalToField.get(em)) match {

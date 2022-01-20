@@ -23,7 +23,7 @@ import uk.gov.hmrc.thirdpartydeveloperfrontend.config.ApplicationConfig
 import uk.gov.hmrc.thirdpartydeveloperfrontend.config.ErrorHandler
 import uk.gov.hmrc.thirdpartydeveloperfrontend.service.{ApplicationService, ApplicationActionService, SessionService}
 import play.api.libs.crypto.CookieSigner
-import controllers.ApplicationController
+import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.ApplicationController
 import uk.gov.hmrc.modules.submissions.views.html._
 import uk.gov.hmrc.modules.submissions.domain.models._
 import uk.gov.hmrc.modules.submissions.services.SubmissionService

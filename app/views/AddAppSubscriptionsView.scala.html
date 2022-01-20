@@ -28,13 +28,14 @@
 @import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.subscriptions.ApiData
 @import views.helper.EnvironmentNameService
 @import uk.gov.hmrc.thirdpartydeveloperfrontend.config.ApplicationConfig
+@import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.routes
 
 @this(devMain: DevMain, subscriptionGroups: SubscriptionGroups)
 
 @(
     role: CollaboratorRole, 
     data: PageData, 
-    form: Form[controllers.EditApplicationForm], 
+    form: Form[uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.EditApplicationForm], 
     app: Application, 
     environment: Environment, 
     subscriptions: Option[GroupedSubscriptions],
@@ -92,7 +93,7 @@
         case _ => {
             <p class="panel panel-border-wide">We can’t load your API subscriptions at the moment.<br>
             Please <a href="@{
-                              routes.Subscriptions.manageSubscriptions(app.id)
+                              routes.SubscriptionsController.manageSubscriptions(app.id)
                               }">try again</a> later</p>
         }
     }

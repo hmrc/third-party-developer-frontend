@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package controllers
+package uk.gov.hmrc.thirdpartydeveloperfrontend.controllers
 
 import java.net.URI
 
@@ -41,7 +41,7 @@ import views.html.protectaccount._
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 import scala.concurrent.Future.successful
-import controllers.profile.ProtectAccount
+import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.profile.ProtectAccount
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.UserId
 import utils.LocalUserIdTracker
 

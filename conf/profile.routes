@@ -1,38 +1,38 @@
-GET         /                                                                                    controllers.profile.Profile.showProfile
-GET         /change                                                                              controllers.profile.Profile.changeProfile
-POST        /                                                                                    controllers.profile.Profile.updateProfile
+GET         /                                                                                    uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.profile.Profile.showProfile
+GET         /change                                                                              uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.profile.Profile.changeProfile
+POST        /                                                                                    uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.profile.Profile.updateProfile
 
-GET         /email-preferences                                                                   controllers.profile.EmailPreferencesController.emailPreferencesSummaryPage
-GET         /email-preferences/unsubscribe                                                       controllers.profile.EmailPreferencesController.unsubscribeAllPage
-POST        /email-preferences/unsubscribe                                                       controllers.profile.EmailPreferencesController.unsubscribeAllAction
-GET         /email-preferences/start                                                             controllers.profile.EmailPreferencesController.flowStartPage
-GET         /email-preferences/categories                                                        controllers.profile.EmailPreferencesController.flowSelectCategoriesPage
-POST        /email-preferences/categories                                                        controllers.profile.EmailPreferencesController.flowSelectCategoriesAction
-POST        /email-preferences/no-categories                                                     controllers.profile.EmailPreferencesController.flowSelectNoCategoriesAction
-GET         /email-preferences/apis                                                              controllers.profile.EmailPreferencesController.flowSelectApisPage(category: String)
-POST        /email-preferences/apis                                                              controllers.profile.EmailPreferencesController.flowSelectApisAction
-GET         /email-preferences/topics                                                            controllers.profile.EmailPreferencesController.flowSelectTopicsPage
-POST        /email-preferences/topics                                                            controllers.profile.EmailPreferencesController.flowSelectTopicsAction
+GET         /email-preferences                                                                   uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.profile.EmailPreferencesController.emailPreferencesSummaryPage
+GET         /email-preferences/unsubscribe                                                       uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.profile.EmailPreferencesController.unsubscribeAllPage
+POST        /email-preferences/unsubscribe                                                       uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.profile.EmailPreferencesController.unsubscribeAllAction
+GET         /email-preferences/start                                                             uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.profile.EmailPreferencesController.flowStartPage
+GET         /email-preferences/categories                                                        uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.profile.EmailPreferencesController.flowSelectCategoriesPage
+POST        /email-preferences/categories                                                        uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.profile.EmailPreferencesController.flowSelectCategoriesAction
+POST        /email-preferences/no-categories                                                     uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.profile.EmailPreferencesController.flowSelectNoCategoriesAction
+GET         /email-preferences/apis                                                              uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.profile.EmailPreferencesController.flowSelectApisPage(category: String)
+POST        /email-preferences/apis                                                              uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.profile.EmailPreferencesController.flowSelectApisAction
+GET         /email-preferences/topics                                                            uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.profile.EmailPreferencesController.flowSelectTopicsPage
+POST        /email-preferences/topics                                                            uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.profile.EmailPreferencesController.flowSelectTopicsAction
 
-GET         /email-preferences/apis-from-subscriptions                                           controllers.profile.EmailPreferencesController.selectApisFromSubscriptionsPage(applicationId: ApplicationId)
-POST        /email-preferences/apis-from-subscriptions                                           controllers.profile.EmailPreferencesController.selectApisFromSubscriptionsAction(applicationId: ApplicationId)
-POST        /email-preferences/no-apis-from-subscriptions                                        controllers.profile.EmailPreferencesController.selectNoApisFromSubscriptionsAction(applicationId: ApplicationId)
-GET         /email-preferences/topics-from-subscriptions                                         controllers.profile.EmailPreferencesController.selectTopicsFromSubscriptionsPage(applicationId: ApplicationId)
-POST        /email-preferences/topics-from-subscriptions                                         controllers.profile.EmailPreferencesController.selectTopicsFromSubscriptionsAction(applicationId: ApplicationId)
+GET         /email-preferences/apis-from-subscriptions                                           uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.profile.EmailPreferencesController.selectApisFromSubscriptionsPage(applicationId: ApplicationId)
+POST        /email-preferences/apis-from-subscriptions                                           uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.profile.EmailPreferencesController.selectApisFromSubscriptionsAction(applicationId: ApplicationId)
+POST        /email-preferences/no-apis-from-subscriptions                                        uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.profile.EmailPreferencesController.selectNoApisFromSubscriptionsAction(applicationId: ApplicationId)
+GET         /email-preferences/topics-from-subscriptions                                         uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.profile.EmailPreferencesController.selectTopicsFromSubscriptionsPage(applicationId: ApplicationId)
+POST        /email-preferences/topics-from-subscriptions                                         uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.profile.EmailPreferencesController.selectTopicsFromSubscriptionsAction(applicationId: ApplicationId)
 
-GET         /protect-account                                                                     controllers.profile.ProtectAccount.getProtectAccount
-GET         /protect-account/setup                                                               controllers.profile.ProtectAccount.getQrCode
-GET         /protect-account/access-code                                                         controllers.profile.ProtectAccount.getAccessCodePage
-GET         /protect-account/complete                                                            controllers.profile.ProtectAccount.getProtectAccountCompletedPage
-POST        /protect-account/enable                                                              controllers.profile.ProtectAccount.protectAccount
-GET         /protect-account/confirm-removal                                                     controllers.profile.ProtectAccount.get2SVRemovalConfirmationPage
-POST        /protect-account/confirm-removal                                                     controllers.profile.ProtectAccount.confirm2SVRemoval
-GET         /protect-account/remove                                                              controllers.profile.ProtectAccount.get2SVRemovalAccessCodePage
-POST        /protect-account/remove                                                              controllers.profile.ProtectAccount.remove2SV
-GET         /protect-account/remove/complete                                                     controllers.profile.ProtectAccount.get2SVRemovalCompletePage
+GET         /protect-account                                                                     uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.profile.ProtectAccount.getProtectAccount
+GET         /protect-account/setup                                                               uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.profile.ProtectAccount.getQrCode
+GET         /protect-account/access-code                                                         uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.profile.ProtectAccount.getAccessCodePage
+GET         /protect-account/complete                                                            uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.profile.ProtectAccount.getProtectAccountCompletedPage
+POST        /protect-account/enable                                                              uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.profile.ProtectAccount.protectAccount
+GET         /protect-account/confirm-removal                                                     uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.profile.ProtectAccount.get2SVRemovalConfirmationPage
+POST        /protect-account/confirm-removal                                                     uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.profile.ProtectAccount.confirm2SVRemoval
+GET         /protect-account/remove                                                              uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.profile.ProtectAccount.get2SVRemovalAccessCodePage
+POST        /protect-account/remove                                                              uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.profile.ProtectAccount.remove2SV
+GET         /protect-account/remove/complete                                                     uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.profile.ProtectAccount.get2SVRemovalCompletePage
 
-GET         /password                                                                            controllers.profile.Profile.showPasswordPage
-POST        /password                                                                            controllers.profile.Profile.updatePassword
+GET         /password                                                                            uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.profile.Profile.showPasswordPage
+POST        /password                                                                            uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.profile.Profile.updatePassword
 
-GET         /delete                                                                              controllers.profile.Profile.requestDeletion
-POST        /delete                                                                              controllers.profile.Profile.deleteAccount
+GET         /delete                                                                              uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.profile.Profile.requestDeletion
+POST        /delete                                                                              uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.profile.Profile.deleteAccount

@@ -36,7 +36,7 @@ class SessionTimeoutFilterWithWhitelistSpec extends AsyncHmrcSpec with GuiceOneA
     val config = SessionTimeoutFilterConfig(timeoutDuration = Duration.ofSeconds(1), onlyWipeAuthToken = false)
 
     val nextOperationFunction = mock[RequestHeader => Future[Result]]
-    val whitelistedUrl = controllers.routes.UserLoginAccount.login().url
+    val whitelistedUrl =uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.routes.UserLoginAccount.login().url
     val otherUrl = "/applications"
     val accessUri = "http://redirect.to/here"
     val bearerToken = "Bearer Token"

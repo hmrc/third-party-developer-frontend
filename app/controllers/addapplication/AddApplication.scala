@@ -14,14 +14,14 @@
  * limitations under the License.
  */
 
-package controllers.addapplication
+package uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.addapplication
 
 import uk.gov.hmrc.thirdpartydeveloperfrontend.config.ApplicationConfig
 import uk.gov.hmrc.thirdpartydeveloperfrontend.config.ErrorHandler
 import uk.gov.hmrc.thirdpartydeveloperfrontend.connectors.ApmConnector
-import controllers.{AddApplicationNameForm, ApplicationController, ChooseApplicationToUpliftForm}
-import controllers.FormKeys.appNameField
-import controllers.UserRequest
+import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers._
+import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.{checkpages => controllercheckpages}
+import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.FormKeys.appNameField
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.ApplicationCreatedResponse
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.Error._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.apidefinitions.APISubscriptionStatus
@@ -44,7 +44,7 @@ import javax.inject.{Inject, Singleton}
 import scala.concurrent.Future.successful
 import scala.concurrent.{ExecutionContext, Future}
 import uk.gov.hmrc.modules.uplift.views.html.BeforeYouStartView
-import controllers.UserRequest
+import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.UserRequest
 import uk.gov.hmrc.modules.uplift.controllers.UpliftJourneySwitch
 
 @Singleton
@@ -187,8 +187,8 @@ class AddApplication @Inject() (
           case Valid =>
             addApplication(formThatPassesSimpleValidation).map(applicationCreatedResponse =>
               environment match {
-                case PRODUCTION => Redirect(controllers.checkpages.routes.ApplicationCheck.requestCheckPage(applicationCreatedResponse.id))
-                case SANDBOX    => Redirect(controllers.routes.Subscriptions.addAppSubscriptions(applicationCreatedResponse.id))
+                case PRODUCTION => Redirect(controllercheckpages.routes.ApplicationCheck.requestCheckPage(applicationCreatedResponse.id))
+                case SANDBOX    => Redirect(routes.SubscriptionsController.addAppSubscriptions(applicationCreatedResponse.id))
               }
             )
 
@@ -223,7 +223,7 @@ class AddApplication @Inject() (
             if(alreadySelectedEmailPreferences || missingSubscriptions.isEmpty) {
               Ok(addApplicationSubordinateSuccessView(application.name, applicationId))
             } else {
-              Redirect(controllers.profile.routes.EmailPreferencesController.selectApisFromSubscriptionsPage(applicationId))
+              Redirect(profile.routes.EmailPreferencesController.selectApisFromSubscriptionsPage(applicationId))
                 .flashing("missingSubscriptions" -> missingSubscriptions.mkString(","))
             }
           }

@@ -19,6 +19,7 @@
 @import views.html.include.DevMain2
 @import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.Application
 @import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.DeveloperSession
+@import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.checkpages.routes
 
 @this(devMain: DevMain2)
 
@@ -45,7 +46,7 @@
     <input type="hidden" name="email" value="@email">
     <div class="govuk-button-group">
       <button id="submit" class="govuk-button" type="submit">Delete team member</button>
-      <a class="govuk-link" href="@controllers.checkpages.routes.ApplicationCheck.team(app.id)">Cancel</a>
+      <a class="govuk-link" href="@routes.ApplicationCheck.team(app.id)">Cancel</a>
     </div>
   }
  }

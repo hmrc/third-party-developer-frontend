@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
-package controllers
+package uk.gov.hmrc.thirdpartydeveloperfrontend.controllers
 
-import controllers.FormKeys.termsOfUseAgreeKey
+import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.FormKeys.termsOfUseAgreeKey
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.CheckInformation
 import play.api.data.Form
 import play.api.data.Forms.{boolean, mapping}

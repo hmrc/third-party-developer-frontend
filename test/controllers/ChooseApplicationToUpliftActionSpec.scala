@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package controllers
+package uk.gov.hmrc.thirdpartydeveloperfrontend.controllers
 
 import builder.DeveloperBuilder
 import uk.gov.hmrc.thirdpartydeveloperfrontend.config.ErrorHandler
@@ -41,7 +41,7 @@ import scala.concurrent.Future
 import play.api.mvc.Result
 import uk.gov.hmrc.modules.uplift.services.mocks._
 import mocks.connector.ApmConnectorMockModule
-import controllers.addapplication.AddApplication
+import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.addapplication.AddApplication
 import builder._
 import uk.gov.hmrc.modules.uplift.views.html.BeforeYouStartView
 import uk.gov.hmrc.modules.uplift.controllers.UpliftJourneySwitch

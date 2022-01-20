@@ -19,7 +19,7 @@ package uk.gov.hmrc.modules.uplift.controllers
 import uk.gov.hmrc.thirdpartydeveloperfrontend.config.ApplicationConfig
 import uk.gov.hmrc.thirdpartydeveloperfrontend.config.ErrorHandler
 import uk.gov.hmrc.thirdpartydeveloperfrontend.connectors.ApmConnector
-import controllers.checkpages.{CanUseCheckActions, DummySubscriptionsForm}
+import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.checkpages.{CanUseCheckActions, DummySubscriptionsForm}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.apidefinitions.APISubscriptionStatus
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.ApplicationId
 import uk.gov.hmrc.modules.uplift.domain.models.{ApiSubscriptions, ResponsibleIndividual, SellResellOrDistribute}
@@ -31,14 +31,15 @@ import uk.gov.hmrc.thirdpartydeveloperfrontend.service.{ApplicationActionService
 import views.helper.IdFormatter
 import uk.gov.hmrc.modules.uplift.views.html._
 import uk.gov.hmrc.modules.uplift.services.GetProductionCredentialsFlowService
+import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.checkpages
 
 import javax.inject.{Inject, Singleton}
 import scala.concurrent.Future.successful
 import scala.concurrent.{ExecutionContext, Future}
-import controllers.ApplicationController
-import controllers.APISubscriptions
+import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.ApplicationController
+import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.APISubscriptions
 import play.api.data.Forms
-import controllers.FormKeys
+import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.FormKeys
 import uk.gov.hmrc.modules.uplift.services.UpliftJourneyService
 import uk.gov.hmrc.thirdpartydeveloperfrontend.config.UpliftJourneyConfig
 import uk.gov.hmrc.thirdpartydeveloperfrontend.config.{On, OnDemand}
@@ -62,8 +63,8 @@ object UpliftJourneyController {
 
   object ResponsibleIndividualForm {
     import uk.gov.hmrc.emailaddress.EmailAddress
-    import controllers.FormKeys._
-    import controllers.textValidator
+    import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.FormKeys._
+    import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.textValidator
 
     lazy val fullnameValidator = textValidator(responsibleIndividualFullnameRequiredKey, fullnameMaxLengthKey, 100)
 
@@ -130,7 +131,7 @@ class UpliftJourneyController @Inject() (val errorHandler: ErrorHandler,
     val success = (upliftedAppId: ApplicationId) => {
       upliftJourneySwitch.performSwitch(
             successful(Redirect(uk.gov.hmrc.modules.submissions.controllers.routes.ProdCredsChecklistController.productionCredentialsChecklistPage(upliftedAppId))),  // new uplift path
-            successful(Redirect(controllers.checkpages.routes.ApplicationCheck.requestCheckPage(upliftedAppId))                                       // existing uplift path
+            successful(Redirect(checkpages.routes.ApplicationCheck.requestCheckPage(upliftedAppId))                                       // existing uplift path
               .withSession(request.session - "subscriptions"))
       )
     }

@@ -16,7 +16,7 @@
 
 package uk.gov.hmrc.thirdpartydeveloperfrontend.config
 
-import controllers.BaseControllerSpec
+import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.BaseControllerSpec
 import play.api.Configuration
 
 class FraudPreventionConfigProviderSpec extends BaseControllerSpec {

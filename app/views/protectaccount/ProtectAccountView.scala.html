@@ -18,6 +18,7 @@
 @import views.html.include.DevMain2
 @import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.DeveloperSession
 @import uk.gov.hmrc.thirdpartydeveloperfrontend.config.ApplicationConfig
+@import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.profile.routes
 
 @this(devMain: DevMain2)
 
@@ -39,5 +40,5 @@
   <p class="govuk-body">You can get an access code on your smartphone or tablet with an authentication app, even with no mobile reception.</p>
   <h2 class="govuk-heading-m">Before you start</h2>
   <p class="govuk-body">You will need your smartphone or tablet to hand.</p>
-  <a id="submit" class="govuk-button" type="submit" href="@controllers.profile.routes.ProtectAccount.getQrCode()">Continue</a>
+  <a id="submit" class="govuk-button" type="submit" href="@routes.ProtectAccount.getQrCode()">Continue</a>
 }

@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
-package controllers
+package uk.gov.hmrc.thirdpartydeveloperfrontend.controllers
 
-import controllers.ErrorFormBuilder.GlobalError
+import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.ErrorFormBuilder.GlobalError
 import play.api.data.{Form, FormError, Forms}
 import utils.AsyncHmrcSpec
 

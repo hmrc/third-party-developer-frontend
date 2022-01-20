@@ -16,9 +16,9 @@
 
 package uk.gov.hmrc.modules.submissions.controllers
 
-import controllers.{BaseControllerSpec, SubscriptionTestHelperSugar}
+import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.{BaseControllerSpec, SubscriptionTestHelperSugar}
 import builder.{DeveloperBuilder, SampleApplication, SampleSession}
-import controllers.SubscriptionTestHelperSugar
+import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.SubscriptionTestHelperSugar
 import utils.{LocalUserIdTracker, WithCSRFAddToken}
 import mocks.service.ApplicationServiceMock
 import mocks.service.ApplicationActionServiceMock

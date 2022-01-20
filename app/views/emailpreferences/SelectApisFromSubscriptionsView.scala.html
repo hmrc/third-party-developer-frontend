@@ -21,6 +21,9 @@
 @import uk.gov.hmrc.thirdpartydeveloperfrontend.config.ApplicationConfig
 @import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.ApplicationId
 @import views.html.include.DevMain2
+@import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.profile.routes
+@import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.SelectApisFromSubscriptionsForm
+@import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.FormKeys
 
 @this(devMain: DevMain2)
 
@@ -45,7 +48,7 @@
       <div id="select-all-description" class="govuk-hint">
         Select all that apply.
       </div>
-      @helper.form(action = controllers.profile.routes.EmailPreferencesController.selectApisFromSubscriptionsAction(applicationId), 'class -> "form", 'id -> "emailPreferencesApisForm") {
+      @helper.form(action = routes.EmailPreferencesController.selectApisFromSubscriptionsAction(applicationId), 'class -> "form", 'id -> "emailPreferencesApisForm") {
         @helper.CSRF.formField
         <a name="error.selectedapis.nonselected.field"></a>
         @fieldError2(form.errors, "category")
@@ -66,7 +69,7 @@
     </fieldset>
   </div>
 
-  @helper.form(action = controllers.profile.routes.EmailPreferencesController.selectNoApisFromSubscriptionsAction(applicationId), 'class -> "form", 'id -> "selectNoApisFromSubscriptionsForm") {
+  @helper.form(action = routes.EmailPreferencesController.selectNoApisFromSubscriptionsAction(applicationId), 'class -> "form", 'id -> "selectNoApisFromSubscriptionsForm") {
     @helper.CSRF.formField
     <button id="noSelectAPIs" class="govuk-button govuk-button--secondary" type="submit">I don't want emails about these APIs</button>
   }

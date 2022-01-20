@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package controllers
+package uk.gov.hmrc.thirdpartydeveloperfrontend.controllers
 
 import play.api.data.{Form, FormError}
 
@@ -22,7 +22,7 @@ object ErrorFormBuilder {
 
   implicit class GlobalError[T](form: Form[T]) {
 
-    import controllers.FormKeys._
+    import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.FormKeys._
 
     //to test it
     def emailAddressAlreadyInUse = form.

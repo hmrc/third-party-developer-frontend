@@ -1,189 +1,189 @@
 # microservice specific routes
 
-GET         /registration                                                                                controllers.Registration.registration
-POST        /registration                                                                                controllers.Registration.register
-GET         /confirmation                                                                                controllers.Registration.confirmation
+GET         /registration                                                                                uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.Registration.registration
+POST        /registration                                                                                uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.Registration.register
+GET         /confirmation                                                                                uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.Registration.confirmation
 
-GET         /verification                                                                                controllers.Registration.verify(code: String)
-GET         /resend-verification                                                                         controllers.Registration.resendVerification
-GET         /resend-confirmation                                                                         controllers.Registration.resendConfirmation
+GET         /verification                                                                                uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.Registration.verify(code: String)
+GET         /resend-verification                                                                         uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.Registration.resendVerification
+GET         /resend-confirmation                                                                         uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.Registration.resendConfirmation
 
-GET         /login                                                                                       controllers.UserLoginAccount.login
-GET         /login/2sv-recommendation                                                                    controllers.UserLoginAccount.get2svRecommendationPage
-POST        /login                                                                                       controllers.UserLoginAccount.authenticate
-GET         /login/2SV-help                                                                              controllers.UserLoginAccount.get2SVHelpConfirmationPage
-POST        /login/2SV-help                                                                              controllers.UserLoginAccount.confirm2SVHelp
-GET         /login/2SV-help/complete                                                                     controllers.UserLoginAccount.get2SVHelpCompletionPage
-GET         /login-totp                                                                                  controllers.UserLoginAccount.enterTotp
-POST        /login-totp                                                                                  controllers.UserLoginAccount.authenticateTotp
-GET         /login/2SV-not-set                                                                           controllers.UserLoginAccount.get2SVNotSetPage
+GET         /login                                                                                       uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.UserLoginAccount.login
+GET         /login/2sv-recommendation                                                                    uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.UserLoginAccount.get2svRecommendationPage
+POST        /login                                                                                       uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.UserLoginAccount.authenticate
+GET         /login/2SV-help                                                                              uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.UserLoginAccount.get2SVHelpConfirmationPage
+POST        /login/2SV-help                                                                              uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.UserLoginAccount.confirm2SVHelp
+GET         /login/2SV-help/complete                                                                     uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.UserLoginAccount.get2SVHelpCompletionPage
+GET         /login-totp                                                                                  uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.UserLoginAccount.enterTotp
+POST        /login-totp                                                                                  uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.UserLoginAccount.authenticateTotp
+GET         /login/2SV-not-set                                                                           uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.UserLoginAccount.get2SVNotSetPage
 
-GET         /logout                                                                                      controllers.UserLogoutAccount.logout
+GET         /logout                                                                                      uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.UserLogoutAccount.logout
 
-GET         /logout/survey                                                                               controllers.UserLogoutAccount.logoutSurvey
-POST        /logout/survey                                                                               controllers.UserLogoutAccount.logoutSurveyAction
+GET         /logout/survey                                                                               uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.UserLogoutAccount.logoutSurvey
+POST        /logout/survey                                                                               uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.UserLogoutAccount.logoutSurveyAction
 
-GET         /support                                                                                     controllers.Support.raiseSupportEnquiry
-POST        /support                                                                                     controllers.Support.submitSupportEnquiry
-GET         /support/submitted                                                                           controllers.Support.thankyou
+GET         /support                                                                                     uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.Support.raiseSupportEnquiry
+POST        /support                                                                                     uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.Support.submitSupportEnquiry
+GET         /support/submitted                                                                           uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.Support.thankyou
 
-GET         /locked                                                                                      controllers.UserLoginAccount.accountLocked
+GET         /locked                                                                                      uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.UserLoginAccount.accountLocked
 
-GET         /forgot-password                                                                             controllers.Password.showForgotPassword
-POST        /forgot-password                                                                             controllers.Password.requestReset
+GET         /forgot-password                                                                             uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.Password.showForgotPassword
+POST        /forgot-password                                                                             uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.Password.requestReset
 
-GET         /reset-password-link                                                                         controllers.Password.validateReset(code: String)
+GET         /reset-password-link                                                                         uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.Password.validateReset(code: String)
 
-GET         /reset-password                                                                              controllers.Password.resetPasswordChange
-POST        /reset-password                                                                              controllers.Password.resetPassword
-GET         /reset-password/error                                                                        controllers.Password.resetPasswordError
+GET         /reset-password                                                                              uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.Password.resetPasswordChange
+POST        /reset-password                                                                              uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.Password.resetPassword
+GET         /reset-password/error                                                                        uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.Password.resetPasswordError
 
-GET         /applications                                                                                controllers.ManageApplications.manageApps
+GET         /applications                                                                                uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.ManageApplications.manageApps
 
-GET         /applications/using-privileged-application-credentials                                       controllers.addapplication.AddApplication.usingPrivilegedApplicationCredentialsPage()
-GET         /applications/access-token                                                                   controllers.addapplication.AddApplication.accessTokenSwitchPage()
+GET         /applications/using-privileged-application-credentials                                       uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.addapplication.AddApplication.usingPrivilegedApplicationCredentialsPage()
+GET         /applications/access-token                                                                   uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.addapplication.AddApplication.accessTokenSwitchPage()
 
-GET         /applications/add/production/10-days                                                         controllers.addapplication.AddApplication.tenDaysWarning
+GET         /applications/add/production/10-days                                                         uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.addapplication.AddApplication.tenDaysWarning
 
-GET         /applications/add/sandbox                                                                    controllers.addapplication.AddApplication.addApplicationSubordinate
-GET         /applications/add/production                                                                 controllers.addapplication.AddApplication.addApplicationPrincipal
-GET         /applications/add/switch                                                                     controllers.addapplication.AddApplication.addApplicationProductionSwitch
-GET         /applications/add/:id                                                                        controllers.addapplication.AddApplication.soleApplicationToUpliftAction(id: ApplicationId)
-POST        /applications/add/switch                                                                     controllers.addapplication.AddApplication.chooseApplicationToUpliftAction
+GET         /applications/add/sandbox                                                                    uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.addapplication.AddApplication.addApplicationSubordinate
+GET         /applications/add/production                                                                 uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.addapplication.AddApplication.addApplicationPrincipal
+GET         /applications/add/switch                                                                     uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.addapplication.AddApplication.addApplicationProductionSwitch
+GET         /applications/add/:id                                                                        uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.addapplication.AddApplication.soleApplicationToUpliftAction(id: ApplicationId)
+POST        /applications/add/switch                                                                     uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.addapplication.AddApplication.chooseApplicationToUpliftAction
 
 
-GET         /applications/add/:environment/name                                                          controllers.addapplication.AddApplication.addApplicationName(environment: Environment)
-POST        /applications/add/:environment/name                                                          controllers.addapplication.AddApplication.editApplicationNameAction(environment: Environment)
+GET         /applications/add/:environment/name                                                          uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.addapplication.AddApplication.addApplicationName(environment: Environment)
+POST        /applications/add/:environment/name                                                          uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.addapplication.AddApplication.editApplicationNameAction(environment: Environment)
 
-GET         /applications/:id/add/success                                                                controllers.addapplication.AddApplication.addApplicationSuccess(id: ApplicationId)
+GET         /applications/:id/add/success                                                                uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.addapplication.AddApplication.addApplicationSuccess(id: ApplicationId)
 
-GET         /applications/:id/team-members                                                               controllers.ManageTeam.manageTeam(id: ApplicationId, error: Option[String])
-GET         /applications/:id/team-members/add                                                           controllers.ManageTeam.addTeamMember(id: ApplicationId)
-POST        /applications/:id/team-members/add/:addTeamMemberPageMode                                    controllers.ManageTeam.addTeamMemberAction(id: ApplicationId, addTeamMemberPageMode: AddTeamMemberPageMode)
-GET         /applications/:id/team-members/:teamMemberHash/remove-confirmation                           controllers.ManageTeam.removeTeamMember(id: ApplicationId, teamMemberHash: String)
-POST        /applications/:id/team-members/remove                                                        controllers.ManageTeam.removeTeamMemberAction(id: ApplicationId)
+GET         /applications/:id/team-members                                                               uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.ManageTeam.manageTeam(id: ApplicationId, error: Option[String])
+GET         /applications/:id/team-members/add                                                           uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.ManageTeam.addTeamMember(id: ApplicationId)
+POST        /applications/:id/team-members/add/:addTeamMemberPageMode                                    uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.ManageTeam.addTeamMemberAction(id: ApplicationId, addTeamMemberPageMode: AddTeamMemberPageMode)
+GET         /applications/:id/team-members/:teamMemberHash/remove-confirmation                           uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.ManageTeam.removeTeamMember(id: ApplicationId, teamMemberHash: String)
+POST        /applications/:id/team-members/remove                                                        uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.ManageTeam.removeTeamMemberAction(id: ApplicationId)
 
-GET         /applications/:id/details                                                                    controllers.Details.details(id: ApplicationId)
+GET         /applications/:id/details                                                                    uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.Details.details(id: ApplicationId)
 
-GET         /applications/:id/details/change                                                             controllers.Details.changeDetails(id: ApplicationId)
-POST        /applications/:id/details/change                                                             controllers.Details.changeDetailsAction(id: ApplicationId)
+GET         /applications/:id/details/change                                                             uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.Details.changeDetails(id: ApplicationId)
+POST        /applications/:id/details/change                                                             uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.Details.changeDetailsAction(id: ApplicationId)
 
-GET         /applications/:id/details/terms-of-use                                                       controllers.TermsOfUse.termsOfUse(id: ApplicationId)
-POST        /applications/:id/details/terms-of-use                                                       controllers.TermsOfUse.agreeTermsOfUse(id: ApplicationId)
+GET         /applications/:id/details/terms-of-use                                                       uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.TermsOfUse.termsOfUse(id: ApplicationId)
+POST        /applications/:id/details/terms-of-use                                                       uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.TermsOfUse.agreeTermsOfUse(id: ApplicationId)
 
-GET         /applications/:id/redirect-uris                                                              controllers.Redirects.redirects(id: ApplicationId)
-GET         /applications/:id/redirect-uris/add                                                          controllers.Redirects.addRedirect(id: ApplicationId)
-POST        /applications/:id/redirect-uris/add                                                          controllers.Redirects.addRedirectAction(id: ApplicationId)
-POST        /applications/:id/redirect-uris/delete-confirmation                                          controllers.Redirects.deleteRedirect(id: ApplicationId)
-POST        /applications/:id/redirect-uris/delete                                                       controllers.Redirects.deleteRedirectAction(id: ApplicationId)
-POST        /applications/:id/redirect-uris/change                                                       controllers.Redirects.changeRedirect(id: ApplicationId)
-POST        /applications/:id/redirect-uris/change-confirmation                                          controllers.Redirects.changeRedirectAction(id: ApplicationId)
+GET         /applications/:id/redirect-uris                                                              uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.Redirects.redirects(id: ApplicationId)
+GET         /applications/:id/redirect-uris/add                                                          uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.Redirects.addRedirect(id: ApplicationId)
+POST        /applications/:id/redirect-uris/add                                                          uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.Redirects.addRedirectAction(id: ApplicationId)
+POST        /applications/:id/redirect-uris/delete-confirmation                                          uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.Redirects.deleteRedirect(id: ApplicationId)
+POST        /applications/:id/redirect-uris/delete                                                       uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.Redirects.deleteRedirectAction(id: ApplicationId)
+POST        /applications/:id/redirect-uris/change                                                       uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.Redirects.changeRedirect(id: ApplicationId)
+POST        /applications/:id/redirect-uris/change-confirmation                                          uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.Redirects.changeRedirectAction(id: ApplicationId)
 
-GET         /applications/:id/delete                                                                     controllers.DeleteApplication.deleteApplication(id: ApplicationId, error: Option[String])
-GET         /applications/:id/delete-principal-confirm                                                   controllers.DeleteApplication.confirmRequestDeletePrincipalApplication(id: ApplicationId, error: Option[String])
-POST        /applications/:id/delete-principal                                                           controllers.DeleteApplication.requestDeletePrincipalApplicationAction(id: ApplicationId)
-GET         /applications/:id/delete-subordinate-confirm                                                 controllers.DeleteApplication.deleteSubordinateApplicationConfirm(id: ApplicationId)
-POST        /applications/:id/delete-subordinate                                                         controllers.DeleteApplication.deleteSubordinateApplicationAction(id: ApplicationId)
+GET         /applications/:id/delete                                                                     uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.DeleteApplication.deleteApplication(id: ApplicationId, error: Option[String])
+GET         /applications/:id/delete-principal-confirm                                                   uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.DeleteApplication.confirmRequestDeletePrincipalApplication(id: ApplicationId, error: Option[String])
+POST        /applications/:id/delete-principal                                                           uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.DeleteApplication.requestDeletePrincipalApplicationAction(id: ApplicationId)
+GET         /applications/:id/delete-subordinate-confirm                                                 uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.DeleteApplication.deleteSubordinateApplicationConfirm(id: ApplicationId)
+POST        /applications/:id/delete-subordinate                                                         uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.DeleteApplication.deleteSubordinateApplicationAction(id: ApplicationId)
 
-GET         /applications/:id/ip-allowlist                                                               controllers.IpAllowListController.viewIpAllowlist(id: ApplicationId)
-GET         /applications/:id/ip-allowlist/allowed-ips                                                   controllers.IpAllowListController.allowedIps(id: ApplicationId)
-GET         /applications/:id/ip-allowlist/setup                                                         controllers.IpAllowListController.settingUpAllowlist(id: ApplicationId)
-GET         /applications/:id/ip-allowlist/change                                                        controllers.IpAllowListController.editIpAllowlist(id: ApplicationId)
-POST        /applications/:id/ip-allowlist/change                                                        controllers.IpAllowListController.editIpAllowlistAction(id: ApplicationId)
-GET         /applications/:id/ip-allowlist/add                                                           controllers.IpAllowListController.addCidrBlock(id: ApplicationId)
-POST        /applications/:id/ip-allowlist/add                                                           controllers.IpAllowListController.addCidrBlockAction(id: ApplicationId)
-GET         /applications/:id/ip-allowlist/remove                                                        controllers.IpAllowListController.removeCidrBlock(id: ApplicationId, cidrBlock: String)
-POST        /applications/:id/ip-allowlist/remove                                                        controllers.IpAllowListController.removeCidrBlockAction(id: ApplicationId, cidrBlock: String)
-GET         /applications/:id/ip-allowlist/activate                                                      controllers.IpAllowListController.reviewIpAllowlist(id: ApplicationId)
-POST        /applications/:id/ip-allowlist/activate                                                      controllers.IpAllowListController.activateIpAllowlist(id: ApplicationId)
-GET         /applications/:id/ip-allowlist/deactivate                                                    controllers.IpAllowListController.removeIpAllowlist(id: ApplicationId)
-POST        /applications/:id/ip-allowlist/deactivate                                                    controllers.IpAllowListController.removeIpAllowlistAction(id: ApplicationId)
+GET         /applications/:id/ip-allowlist                                                               uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.IpAllowListController.viewIpAllowlist(id: ApplicationId)
+GET         /applications/:id/ip-allowlist/allowed-ips                                                   uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.IpAllowListController.allowedIps(id: ApplicationId)
+GET         /applications/:id/ip-allowlist/setup                                                         uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.IpAllowListController.settingUpAllowlist(id: ApplicationId)
+GET         /applications/:id/ip-allowlist/change                                                        uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.IpAllowListController.editIpAllowlist(id: ApplicationId)
+POST        /applications/:id/ip-allowlist/change                                                        uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.IpAllowListController.editIpAllowlistAction(id: ApplicationId)
+GET         /applications/:id/ip-allowlist/add                                                           uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.IpAllowListController.addCidrBlock(id: ApplicationId)
+POST        /applications/:id/ip-allowlist/add                                                           uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.IpAllowListController.addCidrBlockAction(id: ApplicationId)
+GET         /applications/:id/ip-allowlist/remove                                                        uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.IpAllowListController.removeCidrBlock(id: ApplicationId, cidrBlock: String)
+POST        /applications/:id/ip-allowlist/remove                                                        uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.IpAllowListController.removeCidrBlockAction(id: ApplicationId, cidrBlock: String)
+GET         /applications/:id/ip-allowlist/activate                                                      uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.IpAllowListController.reviewIpAllowlist(id: ApplicationId)
+POST        /applications/:id/ip-allowlist/activate                                                      uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.IpAllowListController.activateIpAllowlist(id: ApplicationId)
+GET         /applications/:id/ip-allowlist/deactivate                                                    uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.IpAllowListController.removeIpAllowlist(id: ApplicationId)
+POST        /applications/:id/ip-allowlist/deactivate                                                    uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.IpAllowListController.removeIpAllowlistAction(id: ApplicationId)
 
-GET         /applications/:id/subscriptions                                                              controllers.Subscriptions.manageSubscriptions(id: ApplicationId)
+GET         /applications/:id/subscriptions                                                              uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.SubscriptionsController.manageSubscriptions(id: ApplicationId)
 
-POST        /applications/:id/change-subscription                                                        controllers.Subscriptions.changeApiSubscription(id: ApplicationId, context: ApiContext, version: ApiVersion, redirectTo: String)
+POST        /applications/:id/change-subscription                                                        uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.SubscriptionsController.changeApiSubscription(id: ApplicationId, context: ApiContext, version: ApiVersion, redirectTo: String)
 
-GET         /applications/:id/change-locked-subscription                                                 controllers.Subscriptions.changeLockedApiSubscription(id: ApplicationId, name: String, context: ApiContext, version: ApiVersion, redirectTo: String)
-POST        /applications/:id/change-locked-subscription                                                 controllers.Subscriptions.changeLockedApiSubscriptionAction(id: ApplicationId, name: String, context: ApiContext, version: ApiVersion, redirectTo: String)
+GET         /applications/:id/change-locked-subscription                                                 uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.SubscriptionsController.changeLockedApiSubscription(id: ApplicationId, name: String, context: ApiContext, version: ApiVersion, redirectTo: String)
+POST        /applications/:id/change-locked-subscription                                                 uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.SubscriptionsController.changeLockedApiSubscriptionAction(id: ApplicationId, name: String, context: ApiContext, version: ApiVersion, redirectTo: String)
 
-GET         /applications/:id/change-private-subscription                                                controllers.Subscriptions.changePrivateApiSubscription(id: ApplicationId, name: String, context: ApiContext, version: ApiVersion, redirectTo: String)
-POST        /applications/:id/change-private-subscription                                                controllers.Subscriptions.changePrivateApiSubscriptionAction(id: ApplicationId, name: String, context: ApiContext, version: ApiVersion, redirectTo: String)
+GET         /applications/:id/change-private-subscription                                                uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.SubscriptionsController.changePrivateApiSubscription(id: ApplicationId, name: String, context: ApiContext, version: ApiVersion, redirectTo: String)
+POST        /applications/:id/change-private-subscription                                                uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.SubscriptionsController.changePrivateApiSubscriptionAction(id: ApplicationId, name: String, context: ApiContext, version: ApiVersion, redirectTo: String)
 
-GET         /applications/:id/credentials                                                                controllers.Credentials.credentials(id: ApplicationId)
-GET         /applications/:id/client-id                                                                  controllers.Credentials.clientId(id: ApplicationId)
-GET         /applications/:id/client-secrets                                                             controllers.Credentials.clientSecrets(id: ApplicationId)
-GET         /applications/:id/server-token                                                               controllers.Credentials.serverToken(id: ApplicationId)
-GET         /applications/:id/client-secret/:clientSecretId/delete                                       controllers.Credentials.deleteClientSecret(id: ApplicationId, clientSecretId: String)
-POST        /applications/:id/client-secret/:clientSecretId/delete                                       controllers.Credentials.deleteClientSecretAction(id: ApplicationId, clientSecretId: String)
-POST        /applications/:id/client-secret-new                                                          controllers.Credentials.addClientSecret(id: ApplicationId)
+GET         /applications/:id/credentials                                                                uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.Credentials.credentials(id: ApplicationId)
+GET         /applications/:id/client-id                                                                  uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.Credentials.clientId(id: ApplicationId)
+GET         /applications/:id/client-secrets                                                             uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.Credentials.clientSecrets(id: ApplicationId)
+GET         /applications/:id/server-token                                                               uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.Credentials.serverToken(id: ApplicationId)
+GET         /applications/:id/client-secret/:clientSecretId/delete                                       uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.Credentials.deleteClientSecret(id: ApplicationId, clientSecretId: String)
+POST        /applications/:id/client-secret/:clientSecretId/delete                                       uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.Credentials.deleteClientSecretAction(id: ApplicationId, clientSecretId: String)
+POST        /applications/:id/client-secret-new                                                          uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.Credentials.addClientSecret(id: ApplicationId)
 
-GET         /applications/:id/request-check                                                              controllers.checkpages.ApplicationCheck.requestCheckPage(id: ApplicationId)
-POST        /applications/:id/request-check                                                              controllers.checkpages.ApplicationCheck.requestCheckAction(id: ApplicationId)
-GET         /applications/:id/request-check/submitted                                                    controllers.checkpages.ApplicationCheck.credentialsRequested(id: ApplicationId)
-GET         /applications/:id/request-check/appDetails                                                   controllers.checkpages.ApplicationCheck.unauthorisedAppDetails(id: ApplicationId)
+GET         /applications/:id/request-check                                                              uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.checkpages.ApplicationCheck.requestCheckPage(id: ApplicationId)
+POST        /applications/:id/request-check                                                              uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.checkpages.ApplicationCheck.requestCheckAction(id: ApplicationId)
+GET         /applications/:id/request-check/submitted                                                    uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.checkpages.ApplicationCheck.credentialsRequested(id: ApplicationId)
+GET         /applications/:id/request-check/appDetails                                                   uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.checkpages.ApplicationCheck.unauthorisedAppDetails(id: ApplicationId)
 
-GET         /applications/:id/request-check/name                                                         controllers.checkpages.ApplicationCheck.namePage(id: ApplicationId)
-POST        /applications/:id/request-check/name                                                         controllers.checkpages.ApplicationCheck.nameAction(id: ApplicationId)
-GET         /applications/:id/request-check/contact                                                      controllers.checkpages.ApplicationCheck.contactPage(id: ApplicationId)
-POST        /applications/:id/request-check/contact                                                      controllers.checkpages.ApplicationCheck.contactAction(id: ApplicationId)
-GET         /applications/:id/request-check/subscriptions                                                controllers.checkpages.ApplicationCheck.apiSubscriptionsPage(id: ApplicationId)
-POST        /applications/:id/request-check/subscriptions                                                controllers.checkpages.ApplicationCheck.apiSubscriptionsAction(id: ApplicationId)
-GET         /applications/:id/request-check/privacy-policy                                               controllers.checkpages.ApplicationCheck.privacyPolicyPage(id: ApplicationId)
-POST        /applications/:id/request-check/privacy-policy                                               controllers.checkpages.ApplicationCheck.privacyPolicyAction(id: ApplicationId)
-GET         /applications/:id/request-check/terms-and-conditions                                         controllers.checkpages.ApplicationCheck.termsAndConditionsPage(id: ApplicationId)
-POST        /applications/:id/request-check/terms-and-conditions                                         controllers.checkpages.ApplicationCheck.termsAndConditionsAction(id: ApplicationId)
-GET         /applications/:id/request-check/terms-of-use                                                 controllers.checkpages.ApplicationCheck.termsOfUsePage(id: ApplicationId)
-POST        /applications/:id/request-check/terms-of-use                                                 controllers.checkpages.ApplicationCheck.termsOfUseAction(id: ApplicationId)
-GET         /applications/:id/request-check/team                                                         controllers.checkpages.ApplicationCheck.team(id: ApplicationId)
-POST        /applications/:id/request-check/team                                                         controllers.checkpages.ApplicationCheck.teamAction(id: ApplicationId)
-GET         /applications/:id/request-check/team/add                                                     controllers.checkpages.ApplicationCheck.teamAddMember(id: ApplicationId)
-GET         /applications/:id/request-check/team/remove-confirmation/:teamMemberHash                     controllers.checkpages.ApplicationCheck.teamMemberRemoveConfirmation(id: ApplicationId, teamMemberHash: String)
-POST        /applications/:id/request-check/team/remove                                                  controllers.checkpages.ApplicationCheck.teamMemberRemoveAction(id: ApplicationId)
+GET         /applications/:id/request-check/name                                                         uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.checkpages.ApplicationCheck.namePage(id: ApplicationId)
+POST        /applications/:id/request-check/name                                                         uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.checkpages.ApplicationCheck.nameAction(id: ApplicationId)
+GET         /applications/:id/request-check/contact                                                      uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.checkpages.ApplicationCheck.contactPage(id: ApplicationId)
+POST        /applications/:id/request-check/contact                                                      uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.checkpages.ApplicationCheck.contactAction(id: ApplicationId)
+GET         /applications/:id/request-check/subscriptions                                                uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.checkpages.ApplicationCheck.apiSubscriptionsPage(id: ApplicationId)
+POST        /applications/:id/request-check/subscriptions                                                uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.checkpages.ApplicationCheck.apiSubscriptionsAction(id: ApplicationId)
+GET         /applications/:id/request-check/privacy-policy                                               uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.checkpages.ApplicationCheck.privacyPolicyPage(id: ApplicationId)
+POST        /applications/:id/request-check/privacy-policy                                               uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.checkpages.ApplicationCheck.privacyPolicyAction(id: ApplicationId)
+GET         /applications/:id/request-check/terms-and-conditions                                         uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.checkpages.ApplicationCheck.termsAndConditionsPage(id: ApplicationId)
+POST        /applications/:id/request-check/terms-and-conditions                                         uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.checkpages.ApplicationCheck.termsAndConditionsAction(id: ApplicationId)
+GET         /applications/:id/request-check/terms-of-use                                                 uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.checkpages.ApplicationCheck.termsOfUsePage(id: ApplicationId)
+POST        /applications/:id/request-check/terms-of-use                                                 uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.checkpages.ApplicationCheck.termsOfUseAction(id: ApplicationId)
+GET         /applications/:id/request-check/team                                                         uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.checkpages.ApplicationCheck.team(id: ApplicationId)
+POST        /applications/:id/request-check/team                                                         uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.checkpages.ApplicationCheck.teamAction(id: ApplicationId)
+GET         /applications/:id/request-check/team/add                                                     uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.checkpages.ApplicationCheck.teamAddMember(id: ApplicationId)
+GET         /applications/:id/request-check/team/remove-confirmation/:teamMemberHash                     uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.checkpages.ApplicationCheck.teamMemberRemoveConfirmation(id: ApplicationId, teamMemberHash: String)
+POST        /applications/:id/request-check/team/remove                                                  uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.checkpages.ApplicationCheck.teamMemberRemoveAction(id: ApplicationId)
 
-GET         /applications/:id/add/subscription-configuration-start                                       controllers.ManageSubscriptions.subscriptionConfigurationStart(id: ApplicationId)
-GET         /applications/:id/add/subscription-configuration/:pageNumber                                 controllers.ManageSubscriptions.subscriptionConfigurationPage(id: ApplicationId, pageNumber: Int)
-POST        /applications/:id/add/subscription-configuration/:pageNumber                                 controllers.ManageSubscriptions.subscriptionConfigurationPagePost(id: ApplicationId,pageNumber: Int)
-GET         /applications/:id/add/subscription-configuration-step/:pageNumber                            controllers.ManageSubscriptions.subscriptionConfigurationStepPage(id: ApplicationId, pageNumber: Int)
+GET         /applications/:id/add/subscription-configuration-start                                       uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.ManageSubscriptions.subscriptionConfigurationStart(id: ApplicationId)
+GET         /applications/:id/add/subscription-configuration/:pageNumber                                 uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.ManageSubscriptions.subscriptionConfigurationPage(id: ApplicationId, pageNumber: Int)
+POST        /applications/:id/add/subscription-configuration/:pageNumber                                 uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.ManageSubscriptions.subscriptionConfigurationPagePost(id: ApplicationId,pageNumber: Int)
+GET         /applications/:id/add/subscription-configuration-step/:pageNumber                            uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.ManageSubscriptions.subscriptionConfigurationStepPage(id: ApplicationId, pageNumber: Int)
 
-GET         /applications/:id/check-your-answers/name                                                    controllers.checkpages.CheckYourAnswers.namePage(id: ApplicationId)
-POST        /applications/:id/check-your-answers/name                                                    controllers.checkpages.CheckYourAnswers.nameAction(id: ApplicationId)
-GET         /applications/:id/check-your-answers/contact                                                 controllers.checkpages.CheckYourAnswers.contactPage(id: ApplicationId)
-POST        /applications/:id/check-your-answers/contact                                                 controllers.checkpages.CheckYourAnswers.contactAction(id: ApplicationId)
-GET         /applications/:id/check-your-answers/subscriptions                                           controllers.checkpages.CheckYourAnswers.apiSubscriptionsPage(id: ApplicationId)
-POST        /applications/:id/check-your-answers/subscriptions                                           controllers.checkpages.CheckYourAnswers.apiSubscriptionsAction(id: ApplicationId)
-GET         /applications/:id/check-your-answers/privacy-policy                                          controllers.checkpages.CheckYourAnswers.privacyPolicyPage(id: ApplicationId)
-POST        /applications/:id/check-your-answers/privacy-policy                                          controllers.checkpages.CheckYourAnswers.privacyPolicyAction(id: ApplicationId)
-GET         /applications/:id/check-your-answers/terms-and-conditions                                    controllers.checkpages.CheckYourAnswers.termsAndConditionsPage(id: ApplicationId)
-POST        /applications/:id/check-your-answers/terms-and-conditions                                    controllers.checkpages.CheckYourAnswers.termsAndConditionsAction(id: ApplicationId)
-GET         /applications/:id/check-your-answers/terms-of-use                                            controllers.checkpages.CheckYourAnswers.termsOfUsePage(id: ApplicationId)
-POST        /applications/:id/check-your-answers/terms-of-use                                            controllers.checkpages.CheckYourAnswers.termsOfUseAction(id: ApplicationId)
-GET         /applications/:id/check-your-answers/team                                                    controllers.checkpages.CheckYourAnswers.team(id: ApplicationId)
-POST        /applications/:id/check-your-answers/team                                                    controllers.checkpages.CheckYourAnswers.teamAction(id: ApplicationId)
-GET         /applications/:id/check-your-answers/team/add                                                controllers.checkpages.CheckYourAnswers.teamAddMember(id: ApplicationId)
-GET         /applications/:id/check-your-answers/team/remove-confirmation/:teamMemberHash                controllers.checkpages.CheckYourAnswers.teamMemberRemoveConfirmation(id: ApplicationId, teamMemberHash: String)
-POST        /applications/:id/check-your-answers/team/remove                                             controllers.checkpages.CheckYourAnswers.teamMemberRemoveAction(id: ApplicationId)
+GET         /applications/:id/check-your-answers/name                                                    uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.checkpages.CheckYourAnswers.namePage(id: ApplicationId)
+POST        /applications/:id/check-your-answers/name                                                    uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.checkpages.CheckYourAnswers.nameAction(id: ApplicationId)
+GET         /applications/:id/check-your-answers/contact                                                 uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.checkpages.CheckYourAnswers.contactPage(id: ApplicationId)
+POST        /applications/:id/check-your-answers/contact                                                 uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.checkpages.CheckYourAnswers.contactAction(id: ApplicationId)
+GET         /applications/:id/check-your-answers/subscriptions                                           uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.checkpages.CheckYourAnswers.apiSubscriptionsPage(id: ApplicationId)
+POST        /applications/:id/check-your-answers/subscriptions                                           uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.checkpages.CheckYourAnswers.apiSubscriptionsAction(id: ApplicationId)
+GET         /applications/:id/check-your-answers/privacy-policy                                          uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.checkpages.CheckYourAnswers.privacyPolicyPage(id: ApplicationId)
+POST        /applications/:id/check-your-answers/privacy-policy                                          uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.checkpages.CheckYourAnswers.privacyPolicyAction(id: ApplicationId)
+GET         /applications/:id/check-your-answers/terms-and-conditions                                    uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.checkpages.CheckYourAnswers.termsAndConditionsPage(id: ApplicationId)
+POST        /applications/:id/check-your-answers/terms-and-conditions                                    uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.checkpages.CheckYourAnswers.termsAndConditionsAction(id: ApplicationId)
+GET         /applications/:id/check-your-answers/terms-of-use                                            uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.checkpages.CheckYourAnswers.termsOfUsePage(id: ApplicationId)
+POST        /applications/:id/check-your-answers/terms-of-use                                            uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.checkpages.CheckYourAnswers.termsOfUseAction(id: ApplicationId)
+GET         /applications/:id/check-your-answers/team                                                    uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.checkpages.CheckYourAnswers.team(id: ApplicationId)
+POST        /applications/:id/check-your-answers/team                                                    uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.checkpages.CheckYourAnswers.teamAction(id: ApplicationId)
+GET         /applications/:id/check-your-answers/team/add                                                uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.checkpages.CheckYourAnswers.teamAddMember(id: ApplicationId)
+GET         /applications/:id/check-your-answers/team/remove-confirmation/:teamMemberHash                uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.checkpages.CheckYourAnswers.teamMemberRemoveConfirmation(id: ApplicationId, teamMemberHash: String)
+POST        /applications/:id/check-your-answers/team/remove                                             uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.checkpages.CheckYourAnswers.teamMemberRemoveAction(id: ApplicationId)
 
-GET         /applications/:id/check-your-answers                                                         controllers.checkpages.CheckYourAnswers.answersPage(id: ApplicationId)
-POST        /applications/:id/check-your-answers                                                         controllers.checkpages.CheckYourAnswers.answersPageAction(id: ApplicationId)
+GET         /applications/:id/check-your-answers                                                         uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.checkpages.CheckYourAnswers.answersPage(id: ApplicationId)
+POST        /applications/:id/check-your-answers                                                         uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.checkpages.CheckYourAnswers.answersPageAction(id: ApplicationId)
 
-GET         /applications/:id/api-metadata                                                               controllers.ManageSubscriptions.listApiSubscriptions(id: ApplicationId)
-GET         /applications/:id/api-metadata/:context/:version/:saveSubsFieldsPageMode                     controllers.ManageSubscriptions.editApiMetadataPage(id: ApplicationId, context: ApiContext, version: ApiVersion, saveSubsFieldsPageMode: SaveSubsFieldsPageMode)
-POST        /applications/:id/api-metadata/:context/:version/:saveSubsFieldsPageMode                     controllers.ManageSubscriptions.saveSubscriptionFields(id: ApplicationId, context: ApiContext, version: ApiVersion, saveSubsFieldsPageMode: SaveSubsFieldsPageMode)
-GET         /applications/:id/api-metadata/:context/:version/fields/:fieldName/:saveSubsFieldsPageMode   controllers.ManageSubscriptions.editApiMetadataFieldPage(id: ApplicationId, context: ApiContext, version: ApiVersion, fieldName: String, saveSubsFieldsPageMode: SaveSubsFieldsPageMode)
-POST        /applications/:id/api-metadata/:context/:version/fields/:fieldName/:saveSubsFieldsPageMode   controllers.ManageSubscriptions.saveApiMetadataFieldPage(id: ApplicationId, context: ApiContext, version: ApiVersion, fieldName: String, saveSubsFieldsPageMode: SaveSubsFieldsPageMode)
+GET         /applications/:id/api-metadata                                                               uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.ManageSubscriptions.listApiSubscriptions(id: ApplicationId)
+GET         /applications/:id/api-metadata/:context/:version/:saveSubsFieldsPageMode                     uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.ManageSubscriptions.editApiMetadataPage(id: ApplicationId, context: ApiContext, version: ApiVersion, saveSubsFieldsPageMode: SaveSubsFieldsPageMode)
+POST        /applications/:id/api-metadata/:context/:version/:saveSubsFieldsPageMode                     uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.ManageSubscriptions.saveSubscriptionFields(id: ApplicationId, context: ApiContext, version: ApiVersion, saveSubsFieldsPageMode: SaveSubsFieldsPageMode)
+GET         /applications/:id/api-metadata/:context/:version/fields/:fieldName/:saveSubsFieldsPageMode   uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.ManageSubscriptions.editApiMetadataFieldPage(id: ApplicationId, context: ApiContext, version: ApiVersion, fieldName: String, saveSubsFieldsPageMode: SaveSubsFieldsPageMode)
+POST        /applications/:id/api-metadata/:context/:version/fields/:fieldName/:saveSubsFieldsPageMode   uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.ManageSubscriptions.saveApiMetadataFieldPage(id: ApplicationId, context: ApiContext, version: ApiVersion, fieldName: String, saveSubsFieldsPageMode: SaveSubsFieldsPageMode)
 
-GET         /applications/:id/push-secrets                                                               controllers.PushPullNotifications.showPushSecrets(id: ApplicationId)
+GET         /applications/:id/push-secrets                                                               uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.PushPullNotifications.showPushSecrets(id: ApplicationId)
 
-GET         /applications/:id/add/subscriptions                                                          controllers.Subscriptions.addAppSubscriptions(id: ApplicationId)
+GET         /applications/:id/add/subscriptions                                                          uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.SubscriptionsController.addAppSubscriptions(id: ApplicationId)
 
-GET         /application-verification                                                                    controllers.ApplicationVerification.verifyUplift(code: String)
-GET         /user-navlinks                                                                               controllers.Navigation.navLinks
+GET         /application-verification                                                                    uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.ApplicationVerification.verifyUplift(code: String)
+GET         /user-navlinks                                                                               uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.Navigation.navLinks
 
-GET         /partials/terms-of-use                                                                       controllers.TermsOfUse.termsOfUsePartial
+GET         /partials/terms-of-use                                                                       uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.TermsOfUse.termsOfUsePartial
 
 GET         /assets/*file                                                                                @controllers.Assets.versioned(path="/public", file: Asset)
 
-GET         /keep-alive                                                                                  controllers.SessionController.keepAlive()
+GET         /keep-alive                                                                                  uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.SessionController.keepAlive()
 
 GET         /applications/:id/confirm-subscriptions                                                      uk.gov.hmrc.modules.uplift.controllers.UpliftJourneyController.confirmApiSubscriptionsPage(id: ApplicationId)
 POST        /applications/:id/confirm-subscriptions                                                      uk.gov.hmrc.modules.uplift.controllers.UpliftJourneyController.confirmApiSubscriptionsAction(id: ApplicationId)

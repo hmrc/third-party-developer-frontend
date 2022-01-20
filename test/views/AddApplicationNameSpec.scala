@@ -16,7 +16,7 @@
 
 package views
 
-import controllers.AddApplicationNameForm
+import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.AddApplicationNameForm
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.{ApplicationId, Environment}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.LoggedInState
 import org.jsoup.Jsoup
@@ -26,7 +26,7 @@ import utils.ViewHelpers._
 import utils.WithCSRFAddToken
 import views.helper.CommonViewSpec
 import views.html.AddApplicationNameView
-import controllers.AddApplicationNameForm
+import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.AddApplicationNameForm
 
 class AddApplicationNameSpec extends CommonViewSpec with WithCSRFAddToken {
 

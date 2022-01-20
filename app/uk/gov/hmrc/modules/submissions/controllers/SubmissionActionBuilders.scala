@@ -16,10 +16,10 @@
 
 package uk.gov.hmrc.modules.submissions.controllers
 
-import controllers.UserRequest
-import controllers.BaseController
-import controllers.ApplicationActionBuilders
-import controllers.HasApplication
+import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.UserRequest
+import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.BaseController
+import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.ApplicationActionBuilders
+import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.HasApplication
 import uk.gov.hmrc.modules.submissions.domain.models._
 import scala.concurrent.ExecutionContext
 import play.api.mvc.ActionRefiner
@@ -32,7 +32,7 @@ import cats.instances.future.catsStdInstancesForFuture
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.Application
 import uk.gov.hmrc.modules.submissions.services.SubmissionService
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.ApplicationId
-import controllers.ApplicationRequest
+import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.ApplicationRequest
 import scala.concurrent.Future.successful
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.State
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.CollaboratorRole
