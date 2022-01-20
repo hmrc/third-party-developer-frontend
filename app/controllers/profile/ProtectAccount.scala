@@ -16,7 +16,8 @@
 
 package controllers.profile
 
-import config.{ApplicationConfig, ErrorHandler}
+import uk.gov.hmrc.thirdpartydeveloperfrontend.config.ApplicationConfig
+import uk.gov.hmrc.thirdpartydeveloperfrontend.config.ErrorHandler
 import connectors.ThirdPartyDeveloperConnector
 import domain.models.connectors.UpdateLoggedInStateRequest
 import domain.models.developers.LoggedInState

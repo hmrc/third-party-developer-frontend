@@ -21,7 +21,7 @@ import java.util.UUID
 import java.util.UUID.randomUUID
 
 import builder._
-import config.ApplicationConfig
+import uk.gov.hmrc.thirdpartydeveloperfrontend.config.ApplicationConfig
 import connectors._
 import domain._
 import domain.models.apidefinitions._

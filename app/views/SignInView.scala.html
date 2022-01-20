@@ -15,10 +15,11 @@
  *@
 
 @import include._
+@import uk.gov.hmrc.thirdpartydeveloperfrontend.config.ApplicationConfig
 
 @this(devMain: DevMain2)
 
-@(heading: String, form: Form[controllers.LoginForm], endOfJourney: Boolean = false)(implicit request: play.api.mvc.Request[Any], messagesProvider: MessagesProvider, appConfig: config.ApplicationConfig)
+@(heading: String, form: Form[controllers.LoginForm], endOfJourney: Boolean = false)(implicit request: play.api.mvc.Request[Any], messagesProvider: MessagesProvider, appConfig: ApplicationConfig)
 
 @titleError = { @if(form.errors.nonEmpty) {Error: } else {}}
 

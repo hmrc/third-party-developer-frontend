@@ -20,7 +20,7 @@ import java.util.concurrent.TimeUnit
 
 import akka.actor.ActorSystem
 import akka.pattern.FutureTimeoutSupport
-import config.ApplicationConfig
+import uk.gov.hmrc.thirdpartydeveloperfrontend.config.ApplicationConfig
 import javax.inject.Inject
 import uk.gov.hmrc.http.BadRequestException
 

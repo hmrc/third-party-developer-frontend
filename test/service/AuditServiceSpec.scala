@@ -16,7 +16,7 @@
 
 package service
 
-import config.ApplicationConfig
+import uk.gov.hmrc.thirdpartydeveloperfrontend.config.ApplicationConfig
 import domain.models.developers.LoggedInState
 import org.mockito.ArgumentMatcher
 import service.AuditAction.{ApplicationUpliftRequestDeniedDueToInvalidCredentials, PasswordChangeFailedDueToInvalidCredentials}

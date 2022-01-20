@@ -16,7 +16,7 @@
 
 package views.helper
 
-import config.ApplicationConfig
+import uk.gov.hmrc.thirdpartydeveloperfrontend.config.ApplicationConfig
 import javax.inject.{Inject, Singleton}
 
 @Singleton

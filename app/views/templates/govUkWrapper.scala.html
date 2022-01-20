@@ -26,16 +26,15 @@
 @import uk.gov.hmrc.govukfrontend.views.html.components._
 @import uk.gov.hmrc.hmrcfrontend.views.html.helpers.HmrcReportTechnicalIssueHelper
 @import domain.models.views.NavLink
-@import config.ApplicationConfig
+@import uk.gov.hmrc.thirdpartydeveloperfrontend.config.ApplicationConfig
 @import templates._
 @import views.templates._
-
 
 @this(govukTemplate: GovukTemplate,
   siteHeader: siteHeader,
   siteFooter: siteFooter,
   footerLinks: FooterLinks,
-  applicationConfig: config.ApplicationConfig,
+  applicationConfig: ApplicationConfig,
   hmrcTrackingConsentSnippet: HmrcTrackingConsentSnippet,
   feedbackBannerView: FeedbackBannerView
 )
@@ -57,7 +56,7 @@
   bodyEndBlock: Option[Html] = None,
   feedbackBanner: Option[FeedbackBanner] = None,
   fullWidth: Boolean = false
-)(contentBlock: Html)(implicit applicationConfig: config.ApplicationConfig, request: Request[_], messages: Messages)
+)(contentBlock: Html)(implicit applicationConfig: ApplicationConfig, request: Request[_], messages: Messages)
 
 @head = {
   <link href='@routes.Assets.versioned("stylesheets/main.css")' media="screen" rel="stylesheet" type="text/css" />

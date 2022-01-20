@@ -16,7 +16,7 @@
 
 package connectors
 
-import config.ApplicationConfig
+import uk.gov.hmrc.thirdpartydeveloperfrontend.config.ApplicationConfig
 import domain._
 import domain.models.connectors._
 import javax.inject.{Inject, Singleton}

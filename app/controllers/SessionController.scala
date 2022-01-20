@@ -16,7 +16,8 @@
 
 package controllers
 
-import config.{ApplicationConfig, ErrorHandler}
+import uk.gov.hmrc.thirdpartydeveloperfrontend.config.ApplicationConfig
+import uk.gov.hmrc.thirdpartydeveloperfrontend.config.ErrorHandler
 import connectors.ThirdPartyDeveloperConnector
 import javax.inject.{Inject, Singleton}
 import play.api.libs.crypto.CookieSigner

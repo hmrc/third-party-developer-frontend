@@ -18,10 +18,11 @@
 @import domain.models.developers.DeveloperSession
 @import domain.models.applications.Environment
 @import views.html.include.DevMain2
+@import uk.gov.hmrc.thirdpartydeveloperfrontend.config.ApplicationConfig
 
 @this(devMain: DevMain2)
 
-@()(implicit request: play.api.mvc.Request[Any], loggedIn: DeveloperSession, messages: Messages, appConfig: config.ApplicationConfig)
+@()(implicit request: play.api.mvc.Request[Any], loggedIn: DeveloperSession, messages: Messages, appConfig: ApplicationConfig)
 
 @pageHeading = @{s"We will check your application"}
 

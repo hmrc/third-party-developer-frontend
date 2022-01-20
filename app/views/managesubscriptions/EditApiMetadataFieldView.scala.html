@@ -22,6 +22,7 @@
 @import domain.models.developers.DeveloperSession
 @import domain.models.controllers.SaveSubsFieldsPageMode
 @import views.helper.IdFormatter
+@import uk.gov.hmrc.thirdpartydeveloperfrontend.config.ApplicationConfig
 
 @this(devMain: DevMain)
 
@@ -33,7 +34,7 @@
     implicit request: play.api.mvc.Request[Any],
     loggedIn: DeveloperSession,
     messages: Messages,
-    applicationConfig: config.ApplicationConfig
+    applicationConfig: ApplicationConfig
 )
 
 @pageHeading = @{ s"${viewModel.apiName} ${viewModel.apiVersion.value} ${viewModel.displayedStatus}" }

@@ -18,7 +18,7 @@ package service
 
 import java.time.Period
 import builder._
-import config.ApplicationConfig
+import uk.gov.hmrc.thirdpartydeveloperfrontend.config.ApplicationConfig
 import connectors._
 import domain.models.apidefinitions._
 import domain.models.applications._

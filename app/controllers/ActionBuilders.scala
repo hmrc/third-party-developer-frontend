@@ -16,7 +16,8 @@
 
 package controllers
 
-import config.{ApplicationConfig, ErrorHandler}
+import uk.gov.hmrc.thirdpartydeveloperfrontend.config.ApplicationConfig
+import uk.gov.hmrc.thirdpartydeveloperfrontend.config.ErrorHandler
 import domain.models.applications.{ApplicationId, Capability, Permission, State}
 import play.api.mvc._
 import play.api.mvc.Results._
@@ -27,7 +28,6 @@ import scala.concurrent.{ExecutionContext, Future}
 import service.ApplicationActionService
 
 trait BaseActionBuilders {
-
   val errorHandler: ErrorHandler
 }
 

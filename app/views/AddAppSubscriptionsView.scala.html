@@ -27,6 +27,7 @@
 @import domain.models.apidefinitions.ApiContext
 @import domain.models.subscriptions.ApiData
 @import views.helper.EnvironmentNameService
+@import uk.gov.hmrc.thirdpartydeveloperfrontend.config.ApplicationConfig
 
 @this(devMain: DevMain, subscriptionGroups: SubscriptionGroups)
 
@@ -42,7 +43,7 @@
     implicit request: play.api.mvc.Request[Any],
     loggedIn: DeveloperSession, 
     messages: Messages, 
-    applicationConfig: config.ApplicationConfig, 
+    applicationConfig: ApplicationConfig, 
     environmentNameService: EnvironmentNameService
 )
 

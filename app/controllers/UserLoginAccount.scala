@@ -16,7 +16,8 @@
 
 package controllers
 
-import config.{ApplicationConfig, ErrorHandler}
+import uk.gov.hmrc.thirdpartydeveloperfrontend.config.ApplicationConfig
+import uk.gov.hmrc.thirdpartydeveloperfrontend.config.ErrorHandler
 import domain._
 import domain.models.connectors.UserAuthenticationResponse
 import domain.models.developers.DeveloperSession

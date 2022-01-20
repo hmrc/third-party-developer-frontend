@@ -16,7 +16,8 @@
 
 package controllers
 
-import config.{ApplicationConfig, ErrorHandler}
+import uk.gov.hmrc.thirdpartydeveloperfrontend.config.ApplicationConfig
+import uk.gov.hmrc.thirdpartydeveloperfrontend.config.ErrorHandler
 import domain.models.developers.DeveloperSession
 import javax.inject.{Inject, Singleton}
 import play.api.data.Form

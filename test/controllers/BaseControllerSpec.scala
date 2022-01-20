@@ -19,7 +19,8 @@ package controllers
 import java.time.Period
 
 import akka.stream.Materializer
-import config.{ApplicationConfig, FraudPreventionConfig}
+import uk.gov.hmrc.thirdpartydeveloperfrontend.config.ApplicationConfig
+import uk.gov.hmrc.thirdpartydeveloperfrontend.config.FraudPreventionConfig
 import mocks.service.ErrorHandlerMock
 import org.scalatestplus.play.guice.GuiceOneAppPerSuite
 import play.api.Application

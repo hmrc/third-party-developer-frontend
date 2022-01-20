@@ -43,7 +43,7 @@ import scala.concurrent.Future
 import scala.concurrent.Future.successful
 import utils._
 import builder._
-import config.FraudPreventionConfig
+import uk.gov.hmrc.thirdpartydeveloperfrontend.config.FraudPreventionConfig
 
 
 

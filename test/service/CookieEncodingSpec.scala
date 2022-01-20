@@ -16,7 +16,7 @@
 
 package service
 
-import config.ApplicationConfig
+import uk.gov.hmrc.thirdpartydeveloperfrontend.config.ApplicationConfig
 import connectors.{ConnectorMetrics, NoopConnectorMetrics}
 import org.scalatestplus.play.guice.GuiceOneAppPerSuite
 import play.api.{Application, Mode}

@@ -1,7 +1,7 @@
 package repositories
 
 import akka.stream.Materializer
-import config.ApplicationConfig
+import uk.gov.hmrc.thirdpartydeveloperfrontend.config.ApplicationConfig
 import domain.models.connectors.ApiType.REST_API
 import domain.models.connectors.{CombinedApi, CombinedApiCategory}
 import domain.models.emailpreferences.EmailTopic

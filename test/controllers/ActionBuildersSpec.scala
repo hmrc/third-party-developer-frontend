@@ -16,7 +16,8 @@
 
 package controllers
 
-import config.{ApplicationConfig, ErrorHandler}
+import uk.gov.hmrc.thirdpartydeveloperfrontend.config.ApplicationConfig
+import uk.gov.hmrc.thirdpartydeveloperfrontend.config.ErrorHandler
 import domain.models.apidefinitions.{ApiContext, ApiVersion}
 import domain.models.developers.DeveloperSession
 import helpers.LoggedInRequestTestHelper

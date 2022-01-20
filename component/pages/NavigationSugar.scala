@@ -16,7 +16,7 @@
 
 package pages
 
-import config.ApplicationConfig
+import uk.gov.hmrc.thirdpartydeveloperfrontend.config.ApplicationConfig
 import connectors.{EncryptedJson, LocalCrypto, PayloadEncryption}
 import org.openqa.selenium.WebDriver
 import org.scalatest.concurrent.Eventually

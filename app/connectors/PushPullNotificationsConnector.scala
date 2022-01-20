@@ -18,7 +18,7 @@ package connectors
 
 import akka.actor.ActorSystem
 import akka.pattern.FutureTimeoutSupport
-import config.ApplicationConfig
+import uk.gov.hmrc.thirdpartydeveloperfrontend.config.ApplicationConfig
 import connectors.PushPullNotificationsConnector.readsPushSecret
 import domain.models.applications.{ClientId, Environment}
 import helpers.Retries

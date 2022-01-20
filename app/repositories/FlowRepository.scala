@@ -17,7 +17,7 @@
 package repositories
 
 import akka.stream.Materializer
-import config.ApplicationConfig
+import uk.gov.hmrc.thirdpartydeveloperfrontend.config.ApplicationConfig
 import domain.models.flows.{Flow, FlowType}
 import javax.inject.{Inject, Singleton}
 import play.api.libs.json._

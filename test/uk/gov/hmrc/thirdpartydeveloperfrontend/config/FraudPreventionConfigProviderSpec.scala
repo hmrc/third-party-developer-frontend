@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package config
+package uk.gov.hmrc.thirdpartydeveloperfrontend.config
 
 import controllers.BaseControllerSpec
 import play.api.Configuration

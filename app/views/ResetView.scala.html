@@ -15,11 +15,12 @@
  *@
 
 @import include._
+@import uk.gov.hmrc.thirdpartydeveloperfrontend.config.ApplicationConfig
 
 @this(devMain: DevMain)
 
 @(form: Form[controllers.PasswordResetForm])(implicit request: play.api.mvc.Request[Any],
-        messages: Messages, applicationConfig: config.ApplicationConfig)
+        messages: Messages, applicationConfig: ApplicationConfig)
 
 @titleError = { @if(form.errors.nonEmpty) {Error: } else {}}
 

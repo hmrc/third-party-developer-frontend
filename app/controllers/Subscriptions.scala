@@ -16,7 +16,9 @@
 
 package controllers
 
-import config.{ApplicationConfig, ErrorHandler, FraudPreventionConfig}
+import uk.gov.hmrc.thirdpartydeveloperfrontend.config.ApplicationConfig
+import uk.gov.hmrc.thirdpartydeveloperfrontend.config.ErrorHandler
+import uk.gov.hmrc.thirdpartydeveloperfrontend.config.FraudPreventionConfig
 import connectors.ThirdPartyDeveloperConnector
 import controllers.fraudprevention.FraudPreventionNavLinkHelper
 import domain.models.apidefinitions.{ApiContext, ApiVersion}

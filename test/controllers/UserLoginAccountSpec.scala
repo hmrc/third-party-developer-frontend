@@ -19,7 +19,7 @@ package controllers
 import java.util.UUID
 
 import builder.DeveloperBuilder
-import config.ErrorHandler
+import uk.gov.hmrc.thirdpartydeveloperfrontend.config.ErrorHandler
 import domain._
 import domain.models.connectors.{TicketCreated, UserAuthenticationResponse}
 import domain.models.developers.{DeveloperSession, LoggedInState, Session}

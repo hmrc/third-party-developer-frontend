@@ -17,7 +17,7 @@
 package controllers
 
 import builder.DeveloperBuilder
-import config.ErrorHandler
+import uk.gov.hmrc.thirdpartydeveloperfrontend.config.ErrorHandler
 import domain.models.applications._
 import mocks.service._
 import play.api.mvc.AnyContentAsEmpty
@@ -35,11 +35,9 @@ import scala.concurrent.ExecutionContext.Implicits.global
 import utils.LocalUserIdTracker
 import controllers.addapplication.AddApplication
 import builder._
-import config.UpliftJourneyConfig
-import config.On
-import config.OnDemand
+import uk.gov.hmrc.thirdpartydeveloperfrontend.config.UpliftJourneyConfig
+import uk.gov.hmrc.thirdpartydeveloperfrontend.config.{On, OnDemand, Off}
 import play.api.mvc.Headers
-import config.Off
 import domain.models.controllers.ApplicationSummary
 import uk.gov.hmrc.modules.uplift.views.html.BeforeYouStartView
 import uk.gov.hmrc.modules.uplift.services.GetProductionCredentialsFlowService

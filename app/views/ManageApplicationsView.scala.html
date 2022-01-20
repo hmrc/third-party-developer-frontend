@@ -22,10 +22,11 @@
 @import domain.models.controllers.{ManageApplicationsViewModel, ApplicationSummary}
 @import domain.models.controllers.LeftHandNavFlags
 @import uk.gov.hmrc.urls.Link
+@import uk.gov.hmrc.thirdpartydeveloperfrontend.config.ApplicationConfig
 
 @this(devMain: DevMain2, leftHandNav: LeftHandNav)
 
-@(model: ManageApplicationsViewModel)(implicit request: play.api.mvc.Request[Any], loggedIn: DeveloperSession, messagesProvider: MessagesProvider, appConfig: config.ApplicationConfig, navSection: String = "manage-applications", environmentNameService: EnvironmentNameService)
+@(model: ManageApplicationsViewModel)(implicit request: play.api.mvc.Request[Any], loggedIn: DeveloperSession, messagesProvider: MessagesProvider, appConfig: ApplicationConfig, navSection: String = "manage-applications", environmentNameService: EnvironmentNameService)
 
 @principalWording = @{appConfig.nameOfPrincipalEnvironment.toLowerCase}
 @subordinateWording = @{appConfig.nameOfSubordinateEnvironment.toLowerCase}

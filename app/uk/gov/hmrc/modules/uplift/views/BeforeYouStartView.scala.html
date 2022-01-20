@@ -14,7 +14,7 @@
  * limitations under the License.
  *@
 
-@import config.ApplicationConfig
+@import uk.gov.hmrc.thirdpartydeveloperfrontend.config.ApplicationConfig
 @import domain.models.developers.DeveloperSession
 @import include._
 @import domain.models.controllers.Crumb
@@ -26,7 +26,7 @@
 
 @this(devMain: DevMain2)
 
-@(applicationId: ApplicationId)(implicit request: play.api.mvc.Request[Any], loggedIn: DeveloperSession, messagesProvider: MessagesProvider, appConfig: config.ApplicationConfig)
+@(applicationId: ApplicationId)(implicit request: play.api.mvc.Request[Any], loggedIn: DeveloperSession, messagesProvider: MessagesProvider, appConfig: ApplicationConfig)
 
 @title = @{ "Before you start" }
 

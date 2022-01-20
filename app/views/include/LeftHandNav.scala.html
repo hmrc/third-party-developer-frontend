@@ -14,6 +14,7 @@
  * limitations under the License.
  *@
 
+@import uk.gov.hmrc.thirdpartydeveloperfrontend.config.ApplicationConfig
 @import domain.models.controllers.ApplicationViewModel
 @import domain.models.controllers.FraudPreventionNavLinkViewModel
 @import domain.models.controllers.LeftHandNavFlags
@@ -23,7 +24,7 @@
 
 @this()
 
-@(application: Option[ApplicationViewModel] = None, navSection: Option[String] = None, flags: Map[String, Boolean] = Map.empty, fraudPreventionModel : Option[FraudPreventionNavLinkViewModel] = None)(implicit request: play.api.mvc.Request[Any], loggedIn: DeveloperSession, appConfig: config.ApplicationConfig)
+@(application: Option[ApplicationViewModel] = None, navSection: Option[String] = None, flags: Map[String, Boolean] = Map.empty, fraudPreventionModel : Option[FraudPreventionNavLinkViewModel] = None)(implicit request: play.api.mvc.Request[Any], loggedIn: DeveloperSession, appConfig: ApplicationConfig)
 
 @theSandbox = @{"the sandbox"}
 @subordinateWording = @{ if(appConfig.nameOfSubordinateEnvironment == "Sandbox") {theSandbox} else {appConfig.nameOfSubordinateEnvironment}}

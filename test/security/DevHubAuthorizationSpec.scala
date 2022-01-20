@@ -17,7 +17,8 @@
 package security
 
 import cats.implicits._
-import config.{ApplicationConfig, ErrorHandler}
+import uk.gov.hmrc.thirdpartydeveloperfrontend.config.ApplicationConfig
+import uk.gov.hmrc.thirdpartydeveloperfrontend.config.ErrorHandler
 import controllers.{routes, BaseController, BaseControllerSpec}
 import domain.models.developers.{DeveloperSession, LoggedInState}
 import play.api.libs.crypto.CookieSigner

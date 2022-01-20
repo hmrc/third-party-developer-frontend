@@ -18,7 +18,7 @@ package connectors
 
 import java.util.UUID
 
-import config.ApplicationConfig
+import uk.gov.hmrc.thirdpartydeveloperfrontend.config.ApplicationConfig
 import domain.models.apidefinitions.{ApiContext, ApiVersion}
 import domain.models.applications.{ClientId, Environment}
 import helpers.FutureTimeoutSupportImpl

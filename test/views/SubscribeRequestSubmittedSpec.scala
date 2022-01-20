@@ -16,7 +16,7 @@
 
 package views
 
-import config.ApplicationConfig
+import uk.gov.hmrc.thirdpartydeveloperfrontend.config.ApplicationConfig
 import domain.models.apidefinitions.ApiVersion
 import domain.models.applications._
 import domain.models.developers.LoggedInState

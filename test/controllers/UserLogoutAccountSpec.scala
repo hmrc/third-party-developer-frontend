@@ -31,6 +31,7 @@ import uk.gov.hmrc.play.audit.http.connector.AuditResult.Success
 import utils.WithCSRFAddToken
 import utils.WithLoggedInSession._
 import views.html.{LogoutConfirmationView, SignoutSurveyView}
+import uk.gov.hmrc.thirdpartydeveloperfrontend.config.ErrorHandler
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
@@ -52,7 +53,7 @@ class UserLogoutAccountSpec extends BaseControllerSpec with WithCSRFAddToken wit
       mock[DeskproService],
       sessionServiceMock,
       mock[ApplicationService],
-      mock[config.ErrorHandler],
+      mock[ErrorHandler],
       mcc,
       cookieSigner,
       signoutSurveyView,

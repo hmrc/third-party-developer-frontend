@@ -14,7 +14,8 @@
  * limitations under the License.
  */
 
-package config
+package uk.gov.hmrc.thirdpartydeveloperfrontend.config
+
 
 import uk.gov.hmrc.play.bootstrap.config.ServicesConfig
 import connectors.ApmConnector

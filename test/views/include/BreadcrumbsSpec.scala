@@ -17,7 +17,7 @@
 package views.include
 
 import java.time.Period
-import config.ApplicationConfig
+import uk.gov.hmrc.thirdpartydeveloperfrontend.config.ApplicationConfig
 import domain.models.applications.{Application, ApplicationId, ClientId, Environment}
 import domain.models.controllers.Crumb
 import org.jsoup.Jsoup

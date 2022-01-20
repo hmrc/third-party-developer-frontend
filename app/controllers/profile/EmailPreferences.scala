@@ -16,7 +16,8 @@
 
 package controllers.profile
 
-import config.{ApplicationConfig, ErrorHandler}
+import uk.gov.hmrc.thirdpartydeveloperfrontend.config.ApplicationConfig
+import uk.gov.hmrc.thirdpartydeveloperfrontend.config.ErrorHandler
 import controllers._
 import domain.models.applications.ApplicationId
 import domain.models.connectors.CombinedApi

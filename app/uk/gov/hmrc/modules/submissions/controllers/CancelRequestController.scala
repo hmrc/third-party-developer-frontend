@@ -19,7 +19,7 @@ package uk.gov.hmrc.modules.submissions.controllers
 import javax.inject.{Inject, Singleton}
 import play.api.mvc.MessagesControllerComponents
 import scala.concurrent.ExecutionContext
-import config.ApplicationConfig
+import uk.gov.hmrc.thirdpartydeveloperfrontend.config.ApplicationConfig
 import controllers.ApplicationController
 import domain.models.applications.ApplicationId
 import play.api.data.Form
@@ -31,7 +31,7 @@ import service.SessionService
 import service.ApplicationActionService
 import service.ApplicationService
 import play.api.libs.crypto.CookieSigner
-import config.ErrorHandler
+import uk.gov.hmrc.thirdpartydeveloperfrontend.config.ErrorHandler
 import uk.gov.hmrc.modules.submissions.views.html.{CancelledRequestForProductionCredentialsView, ConfirmCancelRequestForProductionCredentialsView}
 import connectors.ThirdPartyApplicationProductionConnector
 import domain.models.applications.State

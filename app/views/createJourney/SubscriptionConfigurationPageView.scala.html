@@ -14,6 +14,7 @@
  * limitations under the License.
  *@
 
+@import uk.gov.hmrc.thirdpartydeveloperfrontend.config.ApplicationConfig
 @import domain.models.views.BackButtonWithJavaScript
 @import domain.models.controllers.EditManageSubscription.EditApiConfigurationViewModel
 @import domain.models.applications.Application
@@ -28,7 +29,7 @@
   implicit request: play.api.mvc.Request[Any],
   loggedIn: DeveloperSession,
   messages: Messages,
-  applicationConfig: config.ApplicationConfig)
+  applicationConfig: ApplicationConfig)
 
 @pageHeading = @{ s"${viewModel.apiName} ${viewModel.apiVersion.value} ${viewModel.displayedStatus}" }
 

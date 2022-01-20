@@ -17,10 +17,11 @@
 @import domain.models.views.BackButtonWithJavaScript
 @import views.html.include.DevMain2
 @import domain.models.developers.DeveloperSession
+@import uk.gov.hmrc.thirdpartydeveloperfrontend.config.ApplicationConfig
 
 @this(devMain: DevMain2)
 
-@(secret: String, qrImg: String)(implicit request: play.api.mvc.Request[Any], loggedIn: DeveloperSession, appConfig: config.ApplicationConfig, messages: Messages)
+@(secret: String, qrImg: String)(implicit request: play.api.mvc.Request[Any], loggedIn: DeveloperSession, appConfig: ApplicationConfig, messages: Messages)
 
 @devMain(
   title = "Set up your device",

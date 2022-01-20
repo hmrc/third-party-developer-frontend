@@ -16,7 +16,7 @@
 
 package mocks.service
 
-import config.ErrorHandler
+import uk.gov.hmrc.thirdpartydeveloperfrontend.config.ErrorHandler
 import org.mockito.{ArgumentMatchersSugar, MockitoSugar}
 import play.twirl.api.Html
 

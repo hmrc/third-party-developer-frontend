@@ -15,10 +15,11 @@
  *@
 
 @import include._
+@import uk.gov.hmrc.thirdpartydeveloperfrontend.config.ApplicationConfig
 
 @this(devMain: DevMain2)
 
-@()(implicit request: play.api.mvc.Request[Any], messages: Messages, applicationConfig: config.ApplicationConfig)
+@()(implicit request: play.api.mvc.Request[Any], messages: Messages, applicationConfig: ApplicationConfig)
 
 @devMain(title = "We have locked your account", developerSession = None) {
   <h1 class="govuk-heading-l">We have locked your account</h1>

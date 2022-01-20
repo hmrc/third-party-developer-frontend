@@ -19,7 +19,7 @@ package controllers
 import java.util.UUID.randomUUID
 
 import builder.DeveloperBuilder
-import config.ErrorHandler
+import uk.gov.hmrc.thirdpartydeveloperfrontend.config.ErrorHandler
 import domain.models.controllers.SaveSubsFieldsPageMode
 import domain.models.subscriptions.{AccessRequirements, DevhubAccessLevel, DevhubAccessRequirements}
 import domain.models.subscriptions.ApiSubscriptionFields._

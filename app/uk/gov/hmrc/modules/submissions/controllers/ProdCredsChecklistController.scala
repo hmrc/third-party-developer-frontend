@@ -16,7 +16,8 @@
 
 package uk.gov.hmrc.modules.submissions.controllers
 
-import config.{ApplicationConfig, ErrorHandler}
+import uk.gov.hmrc.thirdpartydeveloperfrontend.config.ApplicationConfig
+import uk.gov.hmrc.thirdpartydeveloperfrontend.config.ErrorHandler
 import connectors.ApmConnector
 import domain.models.applications.ApplicationId
 import play.api.libs.crypto.CookieSigner

@@ -18,7 +18,7 @@ package controllers
 
 import akka.stream.Materializer
 import builder.DeveloperBuilder
-import config.ApplicationConfig
+import uk.gov.hmrc.thirdpartydeveloperfrontend.config.ApplicationConfig
 import controllers.profile.EmailPreferences
 import domain.models.apidefinitions.ApiContext
 import domain.models.applications.ApplicationId

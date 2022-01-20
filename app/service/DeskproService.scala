@@ -16,7 +16,7 @@
 
 package service
 
-import config.ApplicationConfig
+import uk.gov.hmrc.thirdpartydeveloperfrontend.config.ApplicationConfig
 import connectors.DeskproConnector
 import controllers.{SignOutSurveyForm, SupportEnquiryForm}
 import domain.models.connectors.{DeskproTicket, Feedback, TicketId, TicketResult}

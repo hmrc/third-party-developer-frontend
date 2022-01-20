@@ -16,7 +16,7 @@
 
 package views.include
 
-import config.ApplicationConfig
+import uk.gov.hmrc.thirdpartydeveloperfrontend.config.ApplicationConfig
 import domain.models.views.IpAllowlistFeedbackBanner
 import org.jsoup.Jsoup
 import org.jsoup.nodes.Document

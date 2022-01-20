@@ -15,10 +15,11 @@
  *@
 
 @import include._
+@import uk.gov.hmrc.thirdpartydeveloperfrontend.config.ApplicationConfig
 
 @this(devMain: DevMain)
 
-@()(implicit request: play.api.mvc.Request[Any], messages: Messages, appConfig: config.ApplicationConfig)
+@()(implicit request: play.api.mvc.Request[Any], messages: Messages, appConfig: ApplicationConfig)
 
 @devMain(
     title = "Logout",

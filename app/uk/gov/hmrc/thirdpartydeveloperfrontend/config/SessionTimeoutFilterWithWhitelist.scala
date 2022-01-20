@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package config
+package uk.gov.hmrc.thirdpartydeveloperfrontend.config
 
 import akka.stream.Materializer
 import javax.inject.Inject

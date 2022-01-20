@@ -19,7 +19,7 @@ package controllers
 import java.net.URI
 
 import builder.DeveloperBuilder
-import config.ErrorHandler
+import uk.gov.hmrc.thirdpartydeveloperfrontend.config.ErrorHandler
 import connectors.ThirdPartyDeveloperConnector
 import domain.models.connectors.UpdateLoggedInStateRequest
 import domain.models.developers.{LoggedInState, Session}

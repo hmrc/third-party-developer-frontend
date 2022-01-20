@@ -16,10 +16,11 @@
 
 @import include._
 @import domain.models.controllers.Crumb
+@import uk.gov.hmrc.thirdpartydeveloperfrontend.config.ApplicationConfig
 
 @this(devMain: DevMain)
 
-@(loggedIn: Option[String], form: Form[controllers.SupportEnquiryForm])(implicit request: play.api.mvc.Request[Any], messages: Messages, appConfig: config.ApplicationConfig)
+@(loggedIn: Option[String], form: Form[controllers.SupportEnquiryForm])(implicit request: play.api.mvc.Request[Any], messages: Messages, appConfig: ApplicationConfig)
 
 @devMain(
     title = "Support",

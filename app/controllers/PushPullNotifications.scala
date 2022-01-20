@@ -17,7 +17,8 @@
 package controllers
 
 import cats.data.NonEmptyList
-import config.{ApplicationConfig, ErrorHandler}
+import uk.gov.hmrc.thirdpartydeveloperfrontend.config.ApplicationConfig
+import uk.gov.hmrc.thirdpartydeveloperfrontend.config.ErrorHandler
 import domain.models.applications.ApplicationId
 import domain.models.applications.Capabilities.ViewPushSecret
 import domain.models.applications.Permissions.SandboxOrAdmin

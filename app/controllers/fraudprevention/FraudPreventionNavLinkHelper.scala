@@ -17,7 +17,7 @@
 package controllers.fraudprevention
 
 import domain.models.controllers.FraudPreventionNavLinkViewModel
-import config.FraudPreventionConfig
+import uk.gov.hmrc.thirdpartydeveloperfrontend.config.FraudPreventionConfig
 import controllers.ApplicationRequest
 import domain.models.applications.Environment
 import domain.models.applications.Application

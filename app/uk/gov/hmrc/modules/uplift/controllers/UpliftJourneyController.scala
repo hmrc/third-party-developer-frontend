@@ -16,7 +16,8 @@
 
 package uk.gov.hmrc.modules.uplift.controllers
 
-import config.{ApplicationConfig, ErrorHandler}
+import uk.gov.hmrc.thirdpartydeveloperfrontend.config.ApplicationConfig
+import uk.gov.hmrc.thirdpartydeveloperfrontend.config.ErrorHandler
 import connectors.ApmConnector
 import controllers.checkpages.{CanUseCheckActions, DummySubscriptionsForm}
 import domain.models.apidefinitions.APISubscriptionStatus
@@ -39,10 +40,10 @@ import controllers.APISubscriptions
 import play.api.data.Forms
 import controllers.FormKeys
 import uk.gov.hmrc.modules.uplift.services.UpliftJourneyService
-import config.UpliftJourneyConfig
+import uk.gov.hmrc.thirdpartydeveloperfrontend.config.UpliftJourneyConfig
+import uk.gov.hmrc.thirdpartydeveloperfrontend.config.{On, OnDemand}
 import play.api.mvc.Request
 import scala.util.Try
-import config.{On, OnDemand}
 import domain.models.controllers.BadRequestWithErrorMessage
 
 object UpliftJourneyController {

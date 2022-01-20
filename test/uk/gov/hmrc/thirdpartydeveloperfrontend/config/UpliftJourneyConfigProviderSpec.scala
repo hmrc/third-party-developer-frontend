@@ -14,13 +14,10 @@
  * limitations under the License.
  */
 
-package controllers
+package uk.gov.hmrc.thirdpartydeveloperfrontend.config
 
-import config.UpliftJourneyConfig
-import config.On
-import config.OnDemand
-import config.Off
 import play.api.Configuration
+import controllers.BaseControllerSpec
 
 class UpliftJourneyConfigSpec extends BaseControllerSpec {
 

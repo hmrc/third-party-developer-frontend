@@ -15,10 +15,11 @@
  *@
 
 @import domain.models.views.FeedbackBanner
+@import uk.gov.hmrc.thirdpartydeveloperfrontend.config.ApplicationConfig
 
 @this()
 
-@(feedbackBanner: FeedbackBanner)(implicit appConfig: config.ApplicationConfig)
+@(feedbackBanner: FeedbackBanner)(implicit appConfig: ApplicationConfig)
 
 <div class="feedback-banner">
   <div class="govuk-width-container">

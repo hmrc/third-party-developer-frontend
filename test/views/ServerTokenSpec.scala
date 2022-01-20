@@ -18,7 +18,7 @@ package views
 
 import java.util.UUID.randomUUID
 
-import config.ApplicationConfig
+import uk.gov.hmrc.thirdpartydeveloperfrontend.config.ApplicationConfig
 import domain.models.applications._
 import domain.models.developers.LoggedInState
 import org.joda.time.DateTime

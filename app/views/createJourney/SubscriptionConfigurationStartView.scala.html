@@ -19,6 +19,7 @@
 @import domain.models.views.BackButtonWithJavaScript
 @import domain.models.applications.Application
 @import domain.models.developers.DeveloperSession
+@import uk.gov.hmrc.thirdpartydeveloperfrontend.config.ApplicationConfig
 
 @this(devMain: DevMain2)
 
@@ -26,7 +27,7 @@
   implicit request: play.api.mvc.Request[Any],
   loggedIn: DeveloperSession,
   messages: Messages,
-  applicationConfig: config.ApplicationConfig
+  applicationConfig: ApplicationConfig
 )
 
 @pageHeading = @{

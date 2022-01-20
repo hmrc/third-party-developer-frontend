@@ -15,8 +15,9 @@
  *@
 
 @import org.joda.time.format.DateTimeFormat
+@import uk.gov.hmrc.thirdpartydeveloperfrontend.config.ApplicationConfig
 
-@()(implicit applicationConfig: config.ApplicationConfig)
+@()(implicit applicationConfig: ApplicationConfig)
 
 @defining(DateTimeFormat.forPattern("dd MMMM yyyy")) { dateFormatter =>
   <p class="govuk-body">Version @{applicationConfig.currentTermsOfUseVersion} issued @{dateFormatter.print(applicationConfig.currentTermsOfUseDate)}</p>

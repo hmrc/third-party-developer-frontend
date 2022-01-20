@@ -20,7 +20,7 @@ import java.net.URLEncoder.encode
 import java.util.UUID
 import akka.actor.ActorSystem
 import akka.pattern.FutureTimeoutSupport
-import config.ApplicationConfig
+import uk.gov.hmrc.thirdpartydeveloperfrontend.config.ApplicationConfig
 import domain.models.apidefinitions.{ApiContext, ApiIdentifier, ApiVersion}
 import domain.models.applications.{ClientId, Environment}
 import domain.models.subscriptions.ApiSubscriptionFields._

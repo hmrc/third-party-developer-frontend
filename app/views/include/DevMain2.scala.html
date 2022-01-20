@@ -19,6 +19,7 @@
 @import domain.models.controllers.Crumb
 @import domain.models.developers.DeveloperSession
 @import templates._
+@import uk.gov.hmrc.thirdpartydeveloperfrontend.config.ApplicationConfig
 
 @this(govUkWrapper: govUkWrapper,
       hmrcTrackingConsentSnippet: HmrcTrackingConsentSnippet
@@ -37,7 +38,7 @@
 )(mainContent: Html)(
   implicit request: Request[_],
   messages: Messages,
-  applicationConfig: config.ApplicationConfig
+  applicationConfig: ApplicationConfig
 )
 
 @scripts = {

@@ -19,10 +19,11 @@
 @import include._
 @import domain.models.controllers.Crumb
 @import views.helper.EnvironmentNameService
+@import uk.gov.hmrc.thirdpartydeveloperfrontend.config.ApplicationConfig
 
 @this(devMain: DevMain2)
 
-@()(implicit request: play.api.mvc.Request[Any], loggedIn: DeveloperSession, messages: Messages, appConfig: config.ApplicationConfig, environmentNameService: EnvironmentNameService)
+@()(implicit request: play.api.mvc.Request[Any], loggedIn: DeveloperSession, messages: Messages, appConfig: ApplicationConfig, environmentNameService: EnvironmentNameService)
 
 @subordinateEnvName = @{environmentNameService.subordinateWording}
 @pageHeading = @{s"Add an application to ${subordinateEnvName}"}

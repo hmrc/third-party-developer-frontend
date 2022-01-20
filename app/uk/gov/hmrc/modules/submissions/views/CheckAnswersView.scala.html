@@ -20,10 +20,12 @@
 @import uk.gov.hmrc.modules.submissions.controllers.models.AnswersViewModel._
 @import include._
 @import includes._
+@import uk.gov.hmrc.thirdpartydeveloperfrontend.config.ApplicationConfig
+
 
 @this(devMain: DevMain2)
 
-@(model: ViewModel, error: Option[String])(implicit request: play.api.mvc.Request[Any], loggedIn: DeveloperSession, messagesProvider: MessagesProvider, appConfig: config.ApplicationConfig)
+@(model: ViewModel, error: Option[String])(implicit request: play.api.mvc.Request[Any], loggedIn: DeveloperSession, messagesProvider: MessagesProvider, appConfig: ApplicationConfig)
 
 @title = @{ "Check your answers before requesting production credentials" }
 

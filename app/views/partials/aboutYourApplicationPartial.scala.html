@@ -16,8 +16,8 @@
 
 @import controllers.checkpages.{CheckYourAnswersData, DummyCheckYourAnswersForm}
 @import domain.models.controllers.SaveSubsFieldsPageMode
+@import uk.gov.hmrc.thirdpartydeveloperfrontend.config.ApplicationConfig
 
-@import config.ApplicationConfig
 @(data: CheckYourAnswersData, form: Form[DummyCheckYourAnswersForm], editable: Boolean)(implicit request: play.api.mvc.Request[Any], messages: Messages, applicationConfig: ApplicationConfig)
 
 @requestProductionCredentials = @{s"production credentials"}

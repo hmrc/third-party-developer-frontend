@@ -19,7 +19,7 @@ package views.helper
 import java.time.Period
 import java.util.Locale
 
-import config.ApplicationConfig
+import uk.gov.hmrc.thirdpartydeveloperfrontend.config.ApplicationConfig
 import domain.models.controllers.FraudPreventionNavLinkViewModel
 import org.scalatestplus.play.guice.GuiceOneAppPerSuite
 import play.api.Application

@@ -19,7 +19,8 @@ package uk.gov.hmrc.modules.submissions.controllers
 import javax.inject.{Inject, Singleton}
 import play.api.mvc.MessagesControllerComponents
 import scala.concurrent.ExecutionContext
-import config.{ApplicationConfig, ErrorHandler}
+import uk.gov.hmrc.thirdpartydeveloperfrontend.config.ApplicationConfig
+import uk.gov.hmrc.thirdpartydeveloperfrontend.config.ErrorHandler
 import service.{ApplicationService, ApplicationActionService, SessionService}
 import play.api.libs.crypto.CookieSigner
 import controllers.ApplicationController

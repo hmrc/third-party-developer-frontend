@@ -18,10 +18,11 @@
 @import domain.models.views.StaticNavLinks
 @import domain.models.controllers.Crumb
 @import play.twirl.api.HtmlFormat
+@import uk.gov.hmrc.thirdpartydeveloperfrontend.config.ApplicationConfig
 
 @this(main: Main)
 
-@(success: Boolean)(implicit request: play.api.mvc.Request[Any], messagesProvider: MessagesProvider, applicationConfig: config.ApplicationConfig)
+@(success: Boolean)(implicit request: play.api.mvc.Request[Any], messagesProvider: MessagesProvider, applicationConfig: ApplicationConfig)
 
 @main(title = applicationConfig.title,
     navTitle = Some(applicationConfig.title),

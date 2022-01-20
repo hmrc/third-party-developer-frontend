@@ -16,7 +16,8 @@
 
 package controllers
 
-import config.{ApplicationConfig, ErrorHandler}
+import uk.gov.hmrc.thirdpartydeveloperfrontend.config.ApplicationConfig
+import uk.gov.hmrc.thirdpartydeveloperfrontend.config.ErrorHandler
 import domain.models.applications.ApplicationId
 import domain.models.applications.Capabilities.SupportsDeletion
 import domain.models.applications.Permissions.{AdministratorOnly, TeamMembersOnly}

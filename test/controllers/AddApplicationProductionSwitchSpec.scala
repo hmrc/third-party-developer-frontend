@@ -17,7 +17,7 @@
 package controllers
 
 import builder.DeveloperBuilder
-import config.ErrorHandler
+import uk.gov.hmrc.thirdpartydeveloperfrontend.config.ErrorHandler
 import domain.models.applications._
 import mocks.service._
 import uk.gov.hmrc.modules.uplift.services.mocks.UpliftLogicMock
@@ -45,7 +45,7 @@ import mocks.connector.ApmConnectorMockModule
 import controllers.addapplication.AddApplication
 import uk.gov.hmrc.modules.uplift.views.html.BeforeYouStartView
 import uk.gov.hmrc.modules.uplift.controllers.UpliftJourneySwitch
-import config.UpliftJourneyConfig
+import uk.gov.hmrc.thirdpartydeveloperfrontend.config.UpliftJourneyConfig
 
 class AddApplicationProductionSwitchSpec
     extends BaseControllerSpec

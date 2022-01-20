@@ -19,8 +19,8 @@ package controllers
 import play.api.mvc.MessagesControllerComponents
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendController
 import security.DevHubAuthorization
-import config.ErrorHandler
-import config.ApplicationConfig
+import uk.gov.hmrc.thirdpartydeveloperfrontend.config.ErrorHandler
+import uk.gov.hmrc.thirdpartydeveloperfrontend.config.ApplicationConfig
 import service.SessionService
 import scala.concurrent.ExecutionContext
 

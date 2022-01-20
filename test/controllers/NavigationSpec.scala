@@ -17,7 +17,7 @@
 package controllers
 
 import builder.DeveloperBuilder
-import config.ErrorHandler
+import uk.gov.hmrc.thirdpartydeveloperfrontend.config.ErrorHandler
 import domain.models.developers.{DeveloperSession, LoggedInState, Session}
 import domain.models.views.NavLink
 import mocks.service.{ApplicationActionServiceMock, ApplicationServiceMock, SessionServiceMock}

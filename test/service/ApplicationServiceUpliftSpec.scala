@@ -24,7 +24,7 @@ import connectors.ThirdPartyApplicationProductionConnector
 import connectors.ThirdPartyApplicationSandboxConnector
 import service.SubscriptionFieldsService.SubscriptionFieldsConnector
 import service.PushPullNotificationsService.PushPullNotificationsConnector
-import config.ApplicationConfig
+import uk.gov.hmrc.thirdpartydeveloperfrontend.config.ApplicationConfig
 import connectors.DeskproConnector
 import connectors.ThirdPartyDeveloperConnector
 import domain.models.applications.ApplicationId

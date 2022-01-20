@@ -21,6 +21,7 @@
 @import views.html.include.OpenAccessApisGroup
 @import domain.models.apidefinitions.ApiContext
 @import domain.models.subscriptions.ApiData
+@import uk.gov.hmrc.thirdpartydeveloperfrontend.config.ApplicationConfig
 
 @this(subscriptionsGroup: SubscriptionsGroup, openAccessApisGroup: OpenAccessApisGroup)
 
@@ -33,7 +34,7 @@
     showSubscriptionFields: Boolean,
     showSectionHeadings: Boolean = true
 )(
-    implicit request: play.api.mvc.Request[Any], messages: Messages, applicationConfig: config.ApplicationConfig
+    implicit request: play.api.mvc.Request[Any], messages: Messages, applicationConfig: ApplicationConfig
 )
 
 @if(subscriptions.exampleApi.nonEmpty) {

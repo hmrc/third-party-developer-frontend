@@ -18,7 +18,7 @@ package connectors
 
 import akka.actor.ActorSystem
 import akka.pattern.FutureTimeoutSupport
-import config.ApplicationConfig
+import uk.gov.hmrc.thirdpartydeveloperfrontend.config.ApplicationConfig
 import domain._
 import domain.models.applications.ApplicationNameValidationJson.{ApplicationNameValidationRequest, ApplicationNameValidationResult}
 import domain.models.applications._

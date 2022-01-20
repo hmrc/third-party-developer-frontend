@@ -16,7 +16,7 @@
 
 package controllers
 
-import config.ApplicationConfig
+import uk.gov.hmrc.thirdpartydeveloperfrontend.config.ApplicationConfig
 import connectors.ThirdPartyDeveloperConnector
 import domain.{InvalidResetCode, UnverifiedAccount}
 import domain.models.connectors.{ChangePassword, PasswordReset}

@@ -14,6 +14,7 @@
  * limitations under the License.
  *@
 
+@import uk.gov.hmrc.thirdpartydeveloperfrontend.config.ApplicationConfig
 @import domain.models.applications.Application
 @import domain.models.controllers.SaveSubsFieldsPageMode.LeftHandNavigation
 @import domain.models.developers.DeveloperSession
@@ -29,7 +30,7 @@
     implicit request: play.api.mvc.Request[Any],
     loggedIn: DeveloperSession,
     messages: Messages,
-    applicationConfig: config.ApplicationConfig
+    applicationConfig: ApplicationConfig
     )
 
 @pageHeading = @{ "Subscription configuration" }

@@ -19,7 +19,7 @@ package controllers
 import java.util.UUID
 
 import builder.DeveloperBuilder
-import config.ErrorHandler
+import uk.gov.hmrc.thirdpartydeveloperfrontend.config.ErrorHandler
 import connectors.ThirdPartyDeveloperConnector
 import domain.models.developers.{LoggedInState, Session}
 import mocks.service.SessionServiceMock

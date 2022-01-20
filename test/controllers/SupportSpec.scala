@@ -17,7 +17,7 @@
 package controllers
 
 import builder.DeveloperBuilder
-import config.ErrorHandler
+import uk.gov.hmrc.thirdpartydeveloperfrontend.config.ErrorHandler
 import domain.models.connectors.TicketCreated
 import domain.models.developers.{LoggedInState, Session}
 import mocks.service.SessionServiceMock

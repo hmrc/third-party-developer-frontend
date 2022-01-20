@@ -17,7 +17,7 @@
 package controllers
 
 import builder.DeveloperBuilder
-import config.ErrorHandler
+import uk.gov.hmrc.thirdpartydeveloperfrontend.config.ErrorHandler
 import domain.models.applications._
 import mocks.service._
 import play.api.mvc.AnyContentAsEmpty
@@ -45,7 +45,7 @@ import controllers.addapplication.AddApplication
 import builder._
 import uk.gov.hmrc.modules.uplift.views.html.BeforeYouStartView
 import uk.gov.hmrc.modules.uplift.controllers.UpliftJourneySwitch
-import config.UpliftJourneyConfig
+import uk.gov.hmrc.thirdpartydeveloperfrontend.config.UpliftJourneyConfig
 import uk.gov.hmrc.modules.uplift.services.GetProductionCredentialsFlowService
 
 class ChooseApplicationToUpliftActionSpec

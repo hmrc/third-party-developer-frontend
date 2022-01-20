@@ -38,8 +38,8 @@ import uk.gov.hmrc.modules.uplift.views.html._
 import scala.concurrent.ExecutionContext.Implicits.global
 import uk.gov.hmrc.modules.uplift.services.mocks._
 import controllers.SubscriptionTestHelperSugar
-import config._
 import scala.concurrent.Future
+import uk.gov.hmrc.thirdpartydeveloperfrontend.config.{UpliftJourneyConfig, On}
 
 class UpliftJourneyControllerSpec extends BaseControllerSpec
                 with SampleSession

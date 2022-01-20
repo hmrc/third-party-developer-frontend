@@ -16,7 +16,7 @@
 
 package connectors
 
-import config.ApplicationConfig
+import uk.gov.hmrc.thirdpartydeveloperfrontend.config.ApplicationConfig
 import play.api.libs.json.{Json, JsString, JsValue}
 import utils.AsyncHmrcSpec
 
