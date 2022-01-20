@@ -10,12 +10,12 @@ import play.api.Mode
 import play.api.{Application => PlayApplication}
 import com.github.tomakehurst.wiremock.client.WireMock._
 import play.api.http.Status._
-import modules.submissions.connectors.ThirdPartyApplicationSubmissionsConnector
-import modules.submissions.connectors.ThirdPartyApplicationSubmissionsConnector._
+import uk.gov.hmrc.modules.submissions.connectors.ThirdPartyApplicationSubmissionsConnector
+import uk.gov.hmrc.modules.submissions.connectors.ThirdPartyApplicationSubmissionsConnector._
 import uk.gov.hmrc.http.HeaderCarrier
-import modules.submissions.domain.services.SubmissionsJsonFormatters
+import uk.gov.hmrc.modules.submissions.domain.services.SubmissionsJsonFormatters
 import domain.services.ApplicationsJsonFormatters
-import modules.submissions.domain.models.ErrorDetails
+import uk.gov.hmrc.modules.submissions.domain.models.ErrorDetails
 
 class ThirdPartyApplicationSubmissionsConnectorSpec 
     extends BaseConnectorIntegrationSpec 

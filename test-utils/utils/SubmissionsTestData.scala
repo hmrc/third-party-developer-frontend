@@ -16,7 +16,7 @@
 
 package utils
 
-import modules.submissions.domain.models._
+import uk.gov.hmrc.modules.submissions.domain.models._
 import uk.gov.hmrc.time.DateTimeUtils
 import cats.data.NonEmptyList
 import domain.models.applications.ApplicationId

@@ -43,7 +43,7 @@ import scala.concurrent.Future._
 import utils.LocalUserIdTracker
 import utils.TestApplications
 import utils.CollaboratorTracker
-import modules.submissions.services.mocks.SubmissionServiceMockModule
+import uk.gov.hmrc.modules.submissions.services.mocks.SubmissionServiceMockModule
 
 class DetailsSpec 
     extends BaseControllerSpec 

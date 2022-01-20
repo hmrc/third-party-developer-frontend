@@ -92,8 +92,8 @@ lazy val microservice = Project(appName, file("."))
       routesImport ++= Seq(
         "controllers.binders._",
         "modules.uplift.controllers._",
-        "modules.submissions.controllers.binders._",
-        "modules.submissions.domain.models._",
+        "uk.gov.hmrc.modules.submissions.controllers.binders._",
+        "uk.gov.hmrc.modules.submissions.domain.models._",
         "domain.models.controllers._",
         "domain.models.applications._",
         "domain.models.apidefinitions._"

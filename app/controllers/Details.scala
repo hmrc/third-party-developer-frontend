@@ -36,10 +36,10 @@ import views.html.checkpages.applicationcheck.UnauthorisedAppDetailsView
 import scala.concurrent.{ExecutionContext, Future}
 import domain.models.subscriptions.DevhubAccessLevel
 import controllers.fraudprevention.FraudPreventionNavLinkHelper
-import modules.submissions.services.SubmissionService
+import uk.gov.hmrc.modules.submissions.services.SubmissionService
 import cats.data.OptionT
 import cats.instances.future.catsStdInstancesForFuture
-import modules.submissions.domain.models.ExtendedSubmission
+import uk.gov.hmrc.modules.submissions.domain.models.ExtendedSubmission
 import scala.concurrent.Future.successful
 
 @Singleton
@@ -78,9 +78,9 @@ class Details @Inject() (
         lazy val newUpliftJourney = (e: ExtendedSubmission) =>
           if (request.role.isAdministrator) {
             if(e.isCompleted) {
-              Redirect(modules.submissions.controllers.routes.CheckAnswersController.checkAnswersPage(applicationId))
+              Redirect(uk.gov.hmrc.modules.submissions.controllers.routes.CheckAnswersController.checkAnswersPage(applicationId))
             } else {
-              Redirect(modules.submissions.controllers.routes.ProdCredsChecklistController.productionCredentialsChecklistPage(applicationId))
+              Redirect(uk.gov.hmrc.modules.submissions.controllers.routes.ProdCredsChecklistController.productionCredentialsChecklistPage(applicationId))
             }
           } else {
             Ok(unauthorisedAppDetailsView(request.application.name, request.application.adminEmails))
@@ -99,7 +99,7 @@ class Details @Inject() (
 
 
         lazy val newUpliftJourney = (e: ExtendedSubmission) =>
-          Redirect(modules.submissions.controllers.routes.CredentialsRequestedController.credentialsRequestedPage(applicationId))
+          Redirect(uk.gov.hmrc.modules.submissions.controllers.routes.CredentialsRequestedController.credentialsRequestedPage(applicationId))
 
         OptionT(submissionService.fetchLatestSubmission(applicationId)).fold(oldJourney)(newUpliftJourney)    
       }

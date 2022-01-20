@@ -14,23 +14,14 @@
  * limitations under the License.
  */
 
-package utils
+package uk.gov.hmrc.modules.submissions.domain.services
 
-import uk.gov.hmrc.modules.submissions.domain.models.{QuestionId, QuestionItem}
-import cats.data.NonEmptyList
+import play.api.libs.json.Json
 
-trait AsIdsHelpers {
-  implicit class ListQIdSyntax(questionItems: List[QuestionItem]) {
-    def asIds(): List[QuestionId] = {
-      questionItems.map(_.question.id)
-    }
-  }
+import uk.gov.hmrc.modules.submissions.domain.models._
 
-  implicit class NELQIdSyntax(questionItems: NonEmptyList[QuestionItem]) {
-    def asIds(): List[QuestionId] = {
-      questionItems.toList.map(_.question.id)
-    }
-  }
+trait GroupOfQuestionnairesJsonFormatters extends QuestionnaireJsonFormatters {
+  implicit val groupOfQuestionnairesJsonFormat = Json.format[GroupOfQuestionnaires]
 }
 
-object AsIdsHelpers extends AsIdsHelpers
+object GroupOfQuestionnairesJsonFormatters extends GroupOfQuestionnairesJsonFormatters
