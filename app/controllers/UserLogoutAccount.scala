@@ -22,7 +22,7 @@ import domain.models.connectors.TicketId
 import javax.inject.{Inject, Singleton}
 import play.api.libs.crypto.CookieSigner
 import play.api.mvc.{AnyContent, MessagesControllerComponents, MessagesRequest}
-import security.ExtendedDevHubAuthorization
+import uk.gov.hmrc.thirdpartydeveloperfrontend.security.ExtendedDevHubAuthorization
 import service.{ApplicationService, DeskproService, SessionService}
 import views.html.{LogoutConfirmationView, SignoutSurveyView}
 import uk.gov.hmrc.modules.common.services.ApplicationLogger

@@ -24,7 +24,7 @@ import domain.models.connectors.CombinedApi
 import domain.models.developers._
 import domain.models.emailpreferences.{APICategoryDisplayDetails, EmailPreferences, EmailTopic, TaxRegimeInterests}
 import domain.models.flows.{EmailPreferencesFlowV2, FlowType, NewApplicationEmailPreferencesFlowV2}
-import repositories.FlowRepository
+import uk.gov.hmrc.thirdpartydeveloperfrontend.repositories.FlowRepository
 import uk.gov.hmrc.http.HeaderCarrier
 import utils.{AsyncHmrcSpec, LocalUserIdTracker}
 

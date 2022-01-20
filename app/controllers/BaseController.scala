@@ -18,7 +18,7 @@ package controllers
 
 import play.api.mvc.MessagesControllerComponents
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendController
-import security.DevHubAuthorization
+import uk.gov.hmrc.thirdpartydeveloperfrontend.security.DevHubAuthorization
 import uk.gov.hmrc.thirdpartydeveloperfrontend.config.ErrorHandler
 import uk.gov.hmrc.thirdpartydeveloperfrontend.config.ApplicationConfig
 import service.SessionService

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package repositories
+package uk.gov.hmrc.thirdpartydeveloperfrontend.repositories
 
 import reactivemongo.api.indexes.Index
 import reactivemongo.api.indexes.IndexType.Ascending

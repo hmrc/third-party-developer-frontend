@@ -18,7 +18,7 @@ package utils
 
 import play.api.libs.crypto.CookieSigner
 import play.api.test.FakeRequest
-import security.CookieEncoding
+import uk.gov.hmrc.thirdpartydeveloperfrontend.security.CookieEncoding
 
 object WithLoggedInSession {
   implicit class AuthFakeRequest[A](fakeRequest: FakeRequest[A]) {

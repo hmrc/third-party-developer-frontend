@@ -18,7 +18,7 @@ package uk.gov.hmrc.modules.uplift.services
 
 import domain.models.developers.DeveloperSession
 import javax.inject.{Inject, Singleton}
-import repositories.FlowRepository
+import uk.gov.hmrc.thirdpartydeveloperfrontend.repositories.FlowRepository
 
 import scala.concurrent.{ExecutionContext, Future}
 import uk.gov.hmrc.modules.uplift.domain.models._

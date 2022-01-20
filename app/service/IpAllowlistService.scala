@@ -21,8 +21,8 @@ import domain.models.applications.Application
 import domain.models.flows.FlowType.IP_ALLOW_LIST
 import domain.models.flows.IpAllowlistFlow
 import javax.inject.{Inject, Singleton}
-import repositories.FlowRepository
-import repositories.ReactiveMongoFormatters.formatIpAllowlistFlow
+import uk.gov.hmrc.thirdpartydeveloperfrontend.repositories.FlowRepository
+import uk.gov.hmrc.thirdpartydeveloperfrontend.repositories.ReactiveMongoFormatters.formatIpAllowlistFlow
 import uk.gov.hmrc.http.{ForbiddenException, HeaderCarrier}
 
 import scala.concurrent.{ExecutionContext, Future}

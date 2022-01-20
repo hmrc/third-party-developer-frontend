@@ -32,7 +32,7 @@ import play.api.mvc.{AnyContentAsFormUrlEncoded, Result}
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
 import play.filters.csrf.CSRF.TokenProvider
-import qr.{OtpAuthUri, QRCode}
+import uk.gov.hmrc.thirdpartydeveloperfrontend.qr.{OtpAuthUri, QRCode}
 import service.{MfaMandateService, MFAResponse, MFAService}
 import utils.WithCSRFAddToken
 import utils.WithLoggedInSession._

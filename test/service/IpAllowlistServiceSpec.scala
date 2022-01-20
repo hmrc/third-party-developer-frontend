@@ -23,8 +23,8 @@ import domain.ApplicationUpdateSuccessful
 import domain.models.applications.{Application, IpAllowlist}
 import domain.models.flows.FlowType.IP_ALLOW_LIST
 import domain.models.flows.IpAllowlistFlow
-import repositories.FlowRepository
-import repositories.ReactiveMongoFormatters.formatIpAllowlistFlow
+import uk.gov.hmrc.thirdpartydeveloperfrontend.repositories.FlowRepository
+import uk.gov.hmrc.thirdpartydeveloperfrontend.repositories.ReactiveMongoFormatters.formatIpAllowlistFlow
 import service.PushPullNotificationsService.PushPullNotificationsConnector
 import service.SubscriptionFieldsService.SubscriptionFieldsConnector
 import uk.gov.hmrc.http.{ForbiddenException, HeaderCarrier}

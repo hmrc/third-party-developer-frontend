@@ -23,10 +23,10 @@ import mocks.service.SessionServiceMock
 import play.api.mvc.AnyContentAsEmpty
 import play.api.test.FakeRequest
 import play.filters.csrf.CSRF.TokenProvider
-import security.CookieEncoding
 import service.SessionService
 import utils.WithLoggedInSession._
 import utils.LocalUserIdTracker
+import uk.gov.hmrc.thirdpartydeveloperfrontend.security.CookieEncoding
 
 trait LoggedInRequestTestHelper extends SessionServiceMock with CookieEncoding with DeveloperBuilder with LocalUserIdTracker {
   this: BaseControllerSpec =>

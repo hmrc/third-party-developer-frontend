@@ -14,15 +14,12 @@
  * limitations under the License.
  */
 
-package security
-
-import java.security.MessageDigest
+package uk.gov.hmrc.thirdpartydeveloperfrontend.security
 
 import cats.implicits._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.config.ApplicationConfig
 import controllers.{routes, BaseController, MaybeUserRequest, UserRequest}
 import domain.models.developers.{DeveloperSession, LoggedInState}
-import play.api.libs.crypto.CookieSigner
 import play.api.mvc._
 import service.SessionService
 import uk.gov.hmrc.http.HeaderCarrier
@@ -131,46 +128,5 @@ trait ExtendedDevHubAuthorization extends DevHubAuthorization {
 
   def removeCookieFromResult(result: Result): Result = {
     result.discardingCookies(DiscardingCookie(cookieName))
-  }
-}
-
-trait CookieEncoding {
-  implicit val appConfig: ApplicationConfig
-
-  private[security] lazy val cookieName = "PLAY2AUTH_SESS_ID"
-  private[security] lazy val cookieSecureOption: Boolean = appConfig.securedCookie
-  private[security] lazy val cookieHttpOnlyOption: Boolean = true
-  private[security] lazy val cookieDomainOption: Option[String] = None
-  private[security] lazy val cookiePathOption: String = "/"
-  private[security] lazy val cookieMaxAge = appConfig.sessionTimeoutInSeconds.some
-
-  val cookieSigner: CookieSigner
-
-  def createCookie(sessionId: String): Cookie = {
-    Cookie(
-      cookieName,
-      encodeCookie(sessionId),
-      cookieMaxAge,
-      cookiePathOption,
-      cookieDomainOption,
-      cookieSecureOption,
-      cookieHttpOnlyOption
-    )
-  }
-
-  def encodeCookie(token: String): String = {
-    cookieSigner.sign(token) + token
-  }
-
-  def decodeCookie(token: String): Option[String] = {
-    val (hmac, value) = token.splitAt(40)
-
-    val signedValue = cookieSigner.sign(value)
-
-    if (MessageDigest.isEqual(signedValue.getBytes, hmac.getBytes)) {
-      Some(value)
-    } else {
-      None
-    }
   }
 }

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package repositories
+package uk.gov.hmrc.thirdpartydeveloperfrontend.repositories
 
 import domain.models.flows._
 import domain.services.CombinedApiJsonFormatters

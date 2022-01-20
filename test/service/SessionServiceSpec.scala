@@ -20,7 +20,7 @@ import builder.DeveloperBuilder
 import uk.gov.hmrc.thirdpartydeveloperfrontend.connectors.ThirdPartyDeveloperConnector
 import domain.models.connectors.{LoginRequest, TotpAuthenticationRequest, UserAuthenticationResponse}
 import domain.models.developers.{LoggedInState, Session, SessionInvalid}
-import repositories.FlowRepository
+import uk.gov.hmrc.thirdpartydeveloperfrontend.repositories.FlowRepository
 import uk.gov.hmrc.http.HeaderCarrier
 import utils.AsyncHmrcSpec
 import scala.concurrent.ExecutionContext.Implicits.global

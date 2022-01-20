@@ -1,4 +1,4 @@
-package repositories
+package uk.gov.hmrc.thirdpartydeveloperfrontend.repositories
 
 import akka.stream.Materializer
 import uk.gov.hmrc.thirdpartydeveloperfrontend.config.ApplicationConfig
@@ -14,7 +14,7 @@ import play.api.libs.json.{JsObject, Json}
 import play.modules.reactivemongo.ReactiveMongoComponent
 import reactivemongo.bson.BSONLong
 import reactivemongo.play.json.ImplicitBSONHandlers.JsObjectDocumentWriter
-import repositories.ReactiveMongoFormatters._
+import uk.gov.hmrc.thirdpartydeveloperfrontend.repositories.ReactiveMongoFormatters._
 import uk.gov.hmrc.mongo.{MongoConnector, MongoSpecSupport}
 
 import scala.concurrent.ExecutionContext.Implicits.global

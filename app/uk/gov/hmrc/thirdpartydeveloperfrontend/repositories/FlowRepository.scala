@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package repositories
+package uk.gov.hmrc.thirdpartydeveloperfrontend.repositories
 
 import akka.stream.Materializer
 import uk.gov.hmrc.thirdpartydeveloperfrontend.config.ApplicationConfig
@@ -27,7 +27,7 @@ import reactivemongo.api.ReadPreference
 import reactivemongo.api.indexes.{Index, IndexType}
 import reactivemongo.bson.{BSONDocument, BSONLong, BSONObjectID}
 import reactivemongo.play.json.ImplicitBSONHandlers.JsObjectDocumentWriter
-import repositories.IndexHelper.createAscendingIndex
+import uk.gov.hmrc.thirdpartydeveloperfrontend.repositories.IndexHelper.createAscendingIndex
 import uk.gov.hmrc.mongo.ReactiveRepository
 import uk.gov.hmrc.mongo.json.ReactiveMongoFormats
 

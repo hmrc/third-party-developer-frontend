@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package qr
+package uk.gov.hmrc.thirdpartydeveloperfrontend.qr
 
 import java.awt.image.BufferedImage
 import java.io.ByteArrayOutputStream

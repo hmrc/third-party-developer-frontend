@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package security
+package uk.gov.hmrc.thirdpartydeveloperfrontend.security
 
 import cats.implicits._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.config.ApplicationConfig

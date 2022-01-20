@@ -1,4 +1,4 @@
-package repositories
+package uk.gov.hmrc.thirdpartydeveloperfrontend.repositories
 
 import play.api.test.{DefaultAwaitTimeout, FutureAwaits}
 import org.scalatest.wordspec.AnyWordSpec
