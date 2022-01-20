@@ -16,7 +16,7 @@
 
 package service
 
-import connectors._
+import uk.gov.hmrc.thirdpartydeveloperfrontend.connectors._
 import domain._
 import domain.models.apidefinitions._
 import domain.models.applications._

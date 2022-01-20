@@ -17,7 +17,7 @@
 package stubs
 
 import com.github.tomakehurst.wiremock.client.WireMock._
-import connectors.EncryptedJson
+import uk.gov.hmrc.thirdpartydeveloperfrontend.connectors.EncryptedJson
 import domain.models.applications.ApplicationNameValidationJson.ApplicationNameValidationResult
 import domain.models.developers.{Registration, UpdateProfileRequest}
 import domain.services.ApiDefinitionsJsonFormatters._
@@ -29,8 +29,8 @@ import domain.models.applications.ClientId
 import domain.models.developers.UserId
 import domain.models.connectors.PasswordResetRequest
 
-import connectors.ThirdPartyDeveloperConnector.{FindUserIdRequest, FindUserIdResponse}
-import connectors.ThirdPartyDeveloperConnector.JsonFormatters.FindUserIdRequestWrites
+import uk.gov.hmrc.thirdpartydeveloperfrontend.connectors.ThirdPartyDeveloperConnector.{FindUserIdRequest, FindUserIdResponse}
+import uk.gov.hmrc.thirdpartydeveloperfrontend.connectors.ThirdPartyDeveloperConnector.JsonFormatters.FindUserIdRequestWrites
 import domain.models.applications._
 import uk.gov.hmrc.modules.common.services.ApplicationLogger
 import org.scalatest.matchers.should.Matchers

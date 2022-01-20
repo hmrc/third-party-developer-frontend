@@ -16,7 +16,7 @@
 
 package service
 
-import connectors.ThirdPartyDeveloperConnector
+import uk.gov.hmrc.thirdpartydeveloperfrontend.connectors.ThirdPartyDeveloperConnector
 import javax.inject.{Inject, Singleton}
 import uk.gov.hmrc.http.HeaderCarrier
 

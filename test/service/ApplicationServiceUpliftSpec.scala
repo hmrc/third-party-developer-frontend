@@ -18,15 +18,15 @@ package service
 
 import utils.AsyncHmrcSpec
 import uk.gov.hmrc.http.HeaderCarrier
-import connectors.ApmConnector
+import uk.gov.hmrc.thirdpartydeveloperfrontend.connectors.ApmConnector
 import scala.concurrent.ExecutionContext.Implicits.global
-import connectors.ThirdPartyApplicationProductionConnector
-import connectors.ThirdPartyApplicationSandboxConnector
+import uk.gov.hmrc.thirdpartydeveloperfrontend.connectors.ThirdPartyApplicationProductionConnector
+import uk.gov.hmrc.thirdpartydeveloperfrontend.connectors.ThirdPartyApplicationSandboxConnector
 import service.SubscriptionFieldsService.SubscriptionFieldsConnector
 import service.PushPullNotificationsService.PushPullNotificationsConnector
 import uk.gov.hmrc.thirdpartydeveloperfrontend.config.ApplicationConfig
-import connectors.DeskproConnector
-import connectors.ThirdPartyDeveloperConnector
+import uk.gov.hmrc.thirdpartydeveloperfrontend.connectors.DeskproConnector
+import uk.gov.hmrc.thirdpartydeveloperfrontend.connectors.ThirdPartyDeveloperConnector
 import domain.models.applications.ApplicationId
 import domain.models.developers.LoggedInState
 import domain.models.connectors.DeskproTicket

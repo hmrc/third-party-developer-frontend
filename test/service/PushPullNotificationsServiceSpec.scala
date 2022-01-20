@@ -19,7 +19,7 @@ package service
 import java.time.Period
 import java.util.UUID
 
-import connectors.ThirdPartyApplicationConnector
+import uk.gov.hmrc.thirdpartydeveloperfrontend.connectors.ThirdPartyApplicationConnector
 import domain.models.applications.Environment.PRODUCTION
 import domain.models.applications.{Application, ApplicationId, ClientId}
 import play.api.http.Status.INTERNAL_SERVER_ERROR

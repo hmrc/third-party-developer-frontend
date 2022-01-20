@@ -16,7 +16,7 @@
 
 package service
 
-import connectors.DeskproConnector
+import uk.gov.hmrc.thirdpartydeveloperfrontend.connectors.DeskproConnector
 import domain.models.apidefinitions.ApiVersion
 import domain.models.applications.{Application, ApplicationId}
 import domain.models.connectors.{DeskproTicket, TicketResult}
@@ -30,7 +30,7 @@ import domain.ApplicationUpdateSuccessful
 import domain.models.subscriptions.FieldName
 import domain.models.subscriptions.ApiSubscriptionFields.SubscriptionFieldDefinition
 import domain.models.subscriptions.ApiSubscriptionFields.SaveSubscriptionFieldsSuccessResponse
-import connectors.ApmConnector
+import uk.gov.hmrc.thirdpartydeveloperfrontend.connectors.ApmConnector
 import scala.concurrent.ExecutionContext
 
 @Singleton

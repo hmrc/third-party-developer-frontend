@@ -35,7 +35,7 @@ import domain.models.controllers.MfaMandateDetails
 
 import scala.concurrent.{ExecutionContext, Future}
 import scala.concurrent.Future.successful
-import connectors.ThirdPartyDeveloperConnector
+import uk.gov.hmrc.thirdpartydeveloperfrontend.connectors.ThirdPartyDeveloperConnector
 
 trait Auditing {
   val auditService: AuditService

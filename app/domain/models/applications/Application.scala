@@ -25,7 +25,7 @@ import domain.models.applications.Permissions.SandboxOrAdmin
 import domain.models.applications.CollaboratorRole.ADMINISTRATOR
 import domain.models.applications.State.{PENDING_GATEKEEPER_APPROVAL, PENDING_REQUESTER_VERIFICATION, TESTING}
 import domain.models.developers.Developer
-import helpers.string.Digest
+import uk.gov.hmrc.thirdpartydeveloperfrontend.helpers.string.Digest
 import org.joda.time.DateTime
 import java.util.UUID
 

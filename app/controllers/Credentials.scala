@@ -18,7 +18,7 @@ package controllers
 
 import uk.gov.hmrc.thirdpartydeveloperfrontend.config.ApplicationConfig
 import uk.gov.hmrc.thirdpartydeveloperfrontend.config.ErrorHandler
-import connectors.ThirdPartyDeveloperConnector
+import uk.gov.hmrc.thirdpartydeveloperfrontend.connectors.ThirdPartyDeveloperConnector
 import controllers.Credentials.serverTokenCutoffDate
 import domain._
 import domain.models.applications.ApplicationId

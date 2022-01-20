@@ -28,7 +28,7 @@ import uk.gov.hmrc.http.HeaderCarrier
 import scala.concurrent.{ExecutionContext, Future}
 import domain.models.applications.ApplicationId
 import domain.models.subscriptions.ApiData
-import connectors.ApmConnector
+import uk.gov.hmrc.thirdpartydeveloperfrontend.connectors.ApmConnector
 import domain.models.subscriptions.FieldName
 
 @Singleton

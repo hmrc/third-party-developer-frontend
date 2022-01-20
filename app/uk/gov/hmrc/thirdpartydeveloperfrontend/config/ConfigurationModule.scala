@@ -19,8 +19,8 @@ package uk.gov.hmrc.thirdpartydeveloperfrontend.config
 import akka.pattern.FutureTimeoutSupport
 import com.google.inject.AbstractModule
 import com.google.inject.name.Names.named
-import connectors._
-import helpers.FutureTimeoutSupportImpl
+import uk.gov.hmrc.thirdpartydeveloperfrontend.connectors._
+import uk.gov.hmrc.thirdpartydeveloperfrontend.helpers.FutureTimeoutSupportImpl
 import service.PushPullNotificationsService.PushPullNotificationsConnector
 import service.SubscriptionFieldsService.SubscriptionFieldsConnector
 import uk.gov.hmrc.play.bootstrap.filters.frontend.SessionTimeoutFilter

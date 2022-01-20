@@ -23,7 +23,7 @@ import javax.inject.{Inject, Singleton}
 import scala.concurrent.{ExecutionContext, Future}
 import uk.gov.hmrc.http.HeaderCarrier
 import domain.models.subscriptions.ApiData
-import connectors.ApmConnector
+import uk.gov.hmrc.thirdpartydeveloperfrontend.connectors.ApmConnector
 
 @Singleton
 class OpenAccessApiService @Inject() (openAccessApisConnector: ApmConnector)(implicit val ec: ExecutionContext) {

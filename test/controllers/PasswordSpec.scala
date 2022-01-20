@@ -17,7 +17,7 @@
 package controllers
 
 import uk.gov.hmrc.thirdpartydeveloperfrontend.config.ApplicationConfig
-import connectors.ThirdPartyDeveloperConnector
+import uk.gov.hmrc.thirdpartydeveloperfrontend.connectors.ThirdPartyDeveloperConnector
 import domain.{InvalidResetCode, UnverifiedAccount}
 import domain.models.connectors.{ChangePassword, PasswordReset}
 import mocks.service.SessionServiceMock

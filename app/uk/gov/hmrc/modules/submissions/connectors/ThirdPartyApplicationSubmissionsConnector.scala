@@ -16,7 +16,7 @@
 
 package uk.gov.hmrc.modules.submissions.connectors
 
-import connectors.ConnectorMetrics
+import uk.gov.hmrc.thirdpartydeveloperfrontend.connectors.ConnectorMetrics
 import domain.models.applications._
 import uk.gov.hmrc.modules.submissions.domain.models._
 import uk.gov.hmrc.modules.submissions.domain.services._

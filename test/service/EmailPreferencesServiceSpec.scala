@@ -17,7 +17,7 @@
 package service
 
 import builder.DeveloperBuilder
-import connectors.{ApmConnector, ThirdPartyDeveloperConnector}
+import uk.gov.hmrc.thirdpartydeveloperfrontend.connectors.{ApmConnector, ThirdPartyDeveloperConnector}
 import domain.models.apidefinitions.CombinedApiTestDataHelper
 import domain.models.applications.ApplicationId
 import domain.models.connectors.CombinedApi

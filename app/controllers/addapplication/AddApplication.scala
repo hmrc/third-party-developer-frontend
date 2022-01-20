@@ -18,7 +18,7 @@ package controllers.addapplication
 
 import uk.gov.hmrc.thirdpartydeveloperfrontend.config.ApplicationConfig
 import uk.gov.hmrc.thirdpartydeveloperfrontend.config.ErrorHandler
-import connectors.ApmConnector
+import uk.gov.hmrc.thirdpartydeveloperfrontend.connectors.ApmConnector
 import controllers.{AddApplicationNameForm, ApplicationController, ChooseApplicationToUpliftForm}
 import controllers.FormKeys.appNameField
 import controllers.UserRequest

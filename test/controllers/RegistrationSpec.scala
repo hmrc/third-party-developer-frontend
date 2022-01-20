@@ -16,7 +16,7 @@
 
 package controllers
 
-import connectors.ThirdPartyDeveloperConnector
+import uk.gov.hmrc.thirdpartydeveloperfrontend.connectors.ThirdPartyDeveloperConnector
 import domain.models.developers
 import domain.models.developers.RegistrationSuccessful
 import mocks.service.SessionServiceMock

@@ -18,7 +18,7 @@ package service
 
 import java.time.Period
 import builder.SubscriptionsBuilder
-import connectors.{ApmConnector, ThirdPartyApplicationConnector}
+import uk.gov.hmrc.thirdpartydeveloperfrontend.connectors.{ApmConnector, ThirdPartyApplicationConnector}
 import domain.models.apidefinitions.{ApiContext, ApiIdentifier, ApiVersion}
 import domain.models.applications._
 import domain.models.subscriptions.ApiSubscriptionFields.{SaveSubscriptionFieldsAccessDeniedResponse, SaveSubscriptionFieldsSuccessResponse, SubscriptionFieldValue}

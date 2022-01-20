@@ -20,7 +20,7 @@ import java.net.URI
 
 import builder.DeveloperBuilder
 import uk.gov.hmrc.thirdpartydeveloperfrontend.config.ErrorHandler
-import connectors.ThirdPartyDeveloperConnector
+import uk.gov.hmrc.thirdpartydeveloperfrontend.connectors.ThirdPartyDeveloperConnector
 import domain.models.connectors.UpdateLoggedInStateRequest
 import domain.models.developers.{LoggedInState, Session}
 import mocks.service.SessionServiceMock

@@ -20,7 +20,7 @@ import uk.gov.hmrc.thirdpartydeveloperfrontend.config.ApplicationConfig
 import uk.gov.hmrc.thirdpartydeveloperfrontend.config.ErrorHandler
 import domain.models.apidefinitions.{ApiContext, ApiVersion}
 import domain.models.developers.DeveloperSession
-import helpers.LoggedInRequestTestHelper
+import uk.gov.hmrc.thirdpartydeveloperfrontend.helpers.LoggedInRequestTestHelper
 import mocks.service._
 import play.api.http.Status.{NOT_FOUND, OK}
 import play.api.libs.crypto.CookieSigner

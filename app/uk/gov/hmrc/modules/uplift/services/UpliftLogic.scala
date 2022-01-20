@@ -20,9 +20,9 @@ import service.AppsByTeamMemberService
 import domain.models.applications.ApplicationId
 import domain.models.apidefinitions.ApiContext
 import domain.models.developers.UserId
-import connectors.ApmConnector
+import uk.gov.hmrc.thirdpartydeveloperfrontend.connectors.ApmConnector
 import javax.inject.{Inject, Singleton}
-import connectors.ThirdPartyApplicationSandboxConnector
+import uk.gov.hmrc.thirdpartydeveloperfrontend.connectors.ThirdPartyApplicationSandboxConnector
 import scala.concurrent.Future
 import uk.gov.hmrc.http.HeaderCarrier
 import scala.concurrent.ExecutionContext

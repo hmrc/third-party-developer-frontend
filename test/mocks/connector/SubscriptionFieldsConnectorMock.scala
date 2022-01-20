@@ -16,7 +16,7 @@
 
 package mocks.connector
 
-import connectors.AbstractSubscriptionFieldsConnector
+import uk.gov.hmrc.thirdpartydeveloperfrontend.connectors.AbstractSubscriptionFieldsConnector
 import domain.models.apidefinitions.{ApiContext, ApiVersion}
 import domain.models.applications.ClientId
 import domain.models.subscriptions.ApiSubscriptionFields.SubscriptionFieldValue

@@ -23,7 +23,7 @@ import domain.models.controllers.AddTeamMemberPageMode.ManageTeamMembers
 import domain.{ApplicationNotFound, ApplicationUpdateSuccessful, TeamMemberAlreadyExists}
 import domain.models.applications._
 import domain.models.controllers.AddTeamMemberPageMode
-import helpers.string._
+import uk.gov.hmrc.thirdpartydeveloperfrontend.helpers.string._
 import mocks.service.{ApplicationActionServiceMock, ApplicationServiceMock, SessionServiceMock}
 import org.joda.time.DateTime
 import play.api.mvc.Result

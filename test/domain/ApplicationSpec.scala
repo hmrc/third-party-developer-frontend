@@ -23,7 +23,7 @@ import domain.models.applications.Capabilities.{ChangeClientSecret, ViewCredenti
 import domain.models.applications._
 import domain.models.applications.Permissions.SandboxOrAdmin
 import domain.models.developers.Developer
-import helpers.string._
+import uk.gov.hmrc.thirdpartydeveloperfrontend.helpers.string._
 import org.joda.time.DateTime
 import utils.LocalUserIdTracker
 import org.scalatest.matchers.should.Matchers

@@ -19,7 +19,7 @@ package uk.gov.hmrc.modules.submissions.controllers
 
 import uk.gov.hmrc.thirdpartydeveloperfrontend.config.ApplicationConfig
 import uk.gov.hmrc.thirdpartydeveloperfrontend.config.ErrorHandler
-import connectors.ApmConnector
+import uk.gov.hmrc.thirdpartydeveloperfrontend.connectors.ApmConnector
 import domain.models.applications.ApplicationId
 import play.api.libs.crypto.CookieSigner
 import play.api.mvc.{MessagesControllerComponents, Result}

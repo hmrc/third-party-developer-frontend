@@ -18,7 +18,7 @@ package controllers
 
 import builder.DeveloperBuilder
 import uk.gov.hmrc.thirdpartydeveloperfrontend.config.ErrorHandler
-import connectors.ThirdPartyDeveloperConnector
+import uk.gov.hmrc.thirdpartydeveloperfrontend.connectors.ThirdPartyDeveloperConnector
 import domain.models.connectors.ChangePassword
 import domain.models.developers.{LoggedInState, Session, UpdateProfileRequest}
 import domain.InvalidCredentials

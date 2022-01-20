@@ -29,7 +29,7 @@ import utils.WithCSRFAddToken
 import views.helper.CommonViewSpec
 import views.html.{AddApplicationSubordinateEmptyNestView, ManageApplicationsView}
 import views.helper.EnvironmentNameService
-import helpers.DateFormatter
+import uk.gov.hmrc.thirdpartydeveloperfrontend.helpers.DateFormatter
 import domain.models.applications.Environment
 
 class ViewAllApplicationsPageSpec extends CommonViewSpec with WithCSRFAddToken {

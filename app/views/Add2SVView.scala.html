@@ -15,6 +15,7 @@
  *@
 
 @import uk.gov.hmrc.thirdpartydeveloperfrontend.config.ApplicationConfig
+@import uk.gov.hmrc.thirdpartydeveloperfrontend.helpers.PluralizeHelper
 @import include._
 @import domain.models.controllers.MfaMandateDetails
 @import domain.models.developers.DeveloperSession
@@ -43,7 +44,7 @@
       <span class="govuk-warning-text__icon" aria-hidden="true">!</span>
       <strong class="govuk-warning-text__text">
         <span class="govuk-warning-text__assistive">Warning</span>
-        If you are the Administrator of an application you have {mfaMandateDetails.daysTillAdminMfaMandate} {helpers.PluralizeHelper.pluralize(mfaMandateDetails.daysTillAdminMfaMandate, "day", "days")} until 2-step verification is mandatory
+        If you are the Administrator of an application you have {mfaMandateDetails.daysTillAdminMfaMandate} {PluralizeHelper.pluralize(mfaMandateDetails.daysTillAdminMfaMandate, "day", "days")} until 2-step verification is mandatory
       </strong>
     </div>
   }

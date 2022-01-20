@@ -20,7 +20,7 @@ import java.util.UUID
 import java.util.UUID.randomUUID
 
 import builder.DeveloperBuilder
-import connectors.ThirdPartyDeveloperConnector
+import uk.gov.hmrc.thirdpartydeveloperfrontend.connectors.ThirdPartyDeveloperConnector
 import domain.models.applications.ApplicationState._
 import domain.models.applications.CollaboratorRole.{ADMINISTRATOR, DEVELOPER}
 import domain.ClientSecretLimitExceeded

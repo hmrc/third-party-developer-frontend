@@ -18,7 +18,7 @@ package service
 
 import com.google.inject.name.Named
 import uk.gov.hmrc.thirdpartydeveloperfrontend.config.ApplicationConfig
-import connectors._
+import uk.gov.hmrc.thirdpartydeveloperfrontend.connectors._
 import domain.models.applications.Environment.PRODUCTION
 import domain.models.applications.{Application, ApplicationId, Environment}
 import javax.inject.{Inject, Singleton}

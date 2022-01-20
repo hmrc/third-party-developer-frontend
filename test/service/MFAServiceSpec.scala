@@ -16,7 +16,7 @@
 
 package service
 
-import connectors.ThirdPartyDeveloperConnector
+import uk.gov.hmrc.thirdpartydeveloperfrontend.connectors.ThirdPartyDeveloperConnector
 import play.api.http.Status.INTERNAL_SERVER_ERROR
 import uk.gov.hmrc.http.{HeaderCarrier, UpstreamErrorResponse}
 import utils.AsyncHmrcSpec

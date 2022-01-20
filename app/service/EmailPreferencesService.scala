@@ -17,7 +17,7 @@
 package service
 
 import cats.data.NonEmptyList
-import connectors.{ApmConnector, ThirdPartyDeveloperConnector}
+import uk.gov.hmrc.thirdpartydeveloperfrontend.connectors.{ApmConnector, ThirdPartyDeveloperConnector}
 import domain.models.applications.ApplicationId
 import domain.models.connectors.ApiType.REST_API
 import domain.models.connectors.{CombinedApi, CombinedApiCategory}

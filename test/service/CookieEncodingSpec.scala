@@ -17,7 +17,7 @@
 package service
 
 import uk.gov.hmrc.thirdpartydeveloperfrontend.config.ApplicationConfig
-import connectors.{ConnectorMetrics, NoopConnectorMetrics}
+import uk.gov.hmrc.thirdpartydeveloperfrontend.connectors.{ConnectorMetrics, NoopConnectorMetrics}
 import org.scalatestplus.play.guice.GuiceOneAppPerSuite
 import play.api.{Application, Mode}
 import play.api.inject.bind

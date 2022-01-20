@@ -33,7 +33,7 @@ import service.ApplicationService
 import play.api.libs.crypto.CookieSigner
 import uk.gov.hmrc.thirdpartydeveloperfrontend.config.ErrorHandler
 import uk.gov.hmrc.modules.submissions.views.html.{CancelledRequestForProductionCredentialsView, ConfirmCancelRequestForProductionCredentialsView}
-import connectors.ThirdPartyApplicationProductionConnector
+import uk.gov.hmrc.thirdpartydeveloperfrontend.connectors.ThirdPartyApplicationProductionConnector
 import domain.models.applications.State
 
 object CancelRequestController {

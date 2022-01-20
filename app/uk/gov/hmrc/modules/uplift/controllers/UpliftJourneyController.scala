@@ -18,7 +18,7 @@ package uk.gov.hmrc.modules.uplift.controllers
 
 import uk.gov.hmrc.thirdpartydeveloperfrontend.config.ApplicationConfig
 import uk.gov.hmrc.thirdpartydeveloperfrontend.config.ErrorHandler
-import connectors.ApmConnector
+import uk.gov.hmrc.thirdpartydeveloperfrontend.connectors.ApmConnector
 import controllers.checkpages.{CanUseCheckActions, DummySubscriptionsForm}
 import domain.models.apidefinitions.APISubscriptionStatus
 import domain.models.applications.ApplicationId

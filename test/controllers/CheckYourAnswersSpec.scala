@@ -24,7 +24,7 @@ import domain.{ApplicationAlreadyExists, ApplicationUpliftSuccessful, DeskproTic
 import domain.models.apidefinitions._
 import domain.models.applications._
 import domain.models.applications.CollaboratorRole.{ADMINISTRATOR, DEVELOPER}
-import helpers.string._
+import uk.gov.hmrc.thirdpartydeveloperfrontend.helpers.string._
 import mocks.service._
 import org.joda.time.DateTimeZone
 import org.jsoup.Jsoup

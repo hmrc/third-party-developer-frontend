@@ -20,7 +20,7 @@ import java.util.UUID
 
 import builder.DeveloperBuilder
 import uk.gov.hmrc.thirdpartydeveloperfrontend.config.ErrorHandler
-import connectors.ThirdPartyDeveloperConnector
+import uk.gov.hmrc.thirdpartydeveloperfrontend.connectors.ThirdPartyDeveloperConnector
 import domain.models.developers.{LoggedInState, Session}
 import mocks.service.SessionServiceMock
 import play.api.test.FakeRequest

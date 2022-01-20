@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package uk.gov.hmrc.modules.uplift.controllers.models
+package uk.gov.hmrc.modules.uplift.domain.models
 
 import domain.models.apidefinitions.ApiIdentifier
 

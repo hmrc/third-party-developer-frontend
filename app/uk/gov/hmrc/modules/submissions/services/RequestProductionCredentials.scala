@@ -21,7 +21,7 @@ import domain.models.applications.ApplicationId
 import domain.models.developers.DeveloperSession
 import uk.gov.hmrc.http.HeaderCarrier
 import domain.models.connectors.DeskproTicket
-import connectors.DeskproConnector
+import uk.gov.hmrc.thirdpartydeveloperfrontend.connectors.DeskproConnector
 import scala.concurrent.Future
 import scala.concurrent.ExecutionContext
 import domain.models.applications.Application

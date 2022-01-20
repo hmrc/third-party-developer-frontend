@@ -18,7 +18,7 @@ package service
 
 import java.time.Period
 import uk.gov.hmrc.thirdpartydeveloperfrontend.config.ApplicationConfig
-import connectors._
+import uk.gov.hmrc.thirdpartydeveloperfrontend.connectors._
 import domain.models.applications.{Application, ApplicationId, ClientId, Environment}
 import play.api.http.Status
 import service.PushPullNotificationsService.PushPullNotificationsConnector

@@ -16,7 +16,7 @@
 
 package uk.gov.hmrc.modules.submissions.services
 
-import connectors.DeskproConnector
+import uk.gov.hmrc.thirdpartydeveloperfrontend.connectors.DeskproConnector
 import domain.models.applications.ApplicationId
 import domain.models.developers.DeveloperSession
 import uk.gov.hmrc.http.HeaderCarrier

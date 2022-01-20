@@ -18,7 +18,7 @@ package uk.gov.hmrc.thirdpartydeveloperfrontend.config
 
 
 import uk.gov.hmrc.play.bootstrap.config.ServicesConfig
-import connectors.ApmConnector
+import uk.gov.hmrc.thirdpartydeveloperfrontend.connectors.ApmConnector
 import com.google.inject.{Provider, Inject, Singleton}
 
 @Singleton

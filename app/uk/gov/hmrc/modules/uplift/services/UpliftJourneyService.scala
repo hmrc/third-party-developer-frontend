@@ -20,7 +20,7 @@ import domain.models.developers.DeveloperSession
 import scala.concurrent.Future
 import domain.models.applications.ApplicationId
 import uk.gov.hmrc.modules.uplift.domain.models.ApiSubscriptions
-import connectors.ApmConnector
+import uk.gov.hmrc.thirdpartydeveloperfrontend.connectors.ApmConnector
 import javax.inject.{Inject, Singleton}
 import uk.gov.hmrc.modules.common.services.EitherTHelper
 import uk.gov.hmrc.http.HeaderCarrier

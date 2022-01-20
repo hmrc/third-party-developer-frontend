@@ -19,7 +19,7 @@ package mocks.connector
 import org.mockito.{ArgumentMatchersSugar, MockitoSugar}
 
 import scala.concurrent.Future.{failed, successful}
-import connectors.ApmConnector
+import uk.gov.hmrc.thirdpartydeveloperfrontend.connectors.ApmConnector
 import domain.models.apidefinitions.{ApiContext, ApiIdentifier}
 import domain.models.applications.ApplicationId
 import domain.models.subscriptions.ApiData

@@ -20,7 +20,7 @@ import java.time.Period
 import java.util.UUID.randomUUID
 
 import builder._
-import connectors._
+import uk.gov.hmrc.thirdpartydeveloperfrontend.connectors._
 import domain._
 import domain.models.apidefinitions._
 import domain.models.applications._

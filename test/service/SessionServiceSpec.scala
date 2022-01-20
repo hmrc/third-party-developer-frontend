@@ -17,7 +17,7 @@
 package service
 
 import builder.DeveloperBuilder
-import connectors.ThirdPartyDeveloperConnector
+import uk.gov.hmrc.thirdpartydeveloperfrontend.connectors.ThirdPartyDeveloperConnector
 import domain.models.connectors.{LoginRequest, TotpAuthenticationRequest, UserAuthenticationResponse}
 import domain.models.developers.{LoggedInState, Session, SessionInvalid}
 import repositories.FlowRepository

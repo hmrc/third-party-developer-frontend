@@ -18,7 +18,7 @@ package controllers.profile
 
 import uk.gov.hmrc.thirdpartydeveloperfrontend.config.ApplicationConfig
 import uk.gov.hmrc.thirdpartydeveloperfrontend.config.ErrorHandler
-import connectors.ThirdPartyDeveloperConnector
+import uk.gov.hmrc.thirdpartydeveloperfrontend.connectors.ThirdPartyDeveloperConnector
 import domain.models.connectors.UpdateLoggedInStateRequest
 import domain.models.developers.LoggedInState
 import javax.inject.{Inject, Singleton}

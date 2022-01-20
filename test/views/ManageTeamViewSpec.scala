@@ -19,7 +19,7 @@ package views
 import controllers.AddTeamMemberForm
 import domain.models.applications._
 import domain.models.developers.LoggedInState
-import helpers.string._
+import uk.gov.hmrc.thirdpartydeveloperfrontend.helpers.string._
 import domain.models.controllers.ApplicationViewModel
 import org.jsoup.Jsoup
 import play.api.data.Form

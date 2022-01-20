@@ -18,7 +18,7 @@ package service
 
 import java.util.UUID.randomUUID
 
-import connectors.ThirdPartyApplicationConnector
+import uk.gov.hmrc.thirdpartydeveloperfrontend.connectors.ThirdPartyApplicationConnector
 import domain.ApplicationUpdateSuccessful
 import domain.models.applications.{Application, IpAllowlist}
 import domain.models.flows.FlowType.IP_ALLOW_LIST

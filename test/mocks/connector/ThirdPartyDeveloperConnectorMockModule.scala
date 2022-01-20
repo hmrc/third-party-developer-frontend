@@ -16,7 +16,7 @@
 
 package mocks.connector
 
-import connectors.ThirdPartyDeveloperConnector
+import uk.gov.hmrc.thirdpartydeveloperfrontend.connectors.ThirdPartyDeveloperConnector
 import domain.models.developers.{Developer, UserId}
 import org.mockito.{ArgumentMatchersSugar, MockitoSugar}
 

@@ -19,7 +19,7 @@ package controllers
 import java.util.UUID.randomUUID
 
 import builder.DeveloperBuilder
-import connectors.ThirdPartyDeveloperConnector
+import uk.gov.hmrc.thirdpartydeveloperfrontend.connectors.ThirdPartyDeveloperConnector
 import domain.models.apidefinitions.{ApiContext, ApiVersion,ApiIdentifier}
 import domain.models.applications._
 import domain.models.connectors.TicketResult

@@ -21,7 +21,7 @@ import builder._
 import utils._
 import mocks.service.ApplicationServiceMock
 import mocks.service.ApplicationActionServiceMock
-import connectors.ThirdPartyApplicationProductionConnector
+import uk.gov.hmrc.thirdpartydeveloperfrontend.connectors.ThirdPartyApplicationProductionConnector
 import org.mockito.MockitoSugar
 import org.mockito.ArgumentMatchersSugar
 import scala.concurrent.Future.successful
