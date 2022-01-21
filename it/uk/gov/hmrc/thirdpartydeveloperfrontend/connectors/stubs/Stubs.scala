@@ -30,7 +30,7 @@ import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.services.ApiDefinitionsJso
 import play.api.http.Status._
 import play.api.libs.json.{Json, Writes}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.connectors.PasswordResetRequest
-import uk.gov.hmrc.modules.common.services.ApplicationLogger
+import uk.gov.hmrc.apiplatform.modules.common.services.ApplicationLogger
 import org.scalatest.matchers.should.Matchers
 
 object Stubs extends ApplicationLogger {

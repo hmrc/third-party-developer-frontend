@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package uk.gov.hmrc.modules.uplift.services.mocks
+package uk.gov.hmrc.apiplatform.modules.uplift.services.mocks
 
 
 import org.mockito.MockitoSugar
@@ -23,7 +23,7 @@ import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.UserId
 import scala.concurrent.Future._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.controllers.ApplicationSummary
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.ApplicationId
-import uk.gov.hmrc.modules.uplift.services.UpliftLogic
+import uk.gov.hmrc.apiplatform.modules.uplift.services.UpliftLogic
 
 
 class UpliftLogicMock extends MockitoSugar with ArgumentMatchersSugar {

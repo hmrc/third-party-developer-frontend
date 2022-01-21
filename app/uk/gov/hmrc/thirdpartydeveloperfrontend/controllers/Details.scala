@@ -38,10 +38,10 @@ import views.html.checkpages.applicationcheck.UnauthorisedAppDetailsView
 import scala.concurrent.{ExecutionContext, Future}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.subscriptions.DevhubAccessLevel
 import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.fraudprevention.FraudPreventionNavLinkHelper
-import uk.gov.hmrc.modules.submissions.services.SubmissionService
+import uk.gov.hmrc.apiplatform.modules.submissions.services.SubmissionService
 import cats.data.OptionT
 import cats.instances.future.catsStdInstancesForFuture
-import uk.gov.hmrc.modules.submissions.domain.models.ExtendedSubmission
+import uk.gov.hmrc.apiplatform.modules.submissions.domain.models.ExtendedSubmission
 import scala.concurrent.Future.successful
 
 @Singleton
@@ -80,9 +80,9 @@ class Details @Inject() (
         lazy val newUpliftJourney = (e: ExtendedSubmission) =>
           if (request.role.isAdministrator) {
             if(e.isCompleted) {
-              Redirect(uk.gov.hmrc.modules.submissions.controllers.routes.CheckAnswersController.checkAnswersPage(applicationId))
+              Redirect(uk.gov.hmrc.apiplatform.modules.submissions.controllers.routes.CheckAnswersController.checkAnswersPage(applicationId))
             } else {
-              Redirect(uk.gov.hmrc.modules.submissions.controllers.routes.ProdCredsChecklistController.productionCredentialsChecklistPage(applicationId))
+              Redirect(uk.gov.hmrc.apiplatform.modules.submissions.controllers.routes.ProdCredsChecklistController.productionCredentialsChecklistPage(applicationId))
             }
           } else {
             Ok(unauthorisedAppDetailsView(request.application.name, request.application.adminEmails))
@@ -101,7 +101,7 @@ class Details @Inject() (
 
 
         lazy val newUpliftJourney = (e: ExtendedSubmission) =>
-          Redirect(uk.gov.hmrc.modules.submissions.controllers.routes.CredentialsRequestedController.credentialsRequestedPage(applicationId))
+          Redirect(uk.gov.hmrc.apiplatform.modules.submissions.controllers.routes.CredentialsRequestedController.credentialsRequestedPage(applicationId))
 
         OptionT(submissionService.fetchLatestSubmission(applicationId)).fold(oldJourney)(newUpliftJourney)    
       }

@@ -16,7 +16,7 @@
 
 package uk.gov.hmrc.thirdpartydeveloperfrontend.utils
 
-import uk.gov.hmrc.modules.submissions.domain.models._
+import uk.gov.hmrc.apiplatform.modules.submissions.domain.models._
 import uk.gov.hmrc.time.DateTimeUtils
 import cats.data.NonEmptyList
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.ApplicationId
@@ -124,7 +124,7 @@ trait SubmissionsTestData {
   val questionnaireAltId = questionnaireAlt.id
   val questionAltId = questionnaireAlt.questions.head.question.id
 
-  val submissionId = SubmissionId.random
+  val submissionId = Submission.Id.random
   val applicationId = ApplicationId.random
 
   def firstQuestion(questionnaire: Questionnaire) = questionnaire.questions.head.question.id
@@ -141,7 +141,7 @@ trait SubmissionsTestData {
 
   val extendedSubmission = ExtendedSubmission(submission, initialProgress)
   
-  val altSubmissionId = SubmissionId.random
+  val altSubmissionId = Submission.Id.random
   require(altSubmissionId != submissionId)
   val altSubmission = Submission(altSubmissionId, applicationId, DateTimeUtils.now.plusMillis(100), activeQuestionnaireGroupings, Map.empty)
 

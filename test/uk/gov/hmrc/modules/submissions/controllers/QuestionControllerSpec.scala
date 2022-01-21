@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package uk.gov.hmrc.modules.submissions.controllers
+package uk.gov.hmrc.apiplatform.modules.submissions.controllers
 
 import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.{BaseControllerSpec, SubscriptionTestHelperSugar}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.builder.{DeveloperBuilder, SampleApplication, SampleSession}
@@ -23,15 +23,15 @@ import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.{LocalUserIdTracker, WithCS
 import uk.gov.hmrc.thirdpartydeveloperfrontend.mocks.service.ApplicationServiceMock
 import uk.gov.hmrc.thirdpartydeveloperfrontend.mocks.service.ApplicationActionServiceMock
 import uk.gov.hmrc.thirdpartydeveloperfrontend.mocks.connectors.ApmConnectorMockModule
-import uk.gov.hmrc.modules.submissions.services.mocks.SubmissionServiceMockModule
+import uk.gov.hmrc.apiplatform.modules.submissions.services.mocks.SubmissionServiceMockModule
 import uk.gov.hmrc.http.HeaderCarrier
-import uk.gov.hmrc.modules.submissions.views.html.CheckAnswersView
-import uk.gov.hmrc.modules.submissions.views.html.QuestionView
+import uk.gov.hmrc.apiplatform.modules.submissions.views.html.CheckAnswersView
+import uk.gov.hmrc.apiplatform.modules.submissions.views.html.QuestionView
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.WithLoggedInSession._
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.SubmissionsTestData.{applicationId, questionId, question2Id, submission, extendedSubmission}
-import uk.gov.hmrc.modules.submissions.domain.models.QuestionId
+import uk.gov.hmrc.apiplatform.modules.submissions.domain.models.QuestionId
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.ApplicationWithSubscriptionData
 import play.api.test.FakeRequest
 import play.api.test.Helpers._

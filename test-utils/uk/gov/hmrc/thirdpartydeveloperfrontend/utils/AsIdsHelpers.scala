@@ -16,7 +16,7 @@
 
 package uk.gov.hmrc.thirdpartydeveloperfrontend.utils
 
-import uk.gov.hmrc.modules.submissions.domain.models.{QuestionId, QuestionItem}
+import uk.gov.hmrc.apiplatform.modules.submissions.domain.models.{QuestionId, QuestionItem}
 import cats.data.NonEmptyList
 
 trait AsIdsHelpers {

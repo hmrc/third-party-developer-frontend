@@ -18,7 +18,7 @@ package uk.gov.hmrc.thirdpartydeveloperfrontend.repositories
 
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.flows._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.services.CombinedApiJsonFormatters
-import uk.gov.hmrc.modules.uplift.domain.models.GetProductionCredentialsFlow
+import uk.gov.hmrc.apiplatform.modules.uplift.domain.models.GetProductionCredentialsFlow
 import org.joda.time.DateTime
 import play.api.libs.json.{Format, Json, OFormat}
 import uk.gov.hmrc.mongo.json.ReactiveMongoFormats

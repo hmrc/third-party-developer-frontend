@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package uk.gov.hmrc.modules.submissions.controllers
+package uk.gov.hmrc.apiplatform.modules.submissions.controllers
 
 import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.BaseControllerSpec
 import uk.gov.hmrc.thirdpartydeveloperfrontend.builder._
@@ -26,9 +26,9 @@ import org.mockito.MockitoSugar
 import org.mockito.ArgumentMatchersSugar
 import scala.concurrent.Future.successful
 import scala.concurrent.ExecutionContext.Implicits.global
-import uk.gov.hmrc.modules.submissions.services.mocks.SubmissionServiceMockModule
+import uk.gov.hmrc.apiplatform.modules.submissions.services.mocks.SubmissionServiceMockModule
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.ApplicationId
-import uk.gov.hmrc.modules.submissions.views.html._
+import uk.gov.hmrc.apiplatform.modules.submissions.views.html._
 import play.api.test.FakeRequest
 import play.filters.csrf.CSRF
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.WithCSRFAddToken

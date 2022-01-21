@@ -14,18 +14,18 @@
  * limitations under the License.
  */
 
-package uk.gov.hmrc.modules.submissions.controllers
+package uk.gov.hmrc.apiplatform.modules.submissions.controllers
 
 import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.BaseControllerSpec
 import uk.gov.hmrc.thirdpartydeveloperfrontend.mocks.service.ApplicationServiceMock
 import uk.gov.hmrc.thirdpartydeveloperfrontend.mocks.service.ApplicationActionServiceMock
 import uk.gov.hmrc.thirdpartydeveloperfrontend.mocks.connectors.ApmConnectorMockModule
-import uk.gov.hmrc.modules.submissions.services.mocks.SubmissionServiceMockModule
+import uk.gov.hmrc.apiplatform.modules.submissions.services.mocks.SubmissionServiceMockModule
 import play.api.test.Helpers._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.WithLoggedInSession._
 
 import scala.concurrent.ExecutionContext.Implicits.global
-import uk.gov.hmrc.modules.submissions.views.html.ProductionCredentialsChecklistView
+import uk.gov.hmrc.apiplatform.modules.submissions.views.html.ProductionCredentialsChecklistView
 import uk.gov.hmrc.thirdpartydeveloperfrontend.builder.DeveloperBuilder
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.LocalUserIdTracker
 import play.api.test.FakeRequest
@@ -35,7 +35,7 @@ import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.Applic
 import uk.gov.hmrc.thirdpartydeveloperfrontend.builder.SampleApplication
 import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.SubscriptionTestHelperSugar
 import uk.gov.hmrc.thirdpartydeveloperfrontend.builder.SampleSession
-import uk.gov.hmrc.modules.submissions.domain.models.ExtendedSubmission
+import uk.gov.hmrc.apiplatform.modules.submissions.domain.models.ExtendedSubmission
 
 class ProdCredsChecklistControllerSpec
   extends BaseControllerSpec
@@ -157,7 +157,7 @@ class ProdCredsChecklistControllerSpec
       val result = controller.productionCredentialsChecklistAction(appId)(loggedInRequest.withCSRFToken)
 
       status(result) shouldBe SEE_OTHER
-      redirectLocation(result) shouldBe Some(uk.gov.hmrc.modules.submissions.controllers.routes.CheckAnswersController.checkAnswersPage(appId).url)
+      redirectLocation(result) shouldBe Some(uk.gov.hmrc.apiplatform.modules.submissions.controllers.routes.CheckAnswersController.checkAnswersPage(appId).url)
     }
 
   }

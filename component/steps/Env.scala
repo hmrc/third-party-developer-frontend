@@ -37,7 +37,7 @@ import stubs.AuditStub
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.BrowserStackCaps
 
 import scala.util.{Properties, Try}
-import uk.gov.hmrc.modules.common.services.ApplicationLogger
+import uk.gov.hmrc.apiplatform.modules.common.services.ApplicationLogger
 import org.openqa.selenium.firefox.FirefoxOptions
 import org.openqa.selenium.firefox.FirefoxDriver
 import org.scalatest.matchers.should.Matchers
