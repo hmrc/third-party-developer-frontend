@@ -16,18 +16,18 @@
 
 package views.emailpreferences
 
-import controllers.TaxRegimeEmailPreferencesForm
-import domain.models.developers.LoggedInState
-import domain.models.emailpreferences.APICategoryDisplayDetails
-import domain.models.flows.EmailPreferencesFlowV2
+import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.TaxRegimeEmailPreferencesForm
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.LoggedInState
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.emailpreferences.APICategoryDisplayDetails
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.flows.EmailPreferencesFlowV2
 import org.jsoup.Jsoup
 import org.jsoup.nodes.Document
 import play.api.data.Form
 import play.api.mvc.AnyContentAsEmpty
 import play.api.test.FakeRequest
 import play.twirl.api.Html
-import utils.ViewHelpers._
-import utils.WithCSRFAddToken
+import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.ViewHelpers._
+import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.{WithCSRFAddToken,DeveloperSessionBuilder}
 import views.helper.CommonViewSpec
 import views.html.emailpreferences.FlowSelectCategoriesView
 
@@ -39,7 +39,7 @@ class FlowSelectCategoriesViewSpec extends CommonViewSpec with WithCSRFAddToken 
     val form = mock[Form[TaxRegimeEmailPreferencesForm]]
 
     val developerSessionWithoutEmailPreferences =
-      utils.DeveloperSession("email@example.com", "First Name", "Last Name", None, loggedInState = LoggedInState.LOGGED_IN)
+      DeveloperSessionBuilder("email@example.com", "First Name", "Last Name", None, loggedInState = LoggedInState.LOGGED_IN)
     val emailPreferencesFlow =
       EmailPreferencesFlowV2(developerSessionWithoutEmailPreferences.session.sessionId, Set("api1", "api2"), Map.empty, Set.empty, List.empty)
     implicit val request: FakeRequest[AnyContentAsEmpty.type] = FakeRequest().withCSRFToken

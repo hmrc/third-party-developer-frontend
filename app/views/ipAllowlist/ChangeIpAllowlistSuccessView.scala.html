@@ -14,14 +14,14 @@
  * limitations under the License.
  *@
 
-@import config.ApplicationConfig
 @import include._
 @import views.html.include.DevMain
-@import domain.models.applications.Application
-@import domain.models.developers.DeveloperSession
-@import domain.models.flows.IpAllowlistFlow
-@import domain.models.views.IpAllowlistFeedbackBanner
-@import domain.models.controllers.Crumb
+@import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.Application
+@import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.DeveloperSession
+@import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.flows.IpAllowlistFlow
+@import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.views.IpAllowlistFeedbackBanner
+@import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.controllers.Crumb
+@import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.routes
 
 @this(devMain: DevMain2)
 
@@ -79,7 +79,7 @@ implicit request: play.api.mvc.Request[Any], loggedIn: DeveloperSession, message
     <br>
 
     <p class="govuk-body">
-      <a class="govuk-link govuk-link--no-visited-state" href="@routes.IpAllowlist.editIpAllowlist(app.id)">Edit your IP allow list</a>
+      <a class="govuk-link govuk-link--no-visited-state" href="@routes.IpAllowListController.editIpAllowlist(app.id)">Edit your IP allow list</a>
     </p>
 
     <p class="govuk-body">

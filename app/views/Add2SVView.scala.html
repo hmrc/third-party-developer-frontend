@@ -14,11 +14,11 @@
  * limitations under the License.
  *@
 
-@import config.ApplicationConfig
+@import uk.gov.hmrc.thirdpartydeveloperfrontend.helpers.PluralizeHelper
 @import include._
-@import domain.models.controllers.MfaMandateDetails
-@import domain.models.developers.DeveloperSession
-@import domain.models.views.BackButtonWithJavaScript
+@import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.controllers.MfaMandateDetails
+@import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.DeveloperSession
+@import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.views.BackButtonWithJavaScript
 
 @this(devMain: DevMain2)
 
@@ -43,13 +43,13 @@
       <span class="govuk-warning-text__icon" aria-hidden="true">!</span>
       <strong class="govuk-warning-text__text">
         <span class="govuk-warning-text__assistive">Warning</span>
-        If you are the Administrator of an application you have {mfaMandateDetails.daysTillAdminMfaMandate} {helpers.PluralizeHelper.pluralize(mfaMandateDetails.daysTillAdminMfaMandate, "day", "days")} until 2-step verification is mandatory
+        If you are the Administrator of an application you have {mfaMandateDetails.daysTillAdminMfaMandate} {PluralizeHelper.pluralize(mfaMandateDetails.daysTillAdminMfaMandate, "day", "days")} until 2-step verification is mandatory
       </strong>
     </div>
   }
   <br/>
 
   <p class="govuk-body">
-    <a class="govuk-link" id="skip" href="@routes.UserLoginAccount.get2SVNotSetPage()">I can't do this right now</a>
+    <a class="govuk-link" id="skip" href="@controllers.routes.UserLoginAccount.get2SVNotSetPage()">I can't do this right now</a>
   </p>
 }

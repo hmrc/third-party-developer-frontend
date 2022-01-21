@@ -16,11 +16,11 @@
 
 package views.emailpreferences
 
-import domain.models.developers.LoggedInState
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.LoggedInState
 import org.jsoup.Jsoup
 import play.api.mvc.AnyContentAsEmpty
 import play.api.test.FakeRequest
-import utils.WithCSRFAddToken
+import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.{DeveloperSessionBuilder, WithCSRFAddToken}
 import views.helper.CommonViewSpec
 import views.html.emailpreferences.EmailPreferencesUnsubscribeAllView
 
@@ -28,7 +28,7 @@ class EmailPreferencesUnsubscribeAllViewSpec extends CommonViewSpec with WithCSR
 
   trait Setup {
     implicit val request: FakeRequest[AnyContentAsEmpty.type] = FakeRequest().withCSRFToken
-    val developerSession = utils.DeveloperSession("email@example.com", "First Name", "Last Name", None, loggedInState = LoggedInState.LOGGED_IN)
+    val developerSession = DeveloperSessionBuilder("email@example.com", "First Name", "Last Name", None, loggedInState = LoggedInState.LOGGED_IN)
 
     val emailPreferencesUnsubscribeAllView = app.injector.instanceOf[EmailPreferencesUnsubscribeAllView]
   }

@@ -18,17 +18,18 @@ package views
 
 import java.util.UUID.randomUUID
 
-import config.ApplicationConfig
-import domain.models.applications._
-import domain.models.developers.LoggedInState
+import uk.gov.hmrc.thirdpartydeveloperfrontend.config.ApplicationConfig
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications._
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.LoggedInState
 import org.joda.time.DateTime
 import org.jsoup.Jsoup
 import org.jsoup.nodes.Document
 import play.api.test.FakeRequest
 import play.twirl.api.Html
-import utils._
+import uk.gov.hmrc.thirdpartydeveloperfrontend.utils._
 import views.helper.CommonViewSpec
 import views.html.ServerTokenView
+import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.DeveloperSessionBuilder
 
 import scala.collection.JavaConverters._
 
@@ -43,7 +44,7 @@ class ServerTokenSpec extends CommonViewSpec with WithCSRFAddToken with Collabor
 
   "Server token page" should {
     val request = FakeRequest().withCSRFToken
-    val developer = utils.DeveloperSession("Test", "Test", "Test", None, loggedInState = LoggedInState.LOGGED_IN)
+    val developer = DeveloperSessionBuilder("Test", "Test", "Test", None, loggedInState = LoggedInState.LOGGED_IN)
 
     val application = Application(
       ApplicationId("Test Application ID"),

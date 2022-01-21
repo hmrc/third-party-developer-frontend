@@ -14,18 +14,19 @@
  * limitations under the License.
  *@
 
-@import helpers.DateFormatter.formatLastAccessDate
+@import uk.gov.hmrc.thirdpartydeveloperfrontend.helpers.DateFormatter.formatLastAccessDate
 @import include._
-@import domain.models.controllers.Crumb
-@import domain.models.developers.DeveloperSession
+@import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.controllers.Crumb
+@import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.DeveloperSession
 @import views.helper.EnvironmentNameService
-@import domain.models.controllers.{ManageApplicationsViewModel, ApplicationSummary}
-@import domain.models.controllers.LeftHandNavFlags
+@import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.controllers.{ManageApplicationsViewModel, ApplicationSummary}
+@import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.controllers.LeftHandNavFlags
 @import uk.gov.hmrc.urls.Link
+@import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.routes
 
 @this(devMain: DevMain2, leftHandNav: LeftHandNav)
 
-@(model: ManageApplicationsViewModel)(implicit request: play.api.mvc.Request[Any], loggedIn: DeveloperSession, messagesProvider: MessagesProvider, appConfig: config.ApplicationConfig, navSection: String = "manage-applications", environmentNameService: EnvironmentNameService)
+@(model: ManageApplicationsViewModel)(implicit request: play.api.mvc.Request[Any], loggedIn: DeveloperSession, messagesProvider: MessagesProvider, appConfig: ApplicationConfig, navSection: String = "manage-applications", environmentNameService: EnvironmentNameService)
 
 @principalWording = @{appConfig.nameOfPrincipalEnvironment.toLowerCase}
 @subordinateWording = @{appConfig.nameOfSubordinateEnvironment.toLowerCase}
@@ -71,7 +72,7 @@
 
   @if(model.hasNoLiveProductionApplications && model.hasAppsThatCanBeUplifted ) {
     <p class="govuk-body">After testing in @theSubordinateWording, you can apply for @principalWording credentials.</p>
-    <a class="govuk-button" data-module="govuk-button" href="@addapplication.routes.AddApplication.addApplicationPrincipal">
+    <a class="govuk-button" data-module="govuk-button" href="@controllers.addapplication.routes.AddApplication.addApplicationPrincipal">
       Get production credentials
     </a>
   }
@@ -104,7 +105,7 @@
           <tr class="govuk-table__row">
             @if(showLastApiCall) {
               <td class="govuk-table__cell govuk-!-width-one-half">
-                <a class="govuk-link" href="@routes.Details.details(app.id)" data-app-name>@app.name</a>
+                <a class="govuk-link" href="@controllers.routes.Details.details(app.id)" data-app-name>@app.name</a>
               </td>
               <td class="govuk-table__cell govuk-!-width-one-quarter" data-app-lastAccess>
                 @{
@@ -116,7 +117,7 @@
               </td>
             } else {
               <td class="govuk-table__cell govuk-!-width-three-quarters">
-                <a class="govuk-link" href="@routes.Details.details(app.id)" data-app-name>@app.name</a>
+                <a class="govuk-link" href="@controllers.routes.Details.details(app.id)" data-app-name>@app.name</a>
               </td>
             }
             <td class="govuk-table__cell your-role" data-app-user-role>

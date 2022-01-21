@@ -14,13 +14,13 @@
  * limitations under the License.
  *@
 
-@import config.ApplicationConfig
-@import helpers.DateFormatter.formatDateWithShortPattern
+@import uk.gov.hmrc.thirdpartydeveloperfrontend.helpers.DateFormatter.formatDateWithShortPattern
 @import java.util.UUID
 
-@import domain.models.applications.ClientSecret
-@import domain.models.applications.Application
-@import domain.models.developers.Developer
+@import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.ClientSecret
+@import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.Application
+@import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.Developer
+@import _root_.controllers.routes.Assets
 
 @(app: Application, developer: Developer, clientSecrets: Seq[ClientSecret])(
   implicit request: play.api.mvc.Request[Any], messages: Messages, applicationConfig: ApplicationConfig, flash: Flash
@@ -34,10 +34,10 @@
   <p class="govuk-body">Your client secret is a unique passphrase that you generate to authorise your application.</p>
 
   @if(app.deployedTo.isSandbox()) {
-    <p class="govuk-body">Use a client secret together with your <a id="client-id" class="govuk-link" href="@routes.Credentials.clientId(app.id)">client ID</a> to test your application in the sandbox.</p>
+    <p class="govuk-body">Use a client secret together with your <a id="client-id" class="govuk-link" href="@controllers.routes.Credentials.clientId(app.id)">client ID</a> to test your application in the sandbox.</p>
   }
   
-  @helper.form(action = routes.Credentials.addClientSecret(app.id), 'class -> "form") {
+  @helper.form(action = controllers.routes.Credentials.addClientSecret(app.id), 'class -> "form") {
     @helper.CSRF.formField
     <button id="submit" class="govuk-button" type="submit">Generate a client secret</button>
   }
@@ -103,7 +103,7 @@
             </td>
             @if(allowDeletion) {
               <td class="govuk-table__cell center-table-text">
-                <a class="govuk-button govuk-button--warning govuk-!-margin-bottom-0" id="delete-client-secret" href="@routes.Credentials.deleteClientSecret(app.id, secret.id)">
+                <a class="govuk-button govuk-button--warning govuk-!-margin-bottom-0" id="delete-client-secret" href="@controllers.routes.Credentials.deleteClientSecret(app.id, secret.id)">
                   Delete secret
                 </a>
               </td>
@@ -146,7 +146,7 @@
       @if(clientSecrets.size < 5) {
         <p class="govuk-body">You can have up to 5 client secrets at any time.</p>
         <div>
-          @helper.form(action = routes.Credentials.addClientSecret(app.id), 'class -> "form") {
+          @helper.form(action = controllers.routes.Credentials.addClientSecret(app.id), 'class -> "form") {
             @helper.CSRF.formField
             <button id="generate-another-client-secret" class="govuk-button" type="submit">
               Generate another client secret
@@ -156,8 +156,8 @@
       } else {
         <p class="govuk-body">You cannot have more than 5 client secrets.</p>
       }
-      <p class="govuk-body"><a class="govuk-link" href="@routes.Details.details(app.id)">View your application details</a></p>
+      <p class="govuk-body"><a class="govuk-link" href="@controllers.routes.Details.details(app.id)">View your application details</a></p>
     </div>
   </div>
 }
-<script src='@routes.Assets.versioned("javascripts/copy-button.js")' type="text/javascript"></script> 
+<script src='@Assets.versioned("javascripts/copy-button.js")' type="text/javascript"></script> 

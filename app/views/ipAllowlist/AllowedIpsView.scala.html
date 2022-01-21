@@ -14,11 +14,11 @@
  * limitations under the License.
  *@
 
-@import config.ApplicationConfig
-@import domain.models.views.{BackButtonWithJavaScript, IpAllowlistFeedbackBanner}
+@import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.views.{BackButtonWithJavaScript, IpAllowlistFeedbackBanner}
 @import views.html.include.DevMain2
-@import domain.models.developers.DeveloperSession
-@import domain.models.applications.Application
+@import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.DeveloperSession
+@import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.Application
+@import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.routes
 
 @this(devMain: DevMain2)
 
@@ -50,7 +50,7 @@
     <p class="govuk-body">Use /32 if you are unsure about CIDR notation but know the individual IP addresses your traffic comes from.</p>
     <p class="govuk-body">The largest netmask we allow is /24.</p>
     <div class="govuk-button-group">
-      <a class="govuk-button" href="@routes.IpAllowlist.settingUpAllowlist(app.id)">Continue</a>
+      <a class="govuk-button" href="@routes.IpAllowListController.settingUpAllowlist(app.id)">Continue</a>
       <a class="govuk-button govuk-button--secondary" href="@routes.Details.details(app.id)">Cancel</a>
     </div>
   </div>

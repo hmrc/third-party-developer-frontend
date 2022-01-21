@@ -14,16 +14,17 @@
  * limitations under the License.
  *@
 
-@import domain.models.developers.DeveloperSession
-@import domain.models.applications.Environment
-@import domain.models.controllers.ApplicationSummary
+@import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.DeveloperSession
+@import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.Environment
+@import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.controllers.ApplicationSummary
 @import include._
-@import domain.models.controllers.Crumb
+@import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.controllers.Crumb
 @import uk.gov.hmrc.urls.Link
+@import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.routes
 
 @this(devMain: DevMain2)
 
-@(form: Form[controllers.ChooseApplicationToUpliftForm], upliftableApps: Seq[ApplicationSummary], showFluff: Boolean)(implicit request: play.api.mvc.Request[Any], loggedIn: DeveloperSession, messagesProvider: MessagesProvider, appConfig: config.ApplicationConfig)
+@(form: Form[uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.ChooseApplicationToUpliftForm], upliftableApps: Seq[ApplicationSummary], showFluff: Boolean)(implicit request: play.api.mvc.Request[Any], loggedIn: DeveloperSession, messagesProvider: MessagesProvider, appConfig: ApplicationConfig)
 
 @pageHeading = @{ "Which application do you want production credentials for?" }
 

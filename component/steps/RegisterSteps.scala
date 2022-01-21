@@ -16,7 +16,7 @@
 
 package steps
 
-import domain.models.developers.Registration
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.Registration
 import io.cucumber.datatable.DataTable
 import io.cucumber.scala.{EN, ScalaDsl}
 import matchers.CustomMatchers

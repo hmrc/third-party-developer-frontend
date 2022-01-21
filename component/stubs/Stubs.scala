@@ -17,22 +17,22 @@
 package stubs
 
 import com.github.tomakehurst.wiremock.client.WireMock._
-import connectors.EncryptedJson
-import domain.models.applications.ApplicationNameValidationJson.ApplicationNameValidationResult
-import domain.models.developers.{Registration, UpdateProfileRequest}
-import domain.services.ApiDefinitionsJsonFormatters._
+import uk.gov.hmrc.thirdpartydeveloperfrontend.connectors.EncryptedJson
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.ApplicationNameValidationJson.ApplicationNameValidationResult
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.{Registration, UpdateProfileRequest}
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.services.ApiDefinitionsJsonFormatters._
 import play.api.libs.json.{Json, Writes}
 import play.api.http.Status._
-import domain.models.apidefinitions.ApiIdentifier
-import domain.models.apidefinitions.{ApiContext, ApiVersion}
-import domain.models.applications.ClientId
-import domain.models.developers.UserId
-import domain.models.connectors.PasswordResetRequest
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.apidefinitions.ApiIdentifier
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.apidefinitions.{ApiContext, ApiVersion}
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.ClientId
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.UserId
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.connectors.PasswordResetRequest
 
-import connectors.ThirdPartyDeveloperConnector.{FindUserIdRequest, FindUserIdResponse}
-import connectors.ThirdPartyDeveloperConnector.JsonFormatters.FindUserIdRequestWrites
-import domain.models.applications._
-import util.ApplicationLogger
+import uk.gov.hmrc.thirdpartydeveloperfrontend.connectors.ThirdPartyDeveloperConnector.{FindUserIdRequest, FindUserIdResponse}
+import uk.gov.hmrc.thirdpartydeveloperfrontend.connectors.ThirdPartyDeveloperConnector.JsonFormatters.FindUserIdRequestWrites
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications._
+import uk.gov.hmrc.modules.common.services.ApplicationLogger
 import org.scalatest.matchers.should.Matchers
 
 object Stubs extends ApplicationLogger {
@@ -77,7 +77,7 @@ object Stubs extends ApplicationLogger {
 }
 
 object DeveloperStub {
-  import utils.GlobalUserIdTracker.idOf
+  import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.GlobalUserIdTracker.idOf
 
   def register(registration: Registration, status: Int)(implicit encryptedJson: EncryptedJson) =
     stubFor(
@@ -215,7 +215,7 @@ object ApplicationStub {
   def configureUserApplications(userId: UserId, applications: List[ApplicationWithSubscriptionIds] = Nil, status: Int = OK) = {
     import play.api.libs.json.Json
     import play.api.libs.json.JodaWrites._
-    import domain.services.ApiDefinitionsJsonFormatters._
+    import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.services.ApiDefinitionsJsonFormatters._
 
     implicit val writes = Json.writes[ApplicationWithSubscriptionIds]
 

@@ -15,13 +15,15 @@
  *@
 
 @import include._
-@import domain.models.controllers.Crumb
-@import domain.models.developers.DeveloperSession
+@import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.controllers.Crumb
+@import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.DeveloperSession
 @import views.html.include.DevMain2
+@import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.routes
+@import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.DeleteProfileForm
 
 @this(devMain: DevMain2, leftHandNav: LeftHandNav)
 
-@(form: Form[DeleteProfileForm])(implicit request: play.api.mvc.Request[Any], loggedIn: DeveloperSession, appConfig: config.ApplicationConfig, messagesProvider: MessagesProvider, navSection: String = "manage-profile")
+@(form: Form[DeleteProfileForm])(implicit request: play.api.mvc.Request[Any], loggedIn: DeveloperSession, appConfig: ApplicationConfig, messagesProvider: MessagesProvider, navSection: String = "manage-profile")
 
 @titleError = { @if(form.errors.nonEmpty) {Error: } else {}}
 

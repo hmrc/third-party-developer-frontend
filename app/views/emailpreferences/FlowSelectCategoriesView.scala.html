@@ -14,13 +14,14 @@
  * limitations under the License.
  *@
 
-@import config.ApplicationConfig
-@import domain.models.developers.DeveloperSession
-@import domain.models.emailpreferences.APICategoryDisplayDetails
+@import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.DeveloperSession
+@import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.emailpreferences.APICategoryDisplayDetails
 @import include._
-@import domain.models.views.BackButtonWithJavaScript
+@import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.views.BackButtonWithJavaScript
 @import views.html.include.DevMain2
-@import domain.models.flows.EmailPreferencesFlowV2
+@import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.flows.EmailPreferencesFlowV2
+@import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.profile.routes
+@import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.TaxRegimeEmailPreferencesForm
 
 @this(devMain: DevMain2)
 
@@ -37,7 +38,7 @@
   developerSession = Some(loggedIn)
 ) {
   @errorSummary2(form)
-  @helper.form(action = controllers.profile.routes.EmailPreferences.flowSelectCategoriesAction(), 'class -> "form", 'id -> "emailPreferencesCategoriesForm") {
+  @helper.form(action = routes.EmailPreferencesController.flowSelectCategoriesAction(), 'class -> "form", 'id -> "emailPreferencesCategoriesForm") {
     @helper.CSRF.formField
     <a name="taxRegime"></a>
     <div class="govuk-form-group @if(form.errors("taxRegime").nonEmpty){govuk-form-group--error}">
@@ -68,7 +69,7 @@
     <button id="selectCategories" class="govuk-button" type="submit">Continue</button>
   }
 
-  @helper.form(action = controllers.profile.routes.EmailPreferences.flowSelectNoCategoriesAction(), 'class -> "form", 'id -> "emailPreferencesNoCategoriesForm") {
+  @helper.form(action = routes.EmailPreferencesController.flowSelectNoCategoriesAction(), 'class -> "form", 'id -> "emailPreferencesNoCategoriesForm") {
     @helper.CSRF.formField
     <button id="noSelectCategories" class="govuk-link govuk-link--no-visited-state link-button govuk-!-font-size-19" type="submit" style="padding-left: 0">I'm not interested in any of these categories</button>
   }

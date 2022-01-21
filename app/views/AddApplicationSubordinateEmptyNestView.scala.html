@@ -14,15 +14,15 @@
  * limitations under the License.
  *@
 
-@import domain.models.applications.Environment
+@import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.Environment
 @import include._
-@import domain.models.controllers.Crumb
-@import domain.models.developers.DeveloperSession
+@import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.controllers.Crumb
+@import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.DeveloperSession
 @import views.helper.EnvironmentNameService
 
 @this(devMain: DevMain2, leftHandNav: LeftHandNav)
 
-@()(implicit request: play.api.mvc.Request[Any], loggedIn: DeveloperSession, messagesProvider: MessagesProvider, appConfig: config.ApplicationConfig, navSection: String = "manage-account", environmentNameService: EnvironmentNameService)
+@()(implicit request: play.api.mvc.Request[Any], loggedIn: DeveloperSession, messagesProvider: MessagesProvider, appConfig: ApplicationConfig, navSection: String = "manage-account", environmentNameService: EnvironmentNameService)
 
 @subordinateEnvName = @{appConfig.nameOfSubordinateEnvironment.toLowerCase}
 @pageHeading = @{"Start using our APIs"}

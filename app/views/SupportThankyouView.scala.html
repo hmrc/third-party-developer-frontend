@@ -15,11 +15,11 @@
  *@
 
 @import include._
-@import domain.models.controllers.Crumb
+@import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.controllers.Crumb
 
 @this(devMain: DevMain)
 
-@(heading: String, loggedIn: Option[String])(implicit request: play.api.mvc.Request[Any], messages: Messages, appConfig: config.ApplicationConfig)
+@(heading: String, loggedIn: Option[String])(implicit request: play.api.mvc.Request[Any], messages: Messages, appConfig: ApplicationConfig)
 
 @devMain(
     title = heading,

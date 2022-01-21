@@ -16,19 +16,19 @@
 
 package views
 
-import controllers.ProfileForm
-import domain.models.developers.LoggedInState
+import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.ProfileForm
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.LoggedInState
 import org.jsoup.Jsoup
 import play.api.test.FakeRequest
-import utils.ViewHelpers._
-import utils.WithCSRFAddToken
+import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.ViewHelpers._
+import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.{DeveloperSessionBuilder, WithCSRFAddToken}
 import views.helper.CommonViewSpec
 import views.html.{ChangeProfileView, ProfileView}
 
 class ProfileSpec extends CommonViewSpec with WithCSRFAddToken {
   private val request = FakeRequest().withCSRFToken
 
-  val developer = utils.DeveloperSession("developer@example.com", "FirstName", "LastName", Some("TestOrganisation"), loggedInState = LoggedInState.LOGGED_IN)
+  val developer = DeveloperSessionBuilder("developer@example.com", "FirstName", "LastName", Some("TestOrganisation"), loggedInState = LoggedInState.LOGGED_IN)
 
   "Profile page" should {
     val profileView = app.injector.instanceOf[ProfileView]

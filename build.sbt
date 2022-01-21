@@ -90,20 +90,22 @@ lazy val microservice = Project(appName, file("."))
   .settings(scalacOptions ++= Seq("-Ypartial-unification"))
   .settings(
       routesImport ++= Seq(
-        "controllers.binders._",
-        "modules.uplift.controllers._",
-        "modules.submissions.controllers.binders._",
-        "modules.submissions.domain.models._",
-        "domain.models.controllers._",
-        "domain.models.applications._",
-        "domain.models.apidefinitions._"
+        "uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.binders._",
+        "uk.gov.hmrc.modules.uplift.controllers._",
+        "uk.gov.hmrc.modules.submissions.controllers.binders._",
+        "uk.gov.hmrc.modules.submissions.domain.models._",
+        "uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.controllers._",
+        "uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications._",
+        "uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.apidefinitions._"
     )
   )
   .settings(
     TwirlKeys.templateImports ++= Seq(
       "play.twirl.api.HtmlFormat",
       "uk.gov.hmrc.govukfrontend.views.html.components._",
-      "uk.gov.hmrc.govukfrontend.views.html.helpers._"
+      "uk.gov.hmrc.govukfrontend.views.html.helpers._",
+      "uk.gov.hmrc.thirdpartydeveloperfrontend.controllers",
+      "uk.gov.hmrc.thirdpartydeveloperfrontend.config.ApplicationConfig"
     )
   )
 

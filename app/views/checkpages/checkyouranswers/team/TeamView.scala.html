@@ -14,16 +14,16 @@
  * limitations under the License.
  *@
 
-@import helpers.string._
-@import config.ApplicationConfig
-@import domain.models.views.BackButtonWithJavaScript
-@import domain.models.views.Link
-@import domain.models.applications.CollaboratorRole
-@import domain.models.applications.Application
-@import domain.models.developers.DeveloperSession
+@import uk.gov.hmrc.thirdpartydeveloperfrontend.helpers.string._
+@import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.views.BackButtonWithJavaScript
+@import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.views.Link
+@import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.CollaboratorRole
+@import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.Application
+@import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.DeveloperSession
 @import views.html.include.DevMain
 @import views.html.include.teamMembers.teamList
-@import domain.models.applications.ApplicationId
+@import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.ApplicationId
+@import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.checkpages.routes
 
 @this(devMain: DevMain)
 
@@ -51,16 +51,16 @@
 
  @{
   def createRemoveLink(appId: ApplicationId, emailAddress: String) = {
-   controllers.checkpages.routes.CheckYourAnswers.teamMemberRemoveConfirmation(appId, emailAddress.toSha256)
+   routes.CheckYourAnswers.teamMemberRemoveConfirmation(appId, emailAddress.toSha256)
   }
-  teamList(app, role, loggedIn, controllers.checkpages.routes.CheckYourAnswers.teamAddMember(app.id), Link, createRemoveLink)
+  teamList(app, role, loggedIn, routes.CheckYourAnswers.teamAddMember(app.id), Link, createRemoveLink)
  }
 
  </br>
 
  </section>
 
- @helper.form(action = controllers.checkpages.routes.CheckYourAnswers.teamAction(app.id), 'class -> "form") {
+ @helper.form(action = routes.CheckYourAnswers.teamAction(app.id), 'class -> "form") {
   @helper.CSRF.formField
 
   <div class="form-group">

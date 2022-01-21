@@ -1,0 +1,68 @@
+@*
+ * Copyright 2022 HM Revenue & Customs
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ *@
+
+@import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.DeveloperSession
+@import include._
+@import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.controllers.Crumb
+@import org.joda.time.format.DateTimeFormat
+@import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.controllers.ApplicationViewModel
+@import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.views.BackButtonWithJavaScript
+@import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.ApplicationId
+@import uk.gov.hmrc.modules.uplift.controllers.UpliftJourneyController.SellResellOrDistributeForm
+
+@this(devMain: DevMain2)
+
+@(applicationId: ApplicationId, form: Form[SellResellOrDistributeForm])(implicit request: play.api.mvc.Request[Any], loggedIn: DeveloperSession, messagesProvider: MessagesProvider, appConfig: ApplicationConfig)
+
+@titleError = {@if(form.errors.nonEmpty) {Error: } else {}}
+@title = @{ "Will you sell, resell or distribute your software?" }
+
+@devMain(
+    title = titleError + title,
+    userFullName = loggedIn.loggedInName,
+    back = BackButtonWithJavaScript,
+    developerSession = Some(loggedIn)
+) {
+  @errorSummary2(form)
+  @helper.form(action = uk.gov.hmrc.modules.uplift.controllers.routes.UpliftJourneyController.sellResellOrDistributeYourSoftwareAction(applicationId), 'class -> "form") {
+    <div class="govuk-form-group @if(form.errors("answer").nonEmpty) {govuk-form-group--error}">
+        <fieldset id="answer" class="govuk-fieldset" role="group" aria-describedby="answer-error">
+            <legend class="govuk-fieldset__legend govuk-fieldset__legend--l">
+                <h1 class="govuk-fieldset__heading">
+                    @title
+                </h1>
+            </legend>
+            @fieldError2(form.errors, "answer")
+            <div class="govuk-radios govuk-radios--inline">
+                @helper.CSRF.formField
+                <div class="govuk-radios__item">
+                    <input class="govuk-radios__input" id="distribute-question-yes" name="answer" type="radio" value="Yes" @if(form.data.get("answer") == Some("Yes")) {checked}>
+                    <label class="govuk-label govuk-radios__label" for="distribute-question-yes">
+                        Yes
+                    </label>
+                </div>
+                <div class="govuk-radios__item">
+                    <input class="govuk-radios__input" id="distribute-question-no" name="answer" type="radio" value="No" @if(form.data.get("answer") == Some("No")) {checked}>
+                    <label class="govuk-label govuk-radios__label" for="distribute-question-no">
+                        No
+                    </label>
+                </div>
+            </div>
+        </fieldset>
+    </div>
+    <button class="govuk-button" id="submit" type="submit">Save and continue</button>
+    }
+}

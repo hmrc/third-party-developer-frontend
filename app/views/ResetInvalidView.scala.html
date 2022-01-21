@@ -15,10 +15,11 @@
  *@
 
 @import include._
+@import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.routes
 
 @this(devMain: DevMain)
 
-@()(implicit request: play.api.mvc.Request[Any], messages: Messages, applicationConfig: config.ApplicationConfig)
+@()(implicit request: play.api.mvc.Request[Any], messages: Messages, applicationConfig: ApplicationConfig)
 
 @devMain(
   title = "Reset password link no longer valid",

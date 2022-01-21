@@ -15,13 +15,14 @@
  *@
 
 @import include._
-@import domain.models.controllers.Crumb
-@import domain.models.controllers.EditManageSubscription._
+@import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.controllers.Crumb
+@import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.controllers.EditManageSubscription._
 @import views.html.include.DevMain
-@import domain.models.applications.Application
-@import domain.models.developers.DeveloperSession
-@import domain.models.controllers.SaveSubsFieldsPageMode
+@import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.Application
+@import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.DeveloperSession
+@import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.controllers.SaveSubsFieldsPageMode
 @import views.helper.IdFormatter
+@import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.routes
 
 @this(devMain: DevMain)
 
@@ -33,7 +34,7 @@
     implicit request: play.api.mvc.Request[Any],
     loggedIn: DeveloperSession,
     messages: Messages,
-    applicationConfig: config.ApplicationConfig
+    applicationConfig: ApplicationConfig
 )
 
 @pageHeading = @{ s"${viewModel.apiName} ${viewModel.apiVersion.value} ${viewModel.displayedStatus}" }

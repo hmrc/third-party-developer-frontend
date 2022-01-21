@@ -14,13 +14,14 @@
  * limitations under the License.
  *@
 
-@import domain.models.views.BackButtonWithJavaScript
+@import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.views.BackButtonWithJavaScript
 @import views.html.include.DevMain2
-@import domain.models.developers.DeveloperSession
+@import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.DeveloperSession
+@import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.profile.routes
 
 @this(devMain: DevMain2)
 
-@()(implicit request: play.api.mvc.Request[Any], loggedIn: DeveloperSession, appConfig: config.ApplicationConfig, messages: Messages)
+@()(implicit request: play.api.mvc.Request[Any], loggedIn: DeveloperSession, appConfig: ApplicationConfig, messages: Messages)
 
 @devMain(
   title = "Protected account",
@@ -35,6 +36,6 @@
 
   <p class="govuk-body">You must remove 2-step verification before you can add it to a new smartphone or tablet.</p>
 
-  <a id="submit" class="govuk-button" type="submit" href="@controllers.profile.routes.ProtectAccount.get2SVRemovalConfirmationPage()">Remove 2-step verification</a>
+  <a id="submit" class="govuk-button" type="submit" href="@routes.ProtectAccount.get2SVRemovalConfirmationPage()">Remove 2-step verification</a>
 
 }

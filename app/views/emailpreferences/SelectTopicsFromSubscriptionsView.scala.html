@@ -14,14 +14,15 @@
  * limitations under the License.
  *@
 
-@import domain.models.emailpreferences.EmailTopic._
-@import config.ApplicationConfig
-@import domain.models.developers.DeveloperSession
+@import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.emailpreferences.EmailTopic._
+@import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.DeveloperSession
 @import include._
-@import domain.models.views.BackButtonWithJavaScript
+@import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.views.BackButtonWithJavaScript
 @import uk.gov.hmrc.urls.Link
-@import domain.models.applications.ApplicationId
+@import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.ApplicationId
 @import views.html.include.DevMain2
+@import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.SelectTopicsFromSubscriptionsForm
+@import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.profile.routes
 
 @this(devMain: DevMain2)
 
@@ -48,7 +49,7 @@
       </p>
         @fieldError2(form.errors, "category")
       <div id="select-topic-hint" class="govuk-hint">Select all that apply.</div>
-      @helper.form(action = controllers.profile.routes.EmailPreferences.selectTopicsFromSubscriptionsAction(applicationId), 'class -> "form", 'id -> "emailPreferencesTopicsForm") {
+      @helper.form(action = routes.EmailPreferencesController.selectTopicsFromSubscriptionsAction(applicationId), 'class -> "form", 'id -> "emailPreferencesTopicsForm") {
         @helper.CSRF.formField
         <input type="hidden" class="govuk-visually-hidden" value="@applicationId.value" name="applicationId" />
         <a name="topic"></a>

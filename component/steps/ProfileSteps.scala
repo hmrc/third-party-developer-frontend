@@ -16,7 +16,7 @@
 
 package steps
 
-import domain.models.developers.UpdateProfileRequest
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.UpdateProfileRequest
 import io.cucumber.scala.{EN, ScalaDsl}
 import org.openqa.selenium.WebDriver
 import pages._

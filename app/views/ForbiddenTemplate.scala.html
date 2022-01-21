@@ -15,12 +15,12 @@
  *@
 
 @import include._
-@import domain.models.views.StaticNavLinks
+@import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.views.StaticNavLinks
 @import play.twirl.api.HtmlFormat
 
 @this(main: Main)
 
-@()(implicit request: play.api.mvc.Request[Any], messages: Messages, applicationConfig: config.ApplicationConfig)
+@()(implicit request: play.api.mvc.Request[Any], messages: Messages, applicationConfig: ApplicationConfig)
 
 @main(title = applicationConfig.title,
     navTitle = Some(applicationConfig.title),

@@ -14,13 +14,13 @@
  * limitations under the License.
  *@
 
-@import config.ApplicationConfig
 @import include._
 @import views.html.include.DevMain
-@import domain.models.developers.DeveloperSession
-@import domain.models.applications.Application
-@import domain.models.views.IpAllowlistFeedbackBanner
-@import domain.models.controllers.Crumb
+@import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.DeveloperSession
+@import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.Application
+@import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.views.IpAllowlistFeedbackBanner
+@import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.controllers.Crumb
+@import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.routes
 
 @this(devMain: DevMain2)
 
@@ -61,11 +61,11 @@ implicit request: play.api.mvc.Request[Any], loggedIn: DeveloperSession, message
 
     <p class="govuk-body">You can set up a new IP allow list at any time.</p>
 
-    @helper.form(action = routes.IpAllowlist.removeIpAllowlistAction(app.id)) {
+    @helper.form(action = routes.IpAllowListController.removeIpAllowlistAction(app.id)) {
       @helper.CSRF.formField
       <div class="govuk-button-group">
         <button id="submit" class="govuk-button govuk-button--warning" type="submit">Remove IP allow list</button>
-        <a class="govuk-button govuk-button--secondary" href="@routes.IpAllowlist.viewIpAllowlist(app.id)">Cancel</a>
+        <a class="govuk-button govuk-button--secondary" href="@routes.IpAllowListController.viewIpAllowlist(app.id)">Cancel</a>
       </div>
     }
   </div>

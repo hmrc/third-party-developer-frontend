@@ -16,18 +16,18 @@
 
 package views.include
 
-import controllers.ChangeSubscriptionConfirmationForm
-import domain.models.apidefinitions.{ApiContext, ApiVersion}
-import domain.models.applications._
-import domain.models.developers.LoggedInState
-import domain.models.views.SubscriptionRedirect
-import domain.models.controllers.ApplicationViewModel
+import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.ChangeSubscriptionConfirmationForm
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.apidefinitions.{ApiContext, ApiVersion}
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications._
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.LoggedInState
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.views.SubscriptionRedirect
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.controllers.ApplicationViewModel
 import org.jsoup.Jsoup
 import play.api.data.Form
 import play.api.test.FakeRequest
 import uk.gov.hmrc.time.DateTimeUtils
-import utils.ViewHelpers.elementExistsByText
-import utils._
+import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.ViewHelpers.elementExistsByText
+import uk.gov.hmrc.thirdpartydeveloperfrontend.utils._
 import views.helper.CommonViewSpec
 import views.html.include.ChangeSubscriptionConfirmationView
 import play.api.mvc.Call
@@ -43,7 +43,7 @@ class ChangeSubscriptionConfirmationSpec extends CommonViewSpec with WithCSRFAdd
   val apiVersion = ApiVersion("1.0")
   val callMock = mock[Call]
 
-  val loggedInDeveloper = utils.DeveloperSession("givenname.familyname@example.com", "Givenname", "Familyname", loggedInState = LoggedInState.LOGGED_IN)
+  val loggedInDeveloper = DeveloperSessionBuilder("givenname.familyname@example.com", "Givenname", "Familyname", loggedInState = LoggedInState.LOGGED_IN)
 
   val application = Application(
     applicationId,

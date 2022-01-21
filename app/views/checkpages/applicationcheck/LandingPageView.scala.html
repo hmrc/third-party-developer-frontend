@@ -14,11 +14,10 @@
  * limitations under the License.
  *@
 
-@import config.ApplicationConfig
 @import include._
-@import domain.models.controllers.{ApplicationViewModel, Crumb}
-@import domain.models.developers.DeveloperSession
-@import domain.models.views.CheckInformationForm
+@import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.controllers.{ApplicationViewModel, Crumb}
+@import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.DeveloperSession
+@import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.views.CheckInformationForm
 
 @this(devMain: DevMain2)
 
@@ -215,7 +214,7 @@
     </div>
     <div class="govuk-button-group">
       <button id="submit" class="govuk-button" type="submit">Check Your Answers</button>
-      <a href="@routes.ManageApplications.manageApps" id="cancel" class="govuk-link govuk-link--no-visited-state">Save and come back later</a>
+      <a href="@controllers.routes.ManageApplications.manageApps" id="cancel" class="govuk-link govuk-link--no-visited-state">Save and come back later</a>
     </div>
   }
 }

@@ -14,14 +14,14 @@
  * limitations under the License.
  *@
 
-@import domain.models.views.{BackButton, BackButtonToUrl, BackButtonWithJavaScript, FeedbackBanner, NoBackButton}
-@import domain.models.controllers.Crumb
+@import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.views.{BackButton, BackButtonToUrl, BackButtonWithJavaScript, FeedbackBanner, NoBackButton}
+@import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.controllers.Crumb
 @import play.twirl.api.HtmlFormat
 @import views.html.include.FeedbackBannerView
 @import views.html.layouts.GovUkTemplate
 @import uk.gov.hmrc.play.views.html.layouts.{BetaBanner, Footer, Head, HeaderNav, MainContentHeader, ServiceInfo}
 @import uk.gov.hmrc.play.views.html.helpers.ReportAProblemLink
-@import domain.models.developers.DeveloperSession
+@import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.DeveloperSession
 
 @this(layoutsHead: Head,
         layoutsFooter: Footer,
@@ -48,7 +48,7 @@
     fullWidthContent: Boolean = false,
     developerSession: Option[DeveloperSession],
     feedbackBanner: Option[FeedbackBanner] = None
-)(mainContent: Html = HtmlFormat.empty)(implicit messagesProvider: MessagesProvider, applicationConfig: config.ApplicationConfig, request: play.api.mvc.Request[Any])
+)(mainContent: Html = HtmlFormat.empty)(implicit messagesProvider: MessagesProvider, applicationConfig: ApplicationConfig, request: play.api.mvc.Request[Any])
 
 @head = {
     @layoutsHead(

@@ -20,8 +20,8 @@ import org.jsoup.Jsoup
 import org.jsoup.nodes.Document
 import play.api.test.FakeRequest
 import play.twirl.api.Html
-import utils.ViewHelpers._
-import utils.WithCSRFAddToken
+import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.ViewHelpers._
+import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.WithCSRFAddToken
 import views.helper.CommonViewSpec
 import views.html.ApplicationVerificationView
 

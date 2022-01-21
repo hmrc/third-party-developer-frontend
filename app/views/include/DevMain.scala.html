@@ -14,9 +14,9 @@
  * limitations under the License.
  *@
 
-@import domain.models.views.{BackButton, FeedbackBanner, NoBackButton, StaticNavLinks, UserNavLinks}
-@import domain.models.controllers.Crumb
-@import domain.models.developers.DeveloperSession
+@import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.views.{BackButton, FeedbackBanner, NoBackButton, StaticNavLinks, UserNavLinks}
+@import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.controllers.Crumb
+@import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.DeveloperSession
 
 @this(main: Main)
 
@@ -32,7 +32,7 @@
 )(mainContent: Html)(
     implicit request: Request[_],
         messages: Messages,
-        applicationConfig: config.ApplicationConfig
+        applicationConfig: ApplicationConfig
 )
 
 

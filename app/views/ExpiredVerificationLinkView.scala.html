@@ -14,14 +14,15 @@
  * limitations under the License.
  *@
 
-@import domain.models.views.StaticNavLinks
+@import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.views.StaticNavLinks
 @import include._
 @import templates.govUkWrapper
 @import play.twirl.api.HtmlFormat
+@import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.routes
 
 @this(govUkWrapper: govUkWrapper)
 
-@()(implicit request: play.api.mvc.Request[Any], messagesProvider: MessagesProvider, applicationConfig: config.ApplicationConfig)
+@()(implicit request: play.api.mvc.Request[Any], messagesProvider: MessagesProvider, applicationConfig: ApplicationConfig)
 
 @govUkWrapper(
   title = "Your account verification link has expired",

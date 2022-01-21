@@ -16,13 +16,13 @@
 
 package views
 
-import builder.DeveloperBuilder
-import domain.models.developers.{DeveloperSession, LoggedInState, Session}
+import uk.gov.hmrc.thirdpartydeveloperfrontend.builder.DeveloperBuilder
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.{DeveloperSession, LoggedInState, Session}
 import play.api.test.FakeRequest
-import utils.WithCSRFAddToken
+import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.WithCSRFAddToken
 import views.helper.CommonViewSpec
 import views.html.protectaccount.ProtectAccountView
-import utils.LocalUserIdTracker
+import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.LocalUserIdTracker
 
 class ProtectAccountSpec extends CommonViewSpec with WithCSRFAddToken with DeveloperBuilder with LocalUserIdTracker {
   implicit val request = FakeRequest()

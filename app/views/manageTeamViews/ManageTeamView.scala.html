@@ -14,22 +14,21 @@
  * limitations under the License.
  *@
 
-@import config.ApplicationConfig
-@import domain.models.views.Button
-@import helpers.string._
+@import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.views.Button
+@import uk.gov.hmrc.thirdpartydeveloperfrontend.helpers.string._
 @import include._
-@import domain.models.controllers.Crumb
+@import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.controllers.Crumb
 @import include.teamMembers._
-@import domain.models.controllers.ApplicationViewModel
-@import domain.models.controllers.FraudPreventionNavLinkViewModel
+@import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.controllers.ApplicationViewModel
+@import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.controllers.FraudPreventionNavLinkViewModel
 @import views.html.include.DevMain
-@import domain.models.applications.{ApplicationId, CollaboratorRole}
-@import domain.models.developers.DeveloperSession
-
+@import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.{ApplicationId, CollaboratorRole}
+@import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.DeveloperSession
+@import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.routes
 
 @this(devMain: DevMain2, leftHandNav: LeftHandNav)
 
-@(applicationView: ApplicationViewModel, role: CollaboratorRole, form: Form[controllers.AddTeamMemberForm], fraudPreventionNavLinkViewModel: Option[FraudPreventionNavLinkViewModel])(
+@(applicationView: ApplicationViewModel, role: CollaboratorRole, form: Form[uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.AddTeamMemberForm], fraudPreventionNavLinkViewModel: Option[FraudPreventionNavLinkViewModel])(
         implicit request: play.api.mvc.Request[Any], messagesProvider: MessagesProvider, applicationConfig: ApplicationConfig, navSection: String = "manage-team", loggedIn: DeveloperSession)
 
 @titleError = { @if(form.errors.nonEmpty) {Error: } else {}}

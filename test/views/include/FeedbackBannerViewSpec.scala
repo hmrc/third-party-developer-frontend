@@ -16,12 +16,12 @@
 
 package views.include
 
-import config.ApplicationConfig
-import domain.models.views.IpAllowlistFeedbackBanner
+import uk.gov.hmrc.thirdpartydeveloperfrontend.config.ApplicationConfig
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.views.IpAllowlistFeedbackBanner
 import org.jsoup.Jsoup
 import org.jsoup.nodes.Document
 import play.twirl.api.Html
-import utils.WithCSRFAddToken
+import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.WithCSRFAddToken
 import views.helper.CommonViewSpec
 import views.html.include.FeedbackBannerView
 

@@ -16,7 +16,7 @@
 
 package views.helper
 
-import utils.AsyncHmrcSpec
+import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.AsyncHmrcSpec
 
 class GlobalSectionSpec extends AsyncHmrcSpec {
 

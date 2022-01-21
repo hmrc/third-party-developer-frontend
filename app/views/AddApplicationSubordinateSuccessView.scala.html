@@ -14,15 +14,15 @@
  * limitations under the License.
  *@
 
-@import domain.models.developers.DeveloperSession
-@import domain.models.applications.ApplicationId
+@import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.DeveloperSession
+@import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.ApplicationId
 @import include._
-@import domain.models.controllers.Crumb
+@import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.controllers.Crumb
 @import views.helper.EnvironmentNameService
 
 @this(devMain: DevMain2)
 
-@(appName: String, id: ApplicationId)(implicit request: play.api.mvc.Request[Any], loggedIn: DeveloperSession, messages: Messages, appConfig: config.ApplicationConfig, environmentNameService: EnvironmentNameService)
+@(appName: String, id: ApplicationId)(implicit request: play.api.mvc.Request[Any], loggedIn: DeveloperSession, messages: Messages, appConfig: ApplicationConfig, environmentNameService: EnvironmentNameService)
 
 @subordinateEnvName = @{appConfig.nameOfSubordinateEnvironment.toLowerCase}
 @pageHeading = @{s"Application added to ${environmentNameService.subordinateWording}"}
@@ -51,6 +51,6 @@
   </p>
 
   <p class="govuk-body">
-    <a id="submit" class="govuk-button" href="@routes.Credentials.credentials(id)">View application credentials</a>
+    <a id="submit" class="govuk-button" href="@controllers.routes.Credentials.credentials(id)">View application credentials</a>
   </p>
 }

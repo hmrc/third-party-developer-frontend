@@ -14,26 +14,29 @@
  * limitations under the License.
  *@
 
-@import domain.models.views.SubscriptionRedirect._
-@import domain.models.controllers.Crumb
+@import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.views.SubscriptionRedirect._
+@import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.controllers.Crumb
 @import include._
 @import uk.gov.hmrc.urls.Link
-@import domain.models.applications.Environment.PRODUCTION
-@import domain.models.applications.CollaboratorRole
-@import domain.models.applications.Environment
-@import domain.models.applications.Application
-@import domain.models.developers.DeveloperSession
-@import domain.models.applications.State
-@import domain.models.apidefinitions.ApiContext
-@import domain.models.subscriptions.ApiData
+@import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.Environment.PRODUCTION
+@import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.CollaboratorRole
+@import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.Environment
+@import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.Application
+@import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.DeveloperSession
+@import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.State
+@import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.apidefinitions.ApiContext
+@import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.subscriptions.ApiData
 @import views.helper.EnvironmentNameService
+@import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers
+@import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.PageData
+@import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.GroupedSubscriptions
 
 @this(devMain: DevMain, subscriptionGroups: SubscriptionGroups)
 
 @(
     role: CollaboratorRole, 
     data: PageData, 
-    form: Form[controllers.EditApplicationForm], 
+    form: Form[uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.EditApplicationForm], 
     app: Application, 
     environment: Environment, 
     subscriptions: Option[GroupedSubscriptions],
@@ -42,7 +45,7 @@
     implicit request: play.api.mvc.Request[Any],
     loggedIn: DeveloperSession, 
     messages: Messages, 
-    applicationConfig: config.ApplicationConfig, 
+    applicationConfig: ApplicationConfig, 
     environmentNameService: EnvironmentNameService
 )
 
@@ -90,9 +93,7 @@
 
         case _ => {
             <p class="panel panel-border-wide">We can’t load your API subscriptions at the moment.<br>
-            Please <a href="@{
-                              routes.Subscriptions.manageSubscriptions(app.id)
-                              }">try again</a> later</p>
+            Please <a href="@{controllers.routes.SubscriptionsController.manageSubscriptions(app.id)}">try again</a> later</p>
         }
     }
 
@@ -101,9 +102,9 @@
 
   <div>
     @if(app.deployedTo == Environment.PRODUCTION){
-          <a class="button" href="@{addapplication.routes.AddApplication.addApplicationSuccess(app.id)}">Add your application</a>
+          <a class="button" href="@{controllers.addapplication.routes.AddApplication.addApplicationSuccess(app.id)}">Add your application</a>
     } else {
-      <a class="button" href="@{routes.ManageSubscriptions.subscriptionConfigurationStart(app.id).url}">Add your application</a>
+      <a class="button" href="@{controllers.routes.ManageSubscriptions.subscriptionConfigurationStart(app.id).url}">Add your application</a>
     }
   </div>
 }
