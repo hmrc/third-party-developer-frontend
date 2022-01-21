@@ -40,9 +40,9 @@ import play.api.test.Helpers._
 import uk.gov.hmrc.apiplatform.modules.submissions.domain.models.ExtendedSubmission
 import uk.gov.hmrc.apiplatform.modules.submissions.domain.models.QuestionnaireProgress
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.SubmissionsTestData
-import uk.gov.hmrc.apiplatform.modules.submissions.domain.models.Completed
+import uk.gov.hmrc.apiplatform.modules.submissions.domain.models.QuestionnaireState.Completed
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.AsIdsHelpers._
-import uk.gov.hmrc.apiplatform.modules.submissions.domain.models.InProgress
+import uk.gov.hmrc.apiplatform.modules.submissions.domain.models.QuestionnaireState.InProgress
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.DeveloperSession
 import scala.concurrent.Future.{successful,failed}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.ApplicationNotFound
@@ -97,11 +97,11 @@ class CheckAnswersControllerSpec
     val mockApmConnector = ApmConnectorMock.aMock
     val mockRequestProdCreds = mock[RequestProductionCredentials]
 
-    val completedProgress = List(SubmissionsTestData.DevelopmentPractices.questionnaire, SubmissionsTestData.BusinessDetails.questionnaire)
+    val completedProgress = List(SubmissionsTestData.DevelopmentPractices.questionnaire, SubmissionsTestData.CustomersAuthorisingYourSoftware.questionnaire, SubmissionsTestData.OrganisationDetails.questionnaire)
         .map(q => q.id -> QuestionnaireProgress(Completed, q.questions.asIds)).toMap
     val completedExtendedSubmission = ExtendedSubmission(submission, completedProgress)
 
-    val incompleteProgress = List(SubmissionsTestData.DevelopmentPractices.questionnaire, SubmissionsTestData.BusinessDetails.questionnaire)
+    val incompleteProgress = List(SubmissionsTestData.DevelopmentPractices.questionnaire, SubmissionsTestData.CustomersAuthorisingYourSoftware.questionnaire, SubmissionsTestData.OrganisationDetails.questionnaire)
         .map(q => q.id -> QuestionnaireProgress(InProgress, q.questions.asIds)).toMap
     val incompleteExtendedSubmission = ExtendedSubmission(submission, incompleteProgress)
 

@@ -13,7 +13,7 @@ import play.api.http.Status._
 import uk.gov.hmrc.apiplatform.modules.submissions.connectors.ThirdPartyApplicationSubmissionsConnector
 import uk.gov.hmrc.apiplatform.modules.submissions.connectors.ThirdPartyApplicationSubmissionsConnector._
 import uk.gov.hmrc.http.HeaderCarrier
-import uk.gov.hmrc.apiplatform.modules.submissions.domain.services.SubmissionsJsonFormatters
+import uk.gov.hmrc.apiplatform.modules.submissions.domain.services.SubmissionsFrontendJsonFormatters
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.services.ApplicationsJsonFormatters
 import uk.gov.hmrc.apiplatform.modules.submissions.domain.models.ErrorDetails
 
@@ -24,7 +24,7 @@ class ThirdPartyApplicationSubmissionsConnectorSpec
     with CollaboratorTracker 
     with LocalUserIdTracker 
     with SubmissionsTestData
-    with SubmissionsJsonFormatters
+    with SubmissionsFrontendJsonFormatters
     with TestApplications
     with ApplicationsJsonFormatters {
   private val apiKey = UUID.randomUUID().toString

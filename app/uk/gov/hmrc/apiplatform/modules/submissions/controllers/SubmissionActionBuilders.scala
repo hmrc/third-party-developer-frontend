@@ -39,7 +39,7 @@ import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.Collab
 
 class SubmissionRequest[A](val extSubmission: ExtendedSubmission, val userRequest: UserRequest[A]) extends UserRequest[A](userRequest.developerSession, userRequest.msgRequest) {
   lazy val submission = extSubmission.submission
-  lazy val answersToQuestions = submission.answersToQuestions
+  lazy val answersToQuestions = submission.latestInstance.answersToQuestions
 }
 
 class SubmissionApplicationRequest[A](val application: Application, val submissionRequest: SubmissionRequest[A]) extends SubmissionRequest[A](submissionRequest.extSubmission, submissionRequest.userRequest) with HasApplication

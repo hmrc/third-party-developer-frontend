@@ -65,7 +65,7 @@ class QuestionsController @Inject()(
   import cats.instances.future.catsStdInstancesForFuture
 
   def showQuestion(submissionId: Submission.Id, questionId: QuestionId, answers: Option[ActualAnswer] = None, errors: Option[String] = None) = withSubmission(submissionId) { implicit request => 
-    val currentAnswer = request.submission.answersToQuestions.get(questionId)
+    val currentAnswer = request.submission.latestInstance.answersToQuestions.get(questionId)
     val submission = request.submission
     val oQuestion = submission.findQuestion(questionId)
     val applicationId = request.application.id

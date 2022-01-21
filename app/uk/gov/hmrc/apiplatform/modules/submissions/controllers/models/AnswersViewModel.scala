@@ -37,7 +37,7 @@ object AnswersViewModel {
   def convertQuestion(extSubmission: ExtendedSubmission)(item: QuestionItem): Option[ViewQuestion] = {
     val id = item.question.id
     
-    extSubmission.submission.answersToQuestions.get(id).flatMap(convertAnswer).map(answer =>
+    extSubmission.submission.latestInstance.answersToQuestions.get(id).flatMap(convertAnswer).map(answer =>
       ViewQuestion(id, item.question.wording.value, answer)
     )
   }
