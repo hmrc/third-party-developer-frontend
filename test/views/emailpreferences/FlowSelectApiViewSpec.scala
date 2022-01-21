@@ -28,7 +28,7 @@ import play.api.data.{Form, FormError}
 import play.api.mvc.AnyContentAsEmpty
 import play.api.test.FakeRequest
 import play.twirl.api.Html
-import utils.WithCSRFAddToken
+import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.{DeveloperSessionBuilder, WithCSRFAddToken}
 import views.helper.CommonViewSpec
 import views.html.emailpreferences.FlowSelectApiView
 
@@ -39,7 +39,7 @@ class FlowSelectApiViewSpec extends CommonViewSpec with WithCSRFAddToken {
 
   trait Setup {
     val developerSessionWithoutEmailPreferences: DeveloperSession = {
-      utils.DeveloperSessionBuilder("email@example.com", "First Name", "Last Name", None, loggedInState = LoggedInState.LOGGED_IN)
+      DeveloperSessionBuilder("email@example.com", "First Name", "Last Name", None, loggedInState = LoggedInState.LOGGED_IN)
     }
     val form = mock[Form[SelectedApisEmailPreferencesForm]]
     val currentCategory = APICategoryDisplayDetails("CATEGORY1", "Category 1")

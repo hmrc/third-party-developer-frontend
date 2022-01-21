@@ -17,19 +17,19 @@
 package uk.gov.hmrc.modules.submissions.controllers
 
 import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.{BaseControllerSpec, SubscriptionTestHelperSugar}
-import builder.{DeveloperBuilder, SampleApplication, SampleSession}
+import uk.gov.hmrc.thirdpartydeveloperfrontend.builder.{DeveloperBuilder, SampleApplication, SampleSession}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.SubscriptionTestHelperSugar
-import utils.{LocalUserIdTracker, WithCSRFAddToken}
+import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.{LocalUserIdTracker, WithCSRFAddToken}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.mocks.service.ApplicationServiceMock
 import uk.gov.hmrc.thirdpartydeveloperfrontend.mocks.service.ApplicationActionServiceMock
 import uk.gov.hmrc.thirdpartydeveloperfrontend.mocks.connectors.ApmConnectorMockModule
 import uk.gov.hmrc.modules.submissions.services.mocks.SubmissionServiceMockModule
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.modules.submissions.views.html.CheckAnswersView
-import utils.WithLoggedInSession._
+import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.WithLoggedInSession._
 
 import scala.concurrent.ExecutionContext.Implicits.global
-import utils.SubmissionsTestData.{applicationId, submission}
+import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.SubmissionsTestData.{applicationId, submission}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.ApplicationWithSubscriptionData
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
@@ -39,9 +39,9 @@ import uk.gov.hmrc.modules.submissions.views.html.ProductionCredentialsRequestRe
 import play.api.test.Helpers._
 import uk.gov.hmrc.modules.submissions.domain.models.ExtendedSubmission
 import uk.gov.hmrc.modules.submissions.domain.models.QuestionnaireProgress
-import utils.SubmissionsTestData
+import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.SubmissionsTestData
 import uk.gov.hmrc.modules.submissions.domain.models.Completed
-import utils.AsIdsHelpers._
+import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.AsIdsHelpers._
 import uk.gov.hmrc.modules.submissions.domain.models.InProgress
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.DeveloperSession
 import scala.concurrent.Future.{successful,failed}

@@ -18,7 +18,7 @@ package uk.gov.hmrc.thirdpartydeveloperfrontend.controllers
 
 import java.util.UUID
 
-import builder.DeveloperBuilder
+import uk.gov.hmrc.thirdpartydeveloperfrontend.builder.DeveloperBuilder
 import uk.gov.hmrc.thirdpartydeveloperfrontend.config.ErrorHandler
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.connectors.{TicketCreated, UserAuthenticationResponse}
@@ -30,8 +30,8 @@ import play.filters.csrf.CSRF.TokenProvider
 import uk.gov.hmrc.play.audit.http.connector.AuditResult
 import uk.gov.hmrc.thirdpartydeveloperfrontend.service.AuditAction._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.service._
-import utils.WithCSRFAddToken
-import utils.WithLoggedInSession._
+import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.WithCSRFAddToken
+import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.WithLoggedInSession._
 import views.html.{AccountLockedView, LogInAccessCodeView, SignInView}
 import views.html.protectaccount.{ProtectAccountNoAccessCodeCompleteView, ProtectAccountNoAccessCodeView}
 
@@ -40,7 +40,7 @@ import scala.concurrent.Future
 import scala.concurrent.Future._
 import views.html.UserDidNotAdd2SVView
 import views.html.Add2SVView
-import utils.LocalUserIdTracker
+import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.LocalUserIdTracker
 import _root_.uk.gov.hmrc.thirdpartydeveloperfrontend.mocks.connectors.ThirdPartyDeveloperConnectorMockModule
 
 class UserLoginAccountSpec extends BaseControllerSpec with WithCSRFAddToken with DeveloperBuilder with LocalUserIdTracker {

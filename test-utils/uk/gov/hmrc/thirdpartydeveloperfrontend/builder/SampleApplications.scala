@@ -14,10 +14,10 @@
  * limitations under the License.
  */
 
-package builder
+package uk.gov.hmrc.thirdpartydeveloperfrontend.builder
 
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications._
-import utils.CollaboratorTracker
+import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.CollaboratorTracker
 
 trait SampleApplications extends SampleApplication {
   self: SampleSession with CollaboratorTracker =>

@@ -14,12 +14,12 @@
  * limitations under the License.
  */
 
-package builder
+package uk.gov.hmrc.thirdpartydeveloperfrontend.builder
 
 import java.time.Period
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications._
 import uk.gov.hmrc.time.DateTimeUtils
-import utils.CollaboratorTracker
+import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.CollaboratorTracker
 
 trait SampleApplication {
   self: SampleSession with CollaboratorTracker =>

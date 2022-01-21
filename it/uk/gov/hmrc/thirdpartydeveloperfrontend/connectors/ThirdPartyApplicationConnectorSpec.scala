@@ -30,10 +30,10 @@ import uk.gov.hmrc.play.http.metrics.common.API
 import uk.gov.hmrc.time.DateTimeUtils
 import ThirdPartyApplicationConnectorJsonFormatters._
 
-import utils.CollaboratorTracker
-import utils.LocalUserIdTracker
+import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.CollaboratorTracker
+import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.LocalUserIdTracker
 import org.scalatestplus.play.guice.GuiceOneAppPerSuite
-import utils.WireMockExtensions
+import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.WireMockExtensions
 import play.api.Configuration
 import play.api.inject.guice.GuiceApplicationBuilder
 import play.api.inject.bind

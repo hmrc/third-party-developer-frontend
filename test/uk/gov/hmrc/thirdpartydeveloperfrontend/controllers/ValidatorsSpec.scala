@@ -20,8 +20,8 @@ import org.scalacheck.Gen
 import play.api.data._
 import play.api.data.Forms._
 import play.api.data.validation.{Invalid, ValidationError, ValidationResult}
-import utils.AsyncHmrcSpec
-import utils.Generators._
+import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.AsyncHmrcSpec
+import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.Generators._
 
 import scala.collection.JavaConverters._
 import org.scalatestplus.scalacheck.ScalaCheckPropertyChecks

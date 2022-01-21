@@ -23,7 +23,7 @@ import org.scalatestplus.play.guice.GuiceOneAppPerSuite
 import uk.gov.hmrc.play.bootstrap.frontend.filters.SessionTimeoutFilterConfig
 import play.api.mvc._
 import play.api.test.FakeRequest
-import utils.{AsyncHmrcSpec, SharedMetricsClearDown}
+import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.{AsyncHmrcSpec, SharedMetricsClearDown}
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future

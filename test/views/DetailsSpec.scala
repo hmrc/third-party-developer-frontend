@@ -28,11 +28,10 @@ import play.api.mvc.AnyContentAsEmpty
 import play.api.test.FakeRequest
 import play.twirl.api.HtmlFormat.Appendable
 import uk.gov.hmrc.time.DateTimeUtils
-import utils.{TestApplications, WithCSRFAddToken}
+import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.{TestApplications, WithCSRFAddToken}
 import views.helper.CommonViewSpec
 import views.html.DetailsView
-import utils.LocalUserIdTracker
-import utils.CollaboratorTracker
+import uk.gov.hmrc.thirdpartydeveloperfrontend.utils._
 
 class DetailsSpec 
     extends CommonViewSpec 
@@ -54,7 +53,7 @@ class DetailsSpec
 
   "Application details view" when {
     implicit val request: FakeRequest[AnyContentAsEmpty.type] = FakeRequest()
-    implicit val loggedIn: DeveloperSession = utils.DeveloperSessionBuilder("developer@example.com", "Joe", "Bloggs", loggedInState = LoggedInState.LOGGED_IN)
+    implicit val loggedIn: DeveloperSession = DeveloperSessionBuilder("developer@example.com", "Joe", "Bloggs", loggedInState = LoggedInState.LOGGED_IN)
     implicit val navSection: String = "details"
 
     "rendering Environment " when {

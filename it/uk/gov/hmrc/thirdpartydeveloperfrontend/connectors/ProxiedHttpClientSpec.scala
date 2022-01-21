@@ -18,7 +18,7 @@ package uk.gov.hmrc.thirdpartydeveloperfrontend.connectors
 
 import java.util.UUID
 
-import utils.AsyncHmrcSpec
+import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.AsyncHmrcSpec
 import play.api.http.HeaderNames
 import org.scalatestplus.play.guice.GuiceOneServerPerSuite
 import play.api.inject.guice.GuiceApplicationBuilder

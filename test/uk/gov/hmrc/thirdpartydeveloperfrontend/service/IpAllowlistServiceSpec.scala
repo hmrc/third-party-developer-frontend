@@ -30,8 +30,8 @@ import uk.gov.hmrc.thirdpartydeveloperfrontend.service.SubscriptionFieldsService
 import uk.gov.hmrc.http.{ForbiddenException, HeaderCarrier}
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future.successful
-import utils._
-import builder.DeveloperBuilder
+import uk.gov.hmrc.thirdpartydeveloperfrontend.utils._
+import uk.gov.hmrc.thirdpartydeveloperfrontend.builder.DeveloperBuilder
 import org.scalatest.matchers.should.Matchers
 
 class IpAllowlistServiceSpec

@@ -26,9 +26,9 @@ import uk.gov.hmrc.thirdpartydeveloperfrontend.service.ApplicationService
 
 import scala.concurrent.Future.{failed, successful}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.apidefinitions.ApiIdentifier
-import utils.TestApplications
-import utils.CollaboratorTracker
-import utils.LocalUserIdTracker
+import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.TestApplications
+import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.CollaboratorTracker
+import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.LocalUserIdTracker
 
 trait ApplicationServiceMock extends MockitoSugar with ArgumentMatchersSugar with TestApplications with CollaboratorTracker with LocalUserIdTracker {
   val applicationServiceMock = mock[ApplicationService]

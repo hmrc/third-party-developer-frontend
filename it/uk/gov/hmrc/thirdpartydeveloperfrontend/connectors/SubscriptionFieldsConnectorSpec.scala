@@ -16,7 +16,7 @@
 
 package uk.gov.hmrc.thirdpartydeveloperfrontend.connectors
 
-import builder.SubscriptionsBuilder
+import uk.gov.hmrc.thirdpartydeveloperfrontend.builder.SubscriptionsBuilder
 import com.github.tomakehurst.wiremock.client.WireMock._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.connectors.SubscriptionFieldsConnectorDomain._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.apidefinitions.ApiContext
@@ -41,7 +41,7 @@ import play.api.libs.json.Json
 import play.api.libs.json.Writes
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.http._
-import utils.WireMockExtensions
+import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.WireMockExtensions
 
 import java.util.UUID
 

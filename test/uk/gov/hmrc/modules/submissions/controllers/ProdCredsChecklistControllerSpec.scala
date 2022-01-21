@@ -22,19 +22,19 @@ import uk.gov.hmrc.thirdpartydeveloperfrontend.mocks.service.ApplicationActionSe
 import uk.gov.hmrc.thirdpartydeveloperfrontend.mocks.connectors.ApmConnectorMockModule
 import uk.gov.hmrc.modules.submissions.services.mocks.SubmissionServiceMockModule
 import play.api.test.Helpers._
-import utils.WithLoggedInSession._
+import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.WithLoggedInSession._
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import uk.gov.hmrc.modules.submissions.views.html.ProductionCredentialsChecklistView
-import builder.DeveloperBuilder
-import utils.LocalUserIdTracker
+import uk.gov.hmrc.thirdpartydeveloperfrontend.builder.DeveloperBuilder
+import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.LocalUserIdTracker
 import play.api.test.FakeRequest
 import play.filters.csrf.CSRF
-import utils.WithCSRFAddToken
+import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.WithCSRFAddToken
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.ApplicationWithSubscriptionData
-import builder.SampleApplication
+import uk.gov.hmrc.thirdpartydeveloperfrontend.builder.SampleApplication
 import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.SubscriptionTestHelperSugar
-import builder.SampleSession
+import uk.gov.hmrc.thirdpartydeveloperfrontend.builder.SampleSession
 import uk.gov.hmrc.modules.submissions.domain.models.ExtendedSubmission
 
 class ProdCredsChecklistControllerSpec
@@ -127,7 +127,7 @@ class ProdCredsChecklistControllerSpec
     }
 
     "succeed" in new Setup {
-      import utils.SubmissionsTestData.extendedSubmission
+      import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.SubmissionsTestData.extendedSubmission
 
       SubmissionServiceMock.FetchLatestSubmission.thenReturns(extendedSubmission)
 
@@ -139,7 +139,7 @@ class ProdCredsChecklistControllerSpec
 
   "productionCredentialsChecklistAction" should {
     "return success when form is valid and incomplete" in new Setup {
-      import utils.SubmissionsTestData.extendedSubmission
+      import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.SubmissionsTestData.extendedSubmission
 
       SubmissionServiceMock.FetchLatestSubmission.thenReturns(extendedSubmission)
 
@@ -149,7 +149,7 @@ class ProdCredsChecklistControllerSpec
     }
 
     "redirect when when form is valid and complete" in new Setup {
-      import utils.SubmissionsTestData.{submission,completedProgress}
+      import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.SubmissionsTestData.{submission,completedProgress}
       val completedSubmission = ExtendedSubmission(submission, completedProgress)
 
       SubmissionServiceMock.FetchLatestSubmission.thenReturns(completedSubmission)

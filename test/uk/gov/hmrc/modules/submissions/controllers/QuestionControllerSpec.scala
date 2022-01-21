@@ -17,9 +17,9 @@
 package uk.gov.hmrc.modules.submissions.controllers
 
 import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.{BaseControllerSpec, SubscriptionTestHelperSugar}
-import builder.{DeveloperBuilder, SampleApplication, SampleSession}
+import uk.gov.hmrc.thirdpartydeveloperfrontend.builder.{DeveloperBuilder, SampleApplication, SampleSession}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.SubscriptionTestHelperSugar
-import utils.{LocalUserIdTracker, WithCSRFAddToken}
+import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.{LocalUserIdTracker, WithCSRFAddToken}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.mocks.service.ApplicationServiceMock
 import uk.gov.hmrc.thirdpartydeveloperfrontend.mocks.service.ApplicationActionServiceMock
 import uk.gov.hmrc.thirdpartydeveloperfrontend.mocks.connectors.ApmConnectorMockModule
@@ -27,10 +27,10 @@ import uk.gov.hmrc.modules.submissions.services.mocks.SubmissionServiceMockModul
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.modules.submissions.views.html.CheckAnswersView
 import uk.gov.hmrc.modules.submissions.views.html.QuestionView
-import utils.WithLoggedInSession._
+import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.WithLoggedInSession._
 
 import scala.concurrent.ExecutionContext.Implicits.global
-import utils.SubmissionsTestData.{applicationId, questionId, question2Id, submission, extendedSubmission}
+import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.SubmissionsTestData.{applicationId, questionId, question2Id, submission, extendedSubmission}
 import uk.gov.hmrc.modules.submissions.domain.models.QuestionId
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.ApplicationWithSubscriptionData
 import play.api.test.FakeRequest

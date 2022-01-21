@@ -27,7 +27,7 @@ import play.api.inject.bind
 import play.api.inject.guice.GuiceApplicationBuilder
 import play.api.{Application, Configuration, Mode}
 import uk.gov.hmrc.http.HeaderCarrier
-import utils.WireMockExtensions
+import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.WireMockExtensions
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.EmailAlreadyInUse
 
 class ThirdPartyDeveloperConnectorEncryptionSpec extends BaseConnectorIntegrationSpec with GuiceOneAppPerSuite with WireMockExtensions {

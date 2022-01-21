@@ -19,7 +19,7 @@ package uk.gov.hmrc.thirdpartydeveloperfrontend.domain
 import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.SupportEnquiryForm
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.connectors.DeskproTicket
 import play.api.test.FakeRequest
-import utils.AsyncHmrcSpec
+import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.AsyncHmrcSpec
 
 class DeskproTicketSpec extends AsyncHmrcSpec {
 

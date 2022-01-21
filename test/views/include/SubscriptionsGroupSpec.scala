@@ -16,7 +16,7 @@
 
 package views.include
 
-import builder.SubscriptionsBuilder
+import uk.gov.hmrc.thirdpartydeveloperfrontend.builder.SubscriptionsBuilder
 import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.APISubscriptions
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.apidefinitions._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications._
@@ -26,11 +26,10 @@ import org.jsoup.Jsoup
 import org.jsoup.nodes.Document
 import play.api.test.FakeRequest
 import uk.gov.hmrc.time.DateTimeUtils
-import utils.WithCSRFAddToken
+import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.WithCSRFAddToken
 import views.helper.CommonViewSpec
 import views.html.include.SubscriptionsGroup
-import utils.CollaboratorTracker
-import utils.LocalUserIdTracker
+import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.{CollaboratorTracker, LocalUserIdTracker, DeveloperSessionBuilder}
 
 class SubscriptionsGroupSpec 
     extends CommonViewSpec 
@@ -41,7 +40,7 @@ class SubscriptionsGroupSpec
 
   implicit val request = FakeRequest().withCSRFToken
 
-  val loggedInDeveloper = utils.DeveloperSessionBuilder("givenname.familyname@example.com", "Givenname", "Familyname", loggedInState = LoggedInState.LOGGED_IN)
+  val loggedInDeveloper = DeveloperSessionBuilder("givenname.familyname@example.com", "Givenname", "Familyname", loggedInState = LoggedInState.LOGGED_IN)
   val applicationId = ApplicationId("1234")
   val clientId = ClientId("clientId123")
   val applicationName = "Test Application"

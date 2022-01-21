@@ -17,7 +17,7 @@
 package uk.gov.hmrc.thirdpartydeveloperfrontend.controllers
 
 import play.api.data.{Form, FormError}
-import utils.AsyncHmrcSpec
+import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.AsyncHmrcSpec
 
 class EmailValidationSpec extends AsyncHmrcSpec {
   "emailValidator for the field email" should {

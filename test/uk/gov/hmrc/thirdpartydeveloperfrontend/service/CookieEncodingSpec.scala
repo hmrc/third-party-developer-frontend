@@ -24,7 +24,7 @@ import play.api.inject.bind
 import play.api.inject.guice.GuiceApplicationBuilder
 import play.api.libs.crypto.CookieSigner
 import uk.gov.hmrc.thirdpartydeveloperfrontend.security.CookieEncoding
-import utils.AsyncHmrcSpec
+import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.AsyncHmrcSpec
 
 class CookieEncodingSpec extends AsyncHmrcSpec with GuiceOneAppPerSuite {
 

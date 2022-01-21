@@ -23,14 +23,15 @@ import uk.gov.hmrc.thirdpartydeveloperfrontend.service.AuditAction.{ApplicationU
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.play.audit.http.connector.AuditConnector
 import uk.gov.hmrc.play.audit.model.DataEvent
-import utils.AsyncHmrcSpec
+import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.AsyncHmrcSpec
+import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.DeveloperSessionBuilder
 
 import scala.concurrent.ExecutionContext
 import scala.concurrent.ExecutionContext.Implicits.global
 
 class AuditServiceSpec extends AsyncHmrcSpec {
 
-  val developer = utils.DeveloperSessionBuilder("email@example.com", "Paul", "Smith", loggedInState = LoggedInState.LOGGED_IN)
+  val developer = DeveloperSessionBuilder("email@example.com", "Paul", "Smith", loggedInState = LoggedInState.LOGGED_IN)
 
   trait Setup {
     implicit val hc = HeaderCarrier().withExtraHeaders(

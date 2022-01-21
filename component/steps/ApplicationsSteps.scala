@@ -43,7 +43,7 @@ object AppWorld {
 }
 
 class ApplicationsSteps extends ScalaDsl with EN with Matchers with NavigationSugar with CustomMatchers with PageSugar {
-  import utils.GlobalUserIdTracker.idOf
+  import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.GlobalUserIdTracker.idOf
   import java.time.Period
 
   implicit val webDriver = Env.driver

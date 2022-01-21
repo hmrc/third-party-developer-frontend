@@ -18,8 +18,8 @@ package uk.gov.hmrc.thirdpartydeveloperfrontend.controllers
 
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.apidefinitions._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.apidefinitions.APIStatus.{BETA, STABLE}
-import utils._
-import builder._
+import uk.gov.hmrc.thirdpartydeveloperfrontend.utils._
+import uk.gov.hmrc.thirdpartydeveloperfrontend.builder._
 
 class APISubscriptionsSpec
   extends AsyncHmrcSpec

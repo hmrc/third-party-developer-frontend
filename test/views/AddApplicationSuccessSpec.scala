@@ -21,8 +21,8 @@ import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.LoggedIn
 import org.jsoup.Jsoup
 import org.jsoup.nodes.Document
 import play.api.test.FakeRequest
-import utils.ViewHelpers._
-import utils.WithCSRFAddToken
+import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.ViewHelpers._
+import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.{DeveloperSessionBuilder, WithCSRFAddToken, LocalUserIdTracker}
 import views.helper.CommonViewSpec
 import views.html.AddApplicationSuccessView
 
@@ -36,7 +36,7 @@ class AddApplicationSuccessSpec extends CommonViewSpec with WithCSRFAddToken {
 
     def testPage(applicationName: String, environment: Environment): Document = {
       val applicationId = ApplicationId("application-id")
-      val loggedIn = utils.DeveloperSessionBuilder("", "", "", None, loggedInState = LoggedInState.LOGGED_IN)
+      val loggedIn = DeveloperSessionBuilder("", "", "", None, loggedInState = LoggedInState.LOGGED_IN)
       val request = FakeRequest().withCSRFToken
       val page = addApplicationSuccess.render(applicationName, applicationId, environment, request, loggedIn, messagesProvider, appConfig, navSection = "nav-section")
       val document = Jsoup.parse(page.body)

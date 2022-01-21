@@ -18,7 +18,7 @@ package uk.gov.hmrc.thirdpartydeveloperfrontend.connectors
 
 import uk.gov.hmrc.thirdpartydeveloperfrontend.config.ApplicationConfig
 import play.api.libs.json.{Json, JsString, JsValue}
-import utils.AsyncHmrcSpec
+import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.AsyncHmrcSpec
 
 class PayloadEncryptionSpec extends AsyncHmrcSpec {
 

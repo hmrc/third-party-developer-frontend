@@ -23,12 +23,12 @@ import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.LoggedIn
 import org.jsoup.Jsoup
 import play.api.test.FakeRequest
 import uk.gov.hmrc.time.DateTimeUtils
-import utils.ViewHelpers.{elementExistsByText, elementIdentifiedByAttrWithValueContainsText}
-import utils.WithCSRFAddToken
+import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.ViewHelpers.{elementExistsByText, elementIdentifiedByAttrWithValueContainsText}
+import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.WithCSRFAddToken
 import views.helper.CommonViewSpec
 import views.html.DeletePrincipalApplicationConfirmView
-import builder.DeveloperBuilder
-import utils.LocalUserIdTracker
+import uk.gov.hmrc.thirdpartydeveloperfrontend.builder.DeveloperBuilder
+import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.{DeveloperSessionBuilder, LocalUserIdTracker}
 
 class DeletePrincipalApplicationConfirmSpec extends CommonViewSpec with WithCSRFAddToken with DeveloperBuilder with LocalUserIdTracker {
 
@@ -39,7 +39,7 @@ class DeletePrincipalApplicationConfirmSpec extends CommonViewSpec with WithCSRF
     val request = FakeRequest().withCSRFToken
     val appId = ApplicationId("1234")
     val clientId = ClientId("clientId123")
-    val loggedInDeveloper = utils.DeveloperSessionBuilder("developer@example.com", "John", "Doe", loggedInState = LoggedInState.LOGGED_IN)
+    val loggedInDeveloper = DeveloperSessionBuilder("developer@example.com", "John", "Doe", loggedInState = LoggedInState.LOGGED_IN)
     val application = Application(
       appId,
       clientId,

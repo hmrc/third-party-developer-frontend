@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package utils
+package uk.gov.hmrc.thirdpartydeveloperfrontend.utils
 
 import java.time.Period
 import java.util.UUID.randomUUID

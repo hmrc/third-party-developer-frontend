@@ -17,8 +17,8 @@
 package uk.gov.hmrc.modules.submissions.controllers
 
 import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.BaseControllerSpec
-import builder._
-import utils._
+import uk.gov.hmrc.thirdpartydeveloperfrontend.builder._
+import uk.gov.hmrc.thirdpartydeveloperfrontend.utils._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.mocks.service.ApplicationServiceMock
 import uk.gov.hmrc.thirdpartydeveloperfrontend.mocks.service.ApplicationActionServiceMock
 import uk.gov.hmrc.thirdpartydeveloperfrontend.connectors.ThirdPartyApplicationProductionConnector
@@ -31,8 +31,8 @@ import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.Applic
 import uk.gov.hmrc.modules.submissions.views.html._
 import play.api.test.FakeRequest
 import play.filters.csrf.CSRF
-import utils.WithCSRFAddToken
-import utils.WithLoggedInSession._
+import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.WithCSRFAddToken
+import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.WithLoggedInSession._
 import play.api.test.Helpers._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.SubscriptionTestHelperSugar
@@ -132,7 +132,7 @@ class CancelRequestControllerSpec
 
 
   "CancelRequestController" should {
-    import utils.SubmissionsTestData.extendedSubmission
+    import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.SubmissionsTestData.extendedSubmission
 
     "cancelRequestForProductionCredentialsPage returns the page" in new Setup with HasSubscriptions with HasAppInTestingState {
       SubmissionServiceMock.FetchLatestSubmission.thenReturns(extendedSubmission)

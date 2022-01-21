@@ -18,7 +18,7 @@ package uk.gov.hmrc.thirdpartydeveloperfrontend.controllers
 
 import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.ErrorFormBuilder.GlobalError
 import play.api.data.{Form, FormError, Forms}
-import utils.AsyncHmrcSpec
+import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.AsyncHmrcSpec
 
 class GlobalErrorSpec extends AsyncHmrcSpec {
 

@@ -21,7 +21,7 @@ import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.views.IpAllowlistFe
 import org.jsoup.Jsoup
 import org.jsoup.nodes.Document
 import play.twirl.api.Html
-import utils.WithCSRFAddToken
+import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.WithCSRFAddToken
 import views.helper.CommonViewSpec
 import views.html.include.FeedbackBannerView
 

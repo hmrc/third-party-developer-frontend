@@ -27,7 +27,7 @@ import play.api.mvc.Results.{EmptyContent, _}
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.service.SessionService
-import utils.DeveloperSessionBuilder
+import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.DeveloperSessionBuilder
 
 import scala.concurrent.{ExecutionContext, Future}
 import scala.concurrent.ExecutionContext.Implicits.global

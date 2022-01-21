@@ -2,7 +2,7 @@ package uk.gov.hmrc.thirdpartydeveloperfrontend.connectors
 
 import java.util.UUID
 import org.scalatestplus.play.guice.GuiceOneAppPerSuite
-import utils._
+import uk.gov.hmrc.thirdpartydeveloperfrontend.utils._
 import play.api.Configuration
 import play.api.inject.guice.GuiceApplicationBuilder
 import play.api.inject.bind

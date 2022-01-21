@@ -16,7 +16,7 @@
 
 package steps
 
-import builder.DeveloperBuilder
+import uk.gov.hmrc.thirdpartydeveloperfrontend.builder.DeveloperBuilder
 import com.github.tomakehurst.wiremock.client.WireMock._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.connectors.{LoginRequest, UserAuthenticationResponse, VerifyMfaRequest}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.{Developer, LoggedInState, Session}
@@ -30,8 +30,8 @@ import play.api.http.Status._
 import play.api.libs.json.{Format, Json}
 import stubs.{DeveloperStub, Stubs}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.connectors.PasswordResetRequest
-import utils.GlobalUserIdTracker
-import utils.UserIdTracker
+import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.GlobalUserIdTracker
+import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.UserIdTracker
 import org.scalatest.matchers.should.Matchers
 
 case class MfaSecret(secret: String)

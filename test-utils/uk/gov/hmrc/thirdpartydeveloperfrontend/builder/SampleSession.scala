@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package builder
+package uk.gov.hmrc.thirdpartydeveloperfrontend.builder
 
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.{Developer, DeveloperSession, Session, LoggedInState}
 

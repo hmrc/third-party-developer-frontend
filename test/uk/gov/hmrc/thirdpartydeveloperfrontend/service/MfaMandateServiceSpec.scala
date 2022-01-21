@@ -25,7 +25,7 @@ import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.thirdpartydeveloperfrontend.mocks.service._
 
 import scala.concurrent.ExecutionContext.Implicits.global
-import utils._
+import uk.gov.hmrc.thirdpartydeveloperfrontend.utils._
 
 class MfaMandateServiceSpec extends AsyncHmrcSpec with CollaboratorTracker with LocalUserIdTracker with AppsByTeamMemberServiceMock {
 

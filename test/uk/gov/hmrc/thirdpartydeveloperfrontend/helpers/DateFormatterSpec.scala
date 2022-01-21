@@ -19,7 +19,7 @@ package uk.gov.hmrc.thirdpartydeveloperfrontend.helpers
 import uk.gov.hmrc.thirdpartydeveloperfrontend.helpers.DateFormatter.initialLastAccessDate
 import org.joda.time.{DateTime, DateTimeUtils}
 import org.scalatest.BeforeAndAfterAll
-import utils.AsyncHmrcSpec
+import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.AsyncHmrcSpec
 
 class DateFormatterSpec extends AsyncHmrcSpec with BeforeAndAfterAll {
   val FixedTimeNow: DateTime = new DateTime("2019-09-01T00:30:00.000")

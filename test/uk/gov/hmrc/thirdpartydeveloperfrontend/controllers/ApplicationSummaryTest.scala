@@ -19,7 +19,7 @@ package uk.gov.hmrc.thirdpartydeveloperfrontend.controllers
 import java.time.Period
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications._
 import org.joda.time.DateTime
-import utils._
+import uk.gov.hmrc.thirdpartydeveloperfrontend.utils._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.Environment.{PRODUCTION, SANDBOX}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.controllers.ApplicationSummary
 import org.scalatest.matchers.should.Matchers

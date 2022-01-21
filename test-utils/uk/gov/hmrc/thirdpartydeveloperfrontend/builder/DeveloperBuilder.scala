@@ -14,12 +14,12 @@
  * limitations under the License.
  */
 
-package builder
+package uk.gov.hmrc.thirdpartydeveloperfrontend.builder
 
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.Developer
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.emailpreferences.EmailPreferences
-import utils.CollaboratorTracker
-import utils.UserIdTracker
+import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.CollaboratorTracker
+import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.UserIdTracker
 
 trait DeveloperBuilder extends CollaboratorTracker {
   self: UserIdTracker =>

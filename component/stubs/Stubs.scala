@@ -77,7 +77,7 @@ object Stubs extends ApplicationLogger {
 }
 
 object DeveloperStub {
-  import utils.GlobalUserIdTracker.idOf
+  import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.GlobalUserIdTracker.idOf
 
   def register(registration: Registration, status: Int)(implicit encryptedJson: EncryptedJson) =
     stubFor(

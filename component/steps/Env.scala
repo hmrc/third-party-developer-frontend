@@ -34,7 +34,7 @@ import play.api.inject.guice.GuiceApplicationBuilder
 import play.api.test.TestServer
 import play.core.server.ServerConfig
 import stubs.AuditStub
-import utils.BrowserStackCaps
+import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.BrowserStackCaps
 
 import scala.util.{Properties, Try}
 import uk.gov.hmrc.modules.common.services.ApplicationLogger

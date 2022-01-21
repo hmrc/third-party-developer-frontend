@@ -25,7 +25,7 @@ import org.jsoup.Jsoup
 import play.api.mvc.{AnyContentAsEmpty, Call}
 import play.api.test.FakeRequest
 import uk.gov.hmrc.time.DateTimeUtils
-import utils._
+import uk.gov.hmrc.thirdpartydeveloperfrontend.utils._
 import views.helper.CommonViewSpec
 import views.html.checkpages.TermsOfUseView
 
@@ -56,7 +56,7 @@ class TermsOfUseSpec extends CommonViewSpec with WithCSRFAddToken with Collabora
       val checkInformation = CheckInformation()
 
       val termsOfUseForm = TermsOfUseForm.fromCheckInformation(checkInformation)
-      val developer = utils.DeveloperSessionBuilder("email@example.com", "First Name", "Last Name", None, loggedInState = LoggedInState.LOGGED_IN)
+      val developer = DeveloperSessionBuilder("email@example.com", "First Name", "Last Name", None, loggedInState = LoggedInState.LOGGED_IN)
 
       val page = termsOfUse.render(
         ApplicationViewModel(thirdPartyApplication, false, false),
@@ -85,7 +85,7 @@ class TermsOfUseSpec extends CommonViewSpec with WithCSRFAddToken with Collabora
       val checkInformation = CheckInformation(termsOfUseAgreements = List(termsOfUseAgreement))
 
       val termsOfUseForm = TermsOfUseForm.fromCheckInformation(checkInformation)
-      val developer = utils.DeveloperSessionBuilder("email@example.com", "First Name", "Last Name", None, loggedInState = LoggedInState.LOGGED_IN)
+      val developer = DeveloperSessionBuilder("email@example.com", "First Name", "Last Name", None, loggedInState = LoggedInState.LOGGED_IN)
 
       val page = termsOfUse.render(
         ApplicationViewModel(thirdPartyApplication.copy(checkInformation = Some(checkInformation)), false, false),

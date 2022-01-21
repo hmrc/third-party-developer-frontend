@@ -22,16 +22,17 @@ import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.LoggedIn
 import org.jsoup.Jsoup
 import play.api.data.Form
 import play.api.test.FakeRequest
-import utils.ViewHelpers._
-import utils.WithCSRFAddToken
+import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.ViewHelpers._
+import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.WithCSRFAddToken
 import views.helper.CommonViewSpec
 import views.html.AddApplicationNameView
 import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.AddApplicationNameForm
+import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.DeveloperSessionBuilder
 
 class AddApplicationNameSpec extends CommonViewSpec with WithCSRFAddToken {
 
   val addApplicationNameView = app.injector.instanceOf[AddApplicationNameView]
-  val loggedInDeveloper = utils.DeveloperSessionBuilder("admin@example.com", "firstName1", "lastName1", loggedInState = LoggedInState.LOGGED_IN)
+  val loggedInDeveloper = DeveloperSessionBuilder("admin@example.com", "firstName1", "lastName1", loggedInState = LoggedInState.LOGGED_IN)
   val subordinateEnvironment = Environment.SANDBOX
   val appId = ApplicationId("1234")
   val principalEnvironment = Environment.PRODUCTION

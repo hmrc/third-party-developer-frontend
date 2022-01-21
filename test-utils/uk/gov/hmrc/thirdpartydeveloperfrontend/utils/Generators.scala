@@ -14,16 +14,20 @@
  * limitations under the License.
  */
 
-package utils
+package uk.gov.hmrc.thirdpartydeveloperfrontend.utils
 
-import play.api.libs.crypto.CookieSigner
-import play.api.test.FakeRequest
-import uk.gov.hmrc.thirdpartydeveloperfrontend.security.CookieEncoding
+import org.scalacheck.Arbitrary.arbitrary
+import org.scalacheck.Gen
 
-object WithLoggedInSession {
-  implicit class AuthFakeRequest[A](fakeRequest: FakeRequest[A]) {
-    def withLoggedIn(implicit cookieEncoding: CookieEncoding, cookieSigner: CookieSigner): String => FakeRequest[A] = { id =>
-      fakeRequest.withCookies(cookieEncoding.createCookie(id))
-    }
-  }
+import scala.util.Random
+
+object Generators {
+  def shuffle[T](xs: Seq[T]): Gen[Seq[T]] =
+    arbitrary[Int].map(new Random(_).shuffle(xs))
+
+  val asciiLower = Gen.alphaLowerChar
+  val asciiUpper = Gen.alphaUpperChar
+  val asciiDigit = Gen.numChar
+  val asciiSpecial = Gen.oneOf(" !\"#$%&'()*+,-./:;<=>?@[\\]^_`{|}~")
+  val asciiPrintable = Gen.oneOf(asciiLower, asciiUpper, asciiDigit, asciiSpecial)
 }

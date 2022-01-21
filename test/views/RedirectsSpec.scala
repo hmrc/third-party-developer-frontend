@@ -24,8 +24,8 @@ import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.controllers.Applica
 import org.jsoup.Jsoup
 import play.api.test.FakeRequest
 import uk.gov.hmrc.time.DateTimeUtils
-import utils.ViewHelpers._
-import utils._
+import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.ViewHelpers._
+import uk.gov.hmrc.thirdpartydeveloperfrontend.utils._
 import views.helper.CommonViewSpec
 import views.html.RedirectsView
 
@@ -33,8 +33,8 @@ class RedirectsSpec extends CommonViewSpec with WithCSRFAddToken with Collaborat
 
   val appId = ApplicationId("1234")
   val clientId = ClientId("clientId123")
-  val loggedInDeveloper = utils.DeveloperSessionBuilder("developer@example.com", "John", "Doe", loggedInState = LoggedInState.LOGGED_IN)
-  val loggedInDev = utils.DeveloperSessionBuilder("developer2@example.com", "Billy", "Fontaine", loggedInState = LoggedInState.LOGGED_IN)
+  val loggedInDeveloper = DeveloperSessionBuilder("developer@example.com", "John", "Doe", loggedInState = LoggedInState.LOGGED_IN)
+  val loggedInDev = DeveloperSessionBuilder("developer2@example.com", "Billy", "Fontaine", loggedInState = LoggedInState.LOGGED_IN)
   val application = Application(
     appId,
     clientId,

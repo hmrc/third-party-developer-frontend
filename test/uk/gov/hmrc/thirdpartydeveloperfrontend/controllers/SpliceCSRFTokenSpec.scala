@@ -21,7 +21,7 @@ import play.api.mvc.{Call, RequestHeader}
 import play.api.test.FakeRequest
 import play.filters.csrf.CSRF.{Token, TokenInfo}
 import play.filters.csrf.CSRFConfigProvider
-import utils.AsyncHmrcSpec
+import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.AsyncHmrcSpec
 
 class SpliceCSRFTokenSpec @Inject() (csrfConfigProvider: CSRFConfigProvider) extends AsyncHmrcSpec {
 

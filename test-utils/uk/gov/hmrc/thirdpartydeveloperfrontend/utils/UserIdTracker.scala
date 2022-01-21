@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package utils
+package uk.gov.hmrc.thirdpartydeveloperfrontend.utils
 
 import scala.collection.mutable
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.UserId

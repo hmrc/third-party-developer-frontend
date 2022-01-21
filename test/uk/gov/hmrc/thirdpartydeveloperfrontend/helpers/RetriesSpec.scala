@@ -22,7 +22,7 @@ import akka.pattern.FutureTimeoutSupport
 import uk.gov.hmrc.thirdpartydeveloperfrontend.config.ApplicationConfig
 import play.api.inject.guice.GuiceApplicationBuilder
 import uk.gov.hmrc.http.BadRequestException
-import utils.AsyncHmrcSpec
+import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.AsyncHmrcSpec
 
 import scala.concurrent.{ExecutionContext, Future}
 import scala.concurrent.Future.failed

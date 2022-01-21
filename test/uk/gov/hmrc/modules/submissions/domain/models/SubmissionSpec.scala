@@ -21,7 +21,7 @@ import org.scalatest.matchers.should.Matchers
 
 class SubmissionSpec extends AnyWordSpec with Matchers {
     private def extendedSubmissionWithStates(states: QuestionnaireState*) = {
-        import utils.SubmissionsTestData.submission
+        import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.SubmissionsTestData.submission
         
         val questionnaireProgress = states.zipWithIndex map {
             case(state, index) => QuestionnaireId(s"q$index") -> QuestionnaireProgress(state, List())

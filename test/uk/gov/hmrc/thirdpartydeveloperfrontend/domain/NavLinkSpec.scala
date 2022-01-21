@@ -17,7 +17,7 @@
 package uk.gov.hmrc.thirdpartydeveloperfrontend.domain
 
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.views.{NavLink, StaticNavLinks, UserNavLinks}
-import utils.AsyncHmrcSpec
+import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.AsyncHmrcSpec
 
 class NavLinkSpec extends AsyncHmrcSpec {
 

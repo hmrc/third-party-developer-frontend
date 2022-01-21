@@ -29,9 +29,7 @@ import views.helper.CommonViewSpec
 import views.html.include.LeftHandNav
 
 import scala.collection.JavaConverters._
-import utils.CollaboratorTracker
-import utils.LocalUserIdTracker
-
+import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.{CollaboratorTracker, LocalUserIdTracker, DeveloperSessionBuilder}
 class LeftHandNavSpec extends CommonViewSpec with CollaboratorTracker with LocalUserIdTracker {
 
   val leftHandNavView = app.injector.instanceOf[LeftHandNav]
@@ -40,7 +38,7 @@ class LeftHandNavSpec extends CommonViewSpec with CollaboratorTracker with Local
     val applicationId = ApplicationId("std-app-id")
     val clientId = ClientId("std-client-id")
     implicit val request = FakeRequest()
-    implicit val loggedIn = utils.DeveloperSessionBuilder("user@example.com", "Test", "Test", None, loggedInState = LoggedInState.LOGGED_IN)
+    implicit val loggedIn = DeveloperSessionBuilder("user@example.com", "Test", "Test", None, loggedInState = LoggedInState.LOGGED_IN)
     val standardApplication = Application(applicationId, clientId, "name", now, now, None, Period.ofDays(547), PRODUCTION, access = Standard())
     val privilegedApplication = Application(applicationId, clientId, "name", now, now, None, Period.ofDays(547), PRODUCTION, access = Privileged())
     val ropcApplication = Application(applicationId, clientId, "name", now, now, None, Period.ofDays(547), PRODUCTION, access = ROPC())

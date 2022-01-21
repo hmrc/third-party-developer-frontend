@@ -24,7 +24,7 @@ import org.jsoup.Jsoup
 import org.jsoup.nodes.Document
 import play.api.test.FakeRequest
 import play.twirl.api.Html
-import utils._
+import uk.gov.hmrc.thirdpartydeveloperfrontend.utils._
 import views.helper.CommonViewSpec
 import views.html.CredentialsView
 
@@ -41,7 +41,7 @@ class CredentialsSpec extends CommonViewSpec with WithCSRFAddToken with Collabor
 
   "Credentials page" should {
     val request = FakeRequest().withCSRFToken
-    val developer = utils.DeveloperSessionBuilder("Test", "Test", "Test", None, loggedInState = LoggedInState.LOGGED_IN)
+    val developer = DeveloperSessionBuilder("Test", "Test", "Test", None, loggedInState = LoggedInState.LOGGED_IN)
 
     val application = Application(
       ApplicationId("Test Application ID"),

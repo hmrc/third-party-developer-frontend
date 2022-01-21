@@ -16,7 +16,6 @@
 
 package uk.gov.hmrc.modules.uplift.controllers
 
-import builder._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.{BaseControllerSpec, SubscriptionTestHelperSugar}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.apidefinitions._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.ApplicationWithSubscriptionData
@@ -31,9 +30,10 @@ import play.api.test.FakeRequest
 import play.api.test.Helpers._
 import play.filters.csrf.CSRF.TokenProvider
 import uk.gov.hmrc.http.HeaderCarrier
-import utils.WithLoggedInSession._
-import utils.{LocalUserIdTracker, WithCSRFAddToken}
+import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.WithLoggedInSession._
+import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.{LocalUserIdTracker, WithCSRFAddToken}
 import uk.gov.hmrc.modules.uplift.views.html._
+import uk.gov.hmrc.thirdpartydeveloperfrontend.builder._
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import uk.gov.hmrc.modules.uplift.services.mocks._

@@ -28,7 +28,7 @@ import org.jsoup.nodes.Document
 import play.api.mvc.Flash
 import play.api.test.FakeRequest
 import uk.gov.hmrc.time.DateTimeUtils
-import utils._
+import uk.gov.hmrc.thirdpartydeveloperfrontend.utils._
 import views.helper.CommonViewSpec
 import views.html.ClientSecretsView
 
@@ -51,7 +51,7 @@ class ClientSecretsSpec extends CommonViewSpec with WithCSRFAddToken with Collab
 
   "Client secrets page" should {
     val request = FakeRequest().withCSRFToken
-    val developer = utils.DeveloperSessionBuilder("Test", "Test", "Test", None, loggedInState = LoggedInState.LOGGED_IN)
+    val developer = DeveloperSessionBuilder("Test", "Test", "Test", None, loggedInState = LoggedInState.LOGGED_IN)
 
     val clientSecret1 = ClientSecret(randomUUID.toString, "", DateTimeUtils.now)
     val clientSecret2 = ClientSecret(randomUUID.toString, "", DateTimeUtils.now)

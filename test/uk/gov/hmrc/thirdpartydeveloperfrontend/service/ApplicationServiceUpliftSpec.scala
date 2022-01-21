@@ -16,7 +16,7 @@
 
 package uk.gov.hmrc.thirdpartydeveloperfrontend.service
 
-import utils.AsyncHmrcSpec
+import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.AsyncHmrcSpec
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.thirdpartydeveloperfrontend.connectors.ApmConnector
 import scala.concurrent.ExecutionContext.Implicits.global
@@ -41,7 +41,7 @@ import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.Applic
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.apidefinitions.ApiIdentifier
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.apidefinitions.ApiVersion
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.apidefinitions.ApiContext
-
+import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.DeveloperSessionBuilder
 class ApplicationServiceUpliftSpec extends AsyncHmrcSpec {
   trait Setup {
     implicit val hc: HeaderCarrier = HeaderCarrier()
@@ -122,7 +122,7 @@ class ApplicationServiceUpliftSpec extends AsyncHmrcSpec {
     val applicationName = "applicationName"
 
     val user =
-      utils.DeveloperSessionBuilder("Firstname", "Lastname", "email@example.com", loggedInState = LoggedInState.LOGGED_IN)
+      DeveloperSessionBuilder("Firstname", "Lastname", "email@example.com", loggedInState = LoggedInState.LOGGED_IN)
 
     "request uplift" in new Setup {
       when(mockDeskproConnector.createTicket(any[DeskproTicket])(eqTo(hc))).thenReturn(successful(TicketCreated))

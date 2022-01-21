@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package utils
+package uk.gov.hmrc.thirdpartydeveloperfrontend.utils
 
 import uk.gov.hmrc.modules.submissions.domain.models._
 import uk.gov.hmrc.time.DateTimeUtils

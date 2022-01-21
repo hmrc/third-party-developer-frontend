@@ -30,7 +30,8 @@ import uk.gov.hmrc.thirdpartydeveloperfrontend.service.{ApplicationActionService
 
 import scala.concurrent.{ExecutionContext, Future}
 import scala.concurrent.ExecutionContext.Implicits.global
-import utils.LocalUserIdTracker
+import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.LocalUserIdTracker
+import uk.gov.hmrc.thirdpartydeveloperfrontend.builder._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.actions.SubscriptionFieldsActions
 
  class TestController(
@@ -47,9 +48,9 @@ import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.actions.SubscriptionF
  class ActionBuildersSpec extends BaseControllerSpec
    with ApplicationServiceMock
    with ApplicationActionServiceMock
-   with builder.ApplicationBuilder
+   with ApplicationBuilder
    with LocalUserIdTracker
-   with builder.SubscriptionsBuilder
+   with SubscriptionsBuilder
    with LoggedInRequestTestHelper
  {
 

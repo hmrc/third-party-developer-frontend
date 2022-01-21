@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package builder
+package uk.gov.hmrc.thirdpartydeveloperfrontend.builder
 
 import java.time.Period
 import java.util.UUID.randomUUID
@@ -23,8 +23,8 @@ import uk.gov.hmrc.time.DateTimeUtils
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.apidefinitions._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.subscriptions.{Fields,FieldValue,FieldName}
-import utils.CollaboratorTracker
-import utils.UserIdTracker
+import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.CollaboratorTracker
+import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.UserIdTracker
 
 trait ApplicationBuilder extends CollaboratorTracker {
   self: UserIdTracker =>

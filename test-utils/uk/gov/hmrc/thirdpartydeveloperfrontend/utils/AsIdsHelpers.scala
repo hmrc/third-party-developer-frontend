@@ -14,18 +14,23 @@
  * limitations under the License.
  */
 
-package utils
+package uk.gov.hmrc.thirdpartydeveloperfrontend.utils
 
-import org.scalatestplus.play.guice.GuiceOneAppPerSuite
-import play.api.test.{CSRFTokenHelper, FakeRequest}
-import play.filters.csrf.CSRFAddToken
+import uk.gov.hmrc.modules.submissions.domain.models.{QuestionId, QuestionItem}
+import cats.data.NonEmptyList
 
-trait WithCSRFAddToken {
-  self: GuiceOneAppPerSuite =>
+trait AsIdsHelpers {
+  implicit class ListQIdSyntax(questionItems: List[QuestionItem]) {
+    def asIds(): List[QuestionId] = {
+      questionItems.map(_.question.id)
+    }
+  }
 
-  val addToken = app.injector.instanceOf[CSRFAddToken]
-
-  implicit class CSRFRequest[T](request: FakeRequest[T]) {
-    def withCSRFToken: FakeRequest[T] = CSRFTokenHelper.addCSRFToken(request).asInstanceOf[FakeRequest[T]]
+  implicit class NELQIdSyntax(questionItems: NonEmptyList[QuestionItem]) {
+    def asIds(): List[QuestionId] = {
+      questionItems.toList.map(_.question.id)
+    }
   }
 }
+
+object AsIdsHelpers extends AsIdsHelpers

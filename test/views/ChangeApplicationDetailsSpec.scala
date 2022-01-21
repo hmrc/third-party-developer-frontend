@@ -26,8 +26,8 @@ import org.jsoup.Jsoup
 import org.jsoup.nodes.Document
 import play.api.test.FakeRequest
 import uk.gov.hmrc.time.DateTimeUtils
-import utils.ViewHelpers.{elementExistsByText, elementIdentifiedByAttrContainsText, textareaExistsWithText}
-import utils.WithCSRFAddToken
+import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.ViewHelpers.{elementExistsByText, elementIdentifiedByAttrContainsText, textareaExistsWithText}
+import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.{WithCSRFAddToken, DeveloperSessionBuilder}
 import views.helper.CommonViewSpec
 import views.html.ChangeDetailsView
 
@@ -41,7 +41,7 @@ class ChangeApplicationDetailsSpec extends CommonViewSpec with WithCSRFAddToken 
 
     def renderPage(application: Application) = {
 
-      val loggedIn = utils.DeveloperSessionBuilder("admin@example.com", "firstName1", "lastName1", loggedInState = LoggedInState.LOGGED_IN)
+      val loggedIn = DeveloperSessionBuilder("admin@example.com", "firstName1", "lastName1", loggedInState = LoggedInState.LOGGED_IN)
       val request = FakeRequest().withCSRFToken
       val form = EditApplicationForm.form.fill(
         EditApplicationForm(application.id, application.name, application.description, application.privacyPolicyUrl, application.termsAndConditionsUrl, "12 months")

@@ -25,8 +25,8 @@ import org.jsoup.nodes.Document
 import play.api.test.FakeRequest
 import play.twirl.api.Html
 import uk.gov.hmrc.time.DateTimeUtils
-import utils.ViewHelpers._
-import utils._
+import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.ViewHelpers._
+import uk.gov.hmrc.thirdpartydeveloperfrontend.utils._
 import views.helper.CommonViewSpec
 import views.html.include.LeftHandNav
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.controllers.LeftHandNavFlags
@@ -42,7 +42,7 @@ class LeftHandNavSpec extends CommonViewSpec with WithCSRFAddToken with Collabor
     val clientId = ClientId("clientId123")
     val applicationName = "Test Application"
 
-    val loggedInDeveloper = utils.DeveloperSessionBuilder("givenname.familyname@example.com", "Givenname", "Familyname", loggedInState = LoggedInState.LOGGED_IN)
+    val loggedInDeveloper = DeveloperSessionBuilder("givenname.familyname@example.com", "Givenname", "Familyname", loggedInState = LoggedInState.LOGGED_IN)
 
     val application = Application(
       applicationId,
