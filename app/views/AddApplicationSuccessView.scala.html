@@ -14,7 +14,6 @@
  * limitations under the License.
  *@
 
-@import uk.gov.hmrc.thirdpartydeveloperfrontend.config.ApplicationConfig
 @import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.Environment
 @import include._
 @import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.controllers.Crumb
@@ -30,7 +29,7 @@
     title = "Application added",
     userFullName = loggedIn.loggedInName,
     breadcrumbs = Seq(
-        Crumb("Add an application",s"${routes.ManageApplications.manageApps}", Some("data-breadcrumb-application-added")),
+        Crumb("Add an application",s"${controllers.routes.ManageApplications.manageApps}", Some("data-breadcrumb-application-added")),
         Crumb.home
     ),
     leftNav = Some(leftHandNav(None, Option(navSection))),
@@ -61,7 +60,7 @@
             <li>Your redirect URIs, if using <a href="/api-documentation/docs/authorisation/user-restricted-endpoints">user-restricted endpoints</a></li>
         </ul>
 
-        <a class="button" href="@routes.SubscriptionsController.manageSubscriptions(applicationId)" id="manage-api-subscriptions">
+        <a class="button" href="@controllers.routes.SubscriptionsController.manageSubscriptions(applicationId)" id="manage-api-subscriptions">
              Manage API subscriptions
         </a>
     }

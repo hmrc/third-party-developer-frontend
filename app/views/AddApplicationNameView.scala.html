@@ -18,7 +18,6 @@
 @import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.Environment
 @import include._
 @import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.controllers.Crumb
-@import uk.gov.hmrc.thirdpartydeveloperfrontend.config.ApplicationConfig
 
 @this(devMain: DevMain2)
 
@@ -40,7 +39,7 @@
 
   @errorSummary2(form)
 
-  @helper.form(action = addapplication.routes.AddApplication.editApplicationNameAction(environment)) {
+  @helper.form(action = controllers.addapplication.routes.AddApplication.editApplicationNameAction(environment)) {
     @helper.CSRF.formField
 
     <h1 class="govuk-heading-l">@pageHeading</h1>

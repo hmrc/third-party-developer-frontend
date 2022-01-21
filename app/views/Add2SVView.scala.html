@@ -14,7 +14,6 @@
  * limitations under the License.
  *@
 
-@import uk.gov.hmrc.thirdpartydeveloperfrontend.config.ApplicationConfig
 @import uk.gov.hmrc.thirdpartydeveloperfrontend.helpers.PluralizeHelper
 @import include._
 @import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.controllers.MfaMandateDetails
@@ -51,6 +50,6 @@
   <br/>
 
   <p class="govuk-body">
-    <a class="govuk-link" id="skip" href="@routes.UserLoginAccount.get2SVNotSetPage()">I can't do this right now</a>
+    <a class="govuk-link" id="skip" href="@controllers.routes.UserLoginAccount.get2SVNotSetPage()">I can't do this right now</a>
   </p>
 }

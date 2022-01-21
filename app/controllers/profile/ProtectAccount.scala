@@ -37,25 +37,27 @@ import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.Remove2SVConfirmForm
 import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.FormKeys
 
 @Singleton
-class ProtectAccount @Inject()(val thirdPartyDeveloperConnector: ThirdPartyDeveloperConnector,
-                               val otpAuthUri: OtpAuthUri,
-                               val mfaService: MFAService,
-                               val sessionService: SessionService,
-                               mcc: MessagesControllerComponents,
-                               val errorHandler: ErrorHandler,
-                               val mfaMandateService: MfaMandateService,
-                               val cookieSigner : CookieSigner,
-                               protectAccountSetupView: ProtectAccountSetupView,
-                               protectedAccountView: ProtectedAccountView,
-                               protectAccountView: ProtectAccountView,
-                               protectAccountAccessCodeView: ProtectAccountAccessCodeView,
-                               protectAccountCompletedView: ProtectAccountCompletedView,
-                               protectAccountRemovalConfirmationView: ProtectAccountRemovalConfirmationView,
-                               protectAccountRemovalAccessCodeView: ProtectAccountRemovalAccessCodeView,
-                               protectAccountRemovalCompleteView: ProtectAccountRemovalCompleteView
-                              )
-                              (implicit val ec: ExecutionContext, val appConfig: ApplicationConfig)
-  extends LoggedInController(mcc) {
+class ProtectAccount @Inject()(
+  val thirdPartyDeveloperConnector: ThirdPartyDeveloperConnector,
+  val otpAuthUri: OtpAuthUri,
+  val mfaService: MFAService,
+  val sessionService: SessionService,
+  mcc: MessagesControllerComponents,
+  val errorHandler: ErrorHandler,
+  val mfaMandateService: MfaMandateService,
+  val cookieSigner : CookieSigner,
+  protectAccountSetupView: ProtectAccountSetupView,
+  protectedAccountView: ProtectedAccountView,
+  protectAccountView: ProtectAccountView,
+  protectAccountAccessCodeView: ProtectAccountAccessCodeView,
+  protectAccountCompletedView: ProtectAccountCompletedView,
+  protectAccountRemovalConfirmationView: ProtectAccountRemovalConfirmationView,
+  protectAccountRemovalAccessCodeView: ProtectAccountRemovalAccessCodeView,
+  protectAccountRemovalCompleteView: ProtectAccountRemovalCompleteView
+)(
+  implicit val ec: ExecutionContext,
+  val appConfig: ApplicationConfig
+) extends LoggedInController(mcc) {
 
   private val scale = 4
   val qrCode = QRCode(scale)

@@ -14,7 +14,6 @@
  * limitations under the License.
  *@
 
-@import uk.gov.hmrc.thirdpartydeveloperfrontend.config.ApplicationConfig
 @import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.DeveloperSession
 @import include._
 @import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.controllers.Crumb
@@ -68,7 +67,7 @@
 
   @if(app.termsOfUseStatus == AGREEMENT_REQUIRED) {
     <hr class="govuk-section-break govuk-section-break--m govuk-section-break--visible">
-    @helper.form(action = routes.TermsOfUse.agreeTermsOfUse(app.id), 'class -> "form", 'id -> "termsOfUseForm") {
+    @helper.form(action = controllers.routes.TermsOfUse.agreeTermsOfUse(app.id), 'class -> "form", 'id -> "termsOfUseForm") {
       @helper.CSRF.formField
       <div class="govuk-form-group @if(form.errors("termsOfUseAgreed").nonEmpty){form-group-error}">
         <fieldset class="govuk-fieldset" aria-describedby="terms-agreed-error">
@@ -83,7 +82,7 @@
       </div>
       <div class="govuk-button-group">
         <button id="submit" class="govuk-button" type="submit">Save</button>
-        <a href="@routes.Details.details(app.id)" class="govuk-button govuk-button--secondary">Cancel</a>
+        <a href="@controllers.routes.Details.details(app.id)" class="govuk-button govuk-button--secondary">Cancel</a>
       </div>
     }
   }

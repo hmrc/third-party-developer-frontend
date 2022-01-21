@@ -45,6 +45,8 @@ import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.profile.ProtectAccoun
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.UserId
 import utils.LocalUserIdTracker
 
+import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.profile.routes.ProtectAccount
+
 class ProtectAccountSpec extends BaseControllerSpec with WithCSRFAddToken with DeveloperBuilder with LocalUserIdTracker {
 
   trait Setup extends SessionServiceMock {
@@ -235,7 +237,7 @@ class ProtectAccountSpec extends BaseControllerSpec with WithCSRFAddToken with D
         private val result = addToken(underTest.protectAccount())(request)
 
         status(result) shouldBe SEE_OTHER
-        redirectLocation(result) shouldBe Some(controllers.profile.routes.ProtectAccount.getProtectAccountCompletedPage().url)
+        redirectLocation(result) shouldBe Some(ProtectAccount.getProtectAccountCompletedPage().url)
 
         verify(underTest.thirdPartyDeveloperConnector)
           .updateSessionLoggedInState(eqTo(sessionId), eqTo(UpdateLoggedInStateRequest(LoggedInState.LOGGED_IN)))(*)
@@ -266,7 +268,7 @@ class ProtectAccountSpec extends BaseControllerSpec with WithCSRFAddToken with D
         private val result = addToken(underTest.remove2SV())(request)
 
         status(result) shouldBe SEE_OTHER
-        redirectLocation(result) shouldBe Some(controllers.profile.routes.ProtectAccount.get2SVRemovalCompletePage().url)
+        redirectLocation(result) shouldBe Some(ProtectAccount.get2SVRemovalCompletePage().url)
       }
     }
   }

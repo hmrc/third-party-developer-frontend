@@ -19,7 +19,6 @@
 @import include._
 @import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.controllers.Crumb
 @import views.helper.EnvironmentNameService
-@import uk.gov.hmrc.thirdpartydeveloperfrontend.config.ApplicationConfig
 
 @this(devMain: DevMain2)
 
@@ -52,6 +51,6 @@
   </p>
 
   <p class="govuk-body">
-    <a id="submit" class="govuk-button" href="@routes.Credentials.credentials(id)">View application credentials</a>
+    <a id="submit" class="govuk-button" href="@controllers.routes.Credentials.credentials(id)">View application credentials</a>
   </p>
 }

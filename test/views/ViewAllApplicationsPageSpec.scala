@@ -32,10 +32,11 @@ import views.html.{AddApplicationSubordinateEmptyNestView, ManageApplicationsVie
 import views.helper.EnvironmentNameService
 import uk.gov.hmrc.thirdpartydeveloperfrontend.helpers.DateFormatter
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.Environment
+import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.addapplication.routes.{AddApplication => AddApplicationRoutes}
 
 class ViewAllApplicationsPageSpec extends CommonViewSpec with WithCSRFAddToken {
   def isGreenAddProductionApplicationButtonVisible(document: Document): Boolean = {
-    val href = controllers.addapplication.routes.AddApplication.addApplicationPrincipal().url
+    val href = AddApplicationRoutes.addApplicationPrincipal().url
 
     val greenButtons = document.select(s"a[href=$href][class=govuk-button]")
 
@@ -51,7 +52,7 @@ class ViewAllApplicationsPageSpec extends CommonViewSpec with WithCSRFAddToken {
     def subordinate: String
     def subordinateWording: String
   }
-  
+
   trait ProdAndET extends EnvNames {
     val principal = "Production"
     val subordinate = "Sandbox"

@@ -29,6 +29,8 @@ import utils.WithLoggedInSession._
 import scala.concurrent.ExecutionContext.Implicits.global
 import utils.LocalUserIdTracker
 
+import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.profile.routes.Profile
+
 class NavigationSpec extends BaseControllerSpec with DeveloperBuilder with LocalUserIdTracker {
   class Setup(loggedInState: Option[LoggedInState]) extends ApplicationServiceMock with SessionServiceMock with ApplicationActionServiceMock {
     val underTest = new Navigation(
@@ -86,7 +88,7 @@ class NavigationSpec extends BaseControllerSpec with DeveloperBuilder with Local
       }
 
       "return the user's profile link" in new Setup(loggedInState = Some(LoggedInState.LOGGED_IN)) {
-        links.head shouldBe NavLink("John Doe", controllers.profile.routes.Profile.showProfile().url)
+        links.head shouldBe NavLink("John Doe", Profile.showProfile().url)
       }
 
       "return a sign-out link" in new Setup(loggedInState = Some(LoggedInState.LOGGED_IN)) {

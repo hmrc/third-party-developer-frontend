@@ -65,7 +65,7 @@ class SubscriptionsSpec extends BaseControllerSpec with WithCSRFAddToken with Lo
     val subscribeRequestSubmittedView = app.injector.instanceOf[SubscribeRequestSubmittedView]
     implicit val environmentNameService = new EnvironmentNameService(appConfig)
 
-    val underTest = new Subscriptions(
+    val underTest = new SubscriptionsController(
       mock[ThirdPartyDeveloperConnector],
       mock[AuditService],
       mockErrorHandler,
