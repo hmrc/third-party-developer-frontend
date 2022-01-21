@@ -20,7 +20,7 @@ import builder.DeveloperBuilder
 import uk.gov.hmrc.thirdpartydeveloperfrontend.config.ErrorHandler
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.connectors.TicketCreated
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.{LoggedInState, Session}
-import mocks.service.SessionServiceMock
+import uk.gov.hmrc.thirdpartydeveloperfrontend.mocks.service.SessionServiceMock
 import org.jsoup.Jsoup
 import org.mockito.ArgumentCaptor
 import play.api.mvc.{Request, Result}

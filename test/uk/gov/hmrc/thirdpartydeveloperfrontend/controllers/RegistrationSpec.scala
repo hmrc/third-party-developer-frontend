@@ -19,7 +19,7 @@ package uk.gov.hmrc.thirdpartydeveloperfrontend.controllers
 import uk.gov.hmrc.thirdpartydeveloperfrontend.connectors.ThirdPartyDeveloperConnector
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.RegistrationSuccessful
-import mocks.service.SessionServiceMock
+import uk.gov.hmrc.thirdpartydeveloperfrontend.mocks.service.SessionServiceMock
 import org.mockito.ArgumentCaptor
 import play.api.test.FakeRequest
 import play.api.test.Helpers._

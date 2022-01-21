@@ -25,7 +25,7 @@ import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.ApplicationUpliftSuccessfu
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.apidefinitions._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.{ApplicationId, _}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.helpers.string._
-import mocks.service._
+import uk.gov.hmrc.thirdpartydeveloperfrontend.mocks.service._
 import org.joda.time.DateTimeZone
 import org.jsoup.Jsoup
 import play.api.mvc.{AnyContentAsEmpty, Result}

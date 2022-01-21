@@ -21,7 +21,7 @@ import java.util.UUID
 import builder.DeveloperBuilder
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.connectors.TicketId
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.{DeveloperSession, LoggedInState, Session}
-import mocks.service.SessionServiceMock
+import uk.gov.hmrc.thirdpartydeveloperfrontend.mocks.service.SessionServiceMock
 import play.api.mvc.Request
 import play.api.test.FakeRequest
 import play.api.test.Helpers._

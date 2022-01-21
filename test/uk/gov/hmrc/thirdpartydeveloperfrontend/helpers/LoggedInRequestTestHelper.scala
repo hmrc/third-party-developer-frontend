@@ -19,7 +19,7 @@ package uk.gov.hmrc.thirdpartydeveloperfrontend.helpers
 import builder.DeveloperBuilder
 import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.BaseControllerSpec
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.{LoggedInState, Session}
-import mocks.service.SessionServiceMock
+import uk.gov.hmrc.thirdpartydeveloperfrontend.mocks.service.SessionServiceMock
 import play.api.mvc.AnyContentAsEmpty
 import play.api.test.FakeRequest
 import play.filters.csrf.CSRF.TokenProvider

@@ -22,14 +22,14 @@ import builder.DeveloperBuilder
 import uk.gov.hmrc.thirdpartydeveloperfrontend.config.ErrorHandler
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.connectors.{TicketCreated, UserAuthenticationResponse}
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.{DeveloperSession, LoggedInState, Session}
-import mocks.service.SessionServiceMock
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.{DeveloperSession, LoggedInState, Session, UserId}
+import uk.gov.hmrc.thirdpartydeveloperfrontend.mocks.service.SessionServiceMock
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
 import play.filters.csrf.CSRF.TokenProvider
-import uk.gov.hmrc.thirdpartydeveloperfrontend.service._
-import uk.gov.hmrc.thirdpartydeveloperfrontend.service.AuditAction._
 import uk.gov.hmrc.play.audit.http.connector.AuditResult
+import uk.gov.hmrc.thirdpartydeveloperfrontend.service.AuditAction._
+import uk.gov.hmrc.thirdpartydeveloperfrontend.service._
 import utils.WithCSRFAddToken
 import utils.WithLoggedInSession._
 import views.html.{AccountLockedView, LogInAccessCodeView, SignInView}
@@ -40,9 +40,8 @@ import scala.concurrent.Future
 import scala.concurrent.Future._
 import views.html.UserDidNotAdd2SVView
 import views.html.Add2SVView
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.UserId
 import utils.LocalUserIdTracker
-import mocks.connector.ThirdPartyDeveloperConnectorMockModule
+import _root_.uk.gov.hmrc.thirdpartydeveloperfrontend.mocks.connectors.ThirdPartyDeveloperConnectorMockModule
 
 class UserLoginAccountSpec extends BaseControllerSpec with WithCSRFAddToken with DeveloperBuilder with LocalUserIdTracker {
   trait Setup extends SessionServiceMock with ThirdPartyDeveloperConnectorMockModule {

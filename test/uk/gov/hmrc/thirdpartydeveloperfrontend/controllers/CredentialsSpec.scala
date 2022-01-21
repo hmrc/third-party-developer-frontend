@@ -25,7 +25,7 @@ import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.Applic
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.CollaboratorRole.{ADMINISTRATOR, DEVELOPER}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.ClientSecretLimitExceeded
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications._
-import mocks.service._
+import uk.gov.hmrc.thirdpartydeveloperfrontend.mocks.service._
 import org.joda.time.{DateTime, DateTimeZone}
 import play.api.mvc.AnyContentAsEmpty
 import play.api.test.CSRFTokenHelper._

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package mocks.connector
+package uk.gov.hmrc.thirdpartydeveloperfrontend.mocks.connectors
 
 import org.mockito.{ArgumentMatchersSugar, MockitoSugar}
 

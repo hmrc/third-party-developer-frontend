@@ -21,7 +21,7 @@ import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.apidefinitions.APIS
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.{DeveloperSession, LoggedInState, Session}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.subscriptions.ApiSubscriptionFields
-import mocks.service._
+import uk.gov.hmrc.thirdpartydeveloperfrontend.mocks.service._
 import org.jsoup.Jsoup
 import play.api.mvc.Result
 import play.api.test.Helpers._

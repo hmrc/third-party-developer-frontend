@@ -20,9 +20,9 @@ import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.{BaseControllerSpec, 
 import builder.{DeveloperBuilder, SampleApplication, SampleSession}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.SubscriptionTestHelperSugar
 import utils.{LocalUserIdTracker, WithCSRFAddToken}
-import mocks.service.ApplicationServiceMock
-import mocks.service.ApplicationActionServiceMock
-import mocks.connector.ApmConnectorMockModule
+import uk.gov.hmrc.thirdpartydeveloperfrontend.mocks.service.ApplicationServiceMock
+import uk.gov.hmrc.thirdpartydeveloperfrontend.mocks.service.ApplicationActionServiceMock
+import uk.gov.hmrc.thirdpartydeveloperfrontend.mocks.connectors.ApmConnectorMockModule
 import uk.gov.hmrc.modules.submissions.services.mocks.SubmissionServiceMockModule
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.modules.submissions.views.html.CheckAnswersView

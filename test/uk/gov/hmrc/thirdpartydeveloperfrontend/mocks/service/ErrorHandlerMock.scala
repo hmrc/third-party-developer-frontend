@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package mocks.service
+package uk.gov.hmrc.thirdpartydeveloperfrontend.mocks.service
 
 import uk.gov.hmrc.thirdpartydeveloperfrontend.config.ErrorHandler
 import org.mockito.{ArgumentMatchersSugar, MockitoSugar}

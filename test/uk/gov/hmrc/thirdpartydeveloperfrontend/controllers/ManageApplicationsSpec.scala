@@ -21,7 +21,7 @@ import java.util.UUID.randomUUID
 import builder.DeveloperBuilder
 import uk.gov.hmrc.thirdpartydeveloperfrontend.config.ErrorHandler
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications._
-import mocks.service._
+import uk.gov.hmrc.thirdpartydeveloperfrontend.mocks.service._
 import org.joda.time.DateTimeZone
 import play.api.mvc.AnyContentAsEmpty
 import play.api.test.FakeRequest
@@ -36,7 +36,7 @@ import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.controllers.Applica
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import utils.LocalUserIdTracker
-import mocks.connector.ApmConnectorMockModule
+import uk.gov.hmrc.thirdpartydeveloperfrontend.mocks.connectors.ApmConnectorMockModule
 import builder._
 import uk.gov.hmrc.modules.uplift.services.mocks.UpliftLogicMock
 

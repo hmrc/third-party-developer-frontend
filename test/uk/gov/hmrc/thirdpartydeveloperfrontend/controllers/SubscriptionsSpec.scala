@@ -23,7 +23,7 @@ import uk.gov.hmrc.thirdpartydeveloperfrontend.connectors.ThirdPartyDeveloperCon
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.apidefinitions.{ApiContext, ApiVersion,ApiIdentifier}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.connectors.TicketResult
-import mocks.service.{ApplicationActionServiceMock, ApplicationServiceMock, SessionServiceMock}
+import uk.gov.hmrc.thirdpartydeveloperfrontend.mocks.service.{ApplicationActionServiceMock, ApplicationServiceMock, SessionServiceMock}
 import org.joda.time.DateTimeZone
 import play.api.mvc.{AnyContentAsEmpty, AnyContentAsFormUrlEncoded, Result}
 import play.api.test.FakeRequest

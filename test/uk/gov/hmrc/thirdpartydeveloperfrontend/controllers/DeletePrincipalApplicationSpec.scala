@@ -20,7 +20,7 @@ import builder.DeveloperBuilder
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.connectors.TicketCreated
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.{DeveloperSession, LoggedInState, Session}
-import mocks.service._
+import uk.gov.hmrc.thirdpartydeveloperfrontend.mocks.service._
 import org.joda.time.DateTime
 import play.api.test.FakeRequest
 import play.api.test.Helpers._

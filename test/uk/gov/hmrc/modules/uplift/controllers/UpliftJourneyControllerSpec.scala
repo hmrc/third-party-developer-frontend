@@ -23,8 +23,8 @@ import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.Applic
 import uk.gov.hmrc.modules.uplift.domain.models._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.{DeveloperSession, LoggedInState, Session}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.subscriptions.{ApiCategory, ApiData, VersionData}
-import mocks.connector.ApmConnectorMockModule
-import mocks.service.{ApplicationActionServiceMock, ApplicationServiceMock, SessionServiceMock}
+import uk.gov.hmrc.thirdpartydeveloperfrontend.mocks.connectors.ApmConnectorMockModule
+import uk.gov.hmrc.thirdpartydeveloperfrontend.mocks.service.{ApplicationActionServiceMock, ApplicationServiceMock, SessionServiceMock}
 import org.jsoup.Jsoup
 import play.api.mvc.Result
 import play.api.test.FakeRequest

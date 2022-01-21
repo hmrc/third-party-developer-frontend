@@ -21,7 +21,7 @@ import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.ApplicationUpdateSuccessfu
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.Application
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.{Developer, DeveloperSession, LoggedInState, Session}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.flows.IpAllowlistFlow
-import mocks.service._
+import uk.gov.hmrc.thirdpartydeveloperfrontend.mocks.service._
 import org.scalatest.Assertion
 import play.api.mvc.Result
 import play.api.test.FakeRequest

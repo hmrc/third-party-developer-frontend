@@ -21,7 +21,7 @@ import java.time.Period
 import akka.stream.Materializer
 import uk.gov.hmrc.thirdpartydeveloperfrontend.config.ApplicationConfig
 import uk.gov.hmrc.thirdpartydeveloperfrontend.config.FraudPreventionConfig
-import mocks.service.ErrorHandlerMock
+import uk.gov.hmrc.thirdpartydeveloperfrontend.mocks.service.ErrorHandlerMock
 import org.scalatestplus.play.guice.GuiceOneAppPerSuite
 import play.api.Application
 import play.api.i18n.MessagesApi
@@ -29,7 +29,7 @@ import play.api.inject.guice.GuiceApplicationBuilder
 import play.api.libs.crypto.CookieSigner
 import play.api.mvc.MessagesControllerComponents
 import utils.{AsyncHmrcSpec, SharedMetricsClearDown}
-import mocks.service.SessionServiceMock
+import uk.gov.hmrc.thirdpartydeveloperfrontend.mocks.service.SessionServiceMock
 
 class BaseControllerSpec
     extends AsyncHmrcSpec

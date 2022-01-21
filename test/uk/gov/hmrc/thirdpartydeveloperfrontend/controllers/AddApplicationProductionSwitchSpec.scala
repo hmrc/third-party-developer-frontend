@@ -19,7 +19,7 @@ package uk.gov.hmrc.thirdpartydeveloperfrontend.controllers
 import builder.DeveloperBuilder
 import uk.gov.hmrc.thirdpartydeveloperfrontend.config.ErrorHandler
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications._
-import mocks.service._
+import uk.gov.hmrc.thirdpartydeveloperfrontend.mocks.service._
 import uk.gov.hmrc.modules.uplift.services.mocks.UpliftLogicMock
 import play.api.mvc.AnyContentAsEmpty
 import play.api.test.FakeRequest
@@ -41,7 +41,7 @@ import builder._
 
 import scala.concurrent.Future
 import play.api.mvc.Result
-import mocks.connector.ApmConnectorMockModule
+import uk.gov.hmrc.thirdpartydeveloperfrontend.mocks.connectors.ApmConnectorMockModule
 import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.addapplication.AddApplication
 import uk.gov.hmrc.modules.uplift.views.html.BeforeYouStartView
 import uk.gov.hmrc.modules.uplift.controllers.UpliftJourneySwitch

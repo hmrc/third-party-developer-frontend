@@ -24,7 +24,7 @@ import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.{ApplicationNotFound, Appl
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.controllers.AddTeamMemberPageMode
 import uk.gov.hmrc.thirdpartydeveloperfrontend.helpers.string._
-import mocks.service.{ApplicationActionServiceMock, ApplicationServiceMock, SessionServiceMock}
+import uk.gov.hmrc.thirdpartydeveloperfrontend.mocks.service.{ApplicationActionServiceMock, ApplicationServiceMock, SessionServiceMock}
 import org.joda.time.DateTime
 import play.api.mvc.Result
 import play.api.test.FakeRequest

@@ -29,7 +29,7 @@ import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.connectors.{ApiDefi
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.emailpreferences._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.flows.{EmailPreferencesFlowV2, FlowType, NewApplicationEmailPreferencesFlowV2}
-import mocks.service.{ErrorHandlerMock, SessionServiceMock}
+import uk.gov.hmrc.thirdpartydeveloperfrontend.mocks.service.{ErrorHandlerMock, SessionServiceMock}
 import org.scalatestplus.play.PlaySpec
 import org.scalatestplus.play.guice.GuiceOneAppPerSuite
 import play.api.i18n.MessagesApi

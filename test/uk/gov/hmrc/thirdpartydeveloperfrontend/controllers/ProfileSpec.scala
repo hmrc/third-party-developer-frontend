@@ -22,7 +22,7 @@ import uk.gov.hmrc.thirdpartydeveloperfrontend.connectors.ThirdPartyDeveloperCon
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.connectors.ChangePassword
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.{LoggedInState, Session, UpdateProfileRequest}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.InvalidCredentials
-import mocks.service.{ApplicationServiceMock, SessionServiceMock}
+import uk.gov.hmrc.thirdpartydeveloperfrontend.mocks.service.{ApplicationServiceMock, SessionServiceMock}
 import org.jsoup.Jsoup
 import org.mockito.ArgumentCaptor
 import play.api.http.Status.OK

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package mocks.connector
+package uk.gov.hmrc.thirdpartydeveloperfrontend.mocks.connectors
 
 import uk.gov.hmrc.thirdpartydeveloperfrontend.connectors.ThirdPartyDeveloperConnector
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.{Developer, UserId}

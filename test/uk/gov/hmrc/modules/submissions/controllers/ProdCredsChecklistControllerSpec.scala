@@ -17,8 +17,9 @@
 package uk.gov.hmrc.modules.submissions.controllers
 
 import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.BaseControllerSpec
-import mocks.service.ApplicationServiceMock
-import mocks.connector.ApmConnectorMockModule
+import uk.gov.hmrc.thirdpartydeveloperfrontend.mocks.service.ApplicationServiceMock
+import uk.gov.hmrc.thirdpartydeveloperfrontend.mocks.service.ApplicationActionServiceMock
+import uk.gov.hmrc.thirdpartydeveloperfrontend.mocks.connectors.ApmConnectorMockModule
 import uk.gov.hmrc.modules.submissions.services.mocks.SubmissionServiceMockModule
 import play.api.test.Helpers._
 import utils.WithLoggedInSession._
@@ -34,7 +35,6 @@ import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.Applic
 import builder.SampleApplication
 import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.SubscriptionTestHelperSugar
 import builder.SampleSession
-import mocks.service.ApplicationActionServiceMock
 import uk.gov.hmrc.modules.submissions.domain.models.ExtendedSubmission
 
 class ProdCredsChecklistControllerSpec

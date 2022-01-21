@@ -24,7 +24,7 @@ import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.subscriptions.ApiSubscriptionFields.{SaveSubscriptionFieldsAccessDeniedResponse, SaveSubscriptionFieldsSuccessResponse, SubscriptionFieldValue}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.subscriptions.DevhubAccessRequirement.NoOne
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.subscriptions.{AccessRequirements, DevhubAccessRequirements, FieldValue, Fields}
-import mocks.connector.SubscriptionFieldsConnectorMock
+import uk.gov.hmrc.thirdpartydeveloperfrontend.mocks.connectors.SubscriptionFieldsConnectorMock
 import org.joda.time.DateTime
 import uk.gov.hmrc.thirdpartydeveloperfrontend.service.PushPullNotificationsService.PushPullNotificationsConnector
 import uk.gov.hmrc.http.HeaderCarrier
