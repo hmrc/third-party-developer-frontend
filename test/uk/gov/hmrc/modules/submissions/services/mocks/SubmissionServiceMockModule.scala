@@ -14,13 +14,13 @@
  * limitations under the License.
  */
 
-package uk.gov.hmrc.modules.submissions.services.mocks
+package uk.gov.hmrc.apiplatform.modules.submissions.services.mocks
 
 import org.mockito.{ArgumentMatchersSugar, MockitoSugar}
-import uk.gov.hmrc.modules.submissions.services.SubmissionService
+import uk.gov.hmrc.apiplatform.modules.submissions.services.SubmissionService
 
 import scala.concurrent.Future.successful
-import uk.gov.hmrc.modules.submissions.domain.models._
+import uk.gov.hmrc.apiplatform.modules.submissions.domain.models._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.ApplicationId
 
 trait SubmissionServiceMockModule extends MockitoSugar with ArgumentMatchersSugar {
@@ -39,21 +39,21 @@ trait SubmissionServiceMockModule extends MockitoSugar with ArgumentMatchersSuga
 
     object Fetch {
       def thenReturns(out: ExtendedSubmission) = {
-        when(aMock.fetch(*[SubmissionId])(*)).thenReturn(successful(Some(out)))
+        when(aMock.fetch(*[Submission.Id])(*)).thenReturn(successful(Some(out)))
       }
 
       def thenReturnsNone() = {
-        when(aMock.fetch(*[SubmissionId])(*)).thenReturn(successful(None))
+        when(aMock.fetch(*[Submission.Id])(*)).thenReturn(successful(None))
       }
     }
 
     object RecordAnswer {
       def thenReturns(out: ExtendedSubmission) = {
-        when(aMock.recordAnswer(*[SubmissionId], *[QuestionId], *)(*)).thenReturn(successful(Right(out)))
+        when(aMock.recordAnswer(*[Submission.Id], *[QuestionId], *)(*)).thenReturn(successful(Right(out)))
       }
 
       def thenReturnsNone() = {
-        when(aMock.recordAnswer(*[SubmissionId], *[QuestionId], *)(*)).thenReturn(successful(Left("Failed to record answer for submission")))
+        when(aMock.recordAnswer(*[Submission.Id], *[QuestionId], *)(*)).thenReturn(successful(Left("Failed to record answer for submission")))
       }
     }
   }

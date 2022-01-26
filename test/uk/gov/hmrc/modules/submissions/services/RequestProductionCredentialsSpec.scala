@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package uk.gov.hmrc.modules.submissions.services
+package uk.gov.hmrc.apiplatform.modules.submissions.services
 
 import uk.gov.hmrc.thirdpartydeveloperfrontend.connectors.DeskproConnector
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.ApplicationId
@@ -29,7 +29,7 @@ import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.LocalUserIdTracker
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.connectors.TicketCreated
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.ApplicationNotFound
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.ApplicationAlreadyExists
-import uk.gov.hmrc.modules.submissions.connectors.ThirdPartyApplicationSubmissionsConnector
+import uk.gov.hmrc.apiplatform.modules.submissions.connectors.ThirdPartyApplicationSubmissionsConnector
 
 class RequestProductionCredentialsSpec extends AsyncHmrcSpec 
   with CollaboratorTracker 

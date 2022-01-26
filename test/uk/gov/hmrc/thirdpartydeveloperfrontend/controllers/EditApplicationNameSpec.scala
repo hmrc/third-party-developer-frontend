@@ -39,10 +39,10 @@ import scala.concurrent.ExecutionContext.Implicits.global
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.LocalUserIdTracker
 import uk.gov.hmrc.thirdpartydeveloperfrontend.builder._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.addapplication.AddApplication
-import uk.gov.hmrc.modules.uplift.views.html.BeforeYouStartView
-import uk.gov.hmrc.modules.uplift.services.mocks._
-import uk.gov.hmrc.modules.uplift.controllers.UpliftJourneySwitch
-import uk.gov.hmrc.modules.uplift.services.GetProductionCredentialsFlowService
+import uk.gov.hmrc.apiplatform.modules.uplift.views.html.BeforeYouStartView
+import uk.gov.hmrc.apiplatform.modules.uplift.services.mocks._
+import uk.gov.hmrc.apiplatform.modules.uplift.controllers.UpliftJourneySwitch
+import uk.gov.hmrc.apiplatform.modules.uplift.services.GetProductionCredentialsFlowService
 
 class EditApplicationNameSpec 
     extends BaseControllerSpec 

@@ -14,16 +14,16 @@
  * limitations under the License.
  */
 
-package uk.gov.hmrc.modules.uplift.services.mocks
+package uk.gov.hmrc.apiplatform.modules.uplift.services.mocks
 
 import org.mockito.MockitoSugar
 import org.mockito.ArgumentMatchersSugar
 import org.mockito.verification.VerificationMode
 import scala.concurrent.Future.successful
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.ApplicationId
-import uk.gov.hmrc.modules.uplift.domain.models._
+import uk.gov.hmrc.apiplatform.modules.uplift.domain.models._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.apidefinitions.APISubscriptionStatus
-import uk.gov.hmrc.modules.uplift.services.UpliftJourneyService
+import uk.gov.hmrc.apiplatform.modules.uplift.services.UpliftJourneyService
 
 trait UpliftJourneyServiceMockModule extends MockitoSugar with ArgumentMatchersSugar {
   protected trait BaseUpliftJourneyServiceMock {

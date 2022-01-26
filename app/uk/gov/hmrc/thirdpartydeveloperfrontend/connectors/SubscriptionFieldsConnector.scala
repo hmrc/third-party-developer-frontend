@@ -31,7 +31,7 @@ import play.api.libs.json.{JsSuccess, Json}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.service.SubscriptionFieldsService.{DefinitionsByApiVersion, SubscriptionFieldsConnector}
 import uk.gov.hmrc.http.{HeaderCarrier, HttpResponse}
 import uk.gov.hmrc.http.HttpClient
-import uk.gov.hmrc.modules.common.services.ApplicationLogger
+import uk.gov.hmrc.apiplatform.modules.common.services.ApplicationLogger
 
 import scala.concurrent.{ExecutionContext, Future}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.subscriptions._

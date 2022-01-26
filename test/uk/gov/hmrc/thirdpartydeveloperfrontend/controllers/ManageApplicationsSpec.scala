@@ -38,7 +38,7 @@ import scala.concurrent.ExecutionContext.Implicits.global
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.LocalUserIdTracker
 import uk.gov.hmrc.thirdpartydeveloperfrontend.mocks.connectors.ApmConnectorMockModule
 import uk.gov.hmrc.thirdpartydeveloperfrontend.builder._
-import uk.gov.hmrc.modules.uplift.services.mocks.UpliftLogicMock
+import uk.gov.hmrc.apiplatform.modules.uplift.services.mocks.UpliftLogicMock
 
 class ManageApplicationsSpec 
     extends BaseControllerSpec 

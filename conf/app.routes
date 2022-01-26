@@ -185,17 +185,17 @@ GET         /assets/*file                                                       
 
 GET         /keep-alive                                                                                  uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.SessionController.keepAlive()
 
-GET         /applications/:id/confirm-subscriptions                                                      uk.gov.hmrc.modules.uplift.controllers.UpliftJourneyController.confirmApiSubscriptionsPage(id: ApplicationId)
-POST        /applications/:id/confirm-subscriptions                                                      uk.gov.hmrc.modules.uplift.controllers.UpliftJourneyController.confirmApiSubscriptionsAction(id: ApplicationId)
+GET         /applications/:id/confirm-subscriptions                                                      uk.gov.hmrc.apiplatform.modules.uplift.controllers.UpliftJourneyController.confirmApiSubscriptionsPage(id: ApplicationId)
+POST        /applications/:id/confirm-subscriptions                                                      uk.gov.hmrc.apiplatform.modules.uplift.controllers.UpliftJourneyController.confirmApiSubscriptionsAction(id: ApplicationId)
 
-GET         /applications/:id/change-api-subscriptions                                                   uk.gov.hmrc.modules.uplift.controllers.UpliftJourneyController.changeApiSubscriptions(id: ApplicationId)
-POST        /applications/:id/change-api-subscriptions                                                   uk.gov.hmrc.modules.uplift.controllers.UpliftJourneyController.saveApiSubscriptionsSubmit(id: ApplicationId)
+GET         /applications/:id/change-api-subscriptions                                                   uk.gov.hmrc.apiplatform.modules.uplift.controllers.UpliftJourneyController.changeApiSubscriptions(id: ApplicationId)
+POST        /applications/:id/change-api-subscriptions                                                   uk.gov.hmrc.apiplatform.modules.uplift.controllers.UpliftJourneyController.saveApiSubscriptionsSubmit(id: ApplicationId)
 
-GET         /applications/:id/responsible-individual                                                     uk.gov.hmrc.modules.uplift.controllers.UpliftJourneyController.responsibleIndividual(id: ApplicationId)
-POST        /applications/:id/responsible-individual                                                     uk.gov.hmrc.modules.uplift.controllers.UpliftJourneyController.responsibleIndividualAction(id: ApplicationId)
+GET         /applications/:id/responsible-individual                                                     uk.gov.hmrc.apiplatform.modules.uplift.controllers.UpliftJourneyController.responsibleIndividual(id: ApplicationId)
+POST        /applications/:id/responsible-individual                                                     uk.gov.hmrc.apiplatform.modules.uplift.controllers.UpliftJourneyController.responsibleIndividualAction(id: ApplicationId)
 
-GET         /applications/:id/sell-resell-or-distribute-your-software                                    uk.gov.hmrc.modules.uplift.controllers.UpliftJourneyController.sellResellOrDistributeYourSoftware(id: ApplicationId)
-POST        /applications/:id/sell-resell-or-distribute-your-software                                    uk.gov.hmrc.modules.uplift.controllers.UpliftJourneyController.sellResellOrDistributeYourSoftwareAction(id: ApplicationId)
+GET         /applications/:id/sell-resell-or-distribute-your-software                                    uk.gov.hmrc.apiplatform.modules.uplift.controllers.UpliftJourneyController.sellResellOrDistributeYourSoftware(id: ApplicationId)
+POST        /applications/:id/sell-resell-or-distribute-your-software                                    uk.gov.hmrc.apiplatform.modules.uplift.controllers.UpliftJourneyController.sellResellOrDistributeYourSoftwareAction(id: ApplicationId)
 
 ->         /govuk-frontend       govuk.Routes
 ->         /hmrc-frontend        hmrcfrontend.Routes

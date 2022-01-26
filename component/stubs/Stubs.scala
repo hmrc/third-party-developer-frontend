@@ -32,7 +32,7 @@ import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.connectors.Password
 import uk.gov.hmrc.thirdpartydeveloperfrontend.connectors.ThirdPartyDeveloperConnector.{FindUserIdRequest, FindUserIdResponse}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.connectors.ThirdPartyDeveloperConnector.JsonFormatters.FindUserIdRequestWrites
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications._
-import uk.gov.hmrc.modules.common.services.ApplicationLogger
+import uk.gov.hmrc.apiplatform.modules.common.services.ApplicationLogger
 import org.scalatest.matchers.should.Matchers
 
 object Stubs extends ApplicationLogger {

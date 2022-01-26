@@ -23,7 +23,7 @@ import uk.gov.hmrc.thirdpartydeveloperfrontend.config.ApplicationConfig
 import javax.inject.Inject
 import uk.gov.hmrc.http.BadRequestException
 
-import uk.gov.hmrc.modules.common.services.ApplicationLogger
+import uk.gov.hmrc.apiplatform.modules.common.services.ApplicationLogger
 
 import scala.concurrent.{ExecutionContext, Future}
 import scala.concurrent.duration._

@@ -35,7 +35,7 @@ import scala.concurrent.{ExecutionContext, Future}
 import scala.util.Success
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.apidefinitions.ApiIdentifier
 import uk.gov.hmrc.http.HttpReads.Implicits._
-import uk.gov.hmrc.modules.common.services.ApplicationLogger
+import uk.gov.hmrc.apiplatform.modules.common.services.ApplicationLogger
 
 abstract class ThirdPartyApplicationConnector(config: ApplicationConfig, metrics: ConnectorMetrics) extends ApplicationConnector with CommonResponseHandlers with ApplicationLogger with HttpErrorFunctions {
 

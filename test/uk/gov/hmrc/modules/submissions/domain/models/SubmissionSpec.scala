@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package uk.gov.hmrc.modules.submissions.domain.models
+package uk.gov.hmrc.apiplatform.modules.submissions.domain.models
 
 import org.scalatest.wordspec.AnyWordSpec
 import org.scalatest.matchers.should.Matchers
@@ -35,26 +35,26 @@ class SubmissionSpec extends AnyWordSpec with Matchers {
     }
 
     "questionnaire with single Completed question is complete" in {
-        extendedSubmissionWithStates(Completed).isCompleted shouldBe true
+        extendedSubmissionWithStates(QuestionnaireState.Completed).isCompleted shouldBe true
     }
 
     "questionnaire with single NotApplicable question is complete" in {
-        extendedSubmissionWithStates(NotApplicable).isCompleted shouldBe true
+        extendedSubmissionWithStates(QuestionnaireState.NotApplicable).isCompleted shouldBe true
     }
 
     "questionnaire with single InProgress question is incomplete" in {
-        extendedSubmissionWithStates(InProgress).isCompleted shouldBe false
+        extendedSubmissionWithStates(QuestionnaireState.InProgress).isCompleted shouldBe false
     }
 
     "questionnaire with single NotStarted question is incomplete" in {
-        extendedSubmissionWithStates(NotStarted).isCompleted shouldBe false
+        extendedSubmissionWithStates(QuestionnaireState.NotStarted).isCompleted shouldBe false
     }
 
     "questionnaire with multiple Completed/NotApplicable questions is complete" in {
-        extendedSubmissionWithStates(Completed, NotApplicable, Completed, NotApplicable).isCompleted shouldBe true
+        extendedSubmissionWithStates(QuestionnaireState.Completed, QuestionnaireState.NotApplicable, QuestionnaireState.Completed, QuestionnaireState.NotApplicable).isCompleted shouldBe true
     }
 
     "questionnaire with one InProgress question among many is incomplete" in {
-        extendedSubmissionWithStates(Completed, NotApplicable, Completed, InProgress, NotApplicable).isCompleted shouldBe false
+        extendedSubmissionWithStates(QuestionnaireState.Completed, QuestionnaireState.NotApplicable, QuestionnaireState.Completed, QuestionnaireState.InProgress, QuestionnaireState.NotApplicable).isCompleted shouldBe false
     }
 }

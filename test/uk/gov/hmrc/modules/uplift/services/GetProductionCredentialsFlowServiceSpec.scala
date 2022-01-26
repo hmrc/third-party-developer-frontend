@@ -14,11 +14,11 @@
  * limitations under the License.
  */
 
-package uk.gov.hmrc.modules.uplift.services
+package uk.gov.hmrc.apiplatform.modules.uplift.services
 
 import uk.gov.hmrc.thirdpartydeveloperfrontend.builder._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.SubscriptionTestHelperSugar
-import uk.gov.hmrc.modules.uplift.domain.models._
+import uk.gov.hmrc.apiplatform.modules.uplift.domain.models._
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.AsyncHmrcSpec
@@ -26,7 +26,7 @@ import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.LocalUserIdTracker
 import org.mockito.MockitoSugar
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.LoggedInState
-import uk.gov.hmrc.modules.uplift.services.mocks.FlowRepositoryMockModule
+import uk.gov.hmrc.apiplatform.modules.uplift.services.mocks.FlowRepositoryMockModule
 
 class GetProductionCredentialsFlowServiceSpec
                 extends AsyncHmrcSpec

@@ -25,7 +25,7 @@ import play.api.mvc.{AnyContent, MessagesControllerComponents, MessagesRequest}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.security.ExtendedDevHubAuthorization
 import uk.gov.hmrc.thirdpartydeveloperfrontend.service.{ApplicationService, DeskproService, SessionService}
 import views.html.{LogoutConfirmationView, SignoutSurveyView}
-import uk.gov.hmrc.modules.common.services.ApplicationLogger
+import uk.gov.hmrc.apiplatform.modules.common.services.ApplicationLogger
 
 import scala.concurrent.{ExecutionContext, Future}
 import scala.util.Failure

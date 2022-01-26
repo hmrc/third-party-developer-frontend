@@ -39,11 +39,11 @@ import uk.gov.hmrc.thirdpartydeveloperfrontend.config.UpliftJourneyConfig
 import uk.gov.hmrc.thirdpartydeveloperfrontend.config.{On, OnDemand, Off}
 import play.api.mvc.Headers
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.controllers.ApplicationSummary
-import uk.gov.hmrc.modules.uplift.views.html.BeforeYouStartView
-import uk.gov.hmrc.modules.uplift.services.GetProductionCredentialsFlowService
-import uk.gov.hmrc.modules.uplift.services.mocks.UpliftLogicMock
-import uk.gov.hmrc.modules.uplift.controllers.UpliftJourneySwitch
-import uk.gov.hmrc.modules.uplift.domain.models.GetProductionCredentialsFlow
+import uk.gov.hmrc.apiplatform.modules.uplift.views.html.BeforeYouStartView
+import uk.gov.hmrc.apiplatform.modules.uplift.services.GetProductionCredentialsFlowService
+import uk.gov.hmrc.apiplatform.modules.uplift.services.mocks.UpliftLogicMock
+import uk.gov.hmrc.apiplatform.modules.uplift.controllers.UpliftJourneySwitch
+import uk.gov.hmrc.apiplatform.modules.uplift.domain.models.GetProductionCredentialsFlow
 import scala.concurrent.Future
 
 class AddApplicationStartSpec

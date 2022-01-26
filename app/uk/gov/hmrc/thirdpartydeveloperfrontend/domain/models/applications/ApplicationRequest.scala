@@ -19,13 +19,15 @@ package uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications
 import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.DeveloperSession
 import play.api.libs.json.Json
-import uk.gov.hmrc.modules.uplift.domain.models._
+import uk.gov.hmrc.apiplatform.modules.uplift.domain.models._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.apidefinitions.ApiIdentifier
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.UserId
 
 case class UpliftData(
   responsibleIndividual: ResponsibleIndividual,
   sellResellOrDistribute: SellResellOrDistribute,
-  subscriptions: Set[ApiIdentifier]
+  subscriptions: Set[ApiIdentifier],
+  requestedBy: UserId
 )
 
 object UpliftData {

@@ -39,10 +39,10 @@ import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.apidefinitions.Comb
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.LocalUserIdTracker
 import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.addapplication.AddApplication
 import uk.gov.hmrc.thirdpartydeveloperfrontend.builder._
-import uk.gov.hmrc.modules.uplift.views.html.BeforeYouStartView
-import uk.gov.hmrc.modules.uplift.services.GetProductionCredentialsFlowService
-import uk.gov.hmrc.modules.uplift.services.mocks.UpliftLogicMock
-import uk.gov.hmrc.modules.uplift.controllers.UpliftJourneySwitch
+import uk.gov.hmrc.apiplatform.modules.uplift.views.html.BeforeYouStartView
+import uk.gov.hmrc.apiplatform.modules.uplift.services.GetProductionCredentialsFlowService
+import uk.gov.hmrc.apiplatform.modules.uplift.services.mocks.UpliftLogicMock
+import uk.gov.hmrc.apiplatform.modules.uplift.controllers.UpliftJourneySwitch
 
 class AddApplicationSuccessSpec
     extends BaseControllerSpec
