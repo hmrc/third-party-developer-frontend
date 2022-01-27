@@ -51,7 +51,7 @@
     <div class="govuk-form-group @if(form.errors("newRedirectUri").nonEmpty) {govuk-form-group--error}">
       <label class="govuk-label govuk-!-font-weight-bold" for="newRedirectUri">Redirect URI</label>
       <div class="govuk-hint">
-        Must be a valid <a class="govuk-link" href="http://localhost:9685/api-documentation/docs/reference-guide#redirect-uris" target="_self" data-sso="false">redirect URI</a>.
+        Must be a valid <a class="govuk-link" href="/api-documentation/docs/reference-guide#redirect-uris" target="_self" data-sso="false">redirect URI</a>.
       </div>
       <span id="newRedirectUri-error" class="govuk-error-message">
         <span class="govuk-visually-hidden">Error:</span> @fieldError2(form.errors, "newRedirectUri")
