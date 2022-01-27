@@ -19,7 +19,6 @@ package uk.gov.hmrc.apiplatform.modules.submissions.domain.models
 import org.joda.time.DateTime
 import java.util.UUID
 import cats.data.NonEmptyList
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.UserId
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.ApplicationId
 
 sealed trait QuestionnaireState
@@ -60,7 +59,7 @@ object Submission {
   }
 
   sealed trait Status {
-    def isInProgress = this match {
+    def isOpenToAnswers = this match {
       case _ : Submission.Status.Created => true
       case _ => false
     }
@@ -80,12 +79,12 @@ object Submission {
 
     case class Submitted(
       timestamp: DateTime,
-      userId: UserId
+      requestedBy: String
     ) extends Status
 
     case class Created(
       timestamp: DateTime,
-      userId: UserId
+      requestedBy: String
     ) extends Status
   }
 
@@ -94,7 +93,8 @@ object Submission {
     answersToQuestions: Submission.AnswersToQuestions,
     statusHistory: NonEmptyList[Submission.Status]
   ) {
-    def isInProgress = this.statusHistory.head.isInProgress
+    lazy val status: Status = statusHistory.head
+    lazy val isOpenToAnswers = status.isOpenToAnswers
   }
 }
 
@@ -121,7 +121,9 @@ case class Submission(
 
   lazy val latestInstance = instances.head
 
-  def isInProgress = latestInstance.isInProgress
+  lazy val isOpenToAnswers = latestInstance.isOpenToAnswers
+  
+  lazy val status: Submission.Status = latestInstance.statusHistory.head
 
   def setLatestAnswers(answers: Submission.AnswersToQuestions): Submission = {
     val newLatest = latestInstance.copy(answersToQuestions = answers)
@@ -138,6 +140,9 @@ case class ExtendedSubmission(
     questionnaireProgress.values
     .map(_.state)
     .forall(QuestionnaireState.isCompleted)
+
+  lazy val isOpenToAnswers = submission.isOpenToAnswers
+  lazy val canBeSubmitted = isOpenToAnswers && isCompleted
 }
 
 case class MarkedSubmission(

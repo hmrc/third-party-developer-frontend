@@ -20,7 +20,6 @@ import uk.gov.hmrc.apiplatform.modules.submissions.domain.models._
 import uk.gov.hmrc.time.DateTimeUtils
 import cats.data.NonEmptyList
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.ApplicationId
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.UserId
 import scala.collection.immutable.ListMap
 
 trait SubmissionsTestData {
@@ -237,7 +236,7 @@ trait SubmissionsTestData {
     organisationUrlId             = OrganisationDetails.question1.id
   )
 
-  val initialStatus = Submission.Status.Created(DateTimeUtils.now, UserId.random)
+  val initialStatus = Submission.Status.Created(DateTimeUtils.now, "user@example.com")
   val initialInstances = NonEmptyList.of(Submission.Instance(0, Map.empty, NonEmptyList.of(initialStatus)))
   val submission = Submission(submissionId, applicationId, DateTimeUtils.now, activeQuestionnaireGroupings, questionIdsOfInterest, initialInstances)
 
