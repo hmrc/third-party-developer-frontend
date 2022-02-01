@@ -154,7 +154,7 @@ class ThirdPartyApplicationSubmissionsConnectorSpec
 
   "requestApproval" should {
     val app = aStandardApplication
-    val url = s"/application/${app.id.value}/request-approval"
+    val url = s"/approvals/application/${app.id.value}/request"
     val email = "bob@spongepants.com"
 
     "return OK with and return the application" in new Setup {
