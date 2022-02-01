@@ -81,7 +81,7 @@ class ThirdPartyApplicationSubmissionsConnector @Inject() (
   def requestApproval(applicationId: ApplicationId, requestedByEmailAddress: String)(implicit hc: HeaderCarrier): Future[Either[ErrorDetails, Application]] = metrics.record(api) {
     import play.api.http.Status._
     
-    val url = s"$serviceBaseUrl/application/${applicationId.value}/request-approval"
+    val url = s"$serviceBaseUrl/approvals/application/${applicationId.value}/request"
     
     http.POST[ApprovalsRequest, HttpResponse](url, ApprovalsRequest(requestedByEmailAddress)).map { response =>
       val jsValue: Try[JsValue] = Try(response.json)

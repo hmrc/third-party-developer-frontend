@@ -53,14 +53,14 @@ trait SubmissionsJsonFormatters extends BaseSubmissionsJsonFormatters {
   import uk.gov.hmrc.mongo.json.ReactiveMongoFormats
   implicit val dateFormat = ReactiveMongoFormats.dateTimeFormats
 
-  implicit val RejectedStatusFormat = Json.format[Rejected]
-  implicit val AcceptedStatusFormat = Json.format[Accepted]
+  implicit val RejectedStatusFormat = Json.format[Declined]
+  implicit val AcceptedStatusFormat = Json.format[Granted]
   implicit val SubmittedStatusFormat = Json.format[Submitted]
   implicit val CreatedStatusFormat = Json.format[Created]
   
   implicit val submissionStatus = Union.from[Submission.Status]("Submission.StatusType")
-    .and[Rejected]("rejected")
-    .and[Accepted]("accepted")
+    .and[Declined]("declined")
+    .and[Granted]("granted")
     .and[Submitted]("submitted")
     .and[Created]("created")
     .format
@@ -76,14 +76,14 @@ trait SubmissionsFrontendJsonFormatters extends BaseSubmissionsJsonFormatters {
   import Submission.Status._
   implicit val utcReads = JodaReads.DefaultJodaDateTimeReads.map(dt => dt.withZone(DateTimeZone.UTC))
 
-  implicit val rejectedStatusFormat = Json.format[Rejected]
-  implicit val acceptedStatusFormat = Json.format[Accepted]
-  implicit val submittedStatusFormat = Json.format[Submitted]
-  implicit val createdStatusFormat = Json.format[Created]
+  implicit val RejectedStatusFormat = Json.format[Declined]
+  implicit val AcceptedStatusFormat = Json.format[Granted]
+  implicit val SubmittedStatusFormat = Json.format[Submitted]
+  implicit val CreatedStatusFormat = Json.format[Created]
   
   implicit val submissionStatus = Union.from[Submission.Status]("Submission.StatusType")
-    .and[Rejected]("rejected")
-    .and[Accepted]("accepted")
+    .and[Declined]("declined")
+    .and[Granted]("granted")
     .and[Submitted]("submitted")
     .and[Created]("created")
     .format

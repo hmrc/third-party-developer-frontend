@@ -59,20 +59,32 @@ object Submission {
   }
 
   sealed trait Status {
-    def isOpenToAnswers = this match {
+    def isOpenToAnswers = isCreated
+
+    def isCreated = this match {
       case _ : Submission.Status.Created => true
-      case _ => false
+      case _ => false      
+    }
+    
+    def isSubmitted = this match {
+      case _ : Submission.Status.Submitted => true
+      case _ => false      
+    }
+
+    def isGranted = this match {
+      case _ : Submission.Status.Granted => true
+      case _ => false      
     }
   }
 
   object Status {
-    case class Rejected(
+    case class Declined(
       timestamp: DateTime,
       name: String,
       reasons: String
     ) extends Status
 
-    case class Accepted(
+    case class Granted(
       timestamp: DateTime,
       name: String
     ) extends Status
