@@ -34,10 +34,10 @@ import play.api.inject.guice.GuiceApplicationBuilder
 import play.api.test.TestServer
 import play.core.server.ServerConfig
 import stubs.AuditStub
-import utils.BrowserStackCaps
+import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.BrowserStackCaps
 
 import scala.util.{Properties, Try}
-import util.ApplicationLogger
+import uk.gov.hmrc.apiplatform.modules.common.services.ApplicationLogger
 import org.openqa.selenium.firefox.FirefoxOptions
 import org.openqa.selenium.firefox.FirefoxDriver
 import org.scalatest.matchers.should.Matchers

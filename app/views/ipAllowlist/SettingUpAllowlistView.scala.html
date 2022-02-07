@@ -1,5 +1,5 @@
 @*
- * Copyright 2021 HM Revenue & Customs
+ * Copyright 2022 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,11 +14,11 @@
  * limitations under the License.
  *@
 
-@import config.ApplicationConfig
-@import domain.models.views.{BackButtonWithJavaScript, IpAllowlistFeedbackBanner}
+@import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.views.{BackButtonWithJavaScript, IpAllowlistFeedbackBanner}
 @import views.html.include.DevMain2
-@import domain.models.developers.DeveloperSession
-@import domain.models.applications.Application
+@import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.DeveloperSession
+@import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.Application
+@import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.routes
 
 @this(devMain: DevMain2)
 
@@ -41,7 +41,7 @@
     <p class="govuk-body">Check the IP addresses you want to use are correct before making your IP allow list active.</p>
     <p class="govuk-body">While your IP allow list is active, all other IP addresses are blocked from making API requests to HMRC.</p>
     <div class="govuk-button-group">
-      <a class="govuk-button" href="@routes.IpAllowlist.addCidrBlock(app.id)">Add an IP address</a>
+      <a class="govuk-button" href="@routes.IpAllowListController.addCidrBlock(app.id)">Add an IP address</a>
       <a class="govuk-button govuk-button--secondary" href="@routes.Details.details(app.id)">Cancel</a>
     </div>
   </div>

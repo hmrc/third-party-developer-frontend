@@ -1,5 +1,5 @@
 @*
- * Copyright 2021 HM Revenue & Customs
+ * Copyright 2022 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,11 +14,12 @@
  * limitations under the License.
  *@
 
-@import config.ApplicationConfig
 @import include._
-@import domain.models.controllers.Crumb
-@import domain.models.controllers.ApplicationViewModel
-@import domain.models.developers.DeveloperSession
+@import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.controllers.Crumb
+@import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.controllers.ApplicationViewModel
+@import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.DeveloperSession
+@import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers
+@import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.DeleteRedirectConfirmationForm
 
 @this(devMain: DevMain2, leftHandNav: LeftHandNav)
 
@@ -50,7 +51,7 @@
   <h2 class="govuk-heading-m">Redirect URI</h2>
   <p id="redirectUriToDelete" class="govuk-body">@redirectUri</p>
 
-  @helper.form(action = routes.Redirects.deleteRedirectAction(application.id), 'class -> "form") {
+  @helper.form(action = controllers.routes.Redirects.deleteRedirectAction(application.id), 'class -> "form") {
     <div class="govuk-form-group @if(form.errors("deleteRedirectConfirm").nonEmpty) {govuk-form-group--error}">
       <fieldset id="deleteRedirectConfirm" class="govuk-fieldset" aria-describedby="deleteRedirectConfirm-error">
         <legend class="govuk-fieldset__legend govuk-fieldset__legend--l">
@@ -75,7 +76,7 @@
     </div>
     <div class="govuk-button-group">
       <button id="submit" class="govuk-button" type="submit">Submit</button>
-      <a id="cancel" href="@routes.Redirects.redirects(application.id)" class="govuk-button govuk-button--secondary">Cancel</a>
+      <a id="cancel" href="@controllers.routes.Redirects.redirects(application.id)" class="govuk-button govuk-button--secondary">Cancel</a>
     </div>
   }
 }

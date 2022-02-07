@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 HM Revenue & Customs
+ * Copyright 2022 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,13 +16,14 @@
 
 package views
 
-import domain.models.developers.LoggedInState
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.LoggedInState
 import org.jsoup.Jsoup
 import play.api.test.FakeRequest
-import utils.ViewHelpers._
-import utils.WithCSRFAddToken
+import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.ViewHelpers._
+import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.WithCSRFAddToken
 import views.helper.CommonViewSpec
 import views.html.ProfileDeleteSubmittedView
+import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.DeveloperSessionBuilder
 
 class ProfileDeleteSubmittedSpec extends CommonViewSpec with WithCSRFAddToken {
   "Profile delete submitted page" should {
@@ -31,7 +32,7 @@ class ProfileDeleteSubmittedSpec extends CommonViewSpec with WithCSRFAddToken {
     "render with no errors" in {
       val request = FakeRequest().withCSRFToken
 
-      val developer = utils.DeveloperSession("Test", "Test", "Test", None, loggedInState = LoggedInState.LOGGED_IN)
+      val developer = DeveloperSessionBuilder("Test", "Test", "Test", None, loggedInState = LoggedInState.LOGGED_IN)
 
       val page = profileDeleteSubmittedView.render(request, developer, appConfig, messagesProvider, "details")
       page.contentType should include("text/html")

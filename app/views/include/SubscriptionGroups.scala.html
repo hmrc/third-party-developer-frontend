@@ -1,5 +1,5 @@
 @*
- * Copyright 2021 HM Revenue & Customs
+ * Copyright 2022 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,13 +14,14 @@
  * limitations under the License.
  *@
 
-@import domain.models.views.SubscriptionRedirect
-@import domain.models.applications.CollaboratorRole
-@import domain.models.applications.Application
+@import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.views.SubscriptionRedirect
+@import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.CollaboratorRole
+@import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.Application
 @import views.html.include.SubscriptionsGroup
 @import views.html.include.OpenAccessApisGroup
-@import domain.models.apidefinitions.ApiContext
-@import domain.models.subscriptions.ApiData
+@import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.apidefinitions.ApiContext
+@import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.subscriptions.ApiData
+@import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers._
 
 @this(subscriptionsGroup: SubscriptionsGroup, openAccessApisGroup: OpenAccessApisGroup)
 
@@ -33,7 +34,7 @@
     showSubscriptionFields: Boolean,
     showSectionHeadings: Boolean = true
 )(
-    implicit request: play.api.mvc.Request[Any], messages: Messages, applicationConfig: config.ApplicationConfig
+    implicit request: play.api.mvc.Request[Any], messages: Messages, applicationConfig: ApplicationConfig
 )
 
 @if(subscriptions.exampleApi.nonEmpty) {

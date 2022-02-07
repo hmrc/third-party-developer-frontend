@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 HM Revenue & Customs
+ * Copyright 2022 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,14 +16,14 @@
 
 package views
 
-import builder.DeveloperBuilder
-import domain.models.developers.{DeveloperSession, LoggedInState, Session}
-import domain.models.views.NoBackButton
+import uk.gov.hmrc.thirdpartydeveloperfrontend.builder.DeveloperBuilder
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.{DeveloperSession, LoggedInState, Session}
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.views.NoBackButton
 import play.twirl.api.{Html, HtmlFormat}
 import play.api.test.FakeRequest
 import views.helper.CommonViewSpec
 import views.html.include.Main
-import utils.LocalUserIdTracker
+import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.LocalUserIdTracker
 
 class MainTemplateSpec extends CommonViewSpec with DeveloperBuilder with LocalUserIdTracker {
 

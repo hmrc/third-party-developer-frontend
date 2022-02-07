@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 HM Revenue & Customs
+ * Copyright 2022 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,17 +17,17 @@
 package views
 
 import java.time.Period
-import domain.models.applications._
-import domain.models.developers.LoggedInState
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications._
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.LoggedInState
 import org.jsoup.Jsoup
 import play.api.test.FakeRequest
 import uk.gov.hmrc.time.DateTimeUtils
-import utils.ViewHelpers.elementExistsByText
-import utils.WithCSRFAddToken
+import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.ViewHelpers.elementExistsByText
+import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.WithCSRFAddToken
 import views.helper.CommonViewSpec
 import views.html.DeleteSubordinateApplicationConfirmView
-import builder.DeveloperBuilder
-import utils.LocalUserIdTracker
+import uk.gov.hmrc.thirdpartydeveloperfrontend.builder.DeveloperBuilder
+import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.{LocalUserIdTracker, DeveloperSessionBuilder}
 
 class DeleteSubordinateApplicationConfirmSpec extends CommonViewSpec with WithCSRFAddToken with DeveloperBuilder with LocalUserIdTracker {
 
@@ -38,7 +38,7 @@ class DeleteSubordinateApplicationConfirmSpec extends CommonViewSpec with WithCS
     val request = FakeRequest().withCSRFToken
     val appId = ApplicationId("1234")
     val clientId = ClientId("clientId123")
-    val loggedInDeveloper = utils.DeveloperSession("developer@example.com", "John", "Doe", loggedInState = LoggedInState.LOGGED_IN)
+    val loggedInDeveloper = DeveloperSessionBuilder("developer@example.com", "John", "Doe", loggedInState = LoggedInState.LOGGED_IN)
     val application = Application(
       appId,
       clientId,

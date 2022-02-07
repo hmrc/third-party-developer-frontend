@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 HM Revenue & Customs
+ * Copyright 2022 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,16 +16,16 @@
 
 package views.checkpages
 
-import config.ApplicationConfig
-import controllers.TermsOfUseForm
-import domain.models.applications._
-import domain.models.developers.LoggedInState
-import domain.models.controllers.ApplicationViewModel
+import uk.gov.hmrc.thirdpartydeveloperfrontend.config.ApplicationConfig
+import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.TermsOfUseForm
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications._
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.LoggedInState
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.controllers.ApplicationViewModel
 import org.jsoup.Jsoup
 import play.api.mvc.{AnyContentAsEmpty, Call}
 import play.api.test.FakeRequest
 import uk.gov.hmrc.time.DateTimeUtils
-import utils._
+import uk.gov.hmrc.thirdpartydeveloperfrontend.utils._
 import views.helper.CommonViewSpec
 import views.html.checkpages.TermsOfUseView
 
@@ -56,7 +56,7 @@ class TermsOfUseSpec extends CommonViewSpec with WithCSRFAddToken with Collabora
       val checkInformation = CheckInformation()
 
       val termsOfUseForm = TermsOfUseForm.fromCheckInformation(checkInformation)
-      val developer = utils.DeveloperSession("email@example.com", "First Name", "Last Name", None, loggedInState = LoggedInState.LOGGED_IN)
+      val developer = DeveloperSessionBuilder("email@example.com", "First Name", "Last Name", None, loggedInState = LoggedInState.LOGGED_IN)
 
       val page = termsOfUse.render(
         ApplicationViewModel(thirdPartyApplication, false, false),
@@ -85,7 +85,7 @@ class TermsOfUseSpec extends CommonViewSpec with WithCSRFAddToken with Collabora
       val checkInformation = CheckInformation(termsOfUseAgreements = List(termsOfUseAgreement))
 
       val termsOfUseForm = TermsOfUseForm.fromCheckInformation(checkInformation)
-      val developer = utils.DeveloperSession("email@example.com", "First Name", "Last Name", None, loggedInState = LoggedInState.LOGGED_IN)
+      val developer = DeveloperSessionBuilder("email@example.com", "First Name", "Last Name", None, loggedInState = LoggedInState.LOGGED_IN)
 
       val page = termsOfUse.render(
         ApplicationViewModel(thirdPartyApplication.copy(checkInformation = Some(checkInformation)), false, false),

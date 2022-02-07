@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 HM Revenue & Customs
+ * Copyright 2022 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,15 +20,15 @@ import java.time.Period
 import java.util.UUID
 import java.util.UUID.randomUUID
 
-import domain.models.applications._
-import domain.models.developers.LoggedInState
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications._
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.LoggedInState
 import org.joda.time.DateTime
 import org.jsoup.Jsoup
 import org.jsoup.nodes.Document
 import play.api.mvc.Flash
 import play.api.test.FakeRequest
 import uk.gov.hmrc.time.DateTimeUtils
-import utils._
+import uk.gov.hmrc.thirdpartydeveloperfrontend.utils._
 import views.helper.CommonViewSpec
 import views.html.ClientSecretsView
 
@@ -51,7 +51,7 @@ class ClientSecretsSpec extends CommonViewSpec with WithCSRFAddToken with Collab
 
   "Client secrets page" should {
     val request = FakeRequest().withCSRFToken
-    val developer = utils.DeveloperSession("Test", "Test", "Test", None, loggedInState = LoggedInState.LOGGED_IN)
+    val developer = DeveloperSessionBuilder("Test", "Test", "Test", None, loggedInState = LoggedInState.LOGGED_IN)
 
     val clientSecret1 = ClientSecret(randomUUID.toString, "", DateTimeUtils.now)
     val clientSecret2 = ClientSecret(randomUUID.toString, "", DateTimeUtils.now)

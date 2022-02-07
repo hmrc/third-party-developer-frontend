@@ -1,5 +1,5 @@
 @*
- * Copyright 2021 HM Revenue & Customs
+ * Copyright 2022 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,7 +14,7 @@
  * limitations under the License.
  *@
 
- @(errors: Seq[FormError], fieldName: String, onlyLast: Boolean = true)(implicit messages: Messages)
+@(errors: Seq[FormError], fieldName: String, onlyLast: Boolean = true)(implicit messages: Messages)
  @if(errors.exists(_.key == fieldName)) {
      <span class="error-message" data-field-error-@fieldName>
      @defining(errors.filter(_.key == fieldName)) { errors =>

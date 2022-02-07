@@ -1,5 +1,5 @@
 @*
- * Copyright 2021 HM Revenue & Customs
+ * Copyright 2022 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,16 +14,17 @@
  * limitations under the License.
  *@
 
-@import domain.models.developers.DeveloperSession
-@import domain.models.applications.Environment
-@import domain.models.controllers.ApplicationSummary
+@import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.DeveloperSession
+@import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.Environment
+@import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.controllers.ApplicationSummary
 @import include._
-@import domain.models.controllers.Crumb
+@import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.controllers.Crumb
 @import uk.gov.hmrc.urls.Link
+@import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.routes
 
 @this(devMain: DevMain2)
 
-@(form: Form[controllers.ChooseApplicationToUpliftForm], upliftableApps: Seq[ApplicationSummary], showFluff: Boolean)(implicit request: play.api.mvc.Request[Any], loggedIn: DeveloperSession, messagesProvider: MessagesProvider, appConfig: config.ApplicationConfig)
+@(form: Form[uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.ChooseApplicationToUpliftForm], upliftableApps: Seq[ApplicationSummary], showFluff: Boolean)(implicit request: play.api.mvc.Request[Any], loggedIn: DeveloperSession, messagesProvider: MessagesProvider, appConfig: ApplicationConfig)
 
 @pageHeading = @{ "Which application do you want production credentials for?" }
 
@@ -32,19 +33,17 @@
 @needToChoose = @{upliftableApps.size > 1}
 
 @invalidAppsSignpost = {
-  @if(needToChoose) {
-    <p class="govuk-body">
-      Your other sandbox applications subscribe to APIs not available in production. 
-    </p>
-    <p class="govuk-body">
-      If you want production credentials for a different sandbox application, you need to:
-    </p>
-    <ul class="govuk-list govuk-list--number">
-      <li>Review the API documentation and check which APIs are available in production.</li>
-      <li>Update the API subscriptions.</li>
-      <li>Request production credentials again.</li>
-    </ul>
-  }
+  <p class="govuk-body">
+    Your other sandbox applications subscribe to APIs not available in production. 
+  </p>
+  <p class="govuk-body">
+    If you want production credentials for a different sandbox application, you need to:
+  </p>
+  <ul class="govuk-list govuk-list--number">
+    <li>@Link.toInternalPage(url = s"${appConfig.apiDocumentationFrontendUrl}/api-documentation/docs/api", value = Some("Review the  API documentation")).toHtml and check which APIs are available in production.</li>
+    <li>Update the API subscriptions.</li>
+    <li>Request production credentials again.</li>
+  </ul>
   <p class="govuk-body">You do not need production credentials for applications that only subscribe to:</p>
   <ul class="govuk-list govuk-list--bullet">
     <li>APIs for testing your service</li>
@@ -90,19 +89,23 @@
         </fieldset>
       </div>
 
+      @if(showFluff == true) {
+        @invalidAppsSignpost
+      }
+
       <button id="submit" class="govuk-button" type="submit">Continue</button>
     }
   } else {
     <h1 class="govuk-heading-l">You are requesting production credentials for</h1>
     
     <p class="govuk-body-l">@{upliftableApps.head.name}</p>
+
+    @if(showFluff == true) {
+      @invalidAppsSignpost
+    }
     
     <p class="govuk-body">
       <a id="continue" href="@controllers.addapplication.routes.AddApplication.soleApplicationToUpliftAction(upliftableApps.head.id)" class="govuk-button">Continue</a>
     </p>    
-  }
-
-  @if(showFluff == true) {
-    @invalidAppsSignpost
   }
 }

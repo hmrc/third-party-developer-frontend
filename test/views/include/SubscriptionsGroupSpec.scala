@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 HM Revenue & Customs
+ * Copyright 2022 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,21 +16,20 @@
 
 package views.include
 
-import builder.SubscriptionsBuilder
-import controllers.APISubscriptions
-import domain.models.apidefinitions._
-import domain.models.applications._
-import domain.models.developers.LoggedInState
-import domain.models.views.SubscriptionRedirect
+import uk.gov.hmrc.thirdpartydeveloperfrontend.builder.SubscriptionsBuilder
+import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.APISubscriptions
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.apidefinitions._
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications._
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.LoggedInState
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.views.SubscriptionRedirect
 import org.jsoup.Jsoup
 import org.jsoup.nodes.Document
 import play.api.test.FakeRequest
 import uk.gov.hmrc.time.DateTimeUtils
-import utils.WithCSRFAddToken
+import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.WithCSRFAddToken
 import views.helper.CommonViewSpec
 import views.html.include.SubscriptionsGroup
-import utils.CollaboratorTracker
-import utils.LocalUserIdTracker
+import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.{CollaboratorTracker, LocalUserIdTracker, DeveloperSessionBuilder}
 
 class SubscriptionsGroupSpec 
     extends CommonViewSpec 
@@ -41,7 +40,7 @@ class SubscriptionsGroupSpec
 
   implicit val request = FakeRequest().withCSRFToken
 
-  val loggedInDeveloper = utils.DeveloperSession("givenname.familyname@example.com", "Givenname", "Familyname", loggedInState = LoggedInState.LOGGED_IN)
+  val loggedInDeveloper = DeveloperSessionBuilder("givenname.familyname@example.com", "Givenname", "Familyname", loggedInState = LoggedInState.LOGGED_IN)
   val applicationId = ApplicationId("1234")
   val clientId = ClientId("clientId123")
   val applicationName = "Test Application"

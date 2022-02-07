@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 HM Revenue & Customs
+ * Copyright 2022 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,13 +16,13 @@
 
 package views
 
-import domain.models.applications.{ApplicationId, Environment}
-import domain.models.developers.LoggedInState
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.{ApplicationId, Environment}
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.LoggedInState
 import org.jsoup.Jsoup
 import org.jsoup.nodes.Document
 import play.api.test.FakeRequest
-import utils.ViewHelpers._
-import utils.WithCSRFAddToken
+import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.ViewHelpers._
+import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.{DeveloperSessionBuilder, WithCSRFAddToken, LocalUserIdTracker}
 import views.helper.CommonViewSpec
 import views.html.AddApplicationSuccessView
 
@@ -36,7 +36,7 @@ class AddApplicationSuccessSpec extends CommonViewSpec with WithCSRFAddToken {
 
     def testPage(applicationName: String, environment: Environment): Document = {
       val applicationId = ApplicationId("application-id")
-      val loggedIn = utils.DeveloperSession("", "", "", None, loggedInState = LoggedInState.LOGGED_IN)
+      val loggedIn = DeveloperSessionBuilder("", "", "", None, loggedInState = LoggedInState.LOGGED_IN)
       val request = FakeRequest().withCSRFToken
       val page = addApplicationSuccess.render(applicationName, applicationId, environment, request, loggedIn, messagesProvider, appConfig, navSection = "nav-section")
       val document = Jsoup.parse(page.body)

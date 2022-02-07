@@ -1,5 +1,5 @@
 @*
- * Copyright 2021 HM Revenue & Customs
+ * Copyright 2022 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,15 +15,15 @@
  *@
 
 @import views.html.include.teamMembers._
-@import helpers.string._
-@import config.ApplicationConfig
-@import domain.models.applications.CollaboratorRole
+@import uk.gov.hmrc.thirdpartydeveloperfrontend.helpers.string._
+@import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.CollaboratorRole
 @import views.html.include.DevMain2
-@import domain.models.views.BackButtonWithJavaScript
-@import domain.models.views.Link
-@import domain.models.applications.Application
-@import domain.models.developers.DeveloperSession
-@import domain.models.applications.ApplicationId
+@import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.views.BackButtonWithJavaScript
+@import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.views.Link
+@import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.Application
+@import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.DeveloperSession
+@import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.ApplicationId
+@import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.checkpages.routes
 
 @this(devMain: DevMain2)
 
@@ -46,14 +46,14 @@
 
   @{
     def createRemoveLink(appId: ApplicationId, emailAddress: String) = {
-      controllers.checkpages.routes.ApplicationCheck.teamMemberRemoveConfirmation(appId, emailAddress.toSha256)
+      routes.ApplicationCheck.teamMemberRemoveConfirmation(appId, emailAddress.toSha256)
     }
-    teamList(app, role, loggedIn, controllers.checkpages.routes.ApplicationCheck.teamAddMember(app.id), Link, createRemoveLink)
+    teamList(app, role, loggedIn, routes.ApplicationCheck.teamAddMember(app.id), Link, createRemoveLink)
   }
 
   </br>
 
-  @helper.form(action = controllers.checkpages.routes.ApplicationCheck.teamAction(app.id), 'class -> "form") {
+  @helper.form(action = routes.ApplicationCheck.teamAction(app.id), 'class -> "form") {
   @helper.CSRF.formField
 
   <button id="submit" class="govuk-button" type="submit">Save and return</button>

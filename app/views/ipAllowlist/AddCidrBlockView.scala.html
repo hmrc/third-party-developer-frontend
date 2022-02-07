@@ -1,5 +1,5 @@
 @*
- * Copyright 2021 HM Revenue & Customs
+ * Copyright 2022 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,18 +14,18 @@
  * limitations under the License.
  *@
 
-@import config.ApplicationConfig
-@import domain.models.views.{BackButtonWithJavaScript, IpAllowlistFeedbackBanner, NoBackButton}
+@import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.views.{BackButtonWithJavaScript, IpAllowlistFeedbackBanner, NoBackButton}
 @import include._
 @import views.html.include.DevMain
-@import domain.models.developers.DeveloperSession
-@import domain.models.applications.Application
-@import domain.models.flows.IpAllowlistFlow
-@import domain.models.controllers.Crumb
+@import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.DeveloperSession
+@import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.Application
+@import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.flows.IpAllowlistFlow
+@import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.controllers.Crumb
+@import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.routes
 
 @this(devMain: DevMain2)
 
-@(app: Application, ipAllowlistFlow: IpAllowlistFlow, form: Form[controllers.AddCidrBlockForm])(
+@(app: Application, ipAllowlistFlow: IpAllowlistFlow, form: Form[uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.AddCidrBlockForm])(
   implicit request: play.api.mvc.Request[Any], loggedIn: DeveloperSession, messages: Messages, applicationConfig: ApplicationConfig
 )
 
@@ -92,7 +92,7 @@
       </div>
     </details>
 
-    @helper.form(action = routes.IpAllowlist.addCidrBlockAction(app.id), 'class -> "form") {
+    @helper.form(action = routes.IpAllowListController.addCidrBlockAction(app.id), 'class -> "form") {
       @helper.CSRF.formField
       <div class="govuk-form-group @if(form.errors("ipAddress").nonEmpty) {govuk-form-group--error}">
         <label class="govuk-label" for="ipAddress">IP address</label>
@@ -107,7 +107,7 @@
         @if(ipAllowlistFlow.allowlist.isEmpty) {
           <a class="govuk-button govuk-button--secondary" href="@routes.Details.details(app.id)">Cancel</a>
         } else {
-          <a class="govuk-button govuk-button--secondary" href="@routes.IpAllowlist.editIpAllowlist(app.id)">Cancel</a>
+          <a class="govuk-button govuk-button--secondary" href="@routes.IpAllowListController.editIpAllowlist(app.id)">Cancel</a>
         }
       </div>
     }

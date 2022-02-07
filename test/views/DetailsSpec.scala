@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 HM Revenue & Customs
+ * Copyright 2022 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,11 +16,11 @@
 
 package views
 
-import controllers.routes
-import domain.models.applications
-import domain.models.applications._
-import domain.models.developers.{DeveloperSession, LoggedInState}
-import domain.models.controllers.ApplicationViewModel
+import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.routes
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications._
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.{DeveloperSession, LoggedInState}
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.controllers.ApplicationViewModel
 import org.joda.time.format.DateTimeFormat
 import org.jsoup.Jsoup
 import org.jsoup.nodes.{Document, Element}
@@ -28,11 +28,10 @@ import play.api.mvc.AnyContentAsEmpty
 import play.api.test.FakeRequest
 import play.twirl.api.HtmlFormat.Appendable
 import uk.gov.hmrc.time.DateTimeUtils
-import utils.{TestApplications, WithCSRFAddToken}
+import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.{TestApplications, WithCSRFAddToken}
 import views.helper.CommonViewSpec
 import views.html.DetailsView
-import utils.LocalUserIdTracker
-import utils.CollaboratorTracker
+import uk.gov.hmrc.thirdpartydeveloperfrontend.utils._
 
 class DetailsSpec 
     extends CommonViewSpec 
@@ -54,7 +53,7 @@ class DetailsSpec
 
   "Application details view" when {
     implicit val request: FakeRequest[AnyContentAsEmpty.type] = FakeRequest()
-    implicit val loggedIn: DeveloperSession = utils.DeveloperSession("developer@example.com", "Joe", "Bloggs", loggedInState = LoggedInState.LOGGED_IN)
+    implicit val loggedIn: DeveloperSession = DeveloperSessionBuilder("developer@example.com", "Joe", "Bloggs", loggedInState = LoggedInState.LOGGED_IN)
     implicit val navSection: String = "details"
 
     "rendering Environment " when {

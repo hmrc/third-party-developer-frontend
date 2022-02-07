@@ -1,5 +1,5 @@
 @*
- * Copyright 2021 HM Revenue & Customs
+ * Copyright 2022 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,13 +14,13 @@
  * limitations under the License.
  *@
 
-@import config.ApplicationConfig
-@import domain.models.developers.DeveloperSession
+@import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.DeveloperSession
 @import include._
-@import domain.models.controllers.Crumb
+@import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.controllers.Crumb
 @import uk.gov.hmrc.urls.Link
 @import views.emailpreferences.EmailPreferencesSummaryViewData
 @import views.html.include.DevMain2
+@import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers
 
 @this(devMain: DevMain2)
 
@@ -66,7 +66,7 @@
     }
     <br />
     <p class="govuk-body">
-      <a class="govuk-link govuk-link--no-visited-state" id="change-apis-link" href="@controllers.profile.routes.EmailPreferences.flowSelectCategoriesPage">Edit your preferences or get emails about other APIs</a>
+      <a class="govuk-link govuk-link--no-visited-state" id="change-apis-link" href="@controllers.profile.routes.EmailPreferencesController.flowSelectCategoriesPage">Edit your preferences or get emails about other APIs</a>
     </p>
 
     <hr class="govuk-section-break govuk-section-break--m govuk-section-break--visible" />
@@ -78,7 +78,7 @@
     }
     <br />
     <p class="govuk-body">
-      <a class="govuk-link govuk-link--no-visited-state" id="change-topics-link" href="@controllers.profile.routes.EmailPreferences.flowSelectTopicsPage">
+      <a class="govuk-link govuk-link--no-visited-state" id="change-topics-link" href="@controllers.profile.routes.EmailPreferencesController.flowSelectTopicsPage">
         Change the topics you are interested in
       </a>
     </p>
@@ -90,7 +90,7 @@
     }
     @EmailPrefsBulletInfoView()
     <p class="govuk-body">
-      <a class="govuk-link govuk-link--no-visited-state" id="setup-emailpreferences-link" href="@controllers.profile.routes.EmailPreferences.flowStartPage()">Set up email preferences</a>
+      <a class="govuk-link govuk-link--no-visited-state" id="setup-emailpreferences-link" href="@controllers.profile.routes.EmailPreferencesController.flowStartPage()">Set up email preferences</a>
     </p>
   }
 
@@ -100,13 +100,13 @@
 
   @if(userHasEmailPreferences) {
     <p class="govuk-body">
-      <a class="govuk-link govuk-link--no-visited-state" id="unsubscribe-link" href="@controllers.profile.routes.EmailPreferences.unsubscribeAllPage">
+      <a class="govuk-link govuk-link--no-visited-state" id="unsubscribe-link" href="@controllers.profile.routes.EmailPreferencesController.unsubscribeAllPage">
         Unsubscribe from Developer Hub emails
       </a>
     </p>
   }
 
   <p class="govuk-body">
-    <a class="govuk-link govuk-link--no-visited-state" id="view-all-applications-link" href="@routes.ManageApplications.manageApps">View all applications</a>
+    <a class="govuk-link govuk-link--no-visited-state" id="view-all-applications-link" href="@controllers.routes.ManageApplications.manageApps">View all applications</a>
   </p>
 }

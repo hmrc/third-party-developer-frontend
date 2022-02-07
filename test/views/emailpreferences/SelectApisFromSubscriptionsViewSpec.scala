@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 HM Revenue & Customs
+ * Copyright 2022 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,19 +16,19 @@
 
 package views.emailpreferences
 
-import controllers.{FormKeys, SelectApisFromSubscriptionsForm}
-import domain.models.applications.ApplicationId
-import domain.models.connectors.ApiType.REST_API
-import domain.models.connectors.{CombinedApi, CombinedApiCategory}
-import domain.models.developers.{DeveloperSession, LoggedInState}
-import domain.models.flows.NewApplicationEmailPreferencesFlowV2
+import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.{FormKeys, SelectApisFromSubscriptionsForm}
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.ApplicationId
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.connectors.ApiType.REST_API
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.connectors.{CombinedApi, CombinedApiCategory}
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.{DeveloperSession, LoggedInState}
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.flows.NewApplicationEmailPreferencesFlowV2
 import org.jsoup.Jsoup
 import org.jsoup.nodes.{Document, Element}
 import play.api.data.{Form, FormError}
 import play.api.mvc.AnyContentAsEmpty
 import play.api.test.FakeRequest
 import play.twirl.api.Html
-import utils.WithCSRFAddToken
+import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.{DeveloperSessionBuilder, WithCSRFAddToken}
 import views.helper.CommonViewSpec
 import views.html.emailpreferences.SelectApisFromSubscriptionsView
 
@@ -38,7 +38,7 @@ class SelectApisFromSubscriptionsViewSpec extends CommonViewSpec with WithCSRFAd
 
   trait Setup {
     val developerSessionWithoutEmailPreferences: DeveloperSession = {
-      utils.DeveloperSession("email@example.com", "First Name", "Last Name", None, loggedInState = LoggedInState.LOGGED_IN)
+      DeveloperSessionBuilder("email@example.com", "First Name", "Last Name", None, loggedInState = LoggedInState.LOGGED_IN)
     }
     val form = mock[Form[SelectApisFromSubscriptionsForm]]
     val apis = Set("api1", "api2")

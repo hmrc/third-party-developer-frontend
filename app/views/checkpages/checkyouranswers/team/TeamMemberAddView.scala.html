@@ -1,5 +1,5 @@
 @*
- * Copyright 2021 HM Revenue & Customs
+ * Copyright 2022 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,19 +14,17 @@
  * limitations under the License.
  *@
 
-@import config.ApplicationConfig
-@import domain.models.views.BackButtonWithJavaScript
-@import domain.models.controllers.ApplicationViewModel
-@import views.html.include.DevMain2
-@import domain.models.developers.DeveloperSession
+@import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.views.BackButtonWithJavaScript
+@import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.controllers.ApplicationViewModel
+@import views.html.include.DevMain
+@import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.DeveloperSession
 @import views.html.include.teamMembers.addTeamMemberPartial
-@import domain.models.controllers.AddTeamMemberPageMode.CheckYourAnswers
+@import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.controllers.AddTeamMemberPageMode.CheckYourAnswers
 
 @this(devMain: DevMain2)
 
-@(applicationView: ApplicationViewModel, form: Form[controllers.AddTeamMemberForm], loggedIn: DeveloperSession)(
-  implicit request: play.api.mvc.Request[Any], messages: Messages,applicationConfig: ApplicationConfig
-)
+@(applicationView: ApplicationViewModel, form: Form[uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.AddTeamMemberForm], loggedIn: DeveloperSession)(
+        implicit request: play.api.mvc.Request[Any], messages: Messages,applicationConfig: ApplicationConfig)
 
 
 @app = @{applicationView.application}

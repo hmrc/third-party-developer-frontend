@@ -1,5 +1,5 @@
 @*
- * Copyright 2021 HM Revenue & Customs
+ * Copyright 2022 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,12 +14,11 @@
  * limitations under the License.
  *@
 
-@import config.ApplicationConfig
-@import domain.models.applications.Environment
+@import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.Environment
 @import include._
-@import domain.models.controllers.Crumb
-@import domain.models.developers.DeveloperSession
-@import domain.models.applications.ApplicationId
+@import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.controllers.Crumb
+@import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.DeveloperSession
+@import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.ApplicationId
 
 @this(devMain: DevMain2, leftHandNav: LeftHandNav)
 
@@ -31,7 +30,7 @@
   title = "Application added",
   userFullName = loggedIn.loggedInName,
   breadcrumbs = Seq(
-    Crumb("Add an application",s"${routes.ManageApplications.manageApps}", Some("data-breadcrumb-application-added")),
+    Crumb("Add an application",s"${controllers.routes.ManageApplications.manageApps}", Some("data-breadcrumb-application-added")),
     Crumb.home
   ),
   leftNav = Some(leftHandNav(None, Option(navSection))),
@@ -62,7 +61,7 @@
       <li>Your redirect URIs, if using <a class="govuk-link" href="/api-documentation/docs/authorisation/user-restricted-endpoints">user-restricted endpoints</a></li>
     </ul>
 
-    <a class="govuk-button" href="@routes.Subscriptions.manageSubscriptions(applicationId)" id="manage-api-subscriptions">
+    <a class="govuk-button" href="@controllers.routes.SubscriptionsController.manageSubscriptions(applicationId)" id="manage-api-subscriptions">
       Manage API subscriptions
     </a>
   }

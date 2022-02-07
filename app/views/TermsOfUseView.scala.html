@@ -1,5 +1,5 @@
 @*
- * Copyright 2021 HM Revenue & Customs
+ * Copyright 2022 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,15 +14,14 @@
  * limitations under the License.
  *@
 
-@import config.ApplicationConfig
-@import domain.models.developers.DeveloperSession
+@import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.DeveloperSession
 @import include._
-@import domain.models.controllers.Crumb
+@import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.controllers.Crumb
 @import org.joda.time.format.DateTimeFormat
-@import controllers.TermsOfUseForm
-@import domain.models.controllers.ApplicationViewModel
-@import domain.models.applications.TermsOfUseStatus.AGREEMENT_REQUIRED
-@import domain.models.applications.TermsOfUseStatus.AGREED
+@import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.TermsOfUseForm
+@import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.controllers.ApplicationViewModel
+@import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.TermsOfUseStatus.AGREEMENT_REQUIRED
+@import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.TermsOfUseStatus.AGREED
 
 @this(devMain: DevMain2, leftHandNav: LeftHandNav)
 
@@ -68,7 +67,7 @@
 
   @if(app.termsOfUseStatus == AGREEMENT_REQUIRED) {
     <hr class="govuk-section-break govuk-section-break--m govuk-section-break--visible">
-    @helper.form(action = routes.TermsOfUse.agreeTermsOfUse(app.id), 'class -> "form", 'id -> "termsOfUseForm") {
+    @helper.form(action = controllers.routes.TermsOfUse.agreeTermsOfUse(app.id), 'class -> "form", 'id -> "termsOfUseForm") {
       @helper.CSRF.formField
       <div class="govuk-form-group @if(form.errors("termsOfUseAgreed").nonEmpty){form-group-error}">
         <fieldset class="govuk-fieldset" aria-describedby="terms-agreed-error">
@@ -83,7 +82,7 @@
       </div>
       <div class="govuk-button-group">
         <button id="submit" class="govuk-button" type="submit">Save</button>
-        <a href="@routes.Details.details(app.id)" class="govuk-button govuk-button--secondary">Cancel</a>
+        <a href="@controllers.routes.Details.details(app.id)" class="govuk-button govuk-button--secondary">Cancel</a>
       </div>
     }
   }

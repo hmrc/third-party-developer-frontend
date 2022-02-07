@@ -1,5 +1,5 @@
 @*
- * Copyright 2021 HM Revenue & Customs
+ * Copyright 2022 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,13 +14,14 @@
  * limitations under the License.
  *@
 
-@import domain.models.emailpreferences.EmailTopic._
-@import config.ApplicationConfig
-@import domain.models.developers.DeveloperSession
+@import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.emailpreferences.EmailTopic._
+@import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.DeveloperSession
 @import include._
-@import domain.models.views.BackButtonWithJavaScript
+@import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.views.BackButtonWithJavaScript
 @import uk.gov.hmrc.urls.Link
 @import views.html.include.DevMain2
+@import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.profile.routes
+@import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.SelectedTopicsEmailPreferencesForm
 
 @this(devMain: DevMain2)
 
@@ -43,7 +44,7 @@
         We’ll only send you information about the APIs you are interested in.
     </p>
     <p id="topics-hint" class="govuk-hint">Select all that apply.</p>
-    @helper.form(action = controllers.profile.routes.EmailPreferences.flowSelectTopicsAction(), 'class -> "form", 'id -> "emailPreferencesTopicsForm") {
+    @helper.form(action = routes.EmailPreferencesController.flowSelectTopicsAction(), 'class -> "form", 'id -> "emailPreferencesTopicsForm") {
         @helper.CSRF.formField
         <div class="govuk-form-group @if(form.errors("topic").nonEmpty){govuk-form-group--error}">
             <fieldset class="govuk-fieldset" aria-describedby="topics-hint">

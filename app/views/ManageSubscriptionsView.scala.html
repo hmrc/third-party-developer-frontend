@@ -1,5 +1,5 @@
 @*
- * Copyright 2021 HM Revenue & Customs
+ * Copyright 2022 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,34 +14,35 @@
  * limitations under the License.
  *@
 
-@import domain.models.views.SubscriptionRedirect._
-@import domain.models.controllers.Crumb
+@import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.views.SubscriptionRedirect._
+@import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.controllers.Crumb
 @import include._
 @import uk.gov.hmrc.urls.Link
-@import domain.models.controllers.ApplicationViewModel
-@import domain.models.applications.CollaboratorRole
-@import domain.models.developers.DeveloperSession
-@import domain.models.applications.Application
-@import domain.models.applications.State
-@import domain.models.applications.ApplicationId
-@import domain.models.applications.CollaboratorRole
-@import domain.models.controllers.FraudPreventionNavLinkViewModel
-@import domain.models.apidefinitions.ApiContext
-@import domain.models.subscriptions.ApiData
+@import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.controllers.ApplicationViewModel
+@import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.CollaboratorRole
+@import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.DeveloperSession
+@import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.Application
+@import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.State
+@import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.ApplicationId
+@import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.CollaboratorRole
+@import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.controllers.FraudPreventionNavLinkViewModel
+@import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.apidefinitions.ApiContext
+@import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.subscriptions.ApiData
+@import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers._
 
 @this(devMain: DevMain, subscriptionGroups: SubscriptionGroups, leftHandNav: LeftHandNav)
 
 @(
     role: CollaboratorRole, 
     data: PageData, 
-    form: Form[controllers.EditApplicationForm], 
+    form: Form[uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.EditApplicationForm], 
     applicationView: ApplicationViewModel, 
     subscriptions: Option[GroupedSubscriptions], 
     openAccessApis: Map[ApiContext, ApiData],
     id: ApplicationId,
     fraudPreventionNavLinkViewModel: Option[FraudPreventionNavLinkViewModel]
 )(
-    implicit request: play.api.mvc.Request[Any], loggedIn: DeveloperSession, messagesProvider: MessagesProvider, applicationConfig: config.ApplicationConfig, navSection: String = "subscriptions")
+    implicit request: play.api.mvc.Request[Any], loggedIn: DeveloperSession, messagesProvider: MessagesProvider, applicationConfig: ApplicationConfig, navSection: String = "subscriptions")
 
 @app = @{applicationView.application}
 
@@ -90,9 +91,7 @@
 
         case _ => {
             <p class="panel panel-border-wide">We can’t load your API subscriptions at the moment.<br>
-            Please <a href="@{
-                              routes.Subscriptions.manageSubscriptions(id)
-                              }">try again</a> later</p>
+            Please <a href="@{controllers.routes.SubscriptionsController.manageSubscriptions(id)}">try again</a> later</p>
         }
     }
 }

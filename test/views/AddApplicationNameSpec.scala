@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 HM Revenue & Customs
+ * Copyright 2022 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,22 +16,23 @@
 
 package views
 
-import controllers.AddApplicationNameForm
-import domain.models.applications.{ApplicationId, Environment}
-import domain.models.developers.LoggedInState
+import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.AddApplicationNameForm
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.{ApplicationId, Environment}
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.LoggedInState
 import org.jsoup.Jsoup
 import play.api.data.Form
 import play.api.test.FakeRequest
-import utils.ViewHelpers._
-import utils.WithCSRFAddToken
+import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.ViewHelpers._
+import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.WithCSRFAddToken
 import views.helper.CommonViewSpec
 import views.html.AddApplicationNameView
-import controllers.AddApplicationNameForm
+import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.AddApplicationNameForm
+import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.DeveloperSessionBuilder
 
 class AddApplicationNameSpec extends CommonViewSpec with WithCSRFAddToken {
 
   val addApplicationNameView = app.injector.instanceOf[AddApplicationNameView]
-  val loggedInDeveloper = utils.DeveloperSession("admin@example.com", "firstName1", "lastName1", loggedInState = LoggedInState.LOGGED_IN)
+  val loggedInDeveloper = DeveloperSessionBuilder("admin@example.com", "firstName1", "lastName1", loggedInState = LoggedInState.LOGGED_IN)
   val subordinateEnvironment = Environment.SANDBOX
   val appId = ApplicationId("1234")
   val principalEnvironment = Environment.PRODUCTION

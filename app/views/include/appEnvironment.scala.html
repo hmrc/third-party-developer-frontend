@@ -1,5 +1,5 @@
 @*
- * Copyright 2021 HM Revenue & Customs
+ * Copyright 2022 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,10 +14,9 @@
  * limitations under the License.
  *@
 
-@import config.ApplicationConfig
-@import domain.models.applications.Application
+@import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.Application
 
-@import domain.models.apidefinitions.AccessType
+@import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.apidefinitions.AccessType
 @(app: Application)(implicit appConfig: ApplicationConfig)
 @principalEnvName = @{appConfig.nameOfPrincipalEnvironment}
 @subordinateEnvName = @{appConfig.nameOfSubordinateEnvironment}

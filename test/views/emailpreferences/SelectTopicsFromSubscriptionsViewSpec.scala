@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 HM Revenue & Customs
+ * Copyright 2022 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,16 +16,16 @@
 
 package views.emailpreferences
 
-import controllers.SelectTopicsFromSubscriptionsForm
-import domain.models.applications.ApplicationId
-import domain.models.developers.LoggedInState
-import domain.models.emailpreferences.EmailTopic
-import domain.models.emailpreferences.EmailTopic.{BUSINESS_AND_POLICY, EVENT_INVITES}
+import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.SelectTopicsFromSubscriptionsForm
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.ApplicationId
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.LoggedInState
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.emailpreferences.EmailTopic
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.emailpreferences.EmailTopic.{BUSINESS_AND_POLICY, EVENT_INVITES}
 import org.jsoup.Jsoup
 import org.jsoup.nodes.Document
 import play.api.mvc.AnyContentAsEmpty
 import play.api.test.FakeRequest
-import utils.WithCSRFAddToken
+import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.{DeveloperSessionBuilder, WithCSRFAddToken}
 import views.helper.CommonViewSpec
 import views.html.emailpreferences.SelectTopicsFromSubscriptionsView
 
@@ -35,7 +35,7 @@ class SelectTopicsFromSubscriptionsViewSpec extends CommonViewSpec with WithCSRF
 
   trait Setup {
     val developerSessionWithoutEmailPreferences =
-      utils.DeveloperSession("email@example.com", "First Name", "Last Name", None, loggedInState = LoggedInState.LOGGED_IN)
+      DeveloperSessionBuilder("email@example.com", "First Name", "Last Name", None, loggedInState = LoggedInState.LOGGED_IN)
     implicit val request: FakeRequest[AnyContentAsEmpty.type] = FakeRequest().withCSRFToken
 
     val applicationId: ApplicationId = ApplicationId.random

@@ -1,5 +1,5 @@
 @*
- * Copyright 2021 HM Revenue & Customs
+ * Copyright 2022 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,13 +14,15 @@
  * limitations under the License.
  *@
 
-@import domain.models.developers.DeveloperSession
+@import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.DeveloperSession
 @import include._
-@import domain.models.connectors.{ApiDefinition, CombinedApi}
-@import domain.models.views.BackButtonWithJavaScript
-@import config.ApplicationConfig
-@import domain.models.applications.ApplicationId
+@import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.connectors.{ApiDefinition, CombinedApi}
+@import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.views.BackButtonWithJavaScript
+@import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.ApplicationId
 @import views.html.include.DevMain2
+@import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.profile.routes
+@import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.SelectApisFromSubscriptionsForm
+@import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.FormKeys
 
 @this(devMain: DevMain2)
 
@@ -45,7 +47,7 @@
       <div id="select-all-description" class="govuk-hint">
         Select all that apply.
       </div>
-      @helper.form(action = controllers.profile.routes.EmailPreferences.selectApisFromSubscriptionsAction(applicationId), 'class -> "form", 'id -> "emailPreferencesApisForm") {
+      @helper.form(action = routes.EmailPreferencesController.selectApisFromSubscriptionsAction(applicationId), 'class -> "form", 'id -> "emailPreferencesApisForm") {
         @helper.CSRF.formField
         <a name="error.selectedapis.nonselected.field"></a>
         @fieldError2(form.errors, "category")
@@ -66,7 +68,7 @@
     </fieldset>
   </div>
 
-  @helper.form(action = controllers.profile.routes.EmailPreferences.selectNoApisFromSubscriptionsAction(applicationId), 'class -> "form", 'id -> "selectNoApisFromSubscriptionsForm") {
+  @helper.form(action = routes.EmailPreferencesController.selectNoApisFromSubscriptionsAction(applicationId), 'class -> "form", 'id -> "selectNoApisFromSubscriptionsForm") {
     @helper.CSRF.formField
     <button id="noSelectAPIs" class="govuk-button govuk-button--secondary" type="submit">I don't want emails about these APIs</button>
   }

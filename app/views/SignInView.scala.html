@@ -1,5 +1,5 @@
 @*
- * Copyright 2021 HM Revenue & Customs
+ * Copyright 2022 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,10 +15,11 @@
  *@
 
 @import include._
+@import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.routes
 
 @this(devMain: DevMain2)
 
-@(heading: String, form: Form[controllers.LoginForm], endOfJourney: Boolean = false)(implicit request: play.api.mvc.Request[Any], messagesProvider: MessagesProvider, appConfig: config.ApplicationConfig)
+@(heading: String, form: Form[uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.LoginForm], endOfJourney: Boolean = false)(implicit request: play.api.mvc.Request[Any], messagesProvider: MessagesProvider, appConfig: ApplicationConfig)
 
 @titleError = { @if(form.errors.nonEmpty) {Error: } else {}}
 

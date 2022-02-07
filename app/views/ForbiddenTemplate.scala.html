@@ -1,5 +1,5 @@
 @*
- * Copyright 2021 HM Revenue & Customs
+ * Copyright 2022 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,12 +15,12 @@
  *@
 
 @import include._
-@import domain.models.views.StaticNavLinks
+@import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.views.StaticNavLinks
 @import play.twirl.api.HtmlFormat
 
 @this(main: Main)
 
-@()(implicit request: play.api.mvc.Request[Any], messages: Messages, applicationConfig: config.ApplicationConfig)
+@()(implicit request: play.api.mvc.Request[Any], messages: Messages, applicationConfig: ApplicationConfig)
 
 @main(title = applicationConfig.title,
     navTitle = Some(applicationConfig.title),

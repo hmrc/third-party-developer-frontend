@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 HM Revenue & Customs
+ * Copyright 2022 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,11 +19,11 @@ package views.emailpreferences
 import views.helper.CommonViewSpec
 import org.jsoup.Jsoup
 import org.jsoup.nodes.Document
-import domain.models.developers.LoggedInState
-import domain.models.emailpreferences.{APICategoryDisplayDetails, EmailPreferences, EmailTopic, TaxRegimeInterests}
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.LoggedInState
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.emailpreferences.{APICategoryDisplayDetails, EmailPreferences, EmailTopic, TaxRegimeInterests}
 import play.api.mvc.AnyContentAsEmpty
 import play.api.test.FakeRequest
-import utils.WithCSRFAddToken
+import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.{WithCSRFAddToken,DeveloperSessionBuilder}
 import views.html.emailpreferences.EmailPreferencesSummaryView
 
 class EmailPreferencesSummaryViewSpec extends CommonViewSpec with WithCSRFAddToken {
@@ -42,10 +42,10 @@ class EmailPreferencesSummaryViewSpec extends CommonViewSpec with WithCSRFAddTok
         Set(EmailTopic.TECHNICAL, EmailTopic.BUSINESS_AND_POLICY))
 
     val developerSession =
-      utils.DeveloperSession("email@example.com", "First Name", "Last Name", None, loggedInState = LoggedInState.LOGGED_IN, emailPreferences = emailPreferences)
+      DeveloperSessionBuilder("email@example.com", "First Name", "Last Name", None, loggedInState = LoggedInState.LOGGED_IN, emailPreferences = emailPreferences)
 
     val developerSessionWithoutEmailPreferences =
-      utils.DeveloperSession("email@example.com", "First Name", "Last Name", None, loggedInState = LoggedInState.LOGGED_IN)
+      DeveloperSessionBuilder("email@example.com", "First Name", "Last Name", None, loggedInState = LoggedInState.LOGGED_IN)
     implicit val request: FakeRequest[AnyContentAsEmpty.type] = FakeRequest().withCSRFToken
 
     val emailPreferencesSummaryView = app.injector.instanceOf[EmailPreferencesSummaryView]

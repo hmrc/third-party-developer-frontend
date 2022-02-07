@@ -1,5 +1,5 @@
 @*
- * Copyright 2021 HM Revenue & Customs
+ * Copyright 2022 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,14 +14,15 @@
  * limitations under the License.
  *@
 
-@import domain.models.applications.Application
-@import domain.models.controllers.SaveSubsFieldsPageMode.LeftHandNavigation
-@import domain.models.developers.DeveloperSession
-@import domain.models.controllers.Crumb
-@import controllers.ManageSubscriptions.ApiDetails
+@import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.Application
+@import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.controllers.SaveSubsFieldsPageMode.LeftHandNavigation
+@import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.DeveloperSession
+@import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.controllers.Crumb
+@import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.ManageSubscriptions.ApiDetails
 @import views.helper.IdFormatter
 @import views.html.include.appEnvironment
 @import views.html.include.DevMain
+@import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.routes
 
 @this(devMain: DevMain)
 
@@ -29,7 +30,7 @@
     implicit request: play.api.mvc.Request[Any],
     loggedIn: DeveloperSession,
     messages: Messages,
-    applicationConfig: config.ApplicationConfig
+    applicationConfig: ApplicationConfig
     )
 
 @pageHeading = @{ "Subscription configuration" }

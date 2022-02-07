@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 HM Revenue & Customs
+ * Copyright 2022 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,15 +17,15 @@
 package views.include
 
 import java.time.Period
-import config.ApplicationConfig
-import domain.models.applications.{Application, ApplicationId, ClientId, Environment}
-import domain.models.controllers.Crumb
+import uk.gov.hmrc.thirdpartydeveloperfrontend.config.ApplicationConfig
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.{Application, ApplicationId, ClientId, Environment}
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.controllers.Crumb
 import org.jsoup.Jsoup
 import org.scalatestplus.play.guice.GuiceOneServerPerSuite
 import play.api.test.Helpers.{contentAsString, contentType}
 import play.twirl.api.Html
 import uk.gov.hmrc.time.DateTimeUtils
-import utils.{AsyncHmrcSpec, SharedMetricsClearDown}
+import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.{AsyncHmrcSpec, SharedMetricsClearDown}
 
 class BreadcrumbsSpec extends AsyncHmrcSpec with GuiceOneServerPerSuite with SharedMetricsClearDown {
 
