@@ -40,7 +40,9 @@
   @helper.form(action = routes.UserLogoutAccount.logoutSurveyAction(),'class -> "form", 'id -> "feedbackForm") {
     @helper.CSRF.formField
 
-    <p>Before you sign out, please give feedback to help us improve the @(applicationConfig.title). It’s only 2 questions. We use your feedback to make our services better.</p>
+    <p class="govuk-body">
+      Before you sign out, please give feedback to help us improve the @(applicationConfig.title). It’s only 2 questions. We use your feedback to make our services better.
+    </p>
 
     <div class="govuk-form-group">
       <fieldset class="govuk-fieldset">

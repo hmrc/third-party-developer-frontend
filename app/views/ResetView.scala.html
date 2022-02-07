@@ -36,7 +36,7 @@
   @helper.form(action = routes.Password.resetPassword) {
     @helper.CSRF.formField
 
-    @passwords("Enter new password", "Confirm new password", form)
+    @passwords2("Enter new password", "Confirm new password", form)
 
     <button id="submit" class="govuk-button" type="submit">Save password</button>
   }
