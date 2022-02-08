@@ -252,6 +252,7 @@ trait SubmissionsTestData {
     questionnaires.map { qn =>
         (qn.id, qn.questions.head.question.id)
     }
+    
     .toList
     .toMap
   

@@ -30,6 +30,8 @@ import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.connectors.TicketCr
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.ApplicationNotFound
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.ApplicationAlreadyExists
 import uk.gov.hmrc.apiplatform.modules.submissions.connectors.ThirdPartyApplicationSubmissionsConnector
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.connectors.DeskproTicket
+import org.mockito.captor.ArgCaptor
 
 class RequestProductionCredentialsSpec extends AsyncHmrcSpec 
   with CollaboratorTracker 
@@ -57,7 +59,10 @@ class RequestProductionCredentialsSpec extends AsyncHmrcSpec
       val result = await(underTest.requestProductionCredentials(applicationId, developerSession))
       
       result.right.value shouldBe app
-      verify(mockDeskproConnector).createTicket(*)(*)
+
+      val ticketCapture = ArgCaptor[DeskproTicket]
+      verify(mockDeskproConnector).createTicket(ticketCapture.capture)(*)
+      ticketCapture.value.subject shouldBe "New application submitted for production credentials"
     }
 
     "fails to create a ticket if the application is not found" in new Setup {
