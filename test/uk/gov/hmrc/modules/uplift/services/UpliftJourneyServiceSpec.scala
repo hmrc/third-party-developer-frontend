@@ -134,7 +134,7 @@ class UpliftJourneyServiceSpec
   "confirmAndUplift" should {
     "return the new app id when everything is good" in new Setup {
       val productionAppId = ApplicationId.random
-      GPCFlowServiceMock.FetchFlow.thenReturns(GetProductionCredentialsFlow("", Some(aResponsibleIndividual), Some(sellResellOrDistribute), Some(aListOfSubscriptions)))
+      GPCFlowServiceMock.FetchFlow.thenReturns(GetProductionCredentialsFlow("", Some(sellResellOrDistribute), Some(aListOfSubscriptions)))
       ApmConnectorMock.FetchUpliftableSubscriptions.willReturn(Set(apiIdentifier1))
       ApmConnectorMock.UpliftApplicationV1.willReturn(productionAppId)
 
@@ -143,16 +143,8 @@ class UpliftJourneyServiceSpec
       result.right.value shouldBe productionAppId
     }
 
-    "fail when missing responsible individual" in new Setup {
-      GPCFlowServiceMock.FetchFlow.thenReturns(GetProductionCredentialsFlow("", None, None, None))
-
-      private val result = await(underTest.confirmAndUplift(sandboxAppId, loggedInDeveloper, true))
-
-      result.left.value shouldBe "No responsible individual set"
-    }
-
     "fail when missing sell resell..." in new Setup {
-      GPCFlowServiceMock.FetchFlow.thenReturns(GetProductionCredentialsFlow("", Some(aResponsibleIndividual), None, None))
+      GPCFlowServiceMock.FetchFlow.thenReturns(GetProductionCredentialsFlow("", None, None))
 
       private val result = await(underTest.confirmAndUplift(sandboxAppId, loggedInDeveloper, true))
 
@@ -160,7 +152,7 @@ class UpliftJourneyServiceSpec
     }
     
     "fail when missing subscriptions" in new Setup {
-      GPCFlowServiceMock.FetchFlow.thenReturns(GetProductionCredentialsFlow("", Some(aResponsibleIndividual), Some(sellResellOrDistribute), None))
+      GPCFlowServiceMock.FetchFlow.thenReturns(GetProductionCredentialsFlow("", Some(sellResellOrDistribute), None))
 
       private val result = await(underTest.confirmAndUplift(sandboxAppId, loggedInDeveloper, true))
 
@@ -168,7 +160,7 @@ class UpliftJourneyServiceSpec
     }
       
     "fail when no upliftable apis found" in new Setup {
-      GPCFlowServiceMock.FetchFlow.thenReturns(GetProductionCredentialsFlow("", Some(aResponsibleIndividual), Some(sellResellOrDistribute), Some(aListOfSubscriptions)))
+      GPCFlowServiceMock.FetchFlow.thenReturns(GetProductionCredentialsFlow("", Some(sellResellOrDistribute), Some(aListOfSubscriptions)))
       ApmConnectorMock.FetchUpliftableSubscriptions.willReturn(Set())
 
       private val result = await(underTest.confirmAndUplift(sandboxAppId, loggedInDeveloper, false))
@@ -179,7 +171,7 @@ class UpliftJourneyServiceSpec
   
   "apiSubscriptionData" should {
     "returns the names of apis when flow has selected them ignoring any that are not upliftable" in new Setup {
-      GPCFlowServiceMock.FetchFlow.thenReturns(GetProductionCredentialsFlow("", Some(aResponsibleIndividual), Some(sellResellOrDistribute), Some(aListOfSubscriptions)))
+      GPCFlowServiceMock.FetchFlow.thenReturns(GetProductionCredentialsFlow("", Some(sellResellOrDistribute), Some(aListOfSubscriptions)))
       ApmConnectorMock.FetchUpliftableSubscriptions.willReturn(Set(apiIdentifier1, apiIdentifier2))
      
       private val result = await(underTest.apiSubscriptionData(sandboxAppId, loggedInDeveloper, List(testAPISubscriptionStatus1, testAPISubscriptionStatus2, testAPISubscriptionStatus3)))
@@ -193,7 +185,7 @@ class UpliftJourneyServiceSpec
     }
 
     "returns the name of selected api ignoring any that are not upliftable" in new Setup {
-      GPCFlowServiceMock.FetchFlow.thenReturns(GetProductionCredentialsFlow("", Some(aResponsibleIndividual), Some(sellResellOrDistribute), Some(aSingleSubscriptions)))
+      GPCFlowServiceMock.FetchFlow.thenReturns(GetProductionCredentialsFlow("", Some(sellResellOrDistribute), Some(aSingleSubscriptions)))
       ApmConnectorMock.FetchUpliftableSubscriptions.willReturn(Set(apiIdentifier1, apiIdentifier2))
      
       private val result = await(underTest.apiSubscriptionData(sandboxAppId, loggedInDeveloper, List(testAPISubscriptionStatus1, testAPISubscriptionStatus2, testAPISubscriptionStatus3)))
@@ -207,7 +199,7 @@ class UpliftJourneyServiceSpec
     }
 
     "returns the name of selected api and false when there is only one upliftable api" in new Setup {
-      GPCFlowServiceMock.FetchFlow.thenReturns(GetProductionCredentialsFlow("", Some(aResponsibleIndividual), Some(sellResellOrDistribute), Some(aSingleSubscriptions)))
+      GPCFlowServiceMock.FetchFlow.thenReturns(GetProductionCredentialsFlow("", Some(sellResellOrDistribute), Some(aSingleSubscriptions)))
       ApmConnectorMock.FetchUpliftableSubscriptions.willReturn(Set(apiIdentifier1))
      
       private val result = await(underTest.apiSubscriptionData(sandboxAppId, loggedInDeveloper, List(testAPISubscriptionStatus1, testAPISubscriptionStatus2, testAPISubscriptionStatus3)))

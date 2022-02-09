@@ -45,7 +45,7 @@ class GetProductionCredentialsFlowServiceSpec
     val sellResellOrDistribute = SellResellOrDistribute("answer")
     val responsibleIndividual = ResponsibleIndividual("oldname", "old@example.com")
     val apiSubscriptions = ApiSubscriptions()
-    val flow = GetProductionCredentialsFlow(sessionId, Some(responsibleIndividual), Some(sellResellOrDistribute), Some(apiSubscriptions))
+    val flow = GetProductionCredentialsFlow(sessionId, Some(sellResellOrDistribute), Some(apiSubscriptions))
     val newResponsibleIndividual = ResponsibleIndividual("newname", "new@example.com")
   }
 
@@ -63,27 +63,6 @@ class GetProductionCredentialsFlowServiceSpec
       val result = await(underTest.fetchFlow(loggedInDeveloper))
 
       result.sessionId shouldBe loggedInDeveloper.session.sessionId
-    }
-  }
-
-  "storeResponsibleIndividual" should {
-    "save responsible individual details correctly" in new Setup {
-      FlowRepositoryMock.FetchBySessionIdAndFlowType.thenReturn(flow)
-      FlowRepositoryMock.SaveFlow.thenReturnsSuccess
-
-      val result = await(underTest.storeResponsibleIndividual(newResponsibleIndividual, loggedInDeveloper))
-
-      result.responsibleIndividual shouldBe Some(newResponsibleIndividual)
-    }
-  }
-
-  "findResponsibleIndividual" should {
-    "return the correct individual details" in new Setup {
-      FlowRepositoryMock.FetchBySessionIdAndFlowType.thenReturn(flow)
-
-      val result = await(underTest.findResponsibleIndividual(loggedInDeveloper))
-
-      result shouldBe Some(responsibleIndividual)
     }
   }
 

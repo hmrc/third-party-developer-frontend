@@ -21,7 +21,6 @@ import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.flows.{Flow, FlowTy
 
 case class GetProductionCredentialsFlow(
   val sessionId: String,
-  responsibleIndividual: Option[ResponsibleIndividual],
   sellResellOrDistribute: Option[SellResellOrDistribute],
   apiSubscriptions: Option[ApiSubscriptions]
 ) extends Flow {
@@ -32,5 +31,5 @@ object GetProductionCredentialsFlow {
   import play.api.libs.json.Json
   implicit val format = Json.format[GetProductionCredentialsFlow]
 
-  def create(sessionId: String): GetProductionCredentialsFlow = GetProductionCredentialsFlow(sessionId, None, None, None)
+  def create(sessionId: String): GetProductionCredentialsFlow = GetProductionCredentialsFlow(sessionId, None, None)
 }
