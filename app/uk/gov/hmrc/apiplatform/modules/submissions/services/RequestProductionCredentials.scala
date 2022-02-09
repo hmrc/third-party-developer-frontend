@@ -43,8 +43,8 @@ class RequestProductionCredentials @Inject()(
     (
       for {
         app           <- ET.fromEitherF(tpaConnector.requestApproval(applicationId, requestedBy.email))
-        upliftTicket   = DeskproTicket.createForUplift(requestedBy.displayedName, requestedBy.email, app.name, applicationId)
-        _              = deskproConnector.createTicket(upliftTicket)
+        ticket         = DeskproTicket.createForRequestProductionCredentials(requestedBy.displayedName, requestedBy.email, app.name, applicationId)
+        _              = deskproConnector.createTicket(ticket)
       } yield app
     )
     .value
