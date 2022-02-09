@@ -66,27 +66,6 @@ class GetProductionCredentialsFlowServiceSpec
     }
   }
 
-  "storeResponsibleIndividual" should {
-    "save responsible individual details correctly" in new Setup {
-      FlowRepositoryMock.FetchBySessionIdAndFlowType.thenReturn(flow)
-      FlowRepositoryMock.SaveFlow.thenReturnsSuccess
-
-      val result = await(underTest.storeResponsibleIndividual(newResponsibleIndividual, loggedInDeveloper))
-
-      result.responsibleIndividual shouldBe Some(newResponsibleIndividual)
-    }
-  }
-
-  "findResponsibleIndividual" should {
-    "return the correct individual details" in new Setup {
-      FlowRepositoryMock.FetchBySessionIdAndFlowType.thenReturn(flow)
-
-      val result = await(underTest.findResponsibleIndividual(loggedInDeveloper))
-
-      result shouldBe Some(responsibleIndividual)
-    }
-  }
-
   "storeSellResellOrDistribute" should {
     "save flow with new details" in new Setup {
       FlowRepositoryMock.FetchBySessionIdAndFlowType.thenReturn(flow)

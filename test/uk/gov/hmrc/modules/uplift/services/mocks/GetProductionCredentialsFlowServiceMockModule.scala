@@ -42,24 +42,6 @@ trait GetProductionCredentialsFlowServiceMockModule extends MockitoSugar with Ar
       }
     }
 
-    object StoreResponsibleIndividual {
-      def thenReturns(ri: ResponsibleIndividual, out: GetProductionCredentialsFlow) =
-        when(aMock.storeResponsibleIndividual(eqTo(ri), *)).thenReturn(successful(out))
-        
-      def thenFail(ex: Exception) = {
-        when(aMock.fetchFlow(*)).thenReturn(failed(ex))
-      }
-    }
-
-     
-    object FindResponsibleIndividual {
-      def thenReturns(out: ResponsibleIndividual) = 
-        when(aMock.findResponsibleIndividual(*)).thenReturn(successful(Some(out)))
-        
-      def thenReturnsNone() = 
-        when(aMock.findResponsibleIndividual(*)).thenReturn(successful(None))
-    }
-
     object StoreSellResellOrDistribute {
       def thenReturns(in: SellResellOrDistribute, out: GetProductionCredentialsFlow) = {
         when(aMock.storeSellResellOrDistribute(eqTo(in), *)).thenReturn(successful(out))
