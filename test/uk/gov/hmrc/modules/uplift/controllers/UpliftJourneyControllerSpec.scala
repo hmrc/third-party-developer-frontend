@@ -200,7 +200,7 @@ class UpliftJourneyControllerSpec extends BaseControllerSpec
       UpliftJourneyServiceMock.ConfirmAndUplift.thenReturns(appId)
 
       ApmConnectorMock.FetchUpliftableSubscriptions.willReturn(apiIdentifiers)
-      GPCFlowServiceMock.StoreApiSubscriptions.thenReturns(GetProductionCredentialsFlow("", None, None, None))
+      GPCFlowServiceMock.StoreApiSubscriptions.thenReturns(GetProductionCredentialsFlow("", None, None))
 
       private val result = controller.saveApiSubscriptionsSubmit(appId)(loggedInRequest.withCSRFToken.withFormUrlEncodedBody(
         "test_api_context_1-1_0-subscribed" -> "true")
@@ -215,8 +215,8 @@ class UpliftJourneyControllerSpec extends BaseControllerSpec
       ApmConnectorMock.FetchUpliftableSubscriptions.willReturn(Set(apiIdentifier1))
 
       val testFlow = ApiSubscriptions(Map(apiIdentifier1 -> true))
-      GPCFlowServiceMock.FetchFlow.thenReturns(GetProductionCredentialsFlow("", None, None, Some(testFlow)))
-      GPCFlowServiceMock.StoreApiSubscriptions.thenReturns(GetProductionCredentialsFlow("", None, None, None))
+      GPCFlowServiceMock.FetchFlow.thenReturns(GetProductionCredentialsFlow("", None, Some(testFlow)))
+      GPCFlowServiceMock.StoreApiSubscriptions.thenReturns(GetProductionCredentialsFlow("", None, None))
 
       private val result = controller.saveApiSubscriptionsSubmit(appId)(loggedInRequest.withCSRFToken.withFormUrlEncodedBody(
         "test_api_context_1-1_0-subscribed" -> "false")
@@ -320,7 +320,7 @@ class UpliftJourneyControllerSpec extends BaseControllerSpec
 
       val testSellResellOrDistribute = SellResellOrDistribute("Yes")
 
-      GPCFlowServiceMock.StoreSellResellOrDistribute.thenReturns(testSellResellOrDistribute,GetProductionCredentialsFlow("", None, Some(testSellResellOrDistribute), None))
+      GPCFlowServiceMock.StoreSellResellOrDistribute.thenReturns(testSellResellOrDistribute, GetProductionCredentialsFlow("", Some(testSellResellOrDistribute), None))
       UpliftJourneyServiceMock.StoreDefaultSubscriptionsInFlow.thenReturns()
 
       private val result = controller.sellResellOrDistributeYourSoftwareAction(appId)(loggedInRequest.withCSRFToken.withFormUrlEncodedBody(
@@ -335,7 +335,7 @@ class UpliftJourneyControllerSpec extends BaseControllerSpec
 
       val testSellResellOrDistribute = SellResellOrDistribute("No")
       
-      GPCFlowServiceMock.StoreSellResellOrDistribute.thenReturns(testSellResellOrDistribute,GetProductionCredentialsFlow("", None, Some(testSellResellOrDistribute), None))
+      GPCFlowServiceMock.StoreSellResellOrDistribute.thenReturns(testSellResellOrDistribute, GetProductionCredentialsFlow("", Some(testSellResellOrDistribute), None))
       UpliftJourneyServiceMock.StoreDefaultSubscriptionsInFlow.thenReturns()
 
       private val result = controller.sellResellOrDistributeYourSoftwareAction(appId)(loggedInRequest.withCSRFToken.withFormUrlEncodedBody(

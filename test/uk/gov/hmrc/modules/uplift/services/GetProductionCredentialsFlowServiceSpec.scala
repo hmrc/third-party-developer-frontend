@@ -45,7 +45,7 @@ class GetProductionCredentialsFlowServiceSpec
     val sellResellOrDistribute = SellResellOrDistribute("answer")
     val responsibleIndividual = ResponsibleIndividual("oldname", "old@example.com")
     val apiSubscriptions = ApiSubscriptions()
-    val flow = GetProductionCredentialsFlow(sessionId, Some(responsibleIndividual), Some(sellResellOrDistribute), Some(apiSubscriptions))
+    val flow = GetProductionCredentialsFlow(sessionId, Some(sellResellOrDistribute), Some(apiSubscriptions))
     val newResponsibleIndividual = ResponsibleIndividual("newname", "new@example.com")
   }
 
