@@ -62,7 +62,7 @@ class RequestProductionCredentialsSpec extends AsyncHmrcSpec
 
       val ticketCapture = ArgCaptor[DeskproTicket]
       verify(mockDeskproConnector).createTicket(ticketCapture.capture)(*)
-      ticketCapture.value.subject shouldBe "New application submitted for production credentials"
+      ticketCapture.value.subject shouldBe "New application submitted for checking"
     }
 
     "fails to create a ticket if the application is not found" in new Setup {

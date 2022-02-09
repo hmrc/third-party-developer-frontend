@@ -40,7 +40,7 @@ object DeskproTicket extends FieldTransformer {
 
   def createForRequestProductionCredentials(requestorName: String, requestorEmail: String, applicationName: String, applicationId: ApplicationId): DeskproTicket = {
     val message =
-      s"""$requestorEmail submitted a request for production credentials for the following application on the Developer Hub:
+      s"""$requestorEmail submitted the following application for production use on the Developer Hub:
          |$applicationName
          |Please check it against our guidelines and send them a response within 2 working days.
          |HMRC Developer Hub
@@ -49,7 +49,7 @@ object DeskproTicket extends FieldTransformer {
     DeskproTicket(
       requestorName,
       requestorEmail,
-      "New application submitted for production credentials",
+      "New application submitted for checking",
       message,
       uk.gov.hmrc.apiplatform.modules.submissions.controllers.routes.CheckAnswersController.checkAnswersPage(applicationId).url
     )
