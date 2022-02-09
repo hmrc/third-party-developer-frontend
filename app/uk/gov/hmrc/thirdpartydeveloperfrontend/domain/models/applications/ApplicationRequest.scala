@@ -23,7 +23,6 @@ import uk.gov.hmrc.apiplatform.modules.uplift.domain.models._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.apidefinitions.ApiIdentifier
 
 case class UpliftData(
-  responsibleIndividual: ResponsibleIndividual,
   sellResellOrDistribute: SellResellOrDistribute,
   subscriptions: Set[ApiIdentifier],
   requestedBy: String
