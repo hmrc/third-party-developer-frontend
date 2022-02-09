@@ -69,7 +69,6 @@ class UpliftJourneyControllerSpec extends BaseControllerSpec
 
     val confirmApisView = app.injector.instanceOf[ConfirmApisView]
     val turnOffApisMasterView = app.injector.instanceOf[TurnOffApisMasterView]
-    val responsibleIndividualView = app.injector.instanceOf[ResponsibleIndividualView]
     val sellResellOrDistributeSoftwareView = app.injector.instanceOf[SellResellOrDistributeSoftwareView]
 
     val mockUpliftJourneyConfig = mock[UpliftJourneyConfig]
@@ -86,7 +85,6 @@ class UpliftJourneyControllerSpec extends BaseControllerSpec
       confirmApisView,
       turnOffApisMasterView,
       ApmConnectorMock.aMock,
-      responsibleIndividualView,
       GPCFlowServiceMock.aMock,
       sellResellOrDistributeSoftwareView,
       sr20UpliftJourneySwitchMock
@@ -202,7 +200,7 @@ class UpliftJourneyControllerSpec extends BaseControllerSpec
       UpliftJourneyServiceMock.ConfirmAndUplift.thenReturns(appId)
 
       ApmConnectorMock.FetchUpliftableSubscriptions.willReturn(apiIdentifiers)
-      GPCFlowServiceMock.StoreApiSubscriptions.thenReturns(GetProductionCredentialsFlow("", None, None, None))
+      GPCFlowServiceMock.StoreApiSubscriptions.thenReturns(GetProductionCredentialsFlow("", None, None))
 
       private val result = controller.saveApiSubscriptionsSubmit(appId)(loggedInRequest.withCSRFToken.withFormUrlEncodedBody(
         "test_api_context_1-1_0-subscribed" -> "true")
@@ -217,8 +215,8 @@ class UpliftJourneyControllerSpec extends BaseControllerSpec
       ApmConnectorMock.FetchUpliftableSubscriptions.willReturn(Set(apiIdentifier1))
 
       val testFlow = ApiSubscriptions(Map(apiIdentifier1 -> true))
-      GPCFlowServiceMock.FetchFlow.thenReturns(GetProductionCredentialsFlow("", None, None, Some(testFlow)))
-      GPCFlowServiceMock.StoreApiSubscriptions.thenReturns(GetProductionCredentialsFlow("", None, None, None))
+      GPCFlowServiceMock.FetchFlow.thenReturns(GetProductionCredentialsFlow("", None, Some(testFlow)))
+      GPCFlowServiceMock.StoreApiSubscriptions.thenReturns(GetProductionCredentialsFlow("", None, None))
 
       private val result = controller.saveApiSubscriptionsSubmit(appId)(loggedInRequest.withCSRFToken.withFormUrlEncodedBody(
         "test_api_context_1-1_0-subscribed" -> "false")
@@ -260,119 +258,6 @@ class UpliftJourneyControllerSpec extends BaseControllerSpec
       contentAsString(result) should include("Turn off API subscriptions you don’t need")
     }
     
-  }
-
-  "responsibleIndividual" should {
-
-    "initially render the 'responsible individual view' unpopulated" in new Setup {
-
-      GPCFlowServiceMock.FindResponsibleIndividual.thenReturnsNone()
-
-      private val result = controller.responsibleIndividual(appId)(loggedInRequest.withCSRFToken)
-
-      status(result) shouldBe OK
-
-      titleOf(result) shouldBe "Responsible individual details - HMRC Developer Hub - GOV.UK"
-
-      contentAsString(result) should include("Provide details for a responsible individual in your organisation")
-      contentAsString(result) shouldNot include("test full name")
-      contentAsString(result) shouldNot include("test email address")
-    }
-
-    "render the 'responsible individual view' populated with a responsible individual" in new Setup {
-
-      GPCFlowServiceMock.FindResponsibleIndividual.thenReturns(ResponsibleIndividual("test full name", "test email address"))
-
-      private val result = controller.responsibleIndividual(appId)(loggedInRequest.withCSRFToken)
-
-      status(result) shouldBe OK
-
-      contentAsString(result) should include("Provide details for a responsible individual in your organisation")
-      contentAsString(result) should include("test full name")
-      contentAsString(result) should include("test email address")
-    }
-
-    "render the 'responsible individual view' with errors when fullName and emailAddress are missing" in new Setup {
-
-      GPCFlowServiceMock.FindResponsibleIndividual.thenReturnsNone()
-
-      private val result = controller.responsibleIndividualAction(appId)(loggedInRequest.withCSRFToken.withFormUrlEncodedBody(
-        "fullName" -> "",
-        "emailAddress" -> ""
-      ))
-
-      status(result) shouldBe BAD_REQUEST
-
-      titleOf(result) shouldBe "Error: Responsible individual details - HMRC Developer Hub - GOV.UK"
-      contentAsString(result) should include("Provide details for a responsible individual in your organisation")
-      contentAsString(result) should include("Provide a full name")
-      contentAsString(result) should include("Provide an email address")
-    }
-
-    "render the 'responsible individual view' with errors when fullName is missing" in new Setup {
-
-      GPCFlowServiceMock.FindResponsibleIndividual.thenReturnsNone()
-
-      private val result = controller.responsibleIndividualAction(appId)(loggedInRequest.withCSRFToken.withFormUrlEncodedBody(
-        "fullName" -> "",
-        "emailAddress" -> "test.user@example.com"
-      ))
-
-      status(result) shouldBe BAD_REQUEST
-
-      titleOf(result) shouldBe "Error: Responsible individual details - HMRC Developer Hub - GOV.UK"
-      contentAsString(result) should include("Provide details for a responsible individual in your organisation")
-      contentAsString(result) should include("Provide a full name")
-      contentAsString(result) shouldNot include("Provide an email address")
-    }
-
-    "render the 'responsible individual view' with errors when emailAddress is missing" in new Setup {
-
-      ApmConnectorMock.FetchUpliftableSubscriptions.willReturn(Set(apiIdentifier1))
-
-      private val result = controller.responsibleIndividualAction(appId)(loggedInRequest.withCSRFToken.withFormUrlEncodedBody(
-        "fullName" -> "test user",
-        "emailAddress" -> ""
-      ))
-
-      status(result) shouldBe BAD_REQUEST
-
-      titleOf(result) shouldBe "Error: Responsible individual details - HMRC Developer Hub - GOV.UK"
-      contentAsString(result) should include("Provide details for a responsible individual in your organisation")
-      contentAsString(result) shouldNot include("Provide a full name")
-      contentAsString(result) should include("Provide an email address")
-    }
-
-    "render the 'responsible individual view' with errors when emailAddress is not valid" in new Setup {
-
-      ApmConnectorMock.FetchUpliftableSubscriptions.willReturn(Set(apiIdentifier1))
-
-      private val result = controller.responsibleIndividualAction(appId)(loggedInRequest.withCSRFToken.withFormUrlEncodedBody(
-        "fullName" -> "test user",
-        "emailAddress" -> "invalidemailaddress"
-      ))
-
-      status(result) shouldBe BAD_REQUEST
-
-      titleOf(result) shouldBe "Error: Responsible individual details - HMRC Developer Hub - GOV.UK"
-      contentAsString(result) should include("Provide details for a responsible individual in your organisation")
-      contentAsString(result) shouldNot include("Provide a full name")
-      contentAsString(result) should include("Provide a valid email address")
-    }
-
-    "store the full name and email address from the 'responsible individual view' and redirect to next page" in new Setup {
-
-      val testResponsibleIndividual = ResponsibleIndividual("test user", "test.user@example.com")
-      GPCFlowServiceMock.StoreResponsibleIndividual.thenReturns(testResponsibleIndividual, GetProductionCredentialsFlow("", Some(testResponsibleIndividual), None, None))
-      ApmConnectorMock.FetchUpliftableSubscriptions.willReturn(Set(apiIdentifier1))
-
-      private val result = controller.responsibleIndividualAction(appId)(loggedInRequest.withCSRFToken.withFormUrlEncodedBody(
-        "fullName" -> testResponsibleIndividual.fullName,
-        "emailAddress" -> testResponsibleIndividual.emailAddress
-      ))
-
-      status(result) shouldBe SEE_OTHER
-    }
   }
 
   "sellResellOrDistributeYourSoftware" should {
@@ -435,7 +320,7 @@ class UpliftJourneyControllerSpec extends BaseControllerSpec
 
       val testSellResellOrDistribute = SellResellOrDistribute("Yes")
 
-      GPCFlowServiceMock.StoreSellResellOrDistribute.thenReturns(testSellResellOrDistribute,GetProductionCredentialsFlow("", None, Some(testSellResellOrDistribute), None))
+      GPCFlowServiceMock.StoreSellResellOrDistribute.thenReturns(testSellResellOrDistribute, GetProductionCredentialsFlow("", Some(testSellResellOrDistribute), None))
       UpliftJourneyServiceMock.StoreDefaultSubscriptionsInFlow.thenReturns()
 
       private val result = controller.sellResellOrDistributeYourSoftwareAction(appId)(loggedInRequest.withCSRFToken.withFormUrlEncodedBody(
@@ -450,7 +335,7 @@ class UpliftJourneyControllerSpec extends BaseControllerSpec
 
       val testSellResellOrDistribute = SellResellOrDistribute("No")
       
-      GPCFlowServiceMock.StoreSellResellOrDistribute.thenReturns(testSellResellOrDistribute,GetProductionCredentialsFlow("", None, Some(testSellResellOrDistribute), None))
+      GPCFlowServiceMock.StoreSellResellOrDistribute.thenReturns(testSellResellOrDistribute, GetProductionCredentialsFlow("", Some(testSellResellOrDistribute), None))
       UpliftJourneyServiceMock.StoreDefaultSubscriptionsInFlow.thenReturns()
 
       private val result = controller.sellResellOrDistributeYourSoftwareAction(appId)(loggedInRequest.withCSRFToken.withFormUrlEncodedBody(

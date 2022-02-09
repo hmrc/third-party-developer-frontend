@@ -63,13 +63,12 @@ class UpliftJourneyService @Inject()(
     (
       for {
         flow                    <- liftF(flowService.fetchFlow(developerSession))
-        responsibleIndividual   <- fromOption(flow.responsibleIndividual, "No responsible individual set")
         sellResellOrDistribute  <- fromOption(flow.sellResellOrDistribute, "No sell or resell or distribute set")
         subscriptionFlow        <- fromOption(flow.apiSubscriptions, "No subscriptions set")
 
         apiIdsToSubscribeTo     <- liftF(apmConnector.fetchUpliftableSubscriptions(sandboxAppId).map(_.filter(subscriptionFlow.isSelected)))
         _                       <- cond(apiIdsToSubscribeTo.nonEmpty, (), "No apis found to subscribe to")
-        upliftData               = UpliftData(responsibleIndividual, sellResellOrDistribute, apiIdsToSubscribeTo, developerSession.developer.email)
+        upliftData               = UpliftData(sellResellOrDistribute, apiIdsToSubscribeTo, developerSession.developer.email)
         upliftedAppId           <- liftF(apmConnector.upliftApplicationV2(sandboxAppId, upliftData))
       } yield upliftedAppId
     )

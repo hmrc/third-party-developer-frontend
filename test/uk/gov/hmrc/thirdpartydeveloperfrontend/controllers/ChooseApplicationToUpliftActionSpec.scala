@@ -153,7 +153,7 @@ class ChooseApplicationToUpliftActionSpec
       val summaries = sandboxAppSummaries
       aUsersUplfitableAndNotUpliftableAppsReturns(summaries, List.empty, List.empty)
 
-      when(flowServiceMock.storeApiSubscriptions(*, *)).thenReturn(Future.successful(GetProductionCredentialsFlow("", None, None, None)))
+      when(flowServiceMock.storeApiSubscriptions(*, *)).thenReturn(Future.successful(GetProductionCredentialsFlow("", None, None)))
 
       val result = underTest.chooseApplicationToUpliftAction()(loggedInRequest.withFormUrlEncodedBody(("applicationId" -> "")))
 
@@ -167,7 +167,7 @@ class ChooseApplicationToUpliftActionSpec
       val subsetOfSubscriptions = summaries.head.subscriptionIds.take(1)
       ApmConnectorMock.FetchUpliftableSubscriptions.willReturn(subsetOfSubscriptions)
       aUsersUplfitableAndNotUpliftableAppsReturns(summaries, summaries.map(_.id), List.empty)
-      when(flowServiceMock.storeApiSubscriptions(*, *)).thenReturn(Future.successful(GetProductionCredentialsFlow("", None, None, None)))
+      when(flowServiceMock.storeApiSubscriptions(*, *)).thenReturn(Future.successful(GetProductionCredentialsFlow("", None, None)))
 
       val result = underTest.chooseApplicationToUpliftAction()(loggedInRequest.withFormUrlEncodedBody(("applicationId" -> sandboxAppId.value)))
 
