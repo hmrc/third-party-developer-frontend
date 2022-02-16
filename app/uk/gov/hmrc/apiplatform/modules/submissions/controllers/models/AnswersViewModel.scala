@@ -34,10 +34,10 @@ object AnswersViewModel {
     case AcknowledgedAnswer => None
   }
   
-  def convertQuestion(extSubmission: ExtendedSubmission)(item: QuestionItem): Option[ViewQuestion] = {
+  def convertQuestion(submission: Submission)(item: QuestionItem): Option[ViewQuestion] = {
     val id = item.question.id
     
-    extSubmission.submission.latestInstance.answersToQuestions.get(id).flatMap(convertAnswer).map(answer =>
+    submission.latestInstance.answersToQuestions.get(id).flatMap(convertAnswer).map(answer =>
       ViewQuestion(id, item.question.wording.value, answer)
     )
   }
@@ -47,7 +47,7 @@ object AnswersViewModel {
     val state = QuestionnaireState.describe(progress.state)
     
     val questions = questionnaire.questions
-      .map(convertQuestion(extSubmission))
+      .map(convertQuestion(extSubmission.submission))
       .collect { case Some(x) => x }
     NonEmptyList.fromList(questions)
       .map(ViewQuestionnaire(questionnaire.label.value, state, questionnaire.id, _))

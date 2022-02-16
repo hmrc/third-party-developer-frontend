@@ -34,7 +34,7 @@ import play.api.libs.crypto.CookieSigner
 import uk.gov.hmrc.thirdpartydeveloperfrontend.config.ErrorHandler
 import uk.gov.hmrc.apiplatform.modules.submissions.views.html.{CancelledRequestForProductionCredentialsView, ConfirmCancelRequestForProductionCredentialsView}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.connectors.ThirdPartyApplicationProductionConnector
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.State
+import scala.concurrent.Future
 
 object CancelRequestController {
   case class DummyForm(dummy: String = "dummy")
@@ -81,30 +81,22 @@ class CancelRequestController @Inject() (
   private val failed = (err: String) => BadRequestWithErrorMessage(err)
 
   def cancelRequestForProductionCredentialsPage(appId: ApplicationId) = withApplicationSubmission(StateFilter.notProduction)(appId) { implicit request =>
-    (
-      for {
-        extSubmission          <- ET.fromOptionF(submissionService.fetchLatestSubmission(appId), failed("No subsmission and/or application found"))
-        _                      <- ET.cond(request.application.state.name != State.PRODUCTION, (), failed("Application submissions can only be cancelled when not already in production."))
-      } yield Ok(confirmCancelRequestForProductionCredentialsView(appId, CancelRequestController.DummyForm.form))
-    )
-    .fold[Result](identity, identity)
+    Future.successful(Ok(confirmCancelRequestForProductionCredentialsView(appId, CancelRequestController.DummyForm.form)))
   }
 
   def cancelRequestForProductionCredentialsAction(appId: ApplicationId) = withApplicationSubmission(StateFilter.notProduction)(appId) { implicit request =>
     lazy val goBackToRegularPage =
-      if(request.submissionRequest.extSubmission.isCompleted) {
+      if(request.submissionRequest.extSubmission.submission.status.isAnsweredCompletely) {
         Redirect(uk.gov.hmrc.apiplatform.modules.submissions.controllers.routes.CheckAnswersController.checkAnswersPage(appId))
       } else {
         Redirect(uk.gov.hmrc.apiplatform.modules.submissions.controllers.routes.ProdCredsChecklistController.productionCredentialsChecklistPage(appId))
       }
 
     val isValidSubmit: (String) => Boolean = (s) => s == "cancel-request" || s == "dont-cancel-request"
+    val formValues = request.body.asFormUrlEncoded.get.filterNot(_._1 == "csrfToken")
 
     val x = (
       for {
-        extSubmission          <- ET.fromOptionF(submissionService.fetchLatestSubmission(appId), failed("No subsmission and/or application found"))
-        _                      <- ET.cond(request.application.state.name != State.PRODUCTION, (), failed("Application submissions can only be cancelled when not already in production."))
-        formValues              = request.body.asFormUrlEncoded.get.filterNot(_._1 == "csrfToken")
         submitAction           <- ET.fromOption(
                                     formValues.get("submit-action")
                                       .flatMap(_.headOption)

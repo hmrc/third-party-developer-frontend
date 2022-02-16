@@ -14,15 +14,13 @@
  * limitations under the License.
  */
 
-package uk.gov.hmrc.thirdpartydeveloperfrontend.utils
+package uk.gov.hmrc.apiplatform.modules.submissions
 
 import uk.gov.hmrc.apiplatform.modules.submissions.domain.models._
-import uk.gov.hmrc.time.DateTimeUtils
 import cats.data.NonEmptyList
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.ApplicationId
 import scala.collection.immutable.ListMap
 
-trait SubmissionsTestData {
+trait QuestionnaireTestData {
   object DevelopmentPractices {
     val question1 = YesNoQuestion(
       QuestionId("653d2ee4-09cf-46a0-bc73-350a385ae860"),
@@ -77,6 +75,62 @@ trait SubmissionsTestData {
     )
   }
     
+  object OrganisationDetails {
+      val questionRI1 = TextQuestion(
+        QuestionId("36b7e670-83fc-4b31-8f85-4d3394908495"),
+        Wording("What is the name of your responsible individual"),
+        
+        Statement(
+          List(
+            StatementText("The responsible individual:"),
+            CompoundFragment(
+              StatementText("ensures your software meets our "),
+              StatementLink("terms of use", "/api-documentation/docs/terms-of-use")
+            ),
+            CompoundFragment(
+              StatementText("understands the "),
+              StatementLink("consequences of not meeting the terms of use", "/api-documentation/docs/terms-of-use")
+            )
+          )
+        )
+      )
+      val questionRI2 = TextQuestion(
+        QuestionId("fb9b8036-cc88-4f4e-ad84-c02caa4cebae"),
+        Wording("What is the email address of your responsible individual"),
+        Statement(
+          List(
+            StatementText("The responsible individual:"),
+            CompoundFragment(
+              StatementText("ensures your software meets our "),
+              StatementLink("terms of use", "/api-documentation/docs/terms-of-use")
+            ),
+            CompoundFragment(
+              StatementText("understands the "),
+              StatementLink("consequences of not meeting the terms of use", "/api-documentation/docs/terms-of-use")
+            )
+          )
+        )
+      )
+    val question1 = TextQuestion(
+      QuestionId("b9dbf0a5-e72b-4c89-a735-26f0858ca6cc"),
+      Wording("Give us your organisation's website URL"),
+      Statement(
+        List(
+          StatementText("For example https://example.com")
+        )
+      ),
+      Some(("My organisation doesn't have a website", Fail))
+    )
+
+    val questionnaire = Questionnaire(
+      id = QuestionnaireId("ac69b129-524a-4d10-89a5-7bfa46ed95c7"),
+      label = Label("Organisation details"),
+      questions = NonEmptyList.of(
+        QuestionItem(question1)
+      )
+    )
+  }
+
   object CustomersAuthorisingYourSoftware {
     val question1 = AcknowledgementOnly(
       QuestionId("95da25e8-af3a-4e05-a621-4a5f4ca788f6"),
@@ -137,7 +191,7 @@ trait SubmissionsTestData {
       ),
       Some(("I don't have a privacy policy", Fail))
     )
-    
+      
     val question5 = TextQuestion(
       QuestionId("0a6d6973-c49a-49c3-93ff-de58daa1b90c"),
       Wording("Give us your terms and conditions URL"),
@@ -149,62 +203,50 @@ trait SubmissionsTestData {
       ),
       Some(("I don't have terms and conditions", Fail))
     )
-    
+      
     val questionnaire = Questionnaire(
       id = QuestionnaireId("3a7f3369-8e28-447c-bd47-efbabeb6d93f"),
       label = Label("Customers authorising your software"),
       questions = NonEmptyList.of(
         QuestionItem(question1),
         QuestionItem(question2),
-        QuestionItem(question3, AskWhenContext(DeriveContext.Keys.IN_HOUSE_SOFTWARE, "No")),
+        QuestionItem(question3, AskWhenContext(AskWhen.Context.Keys.IN_HOUSE_SOFTWARE, "No")),
         QuestionItem(question4),
         QuestionItem(question5)
       )
     )
   }
 
-  object OrganisationDetails {
-    val question1 = TextQuestion(
-      QuestionId("b9dbf0a5-e72b-4c89-a735-26f0858ca6cc"),
-      Wording("Give us your organisation's website URL"),
-      Statement(
-        List(
-          StatementText("For example https://example.com")
-        )
-      ),
-      Some(("My organisation doesn't have a website", Fail))
-    )
-
-    val questionnaire = Questionnaire(
-      id = QuestionnaireId("ac69b129-524a-4d10-89a5-7bfa46ed95c7"),
-      label = Label("Organisation details"),
-      questions = NonEmptyList.of(
-        QuestionItem(question1)
-      )
-    )
-  }
-
-  val activeQuestionnaireGroupings = 
+  val testGroups = 
     NonEmptyList.of(
       GroupOfQuestionnaires(
-        heading = "About your processes",
+        heading = "Your processes",
         links = NonEmptyList.of(
           DevelopmentPractices.questionnaire
         )            
       ),
       GroupOfQuestionnaires(
-        heading = "About your software",
+        heading = "Your software",
         links = NonEmptyList.of(
-          CustomersAuthorisingYourSoftware.questionnaire,
-        )
+          CustomersAuthorisingYourSoftware.questionnaire
+        )            
       ),
       GroupOfQuestionnaires(
-        heading = "About your organisation",
+        heading = "Your details",
         links = NonEmptyList.of(
           OrganisationDetails.questionnaire
         )
       )
     )
+
+  val testQuestionIdsOfInterest = QuestionIdsOfInterest(
+    responsibleIndividualNameId   = OrganisationDetails.questionRI1.id,
+    responsibleIndividualEmailId  = OrganisationDetails.questionRI2.id,
+    applicationNameId             = CustomersAuthorisingYourSoftware.question2.id,
+    privacyPolicyUrlId            = CustomersAuthorisingYourSoftware.question4.id,
+    termsAndConditionsUrlId       = CustomersAuthorisingYourSoftware.question5.id,
+    organisationUrlId             = OrganisationDetails.question1.id,
+  )
 
   val questionnaire = DevelopmentPractices.questionnaire
   val questionnaireId = questionnaire.id
@@ -214,58 +256,36 @@ trait SubmissionsTestData {
   val questionnaireAlt = OrganisationDetails.questionnaire
   val questionnaireAltId = questionnaireAlt.id
   val questionAltId = questionnaireAlt.questions.head.question.id
+  val optionalQuestion = CustomersAuthorisingYourSoftware.question4
+  val optionalQuestionId = optionalQuestion.id
 
-  val submissionId = Submission.Id.random
-  val applicationId = ApplicationId.random
+  val allQuestionnaires = testGroups.flatMap(_.links)
+
+  val expectedAppName = "expectedAppName"
+
+  val answersToQuestions: Submission.AnswersToQuestions = 
+    Map(
+      testQuestionIdsOfInterest.applicationNameId -> TextAnswer(expectedAppName), 
+      testQuestionIdsOfInterest.responsibleIndividualEmailId -> TextAnswer("bob@example.com"),
+      testQuestionIdsOfInterest.responsibleIndividualNameId -> TextAnswer("Bob Cratchett")
+    )  
+
+
+  val sampleAnswersToQuestions = Map(
+    (DevelopmentPractices.question1.id -> SingleChoiceAnswer("Yes")),
+    (DevelopmentPractices.question2.id -> SingleChoiceAnswer("No")),
+    (DevelopmentPractices.question3.id -> SingleChoiceAnswer("No")),
+    (OrganisationDetails.question1.id -> TextAnswer("https://example.com")),
+    (OrganisationDetails.questionRI1.id -> TextAnswer("Bob Cratchett")),
+    (OrganisationDetails.questionRI2.id -> TextAnswer("bob@example.com")),
+    (OrganisationDetails.question1.id -> TextAnswer("https://example.com")),
+    (CustomersAuthorisingYourSoftware.question1.id -> AcknowledgedAnswer),
+    (CustomersAuthorisingYourSoftware.question2.id -> TextAnswer("name of software")),
+    (CustomersAuthorisingYourSoftware.question3.id -> MultipleChoiceAnswer(Set("In the UK"))),
+    (CustomersAuthorisingYourSoftware.question4.id -> TextAnswer("https://example.com/privacy-policy")),
+    (CustomersAuthorisingYourSoftware.question5.id -> NoAnswer)
+  )
 
   def firstQuestion(questionnaire: Questionnaire) = questionnaire.questions.head.question.id
 
-  import AsIdsHelpers._
-  val initialProgress = List(DevelopmentPractices.questionnaire, CustomersAuthorisingYourSoftware.questionnaire, OrganisationDetails.questionnaire).map(q => q.id -> QuestionnaireProgress(QuestionnaireState.NotStarted, q.questions.asIds)).toMap
-  val completedProgress = List(DevelopmentPractices.questionnaire, CustomersAuthorisingYourSoftware.questionnaire, OrganisationDetails.questionnaire).map(q => q.id -> QuestionnaireProgress(QuestionnaireState.Completed, q.questions.asIds)).toMap
-  val notApplicableProgress = (
-    List(OrganisationDetails.questionnaire).map(q => q.id -> QuestionnaireProgress(QuestionnaireState.NotStarted, q.questions.asIds)) ++ 
-    List(CustomersAuthorisingYourSoftware.questionnaire).map(q => q.id -> QuestionnaireProgress(QuestionnaireState.NotStarted, q.questions.asIds)) ++ 
-    List(DevelopmentPractices.questionnaire).map(q => q.id -> QuestionnaireProgress(QuestionnaireState.NotApplicable, q.questions.asIds))
-  ).toMap
-
-  val questionIdsOfInterest = QuestionIdsOfInterest(
-    applicationNameId             = CustomersAuthorisingYourSoftware.question2.id,
-    privacyPolicyUrlId            = CustomersAuthorisingYourSoftware.question4.id,
-    termsAndConditionsUrlId       = CustomersAuthorisingYourSoftware.question5.id,
-    organisationUrlId             = OrganisationDetails.question1.id
-  )
-
-  val initialStatus = Submission.Status.Created(DateTimeUtils.now, "user@example.com")
-  val initialInstances = NonEmptyList.of(Submission.Instance(0, Map.empty, NonEmptyList.of(initialStatus)))
-  val submission = Submission(submissionId, applicationId, DateTimeUtils.now, activeQuestionnaireGroupings, questionIdsOfInterest, initialInstances)
-
-  val extendedSubmission = ExtendedSubmission(submission, initialProgress)
-  
-  val altSubmissionId = Submission.Id.random
-  require(altSubmissionId != submissionId)
-  val altSubmission = Submission(altSubmissionId, applicationId, DateTimeUtils.now.plusMillis(100), activeQuestionnaireGroupings, questionIdsOfInterest, initialInstances)
-
-  val altExtendedSubmission = ExtendedSubmission(altSubmission, initialProgress)
-
-  def allFirstQuestions(questionnaires: NonEmptyList[Questionnaire]): Map[QuestionnaireId, QuestionId] =
-    questionnaires.map { qn =>
-        (qn.id, qn.questions.head.question.id)
-    }
-    
-    .toList
-    .toMap
-  
-  object DeriveContext {
-    object Keys {
-      val VAT_OR_ITSA = "VAT_OR_ITSA"
-      val IN_HOUSE_SOFTWARE = "IN_HOUSE_SOFTWARE" // Stored on Application
-    }
-  }
-
-  val simpleContext = Map(DeriveContext.Keys.IN_HOUSE_SOFTWARE -> "Yes", DeriveContext.Keys.VAT_OR_ITSA -> "No")
-  val soldContext = Map(DeriveContext.Keys.IN_HOUSE_SOFTWARE -> "No", DeriveContext.Keys.VAT_OR_ITSA -> "No")
-  val vatContext = Map(DeriveContext.Keys.IN_HOUSE_SOFTWARE -> "Yes", DeriveContext.Keys.VAT_OR_ITSA -> "Yes")
 }
-
-object SubmissionsTestData extends SubmissionsTestData

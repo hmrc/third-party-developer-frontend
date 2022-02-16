@@ -112,8 +112,8 @@ class CredentialsRequestedController @Inject() (
     }
 
     val vm = for {
-      submission          <- fromOptionF(submissionService.fetchLatestSubmission(productionAppId), "No submission and/or application found")
-      viewModel           =  convertSubmissionToViewModel(submission)(request.application.id, request.application.name)
+      extSubmission       <- fromOptionF(submissionService.fetchLatestExtendedSubmission(productionAppId), "No submission and/or application found")
+      viewModel            =  convertSubmissionToViewModel(extSubmission)(request.application.id, request.application.name)
     } yield viewModel
 
     vm.fold[Result](failed, success)

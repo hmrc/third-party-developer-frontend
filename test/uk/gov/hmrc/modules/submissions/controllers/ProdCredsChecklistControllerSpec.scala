@@ -35,7 +35,7 @@ import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.Applic
 import uk.gov.hmrc.thirdpartydeveloperfrontend.builder.SampleApplication
 import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.SubscriptionTestHelperSugar
 import uk.gov.hmrc.thirdpartydeveloperfrontend.builder.SampleSession
-import uk.gov.hmrc.apiplatform.modules.submissions.domain.models.ExtendedSubmission
+import uk.gov.hmrc.apiplatform.modules.submissions.SubmissionsTestData
 
 class ProdCredsChecklistControllerSpec
   extends BaseControllerSpec
@@ -81,7 +81,8 @@ class ProdCredsChecklistControllerSpec
     with SubmissionServiceMockModule
     with HasSessionDeveloperFlow
     with HasSubscriptions
-    with HasAppInTestingState {
+    with HasAppInTestingState
+    with SubmissionsTestData {
 
     val productionCredentialsChecklistView = app.injector.instanceOf[ProductionCredentialsChecklistView]
 
@@ -119,7 +120,7 @@ class ProdCredsChecklistControllerSpec
 
   "productionCredentialsChecklist" should {
     "fail with NOT FOUND" in new Setup {
-      SubmissionServiceMock.FetchLatestSubmission.thenReturnsNone()
+      SubmissionServiceMock.FetchLatestExtendedSubmission.thenReturnsNone()
 
       val result = controller.productionCredentialsChecklistPage(appId)(loggedInRequest.withCSRFToken)
 
@@ -127,9 +128,7 @@ class ProdCredsChecklistControllerSpec
     }
 
     "succeed" in new Setup {
-      import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.SubmissionsTestData.extendedSubmission
-
-      SubmissionServiceMock.FetchLatestSubmission.thenReturns(extendedSubmission)
+      SubmissionServiceMock.FetchLatestExtendedSubmission.thenReturns(answeredSubmission.withCompletedProgresss)
 
       val result = controller.productionCredentialsChecklistPage(appId)(loggedInRequest.withCSRFToken)
 
@@ -139,9 +138,7 @@ class ProdCredsChecklistControllerSpec
 
   "productionCredentialsChecklistAction" should {
     "return success when form is valid and incomplete" in new Setup {
-      import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.SubmissionsTestData.extendedSubmission
-
-      SubmissionServiceMock.FetchLatestSubmission.thenReturns(extendedSubmission)
+      SubmissionServiceMock.FetchLatestExtendedSubmission.thenReturns(answeringSubmission.withIncompleteProgress)
 
       val result = controller.productionCredentialsChecklistAction(appId)(loggedInRequest.withCSRFToken)
 
@@ -149,10 +146,7 @@ class ProdCredsChecklistControllerSpec
     }
 
     "redirect when when form is valid and complete" in new Setup {
-      import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.SubmissionsTestData.{submission,completedProgress}
-      val completedSubmission = ExtendedSubmission(submission, completedProgress)
-
-      SubmissionServiceMock.FetchLatestSubmission.thenReturns(completedSubmission)
+      SubmissionServiceMock.FetchLatestExtendedSubmission.thenReturns(answeredSubmission.withCompletedProgresss)
 
       val result = controller.productionCredentialsChecklistAction(appId)(loggedInRequest.withCSRFToken)
 

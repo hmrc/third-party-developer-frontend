@@ -30,7 +30,7 @@ import uk.gov.hmrc.apiplatform.modules.submissions.views.html.QuestionView
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.WithLoggedInSession._
 
 import scala.concurrent.ExecutionContext.Implicits.global
-import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.SubmissionsTestData.{applicationId, questionId, question2Id, submission, extendedSubmission}
+import uk.gov.hmrc.apiplatform.modules.submissions.SubmissionsTestData
 import uk.gov.hmrc.apiplatform.modules.submissions.domain.models.QuestionId
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.ApplicationWithSubscriptionData
 import play.api.test.FakeRequest
@@ -44,7 +44,8 @@ class QuestionControllerSpec
     with SubscriptionTestHelperSugar
     with WithCSRFAddToken 
     with DeveloperBuilder
-    with LocalUserIdTracker {
+    with LocalUserIdTracker
+    with SubmissionsTestData {
 
   trait HasSubscriptions {
     val aSubscription = exampleSubscriptionWithoutFields("prefix")
@@ -105,17 +106,17 @@ class QuestionControllerSpec
 
   "showQuestion" should {
     "succeed" in new Setup {
-      SubmissionServiceMock.Fetch.thenReturns(extendedSubmission)
+      SubmissionServiceMock.Fetch.thenReturns(aSubmission.withIncompleteProgress)
 
-      val result = controller.showQuestion(submission.id, questionId)(loggedInRequest.withCSRFToken)
+      val result = controller.showQuestion(aSubmission.id, questionId)(loggedInRequest.withCSRFToken)
 
       status(result) shouldBe OK
     }
 
     "fail with a BAD REQUEST for an invalid questionId" in new Setup {
-      SubmissionServiceMock.Fetch.thenReturns(extendedSubmission)
+      SubmissionServiceMock.Fetch.thenReturns(aSubmission.withIncompleteProgress)
 
-      val result = controller.showQuestion(submission.id, QuestionId("BAD_ID"))(loggedInRequest.withCSRFToken)
+      val result = controller.showQuestion(aSubmission.id, QuestionId("BAD_ID"))(loggedInRequest.withCSRFToken)
 
       status(result) shouldBe BAD_REQUEST
     }
@@ -123,24 +124,24 @@ class QuestionControllerSpec
 
   "recordAnswer" should {
     "succeed when answer given" in new Setup {
-      SubmissionServiceMock.Fetch.thenReturns(extendedSubmission)
-      SubmissionServiceMock.RecordAnswer.thenReturns(extendedSubmission)
+      SubmissionServiceMock.Fetch.thenReturns(aSubmission.withIncompleteProgress)
+      SubmissionServiceMock.RecordAnswer.thenReturns(aSubmission.withIncompleteProgress)
       private val answer1 = "Yes"
       private val request = loggedInRequest.withFormUrlEncodedBody("answer" -> answer1, "submit-action" -> "save")
 
-      val result = controller.recordAnswer(submission.id, questionId)(request.withCSRFToken)
+      val result = controller.recordAnswer(aSubmission.id, questionId)(request.withCSRFToken)
 
       status(result) shouldBe SEE_OTHER
-      redirectLocation(result) shouldBe Some(s"/developer/submissions/${submission.id.value}/question/${question2Id.value}")
+      redirectLocation(result) shouldBe Some(s"/developer/submissions/${aSubmission.id.value}/question/${question2Id.value}")
     }
     
     "return when no valid answer given" in new Setup {
-      SubmissionServiceMock.Fetch.thenReturns(extendedSubmission)
+      SubmissionServiceMock.Fetch.thenReturns(aSubmission.withIncompleteProgress)
       SubmissionServiceMock.RecordAnswer.thenReturnsNone()
       private val answer1 = ""
       private val request = loggedInRequest.withFormUrlEncodedBody("answer" -> answer1, "submit-action" -> "save")
 
-      val result = controller.recordAnswer(submission.id, questionId)(request.withCSRFToken)
+      val result = controller.recordAnswer(aSubmission.id, questionId)(request.withCSRFToken)
 
       status(result) shouldBe BAD_REQUEST
 
@@ -150,10 +151,10 @@ class QuestionControllerSpec
     }
 
     "fail if no answer field in form" in new Setup {
-      SubmissionServiceMock.Fetch.thenReturns(extendedSubmission)
+      SubmissionServiceMock.Fetch.thenReturns(aSubmission.withIncompleteProgress)
       private val request = loggedInRequest.withFormUrlEncodedBody("submit-action" -> "save")
 
-      val result = controller.recordAnswer(submission.id, questionId)(request.withCSRFToken)
+      val result = controller.recordAnswer(aSubmission.id, questionId)(request.withCSRFToken)
 
       status(result) shouldBe BAD_REQUEST
     }

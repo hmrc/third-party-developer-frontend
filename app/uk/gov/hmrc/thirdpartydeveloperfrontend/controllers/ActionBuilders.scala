@@ -47,6 +47,7 @@ trait ApplicationActionBuilders extends BaseActionBuilders {
         implicit val implicitRequest: UserRequest[A] = request
         import cats.implicits._
 
+        println(applicationId)
         applicationActionService.process(applicationId, request)
         .toRight(NotFound(errorHandler.notFoundTemplate(Request(request, request.developerSession)))).value
       }

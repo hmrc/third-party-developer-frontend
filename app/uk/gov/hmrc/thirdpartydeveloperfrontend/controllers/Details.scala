@@ -41,8 +41,8 @@ import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.fraudprevention.Fraud
 import uk.gov.hmrc.apiplatform.modules.submissions.services.SubmissionService
 import cats.data.OptionT
 import cats.instances.future.catsStdInstancesForFuture
-import uk.gov.hmrc.apiplatform.modules.submissions.domain.models.ExtendedSubmission
 import scala.concurrent.Future.successful
+import uk.gov.hmrc.apiplatform.modules.submissions.domain.models.Submission
 
 @Singleton
 class Details @Inject() (
@@ -77,9 +77,9 @@ class Details @Inject() (
           else
             Ok(unauthorisedAppDetailsView(request.application.name, request.application.adminEmails))
 
-        lazy val newUpliftJourney = (e: ExtendedSubmission) =>
+        lazy val newUpliftJourney = (s: Submission) =>
           if (request.role.isAdministrator) {
-            if(e.isCompleted) {
+            if(s.status.isAnsweredCompletely) {
               Redirect(uk.gov.hmrc.apiplatform.modules.submissions.controllers.routes.CheckAnswersController.checkAnswersPage(applicationId))
             } else {
               Redirect(uk.gov.hmrc.apiplatform.modules.submissions.controllers.routes.ProdCredsChecklistController.productionCredentialsChecklistPage(applicationId))
@@ -100,7 +100,7 @@ class Details @Inject() (
           )
 
 
-        lazy val newUpliftJourney = (e: ExtendedSubmission) =>
+        lazy val newUpliftJourney = (s: Submission) =>
           Redirect(uk.gov.hmrc.apiplatform.modules.submissions.controllers.routes.CredentialsRequestedController.credentialsRequestedPage(applicationId))
 
         OptionT(submissionService.fetchLatestSubmission(applicationId)).fold(oldJourney)(newUpliftJourney)    

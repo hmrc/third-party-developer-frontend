@@ -21,7 +21,7 @@ import uk.gov.hmrc.thirdpartydeveloperfrontend.config.ErrorHandler
 import uk.gov.hmrc.thirdpartydeveloperfrontend.connectors.ApmConnector
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.ApplicationId
 import play.api.libs.crypto.CookieSigner
-import play.api.mvc.{Action, AnyContent, MessagesControllerComponents, Result}
+import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.service.{ApplicationActionService, ApplicationService, SessionService}
 import uk.gov.hmrc.apiplatform.modules.submissions.views.html._
 
@@ -33,7 +33,6 @@ import cats.data.NonEmptyList
 import uk.gov.hmrc.apiplatform.modules.submissions.domain.models._
 import uk.gov.hmrc.apiplatform.modules.submissions.services.SubmissionService
 import uk.gov.hmrc.apiplatform.modules.common.services.EitherTHelper
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.controllers.BadRequestWithErrorMessage
 import uk.gov.hmrc.apiplatform.modules.submissions.domain.models.QuestionnaireState.NotApplicable
 
 import scala.concurrent.Future.successful
@@ -112,33 +111,23 @@ class ProdCredsChecklistController @Inject() (
      with EitherTHelper[String]
      with SubmissionActionBuilders {
 
-  import cats.implicits._
-  import cats.instances.future.catsStdInstancesForFuture
   import ProdCredsChecklistController._
   import SubmissionActionBuilders.{StateFilter, RoleFilter}
 
   def productionCredentialsChecklistPage(productionAppId: ApplicationId): Action[AnyContent] = withApplicationSubmission(StateFilter.inTesting, RoleFilter.isAdminRole)(productionAppId) { implicit request =>
-    val failed = (err: String) => BadRequestWithErrorMessage(err)
-
-    val success = (viewModel: ViewModel) => {
+    val show = (viewModel: ViewModel) => {
       filterGroupingsForEmptyQuestionnaireSummaries(viewModel.groupings).fold(
         BadRequest("No questionnaires applicable") 
       )(vg =>
         Ok(productionCredentialsChecklistView(viewModel.copy(groupings = vg), DummyForm.form.fillAndValidate(DummyForm("dummy"))))
       )
     }
-    
-    val vm = for {
-      submission          <- fromOptionF(submissionService.fetchLatestSubmission(productionAppId), "No submission and/or application found")
-      viewModel           = convertSubmissionToViewModel(submission)(request.application.id, request.application.name)
-    } yield viewModel
-
-    vm.fold[Result](failed, success)
+    successful(show(convertSubmissionToViewModel(request.extSubmission)(request.application.id, request.application.name)))
   }
 
   def productionCredentialsChecklistAction(productionAppId: ApplicationId) = withApplicationSubmission(StateFilter.inTesting)(productionAppId) { implicit request =>
     def handleValidForm(validForm: DummyForm) = {
-      if(request.extSubmission.isCompleted) {
+      if(request.extSubmission.submission.status.isAnsweredCompletely) {
         successful(Redirect(uk.gov.hmrc.apiplatform.modules.submissions.controllers.routes.CheckAnswersController.checkAnswersPage(productionAppId)))
       }
       else {

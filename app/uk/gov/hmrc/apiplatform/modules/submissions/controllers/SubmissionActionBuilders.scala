@@ -110,7 +110,7 @@ trait SubmissionActionBuilders {
         
         (
           for {
-            submission <- E.fromOptionF(submissionService.fetchLatestSubmission(request.application.id), NotFound(errorHandler.notFoundTemplate(request)) )
+            submission <- E.fromOptionF(submissionService.fetchLatestExtendedSubmission(request.application.id), NotFound(errorHandler.notFoundTemplate(request)) )
           } yield new SubmissionApplicationRequest(request.application, new SubmissionRequest(submission, request.userRequest))
         )
         .value
@@ -143,7 +143,7 @@ trait SubmissionActionBuilders {
       override protected def executionContext: ExecutionContext = ec
 
       override protected def filter[A](request: SR[A]): Future[Option[Result]] =
-        if(request.extSubmission.isCompleted) {
+        if(request.extSubmission.submission.status.isAnsweredCompletely) {
           successful(None)
         } else {
           successful(Some(redirectOnIncomplete))

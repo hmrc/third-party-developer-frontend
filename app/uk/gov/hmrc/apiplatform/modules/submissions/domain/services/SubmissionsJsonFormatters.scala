@@ -50,18 +50,23 @@ trait BaseSubmissionsJsonFormatters extends GroupOfQuestionnairesJsonFormatters 
 
 trait SubmissionsJsonFormatters extends BaseSubmissionsJsonFormatters {
   import Submission.Status._
+  
   import uk.gov.hmrc.mongo.json.ReactiveMongoFormats
   implicit val dateFormat = ReactiveMongoFormats.dateTimeFormats
 
   implicit val RejectedStatusFormat = Json.format[Declined]
   implicit val AcceptedStatusFormat = Json.format[Granted]
+  implicit val AcceptedWithWarningsStatusFormat = Json.format[GrantedWithWarnings]
   implicit val SubmittedStatusFormat = Json.format[Submitted]
+  implicit val answeringStatusFormat = Json.format[Answering]
   implicit val CreatedStatusFormat = Json.format[Created]
   
   implicit val submissionStatus = Union.from[Submission.Status]("Submission.StatusType")
     .and[Declined]("declined")
     .and[Granted]("granted")
+    .and[GrantedWithWarnings]("grantedWithWarnings")
     .and[Submitted]("submitted")
+    .and[Answering]("answering")
     .and[Created]("created")
     .format
 
@@ -74,17 +79,22 @@ object SubmissionsJsonFormatters extends SubmissionsJsonFormatters
 trait SubmissionsFrontendJsonFormatters extends BaseSubmissionsJsonFormatters {
   import JodaWrites.JodaDateTimeWrites
   import Submission.Status._
+
   implicit val utcReads = JodaReads.DefaultJodaDateTimeReads.map(dt => dt.withZone(DateTimeZone.UTC))
 
-  implicit val RejectedStatusFormat = Json.format[Declined]
-  implicit val AcceptedStatusFormat = Json.format[Granted]
-  implicit val SubmittedStatusFormat = Json.format[Submitted]
-  implicit val CreatedStatusFormat = Json.format[Created]
+  implicit val rejectedStatusFormat = Json.format[Declined]
+  implicit val acceptedStatusFormat = Json.format[Granted]
+  implicit val acceptedWithWarningsStatusFormat = Json.format[GrantedWithWarnings]
+  implicit val submittedStatusFormat = Json.format[Submitted]
+  implicit val answeringStatusFormat = Json.format[Answering]
+  implicit val createdStatusFormat = Json.format[Created]
   
   implicit val submissionStatus = Union.from[Submission.Status]("Submission.StatusType")
     .and[Declined]("declined")
     .and[Granted]("granted")
+    .and[GrantedWithWarnings]("grantedWithWarnings")
     .and[Submitted]("submitted")
+    .and[Answering]("answering")
     .and[Created]("created")
     .format
 
