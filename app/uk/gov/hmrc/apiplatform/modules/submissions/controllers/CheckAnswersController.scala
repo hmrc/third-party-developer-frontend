@@ -63,17 +63,14 @@ class CheckAnswersController @Inject() (
   val redirectToGetProdCreds = (applicationId: ApplicationId) => Redirect(routes.ProdCredsChecklistController.productionCredentialsChecklistPage(applicationId))
 
    /*, Read/Write and State details */ 
-  def checkAnswersPage(productionAppId: ApplicationId) = withApplicationAndCompletedSubmission(StateFilter.inTesting, RoleFilter.isAdminRole)(redirectToGetProdCreds(productionAppId))(productionAppId) { implicit request =>
+  def checkAnswersPage(productionAppId: ApplicationId) = withApplicationAndAnsweredSubmission(StateFilter.inTesting, RoleFilter.isAdminRole)(redirectToGetProdCreds(productionAppId))(productionAppId) { implicit request =>
     val failed = (err: String) => BadRequestWithErrorMessage(err)
-
     
     val success = (viewModel: ViewModel) => {
       val err = request.msgRequest.flash.get("error")
       Ok(checkAnswersView(viewModel, err))
     }
 
-    println("Got past refiner")
-    
     val vm = for {
       extSubmission      <- fromOptionF(submissionService.fetchLatestExtendedSubmission(productionAppId), "No submission and/or application found")
       viewModel           =  convertSubmissionToViewModel(extSubmission)(request.application.id, request.application.name)
@@ -82,7 +79,7 @@ class CheckAnswersController @Inject() (
     vm.fold[Result](failed, success)
   }
 
-  def checkAnswersAction(productionAppId: ApplicationId) = withApplicationAndCompletedSubmission(StateFilter.inTesting, RoleFilter.isAdminRole)(redirectToGetProdCreds(productionAppId))(productionAppId) { implicit request =>
+  def checkAnswersAction(productionAppId: ApplicationId) = withApplicationAndAnsweredSubmission(StateFilter.inTesting, RoleFilter.isAdminRole)(redirectToGetProdCreds(productionAppId))(productionAppId) { implicit request =>
     requestProductionCredentials
       .requestProductionCredentials(productionAppId, request.developerSession)
       .map(_ match {

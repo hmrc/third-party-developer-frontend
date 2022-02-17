@@ -137,7 +137,7 @@ trait SubmissionActionBuilders {
       }
     }
 
-  private def completedSubmissionFilter[SR[_] <: SubmissionRequest[_]](redirectOnIncomplete: => Result): ActionFilter[SR] = 
+  private def answeredSubmissionFilter[SR[_] <: SubmissionRequest[_]](redirectOnIncomplete: => Result): ActionFilter[SR] = 
     new ActionFilter[SR] {
 
       override protected def executionContext: ExecutionContext = ec
@@ -149,8 +149,7 @@ trait SubmissionActionBuilders {
           successful(Some(redirectOnIncomplete))
         }
     }
-    
-
+   
   private def applicationStateFilter[AR[_] <: MessagesRequest[_] with HasApplication](allowedStateFilter: State => Boolean): ActionFilter[AR] = 
     new ActionFilter[AR] {
 
@@ -160,7 +159,7 @@ trait SubmissionActionBuilders {
         if(allowedStateFilter(request.application.state.name)) {
           successful(None)
         } else {
-          successful(Some(BadRequest("Application is in an incompatible state")))
+          successful(Some(BadRequest(s"Application is in an incompatible state of ${request.application.state.name}")))
         }
     }
 
@@ -186,7 +185,7 @@ trait SubmissionActionBuilders {
     }
   }
 
-  def withApplicationAndCompletedSubmission(allowedStateFilter: StateFilter.Type = StateFilter.allAllowed, allowedRoleFilter: RoleFilter.Type = RoleFilter.isTeamMember)(redirectOnIncomplete: => Result)(applicationId: ApplicationId)(block: SubmissionApplicationRequest[AnyContent] => Future[Result])(implicit ec: ExecutionContext): Action[AnyContent] = {
+  def withApplicationAndAnsweredSubmission(allowedStateFilter: StateFilter.Type = StateFilter.allAllowed, allowedRoleFilter: RoleFilter.Type = RoleFilter.isTeamMember)(redirectOnIncomplete: => Result)(applicationId: ApplicationId)(block: SubmissionApplicationRequest[AnyContent] => Future[Result])(implicit ec: ExecutionContext): Action[AnyContent] = {
     Action.async { implicit request =>
       (
         loggedInActionRefiner() andThen
@@ -194,7 +193,20 @@ trait SubmissionActionBuilders {
         collaboratorFilter(allowedRoleFilter) andThen
         applicationSubmissionRefiner andThen
         applicationStateFilter(allowedStateFilter) andThen
-        completedSubmissionFilter(redirectOnIncomplete)
+        answeredSubmissionFilter(redirectOnIncomplete)
+      ).invokeBlock(request, block)
+    }
+  }
+
+  
+  def withApplicationAndSubmittedSubmission(allowedStateFilter: StateFilter.Type = StateFilter.allAllowed, allowedRoleFilter: RoleFilter.Type = RoleFilter.isTeamMember)(redirectOnIncomplete: => Result)(applicationId: ApplicationId)(block: SubmissionApplicationRequest[AnyContent] => Future[Result])(implicit ec: ExecutionContext): Action[AnyContent] = {
+    Action.async { implicit request =>
+      (
+        loggedInActionRefiner() andThen
+        applicationRequestRefiner(applicationId) andThen
+        collaboratorFilter(allowedRoleFilter) andThen
+        applicationSubmissionRefiner andThen
+        applicationStateFilter(allowedStateFilter)
       ).invokeBlock(request, block)
     }
   }
