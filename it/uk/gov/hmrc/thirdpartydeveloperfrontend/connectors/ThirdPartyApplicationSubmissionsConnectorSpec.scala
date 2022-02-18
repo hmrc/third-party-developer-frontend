@@ -16,6 +16,7 @@ import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.apiplatform.modules.submissions.domain.services.SubmissionsFrontendJsonFormatters
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.services.ApplicationsJsonFormatters
 import uk.gov.hmrc.apiplatform.modules.submissions.domain.models.ErrorDetails
+import uk.gov.hmrc.apiplatform.modules.submissions.SubmissionsTestData
 
 class ThirdPartyApplicationSubmissionsConnectorSpec 
     extends BaseConnectorIntegrationSpec 
@@ -46,6 +47,8 @@ class ThirdPartyApplicationSubmissionsConnectorSpec
     implicit val hc = HeaderCarrier()
     
     val connector = app.injector.instanceOf[ThirdPartyApplicationSubmissionsConnector]
+
+    val extendedSubmission = answeringSubmission.withIncompleteProgress
   }
     
   "recordAnswer" should {
@@ -67,7 +70,7 @@ class ThirdPartyApplicationSubmissionsConnectorSpec
       result shouldBe 'Left
     }
 
-    "return OK with and return the submission" in new Setup {
+    "return OK with the submission" in new Setup {
       stubFor(
         post(urlEqualTo(url))
         .withJsonRequestBody(OutboundRecordAnswersRequest(answers))
@@ -142,11 +145,44 @@ class ThirdPartyApplicationSubmissionsConnectorSpec
         .willReturn(
             aResponse()
             .withStatus(OK)
-            .withJsonBody(extendedSubmission)
+            .withJsonBody(answeredSubmission)
         )
       )
 
       val result = await(connector.fetchLatestSubmission(applicationId))
+
+      result.value shouldBe answeredSubmission
+    }
+  }
+
+  "fetchLatestExtendedSubmission" should {
+    val url = s"/submissions/application/${applicationId.value}/extended"
+
+    "return NOT FOUND with empty response body" in new Setup {
+      stubFor(
+        get(urlEqualTo(url))
+        .willReturn(
+            aResponse()
+            .withStatus(NOT_FOUND)
+        )
+      )
+
+      val result = await(connector.fetchLatestExtendedSubmission(applicationId))
+
+      result shouldBe None
+    }
+
+    "return OK with a submission body" in new Setup {
+      stubFor(
+        get(urlEqualTo(url))
+        .willReturn(
+            aResponse()
+            .withStatus(OK)
+            .withJsonBody(extendedSubmission)
+        )
+      )
+
+      val result = await(connector.fetchLatestExtendedSubmission(applicationId))
 
       result.value shouldBe extendedSubmission
     }

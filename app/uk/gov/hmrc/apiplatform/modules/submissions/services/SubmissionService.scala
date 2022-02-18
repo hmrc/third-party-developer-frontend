@@ -25,7 +25,9 @@ import uk.gov.hmrc.apiplatform.modules.submissions.connectors.ThirdPartyApplicat
 
 @Singleton
 class SubmissionService @Inject() (productionApplicationConnector: ThirdPartyApplicationSubmissionsConnector) {
-  def fetchLatestSubmission(appId: ApplicationId)(implicit hc: HeaderCarrier): Future[Option[ExtendedSubmission]] = productionApplicationConnector.fetchLatestSubmission(appId)
+  def fetchLatestSubmission(appId: ApplicationId)(implicit hc: HeaderCarrier): Future[Option[Submission]] = productionApplicationConnector.fetchLatestSubmission(appId)
+  
+  def fetchLatestExtendedSubmission(appId: ApplicationId)(implicit hc: HeaderCarrier): Future[Option[ExtendedSubmission]] = productionApplicationConnector.fetchLatestExtendedSubmission(appId)
 
   def fetch(id: Submission.Id)(implicit hc: HeaderCarrier): Future[Option[ExtendedSubmission]] = productionApplicationConnector.fetchSubmission(id)
 

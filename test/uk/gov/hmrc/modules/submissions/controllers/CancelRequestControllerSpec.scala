@@ -36,6 +36,7 @@ import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.WithLoggedInSession._
 import play.api.test.Helpers._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.SubscriptionTestHelperSugar
+import uk.gov.hmrc.apiplatform.modules.submissions.SubmissionsTestData
 
 trait TPAProductionConnectorMockModule extends MockitoSugar with ArgumentMatchersSugar {
 
@@ -56,7 +57,8 @@ class CancelRequestControllerSpec
     with SubscriptionTestHelperSugar
     with WithCSRFAddToken 
     with DeveloperBuilder
-    with LocalUserIdTracker {
+    with LocalUserIdTracker
+    with SubmissionsTestData {
 
   trait HasSubscriptions {
     val aSubscription = exampleSubscriptionWithoutFields("prefix")
@@ -96,6 +98,8 @@ class CancelRequestControllerSpec
     )
 
     val loggedInRequest = FakeRequest().withLoggedIn(controller, implicitly)(sessionId).withSession(sessionParams: _*)
+
+    val extendedSubmission = aSubmission.withIncompleteProgress
   }
 
   trait HasAppInProductionState {
@@ -132,10 +136,8 @@ class CancelRequestControllerSpec
 
 
   "CancelRequestController" should {
-    import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.SubmissionsTestData.extendedSubmission
-
     "cancelRequestForProductionCredentialsPage returns the page" in new Setup with HasSubscriptions with HasAppInTestingState {
-      SubmissionServiceMock.FetchLatestSubmission.thenReturns(extendedSubmission)
+      SubmissionServiceMock.FetchLatestExtendedSubmission.thenReturns(extendedSubmission)
 
       val result = controller.cancelRequestForProductionCredentialsPage(appId)(loggedInRequest.withCSRFToken)
       status(result) shouldBe OK
@@ -144,21 +146,21 @@ class CancelRequestControllerSpec
     }
     
     "cancelRequestForProductionCredentialsPage fails when app is not in testing state" in new Setup with HasSubscriptions with HasAppInProductionState {
-      SubmissionServiceMock.FetchLatestSubmission.thenReturns(extendedSubmission)
+      SubmissionServiceMock.FetchLatestExtendedSubmission.thenReturns(extendedSubmission)
 
       val result = controller.cancelRequestForProductionCredentialsPage(appId)(loggedInRequest.withCSRFToken)
       status(result) shouldBe BAD_REQUEST
     }
     
     "cancelRequestForProductionCredentialsPage fails when no submission exists" in new Setup with HasSubscriptions with HasAppInTestingState {
-      SubmissionServiceMock.FetchLatestSubmission.thenReturnsNone()
+      SubmissionServiceMock.FetchLatestExtendedSubmission.thenReturnsNone()
 
       val result = controller.cancelRequestForProductionCredentialsPage(appId)(loggedInRequest.withCSRFToken)
       status(result) shouldBe NOT_FOUND
     }
     
     "cancelRequestForProductionCredentialsAction when cancelling the request" in new Setup with HasSubscriptions with HasAppInTestingState {
-      SubmissionServiceMock.FetchLatestSubmission.thenReturns(extendedSubmission)
+      SubmissionServiceMock.FetchLatestExtendedSubmission.thenReturns(extendedSubmission)
 
       private val request = loggedInRequest.withFormUrlEncodedBody("submit-action" -> "cancel-request")
 
@@ -171,7 +173,7 @@ class CancelRequestControllerSpec
     }
 
     "cancelRequestForProductionCredentialsAction fails when app is not in testing state" in new Setup with HasSubscriptions with HasAppInProductionState {
-      SubmissionServiceMock.FetchLatestSubmission.thenReturns(extendedSubmission)
+      SubmissionServiceMock.FetchLatestExtendedSubmission.thenReturns(extendedSubmission)
 
       private val request = loggedInRequest.withFormUrlEncodedBody("submit-action" -> "dont-cancel-request")
 
@@ -181,7 +183,7 @@ class CancelRequestControllerSpec
     }
     
     "cancelRequestForProductionCredentialsAction when rejecting the cancellation" in new Setup with HasSubscriptions with HasAppInTestingState {
-      SubmissionServiceMock.FetchLatestSubmission.thenReturns(extendedSubmission)
+      SubmissionServiceMock.FetchLatestExtendedSubmission.thenReturns(extendedSubmission)
 
       private val request = loggedInRequest.withFormUrlEncodedBody("submit-action" -> "dont-cancel-request")
 
