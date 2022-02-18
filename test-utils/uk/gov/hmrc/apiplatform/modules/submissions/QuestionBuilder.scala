@@ -60,7 +60,16 @@ trait QuestionBuilder {
       None
     )
   }
-  
+
+  def chooseOneOfQuestion(counter: Int, choices: String*): ChooseOneOfQuestion = {
+    ChooseOneOfQuestion(
+      QuestionId.random,
+      Wording(s"Wording$counter"),
+      Statement(List()),
+      choices.toList.map(c => (PossibleAnswer(c) -> Pass)).foldRight(ListMap.empty[PossibleAnswer, Mark])( (pair, acc) => acc + pair)
+    )
+  }
+
   def multichoiceQuestion(counter: Int, choices: String*): MultiChoiceQuestion = {
     MultiChoiceQuestion(
       QuestionId.random,

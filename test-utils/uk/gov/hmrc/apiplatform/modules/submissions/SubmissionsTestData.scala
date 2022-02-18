@@ -101,15 +101,14 @@ trait SubmissionsTestData extends QuestionBuilder with QuestionnaireTestData wit
       .hasCompletelyAnsweredWith(answersToQuestions)
       .withCompletedProgresss
 
+  val gatekeeperUserName = "gatekeeperUserName"
+  val reasons = "some reasons"
 
   val createdSubmission = aSubmission
   val answeringSubmission = createdSubmission.answeringWith(answersToQuestions)
   val answeredSubmission = createdSubmission.hasCompletelyAnsweredWith(answersToQuestions)
   val submittedSubmission = Submission.submit(now, "bob@example.com")(answeredSubmission)
-
-  val gatekeeperUserName = "user name"
-  val submissionDeclinedReason = "declined due to testing"
-  val declinedSubmission = Submission.decline(now, gatekeeperUserName, submissionDeclinedReason)(submittedSubmission)
+  val declinedSubmission = Submission.decline(now, gatekeeperUserName, reasons)(submittedSubmission)
   val grantedSubmission = Submission.grant(now, gatekeeperUserName)(submittedSubmission)
 
   def buildSubmissionWithQuestions(): Submission = {
@@ -125,6 +124,7 @@ trait SubmissionsTestData extends QuestionBuilder with QuestionnaireTestData wit
     val questionWeb = textQuestion(7)
     val question2 = acknowledgementOnly(8)
     val question3 = multichoiceQuestion(9, "a", "b", "c")
+    val questionIdentifyOrg = chooseOneOfQuestion(10, "a", "b", "c")
     
     val questionnaire1 = Questionnaire(
         id = QuestionnaireId.random,
@@ -149,7 +149,7 @@ trait SubmissionsTestData extends QuestionBuilder with QuestionnaireTestData wit
         )
     )
 
-    Submission.create("bob@example.com", subId, appId, DateTimeUtils.now, questionnaireGroups, QuestionIdsOfInterest(questionName.id, questionPrivacy.id, questionTerms.id, questionWeb.id, questionRIName.id, questionRIEmail.id))
+    Submission.create("bob@example.com", subId, appId, DateTimeUtils.now, questionnaireGroups, QuestionIdsOfInterest(questionName.id, questionPrivacy.id, questionTerms.id, questionWeb.id, questionRIName.id, questionRIEmail.id, questionIdentifyOrg.id))
   }
 
   private def buildAnsweredSubmission(fullyAnswered: Boolean)(submission: Submission): Submission = {
@@ -270,7 +270,7 @@ trait MarkedSubmissionsTestData extends SubmissionsTestData with AnsweringQuesti
     (CustomersAuthorisingYourSoftware.question5.id -> Fail)
   )
 
-  val markedSubmission = MarkedSubmission(aSubmission, markedAnswers)
+  val markedSubmission = MarkedSubmission(submittedSubmission, markedAnswers)
 
   def markAsPass(now: DateTime = DateTimeUtils.now, requestedBy: String = "bob@example.com")(submission: Submission): MarkedSubmission = {
     val answers = answersForGroups(Pass)(submission.groups)

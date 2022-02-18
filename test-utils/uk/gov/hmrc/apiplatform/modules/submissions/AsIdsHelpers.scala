@@ -20,13 +20,13 @@ import cats.data.NonEmptyList
 import uk.gov.hmrc.apiplatform.modules.submissions.domain.models._
 
 trait AsIdsHelpers {
-  implicit class ListQIdSyntax(questionItems: List[QuestionItem]) {
+  implicit class ListQuestionIdSyntax(questionItems: List[QuestionItem]) {
     def asIds(): List[QuestionId] = {
       questionItems.map(_.question.id)
     }
   }
 
-  implicit class NELQIdSyntax(questionItems: NonEmptyList[QuestionItem]) {
+  implicit class NELQuestionIdSyntax(questionItems: NonEmptyList[QuestionItem]) {
     def asIds(): List[QuestionId] = {
       questionItems.toList.map(_.question.id)
     }

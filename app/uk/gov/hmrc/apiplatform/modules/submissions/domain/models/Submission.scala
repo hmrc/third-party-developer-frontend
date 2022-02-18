@@ -51,7 +51,8 @@ case class QuestionIdsOfInterest(
     termsAndConditionsUrlId: QuestionId,
     organisationUrlId: QuestionId,
     responsibleIndividualNameId: QuestionId,
-    responsibleIndividualEmailId: QuestionId
+    responsibleIndividualEmailId: QuestionId,
+    identifyYourOrganisationId: QuestionId
 )
 
 object Submission {
@@ -89,16 +90,15 @@ object Submission {
 
   val addStatusHistory: (Submission.Status) => Submission => Submission = newStatus => s => {
     require(Submission.Status.isLegalTransition(s.status, newStatus))
-    changeLatestInstance(_.copy(statusHistory = newStatus :: s.latestInstance.statusHistory))(s)
-  }
+    
+    val currentHistory = s.latestInstance.statusHistory
 
-  val changeStatusHistory: (Submission.Status => Submission.Status) => Submission => Submission = delta => s => {
-    val inStatus = s.latestInstance.statusHistory.head
-    val outStatus = delta(inStatus)
-
-    changeLatestInstance(
-      _.copy(statusHistory = NonEmptyList(outStatus, s.latestInstance.statusHistory.tail))
-    )(s)
+    // Do not ADD if going from answering to answering - instead replace
+    if((s.status.isAnswering && newStatus.isAnswering)) {
+      changeLatestInstance(_.copy(statusHistory = NonEmptyList(newStatus, currentHistory.tail)))(s)
+    } else {
+      changeLatestInstance(_.copy(statusHistory = newStatus :: currentHistory))(s)
+    }
   }
 
   val updateLatestAnswersTo: (Submission.AnswersToQuestions) => Submission => Submission = (newAnswers) => changeLatestInstance(_.copy(answersToQuestions = newAnswers))
@@ -124,7 +124,7 @@ object Submission {
     
     def isOpenToAnswers = isCreated || isAnswering
     
-    def canBeMarked = isAnsweredCompletely | isSubmitted | isDeclined | isGranted | isGrantedWithWarnings
+    def canBeMarked = isAnsweredCompletely || isSubmitted || isDeclined || isGranted || isGrantedWithWarnings
 
     def isAnsweredCompletely = this match {
       case Submission.Status.Answering(_, completed) => completed
@@ -198,6 +198,7 @@ object Submission {
     def isLegalTransition(from: Submission.Status, to: Submission.Status): Boolean = (from, to) match {
       case (c: Created, a: Answering)               => true
       case (Answering(_, true), s: Submitted)       => true
+      case (a: Answering, b: Answering)             => true
       case (s: Submitted, d: Declined)              => true
       case (s: Submitted, g: Granted)               => true
       case (s: Submitted, w: GrantedWithWarnings)   => true
@@ -213,6 +214,7 @@ object Submission {
     statusHistory: NonEmptyList[Submission.Status]
   ) {
     lazy val status: Status = statusHistory.head
+
     lazy val isOpenToAnswers = status.isOpenToAnswers
     lazy val isAnsweredCompletely = status.isAnsweredCompletely
 
