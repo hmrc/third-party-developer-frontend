@@ -84,14 +84,17 @@ trait SubmissionsTestData extends QuestionBuilder with QuestionnaireTestData wit
 
   val submissionId = Submission.Id.random
   val applicationId = ApplicationId.random
-  
+  val standardContext: AskWhen.Context = Map(
+    AskWhen.Context.Keys.IN_HOUSE_SOFTWARE -> "No",
+    AskWhen.Context.Keys.VAT_OR_ITSA -> "No"
+  )
   val now = DateTimeUtils.now
 
-  val aSubmission = Submission.create("bob@example.com", submissionId, applicationId, now, testGroups, testQuestionIdsOfInterest)
+  val aSubmission = Submission.create("bob@example.com", submissionId, applicationId, now, testGroups, testQuestionIdsOfInterest, standardContext)
 
   val altSubmissionId = Submission.Id.random
   require(altSubmissionId != submissionId)
-  val altSubmission = Submission.create("bob@example.com", altSubmissionId, applicationId, now.plusSeconds(100), testGroups, testQuestionIdsOfInterest)
+  val altSubmission = Submission.create("bob@example.com", altSubmissionId, applicationId, now.plusSeconds(100), testGroups, testQuestionIdsOfInterest, standardContext)
 
   val completedSubmissionId = Submission.Id.random
   require(completedSubmissionId != submissionId)
@@ -149,7 +152,7 @@ trait SubmissionsTestData extends QuestionBuilder with QuestionnaireTestData wit
         )
     )
 
-    Submission.create("bob@example.com", subId, appId, DateTimeUtils.now, questionnaireGroups, QuestionIdsOfInterest(questionName.id, questionPrivacy.id, questionTerms.id, questionWeb.id, questionRIName.id, questionRIEmail.id, questionIdentifyOrg.id))
+    Submission.create("bob@example.com", subId, appId, DateTimeUtils.now, questionnaireGroups, QuestionIdsOfInterest(questionName.id, questionPrivacy.id, questionTerms.id, questionWeb.id, questionRIName.id, questionRIEmail.id, questionIdentifyOrg.id), standardContext)
   }
 
   private def buildAnsweredSubmission(fullyAnswered: Boolean)(submission: Submission): Submission = {

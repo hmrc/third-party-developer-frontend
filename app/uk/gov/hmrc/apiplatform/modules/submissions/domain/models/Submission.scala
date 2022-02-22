@@ -17,6 +17,7 @@
 package uk.gov.hmrc.apiplatform.modules.submissions.domain.models
 
 import org.joda.time.DateTime
+
 import java.util.UUID
 import cats.data.NonEmptyList
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.ApplicationId
@@ -67,16 +68,17 @@ object Submission {
   }
 
   val create: (
-      String,
-      Submission.Id,
-      ApplicationId,
-      DateTime,
-      NonEmptyList[GroupOfQuestionnaires],
-      QuestionIdsOfInterest) => Submission = (requestedBy, id, applicationId, timestamp, groups, questionIdsOfInterest) => {
-
-      val initialStatus = Submission.Status.Created(timestamp, requestedBy)
-      val initialInstances = NonEmptyList.of(Submission.Instance(0, Map.empty, NonEmptyList.of(initialStatus)))
-    Submission(id, applicationId, timestamp, groups, questionIdsOfInterest, initialInstances)
+    String,
+    Submission.Id,
+    ApplicationId,
+    DateTime,
+    NonEmptyList[GroupOfQuestionnaires],
+    QuestionIdsOfInterest,
+    AskWhen.Context
+  ) => Submission = (requestedBy, id, applicationId, timestamp, groups, questionIdsOfInterest, context) => {
+    val initialStatus = Submission.Status.Created(timestamp, requestedBy)
+    val initialInstances = NonEmptyList.of(Submission.Instance(0, Map.empty, NonEmptyList.of(initialStatus)))
+    Submission(id, applicationId, timestamp, groups, questionIdsOfInterest, initialInstances, context)
   }
   
   val addInstance: (Submission.AnswersToQuestions, Submission.Status) => Submission => Submission = (answers, status) => s => {
@@ -233,7 +235,8 @@ case class Submission(
   startedOn: DateTime,
   groups: NonEmptyList[GroupOfQuestionnaires],
   questionIdsOfInterest: QuestionIdsOfInterest,
-  instances: NonEmptyList[Submission.Instance]
+  instances: NonEmptyList[Submission.Instance],
+  context: AskWhen.Context
 ) {
   lazy val allQuestionnaires: NonEmptyList[Questionnaire] = groups.flatMap(g => g.links)
 
