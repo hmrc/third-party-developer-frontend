@@ -20,18 +20,18 @@
 @import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.controllers.Crumb
 @import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.ManageSubscriptions.ApiDetails
 @import views.helper.IdFormatter
-@import views.html.include.appEnvironment
-@import views.html.include.DevMain
+@import views.html.include.appEnvironment2
+@import views.html.include.DevMain2
 @import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.routes
 
-@this(devMain: DevMain)
+@this(devMain: DevMain2)
 
 @(app: Application, details: Seq[ApiDetails])(
-    implicit request: play.api.mvc.Request[Any],
-    loggedIn: DeveloperSession,
-    messages: Messages,
-    applicationConfig: ApplicationConfig
-    )
+  implicit request: play.api.mvc.Request[Any],
+  loggedIn: DeveloperSession,
+  messages: Messages,
+  applicationConfig: ApplicationConfig
+)
 
 @pageHeading = @{ "Subscription configuration" }
 
@@ -46,35 +46,34 @@
     Crumb.home
   )
 ) {
-<header>
-  <h1 class="heading-xlarge">@pageHeading</h1>
-</header>
+  <h1 class="govuk-heading-l">@pageHeading</h1>
 
-@appEnvironment(app)
+  @appEnvironment2(app)
 
-<br>
+  <br>
 
-<p>Edit the configuration for these APIs you have subscribed to.</p>
+  <p class="govuk-body">Edit the configuration for these APIs you have subscribed to.</p>
 
   @for(api <- details) {
-    <h2>@{api.name} @{api.version.value} @{api.displayedStatus}</h2>
-    <table>
-      <thead>
-        <tr>
-        <th class="col-35">Name</th>
-        <th class="col-60">Configuration</th>
-        <td>
-        </td>
+    <h2 class="govuk-heading-m">
+      @{api.name} @{api.version.value} @{api.displayedStatus}
+    </h2>
+    <table class="govuk-table">
+      <thead class="govuk-table__head">
+        <tr class="govuk-table__row">
+          <th class="govuk-table__header col-35">Name</th>
+          <th class="govuk-table__header col-60">Configuration</th>
+          <td class="govuk-table__header"></td>
         </tr>
       </thead>
-      <tbody>
+      <tbody class="govuk-table__body">
         @for(field <- api.subsValues.toList) {
-          <tr>
-            <td>@{field.shortDescription}</td>
-            <td>@{field.value}</td>
-            <td>
+          <tr class="govuk-table__row">
+            <td class="govuk-table__cell">@{field.shortDescription}</td>
+            <td class="govuk-table__cell">@{field.value}</td>
+            <td class="govuk-table__cell">
               @if(field.canWrite) {
-                <a href="@{routes.ManageSubscriptions.editApiMetadataFieldPage(app.id, api.context, api.version, field.name, LeftHandNavigation)}" class="numeric" id="@{IdFormatter.identifier(api.context, api.version)}-@{field.name}-submit">Edit</a>
+                <a class="govuk-link govuk-link--no-visited-state" href="@{routes.ManageSubscriptions.editApiMetadataFieldPage(app.id, api.context, api.version, field.name, LeftHandNavigation)}" id="@{IdFormatter.identifier(api.context, api.version)}-@{field.name}-submit">Edit</a>
               }
             </td>
           </tr>
