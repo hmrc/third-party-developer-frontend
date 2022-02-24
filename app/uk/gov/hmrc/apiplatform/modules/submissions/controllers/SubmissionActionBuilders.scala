@@ -36,13 +36,14 @@ import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.ApplicationRequest
 import scala.concurrent.Future.successful
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.State
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.CollaboratorRole
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.apidefinitions.APISubscriptionStatus
 
 class SubmissionRequest[A](val extSubmission: ExtendedSubmission, val userRequest: UserRequest[A]) extends UserRequest[A](userRequest.developerSession, userRequest.msgRequest) {
   lazy val submission = extSubmission.submission
   lazy val answersToQuestions = submission.latestInstance.answersToQuestions
 }
 
-class SubmissionApplicationRequest[A](val application: Application, val submissionRequest: SubmissionRequest[A]) extends SubmissionRequest[A](submissionRequest.extSubmission, submissionRequest.userRequest) with HasApplication
+class SubmissionApplicationRequest[A](val application: Application, val submissionRequest: SubmissionRequest[A], val subscriptions: List[APISubscriptionStatus]) extends SubmissionRequest[A](submissionRequest.extSubmission, submissionRequest.userRequest) with HasApplication
 
 object SubmissionActionBuilders {
   
@@ -97,7 +98,7 @@ trait SubmissionActionBuilders {
         
         applicationActionService.process(request.submission.applicationId, request.userRequest)
         .toRight(NotFound(errorHandler.notFoundTemplate(request)))
-        .map(r => new SubmissionApplicationRequest(r.application, request))
+        .map(r => new SubmissionApplicationRequest(r.application, request, r.subscriptions))
         .value
       }
     }
@@ -111,7 +112,7 @@ trait SubmissionActionBuilders {
         (
           for {
             submission <- E.fromOptionF(submissionService.fetchLatestExtendedSubmission(request.application.id), NotFound(errorHandler.notFoundTemplate(request)) )
-          } yield new SubmissionApplicationRequest(request.application, new SubmissionRequest(submission, request.userRequest))
+          } yield new SubmissionApplicationRequest(request.application, new SubmissionRequest(submission, request.userRequest), request.subscriptions)
         )
         .value
       }
