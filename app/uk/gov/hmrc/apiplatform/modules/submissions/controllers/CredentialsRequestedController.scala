@@ -43,7 +43,7 @@ object CredentialsRequestedController {
   case class CredentialsRequestedViewModel (
     appId: ApplicationId, 
     appName: String, 
-    subs: Seq[APISubscriptionStatus],
+    subscriptions: Seq[APISubscriptionStatus],
     sellResellOrDistribute: String,
     answersViewModel: ViewModel
   )
@@ -83,17 +83,17 @@ class CredentialsRequestedController @Inject() (
       Ok(credentialsRequestedView(viewModel, err))
     }
 
-    def convertToViewModel(application: Application, submision: Submission, subs: Seq[APISubscriptionStatus], answersViewModel: ViewModel): CredentialsRequestedViewModel = {
-      val inHouse = submision.context.get(AskWhen.Context.Keys.IN_HOUSE_SOFTWARE)
+    def convertToViewModel(application: Application, submission: Submission, subscriptions: List[APISubscriptionStatus], answersViewModel: ViewModel): CredentialsRequestedViewModel = {
+      val inHouse = submission.context.get(AskWhen.Context.Keys.IN_HOUSE_SOFTWARE)
       val sellResellOrDistribute = if(inHouse == Some("No")) "Yes" else "No"
-      val selectedSubs = subs.filter(s => s.subscribed)
-      CredentialsRequestedViewModel(application.id, application.name, selectedSubs, sellResellOrDistribute, answersViewModel)
+      val selectedSubscriptions = subscriptions.filter(s => s.subscribed)
+      CredentialsRequestedViewModel(application.id, application.name, selectedSubscriptions, sellResellOrDistribute, answersViewModel)
     }
 
     val vm = for {
       extSubmission       <- fromOptionF(submissionService.fetchLatestExtendedSubmission(productionAppId), "No submission and/or application found")
       answersViewModel    =  convertSubmissionToViewModel(extSubmission)(request.application.id, request.application.name)
-      viewModel           =  convertToViewModel(request.application, request.submission, request.subscriptions, answersViewModel)
+      viewModel           =  convertToViewModel(request.application, extSubmission.submission, request.subscriptions, answersViewModel)
     } yield viewModel
 
     vm.fold[Result](failed, success)
