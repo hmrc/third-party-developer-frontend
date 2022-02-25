@@ -38,6 +38,7 @@ import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.apidefinitions.APIS
 import uk.gov.hmrc.apiplatform.modules.submissions.domain.models.Submission
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.Application
 import uk.gov.hmrc.apiplatform.modules.submissions.domain.models.AskWhen
+import uk.gov.hmrc.apiplatform.modules.submissions.controllers.models.AnswersViewModel
 
 object CredentialsRequestedController {
   case class CredentialsRequestedViewModel (
@@ -45,7 +46,7 @@ object CredentialsRequestedController {
     appName: String, 
     subscriptions: Seq[APISubscriptionStatus],
     sellResellOrDistribute: String,
-    answersViewModel: ViewModel
+    answersViewModel: AnswersViewModel.ViewModel
   )
 }
 
