@@ -54,8 +54,6 @@ class ApplicationConfig @Inject()(config: Configuration) extends ServicesConfig(
   lazy val title = "Developer Hub"
   lazy val jsonEncryptionKey = getString("json.encryption.key")
   lazy val hasSandbox = getConfigDefaulted("hasSandbox", false)
-  lazy val currentTermsOfUseVersion = getConfigDefaulted("currentTermsOfUseVersion", "")
-  lazy val currentTermsOfUseDate = DateTime.parse(getConfigDefaulted("currentTermsOfUseDate", ""))
   lazy val retryCount = getConfigDefaulted("retryCount", 0)
   lazy val retryDelayMilliseconds = getConfigDefaulted("retryDelayMilliseconds", 500)
 

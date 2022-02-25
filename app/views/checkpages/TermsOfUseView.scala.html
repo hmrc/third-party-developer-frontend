@@ -20,11 +20,11 @@
 @import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.views.BackButtonWithJavaScript
 @import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.controllers.ApplicationViewModel
 @import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.DeveloperSession
+@import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.TermsOfUseVersion
 
 @this(devMain: DevMain2)
 
-@(applicationViewModel: ApplicationViewModel, form: Form[TermsOfUseForm], submitButtonLabel: String, submitAction: Call, landingPageRoute: Call)(implicit request: play.api.mvc.Request[Any], loggedIn: DeveloperSession, messagesProvider: MessagesProvider, applicationConfig: ApplicationConfig)
-
+@(applicationViewModel: ApplicationViewModel, form: Form[TermsOfUseForm], submitButtonLabel: String, submitAction: Call, landingPageRoute: Call, termsOfUseVersion: TermsOfUseVersion)(implicit request: play.api.mvc.Request[Any], loggedIn: DeveloperSession, messagesProvider: MessagesProvider, applicationConfig: ApplicationConfig)
 
 @titleError = { @if(form.errors.nonEmpty) {Error: } else {}}
 
@@ -56,7 +56,7 @@
       </fieldset>
     </div>
 
-    @partials.termsOfUse()
+    @termsOfUseVersion.getTermsOfUseAsHtml()
 
     <div class="govuk-form-group @if(form.errors("termsOfUseAgreed").nonEmpty){govuk-form-group--error}">
       <fieldset class="govuk-fieldset">

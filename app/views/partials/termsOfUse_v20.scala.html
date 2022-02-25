@@ -1,0 +1,349 @@
+@*
+ * Copyright 2022 HM Revenue & Customs
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ *@
+
+@import org.joda.time.format.DateTimeFormat
+
+@()(implicit applicationConfig: ApplicationConfig)
+
+<div class="govuk-grid-column-three-quarters">
+  <h1 id="top" class="govuk-heading-l">Terms of use</h1>
+</div>
+
+<div class="govuk-grid-column-one-third">
+  <ul class="govuk-list">
+    <li>
+      <a class="govuk-link govuk-link--no-visited-state" href="#introduction">Introduction</a>
+    </li>
+    <li>
+      <a class="govuk-link govuk-link--no-visited-state" href="#development-practices">Development practices</a>
+    </li>
+    <li>
+      <a class="govuk-link govuk-link--no-visited-state" href="#service-management-practices">Service management practices</a>
+    </li>
+    <li>
+      <a class="govuk-link govuk-link--no-visited-state" href="#handling-personal-data">Handling personal data</a>
+    </li>
+    <li>
+      <a class="govuk-link govuk-link--no-visited-state" href="#software-security">Software security</a>
+    </li>
+  </ul>
+</div>
+
+<div class="govuk-grid-column-one-third">
+  <ul class="govuk-list">
+    <li>
+      <a class="govuk-link govuk-link--no-visited-state" href="#fraud-prevention-data">Fraud prevention data</a>
+    </li>
+    <li>
+      <a class="govuk-link govuk-link--no-visited-state" href="#authorising-your-software">Customers authorising your software</a>
+    </li>
+    <li>
+      <a class="govuk-link govuk-link--no-visited-state" href="#marketing-your-software">Marketing your software</a>
+    </li>
+    <li>
+      <a class="govuk-link govuk-link--no-visited-state" href="#organisation-details">Organisation details</a>
+    </li>
+  </ul>
+</div>
+
+<div class="govuk-grid-column-three-quarters">
+
+  <hr class="govuk-section-break govuk-section-break--l govuk-section-break--visible">
+
+  <h2 class="govuk-heading-m" id="introduction">Introduction</h2>
+
+  <p class="govuk-body">
+    The terms of use explain what we expect from you when creating and operating software services that use HMRC APIs hosted on the HMRC Developer Hub.
+<p>
+  <p class="govuk-body">
+    You’ll be asked these questions when you apply for production credentials. You must make sure that your software conforms to our terms of use.
+<p>
+  <p class="govuk-body">
+    HMRC staff will review your responses and information is kept private.
+<p>
+  <p class="govuk-body">
+    The terms of use is not a legal relationship between HMRC and any software developer.
+<p>
+  <p class="govuk-body">
+    We reserve the right to remove your access to the Developer Hub and its APIs temporarily or permanently.
+<p>
+
+  <ul class="govuk-list">
+    <li>
+      <a class="govuk-link govuk-link--no-visited-state" href="what_you_can_expect_from_us">What you can expect from us</a>
+    </li>
+    <li>
+      <a class="govuk-link govuk-link--no-visited-state" href="not_meeting_terms_of_use">Not meeting our terms of use</a>
+    </li>
+  </ul>
+
+  <p class="govuk-body">Share the terms of use with your colleagues.
+  </p>
+  <button class="govuk-button govuk-button--secondary" data-module="govuk-button">
+    Copy link to clipboard
+  </button>
+
+  <hr class="govuk-section-break govuk-section-break--l govuk-section-break--visible">
+
+  <h2 class="govuk-heading-m govuk-!-margin-top-7">About your processes</h2>
+
+    <!-- Development practices -->
+  <table class="govuk-table">
+    <caption id="development-practices" class="govuk-table__caption govuk-table__caption--s">Development practices</caption>
+    <thead class="govuk-table__head">
+      <tr class="govuk-table__row">
+        <th scope="col" class="govuk-table__header govuk-!-width-one-third">Question</th>
+        <th scope="col" class="govuk-table__header govuk-!-width-two-thirds">Notes</th>
+      </tr>
+    </thead>
+    <tbody class="govuk-table__body">
+      <tr class="govuk-table__row">
+        <td scope="row" class="govuk-table__cell">Do your development practices follow our guidance?</td>
+        <td class="govuk-table__cell">You must develop your software following our <a href="#" class="govuk-link govuk-link--no-visited-state">development practices</a>.</td>
+      </tr>
+      <tr class="govuk-table__row">
+        <td scope="row" class="govuk-table__cell">Does your error handling meet our specification?</td>
+        <td class="govuk-table__cell">We will check for evidence that you comply with our <a href="#" class="govuk-link govuk-link--no-visited-state">error handling specification</a>.</td>
+      </tr>
+      <tr class="govuk-table__row">
+        <td scope="row" class="govuk-table__cell">Does your software meet accessibility standards?</td>
+        <td class="govuk-table__cell">Web-based software must meet level AA of the <a href="https://www.w3.org/WAI/standards-guidelines/wcag/" class="govuk-link govuk-link--no-visited-state">Web Content Acessibility Guidelines (WCAG)</a>. Desktop software should follow equivalent offline standards.</td>
+      </tr>
+    </tbody>
+  </table>
+
+    <!-- Service management practices -->
+  <table class="govuk-table">
+    <caption id="service-management-practices" class="govuk-table__caption govuk-table__caption--s">Service management practices</caption>
+    <thead class="govuk-table__head">
+      <tr class="govuk-table__row">
+        <th scope="col" class="govuk-table__header govuk-!-width-one-third">Question</th>
+        <th scope="col" class="govuk-table__header govuk-!-width-two-thirds">Notes</th>
+      </tr>
+    </thead>
+    <tbody class="govuk-table__body">
+      <tr class="govuk-table__row">
+        <td scope="row" class="govuk-table__cell">Do you have a process for notifying HMRC in the case of a security breach?</td>
+        <td class="govuk-table__cell">Any issues concerning the security of customer data must be reported immediately to HMRC. You must also <a href="https://ico.org.uk/for-organisations/guide-to-data-protection/guide-to-the-general-data-protection-regulation-gdpr/personal-data-breaches/" class="govuk-link govuk-link--no-visited-state">notify the ICO about personal data breaches</a> within 72 hours of becoming aware of it.</td>
+      </tr>
+      <tr class="govuk-table__row">
+        <td scope="row" class="govuk-table__cell">Do you provide a way for your customers or third parties to tell you about a security risk or incident?</td>
+        <td class="govuk-table__cell">We expect you to provide an easy contact method in the case of a security breach.</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <a class="govuk-link govuk-link--no-visited-state govuk-!-font-weight-bold" href="#top">Back to top</a>
+
+  <h2 class="govuk-heading-m govuk-!-margin-top-7">About your software</h2>
+
+    <!-- Handling personal data -->
+  <table class="govuk-table">
+    <caption id="handling-personal-data" class="govuk-table__caption govuk-table__caption--s">Handling personal data</caption>
+    <thead class="govuk-table__head">
+      <tr class="govuk-table__row">
+        <th scope="col" class="govuk-table__header govuk-!-width-one-third">Question</th>
+        <th scope="col" class="govuk-table__header govuk-!-width-two-thirds">Notes</th>
+      </tr>
+    </thead>
+    <tbody class="govuk-table__body">
+      <tr class="govuk-table__row">
+        <td scope="row" class="govuk-table__cell">Do you comply with the General Data Protection Regulation (GDPR)?</td>
+        <td class="govuk-table__cell"><p>To be GDPR compliant you must keep customer data safe. This includes telling customers:</p>
+          <ul class="govuk-list govuk-list--bullet">
+            <li>what personal data you will be processing and why</li>
+            <li>that you are responsible for protecting their data</li>
+            <li>your <a href="https://ico.org.uk/for-organisations/guide-to-data-protection/guide-to-the-general-data-protection-regulation-gdpr/lawful-basis-for-processing/" class="govuk-link govuk-link--no-visited-state">lawful basis</a> for processing personal data</li>
+          </ul></td>
+      </tr>
+      <tr class="govuk-table__row">
+        <td scope="row" class="govuk-table__cell">Do you encrypt all customer data that you handle?</td>
+        <td class="govuk-table__cell">You must encrypt access tokens and personally identifiable data when it is stored and in transit. Read the <a href="https://ico.org.uk/for-organisations/guide-to-data-protection/guide-to-the-general-data-protection-regulation-gdpr/encryption/encryption-and-data-transfer" class="govuk-link govuk-link--no-visited-state">GDPR guidelines on encryption</a>.</td>
+      </tr>
+      <tr class="govuk-table__row">
+        <td scope="row" class="govuk-table__cell">Do you ensure that each customer’s data cannot be accessed by other users?</td>
+        <td class="govuk-table__cell">Read the National Cyber Security Centre’s guidance on <a href="https://www.ncsc.gov.uk/collection/cloud-security/implementing-the-cloud-security-principles/separation-between-users" class="govuk-link govuk-link--no-visited-state">keeping user data separate</a> and best practice for <a href="https://www.ncsc.gov.uk/collection/passwords/updating-your-approach" class="govuk-link govuk-link--no-visited-state">username and password security</a>.</td>
+      </tr>
+      <tr class="govuk-table__row">
+        <td scope="row" class="govuk-table__cell">Do you have access control for employees using customer data?</td>
+        <td class="govuk-table__cell">Using a personnel security policy and Role Based Access Control (RBAC) will ensure that employees can only access data essential to their job role. Read the <a href="https://www.ncsc.gov.uk/collection/cloud-security/implementing-the-cloud-security-principles/personnel-security" class="govuk-link govuk-link--no-visited-state">National Cyber Security Centre’s guidance</a>.</td>
+      </tr>
+      <tr class="govuk-table__row">
+        <td scope="row" class="govuk-table__cell">Can customers access their data?</td>
+        <td class="govuk-table__cell">You must allow customers to change, export or delete their data if they want to.</td>
+      </tr>
+      <tr class="govuk-table__row">
+        <td scope="row" class="govuk-table__cell">Do you store your customers’ Government Gateway credentials?</td>
+        <td class="govuk-table__cell">Implementing OAuth 2.0 means there is no need to store Government Gateway credentials.</td>
+      </tr>
+    </tbody>
+  </table>
+
+    <!-- Software security -->
+  <h3 id="software-security" class="govuk-heading-s govuk-!-margin-bottom-1">Software security
+  </h3>
+  <p class="govuk-body">If you provide software as a service (Saas), we will ask you these questions about your software security.
+  </p>
+  <table class="govuk-table">
+    <caption class="govuk-table__caption govuk-table__caption--s govuk-visually-hidden">Software security</caption>
+    <thead class="govuk-table__head">
+      <tr class="govuk-table__row">
+        <th scope="col" class="govuk-table__header govuk-!-width-one-third">Question</th>
+        <th scope="col" class="govuk-table__header govuk-!-width-two-thirds">Notes</th>
+      </tr>
+    </thead>
+    <tbody class="govuk-table__body">
+      <tr class="govuk-table__row">
+        <td scope="row" class="govuk-table__cell">Has your application passed software penetration testing?</td>
+        <td class="govuk-table__cell">Use either penetration test tools or an independent third party supplier. For penetration testing methodologies read the <a href="https://wiki.owasp.org/index.php/Penetration_testing_methodologies" class="govuk-link govuk-link--no-visited-state">Open Web Application Security Project (OWASP) guide</a>.</td>
+      </tr>
+      <tr class="govuk-table__row">
+        <td scope="row" class="govuk-table__cell">Do you audit security controls to ensure you comply with data protection law?</td>
+        <td class="govuk-table__cell">Assess your compliance using the <a href="https://ico.org.uk/for-organisations/sme-web-hub/checklists/data-protection-self-assessment/" class="govuk-link govuk-link--no-visited-state">ICO information security checklist</a>.</td>
+      </tr>
+    </tbody>
+  </table>
+
+    <!-- Fraud prevention data -->
+  <h3 id="fraud-prevention-data" class="govuk-heading-s govuk-!-margin-bottom-1">Fraud prevention data
+  </h3>
+  <p class="govuk-body">If you use VAT (MTD) or Income Tax Self Assessment (MTD) APIs, we will ask you these questions about fraud prevention data.
+  </p>
+  <table class="govuk-table">
+    <caption class="govuk-table__caption govuk-table__caption--s govuk-visually-hidden">Fraud prevention data</caption>
+    <thead class="govuk-table__head">
+      <tr class="govuk-table__row">
+        <th scope="col" class="govuk-table__header govuk-!-width-one-third">Question</th>
+        <th scope="col" class="govuk-table__header govuk-!-width-two-thirds">Notes</th>
+      </tr>
+    </thead>
+    <tbody class="govuk-table__body">
+      <tr class="govuk-table__row">
+        <td scope="row" class="govuk-table__cell">Does your software submit fraud prevention data?</td>
+        <td class="govuk-table__cell">You must submit header data in line with the <a href="https://developer.service.hmrc.gov.uk/guides/fraud-prevention/" class="govuk-link govuk-link--no-visited-state">fraud prevention specification</a>.</td>
+      </tr>
+      <tr class="govuk-table__row">
+        <td scope="row" class="govuk-table__cell">Have you checked that your software submits fraud prevention data correctly?</td>
+        <td class="govuk-table__cell">Before you submit any header data, you need to use the <a href="https://developer.service.hmrc.gov.uk/api-documentation/docs/api/service/txm-fph-validator-api/1.0" class="govuk-link govuk-link--no-visited-state">Test Fraud Prevention Headers API</a>.</td>
+      </tr>
+    </tbody>
+  </table>
+
+    <!-- Customers authorising your software -->
+  <table class="govuk-table">
+    <caption id="authorising-your-software" class="govuk-table__caption govuk-table__caption--s">Customers authorising your software</caption>
+    <thead class="govuk-table__head">
+      <tr class="govuk-table__row">
+        <th scope="col" class="govuk-table__header govuk-!-width-one-third">Question</th>
+        <th scope="col" class="govuk-table__header govuk-!-width-two-thirds">Notes</th>
+      </tr>
+    </thead>
+    <tbody class="govuk-table__body">
+      <tr class="govuk-table__row">
+        <td scope="row" class="govuk-table__cell">What is the location of the servers that store your customer data?</td>
+        <td class="govuk-table__cell">Tell us if your servers are located outside the EU.</td>
+      </tr>
+      <tr class="govuk-table__row">
+        <td scope="row" class="govuk-table__cell">What is your privacy policy URL?</td>
+        <td class="govuk-table__cell">Include the policy which covers the software you are requesting production credentials for.</td>
+      </tr>
+      <tr class="govuk-table__row">
+        <td scope="row" class="govuk-table__cell">What is your terms and conditions URL?</td>
+        <td class="govuk-table__cell">Your terms and conditions should cover the software you are requesting production credentials for.</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <a class="govuk-link govuk-link--no-visited-state govuk-!-font-weight-bold" href="#top">Back to top</a>
+
+  <h2 class="govuk-heading-m govuk-!-margin-top-7">About your organisation</h2>
+
+    <!-- Marketing your software -->
+  <table class="govuk-table">
+    <caption id="marketing-your-software" class="govuk-table__caption govuk-table__caption--s">Marketing your software</caption>
+    <thead class="govuk-table__head">
+      <tr class="govuk-table__row">
+        <th scope="col" class="govuk-table__header govuk-!-width-one-third">Question</th>
+        <th scope="col" class="govuk-table__header govuk-!-width-two-thirds">Notes</th>
+      </tr>
+    </thead>
+    <tbody class="govuk-table__body">
+      <tr class="govuk-table__row">
+        <td scope="row" class="govuk-table__cell">Do you use HMRC logos in your software, marketing or website?</td>
+        <td class="govuk-table__cell">You must not use the HMRC logo in any way.</td>
+      </tr>
+      <tr class="govuk-table__row">
+        <td scope="row" class="govuk-table__cell">Do adverts in your software comply with UK standards?</td>
+        <td class="govuk-table__cell">
+          <p>Advertising that appears in your software must follow:</p>
+          <ul class="govuk-list govuk-list--bullet">
+            <li>
+              <a class="govuk-link govuk-link--no-visited-state" href="https://www.asa.org.uk/codes-and-rulings/advertising-codes.html">Advertising Standards Authority Codes</a>
+            </li>
+            <li>
+              <a class="govuk-link govuk-link--no-visited-state" href="https://www.gov.uk/marketing-advertising-law/regulations-that-affect-advertising">UK marketing and advertising laws</a>
+            </li>
+          </ul>
+        </td>
+      </tr>
+      <tr class="govuk-table__row">
+        <td scope="row" class="govuk-table__cell">Do you advertise your software as ‘HMRC recognised’?</td>
+        <td class="govuk-table__cell">Only use ‘HMRC recognised’ when advertising your software. Do not use terms like ‘accredited’ or ‘approved’.</td>
+      </tr>
+      <tr class="govuk-table__row">
+        <td scope="row" class="govuk-table__cell">Do you get your customers’ consent before sharing their personal data for marketing?</td>
+        <td class="govuk-table__cell">You must not share customers’ personal data without their consent. Read the <a href="https://ico.org.uk/for-organisations/guide-to-pecr/electronic-and-telephone-marketing/" class="govuk-link govuk-link--no-visited-state">Direct Marketing Guidance</a> from the Information Commissioner’s Office.</td>
+      </tr>
+    </tbody>
+  </table>
+
+    <!-- Organisation details -->
+  <table class="govuk-table">
+    <caption id="organisation-details" class="govuk-table__caption govuk-table__caption--s">Organisation details</caption>
+    <thead class="govuk-table__head">
+      <tr class="govuk-table__row">
+        <th scope="col" class="govuk-table__header govuk-!-width-one-third">Question</th>
+        <th scope="col" class="govuk-table__header govuk-!-width-two-thirds">Notes</th>
+      </tr>
+    </thead>
+    <tbody class="govuk-table__body">
+      <tr class="govuk-table__row">
+        <td scope="row" class="govuk-table__cell">What is your organisation’s website URL?</td>
+        <td class="govuk-table__cell">For example https://example.com.</td>
+      </tr>
+      <tr class="govuk-table__row">
+        <td scope="row" class="govuk-table__cell">Provide evidence that your organisation is officially registered.</td>
+        <td class="govuk-table__cell">
+          If you’re in the UK, you can identify your organisation using your:
+          <ul class="govuk-list govuk-list--bullet govuk-!-padding-top-2">
+            <li>Unique Taxpayer Reference (UTR)
+            </li>
+            <li>VAT registration number
+            </li>
+            <li>PAYE reference
+            </li>
+            <li>Corporation Tax Unique Taxpayer Reference (UTR)
+            </li>
+          </ul>
+          <p class="govuk-body">Or you can use your company registration number given to you by Companies House.
+          </p>
+          <p class="govuk-body">If your organisation is outside the UK, we’ll need evidence that your organisation is officially registered in your country.
+          </p>
+        </td>
+      </tr>
+    </tbody>
+  </table>
+</div>

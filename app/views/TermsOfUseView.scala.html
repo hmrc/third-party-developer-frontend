@@ -22,10 +22,11 @@
 @import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.controllers.ApplicationViewModel
 @import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.TermsOfUseStatus.AGREEMENT_REQUIRED
 @import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.TermsOfUseStatus.AGREED
+@import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.TermsOfUseVersion
 
 @this(devMain: DevMain2, leftHandNav: LeftHandNav)
 
-@(applicationView: ApplicationViewModel, form: Form[TermsOfUseForm])(
+@(applicationView: ApplicationViewModel, form: Form[TermsOfUseForm], termsOfUseVersion: TermsOfUseVersion)(
   implicit request: play.api.mvc.Request[Any], loggedIn: DeveloperSession, messages: Messages, appConfig: ApplicationConfig, navSection: String = "details"
 )
 
@@ -62,7 +63,7 @@
   }
 
   <div id="termsOfUse">
-    @partials.termsOfUse()
+    @termsOfUseVersion.getTermsOfUseAsHtml()
   </div>
 
   @if(app.termsOfUseStatus == AGREEMENT_REQUIRED) {
