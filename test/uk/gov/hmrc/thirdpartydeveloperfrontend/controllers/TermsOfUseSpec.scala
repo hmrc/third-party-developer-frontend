@@ -18,12 +18,12 @@ package uk.gov.hmrc.thirdpartydeveloperfrontend.controllers
 
 import uk.gov.hmrc.thirdpartydeveloperfrontend.builder.DeveloperBuilder
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.ApplicationUpdateSuccessful
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.{TermsOfUseVersion, applications}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.Environment.{PRODUCTION, SANDBOX}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.CollaboratorRole.ADMINISTRATOR
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.{LoggedInState, Session}
-import uk.gov.hmrc.thirdpartydeveloperfrontend.mocks.service.{ApplicationActionServiceMock, ApplicationServiceMock, SessionServiceMock}
+import uk.gov.hmrc.thirdpartydeveloperfrontend.mocks.service.{ApplicationActionServiceMock, ApplicationServiceMock, SessionServiceMock, TermsOfUseVersionServiceMock}
 import org.joda.time.DateTime
 import org.joda.time.format.DateTimeFormat
 import org.mockito.ArgumentCaptor
@@ -42,13 +42,13 @@ import scala.concurrent.Future.successful
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.DeveloperSession
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.LocalUserIdTracker
 
-class TermsOfUseSpec 
-    extends BaseControllerSpec 
+class TermsOfUseSpec
+    extends BaseControllerSpec
     with WithCSRFAddToken
     with DeveloperBuilder
     with LocalUserIdTracker {
 
-  trait Setup extends ApplicationServiceMock with SessionServiceMock with ApplicationActionServiceMock {
+  trait Setup extends ApplicationServiceMock with SessionServiceMock with ApplicationActionServiceMock with TermsOfUseVersionServiceMock {
 
     val termsOfUseView = app.injector.instanceOf[TermsOfUseView]
 
@@ -59,7 +59,8 @@ class TermsOfUseSpec
       sessionServiceMock,
       mcc,
       cookieSigner,
-      termsOfUseView
+      termsOfUseView,
+      termsOfUseVersionServiceMock
     )
 
     val loggedInDeveloper = buildDeveloper()
@@ -106,21 +107,15 @@ class TermsOfUseSpec
   }
 
   "termsOfUsePartial" should {
-    "render the partial with correct version, date and links to the support page" in new Setup {
-
-      val version = "1.1"
-      val date = DateTime.parse("2018-06-25")
+    "render the partial" in new Setup {
+      returnLatestTermsOfUseVersion
 
       when(underTest.appConfig.thirdPartyDeveloperFrontendUrl).thenReturn("http://tpdf")
-      when(underTest.appConfig.currentTermsOfUseVersion).thenReturn(version)
-      when(underTest.appConfig.currentTermsOfUseDate).thenReturn(date)
 
       val request = FakeRequest()
       val result = underTest.termsOfUsePartial()(request)
 
       status(result) shouldBe OK
-      contentAsString(result) should include(s"Version $version issued 25 June 2018")
-      contentAsString(result) should include("http://tpdf/developer/support")
     }
   }
 
@@ -128,6 +123,7 @@ class TermsOfUseSpec
 
     "render the page for an administrator on a standard production app when the ToU have not been agreed" in new Setup {
       val checkInformation = CheckInformation(termsOfUseAgreements = List.empty)
+      returnTermsOfUseVersionForApplication
       givenApplicationExists(checkInformation = Some(checkInformation))
       val result = addToken(underTest.termsOfUse(appId))(loggedInRequest)
       status(result) shouldBe OK
@@ -142,6 +138,7 @@ class TermsOfUseSpec
       val version = "1.0"
 
       val checkInformation = CheckInformation(termsOfUseAgreements = List(TermsOfUseAgreement(email, timeStamp, version)))
+      returnTermsOfUseVersionForApplication
       givenApplicationExists(checkInformation = Some(checkInformation))
       val result = addToken(underTest.termsOfUse(appId))(loggedInRequest)
       status(result) shouldBe OK
@@ -171,12 +168,8 @@ class TermsOfUseSpec
   "agreeTermsOfUse" should {
 
     "record the terms of use agreement for an administrator on a standard production app" in new Setup {
-
-      val version = "1.1"
-
-      when(underTest.appConfig.currentTermsOfUseVersion).thenReturn(version)
-
       val application = givenApplicationExists()
+      returnLatestTermsOfUseVersion
       val captor: ArgumentCaptor[CheckInformation] = ArgumentCaptor.forClass(classOf[CheckInformation])
       when(underTest.applicationService.updateCheckInformation(eqTo(application), captor.capture())(*)).thenReturn(Future.successful(ApplicationUpdateSuccessful))
 
@@ -187,10 +180,11 @@ class TermsOfUseSpec
 
       val termsOfUseAgreement = captor.getValue.termsOfUseAgreements.head
       termsOfUseAgreement.emailAddress shouldBe loggedInDeveloper.email
-      termsOfUseAgreement.version shouldBe version
+      termsOfUseAgreement.version shouldBe TermsOfUseVersion.latest.toString
     }
 
     "return a bad request if termsOfUseAgreed is not set in the request" in new Setup {
+      returnTermsOfUseVersionForApplication
       givenApplicationExists()
       val result = addToken(underTest.agreeTermsOfUse(appId))(loggedInRequest)
       status(result) shouldBe BAD_REQUEST

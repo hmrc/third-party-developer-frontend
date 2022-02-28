@@ -48,15 +48,15 @@ import scala.concurrent.Future.{failed, successful}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.LocalUserIdTracker
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.DeveloperSession
 
-class CheckYourAnswersSpec 
-    extends BaseControllerSpec 
-    with LocalUserIdTracker 
+class CheckYourAnswersSpec
+    extends BaseControllerSpec
+    with LocalUserIdTracker
     with DeveloperBuilder
     with SampleSession
     with SampleApplication
-    with SubscriptionTestHelperSugar 
-    with WithCSRFAddToken 
-    with SubscriptionsBuilder 
+    with SubscriptionTestHelperSugar
+    with WithCSRFAddToken
+    with SubscriptionsBuilder
 {
 
   private def aClientSecret() = ClientSecret(randomUUID.toString, randomUUID.toString, DateTimeUtils.now.withZone(DateTimeZone.getDefault))
@@ -120,7 +120,7 @@ class CheckYourAnswersSpec
 
   val groupedSubsSubscribedToNothing = GroupedSubscriptions(testApis = Seq.empty, apis = Seq.empty, exampleApi = None)
 
-  trait Setup extends ApplicationServiceMock with ApplicationActionServiceMock with SessionServiceMock {
+  trait Setup extends ApplicationServiceMock with ApplicationActionServiceMock with SessionServiceMock with TermsOfUseVersionServiceMock {
     val checkYourAnswersView = app.injector.instanceOf[CheckYourAnswersView]
     val landingPageView = app.injector.instanceOf[LandingPageView]
     val teamView = app.injector.instanceOf[TeamView]
@@ -151,7 +151,8 @@ class CheckYourAnswersSpec
       termsAndConditionsView,
       privacyPolicyView,
       apiSubscriptionsViewTemplate,
-      contactDetailsView
+      contactDetailsView,
+      termsOfUseVersionServiceMock
     )
 
     fetchSessionByIdReturns(sessionId, session)
