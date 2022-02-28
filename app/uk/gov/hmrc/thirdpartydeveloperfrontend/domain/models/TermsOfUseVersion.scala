@@ -18,7 +18,6 @@ package uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models
 
 import _root_.views.html.partials
 import uk.gov.hmrc.thirdpartydeveloperfrontend.config.ApplicationConfig
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.Application
 
 object TermsOfUseVersion {
   def fromVersionString(version: String): Option[TermsOfUseVersion] = version match {
@@ -27,12 +26,6 @@ object TermsOfUseVersion {
     case "1.2" => Some(V1_2)
     case "2.0" => Some(V2_0)
     case _ => None
-  }
-
-  def fromApplication(application: Application): Option[TermsOfUseVersion] = {
-    application.checkInformation
-      .flatMap(checkInformation => checkInformation.termsOfUseAgreements.lastOption)
-      .flatMap(agreement => TermsOfUseVersion.fromVersionString(agreement.version))
   }
 
   case object V1_2 extends TermsOfUseVersion

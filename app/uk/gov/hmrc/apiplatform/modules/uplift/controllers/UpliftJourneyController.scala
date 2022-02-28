@@ -190,17 +190,19 @@ class UpliftJourneyController @Inject() (val errorHandler: ErrorHandler,
 @Singleton
 class UpliftJourneySwitch @Inject() (upliftJourneyConfig: UpliftJourneyConfig) {
 
-  private def upliftJourneyTurnedOnInRequestHeader(implicit request: Request[_]): Boolean =
+  private def upliftJourneyTurnedOnInRequestHeader(implicit request: Request[_]): Boolean = {
     request.headers.get("useNewUpliftJourney").fold(false) { setting =>
       Try(setting.toBoolean).getOrElse(false)
     }
+  }
 
-  def shouldUseV2(implicit request: Request[_]): Boolean =
+  def shouldUseV2(implicit request: Request[_]): Boolean = {
     upliftJourneyConfig.status match {
       case On => true
       case OnDemand if upliftJourneyTurnedOnInRequestHeader => true
       case _ => false
     }
+  }
 
   def performSwitch(newUpliftPath: => Future[Result], existingUpliftPath: => Future[Result])(implicit request: Request[_]): Future[Result] =
     if(shouldUseV2) newUpliftPath else existingUpliftPath

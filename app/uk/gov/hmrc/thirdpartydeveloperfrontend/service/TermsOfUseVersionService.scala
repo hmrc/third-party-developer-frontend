@@ -29,6 +29,12 @@ class TermsOfUseVersionService @Inject() (upliftJourneySwitch: UpliftJourneySwit
     if (upliftJourneySwitch.shouldUseV2) TermsOfUseVersion.latest else TermsOfUseVersion.V1_2
   }
   def getForApplication(application: Application)(implicit request: Request[AnyContent]): TermsOfUseVersion = {
-    TermsOfUseVersion.fromApplication(application).getOrElse(getLatest())
+    (
+      for {
+        checkInformation <- application.checkInformation
+        agreement <- checkInformation.termsOfUseAgreements.lastOption
+        version <- TermsOfUseVersion.fromVersionString(agreement.version)
+      } yield version
+    ).getOrElse(getLatest())
   }
 }
