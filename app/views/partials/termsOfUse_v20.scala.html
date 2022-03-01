@@ -16,8 +16,6 @@
 
 @import org.joda.time.format.DateTimeFormat
 
-@()(implicit applicationConfig: ApplicationConfig)
-
 <div class="govuk-grid-column-full">
   <div class="govuk-grid-column-one-half">
     <ul class="govuk-list terms-of-use-nav-links">
@@ -89,7 +87,7 @@
 
   <p class="govuk-body">Share the terms of use with your colleagues.
   </p>
-  <button class="govuk-button govuk-button--secondary" data-module="govuk-button">
+  <button class="govuk-button govuk-button--secondary" data-module="govuk-button" onclick="javascript:navigator.clipboard.writeText(window.location.href)">
     Copy link to clipboard
   </button>
 
