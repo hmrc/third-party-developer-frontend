@@ -92,7 +92,7 @@ class QuestionsController @Inject()(
   }
 
   def updateQuestion(submissionId: Submission.Id, questionId: QuestionId, answers: Option[ActualAnswer] = None, errors: Option[String] = None) = withSubmission(submissionId) { implicit request => 
-    val submitAction: Call = uk.gov.hmrc.apiplatform.modules.submissions.controllers.routes.QuestionsController.updateAnswer(submissionId, questionId)
+    val submitAction = uk.gov.hmrc.apiplatform.modules.submissions.controllers.routes.QuestionsController.updateAnswer(submissionId, questionId)
     processQuestion(submissionId, questionId, answers, errors)(submitAction)
   }
 

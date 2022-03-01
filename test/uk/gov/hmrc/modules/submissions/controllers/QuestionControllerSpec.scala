@@ -36,6 +36,7 @@ import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.Applic
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
 import play.filters.csrf.CSRF
+import org.scalatest.AppendedClues
 
 class QuestionControllerSpec 
   extends BaseControllerSpec
@@ -82,7 +83,8 @@ class QuestionControllerSpec
     with SubmissionServiceMockModule
     with HasSubscriptions
     with HasSessionDeveloperFlow
-    with HasAppInTestingState {
+    with HasAppInTestingState
+    with AppendedClues {
 
     implicit val hc = HeaderCarrier()
 
@@ -108,15 +110,37 @@ class QuestionControllerSpec
     "succeed" in new Setup {
       SubmissionServiceMock.Fetch.thenReturns(aSubmission.withIncompleteProgress)
 
+      val formSubmissionLink = s"${aSubmission.id.value}/question/${questionId.value}"
       val result = controller.showQuestion(aSubmission.id, questionId)(loggedInRequest.withCSRFToken)
 
       status(result) shouldBe OK
+      contentAsString(result) contains(formSubmissionLink) shouldBe true withClue(s"(HTML content did not contain $formSubmissionLink)")
     }
 
     "fail with a BAD REQUEST for an invalid questionId" in new Setup {
       SubmissionServiceMock.Fetch.thenReturns(aSubmission.withIncompleteProgress)
 
       val result = controller.showQuestion(aSubmission.id, QuestionId("BAD_ID"))(loggedInRequest.withCSRFToken)
+
+      status(result) shouldBe BAD_REQUEST
+    }
+  }
+
+  "updateQuestion" should {
+    "succeed" in new Setup {
+      SubmissionServiceMock.Fetch.thenReturns(aSubmission.withIncompleteProgress)
+
+      val formSubmissionLink = s"${aSubmission.id.value}/question/${questionId.value}/update"
+      val result = controller.updateQuestion(aSubmission.id, questionId)(loggedInRequest.withCSRFToken)
+      
+      status(result) shouldBe OK
+      contentAsString(result) contains(formSubmissionLink) shouldBe true withClue(s"(HTML content did not contain $formSubmissionLink)")
+    }
+
+    "fail with a BAD REQUEST for an invalid questionId" in new Setup {
+      SubmissionServiceMock.Fetch.thenReturns(aSubmission.withIncompleteProgress)
+
+      val result = controller.updateQuestion(aSubmission.id, QuestionId("BAD_ID"))(loggedInRequest.withCSRFToken)
 
       status(result) shouldBe BAD_REQUEST
     }
