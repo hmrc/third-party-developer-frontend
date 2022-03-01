@@ -24,12 +24,13 @@ import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.ManageSubscriptions.F
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.{ApplicationAlreadyExists, DeskproTicketCreationFailed}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.apidefinitions.{APISubscriptionStatus, _}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications._
+
 import javax.inject.{Inject, Singleton}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.controllers.ApplicationViewModel
 import play.api.data.Form
 import play.api.libs.crypto.CookieSigner
 import play.api.mvc._
-import uk.gov.hmrc.thirdpartydeveloperfrontend.service.{ApplicationService, SessionService, ApplicationActionService}
+import uk.gov.hmrc.thirdpartydeveloperfrontend.service.{ApplicationActionService, ApplicationService, SessionService, TermsOfUseVersionService}
 import views.html.checkpages._
 import views.html.checkpages.applicationcheck.LandingPageView
 import views.html.checkpages.applicationcheck.team.{TeamMemberAddView, TeamMemberRemoveConfirmationView}
@@ -59,7 +60,8 @@ class CheckYourAnswers @Inject() (
     val termsAndConditionsView: TermsAndConditionsView,
     val privacyPolicyView: PrivacyPolicyView,
     val apiSubscriptionsViewTemplate: ApiSubscriptionsView,
-    val contactDetailsView: ContactDetailsView
+    val contactDetailsView: ContactDetailsView,
+    val termsOfUseVersionService: TermsOfUseVersionService
 )(implicit val ec: ExecutionContext, val appConfig: ApplicationConfig)
     extends ApplicationController(mcc)
     with ApplicationHelper

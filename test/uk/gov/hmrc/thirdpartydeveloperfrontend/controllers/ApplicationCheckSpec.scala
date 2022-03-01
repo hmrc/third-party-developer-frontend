@@ -88,7 +88,7 @@ class ApplicationCheckSpec
           subscribed = true,
           requiresTrust = false,
           fields = emptyFields
-        ) 
+        )
       )
     )
   )
@@ -170,7 +170,7 @@ class ApplicationCheckSpec
     createFullyConfigurableApplication(collaborators, appId, clientId, state, checkInformation, access)
   }
 
-  trait BaseSetup extends ApplicationServiceMock with ApplicationActionServiceMock with SessionServiceMock with ApplicationProvider {
+  trait BaseSetup extends ApplicationServiceMock with ApplicationActionServiceMock with SessionServiceMock with ApplicationProvider with TermsOfUseVersionServiceMock {
     val landingPageView = app.injector.instanceOf[LandingPageView]
     val unauthorisedAppDetailsView = app.injector.instanceOf[UnauthorisedAppDetailsView]
     val nameSubmittedView = app.injector.instanceOf[NameSubmittedView]
@@ -204,7 +204,8 @@ class ApplicationCheckSpec
       contactDetailsView,
       apiSubscriptionsViewTemplate,
       privacyPolicyView,
-      termsAndConditionsView
+      termsAndConditionsView,
+      termsOfUseVersionServiceMock
     )
 
     val application = createApplication()
@@ -1139,6 +1140,7 @@ class ApplicationCheckSpec
     "return page" in new Setup {
 
       def createApplication() = createPartiallyConfigurableApplication()
+      returnTermsOfUseVersionForApplication
       private val result = addToken(underTest.termsOfUsePage(appId))(loggedInRequest)
 
       status(result) shouldBe OK

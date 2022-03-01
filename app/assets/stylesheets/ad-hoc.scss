@@ -345,7 +345,14 @@ tr.teamMembers, th {
 .compressed-header {
   margin-top: 0px;
 }
-
+#termsOfUse {
+  ul.terms-of-use-nav-links {
+    list-style-type: none;
+  }
+  .govuk-grid-column-full, .govuk-grid-column-one-half {
+    padding: 0;
+  }
+}
 .feedback-banner {
   $blue: #1d70b8;
   $light-grey: #f3f2f1;

@@ -18,9 +18,8 @@
 
 @()(implicit applicationConfig: ApplicationConfig)
 
-@defining(DateTimeFormat.forPattern("dd MMMM yyyy")) { dateFormatter =>
-  <p class="govuk-body">Version @{applicationConfig.currentTermsOfUseVersion} issued @{dateFormatter.print(applicationConfig.currentTermsOfUseDate)}</p>
-}
+<p class="govuk-body">Version 1.2 issued 18 December 2018</p>
+
 <p class="govuk-body">
   These terms of use explain what you can expect from us and what we expect from you when creating and operating software services that consume HMRC Application Programming Interfaces (APIs) hosted on the HMRC Developer Hub.
   They do not create a legal relationship between HMRC and any software developer.
