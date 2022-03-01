@@ -65,7 +65,7 @@ class QuestionsController @Inject()(
 
   import cats.instances.future.catsStdInstancesForFuture
 
-  private def fiddleWithQuestion(submissionId: Submission.Id, questionId: QuestionId, answers: Option[ActualAnswer] = None, errors: Option[String] = None)(submitAction: Call)(implicit request: SubmissionApplicationRequest[AnyContent]) = {
+  private def processQuestion(submissionId: Submission.Id, questionId: QuestionId, answers: Option[ActualAnswer] = None, errors: Option[String] = None)(submitAction: Call)(implicit request: SubmissionApplicationRequest[AnyContent]) = {
     val currentAnswer = request.submission.latestInstance.answersToQuestions.get(questionId)
     val submission = request.submission
     val oQuestion = submission.findQuestion(questionId)
@@ -87,18 +87,16 @@ class QuestionsController @Inject()(
   }
 
   def showQuestion(submissionId: Submission.Id, questionId: QuestionId, answers: Option[ActualAnswer] = None, errors: Option[String] = None) = withSubmission(submissionId) { implicit request => 
-    println("***** Showing Question *****")
     val submitAction = uk.gov.hmrc.apiplatform.modules.submissions.controllers.routes.QuestionsController.recordAnswer(submissionId, questionId)
-    fiddleWithQuestion(submissionId, questionId, answers, errors)(submitAction)
+    processQuestion(submissionId, questionId, answers, errors)(submitAction)
   }
 
   def updateQuestion(submissionId: Submission.Id, questionId: QuestionId, answers: Option[ActualAnswer] = None, errors: Option[String] = None) = withSubmission(submissionId) { implicit request => 
-    println("***** Updating Question *****")
     val submitAction: Call = uk.gov.hmrc.apiplatform.modules.submissions.controllers.routes.QuestionsController.updateAnswer(submissionId, questionId)
-    fiddleWithQuestion(submissionId, questionId, answers, errors)(submitAction)
+    processQuestion(submissionId, questionId, answers, errors)(submitAction)
   }
 
-  private def fiddleWithAnswer(submissionId: Submission.Id, questionId: QuestionId)(success: (ExtendedSubmission) => Future[Result])(implicit request: SubmissionApplicationRequest[AnyContent]) = {
+  private def processAnswer(submissionId: Submission.Id, questionId: QuestionId)(success: (ExtendedSubmission) => Future[Result])(implicit request: SubmissionApplicationRequest[AnyContent]) = {
     lazy val failed = (msg: String) => {
       logger.info(s"Failed to recordAnswer - $msg")
       showQuestion(submissionId, questionId, None, Some("Please provide an answer to the question"))(request)
@@ -143,27 +141,28 @@ class QuestionsController @Inject()(
       successful(Redirect(nextQuestion.fold(toProdChecklist)(toNextQuestion)))
     }
 
-    println("***** Recording Answer *****")
-
-    fiddleWithAnswer(submissionId, questionId)(success)
+    processAnswer(submissionId, questionId)(success)
   }
 
   def updateAnswer(submissionId: Submission.Id, questionId: QuestionId) = withSubmission(submissionId) { implicit request =>
+    def hasQuestionBeenAnswered(questionId: QuestionId) = {
+      request.submission.latestInstance.answersToQuestions.get(questionId).fold(false)(_ => true)
+    }
+
     val success = (extSubmission: ExtendedSubmission) => { 
       val questionnaire = extSubmission.submission.findQuestionnaireContaining(questionId).get
       val nextQuestion = extSubmission.questionnaireProgress.get(questionnaire.id)
                         .flatMap(_.questionsToAsk.dropWhile(_ != questionId).tail.headOption)
-                        
-      val currentAnswer = request.submission.latestInstance.answersToQuestions.get(questionId)
       
       lazy val toCheckAnswers = uk.gov.hmrc.apiplatform.modules.submissions.controllers.routes.CheckAnswersController.checkAnswersPage(request.submission.applicationId)
-      lazy val toNextQuestion = (nextQuestionId) => uk.gov.hmrc.apiplatform.modules.submissions.controllers.routes.QuestionsController.updateQuestion(submissionId, nextQuestionId)
+      lazy val toNextQuestion = (nextQuestionId: QuestionId) => if(hasQuestionBeenAnswered(nextQuestionId))
+        uk.gov.hmrc.apiplatform.modules.submissions.controllers.routes.CheckAnswersController.checkAnswersPage(request.submission.applicationId)
+      else
+        uk.gov.hmrc.apiplatform.modules.submissions.controllers.routes.QuestionsController.updateQuestion(submissionId, nextQuestionId)
 
       successful(Redirect(nextQuestion.fold(toCheckAnswers)(toNextQuestion)))
     }
 
-    println("***** Updating Answer *****")
-
-    fiddleWithAnswer(submissionId, questionId)(success)
+    processAnswer(submissionId, questionId)(success)
   }
 }
