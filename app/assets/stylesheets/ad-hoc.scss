@@ -346,6 +346,7 @@ tr.teamMembers, th {
   margin-top: 0px;
 }
 #termsOfUse {
+  overflow: auto;
   ul.terms-of-use-nav-links {
     list-style-type: none;
   }
