@@ -70,13 +70,13 @@ trait ProgressTestDataHelper {
       def withIncompleteProgress(): ExtendedSubmission =
         ExtendedSubmission(submission, allQuestionnaireIds.map(i => (i -> incompleteQuestionnaireProgress(i))).toList.toMap)
         
-      def withCompletedProgresss(): ExtendedSubmission =
+      def withCompletedProgress(): ExtendedSubmission =
         ExtendedSubmission(submission, allQuestionnaireIds.map(i => (i -> completedQuestionnaireProgress(i))).toList.toMap)
 
-      def withNotStartedProgresss(): ExtendedSubmission =
+      def withNotStartedProgress(): ExtendedSubmission =
         ExtendedSubmission(submission, allQuestionnaireIds.map(i => (i -> notStartedQuestionnaireProgress(i))).toList.toMap)
 
-      def withNotApplicableProgresss(): ExtendedSubmission =
+      def withNotApplicableProgress(): ExtendedSubmission =
         ExtendedSubmission(submission, allQuestionnaireIds.map(i => (i -> notApplicableQuestionnaireProgress(i))).toList.toMap)
     }
 }
@@ -102,7 +102,7 @@ trait SubmissionsTestData extends QuestionBuilder with QuestionnaireTestData wit
   val completelyAnswerExtendedSubmission = 
       aSubmission.copy(id = completedSubmissionId)
       .hasCompletelyAnsweredWith(answersToQuestions)
-      .withCompletedProgresss
+      .withCompletedProgress
 
   val gatekeeperUserName = "gatekeeperUserName"
   val reasons = "some reasons"
@@ -114,9 +114,8 @@ trait SubmissionsTestData extends QuestionBuilder with QuestionnaireTestData wit
   val declinedSubmission = Submission.decline(now, gatekeeperUserName, reasons)(submittedSubmission)
   val grantedSubmission = Submission.grant(now, gatekeeperUserName)(submittedSubmission)
 
-  def buildSubmissionWithQuestions(): Submission = {
+  def buildSubmissionWithQuestions(appId: ApplicationId = ApplicationId.random): Submission = {
     val subId = Submission.Id.random
-    val appId = ApplicationId.random
 
     val question1 = yesNoQuestion(1)
     val questionRIName = textQuestion(2)
@@ -180,7 +179,7 @@ trait SubmissionsTestData extends QuestionBuilder with QuestionnaireTestData wit
   def buildPartiallyAnsweredSubmission(submission: Submission = buildSubmissionWithQuestions()): Submission = 
     buildAnsweredSubmission(false)(submission)
 
-  def buildFullyAnsweredSubmission(submission: Submission = buildSubmissionWithQuestions()): Submission =
+  def buildFullyAnsweredSubmission(applicationId: ApplicationId = ApplicationId.random, submission: Submission = buildSubmissionWithQuestions(applicationId)): Submission =
     buildAnsweredSubmission(true)(submission)
 
 

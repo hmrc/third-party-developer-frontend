@@ -153,7 +153,7 @@ class QuestionsController @Inject()(
       val questionnaire = extSubmission.submission.findQuestionnaireContaining(questionId).get
       val nextQuestion = extSubmission.questionnaireProgress.get(questionnaire.id)
                         .flatMap(_.questionsToAsk.dropWhile(_ != questionId).tail.headOption)
-      
+
       lazy val toCheckAnswers = uk.gov.hmrc.apiplatform.modules.submissions.controllers.routes.CheckAnswersController.checkAnswersPage(request.submission.applicationId)
       lazy val toNextQuestion = (nextQuestionId: QuestionId) => if(hasQuestionBeenAnswered(nextQuestionId))
         uk.gov.hmrc.apiplatform.modules.submissions.controllers.routes.CheckAnswersController.checkAnswersPage(request.submission.applicationId)

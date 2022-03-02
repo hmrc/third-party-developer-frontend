@@ -129,7 +129,7 @@ class CheckAnswersControllerSpec
 
   "checkAnswersPage" should {
     "succeed when submission is complete" in new Setup {
-      SubmissionServiceMock.FetchLatestExtendedSubmission.thenReturns(answeredSubmission.withCompletedProgresss)
+      SubmissionServiceMock.FetchLatestExtendedSubmission.thenReturns(answeredSubmission.withCompletedProgress)
 
       val result = underTest.checkAnswersPage(applicationId)(loggedInRequest.withCSRFToken)
 
@@ -157,7 +157,7 @@ class CheckAnswersControllerSpec
   "checkAnswersAction" should {
     "succeed when production credentials are requested successfully" in new Setup {
       when(mockRequestProdCreds.requestProductionCredentials(eqTo(applicationId), *[DeveloperSession])(*)).thenReturn(successful(Right(sampleApp)))
-      SubmissionServiceMock.FetchLatestExtendedSubmission.thenReturns(answeredSubmission.withCompletedProgresss)
+      SubmissionServiceMock.FetchLatestExtendedSubmission.thenReturns(answeredSubmission.withCompletedProgress)
 
       val result = underTest.checkAnswersAction(applicationId)(loggedInRequest.withCSRFToken)
 

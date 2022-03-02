@@ -344,14 +344,15 @@ trait QuestionnaireTestData {
       testQuestionIdsOfInterest.responsibleIndividualNameId -> TextAnswer("Bob Cratchett")
     )  
 
-  val sampleAnswersToQuestions = Map(
+  val completeAnswersToQuestions = Map(
     (DevelopmentPractices.question1.id -> SingleChoiceAnswer("Yes")),
     (DevelopmentPractices.question2.id -> SingleChoiceAnswer("No")),
     (DevelopmentPractices.question3.id -> SingleChoiceAnswer("No")),
-    (OrganisationDetails.question1.id -> TextAnswer("https://example.com")),
     (OrganisationDetails.questionRI1.id -> TextAnswer("Bob Cratchett")),
     (OrganisationDetails.questionRI2.id -> TextAnswer("bob@example.com")),
     (OrganisationDetails.question1.id -> TextAnswer("https://example.com")),
+    (OrganisationDetails.question2.id -> SingleChoiceAnswer("VAT registration number")),
+    (OrganisationDetails.question2c.id -> TextAnswer("123456789")),
     (CustomersAuthorisingYourSoftware.question1.id -> AcknowledgedAnswer),
     (CustomersAuthorisingYourSoftware.question2.id -> TextAnswer("name of software")),
     (CustomersAuthorisingYourSoftware.question3.id -> MultipleChoiceAnswer(Set("In the UK"))),
