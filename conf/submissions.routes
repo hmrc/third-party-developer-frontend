@@ -3,6 +3,8 @@ POST        /application/:aid/production-credentials-checklist                  
 
 GET         /:sid/question/:qid                                                   uk.gov.hmrc.apiplatform.modules.submissions.controllers.QuestionsController.showQuestion(sid: Submission.Id, qid: QuestionId)
 POST        /:sid/question/:qid                                                   uk.gov.hmrc.apiplatform.modules.submissions.controllers.QuestionsController.recordAnswer(sid: Submission.Id, qid: QuestionId)
+GET         /:sid/question/:qid/update                                            uk.gov.hmrc.apiplatform.modules.submissions.controllers.QuestionsController.updateQuestion(sid: Submission.Id, qid: QuestionId)
+POST        /:sid/question/:qid/update                                            uk.gov.hmrc.apiplatform.modules.submissions.controllers.QuestionsController.updateAnswer(sid: Submission.Id, qid: QuestionId)
 
 GET         /application/:aid/cancel-request                                      uk.gov.hmrc.apiplatform.modules.submissions.controllers.CancelRequestController.cancelRequestForProductionCredentialsPage(aid: ApplicationId)
 POST        /application/:aid/cancel-request                                      uk.gov.hmrc.apiplatform.modules.submissions.controllers.CancelRequestController.cancelRequestForProductionCredentialsAction(aid: ApplicationId)

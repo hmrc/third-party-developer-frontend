@@ -64,3 +64,13 @@ trait ApplicationActionServiceMock extends MockitoSugar with ArgumentMatchersSug
   }
 
 }
+
+trait ApplicationActionServiceMockModule extends MockitoSugar with ArgumentMatchersSugar  {
+  protected trait BaseApplicationActionServiceMock {
+    def aMock: ApplicationActionService
+  }
+
+  object ApplicationActionServiceMock extends BaseApplicationActionServiceMock {
+    val aMock = mock[ApplicationActionService](withSettings.lenient())
+  }
+}

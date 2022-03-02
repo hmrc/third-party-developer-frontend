@@ -36,6 +36,18 @@ import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.Applic
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
 import play.filters.csrf.CSRF
+import org.scalatest.AppendedClues
+import uk.gov.hmrc.apiplatform.modules.submissions.domain.models.Submission
+import uk.gov.hmrc.time.DateTimeUtils
+import uk.gov.hmrc.apiplatform.modules.submissions.domain.models.SingleChoiceAnswer
+import uk.gov.hmrc.apiplatform.modules.submissions.domain.models.TextAnswer
+import uk.gov.hmrc.apiplatform.modules.submissions.domain.models.AcknowledgedAnswer
+import uk.gov.hmrc.apiplatform.modules.submissions.domain.models.MultipleChoiceAnswer
+import uk.gov.hmrc.apiplatform.modules.submissions.domain.models.NoAnswer
+import uk.gov.hmrc.apiplatform.modules.submissions.domain.models.ExtendedSubmission
+import cats.data.NonEmptyList
+import uk.gov.hmrc.apiplatform.modules.submissions.domain.models.QuestionnaireProgress
+import uk.gov.hmrc.apiplatform.modules.submissions.domain.models.QuestionnaireState
 
 class QuestionControllerSpec 
   extends BaseControllerSpec
@@ -82,7 +94,8 @@ class QuestionControllerSpec
     with SubmissionServiceMockModule
     with HasSubscriptions
     with HasSessionDeveloperFlow
-    with HasAppInTestingState {
+    with HasAppInTestingState
+    with AppendedClues {
 
     implicit val hc = HeaderCarrier()
 
@@ -108,15 +121,37 @@ class QuestionControllerSpec
     "succeed" in new Setup {
       SubmissionServiceMock.Fetch.thenReturns(aSubmission.withIncompleteProgress)
 
+      val formSubmissionLink = s"${aSubmission.id.value}/question/${questionId.value}"
       val result = controller.showQuestion(aSubmission.id, questionId)(loggedInRequest.withCSRFToken)
 
       status(result) shouldBe OK
+      contentAsString(result) contains(formSubmissionLink) shouldBe true withClue(s"(HTML content did not contain $formSubmissionLink)")
     }
 
     "fail with a BAD REQUEST for an invalid questionId" in new Setup {
       SubmissionServiceMock.Fetch.thenReturns(aSubmission.withIncompleteProgress)
 
       val result = controller.showQuestion(aSubmission.id, QuestionId("BAD_ID"))(loggedInRequest.withCSRFToken)
+
+      status(result) shouldBe BAD_REQUEST
+    }
+  }
+
+  "updateQuestion" should {
+    "succeed" in new Setup {
+      SubmissionServiceMock.Fetch.thenReturns(aSubmission.withIncompleteProgress)
+
+      val formSubmissionLink = s"${aSubmission.id.value}/question/${questionId.value}/update"
+      val result = controller.updateQuestion(aSubmission.id, questionId)(loggedInRequest.withCSRFToken)
+      
+      status(result) shouldBe OK
+      contentAsString(result) contains(formSubmissionLink) shouldBe true withClue(s"(HTML content did not contain $formSubmissionLink)")
+    }
+
+    "fail with a BAD REQUEST for an invalid questionId" in new Setup {
+      SubmissionServiceMock.Fetch.thenReturns(aSubmission.withIncompleteProgress)
+
+      val result = controller.updateQuestion(aSubmission.id, QuestionId("BAD_ID"))(loggedInRequest.withCSRFToken)
 
       status(result) shouldBe BAD_REQUEST
     }
@@ -157,6 +192,87 @@ class QuestionControllerSpec
       val result = controller.recordAnswer(aSubmission.id, questionId)(request.withCSRFToken)
 
       status(result) shouldBe BAD_REQUEST
+    }
+  }
+
+  "updateAnswer" should {
+    "succeed when given an answer and redirect to check answers page if no more questions need answering" in new Setup {
+      val fullyAnsweredSubmission = Submission.create(
+        "bob@example.com",
+        Submission.Id.random,
+        applicationId,
+        DateTimeUtils.now,
+        testGroups,
+        testQuestionIdsOfInterest,
+        standardContext
+      )
+      .hasCompletelyAnsweredWith(completeAnswersToQuestions)
+      .withCompletedProgress
+
+      SubmissionServiceMock.Fetch.thenReturns(fullyAnsweredSubmission)
+      SubmissionServiceMock.RecordAnswer.thenReturns(fullyAnsweredSubmission)
+
+      private val answer1 = "Yes"
+      private val request = loggedInRequest.withFormUrlEncodedBody("answer" -> answer1, "submit-action" -> "save")
+
+      val result = controller.updateAnswer(aSubmission.id, questionId)(request.withCSRFToken)
+
+      status(result) shouldBe SEE_OTHER
+      redirectLocation(result) shouldBe Some(s"/developer/submissions/application/${applicationId.value}/check-answers")
+    }
+
+    "succeed when given an answer and redirect to the next question to answer" in new Setup {
+      val fullyAnsweredSubmission = Submission.create(
+        "bob@example.com",
+        Submission.Id.random,
+        applicationId,
+        DateTimeUtils.now,
+        testGroups,
+        testQuestionIdsOfInterest,
+        standardContext
+      )
+      .hasCompletelyAnsweredWith(completeAnswersToQuestions)
+      .withCompletedProgress
+
+      val modifiedAnswersToQuestions = fullyAnsweredSubmission.submission.latestInstance.answersToQuestions - 
+        OrganisationDetails.question2c.id ++ Map(
+          OrganisationDetails.question2.id -> SingleChoiceAnswer("Unique Taxpayer Reference (UTR)")
+        )
+
+      val modifiedProgress = Map(OrganisationDetails.questionnaire.id -> 
+        QuestionnaireProgress(QuestionnaireState.InProgress, 
+          List(
+            OrganisationDetails.questionRI1.id, 
+            OrganisationDetails.questionRI2.id, 
+            OrganisationDetails.question1.id, 
+            OrganisationDetails.question2.id, 
+            OrganisationDetails.question2b.id
+          )
+        )
+      )
+
+      val modifiedSubmission: ExtendedSubmission = fullyAnsweredSubmission.copy(
+        submission = fullyAnsweredSubmission.submission.copy(
+          instances = NonEmptyList(fullyAnsweredSubmission.submission.latestInstance.copy(
+            answersToQuestions = modifiedAnswersToQuestions
+          ), Nil)
+        ),
+        questionnaireProgress = fullyAnsweredSubmission.questionnaireProgress ++ modifiedProgress
+      )
+
+      SubmissionServiceMock.Fetch.thenReturns(fullyAnsweredSubmission)
+      SubmissionServiceMock.RecordAnswer.thenReturns(modifiedSubmission)
+
+      private val utrAnswer = "Unique Taxpayer Reference (UTR)"
+      private val request = loggedInRequest.withFormUrlEncodedBody("answer" -> utrAnswer, "submit-action" -> "save")
+
+      private val questionId = OrganisationDetails.question2.id
+      private val followUpQuestionId = OrganisationDetails.question2b.id
+
+      val result = controller.updateAnswer(fullyAnsweredSubmission.submission.id, questionId)(request.withCSRFToken)
+
+      status(result) shouldBe SEE_OTHER
+      redirectLocation(result) shouldBe Some(s"/developer/submissions/${fullyAnsweredSubmission.submission.id.value}/question/${followUpQuestionId.value}/update")
     }
   }
 }

@@ -128,7 +128,7 @@ class ProdCredsChecklistControllerSpec
     }
 
     "succeed" in new Setup {
-      SubmissionServiceMock.FetchLatestExtendedSubmission.thenReturns(answeredSubmission.withCompletedProgresss)
+      SubmissionServiceMock.FetchLatestExtendedSubmission.thenReturns(answeredSubmission.withCompletedProgress)
 
       val result = controller.productionCredentialsChecklistPage(appId)(loggedInRequest.withCSRFToken)
 
@@ -146,7 +146,7 @@ class ProdCredsChecklistControllerSpec
     }
 
     "redirect when when form is valid and complete" in new Setup {
-      SubmissionServiceMock.FetchLatestExtendedSubmission.thenReturns(answeredSubmission.withCompletedProgresss)
+      SubmissionServiceMock.FetchLatestExtendedSubmission.thenReturns(answeredSubmission.withCompletedProgress)
 
       val result = controller.productionCredentialsChecklistAction(appId)(loggedInRequest.withCSRFToken)
 
