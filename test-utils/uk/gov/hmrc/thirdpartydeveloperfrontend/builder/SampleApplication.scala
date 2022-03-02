@@ -43,4 +43,5 @@ trait SampleApplication {
   )
 
   val testingApp = sampleApp.copy(state = ApplicationState.testing)
+  val submittedApp = sampleApp.copy(state = ApplicationState.pendingGatekeeperApproval("requestedBy"))
 }

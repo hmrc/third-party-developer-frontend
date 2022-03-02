@@ -30,52 +30,24 @@ import javax.inject.{Inject, Singleton}
 import scala.concurrent.ExecutionContext
 import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.ApplicationController
 import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.checkpages.CanUseCheckActions
-import cats.data.NonEmptyList
-import uk.gov.hmrc.apiplatform.modules.submissions.domain.models._
 import uk.gov.hmrc.apiplatform.modules.submissions.services.SubmissionService
 import uk.gov.hmrc.apiplatform.modules.common.services.EitherTHelper
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.controllers.BadRequestWithErrorMessage
 import uk.gov.hmrc.apiplatform.modules.submissions.controllers.models.AnswersViewModel._
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.apidefinitions.APISubscriptionStatus
+import uk.gov.hmrc.apiplatform.modules.submissions.domain.models.Submission
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.Application
+import uk.gov.hmrc.apiplatform.modules.submissions.domain.models.AskWhen
+import uk.gov.hmrc.apiplatform.modules.submissions.controllers.models.AnswersViewModel
 
 object CredentialsRequestedController {
-  case class ViewQuestion(id: QuestionId, text: String, answer: String)
-  case class ViewQuestionnaire(label: String, state: String, id: QuestionnaireId, questions: NonEmptyList[ViewQuestion])
-  case class ViewModel(appId: ApplicationId, appName: String, questionnaires: List[ViewQuestionnaire])
-
-  def convertAnswer(answer: ActualAnswer): Option[String] = answer match {
-    case SingleChoiceAnswer(value) => Some(value)
-    case TextAnswer(value) => Some(value)
-    case MultipleChoiceAnswer(values) => Some(values.mkString)
-    case NoAnswer => Some("n/a")
-    case AcknowledgedAnswer => None
-  }
-  
-  def convertQuestion(extSubmission: ExtendedSubmission)(item: QuestionItem): Option[ViewQuestion] = {
-    val id = item.question.id
-    
-    extSubmission.submission.latestInstance.answersToQuestions.get(id).flatMap(convertAnswer).map(answer =>
-      ViewQuestion(id, item.question.wording.value, answer)
-    )
-  }
-  
-  def convertQuestionnaire(extSubmission: ExtendedSubmission)(questionnaire: Questionnaire): Option[ViewQuestionnaire] = {
-    val progress = extSubmission.questionnaireProgress.get(questionnaire.id).get
-    val state = QuestionnaireState.describe(progress.state)
-    
-    val questions = questionnaire.questions
-      .map(convertQuestion(extSubmission))
-      .collect { case Some(x) => x }
-    NonEmptyList.fromList(questions)
-      .map(ViewQuestionnaire(questionnaire.label.value, state, questionnaire.id, _))
-  }
-
-  def convertSubmissionToViewModel(extSubmission: ExtendedSubmission)(appId: ApplicationId, appName: String): ViewModel = {
-    val questionnaires = extSubmission.submission.groups.flatMap(g => g.links)
-      .map(convertQuestionnaire(extSubmission))
-      .collect { case Some(x) => x }
-
-    ViewModel(appId, appName, questionnaires)
-  }
+  case class CredentialsRequestedViewModel (
+    appId: ApplicationId, 
+    appName: String, 
+    subscriptions: Seq[APISubscriptionStatus],
+    sellResellOrDistribute: String,
+    answersViewModel: AnswersViewModel.ViewModel
+  )
 }
 
 @Singleton
@@ -99,21 +71,30 @@ class CredentialsRequestedController @Inject() (
   import SubmissionActionBuilders.{StateFilter,RoleFilter}
   import cats.implicits._
   import cats.instances.future.catsStdInstancesForFuture
-  
+  import CredentialsRequestedController.CredentialsRequestedViewModel
+
   val redirectToGetProdCreds = (applicationId: ApplicationId) => Redirect(routes.ProdCredsChecklistController.productionCredentialsChecklistPage(applicationId))
 
    /*, Read/Write and State details */ 
   def credentialsRequestedPage(productionAppId: ApplicationId) = withApplicationAndSubmittedSubmission(StateFilter.pendingApproval, RoleFilter.isTeamMember)(redirectToGetProdCreds(productionAppId))(productionAppId) { implicit request =>
     val failed = (err: String) => BadRequestWithErrorMessage(err)
     
-    val success = (viewModel: ViewModel) => {
+    val success = (viewModel: CredentialsRequestedViewModel) => {
       val err = request.msgRequest.flash.get("error")
       Ok(credentialsRequestedView(viewModel, err))
     }
 
+    def convertToViewModel(application: Application, submission: Submission, subscriptions: List[APISubscriptionStatus], answersViewModel: ViewModel): CredentialsRequestedViewModel = {
+      val inHouse = submission.context.get(AskWhen.Context.Keys.IN_HOUSE_SOFTWARE)
+      val sellResellOrDistribute = if(inHouse == Some("No")) "Yes" else "No"
+      val selectedSubscriptions = subscriptions.filter(s => s.subscribed)
+      CredentialsRequestedViewModel(application.id, application.name, selectedSubscriptions, sellResellOrDistribute, answersViewModel)
+    }
+
     val vm = for {
       extSubmission       <- fromOptionF(submissionService.fetchLatestExtendedSubmission(productionAppId), "No submission and/or application found")
-      viewModel            =  convertSubmissionToViewModel(extSubmission)(request.application.id, request.application.name)
+      answersViewModel    =  convertSubmissionToViewModel(extSubmission)(request.application.id, request.application.name)
+      viewModel           =  convertToViewModel(request.application, extSubmission.submission, request.subscriptions, answersViewModel)
     } yield viewModel
 
     vm.fold[Result](failed, success)
