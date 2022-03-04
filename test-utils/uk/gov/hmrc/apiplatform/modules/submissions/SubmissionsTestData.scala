@@ -269,7 +269,7 @@ trait MarkedSubmissionsTestData extends SubmissionsTestData with AnsweringQuesti
     (OrganisationDetails.questionRI2.id -> Pass),
     (CustomersAuthorisingYourSoftware.question3.id -> Pass),
     (CustomersAuthorisingYourSoftware.question4.id -> Pass),
-    (CustomersAuthorisingYourSoftware.question5.id -> Fail)
+    (CustomersAuthorisingYourSoftware.question6.id -> Fail)
   )
 
   val markedSubmission = MarkedSubmission(submittedSubmission, markedAnswers)

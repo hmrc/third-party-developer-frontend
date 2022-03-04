@@ -18,6 +18,8 @@ package uk.gov.hmrc.apiplatform.modules.submissions
 
 import uk.gov.hmrc.apiplatform.modules.submissions.domain.models._
 import cats.data.NonEmptyList
+import uk.gov.hmrc.apiplatform.modules.submissions.domain.models.AskWhen.Context.Keys
+
 import scala.collection.immutable.ListMap
 
 trait QuestionnaireTestData {
@@ -232,7 +234,7 @@ trait QuestionnaireTestData {
           CompoundFragment(
             StatementText("It must comply with our "),
             StatementLink("naming guidelines (opens in a new tab)", "https://developer.service.hmrc.gov.uk/api-documentation/docs/using-the-hub/name-guidelines"),
-            StatementText(".")            
+            StatementText(".")
           ),
           StatementText("Application name")
         )
@@ -252,39 +254,67 @@ trait QuestionnaireTestData {
       )
     )
 
-    val question4 = TextQuestion(
-      QuestionId("c0e4b068-23c9-4d51-a1fa-2513f50e428f"),
-      Wording("Give us your privacy policy URL"),
+    val question4 = ChooseOneOfQuestion(
+      QuestionId("b0ae9d71-e6a7-4cf6-abd4-7eb7ba992bc6"),
+      Wording("Do you have a privacy policy URL for your software?"),
       Statement(
         List(
-          StatementText("Include the policy which covers the software you are requesting production credentials for."),
+          StatementText("You need a privacy policy covering the software you request production credentials for.")
+        )
+      ),
+      ListMap(
+        (PossibleAnswer("Yes") -> Pass),
+        (PossibleAnswer("No") -> Fail),
+        (PossibleAnswer("The privacy policy is in desktop software") -> Pass)
+      )
+    )
+
+    val question5 = TextQuestion(
+      QuestionId("c0e4b068-23c9-4d51-a1fa-2513f50e428f"),
+      Wording("What is your privacy policy URL?"),
+      Statement(
+        List(
           StatementText("For example https://example.com/privacy-policy")
         )
-      ),
-      Some(("I don't have a privacy policy", Fail))
+      )
     )
-      
-    val question5 = TextQuestion(
-      QuestionId("0a6d6973-c49a-49c3-93ff-de58daa1b90c"),
-      Wording("Give us your terms and conditions URL"),
+
+    val question6 = ChooseOneOfQuestion(
+      QuestionId("ca6af382-4007-4228-a781-1446231578b9"),
+      Wording("Do you have a terms and conditions URL for your software?"),
       Statement(
         List(
-          StatementText("Your terms and conditions should cover the software you are requesting production credentials for."),
-          StatementText("For example https://example.com/terms-conditions")
+          StatementText("You need terms and conditions covering the software you request production credentials for.")
         )
       ),
-      Some(("I don't have terms and conditions", Fail))
+      ListMap(
+        (PossibleAnswer("Yes") -> Pass),
+        (PossibleAnswer("No") -> Fail),
+        (PossibleAnswer("The terms and conditions are in desktop software") -> Pass)
+      )
     )
-      
+
+    val question7 = TextQuestion(
+      QuestionId("0a6d6973-c49a-49c3-93ff-de58daa1b90c"),
+      Wording("What is your terms and conditions URL?"),
+      Statement(
+        List(
+          StatementText("For example https://example.com/terms-conditions")
+        )
+      )
+    )
+
     val questionnaire = Questionnaire(
       id = QuestionnaireId("3a7f3369-8e28-447c-bd47-efbabeb6d93f"),
       label = Label("Customers authorising your software"),
       questions = NonEmptyList.of(
         QuestionItem(question1),
         QuestionItem(question2),
-        QuestionItem(question3, AskWhenContext(AskWhen.Context.Keys.IN_HOUSE_SOFTWARE, "No")),
+        QuestionItem(question3, AskWhenContext(Keys.IN_HOUSE_SOFTWARE, "No")),
         QuestionItem(question4),
-        QuestionItem(question5)
+        QuestionItem(question5, AskWhenAnswer(question4, "Yes")),
+        QuestionItem(question6),
+        QuestionItem(question7, AskWhenAnswer(question6, "Yes"))
       )
     )
   }
@@ -315,8 +345,8 @@ trait QuestionnaireTestData {
     responsibleIndividualNameId   = OrganisationDetails.questionRI1.id,
     responsibleIndividualEmailId  = OrganisationDetails.questionRI2.id,
     applicationNameId             = CustomersAuthorisingYourSoftware.question2.id,
-    privacyPolicyUrlId            = CustomersAuthorisingYourSoftware.question4.id,
-    termsAndConditionsUrlId       = CustomersAuthorisingYourSoftware.question5.id,
+    privacyPolicyUrlId            = CustomersAuthorisingYourSoftware.question5.id,
+    termsAndConditionsUrlId       = CustomersAuthorisingYourSoftware.question7.id,
     organisationUrlId             = OrganisationDetails.question1.id,
     identifyYourOrganisationId    = OrganisationDetails.question2.id
   )
@@ -329,7 +359,7 @@ trait QuestionnaireTestData {
   val questionnaireAlt = OrganisationDetails.questionnaire
   val questionnaireAltId = questionnaireAlt.id
   val questionAltId = questionnaireAlt.questions.head.question.id
-  val optionalQuestion = CustomersAuthorisingYourSoftware.question4
+  val optionalQuestion = OrganisationDetails.question1
   val optionalQuestionId = optionalQuestion.id
 
   val allQuestionnaires = testGroups.flatMap(_.links)
@@ -355,8 +385,10 @@ trait QuestionnaireTestData {
     (CustomersAuthorisingYourSoftware.question1.id -> AcknowledgedAnswer),
     (CustomersAuthorisingYourSoftware.question2.id -> TextAnswer("name of software")),
     (CustomersAuthorisingYourSoftware.question3.id -> MultipleChoiceAnswer(Set("In the UK"))),
-    (CustomersAuthorisingYourSoftware.question4.id -> TextAnswer("https://example.com/privacy-policy")),
-    (CustomersAuthorisingYourSoftware.question5.id -> NoAnswer)
+    (CustomersAuthorisingYourSoftware.question4.id -> SingleChoiceAnswer("Yes")),
+    (CustomersAuthorisingYourSoftware.question5.id -> TextAnswer("https://example.com/privacy-policy")),
+    (CustomersAuthorisingYourSoftware.question6.id -> SingleChoiceAnswer("Yes")),
+    (CustomersAuthorisingYourSoftware.question7.id -> NoAnswer)
   )
 
   def firstQuestion(questionnaire: Questionnaire) = questionnaire.questions.head.question.id
