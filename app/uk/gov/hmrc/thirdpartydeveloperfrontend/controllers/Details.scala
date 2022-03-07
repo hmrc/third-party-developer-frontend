@@ -68,7 +68,7 @@ class Details @Inject() (
     val accessLevel = DevhubAccessLevel.fromRole(request.role)
     val checkYourAnswersData = CheckYourAnswersData(accessLevel, request.application, request.subscriptions)
 
-    
+
     request.application.state.name match {
       case State.TESTING =>
         lazy val oldJourney =

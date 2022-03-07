@@ -18,4 +18,13 @@ package uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.controllers
 
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.Application
 
-case class ApplicationViewModel(application: Application, hasSubscriptionsFields: Boolean, hasPpnsFields: Boolean)
+case class ApplicationViewModel(application: Application, hasSubscriptionsFields: Boolean, hasPpnsFields: Boolean) {
+  lazy val privacyPolicyInDesktopApp = application.privacyPolicyUrl match {
+    case Some("desktop") => true
+    case _ => false
+  }
+  lazy val termsAndConditionsInDesktopApp = application.termsAndConditionsUrl match {
+    case Some("desktop") => true
+    case _ => false
+  }
+}

@@ -110,11 +110,23 @@
       </tr>
       <tr class="govuk-table__row">
         <th scope="row" class="govuk-table__header">Privacy policy URL</th>
-        <td class="govuk-table__cell" id="privacyPolicyUrl">@{app.privacyPolicyUrl.getOrElse("None")}</td>
+        <td class="govuk-table__cell" id="privacyPolicyUrl">
+          @if(applicationViewModel.privacyPolicyInDesktopApp) {
+            In desktop software
+          } else {
+            @{app.privacyPolicyUrl.getOrElse("None")}
+          }
+        </td>
       </tr>
       <tr class="govuk-table__row">
         <th scope="row" class="govuk-table__header">Terms and conditions URL</th>
-        <td class="govuk-table__cell" id="termsAndConditionsUrl">@{app.termsAndConditionsUrl.getOrElse("None")}</td>
+        <td class="govuk-table__cell" id="termsAndConditionsUrl">
+          @if(applicationViewModel.termsAndConditionsInDesktopApp) {
+            In desktop software
+          } else {
+            @{app.termsAndConditionsUrl.getOrElse("None")}
+          }
+        </td>
       </tr>
       <tr class="govuk-table__row">
         <th scope="row" class="govuk-table__header">Application grant length</th>
