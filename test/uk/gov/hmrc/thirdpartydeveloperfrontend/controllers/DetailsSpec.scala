@@ -399,7 +399,8 @@ class DetailsSpec
 
       status(result) shouldBe OK
       val doc = Jsoup.parse(contentAsString(result))
-      linkExistsWithHref(doc, routes.Details.changeDetails(application.id).url) shouldBe hasChangeButton
+      // APIS-5669 - temporarily removed Change link
+      // linkExistsWithHref(doc, routes.Details.changeDetails(application.id).url) shouldBe hasChangeButton
       elementIdentifiedByIdContainsText(doc, "applicationId", application.id.value) shouldBe true
       elementIdentifiedByIdContainsText(doc, "applicationName", application.name) shouldBe true
       elementIdentifiedByIdContainsText(doc, "description", application.description.getOrElse("None")) shouldBe true
