@@ -30,7 +30,7 @@
           <dd class="govuk-summary-list__value width-20">@question.answer</dd>
           <dd class="govuk-summary-list__actions width-10">
             @if(canChange) {
-              <a href="@uk.gov.hmrc.apiplatform.modules.submissions.controllers.routes.QuestionsController.updateQuestion(model.submissionId, question.id)">Change</a>
+              <a class="govuk-link" href="@uk.gov.hmrc.apiplatform.modules.submissions.controllers.routes.QuestionsController.updateQuestion(model.submissionId, question.id)">Change</a>
             }
           </dd>
         </div>
