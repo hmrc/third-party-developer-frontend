@@ -86,14 +86,15 @@
       <col width="60%">
     </colgroup>
     <thead class="govuk-table__head">
-      <tr class="govuk-table__row">
-        <th scope="col" class="govuk-table__header">Application details</th>
-        <th scope="col" class="govuk-table__header">
-          @if(app.isPermittedToEditAppDetails(loggedIn.developer)) {
-            <a id="change" class="govuk-link govuk-link--no-visited-state" href="@routes.Details.changeDetails(app.id)">Change <span class="govuk-visually-hidden">application details</span></a>
-          }
-        </th>
-      </tr>
+@* APIS-5669 - Agreed to temporarily remove this until UI has been changed to accommodate 'In Desktop Software' option *@
+@*      <tr class="govuk-table__row">*@
+@*        <th scope="col" class="govuk-table__header">Application details</th>*@
+@*        <th scope="col" class="govuk-table__header">*@
+@*          @if(app.isPermittedToEditAppDetails(loggedIn.developer)) {*@
+@*            <a id="change" class="govuk-link govuk-link--no-visited-state" href="@routes.Details.changeDetails(app.id)">Change <span class="govuk-visually-hidden">application details</span></a>*@
+@*          }*@
+@*        </th>*@
+@*      </tr>*@
     </thead>
     <tbody class="govuk-table__body">
       <tr class="govuk-table__row">
@@ -110,11 +111,23 @@
       </tr>
       <tr class="govuk-table__row">
         <th scope="row" class="govuk-table__header">Privacy policy URL</th>
-        <td class="govuk-table__cell" id="privacyPolicyUrl">@{app.privacyPolicyUrl.getOrElse("None")}</td>
+        <td class="govuk-table__cell" id="privacyPolicyUrl">
+          @if(app.privacyPolicyInDesktopApp) {
+            In desktop software
+          } else {
+            @{app.privacyPolicyUrl.getOrElse("None")}
+          }
+        </td>
       </tr>
       <tr class="govuk-table__row">
         <th scope="row" class="govuk-table__header">Terms and conditions URL</th>
-        <td class="govuk-table__cell" id="termsAndConditionsUrl">@{app.termsAndConditionsUrl.getOrElse("None")}</td>
+        <td class="govuk-table__cell" id="termsAndConditionsUrl">
+          @if(app.termsAndConditionsInDesktopApp) {
+            In desktop software
+          } else {
+            @{app.termsAndConditionsUrl.getOrElse("None")}
+          }
+        </td>
       </tr>
       <tr class="govuk-table__row">
         <th scope="row" class="govuk-table__header">Application grant length</th>

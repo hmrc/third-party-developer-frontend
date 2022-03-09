@@ -185,7 +185,10 @@ case class Application(
   val state: ApplicationState = ApplicationState.testing,
   val checkInformation: Option[CheckInformation] = None,
   val ipAllowlist: IpAllowlist = IpAllowlist()
-) extends BaseApplication
+) extends BaseApplication {
+  lazy val privacyPolicyInDesktopApp = privacyPolicyUrl.exists(_ == "desktop")
+  lazy val termsAndConditionsInDesktopApp = termsAndConditionsUrl.exists(_ == "desktop")
+}
 
 
 object Application {

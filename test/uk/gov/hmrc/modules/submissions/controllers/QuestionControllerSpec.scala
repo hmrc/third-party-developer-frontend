@@ -40,10 +40,6 @@ import org.scalatest.AppendedClues
 import uk.gov.hmrc.apiplatform.modules.submissions.domain.models.Submission
 import uk.gov.hmrc.time.DateTimeUtils
 import uk.gov.hmrc.apiplatform.modules.submissions.domain.models.SingleChoiceAnswer
-import uk.gov.hmrc.apiplatform.modules.submissions.domain.models.TextAnswer
-import uk.gov.hmrc.apiplatform.modules.submissions.domain.models.AcknowledgedAnswer
-import uk.gov.hmrc.apiplatform.modules.submissions.domain.models.MultipleChoiceAnswer
-import uk.gov.hmrc.apiplatform.modules.submissions.domain.models.NoAnswer
 import uk.gov.hmrc.apiplatform.modules.submissions.domain.models.ExtendedSubmission
 import cats.data.NonEmptyList
 import uk.gov.hmrc.apiplatform.modules.submissions.domain.models.QuestionnaireProgress

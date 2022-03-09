@@ -345,7 +345,9 @@ trait QuestionnaireTestData {
     responsibleIndividualNameId   = OrganisationDetails.questionRI1.id,
     responsibleIndividualEmailId  = OrganisationDetails.questionRI2.id,
     applicationNameId             = CustomersAuthorisingYourSoftware.question2.id,
+    privacyPolicyId               = CustomersAuthorisingYourSoftware.question4.id,
     privacyPolicyUrlId            = CustomersAuthorisingYourSoftware.question5.id,
+    termsAndConditionsId          = CustomersAuthorisingYourSoftware.question6.id,
     termsAndConditionsUrlId       = CustomersAuthorisingYourSoftware.question7.id,
     organisationUrlId             = OrganisationDetails.question1.id,
     identifyYourOrganisationId    = OrganisationDetails.question2.id
