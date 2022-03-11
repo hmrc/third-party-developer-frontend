@@ -19,12 +19,14 @@ package uk.gov.hmrc.thirdpartydeveloperfrontend.controllers
 
 import uk.gov.hmrc.thirdpartydeveloperfrontend.config.ApplicationConfig
 import uk.gov.hmrc.thirdpartydeveloperfrontend.config.ErrorHandler
+
 import javax.inject.{Inject, Singleton}
 import play.api.libs.crypto.CookieSigner
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.service._
 import views.helper.EnvironmentNameService
 import views.html._
+import views.html.noapplications._
 
 import scala.concurrent.ExecutionContext
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.controllers.ManageApplicationsViewModel
@@ -40,7 +42,7 @@ class ManageApplications @Inject() (
     upliftLogic: UpliftLogic,
     
     manageApplicationsView: ManageApplicationsView,
-    addApplicationSubordinateEmptyNestView: AddApplicationSubordinateEmptyNestView,
+    addApplicationSubordinateEmptyNestView: StartUsingRestApisView,
     mcc: MessagesControllerComponents
 )(implicit val ec: ExecutionContext, val appConfig: ApplicationConfig, val environmentNameService: EnvironmentNameService)
    extends LoggedInController(mcc) {

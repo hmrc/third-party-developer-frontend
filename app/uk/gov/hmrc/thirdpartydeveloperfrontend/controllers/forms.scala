@@ -533,3 +533,13 @@ object SelectTopicsFromSubscriptionsForm {
     )(SelectTopicsFromSubscriptionsForm.apply)(SelectTopicsFromSubscriptionsForm.unapply)
   )
 }
+
+final case class EmptyNestForm(choice: Option[String])
+
+object EmptyNestForm {
+  def form: Form[EmptyNestForm] = Form(mapping("choice" -> optional(text)
+    .verifying(FormKeys.emptyNestChoiceRequiredKey, s => s.isDefined))(EmptyNestForm.apply)(EmptyNestForm.unapply)
+)
+
+
+}

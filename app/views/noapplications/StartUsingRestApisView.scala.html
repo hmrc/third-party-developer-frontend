@@ -14,6 +14,7 @@
  * limitations under the License.
  *@
 
+@import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.views.BackButtonWithJavaScript
 @import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.Environment
 @import include._
 @import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.controllers.Crumb
@@ -25,17 +26,14 @@
 @()(implicit request: play.api.mvc.Request[Any], loggedIn: DeveloperSession, messagesProvider: MessagesProvider, appConfig: ApplicationConfig, navSection: String = "manage-account", environmentNameService: EnvironmentNameService)
 
 @subordinateEnvName = @{appConfig.nameOfSubordinateEnvironment.toLowerCase}
-@pageHeading = @{"Start using our APIs"}
+@pageHeading = @{"Start using our REST APIs"}
 
 
     @devMain(
     title = pageHeading,
     userFullName = loggedIn.loggedInName,
-    breadcrumbs = Seq(
-        Crumb("View all applications", "", Some("data-breadcrumb-manage-app")),
-        Crumb.home
-    ),
-    leftNav = Some(leftHandNav(None, Option(navSection))),
+    back = BackButtonWithJavaScript,
+    leftNav = Some(leftHandNav(None, None)),
     developerSession = Some(loggedIn)
 ) {
   <h1 class="govuk-heading-l">@pageHeading</h1>

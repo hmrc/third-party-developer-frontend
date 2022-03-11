@@ -17,7 +17,6 @@
 package uk.gov.hmrc.thirdpartydeveloperfrontend.controllers
 
 import java.util.UUID.randomUUID
-
 import uk.gov.hmrc.thirdpartydeveloperfrontend.builder.DeveloperBuilder
 import uk.gov.hmrc.thirdpartydeveloperfrontend.config.ErrorHandler
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications._
@@ -39,6 +38,7 @@ import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.LocalUserIdTracker
 import uk.gov.hmrc.thirdpartydeveloperfrontend.mocks.connectors.ApmConnectorMockModule
 import uk.gov.hmrc.thirdpartydeveloperfrontend.builder._
 import uk.gov.hmrc.apiplatform.modules.uplift.services.mocks.UpliftLogicMock
+import views.html.noapplications.StartUsingRestApisView
 
 class ManageApplicationsSpec 
     extends BaseControllerSpec 
@@ -55,7 +55,7 @@ class ManageApplicationsSpec
   private val sessionParams = Seq("csrfToken" -> app.injector.instanceOf[TokenProvider].generateToken)
 
   trait Setup extends UpliftLogicMock with AppsByTeamMemberServiceMock with ApplicationServiceMock with ApmConnectorMockModule with SessionServiceMock {
-    val addApplicationSubordinateEmptyNestView = app.injector.instanceOf[AddApplicationSubordinateEmptyNestView]
+    val addApplicationSubordinateEmptyNestView = app.injector.instanceOf[StartUsingRestApisView]
     val manageApplicationsView = app.injector.instanceOf[ManageApplicationsView]
 
     implicit val environmentNameService = new EnvironmentNameService(appConfig)

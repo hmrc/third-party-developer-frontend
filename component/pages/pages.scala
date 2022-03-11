@@ -91,7 +91,7 @@ object ManageApplicationPage extends FormPage {
 }
 
 object AddApplicationEmptyPage extends FormPage {
-  override val pageHeading = "Start using our APIs"
+  override val pageHeading = "Start using our REST APIs"
   override val url: String = s"${Env.host}/developer/applications/"
 }
 
