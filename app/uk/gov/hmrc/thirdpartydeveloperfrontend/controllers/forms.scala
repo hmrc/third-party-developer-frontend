@@ -534,11 +534,11 @@ object SelectTopicsFromSubscriptionsForm {
   )
 }
 
-final case class EmptyNestForm(choice: Option[String])
+final case class NoApplicationsChoiceForm(choice: Option[String])
 
-object EmptyNestForm {
-  def form: Form[EmptyNestForm] = Form(mapping("choice" -> optional(text)
-    .verifying(FormKeys.noApplicationsChoiceRequiredKey, s => s.isDefined))(EmptyNestForm.apply)(EmptyNestForm.unapply)
+object NoApplicationsChoiceForm {
+  def form: Form[NoApplicationsChoiceForm] = Form(mapping("choice" -> optional(text)
+    .verifying(FormKeys.noApplicationsChoiceRequiredKey, s => s.isDefined))(NoApplicationsChoiceForm.apply)(NoApplicationsChoiceForm.unapply)
 )
 
 

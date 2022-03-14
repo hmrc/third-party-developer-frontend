@@ -25,7 +25,6 @@ import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.controllers.ManageA
 import uk.gov.hmrc.thirdpartydeveloperfrontend.service._
 import views.helper.EnvironmentNameService
 import views.html._
-import views.html.noapplications._
 
 import javax.inject.{Inject, Singleton}
 import scala.concurrent.ExecutionContext
@@ -35,12 +34,9 @@ class ManageApplications @Inject()(
                                     val errorHandler: ErrorHandler,
                                     val sessionService: SessionService,
                                     val cookieSigner: CookieSigner,
-
                                     appsByTeamMember: AppsByTeamMemberService,
                                     upliftLogic: UpliftLogic,
-
                                     manageApplicationsView: ManageApplicationsView,
-                                    addApplicationSufbordinateEmptyNestView: StartUsingRestApisView,
                                     mcc: MessagesControllerComponents
                                   )(implicit val ec: ExecutionContext, val appConfig: ApplicationConfig, val environmentNameService: EnvironmentNameService)
   extends LoggedInController(mcc) {

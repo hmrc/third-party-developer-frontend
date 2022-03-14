@@ -19,7 +19,7 @@ package uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.noapplications
 import play.api.libs.crypto.CookieSigner
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.config.{ApplicationConfig, ErrorHandler}
-import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.{EmptyNestForm, LoggedInController}
+import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.{NoApplicationsChoiceForm, LoggedInController}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.service._
 import views.helper.EnvironmentNameService
 import views.html.noapplications._
@@ -38,21 +38,19 @@ class NoApplications @Inject()(
                               )(implicit val ec: ExecutionContext, val appConfig: ApplicationConfig, val environmentNameService: EnvironmentNameService)
   extends LoggedInController(mcc) {
 
-
   def noApplicationsPage: Action[AnyContent] = loggedInAction { implicit request =>
-    Future.successful(Ok(noApplicationsChoiceView(EmptyNestForm.form)))
+    Future.successful(Ok(noApplicationsChoiceView(NoApplicationsChoiceForm.form)))
   }
 
   def noApplicationsAction: Action[AnyContent] = loggedInAction { implicit request =>
 
-    EmptyNestForm.form.bindFromRequest().fold(
-      hasErrors => Future.successful(Ok(noApplicationsChoiceView(hasErrors))),
+    NoApplicationsChoiceForm.form.bindFromRequest().fold(
+      hasErrors => Future.successful(BadRequest(noApplicationsChoiceView(hasErrors))),
       formData => formData.choice.getOrElse("") match {
         case "get-emails" => Future.successful(Redirect(uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.profile.routes.EmailPreferencesController.emailPreferencesSummaryPage()))
         case "use-apis" => Future.successful(Redirect(routes.NoApplications.startUsingRestApisPage()))
         case _ => Future.successful(InternalServerError(errorHandler.internalServerErrorTemplate))
       })
-
   }
 
   def startUsingRestApisPage: Action[AnyContent] = loggedInAction { implicit request =>

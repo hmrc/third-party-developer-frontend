@@ -38,15 +38,14 @@ import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.LocalUserIdTracker
 import uk.gov.hmrc.thirdpartydeveloperfrontend.mocks.connectors.ApmConnectorMockModule
 import uk.gov.hmrc.thirdpartydeveloperfrontend.builder._
 import uk.gov.hmrc.apiplatform.modules.uplift.services.mocks.UpliftLogicMock
-import views.html.noapplications.StartUsingRestApisView
 
-class ManageApplicationsSpec 
-    extends BaseControllerSpec 
-    with ApplicationActionServiceMock 
+class ManageApplicationsSpec
+    extends BaseControllerSpec
+    with ApplicationActionServiceMock
     with SampleSession
     with SampleApplication
-    with SubscriptionTestHelperSugar 
-    with WithCSRFAddToken 
+    with SubscriptionTestHelperSugar
+    with WithCSRFAddToken
     with DeveloperBuilder
     with LocalUserIdTracker {
 
@@ -55,7 +54,6 @@ class ManageApplicationsSpec
   private val sessionParams = Seq("csrfToken" -> app.injector.instanceOf[TokenProvider].generateToken)
 
   trait Setup extends UpliftLogicMock with AppsByTeamMemberServiceMock with ApplicationServiceMock with ApmConnectorMockModule with SessionServiceMock {
-    val addApplicationSubordinateEmptyNestView = app.injector.instanceOf[StartUsingRestApisView]
     val manageApplicationsView = app.injector.instanceOf[ManageApplicationsView]
 
     implicit val environmentNameService = new EnvironmentNameService(appConfig)
@@ -64,13 +62,9 @@ class ManageApplicationsSpec
       mock[ErrorHandler],
       sessionServiceMock,
       cookieSigner,
-
       appsByTeamMemberServiceMock,
       upliftLogicMock,
-      
       manageApplicationsView,
-      addApplicationSubordinateEmptyNestView,
-
       mcc
     )
 
@@ -101,6 +95,18 @@ class ManageApplicationsSpec
       contentAsString(result) should include("App name 1")
       contentAsString(result) should not include "Sign in"
     }
+
+
+    "redirect to the no Applications page when the user logged in and no applications returned for user" in new Setup {
+      aUsersUplfitableAndNotUpliftableAppsReturns(List.empty, List.empty, List.empty)
+      fetchProductionSummariesByTeamMemberReturns(List.empty)
+
+      private val result = manageApplicationsController.manageApps()(loggedInRequest)
+
+      status(result) shouldBe SEE_OTHER
+      headers(result).get("LOCATION").getOrElse("") shouldBe "/developer/no-applications"
+    }
+
 
     "return to the login page when the user is not logged in" in new Setup {
       val request = FakeRequest()

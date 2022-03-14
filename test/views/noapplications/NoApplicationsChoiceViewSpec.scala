@@ -19,7 +19,7 @@ package views.noapplications
 import org.jsoup.Jsoup
 import play.api.mvc.AnyContentAsEmpty
 import play.api.test.FakeRequest
-import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.EmptyNestForm
+import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.NoApplicationsChoiceForm
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.LoggedInState
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.ViewHelpers._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.{DeveloperSessionBuilder, WithCSRFAddToken}
@@ -38,7 +38,7 @@ class NoApplicationsChoiceViewSpec extends CommonViewSpec with WithCSRFAddToken 
   "No application page" should {
 
     "render with no errors" in new Setup {
-      val page = noApplicationsChoiceView.render(EmptyNestForm.form, request, developerSession, messagesProvider, appConfig)
+      val page = noApplicationsChoiceView.render(NoApplicationsChoiceForm.form, request, developerSession, messagesProvider, appConfig)
 
       page.contentType should include("text/html")
 
@@ -60,7 +60,7 @@ class NoApplicationsChoiceViewSpec extends CommonViewSpec with WithCSRFAddToken 
     }
 
     "render with errors" in new Setup {
-      val formWithErrors = EmptyNestForm.form.withError("no.applications.choice.error.required.field", "Please select an option")
+      val formWithErrors = NoApplicationsChoiceForm.form.withError("no.applications.choice.error.required.field", "Please select an option")
       val page = noApplicationsChoiceView.render(formWithErrors, request, developerSession, messagesProvider, appConfig)
 
       page.contentType should include("text/html")
