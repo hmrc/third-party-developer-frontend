@@ -163,7 +163,7 @@ package object controllers {
     val responsibleIndividualFullnameRequiredKey = "responsible_individual_fullname.error.required.field"
     val responsibleIndividualEmailAddressRequiredKey = "responsible_individual_emailaddress.error.required.field"
 
-    val emptyNestChoiceRequiredKey = "emptynest.choice.error.required.field"
+    val noApplicationsChoiceRequiredKey = "no.applications.choice.error.required.field"
 
     val formKeysMap = Map(
       firstnameRequiredKey -> firstnameRequiredGlobalKey,

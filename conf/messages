@@ -185,4 +185,4 @@ responsible_individual_emailaddress.error.required.field=Provide an email addres
 
 production.credentials.checklist.error.global = You must complete all questionnaires
 
-emptynest.choice.error.required.field = Please select an option
+no.applications.choice.error.required.field = Please select an option

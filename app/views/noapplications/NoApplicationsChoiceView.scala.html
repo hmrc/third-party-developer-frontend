@@ -39,11 +39,11 @@
                 @helper.CSRF.formField
                 <fieldset class="govuk-fieldset" aria-describedby="sign-in-hint">
                     <legend class="govuk-fieldset__legend govuk-fieldset__legend--l">
-                        <h1 class="govuk-fieldset__heading">
+                        <h1 id="form-heading" class="govuk-fieldset__heading">
                             Using the Developer Hub
                         </h1>
                     </legend>
-                    <div id="sign-in-hint" class="govuk-hint">
+                    <div id="no-applications-hint" class="govuk-hint">
                         Tell us what you want to do.
                     </div>
                     <div class="govuk-radios @if(form.errors("choice").nonEmpty){govuk-form-group--error}" data-module="govuk-radios" >
@@ -52,16 +52,16 @@
                             <label class="govuk-label govuk-radios__label" for="get-emails">
                                 Get emails about our APIs
                             </label>
-                            <div id="sign-in-2-item-hint" class="govuk-hint govuk-radios__hint">
+                            <div id="get-emails-item-hint" class="govuk-hint govuk-radios__hint">
                                 Setup or manage the emails you receive from us.
                             </div>
                         </div>
                         <div class="govuk-radios__item">
-                            <input class="govuk-radios__input" id="sign-in" name="choice" type="radio" value="use-apis" aria-describedby="use-apis-item-hint">
+                            <input class="govuk-radios__input" id="use-apis" name="choice" type="radio" value="use-apis" aria-describedby="use-apis-item-hint">
                             <label class="govuk-label govuk-radios__label" for="use-apis">
                                 Start using our REST APIs
                             </label>
-                            <div id="sign-in-item-hint" class="govuk-hint govuk-radios__hint">
+                            <div id="use-apis-item-hint" class="govuk-hint govuk-radios__hint">
                                 Create an application and setup your email preferences later.
                             </div>
                         </div>

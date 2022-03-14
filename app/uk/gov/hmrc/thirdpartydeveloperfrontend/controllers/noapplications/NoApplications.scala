@@ -19,10 +19,9 @@ package uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.noapplications
 import play.api.libs.crypto.CookieSigner
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.config.{ApplicationConfig, ErrorHandler}
-import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.{EmptyNestForm, ForgotPasswordForm, LoggedInController}
+import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.{EmptyNestForm, LoggedInController}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.service._
 import views.helper.EnvironmentNameService
-import views.html._
 import views.html.noapplications._
 
 import javax.inject.{Inject, Singleton}
@@ -36,8 +35,8 @@ class NoApplications @Inject()(
                                 startUsingRestApisView: StartUsingRestApisView,
                                 noApplicationsChoiceView: NoApplicationsChoiceView,
                                 mcc: MessagesControllerComponents
-)(implicit val ec: ExecutionContext, val appConfig: ApplicationConfig, val environmentNameService: EnvironmentNameService)
-   extends LoggedInController(mcc) {
+                              )(implicit val ec: ExecutionContext, val appConfig: ApplicationConfig, val environmentNameService: EnvironmentNameService)
+  extends LoggedInController(mcc) {
 
 
   def noApplicationsPage: Action[AnyContent] = loggedInAction { implicit request =>

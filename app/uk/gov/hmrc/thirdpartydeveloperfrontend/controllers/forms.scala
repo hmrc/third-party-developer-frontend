@@ -538,7 +538,7 @@ final case class EmptyNestForm(choice: Option[String])
 
 object EmptyNestForm {
   def form: Form[EmptyNestForm] = Form(mapping("choice" -> optional(text)
-    .verifying(FormKeys.emptyNestChoiceRequiredKey, s => s.isDefined))(EmptyNestForm.apply)(EmptyNestForm.unapply)
+    .verifying(FormKeys.noApplicationsChoiceRequiredKey, s => s.isDefined))(EmptyNestForm.apply)(EmptyNestForm.unapply)
 )
 
 
