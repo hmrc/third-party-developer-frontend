@@ -16,16 +16,30 @@
 
 package uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.noapplications
 
+import play.api.data.Form
+import play.api.data.Forms.{mapping, optional, text}
 import play.api.libs.crypto.CookieSigner
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.config.{ApplicationConfig, ErrorHandler}
-import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.{NoApplicationsChoiceForm, LoggedInController}
+import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.noapplications.NoApplications.NoApplicationsChoiceForm
+import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.{FormKeys, LoggedInController}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.service._
 import views.helper.EnvironmentNameService
 import views.html.noapplications._
 
 import javax.inject.{Inject, Singleton}
 import scala.concurrent.{ExecutionContext, Future}
+
+object NoApplications{
+  final case class NoApplicationsChoiceForm(choice: Option[String])
+
+  object NoApplicationsChoiceForm {
+    def form: Form[NoApplicationsChoiceForm] = Form(mapping("choice" -> optional(text)
+      .verifying(FormKeys.noApplicationsChoiceRequiredKey, s => s.isDefined))(NoApplicationsChoiceForm.apply)(NoApplicationsChoiceForm.unapply)
+    )
+
+  }
+}
 
 @Singleton
 class NoApplications @Inject()(

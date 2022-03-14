@@ -533,13 +533,3 @@ object SelectTopicsFromSubscriptionsForm {
     )(SelectTopicsFromSubscriptionsForm.apply)(SelectTopicsFromSubscriptionsForm.unapply)
   )
 }
-
-final case class NoApplicationsChoiceForm(choice: Option[String])
-
-object NoApplicationsChoiceForm {
-  def form: Form[NoApplicationsChoiceForm] = Form(mapping("choice" -> optional(text)
-    .verifying(FormKeys.noApplicationsChoiceRequiredKey, s => s.isDefined))(NoApplicationsChoiceForm.apply)(NoApplicationsChoiceForm.unapply)
-)
-
-
-}

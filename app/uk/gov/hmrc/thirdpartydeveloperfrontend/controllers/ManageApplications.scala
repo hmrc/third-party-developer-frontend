@@ -30,27 +30,26 @@ import javax.inject.{Inject, Singleton}
 import scala.concurrent.ExecutionContext
 
 @Singleton
-class ManageApplications @Inject()(
-                                    val errorHandler: ErrorHandler,
-                                    val sessionService: SessionService,
-                                    val cookieSigner: CookieSigner,
-                                    appsByTeamMember: AppsByTeamMemberService,
-                                    upliftLogic: UpliftLogic,
-                                    manageApplicationsView: ManageApplicationsView,
-                                    mcc: MessagesControllerComponents
-                                  )(implicit val ec: ExecutionContext, val appConfig: ApplicationConfig, val environmentNameService: EnvironmentNameService)
+class ManageApplications @Inject() (
+    val errorHandler: ErrorHandler,
+    val sessionService: SessionService,
+    val cookieSigner: CookieSigner,
+    appsByTeamMember: AppsByTeamMemberService,
+    upliftLogic: UpliftLogic,
+    manageApplicationsView: ManageApplicationsView,
+    mcc: MessagesControllerComponents
+    )(implicit val ec: ExecutionContext, val appConfig: ApplicationConfig, val environmentNameService: EnvironmentNameService)
   extends LoggedInController(mcc) {
 
   def manageApps: Action[AnyContent] = loggedInAction { implicit request =>
     for {
-      upliftData <- upliftLogic.aUsersSandboxAdminSummariesAndUpliftIds(request.userId)
+      upliftData                  <- upliftLogic.aUsersSandboxAdminSummariesAndUpliftIds(request.userId)
       sandboxApplicationSummaries = upliftData.sandboxApplicationSummaries
-      upliftableApplicationIds = upliftData.upliftableApplicationIds
-
-      productionAppSummaries <- appsByTeamMember.fetchProductionSummariesByTeamMember(request.userId)
+      upliftableApplicationIds    = upliftData.upliftableApplicationIds
+      productionAppSummaries      <- appsByTeamMember.fetchProductionSummariesByTeamMember(request.userId)
     } yield (sandboxApplicationSummaries, productionAppSummaries) match {
       case (Nil, Nil) => Redirect(uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.noapplications.routes.NoApplications.noApplicationsPage())
-      case _ => Ok(manageApplicationsView(
+      case _          => Ok(manageApplicationsView(
         ManageApplicationsViewModel(sandboxApplicationSummaries, productionAppSummaries, upliftableApplicationIds, upliftData.hasAppsThatCannotBeUplifted)
       ))
     }
