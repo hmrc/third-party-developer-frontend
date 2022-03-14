@@ -329,7 +329,7 @@ class DetailsSpec
     }
   }
 
-  trait Setup extends ApplicationServiceMock with ApplicationActionServiceMock {
+  trait Setup extends ApplicationServiceMock with ApplicationActionServiceMock with TermsOfUseVersionServiceMock {
     val unauthorisedAppDetailsView = app.injector.instanceOf[UnauthorisedAppDetailsView]
     val pendingApprovalView = app.injector.instanceOf[PendingApprovalView]
     val detailsView = app.injector.instanceOf[DetailsView]
@@ -347,7 +347,8 @@ class DetailsSpec
       detailsView,
       changeDetailsView,
       fraudPreventionConfig,
-      SubmissionServiceMock.aMock
+      SubmissionServiceMock.aMock,
+      termsOfUseVersionServiceMock
     )
 
     implicit val hc: HeaderCarrier = HeaderCarrier()

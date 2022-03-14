@@ -12,3 +12,6 @@ POST        /application/:aid/cancel-request                                    
 GET         /application/:aid/check-answers                                       uk.gov.hmrc.apiplatform.modules.submissions.controllers.CheckAnswersController.checkAnswersPage(aid: ApplicationId)
 GET         /application/:aid/view-answers                                        uk.gov.hmrc.apiplatform.modules.submissions.controllers.CredentialsRequestedController.credentialsRequestedPage(aid: ApplicationId)
 GET         /application/:aid/submit-request                                      uk.gov.hmrc.apiplatform.modules.submissions.controllers.CheckAnswersController.checkAnswersAction(aid: ApplicationId)
+
+GET         /application/:aid/terms-of-use-responses                              uk.gov.hmrc.apiplatform.modules.submissions.controllers.TermsOfUseResponsesController.termsOfUseResponsesPage(aid: ApplicationId)
+

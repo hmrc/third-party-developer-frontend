@@ -25,6 +25,7 @@ import uk.gov.hmrc.thirdpartydeveloperfrontend.domain._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.Capabilities.SupportsDetails
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.Permissions.SandboxOrAdmin
+
 import javax.inject.{Inject, Singleton}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.controllers.ApplicationViewModel
 import play.api.data.Form
@@ -41,9 +42,23 @@ import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.fraudprevention.Fraud
 import uk.gov.hmrc.apiplatform.modules.submissions.services.SubmissionService
 import cats.data.OptionT
 import cats.instances.future.catsStdInstancesForFuture
+import org.joda.time.DateTime
+
 import scala.concurrent.Future.successful
 import uk.gov.hmrc.apiplatform.modules.submissions.domain.models.Submission
+import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.Details.TermsOfUseViewModel
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.TermsOfUseVersion
 
+object Details {
+  case class TermsOfUseViewModel(
+    exists: Boolean,
+    agreed: Boolean,
+    agreementNeeded: Boolean,
+    appUsesOldVersion: Boolean,
+    emailAddressOfWhoAgreed: String,
+    timestampOfWhenAgreed: DateTime
+  )
+}
 @Singleton
 class Details @Inject() (
     val errorHandler: ErrorHandler,
@@ -57,7 +72,8 @@ class Details @Inject() (
     detailsView: DetailsView,
     changeDetailsView: ChangeDetailsView,
     val fraudPreventionConfig: FraudPreventionConfig,
-    submissionService: SubmissionService
+    submissionService: SubmissionService,
+    termsOfUseVersionService: TermsOfUseVersionService
 )(implicit val ec: ExecutionContext, val appConfig: ApplicationConfig)
     extends ApplicationController(mcc) with FraudPreventionNavLinkHelper {
 
@@ -111,6 +127,7 @@ class Details @Inject() (
           Ok(
             detailsView(
               applicationViewModelFromApplicationRequest,
+              buildTermsOfUseViewModel,
               createOptionalFraudPreventionNavLinkViewModel(
                 request.application,
                 request.subscriptions,
@@ -120,6 +137,18 @@ class Details @Inject() (
           )
         )
     }
+  }
+
+  private def buildTermsOfUseViewModel()(implicit request: ApplicationRequest[AnyContent]): TermsOfUseViewModel = {
+    val application = request.application
+    val hasTermsOfUse = application.termsOfUseStatus != TermsOfUseStatus.NOT_APPLICABLE
+    val termsOfUseAgreed = application.termsOfUseStatus == TermsOfUseStatus.AGREED
+    val termsOfUseAgreementRequired = application.termsOfUseStatus == TermsOfUseStatus.AGREEMENT_REQUIRED
+    val appUsesOldTermsOfUse = termsOfUseVersionService.getForApplication(application) == TermsOfUseVersion.V1_2
+    val emailAddress = "email@example.com" //TODO
+    val timestamp = DateTime.now //TODO
+
+    TermsOfUseViewModel(hasTermsOfUse, termsOfUseAgreed, termsOfUseAgreementRequired, appUsesOldTermsOfUse, emailAddress, timestamp)
   }
 
   def changeDetails(applicationId: ApplicationId): Action[AnyContent] = canChangeDetailsAndIsApprovedAction(applicationId) { implicit request =>
