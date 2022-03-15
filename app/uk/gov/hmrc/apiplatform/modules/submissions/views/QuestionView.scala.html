@@ -169,6 +169,11 @@
           </label>
         </h1>
       }
+      @if(question.hintText.isDefined) {
+        <div class="govuk-hint">
+          @{question.hintText.get.value}
+        </div>
+      }
       <input class="govuk-input" id="question-@{question.id.value}-id" name="answer" type="text" value="@actualValue">
     </div>
   }
