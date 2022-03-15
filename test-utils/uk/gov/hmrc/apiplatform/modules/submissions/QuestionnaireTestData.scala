@@ -122,7 +122,7 @@ trait QuestionnaireTestData {
           StatementText("For example https://example.com")
         )
       ),
-      Some(("My organisation doesn't have a website", Fail))
+      absence = Some(("My organisation doesn't have a website", Fail))
     )
 
     val question2 = ChooseOneOfQuestion(
@@ -152,7 +152,7 @@ trait QuestionnaireTestData {
           StatementText("It's 8 characters long or 2 letters followed by 6  numbers. Check and documents from Companies House.")
         )
       ),
-      Some(("My organisation doesn't have a company registration", Warn))
+      absence = Some(("My organisation doesn't have a company registration", Warn))
     )
 
     val question2b = TextQuestion(

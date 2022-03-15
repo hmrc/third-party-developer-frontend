@@ -157,12 +157,18 @@
     }
   ) { actualValue =>
     <div class="govuk-form-group">
-      <!-- Below is needed for accessibility, it is hidden visually -->
-      <h1 class="govuk-visually-hidden">
-        <label class="govuk-label govuk-label--l" for="question-@{question.id.value}-id">
-          @pageHeading
+      @if(question.label.isDefined) {
+        <label class="govuk-label" for="question-@{question.id.value}-id">
+          @{question.label.get.value}
         </label>
-      </h1>
+      } else {
+        <!-- Below is needed for accessibility, it is hidden visually -->
+        <h1 class="govuk-visually-hidden">
+          <label class="govuk-label govuk-label--l" for="question-@{question.id.value}-id">
+            @pageHeading
+          </label>
+        </h1>
+      }
       <input class="govuk-input" id="question-@{question.id.value}-id" name="answer" type="text" value="@actualValue">
     </div>
   }
@@ -176,11 +182,11 @@
 
 @renderQuestionType(question: Question) = @{
   question match {
-    case q: YesNoQuestion => renderSingleChoiceQuestion(q, true)
+    case q: YesNoQuestion        => renderSingleChoiceQuestion(q, true)
     case q: SingleChoiceQuestion => renderSingleChoiceQuestion(q, false)
-    case q: MultiChoiceQuestion => renderMultiChoiceQuestion(q)
-    case q: TextQuestion => renderTextInputQuestion(q)
-    case q: AcknowledgementOnly => renderAcknowledgementOnly(q)
+    case q: MultiChoiceQuestion  => renderMultiChoiceQuestion(q)
+    case q: TextQuestion         => renderTextInputQuestion(q)
+    case q: AcknowledgementOnly  => renderAcknowledgementOnly(q)
     case _ => <p>TODO</p>
   }
 }
@@ -212,8 +218,8 @@
   <p class="govuk-body">
     @{
     question.statement.fragments.map( fragment => fragment match {
-    case st: StatementText => renderParagraphStatementText(st)
-    case sl: StatementLink => renderParagraphStatementLink(sl)
+    case st: StatementText    => renderParagraphStatementText(st)
+    case sl: StatementLink    => renderParagraphStatementLink(sl)
     case cs: CompoundFragment => renderParagraphCompoundFragment(cs)
     case sb: StatementBullets => renderStatementBullets(sb)
     })
