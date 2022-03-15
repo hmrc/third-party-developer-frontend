@@ -42,7 +42,17 @@ sealed trait Question {
   final def isOptional: Boolean = absence.isDefined
 }
 
-case class TextQuestion(id: QuestionId, wording: Wording, statement: Statement, absence: Option[(String, Mark)] = None) extends Question
+case class TextQuestion(id: QuestionId, wording: Wording, statement: Statement, label: Option[TextQuestion.Label] = None, hintText: Option[TextQuestion.HintText] = None, absence: Option[(String, Mark)] = None) extends Question
+
+object TextQuestion {
+  import play.api.libs.json.Json
+
+  case class Label(value: String) extends AnyVal
+  case class HintText(value: String) extends AnyVal
+
+  implicit val labelFormat = Json.valueFormat[Label]
+  implicit val hintTextFormat = Json.valueFormat[HintText]
+}
 
 case class AcknowledgementOnly(id: QuestionId, wording: Wording, statement: Statement) extends Question {
   val absence = None
