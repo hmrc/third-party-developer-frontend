@@ -16,7 +16,6 @@
 
 package uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models
 
-import org.scalatest.Matchers
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.emailpreferences.TaxRegimeInterests
 import org.scalatest.wordspec.AnyWordSpec
 import org.scalatest.matchers.should.Matchers

@@ -70,6 +70,11 @@ object EmailConfirmationPage extends FormPage {
   override val pageHeading = "Confirm your email address"
 }
 
+object EmailPreferencesSummaryPage extends FormPage {
+  override val url: String = s"${Env.host}/developer/profile/email-preferences"
+  override val pageHeading = "Email preferences"
+}
+
 object ManageProfilePage extends FormPage {
   override val pageHeading = "Manage profile"
   override val url: String = s"${Env.host}/developer/profile"
@@ -91,8 +96,13 @@ object ManageApplicationPage extends FormPage {
 }
 
 object AddApplicationEmptyPage extends FormPage {
-  override val pageHeading = "Start using our APIs"
-  override val url: String = s"${Env.host}/developer/applications/"
+  override val pageHeading = "Start using our REST APIs"
+  override val url: String = s"${Env.host}/developer/no-applications-start/"
+}
+
+object NoApplicationsPage extends FormPage {
+  override val pageHeading = "Using the Developer Hub"
+  override val url: String = s"${Env.host}/developer/no-applications"
 }
 
 object AddApplicationSuccessPage extends FormPage {
