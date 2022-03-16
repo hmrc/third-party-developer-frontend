@@ -21,6 +21,7 @@ import org.mockito.verification.VerificationMode
 import scala.concurrent.Future.{successful, failed}
 import uk.gov.hmrc.apiplatform.modules.uplift.domain.models._
 import uk.gov.hmrc.apiplatform.modules.uplift.services.GetProductionCredentialsFlowService
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.SellResellOrDistribute
 
 trait GetProductionCredentialsFlowServiceMockModule extends MockitoSugar with ArgumentMatchersSugar {
 

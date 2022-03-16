@@ -27,6 +27,8 @@ import org.mockito.MockitoSugar
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.LoggedInState
 import uk.gov.hmrc.apiplatform.modules.uplift.services.mocks.FlowRepositoryMockModule
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.SellResellOrDistribute
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.ResponsibleIndividual
 
 class GetProductionCredentialsFlowServiceSpec
                 extends AsyncHmrcSpec
@@ -43,10 +45,10 @@ class GetProductionCredentialsFlowServiceSpec
     val underTest = new GetProductionCredentialsFlowService(FlowRepositoryMock.aMock)
     val sessionId = "sessionId"
     val sellResellOrDistribute = SellResellOrDistribute("answer")
-    val responsibleIndividual = ResponsibleIndividual("oldname", "old@example.com")
+    val responsibleIndividual = ResponsibleIndividual(ResponsibleIndividual.Name("oldname"), ResponsibleIndividual.EmailAddress("old@example.com"))
     val apiSubscriptions = ApiSubscriptions()
     val flow = GetProductionCredentialsFlow(sessionId, Some(sellResellOrDistribute), Some(apiSubscriptions))
-    val newResponsibleIndividual = ResponsibleIndividual("newname", "new@example.com")
+    val newResponsibleIndividual = ResponsibleIndividual(ResponsibleIndividual.Name("newname"), ResponsibleIndividual.EmailAddress("new@example.com"))
   }
 
   "fetchFlow" should {

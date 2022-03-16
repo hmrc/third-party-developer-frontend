@@ -22,7 +22,7 @@ import uk.gov.hmrc.thirdpartydeveloperfrontend.connectors.ApmConnector
 import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.checkpages.{CanUseCheckActions, DummySubscriptionsForm}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.apidefinitions.APISubscriptionStatus
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.ApplicationId
-import uk.gov.hmrc.apiplatform.modules.uplift.domain.models.{ApiSubscriptions, SellResellOrDistribute}
+import uk.gov.hmrc.apiplatform.modules.uplift.domain.models.{ApiSubscriptions}
 import play.api.data.Forms._
 import play.api.data.{Form, FormError}
 import play.api.libs.crypto.CookieSigner
@@ -45,6 +45,7 @@ import uk.gov.hmrc.thirdpartydeveloperfrontend.config.{On, OnDemand}
 import play.api.mvc.Request
 import scala.util.Try
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.controllers.BadRequestWithErrorMessage
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.SellResellOrDistribute
 
 object UpliftJourneyController {
 
