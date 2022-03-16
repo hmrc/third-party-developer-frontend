@@ -139,10 +139,6 @@ class ProdCredsChecklistController @Inject() (
           filterGroupingsForEmptyQuestionnaireSummaries(viewModel.groupings).fold(
             throw new AssertionError("submissions with only n/a questionnaires will be marked as complete")
           )(vg => {
-//            var form = DummyForm.form.fill(validForm)
-//            vg.flatMap(group => group.questionnaireSummaries).filter(!_.isComplete).foreach(summary => {
-//              form = form.withError(summary.fieldName, s"Complete the ${summary.label.toLowerCase} section")
-//            })
             val form = vg.flatMap(group => group.questionnaireSummaries)
               .filter(!_.isComplete)
               .foldLeft(DummyForm.form.fill(validForm))((form, summary) => form.withError(summary.fieldName, s"Complete the ${summary.label.toLowerCase} section"))
