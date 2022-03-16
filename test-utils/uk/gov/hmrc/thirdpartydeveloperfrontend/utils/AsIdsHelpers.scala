@@ -16,18 +16,18 @@
 
 package uk.gov.hmrc.thirdpartydeveloperfrontend.utils
 
-import uk.gov.hmrc.apiplatform.modules.submissions.domain.models.{QuestionId, QuestionItem}
+import uk.gov.hmrc.apiplatform.modules.submissions.domain.models.{Question, QuestionItem}
 import cats.data.NonEmptyList
 
 trait AsIdsHelpers {
   implicit class ListQIdSyntax(questionItems: List[QuestionItem]) {
-    def asIds(): List[QuestionId] = {
+    def asIds(): List[Question.Id] = {
       questionItems.map(_.question.id)
     }
   }
 
   implicit class NELQIdSyntax(questionItems: NonEmptyList[QuestionItem]) {
-    def asIds(): List[QuestionId] = {
+    def asIds(): List[Question.Id] = {
       questionItems.toList.map(_.question.id)
     }
   }

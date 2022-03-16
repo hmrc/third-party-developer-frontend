@@ -18,21 +18,14 @@ package uk.gov.hmrc.apiplatform.modules.submissions.domain.models
 
 import scala.collection.immutable.ListSet
 import scala.collection.immutable.ListMap
+import play.api.libs.json.Json
 
-case class Wording(value: String) extends AnyVal
-
-case class QuestionId(value: String) extends AnyVal
-
-object QuestionId {
-  def random = QuestionId(java.util.UUID.randomUUID.toString)
-
-  implicit val jsonFormatQuestionId = play.api.libs.json.Json.valueFormat[QuestionId]
-}
 
 sealed trait Question {
-  def id: QuestionId
+  def id: Question.Id
   def wording: Wording
   def statement: Statement
+  def afterStatement: Statement
 
   def absence: Option[(String, Mark)]
 
@@ -42,20 +35,42 @@ sealed trait Question {
   final def isOptional: Boolean = absence.isDefined
 }
 
-case class TextQuestion(id: QuestionId, wording: Wording, statement: Statement, label: Option[TextQuestion.Label] = None, hintText: Option[TextQuestion.HintText] = None, absence: Option[(String, Mark)] = None) extends Question
+case class Wording(value: String) extends AnyVal
 
-object TextQuestion {
-  import play.api.libs.json.Json
-
-  case class Label(value: String) extends AnyVal
-  case class HintText(value: String) extends AnyVal
-
-  implicit val labelFormat = Json.valueFormat[Label]
-  implicit val hintTextFormat = Json.valueFormat[HintText]
+object Wording {
+  implicit val format = Json.valueFormat[Wording]
 }
 
-case class AcknowledgementOnly(id: QuestionId, wording: Wording, statement: Statement) extends Question {
+
+object Question {
+  case class Id(value: String) extends AnyVal
+
+  object Id {
+    def random = Id(java.util.UUID.randomUUID.toString)
+
+    implicit val format = Json.valueFormat[Id]
+  }
+
+  case class Label(value: String) extends AnyVal
+
+  object Label {
+    implicit val format = Json.valueFormat[Label]
+  }
+}
+
+case class TextQuestion(
+  id: Question.Id,
+  wording: Wording,
+  statement: Statement = Statement(),
+  afterStatement: Statement = Statement(),
+  label: Option[Question.Label] = None,
+  hintText: Option[NonBulletStatementFragment] = None,
+  absence: Option[(String, Mark)] = None
+) extends Question
+
+case class AcknowledgementOnly(id: Question.Id, wording: Wording, statement: Statement = Statement()) extends Question {
   val absence = None
+  val afterStatement = Statement()
 }
 
 sealed trait Mark
@@ -87,15 +102,41 @@ sealed trait ChoiceQuestion extends Question {
 
 sealed trait SingleChoiceQuestion extends ChoiceQuestion
 
-case class MultiChoiceQuestion(id: QuestionId, wording: Wording, statement: Statement, marking: ListMap[PossibleAnswer, Mark], absence: Option[(String, Mark)] = None) extends ChoiceQuestion {
+case class MultiChoiceQuestion(
+  id: Question.Id,
+  wording: Wording,
+  statement: Statement = Statement(),
+  afterStatement: Statement = Statement(),
+  label: Option[Question.Label] = None,
+  hintText: Option[NonBulletStatementFragment] = None,
+  marking: ListMap[PossibleAnswer, Mark],
+  absence: Option[(String, Mark)] = None) extends ChoiceQuestion {
   lazy val choices: ListSet[PossibleAnswer] = ListSet(marking.keys.toList : _*)
 }
 
-case class ChooseOneOfQuestion(id: QuestionId, wording: Wording, statement: Statement, marking: ListMap[PossibleAnswer, Mark], absence: Option[(String, Mark)] = None) extends SingleChoiceQuestion {
+case class ChooseOneOfQuestion(
+  id: Question.Id,
+  wording: Wording,
+  statement: Statement = Statement(),
+  afterStatement: Statement = Statement(),
+  label: Option[Question.Label] = None,
+  hintText: Option[NonBulletStatementFragment] = None,
+  marking: ListMap[PossibleAnswer, Mark],
+  absence: Option[(String, Mark)] = None) extends SingleChoiceQuestion {
   lazy val choices: ListSet[PossibleAnswer] = ListSet(marking.keys.toList : _*)
 }
 
-case class YesNoQuestion(id: QuestionId, wording: Wording, statement: Statement,  yesMarking: Mark, noMarking: Mark, absence: Option[(String, Mark)] = None) extends SingleChoiceQuestion {
+case class YesNoQuestion(
+  id: Question.Id,
+  wording: Wording,
+  statement: Statement = Statement(),
+  afterStatement: Statement = Statement(),
+  label: Option[Question.Label] = None,
+  hintText: Option[NonBulletStatementFragment] = None,
+  yesMarking: Mark, noMarking: Mark,
+  absence: Option[(String, Mark)] = None
+) extends SingleChoiceQuestion {
+  
   val YES = PossibleAnswer("Yes")
   val NO = PossibleAnswer("No")
 

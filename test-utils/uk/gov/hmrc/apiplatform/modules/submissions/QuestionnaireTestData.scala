@@ -25,7 +25,7 @@ import scala.collection.immutable.ListMap
 trait QuestionnaireTestData {
   object DevelopmentPractices {
     val question1 = YesNoQuestion(
-      QuestionId("653d2ee4-09cf-46a0-bc73-350a385ae860"),
+      Question.Id("653d2ee4-09cf-46a0-bc73-350a385ae860"),
       Wording("Do your development practices follow our guidance?"),
       Statement(
         CompoundFragment(
@@ -39,7 +39,7 @@ trait QuestionnaireTestData {
     )
 
     val question2 = YesNoQuestion(
-      QuestionId("6139f57d-36ab-4338-85b3-a2079d6cf376"),
+      Question.Id("6139f57d-36ab-4338-85b3-a2079d6cf376"),
       Wording("Does your error handling meet our specification?"),
       Statement(
         CompoundFragment(
@@ -53,7 +53,7 @@ trait QuestionnaireTestData {
     )
       
     val question3 = YesNoQuestion(
-      QuestionId("3c5cd29d-bec2-463f-8593-cd5412fab1e5"),
+      Question.Id("3c5cd29d-bec2-463f-8593-cd5412fab1e5"),
       Wording("Does your software meet accessibility standards?"),
       Statement(
         CompoundFragment(
@@ -67,8 +67,8 @@ trait QuestionnaireTestData {
     )
 
     val questionnaire = Questionnaire(
-      id = QuestionnaireId("796336a5-f7b4-4dad-8003-a818e342cbb4"),
-      label = Label("Development practices"),
+      id = Questionnaire.Id("796336a5-f7b4-4dad-8003-a818e342cbb4"),
+      label = Questionnaire.Label("Development practices"),
       questions = NonEmptyList.of(
         QuestionItem(question1), 
         QuestionItem(question2), 
@@ -79,7 +79,7 @@ trait QuestionnaireTestData {
     
   object OrganisationDetails {
     val questionRI1 = TextQuestion(
-      QuestionId("36b7e670-83fc-4b31-8f85-4d3394908495"),
+      Question.Id("36b7e670-83fc-4b31-8f85-4d3394908495"),
       Wording("What is the name of your responsible individual"),
       
       Statement(
@@ -97,7 +97,7 @@ trait QuestionnaireTestData {
       )
     )
     val questionRI2 = TextQuestion(
-      QuestionId("fb9b8036-cc88-4f4e-ad84-c02caa4cebae"),
+      Question.Id("fb9b8036-cc88-4f4e-ad84-c02caa4cebae"),
       Wording("What is the email address of your responsible individual"),
       Statement(
         List(
@@ -115,7 +115,7 @@ trait QuestionnaireTestData {
     )
 
     val question1 = TextQuestion(
-      QuestionId("b9dbf0a5-e72b-4c89-a735-26f0858ca6cc"),
+      Question.Id("b9dbf0a5-e72b-4c89-a735-26f0858ca6cc"),
       Wording("Give us your organisation's website URL"),
       Statement(
         List(
@@ -126,14 +126,14 @@ trait QuestionnaireTestData {
     )
 
     val question2 = ChooseOneOfQuestion(
-      QuestionId("cbdf264f-be39-4638-92ff-6ecd2259c662"),
+      Question.Id("cbdf264f-be39-4638-92ff-6ecd2259c662"),
       Wording("Identify your organisation"),
       Statement(
         List(
           StatementText("Provide evidence that you or your organisation is officially registered in the UK. Choose one option.")
         )
       ),
-      ListMap(
+      marking = ListMap(
         (PossibleAnswer("Unique Taxpayer Reference (UTR)") -> Pass),
         (PossibleAnswer("VAT registration number") -> Pass),
         (PossibleAnswer("Corporation Tax Unique Taxpayer Reference (UTR)") -> Pass),
@@ -144,7 +144,7 @@ trait QuestionnaireTestData {
     )
 
     val question2a = TextQuestion(
-      QuestionId("4e148791-1a07-4f28-8fe4-ba3e18cdc118"),
+      Question.Id("4e148791-1a07-4f28-8fe4-ba3e18cdc118"),
       Wording("What is your company registration number?"),
       Statement(
         List(
@@ -156,28 +156,28 @@ trait QuestionnaireTestData {
     )
 
     val question2b = TextQuestion(
-      QuestionId("55da0b97-178c-45b5-a139-b61ad7b9ca84"),
+      Question.Id("55da0b97-178c-45b5-a139-b61ad7b9ca84"),
       Wording("What is your Unique Taxpayer Reference (UTR)?"),
       Statement(List.empty)
     )
     val question2c = TextQuestion(
-      QuestionId("dd12fd8b-907b-4ba1-95d3-ef6317f36199"),
+      Question.Id("dd12fd8b-907b-4ba1-95d3-ef6317f36199"),
       Wording("What is your VAT registration number?"),
       Statement(List.empty)
     )
     val question2d = TextQuestion(
-      QuestionId("6be23951-ac69-47bf-aa56-86d3d690ee0b"),
+      Question.Id("6be23951-ac69-47bf-aa56-86d3d690ee0b"),
       Wording("What is your Corporation Tax Unique Taxpayer Reference (UTR)?"),
       Statement(List.empty)
     )
     val question2e = TextQuestion(
-      QuestionId("a143760e-72f3-423b-a6b4-558db37a3453"),
+      Question.Id("a143760e-72f3-423b-a6b4-558db37a3453"),
       Wording("What is your PAYE reference?"),
       Statement(List.empty)
     )
     
     val question3 = AcknowledgementOnly(
-      QuestionId("a12f314e-bc12-4e0d-87ba-1326acb31008"),
+      Question.Id("a12f314e-bc12-4e0d-87ba-1326acb31008"),
       Wording("Provide evidence of your organisation's registration"),
       Statement(
         List(
@@ -188,8 +188,8 @@ trait QuestionnaireTestData {
     )
       
     val questionnaire = Questionnaire(
-      id = QuestionnaireId("ac69b129-524a-4d10-89a5-7bfa46ed95c7"),
-      label = Label("Organisation details"),
+      id = Questionnaire.Id("ac69b129-524a-4d10-89a5-7bfa46ed95c7"),
+      label = Questionnaire.Label("Organisation details"),
       questions = NonEmptyList.of(
         QuestionItem(questionRI1),
         QuestionItem(questionRI2),
@@ -207,7 +207,7 @@ trait QuestionnaireTestData {
 
   object CustomersAuthorisingYourSoftware {
     val question1 = AcknowledgementOnly(
-      QuestionId("95da25e8-af3a-4e05-a621-4a5f4ca788f6"),
+      Question.Id("95da25e8-af3a-4e05-a621-4a5f4ca788f6"),
       Wording("Customers authorising your software"),
       Statement(
         List(
@@ -226,7 +226,7 @@ trait QuestionnaireTestData {
     )
 
     val question2 = TextQuestion(
-      QuestionId("4d5a41c8-8727-4d09-96c0-e2ce1bc222d3"),
+      Question.Id("4d5a41c8-8727-4d09-96c0-e2ce1bc222d3"),
       Wording("Confirm the name of your software"),
       Statement(
         List(
@@ -242,12 +242,12 @@ trait QuestionnaireTestData {
     )
 
     val question3 = MultiChoiceQuestion(
-      QuestionId("57d706ad-c0b8-462b-a4f8-90e7aa58e57a"),
+      Question.Id("57d706ad-c0b8-462b-a4f8-90e7aa58e57a"),
       Wording("Where are your servers that store customer information?"),
       Statement(
         StatementText("Select all that apply.")
       ),
-      ListMap(
+      marking = ListMap(
         (PossibleAnswer("In the UK") -> Pass),
         (PossibleAnswer("In the European Economic Area") -> Pass),
         (PossibleAnswer("Outside the European Economic Area") -> Warn)
@@ -255,14 +255,14 @@ trait QuestionnaireTestData {
     )
 
     val question4 = ChooseOneOfQuestion(
-      QuestionId("b0ae9d71-e6a7-4cf6-abd4-7eb7ba992bc6"),
+      Question.Id("b0ae9d71-e6a7-4cf6-abd4-7eb7ba992bc6"),
       Wording("Do you have a privacy policy URL for your software?"),
       Statement(
         List(
           StatementText("You need a privacy policy covering the software you request production credentials for.")
         )
       ),
-      ListMap(
+      marking = ListMap(
         (PossibleAnswer("Yes") -> Pass),
         (PossibleAnswer("No") -> Fail),
         (PossibleAnswer("The privacy policy is in desktop software") -> Pass)
@@ -270,7 +270,7 @@ trait QuestionnaireTestData {
     )
 
     val question5 = TextQuestion(
-      QuestionId("c0e4b068-23c9-4d51-a1fa-2513f50e428f"),
+      Question.Id("c0e4b068-23c9-4d51-a1fa-2513f50e428f"),
       Wording("What is your privacy policy URL?"),
       Statement(
         List(
@@ -280,14 +280,14 @@ trait QuestionnaireTestData {
     )
 
     val question6 = ChooseOneOfQuestion(
-      QuestionId("ca6af382-4007-4228-a781-1446231578b9"),
+      Question.Id("ca6af382-4007-4228-a781-1446231578b9"),
       Wording("Do you have a terms and conditions URL for your software?"),
       Statement(
         List(
           StatementText("You need terms and conditions covering the software you request production credentials for.")
         )
       ),
-      ListMap(
+      marking = ListMap(
         (PossibleAnswer("Yes") -> Pass),
         (PossibleAnswer("No") -> Fail),
         (PossibleAnswer("The terms and conditions are in desktop software") -> Pass)
@@ -295,7 +295,7 @@ trait QuestionnaireTestData {
     )
 
     val question7 = TextQuestion(
-      QuestionId("0a6d6973-c49a-49c3-93ff-de58daa1b90c"),
+      Question.Id("0a6d6973-c49a-49c3-93ff-de58daa1b90c"),
       Wording("What is your terms and conditions URL?"),
       Statement(
         List(
@@ -305,8 +305,8 @@ trait QuestionnaireTestData {
     )
 
     val questionnaire = Questionnaire(
-      id = QuestionnaireId("3a7f3369-8e28-447c-bd47-efbabeb6d93f"),
-      label = Label("Customers authorising your software"),
+      id = Questionnaire.Id("3a7f3369-8e28-447c-bd47-efbabeb6d93f"),
+      label = Questionnaire.Label("Customers authorising your software"),
       questions = NonEmptyList.of(
         QuestionItem(question1),
         QuestionItem(question2),

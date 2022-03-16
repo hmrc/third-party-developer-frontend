@@ -44,19 +44,19 @@
   )
 }
 
-@renderBulletItem(bullet: StatementFragment) = @{
-  bullet match {
+@renderNonBulletStatementFragment(nbsf: NonBulletStatementFragment) = @{
+  nbsf match {
     case st: StatementText => renderStatementText(st)
     case sl: StatementLink => renderStatementLink(sl)
     case cs: CompoundFragment => renderCompoundFragment(cs)
-    case _ => ""
   }
 }
 
 @renderStatementBullets(cs: StatementBullets) = {
   <ul class="govuk-list govuk-list--bullet">
-    @for( bullet <- cs.bullets ) { <li>@renderBulletItem(bullet)</li>
-      }
+    @for( bullet <- cs.bullets ) {
+      <li>@renderNonBulletStatementFragment(bullet)</li>
+    }
   </ul>
 }
 
@@ -66,6 +66,22 @@
 
 @renderParagraphCompoundFragment(cs: CompoundFragment) = { <p class="govuk-body">@renderCompoundFragment(cs)</p> }
 
+@renderHint(nbsf: NonBulletStatementFragment) = {
+  <div class="govuk-hint">@renderNonBulletStatementFragment(nbsf)</div>
+}
+
+@renderStatement(s: Statement) = {
+  <p class="govuk-body">
+    @{
+      question.statement.fragments.map( fragment => fragment match {
+        case st: StatementText => renderParagraphStatementText(st)
+        case sl: StatementLink => renderParagraphStatementLink(sl)
+        case cs: CompoundFragment => renderParagraphCompoundFragment(cs)
+        case sb: StatementBullets => renderStatementBullets(sb)
+      })
+    }
+  </p>
+}
 
 @renderRadioQuestionChoice(choice: PossibleAnswer, actualAnswer: Option[SingleChoiceAnswer]) = {
   @defining( if(Some(choice.value) == actualAnswer.map(_.value)) """checked="checked"""" else "") { checked => 
@@ -170,9 +186,7 @@
         </h1>
       }
       @if(question.hintText.isDefined) {
-        <div class="govuk-hint">
-          @{question.hintText.get.value}
-        </div>
+        @renderHint(question.hintText.get)
       }
       <input class="govuk-input" id="question-@{question.id.value}-id" name="answer" type="text" value="@actualValue">
     </div>
@@ -220,20 +234,14 @@
 
   <h1 class="govuk-heading-l">@pageHeading</h1>
 
-  <p class="govuk-body">
-    @{
-    question.statement.fragments.map( fragment => fragment match {
-    case st: StatementText    => renderParagraphStatementText(st)
-    case sl: StatementLink    => renderParagraphStatementLink(sl)
-    case cs: CompoundFragment => renderParagraphCompoundFragment(cs)
-    case sb: StatementBullets => renderStatementBullets(sb)
-    })
-    }
-  </p>
+  @renderStatement(question.statement)
 
   @helper.form(action = submitAction, 'class -> "form") {
     @helper.CSRF.formField
 
     @renderQuestionType(question)
   }
+
+  @renderStatement(question.afterStatement)
+
 }
