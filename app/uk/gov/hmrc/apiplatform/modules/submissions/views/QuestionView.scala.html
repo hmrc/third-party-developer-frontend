@@ -70,10 +70,10 @@
   <div class="govuk-hint">@renderNonBulletStatementFragment(nbsf)</div>
 }
 
-@renderStatement(s: Statement) = {
+@renderStatement(statement: Statement) = {
   <p class="govuk-body">
     @{
-      question.statement.fragments.map( fragment => fragment match {
+      statement.fragments.map( fragment => fragment match {
         case st: StatementText => renderParagraphStatementText(st)
         case sl: StatementLink => renderParagraphStatementLink(sl)
         case cs: CompoundFragment => renderParagraphCompoundFragment(cs)
@@ -138,6 +138,8 @@
     </fieldset>
   </div>
 
+  @renderStatement(question.afterStatement)
+
   @renderButtonOrButtons(question.absenceText)
 }
 
@@ -161,8 +163,9 @@
     </fieldset>
   </div>
 
-  @renderButtonOrButtons(question.absenceText)
+  @renderStatement(question.afterStatement)
 
+  @renderButtonOrButtons(question.absenceText)
 }
 
 @renderTextInputQuestion(question: TextQuestion) = {
@@ -191,6 +194,8 @@
       <input class="govuk-input" id="question-@{question.id.value}-id" name="answer" type="text" value="@actualValue">
     </div>
   }
+
+  @renderStatement(question.afterStatement)
 
   @renderButtonOrButtons(question.absenceText)
 }
@@ -241,7 +246,5 @@
 
     @renderQuestionType(question)
   }
-
-  @renderStatement(question.afterStatement)
 
 }
