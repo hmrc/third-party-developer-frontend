@@ -14,12 +14,13 @@
  * limitations under the License.
  */
 
-package uk.gov.hmrc.apiplatform.modules.uplift.domain.models
+package uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications
 
-import play.api.libs.json.{Format, Json}
-
-case class SellResellOrDistribute(answer: String) extends AnyVal
+final case class SellResellOrDistribute(answer: String) extends AnyVal
 
 object SellResellOrDistribute {
+  import play.api.libs.json.{Format, Json}
+  
   implicit val format: Format[SellResellOrDistribute] = Json.valueFormat[SellResellOrDistribute]
 }
+
