@@ -31,6 +31,8 @@ import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.AsyncHmrcSpec
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.LocalUserIdTracker
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.ApplicationId
 import uk.gov.hmrc.apiplatform.modules.uplift.services.mocks._
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.SellResellOrDistribute
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.ResponsibleIndividual
 
 class UpliftJourneyServiceSpec
                 extends AsyncHmrcSpec
@@ -124,7 +126,7 @@ class UpliftJourneyServiceSpec
 
     ApmConnectorMock.FetchAllApis.willReturn(singleApi)
 
-    val aResponsibleIndividual = ResponsibleIndividual("test full name", "test email address")
+    val aResponsibleIndividual = ResponsibleIndividual(ResponsibleIndividual.Name("test full name"), ResponsibleIndividual.EmailAddress("test email address"))
     val sellResellOrDistribute = SellResellOrDistribute("Yes")
     val doNotSellResellOrDistribute = SellResellOrDistribute("No")
     val aListOfSubscriptions = ApiSubscriptions(toIdentifiers(multipleApis).map(id => id -> true).toMap)
