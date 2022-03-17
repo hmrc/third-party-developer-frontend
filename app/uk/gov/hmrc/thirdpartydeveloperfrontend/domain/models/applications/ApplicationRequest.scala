@@ -60,8 +60,8 @@ case class UpdateApplicationRequest(
     id: ApplicationId,
     environment: Environment,
     name: String,
-    description: Option[String] = None,
-    access: Access = Standard(List.empty, None, None, Set.empty)
+    description: Option[String],
+    access: Access
 )
 
 object UpdateApplicationRequest extends ApplicationRequest {
@@ -82,10 +82,9 @@ object UpdateApplicationRequest extends ApplicationRequest {
       application.deployedTo,
       name,
       normalizeDescription(form.description),
-      Standard(
-        access.redirectUris.map(_.trim).filter(_.nonEmpty).distinct,
-        form.termsAndConditionsUrl.map(_.trim),
-        form.privacyPolicyUrl.map(_.trim)
+      access.copy(
+        termsAndConditionsUrl = form.termsAndConditionsUrl.map(_.trim),
+        privacyPolicyUrl = form.privacyPolicyUrl.map(_.trim)
       )
     )
   }
