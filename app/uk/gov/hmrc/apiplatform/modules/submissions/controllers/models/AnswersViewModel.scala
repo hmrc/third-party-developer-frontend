@@ -21,8 +21,8 @@ import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.Applic
 import uk.gov.hmrc.apiplatform.modules.submissions.domain.models._
 
 object AnswersViewModel {
-  case class ViewQuestion(id: QuestionId, text: String, answer: String)
-  case class ViewQuestionnaire(label: String, state: String, id: QuestionnaireId, questions: NonEmptyList[ViewQuestion])
+  case class ViewQuestion(id: Question.Id, text: String, answer: String)
+  case class ViewQuestionnaire(label: String, state: String, id: Questionnaire.Id, questions: NonEmptyList[ViewQuestion])
   case class ViewModel(appId: ApplicationId, appName: String, submissionId: Submission.Id, questionnaires: List[ViewQuestionnaire])
 
   private def convertAnswer(answer: ActualAnswer): Option[String] = answer match {

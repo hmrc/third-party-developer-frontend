@@ -14,15 +14,18 @@
  * limitations under the License.
  */
 
-package uk.gov.hmrc.apiplatform.modules.uplift.domain.models
+package uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications
 
-import play.api.libs.json.{Format, Json}
 
-final case class ResponsibleIndividual(fullName: String, emailAddress: String)
-
+case class ResponsibleIndividual(fullName: ResponsibleIndividual.Name, emailAddress: ResponsibleIndividual.EmailAddress)
 object ResponsibleIndividual {
-    implicit val format: Format[ResponsibleIndividual] = Json.format[ResponsibleIndividual]
+  import play.api.libs.json.{Format, Json}
+
+  case class Name(value: String) extends AnyVal
+  case class EmailAddress(value: String) extends AnyVal
+  
+  implicit val nameFormat = Json.valueFormat[Name]
+  implicit val emailAddressFormat = Json.valueFormat[EmailAddress]
+
+  implicit val format: Format[ResponsibleIndividual] = Json.format[ResponsibleIndividual]
 }
-
-
-

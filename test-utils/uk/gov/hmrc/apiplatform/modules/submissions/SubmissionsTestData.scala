@@ -57,15 +57,15 @@ trait StatusTestDataHelper {
 trait ProgressTestDataHelper {
   
     implicit class ProgressSyntax(submission: Submission) {
-      private val allQuestionnaireIds: NonEmptyList[QuestionnaireId] = submission.allQuestionnaires.map(_.id)
+      private val allQuestionnaireIds: NonEmptyList[Questionnaire.Id] = submission.allQuestionnaires.map(_.id)
       private val allQuestionIds = submission.allQuestions.map(_.id)
-      private def questionnaire(qId: QuestionnaireId): Questionnaire = submission.allQuestionnaires.find(q => q.id == qId).get
-      private def allQuestionIds(qId: QuestionnaireId) = questionnaire(qId).questions.map(_.question).map(_.id).toList
+      private def questionnaire(qId: Questionnaire.Id): Questionnaire = submission.allQuestionnaires.find(q => q.id == qId).get
+      private def allQuestionIds(qId: Questionnaire.Id) = questionnaire(qId).questions.map(_.question).map(_.id).toList
 
-      private def incompleteQuestionnaireProgress(qId: QuestionnaireId): QuestionnaireProgress = QuestionnaireProgress(QuestionnaireState.InProgress, allQuestionIds(qId))
-      private def completedQuestionnaireProgress(qId: QuestionnaireId): QuestionnaireProgress = QuestionnaireProgress(QuestionnaireState.Completed, allQuestionIds.toList)
-      private def notStartedQuestionnaireProgress(qId: QuestionnaireId): QuestionnaireProgress = QuestionnaireProgress(QuestionnaireState.NotStarted, allQuestionIds.toList)
-      private def notApplicableQuestionnaireProgress(qId: QuestionnaireId): QuestionnaireProgress = QuestionnaireProgress(QuestionnaireState.NotApplicable, allQuestionIds.toList)
+      private def incompleteQuestionnaireProgress(qId: Questionnaire.Id): QuestionnaireProgress = QuestionnaireProgress(QuestionnaireState.InProgress, allQuestionIds(qId))
+      private def completedQuestionnaireProgress(qId: Questionnaire.Id): QuestionnaireProgress = QuestionnaireProgress(QuestionnaireState.Completed, allQuestionIds.toList)
+      private def notStartedQuestionnaireProgress(qId: Questionnaire.Id): QuestionnaireProgress = QuestionnaireProgress(QuestionnaireState.NotStarted, allQuestionIds.toList)
+      private def notApplicableQuestionnaireProgress(qId: Questionnaire.Id): QuestionnaireProgress = QuestionnaireProgress(QuestionnaireState.NotApplicable, allQuestionIds.toList)
 
       def withIncompleteProgress(): ExtendedSubmission =
         ExtendedSubmission(submission, allQuestionnaireIds.map(i => (i -> incompleteQuestionnaireProgress(i))).toList.toMap)
@@ -131,8 +131,8 @@ trait SubmissionsTestData extends QuestionBuilder with QuestionnaireTestData wit
     val questionTerms = textQuestion(12)
     
     val questionnaire1 = Questionnaire(
-        id = QuestionnaireId.random,
-        label = Label("Questionnaire 1"),
+        id = Questionnaire.Id.random,
+        label = Questionnaire.Label("Questionnaire 1"),
         questions = NonEmptyList.of(
           QuestionItem(question1), 
           QuestionItem(question2), 
@@ -160,11 +160,11 @@ trait SubmissionsTestData extends QuestionBuilder with QuestionnaireTestData wit
 
     def passAnswer(question: Question): ActualAnswer = {
       question match {
-        case TextQuestion(id, wording, statement, absence) => TextAnswer("some random text")
-        case ChooseOneOfQuestion(id, wording, statement, marking, absence) => SingleChoiceAnswer(marking.filter { case (pa, Pass) => true; case _ => false }.head._1.value)
-        case MultiChoiceQuestion(id, wording, statement, marking, absence) => MultipleChoiceAnswer(Set(marking.filter { case (pa, Pass) => true; case _ => false }.head._1.value))
+        case TextQuestion(id, wording, statement, _, _, _, absence) => TextAnswer("some random text")
+        case ChooseOneOfQuestion(id, wording, statement, _, _, _, marking, absence) => SingleChoiceAnswer(marking.filter { case (pa, Pass) => true; case _ => false }.head._1.value)
+        case MultiChoiceQuestion(id, wording, statement, _, _, _, marking, absence) => MultipleChoiceAnswer(Set(marking.filter { case (pa, Pass) => true; case _ => false }.head._1.value))
         case AcknowledgementOnly(id, wording, statement) => NoAnswer
-        case YesNoQuestion(id, wording, statement, yesMarking, noMarking, absence) => if(yesMarking == Pass) SingleChoiceAnswer("Yes") else SingleChoiceAnswer("No")
+        case YesNoQuestion(id, wording, statement, _, _, _, yesMarking, noMarking, absence) => if(yesMarking == Pass) SingleChoiceAnswer("Yes") else SingleChoiceAnswer("No")
       }
     }
     
@@ -185,7 +185,7 @@ trait SubmissionsTestData extends QuestionBuilder with QuestionnaireTestData wit
     buildAnsweredSubmission(true)(submission)
 
 
-  def allFirstQuestions(questionnaires: NonEmptyList[Questionnaire]): Map[QuestionnaireId, QuestionId] =
+  def allFirstQuestions(questionnaires: NonEmptyList[Questionnaire]): Map[Questionnaire.Id, Question.Id] =
     questionnaires.map { qn =>
         (qn.id, qn.questions.head.question.id)
     }
@@ -198,16 +198,16 @@ trait SubmissionsTestData extends QuestionBuilder with QuestionnaireTestData wit
 }
 
 trait AnsweringQuestionsHelper {
-    def answerForQuestion(desiredMark: Mark)(question: Question): Map[QuestionId, Option[ActualAnswer]] = {
+    def answerForQuestion(desiredMark: Mark)(question: Question): Map[Question.Id, Option[ActualAnswer]] = {
       val answers: List[Option[ActualAnswer]] = question match {
 
-      case YesNoQuestion(id, _, _, yesMarking, noMarking, absence) =>
+      case YesNoQuestion(id, _, _, _, _, _, yesMarking, noMarking, absence) =>
         (if(yesMarking == desiredMark) Some(SingleChoiceAnswer("Yes")) else None) ::
         (if(noMarking == desiredMark) Some(SingleChoiceAnswer("No")) else None) ::
         (absence.flatMap(a => if(a._2 == desiredMark) Some(NoAnswer) else None)) ::
         List.empty[Option[ActualAnswer]]
 
-      case ChooseOneOfQuestion(id, _, _, marking, absence) => {
+      case ChooseOneOfQuestion(id, _, _, _, _, _, marking, absence) => {
         marking.map {
           case (pa, mark) => Some(SingleChoiceAnswer(pa.value))
           case _ => None
@@ -216,7 +216,7 @@ trait AnsweringQuestionsHelper {
         List(absence.flatMap(a => if(a._2 == desiredMark) Some(NoAnswer) else None))
       }
 
-      case TextQuestion(id, _, _, absence) => 
+      case TextQuestion(id, _, _, _, _, _, absence) => 
         if(desiredMark == Pass)
           Some(TextAnswer(Random.nextString(Random.nextInt(25)+1))) ::
           absence.flatMap(a => if(a._2 == desiredMark) Some(NoAnswer) else None) ::
@@ -226,7 +226,7 @@ trait AnsweringQuestionsHelper {
 
       case AcknowledgementOnly(id, _, _) => List(Some(NoAnswer))
 
-      case MultiChoiceQuestion(id, _, _, marking, absence) => 
+      case MultiChoiceQuestion(id, _, _, _, _, _, marking, absence) => 
         marking.map {
           case (pa, mark) if(mark == desiredMark) => Some(MultipleChoiceAnswer(Set(pa.value)))
           case _ => None
@@ -242,7 +242,7 @@ trait AnsweringQuestionsHelper {
     ).headOption)
   }
 
-  def answersForQuestionnaire(desiredMark: Mark)(questionnaire: Questionnaire): Map[QuestionId, ActualAnswer] = {
+  def answersForQuestionnaire(desiredMark: Mark)(questionnaire: Questionnaire): Map[Question.Id, ActualAnswer] = {
     questionnaire.questions
     .toList
     .map(qi => qi.question)
@@ -253,7 +253,7 @@ trait AnsweringQuestionsHelper {
     .toMap
   }
 
-  def answersForGroups(desiredMark: Mark)(groups: NonEmptyList[GroupOfQuestionnaires]): Map[QuestionId, ActualAnswer] = {
+  def answersForGroups(desiredMark: Mark)(groups: NonEmptyList[GroupOfQuestionnaires]): Map[Question.Id, ActualAnswer] = {
     groups
     .flatMap(g => g.links)
     .toList
@@ -262,7 +262,7 @@ trait AnsweringQuestionsHelper {
   }
 }
 trait MarkedSubmissionsTestData extends SubmissionsTestData with AnsweringQuestionsHelper {
-  val markedAnswers: Map[QuestionId, Mark] = Map(
+  val markedAnswers: Map[Question.Id, Mark] = Map(
     (DevelopmentPractices.question1.id -> Pass),
     (DevelopmentPractices.question2.id -> Fail),
     (DevelopmentPractices.question3.id -> Warn),

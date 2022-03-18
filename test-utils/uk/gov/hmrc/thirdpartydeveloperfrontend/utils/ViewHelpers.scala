@@ -16,7 +16,7 @@
 
 package uk.gov.hmrc.thirdpartydeveloperfrontend.utils
 
-import org.jsoup.nodes.Document
+import org.jsoup.nodes.{Document, Element}
 
 import scala.collection.JavaConverters._
 
@@ -66,5 +66,20 @@ object ViewHelpers {
 
   def elementIdentifiedByIdContainsValue(doc: Document, id: String, value: String): Boolean = {
     doc.select(s"#$id").asScala.exists(element => element.`val`.equals(value))
+  }
+
+  def elementExistsContainsText(doc: Document, elementType: String, elementText: String): Boolean = {
+    doc.select(elementType).asScala.exists(node => node.text.trim.contains(elementText))
+  }
+
+  def elementExistsByIdWithAttr(doc: Document, id: String, attr: String): Boolean =
+    doc.select(s"#$id").asScala.filter(_.hasAttr(attr)).nonEmpty
+
+  def elementBySelector(doc: Document, selector: String): Option[Element] = {
+    doc.select(s"$selector").asScala.headOption
+  }
+
+  def elementByAttributeValue(doc: Document, attributeType: String, attributeId: String, text: String): Boolean = {
+    doc.getElementsByAttributeValue(attributeType, attributeId).text().equals(text)
   }
 }

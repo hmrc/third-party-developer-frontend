@@ -45,16 +45,19 @@ trait QuestionBuilder {
 
   def acknowledgementOnly(counter: Int): AcknowledgementOnly =
     AcknowledgementOnly(
-      QuestionId.random,
+      Question.Id.random,
       Wording(s"Wording$counter"),
       Statement(List())
     )
     
   def yesNoQuestion(counter: Int): YesNoQuestion = {
     YesNoQuestion(
-      QuestionId.random,
+      Question.Id.random,
       Wording(s"Wording$counter"),
-      Statement(List()),
+      Statement(),
+      Statement(),
+      None,
+      None,
       Pass,
       Fail,
       None
@@ -63,25 +66,31 @@ trait QuestionBuilder {
 
   def chooseOneOfQuestion(counter: Int, choices: String*): ChooseOneOfQuestion = {
     ChooseOneOfQuestion(
-      QuestionId.random,
+      Question.Id.random,
       Wording(s"Wording$counter"),
-      Statement(List()),
-      choices.toList.map(c => (PossibleAnswer(c) -> Pass)).foldRight(ListMap.empty[PossibleAnswer, Mark])( (pair, acc) => acc + pair)
+      Statement(),
+      Statement(),
+      None,
+      None,
+      marking = choices.toList.map(c => (PossibleAnswer(c) -> Pass)).foldRight(ListMap.empty[PossibleAnswer, Mark])( (pair, acc) => acc + pair)
     )
   }
 
   def multichoiceQuestion(counter: Int, choices: String*): MultiChoiceQuestion = {
     MultiChoiceQuestion(
-      QuestionId.random,
+      Question.Id.random,
       Wording(s"Wording$counter"),
       Statement(List()),
+      Statement(),
+      None,
+      None,
       choices.toList.map(c => (PossibleAnswer(c) -> Pass)).foldRight(ListMap.empty[PossibleAnswer, Mark])( (pair, acc) => acc + pair)
     )
   }
 
   def textQuestion(counter: Int): TextQuestion = {
     TextQuestion(
-      QuestionId.random,
+      Question.Id.random,
       Wording(s"Wording$counter"),
       Statement(List())
     )

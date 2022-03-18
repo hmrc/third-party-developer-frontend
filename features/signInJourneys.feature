@@ -7,7 +7,7 @@ Feature: Sign in
       | john.smith@example.com | StrongPassword1! | John       | Smith     |
     And I have no application assigned to my email 'john.smith@example.com'
 
-  Scenario: Signing with a valid credentials and no MFA mandated or setup
+  Scenario: Signing with a valid credentials and no MFA mandated or setup, select email preferences
     Given I navigate to the 'Sign in' page
     And I enter all the fields:
       | email address          | password         |
@@ -17,8 +17,25 @@ Feature: Sign in
     When I click on the button with id 'skip'
     Then I am on the 'Recommend Mfa Skip Acknowledge' page
     When I click on the button with id 'submit'
-    Then I am on the 'Add an application to the sandbox empty nest' page
+    Given I am on the 'Using the Developer Hub' page
+    When I click on the radio button with id 'get-emails'
+    And I click on the button with id 'submit'
+    Then I am on the 'Email preferences' page
 
+  Scenario: Signing with a valid credentials and no MFA mandated or setup, start using our rest APIs
+    Given I navigate to the 'Sign in' page
+    And I enter all the fields:
+      | email address          | password         |
+      | john.smith@example.com | StrongPassword1! |
+    When I click on the button with id 'submit'
+    Then I am on the 'Recommend Mfa' page
+    When I click on the button with id 'skip'
+    Then I am on the 'Recommend Mfa Skip Acknowledge' page
+    When I click on the button with id 'submit'
+    Given I am on the 'Using the Developer Hub' page
+    When I click on the radio button with id 'use-apis'
+    And I click on the button with id 'submit'
+    Then I am on the 'Add an application to the sandbox empty nest' page
 
   Scenario: Signing with a valid credentials, no mfa enabled and with a production admin app and the mandate date is in the past
     Given application with name 'My Admin Production App' can be created

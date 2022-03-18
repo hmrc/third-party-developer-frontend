@@ -31,7 +31,7 @@ import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.WithLoggedInSession._
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import uk.gov.hmrc.apiplatform.modules.submissions.SubmissionsTestData
-import uk.gov.hmrc.apiplatform.modules.submissions.domain.models.QuestionId
+import uk.gov.hmrc.apiplatform.modules.submissions.domain.models.Question
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.ApplicationWithSubscriptionData
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
@@ -127,7 +127,7 @@ class QuestionControllerSpec
     "fail with a BAD REQUEST for an invalid questionId" in new Setup {
       SubmissionServiceMock.Fetch.thenReturns(aSubmission.withIncompleteProgress)
 
-      val result = controller.showQuestion(aSubmission.id, QuestionId("BAD_ID"))(loggedInRequest.withCSRFToken)
+      val result = controller.showQuestion(aSubmission.id, Question.Id("BAD_ID"))(loggedInRequest.withCSRFToken)
 
       status(result) shouldBe BAD_REQUEST
     }
@@ -147,7 +147,7 @@ class QuestionControllerSpec
     "fail with a BAD REQUEST for an invalid questionId" in new Setup {
       SubmissionServiceMock.Fetch.thenReturns(aSubmission.withIncompleteProgress)
 
-      val result = controller.updateQuestion(aSubmission.id, QuestionId("BAD_ID"))(loggedInRequest.withCSRFToken)
+      val result = controller.updateQuestion(aSubmission.id, Question.Id("BAD_ID"))(loggedInRequest.withCSRFToken)
 
       status(result) shouldBe BAD_REQUEST
     }

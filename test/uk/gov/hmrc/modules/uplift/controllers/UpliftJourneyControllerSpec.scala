@@ -40,6 +40,7 @@ import uk.gov.hmrc.apiplatform.modules.uplift.services.mocks._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.SubscriptionTestHelperSugar
 import scala.concurrent.Future
 import uk.gov.hmrc.thirdpartydeveloperfrontend.config.{UpliftJourneyConfig, On}
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.SellResellOrDistribute
 
 class UpliftJourneyControllerSpec extends BaseControllerSpec
                 with SampleSession
