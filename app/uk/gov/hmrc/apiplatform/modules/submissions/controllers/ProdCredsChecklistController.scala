@@ -53,7 +53,10 @@ object ProdCredsChecklistController {
     }
   }
 
-  case class ViewQuestionnaireSummary(label: String, state: String, isComplete: Boolean, id: Questionnaire.Id = Questionnaire.Id.random, nextQuestionUrl: Option[String] = None)
+
+  case class ViewQuestionnaireSummary(label: String, state: String, isComplete: Boolean, id: Questionnaire.Id = Questionnaire.Id.random, nextQuestionUrl: Option[String] = None) {
+    lazy val fieldName = label.toLowerCase
+  }
   case class ViewGrouping(label: String, questionnaireSummaries: NonEmptyList[ViewQuestionnaireSummary])
   case class ViewModel(appId: ApplicationId, appName: String, groupings: NonEmptyList[ViewGrouping])
 
@@ -136,9 +139,13 @@ class ProdCredsChecklistController @Inject() (
         successful(
           filterGroupingsForEmptyQuestionnaireSummaries(viewModel.groupings).fold(
             throw new AssertionError("submissions with only n/a questionnaires will be marked as complete")
-          )(vg =>
-            Ok(productionCredentialsChecklistView(viewModel.copy(groupings = vg), DummyForm.form.fill(validForm).withGlobalError("production.credentials.checklist.error.global")))
-          )
+          )(vg => {
+            val form = vg.flatMap(group => group.questionnaireSummaries)
+              .filter(!_.isComplete)
+              .foldLeft(DummyForm.form.fill(validForm))((form, summary) => form.withError(summary.fieldName, s"Complete the ${summary.label.toLowerCase} section"))
+
+            Ok(productionCredentialsChecklistView(viewModel.copy(groupings = vg), form))
+          })
         )
       }
     }
