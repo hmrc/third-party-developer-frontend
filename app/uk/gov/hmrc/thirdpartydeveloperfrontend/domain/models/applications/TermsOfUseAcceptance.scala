@@ -14,23 +14,17 @@
  * limitations under the License.
  */
 
-package uk.gov.hmrc.thirdpartydeveloperfrontend.utils
+package uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications
 
-import uk.gov.hmrc.apiplatform.modules.submissions.domain.models.{Question, QuestionItem}
-import cats.data.NonEmptyList
+import play.api.libs.json._
+import org.joda.time.{DateTime, DateTimeZone}
+import uk.gov.hmrc.apiplatform.modules.submissions.domain.models.Submission
 
-trait AsIdsHelpers {
-  implicit class ListQIdSyntax(questionItems: List[QuestionItem]) {
-    def asIds(): List[Question.Id] = {
-      questionItems.map(_.question.id)
-    }
-  }
+case class TermsOfUseAcceptance(responsibleIndividual: ResponsibleIndividual, dateTime: DateTime, submissionId: Submission.Id, version: String)
 
-  implicit class NELQIdSyntax(questionItems: NonEmptyList[QuestionItem]) {
-    def asIds(): List[Question.Id] = {
-      questionItems.toList.map(_.question.id)
-    }
-  }
+object TermsOfUseAcceptance {
+  import JodaWrites.JodaDateTimeWrites
+  implicit val utcReads = JodaReads.DefaultJodaDateTimeReads.map(dt => dt.withZone(DateTimeZone.UTC))
+
+  implicit val format = Json.format[TermsOfUseAcceptance]
 }
-
-object AsIdsHelpers extends AsIdsHelpers

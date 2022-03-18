@@ -19,7 +19,6 @@ package uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications
 import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.DeveloperSession
 import play.api.libs.json.Json
-import uk.gov.hmrc.apiplatform.modules.uplift.domain.models._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.apidefinitions.ApiIdentifier
 
 case class UpliftData(
@@ -61,8 +60,8 @@ case class UpdateApplicationRequest(
     id: ApplicationId,
     environment: Environment,
     name: String,
-    description: Option[String] = None,
-    access: Access = Standard(List.empty, None, None, Set.empty)
+    description: Option[String],
+    access: Access
 )
 
 object UpdateApplicationRequest extends ApplicationRequest {
@@ -83,10 +82,9 @@ object UpdateApplicationRequest extends ApplicationRequest {
       application.deployedTo,
       name,
       normalizeDescription(form.description),
-      Standard(
-        access.redirectUris.map(_.trim).filter(_.nonEmpty).distinct,
-        form.termsAndConditionsUrl.map(_.trim),
-        form.privacyPolicyUrl.map(_.trim)
+      access.copy(
+        termsAndConditionsUrl = form.termsAndConditionsUrl.map(_.trim),
+        privacyPolicyUrl = form.privacyPolicyUrl.map(_.trim)
       )
     )
   }

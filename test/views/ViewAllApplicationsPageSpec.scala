@@ -16,7 +16,7 @@
 
 package views
 
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.controllers.{ManageApplicationsViewModel, ApplicationSummary}
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.controllers.{ApplicationSummary, ManageApplicationsViewModel}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.apidefinitions.AccessType
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.{ApplicationId, CollaboratorRole, State, TermsOfUseStatus}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.LoggedInState
@@ -28,11 +28,12 @@ import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.ViewHelpers.{elementExistsB
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.WithCSRFAddToken
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.DeveloperSessionBuilder
 import views.helper.CommonViewSpec
-import views.html.{AddApplicationSubordinateEmptyNestView, ManageApplicationsView}
+import views.html.ManageApplicationsView
 import views.helper.EnvironmentNameService
 import uk.gov.hmrc.thirdpartydeveloperfrontend.helpers.DateFormatter
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.Environment
 import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.addapplication.routes.{AddApplication => AddApplicationRoutes}
+import views.html.noapplications.StartUsingRestApisView
 
 class ViewAllApplicationsPageSpec extends CommonViewSpec with WithCSRFAddToken {
   def isGreenAddProductionApplicationButtonVisible(document: Document): Boolean = {
@@ -278,7 +279,7 @@ class ViewAllApplicationsPageSpec extends CommonViewSpec with WithCSRFAddToken {
     def renderPage(appSummaries: Seq[ApplicationSummary]) = {
       val request = FakeRequest().withCSRFToken
       val loggedIn = DeveloperSessionBuilder("developer@example.com", "firstName", "lastname", loggedInState = LoggedInState.LOGGED_IN)
-      val addApplicationSubordinateEmptyNestView = app.injector.instanceOf[AddApplicationSubordinateEmptyNestView]
+      val addApplicationSubordinateEmptyNestView = app.injector.instanceOf[StartUsingRestApisView]
 
       addApplicationSubordinateEmptyNestView.render(request, loggedIn, messagesProvider, appConfig, "nav-section", environmentNameService)
     }
@@ -288,7 +289,7 @@ class ViewAllApplicationsPageSpec extends CommonViewSpec with WithCSRFAddToken {
 
       val document = Jsoup.parse(renderPage(appSummaries).body)
 
-      elementExistsByText(document, "h1", "Start using our APIs") shouldBe true
+      elementExistsByText(document, "h1", "Start using our REST APIs") shouldBe true
     }
 
     "show the empty nest page when there are no applications when environment is QA/Dev" in new QaAndDev with Setup {
@@ -296,7 +297,7 @@ class ViewAllApplicationsPageSpec extends CommonViewSpec with WithCSRFAddToken {
 
       val document = Jsoup.parse(renderPage(appSummaries).body)
 
-      elementExistsByText(document, "h1", "Start using our APIs") shouldBe true
+      elementExistsByText(document, "h1", "Start using our REST APIs") shouldBe true
     }
   }
 }

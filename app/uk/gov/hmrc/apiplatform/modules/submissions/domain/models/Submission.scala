@@ -43,23 +43,23 @@ object QuestionnaireState {
   }
 }
 
-case class QuestionnaireProgress(state: QuestionnaireState, questionsToAsk: List[QuestionId])
+case class QuestionnaireProgress(state: QuestionnaireState, questionsToAsk: List[Question.Id])
 
 
 case class QuestionIdsOfInterest(
-    applicationNameId: QuestionId,
-    privacyPolicyId: QuestionId,
-    privacyPolicyUrlId: QuestionId,
-    termsAndConditionsId: QuestionId,
-    termsAndConditionsUrlId: QuestionId,
-    organisationUrlId: QuestionId,
-    responsibleIndividualNameId: QuestionId,
-    responsibleIndividualEmailId: QuestionId,
-    identifyYourOrganisationId: QuestionId
+    applicationNameId: Question.Id,
+    privacyPolicyId: Question.Id,
+    privacyPolicyUrlId: Question.Id,
+    termsAndConditionsId: Question.Id,
+    termsAndConditionsUrlId: Question.Id,
+    organisationUrlId: Question.Id,
+    responsibleIndividualNameId: Question.Id,
+    responsibleIndividualEmailId: Question.Id,
+    identifyYourOrganisationId: Question.Id
 )
 
 object Submission {
-  type AnswersToQuestions = Map[QuestionId, ActualAnswer]
+  type AnswersToQuestions = Map[Question.Id, ActualAnswer]
 
   case class Id(value: String) extends AnyVal
 
@@ -244,9 +244,9 @@ case class Submission(
 
   lazy val allQuestions: NonEmptyList[Question] = allQuestionnaires.flatMap(l => l.questions.map(_.question))
 
-  def findQuestion(questionId: QuestionId): Option[Question] = allQuestions.find(q => q.id == questionId)
+  def findQuestion(questionId: Question.Id): Option[Question] = allQuestions.find(q => q.id == questionId)
 
-  def findQuestionnaireContaining(questionId: QuestionId): Option[Questionnaire] = 
+  def findQuestionnaireContaining(questionId: Question.Id): Option[Questionnaire] = 
     allQuestionnaires.find(qn => 
       qn.questions.exists(qi => 
         qi.question.id == questionId
@@ -261,12 +261,12 @@ case class Submission(
 
 case class ExtendedSubmission(
   submission: Submission,
-  questionnaireProgress: Map[QuestionnaireId, QuestionnaireProgress]
+  questionnaireProgress: Map[Questionnaire.Id, QuestionnaireProgress]
 )
 
 case class MarkedSubmission(
   submission: Submission,
-  markedAnswers: Map[QuestionId, Mark]
+  markedAnswers: Map[Question.Id, Mark]
 ) {
   lazy val isFail = markedAnswers.values.toList.contains(Fail) | markedAnswers.values.filter(_ == Warn).size >= 4
   lazy val isWarn = markedAnswers.values.toList.contains(Warn)

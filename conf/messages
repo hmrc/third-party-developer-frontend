@@ -184,3 +184,5 @@ responsible_individual_fullname.error.required.field=Provide a full name
 responsible_individual_emailaddress.error.required.field=Provide an email address
 
 production.credentials.checklist.error.global = You must complete all questionnaires
+
+no.applications.choice.error.required.field = Please select an option

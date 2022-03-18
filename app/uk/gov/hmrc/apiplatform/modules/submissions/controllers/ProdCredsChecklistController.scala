@@ -53,7 +53,7 @@ object ProdCredsChecklistController {
     }
   }
 
-  case class ViewQuestionnaireSummary(label: String, state: String, isComplete: Boolean, id: QuestionnaireId = QuestionnaireId.random, nextQuestionUrl: Option[String] = None)
+  case class ViewQuestionnaireSummary(label: String, state: String, isComplete: Boolean, id: Questionnaire.Id = Questionnaire.Id.random, nextQuestionUrl: Option[String] = None)
   case class ViewGrouping(label: String, questionnaireSummaries: NonEmptyList[ViewQuestionnaireSummary])
   case class ViewModel(appId: ApplicationId, appName: String, groupings: NonEmptyList[ViewGrouping])
 

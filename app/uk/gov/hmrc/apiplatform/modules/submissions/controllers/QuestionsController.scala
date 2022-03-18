@@ -65,7 +65,7 @@ class QuestionsController @Inject()(
 
   import cats.instances.future.catsStdInstancesForFuture
 
-  private def processQuestion(submissionId: Submission.Id, questionId: QuestionId, answers: Option[ActualAnswer] = None, errors: Option[String] = None)(submitAction: Call)(implicit request: SubmissionApplicationRequest[AnyContent]) = {
+  private def processQuestion(submissionId: Submission.Id, questionId: Question.Id, answers: Option[ActualAnswer], errors: Option[String])(submitAction: Call)(implicit request: SubmissionApplicationRequest[AnyContent]) = {
     val currentAnswer = request.submission.latestInstance.answersToQuestions.get(questionId)
     val submission = request.submission
     val oQuestion = submission.findQuestion(questionId)
@@ -86,17 +86,17 @@ class QuestionsController @Inject()(
     .fold[Result](BadRequest(_), identity(_))
   }
 
-  def showQuestion(submissionId: Submission.Id, questionId: QuestionId, answers: Option[ActualAnswer] = None, errors: Option[String] = None) = withSubmission(submissionId) { implicit request => 
+  def showQuestion(submissionId: Submission.Id, questionId: Question.Id, answers: Option[ActualAnswer] = None, errors: Option[String] = None) = withSubmission(submissionId) { implicit request => 
     val submitAction = uk.gov.hmrc.apiplatform.modules.submissions.controllers.routes.QuestionsController.recordAnswer(submissionId, questionId)
     processQuestion(submissionId, questionId, answers, errors)(submitAction)
   }
 
-  def updateQuestion(submissionId: Submission.Id, questionId: QuestionId, answers: Option[ActualAnswer] = None, errors: Option[String] = None) = withSubmission(submissionId) { implicit request => 
+  def updateQuestion(submissionId: Submission.Id, questionId: Question.Id, answers: Option[ActualAnswer] = None, errors: Option[String] = None) = withSubmission(submissionId) { implicit request => 
     val submitAction = uk.gov.hmrc.apiplatform.modules.submissions.controllers.routes.QuestionsController.updateAnswer(submissionId, questionId)
     processQuestion(submissionId, questionId, answers, errors)(submitAction)
   }
 
-  private def processAnswer(submissionId: Submission.Id, questionId: QuestionId)(success: (ExtendedSubmission) => Future[Result])(implicit request: SubmissionApplicationRequest[AnyContent]) = {
+  private def processAnswer(submissionId: Submission.Id, questionId: Question.Id)(success: (ExtendedSubmission) => Future[Result])(implicit request: SubmissionApplicationRequest[AnyContent]) = {
     lazy val failed = (msg: String) => {
       logger.info(s"Failed to recordAnswer - $msg")
       showQuestion(submissionId, questionId, None, Some("Please provide an answer to the question"))(request)
@@ -129,7 +129,7 @@ class QuestionsController @Inject()(
     .flatten
   } 
 
-  def recordAnswer(submissionId: Submission.Id, questionId: QuestionId) = withSubmission(submissionId) { implicit request => 
+  def recordAnswer(submissionId: Submission.Id, questionId: Question.Id) = withSubmission(submissionId) { implicit request => 
     val success = (extSubmission: ExtendedSubmission) => { 
       val questionnaire = extSubmission.submission.findQuestionnaireContaining(questionId).get
       val nextQuestion = extSubmission.questionnaireProgress.get(questionnaire.id)
@@ -144,8 +144,8 @@ class QuestionsController @Inject()(
     processAnswer(submissionId, questionId)(success)
   }
 
-  def updateAnswer(submissionId: Submission.Id, questionId: QuestionId) = withSubmission(submissionId) { implicit request =>
-    def hasQuestionBeenAnswered(questionId: QuestionId) = {
+  def updateAnswer(submissionId: Submission.Id, questionId: Question.Id) = withSubmission(submissionId) { implicit request =>
+    def hasQuestionBeenAnswered(questionId: Question.Id) = {
       request.submission.latestInstance.answersToQuestions.get(questionId).fold(false)(_ => true)
     }
 
@@ -155,7 +155,7 @@ class QuestionsController @Inject()(
                         .flatMap(_.questionsToAsk.dropWhile(_ != questionId).tail.headOption)
 
       lazy val toCheckAnswers = uk.gov.hmrc.apiplatform.modules.submissions.controllers.routes.CheckAnswersController.checkAnswersPage(request.submission.applicationId)
-      lazy val toNextQuestion = (nextQuestionId: QuestionId) => if(hasQuestionBeenAnswered(nextQuestionId))
+      lazy val toNextQuestion = (nextQuestionId: Question.Id) => if(hasQuestionBeenAnswered(nextQuestionId))
         uk.gov.hmrc.apiplatform.modules.submissions.controllers.routes.CheckAnswersController.checkAnswersPage(request.submission.applicationId)
       else
         uk.gov.hmrc.apiplatform.modules.submissions.controllers.routes.QuestionsController.updateQuestion(submissionId, nextQuestionId)
