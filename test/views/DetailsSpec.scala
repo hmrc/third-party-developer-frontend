@@ -49,11 +49,11 @@ class DetailsSpec
     lazy val environmentName: Element = body.getElementById("environmentName")
     lazy val warning: Element = body.getElementById("terms-of-use-header")
     lazy val termsOfUse: Element = body.getElementById("termsOfUse")
-    lazy val agreementDetails: Element = termsOfUse.getElementById("termsOfUseAgreementDetails")
-    lazy val readLink: Element = termsOfUse.getElementById("termsOfUseReadLink")
+    lazy val agreementDetails: Element = body.getElementById("termsOfUseAgreementDetails")
+    lazy val readLink: Element = body.getElementById("termsOfUseReadLink")
   }
 
-  val termsOfUseViewModel = TermsOfUseViewModel(true, true, false, true, "user@example.com", DateTime.now)
+  val termsOfUseViewModel = TermsOfUseViewModel(true, true, true, "user@example.com", DateTime.now)
 
   "Application details view" when {
     implicit val request: FakeRequest[AnyContentAsEmpty.type] = FakeRequest()
@@ -180,7 +180,7 @@ class DetailsSpec
           "the user is a developer" should {
             "show 'not agreed' and have no link to read and agree when the terms of use have not been agreed" in {
               val checkInformation = CheckInformation(termsOfUseAgreements = List.empty)
-              val termsOfUseViewModelNotAgreed = termsOfUseViewModel.copy(agreed = false, agreementNeeded = true)
+              val termsOfUseViewModelNotAgreed = termsOfUseViewModel.copy(agreed = false)
 
               val application = anApplication(environment = deployedTo, access = access)
                 .withTeamMember(loggedIn.developer.email, CollaboratorRole.ADMINISTRATOR)
@@ -216,7 +216,7 @@ class DetailsSpec
 
             "show 'not agreed', have a button to read and agree and show a warning when the terms of use have not been agreed" in {
               val checkInformation = CheckInformation(termsOfUseAgreements = List.empty)
-              val termsOfUseViewModelNotAgreed = termsOfUseViewModel.copy(agreed = false, agreementNeeded = true)
+              val termsOfUseViewModelNotAgreed = termsOfUseViewModel.copy(agreed = false)
 
               val application = anApplication(environment = deployedTo, access = access)
                 .withTeamMembers(collaborators)

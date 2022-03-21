@@ -166,7 +166,7 @@
           <td class="govuk-table__cell">Terms of use</td>
           <td class="govuk-table__cell" id="termsOfUseAgreementDetails">
             @if(termsOfUse.agreed) {
-              Agreed by @{termsOfUse.emailAddressOfWhoAgreed} on @{DateTimeFormat.forPattern("dd MMMM yyyy").print(termsOfUse.timestampOfWhenAgreed)}
+              Agreed by @{termsOfUse.whoAgreed} on @{DateTimeFormat.forPattern("dd MMMM yyyy").print(termsOfUse.timestampOfWhenAgreed)}
             } else {
               Not agreed
             }
@@ -186,7 +186,7 @@
     } else {
       <h2 class="govuk-heading-s govuk-!-margin-top-7 govuk-!-margin-bottom-2">Terms of use</h2>
       @if(termsOfUse.agreed) {
-        <p class="govuk-body govuk-!-margin-bottom-1" id="termsOfUseAgreementDetails">@{termsOfUse.emailAddressOfWhoAgreed} verified @{app.name} will conform to our terms of use on @{DateTimeFormat.forPattern("dd MMMM yyyy").print(termsOfUse.timestampOfWhenAgreed)}. </p>
+        <p class="govuk-body govuk-!-margin-bottom-1" id="termsOfUseAgreementDetails">@{termsOfUse.whoAgreed} verified @{app.name} will conform to our terms of use on @{DateTimeFormat.forPattern("dd MMMM yyyy").print(termsOfUse.timestampOfWhenAgreed)}. </p>
         <p class="govuk-body"><a class="govuk-link govuk-link--no-visited-state" href="@uk.gov.hmrc.apiplatform.modules.submissions.controllers.routes.TermsOfUseResponsesController.termsOfUseResponsesPage(app.id)">Review the terms of use responses for @{app.name}</a></p>
       } else {
         <p class="govuk-body" id="termsOfUseAgreementDetails">Not agreed</p>

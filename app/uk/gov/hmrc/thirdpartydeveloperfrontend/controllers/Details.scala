@@ -48,16 +48,19 @@ import scala.concurrent.Future.successful
 import uk.gov.hmrc.apiplatform.modules.submissions.domain.models.Submission
 import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.Details.TermsOfUseViewModel
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.TermsOfUseVersion
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.services.TermsOfUseService
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.services.TermsOfUseService.TermsOfUseAgreementDetails
 
 object Details {
   case class TermsOfUseViewModel(
     exists: Boolean,
     agreed: Boolean,
-    agreementNeeded: Boolean,
     appUsesOldVersion: Boolean,
-    emailAddressOfWhoAgreed: String,
+    whoAgreed: String,
     timestampOfWhenAgreed: DateTime
-  )
+  ) {
+    lazy val agreementNeeded = exists && !agreed
+  }
 }
 @Singleton
 class Details @Inject() (
@@ -73,7 +76,7 @@ class Details @Inject() (
     changeDetailsView: ChangeDetailsView,
     val fraudPreventionConfig: FraudPreventionConfig,
     submissionService: SubmissionService,
-    termsOfUseVersionService: TermsOfUseVersionService
+    termsOfUseService: TermsOfUseService
 )(implicit val ec: ExecutionContext, val appConfig: ApplicationConfig)
     extends ApplicationController(mcc) with FraudPreventionNavLinkHelper {
 
@@ -141,14 +144,18 @@ class Details @Inject() (
 
   private def buildTermsOfUseViewModel()(implicit request: ApplicationRequest[AnyContent]): TermsOfUseViewModel = {
     val application = request.application
-    val hasTermsOfUse = application.termsOfUseStatus != TermsOfUseStatus.NOT_APPLICABLE
-    val termsOfUseAgreed = application.termsOfUseStatus == TermsOfUseStatus.AGREED
-    val termsOfUseAgreementRequired = application.termsOfUseStatus == TermsOfUseStatus.AGREEMENT_REQUIRED
-    val appUsesOldTermsOfUse = termsOfUseVersionService.getForApplication(application) == TermsOfUseVersion.V1_2
-    val emailAddress = "email@example.com" //TODO
-    val timestamp = DateTime.now //TODO
 
-    TermsOfUseViewModel(hasTermsOfUse, termsOfUseAgreed, termsOfUseAgreementRequired, appUsesOldTermsOfUse, emailAddress, timestamp)
+    val latestTermsOfUseAgreementDetails = termsOfUseService.getAgreementDetails(application).lastOption
+
+    val hasTermsOfUse = ! application.deployedTo.isSandbox && application.access.accessType.isStandard
+
+    latestTermsOfUseAgreementDetails match {
+      case Some(TermsOfUseAgreementDetails(emailAddress, maybeName, date, versionString)) => {
+        val version = TermsOfUseVersion.fromVersionString(versionString)
+        TermsOfUseViewModel(hasTermsOfUse, true, version == TermsOfUseVersion.V1_2, maybeName.getOrElse(emailAddress), date)
+      }
+      case _ => TermsOfUseViewModel(hasTermsOfUse, false, false, null, null) //TODO get rid of nulls
+    }
   }
 
   def changeDetails(applicationId: ApplicationId): Action[AnyContent] = canChangeDetailsAndIsApprovedAction(applicationId) { implicit request =>
