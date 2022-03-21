@@ -35,6 +35,13 @@ sealed trait Question {
   final def isOptional: Boolean = absence.isDefined
 }
 
+trait LabelAndHints {
+  self: Question =>
+
+  def label: Option[Question.Label]
+  def hintText: Option[NonBulletStatementFragment]
+}
+
 case class Wording(value: String) extends AnyVal
 
 object Wording {
@@ -66,7 +73,7 @@ case class TextQuestion(
   label: Option[Question.Label] = None,
   hintText: Option[NonBulletStatementFragment] = None,
   absence: Option[(String, Mark)] = None
-) extends Question
+) extends Question with LabelAndHints
 
 case class AcknowledgementOnly(id: Question.Id, wording: Wording, statement: Statement = Statement()) extends Question {
   val absence = None
@@ -95,7 +102,7 @@ object Mark {
 
 case class PossibleAnswer(value: String) extends AnyVal
 
-sealed trait ChoiceQuestion extends Question {
+sealed trait ChoiceQuestion extends Question with LabelAndHints {
   def choices: ListSet[PossibleAnswer]
   def marking: ListMap[PossibleAnswer, Mark]
 }

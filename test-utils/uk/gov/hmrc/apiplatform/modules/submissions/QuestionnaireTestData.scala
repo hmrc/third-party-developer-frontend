@@ -80,48 +80,43 @@ trait QuestionnaireTestData {
   object OrganisationDetails {
     val questionRI1 = TextQuestion(
       Question.Id("36b7e670-83fc-4b31-8f85-4d3394908495"),
-      Wording("What is the name of your responsible individual"),
-      
-      Statement(
+      Wording("Provide details for a responsible individual in your organisation"),
+      statement = Statement(
         List(
           StatementText("The responsible individual:"),
-          CompoundFragment(
-            StatementText("ensures your software meets our "),
-            StatementLink("terms of use", "/api-documentation/docs/terms-of-use")
-          ),
-          CompoundFragment(
-            StatementText("understands the "),
-            StatementLink("consequences of not meeting the terms of use", "/api-documentation/docs/terms-of-use")
+          StatementBullets(
+            CompoundFragment(
+              StatementText("ensures your software conforms to the "),
+              StatementLink("terms of use (opens in new tab)", "/api-documentation/docs/terms-of-use")
+            ),
+            CompoundFragment(
+              StatementText("understands the "),
+              StatementLink("consequences of not conforming to the terms of use (opens in new tab)", "/api-documentation/docs/terms-of-use")
+            )
           )
         )
-      )
+      ),
+      label = Some(Question.Label("First and last name"))
     )
     val questionRI2 = TextQuestion(
       Question.Id("fb9b8036-cc88-4f4e-ad84-c02caa4cebae"),
-      Wording("What is the email address of your responsible individual"),
-      Statement(
+      Wording("Provide an email address for the responsible individual"),
+      statement = Statement(List.empty),
+      afterStatement = Statement(
         List(
-          StatementText("The responsible individual:"),
-          CompoundFragment(
-            StatementText("ensures your software meets our "),
-            StatementLink("terms of use", "/api-documentation/docs/terms-of-use")
-          ),
-          CompoundFragment(
-            StatementText("understands the "),
-            StatementLink("consequences of not meeting the terms of use", "/api-documentation/docs/terms-of-use")
-          )
+          StatementText("We will send a verification email to the email address provided."),
+          StatementText("The responsible individual must verify within 10 days that they are responsible for ensuring your software conforms to our terms of use.")
         )
-      )
+      ),
+      label = Some(Question.Label("Email address")),
+      hintText = Some(StatementText("Cannot be a shared mailbox"))
     )
 
     val question1 = TextQuestion(
       Question.Id("b9dbf0a5-e72b-4c89-a735-26f0858ca6cc"),
-      Wording("Give us your organisation's website URL"),
-      Statement(
-        List(
-          StatementText("For example https://example.com")
-        )
-      ),
+      Wording("What is your organisation’s URL?"),
+      statement = Statement(List.empty),
+      hintText = Some(StatementText("For example https://example.com")),
       absence = Some(("My organisation doesn't have a website", Fail))
     )
 

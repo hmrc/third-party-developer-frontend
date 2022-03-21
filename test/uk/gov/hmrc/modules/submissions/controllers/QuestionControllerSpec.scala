@@ -124,6 +124,19 @@ class QuestionControllerSpec
       contentAsString(result) contains(formSubmissionLink) shouldBe true withClue(s"(HTML content did not contain $formSubmissionLink)")
     }
 
+    "succeed and check for label, hintText and afterStatement" in new Setup {
+      SubmissionServiceMock.Fetch.thenReturns(aSubmission.withIncompleteProgress)
+
+      val formSubmissionLink = s"${aSubmission.id.value}/question/${testQuestionIdsOfInterest.responsibleIndividualEmailId.value}"
+      val result = controller.showQuestion(aSubmission.id, testQuestionIdsOfInterest.responsibleIndividualEmailId)(loggedInRequest.withCSRFToken)
+
+      status(result) shouldBe OK
+      contentAsString(result) contains(formSubmissionLink) shouldBe true withClue(s"(HTML content did not contain $formSubmissionLink)")
+      contentAsString(result) contains("Email address") shouldBe true withClue("HTML content did not contain label")
+      contentAsString(result) contains("Cannot be a shared mailbox") shouldBe true withClue("HTML content did not contain hintText")
+      contentAsString(result) contains("We will send a verification email to the email address provided") shouldBe true withClue("HTML content did not contain afterStatement")
+    }
+
     "fail with a BAD REQUEST for an invalid questionId" in new Setup {
       SubmissionServiceMock.Fetch.thenReturns(aSubmission.withIncompleteProgress)
 

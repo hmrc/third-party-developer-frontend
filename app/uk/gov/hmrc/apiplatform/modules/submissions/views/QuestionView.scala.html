@@ -126,6 +126,9 @@
           @pageHeading
         </h1>
       </legend>
+      @if(question.hintText.isDefined) {
+        @renderHint(question.hintText.get)
+      }
       <div class="govuk-checkboxes" data-module="govuk-checkboxes">
         @{
         val a = currentAnswers match {
@@ -151,7 +154,10 @@
           @pageHeading
         </h1>
       </legend>
-      <div class="govuk-radios @{if(inline) " govuk-radios--inline" else "" }">
+      @if(question.hintText.isDefined) {
+        @renderHint(question.hintText.get)
+      }
+      <div class='govuk-radios @{if(inline) " govuk-radios--inline" else "" }'>
         @{
         val a = currentAnswers match {
           case Some(sca @ SingleChoiceAnswer(_)) => Some(sca)

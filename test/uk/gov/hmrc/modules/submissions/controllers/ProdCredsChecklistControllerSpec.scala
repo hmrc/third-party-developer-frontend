@@ -16,6 +16,8 @@
 
 package uk.gov.hmrc.apiplatform.modules.submissions.controllers
 
+import org.mockito.captor.ArgCaptor
+import play.api.data.Form
 import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.BaseControllerSpec
 import uk.gov.hmrc.thirdpartydeveloperfrontend.mocks.service.ApplicationServiceMock
 import uk.gov.hmrc.thirdpartydeveloperfrontend.mocks.service.ApplicationActionServiceMock
@@ -36,6 +38,7 @@ import uk.gov.hmrc.thirdpartydeveloperfrontend.builder.SampleApplication
 import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.SubscriptionTestHelperSugar
 import uk.gov.hmrc.thirdpartydeveloperfrontend.builder.SampleSession
 import uk.gov.hmrc.apiplatform.modules.submissions.SubmissionsTestData
+import uk.gov.hmrc.apiplatform.modules.submissions.controllers.ProdCredsChecklistController.{DummyForm, ViewModel}
 
 class ProdCredsChecklistControllerSpec
   extends BaseControllerSpec
@@ -84,8 +87,8 @@ class ProdCredsChecklistControllerSpec
     with HasAppInTestingState
     with SubmissionsTestData {
 
-    val productionCredentialsChecklistView = app.injector.instanceOf[ProductionCredentialsChecklistView]
-
+    val productionCredentialsChecklistView = mock[ProductionCredentialsChecklistView]
+    when(productionCredentialsChecklistView.apply(*[ViewModel], *)(*, *, *,*)).thenReturn(play.twirl.api.HtmlFormat.empty)
     val controller = new ProdCredsChecklistController(
       mockErrorHandler,
       sessionServiceMock,
@@ -139,10 +142,17 @@ class ProdCredsChecklistControllerSpec
   "productionCredentialsChecklistAction" should {
     "return success when form is valid and incomplete" in new Setup {
       SubmissionServiceMock.FetchLatestExtendedSubmission.thenReturns(answeringSubmission.withIncompleteProgress)
-
+      val formCaptor = ArgCaptor[Form[DummyForm]]
       val result = controller.productionCredentialsChecklistAction(appId)(loggedInRequest.withCSRFToken)
 
       status(result) shouldBe OK
+
+      verify(productionCredentialsChecklistView).apply(*, formCaptor.capture)(*,*,*,*)
+      val form = formCaptor.value
+      form.errors.size shouldBe 3
+      form.errors("development practices").head.messages shouldBe Seq("Complete the development practices section")
+      form.errors("customers authorising your software").head.messages shouldBe Seq("Complete the customers authorising your software section")
+      form.errors("organisation details").head.messages shouldBe Seq("Complete the organisation details section")
     }
 
     "redirect when when form is valid and complete" in new Setup {
