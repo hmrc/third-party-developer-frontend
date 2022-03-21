@@ -71,6 +71,7 @@ class UpliftJourneyControllerSpec extends BaseControllerSpec
     val confirmApisView = app.injector.instanceOf[ConfirmApisView]
     val turnOffApisMasterView = app.injector.instanceOf[TurnOffApisMasterView]
     val sellResellOrDistributeSoftwareView = app.injector.instanceOf[SellResellOrDistributeSoftwareView]
+    val weWillCheckYourAnswersView = app.injector.instanceOf[WeWillCheckYourAnswersView]
 
     val mockUpliftJourneyConfig = mock[UpliftJourneyConfig]
     val sr20UpliftJourneySwitchMock = new UpliftJourneySwitch(mockUpliftJourneyConfig)
@@ -88,6 +89,7 @@ class UpliftJourneyControllerSpec extends BaseControllerSpec
       ApmConnectorMock.aMock,
       GPCFlowServiceMock.aMock,
       sellResellOrDistributeSoftwareView,
+      weWillCheckYourAnswersView,
       sr20UpliftJourneySwitchMock
     )
 
@@ -345,6 +347,19 @@ class UpliftJourneyControllerSpec extends BaseControllerSpec
 
       status(result) shouldBe SEE_OTHER
       redirectLocation(result) shouldBe Some("/developer/applications/myAppId/confirm-subscriptions")
+    }
+  }
+
+  "weWillCheckYourAnswers" should {
+
+    "render the 'we will check your answers' page" in new Setup {
+      private val result = controller.weWillCheckYourAnswers(appId)(loggedInRequest.withCSRFToken)
+
+      status(result) shouldBe OK
+
+      titleOf(result) shouldBe "We will check your answers - HMRC Developer Hub - GOV.UK"
+
+      contentAsString(result) should include("We will check your answers")
     }
   }
 }
