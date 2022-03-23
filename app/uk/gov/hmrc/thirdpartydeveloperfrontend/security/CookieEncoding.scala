@@ -31,7 +31,7 @@ trait CookieEncoding {
   private[security] lazy val cookieHttpOnlyOption: Boolean = true
   private[security] lazy val cookieDomainOption: Option[String] = None
   private[security] lazy val cookiePathOption: String = "/"
-  private[security] lazy val cookieMaxAge = appConfig.sessionTimeoutInSeconds.some
+  private[security] lazy val cookieMaxAge = 86400 // Hardcoded to 24 Hours until we fix the timeout dialog.
 
   val cookieSigner: CookieSigner
 
@@ -39,7 +39,7 @@ trait CookieEncoding {
     Cookie(
       cookieName,
       encodeCookie(sessionId),
-      cookieMaxAge,
+      Some(cookieMaxAge),
       cookiePathOption,
       cookieDomainOption,
       cookieSecureOption,
