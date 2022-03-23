@@ -72,6 +72,7 @@ class UpliftJourneyControllerSpec extends BaseControllerSpec
     val turnOffApisMasterView = app.injector.instanceOf[TurnOffApisMasterView]
     val sellResellOrDistributeSoftwareView = app.injector.instanceOf[SellResellOrDistributeSoftwareView]
     val weWillCheckYourAnswersView = app.injector.instanceOf[WeWillCheckYourAnswersView]
+    val beforeYouStartView = app.injector.instanceOf[BeforeYouStartView]
 
     val mockUpliftJourneyConfig = mock[UpliftJourneyConfig]
     val sr20UpliftJourneySwitchMock = new UpliftJourneySwitch(mockUpliftJourneyConfig)
@@ -90,6 +91,7 @@ class UpliftJourneyControllerSpec extends BaseControllerSpec
       GPCFlowServiceMock.aMock,
       sellResellOrDistributeSoftwareView,
       weWillCheckYourAnswersView,
+      beforeYouStartView,
       sr20UpliftJourneySwitchMock
     )
 
@@ -360,6 +362,19 @@ class UpliftJourneyControllerSpec extends BaseControllerSpec
       titleOf(result) shouldBe "We will check your answers - HMRC Developer Hub - GOV.UK"
 
       contentAsString(result) should include("We will check your answers")
+    }
+  }
+
+  "beforeYouStart" should {
+
+    "render the 'before you start' page" in new Setup {
+      private val result = controller.beforeYouStart(appId)(loggedInRequest.withCSRFToken)
+
+      status(result) shouldBe OK
+
+      titleOf(result) shouldBe "Before you start - HMRC Developer Hub - GOV.UK"
+
+      contentAsString(result) should include("Before you start")
     }
   }
 }
