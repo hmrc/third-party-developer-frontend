@@ -190,11 +190,11 @@ class UpliftJourneyController @Inject() (val errorHandler: ErrorHandler,
   }
 
   def beforeYouStart(sandboxAppId: ApplicationId): Action[AnyContent] = whenTeamMemberOnApp(sandboxAppId) { implicit request =>
-    Future(Ok(beforeYouStartView(sandboxAppId)))
+    successful(Ok(beforeYouStartView(sandboxAppId)))
   }
 
   def weWillCheckYourAnswers(sandboxAppId: ApplicationId): Action[AnyContent] = whenTeamMemberOnApp(sandboxAppId) { implicit request =>
-    Future(Ok(weWillCheckYourAnswersView(sandboxAppId)))
+    successful(Ok(weWillCheckYourAnswersView(sandboxAppId)))
   }
 }
 
