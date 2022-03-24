@@ -84,6 +84,7 @@ class UpliftJourneyController @Inject() (val errorHandler: ErrorHandler,
                       flowService: GetProductionCredentialsFlowService,
                       sellResellOrDistributeSoftwareView: SellResellOrDistributeSoftwareView,
                       weWillCheckYourAnswersView: WeWillCheckYourAnswersView,
+                      beforeYouStartView: BeforeYouStartView,
                       upliftJourneySwitch: UpliftJourneySwitch)
                      (implicit val ec: ExecutionContext, val appConfig: ApplicationConfig)
   extends ApplicationController(mcc)
@@ -188,8 +189,12 @@ class UpliftJourneyController @Inject() (val errorHandler: ErrorHandler,
     sellResellOrDistributeForm.bindFromRequest.fold(handleInvalidForm, handleValidForm)
   }
 
+  def beforeYouStart(sandboxAppId: ApplicationId): Action[AnyContent] = whenTeamMemberOnApp(sandboxAppId) { implicit request =>
+    successful(Ok(beforeYouStartView(sandboxAppId)))
+  }
+
   def weWillCheckYourAnswers(sandboxAppId: ApplicationId): Action[AnyContent] = whenTeamMemberOnApp(sandboxAppId) { implicit request =>
-    Future(Ok(weWillCheckYourAnswersView(sandboxAppId)))
+    successful(Ok(weWillCheckYourAnswersView(sandboxAppId)))
   }
 }
 

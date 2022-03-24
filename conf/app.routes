@@ -198,6 +198,7 @@ POST        /applications/:id/change-api-subscriptions                          
 GET         /applications/:id/sell-resell-or-distribute-your-software                                    uk.gov.hmrc.apiplatform.modules.uplift.controllers.UpliftJourneyController.sellResellOrDistributeYourSoftware(id: ApplicationId)
 POST        /applications/:id/sell-resell-or-distribute-your-software                                    uk.gov.hmrc.apiplatform.modules.uplift.controllers.UpliftJourneyController.sellResellOrDistributeYourSoftwareAction(id: ApplicationId)
 
+GET         /applications/:id/before-you-start                                                           uk.gov.hmrc.apiplatform.modules.uplift.controllers.UpliftJourneyController.beforeYouStart(id: ApplicationId)
 GET         /applications/:id/we-will-check-your-answers                                                 uk.gov.hmrc.apiplatform.modules.uplift.controllers.UpliftJourneyController.weWillCheckYourAnswers(id: ApplicationId)
 
 ->         /govuk-frontend       govuk.Routes
