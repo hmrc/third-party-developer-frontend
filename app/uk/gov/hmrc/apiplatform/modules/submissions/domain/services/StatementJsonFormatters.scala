@@ -43,13 +43,13 @@ trait StatementJsonFormatters extends NonEmptyListFormatters {
   implicit lazy val jsonFormatStatementBullets: OFormat[StatementBullets] = OFormat(readsStatementBullets, writesStatementBullets)
 
   implicit lazy val readsCompoundFragment: Reads[CompoundFragment] = (
-    ( __ \ "bullets" ).read(nelReads[SimpleStatementFragment])
+    ( __ \ "fragments" ).read(nelReads[SimpleStatementFragment])
   )
   .map(CompoundFragment(_))
 
   implicit lazy val writesCompoundFragment: OWrites[CompoundFragment] = (
     (
-      (__ \ "bullets").write(nelWrites[SimpleStatementFragment])
+      (__ \ "fragments").write(nelWrites[SimpleStatementFragment])
     )
     .contramap (unlift(CompoundFragment.unapply))
   )

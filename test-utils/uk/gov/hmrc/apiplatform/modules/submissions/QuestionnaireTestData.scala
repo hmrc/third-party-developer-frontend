@@ -95,8 +95,10 @@ trait QuestionnaireTestData {
           )
         )
       ).some,
-      label = Some(Question.Label("First and last name"))
+      label = Some(Question.Label("First and last name")),
+      errorInfo = ErrorInfo("Enter a first and last name","First and last name cannot be blank").some
     )
+
     val questionRI2 = TextQuestion(
       Question.Id("fb9b8036-cc88-4f4e-ad84-c02caa4cebae"),
       Wording("Provide an email address for the responsible individual"),
@@ -106,7 +108,9 @@ trait QuestionnaireTestData {
         StatementText("The responsible individual must verify within 10 days that they are responsible for ensuring your software conforms to our terms of use.")
       ).some,
       label = Some(Question.Label("Email address")),
-      hintText = Some(StatementText("Cannot be a shared mailbox"))
+      hintText = Some(StatementText("Cannot be a shared mailbox")),
+      validation = TextValidation.Email.some,
+      errorInfo = ErrorInfo("Enter an email address in the correct format, like yourname@example.com","Email address cannot be blank").some
     )
 
     val question1 = TextQuestion(

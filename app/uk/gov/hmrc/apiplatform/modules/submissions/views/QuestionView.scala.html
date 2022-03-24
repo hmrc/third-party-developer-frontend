@@ -24,7 +24,7 @@
 
 @this(devMain: DevMain2)(implicit applicationConfig: ApplicationConfig)
 
-@(question: Question, applicationId: ApplicationId, submitAction: Call, currentAnswers: Option[ActualAnswer], errorSummary: Option[String], errorMessage: Option[String])(implicit request: Request[Any], messages: Messages, loggedIn: DeveloperSession)
+@(question: Question, applicationId: ApplicationId, submitAction: Call, currentAnswers: Option[ActualAnswer], errorInfo: Option[ErrorInfo])(implicit request: Request[Any], messages: Messages, loggedIn: DeveloperSession)
 
 @pageHeading = @{ question.wording.value }
 
@@ -191,7 +191,7 @@
       case _ => ""
     }
   ) { actualValue =>
-    <div class="govuk-form-group @if(errorMessage.isDefined) {govuk-form-group--error}">
+    <div class="govuk-form-group @if(errorInfo.isDefined) {govuk-form-group--error}">
       @if(question.label.isDefined) {
         <label id="question-label" class="govuk-label" for="question-@{question.id.value}-id">
           @{question.label.get.value}
@@ -208,9 +208,9 @@
       @if(question.hintText.isDefined) {
         @renderHint(question.hintText.get)
       }
-      @if(errorMessage.nonEmpty) {
+      @if(errorInfo.isDefined) {
         <p id="question-error" class="govuk-error-message">
-          <span class="govuk-visually-hidden">Error:</span>@errorMessage
+          <span class="govuk-visually-hidden">Error:</span>@errorInfo.get.message
         </p>
       }
       <input class="govuk-input" id="question-@{question.id.value}-id" name="answer" type="text" value="@actualValue">
@@ -244,7 +244,7 @@
   developerSession = Some(loggedIn)
 ) {
 
-  @if(errorSummary.nonEmpty) {
+  @if(errorInfo.isDefined) {
     <div id="error-summary-display" class="govuk-error-summary" aria-labelledby="error-summary-title" role="alert" tabindex="-1" data-module="govuk-error-summary">
       <h2 id="error-summary-title" class="govuk-error-summary__title">
         There is a problem
@@ -252,7 +252,7 @@
       <div class="govuk-error-summary__body">
         <ul class="govuk-list govuk-error-summary__list">
           <li>
-            <a href="#question-@{question.id.value}-id">@{errorSummary.get}</a>
+            <a href="#question-@{question.id.value}-id">@{errorInfo.get.summary}</a>
           </li>
         </ul>
       </div>

@@ -42,11 +42,16 @@ trait LabelAndHints {
   def hintText: Option[NonBulletStatementFragment]
 }
 
+case class ErrorInfo(summary: String, message: String)
+
+object ErrorInfo {
+  implicit val format = Json.format[ErrorInfo]
+}
+
 trait ErrorMessaging {
   self: Question =>
   
-  def errorMessage: Option[String]
-  def errorSummary: Option[String]
+  def errorInfo: Option[ErrorInfo]
 }
 case class Wording(value: String) extends AnyVal
 
@@ -80,8 +85,7 @@ case class TextQuestion(
   hintText: Option[NonBulletStatementFragment] = None,
   validation: Option[TextValidation] = None,
   absence: Option[(String, Mark)] = None,
-  errorMessage: Option[String] = None,
-  errorSummary: Option[String] = None
+  errorInfo: Option[ErrorInfo] = None
 ) extends Question with LabelAndHints with ErrorMessaging
 
 case class AcknowledgementOnly(
@@ -131,8 +135,7 @@ case class MultiChoiceQuestion(
   hintText: Option[NonBulletStatementFragment] = None,
   marking: ListMap[PossibleAnswer, Mark],
   absence: Option[(String, Mark)] = None,
-  errorMessage: Option[String] = None,
-  errorSummary: Option[String] = None
+  errorInfo: Option[ErrorInfo] = None
 ) extends ChoiceQuestion {
   lazy val choices: ListSet[PossibleAnswer] = ListSet(marking.keys.toList : _*)
 }
@@ -146,8 +149,7 @@ case class ChooseOneOfQuestion(
   hintText: Option[NonBulletStatementFragment] = None,
   marking: ListMap[PossibleAnswer, Mark],
   absence: Option[(String, Mark)] = None,
-  errorMessage: Option[String] = None,
-  errorSummary: Option[String] = None
+  errorInfo: Option[ErrorInfo] = None
 ) extends SingleChoiceQuestion {
   lazy val choices: ListSet[PossibleAnswer] = ListSet(marking.keys.toList : _*)
 }
@@ -161,8 +163,7 @@ case class YesNoQuestion(
   hintText: Option[NonBulletStatementFragment] = None,
   yesMarking: Mark, noMarking: Mark,
   absence: Option[(String, Mark)] = None,
-  errorMessage: Option[String] = None,
-  errorSummary: Option[String] = None
+  errorInfo: Option[ErrorInfo] = None
 ) extends SingleChoiceQuestion {
   
   val YES = PossibleAnswer("Yes")
