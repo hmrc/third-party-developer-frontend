@@ -311,7 +311,6 @@ trait QuestionnaireTestData {
         )
       )
     )
-
   val testQuestionIdsOfInterest = QuestionIdsOfInterest(
     responsibleIndividualNameId   = OrganisationDetails.questionRI1.id,
     responsibleIndividualEmailId  = OrganisationDetails.questionRI2.id,
@@ -321,7 +320,8 @@ trait QuestionnaireTestData {
     termsAndConditionsId          = CustomersAuthorisingYourSoftware.question6.id,
     termsAndConditionsUrlId       = CustomersAuthorisingYourSoftware.question7.id,
     organisationUrlId             = OrganisationDetails.question1.id,
-    identifyYourOrganisationId    = OrganisationDetails.question2.id
+    identifyYourOrganisationId    = OrganisationDetails.question2.id,
+    serverLocationsId             = CustomersAuthorisingYourSoftware.question1.id
   )
 
   val questionnaire = DevelopmentPractices.questionnaire
