@@ -16,8 +16,10 @@
 
 package uk.gov.hmrc.apiplatform.modules.submissions.domain.services
 
+import uk.gov.hmrc.apiplatform.modules.common.services.NonEmptyListFormatters
 
-trait StatementJsonFormatters {
+
+trait StatementJsonFormatters extends NonEmptyListFormatters {
   import uk.gov.hmrc.apiplatform.modules.submissions.domain.models._
   import play.api.libs.json._
   import play.api.libs.functional.syntax._
@@ -27,27 +29,27 @@ trait StatementJsonFormatters {
   implicit val jsonFormatStatementLink = Json.format[StatementLink]
 
   implicit lazy val readsStatementBullets: Reads[StatementBullets] = (
-      ( __ \ "bullets" ).read(Reads.seq[NonBulletStatementFragment](jsonFormatNonBulletStatementFragment)
-    .map(_.toList).map(StatementBullets(_)))
+      ( __ \ "bullets" ).read(nelReads[NonBulletStatementFragment])
   )
+  .map(StatementBullets(_))
 
   implicit lazy val writesStatementBullets: OWrites[StatementBullets] = (
     (
-              (__ \ "bullets").write(Writes.seq[NonBulletStatementFragment](jsonFormatNonBulletStatementFragment.writes))
+      (__ \ "bullets").write(nelWrites[NonBulletStatementFragment])
     )
-    .contramap (unlift(StatementBullets.unapply))
+    .contramap(unlift(StatementBullets.unapply))
   )
 
   implicit lazy val jsonFormatStatementBullets: OFormat[StatementBullets] = OFormat(readsStatementBullets, writesStatementBullets)
 
   implicit lazy val readsCompoundFragment: Reads[CompoundFragment] = (
-      ( __ \ "bullets" ).read(Reads.seq[SimpleStatementFragment](jsonFormatSimpleStatementFragment)
-    .map(_.toList).map(CompoundFragment(_)))
+    ( __ \ "bullets" ).read(nelReads[SimpleStatementFragment])
   )
+  .map(CompoundFragment(_))
 
   implicit lazy val writesCompoundFragment: OWrites[CompoundFragment] = (
     (
-              (__ \ "bullets").write(Writes.seq[SimpleStatementFragment](jsonFormatSimpleStatementFragment.writes))
+      (__ \ "bullets").write(nelWrites[SimpleStatementFragment])
     )
     .contramap (unlift(CompoundFragment.unapply))
   )

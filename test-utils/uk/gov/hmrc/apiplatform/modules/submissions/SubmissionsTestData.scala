@@ -160,11 +160,11 @@ trait SubmissionsTestData extends QuestionBuilder with QuestionnaireTestData wit
 
     def passAnswer(question: Question): ActualAnswer = {
       question match {
-        case TextQuestion(id, wording, statement, _, _, _, absence) => TextAnswer("some random text")
-        case ChooseOneOfQuestion(id, wording, statement, _, _, _, marking, absence) => SingleChoiceAnswer(marking.filter { case (pa, Pass) => true; case _ => false }.head._1.value)
-        case MultiChoiceQuestion(id, wording, statement, _, _, _, marking, absence) => MultipleChoiceAnswer(Set(marking.filter { case (pa, Pass) => true; case _ => false }.head._1.value))
-        case AcknowledgementOnly(id, wording, statement) => NoAnswer
-        case YesNoQuestion(id, wording, statement, _, _, _, yesMarking, noMarking, absence) => if(yesMarking == Pass) SingleChoiceAnswer("Yes") else SingleChoiceAnswer("No")
+        case TextQuestion(id, wording, statement, _, _, _, _, absence, _, _)                      => TextAnswer("some random text")
+        case ChooseOneOfQuestion(id, wording, statement, _, _, _, marking, absence, _, _)         => SingleChoiceAnswer(marking.filter { case (pa, Pass) => true; case _ => false }.head._1.value)
+        case MultiChoiceQuestion(id, wording, statement, _, _, _, marking, absence, _, _)         => MultipleChoiceAnswer(Set(marking.filter { case (pa, Pass) => true; case _ => false }.head._1.value))
+        case AcknowledgementOnly(id, wording, statement)                                          => NoAnswer
+        case YesNoQuestion(id, wording, statement, _, _, _, yesMarking, noMarking, absence, _, _) => if(yesMarking == Pass) SingleChoiceAnswer("Yes") else SingleChoiceAnswer("No")
       }
     }
     
@@ -201,13 +201,13 @@ trait AnsweringQuestionsHelper {
     def answerForQuestion(desiredMark: Mark)(question: Question): Map[Question.Id, Option[ActualAnswer]] = {
       val answers: List[Option[ActualAnswer]] = question match {
 
-      case YesNoQuestion(id, _, _, _, _, _, yesMarking, noMarking, absence) =>
+      case YesNoQuestion(id, _, _, _, _, _, yesMarking, noMarking, absence, _, _) =>
         (if(yesMarking == desiredMark) Some(SingleChoiceAnswer("Yes")) else None) ::
         (if(noMarking == desiredMark) Some(SingleChoiceAnswer("No")) else None) ::
         (absence.flatMap(a => if(a._2 == desiredMark) Some(NoAnswer) else None)) ::
         List.empty[Option[ActualAnswer]]
 
-      case ChooseOneOfQuestion(id, _, _, _, _, _, marking, absence) => {
+      case ChooseOneOfQuestion(id, _, _, _, _, _, marking, absence, _, _) => {
         marking.map {
           case (pa, mark) => Some(SingleChoiceAnswer(pa.value))
           case _ => None
@@ -216,7 +216,7 @@ trait AnsweringQuestionsHelper {
         List(absence.flatMap(a => if(a._2 == desiredMark) Some(NoAnswer) else None))
       }
 
-      case TextQuestion(id, _, _, _, _, _, absence) => 
+      case TextQuestion(id, _, _, _, _, _, _, absence, _, _) => 
         if(desiredMark == Pass)
           Some(TextAnswer(Random.nextString(Random.nextInt(25)+1))) ::
           absence.flatMap(a => if(a._2 == desiredMark) Some(NoAnswer) else None) ::
@@ -226,7 +226,7 @@ trait AnsweringQuestionsHelper {
 
       case AcknowledgementOnly(id, _, _) => List(Some(NoAnswer))
 
-      case MultiChoiceQuestion(id, _, _, _, _, _, marking, absence) => 
+      case MultiChoiceQuestion(id, _, _, _, _, _, marking, absence, _, _) => 
         marking.map {
           case (pa, mark) if(mark == desiredMark) => Some(MultipleChoiceAnswer(Set(pa.value)))
           case _ => None

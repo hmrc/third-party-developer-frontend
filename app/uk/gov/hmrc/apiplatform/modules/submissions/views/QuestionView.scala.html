@@ -24,7 +24,7 @@
 
 @this(devMain: DevMain2)(implicit applicationConfig: ApplicationConfig)
 
-@(question: Question, applicationId: ApplicationId, submitAction: Call, currentAnswers: Option[ActualAnswer], errors: Option[String])(implicit request: Request[Any], messages: Messages, loggedIn: DeveloperSession)
+@(question: Question, applicationId: ApplicationId, submitAction: Call, currentAnswers: Option[ActualAnswer], errorSummary: Option[String], errorMessage: Option[String])(implicit request: Request[Any], messages: Messages, loggedIn: DeveloperSession)
 
 @pageHeading = @{ question.wording.value }
 
@@ -81,6 +81,15 @@
       })
     }
   </p>
+}
+
+@renderMaybeStatement(maybeStatement: Option[Statement]) = {
+  @{
+    maybeStatement match {
+      case Some(stmt) => renderStatement(stmt)
+      case _ =>
+    }
+  }
 }
 
 @renderRadioQuestionChoice(choice: PossibleAnswer, actualAnswer: Option[SingleChoiceAnswer]) = {
@@ -141,7 +150,7 @@
     </fieldset>
   </div>
 
-  @renderStatement(question.afterStatement)
+  @renderMaybeStatement(question.afterStatement)
 
   @renderButtonOrButtons(question.absenceText)
 }
@@ -169,7 +178,7 @@
     </fieldset>
   </div>
 
-  @renderStatement(question.afterStatement)
+  @renderMaybeStatement(question.afterStatement)
 
   @renderButtonOrButtons(question.absenceText)
 }
@@ -201,7 +210,7 @@
     </div>
   }
 
-  @renderStatement(question.afterStatement)
+  @renderMaybeStatement(question.afterStatement)
 
   @renderButtonOrButtons(question.absenceText)
 }
@@ -228,7 +237,7 @@
   developerSession = Some(loggedIn)
 ) {
 
-  @if(errors.nonEmpty) {
+  @if(errorSummary.nonEmpty) {
     <div id="error-summary-display" class="govuk-error-summary" aria-labelledby="error-summary-title" role="alert" tabindex="-1" data-module="govuk-error-summary">
       <h2 id="error-summary-title" class="govuk-error-summary__title">
         There is a problem
@@ -236,7 +245,7 @@
       <div class="govuk-error-summary__body">
         <ul class="govuk-list govuk-error-summary__list">
           <li>
-            <a href="">@{errors.get}</a>
+            <a href="">@{errorSummary.get}</a>
           </li>
         </ul>
       </div>
@@ -245,7 +254,7 @@
 
   <h1 class="govuk-heading-l">@pageHeading</h1>
 
-  @renderStatement(question.statement)
+  @renderMaybeStatement(question.statement)
 
   @helper.form(action = submitAction, 'class -> "form") {
     @helper.CSRF.formField
