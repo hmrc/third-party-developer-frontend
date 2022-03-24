@@ -22,17 +22,26 @@ import scala.util.Try
 import scala.util.Success
 
 sealed trait TextValidation {
-  def isValid(text: String): Boolean = this match {
-    case TextValidation.Url => Try(new java.net.URL(text)) match { 
-      case Success(_) => true
-      case _ => false
-    }
-    case TextValidation.Email => TextValidation.emailValidator.isValid(text)
+  def isValid(text: String): Boolean = this.validate(text).isRight
+
+  def validate(text: String): Either[String, String] = this match {
+    case TextValidation.Url => 
+      Try(new java.net.URL(text)) match { 
+        case Success(_) => Right(text)
+        case _ => Left(s"$text is not a valid Url")
+      }
+
+    case TextValidation.Email => 
+      if(TextValidation.emailValidator.isValid(text))
+        Right(text)
+      else
+        Left(s"$text is not a valid email")
+
     case TextValidation.MatchRegex(regex) => {
       val matcher = regex.r
       text match {
-        case matcher(_*) => true
-        case _ => false
+        case matcher(_*) => Right(text)
+        case _ => Left(s"$text does not match expected pattern")
       }
     }
   }

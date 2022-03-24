@@ -41,7 +41,7 @@
       case sl: StatementLink => renderStatementLink(sl)
       case _ => Html("<p />")
     }
-  )
+  ).toList
 }
 
 @renderNonBulletStatementFragment(nbsf: NonBulletStatementFragment) = @{
@@ -54,7 +54,7 @@
 
 @renderStatementBullets(cs: StatementBullets) = {
   <ul class="govuk-list govuk-list--bullet">
-    @for( bullet <- cs.bullets ) {
+    @for( bullet <- cs.bullets.toList ) {
       <li>@renderNonBulletStatementFragment(bullet)</li>
     }
   </ul>
@@ -79,6 +79,7 @@
         case cs: CompoundFragment => renderParagraphCompoundFragment(cs)
         case sb: StatementBullets => renderStatementBullets(sb)
       })
+      .toList
     }
   </p>
 }
@@ -190,21 +191,27 @@
       case _ => ""
     }
   ) { actualValue =>
-    <div class="govuk-form-group">
+    <div class="govuk-form-group @if(errorMessage.isDefined) {govuk-form-group--error}">
       @if(question.label.isDefined) {
-        <label class="govuk-label" for="question-@{question.id.value}-id">
+        <label id="question-label" class="govuk-label" for="question-@{question.id.value}-id">
           @{question.label.get.value}
         </label>
       } else {
         <!-- Below is needed for accessibility, it is hidden visually -->
         <h1 class="govuk-visually-hidden">
-          <label class="govuk-label govuk-label--l" for="question-@{question.id.value}-id">
+          <label id="question-label" class="govuk-label govuk-label--l" for="question-@{question.id.value}-id">
             @pageHeading
           </label>
         </h1>
       }
+
       @if(question.hintText.isDefined) {
         @renderHint(question.hintText.get)
+      }
+      @if(errorMessage.nonEmpty) {
+        <p id="question-error" class="govuk-error-message">
+          <span class="govuk-visually-hidden">Error:</span>@errorMessage
+        </p>
       }
       <input class="govuk-input" id="question-@{question.id.value}-id" name="answer" type="text" value="@actualValue">
     </div>
@@ -245,7 +252,7 @@
       <div class="govuk-error-summary__body">
         <ul class="govuk-list govuk-error-summary__list">
           <li>
-            <a href="">@{errorSummary.get}</a>
+            <a href="#question-@{question.id.value}-id">@{errorSummary.get}</a>
           </li>
         </ul>
       </div>
