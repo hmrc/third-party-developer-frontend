@@ -165,6 +165,8 @@ package object controllers {
 
     val noApplicationsChoiceRequiredKey = "no.applications.choice.error.required.field"
 
+    val choseApplicationToUpliftError = "choose.application.to.uplift.error"
+
     val formKeysMap = Map(
       firstnameRequiredKey -> firstnameRequiredGlobalKey,
       firstnameMaxLengthKey -> firstnameMaxLengthGlobalKey,
@@ -309,7 +311,6 @@ package object controllers {
   }
 
   def environmentValidator = optional(text).verifying(environmentInvalidKey, s => s.fold(false)(isValidEnvironment))
-
 
   private def isNotBlankString: String => Boolean = s => s.trim.length > 0
 

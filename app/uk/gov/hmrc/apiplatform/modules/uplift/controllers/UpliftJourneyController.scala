@@ -173,7 +173,7 @@ class UpliftJourneyController @Inject() (val errorHandler: ErrorHandler,
   def sellResellOrDistributeYourSoftwareAction(sandboxAppId: ApplicationId): Action[AnyContent] = whenTeamMemberOnApp(sandboxAppId) { implicit request =>
 
     def handleInvalidForm(formWithErrors: Form[SellResellOrDistributeForm]) =
-      Future(BadRequest(sellResellOrDistributeSoftwareView(sandboxAppId, formWithErrors)))
+      successful(BadRequest(sellResellOrDistributeSoftwareView(sandboxAppId, formWithErrors)))
 
     def handleValidForm(validForm: SellResellOrDistributeForm) = {
       validForm.answer match {
@@ -186,6 +186,7 @@ class UpliftJourneyController @Inject() (val errorHandler: ErrorHandler,
         case None => throw new IllegalStateException("Should never get here")
       }
     }
+
     sellResellOrDistributeForm.bindFromRequest.fold(handleInvalidForm, handleValidForm)
   }
 
