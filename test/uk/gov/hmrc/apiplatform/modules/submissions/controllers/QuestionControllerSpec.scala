@@ -191,10 +191,12 @@ class QuestionControllerSpec
 
       val body = contentAsString(result)
 
-      val expectedErrorSummary = OrganisationDetails.questionRI2.errorInfo.get.summary
+      val errorInfo = OrganisationDetails.questionRI2.errorInfo.get
+
+      val expectedErrorSummary = errorInfo.summary
       body should include(expectedErrorSummary)
       
-      val expectedErrorMessage = OrganisationDetails.questionRI2.errorInfo.get.message
+      val expectedErrorMessage = errorInfo.message.getOrElse(errorInfo.summary)
       body should include(expectedErrorMessage)
     }
 
@@ -210,12 +212,15 @@ class QuestionControllerSpec
 
       val body = contentAsString(result)
 
-      val expectedErrorSummary = OrganisationDetails.questionRI1.errorInfo.get.summary
+      val errorInfo = OrganisationDetails.questionRI1.errorInfo.get
+
+      val expectedErrorSummary = errorInfo.summary
       body should include(expectedErrorSummary)
       
-      val expectedErrorMessage = OrganisationDetails.questionRI1.errorInfo.get.message
+      val expectedErrorMessage = errorInfo.message.getOrElse(errorInfo.summary)
       body should include(expectedErrorMessage)
     }
+    
     "fail if no answer field in form" in new Setup {
       SubmissionServiceMock.Fetch.thenReturns(aSubmission.withIncompleteProgress)
       private val request = loggedInRequest.withFormUrlEncodedBody("submit-action" -> "save")
