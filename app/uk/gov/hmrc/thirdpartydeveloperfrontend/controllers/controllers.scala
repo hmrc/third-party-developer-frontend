@@ -165,8 +165,6 @@ package object controllers {
 
     val noApplicationsChoiceRequiredKey = "no.applications.choice.error.required.field"
 
-    val choseApplicationToUpliftError = "choose.application.to.uplift.error"
-
     val formKeysMap = Map(
       firstnameRequiredKey -> firstnameRequiredGlobalKey,
       firstnameMaxLengthKey -> firstnameMaxLengthGlobalKey,
