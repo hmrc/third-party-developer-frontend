@@ -65,7 +65,7 @@ class QuestionsController @Inject()(
 
   import cats.instances.future.catsStdInstancesForFuture
 
-  private def processQuestion(submissionId: Submission.Id, questionId: Question.Id, answers: Option[ActualAnswer], errors: Option[String])(submitAction: Call)(implicit request: SubmissionApplicationRequest[AnyContent]) = {
+  private def processQuestion(submissionId: Submission.Id, questionId: Question.Id, answers: Option[ActualAnswer], errorInfo: Option[ErrorInfo])(submitAction: Call)(implicit request: SubmissionApplicationRequest[AnyContent]) = {
     val currentAnswer = request.submission.latestInstance.answersToQuestions.get(questionId)
     val submission = request.submission
     val oQuestion = submission.findQuestion(questionId)
@@ -76,30 +76,40 @@ class QuestionsController @Inject()(
         flowItem      <- fromOption(oQuestion, "Question not found in questionnaire")
         question       = oQuestion.get
       } yield {
-        errors.fold(
+        errorInfo.fold(
           Ok(questionView(question, applicationId, submitAction, currentAnswer, None))
         )(
-          _ => BadRequest(questionView(question, applicationId, submitAction, currentAnswer, errors))
+          _ => BadRequest(questionView(question, applicationId, submitAction, currentAnswer, errorInfo))
         )
       }
     )
     .fold[Result](BadRequest(_), identity(_))
   }
 
-  def showQuestion(submissionId: Submission.Id, questionId: Question.Id, answers: Option[ActualAnswer] = None, errors: Option[String] = None) = withSubmission(submissionId) { implicit request => 
+  def showQuestion(submissionId: Submission.Id, questionId: Question.Id, answers: Option[ActualAnswer] = None, errorInfo: Option[ErrorInfo] = None) = withSubmission(submissionId) { implicit request => 
     val submitAction = uk.gov.hmrc.apiplatform.modules.submissions.controllers.routes.QuestionsController.recordAnswer(submissionId, questionId)
-    processQuestion(submissionId, questionId, answers, errors)(submitAction)
+    processQuestion(submissionId, questionId, answers, errorInfo)(submitAction)
   }
 
-  def updateQuestion(submissionId: Submission.Id, questionId: Question.Id, answers: Option[ActualAnswer] = None, errors: Option[String] = None) = withSubmission(submissionId) { implicit request => 
+  def updateQuestion(submissionId: Submission.Id, questionId: Question.Id, answers: Option[ActualAnswer] = None, errorInfo: Option[ErrorInfo] = None) = withSubmission(submissionId) { implicit request => 
     val submitAction = uk.gov.hmrc.apiplatform.modules.submissions.controllers.routes.QuestionsController.updateAnswer(submissionId, questionId)
-    processQuestion(submissionId, questionId, answers, errors)(submitAction)
+    processQuestion(submissionId, questionId, answers, errorInfo)(submitAction)
   }
 
   private def processAnswer(submissionId: Submission.Id, questionId: Question.Id)(success: (ExtendedSubmission) => Future[Result])(implicit request: SubmissionApplicationRequest[AnyContent]) = {
     lazy val failed = (msg: String) => {
+      val defaultMessage = "Please provide an answer to the question"
+      import cats.implicits._
+
       logger.info(s"Failed to recordAnswer - $msg")
-      showQuestion(submissionId, questionId, None, Some("Please provide an answer to the question"))(request)
+
+      val question = request.submission.findQuestion(questionId) collect {
+        case q: Question with ErrorMessaging => q
+      }
+
+      val errorInfo = question.flatMap(_.errorInfo).getOrElse(ErrorInfo(defaultMessage,defaultMessage))
+
+      showQuestion(submissionId, questionId, None, errorInfo.some)(request)
     }
 
     val formValues = request.body.asFormUrlEncoded.get.filterNot(_._1 == "csrfToken")
@@ -122,6 +132,7 @@ class QuestionsController @Inject()(
     (
       for {
         effectiveAnswers  <- fromEither(validateAnswers(submitAction, answers))
+        // TODO - add validation
         result            <- fromEitherF(submissionService.recordAnswer(submissionId, questionId, effectiveAnswers))
       } yield result
     )

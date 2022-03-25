@@ -16,6 +16,8 @@
 
 package uk.gov.hmrc.apiplatform.modules.submissions.domain.models
 
+import cats.data.NonEmptyList
+
 
 sealed trait StatementFragment
 sealed trait NonBulletStatementFragment extends StatementFragment
@@ -23,21 +25,21 @@ sealed trait SimpleStatementFragment extends NonBulletStatementFragment
 case class StatementText(text: String) extends SimpleStatementFragment
 case class StatementLink(text: String, url: String) extends SimpleStatementFragment
 
-case class StatementBullets(bullets: List[NonBulletStatementFragment]) extends StatementFragment
+case class StatementBullets(bullets: NonEmptyList[NonBulletStatementFragment]) extends StatementFragment
 
 object StatementBullets {
-  def apply(bullets: NonBulletStatementFragment*) = new StatementBullets(bullets.toList)
+  def apply(bullet: NonBulletStatementFragment, bullets: NonBulletStatementFragment*) = new StatementBullets(NonEmptyList.of(bullet, bullets: _*))
 }
 
-case class CompoundFragment(fragments: List[SimpleStatementFragment]) extends NonBulletStatementFragment
+case class CompoundFragment(fragments: NonEmptyList[SimpleStatementFragment]) extends NonBulletStatementFragment
 
 object CompoundFragment {
-  def apply(fragments: SimpleStatementFragment*) = new CompoundFragment(fragments.toList)
+  def apply(fragment: SimpleStatementFragment, fragments: SimpleStatementFragment*) = new CompoundFragment(NonEmptyList.of(fragment, fragments: _*))
 }
 
-case class Statement(fragments: List[StatementFragment])
+case class Statement(fragments: NonEmptyList[StatementFragment])
 
 object Statement {
-  def apply(fragments: StatementFragment*) = new Statement(fragments.toList)
+  def apply(fragment: StatementFragment, fragments: StatementFragment*) = new Statement(NonEmptyList.of(fragment, fragments: _*))
 }
 

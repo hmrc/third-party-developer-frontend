@@ -24,7 +24,7 @@
 
 @this(devMain: DevMain2)(implicit applicationConfig: ApplicationConfig)
 
-@(question: Question, applicationId: ApplicationId, submitAction: Call, currentAnswers: Option[ActualAnswer], errors: Option[String])(implicit request: Request[Any], messages: Messages, loggedIn: DeveloperSession)
+@(question: Question, applicationId: ApplicationId, submitAction: Call, currentAnswers: Option[ActualAnswer], errorInfo: Option[ErrorInfo])(implicit request: Request[Any], messages: Messages, loggedIn: DeveloperSession)
 
 @pageHeading = @{ question.wording.value }
 
@@ -41,7 +41,7 @@
       case sl: StatementLink => renderStatementLink(sl)
       case _ => Html("<p />")
     }
-  )
+  ).toList
 }
 
 @renderNonBulletStatementFragment(nbsf: NonBulletStatementFragment) = @{
@@ -54,7 +54,7 @@
 
 @renderStatementBullets(cs: StatementBullets) = {
   <ul class="govuk-list govuk-list--bullet">
-    @for( bullet <- cs.bullets ) {
+    @for( bullet <- cs.bullets.toList ) {
       <li>@renderNonBulletStatementFragment(bullet)</li>
     }
   </ul>
@@ -79,8 +79,18 @@
         case cs: CompoundFragment => renderParagraphCompoundFragment(cs)
         case sb: StatementBullets => renderStatementBullets(sb)
       })
+      .toList
     }
   </p>
+}
+
+@renderMaybeStatement(maybeStatement: Option[Statement]) = {
+  @{
+    maybeStatement match {
+      case Some(stmt) => renderStatement(stmt)
+      case _ =>
+    }
+  }
 }
 
 @renderRadioQuestionChoice(choice: PossibleAnswer, actualAnswer: Option[SingleChoiceAnswer]) = {
@@ -141,7 +151,7 @@
     </fieldset>
   </div>
 
-  @renderStatement(question.afterStatement)
+  @renderMaybeStatement(question.afterStatement)
 
   @renderButtonOrButtons(question.absenceText)
 }
@@ -169,7 +179,7 @@
     </fieldset>
   </div>
 
-  @renderStatement(question.afterStatement)
+  @renderMaybeStatement(question.afterStatement)
 
   @renderButtonOrButtons(question.absenceText)
 }
@@ -181,27 +191,36 @@
       case _ => ""
     }
   ) { actualValue =>
-    <div class="govuk-form-group">
+    <div class="govuk-form-group @if(errorInfo.isDefined) {govuk-form-group--error}">
       @if(question.label.isDefined) {
-        <label class="govuk-label" for="question-@{question.id.value}-id">
+        <label id="question-label" class="govuk-label" for="question-@{question.id.value}-id">
           @{question.label.get.value}
         </label>
       } else {
         <!-- Below is needed for accessibility, it is hidden visually -->
         <h1 class="govuk-visually-hidden">
-          <label class="govuk-label govuk-label--l" for="question-@{question.id.value}-id">
+          <label id="question-label" class="govuk-label govuk-label--l" for="question-@{question.id.value}-id">
             @pageHeading
           </label>
         </h1>
       }
+
       @if(question.hintText.isDefined) {
         @renderHint(question.hintText.get)
       }
-      <input class="govuk-input" id="question-@{question.id.value}-id" name="answer" type="text" value="@actualValue">
+      @if(errorInfo.isDefined) {
+        <p id="question-error" class="govuk-error-message">
+          <span class="govuk-visually-hidden">Error:</span>@errorInfo.get.message
+        </p>
+
+        <input class="govuk-input" id="question-@{question.id.value}-id" name="answer" type="text" value="">
+      } else {
+        <input class="govuk-input" id="question-@{question.id.value}-id" name="answer" type="text" value="@actualValue">
+      }
     </div>
   }
 
-  @renderStatement(question.afterStatement)
+  @renderMaybeStatement(question.afterStatement)
 
   @renderButtonOrButtons(question.absenceText)
 }
@@ -228,7 +247,7 @@
   developerSession = Some(loggedIn)
 ) {
 
-  @if(errors.nonEmpty) {
+  @if(errorInfo.isDefined) {
     <div id="error-summary-display" class="govuk-error-summary" aria-labelledby="error-summary-title" role="alert" tabindex="-1" data-module="govuk-error-summary">
       <h2 id="error-summary-title" class="govuk-error-summary__title">
         There is a problem
@@ -236,7 +255,7 @@
       <div class="govuk-error-summary__body">
         <ul class="govuk-list govuk-error-summary__list">
           <li>
-            <a href="">@{errors.get}</a>
+            <a href="#question-@{question.id.value}-id">@{errorInfo.get.summary}</a>
           </li>
         </ul>
       </div>
@@ -245,7 +264,7 @@
 
   <h1 class="govuk-heading-l">@pageHeading</h1>
 
-  @renderStatement(question.statement)
+  @renderMaybeStatement(question.statement)
 
   @helper.form(action = submitAction, 'class -> "form") {
     @helper.CSRF.formField
