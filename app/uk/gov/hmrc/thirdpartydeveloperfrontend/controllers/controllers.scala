@@ -310,7 +310,6 @@ package object controllers {
 
   def environmentValidator = optional(text).verifying(environmentInvalidKey, s => s.fold(false)(isValidEnvironment))
 
-
   private def isNotBlankString: String => Boolean = s => s.trim.length > 0
 
   private def isBlank: String => Boolean = s => s.length == 0

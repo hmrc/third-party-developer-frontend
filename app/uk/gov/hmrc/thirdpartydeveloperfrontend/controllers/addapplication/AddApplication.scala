@@ -162,10 +162,19 @@ class AddApplication @Inject() (
       ( upliftData.upliftableApplicationIds.size, upliftData.hasAppsThatCannotBeUplifted) match {
           case (0, _)     => successful(BadRequest(Json.toJson(BadRequestError)))
           case (1, false) => successful(BadRequest(Json.toJson(BadRequestError)))
-          case _  => successful(BadRequest(chooseApplicationToUpliftView(formWithErrors, upliftData.upliftableSummaries.toSeq, upliftData.hasAppsThatCannotBeUplifted)))
+          case _  => successful(
+            BadRequest(
+              chooseApplicationToUpliftView(
+                formWithErrors,
+                upliftData.upliftableSummaries.toSeq,
+                upliftData.hasAppsThatCannotBeUplifted
+              )
+            )
+          )
         }
       }
     }      
+
     ChooseApplicationToUpliftForm.form.bindFromRequest().fold(handleInvalidForm, handleValidForm)
   }
 

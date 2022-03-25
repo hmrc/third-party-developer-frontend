@@ -69,7 +69,6 @@
 
     @helper.form(action = controllers.addapplication.routes.AddApplication.chooseApplicationToUpliftAction()) {
       @helper.CSRF.formField
-
       <div class="govuk-form-group @if(form.errors("applicationId").nonEmpty) {govuk-form-group--error}">
         <fieldset class="govuk-fieldset">
           <legend class="govuk-fieldset__legend govuk-fieldset__legend--2">
@@ -77,6 +76,7 @@
               @pageHeading
             </h1>
           </legend>
+          @fieldError2(form.errors, "applicationId")
           <div class="govuk-radios">
           @for(app <- upliftableApps) {
             <div class="govuk-radios__item">
