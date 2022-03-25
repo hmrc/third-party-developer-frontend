@@ -65,8 +65,8 @@ class QuestionsController @Inject()(
 
   import cats.instances.future.catsStdInstancesForFuture
 
-  private def processQuestion(submissionId: Submission.Id, questionId: Question.Id, answers: Option[ActualAnswer], errorInfo: Option[ErrorInfo])(submitAction: Call)(implicit request: SubmissionApplicationRequest[AnyContent]) = {
-    val currentAnswer = request.submission.latestInstance.answersToQuestions.get(questionId)
+  private def processQuestion(submissionId: Submission.Id, questionId: Question.Id, onFormAnswer: Option[ActualAnswer], errorInfo: Option[ErrorInfo])(submitAction: Call)(implicit request: SubmissionApplicationRequest[AnyContent]) = {
+    val persistedAnswer = request.submission.latestInstance.answersToQuestions.get(questionId)
     val submission = request.submission
     val oQuestion = submission.findQuestion(questionId)
     val applicationId = request.application.id
@@ -77,39 +77,46 @@ class QuestionsController @Inject()(
         question       = oQuestion.get
       } yield {
         errorInfo.fold(
-          Ok(questionView(question, applicationId, submitAction, currentAnswer, None))
+          Ok(questionView(question, applicationId, submitAction, persistedAnswer, None))
         )(
-          _ => BadRequest(questionView(question, applicationId, submitAction, currentAnswer, errorInfo))
+          _ => BadRequest(questionView(question, applicationId, submitAction, onFormAnswer, errorInfo))
         )
       }
     )
     .fold[Result](BadRequest(_), identity(_))
   }
 
-  def showQuestion(submissionId: Submission.Id, questionId: Question.Id, answers: Option[ActualAnswer] = None, errorInfo: Option[ErrorInfo] = None) = withSubmission(submissionId) { implicit request => 
+  def showQuestion(submissionId: Submission.Id, questionId: Question.Id, onFormAnswer: Option[ActualAnswer] = None, errorInfo: Option[ErrorInfo] = None) = withSubmission(submissionId) { implicit request => 
     val submitAction = uk.gov.hmrc.apiplatform.modules.submissions.controllers.routes.QuestionsController.recordAnswer(submissionId, questionId)
-    processQuestion(submissionId, questionId, answers, errorInfo)(submitAction)
+    processQuestion(submissionId, questionId, onFormAnswer, errorInfo)(submitAction)
   }
 
-  def updateQuestion(submissionId: Submission.Id, questionId: Question.Id, answers: Option[ActualAnswer] = None, errorInfo: Option[ErrorInfo] = None) = withSubmission(submissionId) { implicit request => 
+  def updateQuestion(submissionId: Submission.Id, questionId: Question.Id, onFormAnswer: Option[ActualAnswer] = None, errorInfo: Option[ErrorInfo] = None) = withSubmission(submissionId) { implicit request => 
     val submitAction = uk.gov.hmrc.apiplatform.modules.submissions.controllers.routes.QuestionsController.updateAnswer(submissionId, questionId)
-    processQuestion(submissionId, questionId, answers, errorInfo)(submitAction)
+    processQuestion(submissionId, questionId, onFormAnswer, errorInfo)(submitAction)
   }
 
   private def processAnswer(submissionId: Submission.Id, questionId: Question.Id)(success: (ExtendedSubmission) => Future[Result])(implicit request: SubmissionApplicationRequest[AnyContent]) = {
-    lazy val failed = (msg: String) => {
+    def failed(answers: List[String]) = (msg: String) => {
       val defaultMessage = "Please provide an answer to the question"
       import cats.implicits._
 
       logger.info(s"Failed to recordAnswer - $msg")
 
-      val question = request.submission.findQuestion(questionId) collect {
-        case q: Question with ErrorMessaging => q
+      val question = request.submission.findQuestion(questionId).get
+
+      val errorInfo = (question match {
+        case q: Question with ErrorMessaging  => q.errorInfo
+        case _                                => None
+      })
+      .getOrElse(ErrorInfo(defaultMessage, defaultMessage))
+
+      val onFormAnswer = question match {
+        case q: TextQuestion => answers.headOption.map(TextAnswer)
+        case _               => None
       }
 
-      val errorInfo = question.flatMap(_.errorInfo).getOrElse(ErrorInfo(defaultMessage,defaultMessage))
-
-      showQuestion(submissionId, questionId, None, errorInfo.some)(request)
+      showQuestion(submissionId, questionId, onFormAnswer, errorInfo.some)(request)
     }
 
     val formValues = request.body.asFormUrlEncoded.get.filterNot(_._1 == "csrfToken")
@@ -136,7 +143,7 @@ class QuestionsController @Inject()(
         result            <- fromEitherF(submissionService.recordAnswer(submissionId, questionId, effectiveAnswers))
       } yield result
     )
-    .fold(failed, success)
+    .fold(failed(answers), success)
     .flatten
   } 
 
