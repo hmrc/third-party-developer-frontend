@@ -21,10 +21,11 @@
 @import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.views.BackButtonWithJavaScript
 @import play.api.mvc.Call
 @import play.api.mvc.Request
+@import uk.gov.hmrc.apiplatform.modules.submissions.controllers.QuestionsController.ViewErrorInfo
 
 @this(devMain: DevMain2)(implicit applicationConfig: ApplicationConfig)
 
-@(question: Question, applicationId: ApplicationId, submitAction: Call, currentAnswers: Option[ActualAnswer], errorInfo: Option[ErrorInfo])(implicit request: Request[Any], messages: Messages, loggedIn: DeveloperSession)
+@(question: Question, applicationId: ApplicationId, submitAction: Call, currentAnswers: Option[ActualAnswer], errorInfo: Option[ViewErrorInfo])(implicit request: Request[Any], messages: Messages, loggedIn: DeveloperSession)
 
 @pageHeading = @{ question.wording.value }
 
