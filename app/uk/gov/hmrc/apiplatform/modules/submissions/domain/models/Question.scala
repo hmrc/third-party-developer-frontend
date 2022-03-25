@@ -42,9 +42,12 @@ trait LabelAndHints {
   def hintText: Option[NonBulletStatementFragment]
 }
 
-case class ErrorInfo(summary: String, message: String)
+case class ErrorInfo(summary: String, message: Option[String])
 
 object ErrorInfo {
+  def apply(summary: String): ErrorInfo = new ErrorInfo(summary, None)
+  def apply(summary: String, message: String): ErrorInfo =  if(summary == message) apply(summary) else new ErrorInfo(summary, Some(message))
+
   implicit val format = Json.format[ErrorInfo]
 }
 

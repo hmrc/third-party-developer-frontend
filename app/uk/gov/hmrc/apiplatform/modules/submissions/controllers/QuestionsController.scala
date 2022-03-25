@@ -43,6 +43,17 @@ object QuestionsController {
 
   case class InboundRecordAnswersRequest(answers: NonEmptyList[String])
   implicit val readsInboundRecordAnswersRequest = Json.reads[InboundRecordAnswersRequest]
+
+  case class ViewErrorInfo private(summary: String, message: String)
+
+  object ViewErrorInfo {
+    implicit val format = Json.format[ViewErrorInfo]
+
+    def apply(errorInfo: ErrorInfo): ViewErrorInfo = errorInfo match {
+      case ErrorInfo(summary, Some(message)) => new ViewErrorInfo(summary, message)
+      case ErrorInfo(summary, None)          => new ViewErrorInfo(summary, summary)
+    }
+  }
 }
 
 @Singleton
@@ -64,6 +75,7 @@ class QuestionsController @Inject()(
   with EitherTHelper[String] {
 
   import cats.instances.future.catsStdInstancesForFuture
+  import QuestionsController._
 
   private def processQuestion(submissionId: Submission.Id, questionId: Question.Id, onFormAnswer: Option[ActualAnswer], errorInfo: Option[ErrorInfo])(submitAction: Call)(implicit request: SubmissionApplicationRequest[AnyContent]) = {
     val persistedAnswer = request.submission.latestInstance.answersToQuestions.get(questionId)
@@ -79,7 +91,7 @@ class QuestionsController @Inject()(
         errorInfo.fold(
           Ok(questionView(question, applicationId, submitAction, persistedAnswer, None))
         )(
-          _ => BadRequest(questionView(question, applicationId, submitAction, onFormAnswer, errorInfo))
+          ei => BadRequest(questionView(question, applicationId, submitAction, onFormAnswer, Some(ViewErrorInfo(ei))))
         )
       }
     )
