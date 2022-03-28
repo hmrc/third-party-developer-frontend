@@ -24,8 +24,8 @@ import play.api.libs.json.Json
 sealed trait Question {
   def id: Question.Id
   def wording: Wording
-  def statement: Statement
-  def afterStatement: Statement
+  def statement: Option[Statement]
+  def afterStatement: Option[Statement]
 
   def absence: Option[(String, Mark)]
 
@@ -42,6 +42,20 @@ trait LabelAndHints {
   def hintText: Option[NonBulletStatementFragment]
 }
 
+case class ErrorInfo(summary: String, message: Option[String])
+
+object ErrorInfo {
+  def apply(summary: String): ErrorInfo = new ErrorInfo(summary, None)
+  def apply(summary: String, message: String): ErrorInfo =  if(summary == message) apply(summary) else new ErrorInfo(summary, Some(message))
+
+  implicit val format = Json.format[ErrorInfo]
+}
+
+trait ErrorMessaging {
+  self: Question =>
+  
+  def errorInfo: Option[ErrorInfo]
+}
 case class Wording(value: String) extends AnyVal
 
 object Wording {
@@ -68,16 +82,22 @@ object Question {
 case class TextQuestion(
   id: Question.Id,
   wording: Wording,
-  statement: Statement = Statement(),
-  afterStatement: Statement = Statement(),
+  statement: Option[Statement],
+  afterStatement: Option[Statement] = None,
   label: Option[Question.Label] = None,
   hintText: Option[NonBulletStatementFragment] = None,
-  absence: Option[(String, Mark)] = None
-) extends Question with LabelAndHints
+  validation: Option[TextValidation] = None,
+  absence: Option[(String, Mark)] = None,
+  errorInfo: Option[ErrorInfo] = None
+) extends Question with LabelAndHints with ErrorMessaging
 
-case class AcknowledgementOnly(id: Question.Id, wording: Wording, statement: Statement = Statement()) extends Question {
+case class AcknowledgementOnly(
+  id: Question.Id,
+  wording: Wording,
+  statement: Option[Statement]
+) extends Question {
   val absence = None
-  val afterStatement = Statement()
+  val afterStatement = None
 }
 
 sealed trait Mark
@@ -102,7 +122,7 @@ object Mark {
 
 case class PossibleAnswer(value: String) extends AnyVal
 
-sealed trait ChoiceQuestion extends Question with LabelAndHints {
+sealed trait ChoiceQuestion extends Question with LabelAndHints with ErrorMessaging {
   def choices: ListSet[PossibleAnswer]
   def marking: ListMap[PossibleAnswer, Mark]
 }
@@ -112,36 +132,41 @@ sealed trait SingleChoiceQuestion extends ChoiceQuestion
 case class MultiChoiceQuestion(
   id: Question.Id,
   wording: Wording,
-  statement: Statement = Statement(),
-  afterStatement: Statement = Statement(),
+  statement: Option[Statement],
+  afterStatement: Option[Statement] = None,
   label: Option[Question.Label] = None,
   hintText: Option[NonBulletStatementFragment] = None,
   marking: ListMap[PossibleAnswer, Mark],
-  absence: Option[(String, Mark)] = None) extends ChoiceQuestion {
+  absence: Option[(String, Mark)] = None,
+  errorInfo: Option[ErrorInfo] = None
+) extends ChoiceQuestion {
   lazy val choices: ListSet[PossibleAnswer] = ListSet(marking.keys.toList : _*)
 }
 
 case class ChooseOneOfQuestion(
   id: Question.Id,
   wording: Wording,
-  statement: Statement = Statement(),
-  afterStatement: Statement = Statement(),
+  statement: Option[Statement],
+  afterStatement: Option[Statement] = None,
   label: Option[Question.Label] = None,
   hintText: Option[NonBulletStatementFragment] = None,
   marking: ListMap[PossibleAnswer, Mark],
-  absence: Option[(String, Mark)] = None) extends SingleChoiceQuestion {
+  absence: Option[(String, Mark)] = None,
+  errorInfo: Option[ErrorInfo] = None
+) extends SingleChoiceQuestion {
   lazy val choices: ListSet[PossibleAnswer] = ListSet(marking.keys.toList : _*)
 }
 
 case class YesNoQuestion(
   id: Question.Id,
   wording: Wording,
-  statement: Statement = Statement(),
-  afterStatement: Statement = Statement(),
+  statement: Option[Statement],
+  afterStatement: Option[Statement] = None,
   label: Option[Question.Label] = None,
   hintText: Option[NonBulletStatementFragment] = None,
   yesMarking: Mark, noMarking: Mark,
-  absence: Option[(String, Mark)] = None
+  absence: Option[(String, Mark)] = None,
+  errorInfo: Option[ErrorInfo] = None
 ) extends SingleChoiceQuestion {
   
   val YES = PossibleAnswer("Yes")

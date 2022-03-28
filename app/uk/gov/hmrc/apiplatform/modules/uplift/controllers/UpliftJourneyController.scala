@@ -83,6 +83,8 @@ class UpliftJourneyController @Inject() (val errorHandler: ErrorHandler,
                       val apmConnector: ApmConnector,
                       flowService: GetProductionCredentialsFlowService,
                       sellResellOrDistributeSoftwareView: SellResellOrDistributeSoftwareView,
+                      weWillCheckYourAnswersView: WeWillCheckYourAnswersView,
+                      beforeYouStartView: BeforeYouStartView,
                       upliftJourneySwitch: UpliftJourneySwitch)
                      (implicit val ec: ExecutionContext, val appConfig: ApplicationConfig)
   extends ApplicationController(mcc)
@@ -171,7 +173,7 @@ class UpliftJourneyController @Inject() (val errorHandler: ErrorHandler,
   def sellResellOrDistributeYourSoftwareAction(sandboxAppId: ApplicationId): Action[AnyContent] = whenTeamMemberOnApp(sandboxAppId) { implicit request =>
 
     def handleInvalidForm(formWithErrors: Form[SellResellOrDistributeForm]) =
-      Future(BadRequest(sellResellOrDistributeSoftwareView(sandboxAppId, formWithErrors)))
+      successful(BadRequest(sellResellOrDistributeSoftwareView(sandboxAppId, formWithErrors)))
 
     def handleValidForm(validForm: SellResellOrDistributeForm) = {
       validForm.answer match {
@@ -184,7 +186,16 @@ class UpliftJourneyController @Inject() (val errorHandler: ErrorHandler,
         case None => throw new IllegalStateException("Should never get here")
       }
     }
+
     sellResellOrDistributeForm.bindFromRequest.fold(handleInvalidForm, handleValidForm)
+  }
+
+  def beforeYouStart(sandboxAppId: ApplicationId): Action[AnyContent] = whenTeamMemberOnApp(sandboxAppId) { implicit request =>
+    successful(Ok(beforeYouStartView(sandboxAppId)))
+  }
+
+  def weWillCheckYourAnswers(sandboxAppId: ApplicationId): Action[AnyContent] = whenTeamMemberOnApp(sandboxAppId) { implicit request =>
+    successful(Ok(weWillCheckYourAnswersView(sandboxAppId)))
   }
 }
 

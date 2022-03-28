@@ -47,20 +47,17 @@ trait QuestionBuilder {
     AcknowledgementOnly(
       Question.Id.random,
       Wording(s"Wording$counter"),
-      Statement(List())
+      None
     )
     
   def yesNoQuestion(counter: Int): YesNoQuestion = {
     YesNoQuestion(
       Question.Id.random,
       Wording(s"Wording$counter"),
-      Statement(),
-      Statement(),
       None,
       None,
-      Pass,
-      Fail,
-      None
+      yesMarking = Pass,
+      noMarking = Fail
     )
   }
 
@@ -68,8 +65,8 @@ trait QuestionBuilder {
     ChooseOneOfQuestion(
       Question.Id.random,
       Wording(s"Wording$counter"),
-      Statement(),
-      Statement(),
+      None,
+      None,
       None,
       None,
       marking = choices.toList.map(c => (PossibleAnswer(c) -> Pass)).foldRight(ListMap.empty[PossibleAnswer, Mark])( (pair, acc) => acc + pair)
@@ -80,8 +77,8 @@ trait QuestionBuilder {
     MultiChoiceQuestion(
       Question.Id.random,
       Wording(s"Wording$counter"),
-      Statement(List()),
-      Statement(),
+      None,
+      None,
       None,
       None,
       choices.toList.map(c => (PossibleAnswer(c) -> Pass)).foldRight(ListMap.empty[PossibleAnswer, Mark])( (pair, acc) => acc + pair)
@@ -92,7 +89,7 @@ trait QuestionBuilder {
     TextQuestion(
       Question.Id.random,
       Wording(s"Wording$counter"),
-      Statement(List())
+      None
     )
   }
 }

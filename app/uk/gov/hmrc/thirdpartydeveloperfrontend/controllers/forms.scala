@@ -229,7 +229,7 @@ case class ChooseApplicationToUpliftForm(applicationId: ApplicationId)
 object ChooseApplicationToUpliftForm {
   val form: Form[ChooseApplicationToUpliftForm] = Form(
     mapping(
-      "applicationId" -> nonEmptyText.transform[ApplicationId](ApplicationId(_), id => id.value)
+      "applicationId" -> optional(text).verifying("choose.application.to.uplift.error", s => s.isDefined && !s.get.isEmpty()).transform[ApplicationId](s => ApplicationId(s.get), id => Some(id.value))
     )(ChooseApplicationToUpliftForm.apply)(ChooseApplicationToUpliftForm.unapply)
   )
 }
