@@ -14,27 +14,28 @@
  * limitations under the License.
  *@
 
-@import uk.gov.hmrc.hmrcfrontend.views.html.helpers.HmrcTrackingConsentSnippet
 @import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.views.{BackButton, BackButtonToUrl, BackButtonWithJavaScript, FeedbackBanner, NoBackButton}
 @import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.controllers.Crumb
 @import play.twirl.api.HtmlFormat
 @import views.html.include.FeedbackBannerView
-@import views.html.layouts.GovUkTemplate
 @import uk.gov.hmrc.play.views.html.helpers.ReportAProblemLink
 @import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.DeveloperSession
 
-@import uk.gov.hmrc.govukfrontend.views.html.components._
 @import uk.gov.hmrc.hmrcfrontend.views.html.helpers.HmrcReportTechnicalIssueHelper
 @import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.views.NavLink
 @import templates._
 @import views.templates._
 
-@this(govukTemplate: GovukTemplate,
-  siteHeader: siteHeader,
-  siteFooter: siteFooter,
-  footerLinks: FooterLinks,
+@import uk.gov.hmrc.play.views.html.layouts._
+@import uk.gov.hmrc.hmrcfrontend.views.html.components.HmrcHeader
+@import uk.gov.hmrc.hmrcfrontend.views.html.components.Header
+@import uk.gov.hmrc.hmrcfrontend.views.viewmodels.language.En
+@import uk.gov.hmrc.hmrcfrontend.views.viewmodels.footer.Footer
+
+@this(govukLayout: GovukLayout,
+  hmrcHeader: HmrcHeader,
+  hmrcFooter: HmrcFooter,
   applicationConfig: ApplicationConfig,
-  hmrcTrackingConsentSnippet: HmrcTrackingConsentSnippet,
   feedbackBannerView: FeedbackBannerView
 )
 
@@ -59,7 +60,6 @@
 
 @head = {
   <link href='@routes.Assets.versioned("stylesheets/main.css")' media="screen" rel="stylesheet" type="text/css" />
-  @hmrcTrackingConsentSnippet()
 }
 
 @footerBlock = {
@@ -71,7 +71,6 @@
       case _ => {}
     }
   </div>
-  @siteFooter(new Footer(meta = Some(Meta(items = Some(footerLinks.items)))))
 }
 
 @backLink = {
@@ -152,11 +151,20 @@
   @scripts
 }
 
-@govukTemplate(
+@govukLayout(
   pageTitle = Some(title),
   headBlock = Some(head),
   beforeContentBlock = Some(beforeContentBlock),
   bodyEndBlock = Some(bodyEndDefault),
-  headerBlock = siteHeader(navLinks),
-  footerBlock = footerBlock
+  headerBlock = Some(hmrcHeader(Header(
+        homepageUrl ="https://www.gov.uk",
+        serviceName = Some(messages("service.name")),
+        navigation = None,
+        serviceUrl = "",
+        displayHmrcBanner = false,
+        containerClasses = "govuk-width-container",
+        signOutHref = None,
+        language = En
+  ))),
+  footerBlock = Some(hmrcFooter(new Footer(meta = None, language = En)))
 )(mainContentDefault)
