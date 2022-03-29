@@ -20,22 +20,20 @@ import play.api.mvc.{AnyContent, Request}
 import uk.gov.hmrc.apiplatform.modules.uplift.controllers.UpliftJourneySwitch
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.TermsOfUseVersion
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.Application
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.services.TermsOfUseService
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.services.TermsOfUseService.TermsOfUseAgreementDetails
 
 import javax.inject.{Inject, Singleton}
 
 @Singleton
-class TermsOfUseVersionService @Inject() (upliftJourneySwitch: UpliftJourneySwitch) {
+class TermsOfUseVersionService @Inject() (upliftJourneySwitch: UpliftJourneySwitch, termsOfUseService: TermsOfUseService) {
   def getLatest()(implicit request: Request[AnyContent]): TermsOfUseVersion = {
     if (upliftJourneySwitch.shouldUseV2) TermsOfUseVersion.latest else TermsOfUseVersion.V1_2
   }
 
   def getForApplication(application: Application)(implicit request: Request[AnyContent]): TermsOfUseVersion = {
-    (
-      for {
-        checkInformation <- application.checkInformation
-        agreement <- checkInformation.termsOfUseAgreements.lastOption
-        version <- TermsOfUseVersion.fromVersionString(agreement.version)
-      } yield version
-    ).getOrElse(getLatest())
+    termsOfUseService.getAgreementDetails(application).lastOption
+      .flatMap((tou : TermsOfUseAgreementDetails) => TermsOfUseVersion.fromVersionString(tou.version))
+      .getOrElse(getLatest())
   }
 }

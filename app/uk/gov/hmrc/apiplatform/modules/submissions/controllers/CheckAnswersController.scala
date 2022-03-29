@@ -26,6 +26,7 @@ import play.api.mvc.{MessagesControllerComponents, Result}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.service.{ApplicationActionService, ApplicationService, SessionService}
 import uk.gov.hmrc.apiplatform.modules.submissions.views.html._
 import uk.gov.hmrc.apiplatform.modules.common.services.EitherTHelper
+import uk.gov.hmrc.apiplatform.modules.submissions.controllers.SubmissionActionBuilders.SubmissionStatusFilter
 
 import javax.inject.{Inject, Singleton}
 import scala.concurrent.ExecutionContext
@@ -56,14 +57,14 @@ class CheckAnswersController @Inject() (
      with EitherTHelper[String]
      with SubmissionActionBuilders {
 
-  import SubmissionActionBuilders.{StateFilter,RoleFilter}
+  import SubmissionActionBuilders.{ApplicationStateFilter,RoleFilter}
   import cats.implicits._
   import cats.instances.future.catsStdInstancesForFuture
   
   val redirectToGetProdCreds = (applicationId: ApplicationId) => Redirect(routes.ProdCredsChecklistController.productionCredentialsChecklistPage(applicationId))
 
    /*, Read/Write and State details */ 
-  def checkAnswersPage(productionAppId: ApplicationId) = withApplicationAndAnsweredSubmission(StateFilter.inTesting, RoleFilter.isAdminRole)(redirectToGetProdCreds(productionAppId))(productionAppId) { implicit request =>
+  def checkAnswersPage(productionAppId: ApplicationId) = withApplicationAndSubmissionInSpecifiedState(ApplicationStateFilter.inTesting, RoleFilter.isAdminRole, SubmissionStatusFilter.answeredCompletely)(redirectToGetProdCreds(productionAppId))(productionAppId) { implicit request =>
     val failed = (err: String) => BadRequestWithErrorMessage(err)
     
     val success = (viewModel: ViewModel) => {
@@ -79,7 +80,7 @@ class CheckAnswersController @Inject() (
     vm.fold[Result](failed, success)
   }
 
-  def checkAnswersAction(productionAppId: ApplicationId) = withApplicationAndAnsweredSubmission(StateFilter.inTesting, RoleFilter.isAdminRole)(redirectToGetProdCreds(productionAppId))(productionAppId) { implicit request =>
+  def checkAnswersAction(productionAppId: ApplicationId) = withApplicationAndSubmissionInSpecifiedState(ApplicationStateFilter.inTesting, RoleFilter.isAdminRole, SubmissionStatusFilter.answeredCompletely)(redirectToGetProdCreds(productionAppId))(productionAppId) { implicit request =>
     requestProductionCredentials
       .requestProductionCredentials(productionAppId, request.developerSession)
       .map(_ match {

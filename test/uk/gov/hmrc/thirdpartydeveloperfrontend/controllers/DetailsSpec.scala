@@ -16,6 +16,7 @@
 
 package uk.gov.hmrc.thirdpartydeveloperfrontend.controllers
 
+import org.joda.time.DateTime
 import uk.gov.hmrc.thirdpartydeveloperfrontend.builder.DeveloperBuilder
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications._
@@ -44,6 +45,7 @@ import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.LocalUserIdTracker
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.TestApplications
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.CollaboratorTracker
 import uk.gov.hmrc.apiplatform.modules.submissions.services.mocks.SubmissionServiceMockModule
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.services.TermsOfUseService.TermsOfUseAgreementDetails
 
 class DetailsSpec 
     extends BaseControllerSpec 
@@ -329,7 +331,7 @@ class DetailsSpec
     }
   }
 
-  trait Setup extends ApplicationServiceMock with ApplicationActionServiceMock {
+  trait Setup extends ApplicationServiceMock with ApplicationActionServiceMock with TermsOfUseServiceMock {
     val unauthorisedAppDetailsView = app.injector.instanceOf[UnauthorisedAppDetailsView]
     val pendingApprovalView = app.injector.instanceOf[PendingApprovalView]
     val detailsView = app.injector.instanceOf[DetailsView]
@@ -347,7 +349,8 @@ class DetailsSpec
       detailsView,
       changeDetailsView,
       fraudPreventionConfig,
-      SubmissionServiceMock.aMock
+      SubmissionServiceMock.aMock,
+      termsOfUseServiceMock
     )
 
     implicit val hc: HeaderCarrier = HeaderCarrier()
@@ -394,6 +397,7 @@ class DetailsSpec
 
     def detailsShouldRenderThePage(application: Application, hasChangeButton: Boolean = true) = {
       givenApplicationAction(application, loggedInDeveloper)
+      returnAgreementDetails(TermsOfUseAgreementDetails("test@example.com", None, DateTime.now, "1.2"))
 
       val result = application.callDetails
 
