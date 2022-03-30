@@ -33,9 +33,7 @@ object FlowType extends Enum[FlowType] with PlayJsonEnum[FlowType] {
   
   case object IP_ALLOW_LIST extends FlowType
   case object EMAIL_PREFERENCES extends FlowType
-  case object EMAIL_PREFERENCES_V2 extends FlowType
   case object NEW_APPLICATION_EMAIL_PREFERENCES extends FlowType
-  case object NEW_APPLICATION_EMAIL_PREFERENCES_V2 extends FlowType
   case object GET_PRODUCTION_CREDENTIALS extends FlowType
 }
 
@@ -52,12 +50,12 @@ case class IpAllowlistFlow(override val sessionId: String,
   override val flowType: FlowType = FlowType.IP_ALLOW_LIST
 }
 
-case class EmailPreferencesFlowV2(override val sessionId: String,
-                                  selectedCategories: Set[String],
-                                  selectedAPIs: Map[String, Set[String]],
-                                  selectedTopics: Set[String],
-                                  visibleApis: List[CombinedApi]) extends Flow with EmailPreferencesProducer {
-  override val flowType: FlowType = FlowType.EMAIL_PREFERENCES_V2
+case class EmailPreferencesFlow(override val sessionId: String,
+                                selectedCategories: Set[String],
+                                selectedAPIs: Map[String, Set[String]],
+                                selectedTopics: Set[String],
+                                visibleApis: List[CombinedApi]) extends Flow with EmailPreferencesProducer {
+  override val flowType: FlowType = FlowType.EMAIL_PREFERENCES
 
   def categoriesInOrder: List[String] = selectedCategories.toList.sorted
 
@@ -77,14 +75,14 @@ case class EmailPreferencesFlowV2(override val sessionId: String,
   }
 }
 
-object EmailPreferencesFlowV2 {
-  def fromDeveloperSession(developerSession: DeveloperSession): EmailPreferencesFlowV2 = {
+object EmailPreferencesFlow {
+  def fromDeveloperSession(developerSession: DeveloperSession): EmailPreferencesFlow = {
     val existingEmailPreferences = developerSession.developer.emailPreferences
 
     existingEmailPreferences match {
       case EmailPreferences(i: List[TaxRegimeInterests], t: Set[EmailTopic]) if i.isEmpty && t.isEmpty =>
-        new EmailPreferencesFlowV2(developerSession.session.sessionId, Set.empty, Map.empty, Set.empty, List.empty)
-      case emailPreferences => new EmailPreferencesFlowV2(
+        new EmailPreferencesFlow(developerSession.session.sessionId, Set.empty, Map.empty, Set.empty, List.empty)
+      case emailPreferences => new EmailPreferencesFlow(
         developerSession.session.sessionId,
         emailPreferences.interests.map(_.regime).toSet,
         taxRegimeInterestsToCategoryServicesMap(emailPreferences.interests),
@@ -101,13 +99,13 @@ object EmailPreferencesFlowV2 {
   }
 }
 
-case class NewApplicationEmailPreferencesFlowV2(override val sessionId: String,
-                                                existingEmailPreferences: EmailPreferences,
-                                                applicationId: ApplicationId,
-                                                missingSubscriptions: Set[CombinedApi],
-                                                selectedApis: Set[CombinedApi],
-                                                selectedTopics: Set[String]) extends Flow with EmailPreferencesProducer {
-  override val flowType: FlowType = FlowType.NEW_APPLICATION_EMAIL_PREFERENCES_V2
+case class NewApplicationEmailPreferencesFlow(override val sessionId: String,
+                                              existingEmailPreferences: EmailPreferences,
+                                              applicationId: ApplicationId,
+                                              missingSubscriptions: Set[CombinedApi],
+                                              selectedApis: Set[CombinedApi],
+                                              selectedTopics: Set[String]) extends Flow with EmailPreferencesProducer {
+  override val flowType: FlowType = FlowType.NEW_APPLICATION_EMAIL_PREFERENCES
 
   def optionCombine[A: Semigroup](a: A, opt: Option[A]): A = opt.map(a combine _).getOrElse(a)
 

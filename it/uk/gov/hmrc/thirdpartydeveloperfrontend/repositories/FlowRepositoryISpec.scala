@@ -6,7 +6,7 @@ import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.connectors.ApiType.
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.connectors.{CombinedApi, CombinedApiCategory}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.emailpreferences.EmailTopic
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.flows.FlowType._
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.flows.{EmailPreferencesFlowV2, Flow, FlowType, IpAllowlistFlow}
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.flows.{EmailPreferencesFlow, Flow, FlowType, IpAllowlistFlow}
 import org.joda.time.DateTime
 import org.scalatestplus.play.guice.GuiceOneAppPerSuite
 import play.api.libs.json.{JsObject, Json}
@@ -44,7 +44,7 @@ class FlowRepositoryISpec extends BaseRepositoryIntegrationSpec with MongoSpecSu
 
     val currentFlow: IpAllowlistFlow = IpAllowlistFlow(currentSession, Set("ip1", "ip2"))
     val flowInDifferentSession: IpAllowlistFlow = IpAllowlistFlow(anotherSession, Set("ip3", "ip4"))
-    val flowOfDifferentType: EmailPreferencesFlowV2 = EmailPreferencesFlowV2(currentSession,
+    val flowOfDifferentType: EmailPreferencesFlow = EmailPreferencesFlow(currentSession,
       selectedCategories = Set("category1", "category2"),
       selectedAPIs = Map("category1" -> Set("qwqw", "asass")),
       selectedTopics = Set("BUSINESS_AND_POLICY"),
@@ -87,7 +87,7 @@ class FlowRepositoryISpec extends BaseRepositoryIntegrationSpec with MongoSpecSu
       }
 
       "save email preferences" in {
-        val flow =  EmailPreferencesFlowV2(currentSession,
+        val flow =  EmailPreferencesFlow(currentSession,
           selectedCategories= Set("category1", "category2"),
           selectedAPIs = Map("category1" -> Set("qwqw", "asass")),
           selectedTopics = Set("BUSINESS_AND_POLICY",  "EVENT_INVITES"),
@@ -97,7 +97,7 @@ class FlowRepositoryISpec extends BaseRepositoryIntegrationSpec with MongoSpecSu
 
         val Some(result) = await(repository.collection.find[JsObject, JsObject](Json.obj("sessionId" -> currentSession)).one[JsObject])
         (result \ "sessionId").as[String] shouldBe currentSession
-        (result \ "flowType").as[String] shouldBe EMAIL_PREFERENCES_V2.toString
+        (result \ "flowType").as[String] shouldBe EMAIL_PREFERENCES.toString
         (result \ "lastUpdated").asOpt[DateTime] should not be empty
         (result \ "selectedTopics").as[Set[EmailTopic]] should contain only (EmailTopic.BUSINESS_AND_POLICY, EmailTopic.EVENT_INVITES)
         (result \ "visibleApis").as[List[CombinedApi]] should contain only (CombinedApi("api1ServiceName", "api1DisplayName",   List(CombinedApiCategory("VAT"), CombinedApiCategory("AGENT")), REST_API))

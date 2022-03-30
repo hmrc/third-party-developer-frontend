@@ -19,7 +19,7 @@ package views.emailpreferences
 import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.TaxRegimeEmailPreferencesForm
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.LoggedInState
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.emailpreferences.APICategoryDisplayDetails
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.flows.EmailPreferencesFlowV2
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.flows.EmailPreferencesFlow
 import org.jsoup.Jsoup
 import org.jsoup.nodes.Document
 import play.api.data.Form
@@ -41,7 +41,7 @@ class FlowSelectCategoriesViewSpec extends CommonViewSpec with WithCSRFAddToken 
     val developerSessionWithoutEmailPreferences =
       DeveloperSessionBuilder("email@example.com", "First Name", "Last Name", None, loggedInState = LoggedInState.LOGGED_IN)
     val emailPreferencesFlow =
-      EmailPreferencesFlowV2(developerSessionWithoutEmailPreferences.session.sessionId, Set("api1", "api2"), Map.empty, Set.empty, List.empty)
+      EmailPreferencesFlow(developerSessionWithoutEmailPreferences.session.sessionId, Set("api1", "api2"), Map.empty, Set.empty, List.empty)
     implicit val request: FakeRequest[AnyContentAsEmpty.type] = FakeRequest().withCSRFToken
 
     val flowSelectCategoriesView = app.injector.instanceOf[FlowSelectCategoriesView]

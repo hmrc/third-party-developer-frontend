@@ -21,7 +21,7 @@ import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.connectors.ApiType.
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.connectors.{CombinedApi, CombinedApiCategory}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.{DeveloperSession, LoggedInState}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.emailpreferences.APICategoryDisplayDetails
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.flows.EmailPreferencesFlowV2
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.flows.EmailPreferencesFlow
 import org.jsoup.Jsoup
 import org.jsoup.nodes.{Document, Element}
 import play.api.data.{Form, FormError}
@@ -44,7 +44,7 @@ class FlowSelectApiViewSpec extends CommonViewSpec with WithCSRFAddToken {
     val form = mock[Form[SelectedApisEmailPreferencesForm]]
     val currentCategory = APICategoryDisplayDetails("CATEGORY1", "Category 1")
     val apis = Set("api1", "api2")
-    val emailpreferencesFlow: EmailPreferencesFlowV2 = EmailPreferencesFlowV2(developerSessionWithoutEmailPreferences.session.sessionId, apis, Map(currentCategory.category -> apis), Set.empty, List.empty)
+    val emailpreferencesFlow: EmailPreferencesFlow = EmailPreferencesFlow(developerSessionWithoutEmailPreferences.session.sessionId, apis, Map(currentCategory.category -> apis), Set.empty, List.empty)
     implicit val request: FakeRequest[AnyContentAsEmpty.type] = FakeRequest().withCSRFToken
 
     val flowSelectApiView: FlowSelectApiView = app.injector.instanceOf[FlowSelectApiView]

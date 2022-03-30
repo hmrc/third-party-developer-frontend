@@ -16,28 +16,21 @@
 
 package uk.gov.hmrc.apiplatform.modules.submissions.controllers
 
-import javax.inject.{Inject, Singleton}
-import play.api.mvc.MessagesControllerComponents
-
-import scala.concurrent.ExecutionContext
-import uk.gov.hmrc.thirdpartydeveloperfrontend.config.ApplicationConfig
-import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.ApplicationController
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.ApplicationId
 import play.api.data.Form
+import play.api.libs.crypto.CookieSigner
+import play.api.mvc.{MessagesControllerComponents, Result}
 import uk.gov.hmrc.apiplatform.modules.common.services.EitherTHelper
 import uk.gov.hmrc.apiplatform.modules.submissions.services.SubmissionService
-import play.api.mvc.Result
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.controllers.BadRequestWithErrorMessage
-import uk.gov.hmrc.thirdpartydeveloperfrontend.service.SessionService
-import uk.gov.hmrc.thirdpartydeveloperfrontend.service.ApplicationActionService
-import uk.gov.hmrc.thirdpartydeveloperfrontend.service.ApplicationService
-import play.api.libs.crypto.CookieSigner
-import uk.gov.hmrc.apiplatform.modules.submissions.controllers.SubmissionActionBuilders.ApplicationStateFilter
-import uk.gov.hmrc.thirdpartydeveloperfrontend.config.ErrorHandler
 import uk.gov.hmrc.apiplatform.modules.submissions.views.html.{CancelledRequestForProductionCredentialsView, ConfirmCancelRequestForProductionCredentialsView}
+import uk.gov.hmrc.thirdpartydeveloperfrontend.config.{ApplicationConfig, ErrorHandler}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.connectors.ThirdPartyApplicationProductionConnector
+import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.ApplicationController
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.ApplicationId
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.controllers.BadRequestWithErrorMessage
+import uk.gov.hmrc.thirdpartydeveloperfrontend.service.{ApplicationActionService, ApplicationService, SessionService}
 
-import scala.concurrent.Future
+import javax.inject.{Inject, Singleton}
+import scala.concurrent.{ExecutionContext, Future}
 
 object CancelRequestController {
   case class DummyForm(dummy: String = "dummy")
@@ -75,9 +68,8 @@ class CancelRequestController @Inject() (
   with EitherTHelper[String]
   with SubmissionActionBuilders {
   
-  import cats.implicits._
-  import cats.instances.future.catsStdInstancesForFuture
   import SubmissionActionBuilders.ApplicationStateFilter
+  import cats.instances.future.catsStdInstancesForFuture
 
   private val exec = ec
   private val ET = new EitherTHelper[Result] { implicit val ec: ExecutionContext = exec }

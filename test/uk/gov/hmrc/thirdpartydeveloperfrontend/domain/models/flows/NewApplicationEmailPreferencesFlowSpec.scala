@@ -26,7 +26,7 @@ import org.scalatest.matchers.should.Matchers
 import org.scalatest.wordspec.AnyWordSpec
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.LocalUserIdTracker
 
-class NewApplicationEmailPreferencesFlowV2V2Spec extends AnyWordSpec with Matchers with CombinedApiTestDataHelper with DeveloperBuilder with LocalUserIdTracker {
+class NewApplicationEmailPreferencesFlowSpec extends AnyWordSpec with Matchers with CombinedApiTestDataHelper with DeveloperBuilder with LocalUserIdTracker {
 
     val category1 = "CATEGORY_1"
     val category2 = "CATEGORY_2"
@@ -43,8 +43,8 @@ class NewApplicationEmailPreferencesFlowV2V2Spec extends AnyWordSpec with Matche
         DeveloperSession(session)
     }
 
-    def newApplicationEmailPreferencesFlow(selectedApis: Set[CombinedApi], selectedTopics: Set[String]): NewApplicationEmailPreferencesFlowV2 = {
-        NewApplicationEmailPreferencesFlowV2(sessionId, emailPreferences, applicationId, Set.empty, selectedApis, selectedTopics)
+    def newApplicationEmailPreferencesFlow(selectedApis: Set[CombinedApi], selectedTopics: Set[String]): NewApplicationEmailPreferencesFlow = {
+        NewApplicationEmailPreferencesFlow(sessionId, emailPreferences, applicationId, Set.empty, selectedApis, selectedTopics)
     }
 
     "NewApplicationEmailPreferencesFlow" when {

@@ -21,7 +21,7 @@ import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.Applic
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.connectors.ApiType.REST_API
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.connectors.{CombinedApi, CombinedApiCategory}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.{DeveloperSession, LoggedInState}
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.flows.NewApplicationEmailPreferencesFlowV2
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.flows.NewApplicationEmailPreferencesFlow
 import org.jsoup.Jsoup
 import org.jsoup.nodes.{Document, Element}
 import play.api.data.{Form, FormError}
@@ -43,7 +43,7 @@ class SelectApisFromSubscriptionsViewSpec extends CommonViewSpec with WithCSRFAd
     val form = mock[Form[SelectApisFromSubscriptionsForm]]
     val apis = Set("api1", "api2")
     val applicationId = ApplicationId.random
-    val newApplicationEmailPreferencesFlow = NewApplicationEmailPreferencesFlowV2(
+    val newApplicationEmailPreferencesFlow = NewApplicationEmailPreferencesFlow(
         developerSessionWithoutEmailPreferences.session.sessionId,
         developerSessionWithoutEmailPreferences.developer.emailPreferences,
         applicationId,

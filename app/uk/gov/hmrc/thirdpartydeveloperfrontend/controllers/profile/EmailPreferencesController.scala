@@ -23,7 +23,7 @@ import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.Applic
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.connectors.CombinedApi
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.emailpreferences.APICategoryDisplayDetails
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.emailpreferences.EmailPreferences
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.flows.{FlowType, NewApplicationEmailPreferencesFlowV2}
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.flows.{FlowType, NewApplicationEmailPreferencesFlow}
 import play.api.data.Form
 import play.api.libs.crypto.CookieSigner
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents, Result}
@@ -164,7 +164,7 @@ class EmailPreferencesController @Inject()(
             flow <- emailPreferencesService.fetchEmailPreferencesFlow(request.developerSession)
             updateResult <- emailPreferencesService
               .updateEmailPreferences(request.userId, flow.copy(selectedTopics = selectedTopicsForm.topic.toSet))
-            _ = if (updateResult) emailPreferencesService.deleteFlow(request.sessionId, FlowType.EMAIL_PREFERENCES_V2)
+            _ = if (updateResult) emailPreferencesService.deleteFlow(request.sessionId, FlowType.EMAIL_PREFERENCES)
           } yield if (updateResult) Redirect(profile.routes.EmailPreferencesController.emailPreferencesSummaryPage())
           else Redirect(profile.routes.EmailPreferencesController.flowSelectTopicsPage())
       }
@@ -245,7 +245,7 @@ class EmailPreferencesController @Inject()(
   }
 
   def renderSelectApisFromSubscriptionsPage(form: Form[SelectApisFromSubscriptionsForm] = SelectApisFromSubscriptionsForm.form,
-                                            flow: NewApplicationEmailPreferencesFlowV2)(implicit request: UserRequest[AnyContent]): Html =
+                                            flow: NewApplicationEmailPreferencesFlow)(implicit request: UserRequest[AnyContent]): Html =
     selectApisFromSubscriptionsView(form, flow.missingSubscriptions.toList.sortBy(_.serviceName), flow.applicationId, flow.selectedApis.map(_.serviceName))
 
   def selectApisFromSubscriptionsAction(applicationId: ApplicationId): Action[AnyContent] = loggedInAction { implicit request =>
@@ -275,7 +275,7 @@ class EmailPreferencesController @Inject()(
   }
 
   private def renderSelectTopicsFromSubscriptionsView(form: Form[SelectTopicsFromSubscriptionsForm] = SelectTopicsFromSubscriptionsForm.form,
-                                                      flow: NewApplicationEmailPreferencesFlowV2)(implicit request: UserRequest[AnyContent]): Html =
+                                                      flow: NewApplicationEmailPreferencesFlow)(implicit request: UserRequest[AnyContent]): Html =
     selectTopicsFromSubscriptionsView.apply(form, flow.selectedTopics, flow.applicationId)
 
   def selectTopicsFromSubscriptionsAction(applicationId: ApplicationId): Action[AnyContent] = loggedInAction { implicit request =>
@@ -292,7 +292,7 @@ class EmailPreferencesController @Inject()(
           for {
             flow <- emailPreferencesService.fetchNewApplicationEmailPreferencesFlow(request.developerSession, applicationId)
             _ <- emailPreferencesService.updateEmailPreferences(request.developerSession.developer.userId, flow.copy(selectedTopics = selectedTopicsForm.topic.toSet))
-            _ <- emailPreferencesService.deleteFlow(request.sessionId, FlowType.NEW_APPLICATION_EMAIL_PREFERENCES_V2)
+            _ <- emailPreferencesService.deleteFlow(request.sessionId, FlowType.NEW_APPLICATION_EMAIL_PREFERENCES)
           } yield Redirect(addapplication.routes.AddApplication.addApplicationSuccess(applicationId)).flashing("emailPreferencesSelected" -> "true")
       }
     )
