@@ -22,7 +22,6 @@ import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.{Appli
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.subscriptions.ApiSubscriptionFields._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.subscriptions.{DevhubAccessLevel, FieldValue, Fields}
 import javax.inject.{Inject, Singleton}
-import uk.gov.hmrc.thirdpartydeveloperfrontend.service.SubscriptionFieldsService.DefinitionsByApiVersion
 import uk.gov.hmrc.http.HeaderCarrier
 
 import scala.concurrent.{ExecutionContext, Future}
@@ -33,18 +32,6 @@ import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.subscriptions.Field
 
 @Singleton
 class SubscriptionFieldsService @Inject() (connectorsWrapper: ConnectorsWrapper, apmConnector: ApmConnector)(implicit val ec: ExecutionContext) {
-
-  def fetchFieldsValues(application: Application, fieldDefinitions: Seq[SubscriptionFieldDefinition], apiIdentifier: ApiIdentifier)(
-      implicit hc: HeaderCarrier
-  ): Future[Seq[SubscriptionFieldValue]] = {
-    val connector = connectorsWrapper.forEnvironment(application.deployedTo).apiSubscriptionFieldsConnector
-
-    if (fieldDefinitions.isEmpty) {
-      Future.successful(Seq.empty[SubscriptionFieldValue])
-    } else {
-      connector.fetchFieldValues(application.clientId, apiIdentifier.context, apiIdentifier.version)
-    }
-  }
 
   def saveFieldValues(role: CollaboratorRole, application: Application, apiContext: ApiContext, apiVersion: ApiVersion, oldValues: Seq[SubscriptionFieldValue], newValues: Fields.Alias)(
       implicit hc: HeaderCarrier
@@ -83,46 +70,12 @@ class SubscriptionFieldsService @Inject() (connectorsWrapper: ConnectorsWrapper,
     }
   }
 
-  def saveBlankFieldValues(application: Application, apiContext: ApiContext, apiVersion: ApiVersion, values: Seq[SubscriptionFieldValue])(
-      implicit hc: HeaderCarrier
-  ): Future[ServiceSaveSubscriptionFieldsResponse] = {
-
-    def createEmptyFieldValues(fieldDefinitions: Seq[SubscriptionFieldDefinition]): Fields.Alias = {
-      fieldDefinitions
-        .map(d => d.name -> FieldValue.empty)
-        .toMap
-    }
-
-    if (values.forall(_.value.isEmpty)) {
-      val connector = connectorsWrapper.forEnvironment(application.deployedTo).apiSubscriptionFieldsConnector
-
-      val emptyFieldValues = createEmptyFieldValues(values.map(_.definition))
-
-      connector.saveFieldValues(application.clientId, apiContext, apiVersion, emptyFieldValues)
-    } else {
-      Future.successful(SaveSubscriptionFieldsSuccessResponse)
-    }
-  }
-
   def fetchAllPossibleSubscriptions(applicationId: ApplicationId)(implicit hc: HeaderCarrier): Future[Map[ApiContext, ApiData]] = {
     apmConnector.fetchAllPossibleSubscriptions(applicationId)
   }
 
   def fetchAllFieldDefinitions(environment: Environment)(implicit hc: HeaderCarrier): Future[Map[ApiContext,Map[ApiVersion, Map[FieldName, SubscriptionFieldDefinition]]]] = {
     apmConnector.getAllFieldDefinitions(environment)
-  }
-
-  def getAllFieldDefinitions(environment: Environment)(implicit hc: HeaderCarrier): Future[DefinitionsByApiVersion] = {
-    connectorsWrapper
-      .forEnvironment(environment)
-      .apiSubscriptionFieldsConnector
-      .fetchAllFieldDefinitions()
-  }
-
-  def getFieldDefinitions(application: Application, apiIdentifier: ApiIdentifier)(implicit hc: HeaderCarrier): Future[Seq[SubscriptionFieldDefinition]] = {
-    val connector = connectorsWrapper.forEnvironment(application.deployedTo).apiSubscriptionFieldsConnector
-
-    connector.fetchFieldDefinitions(apiIdentifier.context, apiIdentifier.version)
   }
 }
 
