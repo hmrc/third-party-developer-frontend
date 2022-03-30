@@ -397,7 +397,7 @@ class DetailsSpec
 
     def detailsShouldRenderThePage(application: Application, hasChangeButton: Boolean = true) = {
       givenApplicationAction(application, loggedInDeveloper)
-      returnAgreementDetails(TermsOfUseAgreementDetails("test@example.com", None, DateTime.now, "1.2"))
+      returnAgreementDetails(TermsOfUseAgreementDetails("test@example.com", None, DateTime.now, Some("1.2")))
 
       val result = application.callDetails
 

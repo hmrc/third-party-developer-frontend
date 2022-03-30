@@ -47,7 +47,6 @@ import org.joda.time.DateTime
 import scala.concurrent.Future.successful
 import uk.gov.hmrc.apiplatform.modules.submissions.domain.models.Submission
 import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.Details.TermsOfUseViewModel
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.TermsOfUseVersion
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.services.TermsOfUseService
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.services.TermsOfUseService.TermsOfUseAgreementDetails
 
@@ -150,9 +149,8 @@ class Details @Inject() (
     val hasTermsOfUse = ! application.deployedTo.isSandbox && application.access.accessType.isStandard
 
     latestTermsOfUseAgreementDetails match {
-      case Some(TermsOfUseAgreementDetails(emailAddress, maybeName, date, versionString)) => {
-        val version = TermsOfUseVersion.fromVersionString(versionString)
-        TermsOfUseViewModel(hasTermsOfUse, true, version == TermsOfUseVersion.V1_2, maybeName.getOrElse(emailAddress), date)
+      case Some(TermsOfUseAgreementDetails(emailAddress, maybeName, date, maybeVersionString)) => {
+        TermsOfUseViewModel(hasTermsOfUse, true, maybeVersionString.isDefined, maybeName.getOrElse(emailAddress), date)
       }
       case _ => TermsOfUseViewModel(hasTermsOfUse, false, false, null, null) //TODO get rid of nulls
     }

@@ -32,7 +32,6 @@ import uk.gov.hmrc.thirdpartydeveloperfrontend.service.SessionService
 import uk.gov.hmrc.thirdpartydeveloperfrontend.service.ApplicationActionService
 import uk.gov.hmrc.thirdpartydeveloperfrontend.service.ApplicationService
 import play.api.libs.crypto.CookieSigner
-import uk.gov.hmrc.apiplatform.modules.submissions.controllers.SubmissionActionBuilders.ApplicationStateFilter
 import uk.gov.hmrc.thirdpartydeveloperfrontend.config.ErrorHandler
 import uk.gov.hmrc.apiplatform.modules.submissions.views.html.{CancelledRequestForProductionCredentialsView, ConfirmCancelRequestForProductionCredentialsView}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.connectors.ThirdPartyApplicationProductionConnector
