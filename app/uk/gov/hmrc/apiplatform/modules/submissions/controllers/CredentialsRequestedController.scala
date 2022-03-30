@@ -77,7 +77,7 @@ class CredentialsRequestedController @Inject() (
   val redirectToGetProdCreds = (applicationId: ApplicationId) => Redirect(routes.ProdCredsChecklistController.productionCredentialsChecklistPage(applicationId))
 
    /*, Read/Write and State details */ 
-  def credentialsRequestedPage(productionAppId: ApplicationId) = withApplicationAndSubmissionInSpecifiedState(ApplicationStateFilter.pendingApproval, RoleFilter.isTeamMember, SubmissionStatusFilter.submitted)(redirectToGetProdCreds(productionAppId))(productionAppId) { implicit request =>
+  def credentialsRequestedPage(productionAppId: ApplicationId) = withApplicationAndSubmissionInSpecifiedState(ApplicationStateFilter.pendingApproval, RoleFilter.isTeamMember, SubmissionStatusFilter.submittedGrantedOrDeclined)(redirectToGetProdCreds(productionAppId))(productionAppId) { implicit request =>
     val failed = (err: String) => BadRequestWithErrorMessage(err)
     
     val success = (viewModel: CredentialsRequestedViewModel) => {
