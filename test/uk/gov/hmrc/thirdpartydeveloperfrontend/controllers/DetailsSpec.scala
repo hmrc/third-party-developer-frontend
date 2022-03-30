@@ -63,8 +63,13 @@ class DetailsSpec
         detailsShouldRenderThePage(approvedApplication, hasChangeButton = false)
       }
 
+      "return the view for a standard production app with terms of use not agreed"  in new Setup {
+        val approvedApplication = anApplication(developerEmail = loggedInDeveloper.email)
+        detailsShouldRenderThePage(approvedApplication, hasChangeButton = false, hasTermsOfUseAgreement = false)
+      }
+
       "return the view for a developer on a sandbox app" in new Setup {
-        detailsShouldRenderThePage(aSandboxApplication(developerEmail = loggedInDeveloper.email))
+        detailsShouldRenderThePage(aSandboxApplication(developerEmail = loggedInDeveloper.email), hasTermsOfUseAgreement = false)
       }
     }
 
@@ -75,7 +80,7 @@ class DetailsSpec
       }
 
       "return the view for an admin on a sandbox app" in new Setup {
-        detailsShouldRenderThePage(aSandboxApplication(adminEmail = loggedInDeveloper.email))
+        detailsShouldRenderThePage(aSandboxApplication(adminEmail = loggedInDeveloper.email), hasTermsOfUseAgreement = false)
       }
 
       "return a redirect when using an application in testing state" in new Setup {
@@ -139,7 +144,7 @@ class DetailsSpec
         redirectsToLogin(result)
       }
     }
-  }
+}
 
   "changeDetails" should {
     "return the view for an admin on a standard production app" in new Setup {
@@ -395,9 +400,14 @@ class DetailsSpec
       redirectLocation(result) shouldBe Some(routes.UserLoginAccount.login().url)
     }
 
-    def detailsShouldRenderThePage(application: Application, hasChangeButton: Boolean = true) = {
+    def detailsShouldRenderThePage(application: Application, hasChangeButton: Boolean = true, hasTermsOfUseAgreement: Boolean = true) = {
       givenApplicationAction(application, loggedInDeveloper)
-      returnAgreementDetails(TermsOfUseAgreementDetails("test@example.com", None, DateTime.now, Some("1.2")))
+
+      if (hasTermsOfUseAgreement) {
+        returnAgreementDetails(TermsOfUseAgreementDetails("test@example.com", None, DateTime.now, Some("1.2")))
+      } else {
+        returnAgreementDetails()
+      }
 
       val result = application.callDetails
 
@@ -410,6 +420,7 @@ class DetailsSpec
       elementIdentifiedByIdContainsText(doc, "description", application.description.getOrElse("None")) shouldBe true
       elementIdentifiedByIdContainsText(doc, "privacyPolicyUrl", application.privacyPolicyUrl.getOrElse("None")) shouldBe true
       elementIdentifiedByIdContainsText(doc, "termsAndConditionsUrl", application.termsAndConditionsUrl.getOrElse("None")) shouldBe true
+      elementExistsContainsText(doc, "td", "Agreed by test@example.com") shouldBe hasTermsOfUseAgreement
     }
 
     def changeDetailsShouldRenderThePage(application: Application) = {
