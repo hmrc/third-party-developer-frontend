@@ -148,11 +148,10 @@ class Details @Inject() (
     val latestTermsOfUseAgreementDetails = termsOfUseService.getAgreementDetails(application).lastOption
 
     val hasTermsOfUse = ! application.deployedTo.isSandbox && application.access.accessType.isStandard
-
     latestTermsOfUseAgreementDetails match {
       case Some(TermsOfUseAgreementDetails(emailAddress, maybeName, date, versionString)) => {
         val version = TermsOfUseVersion.fromVersionString(versionString)
-        TermsOfUseViewModel(hasTermsOfUse, true, version == TermsOfUseVersion.V1_2, maybeName.getOrElse(emailAddress), date)
+        TermsOfUseViewModel(hasTermsOfUse, true, version.contains(TermsOfUseVersion.V1_2), maybeName.getOrElse(emailAddress), date)
       }
       case _ => TermsOfUseViewModel(hasTermsOfUse, false, false, null, null) //TODO get rid of nulls
     }
