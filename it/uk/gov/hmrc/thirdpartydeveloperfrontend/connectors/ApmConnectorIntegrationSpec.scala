@@ -41,7 +41,7 @@ class ApmConnectorIntegrationSpec extends BaseConnectorIntegrationSpec with Guic
 
     def combinedApiByServiceName(serviceName: String, body: String) = {
       stubFor(
-        get(urlEqualTo(s"/combined-rest-xml-apis/developer/$serviceName"))
+        get(urlEqualTo(s"/combined-rest-xml-apis/$serviceName"))
           .willReturn(
             aResponse()
               .withStatus(OK)
