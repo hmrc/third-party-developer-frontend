@@ -70,6 +70,7 @@ object SubmissionActionBuilders {
     type Type = Status => Boolean
     val answeredCompletely: Type = _.isAnsweredCompletely
     val submitted: Type = _.isSubmitted
+    val submittedGrantedOrDeclined: Type = status => status.isSubmitted || status.isGranted || status.isGrantedWithWarnings || status.isDeclined
     val granted: Type = status => status.isGranted || status.isGrantedWithWarnings
     val allAllowed: Type = _ => true
   }
