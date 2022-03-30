@@ -94,7 +94,7 @@ class ApmConnector @Inject()(http: HttpClient, config: ApmConnector.Config, metr
     http.GET[ExtendedApiDefinition](s"${config.serviceBaseUrl}/combined-api-definitions/$serviceName")
 
   def fetchCombinedApi(serviceName: String)(implicit hc: HeaderCarrier): Future[Either[Throwable, CombinedApi]] =
-    http.GET[CombinedApi](s"${config.serviceBaseUrl}/combined-rest-xml-apis/developer/$serviceName")
+    http.GET[CombinedApi](s"${config.serviceBaseUrl}/combined-rest-xml-apis/$serviceName")
       .map(Right(_))
       .recover {
         case NonFatal(e) => Left(e)
