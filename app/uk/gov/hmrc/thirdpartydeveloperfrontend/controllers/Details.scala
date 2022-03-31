@@ -46,20 +46,19 @@ import org.joda.time.DateTime
 
 import scala.concurrent.Future.successful
 import uk.gov.hmrc.apiplatform.modules.submissions.domain.models.Submission
-import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.Details.TermsOfUseViewModel
+import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.Details.{Agreement, TermsOfUseViewModel}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.TermsOfUseVersion
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.services.TermsOfUseService
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.services.TermsOfUseService.TermsOfUseAgreementDetails
 
 object Details {
+  case class Agreement(who: String, when: DateTime)
   case class TermsOfUseViewModel(
     exists: Boolean,
-    agreed: Boolean,
     appUsesOldVersion: Boolean,
-    whoAgreed: Option[String] = None,
-    timestampOfWhenAgreed: Option[DateTime] = None
+    agreement: Option[Agreement]
   ) {
-    lazy val agreementNeeded = exists && !agreed
+    lazy val agreementNeeded = exists && !agreement.isDefined
   }
 }
 @Singleton
@@ -151,9 +150,9 @@ class Details @Inject() (
     latestTermsOfUseAgreementDetails match {
       case Some(TermsOfUseAgreementDetails(emailAddress, maybeName, date, maybeVersionString)) => {
         val maybeVersion = maybeVersionString.flatMap(TermsOfUseVersion.fromVersionString(_))
-        TermsOfUseViewModel(hasTermsOfUse, true, maybeVersion.contains(TermsOfUseVersion.OLD_JOURNEY), Some(maybeName.getOrElse(emailAddress)), Some(date))
+        TermsOfUseViewModel(hasTermsOfUse, maybeVersion.contains(TermsOfUseVersion.OLD_JOURNEY), Some(Agreement(maybeName.getOrElse(emailAddress), date)))
       }
-      case _ => TermsOfUseViewModel(hasTermsOfUse, false, false)
+      case _ => TermsOfUseViewModel(hasTermsOfUse, false, None)
     }
   }
 
