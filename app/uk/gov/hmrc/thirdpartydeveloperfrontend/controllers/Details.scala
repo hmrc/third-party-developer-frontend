@@ -56,8 +56,8 @@ object Details {
     exists: Boolean,
     agreed: Boolean,
     appUsesOldVersion: Boolean,
-    whoAgreed: String,
-    timestampOfWhenAgreed: DateTime
+    whoAgreed: Option[String] = None,
+    timestampOfWhenAgreed: Option[DateTime] = None
   ) {
     lazy val agreementNeeded = exists && !agreed
   }
@@ -151,9 +151,9 @@ class Details @Inject() (
     latestTermsOfUseAgreementDetails match {
       case Some(TermsOfUseAgreementDetails(emailAddress, maybeName, date, maybeVersionString)) => {
         val maybeVersion = maybeVersionString.flatMap(TermsOfUseVersion.fromVersionString(_))
-        TermsOfUseViewModel(hasTermsOfUse, true, maybeVersion.contains(TermsOfUseVersion.OLD_JOURNEY), maybeName.getOrElse(emailAddress), date)
+        TermsOfUseViewModel(hasTermsOfUse, true, maybeVersion.contains(TermsOfUseVersion.OLD_JOURNEY), Some(maybeName.getOrElse(emailAddress)), Some(date))
       }
-      case _ => TermsOfUseViewModel(hasTermsOfUse, false, false, null, null) //TODO get rid of nulls
+      case _ => TermsOfUseViewModel(hasTermsOfUse, false, false)
     }
   }
 

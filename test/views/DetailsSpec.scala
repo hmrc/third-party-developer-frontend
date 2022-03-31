@@ -53,7 +53,7 @@ class DetailsSpec
     lazy val readLink: Element = body.getElementById("termsOfUseReadLink")
   }
 
-  val termsOfUseViewModel = TermsOfUseViewModel(true, true, true, "user@example.com", DateTime.now)
+  val termsOfUseViewModel = TermsOfUseViewModel(true, true, true, Some("user@example.com"), Some(DateTime.now))
 
   "Application details view" when {
     implicit val request: FakeRequest[AnyContentAsEmpty.type] = FakeRequest()
