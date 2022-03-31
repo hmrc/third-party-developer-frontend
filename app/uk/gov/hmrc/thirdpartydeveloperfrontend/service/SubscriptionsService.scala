@@ -28,8 +28,6 @@ import scala.concurrent.Future
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.apidefinitions._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.ApplicationUpdateSuccessful
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.subscriptions.FieldName
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.subscriptions.ApiSubscriptionFields.SubscriptionFieldDefinition
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.subscriptions.ApiSubscriptionFields.SaveSubscriptionFieldsSuccessResponse
 import uk.gov.hmrc.thirdpartydeveloperfrontend.connectors.ApmConnector
 import scala.concurrent.ExecutionContext
 
@@ -59,34 +57,7 @@ class SubscriptionsService @Inject() (
   type FieldMap[V] = ApiMap[Map[FieldName,V]]
 
   def subscribeToApi(application: Application, apiIdentifier: ApiIdentifier)(implicit hc: HeaderCarrier): Future[ApplicationUpdateSuccessful] = {
-
-    def ensureEmptyValuesWhenNoneExists(fieldDefinitions: Seq[SubscriptionFieldDefinition]): Future[Unit] = {
-      for {
-        oldValues <- subscriptionFieldsService.fetchFieldsValues(application, fieldDefinitions, apiIdentifier)
-        saveResponse <- subscriptionFieldsService.saveBlankFieldValues(application, apiIdentifier.context, apiIdentifier.version, oldValues)
-      } yield saveResponse match {
-        case SaveSubscriptionFieldsSuccessResponse => ()
-        case error =>
-          val errorMessage = s"Failed to save blank subscription field values: $error"
-          throw new RuntimeException(errorMessage)
-      }
-    }
-
-    def ensureSavedValuesForAnyDefinitions(defns: Seq[SubscriptionFieldDefinition]): Future[Unit] = {
-      if (defns.nonEmpty) {
-        ensureEmptyValuesWhenNoneExists(defns)
-      } else {
-        Future.successful(())
-      }
-    }
-
-    val subscribeResponse: Future[ApplicationUpdateSuccessful] = apmConnector.subscribeToApi(application.id, apiIdentifier)
-    
-    val fieldDefinitions: Future[Seq[SubscriptionFieldDefinition]] = subscriptionFieldsService.getFieldDefinitions(application, apiIdentifier)
-
-    fieldDefinitions
-      .flatMap(ensureSavedValuesForAnyDefinitions)
-      .flatMap(_ => subscribeResponse)
+    apmConnector.subscribeToApi(application.id, apiIdentifier)
   }
   
   def isSubscribedToApi(applicationId: ApplicationId, apiIdentifier: ApiIdentifier)(implicit hc: HeaderCarrier): Future[Boolean] = {

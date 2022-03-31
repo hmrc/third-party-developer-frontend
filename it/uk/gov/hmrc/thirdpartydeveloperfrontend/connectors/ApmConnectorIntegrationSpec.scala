@@ -1,7 +1,7 @@
 package uk.gov.hmrc.thirdpartydeveloperfrontend.connectors
 
 import com.github.tomakehurst.wiremock.client.WireMock._
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.connectors.{ApiDefinition, CombinedApi, CombinedApiCategory, ExtendedApiDefinition}
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.connectors._
 import org.scalatestplus.play.guice.GuiceOneAppPerSuite
 import play.api.http.Status._
 import play.api.inject.bind
@@ -23,6 +23,7 @@ import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.services.CombinedApiJsonFo
 import play.api.libs.json.Json
 
 class ApmConnectorIntegrationSpec extends BaseConnectorIntegrationSpec with GuiceOneAppPerSuite with WireMockExtensions with CombinedApiJsonFormatters {
+
   private val stubConfig = Configuration(
     "microservice.services.api-platform-microservice.port" -> stubPort
   )
@@ -39,13 +40,15 @@ class ApmConnectorIntegrationSpec extends BaseConnectorIntegrationSpec with Guic
     val underTest = app.injector.instanceOf[ApmConnector]
 
     def combinedApiByServiceName(serviceName: String, body: String) = {
-        stubFor(
-            get(urlEqualTo(s"/combined-apis/$serviceName"))
-        .willReturn(
+      stubFor(
+        get(urlEqualTo(s"/combined-rest-xml-apis/$serviceName"))
+          .willReturn(
             aResponse()
-            .withStatus(OK)
-            .withBody(body)
-            .withHeader("content-type", "application/json")))
+              .withStatus(OK)
+              .withBody(body)
+              .withHeader("content-type", "application/json")
+          )
+      )
     }
 
     def fetchApiDefinitionsVisibleToUser(userId: UserId, body: String) = {
@@ -55,7 +58,9 @@ class ApmConnectorIntegrationSpec extends BaseConnectorIntegrationSpec with Guic
             aResponse()
               .withStatus(OK)
               .withBody(body)
-              .withHeader("content-type", "application/json")))
+              .withHeader("content-type", "application/json")
+          )
+      )
     }
   }
 
@@ -75,7 +80,7 @@ class ApmConnectorIntegrationSpec extends BaseConnectorIntegrationSpec with Guic
 
       val result = await(underTest.fetchAllAPICategories())
 
-      result.size should be (2)
+      result.size should be(2)
       result should contain only (category1, category2)
     }
   }
@@ -96,69 +101,66 @@ class ApmConnectorIntegrationSpec extends BaseConnectorIntegrationSpec with Guic
 
       val result: Either[Throwable, List[APICategoryDisplayDetails]] = await(underTest.fetchAllCombinedAPICategories())
       result match {
-        case Right(x) =>   x.size should be (2)
-                           x should contain only (category1, category2)
-        case _ => fail()
+        case Right(x) => x.size should be(2)
+          x should contain only (category1, category2)
+        case _        => fail()
       }
 
     }
   }
 
-
   "fetchCombinedApi" should {
-      "retrieve an CombinedApi based on a serviceName" in new Setup {
-          val serviceName = "api1"
-          val displayName = "API 1"
-        val expectedApi = CombinedApi(serviceName, displayName, List(CombinedApiCategory("VAT")), REST_API)
-         combinedApiByServiceName(serviceName, Json.toJson(expectedApi).toString())
-         val result: Either[Throwable, CombinedApi] = await(underTest.fetchCombinedApi("api1"))
-        result match {
-          case Right(x) =>  x.serviceName shouldBe serviceName
-                            x.displayName shouldBe displayName
-          case _ => fail()
-        }
-
+    "retrieve an CombinedApi based on a serviceName" in new Setup {
+      val serviceName = "api1"
+      val displayName = "API 1"
+      val expectedApi = CombinedApi(serviceName, displayName, List(CombinedApiCategory("VAT")), REST_API)
+      combinedApiByServiceName(serviceName, Json.toJson(expectedApi).toString())
+      val result: Either[Throwable, CombinedApi] = await(underTest.fetchCombinedApi("api1"))
+      result match {
+        case Right(x) => x.serviceName shouldBe serviceName
+          x.displayName shouldBe displayName
+        case _        => fail()
       }
+
+    }
 
     "fail on Upstream5xxResponse when the call return a 500" in new Setup {
 
       stubFor(
-        get(urlEqualTo("/combined-apis/api1"))
+        get(urlEqualTo("/combined-rest-xml-apis/developer/api1"))
           .willReturn(
             aResponse()
               .withStatus(INTERNAL_SERVER_ERROR)
           )
       )
 
-        val result = await(underTest.fetchCombinedApi("api1"))
-        result match {
-          case Right(_) => fail()
-          case Left(_: UpstreamErrorResponse) => succeed
-          case _ => fail()
-        }
+      val result = await(underTest.fetchCombinedApi("api1"))
+      result match {
+        case Right(_)                       => fail()
+        case Left(_: UpstreamErrorResponse) => succeed
+        case _                              => fail()
+      }
     }
 
-      "throw notfound when the api is not found" in new Setup {
-        stubFor(
-          get(urlEqualTo("/combined-apis/unknownapi"))
-            .willReturn(
-              aResponse()
-                .withStatus(NOT_FOUND)
-                .withHeader("Content-Type", "application/json")
-            )
-        )
+    "throw notfound when the api is not found" in new Setup {
+      stubFor(
+        get(urlEqualTo("/combined-rest-xml-apis/developer/unknownapi"))
+          .willReturn(
+            aResponse()
+              .withStatus(NOT_FOUND)
+              .withHeader("Content-Type", "application/json")
+          )
+      )
 
-        val result = await(underTest.fetchCombinedApi("unknownapi"))
-        result match {
-          case Right(_) => fail()
-          case Left(e: UpstreamErrorResponse) => e.statusCode shouldBe NOT_FOUND
-          case _ => fail()
-        }
-
-
+      val result = await(underTest.fetchCombinedApi("unknownapi"))
+      result match {
+        case Right(_)                       => fail()
+        case Left(e: UpstreamErrorResponse) => e.statusCode shouldBe NOT_FOUND
+        case _                              => fail()
       }
-  }
 
+    }
+  }
 
   "fetchApiDefinitionsVisibleToUser" should {
 
@@ -197,7 +199,7 @@ class ApmConnectorIntegrationSpec extends BaseConnectorIntegrationSpec with Guic
     "subscribe application to an api" in new Setup {
       stubFor(
         post(urlPathEqualTo(url))
-        .withJsonRequestBody(apiIdentifier)
+          .withJsonRequestBody(apiIdentifier)
           .willReturn(
             aResponse()
               .withStatus(OK)
@@ -212,7 +214,7 @@ class ApmConnectorIntegrationSpec extends BaseConnectorIntegrationSpec with Guic
     "throw ApplicationNotFound if the application cannot be found" in new Setup {
       stubFor(
         post(urlPathEqualTo(url))
-        .withJsonRequestBody(apiIdentifier)
+          .withJsonRequestBody(apiIdentifier)
           .willReturn(
             aResponse()
               .withStatus(NOT_FOUND)
