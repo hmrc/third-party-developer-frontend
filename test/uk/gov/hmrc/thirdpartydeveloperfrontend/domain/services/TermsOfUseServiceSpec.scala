@@ -18,7 +18,7 @@ package uk.gov.hmrc.thirdpartydeveloperfrontend.domain.services
 
 import org.joda.time.DateTime
 import uk.gov.hmrc.apiplatform.modules.submissions.domain.models.Submission
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.{Application, ApplicationId, ApplicationState, CheckInformation, ClientId, Environment, ImportantSubmissionData, PrivacyPolicyLocation, Privileged, ResponsibleIndividual, ServerLocation, Standard, TermsAndConditionsLocation, TermsOfUseAcceptance, TermsOfUseAgreement}
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.services.TermsOfUseService.TermsOfUseAgreementDetails
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.HmrcSpec
 import uk.gov.hmrc.time.DateTimeUtils

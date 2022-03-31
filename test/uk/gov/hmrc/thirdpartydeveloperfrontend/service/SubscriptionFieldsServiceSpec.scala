@@ -19,7 +19,7 @@ package uk.gov.hmrc.thirdpartydeveloperfrontend.service
 import java.time.Period
 import uk.gov.hmrc.thirdpartydeveloperfrontend.builder.SubscriptionsBuilder
 import uk.gov.hmrc.thirdpartydeveloperfrontend.connectors.{ApmConnector, ThirdPartyApplicationConnector}
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.apidefinitions.{ApiContext, ApiIdentifier, ApiVersion}
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.apidefinitions.{ApiContext, ApiVersion}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.subscriptions.ApiSubscriptionFields.{SaveSubscriptionFieldsAccessDeniedResponse, SaveSubscriptionFieldsSuccessResponse, SubscriptionFieldValue}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.subscriptions.DevhubAccessRequirement.NoOne
@@ -72,56 +72,6 @@ class SubscriptionFieldsServiceSpec extends AsyncHmrcSpec with SubscriptionsBuil
     )
   }
 
-  "fetchFieldsValues" should {
-    "return empty sequence when there are none" in new Setup {
-      private val subscriptionFieldValues = await(
-        underTest.fetchFieldsValues(
-          application,
-          fieldDefinitions = Seq.empty,
-          ApiIdentifier(ApiContext("context"), versionOne)
-        )
-      )
-
-      subscriptionFieldValues shouldBe Seq.empty
-    }
-
-    "find and return matching values" in new Setup {
-      private val apiIdentifier: ApiIdentifier = ApiIdentifier(ApiContext("context1"), versionOne)
-
-      private val subscriptionFieldValue1 = buildSubscriptionFieldValue("value1")
-      private val subscriptionFieldValue2 = buildSubscriptionFieldValue("value2")
-
-      val fieldDefinitions = Seq(subscriptionFieldValue1.definition, subscriptionFieldValue2.definition)
-
-      private val subscriptionFields: Seq[SubscriptionFieldValue] =
-        Seq(subscriptionFieldValue1, subscriptionFieldValue2)
-
-      fetchFieldValuesReturns(application.clientId, apiIdentifier.context, apiIdentifier.version)(subscriptionFields)
-
-      private val subscriptionFieldValues =
-        await(underTest.fetchFieldsValues(application, fieldDefinitions, apiIdentifier))
-
-      subscriptionFieldValues shouldBe Seq(subscriptionFieldValue1, subscriptionFieldValue2)
-    }
-
-    "find no matching values" in new Setup {
-      private val apiIdentifier: ApiIdentifier = ApiIdentifier(ApiContext("context1"), versionOne)
-
-      private val subscriptionFieldValue = buildSubscriptionFieldValue("value")
-
-      private val subscriptionFieldValues: Seq[SubscriptionFieldValue] = Seq(subscriptionFieldValue)
-
-      val fieldDefinitions = Seq(subscriptionFieldValue.definition)
-
-      fetchFieldValuesReturns(application.clientId, apiIdentifier.context, apiIdentifier.version)(subscriptionFieldValues)
-
-      private val result =
-        await(underTest.fetchFieldsValues(application, fieldDefinitions, apiIdentifier))
-
-      result shouldBe subscriptionFieldValues
-    }
-  }
-
   "saveFieldsValues" should {
     "save the fields" in new Setup {
       val developerRole = CollaboratorRole.DEVELOPER
@@ -172,38 +122,6 @@ class SubscriptionFieldsServiceSpec extends AsyncHmrcSpec with SubscriptionsBuil
       val result = await(underTest.saveFieldValues(developerRole, application, apiContext, apiVersion, oldValues, newValues))
 
       result shouldBe SaveSubscriptionFieldsAccessDeniedResponse
-
-      verify(mockSubscriptionFieldsConnector, never)
-        .saveFieldValues(*[ClientId], *[ApiContext], *[ApiVersion], *)(*)
-    }
-  }
-
-  "saveBlankFieldValues" should {
-    "save when old values are empty" in new Setup {
-      val emptyOldValue = SubscriptionFieldValue(buildSubscriptionFieldValue("field-name").definition, FieldValue.empty)
-
-      when(mockSubscriptionFieldsConnector.saveFieldValues(*[ClientId], *[ApiContext], *[ApiVersion], *)(*))
-        .thenReturn(Future.successful(SaveSubscriptionFieldsSuccessResponse))
-
-      val result = await(underTest.saveBlankFieldValues(application, apiContext, apiVersion, Seq(emptyOldValue)))
-      result shouldBe SaveSubscriptionFieldsSuccessResponse
-
-      val expectedSavedFields = Map(
-        emptyOldValue.definition.name -> FieldValue.empty
-      )
-
-      verify(mockSubscriptionFieldsConnector)
-        .saveFieldValues(eqTo(clientId), eqTo(apiContext), eqTo(apiVersion), eqTo(expectedSavedFields))(*)
-    }
-
-    "dont save when old values are populated" in new Setup {
-      val populatedValue = buildSubscriptionFieldValue("field-name")
-
-      when(mockSubscriptionFieldsConnector.saveFieldValues(*[ClientId], *[ApiContext], *[ApiVersion], *)(*))
-        .thenReturn(Future.successful(SaveSubscriptionFieldsSuccessResponse))
-
-      val result = await(underTest.saveBlankFieldValues(application, apiContext, apiVersion, Seq(populatedValue)))
-      result shouldBe SaveSubscriptionFieldsSuccessResponse
 
       verify(mockSubscriptionFieldsConnector, never)
         .saveFieldValues(*[ClientId], *[ApiContext], *[ApiVersion], *)(*)
