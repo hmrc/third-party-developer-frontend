@@ -404,7 +404,7 @@ class DetailsSpec
       givenApplicationAction(application, loggedInDeveloper)
 
       if (hasTermsOfUseAgreement) {
-        returnAgreementDetails(TermsOfUseAgreementDetails("test@example.com", None, DateTime.now, "1.2"))
+        returnAgreementDetails(TermsOfUseAgreementDetails("test@example.com", None, DateTime.now, Some("1.2")))
       } else {
         returnAgreementDetails()
       }

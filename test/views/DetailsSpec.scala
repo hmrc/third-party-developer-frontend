@@ -28,7 +28,7 @@ import org.jsoup.nodes.{Document, Element}
 import play.api.mvc.AnyContentAsEmpty
 import play.api.test.FakeRequest
 import play.twirl.api.HtmlFormat.Appendable
-import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.Details.TermsOfUseViewModel
+import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.Details.{Agreement, TermsOfUseViewModel}
 import uk.gov.hmrc.time.DateTimeUtils
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.{TestApplications, WithCSRFAddToken}
 import views.helper.CommonViewSpec
@@ -53,7 +53,7 @@ class DetailsSpec
     lazy val readLink: Element = body.getElementById("termsOfUseReadLink")
   }
 
-  val termsOfUseViewModel = TermsOfUseViewModel(true, true, true, "user@example.com", DateTime.now)
+  val termsOfUseViewModel = TermsOfUseViewModel(true, true, Some(Agreement("user@example.com", DateTime.now)))
 
   "Application details view" when {
     implicit val request: FakeRequest[AnyContentAsEmpty.type] = FakeRequest()
@@ -180,7 +180,7 @@ class DetailsSpec
           "the user is a developer" should {
             "show 'not agreed' and have no link to read and agree when the terms of use have not been agreed" in {
               val checkInformation = CheckInformation(termsOfUseAgreements = List.empty)
-              val termsOfUseViewModelNotAgreed = termsOfUseViewModel.copy(agreed = false)
+              val termsOfUseViewModelNotAgreed = termsOfUseViewModel.copy(agreement = None)
 
               val application = anApplication(environment = deployedTo, access = access)
                 .withTeamMember(loggedIn.developer.email, CollaboratorRole.ADMINISTRATOR)
@@ -216,7 +216,7 @@ class DetailsSpec
 
             "show 'not agreed', have a button to read and agree and show a warning when the terms of use have not been agreed" in {
               val checkInformation = CheckInformation(termsOfUseAgreements = List.empty)
-              val termsOfUseViewModelNotAgreed = termsOfUseViewModel.copy(agreed = false)
+              val termsOfUseViewModelNotAgreed = termsOfUseViewModel.copy(agreement = None)
 
               val application = anApplication(environment = deployedTo, access = access)
                 .withTeamMembers(collaborators)

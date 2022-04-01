@@ -23,18 +23,18 @@ import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.services.TermsOfUseService
 import javax.inject.Singleton
 
 object TermsOfUseService {
-  case class TermsOfUseAgreementDetails(emailAddress: String, name: Option[String], date: DateTime, version: String)
+  case class TermsOfUseAgreementDetails(emailAddress: String, name: Option[String], date: DateTime, version: Option[String])
 }
 
 @Singleton
 class TermsOfUseService {
   private def getAgreementDetailsFromCheckInformation(checkInformation: CheckInformation): List[TermsOfUseAgreementDetails] = {
-    checkInformation.termsOfUseAgreements.map((toua: TermsOfUseAgreement) => TermsOfUseAgreementDetails(toua.emailAddress, None, toua.timeStamp, toua.version))
+    checkInformation.termsOfUseAgreements.map((toua: TermsOfUseAgreement) => TermsOfUseAgreementDetails(toua.emailAddress, None, toua.timeStamp, Some(toua.version)))
   }
 
   private def getAgreementDetailsFromStandardApp(std: Standard): List[TermsOfUseAgreementDetails] = {
     std.importantSubmissionData.fold[List[TermsOfUseAgreementDetails]](List.empty)(isd => isd.termsOfUseAcceptances
-      .map((toua: TermsOfUseAcceptance) => TermsOfUseAgreementDetails(toua.responsibleIndividual.emailAddress.value, Some(toua.responsibleIndividual.fullName.value), toua.dateTime, toua.version)))
+      .map((toua: TermsOfUseAcceptance) => TermsOfUseAgreementDetails(toua.responsibleIndividual.emailAddress.value, Some(toua.responsibleIndividual.fullName.value), toua.dateTime, None)))
   }
 
   def getAgreementDetails(application: Application): List[TermsOfUseAgreementDetails] =

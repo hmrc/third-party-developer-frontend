@@ -165,18 +165,16 @@
         <tr class="govuk-table__row">
           <td class="govuk-table__cell">Terms of use</td>
           <td class="govuk-table__cell" id="termsOfUseAgreementDetails">
-            @if(termsOfUse.agreed) {
-              Agreed by @{termsOfUse.whoAgreed} on @{DateTimeFormat.forPattern("dd MMMM yyyy").print(termsOfUse.timestampOfWhenAgreed)}
-            } else {
-              Not agreed
+            @termsOfUse.agreement match {
+              case Some(agreement) => { Agreed by @agreement.who on @DateTimeFormat.forPattern("dd MMMM yyyy").print(agreement.when) }
+              case None => { Not agreed }
             }
           </td>
           <td class="govuk-table__cell">
             @if(app.isPermittedToEditAppDetails(loggedIn.developer)) {
-              @if(termsOfUse.agreed) {
-                <a id="termsOfUseReadLink" class="govuk-link" href="@routes.TermsOfUse.termsOfUse(app.id)">Read</a>
-              } else {
-                <a id="termsOfUseReadLink" class="govuk-button govuk-!-margin-0" href="@routes.TermsOfUse.termsOfUse(app.id)">Read and agree</a>
+              @termsOfUse.agreement match {
+                case Some(agreement) => { <a id="termsOfUseReadLink" class="govuk-link" href="@routes.TermsOfUse.termsOfUse(app.id)">Read</a> }
+                case None => { <a id="termsOfUseReadLink" class="govuk-button govuk-!-margin-0" href="@routes.TermsOfUse.termsOfUse(app.id)">Read and agree</a> }
               }
             }
           </td>
@@ -185,11 +183,12 @@
     </table>
     } else {
       <h2 class="govuk-heading-s govuk-!-margin-top-7 govuk-!-margin-bottom-2">Terms of use</h2>
-      @if(termsOfUse.agreed) {
-        <p class="govuk-body govuk-!-margin-bottom-1" id="termsOfUseAgreementDetails">@{termsOfUse.whoAgreed} verified @{app.name} will conform to our terms of use on @{DateTimeFormat.forPattern("dd MMMM yyyy").print(termsOfUse.timestampOfWhenAgreed)}. </p>
-        <p class="govuk-body"><a class="govuk-link govuk-link--no-visited-state" href="@uk.gov.hmrc.apiplatform.modules.submissions.controllers.routes.TermsOfUseResponsesController.termsOfUseResponsesPage(app.id)">Review the terms of use responses for @{app.name}</a></p>
-      } else {
-        <p class="govuk-body" id="termsOfUseAgreementDetails">Not agreed</p>
+      @termsOfUse.agreement match {
+        case Some(agreement) => {
+          <p class="govuk-body govuk-!-margin-bottom-1" id="termsOfUseAgreementDetails">@agreement.who verified @{app.name} will conform to our terms of use on @{DateTimeFormat.forPattern("dd MMMM yyyy").print(agreement.when)}. </p>
+          <p class="govuk-body"><a class="govuk-link govuk-link--no-visited-state" href="@uk.gov.hmrc.apiplatform.modules.submissions.controllers.routes.TermsOfUseResponsesController.termsOfUseResponsesPage(app.id)">Review the terms of use responses for @{app.name}</a></p>
+        }
+        case None => { <p class="govuk-body" id="termsOfUseAgreementDetails">Not agreed</p> }
       }
     }
   }
