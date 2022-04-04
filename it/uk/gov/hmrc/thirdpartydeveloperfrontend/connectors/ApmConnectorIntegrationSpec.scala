@@ -64,27 +64,6 @@ class ApmConnectorIntegrationSpec extends BaseConnectorIntegrationSpec with Guic
     }
   }
 
-  "fetchAllAPICategories" should {
-    val category1 = APICategoryDisplayDetails("CATEGORY_1", "Category 1")
-    val category2 = APICategoryDisplayDetails("CATEGORY_2", "Category 2")
-
-    "return all API Category details" in new Setup {
-      stubFor(
-        get(urlEqualTo("/api-categories"))
-          .willReturn(
-            aResponse()
-              .withStatus(OK)
-              .withJsonBody(Seq(category1, category2))
-          )
-      )
-
-      val result = await(underTest.fetchAllAPICategories())
-
-      result.size should be(2)
-      result should contain only (category1, category2)
-    }
-  }
-
   "fetchAllCombinedAPICategories" should {
     val category1 = APICategoryDisplayDetails("CATEGORY_1", "Category 1")
     val category2 = APICategoryDisplayDetails("CATEGORY_2", "Category 2")

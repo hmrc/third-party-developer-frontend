@@ -17,6 +17,7 @@
 package uk.gov.hmrc.thirdpartydeveloperfrontend.service
 
 import cats.data.NonEmptyList
+import uk.gov.hmrc.apiplatform.modules.common.services.ApplicationLogger
 import uk.gov.hmrc.thirdpartydeveloperfrontend.connectors.{ApmConnector, ThirdPartyDeveloperConnector}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.ApplicationId
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.connectors.ApiType.REST_API
@@ -36,7 +37,7 @@ import scala.concurrent.{ExecutionContext, Future}
 @Singleton
 class EmailPreferencesService @Inject()(val apmConnector: ApmConnector,
                                         val thirdPartyDeveloperConnector: ThirdPartyDeveloperConnector,
-                                        val flowRepository: FlowRepository)(implicit val ec: ExecutionContext) {
+                                        val flowRepository: FlowRepository)(implicit val ec: ExecutionContext) extends ApplicationLogger{
 
   def fetchCategoriesVisibleToUser(developerSession: DeveloperSession, existingFlow: EmailPreferencesFlowV2)
                                   (implicit hc: HeaderCarrier): Future[List[APICategoryDisplayDetails]] =
@@ -63,7 +64,8 @@ class EmailPreferencesService @Inject()(val apmConnector: ApmConnector,
   def fetchAllAPICategoryDetails()(implicit hc: HeaderCarrier): Future[List[APICategoryDisplayDetails]] = {
     apmConnector.fetchAllCombinedAPICategories().flatMap{
       case Right(x) => successful(x)
-      case Left(_) => apmConnector.fetchAllAPICategories()
+      case Left(e: Throwable) => logger.error(s"fetchAllAPICategoryDetails failed: ${e.getMessage}")
+                                 successful(List.empty)
     }
   }
 
