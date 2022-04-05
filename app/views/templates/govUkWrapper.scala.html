@@ -27,12 +27,16 @@
 @import views.templates._
 
 @import uk.gov.hmrc.play.views.html.layouts._
-@import uk.gov.hmrc.hmrcfrontend.views.html.components.HmrcHeader
-@import uk.gov.hmrc.hmrcfrontend.views.html.components.Header
+@import uk.gov.hmrc.hmrcfrontend.views.html.components._
+@import uk.gov.hmrc.hmrcfrontend.views.html.helpers._
 @import uk.gov.hmrc.hmrcfrontend.views.viewmodels.language.En
 @import uk.gov.hmrc.hmrcfrontend.views.viewmodels.footer.Footer
 
-@this(govukLayout: GovukLayout,
+@import uk.gov.hmrc.govukfrontend.views.html.components.GovukLayout
+@import uk.gov.hmrc.govukfrontend.views.html.components.Text
+
+@this(
+  govukLayout: GovukLayout,
   hmrcHeader: HmrcHeader,
   hmrcFooter: HmrcFooter,
   applicationConfig: ApplicationConfig,
@@ -56,11 +60,27 @@
   navLinks: Seq[NavLink] = Seq.empty,
   bodyEndBlock: Option[Html] = None,
   feedbackBanner: Option[FeedbackBanner] = None,
-  fullWidth: Boolean = false
-)(contentBlock: Html)(implicit applicationConfig: ApplicationConfig, request: Request[_], messages: Messages)
+  fullWidth: Boolean = false,
+  timeout: Boolean = true
+)(contentBlock: Html)(implicit request: Request[_], messages: Messages)
 
 @head = {
   <link href='@routes.Assets.versioned("stylesheets/main.css")' media="screen" rel="stylesheet" type="text/css" />
+
+  @if(timeout) {
+    @hmrcTimeoutDialog(
+      TimeoutDialog(
+        message = Some("FIXME"),
+        keepAliveButtonText = Some("FIXME"),
+        signOutButtonText = Some("FIXME"),
+        timeout = Some(applicationConfig.sessionTimeout),
+        countdown = Some(applicationConfig.sessionCountdown),
+        keepAliveUrl = Some(uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.routes.SessionController.keepAlive().url),
+        signOutUrl = Some(uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.routes.UserLogoutAccount.logout().url),
+        language = Some("en")
+      )
+    )
+  }
 }
 
 @footerBlock = {
@@ -143,8 +163,10 @@
 
 @scripts = {
   <script src='@routes.Assets.versioned("lib/govuk-frontend/govuk/all.js")'></script>
+  <script src='@routes.Assets.versioned("lib/hmrc-frontend/hmrc/all.js")'></script>
   <script src='@routes.Assets.versioned("javascripts/feedback.js")' type="text/javascript"></script>
   <script>window.GOVUKFrontend.initAll();</script>
+  <script>window.HMRCFrontend.initAll();</script>
 }
 
 @bodyEndDefault = {

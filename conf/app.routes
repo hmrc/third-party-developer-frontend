@@ -187,9 +187,9 @@ GET         /assets/*file                                                       
 
 GET         /keep-alive                                                                                  uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.SessionController.keepAlive()
 
-GET         /no-applications                                                                              uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.noapplications.NoApplications.noApplicationsPage
-POST        /no-applications                                                                                  uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.noapplications.NoApplications.noApplicationsAction
-GET         /no-applications-start                                                                   uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.noapplications.NoApplications.startUsingRestApisPage
+GET         /no-applications                                                                             uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.noapplications.NoApplications.noApplicationsPage
+POST        /no-applications                                                                             uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.noapplications.NoApplications.noApplicationsAction
+GET         /no-applications-start                                                                       uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.noapplications.NoApplications.startUsingRestApisPage
 
 GET         /applications/:id/confirm-subscriptions                                                      uk.gov.hmrc.apiplatform.modules.uplift.controllers.UpliftJourneyController.confirmApiSubscriptionsPage(id: ApplicationId)
 POST        /applications/:id/confirm-subscriptions                                                      uk.gov.hmrc.apiplatform.modules.uplift.controllers.UpliftJourneyController.confirmApiSubscriptionsAction(id: ApplicationId)
