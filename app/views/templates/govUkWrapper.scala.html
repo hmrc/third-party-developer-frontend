@@ -36,7 +36,8 @@
   hmrcHeader: HmrcHeader,
   hmrcFooter: HmrcFooter,
   applicationConfig: ApplicationConfig,
-  feedbackBannerView: FeedbackBannerView
+  feedbackBannerView: FeedbackBannerView,
+  hmrcTimeoutDialog: HmrcTimeoutDialog
 )
 
 @(title: String,
@@ -151,20 +152,30 @@
   @scripts
 }
 
+@navigation = @{
+  Seq(
+      NavigationItem(content = Text("Documentation"), href = Some(s"${applicationConfig.apiDocumentationFrontendUrl}/api-documentation/docs/using-the-hub")),
+      NavigationItem(content = Text("Applications"), href = Some(s"${applicationConfig.thirdPartyDeveloperFrontendUrl}/developer/applications")),
+      NavigationItem(content = Text("Support"), href = Some(s"${applicationConfig.thirdPartyDeveloperFrontendUrl}/developer/support")),
+      NavigationItem(content = Text("Service Availability"), href = Some("https://api-platform-status.production.tax.service.gov.uk/"))
+  )
+}
+
 @govukLayout(
   pageTitle = Some(title),
   headBlock = Some(head),
   beforeContentBlock = Some(beforeContentBlock),
   bodyEndBlock = Some(bodyEndDefault),
+  mainContentLayout = None,
   headerBlock = Some(hmrcHeader(Header(
-        homepageUrl ="https://www.gov.uk",
-        serviceName = Some(messages("service.name")),
-        navigation = None,
+        homepageUrl = "https://www.gov.uk",
+        serviceName = Some(applicationConfig.title),
+        navigation = Some(navigation),
         serviceUrl = "",
         displayHmrcBanner = false,
         containerClasses = "govuk-width-container",
         signOutHref = None,
         language = En
   ))),
-  footerBlock = Some(hmrcFooter(new Footer(meta = None, language = En)))
+  footerBlock = Some(hmrcFooter(new Footer(meta = None, language = En))),
 )(mainContentDefault)
