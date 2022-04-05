@@ -68,9 +68,6 @@
   @if(timeout) {
     @hmrcTimeoutDialog(
       TimeoutDialog(
-        message = Some("FIXME"),
-        keepAliveButtonText = Some("FIXME"),
-        signOutButtonText = Some("FIXME"),
         timeout = Some(applicationConfig.sessionTimeout),
         countdown = Some(applicationConfig.sessionCountdown),
         keepAliveUrl = Some(uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.routes.SessionController.keepAlive().url),
