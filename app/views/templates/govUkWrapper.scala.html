@@ -64,9 +64,7 @@
   timeout: Boolean = true
 )(contentBlock: Html)(implicit request: Request[_], messages: Messages)
 
-@head = {
-  <link href='@routes.Assets.versioned("stylesheets/main.css")' media="screen" rel="stylesheet" type="text/css" />
-
+@timeoutBlock = {
   @if(timeout) {
     @hmrcTimeoutDialog(
       TimeoutDialog(
@@ -79,8 +77,14 @@
         signOutUrl = Some(uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.routes.UserLogoutAccount.logout().url),
         language = Some("en")
       )
-    )
+    ) 
   }
+}
+
+@head = {
+  <link href='@routes.Assets.versioned("stylesheets/main.css")' media="screen" rel="stylesheet" type="text/css" />
+
+  @timeoutBlock
 }
 
 @footerBlock = {
@@ -164,14 +168,13 @@
 @scripts = {
   <script src='@routes.Assets.versioned("lib/govuk-frontend/govuk/all.js")'></script>
   <script src='@routes.Assets.versioned("lib/hmrc-frontend/hmrc/all.js")'></script>
-  <script src='@routes.Assets.versioned("javascripts/feedback.js")' type="text/javascript"></script>
   <script>window.GOVUKFrontend.initAll();</script>
   <script>window.HMRCFrontend.initAll();</script>
+  <script src='@routes.Assets.versioned("javascripts/feedback.js")' type="text/javascript"></script>
 }
 
 @bodyEndDefault = {
   @bodyEndBlock
-  @scripts
 }
 
 @navigation = @{
@@ -186,9 +189,6 @@
 @govukLayout(
   pageTitle = Some(title),
   headBlock = Some(head),
-  beforeContentBlock = Some(beforeContentBlock),
-  bodyEndBlock = Some(bodyEndDefault),
-  mainContentLayout = None,
   headerBlock = Some(hmrcHeader(Header(
         homepageUrl = "https://www.gov.uk",
         serviceName = Some(applicationConfig.title),
@@ -199,5 +199,9 @@
         signOutHref = None,
         language = En
   ))),
+  beforeContentBlock = Some(beforeContentBlock),
+  mainContentLayout = None,
   footerBlock = Some(hmrcFooter(new Footer(meta = None, language = En))),
+  bodyEndBlock = Some(bodyEndDefault),
+  scriptsBlock = Some(scripts)
 )(mainContentDefault)
