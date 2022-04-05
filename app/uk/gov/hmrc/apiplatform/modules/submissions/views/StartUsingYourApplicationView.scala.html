@@ -1,0 +1,81 @@
+@*
+ * Copyright 2022 HM Revenue & Customs
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ *@
+
+@import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.DeveloperSession
+@import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.views.BackButtonWithJavaScript
+@import include._
+@import uk.gov.hmrc.apiplatform.modules.submissions.controllers.StartUsingYourApplicationController.ViewModel
+
+@this(devMain: DevMain2)
+
+@(model: ViewModel)(implicit request: play.api.mvc.Request[Any], loggedIn: DeveloperSession, messagesProvider: MessagesProvider, appConfig: ApplicationConfig)
+
+@title = @{ "Start using your application" }
+
+@devMain(
+    title = title,
+    userFullName = loggedIn.loggedInName,
+    back = BackButtonWithJavaScript,
+    developerSession = Some(loggedIn)
+) {
+    <h1 class="govuk-heading-l">Start using your application</h1>
+
+    <dl class="govuk-summary-list govuk-summary-list--no-border govuk-!-font-size-16 govuk-!-margin-bottom-2">
+        <div class="govuk-summary-list__row">
+            <dt class="govuk-summary-list__key govuk-!-padding-top-1 govuk-!-padding-bottom-0 govuk-!-width-one-quarter">Application</dt>
+            <dd class="govuk-summary-list__value govuk-!-padding-top-1 govuk-!-padding-bottom-0">@model.appName</dd>
+        </div>
+        <div class="govuk-summary-list__row">
+            <dt class="govuk-summary-list__key govuk-!-padding-top-1 govuk-!-padding-bottom-1 govuk-!-width-one-quarter">Environment</dt>
+            <dd class="govuk-summary-list__value govuk-!-padding-top-1 govuk-!-padding-bottom-1">Production</dd>
+        </div>
+    </dl>
+
+    <hr class="govuk-section-break govuk-section-break--s govuk-section-break--visible govuk-!-margin-bottom-6">
+
+    <p class="govuk-body">
+        Before your software will work in production, you need to:
+    </p>
+
+    <ol class="govuk-list govuk-list--bullet">
+        <li><a class="govuk-link govuk-link--no-visited-state" href="@uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.routes.Credentials.clientId(model.appId).url">get your application’s client ID</a></li>
+        <li><a class="govuk-link govuk-link--no-visited-state" href="@uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.routes.Credentials.clientSecrets(model.appId).url">generate a client secret</a></li>
+        <li><a class="govuk-link govuk-link--no-visited-state" href="@uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.routes.SubscriptionsController.manageSubscriptions(model.appId).url">configure the APIs you subscribe to</a></li>
+        <li><a class="govuk-link govuk-link--no-visited-state" href="@uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.routes.Redirects.redirects(model.appId).url">add a redirect URI</a></li>
+    </ol>
+
+    @helper.form(action = uk.gov.hmrc.apiplatform.modules.submissions.controllers.routes.StartUsingYourApplicationController.startUsingYourApplicationAction(model.appId), 'class -> "form") {
+        @helper.CSRF.formField
+        <div class="govuk-button-group">
+            <button id="submit-ok" class="govuk-button govuk-!-margin-top-3 govuk-!-margin-bottom-7" data-module="govuk-button" type="submit">I have finished</button>
+            <a class="govuk-button govuk-button--secondary" href="@uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.routes.ManageApplications.manageApps.url" role="button" draggable="false"  data-module="govuk-button">I will do this later</a>
+        </div>
+    }
+
+    <h2 class="govuk-heading-m">Managing your application</h2>
+
+    <p class="govuk-body">
+        If you need to, you can:
+    </p>
+
+    <ol class="govuk-list govuk-list--bullet">
+        <li><a class="govuk-link govuk-link--no-visited-state" href="@uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.routes.Details.details(model.appId).url">check your application details</a></li>
+        <li><a class="govuk-link govuk-link--no-visited-state" href="@uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.routes.ManageTeam.manageTeam(model.appId, None).url">add team members</a> and give others access to the application</li>
+        <li><a class="govuk-link govuk-link--no-visited-state" href="@uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.routes.IpAllowListController.viewIpAllowlist(model.appId).url">set up an IP allow list</a></li>
+        <li><a class="govuk-link govuk-link--no-visited-state" href="@uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.profile.routes.EmailPreferencesController.emailPreferencesSummaryPage.url">change your email preferences</a> and get emails about the APIs you use</li>
+    </ol>
+
+}

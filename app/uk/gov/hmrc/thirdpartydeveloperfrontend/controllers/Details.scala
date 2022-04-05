@@ -124,6 +124,11 @@ class Details @Inject() (
         OptionT(submissionService.fetchLatestSubmission(applicationId)).fold(oldJourney)(newUpliftJourney)    
       }
 
+      case State.PRE_PRODUCTION =>
+        successful(
+          Redirect(uk.gov.hmrc.apiplatform.modules.submissions.controllers.routes.StartUsingYourApplicationController.startUsingYourApplicationPage(applicationId))
+        )
+
       case State.PRODUCTION =>
         successful(
           Ok(

@@ -61,6 +61,7 @@ object SubmissionActionBuilders {
     type Type = State => Boolean
     val notProduction: Type = _ != State.PRODUCTION
     val production: Type = _ == State.PRODUCTION
+    val preProduction: Type = _ == State.PRE_PRODUCTION
     val inTesting: Type = _ == State.TESTING
     val allAllowed: Type = _ => true
     val pendingApproval: Type = s => s == State.PENDING_GATEKEEPER_APPROVAL || s == State.PENDING_REQUESTER_VERIFICATION
