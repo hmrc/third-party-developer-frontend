@@ -17,10 +17,10 @@
 package views.include
 
 import uk.gov.hmrc.thirdpartydeveloperfrontend.config.ApplicationConfig
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.views.IpAllowlistFeedbackBanner
 import org.jsoup.Jsoup
 import org.jsoup.nodes.Document
 import play.twirl.api.Html
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.views.GenericFeedbackBanner
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.WithCSRFAddToken
 import views.helper.CommonViewSpec
 import views.html.include.FeedbackBannerView
@@ -34,9 +34,9 @@ class FeedbackBannerViewSpec extends CommonViewSpec with WithCSRFAddToken {
   "Feedback banner view" should {
     "render with the link to the survey from the config" in new Setup {
       val expectedSurveyUrl = "https://example.com/survey"
-      when(appConfig.getString(IpAllowlistFeedbackBanner.surveyUrlKey)).thenReturn(expectedSurveyUrl)
+      when(appConfig.getString(GenericFeedbackBanner.surveyUrlKey)).thenReturn(expectedSurveyUrl)
 
-      val page: Html = feedbackBannerView.render(IpAllowlistFeedbackBanner, appConfig)
+      val page: Html = feedbackBannerView.render(GenericFeedbackBanner, appConfig)
 
       page.contentType should include("text/html")
       val document: Document = Jsoup.parse(page.body)

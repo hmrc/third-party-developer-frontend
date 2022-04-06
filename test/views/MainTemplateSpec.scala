@@ -16,14 +16,16 @@
 
 package views
 
+import org.jsoup.Jsoup
 import uk.gov.hmrc.thirdpartydeveloperfrontend.builder.DeveloperBuilder
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.{DeveloperSession, LoggedInState, Session}
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.views.NoBackButton
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.views.{GenericFeedbackBanner, NoBackButton}
 import play.twirl.api.{Html, HtmlFormat}
 import play.api.test.FakeRequest
 import views.helper.CommonViewSpec
 import views.html.include.Main
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.LocalUserIdTracker
+import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.ViewHelpers.elementExistsById
 
 class MainTemplateSpec extends CommonViewSpec with DeveloperBuilder with LocalUserIdTracker {
 
@@ -53,11 +55,17 @@ class MainTemplateSpec extends CommonViewSpec with DeveloperBuilder with LocalUs
         developerSession = Some(developerSession),
         mainContent = HtmlFormat.empty,
         messagesProvider = messagesProvider,
-        applicationConfig = appConfig, 
+        applicationConfig = appConfig,
         request = request,
-        feedbackBanner = None)
+        feedbackBanner = Some(GenericFeedbackBanner))
 
       view.body should include("data-title=\"Application Title")
+
+      val document = Jsoup.parse(view.body)
+
+      elementExistsById(document, "feedback") shouldBe true
+      document.getElementById("feedback-title").text() shouldBe "Your feedback helps us improve our service"
+
     }
   }
 }
