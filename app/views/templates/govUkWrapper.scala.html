@@ -198,7 +198,19 @@
   ))),
   beforeContentBlock = Some(beforeContentBlock),
   mainContentLayout = None,
-  footerBlock = Some(hmrcFooter(new Footer(meta = None, language = En))),
+  footerBlock = Some(hmrcFooter(new Footer(meta = Some(
+    Meta(
+      items = Some(
+        Seq(
+          FooterItem(text = Some("Cookies"), href = Some(s"${applicationConfig.apiDocumentationFrontendUrl}/api-documentation/docs/help/cookies")),
+          FooterItem(text = Some("Accessibility statement"), href = Some(s"${applicationConfig.thirdPartyDeveloperFrontendUrl}/accessibility-statement")),
+          FooterItem(text = Some("Privacy Policy"), href = Some(s"${applicationConfig.thirdPartyDeveloperFrontendUrl}/api-documentation/docs/help/privacy")),
+          FooterItem(text = Some("Terms and conditions"), href = Some(s"${applicationConfig.thirdPartyDeveloperFrontendUrl}/api-documentation/docs/help/terms-and-conditions")),
+          FooterItem(text = Some("Help using GOV.UK "), href = Some("https://www.gov.uk/help"))
+        )
+      )
+    )
+  ), language = En))),
   bodyEndBlock = Some(bodyEndDefault),
   scriptsBlock = Some(scripts)
 )(mainContentDefault)
