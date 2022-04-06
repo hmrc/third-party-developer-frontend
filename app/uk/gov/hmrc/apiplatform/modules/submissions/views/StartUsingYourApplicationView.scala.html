@@ -18,6 +18,7 @@
 @import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.views.BackButtonWithJavaScript
 @import include._
 @import uk.gov.hmrc.apiplatform.modules.submissions.controllers.StartUsingYourApplicationController.ViewModel
+@import views.helper.EnvironmentNameService
 
 @this(devMain: DevMain2)
 
@@ -40,20 +41,22 @@
         </div>
         <div class="govuk-summary-list__row">
             <dt class="govuk-summary-list__key govuk-!-padding-top-1 govuk-!-padding-bottom-1 govuk-!-width-one-quarter">Environment</dt>
-            <dd class="govuk-summary-list__value govuk-!-padding-top-1 govuk-!-padding-bottom-1">Production</dd>
+            <dd class="govuk-summary-list__value govuk-!-padding-top-1 govuk-!-padding-bottom-1">@appConfig.nameOfPrincipalEnvironment</dd>
         </div>
     </dl>
 
     <hr class="govuk-section-break govuk-section-break--s govuk-section-break--visible govuk-!-margin-bottom-6">
 
     <p class="govuk-body">
-        Before your software will work in production, you need to:
+        Before your software will work in @appConfig.nameOfPrincipalEnvironment.toLowerCase(), you need to:
     </p>
 
     <ol class="govuk-list govuk-list--bullet">
         <li><a class="govuk-link govuk-link--no-visited-state" href="@uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.routes.Credentials.clientId(model.appId).url">get your application’s client ID</a></li>
         <li><a class="govuk-link govuk-link--no-visited-state" href="@uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.routes.Credentials.clientSecrets(model.appId).url">generate a client secret</a></li>
-        <li><a class="govuk-link govuk-link--no-visited-state" href="@uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.routes.SubscriptionsController.manageSubscriptions(model.appId).url">configure the APIs you subscribe to</a></li>
+        @if(model.showApiConfig) {
+            <li><a class="govuk-link govuk-link--no-visited-state" href="@uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.routes.ManageSubscriptions.listApiSubscriptions(model.appId).url">configure the APIs you subscribe to</a></li>
+        }
         <li><a class="govuk-link govuk-link--no-visited-state" href="@uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.routes.Redirects.redirects(model.appId).url">add a redirect URI</a></li>
     </ol>
 

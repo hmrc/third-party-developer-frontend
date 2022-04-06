@@ -38,6 +38,9 @@ object ThirdPartyApplicationSubmissionsConnector {
 
   case class ApprovalsRequest(requestedByEmailAddress: String) 
   implicit val writesApprovalsRequest = Json.writes[ApprovalsRequest]
+
+  case class ConfirmSetupCompleteRequest(requesterEmailAddress: String)
+  implicit val writesConfirmSetupCompleteRequest = Json.writes[ConfirmSetupCompleteRequest]
 }
 
 @Singleton
@@ -99,5 +102,14 @@ class ThirdPartyApplicationSubmissionsConnector @Inject() (
         case (_, _)                                 => throw badResponse
       }
     }
+  }
+
+  def confirmSetupComplete(applicationId: ApplicationId, userEmailAddress: String)(implicit hc: HeaderCarrier): Future[Either[String, Unit]] = metrics.record(api) {
+    import cats.implicits._
+
+    val url = s"$serviceBaseUrl/application/${applicationId.value}/confirm-setup-complete"
+    val failed = (err: UpstreamErrorResponse) => s"Failed to confirm setup complete for application ${applicationId.value}"
+
+    http.POST[ConfirmSetupCompleteRequest, Either[UpstreamErrorResponse, Unit]](url, ConfirmSetupCompleteRequest(userEmailAddress)).map(_.leftMap(failed))
   }
 }

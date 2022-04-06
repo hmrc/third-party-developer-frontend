@@ -36,7 +36,7 @@ import scala.concurrent.ExecutionContext
 import scala.concurrent.Future.successful
 
 object StartUsingYourApplicationController {
-  case class ViewModel(appId: ApplicationId, appName: String)
+  case class ViewModel(appId: ApplicationId, appName: String, showApiConfig: Boolean)
 }
 
 @Singleton
@@ -57,13 +57,16 @@ class StartUsingYourApplicationController @Inject()(
      with SubmissionActionBuilders {
 
   import SubmissionActionBuilders.{ApplicationStateFilter, RoleFilter}
-
+52677.52
   def startUsingYourApplicationPage(productionAppId: ApplicationId) = withApplicationSubmission(ApplicationStateFilter.preProduction, RoleFilter.isAdminRole)(productionAppId) { implicit request =>
-    //TODO environment name, flag for showing API Subs link
-    successful(Ok(startUsingYourApplicationView(ViewModel(request.application.id, request.application.name))))
+    val showApiConfig = request.subscriptions.exists(s => s.subscribed && s.fields.fields.nonEmpty)
+    successful(Ok(startUsingYourApplicationView(ViewModel(request.application.id, request.application.name, showApiConfig))))
   }
 
   def startUsingYourApplicationAction(productionAppId: ApplicationId) = withApplicationSubmission(ApplicationStateFilter.preProduction, RoleFilter.isAdminRole)(productionAppId) { implicit request =>
-    ???
+    val userEmail = request.developerSession.developer.email
+    val failure = BadRequest(errorHandler.badRequestTemplate)
+    val success = Redirect(uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.routes.Details.details(productionAppId))
+    submissionService.confirmSetupComplete(productionAppId, userEmail).map((esu: Either[String,Unit]) => esu.fold(_ => failure, _ => success))
   }
 }
