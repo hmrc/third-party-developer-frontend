@@ -28,7 +28,7 @@ import views.html.include.FeedbackBannerView
 class FeedbackBannerViewSpec extends CommonViewSpec with WithCSRFAddToken {
   trait Setup {
     val appConfig: ApplicationConfig = mock[ApplicationConfig]
-    val feedbackBannerView: FeedbackBannerView = app.injector.instanceOf[FeedbackBannerView]
+    val feedbackBannerView: FeedbackBannerView = new FeedbackBannerView(appConfig)
   }
 
   "Feedback banner view" should {
@@ -36,7 +36,7 @@ class FeedbackBannerViewSpec extends CommonViewSpec with WithCSRFAddToken {
       val expectedSurveyUrl = "https://example.com/survey"
       when(appConfig.getString(GenericFeedbackBanner.surveyUrlKey)).thenReturn(expectedSurveyUrl)
 
-      val page: Html = feedbackBannerView.render(GenericFeedbackBanner, appConfig)
+      val page: Html = feedbackBannerView.render(GenericFeedbackBanner)
 
       page.contentType should include("text/html")
       val document: Document = Jsoup.parse(page.body)
