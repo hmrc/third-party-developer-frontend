@@ -21,10 +21,7 @@ import uk.gov.hmrc.apiplatform.modules.submissions.services.SubmissionService
 
 import scala.concurrent.Future.successful
 import uk.gov.hmrc.apiplatform.modules.submissions.domain.models._
-import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.ApplicationId
-
-import scala.concurrent.Future
 
 trait SubmissionServiceMockModule extends MockitoSugar with ArgumentMatchersSugar {
   

@@ -16,24 +16,19 @@
 
 package uk.gov.hmrc.apiplatform.modules.submissions.controllers
 
-import cats.data.OptionT
 import play.api.http.Status.{BAD_REQUEST, NOT_FOUND, OK, SEE_OTHER}
 import play.api.test.FakeRequest
 import play.api.test.Helpers.{redirectLocation, status}
 import play.filters.csrf.CSRF
 import uk.gov.hmrc.apiplatform.modules.submissions.SubmissionsTestData
-import uk.gov.hmrc.apiplatform.modules.submissions.domain.models.{ExtendedSubmission, QuestionnaireProgress}
-import uk.gov.hmrc.apiplatform.modules.submissions.domain.models.QuestionnaireState.{Completed, InProgress}
-import uk.gov.hmrc.apiplatform.modules.submissions.services.RequestProductionCredentials
 import uk.gov.hmrc.apiplatform.modules.submissions.services.mocks.SubmissionServiceMockModule
-import uk.gov.hmrc.apiplatform.modules.submissions.views.html.{CheckAnswersView, ProductionCredentialsRequestReceivedView, StartUsingYourApplicationView}
+import uk.gov.hmrc.apiplatform.modules.submissions.views.html.StartUsingYourApplicationView
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.thirdpartydeveloperfrontend.builder.{DeveloperBuilder, SampleApplication, SampleSession}
-import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.{BaseControllerSpec, SubscriptionTestHelperSugar, UserRequest}
+import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.{BaseControllerSpec, SubscriptionTestHelperSugar}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.{ApplicationId, ApplicationState}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.mocks.connectors.ApmConnectorMockModule
 import uk.gov.hmrc.thirdpartydeveloperfrontend.mocks.service.{ApplicationActionServiceMock, ApplicationServiceMock}
-import uk.gov.hmrc.thirdpartydeveloperfrontend.service.ApplicationActionService
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.{LocalUserIdTracker, WithCSRFAddToken}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.WithLoggedInSession._
 
@@ -100,7 +95,7 @@ class StartUsingYourApplicationControllerSpec extends BaseControllerSpec
   }
 
   "startUsingYourApplicationAction" should {
-    "redirects to details page when submission service called successfully" in new Setup {
+    "redirect to details page when submission service called successfully" in new Setup {
       val app = sampleApp.copy(state = ApplicationState.preProduction(loggedInDeveloper.email))
       givenApplicationAction(app, loggedInDeveloper)
       SubmissionServiceMock.ConfirmSetupComplete.thenReturnSuccessFor(app.id, loggedInDeveloper.email)
@@ -111,7 +106,7 @@ class StartUsingYourApplicationControllerSpec extends BaseControllerSpec
       redirectLocation(result) shouldBe Some(uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.routes.Details.details(app.id).url)
     }
 
-    "redirects bad request page when submission service called unsuccessfully" in new Setup {
+    "redirect to bad request page when submission service called unsuccessfully" in new Setup {
       val app = sampleApp.copy(state = ApplicationState.preProduction(loggedInDeveloper.email))
       givenApplicationAction(app, loggedInDeveloper)
       SubmissionServiceMock.ConfirmSetupComplete.thenReturnFailure()

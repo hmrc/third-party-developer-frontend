@@ -201,7 +201,5 @@ POST        /applications/:id/sell-resell-or-distribute-your-software           
 GET         /applications/:id/before-you-start                                                           uk.gov.hmrc.apiplatform.modules.uplift.controllers.UpliftJourneyController.beforeYouStart(id: ApplicationId)
 GET         /applications/:id/we-will-check-your-answers                                                 uk.gov.hmrc.apiplatform.modules.uplift.controllers.UpliftJourneyController.weWillCheckYourAnswers(id: ApplicationId)
 
-GET         /applications/:id/start-using-your-application                                               uk.gov.hmrc.apiplatform.modules.uplift.controllers.UpliftJourneyController.weWillCheckYourAnswers(id: ApplicationId)
-
 ->         /govuk-frontend       govuk.Routes
 ->         /hmrc-frontend        hmrcfrontend.Routes
