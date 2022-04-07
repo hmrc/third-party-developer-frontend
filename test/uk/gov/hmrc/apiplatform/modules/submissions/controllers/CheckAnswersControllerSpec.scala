@@ -113,7 +113,7 @@ class CheckAnswersControllerSpec
     val underTest = new CheckAnswersController(
       mockErrorHandler,
       sessionServiceMock,
-      applicationActionServiceMock, 
+      applicationActionServiceMock,
       applicationServiceMock,
       mcc,
       cookieSigner,

@@ -147,7 +147,10 @@ trait BaseApplication {
     case _           => false
   }
 
-  def hasLockedSubscriptions = deployedTo.isProduction && state.name != State.TESTING
+  def isInTesting = state.isInTesting
+  def isPendingApproval = state.isPendingApproval
+  def isApproved = state.isApproved
+  def hasLockedSubscriptions = deployedTo.isProduction && ! isInTesting
 
   def findCollaboratorByHash(teamMemberHash: String): Option[Collaborator] = {
     collaborators.find(c => c.emailAddress.toSha256 == teamMemberHash)

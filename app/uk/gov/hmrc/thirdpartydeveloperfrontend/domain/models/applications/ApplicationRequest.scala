@@ -69,7 +69,7 @@ object UpdateApplicationRequest extends ApplicationRequest {
   implicit val format = Json.format[UpdateApplicationRequest]
 
   def from(form: EditApplicationForm, application: Application) = {
-    val name = if (application.state.name == State.TESTING || application.deployedTo.isSandbox) {
+    val name = if (application.isInTesting || application.deployedTo.isSandbox) {
       form.applicationName.trim
     } else {
       application.name

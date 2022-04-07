@@ -19,7 +19,10 @@ package uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications
 import enumeratum.{EnumEntry, PlayEnum}
 
 sealed trait State extends EnumEntry{
-  def isApproved: Boolean = this == State.PRE_PRODUCTION || this == State.PRODUCTION
+  def isPreProduction: Boolean = this == State.PRE_PRODUCTION
+  def isProduction: Boolean = this == State.PRODUCTION
+
+  def isApproved: Boolean = isPreProduction || isProduction
 
   def isPendingApproval: Boolean = (this == State.PENDING_REQUESTER_VERIFICATION
                           || this == State.PENDING_GATEKEEPER_APPROVAL)

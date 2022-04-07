@@ -50,10 +50,7 @@
 )
 
 @isPendingOrActiveProductionApplication(application: Application) = @{
-    application.deployedTo.isProduction && (
-        application.state.name == State.PENDING_GATEKEEPER_APPROVAL ||
-        application.state.name == State.PENDING_REQUESTER_VERIFICATION ||
-        application.state.name == State.PRODUCTION)
+    application.deployedTo.isProduction && !application.isInTesting
 }
 
 @pageHeading = @{"Which APIs do you want to use?"}

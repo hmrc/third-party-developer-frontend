@@ -20,11 +20,15 @@ import org.joda.time.DateTime
 import uk.gov.hmrc.time.DateTimeUtils
 
 case class ApplicationState(
-                             name: State,
-                             requestedByEmailAddress: Option[String],
-                             verificationCode: Option[String] = None,
-                             updatedOn: DateTime = DateTimeUtils.now
-                           )
+ name: State,
+ requestedByEmailAddress: Option[String],
+ verificationCode: Option[String] = None,
+ updatedOn: DateTime = DateTimeUtils.now
+) {
+  def isInTesting = name.isInTesting
+  def isPendingApproval = name.isPendingApproval
+  def isApproved = name.isApproved
+}
 
 object ApplicationState {
   import play.api.libs.json.Json
@@ -40,6 +44,9 @@ object ApplicationState {
 
   def pendingRequesterVerification(requestedBy: String, verificationCode: String) =
     ApplicationState(State.PENDING_REQUESTER_VERIFICATION, Some(requestedBy), Some(verificationCode))
+
+  def preProduction(requestedBy: String) =
+    ApplicationState(State.PRE_PRODUCTION, Some(requestedBy), None)
 
   def production(requestedBy: String, verificationCode: String) =
     ApplicationState(State.PRODUCTION, Some(requestedBy), Some(verificationCode))

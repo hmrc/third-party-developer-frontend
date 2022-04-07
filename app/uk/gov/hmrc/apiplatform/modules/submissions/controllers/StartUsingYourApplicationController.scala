@@ -17,18 +17,18 @@
 package uk.gov.hmrc.apiplatform.modules.submissions.controllers
 
 import play.api.libs.crypto.CookieSigner
-import play.api.mvc.{MessagesControllerComponents, Result}
+import play.api.mvc.MessagesControllerComponents
 import uk.gov.hmrc.apiplatform.modules.common.services.EitherTHelper
 import uk.gov.hmrc.apiplatform.modules.submissions.controllers.StartUsingYourApplicationController.ViewModel
-import uk.gov.hmrc.apiplatform.modules.submissions.domain.models._
-import uk.gov.hmrc.apiplatform.modules.submissions.services.{RequestProductionCredentials, SubmissionService}
+import uk.gov.hmrc.apiplatform.modules.submissions.services.SubmissionService
 import uk.gov.hmrc.apiplatform.modules.submissions.views.html._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.config.{ApplicationConfig, ErrorHandler}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.connectors.ApmConnector
 import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.ApplicationController
 import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.checkpages.CanUseCheckActions
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.Capabilities.SupportsSubscriptions
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.ApplicationId
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.controllers.BadRequestWithErrorMessage
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.Permissions.AdministratorOnly
 import uk.gov.hmrc.thirdpartydeveloperfrontend.service.{ApplicationActionService, ApplicationService, SessionService}
 
 import javax.inject.{Inject, Singleton}
@@ -56,14 +56,11 @@ class StartUsingYourApplicationController @Inject()(
      with EitherTHelper[String]
      with SubmissionActionBuilders {
 
-  import SubmissionActionBuilders.{ApplicationStateFilter, RoleFilter}
-52677.52
-  def startUsingYourApplicationPage(productionAppId: ApplicationId) = withApplicationSubmission(ApplicationStateFilter.preProduction, RoleFilter.isAdminRole)(productionAppId) { implicit request =>
-    val showApiConfig = request.subscriptions.exists(s => s.subscribed && s.fields.fields.nonEmpty)
-    successful(Ok(startUsingYourApplicationView(ViewModel(request.application.id, request.application.name, showApiConfig))))
+  def startUsingYourApplicationPage(productionAppId: ApplicationId) = checkActionForPreProduction(SupportsSubscriptions, AdministratorOnly)(productionAppId) { implicit request =>
+    successful(Ok(startUsingYourApplicationView(ViewModel(productionAppId, request.application.name, request.hasSubscriptionFields))))
   }
 
-  def startUsingYourApplicationAction(productionAppId: ApplicationId) = withApplicationSubmission(ApplicationStateFilter.preProduction, RoleFilter.isAdminRole)(productionAppId) { implicit request =>
+  def startUsingYourApplicationAction(productionAppId: ApplicationId) = checkActionForPreProduction(SupportsSubscriptions, AdministratorOnly)(productionAppId) { implicit request =>
     val userEmail = request.developerSession.developer.email
     val failure = BadRequest(errorHandler.badRequestTemplate)
     val success = Redirect(uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.routes.Details.details(productionAppId))

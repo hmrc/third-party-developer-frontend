@@ -85,7 +85,17 @@ class Details @Inject() (
   def details(applicationId: ApplicationId): Action[AnyContent] = whenTeamMemberOnApp(applicationId) { implicit request =>
     val accessLevel = DevhubAccessLevel.fromRole(request.role)
     val checkYourAnswersData = CheckYourAnswersData(accessLevel, request.application, request.subscriptions)
-
+    def appDetailsPage = Ok(
+      detailsView(
+        applicationViewModelFromApplicationRequest,
+        buildTermsOfUseViewModel,
+        createOptionalFraudPreventionNavLinkViewModel(
+          request.application,
+          request.subscriptions,
+          fraudPreventionConfig
+        )
+      )
+    )
 
     request.application.state.name match {
       case State.TESTING =>
@@ -125,24 +135,13 @@ class Details @Inject() (
       }
 
       case State.PRE_PRODUCTION =>
-        successful(
-          Redirect(uk.gov.hmrc.apiplatform.modules.submissions.controllers.routes.StartUsingYourApplicationController.startUsingYourApplicationPage(applicationId))
-        )
+        successful(request.queryString.contains("forceAppDetails") match {
+          case true => appDetailsPage
+          case false => Redirect(uk.gov.hmrc.apiplatform.modules.submissions.controllers.routes.StartUsingYourApplicationController.startUsingYourApplicationPage(applicationId))
+        })
 
       case State.PRODUCTION =>
-        successful(
-          Ok(
-            detailsView(
-              applicationViewModelFromApplicationRequest,
-              buildTermsOfUseViewModel,
-              createOptionalFraudPreventionNavLinkViewModel(
-                request.application,
-                request.subscriptions,
-                fraudPreventionConfig
-              )
-            )
-          )
-        )
+        successful(appDetailsPage)
     }
   }
 
