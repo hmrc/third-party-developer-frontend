@@ -21,18 +21,21 @@ import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.BaseController
 import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.ApplicationActionBuilders
 import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.HasApplication
 import uk.gov.hmrc.apiplatform.modules.submissions.domain.models._
+
 import scala.concurrent.ExecutionContext
 import play.api.mvc.ActionRefiner
+
 import scala.concurrent.Future
 import play.api.mvc._
 import uk.gov.hmrc.apiplatform.modules.common.services.EitherTHelper
-
 import cats.implicits._
 import cats.instances.future.catsStdInstancesForFuture
+import uk.gov.hmrc.apiplatform.modules.submissions.domain.models.Submission.Status
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.Application
 import uk.gov.hmrc.apiplatform.modules.submissions.services.SubmissionService
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.ApplicationId
 import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.ApplicationRequest
+
 import scala.concurrent.Future.successful
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.State
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.CollaboratorRole
@@ -54,19 +57,28 @@ object SubmissionActionBuilders {
   }
 
   
-  object StateFilter {
+  object ApplicationStateFilter {
     type Type = State => Boolean
     val notProduction: Type = _ != State.PRODUCTION
+    val production: Type = _ == State.PRODUCTION
     val inTesting: Type = _ == State.TESTING
     val allAllowed: Type = _ => true
     val pendingApproval: Type = s => s == State.PENDING_GATEKEEPER_APPROVAL || s == State.PENDING_REQUESTER_VERIFICATION
   }
 
+  object SubmissionStatusFilter {
+    type Type = Status => Boolean
+    val answeredCompletely: Type = _.isAnsweredCompletely
+    val submitted: Type = _.isSubmitted
+    val submittedGrantedOrDeclined: Type = status => status.isSubmitted || status.isGranted || status.isGrantedWithWarnings || status.isDeclined
+    val granted: Type = status => status.isGranted || status.isGrantedWithWarnings
+    val allAllowed: Type = _ => true
+  }
 }
 trait SubmissionActionBuilders {
   self: BaseController with ApplicationActionBuilders =>
 
-  import SubmissionActionBuilders._
+  import SubmissionActionBuilders.{SubmissionStatusFilter,ApplicationStateFilter,RoleFilter}
 
   val submissionService: SubmissionService
   
@@ -138,20 +150,20 @@ trait SubmissionActionBuilders {
       }
     }
 
-  private def answeredSubmissionFilter[SR[_] <: SubmissionRequest[_]](redirectOnIncomplete: => Result): ActionFilter[SR] = 
+  private def submissionFilter[SR[_] <: SubmissionRequest[_]](submissionStatusFilter: SubmissionStatusFilter.Type)(redirectOnIncomplete: => Result): ActionFilter[SR] =
     new ActionFilter[SR] {
 
       override protected def executionContext: ExecutionContext = ec
 
       override protected def filter[A](request: SR[A]): Future[Option[Result]] =
-        if(request.extSubmission.submission.status.isAnsweredCompletely) {
+        if (submissionStatusFilter(request.extSubmission.submission.status)) {
           successful(None)
         } else {
           successful(Some(redirectOnIncomplete))
         }
     }
-   
-  private def applicationStateFilter[AR[_] <: MessagesRequest[_] with HasApplication](allowedStateFilter: State => Boolean): ActionFilter[AR] = 
+
+  private def applicationStateFilter[AR[_] <: MessagesRequest[_] with HasApplication](allowedStateFilter: State => Boolean): ActionFilter[AR] =
     new ActionFilter[AR] {
 
       override protected def executionContext: ExecutionContext = ec
@@ -174,7 +186,7 @@ trait SubmissionActionBuilders {
     }
   }
 
-  def withApplicationSubmission(allowedStateFilter: StateFilter.Type = StateFilter.allAllowed, allowedRoleFilter: RoleFilter.Type = RoleFilter.isTeamMember)(applicationId: ApplicationId)(block: SubmissionApplicationRequest[AnyContent] => Future[Result])(implicit ec: ExecutionContext): Action[AnyContent] = {
+  def withApplicationSubmission(allowedStateFilter: ApplicationStateFilter.Type = ApplicationStateFilter.allAllowed, allowedRoleFilter: RoleFilter.Type = RoleFilter.isTeamMember)(applicationId: ApplicationId)(block: SubmissionApplicationRequest[AnyContent] => Future[Result])(implicit ec: ExecutionContext): Action[AnyContent] = {
     Action.async { implicit request =>
       (
         loggedInActionRefiner() andThen
@@ -186,29 +198,16 @@ trait SubmissionActionBuilders {
     }
   }
 
-  def withApplicationAndAnsweredSubmission(allowedStateFilter: StateFilter.Type = StateFilter.allAllowed, allowedRoleFilter: RoleFilter.Type = RoleFilter.isTeamMember)(redirectOnIncomplete: => Result)(applicationId: ApplicationId)(block: SubmissionApplicationRequest[AnyContent] => Future[Result])(implicit ec: ExecutionContext): Action[AnyContent] = {
+  def withApplicationAndSubmissionInSpecifiedState(allowedStateFilter: ApplicationStateFilter.Type = ApplicationStateFilter.allAllowed, allowedRoleFilter: RoleFilter.Type = RoleFilter.isTeamMember, submissionStatusFilter: SubmissionStatusFilter.Type = SubmissionStatusFilter.allAllowed)(redirectOnNotMatched: => Result)(applicationId: ApplicationId)(block: SubmissionApplicationRequest[AnyContent] => Future[Result])(implicit ec: ExecutionContext): Action[AnyContent] = {
     Action.async { implicit request =>
       (
         loggedInActionRefiner() andThen
-        applicationRequestRefiner(applicationId) andThen
-        collaboratorFilter(allowedRoleFilter) andThen
-        applicationSubmissionRefiner andThen
-        applicationStateFilter(allowedStateFilter) andThen
-        answeredSubmissionFilter(redirectOnIncomplete)
-      ).invokeBlock(request, block)
-    }
-  }
-
-  
-  def withApplicationAndSubmittedSubmission(allowedStateFilter: StateFilter.Type = StateFilter.allAllowed, allowedRoleFilter: RoleFilter.Type = RoleFilter.isTeamMember)(redirectOnIncomplete: => Result)(applicationId: ApplicationId)(block: SubmissionApplicationRequest[AnyContent] => Future[Result])(implicit ec: ExecutionContext): Action[AnyContent] = {
-    Action.async { implicit request =>
-      (
-        loggedInActionRefiner() andThen
-        applicationRequestRefiner(applicationId) andThen
-        collaboratorFilter(allowedRoleFilter) andThen
-        applicationSubmissionRefiner andThen
-        applicationStateFilter(allowedStateFilter)
-      ).invokeBlock(request, block)
+          applicationRequestRefiner(applicationId) andThen
+          collaboratorFilter(allowedRoleFilter) andThen
+          applicationSubmissionRefiner andThen
+          applicationStateFilter(allowedStateFilter) andThen
+          submissionFilter[SubmissionApplicationRequest](submissionStatusFilter)(redirectOnNotMatched)
+        ).invokeBlock(request, block)
     }
   }
 }

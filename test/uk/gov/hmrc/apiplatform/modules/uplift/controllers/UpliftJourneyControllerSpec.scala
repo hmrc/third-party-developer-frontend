@@ -71,6 +71,8 @@ class UpliftJourneyControllerSpec extends BaseControllerSpec
     val confirmApisView = app.injector.instanceOf[ConfirmApisView]
     val turnOffApisMasterView = app.injector.instanceOf[TurnOffApisMasterView]
     val sellResellOrDistributeSoftwareView = app.injector.instanceOf[SellResellOrDistributeSoftwareView]
+    val weWillCheckYourAnswersView = app.injector.instanceOf[WeWillCheckYourAnswersView]
+    val beforeYouStartView = app.injector.instanceOf[BeforeYouStartView]
 
     val mockUpliftJourneyConfig = mock[UpliftJourneyConfig]
     val sr20UpliftJourneySwitchMock = new UpliftJourneySwitch(mockUpliftJourneyConfig)
@@ -88,6 +90,8 @@ class UpliftJourneyControllerSpec extends BaseControllerSpec
       ApmConnectorMock.aMock,
       GPCFlowServiceMock.aMock,
       sellResellOrDistributeSoftwareView,
+      weWillCheckYourAnswersView,
+      beforeYouStartView,
       sr20UpliftJourneySwitchMock
     )
 
@@ -311,10 +315,10 @@ class UpliftJourneyControllerSpec extends BaseControllerSpec
 
       status(result) shouldBe BAD_REQUEST
 
-      titleOf(result) shouldBe "Error: Will you sell, resell or distribute your software? - HMRC Developer Hub - GOV.UK"
+      titleOf(result) shouldBe "Will you sell, resell or distribute your software? - HMRC Developer Hub - GOV.UK"
 
       contentAsString(result) should include("Will you sell, resell or distribute your software?")
-      contentAsString(result) should include("Tell us if you will sell, resell or distribute your software")
+      contentAsString(result) should include("Select yes if you sell, resell or distribute your software")
     }
 
     "store the answer 'Yes' from the 'sell resell or distribute your software view' and redirect to next page" in new Setup {
@@ -345,6 +349,32 @@ class UpliftJourneyControllerSpec extends BaseControllerSpec
 
       status(result) shouldBe SEE_OTHER
       redirectLocation(result) shouldBe Some("/developer/applications/myAppId/confirm-subscriptions")
+    }
+  }
+
+  "weWillCheckYourAnswers" should {
+
+    "render the 'we will check your answers' page" in new Setup {
+      private val result = controller.weWillCheckYourAnswers(appId)(loggedInRequest.withCSRFToken)
+
+      status(result) shouldBe OK
+
+      titleOf(result) shouldBe "We will check your answers - HMRC Developer Hub - GOV.UK"
+
+      contentAsString(result) should include("We will check your answers")
+    }
+  }
+
+  "beforeYouStart" should {
+
+    "render the 'before you start' page" in new Setup {
+      private val result = controller.beforeYouStart(appId)(loggedInRequest.withCSRFToken)
+
+      status(result) shouldBe OK
+
+      titleOf(result) shouldBe "Before you start - HMRC Developer Hub - GOV.UK"
+
+      contentAsString(result) should include("Before you start")
     }
   }
 }

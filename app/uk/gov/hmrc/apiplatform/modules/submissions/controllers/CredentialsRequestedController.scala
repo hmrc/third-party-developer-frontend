@@ -32,6 +32,7 @@ import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.ApplicationController
 import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.checkpages.CanUseCheckActions
 import uk.gov.hmrc.apiplatform.modules.submissions.services.SubmissionService
 import uk.gov.hmrc.apiplatform.modules.common.services.EitherTHelper
+import uk.gov.hmrc.apiplatform.modules.submissions.controllers.SubmissionActionBuilders.SubmissionStatusFilter
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.controllers.BadRequestWithErrorMessage
 import uk.gov.hmrc.apiplatform.modules.submissions.controllers.models.AnswersViewModel._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.apidefinitions.APISubscriptionStatus
@@ -68,7 +69,7 @@ class CredentialsRequestedController @Inject() (
      with SubmissionActionBuilders {
 
 
-  import SubmissionActionBuilders.{StateFilter,RoleFilter}
+  import SubmissionActionBuilders.{ApplicationStateFilter,RoleFilter}
   import cats.implicits._
   import cats.instances.future.catsStdInstancesForFuture
   import CredentialsRequestedController.CredentialsRequestedViewModel
@@ -76,7 +77,7 @@ class CredentialsRequestedController @Inject() (
   val redirectToGetProdCreds = (applicationId: ApplicationId) => Redirect(routes.ProdCredsChecklistController.productionCredentialsChecklistPage(applicationId))
 
    /*, Read/Write and State details */ 
-  def credentialsRequestedPage(productionAppId: ApplicationId) = withApplicationAndSubmittedSubmission(StateFilter.pendingApproval, RoleFilter.isTeamMember)(redirectToGetProdCreds(productionAppId))(productionAppId) { implicit request =>
+  def credentialsRequestedPage(productionAppId: ApplicationId) = withApplicationAndSubmissionInSpecifiedState(ApplicationStateFilter.pendingApproval, RoleFilter.isTeamMember, SubmissionStatusFilter.submittedGrantedOrDeclined)(redirectToGetProdCreds(productionAppId))(productionAppId) { implicit request =>
     val failed = (err: String) => BadRequestWithErrorMessage(err)
     
     val success = (viewModel: CredentialsRequestedViewModel) => {

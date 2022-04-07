@@ -31,8 +31,9 @@ object AppDependencies {
     "com.google.zxing"            %  "core"                           % "3.2.1",
     "org.typelevel"               %% "cats-core"                      % "2.6.1",
     "com.typesafe.play"           %% "play-json"                      % "2.9.2",
-    "com.typesafe.play"           %% "play-json-joda"                 % "2.9.2"
-  )
+    "com.typesafe.play"           %% "play-json-joda"                 % "2.9.2",
+    "commons-validator"           %  "commons-validator"              % "1.7"
+   )
 
   lazy val test =  Seq(
     "uk.gov.hmrc"                 %% "bootstrap-test-play-28"         % "5.16.0",

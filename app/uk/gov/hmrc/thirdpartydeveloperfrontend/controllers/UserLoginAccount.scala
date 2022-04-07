@@ -24,6 +24,7 @@ import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.Develope
 import javax.inject.{Inject, Singleton}
 import play.api.libs.crypto.CookieSigner
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents, Request, Result, Session => PlaySession}
+import uk.gov.hmrc.apiplatform.modules.common.services.ApplicationLogger
 import uk.gov.hmrc.thirdpartydeveloperfrontend.service._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.service.AuditAction._
 import uk.gov.hmrc.http.HeaderCarrier
@@ -68,7 +69,7 @@ class UserLoginAccount @Inject()(val auditService: AuditService,
                                  add2SVView: Add2SVView
                                 )
                                 (implicit val ec: ExecutionContext, val appConfig: ApplicationConfig)
-  extends LoggedOutController(mcc) with Auditing {
+  extends LoggedOutController(mcc) with Auditing with ApplicationLogger {
 
   import play.api.data._
 
@@ -149,15 +150,19 @@ class UserLoginAccount @Inject()(val auditService: AuditService,
         } yield response
       } recover {
         case _: InvalidEmail =>
+          logger.warn("Login failed due to invalid Email")
           audit(LoginFailedDueToInvalidEmail, Map("developerEmail" -> login.emailaddress))
           Unauthorized(signInView("Sign in", LoginForm.invalidCredentials(requestForm, login.emailaddress)))
         case _: InvalidCredentials =>
+          logger.warn("Login failed due to invalid credentials")
           audit(LoginFailedDueToInvalidPassword, Map("developerEmail" -> login.emailaddress))
           Unauthorized(signInView("Sign in", LoginForm.invalidCredentials(requestForm, login.emailaddress)))
         case _: LockedAccount =>
+          logger.warn("Login failed account locked")
           audit(LoginFailedDueToLockedAccount, Map("developerEmail" -> login.emailaddress))
           Locked(accountLockedView())
         case _: UnverifiedAccount =>
+          logger.warn("Login failed unverified account")
           Forbidden(signInView("Sign in", LoginForm.accountUnverified(requestForm, login.emailaddress)))
             .withSession("email" -> login.emailaddress)
       }
@@ -178,6 +183,7 @@ class UserLoginAccount @Inject()(val auditService: AuditService,
           loginSucceeded(request).map(r => withSessionCookie(r, session.sessionId))
         } recover {
           case _: InvalidCredentials =>
+            logger.warn("Login failed due to invalid access code")
             audit(LoginFailedDueToInvalidAccessCode, Map("developerEmail" -> email))
             Unauthorized(logInAccessCodeView(ProtectAccountForm.form.fill(validForm).withError("accessCode", "You have entered an incorrect access code")))
         }

@@ -82,7 +82,6 @@ class ThirdPartyApplicationSubmissionsConnector @Inject() (
       http.GET[Option[ExtendedSubmission]](s"$serviceBaseUrl/submissions/${id.value}")
     }
   }
-
   
   def requestApproval(applicationId: ApplicationId, requestedByEmailAddress: String)(implicit hc: HeaderCarrier): Future[Either[ErrorDetails, Application]] = metrics.record(api) {
     import play.api.http.Status._

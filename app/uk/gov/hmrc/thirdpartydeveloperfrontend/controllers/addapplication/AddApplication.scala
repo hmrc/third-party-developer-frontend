@@ -103,7 +103,7 @@ class AddApplication @Inject() (
 
   def progressOnUpliftJourney(sandboxAppId: ApplicationId): Action[AnyContent] = loggedInAction { implicit request =>
     upliftJourneySwitch.performSwitch(
-      successful(Ok(beforeYouStartView(sandboxAppId))),        // new uplift path
+      successful(Redirect(uk.gov.hmrc.apiplatform.modules.uplift.controllers.routes.UpliftJourneyController.beforeYouStart(sandboxAppId))),        // new uplift path
       showConfirmSubscriptionsPage(sandboxAppId)(request)      // existing uplift path
     )
   }
@@ -162,10 +162,19 @@ class AddApplication @Inject() (
       ( upliftData.upliftableApplicationIds.size, upliftData.hasAppsThatCannotBeUplifted) match {
           case (0, _)     => successful(BadRequest(Json.toJson(BadRequestError)))
           case (1, false) => successful(BadRequest(Json.toJson(BadRequestError)))
-          case _  => successful(BadRequest(chooseApplicationToUpliftView(formWithErrors, upliftData.upliftableSummaries.toSeq, upliftData.hasAppsThatCannotBeUplifted)))
+          case _  => successful(
+            BadRequest(
+              chooseApplicationToUpliftView(
+                formWithErrors,
+                upliftData.upliftableSummaries.toSeq,
+                upliftData.hasAppsThatCannotBeUplifted
+              )
+            )
+          )
         }
       }
     }      
+
     ChooseApplicationToUpliftForm.form.bindFromRequest().fold(handleInvalidForm, handleValidForm)
   }
 

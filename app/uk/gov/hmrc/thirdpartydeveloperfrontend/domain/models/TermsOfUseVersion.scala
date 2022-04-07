@@ -21,30 +21,30 @@ import uk.gov.hmrc.thirdpartydeveloperfrontend.config.ApplicationConfig
 
 object TermsOfUseVersion {
   def fromVersionString(version: String): Option[TermsOfUseVersion] = version match {
-    case "1.0" => Some(V1_2) // some older apps in QA agreed to this version of the ToU
-    case "1.1" => Some(V1_2) // some older apps in QA agreed to this version of the ToU
-    case "1.2" => Some(V1_2)
-    case "2.0" => Some(V2_0)
+    case "1.0" => Some(OLD_JOURNEY) // some older apps in QA agreed to this version of the ToU
+    case "1.1" => Some(OLD_JOURNEY) // some older apps in QA agreed to this version of the ToU
+    case "1.2" => Some(OLD_JOURNEY)
+    case "2.0" => Some(NEW_JOURNEY)
     case _ => None
   }
 
-  case object V1_2 extends TermsOfUseVersion
-  case object V2_0 extends TermsOfUseVersion
+  case object OLD_JOURNEY extends TermsOfUseVersion
+  case object NEW_JOURNEY extends TermsOfUseVersion
 
-  val latest = V2_0
+  val latest = NEW_JOURNEY
 }
 
 sealed abstract class TermsOfUseVersion  {
   import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.TermsOfUseVersion._
 
   def getTermsOfUseAsHtml()(implicit applicationConfig: ApplicationConfig) = this match {
-    case V1_2 => partials.termsOfUse_v12()
-    case V2_0 => partials.termsOfUse_v20()
+    case OLD_JOURNEY => partials.termsOfUse_v12()
+    case NEW_JOURNEY => partials.termsOfUse_v20()
   }
 
   override def toString: String = this match {
-    case V1_2 => "1.2"
-    case V2_0 => "2.0"
+    case OLD_JOURNEY => "1.2"
+    case NEW_JOURNEY => "2.0"
   }
 }
 

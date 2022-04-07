@@ -14,7 +14,7 @@
  * limitations under the License.
  *@
 
-@import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.views.{BackButtonWithJavaScript, IpAllowlistFeedbackBanner}
+@import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.views.BackButtonWithJavaScript
 @import include._
 @import views.html.include.DevMain
 @import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.CollaboratorRole
@@ -32,8 +32,7 @@ implicit request: play.api.mvc.Request[Any], loggedIn: DeveloperSession, message
   title = "IP allow list",
   userFullName = loggedIn.loggedInName,
   back = BackButtonWithJavaScript,
-  developerSession = Some(loggedIn),
-  feedbackBanner = Some(IpAllowlistFeedbackBanner)
+  developerSession = Some(loggedIn)
 ) {
   <div class="ip-allowlist">
     <h1 class="govuk-heading-l">IP allow list</h1>

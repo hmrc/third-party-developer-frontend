@@ -22,93 +22,79 @@ import uk.gov.hmrc.apiplatform.modules.uplift.controllers.UpliftJourneySwitch
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.thirdpartydeveloperfrontend.builder.ApplicationBuilder
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.TermsOfUseVersion
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.{CheckInformation, TermsOfUseAgreement}
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.services.TermsOfUseService.TermsOfUseAgreementDetails
+import uk.gov.hmrc.thirdpartydeveloperfrontend.mocks.service.TermsOfUseServiceMock
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.{HmrcSpec, LocalUserIdTracker}
 
 class TermsOfUseVersionServiceSpec extends HmrcSpec with ApplicationBuilder with LocalUserIdTracker{
-  trait Setup {
+  trait Setup extends TermsOfUseServiceMock {
     implicit val hc: HeaderCarrier = HeaderCarrier()
 
     val upliftJourneySwitch = mock[UpliftJourneySwitch]
     val request = FakeRequest()
     val email = "test@example.com"
-    val underTest = new TermsOfUseVersionService(upliftJourneySwitch)
+    val application = buildApplication(email)
+    val underTest = new TermsOfUseVersionService(upliftJourneySwitch, termsOfUseServiceMock)
 
     def givenUpliftJourneySwitchIsOff = when(upliftJourneySwitch.shouldUseV2(*)).thenReturn(false)
     def givenUpliftJourneySwitchIsOn = when(upliftJourneySwitch.shouldUseV2(*)).thenReturn(true)
   }
 
   "getLatest" should {
-    "return v1.2 if uplift journey switch is off" in new Setup {
+    "return OLD_JOURNEY if uplift journey switch is off" in new Setup {
       givenUpliftJourneySwitchIsOff
       val result = underTest.getLatest()(request)
-      result shouldBe TermsOfUseVersion.V1_2
+      result shouldBe TermsOfUseVersion.OLD_JOURNEY
     }
-    "return v2.0 if uplift journey switch is on" in new Setup {
+    "return NEW_JOURNEY if uplift journey switch is on" in new Setup {
       givenUpliftJourneySwitchIsOn
       val result = underTest.getLatest()(request)
-      result shouldBe TermsOfUseVersion.V2_0
+      result shouldBe TermsOfUseVersion.NEW_JOURNEY
     }
   }
 
   "getForApplication" should {
-    "return latest ToU version if uplift journey switch is on and application has no CheckInformation" in new Setup {
+    "return latest ToU version if uplift journey switch is on and no ToU agreements found" in new Setup {
       givenUpliftJourneySwitchIsOn
-      val application = buildApplication(email).copy(checkInformation = None)
+      returnAgreementDetails()
 
       val result = underTest.getForApplication(application)(request)
 
       result shouldBe TermsOfUseVersion.latest
     }
-    "return ToU version 1.2 if uplift journey switch is off and application has no CheckInformation" in new Setup {
+    "return ToU version OLD_JOURNEY if uplift journey switch is off and application has no CheckInformation" in new Setup {
       givenUpliftJourneySwitchIsOff
-      val application = buildApplication(email).copy(checkInformation = None)
+      returnAgreementDetails()
 
       val result = underTest.getForApplication(application)(request)
 
-      result shouldBe TermsOfUseVersion.V1_2
+      result shouldBe TermsOfUseVersion.OLD_JOURNEY
     }
-    "return latest ToU version if uplift journey switch is on and application has no TermsOfUseAgreements in CheckInformation" in new Setup {
+    "return ToU version OLD_JOURNEY if uplift journey switch is off and application has unrecognised version value" in new Setup {
+      givenUpliftJourneySwitchIsOff
+      returnAgreementDetails(TermsOfUseAgreementDetails(email, None, DateTime.now, Some("bad.version")))
+
+      val result = underTest.getForApplication(application)(request)
+
+      result shouldBe TermsOfUseVersion.OLD_JOURNEY
+    }
+    "return ToU version NEW_JOURNEY if uplift journey switch is on and application has unrecognised version value in CheckInformation" in new Setup {
       givenUpliftJourneySwitchIsOn
-      val application = buildApplication(email).copy(checkInformation = Some(CheckInformation(termsOfUseAgreements = List.empty)))
+      returnAgreementDetails(TermsOfUseAgreementDetails(email, None, DateTime.now, Some("bad.version")))
 
       val result = underTest.getForApplication(application)(request)
 
-      result shouldBe TermsOfUseVersion.latest
-    }
-    "return ToU version v1.2 if uplift journey switch is off and application has no TermsOfUseAgreements in CheckInformation" in new Setup {
-      givenUpliftJourneySwitchIsOff
-      val application = buildApplication(email).copy(checkInformation = Some(CheckInformation(termsOfUseAgreements = List.empty)))
-
-      val result = underTest.getForApplication(application)(request)
-
-      result shouldBe TermsOfUseVersion.V1_2
-    }
-    "return latest ToU version if uplift journey switch is on and application has unrecognised version value in CheckInformation" in new Setup {
-      givenUpliftJourneySwitchIsOff
-      val application = buildApplication(email).copy(checkInformation = Some(CheckInformation(termsOfUseAgreements = List(TermsOfUseAgreement(email, DateTime.now(), "bad.version")))))
-
-      val result = underTest.getForApplication(application)(request)
-
-      result shouldBe TermsOfUseVersion.V1_2
-    }
-    "return ToU version v1.2 if uplift journey switch is off and application has unrecognised version value in CheckInformation" in new Setup {
-      givenUpliftJourneySwitchIsOn
-      val application = buildApplication(email).copy(checkInformation = Some(CheckInformation(termsOfUseAgreements = List(TermsOfUseAgreement(email, DateTime.now(), "bad.version")))))
-
-      val result = underTest.getForApplication(application)(request)
-
-      result shouldBe TermsOfUseVersion.latest
+      result shouldBe TermsOfUseVersion.NEW_JOURNEY
     }
 
     "return correct ToU version if valid value is present in CheckInformation" in new Setup {
-      val application = buildApplication(email).copy(checkInformation = Some(CheckInformation(termsOfUseAgreements = List(
-        TermsOfUseAgreement(email, DateTime.now(), "1.0"),
-        TermsOfUseAgreement(email, DateTime.now(), "1.1"),
-        TermsOfUseAgreement(email, DateTime.now(), "2.0")
-      ))))
+      returnAgreementDetails(
+        TermsOfUseAgreementDetails(email, None, DateTime.now, Some("1.0")),
+        TermsOfUseAgreementDetails(email, None, DateTime.now, Some("1.2")),
+        TermsOfUseAgreementDetails(email, None, DateTime.now, Some("2.0"))
+      )
       val result = underTest.getForApplication(application)(request)
-      result shouldBe TermsOfUseVersion.V2_0
+      result shouldBe TermsOfUseVersion.NEW_JOURNEY
     }
   }
 

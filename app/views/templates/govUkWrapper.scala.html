@@ -84,17 +84,6 @@
   @timeoutBlock
 }
 
-@footerBlock = {
-  <div class="govuk-!-margin-top-8">
-    @feedbackBanner match {
-      case Some(fb) => {
-      @feedbackBannerView(fb)
-    }
-      case _ => {}
-    }
-  </div>
-}
-
 @backLink = {
   @back match {
     case BackButtonToUrl(url) => {
@@ -183,6 +172,35 @@
   )
 }
 
+@siteFooter = {
+  @hmrcFooter(new Footer(meta = Some(
+    Meta(
+      items = Some(
+        Seq(
+          FooterItem(text = Some("Cookies"), href = Some(s"${applicationConfig.apiDocumentationFrontendUrl}/api-documentation/docs/help/cookies")),
+          FooterItem(text = Some("Accessibility statement"), href = Some(s"${applicationConfig.thirdPartyDeveloperFrontendUrl}/accessibility-statement")),
+          FooterItem(text = Some("Privacy Policy"), href = Some(s"${applicationConfig.thirdPartyDeveloperFrontendUrl}/api-documentation/docs/help/privacy")),
+          FooterItem(text = Some("Terms and conditions"), href = Some(s"${applicationConfig.thirdPartyDeveloperFrontendUrl}/api-documentation/docs/help/terms-and-conditions")),
+          FooterItem(text = Some("Help using GOV.UK "), href = Some("https://www.gov.uk/help"))
+        )
+      )
+    )
+  ), language = En))
+}
+
+@footerBlock = {
+  <div class="govuk-!-margin-top-8">
+    @feedbackBanner match {
+      case Some(fb) => {
+        @feedbackBannerView(fb)
+      }
+      case _ => {}
+    }
+  </div>
+  @siteFooter
+}
+
+
 @govukLayout(
   pageTitle = Some(title),
   headBlock = Some(head),
@@ -198,19 +216,7 @@
   ))),
   beforeContentBlock = Some(beforeContentBlock),
   mainContentLayout = None,
-  footerBlock = Some(hmrcFooter(new Footer(meta = Some(
-    Meta(
-      items = Some(
-        Seq(
-          FooterItem(text = Some("Cookies"), href = Some(s"${applicationConfig.apiDocumentationFrontendUrl}/api-documentation/docs/help/cookies")),
-          FooterItem(text = Some("Accessibility statement"), href = Some(s"${applicationConfig.thirdPartyDeveloperFrontendUrl}/accessibility-statement")),
-          FooterItem(text = Some("Privacy Policy"), href = Some(s"${applicationConfig.thirdPartyDeveloperFrontendUrl}/api-documentation/docs/help/privacy")),
-          FooterItem(text = Some("Terms and conditions"), href = Some(s"${applicationConfig.thirdPartyDeveloperFrontendUrl}/api-documentation/docs/help/terms-and-conditions")),
-          FooterItem(text = Some("Help using GOV.UK "), href = Some("https://www.gov.uk/help"))
-        )
-      )
-    )
-  ), language = En))),
+  footerBlock = Some(footerBlock),
   bodyEndBlock = Some(bodyEndDefault),
   scriptsBlock = Some(scripts)
 )(mainContentDefault)

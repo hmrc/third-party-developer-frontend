@@ -18,6 +18,7 @@ package uk.gov.hmrc.apiplatform.modules.submissions.controllers
 
 import javax.inject.{Inject, Singleton}
 import play.api.mvc.MessagesControllerComponents
+
 import scala.concurrent.ExecutionContext
 import uk.gov.hmrc.thirdpartydeveloperfrontend.config.ApplicationConfig
 import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.ApplicationController
@@ -34,6 +35,7 @@ import play.api.libs.crypto.CookieSigner
 import uk.gov.hmrc.thirdpartydeveloperfrontend.config.ErrorHandler
 import uk.gov.hmrc.apiplatform.modules.submissions.views.html.{CancelledRequestForProductionCredentialsView, ConfirmCancelRequestForProductionCredentialsView}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.connectors.ThirdPartyApplicationProductionConnector
+
 import scala.concurrent.Future
 
 object CancelRequestController {
@@ -74,17 +76,17 @@ class CancelRequestController @Inject() (
   
   import cats.implicits._
   import cats.instances.future.catsStdInstancesForFuture
-  import SubmissionActionBuilders.StateFilter
+  import SubmissionActionBuilders.ApplicationStateFilter
 
   private val exec = ec
   private val ET = new EitherTHelper[Result] { implicit val ec: ExecutionContext = exec }
   private val failed = (err: String) => BadRequestWithErrorMessage(err)
 
-  def cancelRequestForProductionCredentialsPage(appId: ApplicationId) = withApplicationSubmission(StateFilter.notProduction)(appId) { implicit request =>
+  def cancelRequestForProductionCredentialsPage(appId: ApplicationId) = withApplicationSubmission(ApplicationStateFilter.notProduction)(appId) { implicit request =>
     Future.successful(Ok(confirmCancelRequestForProductionCredentialsView(appId, CancelRequestController.DummyForm.form)))
   }
 
-  def cancelRequestForProductionCredentialsAction(appId: ApplicationId) = withApplicationSubmission(StateFilter.notProduction)(appId) { implicit request =>
+  def cancelRequestForProductionCredentialsAction(appId: ApplicationId) = withApplicationSubmission(ApplicationStateFilter.notProduction)(appId) { implicit request =>
     lazy val goBackToRegularPage =
       if(request.submissionRequest.extSubmission.submission.status.isAnsweredCompletely) {
         Redirect(uk.gov.hmrc.apiplatform.modules.submissions.controllers.routes.CheckAnswersController.checkAnswersPage(appId))

@@ -25,6 +25,7 @@ import uk.gov.hmrc.thirdpartydeveloperfrontend.domain._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.Capabilities.SupportsDetails
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.Permissions.SandboxOrAdmin
+
 import javax.inject.{Inject, Singleton}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.controllers.ApplicationViewModel
 import play.api.data.Form
@@ -41,9 +42,25 @@ import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.fraudprevention.Fraud
 import uk.gov.hmrc.apiplatform.modules.submissions.services.SubmissionService
 import cats.data.OptionT
 import cats.instances.future.catsStdInstancesForFuture
+import org.joda.time.DateTime
+
 import scala.concurrent.Future.successful
 import uk.gov.hmrc.apiplatform.modules.submissions.domain.models.Submission
+import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.Details.{Agreement, TermsOfUseViewModel}
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.TermsOfUseVersion
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.services.TermsOfUseService
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.services.TermsOfUseService.TermsOfUseAgreementDetails
 
+object Details {
+  case class Agreement(who: String, when: DateTime)
+  case class TermsOfUseViewModel(
+    exists: Boolean,
+    appUsesOldVersion: Boolean,
+    agreement: Option[Agreement]
+  ) {
+    lazy val agreementNeeded = exists && !agreement.isDefined
+  }
+}
 @Singleton
 class Details @Inject() (
     val errorHandler: ErrorHandler,
@@ -57,7 +74,8 @@ class Details @Inject() (
     detailsView: DetailsView,
     changeDetailsView: ChangeDetailsView,
     val fraudPreventionConfig: FraudPreventionConfig,
-    submissionService: SubmissionService
+    submissionService: SubmissionService,
+    termsOfUseService: TermsOfUseService
 )(implicit val ec: ExecutionContext, val appConfig: ApplicationConfig)
     extends ApplicationController(mcc) with FraudPreventionNavLinkHelper {
 
@@ -111,6 +129,7 @@ class Details @Inject() (
           Ok(
             detailsView(
               applicationViewModelFromApplicationRequest,
+              buildTermsOfUseViewModel,
               createOptionalFraudPreventionNavLinkViewModel(
                 request.application,
                 request.subscriptions,
@@ -119,6 +138,21 @@ class Details @Inject() (
             )
           )
         )
+    }
+  }
+
+  private def buildTermsOfUseViewModel()(implicit request: ApplicationRequest[AnyContent]): TermsOfUseViewModel = {
+    val application = request.application
+
+    val latestTermsOfUseAgreementDetails = termsOfUseService.getAgreementDetails(application).lastOption
+
+    val hasTermsOfUse = ! application.deployedTo.isSandbox && application.access.accessType.isStandard
+    latestTermsOfUseAgreementDetails match {
+      case Some(TermsOfUseAgreementDetails(emailAddress, maybeName, date, maybeVersionString)) => {
+        val maybeVersion = maybeVersionString.flatMap(TermsOfUseVersion.fromVersionString(_))
+        TermsOfUseViewModel(hasTermsOfUse, maybeVersion.contains(TermsOfUseVersion.OLD_JOURNEY), Some(Agreement(maybeName.getOrElse(emailAddress), date)))
+      }
+      case _ => TermsOfUseViewModel(hasTermsOfUse, false, None)
     }
   }
 
