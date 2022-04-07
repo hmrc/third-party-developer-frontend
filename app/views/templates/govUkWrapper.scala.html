@@ -20,6 +20,7 @@
 @import views.html.include.FeedbackBannerView
 @import uk.gov.hmrc.play.views.html.helpers.ReportAProblemLink
 @import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.DeveloperSession
+@import uk.gov.hmrc.hmrcfrontend.views.html.helpers.HmrcTrackingConsentSnippet
 
 @import uk.gov.hmrc.hmrcfrontend.views.html.helpers.HmrcReportTechnicalIssueHelper
 @import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.views.NavLink
@@ -41,7 +42,8 @@
   hmrcFooter: HmrcFooter,
   applicationConfig: ApplicationConfig,
   feedbackBannerView: FeedbackBannerView,
-  hmrcTimeoutDialog: HmrcTimeoutDialog
+  hmrcTimeoutDialog: HmrcTimeoutDialog,
+  hmrcTrackingConsentSnippet: HmrcTrackingConsentSnippet
 )
 
 @(title: String,
@@ -80,7 +82,7 @@
 
 @head = {
   <link href='@routes.Assets.versioned("stylesheets/main.css")' media="screen" rel="stylesheet" type="text/css" />
-
+  @hmrcTrackingConsentSnippet()
   @timeoutBlock
 }
 
