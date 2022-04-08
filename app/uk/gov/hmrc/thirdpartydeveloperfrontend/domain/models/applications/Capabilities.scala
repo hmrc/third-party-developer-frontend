@@ -62,7 +62,7 @@ object Capabilities {
   case object SupportsDeletion extends StandardAppCapability
 
   case object SupportsAppChecks extends Capability {
-    def hasCapability(app: BaseApplication): Boolean = app.isInTesting
+    def hasCapability(app: BaseApplication): Boolean = app.state.name.isInTesting && app.access.hasSubmissions == false
   }
 
   case object SupportChangingAppDetails extends Capability {
