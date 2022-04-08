@@ -47,6 +47,9 @@ class ApplicationConfig @Inject()(config: Configuration) extends ServicesConfig(
   lazy val productionApiBaseUrl = buildUrl("platform.api.production")
   lazy val sandboxApiBaseUrl = buildUrl("platform.api.sandbox")
 
+  lazy val sessionTimeout = getInt("timeout.timeout")
+  lazy val sessionCountdown = getInt("timeout.countdown")
+
   lazy val sessionTimeoutInSeconds = getInt("session.timeoutSeconds")
   lazy val analyticsToken = config.getOptional[String]("google-analytics.token").filterNot(_ == "")
   lazy val analyticsHost = getConfigDefaulted("google-analytics.host", "auto")

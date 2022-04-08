@@ -14,7 +14,7 @@
  * limitations under the License.
  *@
 
-@import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.views.{BackButtonWithJavaScript, IpAllowlistFeedbackBanner, NoBackButton}
+@import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.views.{BackButtonWithJavaScript, NoBackButton}
 @import include._
 @import views.html.include.DevMain
 @import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.DeveloperSession
@@ -55,8 +55,7 @@
   userFullName = loggedIn.loggedInName,
   back = backButton,
   developerSession = Some(loggedIn),
-  breadcrumbs = breadcrumbs,
-  feedbackBanner = Some(IpAllowlistFeedbackBanner)
+  breadcrumbs = breadcrumbs
 ) {
   <div class="ip-allowlist">
     @errorSummary2(form)
