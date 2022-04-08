@@ -170,6 +170,34 @@ class ApplicationCheckSpec
     createFullyConfigurableApplication(collaborators, appId, clientId, state, checkInformation, access)
   }
 
+  def createFakeApplicationWithImporantSubmissionData(
+      appId: ApplicationId = appId,
+      clientId: ClientId = clientId,
+      state: ApplicationState = testing
+  ): Application = {
+
+    val collaborators = Set(
+      loggedInDeveloper.email.asCollaborator(ADMINISTRATOR),
+      anotherCollaboratorEmail.asCollaborator(DEVELOPER)
+    )
+
+    Application(
+      appId,
+      clientId,
+      appName,
+      DateTimeUtils.now,
+      DateTimeUtils.now,
+      None,
+      grantLength,
+      Environment.PRODUCTION,
+      collaborators = collaborators,
+      access = Standard().copy(importantSubmissionData = Some(mock[ImportantSubmissionData])),
+      state = state,
+      checkInformation = None
+    )
+  }
+
+
   trait BaseSetup extends ApplicationServiceMock with ApplicationActionServiceMock with SessionServiceMock with ApplicationProvider with TermsOfUseVersionServiceMock {
     val landingPageView = app.injector.instanceOf[LandingPageView]
     val unauthorisedAppDetailsView = app.injector.instanceOf[UnauthorisedAppDetailsView]
@@ -538,6 +566,16 @@ class ApplicationCheckSpec
       status(result) shouldBe OK
       contentAsString(result) should include("Confirm which APIs you want to use")
       contentAsString(result) should include(generateName("api1"))
+    }
+
+    "return a bad request when application is new submission based uplift" in new SetupWithSubs {
+      def createApplication() = createFakeApplicationWithImporantSubmissionData()
+      val subsData = List(exampleSubscriptionWithoutFields("api1"), exampleSubscriptionWithoutFields("api2"))
+      setupApplicationWithSubs(application, subsData)
+
+      private val result = addToken(underTest.apiSubscriptionsPage(application.id))(loggedInRequest)
+
+      status(result) shouldBe BAD_REQUEST
     }
 
     "success action" in new SetupWithSubs {

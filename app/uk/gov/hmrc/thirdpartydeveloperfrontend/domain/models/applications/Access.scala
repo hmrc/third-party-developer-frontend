@@ -33,9 +33,10 @@ object ImportantSubmissionData {
   implicit val format = Json.format[ImportantSubmissionData]
 }
 
-
 sealed trait Access {
   val accessType: AccessType
+
+  def hasSubmissions: Boolean
 }
 
 object Access {
@@ -60,13 +61,19 @@ case class Standard(
   importantSubmissionData: Option[ImportantSubmissionData] = None
 ) extends Access {
   override val accessType = AccessType.STANDARD
+
+  lazy val hasSubmissions: Boolean = importantSubmissionData.nonEmpty
 }
 
 
 case class Privileged(scopes: Set[String] = Set.empty) extends Access {
   override val accessType = AccessType.PRIVILEGED
+
+  val hasSubmissions: Boolean = false
 }
 
 case class ROPC(scopes: Set[String] = Set.empty) extends Access {
   override val accessType = AccessType.ROPC
+
+  val hasSubmissions: Boolean = false
 }
