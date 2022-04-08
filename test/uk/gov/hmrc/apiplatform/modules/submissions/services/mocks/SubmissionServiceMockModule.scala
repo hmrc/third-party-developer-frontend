@@ -65,6 +65,15 @@ trait SubmissionServiceMockModule extends MockitoSugar with ArgumentMatchersSuga
         when(aMock.recordAnswer(*[Submission.Id], *[Question.Id], *)(*)).thenReturn(successful(Left("Failed to record answer for submission")))
       }
     }
+
+    object ConfirmSetupComplete {
+      def thenReturnSuccessFor(applicationId: ApplicationId, userEmailAddress: String) = {
+        when(aMock.confirmSetupComplete(eqTo(applicationId), eqTo(userEmailAddress))(*)).thenReturn(successful(Right()))
+      }
+      def thenReturnFailure() = {
+        when(aMock.confirmSetupComplete(*[ApplicationId], *[String])(*)).thenReturn(successful(Left("nope")))
+      }
+    }
   }
 
   object SubmissionServiceMock extends BaseSubmissionServiceMock {

@@ -32,4 +32,6 @@ class SubmissionService @Inject() (productionApplicationConnector: ThirdPartyApp
   def fetch(id: Submission.Id)(implicit hc: HeaderCarrier): Future[Option[ExtendedSubmission]] = productionApplicationConnector.fetchSubmission(id)
 
   def recordAnswer(submissionId: Submission.Id, questionId: Question.Id, rawAnswers: List[String])(implicit hc: HeaderCarrier): Future[Either[String, ExtendedSubmission]] = productionApplicationConnector.recordAnswer(submissionId, questionId, rawAnswers)
+
+  def confirmSetupComplete(applicationId: ApplicationId, userEmailAddress: String)(implicit hc: HeaderCarrier): Future[Either[String, Unit]] = productionApplicationConnector.confirmSetupComplete(applicationId, userEmailAddress)
 }

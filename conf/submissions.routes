@@ -15,3 +15,5 @@ GET         /application/:aid/submit-request                                    
 
 GET         /application/:aid/terms-of-use-responses                              uk.gov.hmrc.apiplatform.modules.submissions.controllers.TermsOfUseResponsesController.termsOfUseResponsesPage(aid: ApplicationId)
 
+GET         /application/:aid/start-using-your-application                        uk.gov.hmrc.apiplatform.modules.submissions.controllers.StartUsingYourApplicationController.startUsingYourApplicationPage(aid: ApplicationId)
+POST        /application/:aid/start-using-your-application                        uk.gov.hmrc.apiplatform.modules.submissions.controllers.StartUsingYourApplicationController.startUsingYourApplicationAction(aid: ApplicationId)

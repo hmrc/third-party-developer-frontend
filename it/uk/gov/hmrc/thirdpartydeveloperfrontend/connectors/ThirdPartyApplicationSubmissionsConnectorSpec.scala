@@ -188,6 +188,42 @@ class ThirdPartyApplicationSubmissionsConnectorSpec
     }
   }
 
+  "confirmSetupComplete" should {
+    val app = aStandardApplication
+    val email = "bob@example.com"
+    val url = s"/application/${app.id.value}/confirm-setup-complete"
+
+    "return successfully if TPA returns OK" in new Setup {
+      stubFor(
+        post(urlEqualTo(url))
+          .withJsonRequestBody(ConfirmSetupCompleteRequest(email))
+          .willReturn(
+            aResponse()
+              .withStatus(OK)
+          )
+      )
+
+      val result = await(connector.confirmSetupComplete(app.id, email))
+
+      result shouldBe Right()
+    }
+
+    "return an error if TPA returns error" in new Setup {
+      stubFor(
+        post(urlEqualTo(url))
+          .withJsonRequestBody(ConfirmSetupCompleteRequest(email))
+          .willReturn(
+            aResponse()
+              .withStatus(BAD_REQUEST)
+          )
+      )
+
+      val result = await(connector.confirmSetupComplete(app.id, email))
+
+      result shouldBe Left(s"Failed to confirm setup complete for application ${app.id.value}")
+    }
+  }
+
   "requestApproval" should {
     val app = aStandardApplication
     val url = s"/approvals/application/${app.id.value}/request"

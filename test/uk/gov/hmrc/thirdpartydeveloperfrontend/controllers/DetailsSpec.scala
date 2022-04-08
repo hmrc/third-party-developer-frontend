@@ -121,6 +121,32 @@ class DetailsSpec
         elementExistsByText(document, "h1", "Credentials requested") shouldBe true
         elementExistsByText(document, "span", pendingVerificationApplication.name) shouldBe true
       }
+
+      "redirect to the Start Using Your Application page on an application in pre-production state" in new Setup {
+        val userEmail = "test@example.con"
+        val preProdApplication = anApplication(adminEmail = loggedInDeveloper.email, state = ApplicationState.preProduction(userEmail))
+
+        givenApplicationAction(preProdApplication, loggedInDeveloper)
+
+        val result = addToken(underTest.details(preProdApplication.id))(loggedInRequest)
+
+        status(result) shouldBe SEE_OTHER
+        redirectLocation(result) shouldBe Some(uk.gov.hmrc.apiplatform.modules.submissions.controllers.routes.StartUsingYourApplicationController.startUsingYourApplicationPage(preProdApplication.id).url)
+      }
+
+      "display the Application Details page for an application in pre-production state when the forceAppDetails parameter is used" in new Setup {
+        val userEmail = "test@example.con"
+        val preProdApplication = anApplication(adminEmail = loggedInDeveloper.email, state = ApplicationState.preProduction(userEmail))
+
+        returnAgreementDetails()
+        givenApplicationAction(preProdApplication, loggedInDeveloper)
+        val loggedInRequestWithForceAppDetailsParam = FakeRequest("GET", "/?forceAppDetails").withLoggedIn(underTest, implicitly)(sessionId).withSession(sessionParams: _*)
+        val result = addToken(underTest.details(preProdApplication.id))(loggedInRequestWithForceAppDetailsParam)
+
+        status(result) shouldBe OK
+        val document = Jsoup.parse(contentAsString(result))
+        elementExistsByText(document, "h1", "Application details") shouldBe true
+      }
     }
 
     "not a team member on an application" should {
