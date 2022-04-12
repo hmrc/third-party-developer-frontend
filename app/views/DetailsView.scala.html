@@ -70,7 +70,7 @@
 
   <br>
 
-  @if(termsOfUse.agreementNeeded && app.isPermittedToEditAppDetails(loggedIn.developer)) {
+  @if(termsOfUse.agreementNeeded && app.isPermittedToAgreeToTermsOfUse(loggedIn.developer)) {
     <div class="govuk-warning-text">
       <span class="govuk-warning-text__icon" aria-hidden="true">!</span>
       <strong id="terms-of-use-header" class="govuk-warning-text__text">
@@ -87,15 +87,14 @@
       <col width="60%">
     </colgroup>
     <thead class="govuk-table__head">
-@* APIS-5669 - Agreed to temporarily remove this until UI has been changed to accommodate 'In Desktop Software' option *@
-@*      <tr class="govuk-table__row">*@
-@*        <th scope="col" class="govuk-table__header">Application details</th>*@
-@*        <th scope="col" class="govuk-table__header">*@
-@*          @if(app.isPermittedToEditAppDetails(loggedIn.developer)) {*@
-@*            <a id="change" class="govuk-link govuk-link--no-visited-state" href="@routes.Details.changeDetails(app.id)">Change <span class="govuk-visually-hidden">application details</span></a>*@
-@*          }*@
-@*        </th>*@
-@*      </tr>*@
+      <tr class="govuk-table__row">
+        <th scope="col" class="govuk-table__header">Application details</th>
+        <th scope="col" class="govuk-table__header">
+          @if(app.isPermittedToEditAppDetails(loggedIn.developer)) {
+            <a id="change" class="govuk-link govuk-link--no-visited-state" href="@routes.Details.changeDetails(app.id)">Change <span class="govuk-visually-hidden">application details</span></a>
+          }
+        </th>
+      </tr>
     </thead>
     <tbody class="govuk-table__body">
       <tr class="govuk-table__row">
@@ -171,7 +170,7 @@
             }
           </td>
           <td class="govuk-table__cell">
-            @if(app.isPermittedToEditAppDetails(loggedIn.developer)) {
+            @if(app.isPermittedToAgreeToTermsOfUse(loggedIn.developer)) {
               @termsOfUse.agreement match {
                 case Some(agreement) => { <a id="termsOfUseReadLink" class="govuk-link" href="@routes.TermsOfUse.termsOfUse(app.id)">Read</a> }
                 case None => { <a id="termsOfUseReadLink" class="govuk-button govuk-!-margin-0" href="@routes.TermsOfUse.termsOfUse(app.id)">Read and agree</a> }
