@@ -31,6 +31,8 @@ import java.util.UUID
 
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.UserId
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.apidefinitions.ApiIdentifier
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.PrivacyPolicyLocation.{InDesktopSoftware => PrivacyPolicyInDesktopSoftware, Url => PrivacyPolicyUrl}
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.TermsAndConditionsLocation.{InDesktopSoftware => TermsAndConditionsInDesktopSoftware, Url => TermsAndConditionsUrl}
 
 case class ApplicationId(value: String) extends AnyVal
 
@@ -97,13 +99,15 @@ trait BaseApplication {
   }
 
   def privacyPolicyUrl = access match {
-    case x: Standard => x.privacyPolicyUrl
-    case _           => None
+    case Standard(_, _, _, _, _, Some(ImportantSubmissionData(_, _, _, _, PrivacyPolicyUrl(url), _))) => Some(url)
+    case Standard(_, _, Some(url), _, _, None) => Some(url)
+    case _ => None
   }
 
   def termsAndConditionsUrl = access match {
-    case x: Standard => x.termsAndConditionsUrl
-    case _           => None
+    case Standard(_, _, _, _, _, Some(ImportantSubmissionData(_, _, _, TermsAndConditionsUrl(url), _, _))) => Some(url)
+    case Standard(_, Some(url), _, _, _, None) => Some(url)
+    case _ => None
   }
 
   def isPermittedToEditAppDetails(developer: Developer): Boolean = allows(SupportsDetails, developer, SandboxOrAdmin)
@@ -189,10 +193,17 @@ case class Application(
   val checkInformation: Option[CheckInformation] = None,
   val ipAllowlist: IpAllowlist = IpAllowlist()
 ) extends BaseApplication {
-  lazy val privacyPolicyInDesktopApp = privacyPolicyUrl.exists(_ == "desktop")
-  lazy val termsAndConditionsInDesktopApp = termsAndConditionsUrl.exists(_ == "desktop")
-}
 
+  lazy val privacyPolicyInDesktopApp = access match {
+    case Standard(_, _, _, _, _, Some(ImportantSubmissionData(_, _, _, _, PrivacyPolicyInDesktopSoftware, _))) => true
+    case _ => false
+  }
+
+  lazy val termsAndConditionsInDesktopApp = access match {
+    case Standard(_, _, _, _, _, Some(ImportantSubmissionData(_, _, _, TermsAndConditionsInDesktopSoftware, _, _))) => true
+    case _ => false
+  }
+}
 
 object Application {
   import play.api.libs.json.Json
