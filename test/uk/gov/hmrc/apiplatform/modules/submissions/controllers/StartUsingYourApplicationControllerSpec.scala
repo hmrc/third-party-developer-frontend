@@ -95,7 +95,7 @@ class StartUsingYourApplicationControllerSpec extends BaseControllerSpec
   }
 
   "startUsingYourApplicationAction" should {
-    "redirect to details page when submission service called successfully" in new Setup {
+    "redirect to manage apps page when submission service called successfully" in new Setup {
       val app = sampleApp.copy(state = ApplicationState.preProduction(loggedInDeveloper.email))
       givenApplicationAction(app, loggedInDeveloper)
       SubmissionServiceMock.ConfirmSetupComplete.thenReturnSuccessFor(app.id, loggedInDeveloper.email)
@@ -103,7 +103,7 @@ class StartUsingYourApplicationControllerSpec extends BaseControllerSpec
       val result = underTest.startUsingYourApplicationAction(app.id)(loggedInRequest.withCSRFToken)
 
       status(result) shouldBe SEE_OTHER
-      redirectLocation(result) shouldBe Some(uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.routes.Details.details(app.id).url)
+      redirectLocation(result) shouldBe Some(uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.routes.ManageApplications.manageApps.url)
     }
 
     "redirect to bad request page when submission service called unsuccessfully" in new Setup {
