@@ -152,15 +152,7 @@
 
               <tr id="providedPolicyURL">
                   <th class="col-40"><span strong class="bold-small">Privacy policy</span></th>
-                  <td>
-                      @{
-                          data.privacyPolicyLocation match {
-                              case PrivacyPolicyLocation.Url(url) => url
-                              case PrivacyPolicyLocation.InDesktopSoftware => "In desktop software"
-                              case _ => "None"
-                          }
-                      }
-                  </td>
+                  <td>@{PrivacyPolicyLocation.asText(data.privacyPolicyLocation)}</td>
                   @if(editable) {
                     <td>
                         <div align="right">
@@ -172,15 +164,7 @@
 
               <tr id="providedTermsAndConditionsURL">
                   <th><span strong class="bold-small">Terms and conditions</span></th>
-                  <td>
-                  @{
-                      data.termsAndConditionsLocation match {
-                          case TermsAndConditionsLocation.Url(url) => url
-                          case TermsAndConditionsLocation.InDesktopSoftware => "In desktop software"
-                          case _ => "None"
-                      }
-                  }
-                  </td>
+                  <td>@{TermsAndConditionsLocation.asText(data.termsAndConditionsLocation)}</td>
                   @if(editable) {
                     <td>
                         <div align="right">

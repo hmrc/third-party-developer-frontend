@@ -26,6 +26,13 @@ object PrivacyPolicyLocation {
   case object InDesktopSoftware extends PrivacyPolicyLocation
   case class Url(value: String) extends PrivacyPolicyLocation
 
+  def asText(location: PrivacyPolicyLocation) =
+    location match {
+      case PrivacyPolicyLocation.Url(url) => url
+      case PrivacyPolicyLocation.InDesktopSoftware => "In desktop software"
+      case PrivacyPolicyLocation.NoneProvided => "None"
+    }
+
   implicit val noneProvidedFormat = Json.format[NoneProvided.type]
   implicit val inDesktopSoftwareFormat = Json.format[InDesktopSoftware.type]
   implicit val urlFormat = Json.format[Url]

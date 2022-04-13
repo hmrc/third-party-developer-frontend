@@ -114,27 +114,11 @@
       </tr>
       <tr class="govuk-table__row">
         <th scope="row" class="govuk-table__header">Privacy policy URL</th>
-        <td class="govuk-table__cell" id="privacyPolicyUrl">
-          @{
-            app.privacyPolicyLocation match {
-              case PrivacyPolicyLocation.Url(url) => url
-              case PrivacyPolicyLocation.InDesktopSoftware => "In desktop software"
-              case _ => "None"
-            }
-          }
-        </td>
+        <td class="govuk-table__cell" id="privacyPolicyUrl">@{PrivacyPolicyLocation.asText(app.privacyPolicyLocation)}</td>
       </tr>
       <tr class="govuk-table__row">
         <th scope="row" class="govuk-table__header">Terms and conditions URL</th>
-        <td class="govuk-table__cell" id="termsAndConditionsUrl">
-        @{
-          app.termsAndConditionsLocation match {
-            case TermsAndConditionsLocation.Url(url) => url
-            case TermsAndConditionsLocation.InDesktopSoftware => "In desktop software"
-            case _ => "None"
-          }
-        }
-        </td>
+        <td class="govuk-table__cell" id="termsAndConditionsUrl">@{TermsAndConditionsLocation.asText(app.termsAndConditionsLocation)}</td>
       </tr>
       <tr class="govuk-table__row">
         <th scope="row" class="govuk-table__header">Application grant length</th>
