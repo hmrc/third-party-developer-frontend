@@ -28,7 +28,6 @@
 
 @this(devMain: DevMain2, leftHandNav: LeftHandNav)
 
-
 @(applicationViewModel: ApplicationViewModel, termsOfUse: TermsOfUseViewModel, fraudPreventionViewModel: Option[FraudPreventionNavLinkViewModel] = None)(
         implicit request: play.api.mvc.Request[Any],
         loggedIn: DeveloperSession,
@@ -37,7 +36,6 @@
         navSection: String = "details"
 )
 
-@import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.TermsAndConditionsLocation
 @app = @{applicationViewModel.application}
 
 @title = @{ "Application details" }
