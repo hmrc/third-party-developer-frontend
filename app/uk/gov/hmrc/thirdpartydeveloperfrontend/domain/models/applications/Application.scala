@@ -30,8 +30,6 @@ import org.joda.time.DateTime
 import java.util.UUID
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.UserId
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.apidefinitions.ApiIdentifier
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.PrivacyPolicyLocation.{InDesktopSoftware => PrivacyPolicyInDesktopSoftware, Url => PrivacyPolicyUrl}
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.TermsAndConditionsLocation.{InDesktopSoftware => TermsAndConditionsInDesktopSoftware, Url => TermsAndConditionsUrl}
 
 case class ApplicationId(value: String) extends AnyVal
 
@@ -97,16 +95,16 @@ trait BaseApplication {
     }
   }
 
-  def privacyPolicyUrl = access match {
-    case Standard(_, _, _, _, _, Some(ImportantSubmissionData(_, _, _, _, PrivacyPolicyUrl(url), _))) => Some(url)
-    case Standard(_, _, Some(url), _, _, None) => Some(url)
-    case _ => None
+  def privacyPolicyLocation = access match {
+    case Standard(_, _, _, _, _, Some(ImportantSubmissionData(_, _, _, _, privacyPolicyLocation, _))) => privacyPolicyLocation
+    case Standard(_, _, Some(url), _, _, None) => PrivacyPolicyLocation.Url(url)
+    case _ => PrivacyPolicyLocation.NoneProvided
   }
 
-  def termsAndConditionsUrl = access match {
-    case Standard(_, _, _, _, _, Some(ImportantSubmissionData(_, _, _, TermsAndConditionsUrl(url), _, _))) => Some(url)
-    case Standard(_, Some(url), _, _, _, None) => Some(url)
-    case _ => None
+  def termsAndConditionsLocation = access match {
+    case Standard(_, _, _, _, _, Some(ImportantSubmissionData(_, _, _, termsAndConditionsLocation, _, _))) => termsAndConditionsLocation
+    case Standard(_, Some(url), _, _, _, None) => TermsAndConditionsLocation.Url(url)
+    case _ => TermsAndConditionsLocation.NoneProvided
   }
 
   def isPermittedToEditAppDetails(developer: Developer): Boolean = allows(SupportsDetails, developer, SandboxOnly)
@@ -177,7 +175,6 @@ trait BaseApplication {
   }
 }
 
-
 case class Application(
   val id: ApplicationId,
   val clientId: ClientId,
@@ -193,18 +190,7 @@ case class Application(
   val state: ApplicationState = ApplicationState.testing,
   val checkInformation: Option[CheckInformation] = None,
   val ipAllowlist: IpAllowlist = IpAllowlist()
-) extends BaseApplication {
-
-  lazy val privacyPolicyInDesktopApp = access match {
-    case Standard(_, _, _, _, _, Some(ImportantSubmissionData(_, _, _, _, PrivacyPolicyInDesktopSoftware, _))) => true
-    case _ => false
-  }
-
-  lazy val termsAndConditionsInDesktopApp = access match {
-    case Standard(_, _, _, _, _, Some(ImportantSubmissionData(_, _, _, TermsAndConditionsInDesktopSoftware, _, _))) => true
-    case _ => false
-  }
-}
+) extends BaseApplication
 
 object Application {
   import play.api.libs.json.Json

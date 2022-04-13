@@ -444,8 +444,16 @@ class DetailsSpec
       elementIdentifiedByIdContainsText(doc, "applicationId", application.id.value) shouldBe true
       elementIdentifiedByIdContainsText(doc, "applicationName", application.name) shouldBe true
       elementIdentifiedByIdContainsText(doc, "description", application.description.getOrElse("None")) shouldBe true
-      elementIdentifiedByIdContainsText(doc, "privacyPolicyUrl", application.privacyPolicyUrl.getOrElse("None")) shouldBe true
-      elementIdentifiedByIdContainsText(doc, "termsAndConditionsUrl", application.termsAndConditionsUrl.getOrElse("None")) shouldBe true
+      elementIdentifiedByIdContainsText(doc, "privacyPolicyUrl", application.privacyPolicyLocation match {
+        case PrivacyPolicyLocation.Url(url) => url
+        case PrivacyPolicyLocation.InDesktopSoftware => "In desktop software"
+        case PrivacyPolicyLocation.NoneProvided => "None"
+      }) shouldBe true
+      elementIdentifiedByIdContainsText(doc, "termsAndConditionsUrl", application.termsAndConditionsLocation match {
+        case TermsAndConditionsLocation.Url(url) => url
+        case TermsAndConditionsLocation.InDesktopSoftware => "In desktop software"
+        case TermsAndConditionsLocation.NoneProvided => "None"
+      }) shouldBe true
       elementExistsContainsText(doc, "td", "Agreed by test@example.com") shouldBe hasTermsOfUseAgreement
     }
 
@@ -465,8 +473,16 @@ class DetailsSpec
         inputExistsWithValue(doc, "applicationName", "hidden", application.name) shouldBe true
       }
       textareaExistsWithText(doc, "description", application.description.getOrElse("None")) shouldBe true
-      inputExistsWithValue(doc, "privacyPolicyUrl", "text", application.privacyPolicyUrl.getOrElse("None")) shouldBe true
-      inputExistsWithValue(doc, "termsAndConditionsUrl", "text", application.termsAndConditionsUrl.getOrElse("None")) shouldBe true
+      inputExistsWithValue(doc, "privacyPolicyUrl", "text", application.privacyPolicyLocation match {
+        case PrivacyPolicyLocation.Url(url) => url
+        case PrivacyPolicyLocation.InDesktopSoftware => "In desktop software"
+        case PrivacyPolicyLocation.NoneProvided => "None"
+      }) shouldBe true
+      inputExistsWithValue(doc, "termsAndConditionsUrl", "text", application.termsAndConditionsLocation match {
+        case TermsAndConditionsLocation.Url(url) => url
+        case TermsAndConditionsLocation.InDesktopSoftware => "In desktop software"
+        case TermsAndConditionsLocation.NoneProvided => "None"
+      }) shouldBe true
     }
 
     def changeDetailsShouldRedirectOnSuccess(application: Application) = {
