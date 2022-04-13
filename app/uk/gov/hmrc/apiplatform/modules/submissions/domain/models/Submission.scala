@@ -117,8 +117,8 @@ object Submission {
 
   val grant: (DateTime, String) => Submission => Submission = (timestamp, name) => addStatusHistory(Status.Granted(timestamp, name))
 
-  val grantWithWarnings: (DateTime, String, String) => Submission => Submission = (timestamp, name, warnings) => {
-    addStatusHistory(Status.GrantedWithWarnings(timestamp, name, warnings))
+  val grantWithWarnings: (DateTime, String, String, Option[String]) => Submission => Submission = (timestamp, name, warnings, escalatedTo) => {
+    addStatusHistory(Status.GrantedWithWarnings(timestamp, name, warnings, escalatedTo))
   }
 
   val submit: (DateTime, String) => Submission => Submission = (timestamp, requestedBy) => addStatusHistory(Status.Submitted(timestamp, requestedBy))
@@ -182,7 +182,8 @@ object Submission {
     case class GrantedWithWarnings(
       timestamp: DateTime,
       name: String,
-      warnings: String
+      warnings: String,
+      escalatedTo: Option[String]
     ) extends Status
 
     case class Submitted(
