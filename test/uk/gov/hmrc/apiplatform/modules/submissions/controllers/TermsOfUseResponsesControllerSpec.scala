@@ -116,6 +116,15 @@ class TermsOfUseResponsesControllerSpec
 
       status(result) shouldBe NOT_FOUND
     }
+
+    "fails when submission not found" in new Setup {
+      givenAppInState(ApplicationState.production("requestedBy", "verificationCode"))
+      SubmissionServiceMock.FetchLatestExtendedSubmission.thenReturnsNone()
+
+      val result = underTest.termsOfUseResponsesPage(appId)(loggedInRequest.withCSRFToken)
+
+      status(result) shouldBe BAD_REQUEST
+    }
   }
 
 }

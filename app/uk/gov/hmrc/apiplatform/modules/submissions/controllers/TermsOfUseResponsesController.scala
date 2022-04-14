@@ -58,9 +58,6 @@ class TermsOfUseResponsesController @Inject()(
 
 
   import TermsOfUseResponsesController.TermsOfUseResponsesViewModel
-  import SubmissionActionBuilders.{RoleFilter, ApplicationStateFilter}
-
-  val redirectToGetProdCreds = (applicationId: ApplicationId) => Redirect(routes.ProdCredsChecklistController.productionCredentialsChecklistPage(applicationId))
 
   def termsOfUseResponsesPage(applicationId: ApplicationId) = checkActionForProduction(SupportsSubscriptions, AdministratorOnly)(applicationId) { implicit request =>
     val failed = (err: String) => BadRequestWithErrorMessage(err)
