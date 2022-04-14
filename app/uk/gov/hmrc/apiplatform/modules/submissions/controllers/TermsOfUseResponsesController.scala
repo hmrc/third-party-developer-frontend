@@ -19,7 +19,6 @@ package uk.gov.hmrc.apiplatform.modules.submissions.controllers
 import play.api.libs.crypto.CookieSigner
 import play.api.mvc.{MessagesControllerComponents, Result}
 import uk.gov.hmrc.apiplatform.modules.common.services.EitherTHelper
-import uk.gov.hmrc.apiplatform.modules.submissions.controllers.SubmissionActionBuilders.SubmissionStatusFilter
 import uk.gov.hmrc.apiplatform.modules.submissions.controllers.models.AnswersViewModel._
 import uk.gov.hmrc.apiplatform.modules.submissions.services.SubmissionService
 import uk.gov.hmrc.apiplatform.modules.submissions.views.html._
@@ -28,6 +27,8 @@ import uk.gov.hmrc.thirdpartydeveloperfrontend.connectors.ApmConnector
 import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.ApplicationController
 import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.checkpages.CanUseCheckActions
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.ApplicationId
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.Capabilities.SupportsSubscriptions
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.Permissions.AdministratorOnly
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.controllers.BadRequestWithErrorMessage
 import uk.gov.hmrc.thirdpartydeveloperfrontend.service.{ApplicationActionService, ApplicationService, SessionService}
 
@@ -61,7 +62,7 @@ class TermsOfUseResponsesController @Inject()(
 
   val redirectToGetProdCreds = (applicationId: ApplicationId) => Redirect(routes.ProdCredsChecklistController.productionCredentialsChecklistPage(applicationId))
 
-  def termsOfUseResponsesPage(applicationId: ApplicationId) = withApplicationAndSubmissionInSpecifiedState(ApplicationStateFilter.production, RoleFilter.isTeamMember, SubmissionStatusFilter.granted)(redirectToGetProdCreds(applicationId))(applicationId) { implicit request =>
+  def termsOfUseResponsesPage(applicationId: ApplicationId) = checkActionForProduction(SupportsSubscriptions, AdministratorOnly)(applicationId) { implicit request =>
     val failed = (err: String) => BadRequestWithErrorMessage(err)
     
     val success = (viewModel: TermsOfUseResponsesViewModel) => {
