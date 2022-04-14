@@ -24,7 +24,7 @@ import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.checkpages.{CheckYour
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.Capabilities.SupportsDetails
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.Permissions.SandboxOrAdmin
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.Permissions.SandboxOnly
 
 import javax.inject.{Inject, Singleton}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.controllers.ApplicationViewModel
@@ -80,7 +80,7 @@ class Details @Inject() (
     extends ApplicationController(mcc) with FraudPreventionNavLinkHelper {
 
   def canChangeDetailsAndIsApprovedAction(applicationId: ApplicationId)(fun: ApplicationRequest[AnyContent] => Future[Result]): Action[AnyContent] =
-    checkActionForApprovedApps(SupportsDetails, SandboxOrAdmin)(applicationId)(fun)
+    checkActionForApprovedApps(SupportsDetails, SandboxOnly)(applicationId)(fun)
 
   def details(applicationId: ApplicationId): Action[AnyContent] = whenTeamMemberOnApp(applicationId) { implicit request =>
     val accessLevel = DevhubAccessLevel.fromRole(request.role)
