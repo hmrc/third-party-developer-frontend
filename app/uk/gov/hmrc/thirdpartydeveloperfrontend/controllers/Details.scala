@@ -164,32 +164,6 @@ class Details @Inject() (
     Future.successful(Ok(changeDetailsView(EditApplicationForm.withData(request.application), applicationViewModelFromApplicationRequest)))
   }
 
-  private def buildCheckInformation(updateRequest: UpdateApplicationRequest, application: Application): CheckInformation = {
-    val updatedAccess = updateRequest.access.asInstanceOf[Standard]
-    val access = application.access.asInstanceOf[Standard]
-
-    def confirmedNameValue(checkInformation: CheckInformation): Boolean =
-      updateRequest.name == application.name && checkInformation.confirmedName
-
-    def providedPrivacyPolicyUrlValue(checkInformation: CheckInformation): Boolean = {
-      updatedAccess.privacyPolicyUrl == access.privacyPolicyUrl && checkInformation.providedPrivacyPolicyURL
-    }
-
-    def providedTermsAndConditionsUrlValue(checkInformation: CheckInformation): Boolean = {
-      updatedAccess.termsAndConditionsUrl == access.termsAndConditionsUrl && checkInformation.providedTermsAndConditionsURL
-    }
-
-    val checkInformation = application.checkInformation.getOrElse(CheckInformation())
-
-    CheckInformation(
-      confirmedName = confirmedNameValue(checkInformation),
-      contactDetails = checkInformation.contactDetails,
-      providedPrivacyPolicyURL = providedPrivacyPolicyUrlValue(checkInformation),
-      providedTermsAndConditionsURL = providedTermsAndConditionsUrlValue(checkInformation),
-      termsOfUseAgreements = checkInformation.termsOfUseAgreements
-    )
-  }
-
   private def updateApplication(updateRequest: UpdateApplicationRequest)
                                (implicit request: ApplicationRequest[AnyContent]): Future[ApplicationUpdateSuccessful] = {
     applicationService.update(updateRequest)
@@ -198,14 +172,6 @@ class Details @Inject() (
   def changeDetailsAction(applicationId: ApplicationId): Action[AnyContent] =
     canChangeDetailsAndIsApprovedAction(applicationId) { implicit request: ApplicationRequest[AnyContent] =>
       val application = request.application
-
-      def updateCheckInformation(updateRequest: UpdateApplicationRequest): Future[ApplicationUpdateSuccessful] = {
-        if (application.deployedTo.isProduction()) {
-          applicationService.updateCheckInformation(application, buildCheckInformation(updateRequest, application))
-        } else {
-          Future.successful(ApplicationUpdateSuccessful)
-        }
-      }
 
       def handleValidForm(form: EditApplicationForm): Future[Result] = {
         val requestForm = EditApplicationForm.form.bindFromRequest
@@ -218,7 +184,6 @@ class Details @Inject() (
               val updateRequest = UpdateApplicationRequest.from(form, application)
               for {
                 _ <- updateApplication(updateRequest)
-                _ <- updateCheckInformation(updateRequest)
               } yield Redirect(routes.Details.details(applicationId))
 
             case invalid: Invalid =>
