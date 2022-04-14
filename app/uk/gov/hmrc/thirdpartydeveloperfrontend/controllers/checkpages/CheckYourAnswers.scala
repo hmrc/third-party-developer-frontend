@@ -180,8 +180,8 @@ case class CheckYourAnswersData(
     email: Option[String],
     telephoneNumber: Option[String],
     teamMembers: Set[String],
-    privacyPolicyUrl: Option[String],
-    termsAndConditionsUrl: Option[String],
+    privacyPolicyLocation: PrivacyPolicyLocation,
+    termsAndConditionsLocation: TermsAndConditionsLocation,
     acceptedTermsOfUse: Boolean,
     subscriptions: Seq[CheckYourSubscriptionData]
 )
@@ -207,8 +207,8 @@ object CheckYourAnswersData {
       email = contactDetails.map(_.email),
       telephoneNumber = contactDetails.map(_.telephoneNumber),
       teamMembers = application.collaborators.map(_.emailAddress),
-      privacyPolicyUrl = application.privacyPolicyUrl,
-      termsAndConditionsUrl = application.termsAndConditionsUrl,
+      privacyPolicyLocation = application.privacyPolicyLocation,
+      termsAndConditionsLocation = application.termsAndConditionsLocation,
       acceptedTermsOfUse = application.checkInformation.fold(false)(_.termsOfUseAgreements.nonEmpty),
       subscriptions = subs.filter(_.subscribed).map(asCheckYourSubscriptionData(accessLevel))
     )

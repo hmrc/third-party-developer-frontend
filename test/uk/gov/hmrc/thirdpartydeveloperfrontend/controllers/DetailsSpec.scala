@@ -444,8 +444,8 @@ class DetailsSpec
       elementIdentifiedByIdContainsText(doc, "applicationId", application.id.value) shouldBe true
       elementIdentifiedByIdContainsText(doc, "applicationName", application.name) shouldBe true
       elementIdentifiedByIdContainsText(doc, "description", application.description.getOrElse("None")) shouldBe true
-      elementIdentifiedByIdContainsText(doc, "privacyPolicyUrl", application.privacyPolicyUrl.getOrElse("None")) shouldBe true
-      elementIdentifiedByIdContainsText(doc, "termsAndConditionsUrl", application.termsAndConditionsUrl.getOrElse("None")) shouldBe true
+      elementIdentifiedByIdContainsText(doc, "privacyPolicyUrl", PrivacyPolicyLocation.asText(application.privacyPolicyLocation)) shouldBe true
+      elementIdentifiedByIdContainsText(doc, "termsAndConditionsUrl", TermsAndConditionsLocation.asText(application.termsAndConditionsLocation)) shouldBe true
       elementExistsContainsText(doc, "td", "Agreed by test@example.com") shouldBe hasTermsOfUseAgreement
     }
 
@@ -465,8 +465,8 @@ class DetailsSpec
         inputExistsWithValue(doc, "applicationName", "hidden", application.name) shouldBe true
       }
       textareaExistsWithText(doc, "description", application.description.getOrElse("None")) shouldBe true
-      inputExistsWithValue(doc, "privacyPolicyUrl", "text", application.privacyPolicyUrl.getOrElse("None")) shouldBe true
-      inputExistsWithValue(doc, "termsAndConditionsUrl", "text", application.termsAndConditionsUrl.getOrElse("None")) shouldBe true
+      inputExistsWithValue(doc, "privacyPolicyUrl", "text", PrivacyPolicyLocation.asText(application.privacyPolicyLocation)) shouldBe true
+      inputExistsWithValue(doc, "termsAndConditionsUrl", "text", TermsAndConditionsLocation.asText(application.termsAndConditionsLocation)) shouldBe true
     }
 
     def changeDetailsShouldRedirectOnSuccess(application: Application) = {

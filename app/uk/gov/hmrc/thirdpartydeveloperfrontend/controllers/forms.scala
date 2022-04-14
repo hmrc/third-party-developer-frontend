@@ -16,7 +16,7 @@
 
 package uk.gov.hmrc.thirdpartydeveloperfrontend.controllers
 
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.{Application, ApplicationId, Standard}
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.{Application, ApplicationId, PrivacyPolicyLocation, TermsAndConditionsLocation}
 import play.api.data.Form
 import play.api.data.Forms._
 import play.api.data.validation.{Constraint, Invalid, Valid, ValidationError}
@@ -267,14 +267,21 @@ object EditApplicationForm {
   )
 
   def withData(app: Application) = {
-    val appAccess = app.access.asInstanceOf[Standard]
+    val privacyPolicyUrl = app.privacyPolicyLocation match {
+      case PrivacyPolicyLocation.Url(url) => Some(url)
+      case _ => None
+    }
+    val termsAndConditionsUrl = app.termsAndConditionsLocation match {
+      case TermsAndConditionsLocation.Url(url) => Some(url)
+      case _ => None
+    }
     form.fillAndValidate(
       EditApplicationForm(
         app.id,
         app.name,
         app.description,
-        appAccess.privacyPolicyUrl,
-        appAccess.termsAndConditionsUrl,
+        privacyPolicyUrl,
+        termsAndConditionsUrl,
         app.grantLengthDisplayValue
       )
     )

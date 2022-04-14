@@ -43,8 +43,17 @@ class ChangeApplicationDetailsSpec extends CommonViewSpec with WithCSRFAddToken 
 
       val loggedIn = DeveloperSessionBuilder("admin@example.com", "firstName1", "lastName1", loggedInState = LoggedInState.LOGGED_IN)
       val request = FakeRequest().withCSRFToken
+      val privacyPolicyUrl = application.privacyPolicyLocation match {
+        case PrivacyPolicyLocation.Url(url) => Some(url)
+        case _ => None
+      }
+      val termsAndConditionsUrl = application.termsAndConditionsLocation match {
+        case TermsAndConditionsLocation.Url(url) => Some(url)
+        case _ => None
+      }
+
       val form = EditApplicationForm.form.fill(
-        EditApplicationForm(application.id, application.name, application.description, application.privacyPolicyUrl, application.termsAndConditionsUrl, "12 months")
+        EditApplicationForm(application.id, application.name, application.description, privacyPolicyUrl, termsAndConditionsUrl, "12 months")
       )
 
       changeDetails.render(form, ApplicationViewModel(application, hasSubscriptionsFields = false, hasPpnsFields = false), request, loggedIn, messagesProvider, appConfig, "nav-section")
