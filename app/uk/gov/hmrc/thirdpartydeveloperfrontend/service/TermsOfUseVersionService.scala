@@ -28,12 +28,13 @@ import javax.inject.{Inject, Singleton}
 @Singleton
 class TermsOfUseVersionService @Inject() (upliftJourneySwitch: UpliftJourneySwitch, termsOfUseService: TermsOfUseService) {
   def getLatest()(implicit request: Request[AnyContent]): TermsOfUseVersion = {
-    if (upliftJourneySwitch.shouldUseV2) TermsOfUseVersion.latest else TermsOfUseVersion.V1_2
+    if (upliftJourneySwitch.shouldUseV2) TermsOfUseVersion.latest else TermsOfUseVersion.OLD_JOURNEY
   }
 
   def getForApplication(application: Application)(implicit request: Request[AnyContent]): TermsOfUseVersion = {
     termsOfUseService.getAgreementDetails(application).lastOption
-      .flatMap((tou : TermsOfUseAgreementDetails) => TermsOfUseVersion.fromVersionString(tou.version))
+      .flatMap((tou : TermsOfUseAgreementDetails) => tou.version)
+      .flatMap(TermsOfUseVersion.fromVersionString(_))
       .getOrElse(getLatest())
   }
 }

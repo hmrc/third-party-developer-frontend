@@ -121,6 +121,32 @@ class DetailsSpec
         elementExistsByText(document, "h1", "Credentials requested") shouldBe true
         elementExistsByText(document, "span", pendingVerificationApplication.name) shouldBe true
       }
+
+      "redirect to the Start Using Your Application page on an application in pre-production state" in new Setup {
+        val userEmail = "test@example.con"
+        val preProdApplication = anApplication(adminEmail = loggedInDeveloper.email, state = ApplicationState.preProduction(userEmail))
+
+        givenApplicationAction(preProdApplication, loggedInDeveloper)
+
+        val result = addToken(underTest.details(preProdApplication.id))(loggedInRequest)
+
+        status(result) shouldBe SEE_OTHER
+        redirectLocation(result) shouldBe Some(uk.gov.hmrc.apiplatform.modules.submissions.controllers.routes.StartUsingYourApplicationController.startUsingYourApplicationPage(preProdApplication.id).url)
+      }
+
+      "display the Application Details page for an application in pre-production state when the forceAppDetails parameter is used" in new Setup {
+        val userEmail = "test@example.con"
+        val preProdApplication = anApplication(adminEmail = loggedInDeveloper.email, state = ApplicationState.preProduction(userEmail))
+
+        returnAgreementDetails()
+        givenApplicationAction(preProdApplication, loggedInDeveloper)
+        val loggedInRequestWithForceAppDetailsParam = FakeRequest("GET", "/?forceAppDetails").withLoggedIn(underTest, implicitly)(sessionId).withSession(sessionParams: _*)
+        val result = addToken(underTest.details(preProdApplication.id))(loggedInRequestWithForceAppDetailsParam)
+
+        status(result) shouldBe OK
+        val document = Jsoup.parse(contentAsString(result))
+        elementExistsByText(document, "h1", "Application details") shouldBe true
+      }
     }
 
     "not a team member on an application" should {
@@ -404,7 +430,7 @@ class DetailsSpec
       givenApplicationAction(application, loggedInDeveloper)
 
       if (hasTermsOfUseAgreement) {
-        returnAgreementDetails(TermsOfUseAgreementDetails("test@example.com", None, DateTime.now, "1.2"))
+        returnAgreementDetails(TermsOfUseAgreementDetails("test@example.com", None, DateTime.now, Some("1.2")))
       } else {
         returnAgreementDetails()
       }
@@ -418,8 +444,8 @@ class DetailsSpec
       elementIdentifiedByIdContainsText(doc, "applicationId", application.id.value) shouldBe true
       elementIdentifiedByIdContainsText(doc, "applicationName", application.name) shouldBe true
       elementIdentifiedByIdContainsText(doc, "description", application.description.getOrElse("None")) shouldBe true
-      elementIdentifiedByIdContainsText(doc, "privacyPolicyUrl", application.privacyPolicyUrl.getOrElse("None")) shouldBe true
-      elementIdentifiedByIdContainsText(doc, "termsAndConditionsUrl", application.termsAndConditionsUrl.getOrElse("None")) shouldBe true
+      elementIdentifiedByIdContainsText(doc, "privacyPolicyUrl", PrivacyPolicyLocation.asText(application.privacyPolicyLocation)) shouldBe true
+      elementIdentifiedByIdContainsText(doc, "termsAndConditionsUrl", TermsAndConditionsLocation.asText(application.termsAndConditionsLocation)) shouldBe true
       elementExistsContainsText(doc, "td", "Agreed by test@example.com") shouldBe hasTermsOfUseAgreement
     }
 
@@ -439,8 +465,8 @@ class DetailsSpec
         inputExistsWithValue(doc, "applicationName", "hidden", application.name) shouldBe true
       }
       textareaExistsWithText(doc, "description", application.description.getOrElse("None")) shouldBe true
-      inputExistsWithValue(doc, "privacyPolicyUrl", "text", application.privacyPolicyUrl.getOrElse("None")) shouldBe true
-      inputExistsWithValue(doc, "termsAndConditionsUrl", "text", application.termsAndConditionsUrl.getOrElse("None")) shouldBe true
+      inputExistsWithValue(doc, "privacyPolicyUrl", "text", PrivacyPolicyLocation.asText(application.privacyPolicyLocation)) shouldBe true
+      inputExistsWithValue(doc, "termsAndConditionsUrl", "text", TermsAndConditionsLocation.asText(application.termsAndConditionsLocation)) shouldBe true
     }
 
     def changeDetailsShouldRedirectOnSuccess(application: Application) = {

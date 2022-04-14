@@ -17,6 +17,7 @@
 @import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.checkpages.{CheckYourAnswersData, DummyCheckYourAnswersForm}
 @import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.controllers.SaveSubsFieldsPageMode
 @import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers
+@import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.{PrivacyPolicyLocation, TermsAndConditionsLocation}
 
 @(data: CheckYourAnswersData, form: Form[DummyCheckYourAnswersForm], editable: Boolean)(implicit request: play.api.mvc.Request[Any], messages: Messages, applicationConfig: ApplicationConfig)
 
@@ -151,9 +152,7 @@
 
               <tr id="providedPolicyURL">
                   <th class="col-40"><span strong class="bold-small">Privacy policy</span></th>
-                  <td>
-                      @data.privacyPolicyUrl.getOrElse("None")
-                  </td>
+                  <td>@{PrivacyPolicyLocation.asText(data.privacyPolicyLocation)}</td>
                   @if(editable) {
                     <td>
                         <div align="right">
@@ -165,9 +164,7 @@
 
               <tr id="providedTermsAndConditionsURL">
                   <th><span strong class="bold-small">Terms and conditions</span></th>
-                  <td>
-                      @data.termsAndConditionsUrl.getOrElse("None")
-                  </td>
+                  <td>@{TermsAndConditionsLocation.asText(data.termsAndConditionsLocation)}</td>
                   @if(editable) {
                     <td>
                         <div align="right">

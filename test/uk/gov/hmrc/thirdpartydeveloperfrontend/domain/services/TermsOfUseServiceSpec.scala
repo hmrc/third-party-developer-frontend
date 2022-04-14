@@ -56,7 +56,7 @@ class TermsOfUseServiceSpec extends HmrcSpec {
   val version1_2 = "1.2"
   val appWithNoAgreements = buildApplication()
   val checkInfoAgreement = TermsOfUseAgreement(email, timestamp, version1_2)
-  val stdAppAgreement = TermsOfUseAcceptance(responsibleIndividual, timestamp, Submission.Id.random, version1_2)
+  val stdAppAgreement = TermsOfUseAcceptance(responsibleIndividual, timestamp, Submission.Id.random)
   val appWithCheckInfoAgreements = buildApplication(Some(List(checkInfoAgreement)))
   val appWithStdAppAgreements = buildApplication(None, Some(List(stdAppAgreement)))
   val nonStdApp = buildApplication().copy(access = Privileged())
@@ -69,11 +69,11 @@ class TermsOfUseServiceSpec extends HmrcSpec {
     }
     "return correctly populated agreements if details found in CheckInformation" in {
       val agreements = underTest.getAgreementDetails(appWithCheckInfoAgreements)
-      agreements shouldBe List(TermsOfUseAgreementDetails(email, None, timestamp, version1_2))
+      agreements shouldBe List(TermsOfUseAgreementDetails(email, None, timestamp, Some(version1_2)))
     }
     "return correctly populated agreements if details found in ImportantSubmissionData" in {
       val agreements = underTest.getAgreementDetails(appWithStdAppAgreements)
-      agreements shouldBe List(TermsOfUseAgreementDetails(email, Some(name), timestamp, version1_2))
+      agreements shouldBe List(TermsOfUseAgreementDetails(email, Some(name), timestamp, None))
     }
     "return empty list if non-standard app is checked" in {
       val agreements = underTest.getAgreementDetails(nonStdApp)

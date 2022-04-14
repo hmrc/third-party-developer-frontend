@@ -18,10 +18,12 @@ package uk.gov.hmrc.apiplatform.modules.submissions.services
 
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.AsyncHmrcSpec
 import uk.gov.hmrc.apiplatform.modules.submissions.connectors.ThirdPartyApplicationSubmissionsConnector
+
 import scala.concurrent.Future.successful
 import uk.gov.hmrc.apiplatform.modules.submissions.SubmissionsTestData
 import uk.gov.hmrc.http.HeaderCarrier
-import uk.gov.hmrc.apiplatform.modules.submissions.domain.models.Submission
+import uk.gov.hmrc.apiplatform.modules.submissions.domain.models.{Submission,Question}
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.ApplicationId
 
 class SubmissionServiceSpec extends AsyncHmrcSpec {
   trait Setup extends SubmissionsTestData {
@@ -34,7 +36,7 @@ class SubmissionServiceSpec extends AsyncHmrcSpec {
     )
   }
 
-  "SubmissionService" should {
+  "fetch" should {
     "return extended submission for given submission id" in new Setup {
       when(mockSubmissionsConnector.fetchSubmission(*[Submission.Id])(*)).thenReturn(successful(Some(completelyAnswerExtendedSubmission)))
 
@@ -42,6 +44,54 @@ class SubmissionServiceSpec extends AsyncHmrcSpec {
       
       result shouldBe 'defined
       result.get.submission.id shouldBe completelyAnswerExtendedSubmission.submission.id
+    }
+
+    "return latest submission for given application id" in new Setup {
+      when(mockSubmissionsConnector.fetchLatestSubmission(*[ApplicationId])(*)).thenReturn(successful(Some(aSubmission)))
+
+      val result = await(underTest.fetchLatestSubmission(aSubmission.applicationId))
+      
+      result shouldBe 'defined
+      result.get.id shouldBe aSubmission.id
+    }
+
+    "return latest extended submission for given application id" in new Setup {
+      when(mockSubmissionsConnector.fetchLatestExtendedSubmission(*[ApplicationId])(*)).thenReturn(successful(Some(completelyAnswerExtendedSubmission)))
+
+      val result = await(underTest.fetchLatestExtendedSubmission(completelyAnswerExtendedSubmission.submission.applicationId))
+      
+      result shouldBe 'defined
+      result.get.submission.id shouldBe completelyAnswerExtendedSubmission.submission.id
+    }
+
+    "record answer for given submisson id and question id" in new Setup {
+      when(mockSubmissionsConnector.recordAnswer(*[Submission.Id], *[Question.Id], *)(*)).thenReturn(successful(Right(answeringSubmission.withIncompleteProgress())))
+
+      val result = await(underTest.recordAnswer(completelyAnswerExtendedSubmission.submission.id, questionId, List("")))
+      
+      // result shouldBe 'defined
+      result.isRight shouldBe true
+    }
+  }
+
+  "confirmSetupComplete" should {
+    val emailAddress = "user@example.com"
+    val err = "nope"
+
+    "return without errors if TPA connector call was successful" in new Setup {
+      when(mockSubmissionsConnector.confirmSetupComplete(applicationId, emailAddress)).thenReturn(successful(Right()))
+
+      val result = await(underTest.confirmSetupComplete(applicationId, emailAddress))
+
+      result shouldBe Right()
+    }
+
+    "return an error message if TPA connector call fails" in new Setup {
+      when(mockSubmissionsConnector.confirmSetupComplete(applicationId, emailAddress)).thenReturn(successful(Left(err)))
+
+      val result = await(underTest.confirmSetupComplete(applicationId, emailAddress))
+
+      result shouldBe Left(err)
     }
   }
 }

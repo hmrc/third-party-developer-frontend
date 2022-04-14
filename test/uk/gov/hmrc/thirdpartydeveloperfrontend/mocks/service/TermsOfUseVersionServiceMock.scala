@@ -26,6 +26,6 @@ trait TermsOfUseVersionServiceMock extends MockitoSugar with ArgumentMatchersSug
 
   def returnLatestTermsOfUseVersion = when(termsOfUseVersionServiceMock.getLatest()(*)).thenReturn(TermsOfUseVersion.latest)
 
-  def returnTermsOfUseVersionForApplication = when(termsOfUseVersionServiceMock.getForApplication(*[Application])(*)).thenReturn(TermsOfUseVersion.V2_0)
+  def returnTermsOfUseVersionForApplication = when(termsOfUseVersionServiceMock.getForApplication(*[Application])(*)).thenReturn(TermsOfUseVersion.NEW_JOURNEY)
 
 }
