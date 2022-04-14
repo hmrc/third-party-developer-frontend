@@ -16,7 +16,7 @@
 
 package uk.gov.hmrc.apiplatform.modules.submissions.controllers
 
-import play.api.http.Status.{OK,BAD_REQUEST}
+import play.api.http.Status.{BAD_REQUEST, NOT_FOUND, OK}
 import play.api.test.FakeRequest
 import play.api.test.Helpers.status
 import play.filters.csrf.CSRF
@@ -99,7 +99,7 @@ class TermsOfUseResponsesControllerSpec
   }
 
   "termsOfUseResponsesPage" should {
-    "succeed when submission is granted and application is in production" in new Setup {
+    "succeed when application is in production" in new Setup {
       givenAppInState(ApplicationState.production("requestedBy", "verificationCode"))
       SubmissionServiceMock.FetchLatestExtendedSubmission.thenReturns(grantedSubmission.withCompletedProgress())
 
@@ -114,7 +114,7 @@ class TermsOfUseResponsesControllerSpec
 
       val result = underTest.termsOfUseResponsesPage(appId)(loggedInRequest.withCSRFToken)
 
-      status(result) shouldBe BAD_REQUEST
+      status(result) shouldBe NOT_FOUND
     }
   }
 
