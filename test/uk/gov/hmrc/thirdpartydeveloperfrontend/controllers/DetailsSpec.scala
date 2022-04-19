@@ -173,10 +173,13 @@ class DetailsSpec
 }
 
   "changeDetails" should {
-    "return the view for an admin on a standard production app" in new Setup {
-      changeDetailsShouldRenderThePage(
-        anApplication(adminEmail = loggedInDeveloper.email)
-      )
+    "return forbidden for an admin on a standard production app" in new Setup {
+      val application = anApplication(adminEmail = loggedInDeveloper.email)
+      givenApplicationAction(application, loggedInDeveloper)
+
+      val result = application.callChangeDetails
+
+      status(result) shouldBe FORBIDDEN
     }
 
     "return the view for a developer on a sandbox app" in new Setup {
@@ -239,7 +242,7 @@ class DetailsSpec
 
   "changeDetailsAction validation" should {
     "not pass when application is updated with empty name" in new Setup {
-      val application = anApplication(adminEmail = loggedInDeveloper.email)
+      val application = aSandboxApplication(adminEmail = loggedInDeveloper.email)
       givenApplicationAction(application, loggedInDeveloper)
 
       val result = application.withName("").callChangeDetailsAction
@@ -248,7 +251,7 @@ class DetailsSpec
     }
 
     "not pass when application is updated with invalid name" in new Setup {
-      val application = anApplication(adminEmail = loggedInDeveloper.email)
+      val application = aSandboxApplication(adminEmail = loggedInDeveloper.email)
       givenApplicationAction(application, loggedInDeveloper)
 
       val result = application.withName("a").callChangeDetailsAction
@@ -260,7 +263,7 @@ class DetailsSpec
       when(underTest.applicationService.isApplicationNameValid(*, *, *)(*))
         .thenReturn(Future.successful(Invalid.invalidName))
 
-      val application = anApplication(adminEmail = loggedInDeveloper.email)
+      val application = aSandboxApplication(adminEmail = loggedInDeveloper.email)
       givenApplicationAction(application, loggedInDeveloper)
 
       val result = application.withName("my invalid HMRC application name").callChangeDetailsAction
@@ -305,12 +308,6 @@ class DetailsSpec
 
   "changeDetailsAction for production app in uplifted state" should {
 
-    "redirect to the details page on success for an admin" in new Setup {
-      val application = anApplication(adminEmail = loggedInDeveloper.email)
-
-      changeDetailsShouldRedirectOnSuccess(application)
-    }
-
     "return forbidden for a developer" in new Setup {
       val application = anApplication(developerEmail = loggedInDeveloper.email)
 
@@ -321,15 +318,14 @@ class DetailsSpec
       status(result) shouldBe FORBIDDEN
     }
 
-    "keep original application name when administrator does an update" in new Setup {
+    "return forbidden for an admin" in new Setup {
       val application = anApplication(adminEmail = loggedInDeveloper.email)
 
       givenApplicationAction(application, loggedInDeveloper)
 
-      application.withName(newName).callChangeDetailsAction
+      val result = application.withDescription(newDescription).callChangeDetailsAction
 
-      val updatedApplication = captureUpdatedApplication
-      updatedApplication.name shouldBe application.name
+      status(result) shouldBe FORBIDDEN
     }
   }
 
