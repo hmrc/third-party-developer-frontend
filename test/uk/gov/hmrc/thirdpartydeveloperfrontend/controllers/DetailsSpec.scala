@@ -16,6 +16,7 @@
 
 package uk.gov.hmrc.thirdpartydeveloperfrontend.controllers
 
+import org.joda.time.DateTime
 import uk.gov.hmrc.thirdpartydeveloperfrontend.builder.DeveloperBuilder
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications._
@@ -44,6 +45,7 @@ import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.LocalUserIdTracker
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.TestApplications
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.CollaboratorTracker
 import uk.gov.hmrc.apiplatform.modules.submissions.services.mocks.SubmissionServiceMockModule
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.services.TermsOfUseService.TermsOfUseAgreementDetails
 
 class DetailsSpec 
     extends BaseControllerSpec 
@@ -61,8 +63,13 @@ class DetailsSpec
         detailsShouldRenderThePage(approvedApplication, hasChangeButton = false)
       }
 
+      "return the view for a standard production app with terms of use not agreed"  in new Setup {
+        val approvedApplication = anApplication(developerEmail = loggedInDeveloper.email)
+        detailsShouldRenderThePage(approvedApplication, hasChangeButton = false, hasTermsOfUseAgreement = false)
+      }
+
       "return the view for a developer on a sandbox app" in new Setup {
-        detailsShouldRenderThePage(aSandboxApplication(developerEmail = loggedInDeveloper.email))
+        detailsShouldRenderThePage(aSandboxApplication(developerEmail = loggedInDeveloper.email), hasTermsOfUseAgreement = false)
       }
     }
 
@@ -73,7 +80,7 @@ class DetailsSpec
       }
 
       "return the view for an admin on a sandbox app" in new Setup {
-        detailsShouldRenderThePage(aSandboxApplication(adminEmail = loggedInDeveloper.email))
+        detailsShouldRenderThePage(aSandboxApplication(adminEmail = loggedInDeveloper.email), hasTermsOfUseAgreement = false)
       }
 
       "return a redirect when using an application in testing state" in new Setup {
@@ -114,6 +121,32 @@ class DetailsSpec
         elementExistsByText(document, "h1", "Credentials requested") shouldBe true
         elementExistsByText(document, "span", pendingVerificationApplication.name) shouldBe true
       }
+
+      "redirect to the Start Using Your Application page on an application in pre-production state" in new Setup {
+        val userEmail = "test@example.con"
+        val preProdApplication = anApplication(adminEmail = loggedInDeveloper.email, state = ApplicationState.preProduction(userEmail))
+
+        givenApplicationAction(preProdApplication, loggedInDeveloper)
+
+        val result = addToken(underTest.details(preProdApplication.id))(loggedInRequest)
+
+        status(result) shouldBe SEE_OTHER
+        redirectLocation(result) shouldBe Some(uk.gov.hmrc.apiplatform.modules.submissions.controllers.routes.StartUsingYourApplicationController.startUsingYourApplicationPage(preProdApplication.id).url)
+      }
+
+      "display the Application Details page for an application in pre-production state when the forceAppDetails parameter is used" in new Setup {
+        val userEmail = "test@example.con"
+        val preProdApplication = anApplication(adminEmail = loggedInDeveloper.email, state = ApplicationState.preProduction(userEmail))
+
+        returnAgreementDetails()
+        givenApplicationAction(preProdApplication, loggedInDeveloper)
+        val loggedInRequestWithForceAppDetailsParam = FakeRequest("GET", "/?forceAppDetails").withLoggedIn(underTest, implicitly)(sessionId).withSession(sessionParams: _*)
+        val result = addToken(underTest.details(preProdApplication.id))(loggedInRequestWithForceAppDetailsParam)
+
+        status(result) shouldBe OK
+        val document = Jsoup.parse(contentAsString(result))
+        elementExistsByText(document, "h1", "Application details") shouldBe true
+      }
     }
 
     "not a team member on an application" should {
@@ -137,13 +170,16 @@ class DetailsSpec
         redirectsToLogin(result)
       }
     }
-  }
+}
 
   "changeDetails" should {
-    "return the view for an admin on a standard production app" in new Setup {
-      changeDetailsShouldRenderThePage(
-        anApplication(adminEmail = loggedInDeveloper.email)
-      )
+    "return forbidden for an admin on a standard production app" in new Setup {
+      val application = anApplication(adminEmail = loggedInDeveloper.email)
+      givenApplicationAction(application, loggedInDeveloper)
+
+      val result = application.callChangeDetails
+
+      status(result) shouldBe FORBIDDEN
     }
 
     "return the view for a developer on a sandbox app" in new Setup {
@@ -206,7 +242,7 @@ class DetailsSpec
 
   "changeDetailsAction validation" should {
     "not pass when application is updated with empty name" in new Setup {
-      val application = anApplication(adminEmail = loggedInDeveloper.email)
+      val application = aSandboxApplication(adminEmail = loggedInDeveloper.email)
       givenApplicationAction(application, loggedInDeveloper)
 
       val result = application.withName("").callChangeDetailsAction
@@ -215,7 +251,7 @@ class DetailsSpec
     }
 
     "not pass when application is updated with invalid name" in new Setup {
-      val application = anApplication(adminEmail = loggedInDeveloper.email)
+      val application = aSandboxApplication(adminEmail = loggedInDeveloper.email)
       givenApplicationAction(application, loggedInDeveloper)
 
       val result = application.withName("a").callChangeDetailsAction
@@ -227,7 +263,7 @@ class DetailsSpec
       when(underTest.applicationService.isApplicationNameValid(*, *, *)(*))
         .thenReturn(Future.successful(Invalid.invalidName))
 
-      val application = anApplication(adminEmail = loggedInDeveloper.email)
+      val application = aSandboxApplication(adminEmail = loggedInDeveloper.email)
       givenApplicationAction(application, loggedInDeveloper)
 
       val result = application.withName("my invalid HMRC application name").callChangeDetailsAction
@@ -272,12 +308,6 @@ class DetailsSpec
 
   "changeDetailsAction for production app in uplifted state" should {
 
-    "redirect to the details page on success for an admin" in new Setup {
-      val application = anApplication(adminEmail = loggedInDeveloper.email)
-
-      changeDetailsShouldRedirectOnSuccess(application)
-    }
-
     "return forbidden for a developer" in new Setup {
       val application = anApplication(developerEmail = loggedInDeveloper.email)
 
@@ -288,15 +318,14 @@ class DetailsSpec
       status(result) shouldBe FORBIDDEN
     }
 
-    "keep original application name when administrator does an update" in new Setup {
+    "return forbidden for an admin" in new Setup {
       val application = anApplication(adminEmail = loggedInDeveloper.email)
 
       givenApplicationAction(application, loggedInDeveloper)
 
-      application.withName(newName).callChangeDetailsAction
+      val result = application.withDescription(newDescription).callChangeDetailsAction
 
-      val updatedApplication = captureUpdatedApplication
-      updatedApplication.name shouldBe application.name
+      status(result) shouldBe FORBIDDEN
     }
   }
 
@@ -329,7 +358,7 @@ class DetailsSpec
     }
   }
 
-  trait Setup extends ApplicationServiceMock with ApplicationActionServiceMock {
+  trait Setup extends ApplicationServiceMock with ApplicationActionServiceMock with TermsOfUseServiceMock {
     val unauthorisedAppDetailsView = app.injector.instanceOf[UnauthorisedAppDetailsView]
     val pendingApprovalView = app.injector.instanceOf[PendingApprovalView]
     val detailsView = app.injector.instanceOf[DetailsView]
@@ -347,7 +376,8 @@ class DetailsSpec
       detailsView,
       changeDetailsView,
       fraudPreventionConfig,
-      SubmissionServiceMock.aMock
+      SubmissionServiceMock.aMock,
+      termsOfUseServiceMock
     )
 
     implicit val hc: HeaderCarrier = HeaderCarrier()
@@ -392,19 +422,27 @@ class DetailsSpec
       redirectLocation(result) shouldBe Some(routes.UserLoginAccount.login().url)
     }
 
-    def detailsShouldRenderThePage(application: Application, hasChangeButton: Boolean = true) = {
+    def detailsShouldRenderThePage(application: Application, hasChangeButton: Boolean = true, hasTermsOfUseAgreement: Boolean = true) = {
       givenApplicationAction(application, loggedInDeveloper)
+
+      if (hasTermsOfUseAgreement) {
+        returnAgreementDetails(TermsOfUseAgreementDetails("test@example.com", None, DateTime.now, Some("1.2")))
+      } else {
+        returnAgreementDetails()
+      }
 
       val result = application.callDetails
 
       status(result) shouldBe OK
       val doc = Jsoup.parse(contentAsString(result))
-      linkExistsWithHref(doc, routes.Details.changeDetails(application.id).url) shouldBe hasChangeButton
+      // APIS-5669 - temporarily removed Change link
+      // linkExistsWithHref(doc, routes.Details.changeDetails(application.id).url) shouldBe hasChangeButton
       elementIdentifiedByIdContainsText(doc, "applicationId", application.id.value) shouldBe true
       elementIdentifiedByIdContainsText(doc, "applicationName", application.name) shouldBe true
       elementIdentifiedByIdContainsText(doc, "description", application.description.getOrElse("None")) shouldBe true
-      elementIdentifiedByIdContainsText(doc, "privacyPolicyUrl", application.privacyPolicyUrl.getOrElse("None")) shouldBe true
-      elementIdentifiedByIdContainsText(doc, "termsAndConditionsUrl", application.termsAndConditionsUrl.getOrElse("None")) shouldBe true
+      elementIdentifiedByIdContainsText(doc, "privacyPolicyUrl", PrivacyPolicyLocation.asText(application.privacyPolicyLocation)) shouldBe true
+      elementIdentifiedByIdContainsText(doc, "termsAndConditionsUrl", TermsAndConditionsLocation.asText(application.termsAndConditionsLocation)) shouldBe true
+      elementExistsContainsText(doc, "td", "Agreed by test@example.com") shouldBe hasTermsOfUseAgreement
     }
 
     def changeDetailsShouldRenderThePage(application: Application) = {
@@ -423,8 +461,8 @@ class DetailsSpec
         inputExistsWithValue(doc, "applicationName", "hidden", application.name) shouldBe true
       }
       textareaExistsWithText(doc, "description", application.description.getOrElse("None")) shouldBe true
-      inputExistsWithValue(doc, "privacyPolicyUrl", "text", application.privacyPolicyUrl.getOrElse("None")) shouldBe true
-      inputExistsWithValue(doc, "termsAndConditionsUrl", "text", application.termsAndConditionsUrl.getOrElse("None")) shouldBe true
+      inputExistsWithValue(doc, "privacyPolicyUrl", "text", PrivacyPolicyLocation.asText(application.privacyPolicyLocation)) shouldBe true
+      inputExistsWithValue(doc, "termsAndConditionsUrl", "text", TermsAndConditionsLocation.asText(application.termsAndConditionsLocation)) shouldBe true
     }
 
     def changeDetailsShouldRedirectOnSuccess(application: Application) = {

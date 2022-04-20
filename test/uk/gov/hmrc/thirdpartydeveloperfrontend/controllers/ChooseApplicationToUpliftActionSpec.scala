@@ -151,13 +151,15 @@ class ChooseApplicationToUpliftActionSpec
   "chooseApplicationToUpliftAction" should {
     "go back to the form when no app is selected" in new Setup {
       val summaries = sandboxAppSummaries
-      aUsersUplfitableAndNotUpliftableAppsReturns(summaries, List.empty, List.empty)
+      aUsersUplfitableAndNotUpliftableAppsReturns(summaries, summaries.map(_.id), List.empty)
 
-      when(flowServiceMock.storeApiSubscriptions(*, *)).thenReturn(Future.successful(GetProductionCredentialsFlow("", None, None, None)))
+      when(flowServiceMock.storeApiSubscriptions(*, *)).thenReturn(Future.successful(GetProductionCredentialsFlow("", None, None)))
 
       val result = underTest.chooseApplicationToUpliftAction()(loggedInRequest.withFormUrlEncodedBody(("applicationId" -> "")))
 
       status(result) shouldBe BAD_REQUEST
+
+      contentAsString(result) should include("Select the application you want production credentials for")
     }
     
     "go to next stage in journey when one app is selected and uplifted" in new Setup {
@@ -167,7 +169,7 @@ class ChooseApplicationToUpliftActionSpec
       val subsetOfSubscriptions = summaries.head.subscriptionIds.take(1)
       ApmConnectorMock.FetchUpliftableSubscriptions.willReturn(subsetOfSubscriptions)
       aUsersUplfitableAndNotUpliftableAppsReturns(summaries, summaries.map(_.id), List.empty)
-      when(flowServiceMock.storeApiSubscriptions(*, *)).thenReturn(Future.successful(GetProductionCredentialsFlow("", None, None, None)))
+      when(flowServiceMock.storeApiSubscriptions(*, *)).thenReturn(Future.successful(GetProductionCredentialsFlow("", None, None)))
 
       val result = underTest.chooseApplicationToUpliftAction()(loggedInRequest.withFormUrlEncodedBody(("applicationId" -> sandboxAppId.value)))
 

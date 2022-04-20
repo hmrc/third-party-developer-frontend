@@ -17,18 +17,17 @@
 package uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications
 
 import java.time.Period
-
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.apidefinitions.AccessType.STANDARD
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.Capabilities.{ChangeClientSecret, SupportsDetails, ViewPushSecret}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.Environment._
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.Permissions.SandboxOrAdmin
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.Permissions.{ProductionAndAdmin, SandboxOnly, SandboxOrAdmin}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.CollaboratorRole.ADMINISTRATOR
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.State.{PENDING_GATEKEEPER_APPROVAL, PENDING_REQUESTER_VERIFICATION, TESTING}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.Developer
 import uk.gov.hmrc.thirdpartydeveloperfrontend.helpers.string.Digest
 import org.joda.time.DateTime
-import java.util.UUID
 
+import java.util.UUID
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.UserId
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.apidefinitions.ApiIdentifier
 
@@ -96,17 +95,21 @@ trait BaseApplication {
     }
   }
 
-  def privacyPolicyUrl = access match {
-    case x: Standard => x.privacyPolicyUrl
-    case _           => None
+  def privacyPolicyLocation = access match {
+    case Standard(_, _, _, _, _, Some(ImportantSubmissionData(_, _, _, _, privacyPolicyLocation, _))) => privacyPolicyLocation
+    case Standard(_, _, Some(url), _, _, None) => PrivacyPolicyLocation.Url(url)
+    case _ => PrivacyPolicyLocation.NoneProvided
   }
 
-  def termsAndConditionsUrl = access match {
-    case x: Standard => x.termsAndConditionsUrl
-    case _           => None
+  def termsAndConditionsLocation = access match {
+    case Standard(_, _, _, _, _, Some(ImportantSubmissionData(_, _, _, termsAndConditionsLocation, _, _))) => termsAndConditionsLocation
+    case Standard(_, Some(url), _, _, _, None) => TermsAndConditionsLocation.Url(url)
+    case _ => TermsAndConditionsLocation.NoneProvided
   }
 
-  def isPermittedToEditAppDetails(developer: Developer): Boolean = allows(SupportsDetails, developer, SandboxOrAdmin)
+  def isPermittedToEditAppDetails(developer: Developer): Boolean = allows(SupportsDetails, developer, SandboxOnly)
+
+  def isPermittedToAgreeToTermsOfUse(developer: Developer): Boolean = allows(SupportsDetails, developer, ProductionAndAdmin)
 
   /*
   Allows access to at least one of (client id, client secrets and server token) (where appropriate)
@@ -147,7 +150,10 @@ trait BaseApplication {
     case _           => false
   }
 
-  def hasLockedSubscriptions = deployedTo.isProduction && state.name != State.TESTING
+  def isInTesting = state.isInTesting
+  def isPendingApproval = state.isPendingApproval
+  def isApproved = state.isApproved
+  def hasLockedSubscriptions = deployedTo.isProduction && ! isInTesting
 
   def findCollaboratorByHash(teamMemberHash: String): Option[Collaborator] = {
     collaborators.find(c => c.emailAddress.toSha256 == teamMemberHash)
@@ -169,7 +175,6 @@ trait BaseApplication {
   }
 }
 
-
 case class Application(
   val id: ApplicationId,
   val clientId: ClientId,
@@ -186,7 +191,6 @@ case class Application(
   val checkInformation: Option[CheckInformation] = None,
   val ipAllowlist: IpAllowlist = IpAllowlist()
 ) extends BaseApplication
-
 
 object Application {
   import play.api.libs.json.Json

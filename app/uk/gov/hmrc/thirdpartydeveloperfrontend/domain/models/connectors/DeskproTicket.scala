@@ -38,6 +38,23 @@ case class DeskproTicket(
 object DeskproTicket extends FieldTransformer {
   implicit val format = Json.format[DeskproTicket]
 
+  def createForRequestProductionCredentials(requestorName: String, requestorEmail: String, applicationName: String, applicationId: ApplicationId): DeskproTicket = {
+    val message =
+      s"""$requestorEmail submitted the following application for production use on the Developer Hub:
+         |$applicationName
+         |Please check it against our guidelines and send them a response within 2 working days.
+         |HMRC Developer Hub
+         |""".stripMargin
+
+    DeskproTicket(
+      requestorName,
+      requestorEmail,
+      "New application submitted for checking",
+      message,
+      uk.gov.hmrc.apiplatform.modules.submissions.controllers.routes.CheckAnswersController.checkAnswersPage(applicationId).url
+    )
+  }
+
   def createForUplift(requestorName: String, requestorEmail: String, applicationName: String, applicationId: ApplicationId): DeskproTicket = {
     val message =
       s"""$requestorEmail submitted the following application for production use on the Developer Hub:

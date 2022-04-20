@@ -14,6 +14,7 @@
  * limitations under the License.
  *@
 
+@import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.views.BackButtonWithJavaScript
 @import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.DeveloperSession
 @import include._
 @import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.controllers.Crumb
@@ -37,7 +38,7 @@
 @devMain(
   title = pageHeading,
   userFullName = loggedIn.loggedInName,
-  breadcrumbs = Seq(Crumb.emailPreferences, Crumb.viewAllApplications, Crumb.home),
+  back = BackButtonWithJavaScript,
   developerSession = Some(loggedIn)
 ) {
   @if(viewData.unsubscribed) {

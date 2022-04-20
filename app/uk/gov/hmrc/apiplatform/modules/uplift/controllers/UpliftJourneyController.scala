@@ -22,7 +22,7 @@ import uk.gov.hmrc.thirdpartydeveloperfrontend.connectors.ApmConnector
 import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.checkpages.{CanUseCheckActions, DummySubscriptionsForm}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.apidefinitions.APISubscriptionStatus
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.ApplicationId
-import uk.gov.hmrc.apiplatform.modules.uplift.domain.models.{ApiSubscriptions, ResponsibleIndividual, SellResellOrDistribute}
+import uk.gov.hmrc.apiplatform.modules.uplift.domain.models.{ApiSubscriptions}
 import play.api.data.Forms._
 import play.api.data.{Form, FormError}
 import play.api.libs.crypto.CookieSigner
@@ -38,7 +38,6 @@ import scala.concurrent.Future.successful
 import scala.concurrent.{ExecutionContext, Future}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.ApplicationController
 import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.APISubscriptions
-import play.api.data.Forms
 import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.FormKeys
 import uk.gov.hmrc.apiplatform.modules.uplift.services.UpliftJourneyService
 import uk.gov.hmrc.thirdpartydeveloperfrontend.config.UpliftJourneyConfig
@@ -46,6 +45,7 @@ import uk.gov.hmrc.thirdpartydeveloperfrontend.config.{On, OnDemand}
 import play.api.mvc.Request
 import scala.util.Try
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.controllers.BadRequestWithErrorMessage
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.SellResellOrDistribute
 
 object UpliftJourneyController {
 
@@ -56,29 +56,6 @@ object UpliftJourneyController {
       mapping(
         "applicationId" -> nonEmptyText.transform[ApplicationId](ApplicationId(_), id => id.value)
       )(ChooseApplicationToUpliftForm.apply)(ChooseApplicationToUpliftForm.unapply)
-    )
-  }
-
-  case class ResponsibleIndividualForm(fullName: String, emailAddress: String)
-
-  object ResponsibleIndividualForm {
-    import uk.gov.hmrc.emailaddress.EmailAddress
-    import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.FormKeys._
-    import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.textValidator
-
-    lazy val fullnameValidator = textValidator(responsibleIndividualFullnameRequiredKey, fullnameMaxLengthKey, 100)
-
-    lazy val emailValidator =
-      Forms.text
-        .verifying(emailaddressNotValidKey, email => EmailAddress.isValid(email) || email.length == 0)
-        .verifying(emailMaxLengthKey, email => email.length <= 320)
-        .verifying(responsibleIndividualEmailAddressRequiredKey, email => email.length > 0)
-
-    def form: Form[ResponsibleIndividualForm] = Form(
-      mapping(
-        "fullName" -> fullnameValidator,
-        "emailAddress" -> emailValidator
-      )(ResponsibleIndividualForm.apply)(ResponsibleIndividualForm.unapply)
     )
   }
 
@@ -104,9 +81,10 @@ class UpliftJourneyController @Inject() (val errorHandler: ErrorHandler,
                       confirmApisView: ConfirmApisView,
                       turnOffApisMasterView: TurnOffApisMasterView,
                       val apmConnector: ApmConnector,
-                      responsibleIndividualView: ResponsibleIndividualView,
                       flowService: GetProductionCredentialsFlowService,
                       sellResellOrDistributeSoftwareView: SellResellOrDistributeSoftwareView,
+                      weWillCheckYourAnswersView: WeWillCheckYourAnswersView,
+                      beforeYouStartView: BeforeYouStartView,
                       upliftJourneySwitch: UpliftJourneySwitch)
                      (implicit val ec: ExecutionContext, val appConfig: ApplicationConfig)
   extends ApplicationController(mcc)
@@ -114,7 +92,6 @@ class UpliftJourneyController @Inject() (val errorHandler: ErrorHandler,
 
   import UpliftJourneyController._
 
-  val responsibleIndividualForm: Form[ResponsibleIndividualForm] = ResponsibleIndividualForm.form
   val sellResellOrDistributeForm: Form[SellResellOrDistributeForm] = SellResellOrDistributeForm.form
 
   def confirmApiSubscriptionsPage(sandboxAppId: ApplicationId): Action[AnyContent] = whenTeamMemberOnApp(sandboxAppId) { implicit request =>
@@ -186,29 +163,6 @@ class UpliftJourneyController @Inject() (val errorHandler: ErrorHandler,
     }
   }
 
-  def responsibleIndividual(sandboxAppId: ApplicationId): Action[AnyContent] = whenTeamMemberOnApp(sandboxAppId) { implicit request =>
-    for {
-      responsibleIndividual <- flowService.findResponsibleIndividual(request.developerSession)
-      form = responsibleIndividual.fold[Form[ResponsibleIndividualForm]](responsibleIndividualForm)(x => responsibleIndividualForm.fill(ResponsibleIndividualForm(x.fullName, x.emailAddress)))
-    } yield Ok(responsibleIndividualView(sandboxAppId, form))
-  }
-
-  def responsibleIndividualAction(sandboxAppId: ApplicationId): Action[AnyContent] = whenTeamMemberOnApp(sandboxAppId) { implicit request =>
-
-    def handleValidForm(form: ResponsibleIndividualForm): Future[Result] = {
-      val responsibleIndividual = ResponsibleIndividual(form.fullName, form.emailAddress)
-      for {
-        _ <- flowService.storeResponsibleIndividual(responsibleIndividual, request.developerSession)
-      } yield Redirect(uk.gov.hmrc.apiplatform.modules.uplift.controllers.routes.UpliftJourneyController.sellResellOrDistributeYourSoftware(sandboxAppId))
-    }
-  
-    def handleInvalidForm(form: Form[ResponsibleIndividualForm]): Future[Result] = {
-      successful(BadRequest(responsibleIndividualView(sandboxAppId, form)))
-    }
-
-    responsibleIndividualForm.bindFromRequest.fold(handleInvalidForm, handleValidForm)
-  }
-
   def sellResellOrDistributeYourSoftware(sandboxAppId: ApplicationId): Action[AnyContent] = whenTeamMemberOnApp(sandboxAppId) { implicit request =>
     for {
       sellResellOrDistribute <- flowService.findSellResellOrDistribute(request.developerSession)
@@ -219,7 +173,7 @@ class UpliftJourneyController @Inject() (val errorHandler: ErrorHandler,
   def sellResellOrDistributeYourSoftwareAction(sandboxAppId: ApplicationId): Action[AnyContent] = whenTeamMemberOnApp(sandboxAppId) { implicit request =>
 
     def handleInvalidForm(formWithErrors: Form[SellResellOrDistributeForm]) =
-      Future(BadRequest(sellResellOrDistributeSoftwareView(sandboxAppId, formWithErrors)))
+      successful(BadRequest(sellResellOrDistributeSoftwareView(sandboxAppId, formWithErrors)))
 
     def handleValidForm(validForm: SellResellOrDistributeForm) = {
       validForm.answer match {
@@ -232,7 +186,16 @@ class UpliftJourneyController @Inject() (val errorHandler: ErrorHandler,
         case None => throw new IllegalStateException("Should never get here")
       }
     }
+
     sellResellOrDistributeForm.bindFromRequest.fold(handleInvalidForm, handleValidForm)
+  }
+
+  def beforeYouStart(sandboxAppId: ApplicationId): Action[AnyContent] = whenTeamMemberOnApp(sandboxAppId) { implicit request =>
+    successful(Ok(beforeYouStartView(sandboxAppId)))
+  }
+
+  def weWillCheckYourAnswers(sandboxAppId: ApplicationId): Action[AnyContent] = whenTeamMemberOnApp(sandboxAppId) { implicit request =>
+    successful(Ok(weWillCheckYourAnswersView(sandboxAppId)))
   }
 }
 

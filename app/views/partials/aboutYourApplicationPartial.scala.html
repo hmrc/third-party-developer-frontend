@@ -17,6 +17,7 @@
 @import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.checkpages.{CheckYourAnswersData, DummyCheckYourAnswersForm}
 @import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.controllers.SaveSubsFieldsPageMode
 @import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers
+@import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.{PrivacyPolicyLocation, TermsAndConditionsLocation}
 
 @(data: CheckYourAnswersData, form: Form[DummyCheckYourAnswersForm], editable: Boolean)(implicit request: play.api.mvc.Request[Any], messages: Messages, applicationConfig: ApplicationConfig)
 
@@ -156,7 +157,7 @@
           <span class="govuk-!-font-weight-bold">Privacy policy</span>
         </th>
         <td class="govuk-table__cell">
-          @data.privacyPolicyUrl.getOrElse("None")
+          @{PrivacyPolicyLocation.asText(data.privacyPolicyLocation)}
         </td>
         @if(editable) {
           <td class="govuk-table__cell">
@@ -167,41 +168,40 @@
         }
       </tr>
 
-      <tr id="providedTermsAndConditionsURL">
-        <th scope="row" class="govuk-table__header">
-          <span class="govuk-!-font-weight-bold">Terms and conditions</span>
-        </th>
-        <td class="govuk-table__cell">
-          @data.termsAndConditionsUrl.getOrElse("None")
-        </td>
-        @if(editable) {
-          <td class="govuk-table__cell">
-            <div align="right">
-              <a class="govuk-link" href="@controllers.checkpages.routes.CheckYourAnswers.termsAndConditionsPage(data.appId)">Change<span class="govuk-visually-hidden">Edit Terms and conditions</span></a>
-            </div>
-          </td>
-        }
+      <tr class="govuk-table__row" id="providedTermsAndConditionsURL">
+          <th scope="row" class="govuk-table__header">
+            <span class="govuk-!-font-weight-bold">Terms and conditions</span>
+          </th>
+          <td class="govuk-table__cell">@{TermsAndConditionsLocation.asText(data.termsAndConditionsLocation)}</td>
+          @if(editable) {
+            <td class="govuk-table__cell">
+                <div align="right">
+                    <a class="govuk-link" href="@controllers.checkpages.routes.CheckYourAnswers.termsAndConditionsPage(data.appId)">Change<span class="govuk-visually-hidden">Edit Terms and conditions</span></a>
+                </div>
+            </td>
+          }
       </tr>
 
-      <tr id="agreeTermsOfUse">
-        <th scope="row" class="govuk-table__header">
-          <span class="govuk-!-font-weight-bold">Terms of use</span>
-        </th>
-        <td class="govuk-table__cell">
-          @if(data.acceptedTermsOfUse) { Accepted } else { Not Accepted }
-        </td>
-        @if(editable) {
+      <tr class="govuk-table__row" id="agreeTermsOfUse">
+          <th scope="row" class="govuk-table__header">
+            <span class="govuk-!-font-weight-bold">Terms of use</span>
+          </th>
           <td class="govuk-table__cell">
-            <div align="right">
-              <a class="govuk-link" href="@controllers.checkpages.routes.CheckYourAnswers.termsOfUsePage(data.appId)">View<span class="govuk-visually-hidden">View Terms of use</span></a>
-            </div>
+              @if(data.acceptedTermsOfUse) { Accepted } else { Not Accepted }
           </td>
-        }
+          @if(editable) {
+            <td class="govuk-table__cell">
+                <div align="right">
+                    <a class="govuk-link" href="@controllers.checkpages.routes.CheckYourAnswers.termsOfUsePage(data.appId)">View<span class="govuk-visually-hidden">View Terms of use</span></a>
+                </div>
+            </td>
+          }
       </tr>
+
     </tbody>
   </table>
   @if(editable) {
-    <h2 class="govuk-heading-m">Now request @principalWording</h2>
+    <h2 class="govuk-heading-m">Now request @principalWording </h2>
     <p class="govuk-body">By submitting your request you are confirming that, to the best your knowledge, the details you are providing are correct.</p>
     <button id="submit" class="govuk-button" type="submit">Accept and send</button>
     <a href="@controllers.routes.ManageApplications.manageApps" id="cancel" class="govuk-button govuk-button--secondary">Save and come back later</a>

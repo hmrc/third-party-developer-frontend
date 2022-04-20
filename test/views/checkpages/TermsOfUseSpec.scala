@@ -24,6 +24,7 @@ import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.controllers.Applica
 import org.jsoup.Jsoup
 import play.api.mvc.{AnyContentAsEmpty, Call}
 import play.api.test.FakeRequest
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.TermsOfUseVersion
 import uk.gov.hmrc.time.DateTimeUtils
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils._
 import views.helper.CommonViewSpec
@@ -64,6 +65,7 @@ class TermsOfUseSpec extends CommonViewSpec with WithCSRFAddToken with Collabora
         submitButtonLabel = "A Label",
         submitAction = mock[Call],
         landingPageRoute = mock[Call],
+        TermsOfUseVersion.latest,
         request,
         developer,
         messagesProvider,
@@ -93,6 +95,7 @@ class TermsOfUseSpec extends CommonViewSpec with WithCSRFAddToken with Collabora
         submitButtonLabel = "A Label",
         submitAction = mock[Call],
         landingPageRoute = mock[Call],
+        TermsOfUseVersion.latest,
         request,
         developer,
         implicitly,

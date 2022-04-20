@@ -163,6 +163,8 @@ package object controllers {
     val responsibleIndividualFullnameRequiredKey = "responsible_individual_fullname.error.required.field"
     val responsibleIndividualEmailAddressRequiredKey = "responsible_individual_emailaddress.error.required.field"
 
+    val noApplicationsChoiceRequiredKey = "no.applications.choice.error.required.field"
+
     val formKeysMap = Map(
       firstnameRequiredKey -> firstnameRequiredGlobalKey,
       firstnameMaxLengthKey -> firstnameMaxLengthGlobalKey,
@@ -307,7 +309,6 @@ package object controllers {
   }
 
   def environmentValidator = optional(text).verifying(environmentInvalidKey, s => s.fold(false)(isValidEnvironment))
-
 
   private def isNotBlankString: String => Boolean = s => s.trim.length > 0
 

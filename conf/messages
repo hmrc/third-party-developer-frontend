@@ -91,15 +91,15 @@ invalid.password.global = Provide a valid password
 password.used.before.global =Choose a password you have no used before
 password.used.before.field =Choose a password you have no used before
 
-application.name.invalid.length.and.characters=Application name must be between 2 and 50 characters
-application.name.invalid.name=Application name must not include HMRC or HM Revenue and Customs
-application.name.already.exists.field=That application name already exists. Enter a unique name for your application.
+application.name.invalid.length.and.characters = Application name must be between 2 and 50 characters
+application.name.invalid.name = Application name must not include HMRC or HM Revenue and Customs
+application.name.already.exists.field = That application name already exists. Enter a unique name for your application.
 
-environment.error.required.field=Choose an environment for your application
+environment.error.required.field = Choose an environment for your application
 
-client.secret.limit.exceeded=You exceeded the number of client secrets
-production.cannot.delete.only.client.secret=You cannot delete the only client secret for production
-sandbox.cannot.delete.only.client.secret=You cannot delete the only client secret for sandbox
+client.secret.limit.exceeded = You exceeded the number of client secrets
+production.cannot.delete.only.client.secret = You cannot delete the only client secret for production
+sandbox.cannot.delete.only.client.secret = You cannot delete the only client secret for sandbox
 
 team.member.error.emailAddress.required.field = Provide an email address
 team.member.error.emailAddress.already.exists.field = This user is already a team member on this application
@@ -133,11 +133,10 @@ tnc.links.required.field=Provide a link to your application’s terms and condit
 team.required.field=Tell us the name of your team members
 agree.terms.of.use.required.field=Agree to our terms of use
 
-
 delete.application.confirmation.no.choice.field = Tell us if you want us to delete this application
 delete.client.secrets.confirmation.no.choice.field = Tell us if you want us to delete your client secrets
 
-sell.resell.distribute.confirmation.no.choice.field = Tell us if you will sell, resell or distribute your software
+sell.resell.distribute.confirmation.no.choice.field = Select yes if you sell, resell or distribute your software
 
 developer.delete.error.required.field=Tell us if you want us to delete your account
 
@@ -184,3 +183,7 @@ responsible_individual_fullname.error.required.field=Provide a full name
 responsible_individual_emailaddress.error.required.field=Provide an email address
 
 production.credentials.checklist.error.global = You must complete all questionnaires
+
+no.applications.choice.error.required.field = Please select an option
+
+choose.application.to.uplift.error = Select the application you want production credentials for

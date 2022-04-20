@@ -17,6 +17,7 @@
 package uk.gov.hmrc.apiplatform.modules.submissions.domain.models
 
 import org.joda.time.DateTime
+
 import java.util.UUID
 import cats.data.NonEmptyList
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.ApplicationId
@@ -42,13 +43,24 @@ object QuestionnaireState {
   }
 }
 
-case class QuestionnaireProgress(state: QuestionnaireState, questionsToAsk: List[QuestionId])
+case class QuestionnaireProgress(state: QuestionnaireState, questionsToAsk: List[Question.Id])
 
 
-case class QuestionIdsOfInterest(applicationNameId: QuestionId, privacyPolicyUrlId: QuestionId, termsAndConditionsUrlId: QuestionId, organisationUrlId: QuestionId)
+case class QuestionIdsOfInterest(
+    applicationNameId: Question.Id,
+    privacyPolicyId: Question.Id,
+    privacyPolicyUrlId: Question.Id,
+    termsAndConditionsId: Question.Id,
+    termsAndConditionsUrlId: Question.Id,
+    organisationUrlId: Question.Id,
+    responsibleIndividualNameId: Question.Id,
+    responsibleIndividualEmailId: Question.Id,
+    identifyYourOrganisationId: Question.Id,
+    serverLocationsId: Question.Id
+)
 
 object Submission {
-  type AnswersToQuestions = Map[QuestionId, ActualAnswer]
+  type AnswersToQuestions = Map[Question.Id, ActualAnswer]
 
   case class Id(value: String) extends AnyVal
 
@@ -58,11 +70,79 @@ object Submission {
     def random: Id = Id(UUID.randomUUID().toString())
   }
 
+  val create: (
+    String,
+    Submission.Id,
+    ApplicationId,
+    DateTime,
+    NonEmptyList[GroupOfQuestionnaires],
+    QuestionIdsOfInterest,
+    AskWhen.Context
+  ) => Submission = (requestedBy, id, applicationId, timestamp, groups, questionIdsOfInterest, context) => {
+    val initialStatus = Submission.Status.Created(timestamp, requestedBy)
+    val initialInstances = NonEmptyList.of(Submission.Instance(0, Map.empty, NonEmptyList.of(initialStatus)))
+    Submission(id, applicationId, timestamp, groups, questionIdsOfInterest, initialInstances, context)
+  }
+  
+  val addInstance: (Submission.AnswersToQuestions, Submission.Status) => Submission => Submission = (answers, status) => s => {
+    val newInstance = Submission.Instance(s.latestInstance.index+1, answers, NonEmptyList.of(status))
+    s.copy(instances = newInstance :: s.instances)
+  }
+  
+  val changeLatestInstance: (Submission.Instance => Submission.Instance) => Submission => Submission = delta => s => {
+    s.copy(instances = NonEmptyList(delta(s.instances.head), s.instances.tail))
+  }
+
+  val addStatusHistory: (Submission.Status) => Submission => Submission = newStatus => s => {
+    require(Submission.Status.isLegalTransition(s.status, newStatus))
+    
+    val currentHistory = s.latestInstance.statusHistory
+
+    // Do not ADD if going from answering to answering - instead replace
+    if((s.status.isAnswering && newStatus.isAnswering)) {
+      changeLatestInstance(_.copy(statusHistory = NonEmptyList(newStatus, currentHistory.tail)))(s)
+    } else {
+      changeLatestInstance(_.copy(statusHistory = newStatus :: currentHistory))(s)
+    }
+  }
+
+  val updateLatestAnswersTo: (Submission.AnswersToQuestions) => Submission => Submission = (newAnswers) => changeLatestInstance(_.copy(answersToQuestions = newAnswers))
+
+  val decline: (DateTime, String, String) => Submission => Submission = (timestamp, name, reasons) => {
+    val addDeclinedStatus = addStatusHistory(Status.Declined(timestamp, name, reasons))
+    val addNewlyAnsweringInstance: Submission => Submission = (s) => addInstance(s.latestInstance.answersToQuestions, Status.Answering(timestamp, true))(s)
+    
+    addDeclinedStatus andThen addNewlyAnsweringInstance
+  }
+
+  val grant: (DateTime, String) => Submission => Submission = (timestamp, name) => addStatusHistory(Status.Granted(timestamp, name))
+
+  val grantWithWarnings: (DateTime, String, String, Option[String]) => Submission => Submission = (timestamp, name, warnings, escalatedTo) => {
+    addStatusHistory(Status.GrantedWithWarnings(timestamp, name, warnings, escalatedTo))
+  }
+
+  val submit: (DateTime, String) => Submission => Submission = (timestamp, requestedBy) => addStatusHistory(Status.Submitted(timestamp, requestedBy))
+
+  
   sealed trait Status {
-    def isOpenToAnswers = isCreated
+    def timestamp: DateTime
+    
+    def isOpenToAnswers = isCreated || isAnswering
+    
+    def canBeMarked = isAnsweredCompletely || isSubmitted || isDeclined || isGranted || isGrantedWithWarnings
+
+    def isAnsweredCompletely = this match {
+      case Submission.Status.Answering(_, completed) => completed
+      case _                                         => false      
+    }
 
     def isCreated = this match {
       case _ : Submission.Status.Created => true
+      case _ => false      
+    }
+
+    def isAnswering = this match {
+      case _ : Submission.Status.Answering => true
       case _ => false      
     }
     
@@ -75,6 +155,16 @@ object Submission {
       case _ : Submission.Status.Granted => true
       case _ => false      
     }
+
+    def isGrantedWithWarnings = this match {
+      case _ : Submission.Status.GrantedWithWarnings => true
+      case _ => false          
+    }
+
+    def isDeclined = this match {
+      case _ : Submission.Status.Declined => true
+      case _ => false
+    }
   }
 
   object Status {
@@ -83,10 +173,17 @@ object Submission {
       name: String,
       reasons: String
     ) extends Status
-
+    
     case class Granted(
       timestamp: DateTime,
       name: String
+    ) extends Status
+
+    case class GrantedWithWarnings(
+      timestamp: DateTime,
+      name: String,
+      warnings: String,
+      escalatedTo: Option[String]
     ) extends Status
 
     case class Submitted(
@@ -94,10 +191,27 @@ object Submission {
       requestedBy: String
     ) extends Status
 
+    case class Answering(
+      timestamp: DateTime,
+      completed: Boolean
+    ) extends Status
+
     case class Created(
       timestamp: DateTime,
       requestedBy: String
     ) extends Status
+
+    def isLegalTransition(from: Submission.Status, to: Submission.Status): Boolean = (from, to) match {
+      case (c: Created, a: Answering)               => true
+      case (Answering(_, true), s: Submitted)       => true
+      case (a: Answering, b: Answering)             => true
+      case (s: Submitted, d: Declined)              => true
+      case (s: Submitted, g: Granted)               => true
+      case (s: Submitted, w: GrantedWithWarnings)   => true
+      case (w: GrantedWithWarnings, d: Declined)    => true   // ? Maybe
+      case (w: GrantedWithWarnings, g: Granted)     => true   // ? Maybe
+      case _                                        => false
+    }
   }
 
   case class Instance(
@@ -106,7 +220,16 @@ object Submission {
     statusHistory: NonEmptyList[Submission.Status]
   ) {
     lazy val status: Status = statusHistory.head
+
     lazy val isOpenToAnswers = status.isOpenToAnswers
+    lazy val isAnsweredCompletely = status.isAnsweredCompletely
+
+    lazy val isCreated = status.isCreated
+    lazy val isAnswering = status.isAnswering
+    lazy val isGranted = status.isGranted
+    lazy val isGrantedWithWarnings = status.isGrantedWithWarnings
+    lazy val isDeclined = status.isDeclined
+    lazy val isSubmitted = status.isSubmitted
   }
 }
 
@@ -116,15 +239,16 @@ case class Submission(
   startedOn: DateTime,
   groups: NonEmptyList[GroupOfQuestionnaires],
   questionIdsOfInterest: QuestionIdsOfInterest,
-  instances: NonEmptyList[Submission.Instance]
+  instances: NonEmptyList[Submission.Instance],
+  context: AskWhen.Context
 ) {
   lazy val allQuestionnaires: NonEmptyList[Questionnaire] = groups.flatMap(g => g.links)
 
   lazy val allQuestions: NonEmptyList[Question] = allQuestionnaires.flatMap(l => l.questions.map(_.question))
 
-  def findQuestion(questionId: QuestionId): Option[Question] = allQuestions.find(q => q.id == questionId)
+  def findQuestion(questionId: Question.Id): Option[Question] = allQuestions.find(q => q.id == questionId)
 
-  def findQuestionnaireContaining(questionId: QuestionId): Option[Questionnaire] = 
+  def findQuestionnaireContaining(questionId: Question.Id): Option[Questionnaire] = 
     allQuestionnaires.find(qn => 
       qn.questions.exists(qi => 
         qi.question.id == questionId
@@ -133,34 +257,18 @@ case class Submission(
 
   lazy val latestInstance = instances.head
 
-  lazy val isOpenToAnswers = latestInstance.isOpenToAnswers
-  
   lazy val status: Submission.Status = latestInstance.statusHistory.head
-
-  def setLatestAnswers(answers: Submission.AnswersToQuestions): Submission = {
-    val newLatest = latestInstance.copy(answersToQuestions = answers)
-    this.copy(instances = NonEmptyList.of(newLatest, this.instances.tail: _*))
-  }
 }
 
 
 case class ExtendedSubmission(
   submission: Submission,
-  questionnaireProgress: Map[QuestionnaireId, QuestionnaireProgress]
-) {
-  lazy val isCompleted = 
-    questionnaireProgress.values
-    .map(_.state)
-    .forall(QuestionnaireState.isCompleted)
-
-  lazy val isOpenToAnswers = submission.isOpenToAnswers
-  lazy val canBeSubmitted = isOpenToAnswers && isCompleted
-}
+  questionnaireProgress: Map[Questionnaire.Id, QuestionnaireProgress]
+)
 
 case class MarkedSubmission(
   submission: Submission,
-  questionnaireProgress: Map[QuestionnaireId, QuestionnaireProgress],
-  markedAnswers: Map[QuestionId, Mark]
+  markedAnswers: Map[Question.Id, Mark]
 ) {
   lazy val isFail = markedAnswers.values.toList.contains(Fail) | markedAnswers.values.filter(_ == Warn).size >= 4
   lazy val isWarn = markedAnswers.values.toList.contains(Warn)

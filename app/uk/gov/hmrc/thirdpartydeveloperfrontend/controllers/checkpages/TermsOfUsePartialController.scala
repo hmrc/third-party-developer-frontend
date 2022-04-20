@@ -16,11 +16,12 @@
 
 package uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.checkpages
 
-import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.{ApplicationController, TermsOfUseForm, ApplicationRequest}
+import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.{ApplicationController, ApplicationRequest, TermsOfUseForm}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.{ApplicationId, CheckInformation, TermsOfUseAgreement}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.controllers.ApplicationViewModel
 import play.api.data.Form
 import play.api.mvc.{Action, AnyContent, Call}
+import uk.gov.hmrc.thirdpartydeveloperfrontend.service.TermsOfUseVersionService
 import uk.gov.hmrc.time.DateTimeUtils
 import views.html.checkpages.TermsOfUseView
 
@@ -29,6 +30,7 @@ import scala.concurrent.Future
 trait TermsOfUsePartialController {
   self: ApplicationController with CanUseCheckActions =>
   val termsOfUseView: TermsOfUseView
+  val termsOfUseVersionService: TermsOfUseVersionService
 
   private def createTermsOfUse(applicationViewModel: ApplicationViewModel, form: Form[TermsOfUseForm])(implicit request: ApplicationRequest[AnyContent]) = {
     termsOfUseView(
@@ -36,7 +38,8 @@ trait TermsOfUsePartialController {
       form,
       submitButtonLabel = submitButtonLabel,
       submitAction = termsOfUseActionRoute(applicationViewModel.application.id),
-      landingPageRoute = landingPageRoute(applicationViewModel.application.id)
+      landingPageRoute = landingPageRoute(applicationViewModel.application.id),
+      termsOfUseVersionService.getForApplication(request.application)
     )
   }
 
@@ -49,7 +52,7 @@ trait TermsOfUsePartialController {
   }
 
   def termsOfUseAction(appId: ApplicationId): Action[AnyContent] = canUseChecksAction(appId) { implicit request =>
-    val version = appConfig.currentTermsOfUseVersion
+    val version = termsOfUseVersionService.getLatest().toString
     val app = request.application
 
     val requestForm = TermsOfUseForm.form.bindFromRequest

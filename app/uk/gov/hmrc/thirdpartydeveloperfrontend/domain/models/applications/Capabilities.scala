@@ -38,7 +38,7 @@ object Capabilities {
   }
 
   case object ChangeClientSecret extends Capability {
-    def hasCapability(app: BaseApplication) = app.state.name.isApproved
+    def hasCapability(app: BaseApplication) = app.isApproved
   }
 
   case object SupportsTeamMembers extends Capability {
@@ -48,7 +48,7 @@ object Capabilities {
   case object SupportsSubscriptions extends StandardAppCapability
 
   case object EditSubscriptionFields extends Capability {
-    override def hasCapability(app: BaseApplication): Boolean = !app.state.name.isPendingApproval
+    override def hasCapability(app: BaseApplication): Boolean = !app.isPendingApproval
   }
 
   case object SupportsDetails extends StandardAppCapability
@@ -62,11 +62,11 @@ object Capabilities {
   case object SupportsDeletion extends StandardAppCapability
 
   case object SupportsAppChecks extends Capability {
-    def hasCapability(app: BaseApplication): Boolean = app.state.name.isInTesting
+    def hasCapability(app: BaseApplication): Boolean = app.state.name.isInTesting && app.access.hasSubmissions == false
   }
 
   case object SupportChangingAppDetails extends Capability {
-    def hasCapability(app: BaseApplication): Boolean = app.state.name.isInTesting || app.deployedTo.isSandbox
+    def hasCapability(app: BaseApplication): Boolean = app.isInTesting || app.deployedTo.isSandbox
   }
 
   case object SupportsIpAllowlist extends Capability {

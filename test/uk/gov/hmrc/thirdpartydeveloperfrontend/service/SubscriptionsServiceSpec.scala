@@ -32,10 +32,6 @@ import scala.concurrent.ExecutionContext.Implicits.global
 import uk.gov.hmrc.thirdpartydeveloperfrontend.service.PushPullNotificationsService.PushPullNotificationsConnector
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.thirdpartydeveloperfrontend.service.SubscriptionFieldsService.SubscriptionFieldsConnector
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.subscriptions.ApiSubscriptionFields.SubscriptionFieldValue
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.subscriptions.FieldValue
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.subscriptions.ApiSubscriptionFields.SaveSubscriptionFieldsFailureResponse
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.subscriptions.ApiSubscriptionFields.SaveSubscriptionFieldsSuccessResponse
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.LocalUserIdTracker
 
 class SubscriptionsServiceSpec extends AsyncHmrcSpec with SubscriptionsBuilder with ApplicationBuilder with LocalUserIdTracker {
@@ -127,12 +123,7 @@ class SubscriptionsServiceSpec extends AsyncHmrcSpec with SubscriptionsBuilder w
 
       private val subscription = ApiIdentifier(context, version)
 
-      private val fieldDefinitions = Seq.empty
-
       theProductionConnectorthenReturnTheApplication(productionApplicationId, productionApplication)
-
-      when(mockSubscriptionFieldsService.getFieldDefinitions(eqTo(productionApplication), eqTo(subscription))(*))
-        .thenReturn(successful(fieldDefinitions))
 
       when(mockApmConnector.subscribeToApi(eqTo(productionApplicationId), eqTo(subscription))(*))
         .thenReturn(successful(ApplicationUpdateSuccessful))
@@ -140,73 +131,6 @@ class SubscriptionsServiceSpec extends AsyncHmrcSpec with SubscriptionsBuilder w
       await(subscriptionsService.subscribeToApi(productionApplication, subscription)) shouldBe ApplicationUpdateSuccessful
 
       verify(mockApmConnector).subscribeToApi(eqTo(productionApplicationId), eqTo(subscription))(*)
-      verify(mockSubscriptionFieldsService, never).saveBlankFieldValues(*, *[ApiContext], *[ApiVersion], *)(*)
-    }
-
-    "with subscription fields definitions" should {
-      "save blank subscription values" in new Setup {
-        private val context = ApiContext("api1")
-        private val version = versionOne
-
-        private val subscription = ApiIdentifier(context, version)
-
-        private val fieldDefinitions = Seq(buildSubscriptionFieldValue("name").definition)
-
-        private val fieldDefinitionsWithoutValues = fieldDefinitions.map(d => SubscriptionFieldValue(d, FieldValue.empty))
-
-        theProductionConnectorthenReturnTheApplication(productionApplicationId, productionApplication)
-
-        when(mockSubscriptionFieldsService.getFieldDefinitions(eqTo(productionApplication), eqTo(subscription))(*))
-          .thenReturn(successful(fieldDefinitions))
-        when(mockSubscriptionFieldsService.fetchFieldsValues(eqTo(productionApplication), eqTo(fieldDefinitions), eqTo(subscription))(*))
-          .thenReturn(successful(fieldDefinitionsWithoutValues))
-
-        when(mockApmConnector.subscribeToApi(eqTo(productionApplicationId), eqTo(subscription))(*))
-          .thenReturn(successful(ApplicationUpdateSuccessful))
-        when(mockSubscriptionFieldsService.saveBlankFieldValues(*, *[ApiContext], *[ApiVersion], *)(*))
-          .thenReturn(successful(SaveSubscriptionFieldsSuccessResponse))
-
-        await(subscriptionsService.subscribeToApi(productionApplication, subscription)) shouldBe ApplicationUpdateSuccessful
-
-        verify(mockApmConnector).subscribeToApi(eqTo(productionApplicationId), eqTo(subscription))(
-          *
-        )
-        verify(mockSubscriptionFieldsService)
-          .saveBlankFieldValues(eqTo(productionApplication), eqTo(context), eqTo(version), eqTo(fieldDefinitionsWithoutValues))(*)
-      }
-
-      "but fails to save subscription fields" in new Setup {
-        private val context = ApiContext("api1")
-        private val version = versionOne
-
-        private val subscription = ApiIdentifier(context, version)
-
-        private val fieldDefinitions = Seq(buildSubscriptionFieldValue("name").definition)
-
-        private val fieldDefinitionsWithoutValues = fieldDefinitions.map(d => SubscriptionFieldValue(d, FieldValue.empty))
-
-        theProductionConnectorthenReturnTheApplication(productionApplicationId, productionApplication)
-
-        when(mockSubscriptionFieldsService.getFieldDefinitions(eqTo(productionApplication), eqTo(subscription))(*))
-          .thenReturn(successful(fieldDefinitions))
-        when(mockSubscriptionFieldsService.fetchFieldsValues(eqTo(productionApplication), eqTo(fieldDefinitions), eqTo(subscription))(*))
-          .thenReturn(successful(fieldDefinitionsWithoutValues))
-
-        when(mockApmConnector.subscribeToApi(eqTo(productionApplicationId), *)(*))
-          .thenReturn(successful(ApplicationUpdateSuccessful))
-
-        val errors = Map("fieldName" -> "failure reason")
-
-        when(mockSubscriptionFieldsService.saveBlankFieldValues(*, *[ApiContext], *[ApiVersion], *)(*))
-          .thenReturn(successful(SaveSubscriptionFieldsFailureResponse(errors)))
-
-        private val exception = intercept[RuntimeException](
-          await(subscriptionsService.subscribeToApi(productionApplication, subscription)) shouldBe ApplicationUpdateSuccessful
-        )
-
-        exception.getMessage should include("failure reason")
-        exception.getMessage should include("Failed to save blank subscription field values")
-      }
     }
   }
 }  

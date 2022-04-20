@@ -17,6 +17,7 @@
 package uk.gov.hmrc.apiplatform.modules.submissions.domain.models
 
 import cats.data.NonEmptyList
+import play.api.libs.json.Json
 
 object AskWhen {
   import Submission.AnswersToQuestions
@@ -41,7 +42,7 @@ object AskWhen {
 
 sealed trait AskWhen
 case class AskWhenContext(contextKey: String, expectedValue: String) extends AskWhen
-case class AskWhenAnswer(questionId: QuestionId, expectedValue: SingleChoiceAnswer) extends AskWhen
+case class AskWhenAnswer(questionId: Question.Id, expectedValue: SingleChoiceAnswer) extends AskWhen
 case object AlwaysAsk extends AskWhen
 
 object AskWhenAnswer {
@@ -50,26 +51,34 @@ object AskWhenAnswer {
     AskWhenAnswer(question.id, SingleChoiceAnswer(expectedValue))
   }
 }
-case class QuestionItem(question: Question, askWhen: AskWhen)
 
-case class Label(value: String) extends AnyVal
+case class QuestionItem(question: Question, askWhen: AskWhen)
 
 object QuestionItem {
   def apply(question: Question): QuestionItem = QuestionItem(question, AlwaysAsk)
   def apply(question: Question, askWhen: AskWhen): QuestionItem = new QuestionItem(question, askWhen)
 }
 
-case class QuestionnaireId(value: String) extends AnyVal
+object Questionnaire {
+  case class Label(value: String) extends AnyVal
+  case class Id(value: String) extends AnyVal
 
-object QuestionnaireId {
-  def random = QuestionnaireId(java.util.UUID.randomUUID.toString)
+  object Label {
+    implicit val format = Json.valueFormat[Label]
+  }  
+
+  object Id {
+    def random = Questionnaire.Id(java.util.UUID.randomUUID.toString)
+
+    implicit val format = Json.valueFormat[Id]
+  }
 }
 
 case class Questionnaire(
-  id: QuestionnaireId,
-  label: Label,
+  id: Questionnaire.Id,
+  label: Questionnaire.Label,
   questions: NonEmptyList[QuestionItem]
 ) {
-  def hasQuestion(qid: QuestionId): Boolean = question(qid).isDefined
-  def question(qid: QuestionId): Option[Question] = questions.find(_.question.id == qid).map(_.question)
+  def hasQuestion(qid: Question.Id): Boolean = question(qid).isDefined
+  def question(qid: Question.Id): Option[Question] = questions.find(_.question.id == qid).map(_.question)
 }

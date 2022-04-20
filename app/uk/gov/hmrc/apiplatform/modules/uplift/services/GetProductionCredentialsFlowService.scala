@@ -22,6 +22,7 @@ import uk.gov.hmrc.thirdpartydeveloperfrontend.repositories.FlowRepository
 
 import scala.concurrent.{ExecutionContext, Future}
 import uk.gov.hmrc.apiplatform.modules.uplift.domain.models._
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.SellResellOrDistribute
 import cats.implicits._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.flows.FlowType
 
@@ -37,16 +38,6 @@ class GetProductionCredentialsFlowService @Inject()(
       case None       => val newFlowObject = GetProductionCredentialsFlow.create(developerSession.session.sessionId)
                          flowRepository.saveFlow[GetProductionCredentialsFlow](newFlowObject)
     }
-
-  def storeResponsibleIndividual(newResponsibleIndividual: ResponsibleIndividual, developerSession: DeveloperSession): Future[GetProductionCredentialsFlow] = {
-    for {
-      existingFlow <- fetchFlow(developerSession)
-      savedFlow    <- flowRepository.saveFlow[GetProductionCredentialsFlow](existingFlow.copy(responsibleIndividual = Some(newResponsibleIndividual)))
-    } yield savedFlow
-  }
-
-  def findResponsibleIndividual(developerSession: DeveloperSession): Future[Option[ResponsibleIndividual]] = 
-    fetchFlow(developerSession).map(_.responsibleIndividual)
 
   def storeSellResellOrDistribute(sellResellOrDistribute: SellResellOrDistribute, developerSession: DeveloperSession): Future[GetProductionCredentialsFlow] = {
     for {

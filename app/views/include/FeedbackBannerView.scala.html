@@ -16,16 +16,18 @@
 
 @import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.views.FeedbackBanner
 
-@this()
+@this(
+  appConfig: ApplicationConfig
+)
 
-@(feedbackBanner: FeedbackBanner)(implicit appConfig: ApplicationConfig)
+@(feedbackBanner: FeedbackBanner)
 
 <div class="feedback-banner">
   <div class="govuk-width-container">
     <div class="centered-content">
       <div id="feedback">
-        <p class="govuk-body govuk-highlight-text">Your feedback helps us improve our service</p>
-        <button class="govuk-button govuk-!-margin-bottom-0" id="show-survey">Tell us what you think</button>
+        <p id="feedback-title" class="govuk-body govuk-highlight-text">Your feedback helps us improve our service</p>
+        <button class="govuk-button govuk-!-margin-bottom-0" id="show-survey">Give feedback</button>
       </div>
       <div id="survey">
         <button class="govuk-button" id="close-survey">Close</button>

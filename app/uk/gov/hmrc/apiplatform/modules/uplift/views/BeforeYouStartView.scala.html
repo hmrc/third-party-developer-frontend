@@ -37,21 +37,11 @@
 ) {
     <h1 class="govuk-heading-l">@title</h1>
 
-    <p class="govuk-body">You will need:</p>
-    <ul class="govuk-list govuk-list--bullet">
-      <li>the name and email address of a responsible individual in your organisation who is accountable for compliance with our <a href="/api-documentation/docs/terms-of-use" class="govuk-link">terms of use</a></li>
-      <li>details of your development and service management processes</li>
-      <li>a link to your software terms and conditions and privacy policy </li>
-      <li>organisation details like your website and evidence that your organisation is officially registered in your country</li>
-    </ul>
+    <p class="govuk-body">We will ask you questions about your organisation and development practices.</p>
 
-    <p class="govuk-body">
-      By requesting production credentials you agree to our <a href="/api-documentation/docs/terms-of-use" class="govuk-link">terms of use</a> for 12 months.
-    </p>
+    <p class="govuk-body">You can <a href="/api-documentation/docs/terms-of-use" class="govuk-link" target="_blank">review the questions before you start (opens in new tab)</a>.</p>
 
-    <p class="govuk-body">
-      You will need to agree to our terms of use every 12 months.
-    </p>
+    <p class="govuk-body">You will need the name and email address of a responsible individual in your organisation who is accountable for compliance with our <a href="/api-documentation/docs/terms-of-use" class="govuk-link" target="_blank">terms of use (opens in new tab)</a>.</p>
 
-    <a class="govuk-button" href="@uk.gov.hmrc.apiplatform.modules.uplift.controllers.routes.UpliftJourneyController.responsibleIndividual(applicationId)">Continue</a>
+    <a class="govuk-button" href="@uk.gov.hmrc.apiplatform.modules.uplift.controllers.routes.UpliftJourneyController.weWillCheckYourAnswers(applicationId)">Continue</a>
 }

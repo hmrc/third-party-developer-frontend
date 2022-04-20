@@ -189,24 +189,25 @@ class AddApplicationStartSpec
       "and we have only 1 application" in new Setup {
       when(appConfig.nameOfPrincipalEnvironment).thenReturn("QA")
       when(appConfig.nameOfSubordinateEnvironment).thenReturn("Development")
-      when(flowServiceMock.resetFlow(*)).thenReturn(Future.successful(GetProductionCredentialsFlow("", None, None, None)))
+      when(flowServiceMock.resetFlow(*)).thenReturn(Future.successful(GetProductionCredentialsFlow("", None, None)))
 
       val summaries = sandboxAppSummaries.take(1)
+      val myAppId = summaries.head.id
       aUsersUplfitableAndNotUpliftableAppsReturns(summaries, summaries.map(_.id), List.empty)
 
       when(upliftJourneyConfigMock.status).thenReturn(On)
       
       private val result = underTest.addApplicationPrincipal()(loggedInRequest)
 
-      status(result) shouldBe OK
-      contentAsString(result) should include("Before you start")
+      status(result) shouldBe SEE_OTHER
+      redirectLocation(result) shouldBe Some(s"/developer/applications/${myAppId.value}/before-you-start")
     }
 
     "return the uplift journey 'Which application do you want production credentials for?' page when the UpliftJourneyConfig returns On" +
       "and we have more than 1 application" in new Setup {
       when(appConfig.nameOfPrincipalEnvironment).thenReturn("QA")
       when(appConfig.nameOfSubordinateEnvironment).thenReturn("Development")
-      when(flowServiceMock.resetFlow(*)).thenReturn(Future.successful(GetProductionCredentialsFlow("", None, None, None)))
+      when(flowServiceMock.resetFlow(*)).thenReturn(Future.successful(GetProductionCredentialsFlow("", None, None)))
 
       val summaries = sandboxAppSummaries.take(2)
       aUsersUplfitableAndNotUpliftableAppsReturns(summaries, summaries.map(_.id), List.empty)
@@ -251,9 +252,10 @@ class AddApplicationStartSpec
         "returns OnDemand and request header contains the uplift journey flag set to true" in new Setup {
       when(appConfig.nameOfPrincipalEnvironment).thenReturn("QA")
       when(appConfig.nameOfSubordinateEnvironment).thenReturn("Development")
-      when(flowServiceMock.resetFlow(*)).thenReturn(Future.successful(GetProductionCredentialsFlow("", None, None, None)))
+      when(flowServiceMock.resetFlow(*)).thenReturn(Future.successful(GetProductionCredentialsFlow("", None, None)))
 
       val summaries = sandboxAppSummaries.take(1)
+      val myAppId = summaries.head.id
       aUsersUplfitableAndNotUpliftableAppsReturns(summaries, summaries.map(_.id), List.empty)
 
       when(upliftJourneyConfigMock.status).thenReturn(OnDemand)
@@ -262,8 +264,8 @@ class AddApplicationStartSpec
 
       private val result = underTest.addApplicationPrincipal()(loggedInRequestWithFlag)
 
-      status(result) shouldBe OK
-      contentAsString(result) should include("Before you start")
+      status(result) shouldBe SEE_OTHER
+      redirectLocation(result) shouldBe Some(s"/developer/applications/${myAppId.value}/before-you-start")
     }
 
     "return the add applications page when the UpliftJourneyConfig " +
@@ -285,9 +287,10 @@ class AddApplicationStartSpec
       "returns On and request header contains the uplift journey flag set to false" in new Setup {
           when(appConfig.nameOfPrincipalEnvironment).thenReturn("QA")
           when(appConfig.nameOfSubordinateEnvironment).thenReturn("Development")
-       when(flowServiceMock.resetFlow(*)).thenReturn(Future.successful(GetProductionCredentialsFlow("", None, None, None)))
+          when(flowServiceMock.resetFlow(*)).thenReturn(Future.successful(GetProductionCredentialsFlow("", None, None)))
 
           val summaries = sandboxAppSummaries.take(1)
+          val myAppId = summaries.head.id
           aUsersUplfitableAndNotUpliftableAppsReturns(summaries, summaries.map(_.id), List.empty)
 
           when(upliftJourneyConfigMock.status).thenReturn(On)
@@ -296,9 +299,9 @@ class AddApplicationStartSpec
 
           private val result = underTest.addApplicationPrincipal()(loggedInRequestWithFlag)
 
-          status(result) shouldBe OK
-          contentAsString(result) should include("Before you start")
-        }
+          status(result) shouldBe SEE_OTHER
+          redirectLocation(result) shouldBe Some(s"/developer/applications/${myAppId.value}/before-you-start")
+       }
 
     "return to the login page when the user is not logged in" in new Setup {
       val request = FakeRequest()
