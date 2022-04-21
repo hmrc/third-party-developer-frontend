@@ -24,22 +24,22 @@ object AppDependencies {
     "uk.gov.hmrc"                 %% "json-encryption"                % "4.10.0-play-28",
     "uk.gov.hmrc"                 %% "emailaddress"                   % "3.5.0",
     "uk.gov.hmrc"                 %% "play-conditional-form-mapping"  % "1.10.0-play-28",
-    "uk.gov.hmrc"                 %% "play-frontend-govuk"            % "0.65.0-play-28",
-    "uk.gov.hmrc"                 %% "play-frontend-hmrc"             % "1.9.0-play-28",
+    "uk.gov.hmrc"                 %% "play-frontend-hmrc"             % "1.26.0-play-28",
     "commons-net"                 %  "commons-net"                    % "3.6",
     "com.beachape"                %% "enumeratum"                     % enumeratumVersion,
     "com.beachape"                %% "enumeratum-play"                % enumeratumVersion,
     "com.google.zxing"            %  "core"                           % "3.2.1",
     "org.typelevel"               %% "cats-core"                      % "2.6.1",
     "com.typesafe.play"           %% "play-json"                      % "2.9.2",
-    "com.typesafe.play"           %% "play-json-joda"                 % "2.9.2"
-  )
+    "com.typesafe.play"           %% "play-json-joda"                 % "2.9.2",
+    "commons-validator"           %  "commons-validator"              % "1.7"
+   )
 
   lazy val test =  Seq(
     "uk.gov.hmrc"                 %% "bootstrap-test-play-28"         % "5.16.0",
     "uk.gov.hmrc"                 %% "reactivemongo-test"             % "5.0.0-play-28",
     "org.mockito"                 %% "mockito-scala-scalatest"        % "1.16.46",
-    "org.jsoup"                   %  "jsoup"                          % "1.10.2",
+    "org.jsoup"                   %  "jsoup"                          % "1.13.1",
     "org.scalaj"                  %% "scalaj-http"                    % "2.4.2",
     "com.github.tomakehurst"      %  "wiremock-jre8-standalone"       % "2.31.0",
     "org.scalacheck"              %% "scalacheck"                     % "1.15.4",

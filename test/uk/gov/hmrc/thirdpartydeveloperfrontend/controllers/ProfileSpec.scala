@@ -141,7 +141,7 @@ class ProfileSpec extends BaseControllerSpec with WithCSRFAddToken with Develope
 
       status(result) shouldBe OK
       val dom = Jsoup.parse(contentAsString(result))
-      dom.getElementsByClass("govuk-panel__title").text shouldEqual "Password changed"
+      dom.getElementsByClass("govuk-panel__title").get(0).text shouldEqual "Password changed"
 
     }
   }

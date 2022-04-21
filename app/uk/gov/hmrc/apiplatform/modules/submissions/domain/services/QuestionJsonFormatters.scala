@@ -24,7 +24,6 @@ trait QuestionJsonFormatters extends StatementJsonFormatters with MapJsonFormatt
   import uk.gov.hmrc.play.json.Union
 
   implicit val jsonFormatWording = Json.valueFormat[Wording]
-  implicit val jsonFormatLabel = Json.valueFormat[Label]
 
   implicit val markWrites : Writes[Mark] = Writes {
     case Fail => JsString("fail")
@@ -39,8 +38,8 @@ trait QuestionJsonFormatters extends StatementJsonFormatters with MapJsonFormatt
     case _ => JsError("Failed to parse Mark value")
   }
 
-  implicit val keyReadsQuestionId: KeyReads[QuestionId] = key => JsSuccess(QuestionId(key))
-  implicit val keyWritesQuestionId: KeyWrites[QuestionId] = _.value
+  implicit val keyReadsQuestionId: KeyReads[Question.Id] = key => JsSuccess(Question.Id(key))
+  implicit val keyWritesQuestionId: KeyWrites[Question.Id] = _.value
 
   implicit val keyReadsPossibleAnswer: KeyReads[PossibleAnswer] = key => JsSuccess(PossibleAnswer(key))
   implicit val keyWritesPossibleAnswer: KeyWrites[PossibleAnswer] = _.value

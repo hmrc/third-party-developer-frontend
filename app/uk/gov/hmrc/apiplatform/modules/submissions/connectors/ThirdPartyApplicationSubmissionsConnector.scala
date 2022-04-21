@@ -38,6 +38,9 @@ object ThirdPartyApplicationSubmissionsConnector {
 
   case class ApprovalsRequest(requestedByEmailAddress: String) 
   implicit val writesApprovalsRequest = Json.writes[ApprovalsRequest]
+
+  case class ConfirmSetupCompleteRequest(requesterEmailAddress: String)
+  implicit val writesConfirmSetupCompleteRequest = Json.writes[ConfirmSetupCompleteRequest]
 }
 
 @Singleton
@@ -55,7 +58,7 @@ class ThirdPartyApplicationSubmissionsConnector @Inject() (
 
   val environment = Environment.PRODUCTION
 
-  def recordAnswer(submissionId: Submission.Id, questionId: QuestionId, rawAnswers: List[String])(implicit hc: HeaderCarrier): Future[Either[String, ExtendedSubmission]] = {
+  def recordAnswer(submissionId: Submission.Id, questionId: Question.Id, rawAnswers: List[String])(implicit hc: HeaderCarrier): Future[Either[String, ExtendedSubmission]] = {
     import cats.implicits._
     val failed = (err: UpstreamErrorResponse) => s"Failed to record answer for submission ${submissionId.value} and question ${questionId.value}"
 
@@ -65,9 +68,15 @@ class ThirdPartyApplicationSubmissionsConnector @Inject() (
     }
   }
 
-  def fetchLatestSubmission(applicationId: ApplicationId)(implicit hc: HeaderCarrier): Future[Option[ExtendedSubmission]] = {
+  def fetchLatestSubmission(applicationId: ApplicationId)(implicit hc: HeaderCarrier): Future[Option[Submission]] = {
     metrics.record(api) {
-      http.GET[Option[ExtendedSubmission]](s"$serviceBaseUrl/submissions/application/${applicationId.value}")
+      http.GET[Option[Submission]](s"$serviceBaseUrl/submissions/application/${applicationId.value}")
+    }
+  }
+
+  def fetchLatestExtendedSubmission(applicationId: ApplicationId)(implicit hc: HeaderCarrier): Future[Option[ExtendedSubmission]] = {
+    metrics.record(api) {
+      http.GET[Option[ExtendedSubmission]](s"$serviceBaseUrl/submissions/application/${applicationId.value}/extended")
     }
   }
   
@@ -76,7 +85,6 @@ class ThirdPartyApplicationSubmissionsConnector @Inject() (
       http.GET[Option[ExtendedSubmission]](s"$serviceBaseUrl/submissions/${id.value}")
     }
   }
-
   
   def requestApproval(applicationId: ApplicationId, requestedByEmailAddress: String)(implicit hc: HeaderCarrier): Future[Either[ErrorDetails, Application]] = metrics.record(api) {
     import play.api.http.Status._
@@ -94,5 +102,14 @@ class ThirdPartyApplicationSubmissionsConnector @Inject() (
         case (_, _)                                 => throw badResponse
       }
     }
+  }
+
+  def confirmSetupComplete(applicationId: ApplicationId, userEmailAddress: String)(implicit hc: HeaderCarrier): Future[Either[String, Unit]] = metrics.record(api) {
+    import cats.implicits._
+
+    val url = s"$serviceBaseUrl/application/${applicationId.value}/confirm-setup-complete"
+    val failed = (err: UpstreamErrorResponse) => s"Failed to confirm setup complete for application ${applicationId.value}"
+
+    http.POST[ConfirmSetupCompleteRequest, Either[UpstreamErrorResponse, Unit]](url, ConfirmSetupCompleteRequest(userEmailAddress)).map(_.leftMap(failed))
   }
 }

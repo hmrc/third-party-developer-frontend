@@ -35,6 +35,7 @@ import uk.gov.hmrc.apiplatform.modules.common.services.EitherTHelper
 import play.api.mvc._
 import play.api.libs.json.Json
 import cats.data.NonEmptyList
+import scala.concurrent.Future
 
 object QuestionsController {
   case class ErrorMessage(message: String)
@@ -42,6 +43,17 @@ object QuestionsController {
 
   case class InboundRecordAnswersRequest(answers: NonEmptyList[String])
   implicit val readsInboundRecordAnswersRequest = Json.reads[InboundRecordAnswersRequest]
+
+  case class ViewErrorInfo private(summary: String, message: String)
+
+  object ViewErrorInfo {
+    implicit val format = Json.format[ViewErrorInfo]
+
+    def apply(errorInfo: ErrorInfo): ViewErrorInfo = errorInfo match {
+      case ErrorInfo(summary, Some(message)) => new ViewErrorInfo(summary, message)
+      case ErrorInfo(summary, None)          => new ViewErrorInfo(summary, summary)
+    }
+  }
 }
 
 @Singleton
@@ -63,9 +75,10 @@ class QuestionsController @Inject()(
   with EitherTHelper[String] {
 
   import cats.instances.future.catsStdInstancesForFuture
+  import QuestionsController._
 
-  def showQuestion(submissionId: Submission.Id, questionId: QuestionId, answers: Option[ActualAnswer] = None, errors: Option[String] = None) = withSubmission(submissionId) { implicit request => 
-    val currentAnswer = request.submission.latestInstance.answersToQuestions.get(questionId)
+  private def processQuestion(submissionId: Submission.Id, questionId: Question.Id, onFormAnswer: Option[ActualAnswer], errorInfo: Option[ErrorInfo])(submitAction: Call)(implicit request: SubmissionApplicationRequest[AnyContent]) = {
+    val persistedAnswer = request.submission.latestInstance.answersToQuestions.get(questionId)
     val submission = request.submission
     val oQuestion = submission.findQuestion(questionId)
     val applicationId = request.application.id
@@ -75,35 +88,49 @@ class QuestionsController @Inject()(
         flowItem      <- fromOption(oQuestion, "Question not found in questionnaire")
         question       = oQuestion.get
       } yield {
-        val submitAction: Call = uk.gov.hmrc.apiplatform.modules.submissions.controllers.routes.QuestionsController.recordAnswer(submissionId, questionId)
-        errors.fold(
-          Ok(questionView(question, applicationId, submitAction, currentAnswer, None))
+        errorInfo.fold(
+          Ok(questionView(question, applicationId, submitAction, persistedAnswer, None))
         )(
-          _ => BadRequest(questionView(question, applicationId, submitAction, currentAnswer, errors))
+          ei => BadRequest(questionView(question, applicationId, submitAction, onFormAnswer, Some(ViewErrorInfo(ei))))
         )
       }
     )
     .fold[Result](BadRequest(_), identity(_))
   }
 
-  def recordAnswer(submissionId: Submission.Id, questionId: QuestionId) = withSubmission(submissionId) { implicit request => 
+  def showQuestion(submissionId: Submission.Id, questionId: Question.Id, onFormAnswer: Option[ActualAnswer] = None, errorInfo: Option[ErrorInfo] = None) = withSubmission(submissionId) { implicit request => 
+    val submitAction = uk.gov.hmrc.apiplatform.modules.submissions.controllers.routes.QuestionsController.recordAnswer(submissionId, questionId)
+    processQuestion(submissionId, questionId, onFormAnswer, errorInfo)(submitAction)
+  }
 
-    lazy val failed = (msg: String) => {
+  def updateQuestion(submissionId: Submission.Id, questionId: Question.Id, onFormAnswer: Option[ActualAnswer] = None, errorInfo: Option[ErrorInfo] = None) = withSubmission(submissionId) { implicit request => 
+    val submitAction = uk.gov.hmrc.apiplatform.modules.submissions.controllers.routes.QuestionsController.updateAnswer(submissionId, questionId)
+    processQuestion(submissionId, questionId, onFormAnswer, errorInfo)(submitAction)
+  }
+
+  private def processAnswer(submissionId: Submission.Id, questionId: Question.Id)(success: (ExtendedSubmission) => Future[Result])(implicit request: SubmissionApplicationRequest[AnyContent]) = {
+    def failed(answers: List[String]) = (msg: String) => {
+      val defaultMessage = "Please provide an answer to the question"
+      import cats.implicits._
+
       logger.info(s"Failed to recordAnswer - $msg")
-      showQuestion(submissionId, questionId, None, Some("Please provide an answer to the question"))(request)
+
+      val question = request.submission.findQuestion(questionId).get
+
+      val errorInfo = (question match {
+        case q: Question with ErrorMessaging  => q.errorInfo
+        case _                                => None
+      })
+      .getOrElse(ErrorInfo(defaultMessage, defaultMessage))
+
+      val onFormAnswer = question match {
+        case q: TextQuestion => answers.headOption.map(TextAnswer)
+        case _               => None
+      }
+
+      showQuestion(submissionId, questionId, onFormAnswer, errorInfo.some)(request)
     }
 
-    val success = (extSubmission: ExtendedSubmission) => { 
-      val questionnaire = extSubmission.submission.findQuestionnaireContaining(questionId).get
-      val nextQuestion = extSubmission.questionnaireProgress.get(questionnaire.id)
-                        .flatMap(_.questionsToAsk.dropWhile(_ != questionId).tail.headOption)
-      
-      lazy val toProdChecklist = uk.gov.hmrc.apiplatform.modules.submissions.controllers.routes.ProdCredsChecklistController.productionCredentialsChecklistPage(extSubmission.submission.applicationId)
-      lazy val toNextQuestion = (nextQuestionId) => uk.gov.hmrc.apiplatform.modules.submissions.controllers.routes.QuestionsController.showQuestion(submissionId, nextQuestionId)
-
-      successful(Redirect(nextQuestion.fold(toProdChecklist)(toNextQuestion)))
-    }
-  
     val formValues = request.body.asFormUrlEncoded.get.filterNot(_._1 == "csrfToken")
     val submitAction = formValues.get("submit-action").flatMap(_.headOption)
     val answers = formValues.get("answer").fold(List.empty[String])(_.toList.filter(_.nonEmpty))
@@ -124,11 +151,48 @@ class QuestionsController @Inject()(
     (
       for {
         effectiveAnswers  <- fromEither(validateAnswers(submitAction, answers))
+        // TODO - add validation
         result            <- fromEitherF(submissionService.recordAnswer(submissionId, questionId, effectiveAnswers))
       } yield result
     )
-    .fold(failed, success)
+    .fold(failed(answers), success)
     .flatten
+  } 
+
+  def recordAnswer(submissionId: Submission.Id, questionId: Question.Id) = withSubmission(submissionId) { implicit request => 
+    val success = (extSubmission: ExtendedSubmission) => { 
+      val questionnaire = extSubmission.submission.findQuestionnaireContaining(questionId).get
+      val nextQuestion = extSubmission.questionnaireProgress.get(questionnaire.id)
+                        .flatMap(_.questionsToAsk.dropWhile(_ != questionId).tail.headOption)
+      
+      lazy val toProdChecklist = uk.gov.hmrc.apiplatform.modules.submissions.controllers.routes.ProdCredsChecklistController.productionCredentialsChecklistPage(extSubmission.submission.applicationId)
+      lazy val toNextQuestion = (nextQuestionId) => uk.gov.hmrc.apiplatform.modules.submissions.controllers.routes.QuestionsController.showQuestion(submissionId, nextQuestionId)
+
+      successful(Redirect(nextQuestion.fold(toProdChecklist)(toNextQuestion)))
+    }
+
+    processAnswer(submissionId, questionId)(success)
   }
 
+  def updateAnswer(submissionId: Submission.Id, questionId: Question.Id) = withSubmission(submissionId) { implicit request =>
+    def hasQuestionBeenAnswered(questionId: Question.Id) = {
+      request.submission.latestInstance.answersToQuestions.get(questionId).fold(false)(_ => true)
+    }
+
+    val success = (extSubmission: ExtendedSubmission) => { 
+      val questionnaire = extSubmission.submission.findQuestionnaireContaining(questionId).get
+      val nextQuestion = extSubmission.questionnaireProgress.get(questionnaire.id)
+                        .flatMap(_.questionsToAsk.dropWhile(_ != questionId).tail.headOption)
+
+      lazy val toCheckAnswers = uk.gov.hmrc.apiplatform.modules.submissions.controllers.routes.CheckAnswersController.checkAnswersPage(request.submission.applicationId)
+      lazy val toNextQuestion = (nextQuestionId: Question.Id) => if(hasQuestionBeenAnswered(nextQuestionId))
+        uk.gov.hmrc.apiplatform.modules.submissions.controllers.routes.CheckAnswersController.checkAnswersPage(request.submission.applicationId)
+      else
+        uk.gov.hmrc.apiplatform.modules.submissions.controllers.routes.QuestionsController.updateQuestion(submissionId, nextQuestionId)
+
+      successful(Redirect(nextQuestion.fold(toCheckAnswers)(toNextQuestion)))
+    }
+
+    processAnswer(submissionId, questionId)(success)
+  }
 }

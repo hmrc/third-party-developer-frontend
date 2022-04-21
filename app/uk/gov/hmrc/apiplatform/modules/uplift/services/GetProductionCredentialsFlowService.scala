@@ -22,6 +22,7 @@ import uk.gov.hmrc.thirdpartydeveloperfrontend.repositories.FlowRepository
 
 import scala.concurrent.{ExecutionContext, Future}
 import uk.gov.hmrc.apiplatform.modules.uplift.domain.models._
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.SellResellOrDistribute
 import cats.implicits._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.flows.FlowType
 

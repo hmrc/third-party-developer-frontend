@@ -21,29 +21,26 @@
 @import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.checkpages.DummyCheckYourAnswersForm
 @import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.DeveloperSession
 
-@this(devMain: DevMain)
+@this(devMain: DevMain2)
 
 @(data: CheckYourAnswersData, form: Form[DummyCheckYourAnswersForm])(implicit request: play.api.mvc.Request[Any], loggedIn: DeveloperSession, messages: Messages, applicationConfig: ApplicationConfig)
 
 @pageHeading = @{ "Check your answers before requesting credentials" }
 
 @devMain(
-    title = pageHeading,
-    userFullName = loggedIn.loggedInName,
-    breadcrumbs = Seq(
+  title = pageHeading,
+  userFullName = loggedIn.loggedInName,
+  breadcrumbs = Seq(
     Crumb(pageHeading),
     Crumb.viewAllApplications,
     Crumb.home
-),
-developerSession = Some(loggedIn)
+  ),
+  developerSession = Some(loggedIn)
 ) {
+  @errorSummary2(form)
+  <h1 class="govuk-heading-l">
+    @pageHeading
+  </h1>
 
-    @errorSummary(form)
-    <heading>
-        <h1 class="heading-xlarge">
-            @pageHeading
-        </h1>
-    </heading>
-
-    @aboutYourApplicationPartial(data, form, editable = true)
+  @aboutYourApplicationPartial(data, form, editable = true)
 }

@@ -16,19 +16,19 @@
 
 package uk.gov.hmrc.thirdpartydeveloperfrontend.controllers
 
-import uk.gov.hmrc.thirdpartydeveloperfrontend.config.ApplicationConfig
-import uk.gov.hmrc.thirdpartydeveloperfrontend.config.ErrorHandler
+import uk.gov.hmrc.thirdpartydeveloperfrontend.config.{ApplicationConfig, ErrorHandler}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.Capabilities.SupportsTermsOfUse
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.Permissions.SandboxOrAdmin
+
 import javax.inject.{Inject, Singleton}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.controllers.ApplicationViewModel
 import play.api.data.Form
 import play.api.libs.crypto.CookieSigner
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents, Result}
-import uk.gov.hmrc.thirdpartydeveloperfrontend.service.{ApplicationService, SessionService, ApplicationActionService}
+import uk.gov.hmrc.thirdpartydeveloperfrontend.service.{ApplicationActionService, ApplicationService, SessionService, TermsOfUseVersionService}
 import uk.gov.hmrc.time.DateTimeUtils
-import views.html.{TermsOfUseView, partials}
+import views.html.TermsOfUseView
 
 import scala.concurrent.{ExecutionContext, Future}
 
@@ -40,7 +40,8 @@ class TermsOfUse @Inject() (
     val sessionService: SessionService,
     mcc: MessagesControllerComponents,
     val cookieSigner: CookieSigner,
-    termsOfUseView: TermsOfUseView
+    termsOfUseView: TermsOfUseView,
+    termsOfUseVersionService: TermsOfUseVersionService
 )(implicit val ec: ExecutionContext, val appConfig: ApplicationConfig)
     extends ApplicationController(mcc)
     with ApplicationHelper {
@@ -48,15 +49,16 @@ class TermsOfUse @Inject() (
   def canChangeTermsOfUseAction(applicationId: ApplicationId)(fun: ApplicationRequest[AnyContent] => Future[Result]): Action[AnyContent] =
     checkActionForApprovedApps(SupportsTermsOfUse, SandboxOrAdmin)(applicationId)(fun)
 
-  def termsOfUsePartial() = Action {
-    Ok(partials.termsOfUse())
+  def termsOfUsePartial() = Action { implicit request =>
+    Ok(termsOfUseVersionService.getLatest().getTermsOfUseAsHtml())
   }
 
   def termsOfUse(id: ApplicationId) = canChangeTermsOfUseAction(id) { implicit request =>
     if (request.application.termsOfUseStatus == TermsOfUseStatus.NOT_APPLICABLE) {
       Future.successful(BadRequest(errorHandler.badRequestTemplate))
     } else {
-      Future.successful(Ok(termsOfUseView(applicationViewModelFromApplicationRequest, TermsOfUseForm.form)))
+      val termsOfUse = termsOfUseVersionService.getForApplication(request.application)
+      Future.successful(Ok(termsOfUseView(applicationViewModelFromApplicationRequest, TermsOfUseForm.form, termsOfUse)))
     }
   }
 
@@ -65,7 +67,7 @@ class TermsOfUse @Inject() (
       if (app.termsOfUseStatus == TermsOfUseStatus.AGREEMENT_REQUIRED) {
         val information = app.checkInformation.getOrElse(CheckInformation())
         val updatedInformation = information.copy(
-          termsOfUseAgreements = information.termsOfUseAgreements :+ TermsOfUseAgreement(request.developerSession.email, DateTimeUtils.now, appConfig.currentTermsOfUseVersion)
+          termsOfUseAgreements = information.termsOfUseAgreements :+ TermsOfUseAgreement(request.developerSession.email, DateTimeUtils.now, termsOfUseVersionService.getLatest().toString)
         )
 
         applicationService
@@ -77,10 +79,12 @@ class TermsOfUse @Inject() (
     }
 
     def handleInvalidForm(applicationViewModel: ApplicationViewModel, form: Form[TermsOfUseForm]) = {
-      Future.successful(BadRequest(termsOfUseView(applicationViewModel, form)))
+      val termsOfUse = termsOfUseVersionService.getForApplication(request.application)
+      Future.successful(BadRequest(termsOfUseView(applicationViewModel, form, termsOfUse)))
     }
 
     TermsOfUseForm.form.bindFromRequest
       .fold(invalidForm => handleInvalidForm(applicationViewModelFromApplicationRequest, invalidForm), validForm => handleValidForm(request.application, validForm))
   }
+
 }

@@ -23,7 +23,8 @@
 @this(devMain: DevMain)
 
 @(app: Application, loggedIn: DeveloperSession, email: String)(
-        implicit request: play.api.mvc.Request[Any], messages: Messages,applicationConfig: ApplicationConfig)
+  implicit request: play.api.mvc.Request[Any], messages: Messages,applicationConfig: ApplicationConfig
+)
 
 @pageHeading = @{ "Are you sure you want to remove this team member from your application?" }
 
@@ -33,25 +34,19 @@
   back = BackButtonWithJavaScript,
   developerSession = Some(loggedIn)
 ) {
-  <header>
-   <h1 class="heading-xlarge">@pageHeading</h1>
-  </header>
+  <h1 class="govuk-heading-l">@pageHeading</h1>
 
-  <section>
-
-  <div>
-   <strong class="bold">Team member:</strong> @email
-  </div>
+  <p class="govuk-body">
+    <span class="govuk-!-font-weight-bold">Team member:</span> @email
+  </p>
 
   <br/>
 
   @helper.form(action = routes.CheckYourAnswers.teamMemberRemoveAction(app.id)) {
-   @helper.CSRF.formField
-   <input type="hidden" name="email" value="@email">
+    @helper.CSRF.formField
+    <input type="hidden" class="govuk-visually-hidden" name="email" value="@email">
 
-    <button id="submit" class="button button--padded" type="submit">Delete team member</button>
-    <a href="@routes.CheckYourAnswers.team(app.id)" class="secondary-button">Cancel</a>
+    <button id="submit" class="govuk-button govuk-button--warning" type="submit">Delete team member</button>
+    <a href="@routes.CheckYourAnswers.team(app.id)" class="govuk-button govuk-button--secondary">Cancel</a>
   }
-  </section>
-
- }
+}

@@ -14,7 +14,7 @@
  * limitations under the License.
  *@
 
-@import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.views.{BackButtonWithJavaScript, IpAllowlistFeedbackBanner}
+@import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.views.BackButtonWithJavaScript
 @import views.html.include.DevMain2
 @import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.DeveloperSession
 @import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.Application
@@ -30,8 +30,7 @@
   title = "Setting up IP allow list",
   userFullName = loggedIn.loggedInName,
   back = BackButtonWithJavaScript,
-  developerSession = Some(loggedIn),
-  feedbackBanner = Some(IpAllowlistFeedbackBanner)
+  developerSession = Some(loggedIn)
 ) {
   <div class="ip-allowlist">
     <h1 class="govuk-heading-l">Setting up your IP allow list</h1>

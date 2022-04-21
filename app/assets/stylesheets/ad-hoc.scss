@@ -345,7 +345,15 @@ tr.teamMembers, th {
 .compressed-header {
   margin-top: 0px;
 }
-
+#termsOfUse {
+  overflow: auto;
+  ul.terms-of-use-nav-links {
+    list-style-type: none;
+  }
+  .govuk-grid-column-full, .govuk-grid-column-one-half {
+    padding: 0;
+  }
+}
 .feedback-banner {
   $blue: #1d70b8;
   $light-grey: #f3f2f1;
@@ -480,4 +488,32 @@ tr.teamMembers, th {
 .your-role {
   width: 15%;
   padding-right: 0;
+}
+
+// Interrupt
+
+.interrupt-banner {
+  overflow: hidden;
+  background: #1d70b8;
+  color: govuk-colour("white");
+  padding: 25px;
+}
+
+.white {
+  color: govuk-colour("white");
+}
+
+// Interrupt button //
+
+a.interrupt-button {
+  background: govuk-colour("white");
+  color: govuk-colour("blue") !important;
+  font-size: 24px;
+  box-shadow: 0 2px 0 #144E81;
+  font-weight: 700;
+}
+
+a.interrupt-button:hover {
+  background: govuk-colour("light-grey");
+  box-shadow: 0 2px 0 govuk-colour("dark-blue");
 }

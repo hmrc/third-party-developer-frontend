@@ -23,10 +23,12 @@
 @import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.DeveloperSession
 @import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.TermsOfUseStatus
 @import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.routes
+@import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.Details.TermsOfUseViewModel
+@import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.{PrivacyPolicyLocation,TermsAndConditionsLocation}
 
 @this(devMain: DevMain2, leftHandNav: LeftHandNav)
 
-@(applicationViewModel: ApplicationViewModel, fraudPreventionViewModel: Option[FraudPreventionNavLinkViewModel] = None)(
+@(applicationViewModel: ApplicationViewModel, termsOfUse: TermsOfUseViewModel, fraudPreventionViewModel: Option[FraudPreventionNavLinkViewModel] = None)(
         implicit request: play.api.mvc.Request[Any],
         loggedIn: DeveloperSession,
         messagesProvider: MessagesProvider,
@@ -69,7 +71,7 @@
 
   <br>
 
-  @if(app.termsOfUseStatus == TermsOfUseStatus.AGREEMENT_REQUIRED && app.isPermittedToEditAppDetails(loggedIn.developer)) {
+  @if(termsOfUse.agreementNeeded && app.isPermittedToAgreeToTermsOfUse(loggedIn.developer)) {
     <div class="govuk-warning-text">
       <span class="govuk-warning-text__icon" aria-hidden="true">!</span>
       <strong id="terms-of-use-header" class="govuk-warning-text__text">
@@ -88,11 +90,11 @@
     <thead class="govuk-table__head">
       <tr class="govuk-table__row">
         <th scope="col" class="govuk-table__header">Application details</th>
-        <th scope="col" class="govuk-table__header">
+        <td scope="col" class="govuk-table__header">
           @if(app.isPermittedToEditAppDetails(loggedIn.developer)) {
             <a id="change" class="govuk-link govuk-link--no-visited-state" href="@routes.Details.changeDetails(app.id)">Change <span class="govuk-visually-hidden">application details</span></a>
           }
-        </th>
+        </td>
       </tr>
     </thead>
     <tbody class="govuk-table__body">
@@ -110,11 +112,11 @@
       </tr>
       <tr class="govuk-table__row">
         <th scope="row" class="govuk-table__header">Privacy policy URL</th>
-        <td class="govuk-table__cell" id="privacyPolicyUrl">@{app.privacyPolicyUrl.getOrElse("None")}</td>
+        <td class="govuk-table__cell" id="privacyPolicyUrl">@{PrivacyPolicyLocation.asText(app.privacyPolicyLocation)}</td>
       </tr>
       <tr class="govuk-table__row">
         <th scope="row" class="govuk-table__header">Terms and conditions URL</th>
-        <td class="govuk-table__cell" id="termsAndConditionsUrl">@{app.termsAndConditionsUrl.getOrElse("None")}</td>
+        <td class="govuk-table__cell" id="termsAndConditionsUrl">@{TermsAndConditionsLocation.asText(app.termsAndConditionsLocation)}</td>
       </tr>
       <tr class="govuk-table__row">
         <th scope="row" class="govuk-table__header">Application grant length</th>
@@ -123,7 +125,8 @@
     </tbody>
   </table>
 
-  @if(app.termsOfUseStatus != TermsOfUseStatus.NOT_APPLICABLE) {
+  @if(termsOfUse.exists) {
+    @if(termsOfUse.appUsesOldVersion) {
     <br>
     <table class="govuk-table" id="termsOfUse">
       <colgroup>
@@ -149,24 +152,32 @@
       <tbody class="govuk-table__body">
         <tr class="govuk-table__row">
           <td class="govuk-table__cell">Terms of use</td>
-          <td class="govuk-table__cell" id="termsOfUseAagreementDetails">
-            @if(app.termsOfUseStatus == TermsOfUseStatus.AGREED) {
-              Agreed by @{app.termsOfUseAgreements.head.emailAddress} on @{DateTimeFormat.forPattern("dd MMMM yyyy").print(app.termsOfUseAgreements.head.timeStamp)}
-            } else {
-              Not agreed
+          <td class="govuk-table__cell" id="termsOfUseAgreementDetails">
+            @termsOfUse.agreement match {
+              case Some(agreement) => { Agreed by @agreement.who on @DateTimeFormat.forPattern("dd MMMM yyyy").print(agreement.when) }
+              case None => { Not agreed }
             }
           </td>
           <td class="govuk-table__cell">
-            @if(app.isPermittedToEditAppDetails(loggedIn.developer)) {
-              @if(app.termsOfUseStatus == TermsOfUseStatus.AGREED) {
-                <a id="termsOfUseReadLink" class="govuk-link" href="@routes.TermsOfUse.termsOfUse(app.id)">Read</a>
-              } else {
-                <a id="termsOfUseReadLink" class="govuk-button govuk-!-margin-0" href="@routes.TermsOfUse.termsOfUse(app.id)">Read and agree</a>
+            @if(app.isPermittedToAgreeToTermsOfUse(loggedIn.developer)) {
+              @termsOfUse.agreement match {
+                case Some(agreement) => { <a id="termsOfUseReadLink" class="govuk-link" href="@routes.TermsOfUse.termsOfUse(app.id)">Read</a> }
+                case None => { <a id="termsOfUseReadLink" class="govuk-button govuk-!-margin-0" href="@routes.TermsOfUse.termsOfUse(app.id)">Read and agree</a> }
               }
             }
           </td>
         </tr>
       </tbody>
     </table>
+    } else {
+      <h2 class="govuk-heading-s govuk-!-margin-top-7 govuk-!-margin-bottom-2">Terms of use</h2>
+      @termsOfUse.agreement match {
+        case Some(agreement) => {
+          <p class="govuk-body govuk-!-margin-bottom-1" id="termsOfUseAgreementDetails">@agreement.who verified @{app.name} will conform to our terms of use on @{DateTimeFormat.forPattern("dd MMMM yyyy").print(agreement.when)}. </p>
+          <p class="govuk-body"><a class="govuk-link govuk-link--no-visited-state" href="@uk.gov.hmrc.apiplatform.modules.submissions.controllers.routes.TermsOfUseResponsesController.termsOfUseResponsesPage(app.id)">Review the terms of use responses for @{app.name}</a></p>
+        }
+        case None => { <p class="govuk-body" id="termsOfUseAgreementDetails">Not agreed</p> }
+      }
+    }
   }
 }

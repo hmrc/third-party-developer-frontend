@@ -22,12 +22,13 @@ import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.FormKeys._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.{ApplicationId, CheckInformation}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.views.CheckInformationForm
+
 import javax.inject.{Inject, Singleton}
 import play.api.data.Form
 import play.api.data.Forms.{boolean, mapping, optional, text}
 import play.api.libs.crypto.CookieSigner
 import play.api.mvc._
-import uk.gov.hmrc.thirdpartydeveloperfrontend.service.{ApplicationService, SessionService}
+import uk.gov.hmrc.thirdpartydeveloperfrontend.service.{ApplicationActionService, ApplicationService, SessionService, TermsOfUseVersionService}
 import uk.gov.voa.play.form.ConditionalMappings._
 import views.html.checkpages._
 import views.html.checkpages.applicationcheck.{LandingPageView, UnauthorisedAppDetailsView}
@@ -36,7 +37,6 @@ import views.html.editapplication.NameSubmittedView
 
 import scala.concurrent.{ExecutionContext, Future}
 import scala.concurrent.Future.successful
-import uk.gov.hmrc.thirdpartydeveloperfrontend.service.ApplicationActionService
 
 @Singleton
 class ApplicationCheck @Inject() (
@@ -57,7 +57,8 @@ class ApplicationCheck @Inject() (
     val contactDetailsView: ContactDetailsView,
     val apiSubscriptionsViewTemplate: ApiSubscriptionsView,
     val privacyPolicyView: PrivacyPolicyView,
-    val termsAndConditionsView: TermsAndConditionsView
+    val termsAndConditionsView: TermsAndConditionsView,
+    val termsOfUseVersionService: TermsOfUseVersionService
 )(implicit val ec: ExecutionContext, val appConfig: ApplicationConfig)
     extends ApplicationController(mcc)
     with ApplicationHelper

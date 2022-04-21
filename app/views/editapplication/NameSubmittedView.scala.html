@@ -20,10 +20,11 @@
 @import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.DeveloperSession
 @import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.routes
 
-@this(devMain: DevMain)
+@this(devMain: DevMain2)
 
 @(applicationId: ApplicationId, app: Application)(
-        implicit request: Request[_], loggedIn: DeveloperSession, messages: Messages, appConfig: ApplicationConfig)
+  implicit request: Request[_], loggedIn: DeveloperSession, messages: Messages, appConfig: ApplicationConfig
+)
 
 @nameOfEnv = @{appConfig.nameOfPrincipalEnvironment}
 @nameOfEnvLowerCase = @{appConfig.nameOfPrincipalEnvironment.toLowerCase()}
@@ -31,40 +32,35 @@
 @pageHeading = @{s"Request received"}
 
 @devMain(
-    title = pageHeading,
-    userFullName = loggedIn.loggedInName,
-    breadcrumbs = Seq(
-        Crumb(pageHeading),
-        Crumb.viewAllApplications,
-        Crumb.home
-    ),
-    developerSession = Some(loggedIn),
-    fullWidthContent = true
+  title = pageHeading,
+  userFullName = loggedIn.loggedInName,
+  breadcrumbs = Seq(
+    Crumb(pageHeading),
+    Crumb.viewAllApplications,
+    Crumb.home
+  ),
+  developerSession = Some(loggedIn),
+  fullWidthContent = true
 ) {
-
-    <div class="grid-row">
-        <div class="column-three-quarters">
-            <div class="govuk-box-highlight">
-                <h1 class="heading-xlarge">
-                    @pageHeading
-                </h1>
-                <p class="font-large">
-                    We've sent you a confirmation email
-                </p>
-            </div>
-            <h2 class="heading-large">What happens next?</h2>
-            <p>Before we can give you access to live data, we need to check the information you've provided and review your testing.<p/>
-            <p>We may ask for a demonstration of your software.
-            </p>
-            <p>The checking process can take up to 10 working days.</p>
-
-            <h3 class="heading-medium">New @principalEnv application</h3>
-            <p>By requesting credentials you've created a new @principalEnv application called <span class="bold">@{app.name}</span>.<p/>
-            <p>Once your credentials are issued, you can access them in your application. You'll be notified by email.</p>
-            <br>
-
-            <a href="@routes.Details.details(app.id)" class="button">View new @principalEnv application</a>
-        </div>
+  <div class="govuk-grid-row">
+    <div class="govuk-panel govuk-panel--confirmation">
+      <h1 class="govuk-panel__title">
+        @pageHeading
+      </h1>
+      <div class="govuk-panel__body">
+        We've sent you a confirmation email
+      </div>
     </div>
+    <h2 class="govuk-heading-m">What happens next?</h2>
+    <p class="govuk-body">Before we can give you access to live data, we need to check the information you've provided and review your testing.<p/>
+    <p class="govuk-body">We may ask for a demonstration of your software.</p>
+    <p class="govuk-body">The checking process can take up to 10 working days.</p>
 
+    <h3 class="govuk-heading-s">New @principalEnv application</h3>
+    <p class="govuk-body">By requesting credentials you've created a new @principalEnv application called <span class="govuk-!-font-weight-bold">@{app.name}</span>.<p/>
+    <p class="govuk-body">Once your credentials are issued, you can access them in your application. You'll be notified by email.</p>
+    <br>
+
+    <a href="@routes.Details.details(app.id)" class="govuk-button">View new @principalEnv application</a>
+  </div>
 }

@@ -21,31 +21,29 @@
 @import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.checkpages.CheckYourAnswersData
 @import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.checkpages.DummyCheckYourAnswersForm
 
-@this(devMain: DevMain)
+@this(devMain: DevMain2)
 
 @(data: CheckYourAnswersData, form: Form[DummyCheckYourAnswersForm])(implicit request: play.api.mvc.Request[Any], loggedIn: DeveloperSession, messages: Messages, applicationConfig: ApplicationConfig)
 
 @devMain(
-    title = data.softwareName + " Credentials requested",
-    userFullName = loggedIn.loggedInName,
-    breadcrumbs = Seq(
-      Crumb(data.softwareName),
-      Crumb.viewAllApplications,
-      Crumb.home
-    ),
-    developerSession = Some(loggedIn)
+  title = data.softwareName + " Credentials requested",
+  userFullName = loggedIn.loggedInName,
+  breadcrumbs = Seq(
+    Crumb(data.softwareName),
+    Crumb.viewAllApplications,
+    Crumb.home
+  ),
+  developerSession = Some(loggedIn)
 ) {
-    @errorSummary(form)
+  @errorSummary2(form)
 
-    <heading>
-        <span class="govuk-caption-xl">@{data.softwareName}</span>
-        <h1 class="heading-xlarge compressed-header">
-            Credentials requested
-        </h1>
-    </heading>
+  <span class="govuk-caption-l">@{data.softwareName}</span>
+  <h1 class="govuk-heading-l">
+    Credentials requested
+  </h1>
 
-    <p>We're checking the information you've provided and reviewing your testing.</p>
-    <p>Once your credentials are issued, you can access them in your application. You'll be notified by email.</p>
+  <p class="govuk-body">We're checking the information you've provided and reviewing your testing.</p>
+  <p class="govuk-body">Once your credentials are issued, you can access them in your application. You'll be notified by email.</p>
 
-    @aboutYourApplicationPartial(data, form, editable = false)
+  @aboutYourApplicationPartial(data, form, editable = false)
 }

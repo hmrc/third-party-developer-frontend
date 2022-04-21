@@ -18,9 +18,25 @@ package uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications
 
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.apidefinitions.AccessType
 import uk.gov.hmrc.play.json.Union
+import play.api.libs.json.Json
+
+case class ImportantSubmissionData(
+  organisationUrl: Option[String] = None,
+  responsibleIndividual: ResponsibleIndividual,
+  serverLocations: Set[ServerLocation],
+  termsAndConditionsLocation: TermsAndConditionsLocation,
+  privacyPolicyLocation: PrivacyPolicyLocation,
+  termsOfUseAcceptances: List[TermsOfUseAcceptance]
+)
+
+object ImportantSubmissionData {
+  implicit val format = Json.format[ImportantSubmissionData]
+}
 
 sealed trait Access {
   val accessType: AccessType
+
+  def hasSubmissions: Boolean
 }
 
 object Access {
@@ -36,17 +52,28 @@ object Access {
     .format
 }
 
-case class Standard(redirectUris: List[String] = List.empty,
-                    termsAndConditionsUrl: Option[String] = None,
-                    privacyPolicyUrl: Option[String] = None,
-                    overrides: Set[OverrideFlag] = Set.empty) extends Access {
+case class Standard(
+  redirectUris: List[String] = List.empty,
+  termsAndConditionsUrl: Option[String] = None,
+  privacyPolicyUrl: Option[String] = None,
+  overrides: Set[OverrideFlag] = Set.empty,
+  sellResellOrDistribute: Option[SellResellOrDistribute] = None,
+  importantSubmissionData: Option[ImportantSubmissionData] = None
+) extends Access {
   override val accessType = AccessType.STANDARD
+
+  lazy val hasSubmissions: Boolean = importantSubmissionData.nonEmpty
 }
+
 
 case class Privileged(scopes: Set[String] = Set.empty) extends Access {
   override val accessType = AccessType.PRIVILEGED
+
+  val hasSubmissions: Boolean = false
 }
 
 case class ROPC(scopes: Set[String] = Set.empty) extends Access {
   override val accessType = AccessType.ROPC
+
+  val hasSubmissions: Boolean = false
 }

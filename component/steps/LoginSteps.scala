@@ -16,23 +16,21 @@
 
 package steps
 
-import uk.gov.hmrc.thirdpartydeveloperfrontend.builder.DeveloperBuilder
 import com.github.tomakehurst.wiremock.client.WireMock._
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.connectors.{LoginRequest, UserAuthenticationResponse, VerifyMfaRequest}
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.{Developer, LoggedInState, Session}
 import io.cucumber.datatable.DataTable
-import io.cucumber.scala.{EN, ScalaDsl}
 import io.cucumber.scala.Implicits._
+import io.cucumber.scala.{EN, ScalaDsl}
 import matchers.CustomMatchers
 import org.openqa.selenium.{By, WebDriver}
+import org.scalatest.matchers.should.Matchers
 import pages._
 import play.api.http.Status._
 import play.api.libs.json.{Format, Json}
 import stubs.{DeveloperStub, Stubs}
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.connectors.PasswordResetRequest
-import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.GlobalUserIdTracker
-import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.UserIdTracker
-import org.scalatest.matchers.should.Matchers
+import uk.gov.hmrc.thirdpartydeveloperfrontend.builder.DeveloperBuilder
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.connectors.{LoginRequest, PasswordResetRequest, UserAuthenticationResponse, VerifyMfaRequest}
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.{Developer, LoggedInState, Session}
+import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.{GlobalUserIdTracker, UserIdTracker}
 
 case class MfaSecret(secret: String)
 
@@ -87,6 +85,8 @@ class LoginSteps extends ScalaDsl with EN with Matchers with NavigationSugar wit
 
     setupVerificationOfAccessCode(developer)
 
+    setUpGetCombinedApis()
+
     setupEnablingMfa(developer)
   }
 
@@ -121,6 +121,13 @@ class LoginSteps extends ScalaDsl with EN with Matchers with NavigationSugar wit
       .willReturn(aResponse()
         .withStatus(OK)
         .withBody(Json.toJson(developer).toString())))
+  }
+
+  private def setUpGetCombinedApis(): Unit = {
+    stubFor(get(urlPathEqualTo("/api-categories/combined"))
+    .willReturn(aResponse()
+    .withStatus(OK)
+    .withBody("[]")))
   }
 
   Given("""^'(.*)' session is uplifted to LoggedIn$""") { email: String =>

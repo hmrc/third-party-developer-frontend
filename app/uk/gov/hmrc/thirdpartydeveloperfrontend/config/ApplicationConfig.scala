@@ -47,6 +47,9 @@ class ApplicationConfig @Inject()(config: Configuration) extends ServicesConfig(
   lazy val productionApiBaseUrl = buildUrl("platform.api.production")
   lazy val sandboxApiBaseUrl = buildUrl("platform.api.sandbox")
 
+  lazy val sessionTimeout = getInt("timeout.timeout")
+  lazy val sessionCountdown = getInt("timeout.countdown")
+
   lazy val sessionTimeoutInSeconds = getInt("session.timeoutSeconds")
   lazy val analyticsToken = config.getOptional[String]("google-analytics.token").filterNot(_ == "")
   lazy val analyticsHost = getConfigDefaulted("google-analytics.host", "auto")
@@ -54,8 +57,6 @@ class ApplicationConfig @Inject()(config: Configuration) extends ServicesConfig(
   lazy val title = "Developer Hub"
   lazy val jsonEncryptionKey = getString("json.encryption.key")
   lazy val hasSandbox = getConfigDefaulted("hasSandbox", false)
-  lazy val currentTermsOfUseVersion = getConfigDefaulted("currentTermsOfUseVersion", "")
-  lazy val currentTermsOfUseDate = DateTime.parse(getConfigDefaulted("currentTermsOfUseDate", ""))
   lazy val retryCount = getConfigDefaulted("retryCount", 0)
   lazy val retryDelayMilliseconds = getConfigDefaulted("retryDelayMilliseconds", 500)
 

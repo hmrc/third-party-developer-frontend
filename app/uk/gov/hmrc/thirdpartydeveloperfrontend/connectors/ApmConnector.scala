@@ -78,11 +78,6 @@ class ApmConnector @Inject()(http: HttpClient, config: ApmConnector.Config, metr
     http.GET[Map[ApiContext, ApiData]](s"${config.serviceBaseUrl}/api-definitions/open", Seq("environment" -> environment.toString))
   }
 
-  @deprecated("This is no longer used, please use fetchAllCombinedAPICategories", "")
-  def fetchAllAPICategories()(implicit hc: HeaderCarrier): Future[List[APICategoryDisplayDetails]] =
-    http.GET[List[APICategoryDisplayDetails]](s"${config.serviceBaseUrl}/api-categories")
-
-
   def fetchAllCombinedAPICategories()(implicit hc: HeaderCarrier): Future[Either[Throwable, List[APICategoryDisplayDetails]]] =
     http.GET[List[APICategoryDisplayDetails]](s"${config.serviceBaseUrl}/api-categories/combined")
       .map(Right(_))
@@ -94,7 +89,7 @@ class ApmConnector @Inject()(http: HttpClient, config: ApmConnector.Config, metr
     http.GET[ExtendedApiDefinition](s"${config.serviceBaseUrl}/combined-api-definitions/$serviceName")
 
   def fetchCombinedApi(serviceName: String)(implicit hc: HeaderCarrier): Future[Either[Throwable, CombinedApi]] =
-    http.GET[CombinedApi](s"${config.serviceBaseUrl}/combined-apis/$serviceName")
+    http.GET[CombinedApi](s"${config.serviceBaseUrl}/combined-rest-xml-apis/$serviceName")
       .map(Right(_))
       .recover {
         case NonFatal(e) => Left(e)
@@ -104,7 +99,7 @@ class ApmConnector @Inject()(http: HttpClient, config: ApmConnector.Config, metr
     http.GET[List[ApiDefinition]](s"${config.serviceBaseUrl}/combined-api-definitions", Seq("developerId" -> userId.asText))
 
   def fetchCombinedApisVisibleToUser(userId: UserId)(implicit hc: HeaderCarrier): Future[Either[Throwable, List[CombinedApi]]] =
-    http.GET[List[CombinedApi]](s"${config.serviceBaseUrl}/combined-apis", Seq("developerId" -> userId.asText))
+    http.GET[List[CombinedApi]](s"${config.serviceBaseUrl}/combined-rest-xml-apis/developer", Seq("developerId" -> userId.asText))
       .map(Right(_))
       .recover {
         case NonFatal(e) => Left(e)

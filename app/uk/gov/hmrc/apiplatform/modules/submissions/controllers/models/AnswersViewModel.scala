@@ -21,12 +21,11 @@ import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.Applic
 import uk.gov.hmrc.apiplatform.modules.submissions.domain.models._
 
 object AnswersViewModel {
-  
-  case class ViewQuestion(id: QuestionId, text: String, answer: String)
-  case class ViewQuestionnaire(label: String, state: String, id: QuestionnaireId, questions: NonEmptyList[ViewQuestion])
-  case class ViewModel(appId: ApplicationId, appName: String, questionnaires: List[ViewQuestionnaire])
+  case class ViewQuestion(id: Question.Id, text: String, answer: String)
+  case class ViewQuestionnaire(label: String, state: String, id: Questionnaire.Id, questions: NonEmptyList[ViewQuestion])
+  case class ViewModel(appId: ApplicationId, appName: String, submissionId: Submission.Id, questionnaires: List[ViewQuestionnaire])
 
-  def convertAnswer(answer: ActualAnswer): Option[String] = answer match {
+  private def convertAnswer(answer: ActualAnswer): Option[String] = answer match {
     case SingleChoiceAnswer(value) => Some(value)
     case TextAnswer(value) => Some(value)
     case MultipleChoiceAnswer(values) => Some(values.mkString)
@@ -34,20 +33,20 @@ object AnswersViewModel {
     case AcknowledgedAnswer => None
   }
   
-  def convertQuestion(extSubmission: ExtendedSubmission)(item: QuestionItem): Option[ViewQuestion] = {
+  private def convertQuestion(submission: Submission)(item: QuestionItem): Option[ViewQuestion] = {
     val id = item.question.id
     
-    extSubmission.submission.latestInstance.answersToQuestions.get(id).flatMap(convertAnswer).map(answer =>
+    submission.latestInstance.answersToQuestions.get(id).flatMap(convertAnswer).map(answer =>
       ViewQuestion(id, item.question.wording.value, answer)
     )
   }
   
-  def convertQuestionnaire(extSubmission: ExtendedSubmission)(questionnaire: Questionnaire): Option[ViewQuestionnaire] = {
+  private def convertQuestionnaire(extSubmission: ExtendedSubmission)(questionnaire: Questionnaire): Option[ViewQuestionnaire] = {
     val progress = extSubmission.questionnaireProgress.get(questionnaire.id).get
     val state = QuestionnaireState.describe(progress.state)
     
     val questions = questionnaire.questions
-      .map(convertQuestion(extSubmission))
+      .map(convertQuestion(extSubmission.submission))
       .collect { case Some(x) => x }
     NonEmptyList.fromList(questions)
       .map(ViewQuestionnaire(questionnaire.label.value, state, questionnaire.id, _))
@@ -58,6 +57,6 @@ object AnswersViewModel {
       .map(convertQuestionnaire(extSubmission))
       .collect { case Some(x) => x }
 
-    ViewModel(appId, appName, questionnaires)
+    ViewModel(appId, appName, extSubmission.submission.id, questionnaires)
   }
 }

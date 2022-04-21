@@ -18,99 +18,101 @@
 @import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.routes
 @import include._
 
-@this(devMain: DevMain)
+@this(devMain: DevMain2)
 
 @(heading: String, form: Form[uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.SignOutSurveyForm])(implicit request: play.api.mvc.Request[Any],
         loggedIn: DeveloperSession, messages: Messages, applicationConfig: ApplicationConfig)
 
 @devMain(
-    title = heading,
-    userFullName = loggedIn.loggedInName,
-    fullWidthContent = true,
-    developerSession = Some(loggedIn)
+  title = heading,
+  userFullName = loggedIn.loggedInName,
+  fullWidthContent = true,
+  developerSession = Some(loggedIn)
 ) {
+  <h1 class="govuk-heading-l">@heading</h1>
 
-    <h1 class="heading-xlarge">@heading</h1>
+  <a href="@routes.UserLogoutAccount.logout()" class="govuk-button">Yes, sign me out</a>
 
-    <div class="form-group">
-        <a href="@routes.UserLogoutAccount.logout()" class="button">Yes, sign me out</a>
+  <hr>
+
+  <h2 class="govuk-heading-m">Feedback survey</h2>
+
+  @helper.form(action = routes.UserLogoutAccount.logoutSurveyAction(),'class -> "form", 'id -> "feedbackForm") {
+    @helper.CSRF.formField
+
+    <p class="govuk-body">
+      Before you sign out, please give feedback to help us improve the @(applicationConfig.title). It’s only 2 questions. We use your feedback to make our services better.
+    </p>
+
+    <div class="govuk-form-group">
+      <fieldset class="govuk-fieldset">
+        <legend class="govuk-fieldset__legend govuk-!-font-weight-bold" for="rating" id="rating-label">
+          Overall, how satisfied were you with using the @(applicationConfig.title)?
+        </legend>
+        <br>
+        <div class="govuk-radios">
+          @ratingRadioButton("5", "Very satisfied")
+          @ratingRadioButton("4", "Satisfied")
+          @ratingRadioButton("3", "Neutral")
+          @ratingRadioButton("2", "Dissatisfied")
+          @ratingRadioButton("1", "Very dissatisfied")
+        </div>
+      </fieldset>
     </div>
 
-    <hr>
+    <div class="govuk-form-group">
+      <label class="govuk-fieldset__legend govuk-!-font-weight-bold" for="@improvementSuggestionsKey">
+        <p class="govuk-body" id="@improvementSuggestionsKey-label">How could we improve the @(applicationConfig.title)?</p>
+        <span class="govuk-hint" id="@improvementSuggestionsKey-note">
+          Don’t include any sensitive information. For example, National Insurance or credit card numbers. HMRC cannot reply to questions posted here.
+        </span>
+      </label>
 
-    <h2 class="heading-large">Feedback survey</h2>
+      <input type="hidden" class="govuk-visually-hidden" name="email" value='@loggedIn.email'>
 
-    @helper.form(action = routes.UserLogoutAccount.logoutSurveyAction(),
-        'class -> "form", 'id -> "feedbackForm") {
-        @helper.CSRF.formField
+      <input type="hidden" class="govuk-visually-hidden" name="name" value='@loggedIn.displayedName'>
 
-        <p>Before you sign out, please give feedback to help us improve the @(applicationConfig.title). It’s only 2 questions. We use your feedback to make our services better.</p>
+      <script>
+        document.forms['myform_id'];
+      </script>
 
-        <div class="form-group">
-            <fieldset>
+      <input type="hidden" class="govuk-visually-hidden" name="isJavascript" value='false'>
 
-                <legend for="rating" id="rating-label"><span class="form-label-bold">Overall, how satisfied were you with using the @(applicationConfig.title)?</span></legend>
-                <br>
-                @ratingRadioButton("5", "Very satisfied")
-                @ratingRadioButton("4", "Satisfied")
-                @ratingRadioButton("3", "Neutral")
-                @ratingRadioButton("2", "Dissatisfied")
-                @ratingRadioButton("1", "Very dissatisfied")
-            </fieldset>
-        </div>
+      <textarea class="js-char-count form-control form-control-3-4"
+      id="@improvementSuggestionsKey"
+      name="@improvementSuggestionsKey"
+      cols="40"
+      rows="4"
+      maxlength="2000"
+      class="govuk-textarea"
+      aria-labelledby="@improvementSuggestionsKey-label"
+      aria-describedby="@improvementSuggestionsKey-note"></textarea>
+    </div>
 
-        <div class="form-group">
-            <label class="form-label-bold" for="@improvementSuggestionsKey">
-                <span id="@improvementSuggestionsKey-label">How could we improve the @(applicationConfig.title)?</span>
-                <span class="form-hint" id="@improvementSuggestionsKey-note">
-                    Don’t include any sensitive information. For example, National Insurance or credit card numbers. HMRC cannot reply to questions posted here.
-                </span>
-            </label>
+    <button class="govuk-button" type="submit">Submit and sign out</button>
+  }
 
-            <input type="hidden" name="email" value='@loggedIn.email'>
-
-            <input type="hidden" name="name" value='@loggedIn.displayedName'>
-
-            <script>
-                    document.forms['myform_id'];
-            </script>
-
-            <input type="hidden" name="isJavascript" value='false'>
-
-            <textarea class="js-char-count form-control form-control-3-4"
-                      id="@improvementSuggestionsKey"
-                      name="@improvementSuggestionsKey"
-                      cols="40"
-                      rows="4"
-                      maxlength="2000"
-                      aria-labelledby="@improvementSuggestionsKey-label"
-                      aria-describedby="@improvementSuggestionsKey-note"></textarea>
-        </div>
-
-        <div class="form-field">
-            <button class="button" type="submit">Submit and sign out</button>
-        </div>
-
-    }
-
-    <script language="JavaScript">
-            var feedbackForm = document.forms['feedbackForm'];
-            feedbackForm.elements["isJavascript"].value = "true";
-    </script>
+  <script language="JavaScript">
+    var feedbackForm = document.forms['feedbackForm'];
+    feedbackForm.elements["isJavascript"].value = "true";
+  </script>
 }
 
 @improvementSuggestionsKey = @{ "improvementSuggestions" }
 
 @ratingRadioButton(value: String, text: String) = {
-    <div class="multiple-choice">
-        <input id="@value-radio-button"
-               name="rating"
-               type="radio"
-               value="@value"
-               aria-describedby="value-@value"
-               aria-labelledby="rating-label"/>
-        <label id="value-@value" for="@value-radio-button">
-            <strong class="bold">@text</strong>
-        </label>
-    </div>
+  <div class="govuk-radios__item">
+    <input
+      id="@value-radio-button"
+      name="rating"
+      class="govuk-radios__input"
+      type="radio"
+      value="@value"
+      aria-describedby="value-@value"
+      aria-labelledby="rating-label"
+    />
+    <label class="govuk-label govuk-radios__label govuk-!-font-weight-bold" id="value-@value" for="@value-radio-button">
+      @text
+    </label>
+  </div>
 }
