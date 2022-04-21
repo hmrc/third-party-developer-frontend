@@ -24,25 +24,23 @@
 @(success: Boolean)(implicit request: play.api.mvc.Request[Any], messagesProvider: MessagesProvider, applicationConfig: ApplicationConfig)
 
 @main(title = applicationConfig.title,
-    navTitle = Some(applicationConfig.title),
-    navTitleLink = None,
-    breadcrumbs = Seq(
+  navTitle = Some(applicationConfig.title),
+  navTitleLink = None,
+  breadcrumbs = Seq(
     Crumb("Email verified"),
     Crumb.home
-    ),
-    headerNavLinks = headerNavLinks(StaticNavLinks(applicationConfig.apiDocumentationFrontendUrl, applicationConfig.thirdPartyDeveloperFrontendUrl)),
-    serviceInfoContent = Some(HtmlFormat.empty),
-    developerSession = None
+  ),
+  headerNavLinks = headerNavLinks(StaticNavLinks(applicationConfig.apiDocumentationFrontendUrl, applicationConfig.thirdPartyDeveloperFrontendUrl)),
+  serviceInfoContent = Some(HtmlFormat.empty),
+  developerSession = None
 ) {
-
-            @if(success) {
-
-                <div class="govuk-box-highlight">
-                    <h1 class="heading-xlarge">Email verified</h1>
-                </div>
-                <h2>What happens next?</h2>
-                <p>You can now <a href="/developer/login/">sign in</a> to view your production credentials.</p>
-            } else {
-                <h1>The link has expired</h1>
-            }
+  @if(success) {
+    <div class="govuk-panel govuk-panel--confirmation">
+      <h1 class="govuk-panel__title">Email verified</h1>
+    </div>
+    <h2 class="govuk-heading-m">What happens next?</h2>
+    <p class="govuk-body">You can now <a class="govuk-link" href="/developer/login/">sign in</a> to view your production credentials.</p>
+  } else {
+    <h2 class="govuk-heading-m">The link has expired</h2>
+  }
 }

@@ -18,47 +18,42 @@
 @import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.controllers.Crumb
 @import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.DeveloperSession
 
-@this(devMain: DevMain)
+@this(devMain: DevMain2)
 
 @(appName: String, adminEmails: Set[String])(
-        implicit request: play.api.mvc.Request[Any], loggedIn: DeveloperSession, messages: Messages, applicationConfig: ApplicationConfig)
+  implicit request: play.api.mvc.Request[Any], loggedIn: DeveloperSession, messages: Messages, applicationConfig: ApplicationConfig
+)
 
 @devMain(
-    title = "Production application",
-    userFullName = loggedIn.loggedInName,
-    breadcrumbs = Seq(
-        Crumb(appName),
-        Crumb.viewAllApplications,
-        Crumb.home
-    ),
-    developerSession = Some(loggedIn)
+  title = "Production application",
+  userFullName = loggedIn.loggedInName,
+  breadcrumbs = Seq(
+    Crumb(appName),
+    Crumb.viewAllApplications,
+    Crumb.home
+  ),
+  developerSession = Some(loggedIn)
 ) {
 
-    <header>
-        <span class="govuk-caption-xl">Production application</span>
-        <h1 class="heading-xlarge-captioned">@appName</h1>
-        <br>
-    </header>
+  <span class="govuk-caption-l">Production application</span>
+  <h1 class="govuk-heading-l">@appName</h1>
 
-    <div class="panel panel-border-wide">
-        <p>
-            You cannot view this application because you're not an administrator.
-        </p>
-    </div>
+  <div class="govuk-inset-text">
+    You cannot view this application because you're not an administrator.
+  </div>
 
-    @if(adminEmails.size == 1){
-        <p>
-            Ask the administrator <a href="mailto:@{adminEmails.head}">@{adminEmails.head}</a> to remove you from the application and add you as an administrator.
-        </p>
-    } else {
-        <p>
-            Ask an administrator to remove you from the application and add you as an administrator:
-        </p>
-        <ul class="list list-bullet">
-            @for(email<-adminEmails) {
-                <li><a href="mailto:@{email}">@email</a></li>
-            }
-        </ul>
-    }
-
+  @if(adminEmails.size == 1){
+    <p class="govuk-body">
+      Ask the administrator <a class="govuk-link" href="mailto:@{adminEmails.head}">@{adminEmails.head}</a> to remove you from the application and add you as an administrator.
+    </p>
+  } else {
+    <p class="govuk-body">
+      Ask an administrator to remove you from the application and add you as an administrator:
+    </p>
+    <ul class="govuk-list govuk-list--bullet">
+      @for(email<-adminEmails) {
+        <li><a class="govuk-link" href="mailto:@{email}">@email</a></li>
+      }
+    </ul>
+  }
 }

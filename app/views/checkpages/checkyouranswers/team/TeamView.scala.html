@@ -28,43 +28,36 @@
 @this(devMain: DevMain)
 
 @(app: Application, role: CollaboratorRole, loggedIn: DeveloperSession)(
-        implicit request: play.api.mvc.Request[Any], messages: Messages,applicationConfig: ApplicationConfig)
+  implicit request: play.api.mvc.Request[Any], messages: Messages,applicationConfig: ApplicationConfig
+)
 
 @pageHeading = @{ "Tell us your team members" }
 
 @devMain(
- title = pageHeading,
- userFullName = loggedIn.loggedInName,
- back = BackButtonWithJavaScript,
- developerSession = Some(loggedIn)
+  title = pageHeading,
+  userFullName = loggedIn.loggedInName,
+  back = BackButtonWithJavaScript,
+  developerSession = Some(loggedIn)
 ) {
 
+  <h1 class="govuk-heading-l">@pageHeading</h1>
 
- <header>
-  <h1 class="heading-xlarge">@pageHeading</h1>
- </header>
+  <p class="govuk-body">
+    Add members of your organisation and give them permissions to access this application.
+  </p>
 
- <section>
- <p>
- Add members of your organisation and give them permissions to access this application.
- </p>
-
- @{
-  def createRemoveLink(appId: ApplicationId, emailAddress: String) = {
-   routes.CheckYourAnswers.teamMemberRemoveConfirmation(appId, emailAddress.toSha256)
+  @{
+    def createRemoveLink(appId: ApplicationId, emailAddress: String) = {
+    routes.CheckYourAnswers.teamMemberRemoveConfirmation(appId, emailAddress.toSha256)
+    }
+    teamList(app, role, loggedIn, routes.CheckYourAnswers.teamAddMember(app.id), Link, createRemoveLink)
   }
-  teamList(app, role, loggedIn, routes.CheckYourAnswers.teamAddMember(app.id), Link, createRemoveLink)
- }
 
- </br>
+  </br>
 
- </section>
+  @helper.form(action = routes.CheckYourAnswers.teamAction(app.id), 'class -> "form") {
+    @helper.CSRF.formField
 
- @helper.form(action = routes.CheckYourAnswers.teamAction(app.id), 'class -> "form") {
-  @helper.CSRF.formField
-
-  <div class="form-group">
-   <button id="submit" class="button" type="submit">Save and return</button>
-  </div>
- }
+    <button id="submit" class="govuk-button" type="submit">Save and return</button>
+  }
 }

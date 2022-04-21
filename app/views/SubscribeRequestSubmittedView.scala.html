@@ -22,7 +22,7 @@
 @import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.controllers.ApplicationViewModel
 @import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.routes
 
-@this(devMain: DevMain, leftHandNav: LeftHandNav)
+@this(devMain: DevMain2, leftHandNav: LeftHandNav)
 
 @(applicationView: ApplicationViewModel, name: String, version: ApiVersion)(
 implicit request: play.api.mvc.Request[Any], loggedIn: DeveloperSession, messagesProvider: MessagesProvider, applicationConfig: ApplicationConfig, navSection: String = "subscriptions")
@@ -30,26 +30,26 @@ implicit request: play.api.mvc.Request[Any], loggedIn: DeveloperSession, message
 @app = @{applicationView.application}
 
 @devMain(
-    title = "API Subscriptions",
-    userFullName = loggedIn.loggedInName,
-    breadcrumbs = Seq(
-        Crumb("Manage API Subscriptions"),
-        Crumb.application(app),
-        Crumb.viewAllApplications,
-        Crumb.home
-    ),
-    leftNav = Some(leftHandNav(Option(applicationView), Option(navSection))),
-    developerSession = Some(loggedIn)
+  title = "API Subscriptions",
+  userFullName = loggedIn.loggedInName,
+  breadcrumbs = Seq(
+    Crumb("Manage API Subscriptions"),
+    Crumb.application(app),
+    Crumb.viewAllApplications,
+    Crumb.home
+  ),
+  leftNav = Some(leftHandNav(Option(applicationView), Option(navSection))),
+  developerSession = Some(loggedIn)
 ) {
-    <div class="govuk-box-highlight">
-        <h1 class="heading-xlarge">Request submitted</h1>
-    </div>
+  <div class="govuk-panel govuk-panel--confirmation">
+    <h1 class="govuk-panel__title">Request submitted</h1>
+  </div>
 
-    <p id="success-request-subscribe-text">You have requested to subscribe your application to <span class="bold">@name @version.value</span>.</p>
+  <p class="govuk-body" id="success-request-subscribe-text">You have requested to subscribe your application to <span class="govuk-!-font-weight-bold">@name @version.value</span>.</p>
 
-    <h2 class="heading-large">What happens next</h2>
-    <p>We will review your request and respond within 2 working days.</p>
-    <p>You will not see changes to your API subscriptions until we have approved them.</p>
+  <h2 class="govuk-heading-m">What happens next</h2>
+  <p class="govuk-body">We will review your request and respond within 2 working days.</p>
+  <p class="govuk-body">You will not see changes to your API subscriptions until we have approved them.</p>
 
-    <a href="@routes.SubscriptionsController.manageSubscriptions(app.id)" id="submit" class="button">Finish</a>
+  <a href="@routes.SubscriptionsController.manageSubscriptions(app.id)" id="submit" class="govuk-button">Finish</a>
 }
