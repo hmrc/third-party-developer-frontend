@@ -91,7 +91,7 @@ class ChangeSubscriptionConfirmationSpec extends CommonViewSpec with WithCSRFAdd
 
         val document = Jsoup.parse(page.body)
         elementExistsByText(document, "h1", "Manage API subscriptions") shouldBe true
-        elementExistsByText(document, "p", "For security reasons we must approve any API subscription changes. This takes up to 2 working days.") shouldBe true
+        elementExistsByText(document, "div", "For security reasons we must approve any API subscription changes. This takes up to 2 working days.") shouldBe true
         elementExistsByText(document, "h2", "Are you sure you want to request to subscribe to Test API 1.0?") shouldBe true
       }
 
@@ -106,7 +106,7 @@ class ChangeSubscriptionConfirmationSpec extends CommonViewSpec with WithCSRFAdd
         document.body().toString.contains("Confirmation error message") shouldBe true
 
         elementExistsByText(document, "h1", "Manage API subscriptions") shouldBe true
-        elementExistsByText(document, "p", "For security reasons we must approve any API subscription changes. This takes up to 2 working days.") shouldBe true
+        elementExistsByText(document, "div", "For security reasons we must approve any API subscription changes. This takes up to 2 working days.") shouldBe true
         elementExistsByText(document, "h2", "Are you sure you want to request to subscribe to Test API 1.0?") shouldBe true
       }
     }
@@ -121,7 +121,7 @@ class ChangeSubscriptionConfirmationSpec extends CommonViewSpec with WithCSRFAdd
 
         val document = Jsoup.parse(page.body)
         elementExistsByText(document, "h1", "Manage API subscriptions") shouldBe true
-        elementExistsByText(document, "p", "For security reasons we must approve any API subscription changes. This takes up to 2 working days.") shouldBe true
+        elementExistsByText(document, "div", "For security reasons we must approve any API subscription changes. This takes up to 2 working days.") shouldBe true
         elementExistsByText(document, "h2", "Are you sure you want to request to unsubscribe from Test API 1.0?") shouldBe true
       }
 
@@ -136,7 +136,7 @@ class ChangeSubscriptionConfirmationSpec extends CommonViewSpec with WithCSRFAdd
         document.body().toString.contains("Confirmation error message") shouldBe true
 
         elementExistsByText(document, "h1", "Manage API subscriptions") shouldBe true
-        elementExistsByText(document, "p", "For security reasons we must approve any API subscription changes. This takes up to 2 working days.") shouldBe true
+        elementExistsByText(document, "div", "For security reasons we must approve any API subscription changes. This takes up to 2 working days.") shouldBe true
         elementExistsByText(document, "h2", "Are you sure you want to request to unsubscribe from Test API 1.0?") shouldBe true
       }
     }

@@ -17,47 +17,45 @@
 @import include._
 @import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.controllers.Crumb
 @import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.controllers.EditManageSubscription._
-@import views.html.include.DevMain
+@import views.html.include.DevMain2
 @import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.Application
 @import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.DeveloperSession
 @import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.controllers.SaveSubsFieldsPageMode
 @import views.helper.IdFormatter
 @import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.routes
 
-@this(devMain: DevMain)
+@this(devMain: DevMain2)
 
 @(
   app: Application,
   viewModel: EditApiConfigurationFieldViewModel,
   mode: SaveSubsFieldsPageMode
 )(
-    implicit request: play.api.mvc.Request[Any],
-    loggedIn: DeveloperSession,
-    messages: Messages,
-    applicationConfig: ApplicationConfig
+  implicit request: play.api.mvc.Request[Any],
+  loggedIn: DeveloperSession,
+  messages: Messages,
+  applicationConfig: ApplicationConfig
 )
 
 @pageHeading = @{ s"${viewModel.apiName} ${viewModel.apiVersion.value} ${viewModel.displayedStatus}" }
 
 @devMain(
-    title = pageHeading,
-    userFullName = loggedIn.loggedInName,
-    developerSession = Some(loggedIn),
-    breadcrumbs = Seq(
-        Crumb(pageHeading),
-        Crumb.applicationMetadata(app),
-        Crumb.application(app)
-    )
+  title = pageHeading,
+  userFullName = loggedIn.loggedInName,
+  developerSession = Some(loggedIn),
+  breadcrumbs = Seq(
+    Crumb(pageHeading),
+    Crumb.applicationMetadata(app),
+    Crumb.application(app)
+  )
 ) {
 
-  @errorSummaryForFormErrors(viewModel.errors)
+  @errorSummaryForFormErrors2(viewModel.errors)
 
-  <div>
-    <span class="govuk-caption-xl">@pageHeading</span>
-    <h1 class="heading-large-captioned metadata-header-large-captioned" >@{viewModel.field.description}</h1>
-  </div>
+  <span class="govuk-caption-l">@pageHeading</span>
+  <h1 class="govuk-heading-l" >@{viewModel.field.description}</h1>
+
   <br>
-
 
   @helper.form(
     action = routes.ManageSubscriptions.saveApiMetadataFieldPage(app.id, viewModel.apiContext, viewModel.apiVersion, viewModel.field.name.value, mode),
@@ -65,25 +63,22 @@
 
     @helper.CSRF.formField
 
-    <div class="form-group @if(viewModel.field.errors.nonEmpty){form-group-error}">
-
-      @fieldError(viewModel.field.errors, viewModel.field.name.value)
-
-      <span class="form-hint">@{viewModel.field.hint}</span>
-
-      <input type="text"
-      name="@{viewModel.field.name.value}"
-      value="@{viewModel.field.value.value}"
-      class="form-input input--medium @if(viewModel.field.errors.nonEmpty){form-control-error}"
-      id="@{viewModel.field.name.value}" />
-
+    <div class="govuk-form-group @if(viewModel.field.errors.nonEmpty){form-group-error}">
+      <span id="meta-data-hint" class="govuk-hint">@{viewModel.field.hint}</span>
+      @fieldError2(viewModel.field.errors, viewModel.field.name.value)
+      <input
+        type="text"
+        name="@{viewModel.field.name.value}"
+        value="@{viewModel.field.value.value}"
+        class="govuk-input input--medium @if(viewModel.field.errors.nonEmpty){form-control-error}"
+        id="@{viewModel.field.name.value}"
+        aria-describedby="meta-data-hint"
+      />
     </div>
 
-    <div class="form-group">
-      <button id="@{IdFormatter.identifier(viewModel.apiContext, viewModel.apiVersion)}-submit" class="button submit-button" type="submit">Save and continue</button>
-
-      <a href="@{routes.ManageSubscriptions.listApiSubscriptions(app.id)}" class="secondary-button">Cancel</a>
-
+    <div class="govuk-button-group">
+      <button id="@{IdFormatter.identifier(viewModel.apiContext, viewModel.apiVersion)}-submit" class="govuk-button" type="submit">Save and continue</button>
+      <a href="@{routes.ManageSubscriptions.listApiSubscriptions(app.id)}" class="govuk-button govuk-button--secondary">Cancel</a>
     </div>
   }
 }
