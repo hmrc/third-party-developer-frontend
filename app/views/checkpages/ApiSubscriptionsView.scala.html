@@ -28,59 +28,59 @@
 @import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.checkpages.routes
 @import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.GroupedSubscriptions
 
-@this(devMain: DevMain2, subscriptionGroups: SubscriptionGroups)
+@this(devMain: DevMain, subscriptionGroups: SubscriptionGroups)
 @(
-  app: Application, 
-  role: CollaboratorRole,
-  subscriptions: Option[GroupedSubscriptions], 
-  openAccessApis: Map[ApiContext, ApiData],
-  id: ApplicationId, 
-  submitAction: Call, 
-  errorForm: Option[Form[DummySubscriptionsForm]] = None
+    app: Application, 
+    role: CollaboratorRole,
+    subscriptions: Option[GroupedSubscriptions], 
+    openAccessApis: Map[ApiContext, ApiData],
+    id: ApplicationId, 
+    submitAction: Call, 
+    errorForm: Option[Form[DummySubscriptionsForm]] = None
 )(
-  implicit request: play.api.mvc.Request[Any],
-  loggedIn: DeveloperSession,
-  messages: Messages,
-  applicationConfig: ApplicationConfig
+    implicit request: play.api.mvc.Request[Any],
+    loggedIn: DeveloperSession,
+    messages: Messages,
+    applicationConfig: ApplicationConfig
 )
 
-@pageHeading = @{ "Confirm which APIs you want to use" }
+    @pageHeading = @{ "Confirm which APIs you want to use" }
 
 @devMain(
-  title = pageHeading,
-  userFullName = loggedIn.loggedInName,
-  back = BackButtonWithJavaScript,
-  developerSession = Some(loggedIn)
+    title = pageHeading,
+    userFullName = loggedIn.loggedInName,
+    back = BackButtonWithJavaScript,
+    developerSession = Some(loggedIn)
 ) {
 
-  @if(errorForm.isDefined) { @errorSummary2(errorForm.get) }
+    @if(errorForm.isDefined) { @errorSummary(errorForm.get) }
 
-  <h1 class="govuk-heading-l">@pageHeading</h1>
-  <p class="govuk-body">
-    You must subscribe to an API so your application can access it. You’ll receive notifications about its lifecycle events, such as new version introductions and old version retirements.
-  </p>
-  <div class="govuk-warning-text">
-    <span class="govuk-warning-text__icon" aria-hidden="true">!</span>
-    <strong class="govuk-warning-text__text">
-      <span class="govuk-warning-text__assistive">Warning</span>
-      After you submit this application for checking, for security reasons we must review and approve any further changes to API subscriptions
-    </strong>
-  </div>
-  @subscriptions match {
-    case Some(groupedSubscriptions) => {
-      @subscriptionGroups(role: CollaboratorRole, groupedSubscriptions, openAccessApis, app, APPLICATION_CHECK_PAGE, true)
-      <br/>
-      <br/>
-      @helper.form(action = submitAction, 'class -> "form") {
-        @helper.CSRF.formField
-        <button id="submit" class="govuk-button" type="submit">Save and continue</button>
-      }
+    <h1 class="heading-xlarge">@pageHeading</h1>
+    <p>You must subscribe to an API so your application can access it. You’ll receive notifications about its lifecycle events, such as new version introductions and old version retirements.</p>
+    <div class="notice">
+        <i class="icon icon-important">
+            <span class="visually-hidden">Warning</span>
+        </i>
+        <strong class="bold-small">
+            After you submit this application for checking, for security reasons we must review and approve any further changes to API subscriptions
+        </strong>
+    </div>
+    @subscriptions match {
+        case Some(groupedSubscriptions) => {
+            @subscriptionGroups(role: CollaboratorRole, groupedSubscriptions, openAccessApis, app, APPLICATION_CHECK_PAGE, true)
+            <br/>
+            <br/>
+            @helper.form(action = submitAction, 'class -> "form") {
+                @helper.CSRF.formField
+                <div class="form-group">
+                    <button id="submit" class="button" type="submit">Save and continue</button>
+                </div>
+            }
+        }
+        case _ => {
+            <p class="panel panel-border-wide">We can’t load your API subscriptions at the moment.<br>
+                Please
+                <a href="@{controllers.checkpages.routes.ApplicationCheck.apiSubscriptionsPage(app.id)}">try again</a> later</p>
+        }
     }
-    case _ => {
-      <div class="govuk-inset-text">
-        We can’t load your API subscriptions at the moment.<br>
-        Please <a class="govuk-link govuk-link--no-visited-state" href="@{controllers.checkpages.routes.ApplicationCheck.apiSubscriptionsPage(app.id)}">try again</a> later
-      </div>
-    }
-  }
 }
