@@ -227,12 +227,13 @@ class ThirdPartyApplicationSubmissionsConnectorSpec
   "requestApproval" should {
     val app = aStandardApplication
     val url = s"/approvals/application/${app.id.value}/request"
+    val name = "bob example"
     val email = "bob@spongepants.com"
 
     "return OK with and return the application" in new Setup {
       stubFor(
         post(urlEqualTo(url))
-        .withJsonRequestBody(ApprovalsRequest(email))
+        .withJsonRequestBody(ApprovalsRequest(name, email))
         .willReturn(
           aResponse()
             .withStatus(OK)
@@ -240,7 +241,7 @@ class ThirdPartyApplicationSubmissionsConnectorSpec
         )
       )
 
-      val result = await(connector.requestApproval(app.id, email))
+      val result = await(connector.requestApproval(app.id, name, email))
 
       result shouldBe 'Right
       result.right.get.name shouldBe app.name
@@ -251,7 +252,7 @@ class ThirdPartyApplicationSubmissionsConnectorSpec
 
       stubFor(
         post(urlEqualTo(url))
-        .withJsonRequestBody(ApprovalsRequest(email))
+        .withJsonRequestBody(ApprovalsRequest(name, email))
         .willReturn(
           aResponse()
             .withStatus(PRECONDITION_FAILED)
@@ -259,7 +260,7 @@ class ThirdPartyApplicationSubmissionsConnectorSpec
         )
       )
 
-      val result = await(connector.requestApproval(app.id, email))
+      val result = await(connector.requestApproval(app.id, name, email))
 
       result shouldBe 'Left
       result.left.get.message shouldBe msg
@@ -270,7 +271,7 @@ class ThirdPartyApplicationSubmissionsConnectorSpec
 
       stubFor(
         post(urlEqualTo(url))
-        .withJsonRequestBody(ApprovalsRequest(email))
+        .withJsonRequestBody(ApprovalsRequest(name, email))
         .willReturn(
           aResponse()
             .withStatus(CONFLICT)
@@ -278,7 +279,7 @@ class ThirdPartyApplicationSubmissionsConnectorSpec
         )
       )
 
-      val result = await(connector.requestApproval(app.id, email))
+      val result = await(connector.requestApproval(app.id, name, email))
 
       result shouldBe 'Left
       result.left.get.message shouldBe msg
@@ -287,7 +288,7 @@ class ThirdPartyApplicationSubmissionsConnectorSpec
     "return with a BAD_REQUEST error" in new Setup {
       stubFor(
         post(urlEqualTo(url))
-        .withJsonRequestBody(ApprovalsRequest(email))
+        .withJsonRequestBody(ApprovalsRequest(name, email))
         .willReturn(
           aResponse()
             .withStatus(BAD_REQUEST)
@@ -295,7 +296,7 @@ class ThirdPartyApplicationSubmissionsConnectorSpec
       )
 
       intercept[RuntimeException] {
-        await(connector.requestApproval(app.id, email))
+        await(connector.requestApproval(app.id, name, email))
       }
     }
   }

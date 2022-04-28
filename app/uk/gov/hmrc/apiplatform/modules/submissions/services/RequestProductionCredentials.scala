@@ -42,7 +42,7 @@ class RequestProductionCredentials @Inject()(
   def requestProductionCredentials(applicationId: ApplicationId, requestedBy: DeveloperSession)(implicit hc: HeaderCarrier): Future[Either[ErrorDetails, Application]] = {
     (
       for {
-        app           <- ET.fromEitherF(tpaConnector.requestApproval(applicationId, requestedBy.email))
+        app           <- ET.fromEitherF(tpaConnector.requestApproval(applicationId, requestedBy.displayedName, requestedBy.email))
         ticket         = DeskproTicket.createForRequestProductionCredentials(requestedBy.displayedName, requestedBy.email, app.name, applicationId)
         _              = deskproConnector.createTicket(ticket)
       } yield app
