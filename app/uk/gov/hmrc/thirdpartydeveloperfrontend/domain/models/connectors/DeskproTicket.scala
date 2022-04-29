@@ -96,7 +96,7 @@ object DeskproTicket extends FieldTransformer {
       apiName: String,
       apiVersion: ApiVersion
   ): DeskproTicket = {
-    val message = s""""I '$requestorEmail' want my application '$applicationName'
+    val message = s"""I '$requestorEmail' want my application '$applicationName'
                   |identified by '${applicationId.value}'
                   |to be unsubscribed from the API '$apiName'
                   |with version '${apiVersion.value}'""".stripMargin
