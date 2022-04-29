@@ -53,7 +53,7 @@ class TermsOfUseSpec extends CommonViewSpec with WithCSRFAddToken {
     val clientId = ClientId("clientId")
     val appName = "an application"
     val createdOn = DateTimeUtils.now
-    val lastAccess = DateTimeUtils.now
+    val lastAccess = Some(DateTimeUtils.now)
     val grantLength = Period.ofDays(547)
     val deployedTo = Environment.PRODUCTION
 

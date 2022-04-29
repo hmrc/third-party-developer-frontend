@@ -31,8 +31,8 @@ class ApplicationSummaryTest extends AnyWordSpec with Matchers with Collaborator
     val user = "foo@bar.com".asDeveloperCollaborator
 
     val serverTokenApplication =
-      new Application(ApplicationId(""), ClientId(""), "", DateTime.now, DateTime.now, Some(DateTime.now), grantLength = Period.ofDays(547), PRODUCTION, collaborators = Set(user))
-    val noServerTokenApplication = new Application(ApplicationId(""), ClientId(""), "", DateTime.now, DateTime.now, None, grantLength = Period.ofDays(547), PRODUCTION, collaborators = Set(user))
+      new Application(ApplicationId(""), ClientId(""), "", DateTime.now, Some(DateTime.now), Some(DateTime.now), grantLength = Period.ofDays(547), PRODUCTION, collaborators = Set(user))
+    val noServerTokenApplication = new Application(ApplicationId(""), ClientId(""), "", DateTime.now, Some(DateTime.now), None, grantLength = Period.ofDays(547), PRODUCTION, collaborators = Set(user))
 
     "set serverTokenUsed if application has a date set for lastAccessTokenUsage" in {
       val summary = ApplicationSummary.from(serverTokenApplication.copy(deployedTo = SANDBOX), user.userId)

@@ -211,7 +211,7 @@ class ApplicationSpec extends AnyFunSpec with Matchers with DeveloperBuilder wit
       ClientId("clientId"),
       "app name",
       DateTime.now(),
-      DateTime.now(),
+      Some(DateTime.now()),
       None,
       grantLength = Period.ofDays(547),
       environment,

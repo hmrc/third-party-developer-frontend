@@ -45,7 +45,7 @@ class SubscribeRequestSubmittedSpec extends CommonViewSpec with WithCSRFAddToken
         clientId,
         "Test Application",
         DateTimeUtils.now,
-        DateTimeUtils.now,
+        Some(DateTimeUtils.now),
         None,
         grantLength,
         Environment.PRODUCTION,

@@ -78,7 +78,7 @@ class SubscriptionsServiceSpec extends AsyncHmrcSpec with SubscriptionsBuilder w
   val productionApplicationId = ApplicationId("Application ID")
   val productionClientId = ClientId(s"client-id-${randomUUID().toString}")
   val productionApplication: Application =
-    Application(productionApplicationId, productionClientId, "name", DateTimeUtils.now, DateTimeUtils.now, None, grantLength, Environment.PRODUCTION, Some("description"), Set())
+    Application(productionApplicationId, productionClientId, "name", DateTimeUtils.now, Some(DateTimeUtils.now), None, grantLength, Environment.PRODUCTION, Some("description"), Set())
 
   "isSubscribedToApi" should {
     val subscriptions = Set(

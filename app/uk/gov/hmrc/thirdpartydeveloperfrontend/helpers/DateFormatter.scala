@@ -34,13 +34,16 @@ object DateFormatter {
     standardFormatter.print(dateTime)
   }
 
-  def formatLastAccessDate(lastAccessDate: DateTime, createdOnDate: DateTime): Option[String] = {
-    if (secondsBetween(createdOnDate, lastAccessDate).getSeconds == 0) {
-      None
-    } else if (daysBetween(initialLastAccessDate.toLocalDate, lastAccessDate.toLocalDate) > 0) {
-      Some(standardFormatter.print(lastAccessDate))
-    } else {
-      Some(s"more than ${monthsBetween(lastAccessDate, now).getMonths} months ago")
+  def formatLastAccessDate(mayBeLastAccess: Option[DateTime], createdOnDate: DateTime): Option[String] = {
+    def formatDateValue(lastAccessDate: DateTime) = {
+     if (daysBetween(initialLastAccessDate.toLocalDate, lastAccessDate.toLocalDate) > 0) {
+        standardFormatter.print(lastAccessDate)
+      } else {
+        s"more than ${monthsBetween(lastAccessDate, now).getMonths} months ago"
+      }
     }
+
+    mayBeLastAccess.filterNot( lastAccessDate => secondsBetween(createdOnDate, lastAccessDate).getSeconds == 0).map(formatDateValue)
+
   }
 }

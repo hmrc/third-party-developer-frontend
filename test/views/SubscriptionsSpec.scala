@@ -49,7 +49,7 @@ class SubscriptionsSpec extends CommonViewSpec with WithCSRFAddToken {
     ClientId("Test Application Client ID"),
     "Test Application",
     DateTime.now(),
-    DateTime.now(),
+    Some(DateTime.now()),
     None,
     grantLength,
     environment,

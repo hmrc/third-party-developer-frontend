@@ -59,7 +59,7 @@ trait TestApplications {
       clientId = clientId,
       name = "App name 1",
       createdOn = DateTimeUtils.now,
-      lastAccess = DateTimeUtils.now,
+      lastAccess = Some(DateTimeUtils.now),
       grantLength = Period.ofDays(547),
       deployedTo = environment,
       description = Some("Description 1"),

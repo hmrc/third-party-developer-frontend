@@ -49,7 +49,7 @@ class LeftHandNavSpec extends CommonViewSpec with WithCSRFAddToken with Collabor
       clientId,
       applicationName,
       DateTimeUtils.now,
-      DateTimeUtils.now,
+      Some(DateTimeUtils.now),
       None,
       grantLength,
       Environment.PRODUCTION,

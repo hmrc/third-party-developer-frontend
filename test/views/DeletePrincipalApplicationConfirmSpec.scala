@@ -45,7 +45,7 @@ class DeletePrincipalApplicationConfirmSpec extends CommonViewSpec with WithCSRF
       clientId,
       "App name 1",
       DateTimeUtils.now,
-      DateTimeUtils.now,
+      Some(DateTimeUtils.now),
       None,
       Period.ofDays(547),
       Environment.PRODUCTION,

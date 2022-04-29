@@ -99,7 +99,7 @@ class ThirdPartyApplicationConnectorSpec extends BaseConnectorIntegrationSpec wi
       clientId,
       appName,
       DateTimeUtils.now,
-      DateTimeUtils.now,
+      Some(DateTimeUtils.now),
       None,
       Period.ofDays(547),
       connector.environment,

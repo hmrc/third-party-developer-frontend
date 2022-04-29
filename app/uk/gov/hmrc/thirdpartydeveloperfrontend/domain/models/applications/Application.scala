@@ -54,7 +54,8 @@ trait BaseApplication {
   def clientId: ClientId
   def name: String
   def createdOn: DateTime
-  def lastAccess: DateTime
+  def lastAccess: Option[DateTime]
+
   def grantLength: Period
   def lastAccessTokenUsage: Option[DateTime]
   def deployedTo: Environment
@@ -180,7 +181,7 @@ case class Application(
   val clientId: ClientId,
   val name: String,
   val createdOn: DateTime,
-  val lastAccess: DateTime,
+  val lastAccess: Option[DateTime],
   val lastAccessTokenUsage: Option[DateTime] = None, // API-4376: Temporary inclusion whilst Server Token functionality is retired
   val grantLength: Period,
   val deployedTo: Environment,
@@ -207,7 +208,7 @@ case class ApplicationWithSubscriptionIds(
   val clientId: ClientId,
   val name: String,
   val createdOn: DateTime,
-  val lastAccess: DateTime,
+  val lastAccess: Option[DateTime],
   val lastAccessTokenUsage: Option[DateTime] = None,
   val grantLength: Period = Period.ofDays(547),
   val deployedTo: Environment,

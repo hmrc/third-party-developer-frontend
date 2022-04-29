@@ -44,7 +44,7 @@ class DeleteSubordinateApplicationConfirmSpec extends CommonViewSpec with WithCS
       clientId,
       "App name 1",
       DateTimeUtils.now,
-      DateTimeUtils.now,
+      Some(DateTimeUtils.now),
       None,
       Period.ofDays(547),
       Environment.SANDBOX,

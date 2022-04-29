@@ -73,7 +73,7 @@ class ManageSubscriptionsSpec
     clientId,
     "App name 1",
     DateTimeUtils.now,
-    DateTimeUtils.now,
+    Some(DateTimeUtils.now),
     None,
     grantLength,
     Environment.SANDBOX,

@@ -32,7 +32,7 @@ trait SampleApplication {
     clientId,
     "App name 1",
     DateTimeUtils.now,
-    DateTimeUtils.now,
+    Some(DateTimeUtils.now),
     None,
     grantLength = Period.ofDays(547),
     Environment.PRODUCTION,

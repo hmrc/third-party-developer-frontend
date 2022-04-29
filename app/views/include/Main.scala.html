@@ -116,7 +116,7 @@
 
 @banner = {
     <div class="banner">
-        @include.breadcrumbs(breadcrumbs: _*)
+        @include.breadcrumbs(breadcrumbs)
         @backLink
 
         @if(back == NoBackButton && breadcrumbs.isEmpty){

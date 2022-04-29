@@ -63,7 +63,7 @@ class SubscriptionsGroupSpec
         clientId,
         applicationName,
         DateTimeUtils.now,
-        DateTimeUtils.now,
+        Some(DateTimeUtils.now),
         None,
         grantLength,
         environment,
