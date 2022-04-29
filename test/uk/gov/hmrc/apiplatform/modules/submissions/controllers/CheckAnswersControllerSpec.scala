@@ -37,7 +37,7 @@ import play.api.test.Helpers._
 import play.filters.csrf.CSRF
 import uk.gov.hmrc.apiplatform.modules.submissions.services.RequestProductionCredentials
 import uk.gov.hmrc.apiplatform.modules.submissions.views.html.ProductionCredentialsRequestReceivedView
-import uk.gov.hmrc.apiplatform.modules.submissions.domain.models.{ExtendedSubmission, QuestionnaireProgress, SingleChoiceAnswer}
+import uk.gov.hmrc.apiplatform.modules.submissions.domain.models.{ExtendedSubmission, NoAnswer, QuestionnaireProgress, SingleChoiceAnswer}
 import uk.gov.hmrc.apiplatform.modules.submissions.SubmissionsTestData
 import uk.gov.hmrc.apiplatform.modules.submissions.domain.models.QuestionnaireState.Completed
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.AsIdsHelpers._
@@ -182,10 +182,34 @@ class CheckAnswersControllerSpec
       val extSubmission = ExtendedSubmission(answeredSubmission.hasCompletelyAnsweredWith(answers), completedProgress)
       SubmissionServiceMock.FetchLatestExtendedSubmission.thenReturns(extSubmission)
 
-      underTest.checkAnswersAction(applicationId)(loggedInRequest.withCSRFToken)
+      await(underTest.checkAnswersAction(applicationId)(loggedInRequest.withCSRFToken))
 
       verify(productionCredentialsRequestReceivedView).apply(viewModelCaptor.capture)(*, *, *, *)
       viewModelCaptor.value.requesterIsResponsibleIndividual shouldBe true
+    }
+
+    "do display verification email text if requester is not the Responsible Individual" in new Setup {
+      when(mockRequestProdCreds.requestProductionCredentials(eqTo(applicationId), *[DeveloperSession])(*)).thenReturn(successful(Right(sampleApp)))
+      val answers = answersToQuestions.updated(testQuestionIdsOfInterest.responsibleIndividualIsRequesterId, SingleChoiceAnswer("No"))
+      val extSubmission = ExtendedSubmission(answeredSubmission.hasCompletelyAnsweredWith(answers), completedProgress)
+      SubmissionServiceMock.FetchLatestExtendedSubmission.thenReturns(extSubmission)
+
+      await(underTest.checkAnswersAction(applicationId)(loggedInRequest.withCSRFToken))
+
+      verify(productionCredentialsRequestReceivedView).apply(viewModelCaptor.capture)(*, *, *, *)
+      viewModelCaptor.value.requesterIsResponsibleIndividual shouldBe false
+    }
+
+    "don't display verification email text if requester is Responsible Individual question not answered" in new Setup {
+      when(mockRequestProdCreds.requestProductionCredentials(eqTo(applicationId), *[DeveloperSession])(*)).thenReturn(successful(Right(sampleApp)))
+      val answers = answersToQuestions.updated(testQuestionIdsOfInterest.responsibleIndividualIsRequesterId, NoAnswer)
+      val extSubmission = ExtendedSubmission(answeredSubmission.hasCompletelyAnsweredWith(answers), completedProgress)
+      SubmissionServiceMock.FetchLatestExtendedSubmission.thenReturns(extSubmission)
+
+      await(underTest.checkAnswersAction(applicationId)(loggedInRequest.withCSRFToken))
+
+      verify(productionCredentialsRequestReceivedView).apply(viewModelCaptor.capture)(*, *, *, *)
+      viewModelCaptor.value.requesterIsResponsibleIndividual shouldBe false
     }
   }
 

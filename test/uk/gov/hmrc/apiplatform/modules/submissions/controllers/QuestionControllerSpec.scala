@@ -134,7 +134,7 @@ class QuestionControllerSpec
       contentAsString(result) contains(formSubmissionLink) shouldBe true withClue(s"(HTML content did not contain $formSubmissionLink)")
       contentAsString(result) contains("Email address") shouldBe true withClue("HTML content did not contain label")
       contentAsString(result) contains("Cannot be a shared mailbox") shouldBe true withClue("HTML content did not contain hintText")
-      contentAsString(result) contains("We will send a verification email to the email address provided") shouldBe true withClue("HTML content did not contain afterStatement")
+      contentAsString(result) contains("We will email a verification link to the responsible individual that expires in 10 working days.") shouldBe true withClue("HTML content did not contain afterStatement")
     }
 
     "fail with a BAD REQUEST for an invalid questionId" in new Setup {

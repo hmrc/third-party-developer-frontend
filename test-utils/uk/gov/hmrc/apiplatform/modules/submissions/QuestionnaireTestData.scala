@@ -388,6 +388,7 @@ trait QuestionnaireTestData {
   val answersToQuestions: Submission.AnswersToQuestions = 
     Map(
       testQuestionIdsOfInterest.applicationNameId -> TextAnswer(expectedAppName), 
+      testQuestionIdsOfInterest.responsibleIndividualIsRequesterId -> SingleChoiceAnswer("No"),
       testQuestionIdsOfInterest.responsibleIndividualEmailId -> TextAnswer("bob@example.com"),
       testQuestionIdsOfInterest.responsibleIndividualNameId -> TextAnswer("Bob Cratchett")
     )  
