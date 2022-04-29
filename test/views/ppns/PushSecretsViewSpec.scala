@@ -48,7 +48,7 @@ class PushSecretsViewSpec extends CommonViewSpec with WithCSRFAddToken with Coll
       ClientId("Test Application Client ID"),
       "Test Application",
       DateTime.now(),
-      DateTime.now(),
+      Some(DateTime.now()),
       None,
       grantLength,
       Environment.PRODUCTION,

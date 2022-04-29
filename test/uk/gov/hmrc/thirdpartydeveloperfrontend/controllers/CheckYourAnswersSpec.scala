@@ -222,7 +222,7 @@ class CheckYourAnswersSpec
         clientId,
         appName,
         DateTimeUtils.now,
-        DateTimeUtils.now,
+        Some(DateTimeUtils.now),
         None,
         grantLength,
         Environment.PRODUCTION,

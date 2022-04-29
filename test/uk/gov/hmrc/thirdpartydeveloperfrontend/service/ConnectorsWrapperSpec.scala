@@ -72,10 +72,10 @@ class ConnectorsWrapperSpec extends AsyncHmrcSpec {
   val productionClientId = ClientId("hBnFo14C0y4SckYUbcoL2PbFA40a")
   val grantLength = Period.ofDays(547)
   val productionApplication =
-    Application(productionApplicationId, productionClientId, "name", DateTimeUtils.now, DateTimeUtils.now, None, grantLength, Environment.PRODUCTION, Some("description"))
+    Application(productionApplicationId, productionClientId, "name", DateTimeUtils.now, Some(DateTimeUtils.now), None, grantLength, Environment.PRODUCTION, Some("description"))
   val sandboxApplicationId = ApplicationId("Application ID")
   val sandboxClientId = ClientId("Client ID")
-  val sandboxApplication = Application(sandboxApplicationId, sandboxClientId, "name", DateTimeUtils.now, DateTimeUtils.now, None, grantLength, Environment.SANDBOX, Some("description"))
+  val sandboxApplication = Application(sandboxApplicationId, sandboxClientId, "name", DateTimeUtils.now, Some(DateTimeUtils.now), None, grantLength, Environment.SANDBOX, Some("description"))
 
   "fetchByApplicationId" when {
     "return the application fetched from the production connector when it exists there" in new Setup {

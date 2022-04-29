@@ -80,7 +80,7 @@ class DeletePrincipalApplicationSpec
       clientId,
       appName,
       DateTime.now.withTimeAtStartOfDay(),
-      DateTime.now.withTimeAtStartOfDay(),
+      Some(DateTime.now.withTimeAtStartOfDay()),
       None,
       grantLength,
       Environment.PRODUCTION,

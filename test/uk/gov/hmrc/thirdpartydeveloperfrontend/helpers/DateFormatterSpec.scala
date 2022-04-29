@@ -51,30 +51,35 @@ class DateFormatterSpec extends AsyncHmrcSpec with BeforeAndAfterAll {
     "use long date format for dates after the initial last access date" in {
       val lastAccessDate = initialLastAccessDate.plusDays(1)
       val createdOnDate = lastAccessDate.minusHours(1)
-      DateFormatter.formatLastAccessDate(lastAccessDate, createdOnDate) shouldBe Some("26 June 2019")
+      DateFormatter.formatLastAccessDate(Some(lastAccessDate), createdOnDate) shouldBe Some("26 June 2019")
     }
 
     "use inexact format for dates before the initial last access date" in {
       val lastAccessDate = initialLastAccessDate.minusDays(1)
       val createdOnDate = lastAccessDate.minusHours(1)
-      DateFormatter.formatLastAccessDate(lastAccessDate, createdOnDate) shouldBe Some("more than 2 months ago")
+      DateFormatter.formatLastAccessDate(Some(lastAccessDate), createdOnDate) shouldBe Some("more than 2 months ago")
     }
 
     "use inexact format for dates on the initial last access date" in {
       val lastAccessDate = initialLastAccessDate.plusHours(3)
       val createdOnDate = lastAccessDate.minusHours(1)
-      DateFormatter.formatLastAccessDate(lastAccessDate, createdOnDate) shouldBe Some("more than 2 months ago")
+      DateFormatter.formatLastAccessDate(Some(lastAccessDate), createdOnDate) shouldBe Some("more than 2 months ago")
     }
 
-    "display 'never used' if the last access date is the same as the created date" in {
+    "return None if the last access date is the same as the created date" in {
       val createdDate = initialLastAccessDate.plusHours(3)
-      DateFormatter.formatLastAccessDate(createdDate, createdDate) shouldBe None
+      DateFormatter.formatLastAccessDate(Some(createdDate), createdDate) shouldBe None
     }
 
-    "display 'never used' if the last access date is within a second of the created date" in {
+    "return None if the last access date None" in {
       val createdDate = initialLastAccessDate.plusHours(3)
-      DateFormatter.formatLastAccessDate(createdDate.plusMillis(900), createdDate) shouldBe None // scalastyle:ignore magic.number
-      DateFormatter.formatLastAccessDate(createdDate.minusMillis(900), createdDate) shouldBe None // scalastyle:ignore magic.number
+      DateFormatter.formatLastAccessDate(None, createdDate) shouldBe None
+    }
+
+    "return None if the last access date is within a second of the created date" in {
+      val createdDate = initialLastAccessDate.plusHours(3)
+      DateFormatter.formatLastAccessDate(Some(createdDate.plusMillis(900)), createdDate) shouldBe None // scalastyle:ignore magic.number
+      DateFormatter.formatLastAccessDate(Some(createdDate.minusMillis(900)), createdDate) shouldBe None // scalastyle:ignore magic.number
     }
   }
 }

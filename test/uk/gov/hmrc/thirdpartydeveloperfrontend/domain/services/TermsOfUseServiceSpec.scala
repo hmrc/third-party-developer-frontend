@@ -31,7 +31,7 @@ class TermsOfUseServiceSpec extends HmrcSpec {
     ClientId("clientId"),
     "App name 1",
     DateTimeUtils.now,
-    DateTimeUtils.now,
+    Some(DateTimeUtils.now),
     None,
     Period.ofDays(10),
     Environment.PRODUCTION,

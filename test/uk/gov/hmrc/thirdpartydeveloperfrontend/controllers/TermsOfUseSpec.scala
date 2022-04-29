@@ -86,7 +86,7 @@ class TermsOfUseSpec
         ClientId("clientId"),
         "appName",
         DateTimeUtils.now,
-        DateTimeUtils.now,
+        Some(DateTimeUtils.now),
         None,
         grantLength,
         environment,

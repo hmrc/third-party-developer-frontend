@@ -69,9 +69,9 @@ class AppsByTeamMemberServiceSpec extends AsyncHmrcSpec with SubscriptionsBuilde
     val userId = UserId.random
     val email = "bob@example.com"
     val grantLength = Period.ofDays(547)
-    val productionApp1 = ApplicationWithSubscriptionIds(ApplicationId("id1"), ClientId("cl-id1"), "zapplication", DateTime.now, DateTime.now, None, grantLength, Environment.PRODUCTION, collaborators = Set(Collaborator(email, CollaboratorRole.ADMINISTRATOR, userId)))
-    val sandboxApp1 = ApplicationWithSubscriptionIds(ApplicationId("id2"), ClientId("cl-id2"), "application", DateTime.now, DateTime.now, None, grantLength, Environment.SANDBOX, collaborators = Set(Collaborator(email, CollaboratorRole.ADMINISTRATOR, userId)))
-    val productionApp2 = ApplicationWithSubscriptionIds(ApplicationId("id3"), ClientId("cl-id3"), "4pplication", DateTime.now, DateTime.now, None, grantLength, Environment.PRODUCTION, collaborators = Set(Collaborator(email, CollaboratorRole.ADMINISTRATOR, userId)))
+    val productionApp1 = ApplicationWithSubscriptionIds(ApplicationId("id1"), ClientId("cl-id1"), "zapplication", DateTime.now, Some(DateTime.now), None, grantLength, Environment.PRODUCTION, collaborators = Set(Collaborator(email, CollaboratorRole.ADMINISTRATOR, userId)))
+    val sandboxApp1 = ApplicationWithSubscriptionIds(ApplicationId("id2"), ClientId("cl-id2"), "application", DateTime.now, Some(DateTime.now), None, grantLength, Environment.SANDBOX, collaborators = Set(Collaborator(email, CollaboratorRole.ADMINISTRATOR, userId)))
+    val productionApp2 = ApplicationWithSubscriptionIds(ApplicationId("id3"), ClientId("cl-id3"), "4pplication", DateTime.now, Some(DateTime.now), None, grantLength, Environment.PRODUCTION, collaborators = Set(Collaborator(email, CollaboratorRole.ADMINISTRATOR, userId)))
 
     val productionApps = Seq(productionApp1, productionApp2)
     val sandboxApps = Seq(sandboxApp1)

@@ -39,7 +39,7 @@ class DeleteApplicationSpec extends CommonViewSpec with WithCSRFAddToken with Co
     clientId,
     "App name 1",
     DateTimeUtils.now,
-    DateTimeUtils.now,
+    Some(DateTimeUtils.now),
     None,
     Period.ofDays(547),
     Environment.PRODUCTION,

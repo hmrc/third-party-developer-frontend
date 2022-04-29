@@ -50,7 +50,7 @@ class ChangeSubscriptionConfirmationSpec extends CommonViewSpec with WithCSRFAdd
     clientId,
     applicationName,
     DateTimeUtils.now,
-    DateTimeUtils.now,
+    Some(DateTimeUtils.now),
     None,
     grantLength,
     Environment.PRODUCTION,

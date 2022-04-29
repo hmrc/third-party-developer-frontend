@@ -39,7 +39,7 @@ trait ApplicationBuilder extends CollaboratorTracker {
       clientId,
       s"${appId.value}-name",
       DateTimeUtils.now,
-      DateTimeUtils.now,
+      Some(DateTimeUtils.now),
       None,
       grantLength = Period.ofDays(547),
       Environment.SANDBOX,

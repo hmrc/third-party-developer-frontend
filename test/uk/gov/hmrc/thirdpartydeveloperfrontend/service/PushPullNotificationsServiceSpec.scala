@@ -43,7 +43,7 @@ class PushPullNotificationsServiceSpec extends AsyncHmrcSpec {
       clientId,
       "App name 1",
       DateTimeUtils.now,
-      DateTimeUtils.now,
+      Some(DateTimeUtils.now),
       None,
       grantLength,
       deployedTo = PRODUCTION

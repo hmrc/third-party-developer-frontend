@@ -64,7 +64,7 @@ class ClientSecretsSpec extends CommonViewSpec with WithCSRFAddToken with Collab
       ClientId("Test Application Client ID"),
       "Test Application",
       DateTime.now(),
-      DateTime.now(),
+      Some(DateTime.now()),
       None,
       Period.ofDays(547),
       Environment.PRODUCTION,

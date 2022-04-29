@@ -115,11 +115,11 @@ class ApplicationServiceSpec extends AsyncHmrcSpec with SubscriptionsBuilder wit
   val productionApplicationId = ApplicationId("Application ID")
   val productionClientId = ClientId(s"client-id-${randomUUID().toString}")
   val productionApplication: Application =
-    Application(productionApplicationId, productionClientId, "name", DateTimeUtils.now, DateTimeUtils.now, None, grantLength, Environment.PRODUCTION, Some("description"), Set())
+    Application(productionApplicationId, productionClientId, "name", DateTimeUtils.now, Some(DateTimeUtils.now), None, grantLength, Environment.PRODUCTION, Some("description"), Set())
   val sandboxApplicationId = ApplicationId("Application ID")
   val sandboxClientId = ClientId("Client ID")
   val sandboxApplication: Application =
-    Application(sandboxApplicationId, sandboxClientId, "name", DateTimeUtils.now, DateTimeUtils.now, None, grantLength, Environment.SANDBOX, Some("description"))
+    Application(sandboxApplicationId, sandboxClientId, "name", DateTimeUtils.now, Some(DateTimeUtils.now), None, grantLength, Environment.SANDBOX, Some("description"))
 
   def subStatusWithoutFieldValues(
       appId: ApplicationId,
@@ -183,7 +183,7 @@ class ApplicationServiceSpec extends AsyncHmrcSpec with SubscriptionsBuilder wit
     val applicationId = ApplicationId("applicationId")
     val clientId = ClientId("clientId")
     val applicationName = "applicationName"
-    val application = Application(applicationId, clientId, applicationName, DateTimeUtils.now, DateTimeUtils.now, None, grantLength, Environment.PRODUCTION, None)
+    val application = Application(applicationId, clientId, applicationName, DateTimeUtils.now, Some(DateTimeUtils.now), None, grantLength, Environment.PRODUCTION, None)
 
     "truncate the description to 250 characters on update request" in new Setup {
       private val longDescription = "abcde" * 100

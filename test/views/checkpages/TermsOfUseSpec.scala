@@ -41,7 +41,7 @@ class TermsOfUseSpec extends CommonViewSpec with WithCSRFAddToken with Collabora
         ClientId("CLIENT_ID"),
         "APPLICATION NAME",
         DateTimeUtils.now,
-        DateTimeUtils.now,
+        Some(DateTimeUtils.now),
         None,
         grantLength,
         Environment.PRODUCTION,

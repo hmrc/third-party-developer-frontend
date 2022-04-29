@@ -108,7 +108,7 @@ class ApplicationServiceClientSecretSpec extends AsyncHmrcSpec with Subscription
   val productionApplicationId = ApplicationId("Application ID")
   val productionClientId = ClientId(s"client-id-${randomUUID().toString}")
   val productionApplication: Application =
-    Application(productionApplicationId, productionClientId, "name", DateTimeUtils.now, DateTimeUtils.now, None, grantLength,
+    Application(productionApplicationId, productionClientId, "name", DateTimeUtils.now, Some(DateTimeUtils.now), None, grantLength,
       Environment.PRODUCTION, Some("description"), Set())
 
   "addClientSecret" should {

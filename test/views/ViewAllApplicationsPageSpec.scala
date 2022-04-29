@@ -123,7 +123,7 @@ class ViewAllApplicationsPageSpec extends CommonViewSpec with WithCSRFAddToken {
     val appName = "App name 1"
     val appUserRole = CollaboratorRole.ADMINISTRATOR
     val appCreatedOn = DateTimeUtils.now.minusDays(1)
-    val appLastAccess = appCreatedOn
+    val appLastAccess = Some(appCreatedOn)
 
     val sandboxAppSummaries = Seq(
         ApplicationSummary(
@@ -219,7 +219,7 @@ class ViewAllApplicationsPageSpec extends CommonViewSpec with WithCSRFAddToken {
       "show the last access and user role" in new ProdAndET with Setup {
         val datetime = DateTimeUtils.now
         val datetimeText = DateFormatter.standardFormatter.print(datetime)
-        val calledApp = sandboxAppSummaries.map(_.copy(lastAccess = datetime))
+        val calledApp = sandboxAppSummaries.map(_.copy(lastAccess = Some(datetime)))
         implicit val document = Jsoup.parse(renderPage(calledApp, Seq.empty, Set(applicationId)).body)
         
         showsAppName(appName)

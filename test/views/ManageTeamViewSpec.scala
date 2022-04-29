@@ -44,7 +44,7 @@ class ManageTeamViewSpec extends CommonViewSpec with WithCSRFAddToken with Devel
     clientId,
     "App name 1",
     DateTimeUtils.now,
-    DateTimeUtils.now,
+    Some(DateTimeUtils.now),
     None,
     grantLength,
     Environment.PRODUCTION,

@@ -102,7 +102,7 @@ class ManageTeamSpec
       val developerSession = DeveloperSession(session)
 
       val collaborators = aStandardApplication.collaborators ++ additionalTeamMembers ++ Set(developerSession.email.asCollaborator(userRole))
-      val application = aStandardApplication.copy(id = appId, collaborators = collaborators, createdOn = DateTime.parse("2018-04-06T09:00"), lastAccess = DateTime.parse("2018-04-06T09:00"))
+      val application = aStandardApplication.copy(id = appId, collaborators = collaborators, createdOn = DateTime.parse("2018-04-06T09:00"), lastAccess = Some(DateTime.parse("2018-04-06T09:00")))
 
       givenApplicationAction(application, developerSession)
       fetchCredentialsReturns(application, tokens())

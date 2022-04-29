@@ -31,7 +31,7 @@ case class ApplicationSummary(
   role: CollaboratorRole,
   termsOfUseStatus: TermsOfUseStatus,
   state: State,
-  lastAccess: DateTime,
+  lastAccess: Option[DateTime],
   grantLength: Period,
   serverTokenUsed: Boolean = false,
   createdOn: DateTime,
