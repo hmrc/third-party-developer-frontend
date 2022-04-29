@@ -77,38 +77,47 @@ trait QuestionnaireTestData {
       )
     )
   }
-    
+
   object OrganisationDetails {
-    val questionRI1 = TextQuestion(
-      Question.Id("36b7e670-83fc-4b31-8f85-4d3394908495"),
-      Wording("Provide details for a responsible individual in your organisation"),
+    val questionRI1 = YesNoQuestion(
+      Question.Id("99d9362d-e365-4af1-aa46-88e95f9858f7"),
+      Wording("Are you the individual responsible for the software in your organisation?"),
       statement = Statement(
-        StatementText("The responsible individual:"),
+        StatementText("As the responsible individual you:"),
         StatementBullets(
           CompoundFragment(
-            StatementText("ensures your software conforms to the "),
+            StatementText("ensure your software conforms to the "),
             StatementLink("terms of use (opens in new tab)", "/api-documentation/docs/terms-of-use")
           ),
           CompoundFragment(
-            StatementText("understands the "),
+            StatementText("understand the "),
             StatementLink("consequences of not conforming to the terms of use (opens in new tab)", "/api-documentation/docs/terms-of-use")
           )
         )
       ).some,
-      label = Some(Question.Label("First and last name")),
-      errorInfo = ErrorInfo("Enter a first and last name","First and last name cannot be blank").some
+      yesMarking = Pass,
+      noMarking = Pass,
+      errorInfo = ErrorInfo("Select Yes if you are the individual responsible for the software in your organisation").some
     )
 
     val questionRI2 = TextQuestion(
+      Question.Id("36b7e670-83fc-4b31-8f85-4d3394908495"),
+      Wording("Who is responsible for the software in your organisation?"),
+      statement = None,
+      label = Question.Label("First and last name").some,
+      errorInfo = ErrorInfo("Enter a first and last name","First and last name cannot be blank").some
+    )
+
+    val questionRI3 = TextQuestion(
       Question.Id("fb9b8036-cc88-4f4e-ad84-c02caa4cebae"),
-      Wording("Provide an email address for the responsible individual"),
+      Wording("Give us the email address of the individual responsible for the software"),
       statement = None,
       afterStatement = Statement(
-        StatementText("We will send a verification email to the email address provided."),
-        StatementText("The responsible individual must verify within 10 days that they are responsible for ensuring your software conforms to our terms of use.")
+        StatementText("We will email a verification link to the responsible individual that expires in 10 working days."),
+        StatementText("The responsible individual must verify before we can process your request for production credentials.")
       ).some,
-      label = Some(Question.Label("Email address")),
-      hintText = Some(StatementText("Cannot be a shared mailbox")),
+      label = Question.Label("Email address").some,
+      hintText = StatementText("Cannot be a shared mailbox").some,
       validation = TextValidation.Email.some,
       errorInfo = ErrorInfo("Enter an email address in the correct format, like yourname@example.com","Email address cannot be blank").some
     )
@@ -117,14 +126,16 @@ trait QuestionnaireTestData {
       Question.Id("b9dbf0a5-e72b-4c89-a735-26f0858ca6cc"),
       Wording("What is your organisation’s URL?"),
       statement = None,
-      hintText = Some(StatementText("For example https://example.com")),
-      absence = Some(("My organisation doesn't have a website", Fail))
+      hintText = StatementText("For example https://example.com").some,
+      absence = ("My organisation doesn't have a website", Fail).some,
+      validation = TextValidation.Url.some,
+      errorInfo = ErrorInfo("Enter the URL, like https://example.com","URL cannot be blank").some
     )
 
     val question2 = ChooseOneOfQuestion(
       Question.Id("cbdf264f-be39-4638-92ff-6ecd2259c662"),
       Wording("Identify your organisation"),
-      Statement(
+      statement = Statement(
         StatementText("Provide evidence that you or your organisation is officially registered in the UK. Choose one option.")
       ).some,
       marking = ListMap(
@@ -134,54 +145,83 @@ trait QuestionnaireTestData {
         (PossibleAnswer("PAYE reference") -> Pass),
         (PossibleAnswer("My organisation is in the UK and doesn't have any of these") -> Pass),
         (PossibleAnswer("My organisation is outside the UK and doesn't have any of these") -> Warn)
-      )
+      ),
+      errorInfo = ErrorInfo("Select a way to identify your organisation").some
     )
 
     val question2a = TextQuestion(
       Question.Id("4e148791-1a07-4f28-8fe4-ba3e18cdc118"),
       Wording("What is your company registration number?"),
-      Statement(
-        StatementText("You can find your company registration number on any official documentation you receive from Companies House."),
+      statement = Statement(
+        CompoundFragment(
+          StatementText("You can "),
+          StatementLink("search Companies House for your company registration number (opens in new tab)", "https://find-and-update.company-information.service.gov.uk/"),
+          StatementText(".")
+        )
       ).some,
-      absence = Some(("My organisation doesn't have a company registration", Warn))
+      hintText = StatementText("It is 8 characters. For example, 01234567 or AC012345.").some,
+      absence = Tuple2("My organisation doesn't have a company registration", Fail).some,
+      errorInfo = ErrorInfo("Your company registration number cannot be blank","Enter your company registration number, like 01234567").some
     )
 
     val question2b = TextQuestion(
       Question.Id("55da0b97-178c-45b5-a139-b61ad7b9ca84"),
-      Wording("What is your Unique Taxpayer Reference (UTR)?"),
-      None
+      Wording("What is your Self Assessment Unique Taxpayer Reference?"),
+      statement = None,
+      hintText =
+        CompoundFragment(
+          StatementText("This is 10 numbers, for example 1234567890. It will be on tax returns and other letters about Self Assessment. It may be called ‘reference’, ‘UTR’ or ‘official use’. You can "),
+          StatementLink("find a lost UTR number (opens in new tab)", "https://www.gov.uk/find-lost-utr-number"),
+          StatementText(".")
+        ).some,
+      errorInfo = ErrorInfo("Your Self Assessment Unique Taxpayer Reference cannot be blank","Enter your Self Assessment Unique Taxpayer Reference, like 1234567890").some
     )
+
     val question2c = TextQuestion(
       Question.Id("dd12fd8b-907b-4ba1-95d3-ef6317f36199"),
-      Wording("What is your VAT registration number?"),
-      None
+      Wording("What is your company’s VAT registration number?"),
+      statement = None,
+      hintText = StatementText("This is 9 numbers, sometimes with ‘GB’ at the start, for example 123456789 or GB123456789. You can find it on your company’s VAT registration certificate.").some,
+      errorInfo = ErrorInfo("Your company's VAT registration number cannot be blank","Enter your company's VAT registration number, like 123456789").some
     )
+
     val question2d = TextQuestion(
       Question.Id("6be23951-ac69-47bf-aa56-86d3d690ee0b"),
-      Wording("What is your Corporation Tax Unique Taxpayer Reference (UTR)?"),
-      None
+      Wording("What is your Corporation Tax Unique Taxpayer Reference?"),
+      statement = None,
+      hintText =
+        CompoundFragment(
+          StatementText("This is 10 numbers, for example 1234567890. It will be on tax returns and other letters about Corporation Tax. It may be called ‘reference’, ‘UTR’ or ‘official use’. You can "),
+          StatementLink("find a lost UTR number (opens in new tab)", "https://www.gov.uk/find-lost-utr-number"),
+          StatementText(".")
+        ).some,
+      errorInfo = ErrorInfo("Your Corporation Tax Unique Taxpayer Reference cannot be blank","Enter your Corporation Tax Unique Taxpayer Reference, like 1234567890").some
     )
+
     val question2e = TextQuestion(
       Question.Id("a143760e-72f3-423b-a6b4-558db37a3453"),
-      Wording("What is your PAYE reference?"),
-      None
+      Wording("What is your company’s employer PAYE reference?"),
+      statement = None,
+      hintText = StatementText("This is a 3 digit tax office number, a forward slash, and a tax office employer reference, like 123/AB456. It may be called ‘Employer PAYE reference’ or ‘PAYE reference’. It will be on your P60.").some,
+      errorInfo = ErrorInfo("Your company's employer PAYE reference number cannot be blank","Enter your company's employer PAYE reference number, like 123/AB456").some
     )
-    
+
     val question3 = AcknowledgementOnly(
       Question.Id("a12f314e-bc12-4e0d-87ba-1326acb31008"),
-      Wording("Provide evidence of your organisation's registration"),
-      Statement(
+      Wording("Provide evidence of your organisation’s registration"),
+      statement = Statement(
         StatementText("You will need to provide evidence that your organisation is officially registered in a country outside of the UK."),
         StatementText("You will be asked for a digital copy of the official registration document.")
       ).some
     )
-      
+
     val questionnaire = Questionnaire(
       id = Questionnaire.Id("ac69b129-524a-4d10-89a5-7bfa46ed95c7"),
       label = Questionnaire.Label("Organisation details"),
       questions = NonEmptyList.of(
         QuestionItem(questionRI1),
-        QuestionItem(questionRI2),
+        QuestionItem(questionRI2, AskWhenAnswer(questionRI1, "No")),
+        QuestionItem(questionRI3, AskWhenAnswer(questionRI1, "No")),
         QuestionItem(question1),
         QuestionItem(question2),
         QuestionItem(question2a, AskWhenAnswer(question2, "My organisation is in the UK and doesn't have any of these")),
@@ -315,9 +355,11 @@ trait QuestionnaireTestData {
         )
       )
     )
+
   val testQuestionIdsOfInterest = QuestionIdsOfInterest(
-    responsibleIndividualNameId   = OrganisationDetails.questionRI1.id,
-    responsibleIndividualEmailId  = OrganisationDetails.questionRI2.id,
+    responsibleIndividualIsRequesterId = OrganisationDetails.questionRI1.id,
+    responsibleIndividualNameId   = OrganisationDetails.questionRI2.id,
+    responsibleIndividualEmailId  = OrganisationDetails.questionRI3.id,
     applicationNameId             = CustomersAuthorisingYourSoftware.question2.id,
     privacyPolicyId               = CustomersAuthorisingYourSoftware.question4.id,
     privacyPolicyUrlId            = CustomersAuthorisingYourSoftware.question5.id,
@@ -325,7 +367,7 @@ trait QuestionnaireTestData {
     termsAndConditionsUrlId       = CustomersAuthorisingYourSoftware.question7.id,
     organisationUrlId             = OrganisationDetails.question1.id,
     identifyYourOrganisationId    = OrganisationDetails.question2.id,
-    serverLocationsId             = CustomersAuthorisingYourSoftware.question1.id
+    serverLocationsId             = CustomersAuthorisingYourSoftware.question3.id
   )
 
   val questionnaire = DevelopmentPractices.questionnaire
