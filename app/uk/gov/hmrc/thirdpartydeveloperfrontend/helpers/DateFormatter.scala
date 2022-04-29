@@ -34,7 +34,7 @@ object DateFormatter {
     standardFormatter.print(dateTime)
   }
 
-  def formatLastAccessDate(mayBeLastAccess: Option[DateTime], createdOnDate: DateTime): Option[String] = {
+  def formatLastAccessDate(maybeLastAccess: Option[DateTime], createdOnDate: DateTime): Option[String] = {
     def formatDateValue(lastAccessDate: DateTime) = {
      if (daysBetween(initialLastAccessDate.toLocalDate, lastAccessDate.toLocalDate) > 0) {
         standardFormatter.print(lastAccessDate)
@@ -43,7 +43,7 @@ object DateFormatter {
       }
     }
 
-    mayBeLastAccess.filterNot( lastAccessDate => secondsBetween(createdOnDate, lastAccessDate).getSeconds == 0).map(formatDateValue)
+    maybeLastAccess.filterNot( lastAccessDate => secondsBetween(createdOnDate, lastAccessDate).getSeconds == 0).map(formatDateValue)
 
   }
 }

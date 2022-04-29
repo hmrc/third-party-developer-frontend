@@ -66,12 +66,17 @@ class DateFormatterSpec extends AsyncHmrcSpec with BeforeAndAfterAll {
       DateFormatter.formatLastAccessDate(Some(lastAccessDate), createdOnDate) shouldBe Some("more than 2 months ago")
     }
 
-    "display 'never used' if the last access date is the same as the created date" in {
+    "return None if the last access date is the same as the created date" in {
       val createdDate = initialLastAccessDate.plusHours(3)
       DateFormatter.formatLastAccessDate(Some(createdDate), createdDate) shouldBe None
     }
 
-    "display 'never used' if the last access date is within a second of the created date" in {
+    "return None if the last access date None" in {
+      val createdDate = initialLastAccessDate.plusHours(3)
+      DateFormatter.formatLastAccessDate(None, createdDate) shouldBe None
+    }
+
+    "return None if the last access date is within a second of the created date" in {
       val createdDate = initialLastAccessDate.plusHours(3)
       DateFormatter.formatLastAccessDate(Some(createdDate.plusMillis(900)), createdDate) shouldBe None // scalastyle:ignore magic.number
       DateFormatter.formatLastAccessDate(Some(createdDate.minusMillis(900)), createdDate) shouldBe None // scalastyle:ignore magic.number
