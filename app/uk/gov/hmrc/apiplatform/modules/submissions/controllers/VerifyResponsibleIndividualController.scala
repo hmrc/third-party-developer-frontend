@@ -28,15 +28,14 @@ import play.api.data.Forms._
 import uk.gov.hmrc.apiplatform.modules.common.services.EitherTHelper
 import uk.gov.hmrc.apiplatform.modules.submissions.services.SubmissionService
 import play.api.mvc.Result
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.controllers.BadRequestWithErrorMessage
 import uk.gov.hmrc.thirdpartydeveloperfrontend.service.SessionService
 import uk.gov.hmrc.thirdpartydeveloperfrontend.service.ApplicationActionService
 import uk.gov.hmrc.thirdpartydeveloperfrontend.service.ApplicationService
 import play.api.libs.crypto.CookieSigner
 import uk.gov.hmrc.thirdpartydeveloperfrontend.config.ErrorHandler
 import uk.gov.hmrc.apiplatform.modules.submissions.views.html.{VerifyResponsibleIndividualView, ResponsibleIndividualAcceptedView, ResponsibleIndividualDeclinedView, ResponsibleIndividualErrorView}
-import uk.gov.hmrc.thirdpartydeveloperfrontend.connectors.ThirdPartyApplicationProductionConnector
-import uk.gov.hmrc.apiplatform.modules.submissions.domain.models.ResponsibleIndividualVerification
+import uk.gov.hmrc.apiplatform.modules.submissions.services.ResponsibleIndividualVerificationService
+import uk.gov.hmrc.apiplatform.modules.submissions.domain.models.{ResponsibleIndividualVerification, ErrorDetails}
 
 object VerifyResponsibleIndividualController {
   case class ViewModel (
@@ -63,7 +62,7 @@ class VerifyResponsibleIndividualController @Inject() (
   val applicationService: ApplicationService,
   mcc: MessagesControllerComponents,
   val submissionService: SubmissionService,
-  productionApplicationConnector: ThirdPartyApplicationProductionConnector,
+  responsibleIndividualVerificationService: ResponsibleIndividualVerificationService,
   verifyResponsibleIndividualView: VerifyResponsibleIndividualView,
   responsibleIndividualAcceptedView: ResponsibleIndividualAcceptedView,
   responsibleIndividualDeclinedView: ResponsibleIndividualDeclinedView,
@@ -81,7 +80,6 @@ class VerifyResponsibleIndividualController @Inject() (
 
   private val exec = ec
   private val ET = new EitherTHelper[Result] { implicit val ec: ExecutionContext = exec }
-  private val failed = (err: String) => BadRequestWithErrorMessage(err)
   private val noRIVerificationRecordError = "This link has already been used to verify the responsible individual or has expired"
 
   def verifyPage(code: String) = Action.async { implicit request =>
@@ -91,7 +89,7 @@ class VerifyResponsibleIndividualController @Inject() (
     (
       for {
         // Call into TPA to get details from the code supplied - error if not found
-        riVerification   <- ET.fromOptionF(productionApplicationConnector.fetchResponsibleIndividualVerification(code), Ok(responsibleIndividualErrorView(noRIVerificationRecordError)))
+        riVerification   <- ET.fromOptionF(responsibleIndividualVerificationService.fetchResponsibleIndividualVerification(code), Ok(responsibleIndividualErrorView(noRIVerificationRecordError)))
       } yield success(riVerification)
     ).fold(identity(_), identity(_))    
   }
@@ -108,13 +106,19 @@ class VerifyResponsibleIndividualController @Inject() (
     }  
 
     def handleValidForm(form: VerifyResponsibleIndividualController.HasVerifiedForm) = {
-      (
-        for {
-          // Call into TPA to accept or decline responsible individual
-          riVerification    <- ET.fromOptionF(productionApplicationConnector.fetchResponsibleIndividualVerification(code), Ok(responsibleIndividualErrorView(noRIVerificationRecordError)))
-          verified: Boolean =  getVerified(form.verified)
-        } yield success(verified, riVerification)
-      ).fold(identity(_), identity(_))
+      val verified: Boolean =  getVerified(form.verified)
+      responsibleIndividualVerificationService
+        .verifyResponsibleIndividual(code, verified)
+        .map(_ match {
+          case Right(riVerification) => success(verified, riVerification)
+          case Left(ErrorDetails(_, msg)) => Ok(responsibleIndividualErrorView(msg)) 
+        })
+      // (
+      //   for {
+      //     // Call into TPA to accept or decline responsible individual
+      //     riVerification    <- ET.fromEitherF(responsibleIndividualVerificationService.verifyResponsibleIndividual(code, verified))
+      //   } yield success(verified, riVerification)
+      // ).fold(identity(_), identity(_))
     }
 
     def handleInvalidForm(form: Form[VerifyResponsibleIndividualController.HasVerifiedForm]) = {
@@ -124,7 +128,7 @@ class VerifyResponsibleIndividualController @Inject() (
       (
         for {
           // Call into TPA to get details from the code supplied - error if not found
-          riVerification   <- ET.fromOptionF(productionApplicationConnector.fetchResponsibleIndividualVerification(code), Ok(responsibleIndividualErrorView(noRIVerificationRecordError)))
+          riVerification   <- ET.fromOptionF(responsibleIndividualVerificationService.fetchResponsibleIndividualVerification(code), Ok(responsibleIndividualErrorView(noRIVerificationRecordError)))
         } yield formValidationError(riVerification)
       ).fold(identity(_), identity(_))    
     }

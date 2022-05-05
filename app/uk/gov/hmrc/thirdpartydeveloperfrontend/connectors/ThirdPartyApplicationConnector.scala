@@ -109,16 +109,6 @@ abstract class ThirdPartyApplicationConnector(config: ApplicationConfig, metrics
       Future.successful(None)
     }
 
-  def fetchResponsibleIndividualVerification(code: String)(implicit hc: HeaderCarrier): Future[Option[ResponsibleIndividualVerification]] =
-//    if (isEnabled) {
-//      metrics.record(api) {
-//        http.GET[Option[ResponsibleIndividualVerification]](s"$serviceBaseUrl/responsibleIndividualVerification/${code}")
-//      }
-//    } else {
-      Future.successful(Some(ResponsibleIndividualVerification("code1234", ApplicationId.random, "Application Name")))
-      //Future.successful(None)
-//    }
-
   def unsubscribeFromApi(applicationId: ApplicationId, apiIdentifier: ApiIdentifier)(implicit hc: HeaderCarrier): Future[ApplicationUpdateSuccessful] =
     metrics.record(api) {
       http.DELETE[ErrorOrUnit](s"$serviceBaseUrl/application/${applicationId.value}/subscription?context=${apiIdentifier.context.value}&version=${apiIdentifier.version.value}")
