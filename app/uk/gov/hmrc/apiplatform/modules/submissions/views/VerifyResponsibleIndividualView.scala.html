@@ -19,12 +19,12 @@
 @import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.ApplicationId
 @import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.DeveloperSession
 @import uk.gov.hmrc.apiplatform.modules.submissions.domain.models._
-@import uk.gov.hmrc.apiplatform.modules.submissions.controllers.VerifyResponsibleIndividualController.DummyForm
+@import uk.gov.hmrc.apiplatform.modules.submissions.controllers.VerifyResponsibleIndividualController.HasVerifiedForm
 @import uk.gov.hmrc.apiplatform.modules.submissions.controllers.VerifyResponsibleIndividualController.ViewModel
 
 @this(devMain: DevMain2)
 
-@(model: ViewModel, form: Form[DummyForm])(
+@(model: ViewModel, form: Form[HasVerifiedForm])(
   implicit request: play.api.mvc.Request[Any], messagesProvider: MessagesProvider, applicationConfig: ApplicationConfig
 )
 
@@ -44,8 +44,10 @@
 
   <ul class="govuk-list govuk-list--bullet">
     <li>ensure your software conforms to the <a class="govuk-link govuk-link--no-visited-state" target="_blank" href="/api-documentation/docs/terms-of-use">terms of use (opens in new tab)</a></li>
-    <li>understand the <a class="govuk-link govuk-link--no-visited-state" target="_blank" href="/api-documentation/docs/terms-of-use">consequences of not conforming to the terms of use (opens in new tab)</a></li>
+    <li>understand the <a class="govuk-link govuk-link--no-visited-state" target="_blank" href="/api-documentation/docs/terms-of-use/not-meeting-terms-of-use">consequences of not conforming to the terms of use (opens in new tab)</a></li>
   </ul>
+
+  @errorSummary2(form)
 
   @helper.form(action = uk.gov.hmrc.apiplatform.modules.submissions.controllers.routes.VerifyResponsibleIndividualController.verifyAction(model.code), 'class -> "form") {
     @helper.CSRF.formField
@@ -53,11 +55,11 @@
     <div class="govuk-form-group">
       <div class="govuk-radios govuk-radios--inline">
         <div class="govuk-radios__item">
-          <input class="govuk-radios__input" id="yes" type="radio" name="ri-accepted" value="yes">
+          <input class="govuk-radios__input" id="yes" type="radio" name="verified" value="yes">
           <label class="govuk-label govuk-radios__label" for="yes">Yes</label>
         </div>
         <div class="govuk-radios__item">
-          <input class="govuk-radios__input" id="no" type="radio" name="ri-declined" value="no">
+          <input class="govuk-radios__input" id="no" type="radio" name="verified" value="no">
           <label class="govuk-label govuk-radios__label" for="no">No</label>
         </div>
       </div>

@@ -24,6 +24,7 @@ import uk.gov.hmrc.thirdpartydeveloperfrontend.config.ApplicationConfig
 import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.ApplicationController
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.ApplicationId
 import play.api.data.Form
+import play.api.data.Forms._
 import uk.gov.hmrc.apiplatform.modules.common.services.EitherTHelper
 import uk.gov.hmrc.apiplatform.modules.submissions.services.SubmissionService
 import play.api.mvc.Result
@@ -33,10 +34,9 @@ import uk.gov.hmrc.thirdpartydeveloperfrontend.service.ApplicationActionService
 import uk.gov.hmrc.thirdpartydeveloperfrontend.service.ApplicationService
 import play.api.libs.crypto.CookieSigner
 import uk.gov.hmrc.thirdpartydeveloperfrontend.config.ErrorHandler
-import uk.gov.hmrc.apiplatform.modules.submissions.views.html.{VerifyResponsibleIndividualView}
+import uk.gov.hmrc.apiplatform.modules.submissions.views.html.{VerifyResponsibleIndividualView, ResponsibleIndividualAcceptedView, ResponsibleIndividualDeclinedView, ResponsibleIndividualErrorView}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.connectors.ThirdPartyApplicationProductionConnector
-
-import scala.concurrent.Future
+import uk.gov.hmrc.apiplatform.modules.submissions.domain.models.ResponsibleIndividualVerification
 
 object VerifyResponsibleIndividualController {
   case class ViewModel (
@@ -45,19 +45,13 @@ object VerifyResponsibleIndividualController {
     code: String
   )
 
-  case class DummyForm(dummy: String = "dummy")
+  case class HasVerifiedForm(verified: String)
 
-  object DummyForm {
-    import play.api.data.Forms.{ignored, mapping}
-
-    def form: Form[DummyForm] = {
-      Form(
-        mapping(
-          "dummy" -> ignored("dummy")
-        )(DummyForm.apply)(DummyForm.unapply)
-      )
-    }
-  }
+  val hasVerifiedForm: Form[HasVerifiedForm] = Form(
+    mapping(
+      "verified" -> nonEmptyText
+    )(HasVerifiedForm.apply)(HasVerifiedForm.unapply)
+  )
 }
 
 @Singleton
@@ -70,7 +64,10 @@ class VerifyResponsibleIndividualController @Inject() (
   mcc: MessagesControllerComponents,
   val submissionService: SubmissionService,
   productionApplicationConnector: ThirdPartyApplicationProductionConnector,
-  verifyResponsibleIndividualView: VerifyResponsibleIndividualView
+  verifyResponsibleIndividualView: VerifyResponsibleIndividualView,
+  responsibleIndividualAcceptedView: ResponsibleIndividualAcceptedView,
+  responsibleIndividualDeclinedView: ResponsibleIndividualDeclinedView,
+  responsibleIndividualErrorView: ResponsibleIndividualErrorView
 )
 (
   implicit val ec: ExecutionContext,
@@ -81,43 +78,57 @@ class VerifyResponsibleIndividualController @Inject() (
   
   import cats.implicits._
   import cats.instances.future.catsStdInstancesForFuture
-  import SubmissionActionBuilders.ApplicationStateFilter
 
   private val exec = ec
   private val ET = new EitherTHelper[Result] { implicit val ec: ExecutionContext = exec }
   private val failed = (err: String) => BadRequestWithErrorMessage(err)
+  private val noRIVerificationRecordError = "This link has already been used to verify the responsible individual or has expired"
 
   def verifyPage(code: String) = Action.async { implicit request =>
-    Future.successful(Ok(verifyResponsibleIndividualView(VerifyResponsibleIndividualController.ViewModel(ApplicationId.random, "App Name", "code"), VerifyResponsibleIndividualController.DummyForm.form)))
+    lazy val success = (riVerification: ResponsibleIndividualVerification) => 
+      Ok(verifyResponsibleIndividualView(VerifyResponsibleIndividualController.ViewModel(riVerification.appId, riVerification.appName, code), VerifyResponsibleIndividualController.hasVerifiedForm))
+
+    (
+      for {
+        // Call into TPA to get details from the code supplied - error if not found
+        riVerification   <- ET.fromOptionF(productionApplicationConnector.fetchResponsibleIndividualVerification(code), Ok(responsibleIndividualErrorView(noRIVerificationRecordError)))
+      } yield success(riVerification)
+    ).fold(identity(_), identity(_))    
   }
 
   def verifyAction(code: String) = Action.async { implicit request =>
-    Future.successful(Ok(verifyResponsibleIndividualView(VerifyResponsibleIndividualController.ViewModel(ApplicationId.random, "App Name", "code"), VerifyResponsibleIndividualController.DummyForm.form)))
+    lazy val success = (verified: Boolean, riVerification: ResponsibleIndividualVerification) => 
+      if(verified)
+        Ok(responsibleIndividualAcceptedView(VerifyResponsibleIndividualController.ViewModel(riVerification.appId, riVerification.appName, code)))
+      else
+        Ok(responsibleIndividualDeclinedView(VerifyResponsibleIndividualController.ViewModel(riVerification.appId, riVerification.appName, code)))
+
+    def getVerified(verifyAnswer: String): Boolean = {
+      verifyAnswer == "yes"
+    }  
+
+    def handleValidForm(form: VerifyResponsibleIndividualController.HasVerifiedForm) = {
+      (
+        for {
+          // Call into TPA to accept or decline responsible individual
+          riVerification    <- ET.fromOptionF(productionApplicationConnector.fetchResponsibleIndividualVerification(code), Ok(responsibleIndividualErrorView(noRIVerificationRecordError)))
+          verified: Boolean =  getVerified(form.verified)
+        } yield success(verified, riVerification)
+      ).fold(identity(_), identity(_))
+    }
+
+    def handleInvalidForm(form: Form[VerifyResponsibleIndividualController.HasVerifiedForm]) = {
+      lazy val formValidationError = (riVerification: ResponsibleIndividualVerification) => 
+        BadRequest(verifyResponsibleIndividualView(VerifyResponsibleIndividualController.ViewModel(riVerification.appId, riVerification.appName, code), form))
+
+      (
+        for {
+          // Call into TPA to get details from the code supplied - error if not found
+          riVerification   <- ET.fromOptionF(productionApplicationConnector.fetchResponsibleIndividualVerification(code), Ok(responsibleIndividualErrorView(noRIVerificationRecordError)))
+        } yield formValidationError(riVerification)
+      ).fold(identity(_), identity(_))    
+    }
+
+    VerifyResponsibleIndividualController.hasVerifiedForm.bindFromRequest.fold(handleInvalidForm, handleValidForm)
   }
-
-  // def cancelRequestForProductionCredentialsAction(appId: ApplicationId) = withApplicationSubmission(ApplicationStateFilter.notProduction)(appId) { implicit request =>
-  //   lazy val goBackToRegularPage =
-  //     if(request.submissionRequest.extSubmission.submission.status.isAnsweredCompletely) {
-  //       Redirect(uk.gov.hmrc.apiplatform.modules.submissions.controllers.routes.CheckAnswersController.checkAnswersPage(appId))
-  //     } else {
-  //       Redirect(uk.gov.hmrc.apiplatform.modules.submissions.controllers.routes.ProdCredsChecklistController.productionCredentialsChecklistPage(appId))
-  //     }
-
-  //   val isValidSubmit: (String) => Boolean = (s) => s == "cancel-request" || s == "dont-cancel-request"
-  //   val formValues = request.body.asFormUrlEncoded.get.filterNot(_._1 == "csrfToken")
-
-  //   val x = (
-  //     for {
-  //       submitAction           <- ET.fromOption(
-  //                                   formValues.get("submit-action")
-  //                                     .flatMap(_.headOption)
-  //                                     .filter(isValidSubmit), 
-  //                                   failed("Bad form data")
-  //                                 )
-  //       cancelAction           <- ET.cond(submitAction == "cancel-request", submitAction, goBackToRegularPage )
-  //       _                      <- ET.liftF(productionApplicationConnector.deleteApplication(appId))
-  //     } yield Ok(cancelledRequestForProductionCredentialsView(request.application.name))
-  //   )
-  //   x.fold[Result](identity, identity)
-  // }
 }
