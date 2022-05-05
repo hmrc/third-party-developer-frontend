@@ -28,7 +28,10 @@ import uk.gov.hmrc.play.http.metrics.common.API
 import javax.inject.{Inject, Singleton}
 import scala.concurrent.{ExecutionContext, Future}
 import scala.util.{Success, Try}
-
+import org.joda.time.DateTime
+import java.time.Period
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.UserId
+import scala.concurrent.Future.successful
 
 object ThirdPartyApplicationSubmissionsConnector {
   case class Config(serviceBaseUrl: String, apiKey: String)
@@ -96,40 +99,73 @@ class ThirdPartyApplicationSubmissionsConnector @Inject() (
       //Future.successful(None)
 //    }
 
-  def responsibleIndividualAccept(applicationId: ApplicationId, code: String)(implicit hc: HeaderCarrier): Future[Either[ErrorDetails, Application]] = metrics.record(api) {
-    import play.api.http.Status._
-    
-    val url = s"$serviceBaseUrl/submissions/application/${applicationId.value}/responsible-individual-accept"
-    
-    http.POST[ResponsibleIndividualVerificationRequest, HttpResponse](url, ResponsibleIndividualVerificationRequest(code)).map { response =>
-      val jsValue: Try[JsValue] = Try(response.json)
-      lazy val badResponse = new RuntimeException("Something went wrong in the response")
+  def responsibleIndividualAccept(code: String)(implicit hc: HeaderCarrier): Future[Either[ErrorDetails, Application]] = metrics.record(api) {
 
-      (response.status, jsValue) match {
-        case (OK, Success(value))                   => Right(value.asOpt[Application].getOrElse(throw badResponse))
-        case (PRECONDITION_FAILED, Success(value))  => Left(value.asOpt[ErrorDetails].getOrElse(throw badResponse))
-        case (CONFLICT, Success(value))             => Left(value.asOpt[ErrorDetails].getOrElse(throw badResponse))
-        case (_, _)                                 => throw badResponse
-      }
-    }
+    val sampleApp: Application = Application(
+      ApplicationId("myAppId"),
+      ClientId("myClientId"),
+      "App name 1",
+      DateTime.now,
+      Some(DateTime.now),
+      None,
+      grantLength = Period.ofDays(547),
+      Environment.PRODUCTION,
+      Some("Description 1"),
+      Set(Collaborator("email", CollaboratorRole.DEVELOPER, UserId.random)),
+      state = ApplicationState.production("loggedInDeveloper.email", ""),
+      access = Standard(redirectUris = List("https://red1", "https://red2"), termsAndConditionsUrl = Some("http://tnc-url.com"))
+    )
+    successful(Right(sampleApp))
+
+    //  import play.api.http.Status._
+
+    // val url = s"$serviceBaseUrl/submissions/responsible-individual-accept"
+    // http.POST[ResponsibleIndividualVerificationRequest, HttpResponse](url, ResponsibleIndividualVerificationRequest(code)).map { response =>
+    //   val jsValue: Try[JsValue] = Try(response.json)
+    //   lazy val badResponse = new RuntimeException("Something went wrong in the response")
+
+    //   (response.status, jsValue) match {
+    //     case (OK, Success(value))                   => Right(value.asOpt[Application].getOrElse(throw badResponse))
+    //     case (PRECONDITION_FAILED, Success(value))  => Left(value.asOpt[ErrorDetails].getOrElse(throw badResponse))
+    //     case (CONFLICT, Success(value))             => Left(value.asOpt[ErrorDetails].getOrElse(throw badResponse))
+    //     case (_, _)                                 => throw badResponse
+    //   }
+    // }
   }
 
-  def responsibleIndividualDecline(applicationId: ApplicationId, code: String)(implicit hc: HeaderCarrier): Future[Either[ErrorDetails, Application]] = metrics.record(api) {
-    import play.api.http.Status._
-    
-    val url = s"$serviceBaseUrl/submissions/application/${applicationId.value}/responsible-individual-decline"
-    
-    http.POST[ResponsibleIndividualVerificationRequest, HttpResponse](url, ResponsibleIndividualVerificationRequest(code)).map { response =>
-      val jsValue: Try[JsValue] = Try(response.json)
-      lazy val badResponse = new RuntimeException("Something went wrong in the response")
+  def responsibleIndividualDecline(code: String)(implicit hc: HeaderCarrier): Future[Either[ErrorDetails, Application]] = metrics.record(api) {
 
-      (response.status, jsValue) match {
-        case (OK, Success(value))                   => Right(value.asOpt[Application].getOrElse(throw badResponse))
-        case (PRECONDITION_FAILED, Success(value))  => Left(value.asOpt[ErrorDetails].getOrElse(throw badResponse))
-        case (CONFLICT, Success(value))             => Left(value.asOpt[ErrorDetails].getOrElse(throw badResponse))
-        case (_, _)                                 => throw badResponse
-      }
-    }
+    val sampleApp: Application = Application(
+      ApplicationId("myAppId"),
+      ClientId("myClientId"),
+      "App name 1",
+      DateTime.now,
+      Some(DateTime.now),
+      None,
+      grantLength = Period.ofDays(547),
+      Environment.PRODUCTION,
+      Some("Description 1"),
+      Set(Collaborator("email", CollaboratorRole.DEVELOPER, UserId.random)),
+      state = ApplicationState.production("loggedInDeveloper.email", ""),
+      access = Standard(redirectUris = List("https://red1", "https://red2"), termsAndConditionsUrl = Some("http://tnc-url.com"))
+    )
+    successful(Right(sampleApp))
+
+    // import play.api.http.Status._
+    
+    // val url = s"$serviceBaseUrl/submissions/responsible-individual-decline"
+    
+    // http.POST[ResponsibleIndividualVerificationRequest, HttpResponse](url, ResponsibleIndividualVerificationRequest(code)).map { response =>
+    //   val jsValue: Try[JsValue] = Try(response.json)
+    //   lazy val badResponse = new RuntimeException("Something went wrong in the response")
+
+    //   (response.status, jsValue) match {
+    //     case (OK, Success(value))                   => Right(value.asOpt[Application].getOrElse(throw badResponse))
+    //     case (PRECONDITION_FAILED, Success(value))  => Left(value.asOpt[ErrorDetails].getOrElse(throw badResponse))
+    //     case (CONFLICT, Success(value))             => Left(value.asOpt[ErrorDetails].getOrElse(throw badResponse))
+    //     case (_, _)                                 => throw badResponse
+    //   }
+    // }
   }
 
   def requestApproval(applicationId: ApplicationId, requestedByEmailAddress: String)(implicit hc: HeaderCarrier): Future[Either[ErrorDetails, Application]] = metrics.record(api) {

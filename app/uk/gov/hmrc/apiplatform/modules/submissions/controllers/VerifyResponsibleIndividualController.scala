@@ -22,6 +22,7 @@ import play.api.mvc.MessagesControllerComponents
 import scala.concurrent.ExecutionContext
 import uk.gov.hmrc.thirdpartydeveloperfrontend.config.ApplicationConfig
 import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.ApplicationController
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.Application
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.ApplicationId
 import play.api.data.Form
 import play.api.data.Forms._
@@ -95,11 +96,11 @@ class VerifyResponsibleIndividualController @Inject() (
   }
 
   def verifyAction(code: String) = Action.async { implicit request =>
-    lazy val success = (verified: Boolean, riVerification: ResponsibleIndividualVerification) => 
+    lazy val success = (verified: Boolean, app: Application) => 
       if(verified)
-        Ok(responsibleIndividualAcceptedView(VerifyResponsibleIndividualController.ViewModel(riVerification.appId, riVerification.appName, code)))
+        Ok(responsibleIndividualAcceptedView(VerifyResponsibleIndividualController.ViewModel(app.id, app.name, code)))
       else
-        Ok(responsibleIndividualDeclinedView(VerifyResponsibleIndividualController.ViewModel(riVerification.appId, riVerification.appName, code)))
+        Ok(responsibleIndividualDeclinedView(VerifyResponsibleIndividualController.ViewModel(app.id, app.name, code)))
 
     def getVerified(verifyAnswer: String): Boolean = {
       verifyAnswer == "yes"
@@ -110,15 +111,9 @@ class VerifyResponsibleIndividualController @Inject() (
       responsibleIndividualVerificationService
         .verifyResponsibleIndividual(code, verified)
         .map(_ match {
-          case Right(riVerification) => success(verified, riVerification)
+          case Right(app) => success(verified, app)
           case Left(ErrorDetails(_, msg)) => Ok(responsibleIndividualErrorView(msg)) 
         })
-      // (
-      //   for {
-      //     // Call into TPA to accept or decline responsible individual
-      //     riVerification    <- ET.fromEitherF(responsibleIndividualVerificationService.verifyResponsibleIndividual(code, verified))
-      //   } yield success(verified, riVerification)
-      // ).fold(identity(_), identity(_))
     }
 
     def handleInvalidForm(form: Form[VerifyResponsibleIndividualController.HasVerifiedForm]) = {

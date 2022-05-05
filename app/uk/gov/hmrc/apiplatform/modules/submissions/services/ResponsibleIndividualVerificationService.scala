@@ -44,14 +44,24 @@ class ResponsibleIndividualVerificationService @Inject()(
     tpaConnector.fetchResponsibleIndividualVerification(code)
   }
 
-  def verifyResponsibleIndividual(code: String, verified: Boolean)(implicit hc: HeaderCarrier): Future[Either[ErrorDetails, ResponsibleIndividualVerification]] = {
-    (
-      for {
-        riVerification <- ET.fromOptionF(tpaConnector.fetchResponsibleIndividualVerification(code), ErrorDetails("RecordNotFound", "Error - can't find responsibleIndividualVerification record"))
-        ticket         = DeskproTicket.createForRequestProductionCredentials("requestedBy.displayedName", "requestedBy.email", riVerification.appName, riVerification.appId)
-        _              = deskproConnector.createTicket(ticket)
-      } yield riVerification
-    )
-    .value
+  def verifyResponsibleIndividual(code: String, verified: Boolean)(implicit hc: HeaderCarrier): Future[Either[ErrorDetails, Application]] = {
+    verified match {
+      case true => // Responsible individual has accepted
+        (
+          for {
+            app            <- ET.fromEitherF(tpaConnector.responsibleIndividualAccept(code))
+            ticket         = DeskproTicket.createForRequestProductionCredentials("requestedBy.displayedName", "requestedBy.email", app.name, app.id)
+            _              = deskproConnector.createTicket(ticket)
+          } yield app
+        )
+        .value
+      case false => // Responsible individual has declined
+        (
+          for {
+            app <- ET.fromEitherF(tpaConnector.responsibleIndividualDecline(code))
+          } yield app
+        )
+        .value
+    }
   }
 }
