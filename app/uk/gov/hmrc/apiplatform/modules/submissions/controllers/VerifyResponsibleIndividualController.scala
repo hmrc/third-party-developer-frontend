@@ -96,11 +96,11 @@ class VerifyResponsibleIndividualController @Inject() (
   }
 
   def verifyAction(code: String) = Action.async { implicit request =>
-    lazy val success = (verified: Boolean, app: Application) => 
+    lazy val success = (verified: Boolean, riVerification: ResponsibleIndividualVerification) => 
       if(verified)
-        Ok(responsibleIndividualAcceptedView(VerifyResponsibleIndividualController.ViewModel(app.id, app.name, code)))
+        Ok(responsibleIndividualAcceptedView(VerifyResponsibleIndividualController.ViewModel(riVerification.appId, riVerification.appName, code)))
       else
-        Ok(responsibleIndividualDeclinedView(VerifyResponsibleIndividualController.ViewModel(app.id, app.name, code)))
+        Ok(responsibleIndividualDeclinedView(VerifyResponsibleIndividualController.ViewModel(riVerification.appId, riVerification.appName, code)))
 
     def getVerified(verifyAnswer: String): Boolean = {
       verifyAnswer == "yes"
@@ -111,7 +111,7 @@ class VerifyResponsibleIndividualController @Inject() (
       responsibleIndividualVerificationService
         .verifyResponsibleIndividual(code, verified)
         .map(_ match {
-          case Right(app) => success(verified, app)
+          case Right(riVerification) => success(verified, riVerification)
           case Left(ErrorDetails(_, msg)) => Ok(responsibleIndividualErrorView(msg)) 
         })
     }
