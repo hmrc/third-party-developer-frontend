@@ -26,6 +26,7 @@ import play.api.mvc.{MessagesControllerComponents, Result}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.service.{ApplicationActionService, ApplicationService, SessionService}
 import uk.gov.hmrc.apiplatform.modules.submissions.views.html._
 import uk.gov.hmrc.apiplatform.modules.common.services.EitherTHelper
+import uk.gov.hmrc.apiplatform.modules.submissions.controllers.CheckAnswersController.ProdCredsRequestReceivedViewModel
 import uk.gov.hmrc.apiplatform.modules.submissions.controllers.SubmissionActionBuilders.SubmissionStatusFilter
 
 import javax.inject.{Inject, Singleton}
@@ -37,6 +38,10 @@ import uk.gov.hmrc.apiplatform.modules.submissions.services.SubmissionService
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.controllers.BadRequestWithErrorMessage
 import uk.gov.hmrc.apiplatform.modules.submissions.services.RequestProductionCredentials
 import uk.gov.hmrc.apiplatform.modules.submissions.controllers.models.AnswersViewModel._
+
+object CheckAnswersController {
+  case class ProdCredsRequestReceivedViewModel(appId: ApplicationId, requesterIsResponsibleIndividual: Boolean)
+}
 
 @Singleton
 class CheckAnswersController @Inject() (
@@ -84,7 +89,15 @@ class CheckAnswersController @Inject() (
     requestProductionCredentials
       .requestProductionCredentials(productionAppId, request.developerSession)
       .map(_ match {
-        case Right(app) => Ok(prodCredsRequestReceivedView(app.id))
+        case Right(app) => {
+          val responsibleIndividualIsRequesterId = request.submission.questionIdsOfInterest.responsibleIndividualIsRequesterId
+          val requesterIsResponsibleIndividual = request.submission.latestInstance.answersToQuestions.get(responsibleIndividualIsRequesterId) match {
+            case Some(SingleChoiceAnswer(answer)) => answer == "Yes"
+            case _ => false
+          }
+          val viewModel = ProdCredsRequestReceivedViewModel(productionAppId, requesterIsResponsibleIndividual)
+          Ok(prodCredsRequestReceivedView(viewModel))
+        }
         case Left(ErrorDetails(_, msg)) => Redirect(routes.CheckAnswersController.checkAnswersPage(productionAppId)).flashing("error" -> msg)
       })
   }

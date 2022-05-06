@@ -44,8 +44,10 @@ class RequestProductionCredentialsSpec extends AsyncHmrcSpec
     val mockSubmissionsConnector: ThirdPartyApplicationSubmissionsConnector = mock[ThirdPartyApplicationSubmissionsConnector]
 
     val email: String = "test@example.com"
+    val name: String = "bob example"
     val developerSession = mock[DeveloperSession]
     when(developerSession.email).thenReturn(email)
+    when(developerSession.displayedName).thenReturn(name)
 
     val mockDeskproConnector = mock[DeskproConnector]
     val underTest = new RequestProductionCredentials(mockSubmissionsConnector, mockDeskproConnector)
@@ -54,7 +56,7 @@ class RequestProductionCredentialsSpec extends AsyncHmrcSpec
   "requestProductionCredentials" should {
     "successfully create a ticket" in new Setup {
       val app = anApplication(developerEmail = email)
-      when(mockSubmissionsConnector.requestApproval(eqTo(applicationId), eqTo(email))(*)).thenReturn(successful(Right(app)))
+      when(mockSubmissionsConnector.requestApproval(eqTo(applicationId), eqTo(name), eqTo(email))(*)).thenReturn(successful(Right(app)))
       when(mockDeskproConnector.createTicket(*)(*)).thenReturn(successful(TicketCreated))
       val result = await(underTest.requestProductionCredentials(applicationId, developerSession))
       
@@ -66,7 +68,7 @@ class RequestProductionCredentialsSpec extends AsyncHmrcSpec
     }
 
     "fails to create a ticket if the application is not found" in new Setup {
-      when(mockSubmissionsConnector.requestApproval(eqTo(applicationId), eqTo(email))(*)).thenThrow(new ApplicationNotFound())
+      when(mockSubmissionsConnector.requestApproval(eqTo(applicationId), eqTo(name), eqTo(email))(*)).thenThrow(new ApplicationNotFound())
       
       intercept[ApplicationNotFound] {
         await(underTest.requestProductionCredentials(applicationId, developerSession))
@@ -75,7 +77,7 @@ class RequestProductionCredentialsSpec extends AsyncHmrcSpec
     }
 
     "fails to create a ticket if application already exists" in new Setup {
-      when(mockSubmissionsConnector.requestApproval(eqTo(applicationId), eqTo(email))(*)).thenThrow(new ApplicationAlreadyExists())
+      when(mockSubmissionsConnector.requestApproval(eqTo(applicationId), eqTo(name), eqTo(email))(*)).thenThrow(new ApplicationAlreadyExists())
       
       intercept[ApplicationAlreadyExists] {
         await(underTest.requestProductionCredentials(applicationId, developerSession))
