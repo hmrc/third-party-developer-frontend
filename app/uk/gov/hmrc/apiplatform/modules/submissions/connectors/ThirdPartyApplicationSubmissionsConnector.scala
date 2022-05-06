@@ -18,6 +18,7 @@ package uk.gov.hmrc.apiplatform.modules.submissions.connectors
 
 import uk.gov.hmrc.thirdpartydeveloperfrontend.connectors.ConnectorMetrics
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications._
+import uk.gov.hmrc.apiplatform.modules.submissions.domain.models.Submission.Id
 import uk.gov.hmrc.apiplatform.modules.submissions.domain.models._
 import uk.gov.hmrc.apiplatform.modules.submissions.domain.services._
 import play.api.libs.json.{JsValue, Json}
@@ -101,7 +102,7 @@ class ThirdPartyApplicationSubmissionsConnector @Inject() (
 
   def responsibleIndividualAccept(code: String)(implicit hc: HeaderCarrier): Future[Either[ErrorDetails, ResponsibleIndividualVerification]] = metrics.record(api) {
 
-    successful(Right(ResponsibleIndividualVerification("code1234", ApplicationId.random, "Application Name")))
+    successful(Right(ResponsibleIndividualVerification(ResponsibleIndividualVerificationId("code1234"), ApplicationId.random, "Application Name", Submission.Id.random, 0)))
 
     //  import play.api.http.Status._
 
@@ -121,7 +122,7 @@ class ThirdPartyApplicationSubmissionsConnector @Inject() (
 
   def responsibleIndividualDecline(code: String)(implicit hc: HeaderCarrier): Future[Either[ErrorDetails, ResponsibleIndividualVerification]] = metrics.record(api) {
 
-    successful(Right(ResponsibleIndividualVerification("code1234", ApplicationId.random, "Application Name")))
+    successful(Right(ResponsibleIndividualVerification(ResponsibleIndividualVerificationId("code1234"), ApplicationId.random, "Application Name", Submission.Id.random, 0)))
 
     // import play.api.http.Status._
     

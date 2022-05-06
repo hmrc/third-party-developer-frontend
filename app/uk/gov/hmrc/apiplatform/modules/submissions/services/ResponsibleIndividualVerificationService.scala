@@ -50,7 +50,7 @@ class ResponsibleIndividualVerificationService @Inject()(
         (
           for {
             riVerification <- ET.fromEitherF(tpaConnector.responsibleIndividualAccept(code))
-            ticket         = DeskproTicket.createForRequestProductionCredentials("requestedBy.displayedName", "requestedBy.email", riVerification.appName, riVerification.appId)
+            ticket         = DeskproTicket.createForRequestProductionCredentials("requestedBy.displayedName", "requestedBy.email", riVerification.applicationName, riVerification.applicationId)
             _              = deskproConnector.createTicket(ticket)
           } yield riVerification
         )

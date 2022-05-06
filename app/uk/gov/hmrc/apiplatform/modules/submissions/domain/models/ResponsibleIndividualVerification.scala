@@ -20,15 +20,30 @@ import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.Applic
 import org.joda.time.DateTime
 import play.api.libs.json.Json
 
-case class ResponsibleIndividualVerification(code: String, appId: ApplicationId, appName: String, dateSent: DateTime)
+case class ResponsibleIndividualVerificationId(value: String) extends AnyVal
+
+object ResponsibleIndividualVerificationId {
+  import play.api.libs.json.Json
+
+  implicit val JsonFormat = Json.valueFormat[ResponsibleIndividualVerificationId]
+}
+
+case class ResponsibleIndividualVerification(
+    id: ResponsibleIndividualVerificationId,
+    applicationId: ApplicationId,
+    submissionId: Submission.Id,
+    submissionInstance: Int,
+    applicationName: String,
+    createdOn: DateTime
+)
 
 object ResponsibleIndividualVerification {
-  def apply(code: String, appId: ApplicationId, appName: String): ResponsibleIndividualVerification = new ResponsibleIndividualVerification(code, appId, appName, DateTime.now())
+  def apply(id: ResponsibleIndividualVerificationId, appId: ApplicationId, appName: String, submissionId: Submission.Id, submissionInstance: Int): ResponsibleIndividualVerification = new ResponsibleIndividualVerification(id, appId, submissionId, submissionInstance, appName, DateTime.now())
 
   import play.api.libs.json.Json
   import play.api.libs.json.JodaReads.DefaultJodaDateTimeReads
   import play.api.libs.json.JodaWrites.JodaDateTimeNumberWrites
   implicit val numberWrites = JodaDateTimeNumberWrites
-  
+
   implicit val formatResponsibleIndividualVerification = Json.format[ResponsibleIndividualVerification]
 }
