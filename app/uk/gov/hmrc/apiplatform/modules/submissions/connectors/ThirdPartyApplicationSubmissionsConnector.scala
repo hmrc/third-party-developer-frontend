@@ -36,7 +36,7 @@ object ThirdPartyApplicationSubmissionsConnector {
   case class OutboundRecordAnswersRequest(answers: List[String])
   implicit val writesOutboundRecordAnswersRequest = Json.writes[OutboundRecordAnswersRequest]
 
-  case class ApprovalsRequest(requestedByEmailAddress: String) 
+  case class ApprovalsRequest(requestedByName: String, requestedByEmailAddress: String)
   implicit val writesApprovalsRequest = Json.writes[ApprovalsRequest]
 
   case class ConfirmSetupCompleteRequest(requesterEmailAddress: String)
@@ -86,12 +86,12 @@ class ThirdPartyApplicationSubmissionsConnector @Inject() (
     }
   }
   
-  def requestApproval(applicationId: ApplicationId, requestedByEmailAddress: String)(implicit hc: HeaderCarrier): Future[Either[ErrorDetails, Application]] = metrics.record(api) {
+  def requestApproval(applicationId: ApplicationId, requestedByName: String, requestedByEmailAddress: String)(implicit hc: HeaderCarrier): Future[Either[ErrorDetails, Application]] = metrics.record(api) {
     import play.api.http.Status._
     
     val url = s"$serviceBaseUrl/approvals/application/${applicationId.value}/request"
     
-    http.POST[ApprovalsRequest, HttpResponse](url, ApprovalsRequest(requestedByEmailAddress)).map { response =>
+    http.POST[ApprovalsRequest, HttpResponse](url, ApprovalsRequest(requestedByName, requestedByEmailAddress)).map { response =>
       val jsValue: Try[JsValue] = Try(response.json)
       lazy val badResponse = new RuntimeException("Something went wrong in the response")
 
