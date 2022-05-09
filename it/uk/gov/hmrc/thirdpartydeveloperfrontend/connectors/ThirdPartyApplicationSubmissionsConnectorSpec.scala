@@ -17,6 +17,9 @@ import uk.gov.hmrc.apiplatform.modules.submissions.domain.services.SubmissionsFr
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.services.ApplicationsJsonFormatters
 import uk.gov.hmrc.apiplatform.modules.submissions.domain.models.ErrorDetails
 import uk.gov.hmrc.apiplatform.modules.submissions.SubmissionsTestData
+import uk.gov.hmrc.apiplatform.modules.submissions.domain.models.{ResponsibleIndividualVerification, ResponsibleIndividualVerificationId}
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.ApplicationId
+import uk.gov.hmrc.apiplatform.modules.submissions.domain.models.Submission
 
 class ThirdPartyApplicationSubmissionsConnectorSpec 
     extends BaseConnectorIntegrationSpec 
@@ -29,6 +32,7 @@ class ThirdPartyApplicationSubmissionsConnectorSpec
     with TestApplications
     with ApplicationsJsonFormatters {
   private val apiKey = UUID.randomUUID().toString
+  private val code = "123456789"
 
   private val stubConfig = Configuration(
     "microservice.services.third-party-application-production.port" -> stubPort,
@@ -47,6 +51,8 @@ class ThirdPartyApplicationSubmissionsConnectorSpec
     implicit val hc = HeaderCarrier()
     
     val connector = app.injector.instanceOf[ThirdPartyApplicationSubmissionsConnector]
+
+    val riVerification = ResponsibleIndividualVerification(ResponsibleIndividualVerificationId(code), ApplicationId.random, "App name", Submission.Id.random, 0)
 
     val extendedSubmission = answeringSubmission.withIncompleteProgress
   }
@@ -298,6 +304,39 @@ class ThirdPartyApplicationSubmissionsConnectorSpec
       intercept[RuntimeException] {
         await(connector.requestApproval(app.id, name, email))
       }
+    }
+  }
+
+  "fetchResponsibleIndividualVerification" should {
+    val url = s"/approvals/responsible-individual-verification/${code}"
+
+    "return NOT FOUND with empty response body" in new Setup {
+      stubFor(
+        get(urlEqualTo(url))
+        .willReturn(
+            aResponse()
+            .withStatus(NOT_FOUND)
+        )
+      )
+
+      val result = await(connector.fetchResponsibleIndividualVerification(code))
+
+      result shouldBe None
+    }
+
+    "return OK with a responsible individual verification body" in new Setup {
+      stubFor(
+        get(urlEqualTo(url))
+        .willReturn(
+            aResponse()
+            .withStatus(OK)
+            .withJsonBody(riVerification)
+        )
+      )
+
+      val result = await(connector.fetchResponsibleIndividualVerification(code))
+
+      result.value shouldBe riVerification
     }
   }
 }

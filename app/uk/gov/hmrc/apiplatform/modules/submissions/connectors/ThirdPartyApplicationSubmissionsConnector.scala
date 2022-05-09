@@ -18,7 +18,6 @@ package uk.gov.hmrc.apiplatform.modules.submissions.connectors
 
 import uk.gov.hmrc.thirdpartydeveloperfrontend.connectors.ConnectorMetrics
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications._
-import uk.gov.hmrc.apiplatform.modules.submissions.domain.models.Submission.Id
 import uk.gov.hmrc.apiplatform.modules.submissions.domain.models._
 import uk.gov.hmrc.apiplatform.modules.submissions.domain.services._
 import play.api.libs.json.{JsValue, Json}
@@ -29,10 +28,7 @@ import uk.gov.hmrc.play.http.metrics.common.API
 import javax.inject.{Inject, Singleton}
 import scala.concurrent.{ExecutionContext, Future}
 import scala.util.{Success, Try}
-import org.joda.time.DateTime
-import java.time.Period
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.UserId
-import scala.concurrent.Future.successful
+
 
 object ThirdPartyApplicationSubmissionsConnector {
   case class Config(serviceBaseUrl: String, apiKey: String)
@@ -96,49 +92,39 @@ class ThirdPartyApplicationSubmissionsConnector @Inject() (
   def fetchResponsibleIndividualVerification(code: String)(implicit hc: HeaderCarrier): Future[Option[ResponsibleIndividualVerification]] =
     metrics.record(api) {
       http.GET[Option[ResponsibleIndividualVerification]](s"$serviceBaseUrl/approvals/responsible-individual-verification/${code}")
-      //Future.successful(Some(ResponsibleIndividualVerification("code1234", ApplicationId.random, "Application Name")))
-      //Future.successful(None)
     }
 
   def responsibleIndividualAccept(code: String)(implicit hc: HeaderCarrier): Future[Either[ErrorDetails, ResponsibleIndividualVerification]] = metrics.record(api) {
 
-    successful(Right(ResponsibleIndividualVerification(ResponsibleIndividualVerificationId("code1234"), ApplicationId.random, "Application Name", Submission.Id.random, 0)))
+    import play.api.http.Status._
 
-    //  import play.api.http.Status._
+    val url = s"$serviceBaseUrl/approvals/responsible-individual-accept"
+    http.POST[ResponsibleIndividualVerificationRequest, HttpResponse](url, ResponsibleIndividualVerificationRequest(code)).map { response =>
+      val jsValue: Try[JsValue] = Try(response.json)
+      lazy val badResponse = new RuntimeException("Something went wrong in the response")
 
-    // val url = s"$serviceBaseUrl/approvals/responsible-individual-accept"
-    // http.POST[ResponsibleIndividualVerificationRequest, HttpResponse](url, ResponsibleIndividualVerificationRequest(code)).map { response =>
-    //   val jsValue: Try[JsValue] = Try(response.json)
-    //   lazy val badResponse = new RuntimeException("Something went wrong in the response")
-
-    //   (response.status, jsValue) match {
-    //     case (OK, Success(value))                   => Right(value.asOpt[ResponsibleIndividualVerification].getOrElse(throw badResponse))
-    //     case (PRECONDITION_FAILED, Success(value))  => Left(value.asOpt[ErrorDetails].getOrElse(throw badResponse))
-    //     case (CONFLICT, Success(value))             => Left(value.asOpt[ErrorDetails].getOrElse(throw badResponse))
-    //     case (_, _)                                 => throw badResponse
-    //   }
-    // }
+      (response.status, jsValue) match {
+        case (OK, Success(value))                   => Right(value.asOpt[ResponsibleIndividualVerification].getOrElse(throw badResponse))
+        case (_, _)                                 => throw badResponse
+      }
+    }
   }
 
   def responsibleIndividualDecline(code: String)(implicit hc: HeaderCarrier): Future[Either[ErrorDetails, ResponsibleIndividualVerification]] = metrics.record(api) {
 
-    successful(Right(ResponsibleIndividualVerification(ResponsibleIndividualVerificationId("code1234"), ApplicationId.random, "Application Name", Submission.Id.random, 0)))
-
-    // import play.api.http.Status._
+    import play.api.http.Status._
     
-    // val url = s"$serviceBaseUrl/approvals/responsible-individual-decline"
+    val url = s"$serviceBaseUrl/approvals/responsible-individual-decline"
     
-    // http.POST[ResponsibleIndividualVerificationRequest, HttpResponse](url, ResponsibleIndividualVerificationRequest(code)).map { response =>
-    //   val jsValue: Try[JsValue] = Try(response.json)
-    //   lazy val badResponse = new RuntimeException("Something went wrong in the response")
+    http.POST[ResponsibleIndividualVerificationRequest, HttpResponse](url, ResponsibleIndividualVerificationRequest(code)).map { response =>
+      val jsValue: Try[JsValue] = Try(response.json)
+      lazy val badResponse = new RuntimeException("Something went wrong in the response")
 
-    //   (response.status, jsValue) match {
-    //     case (OK, Success(value))                   => Right(value.asOpt[ResponsibleIndividualVerification].getOrElse(throw badResponse))
-    //     case (PRECONDITION_FAILED, Success(value))  => Left(value.asOpt[ErrorDetails].getOrElse(throw badResponse))
-    //     case (CONFLICT, Success(value))             => Left(value.asOpt[ErrorDetails].getOrElse(throw badResponse))
-    //     case (_, _)                                 => throw badResponse
-    //   }
-    // }
+      (response.status, jsValue) match {
+        case (OK, Success(value))                   => Right(value.asOpt[ResponsibleIndividualVerification].getOrElse(throw badResponse))
+        case (_, _)                                 => throw badResponse
+      }
+    }
   }
 
   def requestApproval(applicationId: ApplicationId, requestedByName: String, requestedByEmailAddress: String)(implicit hc: HeaderCarrier): Future[Either[ErrorDetails, Application]] = metrics.record(api) {

@@ -18,7 +18,6 @@ package uk.gov.hmrc.apiplatform.modules.submissions.domain.models
 
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.ApplicationId
 import org.joda.time.DateTime
-import play.api.libs.json.Json
 
 case class ResponsibleIndividualVerificationId(value: String) extends AnyVal
 

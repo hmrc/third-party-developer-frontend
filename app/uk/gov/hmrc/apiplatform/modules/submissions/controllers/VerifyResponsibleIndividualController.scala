@@ -22,12 +22,10 @@ import play.api.mvc.MessagesControllerComponents
 import scala.concurrent.ExecutionContext
 import uk.gov.hmrc.thirdpartydeveloperfrontend.config.ApplicationConfig
 import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.ApplicationController
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.Application
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.ApplicationId
 import play.api.data.Form
 import play.api.data.Forms._
 import uk.gov.hmrc.apiplatform.modules.common.services.EitherTHelper
-import uk.gov.hmrc.apiplatform.modules.submissions.services.SubmissionService
 import play.api.mvc.Result
 import uk.gov.hmrc.thirdpartydeveloperfrontend.service.SessionService
 import uk.gov.hmrc.thirdpartydeveloperfrontend.service.ApplicationActionService
@@ -62,7 +60,6 @@ class VerifyResponsibleIndividualController @Inject() (
   val applicationActionService: ApplicationActionService,
   val applicationService: ApplicationService,
   mcc: MessagesControllerComponents,
-  val submissionService: SubmissionService,
   responsibleIndividualVerificationService: ResponsibleIndividualVerificationService,
   verifyResponsibleIndividualView: VerifyResponsibleIndividualView,
   responsibleIndividualAcceptedView: ResponsibleIndividualAcceptedView,
@@ -73,8 +70,7 @@ class VerifyResponsibleIndividualController @Inject() (
   implicit val ec: ExecutionContext,
   val appConfig: ApplicationConfig
 ) extends ApplicationController(mcc)
-  with EitherTHelper[String]
-  with SubmissionActionBuilders {
+  with EitherTHelper[String] {
   
   import cats.implicits._
   import cats.instances.future.catsStdInstancesForFuture
@@ -90,7 +86,7 @@ class VerifyResponsibleIndividualController @Inject() (
     (
       for {
         // Call into TPA to get details from the code supplied - error if not found
-        riVerification   <- ET.fromOptionF(responsibleIndividualVerificationService.fetchResponsibleIndividualVerification(code), Ok(responsibleIndividualErrorView(noRIVerificationRecordError)))
+        riVerification   <- ET.fromOptionF(responsibleIndividualVerificationService.fetchResponsibleIndividualVerification(code), BadRequest(responsibleIndividualErrorView(noRIVerificationRecordError)))
       } yield success(riVerification)
     ).fold(identity(_), identity(_))    
   }
@@ -123,7 +119,7 @@ class VerifyResponsibleIndividualController @Inject() (
       (
         for {
           // Call into TPA to get details from the code supplied - error if not found
-          riVerification   <- ET.fromOptionF(responsibleIndividualVerificationService.fetchResponsibleIndividualVerification(code), Ok(responsibleIndividualErrorView(noRIVerificationRecordError)))
+          riVerification   <- ET.fromOptionF(responsibleIndividualVerificationService.fetchResponsibleIndividualVerification(code), BadRequest(responsibleIndividualErrorView(noRIVerificationRecordError)))
         } yield formValidationError(riVerification)
       ).fold(identity(_), identity(_))    
     }
