@@ -78,6 +78,7 @@ class ResponsibleIndividualVerificationServiceSpec extends AsyncHmrcSpec
       
       val result = await(underTest.verifyResponsibleIndividual(code, true))
       
+      result shouldBe 'Right
       result.right.value shouldBe riVerification
       val ticketCapture = ArgCaptor[DeskproTicket]
       verify(mockDeskproConnector).createTicket(ticketCapture.capture)(*)
@@ -89,6 +90,7 @@ class ResponsibleIndividualVerificationServiceSpec extends AsyncHmrcSpec
       
       val result = await(underTest.verifyResponsibleIndividual(code, false))
       
+      result shouldBe 'Right
       result.right.value shouldBe riVerification
       verify(mockDeskproConnector, never).createTicket(*)(*)
     }

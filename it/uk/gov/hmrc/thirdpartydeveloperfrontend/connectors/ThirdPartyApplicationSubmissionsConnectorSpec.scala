@@ -211,7 +211,7 @@ class ThirdPartyApplicationSubmissionsConnectorSpec
 
       val result = await(connector.confirmSetupComplete(app.id, email))
 
-      result shouldBe Right()
+      result shouldBe 'Right
     }
 
     "return an error if TPA returns error" in new Setup {
@@ -337,6 +337,78 @@ class ThirdPartyApplicationSubmissionsConnectorSpec
       val result = await(connector.fetchResponsibleIndividualVerification(code))
 
       result.value shouldBe riVerification
+    }
+  }
+
+  "responsibleIndividualAccept" should {
+    val url = "/approvals/responsible-individual-accept"
+
+    "return OK with and return the riVerification" in new Setup {
+      stubFor(
+        post(urlEqualTo(url))
+        .withJsonRequestBody(ResponsibleIndividualVerificationRequest(code))
+        .willReturn(
+          aResponse()
+            .withStatus(OK)
+            .withJsonBody(riVerification)
+        )
+      )
+
+      val result = await(connector.responsibleIndividualAccept(code))
+
+      result shouldBe 'Right
+      result.right.get shouldBe riVerification
+    }
+
+    "return with a BAD_REQUEST error" in new Setup {
+      stubFor(
+        post(urlEqualTo(url))
+        .withJsonRequestBody(ResponsibleIndividualVerificationRequest(code))
+        .willReturn(
+          aResponse()
+            .withStatus(BAD_REQUEST)
+        )
+      )
+
+      intercept[RuntimeException] {
+        await(connector.responsibleIndividualAccept(code))
+      }
+    }
+  }
+
+  "responsibleIndividualDecline" should {
+    val url = "/approvals/responsible-individual-decline"
+
+    "return OK with and return the riVerification" in new Setup {
+      stubFor(
+        post(urlEqualTo(url))
+        .withJsonRequestBody(ResponsibleIndividualVerificationRequest(code))
+        .willReturn(
+          aResponse()
+            .withStatus(OK)
+            .withJsonBody(riVerification)
+        )
+      )
+
+      val result = await(connector.responsibleIndividualDecline(code))
+
+      result shouldBe 'Right
+      result.right.get shouldBe riVerification
+    }
+
+    "return with a BAD_REQUEST error" in new Setup {
+      stubFor(
+        post(urlEqualTo(url))
+        .withJsonRequestBody(ResponsibleIndividualVerificationRequest(code))
+        .willReturn(
+          aResponse()
+            .withStatus(BAD_REQUEST)
+        )
+      )
+
+      intercept[RuntimeException] {
+        await(connector.responsibleIndividualDecline(code))
+      }
     }
   }
 }
