@@ -54,11 +54,11 @@ class RequestProductionCredentialsSpec extends AsyncHmrcSpec
   }
 
   "requestProductionCredentials" should {
-    "successfully create a ticket" in new Setup {
+    "successfully create a ticket if requester is responsible individual" in new Setup {
       val app = anApplication(developerEmail = email)
       when(mockSubmissionsConnector.requestApproval(eqTo(applicationId), eqTo(name), eqTo(email))(*)).thenReturn(successful(Right(app)))
       when(mockDeskproConnector.createTicket(*)(*)).thenReturn(successful(TicketCreated))
-      val result = await(underTest.requestProductionCredentials(applicationId, developerSession))
+      val result = await(underTest.requestProductionCredentials(applicationId, developerSession, true))
       
       result.right.value shouldBe app
 
@@ -67,11 +67,21 @@ class RequestProductionCredentialsSpec extends AsyncHmrcSpec
       ticketCapture.value.subject shouldBe "New application submitted for checking"
     }
 
+    "not create a ticket if requester is not responsible individual" in new Setup {
+      val app = anApplication(developerEmail = email)
+      when(mockSubmissionsConnector.requestApproval(eqTo(applicationId), eqTo(name), eqTo(email))(*)).thenReturn(successful(Right(app)))
+      val result = await(underTest.requestProductionCredentials(applicationId, developerSession, false))
+
+      result.right.value shouldBe app
+
+      verify(mockDeskproConnector, never).createTicket(*)(*)
+    }
+
     "fails to create a ticket if the application is not found" in new Setup {
       when(mockSubmissionsConnector.requestApproval(eqTo(applicationId), eqTo(name), eqTo(email))(*)).thenThrow(new ApplicationNotFound())
       
       intercept[ApplicationNotFound] {
-        await(underTest.requestProductionCredentials(applicationId, developerSession))
+        await(underTest.requestProductionCredentials(applicationId, developerSession, true))
       }
       verify(mockDeskproConnector, never).createTicket(*)(*)
     }
@@ -80,7 +90,7 @@ class RequestProductionCredentialsSpec extends AsyncHmrcSpec
       when(mockSubmissionsConnector.requestApproval(eqTo(applicationId), eqTo(name), eqTo(email))(*)).thenThrow(new ApplicationAlreadyExists())
       
       intercept[ApplicationAlreadyExists] {
-        await(underTest.requestProductionCredentials(applicationId, developerSession))
+        await(underTest.requestProductionCredentials(applicationId, developerSession, true))
       }
       verify(mockDeskproConnector, never).createTicket(*)(*)
     }

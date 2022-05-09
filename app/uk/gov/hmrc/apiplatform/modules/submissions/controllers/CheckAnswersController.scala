@@ -86,15 +86,15 @@ class CheckAnswersController @Inject() (
   }
 
   def checkAnswersAction(productionAppId: ApplicationId) = withApplicationAndSubmissionInSpecifiedState(ApplicationStateFilter.inTesting, RoleFilter.isAdminRole, SubmissionStatusFilter.answeredCompletely)(redirectToGetProdCreds(productionAppId))(productionAppId) { implicit request =>
+    val responsibleIndividualIsRequesterId = request.submission.questionIdsOfInterest.responsibleIndividualIsRequesterId
+    val requesterIsResponsibleIndividual = request.submission.latestInstance.answersToQuestions.get(responsibleIndividualIsRequesterId) match {
+      case Some(SingleChoiceAnswer(answer)) => answer == "Yes"
+      case _ => false
+    }
     requestProductionCredentials
-      .requestProductionCredentials(productionAppId, request.developerSession)
+      .requestProductionCredentials(productionAppId, request.developerSession, requesterIsResponsibleIndividual)
       .map(_ match {
         case Right(app) => {
-          val responsibleIndividualIsRequesterId = request.submission.questionIdsOfInterest.responsibleIndividualIsRequesterId
-          val requesterIsResponsibleIndividual = request.submission.latestInstance.answersToQuestions.get(responsibleIndividualIsRequesterId) match {
-            case Some(SingleChoiceAnswer(answer)) => answer == "Yes"
-            case _ => false
-          }
           val viewModel = ProdCredsRequestReceivedViewModel(productionAppId, requesterIsResponsibleIndividual)
           Ok(prodCredsRequestReceivedView(viewModel))
         }
