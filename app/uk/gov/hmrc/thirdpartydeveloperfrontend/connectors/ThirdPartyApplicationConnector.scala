@@ -20,6 +20,7 @@ import akka.actor.ActorSystem
 import akka.pattern.FutureTimeoutSupport
 import uk.gov.hmrc.thirdpartydeveloperfrontend.config.ApplicationConfig
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain._
+import uk.gov.hmrc.apiplatform.modules.submissions.domain.models.ResponsibleIndividualVerification
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.ApplicationNameValidationJson.{ApplicationNameValidationRequest, ApplicationNameValidationResult}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.connectors.DeleteCollaboratorRequest
