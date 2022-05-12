@@ -16,21 +16,24 @@
 
 package uk.gov.hmrc.thirdpartydeveloperfrontend.connectors
 
+import akka.http.scaladsl.model.HttpRequest
+import play.api.Logging
 import uk.gov.hmrc.thirdpartydeveloperfrontend.config.ApplicationConfig
 import uk.gov.hmrc.thirdpartydeveloperfrontend.connectors.ThirdPartyDeveloperConnector.UnregisteredUserCreationRequest
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.connectors._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers._
+
 import javax.inject.{Inject, Singleton}
 import play.api.http.Status._
 import play.api.libs.json.{Format, Json}
 import uk.gov.hmrc.http._
 import uk.gov.hmrc.http.HttpClient
 import uk.gov.hmrc.play.http.metrics.common.API
+
 import scala.concurrent.{ExecutionContext, Future}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.emailpreferences.EmailPreferences
 import uk.gov.hmrc.thirdpartydeveloperfrontend.connectors.ThirdPartyDeveloperConnector.RemoveMfaRequest
-
 import uk.gov.hmrc.http.HttpReads.Implicits._
 
 
@@ -55,7 +58,7 @@ object ThirdPartyDeveloperConnector {
 
 @Singleton
 class ThirdPartyDeveloperConnector @Inject()(http: HttpClient, encryptedJson: EncryptedJson, config: ApplicationConfig, metrics: ConnectorMetrics
-                                            )(implicit val ec: ExecutionContext) extends CommonResponseHandlers {
+                                            )(implicit val ec: ExecutionContext) extends CommonResponseHandlers with Logging {
 
   import ThirdPartyDeveloperConnector._
   import ThirdPartyDeveloperConnector.JsonFormatters._
@@ -221,6 +224,41 @@ class ThirdPartyDeveloperConnector @Inject()(http: HttpClient, encryptedJson: En
 
   def deleteSession(sessionId: String)(implicit hc: HeaderCarrier): Future[Int] = metrics.record(api) {
     http.DELETE[ErrorOr[HttpResponse]](s"$serviceBaseUrl/session/$sessionId")
+      .map {
+        case Right(response) => response.status
+        // treat session not found as successfully destroyed
+        case Left(UpstreamErrorResponse(_,NOT_FOUND,_,_)) => NO_CONTENT
+        case Left(err) => throw err
+      }
+  }
+
+  def createDeviceSession(userId: UserId)(implicit hc: HeaderCarrier): Future[Option[DeviceSession]] = metrics.record(api) {
+      http.POST[String ,ErrorOr[DeviceSession]](s"$serviceBaseUrl/device-session/user/${userId.toString}", "")
+      .map {
+        case Right(response) => Some(response)
+        // treat session not found as successfully destroyed
+        case Left(UpstreamErrorResponse(_,NOT_FOUND,_,_)) => {
+          logger.error(s"Error creating Device Session - NOT FOUND returned from TPD")
+          None
+        }
+        case Left(err) => {
+          logger.error(s"Error creating Device Session - ${err.getMessage()}")
+          throw err
+        }
+
+      }
+  }
+
+  def fetchDeviceSession(deviceSessionId: String, userId: UserId)(implicit hc: HeaderCarrier): Future[DeviceSession] = metrics.record(api) {
+    http.GET[Option[DeviceSession]](s"$serviceBaseUrl/device-session/$deviceSessionId/user/${userId.toString}")
+      .map {
+        case Some(deviceSession) => deviceSession
+        case None => throw new DeviceSessionInvalid
+      }
+  }
+
+  def deleteDeviceSession(deviceSessionId: String)(implicit hc: HeaderCarrier): Future[Int] = metrics.record(api) {
+    http.DELETE[ErrorOr[HttpResponse]](s"$serviceBaseUrl/device-session/$deviceSessionId")
       .map {
         case Right(response) => response.status
         // treat session not found as successfully destroyed
