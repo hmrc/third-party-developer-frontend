@@ -94,7 +94,7 @@ class ThirdPartyApplicationSubmissionsConnector @Inject() (
       http.GET[Option[ResponsibleIndividualVerification]](s"$serviceBaseUrl/approvals/responsible-individual-verification/${code}")
     }
 
-  def responsibleIndividualAccept(code: String)(implicit hc: HeaderCarrier): Future[Either[ErrorDetails, ResponsibleIndividualVerification]] = metrics.record(api) {
+  def responsibleIndividualAccept(code: String)(implicit hc: HeaderCarrier): Future[Either[ErrorDetails, ResponsibleIndividualVerificationWithDetails]] = metrics.record(api) {
 
     import play.api.http.Status._
 
@@ -104,7 +104,7 @@ class ThirdPartyApplicationSubmissionsConnector @Inject() (
       lazy val badResponse = new RuntimeException("Something went wrong in the response")
 
       (response.status, jsValue) match {
-        case (OK, Success(value))                   => Right(value.asOpt[ResponsibleIndividualVerification].getOrElse(throw badResponse))
+        case (OK, Success(value))                   => Right(value.asOpt[ResponsibleIndividualVerificationWithDetails].getOrElse(throw badResponse))
         case (_, _)                                 => throw badResponse
       }
     }

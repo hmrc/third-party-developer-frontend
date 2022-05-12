@@ -17,10 +17,11 @@
 package uk.gov.hmrc.apiplatform.modules.submissions.services
 
 import uk.gov.hmrc.thirdpartydeveloperfrontend.connectors.DeskproConnector
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.ApplicationId
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.{ApplicationId, ResponsibleIndividual}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.DeveloperSession
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.AsyncHmrcSpec
+
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future.successful
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.TestApplications
@@ -32,8 +33,7 @@ import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.ApplicationAlreadyExists
 import uk.gov.hmrc.apiplatform.modules.submissions.connectors.ThirdPartyApplicationSubmissionsConnector
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.connectors.DeskproTicket
 import org.mockito.captor.ArgCaptor
-import uk.gov.hmrc.apiplatform.modules.submissions.domain.models.{ResponsibleIndividualVerification, ResponsibleIndividualVerificationId}
-import uk.gov.hmrc.apiplatform.modules.submissions.domain.models.Submission
+import uk.gov.hmrc.apiplatform.modules.submissions.domain.models.{ResponsibleIndividualVerification, ResponsibleIndividualVerificationId, ResponsibleIndividualVerificationWithDetails, Submission}
 
 class ResponsibleIndividualVerificationServiceSpec extends AsyncHmrcSpec 
   with CollaboratorTracker 
@@ -47,6 +47,8 @@ class ResponsibleIndividualVerificationServiceSpec extends AsyncHmrcSpec
 
     val code = "12345678"
     val riVerification = ResponsibleIndividualVerification(ResponsibleIndividualVerificationId(code), ApplicationId.random, "App name", Submission.Id.random, 0)
+    val responsibleIndividual = ResponsibleIndividual.build("bob example", "bob@example.com")
+    val riVerificationWithDetails = ResponsibleIndividualVerificationWithDetails(riVerification, responsibleIndividual)
 
     val mockDeskproConnector = mock[DeskproConnector]
     val underTest = new ResponsibleIndividualVerificationService(mockSubmissionsConnector, mockDeskproConnector)
@@ -73,7 +75,7 @@ class ResponsibleIndividualVerificationServiceSpec extends AsyncHmrcSpec
 
   "verifyResponsibleIndividual" should {
     "successfully return a riVerification record for accept" in new Setup {
-      when(mockSubmissionsConnector.responsibleIndividualAccept(eqTo(code))(*)).thenReturn(successful(Right(riVerification)))
+      when(mockSubmissionsConnector.responsibleIndividualAccept(eqTo(code))(*)).thenReturn(successful(Right(riVerificationWithDetails)))
       when(mockDeskproConnector.createTicket(*)(*)).thenReturn(successful(TicketCreated))
       
       val result = await(underTest.verifyResponsibleIndividual(code, true))

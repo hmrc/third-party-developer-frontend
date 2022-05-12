@@ -10,16 +10,15 @@ import play.api.Mode
 import play.api.{Application => PlayApplication}
 import com.github.tomakehurst.wiremock.client.WireMock._
 import play.api.http.Status._
+import play.api.libs.json.Json
 import uk.gov.hmrc.apiplatform.modules.submissions.connectors.ThirdPartyApplicationSubmissionsConnector
 import uk.gov.hmrc.apiplatform.modules.submissions.connectors.ThirdPartyApplicationSubmissionsConnector._
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.apiplatform.modules.submissions.domain.services.SubmissionsFrontendJsonFormatters
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.services.ApplicationsJsonFormatters
-import uk.gov.hmrc.apiplatform.modules.submissions.domain.models.ErrorDetails
+import uk.gov.hmrc.apiplatform.modules.submissions.domain.models.{ErrorDetails, ResponsibleIndividualVerification, ResponsibleIndividualVerificationId, ResponsibleIndividualVerificationWithDetails, Submission}
 import uk.gov.hmrc.apiplatform.modules.submissions.SubmissionsTestData
-import uk.gov.hmrc.apiplatform.modules.submissions.domain.models.{ResponsibleIndividualVerification, ResponsibleIndividualVerificationId}
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.ApplicationId
-import uk.gov.hmrc.apiplatform.modules.submissions.domain.models.Submission
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.{ApplicationId, ResponsibleIndividual}
 
 class ThirdPartyApplicationSubmissionsConnectorSpec 
     extends BaseConnectorIntegrationSpec 
@@ -53,6 +52,8 @@ class ThirdPartyApplicationSubmissionsConnectorSpec
     val connector = app.injector.instanceOf[ThirdPartyApplicationSubmissionsConnector]
 
     val riVerification = ResponsibleIndividualVerification(ResponsibleIndividualVerificationId(code), ApplicationId.random, "App name", Submission.Id.random, 0)
+    val responsibleIndividual = ResponsibleIndividual.build("bob example", "bob@example.com")
+    val riVerificationWithDetails = ResponsibleIndividualVerificationWithDetails(riVerification, responsibleIndividual)
 
     val extendedSubmission = answeringSubmission.withIncompleteProgress
   }
@@ -342,22 +343,23 @@ class ThirdPartyApplicationSubmissionsConnectorSpec
 
   "responsibleIndividualAccept" should {
     val url = "/approvals/responsible-individual-accept"
+    implicit val writes = Json.writes[ResponsibleIndividualVerificationWithDetails]
 
-    "return OK with and return the riVerification" in new Setup {
+    "return OK with and return the riVerificationWithDetails" in new Setup {
       stubFor(
         post(urlEqualTo(url))
         .withJsonRequestBody(ResponsibleIndividualVerificationRequest(code))
         .willReturn(
           aResponse()
             .withStatus(OK)
-            .withJsonBody(riVerification)
+            .withJsonBody(riVerificationWithDetails)
         )
       )
 
       val result = await(connector.responsibleIndividualAccept(code))
 
       result shouldBe 'Right
-      result.right.get shouldBe riVerification
+      result.right.get shouldBe riVerificationWithDetails
     }
 
     "return with a BAD_REQUEST error" in new Setup {

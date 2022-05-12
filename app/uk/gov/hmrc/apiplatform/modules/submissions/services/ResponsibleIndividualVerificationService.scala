@@ -22,13 +22,13 @@ import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.Develope
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.connectors.DeskproTicket
 import uk.gov.hmrc.thirdpartydeveloperfrontend.connectors.DeskproConnector
+
 import scala.concurrent.Future
 import scala.concurrent.ExecutionContext
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.Application
-import uk.gov.hmrc.apiplatform.modules.submissions.domain.models.ErrorDetails
+import uk.gov.hmrc.apiplatform.modules.submissions.domain.models.{ErrorDetails, ResponsibleIndividualVerification, ResponsibleIndividualVerificationWithDetails}
 import uk.gov.hmrc.apiplatform.modules.common.services.EitherTHelper
 import uk.gov.hmrc.apiplatform.modules.submissions.connectors.ThirdPartyApplicationSubmissionsConnector
-import uk.gov.hmrc.apiplatform.modules.submissions.domain.models.ResponsibleIndividualVerification
 
 @Singleton
 class ResponsibleIndividualVerificationService @Inject()(
@@ -49,11 +49,10 @@ class ResponsibleIndividualVerificationService @Inject()(
       case true => // Responsible individual has accepted
         (
           for {
-            riVerification <- ET.fromEitherF(tpaConnector.responsibleIndividualAccept(code))
-
-            // TODO - fill in requester name and email.  To be done as part of seperate story.
-            ticket         = DeskproTicket.createForRequestProductionCredentials("requestedBy.displayedName", "requestedBy@email.com", riVerification.applicationName, riVerification.applicationId)
-            _              = deskproConnector.createTicket(ticket)
+            riVerificationWithDetails <- ET.fromEitherF(tpaConnector.responsibleIndividualAccept(code))
+            riVerification             = riVerificationWithDetails.verification
+            ticket                     = createDeskproTicket(riVerificationWithDetails)
+            _                          = deskproConnector.createTicket(ticket)
           } yield riVerification
         )
         .value
@@ -65,5 +64,16 @@ class ResponsibleIndividualVerificationService @Inject()(
         )
         .value
     }
+  }
+
+  private def createDeskproTicket(riVerificationWithDetails: ResponsibleIndividualVerificationWithDetails) = {
+    val responsibleIndividual = riVerificationWithDetails.responsibleIndividual
+    val name = responsibleIndividual.fullName.value
+    val email = responsibleIndividual.emailAddress.value
+    val verification = riVerificationWithDetails.verification
+    val appName = verification.applicationName
+    val appId = verification.applicationId
+
+    DeskproTicket.createForRequestProductionCredentials(name, email, appName, appId)
   }
 }
