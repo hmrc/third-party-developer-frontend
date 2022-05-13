@@ -22,13 +22,16 @@ import uk.gov.hmrc.thirdpartydeveloperfrontend.connectors.ThirdPartyDeveloperCon
 import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.connectors.UpdateLoggedInStateRequest
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.LoggedInState
+
 import javax.inject.{Inject, Singleton}
 import play.api.data.Form
 import play.api.data.Forms._
 import play.api.libs.crypto.CookieSigner
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents, Result}
+import uk.gov.hmrc.apiplatform.modules.mfa.connectors.ThirdPartyDeveloperMfaConnector
+import uk.gov.hmrc.apiplatform.modules.mfa.service.{MFAService, MfaMandateService}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.qr.{OtpAuthUri, QRCode}
-import uk.gov.hmrc.thirdpartydeveloperfrontend.service.{MfaMandateService, MFAService, SessionService}
+import uk.gov.hmrc.thirdpartydeveloperfrontend.service.SessionService
 import views.html.protectaccount._
 
 import scala.concurrent.{ExecutionContext, Future}
@@ -39,6 +42,7 @@ import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.FormKeys
 @Singleton
 class ProtectAccount @Inject()(
   val thirdPartyDeveloperConnector: ThirdPartyDeveloperConnector,
+  val thirdPartyDeveloperMfaConnector: ThirdPartyDeveloperMfaConnector,
   val otpAuthUri: OtpAuthUri,
   val mfaService: MFAService,
   val sessionService: SessionService,
@@ -63,7 +67,7 @@ class ProtectAccount @Inject()(
   val qrCode = QRCode(scale)
 
   def getQrCode: Action[AnyContent] = atLeastPartLoggedInEnablingMfaAction { implicit request =>
-    thirdPartyDeveloperConnector.createMfaSecret(request.userId).map(secret => {
+    thirdPartyDeveloperMfaConnector.createMfaSecret(request.userId).map(secret => {
       val uri = otpAuthUri(secret.toLowerCase, "HMRC Developer Hub", request.developerSession.email)
       val qrImg = qrCode.generateDataImageBase64(uri.toString)
       Ok(protectAccountSetupView(secret.toLowerCase().grouped(4).mkString(" "), qrImg))

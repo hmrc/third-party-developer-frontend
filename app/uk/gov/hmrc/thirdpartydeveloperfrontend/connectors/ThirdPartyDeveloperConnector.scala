@@ -16,32 +16,26 @@
 
 package uk.gov.hmrc.thirdpartydeveloperfrontend.connectors
 
-import akka.http.scaladsl.model.HttpRequest
 import play.api.Logging
+import play.api.http.Status._
+import play.api.libs.json.{Format, Json}
+import uk.gov.hmrc.http.HttpReads.Implicits._
+import uk.gov.hmrc.http.{HttpClient, _}
+import uk.gov.hmrc.play.http.metrics.common.API
 import uk.gov.hmrc.thirdpartydeveloperfrontend.config.ApplicationConfig
-import uk.gov.hmrc.thirdpartydeveloperfrontend.connectors.ThirdPartyDeveloperConnector.UnregisteredUserCreationRequest
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.connectors._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers._
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.emailpreferences.EmailPreferences
 
 import javax.inject.{Inject, Singleton}
-import play.api.http.Status._
-import play.api.libs.json.{Format, Json}
-import uk.gov.hmrc.http._
-import uk.gov.hmrc.http.HttpClient
-import uk.gov.hmrc.play.http.metrics.common.API
-
 import scala.concurrent.{ExecutionContext, Future}
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.emailpreferences.EmailPreferences
-import uk.gov.hmrc.thirdpartydeveloperfrontend.connectors.ThirdPartyDeveloperConnector.RemoveMfaRequest
-import uk.gov.hmrc.http.HttpReads.Implicits._
 
 
 object ThirdPartyDeveloperConnector {
   private[connectors] case class UnregisteredUserCreationRequest(email: String)
 
-  case class RemoveMfaRequest(removedBy: String)
-  case class CreateMfaResponse(secret: String)
+
   case class EmailForResetResponse(email: String)
 
   case class FindUserIdRequest(email: String)
@@ -60,8 +54,8 @@ object ThirdPartyDeveloperConnector {
 class ThirdPartyDeveloperConnector @Inject()(http: HttpClient, encryptedJson: EncryptedJson, config: ApplicationConfig, metrics: ConnectorMetrics
                                             )(implicit val ec: ExecutionContext) extends CommonResponseHandlers with Logging {
 
-  import ThirdPartyDeveloperConnector._
   import ThirdPartyDeveloperConnector.JsonFormatters._
+  import ThirdPartyDeveloperConnector._
 
   def authenticate(loginRequest: LoginRequest)(implicit hc: HeaderCarrier): Future[UserAuthenticationResponse] = metrics.record(api) {
     encryptedJson.secretRequest(
@@ -232,41 +226,6 @@ class ThirdPartyDeveloperConnector @Inject()(http: HttpClient, encryptedJson: En
       }
   }
 
-  def createDeviceSession(userId: UserId)(implicit hc: HeaderCarrier): Future[Option[DeviceSession]] = metrics.record(api) {
-      http.POST[String ,ErrorOr[DeviceSession]](s"$serviceBaseUrl/device-session/user/${userId.toString}", "")
-      .map {
-        case Right(response) => Some(response)
-        // treat session not found as successfully destroyed
-        case Left(UpstreamErrorResponse(_,NOT_FOUND,_,_)) => {
-          logger.error(s"Error creating Device Session - NOT FOUND returned from TPD")
-          None
-        }
-        case Left(err) => {
-          logger.error(s"Error creating Device Session - ${err.getMessage()}")
-          throw err
-        }
-
-      }
-  }
-
-  def fetchDeviceSession(deviceSessionId: String, userId: UserId)(implicit hc: HeaderCarrier): Future[DeviceSession] = metrics.record(api) {
-    http.GET[Option[DeviceSession]](s"$serviceBaseUrl/device-session/$deviceSessionId/user/${userId.toString}")
-      .map {
-        case Some(deviceSession) => deviceSession
-        case None => throw new DeviceSessionInvalid
-      }
-  }
-
-  def deleteDeviceSession(deviceSessionId: String)(implicit hc: HeaderCarrier): Future[Int] = metrics.record(api) {
-    http.DELETE[ErrorOr[HttpResponse]](s"$serviceBaseUrl/device-session/$deviceSessionId")
-      .map {
-        case Right(response) => response.status
-        // treat session not found as successfully destroyed
-        case Left(UpstreamErrorResponse(_,NOT_FOUND,_,_)) => NO_CONTENT
-        case Left(err) => throw err
-      }
-  }
-
   def updateRoles(userId: UserId, roles: AccountSetupRequest)(implicit hc: HeaderCarrier): Future[Developer] =
     metrics.record(api) {
       http.PUT[AccountSetupRequest,Developer](s"$serviceBaseUrl/developer/account-setup/${userId.value}/roles", roles)
@@ -298,40 +257,6 @@ class ThirdPartyDeveloperConnector @Inject()(http: HttpClient, encryptedJson: En
     http.POST[Set[String], Seq[User]](s"$serviceBaseUrl/developers/get-by-emails", emails)
   }
 
-  def createMfaSecret(userId: UserId)(implicit hc: HeaderCarrier): Future[String] = {
-    implicit val CreateMfaResponseReads = Json.reads[CreateMfaResponse]
-
-    metrics.record(api) {
-      http.POSTEmpty[CreateMfaResponse](s"$serviceBaseUrl/developer/${userId.value}/mfa")
-      .map(_.secret)
-    }
-  }
-
-  def verifyMfa(userId: UserId, code: String)(implicit hc: HeaderCarrier): Future[Boolean] = {
-    metrics.record(api) {
-      http.POST[VerifyMfaRequest, ErrorOrUnit](s"$serviceBaseUrl/developer/${userId.value}/mfa/verification", VerifyMfaRequest(code))
-      .map {
-        case Right(()) => true
-        case Left(UpstreamErrorResponse(_,BAD_REQUEST,_,_)) => false
-        case Left(err) => throw err
-      }
-    }
-  }
-
-  def enableMfa(userId: UserId)(implicit hc: HeaderCarrier): Future[Unit] = {
-    metrics.record(api) {
-      http.PUT[String, ErrorOrUnit](s"$serviceBaseUrl/developer/${userId.value}/mfa/enable", "")
-      .map(throwOrUnit)
-    }
-  }
-
-  def removeMfa(userId: UserId, email: String)(implicit hc: HeaderCarrier): Future[Unit] = {
-    implicit val RemoveMfaRequestFormat = Json.format[RemoveMfaRequest]
-    metrics.record(api) {
-      http.POST[RemoveMfaRequest, ErrorOrUnit](s"$serviceBaseUrl/developer/${userId.value}/mfa/remove", RemoveMfaRequest(email))
-      .map(throwOrUnit)
-    }
-  }
 
   def removeEmailPreferences(userId: UserId)(implicit hc: HeaderCarrier): Future[Boolean] = metrics.record(api) {
       http.DELETE[ErrorOrUnit](s"$serviceBaseUrl/developer/${userId.value}/email-preferences")

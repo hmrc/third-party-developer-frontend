@@ -14,16 +14,17 @@
  * limitations under the License.
  */
 
-package uk.gov.hmrc.thirdpartydeveloperfrontend.service
+package uk.gov.hmrc.apiplatform.modules.mfa.service
 
-import uk.gov.hmrc.thirdpartydeveloperfrontend.connectors.ThirdPartyDeveloperConnector
 import play.api.http.Status.INTERNAL_SERVER_ERROR
+import uk.gov.hmrc.apiplatform.modules.mfa.connectors.ThirdPartyDeveloperMfaConnector
 import uk.gov.hmrc.http.{HeaderCarrier, UpstreamErrorResponse}
+import uk.gov.hmrc.thirdpartydeveloperfrontend.connectors.ThirdPartyDeveloperConnector
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.UserId
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.AsyncHmrcSpec
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future.{failed, successful}
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.UserId
 
 class MFAServiceSpec extends AsyncHmrcSpec {
 
@@ -31,7 +32,7 @@ class MFAServiceSpec extends AsyncHmrcSpec {
     val userId = UserId.random
     val email = "bob.smith@example.com"
     val totpCode = "12345678"
-    val connector = mock[ThirdPartyDeveloperConnector]
+    val connector = mock[ThirdPartyDeveloperMfaConnector]
 
     when(connector.enableMfa(eqTo(userId))(*)).thenReturn(successful(()))
     when(connector.removeMfa(eqTo(userId), eqTo(email))(*)).thenReturn(successful(()))

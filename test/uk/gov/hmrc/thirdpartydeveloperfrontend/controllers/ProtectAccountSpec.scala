@@ -17,7 +17,6 @@
 package uk.gov.hmrc.thirdpartydeveloperfrontend.controllers
 
 import java.net.URI
-
 import uk.gov.hmrc.thirdpartydeveloperfrontend.builder.DeveloperBuilder
 import uk.gov.hmrc.thirdpartydeveloperfrontend.config.ErrorHandler
 import uk.gov.hmrc.thirdpartydeveloperfrontend.connectors.ThirdPartyDeveloperConnector
@@ -32,8 +31,9 @@ import play.api.mvc.{AnyContentAsFormUrlEncoded, Result}
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
 import play.filters.csrf.CSRF.TokenProvider
+import uk.gov.hmrc.apiplatform.modules.mfa.connectors.ThirdPartyDeveloperMfaConnector
+import uk.gov.hmrc.apiplatform.modules.mfa.service.{MFAResponse, MFAService, MfaMandateService}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.qr.{OtpAuthUri, QRCode}
-import uk.gov.hmrc.thirdpartydeveloperfrontend.service.{MfaMandateService, MFAResponse, MFAService}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.WithCSRFAddToken
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.WithLoggedInSession._
 import views.html.protectaccount._
@@ -44,7 +44,6 @@ import scala.concurrent.Future.successful
 import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.profile.ProtectAccount
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.UserId
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.LocalUserIdTracker
-
 import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.profile.routes.ProtectAccount
 
 class ProtectAccountSpec extends BaseControllerSpec with WithCSRFAddToken with DeveloperBuilder with LocalUserIdTracker {
@@ -71,6 +70,7 @@ class ProtectAccountSpec extends BaseControllerSpec with WithCSRFAddToken with D
 
     val underTest: ProtectAccount = new ProtectAccount(
       mock[ThirdPartyDeveloperConnector],
+      mock[ThirdPartyDeveloperMfaConnector],
       mock[OtpAuthUri],
       mock[MFAService],
       sessionServiceMock,
@@ -114,7 +114,7 @@ class ProtectAccountSpec extends BaseControllerSpec with WithCSRFAddToken with D
   trait SetupSuccessfulStart2SV extends Setup {
     when(underTest.otpAuthUri.apply(secret.toLowerCase(), issuer, loggedInDeveloper.email)).thenReturn(otpUri)
     when(underTest.qrCode.generateDataImageBase64(otpUri.toString)).thenReturn(qrImage)
-    when(underTest.thirdPartyDeveloperConnector.createMfaSecret(eqTo(loggedInDeveloper.userId))(*))
+    when(underTest.thirdPartyDeveloperMfaConnector.createMfaSecret(eqTo(loggedInDeveloper.userId))(*))
       .thenReturn(successful(secret))
   }
 
