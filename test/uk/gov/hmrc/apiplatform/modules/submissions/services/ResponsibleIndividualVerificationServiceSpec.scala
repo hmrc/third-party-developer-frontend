@@ -70,7 +70,7 @@ class ResponsibleIndividualVerificationServiceSpec extends AsyncHmrcSpec
   }
 
   "verifyResponsibleIndividual" should {
-    "successfully return a riVerification record for accept" in new Setup {
+    "successfully return a riVerification record for accept and create a deskpro ticket with correct details" in new Setup {
       when(mockSubmissionsConnector.responsibleIndividualAccept(eqTo(code))(*)).thenReturn(successful(Right(riVerificationWithDetails)))
       when(mockDeskproConnector.createTicket(*)(*)).thenReturn(successful(TicketCreated))
       
@@ -80,7 +80,12 @@ class ResponsibleIndividualVerificationServiceSpec extends AsyncHmrcSpec
       result.right.value shouldBe riVerification
       val ticketCapture = ArgCaptor[DeskproTicket]
       verify(mockDeskproConnector).createTicket(ticketCapture.capture)(*)
-      ticketCapture.value.subject shouldBe "New application submitted for checking"
+      val deskproTicket = ticketCapture.value
+      deskproTicket.subject shouldBe "New application submitted for checking"
+      deskproTicket.name shouldBe responsibleIndividual.fullName.value
+      deskproTicket.email shouldBe responsibleIndividual.emailAddress.value
+      deskproTicket.message should include (riVerification.applicationName)
+      deskproTicket.referrer should include (s"/application/${riVerification.applicationId.value}/check-answers")
     }
 
     "successfully return a riVerification record for decline" in new Setup {
