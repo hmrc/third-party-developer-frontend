@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.profile
+package uk.gov.hmrc.apiplatform.modules.mfa.controllers.profile
 
 import uk.gov.hmrc.thirdpartydeveloperfrontend.config.ApplicationConfig
 import uk.gov.hmrc.thirdpartydeveloperfrontend.config.ErrorHandler
@@ -95,7 +95,7 @@ class ProtectAccount @Inject()(
 
     def logonAndComplete(): Result = {
       thirdPartyDeveloperConnector.updateSessionLoggedInState(request.sessionId, UpdateLoggedInStateRequest(LoggedInState.LOGGED_IN))
-      Redirect(profile.routes.ProtectAccount.getProtectAccountCompletedPage())
+      Redirect(uk.gov.hmrc.apiplatform.modules.mfa.controllers.profile.routes.ProtectAccount.getProtectAccountCompletedPage())
     }
 
     def invalidCode(form: ProtectAccountForm): Result = {
@@ -109,7 +109,7 @@ class ProtectAccount @Inject()(
 
     ProtectAccountForm.form.bindFromRequest.fold(form => {
       Future.successful(BadRequest(protectAccountAccessCodeView(form)))
-  },
+    },
       (form: ProtectAccountForm) => {
         for {
           mfaResponse <- mfaService.enableMfa(request.userId, form.accessCode)
@@ -131,8 +131,8 @@ class ProtectAccount @Inject()(
     },
       form => {
         form.removeConfirm match {
-          case Some("Yes") => Future.successful(Redirect(profile.routes.ProtectAccount.get2SVRemovalAccessCodePage()))
-          case _ => Future.successful(Redirect(profile.routes.ProtectAccount.getProtectAccount()))
+          case Some("Yes") => Future.successful(Redirect(uk.gov.hmrc.apiplatform.modules.mfa.controllers.profile.routes.ProtectAccount.get2SVRemovalAccessCodePage()))
+          case _ => Future.successful(Redirect(uk.gov.hmrc.apiplatform.modules.mfa.controllers.profile.routes.ProtectAccount.getProtectAccount()))
         }
       })
   }
@@ -148,7 +148,7 @@ class ProtectAccount @Inject()(
       form => {
         mfaService.removeMfa(request.userId, request.developerSession.email, form.accessCode).map(r =>
           r.totpVerified match {
-            case true => Redirect(profile.routes.ProtectAccount.get2SVRemovalCompletePage())
+            case true => Redirect(uk.gov.hmrc.apiplatform.modules.mfa.controllers.profile.routes.ProtectAccount.get2SVRemovalCompletePage())
             case _ =>
               val protectAccountForm = ProtectAccountForm.form.fill(form)
                 .withError("accessCode", "You have entered an incorrect access code")

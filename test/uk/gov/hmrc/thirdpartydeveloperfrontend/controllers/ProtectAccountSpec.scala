@@ -32,6 +32,7 @@ import play.api.test.FakeRequest
 import play.api.test.Helpers._
 import play.filters.csrf.CSRF.TokenProvider
 import uk.gov.hmrc.apiplatform.modules.mfa.connectors.ThirdPartyDeveloperMfaConnector
+import uk.gov.hmrc.apiplatform.modules.mfa.controllers.profile.ProtectAccount
 import uk.gov.hmrc.apiplatform.modules.mfa.service.{MFAResponse, MFAService, MfaMandateService}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.qr.{OtpAuthUri, QRCode}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.WithCSRFAddToken
@@ -41,10 +42,8 @@ import views.html.protectaccount._
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 import scala.concurrent.Future.successful
-import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.profile.ProtectAccount
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.UserId
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.LocalUserIdTracker
-import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.profile.routes.ProtectAccount
 
 class ProtectAccountSpec extends BaseControllerSpec with WithCSRFAddToken with DeveloperBuilder with LocalUserIdTracker {
 
@@ -237,7 +236,7 @@ class ProtectAccountSpec extends BaseControllerSpec with WithCSRFAddToken with D
         private val result = addToken(underTest.protectAccount())(request)
 
         status(result) shouldBe SEE_OTHER
-        redirectLocation(result) shouldBe Some(ProtectAccount.getProtectAccountCompletedPage().url)
+        redirectLocation(result) shouldBe Some(uk.gov.hmrc.apiplatform.modules.mfa.controllers.profile.routes.ProtectAccount.getProtectAccountCompletedPage().url)
 
         verify(underTest.thirdPartyDeveloperConnector)
           .updateSessionLoggedInState(eqTo(sessionId), eqTo(UpdateLoggedInStateRequest(LoggedInState.LOGGED_IN)))(*)
@@ -268,7 +267,7 @@ class ProtectAccountSpec extends BaseControllerSpec with WithCSRFAddToken with D
         private val result = addToken(underTest.remove2SV())(request)
 
         status(result) shouldBe SEE_OTHER
-        redirectLocation(result) shouldBe Some(ProtectAccount.get2SVRemovalCompletePage().url)
+        redirectLocation(result) shouldBe Some(uk.gov.hmrc.apiplatform.modules.mfa.controllers.profile.routes.ProtectAccount.get2SVRemovalCompletePage().url)
       }
     }
   }
