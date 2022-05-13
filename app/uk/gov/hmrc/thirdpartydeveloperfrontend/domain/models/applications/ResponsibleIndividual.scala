@@ -28,4 +28,6 @@ object ResponsibleIndividual {
   implicit val emailAddressFormat = Json.valueFormat[EmailAddress]
 
   implicit val format: Format[ResponsibleIndividual] = Json.format[ResponsibleIndividual]
+
+  def build(name: String, email: String) = ResponsibleIndividual(Name(name), EmailAddress(email))
 }

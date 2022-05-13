@@ -30,6 +30,8 @@ import uk.gov.hmrc.http.UpstreamErrorResponse
 import uk.gov.hmrc.http.HttpReads.Implicits._
 import uk.gov.hmrc.apiplatform.modules.common.services.ApplicationLogger
 
+import scala.util.Success
+
 @Singleton
 class DeskproConnector @Inject()(http: HttpClient, config: ApplicationConfig, metrics: ConnectorMetrics)(implicit val ec: ExecutionContext) 
 extends CommonResponseHandlers with ApplicationLogger {
@@ -41,6 +43,9 @@ extends CommonResponseHandlers with ApplicationLogger {
 
     http.POST[DeskproTicket,ErrorOrUnit](requestUrl("/deskpro/ticket"), deskproTicket)
     .map(throwOr(TicketCreated))
+    .andThen {
+      case Success(_) => logger.info(s"Deskpro ticket '${deskproTicket.subject}' created successfully")
+    }
     .recover {
       case NonFatal(e) =>
         logger.error(s"Deskpro ticket creation failed for: $deskproTicket", e)
