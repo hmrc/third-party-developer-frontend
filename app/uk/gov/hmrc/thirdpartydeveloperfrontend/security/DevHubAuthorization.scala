@@ -110,8 +110,13 @@ trait ExtendedDevHubAuthorization extends DevHubAuthorization {
     Future.successful(Redirect(uri).withNewSession)
   }
 
+
   def withSessionCookie(result: Result, sessionId: String): Result = {
     result.withCookies(createCookie(sessionId))
+  }
+
+  def withSessionAndDeviceCookies(result: Result, sessionId: String, deviceSessionId: String): Result = {
+    result.withCookies(createCookie(sessionId), createDeviceCookie(deviceSessionId))
   }
 
   def extractSessionIdFromCookie(request: RequestHeader): Option[String] = {

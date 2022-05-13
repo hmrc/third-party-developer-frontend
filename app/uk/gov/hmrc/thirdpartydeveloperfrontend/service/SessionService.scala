@@ -19,7 +19,7 @@ package uk.gov.hmrc.thirdpartydeveloperfrontend.service
 import uk.gov.hmrc.apiplatform.modules.mfa.service.MfaMandateService
 import uk.gov.hmrc.thirdpartydeveloperfrontend.connectors.ThirdPartyDeveloperConnector
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.connectors.{LoginRequest, TotpAuthenticationRequest, UserAuthenticationResponse}
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.{Session, SessionInvalid}
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.{Session, SessionInvalid, UserId}
 
 import javax.inject.{Inject, Singleton}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.repositories.FlowRepository
@@ -32,12 +32,12 @@ import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.InvalidEmail
 class SessionService @Inject()(val thirdPartyDeveloperConnector: ThirdPartyDeveloperConnector,
                                val mfaMandateService: MfaMandateService,
                                val flowRepository: FlowRepository)(implicit val ec: ExecutionContext) {
-  def authenticate(emailAddress: String, password: String)(implicit hc: HeaderCarrier): Future[UserAuthenticationResponse] = {
+  def authenticate(emailAddress: String, password: String)(implicit hc: HeaderCarrier): Future[(UserAuthenticationResponse, UserId)] = {
     for {
       coreUser <- thirdPartyDeveloperConnector.findUserId(emailAddress).map(_.getOrElse(throw new InvalidEmail))
       mfaMandatedForUser <- mfaMandateService.isMfaMandatedForUser(coreUser.id)
       response <- thirdPartyDeveloperConnector.authenticate(LoginRequest(emailAddress, password, mfaMandatedForUser))
-    } yield response
+    } yield (response, coreUser.id)
   }
 
   def authenticateTotp(emailAddress: String, totp: String, nonce: String)(implicit hc: HeaderCarrier): Future[Session] = {
