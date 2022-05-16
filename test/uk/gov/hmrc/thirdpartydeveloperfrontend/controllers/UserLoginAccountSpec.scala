@@ -40,11 +40,11 @@ import scala.concurrent.Future._
 import views.html.UserDidNotAdd2SVView
 import views.html.Add2SVView
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.LocalUserIdTracker
-import _root_.uk.gov.hmrc.thirdpartydeveloperfrontend.mocks.connectors.ThirdPartyDeveloperConnectorMockModule
+import _root_.uk.gov.hmrc.thirdpartydeveloperfrontend.mocks.connectors.{ThirdPartyDeveloperConnectorMockModule, ThirdPartyDeveloperMfaConnectorMockModule}
 import uk.gov.hmrc.apiplatform.modules.mfa.service.MfaMandateService
 
 class UserLoginAccountSpec extends BaseControllerSpec with WithCSRFAddToken with DeveloperBuilder with LocalUserIdTracker {
-  trait Setup extends SessionServiceMock with ThirdPartyDeveloperConnectorMockModule {
+  trait Setup extends SessionServiceMock with ThirdPartyDeveloperConnectorMockModule with ThirdPartyDeveloperMfaConnectorMockModule {
     val developer = buildDeveloper()
     val session = Session(UUID.randomUUID().toString, developer, LoggedInState.LOGGED_IN)
     val user = DeveloperSession(session)
@@ -76,6 +76,7 @@ class UserLoginAccountSpec extends BaseControllerSpec with WithCSRFAddToken with
       mock[SubscriptionFieldsService],
       TPDMock.aMock,
       sessionServiceMock,
+      TPDMFAMock.aMock,
       mcc,
       mfaMandateService,
       cookieSigner,
@@ -99,7 +100,7 @@ class UserLoginAccountSpec extends BaseControllerSpec with WithCSRFAddToken with
                          resultShowAdminMfaMandateMessage: Future[Boolean]): Unit = {
 
       when(underTest.sessionService.authenticate(eqTo(email), eqTo(password))(*))
-        .thenReturn(result)
+        .thenReturn(result.map(x => (x, user.developer.userId)) )
 
       when(underTest.mfaMandateService.showAdminMfaMandatedMessage(*[UserId])(*))
         .thenReturn(resultShowAdminMfaMandateMessage)
