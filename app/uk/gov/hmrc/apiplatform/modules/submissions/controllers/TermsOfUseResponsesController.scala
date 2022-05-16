@@ -59,7 +59,7 @@ class TermsOfUseResponsesController @Inject()(
 
   import TermsOfUseResponsesController.TermsOfUseResponsesViewModel
 
-  def termsOfUseResponsesPage(applicationId: ApplicationId) = checkActionForProduction(SupportsSubscriptions, AdministratorOnly)(applicationId) { implicit request =>
+  def termsOfUseResponsesPage(applicationId: ApplicationId) = checkActionForApprovedApps(SupportsSubscriptions, AdministratorOnly)(applicationId) { implicit request =>
     val failed = (err: String) => BadRequestWithErrorMessage(err)
     
     val success = (viewModel: TermsOfUseResponsesViewModel) => {
