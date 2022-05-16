@@ -108,6 +108,15 @@ class TermsOfUseResponsesControllerSpec
       status(result) shouldBe OK
     }
 
+    "succeed when application is in pre-production" in new Setup {
+      givenAppInState(ApplicationState.preProduction("requestedBy"))
+      SubmissionServiceMock.FetchLatestExtendedSubmission.thenReturns(grantedSubmission.withCompletedProgress())
+
+      val result = underTest.termsOfUseResponsesPage(appId)(loggedInRequest.withCSRFToken)
+
+      status(result) shouldBe OK
+    }
+
     "fails when application is not in production" in new Setup {
       givenAppInState(ApplicationState.pendingGatekeeperApproval("requestedBy"))
       SubmissionServiceMock.FetchLatestExtendedSubmission.thenReturns(grantedSubmission.withCompletedProgress())
