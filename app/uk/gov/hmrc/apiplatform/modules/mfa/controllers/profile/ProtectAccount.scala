@@ -146,9 +146,10 @@ class ProtectAccount @Inject()(
       Future.successful(BadRequest(protectAccountRemovalAccessCodeView(form)))
     },
       form => {
+
         mfaService.removeMfa(request.userId, request.developerSession.email, form.accessCode).map(r =>
           r.totpVerified match {
-            case true => Redirect(uk.gov.hmrc.apiplatform.modules.mfa.controllers.profile.routes.ProtectAccount.get2SVRemovalCompletePage())
+            case true => removeDeviceSessionCookieFromResult(Redirect(uk.gov.hmrc.apiplatform.modules.mfa.controllers.profile.routes.ProtectAccount.get2SVRemovalCompletePage()))
             case _ =>
               val protectAccountForm = ProtectAccountForm.form.fill(form)
                 .withError("accessCode", "You have entered an incorrect access code")

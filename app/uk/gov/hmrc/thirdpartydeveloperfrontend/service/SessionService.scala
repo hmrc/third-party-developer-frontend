@@ -28,15 +28,17 @@ import uk.gov.hmrc.http.HeaderCarrier
 import scala.concurrent.{ExecutionContext, Future}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.InvalidEmail
 
+import java.util.UUID
+
 @Singleton
 class SessionService @Inject()(val thirdPartyDeveloperConnector: ThirdPartyDeveloperConnector,
                                val mfaMandateService: MfaMandateService,
                                val flowRepository: FlowRepository)(implicit val ec: ExecutionContext) {
-  def authenticate(emailAddress: String, password: String)(implicit hc: HeaderCarrier): Future[(UserAuthenticationResponse, UserId)] = {
+  def authenticate(emailAddress: String, password: String, deviceSessionId: Option[UUID])(implicit hc: HeaderCarrier): Future[(UserAuthenticationResponse, UserId)] = {
     for {
       coreUser <- thirdPartyDeveloperConnector.findUserId(emailAddress).map(_.getOrElse(throw new InvalidEmail))
       mfaMandatedForUser <- mfaMandateService.isMfaMandatedForUser(coreUser.id)
-      response <- thirdPartyDeveloperConnector.authenticate(LoginRequest(emailAddress, password, mfaMandatedForUser))
+      response <- thirdPartyDeveloperConnector.authenticate(LoginRequest(emailAddress, password, mfaMandatedForUser, deviceSessionId))
     } yield (response, coreUser.id)
   }
 

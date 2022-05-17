@@ -75,6 +75,6 @@ class UserLogoutAccount @Inject() (
     destroySession(request)
       .getOrElse(Future.successful(()))
       .map(_ => Ok(logoutConfirmationView()).withNewSession)
-      .map(removeCookieFromResult)
+      .map(removeSessionCookieFromResult)
   }
 }
