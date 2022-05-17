@@ -16,34 +16,30 @@
 
 package uk.gov.hmrc.thirdpartydeveloperfrontend.controllers
 
-import uk.gov.hmrc.thirdpartydeveloperfrontend.config.ApplicationConfig
-import uk.gov.hmrc.thirdpartydeveloperfrontend.config.ErrorHandler
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain._
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.connectors.UserAuthenticationResponse
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.{DeveloperSession, LoggedInState, UserId}
-
-import javax.inject.{Inject, Singleton}
 import play.api.libs.crypto.CookieSigner
-import play.api.mvc.{Action, AnyContent, Cookie, MessagesControllerComponents, Request, Result, Session => PlaySession}
+import play.api.mvc.{Action, AnyContent, MessagesControllerComponents, Request, Result, Session => PlaySession}
 import uk.gov.hmrc.apiplatform.modules.common.services.ApplicationLogger
 import uk.gov.hmrc.apiplatform.modules.mfa.connectors.ThirdPartyDeveloperMfaConnector
 import uk.gov.hmrc.apiplatform.modules.mfa.controllers.profile.ProtectAccountForm
 import uk.gov.hmrc.apiplatform.modules.mfa.models.DeviceSession
 import uk.gov.hmrc.apiplatform.modules.mfa.service.MfaMandateService
-import uk.gov.hmrc.thirdpartydeveloperfrontend.service._
-import uk.gov.hmrc.thirdpartydeveloperfrontend.service.AuditAction._
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.connectors.UpdateLoggedInStateRequest
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.play.audit.http.connector.AuditResult
+import uk.gov.hmrc.thirdpartydeveloperfrontend.config.{ApplicationConfig, ErrorHandler}
+import uk.gov.hmrc.thirdpartydeveloperfrontend.connectors.ThirdPartyDeveloperConnector
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain._
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.connectors.UserAuthenticationResponse
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.controllers.MfaMandateDetails
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.{DeveloperSession, UserId}
+import uk.gov.hmrc.thirdpartydeveloperfrontend.service.AuditAction._
+import uk.gov.hmrc.thirdpartydeveloperfrontend.service._
 import views.html._
 import views.html.protectaccount._
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.controllers.MfaMandateDetails
-
-import scala.concurrent.{ExecutionContext, Future}
-import scala.concurrent.Future.successful
-import uk.gov.hmrc.thirdpartydeveloperfrontend.connectors.ThirdPartyDeveloperConnector
 
 import java.util.UUID
+import javax.inject.{Inject, Singleton}
+import scala.concurrent.Future.successful
+import scala.concurrent.{ExecutionContext, Future}
 
 trait Auditing {
   val auditService: AuditService
@@ -115,8 +111,6 @@ class UserLoginAccount @Inject()(val auditService: AuditService,
                                 userAuthenticationResponse: UserAuthenticationResponse,
                                 playSession: PlaySession,
                                 userId: UserId)(implicit request: Request[AnyContent]): Future[Result] = {
-
-    println(s"******** userAuthenticationResponse : $userAuthenticationResponse")
 
     // In each case retain the Play session so that 'access_uri' query param, if set, is used at the end of the 2SV reminder flow
     (userAuthenticationResponse.session, userAuthenticationResponse.accessCodeRequired) match {
@@ -234,8 +228,8 @@ class UserLoginAccount @Inject()(val auditService: AuditService,
   }
 
   def confirm2SVHelp(): Action[AnyContent] = loggedOutAction { implicit request =>
-    import cats.implicits._
     import cats.data.OptionT
+    import cats.implicits._
 
     val email = request.session.get("emailAddress").getOrElse("")
 

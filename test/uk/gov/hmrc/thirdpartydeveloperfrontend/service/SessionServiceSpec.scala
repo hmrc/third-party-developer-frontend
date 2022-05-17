@@ -30,6 +30,8 @@ import scala.concurrent.Future.{failed, successful}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.UserId
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.LocalUserIdTracker
 
+import java.util.UUID
+
 class SessionServiceSpec extends AsyncHmrcSpec with DeveloperBuilder with LocalUserIdTracker {
   trait Setup {
     implicit val hc: HeaderCarrier = HeaderCarrier()
@@ -44,8 +46,9 @@ class SessionServiceSpec extends AsyncHmrcSpec with DeveloperBuilder with LocalU
     val nonce = "ABC-123"
     val developer = buildDeveloper(emailAddress = email)
     val sessionId = "sessionId"
+    val deviceSessionId = UUID.randomUUID()
     val session = Session(sessionId, developer, LoggedInState.LOGGED_IN)
-    val userAuthenticationResponse = UserAuthenticationResponse(accessCodeRequired = false, session = Some(session))
+    val userAuthenticationResponse = UserAuthenticationResponse(accessCodeRequired = false, mfaEnabled = false, session = Some(session))
   }
 
   "authenticate" should {
@@ -55,10 +58,10 @@ class SessionServiceSpec extends AsyncHmrcSpec with DeveloperBuilder with LocalU
       when(underTest.thirdPartyDeveloperConnector.authenticate(*)(*))
         .thenReturn(successful(userAuthenticationResponse))
 
-      await(underTest.authenticate(email, password)) shouldBe (userAuthenticationResponse, userId)
+      await(underTest.authenticate(email, password, Some(deviceSessionId))) shouldBe (userAuthenticationResponse, userId)
 
       verify(underTest.mfaMandateService).isMfaMandatedForUser(userId)
-      verify(underTest.thirdPartyDeveloperConnector).authenticate(LoginRequest(email, password, mfaMandatedForUser = false))
+      verify(underTest.thirdPartyDeveloperConnector).authenticate(LoginRequest(email, password, mfaMandatedForUser = false, Some(deviceSessionId)))
     }
 
     "return the user authentication response from the connector when the authentication succeeds and mfaMandatedForUser is true" in new Setup {
@@ -67,10 +70,10 @@ class SessionServiceSpec extends AsyncHmrcSpec with DeveloperBuilder with LocalU
       when(underTest.thirdPartyDeveloperConnector.authenticate(*)(*))
         .thenReturn(successful(userAuthenticationResponse))
 
-      await(underTest.authenticate(email, password)) shouldBe (userAuthenticationResponse, userId)
+      await(underTest.authenticate(email, password, Some(deviceSessionId))) shouldBe (userAuthenticationResponse, userId)
 
       verify(underTest.mfaMandateService).isMfaMandatedForUser(userId)
-      verify(underTest.thirdPartyDeveloperConnector).authenticate(LoginRequest(email, password, mfaMandatedForUser = true))
+      verify(underTest.thirdPartyDeveloperConnector).authenticate(LoginRequest(email, password, mfaMandatedForUser = true, Some(deviceSessionId)))
     }
 
     "propagate the exception when the connector fails" in new Setup {
@@ -79,7 +82,7 @@ class SessionServiceSpec extends AsyncHmrcSpec with DeveloperBuilder with LocalU
       when(underTest.thirdPartyDeveloperConnector.authenticate(*)(*))
         .thenThrow(new RuntimeException("this one"))
 
-      intercept[RuntimeException](await(underTest.authenticate(email, password))).getMessage() shouldBe "this one"
+      intercept[RuntimeException](await(underTest.authenticate(email, password, Some(deviceSessionId)))).getMessage() shouldBe "this one"
     }
   }
 
