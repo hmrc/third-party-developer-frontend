@@ -56,7 +56,7 @@ class TermsOfUseServiceSpec extends HmrcSpec {
   val version1_2 = "1.2"
   val appWithNoAgreements = buildApplication()
   val checkInfoAgreement = TermsOfUseAgreement(email, timestamp, version1_2)
-  val stdAppAgreement = TermsOfUseAcceptance(responsibleIndividual, timestamp, Submission.Id.random)
+  val stdAppAgreement = TermsOfUseAcceptance(responsibleIndividual, timestamp, Submission.Id.random, 0)
   val appWithCheckInfoAgreements = buildApplication(Some(List(checkInfoAgreement)))
   val appWithStdAppAgreements = buildApplication(None, Some(List(stdAppAgreement)))
   val nonStdApp = buildApplication().copy(access = Privileged())
