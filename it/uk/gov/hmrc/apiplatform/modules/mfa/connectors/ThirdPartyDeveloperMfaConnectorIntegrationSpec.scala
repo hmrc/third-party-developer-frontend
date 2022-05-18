@@ -53,7 +53,7 @@ class ThirdPartyDeveloperMfaConnectorIntegrationSpec extends BaseConnectorIntegr
 
     val userPassword = "password1!"
     val sessionId = "sessionId"
-    val loginRequest = LoginRequest(userEmail, userPassword, mfaMandatedForUser = false)
+    val loginRequest = LoginRequest(userEmail, userPassword, mfaMandatedForUser = false, None)
     val deviceSessionId = UUID.randomUUID()
     val deviceSession = DeviceSession(deviceSessionId, userId)
     val createDeviceSessionUrl = s"/device-session/user/${userId.value}"

@@ -132,6 +132,7 @@ class LoginCSRFIntegrationSpec extends BaseConnectorIntegrationSpec with GuiceOn
                 .withBody(s"""
                    |{
                    |  "accessCodeRequired": false,
+                   |  "mfaEnabled": false,
                    |  "session": {
                    |    "sessionId": "$sessionId",
                    |    "loggedInState": "LOGGED_IN",
@@ -171,6 +172,7 @@ class LoginCSRFIntegrationSpec extends BaseConnectorIntegrationSpec with GuiceOn
                 .withBody(s"""
                    |{
                    |  "accessCodeRequired": true,
+                   |  "mfaEnabled": true,
                    |  "nonce": "123456"
                    |}""".stripMargin)
             )

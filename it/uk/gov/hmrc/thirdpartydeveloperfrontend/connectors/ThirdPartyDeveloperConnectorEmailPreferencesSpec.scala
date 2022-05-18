@@ -53,7 +53,7 @@ class ThirdPartyDeveloperConnectorEmailPreferencesSpec extends BaseConnectorInte
     val userEmail = "thirdpartydeveloper@example.com"
     val userPassword = "password1!"
     val sessionId = "sessionId"
-    val loginRequest = LoginRequest(userEmail, userPassword, mfaMandatedForUser = false)
+    val loginRequest = LoginRequest(userEmail, userPassword, mfaMandatedForUser = false, None)
     val totp = "123456"
     val nonce = "ABC-123"
     val totpAuthenticationRequest = TotpAuthenticationRequest(userEmail, totp, nonce)
