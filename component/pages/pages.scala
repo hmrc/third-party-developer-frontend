@@ -158,11 +158,13 @@ case object Setup2svEnterAccessCodePage extends FormPage {
   override val pageHeading: String = "Enter your access code"
   override val url: String = s"${Env.host}/developer/profile/protect-account/access-code"
 
-  def enterAccessCode(accessCode: String) = {
-    val formData = Map("accessCode" -> accessCode)
+  def enterAccessCode(accessCode: String, rememberMe: Boolean = false) = {
+    val formData = Map("accessCode" -> accessCode, "rememberMe" -> s"$rememberMe")
 
     Form.populate(formData)
   }
+
+
 }
 
 case object ProtectAccountCompletePage extends FormPage {

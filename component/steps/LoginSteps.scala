@@ -26,7 +26,7 @@ import org.scalatest.matchers.should.Matchers
 import pages._
 import play.api.http.Status._
 import play.api.libs.json.{Format, Json}
-import stubs.{DeveloperStub, Stubs}
+import stubs.{DeveloperStub, MfaStub, Stubs}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.builder.DeveloperBuilder
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.connectors.{LoginRequest, PasswordResetRequest, UserAuthenticationResponse, VerifyMfaRequest}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.{Developer, LoggedInState, Session}
@@ -81,39 +81,39 @@ class LoginSteps extends ScalaDsl with EN with Matchers with NavigationSugar wit
 
     setupGettingDeveloperByEmail(developer)
 
-    setupGettingMfaSecret(developer)
+    MfaStub.setupGettingMfaSecret(developer)
 
-    setupVerificationOfAccessCode(developer)
+    MfaStub.setupVerificationOfAccessCode(developer)
 
     setUpGetCombinedApis()
 
-    setupEnablingMfa(developer)
+    MfaStub.setupEnablingMfa(developer)
   }
 
-  private def setupVerificationOfAccessCode(developer: Developer): Unit = {
-    stubFor(
-      post(urlPathEqualTo(s"/developer/${developer.userId.value}/mfa/verification"))
-        .withRequestBody(equalTo(Json.toJson(VerifyMfaRequest(accessCode)).toString()))
-        .willReturn(aResponse()
-          .withStatus(NO_CONTENT)
-        ))
-  }
+//  private def setupVerificationOfAccessCode(developer: Developer): Unit = {
+//    stubFor(
+//      post(urlPathEqualTo(s"/developer/${developer.userId.value}/mfa/verification"))
+//        .withRequestBody(equalTo(Json.toJson(VerifyMfaRequest(accessCode)).toString()))
+//        .willReturn(aResponse()
+//          .withStatus(NO_CONTENT)
+//        ))
+//  }
 
-  private def setupEnablingMfa(developer: Developer): Unit = {
-    stubFor(
-      put(urlPathEqualTo(s"/developer/${developer.userId.value}/mfa/enable"))
-        .willReturn(aResponse()
-          .withStatus(OK)
-        ))
-  }
-
-  private def setupGettingMfaSecret(developer: Developer): Unit = {
-    stubFor(
-      post(urlPathEqualTo(s"/developer/${developer.userId.value}/mfa"))
-        .willReturn(aResponse()
-          .withStatus(OK)
-          .withBody(Json.toJson(MfaSecret("mySecret")).toString())))
-  }
+//  private def setupEnablingMfa(developer: Developer): Unit = {
+//    stubFor(
+//      put(urlPathEqualTo(s"/developer/${developer.userId.value}/mfa/enable"))
+//        .willReturn(aResponse()
+//          .withStatus(OK)
+//        ))
+//  }
+//
+//  private def setupGettingMfaSecret(developer: Developer): Unit = {
+//    stubFor(
+//      post(urlPathEqualTo(s"/developer/${developer.userId.value}/mfa"))
+//        .willReturn(aResponse()
+//          .withStatus(OK)
+//          .withBody(Json.toJson(MfaSecret("mySecret")).toString())))
+//  }
 
   private def setupGettingDeveloperByEmail(developer: Developer): Unit = {
     stubFor(get(urlPathEqualTo("/developer"))
@@ -130,15 +130,13 @@ class LoginSteps extends ScalaDsl with EN with Matchers with NavigationSugar wit
     .withBody("[]")))
   }
 
+
+
   Given("""^'(.*)' session is uplifted to LoggedIn$""") { email: String =>
     if (email != TestContext.developer.email) {
       throw new IllegalArgumentException(s"Can only know how to uplift ${TestContext.developer.email}'s session")
     }
-
-    val session = Session(TestContext.sessionIdForMfaMandatingUser, TestContext.developer, LoggedInState.LOGGED_IN)
-
-    Stubs.setupRequest(s"/session/${TestContext.sessionIdForMfaMandatingUser}", OK, Json.toJson(session).toString())
-    Stubs.setupDeleteRequest(s"/session/${TestContext.sessionIdForMfaMandatingUser}", OK)
+    MfaStub.setupMfaMandated()
   }
 
   Given("""^I fill in the login form with$""") { (data: DataTable) =>
@@ -173,10 +171,6 @@ class LoginSteps extends ScalaDsl with EN with Matchers with NavigationSugar wit
     }
   }
 
-  When("""^I enter the correct access code and continue$""") {
-    Setup2svEnterAccessCodePage.enterAccessCode(accessCode)
-    Setup2svEnterAccessCodePage.clickContinue()
-  }
 
   Then("""^I should be sent an email with a link to reset for '(.*)'$""") { email : String =>
     DeveloperStub.verifyResetPassword(PasswordResetRequest(email))
@@ -206,7 +200,7 @@ class LoginSteps extends ScalaDsl with EN with Matchers with NavigationSugar wit
     val sessionId = "sessionId_" + loggedInState.toString
 
     val session = Session(sessionId, developer, loggedInState)
-    val userAuthenticationResponse = UserAuthenticationResponse(accessCodeRequired = false, mfaEnabled= true, session = Some(session))
+    val userAuthenticationResponse = UserAuthenticationResponse(accessCodeRequired = false, mfaEnabled= false, session = Some(session))
 
     val mfaMandatedForUser = loggedInState == LoggedInState.PART_LOGGED_IN_ENABLING_MFA
 
