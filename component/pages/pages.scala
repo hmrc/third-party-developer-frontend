@@ -132,12 +132,27 @@ case class SignInPage(override val pageHeading: String = "Sign in") extends Form
 
 case object RecommendMfaPage extends FormPage {
   override val pageHeading: String = "Add 2-step verification"
-  override val url: String = s"${Env.host}/developer/login"
+  override val url: String = s"${Env.host}/developer/login/2sv-recommendation"
 }
 
 case object RecommendMfaSkipAcknowledgePage extends FormPage {
   override val pageHeading: String = "Add 2-step verification"
   override val url: String = s"${Env.host}/developer/login/2SV-not-set"
+}
+
+case object Login2svEnterAccessCodePage extends FormPage {
+  def clickContinue() = {
+    click on id("submit")
+  }
+
+  override val pageHeading: String = "Enter your access code"
+  override val url: String = s"${Env.host}/developer/login-totp"
+
+  def enterAccessCode(accessCode: String, rememberMe: Boolean = false) = {
+    val formData = Map("accessCode" -> accessCode, "rememberMe" -> s"$rememberMe")
+
+    Form.populate(formData)
+  }
 }
 
 case object ProtectAccountPage extends FormPage {
@@ -158,13 +173,11 @@ case object Setup2svEnterAccessCodePage extends FormPage {
   override val pageHeading: String = "Enter your access code"
   override val url: String = s"${Env.host}/developer/profile/protect-account/access-code"
 
-  def enterAccessCode(accessCode: String, rememberMe: Boolean = false) = {
-    val formData = Map("accessCode" -> accessCode, "rememberMe" -> s"$rememberMe")
+  def enterAccessCode(accessCode: String) = {
+    val formData = Map("accessCode" -> accessCode)
 
     Form.populate(formData)
   }
-
-
 }
 
 case object ProtectAccountCompletePage extends FormPage {

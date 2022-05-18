@@ -16,11 +16,12 @@
 
 package uk.gov.hmrc.thirdpartydeveloperfrontend.controllers
 
+import play.api.data.Form
+import play.api.data.Forms._
 import play.api.libs.crypto.CookieSigner
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents, Request, Result, Session => PlaySession}
 import uk.gov.hmrc.apiplatform.modules.common.services.ApplicationLogger
 import uk.gov.hmrc.apiplatform.modules.mfa.connectors.ThirdPartyDeveloperMfaConnector
-import uk.gov.hmrc.apiplatform.modules.mfa.controllers.profile.ProtectAccountForm
 import uk.gov.hmrc.apiplatform.modules.mfa.models.DeviceSession
 import uk.gov.hmrc.apiplatform.modules.mfa.service.MfaMandateService
 import uk.gov.hmrc.http.HeaderCarrier
@@ -187,11 +188,11 @@ class UserLoginAccount @Inject()(val auditService: AuditService,
   }
 
   def enterTotp: Action[AnyContent] = Action.async { implicit request =>
-      Future.successful(Ok(logInAccessCodeView(ProtectAccountForm.form)))
+      Future.successful(Ok(logInAccessCodeView(MfaAccessCodeForm.form)))
   }
 
   def authenticateTotp: Action[AnyContent] = Action.async { implicit request =>
-    ProtectAccountForm.form.bindFromRequest.fold(
+    MfaAccessCodeForm.form.bindFromRequest.fold(
       errors => successful(BadRequest(logInAccessCodeView(errors))),
       validForm => {
         val email = request.session.get("emailAddress").get
@@ -213,7 +214,7 @@ class UserLoginAccount @Inject()(val auditService: AuditService,
           case _: InvalidCredentials =>
             logger.warn("Login failed due to invalid access code")
             audit(LoginFailedDueToInvalidAccessCode, Map("developerEmail" -> email))
-            Unauthorized(logInAccessCodeView(ProtectAccountForm.form.fill(validForm).withError("accessCode", "You have entered an incorrect access code")))
+            Unauthorized(logInAccessCodeView(MfaAccessCodeForm.form.fill(validForm).withError("accessCode", "You have entered an incorrect access code")))
         }
       }
     )
@@ -251,3 +252,17 @@ class UserLoginAccount @Inject()(val auditService: AuditService,
     } yield Ok(protectAccountNoAccessCodeCompleteView())
   }
 }
+
+
+final case class MfaAccessCodeForm(accessCode: String, rememberMe: Boolean)
+
+object MfaAccessCodeForm {
+  def form: Form[MfaAccessCodeForm] = Form(
+    mapping(
+      "accessCode" -> text.verifying(FormKeys.accessCodeInvalidKey, s => s.matches("^[0-9]{6}$")),
+      "rememberMe" -> boolean
+
+    )(MfaAccessCodeForm.apply)(MfaAccessCodeForm.unapply)
+  )
+}
+

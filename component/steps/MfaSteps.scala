@@ -16,6 +16,8 @@
 
 package steps
 
+import io.cucumber.datatable.DataTable
+import io.cucumber.scala.Implicits._
 import io.cucumber.scala.{EN, ScalaDsl}
 import matchers.CustomMatchers
 import org.openqa.selenium.WebDriver
@@ -23,7 +25,7 @@ import org.scalatest.matchers.should.Matchers
 import pages._
 import play.api.http.Status._
 import play.api.libs.json.Json
-import stubs.Stubs
+import stubs.{DeveloperStub, Stubs, MfaStub}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.builder.DeveloperBuilder
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.connectors.{LoginRequest, UserAuthenticationResponse}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.{Developer, LoggedInState, Session}
@@ -37,15 +39,46 @@ class MfaSteps extends ScalaDsl with EN with Matchers with NavigationSugar with 
 
   private val accessCode = "123456"
 
+  Given("""^I am registered as well with$""") { data: DataTable =>
+    val result: Map[String,String] = data.asScalaRawMaps[String, String].head
+
+    val password = result("Password")
+    val developer = buildDeveloper(emailAddress = result("Email address"), firstName = result("First name"), lastName = result("Last name"))
+
+    DeveloperStub.findUserIdByEmailAddress(developer.email)
+    Stubs.setupPostRequest("/check-password", NO_CONTENT)
+    Stubs.setupPostRequest("/authenticate", UNAUTHORIZED)
+
+    TestContext.developer = developer
+
+    TestContext.sessionIdForloggedInDeveloper = setupLoggedOrPartLoggedInDeveloper(developer, password, LoggedInState.LOGGED_IN)
+    TestContext.sessionIdForMfaMandatingUser = setupLoggedOrPartLoggedInDeveloper(developer, password, LoggedInState.PART_LOGGED_IN_ENABLING_MFA)
+
+    DeveloperStub.setupGettingDeveloperByEmail(developer)
+
+    MfaStub.setupGettingMfaSecret(developer)
+
+    MfaStub.setupVerificationOfAccessCode(developer)
+
+    DeveloperStub.setUpGetCombinedApis()
+
+    MfaStub.setupEnablingMfa(developer)
+  }
+
   Then("""My device session is not set$""") { () =>
     val authCookie = webDriver.manage().getCookieNamed("DEVICE_SESS_ID")
     authCookie shouldBe null
   }
 
+  When("""^I enter the correct access code during 2SVSetup$""") {
+    stubs.MfaStub.stubAuthenticateTotpSuccess()
+    Setup2svEnterAccessCodePage.enterAccessCode(accessCode)
+    Setup2svEnterAccessCodePage.clickContinue()
+  }
 
   When("""^I enter the correct access code and click remember me for 7 days then click continue$""") {
-    Setup2svEnterAccessCodePage.enterAccessCode(accessCode, true)
-    Setup2svEnterAccessCodePage.clickContinue()
+    Login2svEnterAccessCodePage.enterAccessCode(accessCode, true)
+    Login2svEnterAccessCodePage.clickContinue()
   }
 
   Then("""My device session is set$""") { () =>
@@ -54,8 +87,8 @@ class MfaSteps extends ScalaDsl with EN with Matchers with NavigationSugar with 
   }
 
   When("""^I enter the correct access code and do NOT click remember me for 7 days then click continue$""") {
-    Setup2svEnterAccessCodePage.enterAccessCode(accessCode)
-    Setup2svEnterAccessCodePage.clickContinue()
+    Login2svEnterAccessCodePage.enterAccessCode(accessCode)
+    Login2svEnterAccessCodePage.clickContinue()
   }
 
   def setupLoggedOrPartLoggedInDeveloper(developer: Developer, password: String, loggedInState: LoggedInState): String = {
@@ -74,4 +107,5 @@ class MfaSteps extends ScalaDsl with EN with Matchers with NavigationSugar with 
 
     sessionId
   }
+
 }

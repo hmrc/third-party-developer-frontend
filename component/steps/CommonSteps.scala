@@ -49,7 +49,7 @@ class CommonSteps extends ScalaDsl with EN with Matchers with NavigationSugar wi
     "Registration" -> RegistrationPage,
     "View all applications" -> ManageApplicationPage,
     "Add an application to the sandbox empty nest" -> AddApplicationEmptyPage,
-    "Using the Developer Hub" -> NoApplicationsPage,
+    "No Applications" -> NoApplicationsPage,
     "Add application success" -> AddApplicationSuccessPage,
     "Sign in" -> SignInPage.default,
     "Email confirmation" -> EmailConfirmationPage,

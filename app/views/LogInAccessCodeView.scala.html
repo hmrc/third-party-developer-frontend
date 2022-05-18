@@ -16,12 +16,13 @@
 
 @import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.views.BackButtonWithJavaScript
 @import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.routes
+@import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.MfaAccessCodeForm
 @import include._
-@import uk.gov.hmrc.apiplatform.modules.mfa.controllers.profile.ProtectAccountForm
 
 @this(devMain: DevMain2)
 
-@(form: Form[ProtectAccountForm])(implicit messages: Messages, request: play.api.mvc.Request[Any], appConfig: ApplicationConfig)
+
+@(form: Form[MfaAccessCodeForm])(implicit messages: Messages, request: play.api.mvc.Request[Any], appConfig: ApplicationConfig)
 
 @devMain(
   title = "Enter your access code",

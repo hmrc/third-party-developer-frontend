@@ -165,15 +165,15 @@ class ProtectAccount @Inject()(
   }
 }
 
-final case class ProtectAccountForm(accessCode: String, rememberMe: Boolean)
+final case class ProtectAccountForm(accessCode: String)
 
 object ProtectAccountForm {
   def form: Form[ProtectAccountForm] = Form(
     mapping(
-      "accessCode" -> text.verifying(FormKeys.accessCodeInvalidKey, s => s.matches("^[0-9]{6}$")),
-      "rememberMe" -> boolean
+      "accessCode" -> text.verifying(FormKeys.accessCodeInvalidKey, s => s.matches("^[0-9]{6}$"))
 
     )(ProtectAccountForm.apply)(ProtectAccountForm.unapply)
   )
 }
+
 

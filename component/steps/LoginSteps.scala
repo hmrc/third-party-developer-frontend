@@ -79,58 +79,16 @@ class LoginSteps extends ScalaDsl with EN with Matchers with NavigationSugar wit
     TestContext.sessionIdForloggedInDeveloper = setupLoggedOrPartLoggedInDeveloper(developer, password, LoggedInState.LOGGED_IN)
     TestContext.sessionIdForMfaMandatingUser = setupLoggedOrPartLoggedInDeveloper(developer, password, LoggedInState.PART_LOGGED_IN_ENABLING_MFA)
 
-    setupGettingDeveloperByEmail(developer)
+    DeveloperStub.setupGettingDeveloperByEmail(developer)
 
     MfaStub.setupGettingMfaSecret(developer)
 
     MfaStub.setupVerificationOfAccessCode(developer)
 
-    setUpGetCombinedApis()
+    DeveloperStub.setUpGetCombinedApis()
 
     MfaStub.setupEnablingMfa(developer)
   }
-
-//  private def setupVerificationOfAccessCode(developer: Developer): Unit = {
-//    stubFor(
-//      post(urlPathEqualTo(s"/developer/${developer.userId.value}/mfa/verification"))
-//        .withRequestBody(equalTo(Json.toJson(VerifyMfaRequest(accessCode)).toString()))
-//        .willReturn(aResponse()
-//          .withStatus(NO_CONTENT)
-//        ))
-//  }
-
-//  private def setupEnablingMfa(developer: Developer): Unit = {
-//    stubFor(
-//      put(urlPathEqualTo(s"/developer/${developer.userId.value}/mfa/enable"))
-//        .willReturn(aResponse()
-//          .withStatus(OK)
-//        ))
-//  }
-//
-//  private def setupGettingMfaSecret(developer: Developer): Unit = {
-//    stubFor(
-//      post(urlPathEqualTo(s"/developer/${developer.userId.value}/mfa"))
-//        .willReturn(aResponse()
-//          .withStatus(OK)
-//          .withBody(Json.toJson(MfaSecret("mySecret")).toString())))
-//  }
-
-  private def setupGettingDeveloperByEmail(developer: Developer): Unit = {
-    stubFor(get(urlPathEqualTo("/developer"))
-      .withQueryParam("developerId", equalTo(developer.userId.asText))
-      .willReturn(aResponse()
-        .withStatus(OK)
-        .withBody(Json.toJson(developer).toString())))
-  }
-
-  private def setUpGetCombinedApis(): Unit = {
-    stubFor(get(urlPathEqualTo("/api-categories/combined"))
-    .willReturn(aResponse()
-    .withStatus(OK)
-    .withBody("[]")))
-  }
-
-
 
   Given("""^'(.*)' session is uplifted to LoggedIn$""") { email: String =>
     if (email != TestContext.developer.email) {
