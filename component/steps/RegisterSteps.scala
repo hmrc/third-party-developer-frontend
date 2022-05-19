@@ -30,6 +30,9 @@ import org.scalatest.matchers.should.Matchers
 
 object Form extends WebBrowser {
   def populate(a: Map[String, String])(implicit driver: WebDriver) = a.foreach {
+    case (field, value) if field.contains("rememberMe") =>
+       val f = field.replaceAll(" ", "")
+      if(java.lang.Boolean.parseBoolean(value)) checkbox(f).select()
     case (field, value) if field.toLowerCase.contains("password") =>
       val f = field.replaceAll(" ", "")
       pwdField(f).value = value

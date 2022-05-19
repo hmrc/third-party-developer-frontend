@@ -6,17 +6,19 @@ import play.api.libs.json.Json
 import steps.{MfaSecret, TestContext}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.connectors.{TotpAuthenticationRequest, VerifyMfaRequest}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.{Developer, LoggedInState, Session}
+import uk.gov.hmrc.thirdpartydeveloperfrontend.connectors.EncryptedJson
 
 object MfaStub {
 
   private val accessCode = "123456"
+  val nonce = "iamanoncevalue"
 
-  def stubAuthenticateTotpSuccess(): Unit = {
+  def stubAuthenticateTotpSuccess()(implicit encryptedJson: EncryptedJson): Unit = {
     val session = Session(TestContext.sessionIdForloggedInDeveloper, TestContext.developer, LoggedInState.LOGGED_IN)
 
     stubFor(
       post(urlEqualTo("/authenticate-totp"))
-        .withRequestBody(equalToJson(Json.toJson(TotpAuthenticationRequest("emailAddress", accessCode, "nonce")).toString()))
+      .withRequestBody(equalToJson(encryptedJson.toSecretRequestJson(TotpAuthenticationRequest("john.smith@example.com", accessCode, nonce)).toString()))
         .willReturn(
           aResponse()
             .withStatus(OK)

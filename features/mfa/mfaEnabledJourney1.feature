@@ -1,22 +1,38 @@
-@mfaEnabled1
-Feature: MFA Enabled Journey 1 User with Existing Device Session
+@mfaEnabledWithoutDeviceSession
+Feature: MFA Enabled Journey User with No Device Session
 
   Background:
-    Given I am mfaEnabled and with DeviceSession registered with
+    Given I am mfaEnabled without a DeviceSession and registered with
       | Email address          | Password         | First name | Last name |
       | john.smith@example.com | StrongPassword1! | John       | Smith     |
     And I have no application assigned to my email 'john.smith@example.com'
 
-#   MFA already setup, device session exists, mfa not mandated
-  Scenario: Signing with a valid credentials and no MFA mandated or setup, select email preferences
+  Scenario: Signing with a valid credentials and no MFA mandated but is setup, select email preferences
     Given I navigate to the 'Sign in' page
     And I enter all the fields:
       | email address          | password         |
       | john.smith@example.com | StrongPassword1! |
-    And I already have a device cookie
     When I click on the button with id 'submit'
+    Given I am on the 'Enter Access Code' page
+    Then My device session is not set
+    When I enter the correct access code and click remember me for 7 days then click continue
     Given I am on the 'No Applications' page
     Then My device session is set
+    When I click on the radio button with id 'get-emails'
+    And I click on the button with id 'submit'
+    Then I am on the 'Email preferences' page
+
+  Scenario: Signing with a valid credentials and no MFA mandated but is setup, select email preferences
+    Given I navigate to the 'Sign in' page
+    And I enter all the fields:
+      | email address          | password         |
+      | john.smith@example.com | StrongPassword1! |
+    When I click on the button with id 'submit'
+    Given I am on the 'Enter Access Code' page
+    Then My device session is not set
+    When I enter the correct access code and click do NOT remember me for 7 days then click continue
+    Given I am on the 'No Applications' page
+    Then My device session is not set
     When I click on the radio button with id 'get-emails'
     And I click on the button with id 'submit'
     Then I am on the 'Email preferences' page

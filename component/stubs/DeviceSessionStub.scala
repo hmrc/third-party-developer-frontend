@@ -12,7 +12,6 @@ object DeviceSessionStub {
   val staticDeviceSessionId = UUID.fromString("69fc10f6-9193-42b4-97f2-87886c972ad4")
 
   def getDeviceSessionForSessionIdAndUserId(userId: UserId): Any = {
-    println(s"*** STUBBING getDeviceSessionForSessionIdAndUserId $staticDeviceSessionId ${userId.value}")
     stubFor(
       get(urlMatching(s"/device-session/$staticDeviceSessionId/user/${userId.value}"))
         .willReturn(
@@ -23,13 +22,11 @@ object DeviceSessionStub {
   }
 
     def getDeviceSessionNotFound(userId: UserId): Any = {
-       println("*** STUBBING getDeviceSessionNotFound")
     stubFor(
       get(urlMatching(s"/device-session/$staticDeviceSessionId/user/${userId.value}"))
         .willReturn(
           aResponse()
             .withStatus(NOT_FOUND)
-           
         ))
   }
 

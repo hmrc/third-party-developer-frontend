@@ -43,31 +43,6 @@ class MfaSteps extends ScalaDsl with EN with Matchers with NavigationSugar with 
   private val deviceCookieName = "DEVICE_SESS_ID"
   private val deviceCookieValue = "a6b5b0cca96fef5ffc66edffd514a9239b46b4e869fc10f6-9193-42b4-97f2-87886c972ad4"
 
-  // Given("""^I am registered as well with$""") { data: DataTable =>
-  //   val result: Map[String,String] = data.asScalaRawMaps[String, String].head
-
-  //   val password = result("Password")
-  //   val developer = buildDeveloper(emailAddress = result("Email address"), firstName = result("First name"), lastName = result("Last name"))
-
-  //   DeveloperStub.findUserIdByEmailAddress(developer.email)
-  //   Stubs.setupPostRequest("/check-password", NO_CONTENT)
-  //   Stubs.setupPostRequest("/authenticate", UNAUTHORIZED)
-
-  //   TestContext.developer = developer
-
-  //   TestContext.sessionIdForloggedInDeveloper = setupLoggedOrPartLoggedInDeveloper(developer, password, LoggedInState.LOGGED_IN)
-  //   TestContext.sessionIdForMfaMandatingUser = setupLoggedOrPartLoggedInDeveloper(developer, password, LoggedInState.PART_LOGGED_IN_ENABLING_MFA)
-
-  //   DeveloperStub.setupGettingDeveloperByEmail(developer)
-
-  //   MfaStub.setupGettingMfaSecret(developer)
-
-  //   MfaStub.setupVerificationOfAccessCode(developer)
-
-  //   DeveloperStub.setUpGetCombinedApis()
-
-  //   MfaStub.setupEnablingMfa(developer)
-  // }
 
   Then("""My device session is not set$""") { () =>
     val authCookie = webDriver.manage().getCookieNamed(deviceCookieName)
@@ -81,7 +56,14 @@ class MfaSteps extends ScalaDsl with EN with Matchers with NavigationSugar with 
   }
 
   When("""^I enter the correct access code and click remember me for 7 days then click continue$""") {
+     MfaStub.stubAuthenticateTotpSuccess()
     Login2svEnterAccessCodePage.enterAccessCode(accessCode, rememberMe = true)
+    Login2svEnterAccessCodePage.clickContinue()
+  }
+
+  When("""^I enter the correct access code and do NOT click remember me for 7 days then click continue$""") {
+    MfaStub.stubAuthenticateTotpSuccess()
+    Login2svEnterAccessCodePage.enterAccessCode(accessCode)
     Login2svEnterAccessCodePage.clickContinue()
   }
 
@@ -90,7 +72,18 @@ class MfaSteps extends ScalaDsl with EN with Matchers with NavigationSugar with 
     authCookie should not be null
   }
 
-  Given("""^I am mfaEnabled and with DeviceSession registered with$""") {  data: DataTable =>
+  Given("""^I am mfaEnabled without a DeviceSession and registered with$"""){  data: DataTable =>
+    val result: Map[String,String] = data.asScalaRawMaps[String, String].head
+  
+    val password = result("Password")
+
+      val developer = buildDeveloper(emailAddress = result("Email address"), firstName = result("First name"), lastName = result("Last name"))
+    .copy(mfaEnabled = Some(true), userId = UserId(staticUserUUID))
+   setUpDeveloperStub(developer, password, None, false)
+
+  }
+
+  Given("""^I am mfaEnabled and with a DeviceSession registered with$""") {  data: DataTable =>
     val result: Map[String,String] = data.asScalaRawMaps[String, String].head
   
     val password = result("Password")
@@ -101,12 +94,14 @@ class MfaSteps extends ScalaDsl with EN with Matchers with NavigationSugar with 
 
   }
 
+
+
   def setUpDeveloperStub(developer: Developer, password: String, deviceSessionId: Option[UUID], deviceSessionFound: Boolean) ={
+    webDriver.manage().deleteAllCookies()
     val mfaEnabled = developer.mfaEnabled.getOrElse(false)
-        println(s"*** mfaEnabled: $mfaEnabled, developer  value: ${developer.mfaEnabled}***")
+
         val accessCodeRequired = deviceSessionId.isEmpty && mfaEnabled
        val  userId = UserId(staticUserUUID)
-       println(s"***setUpDeveloperStub  deviceSessionId:$deviceSessionId userId:$staticUserUUID")
       TestContext.sessionIdForloggedInDeveloper =
          setupLoggedOrPartLoggedInDeveloper(developer, password, LoggedInState.LOGGED_IN, deviceSessionId , accessCodeRequired, mfaEnabled)
     deviceSessionId.map(_ => 
@@ -129,10 +124,7 @@ class MfaSteps extends ScalaDsl with EN with Matchers with NavigationSugar with 
     webDriver.manage().addCookie(cookie)
   }
 
-  When("""^I enter the correct access code and do NOT click remember me for 7 days then click continue$""") {
-    Login2svEnterAccessCodePage.enterAccessCode(accessCode)
-    Login2svEnterAccessCodePage.clickContinue()
-  }
+
 
   def setupLoggedOrPartLoggedInDeveloper(developer: Developer, password: String, loggedInState: LoggedInState, deviceSessionId: Option[UUID], accessCodeRequired: Boolean, mfaEnabled : Boolean): String = {
     val sessionId = "sessionId_" + loggedInState.toString
@@ -140,11 +132,13 @@ class MfaSteps extends ScalaDsl with EN with Matchers with NavigationSugar with 
     val session = Session(sessionId, developer, loggedInState)
 
     val actualSession = if(accessCodeRequired) None else Some(session)
-        //println(s"***  mafEnabled:$mfaEnabled accessCodeRequired:$accessCodeRequired actualSession:$actualSession ***")
-    val userAuthenticationResponse = UserAuthenticationResponse(accessCodeRequired, mfaEnabled, session = actualSession)
+
+    val nonce = if(accessCodeRequired) Some(MfaStub.nonce) else None
+
+    val userAuthenticationResponse = UserAuthenticationResponse(accessCodeRequired, mfaEnabled, session = actualSession, nonce = nonce)
 
     val mfaMandatedForUser = loggedInState == LoggedInState.PART_LOGGED_IN_ENABLING_MFA
-  println(s"$loggedInState $mfaMandatedForUser")
+
     Stubs.setupEncryptedPostRequest("/authenticate", LoginRequest(developer.email, password, mfaMandatedForUser, deviceSessionId),
       OK, Json.toJson(userAuthenticationResponse).toString())
 
