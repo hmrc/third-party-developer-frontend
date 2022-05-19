@@ -16,8 +16,8 @@ Feature: MFA Enabled Journey User with No Device Session
     Given I am on the 'Enter Access Code' page
     Then My device session is not set
     When I enter the correct access code and click remember me for 7 days then click continue
-    Given I am on the 'No Applications' page
     Then My device session is set
+    Given I am on the 'No Applications' page
     When I click on the radio button with id 'get-emails'
     And I click on the button with id 'submit'
     Then I am on the 'Email preferences' page
@@ -30,7 +30,7 @@ Feature: MFA Enabled Journey User with No Device Session
     When I click on the button with id 'submit'
     Given I am on the 'Enter Access Code' page
     Then My device session is not set
-    When I enter the correct access code and click do NOT remember me for 7 days then click continue
+    When I enter the correct access code and do NOT click remember me for 7 days then click continue
     Given I am on the 'No Applications' page
     Then My device session is not set
     When I click on the radio button with id 'get-emails'

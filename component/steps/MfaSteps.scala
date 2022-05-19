@@ -44,10 +44,6 @@ class MfaSteps extends ScalaDsl with EN with Matchers with NavigationSugar with 
   private val deviceCookieValue = "a6b5b0cca96fef5ffc66edffd514a9239b46b4e869fc10f6-9193-42b4-97f2-87886c972ad4"
 
 
-  Then("""My device session is not set$""") { () =>
-    val authCookie = webDriver.manage().getCookieNamed(deviceCookieName)
-    authCookie shouldBe null
-  }
 
   When("""^I enter the correct access code during 2SVSetup$""") {
     stubs.MfaStub.stubAuthenticateTotpSuccess()
@@ -55,10 +51,19 @@ class MfaSteps extends ScalaDsl with EN with Matchers with NavigationSugar with 
     Setup2svEnterAccessCodePage.clickContinue()
   }
 
+  When("""^I enter the correct access code during remove2SV$""") {
+    stubs.MfaStub.stubAuthenticateTotpSuccess()
+    MfaRemovePage.enterAccessCode(accessCode)
+    MfaRemovePage.clickContinue()
+  }
+
+
   When("""^I enter the correct access code and click remember me for 7 days then click continue$""") {
      MfaStub.stubAuthenticateTotpSuccess()
     Login2svEnterAccessCodePage.enterAccessCode(accessCode, rememberMe = true)
+    DeviceSessionStub.createDeviceSession(UserId(staticUserUUID), CREATED)
     Login2svEnterAccessCodePage.clickContinue()
+
   }
 
   When("""^I enter the correct access code and do NOT click remember me for 7 days then click continue$""") {
@@ -68,9 +73,15 @@ class MfaSteps extends ScalaDsl with EN with Matchers with NavigationSugar with 
   }
 
   Then("""My device session is set$""") { () =>
-    val authCookie = webDriver.manage().getCookieNamed(deviceCookieName)
-    authCookie should not be null
+    val deviceSessionCookie = webDriver.manage().getCookieNamed(deviceCookieName)
+    deviceSessionCookie should not be null
   }
+  Then("""My device session is not set$""") { () =>
+    val authCookie = webDriver.manage().getCookieNamed(deviceCookieName)
+    authCookie shouldBe null
+  }
+
+
 
   Given("""^I am mfaEnabled without a DeviceSession and registered with$"""){  data: DataTable =>
     val result: Map[String,String] = data.asScalaRawMaps[String, String].head
@@ -104,11 +115,15 @@ class MfaSteps extends ScalaDsl with EN with Matchers with NavigationSugar with 
        val  userId = UserId(staticUserUUID)
       TestContext.sessionIdForloggedInDeveloper =
          setupLoggedOrPartLoggedInDeveloper(developer, password, LoggedInState.LOGGED_IN, deviceSessionId , accessCodeRequired, mfaEnabled)
-    deviceSessionId.map(_ => 
-      if(deviceSessionFound) DeviceSessionStub.getDeviceSessionForSessionIdAndUserId(userId)
-      else DeviceSessionStub.getDeviceSessionNotFound(userId))
-    
+    deviceSessionId match {
+      case Some(_) => deviceSessionId.map(_ =>
+        if(deviceSessionFound) DeviceSessionStub.getDeviceSessionForSessionIdAndUserId(userId)
+        else DeviceSessionStub.getDeviceSessionNotFound(userId))
+      case None => ()
+    }
 
+    MfaStub.stubRemoveMfa(developer)
+    MfaStub.setupVerificationOfAccessCode(developer)
     DeveloperStub.findUserIdByEmailAddress(developer.email)
     Stubs.setupPostRequest("/check-password", NO_CONTENT)
 

@@ -30,5 +30,13 @@ object DeviceSessionStub {
         ))
   }
 
+  def createDeviceSession(userId: UserId, status: Int) =
+    stubFor(
+      post(urlMatching(s"/device-session/user/${userId.value}"))
+        .willReturn(aResponse()
+          .withBody(Json.toJson(DeviceSession(deviceSessionId = staticDeviceSessionId, userId)).toString())
+          .withStatus(status))
+    )
+
 
 }

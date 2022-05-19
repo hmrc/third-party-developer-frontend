@@ -68,6 +68,10 @@ class CommonSteps extends ScalaDsl with EN with Matchers with NavigationSugar wi
     "Setup 2SV QR" -> Setup2svQrPage,
     "Setup 2SV Enter Access Code" -> Setup2svEnterAccessCodePage,
     "Protect Account Complete" -> ProtectAccountCompletePage,
+    "Account protection" -> AccountProtectionPage,
+    "Confirm 2SV removal"-> MfaConfirmRemovalPage,
+    "2SV remove"-> MfaRemovePage,
+    "2SV removal complete" -> MfaRemovalCompletePage,
     "Password reset confirmation" -> PasswordResetConfirmationPage,
     "You have reset your password" -> YouHaveResetYourPasswordPage,
     "Reset password link no longer valid" -> ResetPasswordLinkNoLongerValidPage

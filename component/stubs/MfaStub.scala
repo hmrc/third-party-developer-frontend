@@ -4,6 +4,7 @@ import com.github.tomakehurst.wiremock.client.WireMock.{aResponse, equalTo, equa
 import play.api.http.Status.{NO_CONTENT, OK}
 import play.api.libs.json.Json
 import steps.{MfaSecret, TestContext}
+import uk.gov.hmrc.apiplatform.modules.mfa.connectors.ThirdPartyDeveloperMfaConnector.RemoveMfaRequest
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.connectors.{TotpAuthenticationRequest, VerifyMfaRequest}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.{Developer, LoggedInState, Session}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.connectors.EncryptedJson
@@ -31,6 +32,17 @@ object MfaStub {
     stubFor(
       post(urlPathEqualTo(s"/developer/${developer.userId.value}/mfa/verification"))
         .withRequestBody(equalTo(Json.toJson(VerifyMfaRequest(accessCode)).toString()))
+        .willReturn(aResponse()
+          .withStatus(NO_CONTENT)
+        ))
+  }
+
+  def stubRemoveMfa(developer: Developer): Unit = {
+    implicit val RemoveMfaRequestFormat = Json.format[RemoveMfaRequest]
+
+    stubFor(
+      post(urlPathEqualTo(s"/developer/${developer.userId.value}/mfa/remove"))
+        .withRequestBody(equalTo(Json.toJson(RemoveMfaRequest("john.smith@example.com")).toString()))
         .willReturn(aResponse()
           .withStatus(NO_CONTENT)
         ))
