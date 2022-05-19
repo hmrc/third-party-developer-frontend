@@ -26,11 +26,13 @@ import org.scalatest.matchers.should.Matchers
 import pages._
 import play.api.http.Status._
 import play.api.libs.json.{Format, Json}
-import stubs.{DeveloperStub, MfaStub, Stubs}
+import stubs.{DeveloperStub, DeviceSessionStub, MfaStub, Stubs}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.builder.DeveloperBuilder
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.connectors.{LoginRequest, PasswordResetRequest, UserAuthenticationResponse, VerifyMfaRequest}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.{Developer, LoggedInState, Session}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.{GlobalUserIdTracker, UserIdTracker}
+
+import java.util.Date
 
 case class MfaSecret(secret: String)
 
@@ -90,6 +92,7 @@ class LoginSteps extends ScalaDsl with EN with Matchers with NavigationSugar wit
     MfaStub.setupEnablingMfa(developer)
   }
 
+
   Given("""^'(.*)' session is uplifted to LoggedIn$""") { email: String =>
     if (email != TestContext.developer.email) {
       throw new IllegalArgumentException(s"Can only know how to uplift ${TestContext.developer.email}'s session")
@@ -120,7 +123,7 @@ class LoginSteps extends ScalaDsl with EN with Matchers with NavigationSugar wit
       val link = webDriver.findElement(By.linkText("Sign out"))
       link.click()
     } catch {
-      case _: org.openqa.selenium.NoSuchElementException =>
+      case _: NoSuchElementException =>
         val menu = webDriver.findElement(By.linkText("Menu"))
         menu.click()
 
