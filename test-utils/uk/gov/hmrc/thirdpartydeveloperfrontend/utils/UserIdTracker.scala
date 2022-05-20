@@ -20,11 +20,9 @@ import scala.collection.mutable
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.UserId
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.{Collaborator, CollaboratorRole}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.CollaboratorRole._
-import java.util.UUID
 
 // Trait allows for mix in of either local or global userIdTracker into things like CollaboratorTracker
 trait UserIdTracker {
-  val staticUserUUID = UUID.fromString("11edcde7-c619-4bc1-bb6a-84dc14ea25cd")
   def idOf(email: String): UserId
 }
 
@@ -32,7 +30,7 @@ trait UserIdTracker {
 trait LocalUserIdTracker extends UserIdTracker {
   private lazy val idsByEmail = mutable.Map[String, UserId]()
 
-  def idOf(email: String): UserId = idsByEmail.getOrElseUpdate(email, UserId(staticUserUUID))
+  def idOf(email: String): UserId = idsByEmail.getOrElseUpdate(email, UserId.random)
 }
 
 // Use this when you want to share the map across files like component tests where

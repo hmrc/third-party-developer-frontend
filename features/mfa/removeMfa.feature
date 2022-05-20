@@ -27,6 +27,5 @@ Feature: Remove MFA. User with MFA enabled and Existing Device Session
     When I click on the radio button with id 'confirm-remove-2sv-yes'
     And I click on the button with id 'submit'
     Then I am on the '2SV remove' page
-    When I enter the correct access code during remove2SV
-    And I click on the button with id 'submit'
+    When I enter the correct access code during remove2SV then click continue
     Then I am on the '2SV removal complete' page

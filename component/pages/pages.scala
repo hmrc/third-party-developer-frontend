@@ -186,7 +186,7 @@ case object MfaRemovePage extends FormPage {
 }
 
 case object MfaRemovalCompletePage extends FormPage {
-  override val pageHeading: String = "2-step verification remove"
+  override val pageHeading: String = "2-step verification removed"
   override val url: String = s"${Env.host}/developer/profile/protect-account/remove/complete"
 }
 

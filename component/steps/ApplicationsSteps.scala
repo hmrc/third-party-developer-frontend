@@ -17,9 +17,8 @@
 package steps
 
 import java.util.UUID.randomUUID
-
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.Environment.PRODUCTION
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.{Application, ApplicationState, ApplicationToken, ClientSecret, Collaborator, Environment, Privileged, ROPC, CollaboratorRole, Standard}
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.{Application, ApplicationState, ApplicationToken, ClientSecret, Collaborator, CollaboratorRole, Environment, Privileged, ROPC, Standard}
 import io.cucumber.datatable.DataTable
 import io.cucumber.scala.{EN, ScalaDsl}
 import io.cucumber.scala.Implicits._
@@ -36,14 +35,15 @@ import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.Client
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.UserId
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.ApplicationWithSubscriptionIds
 import org.scalatest.matchers.should.Matchers
+import utils.ComponentTestDeveloperBuilder
 
 object AppWorld {
   var userApplicationsOnBackend: List[Application] = Nil
   var tokens: Map[String, ApplicationToken] = Map.empty
 }
 
-class ApplicationsSteps extends ScalaDsl with EN with Matchers with NavigationSugar with CustomMatchers with PageSugar {
-  import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.GlobalUserIdTracker.idOf
+class ApplicationsSteps extends ScalaDsl with EN with Matchers with NavigationSugar with CustomMatchers with PageSugar with ComponentTestDeveloperBuilder {
+
   import java.time.Period
 
   implicit val webDriver = Env.driver
@@ -63,7 +63,7 @@ class ApplicationsSteps extends ScalaDsl with EN with Matchers with NavigationSu
     Period.ofDays(547),
     Environment.from(environment).getOrElse(PRODUCTION),
     description = None,
-    collaborators = Set(Collaborator(collaboratorEmail, CollaboratorRole.ADMINISTRATOR, idOf(collaboratorEmail)))
+    collaborators = Set(Collaborator(collaboratorEmail, CollaboratorRole.ADMINISTRATOR, staticUserId))
   )
 
   Given("""^application with name '(.*)' can be created$""") { (name: String) =>
@@ -86,9 +86,8 @@ class ApplicationsSteps extends ScalaDsl with EN with Matchers with NavigationSu
   }
 
   Given("""^I have no application assigned to my email '(.*)'$""") { (email: String) =>
-    val userId = idOf(email)
 
-    ApplicationStub.configureUserApplications(userId)
+    ApplicationStub.configureUserApplications(staticUserId)
     AppWorld.userApplicationsOnBackend = Nil
   }
 
@@ -145,8 +144,8 @@ class ApplicationsSteps extends ScalaDsl with EN with Matchers with NavigationSu
   }
 
   def configureStubsForApplications(email: String, applications: List[Application]) = {
-    val userId = idOf(email)
-    ApplicationStub.configureUserApplications(userId, applications.map(ApplicationWithSubscriptionIds.from))
+
+    ApplicationStub.configureUserApplications(staticUserId, applications.map(ApplicationWithSubscriptionIds.from))
     for (app <- applications) {
       // configure to be able to fetch apps and Subscriptions
       ApplicationStub.setUpFetchApplication(app.id, OK, Json.toJson(app).toString())

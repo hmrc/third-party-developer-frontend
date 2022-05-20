@@ -16,7 +16,6 @@
 
 package steps
 
-import com.github.tomakehurst.wiremock.client.WireMock._
 import io.cucumber.datatable.DataTable
 import io.cucumber.scala.Implicits._
 import io.cucumber.scala.{EN, ScalaDsl}
@@ -26,13 +25,10 @@ import org.scalatest.matchers.should.Matchers
 import pages._
 import play.api.http.Status._
 import play.api.libs.json.{Format, Json}
-import stubs.{DeveloperStub, DeviceSessionStub, MfaStub, Stubs}
-import uk.gov.hmrc.thirdpartydeveloperfrontend.builder.DeveloperBuilder
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.connectors.{LoginRequest, PasswordResetRequest, UserAuthenticationResponse, VerifyMfaRequest}
+import stubs.{DeveloperStub, MfaStub, Stubs}
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.connectors.{LoginRequest, PasswordResetRequest, UserAuthenticationResponse}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.{Developer, LoggedInState, Session}
-import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.{GlobalUserIdTracker, UserIdTracker}
-
-import java.util.Date
+import utils.ComponentTestDeveloperBuilder
 
 case class MfaSecret(secret: String)
 
@@ -47,8 +43,8 @@ object TestContext {
   var sessionIdForMfaMandatingUser: String = ""
 }
 
-class LoginSteps extends ScalaDsl with EN with Matchers with NavigationSugar with PageSugar with CustomMatchers with DeveloperBuilder with UserIdTracker {
-  def idOf(email: String) = GlobalUserIdTracker.idOf(email)
+class LoginSteps extends ScalaDsl with EN with Matchers with NavigationSugar with PageSugar with CustomMatchers with ComponentTestDeveloperBuilder  {
+
 
   implicit val webDriver: WebDriver = Env.driver
 

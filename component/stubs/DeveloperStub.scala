@@ -8,9 +8,10 @@ import uk.gov.hmrc.thirdpartydeveloperfrontend.connectors.ThirdPartyDeveloperCon
 import uk.gov.hmrc.thirdpartydeveloperfrontend.connectors.ThirdPartyDeveloperConnector.JsonFormatters.FindUserIdRequestWrites
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.connectors.PasswordResetRequest
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.{Developer, Registration, UpdateProfileRequest, UserId}
+import utils.ComponentTestDeveloperBuilder
 
-object DeveloperStub {
-  import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.GlobalUserIdTracker.idOf
+object DeveloperStub extends ComponentTestDeveloperBuilder {
+
 
   def register(registration: Registration, status: Int)(implicit encryptedJson: EncryptedJson) =
     stubFor(
@@ -27,7 +28,7 @@ object DeveloperStub {
     )
 
   def setupResend(email: String, status: Int) = {
-    val userId = idOf(email)
+    val userId = staticUserId
 
     implicit val writes = Json.writes[FindUserIdResponse]
 
@@ -52,7 +53,6 @@ object DeveloperStub {
   }
 
   def findUserIdByEmailAddress(emailAddress: String) = {
-    val userId = idOf(emailAddress)
 
     stubFor(
       post(urlEqualTo("/developers/find-user-id"))
@@ -60,7 +60,7 @@ object DeveloperStub {
         .willReturn(
           aResponse()
             .withStatus(OK)
-            .withBody(s"""{"userId":"${userId.asText}"}""")
+            .withBody(s"""{"userId":"${staticUserId.asText}"}""")
         )
     )
   }

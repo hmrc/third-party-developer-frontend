@@ -26,16 +26,16 @@ import pages._
 import play.api.http.Status._
 import play.api.libs.json.Json
 import stubs.{DeveloperStub, DeviceSessionStub, MfaStub, Stubs}
-import uk.gov.hmrc.thirdpartydeveloperfrontend.builder.DeveloperBuilder
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.connectors.{LoginRequest, UserAuthenticationResponse}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.{Developer, LoggedInState, Session, UserId}
-import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.{GlobalUserIdTracker, UserIdTracker}
+import utils.ComponentTestDeveloperBuilder
+
 import java.util.UUID
 
 
 class MfaSteps extends ScalaDsl with EN with Matchers with NavigationSugar with PageSugar
-  with CustomMatchers with DeveloperBuilder with UserIdTracker{
-  def idOf(email: String) = GlobalUserIdTracker.idOf(email)
+  with CustomMatchers with ComponentTestDeveloperBuilder {
+
 
   implicit val webDriver: WebDriver = Env.driver
 
@@ -51,7 +51,7 @@ class MfaSteps extends ScalaDsl with EN with Matchers with NavigationSugar with 
     Setup2svEnterAccessCodePage.clickContinue()
   }
 
-  When("""^I enter the correct access code during remove2SV$""") {
+  When("""^I enter the correct access code during remove2SV then click continue$""") {
     stubs.MfaStub.stubAuthenticateTotpSuccess()
     MfaRemovePage.enterAccessCode(accessCode)
     MfaRemovePage.clickContinue()
@@ -61,7 +61,7 @@ class MfaSteps extends ScalaDsl with EN with Matchers with NavigationSugar with 
   When("""^I enter the correct access code and click remember me for 7 days then click continue$""") {
      MfaStub.stubAuthenticateTotpSuccess()
     Login2svEnterAccessCodePage.enterAccessCode(accessCode, rememberMe = true)
-    DeviceSessionStub.createDeviceSession(UserId(staticUserUUID), CREATED)
+    DeviceSessionStub.createDeviceSession(staticUserId, CREATED)
     Login2svEnterAccessCodePage.clickContinue()
 
   }
@@ -89,7 +89,7 @@ class MfaSteps extends ScalaDsl with EN with Matchers with NavigationSugar with 
     val password = result("Password")
 
       val developer = buildDeveloper(emailAddress = result("Email address"), firstName = result("First name"), lastName = result("Last name"))
-    .copy(mfaEnabled = Some(true), userId = UserId(staticUserUUID))
+    .copy(mfaEnabled = Some(true), userId = staticUserId)
    setUpDeveloperStub(developer, password, None, false)
 
   }
@@ -100,7 +100,7 @@ class MfaSteps extends ScalaDsl with EN with Matchers with NavigationSugar with 
     val password = result("Password")
 
       val developer = buildDeveloper(emailAddress = result("Email address"), firstName = result("First name"), lastName = result("Last name"))
-    .copy(mfaEnabled = Some(true), userId = UserId(staticUserUUID))
+    .copy(mfaEnabled = Some(true), userId = staticUserId)
    setUpDeveloperStub(developer, password, Some(DeviceSessionStub.staticDeviceSessionId), true)
 
   }
@@ -112,13 +112,13 @@ class MfaSteps extends ScalaDsl with EN with Matchers with NavigationSugar with 
     val mfaEnabled = developer.mfaEnabled.getOrElse(false)
 
         val accessCodeRequired = deviceSessionId.isEmpty && mfaEnabled
-       val  userId = UserId(staticUserUUID)
+
       TestContext.sessionIdForloggedInDeveloper =
          setupLoggedOrPartLoggedInDeveloper(developer, password, LoggedInState.LOGGED_IN, deviceSessionId , accessCodeRequired, mfaEnabled)
     deviceSessionId match {
       case Some(_) => deviceSessionId.map(_ =>
-        if(deviceSessionFound) DeviceSessionStub.getDeviceSessionForSessionIdAndUserId(userId)
-        else DeviceSessionStub.getDeviceSessionNotFound(userId))
+        if(deviceSessionFound) DeviceSessionStub.getDeviceSessionForSessionIdAndUserId(staticUserId)
+        else DeviceSessionStub.getDeviceSessionNotFound(staticUserId))
       case None => ()
     }
 
