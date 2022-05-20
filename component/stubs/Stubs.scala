@@ -40,6 +40,12 @@ object Stubs extends ApplicationLogger {
   def setupPostRequest(path: String, status: Int) =
     stubFor(post(urlEqualTo(path)).willReturn(aResponse().withStatus(status)))
 
+  def setupPutRequest(path: String, status: Int, response: String) =
+    stubFor(
+      put(urlEqualTo(path))
+      .willReturn(aResponse().withStatus(status).withBody(response))
+    )
+
   def setupPostRequest(path: String, status: Int, response: String) =
     stubFor(
       post(urlEqualTo(path))

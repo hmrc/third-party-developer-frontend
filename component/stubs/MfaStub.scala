@@ -72,6 +72,14 @@ object MfaStub {
         .withBody(Json.toJson(developer).toString())))
   }
 
+
+  def stubUpliftAuthSession(isMfaMandated: Boolean) ={
+    val sessionId = if(isMfaMandated) TestContext.sessionIdForMfaMandatingUser else TestContext.sessionIdForloggedInDeveloper
+    val session = Session(sessionId, TestContext.developer, LoggedInState.LOGGED_IN)
+
+    Stubs.setupPutRequest(s"/session/$sessionId/loggedInState/LOGGED_IN", OK, Json.toJson(session).toString())
+  }
+
   def setupMfaMandated() ={
     val session = Session(TestContext.sessionIdForMfaMandatingUser, TestContext.developer, LoggedInState.LOGGED_IN)
 

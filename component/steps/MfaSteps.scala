@@ -44,15 +44,16 @@ class MfaSteps extends ScalaDsl with EN with Matchers with NavigationSugar with 
   private val deviceCookieValue = "a6b5b0cca96fef5ffc66edffd514a9239b46b4e869fc10f6-9193-42b4-97f2-87886c972ad4"
 
 
-
-  When("""^I enter the correct access code during 2SVSetup$""") {
-    stubs.MfaStub.stubAuthenticateTotpSuccess()
+  When("""^I enter the correct access code during 2SVSetup with mfaMandated '(.*)'$""") { (mfaMandated: String) =>
+    val isMfaMandated = java.lang.Boolean.parseBoolean(mfaMandated)
+    MfaStub.stubAuthenticateTotpSuccess()
+    MfaStub.stubUpliftAuthSession(isMfaMandated)
     Setup2svEnterAccessCodePage.enterAccessCode(accessCode)
     Setup2svEnterAccessCodePage.clickContinue()
   }
 
   When("""^I enter the correct access code during remove2SV then click continue$""") {
-    stubs.MfaStub.stubAuthenticateTotpSuccess()
+    MfaStub.stubAuthenticateTotpSuccess()
     MfaRemovePage.enterAccessCode(accessCode)
     MfaRemovePage.clickContinue()
   }

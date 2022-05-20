@@ -34,7 +34,7 @@ Feature: Sign in
     Then I am on the 'Setup 2SV QR' page
     When I click on the button with id 'submit'
     Then I am on the 'Setup 2SV Enter Access Code' page
-    When I enter the correct access code during 2SVSetup
+    When I enter the correct access code during 2SVSetup with mfaMandated 'true'
     Then I am on the 'Protect Account Complete' page
     Given 'john.smith@example.com' session is uplifted to LoggedIn
     When I click on the button with id 'submit'
