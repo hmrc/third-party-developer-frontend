@@ -19,7 +19,7 @@ package uk.gov.hmrc.thirdpartydeveloperfrontend.config
 import javax.inject.{Inject, Singleton}
 import org.joda.time._
 import play.api.{ConfigLoader, Configuration}
-import uk.gov.hmrc.thirdpartydeveloperfrontend.service.MfaMandateService
+import uk.gov.hmrc.apiplatform.modules.mfa.service.MfaMandateService
 import uk.gov.hmrc.play.bootstrap.config.ServicesConfig
 
 @Singleton

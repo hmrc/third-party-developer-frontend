@@ -20,6 +20,7 @@ import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.Session
 import play.api.libs.json.Json
 
 case class UserAuthenticationResponse(accessCodeRequired: Boolean,
+                                      mfaEnabled: Boolean,
                                       nonce: Option[String] = None,
                                       session: Option[Session] = None)
 

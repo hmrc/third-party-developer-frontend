@@ -16,11 +16,7 @@
 
 package uk.gov.hmrc.thirdpartydeveloperfrontend.connectors
 
-import uk.gov.hmrc.thirdpartydeveloperfrontend.builder.DeveloperBuilder
 import com.github.tomakehurst.wiremock.client.WireMock._
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.connectors.{LoginRequest, TotpAuthenticationRequest, UserAuthenticationResponse}
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.{LoggedInState, Session, SessionInvalid}
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.{InvalidCredentials, InvalidEmail, LockedAccount, UnverifiedAccount}
 import org.scalatestplus.play.guice.GuiceOneAppPerSuite
 import play.api.http.Status._
 import play.api.inject.bind
@@ -28,18 +24,14 @@ import play.api.inject.guice.GuiceApplicationBuilder
 import play.api.libs.json.{JsValue, Json}
 import play.api.{Application, Configuration, Mode}
 import uk.gov.hmrc.http.{HeaderCarrier, UpstreamErrorResponse}
-import uk.gov.hmrc.http.UpstreamErrorResponse
-import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.LocalUserIdTracker
-import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.WireMockExtensions
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.connectors.UpdateLoggedInStateRequest
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.UpdateProfileRequest
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.connectors.PasswordResetRequest
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.connectors.PasswordReset
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.connectors.AccountSetupRequest
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.connectors.ChangePassword
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.connectors.VerifyMfaRequest
+import uk.gov.hmrc.thirdpartydeveloperfrontend.builder.DeveloperBuilder
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.connectors._
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.{LoggedInState, Session, SessionInvalid, UpdateProfileRequest}
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.{InvalidCredentials, InvalidEmail, LockedAccount, UnverifiedAccount}
+import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.{LocalUserIdTracker, WireMockExtensions}
 
-class ThirdPartyDeveloperConnectorIntegrationSpec extends BaseConnectorIntegrationSpec with GuiceOneAppPerSuite with DeveloperBuilder with LocalUserIdTracker with WireMockExtensions {
+class ThirdPartyDeveloperConnectorIntegrationSpec extends BaseConnectorIntegrationSpec
+  with GuiceOneAppPerSuite with DeveloperBuilder with LocalUserIdTracker with WireMockExtensions {
   private val stubConfig = Configuration(
     "microservice.services.third-party-developer.port" -> stubPort,
     "json.encryption.key" -> "czV2OHkvQj9FKEgrTWJQZVNoVm1ZcTN0Nnc5eiRDJkY="
@@ -60,7 +52,7 @@ class ThirdPartyDeveloperConnectorIntegrationSpec extends BaseConnectorIntegrati
 
     val userPassword = "password1!"
     val sessionId = "sessionId"
-    val loginRequest = LoginRequest(userEmail, userPassword, mfaMandatedForUser = false)
+    val loginRequest = LoginRequest(userEmail, userPassword, mfaMandatedForUser = false, None)
     val totp = "123456"
     val nonce = "ABC-123"
     val totpAuthenticationRequest = TotpAuthenticationRequest(userEmail, totp, nonce)
@@ -418,110 +410,6 @@ class ThirdPartyDeveloperConnectorIntegrationSpec extends BaseConnectorIntegrati
     }
   }
 
-  "create MFA" should {
-
-    "return the created secret" in new Setup {
-      val expectedSecret = "ABCDEF"
-      implicit val writes = Json.writes[ThirdPartyDeveloperConnector.CreateMfaResponse]
-
-      stubFor(
-        post(urlPathEqualTo(s"/developer/${userId.value}/mfa"))
-          .willReturn(
-            aResponse()
-              .withStatus(OK)
-              .withJsonBody(ThirdPartyDeveloperConnector.CreateMfaResponse(expectedSecret))
-          )
-      )
-      await(underTest.createMfaSecret(userId)) shouldBe expectedSecret
-    }
-  }
-
-  "verify MFA" should {
-    val code = "12341234"
-    val verifyMfaRequest = VerifyMfaRequest(code)
-
-    "return false if verification fails due to InvalidCode" in new Setup {
-      val url = s"/developer/${userId.value}/mfa/verification"
-
-      stubFor(
-        post(urlPathEqualTo(url))
-        .withJsonRequestBody(verifyMfaRequest)
-          .willReturn(
-            aResponse()
-              .withStatus(BAD_REQUEST)
-          )
-      )
-      await(underTest.verifyMfa(userId, code)) shouldBe false
-    }
-
-    "return true if verification is successful" in new Setup {
-      val url = s"/developer/${userId.value}/mfa/verification"
-
-      stubFor(
-        post(urlPathEqualTo(url))
-        .withJsonRequestBody(verifyMfaRequest)
-          .willReturn(
-            aResponse()
-              .withStatus(OK)
-          )
-      )
-      await(underTest.verifyMfa(userId, code)) shouldBe true
-    }
-
-    "throw if verification fails due to error" in new Setup {
-      val url = s"/developer/${userId.value}/mfa/verification"
-
-      stubFor(
-        post(urlPathEqualTo(url))
-        .withJsonRequestBody(verifyMfaRequest)
-          .willReturn(
-            aResponse()
-              .withStatus(INTERNAL_SERVER_ERROR)
-          )
-      )
-      intercept[UpstreamErrorResponse] {
-        await(underTest.verifyMfa(userId, code))
-      }
-    }
-  }
-
-  "enableMFA" should {
-    "return no_content if successfully enabled" in new Setup {
-      stubFor(
-        put(urlPathEqualTo(s"/developer/${userId.value}/mfa/enable"))
-          .willReturn(
-            aResponse()
-              .withStatus(NO_CONTENT)
-          )
-      )
-      await(underTest.enableMfa(userId))
-    }
-  }
-
-
-  "removeMfa" should {
-    "return OK on successful removal" in new Setup {
-      val email = "test.user@example.com"
-      stubFor(post(urlPathEqualTo(s"/developer/${userId.value}/mfa/remove")).willReturn(aResponse().withStatus(OK)))
-
-      await(underTest.removeMfa(userId, email))
-    }
-
-    "throw UpstreamErrorResponse with status of 404 if user not found" in new Setup {
-      val email = "invalid.user@example.com"
-      stubFor(post(urlPathEqualTo(s"/developer/${userId.value}/mfa/remove")).willReturn(aResponse().withStatus(NOT_FOUND)))
-
-      intercept[UpstreamErrorResponse](await(underTest.removeMfa(userId, email))).statusCode shouldBe NOT_FOUND
-    }
-
-    "throw UpstreamErrorResponse with status of 500 if it failed to remove MFA" in new Setup {
-      val email = "test.user@example.com"
-      stubFor(post(urlPathEqualTo(s"/developer/${userId.value}/mfa/remove")).willReturn(aResponse().withStatus(INTERNAL_SERVER_ERROR)))
-
-      intercept[UpstreamErrorResponse](await(underTest.removeMfa(userId, email))).statusCode shouldBe INTERNAL_SERVER_ERROR
-    }
-  }
-
   "authenticate" should {
     "return the session containing the user when the credentials are valid and MFA is disabled" in new Setup {
 
@@ -535,6 +423,7 @@ class ThirdPartyDeveloperConnectorIntegrationSpec extends BaseConnectorIntegrati
               .withBody(s"""
                  |{
                  |  "accessCodeRequired": false,
+                 |  "mfaEnabled": false,
                  |  "session": {
                  |    "sessionId": "$sessionId",
                  |    "loggedInState": "LOGGED_IN",
@@ -553,7 +442,7 @@ class ThirdPartyDeveloperConnectorIntegrationSpec extends BaseConnectorIntegrati
       val result: UserAuthenticationResponse = await(underTest.authenticate(loginRequest))
 
       verify(1, postRequestedFor(urlMatching("/authenticate")).withRequestBody(equalToJson(encryptedLoginRequest.toString)))
-      result shouldBe UserAuthenticationResponse(accessCodeRequired = false, session = Some(Session(sessionId, buildDeveloper(userEmail), LoggedInState.LOGGED_IN)))
+      result shouldBe UserAuthenticationResponse(accessCodeRequired = false, mfaEnabled= false, session = Some(Session(sessionId, buildDeveloper(userEmail), LoggedInState.LOGGED_IN)))
     }
 
     "return the nonce when the credentials are valid and MFA is enabled" in new Setup {
@@ -568,6 +457,7 @@ class ThirdPartyDeveloperConnectorIntegrationSpec extends BaseConnectorIntegrati
               .withBody(s"""
                  |{
                  |  "accessCodeRequired": true,
+                 |  "mfaEnabled": true,
                  |  "nonce": "$nonce"
                  |}""".stripMargin)
           )
@@ -576,7 +466,7 @@ class ThirdPartyDeveloperConnectorIntegrationSpec extends BaseConnectorIntegrati
       val result: UserAuthenticationResponse = await(underTest.authenticate(loginRequest))
 
       verify(1, postRequestedFor(urlEqualTo("/authenticate")).withRequestBody(equalToJson(encryptedLoginRequest.toString)))
-      result shouldBe UserAuthenticationResponse(accessCodeRequired = true, Some(nonce))
+      result shouldBe UserAuthenticationResponse(accessCodeRequired = true, mfaEnabled = true, Some(nonce))
     }
 
     "throw Invalid credentials when the credentials are invalid" in new Setup {
@@ -590,7 +480,7 @@ class ThirdPartyDeveloperConnectorIntegrationSpec extends BaseConnectorIntegrati
           )
       )
 
-      intercept[InvalidCredentials](await(underTest.authenticate(LoginRequest(userEmail, userPassword, mfaMandatedForUser = false))))
+      intercept[InvalidCredentials](await(underTest.authenticate(LoginRequest(userEmail, userPassword, mfaMandatedForUser = false, None))))
     }
 
     "throw LockedAccount exception when the account is locked" in new Setup {
@@ -605,7 +495,7 @@ class ThirdPartyDeveloperConnectorIntegrationSpec extends BaseConnectorIntegrati
       )
 
       intercept[LockedAccount] {
-        await(underTest.authenticate(LoginRequest(userEmail, userPassword, mfaMandatedForUser = false)))
+        await(underTest.authenticate(LoginRequest(userEmail, userPassword, mfaMandatedForUser = false, None)))
       }
     }
 
@@ -621,7 +511,7 @@ class ThirdPartyDeveloperConnectorIntegrationSpec extends BaseConnectorIntegrati
       )
 
       intercept[UnverifiedAccount] {
-        await(underTest.authenticate(LoginRequest(userEmail, userPassword, mfaMandatedForUser = false)))
+        await(underTest.authenticate(LoginRequest(userEmail, userPassword, mfaMandatedForUser = false, None)))
       }
     }
 
@@ -636,7 +526,7 @@ class ThirdPartyDeveloperConnectorIntegrationSpec extends BaseConnectorIntegrati
       )
 
       intercept[UpstreamErrorResponse] {
-        await(underTest.authenticate(LoginRequest(userEmail, userPassword, mfaMandatedForUser = false)))
+        await(underTest.authenticate(LoginRequest(userEmail, userPassword, mfaMandatedForUser = false, None)))
       }.statusCode shouldBe INTERNAL_SERVER_ERROR
     }
   }

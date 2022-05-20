@@ -16,9 +16,11 @@
 
 package uk.gov.hmrc.thirdpartydeveloperfrontend.service
 
+import uk.gov.hmrc.apiplatform.modules.mfa.service.MfaMandateService
 import uk.gov.hmrc.thirdpartydeveloperfrontend.connectors.ThirdPartyDeveloperConnector
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.connectors.{LoginRequest, TotpAuthenticationRequest, UserAuthenticationResponse}
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.{Session, SessionInvalid}
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.{Session, SessionInvalid, UserId}
+
 import javax.inject.{Inject, Singleton}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.repositories.FlowRepository
 import uk.gov.hmrc.http.HeaderCarrier
@@ -26,16 +28,18 @@ import uk.gov.hmrc.http.HeaderCarrier
 import scala.concurrent.{ExecutionContext, Future}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.InvalidEmail
 
+import java.util.UUID
+
 @Singleton
 class SessionService @Inject()(val thirdPartyDeveloperConnector: ThirdPartyDeveloperConnector,
                                val mfaMandateService: MfaMandateService,
                                val flowRepository: FlowRepository)(implicit val ec: ExecutionContext) {
-  def authenticate(emailAddress: String, password: String)(implicit hc: HeaderCarrier): Future[UserAuthenticationResponse] = {
+  def authenticate(emailAddress: String, password: String, deviceSessionId: Option[UUID])(implicit hc: HeaderCarrier): Future[(UserAuthenticationResponse, UserId)] = {
     for {
       coreUser <- thirdPartyDeveloperConnector.findUserId(emailAddress).map(_.getOrElse(throw new InvalidEmail))
       mfaMandatedForUser <- mfaMandateService.isMfaMandatedForUser(coreUser.id)
-      response <- thirdPartyDeveloperConnector.authenticate(LoginRequest(emailAddress, password, mfaMandatedForUser))
-    } yield response
+      response <- thirdPartyDeveloperConnector.authenticate(LoginRequest(emailAddress, password, mfaMandatedForUser, deviceSessionId))
+    } yield (response, coreUser.id)
   }
 
   def authenticateTotp(emailAddress: String, totp: String, nonce: String)(implicit hc: HeaderCarrier): Future[Session] = {

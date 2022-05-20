@@ -16,27 +16,31 @@
 
 package uk.gov.hmrc.thirdpartydeveloperfrontend.controllers
 
-import uk.gov.hmrc.thirdpartydeveloperfrontend.config.ApplicationConfig
-import uk.gov.hmrc.thirdpartydeveloperfrontend.config.ErrorHandler
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain._
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.connectors.UserAuthenticationResponse
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.DeveloperSession
-import javax.inject.{Inject, Singleton}
+import play.api.data.Form
+import play.api.data.Forms._
 import play.api.libs.crypto.CookieSigner
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents, Request, Result, Session => PlaySession}
 import uk.gov.hmrc.apiplatform.modules.common.services.ApplicationLogger
-import uk.gov.hmrc.thirdpartydeveloperfrontend.service._
-import uk.gov.hmrc.thirdpartydeveloperfrontend.service.AuditAction._
+import uk.gov.hmrc.apiplatform.modules.mfa.connectors.ThirdPartyDeveloperMfaConnector
+import uk.gov.hmrc.apiplatform.modules.mfa.models.DeviceSession
+import uk.gov.hmrc.apiplatform.modules.mfa.service.MfaMandateService
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.play.audit.http.connector.AuditResult
+import uk.gov.hmrc.thirdpartydeveloperfrontend.config.{ApplicationConfig, ErrorHandler}
+import uk.gov.hmrc.thirdpartydeveloperfrontend.connectors.ThirdPartyDeveloperConnector
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain._
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.connectors.UserAuthenticationResponse
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.controllers.MfaMandateDetails
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.{DeveloperSession, UserId}
+import uk.gov.hmrc.thirdpartydeveloperfrontend.service.AuditAction._
+import uk.gov.hmrc.thirdpartydeveloperfrontend.service._
 import views.html._
 import views.html.protectaccount._
-import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.profile.ProtectAccountForm
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.controllers.MfaMandateDetails
 
-import scala.concurrent.{ExecutionContext, Future}
+import java.util.UUID
+import javax.inject.{Inject, Singleton}
 import scala.concurrent.Future.successful
-import uk.gov.hmrc.thirdpartydeveloperfrontend.connectors.ThirdPartyDeveloperConnector
+import scala.concurrent.{ExecutionContext, Future}
 
 trait Auditing {
   val auditService: AuditService
@@ -57,6 +61,7 @@ class UserLoginAccount @Inject()(val auditService: AuditService,
                                  val subscriptionFieldsService: SubscriptionFieldsService,
                                  tpdService: ThirdPartyDeveloperConnector,
                                  val sessionService: SessionService,
+                                 val thirdPartyDeveloperMfaConnector: ThirdPartyDeveloperMfaConnector,
                                  mcc: MessagesControllerComponents,
                                  val mfaMandateService: MfaMandateService,
                                  val cookieSigner : CookieSigner,
@@ -102,21 +107,41 @@ class UserLoginAccount @Inject()(val auditService: AuditService,
     }
   }
 
+
   private def routeToLoginOr2SV(login: LoginForm,
                                 userAuthenticationResponse: UserAuthenticationResponse,
-                                playSession: PlaySession)(implicit request: Request[AnyContent]): Future[Result] = {
+                                playSession: PlaySession,
+                                userId: UserId)(implicit request: Request[AnyContent]): Future[Result] = {
 
     // In each case retain the Play session so that 'access_uri' query param, if set, is used at the end of the 2SV reminder flow
-    userAuthenticationResponse.session match {
-      case Some(session) if session.loggedInState.isLoggedIn => audit(LoginSucceeded, DeveloperSession.apply(session))
+    (userAuthenticationResponse.session, userAuthenticationResponse.accessCodeRequired) match {
+      case (Some(session), false) if session.loggedInState.isLoggedIn => audit(LoginSucceeded, DeveloperSession.apply(session))
+        if(userAuthenticationResponse.mfaEnabled) {
+          successful(
+            withSessionCookie(
+              Redirect(routes.ManageApplications.manageApps(), SEE_OTHER).withSession(playSession),
+              session.sessionId
+            )
+          )
+        } else {
+          successful(
+            withSessionCookie(
+              Redirect(routes.UserLoginAccount.get2svRecommendationPage(), SEE_OTHER).withSession(playSession),
+              session.sessionId
+            )
+          )
+        }
+
+      case (Some(session), false) if session.loggedInState.isPartLoggedInEnablingMFA =>
         successful(
           withSessionCookie(
-            Redirect(routes.UserLoginAccount.get2svRecommendationPage(), SEE_OTHER).withSession(playSession),
+            Redirect(uk.gov.hmrc.apiplatform.modules.mfa.controllers.profile.routes.ProtectAccount.getProtectAccount().url).withSession(playSession),
             session.sessionId
           )
         )
 
-      case None => {
+      case (None, true) =>
+        // TODO: delete device session cookie --- If Device cookie is going to be refreshed / recreated do we need to delete it?
         successful(
           Redirect(
             routes.UserLoginAccount.enterTotp(), SEE_OTHER
@@ -124,16 +149,9 @@ class UserLoginAccount @Inject()(val auditService: AuditService,
             playSession + ("emailAddress" -> login.emailaddress) + ("nonce" -> userAuthenticationResponse.nonce.get)
           )
         )
-      }
 
-      case Some(session) if session.loggedInState.isPartLoggedInEnablingMFA => {
-        successful(
-          withSessionCookie(
-            Redirect(profile.routes.ProtectAccount.getProtectAccount().url).withSession(playSession),
-            session.sessionId
-          )
-        )
-      }
+
+
     }
   }
 
@@ -143,10 +161,10 @@ class UserLoginAccount @Inject()(val auditService: AuditService,
     requestForm.fold(
       errors => successful(BadRequest(signInView("Sign in", errors))),
       login => {
-
+        val deviceSessionId = request.cookies.get("DEVICE_SESS_ID").flatMap(x => decodeCookie(x.value)).map(UUID.fromString)
         for {
-          userAuthenticationResponse <- sessionService.authenticate(login.emailaddress, login.password)
-          response <- routeToLoginOr2SV(login, userAuthenticationResponse, request.session)
+          (userAuthenticationResponse, userId) <- sessionService.authenticate(login.emailaddress, login.password, deviceSessionId)
+          response <- routeToLoginOr2SV(login, userAuthenticationResponse, request.session, userId)
         } yield response
       } recover {
         case _: InvalidEmail =>
@@ -170,22 +188,33 @@ class UserLoginAccount @Inject()(val auditService: AuditService,
   }
 
   def enterTotp: Action[AnyContent] = Action.async { implicit request =>
-      Future.successful(Ok(logInAccessCodeView(ProtectAccountForm.form)))
+      Future.successful(Ok(logInAccessCodeView(MfaAccessCodeForm.form)))
   }
 
   def authenticateTotp: Action[AnyContent] = Action.async { implicit request =>
-    ProtectAccountForm.form.bindFromRequest.fold(
+    MfaAccessCodeForm.form.bindFromRequest.fold(
       errors => successful(BadRequest(logInAccessCodeView(errors))),
       validForm => {
         val email = request.session.get("emailAddress").get
         sessionService.authenticateTotp(email, validForm.accessCode, request.session.get("nonce").get) flatMap { session =>
           audit(LoginSucceeded, DeveloperSession.apply(session))
-          loginSucceeded(request).map(r => withSessionCookie(r, session.sessionId))
+          //create device session if 7 days checkbox clicked (from form)  then create cookie
+          if(validForm.rememberMe) {
+            thirdPartyDeveloperMfaConnector.createDeviceSession(session.developer.userId) flatMap {
+              case Some(deviceSession: DeviceSession) =>
+                loginSucceeded(request).map(r => withSessionAndDeviceCookies(r, session.sessionId, deviceSession.deviceSessionId.toString))
+              case _ => successful(InternalServerError(""))
+            }
+          }else {
+            loginSucceeded(request).map(r => withSessionCookie(r, session.sessionId))
+          }
+
+
         } recover {
           case _: InvalidCredentials =>
             logger.warn("Login failed due to invalid access code")
             audit(LoginFailedDueToInvalidAccessCode, Map("developerEmail" -> email))
-            Unauthorized(logInAccessCodeView(ProtectAccountForm.form.fill(validForm).withError("accessCode", "You have entered an incorrect access code")))
+            Unauthorized(logInAccessCodeView(MfaAccessCodeForm.form.fill(validForm).withError("accessCode", "You have entered an incorrect access code")))
         }
       }
     )
@@ -200,8 +229,8 @@ class UserLoginAccount @Inject()(val auditService: AuditService,
   }
 
   def confirm2SVHelp(): Action[AnyContent] = loggedOutAction { implicit request =>
-    import cats.implicits._
     import cats.data.OptionT
+    import cats.implicits._
 
     val email = request.session.get("emailAddress").getOrElse("")
 
@@ -223,3 +252,17 @@ class UserLoginAccount @Inject()(val auditService: AuditService,
     } yield Ok(protectAccountNoAccessCodeCompleteView())
   }
 }
+
+
+final case class MfaAccessCodeForm(accessCode: String, rememberMe: Boolean)
+
+object MfaAccessCodeForm {
+  def form: Form[MfaAccessCodeForm] = Form(
+    mapping(
+      "accessCode" -> text.verifying(FormKeys.accessCodeInvalidKey, s => s.matches("^[0-9]{6}$")),
+      "rememberMe" -> boolean
+
+    )(MfaAccessCodeForm.apply)(MfaAccessCodeForm.unapply)
+  )
+}
+

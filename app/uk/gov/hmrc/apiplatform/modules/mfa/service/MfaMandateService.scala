@@ -14,17 +14,18 @@
  * limitations under the License.
  */
 
-package uk.gov.hmrc.thirdpartydeveloperfrontend.service
+package uk.gov.hmrc.apiplatform.modules.mfa.service
 
-import uk.gov.hmrc.thirdpartydeveloperfrontend.config.ApplicationConfig
-import javax.inject.{Inject, Singleton}
 import org.joda.time.{Days, LocalDate}
 import uk.gov.hmrc.http.HeaderCarrier
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.UserId
-
-import scala.concurrent.{ExecutionContext, Future}
+import uk.gov.hmrc.thirdpartydeveloperfrontend.config.ApplicationConfig
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.CollaboratorRole._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.Environment._
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.UserId
+import uk.gov.hmrc.thirdpartydeveloperfrontend.service.AppsByTeamMemberService
+
+import javax.inject.{Inject, Singleton}
+import scala.concurrent.{ExecutionContext, Future}
 
 @Singleton
 class MfaMandateService @Inject()(val appConfig: ApplicationConfig, val appsByTeamMember: AppsByTeamMemberService)(implicit val ec: ExecutionContext) {

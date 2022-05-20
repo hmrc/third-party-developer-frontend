@@ -216,7 +216,7 @@ object ThirdPartyDeveloperStub {
         .willReturn(
           aResponse()
             .withStatus(OK)
-            .withBody(Json.toJson(UserAuthenticationResponse(false, None, session)).toString())
+            .withBody(Json.toJson(UserAuthenticationResponse(false, false, None, session)).toString())
             .withHeader("content-type", "application/json")
         )
     )

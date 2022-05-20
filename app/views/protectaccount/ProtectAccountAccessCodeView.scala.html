@@ -18,11 +18,13 @@
 @import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.views.BackButtonWithJavaScript
 @import views.html.include.DevMain2
 @import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.DeveloperSession
-@import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.profile.routes
+@import uk.gov.hmrc.apiplatform.modules.mfa.controllers.profile.routes
+@import uk.gov.hmrc.apiplatform.modules.mfa.controllers.profile.ProtectAccountForm
 
 @this(devMain: DevMain2)
 
-@(form: Form[uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.profile.ProtectAccountForm])(implicit messages: Messages, request: play.api.mvc.Request[Any], loggedIn: DeveloperSession, appConfig: ApplicationConfig)
+
+@(form: Form[ProtectAccountForm])(implicit messages: Messages, request: play.api.mvc.Request[Any], loggedIn: DeveloperSession, appConfig: ApplicationConfig)
 
 @devMain(
   title = "Enter your access code",
@@ -55,6 +57,8 @@
         aria-describedby="access-code-hint"
       />
     </div>
+
+      <input id="rememberMe" name="rememberMe" type="hidden" />
 
     <button id="submit" class="govuk-button" type="submit">Continue</button>
   }

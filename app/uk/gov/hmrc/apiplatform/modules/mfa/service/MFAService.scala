@@ -14,29 +14,29 @@
  * limitations under the License.
  */
 
-package uk.gov.hmrc.thirdpartydeveloperfrontend.service
+package uk.gov.hmrc.apiplatform.modules.mfa.service
 
-import uk.gov.hmrc.thirdpartydeveloperfrontend.connectors.ThirdPartyDeveloperConnector
-import javax.inject.{Inject, Singleton}
+import uk.gov.hmrc.apiplatform.modules.mfa.connectors.ThirdPartyDeveloperMfaConnector
 import uk.gov.hmrc.http.HeaderCarrier
-
-import scala.concurrent.{ExecutionContext, Future}
-import scala.concurrent.Future.successful
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.UserId
 
+import javax.inject.{Inject, Singleton}
+import scala.concurrent.Future.successful
+import scala.concurrent.{ExecutionContext, Future}
+
 @Singleton
-class MFAService @Inject()(tpdConnector: ThirdPartyDeveloperConnector)(implicit val ec: ExecutionContext) {
+class MFAService @Inject()(thirdPartyDeveloperMfaConnector: ThirdPartyDeveloperMfaConnector)(implicit val ec: ExecutionContext) {
 
   def enableMfa(userId: UserId, totpCode: String)(implicit hc: HeaderCarrier): Future[MFAResponse] = {
-    tpdConnector.verifyMfa(userId, totpCode) flatMap {
-      case true => tpdConnector.enableMfa(userId).map(_ => MFAResponse(true))
+    thirdPartyDeveloperMfaConnector.verifyMfa(userId, totpCode) flatMap {
+      case true => thirdPartyDeveloperMfaConnector.enableMfa(userId).map(_ => MFAResponse(true))
       case _ => successful(MFAResponse(false))
     }
   }
 
   def removeMfa(userId: UserId, email: String, totpCode: String)(implicit hc: HeaderCarrier): Future[MFAResponse] = {
-    tpdConnector.verifyMfa(userId, totpCode) flatMap {
-      case true => tpdConnector.removeMfa(userId, email).map(_ => MFAResponse(true))
+    thirdPartyDeveloperMfaConnector.verifyMfa(userId, totpCode) flatMap {
+      case true => thirdPartyDeveloperMfaConnector.removeMfa(userId, email).map(_ => MFAResponse(true))
       case _ => successful(MFAResponse(false))
     }
   }

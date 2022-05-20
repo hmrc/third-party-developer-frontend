@@ -18,7 +18,9 @@ package uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.connectors
 
 import play.api.libs.json.Json
 
-case class LoginRequest(email: String, password: String, mfaMandatedForUser: Boolean)
+import java.util.UUID
+
+case class LoginRequest(email: String, password: String, mfaMandatedForUser: Boolean, deviceSessionId: Option[UUID])
 
 object LoginRequest {
   implicit val format = Json.format[LoginRequest]

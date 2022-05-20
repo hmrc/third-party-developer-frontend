@@ -17,7 +17,6 @@
 package uk.gov.hmrc.thirdpartydeveloperfrontend.controllers
 
 import java.net.URI
-
 import uk.gov.hmrc.thirdpartydeveloperfrontend.builder.DeveloperBuilder
 import uk.gov.hmrc.thirdpartydeveloperfrontend.config.ErrorHandler
 import uk.gov.hmrc.thirdpartydeveloperfrontend.connectors.ThirdPartyDeveloperConnector
@@ -32,8 +31,10 @@ import play.api.mvc.{AnyContentAsFormUrlEncoded, Result}
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
 import play.filters.csrf.CSRF.TokenProvider
+import uk.gov.hmrc.apiplatform.modules.mfa.connectors.ThirdPartyDeveloperMfaConnector
+import uk.gov.hmrc.apiplatform.modules.mfa.controllers.profile.ProtectAccount
+import uk.gov.hmrc.apiplatform.modules.mfa.service.{MFAResponse, MFAService, MfaMandateService}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.qr.{OtpAuthUri, QRCode}
-import uk.gov.hmrc.thirdpartydeveloperfrontend.service.{MfaMandateService, MFAResponse, MFAService}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.WithCSRFAddToken
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.WithLoggedInSession._
 import views.html.protectaccount._
@@ -41,11 +42,8 @@ import views.html.protectaccount._
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 import scala.concurrent.Future.successful
-import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.profile.ProtectAccount
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.UserId
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.LocalUserIdTracker
-
-import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.profile.routes.ProtectAccount
 
 class ProtectAccountSpec extends BaseControllerSpec with WithCSRFAddToken with DeveloperBuilder with LocalUserIdTracker {
 
@@ -71,6 +69,7 @@ class ProtectAccountSpec extends BaseControllerSpec with WithCSRFAddToken with D
 
     val underTest: ProtectAccount = new ProtectAccount(
       mock[ThirdPartyDeveloperConnector],
+      mock[ThirdPartyDeveloperMfaConnector],
       mock[OtpAuthUri],
       mock[MFAService],
       sessionServiceMock,
@@ -114,7 +113,7 @@ class ProtectAccountSpec extends BaseControllerSpec with WithCSRFAddToken with D
   trait SetupSuccessfulStart2SV extends Setup {
     when(underTest.otpAuthUri.apply(secret.toLowerCase(), issuer, loggedInDeveloper.email)).thenReturn(otpUri)
     when(underTest.qrCode.generateDataImageBase64(otpUri.toString)).thenReturn(qrImage)
-    when(underTest.thirdPartyDeveloperConnector.createMfaSecret(eqTo(loggedInDeveloper.userId))(*))
+    when(underTest.thirdPartyDeveloperMfaConnector.createMfaSecret(eqTo(loggedInDeveloper.userId))(*))
       .thenReturn(successful(secret))
   }
 
@@ -237,7 +236,7 @@ class ProtectAccountSpec extends BaseControllerSpec with WithCSRFAddToken with D
         private val result = addToken(underTest.protectAccount())(request)
 
         status(result) shouldBe SEE_OTHER
-        redirectLocation(result) shouldBe Some(ProtectAccount.getProtectAccountCompletedPage().url)
+        redirectLocation(result) shouldBe Some(uk.gov.hmrc.apiplatform.modules.mfa.controllers.profile.routes.ProtectAccount.getProtectAccountCompletedPage().url)
 
         verify(underTest.thirdPartyDeveloperConnector)
           .updateSessionLoggedInState(eqTo(sessionId), eqTo(UpdateLoggedInStateRequest(LoggedInState.LOGGED_IN)))(*)
@@ -268,7 +267,7 @@ class ProtectAccountSpec extends BaseControllerSpec with WithCSRFAddToken with D
         private val result = addToken(underTest.remove2SV())(request)
 
         status(result) shouldBe SEE_OTHER
-        redirectLocation(result) shouldBe Some(ProtectAccount.get2SVRemovalCompletePage().url)
+        redirectLocation(result) shouldBe Some(uk.gov.hmrc.apiplatform.modules.mfa.controllers.profile.routes.ProtectAccount.get2SVRemovalCompletePage().url)
       }
     }
   }

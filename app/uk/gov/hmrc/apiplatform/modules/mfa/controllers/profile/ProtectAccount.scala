@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.profile
+package uk.gov.hmrc.apiplatform.modules.mfa.controllers.profile
 
 import uk.gov.hmrc.thirdpartydeveloperfrontend.config.ApplicationConfig
 import uk.gov.hmrc.thirdpartydeveloperfrontend.config.ErrorHandler
@@ -22,13 +22,16 @@ import uk.gov.hmrc.thirdpartydeveloperfrontend.connectors.ThirdPartyDeveloperCon
 import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.connectors.UpdateLoggedInStateRequest
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.LoggedInState
+
 import javax.inject.{Inject, Singleton}
 import play.api.data.Form
 import play.api.data.Forms._
 import play.api.libs.crypto.CookieSigner
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents, Result}
+import uk.gov.hmrc.apiplatform.modules.mfa.connectors.ThirdPartyDeveloperMfaConnector
+import uk.gov.hmrc.apiplatform.modules.mfa.service.{MFAService, MfaMandateService}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.qr.{OtpAuthUri, QRCode}
-import uk.gov.hmrc.thirdpartydeveloperfrontend.service.{MfaMandateService, MFAService, SessionService}
+import uk.gov.hmrc.thirdpartydeveloperfrontend.service.SessionService
 import views.html.protectaccount._
 
 import scala.concurrent.{ExecutionContext, Future}
@@ -39,6 +42,7 @@ import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.FormKeys
 @Singleton
 class ProtectAccount @Inject()(
   val thirdPartyDeveloperConnector: ThirdPartyDeveloperConnector,
+  val thirdPartyDeveloperMfaConnector: ThirdPartyDeveloperMfaConnector,
   val otpAuthUri: OtpAuthUri,
   val mfaService: MFAService,
   val sessionService: SessionService,
@@ -63,7 +67,7 @@ class ProtectAccount @Inject()(
   val qrCode = QRCode(scale)
 
   def getQrCode: Action[AnyContent] = atLeastPartLoggedInEnablingMfaAction { implicit request =>
-    thirdPartyDeveloperConnector.createMfaSecret(request.userId).map(secret => {
+    thirdPartyDeveloperMfaConnector.createMfaSecret(request.userId).map(secret => {
       val uri = otpAuthUri(secret.toLowerCase, "HMRC Developer Hub", request.developerSession.email)
       val qrImg = qrCode.generateDataImageBase64(uri.toString)
       Ok(protectAccountSetupView(secret.toLowerCase().grouped(4).mkString(" "), qrImg))
@@ -91,7 +95,7 @@ class ProtectAccount @Inject()(
 
     def logonAndComplete(): Result = {
       thirdPartyDeveloperConnector.updateSessionLoggedInState(request.sessionId, UpdateLoggedInStateRequest(LoggedInState.LOGGED_IN))
-      Redirect(profile.routes.ProtectAccount.getProtectAccountCompletedPage())
+      Redirect(uk.gov.hmrc.apiplatform.modules.mfa.controllers.profile.routes.ProtectAccount.getProtectAccountCompletedPage())
     }
 
     def invalidCode(form: ProtectAccountForm): Result = {
@@ -105,7 +109,7 @@ class ProtectAccount @Inject()(
 
     ProtectAccountForm.form.bindFromRequest.fold(form => {
       Future.successful(BadRequest(protectAccountAccessCodeView(form)))
-  },
+    },
       (form: ProtectAccountForm) => {
         for {
           mfaResponse <- mfaService.enableMfa(request.userId, form.accessCode)
@@ -127,8 +131,8 @@ class ProtectAccount @Inject()(
     },
       form => {
         form.removeConfirm match {
-          case Some("Yes") => Future.successful(Redirect(profile.routes.ProtectAccount.get2SVRemovalAccessCodePage()))
-          case _ => Future.successful(Redirect(profile.routes.ProtectAccount.getProtectAccount()))
+          case Some("Yes") => Future.successful(Redirect(uk.gov.hmrc.apiplatform.modules.mfa.controllers.profile.routes.ProtectAccount.get2SVRemovalAccessCodePage()))
+          case _ => Future.successful(Redirect(uk.gov.hmrc.apiplatform.modules.mfa.controllers.profile.routes.ProtectAccount.getProtectAccount()))
         }
       })
   }
@@ -142,9 +146,10 @@ class ProtectAccount @Inject()(
       Future.successful(BadRequest(protectAccountRemovalAccessCodeView(form)))
     },
       form => {
+
         mfaService.removeMfa(request.userId, request.developerSession.email, form.accessCode).map(r =>
           r.totpVerified match {
-            case true => Redirect(profile.routes.ProtectAccount.get2SVRemovalCompletePage())
+            case true => removeDeviceSessionCookieFromResult(Redirect(uk.gov.hmrc.apiplatform.modules.mfa.controllers.profile.routes.ProtectAccount.get2SVRemovalCompletePage()))
             case _ =>
               val protectAccountForm = ProtectAccountForm.form.fill(form)
                 .withError("accessCode", "You have entered an incorrect access code")
@@ -166,7 +171,9 @@ object ProtectAccountForm {
   def form: Form[ProtectAccountForm] = Form(
     mapping(
       "accessCode" -> text.verifying(FormKeys.accessCodeInvalidKey, s => s.matches("^[0-9]{6}$"))
+
     )(ProtectAccountForm.apply)(ProtectAccountForm.unapply)
   )
 }
+
 

@@ -79,6 +79,10 @@ trait DevHubAuthorization extends FrontendHeaderCarrierProvider with CookieEncod
     implicit request: MessagesRequest[AnyContent] => loadSession.flatMap(maybeDeveloperSession => body(new MaybeUserRequest(maybeDeveloperSession, request)))
   }
 
+  def removeDeviceSessionCookieFromResult(result: Result): Result = {
+    result.discardingCookies(DiscardingCookie(devicecookieName))
+  }
+
   private[security] def loadSession[A](implicit ec: ExecutionContext, request: Request[A]): Future[Option[DeveloperSession]] = {
     (for {
       cookie <- request.cookies.get(cookieName)
@@ -110,8 +114,13 @@ trait ExtendedDevHubAuthorization extends DevHubAuthorization {
     Future.successful(Redirect(uri).withNewSession)
   }
 
+
   def withSessionCookie(result: Result, sessionId: String): Result = {
     result.withCookies(createCookie(sessionId))
+  }
+
+  def withSessionAndDeviceCookies(result: Result, sessionId: String, deviceSessionId: String): Result = {
+    result.withCookies(createCookie(sessionId), createDeviceCookie(deviceSessionId))
   }
 
   def extractSessionIdFromCookie(request: RequestHeader): Option[String] = {
@@ -126,7 +135,8 @@ trait ExtendedDevHubAuthorization extends DevHubAuthorization {
       .map(sessionId => sessionService.destroy(sessionId))
   }
 
-  def removeCookieFromResult(result: Result): Result = {
+  def removeSessionCookieFromResult(result: Result): Result = {
     result.discardingCookies(DiscardingCookie(cookieName))
   }
+
 }

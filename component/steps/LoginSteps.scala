@@ -16,7 +16,6 @@
 
 package steps
 
-import com.github.tomakehurst.wiremock.client.WireMock._
 import io.cucumber.datatable.DataTable
 import io.cucumber.scala.Implicits._
 import io.cucumber.scala.{EN, ScalaDsl}
@@ -26,11 +25,10 @@ import org.scalatest.matchers.should.Matchers
 import pages._
 import play.api.http.Status._
 import play.api.libs.json.{Format, Json}
-import stubs.{DeveloperStub, Stubs}
-import uk.gov.hmrc.thirdpartydeveloperfrontend.builder.DeveloperBuilder
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.connectors.{LoginRequest, PasswordResetRequest, UserAuthenticationResponse, VerifyMfaRequest}
+import stubs.{DeveloperStub, MfaStub, Stubs}
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.connectors.{LoginRequest, PasswordResetRequest, UserAuthenticationResponse}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.{Developer, LoggedInState, Session}
-import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.{GlobalUserIdTracker, UserIdTracker}
+import utils.ComponentTestDeveloperBuilder
 
 case class MfaSecret(secret: String)
 
@@ -45,8 +43,8 @@ object TestContext {
   var sessionIdForMfaMandatingUser: String = ""
 }
 
-class LoginSteps extends ScalaDsl with EN with Matchers with NavigationSugar with PageSugar with CustomMatchers with DeveloperBuilder with UserIdTracker {
-  def idOf(email: String) = GlobalUserIdTracker.idOf(email)
+class LoginSteps extends ScalaDsl with EN with Matchers with NavigationSugar with PageSugar with CustomMatchers with ComponentTestDeveloperBuilder  {
+
 
   implicit val webDriver: WebDriver = Env.driver
 
@@ -79,66 +77,23 @@ class LoginSteps extends ScalaDsl with EN with Matchers with NavigationSugar wit
     TestContext.sessionIdForloggedInDeveloper = setupLoggedOrPartLoggedInDeveloper(developer, password, LoggedInState.LOGGED_IN)
     TestContext.sessionIdForMfaMandatingUser = setupLoggedOrPartLoggedInDeveloper(developer, password, LoggedInState.PART_LOGGED_IN_ENABLING_MFA)
 
-    setupGettingDeveloperByEmail(developer)
+    DeveloperStub.setupGettingDeveloperByEmail(developer)
 
-    setupGettingMfaSecret(developer)
+    MfaStub.setupGettingMfaSecret(developer)
 
-    setupVerificationOfAccessCode(developer)
+    MfaStub.setupVerificationOfAccessCode(developer)
 
-    setUpGetCombinedApis()
+    DeveloperStub.setUpGetCombinedApis()
 
-    setupEnablingMfa(developer)
+    MfaStub.setupEnablingMfa(developer)
   }
 
-  private def setupVerificationOfAccessCode(developer: Developer): Unit = {
-    stubFor(
-      post(urlPathEqualTo(s"/developer/${developer.userId.value}/mfa/verification"))
-        .withRequestBody(equalTo(Json.toJson(VerifyMfaRequest(accessCode)).toString()))
-        .willReturn(aResponse()
-          .withStatus(NO_CONTENT)
-        ))
-  }
-
-  private def setupEnablingMfa(developer: Developer): Unit = {
-    stubFor(
-      put(urlPathEqualTo(s"/developer/${developer.userId.value}/mfa/enable"))
-        .willReturn(aResponse()
-          .withStatus(OK)
-        ))
-  }
-
-  private def setupGettingMfaSecret(developer: Developer): Unit = {
-    stubFor(
-      post(urlPathEqualTo(s"/developer/${developer.userId.value}/mfa"))
-        .willReturn(aResponse()
-          .withStatus(OK)
-          .withBody(Json.toJson(MfaSecret("mySecret")).toString())))
-  }
-
-  private def setupGettingDeveloperByEmail(developer: Developer): Unit = {
-    stubFor(get(urlPathEqualTo("/developer"))
-      .withQueryParam("developerId", equalTo(developer.userId.asText))
-      .willReturn(aResponse()
-        .withStatus(OK)
-        .withBody(Json.toJson(developer).toString())))
-  }
-
-  private def setUpGetCombinedApis(): Unit = {
-    stubFor(get(urlPathEqualTo("/api-categories/combined"))
-    .willReturn(aResponse()
-    .withStatus(OK)
-    .withBody("[]")))
-  }
 
   Given("""^'(.*)' session is uplifted to LoggedIn$""") { email: String =>
     if (email != TestContext.developer.email) {
       throw new IllegalArgumentException(s"Can only know how to uplift ${TestContext.developer.email}'s session")
     }
-
-    val session = Session(TestContext.sessionIdForMfaMandatingUser, TestContext.developer, LoggedInState.LOGGED_IN)
-
-    Stubs.setupRequest(s"/session/${TestContext.sessionIdForMfaMandatingUser}", OK, Json.toJson(session).toString())
-    Stubs.setupDeleteRequest(s"/session/${TestContext.sessionIdForMfaMandatingUser}", OK)
+    MfaStub.setupMfaMandated()
   }
 
   Given("""^I fill in the login form with$""") { (data: DataTable) =>
@@ -164,7 +119,7 @@ class LoginSteps extends ScalaDsl with EN with Matchers with NavigationSugar wit
       val link = webDriver.findElement(By.linkText("Sign out"))
       link.click()
     } catch {
-      case _: org.openqa.selenium.NoSuchElementException =>
+      case _: NoSuchElementException =>
         val menu = webDriver.findElement(By.linkText("Menu"))
         menu.click()
 
@@ -173,10 +128,6 @@ class LoginSteps extends ScalaDsl with EN with Matchers with NavigationSugar wit
     }
   }
 
-  When("""^I enter the correct access code and continue$""") {
-    Setup2svEnterAccessCodePage.enterAccessCode(accessCode)
-    Setup2svEnterAccessCodePage.clickContinue()
-  }
 
   Then("""^I should be sent an email with a link to reset for '(.*)'$""") { email : String =>
     DeveloperStub.verifyResetPassword(PasswordResetRequest(email))
@@ -206,11 +157,11 @@ class LoginSteps extends ScalaDsl with EN with Matchers with NavigationSugar wit
     val sessionId = "sessionId_" + loggedInState.toString
 
     val session = Session(sessionId, developer, loggedInState)
-    val userAuthenticationResponse = UserAuthenticationResponse(accessCodeRequired = false, session = Some(session))
+    val userAuthenticationResponse = UserAuthenticationResponse(accessCodeRequired = false, mfaEnabled= false, session = Some(session))
 
     val mfaMandatedForUser = loggedInState == LoggedInState.PART_LOGGED_IN_ENABLING_MFA
 
-    Stubs.setupEncryptedPostRequest("/authenticate", LoginRequest(developer.email, password, mfaMandatedForUser),
+    Stubs.setupEncryptedPostRequest("/authenticate", LoginRequest(developer.email, password, mfaMandatedForUser, None),
       OK, Json.toJson(userAuthenticationResponse).toString())
 
     Stubs.setupRequest(s"/session/$sessionId", OK, Json.toJson(session).toString())

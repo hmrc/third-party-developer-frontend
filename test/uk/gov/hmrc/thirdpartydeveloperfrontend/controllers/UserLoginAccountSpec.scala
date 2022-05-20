@@ -17,7 +17,6 @@
 package uk.gov.hmrc.thirdpartydeveloperfrontend.controllers
 
 import java.util.UUID
-
 import uk.gov.hmrc.thirdpartydeveloperfrontend.builder.DeveloperBuilder
 import uk.gov.hmrc.thirdpartydeveloperfrontend.config.ErrorHandler
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain._
@@ -41,10 +40,14 @@ import scala.concurrent.Future._
 import views.html.UserDidNotAdd2SVView
 import views.html.Add2SVView
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.LocalUserIdTracker
-import _root_.uk.gov.hmrc.thirdpartydeveloperfrontend.mocks.connectors.ThirdPartyDeveloperConnectorMockModule
+import _root_.uk.gov.hmrc.thirdpartydeveloperfrontend.mocks.connectors.{ThirdPartyDeveloperConnectorMockModule, ThirdPartyDeveloperMfaConnectorMockModule}
+import play.api.mvc.Cookie
+import uk.gov.hmrc.apiplatform.modules.mfa.service.MfaMandateService
+import uk.gov.hmrc.thirdpartydeveloperfrontend.security.CookieEncoding
 
-class UserLoginAccountSpec extends BaseControllerSpec with WithCSRFAddToken with DeveloperBuilder with LocalUserIdTracker {
-  trait Setup extends SessionServiceMock with ThirdPartyDeveloperConnectorMockModule {
+class UserLoginAccountSpec extends BaseControllerSpec with WithCSRFAddToken with DeveloperBuilder with LocalUserIdTracker with CookieEncoding {
+  trait Setup extends SessionServiceMock with ThirdPartyDeveloperConnectorMockModule with ThirdPartyDeveloperMfaConnectorMockModule {
+
     val developer = buildDeveloper()
     val session = Session(UUID.randomUUID().toString, developer, LoggedInState.LOGGED_IN)
     val user = DeveloperSession(session)
@@ -55,6 +58,9 @@ class UserLoginAccountSpec extends BaseControllerSpec with WithCSRFAddToken with
     val nonce = "ABC-123"
 
     private val daysRemaining = 10
+
+    val deviceSessionId = UUID.randomUUID()
+    val deviceSessionCookie = createDeviceCookie(deviceSessionId.toString)
 
     val sessionId = "sessionId"
     val loggedInDeveloper = buildDeveloper()
@@ -76,6 +82,7 @@ class UserLoginAccountSpec extends BaseControllerSpec with WithCSRFAddToken with
       mock[SubscriptionFieldsService],
       TPDMock.aMock,
       sessionServiceMock,
+      TPDMFAMock.aMock,
       mcc,
       mfaMandateService,
       cookieSigner,
@@ -98,8 +105,8 @@ class UserLoginAccountSpec extends BaseControllerSpec with WithCSRFAddToken with
     def mockAuthenticate(email: String, password: String, result: Future[UserAuthenticationResponse],
                          resultShowAdminMfaMandateMessage: Future[Boolean]): Unit = {
 
-      when(underTest.sessionService.authenticate(eqTo(email), eqTo(password))(*))
-        .thenReturn(result)
+      when(underTest.sessionService.authenticate(eqTo(email), eqTo(password), eqTo(Some(deviceSessionId)))(*))
+        .thenReturn(result.map(x => (x, user.developer.userId)) )
 
       when(underTest.mfaMandateService.showAdminMfaMandatedMessage(*[UserId])(*))
         .thenReturn(resultShowAdminMfaMandateMessage)
@@ -113,7 +120,7 @@ class UserLoginAccountSpec extends BaseControllerSpec with WithCSRFAddToken with
       when(underTest.sessionService.destroy(eqTo(session.sessionId))(*))
         .thenReturn(Future.successful(NO_CONTENT))
 
-    when(underTest.sessionService.authenticate(*, *)(*)).thenReturn(failed(new InvalidCredentials))
+    when(underTest.sessionService.authenticate(*, *, *)(*)).thenReturn(failed(new InvalidCredentials))
     when(underTest.sessionService.authenticateTotp(*, *, *)(*)).thenReturn(failed(new InvalidCredentials))
 
     def mockAudit(auditAction: AuditAction, result: Future[AuditResult]): Unit =
@@ -121,7 +128,7 @@ class UserLoginAccountSpec extends BaseControllerSpec with WithCSRFAddToken with
   }
 
   trait SetupWithUserAuthenticationResponse extends Setup {
-    val userAuthenticationResponse = UserAuthenticationResponse(accessCodeRequired = false, session = Some(session))
+    val userAuthenticationResponse = UserAuthenticationResponse(accessCodeRequired = false, mfaEnabled = false, session = Some(session))
   }
 
   trait SetupWithuserAuthenticationResponseWithMfaEnablementRequired extends Setup {
@@ -129,6 +136,7 @@ class UserLoginAccountSpec extends BaseControllerSpec with WithCSRFAddToken with
 
     val userAuthenticationResponseWithMfaEnablementRequired = UserAuthenticationResponse(
         accessCodeRequired = false,
+        mfaEnabled = false,
         nonce = None,
         session = Some(sessionPartLoggedInEnablingMfa))
   }
@@ -136,6 +144,7 @@ class UserLoginAccountSpec extends BaseControllerSpec with WithCSRFAddToken with
   trait SetupWithuserAuthenticationWith2SVResponse extends Setup {
     val userAuthenticationWith2SVResponse = UserAuthenticationResponse(
       accessCodeRequired = true,
+      mfaEnabled = true,
       nonce = Some(nonce),
       session = None)
   }
@@ -157,6 +166,7 @@ class UserLoginAccountSpec extends BaseControllerSpec with WithCSRFAddToken with
       mockAudit(LoginSucceeded, successful(AuditResult.Success))
 
       private val request = FakeRequest()
+        .withCookies(deviceSessionCookie)
         .withSession(sessionParams: _*)
         .withFormUrlEncodedBody((emailFieldName, user.email), (passwordFieldName, userPassword))
 
@@ -184,6 +194,7 @@ class UserLoginAccountSpec extends BaseControllerSpec with WithCSRFAddToken with
       mockAudit(LoginSucceeded, successful(AuditResult.Success))
 
       private val request = FakeRequest()
+        .withCookies(deviceSessionCookie)
         .withSession(sessionParams: _*)
         .withFormUrlEncodedBody((emailFieldName, user.email), (passwordFieldName, userPassword))
 
@@ -202,6 +213,7 @@ class UserLoginAccountSpec extends BaseControllerSpec with WithCSRFAddToken with
       mockAudit(LoginSucceeded, successful(AuditResult.Success))
 
       private val request = FakeRequest()
+        .withCookies(deviceSessionCookie)
         .withSession(sessionParams: _*)
         .withFormUrlEncodedBody((emailFieldName, user.email), (passwordFieldName, userPassword))
 
@@ -220,6 +232,7 @@ class UserLoginAccountSpec extends BaseControllerSpec with WithCSRFAddToken with
       mockAudit(LoginSucceeded, successful(AuditResult.Success))
 
       private val request = FakeRequest()
+        .withCookies(deviceSessionCookie)
         .withSession(sessionParams: _*)
         .withFormUrlEncodedBody((emailFieldName, user.email), (passwordFieldName, userPassword))
 
@@ -248,6 +261,7 @@ class UserLoginAccountSpec extends BaseControllerSpec with WithCSRFAddToken with
       mockAuthenticate(unregisteredEmail, userPassword, failed(new InvalidEmail), successful(false))
 
       private val request = FakeRequest()
+        .withCookies(deviceSessionCookie)
         .withSession(sessionParams: _*)
         .withFormUrlEncodedBody((emailFieldName, unregisteredEmail), (passwordFieldName, userPassword))
       private val result = addToken(underTest.authenticate())(request)
@@ -262,6 +276,7 @@ class UserLoginAccountSpec extends BaseControllerSpec with WithCSRFAddToken with
       mockAuthenticate(user.developer.email, userPassword, failed(new UnverifiedAccount), successful(false))
 
       private val request = FakeRequest()
+        .withCookies(deviceSessionCookie)
         .withSession(sessionParams: _*)
         .withFormUrlEncodedBody((emailFieldName, user.email), (passwordFieldName, userPassword))
       private val result = addToken(underTest.authenticate())(request)
@@ -275,6 +290,7 @@ class UserLoginAccountSpec extends BaseControllerSpec with WithCSRFAddToken with
       mockAuthenticate(user.developer.email, userPassword, failed(new LockedAccount), successful(false))
 
       private val request = FakeRequest()
+        .withCookies(deviceSessionCookie)
         .withSession(sessionParams: _*)
         .withFormUrlEncodedBody((emailFieldName, user.email), (passwordFieldName, userPassword))
 

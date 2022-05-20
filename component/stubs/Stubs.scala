@@ -17,23 +17,11 @@
 package stubs
 
 import com.github.tomakehurst.wiremock.client.WireMock._
-import uk.gov.hmrc.thirdpartydeveloperfrontend.connectors.EncryptedJson
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.ApplicationNameValidationJson.ApplicationNameValidationResult
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.{Registration, UpdateProfileRequest}
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.services.ApiDefinitionsJsonFormatters._
-import play.api.libs.json.{Json, Writes}
-import play.api.http.Status._
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.apidefinitions.ApiIdentifier
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.apidefinitions.{ApiContext, ApiVersion}
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.ClientId
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.UserId
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.connectors.PasswordResetRequest
-
-import uk.gov.hmrc.thirdpartydeveloperfrontend.connectors.ThirdPartyDeveloperConnector.{FindUserIdRequest, FindUserIdResponse}
-import uk.gov.hmrc.thirdpartydeveloperfrontend.connectors.ThirdPartyDeveloperConnector.JsonFormatters.FindUserIdRequestWrites
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications._
-import uk.gov.hmrc.apiplatform.modules.common.services.ApplicationLogger
 import org.scalatest.matchers.should.Matchers
+import play.api.http.Status._
+import play.api.libs.json.Writes
+import uk.gov.hmrc.apiplatform.modules.common.services.ApplicationLogger
+import uk.gov.hmrc.thirdpartydeveloperfrontend.connectors.EncryptedJson
 
 object Stubs extends ApplicationLogger {
 
@@ -51,6 +39,12 @@ object Stubs extends ApplicationLogger {
 
   def setupPostRequest(path: String, status: Int) =
     stubFor(post(urlEqualTo(path)).willReturn(aResponse().withStatus(status)))
+
+  def setupPutRequest(path: String, status: Int, response: String) =
+    stubFor(
+      put(urlEqualTo(path))
+      .willReturn(aResponse().withStatus(status).withBody(response))
+    )
 
   def setupPostRequest(path: String, status: Int, response: String) =
     stubFor(
@@ -74,203 +68,6 @@ object Stubs extends ApplicationLogger {
         .withRequestBody(equalToJson(encryptedJson.toSecretRequestJson(data).toString()))
         .willReturn(aResponse().withStatus(status).withBody(response))
     )
-}
-
-object DeveloperStub {
-  import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.GlobalUserIdTracker.idOf
-
-  def register(registration: Registration, status: Int)(implicit encryptedJson: EncryptedJson) =
-    stubFor(
-      post(urlMatching(s"/developer"))
-        .withRequestBody(equalToJson(encryptedJson.toSecretRequestJson(registration).toString()))
-        .willReturn(aResponse().withStatus(status))
-    )
-
-  def update(userId: UserId, profile: UpdateProfileRequest, status: Int) =
-    stubFor(
-      post(urlMatching(s"/developer/${userId.value}"))
-        .withRequestBody(equalToJson(Json.toJson(profile).toString()))
-        .willReturn(aResponse().withStatus(status))
-    )
-
-  def setupResend(email: String, status: Int) = {
-    val userId = idOf(email)
-
-    implicit val writes = Json.writes[FindUserIdResponse]
-    
-    stubFor(
-      post(urlEqualTo("/developers/find-user-id"))
-        .willReturn(
-          aResponse()
-            .withStatus(OK)
-            .withBody(Json.toJson(FindUserIdResponse(userId)).toString)
-            .withHeader("Content-Type", "application/json")
-        )
-    )
-    
-    stubFor(
-      post(urlPathEqualTo(s"/${userId.value}/resend-verification"))
-        .willReturn(aResponse().withStatus(status))
-    )
-  }
-
-  def verifyResetPassword(request: PasswordResetRequest) = {
-    verify(1, postRequestedFor(urlPathEqualTo("/password-reset-request")).withRequestBody(equalToJson(Json.toJson(request).toString())))
-  }
-
-  def findUserIdByEmailAddress(emailAddress: String) = {
-    val userId = idOf(emailAddress)
-
-    stubFor(
-      post(urlEqualTo("/developers/find-user-id"))
-        .withRequestBody(equalToJson(Json.toJson(FindUserIdRequest(emailAddress)).toString()))
-        .willReturn(
-          aResponse()
-            .withStatus(OK)
-            .withBody(s"""{"userId":"${userId.asText}"}""")
-        )
-    )
-  }
-
-  def stubResetPasswordJourney(email: String,code: String) {
-    fetchEmailForResetCode(email, code)
-    resetPassword()
-  }
-
-  def stubResetPasswordJourneyFail() {
-    stubFor(
-      get(urlPathEqualTo("/reset-password"))
-        .willReturn(
-          aResponse()
-            .withStatus(BAD_REQUEST)
-        )
-    )
-  }
-
-  def fetchEmailForResetCode(email: String,code: String) = {
-    stubFor(
-      get(urlPathEqualTo("/reset-password"))
-      .willReturn(
-        aResponse()
-        .withStatus(OK)
-        .withBody(s"""{ "email": "$email" }"""")
-      )
-    )
-  }
-
-  def resetPassword() = {
-    stubFor(
-      post(urlEqualTo("/reset-password"))
-      .willReturn(
-        aResponse()
-        .withStatus(OK)
-      )
-    )
-  }
-}
-
-object ApplicationStub {
-  def setupApplicationNameValidation() = {
-    val validNameResult = ApplicationNameValidationResult(None)
-
-    Stubs.setupPostRequest("/application/name/validate", OK, Json.toJson(validNameResult).toString)
-  }
-
-  def setUpFetchApplication(id: ApplicationId, status: Int, response: String = "") = {
-    stubFor(
-      get(urlEqualTo(s"/application/${id.value}"))
-        .willReturn(aResponse().withStatus(status).withBody(response))
-    )
-  }
-
-  def setUpFetchEmptySubscriptions(id: ApplicationId, status: Int) = {
-    stubFor(
-      get(urlEqualTo(s"/application/${id.value}/subscription"))
-        .willReturn(aResponse().withStatus(status).withBody("[]"))
-    )
-  }
-
-  def setUpDeleteSubscription(id: ApplicationId, api: String, version: ApiVersion, status: Int) = {
-    stubFor(
-      delete(urlEqualTo(s"/application/${id.value}/subscription?context=$api&version=${version.value}"))
-        .willReturn(aResponse().withStatus(status))
-    )
-  }
-
-  def setUpExecuteSubscription(id: ApplicationId, api: String, version: ApiVersion, status: Int) = {
-    stubFor(
-      post(urlEqualTo(s"/application/${id.value}/subscription"))
-        .withRequestBody(equalToJson(Json.toJson(ApiIdentifier(ApiContext(api), version)).toString()))
-        .willReturn(aResponse().withStatus(status))
-    )
-  }
-
-  def setUpUpdateApproval(id: ApplicationId) = {
-    stubFor(
-      post(urlEqualTo(s"/application/${id.value}/check-information"))
-        .willReturn(aResponse().withStatus(OK))
-    )
-  }
-
-  def configureUserApplications(userId: UserId, applications: List[ApplicationWithSubscriptionIds] = Nil, status: Int = OK) = {
-    import play.api.libs.json.Json
-    import play.api.libs.json.JodaWrites._
-    import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.services.ApiDefinitionsJsonFormatters._
-
-    implicit val writes = Json.writes[ApplicationWithSubscriptionIds]
-
-    def stubResponse(environment: Environment, applications: List[ApplicationWithSubscriptionIds]) = {
-      stubFor(
-        get(urlPathEqualTo("/developer/applications"))
-          .withQueryParam("userId", equalTo(userId.asText))
-          .withQueryParam("environment", equalTo(environment.toString))
-          .willReturn(
-            aResponse()
-              .withStatus(status)
-              .withBody(Json.toJson(applications).toString())
-          )
-      )
-    }
-
-    val (prodApps, sandboxApps) = applications.partition(_.deployedTo == Environment.PRODUCTION)
-
-    stubResponse(Environment.PRODUCTION, prodApps)
-    stubResponse(Environment.SANDBOX, sandboxApps)
-
-    stubFor(
-      get(urlPathEqualTo("/api-definitions/all"))
-      .withQueryParam("environment", equalTo("SANDBOX"))
-      .willReturn(
-        aResponse()
-        .withStatus(OK)
-        .withBody("{}")
-      )
-    )
-
-    val apisUpliftable = Set.empty[ApiIdentifier]
-
-    stubFor(
-      get(urlPathEqualTo("/api-definitions/upliftable"))
-      .willReturn(
-        aResponse()
-        .withBody(Json.toJson(apisUpliftable).toString)
-      )
-    )
-  }
-
-  def configureApplicationCredentials(tokens: Map[String, ApplicationToken], status: Int = OK) = {
-    tokens.foreach { entry =>
-      stubFor(
-        get(urlEqualTo(s"/application/${entry._1}/credentials"))
-          .willReturn(
-            aResponse()
-              .withStatus(status)
-              .withBody(Json.toJson(entry._2).toString())
-              .withHeader("content-type", "application/json")
-          )
-      )
-    }
-  }
 }
 
 object DeskproStub extends Matchers {
@@ -298,27 +95,5 @@ object AuditStub extends Matchers {
       Stubs.setupPostRequest(auditPath, status)
       Stubs.setupPostRequest(mergedAuditPath, status)
     }
-  }
-}
-
-object ApiSubscriptionFieldsStub {
-
-  def setUpDeleteSubscriptionFields(clientId: ClientId, apiContext: ApiContext, apiVersion: ApiVersion) = {
-    stubFor(
-      delete(urlEqualTo(fieldValuesUrl(clientId, apiContext, apiVersion)))
-        .willReturn(aResponse().withStatus(NO_CONTENT))
-    )
-  }
-
-  private def fieldValuesUrl(clientId: ClientId, apiContext: ApiContext, apiVersion: ApiVersion) = {
-    s"/field/application/${clientId.value}/context/${apiContext.value}/version/${apiVersion.value}"
-  }
-
-  def noSubscriptionFields(apiContext: ApiContext, version: ApiVersion): Any = {
-    stubFor(get(urlEqualTo(fieldDefinitionsUrl(apiContext, version))).willReturn(aResponse().withStatus(NOT_FOUND)))
-  }
-
-  private def fieldDefinitionsUrl(apiContext: ApiContext, version: ApiVersion) = {
-    s"/definition/context/${apiContext.value}/version/${version.value}"
   }
 }

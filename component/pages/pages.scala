@@ -132,7 +132,7 @@ case class SignInPage(override val pageHeading: String = "Sign in") extends Form
 
 case object RecommendMfaPage extends FormPage {
   override val pageHeading: String = "Add 2-step verification"
-  override val url: String = s"${Env.host}/developer/login"
+  override val url: String = s"${Env.host}/developer/login/2sv-recommendation"
 }
 
 case object RecommendMfaSkipAcknowledgePage extends FormPage {
@@ -140,9 +140,54 @@ case object RecommendMfaSkipAcknowledgePage extends FormPage {
   override val url: String = s"${Env.host}/developer/login/2SV-not-set"
 }
 
+case object Login2svEnterAccessCodePage extends FormPage {
+  def clickContinue() = {
+    click on id("submit")
+  }
+
+  override val pageHeading: String = "Enter your access code"
+  override val url: String = s"${Env.host}/developer/login-totp"
+
+  def enterAccessCode(accessCode: String, rememberMe: Boolean = false) = {
+    val formData = Map("accessCode" -> accessCode, "rememberMe" -> s"$rememberMe")
+
+    Form.populate(formData)
+  }
+}
+
 case object ProtectAccountPage extends FormPage {
   override val pageHeading: String = "Protect your account"
   override val url: String = s"${Env.host}/developer/profile/protect-account"
+}
+
+case object AccountProtectionPage extends FormPage {
+  override val pageHeading: String = "Account protection"
+  override val url: String = s"${Env.host}/developer/profile/protect-account"
+}
+
+case object MfaConfirmRemovalPage extends FormPage {
+  override val pageHeading: String = "Are you sure you want to remove 2-step verification?"
+  override val url: String = s"${Env.host}/developer/profile/protect-account/confirm-removal"
+}
+
+case object MfaRemovePage extends FormPage {
+  def clickContinue() = {
+    click on id("submit")
+  }
+
+  override val pageHeading: String = "Enter your access code"
+  override val url: String = s"${Env.host}/developer/profile/protect-account/remove"
+
+  def enterAccessCode(accessCode: String) = {
+    val formData = Map("accessCode" -> accessCode)
+
+    Form.populate(formData)
+  }
+}
+
+case object MfaRemovalCompletePage extends FormPage {
+  override val pageHeading: String = "2-step verification removed"
+  override val url: String = s"${Env.host}/developer/profile/protect-account/remove/complete"
 }
 
 case object Setup2svQrPage extends FormPage {

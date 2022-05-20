@@ -33,6 +33,9 @@ trait CookieEncoding {
   private[security] lazy val cookiePathOption: String = "/"
   private[security] lazy val cookieMaxAge = Some(86400) // Hardcoded to 24 Hours until we fix the timeout dialog.
 
+  private[security] lazy val devicecookieName = "DEVICE_SESS_ID"
+  private[security] lazy val devicecookieMaxAge = Some(604800) // Hardcoded to 7 Days
+
   val cookieSigner: CookieSigner
 
   def createCookie(sessionId: String): Cookie = {
@@ -46,6 +49,19 @@ trait CookieEncoding {
       cookieHttpOnlyOption
     )
   }
+
+  def createDeviceCookie(sessionId: String): Cookie = {
+    Cookie(
+      devicecookieName,
+      encodeCookie(sessionId),
+      devicecookieMaxAge,
+      cookiePathOption,
+      cookieDomainOption,
+      cookieSecureOption,
+      cookieHttpOnlyOption
+    )
+  }
+
 
   def encodeCookie(token: String): String = {
     cookieSigner.sign(token) + token
