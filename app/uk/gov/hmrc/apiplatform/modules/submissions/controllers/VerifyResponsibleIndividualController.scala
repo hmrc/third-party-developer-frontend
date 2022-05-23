@@ -77,7 +77,7 @@ class VerifyResponsibleIndividualController @Inject() (
 
   private val exec = ec
   private val ET = new EitherTHelper[Result] { implicit val ec: ExecutionContext = exec }
-  private val noRIVerificationRecordError = "This link has already been used to verify the responsible individual or has expired"
+  private val noRIVerificationRecordError = "This page has expired"
 
   def verifyPage(code: String) = Action.async { implicit request =>
     lazy val success = (riVerification: ResponsibleIndividualVerification) => 
