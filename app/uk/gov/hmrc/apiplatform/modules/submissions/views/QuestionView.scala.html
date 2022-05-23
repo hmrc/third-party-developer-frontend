@@ -31,9 +31,7 @@
 
 @renderStatementText(st: StatementText) = @{st.text}
 
-@renderStatementLink(sl: StatementLink) = {
-  <a class="govuk-link" href="@{sl.url}" target="_blank">@{sl.text}</a>
-}
+@renderStatementLink(sl: StatementLink) = {<a class="govuk-link" href="@{sl.url}" target="_blank">@{sl.text}</a>}
 
 @renderCompoundFragment(cs: CompoundFragment) = @{
   cs.fragments.map( fragment =>
