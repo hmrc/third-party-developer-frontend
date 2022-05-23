@@ -36,23 +36,28 @@
   ),
   developerSession = None
 ) {
-  <h1 class="govuk-heading-l">Are you the individual responsible for this software on the HMRC Developer Hub?</h1>
-
-  <p class="govuk-body govuk-!-font-size-27 govuk-!-margin-top-4 govuk-!-margin-bottom-6">@model.appName</p>
-
-  <p class="govuk-body">As the responsible individual you:</p>
-
-  <ul class="govuk-list govuk-list--bullet">
-    <li>ensure your software conforms to the <a class="govuk-link govuk-link--no-visited-state" target="_blank" href="/api-documentation/docs/terms-of-use">terms of use (opens in new tab)</a></li>
-    <li>understand the <a class="govuk-link govuk-link--no-visited-state" target="_blank" href="/api-documentation/docs/terms-of-use/not-meeting-terms-of-use">consequences of not conforming to the terms of use (opens in new tab)</a></li>
-  </ul>
-
   @errorSummary2(form)
 
   @helper.form(action = uk.gov.hmrc.apiplatform.modules.submissions.controllers.routes.VerifyResponsibleIndividualController.verifyAction(model.code), 'class -> "form") {
     @helper.CSRF.formField
 
-    <div class="govuk-form-group">
+    <div class="govuk-form-group @if(form.errors("verified").nonEmpty) {govuk-form-group--error}">
+
+      <h1 class="govuk-heading-l">Are you the individual responsible for this software on the HMRC Developer Hub?</h1>
+
+      <p class="govuk-body govuk-!-font-size-27 govuk-!-margin-top-4 govuk-!-margin-bottom-6">@model.appName</p>
+
+      <p class="govuk-body">As the responsible individual you:</p>
+
+      <ul class="govuk-list govuk-list--bullet">
+        <li>ensure your software conforms to the <a class="govuk-link govuk-link--no-visited-state" target="_blank" href="/api-documentation/docs/terms-of-use">terms of use (opens in new tab)</a></li>
+        <li>understand the <a class="govuk-link govuk-link--no-visited-state" target="_blank" href="/api-documentation/docs/terms-of-use/not-meeting-terms-of-use">consequences of not conforming to the terms of use (opens in new tab)</a></li>
+      </ul>
+
+      <p id="verified-error" class="govuk-error-message">
+        <span class="govuk-visually-hidden">Error: </span> @fieldError2(form.errors, "verified", form.error("submissionError").isEmpty)
+      </p>
+
       <div class="govuk-radios govuk-radios--inline">
         <div class="govuk-radios__item">
           <input class="govuk-radios__input" id="yes" type="radio" name="verified" value="yes">
