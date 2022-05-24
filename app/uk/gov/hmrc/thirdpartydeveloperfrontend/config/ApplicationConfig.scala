@@ -54,7 +54,7 @@ class ApplicationConfig @Inject()(config: Configuration) extends ServicesConfig(
   lazy val analyticsToken = config.getOptional[String]("google-analytics.token").filterNot(_ == "")
   lazy val analyticsHost = getConfigDefaulted("google-analytics.host", "auto")
   lazy val securedCookie = getConfigDefaulted("cookie.secure", true)
-  lazy val title = "Developer Hub"
+  lazy val title = "HMRC Developer Hub"
   lazy val jsonEncryptionKey = getString("json.encryption.key")
   lazy val hasSandbox = getConfigDefaulted("hasSandbox", false)
   lazy val retryCount = getConfigDefaulted("retryCount", 0)
