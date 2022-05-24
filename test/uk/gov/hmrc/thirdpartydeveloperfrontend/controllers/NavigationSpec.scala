@@ -88,7 +88,7 @@ class NavigationSpec extends BaseControllerSpec with DeveloperBuilder with Local
       }
 
       "return the user's profile link" in new Setup(loggedInState = Some(LoggedInState.LOGGED_IN)) {
-        links.head shouldBe NavLink("John Doe", Profile.showProfile().url)
+        links.head shouldBe NavLink("John Doe", Profile.showProfile().url, isSensitive = true)
       }
 
       "return a sign-out link" in new Setup(loggedInState = Some(LoggedInState.LOGGED_IN)) {

@@ -24,7 +24,7 @@ class NavLinkSpec extends AsyncHmrcSpec {
   "NavigationHelper" should {
     "return user nav links if username is given" in {
       UserNavLinks(Some("User Name")) shouldBe
-        Seq(NavLink("User Name", "/developer/profile"), NavLink("Sign out", "/developer/logout/survey"))
+        Seq(NavLink("User Name", "/developer/profile", isSensitive = true), NavLink("Sign out", "/developer/logout/survey"))
     }
 
     "return logged out nav links if username is not given" in {

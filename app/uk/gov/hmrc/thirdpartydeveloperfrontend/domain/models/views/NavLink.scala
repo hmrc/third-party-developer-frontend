@@ -18,7 +18,7 @@ package uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.views
 
 import play.api.libs.json.Json
 
-case class NavLink(label: String, href: String, truncate: Boolean = false, openInNewWindow: Boolean = false)
+case class NavLink(label: String, href: String, truncate: Boolean = false, openInNewWindow: Boolean = false, isSensitive: Boolean = false)
 
 object NavLink {
   implicit val format = Json.format[NavLink]
@@ -45,7 +45,7 @@ case object UserNavLinks {
     }
 
   private def loggedInNavLinks(userFullName: String) = List(
-    NavLink(userFullName,"/developer/profile"),
+    NavLink(userFullName,"/developer/profile", isSensitive = true),
     NavLink("Sign out","/developer/logout/survey")
   )
 
