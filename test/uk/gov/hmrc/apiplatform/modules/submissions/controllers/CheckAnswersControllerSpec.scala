@@ -19,7 +19,6 @@ package uk.gov.hmrc.apiplatform.modules.submissions.controllers
 import org.mockito.captor.ArgCaptor
 import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.{BaseControllerSpec, SubscriptionTestHelperSugar}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.builder.{DeveloperBuilder, SampleApplication, SampleSession}
-import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.SubscriptionTestHelperSugar
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.{LocalUserIdTracker, WithCSRFAddToken}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.mocks.service.ApplicationServiceMock
 import uk.gov.hmrc.thirdpartydeveloperfrontend.mocks.service.ApplicationActionServiceMock
@@ -37,8 +36,7 @@ import play.api.test.Helpers._
 import play.filters.csrf.CSRF
 import uk.gov.hmrc.apiplatform.modules.submissions.services.RequestProductionCredentials
 import uk.gov.hmrc.apiplatform.modules.submissions.views.html.ProductionCredentialsRequestReceivedView
-import uk.gov.hmrc.apiplatform.modules.submissions.domain.models.{ExtendedSubmission, NoAnswer, QuestionnaireProgress, SingleChoiceAnswer}
-import uk.gov.hmrc.apiplatform.modules.submissions.SubmissionsTestData
+import uk.gov.hmrc.apiplatform.modules.submissions.domain.models.{ExtendedSubmission, NoAnswer, QuestionnaireProgress, SingleChoiceAnswer, Submission}
 import uk.gov.hmrc.apiplatform.modules.submissions.domain.models.QuestionnaireState.Completed
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.AsIdsHelpers._
 import uk.gov.hmrc.apiplatform.modules.submissions.domain.models.QuestionnaireState.InProgress
@@ -46,7 +44,6 @@ import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.Develope
 
 import scala.concurrent.Future.{failed, successful}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.ApplicationNotFound
-import uk.gov.hmrc.apiplatform.modules.submissions.SubmissionsTestData
 import uk.gov.hmrc.apiplatform.modules.submissions.controllers.CheckAnswersController.ProdCredsRequestReceivedViewModel
 
 class CheckAnswersControllerSpec 
@@ -109,7 +106,8 @@ class CheckAnswersControllerSpec
         .map(q => q.id -> QuestionnaireProgress(InProgress, q.questions.asIds)).toMap
     val incompleteExtendedSubmission = ExtendedSubmission(aSubmission, incompleteProgress)
 
-    val checkAnswersView = app.injector.instanceOf[CheckAnswersView]
+    val checkAnswersView = mock[CheckAnswersView]
+    when(checkAnswersView.apply(*,*,*)(*, *, *, *)).thenReturn(play.twirl.api.HtmlFormat.empty)
     val productionCredentialsRequestReceivedView = mock[ProductionCredentialsRequestReceivedView]
     val viewModelCaptor = ArgCaptor[ProdCredsRequestReceivedViewModel]
     when(productionCredentialsRequestReceivedView.apply(*)(*, *, *, *)).thenReturn(play.twirl.api.HtmlFormat.empty)
@@ -155,6 +153,21 @@ class CheckAnswersControllerSpec
       val result = underTest.checkAnswersPage(applicationId)(loggedInRequest.withCSRFToken)
 
       status(result) shouldBe NOT_FOUND
+    }
+
+    "show submission declined text when previous submission was declined" in new Setup {
+      SubmissionServiceMock.FetchLatestExtendedSubmission.thenReturns(declinedSubmission.withCompletedProgress)
+
+      await(underTest.checkAnswersPage(applicationId)(loggedInRequest.withCSRFToken))
+
+      verify(checkAnswersView).apply(*, eqTo(true), *)(*, *, *, *)
+    }
+    "don't show submission declined text when previous submission was not declined" in new Setup {
+      SubmissionServiceMock.FetchLatestExtendedSubmission.thenReturns(answeredSubmission.withCompletedProgress)
+
+      await(underTest.checkAnswersPage(applicationId)(loggedInRequest.withCSRFToken))
+
+      verify(checkAnswersView).apply(*, eqTo(false), *)(*, *, *, *)
     }
   }
 
