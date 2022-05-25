@@ -22,7 +22,7 @@ import uk.gov.hmrc.thirdpartydeveloperfrontend.connectors.ApmConnector
 import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.checkpages.{CanUseCheckActions, DummySubscriptionsForm}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.apidefinitions.APISubscriptionStatus
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.ApplicationId
-import uk.gov.hmrc.apiplatform.modules.uplift.domain.models.{ApiSubscriptions}
+import uk.gov.hmrc.apiplatform.modules.uplift.domain.models.ApiSubscriptions
 import play.api.data.Forms._
 import play.api.data.{Form, FormError}
 import play.api.libs.crypto.CookieSigner
@@ -43,6 +43,8 @@ import uk.gov.hmrc.apiplatform.modules.uplift.services.UpliftJourneyService
 import uk.gov.hmrc.thirdpartydeveloperfrontend.config.UpliftJourneyConfig
 import uk.gov.hmrc.thirdpartydeveloperfrontend.config.{On, OnDemand}
 import play.api.mvc.Request
+import uk.gov.hmrc.play.bootstrap.controller.WithDefaultFormBinding
+
 import scala.util.Try
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.controllers.BadRequestWithErrorMessage
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.SellResellOrDistribute
@@ -88,7 +90,8 @@ class UpliftJourneyController @Inject() (val errorHandler: ErrorHandler,
                       upliftJourneySwitch: UpliftJourneySwitch)
                      (implicit val ec: ExecutionContext, val appConfig: ApplicationConfig)
   extends ApplicationController(mcc)
-     with CanUseCheckActions {
+     with CanUseCheckActions
+     with WithDefaultFormBinding {
 
   import UpliftJourneyController._
 

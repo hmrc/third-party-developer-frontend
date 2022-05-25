@@ -37,6 +37,7 @@ import uk.gov.hmrc.apiplatform.modules.submissions.domain.models.QuestionnaireSt
 
 import scala.concurrent.Future.successful
 import play.api.data.Form
+import uk.gov.hmrc.play.bootstrap.controller.WithDefaultFormBinding
 
 object ProdCredsChecklistController {
   case class DummyForm(dummy: String = "dummy")
@@ -112,7 +113,8 @@ class ProdCredsChecklistController @Inject() (
   extends ApplicationController(mcc)
      with CanUseCheckActions
      with EitherTHelper[String]
-     with SubmissionActionBuilders {
+     with SubmissionActionBuilders
+     with WithDefaultFormBinding {
 
   import ProdCredsChecklistController._
   import SubmissionActionBuilders.{ApplicationStateFilter, RoleFilter}
