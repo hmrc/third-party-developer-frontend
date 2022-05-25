@@ -22,7 +22,7 @@ import uk.gov.hmrc.thirdpartydeveloperfrontend.config.ErrorHandler
 import uk.gov.hmrc.thirdpartydeveloperfrontend.connectors.ApmConnector
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.ApplicationId
 import play.api.libs.crypto.CookieSigner
-import play.api.mvc.{MessagesControllerComponents, Result}
+import play.api.mvc.MessagesControllerComponents
 import uk.gov.hmrc.thirdpartydeveloperfrontend.service.{ApplicationActionService, ApplicationService, SessionService}
 import uk.gov.hmrc.apiplatform.modules.submissions.views.html._
 import uk.gov.hmrc.apiplatform.modules.common.services.EitherTHelper
@@ -63,26 +63,20 @@ class CheckAnswersController @Inject() (
      with SubmissionActionBuilders {
 
   import SubmissionActionBuilders.{ApplicationStateFilter,RoleFilter}
-  import cats.implicits._
-  import cats.instances.future.catsStdInstancesForFuture
-  
+
   val redirectToGetProdCreds = (applicationId: ApplicationId) => Redirect(routes.ProdCredsChecklistController.productionCredentialsChecklistPage(applicationId))
 
    /*, Read/Write and State details */ 
   def checkAnswersPage(productionAppId: ApplicationId) = withApplicationAndSubmissionInSpecifiedState(ApplicationStateFilter.inTesting, RoleFilter.isAdminRole, SubmissionStatusFilter.answeredCompletely)(redirectToGetProdCreds(productionAppId))(productionAppId) { implicit request =>
-    val failed = (err: String) => BadRequestWithErrorMessage(err)
-    
-    val success = (viewModel: ViewModel) => {
-      val err = request.msgRequest.flash.get("error")
-      Ok(checkAnswersView(viewModel, err))
-    }
-
-    val vm = for {
-      extSubmission      <- fromOptionF(submissionService.fetchLatestExtendedSubmission(productionAppId), "No submission and/or application found")
-      viewModel           =  convertSubmissionToViewModel(extSubmission)(request.application.id, request.application.name)
-    } yield viewModel
-
-    vm.fold[Result](failed, success)
+    submissionService.fetchLatestExtendedSubmission(productionAppId).map(_ match {
+      case Some(extSubmission) => {
+        val viewModel = convertSubmissionToViewModel(extSubmission)(request.application.id, request.application.name)
+        val maybePreviousInstance = extSubmission.submission.instances.tail.headOption // previous instance, if there was one
+        val previousInstanceWasDeclined = maybePreviousInstance.map(_.isDeclined).getOrElse(false)
+        Ok(checkAnswersView(viewModel, previousInstanceWasDeclined, request.msgRequest.flash.get("error")))
+      }
+      case None => BadRequestWithErrorMessage("No submission and/or application found")
+    })
   }
 
   def checkAnswersAction(productionAppId: ApplicationId) = withApplicationAndSubmissionInSpecifiedState(ApplicationStateFilter.inTesting, RoleFilter.isAdminRole, SubmissionStatusFilter.answeredCompletely)(redirectToGetProdCreds(productionAppId))(productionAppId) { implicit request =>

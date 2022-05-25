@@ -24,9 +24,9 @@
 
 @this(devMain: DevMain2)
 
-@(model: ViewModel, error: Option[String])(implicit request: play.api.mvc.Request[Any], loggedIn: DeveloperSession, messagesProvider: MessagesProvider, appConfig: ApplicationConfig)
+@(model: ViewModel, wasDeclined: Boolean, error: Option[String])(implicit request: play.api.mvc.Request[Any], loggedIn: DeveloperSession, messagesProvider: MessagesProvider, appConfig: ApplicationConfig)
 
-@title = @{ "Check your answers before requesting production credentials" }
+@title = @{ if(wasDeclined) { "Your request for production credentials" } else { "Check your answers before requesting credentials" }}
 
 @labelAsId(label: String) = @{
   label.toLowerCase.replaceAll(" ", "-") + "-link"
@@ -59,6 +59,12 @@
         @title
     </h1>
 
+    @if(wasDeclined) {
+        <p class="govuk-body">We have declined your request for production credentials.</p>
+        <p class="govuk-body">You can make changes and request credentials again at any time.</p>
+    }
+
+    <hr class="govuk-section-break govuk-section-break--l govuk-section-break--visible">
     @answersFragment(model, canChange = true)
 
     <div class="govuk-button-group">
