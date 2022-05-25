@@ -27,6 +27,6 @@
 
 @for(link <- mobileNavLinks) {
     <li class="desktop-only">
-      <a class="@anchorClass.getOrElse("") @if(link.isSensitive){"hmrc-redacted"}" href="@{link.href}" @if(link.openInNewWindow){target="_blank"}>@{link.label}</a>
+      <a class="@anchorClass.getOrElse("") @if(link.isSensitive){hmrc-redacted}" href="@{link.href}" @if(link.openInNewWindow){target="_blank"}>@{link.label}</a>
     </li>
 }
