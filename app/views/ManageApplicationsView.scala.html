@@ -105,7 +105,7 @@
           <tr class="govuk-table__row">
             @if(showLastApiCall) {
               <td class="govuk-table__cell govuk-!-width-one-half">
-                <a class="govuk-link" href="@controllers.routes.Details.details(app.id)" data-app-name>@app.name</a>
+                <a class="govuk-link hmrc-redacted" href="@controllers.routes.Details.details(app.id)" data-app-name>@app.name</a>
               </td>
               <td class="govuk-table__cell govuk-!-width-one-quarter" data-app-lastAccess>
                 @{
@@ -117,7 +117,7 @@
               </td>
             } else {
               <td class="govuk-table__cell govuk-!-width-three-quarters">
-                <a class="govuk-link" href="@controllers.routes.Details.details(app.id)" data-app-name>@app.name</a>
+                <a class="govuk-link hmrc-redacted" href="@controllers.routes.Details.details(app.id)" data-app-name>@app.name</a>
               </td>
             }
             <td class="govuk-table__cell your-role" data-app-user-role>

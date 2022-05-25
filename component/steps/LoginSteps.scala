@@ -48,7 +48,7 @@ class LoginSteps extends ScalaDsl with EN with Matchers with NavigationSugar wit
 
   implicit val webDriver: WebDriver = Env.driver
 
-  private val accessCode = "123456"
+  // private val accessCode = "123456"
 
   Given("""^I am successfully logged in with '(.*)' and '(.*)'$""") { (email: String, password: String) =>
     goOn(SignInPage.default)

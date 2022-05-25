@@ -27,7 +27,7 @@ import play.api.http.Status._
 import play.api.libs.json.Json
 import stubs.{DeveloperStub, DeviceSessionStub, MfaStub, Stubs}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.connectors.{LoginRequest, UserAuthenticationResponse}
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.{Developer, LoggedInState, Session, UserId}
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.{Developer, LoggedInState, Session}
 import utils.ComponentTestDeveloperBuilder
 
 import java.util.UUID
