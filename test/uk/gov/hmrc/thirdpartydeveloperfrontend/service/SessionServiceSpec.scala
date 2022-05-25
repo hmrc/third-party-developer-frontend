@@ -58,7 +58,7 @@ class SessionServiceSpec extends AsyncHmrcSpec with DeveloperBuilder with LocalU
       when(underTest.thirdPartyDeveloperConnector.authenticate(*)(*))
         .thenReturn(successful(userAuthenticationResponse))
 
-      await(underTest.authenticate(email, password, Some(deviceSessionId))) shouldBe (userAuthenticationResponse, userId)
+      await(underTest.authenticate(email, password, Some(deviceSessionId))) shouldBe ((userAuthenticationResponse, userId))
 
       verify(underTest.mfaMandateService).isMfaMandatedForUser(userId)
       verify(underTest.thirdPartyDeveloperConnector).authenticate(LoginRequest(email, password, mfaMandatedForUser = false, Some(deviceSessionId)))
@@ -70,7 +70,7 @@ class SessionServiceSpec extends AsyncHmrcSpec with DeveloperBuilder with LocalU
       when(underTest.thirdPartyDeveloperConnector.authenticate(*)(*))
         .thenReturn(successful(userAuthenticationResponse))
 
-      await(underTest.authenticate(email, password, Some(deviceSessionId))) shouldBe (userAuthenticationResponse, userId)
+      await(underTest.authenticate(email, password, Some(deviceSessionId))) shouldBe ((userAuthenticationResponse, userId))
 
       verify(underTest.mfaMandateService).isMfaMandatedForUser(userId)
       verify(underTest.thirdPartyDeveloperConnector).authenticate(LoginRequest(email, password, mfaMandatedForUser = true, Some(deviceSessionId)))

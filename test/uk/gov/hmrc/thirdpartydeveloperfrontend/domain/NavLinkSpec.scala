@@ -43,3 +43,4 @@ class NavLinkSpec extends AsyncHmrcSpec {
     }
   }
 }
+    

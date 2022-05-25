@@ -41,7 +41,6 @@ import views.html.UserDidNotAdd2SVView
 import views.html.Add2SVView
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.LocalUserIdTracker
 import _root_.uk.gov.hmrc.thirdpartydeveloperfrontend.mocks.connectors.{ThirdPartyDeveloperConnectorMockModule, ThirdPartyDeveloperMfaConnectorMockModule}
-import play.api.mvc.Cookie
 import uk.gov.hmrc.apiplatform.modules.mfa.service.MfaMandateService
 import uk.gov.hmrc.thirdpartydeveloperfrontend.security.CookieEncoding
 

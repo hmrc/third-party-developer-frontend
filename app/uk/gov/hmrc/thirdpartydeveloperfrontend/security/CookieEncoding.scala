@@ -21,8 +21,6 @@ import play.api.libs.crypto.CookieSigner
 import play.api.mvc.Cookie
 import java.security.MessageDigest
 
-import cats.implicits._
-
 trait CookieEncoding {
   implicit val appConfig: ApplicationConfig
 
