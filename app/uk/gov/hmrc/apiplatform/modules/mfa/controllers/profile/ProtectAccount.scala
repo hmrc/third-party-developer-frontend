@@ -30,6 +30,7 @@ import play.api.libs.crypto.CookieSigner
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents, Result}
 import uk.gov.hmrc.apiplatform.modules.mfa.connectors.ThirdPartyDeveloperMfaConnector
 import uk.gov.hmrc.apiplatform.modules.mfa.service.{MFAService, MfaMandateService}
+import uk.gov.hmrc.play.bootstrap.controller.WithDefaultFormBinding
 import uk.gov.hmrc.thirdpartydeveloperfrontend.qr.{OtpAuthUri, QRCode}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.service.SessionService
 import views.html.protectaccount._
@@ -61,7 +62,7 @@ class ProtectAccount @Inject()(
 )(
   implicit val ec: ExecutionContext,
   val appConfig: ApplicationConfig
-) extends LoggedInController(mcc) {
+) extends LoggedInController(mcc) with WithDefaultFormBinding {
 
   private val scale = 4
   val qrCode = QRCode(scale)

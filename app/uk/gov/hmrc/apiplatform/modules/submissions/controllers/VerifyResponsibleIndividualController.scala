@@ -32,9 +32,10 @@ import uk.gov.hmrc.thirdpartydeveloperfrontend.service.ApplicationActionService
 import uk.gov.hmrc.thirdpartydeveloperfrontend.service.ApplicationService
 import play.api.libs.crypto.CookieSigner
 import uk.gov.hmrc.thirdpartydeveloperfrontend.config.ErrorHandler
-import uk.gov.hmrc.apiplatform.modules.submissions.views.html.{VerifyResponsibleIndividualView, ResponsibleIndividualAcceptedView, ResponsibleIndividualDeclinedView, ResponsibleIndividualErrorView}
+import uk.gov.hmrc.apiplatform.modules.submissions.views.html.{ResponsibleIndividualAcceptedView, ResponsibleIndividualDeclinedView, ResponsibleIndividualErrorView, VerifyResponsibleIndividualView}
 import uk.gov.hmrc.apiplatform.modules.submissions.services.ResponsibleIndividualVerificationService
-import uk.gov.hmrc.apiplatform.modules.submissions.domain.models.{ResponsibleIndividualVerification, ErrorDetails}
+import uk.gov.hmrc.apiplatform.modules.submissions.domain.models.{ErrorDetails, ResponsibleIndividualVerification}
+import uk.gov.hmrc.play.bootstrap.controller.WithDefaultFormBinding
 
 object VerifyResponsibleIndividualController {
   case class ViewModel (
@@ -70,7 +71,8 @@ class VerifyResponsibleIndividualController @Inject() (
   implicit val ec: ExecutionContext,
   val appConfig: ApplicationConfig
 ) extends ApplicationController(mcc)
-  with EitherTHelper[String] {
+  with EitherTHelper[String]
+  with WithDefaultFormBinding{
   
   import cats.implicits._
   import cats.instances.future.catsStdInstancesForFuture

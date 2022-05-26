@@ -19,16 +19,19 @@ package uk.gov.hmrc.thirdpartydeveloperfrontend.controllers
 import uk.gov.hmrc.thirdpartydeveloperfrontend.config.ApplicationConfig
 import uk.gov.hmrc.thirdpartydeveloperfrontend.config.ErrorHandler
 import uk.gov.hmrc.thirdpartydeveloperfrontend.connectors.ThirdPartyDeveloperConnector
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.{EmailAlreadyInUse, Registration => RegistrationModel, RegistrationSuccessful}
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.{EmailAlreadyInUse, RegistrationSuccessful, Registration => RegistrationModel}
+
 import javax.inject.{Inject, Singleton}
 import play.api.libs.crypto.CookieSigner
 import play.api.mvc.{MessagesControllerComponents, Request}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.service.SessionService
 import uk.gov.hmrc.http.{BadRequestException, HeaderCarrier}
 import views.html._
+
 import scala.concurrent.{ExecutionContext, Future}
 import scala.util.control.NonFatal
 import uk.gov.hmrc.apiplatform.modules.common.services.ApplicationLogger
+import uk.gov.hmrc.play.bootstrap.controller.WithDefaultFormBinding
 
 @Singleton
 class Registration @Inject()(override val sessionService: SessionService,
@@ -44,7 +47,7 @@ class Registration @Inject()(override val sessionService: SessionService,
                              resendConfirmationView: ResendConfirmationView
                              )
                             (implicit val ec: ExecutionContext, val appConfig: ApplicationConfig)
-  extends LoggedOutController(mcc) with ApplicationLogger {
+  extends LoggedOutController(mcc) with ApplicationLogger with WithDefaultFormBinding {
 
   import ErrorFormBuilder.GlobalError
   import play.api.data._

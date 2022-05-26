@@ -21,11 +21,12 @@ import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.checkpages.HasUrl._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.{ApplicationId, CheckInformation, Standard, UpdateApplicationRequest}
 import play.api.data.Form
 import play.api.mvc.{Action, AnyContent, Call}
+import uk.gov.hmrc.play.bootstrap.controller.WithDefaultFormBinding
 import views.html.checkpages.PrivacyPolicyView
 
 import scala.concurrent.Future
 
-trait PrivacyPolicyPartialController {
+trait PrivacyPolicyPartialController extends WithDefaultFormBinding {
   self: ApplicationController with CanUseCheckActions =>
 
   val privacyPolicyView: PrivacyPolicyView
