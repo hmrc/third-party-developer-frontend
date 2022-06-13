@@ -53,7 +53,7 @@ class ThirdPartyApplicationSubmissionsConnectorSpec
 
     val riVerification = ResponsibleIndividualVerification(ResponsibleIndividualVerificationId(code), ApplicationId.random, "App name", Submission.Id.random, 0)
     val responsibleIndividual = ResponsibleIndividual.build("bob example", "bob@example.com")
-    val riVerificationWithDetails = ResponsibleIndividualVerificationWithDetails(riVerification, responsibleIndividual)
+    val riVerificationWithDetails = ResponsibleIndividualVerificationWithDetails(riVerification, responsibleIndividual, "Rick Deckard", "rick@submitter.com")
 
     val extendedSubmission = answeringSubmission.withIncompleteProgress
   }

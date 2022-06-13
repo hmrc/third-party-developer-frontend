@@ -63,9 +63,8 @@ class ResponsibleIndividualVerificationService @Inject()(
   }
 
   private def createDeskproTicket(riVerificationWithDetails: ResponsibleIndividualVerificationWithDetails) = {
-    val responsibleIndividual = riVerificationWithDetails.responsibleIndividual
-    val name = responsibleIndividual.fullName.value
-    val email = responsibleIndividual.emailAddress.value
+    val name = riVerificationWithDetails.submitterName
+    val email = riVerificationWithDetails.submitterEmail
     val verification = riVerificationWithDetails.verification
     val appName = verification.applicationName
     val appId = verification.applicationId

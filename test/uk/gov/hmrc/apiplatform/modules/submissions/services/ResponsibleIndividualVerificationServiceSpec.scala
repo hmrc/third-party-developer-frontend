@@ -44,7 +44,7 @@ class ResponsibleIndividualVerificationServiceSpec extends AsyncHmrcSpec
     val code = "12345678"
     val riVerification = ResponsibleIndividualVerification(ResponsibleIndividualVerificationId(code), ApplicationId.random, "App name", Submission.Id.random, 0)
     val responsibleIndividual = ResponsibleIndividual.build("bob example", "bob@example.com")
-    val riVerificationWithDetails = ResponsibleIndividualVerificationWithDetails(riVerification, responsibleIndividual)
+    val riVerificationWithDetails = ResponsibleIndividualVerificationWithDetails(riVerification, responsibleIndividual, "Rick Deckard", "rick@submitter.com")
 
     val mockDeskproConnector = mock[DeskproConnector]
     val underTest = new ResponsibleIndividualVerificationService(mockSubmissionsConnector, mockDeskproConnector)
@@ -82,8 +82,8 @@ class ResponsibleIndividualVerificationServiceSpec extends AsyncHmrcSpec
       verify(mockDeskproConnector).createTicket(ticketCapture.capture)(*)
       val deskproTicket = ticketCapture.value
       deskproTicket.subject shouldBe "New application submitted for checking"
-      deskproTicket.name shouldBe responsibleIndividual.fullName.value
-      deskproTicket.email shouldBe responsibleIndividual.emailAddress.value
+      deskproTicket.name shouldBe riVerificationWithDetails.submitterName
+      deskproTicket.email shouldBe riVerificationWithDetails.submitterEmail
       deskproTicket.message should include (riVerification.applicationName)
       deskproTicket.referrer should include (s"/application/${riVerification.applicationId.value}/check-answers")
     }
