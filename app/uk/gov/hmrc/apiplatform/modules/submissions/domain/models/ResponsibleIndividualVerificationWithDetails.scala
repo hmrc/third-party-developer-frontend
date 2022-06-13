@@ -25,6 +25,8 @@ object ResponsibleIndividualVerificationWithDetails {
 
 case class ResponsibleIndividualVerificationWithDetails(
     verification: ResponsibleIndividualVerification,
-    responsibleIndividual: ResponsibleIndividual
+    responsibleIndividual: ResponsibleIndividual,
+    submitterName: String,
+    submitterEmail: String
 )
 
