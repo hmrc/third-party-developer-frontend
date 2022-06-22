@@ -61,6 +61,7 @@ object Details {
   ) {
     lazy val agreementNeeded = exists && !agreement.isDefined
   }
+  case class ApplicationName(appId: ApplicationId)
 }
 @Singleton
 class Details @Inject() (
@@ -205,4 +206,15 @@ class Details @Inject() (
 
   private def errorView(id: ApplicationId, form: Form[EditApplicationForm], applicationViewModel: ApplicationViewModel)(implicit request: ApplicationRequest[_]): Future[Result] =
     Future.successful(BadRequest(changeDetailsView(form, applicationViewModel)))
+
+  def requestChangeOfAppName(applicationId: ApplicationId): Action[AnyContent] = canChangeDetailsAndIsApprovedAction(applicationId) { implicit request =>
+      Future.successful(Ok(changeDetailsView(EditApplicationForm.withData(request.application), applicationViewModelFromApplicationRequest)))
+
+  }
+
+  def requestChangeOfAppNameAction(applicationId: ApplicationId): Action[AnyContent] = canChangeDetailsAndIsApprovedAction(applicationId) { implicit request =>
+      Future.successful(Ok(changeDetailsView(EditApplicationForm.withData(request.application), applicationViewModelFromApplicationRequest)))
+
+  }  
+  
 }
