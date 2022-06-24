@@ -24,7 +24,7 @@ import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.checkpages.{CheckYour
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.Capabilities.SupportsDetails
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.Permissions.SandboxOnly
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.Permissions.{SandboxOnly, ProductionAndAdmin}
 
 import javax.inject.{Inject, Singleton}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.controllers.ApplicationViewModel
@@ -32,7 +32,7 @@ import play.api.data.Form
 import play.api.libs.crypto.CookieSigner
 import play.api.mvc._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.service._
-import views.html.{ChangeDetailsView, DetailsView}
+import views.html.{ChangeDetailsView, DetailsView, RequestChangeOfApplicationNameView, ChangeOfApplicationNameConfirmationView}
 import views.html.application.PendingApprovalView
 import views.html.checkpages.applicationcheck.UnauthorisedAppDetailsView
 
@@ -47,7 +47,7 @@ import org.joda.time.DateTime
 import scala.concurrent.Future.successful
 import uk.gov.hmrc.apiplatform.modules.submissions.domain.models.Submission
 import uk.gov.hmrc.play.bootstrap.controller.WithDefaultFormBinding
-import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.Details.{Agreement, TermsOfUseViewModel}
+import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.Details.{Agreement, TermsOfUseViewModel, ApplicationNameModel}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.TermsOfUseVersion
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.services.TermsOfUseService
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.services.TermsOfUseService.TermsOfUseAgreementDetails
@@ -61,7 +61,7 @@ object Details {
   ) {
     lazy val agreementNeeded = exists && !agreement.isDefined
   }
-  case class ApplicationName(appId: ApplicationId)
+  case class ApplicationNameModel(application: Application)
 }
 @Singleton
 class Details @Inject() (
@@ -75,6 +75,8 @@ class Details @Inject() (
     pendingApprovalView: PendingApprovalView,
     detailsView: DetailsView,
     changeDetailsView: ChangeDetailsView,
+    requestChangeOfApplicationNameView: RequestChangeOfApplicationNameView,
+    changeOfApplicationNameConfirmationView: ChangeOfApplicationNameConfirmationView,
     val fraudPreventionConfig: FraudPreventionConfig,
     submissionService: SubmissionService,
     termsOfUseService: TermsOfUseService
@@ -207,14 +209,40 @@ class Details @Inject() (
   private def errorView(id: ApplicationId, form: Form[EditApplicationForm], applicationViewModel: ApplicationViewModel)(implicit request: ApplicationRequest[_]): Future[Result] =
     Future.successful(BadRequest(changeDetailsView(form, applicationViewModel)))
 
-  def requestChangeOfAppName(applicationId: ApplicationId): Action[AnyContent] = canChangeDetailsAndIsApprovedAction(applicationId) { implicit request =>
-      Future.successful(Ok(changeDetailsView(EditApplicationForm.withData(request.application), applicationViewModelFromApplicationRequest)))
+  def canChangeProductionDetailsAndIsApprovedAction(applicationId: ApplicationId)(fun: ApplicationRequest[AnyContent] => Future[Result]): Action[AnyContent] =
+    checkActionForApprovedApps(SupportsDetails, ProductionAndAdmin)(applicationId)(fun)
 
+  def requestChangeOfAppName(applicationId: ApplicationId): Action[AnyContent] = canChangeProductionDetailsAndIsApprovedAction(applicationId) { implicit request =>
+      Future.successful(Ok(requestChangeOfApplicationNameView(ChangeOfApplicationNameForm.withData(request.application.name), ApplicationNameModel(request.application))))
   }
 
-  def requestChangeOfAppNameAction(applicationId: ApplicationId): Action[AnyContent] = canChangeDetailsAndIsApprovedAction(applicationId) { implicit request =>
-      Future.successful(Ok(changeDetailsView(EditApplicationForm.withData(request.application), applicationViewModelFromApplicationRequest)))
+  def requestChangeOfAppNameAction(applicationId: ApplicationId): Action[AnyContent] = canChangeProductionDetailsAndIsApprovedAction(applicationId) { implicit request =>
+      val application = request.application
 
+      def handleValidForm(form: ChangeOfApplicationNameForm): Future[Result] = {
+        val requestForm = ChangeOfApplicationNameForm.form.bindFromRequest
+
+        applicationService
+          .isApplicationNameValid(form.applicationName, application.deployedTo, Some(applicationId))
+          .flatMap({
+
+            case Valid =>
+              for {
+                _ <- applicationService.requestProductonApplicationNameChange(application, form.applicationName, request.developerSession.displayedName, request.developerSession.email)
+              } yield Ok(changeOfApplicationNameConfirmationView(ApplicationNameModel(request.application), form.applicationName))
+
+            case invalid: Invalid =>
+              def invalidNameCheckForm: Form[ChangeOfApplicationNameForm] =
+                requestForm.withError(appNameField, invalid.validationErrorMessageKey)
+
+              Future.successful(BadRequest(requestChangeOfApplicationNameView(invalidNameCheckForm, ApplicationNameModel(request.application))))
+          })
+      }
+
+      def handleInvalidForm(formWithErrors: Form[ChangeOfApplicationNameForm]): Future[Result] =
+        Future.successful(BadRequest(requestChangeOfApplicationNameView(formWithErrors, ApplicationNameModel(request.application))))
+
+      ChangeOfApplicationNameForm.form.bindFromRequest.fold(handleInvalidForm, handleValidForm)
   }  
   
 }

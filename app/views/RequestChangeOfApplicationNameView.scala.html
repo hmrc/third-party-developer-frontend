@@ -15,17 +15,15 @@
  *@
 
 @import include._
-@import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.controllers.Crumb
 @import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.ApplicationId
 @import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.DeveloperSession
-@import uk.gov.hmrc.apiplatform.modules.submissions.domain.models._
-@import uk.gov.hmrc.apiplatform.modules.submissions.controllers.VerifyResponsibleIndividualController.HasVerifiedForm
-@import uk.gov.hmrc.apiplatform.modules.submissions.controllers.VerifyResponsibleIndividualController.ViewModel
 @import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.views.BackButtonWithJavaScript
-@import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.Details.ApplicationName
+@import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.Details.ApplicationNameModel
+@import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.routes
+
 @this(devMain: DevMain2)
 
-@(model: ApplicationName, form: Form[HasVerifiedForm])(
+@(form: Form[uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.ChangeOfApplicationNameForm], model: ApplicationNameModel)(
   implicit request: play.api.mvc.Request[Any], loggedIn: DeveloperSession, messagesProvider: MessagesProvider, applicationConfig: ApplicationConfig
 )
 
@@ -35,12 +33,11 @@
   back = BackButtonWithJavaScript,
   developerSession = Some(loggedIn)
 ) {
-  @errorSummary2(form)
 
-  @helper.form(action = routes.Details.requestChangeOfAppNameAction(model.appId), 'class -> "form") {
+  @helper.form(action = controllers.routes.Details.requestChangeOfAppNameAction(model.application.id), 'class -> "form") {
     @helper.CSRF.formField
 
-    <div class="govuk-form-group @if(form.errors("verified").nonEmpty) {govuk-form-group--error}">
+      @errorSummary2(form)
 
       <h1 class="govuk-heading-l">Request a change to the application name</h1>
 
@@ -52,18 +49,20 @@
 
       <p class="govuk-body">Previous application names will become available for others to use.</p>
 
-      <p id="verified-error" class="govuk-error-message">
-        <span class="govuk-visually-hidden">Error: </span> @fieldError2(form.errors, "verified", form.error("submissionError").isEmpty)
-      </p>
+      <div class="govuk-form-group @if(form.errors("applicationName").nonEmpty) {govuk-form-group--error}">
 
-      <p class="govuk-body">
-        <input class="govuk-input govuk-input--width-20" id="application-name" type="text">
-      </p>
-    
-      <div class="govuk-button-group"></div>
-        <button id="submit-ok" class="govuk-button" type="submit" name="submit-action" value="save-and-continue">Save and continue</button>
-        <button id="cancel" class="govuk-button govuk-button--secondary" type="submit" name="submit-action" value="cancel">Cancel</button>
+        <p id="verified-error" class="govuk-error-message">
+          <span class="govuk-visually-hidden">Error: </span> @fieldError2(form.errors, "applicationName", form.error("submissionError").isEmpty)
+        </p>
+
+        <p class="govuk-body">
+          <input class="govuk-input govuk-input--width-20" id="applicationName" name="applicationName" type="text" value="@form.data("applicationName")">
+        </p>
+
       </div>
-    </div>
-}
+
+      <button id="submit-ok" class="govuk-button" type="submit" name="submit-action" value="save-and-continue">Save and continue</button>
+      <a href="@routes.Details.details(model.application.id)" class="govuk-button govuk-button--secondary">Cancel</a>
+
+  }
 }

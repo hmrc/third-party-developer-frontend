@@ -540,3 +540,22 @@ object SelectTopicsFromSubscriptionsForm {
     )(SelectTopicsFromSubscriptionsForm.apply)(SelectTopicsFromSubscriptionsForm.unapply)
   )
 }
+
+case class ChangeOfApplicationNameForm(applicationName: String)
+
+object ChangeOfApplicationNameForm {
+
+  val form: Form[ChangeOfApplicationNameForm] = Form(
+    mapping(
+      "applicationName" -> applicationNameValidator
+    )(ChangeOfApplicationNameForm.apply)(ChangeOfApplicationNameForm.unapply)
+  )
+
+  def withData(applicationName: String) = {
+    form.fillAndValidate(
+      ChangeOfApplicationNameForm(
+        applicationName
+      )
+    )
+  }
+}

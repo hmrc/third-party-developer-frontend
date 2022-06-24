@@ -110,6 +110,8 @@ trait BaseApplication {
 
   def isPermittedToEditAppDetails(developer: Developer): Boolean = allows(SupportsDetails, developer, SandboxOnly)
 
+  def isPermittedToEditProductionAppDetails(developer: Developer): Boolean = allows(SupportsDetails, developer, ProductionAndAdmin)
+
   def isPermittedToAgreeToTermsOfUse(developer: Developer): Boolean = allows(SupportsDetails, developer, ProductionAndAdmin)
 
   /*
