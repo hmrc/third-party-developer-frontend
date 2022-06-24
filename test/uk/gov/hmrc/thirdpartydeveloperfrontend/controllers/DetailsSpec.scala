@@ -358,6 +358,17 @@ class DetailsSpec
     }
   }
 
+  "changeOfApplicationName" should {
+    "show page successfully" in new Setup {
+
+      val approvedApplication = anApplication(adminEmail = loggedInDeveloper.email)
+      givenApplicationAction(approvedApplication, loggedInDeveloper)
+
+      val result = addToken(underTest.requestChangeOfAppName(approvedApplication.id))(loggedInRequest)
+
+      status(result) shouldBe OK
+    }
+  }
   trait Setup extends ApplicationServiceMock with ApplicationActionServiceMock with TermsOfUseServiceMock {
     val unauthorisedAppDetailsView = app.injector.instanceOf[UnauthorisedAppDetailsView]
     val pendingApprovalView = app.injector.instanceOf[PendingApprovalView]
