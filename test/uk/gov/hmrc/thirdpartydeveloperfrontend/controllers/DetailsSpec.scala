@@ -34,7 +34,7 @@ import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.ViewHelpers._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.WithCSRFAddToken
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.WithLoggedInSession._
-import views.html.{ChangeDetailsView, DetailsView, RequestChangeOfApplicationNameView}
+import views.html.{ChangeDetailsView, DetailsView, RequestChangeOfApplicationNameView, ChangeOfApplicationNameConfirmationView}
 import views.html.application.PendingApprovalView
 import views.html.checkpages.applicationcheck.UnauthorisedAppDetailsView
 
@@ -364,6 +364,7 @@ class DetailsSpec
     val detailsView = app.injector.instanceOf[DetailsView]
     val changeDetailsView = app.injector.instanceOf[ChangeDetailsView]
     val requestChangeOfApplicationNameView = app.injector.instanceOf[RequestChangeOfApplicationNameView]
+    val changeOfApplicationNameConfirmationView = app.injector.instanceOf[ChangeOfApplicationNameConfirmationView]
 
     val underTest = new Details(
       mockErrorHandler,
@@ -377,6 +378,7 @@ class DetailsSpec
       detailsView,
       changeDetailsView,
       requestChangeOfApplicationNameView,
+      changeOfApplicationNameConfirmationView,
       fraudPreventionConfig,
       SubmissionServiceMock.aMock,
       termsOfUseServiceMock
