@@ -37,6 +37,7 @@ import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.WithLoggedInSession._
 import views.html.{ChangeDetailsView, DetailsView, RequestChangeOfApplicationNameView, ChangeOfApplicationNameConfirmationView}
 import views.html.application.PendingApprovalView
 import views.html.checkpages.applicationcheck.UnauthorisedAppDetailsView
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.connectors.TicketCreated
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
@@ -360,7 +361,6 @@ class DetailsSpec
 
   "changeOfApplicationName" should {
     "show page successfully" in new Setup {
-
       val approvedApplication = anApplication(adminEmail = loggedInDeveloper.email)
       givenApplicationAction(approvedApplication, loggedInDeveloper)
 
@@ -369,6 +369,49 @@ class DetailsSpec
       status(result) shouldBe OK
     }
   }
+
+  "changeOfApplicationNameAction" should {
+    "show success page if name changed successfully" in new Setup {
+      val approvedApplication = anApplication(adminEmail = loggedInDeveloper.email)
+      givenApplicationAction(approvedApplication, loggedInDeveloper)
+      when(underTest.applicationService.requestProductonApplicationNameChange(*, *, *, *)(*))
+        .thenReturn(Future.successful(TicketCreated))
+
+      private val request = loggedInRequest.withFormUrlEncodedBody("applicationName" -> "Legal new app name")
+
+      val result = addToken(underTest.requestChangeOfAppNameAction(approvedApplication.id))(request)
+
+      status(result) shouldBe OK
+      contentAsString(result) should include("We have received your request to change the application name to")
+    }
+
+    "show error if application name is not valid" in new Setup {
+      val approvedApplication = anApplication(adminEmail = loggedInDeveloper.email)
+      givenApplicationAction(approvedApplication, loggedInDeveloper)
+      when(underTest.applicationService.isApplicationNameValid(*, *, *)(*))
+        .thenReturn(Future.successful(Invalid(true, false)))
+
+      private val request = loggedInRequest.withFormUrlEncodedBody("applicationName" -> "HMRC - Illegal new app name")
+
+      val result = addToken(underTest.requestChangeOfAppNameAction(approvedApplication.id))(request)
+
+      status(result) shouldBe BAD_REQUEST
+      contentAsString(result) should include("Application name must not include HMRC or HM Revenue and Customs")
+    }
+
+    "show error if application name is too short" in new Setup {
+      val approvedApplication = anApplication(adminEmail = loggedInDeveloper.email)
+      givenApplicationAction(approvedApplication, loggedInDeveloper)
+
+      private val request = loggedInRequest.withFormUrlEncodedBody("applicationName" -> "")
+
+      val result = addToken(underTest.requestChangeOfAppNameAction(approvedApplication.id))(request)
+
+      status(result) shouldBe BAD_REQUEST
+      contentAsString(result) should include("Application name must be between 2 and 50 characters")
+    }
+  }
+
   trait Setup extends ApplicationServiceMock with ApplicationActionServiceMock with TermsOfUseServiceMock {
     val unauthorisedAppDetailsView = app.injector.instanceOf[UnauthorisedAppDetailsView]
     val pendingApprovalView = app.injector.instanceOf[PendingApprovalView]
@@ -410,7 +453,7 @@ class DetailsSpec
 
     when(underTest.applicationService.isApplicationNameValid(*, *, *)(*))
       .thenReturn(Future.successful(Valid))
-
+ 
     when(underTest.sessionService.fetch(eqTo(sessionId))(*))
       .thenReturn(successful(Some(session)))
 
