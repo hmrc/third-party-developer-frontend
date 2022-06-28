@@ -217,9 +217,7 @@ class ApplicationService @Inject() (
     }
 
     val ticket = createDeskproTicket(application, newApplicationName, requesterName, requesterEmail)
-    for {
-      ticketResponse <- deskproConnector.createTicket(ticket)
-    } yield ticketResponse
+    deskproConnector.createTicket(ticket)
   }
 
   def applicationConnectorFor(application: Application): ThirdPartyApplicationConnector = applicationConnectorFor(Some(application.deployedTo))

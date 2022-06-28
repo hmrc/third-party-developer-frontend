@@ -221,10 +221,10 @@ class Details @Inject() (
 
       def handleValidForm(form: ChangeOfApplicationNameForm): Future[Result] = {
         val requestForm = ChangeOfApplicationNameForm.form.bindFromRequest
-        val newApplicationName = form.applicationName
+        val newApplicationName = form.applicationName.trim()
 
         if (newApplicationName.equalsIgnoreCase(application.name)) {
-          
+
           def unchangedNameCheckForm: Form[ChangeOfApplicationNameForm] =
             requestForm.withError(appNameField, "application.name.unchanged.error")
           Future.successful(BadRequest(requestChangeOfApplicationNameView(unchangedNameCheckForm, ApplicationNameModel(request.application))))
