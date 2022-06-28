@@ -410,6 +410,18 @@ class DetailsSpec
       status(result) shouldBe BAD_REQUEST
       contentAsString(result) should include("Application name must be between 2 and 50 characters")
     }
+
+    "show error if new application name is the same as the old one" in new Setup {
+      val approvedApplication = anApplication(adminEmail = loggedInDeveloper.email)
+      givenApplicationAction(approvedApplication, loggedInDeveloper)
+
+      private val request = loggedInRequest.withFormUrlEncodedBody("applicationName" -> approvedApplication.name)
+
+      val result = addToken(underTest.requestChangeOfAppNameAction(approvedApplication.id))(request)
+
+      status(result) shouldBe BAD_REQUEST
+      contentAsString(result) should include("The application already has the specified name")
+    }
   }
 
   trait Setup extends ApplicationServiceMock with ApplicationActionServiceMock with TermsOfUseServiceMock {

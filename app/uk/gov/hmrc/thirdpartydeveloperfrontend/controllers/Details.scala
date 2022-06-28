@@ -221,22 +221,32 @@ class Details @Inject() (
 
       def handleValidForm(form: ChangeOfApplicationNameForm): Future[Result] = {
         val requestForm = ChangeOfApplicationNameForm.form.bindFromRequest
+        val newApplicationName = form.applicationName
 
-        applicationService
-          .isApplicationNameValid(form.applicationName, application.deployedTo, Some(applicationId))
-          .flatMap({
+        if (newApplicationName.equalsIgnoreCase(application.name)) {
+          
+          def unchangedNameCheckForm: Form[ChangeOfApplicationNameForm] =
+            requestForm.withError(appNameField, "application.name.unchanged.error")
+          Future.successful(BadRequest(requestChangeOfApplicationNameView(unchangedNameCheckForm, ApplicationNameModel(request.application))))
 
-            case Valid =>
-              for {
-                _ <- applicationService.requestProductonApplicationNameChange(application, form.applicationName, request.developerSession.displayedName, request.developerSession.email)
-              } yield Ok(changeOfApplicationNameConfirmationView(ApplicationNameModel(request.application), form.applicationName))
+        } else {
 
-            case invalid: Invalid =>
-              def invalidNameCheckForm: Form[ChangeOfApplicationNameForm] =
-                requestForm.withError(appNameField, invalid.validationErrorMessageKey)
+          applicationService
+            .isApplicationNameValid(newApplicationName, application.deployedTo, Some(applicationId))
+            .flatMap({
 
-              Future.successful(BadRequest(requestChangeOfApplicationNameView(invalidNameCheckForm, ApplicationNameModel(request.application))))
+              case Valid =>
+                for {
+                  _ <- applicationService.requestProductonApplicationNameChange(application, newApplicationName, request.developerSession.displayedName, request.developerSession.email)
+                } yield Ok(changeOfApplicationNameConfirmationView(ApplicationNameModel(request.application), newApplicationName))
+
+              case invalid: Invalid =>
+                def invalidNameCheckForm: Form[ChangeOfApplicationNameForm] =
+                  requestForm.withError(appNameField, invalid.validationErrorMessageKey)
+
+                Future.successful(BadRequest(requestChangeOfApplicationNameView(invalidNameCheckForm, ApplicationNameModel(request.application))))
           })
+        }
       }
 
       def handleInvalidForm(formWithErrors: Form[ChangeOfApplicationNameForm]): Future[Result] =
