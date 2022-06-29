@@ -33,7 +33,7 @@ implicit request: play.api.mvc.Request[Any], loggedIn: DeveloperSession, message
   developerSession = Some(loggedIn)
 ) {
 
-@helper.form(action = controllers.routes.Details.requestChangeOfPrivacyPolicyLocationAction(appId), 'class -> "form") {
+@helper.form(action = controllers.routes.Details.updatePrivacyPolicyLocationAction(appId), 'class -> "form") {
 @helper.CSRF.formField
 
 @errorSummary2(form)

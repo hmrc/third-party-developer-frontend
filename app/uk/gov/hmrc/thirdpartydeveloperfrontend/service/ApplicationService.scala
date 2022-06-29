@@ -52,6 +52,9 @@ class ApplicationService @Inject() (
   def update(updateApplicationRequest: UpdateApplicationRequest)(implicit hc: HeaderCarrier): Future[ApplicationUpdateSuccessful] =
     connectorWrapper.forEnvironment(updateApplicationRequest.environment).thirdPartyApplicationConnector.update(updateApplicationRequest.id, updateApplicationRequest)
 
+  def updatePrivacyPolicyLocation(applicationId: ApplicationId, newLocation: PrivacyPolicyLocation): Future[ApplicationUpdateSuccessful] =
+    Future.successful(ApplicationUpdateSuccessful)
+
   def fetchByApplicationId(applicationId: ApplicationId)(implicit hc: HeaderCarrier): Future[Option[ApplicationWithSubscriptionData]] = {
     apmConnector.fetchApplicationById(applicationId)
   }
