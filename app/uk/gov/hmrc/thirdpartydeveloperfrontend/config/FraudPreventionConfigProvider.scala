@@ -32,7 +32,9 @@ class FraudPreventionConfigProvider @Inject()(config: Configuration) extends Pro
 
       val enabled:Boolean = config.underlying.getBoolean("fraudPreventionLink.enabled")
       val apisWithFraudPrevention: List[String] = config.underlying.getStringList("fraudPreventionLink.apisWithFraudPrevention").asScala.toList
-      val uri: String = config.underlying.getString("fraudPreventionLink.uri")
+      val uriBase: String = config.underlying.getString("fraudPreventionLink.uri.base")
+      val uriPath: String = config.underlying.getString("fraudPreventionLink.uri.path")
+      val uri = s"$uriBase$uriPath"
 
       val result = FraudPreventionConfig(enabled, apisWithFraudPrevention, uri)
       result
