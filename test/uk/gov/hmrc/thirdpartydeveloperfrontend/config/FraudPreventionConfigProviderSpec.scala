@@ -35,13 +35,10 @@ class FraudPreventionConfigProviderSpec extends BaseControllerSpec {
 
     "be false when fraudPreventionLink.linkEnabled is false" in {
       val fraudPreventionApis = List("vat-api")
-      val uriBase = "base"
-      val uriPath = "/the/path"
-      val uri = uriBase + uriPath
+      val uri = "uri"
       val testConfig = Configuration.from(Map("fraudPreventionLink.enabled" -> "false",
         "fraudPreventionLink.apisWithFraudPrevention" -> fraudPreventionApis,
-        "fraudPreventionLink.uri.base" -> uriBase,
-        "fraudPreventionLink.uri.path" -> uriPath))
+        "fraudPreventionLink.uri" -> uri))
 
       val underTest = new FraudPreventionConfigProvider(testConfig).get()
 
