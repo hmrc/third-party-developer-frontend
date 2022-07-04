@@ -16,7 +16,7 @@
 
 package uk.gov.hmrc.thirdpartydeveloperfrontend.connectors
 
-import java.time.Period
+import java.time.{LocalDateTime, Period}
 import java.util.UUID
 import java.util.UUID.randomUUID
 import com.github.tomakehurst.wiremock.client.WireMock._
@@ -29,7 +29,6 @@ import uk.gov.hmrc.http._
 import uk.gov.hmrc.play.http.metrics.common.API
 import uk.gov.hmrc.time.DateTimeUtils
 import ThirdPartyApplicationConnectorJsonFormatters._
-
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.CollaboratorTracker
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.LocalUserIdTracker
 import org.scalatestplus.play.guice.GuiceOneAppPerSuite
@@ -38,10 +37,12 @@ import play.api.Configuration
 import play.api.inject.guice.GuiceApplicationBuilder
 import play.api.inject.bind
 import play.api.Mode
+import play.api.libs.json.Json
 import play.api.{Application => PlayApplication}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.apidefinitions.ApiContext
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.apidefinitions.ApiVersion
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.apidefinitions.ApiIdentifier
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.UserId
 
 
 class ThirdPartyApplicationConnectorSpec extends BaseConnectorIntegrationSpec with GuiceOneAppPerSuite with WireMockExtensions with CollaboratorTracker with LocalUserIdTracker {
@@ -112,7 +113,7 @@ class ThirdPartyApplicationConnectorSpec extends BaseConnectorIntegrationSpec wi
     implicit val hc = HeaderCarrier()
   }
 
-  trait Setup extends BaseSetup {
+  trait Setup extends BaseSetup with ApplicationUpdateFormatters {
     val connector = app.injector.instanceOf[ThirdPartyApplicationProductionConnector]
   }
 
@@ -163,6 +164,25 @@ class ThirdPartyApplicationConnectorSpec extends BaseConnectorIntegrationSpec wi
       )
 
       val result = await(connector.update(applicationId, updateApplicationRequest))
+
+      result shouldBe ApplicationUpdateSuccessful
+    }
+  }
+
+  "applicationUpdate" should {
+    val url = s"/application/${applicationId.value}"
+    val updateRequest = ChangeProductionApplicationPrivacyPolicyLocation(UserId.random, LocalDateTime.now, PrivacyPolicyLocation.InDesktopSoftware, PrivacyPolicyLocation.Url("http://example.com"))
+    "successfully update an application using the PATCH endpoint" in new Setup {
+      stubFor(
+        patch(urlEqualTo(url))
+          .withJsonRequestBody(Json.toJsObject(updateRequest) ++ Json.obj("updateType" -> "changeProductionApplicationPrivacyPolicyLocation"))
+          .willReturn(
+            aResponse()
+              .withStatus(OK)
+          )
+      )
+
+      val result = await(connector.applicationUpdate(applicationId, updateRequest))
 
       result shouldBe ApplicationUpdateSuccessful
     }
