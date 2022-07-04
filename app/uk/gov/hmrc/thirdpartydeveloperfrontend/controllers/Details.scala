@@ -236,7 +236,7 @@ class Details @Inject() (
         Future.successful(BadRequest(updatePrivacyPolicyLocationView(unchangedUrlForm, applicationId)))
 
       } else {
-        applicationService.updatePrivacyPolicyLocation(applicationId, newLocation).map(_ => Redirect(routes.Details.details(applicationId)))
+        applicationService.updatePrivacyPolicyLocation(application, request.userId,  oldLocation, newLocation).map(_ => Redirect(routes.Details.details(applicationId)))
       }
     }
 

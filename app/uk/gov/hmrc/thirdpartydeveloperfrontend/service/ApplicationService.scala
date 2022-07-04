@@ -24,6 +24,7 @@ import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.Enviro
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.connectors.{DeskproTicket, TicketResult}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.{DeveloperSession, UserId}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.subscriptions._
+
 import javax.inject.{Inject, Singleton}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.service.AuditAction.{AccountDeletionRequested, ApplicationDeletionRequested, Remove2SVRequested, UserLogoutSurveyCompleted}
 import uk.gov.hmrc.http.{ForbiddenException, HeaderCarrier}
@@ -32,6 +33,8 @@ import uk.gov.hmrc.time.DateTimeUtils
 
 import scala.concurrent.{ExecutionContext, Future}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.connectors.AddTeamMemberRequest
+
+import java.time.LocalDateTime
 
 @Singleton
 class ApplicationService @Inject() (
@@ -52,8 +55,10 @@ class ApplicationService @Inject() (
   def update(updateApplicationRequest: UpdateApplicationRequest)(implicit hc: HeaderCarrier): Future[ApplicationUpdateSuccessful] =
     connectorWrapper.forEnvironment(updateApplicationRequest.environment).thirdPartyApplicationConnector.update(updateApplicationRequest.id, updateApplicationRequest)
 
-  def updatePrivacyPolicyLocation(applicationId: ApplicationId, newLocation: PrivacyPolicyLocation): Future[ApplicationUpdateSuccessful] =
-    Future.successful(ApplicationUpdateSuccessful)
+  def updatePrivacyPolicyLocation(application: Application, userId: UserId, oldLocation: PrivacyPolicyLocation, newLocation: PrivacyPolicyLocation)(implicit hc: HeaderCarrier): Future[ApplicationUpdateSuccessful] = {
+    val request = ChangeProductionApplicationPrivacyPolicyLocation(userId,  LocalDateTime.now(), oldLocation, newLocation)
+    connectorWrapper.forEnvironment(application.deployedTo).thirdPartyApplicationConnector.applicationUpdate(application.id, request)
+  }
 
   def fetchByApplicationId(applicationId: ApplicationId)(implicit hc: HeaderCarrier): Future[Option[ApplicationWithSubscriptionData]] = {
     apmConnector.fetchApplicationById(applicationId)
