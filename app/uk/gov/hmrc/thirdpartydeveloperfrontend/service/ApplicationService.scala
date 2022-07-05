@@ -34,7 +34,7 @@ import uk.gov.hmrc.time.DateTimeUtils
 import scala.concurrent.{ExecutionContext, Future}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.connectors.AddTeamMemberRequest
 
-import java.time.LocalDateTime
+import java.time.{Clock, LocalDateTime}
 
 @Singleton
 class ApplicationService @Inject() (
@@ -46,7 +46,8 @@ class ApplicationService @Inject() (
     developerConnector: ThirdPartyDeveloperConnector,
     sandboxApplicationConnector: ThirdPartyApplicationSandboxConnector,
     productionApplicationConnector: ThirdPartyApplicationProductionConnector,
-    auditService: AuditService
+    auditService: AuditService,
+    clock: Clock
 )(implicit val ec: ExecutionContext) {
 
   def createForUser(createApplicationRequest: CreateApplicationRequest)(implicit hc: HeaderCarrier): Future[ApplicationCreatedResponse] =
@@ -56,7 +57,7 @@ class ApplicationService @Inject() (
     connectorWrapper.forEnvironment(updateApplicationRequest.environment).thirdPartyApplicationConnector.update(updateApplicationRequest.id, updateApplicationRequest)
 
   def updatePrivacyPolicyLocation(application: Application, userId: UserId, oldLocation: PrivacyPolicyLocation, newLocation: PrivacyPolicyLocation)(implicit hc: HeaderCarrier): Future[ApplicationUpdateSuccessful] = {
-    val request = ChangeProductionApplicationPrivacyPolicyLocation(userId,  LocalDateTime.now(), oldLocation, newLocation)
+    val request = ChangeProductionApplicationPrivacyPolicyLocation(userId,  LocalDateTime.now(clock), oldLocation, newLocation)
     connectorWrapper.forEnvironment(application.deployedTo).thirdPartyApplicationConnector.applicationUpdate(application.id, request)
   }
 
