@@ -207,12 +207,11 @@ class ApplicationServiceSpec extends AsyncHmrcSpec with SubscriptionsBuilder wit
   "Update Privacy Policy Location" should {
     "call the TPA connector correctly" in new Setup {
       val userId = UserId.random
-      val oldLocation = PrivacyPolicyLocation.InDesktopSoftware
       val newLocation = PrivacyPolicyLocation.Url("http://example.com")
-      val applicationUpdate = ChangeProductionApplicationPrivacyPolicyLocation(userId, LocalDateTime.now(clock), oldLocation, newLocation)
+      val applicationUpdate = ChangeProductionApplicationPrivacyPolicyLocation(userId, LocalDateTime.now(clock), newLocation)
       when(mockProductionApplicationConnector.applicationUpdate(productionApplicationId, applicationUpdate)).thenReturn(Future.successful(ApplicationUpdateSuccessful))
 
-      val result = await(applicationService.updatePrivacyPolicyLocation(productionApplication, userId, oldLocation, newLocation))
+      val result = await(applicationService.updatePrivacyPolicyLocation(productionApplication, userId, newLocation))
 
       result shouldBe ApplicationUpdateSuccessful
     }

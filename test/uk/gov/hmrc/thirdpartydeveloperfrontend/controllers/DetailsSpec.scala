@@ -424,7 +424,7 @@ class DetailsSpec
     "update location if form data is valid and return to app details page" in new Setup {
       val appWithPrivPolicyInDesktop = appWithPrivacyPolicyLocation(PrivacyPolicyLocation.InDesktopSoftware)
       givenApplicationAction(appWithPrivPolicyInDesktop, loggedInAdmin)
-      when(applicationServiceMock.updatePrivacyPolicyLocation(eqTo(appWithPrivPolicyInDesktop), *[UserId], eqTo(PrivacyPolicyLocation.InDesktopSoftware), eqTo(PrivacyPolicyLocation.Url(privacyPolicyUrl)))(*))
+      when(applicationServiceMock.updatePrivacyPolicyLocation(eqTo(appWithPrivPolicyInDesktop), *[UserId], eqTo(PrivacyPolicyLocation.Url(privacyPolicyUrl)))(*))
         .thenReturn(Future.successful(ApplicationUpdateSuccessful))
 
       val form = ChangeOfPrivacyPolicyLocationForm(privacyPolicyUrl, false)

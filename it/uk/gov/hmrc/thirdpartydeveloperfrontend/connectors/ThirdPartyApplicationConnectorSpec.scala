@@ -171,7 +171,7 @@ class ThirdPartyApplicationConnectorSpec extends BaseConnectorIntegrationSpec wi
 
   "applicationUpdate" should {
     val url = s"/application/${applicationId.value}"
-    val updateRequest = ChangeProductionApplicationPrivacyPolicyLocation(UserId.random, LocalDateTime.now, PrivacyPolicyLocation.InDesktopSoftware, PrivacyPolicyLocation.Url("http://example.com"))
+    val updateRequest = ChangeProductionApplicationPrivacyPolicyLocation(UserId.random, LocalDateTime.now, PrivacyPolicyLocation.Url("http://example.com"))
     "successfully update an application using the PATCH endpoint" in new Setup {
       stubFor(
         patch(urlEqualTo(url))
