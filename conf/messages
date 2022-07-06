@@ -95,6 +95,9 @@ application.name.invalid.length.and.characters = Application name must be betwee
 application.name.invalid.name = Application name must not include HMRC or HM Revenue and Customs
 application.name.already.exists.field = That application name already exists. Enter a unique name for your application.
 
+application.privacypolicylocation.invalid.unchanged = The Privacy Policy location has not changed
+application.privacypolicylocation.invalid.badurl = Provide a valid Privacy Policy URL
+
 environment.error.required.field = Choose an environment for your application
 
 client.secret.limit.exceeded = You exceeded the number of client secrets

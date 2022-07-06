@@ -35,7 +35,7 @@ import views.helper.CommonViewSpec
 import views.html.DetailsView
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils._
 
-class DetailsSpec 
+class DetailsViewSpec
     extends CommonViewSpec 
     with TestApplications 
     with CollaboratorTracker 

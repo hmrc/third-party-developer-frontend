@@ -95,32 +95,43 @@
             <a id="change" class="govuk-link govuk-link--no-visited-state" href="@routes.Details.changeDetails(app.id)">Change <span class="govuk-visually-hidden">application details</span></a>
           }
         </td>
+        <td class="govuk-table__header"></td>
       </tr>
     </thead>
     <tbody class="govuk-table__body">
       <tr class="govuk-table__row">
         <th scope="row" class="govuk-table__header">Application ID</th>
         <td class="govuk-table__cell" id="applicationId">@{app.id.value}</td>
+        <td class="govuk-table__cell"></td>
       </tr>
       <tr class="govuk-table__row">
         <th scope="row" class="govuk-table__header">Application name</th>
         <td class="govuk-table__cell" id="applicationName">@{app.name}</td>
+        <td class="govuk-table__cell"></td>
       </tr>
       <tr class="govuk-table__row">
         <th scope="row" class="govuk-table__header">Application description</th>
         <td class="govuk-table__cell" id="description">@if(app.description.nonEmpty) {@{app.description}} else {None}</td>
+        <td class="govuk-table__cell"></td>
       </tr>
       <tr class="govuk-table__row">
         <th scope="row" class="govuk-table__header">Privacy policy URL</th>
         <td class="govuk-table__cell" id="privacyPolicyUrl">@{PrivacyPolicyLocation.asText(app.privacyPolicyLocation)}</td>
+        <td class="govuk-table__cell">
+        @if(app.isPermittedToEditProductionAppDetails(loggedIn.developer)) {
+          <a id="change" class="govuk-link govuk-link--no-visited-state" href="@routes.Details.updatePrivacyPolicyLocation(app.id)">Change <span class="govuk-visually-hidden">application details</span></a>
+        }
+        </td>
       </tr>
       <tr class="govuk-table__row">
         <th scope="row" class="govuk-table__header">Terms and conditions URL</th>
         <td class="govuk-table__cell" id="termsAndConditionsUrl">@{TermsAndConditionsLocation.asText(app.termsAndConditionsLocation)}</td>
+        <td class="govuk-table__cell"></td>
       </tr>
       <tr class="govuk-table__row">
         <th scope="row" class="govuk-table__header">Application grant length</th>
         <td class="govuk-table__cell" id="applicationGrantLength">@{app.grantLengthDisplayValue}</td>
+        <td class="govuk-table__cell"></td>
       </tr>
     </tbody>
   </table>

@@ -24,7 +24,7 @@ import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.checkpages.{CheckYour
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.Capabilities.SupportsDetails
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.Permissions.SandboxOnly
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.Permissions.{ProductionAndAdmin, SandboxOnly}
 
 import javax.inject.{Inject, Singleton}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.controllers.ApplicationViewModel
@@ -32,7 +32,7 @@ import play.api.data.Form
 import play.api.libs.crypto.CookieSigner
 import play.api.mvc._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.service._
-import views.html.{ChangeDetailsView, DetailsView}
+import views.html.{ChangeDetailsView, DetailsView, UpdatePrivacyPolicyLocationView}
 import views.html.application.PendingApprovalView
 import views.html.checkpages.applicationcheck.UnauthorisedAppDetailsView
 
@@ -49,6 +49,7 @@ import uk.gov.hmrc.apiplatform.modules.submissions.domain.models.Submission
 import uk.gov.hmrc.play.bootstrap.controller.WithDefaultFormBinding
 import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.Details.{Agreement, TermsOfUseViewModel}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.TermsOfUseVersion
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.PrivacyPolicyLocation.NoneProvided
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.services.TermsOfUseService
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.services.TermsOfUseService.TermsOfUseAgreementDetails
 
@@ -61,6 +62,7 @@ object Details {
   ) {
     lazy val agreementNeeded = exists && !agreement.isDefined
   }
+  case class PrivacyPolicyLocationModel(applicationId: ApplicationId, privacyPolicyUrl: String, isInDesktop: Boolean)
 }
 @Singleton
 class Details @Inject() (
@@ -74,6 +76,7 @@ class Details @Inject() (
     pendingApprovalView: PendingApprovalView,
     detailsView: DetailsView,
     changeDetailsView: ChangeDetailsView,
+    updatePrivacyPolicyLocationView: UpdatePrivacyPolicyLocationView,
     val fraudPreventionConfig: FraudPreventionConfig,
     submissionService: SubmissionService,
     termsOfUseService: TermsOfUseService
@@ -202,6 +205,48 @@ class Details @Inject() (
 
       EditApplicationForm.form.bindFromRequest.fold(handleInvalidForm, handleValidForm)
     }
+
+  def canChangeProductionDetailsAndIsApprovedAction(applicationId: ApplicationId)(fun: ApplicationRequest[AnyContent] => Future[Result]): Action[AnyContent] =
+    checkActionForApprovedApps(SupportsDetails, ProductionAndAdmin)(applicationId)(fun)
+
+  def updatePrivacyPolicyLocation(applicationId: ApplicationId): Action[AnyContent] = canChangeProductionDetailsAndIsApprovedAction(applicationId) { implicit request =>
+    val application = request.application
+    application.access match {
+      case Standard(_,_,_,_,_,Some(ImportantSubmissionData(_, _, _, _, privacyPolicyLocation, _))) =>
+        Future.successful(Ok(updatePrivacyPolicyLocationView(ChangeOfPrivacyPolicyLocationForm.withData(privacyPolicyLocation), applicationId)))
+      case _ => Future.successful(BadRequest)
+    }
+  }
+
+  def updatePrivacyPolicyLocationAction(applicationId: ApplicationId): Action[AnyContent] = canChangeProductionDetailsAndIsApprovedAction(applicationId) { implicit request =>
+    val application = request.application
+
+    def handleValidForm(form: ChangeOfPrivacyPolicyLocationForm): Future[Result] = {
+      val requestForm = ChangeOfPrivacyPolicyLocationForm.form.bindFromRequest
+
+      val oldLocation = application.access match {
+        case Standard(_, _, _, _, _, Some(ImportantSubmissionData(_, _, _, _, privacyPolicyLocation, _))) => privacyPolicyLocation
+        case _ => NoneProvided
+      }
+      val newLocation = form.toLocation
+
+      val locationHasChanged = oldLocation != newLocation
+      if (!locationHasChanged) {
+        def unchangedUrlForm: Form[ChangeOfPrivacyPolicyLocationForm] = requestForm.withError(appNameField, "application.privacypolicylocation.invalid.unchanged")
+        Future.successful(BadRequest(updatePrivacyPolicyLocationView(unchangedUrlForm, applicationId)))
+
+      } else {
+        applicationService.updatePrivacyPolicyLocation(application, request.userId, newLocation).map(_ => Redirect(routes.Details.details(applicationId)))
+      }
+    }
+
+    def handleInvalidForm(formWithErrors: Form[ChangeOfPrivacyPolicyLocationForm]): Future[Result] = {
+      Future.successful(BadRequest(updatePrivacyPolicyLocationView(formWithErrors, applicationId)))
+    }
+
+    ChangeOfPrivacyPolicyLocationForm.form.bindFromRequest.fold(handleInvalidForm, handleValidForm)
+  }
+
 
   private def errorView(id: ApplicationId, form: Form[EditApplicationForm], applicationViewModel: ApplicationViewModel)(implicit request: ApplicationRequest[_]): Future[Result] =
     Future.successful(BadRequest(changeDetailsView(form, applicationViewModel)))

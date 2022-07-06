@@ -16,11 +16,17 @@
 
 package uk.gov.hmrc.thirdpartydeveloperfrontend.controllers
 
-import play.api.data.FormError
+import play.api.data.{Form, FormError}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.AsyncHmrcSpec
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.ApplicationId
 
 class FormValidationSpec extends AsyncHmrcSpec {
+  private def buildValidateNoErrors[T](bind: Map[String, String] => Form[T])(formData: Map[String, String]): Unit = {
+    val boundForm = bind(formData)
+    boundForm.errors shouldBe List()
+    boundForm.globalErrors shouldBe List()
+  }
+
   "ForgotPasswordForm " should {
     val validForgotPasswordForm = Map("emailaddress" -> "john.smith@example.com")
 
@@ -339,11 +345,7 @@ class FormValidationSpec extends AsyncHmrcSpec {
   }
 
   "SupportEnquiryForm" should {
-    def validateNoErrors(formData: Map[String, String]): Unit = {
-      val boundForm = SupportEnquiryForm.form.bind(formData)
-      boundForm.errors shouldBe List()
-      boundForm.globalErrors shouldBe List()
-    }
+    def validateNoErrors = buildValidateNoErrors(SupportEnquiryForm.form.bind) _
 
     val validFormData = Map("fullname" -> "Terry Jones", "emailaddress" -> "test@example.com", "comments" -> "this is fine")
 
@@ -406,11 +408,7 @@ class FormValidationSpec extends AsyncHmrcSpec {
   }
 
   "ProfileForm" should {
-    def validateNoErrors(formData: Map[String, String]): Unit = {
-      val boundForm = ProfileForm.form.bind(formData)
-      boundForm.errors shouldBe List()
-      boundForm.globalErrors shouldBe List()
-    }
+    def validateNoErrors = buildValidateNoErrors(ProfileForm.form.bind) _
 
     val validFormData = Map("firstname" -> "Terry", "lastname" -> "Jones", "organisation" -> "HMRC")
 
@@ -456,11 +454,7 @@ class FormValidationSpec extends AsyncHmrcSpec {
   }
 
   "SelectApisFromSubscriptionsForm" should {
-    def validateNoErrors(formData: Map[String, String]): Unit = {
-      val boundForm = SelectApisFromSubscriptionsForm.form.bind(formData)
-      boundForm.errors shouldBe List()
-      boundForm.globalErrors shouldBe List()
-    }
+    def validateNoErrors = buildValidateNoErrors(SelectApisFromSubscriptionsForm.form.bind) _
 
     val validFormData = Map("selectedApi[0]" -> "", "applicationId" -> ApplicationId.random.value)
 
@@ -474,11 +468,7 @@ class FormValidationSpec extends AsyncHmrcSpec {
   }
 
   "SelectTopicsFromSubscriptionsForm" should {
-    def validateNoErrors(formData: Map[String, String]): Unit = {
-      val boundForm = SelectTopicsFromSubscriptionsForm.form.bind(formData)
-      boundForm.errors shouldBe List()
-      boundForm.globalErrors shouldBe List()
-    }
+    def validateNoErrors = buildValidateNoErrors(SelectTopicsFromSubscriptionsForm.form.bind) _
 
     val validFormData = Map("topic[0]" -> "TopicOne", "applicationId" -> ApplicationId.random.value)
 
@@ -492,6 +482,27 @@ class FormValidationSpec extends AsyncHmrcSpec {
       val err = boundForm.errors.head
       err.key shouldBe "topic"
       err.messages shouldBe List("error.selectedtopics.nonselected.field")
+    }
+  }
+
+  "ChangeOfPrivacyPolicyLocationForm" should {
+    def validateNoErrors = buildValidateNoErrors(ChangeOfPrivacyPolicyLocationForm.form.bind) _
+
+    "accept valid form with valid url" in {
+      val validFormDataWithUrl = Map("privacyPolicyUrl" -> "http://example.com", "isInDesktop" -> "false")
+      validateNoErrors(validFormDataWithUrl)
+    }
+
+    "accept valid form with in desktop" in {
+      val validFormDataWithInDesktop = Map("privacyPolicyUrl" -> "", "isInDesktop" -> "true")
+      validateNoErrors(validFormDataWithInDesktop)
+    }
+
+    "reject form with invalid url" in {
+      val invalidFormDataWithBadUrl = Map("privacyPolicyUrl" -> "not a url", "isInDesktop" -> "false")
+      val boundForm = ChangeOfPrivacyPolicyLocationForm.form.bind(invalidFormDataWithBadUrl)
+      boundForm.errors.head.key shouldBe ""
+      boundForm.errors.head.messages shouldBe List("application.privacypolicylocation.invalid.badurl")
     }
   }
 }

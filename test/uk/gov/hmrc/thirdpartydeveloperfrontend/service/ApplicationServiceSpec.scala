@@ -16,11 +16,10 @@
 
 package uk.gov.hmrc.thirdpartydeveloperfrontend.service
 
-import java.time.Period
+import java.time.{LocalDateTime, Period}
 import java.util.UUID.randomUUID
-
 import uk.gov.hmrc.thirdpartydeveloperfrontend.builder._
-import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.DeveloperSessionBuilder
+import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.{AsyncHmrcSpec, DeveloperSessionBuilder, FixedClock, LocalUserIdTracker}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.config.ApplicationConfig
 import uk.gov.hmrc.thirdpartydeveloperfrontend.connectors._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.EditApplicationForm
@@ -29,21 +28,21 @@ import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.apidefinitions._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.apidefinitions.APIStatus._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.connectors.{DeskproTicket, TicketCreated}
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.{LoggedInState}
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.{LoggedInState, UserId}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.subscriptions.ApiSubscriptionFields._
 import org.mockito.ArgumentCaptor
 import uk.gov.hmrc.thirdpartydeveloperfrontend.service.SubscriptionFieldsService.SubscriptionFieldsConnector
 import uk.gov.hmrc.http.{ForbiddenException, HeaderCarrier}
 import uk.gov.hmrc.play.audit.http.connector.AuditResult.Success
 import uk.gov.hmrc.time.DateTimeUtils
-import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.AsyncHmrcSpec
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future.{failed, successful}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.subscriptions.VersionSubscription
 import uk.gov.hmrc.thirdpartydeveloperfrontend.service.PushPullNotificationsService.PushPullNotificationsConnector
-import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.LocalUserIdTracker
 import org.mockito.captor.ArgCaptor
+
+import scala.concurrent.Future
 
 class ApplicationServiceSpec extends AsyncHmrcSpec with SubscriptionsBuilder with ApplicationBuilder with LocalUserIdTracker {
 
@@ -51,7 +50,7 @@ class ApplicationServiceSpec extends AsyncHmrcSpec with SubscriptionsBuilder wit
   val versionTwo = ApiVersion("2.0")
   val grantLength = Period.ofDays(547)
 
-  trait Setup {
+  trait Setup extends FixedClock {
     implicit val hc: HeaderCarrier = HeaderCarrier()
 
     private val mockAppConfig = mock[ApplicationConfig]
@@ -93,7 +92,8 @@ class ApplicationServiceSpec extends AsyncHmrcSpec with SubscriptionsBuilder wit
       mockDeveloperConnector,
       mockSandboxApplicationConnector,
       mockProductionApplicationConnector,
-      mockAuditService
+      mockAuditService,
+      clock
     )
 
     def theProductionConnectorthenReturnTheApplication(applicationId: ApplicationId, application: Application): Unit = {
@@ -200,6 +200,19 @@ class ApplicationServiceSpec extends AsyncHmrcSpec with SubscriptionsBuilder wit
       private val updateApplicationRequest = UpdateApplicationRequest.from(editApplicationForm, application)
 
       private val result = await(applicationService.update(updateApplicationRequest))
+      result shouldBe ApplicationUpdateSuccessful
+    }
+  }
+
+  "Update Privacy Policy Location" should {
+    "call the TPA connector correctly" in new Setup {
+      val userId = UserId.random
+      val newLocation = PrivacyPolicyLocation.Url("http://example.com")
+      val applicationUpdate = ChangeProductionApplicationPrivacyPolicyLocation(userId, LocalDateTime.now(clock), newLocation)
+      when(mockProductionApplicationConnector.applicationUpdate(productionApplicationId, applicationUpdate)).thenReturn(Future.successful(ApplicationUpdateSuccessful))
+
+      val result = await(applicationService.updatePrivacyPolicyLocation(productionApplication, userId, newLocation))
+
       result shouldBe ApplicationUpdateSuccessful
     }
   }

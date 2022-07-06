@@ -27,6 +27,8 @@ import uk.gov.hmrc.play.bootstrap.filters.frontend.SessionTimeoutFilter
 import uk.gov.hmrc.apiplatform.modules.submissions.connectors.ThirdPartyApplicationSubmissionsConnector
 import uk.gov.hmrc.apiplatform.modules.submissions.config.ThirdPartyApplicationSubmissionsConnectorConfigProvider
 
+import java.time.Clock
+
 class ConfigurationModule extends AbstractModule {
   override def configure(): Unit = {
     bind(classOf[ConnectorMetrics]).to(classOf[ConnectorMetricsImpl])
@@ -55,5 +57,7 @@ class ConfigurationModule extends AbstractModule {
 
     bind(classOf[ThirdPartyApplicationSubmissionsConnector.Config])
       .toProvider(classOf[ThirdPartyApplicationSubmissionsConnectorConfigProvider])
+
+    bind(classOf[Clock]).toInstance(Clock.systemUTC())
   }
 }

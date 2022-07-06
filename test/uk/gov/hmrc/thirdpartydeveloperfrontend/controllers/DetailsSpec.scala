@@ -20,7 +20,7 @@ import org.joda.time.DateTime
 import uk.gov.hmrc.thirdpartydeveloperfrontend.builder.DeveloperBuilder
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications._
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.{DeveloperSession, LoggedInState, Session}
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.{DeveloperSession, LoggedInState, Session, UserId}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.mocks.service._
 import org.jsoup.Jsoup
 import org.mockito.captor.ArgCaptor
@@ -34,7 +34,7 @@ import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.ViewHelpers._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.WithCSRFAddToken
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.WithLoggedInSession._
-import views.html.{ChangeDetailsView, DetailsView}
+import views.html.{ChangeDetailsView, DetailsView, UpdatePrivacyPolicyLocationView}
 import views.html.application.PendingApprovalView
 import views.html.checkpages.applicationcheck.UnauthorisedAppDetailsView
 
@@ -99,7 +99,7 @@ class DetailsSpec
 
         givenApplicationAction(pendingApprovalApplication, loggedInDeveloper)
 
-        val result = addToken(underTest.details(pendingApprovalApplication.id))(loggedInRequest)
+        val result = addToken(underTest.details(pendingApprovalApplication.id))(loggedInDevRequest)
 
         status(result) shouldBe OK
 
@@ -113,7 +113,7 @@ class DetailsSpec
 
         givenApplicationAction(pendingVerificationApplication, loggedInDeveloper)
 
-        val result = addToken(underTest.details(pendingVerificationApplication.id))(loggedInRequest)
+        val result = addToken(underTest.details(pendingVerificationApplication.id))(loggedInDevRequest)
 
         status(result) shouldBe OK
 
@@ -128,7 +128,7 @@ class DetailsSpec
 
         givenApplicationAction(preProdApplication, loggedInDeveloper)
 
-        val result = addToken(underTest.details(preProdApplication.id))(loggedInRequest)
+        val result = addToken(underTest.details(preProdApplication.id))(loggedInDevRequest)
 
         status(result) shouldBe SEE_OTHER
         redirectLocation(result) shouldBe Some(uk.gov.hmrc.apiplatform.modules.submissions.controllers.routes.StartUsingYourApplicationController.startUsingYourApplicationPage(preProdApplication.id).url)
@@ -140,7 +140,7 @@ class DetailsSpec
 
         returnAgreementDetails()
         givenApplicationAction(preProdApplication, loggedInDeveloper)
-        val loggedInRequestWithForceAppDetailsParam = FakeRequest("GET", "/?forceAppDetails").withLoggedIn(underTest, implicitly)(sessionId).withSession(sessionParams: _*)
+        val loggedInRequestWithForceAppDetailsParam = FakeRequest("GET", "/?forceAppDetails").withLoggedIn(underTest, implicitly)(devSessionId).withSession(sessionParams: _*)
         val result = addToken(underTest.details(preProdApplication.id))(loggedInRequestWithForceAppDetailsParam)
 
         status(result) shouldBe OK
@@ -225,7 +225,7 @@ class DetailsSpec
       val application = anROPCApplication()
       givenApplicationAction(application, loggedInDeveloper)
 
-      val result = underTest.details(application.id)(loggedInRequest)
+      val result = underTest.details(application.id)(loggedInDevRequest)
 
       status(result) shouldBe NOT_FOUND
     }
@@ -234,7 +234,7 @@ class DetailsSpec
       val application = aPrivilegedApplication()
       givenApplicationAction(application, loggedInDeveloper)
 
-      val result = underTest.details(application.id)(loggedInRequest)
+      val result = underTest.details(application.id)(loggedInDevRequest)
 
       status(result) shouldBe NOT_FOUND
     }
@@ -358,11 +358,89 @@ class DetailsSpec
     }
   }
 
+  "changing privacy policy location" should {
+    def appWithPrivacyPolicyLocation(privacyPolicyLocation: PrivacyPolicyLocation) = anApplication(access = Standard(List.empty, None, None, Set.empty, None, Some(
+      ImportantSubmissionData(None, ResponsibleIndividual.build("bob example", "bob@example.com"), Set.empty, TermsAndConditionsLocation.InDesktopSoftware,
+        privacyPolicyLocation, List.empty)))
+    )
+    val privacyPolicyUrl = "http://example.com/priv-policy"
+
+    implicit val writeChangeOfPrivacyPolicyLocationForm = Json.writes[ChangeOfPrivacyPolicyLocationForm]
+
+    "display update page with 'in desktop' radio selected" in new Setup {
+      val appWithPrivPolicyInDesktop = appWithPrivacyPolicyLocation(PrivacyPolicyLocation.InDesktopSoftware)
+      givenApplicationAction(appWithPrivPolicyInDesktop, loggedInAdmin)
+
+      val result = addToken(underTest.updatePrivacyPolicyLocation(appWithPrivPolicyInDesktop.id))(loggedInAdminRequest)
+
+      status(result) shouldBe OK
+      val document = Jsoup.parse(contentAsString(result))
+      elementExistsByIdWithAttr(document, "privacyPolicyInDesktop", "checked") shouldBe true
+      elementExistsByIdWithAttr(document, "privacyPolicyHasUrl", "checked") shouldBe false
+    }
+
+    "display update page with 'url' radio selected" in new Setup {
+      val appWithPrivPolicyUrl = appWithPrivacyPolicyLocation(PrivacyPolicyLocation.Url(privacyPolicyUrl))
+      givenApplicationAction(appWithPrivPolicyUrl, loggedInAdmin)
+
+      val result = addToken(underTest.updatePrivacyPolicyLocation(appWithPrivPolicyUrl.id))(loggedInAdminRequest)
+
+      status(result) shouldBe OK
+      val document = Jsoup.parse(contentAsString(result))
+      elementExistsByIdWithAttr(document, "privacyPolicyInDesktop", "checked") shouldBe false
+      elementExistsByIdWithAttr(document, "privacyPolicyHasUrl", "checked") shouldBe true
+      elementIdentifiedByIdContainsValue(document, "privacyPolicyUrl", privacyPolicyUrl)
+    }
+
+    "return Not Found error if application cannot be retrieved" in new Setup {
+      val appWithPrivPolicyInDesktop = appWithPrivacyPolicyLocation(PrivacyPolicyLocation.InDesktopSoftware)
+      givenApplicationActionReturnsNotFound(appWithPrivPolicyInDesktop.id)
+
+      val result = addToken(underTest.updatePrivacyPolicyLocation(appWithPrivPolicyInDesktop.id))(loggedInAdminRequest)
+
+      status(result) shouldBe NOT_FOUND
+    }
+
+    "return bad request if privacy policy location has not changed" in new Setup {
+      val appWithPrivPolicyInDesktop = appWithPrivacyPolicyLocation(PrivacyPolicyLocation.InDesktopSoftware)
+      givenApplicationAction(appWithPrivPolicyInDesktop, loggedInAdmin)
+
+      val form = ChangeOfPrivacyPolicyLocationForm("", true)
+      val result = addToken(underTest.updatePrivacyPolicyLocationAction(appWithPrivPolicyInDesktop.id))(loggedInAdminRequest.withJsonBody(Json.toJson(form)))
+
+      status(result) shouldBe BAD_REQUEST
+    }
+
+    "return bad request if form data is invalid" in new Setup {
+      val appWithPrivPolicyInDesktop = appWithPrivacyPolicyLocation(PrivacyPolicyLocation.InDesktopSoftware)
+      givenApplicationAction(appWithPrivPolicyInDesktop, loggedInAdmin)
+
+      val form = ChangeOfPrivacyPolicyLocationForm("", false)
+      val result = addToken(underTest.updatePrivacyPolicyLocationAction(appWithPrivPolicyInDesktop.id))(loggedInAdminRequest.withJsonBody(Json.toJson(form)))
+
+      status(result) shouldBe BAD_REQUEST
+    }
+
+    "update location if form data is valid and return to app details page" in new Setup {
+      val appWithPrivPolicyInDesktop = appWithPrivacyPolicyLocation(PrivacyPolicyLocation.InDesktopSoftware)
+      givenApplicationAction(appWithPrivPolicyInDesktop, loggedInAdmin)
+      when(applicationServiceMock.updatePrivacyPolicyLocation(eqTo(appWithPrivPolicyInDesktop), *[UserId], eqTo(PrivacyPolicyLocation.Url(privacyPolicyUrl)))(*))
+        .thenReturn(Future.successful(ApplicationUpdateSuccessful))
+
+      val form = ChangeOfPrivacyPolicyLocationForm(privacyPolicyUrl, false)
+      val result = addToken(underTest.updatePrivacyPolicyLocationAction(appWithPrivPolicyInDesktop.id))(loggedInAdminRequest.withJsonBody(Json.toJson(form)))
+
+      status(result) shouldBe SEE_OTHER
+      redirectLocation(result) shouldBe Some(routes.Details.details(appWithPrivPolicyInDesktop.id).url)
+    }
+  }
+
   trait Setup extends ApplicationServiceMock with ApplicationActionServiceMock with TermsOfUseServiceMock {
     val unauthorisedAppDetailsView = app.injector.instanceOf[UnauthorisedAppDetailsView]
     val pendingApprovalView = app.injector.instanceOf[PendingApprovalView]
     val detailsView = app.injector.instanceOf[DetailsView]
     val changeDetailsView = app.injector.instanceOf[ChangeDetailsView]
+    val updatePrivacyPolicyLocationView = app.injector.instanceOf[UpdatePrivacyPolicyLocationView]
 
     val underTest = new Details(
       mockErrorHandler,
@@ -375,6 +453,7 @@ class DetailsSpec
       pendingApprovalView,
       detailsView,
       changeDetailsView,
+      updatePrivacyPolicyLocationView,
       fraudPreventionConfig,
       SubmissionServiceMock.aMock,
       termsOfUseServiceMock
@@ -383,10 +462,14 @@ class DetailsSpec
     implicit val hc: HeaderCarrier = HeaderCarrier()
 
     val developer = buildDeveloper()
-    val sessionId = "sessionId"
-    val session = Session(sessionId, developer, LoggedInState.LOGGED_IN)
+    val admin = buildDeveloper(emailAddress = "admin@example.com")
+    val devSessionId = "dev sessionId"
+    val adminSessionId = "admin sessionId"
+    val devSession = Session(devSessionId, developer, LoggedInState.LOGGED_IN)
+    val adminSession = Session(adminSessionId, admin, LoggedInState.LOGGED_IN)
 
-    val loggedInDeveloper = DeveloperSession(session)
+    val loggedInDeveloper = DeveloperSession(devSession)
+    val loggedInAdmin = DeveloperSession(adminSession)
 
     val newName = "new name"
     val newDescription = Some("new description")
@@ -396,10 +479,10 @@ class DetailsSpec
     when(underTest.applicationService.isApplicationNameValid(*, *, *)(*))
       .thenReturn(Future.successful(Valid))
 
-    when(underTest.sessionService.fetch(eqTo(sessionId))(*))
-      .thenReturn(successful(Some(session)))
+    when(underTest.sessionService.fetch(eqTo(devSessionId))(*)).thenReturn(successful(Some(devSession)))
+    when(underTest.sessionService.fetch(eqTo(adminSessionId))(*)).thenReturn(successful(Some(adminSession)))
 
-    when(underTest.sessionService.updateUserFlowSessions(sessionId)).thenReturn(successful(()))
+    when(underTest.sessionService.updateUserFlowSessions(*)).thenReturn(successful(()))
 
     when(underTest.applicationService.update(any[UpdateApplicationRequest])(*))
       .thenReturn(successful(ApplicationUpdateSuccessful))
@@ -409,7 +492,8 @@ class DetailsSpec
 
     val sessionParams = Seq("csrfToken" -> app.injector.instanceOf[TokenProvider].generateToken)
     val loggedOutRequest = FakeRequest().withSession(sessionParams: _*)
-    val loggedInRequest = FakeRequest().withLoggedIn(underTest, implicitly)(sessionId).withSession(sessionParams: _*)
+    val loggedInDevRequest = FakeRequest().withLoggedIn(underTest, implicitly)(devSessionId).withSession(sessionParams: _*)
+    val loggedInAdminRequest = FakeRequest().withLoggedIn(underTest, implicitly)(adminSessionId).withSession(sessionParams: _*)
 
     def captureUpdatedApplication: UpdateApplicationRequest = {
       val captor = ArgCaptor[UpdateApplicationRequest]
@@ -505,15 +589,15 @@ class DetailsSpec
 
       final def toForm = EditApplicationForm(app.id, app.name, app.description, appAccess.privacyPolicyUrl, appAccess.termsAndConditionsUrl, app.grantLengthDisplayValue)
 
-      final def callDetails: Future[Result] = underTest.details(app.id)(loggedInRequest)
+      final def callDetails: Future[Result] = underTest.details(app.id)(loggedInDevRequest)
 
       final def callDetailsNotLoggedIn: Future[Result] = underTest.details(app.id)(loggedOutRequest)
 
-      final def callChangeDetails: Future[Result] = addToken(underTest.changeDetails(app.id))(loggedInRequest)
+      final def callChangeDetails: Future[Result] = addToken(underTest.changeDetails(app.id))(loggedInDevRequest)
 
       final def callChangeDetailsNotLoggedIn: Future[Result] = addToken(underTest.changeDetails(app.id))(loggedOutRequest)
 
-      final def callChangeDetailsAction: Future[Result] = callChangeDetailsAction(loggedInRequest)
+      final def callChangeDetailsAction: Future[Result] = callChangeDetailsAction(loggedInDevRequest)
 
       final def callChangeDetailsActionNotLoggedIn: Future[Result] = callChangeDetailsAction(loggedOutRequest)
 

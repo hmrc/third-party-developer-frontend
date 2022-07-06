@@ -70,6 +70,9 @@ GET         /applications/:id/details                                           
 GET         /applications/:id/details/change                                                             uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.Details.changeDetails(id: ApplicationId)
 POST        /applications/:id/details/change                                                             uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.Details.changeDetailsAction(id: ApplicationId)
 
+GET         /applications/:id/details/change-privacy-policy-location                                     uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.Details.updatePrivacyPolicyLocation(id: ApplicationId)
+POST        /applications/:id/details/change-privacy-policy-location                                     uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.Details.updatePrivacyPolicyLocationAction(id: ApplicationId)
+
 GET         /applications/:id/details/terms-of-use                                                       uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.TermsOfUse.termsOfUse(id: ApplicationId)
 POST        /applications/:id/details/terms-of-use                                                       uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.TermsOfUse.agreeTermsOfUse(id: ApplicationId)
 
