@@ -76,6 +76,25 @@ class ApplicationSpec extends AnyFunSpec with Matchers with DeveloperBuilder wit
     runTableTests(data, productionApplicationState)({ case (application, user) => application.isPermittedToEditAppDetails(user) })
   }
 
+  describe("Application.isPermittedToEditProductionAppDetails") {
+    val data: Seq[(Environment, Access, Developer, Boolean)] = Seq(
+      (Environment.SANDBOX, Standard(), developer, false),
+      (Environment.SANDBOX, Standard(), administrator, false),
+      (Environment.PRODUCTION, Standard(), developer, false),
+      (Environment.PRODUCTION, Standard(), administrator, true),
+      (Environment.SANDBOX, ROPC(), developer, false),
+      (Environment.SANDBOX, ROPC(), administrator, false),
+      (Environment.PRODUCTION, ROPC(), developer, false),
+      (Environment.PRODUCTION, ROPC(), administrator, false),
+      (Environment.SANDBOX, Privileged(), developer, false),
+      (Environment.SANDBOX, Privileged(), administrator, false),
+      (Environment.PRODUCTION, Privileged(), developer, false),
+      (Environment.PRODUCTION, Privileged(), administrator, false)
+    )
+
+    runTableTests(data, productionApplicationState)({ case (application, user) => application.isPermittedToEditProductionAppDetails(user) })
+  }
+
   describe("Application.isPermittedToAgreeToTermsOfUse") {
     val data: Seq[(Environment, Access, Developer, Boolean)] = Seq(
       (Environment.SANDBOX, Standard(), developer, false),

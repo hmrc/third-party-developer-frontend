@@ -19,13 +19,13 @@ package uk.gov.hmrc.thirdpartydeveloperfrontend.service
 import java.time.Period
 import java.util.UUID
 import java.util.UUID.randomUUID
-
 import uk.gov.hmrc.thirdpartydeveloperfrontend.builder._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.config.ApplicationConfig
 import uk.gov.hmrc.thirdpartydeveloperfrontend.connectors._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.apidefinitions._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications._
+import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.FixedClock
 // import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.subscriptions.ApiSubscriptionFields
 import uk.gov.hmrc.thirdpartydeveloperfrontend.service.SubscriptionFieldsService.SubscriptionFieldsConnector
 import uk.gov.hmrc.http.{HeaderCarrier}
@@ -44,7 +44,7 @@ class ApplicationServiceClientSecretSpec extends AsyncHmrcSpec with Subscription
   val versionTwo = ApiVersion("2.0")
   val grantLength = Period.ofDays(547)
 
-  trait Setup {
+  trait Setup extends FixedClock {
     implicit val hc: HeaderCarrier = HeaderCarrier()
 
     private val mockAppConfig = mock[ApplicationConfig]
@@ -86,7 +86,8 @@ class ApplicationServiceClientSecretSpec extends AsyncHmrcSpec with Subscription
       mockDeveloperConnector,
       mockSandboxApplicationConnector,
       mockProductionApplicationConnector,
-      mockAuditService
+      mockAuditService,
+      clock
     )
 
     def theProductionConnectorthenReturnTheApplication(applicationId: ApplicationId, application: Application): Unit = {

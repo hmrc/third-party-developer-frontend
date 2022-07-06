@@ -22,6 +22,7 @@ import play.api.data.Forms._
 import play.api.data.validation.{Constraint, Invalid, Valid, ValidationError}
 import play.api.data.format.Formatter
 import play.api.data.FormError
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.PrivacyPolicyLocation.{InDesktopSoftware, NoneProvided, Url}
 
 trait ConfirmPassword {
   val password: String
@@ -556,6 +557,46 @@ object ChangeOfApplicationNameForm {
       ChangeOfApplicationNameForm(
         applicationName
       )
+    )
+  }
+}
+
+case class ChangeOfPrivacyPolicyLocationForm(privacyPolicyUrl: String, isInDesktop: Boolean) {
+  def toLocation: PrivacyPolicyLocation = isInDesktop match {
+    case true => InDesktopSoftware
+    case false if !privacyPolicyUrl.isEmpty => Url(privacyPolicyUrl)
+    case _ => NoneProvided
+  }
+}
+
+object ChangeOfPrivacyPolicyLocationForm {
+  val validUrlPresentIfNotInDesktop: Constraint[ChangeOfPrivacyPolicyLocationForm] = Constraint({
+    form =>
+      if (form.isInDesktop || isValidUrl(form.privacyPolicyUrl)) {
+        Valid
+      } else {
+        Invalid(ValidationError("application.privacypolicylocation.invalid.badurl"))
+      }
+  })
+
+  val form: Form[ChangeOfPrivacyPolicyLocationForm] = Form(
+    mapping(
+      "privacyPolicyUrl" -> text,
+      "isInDesktop" -> boolean
+    )(ChangeOfPrivacyPolicyLocationForm.apply)(ChangeOfPrivacyPolicyLocationForm.unapply).verifying(validUrlPresentIfNotInDesktop)
+  )
+
+  def withData(privacyPolicyLocation: PrivacyPolicyLocation) = {
+    val privacyPolicyUrl = privacyPolicyLocation match {
+      case Url(value) => value
+      case _ => ""
+    }
+    val isInDesktop = privacyPolicyLocation match {
+      case InDesktopSoftware => true
+      case _ => false
+    }
+    form.fillAndValidate(
+      ChangeOfPrivacyPolicyLocationForm(privacyPolicyUrl, isInDesktop)
     )
   }
 }
