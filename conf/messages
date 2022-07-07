@@ -98,6 +98,9 @@ application.name.already.exists.field = That application name already exists. En
 application.privacypolicylocation.invalid.unchanged = The Privacy Policy location has not changed
 application.privacypolicylocation.invalid.badurl = Provide a valid Privacy Policy URL
 
+application.termsconditionslocation.invalid.unchanged = The Terms and Conditions location has not changed
+application.termsconditionslocation.invalid.badurl = Provide a valid Terms and Conditions URL
+
 environment.error.required.field = Choose an environment for your application
 
 client.secret.limit.exceeded = You exceeded the number of client secrets

@@ -22,7 +22,6 @@ import play.api.data.Forms._
 import play.api.data.validation.{Constraint, Invalid, Valid, ValidationError}
 import play.api.data.format.Formatter
 import play.api.data.FormError
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.PrivacyPolicyLocation.{InDesktopSoftware, NoneProvided, Url}
 
 trait ConfirmPassword {
   val password: String
@@ -544,9 +543,9 @@ object SelectTopicsFromSubscriptionsForm {
 
 case class ChangeOfPrivacyPolicyLocationForm(privacyPolicyUrl: String, isInDesktop: Boolean, isNewJourney: Boolean) {
   def toLocation: PrivacyPolicyLocation = isInDesktop match {
-    case true => InDesktopSoftware
-    case false if !privacyPolicyUrl.isEmpty => Url(privacyPolicyUrl)
-    case _ => NoneProvided
+    case true => PrivacyPolicyLocation.InDesktopSoftware
+    case false if !privacyPolicyUrl.isEmpty => PrivacyPolicyLocation.Url(privacyPolicyUrl)
+    case _ => PrivacyPolicyLocation.NoneProvided
   }
 }
 
@@ -570,11 +569,11 @@ object ChangeOfPrivacyPolicyLocationForm {
 
   def withNewJourneyData(privacyPolicyLocation: PrivacyPolicyLocation) = {
     val privacyPolicyUrl = privacyPolicyLocation match {
-      case Url(value) => value
+      case PrivacyPolicyLocation.Url(value) => value
       case _ => ""
     }
     val isInDesktop = privacyPolicyLocation match {
-      case InDesktopSoftware => true
+      case PrivacyPolicyLocation.InDesktopSoftware => true
       case _ => false
     }
     form.fillAndValidate(
@@ -585,6 +584,46 @@ object ChangeOfPrivacyPolicyLocationForm {
   def withOldJourneyData(maybePrivacyPolicyUrl: Option[String]) = {
     form.fill(
       ChangeOfPrivacyPolicyLocationForm(maybePrivacyPolicyUrl.getOrElse(""), false, false)
+    )
+  }
+}
+
+case class ChangeOfTermsAndConditionsLocationForm(termsAndConditionsUrl: String, isInDesktop: Boolean) {
+  def toLocation: TermsAndConditionsLocation = isInDesktop match {
+    case true => TermsAndConditionsLocation.InDesktopSoftware
+    case false if !termsAndConditionsUrl.isEmpty => TermsAndConditionsLocation.Url(termsAndConditionsUrl)
+    case _ => TermsAndConditionsLocation.NoneProvided
+  }
+}
+
+object ChangeOfTermsAndConditionsLocationForm {
+  val validUrlPresentIfNotInDesktop: Constraint[ChangeOfTermsAndConditionsLocationForm] = Constraint({
+    form =>
+      if (form.isInDesktop || isValidUrl(form.termsAndConditionsUrl)) {
+        Valid
+      } else {
+        Invalid(ValidationError("application.termsconditionslocation.invalid.badurl"))
+      }
+  })
+
+  val form: Form[ChangeOfTermsAndConditionsLocationForm] = Form(
+    mapping(
+      "termsConditionsUrl" -> text,
+      "isInDesktop" -> boolean
+    )(ChangeOfTermsAndConditionsLocationForm.apply)(ChangeOfTermsAndConditionsLocationForm.unapply).verifying(validUrlPresentIfNotInDesktop)
+  )
+
+  def withData(termsAndConditionsLocation: TermsAndConditionsLocation) = {
+    val termsConditionsUrl = termsAndConditionsLocation match {
+      case TermsAndConditionsLocation.Url(value) => value
+      case _ => ""
+    }
+    val isInDesktop = termsAndConditionsLocation match {
+      case TermsAndConditionsLocation.InDesktopSoftware => true
+      case _ => false
+    }
+    form.fillAndValidate(
+      ChangeOfTermsAndConditionsLocationForm(termsConditionsUrl, isInDesktop)
     )
   }
 }

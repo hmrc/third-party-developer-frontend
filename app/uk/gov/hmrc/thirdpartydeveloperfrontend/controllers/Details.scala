@@ -32,7 +32,7 @@ import play.api.data.Form
 import play.api.libs.crypto.CookieSigner
 import play.api.mvc._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.service._
-import views.html.{ChangeDetailsView, DetailsView, UpdatePrivacyPolicyLocationView}
+import views.html.{ChangeDetailsView, DetailsView, UpdatePrivacyPolicyLocationView, UpdateTermsAndConditionsLocationView}
 import views.html.application.PendingApprovalView
 import views.html.checkpages.applicationcheck.UnauthorisedAppDetailsView
 
@@ -77,6 +77,7 @@ class Details @Inject() (
     detailsView: DetailsView,
     changeDetailsView: ChangeDetailsView,
     updatePrivacyPolicyLocationView: UpdatePrivacyPolicyLocationView,
+    updateTermsAndConditionsLocationView: UpdateTermsAndConditionsLocationView,
     val fraudPreventionConfig: FraudPreventionConfig,
     submissionService: SubmissionService,
     termsOfUseService: TermsOfUseService
@@ -248,6 +249,44 @@ class Details @Inject() (
     }
 
     ChangeOfPrivacyPolicyLocationForm.form.bindFromRequest.fold(handleInvalidForm, handleValidForm)
+  }
+
+  def updateTermsAndConditionsLocation(applicationId: ApplicationId): Action[AnyContent] = canChangeProductionDetailsAndIsApprovedAction(applicationId) { implicit request =>
+    val application = request.application
+    application.access match {
+      case Standard(_,_,_,_,_,Some(ImportantSubmissionData(_, _, _, termsAndConditionsLocation, _, _))) =>
+        Future.successful(Ok(updateTermsAndConditionsLocationView(ChangeOfTermsAndConditionsLocationForm.withData(termsAndConditionsLocation), applicationId)))
+      case _ => Future.successful(BadRequest)
+    }
+  }
+
+  def updateTermsAndConditionsLocationAction(applicationId: ApplicationId): Action[AnyContent] = canChangeProductionDetailsAndIsApprovedAction(applicationId) { implicit request =>
+    val application = request.application
+
+    def handleValidForm(form: ChangeOfTermsAndConditionsLocationForm): Future[Result] = {
+      val requestForm = ChangeOfTermsAndConditionsLocationForm.form.bindFromRequest
+
+      val oldLocation = application.access match {
+        case Standard(_, _, _, _, _, Some(ImportantSubmissionData(_, _, _, termsAndConditionsLocation, _, _))) => termsAndConditionsLocation
+        case _ => NoneProvided
+      }
+      val newLocation = form.toLocation
+
+      val locationHasChanged = oldLocation != newLocation
+      if (!locationHasChanged) {
+        def unchangedUrlForm: Form[ChangeOfTermsAndConditionsLocationForm] = requestForm.withError(appNameField, "application.termsconditionslocation.invalid.unchanged")
+        Future.successful(BadRequest(updateTermsAndConditionsLocationView(unchangedUrlForm, applicationId)))
+
+      } else {
+        applicationService.updateTermsConditionsLocation(application, request.userId, newLocation).map(_ => Redirect(routes.Details.details(applicationId)))
+      }
+    }
+
+    def handleInvalidForm(formWithErrors: Form[ChangeOfTermsAndConditionsLocationForm]): Future[Result] = {
+      Future.successful(BadRequest(updateTermsAndConditionsLocationView(formWithErrors, applicationId)))
+    }
+
+    ChangeOfTermsAndConditionsLocationForm.form.bindFromRequest.fold(handleInvalidForm, handleValidForm)
   }
 
 
