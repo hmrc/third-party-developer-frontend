@@ -542,7 +542,7 @@ object SelectTopicsFromSubscriptionsForm {
   )
 }
 
-case class ChangeOfPrivacyPolicyLocationForm(privacyPolicyUrl: String, isInDesktop: Boolean) {
+case class ChangeOfPrivacyPolicyLocationForm(privacyPolicyUrl: String, isInDesktop: Boolean, isNewJourney: Boolean) {
   def toLocation: PrivacyPolicyLocation = isInDesktop match {
     case true => InDesktopSoftware
     case false if !privacyPolicyUrl.isEmpty => Url(privacyPolicyUrl)
@@ -563,11 +563,12 @@ object ChangeOfPrivacyPolicyLocationForm {
   val form: Form[ChangeOfPrivacyPolicyLocationForm] = Form(
     mapping(
       "privacyPolicyUrl" -> text,
-      "isInDesktop" -> boolean
+      "isInDesktop" -> boolean,
+      "isNewJourney" -> boolean
     )(ChangeOfPrivacyPolicyLocationForm.apply)(ChangeOfPrivacyPolicyLocationForm.unapply).verifying(validUrlPresentIfNotInDesktop)
   )
 
-  def withData(privacyPolicyLocation: PrivacyPolicyLocation) = {
+  def withNewJourneyData(privacyPolicyLocation: PrivacyPolicyLocation) = {
     val privacyPolicyUrl = privacyPolicyLocation match {
       case Url(value) => value
       case _ => ""
@@ -577,7 +578,13 @@ object ChangeOfPrivacyPolicyLocationForm {
       case _ => false
     }
     form.fillAndValidate(
-      ChangeOfPrivacyPolicyLocationForm(privacyPolicyUrl, isInDesktop)
+      ChangeOfPrivacyPolicyLocationForm(privacyPolicyUrl, isInDesktop, true)
+    )
+  }
+
+  def withOldJourneyData(privacyPolicyUrl: String) = {
+    form.fillAndValidate(
+      ChangeOfPrivacyPolicyLocationForm(privacyPolicyUrl, false, false)
     )
   }
 }
