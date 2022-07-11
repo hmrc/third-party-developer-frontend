@@ -582,9 +582,9 @@ object ChangeOfPrivacyPolicyLocationForm {
     )
   }
 
-  def withOldJourneyData(privacyPolicyUrl: String) = {
-    form.fillAndValidate(
-      ChangeOfPrivacyPolicyLocationForm(privacyPolicyUrl, false, false)
+  def withOldJourneyData(maybePrivacyPolicyUrl: Option[String]) = {
+    form.fill(
+      ChangeOfPrivacyPolicyLocationForm(maybePrivacyPolicyUrl.getOrElse(""), false, false)
     )
   }
 }

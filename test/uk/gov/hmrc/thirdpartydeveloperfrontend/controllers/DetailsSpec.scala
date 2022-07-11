@@ -359,13 +359,13 @@ class DetailsSpec
   }
 
   "changing privacy policy location for old journey applications" should {
-    def legacyAppWithPrivacyPolicyLocation(privacyPolicyUrl: String) = anApplication(access = Standard(List.empty, None, Some(privacyPolicyUrl), Set.empty, None, None))
+    def legacyAppWithPrivacyPolicyLocation(maybePrivacyPolicyUrl: Option[String]) = anApplication(access = Standard(List.empty, None, maybePrivacyPolicyUrl, Set.empty, None, None))
     val privacyPolicyUrl = "http://example.com/priv-policy"
 
     implicit val writeChangeOfPrivacyPolicyLocationForm = Json.writes[ChangeOfPrivacyPolicyLocationForm]
 
     "display update page with url field populated" in new Setup {
-      val appWithPrivPolicyUrl = legacyAppWithPrivacyPolicyLocation(privacyPolicyUrl)
+      val appWithPrivPolicyUrl = legacyAppWithPrivacyPolicyLocation(Some(privacyPolicyUrl))
       givenApplicationAction(appWithPrivPolicyUrl, loggedInAdmin)
 
       val result = addToken(underTest.updatePrivacyPolicyLocation(appWithPrivPolicyUrl.id))(loggedInAdminRequest)
@@ -377,9 +377,22 @@ class DetailsSpec
       elementExistsById(document, "privacyPolicyHasUrl") shouldBe false
     }
 
+    "display update page with url field empty if app has no privacy policy" in new Setup {
+      val appWithPrivPolicyUrl = legacyAppWithPrivacyPolicyLocation(None)
+      givenApplicationAction(appWithPrivPolicyUrl, loggedInAdmin)
+
+      val result = addToken(underTest.updatePrivacyPolicyLocation(appWithPrivPolicyUrl.id))(loggedInAdminRequest)
+
+      status(result) shouldBe OK
+      val document = Jsoup.parse(contentAsString(result))
+      elementIdentifiedByIdContainsValue(document, "privacyPolicyUrl", "")
+      elementExistsById(document, "privacyPolicyInDesktop") shouldBe false
+      elementExistsById(document, "privacyPolicyHasUrl") shouldBe false
+    }
+
     "update location if form data is valid and return to app details page" in new Setup {
       val newPrivacyPolicyUrl = "http://example.com/new-priv-policy"
-      val appWithPrivPolicyUrl = legacyAppWithPrivacyPolicyLocation(privacyPolicyUrl)
+      val appWithPrivPolicyUrl = legacyAppWithPrivacyPolicyLocation(Some(privacyPolicyUrl))
       givenApplicationAction(appWithPrivPolicyUrl, loggedInAdmin)
       when(applicationServiceMock.updatePrivacyPolicyLocation(eqTo(appWithPrivPolicyUrl), *[UserId], eqTo(PrivacyPolicyLocation.Url(newPrivacyPolicyUrl)))(*))
         .thenReturn(Future.successful(ApplicationUpdateSuccessful))

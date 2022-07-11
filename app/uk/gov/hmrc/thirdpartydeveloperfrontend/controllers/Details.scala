@@ -214,8 +214,8 @@ class Details @Inject() (
     application.access match {
       case Standard(_,_,_,_,_,Some(ImportantSubmissionData(_, _, _, _, privacyPolicyLocation, _))) =>
         Future.successful(Ok(updatePrivacyPolicyLocationView(ChangeOfPrivacyPolicyLocationForm.withNewJourneyData(privacyPolicyLocation), applicationId)))
-      case Standard(_,_,Some(privacyPolicyUrl),_,_,None) =>
-        Future.successful(Ok(updatePrivacyPolicyLocationView(ChangeOfPrivacyPolicyLocationForm.withOldJourneyData(privacyPolicyUrl), applicationId)))
+      case Standard(_,_,maybePrivacyPolicyUrl,_,_,None) =>
+        Future.successful(Ok(updatePrivacyPolicyLocationView(ChangeOfPrivacyPolicyLocationForm.withOldJourneyData(maybePrivacyPolicyUrl), applicationId)))
       case _ => Future.successful(BadRequest)
     }
   }
