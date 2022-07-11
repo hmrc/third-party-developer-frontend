@@ -72,13 +72,13 @@ implicit request: play.api.mvc.Request[Any], loggedIn: DeveloperSession, message
         </div>
     </div>
     } else {
-        <div class="govuk-form-group">
-            <input type="hidden" name="isNewJourney" value="false"/>
-            <label class="govuk-label" for="privacyPolicyUrl">
-                Privacy policy url
-            </label>
-            <input class="govuk-input govuk-input--width-25" id="privacyPolicyUrl" name="privacyPolicyUrl" value="@form.data.get("privacyPolicyUrl")">
-        </div>
+    <div class="govuk-form-group">
+        <input type="hidden" name="isNewJourney" value="false"/>
+        <label class="govuk-label" for="privacyPolicyUrl">
+            Privacy policy url
+        </label>
+        <input class="govuk-input govuk-input--width-25" id="privacyPolicyUrl" name="privacyPolicyUrl" value="@form.data.get("privacyPolicyUrl")">
+    </div>
     }
 
     <div class="govuk-button-group">

@@ -44,6 +44,7 @@ implicit request: play.api.mvc.Request[Any], loggedIn: DeveloperSession, message
         </h1>
     </legend>
 
+    @if(form.data.get("isNewJourney") == Some("true")) {
     <div class="govuk-hint">
         Select one option.
     </div>
@@ -70,6 +71,15 @@ implicit request: play.api.mvc.Request[Any], loggedIn: DeveloperSession, message
             </label>
         </div>
     </div>
+    } else {
+    <div class="govuk-form-group">
+        <input type="hidden" name="isNewJourney" value="false"/>
+        <label class="govuk-label" for="termsAndConditionsUrl">
+            Terms and conditions url
+        </label>
+        <input class="govuk-input govuk-input--width-25" id="termsAndConditionsUrl" name="termsAndConditionsUrl" value="@form.data.get("termsAndConditionsUrl")">
+    </div>
+    }
 
     <div class="govuk-button-group">
         <button id="submit-ok" class="govuk-button" type="submit" data-module="govuk-button" name="submit-action" value="save-and-continue">

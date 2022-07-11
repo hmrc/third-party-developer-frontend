@@ -510,17 +510,17 @@ class FormValidationSpec extends AsyncHmrcSpec {
     def validateNoErrors = buildValidateNoErrors(ChangeOfTermsAndConditionsLocationForm.form.bind) _
 
     "accept valid form with valid url" in {
-      val validFormDataWithUrl = Map("termsConditionsUrl" -> "http://example.com", "isInDesktop" -> "false")
+      val validFormDataWithUrl = Map("termsAndConditionsUrl" -> "http://example.com", "isInDesktop" -> "false")
       validateNoErrors(validFormDataWithUrl)
     }
 
     "accept valid form with in desktop" in {
-      val validFormDataWithInDesktop = Map("termsConditionsUrl" -> "", "isInDesktop" -> "true")
+      val validFormDataWithInDesktop = Map("termsAndConditionsUrl" -> "", "isInDesktop" -> "true")
       validateNoErrors(validFormDataWithInDesktop)
     }
 
     "reject form with invalid url" in {
-      val invalidFormDataWithBadUrl = Map("termsConditionsUrl" -> "not a url", "isInDesktop" -> "false")
+      val invalidFormDataWithBadUrl = Map("termsAndConditionsUrl" -> "not a url", "isInDesktop" -> "false")
       val boundForm = ChangeOfTermsAndConditionsLocationForm.form.bind(invalidFormDataWithBadUrl)
       boundForm.errors.head.key shouldBe ""
       boundForm.errors.head.messages shouldBe List("application.termsconditionslocation.invalid.badurl")

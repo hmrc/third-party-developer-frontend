@@ -588,7 +588,7 @@ object ChangeOfPrivacyPolicyLocationForm {
   }
 }
 
-case class ChangeOfTermsAndConditionsLocationForm(termsAndConditionsUrl: String, isInDesktop: Boolean) {
+case class ChangeOfTermsAndConditionsLocationForm(termsAndConditionsUrl: String, isInDesktop: Boolean, isNewJourney: Boolean) {
   def toLocation: TermsAndConditionsLocation = isInDesktop match {
     case true => TermsAndConditionsLocation.InDesktopSoftware
     case false if !termsAndConditionsUrl.isEmpty => TermsAndConditionsLocation.Url(termsAndConditionsUrl)
@@ -608,13 +608,14 @@ object ChangeOfTermsAndConditionsLocationForm {
 
   val form: Form[ChangeOfTermsAndConditionsLocationForm] = Form(
     mapping(
-      "termsConditionsUrl" -> text,
-      "isInDesktop" -> boolean
+      "termsAndConditionsUrl" -> text,
+      "isInDesktop" -> boolean,
+      "isNewJourney" -> boolean
     )(ChangeOfTermsAndConditionsLocationForm.apply)(ChangeOfTermsAndConditionsLocationForm.unapply).verifying(validUrlPresentIfNotInDesktop)
   )
 
-  def withData(termsAndConditionsLocation: TermsAndConditionsLocation) = {
-    val termsConditionsUrl = termsAndConditionsLocation match {
+  def withNewJourneyData(termsAndConditionsLocation: TermsAndConditionsLocation) = {
+    val termsAndConditionsUrl = termsAndConditionsLocation match {
       case TermsAndConditionsLocation.Url(value) => value
       case _ => ""
     }
@@ -623,7 +624,13 @@ object ChangeOfTermsAndConditionsLocationForm {
       case _ => false
     }
     form.fillAndValidate(
-      ChangeOfTermsAndConditionsLocationForm(termsConditionsUrl, isInDesktop)
+      ChangeOfTermsAndConditionsLocationForm(termsAndConditionsUrl, isInDesktop, true)
+    )
+  }
+
+  def withOldJourneyData(termsAndConditionsUrl: String) = {
+    form.fillAndValidate(
+      ChangeOfTermsAndConditionsLocationForm(termsAndConditionsUrl, false, false)
     )
   }
 }

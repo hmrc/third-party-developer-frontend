@@ -255,7 +255,9 @@ class Details @Inject() (
     val application = request.application
     application.access match {
       case Standard(_,_,_,_,_,Some(ImportantSubmissionData(_, _, _, termsAndConditionsLocation, _, _))) =>
-        Future.successful(Ok(updateTermsAndConditionsLocationView(ChangeOfTermsAndConditionsLocationForm.withData(termsAndConditionsLocation), applicationId)))
+        Future.successful(Ok(updateTermsAndConditionsLocationView(ChangeOfTermsAndConditionsLocationForm.withNewJourneyData(termsAndConditionsLocation), applicationId)))
+      case Standard(_,Some(termsAndConditionsUrl),_,_,_,None) =>
+        Future.successful(Ok(updateTermsAndConditionsLocationView(ChangeOfTermsAndConditionsLocationForm.withOldJourneyData(termsAndConditionsUrl), applicationId)))
       case _ => Future.successful(BadRequest)
     }
   }
@@ -268,6 +270,7 @@ class Details @Inject() (
 
       val oldLocation = application.access match {
         case Standard(_, _, _, _, _, Some(ImportantSubmissionData(_, _, _, termsAndConditionsLocation, _, _))) => termsAndConditionsLocation
+        case Standard(_,Some(termsAndConditionsUrl),_,_,_,None) => TermsAndConditionsLocation.Url(termsAndConditionsUrl)
         case _ => NoneProvided
       }
       val newLocation = form.toLocation
