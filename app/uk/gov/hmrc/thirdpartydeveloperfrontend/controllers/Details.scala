@@ -256,8 +256,8 @@ class Details @Inject() (
     application.access match {
       case Standard(_,_,_,_,_,Some(ImportantSubmissionData(_, _, _, termsAndConditionsLocation, _, _))) =>
         Future.successful(Ok(updateTermsAndConditionsLocationView(ChangeOfTermsAndConditionsLocationForm.withNewJourneyData(termsAndConditionsLocation), applicationId)))
-      case Standard(_,Some(termsAndConditionsUrl),_,_,_,None) =>
-        Future.successful(Ok(updateTermsAndConditionsLocationView(ChangeOfTermsAndConditionsLocationForm.withOldJourneyData(termsAndConditionsUrl), applicationId)))
+      case Standard(_,maybeTermsAndConditionsUrl,_,_,_,None) =>
+        Future.successful(Ok(updateTermsAndConditionsLocationView(ChangeOfTermsAndConditionsLocationForm.withOldJourneyData(maybeTermsAndConditionsUrl), applicationId)))
       case _ => Future.successful(BadRequest)
     }
   }

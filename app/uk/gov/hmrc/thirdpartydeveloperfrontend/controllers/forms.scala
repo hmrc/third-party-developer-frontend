@@ -628,9 +628,9 @@ object ChangeOfTermsAndConditionsLocationForm {
     )
   }
 
-  def withOldJourneyData(termsAndConditionsUrl: String) = {
-    form.fillAndValidate(
-      ChangeOfTermsAndConditionsLocationForm(termsAndConditionsUrl, false, false)
+  def withOldJourneyData(maybeTermsAndConditionsUrl: Option[String]) = {
+    form.fill(
+      ChangeOfTermsAndConditionsLocationForm(maybeTermsAndConditionsUrl.getOrElse(""), false, false)
     )
   }
 }
