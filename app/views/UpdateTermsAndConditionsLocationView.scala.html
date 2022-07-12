@@ -50,6 +50,7 @@ implicit request: play.api.mvc.Request[Any], loggedIn: DeveloperSession, message
     </div>
 
     <div class="govuk-radios govuk-form-group" data-module="govuk-radios">
+        <input type="hidden" name="isNewJourney" value="true"/>
         <div class="govuk-radios__item">
             <input class="govuk-radios__input" id="termsAndConditionsHasUrl" name="isInDesktop" value="false" type="radio" @{if(form.data.get("isInDesktop") == Some("false")) "checked" } aria-controls="termsAndConditionsUrlInput" aria-expanded="true">
             <label class="govuk-label govuk-radios__label" for="termsAndConditionsHasUrl">
