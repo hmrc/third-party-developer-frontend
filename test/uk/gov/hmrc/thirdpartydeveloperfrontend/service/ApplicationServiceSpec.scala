@@ -406,4 +406,20 @@ class ApplicationServiceSpec extends AsyncHmrcSpec with SubscriptionsBuilder wit
     }
   }
 
+  "requestProductionApplicationNameChange" should {
+
+    val adminEmail = "admin@example.com"
+    val adminRequester = DeveloperSessionBuilder(adminEmail, "firstname", "lastname", loggedInState = LoggedInState.LOGGED_IN)
+
+    "correctly create a deskpro ticket" in new Setup {
+      private val applicationName = "applicationName"
+
+      when(mockDeskproConnector.createTicket(*)(*)).thenReturn(successful(TicketCreated))
+
+      private val result =
+        await(applicationService.requestProductonApplicationNameChange(productionApplication, applicationName, adminRequester.displayedName, adminRequester.email))
+     
+      result shouldBe TicketCreated
+    }
+  }
 }

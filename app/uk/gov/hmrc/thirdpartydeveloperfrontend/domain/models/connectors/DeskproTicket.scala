@@ -150,6 +150,7 @@ object DeskproTicket extends FieldTransformer {
 
     DeskproTicket(name, email, "Request for developer account to be deleted", message, profile.routes.Profile.deleteAccount().url)
   }
+
   def removeDeveloper2SV(name: String, email: String): DeskproTicket = {
     val message =
       s"""I '$email' want my 2SV to be removed"""
@@ -157,6 +158,21 @@ object DeskproTicket extends FieldTransformer {
     DeskproTicket(name, email, "Request for 2SV to be removed", message, routes.UserLoginAccount.confirm2SVHelp().url)
   }
 
+  def createForRequestChangeOfProductionApplicationName(requestorName: String, requestorEmail: String, previousApplicationName: String, newApplicationName: String, applicationId: ApplicationId): DeskproTicket = {
+    val message =
+      s"""$requestorName wants to change the application name for $applicationId from $previousApplicationName to $newApplicationName.
+         |Check if the new application name meets the naming guidelines and update Gatekeeper within 2 working days.
+         |From HMRC Developer Hub
+         |""".stripMargin
+
+    DeskproTicket(
+      requestorName,
+      requestorEmail,
+      "Change to application name",
+      message,
+      uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.routes.Details.requestChangeOfAppName(applicationId).url
+    )
+  }  
 }
 
 sealed trait TicketResult
