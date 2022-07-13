@@ -216,7 +216,9 @@ class Details @Inject() (
     val application = request.application
     application.access match {
       case Standard(_,_,_,_,_,Some(ImportantSubmissionData(_, _, _, _, privacyPolicyLocation, _))) =>
-        Future.successful(Ok(updatePrivacyPolicyLocationView(ChangeOfPrivacyPolicyLocationForm.withData(privacyPolicyLocation), applicationId)))
+        Future.successful(Ok(updatePrivacyPolicyLocationView(ChangeOfPrivacyPolicyLocationForm.withNewJourneyData(privacyPolicyLocation), applicationId)))
+      case Standard(_,_,maybePrivacyPolicyUrl,_,_,None) =>
+        Future.successful(Ok(updatePrivacyPolicyLocationView(ChangeOfPrivacyPolicyLocationForm.withOldJourneyData(maybePrivacyPolicyUrl), applicationId)))
       case _ => Future.successful(BadRequest)
     }
   }
@@ -229,6 +231,7 @@ class Details @Inject() (
 
       val oldLocation = application.access match {
         case Standard(_, _, _, _, _, Some(ImportantSubmissionData(_, _, _, _, privacyPolicyLocation, _))) => privacyPolicyLocation
+        case Standard(_, _, Some(privacyPolicyUrl), _, _, None) => PrivacyPolicyLocation.Url(privacyPolicyUrl)
         case _ => NoneProvided
       }
       val newLocation = form.toLocation

@@ -46,6 +46,7 @@ import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.LocalUserIdTracker
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.TestApplications
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.CollaboratorTracker
 import uk.gov.hmrc.apiplatform.modules.submissions.services.mocks.SubmissionServiceMockModule
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.connectors.TicketCreated
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.services.TermsOfUseService.TermsOfUseAgreementDetails
 
 class DetailsSpec 
@@ -444,7 +445,54 @@ class DetailsSpec
     }
   }
 
-  "changing privacy policy location" should {
+  "changing privacy policy location for old journey applications" should {
+    def legacyAppWithPrivacyPolicyLocation(maybePrivacyPolicyUrl: Option[String]) = anApplication(access = Standard(List.empty, None, maybePrivacyPolicyUrl, Set.empty, None, None))
+    val privacyPolicyUrl = "http://example.com/priv-policy"
+
+    implicit val writeChangeOfPrivacyPolicyLocationForm = Json.writes[ChangeOfPrivacyPolicyLocationForm]
+
+    "display update page with url field populated" in new Setup {
+      val appWithPrivPolicyUrl = legacyAppWithPrivacyPolicyLocation(Some(privacyPolicyUrl))
+      givenApplicationAction(appWithPrivPolicyUrl, loggedInAdmin)
+
+      val result = addToken(underTest.updatePrivacyPolicyLocation(appWithPrivPolicyUrl.id))(loggedInAdminRequest)
+
+      status(result) shouldBe OK
+      val document = Jsoup.parse(contentAsString(result))
+      elementIdentifiedByIdContainsValue(document, "privacyPolicyUrl", privacyPolicyUrl)
+      elementExistsById(document, "privacyPolicyInDesktop") shouldBe false
+      elementExistsById(document, "privacyPolicyHasUrl") shouldBe false
+    }
+
+    "display update page with url field empty if app has no privacy policy" in new Setup {
+      val appWithPrivPolicyUrl = legacyAppWithPrivacyPolicyLocation(None)
+      givenApplicationAction(appWithPrivPolicyUrl, loggedInAdmin)
+
+      val result = addToken(underTest.updatePrivacyPolicyLocation(appWithPrivPolicyUrl.id))(loggedInAdminRequest)
+
+      status(result) shouldBe OK
+      val document = Jsoup.parse(contentAsString(result))
+      elementIdentifiedByIdContainsValue(document, "privacyPolicyUrl", "")
+      elementExistsById(document, "privacyPolicyInDesktop") shouldBe false
+      elementExistsById(document, "privacyPolicyHasUrl") shouldBe false
+    }
+
+    "update location if form data is valid and return to app details page" in new Setup {
+      val newPrivacyPolicyUrl = "http://example.com/new-priv-policy"
+      val appWithPrivPolicyUrl = legacyAppWithPrivacyPolicyLocation(Some(privacyPolicyUrl))
+      givenApplicationAction(appWithPrivPolicyUrl, loggedInAdmin)
+      when(applicationServiceMock.updatePrivacyPolicyLocation(eqTo(appWithPrivPolicyUrl), *[UserId], eqTo(PrivacyPolicyLocation.Url(newPrivacyPolicyUrl)))(*))
+        .thenReturn(Future.successful(ApplicationUpdateSuccessful))
+
+      val form = ChangeOfPrivacyPolicyLocationForm(newPrivacyPolicyUrl, false, false)
+      val result = addToken(underTest.updatePrivacyPolicyLocationAction(appWithPrivPolicyUrl.id))(loggedInAdminRequest.withJsonBody(Json.toJson(form)))
+
+      status(result) shouldBe SEE_OTHER
+      redirectLocation(result) shouldBe Some(routes.Details.details(appWithPrivPolicyUrl.id).url)
+    }
+  }
+
+  "changing privacy policy location for new journey applications" should {
     def appWithPrivacyPolicyLocation(privacyPolicyLocation: PrivacyPolicyLocation) = anApplication(access = Standard(List.empty, None, None, Set.empty, None, Some(
       ImportantSubmissionData(None, ResponsibleIndividual.build("bob example", "bob@example.com"), Set.empty, TermsAndConditionsLocation.InDesktopSoftware,
         privacyPolicyLocation, List.empty)))
@@ -491,7 +539,7 @@ class DetailsSpec
       val appWithPrivPolicyInDesktop = appWithPrivacyPolicyLocation(PrivacyPolicyLocation.InDesktopSoftware)
       givenApplicationAction(appWithPrivPolicyInDesktop, loggedInAdmin)
 
-      val form = ChangeOfPrivacyPolicyLocationForm("", true)
+      val form = ChangeOfPrivacyPolicyLocationForm("", true, true)
       val result = addToken(underTest.updatePrivacyPolicyLocationAction(appWithPrivPolicyInDesktop.id))(loggedInAdminRequest.withJsonBody(Json.toJson(form)))
 
       status(result) shouldBe BAD_REQUEST
@@ -501,7 +549,7 @@ class DetailsSpec
       val appWithPrivPolicyInDesktop = appWithPrivacyPolicyLocation(PrivacyPolicyLocation.InDesktopSoftware)
       givenApplicationAction(appWithPrivPolicyInDesktop, loggedInAdmin)
 
-      val form = ChangeOfPrivacyPolicyLocationForm("", false)
+      val form = ChangeOfPrivacyPolicyLocationForm("", false, true)
       val result = addToken(underTest.updatePrivacyPolicyLocationAction(appWithPrivPolicyInDesktop.id))(loggedInAdminRequest.withJsonBody(Json.toJson(form)))
 
       status(result) shouldBe BAD_REQUEST
@@ -513,7 +561,7 @@ class DetailsSpec
       when(applicationServiceMock.updatePrivacyPolicyLocation(eqTo(appWithPrivPolicyInDesktop), *[UserId], eqTo(PrivacyPolicyLocation.Url(privacyPolicyUrl)))(*))
         .thenReturn(Future.successful(ApplicationUpdateSuccessful))
 
-      val form = ChangeOfPrivacyPolicyLocationForm(privacyPolicyUrl, false)
+      val form = ChangeOfPrivacyPolicyLocationForm(privacyPolicyUrl, false, true)
       val result = addToken(underTest.updatePrivacyPolicyLocationAction(appWithPrivPolicyInDesktop.id))(loggedInAdminRequest.withJsonBody(Json.toJson(form)))
 
       status(result) shouldBe SEE_OTHER
@@ -526,8 +574,6 @@ class DetailsSpec
     val pendingApprovalView = app.injector.instanceOf[PendingApprovalView]
     val detailsView = app.injector.instanceOf[DetailsView]
     val changeDetailsView = app.injector.instanceOf[ChangeDetailsView]
-    val requestChangeOfApplicationNameView = app.injector.instanceOf[RequestChangeOfApplicationNameView]
-    val changeOfApplicationNameConfirmationView = app.injector.instanceOf[ChangeOfApplicationNameConfirmationView]
     val updatePrivacyPolicyLocationView = app.injector.instanceOf[UpdatePrivacyPolicyLocationView]
 
     val underTest = new Details(
@@ -568,7 +614,7 @@ class DetailsSpec
 
     when(underTest.applicationService.isApplicationNameValid(*, *, *)(*))
       .thenReturn(Future.successful(Valid))
- 
+
     when(underTest.sessionService.fetch(eqTo(devSessionId))(*)).thenReturn(successful(Some(devSession)))
     when(underTest.sessionService.fetch(eqTo(adminSessionId))(*)).thenReturn(successful(Some(adminSession)))
 

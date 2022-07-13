@@ -44,11 +44,12 @@ implicit request: play.api.mvc.Request[Any], loggedIn: DeveloperSession, message
         </h1>
     </legend>
 
+    @if(form.data.get("isNewJourney") == Some("true")) {
     <div class="govuk-hint">
         Select one option.
     </div>
-
     <div class="govuk-radios govuk-form-group" data-module="govuk-radios">
+        <input type="hidden" name="isNewJourney" value="true"/>
         <div class="govuk-radios__item">
             <input class="govuk-radios__input" id="privacyPolicyHasUrl" name="isInDesktop" value="false" type="radio" @{if(form.data.get("isInDesktop") == Some("false")) "checked" } aria-controls="privacyPolicyUrlInput" aria-expanded="true">
             <label class="govuk-label govuk-radios__label" for="privacyPolicyHasUrl">
@@ -70,6 +71,15 @@ implicit request: play.api.mvc.Request[Any], loggedIn: DeveloperSession, message
             </label>
         </div>
     </div>
+    } else {
+        <div class="govuk-form-group">
+            <input type="hidden" name="isNewJourney" value="false"/>
+            <label class="govuk-label" for="privacyPolicyUrl">
+                Privacy policy url
+            </label>
+            <input class="govuk-input govuk-input--width-25" id="privacyPolicyUrl" name="privacyPolicyUrl" value="@form.data.get("privacyPolicyUrl")">
+        </div>
+    }
 
     <div class="govuk-button-group">
         <button id="submit-ok" class="govuk-button" type="submit" data-module="govuk-button" name="submit-action" value="save-and-continue">
