@@ -574,6 +574,8 @@ class DetailsSpec
     val pendingApprovalView = app.injector.instanceOf[PendingApprovalView]
     val detailsView = app.injector.instanceOf[DetailsView]
     val changeDetailsView = app.injector.instanceOf[ChangeDetailsView]
+    val requestChangeOfApplicationNameView = app.injector.instanceOf[RequestChangeOfApplicationNameView]
+    val changeOfApplicationNameConfirmationView = app.injector.instanceOf[ChangeOfApplicationNameConfirmationView]
     val updatePrivacyPolicyLocationView = app.injector.instanceOf[UpdatePrivacyPolicyLocationView]
 
     val underTest = new Details(
