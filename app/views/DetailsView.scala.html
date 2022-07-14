@@ -25,8 +25,10 @@
 @import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.routes
 @import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.Details.TermsOfUseViewModel
 @import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.{PrivacyPolicyLocation,TermsAndConditionsLocation}
+@import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.CollaboratorRole
 
 @this(devMain: DevMain2, leftHandNav: LeftHandNav)
+
 
 @(applicationViewModel: ApplicationViewModel, termsOfUse: TermsOfUseViewModel, fraudPreventionViewModel: Option[FraudPreventionNavLinkViewModel] = None)(
         implicit request: play.api.mvc.Request[Any],
@@ -139,6 +141,28 @@
       </tr>
     </tbody>
   </table>
+
+  @if(app.isProductionAppButEditDetailsNotAllowed(loggedIn.developer)) {
+    <details class="govuk-details" data-module="govuk-details" id="changingAppDetails">
+      <summary class="govuk-details__summary">
+        <span class="govuk-details__summary-text" id="changingAppDetailsLink">
+          Changing these application details
+        </span>
+      </summary>
+
+      <div class="govuk-details__text">
+
+        <p class="govuk-body">Only admins can change application details. If you want to make changes, email:</p>
+
+        <ul class="govuk-list" id="changingAppDetailsAdminList">
+          @for(adminEmail <- app.collaborators.filter(_.role == CollaboratorRole.ADMINISTRATOR).map(_.emailAddress)) {
+            <li><a href="mailto:@adminEmail">@adminEmail</a></li>
+          }
+        </ul>
+
+      </div>
+    </details>
+  }
 
   @if(termsOfUse.exists) {
     @if(termsOfUse.appUsesOldVersion) {

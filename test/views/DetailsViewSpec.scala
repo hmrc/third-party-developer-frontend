@@ -51,20 +51,25 @@ class DetailsViewSpec
     lazy val termsOfUse: Element = body.getElementById("termsOfUse")
     lazy val agreementDetails: Element = body.getElementById("termsOfUseAgreementDetails")
     lazy val readLink: Element = body.getElementById("termsOfUseReadLink")
+    lazy val changingAppDetailsAdminList: Element = body.getElementById("changingAppDetailsAdminList")
   }
 
+  val adminEmail = "admin@example.com"
   val termsOfUseViewModel = TermsOfUseViewModel(true, true, Some(Agreement("user@example.com", DateTime.now)))
+
+  implicit val loggedIn: DeveloperSession = DeveloperSessionBuilder("developer@example.com", "Joe", "Bloggs", loggedInState = LoggedInState.LOGGED_IN)
+  trait LoggedInUserIsAdmin {
+    implicit val loggedIn: DeveloperSession = DeveloperSessionBuilder(adminEmail, "Joe", "Bloggs", loggedInState = LoggedInState.LOGGED_IN)
+  }
 
   "Application details view" when {
     implicit val request: FakeRequest[AnyContentAsEmpty.type] = FakeRequest()
-    implicit val loggedIn: DeveloperSession = DeveloperSessionBuilder("developer@example.com", "Joe", "Bloggs", loggedInState = LoggedInState.LOGGED_IN)
     implicit val navSection: String = "details"
 
     "rendering Environment " when {
       "managing a principal application" should {
         val deployedTo = Environment.PRODUCTION
         val application = anApplication(environment = deployedTo)
-          .withTeamMember(loggedIn.developer.email, CollaboratorRole.ADMINISTRATOR)
 
         "Show Production when environment is Production" in {
           when(appConfig.nameOfPrincipalEnvironment).thenReturn("Production")
@@ -83,7 +88,6 @@ class DetailsViewSpec
       "managing a subordinate application" should {
         val deployedTo = Environment.SANDBOX
         val application = anApplication(environment = deployedTo)
-          .withTeamMember(loggedIn.developer.email, CollaboratorRole.ADMINISTRATOR)
 
         "Show Sandbox when environment is Sandbox" in {
           when(appConfig.nameOfPrincipalEnvironment).thenReturn("Production")
@@ -107,16 +111,14 @@ class DetailsViewSpec
 
         "show nothing when a developer" in {
           val application = anApplication(environment = deployedTo)
-            .withTeamMember(loggedIn.developer.email, CollaboratorRole.DEVELOPER)
 
           val page = Page(detailsView(ApplicationViewModel(application, hasSubscriptionsFields = false, hasPpnsFields = false), termsOfUseViewModelForSandboxApp))
 
           page.termsOfUse shouldBe null
         }
 
-        "show nothing when an admin" in {
+        "show nothing when an admin" in new LoggedInUserIsAdmin {
           val application = anApplication(environment = deployedTo)
-            .withTeamMember(loggedIn.developer.email, CollaboratorRole.ADMINISTRATOR)
 
           val page = Page(detailsView(ApplicationViewModel(application, hasSubscriptionsFields = false, hasPpnsFields = false), termsOfUseViewModelForSandboxApp))
 
@@ -134,16 +136,14 @@ class DetailsViewSpec
           "show nothing when a developer" in {
 
             val application = anApplication(environment = deployedTo, access = access)
-              .withTeamMember(loggedIn.developer.email, CollaboratorRole.DEVELOPER)
 
             val page = Page(detailsView(ApplicationViewModel(application, hasSubscriptionsFields = false, hasPpnsFields = false), termsOfUseViewModelForPrivApp))
 
             page.termsOfUse shouldBe null
           }
 
-          "show nothing when an admin" in {
+          "show nothing when an admin" in new LoggedInUserIsAdmin {
             val application = anApplication(environment = deployedTo, access = access)
-              .withTeamMember(loggedIn.developer.email, CollaboratorRole.ADMINISTRATOR)
 
             val page = Page(detailsView(ApplicationViewModel(application, hasSubscriptionsFields = false, hasPpnsFields = false), termsOfUseViewModelForPrivApp))
 
@@ -157,16 +157,13 @@ class DetailsViewSpec
 
           "show nothing when a developer" in {
             val application = anApplication(environment = deployedTo, access = access)
-              .withTeamMember(loggedIn.developer.email, CollaboratorRole.DEVELOPER)
-
             val page = Page(detailsView(ApplicationViewModel(application, hasSubscriptionsFields = false, hasPpnsFields = false), termsOfUseViewModelForRopcApp))
 
             page.termsOfUse shouldBe null
           }
 
-          "show nothing when an admin" in {
+          "show nothing when an admin" in new LoggedInUserIsAdmin {
             val application = anApplication(environment = deployedTo, access = access)
-              .withTeamMember(loggedIn.developer.email, CollaboratorRole.ADMINISTRATOR)
 
             val page = Page(detailsView(ApplicationViewModel(application, hasSubscriptionsFields = false, hasPpnsFields = false), termsOfUseViewModelForRopcApp))
 
@@ -183,7 +180,6 @@ class DetailsViewSpec
               val termsOfUseViewModelNotAgreed = termsOfUseViewModel.copy(agreement = None)
 
               val application = anApplication(environment = deployedTo, access = access)
-                .withTeamMember(loggedIn.developer.email, CollaboratorRole.ADMINISTRATOR)
                 .withCheckInformation(checkInformation)
 
               val page = Page(detailsView(ApplicationViewModel(application, hasSubscriptionsFields = false, hasPpnsFields = false), termsOfUseViewModelNotAgreed))
@@ -200,7 +196,6 @@ class DetailsViewSpec
               val checkInformation = CheckInformation(termsOfUseAgreements = List(TermsOfUseAgreement(emailAddress, timeStamp, version)))
 
               val application = anApplication(environment = deployedTo, access = access)
-                .withTeamMember(loggedIn.developer.email, CollaboratorRole.ADMINISTRATOR)
                 .withCheckInformation(checkInformation)
 
               val page = Page(detailsView(ApplicationViewModel(application, hasSubscriptionsFields = false, hasPpnsFields = false), termsOfUseViewModel))
@@ -212,14 +207,11 @@ class DetailsViewSpec
 
           "the user is an administrator" should {
 
-            val collaborators = Set(loggedIn.developer.email.asAdministratorCollaborator)
-
-            "show 'not agreed', have a button to read and agree and show a warning when the terms of use have not been agreed" in {
+            "show 'not agreed', have a button to read and agree and show a warning when the terms of use have not been agreed" in new LoggedInUserIsAdmin {
               val checkInformation = CheckInformation(termsOfUseAgreements = List.empty)
               val termsOfUseViewModelNotAgreed = termsOfUseViewModel.copy(agreement = None)
 
               val application = anApplication(environment = deployedTo, access = access)
-                .withTeamMembers(collaborators)
                 .withCheckInformation(checkInformation)
 
               val page = Page(detailsView(ApplicationViewModel(application, hasSubscriptionsFields = false, hasPpnsFields = false), termsOfUseViewModelNotAgreed))
@@ -230,7 +222,7 @@ class DetailsViewSpec
               page.warning.text shouldBe "Warning You must agree to the terms of use on this application."
             }
 
-            "show agreement details, have a link to read and not show a warning when the terms of use have been agreed" in {
+            "show agreement details, have a link to read and not show a warning when the terms of use have been agreed" in new LoggedInUserIsAdmin {
               val emailAddress = "user@example.com"
               val timeStamp = DateTimeUtils.now
               val expectedTimeStamp = DateTimeFormat.forPattern("dd MMMM yyyy").print(timeStamp)
@@ -238,7 +230,6 @@ class DetailsViewSpec
               val checkInformation = CheckInformation(termsOfUseAgreements = List(applications.TermsOfUseAgreement(emailAddress, timeStamp, version)))
 
               val application = anApplication(environment = deployedTo, access = access)
-                .withTeamMembers(collaborators)
                 .withCheckInformation(checkInformation)
 
               val page = Page(detailsView(ApplicationViewModel(application, hasSubscriptionsFields = false, hasPpnsFields = false), termsOfUseViewModel))
@@ -249,6 +240,48 @@ class DetailsViewSpec
               page.warning shouldBe null
             }
           }
+        }
+      }
+    }
+
+    "showing Changing these application details" when {
+      "managing a sandbox application" should {
+        val deployedTo = Environment.SANDBOX
+
+        "show nothing when a developer" in {
+          val application = anApplication(environment = deployedTo)
+
+          val page = Page(detailsView(ApplicationViewModel(application, hasSubscriptionsFields = false, hasPpnsFields = false), termsOfUseViewModel))
+
+          page.changingAppDetailsAdminList shouldBe null
+        }
+
+        "show nothing when an admin" in new LoggedInUserIsAdmin {
+          val application = anApplication(environment = deployedTo)
+
+          val page = Page(detailsView(ApplicationViewModel(application, hasSubscriptionsFields = false, hasPpnsFields = false), termsOfUseViewModel))
+
+          page.changingAppDetailsAdminList shouldBe null
+        }
+      }
+
+      "managing a production application" when {
+        val deployedTo = Environment.PRODUCTION
+
+        "show Changing these details section containing admin email address" in {
+          val application = anApplication(environment = deployedTo)
+
+          val page = Page(detailsView(ApplicationViewModel(application, hasSubscriptionsFields = false, hasPpnsFields = false), termsOfUseViewModel))
+
+          page.changingAppDetailsAdminList.text should include(adminEmail)
+        }
+
+        "show nothing when an admin" in new LoggedInUserIsAdmin {
+          val application = anApplication(environment = deployedTo)
+
+          val page = Page(detailsView(ApplicationViewModel(application, hasSubscriptionsFields = false, hasPpnsFields = false), termsOfUseViewModel))
+
+          page.changingAppDetailsAdminList shouldBe null
         }
       }
     }
