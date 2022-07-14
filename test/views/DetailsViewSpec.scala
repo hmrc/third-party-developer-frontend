@@ -53,13 +53,15 @@ class DetailsViewSpec
     lazy val readLink: Element = body.getElementById("termsOfUseReadLink")
     lazy val changePrivacyPolicyLocationLink: Element = body.getElementById("changePrivacyPolicyLocation")
     lazy val changeTermsConditionsLocationLink: Element = body.getElementById("changeTermsAndConditionsLocation")
+    lazy val changingAppDetailsAdminList: Element = body.getElementById("changingAppDetailsAdminList")
   }
 
+  val adminEmail = "admin@example.com"
   val termsOfUseViewModel = TermsOfUseViewModel(true, true, Some(Agreement("user@example.com", DateTime.now)))
 
   implicit val loggedIn: DeveloperSession = DeveloperSessionBuilder("developer@example.com", "Joe", "Bloggs", loggedInState = LoggedInState.LOGGED_IN)
   trait LoggedInUserIsAdmin {
-    implicit val loggedIn: DeveloperSession = DeveloperSessionBuilder("admin@example.com", "Joe", "Bloggs", loggedInState = LoggedInState.LOGGED_IN)
+    implicit val loggedIn: DeveloperSession = DeveloperSessionBuilder(adminEmail, "Joe", "Bloggs", loggedInState = LoggedInState.LOGGED_IN)
   }
 
   "Application details view" when {
@@ -286,6 +288,48 @@ class DetailsViewSpec
               page.warning shouldBe null
             }
           }
+        }
+      }
+    }
+
+    "showing Changing these application details" when {
+      "managing a sandbox application" should {
+        val deployedTo = Environment.SANDBOX
+
+        "show nothing when a developer" in {
+          val application = anApplication(environment = deployedTo)
+
+          val page = Page(detailsView(ApplicationViewModel(application, hasSubscriptionsFields = false, hasPpnsFields = false), termsOfUseViewModel))
+
+          page.changingAppDetailsAdminList shouldBe null
+        }
+
+        "show nothing when an admin" in new LoggedInUserIsAdmin {
+          val application = anApplication(environment = deployedTo)
+
+          val page = Page(detailsView(ApplicationViewModel(application, hasSubscriptionsFields = false, hasPpnsFields = false), termsOfUseViewModel))
+
+          page.changingAppDetailsAdminList shouldBe null
+        }
+      }
+
+      "managing a production application" when {
+        val deployedTo = Environment.PRODUCTION
+
+        "show Changing these details section containing admin email address" in {
+          val application = anApplication(environment = deployedTo)
+
+          val page = Page(detailsView(ApplicationViewModel(application, hasSubscriptionsFields = false, hasPpnsFields = false), termsOfUseViewModel))
+
+          page.changingAppDetailsAdminList.text should include(adminEmail)
+        }
+
+        "show nothing when an admin" in new LoggedInUserIsAdmin {
+          val application = anApplication(environment = deployedTo)
+
+          val page = Page(detailsView(ApplicationViewModel(application, hasSubscriptionsFields = false, hasPpnsFields = false), termsOfUseViewModel))
+
+          page.changingAppDetailsAdminList shouldBe null
         }
       }
     }
