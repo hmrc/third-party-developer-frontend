@@ -26,7 +26,7 @@ import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.{Develop
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.emailpreferences.APICategoryDisplayDetails
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.flows.{EmailPreferencesFlowV2, EmailPreferencesProducer, FlowType, NewApplicationEmailPreferencesFlowV2}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.repositories.FlowRepository
-import uk.gov.hmrc.thirdpartydeveloperfrontend.repositories.ReactiveMongoFormatters.{formatEmailPreferencesFlow, formatNewApplicationEmailPreferencesFlow}
+import uk.gov.hmrc.thirdpartydeveloperfrontend.repositories.MongoFormatters.{formatEmailPreferencesFlow, formatNewApplicationEmailPreferencesFlow}
 import uk.gov.hmrc.http.HeaderCarrier
 
 import javax.inject.{Inject, Singleton}

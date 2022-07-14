@@ -17,32 +17,31 @@
 package uk.gov.hmrc.thirdpartydeveloperfrontend.helpers
 
 import uk.gov.hmrc.thirdpartydeveloperfrontend.helpers.DateFormatter.initialLastAccessDate
-import org.joda.time.{DateTime, DateTimeUtils}
 import org.scalatest.BeforeAndAfterAll
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.AsyncHmrcSpec
 
+import java.time.LocalDateTime
+
 class DateFormatterSpec extends AsyncHmrcSpec with BeforeAndAfterAll {
-  val FixedTimeNow: DateTime = new DateTime("2019-09-01T00:30:00.000")
+  val FixedTimeNow: LocalDateTime = new LocalDateTime("2019-09-01T00:30:00.000")
   override def beforeAll(): Unit = {
     super.beforeAll()
-    DateTimeUtils.setCurrentMillisFixed(FixedTimeNow.toDate.getTime)
   }
 
   override def afterAll(): Unit = {
-    DateTimeUtils.setCurrentMillisSystem()
     super.afterAll()
   }
 
   "formatDateWithShortPattern" should {
     "use short date format" in {
-      val dateTime = new DateTime(2019, 1, 1, 0, 0) // scalastyle:ignore magic.number
+      val dateTime = new LocalDateTime(2019, 1, 1, 0, 0) // scalastyle:ignore magic.number
       DateFormatter.formatDateWithShortPattern(dateTime) shouldBe "1 Jan 2019"
     }
   }
 
   "formatDate" should {
     "use long date format" in {
-      val dateTime = new DateTime(2019, 1, 1, 0, 0) // scalastyle:ignore magic.number
+      val dateTime = new LocalDateTime(2019, 1, 1, 0, 0) // scalastyle:ignore magic.number
       DateFormatter.formatDate(dateTime) shouldBe "1 January 2019"
     }
   }

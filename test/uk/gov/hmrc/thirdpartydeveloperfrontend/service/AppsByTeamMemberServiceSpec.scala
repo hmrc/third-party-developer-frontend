@@ -16,15 +16,14 @@
 
 package uk.gov.hmrc.thirdpartydeveloperfrontend.service
 
-import java.time.Period
+import java.time.{LocalDateTime, Period}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.builder._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.config.ApplicationConfig
 import uk.gov.hmrc.thirdpartydeveloperfrontend.connectors._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.apidefinitions._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications._
-import org.joda.time.DateTime
 import uk.gov.hmrc.thirdpartydeveloperfrontend.service.SubscriptionFieldsService.SubscriptionFieldsConnector
-import uk.gov.hmrc.http.{HeaderCarrier}
+import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.AsyncHmrcSpec
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.UserId
 
@@ -69,9 +68,9 @@ class AppsByTeamMemberServiceSpec extends AsyncHmrcSpec with SubscriptionsBuilde
     val userId = UserId.random
     val email = "bob@example.com"
     val grantLength = Period.ofDays(547)
-    val productionApp1 = ApplicationWithSubscriptionIds(ApplicationId("id1"), ClientId("cl-id1"), "zapplication", DateTime.now, Some(DateTime.now), None, grantLength, Environment.PRODUCTION, collaborators = Set(Collaborator(email, CollaboratorRole.ADMINISTRATOR, userId)))
-    val sandboxApp1 = ApplicationWithSubscriptionIds(ApplicationId("id2"), ClientId("cl-id2"), "application", DateTime.now, Some(DateTime.now), None, grantLength, Environment.SANDBOX, collaborators = Set(Collaborator(email, CollaboratorRole.ADMINISTRATOR, userId)))
-    val productionApp2 = ApplicationWithSubscriptionIds(ApplicationId("id3"), ClientId("cl-id3"), "4pplication", DateTime.now, Some(DateTime.now), None, grantLength, Environment.PRODUCTION, collaborators = Set(Collaborator(email, CollaboratorRole.ADMINISTRATOR, userId)))
+    val productionApp1 = ApplicationWithSubscriptionIds(ApplicationId("id1"), ClientId("cl-id1"), "zapplication", LocalDateTime.now, Some(LocalDateTime.now), None, grantLength, Environment.PRODUCTION, collaborators = Set(Collaborator(email, CollaboratorRole.ADMINISTRATOR, userId)))
+    val sandboxApp1 = ApplicationWithSubscriptionIds(ApplicationId("id2"), ClientId("cl-id2"), "application", LocalDateTime.now, Some(LocalDateTime.now), None, grantLength, Environment.SANDBOX, collaborators = Set(Collaborator(email, CollaboratorRole.ADMINISTRATOR, userId)))
+    val productionApp2 = ApplicationWithSubscriptionIds(ApplicationId("id3"), ClientId("cl-id3"), "4pplication", LocalDateTime.now, Some(LocalDateTime.now), None, grantLength, Environment.PRODUCTION, collaborators = Set(Collaborator(email, CollaboratorRole.ADMINISTRATOR, userId)))
 
     val productionApps = Seq(productionApp1, productionApp2)
     val sandboxApps = Seq(sandboxApp1)

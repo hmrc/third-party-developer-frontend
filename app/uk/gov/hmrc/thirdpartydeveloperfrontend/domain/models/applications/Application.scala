@@ -16,7 +16,10 @@
 
 package uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications
 
-import java.time.Period
+import play.api.libs.json.{Format, OFormat, Reads}
+import uk.gov.hmrc.mongo.play.json.formats.MongoJavatimeFormats
+
+import java.time.{LocalDateTime, Period}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.apidefinitions.AccessType.STANDARD
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.Capabilities.{ChangeClientSecret, SupportsDetails, ViewPushSecret}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.Environment._
@@ -25,7 +28,6 @@ import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.Collab
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.State.{PENDING_GATEKEEPER_APPROVAL, PENDING_REQUESTER_VERIFICATION, TESTING}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.Developer
 import uk.gov.hmrc.thirdpartydeveloperfrontend.helpers.string.Digest
-import org.joda.time.DateTime
 
 import java.util.UUID
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.UserId
@@ -35,17 +37,16 @@ case class ApplicationId(value: String) extends AnyVal
 
 object ApplicationId {
   import play.api.libs.json.Json
-  implicit val applicationIdFormat = Json.valueFormat[ApplicationId]
+  implicit val applicationIdFormat: Format[ApplicationId] = Json.valueFormat[ApplicationId]
 
   def random: ApplicationId = ApplicationId(UUID.randomUUID().toString)
 }
 
 case class ClientId(value: String) extends AnyVal
 
-
 object ClientId {
   import play.api.libs.json.Json
-  implicit val clientIdFormat = Json.valueFormat[ClientId]
+  implicit val clientIdFormat: Format[ClientId] = Json.valueFormat[ClientId]
 }
 
 trait BaseApplication {
@@ -53,11 +54,11 @@ trait BaseApplication {
   def id: ApplicationId
   def clientId: ClientId
   def name: String
-  def createdOn: DateTime
-  def lastAccess: Option[DateTime]
+  def createdOn: LocalDateTime
+  def lastAccess: Option[LocalDateTime]
 
   def grantLength: Period
-  def lastAccessTokenUsage: Option[DateTime]
+  def lastAccessTokenUsage: Option[LocalDateTime]
   def deployedTo: Environment
   def description: Option[String]
   def collaborators: Set[Collaborator]
@@ -71,7 +72,6 @@ trait BaseApplication {
 
   def isUserACollaboratorOfRole(userId: UserId, requiredRole: CollaboratorRole): Boolean = roleForCollaborator(userId).fold(false)(_ == requiredRole)
 
-  
   def adminEmails: Set[String] = collaborators.filter(_.role.isAdministrator).map(_.emailAddress)
 
   def termsOfUseAgreements: List[TermsOfUseAgreement] = checkInformation.map(_.termsOfUseAgreements).getOrElse(List.empty)
@@ -98,14 +98,14 @@ trait BaseApplication {
 
   def privacyPolicyLocation = access match {
     case Standard(_, _, _, _, _, Some(ImportantSubmissionData(_, _, _, _, privacyPolicyLocation, _))) => privacyPolicyLocation
-    case Standard(_, _, Some(url), _, _, None) => PrivacyPolicyLocation.Url(url)
-    case _ => PrivacyPolicyLocation.NoneProvided
+    case Standard(_, _, Some(url), _, _, None)                                                        => PrivacyPolicyLocation.Url(url)
+    case _                                                                                            => PrivacyPolicyLocation.NoneProvided
   }
 
   def termsAndConditionsLocation = access match {
     case Standard(_, _, _, _, _, Some(ImportantSubmissionData(_, _, _, termsAndConditionsLocation, _, _))) => termsAndConditionsLocation
-    case Standard(_, Some(url), _, _, _, None) => TermsAndConditionsLocation.Url(url)
-    case _ => TermsAndConditionsLocation.NoneProvided
+    case Standard(_, Some(url), _, _, _, None)                                                             => TermsAndConditionsLocation.Url(url)
+    case _                                                                                                 => TermsAndConditionsLocation.NoneProvided
   }
 
   def isPermittedToEditAppDetails(developer: Developer): Boolean = allows(SupportsDetails, developer, SandboxOnly)
@@ -157,80 +157,76 @@ trait BaseApplication {
   def isInTesting = state.isInTesting
   def isPendingApproval = state.isPendingApproval
   def isApproved = state.isApproved
-  def hasLockedSubscriptions = deployedTo.isProduction && ! isInTesting
+  def hasLockedSubscriptions = deployedTo.isProduction && !isInTesting
 
   def findCollaboratorByHash(teamMemberHash: String): Option[Collaborator] = {
     collaborators.find(c => c.emailAddress.toSha256 == teamMemberHash)
   }
 
-  def grantLengthDisplayValue() : String = {
+  def grantLengthDisplayValue(): String = {
     grantLength match {
-      case GrantLength.MONTH =>  "1 month"
-      case GrantLength.THREE_MONTHS =>  "3 months"
-      case GrantLength.SIX_MONTHS =>  "6 months"
-      case GrantLength.ONE_YEAR =>  "1 year"
-      case GrantLength.EIGHTEEN_MONTHS =>  "18 months"
-      case GrantLength.THREE_YEARS =>  "3 years"
-      case GrantLength.FIVE_YEARS =>  "5 years"
-      case GrantLength.TEN_YEARS =>  "10 years"
-      case GrantLength.HUNDRED_YEARS =>  "100 years"
-      case _ => s"${Math.round(grantLength.getDays/30)} months"
+      case GrantLength.MONTH           => "1 month"
+      case GrantLength.THREE_MONTHS    => "3 months"
+      case GrantLength.SIX_MONTHS      => "6 months"
+      case GrantLength.ONE_YEAR        => "1 year"
+      case GrantLength.EIGHTEEN_MONTHS => "18 months"
+      case GrantLength.THREE_YEARS     => "3 years"
+      case GrantLength.FIVE_YEARS      => "5 years"
+      case GrantLength.TEN_YEARS       => "10 years"
+      case GrantLength.HUNDRED_YEARS   => "100 years"
+      case _                           => s"${Math.round(grantLength.getDays / 30)} months"
     }
   }
 }
 
 case class Application(
-  val id: ApplicationId,
-  val clientId: ClientId,
-  val name: String,
-  val createdOn: DateTime,
-  val lastAccess: Option[DateTime],
-  val lastAccessTokenUsage: Option[DateTime] = None, // API-4376: Temporary inclusion whilst Server Token functionality is retired
-  val grantLength: Period,
-  val deployedTo: Environment,
-  val description: Option[String] = None,
-  val collaborators: Set[Collaborator] = Set.empty,
-  val access: Access = Standard(),
-  val state: ApplicationState = ApplicationState.testing,
-  val checkInformation: Option[CheckInformation] = None,
-  val ipAllowlist: IpAllowlist = IpAllowlist()
-) extends BaseApplication
+    val id: ApplicationId,
+    val clientId: ClientId,
+    val name: String,
+    val createdOn: LocalDateTime,
+    val lastAccess: Option[LocalDateTime],
+    val lastAccessTokenUsage: Option[LocalDateTime] = None, // API-4376: Temporary inclusion whilst Server Token functionality is retired
+    val grantLength: Period,
+    val deployedTo: Environment,
+    val description: Option[String] = None,
+    val collaborators: Set[Collaborator] = Set.empty,
+    val access: Access = Standard(),
+    val state: ApplicationState = ApplicationState.testing,
+    val checkInformation: Option[CheckInformation] = None,
+    val ipAllowlist: IpAllowlist = IpAllowlist())
+    extends BaseApplication
 
 object Application {
   import play.api.libs.json.Json
-  import play.api.libs.json.JodaReads._
-  import play.api.libs.json.JodaWrites._
 
-  implicit val applicationFormat = Json.format[Application]
-
+  implicit val dateFormat: Format[LocalDateTime] = MongoJavatimeFormats.localDateTimeFormat
+  implicit val applicationFormat: OFormat[Application] = Json.format[Application]
   implicit val ordering: Ordering[Application] = Ordering.by(_.name)
 }
 
 case class ApplicationWithSubscriptionIds(
-  val id: ApplicationId,
-  val clientId: ClientId,
-  val name: String,
-  val createdOn: DateTime,
-  val lastAccess: Option[DateTime],
-  val lastAccessTokenUsage: Option[DateTime] = None,
-  val grantLength: Period = Period.ofDays(547),
-  val deployedTo: Environment,
-  val description: Option[String] = None,
-  val collaborators: Set[Collaborator] = Set.empty,
-  val access: Access = Standard(),
-  val state: ApplicationState = ApplicationState.testing,
-  val checkInformation: Option[CheckInformation] = None,
-  val ipAllowlist: IpAllowlist = IpAllowlist(),
-  val subscriptions: Set[ApiIdentifier] = Set.empty
-) extends BaseApplication
+    val id: ApplicationId,
+    val clientId: ClientId,
+    val name: String,
+    val createdOn: LocalDateTime,
+    val lastAccess: Option[LocalDateTime],
+    val lastAccessTokenUsage: Option[LocalDateTime] = None,
+    val grantLength: Period = Period.ofDays(547),
+    val deployedTo: Environment,
+    val description: Option[String] = None,
+    val collaborators: Set[Collaborator] = Set.empty,
+    val access: Access = Standard(),
+    val state: ApplicationState = ApplicationState.testing,
+    val checkInformation: Option[CheckInformation] = None,
+    val ipAllowlist: IpAllowlist = IpAllowlist(),
+    val subscriptions: Set[ApiIdentifier] = Set.empty)
+    extends BaseApplication
 
 object ApplicationWithSubscriptionIds {
   import play.api.libs.json.Json
-  import play.api.libs.json.JodaReads._
-  import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.services.ApiDefinitionsJsonFormatters._
 
-  implicit val applicationWithSubsIdsReads = Json.reads[ApplicationWithSubscriptionIds]
-
+  implicit val dateFormat: Format[LocalDateTime] = MongoJavatimeFormats.localDateTimeFormat
+  implicit val applicationWithSubsIdsReads: Reads[ApplicationWithSubscriptionIds] = Json.reads[ApplicationWithSubscriptionIds]
   implicit val ordering: Ordering[ApplicationWithSubscriptionIds] = Ordering.by(_.name)
 
   def from(app: Application) =

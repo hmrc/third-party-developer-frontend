@@ -16,7 +16,7 @@
 
 package uk.gov.hmrc.thirdpartydeveloperfrontend.service
 
-import java.time.Period
+import java.time.{LocalDateTime, Period}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.builder.SubscriptionsBuilder
 import uk.gov.hmrc.thirdpartydeveloperfrontend.connectors.{ApmConnector, ThirdPartyApplicationConnector}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.apidefinitions.{ApiContext, ApiVersion}
@@ -25,7 +25,6 @@ import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.subscriptions.ApiSu
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.subscriptions.DevhubAccessRequirement.NoOne
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.subscriptions.{AccessRequirements, DevhubAccessRequirements, FieldValue, Fields}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.mocks.connectors.SubscriptionFieldsConnectorMock
-import org.joda.time.DateTime
 import uk.gov.hmrc.thirdpartydeveloperfrontend.service.PushPullNotificationsService.PushPullNotificationsConnector
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.AsyncHmrcSpec
@@ -42,7 +41,7 @@ class SubscriptionFieldsServiceSpec extends AsyncHmrcSpec with SubscriptionsBuil
   val applicationId: ApplicationId = ApplicationId("application-id")
   val clientId = ClientId("clientId")
   val application =
-    Application(applicationId, clientId, applicationName, DateTime.now(), Some(DateTime.now()), None, grantLength = Period.ofDays(547), Environment.PRODUCTION)
+    Application(applicationId, clientId, applicationName, LocalDateTime.now(), Some(LocalDateTime.now()), None, grantLength = Period.ofDays(547), Environment.PRODUCTION)
 
   trait Setup extends SubscriptionFieldsConnectorMock {
 
@@ -66,7 +65,7 @@ class SubscriptionFieldsServiceSpec extends AsyncHmrcSpec with SubscriptionsBuil
     ).thenReturn(
       Future.successful(
         Some(
-          Application(applicationId, clientId, "name", DateTime.now(), Some(DateTime.now()), None, grantLength = Period.ofDays(547), Environment.PRODUCTION)
+          Application(applicationId, clientId, "name", LocalDateTime.now(), Some(LocalDateTime.now()), None, grantLength = Period.ofDays(547), Environment.PRODUCTION)
         )
       )
     )

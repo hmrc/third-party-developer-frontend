@@ -16,22 +16,20 @@
 
 package uk.gov.hmrc.thirdpartydeveloperfrontend.domain.services
 
-import org.joda.time.DateTime
 import uk.gov.hmrc.apiplatform.modules.submissions.domain.models.Submission
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.services.TermsOfUseService.TermsOfUseAgreementDetails
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.HmrcSpec
-import uk.gov.hmrc.time.DateTimeUtils
 
-import java.time.Period
+import java.time.{LocalDateTime, Period, ZoneOffset}
 
 class TermsOfUseServiceSpec extends HmrcSpec {
   def buildApplication(checkInfoAgreements: Option[List[TermsOfUseAgreement]] = None, standardAppAgreements: Option[List[TermsOfUseAcceptance]] = None) = Application(
     ApplicationId.random,
     ClientId("clientId"),
     "App name 1",
-    DateTimeUtils.now,
-    Some(DateTimeUtils.now),
+    LocalDateTime.now(ZoneOffset.UTC),
+    Some(LocalDateTime.now(ZoneOffset.UTC)),
     None,
     Period.ofDays(10),
     Environment.PRODUCTION,
@@ -49,7 +47,7 @@ class TermsOfUseServiceSpec extends HmrcSpec {
     checkInformation = checkInfoAgreements.map(agreements => CheckInformation(termsOfUseAgreements = agreements))
   )
 
-  val timestamp = DateTime.now
+  val timestamp = LocalDateTime.now(ZoneOffset.UTC)
   val email = "bob@example.com"
   val name = "Bob Example"
   val responsibleIndividual = ResponsibleIndividual(ResponsibleIndividual.Name(name), ResponsibleIndividual.EmailAddress(email))

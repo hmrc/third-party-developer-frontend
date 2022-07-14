@@ -16,24 +16,24 @@
 
 package views
 
-import org.joda.time.DateTime
 import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.routes
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.{DeveloperSession, LoggedInState}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.controllers.ApplicationViewModel
-import org.joda.time.format.DateTimeFormat
 import org.jsoup.Jsoup
 import org.jsoup.nodes.{Document, Element}
 import play.api.mvc.AnyContentAsEmpty
 import play.api.test.FakeRequest
 import play.twirl.api.HtmlFormat.Appendable
 import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.Details.{Agreement, TermsOfUseViewModel}
-import uk.gov.hmrc.time.DateTimeUtils
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.{TestApplications, WithCSRFAddToken}
 import views.helper.CommonViewSpec
 import views.html.DetailsView
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils._
+
+import java.time.{LocalDateTime, ZoneOffset}
+import java.time.format.DateTimeFormatter
 
 class DetailsViewSpec
     extends CommonViewSpec 
@@ -56,6 +56,7 @@ class DetailsViewSpec
     lazy val changingAppDetailsAdminList: Element = body.getElementById("changingAppDetailsAdminList")
   }
 
+  val termsOfUseViewModel = TermsOfUseViewModel(true, true, Some(Agreement("user@example.com", LocalDateTime.now)))
   val adminEmail = "admin@example.com"
   val termsOfUseViewModel = TermsOfUseViewModel(true, true, Some(Agreement("user@example.com", DateTime.now)))
 
@@ -238,8 +239,8 @@ class DetailsViewSpec
 
             "show agreement details and have no link to read when the terms of use have been agreed" in {
               val emailAddress = "user@example.com"
-              val timeStamp = DateTimeUtils.now
-              val expectedTimeStamp = DateTimeFormat.forPattern("dd MMMM yyyy").print(timeStamp)
+              val timeStamp = LocalDateTime.now(ZoneOffset.UTC)
+              val expectedTimeStamp = DateTimeFormatter.ofPattern("dd MMMM yyyy").format(timeStamp)
               val version = "1.0"
               val checkInformation = CheckInformation(termsOfUseAgreements = List(TermsOfUseAgreement(emailAddress, timeStamp, version)))
 
@@ -272,8 +273,8 @@ class DetailsViewSpec
 
             "show agreement details, have a link to read and not show a warning when the terms of use have been agreed" in new LoggedInUserIsAdmin {
               val emailAddress = "user@example.com"
-              val timeStamp = DateTimeUtils.now
-              val expectedTimeStamp = DateTimeFormat.forPattern("dd MMMM yyyy").print(timeStamp)
+              val timeStamp = LocalDateTime.now(ZoneOffset.UTC)
+              val expectedTimeStamp = DateTimeFormatter.ofPattern("dd MMMM yyyy").format(timeStamp)
               val version = "1.0"
               val checkInformation = CheckInformation(termsOfUseAgreements = List(applications.TermsOfUseAgreement(emailAddress, timeStamp, version)))
 

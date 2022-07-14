@@ -16,22 +16,22 @@
 
 package uk.gov.hmrc.apiplatform.modules.mfa.service
 
-import org.joda.time.{DateTime, Duration, Instant, LocalDate}
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.thirdpartydeveloperfrontend.config.ApplicationConfig
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.mocks.service._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils._
 
-import java.time.Period
+import java.time.temporal.ChronoUnit
+import java.time.{LocalDate, LocalDateTime, Period}
 import scala.concurrent.ExecutionContext.Implicits.global
 
 class MfaMandateServiceSpec extends AsyncHmrcSpec with CollaboratorTracker with LocalUserIdTracker with AppsByTeamMemberServiceMock {
 
   trait Setup {
-    val dateAFewDaysAgo: LocalDate = Instant.now().minus(Duration.standardDays((2L))).toDateTime().toLocalDate
-    val dateToday: LocalDate = Instant.now().toDateTime().toLocalDate
-    val dateInTheFuture: LocalDate = Instant.now().plus(Duration.standardDays(1L)).toDateTime().toLocalDate
+    val dateAFewDaysAgo: LocalDate = LocalDate.now().minus(2, ChronoUnit.DAYS)
+    val dateToday: LocalDate = LocalDate.now
+    val dateInTheFuture: LocalDate = LocalDate.now().plus(1, ChronoUnit.DAYS)
 
     val email = "test@example.com"
     val userId = idOf(email)
@@ -52,8 +52,8 @@ class MfaMandateServiceSpec extends AsyncHmrcSpec with CollaboratorTracker with 
           applicationId,
           clientId,
           "myName",
-          new DateTime(),
-          Some(new DateTime()),
+          LocalDateTime.now,
+          Some(LocalDateTime.now),
           None,
           grantLength,
           Environment.PRODUCTION,
@@ -68,8 +68,8 @@ class MfaMandateServiceSpec extends AsyncHmrcSpec with CollaboratorTracker with 
           applicationId,
           clientId,
           "myName",
-          new DateTime(),
-          Some(new DateTime()),
+          LocalDateTime.now,
+          Some(LocalDateTime.now),
           None,
           grantLength,
           Environment.PRODUCTION,
@@ -84,8 +84,8 @@ class MfaMandateServiceSpec extends AsyncHmrcSpec with CollaboratorTracker with 
           applicationId,
           clientId,
           "myName",
-          new DateTime(),
-          Some(new DateTime()),
+          LocalDateTime.now,
+          Some(LocalDateTime.now),
           None,
           grantLength,
           Environment.PRODUCTION,

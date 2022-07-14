@@ -18,7 +18,6 @@ package uk.gov.hmrc.thirdpartydeveloperfrontend.controllers
 
 import java.util.UUID
 import java.util.UUID.randomUUID
-
 import uk.gov.hmrc.thirdpartydeveloperfrontend.builder.DeveloperBuilder
 import uk.gov.hmrc.thirdpartydeveloperfrontend.connectors.ThirdPartyDeveloperConnector
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.ApplicationState._
@@ -26,7 +25,6 @@ import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.Collab
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.ClientSecretLimitExceeded
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.mocks.service._
-import org.joda.time.{DateTime, DateTimeZone}
 import play.api.mvc.AnyContentAsEmpty
 import play.api.test.CSRFTokenHelper._
 import play.api.test.FakeRequest
@@ -34,7 +32,7 @@ import play.api.test.Helpers._
 import play.filters.csrf.CSRF.TokenProvider
 import uk.gov.hmrc.thirdpartydeveloperfrontend.service.AuditService
 import uk.gov.hmrc.http.HeaderCarrier
-import uk.gov.hmrc.time.DateTimeUtils
+import uk.gov.hmrc.time.LocalDateTimeUtils
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.WithLoggedInSession._
 import views.html.{ClientIdView, ClientSecretsView, CredentialsView, ServerTokenView}
 import views.html.editapplication.DeleteClientSecretView
@@ -42,6 +40,8 @@ import views.html.editapplication.DeleteClientSecretView
 import scala.concurrent.ExecutionContext.Implicits.global
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.LocalUserIdTracker
 import uk.gov.hmrc.thirdpartydeveloperfrontend.builder._
+
+import java.time.{LocalDateTime, ZoneOffset}
 
 class CredentialsSpec
     extends BaseControllerSpec
@@ -64,8 +64,8 @@ class CredentialsSpec
         applicationId,
         clientId,
         "App name 1",
-        DateTimeUtils.now,
-        Some(DateTimeUtils.now),
+        LocalDateTimeUtils.now,
+        Some(LocalDateTimeUtils.now),
         None,
         grantLength,
         Environment.PRODUCTION,
@@ -85,14 +85,14 @@ class CredentialsSpec
       state: ApplicationState = ApplicationState.production("", ""),
       access: Access = Standard(),
       environment: Environment = Environment.PRODUCTION,
-      createdOn: DateTime = DateTimeUtils.now
+      createdOn: LocalDateTime = LocalDateTime.now(ZoneOffset.UTC)
   ) =
     Application(
       applicationId,
       clientId,
       "app",
       createdOn,
-      Some(DateTimeUtils.now),
+      Some(LocalDateTime.now(ZoneOffset.UTC)),
       None,
       grantLength,
       environment,
@@ -229,7 +229,7 @@ class CredentialsSpec
     }
 
     "return 404 for new apps" in new Setup {
-      def createApplication() = createConfiguredApplication(applicationId, ADMINISTRATOR, createdOn = DateTimeUtils.now)
+      def createApplication() = createConfiguredApplication(applicationId, ADMINISTRATOR, createdOn = LocalDateTimeUtils.now)
 
       val result = underTest.serverToken(applicationId)(loggedInRequest)
 
@@ -386,6 +386,6 @@ class CredentialsSpec
     }
   }
 
-  private def aClientSecret(secretName: String) = ClientSecret(randomUUID.toString, secretName, DateTimeUtils.now.withZone(DateTimeZone.getDefault))
+  private def aClientSecret(secretName: String) = ClientSecret(randomUUID.toString, secretName, LocalDateTimeUtils.now.withZone(LocalDateTimeZone.getDefault))
 
 }

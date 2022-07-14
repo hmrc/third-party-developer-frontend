@@ -20,7 +20,6 @@ import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.{EditApplicationForm,
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.LoggedInState
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.controllers.ApplicationViewModel
-import org.joda.time.DateTime
 import org.jsoup.Jsoup
 import org.jsoup.nodes.Document
 import play.api.mvc.AnyContentAsEmpty
@@ -30,6 +29,7 @@ import uk.gov.hmrc.thirdpartydeveloperfrontend.utils._
 import views.helper.CommonViewSpec
 import views.html.ManageSubscriptionsView
 
+import java.time.LocalDateTime
 import scala.collection.JavaConverters._
 
 class SubscriptionsSpec extends CommonViewSpec with WithCSRFAddToken {
@@ -48,8 +48,8 @@ class SubscriptionsSpec extends CommonViewSpec with WithCSRFAddToken {
     ApplicationId("Test Application ID"),
     ClientId("Test Application Client ID"),
     "Test Application",
-    DateTime.now(),
-    Some(DateTime.now()),
+    LocalDateTime.now(),
+    Some(LocalDateTime.now()),
     None,
     grantLength,
     environment,

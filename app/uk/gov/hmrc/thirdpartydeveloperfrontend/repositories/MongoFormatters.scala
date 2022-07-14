@@ -19,23 +19,28 @@ package uk.gov.hmrc.thirdpartydeveloperfrontend.repositories
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.flows._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.services.CombinedApiJsonFormatters
 import uk.gov.hmrc.apiplatform.modules.uplift.domain.models.GetProductionCredentialsFlow
-import org.joda.time.DateTime
 import play.api.libs.json.{Format, Json, OFormat}
-import uk.gov.hmrc.mongo.json.ReactiveMongoFormats
+import uk.gov.hmrc.apiplatform.modules.mfa.models.Codecs
+import uk.gov.hmrc.mongo.play.json.formats.MongoJavatimeFormats
 import uk.gov.hmrc.play.json.Union
 
-object ReactiveMongoFormatters extends CombinedApiJsonFormatters {
-  implicit val dateFormat: Format[DateTime] = ReactiveMongoFormats.dateTimeFormats
+import java.time.LocalDateTime
+
+object MongoFormatters extends CombinedApiJsonFormatters {
+
+  implicit val dateFormat: Format[LocalDateTime] = MongoJavatimeFormats.localDateTimeFormat
   implicit val formatIpAllowlistFlow: OFormat[IpAllowlistFlow] = Json.format[IpAllowlistFlow]
 
   implicit val formatEmailPreferencesFlow: OFormat[EmailPreferencesFlowV2] = Json.format[EmailPreferencesFlowV2]
   implicit val formatNewApplicationEmailPreferencesFlow: OFormat[NewApplicationEmailPreferencesFlowV2] = Json.format[NewApplicationEmailPreferencesFlowV2]
   implicit val formatGetProdCredsFlow: OFormat[GetProductionCredentialsFlow] = Json.format[GetProductionCredentialsFlow]
 
-  implicit val formatFlow: Format[Flow] = Union.from[Flow]("flowType")
-    .and[IpAllowlistFlow](FlowType.IP_ALLOW_LIST.toString())
-    .and[EmailPreferencesFlowV2](FlowType.EMAIL_PREFERENCES_V2.toString())
-    .and[NewApplicationEmailPreferencesFlowV2](FlowType.NEW_APPLICATION_EMAIL_PREFERENCES_V2.toString())
-    .and[GetProductionCredentialsFlow](FlowType.GET_PRODUCTION_CREDENTIALS.toString())
+  implicit val formatFlow: OFormat[Flow] = Union.from[Flow]("flowType")
+    .and[IpAllowlistFlow](FlowType.IP_ALLOW_LIST.toString)
+    .and[EmailPreferencesFlowV2](FlowType.EMAIL_PREFERENCES_V2.toString)
+    .and[NewApplicationEmailPreferencesFlowV2](FlowType.NEW_APPLICATION_EMAIL_PREFERENCES_V2.toString)
+    .and[GetProductionCredentialsFlow](FlowType.GET_PRODUCTION_CREDENTIALS.toString)
     .format
+
+  val mongoCodecs = Codecs.unionCodecs[Flow](formatFlow)
 }

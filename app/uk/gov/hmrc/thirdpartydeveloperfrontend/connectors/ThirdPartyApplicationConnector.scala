@@ -220,15 +220,15 @@ abstract class ThirdPartyApplicationConnector(config: ApplicationConfig, metrics
 }
 
 private[connectors] object ThirdPartyApplicationConnectorDomain {
-  import org.joda.time.DateTime
   import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.{ClientId, ClientSecret}
+  import java.time.LocalDateTime
 
   def toDomain(tpaClientSecret: TPAClientSecret): ClientSecret =
     ClientSecret(tpaClientSecret.id, tpaClientSecret.name, tpaClientSecret.createdOn, tpaClientSecret.lastAccess)
 
   case class AddClientSecretResponse(clientId: ClientId, accessToken: String, clientSecrets: List[TPAClientSecret])
 
-  case class TPAClientSecret(id: String, name: String, secret: Option[String], createdOn: DateTime, lastAccess: Option[DateTime])
+  case class TPAClientSecret(id: String, name: String, secret: Option[String], createdOn: LocalDateTime, lastAccess: Option[LocalDateTime])
 
   case class DeleteClientSecretRequest(actorEmailAddress: String)
 

@@ -22,7 +22,7 @@ import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.flows.FlowType.IP_A
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.flows.IpAllowlistFlow
 import javax.inject.{Inject, Singleton}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.repositories.FlowRepository
-import uk.gov.hmrc.thirdpartydeveloperfrontend.repositories.ReactiveMongoFormatters.formatIpAllowlistFlow
+import uk.gov.hmrc.thirdpartydeveloperfrontend.repositories.MongoFormatters.formatIpAllowlistFlow
 import uk.gov.hmrc.http.{ForbiddenException, HeaderCarrier}
 
 import scala.concurrent.{ExecutionContext, Future}

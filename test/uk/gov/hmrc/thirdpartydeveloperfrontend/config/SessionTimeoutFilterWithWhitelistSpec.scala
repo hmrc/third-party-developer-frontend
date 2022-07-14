@@ -16,7 +16,6 @@
 
 package uk.gov.hmrc.thirdpartydeveloperfrontend.config
 
-import org.joda.time.{DateTime, DateTimeZone}
 import org.mockito.invocation.InvocationOnMock
 import org.scalatest.concurrent.ScalaFutures.whenReady
 import org.scalatestplus.play.guice.GuiceOneAppPerSuite
@@ -27,7 +26,7 @@ import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.{AsyncHmrcSpec, SharedMetri
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
-import java.time.Duration
+import java.time.{Duration, LocalDateTime, ZoneOffset}
 
 class SessionTimeoutFilterWithWhitelistSpec extends AsyncHmrcSpec with GuiceOneAppPerSuite with SharedMetricsClearDown {
 
@@ -36,7 +35,7 @@ class SessionTimeoutFilterWithWhitelistSpec extends AsyncHmrcSpec with GuiceOneA
     val config = SessionTimeoutFilterConfig(timeoutDuration = Duration.ofSeconds(1), onlyWipeAuthToken = false)
 
     val nextOperationFunction = mock[RequestHeader => Future[Result]]
-    val whitelistedUrl =uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.routes.UserLoginAccount.login().url
+    val whitelistedUrl = uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.routes.UserLoginAccount.login().url
     val otherUrl = "/applications"
     val accessUri = "http://redirect.to/here"
     val bearerToken = "Bearer Token"
@@ -45,18 +44,14 @@ class SessionTimeoutFilterWithWhitelistSpec extends AsyncHmrcSpec with GuiceOneA
       override val whitelistedCalls = Set(WhitelistedCall(whitelistedUrl, "GET"))
     }
 
-    when(nextOperationFunction.apply(*)).thenAnswer( (invocation: InvocationOnMock) => {
-        val headers = invocation.getArguments.head.asInstanceOf[RequestHeader]
-        Future.successful(Results.Ok.withSession(headers.session + ("authToken" -> bearerToken)))
+    when(nextOperationFunction.apply(*)).thenAnswer((invocation: InvocationOnMock) => {
+      val headers = invocation.getArguments.head.asInstanceOf[RequestHeader]
+      Future.successful(Results.Ok.withSession(headers.session + ("authToken" -> bearerToken)))
     })
 
-    def now: String = {
-      DateTime.now(DateTimeZone.UTC).getMillis.toString
-    }
+    def now: String = LocalDateTime.now().toInstant(ZoneOffset.UTC).toEpochMilli.toString
 
-    def twoSecondsAgo: String = {
-      DateTime.now(DateTimeZone.UTC).minusSeconds(2).getMillis.toString
-    }
+    def twoSecondsAgo: String = LocalDateTime.now().minusSeconds(2).toInstant(ZoneOffset.UTC).toEpochMilli.toString
   }
 
   "when there is an active session, apply" should {

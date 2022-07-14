@@ -16,14 +16,13 @@
 
 package uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications
 
-import org.joda.time.DateTime
-import uk.gov.hmrc.time.DateTimeUtils
+import java.time.{LocalDateTime, ZoneOffset}
 
 case class ApplicationState(
  name: State,
  requestedByEmailAddress: Option[String],
  verificationCode: Option[String] = None,
- updatedOn: DateTime = DateTimeUtils.now
+ updatedOn: LocalDateTime = LocalDateTime.now(ZoneOffset.UTC)
 ) {
   def isInTesting = name.isInTesting
   def isPendingApproval = name.isPendingApproval
@@ -32,8 +31,6 @@ case class ApplicationState(
 
 object ApplicationState {
   import play.api.libs.json.Json
-  import play.api.libs.json.JodaReads._
-  import play.api.libs.json.JodaWrites._
 
   implicit val format = Json.format[ApplicationState]
 

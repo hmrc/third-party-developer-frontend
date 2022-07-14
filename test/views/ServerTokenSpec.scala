@@ -17,11 +17,9 @@
 package views
 
 import java.util.UUID.randomUUID
-
 import uk.gov.hmrc.thirdpartydeveloperfrontend.config.ApplicationConfig
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.LoggedInState
-import org.joda.time.DateTime
 import org.jsoup.Jsoup
 import org.jsoup.nodes.Document
 import play.api.test.FakeRequest
@@ -31,6 +29,7 @@ import views.helper.CommonViewSpec
 import views.html.ServerTokenView
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.DeveloperSessionBuilder
 
+import java.time.LocalDateTime
 import scala.collection.JavaConverters._
 
 class ServerTokenSpec extends CommonViewSpec with WithCSRFAddToken with CollaboratorTracker with LocalUserIdTracker {
@@ -50,8 +49,8 @@ class ServerTokenSpec extends CommonViewSpec with WithCSRFAddToken with Collabor
       ApplicationId("Test Application ID"),
       ClientId("Test Application Client ID"),
       "Test Application",
-      DateTime.now(),
-      Some(DateTime.now()),
+      LocalDateTime.now(),
+      Some(LocalDateTime.now()),
       None,
       grantLength,
       Environment.PRODUCTION,

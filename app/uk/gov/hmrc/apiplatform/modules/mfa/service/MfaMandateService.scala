@@ -16,7 +16,6 @@
 
 package uk.gov.hmrc.apiplatform.modules.mfa.service
 
-import org.joda.time.{Days, LocalDate}
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.thirdpartydeveloperfrontend.config.ApplicationConfig
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.CollaboratorRole._
@@ -24,6 +23,7 @@ import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.Enviro
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.UserId
 import uk.gov.hmrc.thirdpartydeveloperfrontend.service.AppsByTeamMemberService
 
+import java.time.{Duration, LocalDate}
 import javax.inject.{Inject, Singleton}
 import scala.concurrent.{ExecutionContext, Future}
 
@@ -31,11 +31,11 @@ import scala.concurrent.{ExecutionContext, Future}
 class MfaMandateService @Inject()(val appConfig: ApplicationConfig, val appsByTeamMember: AppsByTeamMemberService)(implicit val ec: ExecutionContext) {
 
   def showAdminMfaMandatedMessage(userId: UserId)(implicit hc: HeaderCarrier): Future[Boolean] = {
-    mfaMandateCheck(userId, mandatedDate => mandatedDate.isAfter(new LocalDate()))
+    mfaMandateCheck(userId, mandatedDate => mandatedDate.isAfter(LocalDate.now))
   }
 
   def isMfaMandatedForUser(userId: UserId)(implicit hc: HeaderCarrier): Future[Boolean] = {
-    mfaMandateCheck(userId, mandatedDate => !(mandatedDate.isAfter(new LocalDate())))
+    mfaMandateCheck(userId, mandatedDate => !(mandatedDate.isAfter(LocalDate.now)))
   }
 
   private def mfaMandateCheck(userId: UserId, dateCheck : LocalDate => Boolean)(implicit hc: HeaderCarrier): Future[Boolean] = {
@@ -52,7 +52,7 @@ class MfaMandateService @Inject()(val appConfig: ApplicationConfig, val appsByTe
   def daysTillAdminMfaMandate: Option[Int] = {
 
     def mandatedDateToDays(mandatedDate: LocalDate) = {
-      Days.daysBetween(new LocalDate, mandatedDate).getDays
+      Duration.between(LocalDate.now().atStartOfDay(), mandatedDate.atStartOfDay()).toDays.toInt
     } match {
       case days if days < 0 => None
       case days => Some(days)

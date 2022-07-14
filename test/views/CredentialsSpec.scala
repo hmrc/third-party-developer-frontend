@@ -16,10 +16,9 @@
 
 package views
 
-import java.time.Period
+import java.time.{LocalDateTime, Period}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.LoggedInState
-import org.joda.time.DateTime
 import org.jsoup.Jsoup
 import org.jsoup.nodes.Document
 import play.api.test.FakeRequest
@@ -47,8 +46,8 @@ class CredentialsSpec extends CommonViewSpec with WithCSRFAddToken with Collabor
       ApplicationId("Test Application ID"),
       ClientId("Test Application Client ID"),
       "Test Application",
-      DateTime.now(),
-      Some(DateTime.now()),
+      LocalDateTime.now(),
+      Some(LocalDateTime.now()),
       None,
       Period.ofDays(547),
       Environment.PRODUCTION,

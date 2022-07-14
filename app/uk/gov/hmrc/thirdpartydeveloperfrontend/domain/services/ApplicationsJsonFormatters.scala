@@ -16,13 +16,14 @@
 
 package uk.gov.hmrc.thirdpartydeveloperfrontend.domain.services
 
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.subscriptions.{FieldValue, FieldName}
+import uk.gov.hmrc.mongo.play.json.formats.MongoJavatimeFormats
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.subscriptions.{FieldName, FieldValue}
+
+import java.time.LocalDateTime
 
 trait ApplicationsJsonFormatters extends ApiDefinitionsJsonFormatters {
   import play.api.libs.json._
-  import play.api.libs.json.JodaReads._
-  import play.api.libs.json.JodaWrites._
-  import play.api.libs.json.JodaWrites.JodaDateTimeNumberWrites
+  implicit val dateFormat: Format[LocalDateTime] = MongoJavatimeFormats.localDateTimeFormat
   import uk.gov.hmrc.play.json.Union
   import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications._
   import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.apidefinitions._
@@ -49,7 +50,7 @@ trait ApplicationsJsonFormatters extends ApiDefinitionsJsonFormatters {
 
   object TOUAHelper {
     // DO NOT POLLUTE WHOLE SCOPE WITH THIS WRITER
-    implicit val formatDateTime = Format(DefaultJodaDateTimeReads, JodaDateTimeNumberWrites)
+    implicit val dateFormat: Format[LocalDateTime] = MongoJavatimeFormats.localDateTimeFormat
     val formatTOUA = Json.format[TermsOfUseAgreement]
   }
 

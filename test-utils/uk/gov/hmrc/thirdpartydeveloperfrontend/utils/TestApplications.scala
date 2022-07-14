@@ -16,13 +16,10 @@
 
 package uk.gov.hmrc.thirdpartydeveloperfrontend.utils
 
-import java.time.Period
+import java.time.{LocalDateTime, Period, ZoneOffset}
 import java.util.UUID.randomUUID
-
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.apidefinitions.AccessType
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications._
-import org.joda.time.DateTimeZone
-import uk.gov.hmrc.time.DateTimeUtils
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.UserId
 
 import scala.util.Random
@@ -58,8 +55,8 @@ trait TestApplications {
       id = appId,
       clientId = clientId,
       name = "App name 1",
-      createdOn = DateTimeUtils.now,
-      lastAccess = Some(DateTimeUtils.now),
+      createdOn = LocalDateTime.now(ZoneOffset.UTC),
+      lastAccess = Some(LocalDateTime.now(ZoneOffset.UTC)),
       grantLength = Period.ofDays(547),
       deployedTo = environment,
       description = Some("Description 1"),
@@ -102,7 +99,7 @@ trait TestApplications {
     ApplicationToken(List(aClientSecret()), accessToken)
   }
 
-  private def aClientSecret() = ClientSecret(randomUUID.toString, randomUUID.toString, DateTimeUtils.now.withZone(DateTimeZone.getDefault))
+  private def aClientSecret() = ClientSecret(randomUUID.toString, randomUUID.toString, LocalDateTime.now())
 
   implicit class AppAugment(val app: Application) {
     final def withName(name: String): Application = app.copy(name = name)

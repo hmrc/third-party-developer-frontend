@@ -16,9 +16,8 @@
 
 package uk.gov.hmrc.thirdpartydeveloperfrontend.service
 
-import java.time.Period
+import java.time.{LocalDateTime, Period, ZoneOffset}
 import java.util.UUID
-
 import uk.gov.hmrc.thirdpartydeveloperfrontend.connectors.ThirdPartyApplicationConnector
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.Environment.PRODUCTION
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.{Application, ApplicationId, ClientId}
@@ -26,7 +25,6 @@ import play.api.http.Status.INTERNAL_SERVER_ERROR
 import uk.gov.hmrc.thirdpartydeveloperfrontend.service.PushPullNotificationsService.PushPullNotificationsConnector
 import uk.gov.hmrc.thirdpartydeveloperfrontend.service.SubscriptionFieldsService.SubscriptionFieldsConnector
 import uk.gov.hmrc.http.{HeaderCarrier, UpstreamErrorResponse}
-import uk.gov.hmrc.time.DateTimeUtils
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.AsyncHmrcSpec
 
 import scala.concurrent.Future.{failed, successful}
@@ -42,8 +40,8 @@ class PushPullNotificationsServiceSpec extends AsyncHmrcSpec {
       ApplicationId("appId"),
       clientId,
       "App name 1",
-      DateTimeUtils.now,
-      Some(DateTimeUtils.now),
+      LocalDateTime.now(ZoneOffset.UTC),
+      Some(LocalDateTime.now(ZoneOffset.UTC)),
       None,
       grantLength,
       deployedTo = PRODUCTION

@@ -17,14 +17,15 @@
 package uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications
 
 import play.api.libs.json._
-import org.joda.time.{DateTime, DateTimeZone}
 import uk.gov.hmrc.apiplatform.modules.submissions.domain.models.Submission
+import uk.gov.hmrc.mongo.play.json.formats.MongoJavatimeFormats
 
-case class TermsOfUseAcceptance(responsibleIndividual: ResponsibleIndividual, dateTime: DateTime, submissionId: Submission.Id, submissionInstance: Int)
+import java.time.LocalDateTime
+
+case class TermsOfUseAcceptance(responsibleIndividual: ResponsibleIndividual, dateTime: LocalDateTime, submissionId: Submission.Id, submissionInstance: Int)
 
 object TermsOfUseAcceptance {
-  import JodaWrites.JodaDateTimeWrites
-  implicit val utcReads = JodaReads.DefaultJodaDateTimeReads.map(dt => dt.withZone(DateTimeZone.UTC))
 
+  implicit val dateFormat: Format[LocalDateTime] = MongoJavatimeFormats.localDateTimeFormat
   implicit val format = Json.format[TermsOfUseAcceptance]
 }

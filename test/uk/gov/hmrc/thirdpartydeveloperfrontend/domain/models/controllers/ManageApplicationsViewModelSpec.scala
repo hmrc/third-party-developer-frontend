@@ -16,9 +16,8 @@
 
 package uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.controllers
 
-import java.time.Period
+import java.time.{LocalDateTime, Period}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications._
-import org.joda.time.DateTime
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.apidefinitions.AccessType
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.State._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.CollaboratorRole.DEVELOPER
@@ -35,10 +34,10 @@ class ManageApplicationsViewModelSpec extends AnyWordSpec with Matchers {
         CollaboratorRole.DEVELOPER,
         TermsOfUseStatus.AGREED,
         TESTING,
-        Some(new DateTime()),
+        Some(new LocalDateTime()),
         grantLength,
         serverTokenUsed = false,
-        new DateTime(),
+        new LocalDateTime(),
         AccessType.STANDARD,
         Environment.SANDBOX,
         Set.empty
@@ -51,10 +50,10 @@ class ManageApplicationsViewModelSpec extends AnyWordSpec with Matchers {
         DEVELOPER,
         TermsOfUseStatus.AGREED,
         TESTING,
-        Some(new DateTime()),
+        Some(new LocalDateTime()),
         grantLength,
         serverTokenUsed = false,
-        new DateTime(),
+        new LocalDateTime(),
         AccessType.STANDARD,
         Environment.PRODUCTION,
         Set.empty

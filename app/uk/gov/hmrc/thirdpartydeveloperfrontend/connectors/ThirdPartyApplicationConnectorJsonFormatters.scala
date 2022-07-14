@@ -21,10 +21,8 @@ import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.services.{ApiDefinitionsJs
 import play.api.libs.json.{Format, Json}
 
 private[connectors] object ThirdPartyApplicationConnectorJsonFormatters
-    extends SubscriptionsJsonFormatters 
+    extends SubscriptionsJsonFormatters
     with ApiDefinitionsJsonFormatters {
-  import play.api.libs.json.JodaReads._
-  import play.api.libs.json.JodaWrites._
 
   implicit val formatTPAClientSecret: Format[TPAClientSecret] = Json.format[TPAClientSecret]
   implicit val formatAddClientSecretResponse: Format[AddClientSecretResponse] = Json.format[AddClientSecretResponse]

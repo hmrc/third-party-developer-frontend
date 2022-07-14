@@ -16,11 +16,10 @@
 
 package uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models
 
-import org.joda.time.DateTime
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.{Application, ApplicationId, ClientId, Environment, ImportantSubmissionData, PrivacyPolicyLocation, ResponsibleIndividual, ServerLocation, Standard, TermsAndConditionsLocation, TermsOfUseAcceptance}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.HmrcSpec
 
-import java.time.Period
+import java.time.{LocalDateTime, Period}
 
 class ApplicationSpec extends HmrcSpec {
   val url = "http://example.com"
@@ -33,7 +32,7 @@ class ApplicationSpec extends HmrcSpec {
     PrivacyPolicyLocation.NoneProvided,
     List.empty[TermsOfUseAcceptance]
   )
-  val baseApplication = Application(ApplicationId.random, ClientId("client"), "name", DateTime.now(), Some(DateTime.now()), None, Period.ofDays(1), Environment.PRODUCTION, access = standardAccess)
+  val baseApplication = Application(ApplicationId.random, ClientId("client"), "name", LocalDateTime.now(), Some(LocalDateTime.now()), None, Period.ofDays(1), Environment.PRODUCTION, access = standardAccess)
 
   "privacy policy location" should {
     "be correct for old journey app when no location supplied" in {

@@ -16,7 +16,6 @@
 
 package uk.gov.hmrc.thirdpartydeveloperfrontend.controllers
 
-import org.joda.time.DateTime
 import uk.gov.hmrc.thirdpartydeveloperfrontend.builder.DeveloperBuilder
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications._
@@ -34,6 +33,7 @@ import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.ViewHelpers._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.WithCSRFAddToken
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.WithLoggedInSession._
+import views.html.{ChangeDetailsView, ChangeOfApplicationNameConfirmationView, DetailsView, RequestChangeOfApplicationNameView, UpdatePrivacyPolicyLocationView}
 import views.html.{ChangeDetailsView, DetailsView, UpdatePrivacyPolicyLocationView, UpdateTermsAndConditionsLocationView, RequestChangeOfApplicationNameView, ChangeOfApplicationNameConfirmationView}
 import views.html.application.PendingApprovalView
 import views.html.checkpages.applicationcheck.UnauthorisedAppDetailsView
@@ -48,7 +48,9 @@ import uk.gov.hmrc.apiplatform.modules.submissions.services.mocks.SubmissionServ
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.connectors.TicketCreated
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.services.TermsOfUseService.TermsOfUseAgreementDetails
 
-class DetailsSpec 
+import java.time.LocalDateTime
+
+class DetailsSpec
     extends BaseControllerSpec 
     with WithCSRFAddToken 
     with TestApplications 
@@ -773,7 +775,7 @@ class DetailsSpec
       givenApplicationAction(application, loggedInDeveloper)
 
       if (hasTermsOfUseAgreement) {
-        returnAgreementDetails(TermsOfUseAgreementDetails("test@example.com", None, DateTime.now, Some("1.2")))
+        returnAgreementDetails(TermsOfUseAgreementDetails("test@example.com", None, LocalDateTime.now, Some("1.2")))
       } else {
         returnAgreementDetails()
       }
