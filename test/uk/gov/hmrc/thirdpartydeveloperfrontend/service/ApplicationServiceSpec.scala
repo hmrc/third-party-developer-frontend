@@ -217,6 +217,19 @@ class ApplicationServiceSpec extends AsyncHmrcSpec with SubscriptionsBuilder wit
     }
   }
 
+  "Update Terms and Conditions Location" should {
+    "call the TPA connector correctly" in new Setup {
+      val userId = UserId.random
+      val newLocation = TermsAndConditionsLocation.Url("http://example.com")
+      val applicationUpdate = ChangeProductionApplicationTermsAndConditionsLocation(userId, LocalDateTime.now(clock), newLocation)
+      when(mockProductionApplicationConnector.applicationUpdate(productionApplicationId, applicationUpdate)).thenReturn(Future.successful(ApplicationUpdateSuccessful))
+
+      val result = await(applicationService.updateTermsConditionsLocation(productionApplication, userId, newLocation))
+
+      result shouldBe ApplicationUpdateSuccessful
+    }
+  }
+
   "request application deletion" should {
 
     val adminEmail = "admin@example.com"

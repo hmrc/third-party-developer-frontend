@@ -61,6 +61,11 @@ class ApplicationService @Inject() (
     connectorWrapper.forEnvironment(application.deployedTo).thirdPartyApplicationConnector.applicationUpdate(application.id, request)
   }
 
+  def updateTermsConditionsLocation(application: Application, userId: UserId, newLocation: TermsAndConditionsLocation)(implicit hc: HeaderCarrier): Future[ApplicationUpdateSuccessful] = {
+    val request = ChangeProductionApplicationTermsAndConditionsLocation(userId,  LocalDateTime.now(clock), newLocation)
+    connectorWrapper.forEnvironment(application.deployedTo).thirdPartyApplicationConnector.applicationUpdate(application.id, request)
+  }
+
   def fetchByApplicationId(applicationId: ApplicationId)(implicit hc: HeaderCarrier): Future[Option[ApplicationWithSubscriptionData]] = {
     apmConnector.fetchApplicationById(applicationId)
   }

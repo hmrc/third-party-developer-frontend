@@ -34,10 +34,9 @@ import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.ViewHelpers._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.WithCSRFAddToken
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.WithLoggedInSession._
-import views.html.{ChangeDetailsView, DetailsView, UpdatePrivacyPolicyLocationView, RequestChangeOfApplicationNameView, ChangeOfApplicationNameConfirmationView}
+import views.html.{ChangeDetailsView, DetailsView, UpdatePrivacyPolicyLocationView, UpdateTermsAndConditionsLocationView, RequestChangeOfApplicationNameView, ChangeOfApplicationNameConfirmationView}
 import views.html.application.PendingApprovalView
 import views.html.checkpages.applicationcheck.UnauthorisedAppDetailsView
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.connectors.TicketCreated
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
@@ -569,6 +568,130 @@ class DetailsSpec
     }
   }
 
+  "changing terms and conditions location for old journey applications" should {
+    def legacyAppWithTermsAndConditionsLocation(maybeTermsAndConditionsUrl: Option[String]) = anApplication(access = Standard(List.empty, maybeTermsAndConditionsUrl, None, Set.empty, None, None))
+    val termsAndConditionsUrl = "http://example.com/terms-conds"
+
+    implicit val writeChangeOfTermsAndConditionsForm = Json.writes[ChangeOfTermsAndConditionsLocationForm]
+
+    "display update page with url field populated" in new Setup {
+      val appWithTermsAndConditionsUrl = legacyAppWithTermsAndConditionsLocation(Some(termsAndConditionsUrl))
+      givenApplicationAction(appWithTermsAndConditionsUrl, loggedInAdmin)
+
+      val result = addToken(underTest.updateTermsAndConditionsLocation(appWithTermsAndConditionsUrl.id))(loggedInAdminRequest)
+
+      status(result) shouldBe OK
+      val document = Jsoup.parse(contentAsString(result))
+      elementIdentifiedByIdContainsValue(document, "termsAndConditionsUrl", termsAndConditionsUrl)
+      elementExistsById(document, "termsAndConditionsInDesktop") shouldBe false
+      elementExistsById(document, "termsAndConditionsHasUrl") shouldBe false
+    }
+
+    "display update page with url field empty if app has no terms and conditions" in new Setup {
+      val appWithTermsAndConditionsUrl = legacyAppWithTermsAndConditionsLocation(None)
+      givenApplicationAction(appWithTermsAndConditionsUrl, loggedInAdmin)
+
+      val result = addToken(underTest.updateTermsAndConditionsLocation(appWithTermsAndConditionsUrl.id))(loggedInAdminRequest)
+
+      status(result) shouldBe OK
+      val document = Jsoup.parse(contentAsString(result))
+      elementIdentifiedByIdContainsValue(document, "termsAndConditionsUrl", "")
+      elementExistsById(document, "termsAndConditionsInDesktop") shouldBe false
+      elementExistsById(document, "termsAndConditionsHasUrl") shouldBe false
+    }
+
+    "update location if form data is valid and return to app details page" in new Setup {
+      val newTermsAndConditionsUrl = "http://example.com/new-terms-conds"
+      val appWithTermsAndConditionsUrl = legacyAppWithTermsAndConditionsLocation(Some(termsAndConditionsUrl))
+      givenApplicationAction(appWithTermsAndConditionsUrl, loggedInAdmin)
+      when(applicationServiceMock.updateTermsConditionsLocation(eqTo(appWithTermsAndConditionsUrl), *[UserId], eqTo(TermsAndConditionsLocation.Url(newTermsAndConditionsUrl)))(*))
+        .thenReturn(Future.successful(ApplicationUpdateSuccessful))
+
+      val form = ChangeOfTermsAndConditionsLocationForm(newTermsAndConditionsUrl, false, false)
+      val result = addToken(underTest.updateTermsAndConditionsLocationAction(appWithTermsAndConditionsUrl.id))(loggedInAdminRequest.withJsonBody(Json.toJson(form)))
+
+      status(result) shouldBe SEE_OTHER
+      redirectLocation(result) shouldBe Some(routes.Details.details(appWithTermsAndConditionsUrl.id).url)
+    }
+  }
+
+  "changing terms and conditions location for new journey applications" should {
+    def appWithTermsAndConditionsLocation(termsAndConditionsLocation: TermsAndConditionsLocation) = anApplication(access = Standard(List.empty, None, None, Set.empty, None, Some(
+      ImportantSubmissionData(None, ResponsibleIndividual.build("bob example", "bob@example.com"), Set.empty, termsAndConditionsLocation,
+        PrivacyPolicyLocation.InDesktopSoftware, List.empty)))
+    )
+    val termsAndConditionsUrl = "http://example.com/terms-conds"
+
+    implicit val writeChangeOfTermsAndConditionsForm = Json.writes[ChangeOfTermsAndConditionsLocationForm]
+
+    "display update page with 'in desktop' radio selected" in new Setup {
+      val appWithTermsAndConditionsInDesktop = appWithTermsAndConditionsLocation(TermsAndConditionsLocation.InDesktopSoftware)
+      givenApplicationAction(appWithTermsAndConditionsInDesktop, loggedInAdmin)
+
+      val result = addToken(underTest.updateTermsAndConditionsLocation(appWithTermsAndConditionsInDesktop.id))(loggedInAdminRequest)
+
+      status(result) shouldBe OK
+      val document = Jsoup.parse(contentAsString(result))
+      elementExistsByIdWithAttr(document, "termsAndConditionsInDesktop", "checked") shouldBe true
+      elementExistsByIdWithAttr(document, "termsAndConditionsHasUrl", "checked") shouldBe false
+    }
+
+    "display update page with 'url' radio selected" in new Setup {
+      val appWithTermsAndConditionsUrl = appWithTermsAndConditionsLocation(TermsAndConditionsLocation.Url(termsAndConditionsUrl))
+      givenApplicationAction(appWithTermsAndConditionsUrl, loggedInAdmin)
+
+      val result = addToken(underTest.updateTermsAndConditionsLocation(appWithTermsAndConditionsUrl.id))(loggedInAdminRequest)
+
+      status(result) shouldBe OK
+      val document = Jsoup.parse(contentAsString(result))
+      elementExistsByIdWithAttr(document, "termsAndConditionsInDesktop", "checked") shouldBe false
+      elementExistsByIdWithAttr(document, "termsAndConditionsHasUrl", "checked") shouldBe true
+      elementIdentifiedByIdContainsValue(document, "termsAndConditionsUrl", termsAndConditionsUrl)
+    }
+
+    "return Not Found error if application cannot be retrieved" in new Setup {
+      val appWithTermsAndConditionsInDesktop = appWithTermsAndConditionsLocation(TermsAndConditionsLocation.InDesktopSoftware)
+      givenApplicationActionReturnsNotFound(appWithTermsAndConditionsInDesktop.id)
+
+      val result = addToken(underTest.updateTermsAndConditionsLocationAction(appWithTermsAndConditionsInDesktop.id))(loggedInAdminRequest)
+
+      status(result) shouldBe NOT_FOUND
+    }
+
+    "return bad request if terms and conditions location has not changed" in new Setup {
+      val appWithTermsAndConditionsInDesktop = appWithTermsAndConditionsLocation(TermsAndConditionsLocation.InDesktopSoftware)
+      givenApplicationAction(appWithTermsAndConditionsInDesktop, loggedInAdmin)
+
+      val form = ChangeOfTermsAndConditionsLocationForm("", true, true)
+      val result = addToken(underTest.updateTermsAndConditionsLocationAction(appWithTermsAndConditionsInDesktop.id))(loggedInAdminRequest.withJsonBody(Json.toJson(form)))
+
+      status(result) shouldBe BAD_REQUEST
+    }
+
+    "return bad request if form data is invalid" in new Setup {
+      val appWithTermsAndConditionsInDesktop = appWithTermsAndConditionsLocation(TermsAndConditionsLocation.InDesktopSoftware)
+      givenApplicationAction(appWithTermsAndConditionsInDesktop, loggedInAdmin)
+
+      val form = ChangeOfTermsAndConditionsLocationForm("", false, true)
+      val result = addToken(underTest.updatePrivacyPolicyLocationAction(appWithTermsAndConditionsInDesktop.id))(loggedInAdminRequest.withJsonBody(Json.toJson(form)))
+
+      status(result) shouldBe BAD_REQUEST
+    }
+
+    "update location if form data is valid and return to app details page" in new Setup {
+      val appWithTermsAndConditionsInDesktop = appWithTermsAndConditionsLocation(TermsAndConditionsLocation.InDesktopSoftware)
+      givenApplicationAction(appWithTermsAndConditionsInDesktop, loggedInAdmin)
+      when(applicationServiceMock.updateTermsConditionsLocation(eqTo(appWithTermsAndConditionsInDesktop), *[UserId], eqTo(TermsAndConditionsLocation.Url(termsAndConditionsUrl)))(*))
+        .thenReturn(Future.successful(ApplicationUpdateSuccessful))
+
+      val form = ChangeOfTermsAndConditionsLocationForm(termsAndConditionsUrl, false, true)
+      val result = addToken(underTest.updateTermsAndConditionsLocationAction(appWithTermsAndConditionsInDesktop.id))(loggedInAdminRequest.withJsonBody(Json.toJson(form)))
+
+      status(result) shouldBe SEE_OTHER
+      redirectLocation(result) shouldBe Some(routes.Details.details(appWithTermsAndConditionsInDesktop.id).url)
+    }
+  }
+
   trait Setup extends ApplicationServiceMock with ApplicationActionServiceMock with TermsOfUseServiceMock {
     val unauthorisedAppDetailsView = app.injector.instanceOf[UnauthorisedAppDetailsView]
     val pendingApprovalView = app.injector.instanceOf[PendingApprovalView]
@@ -577,6 +700,7 @@ class DetailsSpec
     val requestChangeOfApplicationNameView = app.injector.instanceOf[RequestChangeOfApplicationNameView]
     val changeOfApplicationNameConfirmationView = app.injector.instanceOf[ChangeOfApplicationNameConfirmationView]
     val updatePrivacyPolicyLocationView = app.injector.instanceOf[UpdatePrivacyPolicyLocationView]
+    val updateTermsAndConditionsLocationView = app.injector.instanceOf[UpdateTermsAndConditionsLocationView]
 
     val underTest = new Details(
       mockErrorHandler,
@@ -592,6 +716,7 @@ class DetailsSpec
       requestChangeOfApplicationNameView,
       changeOfApplicationNameConfirmationView,
       updatePrivacyPolicyLocationView,
+      updateTermsAndConditionsLocationView,
       fraudPreventionConfig,
       SubmissionServiceMock.aMock,
       termsOfUseServiceMock
