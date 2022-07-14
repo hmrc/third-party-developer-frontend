@@ -21,14 +21,11 @@
 @import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.controllers.ApplicationViewModel
 @import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.controllers.FraudPreventionNavLinkViewModel
 @import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.DeveloperSession
-@import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.TermsOfUseStatus
 @import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.routes
 @import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.Details.TermsOfUseViewModel
-@import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.{PrivacyPolicyLocation,TermsAndConditionsLocation}
-@import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.CollaboratorRole
+@import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.{CollaboratorRole, PrivacyPolicyLocation,TermsAndConditionsLocation}
 
 @this(devMain: DevMain2, leftHandNav: LeftHandNav)
-
 
 @(applicationViewModel: ApplicationViewModel, termsOfUse: TermsOfUseViewModel, fraudPreventionViewModel: Option[FraudPreventionNavLinkViewModel] = None)(
         implicit request: play.api.mvc.Request[Any],
@@ -111,7 +108,7 @@
         <td class="govuk-table__cell" id="applicationName">@{app.name}</td>
         <td class="govuk-table__cell" id="applicationNameChange">
           @if(app.isPermittedToEditProductionAppDetails(loggedIn.developer)) {
-            <a id="change" class="govuk-link govuk-link--no-visited-state" href="@routes.Details.requestChangeOfAppName(app.id)">Change <span class="govuk-visually-hidden">application details</span></a>
+            <a id="changeAppName" class="govuk-link govuk-link--no-visited-state" href="@routes.Details.requestChangeOfAppName(app.id)">Change <span class="govuk-visually-hidden">application name</span></a>
           }
         </td>
       </tr>
@@ -125,7 +122,7 @@
         <td class="govuk-table__cell" id="privacyPolicyUrl">@{PrivacyPolicyLocation.asText(app.privacyPolicyLocation)}</td>
         <td class="govuk-table__cell">
         @if(app.isPermittedToEditProductionAppDetails(loggedIn.developer)) {
-          <a id="change" class="govuk-link govuk-link--no-visited-state" href="@routes.Details.updatePrivacyPolicyLocation(app.id)">Change <span class="govuk-visually-hidden">application details</span></a>
+          <a id="changePrivacyPolicy" class="govuk-link govuk-link--no-visited-state" href="@routes.Details.updatePrivacyPolicyLocation(app.id)">Change <span class="govuk-visually-hidden">application privacy policy</span></a>
         }
         </td>
       </tr>
@@ -156,7 +153,7 @@
 
         <ul class="govuk-list" id="changingAppDetailsAdminList">
           @for(adminEmail <- app.collaborators.filter(_.role == CollaboratorRole.ADMINISTRATOR).map(_.emailAddress)) {
-            <li><a href="mailto:@adminEmail">@adminEmail</a></li>
+            <li><a href="mailto:@adminEmail" class="govuk-link">@adminEmail</a></li>
           }
         </ul>
 
