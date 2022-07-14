@@ -34,7 +34,7 @@ import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.ViewHelpers._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.WithCSRFAddToken
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.WithLoggedInSession._
-import views.html.{ChangeDetailsView, DetailsView, UpdatePrivacyPolicyLocationView, UpdateTermsAndConditionsLocationView}
+import views.html.{ChangeDetailsView, DetailsView, UpdatePrivacyPolicyLocationView, UpdateTermsAndConditionsLocationView, RequestChangeOfApplicationNameView, ChangeOfApplicationNameConfirmationView}
 import views.html.application.PendingApprovalView
 import views.html.checkpages.applicationcheck.UnauthorisedAppDetailsView
 
@@ -45,6 +45,7 @@ import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.LocalUserIdTracker
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.TestApplications
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.CollaboratorTracker
 import uk.gov.hmrc.apiplatform.modules.submissions.services.mocks.SubmissionServiceMockModule
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.connectors.TicketCreated
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.services.TermsOfUseService.TermsOfUseAgreementDetails
 
 class DetailsSpec 
@@ -358,6 +359,91 @@ class DetailsSpec
     }
   }
 
+  "changeOfApplicationName" should {
+    "show page successfully" in new Setup {
+      val approvedApplication = anApplication(adminEmail = loggedInAdmin.email)
+      givenApplicationAction(approvedApplication, loggedInAdmin)
+
+      val result = addToken(underTest.requestChangeOfAppName(approvedApplication.id))(loggedInAdminRequest)
+
+      status(result) shouldBe OK
+    }
+
+    "return forbidden when not an admin" in new Setup {
+      val approvedApplication = anApplication(developerEmail = loggedInDeveloper.email)
+      givenApplicationAction(approvedApplication, loggedInDeveloper)
+
+      val result = addToken(underTest.requestChangeOfAppName(approvedApplication.id))(loggedInDevRequest)
+
+      status(result) shouldBe FORBIDDEN
+    }
+  }
+
+  "changeOfApplicationNameAction" should {
+    "show success page if name changed successfully" in new Setup {
+      val approvedApplication = anApplication(adminEmail = loggedInAdmin.email)
+      givenApplicationAction(approvedApplication, loggedInAdmin)
+      when(underTest.applicationService.requestProductonApplicationNameChange(*, *, *, *)(*))
+        .thenReturn(Future.successful(TicketCreated))
+
+      private val request = loggedInAdminRequest.withFormUrlEncodedBody("applicationName" -> "Legal new app name")
+
+      val result = addToken(underTest.requestChangeOfAppNameAction(approvedApplication.id))(request)
+
+      status(result) shouldBe OK
+      contentAsString(result) should include("We have received your request to change the application name to")
+    }
+
+    "show error if application name is not valid" in new Setup {
+      val approvedApplication = anApplication(adminEmail = loggedInAdmin.email)
+      givenApplicationAction(approvedApplication, loggedInAdmin)
+      when(underTest.applicationService.isApplicationNameValid(*, *, *)(*))
+        .thenReturn(Future.successful(Invalid(true, false)))
+
+      private val request = loggedInAdminRequest.withFormUrlEncodedBody("applicationName" -> "HMRC - Illegal new app name")
+
+      val result = addToken(underTest.requestChangeOfAppNameAction(approvedApplication.id))(request)
+
+      status(result) shouldBe BAD_REQUEST
+      contentAsString(result) should include("Application name must not include HMRC or HM Revenue and Customs")
+    }
+
+    "show error if application name is too short" in new Setup {
+      val approvedApplication = anApplication(adminEmail = loggedInAdmin.email)
+      givenApplicationAction(approvedApplication, loggedInAdmin)
+
+      private val request = loggedInAdminRequest.withFormUrlEncodedBody("applicationName" -> "")
+
+      val result = addToken(underTest.requestChangeOfAppNameAction(approvedApplication.id))(request)
+
+      status(result) shouldBe BAD_REQUEST
+      contentAsString(result) should include("Application name must be between 2 and 50 characters")
+    }
+
+    "show error if new application name is the same as the old one" in new Setup {
+      val approvedApplication = anApplication(adminEmail = loggedInAdmin.email)
+      givenApplicationAction(approvedApplication, loggedInAdmin)
+
+      private val request = loggedInAdminRequest.withFormUrlEncodedBody("applicationName" -> approvedApplication.name)
+
+      val result = addToken(underTest.requestChangeOfAppNameAction(approvedApplication.id))(request)
+
+      status(result) shouldBe BAD_REQUEST
+      contentAsString(result) should include("The application already has the specified name")
+    }
+
+    "show forbidden if not an admin" in new Setup {
+      val approvedApplication = anApplication(developerEmail = loggedInDeveloper.email)
+      givenApplicationAction(approvedApplication, loggedInDeveloper)
+
+      private val request = loggedInDevRequest.withFormUrlEncodedBody("applicationName" -> "new app name")
+
+      val result = addToken(underTest.requestChangeOfAppNameAction(approvedApplication.id))(request)
+
+      status(result) shouldBe FORBIDDEN
+    }
+  }
+
   "changing privacy policy location for old journey applications" should {
     def legacyAppWithPrivacyPolicyLocation(maybePrivacyPolicyUrl: Option[String]) = anApplication(access = Standard(List.empty, None, maybePrivacyPolicyUrl, Set.empty, None, None))
     val privacyPolicyUrl = "http://example.com/priv-policy"
@@ -611,6 +697,8 @@ class DetailsSpec
     val pendingApprovalView = app.injector.instanceOf[PendingApprovalView]
     val detailsView = app.injector.instanceOf[DetailsView]
     val changeDetailsView = app.injector.instanceOf[ChangeDetailsView]
+    val requestChangeOfApplicationNameView = app.injector.instanceOf[RequestChangeOfApplicationNameView]
+    val changeOfApplicationNameConfirmationView = app.injector.instanceOf[ChangeOfApplicationNameConfirmationView]
     val updatePrivacyPolicyLocationView = app.injector.instanceOf[UpdatePrivacyPolicyLocationView]
     val updateTermsAndConditionsLocationView = app.injector.instanceOf[UpdateTermsAndConditionsLocationView]
 
@@ -625,6 +713,8 @@ class DetailsSpec
       pendingApprovalView,
       detailsView,
       changeDetailsView,
+      requestChangeOfApplicationNameView,
+      changeOfApplicationNameConfirmationView,
       updatePrivacyPolicyLocationView,
       updateTermsAndConditionsLocationView,
       fraudPreventionConfig,

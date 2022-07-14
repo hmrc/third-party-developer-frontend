@@ -541,6 +541,25 @@ object SelectTopicsFromSubscriptionsForm {
   )
 }
 
+case class ChangeOfApplicationNameForm(applicationName: String)
+
+object ChangeOfApplicationNameForm {
+
+  val form: Form[ChangeOfApplicationNameForm] = Form(
+    mapping(
+      "applicationName" -> applicationNameValidator
+    )(ChangeOfApplicationNameForm.apply)(ChangeOfApplicationNameForm.unapply)
+  )
+
+  def withData(applicationName: String) = {
+    form.fillAndValidate(
+      ChangeOfApplicationNameForm(
+        applicationName
+      )
+    )
+  }
+}
+
 case class ChangeOfPrivacyPolicyLocationForm(privacyPolicyUrl: String, isInDesktop: Boolean, isNewJourney: Boolean) {
   def toLocation: PrivacyPolicyLocation = isInDesktop match {
     case true => PrivacyPolicyLocation.InDesktopSoftware

@@ -221,6 +221,19 @@ class ApplicationService @Inject() (
     )
   }
 
+  def requestProductonApplicationNameChange(application: Application, newApplicationName: String, requesterName: String, requesterEmail: String)(implicit hc: HeaderCarrier) = {
+
+    def createDeskproTicket(application: Application, newApplicationName: String, requesterName: String, requesterEmail: String) = {
+      val previousAppName = application.name
+      val appId = application.id
+
+      DeskproTicket.createForRequestChangeOfProductionApplicationName(requesterName, requesterEmail, previousAppName, newApplicationName, appId)
+    }
+
+    val ticket = createDeskproTicket(application, newApplicationName, requesterName, requesterEmail)
+    deskproConnector.createTicket(ticket)
+  }
+
   def applicationConnectorFor(application: Application): ThirdPartyApplicationConnector = applicationConnectorFor(Some(application.deployedTo))
 
   def applicationConnectorFor(environment: Option[Environment]): ThirdPartyApplicationConnector =
