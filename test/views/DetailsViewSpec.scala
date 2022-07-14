@@ -51,6 +51,8 @@ class DetailsViewSpec
     lazy val termsOfUse: Element = body.getElementById("termsOfUse")
     lazy val agreementDetails: Element = body.getElementById("termsOfUseAgreementDetails")
     lazy val readLink: Element = body.getElementById("termsOfUseReadLink")
+    lazy val changePrivacyPolicyLocationLink: Element = body.getElementById("changePrivacyPolicyLocation")
+    lazy val changeTermsConditionsLocationLink: Element = body.getElementById("changeTermsAndConditionsLocation")
     lazy val changingAppDetailsAdminList: Element = body.getElementById("changingAppDetailsAdminList")
   }
 
@@ -100,6 +102,52 @@ class DetailsViewSpec
           when(appConfig.nameOfSubordinateEnvironment).thenReturn("Development")
           val page = Page(detailsView(ApplicationViewModel(application, hasSubscriptionsFields = false, hasPpnsFields = false), termsOfUseViewModel))
           page.environmentName.text shouldBe "Development"
+        }
+      }
+    }
+
+    "showing Change links for Privacy Policy and Terms & Conditions locations" when {
+      "managing a sandbox application" should {
+        val deployedTo = Environment.SANDBOX
+        val termsOfUseViewModelForSandboxApp = termsOfUseViewModel.copy(exists = false)
+
+        "show nothing when a developer" in {
+          val application = anApplication(environment = deployedTo)
+
+          val page = Page(detailsView(ApplicationViewModel(application, hasSubscriptionsFields = false, hasPpnsFields = false), termsOfUseViewModelForSandboxApp))
+
+          page.changePrivacyPolicyLocationLink shouldBe null
+          page.changeTermsConditionsLocationLink shouldBe null
+        }
+
+        "show nothing when an admin" in new LoggedInUserIsAdmin {
+          val application = anApplication(environment = deployedTo)
+
+          val page = Page(detailsView(ApplicationViewModel(application, hasSubscriptionsFields = false, hasPpnsFields = false), termsOfUseViewModelForSandboxApp))
+
+          page.changePrivacyPolicyLocationLink shouldBe null
+          page.changeTermsConditionsLocationLink shouldBe null
+        }
+      }
+      "managing a production application" should {
+        val deployedTo = Environment.PRODUCTION
+
+        "show nothing when a developer" in {
+          val application = anApplication(environment = deployedTo)
+
+          val page = Page(detailsView(ApplicationViewModel(application, hasSubscriptionsFields = false, hasPpnsFields = false), termsOfUseViewModel))
+
+          page.changePrivacyPolicyLocationLink shouldBe null
+          page.changeTermsConditionsLocationLink shouldBe null
+        }
+
+        "show Change links when an admin" in new LoggedInUserIsAdmin {
+          val application = anApplication(environment = deployedTo)
+
+          val page = Page(detailsView(ApplicationViewModel(application, hasSubscriptionsFields = false, hasPpnsFields = false), termsOfUseViewModel))
+
+          page.changePrivacyPolicyLocationLink.text should startWith("Change")
+          page.changeTermsConditionsLocationLink.text should startWith("Change")
         }
       }
     }

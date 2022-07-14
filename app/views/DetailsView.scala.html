@@ -122,14 +122,19 @@
         <td class="govuk-table__cell" id="privacyPolicyUrl">@{PrivacyPolicyLocation.asText(app.privacyPolicyLocation)}</td>
         <td class="govuk-table__cell">
         @if(app.isPermittedToEditProductionAppDetails(loggedIn.developer)) {
-          <a id="changePrivacyPolicy" class="govuk-link govuk-link--no-visited-state" href="@routes.Details.updatePrivacyPolicyLocation(app.id)">Change <span class="govuk-visually-hidden">application privacy policy</span></a>
+          <a id="changePrivacyPolicyLocation" class="govuk-link govuk-link--no-visited-state" href="@routes.Details.updatePrivacyPolicyLocation(app.id)">Change <span class="govuk-visually-hidden">privacy policy location details</span></a>
         }
         </td>
       </tr>
       <tr class="govuk-table__row">
         <th scope="row" class="govuk-table__header">Terms and conditions URL</th>
         <td class="govuk-table__cell" id="termsAndConditionsUrl">@{TermsAndConditionsLocation.asText(app.termsAndConditionsLocation)}</td>
-        <td class="govuk-table__cell"></td>
+        <td class="govuk-table__cell">
+        @if(app.isPermittedToEditProductionAppDetails(loggedIn.developer)) {
+          <a id="changeTermsAndConditionsLocation" class="govuk-link govuk-link--no-visited-state" href="@routes.Details.updateTermsAndConditionsLocation(app.id)">Change <span class="govuk-visually-hidden">terms and conditions location details</span></a>
+        }
+        </td>
+
       </tr>
       <tr class="govuk-table__row">
         <th scope="row" class="govuk-table__header">Application grant length</th>
