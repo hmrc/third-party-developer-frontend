@@ -18,10 +18,7 @@ import uk.gov.hmrc.apiplatform.modules.submissions.domain.services.SubmissionsFr
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.services.ApplicationsJsonFormatters
 import uk.gov.hmrc.apiplatform.modules.submissions.domain.models.{ErrorDetails, ResponsibleIndividualVerification, ResponsibleIndividualVerificationId, ResponsibleIndividualVerificationWithDetails, Submission}
 import uk.gov.hmrc.apiplatform.modules.submissions.SubmissionsTestData
-import uk.gov.hmrc.mongo.play.json.formats.MongoJavatimeFormats
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.{ApplicationId, ResponsibleIndividual}
-
-import java.time.LocalDateTime
 
 class ThirdPartyApplicationSubmissionsConnectorSpec
     extends BaseConnectorIntegrationSpec
@@ -35,8 +32,6 @@ class ThirdPartyApplicationSubmissionsConnectorSpec
     with ApplicationsJsonFormatters {
   private val apiKey = UUID.randomUUID().toString
   private val code = "123456789"
-
-  override implicit val dateFormat: Format[LocalDateTime] = MongoJavatimeFormats.localDateTimeFormat
 
   private val stubConfig = Configuration(
     "microservice.services.third-party-application-production.port" -> stubPort,
@@ -242,7 +237,7 @@ class ThirdPartyApplicationSubmissionsConnectorSpec
     val name = "bob example"
     val email = "bob@spongepants.com"
 
-    "return OK with and return the application" in new Setup {
+    "return application with OK" in new Setup {
       stubFor(
         post(urlEqualTo(url))
         .withJsonRequestBody(ApprovalsRequest(name, email))

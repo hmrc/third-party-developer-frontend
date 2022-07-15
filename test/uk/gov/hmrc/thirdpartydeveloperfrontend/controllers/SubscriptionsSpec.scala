@@ -42,7 +42,7 @@ import uk.gov.hmrc.thirdpartydeveloperfrontend.utils._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.builder._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.config.FraudPreventionConfig
 
-import java.time.{LocalDateTime, ZoneOffset}
+import java.time.LocalDateTime
 
 class SubscriptionsSpec extends BaseControllerSpec with WithCSRFAddToken with LocalUserIdTracker with DeveloperBuilder with SampleSession with SampleApplications with SubscriptionTestHelperSugar {
 

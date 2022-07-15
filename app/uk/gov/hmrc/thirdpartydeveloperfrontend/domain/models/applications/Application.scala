@@ -16,7 +16,7 @@
 
 package uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications
 
-import play.api.libs.json.{Format, OFormat, Reads}
+import play.api.libs.json.{EnvReads, EnvWrites, Format, OFormat, Reads}
 import uk.gov.hmrc.mongo.play.json.formats.MongoJavatimeFormats
 
 import java.time.{LocalDateTime, Period}
@@ -201,7 +201,6 @@ case class Application(
 object Application {
   import play.api.libs.json.Json
 
-  implicit val dateFormat: Format[LocalDateTime] = MongoJavatimeFormats.localDateTimeFormat
   implicit val applicationFormat: OFormat[Application] = Json.format[Application]
   implicit val ordering: Ordering[Application] = Ordering.by(_.name)
 }

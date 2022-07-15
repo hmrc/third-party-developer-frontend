@@ -16,17 +16,19 @@
 
 package uk.gov.hmrc.thirdpartydeveloperfrontend.domain.services
 
+import play.api.libs.json.{EnvReads, EnvWrites}
 import uk.gov.hmrc.mongo.play.json.formats.MongoJavatimeFormats
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.subscriptions.{FieldName, FieldValue}
 
 import java.time.LocalDateTime
 
-trait ApplicationsJsonFormatters extends ApiDefinitionsJsonFormatters {
+trait ApplicationsJsonFormatters extends ApiDefinitionsJsonFormatters with LocalDateTimeFormatters {
   import play.api.libs.json._
-  implicit val dateFormat: Format[LocalDateTime] = MongoJavatimeFormats.localDateTimeFormat
+
   import uk.gov.hmrc.play.json.Union
   import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications._
   import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.apidefinitions._
+
 
   implicit val formatFieldValue = Json.valueFormat[FieldValue]
   implicit val formatFieldName = Json.valueFormat[FieldName]
