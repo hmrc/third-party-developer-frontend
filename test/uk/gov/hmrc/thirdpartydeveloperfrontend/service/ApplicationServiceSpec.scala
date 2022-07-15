@@ -16,7 +16,7 @@
 
 package uk.gov.hmrc.thirdpartydeveloperfrontend.service
 
-import java.time.{LocalDateTime, Period}
+import java.time.{LocalDateTime, Period, ZoneOffset}
 import java.util.UUID.randomUUID
 import uk.gov.hmrc.thirdpartydeveloperfrontend.builder._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.{AsyncHmrcSpec, DeveloperSessionBuilder, FixedClock, LocalUserIdTracker}
@@ -34,7 +34,6 @@ import org.mockito.ArgumentCaptor
 import uk.gov.hmrc.thirdpartydeveloperfrontend.service.SubscriptionFieldsService.SubscriptionFieldsConnector
 import uk.gov.hmrc.http.{ForbiddenException, HeaderCarrier}
 import uk.gov.hmrc.play.audit.http.connector.AuditResult.Success
-import uk.gov.hmrc.time.DateTimeUtils
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future.{failed, successful}
@@ -115,11 +114,11 @@ class ApplicationServiceSpec extends AsyncHmrcSpec with SubscriptionsBuilder wit
   val productionApplicationId = ApplicationId("Application ID")
   val productionClientId = ClientId(s"client-id-${randomUUID().toString}")
   val productionApplication: Application =
-    Application(productionApplicationId, productionClientId, "name", DateTimeUtils.now, Some(DateTimeUtils.now), None, grantLength, Environment.PRODUCTION, Some("description"), Set())
+    Application(productionApplicationId, productionClientId, "name", LocalDateTime.now(ZoneOffset.UTC), Some(LocalDateTime.now(ZoneOffset.UTC)), None, grantLength, Environment.PRODUCTION, Some("description"), Set())
   val sandboxApplicationId = ApplicationId("Application ID")
   val sandboxClientId = ClientId("Client ID")
   val sandboxApplication: Application =
-    Application(sandboxApplicationId, sandboxClientId, "name", DateTimeUtils.now, Some(DateTimeUtils.now), None, grantLength, Environment.SANDBOX, Some("description"))
+    Application(sandboxApplicationId, sandboxClientId, "name", LocalDateTime.now(ZoneOffset.UTC), Some(LocalDateTime.now(ZoneOffset.UTC)), None, grantLength, Environment.SANDBOX, Some("description"))
 
   def subStatusWithoutFieldValues(
       appId: ApplicationId,
@@ -183,7 +182,7 @@ class ApplicationServiceSpec extends AsyncHmrcSpec with SubscriptionsBuilder wit
     val applicationId = ApplicationId("applicationId")
     val clientId = ClientId("clientId")
     val applicationName = "applicationName"
-    val application = Application(applicationId, clientId, applicationName, DateTimeUtils.now, Some(DateTimeUtils.now), None, grantLength, Environment.PRODUCTION, None)
+    val application = Application(applicationId, clientId, applicationName, LocalDateTime.now(ZoneOffset.UTC), Some(LocalDateTime.now(ZoneOffset.UTC)), None, grantLength, Environment.PRODUCTION, None)
 
     "truncate the description to 250 characters on update request" in new Setup {
       private val longDescription = "abcde" * 100

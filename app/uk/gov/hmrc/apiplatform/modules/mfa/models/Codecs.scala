@@ -72,7 +72,6 @@ trait Codecs {
                     )(implicit tt: TypeTag[P]): Seq[Codec[_]] = {
 
     val clazz: ClassSymbol =  tt.tpe.typeSymbol.asClass
-    require(clazz.isSealed)
     require(clazz.isTrait)
 
     val classSymbols = clazz.knownDirectSubclasses.collect {

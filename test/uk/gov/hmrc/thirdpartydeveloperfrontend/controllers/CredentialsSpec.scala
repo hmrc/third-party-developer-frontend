@@ -32,7 +32,6 @@ import play.api.test.Helpers._
 import play.filters.csrf.CSRF.TokenProvider
 import uk.gov.hmrc.thirdpartydeveloperfrontend.service.AuditService
 import uk.gov.hmrc.http.HeaderCarrier
-import uk.gov.hmrc.time.LocalDateTimeUtils
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.WithLoggedInSession._
 import views.html.{ClientIdView, ClientSecretsView, CredentialsView, ServerTokenView}
 import views.html.editapplication.DeleteClientSecretView
@@ -64,8 +63,8 @@ class CredentialsSpec
         applicationId,
         clientId,
         "App name 1",
-        LocalDateTimeUtils.now,
-        Some(LocalDateTimeUtils.now),
+        LocalDateTime.now,
+        Some(LocalDateTime.now),
         None,
         grantLength,
         Environment.PRODUCTION,
@@ -229,7 +228,7 @@ class CredentialsSpec
     }
 
     "return 404 for new apps" in new Setup {
-      def createApplication() = createConfiguredApplication(applicationId, ADMINISTRATOR, createdOn = LocalDateTimeUtils.now)
+      def createApplication() = createConfiguredApplication(applicationId, ADMINISTRATOR, createdOn = LocalDateTime.now(ZoneOffset.UTC))
 
       val result = underTest.serverToken(applicationId)(loggedInRequest)
 
@@ -386,6 +385,6 @@ class CredentialsSpec
     }
   }
 
-  private def aClientSecret(secretName: String) = ClientSecret(randomUUID.toString, secretName, LocalDateTimeUtils.now.withZone(LocalDateTimeZone.getDefault))
+  private def aClientSecret(secretName: String) = ClientSecret(randomUUID.toString, secretName, LocalDateTime.now(ZoneOffset.UTC))
 
 }

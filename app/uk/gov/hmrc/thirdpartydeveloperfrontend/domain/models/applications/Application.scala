@@ -44,6 +44,7 @@ object ApplicationId {
 
 case class ClientId(value: String) extends AnyVal
 
+
 object ClientId {
   import play.api.libs.json.Json
   implicit val clientIdFormat: Format[ClientId] = Json.valueFormat[ClientId]
@@ -71,6 +72,7 @@ trait BaseApplication {
   def roleForCollaborator(userId: UserId): Option[CollaboratorRole] = collaborators.find(_.userId == userId).map(_.role)
 
   def isUserACollaboratorOfRole(userId: UserId, requiredRole: CollaboratorRole): Boolean = roleForCollaborator(userId).fold(false)(_ == requiredRole)
+
 
   def adminEmails: Set[String] = collaborators.filter(_.role.isAdministrator).map(_.emailAddress)
 
@@ -163,18 +165,18 @@ trait BaseApplication {
     collaborators.find(c => c.emailAddress.toSha256 == teamMemberHash)
   }
 
-  def grantLengthDisplayValue(): String = {
+  def grantLengthDisplayValue() : String = {
     grantLength match {
-      case GrantLength.MONTH           => "1 month"
-      case GrantLength.THREE_MONTHS    => "3 months"
-      case GrantLength.SIX_MONTHS      => "6 months"
-      case GrantLength.ONE_YEAR        => "1 year"
-      case GrantLength.EIGHTEEN_MONTHS => "18 months"
-      case GrantLength.THREE_YEARS     => "3 years"
-      case GrantLength.FIVE_YEARS      => "5 years"
-      case GrantLength.TEN_YEARS       => "10 years"
-      case GrantLength.HUNDRED_YEARS   => "100 years"
-      case _                           => s"${Math.round(grantLength.getDays / 30)} months"
+      case GrantLength.MONTH =>  "1 month"
+      case GrantLength.THREE_MONTHS =>  "3 months"
+      case GrantLength.SIX_MONTHS =>  "6 months"
+      case GrantLength.ONE_YEAR =>  "1 year"
+      case GrantLength.EIGHTEEN_MONTHS =>  "18 months"
+      case GrantLength.THREE_YEARS =>  "3 years"
+      case GrantLength.FIVE_YEARS =>  "5 years"
+      case GrantLength.TEN_YEARS =>  "10 years"
+      case GrantLength.HUNDRED_YEARS =>  "100 years"
+      case _ => s"${Math.round(grantLength.getDays/30)} months"
     }
   }
 }
@@ -224,6 +226,7 @@ case class ApplicationWithSubscriptionIds(
 
 object ApplicationWithSubscriptionIds {
   import play.api.libs.json.Json
+  import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.services.ApiDefinitionsJsonFormatters._
 
   implicit val dateFormat: Format[LocalDateTime] = MongoJavatimeFormats.localDateTimeFormat
   implicit val applicationWithSubsIdsReads: Reads[ApplicationWithSubscriptionIds] = Json.reads[ApplicationWithSubscriptionIds]

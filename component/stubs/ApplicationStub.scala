@@ -54,7 +54,7 @@ object ApplicationStub {
 
   def configureUserApplications(userId: UserId, applications: List[ApplicationWithSubscriptionIds] = Nil, status: Int = OK) = {
     import play.api.libs.json.Json
-    import play.api.libs.json.JodaWrites._
+
     import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.services.ApiDefinitionsJsonFormatters._
 
     implicit val writes = Json.writes[ApplicationWithSubscriptionIds]

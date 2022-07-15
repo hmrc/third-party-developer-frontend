@@ -41,6 +41,8 @@ import scala.concurrent.{ExecutionContext, Future}
 import scala.concurrent.Future.successful
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.subscriptions.DevhubAccessLevel
 
+import java.time.Clock
+
 @Singleton
 class CheckYourAnswers @Inject() (
     val errorHandler: ErrorHandler,
@@ -61,7 +63,8 @@ class CheckYourAnswers @Inject() (
     val privacyPolicyView: PrivacyPolicyView,
     val apiSubscriptionsViewTemplate: ApiSubscriptionsView,
     val contactDetailsView: ContactDetailsView,
-    val termsOfUseVersionService: TermsOfUseVersionService
+    val termsOfUseVersionService: TermsOfUseVersionService,
+    val clock: Clock
 )(implicit val ec: ExecutionContext, val appConfig: ApplicationConfig)
     extends ApplicationController(mcc)
     with ApplicationHelper

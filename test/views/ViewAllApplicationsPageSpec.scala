@@ -23,7 +23,7 @@ import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.LoggedIn
 import org.jsoup.Jsoup
 import org.jsoup.nodes.Document
 import play.api.test.FakeRequest
-import uk.gov.hmrc.time.DateTimeUtils
+import java.time.{LocalDateTime, ZoneOffset}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.ViewHelpers.{elementExistsByText, elementIdentifiedByAttrContainsText}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.WithCSRFAddToken
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.DeveloperSessionBuilder
@@ -122,13 +122,13 @@ class ViewAllApplicationsPageSpec extends CommonViewSpec with WithCSRFAddToken {
     val applicationId = ApplicationId("1111")
     val appName = "App name 1"
     val appUserRole = CollaboratorRole.ADMINISTRATOR
-    val appCreatedOn = DateTimeUtils.now.minusDays(1)
+    val appCreatedOn = LocalDateTime.now(ZoneOffset.UTC).minusDays(1)
     val appLastAccess = Some(appCreatedOn)
 
     val sandboxAppSummaries = Seq(
         ApplicationSummary(
-          applicationId, 
-          appName, 
+          applicationId,
+          appName,
           appUserRole,
           TermsOfUseStatus.NOT_APPLICABLE,
           State.TESTING,
@@ -217,8 +217,8 @@ class ViewAllApplicationsPageSpec extends CommonViewSpec with WithCSRFAddToken {
       }
 
       "show the last access and user role" in new ProdAndET with Setup {
-        val datetime = DateTimeUtils.now
-        val datetimeText = DateFormatter.standardFormatter.print(datetime)
+        val datetime = LocalDateTime.now(ZoneOffset.UTC)
+        val datetimeText = DateFormatter.standardFormatter.format(datetime)
         val calledApp = sandboxAppSummaries.map(_.copy(lastAccess = Some(datetime)))
         implicit val document = Jsoup.parse(renderPage(calledApp, Seq.empty, Set(applicationId)).body)
         

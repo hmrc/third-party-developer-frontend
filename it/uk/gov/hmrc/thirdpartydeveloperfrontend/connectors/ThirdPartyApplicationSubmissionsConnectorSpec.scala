@@ -10,7 +10,7 @@ import play.api.Mode
 import play.api.{Application => PlayApplication}
 import com.github.tomakehurst.wiremock.client.WireMock._
 import play.api.http.Status._
-import play.api.libs.json.Json
+import play.api.libs.json.{Format, Json}
 import uk.gov.hmrc.apiplatform.modules.submissions.connectors.ThirdPartyApplicationSubmissionsConnector
 import uk.gov.hmrc.apiplatform.modules.submissions.connectors.ThirdPartyApplicationSubmissionsConnector._
 import uk.gov.hmrc.http.HeaderCarrier
@@ -18,20 +18,25 @@ import uk.gov.hmrc.apiplatform.modules.submissions.domain.services.SubmissionsFr
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.services.ApplicationsJsonFormatters
 import uk.gov.hmrc.apiplatform.modules.submissions.domain.models.{ErrorDetails, ResponsibleIndividualVerification, ResponsibleIndividualVerificationId, ResponsibleIndividualVerificationWithDetails, Submission}
 import uk.gov.hmrc.apiplatform.modules.submissions.SubmissionsTestData
+import uk.gov.hmrc.mongo.play.json.formats.MongoJavatimeFormats
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.{ApplicationId, ResponsibleIndividual}
 
-class ThirdPartyApplicationSubmissionsConnectorSpec 
-    extends BaseConnectorIntegrationSpec 
-    with GuiceOneAppPerSuite 
-    with WireMockExtensions 
-    with CollaboratorTracker 
-    with LocalUserIdTracker 
+import java.time.LocalDateTime
+
+class ThirdPartyApplicationSubmissionsConnectorSpec
+    extends BaseConnectorIntegrationSpec
+    with GuiceOneAppPerSuite
+    with WireMockExtensions
+    with CollaboratorTracker
+    with LocalUserIdTracker
     with SubmissionsTestData
     with SubmissionsFrontendJsonFormatters
     with TestApplications
     with ApplicationsJsonFormatters {
   private val apiKey = UUID.randomUUID().toString
   private val code = "123456789"
+
+  override implicit val dateFormat: Format[LocalDateTime] = MongoJavatimeFormats.localDateTimeFormat
 
   private val stubConfig = Configuration(
     "microservice.services.third-party-application-production.port" -> stubPort,

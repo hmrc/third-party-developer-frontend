@@ -32,7 +32,6 @@ import play.api.test.FakeRequest
 import play.api.test.Helpers.{redirectLocation, _}
 import play.filters.csrf.CSRF.TokenProvider
 import uk.gov.hmrc.http.HeaderCarrier
-import uk.gov.hmrc.time.DateTimeUtils
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.WithCSRFAddToken
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.WithLoggedInSession._
 import views.html.checkpages._
@@ -45,8 +44,7 @@ import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future.{failed, successful}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.LocalUserIdTracker
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.DeveloperSession
-
-import java.time.{LocalDateTime, ZoneOffset}
+import java.time.{LocalDateTime, ZoneOffset, Clock, Instant}
 
 class CheckYourAnswersSpec
     extends BaseControllerSpec
@@ -132,7 +130,7 @@ class CheckYourAnswersSpec
     val privacyPolicyView = app.injector.instanceOf[PrivacyPolicyView]
     val apiSubscriptionsViewTemplate = app.injector.instanceOf[ApiSubscriptionsView]
     val contactDetailsView = app.injector.instanceOf[ContactDetailsView]
-
+    val clock = Clock.fixed(Instant.now(), ZoneOffset.UTC)
     val underTest = new CheckYourAnswers(
       mockErrorHandler,
       applicationServiceMock,
@@ -152,7 +150,8 @@ class CheckYourAnswersSpec
       privacyPolicyView,
       apiSubscriptionsViewTemplate,
       contactDetailsView,
-      termsOfUseVersionServiceMock
+      termsOfUseVersionServiceMock,
+      clock
     )
 
     fetchSessionByIdReturns(sessionId, session)

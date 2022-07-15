@@ -24,7 +24,7 @@ import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.controllers.Applica
 import org.jsoup.Jsoup
 import play.api.data.Form
 import play.api.test.FakeRequest
-import uk.gov.hmrc.time.DateTimeUtils
+import java.time.{LocalDateTime, ZoneOffset}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.ViewHelpers.{elementExistsByText, linkExistsWithHref}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.WithCSRFAddToken
 import views.helper.CommonViewSpec
@@ -43,8 +43,8 @@ class ManageTeamViewSpec extends CommonViewSpec with WithCSRFAddToken with Devel
     appId,
     clientId,
     "App name 1",
-    DateTimeUtils.now,
-    Some(DateTimeUtils.now),
+    LocalDateTime.now(ZoneOffset.UTC),
+    Some(LocalDateTime.now(ZoneOffset.UTC)),
     None,
     grantLength,
     Environment.PRODUCTION,

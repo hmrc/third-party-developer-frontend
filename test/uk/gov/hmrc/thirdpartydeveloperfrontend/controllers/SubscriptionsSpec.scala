@@ -29,7 +29,6 @@ import play.api.test.Helpers._
 import play.filters.csrf.CSRF.TokenProvider
 import uk.gov.hmrc.thirdpartydeveloperfrontend.service._
 import uk.gov.hmrc.http.HeaderCarrier
-import uk.gov.hmrc.time.DateTimeUtils
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.WithCSRFAddToken
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.WithLoggedInSession._
 import views.helper.EnvironmentNameService
@@ -44,8 +43,6 @@ import uk.gov.hmrc.thirdpartydeveloperfrontend.builder._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.config.FraudPreventionConfig
 
 import java.time.{LocalDateTime, ZoneOffset}
-
-
 
 class SubscriptionsSpec extends BaseControllerSpec with WithCSRFAddToken with LocalUserIdTracker with DeveloperBuilder with SampleSession with SampleApplications with SubscriptionTestHelperSugar {
 

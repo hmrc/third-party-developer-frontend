@@ -22,13 +22,14 @@ import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.controllers.Applica
 import play.api.data.Form
 import play.api.mvc.{Action, AnyContent, Call}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.service.TermsOfUseVersionService
-import uk.gov.hmrc.time.DateTimeUtils
 import views.html.checkpages.TermsOfUseView
 
+import java.time.{Clock, LocalDateTime}
 import scala.concurrent.Future
 
 trait TermsOfUsePartialController {
   self: ApplicationController with CanUseCheckActions =>
+  val clock: Clock
   val termsOfUseView: TermsOfUseView
   val termsOfUseVersionService: TermsOfUseVersionService
 
@@ -67,7 +68,7 @@ trait TermsOfUsePartialController {
       val updatedInformation = if (information.termsOfUseAgreements.exists(terms => terms.version == version)) {
         information
       } else {
-        information.copy(termsOfUseAgreements = information.termsOfUseAgreements :+ TermsOfUseAgreement(request.developerSession.email, DateTimeUtils.now, version))
+        information.copy(termsOfUseAgreements = information.termsOfUseAgreements :+ TermsOfUseAgreement(request.developerSession.email, LocalDateTime.now(clock), version))
       }
 
       for {

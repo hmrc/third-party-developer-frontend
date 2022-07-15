@@ -31,7 +31,6 @@ import play.api.test.FakeRequest
 import play.api.test.Helpers.{redirectLocation, _}
 import play.filters.csrf.CSRF.TokenProvider
 import uk.gov.hmrc.http.HeaderCarrier
-import uk.gov.hmrc.time.DateTimeUtils
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.WithCSRFAddToken
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.WithLoggedInSession._
 import views.html.checkpages._
@@ -45,7 +44,7 @@ import scala.concurrent.Future.successful
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.LocalUserIdTracker
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.DeveloperSession
 
-import java.time.{LocalDateTime, ZoneOffset}
+import java.time.{Clock, Instant, LocalDateTime, ZoneOffset}
 
 class ApplicationCheckSpec
     extends BaseControllerSpec
@@ -213,7 +212,7 @@ class ApplicationCheckSpec
     val termsAndConditionsView = app.injector.instanceOf[TermsAndConditionsView]
 
     val applicationCheck = app.injector.instanceOf[ApplicationCheck]
-
+    val clock = Clock.fixed(Instant.now(), ZoneOffset.UTC)
     val underTest = new ApplicationCheck(
       mockErrorHandler,
       applicationServiceMock,
@@ -233,7 +232,8 @@ class ApplicationCheckSpec
       apiSubscriptionsViewTemplate,
       privacyPolicyView,
       termsAndConditionsView,
-      termsOfUseVersionServiceMock
+      termsOfUseVersionServiceMock,
+      clock
     )
 
     val application = createApplication()
@@ -1402,7 +1402,7 @@ class ApplicationCheckSpec
     }
   }
 
-  private def aClientSecret() = ClientSecret(randomUUID.toString, randomUUID.toString, LocalDateTime.now(ZoneOffset.UTC).withZone(DateTimeZone.getDefault))
+  private def aClientSecret() = ClientSecret(randomUUID.toString, randomUUID.toString, LocalDateTime.now(ZoneOffset.UTC))
 
   private def stepRequiredIndication(id: String) = {
     s"""<div id="$id" class="step-status status-incomplete">To do</div>"""

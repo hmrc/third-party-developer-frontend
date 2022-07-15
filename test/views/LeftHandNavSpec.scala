@@ -16,7 +16,7 @@
 
 package views
 
-import java.time.Period
+import java.time.{LocalDateTime, Period, ZoneOffset}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.Environment.PRODUCTION
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.LoggedInState
@@ -24,17 +24,17 @@ import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.controllers.Applica
 import org.jsoup.Jsoup
 import org.jsoup.nodes.Document
 import play.api.test.FakeRequest
-import uk.gov.hmrc.time.DateTimeUtils.now
 import views.helper.CommonViewSpec
 import views.html.include.LeftHandNav
 
 import scala.collection.JavaConverters._
-import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.{CollaboratorTracker, LocalUserIdTracker, DeveloperSessionBuilder}
+import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.{CollaboratorTracker, DeveloperSessionBuilder, LocalUserIdTracker}
 class LeftHandNavSpec extends CommonViewSpec with CollaboratorTracker with LocalUserIdTracker {
 
   val leftHandNavView = app.injector.instanceOf[LeftHandNav]
 
   trait Setup {
+    val now = LocalDateTime.now(ZoneOffset.UTC)
     val applicationId = ApplicationId("std-app-id")
     val clientId = ClientId("std-client-id")
     implicit val request = FakeRequest()

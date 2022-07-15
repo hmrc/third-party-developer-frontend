@@ -18,7 +18,8 @@ package uk.gov.hmrc.thirdpartydeveloperfrontend.helpers
 
 import java.time.format.DateTimeFormatter
 import java.time.temporal.ChronoUnit
-import java.time.{LocalDateTime, ZoneOffset}
+import java.time.{Clock, LocalDateTime}
+
 object DateFormatter {
   val shortFormatter: DateTimeFormatter = DateTimeFormatter.ofPattern("d MMM yyyy")
   val standardFormatter: DateTimeFormatter = DateTimeFormatter.ofPattern("d MMMM yyyy")
@@ -32,12 +33,12 @@ object DateFormatter {
     standardFormatter.format(dateTime)
   }
 
-  def formatLastAccessDate(maybeLastAccess: Option[LocalDateTime], createdOnDate: LocalDateTime): Option[String] = {
+  def formatLastAccessDate(maybeLastAccess: Option[LocalDateTime], createdOnDate: LocalDateTime, clock: Clock): Option[String] = {
     def formatDateValue(lastAccessDate: LocalDateTime) = {
      if (ChronoUnit.DAYS.between(initialLastAccessDate.toLocalDate, lastAccessDate.toLocalDate) > 0) {
         standardFormatter.format(lastAccessDate)
       } else {
-        s"more than ${ChronoUnit.MONTHS.between(lastAccessDate, LocalDateTime.now(ZoneOffset.UTC).toLocalDate)} months ago"
+        s"more than ${ChronoUnit.MONTHS.between(lastAccessDate.toLocalDate, LocalDateTime.now(clock).toLocalDate)} months ago"
       }
     }
     maybeLastAccess

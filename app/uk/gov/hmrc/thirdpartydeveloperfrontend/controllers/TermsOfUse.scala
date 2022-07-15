@@ -27,7 +27,7 @@ import play.api.data.Form
 import play.api.libs.crypto.CookieSigner
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents, Result}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.service.{ApplicationActionService, ApplicationService, SessionService, TermsOfUseVersionService}
-import uk.gov.hmrc.time.DateTimeUtils
+
 import views.html.TermsOfUseView
 
 import java.time.{LocalDateTime, ZoneOffset}

@@ -38,12 +38,14 @@ import play.api.test.Helpers._
 import play.filters.csrf.CSRF
 import org.scalatest.AppendedClues
 import uk.gov.hmrc.apiplatform.modules.submissions.domain.models.Submission
-import uk.gov.hmrc.time.DateTimeUtils
 import uk.gov.hmrc.apiplatform.modules.submissions.domain.models.SingleChoiceAnswer
 import uk.gov.hmrc.apiplatform.modules.submissions.domain.models.ExtendedSubmission
 import cats.data.NonEmptyList
 import uk.gov.hmrc.apiplatform.modules.submissions.domain.models.QuestionnaireProgress
 import uk.gov.hmrc.apiplatform.modules.submissions.domain.models.QuestionnaireState
+
+import java.time.ZoneOffset
+import java.time.LocalDateTime
 
 class QuestionControllerSpec 
   extends BaseControllerSpec
@@ -237,7 +239,7 @@ class QuestionControllerSpec
         "bob@example.com",
         Submission.Id.random,
         applicationId,
-        DateTimeUtils.now,
+        LocalDateTime.now(ZoneOffset.UTC),
         testGroups,
         testQuestionIdsOfInterest,
         standardContext
@@ -262,7 +264,7 @@ class QuestionControllerSpec
         "bob@example.com",
         Submission.Id.random,
         applicationId,
-        DateTimeUtils.now,
+        LocalDateTime.now(ZoneOffset.UTC),
         testGroups,
         testQuestionIdsOfInterest,
         standardContext

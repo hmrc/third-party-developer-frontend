@@ -17,15 +17,18 @@
 @import uk.gov.hmrc.thirdpartydeveloperfrontend.helpers.DateFormatter.{formatDate, formatLastAccessDate}
 @import include._
 @import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.controllers.Crumb
-@import org.joda.time.format.DateTimeFormat
 @import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.controllers.ApplicationViewModel
 @import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.controllers.FraudPreventionNavLinkViewModel
 @import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.DeveloperSession
 @import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.routes
 @import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.Details.TermsOfUseViewModel
+@import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.{PrivacyPolicyLocation,TermsAndConditionsLocation}
+@import java.time.format.DateTimeFormatter
+@import java.time.Clock
 @import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.{CollaboratorRole, PrivacyPolicyLocation,TermsAndConditionsLocation}
 
-@this(devMain: DevMain2, leftHandNav: LeftHandNav)
+@this(devMain: DevMain2, leftHandNav: LeftHandNav, clock: Clock)
+
 
 @(applicationViewModel: ApplicationViewModel, termsOfUse: TermsOfUseViewModel, fraudPreventionViewModel: Option[FraudPreventionNavLinkViewModel] = None)(
         implicit request: play.api.mvc.Request[Any],
@@ -51,6 +54,7 @@
   leftNav = Some(leftHandNav(Option(applicationViewModel), Option(navSection), Map.empty, fraudPreventionViewModel)),
   developerSession = Some(loggedIn)
 ) {
+
   <h1 class="govuk-heading-l">@title</h1>
 
   @appEnvironment2(app)
@@ -62,7 +66,7 @@
   </p>
 
   <p class="govuk-body">
-    @{formatLastAccessDate(app.lastAccess, app.createdOn) match {
+    @{formatLastAccessDate(app.lastAccess, app.createdOn, clock) match {
       case Some(formattedDate) => s"Last API call $formattedDate"
       case _ => "No API called"
     }}
@@ -195,7 +199,7 @@
           <td class="govuk-table__cell">Terms of use</td>
           <td class="govuk-table__cell" id="termsOfUseAgreementDetails">
             @termsOfUse.agreement match {
-              case Some(agreement) => { Agreed by @agreement.who on @DateTimeFormat.forPattern("dd MMMM yyyy").print(agreement.when) }
+              case Some(agreement) => { Agreed by @agreement.who on @agreement.when.format(DateTimeFormatter.ofPattern("dd MMMM yyyy")) }
               case None => { Not agreed }
             }
           </td>
@@ -214,7 +218,7 @@
       <h2 class="govuk-heading-s govuk-!-margin-top-7 govuk-!-margin-bottom-2">Terms of use</h2>
       @termsOfUse.agreement match {
         case Some(agreement) => {
-          <p class="govuk-body govuk-!-margin-bottom-1" id="termsOfUseAgreementDetails">@agreement.who verified @{app.name} will conform to our terms of use on @{DateTimeFormat.forPattern("dd MMMM yyyy").print(agreement.when)}. </p>
+          <p class="govuk-body govuk-!-margin-bottom-1" id="termsOfUseAgreementDetails">@agreement.who verified @{app.name} will conform to our terms of use on @{agreement.when.format(DateTimeFormatter.ofPattern("dd MMMM yyyy"))}. </p>
           <p class="govuk-body"><a class="govuk-link govuk-link--no-visited-state" href="@uk.gov.hmrc.apiplatform.modules.submissions.controllers.routes.TermsOfUseResponsesController.termsOfUseResponsesPage(app.id)">Review the terms of use responses for @{app.name}</a></p>
         }
         case None => { <p class="govuk-body" id="termsOfUseAgreementDetails">Not agreed</p> }

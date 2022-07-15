@@ -29,7 +29,6 @@ import javax.inject.{Inject, Singleton}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.service.AuditAction.{AccountDeletionRequested, ApplicationDeletionRequested, Remove2SVRequested, UserLogoutSurveyCompleted}
 import uk.gov.hmrc.http.{ForbiddenException, HeaderCarrier}
 import uk.gov.hmrc.play.audit.http.connector.AuditResult
-import uk.gov.hmrc.time.DateTimeUtils
 
 import scala.concurrent.{ExecutionContext, Future}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.connectors.AddTeamMemberRequest
@@ -130,7 +129,7 @@ class ApplicationService @Inject() (
             "appId" -> appId.value,
             "requestedByName" -> requesterName,
             "requestedByEmailAddress" -> requesterEmail,
-            "timestamp" -> DateTimeUtils.now.toString
+            "timestamp" -> LocalDateTime.now(clock).toString
           )
         )
       } yield ticketResponse
@@ -187,7 +186,7 @@ class ApplicationService @Inject() (
 
     for {
       ticketResponse <- deskproConnector.createTicket(deleteDeveloperTicket)
-      _ <- auditService.audit(AccountDeletionRequested, Map("requestedByName" -> name, "requestedByEmailAddress" -> email, "timestamp" -> DateTimeUtils.now.toString))
+      _ <- auditService.audit(AccountDeletionRequested, Map("requestedByName" -> name, "requestedByEmailAddress" -> email, "timestamp" -> LocalDateTime.now(clock).toString))
     } yield ticketResponse
   }
 
@@ -196,7 +195,7 @@ class ApplicationService @Inject() (
 
     for {
       ticketResponse <- deskproConnector.createTicket(remove2SVTicket)
-      _ <- auditService.audit(Remove2SVRequested, Map("requestedByEmailAddress" -> email, "timestamp" -> DateTimeUtils.now.toString))
+      _ <- auditService.audit(Remove2SVRequested, Map("requestedByEmailAddress" -> email, "timestamp" -> LocalDateTime.now(clock).toString))
     } yield ticketResponse
   }
 
@@ -216,7 +215,7 @@ class ApplicationService @Inject() (
         "userName" -> name,
         "satisfactionRating" -> rating,
         "improvementSuggestions" -> improvementSuggestions,
-        "timestamp" -> DateTimeUtils.now.toString
+        "timestamp" -> LocalDateTime.now(clock).toString
       )
     )
   }

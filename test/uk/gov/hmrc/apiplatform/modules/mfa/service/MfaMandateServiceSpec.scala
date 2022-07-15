@@ -281,7 +281,7 @@ class MfaMandateServiceSpec extends AsyncHmrcSpec with CollaboratorTracker with 
         val year = 2001
         val month = 2
         val day = 3
-        MfaMandateService.parseLocalDate("2001-02-03") shouldBe Some(new LocalDate(year, month, day))
+        MfaMandateService.parseLocalDate("2001-02-03") shouldBe Some(LocalDate.of(year, month, day))
       }
     }
   }

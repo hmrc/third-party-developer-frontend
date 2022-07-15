@@ -16,9 +16,8 @@
 
 package uk.gov.hmrc.thirdpartydeveloperfrontend.builder
 
-import java.time.Period
+import java.time.{LocalDateTime, Period, ZoneOffset}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications._
-import uk.gov.hmrc.time.DateTimeUtils
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.CollaboratorTracker
 
 trait SampleApplication {
@@ -31,8 +30,8 @@ trait SampleApplication {
     appId,
     clientId,
     "App name 1",
-    DateTimeUtils.now,
-    Some(DateTimeUtils.now),
+    LocalDateTime.now(ZoneOffset.UTC),
+    Some(LocalDateTime.now(ZoneOffset.UTC)),
     None,
     grantLength = Period.ofDays(547),
     Environment.PRODUCTION,
