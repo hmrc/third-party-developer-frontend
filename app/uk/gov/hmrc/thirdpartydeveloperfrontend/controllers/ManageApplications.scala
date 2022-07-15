@@ -22,6 +22,7 @@ import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
 import uk.gov.hmrc.apiplatform.modules.uplift.services.UpliftLogic
 import uk.gov.hmrc.thirdpartydeveloperfrontend.config.{ApplicationConfig, ErrorHandler}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.controllers.ManageApplicationsViewModel
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.services.LocalDateTimeFormatters
 import uk.gov.hmrc.thirdpartydeveloperfrontend.service._
 import views.helper.EnvironmentNameService
 import views.html._
@@ -39,7 +40,7 @@ class ManageApplications @Inject() (
     manageApplicationsView: ManageApplicationsView,
     mcc: MessagesControllerComponents
     )(implicit val ec: ExecutionContext, val appConfig: ApplicationConfig, val environmentNameService: EnvironmentNameService)
-  extends LoggedInController(mcc) {
+  extends LoggedInController(mcc) with LocalDateTimeFormatters {
 
   def manageApps: Action[AnyContent] = loggedInAction { implicit request =>
     for {

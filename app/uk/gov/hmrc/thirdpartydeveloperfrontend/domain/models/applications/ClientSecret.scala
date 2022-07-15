@@ -16,16 +16,15 @@
 
 package uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications
 
-import play.api.libs.json.{Format, OFormat}
-import uk.gov.hmrc.mongo.play.json.formats.MongoJavatimeFormats
+import play.api.libs.json.OFormat
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.services.LocalDateTimeFormatters
 
 import java.time.LocalDateTime
 
 case class ClientSecret(id: String, name: String, createdOn: LocalDateTime, lastAccess: Option[LocalDateTime] = None)
 
-object ClientSecret {
+object ClientSecret extends LocalDateTimeFormatters {
   import play.api.libs.json.Json
 
-  implicit val dateFormat: Format[LocalDateTime] = MongoJavatimeFormats.localDateTimeFormat
   implicit val format: OFormat[ClientSecret] = Json.format[ClientSecret]
 }

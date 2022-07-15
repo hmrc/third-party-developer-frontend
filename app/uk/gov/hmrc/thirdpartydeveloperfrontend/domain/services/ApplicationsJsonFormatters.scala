@@ -17,7 +17,6 @@
 package uk.gov.hmrc.thirdpartydeveloperfrontend.domain.services
 
 import play.api.libs.json.{EnvReads, EnvWrites}
-import uk.gov.hmrc.mongo.play.json.formats.MongoJavatimeFormats
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.subscriptions.{FieldName, FieldValue}
 
 import java.time.LocalDateTime
@@ -50,9 +49,8 @@ trait ApplicationsJsonFormatters extends ApiDefinitionsJsonFormatters with Local
   implicit val formatPrivileged = Json.format[Privileged]
   implicit val formatROPC = Json.format[ROPC]
 
-  object TOUAHelper {
-    // DO NOT POLLUTE WHOLE SCOPE WITH THIS WRITER
-    implicit val dateFormat: Format[LocalDateTime] = MongoJavatimeFormats.localDateTimeFormat
+  object TOUAHelper extends LocalDateTimeFormatters {
+
     val formatTOUA = Json.format[TermsOfUseAgreement]
   }
 

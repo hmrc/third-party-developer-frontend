@@ -17,8 +17,8 @@
 package uk.gov.hmrc.apiplatform.modules.submissions.domain.models
 
 import play.api.libs.json.{Format, OFormat}
-import uk.gov.hmrc.mongo.play.json.formats.MongoJavatimeFormats
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.ApplicationId
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.services.LocalDateTimeFormatters
 
 import java.time.{LocalDateTime, ZoneOffset}
 
@@ -39,12 +39,11 @@ case class ResponsibleIndividualVerification(
     createdOn: LocalDateTime
 )
 
-object ResponsibleIndividualVerification {
+object ResponsibleIndividualVerification extends LocalDateTimeFormatters {
   def apply(id: ResponsibleIndividualVerificationId, appId: ApplicationId, appName: String, submissionId: Submission.Id, submissionInstance: Int): ResponsibleIndividualVerification =
     new ResponsibleIndividualVerification(id, appId, submissionId, submissionInstance, appName, LocalDateTime.now(ZoneOffset.UTC))
 
   import play.api.libs.json.Json
 
-  implicit val dateFormat: Format[LocalDateTime] = MongoJavatimeFormats.localDateTimeFormat
   implicit val formatResponsibleIndividualVerification: OFormat[ResponsibleIndividualVerification] = Json.format[ResponsibleIndividualVerification]
 }

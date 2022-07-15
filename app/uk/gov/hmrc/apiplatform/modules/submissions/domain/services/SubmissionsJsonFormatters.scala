@@ -18,11 +18,10 @@ package uk.gov.hmrc.apiplatform.modules.submissions.domain.services
 
 import uk.gov.hmrc.apiplatform.modules.submissions.domain.models._
 import play.api.libs.json._
-import uk.gov.hmrc.mongo.play.json.formats.MongoJavatimeFormats
 import uk.gov.hmrc.play.json.Union
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.services.LocalDateTimeFormatters
 
-import java.time.LocalDateTime
+
 
 trait BaseSubmissionsJsonFormatters extends GroupOfQuestionnairesJsonFormatters with LocalDateTimeFormatters {
   implicit val keyReadsQuestionnaireId: KeyReads[Questionnaire.Id] = key => JsSuccess(Questionnaire.Id(key))

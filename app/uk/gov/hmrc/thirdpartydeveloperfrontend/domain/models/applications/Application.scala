@@ -16,8 +16,7 @@
 
 package uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications
 
-import play.api.libs.json.{EnvReads, EnvWrites, Format, OFormat, Reads}
-import uk.gov.hmrc.mongo.play.json.formats.MongoJavatimeFormats
+import play.api.libs.json.{Format, OFormat, Reads}
 
 import java.time.{LocalDateTime, Period}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.apidefinitions.AccessType.STANDARD
@@ -32,6 +31,7 @@ import uk.gov.hmrc.thirdpartydeveloperfrontend.helpers.string.Digest
 import java.util.UUID
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.UserId
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.apidefinitions.ApiIdentifier
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.services.LocalDateTimeFormatters
 
 case class ApplicationId(value: String) extends AnyVal
 
@@ -223,11 +223,10 @@ case class ApplicationWithSubscriptionIds(
     val subscriptions: Set[ApiIdentifier] = Set.empty)
     extends BaseApplication
 
-object ApplicationWithSubscriptionIds {
+object ApplicationWithSubscriptionIds extends LocalDateTimeFormatters {
   import play.api.libs.json.Json
   import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.services.ApiDefinitionsJsonFormatters._
 
-  implicit val dateFormat: Format[LocalDateTime] = MongoJavatimeFormats.localDateTimeFormat
   implicit val applicationWithSubsIdsReads: Reads[ApplicationWithSubscriptionIds] = Json.reads[ApplicationWithSubscriptionIds]
   implicit val ordering: Ordering[ApplicationWithSubscriptionIds] = Ordering.by(_.name)
 

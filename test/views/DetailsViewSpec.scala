@@ -58,7 +58,6 @@ class DetailsViewSpec
 
   val termsOfUseViewModel = TermsOfUseViewModel(true, true, Some(Agreement("user@example.com", LocalDateTime.now)))
   val adminEmail = "admin@example.com"
-  val termsOfUseViewModel = TermsOfUseViewModel(true, true, Some(Agreement("user@example.com", DateTime.now)))
 
   implicit val loggedIn: DeveloperSession = DeveloperSessionBuilder("developer@example.com", "Joe", "Bloggs", loggedInState = LoggedInState.LOGGED_IN)
   trait LoggedInUserIsAdmin {
