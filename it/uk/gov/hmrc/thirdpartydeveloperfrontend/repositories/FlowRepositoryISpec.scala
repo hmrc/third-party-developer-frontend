@@ -1,28 +1,31 @@
 package uk.gov.hmrc.thirdpartydeveloperfrontend.repositories
 
 import akka.stream.Materializer
-import org.mongodb.scala.model.{Filters, Projections}
+import org.mongodb.scala.bson.{BsonDocument, BsonValue, Document}
+import org.mongodb.scala.model.Aggregates.{filter, project}
+import org.mongodb.scala.model.{Aggregates, Filters, Projections}
 import org.mongodb.scala.model.Filters._
+import org.mongodb.scala.model.Projections.fields
 import org.scalatest.{BeforeAndAfterAll, BeforeAndAfterEach, OptionValues}
 import org.scalatest.matchers.should.Matchers
 import org.scalatest.wordspec.AnyWordSpec
-import uk.gov.hmrc.thirdpartydeveloperfrontend.config.ApplicationConfig
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.connectors.ApiType.REST_API
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.connectors.{CombinedApi, CombinedApiCategory}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.emailpreferences.EmailTopic
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.flows.FlowType._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.flows.{EmailPreferencesFlowV2, Flow, FlowType, IpAllowlistFlow}
 import org.scalatestplus.play.guice.GuiceOneAppPerSuite
-import play.api.libs.json.{JsObject, Json}
+import play.api.libs.json.{Format, OFormat}
 import play.api.test.{DefaultAwaitTimeout, FutureAwaits}
-import uk.gov.hmrc.mongo.play.json.{Codecs, PlayMongoRepository}
-import uk.gov.hmrc.mongo.test.DefaultPlayMongoRepositorySupport
+import uk.gov.hmrc.mongo.play.json.Codecs
 import uk.gov.hmrc.thirdpartydeveloperfrontend.repositories.MongoFormatters._
 
 import java.time.LocalDateTime
 import scala.concurrent.ExecutionContext.Implicits.global
+import uk.gov.hmrc.mongo.play.json.formats.MongoJavatimeFormats
 
-class FlowRepositoryISpec extends AnyWordSpec  with GuiceOneAppPerSuite
+class FlowRepositoryISpec extends AnyWordSpec
+  with GuiceOneAppPerSuite
   with Matchers
   with OptionValues
   with DefaultAwaitTimeout
@@ -30,7 +33,6 @@ class FlowRepositoryISpec extends AnyWordSpec  with GuiceOneAppPerSuite
   with BeforeAndAfterAll
   with BeforeAndAfterEach {
 
-  implicit lazy val materializer: Materializer = app.materializer
   private val currentSession = "session 1"
   private val anotherSession = "session 2"
 
@@ -46,30 +48,30 @@ class FlowRepositoryISpec extends AnyWordSpec  with GuiceOneAppPerSuite
   }
 
   trait PopulatedSetup {
-
     val currentFlow: IpAllowlistFlow = IpAllowlistFlow(currentSession, Set("ip1", "ip2"))
     val flowInDifferentSession: IpAllowlistFlow = IpAllowlistFlow(anotherSession, Set("ip3", "ip4"))
     val flowOfDifferentType: EmailPreferencesFlowV2 = EmailPreferencesFlowV2(currentSession,
       selectedCategories = Set("category1", "category2"),
       selectedAPIs = Map("category1" -> Set("qwqw", "asass")),
       selectedTopics = Set("BUSINESS_AND_POLICY"),
-      visibleApis = List(CombinedApi("api1ServiceName", "api1Name",  List(CombinedApiCategory("VAT"), CombinedApiCategory("AGENT")), REST_API)))
+      visibleApis = List(CombinedApi("api1ServiceName", "api1Name",
+                    List(CombinedApiCategory("VAT"), CombinedApiCategory("AGENT")), REST_API)))
+
     await(flowRepository.saveFlow(currentFlow))
     await(flowRepository.saveFlow(flowInDifferentSession))
     await(flowRepository.saveFlow(flowOfDifferentType))
     await(flowRepository.collection.countDocuments().toFuture()) shouldBe 3
 
     def fetchLastUpdated(flow: Flow): LocalDateTime = {
-      await(flowRepository.collection.find(
-        and(Filters.equal("sessionId", Codecs.toBson(flow.sessionId)),
-          Filters.equal( "flowType", Codecs.toBson(flow.flowType))))
-        .projection(
-          Projections.fields(
-            Projections.excludeId(),
-            Projections.include("lastUpdated")
-          )
-        ).toFuture()
-        .map(_.asInstanceOf[LocalDateTime]))
+      val query = Document("sessionId" -> Codecs.toBson(flow.sessionId), "flowType" -> Codecs.toBson(flow.flowType))
+
+      await(flowRepository.collection.aggregate[BsonValue](
+        Seq(
+        filter(query),
+        project(fields(Projections.excludeId(), Projections.include("lastUpdated"))))
+      ).head()
+       .map(Codecs.fromBson[ResultSet]))
+        .lastUpdated
     }
   }
 
@@ -85,11 +87,10 @@ class FlowRepositoryISpec extends AnyWordSpec  with GuiceOneAppPerSuite
         result match {
           case Some(savedFlow: IpAllowlistFlow ) =>
             savedFlow.sessionId shouldBe currentSession
-            savedFlow.flowType shouldBe IP_ALLOW_LIST.toString
-            savedFlow.allowlist shouldBe List("ip1", "ip2")
+            savedFlow.flowType shouldBe IP_ALLOW_LIST
+            savedFlow.allowlist shouldBe Set("ip1", "ip2")
           case _ => fail
         }
-
 
       }
 
@@ -98,29 +99,29 @@ class FlowRepositoryISpec extends AnyWordSpec  with GuiceOneAppPerSuite
           selectedCategories= Set("category1", "category2"),
           selectedAPIs = Map("category1" -> Set("qwqw", "asass")),
           selectedTopics = Set("BUSINESS_AND_POLICY",  "EVENT_INVITES"),
-        visibleApis = List(CombinedApi("api1ServiceName", "api1DisplayName",  List(CombinedApiCategory("VAT"), CombinedApiCategory("AGENT")), REST_API)))
+          visibleApis = List(CombinedApi("api1ServiceName", "api1DisplayName",  List(CombinedApiCategory("VAT"), CombinedApiCategory("AGENT")), REST_API)))
 
         await(flowRepository.saveFlow(flow))
 
         val result: Flow = await(flowRepository.collection.find(Filters.equal("sessionId", Codecs.toBson(currentSession))).first.toFuture())
         val castResult =  result.asInstanceOf[EmailPreferencesFlowV2]
         castResult.sessionId shouldBe currentSession
-        castResult.flowType shouldBe EMAIL_PREFERENCES_V2.toString
-        castResult.selectedTopics should contain only (EmailTopic.BUSINESS_AND_POLICY, EmailTopic.EVENT_INVITES)
+        castResult.flowType shouldBe EMAIL_PREFERENCES_V2
+        castResult.selectedTopics shouldBe Set(EmailTopic.BUSINESS_AND_POLICY.toString, EmailTopic.EVENT_INVITES.toString)
         castResult.visibleApis should contain only (CombinedApi("api1ServiceName", "api1DisplayName",   List(CombinedApiCategory("VAT"), CombinedApiCategory("AGENT")), REST_API))
       }
 
       "update the flow when it already exists" in new PopulatedSetup {
-        val lastUpdatedInCurrentFlow: LocalDateTime = fetchLastUpdated(currentFlow)
+        await(flowRepository.saveFlow(currentFlow))
         val updatedFlow: IpAllowlistFlow = currentFlow.copy(allowlist = Set("new IP"))
 
         val result: IpAllowlistFlow = await(flowRepository.saveFlow(updatedFlow))
 
         result shouldBe updatedFlow
-        val Some(updatedDocument: IpAllowlistFlow) = await(flowRepository.collection
-          .find(and(Filters.equal("sessionId", currentSession), Filters.equal("flowType",  FlowType.IP_ALLOW_LIST.toString()))).toFuture()).headOption
+        val updatedDocument: IpAllowlistFlow = await(flowRepository.collection
+          .find(Document("sessionId" -> currentSession, "flowType" ->  FlowType.IP_ALLOW_LIST.toString)).map(_.asInstanceOf[IpAllowlistFlow]).head())
 
-        updatedDocument.allowlist should contain only "new IP"
+        updatedDocument.allowlist shouldBe Set("new IP")
       }
     }
 
@@ -170,4 +171,14 @@ class FlowRepositoryISpec extends AnyWordSpec  with GuiceOneAppPerSuite
       }
     }
   }
+}
+
+case class ResultSet(lastUpdated: LocalDateTime)
+
+object ResultSet   {
+  import play.api.libs.json.Json
+  implicit val dateFormat: Format[LocalDateTime] = MongoJavatimeFormats.localDateTimeFormat
+  implicit val resultSetFormat: OFormat[ResultSet] = Json.format[ResultSet]
+
+  def apply(lastUpdated: LocalDateTime) = new ResultSet(lastUpdated)
 }

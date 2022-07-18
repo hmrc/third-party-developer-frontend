@@ -16,10 +16,9 @@
 
 package uk.gov.hmrc.thirdpartydeveloperfrontend.repositories
 
-import akka.stream.Materializer
 import org.mongodb.scala.model.Filters.{and, equal}
 import org.mongodb.scala.model.Indexes.ascending
-import org.mongodb.scala.model.{FindOneAndUpdateOptions, IndexModel, IndexOptions, Updates}
+import org.mongodb.scala.model.{IndexModel, IndexOptions,UpdateOptions, Updates}
 import play.api.libs.json._
 import uk.gov.hmrc.apiplatform.modules.uplift.domain.models.GetProductionCredentialsFlow
 import uk.gov.hmrc.mongo.MongoComponent
@@ -33,7 +32,7 @@ import javax.inject.{Inject, Singleton}
 import scala.concurrent.{ExecutionContext, Future}
 
 @Singleton
-class FlowRepository @Inject() (mongo: MongoComponent, appConfig: ApplicationConfig)(implicit val mat: Materializer, val ec: ExecutionContext)
+class FlowRepository @Inject() (mongo: MongoComponent, appConfig: ApplicationConfig)(implicit val ec: ExecutionContext)
     extends PlayMongoRepository[Flow](
       collectionName = "flows",
       mongoComponent = mongo,
@@ -61,17 +60,25 @@ class FlowRepository @Inject() (mongo: MongoComponent, appConfig: ApplicationCon
     ) {
 
   def saveFlow[A <: Flow](flow: A)(implicit format: OFormat[A]): Future[A] = {
-    val findAndReplaceFlow = collection
-      .findOneAndReplace(
-      filter = and(equal("sessionId", flow.sessionId), equal("flowType", Codecs.toBson(flow.flowType))),
-      replacement = flow
-    ).toFuture()
-      .map(_ => flow)
+    val query = and(equal("sessionId", flow.sessionId), equal("flowType", Codecs.toBson(flow.flowType)))
 
-    for {
-      updatedFlow <- findAndReplaceFlow
-      _ <- updateLastUpdated(flow.sessionId)
-    } yield updatedFlow
+    collection.find(query).headOption flatMap {
+      case Some(_: Flow) =>
+        for {
+          updatedFlow <- collection.replaceOne(
+            filter = query,
+            replacement = flow
+          ).toFuture().map(_ => flow)
+
+          _ <- updateLastUpdated(flow.sessionId)
+        } yield updatedFlow
+
+      case None =>
+        for {
+          newFlow <- collection.insertOne(flow).toFuture().map(_ => flow)
+          _ <- updateLastUpdated(flow.sessionId)
+        } yield newFlow
+    }
   }
 
   def deleteBySessionIdAndFlowType(sessionId: String, flowType: FlowType): Future[Boolean] = {
@@ -86,10 +93,10 @@ class FlowRepository @Inject() (mongo: MongoComponent, appConfig: ApplicationCon
   }
 
   def updateLastUpdated(sessionId: String): Future[Unit] = {
-    collection.findOneAndUpdate(
+    collection.updateMany(
       filter = equal("sessionId", sessionId),
       update = Updates.currentDate("lastUpdated"),
-      options = FindOneAndUpdateOptions().upsert(false)
+      options = new UpdateOptions().upsert(false)
     ).toFuture()
       .map(_ => ())
   }
