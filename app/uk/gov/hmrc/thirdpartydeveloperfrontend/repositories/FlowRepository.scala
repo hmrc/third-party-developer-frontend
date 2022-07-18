@@ -21,11 +21,12 @@ import org.mongodb.scala.model.Filters.{and, equal}
 import org.mongodb.scala.model.Indexes.ascending
 import org.mongodb.scala.model.{FindOneAndUpdateOptions, IndexModel, IndexOptions, Updates}
 import play.api.libs.json._
-import uk.gov.hmrc.apiplatform.modules.mfa.models.Codecs
+import uk.gov.hmrc.apiplatform.modules.uplift.domain.models.GetProductionCredentialsFlow
 import uk.gov.hmrc.mongo.MongoComponent
-import uk.gov.hmrc.mongo.play.json.PlayMongoRepository
+import uk.gov.hmrc.mongo.play.json.{Codecs, PlayMongoRepository}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.config.ApplicationConfig
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.flows.{Flow, FlowType}
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.flows.{EmailPreferencesFlowV2, Flow, FlowType, IpAllowlistFlow, NewApplicationEmailPreferencesFlowV2}
+import uk.gov.hmrc.thirdpartydeveloperfrontend.repositories.MongoFormatters.formatFlow
 
 import java.util.concurrent.TimeUnit
 import javax.inject.{Inject, Singleton}
@@ -36,7 +37,7 @@ class FlowRepository @Inject() (mongo: MongoComponent, appConfig: ApplicationCon
     extends PlayMongoRepository[Flow](
       collectionName = "flows",
       mongoComponent = mongo,
-      domainFormat = MongoFormatters.formatFlow,
+      domainFormat = formatFlow,
       indexes = Seq(
         IndexModel(
           ascending("sessionId", "flowType"),
@@ -51,7 +52,12 @@ class FlowRepository @Inject() (mongo: MongoComponent, appConfig: ApplicationCon
             .expireAfter(appConfig.sessionTimeoutInSeconds, TimeUnit.SECONDS)
         )
       ),
-      extraCodecs = MongoFormatters.mongoCodecs
+      extraCodecs = Codecs.playFormatCodecsBuilder(formatFlow)
+        .forType[IpAllowlistFlow]
+        .forType[EmailPreferencesFlowV2]
+        .forType[NewApplicationEmailPreferencesFlowV2]
+        .forType[GetProductionCredentialsFlow]
+        .build
     ) {
 
   def saveFlow[A <: Flow](flow: A)(implicit format: OFormat[A]): Future[A] = {

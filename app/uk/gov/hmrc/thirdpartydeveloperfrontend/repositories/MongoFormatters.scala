@@ -20,7 +20,6 @@ import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.flows._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.services.CombinedApiJsonFormatters
 import uk.gov.hmrc.apiplatform.modules.uplift.domain.models.GetProductionCredentialsFlow
 import play.api.libs.json.{Format, Json, OFormat}
-import uk.gov.hmrc.apiplatform.modules.mfa.models.Codecs
 import uk.gov.hmrc.mongo.play.json.formats.MongoJavatimeFormats
 import uk.gov.hmrc.play.json.Union
 
@@ -42,5 +41,4 @@ object MongoFormatters extends CombinedApiJsonFormatters {
     .and[GetProductionCredentialsFlow](FlowType.GET_PRODUCTION_CREDENTIALS.toString)
     .format
 
-  val mongoCodecs = Codecs.unionCodecs[Flow](formatFlow)
 }
