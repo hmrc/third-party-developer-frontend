@@ -16,23 +16,22 @@
 
 package uk.gov.hmrc.thirdpartydeveloperfrontend.controllers
 
+import play.api.test.FakeRequest
+import play.api.test.Helpers._
+import play.filters.csrf.CSRF.TokenProvider
+import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.thirdpartydeveloperfrontend.builder.DeveloperBuilder
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.connectors.TicketCreated
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.{DeveloperSession, LoggedInState, Session}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.mocks.service._
-import org.joda.time.DateTime
-import play.api.test.FakeRequest
-import play.api.test.Helpers._
-import play.filters.csrf.CSRF.TokenProvider
-import uk.gov.hmrc.http.HeaderCarrier
-import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.{TestApplications, WithCSRFAddToken}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.WithLoggedInSession._
+import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.{LocalUserIdTracker, TestApplications, WithCSRFAddToken}
 import views.html._
 
+import java.time.LocalDate
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
-import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.LocalUserIdTracker
 
 class DeletePrincipalApplicationSpec 
     extends BaseControllerSpec 
@@ -79,8 +78,8 @@ class DeletePrincipalApplicationSpec
       appId,
       clientId,
       appName,
-      DateTime.now.withTimeAtStartOfDay(),
-      Some(DateTime.now.withTimeAtStartOfDay()),
+      LocalDate.now.atStartOfDay(),
+      Some(LocalDate.now.atStartOfDay()),
       None,
       grantLength,
       Environment.PRODUCTION,

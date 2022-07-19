@@ -16,8 +16,7 @@
 
 package views
 
-import java.time.Period
-
+import java.time.{LocalDateTime, Period, ZoneOffset}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.EditApplicationForm
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.LoggedInState
@@ -25,9 +24,8 @@ import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.controllers.Applica
 import org.jsoup.Jsoup
 import org.jsoup.nodes.Document
 import play.api.test.FakeRequest
-import uk.gov.hmrc.time.DateTimeUtils
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.ViewHelpers.{elementExistsByText, elementIdentifiedByAttrContainsText, textareaExistsWithText}
-import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.{WithCSRFAddToken, DeveloperSessionBuilder}
+import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.{DeveloperSessionBuilder, WithCSRFAddToken}
 import views.helper.CommonViewSpec
 import views.html.ChangeDetailsView
 
@@ -69,7 +67,7 @@ class ChangeApplicationDetailsSpec extends CommonViewSpec with WithCSRFAddToken 
 
     "render" in {
 
-      val application = Application(applicationId, clientId, "An App Name", DateTimeUtils.now, Some(DateTimeUtils.now), None, Period.ofDays(547), Environment.SANDBOX)
+      val application = Application(applicationId, clientId, "An App Name", LocalDateTime.now(ZoneOffset.UTC), Some(LocalDateTime.now(ZoneOffset.UTC)), None, Period.ofDays(547), Environment.SANDBOX)
       val document = Jsoup.parse(renderPage(application).body)
 
       elementExistsByText(document, "h1", "Change application details") shouldBe true
@@ -86,7 +84,7 @@ class ChangeApplicationDetailsSpec extends CommonViewSpec with WithCSRFAddToken 
       val aTermsAndConditionsURL = Some("a terms and conditions url")
       val standardAccess = Standard(privacyPolicyUrl = aPrivacyPolicyURL, termsAndConditionsUrl = aTermsAndConditionsURL)
       val application =
-        Application(applicationId, clientId, "An App Name", DateTimeUtils.now, Some(DateTimeUtils.now), None, grantLength, Environment.SANDBOX, description = aDescription, access = standardAccess)
+        Application(applicationId, clientId, "An App Name", LocalDateTime.now(ZoneOffset.UTC), Some(LocalDateTime.now(ZoneOffset.UTC)), None, grantLength, Environment.SANDBOX, description = aDescription, access = standardAccess)
       val document = Jsoup.parse(renderPage(application).body)
 
       formGroupWithLabelIsPrepopulated(document, "Application name", "An App Name") shouldBe true
@@ -101,8 +99,8 @@ class ChangeApplicationDetailsSpec extends CommonViewSpec with WithCSRFAddToken 
         applicationId,
         clientId,
         "An App Name",
-        DateTimeUtils.now,
-        Some(DateTimeUtils.now),
+        LocalDateTime.now(ZoneOffset.UTC),
+        Some(LocalDateTime.now(ZoneOffset.UTC)),
         None,
         grantLength,
         Environment.PRODUCTION,
@@ -119,8 +117,8 @@ class ChangeApplicationDetailsSpec extends CommonViewSpec with WithCSRFAddToken 
         applicationId,
         clientId,
         "An App Name",
-        DateTimeUtils.now,
-        Some(DateTimeUtils.now),
+        LocalDateTime.now(ZoneOffset.UTC),
+        Some(LocalDateTime.now(ZoneOffset.UTC)),
         None,
         grantLength,
         Environment.PRODUCTION,
@@ -134,7 +132,7 @@ class ChangeApplicationDetailsSpec extends CommonViewSpec with WithCSRFAddToken 
     "not display the option to change the app name if in prod with state production" in {
 
       val application =
-        Application(applicationId, clientId, "An App Name", DateTimeUtils.now, Some(DateTimeUtils.now), None, grantLength, Environment.PRODUCTION, state = ApplicationState(State.PRODUCTION, None))
+        Application(applicationId, clientId, "An App Name", LocalDateTime.now(ZoneOffset.UTC), Some(LocalDateTime.now(ZoneOffset.UTC)), None, grantLength, Environment.PRODUCTION, state = ApplicationState(State.PRODUCTION, None))
       val document = Jsoup.parse(renderPage(application).body)
 
       elementExistsByText(document, "label", "Application name") shouldBe false

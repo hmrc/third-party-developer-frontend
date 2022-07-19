@@ -14,17 +14,13 @@
  * limitations under the License.
  */
 
-package uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications
+package uk.gov.hmrc.thirdpartydeveloperfrontend.domain.services
 
-import play.api.libs.json._
-import uk.gov.hmrc.apiplatform.modules.submissions.domain.models.Submission
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.services.LocalDateTimeFormatters
+import play.api.libs.json.{EnvReads, EnvWrites, Format}
 
 import java.time.LocalDateTime
 
-case class TermsOfUseAcceptance(responsibleIndividual: ResponsibleIndividual, dateTime: LocalDateTime, submissionId: Submission.Id, submissionInstance: Int)
+trait LocalDateTimeFormatters extends EnvReads with EnvWrites {
 
-object TermsOfUseAcceptance extends LocalDateTimeFormatters {
-
-  implicit val format = Json.format[TermsOfUseAcceptance]
+  implicit val dateFormat: Format[LocalDateTime] = Format(DefaultLocalDateTimeReads, DefaultLocalDateTimeWrites)
 }

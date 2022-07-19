@@ -16,17 +16,16 @@
 
 package uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications
 
-import org.joda.time.DateTime
+import play.api.libs.json.{OFormat}
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.services.LocalDateTimeFormatters
 
-case class TermsOfUseAgreement(emailAddress: String, timeStamp: DateTime, version: String)
+import java.time.LocalDateTime
 
-object TermsOfUseAgreement {
+case class TermsOfUseAgreement(emailAddress: String, timeStamp: LocalDateTime, version: String)
+
+object TermsOfUseAgreement extends LocalDateTimeFormatters {
 
   import play.api.libs.json.Json
-  import play.api.libs.json.JodaReads.DefaultJodaDateTimeReads
-  import play.api.libs.json.JodaWrites.JodaDateTimeNumberWrites
 
-  implicit val numberWrites = JodaDateTimeNumberWrites
-
-  implicit val format = Json.format[TermsOfUseAgreement]
+  implicit val format: OFormat[TermsOfUseAgreement] = Json.format[TermsOfUseAgreement]
 }

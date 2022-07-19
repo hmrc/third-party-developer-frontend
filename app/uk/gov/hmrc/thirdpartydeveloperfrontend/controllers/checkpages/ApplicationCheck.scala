@@ -35,6 +35,7 @@ import views.html.checkpages.applicationcheck.{LandingPageView, UnauthorisedAppD
 import views.html.checkpages.applicationcheck.team.{TeamMemberAddView, TeamMemberRemoveConfirmationView, TeamView}
 import views.html.editapplication.NameSubmittedView
 
+import java.time.Clock
 import scala.concurrent.{ExecutionContext, Future}
 import scala.concurrent.Future.successful
 
@@ -58,7 +59,8 @@ class ApplicationCheck @Inject() (
     val apiSubscriptionsViewTemplate: ApiSubscriptionsView,
     val privacyPolicyView: PrivacyPolicyView,
     val termsAndConditionsView: TermsAndConditionsView,
-    val termsOfUseVersionService: TermsOfUseVersionService
+    val termsOfUseVersionService: TermsOfUseVersionService,
+    val clock: Clock
 )(implicit val ec: ExecutionContext, val appConfig: ApplicationConfig)
     extends ApplicationController(mcc)
     with ApplicationHelper

@@ -17,7 +17,6 @@
 package uk.gov.hmrc.thirdpartydeveloperfrontend.controllers
 
 import java.util.UUID.randomUUID
-
 import uk.gov.hmrc.thirdpartydeveloperfrontend.builder.DeveloperBuilder
 import uk.gov.hmrc.thirdpartydeveloperfrontend.config.ErrorHandler
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.controllers.SaveSubsFieldsPageMode
@@ -28,14 +27,12 @@ import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.ApplicationNotFound
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.apidefinitions.{APISubscriptionStatus, ApiContext, ApiVersion}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.{CheckInformation, Privileged, Standard, _}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.mocks.service._
-import org.joda.time.DateTimeZone
 import play.api.mvc.{AnyContentAsEmpty, AnyContentAsFormUrlEncoded, Result}
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
 import play.filters.csrf.CSRF.TokenProvider
 import uk.gov.hmrc.thirdpartydeveloperfrontend.service.{AuditService, SubscriptionFieldsService}
 import uk.gov.hmrc.http.HeaderCarrier
-import uk.gov.hmrc.time.DateTimeUtils
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.{TestApplications, WithCSRFAddToken}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.WithLoggedInSession._
 import views.html.createJourney.{SubscriptionConfigurationPageView, SubscriptionConfigurationStartView, SubscriptionConfigurationStepPageView}
@@ -48,6 +45,8 @@ import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.subscriptions.Field
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.subscriptions.FieldName
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.LocalUserIdTracker
 import uk.gov.hmrc.thirdpartydeveloperfrontend.builder._
+
+import java.time.{LocalDateTime, ZoneOffset}
 
 class ManageSubscriptionsSpec 
     extends BaseControllerSpec 
@@ -72,8 +71,8 @@ class ManageSubscriptionsSpec
     appId,
     clientId,
     "App name 1",
-    DateTimeUtils.now,
-    Some(DateTimeUtils.now),
+    LocalDateTime.now(ZoneOffset.UTC),
+    Some(LocalDateTime.now(ZoneOffset.UTC)),
     None,
     grantLength,
     Environment.SANDBOX,
@@ -813,6 +812,6 @@ class ManageSubscriptionsSpec
     ClientSecret(
       randomUUID.toString,
       randomUUID.toString,
-      DateTimeUtils.now.withZone(DateTimeZone.getDefault)
+      LocalDateTime.now
     )
 }

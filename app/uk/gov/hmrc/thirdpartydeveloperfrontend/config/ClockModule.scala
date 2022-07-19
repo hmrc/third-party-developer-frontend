@@ -14,14 +14,15 @@
  * limitations under the License.
  */
 
-package uk.gov.hmrc.thirdpartydeveloperfrontend.repositories
+package uk.gov.hmrc.thirdpartydeveloperfrontend.config
 
-import reactivemongo.api.indexes.Index
-import reactivemongo.api.indexes.IndexType.Ascending
+import com.google.inject.AbstractModule
 
-object IndexHelper {
+import java.time.Clock
 
-  def createAscendingIndex(indexName: Option[String], isUnique: Boolean, isBackground: Boolean, indexFieldsKey: String*): Index =
-    Index(key = indexFieldsKey.map { _ -> Ascending }, name = indexName, unique = isUnique, background = isBackground)
+class ClockModule extends AbstractModule {
 
+  override def configure(): Unit = {
+    bind(classOf[Clock]).toInstance(Clock.systemUTC())
+  }
 }

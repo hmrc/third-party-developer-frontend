@@ -34,7 +34,7 @@ class GetProductionCredentialsFlowService @Inject()(
 
   def fetchFlow(developerSession: DeveloperSession): Future[GetProductionCredentialsFlow] =
     flowRepository.fetchBySessionIdAndFlowType[GetProductionCredentialsFlow](developerSession.session.sessionId, FlowType.GET_PRODUCTION_CREDENTIALS) flatMap {
-      case Some(flow) => flow.pure[Future]
+      case Some(flow: GetProductionCredentialsFlow) => flow.pure[Future]
       case None       => val newFlowObject = GetProductionCredentialsFlow.create(developerSession.session.sessionId)
                          flowRepository.saveFlow[GetProductionCredentialsFlow](newFlowObject)
     }

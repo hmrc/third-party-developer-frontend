@@ -16,18 +16,15 @@
 
 package views
 
-import java.time.Period
+import java.time.{LocalDateTime, Period, ZoneOffset}
 import java.util.UUID
 import java.util.UUID.randomUUID
-
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.LoggedInState
-import org.joda.time.DateTime
 import org.jsoup.Jsoup
 import org.jsoup.nodes.Document
 import play.api.mvc.Flash
 import play.api.test.FakeRequest
-import uk.gov.hmrc.time.DateTimeUtils
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils._
 import views.helper.CommonViewSpec
 import views.html.ClientSecretsView
@@ -53,18 +50,18 @@ class ClientSecretsSpec extends CommonViewSpec with WithCSRFAddToken with Collab
     val request = FakeRequest().withCSRFToken
     val developer = DeveloperSessionBuilder("Test", "Test", "Test", None, loggedInState = LoggedInState.LOGGED_IN)
 
-    val clientSecret1 = ClientSecret(randomUUID.toString, "", DateTimeUtils.now)
-    val clientSecret2 = ClientSecret(randomUUID.toString, "", DateTimeUtils.now)
-    val clientSecret3 = ClientSecret(randomUUID.toString, "", DateTimeUtils.now)
-    val clientSecret4 = ClientSecret(randomUUID.toString, "", DateTimeUtils.now)
-    val clientSecret5 = ClientSecret(randomUUID.toString, "", DateTimeUtils.now)
+    val clientSecret1 = ClientSecret(randomUUID.toString, "", LocalDateTime.now(ZoneOffset.UTC))
+    val clientSecret2 = ClientSecret(randomUUID.toString, "", LocalDateTime.now(ZoneOffset.UTC))
+    val clientSecret3 = ClientSecret(randomUUID.toString, "", LocalDateTime.now(ZoneOffset.UTC))
+    val clientSecret4 = ClientSecret(randomUUID.toString, "", LocalDateTime.now(ZoneOffset.UTC))
+    val clientSecret5 = ClientSecret(randomUUID.toString, "", LocalDateTime.now(ZoneOffset.UTC))
 
     val application = Application(
       ApplicationId(UUID.randomUUID().toString),
       ClientId("Test Application Client ID"),
       "Test Application",
-      DateTime.now(),
-      Some(DateTime.now()),
+      LocalDateTime.now(),
+      Some(LocalDateTime.now()),
       None,
       Period.ofDays(547),
       Environment.PRODUCTION,

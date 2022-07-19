@@ -16,15 +16,13 @@
 
 package uk.gov.hmrc.thirdpartydeveloperfrontend.service
 
-import java.time.Period
+import java.time.{LocalDateTime, Period, ZoneOffset}
 import java.util.UUID.randomUUID
-
 import uk.gov.hmrc.thirdpartydeveloperfrontend.builder._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.connectors._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.apidefinitions._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications._
-import uk.gov.hmrc.time.DateTimeUtils
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.AsyncHmrcSpec
 
 import scala.concurrent.Future.successful
@@ -78,7 +76,7 @@ class SubscriptionsServiceSpec extends AsyncHmrcSpec with SubscriptionsBuilder w
   val productionApplicationId = ApplicationId("Application ID")
   val productionClientId = ClientId(s"client-id-${randomUUID().toString}")
   val productionApplication: Application =
-    Application(productionApplicationId, productionClientId, "name", DateTimeUtils.now, Some(DateTimeUtils.now), None, grantLength, Environment.PRODUCTION, Some("description"), Set())
+    Application(productionApplicationId, productionClientId, "name", LocalDateTime.now(ZoneOffset.UTC), Some(LocalDateTime.now(ZoneOffset.UTC)), None, grantLength, Environment.PRODUCTION, Some("description"), Set())
 
   "isSubscribedToApi" should {
     val subscriptions = Set(

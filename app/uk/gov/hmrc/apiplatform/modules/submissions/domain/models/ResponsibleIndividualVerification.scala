@@ -16,15 +16,18 @@
 
 package uk.gov.hmrc.apiplatform.modules.submissions.domain.models
 
+import play.api.libs.json.{Format, OFormat}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.ApplicationId
-import org.joda.time.DateTime
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.services.LocalDateTimeFormatters
+
+import java.time.{LocalDateTime, ZoneOffset}
 
 case class ResponsibleIndividualVerificationId(value: String) extends AnyVal
 
 object ResponsibleIndividualVerificationId {
   import play.api.libs.json.Json
 
-  implicit val JsonFormat = Json.valueFormat[ResponsibleIndividualVerificationId]
+  implicit val JsonFormat: Format[ResponsibleIndividualVerificationId] = Json.valueFormat[ResponsibleIndividualVerificationId]
 }
 
 case class ResponsibleIndividualVerification(
@@ -33,16 +36,14 @@ case class ResponsibleIndividualVerification(
     submissionId: Submission.Id,
     submissionInstance: Int,
     applicationName: String,
-    createdOn: DateTime
+    createdOn: LocalDateTime
 )
 
-object ResponsibleIndividualVerification {
-  def apply(id: ResponsibleIndividualVerificationId, appId: ApplicationId, appName: String, submissionId: Submission.Id, submissionInstance: Int): ResponsibleIndividualVerification = new ResponsibleIndividualVerification(id, appId, submissionId, submissionInstance, appName, DateTime.now())
+object ResponsibleIndividualVerification extends LocalDateTimeFormatters {
+  def apply(id: ResponsibleIndividualVerificationId, appId: ApplicationId, appName: String, submissionId: Submission.Id, submissionInstance: Int): ResponsibleIndividualVerification =
+    new ResponsibleIndividualVerification(id, appId, submissionId, submissionInstance, appName, LocalDateTime.now(ZoneOffset.UTC))
 
   import play.api.libs.json.Json
-  import play.api.libs.json.JodaReads.DefaultJodaDateTimeReads
-  import play.api.libs.json.JodaWrites.JodaDateTimeNumberWrites
-  implicit val numberWrites = JodaDateTimeNumberWrites
 
-  implicit val formatResponsibleIndividualVerification = Json.format[ResponsibleIndividualVerification]
+  implicit val formatResponsibleIndividualVerification: OFormat[ResponsibleIndividualVerification] = Json.format[ResponsibleIndividualVerification]
 }

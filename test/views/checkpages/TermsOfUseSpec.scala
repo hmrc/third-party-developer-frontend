@@ -25,10 +25,11 @@ import org.jsoup.Jsoup
 import play.api.mvc.{AnyContentAsEmpty, Call}
 import play.api.test.FakeRequest
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.TermsOfUseVersion
-import uk.gov.hmrc.time.DateTimeUtils
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils._
 import views.helper.CommonViewSpec
 import views.html.checkpages.TermsOfUseView
+
+import java.time.{LocalDateTime, ZoneOffset}
 
 class TermsOfUseSpec extends CommonViewSpec with WithCSRFAddToken with CollaboratorTracker with LocalUserIdTracker {
 
@@ -40,15 +41,15 @@ class TermsOfUseSpec extends CommonViewSpec with WithCSRFAddToken with Collabora
         ApplicationId("APPLICATION_ID"),
         ClientId("CLIENT_ID"),
         "APPLICATION NAME",
-        DateTimeUtils.now,
-        Some(DateTimeUtils.now),
+        LocalDateTime.now(ZoneOffset.UTC),
+        Some(LocalDateTime.now(ZoneOffset.UTC)),
         None,
         grantLength,
         Environment.PRODUCTION,
         Some("APPLICATION DESCRIPTION"),
         Set("sample@example.com".asAdministratorCollaborator, "someone@example.com".asDeveloperCollaborator),
         Standard(),
-        ApplicationState(State.TESTING, None, None, DateTimeUtils.now)
+        ApplicationState(State.TESTING, None, None, LocalDateTime.now(ZoneOffset.UTC))
       )
 
     "show terms of use agreement page that requires terms of use to be agreed" in {
@@ -82,7 +83,7 @@ class TermsOfUseSpec extends CommonViewSpec with WithCSRFAddToken with Collabora
       implicit val request: FakeRequest[AnyContentAsEmpty.type] = FakeRequest().withCSRFToken
 
       val appConfigMock = mock[ApplicationConfig]
-      val termsOfUseAgreement = TermsOfUseAgreement("email@example.com", DateTimeUtils.now, "1.0")
+      val termsOfUseAgreement = TermsOfUseAgreement("email@example.com", LocalDateTime.now(ZoneOffset.UTC), "1.0")
 
       val checkInformation = CheckInformation(termsOfUseAgreements = List(termsOfUseAgreement))
 

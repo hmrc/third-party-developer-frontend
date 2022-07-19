@@ -27,9 +27,10 @@ import play.api.data.Form
 import play.api.libs.crypto.CookieSigner
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents, Result}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.service.{ApplicationActionService, ApplicationService, SessionService, TermsOfUseVersionService}
-import uk.gov.hmrc.time.DateTimeUtils
+
 import views.html.TermsOfUseView
 
+import java.time.{LocalDateTime, ZoneOffset}
 import scala.concurrent.{ExecutionContext, Future}
 
 @Singleton
@@ -67,7 +68,7 @@ class TermsOfUse @Inject() (
       if (app.termsOfUseStatus == TermsOfUseStatus.AGREEMENT_REQUIRED) {
         val information = app.checkInformation.getOrElse(CheckInformation())
         val updatedInformation = information.copy(
-          termsOfUseAgreements = information.termsOfUseAgreements :+ TermsOfUseAgreement(request.developerSession.email, DateTimeUtils.now, termsOfUseVersionService.getLatest().toString)
+          termsOfUseAgreements = information.termsOfUseAgreements :+ TermsOfUseAgreement(request.developerSession.email, LocalDateTime.now(ZoneOffset.UTC), termsOfUseVersionService.getLatest().toString)
         )
 
         applicationService

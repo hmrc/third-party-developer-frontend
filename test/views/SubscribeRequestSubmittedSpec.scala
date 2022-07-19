@@ -23,11 +23,12 @@ import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.LoggedIn
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.controllers.ApplicationViewModel
 import org.jsoup.Jsoup
 import play.api.test.FakeRequest
-import uk.gov.hmrc.time.DateTimeUtils
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.ViewHelpers._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils._
 import views.helper.CommonViewSpec
 import views.html.SubscribeRequestSubmittedView
+
+import java.time.{LocalDateTime, ZoneOffset}
 
 class SubscribeRequestSubmittedSpec extends CommonViewSpec with WithCSRFAddToken with CollaboratorTracker with LocalUserIdTracker {
   "Subscribe request submitted page" should {
@@ -44,8 +45,8 @@ class SubscribeRequestSubmittedSpec extends CommonViewSpec with WithCSRFAddToken
         appId,
         clientId,
         "Test Application",
-        DateTimeUtils.now,
-        Some(DateTimeUtils.now),
+        LocalDateTime.now(ZoneOffset.UTC),
+        Some(LocalDateTime.now(ZoneOffset.UTC)),
         None,
         grantLength,
         Environment.PRODUCTION,

@@ -16,18 +16,16 @@
 
 package uk.gov.hmrc.thirdpartydeveloperfrontend.connectors
 
-import java.time.{LocalDateTime, Period}
+import java.time.{LocalDateTime, Period, ZoneOffset}
 import java.util.UUID
 import java.util.UUID.randomUUID
 import com.github.tomakehurst.wiremock.client.WireMock._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.connectors.ThirdPartyApplicationConnectorDomain._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications._
-import org.joda.time.DateTimeZone
 import play.api.http.Status._
 import uk.gov.hmrc.http._
 import uk.gov.hmrc.play.http.metrics.common.API
-import uk.gov.hmrc.time.DateTimeUtils
 import ThirdPartyApplicationConnectorJsonFormatters._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.CollaboratorTracker
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.LocalUserIdTracker
@@ -99,8 +97,8 @@ class ThirdPartyApplicationConnectorSpec extends BaseConnectorIntegrationSpec wi
       appId,
       clientId,
       appName,
-      DateTimeUtils.now,
-      Some(DateTimeUtils.now),
+      LocalDateTime.now(ZoneOffset.UTC),
+      Some(LocalDateTime.now(ZoneOffset.UTC)),
       None,
       Period.ofDays(547),
       connector.environment,
@@ -120,7 +118,6 @@ class ThirdPartyApplicationConnectorSpec extends BaseConnectorIntegrationSpec wi
   trait ProxiedSetup extends BaseSetup {
     val connector = app.injector.instanceOf[ThirdPartyApplicationSandboxConnector]
   }
-
 
   "api" should {
     "be third-party-application" in new Setup {
@@ -474,7 +471,7 @@ class ThirdPartyApplicationConnectorSpec extends BaseConnectorIntegrationSpec wi
 
   "addClientSecret" should {
     def tpaClientSecret(clientSecretId: String, clientSecretValue: Option[String] = None): TPAClientSecret =
-      TPAClientSecret(clientSecretId, "secret-name", clientSecretValue, DateTimeUtils.now, None)
+      TPAClientSecret(clientSecretId, "secret-name", clientSecretValue, LocalDateTime.now(ZoneOffset.UTC), None)
 
     val actorEmailAddress = "john.requestor@example.com"
     val clientSecretRequest = ClientSecretRequest(actorEmailAddress)
@@ -673,5 +670,5 @@ class ThirdPartyApplicationConnectorSpec extends BaseConnectorIntegrationSpec wi
     }
   }
 
-  private def aClientSecret() = ClientSecret(randomUUID.toString, randomUUID.toString, DateTimeUtils.now.withZone(DateTimeZone.getDefault))
+  private def aClientSecret() = ClientSecret(randomUUID.toString, randomUUID.toString, LocalDateTime.now())
 }

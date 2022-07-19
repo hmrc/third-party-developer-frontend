@@ -16,103 +16,88 @@
 
 package uk.gov.hmrc.thirdpartydeveloperfrontend.repositories
 
-import akka.stream.Materializer
-import uk.gov.hmrc.thirdpartydeveloperfrontend.config.ApplicationConfig
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.flows.{Flow, FlowType}
-import javax.inject.{Inject, Singleton}
+import org.mongodb.scala.model.Filters.{and, equal}
+import org.mongodb.scala.model.Indexes.ascending
+import org.mongodb.scala.model.{IndexModel, IndexOptions,UpdateOptions, Updates}
 import play.api.libs.json._
-import play.modules.reactivemongo.ReactiveMongoComponent
-import reactivemongo.api.Cursor.FailOnError
-import reactivemongo.api.ReadPreference
-import reactivemongo.api.indexes.{Index, IndexType}
-import reactivemongo.bson.{BSONDocument, BSONLong, BSONObjectID}
-import reactivemongo.play.json.ImplicitBSONHandlers.JsObjectDocumentWriter
-import uk.gov.hmrc.thirdpartydeveloperfrontend.repositories.IndexHelper.createAscendingIndex
-import uk.gov.hmrc.mongo.ReactiveRepository
-import uk.gov.hmrc.mongo.json.ReactiveMongoFormats
+import uk.gov.hmrc.apiplatform.modules.uplift.domain.models.GetProductionCredentialsFlow
+import uk.gov.hmrc.mongo.MongoComponent
+import uk.gov.hmrc.mongo.play.json.{Codecs, PlayMongoRepository}
+import uk.gov.hmrc.thirdpartydeveloperfrontend.config.ApplicationConfig
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.flows.{EmailPreferencesFlowV2, Flow, FlowType, IpAllowlistFlow, NewApplicationEmailPreferencesFlowV2}
+import uk.gov.hmrc.thirdpartydeveloperfrontend.repositories.MongoFormatters.formatFlow
 
+import java.util.concurrent.TimeUnit
+import javax.inject.{Inject, Singleton}
 import scala.concurrent.{ExecutionContext, Future}
 
 @Singleton
-class FlowRepository @Inject()(mongo: ReactiveMongoComponent, appConfig: ApplicationConfig)(implicit val mat: Materializer, val ec: ExecutionContext)
-  extends ReactiveRepository[Flow, BSONObjectID]("flows", mongo.mongoConnector.db,
-    ReactiveMongoFormatters.formatFlow, ReactiveMongoFormats.objectIdFormats) {
-
-  private lazy val lastUpdatedIndexName = "last_updated_ttl_idx"
-  private lazy val OptExpireAfterSeconds = "expireAfterSeconds"
-
-  override def indexes = Seq(
-    createAscendingIndex(
-      Some("session_flow_type_idx"),
-      isUnique = true,
-      isBackground = true,
-      List("sessionId", "flowType"): _*
-    ),
-    Index(
-      key = Seq("lastUpdated" -> IndexType.Ascending),
-      name = Some(lastUpdatedIndexName),
-      background = true,
-      options = BSONDocument(OptExpireAfterSeconds -> BSONLong(appConfig.sessionTimeoutInSeconds))
-    )
-  )
-
-  override def ensureIndexes(implicit ec: ExecutionContext): Future[Seq[Boolean]] = {
-    dropTTLIndexIfChanged
-    ensureLocalIndexes()
-  }
-
-  private def dropTTLIndexIfChanged(implicit ec: ExecutionContext) = {
-    val indexes = collection.indexesManager.list()
-
-    def matchIndexName(index: Index) = {
-      index.eventualName == lastUpdatedIndexName
-    }
-
-    def compareTTLValueWithConfig(index: Index) = {
-      index.options.getAs[BSONLong](OptExpireAfterSeconds).fold(false)(_.as[Long] != appConfig.sessionTimeoutInSeconds)
-    }
-
-    def checkIfTTLChanged(index: Index): Boolean = {
-      matchIndexName(index) && compareTTLValueWithConfig(index)
-    }
-
-    indexes.map(_.exists(checkIfTTLChanged))
-      .map(hasTTLIndexChanged => if (hasTTLIndexChanged) {
-        logger.info(s"Dropping time to live index for entries in ${collection.name}")
-        Future.sequence(Seq(collection.indexesManager.drop(lastUpdatedIndexName).map(_ > 0),
-          ensureLocalIndexes))
-      })
-  }
-
-  private def ensureLocalIndexes()(implicit ec: ExecutionContext): Future[Seq[Boolean]] = {
-    Future.sequence(indexes.map(index => {
-      logger.info(s"ensuring index ${index.eventualName}")
-      collection.indexesManager.ensure(index)
-    }))
-  }
+class FlowRepository @Inject() (mongo: MongoComponent, appConfig: ApplicationConfig)(implicit val ec: ExecutionContext)
+    extends PlayMongoRepository[Flow](
+      collectionName = "flows",
+      mongoComponent = mongo,
+      domainFormat = formatFlow,
+      indexes = Seq(
+        IndexModel(
+          ascending("sessionId", "flowType"),
+          IndexOptions().name("session_flow_type_idx")
+            .unique(true)
+            .background(true)
+        ),
+        IndexModel(
+          ascending("lastUpdated"),
+          IndexOptions().name("last_updated_ttl_idx")
+            .background(true)
+            .expireAfter(appConfig.sessionTimeoutInSeconds, TimeUnit.SECONDS)
+        )
+      ),
+      extraCodecs = Codecs.playFormatCodecsBuilder(formatFlow)
+        .forType[IpAllowlistFlow]
+        .forType[EmailPreferencesFlowV2]
+        .forType[NewApplicationEmailPreferencesFlowV2]
+        .forType[GetProductionCredentialsFlow]
+        .build
+    ) {
 
   def saveFlow[A <: Flow](flow: A)(implicit format: OFormat[A]): Future[A] = {
-   for {
-     something <- findAndUpdate(Json.obj("sessionId" -> flow.sessionId, "flowType" -> flow.flowType),
-       Json.toJson(flow.asInstanceOf[Flow]).as[JsObject], upsert = true, fetchNewObject = true)
-     _ <- updateLastUpdated(flow.sessionId)
-   } yield something.result[A].head
+    val query = and(equal("sessionId", flow.sessionId), equal("flowType", Codecs.toBson(flow.flowType)))
+
+    collection.find(query).headOption flatMap {
+      case Some(_: Flow) =>
+        for {
+          updatedFlow <- collection.replaceOne(
+            filter = query,
+            replacement = flow
+          ).toFuture().map(_ => flow)
+
+          _ <- updateLastUpdated(flow.sessionId)
+        } yield updatedFlow
+
+      case None =>
+        for {
+          newFlow <- collection.insertOne(flow).toFuture().map(_ => flow)
+          _ <- updateLastUpdated(flow.sessionId)
+        } yield newFlow
+    }
   }
 
   def deleteBySessionIdAndFlowType(sessionId: String, flowType: FlowType): Future[Boolean] = {
-    remove("sessionId" -> sessionId, "flowType" -> flowType).map(_.ok)
+    collection.deleteOne(and(equal("sessionId", sessionId), equal("flowType", Codecs.toBson(flowType))))
+      .toFuture()
+      .map(_.wasAcknowledged())
   }
 
-  def fetchBySessionIdAndFlowType[A <: Flow](sessionId: String, flowType: FlowType)(implicit formatter: OFormat[A]): Future[Option[A]] = {
-    collection
-      .find(Json.obj("sessionId" -> sessionId, "flowType" -> flowType), Option.empty[A])
-      .cursor[A](ReadPreference.primaryPreferred)
-      .collect(maxDocs = -1, FailOnError[List[A]]())
-      .map(_.headOption)
+  def fetchBySessionIdAndFlowType[A <: Flow](sessionId: String, flowType: FlowType)(implicit formatter: OFormat[A]): Future[Option[Flow]] = {
+    collection.find(and(equal("sessionId", sessionId), equal("flowType", Codecs.toBson(flowType))))
+      .headOption()
   }
 
   def updateLastUpdated(sessionId: String): Future[Unit] = {
-    val updateStatement: JsObject = Json.obj("$currentDate" -> Json.obj("lastUpdated" -> true))
-    collection.update(false).one(Json.obj("sessionId" -> sessionId), updateStatement, upsert = false, multi = true).map(_ => ())
+    collection.updateMany(
+      filter = equal("sessionId", sessionId),
+      update = Updates.currentDate("lastUpdated"),
+      options = new UpdateOptions().upsert(false)
+    ).toFuture()
+      .map(_ => ())
   }
 }

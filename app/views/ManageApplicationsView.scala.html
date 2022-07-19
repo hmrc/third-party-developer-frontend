@@ -23,8 +23,10 @@
 @import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.controllers.LeftHandNavFlags
 @import uk.gov.hmrc.urls.Link
 @import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.routes
+@import java.time.Clock
 
-@this(devMain: DevMain2, leftHandNav: LeftHandNav)
+@this(devMain: DevMain2, leftHandNav: LeftHandNav, clock: Clock)
+
 
 @(model: ManageApplicationsViewModel)(implicit request: play.api.mvc.Request[Any], loggedIn: DeveloperSession, messagesProvider: MessagesProvider, appConfig: ApplicationConfig, navSection: String = "manage-applications", environmentNameService: EnvironmentNameService)
 
@@ -109,7 +111,7 @@
               </td>
               <td class="govuk-table__cell govuk-!-width-one-quarter" data-app-lastAccess>
                 @{
-                  formatLastAccessDate(app.lastAccess, app.createdOn) match {
+                  formatLastAccessDate(app.lastAccess, app.createdOn, clock) match {
                     case Some(formattedDate) => formattedDate.capitalize
                     case _ => "No API called"
                   }

@@ -19,7 +19,6 @@ package views.ppns
 import cats.data.NonEmptyList
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.LoggedInState
-import org.joda.time.DateTime
 import org.jsoup.Jsoup
 import org.jsoup.nodes.Document
 import play.api.test.FakeRequest
@@ -28,6 +27,7 @@ import uk.gov.hmrc.thirdpartydeveloperfrontend.utils._
 import views.helper.CommonViewSpec
 import views.html.ppns.PushSecretsView
 
+import java.time.LocalDateTime
 import scala.collection.JavaConverters._
 
 class PushSecretsViewSpec extends CommonViewSpec with WithCSRFAddToken with CollaboratorTracker with LocalUserIdTracker {
@@ -47,8 +47,8 @@ class PushSecretsViewSpec extends CommonViewSpec with WithCSRFAddToken with Coll
       ApplicationId("Test Application ID"),
       ClientId("Test Application Client ID"),
       "Test Application",
-      DateTime.now(),
-      Some(DateTime.now()),
+      LocalDateTime.now(),
+      Some(LocalDateTime.now()),
       None,
       grantLength,
       Environment.PRODUCTION,

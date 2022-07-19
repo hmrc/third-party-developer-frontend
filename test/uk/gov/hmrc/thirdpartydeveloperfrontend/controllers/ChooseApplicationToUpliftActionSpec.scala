@@ -26,7 +26,6 @@ import play.api.test.Helpers._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.service.AuditService
 import uk.gov.hmrc.apiplatform.modules.uplift.domain.models.GetProductionCredentialsFlow
 import uk.gov.hmrc.http.HeaderCarrier
-import uk.gov.hmrc.time.DateTimeUtils
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.WithLoggedInSession._
 import views.helper.EnvironmentNameService
@@ -48,6 +47,9 @@ import uk.gov.hmrc.apiplatform.modules.uplift.controllers.UpliftJourneySwitch
 import uk.gov.hmrc.thirdpartydeveloperfrontend.config.UpliftJourneyConfig
 import uk.gov.hmrc.apiplatform.modules.uplift.services.GetProductionCredentialsFlowService
 
+import java.time.LocalDateTime
+import java.time.ZoneOffset
+
 class ChooseApplicationToUpliftActionSpec
     extends BaseControllerSpec 
     with SampleSession
@@ -60,7 +62,7 @@ class ChooseApplicationToUpliftActionSpec
 
   val collaborator: Collaborator = loggedInDeveloper.email.asAdministratorCollaborator
 
-  val appCreatedOn = DateTimeUtils.now.minusDays(1)
+  val appCreatedOn = LocalDateTime.now(ZoneOffset.UTC).minusDays(1)
   val appLastAccess = appCreatedOn
 
   val sandboxAppSummaries = (1 to 5).map(_ => buildApplication(loggedInDeveloper.email)).map(ApplicationSummary.from(_, loggedInDeveloper.developer.userId)).toList

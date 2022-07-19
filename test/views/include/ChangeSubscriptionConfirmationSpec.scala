@@ -25,12 +25,13 @@ import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.controllers.Applica
 import org.jsoup.Jsoup
 import play.api.data.Form
 import play.api.test.FakeRequest
-import uk.gov.hmrc.time.DateTimeUtils
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.ViewHelpers.elementExistsByText
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils._
 import views.helper.CommonViewSpec
 import views.html.include.ChangeSubscriptionConfirmationView
 import play.api.mvc.Call
+
+import java.time.{LocalDateTime, ZoneOffset}
 
 class ChangeSubscriptionConfirmationSpec extends CommonViewSpec with WithCSRFAddToken with CollaboratorTracker with LocalUserIdTracker {
   val request = FakeRequest().withCSRFToken
@@ -49,8 +50,8 @@ class ChangeSubscriptionConfirmationSpec extends CommonViewSpec with WithCSRFAdd
     applicationId,
     clientId,
     applicationName,
-    DateTimeUtils.now,
-    Some(DateTimeUtils.now),
+    LocalDateTime.now(ZoneOffset.UTC),
+    Some(LocalDateTime.now(ZoneOffset.UTC)),
     None,
     grantLength,
     Environment.PRODUCTION,

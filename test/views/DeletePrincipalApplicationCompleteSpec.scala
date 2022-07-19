@@ -20,13 +20,14 @@ import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.LoggedInState
 import org.jsoup.Jsoup
 import play.api.test.FakeRequest
-import uk.gov.hmrc.time.DateTimeUtils
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.ViewHelpers.elementExistsByText
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.WithCSRFAddToken
 import views.helper.CommonViewSpec
 import views.html.DeletePrincipalApplicationCompleteView
 import uk.gov.hmrc.thirdpartydeveloperfrontend.builder.DeveloperBuilder
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.{DeveloperSessionBuilder, LocalUserIdTracker}
+
+import java.time.{LocalDateTime, ZoneOffset}
 
 class DeletePrincipalApplicationCompleteSpec extends CommonViewSpec with WithCSRFAddToken with DeveloperBuilder with LocalUserIdTracker {
 
@@ -44,8 +45,8 @@ class DeletePrincipalApplicationCompleteSpec extends CommonViewSpec with WithCSR
         appId,
         clientId,
         "App name 1",
-        DateTimeUtils.now,
-        Some(DateTimeUtils.now),
+        LocalDateTime.now(ZoneOffset.UTC),
+        Some(LocalDateTime.now(ZoneOffset.UTC)),
         None,
         grantLength,
         Environment.PRODUCTION,

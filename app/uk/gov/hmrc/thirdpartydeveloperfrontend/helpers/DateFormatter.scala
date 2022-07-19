@@ -15,35 +15,34 @@
  */
 
 package uk.gov.hmrc.thirdpartydeveloperfrontend.helpers
-import org.joda.time.DateTime
-import org.joda.time.Months.monthsBetween
-import org.joda.time.Seconds.secondsBetween
-import org.joda.time.format.{DateTimeFormat, DateTimeFormatter}
-import uk.gov.hmrc.time.DateTimeUtils.{daysBetween, now}
+
+import java.time.format.DateTimeFormatter
+import java.time.temporal.ChronoUnit
+import java.time.{Clock, LocalDateTime}
 
 object DateFormatter {
-  val shortFormatter: DateTimeFormatter = DateTimeFormat.forPattern("d MMM yyyy")
-  val standardFormatter: DateTimeFormatter = DateTimeFormat.forPattern("d MMMM yyyy")
-  val initialLastAccessDate = new DateTime(2019, 6, 25, 0, 0) // scalastyle:ignore magic.number
+  val shortFormatter: DateTimeFormatter = DateTimeFormatter.ofPattern("d MMM yyyy")
+  val standardFormatter: DateTimeFormatter = DateTimeFormatter.ofPattern("d MMMM yyyy")
+  val initialLastAccessDate = LocalDateTime.of(2019, 6, 25, 0, 0) // scalastyle:ignore magic.number
 
-  def formatDateWithShortPattern(dateTime: DateTime): String = {
-    shortFormatter.print(dateTime)
+  def formatDateWithShortPattern(dateTime: LocalDateTime): String = {
+    shortFormatter.format(dateTime)
   }
 
-  def formatDate(dateTime: DateTime): String = {
-    standardFormatter.print(dateTime)
+  def formatDate(dateTime: LocalDateTime): String = {
+    standardFormatter.format(dateTime)
   }
 
-  def formatLastAccessDate(maybeLastAccess: Option[DateTime], createdOnDate: DateTime): Option[String] = {
-    def formatDateValue(lastAccessDate: DateTime) = {
-     if (daysBetween(initialLastAccessDate.toLocalDate, lastAccessDate.toLocalDate) > 0) {
-        standardFormatter.print(lastAccessDate)
+  def formatLastAccessDate(maybeLastAccess: Option[LocalDateTime], createdOnDate: LocalDateTime, clock: Clock): Option[String] = {
+    def formatDateValue(lastAccessDate: LocalDateTime) = {
+     if (ChronoUnit.DAYS.between(initialLastAccessDate.toLocalDate, lastAccessDate.toLocalDate) > 0) {
+        standardFormatter.format(lastAccessDate)
       } else {
-        s"more than ${monthsBetween(lastAccessDate, now).getMonths} months ago"
+        s"more than ${ChronoUnit.MONTHS.between(lastAccessDate.toLocalDate, LocalDateTime.now(clock).toLocalDate)} months ago"
       }
     }
-
-    maybeLastAccess.filterNot( lastAccessDate => secondsBetween(createdOnDate, lastAccessDate).getSeconds == 0).map(formatDateValue)
-
+    maybeLastAccess
+      .filterNot(lastAccessDate => ChronoUnit.SECONDS.between(createdOnDate, lastAccessDate) == 0)
+      .map(formatDateValue)
   }
 }

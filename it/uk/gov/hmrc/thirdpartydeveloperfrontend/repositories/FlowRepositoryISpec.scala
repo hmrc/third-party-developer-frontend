@@ -1,89 +1,90 @@
 package uk.gov.hmrc.thirdpartydeveloperfrontend.repositories
 
-import akka.stream.Materializer
-import uk.gov.hmrc.thirdpartydeveloperfrontend.config.ApplicationConfig
+import org.mongodb.scala.bson.{BsonValue, Document}
+import org.mongodb.scala.model.Aggregates.{filter, project}
+import org.mongodb.scala.model.{Filters, Projections}
+import org.mongodb.scala.model.Projections.fields
+import org.scalatest.{BeforeAndAfterEach, OptionValues}
+import org.scalatest.matchers.should.Matchers
+import org.scalatest.wordspec.AnyWordSpec
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.connectors.ApiType.REST_API
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.connectors.{CombinedApi, CombinedApiCategory}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.emailpreferences.EmailTopic
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.flows.FlowType._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.flows.{EmailPreferencesFlowV2, Flow, FlowType, IpAllowlistFlow}
-import org.joda.time.DateTime
 import org.scalatestplus.play.guice.GuiceOneAppPerSuite
-import play.api.libs.json.{JsObject, Json}
-import play.modules.reactivemongo.ReactiveMongoComponent
-import reactivemongo.bson.BSONLong
-import reactivemongo.play.json.ImplicitBSONHandlers.JsObjectDocumentWriter
-import uk.gov.hmrc.thirdpartydeveloperfrontend.repositories.ReactiveMongoFormatters._
-import uk.gov.hmrc.mongo.{MongoConnector, MongoSpecSupport}
+import play.api.libs.json.{Format, OFormat}
+import play.api.test.{DefaultAwaitTimeout, FutureAwaits}
+import uk.gov.hmrc.mongo.play.json.Codecs
+import uk.gov.hmrc.thirdpartydeveloperfrontend.repositories.MongoFormatters._
 
+import java.time.LocalDateTime
 import scala.concurrent.ExecutionContext.Implicits.global
+import uk.gov.hmrc.mongo.play.json.formats.MongoJavatimeFormats
 
-class FlowRepositoryISpec extends BaseRepositoryIntegrationSpec with MongoSpecSupport with GuiceOneAppPerSuite {
+class FlowRepositoryISpec extends AnyWordSpec
+  with GuiceOneAppPerSuite
+  with Matchers
+  with OptionValues
+  with DefaultAwaitTimeout
+  with FutureAwaits
+  with BeforeAndAfterEach {
 
-  implicit lazy val materializer: Materializer = app.materializer
   private val currentSession = "session 1"
   private val anotherSession = "session 2"
 
-  private val reactiveMongoComponent: ReactiveMongoComponent = new ReactiveMongoComponent {
-    override val mongoConnector: MongoConnector = mongoConnectorForTest
-  }
+  private val flowRepository = app.injector.instanceOf[FlowRepository]
 
-  private val appConfig = app.injector.instanceOf[ApplicationConfig]
-  private val repository = new FlowRepository(reactiveMongoComponent, appConfig)
-
-  override protected def beforeEach() {
-    await(repository.drop)
-    await(repository.ensureIndexes)
-  }
-
-  override protected def afterAll() {
-   await(repository.drop)
+  override protected def beforeEach(): Unit = {
+    await(flowRepository.collection.drop.toFuture())
+    await(flowRepository.ensureIndexes)
   }
 
   trait PopulatedSetup {
-
     val currentFlow: IpAllowlistFlow = IpAllowlistFlow(currentSession, Set("ip1", "ip2"))
     val flowInDifferentSession: IpAllowlistFlow = IpAllowlistFlow(anotherSession, Set("ip3", "ip4"))
     val flowOfDifferentType: EmailPreferencesFlowV2 = EmailPreferencesFlowV2(currentSession,
       selectedCategories = Set("category1", "category2"),
       selectedAPIs = Map("category1" -> Set("qwqw", "asass")),
       selectedTopics = Set("BUSINESS_AND_POLICY"),
-      visibleApis = List(CombinedApi("api1ServiceName", "api1Name",  List(CombinedApiCategory("VAT"), CombinedApiCategory("AGENT")), REST_API)))
-    await(repository.saveFlow(currentFlow))
-    await(repository.saveFlow(flowInDifferentSession))
-    await(repository.saveFlow(flowOfDifferentType))
-    await(repository.findAll()) should have size 3
+      visibleApis = List(CombinedApi("api1ServiceName", "api1Name",
+                    List(CombinedApiCategory("VAT"), CombinedApiCategory("AGENT")), REST_API)))
 
-    def fetchLastUpdated(flow: Flow): DateTime = {
-      (await(repository.collection
-        .find[JsObject, JsObject](Json.obj("sessionId" -> flow.sessionId, "flowType" -> flow.flowType))
-        .one[JsObject]).get \ "lastUpdated")
-        .as[DateTime]
+    await(flowRepository.saveFlow(currentFlow))
+    await(flowRepository.saveFlow(flowInDifferentSession))
+    await(flowRepository.saveFlow(flowOfDifferentType))
+    await(flowRepository.collection.countDocuments().toFuture()) shouldBe 3
+
+    def fetchLastUpdated(flow: Flow): LocalDateTime = {
+      val query = Document("sessionId" -> Codecs.toBson(flow.sessionId), "flowType" -> Codecs.toBson(flow.flowType))
+
+      await(flowRepository.collection.aggregate[BsonValue](
+        Seq(
+        filter(query),
+        project(fields(Projections.excludeId(), Projections.include("lastUpdated"))))
+      ).head()
+       .map(Codecs.fromBson[ResultSet]))
+        .lastUpdated
     }
   }
 
   "FlowRepository" when {
-    "Indexes" should {
-      "create ttl index and it should have correct value matching the session timeout in seconds "in {
-        val mayBeIndex = await(repository.collection.indexesManager.list().map(_.find(_.eventualName.equalsIgnoreCase("last_updated_ttl_idx"))))
-        mayBeIndex shouldNot be(None)
-        val mayBeTtlValue: Option[Long] = mayBeIndex.flatMap(_.options.getAs[BSONLong]("expireAfterSeconds").map(_.as[Long]))
-        mayBeTtlValue shouldNot be(None)
-        mayBeTtlValue.head shouldBe appConfig.sessionTimeoutInSeconds
-      }
-    }
 
     "saveFlow" should {
       "save IP allowlist" in {
         val flow = IpAllowlistFlow(currentSession, Set("ip1", "ip2"))
 
-        await(repository.saveFlow(flow))
+        await(flowRepository.saveFlow(flow))
 
-        val Some(result) = await(repository.collection.find[JsObject, JsObject](Json.obj("sessionId" -> currentSession)).one[JsObject])
-        (result \ "sessionId").as[String] shouldBe currentSession
-        (result \ "flowType").as[String] shouldBe IP_ALLOW_LIST.toString()
-        (result \ "lastUpdated").asOpt[DateTime] should not be empty
-        (result \ "allowlist").as[Set[String]] should contain only ("ip1", "ip2")
+        val result= await(flowRepository.collection.find(Filters.equal("sessionId", currentSession)).headOption())
+        result match {
+          case Some(savedFlow: IpAllowlistFlow ) =>
+            savedFlow.sessionId shouldBe currentSession
+            savedFlow.flowType shouldBe IP_ALLOW_LIST
+            savedFlow.allowlist shouldBe Set("ip1", "ip2")
+          case _ => fail
+        }
+
       }
 
       "save email preferences" in {
@@ -91,43 +92,43 @@ class FlowRepositoryISpec extends BaseRepositoryIntegrationSpec with MongoSpecSu
           selectedCategories= Set("category1", "category2"),
           selectedAPIs = Map("category1" -> Set("qwqw", "asass")),
           selectedTopics = Set("BUSINESS_AND_POLICY",  "EVENT_INVITES"),
-        visibleApis = List(CombinedApi("api1ServiceName", "api1DisplayName",  List(CombinedApiCategory("VAT"), CombinedApiCategory("AGENT")), REST_API)))
+          visibleApis = List(CombinedApi("api1ServiceName", "api1DisplayName",  List(CombinedApiCategory("VAT"), CombinedApiCategory("AGENT")), REST_API)))
 
-        await(repository.saveFlow(flow))
+        await(flowRepository.saveFlow(flow))
 
-        val Some(result) = await(repository.collection.find[JsObject, JsObject](Json.obj("sessionId" -> currentSession)).one[JsObject])
-        (result \ "sessionId").as[String] shouldBe currentSession
-        (result \ "flowType").as[String] shouldBe EMAIL_PREFERENCES_V2.toString
-        (result \ "lastUpdated").asOpt[DateTime] should not be empty
-        (result \ "selectedTopics").as[Set[EmailTopic]] should contain only (EmailTopic.BUSINESS_AND_POLICY, EmailTopic.EVENT_INVITES)
-        (result \ "visibleApis").as[List[CombinedApi]] should contain only (CombinedApi("api1ServiceName", "api1DisplayName",   List(CombinedApiCategory("VAT"), CombinedApiCategory("AGENT")), REST_API))
+        val result: Flow = await(flowRepository.collection.find(Filters.equal("sessionId", Codecs.toBson(currentSession))).first.toFuture())
+        val castResult =  result.asInstanceOf[EmailPreferencesFlowV2]
+        castResult.sessionId shouldBe currentSession
+        castResult.flowType shouldBe EMAIL_PREFERENCES_V2
+        castResult.selectedTopics shouldBe Set(EmailTopic.BUSINESS_AND_POLICY.toString, EmailTopic.EVENT_INVITES.toString)
+        castResult.visibleApis should contain only (CombinedApi("api1ServiceName", "api1DisplayName",   List(CombinedApiCategory("VAT"), CombinedApiCategory("AGENT")), REST_API))
       }
 
       "update the flow when it already exists" in new PopulatedSetup {
-        val lastUpdatedInCurrentFlow: DateTime = fetchLastUpdated(currentFlow)
+        await(flowRepository.saveFlow(currentFlow))
         val updatedFlow: IpAllowlistFlow = currentFlow.copy(allowlist = Set("new IP"))
 
-        val result: IpAllowlistFlow = await(repository.saveFlow(updatedFlow))
+        val result: IpAllowlistFlow = await(flowRepository.saveFlow(updatedFlow))
 
         result shouldBe updatedFlow
-        val Some(updatedDocument) = await(repository.collection
-          .find[JsObject, JsObject](Json.obj("sessionId" -> currentSession, "flowType" -> FlowType.IP_ALLOW_LIST.toString())).one[JsObject])
-        (updatedDocument \ "lastUpdated").as[DateTime].isAfter(lastUpdatedInCurrentFlow) shouldBe true
-        (updatedDocument \ "allowlist").as[Set[String]] should contain only "new IP"
+        val updatedDocument: IpAllowlistFlow = await(flowRepository.collection
+          .find(Document("sessionId" -> currentSession, "flowType" ->  FlowType.IP_ALLOW_LIST.toString)).map(_.asInstanceOf[IpAllowlistFlow]).head())
+
+        updatedDocument.allowlist shouldBe Set("new IP")
       }
     }
 
     "deleteBySessionId" should {
       "delete only the flow for the specified session ID and flow type" in new PopulatedSetup {
-        val result: Boolean = await(repository.deleteBySessionIdAndFlowType(currentSession, FlowType.IP_ALLOW_LIST))
+        val result: Boolean = await(flowRepository.deleteBySessionIdAndFlowType(currentSession, FlowType.IP_ALLOW_LIST))
 
         result shouldBe true
-        await(repository.findAll()) should have size 2
-        await(repository.fetchBySessionIdAndFlowType(currentSession, FlowType.IP_ALLOW_LIST)(formatIpAllowlistFlow)) shouldBe None
+        await(flowRepository.collection.countDocuments().toFuture()) shouldBe 2
+        await(flowRepository.fetchBySessionIdAndFlowType(currentSession, FlowType.IP_ALLOW_LIST)(formatIpAllowlistFlow)) shouldBe None
       }
 
       "return false if it did not have anything to delete" in {
-        val result: Boolean = await(repository.deleteBySessionIdAndFlowType("session 1", FlowType.IP_ALLOW_LIST))
+        val result: Boolean = await(flowRepository.deleteBySessionIdAndFlowType("session 1", FlowType.IP_ALLOW_LIST))
 
         result shouldBe true
       }
@@ -137,13 +138,13 @@ class FlowRepositoryISpec extends BaseRepositoryIntegrationSpec with MongoSpecSu
 
       "fetch the flow for the specified session ID and flow type" in new PopulatedSetup {
 
-        val result: Option[IpAllowlistFlow] = await(repository.fetchBySessionIdAndFlowType(currentSession, FlowType.IP_ALLOW_LIST)(formatIpAllowlistFlow))
+        val result = await(flowRepository.fetchBySessionIdAndFlowType(currentSession, FlowType.IP_ALLOW_LIST)(formatIpAllowlistFlow))
 
         result shouldBe Some(currentFlow)
       }
 
       "return None when the query does not match any data" in {
-        val result: Option[IpAllowlistFlow] = await(repository.fetchBySessionIdAndFlowType("session 1", FlowType.IP_ALLOW_LIST)(formatIpAllowlistFlow))
+        val result = await(flowRepository.fetchBySessionIdAndFlowType("session 1", FlowType.IP_ALLOW_LIST)(formatIpAllowlistFlow))
 
         result shouldBe None
       }
@@ -151,11 +152,11 @@ class FlowRepositoryISpec extends BaseRepositoryIntegrationSpec with MongoSpecSu
 
     "updateLastUpdated" should {
       "update lastUpdated for all flows for the specified session ID" in new PopulatedSetup {
-        val lastUpdatedInCurrentFlow: DateTime = fetchLastUpdated(currentFlow)
-        val lastUpdatedInFlowOfDifferentType: DateTime = fetchLastUpdated(flowOfDifferentType)
-        val lastUpdatedInFlowInDifferentSession: DateTime = fetchLastUpdated(flowInDifferentSession)
+        val lastUpdatedInCurrentFlow: LocalDateTime = fetchLastUpdated(currentFlow)
+        val lastUpdatedInFlowOfDifferentType: LocalDateTime = fetchLastUpdated(flowOfDifferentType)
+        val lastUpdatedInFlowInDifferentSession: LocalDateTime = fetchLastUpdated(flowInDifferentSession)
 
-        await(repository.updateLastUpdated(currentSession))
+        await(flowRepository.updateLastUpdated(currentSession))
 
         fetchLastUpdated(currentFlow).isAfter(lastUpdatedInCurrentFlow) shouldBe true
         fetchLastUpdated(flowOfDifferentType).isAfter(lastUpdatedInFlowOfDifferentType) shouldBe true
@@ -163,4 +164,14 @@ class FlowRepositoryISpec extends BaseRepositoryIntegrationSpec with MongoSpecSu
       }
     }
   }
+}
+
+case class ResultSet(lastUpdated: LocalDateTime)
+
+object ResultSet   {
+  import play.api.libs.json.Json
+  implicit val dateFormat: Format[LocalDateTime] = MongoJavatimeFormats.localDateTimeFormat
+  implicit val resultSetFormat: OFormat[ResultSet] = Json.format[ResultSet]
+
+  def apply(lastUpdated: LocalDateTime) = new ResultSet(lastUpdated)
 }

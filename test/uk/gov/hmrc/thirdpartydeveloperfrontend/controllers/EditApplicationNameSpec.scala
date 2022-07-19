@@ -16,33 +16,30 @@
 
 package uk.gov.hmrc.thirdpartydeveloperfrontend.controllers
 
-import java.util.UUID.randomUUID
-import uk.gov.hmrc.thirdpartydeveloperfrontend.builder.DeveloperBuilder
-import uk.gov.hmrc.thirdpartydeveloperfrontend.config.ErrorHandler
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications._
-import uk.gov.hmrc.thirdpartydeveloperfrontend.mocks.service._
-import org.joda.time.DateTimeZone
 import org.mockito.Mockito
 import play.api.mvc.AnyContentAsEmpty
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
-import uk.gov.hmrc.thirdpartydeveloperfrontend.service.AuditService
+import uk.gov.hmrc.apiplatform.modules.uplift.controllers.UpliftJourneySwitch
+import uk.gov.hmrc.apiplatform.modules.uplift.services.GetProductionCredentialsFlowService
+import uk.gov.hmrc.apiplatform.modules.uplift.services.mocks._
+import uk.gov.hmrc.apiplatform.modules.uplift.views.html.BeforeYouStartView
 import uk.gov.hmrc.http.HeaderCarrier
-import uk.gov.hmrc.time.DateTimeUtils
-import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.WithCSRFAddToken
+import uk.gov.hmrc.thirdpartydeveloperfrontend.builder._
+import uk.gov.hmrc.thirdpartydeveloperfrontend.config.ErrorHandler
+import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.addapplication.AddApplication
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications._
+import uk.gov.hmrc.thirdpartydeveloperfrontend.mocks.connectors.ApmConnectorMockModule
+import uk.gov.hmrc.thirdpartydeveloperfrontend.mocks.service._
+import uk.gov.hmrc.thirdpartydeveloperfrontend.service.AuditService
+import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.{LocalUserIdTracker, WithCSRFAddToken}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.WithLoggedInSession._
 import views.helper.EnvironmentNameService
 import views.html._
-import uk.gov.hmrc.thirdpartydeveloperfrontend.mocks.connectors.ApmConnectorMockModule
 
+import java.time.LocalDateTime
+import java.util.UUID.randomUUID
 import scala.concurrent.ExecutionContext.Implicits.global
-import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.LocalUserIdTracker
-import uk.gov.hmrc.thirdpartydeveloperfrontend.builder._
-import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.addapplication.AddApplication
-import uk.gov.hmrc.apiplatform.modules.uplift.views.html.BeforeYouStartView
-import uk.gov.hmrc.apiplatform.modules.uplift.services.mocks._
-import uk.gov.hmrc.apiplatform.modules.uplift.controllers.UpliftJourneySwitch
-import uk.gov.hmrc.apiplatform.modules.uplift.services.GetProductionCredentialsFlowService
 
 class EditApplicationNameSpec 
     extends BaseControllerSpec 
@@ -249,5 +246,5 @@ class EditApplicationNameSpec
     }
   }
 
-  private def aClientSecret() = ClientSecret(randomUUID.toString, randomUUID.toString, DateTimeUtils.now.withZone(DateTimeZone.getDefault))
+  private def aClientSecret() = ClientSecret(randomUUID.toString, randomUUID.toString, LocalDateTime.now())
 }

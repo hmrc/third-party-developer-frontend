@@ -24,12 +24,13 @@ import org.jsoup.Jsoup
 import org.jsoup.nodes.Document
 import play.api.test.FakeRequest
 import play.twirl.api.Html
-import uk.gov.hmrc.time.DateTimeUtils
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.ViewHelpers._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils._
 import views.helper.CommonViewSpec
 import views.html.include.LeftHandNav
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.controllers.LeftHandNavFlags
+
+import java.time.{LocalDateTime, ZoneOffset}
 
 class LeftHandNavSpec extends CommonViewSpec with WithCSRFAddToken with CollaboratorTracker with LocalUserIdTracker {
 
@@ -48,8 +49,8 @@ class LeftHandNavSpec extends CommonViewSpec with WithCSRFAddToken with Collabor
       applicationId,
       clientId,
       applicationName,
-      DateTimeUtils.now,
-      Some(DateTimeUtils.now),
+      LocalDateTime.now(ZoneOffset.UTC),
+      Some(LocalDateTime.now(ZoneOffset.UTC)),
       None,
       grantLength,
       Environment.PRODUCTION,

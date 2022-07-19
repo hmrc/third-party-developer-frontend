@@ -16,16 +16,18 @@
 
 package uk.gov.hmrc.thirdpartydeveloperfrontend.domain.services
 
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.subscriptions.{FieldValue, FieldName}
+import play.api.libs.json.{EnvReads, EnvWrites}
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.subscriptions.{FieldName, FieldValue}
 
-trait ApplicationsJsonFormatters extends ApiDefinitionsJsonFormatters {
+import java.time.LocalDateTime
+
+trait ApplicationsJsonFormatters extends ApiDefinitionsJsonFormatters with LocalDateTimeFormatters {
   import play.api.libs.json._
-  import play.api.libs.json.JodaReads._
-  import play.api.libs.json.JodaWrites._
-  import play.api.libs.json.JodaWrites.JodaDateTimeNumberWrites
+
   import uk.gov.hmrc.play.json.Union
   import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications._
   import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.apidefinitions._
+
 
   implicit val formatFieldValue = Json.valueFormat[FieldValue]
   implicit val formatFieldName = Json.valueFormat[FieldName]
@@ -47,9 +49,8 @@ trait ApplicationsJsonFormatters extends ApiDefinitionsJsonFormatters {
   implicit val formatPrivileged = Json.format[Privileged]
   implicit val formatROPC = Json.format[ROPC]
 
-  object TOUAHelper {
-    // DO NOT POLLUTE WHOLE SCOPE WITH THIS WRITER
-    implicit val formatDateTime = Format(DefaultJodaDateTimeReads, JodaDateTimeNumberWrites)
+  object TOUAHelper extends LocalDateTimeFormatters {
+
     val formatTOUA = Json.format[TermsOfUseAgreement]
   }
 

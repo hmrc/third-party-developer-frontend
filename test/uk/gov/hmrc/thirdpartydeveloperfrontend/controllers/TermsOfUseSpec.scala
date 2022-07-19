@@ -24,13 +24,11 @@ import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.Enviro
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.CollaboratorRole.ADMINISTRATOR
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.{LoggedInState, Session}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.mocks.service.{ApplicationActionServiceMock, ApplicationServiceMock, SessionServiceMock, TermsOfUseVersionServiceMock}
-import org.joda.time.format.DateTimeFormat
 import org.mockito.ArgumentCaptor
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
 import play.filters.csrf.CSRF.TokenProvider
 import uk.gov.hmrc.http.HeaderCarrier
-import uk.gov.hmrc.time.DateTimeUtils
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.WithCSRFAddToken
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.WithLoggedInSession._
 import views.html.TermsOfUseView
@@ -40,6 +38,9 @@ import scala.concurrent.Future
 import scala.concurrent.Future.successful
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.DeveloperSession
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.LocalUserIdTracker
+
+import java.time.format.DateTimeFormatter
+import java.time.{LocalDateTime, ZoneOffset}
 
 class TermsOfUseSpec
     extends BaseControllerSpec
@@ -85,8 +86,8 @@ class TermsOfUseSpec
         appId,
         ClientId("clientId"),
         "appName",
-        DateTimeUtils.now,
-        Some(DateTimeUtils.now),
+        LocalDateTime.now(ZoneOffset.UTC),
+        Some(LocalDateTime.now(ZoneOffset.UTC)),
         None,
         grantLength,
         environment,
@@ -132,8 +133,8 @@ class TermsOfUseSpec
 
     "render the page for an administrator on a standard production app when the ToU have been agreed" in new Setup {
       val email = "email@exmaple.com"
-      val timeStamp = DateTimeUtils.now
-      val expectedTimeStamp = DateTimeFormat.forPattern("dd MMMM yyyy").print(timeStamp)
+      val timeStamp = LocalDateTime.now(ZoneOffset.UTC)
+      val expectedTimeStamp = DateTimeFormatter.ofPattern("dd MMMM yyyy").format(timeStamp)
       val version = "1.0"
 
       val checkInformation = CheckInformation(termsOfUseAgreements = List(TermsOfUseAgreement(email, timeStamp, version)))
@@ -191,7 +192,7 @@ class TermsOfUseSpec
     }
 
     "return a bad request if the app already has terms of use agreed" in new Setup {
-      val checkInformation = CheckInformation(termsOfUseAgreements = List(applications.TermsOfUseAgreement("bob@example.com", DateTimeUtils.now, "1.0")))
+      val checkInformation = CheckInformation(termsOfUseAgreements = List(applications.TermsOfUseAgreement("bob@example.com", LocalDateTime.now(ZoneOffset.UTC), "1.0")))
       givenApplicationExists(checkInformation = Some(checkInformation))
 
       val request = loggedInRequest.withFormUrlEncodedBody("termsOfUseAgreed" -> "true")

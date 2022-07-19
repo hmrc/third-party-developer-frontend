@@ -16,7 +16,6 @@
 
 package uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.connectors
 
-
 import enumeratum.{Enum, EnumEntry, PlayJsonEnum}
 
 case class CombinedApiCategory(value: String) extends AnyVal
@@ -29,7 +28,4 @@ object ApiType extends Enum[ApiType] with PlayJsonEnum[ApiType] {
   case object XML_API extends ApiType
 }
 
-case class CombinedApi(serviceName: String,
-                        displayName: String,
-                       categories: List[CombinedApiCategory],
-                       apiType: ApiType)
+case class CombinedApi(serviceName: String, displayName: String, categories: List[CombinedApiCategory], apiType: ApiType)

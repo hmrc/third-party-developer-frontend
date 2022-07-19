@@ -16,9 +16,8 @@
 
 package uk.gov.hmrc.thirdpartydeveloperfrontend.controllers
 
-import java.time.Period
+import java.time.{LocalDateTime, Period}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications._
-import org.joda.time.DateTime
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.Environment.{PRODUCTION, SANDBOX}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.controllers.ApplicationSummary
@@ -31,8 +30,8 @@ class ApplicationSummaryTest extends AnyWordSpec with Matchers with Collaborator
     val user = "foo@bar.com".asDeveloperCollaborator
 
     val serverTokenApplication =
-      new Application(ApplicationId(""), ClientId(""), "", DateTime.now, Some(DateTime.now), Some(DateTime.now), grantLength = Period.ofDays(547), PRODUCTION, collaborators = Set(user))
-    val noServerTokenApplication = new Application(ApplicationId(""), ClientId(""), "", DateTime.now, Some(DateTime.now), None, grantLength = Period.ofDays(547), PRODUCTION, collaborators = Set(user))
+      new Application(ApplicationId(""), ClientId(""), "", LocalDateTime.now, Some(LocalDateTime.now), Some(LocalDateTime.now), grantLength = Period.ofDays(547), PRODUCTION, collaborators = Set(user))
+    val noServerTokenApplication = new Application(ApplicationId(""), ClientId(""), "", LocalDateTime.now, Some(LocalDateTime.now), None, grantLength = Period.ofDays(547), PRODUCTION, collaborators = Set(user))
 
     "set serverTokenUsed if application has a date set for lastAccessTokenUsage" in {
       val summary = ApplicationSummary.from(serverTokenApplication.copy(deployedTo = SANDBOX), user.userId)

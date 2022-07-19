@@ -16,14 +16,13 @@
 
 package views
 
-import java.time.Period
+import java.time.{LocalDateTime, Period, ZoneOffset}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.CollaboratorRole.{ADMINISTRATOR, DEVELOPER}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.LoggedInState
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.controllers.ApplicationViewModel
 import org.jsoup.Jsoup
 import play.api.test.FakeRequest
-import uk.gov.hmrc.time.DateTimeUtils
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.ViewHelpers._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils._
 import views.helper.CommonViewSpec
@@ -39,8 +38,8 @@ class RedirectsSpec extends CommonViewSpec with WithCSRFAddToken with Collaborat
     appId,
     clientId,
     "App name 1",
-    DateTimeUtils.now,
-    Some(DateTimeUtils.now),
+    LocalDateTime.now(ZoneOffset.UTC),
+    Some(LocalDateTime.now(ZoneOffset.UTC)),
     None,
     Period.ofDays(547),
     Environment.PRODUCTION,

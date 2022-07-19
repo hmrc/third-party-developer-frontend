@@ -25,11 +25,12 @@ import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.views.SubscriptionR
 import org.jsoup.Jsoup
 import org.jsoup.nodes.Document
 import play.api.test.FakeRequest
-import uk.gov.hmrc.time.DateTimeUtils
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.WithCSRFAddToken
 import views.helper.CommonViewSpec
 import views.html.include.SubscriptionsGroup
-import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.{CollaboratorTracker, LocalUserIdTracker, DeveloperSessionBuilder}
+import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.{CollaboratorTracker, DeveloperSessionBuilder, LocalUserIdTracker}
+
+import java.time.{LocalDateTime, ZoneOffset}
 
 class SubscriptionsGroupSpec 
     extends CommonViewSpec 
@@ -62,8 +63,8 @@ class SubscriptionsGroupSpec
         applicationId,
         clientId,
         applicationName,
-        DateTimeUtils.now,
-        Some(DateTimeUtils.now),
+        LocalDateTime.now(ZoneOffset.UTC),
+        Some(LocalDateTime.now(ZoneOffset.UTC)),
         None,
         grantLength,
         environment,

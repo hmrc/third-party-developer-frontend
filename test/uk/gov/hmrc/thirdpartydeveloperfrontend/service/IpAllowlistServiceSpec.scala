@@ -24,7 +24,7 @@ import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.{Appli
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.flows.FlowType.IP_ALLOW_LIST
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.flows.IpAllowlistFlow
 import uk.gov.hmrc.thirdpartydeveloperfrontend.repositories.FlowRepository
-import uk.gov.hmrc.thirdpartydeveloperfrontend.repositories.ReactiveMongoFormatters.formatIpAllowlistFlow
+import uk.gov.hmrc.thirdpartydeveloperfrontend.repositories.MongoFormatters.formatIpAllowlistFlow
 import uk.gov.hmrc.thirdpartydeveloperfrontend.service.PushPullNotificationsService.PushPullNotificationsConnector
 import uk.gov.hmrc.thirdpartydeveloperfrontend.service.SubscriptionFieldsService.SubscriptionFieldsConnector
 import uk.gov.hmrc.http.{ForbiddenException, HeaderCarrier}

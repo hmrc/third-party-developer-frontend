@@ -16,7 +16,6 @@
 
 package uk.gov.hmrc.thirdpartydeveloperfrontend.service
 
-import org.joda.time.DateTime
 import play.api.test.FakeRequest
 import uk.gov.hmrc.apiplatform.modules.uplift.controllers.UpliftJourneySwitch
 import uk.gov.hmrc.http.HeaderCarrier
@@ -25,6 +24,8 @@ import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.TermsOfUseVersion
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.services.TermsOfUseService.TermsOfUseAgreementDetails
 import uk.gov.hmrc.thirdpartydeveloperfrontend.mocks.service.TermsOfUseServiceMock
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.{HmrcSpec, LocalUserIdTracker}
+
+import java.time.LocalDateTime
 
 class TermsOfUseVersionServiceSpec extends HmrcSpec with ApplicationBuilder with LocalUserIdTracker{
   trait Setup extends TermsOfUseServiceMock {
@@ -72,7 +73,7 @@ class TermsOfUseVersionServiceSpec extends HmrcSpec with ApplicationBuilder with
     }
     "return ToU version OLD_JOURNEY if uplift journey switch is off and application has unrecognised version value" in new Setup {
       givenUpliftJourneySwitchIsOff
-      returnAgreementDetails(TermsOfUseAgreementDetails(email, None, DateTime.now, Some("bad.version")))
+      returnAgreementDetails(TermsOfUseAgreementDetails(email, None, LocalDateTime.now, Some("bad.version")))
 
       val result = underTest.getForApplication(application)(request)
 
@@ -80,7 +81,7 @@ class TermsOfUseVersionServiceSpec extends HmrcSpec with ApplicationBuilder with
     }
     "return ToU version NEW_JOURNEY if uplift journey switch is on and application has unrecognised version value in CheckInformation" in new Setup {
       givenUpliftJourneySwitchIsOn
-      returnAgreementDetails(TermsOfUseAgreementDetails(email, None, DateTime.now, Some("bad.version")))
+      returnAgreementDetails(TermsOfUseAgreementDetails(email, None, LocalDateTime.now, Some("bad.version")))
 
       val result = underTest.getForApplication(application)(request)
 
@@ -89,9 +90,9 @@ class TermsOfUseVersionServiceSpec extends HmrcSpec with ApplicationBuilder with
 
     "return correct ToU version if valid value is present in CheckInformation" in new Setup {
       returnAgreementDetails(
-        TermsOfUseAgreementDetails(email, None, DateTime.now, Some("1.0")),
-        TermsOfUseAgreementDetails(email, None, DateTime.now, Some("1.2")),
-        TermsOfUseAgreementDetails(email, None, DateTime.now, Some("2.0"))
+        TermsOfUseAgreementDetails(email, None, LocalDateTime.now, Some("1.0")),
+        TermsOfUseAgreementDetails(email, None, LocalDateTime.now, Some("1.2")),
+        TermsOfUseAgreementDetails(email, None, LocalDateTime.now, Some("2.0"))
       )
       val result = underTest.getForApplication(application)(request)
       result shouldBe TermsOfUseVersion.NEW_JOURNEY

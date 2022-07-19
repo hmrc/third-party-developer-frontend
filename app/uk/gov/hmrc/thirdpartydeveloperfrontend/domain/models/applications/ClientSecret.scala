@@ -16,14 +16,15 @@
 
 package uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications
 
-import org.joda.time.DateTime
+import play.api.libs.json.OFormat
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.services.LocalDateTimeFormatters
 
-case class ClientSecret(id: String, name: String, createdOn: DateTime, lastAccess: Option[DateTime] = None)
+import java.time.LocalDateTime
 
-object ClientSecret {
+case class ClientSecret(id: String, name: String, createdOn: LocalDateTime, lastAccess: Option[LocalDateTime] = None)
+
+object ClientSecret extends LocalDateTimeFormatters {
   import play.api.libs.json.Json
-  import play.api.libs.json.JodaReads._
-  import play.api.libs.json.JodaWrites._
 
-  implicit val format = Json.format[ClientSecret]
+  implicit val format: OFormat[ClientSecret] = Json.format[ClientSecret]
 }

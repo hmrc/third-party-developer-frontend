@@ -22,7 +22,8 @@ import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.LoggedIn
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.controllers.ApplicationViewModel
 import org.jsoup.Jsoup
 import play.api.test.FakeRequest
-import uk.gov.hmrc.time.DateTimeUtils
+
+import java.time.{LocalDateTime, ZoneOffset}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.ViewHelpers._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils._
 import views.helper.CommonViewSpec
@@ -44,8 +45,8 @@ class UnsubscribeRequestSubmittedSpec extends CommonViewSpec with WithCSRFAddTok
         appId,
         clientId,
         "Test Application",
-        DateTimeUtils.now,
-        Some(DateTimeUtils.now),
+        LocalDateTime.now(ZoneOffset.UTC),
+        Some(LocalDateTime.now(ZoneOffset.UTC)),
         None,
         grantLength,
         Environment.PRODUCTION,

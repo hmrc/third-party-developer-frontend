@@ -42,19 +42,20 @@ import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.fraudprevention.Fraud
 import uk.gov.hmrc.apiplatform.modules.submissions.services.SubmissionService
 import cats.data.OptionT
 import cats.instances.future.catsStdInstancesForFuture
-import org.joda.time.DateTime
 
 import scala.concurrent.Future.successful
 import uk.gov.hmrc.apiplatform.modules.submissions.domain.models.Submission
 import uk.gov.hmrc.play.bootstrap.controller.WithDefaultFormBinding
-import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.Details.{Agreement, TermsOfUseViewModel, ApplicationNameModel}
+import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.Details.{Agreement, ApplicationNameModel, TermsOfUseViewModel}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.TermsOfUseVersion
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.PrivacyPolicyLocation.NoneProvided
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.services.TermsOfUseService
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.services.TermsOfUseService.TermsOfUseAgreementDetails
 
+import java.time.LocalDateTime
+
 object Details {
-  case class Agreement(who: String, when: DateTime)
+  case class Agreement(who: String, when: LocalDateTime)
   case class TermsOfUseViewModel(
     exists: Boolean,
     appUsesOldVersion: Boolean,

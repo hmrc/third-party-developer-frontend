@@ -17,7 +17,6 @@
 package uk.gov.hmrc.thirdpartydeveloperfrontend.controllers
 
 import java.util.UUID.randomUUID
-
 import uk.gov.hmrc.thirdpartydeveloperfrontend.builder._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.checkpages.{ApplicationCheck, CheckYourAnswers}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.{ApplicationAlreadyExists, ApplicationUpliftSuccessful, DeskproTicketCreationFailed}
@@ -26,7 +25,6 @@ import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.CollaboratorRole.{ADMINISTRATOR, DEVELOPER}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.helpers.string._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.mocks.service._
-import org.joda.time.DateTimeZone
 import org.jsoup.Jsoup
 import org.mockito.invocation.InvocationOnMock
 import play.api.mvc.AnyContentAsEmpty
@@ -34,7 +32,6 @@ import play.api.test.FakeRequest
 import play.api.test.Helpers.{redirectLocation, _}
 import play.filters.csrf.CSRF.TokenProvider
 import uk.gov.hmrc.http.HeaderCarrier
-import uk.gov.hmrc.time.DateTimeUtils
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.WithCSRFAddToken
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.WithLoggedInSession._
 import views.html.checkpages._
@@ -47,6 +44,7 @@ import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future.{failed, successful}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.LocalUserIdTracker
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.DeveloperSession
+import java.time.{LocalDateTime, ZoneOffset, Clock, Instant}
 
 class CheckYourAnswersSpec
     extends BaseControllerSpec
@@ -59,7 +57,7 @@ class CheckYourAnswersSpec
     with SubscriptionsBuilder
 {
 
-  private def aClientSecret() = ClientSecret(randomUUID.toString, randomUUID.toString, DateTimeUtils.now.withZone(DateTimeZone.getDefault))
+  private def aClientSecret() = ClientSecret(randomUUID.toString, randomUUID.toString, LocalDateTime.now())
 
   val appName: String = "app"
   val apiVersion = ApiVersion("version")
@@ -67,7 +65,7 @@ class CheckYourAnswersSpec
   val anotherCollaboratorEmail = "collaborator@example.com"
   val hashedAnotherCollaboratorEmail: String = anotherCollaboratorEmail.toSha256
 
-  val testing: ApplicationState = ApplicationState.testing.copy(updatedOn = DateTimeUtils.now.minusMinutes(1))
+  val testing: ApplicationState = ApplicationState.testing.copy(updatedOn = LocalDateTime.now.minusMinutes(1))
   val production: ApplicationState = ApplicationState.production("thirdpartydeveloper@example.com", "ABCD")
   val pendingApproval: ApplicationState = ApplicationState.pendingGatekeeperApproval("thirdpartydeveloper@example.com")
 
@@ -132,7 +130,7 @@ class CheckYourAnswersSpec
     val privacyPolicyView = app.injector.instanceOf[PrivacyPolicyView]
     val apiSubscriptionsViewTemplate = app.injector.instanceOf[ApiSubscriptionsView]
     val contactDetailsView = app.injector.instanceOf[ContactDetailsView]
-
+    val clock = Clock.fixed(Instant.now(), ZoneOffset.UTC)
     val underTest = new CheckYourAnswers(
       mockErrorHandler,
       applicationServiceMock,
@@ -152,7 +150,8 @@ class CheckYourAnswersSpec
       privacyPolicyView,
       apiSubscriptionsViewTemplate,
       contactDetailsView,
-      termsOfUseVersionServiceMock
+      termsOfUseVersionServiceMock,
+      clock
     )
 
     fetchSessionByIdReturns(sessionId, session)
@@ -221,8 +220,8 @@ class CheckYourAnswersSpec
         appId,
         clientId,
         appName,
-        DateTimeUtils.now,
-        Some(DateTimeUtils.now),
+        LocalDateTime.now(ZoneOffset.UTC),
+        Some(LocalDateTime.now(ZoneOffset.UTC)),
         None,
         grantLength,
         Environment.PRODUCTION,
@@ -261,7 +260,7 @@ class CheckYourAnswersSpec
           providedPrivacyPolicyURL = true,
           providedTermsAndConditionsURL = true,
           teamConfirmed = true,
-          List(TermsOfUseAgreement("test@example.com", DateTimeUtils.now, "1.0"))
+          List(TermsOfUseAgreement("test@example.com", LocalDateTime.now(ZoneOffset.UTC), "1.0"))
         )
       )
     )

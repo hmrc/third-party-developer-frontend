@@ -26,7 +26,8 @@ import play.api.test.Helpers.{redirectLocation, _}
 import play.filters.csrf.CSRF.TokenProvider
 import uk.gov.hmrc.thirdpartydeveloperfrontend.service.AuditService
 import uk.gov.hmrc.http.HeaderCarrier
-import uk.gov.hmrc.time.DateTimeUtils
+import java.time.LocalDateTime
+import java.time.ZoneOffset
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.WithCSRFAddToken
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.WithLoggedInSession._
 import views.helper.EnvironmentNameService
@@ -57,8 +58,8 @@ class AddApplicationSuccessSpec
     appId,
     clientId,
     "App name 1",
-    DateTimeUtils.now,
-    Some(DateTimeUtils.now),
+    LocalDateTime.now(ZoneOffset.UTC),
+    Some(LocalDateTime.now(ZoneOffset.UTC)),
     None,
     grantLength,
     Environment.PRODUCTION,
@@ -72,8 +73,8 @@ class AddApplicationSuccessSpec
     appId,
     clientId,
     "App name 2",
-    DateTimeUtils.now,
-    Some(DateTimeUtils.now),
+    LocalDateTime.now(ZoneOffset.UTC),
+    Some(LocalDateTime.now(ZoneOffset.UTC)),
     None,
     grantLength,
     Environment.SANDBOX,

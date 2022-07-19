@@ -24,8 +24,8 @@ import uk.gov.hmrc.thirdpartydeveloperfrontend.domain._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.ApplicationId
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.Capabilities.{ChangeClientSecret, ViewCredentials}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.Permissions.{SandboxOrAdmin, TeamMembersOnly}
+
 import javax.inject.{Inject, Singleton}
-import org.joda.time.DateTime
 import play.api.libs.crypto.CookieSigner
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents, Result}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.service._
@@ -33,6 +33,7 @@ import uk.gov.hmrc.http.ForbiddenException
 import views.html.{ClientIdView, ClientSecretsView, CredentialsView, ServerTokenView}
 import views.html.editapplication.DeleteClientSecretView
 
+import java.time.LocalDateTime
 import scala.concurrent.{ExecutionContext, Future}
 import scala.concurrent.Future.successful
 
@@ -110,5 +111,5 @@ class Credentials @Inject() (
 }
 
 object Credentials {
-  val serverTokenCutoffDate = new DateTime(2020, 4, 1, 0, 0) // scalastyle:ignore magic.number
+  val serverTokenCutoffDate = LocalDateTime.of(2020, 4, 1, 0, 0) // scalastyle:ignore magic.number
 }

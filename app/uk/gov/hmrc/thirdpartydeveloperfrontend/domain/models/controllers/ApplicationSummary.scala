@@ -16,28 +16,26 @@
 
 package uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.controllers
 
-import java.time.Period
-
+import java.time.{LocalDateTime, Period}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.apidefinitions.AccessType
 import uk.gov.hmrc.http.NotFoundException
-import org.joda.time.DateTime
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.UserId
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.apidefinitions.ApiIdentifier
 
 case class ApplicationSummary(
-  id: ApplicationId,
-  name: String,
-  role: CollaboratorRole,
-  termsOfUseStatus: TermsOfUseStatus,
-  state: State,
-  lastAccess: Option[DateTime],
-  grantLength: Period,
-  serverTokenUsed: Boolean = false,
-  createdOn: DateTime,
-  accessType: AccessType,
-  environment: Environment,
-  subscriptionIds: Set[ApiIdentifier])
+                               id: ApplicationId,
+                               name: String,
+                               role: CollaboratorRole,
+                               termsOfUseStatus: TermsOfUseStatus,
+                               state: State,
+                               lastAccess: Option[LocalDateTime],
+                               grantLength: Period,
+                               serverTokenUsed: Boolean = false,
+                               createdOn: LocalDateTime,
+                               accessType: AccessType,
+                               environment: Environment,
+                               subscriptionIds: Set[ApiIdentifier])
 
 object ApplicationSummary {
   def from(app: Application, userId: UserId): ApplicationSummary = {

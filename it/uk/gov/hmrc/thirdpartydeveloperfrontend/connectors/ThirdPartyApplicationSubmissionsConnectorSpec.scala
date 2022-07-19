@@ -10,7 +10,7 @@ import play.api.Mode
 import play.api.{Application => PlayApplication}
 import com.github.tomakehurst.wiremock.client.WireMock._
 import play.api.http.Status._
-import play.api.libs.json.Json
+import play.api.libs.json.{Format, Json}
 import uk.gov.hmrc.apiplatform.modules.submissions.connectors.ThirdPartyApplicationSubmissionsConnector
 import uk.gov.hmrc.apiplatform.modules.submissions.connectors.ThirdPartyApplicationSubmissionsConnector._
 import uk.gov.hmrc.http.HeaderCarrier
@@ -20,12 +20,12 @@ import uk.gov.hmrc.apiplatform.modules.submissions.domain.models.{ErrorDetails, 
 import uk.gov.hmrc.apiplatform.modules.submissions.SubmissionsTestData
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.{ApplicationId, ResponsibleIndividual}
 
-class ThirdPartyApplicationSubmissionsConnectorSpec 
-    extends BaseConnectorIntegrationSpec 
-    with GuiceOneAppPerSuite 
-    with WireMockExtensions 
-    with CollaboratorTracker 
-    with LocalUserIdTracker 
+class ThirdPartyApplicationSubmissionsConnectorSpec
+    extends BaseConnectorIntegrationSpec
+    with GuiceOneAppPerSuite
+    with WireMockExtensions
+    with CollaboratorTracker
+    with LocalUserIdTracker
     with SubmissionsTestData
     with SubmissionsFrontendJsonFormatters
     with TestApplications
@@ -237,7 +237,7 @@ class ThirdPartyApplicationSubmissionsConnectorSpec
     val name = "bob example"
     val email = "bob@spongepants.com"
 
-    "return OK with and return the application" in new Setup {
+    "return application with OK" in new Setup {
       stubFor(
         post(urlEqualTo(url))
         .withJsonRequestBody(ApprovalsRequest(name, email))

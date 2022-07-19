@@ -17,7 +17,6 @@
 package uk.gov.hmrc.thirdpartydeveloperfrontend.controllers
 
 import java.util.UUID.randomUUID
-
 import uk.gov.hmrc.thirdpartydeveloperfrontend.builder._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.checkpages.ApplicationCheck
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.CollaboratorRole.{ADMINISTRATOR, DEVELOPER}
@@ -26,14 +25,12 @@ import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.apidefinitions._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.{ApplicationId, _}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.helpers.string._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.mocks.service._
-import org.joda.time.DateTimeZone
 import org.jsoup.Jsoup
 import play.api.mvc.{AnyContentAsEmpty, Result}
 import play.api.test.FakeRequest
 import play.api.test.Helpers.{redirectLocation, _}
 import play.filters.csrf.CSRF.TokenProvider
 import uk.gov.hmrc.http.HeaderCarrier
-import uk.gov.hmrc.time.DateTimeUtils
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.WithCSRFAddToken
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.WithLoggedInSession._
 import views.html.checkpages._
@@ -46,6 +43,8 @@ import scala.concurrent.Future
 import scala.concurrent.Future.successful
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.LocalUserIdTracker
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.DeveloperSession
+
+import java.time.{Clock, Instant, LocalDateTime, ZoneOffset}
 
 class ApplicationCheckSpec
     extends BaseControllerSpec
@@ -67,7 +66,7 @@ class ApplicationCheckSpec
   val anotherCollaboratorEmail = "collaborator@example.com"
   val yetAnotherCollaboratorEmail = "collaborator2@example.com"
 
-  val testing: ApplicationState = ApplicationState.testing.copy(updatedOn = DateTimeUtils.now.minusMinutes(1))
+  val testing: ApplicationState = ApplicationState.testing.copy(updatedOn = LocalDateTime.now(ZoneOffset.UTC).minusMinutes(1))
   val production: ApplicationState = ApplicationState.production("thirdpartydeveloper@example.com", "ABCD")
   val pendingApproval: ApplicationState = ApplicationState.pendingGatekeeperApproval("thirdpartydeveloper@example.com")
 
@@ -110,8 +109,8 @@ class ApplicationCheckSpec
         appId,
         clientId,
         "App name 1",
-        DateTimeUtils.now,
-        Some(DateTimeUtils.now),
+        LocalDateTime.now(ZoneOffset.UTC),
+        Some(LocalDateTime.now(ZoneOffset.UTC)),
         None,
         grantLength,
         Environment.PRODUCTION,
@@ -138,8 +137,8 @@ class ApplicationCheckSpec
       appId,
       clientId,
       appName,
-      DateTimeUtils.now,
-      Some(DateTimeUtils.now),
+      LocalDateTime.now(ZoneOffset.UTC),
+      Some(LocalDateTime.now(ZoneOffset.UTC)),
       None,
       grantLength,
       Environment.PRODUCTION,
@@ -185,8 +184,8 @@ class ApplicationCheckSpec
       appId,
       clientId,
       appName,
-      DateTimeUtils.now,
-      Some(DateTimeUtils.now),
+      LocalDateTime.now(ZoneOffset.UTC),
+      Some(LocalDateTime.now(ZoneOffset.UTC)),
       None,
       grantLength,
       Environment.PRODUCTION,
@@ -213,7 +212,7 @@ class ApplicationCheckSpec
     val termsAndConditionsView = app.injector.instanceOf[TermsAndConditionsView]
 
     val applicationCheck = app.injector.instanceOf[ApplicationCheck]
-
+    val clock = Clock.fixed(Instant.now(), ZoneOffset.UTC)
     val underTest = new ApplicationCheck(
       mockErrorHandler,
       applicationServiceMock,
@@ -233,7 +232,8 @@ class ApplicationCheckSpec
       apiSubscriptionsViewTemplate,
       privacyPolicyView,
       termsAndConditionsView,
-      termsOfUseVersionServiceMock
+      termsOfUseVersionServiceMock,
+      clock
     )
 
     val application = createApplication()
@@ -425,7 +425,7 @@ class ApplicationCheckSpec
     "show agree to terms of use step as complete when it has been done" in new Setup {
       def createApplication() =
         createPartiallyConfigurableApplication(
-          checkInformation = Some(CheckInformation(termsOfUseAgreements = List(TermsOfUseAgreement("test@example.com", DateTimeUtils.now, "1.0"))))
+          checkInformation = Some(CheckInformation(termsOfUseAgreements = List(TermsOfUseAgreement("test@example.com", LocalDateTime.now(ZoneOffset.UTC), "1.0"))))
         )
 
       private val result = addToken(underTest.requestCheckPage(appId))(loggedInRequest)
@@ -466,7 +466,7 @@ class ApplicationCheckSpec
               providedPrivacyPolicyURL = true,
               providedTermsAndConditionsURL = true,
               teamConfirmed = true,
-              List(TermsOfUseAgreement("test@example.com", DateTimeUtils.now, "1.0"))
+              List(TermsOfUseAgreement("test@example.com", LocalDateTime.now(ZoneOffset.UTC), "1.0"))
             )
           )
         )
@@ -492,7 +492,7 @@ class ApplicationCheckSpec
               providedPrivacyPolicyURL = true,
               providedTermsAndConditionsURL = true,
               teamConfirmed = true,
-              List(TermsOfUseAgreement("test@example.com", DateTimeUtils.now, "1.0"))
+              List(TermsOfUseAgreement("test@example.com", LocalDateTime.now(ZoneOffset.UTC), "1.0"))
             )
           )
         )
@@ -1402,7 +1402,7 @@ class ApplicationCheckSpec
     }
   }
 
-  private def aClientSecret() = ClientSecret(randomUUID.toString, randomUUID.toString, DateTimeUtils.now.withZone(DateTimeZone.getDefault))
+  private def aClientSecret() = ClientSecret(randomUUID.toString, randomUUID.toString, LocalDateTime.now(ZoneOffset.UTC))
 
   private def stepRequiredIndication(id: String) = {
     s"""<div id="$id" class="step-status status-incomplete">To do</div>"""

@@ -16,15 +16,13 @@
 
 package uk.gov.hmrc.thirdpartydeveloperfrontend.domain
 
-import java.time.Period
-
+import java.time.{LocalDateTime, Period}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.builder.DeveloperBuilder
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.Capabilities.{ChangeClientSecret, ViewCredentials}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.Permissions.SandboxOrAdmin
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.Developer
 import uk.gov.hmrc.thirdpartydeveloperfrontend.helpers.string._
-import org.joda.time.DateTime
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.LocalUserIdTracker
 import org.scalatest.matchers.should.Matchers
 import org.scalatest.funspec.AnyFunSpec
@@ -248,8 +246,8 @@ class ApplicationSpec extends AnyFunSpec with Matchers with DeveloperBuilder wit
       ApplicationId("id"),
       ClientId("clientId"),
       "app name",
-      DateTime.now(),
-      Some(DateTime.now()),
+      LocalDateTime.now(),
+      Some(LocalDateTime.now()),
       None,
       grantLength = Period.ofDays(547),
       environment,

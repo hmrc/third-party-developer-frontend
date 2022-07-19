@@ -25,7 +25,6 @@ import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.controllers.AddTeamMemberPageMode
 import uk.gov.hmrc.thirdpartydeveloperfrontend.helpers.string._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.mocks.service.{ApplicationActionServiceMock, ApplicationServiceMock, SessionServiceMock}
-import org.joda.time.DateTime
 import play.api.mvc.Result
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
@@ -42,6 +41,8 @@ import scala.concurrent.Future
 import scala.concurrent.Future.{failed, successful}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.LocalUserIdTracker
 import uk.gov.hmrc.thirdpartydeveloperfrontend.builder._
+
+import java.time.LocalDateTime
 
 class ManageTeamSpec 
     extends BaseControllerSpec 
@@ -102,7 +103,7 @@ class ManageTeamSpec
       val developerSession = DeveloperSession(session)
 
       val collaborators = aStandardApplication.collaborators ++ additionalTeamMembers ++ Set(developerSession.email.asCollaborator(userRole))
-      val application = aStandardApplication.copy(id = appId, collaborators = collaborators, createdOn = DateTime.parse("2018-04-06T09:00"), lastAccess = Some(DateTime.parse("2018-04-06T09:00")))
+      val application = aStandardApplication.copy(id = appId, collaborators = collaborators, createdOn = LocalDateTime.parse("2018-04-06T09:00"), lastAccess = Some(LocalDateTime.parse("2018-04-06T09:00")))
 
       givenApplicationAction(application, developerSession)
       fetchCredentialsReturns(application, tokens())

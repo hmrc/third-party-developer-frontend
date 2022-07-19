@@ -19,7 +19,6 @@ package views
 import uk.gov.hmrc.thirdpartydeveloperfrontend.builder.DeveloperBuilder
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.{DeveloperSession, LoggedInState, Session}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.controllers.MfaMandateDetails
-import org.joda.time.LocalDate
 import play.api.test.FakeRequest
 import play.twirl.api.Html
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.WithCSRFAddToken
@@ -27,6 +26,8 @@ import views.helper.CommonViewSpec
 import views.html.Add2SVView
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.LocalUserIdTracker
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.DeveloperSessionBuilder
+
+import java.time.LocalDate
 class Add2SVSpec extends CommonViewSpec with WithCSRFAddToken with DeveloperBuilder with LocalUserIdTracker {
 
   val add2SVView = app.injector.instanceOf[Add2SVView]
@@ -51,7 +52,7 @@ class Add2SVSpec extends CommonViewSpec with WithCSRFAddToken with DeveloperBuil
     }
 
     "is displayed with plural 'days remaining'" in {
-      when(appConfig.dateOfAdminMfaMandate).thenReturn(Some(new LocalDate().plusDays(1)))
+      when(appConfig.dateOfAdminMfaMandate).thenReturn(Some(LocalDate.now().plusDays(1)))
 
       val daysRemaining = 10
       val page = renderPage(MfaMandateDetails(showAdminMfaMandatedMessage = true, daysTillAdminMfaMandate = daysRemaining))
@@ -62,7 +63,7 @@ class Add2SVSpec extends CommonViewSpec with WithCSRFAddToken with DeveloperBuil
     }
 
     "is displayed with singular 'day remaining'" in {
-      when(appConfig.dateOfAdminMfaMandate).thenReturn(Some(new LocalDate().plusDays(1)))
+      when(appConfig.dateOfAdminMfaMandate).thenReturn(Some(LocalDate.now().plusDays(1)))
 
       val daysRemaining = 1
       val page = renderPage(MfaMandateDetails(showAdminMfaMandatedMessage = true, daysTillAdminMfaMandate = daysRemaining))
