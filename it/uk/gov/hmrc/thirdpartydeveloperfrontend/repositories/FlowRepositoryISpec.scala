@@ -1,12 +1,10 @@
 package uk.gov.hmrc.thirdpartydeveloperfrontend.repositories
 
-import akka.stream.Materializer
-import org.mongodb.scala.bson.{BsonDocument, BsonValue, Document}
+import org.mongodb.scala.bson.{BsonValue, Document}
 import org.mongodb.scala.model.Aggregates.{filter, project}
-import org.mongodb.scala.model.{Aggregates, Filters, Projections}
-import org.mongodb.scala.model.Filters._
+import org.mongodb.scala.model.{Filters, Projections}
 import org.mongodb.scala.model.Projections.fields
-import org.scalatest.{BeforeAndAfterAll, BeforeAndAfterEach, OptionValues}
+import org.scalatest.{BeforeAndAfterEach, OptionValues}
 import org.scalatest.matchers.should.Matchers
 import org.scalatest.wordspec.AnyWordSpec
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.connectors.ApiType.REST_API
@@ -30,7 +28,6 @@ class FlowRepositoryISpec extends AnyWordSpec
   with OptionValues
   with DefaultAwaitTimeout
   with FutureAwaits
-  with BeforeAndAfterAll
   with BeforeAndAfterEach {
 
   private val currentSession = "session 1"
@@ -41,10 +38,6 @@ class FlowRepositoryISpec extends AnyWordSpec
   override protected def beforeEach(): Unit = {
     await(flowRepository.collection.drop.toFuture())
     await(flowRepository.ensureIndexes)
-  }
-
-  override protected def afterAll(): Unit = {
-   await(flowRepository.collection.drop.toFuture())
   }
 
   trait PopulatedSetup {
