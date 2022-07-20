@@ -23,8 +23,6 @@ object MfaDetailHelper {
   def isAuthAppMfaVerified(mfaDetails: List[MfaDetail]): Boolean = {
     //TODO: This will be modified when the SMS authentication is added.
     mfaDetails
-      .filter(x => x.mfaType == MfaType.AUTHENTICATOR_APP && x.verified)
-      .map(_.verified)
-      .headOption.getOrElse(false)
+      .exists(x => x.mfaType == MfaType.AUTHENTICATOR_APP && x.verified)
   }
 }
