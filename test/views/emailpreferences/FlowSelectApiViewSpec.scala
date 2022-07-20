@@ -28,18 +28,23 @@ import play.api.data.{Form, FormError}
 import play.api.mvc.AnyContentAsEmpty
 import play.api.test.FakeRequest
 import play.twirl.api.Html
-import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.{DeveloperSessionBuilder, WithCSRFAddToken}
+import uk.gov.hmrc.thirdpartydeveloperfrontend.builder.{DeveloperBuilder, DeveloperSessionBuilder}
+import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.{LocalUserIdTracker, WithCSRFAddToken}
 import views.helper.CommonViewSpec
 import views.html.emailpreferences.FlowSelectApiView
 
 import scala.collection.JavaConverters._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.connectors.ApiType
 
-class FlowSelectApiViewSpec extends CommonViewSpec with WithCSRFAddToken {
+class FlowSelectApiViewSpec extends CommonViewSpec
+  with WithCSRFAddToken
+  with LocalUserIdTracker
+  with DeveloperSessionBuilder
+  with DeveloperBuilder {
 
   trait Setup {
     val developerSessionWithoutEmailPreferences: DeveloperSession = {
-      DeveloperSessionBuilder("email@example.com", "First Name", "Last Name", None, loggedInState = LoggedInState.LOGGED_IN)
+      buildDeveloperSession(loggedInState = LoggedInState.LOGGED_IN, buildDeveloper("email@example.com", "First Name", "Last Name", None))
     }
     val form = mock[Form[SelectedApisEmailPreferencesForm]]
     val currentCategory = APICategoryDisplayDetails("CATEGORY1", "Category 1")

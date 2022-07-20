@@ -19,25 +19,29 @@ package uk.gov.hmrc.thirdpartydeveloperfrontend.security
 import cats.implicits._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.config.ApplicationConfig
 import uk.gov.hmrc.thirdpartydeveloperfrontend.config.ErrorHandler
-import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.{routes, BaseController, BaseControllerSpec}
+import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.{BaseController, BaseControllerSpec, routes}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.{DeveloperSession, LoggedInState}
 import play.api.libs.crypto.CookieSigner
+import uk.gov.hmrc.thirdpartydeveloperfrontend.builder._
 import play.api.mvc.{Cookie, MessagesControllerComponents}
-import play.api.mvc.Results.{EmptyContent, _}
+import play.api.mvc.Results._
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.service.SessionService
-import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.DeveloperSessionBuilder
 
 import scala.concurrent.{ExecutionContext, Future}
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future.successful
 import org.scalatest.matchers.should.Matchers
+import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.LocalUserIdTracker
 
-class DevHubAuthorizationSpec extends BaseControllerSpec with Matchers {
+class DevHubAuthorizationSpec extends BaseControllerSpec with Matchers  with LocalUserIdTracker
+  with DeveloperSessionBuilder
+  with DeveloperBuilder {
   class TestDevHubAuthorization(mcc: MessagesControllerComponents)(implicit val appConfig: ApplicationConfig, val ec: ExecutionContext)
       extends BaseController(mcc)
-      with ExtendedDevHubAuthorization {
+      with ExtendedDevHubAuthorization
+      {
     override val sessionService: SessionService = mock[SessionService]
     override val errorHandler: ErrorHandler = mock[ErrorHandler]
     override val cookieSigner: CookieSigner = app.injector.instanceOf[CookieSigner]
@@ -62,8 +66,8 @@ class DevHubAuthorizationSpec extends BaseControllerSpec with Matchers {
     when(underTest.sessionService.updateUserFlowSessions(*)).thenReturn(successful(()))
   }
 
-  val loggedInDeveloperSession = DeveloperSessionBuilder("Email", "firstName", "lastName", loggedInState = LoggedInState.LOGGED_IN)
-  val partLoggedInDeveloperSession = DeveloperSessionBuilder("Email", "firstName", "lastName", loggedInState = LoggedInState.PART_LOGGED_IN_ENABLING_MFA)
+  val loggedInDeveloperSession = buildDeveloperSession(loggedInState = LoggedInState.LOGGED_IN, buildDeveloper("Email", "firstName", "lastName"))
+  val partLoggedInDeveloperSession = buildDeveloperSession(loggedInState = LoggedInState.PART_LOGGED_IN_ENABLING_MFA, buildDeveloper("Email", "firstName", "lastName"))
 
   "DebHubAuthWrapper" when {
     "the user is logged in and" when {

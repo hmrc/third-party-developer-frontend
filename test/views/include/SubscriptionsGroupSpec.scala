@@ -16,7 +16,7 @@
 
 package views.include
 
-import uk.gov.hmrc.thirdpartydeveloperfrontend.builder.SubscriptionsBuilder
+import uk.gov.hmrc.thirdpartydeveloperfrontend.builder.{DeveloperBuilder, DeveloperSessionBuilder, SubscriptionsBuilder}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.APISubscriptions
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.apidefinitions._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications._
@@ -28,7 +28,7 @@ import play.api.test.FakeRequest
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.WithCSRFAddToken
 import views.helper.CommonViewSpec
 import views.html.include.SubscriptionsGroup
-import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.{CollaboratorTracker, DeveloperSessionBuilder, LocalUserIdTracker}
+import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.{CollaboratorTracker, LocalUserIdTracker}
 
 import java.time.{LocalDateTime, ZoneOffset}
 
@@ -37,11 +37,15 @@ class SubscriptionsGroupSpec
     with WithCSRFAddToken 
     with SubscriptionsBuilder 
     with CollaboratorTracker
-    with LocalUserIdTracker {
+    with LocalUserIdTracker
+    with DeveloperSessionBuilder
+    with DeveloperBuilder {
 
   implicit val request = FakeRequest().withCSRFToken
 
-  val loggedInDeveloper = DeveloperSessionBuilder("givenname.familyname@example.com", "Givenname", "Familyname", loggedInState = LoggedInState.LOGGED_IN)
+  val loggedInDeveloper = buildDeveloperSession(loggedInState = LoggedInState.LOGGED_IN, buildDeveloper("givenname.familyname@example.com", "Givenname", "Familyname"))
+
+
   val applicationId = ApplicationId("1234")
   val clientId = ClientId("clientId123")
   val applicationName = "Test Application"

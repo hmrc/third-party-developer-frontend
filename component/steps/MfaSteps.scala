@@ -26,6 +26,7 @@ import pages._
 import play.api.http.Status._
 import play.api.libs.json.Json
 import stubs.{DeveloperStub, DeviceSessionStub, MfaStub, Stubs}
+import uk.gov.hmrc.apiplatform.modules.mfa.utils.MfaDetailHelper
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.connectors.{LoginRequest, UserAuthenticationResponse}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.{Developer, LoggedInState, Session}
 import utils.ComponentTestDeveloperBuilder
@@ -35,7 +36,6 @@ import java.util.UUID
 
 class MfaSteps extends ScalaDsl with EN with Matchers with NavigationSugar with PageSugar
   with CustomMatchers with ComponentTestDeveloperBuilder {
-
 
   implicit val webDriver: WebDriver = Env.driver
 
@@ -89,8 +89,11 @@ class MfaSteps extends ScalaDsl with EN with Matchers with NavigationSugar with 
   
     val password = result("Password")
 
-      val developer = buildDeveloper(emailAddress = result("Email address"), firstName = result("First name"), lastName = result("Last name"))
-    .copy(mfaEnabled = Some(true), userId = staticUserId)
+      val developer = buildDeveloper(emailAddress = result("Email address"),
+        firstName = result("First name"),
+        lastName = result("Last name"),
+        mfaDetails = Some(List(authenticatorAppMfaDetails)))
+
    setUpDeveloperStub(developer, password, None, false)
 
   }
@@ -100,22 +103,23 @@ class MfaSteps extends ScalaDsl with EN with Matchers with NavigationSugar with 
   
     val password = result("Password")
 
-      val developer = buildDeveloper(emailAddress = result("Email address"), firstName = result("First name"), lastName = result("Last name"))
-    .copy(mfaEnabled = Some(true), userId = staticUserId)
+      val developer = buildDeveloper(emailAddress = result("Email address"),
+          firstName = result("First name"),
+          lastName = result("Last name"),
+          mfaDetails = Some(List(authenticatorAppMfaDetails)))
+
    setUpDeveloperStub(developer, password, Some(DeviceSessionStub.staticDeviceSessionId), true)
 
   }
 
-
-
   def setUpDeveloperStub(developer: Developer, password: String, deviceSessionId: Option[UUID], deviceSessionFound: Boolean) ={
     webDriver.manage().deleteAllCookies()
-    val mfaEnabled = developer.mfaEnabled.getOrElse(false)
+    val mfaEnabled = MfaDetailHelper.isAuthAppMfaVerified(developer.mfaDetails.getOrElse(List.empty))
+    val accessCodeRequired = deviceSessionId.isEmpty && mfaEnabled
 
-        val accessCodeRequired = deviceSessionId.isEmpty && mfaEnabled
+    TestContext.sessionIdForloggedInDeveloper =
+      setupLoggedOrPartLoggedInDeveloper(developer, password, LoggedInState.LOGGED_IN, deviceSessionId , accessCodeRequired, mfaEnabled)
 
-      TestContext.sessionIdForloggedInDeveloper =
-         setupLoggedOrPartLoggedInDeveloper(developer, password, LoggedInState.LOGGED_IN, deviceSessionId , accessCodeRequired, mfaEnabled)
     deviceSessionId match {
       case Some(_) => deviceSessionId.map(_ =>
         if(deviceSessionFound) DeviceSessionStub.getDeviceSessionForSessionIdAndUserId(staticUserId)
@@ -139,8 +143,6 @@ class MfaSteps extends ScalaDsl with EN with Matchers with NavigationSugar with 
     val cookie = new SCookie(deviceCookieName, deviceCookieValue)
     webDriver.manage().addCookie(cookie)
   }
-
-
 
   def setupLoggedOrPartLoggedInDeveloper(developer: Developer, password: String, loggedInState: LoggedInState, deviceSessionId: Option[UUID], accessCodeRequired: Boolean, mfaEnabled : Boolean): String = {
     val sessionId = "sessionId_" + loggedInState.toString

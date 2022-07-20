@@ -21,7 +21,7 @@ import uk.gov.hmrc.thirdpartydeveloperfrontend.config.ErrorHandler
 import uk.gov.hmrc.thirdpartydeveloperfrontend.connectors.ThirdPartyDeveloperConnector
 import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.connectors.UpdateLoggedInStateRequest
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.LoggedInState
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.{Developer, LoggedInState}
 
 import javax.inject.{Inject, Singleton}
 import play.api.data.Form
@@ -30,6 +30,7 @@ import play.api.libs.crypto.CookieSigner
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents, Result}
 import uk.gov.hmrc.apiplatform.modules.mfa.connectors.ThirdPartyDeveloperMfaConnector
 import uk.gov.hmrc.apiplatform.modules.mfa.service.{MFAService, MfaMandateService}
+import uk.gov.hmrc.apiplatform.modules.mfa.utils.MfaDetailHelper
 import uk.gov.hmrc.play.bootstrap.controller.WithDefaultFormBinding
 import uk.gov.hmrc.thirdpartydeveloperfrontend.qr.{OtpAuthUri, QRCode}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.service.SessionService
@@ -76,12 +77,13 @@ class ProtectAccount @Inject()(
   }
 
   def getProtectAccount: Action[AnyContent] = atLeastPartLoggedInEnablingMfaAction { implicit request =>
-    thirdPartyDeveloperConnector.fetchDeveloper(request.userId).map(dev => {
-      dev.getOrElse(throw new RuntimeException).mfaEnabled.getOrElse(false) match {
+    thirdPartyDeveloperConnector.fetchDeveloper(request.userId).map {
+      case Some(developer: Developer) => developer.mfaDetails.exists(x => MfaDetailHelper.isAuthAppMfaVerified(x)) match {
         case true => Ok(protectedAccountView())
         case false => Ok(protectAccountView())
       }
-    })
+      case None => throw new RuntimeException
+    }
   }
 
   def getAccessCodePage: Action[AnyContent] = atLeastPartLoggedInEnablingMfaAction { implicit request =>

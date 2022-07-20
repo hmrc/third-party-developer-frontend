@@ -26,6 +26,7 @@ import org.jsoup.nodes.{Document, Element}
 import play.api.mvc.AnyContentAsEmpty
 import play.api.test.FakeRequest
 import play.twirl.api.HtmlFormat.Appendable
+import uk.gov.hmrc.thirdpartydeveloperfrontend.builder.{DeveloperSessionBuilder, DeveloperBuilder}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.Details.{Agreement, TermsOfUseViewModel}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.{TestApplications, WithCSRFAddToken}
 import views.helper.CommonViewSpec
@@ -40,7 +41,9 @@ class DetailsViewSpec
     with TestApplications 
     with CollaboratorTracker 
     with LocalUserIdTracker 
-    with WithCSRFAddToken {
+    with WithCSRFAddToken
+    with DeveloperSessionBuilder
+    with DeveloperBuilder {
 
   val detailsView = app.injector.instanceOf[DetailsView]
 
@@ -59,9 +62,9 @@ class DetailsViewSpec
   val termsOfUseViewModel = TermsOfUseViewModel(true, true, Some(Agreement("user@example.com", LocalDateTime.now)))
   val adminEmail = "admin@example.com"
 
-  implicit val loggedIn: DeveloperSession = DeveloperSessionBuilder("developer@example.com", "Joe", "Bloggs", loggedInState = LoggedInState.LOGGED_IN)
+  implicit val loggedIn: DeveloperSession = buildDeveloperSession( loggedInState = LoggedInState.LOGGED_IN, buildDeveloper("developer@example.com", "Joe", "Bloggs"))
   trait LoggedInUserIsAdmin {
-    implicit val loggedIn: DeveloperSession = DeveloperSessionBuilder(adminEmail, "Joe", "Bloggs", loggedInState = LoggedInState.LOGGED_IN)
+    implicit val loggedIn: DeveloperSession = buildDeveloperSession( loggedInState = LoggedInState.LOGGED_IN, buildDeveloper(adminEmail, "Joe", "Bloggs"))
   }
 
   "Application details view" when {

@@ -20,6 +20,8 @@ import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.Credentials.serverTok
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.controllers.{ApplicationViewModel, FraudPreventionNavLinkViewModel, LeftHandNavFlags}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.LoggedInState
+import uk.gov.hmrc.thirdpartydeveloperfrontend.builder.{DeveloperBuilder, DeveloperSessionBuilder}
+
 import org.jsoup.Jsoup
 import org.jsoup.nodes.Document
 import play.api.test.FakeRequest
@@ -32,7 +34,12 @@ import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.controllers.LeftHan
 
 import java.time.{LocalDateTime, ZoneOffset}
 
-class LeftHandNavSpec extends CommonViewSpec with WithCSRFAddToken with CollaboratorTracker with LocalUserIdTracker {
+class LeftHandNavSpec extends CommonViewSpec
+  with WithCSRFAddToken
+  with CollaboratorTracker
+  with LocalUserIdTracker
+  with DeveloperSessionBuilder
+  with DeveloperBuilder {
 
   trait Setup {
     val leftHandNavView = app.injector.instanceOf[LeftHandNav]
@@ -43,7 +50,7 @@ class LeftHandNavSpec extends CommonViewSpec with WithCSRFAddToken with Collabor
     val clientId = ClientId("clientId123")
     val applicationName = "Test Application"
 
-    val loggedInDeveloper = DeveloperSessionBuilder("givenname.familyname@example.com", "Givenname", "Familyname", loggedInState = LoggedInState.LOGGED_IN)
+    val loggedInDeveloper = buildDeveloperSession(loggedInState = LoggedInState.LOGGED_IN, buildDeveloper("givenname.familyname@example.com", "Givenname", "Familyname"))
 
     val application = Application(
       applicationId,

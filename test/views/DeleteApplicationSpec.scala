@@ -16,6 +16,7 @@
 
 package views
 
+import uk.gov.hmrc.thirdpartydeveloperfrontend.builder._
 import java.time.Period
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.CollaboratorRole.{ADMINISTRATOR, DEVELOPER}
@@ -28,12 +29,14 @@ import views.helper.CommonViewSpec
 import views.html.DeleteApplicationView
 import java.time.{LocalDateTime, ZoneOffset}
 
-class DeleteApplicationSpec extends CommonViewSpec with WithCSRFAddToken with CollaboratorTracker with LocalUserIdTracker {
+class DeleteApplicationSpec extends CommonViewSpec with WithCSRFAddToken with CollaboratorTracker with LocalUserIdTracker
+  with DeveloperSessionBuilder
+  with DeveloperBuilder {
 
   val deleteApplicationView = app.injector.instanceOf[DeleteApplicationView]
   val appId = ApplicationId("1234")
   val clientId = ClientId("clientId123")
-  val loggedInDeveloper = DeveloperSessionBuilder("developer@example.com", "John", "Doe", loggedInState = LoggedInState.LOGGED_IN)
+  val loggedInDeveloper = buildDeveloperSession(loggedInState = LoggedInState.LOGGED_IN, buildDeveloper("developer@example.com", "John", "Doe", None))
   val application = Application(
     appId,
     clientId,

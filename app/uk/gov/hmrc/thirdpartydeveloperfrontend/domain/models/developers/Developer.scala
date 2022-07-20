@@ -16,9 +16,12 @@
 
 package uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers
 
-import java.{util => ju}
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.emailpreferences.EmailPreferences
 import play.api.libs.json.{Format, Json}
+import uk.gov.hmrc.apiplatform.modules.mfa.models.MfaDetail
+import uk.gov.hmrc.apiplatform.modules.mfa.models.MfaDetailFormats._
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.emailpreferences.EmailPreferences
+import java.{util => ju}
+
 
 case class UserId(value: ju.UUID) extends AnyVal {
   def asText = value.toString
@@ -37,7 +40,7 @@ case class Developer(
   firstName: String,
   lastName: String,
   organisation: Option[String] = None,
-  mfaEnabled: Option[Boolean] = None,
+  mfaDetails: Option[List[MfaDetail]] = None,
   emailPreferences: EmailPreferences = EmailPreferences.noPreferences
 )
 

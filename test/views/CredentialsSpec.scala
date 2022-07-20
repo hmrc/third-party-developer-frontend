@@ -23,13 +23,20 @@ import org.jsoup.Jsoup
 import org.jsoup.nodes.Document
 import play.api.test.FakeRequest
 import play.twirl.api.Html
+import uk.gov.hmrc.thirdpartydeveloperfrontend.builder.{DeveloperBuilder, DeveloperSessionBuilder}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils._
 import views.helper.CommonViewSpec
 import views.html.CredentialsView
 
 import scala.collection.JavaConverters._
 
-class CredentialsSpec extends CommonViewSpec with WithCSRFAddToken with CollaboratorTracker with LocalUserIdTracker {
+class CredentialsSpec extends CommonViewSpec
+  with WithCSRFAddToken
+  with CollaboratorTracker
+  with LocalUserIdTracker
+  with DeveloperSessionBuilder
+  with DeveloperBuilder {
+
   trait Setup {
     val credentialsView = app.injector.instanceOf[CredentialsView]
 
@@ -40,7 +47,7 @@ class CredentialsSpec extends CommonViewSpec with WithCSRFAddToken with Collabor
 
   "Credentials page" should {
     val request = FakeRequest().withCSRFToken
-    val developer = DeveloperSessionBuilder("Test", "Test", "Test", None, loggedInState = LoggedInState.LOGGED_IN)
+    val developer = buildDeveloperSession(loggedInState = LoggedInState.LOGGED_IN, buildDeveloper("Test", "Test", "Test", None))
 
     val application = Application(
       ApplicationId("Test Application ID"),

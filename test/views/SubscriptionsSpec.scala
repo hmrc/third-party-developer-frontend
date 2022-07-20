@@ -25,6 +25,7 @@ import org.jsoup.nodes.Document
 import play.api.mvc.AnyContentAsEmpty
 import play.api.test.FakeRequest
 import play.twirl.api.Html
+import uk.gov.hmrc.thirdpartydeveloperfrontend.builder.{DeveloperBuilder, DeveloperSessionBuilder}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils._
 import views.helper.CommonViewSpec
 import views.html.ManageSubscriptionsView
@@ -32,7 +33,11 @@ import views.html.ManageSubscriptionsView
 import java.time.LocalDateTime
 import scala.collection.JavaConverters._
 
-class SubscriptionsSpec extends CommonViewSpec with WithCSRFAddToken {
+class SubscriptionsSpec extends CommonViewSpec
+  with WithCSRFAddToken
+  with LocalUserIdTracker
+  with DeveloperSessionBuilder
+  with DeveloperBuilder {
 
   val manageSubscriptions = app.injector.instanceOf[ManageSubscriptionsView]
 
@@ -61,7 +66,7 @@ class SubscriptionsSpec extends CommonViewSpec with WithCSRFAddToken {
   )
 
   "Subscriptions page" should {
-    val developer = DeveloperSessionBuilder("Test", "Test", "Test", None, loggedInState = LoggedInState.LOGGED_IN)
+    val developer = buildDeveloperSession(loggedInState = LoggedInState.LOGGED_IN, buildDeveloperWithRandomId("Test", "Test", "Test", None))
 
     val productionApplicationPendingGatekeeperApproval = buildApplication(ApplicationState.pendingGatekeeperApproval("somebody@example.com"), Environment.PRODUCTION)
     val productionApplicationPendingRequesterVerification = buildApplication(ApplicationState.pendingRequesterVerification("somebody@example.com", ""), Environment.PRODUCTION)

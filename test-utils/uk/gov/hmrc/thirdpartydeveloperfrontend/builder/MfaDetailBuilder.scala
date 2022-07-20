@@ -16,17 +16,17 @@
 
 package uk.gov.hmrc.thirdpartydeveloperfrontend.builder
 
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.{Developer, DeveloperSession, Session, LoggedInState}
+import uk.gov.hmrc.apiplatform.modules.mfa.models.{AuthenticatorAppMfaDetailSummary, MfaId}
 
-trait SampleSession {
-  self: DeveloperBuilder =>
+import java.time.LocalDateTime
+import java.util.UUID
 
-  lazy val developer: Developer = buildDeveloper()
-  lazy val session: Session = Session(sessionId, developer, LoggedInState.LOGGED_IN)
-  lazy val loggedInDeveloper: DeveloperSession = DeveloperSession(session)
-  lazy val sessionId = "sessionId"
+trait MfaDetailBuilder {
+  val verifiedAuthenticatorAppMfaDetails = buildAuthenticatorAppMfaDetails(name = "name", verified = true)
 
-  val partLoggedInSessionId = "partLoggedInSessionId"
-  lazy val partLoggedInSession: Session = Session(partLoggedInSessionId, developer, LoggedInState.PART_LOGGED_IN_ENABLING_MFA)
 
+  def buildAuthenticatorAppMfaDetails(name: String,
+                                      verified: Boolean) ={
+    AuthenticatorAppMfaDetailSummary(MfaId(UUID.randomUUID()), name, LocalDateTime.now, verified)
+  }
 }

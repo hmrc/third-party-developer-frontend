@@ -19,14 +19,15 @@ package views
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.controllers.{ApplicationSummary, ManageApplicationsViewModel}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.apidefinitions.AccessType
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.{ApplicationId, CollaboratorRole, State, TermsOfUseStatus}
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.LoggedInState
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.{LoggedInState, UserId}
 import org.jsoup.Jsoup
 import org.jsoup.nodes.Document
 import play.api.test.FakeRequest
+import uk.gov.hmrc.thirdpartydeveloperfrontend.builder.{DeveloperBuilder, DeveloperSessionBuilder}
+
 import java.time.{LocalDateTime, ZoneOffset}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.ViewHelpers.{elementExistsByText, elementIdentifiedByAttrContainsText}
-import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.WithCSRFAddToken
-import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.DeveloperSessionBuilder
+import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.{LocalUserIdTracker, WithCSRFAddToken}
 import views.helper.CommonViewSpec
 import views.html.ManageApplicationsView
 import views.helper.EnvironmentNameService
@@ -35,7 +36,12 @@ import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.Enviro
 import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.addapplication.routes.{AddApplication => AddApplicationRoutes}
 import views.html.noapplications.StartUsingRestApisView
 
-class ViewAllApplicationsPageSpec extends CommonViewSpec with WithCSRFAddToken {
+class ViewAllApplicationsPageSpec extends CommonViewSpec
+  with WithCSRFAddToken
+  with LocalUserIdTracker
+  with DeveloperSessionBuilder
+  with DeveloperBuilder {
+
   def isGreenAddProductionApplicationButtonVisible(document: Document): Boolean = {
     val href = AddApplicationRoutes.addApplicationPrincipal().url
 
@@ -113,7 +119,7 @@ class ViewAllApplicationsPageSpec extends CommonViewSpec with WithCSRFAddToken {
 
     def renderPage(sandboxAppSummaries: Seq[ApplicationSummary], productionAppSummaries: Seq[ApplicationSummary], upliftableApplicationIds: Set[ApplicationId]) = {
       val request = FakeRequest()
-      val loggedIn = DeveloperSessionBuilder("developer@example.com", "firstName", "lastname", loggedInState = LoggedInState.LOGGED_IN)
+      val loggedIn = buildDeveloperSession(loggedInState = LoggedInState.LOGGED_IN, buildDeveloperWithRandomId("developer@example.com", "firstName", "lastname"))
       val manageApplicationsView = app.injector.instanceOf[ManageApplicationsView]
 
       manageApplicationsView.render(ManageApplicationsViewModel(sandboxAppSummaries, productionAppSummaries, upliftableApplicationIds, false), request, loggedIn, messagesProvider, appConfig, "nav-section", environmentNameService)
@@ -278,7 +284,7 @@ class ViewAllApplicationsPageSpec extends CommonViewSpec with WithCSRFAddToken {
 
     def renderPage(appSummaries: Seq[ApplicationSummary]) = {
       val request = FakeRequest().withCSRFToken
-      val loggedIn = DeveloperSessionBuilder("developer@example.com", "firstName", "lastname", loggedInState = LoggedInState.LOGGED_IN)
+      val loggedIn = buildDeveloperSession( loggedInState = LoggedInState.LOGGED_IN, buildDeveloperWithRandomId("developer@example.com", "firstName", "lastname"))
       val addApplicationSubordinateEmptyNestView = app.injector.instanceOf[StartUsingRestApisView]
 
       addApplicationSubordinateEmptyNestView.render(request, loggedIn, messagesProvider, appConfig, "nav-section", environmentNameService)
