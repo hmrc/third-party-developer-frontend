@@ -15,7 +15,7 @@ trait ComponentTestDeveloperBuilder {
                       firstName: String = "John",
                       lastName: String = "Doe",
                       organisation: Option[String] = None,
-                      mfaDetails: Option[List[MfaDetail]] = None,
+                      mfaDetails: List[MfaDetail] = List.empty,
                       emailPreferences: EmailPreferences = EmailPreferences.noPreferences
                     ): Developer = {
     Developer(
