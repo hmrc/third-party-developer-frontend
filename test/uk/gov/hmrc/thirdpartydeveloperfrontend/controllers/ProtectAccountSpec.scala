@@ -107,7 +107,7 @@ class ProtectAccountSpec extends BaseControllerSpec with WithCSRFAddToken with D
 
   trait SetupProtectedAccount extends Setup {
     when(underTest.thirdPartyDeveloperConnector.fetchDeveloper(eqTo(loggedInDeveloper.userId))(*))
-      .thenReturn(successful(Some(buildDeveloper(emailAddress = loggedInDeveloper.email, organisation = None, mfaDetails = Some(List(verifiedAuthenticatorAppMfaDetails))))))
+      .thenReturn(successful(Some(buildDeveloper(emailAddress = loggedInDeveloper.email, organisation = None, mfaDetails = List(verifiedAuthenticatorAppMfaDetails)))))
   }
 
   trait SetupSuccessfulStart2SV extends Setup {

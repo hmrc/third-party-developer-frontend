@@ -78,9 +78,10 @@ class ProtectAccount @Inject()(
 
   def getProtectAccount: Action[AnyContent] = atLeastPartLoggedInEnablingMfaAction { implicit request =>
     thirdPartyDeveloperConnector.fetchDeveloper(request.userId).map {
-      case Some(developer: Developer) => developer.mfaDetails.exists(x => MfaDetailHelper.isAuthAppMfaVerified(x)) match {
-        case true => Ok(protectedAccountView())
-        case false => Ok(protectAccountView())
+      case Some(developer: Developer) => if (MfaDetailHelper.isAuthAppMfaVerified(developer.mfaDetails)) {
+        Ok(protectedAccountView())
+      } else {
+        Ok(protectAccountView())
       }
       case None => throw new RuntimeException
     }

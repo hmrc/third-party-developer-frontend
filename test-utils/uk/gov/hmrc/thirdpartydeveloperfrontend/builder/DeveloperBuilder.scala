@@ -28,7 +28,7 @@ def buildDeveloperWithRandomId( emailAddress: String = "something@example.com",
                                 firstName: String = "John",
                                 lastName: String = "Doe",
                                 organisation: Option[String] = None,
-                                mfaDetails: Option[List[MfaDetail]] = None,
+                                mfaDetails: List[MfaDetail] = List.empty,
                                 emailPreferences: EmailPreferences = EmailPreferences.noPreferences) ={
   buildDeveloper(emailAddress, firstName, lastName, organisation, mfaDetails, emailPreferences).copy(userId = UserId.random)
 }
@@ -37,7 +37,7 @@ def buildDeveloperWithRandomId( emailAddress: String = "something@example.com",
                       firstName: String = "John",
                       lastName: String = "Doe",
                       organisation: Option[String] = None,
-                      mfaDetails: Option[List[MfaDetail]] = None,
+                      mfaDetails: List[MfaDetail] = List.empty,
                       emailPreferences: EmailPreferences = EmailPreferences.noPreferences
   ): Developer = {
     Developer(

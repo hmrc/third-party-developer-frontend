@@ -16,10 +16,13 @@
 
 package uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers
 
-import play.api.libs.json.{Format, Json}
+import play.api.libs.functional.FunctionalBuilder
+import play.api.libs.json.{Format, JsPath, Json, Reads}
 import uk.gov.hmrc.apiplatform.modules.mfa.models.MfaDetail
 import uk.gov.hmrc.apiplatform.modules.mfa.models.MfaDetailFormats._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.emailpreferences.EmailPreferences
+import play.api.libs.functional.syntax._
+
 import java.{util => ju}
 
 
@@ -40,11 +43,22 @@ case class Developer(
   firstName: String,
   lastName: String,
   organisation: Option[String] = None,
-  mfaDetails: Option[List[MfaDetail]] = None,
+  mfaDetails: List[MfaDetail] = List.empty,
   emailPreferences: EmailPreferences = EmailPreferences.noPreferences
 )
 
 object Developer {
-  implicit val format: Format[Developer] = Json.format[Developer]
+
+  val developerReads: Reads[Developer] = (
+      (JsPath \ "userId").read[UserId] and
+      (JsPath \ "email").read[String] and
+      (JsPath \ "firstName").read[String] and
+      (JsPath \ "lastName").read[String] and
+      (JsPath \ "organisation").readNullable[String] and
+      ((JsPath \ "mfaDetails").read[List[MfaDetail]] or Reads.pure(List.empty[MfaDetail])) and
+      ((JsPath \ "emailPreferences").read[EmailPreferences] or Reads.pure(EmailPreferences.noPreferences))) (Developer.apply _)
+
+  val developerWrites = Json.writes[Developer]
+  implicit val formatDeveloper = Format(developerReads, developerWrites)
 }
 

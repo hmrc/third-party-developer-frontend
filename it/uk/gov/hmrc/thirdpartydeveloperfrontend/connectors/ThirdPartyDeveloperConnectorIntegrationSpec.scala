@@ -97,6 +97,7 @@ class ThirdPartyDeveloperConnectorIntegrationSpec extends BaseConnectorIntegrati
                  |    "email":"$userEmail",
                  |    "firstName":"John",
                  |    "lastName": "Doe",
+                 |    "mfaDetails": [],
                  |    "emailPreferences": { "interests" : [], "topics": [] }
                  |  }
                  |}""".stripMargin)
