@@ -19,11 +19,12 @@ package views.checkpages
 import uk.gov.hmrc.thirdpartydeveloperfrontend.config.ApplicationConfig
 import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.TermsOfUseForm
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications._
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.LoggedInState
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.{LoggedInState, UserId}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.controllers.ApplicationViewModel
 import org.jsoup.Jsoup
 import play.api.mvc.{AnyContentAsEmpty, Call}
 import play.api.test.FakeRequest
+import uk.gov.hmrc.thirdpartydeveloperfrontend.builder.{DeveloperBuilder, DeveloperSessionBuilder}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.TermsOfUseVersion
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils._
 import views.helper.CommonViewSpec
@@ -31,7 +32,7 @@ import views.html.checkpages.TermsOfUseView
 
 import java.time.{LocalDateTime, ZoneOffset}
 
-class TermsOfUseSpec extends CommonViewSpec with WithCSRFAddToken with CollaboratorTracker with LocalUserIdTracker {
+class TermsOfUseSpec extends CommonViewSpec with WithCSRFAddToken with CollaboratorTracker with LocalUserIdTracker with DeveloperSessionBuilder with DeveloperBuilder {
 
   val termsOfUse = app.injector.instanceOf[TermsOfUseView]
 
@@ -58,7 +59,7 @@ class TermsOfUseSpec extends CommonViewSpec with WithCSRFAddToken with Collabora
       val checkInformation = CheckInformation()
 
       val termsOfUseForm = TermsOfUseForm.fromCheckInformation(checkInformation)
-      val developer = DeveloperSessionBuilder("email@example.com", "First Name", "Last Name", None, loggedInState = LoggedInState.LOGGED_IN)
+      val developer = buildDeveloperSession( loggedInState = LoggedInState.LOGGED_IN, buildDeveloperWithRandomId("email@example.com", "First Name", "Last Name", None))
 
       val page = termsOfUse.render(
         ApplicationViewModel(thirdPartyApplication, false, false),
@@ -88,7 +89,7 @@ class TermsOfUseSpec extends CommonViewSpec with WithCSRFAddToken with Collabora
       val checkInformation = CheckInformation(termsOfUseAgreements = List(termsOfUseAgreement))
 
       val termsOfUseForm = TermsOfUseForm.fromCheckInformation(checkInformation)
-      val developer = DeveloperSessionBuilder("email@example.com", "First Name", "Last Name", None, loggedInState = LoggedInState.LOGGED_IN)
+      val developer = buildDeveloperSession( loggedInState = LoggedInState.LOGGED_IN, buildDeveloperWithRandomId( "email@example.com", "First Name", "Last Name", None))
 
       val page = termsOfUse.render(
         ApplicationViewModel(thirdPartyApplication.copy(checkInformation = Some(checkInformation)), false, false),

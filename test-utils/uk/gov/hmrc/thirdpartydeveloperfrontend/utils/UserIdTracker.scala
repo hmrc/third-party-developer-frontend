@@ -37,7 +37,7 @@ trait LocalUserIdTracker extends UserIdTracker {
 // fixture setup is spread over different classes/objects
 object GlobalUserIdTracker extends LocalUserIdTracker
 
-trait CollaboratorTracker { 
+trait CollaboratorTracker {
   self : UserIdTracker =>
   
   def collaboratorOf(email: String, role: CollaboratorRole): Collaborator = Collaborator(email, role, idOf(email))

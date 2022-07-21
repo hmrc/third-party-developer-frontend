@@ -24,7 +24,7 @@ import views.helper.CommonViewSpec
 import views.html.protectaccount.ProtectAccountView
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.LocalUserIdTracker
 
-class ProtectAccountSpec extends CommonViewSpec with WithCSRFAddToken with DeveloperBuilder with LocalUserIdTracker {
+class ProtectAccountViewSpec extends CommonViewSpec with WithCSRFAddToken with DeveloperBuilder with LocalUserIdTracker {
   implicit val request = FakeRequest()
   val protectAccountView = app.injector.instanceOf[ProtectAccountView]
 

@@ -23,10 +23,15 @@ import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.LoggedIn
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.emailpreferences.{APICategoryDisplayDetails, EmailPreferences, EmailTopic, TaxRegimeInterests}
 import play.api.mvc.AnyContentAsEmpty
 import play.api.test.FakeRequest
-import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.{WithCSRFAddToken,DeveloperSessionBuilder}
+import uk.gov.hmrc.thirdpartydeveloperfrontend.builder.{DeveloperBuilder, DeveloperSessionBuilder}
+import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.{LocalUserIdTracker, WithCSRFAddToken}
 import views.html.emailpreferences.EmailPreferencesSummaryView
 
-class EmailPreferencesSummaryViewSpec extends CommonViewSpec with WithCSRFAddToken {
+class EmailPreferencesSummaryViewSpec extends CommonViewSpec
+  with WithCSRFAddToken
+  with LocalUserIdTracker
+  with DeveloperSessionBuilder
+  with DeveloperBuilder {
 
   trait Setup {
     val apiCategoryDetails: Seq[APICategoryDisplayDetails] =
@@ -42,10 +47,10 @@ class EmailPreferencesSummaryViewSpec extends CommonViewSpec with WithCSRFAddTok
         Set(EmailTopic.TECHNICAL, EmailTopic.BUSINESS_AND_POLICY))
 
     val developerSession =
-      DeveloperSessionBuilder("email@example.com", "First Name", "Last Name", None, loggedInState = LoggedInState.LOGGED_IN, emailPreferences = emailPreferences)
+      buildDeveloperSession( loggedInState = LoggedInState.LOGGED_IN, buildDeveloperWithRandomId("email@example.com", "First Name", "Last Name", None,emailPreferences = emailPreferences))
 
     val developerSessionWithoutEmailPreferences =
-      DeveloperSessionBuilder("email@example.com", "First Name", "Last Name", None, loggedInState = LoggedInState.LOGGED_IN)
+      buildDeveloperSession( loggedInState = LoggedInState.LOGGED_IN, buildDeveloperWithRandomId("email@example.com", "First Name", "Last Name", None))
     implicit val request: FakeRequest[AnyContentAsEmpty.type] = FakeRequest().withCSRFToken
 
     val emailPreferencesSummaryView = app.injector.instanceOf[EmailPreferencesSummaryView]

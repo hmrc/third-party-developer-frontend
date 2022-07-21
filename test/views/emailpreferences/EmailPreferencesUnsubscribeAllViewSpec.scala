@@ -20,15 +20,20 @@ import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.LoggedIn
 import org.jsoup.Jsoup
 import play.api.mvc.AnyContentAsEmpty
 import play.api.test.FakeRequest
-import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.{DeveloperSessionBuilder, WithCSRFAddToken}
+import uk.gov.hmrc.thirdpartydeveloperfrontend.builder.{DeveloperBuilder, DeveloperSessionBuilder}
+import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.{LocalUserIdTracker, WithCSRFAddToken}
 import views.helper.CommonViewSpec
 import views.html.emailpreferences.EmailPreferencesUnsubscribeAllView
 
-class EmailPreferencesUnsubscribeAllViewSpec extends CommonViewSpec with WithCSRFAddToken {
+class EmailPreferencesUnsubscribeAllViewSpec extends CommonViewSpec
+  with WithCSRFAddToken
+  with LocalUserIdTracker
+  with DeveloperSessionBuilder
+  with DeveloperBuilder {
 
   trait Setup {
     implicit val request: FakeRequest[AnyContentAsEmpty.type] = FakeRequest().withCSRFToken
-    val developerSession = DeveloperSessionBuilder("email@example.com", "First Name", "Last Name", None, loggedInState = LoggedInState.LOGGED_IN)
+    val developerSession = buildDeveloperSession(loggedInState = LoggedInState.LOGGED_IN, buildDeveloper("email@example.com", "First Name", "Last Name", None))
 
     val emailPreferencesUnsubscribeAllView = app.injector.instanceOf[EmailPreferencesUnsubscribeAllView]
   }

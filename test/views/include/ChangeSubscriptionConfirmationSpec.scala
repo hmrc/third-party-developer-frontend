@@ -30,10 +30,17 @@ import uk.gov.hmrc.thirdpartydeveloperfrontend.utils._
 import views.helper.CommonViewSpec
 import views.html.include.ChangeSubscriptionConfirmationView
 import play.api.mvc.Call
+import uk.gov.hmrc.thirdpartydeveloperfrontend.builder.{DeveloperSessionBuilder, DeveloperBuilder}
 
 import java.time.{LocalDateTime, ZoneOffset}
 
-class ChangeSubscriptionConfirmationSpec extends CommonViewSpec with WithCSRFAddToken with CollaboratorTracker with LocalUserIdTracker {
+class ChangeSubscriptionConfirmationSpec extends CommonViewSpec
+  with WithCSRFAddToken
+  with CollaboratorTracker
+  with LocalUserIdTracker
+  with DeveloperSessionBuilder
+  with DeveloperBuilder {
+
   val request = FakeRequest().withCSRFToken
 
   val applicationId = ApplicationId("1234")
@@ -44,7 +51,7 @@ class ChangeSubscriptionConfirmationSpec extends CommonViewSpec with WithCSRFAdd
   val apiVersion = ApiVersion("1.0")
   val callMock = mock[Call]
 
-  val loggedInDeveloper = DeveloperSessionBuilder("givenname.familyname@example.com", "Givenname", "Familyname", loggedInState = LoggedInState.LOGGED_IN)
+  val loggedInDeveloper = buildDeveloperSession(loggedInState = LoggedInState.LOGGED_IN, buildDeveloper("givenname.familyname@example.com", "Givenname", "Familyname"))
 
   val application = Application(
     applicationId,

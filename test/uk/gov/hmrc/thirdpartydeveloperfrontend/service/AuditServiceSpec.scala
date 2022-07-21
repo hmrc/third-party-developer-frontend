@@ -17,21 +17,21 @@
 package uk.gov.hmrc.thirdpartydeveloperfrontend.service
 
 import uk.gov.hmrc.thirdpartydeveloperfrontend.config.ApplicationConfig
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.LoggedInState
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.{DeveloperSession, LoggedInState}
 import org.mockito.ArgumentMatcher
 import uk.gov.hmrc.thirdpartydeveloperfrontend.service.AuditAction.{ApplicationUpliftRequestDeniedDueToInvalidCredentials, PasswordChangeFailedDueToInvalidCredentials}
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.play.audit.http.connector.AuditConnector
 import uk.gov.hmrc.play.audit.model.DataEvent
-import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.AsyncHmrcSpec
-import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.DeveloperSessionBuilder
+import uk.gov.hmrc.thirdpartydeveloperfrontend.builder._
+import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.{AsyncHmrcSpec, LocalUserIdTracker}
 
 import scala.concurrent.ExecutionContext
 import scala.concurrent.ExecutionContext.Implicits.global
 
-class AuditServiceSpec extends AsyncHmrcSpec {
+class AuditServiceSpec extends AsyncHmrcSpec with LocalUserIdTracker with DeveloperSessionBuilder with DeveloperBuilder {
 
-  val developer = DeveloperSessionBuilder("email@example.com", "Paul", "Smith", loggedInState = LoggedInState.LOGGED_IN)
+  val developer: DeveloperSession = buildDeveloperSession(loggedInState = LoggedInState.LOGGED_IN, buildDeveloper("email@example.com", "Paul", "Smith", None))
 
   trait Setup {
     implicit val hc = HeaderCarrier().withExtraHeaders(

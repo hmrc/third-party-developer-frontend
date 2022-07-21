@@ -16,7 +16,7 @@
 
 package uk.gov.hmrc.thirdpartydeveloperfrontend.controllers
 
-import uk.gov.hmrc.thirdpartydeveloperfrontend.builder.DeveloperBuilder
+import uk.gov.hmrc.thirdpartydeveloperfrontend.builder._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.config.ErrorHandler
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.mocks.service._
@@ -52,6 +52,7 @@ class AddApplicationSuccessSpec
     with SubscriptionTestHelperSugar
     with WithCSRFAddToken
     with DeveloperBuilder
+    with DeveloperSessionBuilder
     with LocalUserIdTracker {
 
   val principalApp = Application(

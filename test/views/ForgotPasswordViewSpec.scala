@@ -19,17 +19,23 @@ package views
 import org.jsoup.Jsoup
 import play.api.data.Form
 import play.api.test.{FakeRequest, StubMessagesFactory}
+import uk.gov.hmrc.thirdpartydeveloperfrontend.builder.{DeveloperBuilder, DeveloperSessionBuilder}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.ForgotPasswordForm
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.{DeveloperSession, LoggedInState}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.ViewHelpers._
-import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.{DeveloperSessionBuilder, WithCSRFAddToken}
+import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.{LocalUserIdTracker, WithCSRFAddToken}
 import views.helper.CommonViewSpec
 import views.html.ForgotPasswordView
 
-class ForgotPasswordViewSpec extends CommonViewSpec with WithCSRFAddToken with StubMessagesFactory {
+class ForgotPasswordViewSpec extends CommonViewSpec
+  with WithCSRFAddToken
+  with LocalUserIdTracker
+  with StubMessagesFactory
+  with DeveloperSessionBuilder
+  with DeveloperBuilder {
 
   val forgotPasswordView: ForgotPasswordView = app.injector.instanceOf[ForgotPasswordView]
-  val loggedInDeveloper: DeveloperSession = DeveloperSessionBuilder("admin@example.com", "firstName1", "lastName1", loggedInState = LoggedInState.LOGGED_IN)
+  val loggedInDeveloper: DeveloperSession = buildDeveloperSession(loggedInState = LoggedInState.LOGGED_IN, buildDeveloperWithRandomId("admin@example.com", "firstName1", "lastName1"))
 
   "Forgot Password page" should {
 

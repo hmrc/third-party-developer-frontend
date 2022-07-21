@@ -29,15 +29,15 @@ import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.ViewHelpers.{elementExistsB
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.WithCSRFAddToken
 import views.helper.CommonViewSpec
 import views.html.manageTeamViews.ManageTeamView
-import uk.gov.hmrc.thirdpartydeveloperfrontend.builder.DeveloperBuilder
-import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.{DeveloperSessionBuilder, LocalUserIdTracker}
+import uk.gov.hmrc.thirdpartydeveloperfrontend.builder.{DeveloperBuilder, DeveloperSessionBuilder}
+import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.LocalUserIdTracker
 
-class ManageTeamViewSpec extends CommonViewSpec with WithCSRFAddToken with DeveloperBuilder with LocalUserIdTracker {
+class ManageTeamViewSpec extends CommonViewSpec with WithCSRFAddToken with DeveloperBuilder with LocalUserIdTracker with DeveloperSessionBuilder {
 
   val appId = ApplicationId("1234")
   val clientId = ClientId("clientId123")
-  val loggedInDeveloper = DeveloperSessionBuilder("admin@example.com", "firstName1", "lastName1", loggedInState = LoggedInState.LOGGED_IN)
-  val collaborator = DeveloperSessionBuilder("developer@example.com", "firstName2", "lastName2", loggedInState = LoggedInState.LOGGED_IN)
+  val loggedInDeveloper = buildDeveloperSession(loggedInState = LoggedInState.LOGGED_IN, buildDeveloper("admin@example.com", "firstName1", "lastName1"))
+  val collaborator = buildDeveloperSession(loggedInState = LoggedInState.LOGGED_IN, buildDeveloper("developer@example.com", "firstName2", "lastName2"))
   val collaborators = Set(loggedInDeveloper.email.asAdministratorCollaborator, collaborator.email.asDeveloperCollaborator)
   val application = Application(
     appId,

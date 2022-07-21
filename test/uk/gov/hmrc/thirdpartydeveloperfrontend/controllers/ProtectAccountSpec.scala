@@ -17,7 +17,7 @@
 package uk.gov.hmrc.thirdpartydeveloperfrontend.controllers
 
 import java.net.URI
-import uk.gov.hmrc.thirdpartydeveloperfrontend.builder.DeveloperBuilder
+import uk.gov.hmrc.thirdpartydeveloperfrontend.builder.{DeveloperBuilder, MfaDetailBuilder}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.config.ErrorHandler
 import uk.gov.hmrc.thirdpartydeveloperfrontend.connectors.ThirdPartyDeveloperConnector
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.connectors.UpdateLoggedInStateRequest
@@ -45,7 +45,7 @@ import scala.concurrent.Future.successful
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.UserId
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.LocalUserIdTracker
 
-class ProtectAccountSpec extends BaseControllerSpec with WithCSRFAddToken with DeveloperBuilder with LocalUserIdTracker {
+class ProtectAccountSpec extends BaseControllerSpec with WithCSRFAddToken with DeveloperBuilder with LocalUserIdTracker with MfaDetailBuilder {
 
   trait Setup extends SessionServiceMock {
     val secret = "ABCDEFGH"
@@ -107,7 +107,7 @@ class ProtectAccountSpec extends BaseControllerSpec with WithCSRFAddToken with D
 
   trait SetupProtectedAccount extends Setup {
     when(underTest.thirdPartyDeveloperConnector.fetchDeveloper(eqTo(loggedInDeveloper.userId))(*))
-      .thenReturn(successful(Some(buildDeveloper(emailAddress = loggedInDeveloper.email, organisation = None, mfaEnabled = Some(true)))))
+      .thenReturn(successful(Some(buildDeveloper(emailAddress = loggedInDeveloper.email, organisation = None, mfaDetails = Some(List(verifiedAuthenticatorAppMfaDetails))))))
   }
 
   trait SetupSuccessfulStart2SV extends Setup {

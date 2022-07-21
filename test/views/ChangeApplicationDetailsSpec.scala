@@ -24,12 +24,17 @@ import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.controllers.Applica
 import org.jsoup.Jsoup
 import org.jsoup.nodes.Document
 import play.api.test.FakeRequest
+import uk.gov.hmrc.thirdpartydeveloperfrontend.builder._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.ViewHelpers.{elementExistsByText, elementIdentifiedByAttrContainsText, textareaExistsWithText}
-import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.{DeveloperSessionBuilder, WithCSRFAddToken}
+import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.{LocalUserIdTracker, WithCSRFAddToken}
 import views.helper.CommonViewSpec
 import views.html.ChangeDetailsView
 
-class ChangeApplicationDetailsSpec extends CommonViewSpec with WithCSRFAddToken {
+class ChangeApplicationDetailsSpec extends CommonViewSpec
+  with WithCSRFAddToken
+  with LocalUserIdTracker
+  with DeveloperSessionBuilder
+  with DeveloperBuilder {
 
   val changeDetails = app.injector.instanceOf[ChangeDetailsView]
   val applicationId = ApplicationId("1234")
@@ -39,7 +44,7 @@ class ChangeApplicationDetailsSpec extends CommonViewSpec with WithCSRFAddToken 
 
     def renderPage(application: Application) = {
 
-      val loggedIn = DeveloperSessionBuilder("admin@example.com", "firstName1", "lastName1", loggedInState = LoggedInState.LOGGED_IN)
+      val loggedIn = buildDeveloperSession(loggedInState = LoggedInState.LOGGED_IN, buildDeveloper("admin@example.com", "firstName1", "lastName1", None))
       val request = FakeRequest().withCSRFToken
       val privacyPolicyUrl = application.privacyPolicyLocation match {
         case PrivacyPolicyLocation.Url(url) => Some(url)

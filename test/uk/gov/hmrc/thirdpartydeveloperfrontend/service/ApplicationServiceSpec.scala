@@ -19,7 +19,7 @@ package uk.gov.hmrc.thirdpartydeveloperfrontend.service
 import java.time.{LocalDateTime, Period, ZoneOffset}
 import java.util.UUID.randomUUID
 import uk.gov.hmrc.thirdpartydeveloperfrontend.builder._
-import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.{AsyncHmrcSpec, DeveloperSessionBuilder, FixedClock, LocalUserIdTracker}
+import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.{AsyncHmrcSpec, FixedClock, LocalUserIdTracker}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.config.ApplicationConfig
 import uk.gov.hmrc.thirdpartydeveloperfrontend.connectors._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.EditApplicationForm
@@ -43,7 +43,12 @@ import org.mockito.captor.ArgCaptor
 
 import scala.concurrent.Future
 
-class ApplicationServiceSpec extends AsyncHmrcSpec with SubscriptionsBuilder with ApplicationBuilder with LocalUserIdTracker {
+class ApplicationServiceSpec extends AsyncHmrcSpec
+  with SubscriptionsBuilder
+  with ApplicationBuilder
+  with LocalUserIdTracker
+  with DeveloperSessionBuilder
+  with DeveloperBuilder {
 
   val versionOne = ApiVersion("1.0")
   val versionTwo = ApiVersion("2.0")
@@ -232,9 +237,9 @@ class ApplicationServiceSpec extends AsyncHmrcSpec with SubscriptionsBuilder wit
   "request application deletion" should {
 
     val adminEmail = "admin@example.com"
-    val adminRequester = DeveloperSessionBuilder(adminEmail, "firstname", "lastname", loggedInState = LoggedInState.LOGGED_IN)
+    val adminRequester = buildDeveloperSession(loggedInState = LoggedInState.LOGGED_IN, buildDeveloper(adminEmail, "firstname", "lastname", None))
     val developerEmail = "developer@example.com"
-    val developerRequester = DeveloperSessionBuilder(developerEmail, "firstname", "lastname", loggedInState = LoggedInState.LOGGED_IN)
+    val developerRequester = buildDeveloperSession(loggedInState = LoggedInState.LOGGED_IN, buildDeveloper(developerEmail, "firstname", "lastname", None))
     val teamMembers = Set(adminEmail.asAdministratorCollaborator, developerEmail.asDeveloperCollaborator)
     val sandboxApp = sandboxApplication.copy(collaborators = teamMembers)
     val productionApp = productionApplication.copy(collaborators = teamMembers)
@@ -290,9 +295,9 @@ class ApplicationServiceSpec extends AsyncHmrcSpec with SubscriptionsBuilder wit
   "delete subordinate application" should {
 
     val adminEmail = "admin@example.com"
-    val adminRequester = DeveloperSessionBuilder(adminEmail, "firstname", "lastname", loggedInState = LoggedInState.LOGGED_IN)
+    val adminRequester = buildDeveloperSession(loggedInState = LoggedInState.LOGGED_IN, buildDeveloper(adminEmail, "firstname", "lastname", None))
     val developerEmail = "developer@example.com"
-    val developerRequester = DeveloperSessionBuilder(developerEmail, "firstname", "lastname", loggedInState = LoggedInState.LOGGED_IN)
+    val developerRequester = buildDeveloperSession(loggedInState = LoggedInState.LOGGED_IN, buildDeveloper(developerEmail, "firstname", "lastname", None))
     val teamMembers = Set(adminEmail.asAdministratorCollaborator, developerEmail.asDeveloperCollaborator)
     val sandboxApp = sandboxApplication.copy(collaborators = teamMembers)
     val invalidROPCApp = sandboxApplication.copy(collaborators = teamMembers, access = ROPC())
@@ -421,7 +426,7 @@ class ApplicationServiceSpec extends AsyncHmrcSpec with SubscriptionsBuilder wit
   "requestProductionApplicationNameChange" should {
 
     val adminEmail = "admin@example.com"
-    val adminRequester = DeveloperSessionBuilder(adminEmail, "firstname", "lastname", loggedInState = LoggedInState.LOGGED_IN)
+    val adminRequester = buildDeveloperSession(loggedInState = LoggedInState.LOGGED_IN, buildDeveloper(adminEmail, "firstname", "lastname", None))
 
     "correctly create a deskpro ticket" in new Setup {
       private val applicationName = "applicationName"

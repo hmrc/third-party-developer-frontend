@@ -16,8 +16,9 @@
 
 package uk.gov.hmrc.thirdpartydeveloperfrontend.service
 
-import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.{AsyncHmrcSpec, DeveloperSessionBuilder, FixedClock}
+import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.{AsyncHmrcSpec, FixedClock, LocalUserIdTracker}
 import uk.gov.hmrc.http.HeaderCarrier
+import uk.gov.hmrc.thirdpartydeveloperfrontend.builder._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.connectors.ApmConnector
 
 import scala.concurrent.ExecutionContext.Implicits.global
@@ -43,7 +44,7 @@ import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.Applic
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.apidefinitions.ApiIdentifier
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.apidefinitions.ApiVersion
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.apidefinitions.ApiContext
-class ApplicationServiceUpliftSpec extends AsyncHmrcSpec {
+class ApplicationServiceUpliftSpec extends AsyncHmrcSpec with LocalUserIdTracker with  DeveloperSessionBuilder with DeveloperBuilder {
   trait Setup extends FixedClock {
     implicit val hc: HeaderCarrier = HeaderCarrier()
 
@@ -123,8 +124,7 @@ class ApplicationServiceUpliftSpec extends AsyncHmrcSpec {
     val applicationId = ApplicationId("applicationId")
     val applicationName = "applicationName"
 
-    val user =
-      DeveloperSessionBuilder("Firstname", "Lastname", "email@example.com", loggedInState = LoggedInState.LOGGED_IN)
+    val user = buildDeveloperSession(loggedInState = LoggedInState.LOGGED_IN, buildDeveloper("email@example.com", "Firstname", "Lastname", None))
 
     "request uplift" in new Setup {
       when(mockDeskproConnector.createTicket(any[DeskproTicket])(eqTo(hc))).thenReturn(successful(TicketCreated))

@@ -22,14 +22,19 @@ import org.jsoup.nodes.Document
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.LoggedInState
 import play.api.mvc.AnyContentAsEmpty
 import play.api.test.FakeRequest
-import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.{WithCSRFAddToken, DeveloperSessionBuilder}
+import uk.gov.hmrc.thirdpartydeveloperfrontend.builder.{DeveloperBuilder, DeveloperSessionBuilder}
+import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.{LocalUserIdTracker, WithCSRFAddToken}
 import views.html.emailpreferences.FlowStartView
 
-class FlowStartViewSpec extends CommonViewSpec with WithCSRFAddToken {
+class FlowStartViewSpec extends CommonViewSpec
+  with WithCSRFAddToken
+  with LocalUserIdTracker
+  with DeveloperSessionBuilder
+  with DeveloperBuilder {
 
   trait Setup {
     val developerSessionWithoutEmailPreferences =
-      DeveloperSessionBuilder("email@example.com", "First Name", "Last Name", None, loggedInState = LoggedInState.LOGGED_IN)
+      buildDeveloperSession( loggedInState = LoggedInState.LOGGED_IN, buildDeveloper("email@example.com", "First Name", "Last Name", None))
     implicit val request: FakeRequest[AnyContentAsEmpty.type] = FakeRequest().withCSRFToken
 
     val flowStartView = app.injector.instanceOf[FlowStartView]

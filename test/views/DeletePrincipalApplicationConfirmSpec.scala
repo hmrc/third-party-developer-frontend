@@ -26,10 +26,10 @@ import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.ViewHelpers.{elementExistsB
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.WithCSRFAddToken
 import views.helper.CommonViewSpec
 import views.html.DeletePrincipalApplicationConfirmView
-import uk.gov.hmrc.thirdpartydeveloperfrontend.builder.DeveloperBuilder
-import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.{DeveloperSessionBuilder, LocalUserIdTracker}
+import uk.gov.hmrc.thirdpartydeveloperfrontend.builder.{DeveloperBuilder, DeveloperSessionBuilder}
+import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.LocalUserIdTracker
 
-class DeletePrincipalApplicationConfirmSpec extends CommonViewSpec with WithCSRFAddToken with DeveloperBuilder with LocalUserIdTracker {
+class DeletePrincipalApplicationConfirmSpec extends CommonViewSpec with WithCSRFAddToken with DeveloperBuilder with LocalUserIdTracker with DeveloperSessionBuilder {
 
   val deletePrincipalApplicationConfirmView = app.injector.instanceOf[DeletePrincipalApplicationConfirmView]
 
@@ -38,7 +38,7 @@ class DeletePrincipalApplicationConfirmSpec extends CommonViewSpec with WithCSRF
     val request = FakeRequest().withCSRFToken
     val appId = ApplicationId("1234")
     val clientId = ClientId("clientId123")
-    val loggedInDeveloper = DeveloperSessionBuilder("developer@example.com", "John", "Doe", loggedInState = LoggedInState.LOGGED_IN)
+    val loggedInDeveloper = buildDeveloperSession( loggedInState = LoggedInState.LOGGED_IN, buildDeveloper("developer@example.com", "John", "Doe"))
     val application = Application(
       appId,
       clientId,

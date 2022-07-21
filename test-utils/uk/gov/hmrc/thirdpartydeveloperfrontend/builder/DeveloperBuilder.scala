@@ -16,21 +16,29 @@
 
 package uk.gov.hmrc.thirdpartydeveloperfrontend.builder
 
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.Developer
+import uk.gov.hmrc.apiplatform.modules.mfa.models.MfaDetail
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.{Developer, UserId}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.emailpreferences.EmailPreferences
-import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.CollaboratorTracker
-import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.UserIdTracker
+import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.{CollaboratorTracker, UserIdTracker}
 
 trait DeveloperBuilder extends CollaboratorTracker {
   self: UserIdTracker =>
 
-  def buildDeveloper(
-    emailAddress: String = "something@example.com",
-    firstName: String = "John",
-    lastName: String = "Doe",
-    organisation: Option[String] = None,
-    mfaEnabled: Option[Boolean] = None,
-    emailPreferences: EmailPreferences = EmailPreferences.noPreferences
+def buildDeveloperWithRandomId( emailAddress: String = "something@example.com",
+                                firstName: String = "John",
+                                lastName: String = "Doe",
+                                organisation: Option[String] = None,
+                                mfaDetails: Option[List[MfaDetail]] = None,
+                                emailPreferences: EmailPreferences = EmailPreferences.noPreferences) ={
+  buildDeveloper(emailAddress, firstName, lastName, organisation, mfaDetails, emailPreferences).copy(userId = UserId.random)
+}
+
+  def buildDeveloper( emailAddress: String = "something@example.com",
+                      firstName: String = "John",
+                      lastName: String = "Doe",
+                      organisation: Option[String] = None,
+                      mfaDetails: Option[List[MfaDetail]] = None,
+                      emailPreferences: EmailPreferences = EmailPreferences.noPreferences
   ): Developer = {
     Developer(
       idOf(emailAddress),
@@ -38,7 +46,7 @@ trait DeveloperBuilder extends CollaboratorTracker {
       firstName,
       lastName,
       organisation,
-      mfaEnabled,
+      mfaDetails,
       emailPreferences
     )
   }

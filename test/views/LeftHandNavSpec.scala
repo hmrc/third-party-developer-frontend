@@ -24,12 +24,13 @@ import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.controllers.Applica
 import org.jsoup.Jsoup
 import org.jsoup.nodes.Document
 import play.api.test.FakeRequest
+import uk.gov.hmrc.thirdpartydeveloperfrontend.builder.{DeveloperSessionBuilder, DeveloperBuilder}
 import views.helper.CommonViewSpec
 import views.html.include.LeftHandNav
 
 import scala.collection.JavaConverters._
-import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.{CollaboratorTracker, DeveloperSessionBuilder, LocalUserIdTracker}
-class LeftHandNavSpec extends CommonViewSpec with CollaboratorTracker with LocalUserIdTracker {
+import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.{CollaboratorTracker, LocalUserIdTracker}
+class LeftHandNavSpec extends CommonViewSpec with CollaboratorTracker with LocalUserIdTracker with DeveloperSessionBuilder with DeveloperBuilder {
 
   val leftHandNavView = app.injector.instanceOf[LeftHandNav]
 
@@ -38,7 +39,7 @@ class LeftHandNavSpec extends CommonViewSpec with CollaboratorTracker with Local
     val applicationId = ApplicationId("std-app-id")
     val clientId = ClientId("std-client-id")
     implicit val request = FakeRequest()
-    implicit val loggedIn = DeveloperSessionBuilder("user@example.com", "Test", "Test", None, loggedInState = LoggedInState.LOGGED_IN)
+    implicit val loggedIn = buildDeveloperSession(loggedInState = LoggedInState.LOGGED_IN, buildDeveloperWithRandomId( "user@example.com", "Test", "Test", None))
     val standardApplication = Application(applicationId, clientId, "name", now, Some(now), None, Period.ofDays(547), PRODUCTION, access = Standard())
     val privilegedApplication = Application(applicationId, clientId, "name", now, Some(now), None, Period.ofDays(547), PRODUCTION, access = Privileged())
     val ropcApplication = Application(applicationId, clientId, "name", now, Some(now), None, Period.ofDays(547), PRODUCTION, access = ROPC())

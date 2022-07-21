@@ -24,16 +24,20 @@ import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.controllers.Applica
 import org.jsoup.Jsoup
 import play.api.test.FakeRequest
 import play.twirl.api.HtmlFormat.Appendable
+import uk.gov.hmrc.thirdpartydeveloperfrontend.builder.{DeveloperBuilder, DeveloperSessionBuilder}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.TermsOfUseVersion
-
-import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.WithCSRFAddToken
+import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.{LocalUserIdTracker, WithCSRFAddToken}
 import views.helper.CommonViewSpec
 import views.html.TermsOfUseView
-import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.DeveloperSessionBuilder
 
 import java.time.format.DateTimeFormatter
 
-class TermsOfUseSpec extends CommonViewSpec with WithCSRFAddToken {
+class TermsOfUseSpec extends CommonViewSpec
+  with WithCSRFAddToken
+  with LocalUserIdTracker
+  with DeveloperSessionBuilder
+  with DeveloperBuilder {
+
   val termsOfUseView = app.injector.instanceOf[TermsOfUseView]
 
   case class Page(doc: Appendable) {
@@ -47,7 +51,7 @@ class TermsOfUseSpec extends CommonViewSpec with WithCSRFAddToken {
 
   "Terms of use view" when {
     implicit val request = FakeRequest().withCSRFToken
-    implicit val loggedIn = DeveloperSessionBuilder("developer@example.com", "Joe", "Bloggs", loggedInState = LoggedInState.LOGGED_IN)
+    implicit val loggedIn = buildDeveloperSession( loggedInState = LoggedInState.LOGGED_IN, buildDeveloperWithRandomId("developer@example.com", "Joe", "Bloggs"))
     implicit val navSection = "details"
 
     val id = ApplicationId("id")

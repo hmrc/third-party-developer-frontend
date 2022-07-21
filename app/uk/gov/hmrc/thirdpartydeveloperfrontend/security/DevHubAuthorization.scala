@@ -44,7 +44,7 @@ trait DevHubAuthorization extends FrontendHeaderCarrierProvider with CookieEncod
     val onlyTrueIfLoggedInFilter: DeveloperSessionFilter.Type = _.loggedInState == LoggedInState.LOGGED_IN
   }
 
-  def loggedInActionRefiner(filter: DeveloperSessionFilter.Type = DeveloperSessionFilter.onlyTrueIfLoggedInFilter): ActionRefiner[MessagesRequest, UserRequest] = 
+  def loggedInActionRefiner(filter: DeveloperSessionFilter.Type = DeveloperSessionFilter.onlyTrueIfLoggedInFilter): ActionRefiner[MessagesRequest, UserRequest] =
     new ActionRefiner[MessagesRequest, UserRequest] {
       def executionContext = ec
       def refine[A](msgRequest: MessagesRequest[A]): Future[Either[Result, UserRequest[A]]] = {
@@ -63,7 +63,7 @@ trait DevHubAuthorization extends FrontendHeaderCarrierProvider with CookieEncod
         })
         .value
       }
-    }   
+    }
       
   def atLeastPartLoggedInEnablingMfaAction(block: UserRequest[AnyContent] => Future[Result]): Action[AnyContent] =
     Action.async { implicit request =>

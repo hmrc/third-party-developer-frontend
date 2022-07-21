@@ -25,7 +25,7 @@ import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.AsyncHmrcSpec
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.LocalUserIdTracker
 import org.mockito.MockitoSugar
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils._
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.LoggedInState
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.{LoggedInState, UserId}
 import uk.gov.hmrc.apiplatform.modules.uplift.services.mocks.FlowRepositoryMockModule
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.SellResellOrDistribute
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.ResponsibleIndividual
@@ -36,12 +36,11 @@ class GetProductionCredentialsFlowServiceSpec
                 with SampleApplication
                 with SubscriptionTestHelperSugar
                 with SubscriptionsBuilder
-                with DeveloperBuilder
                 with FlowRepositoryMockModule
-                with LocalUserIdTracker {
+                with LocalUserIdTracker with DeveloperSessionBuilder with DeveloperBuilder {
 
   trait Setup extends MockitoSugar{
-    val loggedInDeveloper = DeveloperSessionBuilder("dev@example.com", "firstName", "lastName", loggedInState = LoggedInState.LOGGED_IN)
+    val loggedInDeveloper = buildDeveloperSession( loggedInState = LoggedInState.LOGGED_IN, buildDeveloperWithRandomId("dev@example.com", "firstName", "lastName"))
     val underTest = new GetProductionCredentialsFlowService(FlowRepositoryMock.aMock)
     val sessionId = "sessionId"
     val sellResellOrDistribute = SellResellOrDistribute("answer")

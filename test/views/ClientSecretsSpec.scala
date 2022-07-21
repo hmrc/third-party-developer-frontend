@@ -26,12 +26,16 @@ import org.jsoup.nodes.Document
 import play.api.mvc.Flash
 import play.api.test.FakeRequest
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils._
+import uk.gov.hmrc.thirdpartydeveloperfrontend.builder._
 import views.helper.CommonViewSpec
 import views.html.ClientSecretsView
 
 import scala.collection.JavaConverters._
 
-class ClientSecretsSpec extends CommonViewSpec with WithCSRFAddToken with CollaboratorTracker with LocalUserIdTracker {
+class ClientSecretsSpec extends CommonViewSpec with WithCSRFAddToken with CollaboratorTracker with LocalUserIdTracker
+  with DeveloperSessionBuilder
+  with DeveloperBuilder {
+
   trait Setup {
     val clientSecretsView = app.injector.instanceOf[ClientSecretsView]
 
@@ -48,7 +52,7 @@ class ClientSecretsSpec extends CommonViewSpec with WithCSRFAddToken with Collab
 
   "Client secrets page" should {
     val request = FakeRequest().withCSRFToken
-    val developer = DeveloperSessionBuilder("Test", "Test", "Test", None, loggedInState = LoggedInState.LOGGED_IN)
+    val developer = buildDeveloperSession(loggedInState = LoggedInState.LOGGED_IN, buildDeveloper("Test", "Test", "Test", None))
 
     val clientSecret1 = ClientSecret(randomUUID.toString, "", LocalDateTime.now(ZoneOffset.UTC))
     val clientSecret2 = ClientSecret(randomUUID.toString, "", LocalDateTime.now(ZoneOffset.UTC))

@@ -24,15 +24,15 @@ import org.jsoup.Jsoup
 import org.jsoup.nodes.Document
 import play.api.test.FakeRequest
 import play.twirl.api.Html
+import uk.gov.hmrc.thirdpartydeveloperfrontend.builder.{DeveloperBuilder, DeveloperSessionBuilder}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils._
 import views.helper.CommonViewSpec
 import views.html.ServerTokenView
-import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.DeveloperSessionBuilder
 
 import java.time.LocalDateTime
 import scala.collection.JavaConverters._
 
-class ServerTokenSpec extends CommonViewSpec with WithCSRFAddToken with CollaboratorTracker with LocalUserIdTracker {
+class ServerTokenSpec extends CommonViewSpec with WithCSRFAddToken with CollaboratorTracker with LocalUserIdTracker with DeveloperSessionBuilder with DeveloperBuilder{
   trait Setup {
     val appConfig: ApplicationConfig = mock[ApplicationConfig]
 
@@ -43,7 +43,7 @@ class ServerTokenSpec extends CommonViewSpec with WithCSRFAddToken with Collabor
 
   "Server token page" should {
     val request = FakeRequest().withCSRFToken
-    val developer = DeveloperSessionBuilder("Test", "Test", "Test", None, loggedInState = LoggedInState.LOGGED_IN)
+    val developer = buildDeveloperSession(loggedInState = LoggedInState.LOGGED_IN, buildDeveloperWithRandomId("Test", "Test", "Test", None))
 
     val application = Application(
       ApplicationId("Test Application ID"),
