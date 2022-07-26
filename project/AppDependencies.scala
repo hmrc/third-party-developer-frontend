@@ -9,13 +9,14 @@ object AppDependencies {
   lazy val seleniumVersion = "2.53.1"
   lazy val enumeratumVersion = "1.5.12"
   lazy val bootstrapVersion = "5.24.0"
+  lazy val mongoVersion = "0.68.0"
 
   val testScope = "test, it, component"
 
   lazy val compile = Seq(
     ws,
     "uk.gov.hmrc"                 %% "bootstrap-frontend-play-28"     % bootstrapVersion,
-    "uk.gov.hmrc.mongo"           %% "hmrc-mongo-play-28"             % "0.67.0",
+    "uk.gov.hmrc.mongo"           %% "hmrc-mongo-play-28"             % mongoVersion,
     "uk.gov.hmrc"                 %% "govuk-template"                 % "5.72.0-play-28",
     "uk.gov.hmrc"                 %% "play-ui"                        % "9.8.0-play-28",
     "uk.gov.hmrc"                 %% "url-builder"                    % "3.5.0-play-28",
@@ -36,7 +37,7 @@ object AppDependencies {
 
   lazy val test =  Seq(
     "uk.gov.hmrc"                 %% "bootstrap-test-play-28"         % bootstrapVersion,
-    "uk.gov.hmrc.mongo"           %% "hmrc-mongo-test-play-28"        % "0.67.0",
+    "uk.gov.hmrc.mongo"           %% "hmrc-mongo-test-play-28"        % mongoVersion,
     "org.mockito"                 %% "mockito-scala-scalatest"        % "1.16.46",
     "org.jsoup"                   %  "jsoup"                          % "1.13.1",
     "org.scalaj"                  %% "scalaj-http"                    % "2.4.2",
