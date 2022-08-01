@@ -73,6 +73,10 @@ object Capabilities {
     def hasCapability(app: BaseApplication): Boolean = true
   }
 
+  case object SupportsResponsibleIndividual extends Capability {
+    def hasCapability(app: BaseApplication): Boolean = app.deployedTo == Environment.PRODUCTION
+  }
+
   case object ViewPushSecret extends Capability {
     def hasCapability(app: BaseApplication) = true
   }

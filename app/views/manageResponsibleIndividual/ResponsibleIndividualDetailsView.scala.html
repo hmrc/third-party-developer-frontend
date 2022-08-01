@@ -1,0 +1,109 @@
+@*
+ * Copyright 2022 HM Revenue & Customs
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ *@
+
+@import include._
+@import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.routes
+@import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.{Application, CollaboratorRole}
+@import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.controllers.Crumb
+@import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.DeveloperSession
+@import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.ManageResponsibleIndividualController.ViewModel
+
+@this(devMain: DevMain2)
+
+@(app: Application, viewModel: ViewModel)(implicit request: play.api.mvc.Request[Any], loggedIn: DeveloperSession, messages: Messages, applicationConfig: ApplicationConfig)
+
+@devMain(
+    title = "Responsible individual",
+    userFullName = loggedIn.loggedInName,
+    developerSession = Some(loggedIn),
+    breadcrumbs = Seq(
+        Crumb("Responsible individual"),
+        Crumb.application(app),
+        Crumb.viewAllApplications,
+        Crumb.home
+    )
+) {
+    <h1 class="govuk-heading-l">Responsible individual</h1>
+
+    <dl class="govuk-summary-list govuk-summary-list--no-border govuk-!-font-size-16 govuk-!-margin-bottom-5">
+        <div class="govuk-summary-list__row">
+            <dt class="govuk-summary-list__key govuk-!-padding-top-1 govuk-!-padding-bottom-0 govuk-!-width-one-quarter">
+                Application
+            </dt>
+            <dd id="applicationName" class="govuk-summary-list__value govuk-!-padding-top-1 govuk-!-padding-bottom-0">
+                @app.name
+            </dd>
+        </div>
+        <div class="govuk-summary-list__row">
+            <dt class="govuk-summary-list__key govuk-!-padding-top-1 govuk-!-padding-bottom-1 govuk-!-width-one-quarter">
+                Environment
+            </dt>
+            <dd id="environment" class="govuk-summary-list__value govuk-!-padding-top-1 govuk-!-padding-bottom-1">
+                @viewModel.environment
+            </dd>
+        </div>
+    </dl>
+
+    <p class="govuk-body govuk-!-margin-top-7 govuk-!-margin-bottom-8"><span id="currentRiName">@viewModel.responsibleIndividualName</span> is the responsible individual for the application.</p>
+
+    <table id="riHistory" class="govuk-table">
+        <caption class="govuk-table__caption govuk-table__caption--s govuk-!-margin-bottom-3">Responsible individual history</caption>
+        <thead class="govuk-table__head">
+            <tr class="govuk-table__row">
+                <th scope="col" class="govuk-table__header">Name</th>
+                <th scope="col" class="govuk-table__header">Responsible from</th>
+                <th scope="col" class="govuk-table__header">Responsible to</th>
+            </tr>
+        </thead>
+        <tbody class="govuk-table__body">
+            @for(historyItem <- viewModel.history) {
+                <tr class="govuk-table__row">
+                    <th scope="row" class="govuk-table__header riHistoryName">@historyItem.name</th>
+                    <td class="govuk-table__cell riHistoryFrom">@historyItem.fromDate</td>
+                    <td class="govuk-table__cell riHistoryTo">@historyItem.toDate</td>
+                </tr>
+            }
+        </tbody>
+    </table>
+
+    <p class="govuk-body govuk-!-margin-top-7">The responsible individual:</p>
+    <ul class="govuk-list govuk-list--bullet">
+        <li>ensures your software conforms to the <a href="/api-documentation/docs/terms-of-use" class="govuk-link govuk-link--no-visited-state">terms of use</a></li>
+        <li>understands the <a href="/api-documentation/docs/terms-of-use/not-meeting-terms-of-use" class="govuk-link govuk-link--no-visited-state">consequences of not conforming to the terms of use</a></li>
+    </ul>
+
+    @if(viewModel.allowChanges) {
+        <a id="changeResponsibleIndividual" href="" role="button" draggable="false" class="govuk-button govuk-!-margin-top-3" data-module="govuk-button">
+            Change responsible individual
+        </a>
+    } else {
+        @if(viewModel.adminEmails.size == 1) {
+            <p id="changeRiText" class="govuk-body">
+                Only admins can change the responsible individual. Speak to @viewModel.adminEmails.head if you want to make a change.
+            </p>
+        } else {
+            <p id="changeRiText" class="govuk-body">
+                Only admins can change the responsible individual.  If you want to make a change, speak to:
+            </p>
+            <ul id="adminList" class="govuk-list govuk-list--bullet">
+            @for(adminEmail <- viewModel.adminEmails) {
+                <li>@adminEmail</li>
+            }
+            </ul>
+        }
+    }
+
+}

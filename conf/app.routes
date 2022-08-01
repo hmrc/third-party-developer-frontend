@@ -110,6 +110,8 @@ POST        /applications/:id/ip-allowlist/activate                             
 GET         /applications/:id/ip-allowlist/deactivate                                                    uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.IpAllowListController.removeIpAllowlist(id: ApplicationId)
 POST        /applications/:id/ip-allowlist/deactivate                                                    uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.IpAllowListController.removeIpAllowlistAction(id: ApplicationId)
 
+GET         /applications/:id/responsible-individual                                                     uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.ManageResponsibleIndividualController.showResponsibleIndividualDetails(id: ApplicationId)
+
 GET         /applications/:id/subscriptions                                                              uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.SubscriptionsController.manageSubscriptions(id: ApplicationId)
 
 POST        /applications/:id/change-subscription                                                        uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.SubscriptionsController.changeApiSubscription(id: ApplicationId, context: ApiContext, version: ApiVersion, redirectTo: String)
