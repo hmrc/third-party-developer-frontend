@@ -60,6 +60,7 @@ class ProtectAccountSpec extends BaseControllerSpec with WithCSRFAddToken with D
 
     val protectAccountSetupView = app.injector.instanceOf[ProtectAccountSetupView]
     val protectedAccountView = app.injector.instanceOf[ProtectedAccountView]
+    val protectedAccountWithMfaView = app.injector.instanceOf[ProtectedAccountWithMfaView]
     val protectAccountView = app.injector.instanceOf[ProtectAccountView]
     val protectAccountAccessCodeView = app.injector.instanceOf[ProtectAccountAccessCodeView]
     val protectAccountCompletedView = app.injector.instanceOf[ProtectAccountCompletedView]
@@ -78,7 +79,8 @@ class ProtectAccountSpec extends BaseControllerSpec with WithCSRFAddToken with D
       mock[MfaMandateService],
       cookieSigner,
       protectAccountSetupView,
-      protectedAccountView,
+      protectedAccountView, //TODO: This has to go (cleanup)
+      protectedAccountWithMfaView,
       protectAccountView,
       protectAccountAccessCodeView,
       protectAccountCompletedView,

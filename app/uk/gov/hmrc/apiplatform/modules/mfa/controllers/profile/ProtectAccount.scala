@@ -43,23 +43,24 @@ import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.FormKeys
 
 @Singleton
 class ProtectAccount @Inject()(
-  val thirdPartyDeveloperConnector: ThirdPartyDeveloperConnector,
-  val thirdPartyDeveloperMfaConnector: ThirdPartyDeveloperMfaConnector,
-  val otpAuthUri: OtpAuthUri,
-  val mfaService: MFAService,
-  val sessionService: SessionService,
-  mcc: MessagesControllerComponents,
-  val errorHandler: ErrorHandler,
-  val mfaMandateService: MfaMandateService,
-  val cookieSigner : CookieSigner,
-  protectAccountSetupView: ProtectAccountSetupView,
-  protectedAccountView: ProtectedAccountView,
-  protectAccountView: ProtectAccountView,
-  protectAccountAccessCodeView: ProtectAccountAccessCodeView,
-  protectAccountCompletedView: ProtectAccountCompletedView,
-  protectAccountRemovalConfirmationView: ProtectAccountRemovalConfirmationView,
-  protectAccountRemovalAccessCodeView: ProtectAccountRemovalAccessCodeView,
-  protectAccountRemovalCompleteView: ProtectAccountRemovalCompleteView
+                                val thirdPartyDeveloperConnector: ThirdPartyDeveloperConnector,
+                                val thirdPartyDeveloperMfaConnector: ThirdPartyDeveloperMfaConnector,
+                                val otpAuthUri: OtpAuthUri,
+                                val mfaService: MFAService,
+                                val sessionService: SessionService,
+                                mcc: MessagesControllerComponents,
+                                val errorHandler: ErrorHandler,
+                                val mfaMandateService: MfaMandateService,
+                                val cookieSigner : CookieSigner,
+                                protectAccountSetupView: ProtectAccountSetupView,
+                                protectedAccountView: ProtectedAccountView, //TODO: This has to go (cleanup)
+                                protectedAccountWithMfaDetailsView: ProtectedAccountWithMfaView,
+                                protectAccountView: ProtectAccountView,
+                                protectAccountAccessCodeView: ProtectAccountAccessCodeView,
+                                protectAccountCompletedView: ProtectAccountCompletedView,
+                                protectAccountRemovalConfirmationView: ProtectAccountRemovalConfirmationView,
+                                protectAccountRemovalAccessCodeView: ProtectAccountRemovalAccessCodeView,
+                                protectAccountRemovalCompleteView: ProtectAccountRemovalCompleteView
 )(
   implicit val ec: ExecutionContext,
   val appConfig: ApplicationConfig
@@ -79,7 +80,7 @@ class ProtectAccount @Inject()(
   def getProtectAccount: Action[AnyContent] = atLeastPartLoggedInEnablingMfaAction { implicit request =>
     thirdPartyDeveloperConnector.fetchDeveloper(request.userId).map {
       case Some(developer: Developer) => if (MfaDetailHelper.isAuthAppMfaVerified(developer.mfaDetails)) {
-        Ok(protectedAccountView())
+        Ok(protectedAccountWithMfaDetailsView(developer.mfaDetails))
       } else {
         Ok(protectAccountView())
       }
