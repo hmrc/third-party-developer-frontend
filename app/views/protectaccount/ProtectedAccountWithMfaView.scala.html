@@ -20,6 +20,7 @@
 @import uk.gov.hmrc.apiplatform.modules.mfa.controllers.profile.routes
 @import uk.gov.hmrc.apiplatform.modules.mfa.models.MfaDetail
 @import java.time.format.DateTimeFormatter;
+@import java.time.LocalDateTime;
 
 @this(devMain: DevMain2)
 @(mfaDetails: List[MfaDetail])(implicit request: play.api.mvc.Request[Any], loggedIn: DeveloperSession, appConfig: ApplicationConfig, messages: Messages)
@@ -40,7 +41,14 @@
                     <td class="govuk-table__cell" id="mfaType"><strong>@{mfaDetail.mfaType.asText}</strong></td>
                     <td class="govuk-table__cell govuk-!-width-one-half" id="nameAndAddedOn">@{mfaDetail.name}
                     <br>
-                    <span class="govuk-hint">Added @{DateTimeFormatter.ofPattern("dd MMMM yyyy hh:mm").format(mfaDetail.createdOn)}</span></td>
+                    @{
+                        val dataMigratedOn = LocalDateTime.of(2022,8,1,0,0)
+                        val createdOn = mfaDetail.createdOn
+                        if (createdOn.isAfter(dataMigratedOn)) {
+                            <span class="govuk-hint">Added {DateTimeFormatter.ofPattern("dd MMMM yyyy hh:mm").format(createdOn)}</span>
+                        }
+                    }
+                    </td>
                     <td class="govuk-table__cell" id="removeMfaLink"><a id="submit" type="submit" href="#">Remove</a></td>
                 </tr>
             }
