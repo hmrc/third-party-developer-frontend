@@ -207,9 +207,8 @@ class ProtectAccountSpec extends BaseControllerSpec with WithCSRFAddToken with D
         private val result = addToken(underTest.getProtectAccount())(request)
 
         status(result) shouldBe OK
-        contentAsString(result) should include("Your Developer Hub account is currently protected with 2-step verification. This is linked to your smartphone or tablet.")
-
-        contentAsString(result) should include("You must remove 2-step verification before you can add it to a new smartphone or tablet.")
+        contentAsString(result) should include("Account protection")
+        contentAsString(result) should include("This is how you get your access codes.")
       }
     }
 
