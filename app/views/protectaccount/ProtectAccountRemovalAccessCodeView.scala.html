@@ -37,10 +37,10 @@
   @helper.form(action = routes.ProtectAccount.remove2SV()) {
     @helper.CSRF.formField
     @fieldError2(form.errors, "invalidCredentials", true)
-    <p class="govuk-body">This is the 6 digit code from your authentication app.</p>
     <div class="govuk-form-group @if(form.errors("accessCode").nonEmpty){govuk-form-group--error}">
       <label class="govuk-label govuk-!-font-weight-bold" for="accessCode" id="access-code-label">Access code</label>
       @fieldError2(form.errors, "accessCode", true)
+      <p class="govuk-hint">This is the 6 digit code from your authentication app</p>
       <input
         type="text"
         autocomplete="off"
