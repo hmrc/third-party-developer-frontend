@@ -98,6 +98,13 @@ trait BaseApplication {
     }
   }
 
+  def hasResponsibleIndividual = {
+    access match {
+      case Standard(_, _, _, _, _, Some(_)) => true
+      case _ => false
+    }
+  }
+
   def privacyPolicyLocation = access match {
     case Standard(_, _, _, _, _, Some(ImportantSubmissionData(_, _, _, _, privacyPolicyLocation, _))) => privacyPolicyLocation
     case Standard(_, _, Some(url), _, _, None)                                                        => PrivacyPolicyLocation.Url(url)

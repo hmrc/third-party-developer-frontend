@@ -92,6 +92,13 @@
               IP allow list
             </a>
           </li>
+          @if(app.isApproved && app.hasResponsibleIndividual) {
+            <li class="side-nav__list @if(section == "manage-responsible-individual") { side-nav__list--selected }">
+              <a id="nav-manage-responsible-individual" class="side-nav__link" href="@controllers.routes.ManageResponsibleIndividualController.showResponsibleIndividualDetails(app.id)">
+                Responsible individual
+              </a>
+            </li>
+          }
           @(fraudPreventionModel) match {
             case Some(fraudPreventionViewModel) if(fraudPreventionViewModel.isVisible) =>{
 

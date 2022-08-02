@@ -58,6 +58,7 @@ class LeftHandNavSpec extends CommonViewSpec with CollaboratorTracker with Local
       elementExistsById(document, "nav-manage-client-secrets") shouldBe false
       elementExistsById(document, "nav-manage-team") shouldBe true
       elementExistsById(document, "nav-delete-application") shouldBe true
+      elementExistsById(document, "nav-manage-responsible-individual") shouldBe false
     }
 
     "include links to manage team members but not API subscriptions for an app with privileged access" in new Setup {
@@ -69,6 +70,7 @@ class LeftHandNavSpec extends CommonViewSpec with CollaboratorTracker with Local
       elementExistsById(document, "nav-manage-client-secrets") shouldBe false
       elementExistsById(document, "nav-manage-team") shouldBe true
       elementExistsById(document, "nav-delete-application") shouldBe false
+      elementExistsById(document, "nav-manage-responsible-individual") shouldBe false
     }
 
     "include links to manage team members but not API subscriptions for an app with ROPC access" in new Setup {
@@ -80,6 +82,7 @@ class LeftHandNavSpec extends CommonViewSpec with CollaboratorTracker with Local
       elementExistsById(document, "nav-manage-client-secrets") shouldBe false
       elementExistsById(document, "nav-manage-team") shouldBe true
       elementExistsById(document, "nav-delete-application") shouldBe false
+      elementExistsById(document, "nav-manage-responsible-individual") shouldBe false
     }
 
     "include links to client ID and client secrets if the user is an admin and the app has reached production state" in new Setup {
@@ -125,5 +128,21 @@ class LeftHandNavSpec extends CommonViewSpec with CollaboratorTracker with Local
       elementExistsById(sandboxAppAsDevDocument, "nav-manage-push-secrets") shouldBe false
       elementExistsById(prodAppAsDevDocument, "nav-manage-push-secrets") shouldBe false
     }
+
+    "include links to manage Responsible Individual if the app is approved and has a RI" in new Setup {
+      val responsibleIndividual = ResponsibleIndividual.build("Mr Responsible", "ri@example.com")
+      val importantSubmissionData = ImportantSubmissionData(
+        None, responsibleIndividual, Set.empty, TermsAndConditionsLocation.InDesktopSoftware, PrivacyPolicyLocation.InDesktopSoftware, List.empty
+      )
+
+      val application =
+        standardApplication.copy(deployedTo = Environment.PRODUCTION, state = ApplicationState.production("", ""),
+          access = Standard(importantSubmissionData = Some(importantSubmissionData)))
+
+      val document: Document = Jsoup.parse(leftHandNavView(Some(ApplicationViewModel(application, hasSubscriptionsFields = false, hasPpnsFields = false)), Some("")).body)
+
+      elementExistsById(document, "nav-manage-responsible-individual") shouldBe true
+    }
+
   }
 }
