@@ -21,7 +21,6 @@ import play.api.libs.crypto.CookieSigner
 import play.api.mvc._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.config.{ApplicationConfig, ErrorHandler}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.ManageResponsibleIndividualController.{ResponsibleIndividualHistoryItem, ViewModel, formatDateTime}
-import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.actions.SubscriptionFieldsActions
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.Capabilities.SupportsResponsibleIndividual
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.Permissions.TeamMembersOnly
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.{ApplicationId, ImportantSubmissionData, Standard, TermsOfUseAcceptance}
@@ -36,6 +35,7 @@ import scala.concurrent.{ExecutionContext, Future}
 object ManageResponsibleIndividualController {
   case class ResponsibleIndividualHistoryItem(name: String, fromDate: String, toDate: String)
   case class ViewModel(environment: String, responsibleIndividualName: String, history: List[ResponsibleIndividualHistoryItem], allowChanges: Boolean, adminEmails: List[String])
+
   def formatDateTime(localDateTime: LocalDateTime) = localDateTime.format(DateTimeFormatter.ofPattern("d MMMM yyyy"))
 }
 
@@ -47,13 +47,11 @@ class ManageResponsibleIndividualController @Inject()(
     val applicationService: ApplicationService,
     val applicationActionService: ApplicationActionService,
     mcc: MessagesControllerComponents,
-    val subFieldsService: SubscriptionFieldsService,
     val cookieSigner: CookieSigner,
     responsibleIndividualDetailsView: ResponsibleIndividualDetailsView
 )(implicit val ec: ExecutionContext, val appConfig: ApplicationConfig)
     extends ApplicationController(mcc)
-    with ApplicationHelper
-    with SubscriptionFieldsActions {
+    with ApplicationHelper {
 
   private def canViewResponsibleIndividualDetailsAction(applicationId: ApplicationId)(fun: ApplicationRequest[AnyContent] => Future[Result]): Action[AnyContent] =
     checkActionForApprovedApps(SupportsResponsibleIndividual, TeamMembersOnly)(applicationId)(fun)
@@ -79,7 +77,7 @@ class ManageResponsibleIndividualController @Inject()(
         val viewModel = ViewModel(environment, responsibleIndividual.fullName.value, responsibleIndividualHistoryItems, allowChanges, adminEmails)
         successful(Ok(responsibleIndividualDetailsView(request.application, viewModel)))
       }
-      case _ => ??? //TODO
+      case _ => successful(BadRequest("Only Standard apps have Responsible Individual details"))
     }
 
   }

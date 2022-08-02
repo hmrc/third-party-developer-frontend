@@ -26,6 +26,7 @@ import uk.gov.hmrc.thirdpartydeveloperfrontend.helpers.string._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.LocalUserIdTracker
 import org.scalatest.matchers.should.Matchers
 import org.scalatest.funspec.AnyFunSpec
+import uk.gov.hmrc.apiplatform.modules.submissions.domain.models.Submission
 
 class ApplicationSpec extends AnyFunSpec with Matchers with DeveloperBuilder with LocalUserIdTracker {
 
@@ -35,6 +36,15 @@ class ApplicationSpec extends AnyFunSpec with Matchers with DeveloperBuilder wit
 
   val productionApplicationState: ApplicationState = ApplicationState.production(requestedBy = "other email", verificationCode = "123")
   val testingApplicationState: ApplicationState = ApplicationState.testing
+  val responsibleIndividual = ResponsibleIndividual.build("Mr Responsible", "ri@example.com")
+  val importantSubmissionData = ImportantSubmissionData(
+    Some("http://example.com"),
+    responsibleIndividual,
+    Set(ServerLocation.InUK),
+    TermsAndConditionsLocation.InDesktopSoftware,
+    PrivacyPolicyLocation.InDesktopSoftware,
+    List(TermsOfUseAcceptance(responsibleIndividual, LocalDateTime.now().minusYears(1), Submission.Id.random, 0))
+  )
 
   describe("Application.canViewCredentials()") {
     val data: Seq[(Environment, Access, Developer, Boolean)] = Seq(
@@ -233,6 +243,18 @@ class ApplicationSpec extends AnyFunSpec with Matchers with DeveloperBuilder wit
     }
     it ("should return '33 months' display value for 1000 days grant length") {
       app.copy(grantLength = Period.ofDays(thousandDays)).grantLengthDisplayValue() shouldBe "33 months"
+    }
+  }
+
+  describe("hasResponsibleIndividual") {
+    it("should return true for apps with an RI") {
+      createApp(Environment.PRODUCTION, Standard(importantSubmissionData = Some(importantSubmissionData)), productionApplicationState).hasResponsibleIndividual shouldBe true
+    }
+    it("should return false for standard apps without an RI") {
+      createApp(Environment.PRODUCTION, Standard(importantSubmissionData = None), productionApplicationState).hasResponsibleIndividual shouldBe false
+    }
+    it("should return false for non-standard apps") {
+      createApp(Environment.PRODUCTION, Privileged(), productionApplicationState).hasResponsibleIndividual shouldBe false
     }
   }
 
