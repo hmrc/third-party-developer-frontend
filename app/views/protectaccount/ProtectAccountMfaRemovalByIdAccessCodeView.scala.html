@@ -24,7 +24,7 @@
 
 @this(devMain: DevMain2)
 
-@(form: Form[ProtectAccountForm])(implicit messages: Messages, request: play.api.mvc.Request[Any], loggedIn: DeveloperSession, applicationConfig: ApplicationConfig)
+@(mfaId: MfaId, form: Form[ProtectAccountForm])(implicit messages: Messages, request: play.api.mvc.Request[Any], loggedIn: DeveloperSession, applicationConfig: ApplicationConfig)
 
 @devMain(
   title = "Enter your access code",
@@ -35,7 +35,7 @@
   <h1 class="govuk-heading-l">Enter your access code</h1>
   @errorSummary2(form)
 
-  @helper.form(action = routes.ProtectAccount.remove2SV()) {
+  @helper.form(action = routes.ProtectAccount.remove2SVById(mfaId)) {
     @helper.CSRF.formField
     @fieldError2(form.errors, "invalidCredentials", true)
     <div class="govuk-form-group @if(form.errors("accessCode").nonEmpty){govuk-form-group--error}">

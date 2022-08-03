@@ -29,6 +29,8 @@ GET         /protect-account/confirm-removal                                    
 POST        /protect-account/confirm-removal                                                     uk.gov.hmrc.apiplatform.modules.mfa.controllers.profile.ProtectAccount.confirm2SVRemoval
 GET         /protect-account/remove                                                              uk.gov.hmrc.apiplatform.modules.mfa.controllers.profile.ProtectAccount.get2SVRemovalAccessCodePage
 POST        /protect-account/remove                                                              uk.gov.hmrc.apiplatform.modules.mfa.controllers.profile.ProtectAccount.remove2SV
+GET         /protect-account/remove-by-id                                                        uk.gov.hmrc.apiplatform.modules.mfa.controllers.profile.ProtectAccount.get2SVRemovalByIdAccessCodePage(mfaId: uk.gov.hmrc.apiplatform.modules.mfa.models.MfaId)
+POST        /protect-account/remove-by-id                                                        uk.gov.hmrc.apiplatform.modules.mfa.controllers.profile.ProtectAccount.remove2SVById(mfaId: uk.gov.hmrc.apiplatform.modules.mfa.models.MfaId)
 GET         /protect-account/remove/complete                                                     uk.gov.hmrc.apiplatform.modules.mfa.controllers.profile.ProtectAccount.get2SVRemovalCompletePage
 
 GET         /password                                                                            uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.profile.Profile.showPasswordPage

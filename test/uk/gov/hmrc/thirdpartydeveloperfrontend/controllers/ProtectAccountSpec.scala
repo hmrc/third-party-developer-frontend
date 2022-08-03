@@ -37,7 +37,7 @@ import uk.gov.hmrc.apiplatform.modules.mfa.service.{MFAResponse, MFAService, Mfa
 import uk.gov.hmrc.thirdpartydeveloperfrontend.qr.{OtpAuthUri, QRCode}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.WithCSRFAddToken
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.WithLoggedInSession._
-import views.html.protectaccount._
+import views.html.protectaccount.{ProtectAccountMfaRemovalByIdAccessCodeView, _}
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
@@ -66,6 +66,7 @@ class ProtectAccountSpec extends BaseControllerSpec with WithCSRFAddToken with D
     val protectAccountCompletedView = app.injector.instanceOf[ProtectAccountCompletedView]
     val protectAccountRemovalConfirmationView = app.injector.instanceOf[ProtectAccountRemovalConfirmationView]
     val protectAccountRemovalAccessCodeView = app.injector.instanceOf[ProtectAccountRemovalAccessCodeView]
+    val protectAccountMfaRemovalByIdAccessCodeView = app.injector.instanceOf[ProtectAccountMfaRemovalByIdAccessCodeView]
     val protectAccountRemovalCompleteView = app.injector.instanceOf[ProtectAccountRemovalCompleteView]
 
     val underTest: ProtectAccount = new ProtectAccount(
@@ -85,7 +86,8 @@ class ProtectAccountSpec extends BaseControllerSpec with WithCSRFAddToken with D
       protectAccountAccessCodeView,
       protectAccountCompletedView,
       protectAccountRemovalConfirmationView,
-      protectAccountRemovalAccessCodeView,
+      protectAccountRemovalAccessCodeView, //TODO: This has to go (cleanup)
+      protectAccountMfaRemovalByIdAccessCodeView,
       protectAccountRemovalCompleteView
     ) {
       override val qrCode: QRCode = mock[QRCode]

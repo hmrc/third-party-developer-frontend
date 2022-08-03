@@ -29,6 +29,7 @@ import play.api.data.Forms._
 import play.api.libs.crypto.CookieSigner
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents, Result}
 import uk.gov.hmrc.apiplatform.modules.mfa.connectors.ThirdPartyDeveloperMfaConnector
+import uk.gov.hmrc.apiplatform.modules.mfa.models.MfaId
 import uk.gov.hmrc.apiplatform.modules.mfa.service.{MFAService, MfaMandateService}
 import uk.gov.hmrc.apiplatform.modules.mfa.utils.MfaDetailHelper
 import uk.gov.hmrc.play.bootstrap.controller.WithDefaultFormBinding
@@ -59,7 +60,8 @@ class ProtectAccount @Inject()(
                                 protectAccountAccessCodeView: ProtectAccountAccessCodeView,
                                 protectAccountCompletedView: ProtectAccountCompletedView,
                                 protectAccountRemovalConfirmationView: ProtectAccountRemovalConfirmationView,
-                                protectAccountRemovalAccessCodeView: ProtectAccountRemovalAccessCodeView,
+                                protectAccountRemovalAccessCodeView: ProtectAccountRemovalAccessCodeView, //TODO: Clean up
+                                protectAccountMfaRemovalByIdAccessCodeView: ProtectAccountMfaRemovalByIdAccessCodeView,
                                 protectAccountRemovalCompleteView: ProtectAccountRemovalCompleteView
 )(
   implicit val ec: ExecutionContext,
@@ -153,6 +155,29 @@ class ProtectAccount @Inject()(
       form => {
 
         mfaService.removeMfa(request.userId, request.developerSession.email, form.accessCode).map(r =>
+          r.totpVerified match {
+            case true => removeDeviceSessionCookieFromResult(Redirect(uk.gov.hmrc.apiplatform.modules.mfa.controllers.profile.routes.ProtectAccount.get2SVRemovalCompletePage()))
+            case _ =>
+              val protectAccountForm = ProtectAccountForm.form.fill(form)
+                .withError("accessCode", "You have entered an incorrect access code")
+
+              BadRequest(protectAccountRemovalAccessCodeView(protectAccountForm))
+          }
+        )
+      })
+  }
+
+  def get2SVRemovalByIdAccessCodePage(mfaId: MfaId): Action[AnyContent] = loggedInAction { implicit request =>
+    Future.successful(Ok(protectAccountMfaRemovalByIdAccessCodeView(mfaId, ProtectAccountForm.form)))
+  }
+
+  def remove2SVById(mfaId: MfaId): Action[AnyContent] = loggedInAction { implicit request =>
+    ProtectAccountForm.form.bindFromRequest.fold(form => {
+      Future.successful(BadRequest(protectAccountMfaRemovalByIdAccessCodeView(mfaId, form)))
+    },
+      form => {
+
+        mfaService.removeMfaById(request.userId, mfaId, request.developerSession.email, form.accessCode).map(r =>
           r.totpVerified match {
             case true => removeDeviceSessionCookieFromResult(Redirect(uk.gov.hmrc.apiplatform.modules.mfa.controllers.profile.routes.ProtectAccount.get2SVRemovalCompletePage()))
             case _ =>
