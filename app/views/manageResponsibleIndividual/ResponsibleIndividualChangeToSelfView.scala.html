@@ -36,7 +36,7 @@
 
         <h1 class="govuk-heading-l">Become responsible for the application</h1>
 
-        <p class="govuk-body govuk-!-font-size-27 govuk-!-margin-bottom-6">@app.name</p>
+        <p id="appName" class="govuk-body govuk-!-font-size-27 govuk-!-margin-bottom-6">@app.name</p>
 
         <p class="govuk-body">The responsible individual:</p>
         <ul class="govuk-list govuk-list--bullet">
@@ -45,7 +45,7 @@
         </ul>
 
         <div class="govuk-button-group">
-            <button class="govuk-button govuk-!-margin-top-3" data-module="govuk-button">Continue</button>
+            <button id="continue" class="govuk-button govuk-!-margin-top-3" data-module="govuk-button">Continue</button>
 
             <a id="cancel" class="govuk-link govuk-link--no-visited-state" href="@routes.ManageResponsibleIndividualController.showResponsibleIndividualDetails(app.id)">Cancel</a>
         </div>

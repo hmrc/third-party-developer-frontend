@@ -127,6 +127,7 @@ class ManageResponsibleIndividualController @Inject()(
   }
 
   def showResponsibleIndividualChangeToOther(applicationId: ApplicationId) = canUpdateResponsibleIndividualDetailsAction(applicationId) { implicit request =>
+    //TODO update here
     successful(Ok(responsibleIndividualChangeToOtherView(request.application, ResponsibleIndividualChangeToOtherForm.form())))
   }
 

@@ -35,17 +35,17 @@
         <h1 class="govuk-panel__title govuk-!-font-size-36">
             You are now responsible for
         </h1>
-        <div class="govuk-panel__body">
+        <div id="appName" class="govuk-panel__body">
             @app.name
         </div>
     </div>
 
     <ul class="govuk-list">
         <li>
-            <a class="govuk-link govuk-link--no-visited-state" href="@routes.Details.details(app.id)">Check @app.name</a>
+            <a id="appDetails" class="govuk-link govuk-link--no-visited-state" href="@routes.Details.details(app.id)">Check @app.name</a>
         </li>
         <li>
-            <a class="govuk-link govuk-link--no-visited-state" href="@routes.ManageResponsibleIndividualController.showResponsibleIndividualDetails(app.id)">Check the responsible individual for @app.name</a>
+            <a id="riDetails" class="govuk-link govuk-link--no-visited-state" href="@routes.ManageResponsibleIndividualController.showResponsibleIndividualDetails(app.id)">Check the responsible individual for @app.name</a>
         </li>
     </ul>
 }
