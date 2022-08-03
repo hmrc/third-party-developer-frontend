@@ -111,6 +111,14 @@ GET         /applications/:id/ip-allowlist/deactivate                           
 POST        /applications/:id/ip-allowlist/deactivate                                                    uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.IpAllowListController.removeIpAllowlistAction(id: ApplicationId)
 
 GET         /applications/:id/responsible-individual                                                     uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.ManageResponsibleIndividualController.showResponsibleIndividualDetails(id: ApplicationId)
+GET         /applications/:id/responsible-individual/change/self-or-other                                uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.ManageResponsibleIndividualController.showResponsibleIndividualChangeToSelfOrOther(id: ApplicationId)
+POST        /applications/:id/responsible-individual/change/self-or-other                                uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.ManageResponsibleIndividualController.responsibleIndividualChangeToSelfOrOtherAction(id: ApplicationId)
+GET         /applications/:id/responsible-individual/change/self                                         uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.ManageResponsibleIndividualController.showResponsibleIndividualChangeToSelf(id: ApplicationId)
+POST        /applications/:id/responsible-individual/change/self                                         uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.ManageResponsibleIndividualController.responsibleIndividualChangeToSelfAction(id: ApplicationId)
+GET         /applications/:id/responsible-individual/change/self/confirmed                               uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.ManageResponsibleIndividualController.showResponsibleIndividualChangeToSelfConfirmed(id: ApplicationId)
+GET         /applications/:id/responsible-individual/change/other                                        uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.ManageResponsibleIndividualController.showResponsibleIndividualChangeToOther(id: ApplicationId)
+POST        /applications/:id/responsible-individual/change/other                                        uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.ManageResponsibleIndividualController.responsibleIndividualChangeToOtherAction(id: ApplicationId)
+GET         /applications/:id/responsible-individual/change/other/requested                              uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.ManageResponsibleIndividualController.showResponsibleIndividualChangeToOtherRequested(id: ApplicationId)
 
 GET         /applications/:id/subscriptions                                                              uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.SubscriptionsController.manageSubscriptions(id: ApplicationId)
 
