@@ -279,6 +279,17 @@ class ProtectAccountSpec extends BaseControllerSpec with WithCSRFAddToken with D
       }
     }
 
+    "get2SVRemovalByIdAccessCodePage" should {
+      "return 2SV removal access code page" in new SetupSuccessfulRemoval with LoggedIn {
+        private val request = FakeRequest().withLoggedIn(underTest, implicitly)(sessionId)
+
+        private val result = addToken(underTest.get2SVRemovalByIdAccessCodePage(mfaId))(request)
+
+        status(result) shouldBe OK
+        contentAsString(result) should include("This is the 6 digit code from your authentication app")
+      }
+    }
+
     "remove2SVById() is called it" should {
       "return error when totpCode in invalid format" in new SetupSuccessfulRemoval with LoggedIn {
         private val request = protectAccountRequest("abc")
@@ -304,6 +315,15 @@ class ProtectAccountSpec extends BaseControllerSpec with WithCSRFAddToken with D
 
         status(result) shouldBe SEE_OTHER
         redirectLocation(result) shouldBe Some(uk.gov.hmrc.apiplatform.modules.mfa.controllers.profile.routes.ProtectAccount.get2SVRemovalCompletePage().url)
+      }
+
+      "return protect account removal complete view" in new SetupSuccessfulRemoval with LoggedIn {
+        private val request = protectAccountRequest(correctCode)
+
+        private val result = addToken(underTest.get2SVRemovalCompletePage())(request)
+
+        status(result) shouldBe OK
+        contentAsString(result) should include("You've removed this<br>security preference")
       }
     }
   }

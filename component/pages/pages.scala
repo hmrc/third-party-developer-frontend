@@ -156,7 +156,7 @@ case object Login2svEnterAccessCodePage extends FormPage {
 }
 
 case object ProtectAccountPage extends FormPage {
-  override val pageHeading: String = "Protect your account"
+  override val pageHeading: String = "Account protection"
   override val url: String = s"${Env.host}/developer/profile/protect-account"
 }
 

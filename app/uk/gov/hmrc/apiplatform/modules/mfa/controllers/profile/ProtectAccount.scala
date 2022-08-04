@@ -127,7 +127,7 @@ class ProtectAccount @Inject()(
         } yield result
       })
   }
-
+  //TODO: Clean up
   def get2SVRemovalConfirmationPage: Action[AnyContent] = loggedInAction { implicit request =>
     Future.successful(Ok(protectAccountRemovalConfirmationView(Remove2SVConfirmForm.form)))
   }
@@ -144,6 +144,7 @@ class ProtectAccount @Inject()(
       })
   }
 
+  //TODO: Clean up
   def get2SVRemovalAccessCodePage(): Action[AnyContent] = loggedInAction { implicit request =>
     Future.successful(Ok(protectAccountRemovalAccessCodeView(ProtectAccountForm.form)))
   }
