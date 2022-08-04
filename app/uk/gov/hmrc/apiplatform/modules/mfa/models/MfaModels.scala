@@ -27,6 +27,10 @@ import scala.collection.immutable
 
 case class MfaId(value: UUID) extends AnyVal
 
+object MfaId {
+  def random: MfaId = MfaId(UUID.randomUUID())
+}
+
 sealed trait MfaType extends EnumEntry {
   def asText: String
 }

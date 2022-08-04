@@ -9,7 +9,7 @@ import java.util.UUID
 
 trait ComponentTestDeveloperBuilder {
   val staticUserId= UserId(UUID.fromString("11edcde7-c619-4bc1-bb6a-84dc14ea25cd"))
-  val authenticatorAppMfaDetails = AuthenticatorAppMfaDetailSummary(MfaId(UUID.randomUUID()), "name", LocalDateTime.now, verified = true)
+  val authenticatorAppMfaDetails = AuthenticatorAppMfaDetailSummary(MfaId.random, "name", LocalDateTime.now, verified = true)
 
   def buildDeveloper( emailAddress: String = "something@example.com",
                       firstName: String = "John",

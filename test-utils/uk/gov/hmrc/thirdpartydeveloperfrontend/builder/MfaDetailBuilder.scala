@@ -28,6 +28,6 @@ trait MfaDetailBuilder {
   def buildAuthenticatorAppMfaDetails(name: String,
                                       verified: Boolean,
                                       createdOn: LocalDateTime = LocalDateTime.now) ={
-    AuthenticatorAppMfaDetailSummary(MfaId(UUID.randomUUID()), name, createdOn, verified)
+    AuthenticatorAppMfaDetailSummary(MfaId.random, name, createdOn, verified)
   }
 }

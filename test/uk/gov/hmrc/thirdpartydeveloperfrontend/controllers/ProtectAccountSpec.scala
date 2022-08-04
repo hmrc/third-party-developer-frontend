@@ -33,6 +33,7 @@ import play.api.test.Helpers._
 import play.filters.csrf.CSRF.TokenProvider
 import uk.gov.hmrc.apiplatform.modules.mfa.connectors.ThirdPartyDeveloperMfaConnector
 import uk.gov.hmrc.apiplatform.modules.mfa.controllers.profile.ProtectAccount
+import uk.gov.hmrc.apiplatform.modules.mfa.models.MfaId
 import uk.gov.hmrc.apiplatform.modules.mfa.service.{MFAResponse, MFAService, MfaMandateService}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.qr.{OtpAuthUri, QRCode}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.WithCSRFAddToken
@@ -51,6 +52,8 @@ class ProtectAccountSpec extends BaseControllerSpec with WithCSRFAddToken with D
     val secret = "ABCDEFGH"
     val issuer = "HMRC Developer Hub"
     val sessionId = "sessionId"
+    val verifiedMfaDetail = verifiedAuthenticatorAppMfaDetails
+    val mfaId = verifiedMfaDetail.id
     val loggedInDeveloper = buildDeveloper()
     val qrImage = "qrImage"
     val otpUri = new URI("OTPURI")
@@ -139,10 +142,12 @@ class ProtectAccountSpec extends BaseControllerSpec with WithCSRFAddToken with D
 
   trait SetupFailedRemoval extends Setup {
     when(underTest.mfaService.removeMfa(any[UserId], any[String], any[String])(*)).thenReturn(Future.successful(MFAResponse(false)))
+    when(underTest.mfaService.removeMfaById(any[UserId], any[MfaId], any[String], any[String])(*)).thenReturn(Future.successful(MFAResponse(false)))
   }
 
   trait SetupSuccessfulRemoval extends Setup {
     when(underTest.mfaService.removeMfa(eqTo(loggedInDeveloper.userId), eqTo(loggedInDeveloper.email), eqTo(correctCode))(*)).thenReturn(Future.successful(MFAResponse(true)))
+    when(underTest.mfaService.removeMfaById(eqTo(loggedInDeveloper.userId), eqTo(mfaId), eqTo(loggedInDeveloper.email), eqTo(correctCode))(*)).thenReturn(Future.successful(MFAResponse(true)))
   }
 
   "Given a user is not logged in" when {
@@ -246,7 +251,7 @@ class ProtectAccountSpec extends BaseControllerSpec with WithCSRFAddToken with D
       }
     }
 
-    "removeMfa() is called it" should {
+    "remove2SV() is called it" should {
       "return error when totpCode in invalid format" in new SetupSuccessfulRemoval with LoggedIn {
         private val request = protectAccountRequest("abc")
 
@@ -268,6 +273,34 @@ class ProtectAccountSpec extends BaseControllerSpec with WithCSRFAddToken with D
         private val request = protectAccountRequest(correctCode)
 
         private val result = addToken(underTest.remove2SV())(request)
+
+        status(result) shouldBe SEE_OTHER
+        redirectLocation(result) shouldBe Some(uk.gov.hmrc.apiplatform.modules.mfa.controllers.profile.routes.ProtectAccount.get2SVRemovalCompletePage().url)
+      }
+    }
+
+    "remove2SVById() is called it" should {
+      "return error when totpCode in invalid format" in new SetupSuccessfulRemoval with LoggedIn {
+        private val request = protectAccountRequest("abc")
+
+        private val result = addToken(underTest.remove2SVById(mfaId))(request)
+
+        status(result) shouldBe BAD_REQUEST
+        assertIncludesOneError(result, "You have entered an invalid access code")
+      }
+
+      "return error when verification fails" in new SetupFailedRemoval with LoggedIn {
+        private val request = protectAccountRequest(correctCode)
+
+        private val result = addToken(underTest.remove2SVById(mfaId))(request)
+
+        assertIncludesOneError(result, "You have entered an incorrect access code")
+      }
+
+      "redirect to 2SV removal completed action" in new SetupSuccessfulRemoval with LoggedIn {
+        private val request = protectAccountRequest(correctCode)
+
+        private val result = addToken(underTest.remove2SVById(mfaId))(request)
 
         status(result) shouldBe SEE_OTHER
         redirectLocation(result) shouldBe Some(uk.gov.hmrc.apiplatform.modules.mfa.controllers.profile.routes.ProtectAccount.get2SVRemovalCompletePage().url)
