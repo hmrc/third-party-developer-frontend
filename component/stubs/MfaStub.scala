@@ -5,6 +5,7 @@ import play.api.http.Status.{NO_CONTENT, OK}
 import play.api.libs.json.Json
 import steps.{MfaSecret, TestContext}
 import uk.gov.hmrc.apiplatform.modules.mfa.connectors.ThirdPartyDeveloperMfaConnector.RemoveMfaRequest
+import uk.gov.hmrc.apiplatform.modules.mfa.models.MfaId
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.connectors.{TotpAuthenticationRequest, VerifyMfaRequest}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.{Developer, LoggedInState, Session}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.connectors.EncryptedJson
@@ -37,11 +38,11 @@ object MfaStub {
         ))
   }
 
-  def stubRemoveMfa(developer: Developer): Unit = {
+  def stubRemoveMfa(developer: Developer, mfaId: MfaId): Unit = {
     implicit val RemoveMfaRequestFormat = Json.format[RemoveMfaRequest]
 
     stubFor(
-      post(urlPathEqualTo(s"/developer/${developer.userId.value}/mfa/remove"))
+      post(urlPathEqualTo(s"/developer/${developer.userId.value}/mfa/${mfaId.value}/remove"))
         .withRequestBody(equalTo(Json.toJson(RemoveMfaRequest("john.smith@example.com")).toString()))
         .willReturn(aResponse()
           .withStatus(NO_CONTENT)

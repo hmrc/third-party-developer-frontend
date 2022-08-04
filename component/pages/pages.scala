@@ -176,7 +176,7 @@ case object MfaRemovePage extends FormPage {
   }
 
   override val pageHeading: String = "Enter your access code"
-  override val url: String = s"${Env.host}/developer/profile/protect-account/remove"
+  override val url: String = s"${Env.host}/developer/profile/protect-account/remove-by-id"
 
   def enterAccessCode(accessCode: String) = {
     val formData = Map("accessCode" -> accessCode)
@@ -186,7 +186,7 @@ case object MfaRemovePage extends FormPage {
 }
 
 case object MfaRemovalCompletePage extends FormPage {
-  override val pageHeading: String = "2-step verification removed"
+  override val pageHeading: String = "You've removed this security preference"
   override val url: String = s"${Env.host}/developer/profile/protect-account/remove/complete"
 }
 

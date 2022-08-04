@@ -22,12 +22,7 @@ Feature: Remove MFA. User with MFA enabled and Existing Device Session
     Then I am on the 'Email preferences' page
     Given I navigate to the 'Account protection' page
     Then I am on the 'Account protection' page
-
-    #TODO: This need fixing when remove mfa feature is available
-#    And I click on the button with id 'submit'
-#    Then I am on the 'Confirm 2SV removal' page
-#    When I click on the radio button with id 'confirm-remove-2sv-yes'
-#    And I click on the button with id 'submit'
-#    Then I am on the '2SV remove' page
-#    When I enter the correct access code during remove2SV then click continue
-#    Then I am on the '2SV removal complete' page
+    And I click on the button with id 'submit'
+    Then I am on the '2SV remove' page
+    When I enter the correct access code during remove2SV then click continue
+    Then I am on the '2SV removal complete' page

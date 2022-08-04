@@ -127,7 +127,7 @@ class MfaSteps extends ScalaDsl with EN with Matchers with NavigationSugar with 
       case None => ()
     }
 
-    MfaStub.stubRemoveMfa(developer)
+    MfaStub.stubRemoveMfa(developer, authenticatorAppMfaDetails.id)
     MfaStub.setupVerificationOfAccessCode(developer)
     DeveloperStub.findUserIdByEmailAddress(developer.email)
     Stubs.setupPostRequest("/check-password", NO_CONTENT)

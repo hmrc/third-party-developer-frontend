@@ -323,7 +323,7 @@ class ProtectAccountSpec extends BaseControllerSpec with WithCSRFAddToken with D
         private val result = addToken(underTest.get2SVRemovalCompletePage())(request)
 
         status(result) shouldBe OK
-        contentAsString(result) should include("You've removed this<br>security preference")
+        contentAsString(result) should include("You've removed this security preference")
       }
     }
   }
