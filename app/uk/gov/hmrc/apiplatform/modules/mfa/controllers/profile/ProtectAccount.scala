@@ -43,29 +43,29 @@ import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.FormKeys
 
 @Singleton
 class ProtectAccount @Inject()(
-                                val thirdPartyDeveloperConnector: ThirdPartyDeveloperConnector,
-                                val thirdPartyDeveloperMfaConnector: ThirdPartyDeveloperMfaConnector,
-                                val otpAuthUri: OtpAuthUri,
-                                val mfaService: MFAService,
-                                val sessionService: SessionService,
-                                mcc: MessagesControllerComponents,
-                                val errorHandler: ErrorHandler,
-                                val mfaMandateService: MfaMandateService,
-                                val cookieSigner : CookieSigner,
-                                protectAccountSetupView: ProtectAccountSetupView,
-                                protectAccountView: ProtectAccountView,
-                                protectAccountAccessCodeView: ProtectAccountAccessCodeView,
-                                protectAccountCompletedView: ProtectAccountCompletedView,
-                                protectedAccountWithMfaDetailsView: ProtectedAccountWithMfaView,
-                                protectedAccountMfaRemovalByIdAccessCodeView: ProtectedAccountMfaRemovalByIdAccessCodeView,
-                                protectedAccountRemovalCompleteView: ProtectedAccountRemovalCompleteView
+  val thirdPartyDeveloperConnector: ThirdPartyDeveloperConnector,
+  val thirdPartyDeveloperMfaConnector: ThirdPartyDeveloperMfaConnector,
+  val otpAuthUri: OtpAuthUri,
+  val mfaService: MFAService,
+  val sessionService: SessionService,
+  mcc: MessagesControllerComponents,
+  val errorHandler: ErrorHandler,
+  val mfaMandateService: MfaMandateService,
+  val cookieSigner: CookieSigner,
+  protectAccountSetupView: ProtectAccountSetupView,
+  protectAccountView: ProtectAccountView,
+  protectAccountAccessCodeView: ProtectAccountAccessCodeView,
+  protectAccountCompletedView: ProtectAccountCompletedView,
+  protectedAccountWithMfaDetailsView: ProtectedAccountWithMfaView,
+  protectedAccountMfaRemovalByIdAccessCodeView: ProtectedAccountMfaRemovalByIdAccessCodeView,
+  protectedAccountRemovalCompleteView: ProtectedAccountRemovalCompleteView
 )(
   implicit val ec: ExecutionContext,
   val appConfig: ApplicationConfig
 ) extends LoggedInController(mcc) with WithDefaultFormBinding {
 
   private val scale = 4
-  val qrCode: QRCode = QRCode(scale)
+  val qrCode = QRCode(scale)
 
   def getQrCode: Action[AnyContent] = atLeastPartLoggedInEnablingMfaAction { implicit request =>
     thirdPartyDeveloperMfaConnector.createMfaSecret(request.userId).map(secret => {
