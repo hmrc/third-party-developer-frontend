@@ -52,8 +52,7 @@ class ProtectAccountSpec extends BaseControllerSpec with WithCSRFAddToken with D
     val secret = "ABCDEFGH"
     val issuer = "HMRC Developer Hub"
     val sessionId = "sessionId"
-    val verifiedMfaDetail = verifiedAuthenticatorAppMfaDetails
-    val mfaId = verifiedMfaDetail.id
+    val mfaId = verifiedAuthenticatorAppMfaDetails.id
     val loggedInDeveloper = buildDeveloper()
     val qrImage = "qrImage"
     val otpUri = new URI("OTPURI")
@@ -137,12 +136,10 @@ class ProtectAccountSpec extends BaseControllerSpec with WithCSRFAddToken with D
   }
 
   trait SetupFailedRemoval extends Setup {
-    when(underTest.mfaService.removeMfa(any[UserId], any[String], any[String])(*)).thenReturn(Future.successful(MFAResponse(false)))
     when(underTest.mfaService.removeMfaById(any[UserId], any[MfaId], any[String], any[String])(*)).thenReturn(Future.successful(MFAResponse(false)))
   }
 
   trait SetupSuccessfulRemoval extends Setup {
-    when(underTest.mfaService.removeMfa(eqTo(loggedInDeveloper.userId), eqTo(loggedInDeveloper.email), eqTo(correctCode))(*)).thenReturn(Future.successful(MFAResponse(true)))
     when(underTest.mfaService.removeMfaById(eqTo(loggedInDeveloper.userId), eqTo(mfaId), eqTo(loggedInDeveloper.email), eqTo(correctCode))(*)).thenReturn(Future.successful(MFAResponse(true)))
   }
 
@@ -247,7 +244,7 @@ class ProtectAccountSpec extends BaseControllerSpec with WithCSRFAddToken with D
       }
     }
 
-    "get2SVRemovalByIdAccessCodePage" should {
+    "get2SVRemovalByIdAccessCodePage() is called it" should {
       "return 2SV removal access code page" in new SetupSuccessfulRemoval with LoggedIn {
         private val request = FakeRequest().withLoggedIn(underTest, implicitly)(sessionId)
 
@@ -284,7 +281,9 @@ class ProtectAccountSpec extends BaseControllerSpec with WithCSRFAddToken with D
         status(result) shouldBe SEE_OTHER
         redirectLocation(result) shouldBe Some(uk.gov.hmrc.apiplatform.modules.mfa.controllers.profile.routes.ProtectAccount.get2SVRemovalByIdCompletePage().url)
       }
+    }
 
+    "get2SVRemovalByIdCompletePage() is called it" should {
       "return protect account removal complete view" in new SetupSuccessfulRemoval with LoggedIn {
         private val request = protectAccountRequest(correctCode)
 

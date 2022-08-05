@@ -37,7 +37,6 @@ class MFAServiceSpec extends AsyncHmrcSpec {
     val connector = mock[ThirdPartyDeveloperMfaConnector]
 
     when(connector.enableMfa(eqTo(userId))(*)).thenReturn(successful(()))
-    when(connector.removeMfa(eqTo(userId), eqTo(email))(*)).thenReturn(successful(()))
     when(connector.removeMfaById(eqTo(userId), eqTo(mfaId), eqTo(email))(*)).thenReturn(successful(()))
 
     val service = new MFAService(connector)
@@ -77,37 +76,6 @@ class MFAServiceSpec extends AsyncHmrcSpec {
         .thenReturn(failed(UpstreamErrorResponse("failed to enable MFA", INTERNAL_SERVER_ERROR, INTERNAL_SERVER_ERROR)))
 
       intercept[UpstreamErrorResponse](await(service.enableMfa(userId, totpCode)(HeaderCarrier())))
-    }
-  }
-
-  "removeMfa" should {
-    "return failed totp when totp verification fails" in new FailedTotpVerification {
-      val result: MFAResponse = await(service.removeMfa(userId, email, totpCode)(HeaderCarrier()))
-      result.totpVerified shouldBe false
-    }
-
-    "not call remove mfa when totp verification fails" in new FailedTotpVerification {
-      await(service.removeMfa(userId, email, totpCode)(HeaderCarrier()))
-      verify(connector, never).removeMfa(eqTo(userId), eqTo(email))(*)
-    }
-
-    "return successful totp when totp verification passes" in new SuccessfulTotpVerification {
-      val result: MFAResponse = await(service.removeMfa(userId, email, totpCode)(HeaderCarrier()))
-
-      result.totpVerified shouldBe true
-    }
-
-    "remove MFA when totp verification passes" in new SuccessfulTotpVerification {
-      await(service.removeMfa(userId, email, totpCode)(HeaderCarrier()))
-
-      verify(connector, times(1)).removeMfa(eqTo(userId), eqTo(email))(*)
-    }
-
-    "throw exception if removal fails" in new SuccessfulTotpVerification {
-      when(connector.removeMfa(eqTo(userId), eqTo(email))(*))
-        .thenReturn(failed(UpstreamErrorResponse("failed to remove MFA", INTERNAL_SERVER_ERROR, INTERNAL_SERVER_ERROR)))
-
-      intercept[UpstreamErrorResponse](await(service.removeMfa(userId, email, totpCode)(HeaderCarrier())))
     }
   }
 
