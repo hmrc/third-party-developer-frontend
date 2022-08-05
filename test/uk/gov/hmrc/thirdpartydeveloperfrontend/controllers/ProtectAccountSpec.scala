@@ -38,7 +38,7 @@ import uk.gov.hmrc.apiplatform.modules.mfa.service.{MFAResponse, MFAService, Mfa
 import uk.gov.hmrc.thirdpartydeveloperfrontend.qr.{OtpAuthUri, QRCode}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.WithCSRFAddToken
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.WithLoggedInSession._
-import views.html.protectaccount.{ProtectAccountMfaRemovalByIdAccessCodeView, _}
+import views.html.protectaccount._
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
@@ -62,15 +62,12 @@ class ProtectAccountSpec extends BaseControllerSpec with WithCSRFAddToken with D
     def loggedInState: LoggedInState
 
     val protectAccountSetupView = app.injector.instanceOf[ProtectAccountSetupView]
-    val protectedAccountView = app.injector.instanceOf[ProtectedAccountView]
-    val protectedAccountWithMfaView = app.injector.instanceOf[ProtectedAccountWithMfaView]
     val protectAccountView = app.injector.instanceOf[ProtectAccountView]
     val protectAccountAccessCodeView = app.injector.instanceOf[ProtectAccountAccessCodeView]
     val protectAccountCompletedView = app.injector.instanceOf[ProtectAccountCompletedView]
-    val protectAccountRemovalConfirmationView = app.injector.instanceOf[ProtectAccountRemovalConfirmationView]
-    val protectAccountRemovalAccessCodeView = app.injector.instanceOf[ProtectAccountRemovalAccessCodeView]
-    val protectAccountMfaRemovalByIdAccessCodeView = app.injector.instanceOf[ProtectAccountMfaRemovalByIdAccessCodeView]
-    val protectAccountRemovalCompleteView = app.injector.instanceOf[ProtectAccountRemovalCompleteView]
+    val protectedAccountWithMfaView = app.injector.instanceOf[ProtectedAccountWithMfaView]
+    val protectedAccountMfaRemovalByIdAccessCodeView = app.injector.instanceOf[ProtectedAccountMfaRemovalByIdAccessCodeView]
+    val protectedAccountRemovalCompleteView = app.injector.instanceOf[ProtectedAccountRemovalCompleteView]
 
     val underTest: ProtectAccount = new ProtectAccount(
       mock[ThirdPartyDeveloperConnector],
@@ -83,15 +80,12 @@ class ProtectAccountSpec extends BaseControllerSpec with WithCSRFAddToken with D
       mock[MfaMandateService],
       cookieSigner,
       protectAccountSetupView,
-      protectedAccountView, //TODO: This has to go (cleanup)
-      protectedAccountWithMfaView,
       protectAccountView,
       protectAccountAccessCodeView,
       protectAccountCompletedView,
-      protectAccountRemovalConfirmationView,
-      protectAccountRemovalAccessCodeView, //TODO: This has to go (cleanup)
-      protectAccountMfaRemovalByIdAccessCodeView,
-      protectAccountRemovalCompleteView
+      protectedAccountWithMfaView,
+      protectedAccountMfaRemovalByIdAccessCodeView,
+      protectedAccountRemovalCompleteView
     ) {
       override val qrCode: QRCode = mock[QRCode]
     }
@@ -114,7 +108,9 @@ class ProtectAccountSpec extends BaseControllerSpec with WithCSRFAddToken with D
 
   trait SetupProtectedAccount extends Setup {
     when(underTest.thirdPartyDeveloperConnector.fetchDeveloper(eqTo(loggedInDeveloper.userId))(*))
-      .thenReturn(successful(Some(buildDeveloper(emailAddress = loggedInDeveloper.email, organisation = None, mfaDetails = List(verifiedAuthenticatorAppMfaDetails)))))
+      .thenReturn(successful(Some(
+        buildDeveloper(emailAddress = loggedInDeveloper.email, organisation = None, mfaDetails = List(verifiedAuthenticatorAppMfaDetails))))
+      )
   }
 
   trait SetupSuccessfulStart2SV extends Setup {
@@ -251,34 +247,6 @@ class ProtectAccountSpec extends BaseControllerSpec with WithCSRFAddToken with D
       }
     }
 
-    "remove2SV() is called it" should {
-      "return error when totpCode in invalid format" in new SetupSuccessfulRemoval with LoggedIn {
-        private val request = protectAccountRequest("abc")
-
-        private val result = addToken(underTest.remove2SV())(request)
-
-        status(result) shouldBe BAD_REQUEST
-        assertIncludesOneError(result, "You have entered an invalid access code")
-      }
-
-      "return error when verification fails" in new SetupFailedRemoval with LoggedIn {
-        private val request = protectAccountRequest(correctCode)
-
-        private val result = addToken(underTest.remove2SV())(request)
-
-        assertIncludesOneError(result, "You have entered an incorrect access code")
-      }
-
-      "redirect to 2SV removal completed action" in new SetupSuccessfulRemoval with LoggedIn {
-        private val request = protectAccountRequest(correctCode)
-
-        private val result = addToken(underTest.remove2SV())(request)
-
-        status(result) shouldBe SEE_OTHER
-        redirectLocation(result) shouldBe Some(uk.gov.hmrc.apiplatform.modules.mfa.controllers.profile.routes.ProtectAccount.get2SVRemovalCompletePage().url)
-      }
-    }
-
     "get2SVRemovalByIdAccessCodePage" should {
       "return 2SV removal access code page" in new SetupSuccessfulRemoval with LoggedIn {
         private val request = FakeRequest().withLoggedIn(underTest, implicitly)(sessionId)
@@ -314,13 +282,13 @@ class ProtectAccountSpec extends BaseControllerSpec with WithCSRFAddToken with D
         private val result = addToken(underTest.remove2SVById(mfaId))(request)
 
         status(result) shouldBe SEE_OTHER
-        redirectLocation(result) shouldBe Some(uk.gov.hmrc.apiplatform.modules.mfa.controllers.profile.routes.ProtectAccount.get2SVRemovalCompletePage().url)
+        redirectLocation(result) shouldBe Some(uk.gov.hmrc.apiplatform.modules.mfa.controllers.profile.routes.ProtectAccount.get2SVRemovalByIdCompletePage().url)
       }
 
       "return protect account removal complete view" in new SetupSuccessfulRemoval with LoggedIn {
         private val request = protectAccountRequest(correctCode)
 
-        private val result = addToken(underTest.get2SVRemovalCompletePage())(request)
+        private val result = addToken(underTest.get2SVRemovalByIdCompletePage())(request)
 
         status(result) shouldBe OK
         contentAsString(result) should include("You've removed this security preference")
@@ -329,7 +297,6 @@ class ProtectAccountSpec extends BaseControllerSpec with WithCSRFAddToken with D
   }
 
   private def assertIncludesOneError(result: Future[Result], message: String): Assertion = {
-
     val body = contentAsString(result)
 
     body should include(message)

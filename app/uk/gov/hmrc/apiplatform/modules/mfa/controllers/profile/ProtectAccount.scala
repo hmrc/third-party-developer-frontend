@@ -39,7 +39,6 @@ import views.html.protectaccount._
 
 import scala.concurrent.{ExecutionContext, Future}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.LoggedInController
-import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.Remove2SVConfirmForm
 import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.FormKeys
 
 @Singleton
@@ -54,22 +53,19 @@ class ProtectAccount @Inject()(
                                 val mfaMandateService: MfaMandateService,
                                 val cookieSigner : CookieSigner,
                                 protectAccountSetupView: ProtectAccountSetupView,
-                                protectedAccountView: ProtectedAccountView, //TODO: This has to go (cleanup)
-                                protectedAccountWithMfaDetailsView: ProtectedAccountWithMfaView,
                                 protectAccountView: ProtectAccountView,
                                 protectAccountAccessCodeView: ProtectAccountAccessCodeView,
                                 protectAccountCompletedView: ProtectAccountCompletedView,
-                                protectAccountRemovalConfirmationView: ProtectAccountRemovalConfirmationView,
-                                protectAccountRemovalAccessCodeView: ProtectAccountRemovalAccessCodeView, //TODO: Clean up
-                                protectAccountMfaRemovalByIdAccessCodeView: ProtectAccountMfaRemovalByIdAccessCodeView,
-                                protectAccountRemovalCompleteView: ProtectAccountRemovalCompleteView
+                                protectedAccountWithMfaDetailsView: ProtectedAccountWithMfaView,
+                                protectedAccountMfaRemovalByIdAccessCodeView: ProtectedAccountMfaRemovalByIdAccessCodeView,
+                                protectedAccountRemovalCompleteView: ProtectedAccountRemovalCompleteView
 )(
   implicit val ec: ExecutionContext,
   val appConfig: ApplicationConfig
 ) extends LoggedInController(mcc) with WithDefaultFormBinding {
 
   private val scale = 4
-  val qrCode = QRCode(scale)
+  val qrCode: QRCode = QRCode(scale)
 
   def getQrCode: Action[AnyContent] = atLeastPartLoggedInEnablingMfaAction { implicit request =>
     thirdPartyDeveloperMfaConnector.createMfaSecret(request.userId).map(secret => {
@@ -114,10 +110,9 @@ class ProtectAccount @Inject()(
       BadRequest(protectAccountAccessCodeView(protectAccountForm))
     }
 
-    ProtectAccountForm.form.bindFromRequest.fold(form => {
-      Future.successful(BadRequest(protectAccountAccessCodeView(form)))
-    },
-      (form: ProtectAccountForm) => {
+    ProtectAccountForm.form.bindFromRequest.fold(
+      form => Future.successful(BadRequest(protectAccountAccessCodeView(form))),
+      form => {
         for {
           mfaResponse <- mfaService.enableMfa(request.userId, form.accessCode)
           result = {
@@ -127,72 +122,32 @@ class ProtectAccount @Inject()(
         } yield result
       })
   }
-  //TODO: Clean up
-  def get2SVRemovalConfirmationPage: Action[AnyContent] = loggedInAction { implicit request =>
-    Future.successful(Ok(protectAccountRemovalConfirmationView(Remove2SVConfirmForm.form)))
-  }
-
-  def confirm2SVRemoval: Action[AnyContent] = loggedInAction { implicit request =>
-    Remove2SVConfirmForm.form.bindFromRequest.fold(form => {
-      Future.successful(BadRequest(protectAccountRemovalConfirmationView(form)))
-    },
-      form => {
-        form.removeConfirm match {
-          case Some("Yes") => Future.successful(Redirect(uk.gov.hmrc.apiplatform.modules.mfa.controllers.profile.routes.ProtectAccount.get2SVRemovalAccessCodePage()))
-          case _ => Future.successful(Redirect(uk.gov.hmrc.apiplatform.modules.mfa.controllers.profile.routes.ProtectAccount.getProtectAccount()))
-        }
-      })
-  }
-
-  //TODO: Clean up
-  def get2SVRemovalAccessCodePage(): Action[AnyContent] = loggedInAction { implicit request =>
-    Future.successful(Ok(protectAccountRemovalAccessCodeView(ProtectAccountForm.form)))
-  }
-
-  def remove2SV(): Action[AnyContent] = loggedInAction { implicit request =>
-    ProtectAccountForm.form.bindFromRequest.fold(form => {
-      Future.successful(BadRequest(protectAccountRemovalAccessCodeView(form)))
-    },
-      form => {
-
-        mfaService.removeMfa(request.userId, request.developerSession.email, form.accessCode).map(r =>
-          r.totpVerified match {
-            case true => removeDeviceSessionCookieFromResult(Redirect(uk.gov.hmrc.apiplatform.modules.mfa.controllers.profile.routes.ProtectAccount.get2SVRemovalCompletePage()))
-            case _ =>
-              val protectAccountForm = ProtectAccountForm.form.fill(form)
-                .withError("accessCode", "You have entered an incorrect access code")
-
-              BadRequest(protectAccountRemovalAccessCodeView(protectAccountForm))
-          }
-        )
-      })
-  }
 
   def get2SVRemovalByIdAccessCodePage(mfaId: MfaId): Action[AnyContent] = loggedInAction { implicit request =>
-    Future.successful(Ok(protectAccountMfaRemovalByIdAccessCodeView(mfaId, ProtectAccountForm.form)))
+    Future.successful(Ok(protectedAccountMfaRemovalByIdAccessCodeView(mfaId, ProtectAccountForm.form)))
   }
 
   def remove2SVById(mfaId: MfaId): Action[AnyContent] = loggedInAction { implicit request =>
-    ProtectAccountForm.form.bindFromRequest.fold(form => {
-      Future.successful(BadRequest(protectAccountMfaRemovalByIdAccessCodeView(mfaId, form)))
-    },
+    ProtectAccountForm.form.bindFromRequest.fold(
+      form => Future.successful(BadRequest(protectedAccountMfaRemovalByIdAccessCodeView(mfaId, form))),
       form => {
-
-        mfaService.removeMfaById(request.userId, mfaId, request.developerSession.email, form.accessCode).map(r =>
-          r.totpVerified match {
-            case true => removeDeviceSessionCookieFromResult(Redirect(uk.gov.hmrc.apiplatform.modules.mfa.controllers.profile.routes.ProtectAccount.get2SVRemovalCompletePage()))
-            case _ =>
+        mfaService.removeMfaById(request.userId, mfaId, request.developerSession.email, form.accessCode)
+          .map(r =>
+            if (r.totpVerified) {
+              removeDeviceSessionCookieFromResult(
+                Redirect(uk.gov.hmrc.apiplatform.modules.mfa.controllers.profile.routes.ProtectAccount.get2SVRemovalByIdCompletePage())
+              )
+            } else {
               val protectAccountForm = ProtectAccountForm.form.fill(form)
                 .withError("accessCode", "You have entered an incorrect access code")
-
-              BadRequest(protectAccountRemovalAccessCodeView(protectAccountForm))
-          }
-        )
+              BadRequest(protectedAccountMfaRemovalByIdAccessCodeView(mfaId, protectAccountForm))
+            }
+          )
       })
   }
 
-  def get2SVRemovalCompletePage(): Action[AnyContent] = loggedInAction { implicit request =>
-    Future.successful(Ok(protectAccountRemovalCompleteView()))
+  def get2SVRemovalByIdCompletePage(): Action[AnyContent] = loggedInAction { implicit request =>
+    Future.successful(Ok(protectedAccountRemovalCompleteView()))
   }
 }
 
@@ -202,7 +157,6 @@ object ProtectAccountForm {
   def form: Form[ProtectAccountForm] = Form(
     mapping(
       "accessCode" -> text.verifying(FormKeys.accessCodeInvalidKey, s => s.matches("^[0-9]{6}$"))
-
     )(ProtectAccountForm.apply)(ProtectAccountForm.unapply)
   )
 }
