@@ -653,3 +653,29 @@ object ChangeOfTermsAndConditionsLocationForm {
     )
   }
 }
+
+case class ResponsibleIndividualChangeToSelfOrOtherForm(who: String)
+
+object ResponsibleIndividualChangeToSelfOrOtherForm {
+  val self = "self"
+  val other = "other"
+  val whoField = "who"
+  private val validValues = List(self, other)
+
+  def form(): Form[ResponsibleIndividualChangeToSelfOrOtherForm] = Form(
+    mapping(
+      whoField -> text.verifying(validValues contains _)
+    )(ResponsibleIndividualChangeToSelfOrOtherForm.apply)(ResponsibleIndividualChangeToSelfOrOtherForm.unapply)
+  )
+}
+
+case class ResponsibleIndividualChangeToOtherForm(name: String, email: String)
+
+object ResponsibleIndividualChangeToOtherForm {
+  def form(): Form[ResponsibleIndividualChangeToOtherForm] = Form(
+    mapping(
+      "name" -> nonEmptyText,
+      "email" -> email
+    )(ResponsibleIndividualChangeToOtherForm.apply)(ResponsibleIndividualChangeToOtherForm.unapply)
+  )
+}

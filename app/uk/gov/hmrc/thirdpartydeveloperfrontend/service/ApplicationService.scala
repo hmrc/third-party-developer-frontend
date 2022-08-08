@@ -60,6 +60,11 @@ class ApplicationService @Inject() (
     connectorWrapper.forEnvironment(application.deployedTo).thirdPartyApplicationConnector.applicationUpdate(application.id, request)
   }
 
+  def updateResponsibleIndividual(application: Application, userId: UserId, fullName: String, emailAddress: String)(implicit hc: HeaderCarrier): Future[ApplicationUpdateSuccessful] = {
+    val request = ChangeResponsibleIndividual(userId,  LocalDateTime.now(clock), fullName, emailAddress)
+    connectorWrapper.forEnvironment(application.deployedTo).thirdPartyApplicationConnector.applicationUpdate(application.id, request)
+  }
+
   def updateTermsConditionsLocation(application: Application, userId: UserId, newLocation: TermsAndConditionsLocation)(implicit hc: HeaderCarrier): Future[ApplicationUpdateSuccessful] = {
     val request = ChangeProductionApplicationTermsAndConditionsLocation(userId,  LocalDateTime.now(clock), newLocation)
     connectorWrapper.forEnvironment(application.deployedTo).thirdPartyApplicationConnector.applicationUpdate(application.id, request)

@@ -526,4 +526,25 @@ class FormValidationSpec extends AsyncHmrcSpec {
       boundForm.errors.head.messages shouldBe List("application.termsconditionslocation.invalid.badurl")
     }
   }
+
+  "ResponsibleIndividualChangeToSelfOrOtherForm" should {
+    def validateNoErrors = buildValidateNoErrors(ResponsibleIndividualChangeToSelfOrOtherForm.form.bind) _
+
+    "accept valid form with 'who' value of 'self'" in {
+      validateNoErrors(Map("who" -> "self"))
+    }
+    "accept valid form with 'who' value of 'other'" in {
+      validateNoErrors(Map("who" -> "other"))
+    }
+    "not accept form with 'who' value of something else" in {
+      val boundForm = ResponsibleIndividualChangeToSelfOrOtherForm.form.bind(Map("who" -> "him over there"))
+      boundForm.errors.head.key shouldBe "who"
+      boundForm.errors.head.messages shouldBe List("error.unknown")
+    }
+    "not accept form with missing 'who' value" in {
+      val boundForm = ResponsibleIndividualChangeToSelfOrOtherForm.form.bind(Map("name" -> "bob"))
+      boundForm.errors.head.key shouldBe "who"
+      boundForm.errors.head.messages shouldBe List("error.required")
+    }
+  }
 }

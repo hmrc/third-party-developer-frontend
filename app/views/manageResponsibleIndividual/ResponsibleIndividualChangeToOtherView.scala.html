@@ -1,0 +1,79 @@
+@*
+ * Copyright 2022 HM Revenue & Customs
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ *@
+
+@import include._
+@import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.routes
+@import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.Application
+@import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.DeveloperSession
+@import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.views.BackButtonToUrl
+@import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.ResponsibleIndividualChangeToOtherForm
+
+@this(devMain: DevMain2)
+
+@(app: Application, form: Form[ResponsibleIndividualChangeToOtherForm])(implicit request: play.api.mvc.Request[Any], loggedIn: DeveloperSession, messages: Messages, applicationConfig: ApplicationConfig)
+
+@devMain(
+    title = "Provide details for a responsible individual in your organisation",
+    userFullName = loggedIn.loggedInName,
+    developerSession = Some(loggedIn),
+    back = BackButtonToUrl(routes.ManageResponsibleIndividualController.showResponsibleIndividualDetails(app.id).url)
+) {
+    @errorSummary2(form)
+
+    @helper.form(action = routes.ManageResponsibleIndividualController.responsibleIndividualChangeToOtherAction(app.id)) {
+        @helper.CSRF.formField
+
+        <h1 class="govuk-heading-l">Provide details for a responsible individual in your organisation</h1>
+
+        <p class="govuk-body">The responsible individual:</p>
+        <ul class="govuk-list govuk-list--bullet">
+            <li>ensures your software conforms to the <a href="/api-documentation/docs/terms-of-use" class="govuk-link govuk-link--no-visited-state">terms of use</a></li>
+            <li>understands the <a href="/api-documentation/docs/terms-of-use/not-meeting-terms-of-use" class="govuk-link govuk-link--no-visited-state">consequences of not conforming to the terms of use</a></li>
+        </ul>
+
+        <div class="govuk-form-group">
+            <label class="govuk-label" for="name">
+                First and last name
+            </label>
+            @fieldError2(form.errors, "name")
+            <input class="govuk-input govuk-!-width-one-half" id="name" value="@form.data.getOrElse("name", "")" name="name" type="text">
+        </div>
+
+        <div class="govuk-form-group">
+            <label class="govuk-label" for="email">
+                Email address
+            </label>
+            <div id="event-name-hint" class="govuk-hint">
+                Cannot be a shared mailbox.
+            </div>
+            @fieldError2(form.errors, "email")
+            <input class="govuk-input govuk-!-width-three-quarters" id="email" value="@form.data.getOrElse("email", "")"name="email" type="text">
+        </div>
+
+        <p class="govuk-body">
+            We will email a verification link to the responsible individual which expires in 24 hours.
+        </p>
+        <p class="govuk-body">
+            If the link expires, you will need to change the responsible individual again.
+        </p>
+
+        <div class="govuk-button-group">
+            <button id="continue" class="govuk-button" data-module="govuk-button">Save and continue</button>
+
+            <a id="cancel" class="govuk-link govuk-link--no-visited-state" href="@routes.ManageResponsibleIndividualController.showResponsibleIndividualDetails(app.id)">Cancel</a>
+        </div>
+    }
+}

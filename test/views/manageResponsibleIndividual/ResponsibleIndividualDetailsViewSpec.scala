@@ -17,20 +17,15 @@
 package views.manageResponsibleIndividual
 
 import org.jsoup.Jsoup
-import org.jsoup.nodes.Element
-import play.api.data.Form
 import play.api.test.FakeRequest
 import uk.gov.hmrc.thirdpartydeveloperfrontend.builder.{DeveloperBuilder, DeveloperSessionBuilder}
-import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.AddTeamMemberForm
 import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.ManageResponsibleIndividualController.{ResponsibleIndividualHistoryItem, ViewModel}
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.{Application, ApplicationId, ApplicationState, ClientId, Collaborator, CollaboratorRole, Environment, Standard}
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.controllers.ApplicationViewModel
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.{Developer, LoggedInState, loggedInDeveloper}
-import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.ViewHelpers.{elementBySelector, elementExistsById, elementExistsByText, linkExistsWithHref}
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.{Application, ApplicationId, ApplicationState, ClientId, Environment, Standard}
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.LoggedInState
+import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.ViewHelpers.{elementBySelector, elementExistsById, linkExistsWithHref}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.{LocalUserIdTracker, WithCSRFAddToken}
 import views.helper.CommonViewSpec
 import views.html.manageResponsibleIndividual.ResponsibleIndividualDetailsView
-import views.html.manageTeamViews.ManageTeamView
 
 import java.time.{LocalDateTime, ZoneOffset}
 
@@ -69,7 +64,7 @@ class ResponsibleIndividualDetailsViewSpec extends CommonViewSpec with WithCSRFA
         ResponsibleIndividualHistoryItem("ri 1", "from 1", "to 1"),
         ResponsibleIndividualHistoryItem("ri 2", "from 2", "to 2")
       )
-      val document = Jsoup.parse(renderPage(ViewModel(environment, currentRiName, previousRis, true, List())).body)
+      val document = Jsoup.parse(renderPage(ViewModel(environment, currentRiName, previousRis, true, List(), false)).body)
 
       elementBySelector(document, "#applicationName").map(_.text()) shouldBe Some(application.name)
       elementBySelector(document, "#environment").map(_.text()) shouldBe Some(environment)
@@ -91,7 +86,7 @@ class ResponsibleIndividualDetailsViewSpec extends CommonViewSpec with WithCSRFA
     }
 
     "Change button is shown for admins" in {
-      val document = Jsoup.parse(renderPage(ViewModel(environment, currentRiName, List(), true, List())).body)
+      val document = Jsoup.parse(renderPage(ViewModel(environment, currentRiName, List(), true, List(), false)).body)
 
       elementExistsById(document, "changeResponsibleIndividual") shouldBe true
       elementExistsById(document, "changeRiText") shouldBe false
@@ -99,7 +94,7 @@ class ResponsibleIndividualDetailsViewSpec extends CommonViewSpec with WithCSRFA
     }
 
     "Change button is not shown for non-admins, correct text shown if there is only 1 admin" in {
-      val document = Jsoup.parse(renderPage(ViewModel(environment, currentRiName, List(), false, List("admin@example.com"))).body)
+      val document = Jsoup.parse(renderPage(ViewModel(environment, currentRiName, List(), false, List("admin@example.com"), false)).body)
 
       elementExistsById(document, "changeResponsibleIndividual") shouldBe false
       elementBySelector(document, "#changeRiText").map(_.text()) shouldBe Some("Only admins can change the responsible individual. Speak to admin@example.com if you want to make a change.")
@@ -107,12 +102,23 @@ class ResponsibleIndividualDetailsViewSpec extends CommonViewSpec with WithCSRFA
     }
 
     "Change button is not shown for non-admins, correct text shown if there is more than 1 admin" in {
-      val document = Jsoup.parse(renderPage(ViewModel(environment, currentRiName, List(), false, List("admin1@example.com", "admin2@example.com"))).body)
+      val document = Jsoup.parse(renderPage(ViewModel(environment, currentRiName, List(), false, List("admin1@example.com", "admin2@example.com"), false)).body)
 
       elementExistsById(document, "changeResponsibleIndividual") shouldBe false
       elementBySelector(document, "#changeRiText").map(_.text()) shouldBe Some("Only admins can change the responsible individual. If you want to make a change, speak to:")
       elementBySelector(document, "#adminList").map(_.text()) shouldBe Some("admin1@example.com admin2@example.com")
     }
 
+    "Change button navigates to the self/other page if the user is not already the RI" in {
+      val document = Jsoup.parse(renderPage(ViewModel(environment, currentRiName, List(), true, List(), false)).body)
+
+      linkExistsWithHref(document, uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.routes.ManageResponsibleIndividualController.showResponsibleIndividualChangeToSelfOrOther(application.id).url)
+    }
+
+    "Change button skips the self/other page if the user is already the RI" in {
+      val document = Jsoup.parse(renderPage(ViewModel(environment, currentRiName, List(), true, List(), true)).body)
+
+      linkExistsWithHref(document, uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.routes.ManageResponsibleIndividualController.showResponsibleIndividualChangeToOther(application.id).url)
+    }
   }
 }
