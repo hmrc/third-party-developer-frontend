@@ -136,11 +136,11 @@ class ProtectAccountSpec extends BaseControllerSpec with WithCSRFAddToken with D
   }
 
   trait SetupFailedRemoval extends Setup {
-    when(underTest.mfaService.removeMfaById(any[UserId], any[MfaId], any[String], any[String])(*)).thenReturn(Future.successful(MFAResponse(false)))
+    when(underTest.mfaService.removeMfaById(any[UserId], any[MfaId], any[String])(*)).thenReturn(Future.successful(MFAResponse(false)))
   }
 
   trait SetupSuccessfulRemoval extends Setup {
-    when(underTest.mfaService.removeMfaById(eqTo(loggedInDeveloper.userId), eqTo(mfaId), eqTo(loggedInDeveloper.email), eqTo(correctCode))(*)).thenReturn(Future.successful(MFAResponse(true)))
+    when(underTest.mfaService.removeMfaById(eqTo(loggedInDeveloper.userId), eqTo(mfaId), eqTo(correctCode))(*)).thenReturn(Future.successful(MFAResponse(true)))
   }
 
   "Given a user is not logged in" when {

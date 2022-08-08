@@ -131,7 +131,7 @@ class ProtectAccount @Inject()(
     ProtectAccountForm.form.bindFromRequest.fold(
       form => Future.successful(BadRequest(protectedAccountMfaRemovalByIdAccessCodeView(mfaId, form))),
       form => {
-        mfaService.removeMfaById(request.userId, mfaId, request.developerSession.email, form.accessCode)
+        mfaService.removeMfaById(request.userId, mfaId, form.accessCode)
           .map(r =>
             if (r.totpVerified) {
               removeDeviceSessionCookieFromResult(
