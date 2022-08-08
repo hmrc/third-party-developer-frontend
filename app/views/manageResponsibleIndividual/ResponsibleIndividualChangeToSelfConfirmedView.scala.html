@@ -16,20 +16,18 @@
 
 @import include._
 @import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.routes
-@import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.{Application, CollaboratorRole}
-@import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.controllers.Crumb
+@import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.Application
 @import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.DeveloperSession
-@import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.ManageResponsibleIndividualController.ViewModel
-@import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.views.BackButtonWithJavaScript
+@import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.views.BackButtonToUrl
 @this(devMain: DevMain2)
 
 @(app: Application)(implicit request: play.api.mvc.Request[Any], loggedIn: DeveloperSession, messages: Messages, applicationConfig: ApplicationConfig)
 
 @devMain(
-    title = "You are now responsible the application",
+    title = "You are now responsible for the application",
     userFullName = loggedIn.loggedInName,
     developerSession = Some(loggedIn),
-    back = BackButtonWithJavaScript
+    back = BackButtonToUrl(routes.ManageResponsibleIndividualController.showResponsibleIndividualDetails(app.id).url)
 ) {
     <div class="govuk-panel govuk-panel--confirmation govuk-!-margin-bottom-7">
         <h1 class="govuk-panel__title govuk-!-font-size-36">

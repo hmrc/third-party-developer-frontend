@@ -16,11 +16,9 @@
 
 @import include._
 @import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.routes
-@import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.{Application, CollaboratorRole}
-@import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.controllers.Crumb
+@import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.Application
 @import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.DeveloperSession
-@import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.ManageResponsibleIndividualController.ViewModel
-@import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.views.BackButtonWithJavaScript
+@import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.views.BackButtonToUrl
 @this(devMain: DevMain2)
 
 @(app: Application)(implicit request: play.api.mvc.Request[Any], loggedIn: DeveloperSession, messages: Messages, applicationConfig: ApplicationConfig)
@@ -29,7 +27,7 @@
     title = "Become responsible for the application",
     userFullName = loggedIn.loggedInName,
     developerSession = Some(loggedIn),
-    back = BackButtonWithJavaScript
+    back = BackButtonToUrl(routes.ManageResponsibleIndividualController.showResponsibleIndividualChangeToSelfOrOther(app.id).url)
 ) {
     @helper.form(action = routes.ManageResponsibleIndividualController.responsibleIndividualChangeToSelfAction(app.id)) {
         @helper.CSRF.formField

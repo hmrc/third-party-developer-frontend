@@ -16,26 +16,24 @@
 
 @import include._
 @import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.routes
-@import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.{Application, CollaboratorRole}
-@import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.controllers.Crumb
+@import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.Application
 @import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.DeveloperSession
-@import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.ManageResponsibleIndividualController.ViewModel
-@import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.views.BackButtonWithJavaScript
+@import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.views.BackButtonToUrl
 @this(devMain: DevMain2)
 
 @(app: Application, newRiName: Option[String])(implicit request: play.api.mvc.Request[Any], loggedIn: DeveloperSession, messages: Messages, applicationConfig: ApplicationConfig)
 
 @devMain(
-    title = "Provide details for a responsible individual in your organisation",
+    title = "You have requested to change the responsible individual",
     userFullName = loggedIn.loggedInName,
     developerSession = Some(loggedIn),
-    back = BackButtonWithJavaScript
+    back = BackButtonToUrl(routes.ManageResponsibleIndividualController.showResponsibleIndividualChangeToOther(app.id).url)
 ) {
     <h1 class="govuk-heading-l">You have requested to change the responsible individual</h1>
 
     <h2 class="govuk-heading-s govuk-!-margin-bottom-2">What happens next</h2>
 
-    <p id="" class="govuk-body">@newRiName has 24 hours to accept or decline responsibility for @app.name. </p>
+    <p id="riMustAccept" class="govuk-body">@newRiName has 24 hours to accept or decline responsibility for @app.name. </p>
     <p class="govuk-body">We will notify you when a change happens.</p>
 
     <p class="govuk-body govuk-!-margin-top-6">

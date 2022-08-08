@@ -439,4 +439,19 @@ class ApplicationServiceSpec extends AsyncHmrcSpec
       result shouldBe TicketCreated
     }
   }
+
+  "updateResponsibleIndividual" should {
+    "call the TPA connector correctly" in new Setup {
+      val userId = UserId.random
+      val riName = "Mr Responsible"
+      val riEmail = "ri@example.com"
+      val applicationUpdate = ChangeResponsibleIndividual(userId, LocalDateTime.now(clock), riName, riEmail)
+      when(mockProductionApplicationConnector.applicationUpdate(productionApplicationId, applicationUpdate)).thenReturn(Future.successful(ApplicationUpdateSuccessful))
+
+      val result = await(applicationService.updateResponsibleIndividual(productionApplication, userId, riName, riEmail))
+
+      result shouldBe ApplicationUpdateSuccessful
+    }
+
+  }
 }

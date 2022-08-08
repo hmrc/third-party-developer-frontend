@@ -118,8 +118,8 @@ class ManageResponsibleIndividualController @Inject()(
   }
 
   def responsibleIndividualChangeToSelfAction(applicationId: ApplicationId) = canUpdateResponsibleIndividualDetailsAction(applicationId) { implicit request =>
-    //TODO update here
-    successful(Redirect(routes.ManageResponsibleIndividualController.showResponsibleIndividualChangeToSelfConfirmed(applicationId)))
+    applicationService.updateResponsibleIndividual(request.application, request.userId, request.developerSession.displayedName, request.developerSession.email)
+      .map(_ => Redirect(routes.ManageResponsibleIndividualController.showResponsibleIndividualChangeToSelfConfirmed(applicationId)))
   }
 
   def showResponsibleIndividualChangeToSelfConfirmed(applicationId: ApplicationId) = canUpdateResponsibleIndividualDetailsAction(applicationId) { implicit request =>
@@ -127,7 +127,6 @@ class ManageResponsibleIndividualController @Inject()(
   }
 
   def showResponsibleIndividualChangeToOther(applicationId: ApplicationId) = canUpdateResponsibleIndividualDetailsAction(applicationId) { implicit request =>
-    //TODO update here
     successful(Ok(responsibleIndividualChangeToOtherView(request.application, ResponsibleIndividualChangeToOtherForm.form())))
   }
 
@@ -137,7 +136,17 @@ class ManageResponsibleIndividualController @Inject()(
     }
 
     def handleValidForm(form: ResponsibleIndividualChangeToOtherForm): Future[Result] = {
-      successful(Redirect(routes.ManageResponsibleIndividualController.showResponsibleIndividualChangeToOtherRequested(applicationId)).flashing(flashKeyNewRiName -> form.name))
+      request.application.access match {
+        case Standard(_, _, _, _, _, Some(ImportantSubmissionData(_, responsibleIndividual, _, _, _, _))) => {
+          val isAlreadyResponsibleIndividual = form.name.equalsIgnoreCase(responsibleIndividual.fullName.value) &&
+            form.email.equalsIgnoreCase(responsibleIndividual.emailAddress.value)
+          if (isAlreadyResponsibleIndividual) {
+            successful(BadRequest(responsibleIndividualChangeToOtherView(request.application, ResponsibleIndividualChangeToOtherForm.form.fill(form).withGlobalError("responsible_individual.error.nochange"))))
+          } else {
+            successful(Redirect(routes.ManageResponsibleIndividualController.showResponsibleIndividualChangeToOtherRequested(applicationId)).flashing(flashKeyNewRiName -> form.name))
+          }
+        }
+      }
     }
 
     ResponsibleIndividualChangeToOtherForm.form.bindFromRequest.fold(handleInvalidForm, handleValidForm)

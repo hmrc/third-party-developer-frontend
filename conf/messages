@@ -188,6 +188,7 @@ footer.links.accessibility.text = Accessibility statement
 
 responsible_individual_fullname.error.required.field=Provide a full name
 responsible_individual_emailaddress.error.required.field=Provide an email address
+responsible_individual.error.nochange=This person is already the responsible individual for the application
 
 production.credentials.checklist.error.global = You must complete all questionnaires
 
