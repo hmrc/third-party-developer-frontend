@@ -37,6 +37,10 @@ import scala.concurrent.{ExecutionContext, Future}
 object ThirdPartyDeveloperMfaConnector {
 
   case class RemoveMfaByIdRequest(removedBy: String)
+  object RemoveMfaByIdRequest {
+    implicit val removeMfaByIdRequestFormat = Json.format[RemoveMfaByIdRequest]
+  }
+  
   case class CreateMfaResponse(secret: String)
 
 }
@@ -78,7 +82,6 @@ class ThirdPartyDeveloperMfaConnector @Inject()(http: HttpClient, config: Applic
   }
 
   def removeMfaById(userId: UserId, mfaId: MfaId, email: String)(implicit hc: HeaderCarrier): Future[Unit] = {
-    implicit val removeMfaByIdRequestFormat = Json.format[RemoveMfaByIdRequest]
     metrics.record(api) {
       http.POST[RemoveMfaByIdRequest, ErrorOrUnit](s"$serviceBaseUrl/developer/${userId.value}/mfa/${mfaId.value}/remove", RemoveMfaByIdRequest(email))
         .map(throwOrUnit)
