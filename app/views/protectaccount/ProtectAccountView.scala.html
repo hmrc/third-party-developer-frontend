@@ -30,14 +30,11 @@
   isRegistering = true,
   developerSession = Some(loggedIn)
 ) {
-  <h1 class="govuk-heading-l">Protect your account</h1>
+  <h1 class="govuk-heading-l">Account protection</h1>
   @if(loggedIn.session.loggedInState.isPartLoggedInEnablingMFA){
     <p class="govuk-body">Your account has access to sensitive information, for example client secrets.</p>
   }
   <p class="govuk-body">Set up 2-step verification to protect your Developer Hub account and application details from being compromised.</p>
   <p class="govuk-body">You’ll need a new access code every time you sign in.</p>
-  <p class="govuk-body">You can get an access code on your smartphone or tablet with an authentication app, even with no mobile reception.</p>
-  <h2 class="govuk-heading-m">Before you start</h2>
-  <p class="govuk-body">You will need your smartphone or tablet to hand.</p>
   <a id="submit" class="govuk-button" type="submit" href="@routes.ProtectAccount.getQrCode()">Continue</a>
 }

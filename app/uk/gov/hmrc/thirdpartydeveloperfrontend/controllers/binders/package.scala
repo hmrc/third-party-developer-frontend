@@ -20,6 +20,9 @@ import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.apidefinitions.{Api
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.{ApplicationId, ClientId, Environment}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.controllers.{AddTeamMemberPageMode, SaveSubsFieldsPageMode}
 import play.api.mvc.{PathBindable, QueryStringBindable}
+import uk.gov.hmrc.apiplatform.modules.mfa.models.MfaId
+
+import java.util.UUID
 
 package object binders {
   implicit def clientIdPathBinder(implicit textBinder: PathBindable[String]): PathBindable[ClientId] = new PathBindable[ClientId] {
@@ -39,6 +42,16 @@ package object binders {
 
     override def unbind(key: String, applicationId: ApplicationId): String = {
       applicationId.value
+    }
+  }
+
+  implicit def mfaIdPathBinder(implicit textBinder: PathBindable[String]): PathBindable[MfaId] = new PathBindable[MfaId] {
+    override def bind(key: String, value: String): Either[String, MfaId] = {
+      textBinder.bind(key, value).map(x => MfaId(UUID.fromString(x)))
+    }
+
+    override def unbind(key: String, mfaId: MfaId): String = {
+      mfaId.value.toString
     }
   }
 

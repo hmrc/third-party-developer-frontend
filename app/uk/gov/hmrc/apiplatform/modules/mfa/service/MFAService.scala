@@ -17,6 +17,7 @@
 package uk.gov.hmrc.apiplatform.modules.mfa.service
 
 import uk.gov.hmrc.apiplatform.modules.mfa.connectors.ThirdPartyDeveloperMfaConnector
+import uk.gov.hmrc.apiplatform.modules.mfa.models.MfaId
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.UserId
 
@@ -34,9 +35,9 @@ class MFAService @Inject()(thirdPartyDeveloperMfaConnector: ThirdPartyDeveloperM
     }
   }
 
-  def removeMfa(userId: UserId, email: String, totpCode: String)(implicit hc: HeaderCarrier): Future[MFAResponse] = {
+  def removeMfaById(userId: UserId, mfaId: MfaId, totpCode: String)(implicit hc: HeaderCarrier): Future[MFAResponse] = {
     thirdPartyDeveloperMfaConnector.verifyMfa(userId, totpCode) flatMap {
-      case true => thirdPartyDeveloperMfaConnector.removeMfa(userId, email).map(_ => MFAResponse(true))
+      case true => thirdPartyDeveloperMfaConnector.removeMfaById(userId, mfaId).map(_ => MFAResponse(true))
       case _ => successful(MFAResponse(false))
     }
   }

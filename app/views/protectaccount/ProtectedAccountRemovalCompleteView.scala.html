@@ -14,28 +14,26 @@
  * limitations under the License.
  *@
 
+@import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.DeveloperSession
 @import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.views.BackButtonWithJavaScript
 @import views.html.include.DevMain2
-@import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.DeveloperSession
-@import uk.gov.hmrc.apiplatform.modules.mfa.controllers.profile.routes
+@import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers
 
 @this(devMain: DevMain2)
 
-@()(implicit request: play.api.mvc.Request[Any], loggedIn: DeveloperSession, appConfig: ApplicationConfig, messages: Messages)
+@()(implicit request: play.api.mvc.Request[Any], loggedIn: DeveloperSession, messages: Messages, applicationConfig: ApplicationConfig)
 
 @devMain(
-  title = "Protected account",
+  title = "2-step verification removed",
   userFullName = loggedIn.loggedInName,
   back = BackButtonWithJavaScript,
   developerSession = Some(loggedIn)
 ) {
-
-  <h1 class="govuk-heading-l">Account protection</h1>
-
-  <p class="govuk-body">Your Developer Hub account is currently protected with 2-step verification. This is linked to your smartphone or tablet.</p>
-
-  <p class="govuk-body">You must remove 2-step verification before you can add it to a new smartphone or tablet.</p>
-
-  <a id="submit" class="govuk-button" type="submit" href="@routes.ProtectAccount.get2SVRemovalConfirmationPage()">Remove 2-step verification</a>
-
+  <div class="govuk-panel govuk-panel--confirmation">
+    <h1 class="govuk-panel__title">You've removed this security preference</h1>
+  </div>
+  <br />
+  <a id="view-all-apps" class="govuk-button" type="submit" href="@controllers.routes.ManageApplications.manageApps">View all applications</a>
+  <br />
+  <a class="govuk-link" href="@uk.gov.hmrc.apiplatform.modules.mfa.controllers.profile.routes.ProtectAccount.getProtectAccount()">Back to account protection</a>
 }

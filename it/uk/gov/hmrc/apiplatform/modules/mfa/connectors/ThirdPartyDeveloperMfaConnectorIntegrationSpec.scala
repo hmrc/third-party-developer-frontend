@@ -22,7 +22,7 @@ import play.api.http.Status._
 import play.api.inject.bind
 import play.api.inject.guice.GuiceApplicationBuilder
 import play.api.{Application, Configuration, Mode}
-import uk.gov.hmrc.apiplatform.modules.mfa.models.{DeviceSession, DeviceSessionInvalid}
+import uk.gov.hmrc.apiplatform.modules.mfa.models.{DeviceSession, DeviceSessionInvalid, MfaId}
 import uk.gov.hmrc.http.{HeaderCarrier, UpstreamErrorResponse}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.builder.DeveloperBuilder
 import uk.gov.hmrc.thirdpartydeveloperfrontend.connectors._
@@ -50,6 +50,7 @@ class ThirdPartyDeveloperMfaConnectorIntegrationSpec extends BaseConnectorIntegr
 
     val userEmail = "thirdpartydeveloper@example.com"
     val userId = idOf(userEmail)
+    val mfaId = MfaId.random
 
     val userPassword = "password1!"
     val sessionId = "sessionId"
@@ -251,27 +252,26 @@ class ThirdPartyDeveloperMfaConnectorIntegrationSpec extends BaseConnectorIntegr
     }
   }
 
-  "removeMfa" should {
+  "removeMfaById" should {
     "return OK on successful removal" in new Setup {
-      val email = "test.user@example.com"
-      stubFor(post(urlPathEqualTo(s"/developer/${userId.value}/mfa/remove")).willReturn(aResponse().withStatus(OK)))
+      stubFor(delete(urlPathEqualTo(s"/developer/${userId.value}/mfa/${mfaId.value}"))
+        .willReturn(aResponse().withStatus(OK)))
 
-      await(underTest.removeMfa(userId, email))
+      await(underTest.removeMfaById(userId, mfaId))
     }
 
     "throw UpstreamErrorResponse with status of 404 if user not found" in new Setup {
-      val email = "invalid.user@example.com"
-      stubFor(post(urlPathEqualTo(s"/developer/${userId.value}/mfa/remove")).willReturn(aResponse().withStatus(NOT_FOUND)))
+      stubFor(delete(urlPathEqualTo(s"/developer/${userId.value}/mfa/${mfaId.value}"))
+        .willReturn(aResponse().withStatus(NOT_FOUND)))
 
-      intercept[UpstreamErrorResponse](await(underTest.removeMfa(userId, email))).statusCode shouldBe NOT_FOUND
+      intercept[UpstreamErrorResponse](await(underTest.removeMfaById(userId, mfaId))).statusCode shouldBe NOT_FOUND
     }
 
     "throw UpstreamErrorResponse with status of 500 if it failed to remove MFA" in new Setup {
-      val email = "test.user@example.com"
-      stubFor(post(urlPathEqualTo(s"/developer/${userId.value}/mfa/remove")).willReturn(aResponse().withStatus(INTERNAL_SERVER_ERROR)))
+      stubFor(delete(urlPathEqualTo(s"/developer/${userId.value}/mfa/${mfaId.value}"))
+        .willReturn(aResponse().withStatus(INTERNAL_SERVER_ERROR)))
 
-      intercept[UpstreamErrorResponse](await(underTest.removeMfa(userId, email))).statusCode shouldBe INTERNAL_SERVER_ERROR
+      intercept[UpstreamErrorResponse](await(underTest.removeMfaById(userId, mfaId))).statusCode shouldBe INTERNAL_SERVER_ERROR
     }
   }
-
 }

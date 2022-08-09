@@ -29,6 +29,7 @@ import play.api.data.Forms._
 import play.api.libs.crypto.CookieSigner
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents, Result}
 import uk.gov.hmrc.apiplatform.modules.mfa.connectors.ThirdPartyDeveloperMfaConnector
+import uk.gov.hmrc.apiplatform.modules.mfa.models.MfaId
 import uk.gov.hmrc.apiplatform.modules.mfa.service.{MFAService, MfaMandateService}
 import uk.gov.hmrc.apiplatform.modules.mfa.utils.MfaDetailHelper
 import uk.gov.hmrc.play.bootstrap.controller.WithDefaultFormBinding
@@ -38,7 +39,6 @@ import views.html.protectaccount._
 
 import scala.concurrent.{ExecutionContext, Future}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.LoggedInController
-import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.Remove2SVConfirmForm
 import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.FormKeys
 
 @Singleton
@@ -51,15 +51,14 @@ class ProtectAccount @Inject()(
   mcc: MessagesControllerComponents,
   val errorHandler: ErrorHandler,
   val mfaMandateService: MfaMandateService,
-  val cookieSigner : CookieSigner,
+  val cookieSigner: CookieSigner,
   protectAccountSetupView: ProtectAccountSetupView,
-  protectedAccountView: ProtectedAccountView,
   protectAccountView: ProtectAccountView,
   protectAccountAccessCodeView: ProtectAccountAccessCodeView,
   protectAccountCompletedView: ProtectAccountCompletedView,
-  protectAccountRemovalConfirmationView: ProtectAccountRemovalConfirmationView,
-  protectAccountRemovalAccessCodeView: ProtectAccountRemovalAccessCodeView,
-  protectAccountRemovalCompleteView: ProtectAccountRemovalCompleteView
+  protectedAccountWithMfaDetailsView: ProtectedAccountWithMfaView,
+  protectedAccountMfaRemovalByIdAccessCodeView: ProtectedAccountMfaRemovalByIdAccessCodeView,
+  protectedAccountRemovalCompleteView: ProtectedAccountRemovalCompleteView
 )(
   implicit val ec: ExecutionContext,
   val appConfig: ApplicationConfig
@@ -79,7 +78,7 @@ class ProtectAccount @Inject()(
   def getProtectAccount: Action[AnyContent] = atLeastPartLoggedInEnablingMfaAction { implicit request =>
     thirdPartyDeveloperConnector.fetchDeveloper(request.userId).map {
       case Some(developer: Developer) => if (MfaDetailHelper.isAuthAppMfaVerified(developer.mfaDetails)) {
-        Ok(protectedAccountView())
+        Ok(protectedAccountWithMfaDetailsView(developer.mfaDetails.filter(_.verified)))
       } else {
         Ok(protectAccountView())
       }
@@ -111,10 +110,9 @@ class ProtectAccount @Inject()(
       BadRequest(protectAccountAccessCodeView(protectAccountForm))
     }
 
-    ProtectAccountForm.form.bindFromRequest.fold(form => {
-      Future.successful(BadRequest(protectAccountAccessCodeView(form)))
-    },
-      (form: ProtectAccountForm) => {
+    ProtectAccountForm.form.bindFromRequest.fold(
+      form => Future.successful(BadRequest(protectAccountAccessCodeView(form))),
+      form => {
         for {
           mfaResponse <- mfaService.enableMfa(request.userId, form.accessCode)
           result = {
@@ -125,47 +123,31 @@ class ProtectAccount @Inject()(
       })
   }
 
-  def get2SVRemovalConfirmationPage: Action[AnyContent] = loggedInAction { implicit request =>
-    Future.successful(Ok(protectAccountRemovalConfirmationView(Remove2SVConfirmForm.form)))
+  def get2SVRemovalByIdAccessCodePage(mfaId: MfaId): Action[AnyContent] = loggedInAction { implicit request =>
+    Future.successful(Ok(protectedAccountMfaRemovalByIdAccessCodeView(mfaId, ProtectAccountForm.form)))
   }
 
-  def confirm2SVRemoval: Action[AnyContent] = loggedInAction { implicit request =>
-    Remove2SVConfirmForm.form.bindFromRequest.fold(form => {
-      Future.successful(BadRequest(protectAccountRemovalConfirmationView(form)))
-    },
+  def remove2SVById(mfaId: MfaId): Action[AnyContent] = loggedInAction { implicit request =>
+    ProtectAccountForm.form.bindFromRequest.fold(
+      form => Future.successful(BadRequest(protectedAccountMfaRemovalByIdAccessCodeView(mfaId, form))),
       form => {
-        form.removeConfirm match {
-          case Some("Yes") => Future.successful(Redirect(uk.gov.hmrc.apiplatform.modules.mfa.controllers.profile.routes.ProtectAccount.get2SVRemovalAccessCodePage()))
-          case _ => Future.successful(Redirect(uk.gov.hmrc.apiplatform.modules.mfa.controllers.profile.routes.ProtectAccount.getProtectAccount()))
-        }
-      })
-  }
-
-  def get2SVRemovalAccessCodePage(): Action[AnyContent] = loggedInAction { implicit request =>
-    Future.successful(Ok(protectAccountRemovalAccessCodeView(ProtectAccountForm.form)))
-  }
-
-  def remove2SV(): Action[AnyContent] = loggedInAction { implicit request =>
-    ProtectAccountForm.form.bindFromRequest.fold(form => {
-      Future.successful(BadRequest(protectAccountRemovalAccessCodeView(form)))
-    },
-      form => {
-
-        mfaService.removeMfa(request.userId, request.developerSession.email, form.accessCode).map(r =>
-          r.totpVerified match {
-            case true => removeDeviceSessionCookieFromResult(Redirect(uk.gov.hmrc.apiplatform.modules.mfa.controllers.profile.routes.ProtectAccount.get2SVRemovalCompletePage()))
-            case _ =>
+        mfaService.removeMfaById(request.userId, mfaId, form.accessCode)
+          .map(r =>
+            if (r.totpVerified) {
+              removeDeviceSessionCookieFromResult(
+                Redirect(uk.gov.hmrc.apiplatform.modules.mfa.controllers.profile.routes.ProtectAccount.get2SVRemovalByIdCompletePage())
+              )
+            } else {
               val protectAccountForm = ProtectAccountForm.form.fill(form)
                 .withError("accessCode", "You have entered an incorrect access code")
-
-              BadRequest(protectAccountRemovalAccessCodeView(protectAccountForm))
-          }
-        )
+              BadRequest(protectedAccountMfaRemovalByIdAccessCodeView(mfaId, protectAccountForm))
+            }
+          )
       })
   }
 
-  def get2SVRemovalCompletePage(): Action[AnyContent] = loggedInAction { implicit request =>
-    Future.successful(Ok(protectAccountRemovalCompleteView()))
+  def get2SVRemovalByIdCompletePage(): Action[AnyContent] = loggedInAction { implicit request =>
+    Future.successful(Ok(protectedAccountRemovalCompleteView()))
   }
 }
 
@@ -175,7 +157,6 @@ object ProtectAccountForm {
   def form: Form[ProtectAccountForm] = Form(
     mapping(
       "accessCode" -> text.verifying(FormKeys.accessCodeInvalidKey, s => s.matches("^[0-9]{6}$"))
-
     )(ProtectAccountForm.apply)(ProtectAccountForm.unapply)
   )
 }

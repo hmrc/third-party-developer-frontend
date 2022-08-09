@@ -27,12 +27,20 @@ import scala.collection.immutable
 
 case class MfaId(value: UUID) extends AnyVal
 
-sealed trait MfaType extends EnumEntry
+object MfaId {
+  def random: MfaId = MfaId(UUID.randomUUID())
+}
+
+sealed trait MfaType extends EnumEntry {
+  def asText: String
+}
 
 object MfaType extends Enum[MfaType] with PlayJsonEnum[MfaType] {
   val values: immutable.IndexedSeq[MfaType] = findValues
 
-  case object AUTHENTICATOR_APP extends MfaType
+  case object AUTHENTICATOR_APP extends MfaType {
+    override def asText: String = "Authenticator App"
+  }
 }
 
 sealed trait MfaDetail {

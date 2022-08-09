@@ -19,8 +19,8 @@ package uk.gov.hmrc.apiplatform.modules.mfa.connectors
 import play.api.Logging
 import play.api.http.Status._
 import play.api.libs.json.Json
-import uk.gov.hmrc.apiplatform.modules.mfa.connectors.ThirdPartyDeveloperMfaConnector.{CreateMfaResponse, RemoveMfaRequest}
-import uk.gov.hmrc.apiplatform.modules.mfa.models.{DeviceSession, DeviceSessionInvalid}
+import uk.gov.hmrc.apiplatform.modules.mfa.connectors.ThirdPartyDeveloperMfaConnector.CreateMfaResponse
+import uk.gov.hmrc.apiplatform.modules.mfa.models.{DeviceSession, DeviceSessionInvalid, MfaId}
 import uk.gov.hmrc.http.HttpReads.Implicits._
 import uk.gov.hmrc.http.{HttpClient, _}
 import uk.gov.hmrc.play.http.metrics.common.API
@@ -35,8 +35,7 @@ import scala.concurrent.{ExecutionContext, Future}
 
 
 object ThirdPartyDeveloperMfaConnector {
-
-  case class RemoveMfaRequest(removedBy: String)
+  
   case class CreateMfaResponse(secret: String)
 
 }
@@ -77,15 +76,12 @@ class ThirdPartyDeveloperMfaConnector @Inject()(http: HttpClient, config: Applic
     }
   }
 
-  def removeMfa(userId: UserId, email: String)(implicit hc: HeaderCarrier): Future[Unit] = {
-    implicit val RemoveMfaRequestFormat = Json.format[RemoveMfaRequest]
+  def removeMfaById(userId: UserId, mfaId: MfaId)(implicit hc: HeaderCarrier): Future[Unit] = {
     metrics.record(api) {
-      http.POST[RemoveMfaRequest, ErrorOrUnit](s"$serviceBaseUrl/developer/${userId.value}/mfa/remove", RemoveMfaRequest(email))
+      http.DELETE[ErrorOrUnit](s"$serviceBaseUrl/developer/${userId.value}/mfa/${mfaId.value}")
         .map(throwOrUnit)
     }
   }
-
-
 
   def createDeviceSession(userId: UserId)(implicit hc: HeaderCarrier): Future[Option[DeviceSession]] = metrics.record(api) {
       http.POST[String ,ErrorOr[DeviceSession]](s"$serviceBaseUrl/device-session/user/${userId.value}", "")
