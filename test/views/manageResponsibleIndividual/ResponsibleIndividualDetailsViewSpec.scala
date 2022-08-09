@@ -85,40 +85,42 @@ class ResponsibleIndividualDetailsViewSpec extends CommonViewSpec with WithCSRFA
       oldRiToDates.get(1).text() shouldBe "to 2"
     }
 
-    "Change button is shown for admins" in {
-      val document = Jsoup.parse(renderPage(ViewModel(environment, currentRiName, List(), true, List(), false)).body)
+    // RESTORE THESE WHEN FUNCTIONALITY IS COMPLETE
+    //
+    // "Change button is shown for admins" in {
+    //   val document = Jsoup.parse(renderPage(ViewModel(environment, currentRiName, List(), true, List(), false)).body)
 
-      elementExistsById(document, "changeResponsibleIndividual") shouldBe true
-      elementExistsById(document, "changeRiText") shouldBe false
-      elementExistsById(document, "adminList") shouldBe false
-    }
+    //   elementExistsById(document, "changeResponsibleIndividual") shouldBe true
+    //   elementExistsById(document, "changeRiText") shouldBe false
+    //   elementExistsById(document, "adminList") shouldBe false
+    // }
 
-    "Change button is not shown for non-admins, correct text shown if there is only 1 admin" in {
-      val document = Jsoup.parse(renderPage(ViewModel(environment, currentRiName, List(), false, List("admin@example.com"), false)).body)
+    // "Change button is not shown for non-admins, correct text shown if there is only 1 admin" in {
+    //   val document = Jsoup.parse(renderPage(ViewModel(environment, currentRiName, List(), false, List("admin@example.com"), false)).body)
 
-      elementExistsById(document, "changeResponsibleIndividual") shouldBe false
-      elementBySelector(document, "#changeRiText").map(_.text()) shouldBe Some("Only admins can change the responsible individual. Speak to admin@example.com if you want to make a change.")
-      elementExistsById(document, "adminList") shouldBe false
-    }
+    //   elementExistsById(document, "changeResponsibleIndividual") shouldBe false
+    //   elementBySelector(document, "#changeRiText").map(_.text()) shouldBe Some("Only admins can change the responsible individual. Speak to admin@example.com if you want to make a change.")
+    //   elementExistsById(document, "adminList") shouldBe false
+    // }
 
-    "Change button is not shown for non-admins, correct text shown if there is more than 1 admin" in {
-      val document = Jsoup.parse(renderPage(ViewModel(environment, currentRiName, List(), false, List("admin1@example.com", "admin2@example.com"), false)).body)
+    // "Change button is not shown for non-admins, correct text shown if there is more than 1 admin" in {
+    //   val document = Jsoup.parse(renderPage(ViewModel(environment, currentRiName, List(), false, List("admin1@example.com", "admin2@example.com"), false)).body)
 
-      elementExistsById(document, "changeResponsibleIndividual") shouldBe false
-      elementBySelector(document, "#changeRiText").map(_.text()) shouldBe Some("Only admins can change the responsible individual. If you want to make a change, speak to:")
-      elementBySelector(document, "#adminList").map(_.text()) shouldBe Some("admin1@example.com admin2@example.com")
-    }
+    //   elementExistsById(document, "changeResponsibleIndividual") shouldBe false
+    //   elementBySelector(document, "#changeRiText").map(_.text()) shouldBe Some("Only admins can change the responsible individual. If you want to make a change, speak to:")
+    //   elementBySelector(document, "#adminList").map(_.text()) shouldBe Some("admin1@example.com admin2@example.com")
+    // }
 
-    "Change button navigates to the self/other page if the user is not already the RI" in {
-      val document = Jsoup.parse(renderPage(ViewModel(environment, currentRiName, List(), true, List(), false)).body)
+    // "Change button navigates to the self/other page if the user is not already the RI" in {
+    //   val document = Jsoup.parse(renderPage(ViewModel(environment, currentRiName, List(), true, List(), false)).body)
 
-      linkExistsWithHref(document, uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.routes.ManageResponsibleIndividualController.showResponsibleIndividualChangeToSelfOrOther(application.id).url)
-    }
+    //   linkExistsWithHref(document, uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.routes.ManageResponsibleIndividualController.showResponsibleIndividualChangeToSelfOrOther(application.id).url)
+    // }
 
-    "Change button skips the self/other page if the user is already the RI" in {
-      val document = Jsoup.parse(renderPage(ViewModel(environment, currentRiName, List(), true, List(), true)).body)
+    // "Change button skips the self/other page if the user is already the RI" in {
+    //   val document = Jsoup.parse(renderPage(ViewModel(environment, currentRiName, List(), true, List(), true)).body)
 
-      linkExistsWithHref(document, uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.routes.ManageResponsibleIndividualController.showResponsibleIndividualChangeToOther(application.id).url)
-    }
+    //   linkExistsWithHref(document, uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.routes.ManageResponsibleIndividualController.showResponsibleIndividualChangeToOther(application.id).url)
+    // }
   }
 }
