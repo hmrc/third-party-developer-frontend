@@ -85,32 +85,34 @@
         <li>understands the <a href="/api-documentation/docs/terms-of-use/not-meeting-terms-of-use" class="govuk-link govuk-link--no-visited-state">consequences of not conforming to the terms of use</a></li>
     </ul>
 
-    @if(viewModel.allowChanges) {
-        <a id="changeResponsibleIndividual"
-            @if(viewModel.userIsResponsibleIndividual) {
-                href="@routes.ManageResponsibleIndividualController.showResponsibleIndividualChangeToOther(app.id)"
-            } else {
-                href="@routes.ManageResponsibleIndividualController.showResponsibleIndividualChangeToSelfOrOther(app.id)"
-            }
-            role="button" draggable="false" class="govuk-button govuk-!-margin-top-3" data-module="govuk-button">
-                Change responsible individual
-        </a>
-
-    } else {
-        @if(viewModel.adminEmails.size == 1) {
-            <p id="changeRiText" class="govuk-body">
-                Only admins can change the responsible individual. Speak to @viewModel.adminEmails.head if you want to make a change.
-            </p>
-        } else {
-            <p id="changeRiText" class="govuk-body">
-                Only admins can change the responsible individual.  If you want to make a change, speak to:
-            </p>
-            <ul id="adminList" class="govuk-list govuk-list--bullet">
-            @for(adminEmail <- viewModel.adminEmails) {
-                <li>@adminEmail</li>
-            }
-            </ul>
-        }
-    }
-
+@*
+* Restore this once the remaining work is complete
+*    @if(viewModel.allowChanges) {
+*        <a id="changeResponsibleIndividual"
+*            @if(viewModel.userIsResponsibleIndividual) {
+*                href="@routes.ManageResponsibleIndividualController.showResponsibleIndividualChangeToOther(app.id)"
+*            } else {
+*                href="@routes.ManageResponsibleIndividualController.showResponsibleIndividualChangeToSelfOrOther(app.id)"
+*            }
+*            role="button" draggable="false" class="govuk-button govuk-!-margin-top-3" data-module="govuk-button">
+*                Change responsible individual
+*        </a>
+*
+*    } else {
+*        @if(viewModel.adminEmails.size == 1) {
+*            <p id="changeRiText" class="govuk-body">
+*                Only admins can change the responsible individual. Speak to @viewModel.adminEmails.head if you want to make a change.
+*            </p>
+*        } else {
+*            <p id="changeRiText" class="govuk-body">
+*                Only admins can change the responsible individual.  If you want to make a change, speak to:
+*            </p>
+*            <ul id="adminList" class="govuk-list govuk-list--bullet">
+*            @for(adminEmail <- viewModel.adminEmails) {
+*                <li>@adminEmail</li>
+*            }
+*            </ul>
+*        }
+*    }
+*@
 }
