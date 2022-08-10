@@ -234,6 +234,20 @@ class ApplicationServiceSpec extends AsyncHmrcSpec
     }
   }
 
+  "verifyResponsibleIndividual" should {
+    "call the TPA connector correctly" in new Setup {
+      val userId = UserId.random
+      val riName = "ri name"
+      val riEmail = "ri@example.com"
+      val applicationUpdate = VerifyResponsibleIndividual(userId, LocalDateTime.now(clock), riName, riEmail)
+      when(mockProductionApplicationConnector.applicationUpdate(productionApplicationId, applicationUpdate)).thenReturn(Future.successful(ApplicationUpdateSuccessful))
+
+      val result = await(applicationService.verifyResponsibleIndividual(productionApplication, userId, riName, riEmail))
+
+      result shouldBe ApplicationUpdateSuccessful
+    }
+  }
+
   "request application deletion" should {
 
     val adminEmail = "admin@example.com"
@@ -452,6 +466,6 @@ class ApplicationServiceSpec extends AsyncHmrcSpec
 
       result shouldBe ApplicationUpdateSuccessful
     }
-
   }
+
 }

@@ -143,7 +143,8 @@ class ManageResponsibleIndividualController @Inject()(
           if (isAlreadyResponsibleIndividual) {
             successful(BadRequest(responsibleIndividualChangeToOtherView(request.application, ResponsibleIndividualChangeToOtherForm.form.fill(form).withGlobalError("responsible_individual.error.nochange"))))
           } else {
-            successful(Redirect(routes.ManageResponsibleIndividualController.showResponsibleIndividualChangeToOtherRequested(applicationId)).flashing(flashKeyNewRiName -> form.name))
+            applicationService.verifyResponsibleIndividual(request.application, request.userId, form.name, form.email)
+              .map(_ => Redirect(routes.ManageResponsibleIndividualController.showResponsibleIndividualChangeToOtherRequested(applicationId)).flashing(flashKeyNewRiName -> form.name))
           }
         }
       }

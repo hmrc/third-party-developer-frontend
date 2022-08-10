@@ -70,6 +70,11 @@ class ApplicationService @Inject() (
     connectorWrapper.forEnvironment(application.deployedTo).thirdPartyApplicationConnector.applicationUpdate(application.id, request)
   }
 
+  def verifyResponsibleIndividual(application: Application, userId: UserId, riName: String, riEmail: String)(implicit hc: HeaderCarrier): Future[ApplicationUpdateSuccessful] = {
+    val request = VerifyResponsibleIndividual(userId,  LocalDateTime.now(clock), riName, riEmail)
+    connectorWrapper.forEnvironment(application.deployedTo).thirdPartyApplicationConnector.applicationUpdate(application.id, request)
+  }
+
   def fetchByApplicationId(applicationId: ApplicationId)(implicit hc: HeaderCarrier): Future[Option[ApplicationWithSubscriptionData]] = {
     apmConnector.fetchApplicationById(applicationId)
   }
