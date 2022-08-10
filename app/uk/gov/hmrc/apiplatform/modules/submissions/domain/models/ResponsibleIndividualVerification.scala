@@ -19,6 +19,7 @@ package uk.gov.hmrc.apiplatform.modules.submissions.domain.models
 import play.api.libs.json.{Format, OFormat}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.ApplicationId
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.services.LocalDateTimeFormatters
+import uk.gov.hmrc.apiplatform.modules.submissions.domain.models.ResponsibleIndividualVerificationState.ResponsibleIndividualVerificationState
 
 import java.time.{LocalDateTime, ZoneOffset}
 
@@ -36,12 +37,13 @@ case class ResponsibleIndividualVerification(
     submissionId: Submission.Id,
     submissionInstance: Int,
     applicationName: String,
-    createdOn: LocalDateTime
+    createdOn: LocalDateTime,
+    state: ResponsibleIndividualVerificationState
 )
 
 object ResponsibleIndividualVerification extends LocalDateTimeFormatters {
-  def apply(id: ResponsibleIndividualVerificationId, appId: ApplicationId, appName: String, submissionId: Submission.Id, submissionInstance: Int): ResponsibleIndividualVerification =
-    new ResponsibleIndividualVerification(id, appId, submissionId, submissionInstance, appName, LocalDateTime.now(ZoneOffset.UTC))
+  def apply(id: ResponsibleIndividualVerificationId, appId: ApplicationId, appName: String, submissionId: Submission.Id, submissionInstance: Int, state: ResponsibleIndividualVerificationState): ResponsibleIndividualVerification =
+    new ResponsibleIndividualVerification(id, appId, submissionId, submissionInstance, appName, LocalDateTime.now(ZoneOffset.UTC), state)
 
   import play.api.libs.json.Json
 
