@@ -339,7 +339,8 @@ class ManageResponsibleIndividualControllerSpec
     "update responsible individual with new details correctly" in new Setup {
       val name = "bob"
       val email = "bob@example.com"
-      when(applicationServiceMock.verifyResponsibleIndividual(*[Application], *[UserId], eqTo(name), eqTo(email))(*)).thenReturn(successful(ApplicationUpdateSuccessful))
+      val requesterName = developerSession.displayedName
+      when(applicationServiceMock.verifyResponsibleIndividual(*[Application], *[UserId], eqTo(requesterName), eqTo(name), eqTo(email))(*)).thenReturn(successful(ApplicationUpdateSuccessful))
       val user = developerSession.email.asCollaborator(ADMINISTRATOR)
 
       givenTheApplicationExistWithUserRole(List(user), List.empty)

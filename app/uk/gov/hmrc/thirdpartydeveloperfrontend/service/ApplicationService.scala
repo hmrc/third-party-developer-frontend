@@ -70,8 +70,8 @@ class ApplicationService @Inject() (
     connectorWrapper.forEnvironment(application.deployedTo).thirdPartyApplicationConnector.applicationUpdate(application.id, request)
   }
 
-  def verifyResponsibleIndividual(application: Application, userId: UserId, riName: String, riEmail: String)(implicit hc: HeaderCarrier): Future[ApplicationUpdateSuccessful] = {
-    val request = VerifyResponsibleIndividual(userId,  LocalDateTime.now(clock), riName, riEmail)
+  def verifyResponsibleIndividual(application: Application, userId: UserId, requesterName: String, riName: String, riEmail: String)(implicit hc: HeaderCarrier): Future[ApplicationUpdateSuccessful] = {
+    val request = VerifyResponsibleIndividual(userId,  LocalDateTime.now(clock), requesterName, riName, riEmail)
     connectorWrapper.forEnvironment(application.deployedTo).thirdPartyApplicationConnector.applicationUpdate(application.id, request)
   }
 

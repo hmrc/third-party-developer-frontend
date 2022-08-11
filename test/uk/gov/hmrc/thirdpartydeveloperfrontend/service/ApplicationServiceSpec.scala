@@ -239,10 +239,11 @@ class ApplicationServiceSpec extends AsyncHmrcSpec
       val userId = UserId.random
       val riName = "ri name"
       val riEmail = "ri@example.com"
-      val applicationUpdate = VerifyResponsibleIndividual(userId, LocalDateTime.now(clock), riName, riEmail)
+      val requesterName = "ms admin"
+      val applicationUpdate = VerifyResponsibleIndividual(userId, LocalDateTime.now(clock), requesterName, riName, riEmail)
       when(mockProductionApplicationConnector.applicationUpdate(productionApplicationId, applicationUpdate)).thenReturn(Future.successful(ApplicationUpdateSuccessful))
 
-      val result = await(applicationService.verifyResponsibleIndividual(productionApplication, userId, riName, riEmail))
+      val result = await(applicationService.verifyResponsibleIndividual(productionApplication, userId, requesterName, riName, riEmail))
 
       result shouldBe ApplicationUpdateSuccessful
     }
