@@ -16,8 +16,15 @@
 
 package uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.endpointauth
 
-trait Scenario extends MockConnectors {
-  def setup()
-}
+case class Endpoint(verb: String, path: String)
 
+sealed trait EndpointResult
+case class Success() extends EndpointResult
+case class Redirect(location: String) extends EndpointResult
+case class BadRequest() extends EndpointResult
+case class Locked() extends EndpointResult
+case class Error(e: Exception) extends EndpointResult
+case class Unexpected(status: Int) extends EndpointResult
 
+case class EndpointResultOverride(endpoint: Endpoint, result: EndpointResult)
+case class EndpointResults(defaultResult: EndpointResult, overrides: EndpointResultOverride*)

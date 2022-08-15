@@ -17,10 +17,11 @@
 package uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.endpointauth
 
 import org.mockito.MockitoSugar.mock
-import uk.gov.hmrc.thirdpartydeveloperfrontend.connectors.{ThirdPartyApplicationProductionConnector, ThirdPartyApplicationSandboxConnector, ThirdPartyDeveloperConnector}
+import uk.gov.hmrc.thirdpartydeveloperfrontend.connectors.{DeskproConnector, ThirdPartyApplicationProductionConnector, ThirdPartyApplicationSandboxConnector, ThirdPartyDeveloperConnector}
 
-trait MockConnectors1 {
+trait MockConnectors {
   val tpdConnector: ThirdPartyDeveloperConnector = mock[ThirdPartyDeveloperConnector]
   val tpaProductionConnector: ThirdPartyApplicationProductionConnector = mock[ThirdPartyApplicationProductionConnector]
   val tpaSandboxConnector: ThirdPartyApplicationSandboxConnector = mock[ThirdPartyApplicationSandboxConnector]
+  val deskproConnector: DeskproConnector = mock[DeskproConnector]
 }
