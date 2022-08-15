@@ -48,6 +48,8 @@ case class ClientId(value: String) extends AnyVal
 object ClientId {
   import play.api.libs.json.Json
   implicit val clientIdFormat: Format[ClientId] = Json.valueFormat[ClientId]
+
+  def random: ClientId = ClientId(UUID.randomUUID().toString)
 }
 
 trait BaseApplication {
