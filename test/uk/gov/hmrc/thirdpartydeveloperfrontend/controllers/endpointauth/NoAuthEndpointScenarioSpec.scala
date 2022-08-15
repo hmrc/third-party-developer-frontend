@@ -17,13 +17,13 @@
 package uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.endpointauth
 import play.api.mvc.{AnyContentAsEmpty, Request}
 import play.api.test.{CSRFTokenHelper, FakeRequest}
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.connectors.TicketCreated
+import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.endpointauth.preconditions.{DeskproTicketCreationSucceeds, NoUserIdFoundForEmailAddressValue}
 
 import scala.concurrent.Future
 
-class NoAuthEndpointScenarioSpec extends EndpointScenarioSpec {
-  when(tpdConnector.findUserId(*)(*)).thenReturn(Future.successful(None))
-  when(deskproConnector.createTicket(*)(*)).thenReturn(Future.successful(TicketCreated))
+class NoAuthEndpointScenarioSpec extends EndpointScenarioSpec
+    with NoUserIdFoundForEmailAddressValue
+    with DeskproTicketCreationSucceeds {
 
   override def buildRequest(httpVerb: String, requestPath: String): Request[AnyContentAsEmpty.type] =
     CSRFTokenHelper.addCSRFToken(FakeRequest(httpVerb, requestPath))
@@ -45,6 +45,7 @@ class NoAuthEndpointScenarioSpec extends EndpointScenarioSpec {
     EndpointResultOverride(Endpoint("POST", "/login"), BadRequest()),
     EndpointResultOverride(Endpoint("GET", "/support/submitted"), Success()),
     EndpointResultOverride(Endpoint("GET", "/login/2SV-help"), Success()),
+    //TODO the request below triggers a deskpro ticket to be created (should unauth users be able to do this?) that requests 2SV removal for any account, seems wrong? do SDST verify that the correct user made the request?
     EndpointResultOverride(Endpoint("POST", "/login/2SV-help"), Success()),
     EndpointResultOverride(Endpoint("GET", "/login/2SV-help/complete"), Success()),
     EndpointResultOverride(Endpoint("GET", "/locked"), Locked()),
