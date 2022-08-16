@@ -325,5 +325,11 @@ class QuestionControllerSpec
       val htmlValue = PossibleAnswer("something with spaces").htmlValue
       htmlValue shouldBe "something-with-spaces"
     }
+
+    "remove extraneous characters" in {
+      val htmlValue = PossibleAnswer("something#hashed").htmlValue
+      htmlValue.contains("#") shouldBe false
+      htmlValue shouldBe "somethinghashed"
+    }
   }
 }
