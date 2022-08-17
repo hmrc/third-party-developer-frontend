@@ -62,7 +62,7 @@ class FlowSelectApiViewSpec extends CommonViewSpec
 
     val SelectSpecificApiRadio = document.getElementById("individual-apis")
     SelectSpecificApiRadio.`val`() shouldBe "SOME_APIS"
-    document.getElementById("individual-api-description").text() shouldBe s"Select specific APIs. You will not get emails about new Income Tax APIs"
+    document.getElementById("individual-api-description").text() shouldBe s"Select specific APIs. You will not get emails about new $currentCategory APIs"
 
 
 
