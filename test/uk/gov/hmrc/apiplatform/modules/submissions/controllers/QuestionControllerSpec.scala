@@ -46,6 +46,7 @@ import uk.gov.hmrc.apiplatform.modules.submissions.domain.models.QuestionnaireSt
 
 import java.time.ZoneOffset
 import java.time.LocalDateTime
+import uk.gov.hmrc.apiplatform.modules.submissions.domain.models.PossibleAnswer
 
 class QuestionControllerSpec 
   extends BaseControllerSpec
@@ -311,6 +312,24 @@ class QuestionControllerSpec
 
       status(result) shouldBe SEE_OTHER
       redirectLocation(result) shouldBe Some(s"/developer/submissions/${fullyAnsweredSubmission.submission.id.value}/question/${followUpQuestionId.value}/update")
+    }
+  }
+
+  "PossibleAnswer.htmlValue" should {
+    "return no spaces" in {
+      val htmlValue = PossibleAnswer("something with spaces").htmlValue
+      htmlValue.contains(" ") shouldBe false
+    }
+
+    "return hyphens instead of spaces" in {
+      val htmlValue = PossibleAnswer("something with spaces").htmlValue
+      htmlValue shouldBe "something-with-spaces"
+    }
+
+    "remove extraneous characters" in {
+      val htmlValue = PossibleAnswer("something#hashed").htmlValue
+      htmlValue.contains("#") shouldBe false
+      htmlValue shouldBe "somethinghashed"
     }
   }
 }
