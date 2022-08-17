@@ -63,6 +63,9 @@ class ResponsibleIndividualVerificationService @Inject()(
 
   private def sendDeskproTicket(riVerificationWithDetails: ResponsibleIndividualVerificationWithDetails)(implicit hc: HeaderCarrier) = {
     val verification = riVerificationWithDetails.verification
+
+    // TODO - do not send deskpro ticket for new state (when new start is added)
+
     val name = riVerificationWithDetails.submitterName
     val email = riVerificationWithDetails.submitterEmail
     val appName = verification.applicationName
