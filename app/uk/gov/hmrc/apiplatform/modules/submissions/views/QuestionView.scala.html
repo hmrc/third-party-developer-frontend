@@ -66,7 +66,7 @@
 @renderParagraphCompoundFragment(cs: CompoundFragment) = { <p class="govuk-body">@renderCompoundFragment(cs)</p> }
 
 @renderHint(nbsf: NonBulletStatementFragment) = {
-  <div class="govuk-hint">@renderNonBulletStatementFragment(nbsf)</div>
+  <div id="non-bullet-statement-fragment-hint" class="govuk-hint">@renderNonBulletStatementFragment(nbsf)</div>
 }
 
 @renderStatement(statement: Statement) = {
@@ -197,7 +197,7 @@
         </label>
       } else {
         <!-- Below is needed for accessibility, it is hidden visually -->
-        <h1 class="govuk-visually-hidden">
+        <h1 class="govuk-label-wrapper">
           <label id="question-label" class="govuk-label govuk-label--l" for="question-@{question.id.value}-id">
             @pageHeading
           </label>
@@ -206,14 +206,14 @@
 
       @if(question.hintText.isDefined) {
         @renderHint(question.hintText.get)
+        <input class="govuk-input" id="question-@{question.id.value}-id" name="answer" type="text" value="@actualValue" aria-describedby="non-bullet-statement-fragment-hint">
       }
       @if(errorInfo.isDefined) {
         <p id="question-error" class="govuk-error-message">
           <span class="govuk-visually-hidden">Error:</span>@errorInfo.get.message
         </p>
+        <input class="govuk-input" id="question-@{question.id.value}-id" name="answer" type="text" value="@actualValue">
       }
-
-      <input class="govuk-input" id="question-@{question.id.value}-id" name="answer" type="text" value="@actualValue">
     </div>
   }
 
