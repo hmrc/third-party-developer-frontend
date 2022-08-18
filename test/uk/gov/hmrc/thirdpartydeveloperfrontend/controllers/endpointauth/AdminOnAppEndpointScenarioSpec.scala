@@ -16,56 +16,23 @@
 
 package uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.endpointauth
 
-import play.api.http.Status.OK
 import play.api.libs.crypto.CookieSigner
-import play.api.mvc.{AnyContentAsEmpty, Request}
+import play.api.mvc.{AnyContent, AnyContentAsEmpty, Cookie, Request}
 import play.api.test.{CSRFTokenHelper, FakeRequest}
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.connectors.UserAuthenticationResponse
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.{Developer, LoggedInState, Session, UserId}
-import play.api.mvc.{AnyContentAsEmpty, Cookie, Request}
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.{Application, ApplicationId, ApplicationState, ApplicationWithSubscriptionIds, ClientId, Collaborator, CollaboratorRole, Environment, IpAllowlist, Standard}
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.emailpreferences.EmailPreferences
+import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.endpointauth.preconditions.{UserIsAdminOnApplicationTeam, UserIsAuthenticated}
 
-import java.time.{LocalDateTime, Period}
-import scala.concurrent.Future
-
-class AdminOnAppEndpointScenarioSpec extends EndpointScenarioSpec {
-  val sessionId = "my session"
-  val user = Developer(
-    UserId.random, "admin@example.com", "Bob", "Admin", None, List.empty, EmailPreferences.noPreferences
-  )
-  val session = Session(sessionId, user, LoggedInState.LOGGED_IN)
-
+class AdminOnAppEndpointScenarioSpec extends EndpointScenarioSpec with UserIsAuthenticated with UserIsAdminOnApplicationTeam {
   implicit val cookieSigner: CookieSigner = app.injector.instanceOf[CookieSigner]
 
-  when(tpdConnector.authenticate(*)(*)).thenReturn(Future.successful(UserAuthenticationResponse(false, false, None, Some(session))))
-  when(tpdConnector.fetchSession(eqTo(sessionId))(*)).thenReturn(Future.successful(session))
-  when(tpdConnector.deleteSession(eqTo(sessionId))(*)).thenReturn(Future.successful(OK))
-
-  val access = Standard()
-  val collaborators = Set(Collaborator(user.email, CollaboratorRole.ADMINISTRATOR, user.userId))
-  val application = Application(
-    ApplicationId.random, ClientId.random, "my app", LocalDateTime.now, None, None, Period.ofYears(1), Environment.PRODUCTION, None, collaborators, access,
-    ApplicationState.production("mr requester", "code123"), None, IpAllowlist(false, Set.empty)
-  )
-  val appWithSubsIds = ApplicationWithSubscriptionIds.from(application)
-  when(tpaProductionConnector.fetchByTeamMember(*[UserId])(*)).thenReturn(Future.successful(List(appWithSubsIds)))
-  when(tpaSandboxConnector.fetchByTeamMember(*[UserId])(*)).thenReturn(Future.successful(List(appWithSubsIds)))
-
-  override def buildRequest(httpVerb: String, requestPath: String): Request[AnyContentAsEmpty.type] = {
-    CSRFTokenHelper.addCSRFToken(FakeRequest(httpVerb, requestPath).withCookies(
+  override def updateRequestForScenario[T](request: FakeRequest[T]): FakeRequest[T] = { //TODO this belongs inside the UserIsAuthenticated trait
+    request.withCookies(
       Cookie("PLAY2AUTH_SESS_ID", cookieSigner.sign(sessionId) + sessionId, None, "path", None, false, false)
-    ))
+    )
   }
 
   override def describeScenario(): String = "User is authenticated as an Admin on the application team"
 
-  override def expectedEndpointResults(): EndpointResults = EndpointResults(
-    Redirect("/developer/login"),
-    EndpointResultOverride(Endpoint("GET", "/login"), Success()),
-    EndpointResultOverride(Endpoint("GET", "/locked"), Success()),
-    EndpointResultOverride(Endpoint("GET", "/forgot-password"), Success()),
-    EndpointResultOverride(Endpoint("POST", "/support"), BadRequest()),
-    EndpointResultOverride(Endpoint("GET", "/reset-password"), Redirect("/developer/reset-password/error"))
+  override def expectedResponses(): ExpectedResponses = ExpectedResponses(
+    Redirect("/developer/login")
   )
 }
