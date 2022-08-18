@@ -23,6 +23,7 @@ import play.api.inject.guice.GuiceApplicationBuilder
 import play.api.test.Helpers.{redirectLocation, route, status}
 import play.api.test.{CSRFTokenHelper, FakeRequest, Writeables}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.connectors._
+import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.endpointauth.preconditions.HasApplicationId
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.{ApplicationId, Environment}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.repositories.FlowRepository
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.AsyncHmrcSpec
@@ -38,7 +39,7 @@ object EndpointScenarioSpec {
   }
 }
 
-abstract class EndpointScenarioSpec extends AsyncHmrcSpec with GuiceOneAppPerSuite with Writeables with MockConnectors {
+abstract class EndpointScenarioSpec extends AsyncHmrcSpec with GuiceOneAppPerSuite with Writeables with MockConnectors with HasApplicationId {
   import EndpointScenarioSpec._
 
   override def fakeApplication() = {
@@ -53,8 +54,6 @@ abstract class EndpointScenarioSpec extends AsyncHmrcSpec with GuiceOneAppPerSui
       .in(Mode.Test)
       .build()
   }
-
-  val applicationId = ApplicationId.random
 
   private def populatePathTemplateWithValues(pathTemplate: String, values: Map[String,String]): String = {
     //TODO fail test if path contains parameters that aren't supplied by the values map
@@ -91,6 +90,7 @@ abstract class EndpointScenarioSpec extends AsyncHmrcSpec with GuiceOneAppPerSui
         case status: Int if 300 to 399 contains status => Redirect(redirectLocation(result).get)
         case 400 => BadRequest()
         case 401 => Unauthorized()
+        case 403 => Forbidden()
         case 404 => NotFound()
         case 423 => Locked()
         case status => Unexpected(status)
@@ -156,9 +156,9 @@ abstract class EndpointScenarioSpec extends AsyncHmrcSpec with GuiceOneAppPerSui
     List(RequestValues(endpoint, pathParameterValues, queryParameterValues, bodyParameterValues))
   }
 
-  val row = "POST        /applications/:id/check-your-answers/terms-and-conditions                                    uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.checkpages.CheckYourAnswers.termsAndConditionsAction(id: ApplicationId)"
+  val row = "GET         /applications/:id/details/change                                                             uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.Details.changeDetails(id: ApplicationId)"
   s"test endpoints when ${describeScenario()}" should {
-    Source.fromFile("conf/app.routes").getLines().flatMap(parseEndpoint).take(45).flatMap(populateRequestValues(_)).toSet foreach { requestValues: RequestValues =>
+    Source.fromFile("conf/app.routes").getLines().flatMap(parseEndpoint).take(75).flatMap(populateRequestValues(_)).toSet foreach { requestValues: RequestValues =>
 //      List("GET /applications  uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.ManageApplications.manageApps").flatMap(parseEndpoint).flatMap(populateRequestValues(_)).toSet foreach { requestValues: RequestValues =>
 //      List("GET  /applications/:id/details uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.Details.details(id: ApplicationId)").flatMap(parseEndpoint).flatMap(populateRequestValues(_)).toSet foreach { requestValues: RequestValues =>
 //      List(row).flatMap(parseEndpoint).flatMap(populateRequestValues(_)).toSet foreach { requestValues: RequestValues =>

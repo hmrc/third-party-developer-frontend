@@ -24,6 +24,7 @@ case class Redirect(location: String) extends Response
 case class BadRequest() extends Response
 case class Locked() extends Response
 case class Unauthorized() extends Response
+case class Forbidden() extends Response
 case class NotFound() extends Response
 case class Error(errorMsg: String) extends Response
 case class Unexpected(status: Int) extends Response

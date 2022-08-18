@@ -24,13 +24,13 @@ import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.UserId
 import java.time.{LocalDateTime, Period}
 import scala.concurrent.Future
 
-trait UserIsAdminOnApplicationTeam extends MockConnectors with UserIsAuthenticated {
+trait UserIsAdminOnApplicationTeam extends MockConnectors with UserIsAuthenticated with HasApplicationId {
   this: ApplicationHasState =>
 
   val access = Standard()
   val collaborators = Set(Collaborator(user.email, CollaboratorRole.ADMINISTRATOR, user.userId))
   val application = Application(
-    ApplicationId.random, ClientId.random, "my app", LocalDateTime.now, None, None, Period.ofYears(1), Environment.PRODUCTION, None, collaborators, access,
+    applicationId, ClientId.random, "my app", LocalDateTime.now, None, None, Period.ofYears(1), Environment.PRODUCTION, None, collaborators, access,
     applicationState, None, IpAllowlist(false, Set.empty)
   )
   val appWithSubsIds = ApplicationWithSubscriptionIds.from(application)

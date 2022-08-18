@@ -20,7 +20,7 @@ import play.api.libs.crypto.CookieSigner
 import play.api.mvc.{AnyContent, AnyContentAsEmpty, Cookie, Request, Session}
 import play.api.test.{CSRFTokenHelper, FakeRequest}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.endpointauth.preconditions._
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.ApplicationState
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.{ApplicationId, ApplicationState}
 
 class AdminOnProductionAppEndpointScenarioSpec extends EndpointScenarioSpec
   with UserIsAuthenticated
@@ -31,8 +31,11 @@ class AdminOnProductionAppEndpointScenarioSpec extends EndpointScenarioSpec
   with PasswordResetSucceeds
   with DeskproTicketCreationSucceeds
   with AddTeamMemberSucceeds
+  with ApplicationNameIsValid
+  with ApplicationUpdateSucceeds
   with ApplicationHasState {
   implicit val cookieSigner: CookieSigner = app.injector.instanceOf[CookieSigner]
+
   def applicationState: ApplicationState = ApplicationState.production("mr requester", "code123")
 
   override def updateRequestForScenario[T](request: FakeRequest[T]): FakeRequest[T] = { //TODO this belongs inside the UserIsAuthenticated trait
@@ -50,6 +53,16 @@ class AdminOnProductionAppEndpointScenarioSpec extends EndpointScenarioSpec
       case Endpoint("POST", "/applications/:id/check-your-answers/terms-and-conditions") => Map("hasUrl"-> "false")
       case Endpoint("POST", "/applications/:id/team-members/add/:addTeamMemberPageMode") => Map("email"-> "new@example.com", "role" -> "developer")
       case Endpoint("POST", "/applications/:id/team-members/remove") => Map("email"-> "new@example.com", "confirm" -> "yes")
+      case Endpoint("POST", "/applications/:id/details/change-app-name") => Map("applicationName"-> "new app name")
+      case Endpoint("POST", "/applications/:id/details/change-privacy-policy-location") => Map("privacyPolicyUrl" -> "http://example.com", "isInDesktop" -> "false", "isNewJourney" -> "true")
+      case Endpoint("POST", "/applications/:id/details/change-terms-conditions-location") => Map("termsAndConditionsUrl" -> "http://example.com", "isInDesktop" -> "false", "isNewJourney" -> "true")
+      case Endpoint("POST", "/applications/:id/redirect-uris/add") => Map("redirectUri" -> "https://example.com/redirect")
+      case Endpoint("POST", "/applications/:id/details/terms-of-use") => Map("termsOfUseAgreed" -> "true")
+      case Endpoint("POST", "/applications/:id/redirect-uris/change-confirmation") => Map("originalRedirectUri" -> "http://example.com", "newRedirectUri" -> "https://example.com/redirect")
+      case Endpoint("POST", "/applications/:id/redirect-uris/delete") => Map("redirectUri" -> "http://example.com", "deleteRedirectConfirm" -> "yes")
+      case Endpoint("POST", "/applications/:id/delete-principal") => Map("deleteConfirm" -> "yes")
+      case Endpoint("POST", "/applications/:id/ip-allowlist/add") => Map("ipAddress" -> "1.2.3.4/24")
+      case Endpoint("POST", "/applications/:id/ip-allowlist/change") => Map("confirm" -> "yes")
       case _ => Map.empty
     }
   }
@@ -81,6 +94,19 @@ class AdminOnProductionAppEndpointScenarioSpec extends EndpointScenarioSpec
     ExpectedResponseOverride(Endpoint("POST", "/applications/:id/team-members/remove"), Redirect(s"/developer/applications/${applicationId.value}/team-members")),
     ExpectedResponseOverride(Endpoint("GET", "/applications/:id/team-members/:teamMemberHash/remove-confirmation"), Redirect(s"/developer/applications/${applicationId.value}/team-members")),
     ExpectedResponseOverride(Endpoint("POST", "/applications/:id/team-members/add/:addTeamMemberPageMode"), Redirect(s"/developer/applications/${applicationId.value}/request-check/team")),
+    ExpectedResponseOverride(Endpoint("GET", "/applications/:id/details/change"), Forbidden()),
+    ExpectedResponseOverride(Endpoint("POST", "/applications/:id/details/change"), Forbidden()),
+    ExpectedResponseOverride(Endpoint("POST", "/applications/:id/details/change-privacy-policy-location"), Redirect(s"/developer/applications/${applicationId.value}/details")),
+    ExpectedResponseOverride(Endpoint("POST", "/applications/:id/details/change-terms-conditions-location"), Redirect(s"/developer/applications/${applicationId.value}/details")),
+    ExpectedResponseOverride(Endpoint("POST", "/applications/:id/redirect-uris/delete-confirmation"), Redirect(s"/developer/applications/${applicationId.value}/redirect-uris")),
+    ExpectedResponseOverride(Endpoint("POST", "/applications/:id/details/terms-of-use"), Redirect(s"/developer/applications/${applicationId.value}/details")),
+    ExpectedResponseOverride(Endpoint("POST", "/applications/:id/redirect-uris/add"), Redirect(s"/developer/applications/${applicationId.value}/redirect-uris")),
+    ExpectedResponseOverride(Endpoint("POST", "/applications/:id/redirect-uris/delete"), Redirect(s"/developer/applications/${applicationId.value}/redirect-uris")),
+    ExpectedResponseOverride(Endpoint("POST", "/applications/:id/redirect-uris/change-confirmation"), Redirect(s"/developer/applications/${applicationId.value}/redirect-uris")),
+    ExpectedResponseOverride(Endpoint("POST", "/applications/:id/delete-subordinate"), Error("uk.gov.hmrc.http.ForbiddenException: Only standard subordinate applications can be deleted by admins")),
+    ExpectedResponseOverride(Endpoint("POST", "/applications/:id/delete-principal"), Redirect(s"/developer/applications/${applicationId.value}/details")),
+    ExpectedResponseOverride(Endpoint("POST", "/applications/:id/ip-allowlist/change"), Redirect(s"/developer/applications/${applicationId.value}/ip-allowlist/activate")),
+    ExpectedResponseOverride(Endpoint("POST", "/applications/:id/ip-allowlist/add"), Redirect(s"/developer/applications/${applicationId.value}/ip-allowlist/change")),
   )
 
 }
