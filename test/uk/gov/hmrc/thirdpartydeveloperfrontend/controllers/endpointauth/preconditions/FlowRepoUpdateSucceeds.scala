@@ -16,13 +16,17 @@
 
 package uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.endpointauth.preconditions
 
+import akka.stream.scaladsl.Flow
 import play.api.http.Status.OK
+import play.api.libs.json.OFormat
+import uk.gov.hmrc.apiplatform.modules.uplift.domain.models.GetProductionCredentialsFlow
 import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.endpointauth.MockConnectors
 
 import scala.concurrent.Future
 
-trait PasswordResetSucceeds extends MockConnectors {
-  when(tpdConnector.fetchEmailForResetCode(*)(*)).thenReturn(Future.successful("user@example.com"))
-  when(tpdConnector.requestReset(*)(*)).thenReturn(Future.successful(OK))
-  when(tpdConnector.reset(*)(*)).thenReturn(Future.successful(OK))
+trait FlowRepoUpdateSucceeds extends MockConnectors {
+  when(flowRepository.updateLastUpdated(*)).thenReturn(Future.successful())
+  when(flowRepository.fetchBySessionIdAndFlowType(*,*)(*)).thenReturn(Future.successful(None))
+  when(flowRepository.deleteBySessionIdAndFlowType(*,*)).thenReturn(Future.successful(true))
+  when(flowRepository.saveFlow(*[GetProductionCredentialsFlow])(*[OFormat[GetProductionCredentialsFlow]])).thenReturn(Future.successful(GetProductionCredentialsFlow("my session", None, None)))
 }

@@ -16,13 +16,11 @@
 
 package uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.endpointauth.preconditions
 
-import play.api.http.Status.OK
 import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.endpointauth.MockConnectors
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.{EmailAlreadyInUse, RegistrationSuccessful}
 
 import scala.concurrent.Future
 
-trait PasswordResetSucceeds extends MockConnectors {
-  when(tpdConnector.fetchEmailForResetCode(*)(*)).thenReturn(Future.successful("user@example.com"))
-  when(tpdConnector.requestReset(*)(*)).thenReturn(Future.successful(OK))
-  when(tpdConnector.reset(*)(*)).thenReturn(Future.successful(OK))
+trait UserRegistrationFails extends MockConnectors {
+  when(tpdConnector.register(*)(*)).thenReturn(Future.successful(EmailAlreadyInUse))
 }

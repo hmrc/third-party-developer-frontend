@@ -24,13 +24,14 @@ case class Redirect(location: String) extends Response
 case class BadRequest() extends Response
 case class Locked() extends Response
 case class Unauthorized() extends Response
+case class NotFound() extends Response
 case class Error(errorMsg: String) extends Response
 case class Unexpected(status: Int) extends Response
 
 case class ExpectedResponseOverride(endpoint: Endpoint, expectedResponse: Response)
 case class ExpectedResponses(defaultResponse: Response, responseOverrides: ExpectedResponseOverride*)
 
-case class RequestValues(endpoint: Endpoint, pathValues: Map[String,String] = Map.empty, queryParams: Map[String,String] = Map.empty, postBody: Option[Map[String,String]] = None) {
+case class RequestValues(endpoint: Endpoint, pathValues: Map[String,String] = Map.empty, queryParams: Map[String,String] = Map.empty, postBody: Map[String,String] = Map.empty) {
   override def toString() = {
     var path = endpoint.pathTemplate
     for((name,value) <- pathValues) {
@@ -42,9 +43,9 @@ case class RequestValues(endpoint: Endpoint, pathValues: Map[String,String] = Ma
       path += s"?${queryString}"
     }
 
-    s"${endpoint.verb} $path" + (postBody match {
-      case Some(values) => s" with body ${values}"
-      case None => ""
+    s"${endpoint.verb} $path" + (postBody.isEmpty match {
+      case true => ""
+      case false => s" with body ${postBody}"
     })
   }
 }

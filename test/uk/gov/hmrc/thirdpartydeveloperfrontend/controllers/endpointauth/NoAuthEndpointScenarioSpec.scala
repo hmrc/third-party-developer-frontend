@@ -16,7 +16,6 @@
 
 package uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.endpointauth
 import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.endpointauth.preconditions.{DeskproTicketCreationSucceeds, NoUserIdFoundForEmailAddressValue, PasswordResetSucceeds, UserRegistrationSucceeds, UserVerificationSucceeds}
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.{ApplicationId, Environment}
 
 class NoAuthEndpointScenarioSpec extends EndpointScenarioSpec
     with NoUserIdFoundForEmailAddressValue
@@ -27,47 +26,6 @@ class NoAuthEndpointScenarioSpec extends EndpointScenarioSpec
 
   override def describeScenario(): String = "User is not authenticated"
 
-  override def getGlobalPathParameterValues(): Map[String,String] = Map(
-    "id" -> ApplicationId.random.value,
-    "environment" -> Environment.PRODUCTION.entryName,
-    "pageNumber" -> "1",
-    "context" -> "ctx",
-    "version" -> "1.0",
-    "saveSubsFieldsPageMode"-> "lefthandnavigation",
-    "fieldName"-> "field1",
-    "addTeamMemberPageMode" -> "applicationcheck",
-    "file" -> "javascripts/loader.js"
-  )
-
-  override def getEndpointSpecificQueryParameterValues(endpoint: Endpoint): Map[String,String] = {
-    endpoint match {
-      case Endpoint("GET", "/applications/:id/change-locked-subscription") => Map("name" -> "my-api", "context" -> "ctx", "version" -> "1.0", "redirectTo" -> "http://example.com")
-      case Endpoint("POST", "/applications/:id/change-locked-subscription") => Map("name" -> "my-api", "context" -> "ctx", "version" -> "1.0", "redirectTo" -> "http://example.com")
-      case Endpoint("GET", "/applications/:id/change-private-subscription") => Map("name" -> "my-api", "context" -> "ctx", "version" -> "1.0", "redirectTo" -> "http://example.com")
-      case Endpoint("POST", "/applications/:id/change-private-subscription") => Map("name" -> "my-api", "context" -> "ctx", "version" -> "1.0", "redirectTo" -> "http://example.com")
-      case Endpoint("POST", "/applications/:id/change-subscription") => Map("context" -> "ctx", "version" -> "1.0", "redirectTo" -> "http://example.com")
-      case Endpoint("GET", "/applications/:id/ip-allowlist/remove") => Map("cidrBlock" -> "192.168.1.2/8")
-      case Endpoint("POST", "/applications/:id/ip-allowlist/remove") => Map("cidrBlock" -> "192.168.1.2/8")
-      case Endpoint("GET", "/verification") => Map("code" -> "CODE123")
-      case Endpoint("GET", "/reset-password-link") => Map("code" -> "1324")
-      case Endpoint("GET", "/application-verification") => Map("code" -> "1324")
-
-      case _ => Map.empty
-    }
-  }
-
-  override def getEndpointSpecificBodyParameterValues(endpoint: Endpoint): Option[Map[String,String]] = {
-    Option(endpoint match {
-      case Endpoint("POST", "/registration") => Map("firstname" -> "Bob", "lastname" -> "Example", "emailaddress" -> "bob@example.com", "password" -> "S3curE-Pa$$w0rd!", "confirmpassword" -> "S3curE-Pa$$w0rd!")
-      case Endpoint("POST", "/login") => Map("emailaddress" -> "bob@example.com", "password" -> "letmein")
-      case Endpoint("POST", "/forgot-password") => Map("emailaddress" -> "user@example.com")
-      case Endpoint("POST", "/login-totp") => Map("accessCode" -> "123456", "rememberMe" -> "false")
-      case Endpoint("POST", "/reset-password") => Map("password" -> "S3curE-Pa$$w0rd!", "confirmpassword" -> "S3curE-Pa$$w0rd!")
-      case Endpoint("POST", "/support") => Map("fullname" -> "Bob Example", "emailaddress" -> "bob@example.com", "comments" -> "I am very cross about something")
-      case _ => null
-    })
-  }
-
   override def expectedResponses(): ExpectedResponses = ExpectedResponses(
     Redirect("/developer/login"),
     ExpectedResponseOverride(Endpoint("GET", "/login"), Success()),
@@ -75,6 +33,7 @@ class NoAuthEndpointScenarioSpec extends EndpointScenarioSpec
     ExpectedResponseOverride(Endpoint("GET", "/registration"), Success()),
     ExpectedResponseOverride(Endpoint("POST", "/registration"), Redirect("/developer/confirmation")),
     ExpectedResponseOverride(Endpoint("GET", "/login-totp"), Success()),
+    ExpectedResponseOverride(Endpoint("GET", "/application-verification"), Success()),
     //TODO the request below triggers a deskpro ticket to be created (should unauth users be able to do this?) that requests 2SV removal for any account, seems wrong? do SDST verify that the correct user made the request?
     ExpectedResponseOverride(Endpoint("GET", "/login/2SV-help"), Success()),
     ExpectedResponseOverride(Endpoint("POST", "/login/2SV-help"), Success()),

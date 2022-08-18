@@ -18,11 +18,12 @@ package uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.endpointauth.precond
 
 import play.api.http.Status.OK
 import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.endpointauth.MockConnectors
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.ApplicationId
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.connectors.AddTeamMemberRequest
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.RegistrationSuccessful
 
 import scala.concurrent.Future
 
-trait PasswordResetSucceeds extends MockConnectors {
-  when(tpdConnector.fetchEmailForResetCode(*)(*)).thenReturn(Future.successful("user@example.com"))
-  when(tpdConnector.requestReset(*)(*)).thenReturn(Future.successful(OK))
-  when(tpdConnector.reset(*)(*)).thenReturn(Future.successful(OK))
+trait AddTeamMemberSucceeds extends MockConnectors {
+  when(apmConnector.addTeamMember(*[ApplicationId],*[AddTeamMemberRequest])(*)).thenReturn(Future.successful(OK))
 }

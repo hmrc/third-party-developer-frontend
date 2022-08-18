@@ -18,12 +18,12 @@ package uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.endpointauth.precond
 
 import play.api.http.Status.OK
 import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.endpointauth.MockConnectors
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.connectors.UserAuthenticationResponse
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.{Developer, LoggedInState, Session, UserId}
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.emailpreferences.EmailPreferences
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.ApplicationVerificationSuccessful
 
 import scala.concurrent.Future
 
 trait UserVerificationSucceeds extends MockConnectors {
   when(tpdConnector.verify(*)(*)).thenReturn(Future.successful(OK))
+  when(tpaProductionConnector.verify(*)(*)).thenReturn(Future.successful(ApplicationVerificationSuccessful))
+  when(tpdConnector.resendVerificationEmail(*)(*)).thenReturn(Future.successful(OK))
 }

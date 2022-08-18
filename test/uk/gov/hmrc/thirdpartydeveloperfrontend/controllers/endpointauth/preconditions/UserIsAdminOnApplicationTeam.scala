@@ -17,7 +17,7 @@
 package uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.endpointauth.preconditions
 
 import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.endpointauth.MockConnectors
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.{Application, ApplicationId, ApplicationState, ApplicationWithSubscriptionIds, ClientId, Collaborator, CollaboratorRole, Environment, IpAllowlist, Standard}
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.{Application, ApplicationId, ApplicationState, ApplicationWithSubscriptionData, ApplicationWithSubscriptionIds, ClientId, Collaborator, CollaboratorRole, Environment, IpAllowlist, Standard}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.connectors.TicketCreated
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.UserId
 
@@ -25,13 +25,21 @@ import java.time.{LocalDateTime, Period}
 import scala.concurrent.Future
 
 trait UserIsAdminOnApplicationTeam extends MockConnectors with UserIsAuthenticated {
+  this: ApplicationHasState =>
+
   val access = Standard()
   val collaborators = Set(Collaborator(user.email, CollaboratorRole.ADMINISTRATOR, user.userId))
   val application = Application(
     ApplicationId.random, ClientId.random, "my app", LocalDateTime.now, None, None, Period.ofYears(1), Environment.PRODUCTION, None, collaborators, access,
-    ApplicationState.production("mr requester", "code123"), None, IpAllowlist(false, Set.empty)
+    applicationState, None, IpAllowlist(false, Set.empty)
   )
   val appWithSubsIds = ApplicationWithSubscriptionIds.from(application)
+  val appWithSubsData = ApplicationWithSubscriptionData(application, Set.empty, Map.empty)
+
   when(tpaProductionConnector.fetchByTeamMember(*[UserId])(*)).thenReturn(Future.successful(List(appWithSubsIds)))
   when(tpaSandboxConnector.fetchByTeamMember(*[UserId])(*)).thenReturn(Future.successful(List(appWithSubsIds)))
+  when(apmConnector.fetchApplicationById(*[ApplicationId])(*)).thenReturn(Future.successful(Some(appWithSubsData)))
+  when(apmConnector.getAllFieldDefinitions(*[Environment])(*)).thenReturn(Future.successful(Map.empty))
+  when(apmConnector.fetchAllOpenAccessApis(*[Environment])(*)).thenReturn(Future.successful(Map.empty))
+  when(apmConnector.fetchAllPossibleSubscriptions(*[ApplicationId])(*)).thenReturn(Future.successful(Map.empty))
 }
