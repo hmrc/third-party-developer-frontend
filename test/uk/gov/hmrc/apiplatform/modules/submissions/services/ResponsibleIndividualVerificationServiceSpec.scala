@@ -29,7 +29,8 @@ import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.connectors.TicketCr
 import uk.gov.hmrc.apiplatform.modules.submissions.connectors.ThirdPartyApplicationSubmissionsConnector
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.connectors.DeskproTicket
 import org.mockito.captor.ArgCaptor
-import uk.gov.hmrc.apiplatform.modules.submissions.domain.models.{ResponsibleIndividualVerification, ResponsibleIndividualVerificationId, ResponsibleIndividualVerificationWithDetails, Submission, ResponsibleIndividualVerificationState}
+import uk.gov.hmrc.apiplatform.modules.submissions.domain.models.{ResponsibleIndividualToUVerification, ResponsibleIndividualVerificationId, ResponsibleIndividualVerificationWithDetails, Submission, ResponsibleIndividualVerificationState}
+import java.time.{LocalDateTime, ZoneOffset}
 
 class ResponsibleIndividualVerificationServiceSpec extends AsyncHmrcSpec 
   with CollaboratorTracker 
@@ -42,7 +43,7 @@ class ResponsibleIndividualVerificationServiceSpec extends AsyncHmrcSpec
     val mockSubmissionsConnector: ThirdPartyApplicationSubmissionsConnector = mock[ThirdPartyApplicationSubmissionsConnector]
 
     val code = "12345678"
-    val riVerification = ResponsibleIndividualVerification(ResponsibleIndividualVerificationId(code), ApplicationId.random, "App name", Submission.Id.random, 0, ResponsibleIndividualVerificationState.INITIAL)
+    val riVerification = ResponsibleIndividualToUVerification(ResponsibleIndividualVerificationId(code), ApplicationId.random, Submission.Id.random, 0, "App name", LocalDateTime.now(ZoneOffset.UTC), ResponsibleIndividualVerificationState.INITIAL)
     val responsibleIndividual = ResponsibleIndividual.build("bob example", "bob@example.com")
     val riVerificationWithDetails = ResponsibleIndividualVerificationWithDetails(riVerification, responsibleIndividual, "Rick Deckard", "rick@submitter.com")
 

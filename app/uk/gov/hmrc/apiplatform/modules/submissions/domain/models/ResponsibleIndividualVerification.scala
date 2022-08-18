@@ -16,12 +16,13 @@
 
 package uk.gov.hmrc.apiplatform.modules.submissions.domain.models
 
-import play.api.libs.json.{Format, OFormat}
+import play.api.libs.json.Format
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.ApplicationId
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.services.LocalDateTimeFormatters
 import uk.gov.hmrc.apiplatform.modules.submissions.domain.models.ResponsibleIndividualVerificationState.ResponsibleIndividualVerificationState
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.ResponsibleIndividual
 
-import java.time.{LocalDateTime, ZoneOffset}
+import java.time.LocalDateTime
 
 case class ResponsibleIndividualVerificationId(value: String) extends AnyVal
 
@@ -31,7 +32,17 @@ object ResponsibleIndividualVerificationId {
   implicit val JsonFormat: Format[ResponsibleIndividualVerificationId] = Json.valueFormat[ResponsibleIndividualVerificationId]
 }
 
-case class ResponsibleIndividualVerification(
+sealed trait ResponsibleIndividualVerification {
+  def id: ResponsibleIndividualVerificationId
+  def applicationId: ApplicationId
+  def submissionId: Submission.Id
+  def submissionInstance: Int
+  def applicationName: String
+  def createdOn: LocalDateTime
+  def state: ResponsibleIndividualVerificationState
+}
+
+case class ResponsibleIndividualToUVerification(
     id: ResponsibleIndividualVerificationId,
     applicationId: ApplicationId,
     submissionId: Submission.Id,
@@ -39,13 +50,29 @@ case class ResponsibleIndividualVerification(
     applicationName: String,
     createdOn: LocalDateTime,
     state: ResponsibleIndividualVerificationState
-)
+  ) extends ResponsibleIndividualVerification
+
+case class ResponsibleIndividualUpdateVerification(
+    id: ResponsibleIndividualVerificationId,
+    applicationId: ApplicationId,
+    submissionId: Submission.Id,
+    submissionInstance: Int,
+    applicationName: String,
+    createdOn: LocalDateTime,
+    responsibleIndividual: ResponsibleIndividual,
+    state: ResponsibleIndividualVerificationState
+  ) extends ResponsibleIndividualVerification
 
 object ResponsibleIndividualVerification extends LocalDateTimeFormatters {
-  def apply(id: ResponsibleIndividualVerificationId, appId: ApplicationId, appName: String, submissionId: Submission.Id, submissionInstance: Int, state: ResponsibleIndividualVerificationState): ResponsibleIndividualVerification =
-    new ResponsibleIndividualVerification(id, appId, submissionId, submissionInstance, appName, LocalDateTime.now(ZoneOffset.UTC), state)
-
   import play.api.libs.json.Json
+  import uk.gov.hmrc.play.json.Union
+  implicit val utcReads = DefaultLocalDateTimeReads
 
-  implicit val formatResponsibleIndividualVerification: OFormat[ResponsibleIndividualVerification] = Json.format[ResponsibleIndividualVerification]
+  implicit val responsibleIndividualVerificationFormat            = Json.format[ResponsibleIndividualToUVerification]
+  implicit val responsibleIndividualUpdateVerificationFormat      = Json.format[ResponsibleIndividualUpdateVerification]
+
+  implicit val jsonFormatResponsibleIndividualVerification = Union.from[ResponsibleIndividualVerification]("verificationType")
+    .and[ResponsibleIndividualToUVerification]("termsOfUse")
+    .and[ResponsibleIndividualUpdateVerification]("adminUpdate")
+    .format
 }
