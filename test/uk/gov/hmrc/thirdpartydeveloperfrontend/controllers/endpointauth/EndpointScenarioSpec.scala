@@ -110,7 +110,8 @@ abstract class EndpointScenarioSpec extends AsyncHmrcSpec with GuiceOneAppPerSui
     "fieldName"-> "field1",
     "addTeamMemberPageMode" -> "applicationcheck",
     "teamMemberHash" -> "abc123",
-    "file" -> "javascripts/loader.js"
+    "file" -> "javascripts/loader.js",
+    "clientSecretId" -> "s1id"
   )
 
   final def getQueryParameterValues(endpoint: Endpoint): Map[String,String] = {
@@ -158,7 +159,7 @@ abstract class EndpointScenarioSpec extends AsyncHmrcSpec with GuiceOneAppPerSui
 
   val row = "GET         /applications/:id/details/change                                                             uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.Details.changeDetails(id: ApplicationId)"
   s"test endpoints when ${describeScenario()}" should {
-    Source.fromFile("conf/app.routes").getLines().flatMap(parseEndpoint).take(75).flatMap(populateRequestValues(_)).toSet foreach { requestValues: RequestValues =>
+    Source.fromFile("conf/app.routes").getLines().flatMap(parseEndpoint).take(105).flatMap(populateRequestValues(_)).toSet foreach { requestValues: RequestValues =>
 //      List("GET /applications  uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.ManageApplications.manageApps").flatMap(parseEndpoint).flatMap(populateRequestValues(_)).toSet foreach { requestValues: RequestValues =>
 //      List("GET  /applications/:id/details uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.Details.details(id: ApplicationId)").flatMap(parseEndpoint).flatMap(populateRequestValues(_)).toSet foreach { requestValues: RequestValues =>
 //      List(row).flatMap(parseEndpoint).flatMap(populateRequestValues(_)).toSet foreach { requestValues: RequestValues =>

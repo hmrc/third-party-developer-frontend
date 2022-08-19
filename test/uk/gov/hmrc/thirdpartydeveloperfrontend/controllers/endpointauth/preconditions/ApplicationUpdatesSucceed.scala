@@ -26,4 +26,5 @@ trait ApplicationUpdateSucceeds extends MockConnectors {
   when(tpaProductionConnector.applicationUpdate(*[ApplicationId],*[ApplicationUpdate])(*)).thenReturn(Future.successful(ApplicationUpdateSuccessful))
   when(tpaProductionConnector.updateApproval(*[ApplicationId],*[CheckInformation])(*)).thenReturn(Future.successful(ApplicationUpdateSuccessful))
   when(tpaProductionConnector.update(*[ApplicationId],*[UpdateApplicationRequest])(*)).thenReturn(Future.successful(ApplicationUpdateSuccessful))
+  when(tpaProductionConnector.updateIpAllowlist(*[ApplicationId],*[Boolean], *[Set[String]])(*)).thenReturn(Future.successful(ApplicationUpdateSuccessful))
 }

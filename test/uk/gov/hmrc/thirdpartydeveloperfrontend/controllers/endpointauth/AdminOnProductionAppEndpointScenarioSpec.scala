@@ -63,6 +63,12 @@ class AdminOnProductionAppEndpointScenarioSpec extends EndpointScenarioSpec
       case Endpoint("POST", "/applications/:id/delete-principal") => Map("deleteConfirm" -> "yes")
       case Endpoint("POST", "/applications/:id/ip-allowlist/add") => Map("ipAddress" -> "1.2.3.4/24")
       case Endpoint("POST", "/applications/:id/ip-allowlist/change") => Map("confirm" -> "yes")
+      case Endpoint("POST", "/applications/:id/responsible-individual/change/self-or-other") => Map("who" -> "self")
+      case Endpoint("POST", "/applications/:id/responsible-individual/change/other") => Map("name" -> "mr responsible", "email" -> "ri@example.com")
+      case Endpoint("POST", "/applications/:id/change-subscription") => Map("subscribed" -> "true")
+      case Endpoint("POST", "/applications/:id/change-locked-subscription") => Map("subscribed" -> "true", "confirm" -> "true")
+      case Endpoint("POST", "/applications/:id/change-private-subscription") => Map("subscribed" -> "true", "confirm" -> "true")
+      case Endpoint("POST", "/applications/:id/request-check") => Map("apiSubscriptionsComplete" -> "true", "apiSubscriptionConfigurationsComplete" -> "true", "contactDetailsComplete" -> "true", "teamConfirmedComplete" -> "true", "confirmedNameComplete" -> "true", "providedPrivacyPolicyURLComplete" -> "true", "providedTermsAndConditionsURLComplete" -> "true", "termsOfUseAgreementComplete" -> "true")
       case _ => Map.empty
     }
   }
@@ -107,6 +113,13 @@ class AdminOnProductionAppEndpointScenarioSpec extends EndpointScenarioSpec
     ExpectedResponseOverride(Endpoint("POST", "/applications/:id/delete-principal"), Redirect(s"/developer/applications/${applicationId.value}/details")),
     ExpectedResponseOverride(Endpoint("POST", "/applications/:id/ip-allowlist/change"), Redirect(s"/developer/applications/${applicationId.value}/ip-allowlist/activate")),
     ExpectedResponseOverride(Endpoint("POST", "/applications/:id/ip-allowlist/add"), Redirect(s"/developer/applications/${applicationId.value}/ip-allowlist/change")),
+    ExpectedResponseOverride(Endpoint("POST", "/applications/:id/ip-allowlist/remove"), Redirect(s"/developer/applications/${applicationId.value}/ip-allowlist/setup")),
+    ExpectedResponseOverride(Endpoint("POST", "/applications/:id/responsible-individual/change/self-or-other"), Redirect(s"/developer/applications/${applicationId.value}/responsible-individual/change/self")),
+    ExpectedResponseOverride(Endpoint("POST", "/applications/:id/responsible-individual/change/self"), Redirect(s"/developer/applications/${applicationId.value}/responsible-individual/change/self/confirmed")),
+    ExpectedResponseOverride(Endpoint("POST", "/applications/:id/responsible-individual/change/other"), Redirect(s"/developer/applications/${applicationId.value}/responsible-individual/change/other/requested")),
+    ExpectedResponseOverride(Endpoint("POST", "/applications/:id/change-subscription"), BadRequest()),
+    ExpectedResponseOverride(Endpoint("POST", "/applications/:id/client-secret-new"), Redirect(s"/developer/applications/${applicationId.value}/client-secrets")),
+    ExpectedResponseOverride(Endpoint("POST", "/applications/:id/client-secret/:clientSecretId/delete"), Redirect(s"/developer/applications/${applicationId.value}/client-secrets")),
   )
 
 }
