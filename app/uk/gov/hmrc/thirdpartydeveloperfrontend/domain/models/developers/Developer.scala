@@ -16,6 +16,7 @@
 
 package uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers
 
+import play.api.libs.functional.FunctionalBuilder
 import play.api.libs.json.{Format, JsPath, Json, Reads}
 import uk.gov.hmrc.apiplatform.modules.mfa.models.MfaDetail
 import uk.gov.hmrc.apiplatform.modules.mfa.models.MfaDetailFormats._
