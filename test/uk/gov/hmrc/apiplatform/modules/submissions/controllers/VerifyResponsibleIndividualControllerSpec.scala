@@ -36,9 +36,10 @@ import uk.gov.hmrc.thirdpartydeveloperfrontend.builder.SampleApplication
 import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.SubscriptionTestHelperSugar
 import uk.gov.hmrc.thirdpartydeveloperfrontend.builder.SampleSession
 import uk.gov.hmrc.apiplatform.modules.submissions.SubmissionsTestData
-import uk.gov.hmrc.apiplatform.modules.submissions.domain.models.{ResponsibleIndividualVerification, ResponsibleIndividualVerificationId}
+import uk.gov.hmrc.apiplatform.modules.submissions.domain.models.{ResponsibleIndividualToUVerification, ResponsibleIndividualVerificationId, ResponsibleIndividualVerificationState}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.ApplicationId
 import uk.gov.hmrc.apiplatform.modules.submissions.domain.models.Submission
+import java.time.{LocalDateTime, ZoneOffset}
 
 class VerifyResponsibleIndividualControllerSpec
   extends BaseControllerSpec
@@ -107,7 +108,7 @@ class VerifyResponsibleIndividualControllerSpec
     )
 
     val code = "12345678"
-    val riVerification = ResponsibleIndividualVerification(ResponsibleIndividualVerificationId(code), ApplicationId.random, "App name", Submission.Id.random, 0)
+    val riVerification = ResponsibleIndividualToUVerification(ResponsibleIndividualVerificationId(code), ApplicationId.random, Submission.Id.random, 0, "App name", LocalDateTime.now(ZoneOffset.UTC), ResponsibleIndividualVerificationState.INITIAL)
 
     val loggedInRequest = FakeRequest().withLoggedIn(controller, implicitly)(sessionId).withSession(sessionParams: _*)
   }
