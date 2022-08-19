@@ -16,6 +16,7 @@
 
 package uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.controllers
 
+import org.apache.commons.lang3.StringUtils
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.apidefinitions.{APISubscriptionStatusWithSubscriptionFields, APISubscriptionStatusWithWritableSubscriptionField, ApiContext, ApiVersion}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.CollaboratorRole
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.subscriptions.{FieldName, FieldValue}
@@ -102,14 +103,19 @@ object EditManageSubscription {
         fieldsViewModel
       }
 
+      val hintText = StringUtils.firstNonBlank(
+        apiSubscription.subscriptionFieldValue.definition.hint,
+        apiSubscription.subscriptionFieldValue.definition.description
+      )
+
       val subscriptionFieldViewModel =
         SubscriptionFieldViewModel(
           apiSubscription.subscriptionFieldValue.definition.name,
-         apiSubscription.subscriptionFieldValue.definition.description,
-         apiSubscription.subscriptionFieldValue.definition.hint,
-         canWrite,
-         newValue,
-         fieldErrors)
+          apiSubscription.subscriptionFieldValue.definition.description,
+          hintText,
+          canWrite,
+          newValue,
+          fieldErrors)
 
       EditApiConfigurationFieldViewModel(
         apiSubscription.name,
