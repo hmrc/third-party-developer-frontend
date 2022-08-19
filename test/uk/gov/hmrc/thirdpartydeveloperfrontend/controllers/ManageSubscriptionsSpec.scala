@@ -16,6 +16,8 @@
 
 package uk.gov.hmrc.thirdpartydeveloperfrontend.controllers
 
+import org.jsoup.Jsoup
+
 import java.util.UUID.randomUUID
 import uk.gov.hmrc.thirdpartydeveloperfrontend.builder.DeveloperBuilder
 import uk.gov.hmrc.thirdpartydeveloperfrontend.config.ErrorHandler
@@ -362,6 +364,29 @@ class ManageSubscriptionsSpec
           contentAsString(result) should include(field.definition.description)
           contentAsString(result) should include(field.definition.hint)
           contentAsString(result) should include(field.value.value)
+        }
+
+        "use the description if no hint text is available" in new ManageSubscriptionsSetup {
+          val whoCanWrite = Anyone
+          val accessDenied = AccessRequirements(devhub = DevhubAccessRequirements(Anyone, whoCanWrite))
+
+          val fieldName = "my-field-name"
+          val field = buildSubscriptionFieldValue(fieldName, Some("old-value"), accessDenied, Some(""))
+          val wrapper = buildSubscriptionFieldsWrapper(application, List(field))
+
+          val apiSubscriptionStatus: APISubscriptionStatus = exampleSubscriptionWithFields("api1", 1).copy(fields = wrapper)
+          val subsData = List(apiSubscriptionStatus)
+
+          givenApplicationAction(ApplicationWithSubscriptionData(application, asSubscriptions(subsData), asFields(subsData)), loggedInDeveloper, subsData)
+
+          private val result =
+            addToken(manageSubscriptionController.editApiMetadataFieldPage(appId, ApiContext("/api1-api"), ApiVersion("1.0"), fieldName, SaveSubsFieldsPageMode.LeftHandNavigation))(
+              loggedInRequest
+            )
+
+          status(result) shouldBe OK
+          private val dom = Jsoup.parse(contentAsString(result))
+          dom.getElementById("meta-data-hint").html() shouldBe field.definition.description
         }
 
         "404 for invalid field name" in new ManageSubscriptionsSetup {
