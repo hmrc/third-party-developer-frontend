@@ -53,8 +53,7 @@ class ThirdPartyApplicationSubmissionsConnector @Inject() (
     val config: ThirdPartyApplicationSubmissionsConnector.Config,
     val metrics: ConnectorMetrics
 )(implicit val ec: ExecutionContext)
-    extends SubmissionsFrontendJsonFormatters
-    with ResponsibleIndividualVerificationFrontendJsonFormatters with Logging {
+    extends SubmissionsFrontendJsonFormatters {
 
   import ThirdPartyApplicationSubmissionsConnector._
   import config._
