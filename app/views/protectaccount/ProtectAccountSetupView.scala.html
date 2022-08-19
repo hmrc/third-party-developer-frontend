@@ -32,10 +32,9 @@
 ) {
   <h1 class="govuk-heading-l">Set up 2-step verification</h1>
   <ol class="govuk-list govuk-list--number">
-    <li>On your smartphone or tablet, download an authenticator app from your app store
+      <li>On your smartphone or tablet, download an authenticator app from your app store</li>
     <li>
       Using the app, scan this code
-    </li>
     <br />
     <img id="qrCode" alt="QR Code" src="@qrImg">
     <br />
@@ -48,6 +47,7 @@
         <p class="govuk-body-l govuk-!-font-weight-bold" id="secret">@secret</p>
       </div>
     </details>
+    </li>
     <li>Check the app for your 6 digit access code</li>
   </ol>
   <a id="submit" class="govuk-button" type="submit" href="@routes.ProtectAccount.getAccessCodePage()">Continue</a>

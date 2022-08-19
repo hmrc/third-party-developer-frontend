@@ -47,8 +47,7 @@ class ResponsibleIndividualVerificationService @Inject()(
           for {
             riVerificationWithDetails <- ET.fromEitherF(tpaConnector.responsibleIndividualAccept(code))
             riVerification             = riVerificationWithDetails.verification
-            ticket                     = createDeskproTicket(riVerificationWithDetails)
-            _                          = deskproConnector.createTicket(ticket)
+            _                          = sendDeskproTicket(riVerificationWithDetails)
           } yield riVerification
         )
         .value
@@ -62,13 +61,17 @@ class ResponsibleIndividualVerificationService @Inject()(
     }
   }
 
-  private def createDeskproTicket(riVerificationWithDetails: ResponsibleIndividualVerificationWithDetails) = {
+  private def sendDeskproTicket(riVerificationWithDetails: ResponsibleIndividualVerificationWithDetails)(implicit hc: HeaderCarrier) = {
+    val verification = riVerificationWithDetails.verification
+
+    // TODO - do not send deskpro ticket for new state (when new state is added)
+
     val name = riVerificationWithDetails.submitterName
     val email = riVerificationWithDetails.submitterEmail
-    val verification = riVerificationWithDetails.verification
     val appName = verification.applicationName
     val appId = verification.applicationId
 
-    DeskproTicket.createForRequestProductionCredentials(name, email, appName, appId)
+    val ticket = DeskproTicket.createForRequestProductionCredentials(name, email, appName, appId)
+    deskproConnector.createTicket(ticket)
   }
 }

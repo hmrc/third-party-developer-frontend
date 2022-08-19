@@ -120,7 +120,9 @@ object Mark {
   }
 }
 
-case class PossibleAnswer(value: String) extends AnyVal
+case class PossibleAnswer(value: String) extends AnyVal {
+  def htmlValue = value.replace(" ","-").filter(c => c.isLetterOrDigit || c == '-')
+}
 
 sealed trait ChoiceQuestion extends Question with LabelAndHints with ErrorMessaging {
   def choices: ListSet[PossibleAnswer]
