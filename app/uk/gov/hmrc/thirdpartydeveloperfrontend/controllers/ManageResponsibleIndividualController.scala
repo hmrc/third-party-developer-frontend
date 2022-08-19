@@ -18,6 +18,7 @@ package uk.gov.hmrc.thirdpartydeveloperfrontend.controllers
 
 import com.google.inject.{Inject, Singleton}
 import play.api.data.Form
+import play.api.data.Forms.{mapping, nonEmptyText}
 import play.api.libs.crypto.CookieSigner
 import play.api.mvc._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.config.{ApplicationConfig, ErrorHandler}

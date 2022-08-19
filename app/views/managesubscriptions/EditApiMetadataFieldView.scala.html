@@ -53,6 +53,8 @@
   @errorSummaryForFormErrors2(viewModel.errors)
 
   <span class="govuk-caption-l">@pageHeading</span>
+  <h1 class="govuk-heading-l" >@{viewModel.field.description}</h1>
+
   <br>
 
   @helper.form(
@@ -62,15 +64,7 @@
     @helper.CSRF.formField
 
     <div class="govuk-form-group @if(viewModel.field.errors.nonEmpty){form-group-error}">
-      <h1 class="govuk-label-wrapper">
-        <label class="govuk-label govuk-label--l" for="@{viewModel.field.name.value}">
-          @{viewModel.field.description}
-        </label>
-      </h1>
-      <div id="@{viewModel.field.name.value}-hint" class="govuk-hint">
-        @{viewModel.field.hint}
-      </div>
-
+      <span id="meta-data-hint" class="govuk-hint">@{viewModel.field.hint}</span>
       @fieldError2(viewModel.field.errors, viewModel.field.name.value)
       <input
         type="text"
@@ -78,7 +72,7 @@
         value="@{viewModel.field.value.value}"
         class="govuk-input input--medium @if(viewModel.field.errors.nonEmpty){form-control-error}"
         id="@{viewModel.field.name.value}"
-        aria-describedby="@{viewModel.field.name.value}-hint"
+        aria-describedby="meta-data-hint"
       />
     </div>
 
