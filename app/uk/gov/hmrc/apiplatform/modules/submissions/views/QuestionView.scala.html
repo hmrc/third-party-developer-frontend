@@ -197,15 +197,7 @@
         <label id="question-label" class="govuk-label" for="question-@{question.id.value}-id">
           @{question.label.get.value}
         </label>
-      } else {
-        <!-- Below is needed for accessibility, it is hidden visually -->
-        <h1 class="govuk-visually-hidden">
-          <label id="question-label" class="govuk-label govuk-label--l" for="question-@{question.id.value}-id">
-            @pageHeading
-          </label>
-        </h1>
       }
-
       @if(question.hintText.isDefined) {
         @renderHint(question.hintText.get)
         <input class="govuk-input" id="question-@{question.id.value}-id" name="answer" type="text" value="@actualValue" aria-describedby="non-bullet-statement-fragment-hint">
