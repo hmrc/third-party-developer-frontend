@@ -71,6 +71,9 @@ class AdminOnProductionAppEndpointScenarioSpec extends EndpointScenarioSpec
       case Endpoint("POST", "/applications/:id/add/subscription-configuration/:pageNumber") => Map("my_field" -> "my value")
       case Endpoint("POST", "/applications/:id/api-metadata/:context/:version/:saveSubsFieldsPageMode") => Map("my_field" -> "my value")
       case Endpoint("POST", "/applications/:id/api-metadata/:context/:version/fields/:fieldName/:saveSubsFieldsPageMode") => Map("my_field" -> "my value")
+      case Endpoint("POST", "/no-applications") => Map("choice" -> "use-apis")
+      case Endpoint("POST", "/applications/:id/change-api-subscriptions") => Map("ctx-1_0-subscribed" -> "true")
+      case Endpoint("POST", "/applications/:id/sell-resell-or-distribute-your-software") => Map("answer" -> "yes")
       case _ => Map.empty
     }
   }
@@ -165,6 +168,10 @@ class AdminOnProductionAppEndpointScenarioSpec extends EndpointScenarioSpec
     ExpectedResponseOverride(Endpoint("GET", "/applications/:id/check-your-answers/team/remove-confirmation/:teamMemberHash"), BadRequest()),
     ExpectedResponseOverride(Endpoint("POST", "/applications/:id/api-metadata/:context/:version/:saveSubsFieldsPageMode"), Redirect(s"/developer/applications/${applicationId.value}/api-metadata")),
     ExpectedResponseOverride(Endpoint("POST", "/applications/:id/api-metadata/:context/:version/fields/:fieldName/:saveSubsFieldsPageMode"), Redirect(s"/developer/applications/${applicationId.value}/api-metadata")),
+    ExpectedResponseOverride(Endpoint("POST", "/no-applications"), Redirect(s"/developer/no-applications-start")),
+    ExpectedResponseOverride(Endpoint("POST", "/applications/:id/confirm-subscriptions"), Redirect(s"/developer/submissions/application/${applicationId.value}/production-credentials-checklist")),
+    ExpectedResponseOverride(Endpoint("POST", "/applications/:id/change-api-subscriptions"), Redirect(s"/developer/applications/${applicationId.value}/confirm-subscriptions")),
+    ExpectedResponseOverride(Endpoint("POST", "/applications/:id/sell-resell-or-distribute-your-software"), Redirect(s"/developer/applications/${applicationId.value}/confirm-subscriptions")),
   )
 
 }

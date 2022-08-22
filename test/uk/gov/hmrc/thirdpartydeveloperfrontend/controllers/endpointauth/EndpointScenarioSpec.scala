@@ -54,6 +54,7 @@ abstract class EndpointScenarioSpec extends AsyncHmrcSpec with GuiceOneAppPerSui
       .overrides(bind[ApmConnector].toInstance(apmConnector))
       .overrides(bind[SandboxSubscriptionFieldsConnector].toInstance(sandboxSubsFieldsConnector))
       .overrides(bind[ProductionSubscriptionFieldsConnector].toInstance(productionSubsFieldsConnector))
+      .overrides(bind[ProductionPushPullNotificationsConnector].toInstance(productionPushPullNotificationsConnector))
       .in(Mode.Test)
       .build()
   }
@@ -160,10 +161,10 @@ abstract class EndpointScenarioSpec extends AsyncHmrcSpec with GuiceOneAppPerSui
     List(RequestValues(endpoint, pathParameterValues, queryParameterValues, bodyParameterValues))
   }
 
-  val row = "GET         /applications/:id/push-secrets                                                               uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.PushPullNotifications.showPushSecrets(id: ApplicationId)"
+  val row = "POST        /applications/:id/change-api-subscriptions                                                   uk.gov.hmrc.apiplatform.modules.uplift.controllers.UpliftJourneyController.saveApiSubscriptionsSubmit(id: ApplicationId)"
   s"test endpoints when ${describeScenario()}" should {
-//    Source.fromFile("conf/app.routes").getLines().flatMap(parseEndpoint).take(155).flatMap(populateRequestValues(_)).toSet foreach { requestValues: RequestValues =>
-      List(row).flatMap(parseEndpoint).flatMap(populateRequestValues(_)).toSet foreach { requestValues: RequestValues =>
+    Source.fromFile("conf/app.routes").getLines().flatMap(parseEndpoint).flatMap(populateRequestValues(_)).toSet foreach { requestValues: RequestValues =>
+//      List(row).flatMap(parseEndpoint).flatMap(populateRequestValues(_)).toSet foreach { requestValues: RequestValues =>
       val expectedResponse = expectedResponses.responseOverrides.filter(_.endpoint == requestValues.endpoint) match {
         case rules if rules.size == 1 => rules.head.expectedResponse
         case rules if rules.size > 1 => fail(s"Invalid rule configuration, ${rules.size} rules matched request $requestValues for scenario ${describeScenario()}")
