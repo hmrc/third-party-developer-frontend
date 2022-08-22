@@ -67,11 +67,11 @@ class ResponsibleIndividualVerificationService @Inject()(
 
     verification match {
       // Only send deskpro ticket for a ResponsibleIndividualVerification of type 'terms of use'
-      case ResponsibleIndividualToUVerification(_, _ ,_ ,_ ,_ ,_ ,_) => { 
+      case riv: ResponsibleIndividualToUVerification => { 
         val name = riVerificationWithDetails.submitterName
         val email = riVerificationWithDetails.submitterEmail
-        val appName = verification.applicationName
-        val appId = verification.applicationId
+        val appName = riv.applicationName
+        val appId = riv.applicationId
 
         val ticket = DeskproTicket.createForRequestProductionCredentials(name, email, appName, appId)
         deskproConnector.createTicket(ticket)
