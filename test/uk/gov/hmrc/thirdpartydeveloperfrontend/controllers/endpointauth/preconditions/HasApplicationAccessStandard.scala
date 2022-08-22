@@ -16,13 +16,10 @@
 
 package uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.endpointauth.preconditions
 
-import play.api.http.Status.OK
-import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.endpointauth.MockConnectors
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications._
 
-import scala.concurrent.Future
-
-trait PasswordResetSucceeds extends MockConnectors with HasUserData{
-  when(tpdConnector.fetchEmailForResetCode(*)(*)).thenReturn(Future.successful(userEmail))
-  when(tpdConnector.requestReset(*)(*)).thenReturn(Future.successful(OK))
-  when(tpdConnector.reset(*)(*)).thenReturn(Future.successful(OK))
+trait HasApplicationAccessStandard extends HasApplicationData {
+  lazy val access = Standard(List(redirectUrl), None, None, Set.empty, None, Some(ImportantSubmissionData(
+    None, ResponsibleIndividual.build("ri name", "ri@example.com"), Set.empty, TermsAndConditionsLocation.InDesktopSoftware, PrivacyPolicyLocation.InDesktopSoftware, List.empty
+  )))
 }

@@ -17,30 +17,16 @@
 package uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.endpointauth.preconditions
 
 import play.api.http.Status.OK
-import play.api.libs.crypto.CookieSigner
 import uk.gov.hmrc.thirdpartydeveloperfrontend.connectors.ThirdPartyDeveloperConnector.CoreUserDetails
 import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.endpointauth.MockConnectors
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.connectors.{TicketCreated, UserAuthenticationResponse}
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.{Developer, LoggedInState, Session, UserId}
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.emailpreferences.EmailPreferences
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.connectors.UserAuthenticationResponse
 
 import scala.concurrent.Future
 
-trait UserIsAuthenticated extends MockConnectors {
-  val sessionId = "my session"
-  val email = "admin@example.com"
-  val userId = UserId.random
-  val user = Developer(
-    userId, email, "Bob", "Admin", None, List.empty, EmailPreferences.noPreferences
-  )
-  val session = Session(sessionId, user, LoggedInState.LOGGED_IN)
-
+trait UserIsAuthenticated extends MockConnectors with HasSession {
   when(tpdConnector.authenticate(*)(*)).thenReturn(Future.successful(UserAuthenticationResponse(false, false, None, Some(session))))
   when(tpdConnector.fetchSession(eqTo(sessionId))(*)).thenReturn(Future.successful(session))
   when(tpdConnector.deleteSession(eqTo(sessionId))(*)).thenReturn(Future.successful(OK))
-  when(tpdConnector.findUserId(*)(*)).thenReturn(Future.successful(Some(CoreUserDetails(email, userId))))
+  when(tpdConnector.findUserId(*)(*)).thenReturn(Future.successful(Some(CoreUserDetails(userEmail, userId))))
   when(tpdConnector.authenticateTotp(*)(*)).thenReturn(Future.successful(session))
-  when(apmConnector.fetchUpliftableApiIdentifiers(*)).thenReturn(Future.successful(Set.empty))
-  when(apmConnector.fetchAllApis(*)(*)).thenReturn(Future.successful(Map.empty))
-
 }

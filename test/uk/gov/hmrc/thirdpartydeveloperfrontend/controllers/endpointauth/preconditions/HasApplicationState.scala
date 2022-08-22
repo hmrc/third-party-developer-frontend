@@ -18,6 +18,6 @@ package uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.endpointauth.precond
 
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.ApplicationState
 
-trait ApplicationHasState {
+trait HasApplicationState {
   def applicationState: ApplicationState
 }

@@ -17,26 +17,31 @@
 package uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.endpointauth
 
 import play.api.libs.crypto.CookieSigner
-import play.api.mvc.{AnyContent, AnyContentAsEmpty, Cookie, Request, Session}
-import play.api.test.{CSRFTokenHelper, FakeRequest}
+import play.api.mvc.Cookie
+import play.api.test.FakeRequest
 import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.endpointauth.preconditions._
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.{ApplicationId, ApplicationState}
+import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.endpointauth.preconditions.HasApplicationState
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.{ApplicationState, Collaborator, CollaboratorRole, Environment}
 
 class AdminOnProductionAppEndpointScenarioSpec extends EndpointScenarioSpec
   with UserIsAuthenticated
-  with UserIsAdminOnApplicationTeam
+  with UserIsOnApplicationTeam
+  with ApplicationDetailsAreAvailable
   with FlowRepoUpdateSucceeds
   with UserRegistrationFails
   with UserVerificationSucceeds
   with PasswordResetSucceeds
   with DeskproTicketCreationSucceeds
-  with AddTeamMemberSucceeds
+  with ApplicationUpliftSucceeds
   with ApplicationNameIsValid
   with ApplicationUpdateSucceeds
-  with ApplicationHasState {
+  with HasApplicationAccessStandard
+  with HasApplicationState {
   implicit val cookieSigner: CookieSigner = app.injector.instanceOf[CookieSigner]
 
+  def environment: Environment = Environment.PRODUCTION
   def applicationState: ApplicationState = ApplicationState.production("mr requester", "code123")
+  def collaborators: Set[Collaborator] = Set(Collaborator(userEmail, CollaboratorRole.ADMINISTRATOR, userId))
 
   override def updateRequestForScenario[T](request: FakeRequest[T]): FakeRequest[T] = { //TODO this belongs inside the UserIsAuthenticated trait
     request.withCookies(
@@ -46,36 +51,6 @@ class AdminOnProductionAppEndpointScenarioSpec extends EndpointScenarioSpec
       ("emailAddress" , user.email),
       ("nonce" , "123")
     )
-  }
-
-  override def getBodyParameterValueOverrides(endpoint: Endpoint): Map[String, String] = {
-    endpoint match {
-      case Endpoint("POST", "/applications/:id/check-your-answers/terms-and-conditions") => Map("hasUrl"-> "false")
-      case Endpoint("POST", "/applications/:id/team-members/add/:addTeamMemberPageMode") => Map("email"-> "new@example.com", "role" -> "developer")
-      case Endpoint("POST", "/applications/:id/team-members/remove") => Map("email"-> "new@example.com", "confirm" -> "yes")
-      case Endpoint("POST", "/applications/:id/details/change-app-name") => Map("applicationName"-> "new app name")
-      case Endpoint("POST", "/applications/:id/details/change-privacy-policy-location") => Map("privacyPolicyUrl" -> "http://example.com", "isInDesktop" -> "false", "isNewJourney" -> "true")
-      case Endpoint("POST", "/applications/:id/details/change-terms-conditions-location") => Map("termsAndConditionsUrl" -> "http://example.com", "isInDesktop" -> "false", "isNewJourney" -> "true")
-      case Endpoint("POST", "/applications/:id/redirect-uris/add") => Map("redirectUri" -> "https://example.com/redirect")
-      case Endpoint("POST", "/applications/:id/details/terms-of-use") => Map("termsOfUseAgreed" -> "true")
-      case Endpoint("POST", "/applications/:id/redirect-uris/change-confirmation") => Map("originalRedirectUri" -> "http://example.com", "newRedirectUri" -> "https://example.com/redirect")
-      case Endpoint("POST", "/applications/:id/redirect-uris/delete") => Map("redirectUri" -> "http://example.com", "deleteRedirectConfirm" -> "yes")
-      case Endpoint("POST", "/applications/:id/delete-principal") => Map("deleteConfirm" -> "yes")
-      case Endpoint("POST", "/applications/:id/ip-allowlist/add") => Map("ipAddress" -> "1.2.3.4/24")
-      case Endpoint("POST", "/applications/:id/ip-allowlist/change") => Map("confirm" -> "yes")
-      case Endpoint("POST", "/applications/:id/responsible-individual/change/self-or-other") => Map("who" -> "self")
-      case Endpoint("POST", "/applications/:id/responsible-individual/change/other") => Map("name" -> "mr responsible", "email" -> "ri@example.com")
-      case Endpoint("POST", "/applications/:id/change-subscription") => Map("subscribed" -> "true")
-      case Endpoint("POST", "/applications/:id/change-locked-subscription") => Map("subscribed" -> "true", "confirm" -> "true")
-      case Endpoint("POST", "/applications/:id/change-private-subscription") => Map("subscribed" -> "true", "confirm" -> "true")
-      case Endpoint("POST", "/applications/:id/add/subscription-configuration/:pageNumber") => Map("my_field" -> "my value")
-      case Endpoint("POST", "/applications/:id/api-metadata/:context/:version/:saveSubsFieldsPageMode") => Map("my_field" -> "my value")
-      case Endpoint("POST", "/applications/:id/api-metadata/:context/:version/fields/:fieldName/:saveSubsFieldsPageMode") => Map("my_field" -> "my value")
-      case Endpoint("POST", "/no-applications") => Map("choice" -> "use-apis")
-      case Endpoint("POST", "/applications/:id/change-api-subscriptions") => Map("ctx-1_0-subscribed" -> "true")
-      case Endpoint("POST", "/applications/:id/sell-resell-or-distribute-your-software") => Map("answer" -> "yes")
-      case _ => Map.empty
-    }
   }
 
   override def describeScenario(): String = "User is authenticated as an Admin on the application team and the application is in the Production state"

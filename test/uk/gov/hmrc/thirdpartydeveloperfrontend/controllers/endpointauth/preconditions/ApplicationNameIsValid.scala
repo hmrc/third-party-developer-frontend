@@ -19,9 +19,8 @@ package uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.endpointauth.precond
 import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.endpointauth.MockConnectors
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.{ApplicationId, Valid}
 
-
 import scala.concurrent.Future
 
-trait ApplicationNameIsValid extends MockConnectors {
-  when(tpaProductionConnector.validateName(*[String],*[Option[ApplicationId]])(*)).thenReturn(Future.successful(Valid))
+trait ApplicationNameIsValid extends MockConnectors with HasApplicationData {
+  when(tpaProductionConnector.validateName(*[String], *[Option[ApplicationId]])(*)).thenReturn(Future.successful(Valid))
 }

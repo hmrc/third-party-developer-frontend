@@ -23,10 +23,9 @@ import play.api.inject.guice.GuiceApplicationBuilder
 import play.api.test.Helpers.{redirectLocation, route, status}
 import play.api.test.{CSRFTokenHelper, FakeRequest, Writeables}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.connectors._
-import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.endpointauth.preconditions.HasApplicationId
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.{ApplicationId, Environment}
+import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.endpointauth.preconditions.{HasApplicationData, HasUserData}
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.Environment
 import uk.gov.hmrc.thirdpartydeveloperfrontend.repositories.FlowRepository
-import uk.gov.hmrc.thirdpartydeveloperfrontend.service.SubscriptionFieldsService.SubscriptionFieldsConnector
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.AsyncHmrcSpec
 
 import scala.io.Source
@@ -40,7 +39,7 @@ object EndpointScenarioSpec {
   }
 }
 
-abstract class EndpointScenarioSpec extends AsyncHmrcSpec with GuiceOneAppPerSuite with Writeables with MockConnectors with HasApplicationId {
+abstract class EndpointScenarioSpec extends AsyncHmrcSpec with GuiceOneAppPerSuite with Writeables with MockConnectors with HasApplicationData with HasUserData {
   import EndpointScenarioSpec._
 
   override def fakeApplication() = {
@@ -108,10 +107,10 @@ abstract class EndpointScenarioSpec extends AsyncHmrcSpec with GuiceOneAppPerSui
     "id" -> applicationId.value,
     "environment" -> Environment.PRODUCTION.entryName,
     "pageNumber" -> "1",
-    "context" -> "ctx",
-    "version" -> "1.0",
+    "context" -> apiContext.value,
+    "version" -> apiVersion.value,
     "saveSubsFieldsPageMode"-> "lefthandnavigation",
-    "fieldName"-> "my_field",
+    "fieldName"-> apiFieldName.value,
     "addTeamMemberPageMode" -> "applicationcheck",
     "teamMemberHash" -> "abc123",
     "file" -> "javascripts/loader.js",
@@ -120,11 +119,11 @@ abstract class EndpointScenarioSpec extends AsyncHmrcSpec with GuiceOneAppPerSui
 
   final def getQueryParameterValues(endpoint: Endpoint): Map[String,String] = {
     endpoint match {
-      case Endpoint("GET", "/applications/:id/change-locked-subscription") => Map("name" -> "my-api", "context" -> "ctx", "version" -> "1.0", "redirectTo" -> "http://example.com")
-      case Endpoint("POST", "/applications/:id/change-locked-subscription") => Map("name" -> "my-api", "context" -> "ctx", "version" -> "1.0", "redirectTo" -> "http://example.com")
-      case Endpoint("GET", "/applications/:id/change-private-subscription") => Map("name" -> "my-api", "context" -> "ctx", "version" -> "1.0", "redirectTo" -> "http://example.com")
-      case Endpoint("POST", "/applications/:id/change-private-subscription") => Map("name" -> "my-api", "context" -> "ctx", "version" -> "1.0", "redirectTo" -> "http://example.com")
-      case Endpoint("POST", "/applications/:id/change-subscription") => Map("context" -> "ctx", "version" -> "1.0", "redirectTo" -> "http://example.com")
+      case Endpoint("GET", "/applications/:id/change-locked-subscription") => Map("name" -> applicationName, "context" -> apiContext.value, "version" -> apiVersion.value, "redirectTo" -> redirectUrl)
+      case Endpoint("POST", "/applications/:id/change-locked-subscription") => Map("name" -> applicationName, "context" -> apiContext.value, "version" -> apiVersion.value, "redirectTo" -> redirectUrl)
+      case Endpoint("GET", "/applications/:id/change-private-subscription") => Map("name" -> applicationName, "context" -> apiContext.value, "version" -> apiVersion.value, "redirectTo" -> redirectUrl)
+      case Endpoint("POST", "/applications/:id/change-private-subscription") => Map("name" -> applicationName, "context" -> apiContext.value, "version" -> apiVersion.value, "redirectTo" -> redirectUrl)
+      case Endpoint("POST", "/applications/:id/change-subscription") => Map("context" -> apiContext.value, "version" -> apiVersion.value, "redirectTo" -> redirectUrl)
       case Endpoint("GET", "/applications/:id/ip-allowlist/remove") => Map("cidrBlock" -> "192.168.1.2/8")
       case Endpoint("POST", "/applications/:id/ip-allowlist/remove") => Map("cidrBlock" -> "192.168.1.2/8")
       case Endpoint("GET", "/verification") => Map("code" -> "CODE123")
@@ -137,12 +136,36 @@ abstract class EndpointScenarioSpec extends AsyncHmrcSpec with GuiceOneAppPerSui
 
   final def getBodyParameterValues(endpoint: Endpoint): Map[String,String] = {
     endpoint match {
-      case Endpoint("POST", "/registration") => Map("firstname" -> "Bob", "lastname" -> "Example", "emailaddress" -> "bob@example.com", "password" -> "S3curE-Pa$$w0rd!", "confirmpassword" -> "S3curE-Pa$$w0rd!")
-      case Endpoint("POST", "/login") => Map("emailaddress" -> "bob@example.com", "password" -> "letmein")
-      case Endpoint("POST", "/forgot-password") => Map("emailaddress" -> "user@example.com")
+      case Endpoint("POST", "/registration") => Map("firstname" -> userFirstName, "lastname" -> userLastName, "emailaddress" -> userEmail, "password" -> userPassword, "confirmpassword" -> userPassword)
+      case Endpoint("POST", "/login") => Map("emailaddress" -> userEmail, "password" -> userPassword)
+      case Endpoint("POST", "/forgot-password") => Map("emailaddress" -> userEmail)
       case Endpoint("POST", "/login-totp") => Map("accessCode" -> "123456", "rememberMe" -> "false")
-      case Endpoint("POST", "/reset-password") => Map("password" -> "S3curE-Pa$$w0rd!", "confirmpassword" -> "S3curE-Pa$$w0rd!")
-      case Endpoint("POST", "/support") => Map("fullname" -> "Bob Example", "emailaddress" -> "bob@example.com", "comments" -> "I am very cross about something")
+      case Endpoint("POST", "/reset-password") => Map("password" -> userPassword, "confirmpassword" -> userPassword)
+      case Endpoint("POST", "/support") => Map("fullname" -> s"$userFirstName $userLastName", "emailaddress" -> userEmail, "comments" -> "I am very cross about something")
+      case Endpoint("POST", "/applications/:id/check-your-answers/terms-and-conditions") => Map("hasUrl"-> "false")
+      case Endpoint("POST", "/applications/:id/team-members/add/:addTeamMemberPageMode") => Map("email"-> userEmail, "role" -> "developer")
+      case Endpoint("POST", "/applications/:id/team-members/remove") => Map("email"-> userEmail, "confirm" -> "yes")
+      case Endpoint("POST", "/applications/:id/details/change-app-name") => Map("applicationName"-> ("new " + applicationName))
+      case Endpoint("POST", "/applications/:id/details/change-privacy-policy-location") => Map("privacyPolicyUrl" -> "http://example.com", "isInDesktop" -> "false", "isNewJourney" -> "true")
+      case Endpoint("POST", "/applications/:id/details/change-terms-conditions-location") => Map("termsAndConditionsUrl" -> "http://example.com", "isInDesktop" -> "false", "isNewJourney" -> "true")
+      case Endpoint("POST", "/applications/:id/redirect-uris/add") => Map("redirectUri" -> "https://example.com/redirect")
+      case Endpoint("POST", "/applications/:id/details/terms-of-use") => Map("termsOfUseAgreed" -> "true")
+      case Endpoint("POST", "/applications/:id/redirect-uris/change-confirmation") => Map("originalRedirectUri" -> redirectUrl, "newRedirectUri" -> (redirectUrl + "-new"))
+      case Endpoint("POST", "/applications/:id/redirect-uris/delete") => Map("redirectUri" -> redirectUrl, "deleteRedirectConfirm" -> "yes")
+      case Endpoint("POST", "/applications/:id/delete-principal") => Map("deleteConfirm" -> "yes")
+      case Endpoint("POST", "/applications/:id/ip-allowlist/add") => Map("ipAddress" -> "1.2.3.4/24")
+      case Endpoint("POST", "/applications/:id/ip-allowlist/change") => Map("confirm" -> "yes")
+      case Endpoint("POST", "/applications/:id/responsible-individual/change/self-or-other") => Map("who" -> "self")
+      case Endpoint("POST", "/applications/:id/responsible-individual/change/other") => Map("name" -> "mr responsible", "email" -> "ri@example.com")
+      case Endpoint("POST", "/applications/:id/change-subscription") => Map("subscribed" -> "true")
+      case Endpoint("POST", "/applications/:id/change-locked-subscription") => Map("subscribed" -> "true", "confirm" -> "true")
+      case Endpoint("POST", "/applications/:id/change-private-subscription") => Map("subscribed" -> "true", "confirm" -> "true")
+      case Endpoint("POST", "/applications/:id/add/subscription-configuration/:pageNumber") => Map(apiFieldName.value -> apiFieldValue.value)
+      case Endpoint("POST", "/applications/:id/api-metadata/:context/:version/:saveSubsFieldsPageMode") => Map(apiFieldName.value -> apiFieldValue.value)
+      case Endpoint("POST", "/applications/:id/api-metadata/:context/:version/fields/:fieldName/:saveSubsFieldsPageMode") => Map(apiFieldName.value -> apiFieldValue.value)
+      case Endpoint("POST", "/no-applications") => Map("choice" -> "use-apis")
+      case Endpoint("POST", "/applications/:id/change-api-subscriptions") => Map("ctx-1_0-subscribed" -> "true")
+      case Endpoint("POST", "/applications/:id/sell-resell-or-distribute-your-software") => Map("answer" -> "yes")
       case _ => Map.empty
     }
   }
@@ -161,7 +184,7 @@ abstract class EndpointScenarioSpec extends AsyncHmrcSpec with GuiceOneAppPerSui
     List(RequestValues(endpoint, pathParameterValues, queryParameterValues, bodyParameterValues))
   }
 
-  val row = "POST        /applications/:id/change-api-subscriptions                                                   uk.gov.hmrc.apiplatform.modules.uplift.controllers.UpliftJourneyController.saveApiSubscriptionsSubmit(id: ApplicationId)"
+  val row = "GET         /applications/:id/sell-resell-or-distribute-your-software                                    uk.gov.hmrc.apiplatform.modules.uplift.controllers.UpliftJourneyController.sellResellOrDistributeYourSoftware(id: ApplicationId)"
   s"test endpoints when ${describeScenario()}" should {
     Source.fromFile("conf/app.routes").getLines().flatMap(parseEndpoint).flatMap(populateRequestValues(_)).toSet foreach { requestValues: RequestValues =>
 //      List(row).flatMap(parseEndpoint).flatMap(populateRequestValues(_)).toSet foreach { requestValues: RequestValues =>

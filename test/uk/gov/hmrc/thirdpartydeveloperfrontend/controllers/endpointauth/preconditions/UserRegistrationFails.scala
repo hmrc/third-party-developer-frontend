@@ -17,7 +17,7 @@
 package uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.endpointauth.preconditions
 
 import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.endpointauth.MockConnectors
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.{EmailAlreadyInUse, RegistrationSuccessful}
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.EmailAlreadyInUse
 
 import scala.concurrent.Future
 

@@ -16,14 +16,8 @@
 
 package uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.endpointauth.preconditions
 
-import play.api.http.Status.OK
-import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.endpointauth.MockConnectors
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.ApplicationId
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.connectors.AddTeamMemberRequest
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.RegistrationSuccessful
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.Environment
 
-import scala.concurrent.Future
-
-trait AddTeamMemberSucceeds extends MockConnectors {
-  when(apmConnector.addTeamMember(*[ApplicationId],*[AddTeamMemberRequest])(*)).thenReturn(Future.successful(OK))
+trait HasApplicationEnvironment {
+  def environment: Environment
 }
