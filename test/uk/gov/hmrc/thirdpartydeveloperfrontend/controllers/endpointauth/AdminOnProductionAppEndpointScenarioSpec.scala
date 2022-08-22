@@ -68,7 +68,9 @@ class AdminOnProductionAppEndpointScenarioSpec extends EndpointScenarioSpec
       case Endpoint("POST", "/applications/:id/change-subscription") => Map("subscribed" -> "true")
       case Endpoint("POST", "/applications/:id/change-locked-subscription") => Map("subscribed" -> "true", "confirm" -> "true")
       case Endpoint("POST", "/applications/:id/change-private-subscription") => Map("subscribed" -> "true", "confirm" -> "true")
-      case Endpoint("POST", "/applications/:id/request-check") => Map("apiSubscriptionsComplete" -> "true", "apiSubscriptionConfigurationsComplete" -> "true", "contactDetailsComplete" -> "true", "teamConfirmedComplete" -> "true", "confirmedNameComplete" -> "true", "providedPrivacyPolicyURLComplete" -> "true", "providedTermsAndConditionsURLComplete" -> "true", "termsOfUseAgreementComplete" -> "true")
+      case Endpoint("POST", "/applications/:id/add/subscription-configuration/:pageNumber") => Map("my_field" -> "my value")
+      case Endpoint("POST", "/applications/:id/api-metadata/:context/:version/:saveSubsFieldsPageMode") => Map("my_field" -> "my value")
+      case Endpoint("POST", "/applications/:id/api-metadata/:context/:version/fields/:fieldName/:saveSubsFieldsPageMode") => Map("my_field" -> "my value")
       case _ => Map.empty
     }
   }
@@ -120,6 +122,49 @@ class AdminOnProductionAppEndpointScenarioSpec extends EndpointScenarioSpec
     ExpectedResponseOverride(Endpoint("POST", "/applications/:id/change-subscription"), BadRequest()),
     ExpectedResponseOverride(Endpoint("POST", "/applications/:id/client-secret-new"), Redirect(s"/developer/applications/${applicationId.value}/client-secrets")),
     ExpectedResponseOverride(Endpoint("POST", "/applications/:id/client-secret/:clientSecretId/delete"), Redirect(s"/developer/applications/${applicationId.value}/client-secrets")),
+    ExpectedResponseOverride(Endpoint("GET", "/applications/:id/request-check"), BadRequest()),
+    ExpectedResponseOverride(Endpoint("POST", "/applications/:id/request-check"), BadRequest()),
+    ExpectedResponseOverride(Endpoint("GET", "/applications/:id/request-check/name"), BadRequest()),
+    ExpectedResponseOverride(Endpoint("POST", "/applications/:id/request-check/name"), BadRequest()),
+    ExpectedResponseOverride(Endpoint("GET", "/applications/:id/request-check/contact"), BadRequest()),
+    ExpectedResponseOverride(Endpoint("POST", "/applications/:id/request-check/contact"), BadRequest()),
+    ExpectedResponseOverride(Endpoint("GET", "/applications/:id/request-check/appDetails"), Redirect(s"/developer/applications/${applicationId.value}/request-check")),
+    ExpectedResponseOverride(Endpoint("GET", "/applications/:id/request-check/subscriptions"), BadRequest()),
+    ExpectedResponseOverride(Endpoint("POST", "/applications/:id/request-check/subscriptions"), BadRequest()),
+    ExpectedResponseOverride(Endpoint("GET", "/applications/:id/request-check/privacy-policy"), BadRequest()),
+    ExpectedResponseOverride(Endpoint("POST", "/applications/:id/request-check/privacy-policy"), BadRequest()),
+    ExpectedResponseOverride(Endpoint("GET", "/applications/:id/request-check/terms-and-conditions"), BadRequest()),
+    ExpectedResponseOverride(Endpoint("POST", "/applications/:id/request-check/terms-and-conditions"), BadRequest()),
+    ExpectedResponseOverride(Endpoint("GET", "/applications/:id/request-check/terms-of-use"), BadRequest()),
+    ExpectedResponseOverride(Endpoint("POST", "/applications/:id/request-check/terms-of-use"), BadRequest()),
+    ExpectedResponseOverride(Endpoint("GET", "/applications/:id/request-check/team"), BadRequest()),
+    ExpectedResponseOverride(Endpoint("POST", "/applications/:id/request-check/team"), BadRequest()),
+    ExpectedResponseOverride(Endpoint("GET", "/applications/:id/request-check/team/add"), BadRequest()),
+    ExpectedResponseOverride(Endpoint("POST", "/applications/:id/request-check/team/remove"), BadRequest()),
+    ExpectedResponseOverride(Endpoint("GET", "/applications/:id/request-check/team/remove-confirmation/:teamMemberHash"), BadRequest()),
+    ExpectedResponseOverride(Endpoint("POST", "/applications/:id/add/subscription-configuration/:pageNumber"), Redirect(s"/developer/applications/${applicationId.value}/add/subscription-configuration-step/1")),
+    ExpectedResponseOverride(Endpoint("GET", "/applications/:id/add/subscription-configuration-step/:pageNumber"), Redirect(s"/developer/applications/${applicationId.value}/request-check")),
+    ExpectedResponseOverride(Endpoint("GET", "/applications/:id/check-your-answers"), BadRequest()),
+    ExpectedResponseOverride(Endpoint("POST", "/applications/:id/check-your-answers"), BadRequest()),
+    ExpectedResponseOverride(Endpoint("GET", "/applications/:id/check-your-answers/name"), BadRequest()),
+    ExpectedResponseOverride(Endpoint("POST", "/applications/:id/check-your-answers/name"), BadRequest()),
+    ExpectedResponseOverride(Endpoint("GET", "/applications/:id/check-your-answers/subscriptions"), BadRequest()),
+    ExpectedResponseOverride(Endpoint("POST", "/applications/:id/check-your-answers/subscriptions"), BadRequest()),
+    ExpectedResponseOverride(Endpoint("GET", "/applications/:id/check-your-answers/privacy-policy"), BadRequest()),
+    ExpectedResponseOverride(Endpoint("POST", "/applications/:id/check-your-answers/privacy-policy"), BadRequest()),
+    ExpectedResponseOverride(Endpoint("GET", "/applications/:id/check-your-answers/contact"), BadRequest()),
+    ExpectedResponseOverride(Endpoint("POST", "/applications/:id/check-your-answers/contact"), BadRequest()),
+    ExpectedResponseOverride(Endpoint("GET", "/applications/:id/check-your-answers/terms-of-use"), BadRequest()),
+    ExpectedResponseOverride(Endpoint("POST", "/applications/:id/check-your-answers/terms-of-use"), BadRequest()),
+    ExpectedResponseOverride(Endpoint("GET", "/applications/:id/check-your-answers/terms-and-conditions"), BadRequest()),
+    ExpectedResponseOverride(Endpoint("POST", "/applications/:id/check-your-answers/terms-and-conditions"), BadRequest()),
+    ExpectedResponseOverride(Endpoint("POST", "/applications/:id/check-your-answers/team/remove"), BadRequest()),
+    ExpectedResponseOverride(Endpoint("GET", "/applications/:id/check-your-answers/team/add"), BadRequest()),
+    ExpectedResponseOverride(Endpoint("GET", "/applications/:id/check-your-answers/team"), BadRequest()),
+    ExpectedResponseOverride(Endpoint("POST", "/applications/:id/check-your-answers/team"), BadRequest()),
+    ExpectedResponseOverride(Endpoint("GET", "/applications/:id/check-your-answers/team/remove-confirmation/:teamMemberHash"), BadRequest()),
+    ExpectedResponseOverride(Endpoint("POST", "/applications/:id/api-metadata/:context/:version/:saveSubsFieldsPageMode"), Redirect(s"/developer/applications/${applicationId.value}/api-metadata")),
+    ExpectedResponseOverride(Endpoint("POST", "/applications/:id/api-metadata/:context/:version/fields/:fieldName/:saveSubsFieldsPageMode"), Redirect(s"/developer/applications/${applicationId.value}/api-metadata")),
   )
 
 }

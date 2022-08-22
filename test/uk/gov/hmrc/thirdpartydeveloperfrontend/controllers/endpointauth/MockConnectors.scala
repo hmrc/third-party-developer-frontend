@@ -17,8 +17,9 @@
 package uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.endpointauth
 
 import org.mockito.{ArgumentMatchersSugar, MockitoSugar}
-import uk.gov.hmrc.thirdpartydeveloperfrontend.connectors.{ApmConnector, DeskproConnector, ThirdPartyApplicationProductionConnector, ThirdPartyApplicationSandboxConnector, ThirdPartyDeveloperConnector}
+import uk.gov.hmrc.thirdpartydeveloperfrontend.connectors.{ApmConnector, DeskproConnector, ProductionPushPullNotificationsConnector, ProductionSubscriptionFieldsConnector, SandboxPushPullNotificationsConnector, SandboxSubscriptionFieldsConnector, ThirdPartyApplicationProductionConnector, ThirdPartyApplicationSandboxConnector, ThirdPartyDeveloperConnector}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.repositories.FlowRepository
+import uk.gov.hmrc.thirdpartydeveloperfrontend.service.SubscriptionFieldsService.SubscriptionFieldsConnector
 
 trait MockConnectors extends MockitoSugar with ArgumentMatchersSugar {
   val tpdConnector: ThirdPartyDeveloperConnector = mock[ThirdPartyDeveloperConnector]
@@ -27,4 +28,8 @@ trait MockConnectors extends MockitoSugar with ArgumentMatchersSugar {
   val deskproConnector: DeskproConnector = mock[DeskproConnector]
   val flowRepository: FlowRepository = mock[FlowRepository]
   val apmConnector: ApmConnector = mock[ApmConnector]
+  val sandboxSubsFieldsConnector: SandboxSubscriptionFieldsConnector = mock[SandboxSubscriptionFieldsConnector]
+  val productionSubsFieldsConnector: ProductionSubscriptionFieldsConnector = mock[ProductionSubscriptionFieldsConnector]
+  val sandboxPushPullNotificationsConnector: SandboxPushPullNotificationsConnector = mock[SandboxPushPullNotificationsConnector]
+  val productionPushPullNotificationsConnector: ProductionPushPullNotificationsConnector = mock[ProductionPushPullNotificationsConnector]
 }
