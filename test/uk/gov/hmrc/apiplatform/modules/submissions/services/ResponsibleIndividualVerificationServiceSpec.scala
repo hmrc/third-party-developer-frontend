@@ -29,7 +29,7 @@ import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.connectors.TicketCr
 import uk.gov.hmrc.apiplatform.modules.submissions.connectors.ThirdPartyApplicationSubmissionsConnector
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.connectors.DeskproTicket
 import org.mockito.captor.ArgCaptor
-import uk.gov.hmrc.apiplatform.modules.submissions.domain.models.{ResponsibleIndividualToUVerification, ResponsibleIndividualVerificationId, ResponsibleIndividualVerificationWithDetails, Submission, ResponsibleIndividualVerificationState}
+import uk.gov.hmrc.apiplatform.modules.submissions.domain.models.{ResponsibleIndividualToUVerification, ResponsibleIndividualUpdateVerification, ResponsibleIndividualVerificationId, ResponsibleIndividualVerificationWithDetails, Submission, ResponsibleIndividualVerificationState}
 import java.time.{LocalDateTime, ZoneOffset}
 
 class ResponsibleIndividualVerificationServiceSpec extends AsyncHmrcSpec 
@@ -87,6 +87,19 @@ class ResponsibleIndividualVerificationServiceSpec extends AsyncHmrcSpec
       deskproTicket.email shouldBe riVerificationWithDetails.submitterEmail
       deskproTicket.message should include (riVerification.applicationName)
       deskproTicket.referrer should include (s"/application/${riVerification.applicationId.value}/check-answers")
+    }
+
+    "successfully return a riVerification record for accept but don't create a deskpro ticket for an update" in new Setup {
+      val riUpdateVerification = ResponsibleIndividualUpdateVerification(ResponsibleIndividualVerificationId(code), ApplicationId.random, Submission.Id.random, 0, "App name", LocalDateTime.now(ZoneOffset.UTC), responsibleIndividual, ResponsibleIndividualVerificationState.INITIAL)
+      val riVerificationUpdateWithDetails = ResponsibleIndividualVerificationWithDetails(riUpdateVerification, responsibleIndividual, "Rick Deckard", "rick@submitter.com")
+
+      when(mockSubmissionsConnector.responsibleIndividualAccept(eqTo(code))(*)).thenReturn(successful(Right(riVerificationUpdateWithDetails)))
+      
+      val result = await(underTest.verifyResponsibleIndividual(code, true))
+      
+      result shouldBe 'Right
+      result.right.value shouldBe riUpdateVerification
+      verify(mockDeskproConnector, never).createTicket(*)(*)
     }
 
     "successfully return a riVerification record for decline" in new Setup {

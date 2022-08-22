@@ -25,6 +25,7 @@ import scala.concurrent.ExecutionContext
 import uk.gov.hmrc.apiplatform.modules.submissions.domain.models.{ErrorDetails, ResponsibleIndividualVerification, ResponsibleIndividualVerificationWithDetails}
 import uk.gov.hmrc.apiplatform.modules.common.services.EitherTHelper
 import uk.gov.hmrc.apiplatform.modules.submissions.connectors.ThirdPartyApplicationSubmissionsConnector
+import uk.gov.hmrc.apiplatform.modules.submissions.domain.models.ResponsibleIndividualToUVerification
 
 @Singleton
 class ResponsibleIndividualVerificationService @Inject()(
@@ -47,7 +48,7 @@ class ResponsibleIndividualVerificationService @Inject()(
           for {
             riVerificationWithDetails <- ET.fromEitherF(tpaConnector.responsibleIndividualAccept(code))
             riVerification             = riVerificationWithDetails.verification
-            _                          = sendDeskproTicket(riVerificationWithDetails)
+            _                          = sendDeskproTicketForTermsOfUse(riVerificationWithDetails)
           } yield riVerification
         )
         .value
@@ -61,17 +62,21 @@ class ResponsibleIndividualVerificationService @Inject()(
     }
   }
 
-  private def sendDeskproTicket(riVerificationWithDetails: ResponsibleIndividualVerificationWithDetails)(implicit hc: HeaderCarrier) = {
+  private def sendDeskproTicketForTermsOfUse(riVerificationWithDetails: ResponsibleIndividualVerificationWithDetails)(implicit hc: HeaderCarrier) = {
     val verification = riVerificationWithDetails.verification
 
-    // TODO - do not send deskpro ticket for new state (when new state is added)
+    verification match {
+      // Only send deskpro ticket for a ResponsibleIndividualVerification of type 'terms of use'
+      case ResponsibleIndividualToUVerification(_, _ ,_ ,_ ,_ ,_ ,_) => { 
+        val name = riVerificationWithDetails.submitterName
+        val email = riVerificationWithDetails.submitterEmail
+        val appName = verification.applicationName
+        val appId = verification.applicationId
 
-    val name = riVerificationWithDetails.submitterName
-    val email = riVerificationWithDetails.submitterEmail
-    val appName = verification.applicationName
-    val appId = verification.applicationId
-
-    val ticket = DeskproTicket.createForRequestProductionCredentials(name, email, appName, appId)
-    deskproConnector.createTicket(ticket)
+        val ticket = DeskproTicket.createForRequestProductionCredentials(name, email, appName, appId)
+        deskproConnector.createTicket(ticket)
+      }
+      case _ =>
+    }
   }
 }
