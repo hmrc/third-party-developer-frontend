@@ -200,14 +200,13 @@
       }
       @if(question.hintText.isDefined) {
         @renderHint(question.hintText.get)
-        <input class="govuk-input" id="question-@{question.id.value}-id" name="answer" type="text" value="@actualValue" aria-describedby="non-bullet-statement-fragment-hint">
       }
       @if(errorInfo.isDefined) {
-        <p id="question-error" class="govuk-error-message">
-          <span class="govuk-visually-hidden">Error:</span>@errorInfo.get.message
-        </p>
-        <input class="govuk-input" id="question-@{question.id.value}-id" name="answer" type="text" value="@actualValue">
+      <p id="question-error" class="govuk-error-message">
+        <span class="govuk-visually-hidden">Error:</span>@errorInfo.get.message
+      </p>
       }
+      <input class="govuk-input" id="question-@{question.id.value}-id" name="answer" type="text" value="@actualValue" aria-describedby="non-bullet-statement-fragment-hint">
     </div>
   }
 
