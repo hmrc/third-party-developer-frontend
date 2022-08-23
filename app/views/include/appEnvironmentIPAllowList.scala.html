@@ -1,0 +1,49 @@
+@*
+ * Copyright 2022 HM Revenue & Customs
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ *@
+
+@import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.Application
+
+@import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.apidefinitions.AccessType
+@(app: Application)(implicit appConfig: ApplicationConfig)
+@principalEnvName = @{appConfig.nameOfPrincipalEnvironment}
+@subordinateEnvName = @{appConfig.nameOfSubordinateEnvironment}
+@envName = @{ if(app.deployedTo.isProduction) {principalEnvName} else subordinateEnvName}
+
+@if(app.access.accessType.isNotStandard) {
+  <p class="govuk-body">This application is @applicationType() application.</p>
+}
+
+<div class="govuk-summary-list__row">
+    <dt class="govuk-summary-list__key">
+        Application name
+    </dt>
+    <dd class="govuk-summary-list__value">
+        @app.name
+    </dd>
+</div>
+<div class="govuk-summary-list__row">
+    <dt class="govuk-summary-list__key">
+        Environment
+    </dt>
+    <dd class="govuk-summary-list__value">
+        @envName
+    </dd>
+</div>
+
+@applicationType() = @{app.access.accessType match {
+  case AccessType.PRIVILEGED => "a privileged"
+  case _ => "an ROPC"
+}}

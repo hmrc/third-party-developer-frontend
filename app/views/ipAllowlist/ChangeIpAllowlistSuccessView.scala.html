@@ -39,40 +39,40 @@ implicit request: play.api.mvc.Request[Any], loggedIn: DeveloperSession, message
 ) {
 
   <div class="ip-allowlist">
-    <div class="govuk-box-highlight">
-      <h1 class="govuk-heading-l govuk-highlight-text ">
+    <div class="govuk-panel govuk-panel--confirmation">
+      <h1 class="govuk-panel__title">
         @if(app.ipAllowlist.allowlist.isEmpty) {
           Your IP allow list is active
         } else {
           IP allow list changes active
         }
       </h1>
-      <p class="govuk-body govuk-highlight-text ">
-        API requests can only be made from these IP addresses
-      </p>
+      <div class="govuk-panel__body">
+          API requests can only be made from these IP addresses
+      </div>
+      <div class="govuk-label--m">
+      </div>
     </div>
 
     <br>
 
-    @appEnvironment2(app)
-
     <br>
 
-    <table class="govuk-table narrow">
-      <caption class="govuk-visually-hidden">Change IP allow list table</caption>
-      <thead class="govuk-table__head">
-        <tr class="govuk-table__row">
-          <th scope="col" class="govuk-table__header">IP addresses</th>
-        </tr>
-      </thead>
-      <tbody class="govuk-table__body">
-        @for(ipRange <- ipAllowlistFlow.allowlist.toSeq.sorted) {
-          <tr class="govuk-table__row">
-            <td class="govuk-table__cell">@ipRange</td>
-          </tr>
-        }
-      </tbody>
-    </table>
+    <dl class="govuk-summary-list govuk-!-margin-bottom-9">
+        @appEnvironmentIPAllowList(app)
+        <div class="govuk-summary-list__row">
+            <dt class="govuk-summary-list__key">
+                Allowed IP addresses
+            </dt>
+            <dd class="govuk-summary-list__value">
+                <ul class="govuk-list">
+                    @for(ipRange <- ipAllowlistFlow.allowlist.toSeq.sorted) {
+                        <li>@ipRange</li>
+                    }
+                </ul>
+            </dd>
+        </div>
+      </dl>
 
     <br>
 
@@ -85,3 +85,4 @@ implicit request: play.api.mvc.Request[Any], loggedIn: DeveloperSession, message
     </p>
   </div>
 }
+
