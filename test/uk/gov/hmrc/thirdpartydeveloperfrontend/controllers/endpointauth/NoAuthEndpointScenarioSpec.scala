@@ -32,38 +32,35 @@ class NoAuthEndpointScenarioSpec extends EndpointScenarioSpec
 
   override def describeScenario(): String = "User is not authenticated"
 
-  override def expectedResponses(): ExpectedResponses = ExpectedResponses(
-    Redirect("/developer/login"),
-    ExpectedResponseOverride(Endpoint("GET", "/login"), Success()),
-    ExpectedResponseOverride(Endpoint("POST", "/login"), Unauthorized()),
-    ExpectedResponseOverride(Endpoint("GET", "/registration"), Success()),
-    ExpectedResponseOverride(Endpoint("POST", "/registration"), Redirect("/developer/confirmation")),
-    ExpectedResponseOverride(Endpoint("GET", "/login-totp"), Success()),
-    ExpectedResponseOverride(Endpoint("GET", "/application-verification"), Success()),
-    //TODO the request below triggers a deskpro ticket to be created (should unauth users be able to do this?) that requests 2SV removal for any account, seems wrong? do SDST verify that the correct user made the request?
-    ExpectedResponseOverride(Endpoint("GET", "/login/2SV-help"), Success()),
-    ExpectedResponseOverride(Endpoint("POST", "/login/2SV-help"), Success()),
-    ExpectedResponseOverride(Endpoint("GET", "/login/2SV-help/complete"), Success()),
-    ExpectedResponseOverride(Endpoint("GET", "/confirmation"), Success()),
-    ExpectedResponseOverride(Endpoint("GET", "/resend-confirmation"), Success()),
-    ExpectedResponseOverride(Endpoint("POST", "/confirmation"), Success()),
-    ExpectedResponseOverride(Endpoint("GET", "/support/submitted"), Success()),
-    ExpectedResponseOverride(Endpoint("GET", "/verification"), Success()),
-    ExpectedResponseOverride(Endpoint("GET", "/resend-verification"), BadRequest()),
-    ExpectedResponseOverride(Endpoint("GET", "/locked"), Locked()),
-    ExpectedResponseOverride(Endpoint("GET", "/reset-password"), Redirect("/developer/reset-password/error")),
-    ExpectedResponseOverride(Endpoint("GET", "/forgot-password"), Success()),
-    ExpectedResponseOverride(Endpoint("POST", "/forgot-password"), Success()),
-    ExpectedResponseOverride(Endpoint("GET", "/user-navlinks"), Success()),
-    ExpectedResponseOverride(Endpoint("GET", "/logout"), Success()),
-    ExpectedResponseOverride(Endpoint("GET", "/partials/terms-of-use"), Success()),
-    ExpectedResponseOverride(Endpoint("GET", "/reset-password-link"), Redirect("/developer/reset-password")),
-    ExpectedResponseOverride(Endpoint("GET", "/reset-password/error"), BadRequest()),
-    ExpectedResponseOverride(Endpoint("GET", "/support"), Success()),
-    ExpectedResponseOverride(Endpoint("POST", "/support"), Redirect("/developer/support/submitted")),
-    ExpectedResponseOverride(Endpoint("GET", "/assets/*file"), Success()),
-    ExpectedResponseOverride(Endpoint("POST", "/reset-password"), Error("java.lang.RuntimeException: email not found in session")),
-    ExpectedResponseOverride(Endpoint("POST", "/login-totp"), Error("java.util.NoSuchElementException: None.get"))
-  )
+  override def getExpectedResponse(endpoint: Endpoint): Response = {
+    endpoint match {
+      case Endpoint("GET",  "/login") => Success()
+      case Endpoint("POST", "/login") => Unauthorized()
+      case Endpoint(_,      "/registration") => getEndpointSuccessResponse(endpoint)
+      case Endpoint("GET",  "/login-totp") => Success()
+      case Endpoint("POST", "/login-totp") => Error("java.util.NoSuchElementException: None.get")
+      case Endpoint("GET",  "/application-verification") => Success()
+      //TODO the request below triggers a deskpro ticket to be created (should unauth users be able to do this?) that requests 2SV removal for any account, seems wrong? do SDST verify that the correct user made the request?
+      case Endpoint(_,      "/login/2SV-help") => Success()
+      case Endpoint("GET",  "/login/2SV-help/complete") => Success()
+      case Endpoint(_,      "/confirmation") => Success()
+      case Endpoint("GET",  "/resend-confirmation") => Success()
+      case Endpoint("GET",  "/support/submitted") => Success()
+      case Endpoint("GET",  "/verification") => Success()
+      case Endpoint("GET",  "/resend-verification") => BadRequest()
+      case Endpoint("GET",  "/locked") => Locked()
+      case Endpoint("GET",  "/reset-password") => Redirect("/developer/reset-password/error")
+      case Endpoint("POST", "/reset-password") => Error("java.lang.RuntimeException: email not found in session")
+      case Endpoint("GET",  "/reset-password-link") => Redirect("/developer/reset-password")
+      case Endpoint("GET",  "/reset-password/error") => BadRequest()
+      case Endpoint(_,      "/forgot-password") => Success()
+      case Endpoint("GET",  "/user-navlinks") => Success()
+      case Endpoint("GET",  "/logout") => Success()
+      case Endpoint("GET",  "/partials/terms-of-use") => Success()
+      case Endpoint(_,      "/support") => getEndpointSuccessResponse(endpoint)
+      case Endpoint("GET",  "/assets/*file") => Success()
+      case _ => Redirect("/developer/login")
+    }
+  }
 
 }

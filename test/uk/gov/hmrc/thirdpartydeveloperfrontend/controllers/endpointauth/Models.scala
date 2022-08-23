@@ -29,9 +29,6 @@ case class NotFound() extends Response
 case class Error(errorMsg: String) extends Response
 case class Unexpected(status: Int) extends Response
 
-case class ExpectedResponseOverride(endpoint: Endpoint, expectedResponse: Response)
-case class ExpectedResponses(defaultResponse: Response, responseOverrides: ExpectedResponseOverride*)
-
 case class RequestValues(endpoint: Endpoint, pathValues: Map[String,String] = Map.empty, queryParams: Map[String,String] = Map.empty, postBody: Map[String,String] = Map.empty) {
   override def toString() = {
     var path = endpoint.pathTemplate

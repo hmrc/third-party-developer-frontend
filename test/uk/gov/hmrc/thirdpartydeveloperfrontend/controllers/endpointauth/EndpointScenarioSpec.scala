@@ -76,7 +76,7 @@ abstract class EndpointScenarioSpec extends AsyncHmrcSpec with GuiceOneAppPerSui
 
   def describeScenario(): String
 
-  def expectedResponses(): ExpectedResponses
+  def getExpectedResponse(endpoint: Endpoint): Response
 
   def callEndpoint(requestValues: RequestValues): Response = {
     try {
@@ -170,6 +170,53 @@ abstract class EndpointScenarioSpec extends AsyncHmrcSpec with GuiceOneAppPerSui
     }
   }
 
+  def getEndpointSuccessResponse(endpoint: Endpoint): Response = {
+    endpoint match {
+      case Endpoint("POST", "/registration") => Redirect("/developer/confirmation")
+      case Endpoint("GET", "/resend-verification") => Redirect("/developer/confirmation")
+      case Endpoint("GET", "/login") => Redirect("/developer/applications")
+      case Endpoint("POST", "/login") => Redirect("/developer/login/2sv-recommendation")
+      case Endpoint("GET", "/login/2SV-help") => Redirect("/developer/applications")
+      case Endpoint("POST", "/login/2SV-help") => Redirect("/developer/applications")
+      case Endpoint("GET", "/login/2SV-help/complete") => Redirect("/developer/applications")
+      case Endpoint("POST", "/login-totp") => Redirect("/developer/applications")
+      case Endpoint("POST", "/logout/survey") => Redirect("/developer/logout")
+      case Endpoint("GET", "/locked") => Locked()
+      case Endpoint("GET", "/forgot-password") => Redirect("/developer/applications")
+      case Endpoint("GET", "/reset-password-link") => Redirect("/developer/reset-password")
+      case Endpoint("POST", "/support") => Redirect("/developer/support/submitted")
+      case Endpoint("POST", "/applications/:id/team-members/remove") => Redirect(s"/developer/applications/${applicationId.value}/team-members")
+      case Endpoint("GET", "/applications/:id/team-members/:teamMemberHash/remove-confirmation") => Redirect(s"/developer/applications/${applicationId.value}/team-members")
+      case Endpoint("POST", "/applications/:id/team-members/add/:addTeamMemberPageMode") => Redirect(s"/developer/applications/${applicationId.value}/request-check/team")
+      case Endpoint("POST", "/applications/:id/details/change-privacy-policy-location") => Redirect(s"/developer/applications/${applicationId.value}/details")
+      case Endpoint("POST", "/applications/:id/details/change-terms-conditions-location") => Redirect(s"/developer/applications/${applicationId.value}/details")
+      case Endpoint("POST", "/applications/:id/redirect-uris/delete-confirmation") => Redirect(s"/developer/applications/${applicationId.value}/redirect-uris")
+      case Endpoint("POST", "/applications/:id/details/terms-of-use") => Redirect(s"/developer/applications/${applicationId.value}/details")
+      case Endpoint("POST", "/applications/:id/redirect-uris/add") => Redirect(s"/developer/applications/${applicationId.value}/redirect-uris")
+      case Endpoint("POST", "/applications/:id/redirect-uris/delete") => Redirect(s"/developer/applications/${applicationId.value}/redirect-uris")
+      case Endpoint("POST", "/applications/:id/redirect-uris/change-confirmation") => Redirect(s"/developer/applications/${applicationId.value}/redirect-uris")
+      case Endpoint("POST", "/applications/:id/delete-principal") => Redirect(s"/developer/applications/${applicationId.value}/details")
+      case Endpoint("POST", "/applications/:id/ip-allowlist/change") => Redirect(s"/developer/applications/${applicationId.value}/ip-allowlist/activate")
+      case Endpoint("POST", "/applications/:id/ip-allowlist/add") => Redirect(s"/developer/applications/${applicationId.value}/ip-allowlist/change")
+      case Endpoint("POST", "/applications/:id/ip-allowlist/remove") => Redirect(s"/developer/applications/${applicationId.value}/ip-allowlist/setup")
+      case Endpoint("POST", "/applications/:id/responsible-individual/change/self-or-other") => Redirect(s"/developer/applications/${applicationId.value}/responsible-individual/change/self")
+      case Endpoint("POST", "/applications/:id/responsible-individual/change/self") => Redirect(s"/developer/applications/${applicationId.value}/responsible-individual/change/self/confirmed")
+      case Endpoint("POST", "/applications/:id/responsible-individual/change/other") => Redirect(s"/developer/applications/${applicationId.value}/responsible-individual/change/other/requested")
+      case Endpoint("POST", "/applications/:id/client-secret-new") => Redirect(s"/developer/applications/${applicationId.value}/client-secrets")
+      case Endpoint("POST", "/applications/:id/client-secret/:clientSecretId/delete") => Redirect(s"/developer/applications/${applicationId.value}/client-secrets")
+      case Endpoint("GET", "/applications/:id/request-check/appDetails") => Redirect(s"/developer/applications/${applicationId.value}/request-check")
+      case Endpoint("POST", "/applications/:id/add/subscription-configuration/:pageNumber") => Redirect(s"/developer/applications/${applicationId.value}/add/subscription-configuration-step/1")
+      case Endpoint("GET", "/applications/:id/add/subscription-configuration-step/:pageNumber") => Redirect(s"/developer/applications/${applicationId.value}/request-check")
+      case Endpoint("POST", "/applications/:id/api-metadata/:context/:version/:saveSubsFieldsPageMode") => Redirect(s"/developer/applications/${applicationId.value}/api-metadata")
+      case Endpoint("POST", "/applications/:id/api-metadata/:context/:version/fields/:fieldName/:saveSubsFieldsPageMode") => Redirect(s"/developer/applications/${applicationId.value}/api-metadata")
+      case Endpoint("POST", "/no-applications") => Redirect(s"/developer/no-applications-start")
+      case Endpoint("POST", "/applications/:id/confirm-subscriptions") => Redirect(s"/developer/submissions/application/${applicationId.value}/production-credentials-checklist")
+      case Endpoint("POST", "/applications/:id/change-api-subscriptions") => Redirect(s"/developer/applications/${applicationId.value}/confirm-subscriptions")
+      case Endpoint("POST", "/applications/:id/sell-resell-or-distribute-your-software") => Redirect(s"/developer/applications/${applicationId.value}/confirm-subscriptions")
+      case _ => Success()
+    }
+  }
+
   // Override these methods within scenarios classes
   def updateRequestForScenario[T](request: FakeRequest[T]): FakeRequest[T] = request
   def getPathParameterValueOverrides(endpoint: Endpoint) = Map.empty[String,String]
@@ -188,11 +235,8 @@ abstract class EndpointScenarioSpec extends AsyncHmrcSpec with GuiceOneAppPerSui
   s"test endpoints when ${describeScenario()}" should {
     Source.fromFile("conf/app.routes").getLines().flatMap(parseEndpoint).flatMap(populateRequestValues(_)).toSet foreach { requestValues: RequestValues =>
 //      List(row).flatMap(parseEndpoint).flatMap(populateRequestValues(_)).toSet foreach { requestValues: RequestValues =>
-      val expectedResponse = expectedResponses.responseOverrides.filter(_.endpoint == requestValues.endpoint) match {
-        case rules if rules.size == 1 => rules.head.expectedResponse
-        case rules if rules.size > 1 => fail(s"Invalid rule configuration, ${rules.size} rules matched request $requestValues for scenario ${describeScenario()}")
-        case _ => expectedResponses.defaultResponse
-      }
+
+      val expectedResponse = getExpectedResponse(requestValues.endpoint)
       s"give $expectedResponse for $requestValues" in {
         val result = callEndpoint(requestValues)
         result shouldBe expectedResponse

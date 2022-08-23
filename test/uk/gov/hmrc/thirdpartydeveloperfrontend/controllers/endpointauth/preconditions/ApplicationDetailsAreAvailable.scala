@@ -22,7 +22,7 @@ import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications._
 import java.time.LocalDateTime
 import scala.concurrent.Future
 
-trait ApplicationDetailsAreAvailable extends MockConnectors with UserIsAuthenticated with HasApplicationData {
+trait ApplicationDetailsAreAvailable extends MockConnectors with HasApplicationData {
   when(apmConnector.fetchApplicationById(*[ApplicationId])(*)).thenReturn(Future.successful(Some(appWithSubsData)))
   when(apmConnector.getAllFieldDefinitions(*[Environment])(*)).thenReturn(Future.successful(Map(apiContext -> Map(apiVersion -> subscriptionFieldDefinitions))))
   when(apmConnector.fetchAllOpenAccessApis(*[Environment])(*)).thenReturn(Future.successful(Map.empty))
