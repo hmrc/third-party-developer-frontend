@@ -38,31 +38,27 @@
 
   <h1 class="govuk-heading-l">Manage profile</h1>
 
-  <table class="govuk-table">
-    <caption class="govuk-visually-hidden">Manage profile table</caption>
-    <thead class="govuk-table__head">
-      <tr class="govuk-table__row">
-        <th scope="col" class="govuk-table__header govuk-!-width-one-third">Profile details</th>
-        <th scope="col" class="govuk-table__header govuk-!-width-three-quarters">
-          <a class="govuk-link govuk-link--no-visited-state govuk-!-font-weight-regular" style="float:right;" id="change" href="@controllers.profile.routes.Profile.changeProfile">Change <span class="govuk-visually-hidden">profile details</span></a>
-        </th>
-      </tr>
-    </thead>
-    <tbody class="govuk-table__body">
-      <tr class="govuk-table__row">
-        <th scope="row" class="govuk-table__header">Name</th>
-        <td class="govuk-table__cell" id="name">@{loggedIn.displayedName}</td>
-      </tr>
-      <tr class="govuk-table__row">
-        <th scope="row" class="govuk-table__header">Email address</th>
-        <td class="govuk-table__cell" id="emailAddress">@{loggedIn.email}</td>
-      </tr>
-      <tr class="govuk-table__row">
-        <th scope="row" class="govuk-table__header">Organisation</th>
-        <td class="govuk-table__cell" id="organisation">@(loggedIn.developer.organisation.getOrElse("None"))</td>
-      </tr>
-    </tbody>
-  </table>
+  <h2 class="govuk-heading-s">Profile details</h2>
+  <dl class="govuk-summary-list">
+    <div class="govuk-summary-list__row">
+        <dt class="govuk-summary-list__key">Name</dt>
+        <dd class="govuk-summary-list__value">@{loggedIn.displayedName}</dd>
+        <dd class="govuk-summary-list__actions"><a class="govuk-link" href="/developer/profile/change">Change<span class="govuk-visually-hidden">name</span></a>
+        </dd>
+    </div>
+    <div class="govuk-summary-list__row">
+        <dt class="govuk-summary-list__key">Email address</dt>
+        <dd class="govuk-summary-list__value">@{loggedIn.email}</dd>
+        <dd class="govuk-summary-list__actions"><a class="govuk-link" href="/developer/profile/change">Change<span class="govuk-visually-hidden">date of birth</span></a>
+        </dd>
+    </div>
+    <div class="govuk-summary-list__row">
+        <dt class="govuk-summary-list__key">Organisation</dt>
+        <dd class="govuk-summary-list__value">@(loggedIn.developer.organisation.getOrElse("None"))</dd>
+        <dd class="govuk-summary-list__actions"><a class="govuk-link" href="/developer/profile/change">Change<span class="govuk-visually-hidden"> address</span></a>
+        </dd>
+    </div>
+  </dl>
 
   <h2 class="govuk-heading-m">Delete account</h2>
   <p class="govuk-body">
