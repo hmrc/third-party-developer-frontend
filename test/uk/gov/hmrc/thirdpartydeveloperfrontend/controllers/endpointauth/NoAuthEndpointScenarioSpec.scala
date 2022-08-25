@@ -15,22 +15,13 @@
  */
 
 package uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.endpointauth
-import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.endpointauth.preconditions.{DeskproTicketCreationSucceeds, HasApplicationAccessStandardWithSubmissionData, IsNewJourneyApplication, NoUserIdFoundForEmailAddressValue, PasswordResetSucceeds, UserRegistrationSucceeds, UserVerificationSucceeds}
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.{ApplicationState, Collaborator, CollaboratorRole, Environment}
 
 class NoAuthEndpointScenarioSpec extends EndpointScenarioSpec
-    with IsNewJourneyApplication
-    with NoUserIdFoundForEmailAddressValue
-    with DeskproTicketCreationSucceeds
-    with UserVerificationSucceeds
-    with PasswordResetSucceeds
-    with UserRegistrationSucceeds {
-
-  def environment: Environment = Environment.PRODUCTION
-  def applicationState: ApplicationState = ApplicationState.production("mr requester", "code123")
-  def collaborators: Set[Collaborator] = Set(Collaborator(userEmail, CollaboratorRole.ADMINISTRATOR, userId))
-
-  override def describeScenario(): String = "User is not authenticated"
+    with IsNewJourneyStandardApplication
+    with UserIsAdmin
+    with AppDeployedToProductionEnvironment
+    with AppHasProductionStatus
+    with UserIsNotAuthenticated {
 
   override def getExpectedResponse(endpoint: Endpoint): Response = {
     endpoint match {
