@@ -16,19 +16,4 @@
 
 package uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.endpointauth.preconditions
 
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.{Developer, UserId}
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.emailpreferences.EmailPreferences
-
-trait HasUserData {
-  lazy val userEmail = "user@example.com"
-  lazy val userId = UserId.random
-  lazy val userFirstName = "Bob"
-  lazy val userLastName = "Example"
-  lazy val userFullName = s"$userFirstName $userLastName"
-  lazy val userPhone = "01611234567"
-  lazy val userPassword = "S3curE-Pa$$w0rd!"
-  lazy val user = Developer(
-    userId, userEmail, userFirstName, userLastName, None, List.empty, EmailPreferences.noPreferences
-  )
-
-}
+trait IsNewJourneyApplication extends HasNoCheckInformation with HasApplicationAccessStandardWithSubmissionData

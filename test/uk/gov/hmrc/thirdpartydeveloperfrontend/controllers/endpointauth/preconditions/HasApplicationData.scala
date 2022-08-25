@@ -25,13 +25,13 @@ import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.subscriptions._
 
 import java.time.{LocalDateTime, Period}
 
-trait HasApplicationData extends HasApplicationState with HasApplicationEnvironment with HasApplicationCollaborators with HasApplicationAccess {
+trait HasApplicationData extends HasApplicationState with HasApplicationEnvironment with HasApplicationCollaborators with HasApplicationAccess with HasCheckInformationOrNot {
   lazy val applicationId = ApplicationId.random
   lazy val applicationName = "my app"
 
   lazy val application = Application(
     applicationId, ClientId.random, applicationName, LocalDateTime.of(2020, 1, 1, 0, 0, 0), None, None, Period.ofYears(1), environment, None, collaborators, access,
-    applicationState, None, IpAllowlist(false, Set.empty)
+    applicationState, checkInformation, IpAllowlist(false, Set.empty)
   )
 
   lazy val redirectUrl = "https://example.com/redirect-here"
@@ -50,6 +50,6 @@ trait HasApplicationData extends HasApplicationState with HasApplicationEnvironm
     apiPpnsFieldName -> SubscriptionFieldDefinition(apiPpnsFieldName, "field desc", "field short desc", "hint", "PPNSField", AccessRequirements.Default)
   )
   lazy val allPossibleSubscriptions = Map(
-    apiContext -> ApiData("service name", "api name", true, Map(apiVersion -> VersionData(STABLE, APIAccess(PUBLIC))), List(ApiCategory("category")))
+    apiContext -> ApiData("service name", "api name", false, Map(apiVersion -> VersionData(STABLE, APIAccess(PUBLIC))), List(ApiCategory("category")))
   )
 }

@@ -15,15 +15,15 @@
  */
 
 package uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.endpointauth
-import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.endpointauth.preconditions.{DeskproTicketCreationSucceeds, HasApplicationAccessStandard, NoUserIdFoundForEmailAddressValue, PasswordResetSucceeds, UserRegistrationSucceeds, UserVerificationSucceeds}
+import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.endpointauth.preconditions.{DeskproTicketCreationSucceeds, HasApplicationAccessStandardWithSubmissionData, IsNewJourneyApplication, NoUserIdFoundForEmailAddressValue, PasswordResetSucceeds, UserRegistrationSucceeds, UserVerificationSucceeds}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.{ApplicationState, Collaborator, CollaboratorRole, Environment}
 
 class NoAuthEndpointScenarioSpec extends EndpointScenarioSpec
+    with IsNewJourneyApplication
     with NoUserIdFoundForEmailAddressValue
     with DeskproTicketCreationSucceeds
     with UserVerificationSucceeds
     with PasswordResetSucceeds
-    with HasApplicationAccessStandard
     with UserRegistrationSucceeds {
 
   def environment: Environment = Environment.PRODUCTION

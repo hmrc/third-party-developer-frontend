@@ -1,0 +1,126 @@
+/*
+ * Copyright 2022 HM Revenue & Customs
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+package uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.endpointauth
+
+import play.api.libs.crypto.CookieSigner
+import play.api.mvc.Cookie
+import play.api.test.FakeRequest
+import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.endpointauth.preconditions._
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.{ApplicationState, Collaborator, CollaboratorRole, Environment}
+
+class AdminOnSandboxAppEndpointScenarioSpec extends EndpointScenarioSpec
+//  with IsNewJourneyApplication //TODO
+  with IsOldJourneyApplication //TODO
+  with UserIsAuthenticated
+  with UserIsOnApplicationTeam
+  with ApplicationDetailsAreAvailable
+  with FlowRepoUpdateSucceeds
+  with UserRegistrationFails
+  with UserVerificationSucceeds
+  with PasswordResetSucceeds
+  with DeskproTicketCreationSucceeds
+  with ApplicationUpliftSucceeds
+  with ApplicationNameIsValid
+  with ApplicationUpdateSucceeds
+  with HasApplicationState {
+  implicit val cookieSigner: CookieSigner = app.injector.instanceOf[CookieSigner]
+
+  def environment: Environment = Environment.SANDBOX
+  def applicationState: ApplicationState = ApplicationState.testing //ApplicationState.production("user@example.com", "code")
+  def collaborators: Set[Collaborator] = Set(Collaborator(userEmail, CollaboratorRole.ADMINISTRATOR, userId))
+
+  override def updateRequestForScenario[T](request: FakeRequest[T]): FakeRequest[T] = { //TODO this belongs inside the UserIsAuthenticated trait
+    request.withCookies(
+      Cookie("PLAY2AUTH_SESS_ID", cookieSigner.sign(sessionId) + sessionId, None, "path", None, false, false)
+    ).withSession(
+      ("email" , user.email),
+      ("emailAddress" , user.email),
+      ("nonce" , "123")
+    )
+  }
+
+  override def describeScenario(): String = "User is authenticated as an Admin on the application team and the application is in the Production state"
+
+  override def getExpectedResponse(endpoint: Endpoint): Response = {
+    endpoint match {
+      case Endpoint("GET", "/applications") => Success()
+      case Endpoint("GET", "/applications/:id/add/subscription-configuration-step/:pageNumber") => Redirect(s"/developer/applications/${applicationId.value}/add/success")
+      case Endpoint("GET", "/applications/:id/add/success") => Redirect(s"/developer/profile/email-preferences/apis-from-subscriptions?context=${applicationId.value}")
+      case Endpoint("GET", "/applications/:id/change-locked-subscription") => BadRequest()
+      case Endpoint("POST", "/applications/:id/change-locked-subscription") => BadRequest()
+
+      case Endpoint("GET", "/applications/:id/client-id") => BadRequest()
+      case Endpoint("POST", "/applications/:id/client-secret-new") => BadRequest()
+      case Endpoint("GET", "/applications/:id/client-secret/:clientSecretId/delete") => BadRequest()
+      case Endpoint("POST", "/applications/:id/client-secret/:clientSecretId/delete") => BadRequest()
+      case Endpoint("GET", "/applications/:id/client-secrets") => BadRequest()
+      case Endpoint("POST", "/applications/:id/confirm-subscriptions") => Redirect(s"/developer/submissions/application/${applicationId.value}/production-credentials-checklist")
+      case Endpoint("GET", "/applications/:id/credentials") => NotFound()
+      case Endpoint("GET", "/applications/:id/delete") => NotFound()
+      case Endpoint("POST", "/applications/:id/delete-principal") => NotFound()
+      case Endpoint("GET", "/applications/:id/delete-principal-confirm") => NotFound()
+      case Endpoint("POST", "/applications/:id/delete-subordinate") => NotFound()
+      case Endpoint("GET", "/applications/:id/delete-subordinate-confirm") => NotFound()
+      case Endpoint("GET", "/applications/:id/details") => Redirect(s"/developer/applications/${applicationId.value}/request-check")
+      case Endpoint("GET", "/applications/:id/details/change") => NotFound()
+      case Endpoint("POST", "/applications/:id/details/change") => NotFound()
+      case Endpoint("GET", "/applications/:id/details/change-app-name") => Forbidden()
+      case Endpoint("POST", "/applications/:id/details/change-app-name") => Forbidden()
+      case Endpoint(_, "/applications/:id/details/change-privacy-policy-location") => Forbidden()
+      case Endpoint(_, "/applications/:id/details/change-terms-conditions-location") => Forbidden()
+      case Endpoint(_, "/applications/:id/details/terms-of-use") => NotFound()
+      case Endpoint("GET", "/applications/:id/ip-allowlist") => NotFound()
+      case Endpoint("GET", "/applications/:id/ip-allowlist/activate") => NotFound()
+      case Endpoint("POST", "/applications/:id/ip-allowlist/activate") => NotFound()
+      case Endpoint("GET", "/applications/:id/ip-allowlist/add") => NotFound()
+      case Endpoint("POST", "/applications/:id/ip-allowlist/add") => NotFound()
+      case Endpoint("GET", "/applications/:id/ip-allowlist/allowed-ips") => NotFound()
+      case Endpoint("GET", "/applications/:id/ip-allowlist/change") => NotFound()
+      case Endpoint("POST", "/applications/:id/ip-allowlist/change") => NotFound()
+      case Endpoint("GET", "/applications/:id/ip-allowlist/deactivate") => NotFound()
+      case Endpoint("POST", "/applications/:id/ip-allowlist/deactivate") => NotFound()
+      case Endpoint("GET", "/applications/:id/ip-allowlist/remove") => NotFound()
+      case Endpoint("POST", "/applications/:id/ip-allowlist/remove") => NotFound()
+      case Endpoint("GET", "/applications/:id/ip-allowlist/setup") => NotFound()
+      case Endpoint("GET", "/applications/:id/push-secrets") => NotFound()
+      case Endpoint("GET", "/applications/:id/redirect-uris") => NotFound()
+      case Endpoint("GET", "/applications/:id/redirect-uris/add") => NotFound()
+      case Endpoint("POST", "/applications/:id/redirect-uris/add") => NotFound()
+      case Endpoint("POST", "/applications/:id/redirect-uris/change") => NotFound()
+      case Endpoint("POST", "/applications/:id/redirect-uris/change-confirmation") => NotFound()
+      case Endpoint("POST", "/applications/:id/redirect-uris/delete") => NotFound()
+      case Endpoint("POST", "/applications/:id/redirect-uris/delete-confirmation") => NotFound()
+
+      case Endpoint(_, path) if path.startsWith("/applications/:id/responsible-individual") => BadRequest()
+      case Endpoint("GET", "/applications/:id/server-token") => BadRequest()
+      case Endpoint("GET", "/applications/:id/team-members") => NotFound()
+      case Endpoint("GET", "/applications/:id/team-members/:teamMemberHash/remove-confirmation") => NotFound()
+      case Endpoint("GET", "/applications/:id/team-members/add") => NotFound()
+      case Endpoint("POST", "/applications/:id/team-members/remove") => NotFound()
+      case Endpoint("GET", "/applications/add/:id") => BadRequest()
+      case Endpoint("GET", "/applications/add/production") => BadRequest()
+      case Endpoint("GET", "/applications/add/switch") => BadRequest()
+      case Endpoint("POST", "/applications/add/switch") => BadRequest()
+      case Endpoint("POST", "/registration") => BadRequest()
+      case Endpoint("GET", "/registration") => Redirect("/developer/applications")
+      case Endpoint("GET", "/reset-password/error") => BadRequest()
+
+      case _ => getEndpointSuccessResponse(endpoint)
+    }
+  }
+
+}

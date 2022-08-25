@@ -24,6 +24,7 @@ import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.endpointauth.precondi
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.{ApplicationState, Collaborator, CollaboratorRole, Environment}
 
 class AdminOnProductionAppEndpointScenarioSpec extends EndpointScenarioSpec
+  with IsNewJourneyApplication
   with UserIsAuthenticated
   with UserIsOnApplicationTeam
   with ApplicationDetailsAreAvailable
@@ -35,7 +36,6 @@ class AdminOnProductionAppEndpointScenarioSpec extends EndpointScenarioSpec
   with ApplicationUpliftSucceeds
   with ApplicationNameIsValid
   with ApplicationUpdateSucceeds
-  with HasApplicationAccessStandard
   with HasApplicationState {
   implicit val cookieSigner: CookieSigner = app.injector.instanceOf[CookieSigner]
 
@@ -67,8 +67,8 @@ class AdminOnProductionAppEndpointScenarioSpec extends EndpointScenarioSpec
       case Endpoint(_,      "/applications/:id/details/change") => Forbidden()
       case Endpoint("POST", "/applications/:id/change-subscription") => BadRequest()
       case Endpoint("GET",  "/applications/:id/request-check/appDetails") => getEndpointSuccessResponse(endpoint)
-      case Endpoint("GET",  "/applications/:id/request-check/submitted") => getEndpointSuccessResponse(endpoint)
       case Endpoint(_, path) if path.startsWith("/applications/:id/request-check") => BadRequest()
+      case Endpoint("GET",  "/applications/:id/request-check/submitted") => getEndpointSuccessResponse(endpoint)
       case Endpoint(_, path) if path.startsWith("/applications/:id/check-your-answers") => BadRequest()
       case Endpoint("POST", "/applications/:id/delete-subordinate") => Error("uk.gov.hmrc.http.ForbiddenException: Only standard subordinate applications can be deleted by admins")
       case _ => getEndpointSuccessResponse(endpoint)

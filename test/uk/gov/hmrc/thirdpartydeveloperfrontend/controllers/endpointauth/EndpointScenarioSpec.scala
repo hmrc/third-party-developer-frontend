@@ -112,7 +112,7 @@ abstract class EndpointScenarioSpec extends AsyncHmrcSpec with GuiceOneAppPerSui
     "saveSubsFieldsPageMode"-> "lefthandnavigation",
     "fieldName"-> apiFieldName.value,
     "addTeamMemberPageMode" -> "applicationcheck",
-    "teamMemberHash" -> "abc123",
+    "teamMemberHash" -> "b4c9a289323b21a01c3e940f150eb9b8c542587f1abfd8f0e1cc1ffc5e475514",
     "file" -> "javascripts/loader.js",
     "clientSecretId" -> "s1id"
   )
@@ -141,8 +141,8 @@ abstract class EndpointScenarioSpec extends AsyncHmrcSpec with GuiceOneAppPerSui
       case Endpoint("POST", "/forgot-password") => Map("emailaddress" -> userEmail)
       case Endpoint("POST", "/login-totp") => Map("accessCode" -> "123456", "rememberMe" -> "false")
       case Endpoint("POST", "/reset-password") => Map("password" -> userPassword, "confirmpassword" -> userPassword)
-      case Endpoint("POST", "/support") => Map("fullname" -> s"$userFirstName $userLastName", "emailaddress" -> userEmail, "comments" -> "I am very cross about something")
-      case Endpoint("POST", "/applications/:id/check-your-answers/terms-and-conditions") => Map("hasUrl"-> "false")
+      case Endpoint("POST", "/support") => Map("fullname" -> userFullName, "emailaddress" -> userEmail, "comments" -> "I am very cross about something")
+      case Endpoint("POST", "/applications/:id/check-your-answers/terms-and-conditions") => Map("hasUrl" -> "true", "termsAndConditionsURL" -> "https://example.com/tcs")
       case Endpoint("POST", "/applications/:id/team-members/add/:addTeamMemberPageMode") => Map("email"-> userEmail, "role" -> "developer")
       case Endpoint("POST", "/applications/:id/team-members/remove") => Map("email"-> userEmail, "confirm" -> "yes")
       case Endpoint("POST", "/applications/:id/details/change-app-name") => Map("applicationName"-> ("new " + applicationName))
@@ -166,6 +166,19 @@ abstract class EndpointScenarioSpec extends AsyncHmrcSpec with GuiceOneAppPerSui
       case Endpoint("POST", "/no-applications") => Map("choice" -> "use-apis")
       case Endpoint("POST", "/applications/:id/change-api-subscriptions") => Map("ctx-1_0-subscribed" -> "true")
       case Endpoint("POST", "/applications/:id/sell-resell-or-distribute-your-software") => Map("answer" -> "yes")
+      case Endpoint("POST", "/applications/:id/request-check") => Map()
+      case Endpoint("POST", "/applications/:id/request-check/terms-and-conditions") => Map("hasUrl" -> "true", "termsAndConditionsURL" -> "https://example.com/tcs")
+      case Endpoint("POST", "/applications/:id/check-your-answers/contact") => Map("fullname" -> userFullName, "email" -> userEmail, "telephone" -> userPhone)
+      case Endpoint("POST", "/applications/:id/check-your-answers/name") => Map("applicationName" -> applicationName)
+      case Endpoint("POST", "/applications/:id/check-your-answers/privacy-policy") => Map("hasUrl" -> "true", "privacyPolicyURL" -> "https://example.com/priv")
+      case Endpoint("POST", "/applications/:id/check-your-answers/subscriptions") => Map()
+      case Endpoint("POST", "/applications/:id/check-your-answers/team/remove") => Map("email" -> userEmail)
+      case Endpoint("POST", "/applications/:id/check-your-answers/terms-of-use") => Map("termsOfUseAgreed" -> "true")
+      case Endpoint("POST", "/applications/:id/request-check/contact") => Map("fullname" -> userFullName, "email" -> userEmail, "telephone" -> userPhone)
+      case Endpoint("POST", "/applications/:id/request-check/name") => Map("applicationName" -> applicationName)
+      case Endpoint("POST", "/applications/:id/request-check/privacy-policy") => Map("hasUrl" -> "true", "privacyPolicyURL" -> "https://example.com/priv")
+      case Endpoint("POST", "/applications/:id/request-check/team/remove") => Map("email" -> userEmail)
+      case Endpoint("POST", "/applications/:id/request-check/terms-of-use") => Map("termsOfUseAgreed" -> "true")
       case _ => Map.empty
     }
   }
@@ -213,6 +226,27 @@ abstract class EndpointScenarioSpec extends AsyncHmrcSpec with GuiceOneAppPerSui
       case Endpoint("POST", "/applications/:id/confirm-subscriptions") => Redirect(s"/developer/submissions/application/${applicationId.value}/production-credentials-checklist")
       case Endpoint("POST", "/applications/:id/change-api-subscriptions") => Redirect(s"/developer/applications/${applicationId.value}/confirm-subscriptions")
       case Endpoint("POST", "/applications/:id/sell-resell-or-distribute-your-software") => Redirect(s"/developer/applications/${applicationId.value}/confirm-subscriptions")
+      case Endpoint("POST", "/applications/:id/change-subscription") => Redirect(s"/developer/applications/${applicationId.value}/details")
+      case Endpoint("GET", path) if path.startsWith("/applications/:id/check-your-answers") => Success()
+      case Endpoint("GET", path) if path.startsWith("/applications/:id/request-check") => Success()
+      case Endpoint("POST", "/applications/:id/check-your-answers") => Redirect(s"/developer/applications/${applicationId.value}/request-check/submitted")
+      case Endpoint("POST", "/applications/:id/check-your-answers/team") => Redirect(s"/developer/applications/${applicationId.value}/check-your-answers")
+      case Endpoint("POST", "/applications/:id/request-check") => Redirect(s"/developer/applications/${applicationId.value}/check-your-answers")
+      case Endpoint("POST", "/applications/:id/request-check/team") => Redirect(s"/developer/applications/${applicationId.value}/request-check")
+      case Endpoint("POST", "/applications/:id/request-check/terms-and-conditions") => Redirect(s"/developer/applications/${applicationId.value}/request-check")
+      case Endpoint("POST", "/applications/:id/check-your-answers/terms-and-conditions") => Redirect(s"/developer/applications/${applicationId.value}/check-your-answers")
+      case Endpoint("POST", "/applications/:id/check-your-answers/contact") => Redirect(s"/developer/applications/${applicationId.value}/check-your-answers")
+      case Endpoint("POST", "/applications/:id/check-your-answers/name") => Redirect(s"/developer/applications/${applicationId.value}/check-your-answers")
+      case Endpoint("POST", "/applications/:id/check-your-answers/terms-of-use") => Redirect(s"/developer/applications/${applicationId.value}/check-your-answers")
+      case Endpoint("POST", "/applications/:id/check-your-answers/privacy-policy") => Redirect(s"/developer/applications/${applicationId.value}/check-your-answers")
+      case Endpoint("POST", "/applications/:id/check-your-answers/subscriptions") => Redirect(s"/developer/applications/${applicationId.value}/check-your-answers")
+      case Endpoint("POST", "/applications/:id/check-your-answers/team/remove") => Redirect(s"/developer/applications/${applicationId.value}/check-your-answers/team")
+      case Endpoint("POST", "/applications/:id/request-check/subscriptions") => Redirect(s"/developer/applications/${applicationId.value}/request-check")
+      case Endpoint("POST", "/applications/:id/request-check/contact") => Redirect(s"/developer/applications/${applicationId.value}/request-check")
+      case Endpoint("POST", "/applications/:id/request-check/name") => Redirect(s"/developer/applications/${applicationId.value}/request-check")
+      case Endpoint("POST", "/applications/:id/request-check/privacy-policy") => Redirect(s"/developer/applications/${applicationId.value}/request-check")
+      case Endpoint("POST", "/applications/:id/request-check/team/remove") => Redirect(s"/developer/applications/${applicationId.value}/request-check/team")
+      case Endpoint("POST", "/applications/:id/request-check/terms-of-use") => Redirect(s"/developer/applications/${applicationId.value}/request-check")
       case _ => Success()
     }
   }
@@ -231,7 +265,7 @@ abstract class EndpointScenarioSpec extends AsyncHmrcSpec with GuiceOneAppPerSui
     List(RequestValues(endpoint, pathParameterValues, queryParameterValues, bodyParameterValues))
   }
 
-  val row = "GET         /applications/:id/sell-resell-or-distribute-your-software                                    uk.gov.hmrc.apiplatform.modules.uplift.controllers.UpliftJourneyController.sellResellOrDistributeYourSoftware(id: ApplicationId)"
+  val row = "POST        /applications/:id/request-check/contact                                                      uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.checkpages.ApplicationCheck.contactAction(id: ApplicationId)"
   s"test endpoints when ${describeScenario()}" should {
     Source.fromFile("conf/app.routes").getLines().flatMap(parseEndpoint).flatMap(populateRequestValues(_)).toSet foreach { requestValues: RequestValues =>
 //      List(row).flatMap(parseEndpoint).flatMap(populateRequestValues(_)).toSet foreach { requestValues: RequestValues =>
@@ -239,6 +273,7 @@ abstract class EndpointScenarioSpec extends AsyncHmrcSpec with GuiceOneAppPerSui
       val expectedResponse = getExpectedResponse(requestValues.endpoint)
       s"give $expectedResponse for $requestValues" in {
         val result = callEndpoint(requestValues)
+//        println("case Endpoint(\"" + requestValues.endpoint.verb + "\", \"" + requestValues.endpoint.pathTemplate + "\") => " + result + ")")
         result shouldBe expectedResponse
       }
     }

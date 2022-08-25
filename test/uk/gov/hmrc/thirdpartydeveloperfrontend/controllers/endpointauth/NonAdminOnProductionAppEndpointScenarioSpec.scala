@@ -23,6 +23,7 @@ import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.endpointauth.precondi
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.{ApplicationState, Collaborator, CollaboratorRole, Environment}
 
 class NonAdminOnProductionAppEndpointScenarioSpec extends EndpointScenarioSpec
+  with IsNewJourneyApplication
   with UserIsAuthenticated
   with UserIsOnApplicationTeam
   with ApplicationDetailsAreAvailable
@@ -34,7 +35,6 @@ class NonAdminOnProductionAppEndpointScenarioSpec extends EndpointScenarioSpec
   with ApplicationUpliftSucceeds
   with ApplicationNameIsValid
   with ApplicationUpdateSucceeds
-  with HasApplicationAccessStandard
   with HasApplicationState {
   implicit val cookieSigner: CookieSigner = app.injector.instanceOf[CookieSigner]
 
@@ -56,7 +56,7 @@ class NonAdminOnProductionAppEndpointScenarioSpec extends EndpointScenarioSpec
 
   override def getExpectedResponse(endpoint: Endpoint): Response = {
     endpoint match {
-      case Endpoint("GET", "/registration") => Redirect("/developer/applications")
+      case Endpoint("GET",  "/registration") => Redirect("/developer/applications")
       case Endpoint("POST", "/registration") => BadRequest()
       case Endpoint("GET",  "/reset-password/error") => BadRequest()
       case Endpoint("GET",  "/applications/add/production") => BadRequest()

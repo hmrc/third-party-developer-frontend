@@ -16,10 +16,17 @@
 
 package uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.endpointauth.preconditions
 
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications._
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.{CheckInformation, ContactDetails, TermsOfUseAgreement}
 
-trait HasApplicationAccessStandard extends HasApplicationData {
-  lazy val access = Standard(List(redirectUrl), None, None, Set.empty, None, Some(ImportantSubmissionData(
-    None, ResponsibleIndividual.build("ri name", "ri@example.com"), Set.empty, TermsAndConditionsLocation.InDesktopSoftware, PrivacyPolicyLocation.InDesktopSoftware, List.empty
-  )))
+import java.time.LocalDateTime
+
+trait HasCheckInformationOrNot {
+  val checkInformation: Option[CheckInformation]
+}
+trait HasCheckInformation extends HasCheckInformationOrNot with HasUserData {
+  val checkInformation = Some(CheckInformation(true, true, true, Some(ContactDetails(s"$userFirstName $userLastName", userEmail, "01611234567")), true, true, true,
+    List(TermsOfUseAgreement(userEmail, LocalDateTime.now(), "1.0"))))
+}
+trait HasNoCheckInformation extends HasCheckInformationOrNot {
+  val checkInformation = None
 }

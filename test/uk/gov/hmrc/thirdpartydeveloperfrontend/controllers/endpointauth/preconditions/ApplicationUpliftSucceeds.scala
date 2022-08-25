@@ -17,8 +17,9 @@
 package uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.endpointauth.preconditions
 
 import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.endpointauth.MockConnectors
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.ApplicationUpliftSuccessful
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.apidefinitions.ApiIdentifier
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.{ApplicationId, UpliftData}
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.{ApplicationId, UpliftData, UpliftRequest}
 
 import scala.concurrent.Future
 
@@ -27,4 +28,5 @@ trait ApplicationUpliftSucceeds extends MockConnectors with HasApplicationData {
   when(apmConnector.fetchUpliftableApiIdentifiers(*)).thenReturn(Future.successful(Set.empty))
   when(apmConnector.fetchAllApis(*)(*)).thenReturn(Future.successful(Map.empty))
   when(apmConnector.fetchUpliftableSubscriptions(*[ApplicationId])(*)).thenReturn(Future.successful(Set(ApiIdentifier(apiContext, apiVersion))))
+  when(tpaProductionConnector.requestUplift(*[ApplicationId], *[UpliftRequest])(*)).thenReturn(Future.successful(ApplicationUpliftSuccessful))
 }

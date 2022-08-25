@@ -17,16 +17,23 @@
 package uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.endpointauth.preconditions
 
 import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.endpointauth.MockConnectors
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.ApplicationUpdateSuccessful
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications._
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.connectors.ApiType.REST_API
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.connectors.{ApiType, CombinedApi}
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.User
 
 import java.time.LocalDateTime
 import scala.concurrent.Future
 
-trait ApplicationDetailsAreAvailable extends MockConnectors with HasApplicationData {
+trait ApplicationDetailsAreAvailable extends MockConnectors with HasApplicationData with HasUserData {
   when(apmConnector.fetchApplicationById(*[ApplicationId])(*)).thenReturn(Future.successful(Some(appWithSubsData)))
   when(apmConnector.getAllFieldDefinitions(*[Environment])(*)).thenReturn(Future.successful(Map(apiContext -> Map(apiVersion -> subscriptionFieldDefinitions))))
   when(apmConnector.fetchAllOpenAccessApis(*[Environment])(*)).thenReturn(Future.successful(Map.empty))
   when(apmConnector.fetchAllPossibleSubscriptions(*[ApplicationId])(*)).thenReturn(Future.successful(allPossibleSubscriptions))
+  when(apmConnector.fetchCombinedApi(*[String])(*)).thenReturn(Future.successful(Right(CombinedApi("my service", "my service display name", List.empty, REST_API))))
   when(tpaProductionConnector.fetchCredentials(*[ApplicationId])(*)).thenReturn(Future.successful(ApplicationToken(List(ClientSecret("s1id", "s1name", LocalDateTime.now(), None)), "secret")))
   when(productionPushPullNotificationsConnector.fetchPushSecrets(*[ClientId])(*)).thenReturn(Future.successful(List("secret1")))
+  when(tpdConnector.fetchByEmails(*[Set[String]])(*)).thenReturn(Future.successful(List(User(userEmail, Some(true)))))
+  when(tpaSandboxConnector.removeTeamMember(*[ApplicationId], *[String], *[String], *[Set[String]])(*)).thenReturn(Future.successful(ApplicationUpdateSuccessful))
 }
