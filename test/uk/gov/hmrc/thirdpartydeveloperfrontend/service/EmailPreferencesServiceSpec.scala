@@ -188,7 +188,7 @@ class EmailPreferencesServiceSpec extends AsyncHmrcSpec {
         when(mockFlowRepository.fetchBySessionIdAndFlowType[NewApplicationEmailPreferencesFlowV2](eqTo(sessionId), eqTo(FlowType.NEW_APPLICATION_EMAIL_PREFERENCES_V2))(*))
           .thenReturn(Future.successful(Some(existingFlowObject)))
 
-        when(mockFlowRepository.saveFlow(eqTo(expectedFlowObject))(*)).thenReturn(Future.successful(expectedFlowObject))
+        when(mockFlowRepository.saveFlow(eqTo(expectedFlowObject))).thenReturn(Future.successful(expectedFlowObject))
 
         val result = await(underTest.updateNewApplicationSelectedApis(loggedInDeveloper, applicationId, Set(api1Name, api2Name)))
 

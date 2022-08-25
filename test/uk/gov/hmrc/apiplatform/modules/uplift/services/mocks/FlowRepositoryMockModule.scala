@@ -29,12 +29,12 @@ trait FlowRepositoryMockModule extends MockitoSugar with ArgumentMatchersSugar {
     def aMock: FlowRepository
 
     object FetchBySessionIdAndFlowType {
-      def thenReturn(flow: GetProductionCredentialsFlow) = when(aMock.fetchBySessionIdAndFlowType(*, eqTo(FlowType.GET_PRODUCTION_CREDENTIALS))(*[OFormat[GetProductionCredentialsFlow]])).thenReturn(successful(Some(flow)))
-      def thenReturnNothing = when(aMock.fetchBySessionIdAndFlowType(*, eqTo(FlowType.GET_PRODUCTION_CREDENTIALS))(*[OFormat[GetProductionCredentialsFlow]])).thenReturn(successful(None))
+      def thenReturn(flow: GetProductionCredentialsFlow) = when(aMock.fetchBySessionIdAndFlowType[GetProductionCredentialsFlow](*, eqTo(FlowType.GET_PRODUCTION_CREDENTIALS))(*)).thenReturn(successful(Some(flow)))
+      def thenReturnNothing = when(aMock.fetchBySessionIdAndFlowType[GetProductionCredentialsFlow](*, eqTo(FlowType.GET_PRODUCTION_CREDENTIALS))(*)).thenReturn(successful(None))
     }
 
     object SaveFlow {
-      def thenReturnsSuccess = when(aMock.saveFlow(*[GetProductionCredentialsFlow])(*[OFormat[GetProductionCredentialsFlow]])).thenAnswer((f: GetProductionCredentialsFlow) => successful(f))
+      def thenReturnsSuccess = when(aMock.saveFlow(*[GetProductionCredentialsFlow])).thenAnswer((f: GetProductionCredentialsFlow) => successful(f))
     }
 
     object DeleteBySessionIdAndFlowType {

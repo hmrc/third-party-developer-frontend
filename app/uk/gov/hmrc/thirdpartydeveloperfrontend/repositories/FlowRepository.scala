@@ -26,10 +26,12 @@ import uk.gov.hmrc.mongo.play.json.{Codecs, PlayMongoRepository}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.config.ApplicationConfig
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.flows.{EmailPreferencesFlowV2, Flow, FlowType, IpAllowlistFlow, NewApplicationEmailPreferencesFlowV2}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.repositories.MongoFormatters.formatFlow
-
+import scala.reflect.runtime.universe._
 import java.util.concurrent.TimeUnit
 import javax.inject.{Inject, Singleton}
 import scala.concurrent.{ExecutionContext, Future}
+import scala.reflect.ClassTag
+
 
 @Singleton
 class FlowRepository @Inject() (mongo: MongoComponent, appConfig: ApplicationConfig)(implicit val ec: ExecutionContext)
@@ -59,7 +61,7 @@ class FlowRepository @Inject() (mongo: MongoComponent, appConfig: ApplicationCon
         .build
     ) {
 
-  def saveFlow[A <: Flow](flow: A)(implicit format: OFormat[A]): Future[A] = {
+  def saveFlow[A <: Flow](flow: A): Future[A] = {
     val query = and(equal("sessionId", flow.sessionId), equal("flowType", Codecs.toBson(flow.flowType)))
 
     collection.find(query).headOption flatMap {
@@ -87,9 +89,8 @@ class FlowRepository @Inject() (mongo: MongoComponent, appConfig: ApplicationCon
       .map(_.wasAcknowledged())
   }
 
-  def fetchBySessionIdAndFlowType[A <: Flow](sessionId: String, flowType: FlowType)(implicit formatter: OFormat[A]): Future[Option[Flow]] = {
-    collection.find(and(equal("sessionId", sessionId), equal("flowType", Codecs.toBson(flowType))))
-      .headOption()
+  def fetchBySessionIdAndFlowType[A <: Flow](sessionId: String, flowType: FlowType)(implicit ct: ClassTag[A]): Future[Option[A]] = {
+    collection.find[A](and(equal("sessionId", sessionId), equal("flowType", Codecs.toBson(flowType)))).headOption()
   }
 
   def updateLastUpdated(sessionId: String): Future[Unit] = {

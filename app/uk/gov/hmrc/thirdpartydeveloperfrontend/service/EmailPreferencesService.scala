@@ -87,7 +87,7 @@ class EmailPreferencesService @Inject()(val apmConnector: ApmConnector,
   
   def fetchEmailPreferencesFlow(developerSession: DeveloperSession) =
     flowRepository.fetchBySessionIdAndFlowType[EmailPreferencesFlowV2](developerSession.session.sessionId, FlowType.EMAIL_PREFERENCES_V2) map {
-      case Some(flow: EmailPreferencesFlowV2) => flow
+      case Some(flow) => flow
       case None       => val newFlowObject = EmailPreferencesFlowV2.fromDeveloperSession(developerSession)
                           flowRepository.saveFlow[EmailPreferencesFlowV2](newFlowObject)
                           newFlowObject
@@ -95,7 +95,7 @@ class EmailPreferencesService @Inject()(val apmConnector: ApmConnector,
 
   def fetchNewApplicationEmailPreferencesFlow(developerSession: DeveloperSession, applicationId: ApplicationId): Future[NewApplicationEmailPreferencesFlowV2] =
     flowRepository.fetchBySessionIdAndFlowType[NewApplicationEmailPreferencesFlowV2](developerSession.session.sessionId, FlowType.NEW_APPLICATION_EMAIL_PREFERENCES_V2) map {
-      case Some(flow: NewApplicationEmailPreferencesFlowV2) => flow
+      case Some(flow) => flow
       case None       => val newFlowObject = NewApplicationEmailPreferencesFlowV2(developerSession.session.sessionId, developerSession.developer.emailPreferences, applicationId, Set.empty, Set.empty, developerSession.developer.emailPreferences.topics.map(_.value))
                           flowRepository.saveFlow[NewApplicationEmailPreferencesFlowV2](newFlowObject)
                           newFlowObject
