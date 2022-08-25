@@ -21,14 +21,13 @@
 @import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.routes
 @import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.DeleteProfileForm
 
-@this(devMain: DevMain2, leftHandNav: LeftHandNav)
+@this(devMain: DevMain2WithFormErrors, leftHandNav: LeftHandNav)
 
 @(form: Form[DeleteProfileForm])(implicit request: play.api.mvc.Request[Any], loggedIn: DeveloperSession, appConfig: ApplicationConfig, messagesProvider: MessagesProvider, navSection: String = "manage-profile")
 
-@titleError = { @if(form.errors.nonEmpty) {Error: } else {}}
-
 @devMain(
-  title = titleError + "Delete account",
+  form,
+  title = "Delete account",
   userFullName = loggedIn.loggedInName,
   breadcrumbs = Seq(
     Crumb("Delete account"),
@@ -37,9 +36,6 @@
   leftNav = Some(leftHandNav(None, Option(navSection))),
   developerSession = Some(loggedIn)
 ) {
-
-  @errorSummary2(form)
-
   <h1 class="govuk-heading-l">Delete account</h1>
 
   @helper.form(action = controllers.profile.routes.Profile.deleteAccount) {

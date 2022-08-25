@@ -22,20 +22,19 @@
 @import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.ApplicationId
 @import uk.gov.hmrc.apiplatform.modules.uplift.controllers.UpliftJourneyController.SellResellOrDistributeForm
 
-@this(devMain: DevMain2)
+@this(devMain: DevMain2WithFormErrors)
 
 @(applicationId: ApplicationId, form: Form[SellResellOrDistributeForm])(implicit request: play.api.mvc.Request[Any], loggedIn: DeveloperSession, messagesProvider: MessagesProvider, appConfig: ApplicationConfig)
 
 @pageHeading = @{ "Will you sell, resell or distribute your software?" }
 
 @devMain(
-    title = pageHeading,
-    userFullName = loggedIn.loggedInName,
-    back = BackButtonWithJavaScript,
-    developerSession = Some(loggedIn)
+  form,
+  title = pageHeading,
+  userFullName = loggedIn.loggedInName,
+  back = BackButtonWithJavaScript,
+  developerSession = Some(loggedIn)
 ) {
-  @errorSummary2(form)
-  
   @helper.form(action = uk.gov.hmrc.apiplatform.modules.uplift.controllers.routes.UpliftJourneyController.sellResellOrDistributeYourSoftwareAction(applicationId), 'class -> "form") {
     <div class="govuk-form-group @if(form.errors("answer").nonEmpty) {govuk-form-group--error}">
         <fieldset id="answer" class="govuk-fieldset" role="group" aria-describedby="answer-error">

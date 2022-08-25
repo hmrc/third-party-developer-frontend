@@ -20,13 +20,20 @@
 @import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.routes
 @import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.ApplicationId
 
-@this(devMain: DevMain2)
+@this(devMain: DevMain2WithFormErrors)
 
-@(form: Form[uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.ChangeOfPrivacyPolicyLocationForm], appId: ApplicationId)(
-implicit request: play.api.mvc.Request[Any], loggedIn: DeveloperSession, messagesProvider: MessagesProvider, applicationConfig: ApplicationConfig
+@(
+  form: Form[uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.ChangeOfPrivacyPolicyLocationForm],
+  appId: ApplicationId
+)(
+  implicit request: play.api.mvc.Request[Any],
+  loggedIn: DeveloperSession,
+  messagesProvider: MessagesProvider,
+  applicationConfig: ApplicationConfig
 )
 
 @devMain(
+  form,
   title = "Change the privacy policy URL",
   userFullName = loggedIn.loggedInName,
   back = BackButtonWithJavaScript,
@@ -35,8 +42,6 @@ implicit request: play.api.mvc.Request[Any], loggedIn: DeveloperSession, message
 
 @helper.form(action = controllers.routes.Details.updatePrivacyPolicyLocationAction(appId), 'class -> "form") {
 @helper.CSRF.formField
-
-@errorSummary2(form)
 
     <legend class="govuk-fieldset__legend govuk-fieldset__legend--l">
         <h1 class="govuk-fieldset__heading">

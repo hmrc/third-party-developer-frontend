@@ -24,7 +24,7 @@
 @import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.SelectTopicsFromSubscriptionsForm
 @import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.profile.routes
 
-@this(devMain: DevMain2)
+@this(devMain: DevMain2WithFormErrors)
 
 @(form: Form[SelectTopicsFromSubscriptionsForm], selectedTopics: Set[String], applicationId: ApplicationId)(implicit messages: Messages, loggedIn: DeveloperSession, request: play.api.mvc.Request[Any], appConfig: ApplicationConfig)
 
@@ -33,12 +33,12 @@
 }
 
 @devMain(
+  form,
   title = pageHeading,
   userFullName = loggedIn.loggedInName,
   back = BackButtonWithJavaScript,
   developerSession = Some(loggedIn)
 ) {
-  @errorSummary2(form)
   <div class="govuk-form-group">
     <fieldset class="govuk-fieldset" aria-describedby="select-topic-hint">
       <legend class="govuk-fieldset__legend govuk-fieldset__legend--l">

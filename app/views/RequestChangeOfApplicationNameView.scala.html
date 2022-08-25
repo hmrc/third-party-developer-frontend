@@ -21,13 +21,14 @@
 @import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.Details.ApplicationNameModel
 @import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.routes
 
-@this(devMain: DevMain2)
+@this(devMain: DevMain2WithFormErrors)
 
 @(form: Form[uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.ChangeOfApplicationNameForm], model: ApplicationNameModel)(
   implicit request: play.api.mvc.Request[Any], loggedIn: DeveloperSession, messagesProvider: MessagesProvider, applicationConfig: ApplicationConfig
 )
 
 @devMain(
+  form,
   title = "Request a change to the application name",
   userFullName = loggedIn.loggedInName,
   back = BackButtonWithJavaScript,
@@ -36,8 +37,6 @@
 
   @helper.form(action = controllers.routes.Details.requestChangeOfAppNameAction(model.application.id), 'class -> "form") {
     @helper.CSRF.formField
-
-      @errorSummary2(form)
 
       <h1 class="govuk-heading-l">Request a change to the application name</h1>
 

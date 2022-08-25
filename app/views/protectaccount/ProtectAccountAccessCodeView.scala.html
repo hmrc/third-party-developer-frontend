@@ -21,22 +21,20 @@
 @import uk.gov.hmrc.apiplatform.modules.mfa.controllers.profile.routes
 @import uk.gov.hmrc.apiplatform.modules.mfa.controllers.profile.ProtectAccountForm
 
-@this(devMain: DevMain2)
+@this(devMain: DevMain2WithFormErrors)
 
 
 @(form: Form[ProtectAccountForm])(implicit messages: Messages, request: play.api.mvc.Request[Any], loggedIn: DeveloperSession, appConfig: ApplicationConfig)
 
 @devMain(
+  form,
   title = "Enter your access code",
   userFullName = loggedIn.loggedInName,
   back = BackButtonWithJavaScript,
   isRegistering = true,
   developerSession = Some(loggedIn)
 ) {
-
   <h1 class="govuk-heading-l">Enter your access code</h1>
-
-  @errorSummary2(form)
 
   @helper.form(action = routes.ProtectAccount.protectAccount()){
     @helper.CSRF.formField

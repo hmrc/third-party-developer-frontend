@@ -19,19 +19,18 @@
 @import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.MfaAccessCodeForm
 @import include._
 
-@this(devMain: DevMain2)
-
+@this(devMain: DevMain2WithFormErrors)
 
 @(form: Form[MfaAccessCodeForm])(implicit messages: Messages, request: play.api.mvc.Request[Any], appConfig: ApplicationConfig)
 
 @devMain(
+  form,
   title = "Enter your access code",
   isRegistering = true,
   back = BackButtonWithJavaScript,
   developerSession = None
 ) {
   <h1 class="govuk-heading-l">Enter your access code</h1>
-  @errorSummary2(form)
 
   @helper.form(action = routes.UserLoginAccount.authenticateTotp()){
     @helper.CSRF.formField

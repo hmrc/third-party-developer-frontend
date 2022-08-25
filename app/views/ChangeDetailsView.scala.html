@@ -22,7 +22,7 @@
 @import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.DeveloperSession
 @import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.routes
 
-@this(devMain: DevMain2, leftHandNav: LeftHandNav)
+@this(devMain: DevMain2WithFormErrors, leftHandNav: LeftHandNav)
 
 @(form: Form[uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.EditApplicationForm], applicationViewModel: ApplicationViewModel)(
   implicit request: play.api.mvc.Request[Any], loggedIn: DeveloperSession, messagesProvider: MessagesProvider, appConfig: ApplicationConfig, navSection: String = "details"
@@ -33,6 +33,7 @@
 @app = @{applicationViewModel.application}
 
 @devMain(
+  form,
   title = titleError + "Change application details",
   userFullName = loggedIn.loggedInName,
   breadcrumbs = Seq(
@@ -44,8 +45,6 @@
   leftNav = Some(leftHandNav(Option(applicationViewModel), Option(navSection))),
   developerSession = Some(loggedIn)
 ) {
-  @errorSummary2(form)
-
   <h1 class="govuk-heading-l">Change application details</h1>
 
   @appEnvironment2(app)
