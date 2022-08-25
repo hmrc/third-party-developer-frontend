@@ -42,20 +42,19 @@
   <dl class="govuk-summary-list">
     <div class="govuk-summary-list__row">
         <dt class="govuk-summary-list__key">Name</dt>
-        <dd class="govuk-summary-list__value">@{loggedIn.displayedName}</dd>
-        <dd class="govuk-summary-list__actions"><a class="govuk-link" href="/developer/profile/change">Change<span class="govuk-visually-hidden">name</span></a>
+        <dd class="govuk-summary-list__value" id="name">@{loggedIn.displayedName}</dd>
+        <dd class="govuk-summary-list__actions"><a class="govuk-link" id="change" href="@controllers.profile.routes.Profile.changeProfile">Change<span class="govuk-visually-hidden">name</span></a>
         </dd>
     </div>
     <div class="govuk-summary-list__row">
         <dt class="govuk-summary-list__key">Email address</dt>
-        <dd class="govuk-summary-list__value">@{loggedIn.email}</dd>
-        <dd class="govuk-summary-list__actions"><a class="govuk-link" href="/developer/profile/change">Change<span class="govuk-visually-hidden">date of birth</span></a>
+        <dd class="govuk-summary-list__value" id="emailAddress">@{loggedIn.email}</dd>
         </dd>
     </div>
     <div class="govuk-summary-list__row">
         <dt class="govuk-summary-list__key">Organisation</dt>
-        <dd class="govuk-summary-list__value">@(loggedIn.developer.organisation.getOrElse("None"))</dd>
-        <dd class="govuk-summary-list__actions"><a class="govuk-link" href="/developer/profile/change">Change<span class="govuk-visually-hidden"> address</span></a>
+        <dd class="govuk-summary-list__value" id="organisation">@(loggedIn.developer.organisation.getOrElse("None"))</dd>
+        <dd class="govuk-summary-list__actions"><a class="govuk-link" id="change-organisation" href="@controllers.profile.routes.Profile.changeProfile">Change<span class="govuk-visually-hidden">organisation</span></a>
         </dd>
     </div>
   </dl>
