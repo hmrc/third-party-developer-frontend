@@ -28,13 +28,11 @@
   implicit request: play.api.mvc.Request[Any], loggedIn: DeveloperSession, messagesProvider: MessagesProvider, appConfig: ApplicationConfig, navSection: String = "details"
 )
 
-@titleError = { @if(form.errors.nonEmpty) {Error: } else {}}
-
 @app = @{applicationViewModel.application}
 
 @devMain(
   form,
-  title = titleError + "Change application details",
+  title = "Change application details",
   userFullName = loggedIn.loggedInName,
   breadcrumbs = Seq(
     Crumb("Change application details"),

@@ -23,11 +23,10 @@
 @this(devMain: DevMain2WithFormErrors, leftHandNav: LeftHandNav)
 
 @(form: Form[uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.ProfileForm])(implicit request: play.api.mvc.Request[Any], loggedIn: DeveloperSession, appConfig: ApplicationConfig, messagesProvider: MessagesProvider, navSection: String = "manage-profile")
-@titleError = { @if(form.errors.nonEmpty) {Error: } else {}}
 
 @devMain(
   form,
-  title = titleError + "Change profile details",
+  title = "Change profile details",
   userFullName = loggedIn.loggedInName,
   breadcrumbs = Seq(
     Crumb("Manage profile"),
