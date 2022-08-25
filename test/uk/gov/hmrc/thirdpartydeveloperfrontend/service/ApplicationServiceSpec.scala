@@ -445,7 +445,7 @@ class ApplicationServiceSpec extends AsyncHmrcSpec
       val userId = UserId.random
       val riName = "Mr Responsible"
       val riEmail = "ri@example.com"
-      val applicationUpdate = ChangeResponsibleIndividual(userId, LocalDateTime.now(clock), riName, riEmail)
+      val applicationUpdate = ChangeResponsibleIndividualToSelf(userId, LocalDateTime.now(clock), riName, riEmail)
       when(mockProductionApplicationConnector.applicationUpdate(productionApplicationId, applicationUpdate)).thenReturn(Future.successful(ApplicationUpdateSuccessful))
 
       val result = await(applicationService.updateResponsibleIndividual(productionApplication, userId, riName, riEmail))
