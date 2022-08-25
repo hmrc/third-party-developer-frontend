@@ -386,7 +386,7 @@ class ManageSubscriptionsSpec
 
           status(result) shouldBe OK
           private val dom = Jsoup.parse(contentAsString(result))
-          dom.getElementById("meta-data-hint").html() shouldBe field.definition.description
+          dom.getElementById(s"${fieldName}-hint").html() shouldBe field.definition.description
         }
 
         "404 for invalid field name" in new ManageSubscriptionsSetup {
