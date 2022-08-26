@@ -16,6 +16,8 @@
 
 package uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.endpointauth
 
+import uk.gov.hmrc.apiplatform.modules.mfa.models.MfaId
+import uk.gov.hmrc.apiplatform.modules.submissions.domain.models.{ResponsibleIndividualVerification, ResponsibleIndividualVerificationId, ResponsibleIndividualVerificationWithDetails, Submission}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.connectors.ThirdPartyDeveloperConnector.CoreUserDetails
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.apidefinitions.APIAccessType.PUBLIC
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.apidefinitions.APIStatus.STABLE
@@ -28,6 +30,7 @@ import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.subscriptions.ApiSu
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.subscriptions._
 
 import java.time.{LocalDateTime, Period}
+import java.util.UUID
 import scala.concurrent.Future
 
 
@@ -69,6 +72,16 @@ trait HasApplication extends HasAppDeploymentEnvironment with HasUserWithRole wi
   lazy val allPossibleSubscriptions = Map(
     apiContext -> ApiData("service name", "api name", false, Map(apiVersion -> VersionData(STABLE, APIAccess(PUBLIC))), List(ApiCategory("category")))
   )
+  lazy val responsibleIndividualVerificationId = ResponsibleIndividualVerificationId(UUID.randomUUID().toString)
+  lazy val submissionId = Submission.Id.random
+  lazy val submissionIndex = 1
+  lazy val responsibleIndividual = ResponsibleIndividual.build("mr responsible", "ri@example.com")
+  lazy val responsibleIndividualVerification = ResponsibleIndividualVerification(responsibleIndividualVerificationId, applicationId, submissionId, submissionIndex, applicationName, createdOn)
+  lazy val responsibleIndividualVerificationWithDetails = ResponsibleIndividualVerificationWithDetails(
+    responsibleIndividualVerification, responsibleIndividual, "mr submitter", "submitter@example.com"
+  )
+  lazy val mfaId = MfaId.random
+
 }
 trait IsOldJourneyStandardApplication extends HasApplication {
   def describeApplication = "Old Journey application with Standard access"
@@ -79,7 +92,7 @@ trait IsOldJourneyStandardApplication extends HasApplication {
 trait IsNewJourneyStandardApplication extends HasApplication {
   def describeApplication = "New Journey application with Standard access"
   def access: Access = Standard(List(redirectUrl), None, None, Set.empty, None, Some(ImportantSubmissionData(
-    None, ResponsibleIndividual.build("ri name", "ri@example.com"), Set.empty, TermsAndConditionsLocation.Url(termsConditionsUrl), PrivacyPolicyLocation.Url(privacyPolicyUrl), List.empty
+    None, responsibleIndividual, Set.empty, TermsAndConditionsLocation.Url(termsConditionsUrl), PrivacyPolicyLocation.Url(privacyPolicyUrl), List.empty
   )))
   def checkInformation = None
 }

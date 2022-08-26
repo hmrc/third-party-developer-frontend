@@ -42,17 +42,17 @@ class AdminOnProductionAppEndpointScenarioSpec extends EndpointScenarioSpec
 
   override def getExpectedResponse(endpoint: Endpoint): Response = {
     endpoint match {
-      case Endpoint("GET", "/registration") => Redirect("/developer/applications")
-      case Endpoint("POST", "/registration") => BadRequest()
-      case Endpoint("GET",  "/reset-password/error") => BadRequest()
-      case Endpoint("GET",  "/applications/:id/add/success") => NotFound()
-      case Endpoint(_,      "/applications/:id/details/change") => Forbidden()
-      case Endpoint("POST", "/applications/:id/change-subscription") => BadRequest()
-      case Endpoint("GET",  "/applications/:id/request-check/appDetails") => getEndpointSuccessResponse(endpoint)
-      case Endpoint("GET",  "/applications/:id/request-check/submitted") => getEndpointSuccessResponse(endpoint)
-      case Endpoint(_, path) if path.startsWith("/applications/:id/request-check") => BadRequest()
-      case Endpoint(_, path) if path.startsWith("/applications/:id/check-your-answers") => BadRequest()
-      case Endpoint("POST", "/applications/:id/delete-subordinate") => Error("uk.gov.hmrc.http.ForbiddenException: Only standard subordinate applications can be deleted by admins")
+      case Endpoint("GET",  "/developer/registration") => Redirect("/developer/applications")
+      case Endpoint("POST", "/developer/registration") => BadRequest()
+      case Endpoint("GET",  "/developer/reset-password/error") => BadRequest()
+      case Endpoint("GET",  "/developer/applications/:id/add/success") => NotFound()
+      case Endpoint(_,      "/developer/applications/:id/details/change") => Forbidden()
+      case Endpoint("POST", "/developer/applications/:id/change-subscription") => BadRequest()
+      case Endpoint("GET",  "/developer/applications/:id/request-check/appDetails") => getEndpointSuccessResponse(endpoint)
+      case Endpoint("GET",  "/developer/applications/:id/request-check/submitted") => getEndpointSuccessResponse(endpoint)
+      case Endpoint(_, path) if path.startsWith("/developer/applications/:id/request-check") => BadRequest()
+      case Endpoint(_, path) if path.startsWith("/developer/applications/:id/check-your-answers") => BadRequest()
+      case Endpoint("POST", "/developer/applications/:id/delete-subordinate") => Error("uk.gov.hmrc.http.ForbiddenException: Only standard subordinate applications can be deleted by admins")
       case _ => getEndpointSuccessResponse(endpoint)
     }
   }

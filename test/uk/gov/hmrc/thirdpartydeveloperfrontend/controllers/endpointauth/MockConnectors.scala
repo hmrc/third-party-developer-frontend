@@ -17,6 +17,7 @@
 package uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.endpointauth
 
 import org.mockito.{ArgumentMatchersSugar, MockitoSugar}
+import uk.gov.hmrc.apiplatform.modules.submissions.connectors.ThirdPartyApplicationSubmissionsConnector
 import uk.gov.hmrc.thirdpartydeveloperfrontend.connectors.{ApmConnector, DeskproConnector, ProductionPushPullNotificationsConnector, ProductionSubscriptionFieldsConnector, SandboxPushPullNotificationsConnector, SandboxSubscriptionFieldsConnector, ThirdPartyApplicationProductionConnector, ThirdPartyApplicationSandboxConnector, ThirdPartyDeveloperConnector}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.repositories.FlowRepository
 import uk.gov.hmrc.thirdpartydeveloperfrontend.service.SubscriptionFieldsService.SubscriptionFieldsConnector
@@ -32,4 +33,5 @@ trait MockConnectors extends MockitoSugar with ArgumentMatchersSugar {
   val productionSubsFieldsConnector: ProductionSubscriptionFieldsConnector = mock[ProductionSubscriptionFieldsConnector]
   val sandboxPushPullNotificationsConnector: SandboxPushPullNotificationsConnector = mock[SandboxPushPullNotificationsConnector]
   val productionPushPullNotificationsConnector: ProductionPushPullNotificationsConnector = mock[ProductionPushPullNotificationsConnector]
+  val thirdPartyApplicationSubmissionsConnector: ThirdPartyApplicationSubmissionsConnector = mock[ThirdPartyApplicationSubmissionsConnector]
 }
