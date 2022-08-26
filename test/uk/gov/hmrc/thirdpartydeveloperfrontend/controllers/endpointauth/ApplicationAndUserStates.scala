@@ -16,8 +16,10 @@
 
 package uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.endpointauth
 
+import cats.data.NonEmptyList
 import uk.gov.hmrc.apiplatform.modules.mfa.models.MfaId
-import uk.gov.hmrc.apiplatform.modules.submissions.domain.models.{ResponsibleIndividualVerification, ResponsibleIndividualVerificationId, ResponsibleIndividualVerificationWithDetails, Submission}
+import uk.gov.hmrc.apiplatform.modules.submissions.domain.models.Submission.Status.Granted
+import uk.gov.hmrc.apiplatform.modules.submissions.domain.models.{AcknowledgementOnly, AlwaysAsk, ExtendedSubmission, GroupOfQuestionnaires, Question, QuestionIdsOfInterest, QuestionItem, Questionnaire, QuestionnaireProgress, QuestionnaireState, ResponsibleIndividualVerification, ResponsibleIndividualVerificationId, ResponsibleIndividualVerificationWithDetails, Submission, TextAnswer, Wording}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.connectors.ThirdPartyDeveloperConnector.CoreUserDetails
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.apidefinitions.APIAccessType.PUBLIC
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.apidefinitions.APIStatus.STABLE
@@ -62,8 +64,22 @@ trait HasApplication extends HasAppDeploymentEnvironment with HasUserWithRole wi
   lazy val appWithSubsIds = ApplicationWithSubscriptionIds.from(application).copy(subscriptions = Set(apiIdentifier))
   lazy val privacyPolicyUrl = "http://example.com/priv"
   lazy val termsConditionsUrl = "http://example.com/tcs"
+  lazy val category = "category1"
   lazy val appWithSubsData = ApplicationWithSubscriptionData(application, Set(apiIdentifier), Map(
     apiContext -> Map(ApiVersion("1.0") -> Map(apiFieldName -> apiFieldValue, apiPpnsFieldName -> apiPpnsFieldValue))
+  ))
+  lazy val questionnaireId = Questionnaire.Id.random
+  lazy val question = AcknowledgementOnly(Question.Id.random, Wording("hi"), None)
+  lazy val questionItem = QuestionItem(question)
+  lazy val questionnaire = Questionnaire(questionnaireId, Questionnaire.Label("label"), NonEmptyList.one(questionItem))
+  lazy val questionIdsOfInterest = QuestionIdsOfInterest(Question.Id.random, Question.Id.random, Question.Id.random, Question.Id.random, Question.Id.random, Question.Id.random, Question.Id.random, Question.Id.random, Question.Id.random, Question.Id.random, Question.Id.random)
+  lazy val groupOfQuestionnaires = GroupOfQuestionnaires("heading", NonEmptyList.one(questionnaire))
+  lazy val answersToQuestions = Map(question.id -> TextAnswer("yes"))
+  lazy val submissionInstance = Submission.Instance(submissionIndex, answersToQuestions, NonEmptyList.one(Granted(LocalDateTime.now, "mr jones")))
+  lazy val submission = Submission(submissionId, applicationId, LocalDateTime.now, NonEmptyList.one(groupOfQuestionnaires), questionIdsOfInterest, NonEmptyList.one(submissionInstance), Map.empty)
+  lazy val questionnaireProgress = QuestionnaireProgress(QuestionnaireState.Completed, List())
+  lazy val extendedSubmission = ExtendedSubmission(submission, Map(
+    questionnaireId -> questionnaireProgress
   ))
   lazy val subscriptionFieldDefinitions = Map(
     apiFieldName -> SubscriptionFieldDefinition(apiFieldName, "field desc", "field short desc", "hint", "STRING", AccessRequirements.Default),
