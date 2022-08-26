@@ -105,6 +105,7 @@ trait HasUserWithRole extends MockConnectors {
   lazy val userFullName = s"$userFirstName $userLastName"
   lazy val userPhone = "01611234567"
   lazy val userPassword = "S3curE-Pa$$w0rd!"
+  lazy val organisation = "Big Corp"
 
   def describeUserRole: String
   def developer = Developer(

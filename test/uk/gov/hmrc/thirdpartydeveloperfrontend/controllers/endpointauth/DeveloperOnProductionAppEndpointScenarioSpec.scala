@@ -20,7 +20,7 @@ import play.api.libs.crypto.CookieSigner
 import play.api.mvc.Cookie
 import play.api.test.FakeRequest
 
-class NonAdminOnProductionAppEndpointScenarioSpec extends EndpointScenarioSpec
+class DeveloperOnProductionAppEndpointScenarioSpec extends EndpointScenarioSpec
   with IsNewJourneyStandardApplication
   with UserIsDeveloper
   with UserIsAuthenticated

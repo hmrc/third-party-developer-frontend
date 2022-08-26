@@ -24,19 +24,20 @@ import play.api.inject.guice.GuiceApplicationBuilder
 import play.api.libs.json.OFormat
 import play.api.test.Helpers.{redirectLocation, route, status}
 import play.api.test.{CSRFTokenHelper, FakeRequest, Writeables}
+import uk.gov.hmrc.apiplatform.modules.mfa.connectors.ThirdPartyDeveloperMfaConnector
 import uk.gov.hmrc.apiplatform.modules.submissions.connectors.ThirdPartyApplicationSubmissionsConnector
-import uk.gov.hmrc.apiplatform.modules.submissions.domain.models.{ResponsibleIndividualVerification, ResponsibleIndividualVerificationWithDetails}
 import uk.gov.hmrc.apiplatform.modules.uplift.domain.models.{ApiSubscriptions, GetProductionCredentialsFlow}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.connectors._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.{ApplicationUpdateSuccessful, ApplicationUpliftSuccessful}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.apidefinitions.{ApiContext, ApiIdentifier, ApiVersion}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.ApplicationNameValidationJson.ApplicationNameValidationResult
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.{ApplicationId, ApplicationNameValidation, ApplicationToken, ApplicationUpdate, ApplicationVerificationSuccessful, CheckInformation, ClientId, ClientSecret, ClientSecretRequest, Environment, SellResellOrDistribute, UpdateApplicationRequest, UpliftData, UpliftRequest, Valid}
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.connectors.ApiType.REST_API
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.connectors.{AddTeamMemberRequest, CombinedApi, TicketCreated, UserAuthenticationResponse}
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.{User, UserId}
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.flows.FlowType.{GET_PRODUCTION_CREDENTIALS, IP_ALLOW_LIST}
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.flows.IpAllowlistFlow
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.{UpdateProfileRequest, User, UserId}
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.emailpreferences.{APICategoryDisplayDetails, EmailPreferences}
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.flows.FlowType.{EMAIL_PREFERENCES_V2, GET_PRODUCTION_CREDENTIALS, IP_ALLOW_LIST, NEW_APPLICATION_EMAIL_PREFERENCES_V2}
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.flows.{EmailPreferencesFlowV2, IpAllowlistFlow, NewApplicationEmailPreferencesFlowV2}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.subscriptions.ApiSubscriptionFields.SaveSubscriptionFieldsSuccessResponse
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.subscriptions.Fields
 import uk.gov.hmrc.thirdpartydeveloperfrontend.repositories.FlowRepository
@@ -77,6 +78,7 @@ abstract class EndpointScenarioSpec extends AsyncHmrcSpec with GuiceOneAppPerSui
       .overrides(bind[SandboxPushPullNotificationsConnector].toInstance(sandboxPushPullNotificationsConnector))
       .overrides(bind[ProductionPushPullNotificationsConnector].toInstance(productionPushPullNotificationsConnector))
       .overrides(bind[ThirdPartyApplicationSubmissionsConnector].toInstance(thirdPartyApplicationSubmissionsConnector))
+      .overrides(bind[ThirdPartyDeveloperMfaConnector].toInstance(thirdPartyDeveloperMfaConnector))
       .in(Mode.Test)
       .build()
   }
@@ -121,9 +123,14 @@ abstract class EndpointScenarioSpec extends AsyncHmrcSpec with GuiceOneAppPerSui
       GetProductionCredentialsFlow(sessionId, Some(SellResellOrDistribute("sell")), Some(ApiSubscriptions(Map(ApiIdentifier(apiContext, apiVersion) -> true))))
     )))
     when(flowRepository.fetchBySessionIdAndFlowType(*[String], eqTo(IP_ALLOW_LIST))(*[OFormat[IpAllowlistFlow]])).thenReturn(Future.successful(Some(IpAllowlistFlow(sessionId, Set("1.2.3.4")))))
+    when(flowRepository.fetchBySessionIdAndFlowType(*[String], eqTo(EMAIL_PREFERENCES_V2))(*[OFormat[IpAllowlistFlow]])).thenReturn(Future.successful(Some(EmailPreferencesFlowV2(
+      sessionId, Set.empty, Map(), Set.empty, List.empty))))
+    when(flowRepository.fetchBySessionIdAndFlowType(*[String], eqTo(NEW_APPLICATION_EMAIL_PREFERENCES_V2))(*[OFormat[IpAllowlistFlow]])).thenReturn(Future.successful(Some(NewApplicationEmailPreferencesFlowV2(
+      sessionId, EmailPreferences.noPreferences, applicationId, Set.empty, Set.empty, Set.empty))))
     when(flowRepository.deleteBySessionIdAndFlowType(*,*)).thenReturn(Future.successful(true))
     when(flowRepository.saveFlow(isA[GetProductionCredentialsFlow])(*[OFormat[GetProductionCredentialsFlow]])).thenReturn(Future.successful(GetProductionCredentialsFlow(sessionId, None, None)))
     when(flowRepository.saveFlow(isA[IpAllowlistFlow])(*[OFormat[IpAllowlistFlow]])).thenReturn(Future.successful(IpAllowlistFlow(sessionId, Set.empty)))
+    when(flowRepository.saveFlow(isA[NewApplicationEmailPreferencesFlowV2])(*[OFormat[NewApplicationEmailPreferencesFlowV2]])).thenReturn(Future.successful(NewApplicationEmailPreferencesFlowV2(sessionId, EmailPreferences.noPreferences, applicationId, Set.empty, Set.empty, Set.empty)))
     when(tpdConnector.fetchEmailForResetCode(*)(*)).thenReturn(Future.successful(userEmail))
     when(tpdConnector.requestReset(*)(*)).thenReturn(Future.successful(OK))
     when(tpdConnector.reset(*)(*)).thenReturn(Future.successful(OK))
@@ -137,6 +144,10 @@ abstract class EndpointScenarioSpec extends AsyncHmrcSpec with GuiceOneAppPerSui
     when(tpaSandboxConnector.deleteApplication(*[ApplicationId])(*)).thenReturn(Future.successful())
     when(thirdPartyApplicationSubmissionsConnector.fetchResponsibleIndividualVerification(*[String])(*)).thenReturn(Future.successful(Some(responsibleIndividualVerification)))
     when(thirdPartyApplicationSubmissionsConnector.responsibleIndividualAccept(*[String])(*)).thenReturn(Future.successful(Right(responsibleIndividualVerificationWithDetails)))
+    when(apmConnector.fetchAllCombinedAPICategories()(*)).thenReturn(Future.successful(Right(List(APICategoryDisplayDetails("category", "name")))))
+    when(tpdConnector.fetchDeveloper(*[UserId])(*)).thenReturn(Future.successful(Some(developer)))
+    when(tpdConnector.updateProfile(*[UserId], *[UpdateProfileRequest])(*)).thenReturn(Future.successful(1))
+    when(tpdConnector.updateEmailPreferences(*[UserId], *[EmailPreferences])(*)).thenReturn(Future.successful(true))
 
     private def populatePathTemplateWithValues(pathTemplate: String, values: Map[String,String]): String = {
     //TODO fail test if path contains parameters that aren't supplied by the values map
@@ -242,7 +253,7 @@ abstract class EndpointScenarioSpec extends AsyncHmrcSpec with GuiceOneAppPerSui
       case Endpoint("POST", "/developer/applications/:id/ip-allowlist/add") => Map("ipAddress" -> "1.2.3.4/24")
       case Endpoint("POST", "/developer/applications/:id/ip-allowlist/change") => Map("confirm" -> "yes")
       case Endpoint("POST", "/developer/applications/:id/responsible-individual/change/self-or-other") => Map("who" -> "self")
-      case Endpoint("POST", "/developer/applications/:id/responsible-individual/change/other") => Map("name" -> "mr responsible", "email" -> "ri@example.com")
+      case Endpoint("POST", "/developer/applications/:id/responsible-individual/change/other") => Map("name" -> (responsibleIndividual.fullName.value + " new"), "email" -> ("new" + responsibleIndividual.emailAddress.value))
       case Endpoint("POST", "/developer/applications/:id/change-subscription") => Map("subscribed" -> "true")
       case Endpoint("POST", "/developer/applications/:id/change-locked-subscription") => Map("subscribed" -> "true", "confirm" -> "true")
       case Endpoint("POST", "/developer/applications/:id/change-private-subscription") => Map("subscribed" -> "true", "confirm" -> "true")
@@ -267,8 +278,14 @@ abstract class EndpointScenarioSpec extends AsyncHmrcSpec with GuiceOneAppPerSui
       case Endpoint("POST", "/developer/applications/:id/request-check/terms-of-use") => Map("termsOfUseAgreed" -> "true")
       case Endpoint("POST", "/developer/applications/:id/details/change") => Map("applicationId" -> applicationId.value, "applicationName" -> applicationName, "description" -> "my description", "privacyPolicyUrl" -> privacyPolicyUrl, "termsAndConditionsUrl" -> termsConditionsUrl, "grantLength" -> "1")
       case Endpoint("POST", "/developer/applications/add/switch") => Map("applicationId" -> applicationId.value)
-      case Endpoint("POST", "/developer/profile/email-preferences/topics-from-subscriptions") => Map("topic" -> "Topic1 Topic2", "applicationId" -> applicationId.value)
+      case Endpoint("POST", "/developer/profile/email-preferences/topics-from-subscriptions") => Map("topic[]" -> "BUSINESS_AND_POLICY", "applicationId" -> applicationId.value)
       case Endpoint("POST", "/developer/submissions/responsible-individual-verification") => Map("verified" -> "yes")
+      case Endpoint("POST", "/developer/profile/delete") => Map("confirmation" -> "true")
+      case Endpoint("POST", "/developer/profile/email-preferences/topics") => Map("topic[]" -> "BUSINESS_AND_POLICY")
+      case Endpoint("POST", "/developer/profile/email-preferences/topics") => Map("currentpassword" -> userPassword, "password" -> (userPassword + "new"), "confirmpassword" -> (userPassword + "new"))
+      case Endpoint("POST", "/developer/profile/") => Map("firstname" -> userFirstName, "lastname" -> userLastName, "organisation" -> organisation)
+      case Endpoint("POST", "/developer/profile/protect-account/remove-by-id") => Map("accessCode" -> "123456")
+      case Endpoint("POST", "/developer/profile/protect-account/remove-by-id") => Map("selectedApi" -> "my api", "applicationId" -> applicationId.value)
       case _ => Map.empty
     }
   }
@@ -342,6 +359,8 @@ abstract class EndpointScenarioSpec extends AsyncHmrcSpec with GuiceOneAppPerSui
       case Endpoint("GET",  "/developer/applications/add/:id") => Redirect(s"/developer/applications/${applicationId.value}/before-you-start")
       case Endpoint("GET",  "/developer/applications/add/production") => Redirect(s"/developer/applications/${applicationId.value}/before-you-start")
       case Endpoint(_,      "/developer/applications/add/switch") => Redirect(s"/developer/applications/${applicationId.value}/before-you-start")
+      case Endpoint("POST", "/developer/profile/email-preferences/topics-from-subscriptions") => Redirect(s"/developer/applications/${applicationId.value}/add/success")
+      case Endpoint("POST", "/developer/profile/email-preferences/topics") => Redirect(s"/developer/profile/email-preferences")
       case _ => Success()
     }
   }
@@ -361,18 +380,18 @@ abstract class EndpointScenarioSpec extends AsyncHmrcSpec with GuiceOneAppPerSui
   }
 
   val routesFilePrefixes = List(
-    ("app", "/developer"),
+//    ("app", "/developer"),
     ("profile", "/developer/profile"),
-    ("submissions", "/developer/submissions")
+//    ("submissions", "/developer/submissions")
   )
-  val row = "POST  /email-preferences/apis-from-subscriptions "
+  val row = "POST /developer/profile/email-preferences/topics-from-subscriptions "
   s"test endpoints when ${describeScenario()}" should {
     routesFilePrefixes
       .flatMap(routesFilePrefixDetails => {
         val (routesFilePrefix, pathPrefix) = routesFilePrefixDetails
         Source.fromFile(s"conf/${routesFilePrefix}.routes").getLines().flatMap(line => parseEndpoint(line, pathPrefix))
       })
-//      List(parseEndpoint(row + " a", "/developer/profile").get)
+//      List(parseEndpoint(row + " a", "").get)
       .flatMap(populateRequestValues(_))
       .toSet foreach { requestValues: RequestValues =>
       val expectedResponse = getExpectedResponse(requestValues.endpoint)
