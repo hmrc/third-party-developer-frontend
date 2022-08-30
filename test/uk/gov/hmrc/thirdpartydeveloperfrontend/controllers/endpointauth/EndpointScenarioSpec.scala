@@ -145,10 +145,12 @@ abstract class EndpointScenarioSpec extends AsyncHmrcSpec with GuiceOneAppPerSui
     when(tpaProductionConnector.verify(*)(*)).thenReturn(Future.successful(ApplicationVerificationSuccessful))
     when(tpdConnector.resendVerificationEmail(*)(*)).thenReturn(Future.successful(OK))
     when(tpaSandboxConnector.deleteApplication(*[ApplicationId])(*)).thenReturn(Future.successful())
+    when(tpaProductionConnector.deleteApplication(*[ApplicationId])(*)).thenReturn(Future.successful())
     when(thirdPartyApplicationSubmissionsConnector.fetchResponsibleIndividualVerification(*[String])(*)).thenReturn(Future.successful(Some(responsibleIndividualVerification)))
     when(thirdPartyApplicationSubmissionsConnector.responsibleIndividualAccept(*[String])(*)).thenReturn(Future.successful(Right(responsibleIndividualVerificationWithDetails)))
     when(thirdPartyApplicationSubmissionsConnector.fetchLatestExtendedSubmission(*[ApplicationId])(*)).thenReturn(Future.successful(Some(extendedSubmission)))
     when(thirdPartyApplicationSubmissionsConnector.fetchSubmission(*[Submission.Id])(*)).thenReturn(Future.successful(Some(extendedSubmission)))
+    when(thirdPartyApplicationSubmissionsConnector.fetchLatestSubmission(*[ApplicationId])(*)).thenReturn(Future.successful(Some(submission)))
     when(thirdPartyApplicationSubmissionsConnector.recordAnswer(*[Submission.Id], *[Question.Id], *[List[String]])(*)).thenReturn(Future.successful(Right(extendedSubmission)))
     when(apmConnector.fetchAllCombinedAPICategories()(*)).thenReturn(Future.successful(Right(List(APICategoryDisplayDetails("category", "name")))))
     when(tpdConnector.fetchDeveloper(*[UserId])(*)).thenReturn(Future.successful(Some(developer)))
@@ -162,7 +164,7 @@ abstract class EndpointScenarioSpec extends AsyncHmrcSpec with GuiceOneAppPerSui
     when(thirdPartyDeveloperMfaConnector.removeMfaById(*[UserId], *[MfaId])(*)).thenReturn(Future.successful())
     when(thirdPartyDeveloperMfaConnector.createMfaSecret(*[UserId])(*)).thenReturn(Future.successful("secret"))
 
-    private def populatePathTemplateWithValues(pathTemplate: String, values: Map[String,String]): String = {
+  private def populatePathTemplateWithValues(pathTemplate: String, values: Map[String,String]): String = {
     //TODO fail test if path contains parameters that aren't supplied by the values map
     values.foldLeft(pathTemplate)((path: String, kv: (String,String)) => path.replace(s":${kv._1}", kv._2).replace(s"*${kv._1}", kv._2))
   }
@@ -279,7 +281,16 @@ abstract class EndpointScenarioSpec extends AsyncHmrcSpec with GuiceOneAppPerSui
       case Endpoint("POST", "/developer/no-applications") => Map("choice" -> "use-apis")
       case Endpoint("POST", "/developer/applications/:id/change-api-subscriptions") => Map("ctx-1_0-subscribed" -> "true")
       case Endpoint("POST", "/developer/applications/:id/sell-resell-or-distribute-your-software") => Map("answer" -> "yes")
-      case Endpoint("POST", "/developer/applications/:id/request-check") => Map()
+      case Endpoint("POST", "/developer/applications/:id/request-check") => Map(
+        "apiSubscriptionsComplete" -> "true",
+        "apiSubscriptionConfigurationsComplete" -> "true",
+        "contactDetailsComplete" -> "true",
+        "teamConfirmedComplete" -> "true",
+        "confirmedNameComplete" -> "true",
+        "providedPrivacyPolicyURLComplete" -> "true",
+        "providedTermsAndConditionsURLComplete" -> "true",
+        "termsOfUseAgreementComplete" -> "true"
+      )
       case Endpoint("POST", "/developer/applications/:id/request-check/terms-and-conditions") => Map("hasUrl" -> "true", "termsAndConditionsURL" -> "https://example.com/tcs")
       case Endpoint("POST", "/developer/applications/:id/check-your-answers/contact") => Map("fullname" -> userFullName, "email" -> userEmail, "telephone" -> userPhone)
       case Endpoint("POST", "/developer/applications/:id/check-your-answers/name") => Map("applicationName" -> applicationName)
@@ -309,6 +320,7 @@ abstract class EndpointScenarioSpec extends AsyncHmrcSpec with GuiceOneAppPerSui
       case Endpoint("POST", "/developer/profile/email-preferences/categories") => Map("taxRegime[]" -> "1")
       case Endpoint("POST", "/developer/submissions/:sid/question/:qid") => Map("submit-action" -> "acknowledgement")
       case Endpoint("POST", "/developer/submissions/:sid/question/:qid/update") => Map("submit-action" -> "acknowledgement")
+      case Endpoint("POST", "/developer/submissions/application/:aid/cancel-request") => Map("submit-action" -> "cancel-request")
       case _ => Map.empty
     }
   }
@@ -417,7 +429,7 @@ abstract class EndpointScenarioSpec extends AsyncHmrcSpec with GuiceOneAppPerSui
     ("profile", "/developer/profile"),
     ("submissions", "/developer/submissions")
   )
-  val row = "POST        /developer/submissions/:sid/question/:qid/update         "
+  val row = "GET /developer/submissions/application/:aid/view-answers         "
   s"test endpoints when ${describeScenario()}" should {
     routesFilePrefixes
       .flatMap(routesFilePrefixDetails => {

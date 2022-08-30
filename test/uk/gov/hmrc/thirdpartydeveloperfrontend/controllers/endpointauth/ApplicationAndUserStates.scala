@@ -112,6 +112,11 @@ trait IsNewJourneyStandardApplication extends HasApplication {
   )))
   def checkInformation = None
 }
+trait IsNewJourneyStandardApplicationWithoutSubmission extends HasApplication {
+  def describeApplication = "New Journey application with Standard access"
+  def access: Access = Standard(List(redirectUrl), None, None, Set.empty, None, None)
+  def checkInformation = None
+}
 
 trait HasUserWithRole extends MockConnectors {
   lazy val userEmail = "user@example.com"
