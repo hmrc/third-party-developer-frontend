@@ -36,7 +36,7 @@ trait TestApplications {
       developerEmail: String = "developer@example.com"
   ): Application = {
 
-    anApplication(appId, clientId, environment = Environment.SANDBOX, state = ApplicationState(State.PRODUCTION, None), adminEmail = adminEmail, developerEmail = developerEmail)
+    anApplication(appId, clientId, environment = Environment.SANDBOX, state = ApplicationState(State.PRODUCTION, None, None), adminEmail = adminEmail, developerEmail = developerEmail)
   }
 
   def anApplication(
@@ -76,6 +76,9 @@ trait TestApplications {
 
   def aStandardPendingApprovalApplication(adminEmail: String = "admin@example.com"): Application =
     anApplication(adminEmail = adminEmail).withState(ApplicationState.pendingRequesterVerification("test", "test"))
+
+  def aStandardPendingResponsibleIndividualVerificationApplication(adminEmail: String = "admin@example.com"): Application =
+    anApplication(adminEmail = adminEmail).withState(ApplicationState.pendingResponsibleIndividualVerification("admin@example.com", "test"))
 
   def standardAccess(
       redirectUris: List[String] = List("https://redirect1", "https://redirect2"),

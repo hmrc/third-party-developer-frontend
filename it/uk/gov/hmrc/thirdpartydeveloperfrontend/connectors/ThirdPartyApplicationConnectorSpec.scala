@@ -105,7 +105,7 @@ class ThirdPartyApplicationConnectorSpec extends BaseConnectorIntegrationSpec wi
       Some("Description"),
       Set("john@example.com".asAdministratorCollaborator),
       Standard(List("http://example.com/redirect"), Some("http://example.com/terms"), Some("http://example.com/privacy")),
-      state = ApplicationState(State.PENDING_GATEKEEPER_APPROVAL, Some("john@example.com"))
+      state = ApplicationState(State.PENDING_GATEKEEPER_APPROVAL, Some("john@example.com"), Some("John Dory"))
     )
 
     implicit val hc = HeaderCarrier()

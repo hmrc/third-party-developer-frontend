@@ -20,16 +20,19 @@ import javax.inject.{Inject, Singleton}
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.connectors.DeskproTicket
 import uk.gov.hmrc.thirdpartydeveloperfrontend.connectors.DeskproConnector
+import uk.gov.hmrc.thirdpartydeveloperfrontend.service.ApplicationService
 import scala.concurrent.Future
 import scala.concurrent.ExecutionContext
 import uk.gov.hmrc.apiplatform.modules.submissions.domain.models.{ErrorDetails, ResponsibleIndividualVerification, ResponsibleIndividualVerificationWithDetails}
 import uk.gov.hmrc.apiplatform.modules.common.services.EitherTHelper
 import uk.gov.hmrc.apiplatform.modules.submissions.connectors.ThirdPartyApplicationSubmissionsConnector
 import uk.gov.hmrc.apiplatform.modules.submissions.domain.models.ResponsibleIndividualToUVerification
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.ApplicationWithSubscriptionData
 
 @Singleton
 class ResponsibleIndividualVerificationService @Inject()(
-  tpaConnector: ThirdPartyApplicationSubmissionsConnector,
+  tpaSubmissionsConnector: ThirdPartyApplicationSubmissionsConnector,
+  applicationService: ApplicationService,
   deskproConnector: DeskproConnector
 )(
   implicit val ec: ExecutionContext
@@ -38,7 +41,7 @@ class ResponsibleIndividualVerificationService @Inject()(
   private val ET = EitherTHelper.make[ErrorDetails]
 
   def fetchResponsibleIndividualVerification(code: String)(implicit hc: HeaderCarrier): Future[Option[ResponsibleIndividualVerification]] = {
-    tpaConnector.fetchResponsibleIndividualVerification(code)
+    tpaSubmissionsConnector.fetchResponsibleIndividualVerification(code)
   }
 
   def verifyResponsibleIndividual(code: String, verified: Boolean)(implicit hc: HeaderCarrier): Future[Either[ErrorDetails, ResponsibleIndividualVerification]] = {
@@ -46,34 +49,34 @@ class ResponsibleIndividualVerificationService @Inject()(
       case true => // Responsible individual has accepted
         (
           for {
-            riVerificationWithDetails <- ET.fromEitherF(tpaConnector.responsibleIndividualAccept(code))
-            riVerification             = riVerificationWithDetails.verification
-            _                          = sendDeskproTicketForTermsOfUse(riVerificationWithDetails)
+            riVerification <- ET.fromOptionF(tpaSubmissionsConnector.fetchResponsibleIndividualVerification(code), ErrorDetails("riverification001", s"No responsibleIndividualVerification record found for ${code}")) 
+            application    <- ET.fromOptionF(applicationService.fetchByApplicationId(riVerification.applicationId), ErrorDetails("riverification002", s"No application record found for ${riVerification.applicationId}"))
+            submitterEmail <- ET.fromOption(application.application.state.requestedByEmailAddress, ErrorDetails("riverification003", "requestedByEmailAddress not found"))
+            submitterName  <- ET.fromOption(application.application.state.requestedByName, ErrorDetails("riverification004", "requestedByName not found"))
+            _              <- ET.liftF(applicationService.acceptResponsibleIndividualVerification(riVerification.applicationId, code))
+            _              =  sendDeskproTicketForTermsOfUse(riVerification, submitterName, submitterEmail)
           } yield riVerification
         )
         .value
       case false => // Responsible individual has declined
         (
           for {
-            riVerification <- ET.fromEitherF(tpaConnector.responsibleIndividualDecline(code))
+            riVerification <- ET.fromEitherF(tpaSubmissionsConnector.responsibleIndividualDecline(code))
           } yield riVerification
         )
         .value
     }
   }
 
-  private def sendDeskproTicketForTermsOfUse(riVerificationWithDetails: ResponsibleIndividualVerificationWithDetails)(implicit hc: HeaderCarrier) = {
-    val verification = riVerificationWithDetails.verification
-
-    verification match {
+  private def sendDeskproTicketForTermsOfUse(riVerification: ResponsibleIndividualVerification, submitterName: String, submitterEmail: String)(implicit hc: HeaderCarrier) = {
+ 
+    riVerification match {
       // Only send deskpro ticket for a ResponsibleIndividualVerification of type 'terms of use'
       case riv: ResponsibleIndividualToUVerification => { 
-        val name = riVerificationWithDetails.submitterName
-        val email = riVerificationWithDetails.submitterEmail
-        val appName = riv.applicationName
-        val appId = riv.applicationId
+        val appName = riVerification.applicationName
+        val appId = riVerification.applicationId
 
-        val ticket = DeskproTicket.createForRequestProductionCredentials(name, email, appName, appId)
+        val ticket = DeskproTicket.createForRequestProductionCredentials(submitterName, submitterEmail, appName, appId)
         deskproConnector.createTicket(ticket)
       }
       case _ =>
