@@ -140,7 +140,7 @@
       @if(question.hintText.isDefined) {
         @renderHint(question.hintText.get)
       }
-      <div class="govuk-checkboxes" data-module="govuk-checkboxes">
+      <div class="govuk-checkboxes" data-module="govuk-checkboxes" id="question-@{question.id.value}-id">
         @{
         val a = currentAnswers match {
           case Some(mca @ MultipleChoiceAnswer(_)) => Some(mca)
@@ -168,7 +168,7 @@
       @if(question.hintText.isDefined) {
         @renderHint(question.hintText.get)
       }
-      <div class='govuk-radios @{if(inline) " govuk-radios--inline" else "" }'>
+      <div class='govuk-radios @{if(inline) " govuk-radios--inline" else "" }' id="question-@{question.id.value}-id">
         @{
         val a = currentAnswers match {
           case Some(sca @ SingleChoiceAnswer(_)) => Some(sca)
