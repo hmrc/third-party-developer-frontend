@@ -16,10 +16,7 @@
 
 package uk.gov.hmrc.thirdpartydeveloperfrontend.domain.services
 
-import play.api.libs.json.{EnvReads, EnvWrites}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.subscriptions.{FieldName, FieldValue}
-
-import java.time.LocalDateTime
 
 trait ApplicationsJsonFormatters extends ApiDefinitionsJsonFormatters with LocalDateTimeFormatters {
   import play.api.libs.json._
