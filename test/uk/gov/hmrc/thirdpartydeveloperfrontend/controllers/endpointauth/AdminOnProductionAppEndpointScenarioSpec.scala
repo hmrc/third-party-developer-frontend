@@ -16,29 +16,12 @@
 
 package uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.endpointauth
 
-import play.api.libs.crypto.CookieSigner
-import play.api.mvc.Cookie
-import play.api.test.FakeRequest
-
 class AdminOnProductionAppEndpointScenarioSpec extends EndpointScenarioSpec
   with IsNewJourneyStandardApplication
   with UserIsAdmin
   with UserIsAuthenticated
   with AppDeployedToProductionEnvironment
   with AppHasProductionStatus {
-  implicit val cookieSigner: CookieSigner = app.injector.instanceOf[CookieSigner]
-
-  override def updateRequestForScenario[T](request: FakeRequest[T]): FakeRequest[T] = { //TODO this belongs inside the UserIsAuthenticated trait
-    request.withCookies(
-      Cookie("PLAY2AUTH_SESS_ID", cookieSigner.sign(sessionId) + sessionId, None, "path", None, false, false)
-    ).withSession(
-      ("email" , userEmail),
-      ("emailAddress" , userEmail),
-      ("nonce" , "123")
-    )
-  }
-
-  override def describeScenario(): String = "User is authenticated as an Admin on the application team and the application is in the Production state"
 
   override def getExpectedResponse(endpoint: Endpoint): Response = {
     endpoint match {

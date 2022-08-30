@@ -17,9 +17,12 @@
 package uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.endpointauth
 
 import cats.data.NonEmptyList
+import play.api.libs.crypto.CookieSigner
+import play.api.mvc.Cookie
+import play.api.test.FakeRequest
 import uk.gov.hmrc.apiplatform.modules.mfa.models.MfaId
 import uk.gov.hmrc.apiplatform.modules.submissions.domain.models.Submission.Status.Granted
-import uk.gov.hmrc.apiplatform.modules.submissions.domain.models.{AcknowledgementOnly, AlwaysAsk, ExtendedSubmission, GroupOfQuestionnaires, Question, QuestionIdsOfInterest, QuestionItem, Questionnaire, QuestionnaireProgress, QuestionnaireState, ResponsibleIndividualVerification, ResponsibleIndividualVerificationId, ResponsibleIndividualVerificationWithDetails, Submission, TextAnswer, Wording}
+import uk.gov.hmrc.apiplatform.modules.submissions.domain.models._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.connectors.ThirdPartyDeveloperConnector.CoreUserDetails
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.apidefinitions.APIAccessType.PUBLIC
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.apidefinitions.APIStatus.STABLE
@@ -97,23 +100,25 @@ trait HasApplication extends HasAppDeploymentEnvironment with HasUserWithRole wi
     responsibleIndividualVerification, responsibleIndividual, "mr submitter", "submitter@example.com"
   )
   lazy val mfaId = MfaId.random
-
 }
+
 trait IsOldJourneyStandardApplication extends HasApplication {
-  def describeApplication = "Old Journey application with Standard access"
+  def describeApplication = "an Old Journey application with Standard access"
   def access: Access = Standard(List(redirectUrl), None, None, Set.empty, None, None)
   def checkInformation = Some(CheckInformation(true, true, true, Some(ContactDetails(s"$userFirstName $userLastName", userEmail, "01611234567")), true, true, true,
     List(TermsOfUseAgreement(userEmail, LocalDateTime.now(), "1.0"))))
 }
+
 trait IsNewJourneyStandardApplication extends HasApplication {
-  def describeApplication = "New Journey application with Standard access"
+  def describeApplication = "a New Journey application with Standard access"
   def access: Access = Standard(List(redirectUrl), None, None, Set.empty, None, Some(ImportantSubmissionData(
     None, responsibleIndividual, Set.empty, TermsAndConditionsLocation.Url(termsConditionsUrl), PrivacyPolicyLocation.Url(privacyPolicyUrl), List.empty
   )))
   def checkInformation = None
 }
+
 trait IsNewJourneyStandardApplicationWithoutSubmission extends HasApplication {
-  def describeApplication = "New Journey application with Standard access"
+  def describeApplication = "a New Journey application with Standard access but no submission"
   def access: Access = Standard(List(redirectUrl), None, None, Set.empty, None, None)
   def checkInformation = None
 }
@@ -133,22 +138,25 @@ trait HasUserWithRole extends MockConnectors {
     userId, userEmail, userFirstName, userLastName, None, List.empty, EmailPreferences.noPreferences
   )
   def maybeCollaborator: Option[Collaborator]
-
 }
+
 trait UserIsTeamMember extends HasUserWithRole with HasApplication {
   when(tpaProductionConnector.fetchByTeamMember(*[UserId])(*)).thenReturn(Future.successful(List(appWithSubsIds)))
   when(tpaSandboxConnector.fetchByTeamMember(*[UserId])(*)).thenReturn(Future.successful(List(appWithSubsIds)))
 }
+
 trait UserIsAdmin extends UserIsTeamMember {
-  def describeUserRole = "User is an Admin"
+  def describeUserRole = "The user is an Admin on the application team"
   def maybeCollaborator = Some(Collaborator(userEmail, CollaboratorRole.ADMINISTRATOR, userId))
 }
+
 trait UserIsDeveloper extends UserIsTeamMember {
-  def describeUserRole = "User is an Developer"
+  def describeUserRole = "The user is a Developer on the application team"
   def maybeCollaborator = Some(Collaborator(userEmail, CollaboratorRole.DEVELOPER, userId))
 }
+
 trait UserIsNotOnApplicationTeam extends HasUserWithRole {
-  def describeUserRole = "User is not a member of the application team"
+  def describeUserRole = "The user is not a member of the application team"
   def maybeCollaborator = None
 }
 
@@ -158,41 +166,60 @@ trait HasUserSession extends HasUserWithRole {
   def loggedInState: LoggedInState
   def session = Session(sessionId, developer, loggedInState)
 }
-trait UserIsAuthenticated extends HasUserSession {
-  def describeAuthenticationState = "User is authenticated"
+
+trait UserIsAuthenticated extends HasUserSession with UpdatesRequest {
+  def describeAuthenticationState = "and is authenticated"
   def loggedInState = LoggedInState.LOGGED_IN
 
   when(tpdConnector.register(*)(*)).thenReturn(Future.successful(EmailAlreadyInUse))
   when(tpdConnector.findUserId(*)(*)).thenReturn(Future.successful(Some(CoreUserDetails(userEmail, userId))))
+
+  implicit val cookieSigner: CookieSigner
+  override def updateRequestForScenario[T](request: FakeRequest[T]): FakeRequest[T] = {
+    request.withCookies(
+      Cookie("PLAY2AUTH_SESS_ID", cookieSigner.sign(sessionId) + sessionId, None, "path", None, false, false)
+    ).withSession(
+      ("email" , userEmail),
+      ("emailAddress" , userEmail),
+      ("nonce" , "123")
+    )
+  }
 }
+
 trait UserIsNotAuthenticated extends HasUserSession {
-  def describeAuthenticationState = "User is not authenticated"
+  def describeAuthenticationState = "and is not authenticated"
   def loggedInState = LoggedInState.PART_LOGGED_IN_ENABLING_MFA
 
   when(tpdConnector.register(*)(*)).thenReturn(Future.successful(RegistrationSuccessful))
   when(tpdConnector.findUserId(*)(*)).thenReturn(Future.successful(None))
 }
 
-
 trait HasAppDeploymentEnvironment {
-  def describeDeployment = s"App is deployed to $environment"
+  def describeDeployment = s"deployed to $environment"
   def environment: Environment
 }
+
 trait AppDeployedToProductionEnvironment extends HasAppDeploymentEnvironment {
   def environment = PRODUCTION
 }
+
 trait AppDeployedToSandboxEnvironment extends HasAppDeploymentEnvironment {
   def environment = SANDBOX
 }
 
 trait HasAppState {
-  def describeAppState = s"App has state ${state.name}"
+  def describeAppState = s"in state ${state.name}"
   def state: ApplicationState
 }
+
 trait AppHasProductionStatus extends HasAppState {
   def state = ApplicationState.production("requester@example.com", "code123")
 }
+
 trait AppHasTestingStatus extends HasAppState {
   def state = ApplicationState.testing
 }
 
+trait UpdatesRequest {
+  def updateRequestForScenario[T](request: FakeRequest[T]): FakeRequest[T]
+}

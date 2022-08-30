@@ -21,6 +21,7 @@ import play.api.Mode
 import play.api.http.Status.OK
 import play.api.inject.bind
 import play.api.inject.guice.GuiceApplicationBuilder
+import play.api.libs.crypto.CookieSigner
 import play.api.libs.json.OFormat
 import play.api.test.Helpers.{redirectLocation, route, status}
 import play.api.test.{CSRFTokenHelper, FakeRequest, Writeables}
@@ -35,7 +36,7 @@ import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.apidefinitions.{Api
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.ApplicationNameValidationJson.ApplicationNameValidationResult
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.connectors.ApiType.REST_API
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.connectors.{AddTeamMemberRequest, ApiType, ChangePassword, CombinedApi, TicketCreated, UserAuthenticationResponse}
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.connectors.{AddTeamMemberRequest, ChangePassword, CombinedApi, TicketCreated, UserAuthenticationResponse}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.{UpdateProfileRequest, User, UserId}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.emailpreferences.{APICategoryDisplayDetails, EmailPreferences}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.flows.FlowType.{EMAIL_PREFERENCES_V2, GET_PRODUCTION_CREDENTIALS, IP_ALLOW_LIST, NEW_APPLICATION_EMAIL_PREFERENCES_V2}
@@ -63,26 +64,29 @@ abstract class EndpointScenarioSpec extends AsyncHmrcSpec with GuiceOneAppPerSui
   with HasApplication
   with HasUserWithRole
   with HasUserSession
+  with UpdatesRequest
   {
   import EndpointScenarioSpec._
 
+  implicit val cookieSigner: CookieSigner = app.injector.instanceOf[CookieSigner]
+
   override def fakeApplication() = {
-    GuiceApplicationBuilder()
-      .overrides(bind[ConnectorMetrics].to[NoopConnectorMetrics])
-      .overrides(bind[ThirdPartyDeveloperConnector].toInstance(tpdConnector))
-      .overrides(bind[ThirdPartyApplicationProductionConnector].toInstance(tpaProductionConnector))
-      .overrides(bind[ThirdPartyApplicationSandboxConnector].toInstance(tpaSandboxConnector))
-      .overrides(bind[DeskproConnector].toInstance(deskproConnector))
-      .overrides(bind[FlowRepository].toInstance(flowRepository))
-      .overrides(bind[ApmConnector].toInstance(apmConnector))
-      .overrides(bind[SandboxSubscriptionFieldsConnector].toInstance(sandboxSubsFieldsConnector))
-      .overrides(bind[ProductionSubscriptionFieldsConnector].toInstance(productionSubsFieldsConnector))
-      .overrides(bind[SandboxPushPullNotificationsConnector].toInstance(sandboxPushPullNotificationsConnector))
-      .overrides(bind[ProductionPushPullNotificationsConnector].toInstance(productionPushPullNotificationsConnector))
-      .overrides(bind[ThirdPartyApplicationSubmissionsConnector].toInstance(thirdPartyApplicationSubmissionsConnector))
-      .overrides(bind[ThirdPartyDeveloperMfaConnector].toInstance(thirdPartyDeveloperMfaConnector))
-      .in(Mode.Test)
-      .build()
+  GuiceApplicationBuilder()
+    .overrides(bind[ConnectorMetrics].to[NoopConnectorMetrics])
+    .overrides(bind[ThirdPartyDeveloperConnector].toInstance(tpdConnector))
+    .overrides(bind[ThirdPartyApplicationProductionConnector].toInstance(tpaProductionConnector))
+    .overrides(bind[ThirdPartyApplicationSandboxConnector].toInstance(tpaSandboxConnector))
+    .overrides(bind[DeskproConnector].toInstance(deskproConnector))
+    .overrides(bind[FlowRepository].toInstance(flowRepository))
+    .overrides(bind[ApmConnector].toInstance(apmConnector))
+    .overrides(bind[SandboxSubscriptionFieldsConnector].toInstance(sandboxSubsFieldsConnector))
+    .overrides(bind[ProductionSubscriptionFieldsConnector].toInstance(productionSubsFieldsConnector))
+    .overrides(bind[SandboxPushPullNotificationsConnector].toInstance(sandboxPushPullNotificationsConnector))
+    .overrides(bind[ProductionPushPullNotificationsConnector].toInstance(productionPushPullNotificationsConnector))
+    .overrides(bind[ThirdPartyApplicationSubmissionsConnector].toInstance(thirdPartyApplicationSubmissionsConnector))
+    .overrides(bind[ThirdPartyDeveloperMfaConnector].toInstance(thirdPartyDeveloperMfaConnector))
+    .in(Mode.Test)
+    .build()
   }
 
   when(apmConnector.fetchApplicationById(*[ApplicationId])(*)).thenReturn(Future.successful(Some(appWithSubsData)))
@@ -92,77 +96,77 @@ abstract class EndpointScenarioSpec extends AsyncHmrcSpec with GuiceOneAppPerSui
   when(apmConnector.fetchCombinedApi(*[String])(*)).thenReturn(Future.successful(Right(CombinedApi("my service", "my service display name", List.empty, REST_API))))
   when(tpaSandboxConnector.fetchCredentials(*[ApplicationId])(*)).thenReturn(Future.successful(ApplicationToken(List(ClientSecret("s1id", "s1name", LocalDateTime.now(), None)), "secret")))
   when(tpaProductionConnector.fetchCredentials(*[ApplicationId])(*)).thenReturn(Future.successful(ApplicationToken(List(ClientSecret("s1id", "s1name", LocalDateTime.now(), None)), "secret")))
-    when(tpaSandboxConnector.fetchByTeamMember(*[UserId])(*)).thenReturn(Future.successful(List(appWithSubsIds)))
+  when(tpaSandboxConnector.fetchByTeamMember(*[UserId])(*)).thenReturn(Future.successful(List(appWithSubsIds)))
   when(sandboxPushPullNotificationsConnector.fetchPushSecrets(*[ClientId])(*)).thenReturn(Future.successful(List("secret1")))
   when(productionPushPullNotificationsConnector.fetchPushSecrets(*[ClientId])(*)).thenReturn(Future.successful(List("secret1")))
   when(tpdConnector.fetchByEmails(*[Set[String]])(*)).thenReturn(Future.successful(List(User(userEmail, Some(true)))))
   when(tpaSandboxConnector.removeTeamMember(*[ApplicationId], *[String], *[String], *[Set[String]])(*)).thenReturn(Future.successful(ApplicationUpdateSuccessful))
-    when(tpaProductionConnector.validateName(*[String], *[Option[ApplicationId]])(*)).thenReturn(Future.successful(Valid))
-    when(tpaProductionConnector.applicationUpdate(*[ApplicationId],*[ApplicationUpdate])(*)).thenReturn(Future.successful(ApplicationUpdateSuccessful))
-    when(tpaSandboxConnector.updateApproval(*[ApplicationId],*[CheckInformation])(*)).thenReturn(Future.successful(ApplicationUpdateSuccessful))
-    when(tpaProductionConnector.updateApproval(*[ApplicationId],*[CheckInformation])(*)).thenReturn(Future.successful(ApplicationUpdateSuccessful))
-    when(tpaSandboxConnector.update(*[ApplicationId],*[UpdateApplicationRequest])(*)).thenReturn(Future.successful(ApplicationUpdateSuccessful))
-    when(tpaProductionConnector.update(*[ApplicationId],*[UpdateApplicationRequest])(*)).thenReturn(Future.successful(ApplicationUpdateSuccessful))
-    when(tpaSandboxConnector.updateIpAllowlist(*[ApplicationId],*[Boolean], *[Set[String]])(*)).thenReturn(Future.successful(ApplicationUpdateSuccessful))
-    when(tpaProductionConnector.updateIpAllowlist(*[ApplicationId],*[Boolean], *[Set[String]])(*)).thenReturn(Future.successful(ApplicationUpdateSuccessful))
-    when(tpaSandboxConnector.addClientSecrets(*[ApplicationId], *[ClientSecretRequest])(*)).thenReturn(Future.successful(("1","2")))
-    when(tpaProductionConnector.addClientSecrets(*[ApplicationId], *[ClientSecretRequest])(*)).thenReturn(Future.successful(("1","2")))
-    when(tpaSandboxConnector.deleteClientSecret(*[ApplicationId], *, *)(*)).thenReturn(Future.successful(ApplicationUpdateSuccessful))
-    when(tpaProductionConnector.deleteClientSecret(*[ApplicationId], *, *)(*)).thenReturn(Future.successful(ApplicationUpdateSuccessful))
-    when(apmConnector.addTeamMember(*[ApplicationId],*[AddTeamMemberRequest])(*)).thenReturn(Future.successful(OK))
-    when(apmConnector.subscribeToApi(*[ApplicationId],*[ApiIdentifier])(*)).thenReturn(Future.successful(ApplicationUpdateSuccessful))
-    when(productionSubsFieldsConnector.saveFieldValues(*[ClientId], *[ApiContext], *[ApiVersion], *[Fields.Alias])(*)).thenReturn(Future.successful(SaveSubscriptionFieldsSuccessResponse))
-    when(sandboxSubsFieldsConnector.saveFieldValues(*[ClientId], *[ApiContext], *[ApiVersion], *[Fields.Alias])(*)).thenReturn(Future.successful(SaveSubscriptionFieldsSuccessResponse))
-    when(tpaSandboxConnector.validateName(*[String],*[Option[ApplicationId]])(*)).thenReturn(Future.successful(ApplicationNameValidation(ApplicationNameValidationResult(None))))
-    when(apmConnector.upliftApplicationV2(*[ApplicationId], *[UpliftData])(*)).thenAnswer((appId: ApplicationId, _: UpliftData) => Future.successful(appId))
-    when(apmConnector.fetchUpliftableApiIdentifiers(*)).thenReturn(Future.successful(Set(apiIdentifier)))
-    when(apmConnector.fetchAllApis(*)(*)).thenReturn(Future.successful(Map.empty))
-    when(apmConnector.fetchUpliftableSubscriptions(*[ApplicationId])(*)).thenReturn(Future.successful(Set(ApiIdentifier(apiContext, apiVersion))))
-    when(tpaProductionConnector.requestUplift(*[ApplicationId], *[UpliftRequest])(*)).thenReturn(Future.successful(ApplicationUpliftSuccessful))
-    when(deskproConnector.createTicket(*)(*)).thenReturn(Future.successful(TicketCreated))
-    when(flowRepository.updateLastUpdated(*)).thenReturn(Future.successful())
-    when(flowRepository.fetchBySessionIdAndFlowType(*[String], eqTo(GET_PRODUCTION_CREDENTIALS))(*[OFormat[GetProductionCredentialsFlow]])).thenReturn(Future.successful(Some(
-      GetProductionCredentialsFlow(sessionId, Some(SellResellOrDistribute("sell")), Some(ApiSubscriptions(Map(ApiIdentifier(apiContext, apiVersion) -> true))))
-    )))
-    when(flowRepository.fetchBySessionIdAndFlowType(*[String], eqTo(IP_ALLOW_LIST))(*[OFormat[IpAllowlistFlow]])).thenReturn(Future.successful(Some(IpAllowlistFlow(sessionId, Set("1.2.3.4")))))
-    when(flowRepository.fetchBySessionIdAndFlowType(*[String], eqTo(EMAIL_PREFERENCES_V2))(*[OFormat[IpAllowlistFlow]])).thenReturn(Future.successful(Some(EmailPreferencesFlowV2(
-      sessionId, Set.empty, Map(), Set.empty, List.empty))))
-    when(flowRepository.fetchBySessionIdAndFlowType(*[String], eqTo(NEW_APPLICATION_EMAIL_PREFERENCES_V2))(*[OFormat[IpAllowlistFlow]])).thenReturn(Future.successful(Some(NewApplicationEmailPreferencesFlowV2(
-      sessionId, EmailPreferences.noPreferences, applicationId, Set.empty, Set.empty, Set.empty))))
-    when(flowRepository.deleteBySessionIdAndFlowType(*,*)).thenReturn(Future.successful(true))
-    when(flowRepository.saveFlow(isA[GetProductionCredentialsFlow])(*[OFormat[GetProductionCredentialsFlow]])).thenReturn(Future.successful(GetProductionCredentialsFlow(sessionId, None, None)))
-    when(flowRepository.saveFlow(isA[IpAllowlistFlow])(*[OFormat[IpAllowlistFlow]])).thenReturn(Future.successful(IpAllowlistFlow(sessionId, Set.empty)))
-    when(flowRepository.saveFlow(isA[NewApplicationEmailPreferencesFlowV2])(*[OFormat[NewApplicationEmailPreferencesFlowV2]])).thenReturn(Future.successful(NewApplicationEmailPreferencesFlowV2(sessionId, EmailPreferences.noPreferences, applicationId, Set.empty, Set.empty, Set.empty)))
-    when(flowRepository.saveFlow(isA[EmailPreferencesFlowV2])(*[OFormat[EmailPreferencesFlowV2]])).thenReturn(Future.successful(EmailPreferencesFlowV2(sessionId, Set(category), Map.empty, Set.empty, List.empty)))
-    when(tpdConnector.fetchEmailForResetCode(*)(*)).thenReturn(Future.successful(userEmail))
-    when(tpdConnector.requestReset(*)(*)).thenReturn(Future.successful(OK))
-    when(tpdConnector.reset(*)(*)).thenReturn(Future.successful(OK))
-    when(tpdConnector.authenticate(*)(*)).thenReturn(Future.successful(UserAuthenticationResponse(false, false, None, Some(session))))
-    when(tpdConnector.fetchSession(eqTo(sessionId))(*)).thenReturn(Future.successful(session))
-    when(tpdConnector.deleteSession(eqTo(sessionId))(*)).thenReturn(Future.successful(OK))
-    when(tpdConnector.authenticateTotp(*)(*)).thenReturn(Future.successful(session))
-    when(tpdConnector.verify(*)(*)).thenReturn(Future.successful(OK))
-    when(tpaProductionConnector.verify(*)(*)).thenReturn(Future.successful(ApplicationVerificationSuccessful))
-    when(tpdConnector.resendVerificationEmail(*)(*)).thenReturn(Future.successful(OK))
-    when(tpaSandboxConnector.deleteApplication(*[ApplicationId])(*)).thenReturn(Future.successful())
-    when(tpaProductionConnector.deleteApplication(*[ApplicationId])(*)).thenReturn(Future.successful())
-    when(thirdPartyApplicationSubmissionsConnector.fetchResponsibleIndividualVerification(*[String])(*)).thenReturn(Future.successful(Some(responsibleIndividualVerification)))
-    when(thirdPartyApplicationSubmissionsConnector.responsibleIndividualAccept(*[String])(*)).thenReturn(Future.successful(Right(responsibleIndividualVerificationWithDetails)))
-    when(thirdPartyApplicationSubmissionsConnector.fetchLatestExtendedSubmission(*[ApplicationId])(*)).thenReturn(Future.successful(Some(extendedSubmission)))
-    when(thirdPartyApplicationSubmissionsConnector.fetchSubmission(*[Submission.Id])(*)).thenReturn(Future.successful(Some(extendedSubmission)))
-    when(thirdPartyApplicationSubmissionsConnector.fetchLatestSubmission(*[ApplicationId])(*)).thenReturn(Future.successful(Some(submission)))
-    when(thirdPartyApplicationSubmissionsConnector.recordAnswer(*[Submission.Id], *[Question.Id], *[List[String]])(*)).thenReturn(Future.successful(Right(extendedSubmission)))
-    when(apmConnector.fetchAllCombinedAPICategories()(*)).thenReturn(Future.successful(Right(List(APICategoryDisplayDetails("category", "name")))))
-    when(tpdConnector.fetchDeveloper(*[UserId])(*)).thenReturn(Future.successful(Some(developer)))
-    when(tpdConnector.updateProfile(*[UserId], *[UpdateProfileRequest])(*)).thenReturn(Future.successful(1))
-    when(tpdConnector.updateEmailPreferences(*[UserId], *[EmailPreferences])(*)).thenReturn(Future.successful(true))
-    when(tpdConnector.removeEmailPreferences(*[UserId])(*)).thenReturn(Future.successful(true))
-    when(apmConnector.fetchCombinedApisVisibleToUser(*[UserId])(*)).thenReturn(Future.successful(Right(List(CombinedApi("my service", "display name", List.empty, REST_API)))))
-    when(tpdConnector.changePassword(*[ChangePassword])(*)).thenReturn(Future.successful(1))
-    when(thirdPartyDeveloperMfaConnector.verifyMfa(*[UserId], *[String])(*)).thenReturn(Future.successful(true))
-    when(thirdPartyDeveloperMfaConnector.enableMfa(*[UserId])(*)).thenReturn(Future.successful())
-    when(thirdPartyDeveloperMfaConnector.removeMfaById(*[UserId], *[MfaId])(*)).thenReturn(Future.successful())
-    when(thirdPartyDeveloperMfaConnector.createMfaSecret(*[UserId])(*)).thenReturn(Future.successful("secret"))
+  when(tpaProductionConnector.validateName(*[String], *[Option[ApplicationId]])(*)).thenReturn(Future.successful(Valid))
+  when(tpaProductionConnector.applicationUpdate(*[ApplicationId],*[ApplicationUpdate])(*)).thenReturn(Future.successful(ApplicationUpdateSuccessful))
+  when(tpaSandboxConnector.updateApproval(*[ApplicationId],*[CheckInformation])(*)).thenReturn(Future.successful(ApplicationUpdateSuccessful))
+  when(tpaProductionConnector.updateApproval(*[ApplicationId],*[CheckInformation])(*)).thenReturn(Future.successful(ApplicationUpdateSuccessful))
+  when(tpaSandboxConnector.update(*[ApplicationId],*[UpdateApplicationRequest])(*)).thenReturn(Future.successful(ApplicationUpdateSuccessful))
+  when(tpaProductionConnector.update(*[ApplicationId],*[UpdateApplicationRequest])(*)).thenReturn(Future.successful(ApplicationUpdateSuccessful))
+  when(tpaSandboxConnector.updateIpAllowlist(*[ApplicationId],*[Boolean], *[Set[String]])(*)).thenReturn(Future.successful(ApplicationUpdateSuccessful))
+  when(tpaProductionConnector.updateIpAllowlist(*[ApplicationId],*[Boolean], *[Set[String]])(*)).thenReturn(Future.successful(ApplicationUpdateSuccessful))
+  when(tpaSandboxConnector.addClientSecrets(*[ApplicationId], *[ClientSecretRequest])(*)).thenReturn(Future.successful(("1","2")))
+  when(tpaProductionConnector.addClientSecrets(*[ApplicationId], *[ClientSecretRequest])(*)).thenReturn(Future.successful(("1","2")))
+  when(tpaSandboxConnector.deleteClientSecret(*[ApplicationId], *, *)(*)).thenReturn(Future.successful(ApplicationUpdateSuccessful))
+  when(tpaProductionConnector.deleteClientSecret(*[ApplicationId], *, *)(*)).thenReturn(Future.successful(ApplicationUpdateSuccessful))
+  when(apmConnector.addTeamMember(*[ApplicationId],*[AddTeamMemberRequest])(*)).thenReturn(Future.successful(OK))
+  when(apmConnector.subscribeToApi(*[ApplicationId],*[ApiIdentifier])(*)).thenReturn(Future.successful(ApplicationUpdateSuccessful))
+  when(productionSubsFieldsConnector.saveFieldValues(*[ClientId], *[ApiContext], *[ApiVersion], *[Fields.Alias])(*)).thenReturn(Future.successful(SaveSubscriptionFieldsSuccessResponse))
+  when(sandboxSubsFieldsConnector.saveFieldValues(*[ClientId], *[ApiContext], *[ApiVersion], *[Fields.Alias])(*)).thenReturn(Future.successful(SaveSubscriptionFieldsSuccessResponse))
+  when(tpaSandboxConnector.validateName(*[String],*[Option[ApplicationId]])(*)).thenReturn(Future.successful(ApplicationNameValidation(ApplicationNameValidationResult(None))))
+  when(apmConnector.upliftApplicationV2(*[ApplicationId], *[UpliftData])(*)).thenAnswer((appId: ApplicationId, _: UpliftData) => Future.successful(appId))
+  when(apmConnector.fetchUpliftableApiIdentifiers(*)).thenReturn(Future.successful(Set(apiIdentifier)))
+  when(apmConnector.fetchAllApis(*)(*)).thenReturn(Future.successful(Map.empty))
+  when(apmConnector.fetchUpliftableSubscriptions(*[ApplicationId])(*)).thenReturn(Future.successful(Set(ApiIdentifier(apiContext, apiVersion))))
+  when(tpaProductionConnector.requestUplift(*[ApplicationId], *[UpliftRequest])(*)).thenReturn(Future.successful(ApplicationUpliftSuccessful))
+  when(deskproConnector.createTicket(*)(*)).thenReturn(Future.successful(TicketCreated))
+  when(flowRepository.updateLastUpdated(*)).thenReturn(Future.successful())
+  when(flowRepository.fetchBySessionIdAndFlowType(*[String], eqTo(GET_PRODUCTION_CREDENTIALS))(*[OFormat[GetProductionCredentialsFlow]])).thenReturn(Future.successful(Some(
+    GetProductionCredentialsFlow(sessionId, Some(SellResellOrDistribute("sell")), Some(ApiSubscriptions(Map(ApiIdentifier(apiContext, apiVersion) -> true))))
+  )))
+  when(flowRepository.fetchBySessionIdAndFlowType(*[String], eqTo(IP_ALLOW_LIST))(*[OFormat[IpAllowlistFlow]])).thenReturn(Future.successful(Some(IpAllowlistFlow(sessionId, Set("1.2.3.4")))))
+  when(flowRepository.fetchBySessionIdAndFlowType(*[String], eqTo(EMAIL_PREFERENCES_V2))(*[OFormat[IpAllowlistFlow]])).thenReturn(Future.successful(Some(EmailPreferencesFlowV2(
+    sessionId, Set.empty, Map(), Set.empty, List.empty))))
+  when(flowRepository.fetchBySessionIdAndFlowType(*[String], eqTo(NEW_APPLICATION_EMAIL_PREFERENCES_V2))(*[OFormat[IpAllowlistFlow]])).thenReturn(Future.successful(Some(NewApplicationEmailPreferencesFlowV2(
+    sessionId, EmailPreferences.noPreferences, applicationId, Set.empty, Set.empty, Set.empty))))
+  when(flowRepository.deleteBySessionIdAndFlowType(*,*)).thenReturn(Future.successful(true))
+  when(flowRepository.saveFlow(isA[GetProductionCredentialsFlow])(*[OFormat[GetProductionCredentialsFlow]])).thenReturn(Future.successful(GetProductionCredentialsFlow(sessionId, None, None)))
+  when(flowRepository.saveFlow(isA[IpAllowlistFlow])(*[OFormat[IpAllowlistFlow]])).thenReturn(Future.successful(IpAllowlistFlow(sessionId, Set.empty)))
+  when(flowRepository.saveFlow(isA[NewApplicationEmailPreferencesFlowV2])(*[OFormat[NewApplicationEmailPreferencesFlowV2]])).thenReturn(Future.successful(NewApplicationEmailPreferencesFlowV2(sessionId, EmailPreferences.noPreferences, applicationId, Set.empty, Set.empty, Set.empty)))
+  when(flowRepository.saveFlow(isA[EmailPreferencesFlowV2])(*[OFormat[EmailPreferencesFlowV2]])).thenReturn(Future.successful(EmailPreferencesFlowV2(sessionId, Set(category), Map.empty, Set.empty, List.empty)))
+  when(tpdConnector.fetchEmailForResetCode(*)(*)).thenReturn(Future.successful(userEmail))
+  when(tpdConnector.requestReset(*)(*)).thenReturn(Future.successful(OK))
+  when(tpdConnector.reset(*)(*)).thenReturn(Future.successful(OK))
+  when(tpdConnector.authenticate(*)(*)).thenReturn(Future.successful(UserAuthenticationResponse(false, false, None, Some(session))))
+  when(tpdConnector.fetchSession(eqTo(sessionId))(*)).thenReturn(Future.successful(session))
+  when(tpdConnector.deleteSession(eqTo(sessionId))(*)).thenReturn(Future.successful(OK))
+  when(tpdConnector.authenticateTotp(*)(*)).thenReturn(Future.successful(session))
+  when(tpdConnector.verify(*)(*)).thenReturn(Future.successful(OK))
+  when(tpaProductionConnector.verify(*)(*)).thenReturn(Future.successful(ApplicationVerificationSuccessful))
+  when(tpdConnector.resendVerificationEmail(*)(*)).thenReturn(Future.successful(OK))
+  when(tpaSandboxConnector.deleteApplication(*[ApplicationId])(*)).thenReturn(Future.successful())
+  when(tpaProductionConnector.deleteApplication(*[ApplicationId])(*)).thenReturn(Future.successful())
+  when(thirdPartyApplicationSubmissionsConnector.fetchResponsibleIndividualVerification(*[String])(*)).thenReturn(Future.successful(Some(responsibleIndividualVerification)))
+  when(thirdPartyApplicationSubmissionsConnector.responsibleIndividualAccept(*[String])(*)).thenReturn(Future.successful(Right(responsibleIndividualVerificationWithDetails)))
+  when(thirdPartyApplicationSubmissionsConnector.fetchLatestExtendedSubmission(*[ApplicationId])(*)).thenReturn(Future.successful(Some(extendedSubmission)))
+  when(thirdPartyApplicationSubmissionsConnector.fetchSubmission(*[Submission.Id])(*)).thenReturn(Future.successful(Some(extendedSubmission)))
+  when(thirdPartyApplicationSubmissionsConnector.fetchLatestSubmission(*[ApplicationId])(*)).thenReturn(Future.successful(Some(submission)))
+  when(thirdPartyApplicationSubmissionsConnector.recordAnswer(*[Submission.Id], *[Question.Id], *[List[String]])(*)).thenReturn(Future.successful(Right(extendedSubmission)))
+  when(apmConnector.fetchAllCombinedAPICategories()(*)).thenReturn(Future.successful(Right(List(APICategoryDisplayDetails("category", "name")))))
+  when(tpdConnector.fetchDeveloper(*[UserId])(*)).thenReturn(Future.successful(Some(developer)))
+  when(tpdConnector.updateProfile(*[UserId], *[UpdateProfileRequest])(*)).thenReturn(Future.successful(1))
+  when(tpdConnector.updateEmailPreferences(*[UserId], *[EmailPreferences])(*)).thenReturn(Future.successful(true))
+  when(tpdConnector.removeEmailPreferences(*[UserId])(*)).thenReturn(Future.successful(true))
+  when(apmConnector.fetchCombinedApisVisibleToUser(*[UserId])(*)).thenReturn(Future.successful(Right(List(CombinedApi("my service", "display name", List.empty, REST_API)))))
+  when(tpdConnector.changePassword(*[ChangePassword])(*)).thenReturn(Future.successful(1))
+  when(thirdPartyDeveloperMfaConnector.verifyMfa(*[UserId], *[String])(*)).thenReturn(Future.successful(true))
+  when(thirdPartyDeveloperMfaConnector.enableMfa(*[UserId])(*)).thenReturn(Future.successful())
+  when(thirdPartyDeveloperMfaConnector.removeMfaById(*[UserId], *[MfaId])(*)).thenReturn(Future.successful())
+  when(thirdPartyDeveloperMfaConnector.createMfaSecret(*[UserId])(*)).thenReturn(Future.successful("secret"))
 
   private def populatePathTemplateWithValues(pathTemplate: String, values: Map[String,String]): String = {
     //TODO fail test if path contains parameters that aren't supplied by the values map
@@ -411,7 +415,7 @@ abstract class EndpointScenarioSpec extends AsyncHmrcSpec with GuiceOneAppPerSui
   }
 
   // Override these methods within scenarios classes
-  def updateRequestForScenario[T](request: FakeRequest[T]): FakeRequest[T] = request
+  override def updateRequestForScenario[T](request: FakeRequest[T]): FakeRequest[T] = request
   def getPathParameterValueOverrides(endpoint: Endpoint) = Map.empty[String,String]
   def getQueryParameterValueOverrides(endpoint: Endpoint) = Map.empty[String,String]
   def getBodyParameterValueOverrides(endpoint: Endpoint) = Map.empty[String,String]
@@ -429,20 +433,18 @@ abstract class EndpointScenarioSpec extends AsyncHmrcSpec with GuiceOneAppPerSui
     ("profile", "/developer/profile"),
     ("submissions", "/developer/submissions")
   )
-  val row = "GET /developer/submissions/application/:aid/view-answers         "
-  s"test endpoints when ${describeScenario()}" should {
+
+  s"Test all endpoints using ${describeScenario()}" should {
     routesFilePrefixes
       .flatMap(routesFilePrefixDetails => {
         val (routesFilePrefix, pathPrefix) = routesFilePrefixDetails
         Source.fromFile(s"conf/${routesFilePrefix}.routes").getLines().flatMap(line => parseEndpoint(line, pathPrefix))
       })
-//      List(parseEndpoint(row + " a", "").get)
       .flatMap(populateRequestValues(_))
       .toSet foreach { requestValues: RequestValues =>
       val expectedResponse = getExpectedResponse(requestValues.endpoint)
-      s"give $expectedResponse for $requestValues" in {
+      s"return $expectedResponse for $requestValues" in {
         val result = callEndpoint(requestValues)
-//        println("case Endpoint(\"" + requestValues.endpoint.verb + "\", \"" + requestValues.endpoint.pathTemplate + "\") => " + result + ")")
         result shouldBe expectedResponse
       }
     }
