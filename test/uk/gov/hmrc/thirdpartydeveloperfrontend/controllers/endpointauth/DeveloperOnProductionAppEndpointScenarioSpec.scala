@@ -55,6 +55,7 @@ class DeveloperOnProductionAppEndpointScenarioSpec extends EndpointScenarioSpec
       case Endpoint(_,      "/developer/applications/:id/details/change-privacy-policy-location") => Forbidden()
       case Endpoint(_,      "/developer/applications/:id/details/change-terms-conditions-location") => Forbidden()
       case Endpoint(_,      "/developer/applications/:id/details/terms-of-use") => Forbidden()
+      case Endpoint("GET",  "/developer/submissions/application/:aid/terms-of-use-responses") => Forbidden()
       case Endpoint("POST", "/developer/applications/:id/delete-subordinate") => Forbidden()
       case Endpoint(_,      "/developer/applications/:id/delete-subordinate-confirm") => Forbidden()
       case Endpoint("GET",  "/developer/applications/:id/delete-principal-confirm") => Forbidden()
@@ -77,6 +78,13 @@ class DeveloperOnProductionAppEndpointScenarioSpec extends EndpointScenarioSpec
       case Endpoint(_, path) if path.startsWith("/developer/applications/:id/responsible-individual/") => Forbidden()
       case Endpoint(_, path) if path.startsWith("/developer/applications/:id/ip-allowlist/") => Forbidden()
       case Endpoint(_, path) if path.startsWith("/developer/applications/:id/redirect-uris/") => Forbidden()
+
+      case Endpoint(_,      "/developer/submissions/application/:aid/production-credentials-checklist") => BadRequest() // must be in 'testing' state
+      case Endpoint(_,      "/developer/submissions/application/:aid/cancel-request") => BadRequest() // must not be in production state
+      case Endpoint("GET",  "/developer/submissions/application/:aid/check-answers") => BadRequest() // must be in testing state
+      case Endpoint("GET",  "/developer/submissions/application/:aid/view-answers") => BadRequest() // must not be in pending approval state
+      case Endpoint("GET",  "/developer/submissions/application/:aid/submit-request") => BadRequest() // must be in testing state
+      case Endpoint(_,      "/developer/submissions/application/:aid/start-using-your-application") => Forbidden()
 
       case _ => getEndpointSuccessResponse(endpoint)
     }

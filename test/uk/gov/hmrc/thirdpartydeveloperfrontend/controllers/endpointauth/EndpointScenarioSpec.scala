@@ -27,6 +27,7 @@ import play.api.test.{CSRFTokenHelper, FakeRequest, Writeables}
 import uk.gov.hmrc.apiplatform.modules.mfa.connectors.ThirdPartyDeveloperMfaConnector
 import uk.gov.hmrc.apiplatform.modules.mfa.models.MfaId
 import uk.gov.hmrc.apiplatform.modules.submissions.connectors.ThirdPartyApplicationSubmissionsConnector
+import uk.gov.hmrc.apiplatform.modules.submissions.domain.models.{Question, Submission}
 import uk.gov.hmrc.apiplatform.modules.uplift.domain.models.{ApiSubscriptions, GetProductionCredentialsFlow}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.connectors._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.{ApplicationUpdateSuccessful, ApplicationUpliftSuccessful}
@@ -147,6 +148,8 @@ abstract class EndpointScenarioSpec extends AsyncHmrcSpec with GuiceOneAppPerSui
     when(thirdPartyApplicationSubmissionsConnector.fetchResponsibleIndividualVerification(*[String])(*)).thenReturn(Future.successful(Some(responsibleIndividualVerification)))
     when(thirdPartyApplicationSubmissionsConnector.responsibleIndividualAccept(*[String])(*)).thenReturn(Future.successful(Right(responsibleIndividualVerificationWithDetails)))
     when(thirdPartyApplicationSubmissionsConnector.fetchLatestExtendedSubmission(*[ApplicationId])(*)).thenReturn(Future.successful(Some(extendedSubmission)))
+    when(thirdPartyApplicationSubmissionsConnector.fetchSubmission(*[Submission.Id])(*)).thenReturn(Future.successful(Some(extendedSubmission)))
+    when(thirdPartyApplicationSubmissionsConnector.recordAnswer(*[Submission.Id], *[Question.Id], *[List[String]])(*)).thenReturn(Future.successful(Right(extendedSubmission)))
     when(apmConnector.fetchAllCombinedAPICategories()(*)).thenReturn(Future.successful(Right(List(APICategoryDisplayDetails("category", "name")))))
     when(tpdConnector.fetchDeveloper(*[UserId])(*)).thenReturn(Future.successful(Some(developer)))
     when(tpdConnector.updateProfile(*[UserId], *[UpdateProfileRequest])(*)).thenReturn(Future.successful(1))
@@ -207,6 +210,8 @@ abstract class EndpointScenarioSpec extends AsyncHmrcSpec with GuiceOneAppPerSui
   final def getPathParameterValues(): Map[String,String] = Map(
     "id" -> applicationId.value,
     "aid" -> applicationId.value,
+    "qid" -> question.id.value,
+    "sid" -> submissionId.value,
     "environment" -> Environment.PRODUCTION.entryName,
     "pageNumber" -> "1",
     "context" -> apiContext.value,
@@ -302,6 +307,8 @@ abstract class EndpointScenarioSpec extends AsyncHmrcSpec with GuiceOneAppPerSui
       case Endpoint("POST", "/developer/profile/protect-account/enable") => Map("accessCode" -> "123456")
       case Endpoint("POST", "/developer/profile/email-preferences/apis") => Map("apiRadio" -> "1", "selectedApi" -> "api1", "currentCategory" -> category)
       case Endpoint("POST", "/developer/profile/email-preferences/categories") => Map("taxRegime[]" -> "1")
+      case Endpoint("POST", "/developer/submissions/:sid/question/:qid") => Map("submit-action" -> "acknowledgement")
+      case Endpoint("POST", "/developer/submissions/:sid/question/:qid/update") => Map("submit-action" -> "acknowledgement")
       case _ => Map.empty
     }
   }
@@ -385,6 +392,8 @@ abstract class EndpointScenarioSpec extends AsyncHmrcSpec with GuiceOneAppPerSui
       case Endpoint("POST", "/developer/profile/protect-account/remove-by-id") => Redirect(s"/developer/profile/protect-account/remove-by-id/complete")
       case Endpoint("POST", "/developer/profile/email-preferences/apis-from-subscriptions") => Redirect(s"/developer/profile/email-preferences/topics-from-subscriptions?context=${applicationId.value}")
       case Endpoint("POST", "/developer/profile/email-preferences/categories") => Redirect(s"/developer/profile/email-preferences/apis?category=${category}")
+      case Endpoint("POST", "/developer/submissions/:sid/question/:qid") => Redirect(s"/developer/submissions/application/${applicationId.value}/production-credentials-checklist")
+      case Endpoint("POST", "/developer/submissions/:sid/question/:qid/update") => Redirect(s"/developer/submissions/application/${applicationId.value}/check-answers")
       case _ => Success()
     }
   }
@@ -404,11 +413,11 @@ abstract class EndpointScenarioSpec extends AsyncHmrcSpec with GuiceOneAppPerSui
   }
 
   val routesFilePrefixes = List(
-//    ("app", "/developer"),
-//    ("profile", "/developer/profile"),
+    ("app", "/developer"),
+    ("profile", "/developer/profile"),
     ("submissions", "/developer/submissions")
   )
-  val row = "POST /developer/profile/email-preferences/categories  "
+  val row = "POST        /developer/submissions/:sid/question/:qid/update         "
   s"test endpoints when ${describeScenario()}" should {
     routesFilePrefixes
       .flatMap(routesFilePrefixDetails => {

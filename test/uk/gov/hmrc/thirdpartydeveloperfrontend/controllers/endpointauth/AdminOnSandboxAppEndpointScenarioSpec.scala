@@ -59,6 +59,13 @@ class AdminOnSandboxAppEndpointScenarioSpec extends EndpointScenarioSpec
       case Endpoint("POST", "/developer/registration") => BadRequest()
       case Endpoint("GET",  "/developer/reset-password/error") => BadRequest()
 
+      case Endpoint(_,      "/developer/submissions/application/:aid/production-credentials-checklist") => BadRequest() // must be in 'testing' state
+      case Endpoint(_,      "/developer/submissions/application/:aid/cancel-request") => BadRequest() // must not be in production state
+      case Endpoint("GET",  "/developer/submissions/application/:aid/check-answers") => BadRequest() // must be in testing state
+      case Endpoint("GET",  "/developer/submissions/application/:aid/view-answers") => BadRequest() // must not be in pending approval state
+      case Endpoint("GET",  "/developer/submissions/application/:aid/submit-request") => BadRequest() // must be in testing state
+      case Endpoint(_,      "/developer/submissions/application/:aid/start-using-your-application") => NotFound() // must be in pre-production state
+
       case _ => getEndpointSuccessResponse(endpoint)
     }
   }

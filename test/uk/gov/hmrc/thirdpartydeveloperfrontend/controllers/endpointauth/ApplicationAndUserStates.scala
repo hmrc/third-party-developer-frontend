@@ -77,7 +77,7 @@ trait HasApplication extends HasAppDeploymentEnvironment with HasUserWithRole wi
   lazy val answersToQuestions = Map(question.id -> TextAnswer("yes"))
   lazy val submissionInstance = Submission.Instance(submissionIndex, answersToQuestions, NonEmptyList.one(Granted(LocalDateTime.now, "mr jones")))
   lazy val submission = Submission(submissionId, applicationId, LocalDateTime.now, NonEmptyList.one(groupOfQuestionnaires), questionIdsOfInterest, NonEmptyList.one(submissionInstance), Map.empty)
-  lazy val questionnaireProgress = QuestionnaireProgress(QuestionnaireState.Completed, List())
+  lazy val questionnaireProgress = QuestionnaireProgress(QuestionnaireState.Completed, List(question.id))
   lazy val extendedSubmission = ExtendedSubmission(submission, Map(
     questionnaireId -> questionnaireProgress
   ))
