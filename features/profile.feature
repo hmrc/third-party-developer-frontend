@@ -25,6 +25,18 @@ Feature: Developer views/updates profile
     And the user-nav header contains a 'Joe Bloggs' link
     And The current page contains link 'Continue to your profile' to 'Manage profile'
 
+  Scenario: TPSD edits profile
+    Given I want to successfully change my profile
+    When I click on the button with id 'change-organisation'
+    Then I am on the 'Change profile details' page
+    When I enter all the fields:
+      | firstname       | lastname |
+      | Joe             | Bloggs   |
+    And I click on submit
+    Then I am on the 'Manage profile' page
+    And the user-nav header contains a 'Joe Bloggs' link
+    And The current page contains link 'Continue to your profile' to 'Manage profile'
+
   @API-141
   Scenario: TPSD edits password
     Given I want to successfully change my password

@@ -30,15 +30,18 @@ trait ApplicationUpdate {
 case class ChangeProductionApplicationPrivacyPolicyLocation(instigator: UserId, timestamp: LocalDateTime, newLocation: PrivacyPolicyLocation) extends ApplicationUpdate
 case class ChangeProductionApplicationTermsAndConditionsLocation(instigator: UserId, timestamp: LocalDateTime, newLocation: TermsAndConditionsLocation) extends ApplicationUpdate
 case class ChangeResponsibleIndividual(instigator: UserId, timestamp: LocalDateTime, name: String, email: String) extends ApplicationUpdate
+case class VerifyResponsibleIndividual(instigator: UserId, timestamp: LocalDateTime, requesterName: String, riName: String, riEmail: String) extends ApplicationUpdate
 
 trait ApplicationUpdateFormatters {
   implicit val changePrivacyPolicyLocationFormatter = Json.format[ChangeProductionApplicationPrivacyPolicyLocation]
   implicit val changeTermsAndConditionsLocationFormatter = Json.format[ChangeProductionApplicationTermsAndConditionsLocation]
   implicit val changeResponsibleIndividualFormatter = Json.format[ChangeResponsibleIndividual]
+  implicit val verifyResponsibleIndividualFormatter = Json.format[VerifyResponsibleIndividual]
 
   implicit val applicationUpdateRequestFormatter = Union.from[ApplicationUpdate]("updateType")
     .and[ChangeProductionApplicationPrivacyPolicyLocation]("changeProductionApplicationPrivacyPolicyLocation")
     .and[ChangeProductionApplicationTermsAndConditionsLocation]("changeProductionApplicationTermsAndConditionsLocation")
     .and[ChangeResponsibleIndividual]("changeResponsibleIndividual")
+    .and[VerifyResponsibleIndividual]("verifyResponsibleIndividual")
     .format
 }

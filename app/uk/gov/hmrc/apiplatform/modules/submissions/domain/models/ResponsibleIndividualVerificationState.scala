@@ -14,19 +14,14 @@
  * limitations under the License.
  */
 
-package uk.gov.hmrc.thirdpartydeveloperfrontend.builder
+package uk.gov.hmrc.apiplatform.modules.submissions.domain.models
 
-import uk.gov.hmrc.apiplatform.modules.mfa.models.{AuthenticatorAppMfaDetailSummary, MfaId}
+import uk.gov.hmrc.apiplatform.modules.submissions.domain.utils.EnumJson
 
-import java.time.LocalDateTime
+object ResponsibleIndividualVerificationState extends Enumeration {
+  type ResponsibleIndividualVerificationState = Value
 
-trait MfaDetailBuilder {
-  val verifiedAuthenticatorAppMfaDetails = buildAuthenticatorAppMfaDetails(name = "name", verified = true)
+  val INITIAL, REMINDERS_SENT, ADMIN_REQUESTED_CHANGE = Value
 
-
-  def buildAuthenticatorAppMfaDetails(name: String,
-                                      verified: Boolean,
-                                      createdOn: LocalDateTime = LocalDateTime.now) ={
-    AuthenticatorAppMfaDetailSummary(MfaId.random, name, createdOn, verified)
-  }
+  implicit val format = EnumJson.enumFormat(ResponsibleIndividualVerificationState)
 }

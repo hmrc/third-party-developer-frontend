@@ -29,6 +29,8 @@
 
 @pageHeading = @{ question.wording.value }
 
+@choiceAsId(choice: PossibleAnswer) = {question-@{choice.htmlValue}-id}
+
 @renderStatementText(st: StatementText) = @{st.text}
 
 @renderStatementLink(sl: StatementLink) = {<a class="govuk-link" href="@{sl.url}" target="_blank">@{sl.text}</a>}
@@ -66,7 +68,7 @@
 @renderParagraphCompoundFragment(cs: CompoundFragment) = { <p class="govuk-body">@renderCompoundFragment(cs)</p> }
 
 @renderHint(nbsf: NonBulletStatementFragment) = {
-  <div class="govuk-hint">@renderNonBulletStatementFragment(nbsf)</div>
+  <div id="non-bullet-statement-fragment-hint" class="govuk-hint">@renderNonBulletStatementFragment(nbsf)</div>
 }
 
 @renderStatement(statement: Statement) = {
@@ -95,9 +97,9 @@
 @renderRadioQuestionChoice(choice: PossibleAnswer, actualAnswer: Option[SingleChoiceAnswer]) = {
   @defining( if(Some(choice.value) == actualAnswer.map(_.value)) """checked="checked"""" else "") { checked => 
     <div class="govuk-radios__item">
-      <input class="govuk-radios__input" type="radio" id="question-@{choice.value}-id" name="answer" value="@{choice.value}" @{checked}
+      <input class="govuk-radios__input" type="radio" id="@{choiceAsId(choice)}" name="answer" value="@{choice.value}" @{checked}
         data-journey-val="@{choice.value}">
-      <label class="govuk-label govuk-radios__label" for="question-@{choice.value}-id">@{choice.value}</label>
+      <label class="govuk-label govuk-radios__label" for="@{choiceAsId(choice)}">@{choice.value}</label>
     </div>
   }
 }
@@ -105,9 +107,9 @@
 @renderCheckboxChoice(choice: PossibleAnswer, actualAnswer: Option[MultipleChoiceAnswer]) = {
   @defining( if(actualAnswer.map(_.values).getOrElse(Set.empty).contains(choice.value)) """checked="checked"""" else "") { checked => 
     <div class="govuk-checkboxes__item">
-      <input class="govuk-checkboxes__input" id="question-@{choice.value}-id" name="answer" type="checkbox"
+      <input class="govuk-checkboxes__input" id="@{choiceAsId(choice)}" name="answer" type="checkbox"
         value="@{choice.value}" @{checked}>
-      <label class="govuk-label govuk-checkboxes__label" for="question-@{choice.value}-id">@{choice.value}</label>
+      <label class="govuk-label govuk-checkboxes__label" for="@{choiceAsId(choice)}">@{choice.value}</label>
     </div>
   }
 }
@@ -138,7 +140,7 @@
       @if(question.hintText.isDefined) {
         @renderHint(question.hintText.get)
       }
-      <div class="govuk-checkboxes" data-module="govuk-checkboxes">
+      <div class="govuk-checkboxes" data-module="govuk-checkboxes" id="question-@{question.id.value}-id">
         @{
         val a = currentAnswers match {
           case Some(mca @ MultipleChoiceAnswer(_)) => Some(mca)
@@ -166,7 +168,7 @@
       @if(question.hintText.isDefined) {
         @renderHint(question.hintText.get)
       }
-      <div class='govuk-radios @{if(inline) " govuk-radios--inline" else "" }'>
+      <div class='govuk-radios @{if(inline) " govuk-radios--inline" else "" }' id="question-@{question.id.value}-id">
         @{
         val a = currentAnswers match {
           case Some(sca @ SingleChoiceAnswer(_)) => Some(sca)
@@ -195,25 +197,16 @@
         <label id="question-label" class="govuk-label" for="question-@{question.id.value}-id">
           @{question.label.get.value}
         </label>
-      } else {
-        <!-- Below is needed for accessibility, it is hidden visually -->
-        <h1 class="govuk-visually-hidden">
-          <label id="question-label" class="govuk-label govuk-label--l" for="question-@{question.id.value}-id">
-            @pageHeading
-          </label>
-        </h1>
       }
-
       @if(question.hintText.isDefined) {
         @renderHint(question.hintText.get)
       }
       @if(errorInfo.isDefined) {
-        <p id="question-error" class="govuk-error-message">
-          <span class="govuk-visually-hidden">Error:</span>@errorInfo.get.message
-        </p>
+      <p id="question-error" class="govuk-error-message">
+        <span class="govuk-visually-hidden">Error:</span>@errorInfo.get.message
+      </p>
       }
-
-      <input class="govuk-input" id="question-@{question.id.value}-id" name="answer" type="text" value="@actualValue">
+      <input class="govuk-input" id="question-@{question.id.value}-id" name="answer" type="text" value="@actualValue" aria-describedby="non-bullet-statement-fragment-hint">
     </div>
   }
 

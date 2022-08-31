@@ -50,10 +50,10 @@ trait SubscriptionsBuilder {
     )
   }
 
-  def buildSubscriptionFieldValue(name: String, value: Option[String] = None, accessRequirements: AccessRequirements = AccessRequirements.Default): SubscriptionFieldValue = {
+  def buildSubscriptionFieldValue(name: String, value: Option[String] = None, accessRequirements: AccessRequirements = AccessRequirements.Default, hintOverride: Option[String] = None): SubscriptionFieldValue = {
+    val hint = hintOverride.getOrElse(s"hint-$name")
+    val definition = SubscriptionFieldDefinition(FieldName(name), s"description-$name", s"shortDescription-$name", hint, "STRING", accessRequirements)
 
-    val definitnion = SubscriptionFieldDefinition(FieldName(name), s"description-$name", s"hint-$name", "STRING", s"shortDescription-$name", accessRequirements)
-
-    SubscriptionFieldValue(definitnion, FieldValue(value.getOrElse(s"value-$name")))
+    SubscriptionFieldValue(definition, FieldValue(value.getOrElse(s"value-$name")))
   }
 }
