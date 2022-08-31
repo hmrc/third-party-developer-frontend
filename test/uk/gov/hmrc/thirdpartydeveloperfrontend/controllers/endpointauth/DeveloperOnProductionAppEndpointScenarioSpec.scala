@@ -34,19 +34,11 @@ class DeveloperOnProductionAppEndpointScenarioSpec extends EndpointScenarioSpec
       case Endpoint("GET",  "/developer/applications/:id/add/success") => NotFound()
       case Endpoint("POST", "/developer/applications/:id/team-members/remove") => Forbidden()
       case Endpoint("POST", "/developer/applications/:id/team-members/add/:addTeamMemberPageMode") => Forbidden()
-      case Endpoint(_,      "/developer/applications/:id/details/change") => Forbidden()
-      case Endpoint(_,      "/developer/applications/:id/details/change-privacy-policy-location") => Forbidden()
-      case Endpoint(_,      "/developer/applications/:id/details/change-terms-conditions-location") => Forbidden()
       case Endpoint(_,      "/developer/applications/:id/details/terms-of-use") => Forbidden()
       case Endpoint("GET",  "/developer/submissions/application/:aid/terms-of-use-responses") => Forbidden()
-      case Endpoint("POST", "/developer/applications/:id/delete-subordinate") => Forbidden()
-      case Endpoint(_,      "/developer/applications/:id/delete-subordinate-confirm") => Forbidden()
-      case Endpoint("GET",  "/developer/applications/:id/delete-principal-confirm") => Forbidden()
-      case Endpoint("POST", "/developer/applications/:id/delete-principal") => Forbidden()
       case Endpoint("POST", "/developer/applications/:id/change-subscription") => BadRequest()
       case Endpoint("POST", "/developer/applications/:id/client-secret-new") => Forbidden()
       case Endpoint("POST", "/developer/applications/:id/client-secret/:clientSecretId/delete") => Forbidden()
-      case Endpoint(_,      "/developer/applications/:id/details/change-app-name") => Forbidden()
       case Endpoint(_,      "/developer/applications/:id/change-private-subscription") => Forbidden()
       case Endpoint(_,      "/developer/applications/:id/change-locked-subscription") => Forbidden()
       case Endpoint("GET",  "/developer/applications/:id/client-id") => Forbidden()
@@ -55,19 +47,21 @@ class DeveloperOnProductionAppEndpointScenarioSpec extends EndpointScenarioSpec
       case Endpoint("GET",  "/developer/applications/:id/client-secret/:clientSecretId/delete") => Forbidden()
       case Endpoint("GET",  "/developer/applications/:id/push-secrets") => Forbidden()
       case Endpoint("GET",  "/developer/applications/:id/request-check/appDetails") => Success()
+      case Endpoint("GET",  "/developer/applications/:id/delete") => getEndpointSuccessResponse(endpoint)
       case Endpoint("GET",  "/developer/applications/:id/request-check/submitted") => getEndpointSuccessResponse(endpoint)
-      case Endpoint(_, path) if path.startsWith("/developer/applications/:id/request-check") => BadRequest()
-      case Endpoint(_, path) if path.startsWith("/developer/applications/:id/check-your-answers") => BadRequest()
-      case Endpoint(_, path) if path.startsWith("/developer/applications/:id/responsible-individual/") => Forbidden()
-      case Endpoint(_, path) if path.startsWith("/developer/applications/:id/ip-allowlist/") => Forbidden()
-      case Endpoint(_, path) if path.startsWith("/developer/applications/:id/redirect-uris/") => Forbidden()
-
       case Endpoint(_,      "/developer/submissions/application/:aid/production-credentials-checklist") => BadRequest() // must be in 'testing' state
       case Endpoint(_,      "/developer/submissions/application/:aid/cancel-request") => BadRequest() // must not be in production state
       case Endpoint("GET",  "/developer/submissions/application/:aid/check-answers") => BadRequest() // must be in testing state
       case Endpoint("GET",  "/developer/submissions/application/:aid/view-answers") => BadRequest() // must not be in pending approval state
       case Endpoint("GET",  "/developer/submissions/application/:aid/submit-request") => BadRequest() // must be in testing state
       case Endpoint(_,      "/developer/submissions/application/:aid/start-using-your-application") => Forbidden()
+      case Endpoint(_, path) if path.startsWith("/developer/applications/:id/details/change") => Forbidden()
+      case Endpoint(_, path) if path.startsWith("/developer/applications/:id/delete") => Forbidden()
+      case Endpoint(_, path) if path.startsWith("/developer/applications/:id/request-check") => BadRequest()
+      case Endpoint(_, path) if path.startsWith("/developer/applications/:id/check-your-answers") => BadRequest()
+      case Endpoint(_, path) if path.startsWith("/developer/applications/:id/responsible-individual/") => Forbidden()
+      case Endpoint(_, path) if path.startsWith("/developer/applications/:id/ip-allowlist/") => Forbidden()
+      case Endpoint(_, path) if path.startsWith("/developer/applications/:id/redirect-uris/") => Forbidden()
 
       case _ => getEndpointSuccessResponse(endpoint)
     }

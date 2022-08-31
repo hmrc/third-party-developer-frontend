@@ -38,19 +38,6 @@ class AdminOnAppInTestingStateEndpointScenarioSpec extends EndpointScenarioSpec
       case Endpoint(_,      "/developer/applications/:id/details/change") => NotFound() // app is not approved
       case Endpoint(_,      "/developer/applications/:id/details/terms-of-use") => NotFound() // app is not approved
       case Endpoint("GET",  "/developer/applications/:id/details") => Redirect(s"/developer/submissions/application/${applicationId.value}/production-credentials-checklist")
-      case Endpoint("GET",  "/developer/applications/:id/redirect-uris") => NotFound() // app is not approved
-      case Endpoint("POST", "/developer/applications/:id/redirect-uris/delete-confirmation") => NotFound() // app is not approved
-      case Endpoint(_,      "/developer/applications/:id/redirect-uris/add") => NotFound() // app is not approved
-      case Endpoint("POST", "/developer/applications/:id/redirect-uris/change-confirmation") => NotFound() // app is not approved
-      case Endpoint("POST", "/developer/applications/:id/redirect-uris/change") => NotFound() // app is not approved
-      case Endpoint("POST", "/developer/applications/:id/redirect-uris/delete") => NotFound() // app is not approved
-      case Endpoint("GET",  "/developer/applications/:id/delete-principal-confirm") => NotFound() // app is not approved
-      case Endpoint("GET",  "/developer/applications/:id/delete-subordinate-confirm") => NotFound() // app is not approved
-      case Endpoint("POST", "/developer/applications/:id/delete-principal") => NotFound() // app is not approved
-      case Endpoint("POST", "/developer/applications/:id/delete-subordinate") => NotFound() // app is not approved
-      case Endpoint("GET",  "/developer/applications/:id/delete") => NotFound() // app is not approved
-      case Endpoint(_, path) if path.startsWith("/developer/applications/:id/ip-allowlist") => NotFound() // app is not approved
-      case Endpoint(_, path) if path.startsWith("/developer/applications/:id/responsible-individual") => BadRequest() // app is not in production
       case Endpoint("GET",  "/developer/applications/:id/credentials") => NotFound() // app is not approved
       case Endpoint("GET",  "/developer/applications/:id/client-secrets") => BadRequest() // app is not approved
       case Endpoint("POST", "/developer/applications/:id/client-secret-new") => BadRequest() // app is not approved
@@ -65,6 +52,10 @@ class AdminOnAppInTestingStateEndpointScenarioSpec extends EndpointScenarioSpec
       case Endpoint("GET",  "/developer/submissions/application/:aid/view-answers") => BadRequest() // app is not pending approval
       case Endpoint("GET",  "/developer/submissions/application/:aid/check-answers") => Redirect(s"/developer/submissions/application/${applicationId.value}/production-credentials-checklist")
       case Endpoint("GET",  "/developer/submissions/application/:aid/submit-request") => Redirect(s"/developer/submissions/application/${applicationId.value}/production-credentials-checklist")
+      case Endpoint(_, path) if path.startsWith("/developer/applications/:id/redirect-uris") => NotFound() // app is not approved
+      case Endpoint(_, path) if path.startsWith("/developer/applications/:id/delete") => NotFound() // app is not approved
+      case Endpoint(_, path) if path.startsWith("/developer/applications/:id/ip-allowlist") => NotFound() // app is not approved
+      case Endpoint(_, path) if path.startsWith("/developer/applications/:id/responsible-individual") => BadRequest() // app is not in production
 
       case _ => getEndpointSuccessResponse(endpoint)
     }
