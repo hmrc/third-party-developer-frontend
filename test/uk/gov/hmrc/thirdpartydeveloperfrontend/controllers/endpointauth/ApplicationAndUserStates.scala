@@ -21,6 +21,7 @@ import play.api.libs.crypto.CookieSigner
 import play.api.mvc.Cookie
 import play.api.test.FakeRequest
 import uk.gov.hmrc.apiplatform.modules.mfa.models.MfaId
+import uk.gov.hmrc.apiplatform.modules.submissions.domain.models.ResponsibleIndividualVerificationState.INITIAL
 import uk.gov.hmrc.apiplatform.modules.submissions.domain.models.Submission.Status.Granted
 import uk.gov.hmrc.apiplatform.modules.submissions.domain.models._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.connectors.ThirdPartyDeveloperConnector.CoreUserDetails
@@ -95,7 +96,7 @@ trait HasApplication extends HasAppDeploymentEnvironment with HasUserWithRole wi
   lazy val submissionId = Submission.Id.random
   lazy val submissionIndex = 1
   lazy val responsibleIndividual = ResponsibleIndividual.build("mr responsible", "ri@example.com")
-  lazy val responsibleIndividualVerification = ResponsibleIndividualVerification(responsibleIndividualVerificationId, applicationId, submissionId, submissionIndex, applicationName, createdOn)
+  lazy val responsibleIndividualVerification = ResponsibleIndividualToUVerification(responsibleIndividualVerificationId, applicationId, submissionId, submissionIndex, applicationName, createdOn, INITIAL)
   lazy val responsibleIndividualVerificationWithDetails = ResponsibleIndividualVerificationWithDetails(
     responsibleIndividualVerification, responsibleIndividual, "mr submitter", "submitter@example.com"
   )
