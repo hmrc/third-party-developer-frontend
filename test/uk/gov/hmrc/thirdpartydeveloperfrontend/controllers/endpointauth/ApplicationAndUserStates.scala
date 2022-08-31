@@ -217,6 +217,10 @@ trait AppHasProductionStatus extends HasAppState {
   def state = ApplicationState.production("requester@example.com", "code123")
 }
 
+trait AppHasPendingGatekeeperApprovalStatus extends HasAppState {
+  def state = ApplicationState.pendingGatekeeperApproval("requester@example.com")
+}
+
 trait AppHasTestingStatus extends HasAppState {
   def state = ApplicationState.testing
 }
