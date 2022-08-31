@@ -31,7 +31,6 @@ class NoAuthEndpointScenarioSpec extends EndpointScenarioSpec
       case Endpoint("GET",  "/developer/login-totp") => Success()
       case Endpoint("POST", "/developer/login-totp") => Error("java.util.NoSuchElementException: None.get")
       case Endpoint("GET",  "/developer/application-verification") => Success()
-      //TODO the request below triggers a deskpro ticket to be created (should unauth users be able to do this?) that requests 2SV removal for any account, seems wrong? do SDST verify that the correct user made the request?
       case Endpoint(_,      "/developer/login/2SV-help") => Success()
       case Endpoint("GET",  "/developer/login/2SV-help/complete") => Success()
       case Endpoint(_,      "/developer/confirmation") => Success()
