@@ -16,7 +16,7 @@
 
 package uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.endpointauth
 
-class DeveloperOnProductionAppEndpointScenarioSpec extends EndpointScenarioSpec
+class NewJourneyDevUserProdStatusProductionEndpointScenarioSpec extends EndpointScenarioSpec
   with IsNewJourneyStandardApplication
   with UserIsDeveloper
   with UserIsAuthenticated

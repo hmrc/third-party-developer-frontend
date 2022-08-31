@@ -16,7 +16,7 @@
 
 package uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.endpointauth
 
-class NoAuthEndpointScenarioSpec extends EndpointScenarioSpec
+class UnauthenticatedUserEndpointScenarioSpec extends EndpointScenarioSpec
     with IsNewJourneyStandardApplication
     with UserIsAdmin
     with AppDeployedToProductionEnvironment

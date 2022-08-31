@@ -441,11 +441,12 @@ abstract class EndpointScenarioSpec extends AsyncHmrcSpec with GuiceOneAppPerSui
         Source.fromFile(s"conf/${routesFilePrefix}.routes").getLines().flatMap(line => parseEndpoint(line, pathPrefix))
       })
       .flatMap(populateRequestValues(_))
-      .toSet foreach { requestValues: RequestValues =>
-      val expectedResponse = getExpectedResponse(requestValues.endpoint)
-      s"return $expectedResponse for $requestValues" in {
-        val result = callEndpoint(requestValues)
-        result shouldBe expectedResponse
+      .toSet foreach { requestValues: RequestValues => {
+        val expectedResponse = getExpectedResponse(requestValues.endpoint)
+        s"return $expectedResponse for $requestValues" in {
+          val result = callEndpoint(requestValues)
+          result shouldBe expectedResponse
+        }
       }
     }
   }

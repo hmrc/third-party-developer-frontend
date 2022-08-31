@@ -16,7 +16,7 @@
 
 package uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.endpointauth
 
-class AdminOnAppInTestingStateEndpointScenarioSpec extends EndpointScenarioSpec
+class NewJourneyAdminUserTestingStatusSandboxEndpointScenarioSpec extends EndpointScenarioSpec
   with IsNewJourneyStandardApplicationWithoutSubmission
   with UserIsAdmin
   with UserIsAuthenticated
