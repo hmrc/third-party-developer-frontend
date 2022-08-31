@@ -20,21 +20,19 @@
 @import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.Application
 @import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.DeveloperSession
 
-@this(devMain: DevMain2)
+@this(devMain: DevMain2WithFormErrors)
 
 @(app: Application, form: Form[NameForm], submitAction: Call)(implicit request: play.api.mvc.Request[Any], loggedIn: DeveloperSession, messages: Messages, applicationConfig: ApplicationConfig)
 
 @pageHeading = @{ "Confirm the name of your application" }
 
 @devMain(
+  form,
   title = pageHeading,
   userFullName = loggedIn.loggedInName,
   back = BackButtonWithJavaScript,
   developerSession = Some(loggedIn)
 ) {
-
-  @errorSummary2(form)
-
   <h1 class="govuk-heading-l">@pageHeading</h1>
 
   <p class="govuk-body">We show this name to your users when they authorise your software to interact with HMRC.</p>

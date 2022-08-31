@@ -21,18 +21,17 @@
 @import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.views.BackButtonToUrl
 @import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.ResponsibleIndividualChangeToSelfOrOtherForm
 
-@this(devMain: DevMain2)
+@this(devMain: DevMain2WithFormErrors)
 
 @(app: Application, form: Form[ResponsibleIndividualChangeToSelfOrOtherForm])(implicit request: play.api.mvc.Request[Any], loggedIn: DeveloperSession, messages: Messages, applicationConfig: ApplicationConfig)
 
 @devMain(
+    form,
     title = "Who do you want to make the responsible individual?",
     userFullName = loggedIn.loggedInName,
     developerSession = Some(loggedIn),
     back = BackButtonToUrl(routes.ManageResponsibleIndividualController.showResponsibleIndividualDetails(app.id).url)
 ) {
-    @errorSummary2(form)
-
     @helper.form(action = routes.ManageResponsibleIndividualController.responsibleIndividualChangeToSelfOrOtherAction(app.id), 'class -> "form") {
         @helper.CSRF.formField
 

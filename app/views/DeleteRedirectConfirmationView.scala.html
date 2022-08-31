@@ -21,16 +21,15 @@
 @import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers
 @import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.DeleteRedirectConfirmationForm
 
-@this(devMain: DevMain2, leftHandNav: LeftHandNav)
+@this(devMain: DevMain2WithFormErrors, leftHandNav: LeftHandNav)
 
 @(applicationViewModel: ApplicationViewModel, form: Form[DeleteRedirectConfirmationForm], redirectUri: String)(implicit request: play.api.mvc.Request[Any], loggedIn: DeveloperSession, messages: Messages, applicationConfig: ApplicationConfig, navSection: String = "redirects")
-
-@titleError = { @if(form.errors.nonEmpty) {Error: } else {}}
 
 @application = @{applicationViewModel.application}
 
 @devMain(
-  title = titleError + "Delete a redirect URI",
+  form,
+  title = "Delete a redirect URI",
   userFullName = loggedIn.loggedInName,
   breadcrumbs = Seq(
     Crumb("Delete a redirect URI"),
@@ -41,12 +40,10 @@
   leftNav = Some(leftHandNav(Option(applicationViewModel), Option(navSection))),
   developerSession = Some(loggedIn)
 ) {
-  @errorSummary2(form)
-
   <h1 class="govuk-heading-l">Delete a redirect URI</h1>
 
-    @appEnvironment2(application)
-    <br>
+  @appEnvironment2(application)
+  <br>
 
   <h2 class="govuk-heading-m">Redirect URI</h2>
   <p id="redirectUriToDelete" class="govuk-body">@redirectUri</p>

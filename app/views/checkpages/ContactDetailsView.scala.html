@@ -20,22 +20,19 @@
 @import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.Application
 @import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.DeveloperSession
 
-@this(devMain: DevMain2)
+@this(devMain: DevMain2WithFormErrors)
 
 @(app: Application,form: Form[ContactForm], action: Call)(implicit request: play.api.mvc.Request[Any], loggedIn: DeveloperSession, messages: Messages, applicationConfig: ApplicationConfig)
-
-@titleError = { @if(form.errors.nonEmpty) {Error: } else {}}
 
 @pageHeading = @{ "Who to contact about your application" }
 
 @devMain(
-  title = titleError + pageHeading,
+  form,
+  title = pageHeading,
   userFullName = loggedIn.loggedInName,
   back = BackButtonWithJavaScript,
   developerSession = Some(loggedIn)
 ) {
-  @errorSummary2(form)
-
   <h1 class="govuk-heading-l">@pageHeading</h1>
 
   @helper.form(action = action, 'class -> "form") {

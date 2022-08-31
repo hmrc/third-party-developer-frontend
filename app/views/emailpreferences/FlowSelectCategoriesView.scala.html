@@ -23,7 +23,7 @@
 @import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.profile.routes
 @import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.TaxRegimeEmailPreferencesForm
 
-@this(devMain: DevMain2)
+@this(devMain: DevMain2WithFormErrors)
 
 @(form: Form[TaxRegimeEmailPreferencesForm], categories: List[APICategoryDisplayDetails], selectedCategories: Set[String])(implicit messages: Messages, loggedIn: DeveloperSession, request: play.api.mvc.Request[Any], appConfig: ApplicationConfig)
 
@@ -32,12 +32,12 @@
 }
 
 @devMain(
+  form,
   title = pageHeading,
   userFullName = loggedIn.loggedInName,
   back = BackButtonWithJavaScript,
   developerSession = Some(loggedIn)
 ) {
-  @errorSummary2(form)
   @helper.form(action = routes.EmailPreferencesController.flowSelectCategoriesAction(), 'class -> "form", 'id -> "emailPreferencesCategoriesForm") {
     @helper.CSRF.formField
     <a name="taxRegime"></a>

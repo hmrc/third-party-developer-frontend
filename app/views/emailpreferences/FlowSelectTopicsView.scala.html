@@ -23,7 +23,7 @@
 @import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.profile.routes
 @import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.SelectedTopicsEmailPreferencesForm
 
-@this(devMain: DevMain2)
+@this(devMain: DevMain2WithFormErrors)
 
 @(form: Form[SelectedTopicsEmailPreferencesForm], selectedTopics: Set[String])(implicit messages: Messages, loggedIn: DeveloperSession, request: play.api.mvc.Request[Any], appConfig: ApplicationConfig)
 
@@ -32,13 +32,12 @@
 }
 
 @devMain(
+  form,
   title = pageHeading,
   userFullName = loggedIn.loggedInName,
   back = BackButtonWithJavaScript,
   developerSession = Some(loggedIn)
 ) {
-
-    @errorSummary2(form)
     <fieldset class="govuk-fieldset" aria-describedby="topics-hint">
       <legend class="govuk-fieldset__legend govuk-fieldset__legend--l">
         <h1 id="pageHeading" class="govuk-heading-l">@pageHeading</h1>

@@ -24,7 +24,7 @@
 @import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.TermsOfUseVersion
 @import java.time.format.DateTimeFormatter
 
-@this(devMain: DevMain2, leftHandNav: LeftHandNav)
+@this(devMain: DevMain2WithFormErrors, leftHandNav: LeftHandNav)
 
 
 @(applicationView: ApplicationViewModel, form: Form[TermsOfUseForm], termsOfUseVersion: TermsOfUseVersion)(
@@ -35,10 +35,9 @@
 
 @title = { @if(app.termsOfUseStatus == AGREEMENT_REQUIRED) { Agree to our terms of use } else { Terms of use } }
 
-@titleError = { @if(form.errors.nonEmpty) {Error: } else {}}
-
 @devMain(
-  title = titleError + title.toString,
+  form,
+  title = title.toString,
   userFullName = loggedIn.loggedInName,
   breadcrumbs = Seq(
     Crumb("Manage details"),
@@ -49,8 +48,6 @@
   leftNav = Some(leftHandNav(Option(applicationView), Option(navSection))),
   developerSession = Some(loggedIn)
 ) {
-  @errorSummary2(form)
-
   <h1 id="terms-of-use-header" class="govuk-heading-l">@title</h1>
 
   @appEnvironment2(app)

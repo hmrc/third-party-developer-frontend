@@ -18,23 +18,21 @@
 @import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.controllers.Crumb
 @import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.routes
 
-@this(devMain: DevMain2)
+@this(devMain: DevMain2WithFormErrors)
 
 @(form: Form[uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.RegisterForm])(implicit request: play.api.mvc.Request[Any], messagesProvider: MessagesProvider, appConfig: ApplicationConfig)
 
-@titleError = { @if(form.errors.nonEmpty) {Error: } else {}}
+
 @devMain(
-    title = titleError + "Register for a developer account",
-    isRegistering = true,
-    breadcrumbs = Seq(
-      Crumb("Register"),
-      Crumb.home
-    ),
-    developerSession = None
+  form,
+  title = "Register for a developer account",
+  isRegistering = true,
+  breadcrumbs = Seq(
+    Crumb("Register"),
+    Crumb.home
+  ),
+  developerSession = None
 ) {
-
-  @errorSummary2(form)
-
   <h1 class="govuk-heading-l">Register for a developer account</h1>
 
   <p class="govuk-body">

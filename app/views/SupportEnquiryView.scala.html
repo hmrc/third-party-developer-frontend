@@ -18,11 +18,12 @@
 @import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.controllers.Crumb
 @import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.routes
 
-@this(devMain: DevMain2)
+@this(devMain: DevMain2WithFormErrors)
 
 @(loggedIn: Option[String], form: Form[uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.SupportEnquiryForm])(implicit request: play.api.mvc.Request[Any], messages: Messages, appConfig: ApplicationConfig)
 
 @devMain(
+  form,
   title = "Support",
   userFullName = loggedIn,
   breadcrumbs = Seq(
@@ -31,8 +32,6 @@
   ),
   developerSession = None
 ) {
-  @errorSummary2(form)
-
   <h1 class="govuk-heading-l">Support</h1>
 
   <p class="govuk-body">Complete this short form to ask a question, for example, about:</p>

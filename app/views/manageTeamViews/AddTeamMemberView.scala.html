@@ -24,18 +24,17 @@
 @import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.controllers.FraudPreventionNavLinkViewModel
 @import views.html.include.DevMain
 
-@this(devMain: DevMain2, leftHandNav: LeftHandNav)
+@this(devMain: DevMain2WithFormErrors, leftHandNav: LeftHandNav)
 
 @(applicationView: ApplicationViewModel, form: Form[uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.AddTeamMemberForm], loggedIn: DeveloperSession, fraudPreventionNavLinkViewModel: Option[FraudPreventionNavLinkViewModel])(
 implicit request: play.api.mvc.Request[Any], messages: Messages, applicationConfig: ApplicationConfig, navSection: String = "manage-team")
 
 
-@titleError = { @if(form.errors.nonEmpty) {Error: } else {}}
-
 @app = @{applicationView.application}
 
 @devMain(
-  title = titleError + "Add a team member",
+  form,
+  title = "Add a team member",
   userFullName = loggedIn.loggedInName,
   breadcrumbs = Seq(
     Crumb("Manage team members"),
@@ -46,9 +45,6 @@ implicit request: play.api.mvc.Request[Any], messages: Messages, applicationConf
   leftNav = Some(leftHandNav(Option(applicationView), Option(navSection), Map.empty, fraudPreventionNavLinkViewModel)(request, loggedIn, applicationConfig)),
   developerSession = Some(loggedIn)
 ) {
-
-  @errorSummary2(form)
-
   <h1 class="govuk-heading-l">Add a team member</h1>
 
   @appEnvironment2(app)

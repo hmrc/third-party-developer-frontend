@@ -26,7 +26,7 @@
 @import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.SelectedApisEmailPreferencesForm
 @import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.FormKeys
 
-@this(devMain: DevMain2)
+@this(devMain: DevMain2WithFormErrors)
 
 @(form: Form[SelectedApisEmailPreferencesForm], currentCategory: APICategoryDisplayDetails, apis: List[CombinedApi], selectedApis: Set[String])(implicit messages: Messages, loggedIn: DeveloperSession, request: play.api.mvc.Request[Any], appConfig: ApplicationConfig)
 
@@ -35,12 +35,12 @@
 }
 
 @devMain(
+  form,
   title = pageHeading,
   userFullName = loggedIn.loggedInName,
   back = BackButtonWithJavaScript,
   developerSession = Some(loggedIn)
 ) {
-  @errorSummary2(form)
   @helper.form(action = routes.EmailPreferencesController.flowSelectApisAction(), 'class -> "form", 'id -> "emailPreferencesApisForm") {
     @helper.CSRF.formField
     <a name="apiRadio"></a>
