@@ -32,6 +32,7 @@ trait ApplicationBuilder extends CollaboratorTracker {
 
     val appId = ApplicationId("appid-" + randomUUID.toString)
     val clientId = ClientId("clientid-" + randomUUID.toString)
+    val appOwnerName = "App owner name"
 
     Application(
       appId,
@@ -44,7 +45,7 @@ trait ApplicationBuilder extends CollaboratorTracker {
       Environment.SANDBOX,
       Some(s"$appId-description"),
       buildCollaborators(Seq(appOwnerEmail)),
-      state = ApplicationState.production(appOwnerEmail, ""),
+      state = ApplicationState.production(appOwnerEmail, appOwnerName, ""),
       access = Standard(
         redirectUris = List("https://red1", "https://red2"),
         termsAndConditionsUrl = Some("http://tnc-url.com")

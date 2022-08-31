@@ -67,8 +67,8 @@ class ApplicationCheckSpec
   val yetAnotherCollaboratorEmail = "collaborator2@example.com"
 
   val testing: ApplicationState = ApplicationState.testing.copy(updatedOn = LocalDateTime.now(ZoneOffset.UTC).minusMinutes(1))
-  val production: ApplicationState = ApplicationState.production("thirdpartydeveloper@example.com", "ABCD")
-  val pendingApproval: ApplicationState = ApplicationState.pendingGatekeeperApproval("thirdpartydeveloper@example.com")
+  val production: ApplicationState = ApplicationState.production("thirdpartydeveloper@example.com", "thirdpartydeveloper", "ABCD")
+  val pendingApproval: ApplicationState = ApplicationState.pendingGatekeeperApproval("thirdpartydeveloper@example.com", "thirdpartydeveloper")
 
   val emptyFields = emptySubscriptionFieldsWrapper(appId, clientId, exampleContext, ApiVersion("api-example-microservice"))
 
@@ -116,7 +116,7 @@ class ApplicationCheckSpec
         Environment.PRODUCTION,
         Some("Description 1"),
         Set(loggedInDeveloper.email.asAdministratorCollaborator),
-        state = ApplicationState.production(loggedInDeveloper.email, ""),
+        state = ApplicationState.production(loggedInDeveloper.email, loggedInDeveloper.displayedName, ""),
         access = Standard(
           redirectUris = List("https://red1", "https://red2"),
           termsAndConditionsUrl = Some("http://tnc-url.com")

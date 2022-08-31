@@ -35,7 +35,7 @@ class TermsOfUseServiceSpec extends HmrcSpec {
     Environment.PRODUCTION,
     Some("Description 1"),
     Set.empty,
-    state = ApplicationState.production("user@example.com", ""),
+    state = ApplicationState.production("user@example.com", "user", ""),
     access = Standard(importantSubmissionData = standardAppAgreements.map(standardAppAgreements => ImportantSubmissionData(
       Some("http://example.com"),
       responsibleIndividual,

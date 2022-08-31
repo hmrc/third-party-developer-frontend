@@ -44,7 +44,7 @@ trait TestApplications {
       clientId: ClientId = ClientId(randomString(28)),
       grantLength: Period = Period.ofDays(547),
       environment: Environment = Environment.PRODUCTION,
-      state: ApplicationState = ApplicationState.production("test", "test"),
+      state: ApplicationState = ApplicationState.production("test@test.com", "test name", "test"),
       adminEmail: String = "admin@example.com",
       developerEmail: String = "developer@example.com",
       access: Access = standardAccess(),
@@ -75,10 +75,10 @@ trait TestApplications {
     anApplication(adminEmail = adminEmail).withState(ApplicationState.testing)
 
   def aStandardPendingApprovalApplication(adminEmail: String = "admin@example.com"): Application =
-    anApplication(adminEmail = adminEmail).withState(ApplicationState.pendingRequesterVerification("test", "test"))
+    anApplication(adminEmail = adminEmail).withState(ApplicationState.pendingRequesterVerification("test@test.com", "test name", "test"))
 
   def aStandardPendingResponsibleIndividualVerificationApplication(adminEmail: String = "admin@example.com"): Application =
-    anApplication(adminEmail = adminEmail).withState(ApplicationState.pendingResponsibleIndividualVerification("admin@example.com", "test"))
+    anApplication(adminEmail = adminEmail).withState(ApplicationState.pendingResponsibleIndividualVerification("admin@example.com", "admin name"))
 
   def standardAccess(
       redirectUris: List[String] = List("https://redirect1", "https://redirect2"),

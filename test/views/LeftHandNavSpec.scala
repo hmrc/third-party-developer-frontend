@@ -86,7 +86,7 @@ class LeftHandNavSpec extends CommonViewSpec with CollaboratorTracker with Local
     }
 
     "include links to client ID and client secrets if the user is an admin and the app has reached production state" in new Setup {
-      val application = standardApplication.copy(collaborators = Set(loggedIn.email.asAdministratorCollaborator), state = ApplicationState.production("", ""))
+      val application = standardApplication.copy(collaborators = Set(loggedIn.email.asAdministratorCollaborator), state = ApplicationState.production("", "", ""))
 
       val document: Document = Jsoup.parse(leftHandNavView(Some(ApplicationViewModel(application, hasSubscriptionsFields = false, hasPpnsFields = false)), Some("")).body)
 
@@ -96,7 +96,7 @@ class LeftHandNavSpec extends CommonViewSpec with CollaboratorTracker with Local
 
     "include links to client ID and client secrets if the user is not an admin but the app is in sandbox" in new Setup {
       val application =
-        standardApplication.copy(deployedTo = Environment.SANDBOX, collaborators = Set(loggedIn.email.asDeveloperCollaborator), state = ApplicationState.production("", ""))
+        standardApplication.copy(deployedTo = Environment.SANDBOX, collaborators = Set(loggedIn.email.asDeveloperCollaborator), state = ApplicationState.production("", "", ""))
 
       val document: Document = Jsoup.parse(leftHandNavView(Some(ApplicationViewModel(application, hasSubscriptionsFields = false, hasPpnsFields = false)), Some("")).body)
 
@@ -136,7 +136,7 @@ class LeftHandNavSpec extends CommonViewSpec with CollaboratorTracker with Local
       )
 
       val application =
-        standardApplication.copy(deployedTo = Environment.PRODUCTION, state = ApplicationState.production("", ""),
+        standardApplication.copy(deployedTo = Environment.PRODUCTION, state = ApplicationState.production("", "", ""),
           access = Standard(importantSubmissionData = Some(importantSubmissionData)))
 
       val document: Document = Jsoup.parse(leftHandNavView(Some(ApplicationViewModel(application, hasSubscriptionsFields = false, hasPpnsFields = false)), Some("")).body)

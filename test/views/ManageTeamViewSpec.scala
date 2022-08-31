@@ -50,7 +50,7 @@ class ManageTeamViewSpec extends CommonViewSpec with WithCSRFAddToken with Devel
     Environment.PRODUCTION,
     Some("Description 1"),
     collaborators,
-    state = ApplicationState.production(loggedInDeveloper.email, ""),
+    state = ApplicationState.production(loggedInDeveloper.email, loggedInDeveloper.displayedName, ""),
     access = Standard(redirectUris = List("https://red1", "https://red2"), termsAndConditionsUrl = Some("http://tnc-url.com"))
   )
 

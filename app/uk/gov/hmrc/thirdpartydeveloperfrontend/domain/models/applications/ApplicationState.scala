@@ -37,18 +37,18 @@ object ApplicationState {
 
   val testing = ApplicationState(State.TESTING, None, None)
 
-  def pendingGatekeeperApproval(requestedBy: String) =
-    ApplicationState(State.PENDING_GATEKEEPER_APPROVAL, Some(requestedBy), Some(requestedBy))
+  def pendingGatekeeperApproval(requestedByEmail: String, requestedByName: String) =
+    ApplicationState(State.PENDING_GATEKEEPER_APPROVAL, Some(requestedByEmail), Some(requestedByName))
 
   def pendingResponsibleIndividualVerification(requestedByEmail: String, requestedByName: String) =
     ApplicationState(State.PENDING_RESPONSIBLE_INDIVIDUAL_VERIFICATION, Some(requestedByEmail), Some(requestedByName))
 
-  def pendingRequesterVerification(requestedBy: String, verificationCode: String) =
-    ApplicationState(State.PENDING_REQUESTER_VERIFICATION, Some(requestedBy), Some(requestedBy), Some(verificationCode))
+  def pendingRequesterVerification(requestedByEmail: String, requestedByName: String, verificationCode: String) =
+    ApplicationState(State.PENDING_REQUESTER_VERIFICATION, Some(requestedByEmail), Some(requestedByName), Some(verificationCode))
 
-  def preProduction(requestedBy: String) =
-    ApplicationState(State.PRE_PRODUCTION, Some(requestedBy), Some(requestedBy), None)
+  def preProduction(requestedByEmail: String, requestedByName: String) =
+    ApplicationState(State.PRE_PRODUCTION, Some(requestedByEmail), Some(requestedByName), None)
 
-  def production(requestedBy: String, verificationCode: String) =
-    ApplicationState(State.PRODUCTION, Some(requestedBy), Some(requestedBy), Some(verificationCode))
+  def production(requestedByEmail: String, requestedByName: String, verificationCode: String) =
+    ApplicationState(State.PRODUCTION, Some(requestedByEmail), Some(requestedByName), Some(verificationCode))
 }

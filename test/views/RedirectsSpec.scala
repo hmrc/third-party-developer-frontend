@@ -46,7 +46,7 @@ class RedirectsSpec extends CommonViewSpec with WithCSRFAddToken with Collaborat
     Environment.PRODUCTION,
     Some("Description 1"),
     Set(loggedInDeveloper.email.asAdministratorCollaborator, loggedInDev.email.asDeveloperCollaborator),
-    state = ApplicationState.production(loggedInDeveloper.email, ""),
+    state = ApplicationState.production(loggedInDeveloper.email, loggedInDeveloper.displayedName, ""),
     access = Standard(redirectUris = List.empty, termsAndConditionsUrl = None)
   )
 

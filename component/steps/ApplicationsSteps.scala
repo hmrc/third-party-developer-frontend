@@ -100,7 +100,7 @@ class ApplicationsSteps extends ScalaDsl with EN with Matchers with NavigationSu
 
   def splitToSecrets(input: String): List[ClientSecret] = input.split(",").map(_.trim).toList.map(s => ClientSecret(randomUUID.toString, s, LocalDateTime.now(ZoneOffset.UTC)))
 
-  Given("""^I have the following applications assigned to my email '(.*)':$""") { (email: String, data: DataTable) =>
+  Given("""^I have the following applications assigned to my email '(.*)':$""") { (email: String, name: String, data: DataTable) =>
     val applications = data.asScalaRawMaps[String, String].toList
 
     val verificationCode = "aVerificationCode"
@@ -108,9 +108,9 @@ class ApplicationsSteps extends ScalaDsl with EN with Matchers with NavigationSu
     AppWorld.userApplicationsOnBackend = applications map { app: Map[String, String] =>
       val applicationState = app.getOrElse("state", "TESTING") match {
         case "TESTING"                        => ApplicationState.testing
-        case "PRODUCTION"                     => ApplicationState.production(email, verificationCode)
-        case "PENDING_GATEKEEPER_APPROVAL"    => ApplicationState.pendingGatekeeperApproval(email)
-        case "PENDING_REQUESTER_VERIFICATION" => ApplicationState.pendingRequesterVerification(email, verificationCode)
+        case "PRODUCTION"                     => ApplicationState.production(email, name, verificationCode)
+        case "PENDING_GATEKEEPER_APPROVAL"    => ApplicationState.pendingGatekeeperApproval(email, name)
+        case "PENDING_REQUESTER_VERIFICATION" => ApplicationState.pendingRequesterVerification(email, name, verificationCode)
         case unknownState: String             => fail(s"Unknown state '$unknownState'")
       }
       val access = app.getOrElse("accessType", "STANDARD") match {

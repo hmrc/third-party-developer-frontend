@@ -72,7 +72,7 @@ class ClientSecretsSpec extends CommonViewSpec with WithCSRFAddToken with Collab
       Some("Test Application"),
       collaborators = Set(developer.email.asAdministratorCollaborator),
       access = Standard(),
-      state = ApplicationState.production("requester", "verificationCode"),
+      state = ApplicationState.production("requester@test.com", "requester", "verificationCode"),
       checkInformation = None
     )
 

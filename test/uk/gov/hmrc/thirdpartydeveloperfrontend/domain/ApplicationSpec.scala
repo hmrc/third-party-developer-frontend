@@ -34,7 +34,7 @@ class ApplicationSpec extends AnyFunSpec with Matchers with DeveloperBuilder wit
   val developerCollaborator = developer.email.asDeveloperCollaborator
   val administrator = buildDeveloper(emailAddress = "administratorEmail", firstName = "ADMINISTRATOR", lastName = "administratorLast")
 
-  val productionApplicationState: ApplicationState = ApplicationState.production(requestedBy = "other email", verificationCode = "123")
+  val productionApplicationState: ApplicationState = ApplicationState.production(requestedByEmail = "other email", requestedByName = "name", verificationCode = "123")
   val testingApplicationState: ApplicationState = ApplicationState.testing
   val responsibleIndividual = ResponsibleIndividual.build("Mr Responsible", "ri@example.com")
   val importantSubmissionData = ImportantSubmissionData(

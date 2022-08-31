@@ -41,6 +41,7 @@ import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.LocalUserIdTracker
 import uk.gov.hmrc.thirdpartydeveloperfrontend.builder._
 
 import java.time.{LocalDateTime, ZoneOffset}
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.loggedInDeveloper
 
 class CredentialsSpec
     extends BaseControllerSpec
@@ -70,7 +71,7 @@ class CredentialsSpec
         Environment.PRODUCTION,
         Some("Description 1"),
         Set(loggedInDeveloper.email.asAdministratorCollaborator),
-        state = ApplicationState.production(loggedInDeveloper.email, ""),
+        state = ApplicationState.production(loggedInDeveloper.email, loggedInDeveloper.displayedName, ""),
         access = Standard(
           redirectUris = List("https://red1", "https://red2"),
           termsAndConditionsUrl = Some("http://tnc-url.com")
@@ -81,7 +82,7 @@ class CredentialsSpec
   def createConfiguredApplication(
       applicationId: ApplicationId,
       userRole: CollaboratorRole,
-      state: ApplicationState = ApplicationState.production("", ""),
+      state: ApplicationState = ApplicationState.production("", "", ""),
       access: Access = Standard(),
       environment: Environment = Environment.PRODUCTION,
       createdOn: LocalDateTime = LocalDateTime.now(ZoneOffset.UTC)
@@ -180,7 +181,7 @@ class CredentialsSpec
     }
 
     "return 400 when the application has not reached production state" in new Setup {
-      def createApplication() = createConfiguredApplication(applicationId, ADMINISTRATOR, state = pendingGatekeeperApproval(""))
+      def createApplication() = createConfiguredApplication(applicationId, ADMINISTRATOR, state = pendingGatekeeperApproval("", ""))
 
       val result = underTest.clientId(applicationId)(loggedInRequest)
 
@@ -207,7 +208,7 @@ class CredentialsSpec
     }
 
     "return 400 when the application has not reached production state" in new Setup {
-      def createApplication() = createConfiguredApplication(applicationId, ADMINISTRATOR, state = pendingGatekeeperApproval(""))
+      def createApplication() = createConfiguredApplication(applicationId, ADMINISTRATOR, state = pendingGatekeeperApproval("", ""))
 
       val result = underTest.clientSecrets(applicationId)(loggedInRequest.withCSRFToken)
 
@@ -244,7 +245,7 @@ class CredentialsSpec
     }
 
     "return 400 when the application has not reached production state" in new Setup {
-      def createApplication() = createConfiguredApplication(applicationId, ADMINISTRATOR, createdOn = dateBeforeCutoff, state = pendingGatekeeperApproval(""))
+      def createApplication() = createConfiguredApplication(applicationId, ADMINISTRATOR, createdOn = dateBeforeCutoff, state = pendingGatekeeperApproval("", ""))
 
       val result = underTest.serverToken(applicationId)(loggedInRequest)
 
@@ -301,7 +302,7 @@ class CredentialsSpec
     }
 
     "display the error page when the application has not reached production state" in new Setup {
-      def createApplication() = createConfiguredApplication(applicationId, ADMINISTRATOR, state = pendingGatekeeperApproval(""))
+      def createApplication() = createConfiguredApplication(applicationId, ADMINISTRATOR, state = pendingGatekeeperApproval("", ""))
 
       val result = (underTest.addClientSecret(applicationId)(loggedInRequest))
 
@@ -345,7 +346,7 @@ class CredentialsSpec
     }
 
     "return 400 when the application has not reached production state" in new Setup {
-      def createApplication() = createConfiguredApplication(applicationId, ADMINISTRATOR, state = pendingGatekeeperApproval(""))
+      def createApplication() = createConfiguredApplication(applicationId, ADMINISTRATOR, state = pendingGatekeeperApproval("", ""))
 
       val result = underTest.deleteClientSecret(applicationId, clientSecretToDelete.id)(loggedInRequest.withCSRFToken)
 
@@ -377,7 +378,7 @@ class CredentialsSpec
     }
 
     "return 400 when the application has not reached production state" in new Setup {
-      def createApplication() = createConfiguredApplication(applicationId, ADMINISTRATOR, state = pendingGatekeeperApproval(""))
+      def createApplication() = createConfiguredApplication(applicationId, ADMINISTRATOR, state = pendingGatekeeperApproval("", ""))
 
       val result = underTest.deleteClientSecretAction(applicationId, clientSecretId)(loggedInRequest)
 
