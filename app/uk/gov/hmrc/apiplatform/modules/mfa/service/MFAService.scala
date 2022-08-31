@@ -28,15 +28,15 @@ import scala.concurrent.{ExecutionContext, Future}
 @Singleton
 class MFAService @Inject()(thirdPartyDeveloperMfaConnector: ThirdPartyDeveloperMfaConnector)(implicit val ec: ExecutionContext) {
 
-  def enableMfa(userId: UserId, totpCode: String)(implicit hc: HeaderCarrier): Future[MFAResponse] = {
-    thirdPartyDeveloperMfaConnector.verifyMfa(userId, totpCode) flatMap {
-      case true => thirdPartyDeveloperMfaConnector.enableMfa(userId).map(_ => MFAResponse(true))
+  def enableMfa(userId: UserId, mfaId: MfaId, totpCode: String)(implicit hc: HeaderCarrier): Future[MFAResponse] = {
+    thirdPartyDeveloperMfaConnector.verifyMfa(userId, mfaId, totpCode) flatMap {
+      case true => successful(MFAResponse(true))
       case _ => successful(MFAResponse(false))
     }
   }
 
   def removeMfaById(userId: UserId, mfaId: MfaId, totpCode: String)(implicit hc: HeaderCarrier): Future[MFAResponse] = {
-    thirdPartyDeveloperMfaConnector.verifyMfa(userId, totpCode) flatMap {
+    thirdPartyDeveloperMfaConnector.verifyMfa(userId, mfaId, totpCode) flatMap {
       case true => thirdPartyDeveloperMfaConnector.removeMfaById(userId, mfaId).map(_ => MFAResponse(true))
       case _ => successful(MFAResponse(false))
     }

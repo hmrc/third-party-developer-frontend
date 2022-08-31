@@ -32,6 +32,7 @@ import play.api.test.FakeRequest
 import play.api.test.Helpers._
 import play.filters.csrf.CSRF.TokenProvider
 import uk.gov.hmrc.apiplatform.modules.mfa.connectors.ThirdPartyDeveloperMfaConnector
+import uk.gov.hmrc.apiplatform.modules.mfa.connectors.ThirdPartyDeveloperMfaConnector.RegisterAuthAppResponse
 import uk.gov.hmrc.apiplatform.modules.mfa.controllers.profile.ProtectAccount
 import uk.gov.hmrc.apiplatform.modules.mfa.models.MfaId
 import uk.gov.hmrc.apiplatform.modules.mfa.service.{MFAResponse, MFAService, MfaMandateService}
@@ -113,10 +114,12 @@ class ProtectAccountSpec extends BaseControllerSpec with WithCSRFAddToken with D
   }
 
   trait SetupSuccessfulStart2SV extends Setup {
+    val registerAuthAppResponse = RegisterAuthAppResponse(secret, mfaId)
+
     when(underTest.otpAuthUri.apply(secret.toLowerCase(), issuer, loggedInDeveloper.email)).thenReturn(otpUri)
     when(underTest.qrCode.generateDataImageBase64(otpUri.toString)).thenReturn(qrImage)
     when(underTest.thirdPartyDeveloperMfaConnector.createMfaSecret(eqTo(loggedInDeveloper.userId))(*))
-      .thenReturn(successful(secret))
+      .thenReturn(successful(registerAuthAppResponse))
   }
 
   trait PartLogged extends Setup {
@@ -128,11 +131,11 @@ class ProtectAccountSpec extends BaseControllerSpec with WithCSRFAddToken with D
   }
 
   trait SetupFailedVerification extends Setup {
-    when(underTest.mfaService.enableMfa(any[UserId], any[String])(*)).thenReturn(Future.successful(MFAResponse(false)))
+    when(underTest.mfaService.enableMfa(any[UserId], any[MfaId], any[String])(*)).thenReturn(Future.successful(MFAResponse(false)))
   }
 
   trait SetupSuccessfulVerification extends Setup {
-    when(underTest.mfaService.enableMfa(eqTo(loggedInDeveloper.userId), eqTo(correctCode))(*)).thenReturn(Future.successful(MFAResponse(true)))
+    when(underTest.mfaService.enableMfa(eqTo(loggedInDeveloper.userId), eqTo(mfaId), eqTo(correctCode))(*)).thenReturn(Future.successful(MFAResponse(true)))
   }
 
   trait SetupFailedRemoval extends Setup {
@@ -216,7 +219,7 @@ class ProtectAccountSpec extends BaseControllerSpec with WithCSRFAddToken with D
       "return error when access code in invalid format" in new SetupSuccessfulStart2SV with LoggedIn {
         private val request = protectAccountRequest("abc")
 
-        private val result = addToken(underTest.protectAccount())(request)
+        private val result = addToken(underTest.protectAccount(mfaId))(request)
 
         status(result) shouldBe BAD_REQUEST
         assertIncludesOneError(result, "You have entered an invalid access code")
@@ -225,7 +228,7 @@ class ProtectAccountSpec extends BaseControllerSpec with WithCSRFAddToken with D
       "return error when verification fails" in new SetupFailedVerification with LoggedIn {
         private val request = protectAccountRequest(correctCode)
 
-        private val result = addToken(underTest.protectAccount())(request)
+        private val result = addToken(underTest.protectAccount(mfaId))(request)
 
         status(result) shouldBe BAD_REQUEST
         assertIncludesOneError(result, "You have entered an incorrect access code")
@@ -234,7 +237,7 @@ class ProtectAccountSpec extends BaseControllerSpec with WithCSRFAddToken with D
       "redirect to getProtectAccountCompletedAction" in new SetupSuccessfulVerification with LoggedIn {
         private val request = protectAccountRequest(correctCode)
 
-        private val result = addToken(underTest.protectAccount())(request)
+        private val result = addToken(underTest.protectAccount(mfaId))(request)
 
         status(result) shouldBe SEE_OTHER
         redirectLocation(result) shouldBe Some(uk.gov.hmrc.apiplatform.modules.mfa.controllers.profile.routes.ProtectAccount.getProtectAccountCompletedPage().url)

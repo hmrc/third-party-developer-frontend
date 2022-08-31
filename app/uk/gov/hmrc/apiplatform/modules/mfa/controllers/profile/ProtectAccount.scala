@@ -68,10 +68,10 @@ class ProtectAccount @Inject()(
   val qrCode = QRCode(scale)
 
   def getQrCode: Action[AnyContent] = atLeastPartLoggedInEnablingMfaAction { implicit request =>
-    thirdPartyDeveloperMfaConnector.createMfaSecret(request.userId).map(secret => {
-      val uri = otpAuthUri(secret.toLowerCase, "HMRC Developer Hub", request.developerSession.email)
+    thirdPartyDeveloperMfaConnector.createMfaSecret(request.userId).map(registerAuthAppResponse => {
+      val uri = otpAuthUri(registerAuthAppResponse.secret.toLowerCase, "HMRC Developer Hub", request.developerSession.email)
       val qrImg = qrCode.generateDataImageBase64(uri.toString)
-      Ok(protectAccountSetupView(secret.toLowerCase().grouped(4).mkString(" "), qrImg))
+      Ok(protectAccountSetupView(registerAuthAppResponse.secret.toLowerCase().grouped(4).mkString(" "), qrImg, registerAuthAppResponse.mfaId))
     })
   }
 
@@ -86,15 +86,15 @@ class ProtectAccount @Inject()(
     }
   }
 
-  def getAccessCodePage: Action[AnyContent] = atLeastPartLoggedInEnablingMfaAction { implicit request =>
-    Future.successful(Ok(protectAccountAccessCodeView(ProtectAccountForm.form)))
+  def getAccessCodePage(mfaId: MfaId): Action[AnyContent] = atLeastPartLoggedInEnablingMfaAction { implicit request =>
+    Future.successful(Ok(protectAccountAccessCodeView(ProtectAccountForm.form, mfaId)))
   }
 
   def getProtectAccountCompletedPage: Action[AnyContent] = atLeastPartLoggedInEnablingMfaAction { implicit request =>
     Future.successful(Ok(protectAccountCompletedView()))
   }
 
-  def protectAccount: Action[AnyContent] = atLeastPartLoggedInEnablingMfaAction { implicit request =>
+  def protectAccount(mfaId: MfaId): Action[AnyContent] = atLeastPartLoggedInEnablingMfaAction { implicit request =>
 
     def logonAndComplete(): Result = {
       thirdPartyDeveloperConnector.updateSessionLoggedInState(request.sessionId, UpdateLoggedInStateRequest(LoggedInState.LOGGED_IN))
@@ -107,14 +107,14 @@ class ProtectAccount @Inject()(
         .fill(form)
         .withError(key = "accessCode", message = "You have entered an incorrect access code")
 
-      BadRequest(protectAccountAccessCodeView(protectAccountForm))
+      BadRequest(protectAccountAccessCodeView(protectAccountForm, mfaId))
     }
 
     ProtectAccountForm.form.bindFromRequest.fold(
-      form => Future.successful(BadRequest(protectAccountAccessCodeView(form))),
+      form => Future.successful(BadRequest(protectAccountAccessCodeView(form, mfaId))),
       form => {
         for {
-          mfaResponse <- mfaService.enableMfa(request.userId, form.accessCode)
+          mfaResponse <- mfaService.enableMfa(request.userId, mfaId, form.accessCode)
           result = {
             if (mfaResponse.totpVerified) logonAndComplete()
             else invalidCode(form)

@@ -20,11 +20,11 @@
 @import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.DeveloperSession
 @import uk.gov.hmrc.apiplatform.modules.mfa.controllers.profile.routes
 @import uk.gov.hmrc.apiplatform.modules.mfa.controllers.profile.ProtectAccountForm
+@import uk.gov.hmrc.apiplatform.modules.mfa.models.MfaId
 
 @this(devMain: DevMain2WithFormErrors)
 
-
-@(form: Form[ProtectAccountForm])(implicit messages: Messages, request: play.api.mvc.Request[Any], loggedIn: DeveloperSession, appConfig: ApplicationConfig)
+@(form: Form[ProtectAccountForm], mfaId: MfaId)(implicit messages: Messages, request: play.api.mvc.Request[Any], loggedIn: DeveloperSession, appConfig: ApplicationConfig)
 
 @devMain(
   form,
@@ -36,7 +36,7 @@
 ) {
   <h1 class="govuk-heading-l">Enter your access code</h1>
 
-  @helper.form(action = routes.ProtectAccount.protectAccount()){
+  @helper.form(action = routes.ProtectAccount.protectAccount(mfaId)){
     @helper.CSRF.formField
     @fieldError2(form.errors, "invalidCredentials", true)
 
