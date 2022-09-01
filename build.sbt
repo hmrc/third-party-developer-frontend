@@ -36,9 +36,10 @@ lazy val microservice = Project(appName, file("."))
       "unused=true",
       "dead_code=true"
     ),
-    includeFilter in uglify := GlobFilter("apis-*.js"),
+    // includeFilter in uglify := GlobFilter("apis-*.js"),
+    uglify / includeFilter := GlobFilter("apis-*.js"),
     pipelineStages := Seq(digest),
-    pipelineStages in Assets := Seq(
+    Assets / pipelineStages := Seq(
       concat,
       uglify
     )
@@ -79,10 +80,10 @@ lazy val microservice = Project(appName, file("."))
   .settings(inConfig(ComponentTest)(BloopDefaults.configSettings))
   .settings(
     ComponentTest / testOptions := Seq(Tests.Argument(TestFrameworks.ScalaTest, "-eT")),
+    ComponentTest / testOptions += Tests.Setup(() => System.setProperty("javascript.enabled", "true")),
     ComponentTest / unmanagedSourceDirectories ++= Seq(baseDirectory.value / "component", baseDirectory.value / "test-utils"),
     ComponentTest / unmanagedResourceDirectories += baseDirectory.value / "test",
     ComponentTest / unmanagedResourceDirectories += baseDirectory.value / "target" / "web" / "public" / "test",
-    ComponentTest / testOptions += Tests.Setup(() => System.setProperty("javascript.enabled", "true")),
     ComponentTest / testGrouping := oneForkedJvmPerTest((definedTests in ComponentTest).value),
     ComponentTest / parallelExecution := false
   )
