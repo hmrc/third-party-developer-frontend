@@ -84,7 +84,7 @@ lazy val microservice = Project(appName, file("."))
     ComponentTest / unmanagedSourceDirectories ++= Seq(baseDirectory.value / "component", baseDirectory.value / "test-utils"),
     ComponentTest / unmanagedResourceDirectories += baseDirectory.value / "test",
     ComponentTest / unmanagedResourceDirectories += baseDirectory.value / "target" / "web" / "public" / "test",
-    ComponentTest / fork := true,
+    ComponentTest / testGrouping := oneForkedJvmPerTest((definedTests in ComponentTest).value),
     ComponentTest / parallelExecution := false
   )
   .settings(majorVersion := 0)
