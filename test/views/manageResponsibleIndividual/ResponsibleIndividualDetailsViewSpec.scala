@@ -22,7 +22,7 @@ import uk.gov.hmrc.thirdpartydeveloperfrontend.builder.{DeveloperBuilder, Develo
 import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.ManageResponsibleIndividualController.{ResponsibleIndividualHistoryItem, ViewModel}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.{Application, ApplicationId, ApplicationState, ClientId, Environment, Standard}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.LoggedInState
-import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.ViewHelpers.{elementBySelector, elementExistsById, linkExistsWithHref}
+import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.ViewHelpers._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.{LocalUserIdTracker, WithCSRFAddToken}
 import views.helper.CommonViewSpec
 import views.html.manageResponsibleIndividual.ResponsibleIndividualDetailsView
