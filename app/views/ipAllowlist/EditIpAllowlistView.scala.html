@@ -23,7 +23,7 @@
 @import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.controllers.Crumb
 @import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.routes
 
-@this(devMain: DevMain2)
+@this(devMain: DevMain2WithFormErrors)
 
 @(app: Application, ipAllowlistFlow: IpAllowlistFlow, form: Form[uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.AddAnotherCidrBlockConfirmForm])(
   implicit request: play.api.mvc.Request[Any], loggedIn: DeveloperSession, messages: Messages, applicationConfig: ApplicationConfig
@@ -50,6 +50,7 @@
 }
 
 @devMain(
+  form,
   title = "Edit IP allow list",
   userFullName = loggedIn.loggedInName,
   back = backButton,
@@ -57,8 +58,6 @@
   breadcrumbs = breadcrumbs
 ) {
   <div class="ip-allowlist">
-    @errorSummary2(form)
-
     <h1 class="govuk-heading-l">
       @if(app.ipAllowlist.allowlist.isEmpty) {
         Continue setting up your IP allow list

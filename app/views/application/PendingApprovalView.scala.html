@@ -21,11 +21,12 @@
 @import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.checkpages.CheckYourAnswersData
 @import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.checkpages.DummyCheckYourAnswersForm
 
-@this(devMain: DevMain2)
+@this(devMain: DevMain2WithFormErrors)
 
 @(data: CheckYourAnswersData, form: Form[DummyCheckYourAnswersForm])(implicit request: play.api.mvc.Request[Any], loggedIn: DeveloperSession, messages: Messages, applicationConfig: ApplicationConfig)
 
 @devMain(
+  form,
   title = data.softwareName + " Credentials requested",
   userFullName = loggedIn.loggedInName,
   breadcrumbs = Seq(
@@ -35,8 +36,6 @@
   ),
   developerSession = Some(loggedIn)
 ) {
-  @errorSummary2(form)
-
   <span class="govuk-caption-l">@{data.softwareName}</span>
   <h1 class="govuk-heading-l">
     Credentials requested

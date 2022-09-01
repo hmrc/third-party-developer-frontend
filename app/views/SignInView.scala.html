@@ -17,19 +17,16 @@
 @import include._
 @import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.routes
 
-@this(devMain: DevMain2)
+@this(devMain: DevMain2WithFormErrors)
 
 @(heading: String, form: Form[uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.LoginForm], endOfJourney: Boolean = false)(implicit request: play.api.mvc.Request[Any], messagesProvider: MessagesProvider, appConfig: ApplicationConfig)
 
-@titleError = { @if(form.errors.nonEmpty) {Error: } else {}}
-
 @devMain(
-  title = titleError + heading,
+  form,
+  title = heading,
   isRegistering = true,
   developerSession = None
 ) {
-  @errorSummary2(form)
-
   <h1 class="govuk-heading-l">@heading</h1>
 
   @helper.form(action = routes.UserLoginAccount.authenticate) {

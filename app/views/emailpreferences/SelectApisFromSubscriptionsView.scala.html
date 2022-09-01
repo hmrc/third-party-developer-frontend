@@ -24,7 +24,7 @@
 @import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.SelectApisFromSubscriptionsForm
 @import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.FormKeys
 
-@this(devMain: DevMain2)
+@this(devMain: DevMain2WithFormErrors)
 
 @(form: Form[SelectApisFromSubscriptionsForm], apis: List[CombinedApi], applicationId: ApplicationId, selectedApis: Set[String])(implicit messages: Messages, loggedIn: DeveloperSession, request: play.api.mvc.Request[Any], applicationConfig: ApplicationConfig)
 
@@ -33,12 +33,12 @@
 }
 
 @devMain(
+  form,
   title = pageHeading,
   userFullName = loggedIn.loggedInName,
   back = BackButtonWithJavaScript,
   developerSession = Some(loggedIn)
 ) {
-  @errorSummary2(form)
   <div class="govuk-form-group @if(form.errors("apiRadio").nonEmpty || form.errors.map(_.message).contains(FormKeys.selectedApisNonSelectedGlobalKey)) {govuk-form-group--error}">
     <fieldset class="govuk-fieldset" aria-describedby="select-all-description">
       <legend class="govuk-fieldset__legend govuk-fieldset__legend--l">

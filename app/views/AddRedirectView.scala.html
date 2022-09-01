@@ -22,16 +22,15 @@
 @import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.DeveloperSession
 @import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.routes
 
-@this(devMain: DevMain2, leftHandNav: LeftHandNav)
+@this(devMain: DevMain2WithFormErrors, leftHandNav: LeftHandNav)
 
 @(applicationViewModel: ApplicationViewModel, form: Form[AddRedirectForm])(implicit request: play.api.mvc.Request[Any], loggedIn: DeveloperSession, messages: Messages, applicationConfig: ApplicationConfig, navSection: String = "redirects")
-
-@titleError = { @if(form.errors.nonEmpty) {Error: } else {}}
 
 @application = @{applicationViewModel.application}
 
 @devMain(
-  title = titleError + "Add a redirect URI",
+  form,
+  title = "Add a redirect URI",
   userFullName = loggedIn.loggedInName,
   breadcrumbs = Seq(
     Crumb("Add a redirect URI"),
@@ -42,8 +41,6 @@
   leftNav = Some(leftHandNav(Option(applicationViewModel), Option(navSection))),
   developerSession = Some(loggedIn)
 ) {
-  @errorSummary2(form)
-
   <h1 class="govuk-heading-l">Add a redirect URI</h1>
 
   @appEnvironment2(application)

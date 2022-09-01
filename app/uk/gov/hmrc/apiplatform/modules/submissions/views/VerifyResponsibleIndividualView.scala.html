@@ -22,13 +22,14 @@
 @import uk.gov.hmrc.apiplatform.modules.submissions.controllers.VerifyResponsibleIndividualController.HasVerifiedForm
 @import uk.gov.hmrc.apiplatform.modules.submissions.controllers.VerifyResponsibleIndividualController.ViewModel
 
-@this(devMain: DevMain2)
+@this(devMain: DevMain2WithFormErrors)
 
 @(model: ViewModel, form: Form[HasVerifiedForm])(
   implicit request: play.api.mvc.Request[Any], messagesProvider: MessagesProvider, applicationConfig: ApplicationConfig
 )
 
 @devMain(
+  form,
   title = "Are you the responsible individual for this software?",
   breadcrumbs = Seq(
     Crumb("Verify"),
@@ -36,8 +37,6 @@
   ),
   developerSession = None
 ) {
-  @errorSummary2(form)
-
   @helper.form(action = uk.gov.hmrc.apiplatform.modules.submissions.controllers.routes.VerifyResponsibleIndividualController.verifyAction(model.code), 'class -> "form") {
     @helper.CSRF.formField
 

@@ -22,7 +22,7 @@
 @import uk.gov.hmrc.urls.Link
 @import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.routes
 
-@this(devMain: DevMain2)
+@this(devMain: DevMain2WithFormErrors)
 
 @(form: Form[uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.ChooseApplicationToUpliftForm], upliftableApps: Seq[ApplicationSummary], showFluff: Boolean)(implicit request: play.api.mvc.Request[Any], loggedIn: DeveloperSession, messagesProvider: MessagesProvider, appConfig: ApplicationConfig)
 
@@ -53,6 +53,7 @@
 }
 
 @devMain(
+  form,
   title = pageHeading,
   userFullName = loggedIn.loggedInName,
   breadcrumbs = Seq(
@@ -62,9 +63,6 @@
   ),
   developerSession = Some(loggedIn)
 ) {
-
-  @errorSummary2(form)
-
   @if(needToChoose) {
 
     @helper.form(action = controllers.addapplication.routes.AddApplication.chooseApplicationToUpliftAction()) {

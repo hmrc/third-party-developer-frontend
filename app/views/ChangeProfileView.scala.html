@@ -20,13 +20,13 @@
 @import views.html.include.DevMain2
 @import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.routes
 
-@this(devMain: DevMain2, leftHandNav: LeftHandNav)
+@this(devMain: DevMain2WithFormErrors, leftHandNav: LeftHandNav)
 
 @(form: Form[uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.ProfileForm])(implicit request: play.api.mvc.Request[Any], loggedIn: DeveloperSession, appConfig: ApplicationConfig, messagesProvider: MessagesProvider, navSection: String = "manage-profile")
-@titleError = { @if(form.errors.nonEmpty) {Error: } else {}}
 
 @devMain(
-  title = titleError + "Change profile details",
+  form,
+  title = "Change profile details",
   userFullName = loggedIn.loggedInName,
   breadcrumbs = Seq(
     Crumb("Manage profile"),
@@ -35,8 +35,6 @@
   leftNav = Some(leftHandNav(None, Option(navSection))),
   developerSession = Some(loggedIn)
 ) {
-
-  @errorSummary2(form)
 
   <h1 class="govuk-heading-l">Change profile details</h1>
 

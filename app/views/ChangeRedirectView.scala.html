@@ -21,13 +21,14 @@
 @import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.controllers.ApplicationViewModel
 @import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.DeveloperSession
 
-@this(devMain: DevMain2, leftHandNav: LeftHandNav)
+@this(devMain: DevMain2WithFormErrors, leftHandNav: LeftHandNav)
 
 @(applicationViewModel: ApplicationViewModel, form: Form[ChangeRedirectForm])(implicit request: play.api.mvc.Request[Any], loggedIn: DeveloperSession, messages: Messages, applicationConfig: ApplicationConfig, navSection: String = "redirects")
 
 @application = @{applicationViewModel.application}
 
 @devMain(
+  form,
   title = "Change a redirect URI",
   userFullName = loggedIn.loggedInName,
   breadcrumbs = Seq(
@@ -39,12 +40,10 @@
   leftNav = Some(leftHandNav(Option(applicationViewModel), Option(navSection))),
   developerSession = Some(loggedIn)
 ) {
-  @errorSummary2(form)
-
   <h1 class="govuk-heading-l">Change a redirect URI</h1>
 
-    @appEnvironment2(application)
-    <br>
+  @appEnvironment2(application)
+  <br>
 
   @helper.form(action = controllers.routes.Redirects.changeRedirectAction(application.id), 'class -> "form") {
     @helper.CSRF.formField
@@ -63,7 +62,7 @@
       <input id="originalRedirectUri" name="originalRedirectUri" class="govuk-input" hidden aria-hidden="true" type="text" value="@form.data.get("originalRedirectUri")">
     </div>
 
-      <button id="add" class="govuk-button" type="submit">Continue</button>
-      <a href="@controllers.routes.Redirects.redirects(application.id)" class="govuk-button govuk-button--secondary">Cancel</a>
+    <button id="add" class="govuk-button" type="submit">Continue</button>
+    <a href="@controllers.routes.Redirects.redirects(application.id)" class="govuk-button govuk-button--secondary">Cancel</a>
   }
 }
