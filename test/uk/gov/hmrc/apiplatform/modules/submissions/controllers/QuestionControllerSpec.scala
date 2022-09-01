@@ -47,6 +47,9 @@ import uk.gov.hmrc.apiplatform.modules.submissions.domain.models.QuestionnaireSt
 import java.time.ZoneOffset
 import java.time.LocalDateTime
 import uk.gov.hmrc.apiplatform.modules.submissions.domain.models.PossibleAnswer
+import views.html.include.errorSummary
+import uk.gov.hmrc.apiplatform.modules.submissions.domain.models.ErrorInfo
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.controllers.NoSubscriptionFieldsRefinerBehaviour
 
 class QuestionControllerSpec 
   extends BaseControllerSpec
@@ -138,6 +141,17 @@ class QuestionControllerSpec
       contentAsString(result) contains("Email address") shouldBe true withClue("HTML content did not contain label")
       contentAsString(result) contains("Cannot be a shared mailbox") shouldBe true withClue("HTML content did not contain hintText")
       contentAsString(result) contains("We will email a verification link to the responsible individual that expires in 10 working days.") shouldBe true withClue("HTML content did not contain afterStatement")
+      contentAsString(result) contains("<title>")
+    }
+    
+    "display fail and show error in title when applicable" in new Setup {
+      SubmissionServiceMock.Fetch.thenReturns(aSubmission.withIncompleteProgress)
+      
+      val formSubmissionLink = s"${aSubmission.id.value}/question/${testQuestionIdsOfInterest.responsibleIndividualEmailId.value}"
+      val result = controller.showQuestion(aSubmission.id, testQuestionIdsOfInterest.responsibleIndividualEmailId, None, Some(ErrorInfo("blah", "message")))(loggedInRequest.withCSRFToken)
+      
+      status(result) shouldBe BAD_REQUEST
+      contentAsString(result) contains("<title>Error:") shouldBe true withClue("Page title should contain `Error: ` prefix")
     }
 
     "fail with a BAD REQUEST for an invalid questionId" in new Setup {
@@ -147,6 +161,7 @@ class QuestionControllerSpec
 
       status(result) shouldBe BAD_REQUEST
     }
+
   }
 
   "updateQuestion" should {

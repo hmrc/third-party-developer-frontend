@@ -315,7 +315,7 @@ class UpliftJourneyControllerSpec extends BaseControllerSpec
 
       status(result) shouldBe BAD_REQUEST
 
-      titleOf(result) shouldBe "Will you sell, resell or distribute your software? - HMRC Developer Hub - GOV.UK"
+      titleOf(result) shouldBe "Error: Will you sell, resell or distribute your software? - HMRC Developer Hub - GOV.UK"
 
       contentAsString(result) should include("Will you sell, resell or distribute your software?")
       contentAsString(result) should include("Select yes if you sell, resell or distribute your software")

@@ -17,20 +17,16 @@
 @import include._
 @import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.routes
 
-@this(devMain: DevMain2)
+@this(devMain: DevMain2WithFormErrors)
 
 @(form: Form[uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.PasswordResetForm])(implicit request: play.api.mvc.Request[Any],
   messages: Messages, applicationConfig: ApplicationConfig)
 
-@titleError = { @if(form.errors.nonEmpty) {Error: } else {}}
-
 @devMain(
-  title = titleError + "Create a new password",
+  form,
+  title = "Create a new password",
   developerSession = None
 ) {
-
-  @errorSummary2(form)
-
   <h1 class="govuk-heading-l">Create a new password</h1>
 
   @helper.form(action = routes.Password.resetPassword) {

@@ -21,21 +21,19 @@
 @import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.routes
 @import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.DeletePrincipalApplicationForm
 
-@this(devMain: DevMain2)
+@this(devMain: DevMain2WithFormErrors)
 
 @(app: Application, form: Form[DeletePrincipalApplicationForm])(
   implicit request: play.api.mvc.Request[Any], loggedIn: DeveloperSession, messagesProvider: MessagesProvider, applicationConfig: ApplicationConfig
 )
 
-@titleError = { @if(form.errors.nonEmpty) {Error: } else {}}
-
 @devMain(
-  title = titleError + "Delete application",
+  form,
+  title = "Delete application",
   userFullName = loggedIn.loggedInName,
   back = BackButtonWithJavaScript,
   developerSession = Some(loggedIn)
 ) {
-  @errorSummary2(form)
   <h1 class="govuk-heading-l">Delete application</h1>
   @appEnvironment2(app)
   <br>

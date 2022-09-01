@@ -19,7 +19,7 @@
 @import include._
 @import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.controllers.Crumb
 
-@this(devMain: DevMain2)
+@this(devMain: DevMain2WithFormErrors)
 
 @(form: Form[uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.AddApplicationNameForm], environment: Environment
 )(implicit request: play.api.mvc.Request[Any], loggedIn: DeveloperSession, messagesProvider: MessagesProvider, appConfig: ApplicationConfig)
@@ -27,6 +27,7 @@
 @pageHeading = @{ "What's the name of your application?" }
 
 @devMain(
+  form,
   title = pageHeading,
   userFullName = loggedIn.loggedInName,
   breadcrumbs = Seq(
@@ -36,9 +37,6 @@
   ),
   developerSession = Some(loggedIn)
 ) {
-
-  @errorSummary2(form)
-
   @helper.form(action = controllers.addapplication.routes.AddApplication.editApplicationNameAction(environment)) {
     @helper.CSRF.formField
 

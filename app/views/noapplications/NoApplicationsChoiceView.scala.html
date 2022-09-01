@@ -19,59 +19,59 @@
 @import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.DeveloperSession
 @import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.noapplications.NoApplications.NoApplicationsChoiceForm
 
-@this(devMain: DevMain2, leftHandNav: LeftHandNav)
-
+@this(devMain: DevMain2WithFormErrors, leftHandNav: LeftHandNav)
 
 @(form: Form[NoApplicationsChoiceForm])(implicit request: play.api.mvc.Request[Any], loggedIn: DeveloperSession, messagesProvider: MessagesProvider, appConfig: ApplicationConfig)
 
 @pageHeading = @{"Using Developer Hub"}
 
-    @devMain(
+@devMain(
+    form,
     title = pageHeading,
     userFullName = loggedIn.loggedInName,
     breadcrumbs = Seq(Crumb(pageHeading),Crumb.home),
     leftNav = Some(leftHandNav(None, None)),
-    developerSession = Some(loggedIn)) {
-    @errorSummary2(form)
-        @helper.form(action = controllers.noapplications.routes.NoApplications.noApplicationsAction){
-            <div class="govuk-form-group">
-                @helper.CSRF.formField
-                <fieldset class="govuk-fieldset" aria-describedby="sign-in-hint">
-                    <legend class="govuk-fieldset__legend govuk-fieldset__legend--l">
-                        <h1 id="form-heading" class="govuk-fieldset__heading">
-                            Using the Developer Hub
-                        </h1>
-                    </legend>
-                    <div id="no-applications-hint" class="govuk-hint">
-                        Tell us what you want to do.
-                    </div>
-                    <div class="govuk-radios @if(form.errors("choice").nonEmpty){govuk-form-group--error}" data-module="govuk-radios" >
-                        <div class="govuk-radios__item">
-                            <input class="govuk-radios__input" id="get-emails" name="choice" type="radio" value="get-emails" aria-describedby="get-emails-item-hint">
-                            <label class="govuk-label govuk-radios__label" for="get-emails">
-                                Get emails about our APIs
-                            </label>
-                            <div id="get-emails-item-hint" class="govuk-hint govuk-radios__hint">
-                                Setup or manage the emails you receive from us.
-                            </div>
-                        </div>
-                        <div class="govuk-radios__item">
-                            <input class="govuk-radios__input" id="use-apis" name="choice" type="radio" value="use-apis" aria-describedby="use-apis-item-hint">
-                            <label class="govuk-label govuk-radios__label" for="use-apis">
-                                Start using our REST APIs
-                            </label>
-                            <div id="use-apis-item-hint" class="govuk-hint govuk-radios__hint">
-                                Create an application and setup your email preferences later.
-                            </div>
+    developerSession = Some(loggedIn)
+) {
+    @helper.form(action = controllers.noapplications.routes.NoApplications.noApplicationsAction){
+        <div class="govuk-form-group">
+            @helper.CSRF.formField
+            <fieldset class="govuk-fieldset" aria-describedby="sign-in-hint">
+                <legend class="govuk-fieldset__legend govuk-fieldset__legend--l">
+                    <h1 id="form-heading" class="govuk-fieldset__heading">
+                        Using the Developer Hub
+                    </h1>
+                </legend>
+                <div id="no-applications-hint" class="govuk-hint">
+                    Tell us what you want to do.
+                </div>
+                <div class="govuk-radios @if(form.errors("choice").nonEmpty){govuk-form-group--error}" data-module="govuk-radios" >
+                    <div class="govuk-radios__item">
+                        <input class="govuk-radios__input" id="get-emails" name="choice" type="radio" value="get-emails" aria-describedby="get-emails-item-hint">
+                        <label class="govuk-label govuk-radios__label" for="get-emails">
+                            Get emails about our APIs
+                        </label>
+                        <div id="get-emails-item-hint" class="govuk-hint govuk-radios__hint">
+                            Setup or manage the emails you receive from us.
                         </div>
                     </div>
+                    <div class="govuk-radios__item">
+                        <input class="govuk-radios__input" id="use-apis" name="choice" type="radio" value="use-apis" aria-describedby="use-apis-item-hint">
+                        <label class="govuk-label govuk-radios__label" for="use-apis">
+                            Start using our REST APIs
+                        </label>
+                        <div id="use-apis-item-hint" class="govuk-hint govuk-radios__hint">
+                            Create an application and setup your email preferences later.
+                        </div>
+                    </div>
+                </div>
 
-                </fieldset>
-            </div>
+            </fieldset>
+        </div>
 
-            <button id="submit" class="govuk-button" data-module="govuk-button">
-                Continue
-            </button>
+        <button id="submit" class="govuk-button" data-module="govuk-button">
+            Continue
+        </button>
 
-        }
+    }
 }
