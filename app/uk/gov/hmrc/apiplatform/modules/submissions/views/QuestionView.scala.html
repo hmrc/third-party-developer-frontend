@@ -230,8 +230,16 @@
   }
 }
 
+@pageTitle = @{
+  if(errorInfo.isDefined) {
+    s"Error: ${pageHeading}"
+  } else {
+    pageHeading
+  }
+}
+
 @devMain(
-  title = pageHeading,
+  title = pageTitle,
   userFullName = loggedIn.loggedInName,
   back = BackButtonWithJavaScript,
   developerSession = Some(loggedIn)
