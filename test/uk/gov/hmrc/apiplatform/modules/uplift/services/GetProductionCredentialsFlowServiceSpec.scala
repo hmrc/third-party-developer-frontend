@@ -61,7 +61,7 @@ class GetProductionCredentialsFlowServiceSpec
     }
 
     "return a new credentials flow if one does not already exist" in new Setup {
-      FlowRepositoryMock.FetchBySessionIdAndFlowType.thenReturnNothing
+      FlowRepositoryMock.FetchBySessionIdAndFlowType.thenReturnNothing[GetProductionCredentialsFlow]
       FlowRepositoryMock.SaveFlow.thenReturnSuccess
       val result = await(underTest.fetchFlow(loggedInDeveloper))
 
