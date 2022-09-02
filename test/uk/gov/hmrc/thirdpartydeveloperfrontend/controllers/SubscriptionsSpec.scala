@@ -32,7 +32,7 @@ import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.WithCSRFAddToken
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.WithLoggedInSession._
 import views.helper.EnvironmentNameService
-import views.html.{AddAppSubscriptionsView, ManageSubscriptionsView, SubscribeRequestSubmittedView, UnsubscribeRequestSubmittedView}
+import views.html.{AddAppSubscriptionsView, ManageSubscriptionsView, ManageSubscriptionsNewView, SubscribeRequestSubmittedView, UnsubscribeRequestSubmittedView}
 import views.html.include.ChangeSubscriptionConfirmationView
 
 import scala.concurrent.ExecutionContext.Implicits.global
@@ -56,6 +56,7 @@ class SubscriptionsSpec extends BaseControllerSpec with WithCSRFAddToken with Lo
 
   trait Setup extends ApplicationServiceMock with SessionServiceMock with ApplicationActionServiceMock {
     val manageSubscriptionsView = app.injector.instanceOf[ManageSubscriptionsView]
+    val manageSubscriptionsNewView = app.injector.instanceOf[ManageSubscriptionsNewView]
     val addAppSubscriptionsView = app.injector.instanceOf[AddAppSubscriptionsView]
     val changeSubscriptionConfirmationView = app.injector.instanceOf[ChangeSubscriptionConfirmationView]
     val unsubscribeRequestSubmittedView = app.injector.instanceOf[UnsubscribeRequestSubmittedView]
@@ -73,6 +74,7 @@ class SubscriptionsSpec extends BaseControllerSpec with WithCSRFAddToken with Lo
       mcc,
       cookieSigner,
       manageSubscriptionsView,
+      manageSubscriptionsNewView,
       addAppSubscriptionsView,
       changeSubscriptionConfirmationView,
       unsubscribeRequestSubmittedView,
