@@ -94,7 +94,7 @@ class ResponsibleIndividualVerificationServiceSpec extends AsyncHmrcSpec
     }
 
     "successfully return a riVerification record for accept but don't create a deskpro ticket for an update" in new Setup {
-      val riUpdateVerification = ResponsibleIndividualUpdateVerification(ResponsibleIndividualVerificationId(code), applicationId, Submission.Id.random, 0, "App name", LocalDateTime.now(ZoneOffset.UTC), responsibleIndividual, ResponsibleIndividualVerificationState.INITIAL)
+      val riUpdateVerification = ResponsibleIndividualUpdateVerification(ResponsibleIndividualVerificationId(code), applicationId, Submission.Id.random, 0, "App name", LocalDateTime.now(ZoneOffset.UTC), responsibleIndividual, "Mr Admin", "admin@example.com", ResponsibleIndividualVerificationState.INITIAL)
  
       when(mockSubmissionsConnector.fetchResponsibleIndividualVerification(eqTo(code))(*)).thenReturn(successful(Some(riUpdateVerification)))
       ApplicationServiceMock.fetchByApplicationIdReturns(applicationId, application)

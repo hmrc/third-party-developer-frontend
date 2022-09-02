@@ -60,6 +60,8 @@ case class ResponsibleIndividualUpdateVerification(
     applicationName: String,
     createdOn: LocalDateTime,
     responsibleIndividual: ResponsibleIndividual,
+    requestingAdminName: String,
+    requestingAdminEmail: String,
     state: ResponsibleIndividualVerificationState
   ) extends ResponsibleIndividualVerification
 
