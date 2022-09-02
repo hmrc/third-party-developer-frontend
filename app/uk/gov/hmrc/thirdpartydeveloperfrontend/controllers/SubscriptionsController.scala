@@ -38,7 +38,7 @@ import play.twirl.api.Html
 import uk.gov.hmrc.thirdpartydeveloperfrontend.service._
 import uk.gov.hmrc.http.HeaderCarrier
 import views.helper.EnvironmentNameService
-import views.html.{AddAppSubscriptionsView, ManageSubscriptionsView, SubscribeRequestSubmittedView, UnsubscribeRequestSubmittedView}
+import views.html.{AddAppSubscriptionsView, ManageSubscriptionsView, ManageSubscriptionsNewView, SubscribeRequestSubmittedView, UnsubscribeRequestSubmittedView}
 import views.html.include.ChangeSubscriptionConfirmationView
 
 import scala.concurrent.{ExecutionContext, Future}
@@ -58,6 +58,7 @@ class SubscriptionsController @Inject()(
   mcc: MessagesControllerComponents,
   val cookieSigner: CookieSigner,
   manageSubscriptionsView: ManageSubscriptionsView,
+  manageSubscriptionsNewView: ManageSubscriptionsNewView,
   addAppSubscriptionsView: AddAppSubscriptionsView,
   changeSubscriptionConfirmationView: ChangeSubscriptionConfirmationView,
   unsubscribeRequestSubmittedView: UnsubscribeRequestSubmittedView,
@@ -82,6 +83,16 @@ class SubscriptionsController @Inject()(
       request.developerSession,
       (role: CollaboratorRole, data: PageData, form: Form[EditApplicationForm]) => {
         manageSubscriptionsView(role, data, form, applicationViewModelFromApplicationRequest, data.subscriptions, data.openAccessApis ,data.app.id, createOptionalFraudPreventionNavLinkViewModel(request.application, request.subscriptions, fraudPreventionConfig))
+      }
+    )
+  }
+
+  def manageSubscriptionsNew(applicationId: ApplicationId): Action[AnyContent] = canViewSubscriptionsInDevHubAction(applicationId) { implicit request =>
+    renderSubscriptions(
+      request.application,
+      request.developerSession,
+      (role: CollaboratorRole, data: PageData, form: Form[EditApplicationForm]) => {
+        manageSubscriptionsNewView(role, data, form, applicationViewModelFromApplicationRequest, data.subscriptions, data.openAccessApis ,data.app.id, createOptionalFraudPreventionNavLinkViewModel(request.application, request.subscriptions, fraudPreventionConfig))
       }
     )
   }

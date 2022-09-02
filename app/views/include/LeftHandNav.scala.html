@@ -35,7 +35,7 @@
   case (Some(applicationView), Some(section)) => {
     @defining(applicationView.application) { app =>
       <div class="side-nav" role="navigation" aria-labelledby="nav1">
-        <span class="govuk-heading-s govuk-!-margin-bottom-1 govuk-!-margin-top-2" id="nav1">@app.name</span>
+        <h2 class="govuk-heading-s govuk-!-margin-bottom-1 govuk-!-margin-top-2" id="nav1">@app.name</h2>
         <ul class="side-nav__component">
           <li class="side-nav__list @if(section == "details") { side-nav__list--selected }">
             <a id="nav-manage-details" class="side-nav__link" href="@controllers.routes.Details.details(app.id)">

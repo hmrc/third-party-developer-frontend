@@ -45,6 +45,8 @@
   $enabled-colour: #245ea0;
 
   fieldset {
+    border: 0px;
+
     .slider__radios {
       border: 1px solid $enabled-colour;
       border-radius: 10px;
@@ -73,6 +75,12 @@
         &:focus + label {
           outline: 3px solid #ffbf47;
         }
+      }
+    }
+
+    .slider__radios--font-fix {
+      label {
+        font-size: 1rem;
       }
     }
 
@@ -107,4 +115,8 @@
       vertical-align: middle;
     }
   }
+}
+
+.slider__off--label::before, .slider__on--label::before {
+  opacity: 0;
 }
