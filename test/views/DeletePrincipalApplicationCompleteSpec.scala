@@ -54,7 +54,7 @@ class DeletePrincipalApplicationCompleteSpec extends CommonViewSpec with WithCSR
         Environment.PRODUCTION,
         Some("Description 1"),
         Set(loggedInDeveloper.email.asAdministratorCollaborator),
-        state = ApplicationState.production(loggedInDeveloper.email, ""),
+        state = ApplicationState.production(loggedInDeveloper.email, loggedInDeveloper.displayedName, ""),
         access = Standard(redirectUris = List("https://red1", "https://red2"), termsAndConditionsUrl = Some("http://tnc-url.com"))
       )
 

@@ -61,7 +61,7 @@ class CredentialsSpec extends CommonViewSpec
       Some("Test Application"),
       collaborators = Set(developer.email.asAdministratorCollaborator),
       access = Standard(),
-      state = ApplicationState.production("", ""),
+      state = ApplicationState.production("", "", ""),
       checkInformation = None
     )
 

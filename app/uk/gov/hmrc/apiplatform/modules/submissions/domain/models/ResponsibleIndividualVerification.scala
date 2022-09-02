@@ -75,4 +75,11 @@ object ResponsibleIndividualVerification extends LocalDateTimeFormatters {
     .and[ResponsibleIndividualToUVerification]("termsOfUse")
     .and[ResponsibleIndividualUpdateVerification]("adminUpdate")
     .format
+
+  def getVerificationType(riVerification: ResponsibleIndividualVerification): String = {
+    riVerification match {
+      case ritouv: ResponsibleIndividualToUVerification => "termsOfUse"
+      case riuv: ResponsibleIndividualUpdateVerification => "adminUpdate" 
+    }
+  }
 }

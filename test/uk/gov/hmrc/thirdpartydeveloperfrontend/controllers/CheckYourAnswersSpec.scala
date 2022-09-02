@@ -66,8 +66,8 @@ class CheckYourAnswersSpec
   val hashedAnotherCollaboratorEmail: String = anotherCollaboratorEmail.toSha256
 
   val testing: ApplicationState = ApplicationState.testing.copy(updatedOn = LocalDateTime.now.minusMinutes(1))
-  val production: ApplicationState = ApplicationState.production("thirdpartydeveloper@example.com", "ABCD")
-  val pendingApproval: ApplicationState = ApplicationState.pendingGatekeeperApproval("thirdpartydeveloper@example.com")
+  val production: ApplicationState = ApplicationState.production("thirdpartydeveloper@example.com", "thirdpartydeveloper", "ABCD")
+  val pendingApproval: ApplicationState = ApplicationState.pendingGatekeeperApproval("thirdpartydeveloper@example.com", "thirdpartydeveloper")
 
   val appTokens = ApplicationToken(List(aClientSecret(), aClientSecret()), "token")
 

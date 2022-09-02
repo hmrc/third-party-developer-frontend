@@ -100,7 +100,7 @@ class TermsOfUseResponsesControllerSpec
 
   "termsOfUseResponsesPage" should {
     "succeed when application is in production" in new Setup {
-      givenAppInState(ApplicationState.production("requestedBy", "verificationCode"))
+      givenAppInState(ApplicationState.production("requestedByEmail", "requestedByName", "verificationCode"))
       SubmissionServiceMock.FetchLatestExtendedSubmission.thenReturns(grantedSubmission.withCompletedProgress())
 
       val result = underTest.termsOfUseResponsesPage(appId)(loggedInRequest.withCSRFToken)
@@ -109,7 +109,7 @@ class TermsOfUseResponsesControllerSpec
     }
 
     "succeed when application is in pre-production" in new Setup {
-      givenAppInState(ApplicationState.preProduction("requestedBy"))
+      givenAppInState(ApplicationState.preProduction("requestedByEmail", "requestedByName"))
       SubmissionServiceMock.FetchLatestExtendedSubmission.thenReturns(grantedSubmission.withCompletedProgress())
 
       val result = underTest.termsOfUseResponsesPage(appId)(loggedInRequest.withCSRFToken)
@@ -118,7 +118,7 @@ class TermsOfUseResponsesControllerSpec
     }
 
     "fails when application is not in production" in new Setup {
-      givenAppInState(ApplicationState.pendingGatekeeperApproval("requestedBy"))
+      givenAppInState(ApplicationState.pendingGatekeeperApproval("requestedByEmail", "requestedByName"))
       SubmissionServiceMock.FetchLatestExtendedSubmission.thenReturns(grantedSubmission.withCompletedProgress())
 
       val result = underTest.termsOfUseResponsesPage(appId)(loggedInRequest.withCSRFToken)
@@ -127,7 +127,7 @@ class TermsOfUseResponsesControllerSpec
     }
 
     "fails when submission not found" in new Setup {
-      givenAppInState(ApplicationState.production("requestedBy", "verificationCode"))
+      givenAppInState(ApplicationState.production("requestedByEmail", "requestedByName", "verificationCode"))
       SubmissionServiceMock.FetchLatestExtendedSubmission.thenReturnsNone()
 
       val result = underTest.termsOfUseResponsesPage(appId)(loggedInRequest.withCSRFToken)
