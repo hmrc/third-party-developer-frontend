@@ -156,7 +156,11 @@ trait UserIsDeveloper extends UserIsTeamMember {
   def maybeCollaborator = Some(Collaborator(userEmail, CollaboratorRole.DEVELOPER, userId))
 }
 
-trait UserIsNotOnApplicationTeam extends HasUserWithRole {
+trait UserIsNotOnApplicationTeam extends HasUserWithRole with HasApplication {
+  val otherApp = application.copy(id=ApplicationId.random, collaborators = Set(Collaborator(userEmail, CollaboratorRole.DEVELOPER, userId)))
+  val otherAppWithSubsIds = ApplicationWithSubscriptionIds.from(otherApp).copy(subscriptions = Set(apiIdentifier))
+  when(tpaProductionConnector.fetchByTeamMember(*[UserId])(*)).thenReturn(Future.successful(List(otherAppWithSubsIds)))
+  when(tpaSandboxConnector.fetchByTeamMember(*[UserId])(*)).thenReturn(Future.successful(List(otherAppWithSubsIds)))
   def describeUserRole = "The user is not a member of the application team"
   def maybeCollaborator = None
 }
