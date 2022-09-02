@@ -19,17 +19,18 @@ package uk.gov.hmrc.thirdpartydeveloperfrontend.repositories
 import org.mongodb.scala.model.Filters.{and, equal}
 import org.mongodb.scala.model.Indexes.ascending
 import org.mongodb.scala.model.{IndexModel, IndexOptions,UpdateOptions, Updates}
-import play.api.libs.json._
 import uk.gov.hmrc.apiplatform.modules.uplift.domain.models.GetProductionCredentialsFlow
 import uk.gov.hmrc.mongo.MongoComponent
 import uk.gov.hmrc.mongo.play.json.{Codecs, PlayMongoRepository}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.config.ApplicationConfig
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.flows.{EmailPreferencesFlowV2, Flow, FlowType, IpAllowlistFlow, NewApplicationEmailPreferencesFlowV2}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.repositories.MongoFormatters.formatFlow
-
+import scala.reflect.runtime.universe._
 import java.util.concurrent.TimeUnit
 import javax.inject.{Inject, Singleton}
 import scala.concurrent.{ExecutionContext, Future}
+import scala.reflect.ClassTag
+
 
 @Singleton
 class FlowRepository @Inject() (mongo: MongoComponent, appConfig: ApplicationConfig)(implicit val ec: ExecutionContext)
@@ -59,7 +60,7 @@ class FlowRepository @Inject() (mongo: MongoComponent, appConfig: ApplicationCon
         .build
     ) {
 
-  def saveFlow[A <: Flow](flow: A)(implicit format: OFormat[A]): Future[A] = {
+  def saveFlow[A <: Flow](flow: A): Future[A] = {
     val query = and(equal("sessionId", flow.sessionId), equal("flowType", Codecs.toBson(flow.flowType)))
 
     collection.find(query).headOption flatMap {
@@ -87,9 +88,9 @@ class FlowRepository @Inject() (mongo: MongoComponent, appConfig: ApplicationCon
       .map(_.wasAcknowledged())
   }
 
-  def fetchBySessionIdAndFlowType[A <: Flow](sessionId: String, flowType: FlowType)(implicit formatter: OFormat[A]): Future[Option[Flow]] = {
-    collection.find(and(equal("sessionId", sessionId), equal("flowType", Codecs.toBson(flowType))))
-      .headOption()
+  def fetchBySessionIdAndFlowType[A <: Flow: TypeTag](sessionId: String)(implicit ct: ClassTag[A]): Future[Option[A]] = {
+    val flowType = FlowType.from[A]
+    collection.find[A](and(equal("sessionId", sessionId), equal("flowType", Codecs.toBson(flowType)))).headOption()
   }
 
   def updateLastUpdated(sessionId: String): Future[Unit] = {

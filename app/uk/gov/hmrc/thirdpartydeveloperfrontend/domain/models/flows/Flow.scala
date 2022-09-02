@@ -23,8 +23,9 @@ import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.connectors.{Combine
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.DeveloperSession
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.emailpreferences.{EmailPreferences, EmailTopic, TaxRegimeInterests}
 import enumeratum.{Enum, EnumEntry, PlayJsonEnum}
-
+import scala.reflect.runtime.universe._
 import scala.collection.immutable
+import uk.gov.hmrc.apiplatform.modules.uplift.domain.models.GetProductionCredentialsFlow
 
 sealed trait FlowType extends EnumEntry
 
@@ -37,12 +38,22 @@ object FlowType extends Enum[FlowType] with PlayJsonEnum[FlowType] {
   case object NEW_APPLICATION_EMAIL_PREFERENCES extends FlowType
   case object NEW_APPLICATION_EMAIL_PREFERENCES_V2 extends FlowType
   case object GET_PRODUCTION_CREDENTIALS extends FlowType
+
+  def from[A <: Flow : TypeTag]: FlowType = {
+    typeOf[A] match {
+      case t if t =:= typeOf[EmailPreferencesFlowV2]                => FlowType.EMAIL_PREFERENCES_V2
+      case t if t =:= typeOf[IpAllowlistFlow]                       => FlowType.IP_ALLOW_LIST
+      case t if t =:= typeOf[NewApplicationEmailPreferencesFlowV2]  => FlowType.NEW_APPLICATION_EMAIL_PREFERENCES_V2
+      case t if t =:= typeOf[GetProductionCredentialsFlow]          => FlowType.GET_PRODUCTION_CREDENTIALS
+    }
+  }
 }
 
 trait Flow {
   def sessionId: String
   def flowType: FlowType
 }
+
 
 /**
  * The name of the class is used on serialisation as a discriminator. Do not change.

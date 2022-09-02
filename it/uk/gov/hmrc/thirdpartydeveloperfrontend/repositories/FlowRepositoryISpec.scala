@@ -124,7 +124,7 @@ class FlowRepositoryISpec extends AnyWordSpec
 
         result shouldBe true
         await(flowRepository.collection.countDocuments().toFuture()) shouldBe 2
-        await(flowRepository.fetchBySessionIdAndFlowType(currentSession, FlowType.IP_ALLOW_LIST)(formatIpAllowlistFlow)) shouldBe None
+        await(flowRepository.fetchBySessionIdAndFlowType[IpAllowlistFlow](currentSession)) shouldBe None
       }
 
       "return false if it did not have anything to delete" in {
@@ -136,15 +136,22 @@ class FlowRepositoryISpec extends AnyWordSpec
 
     "fetchBySessionIdAndFlowType" should {
 
-      "fetch the flow for the specified session ID and flow type" in new PopulatedSetup {
+      "fetch the flow for the specified session ID and flow type for IpAllowListFlow" in new PopulatedSetup {
 
-        val result = await(flowRepository.fetchBySessionIdAndFlowType(currentSession, FlowType.IP_ALLOW_LIST)(formatIpAllowlistFlow))
+        val result = await(flowRepository.fetchBySessionIdAndFlowType[IpAllowlistFlow](currentSession))
 
         result shouldBe Some(currentFlow)
       }
 
+      "fetch the flow for the specified session ID and flow type for EmailPreferencesFlowV2" in new PopulatedSetup {
+
+        val result = await(flowRepository.fetchBySessionIdAndFlowType[EmailPreferencesFlowV2](currentSession))
+
+        result shouldBe Some(flowOfDifferentType)
+      }
+
       "return None when the query does not match any data" in {
-        val result = await(flowRepository.fetchBySessionIdAndFlowType("session 1", FlowType.IP_ALLOW_LIST)(formatIpAllowlistFlow))
+        val result = await(flowRepository.fetchBySessionIdAndFlowType[IpAllowlistFlow]("session 1"))
 
         result shouldBe None
       }
