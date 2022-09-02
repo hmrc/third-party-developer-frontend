@@ -22,7 +22,6 @@ import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.flows.FlowType.IP_A
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.flows.IpAllowlistFlow
 import javax.inject.{Inject, Singleton}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.repositories.FlowRepository
-import uk.gov.hmrc.thirdpartydeveloperfrontend.repositories.MongoFormatters.formatIpAllowlistFlow
 import uk.gov.hmrc.http.{ForbiddenException, HeaderCarrier}
 
 import scala.concurrent.{ExecutionContext, Future}
@@ -30,8 +29,8 @@ import scala.concurrent.{ExecutionContext, Future}
 @Singleton
 class IpAllowlistService @Inject()(flowRepository: FlowRepository, connectorWrapper: ConnectorsWrapper)(implicit val ec: ExecutionContext) {
 
-  private def fetchIpAllowListFlow( sessionId: String, app: Option[Application] = None, createIfNotFound: Boolean = true): Future[IpAllowlistFlow] = {
-    flowRepository.fetchBySessionIdAndFlowType[IpAllowlistFlow](sessionId, IP_ALLOW_LIST) map { maybeFlow =>
+  private def fetchIpAllowListFlow( sessionId: String, app: Option[Application], createIfNotFound: Boolean = true): Future[IpAllowlistFlow] = {
+    flowRepository.fetchBySessionIdAndFlowType[IpAllowlistFlow](sessionId) map { maybeFlow =>
       (maybeFlow, app, createIfNotFound) match {
         case (Some(flow: IpAllowlistFlow), _, _) => flow
         case (None, Some(app: Application), true) => IpAllowlistFlow(sessionId, app.ipAllowlist.allowlist)

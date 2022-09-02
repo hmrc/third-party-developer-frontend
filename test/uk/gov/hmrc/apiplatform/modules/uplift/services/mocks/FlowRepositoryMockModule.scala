@@ -18,27 +18,42 @@ package uk.gov.hmrc.apiplatform.modules.uplift.services.mocks
 
 import org.mockito.MockitoSugar
 import org.mockito.ArgumentMatchersSugar
+import org.mockito.verification.VerificationMode
 import scala.concurrent.Future.successful
 import uk.gov.hmrc.apiplatform.modules.uplift.domain.models._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.repositories.FlowRepository
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.flows.FlowType
-import play.api.libs.json.OFormat
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.flows.Flow
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.Session
 
 trait FlowRepositoryMockModule extends MockitoSugar with ArgumentMatchersSugar {
   protected trait BaseFlowRepositoryMock {
     def aMock: FlowRepository
 
+    def verify = MockitoSugar.verify(aMock)
+
+    def verifyZeroInteractions() = MockitoSugar.verifyZeroInteractions(aMock)
+
     object FetchBySessionIdAndFlowType {
-      def thenReturn(flow: GetProductionCredentialsFlow) = when(aMock.fetchBySessionIdAndFlowType[GetProductionCredentialsFlow](*, eqTo(FlowType.GET_PRODUCTION_CREDENTIALS))(*)).thenReturn(successful(Some(flow)))
-      def thenReturnNothing = when(aMock.fetchBySessionIdAndFlowType[GetProductionCredentialsFlow](*, eqTo(FlowType.GET_PRODUCTION_CREDENTIALS))(*)).thenReturn(successful(None))
+      def thenReturn[A <: Flow](flow: A) = when(aMock.fetchBySessionIdAndFlowType[A](*)(*,*)).thenReturn(successful(Some(flow)))
+      def thenReturn[A <: Flow](sessionId: String)(flow: A) = when(aMock.fetchBySessionIdAndFlowType[A](eqTo(sessionId))(*,*)).thenReturn(successful(Some(flow)))
+
+      def thenReturnNothing[A <: Flow] = when(aMock.fetchBySessionIdAndFlowType[A](*)(*,*)).thenReturn(successful(None))
+      def thenReturnNothing[A <: Flow](sessionId: String) = when(aMock.fetchBySessionIdAndFlowType[A](eqTo(sessionId))(*,*)).thenReturn(successful(None))
+
+      def verifyCalledWith[A <: Flow](sessionId: String) = verify.fetchBySessionIdAndFlowType[A](eqTo(sessionId))(*,*)
     }
 
     object SaveFlow {
-      def thenReturnsSuccess = when(aMock.saveFlow(*[GetProductionCredentialsFlow])).thenAnswer((f: GetProductionCredentialsFlow) => successful(f))
+      def thenReturnSuccess[A <: Flow] = when(aMock.saveFlow[A](*)).thenAnswer((flow: A) => successful(flow))
+
+      def verifyCalledWith[A <: Flow](flow: A) = verify.saveFlow[A](eqTo(flow))
     }
 
     object DeleteBySessionIdAndFlowType {
-      def thenReturnsSuccess = when(aMock.deleteBySessionIdAndFlowType(*, eqTo(FlowType.GET_PRODUCTION_CREDENTIALS))).thenReturn(successful(true))
+      def thenReturnSuccess(sessionId: String, flowType: FlowType) = when(aMock.deleteBySessionIdAndFlowType(eqTo(sessionId), eqTo(flowType))).thenReturn(successful(true))
+
+     def verifyCalledWith(sessionId: String, flowType: FlowType) = verify.deleteBySessionIdAndFlowType(eqTo(sessionId), eqTo(flowType))
     }
   }
   

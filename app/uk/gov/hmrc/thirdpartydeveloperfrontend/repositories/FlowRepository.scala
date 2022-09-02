@@ -19,7 +19,6 @@ package uk.gov.hmrc.thirdpartydeveloperfrontend.repositories
 import org.mongodb.scala.model.Filters.{and, equal}
 import org.mongodb.scala.model.Indexes.ascending
 import org.mongodb.scala.model.{IndexModel, IndexOptions,UpdateOptions, Updates}
-import play.api.libs.json._
 import uk.gov.hmrc.apiplatform.modules.uplift.domain.models.GetProductionCredentialsFlow
 import uk.gov.hmrc.mongo.MongoComponent
 import uk.gov.hmrc.mongo.play.json.{Codecs, PlayMongoRepository}
@@ -89,7 +88,10 @@ class FlowRepository @Inject() (mongo: MongoComponent, appConfig: ApplicationCon
       .map(_.wasAcknowledged())
   }
 
-  def fetchBySessionIdAndFlowType[A <: Flow](sessionId: String, flowType: FlowType)(implicit ct: ClassTag[A]): Future[Option[A]] = {
+  import scala.reflect.runtime.universe._
+
+  def fetchBySessionIdAndFlowType[A <: Flow](sessionId: String)(implicit tt: TypeTag[A], ct: ClassTag[A]): Future[Option[A]] = {
+    val flowType = FlowType.from[A]
     collection.find[A](and(equal("sessionId", sessionId), equal("flowType", Codecs.toBson(flowType)))).headOption()
   }
 

@@ -68,7 +68,7 @@ trait SubmissionServiceMockModule extends MockitoSugar with ArgumentMatchersSuga
 
     object ConfirmSetupComplete {
       def thenReturnSuccessFor(applicationId: ApplicationId, userEmailAddress: String) = {
-        when(aMock.confirmSetupComplete(eqTo(applicationId), eqTo(userEmailAddress))(*)).thenReturn(successful(Right()))
+        when(aMock.confirmSetupComplete(eqTo(applicationId), eqTo(userEmailAddress))(*)).thenReturn(successful(Right(())))
       }
       def thenReturnFailure() = {
         when(aMock.confirmSetupComplete(*[ApplicationId], *[String])(*)).thenReturn(successful(Left("nope")))
