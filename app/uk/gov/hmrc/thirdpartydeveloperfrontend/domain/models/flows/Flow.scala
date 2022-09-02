@@ -39,7 +39,7 @@ object FlowType extends Enum[FlowType] with PlayJsonEnum[FlowType] {
   case object NEW_APPLICATION_EMAIL_PREFERENCES_V2 extends FlowType
   case object GET_PRODUCTION_CREDENTIALS extends FlowType
 
-  def from[A <: Flow](implicit tt: TypeTag[A]): FlowType = {
+  def from[A <: Flow : TypeTag]: FlowType = {
     typeOf[A] match {
       case t if t =:= typeOf[EmailPreferencesFlowV2]                => FlowType.EMAIL_PREFERENCES_V2
       case t if t =:= typeOf[IpAllowlistFlow]                       => FlowType.IP_ALLOW_LIST
