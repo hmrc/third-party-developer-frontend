@@ -61,13 +61,18 @@ class ApplicationService @Inject() (
   }
 
   def updateResponsibleIndividual(application: Application, userId: UserId, fullName: String, emailAddress: String)(implicit hc: HeaderCarrier): Future[ApplicationUpdateSuccessful] = {
-    val request = ChangeResponsibleIndividual(userId,  LocalDateTime.now(clock), fullName, emailAddress)
+    val request = ChangeResponsibleIndividualToSelf(userId,  LocalDateTime.now(clock), fullName, emailAddress)
     connectorWrapper.forEnvironment(application.deployedTo).thirdPartyApplicationConnector.applicationUpdate(application.id, request)
   }
 
   def updateTermsConditionsLocation(application: Application, userId: UserId, newLocation: TermsAndConditionsLocation)(implicit hc: HeaderCarrier): Future[ApplicationUpdateSuccessful] = {
     val request = ChangeProductionApplicationTermsAndConditionsLocation(userId,  LocalDateTime.now(clock), newLocation)
     connectorWrapper.forEnvironment(application.deployedTo).thirdPartyApplicationConnector.applicationUpdate(application.id, request)
+  }
+
+  def acceptResponsibleIndividualVerification(applicationId: ApplicationId, code: String)(implicit hc: HeaderCarrier): Future[ApplicationUpdateSuccessful] = {
+    val request = ChangeResponsibleIndividualToOther(code, LocalDateTime.now(clock))
+    connectorWrapper.productionApplicationConnector.applicationUpdate(applicationId, request)
   }
 
   def verifyResponsibleIndividual(application: Application, userId: UserId, requesterName: String, riName: String, riEmail: String)(implicit hc: HeaderCarrier): Future[ApplicationUpdateSuccessful] = {

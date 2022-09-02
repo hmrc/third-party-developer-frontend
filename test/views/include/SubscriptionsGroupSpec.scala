@@ -104,7 +104,7 @@ class SubscriptionsGroupSpec
       val role = CollaboratorRole.DEVELOPER
 
       "render enabled toggles for a sandbox app" in {
-        val page = Page(role, Environment.SANDBOX, ApplicationState.production(loggedInDeveloper.email, ""))
+        val page = Page(role, Environment.SANDBOX, ApplicationState.production(loggedInDeveloper.email, loggedInDeveloper.displayedName, ""))
 
         page.toggle.hasAttr("disabled") shouldBe false
         page.requestChangeLink shouldBe None
@@ -118,21 +118,21 @@ class SubscriptionsGroupSpec
       }
 
       "render disabled toggles for a pending-gatekeeper-approval production app with no link to request change" in {
-        val page = Page(role, Environment.PRODUCTION, ApplicationState.pendingGatekeeperApproval(loggedInDeveloper.email))
+        val page = Page(role, Environment.PRODUCTION, ApplicationState.pendingGatekeeperApproval(loggedInDeveloper.email, loggedInDeveloper.displayedName))
 
         page.toggle.hasAttr("disabled") shouldBe true
         page.requestChangeLink shouldBe None
       }
 
       "render disabled toggles for a pending-requester-verification production app with no link to request change" in {
-        val page = Page(role, Environment.PRODUCTION, ApplicationState.pendingRequesterVerification(loggedInDeveloper.email, ""))
+        val page = Page(role, Environment.PRODUCTION, ApplicationState.pendingRequesterVerification(loggedInDeveloper.email, loggedInDeveloper.displayedName, ""))
 
         page.toggle.hasAttr("disabled") shouldBe true
         page.requestChangeLink shouldBe None
       }
 
       "render disabled toggles for a checked production app with no link to request change" in {
-        val page = Page(role, Environment.PRODUCTION, ApplicationState.production(loggedInDeveloper.email, ""))
+        val page = Page(role, Environment.PRODUCTION, ApplicationState.production(loggedInDeveloper.email, loggedInDeveloper.displayedName, ""))
 
         page.toggle.hasAttr("disabled") shouldBe true
         page.requestChangeLink shouldBe None
@@ -143,7 +143,7 @@ class SubscriptionsGroupSpec
       val role = CollaboratorRole.ADMINISTRATOR
 
       "render enabled toggles for a sandbox app" in {
-        val page = Page(role, Environment.SANDBOX, ApplicationState.production(loggedInDeveloper.email, ""))
+        val page = Page(role, Environment.SANDBOX, ApplicationState.production(loggedInDeveloper.email, loggedInDeveloper.displayedName, ""))
 
         page.toggle.hasAttr("disabled") shouldBe false
         page.requestChangeLink shouldBe None
@@ -157,21 +157,21 @@ class SubscriptionsGroupSpec
       }
 
       "render disabled toggles for a pending-gatekeeper-approval production app with a link to request change" in {
-        val page = Page(role, Environment.PRODUCTION, ApplicationState.pendingGatekeeperApproval(loggedInDeveloper.email))
+        val page = Page(role, Environment.PRODUCTION, ApplicationState.pendingGatekeeperApproval(loggedInDeveloper.email, loggedInDeveloper.displayedName))
 
         page.toggle.hasAttr("disabled") shouldBe true
         page.requestChangeLink shouldBe 'defined
       }
 
       "render disabled toggles for a pending-requester-verification production app with a link to request change" in {
-        val page = Page(role, Environment.PRODUCTION, ApplicationState.pendingRequesterVerification(loggedInDeveloper.email, ""))
+        val page = Page(role, Environment.PRODUCTION, ApplicationState.pendingRequesterVerification(loggedInDeveloper.email, loggedInDeveloper.displayedName, ""))
 
         page.toggle.hasAttr("disabled") shouldBe true
         page.requestChangeLink shouldBe 'defined
       }
 
       "render disabled toggles for a checked production app with a link to request change" in {
-        val page = Page(role, Environment.PRODUCTION, ApplicationState.production(loggedInDeveloper.email, ""))
+        val page = Page(role, Environment.PRODUCTION, ApplicationState.production(loggedInDeveloper.email, loggedInDeveloper.displayedName, ""))
 
         page.toggle.hasAttr("disabled") shouldBe true
         page.requestChangeLink shouldBe 'defined

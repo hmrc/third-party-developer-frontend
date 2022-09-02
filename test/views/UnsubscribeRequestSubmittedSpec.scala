@@ -52,7 +52,7 @@ class UnsubscribeRequestSubmittedSpec extends CommonViewSpec with WithCSRFAddTok
         Environment.PRODUCTION,
         Some("Test Application Description"),
         Set(developer.email.asAdministratorCollaborator),
-        state = ApplicationState.production(developer.email, ""),
+        state = ApplicationState.production(developer.email, developer.displayedName, ""),
         access = Standard(redirectUris = List("https://red1", "https://red2"), termsAndConditionsUrl = Some("http://tnc-url.com"))
       )
 

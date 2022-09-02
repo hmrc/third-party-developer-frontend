@@ -96,7 +96,7 @@ class ManageTeamSpec
     def givenTheApplicationExistWithUserRole(
         appId: ApplicationId,
         userRole: CollaboratorRole,
-        state: ApplicationState = ApplicationState.production("test", "test"),
+        state: ApplicationState = ApplicationState.production("test", "test", "test"),
         additionalTeamMembers: Seq[Collaborator] = Seq()
     ) = {
 

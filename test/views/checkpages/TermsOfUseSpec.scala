@@ -50,7 +50,7 @@ class TermsOfUseSpec extends CommonViewSpec with WithCSRFAddToken with Collabora
         Some("APPLICATION DESCRIPTION"),
         Set("sample@example.com".asAdministratorCollaborator, "someone@example.com".asDeveloperCollaborator),
         Standard(),
-        ApplicationState(State.TESTING, None, None, LocalDateTime.now(ZoneOffset.UTC))
+        ApplicationState(State.TESTING, None, None, None, LocalDateTime.now(ZoneOffset.UTC))
       )
 
     "show terms of use agreement page that requires terms of use to be agreed" in {

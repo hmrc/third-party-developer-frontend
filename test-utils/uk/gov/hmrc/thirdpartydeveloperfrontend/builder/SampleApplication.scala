@@ -37,10 +37,10 @@ trait SampleApplication {
     Environment.PRODUCTION,
     Some("Description 1"),
     Set(loggedInDeveloper.email.asAdministratorCollaborator),
-    state = ApplicationState.production(loggedInDeveloper.email, ""),
+    state = ApplicationState.production(loggedInDeveloper.email, loggedInDeveloper.displayedName, ""),
     access = Standard(redirectUris = List("https://red1", "https://red2"), termsAndConditionsUrl = Some("http://tnc-url.com"))
   )
 
   val testingApp = sampleApp.copy(state = ApplicationState.testing)
-  val submittedApp = sampleApp.copy(state = ApplicationState.pendingGatekeeperApproval("requestedBy"))
+  val submittedApp = sampleApp.copy(state = ApplicationState.pendingGatekeeperApproval("requestedByEmail", "requestedByName"))
 }

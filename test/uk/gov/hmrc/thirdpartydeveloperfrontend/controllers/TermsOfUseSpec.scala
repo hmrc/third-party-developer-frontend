@@ -93,7 +93,7 @@ class TermsOfUseSpec
         environment,
         collaborators = Set(loggedInDeveloper.email.asCollaborator(userRole)),
         access = access,
-        state = ApplicationState.production("dont-care", "dont-care"),
+        state = ApplicationState.production("dont-care", "dont-care", "dont-care"),
         checkInformation = checkInformation
       )
 

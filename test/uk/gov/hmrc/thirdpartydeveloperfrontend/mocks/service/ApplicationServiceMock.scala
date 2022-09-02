@@ -119,7 +119,10 @@ trait ApplicationServiceMock extends MockitoSugar with ArgumentMatchersSugar wit
     fetchByApplicationIdReturns(appData.application.id, appData)
 
     when(applicationServiceMock.fetchCredentials(eqTo(appData.application))(*)).thenReturn(successful(tokens()))
+  }
 
+  def acceptResponsibleIndividualVerification(appId: ApplicationId, code: String) = {
+    when(applicationServiceMock.acceptResponsibleIndividualVerification(eqTo(appId), eqTo(code))(*)).thenReturn(successful(ApplicationUpdateSuccessful))
   }
 }
 

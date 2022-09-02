@@ -98,7 +98,7 @@ class DetailsSpec
       }
 
       "return the credentials requested page on an application pending approval" in new Setup {
-        val pendingApprovalApplication = anApplication(adminEmail = loggedInDeveloper.email, state = ApplicationState.pendingGatekeeperApproval("dont-care"))
+        val pendingApprovalApplication = anApplication(adminEmail = loggedInDeveloper.email, state = ApplicationState.pendingGatekeeperApproval("dont-care", "dont-care"))
 
         givenApplicationAction(pendingApprovalApplication, loggedInDeveloper)
 
@@ -112,7 +112,7 @@ class DetailsSpec
       }
 
       "return the credentials requested page on an application pending verification" in new Setup {
-        val pendingVerificationApplication = anApplication(adminEmail = loggedInDeveloper.email, state = ApplicationState.pendingRequesterVerification("dont-care", "dont-care"))
+        val pendingVerificationApplication = anApplication(adminEmail = loggedInDeveloper.email, state = ApplicationState.pendingRequesterVerification("dont-care", "dont-care", "dont-care"))
 
         givenApplicationAction(pendingVerificationApplication, loggedInDeveloper)
 
@@ -127,7 +127,7 @@ class DetailsSpec
 
       "redirect to the Start Using Your Application page on an application in pre-production state" in new Setup {
         val userEmail = "test@example.con"
-        val preProdApplication = anApplication(adminEmail = loggedInDeveloper.email, state = ApplicationState.preProduction(userEmail))
+        val preProdApplication = anApplication(adminEmail = loggedInDeveloper.email, state = ApplicationState.preProduction(userEmail, "name"))
 
         givenApplicationAction(preProdApplication, loggedInDeveloper)
 
@@ -139,7 +139,7 @@ class DetailsSpec
 
       "display the Application Details page for an application in pre-production state when the forceAppDetails parameter is used" in new Setup {
         val userEmail = "test@example.con"
-        val preProdApplication = anApplication(adminEmail = loggedInDeveloper.email, state = ApplicationState.preProduction(userEmail))
+        val preProdApplication = anApplication(adminEmail = loggedInDeveloper.email, state = ApplicationState.preProduction(userEmail, "name"))
 
         returnAgreementDetails()
         givenApplicationAction(preProdApplication, loggedInDeveloper)

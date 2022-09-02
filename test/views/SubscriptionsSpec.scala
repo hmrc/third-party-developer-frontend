@@ -68,9 +68,9 @@ class SubscriptionsSpec extends CommonViewSpec
   "Subscriptions page" should {
     val developer = buildDeveloperSession(loggedInState = LoggedInState.LOGGED_IN, buildDeveloperWithRandomId("Test", "Test", "Test", None))
 
-    val productionApplicationPendingGatekeeperApproval = buildApplication(ApplicationState.pendingGatekeeperApproval("somebody@example.com"), Environment.PRODUCTION)
-    val productionApplicationPendingRequesterVerification = buildApplication(ApplicationState.pendingRequesterVerification("somebody@example.com", ""), Environment.PRODUCTION)
-    val productionApplication = buildApplication(ApplicationState.production("somebody@example.com", ""), Environment.PRODUCTION)
+    val productionApplicationPendingGatekeeperApproval = buildApplication(ApplicationState.pendingGatekeeperApproval("somebody@example.com", "somebody"), Environment.PRODUCTION)
+    val productionApplicationPendingRequesterVerification = buildApplication(ApplicationState.pendingRequesterVerification("somebody@example.com", "somebody", ""), Environment.PRODUCTION)
+    val productionApplication = buildApplication(ApplicationState.production("somebody@example.com", "somebody", ""), Environment.PRODUCTION)
     val productionApplicationTesting = buildApplication(ApplicationState.testing, Environment.PRODUCTION)
 
     val sandboxApplicationTesting = buildApplication(ApplicationState.testing, Environment.SANDBOX)

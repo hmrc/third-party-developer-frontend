@@ -109,7 +109,7 @@ class ChangeApplicationDetailsSpec extends CommonViewSpec
         None,
         grantLength,
         Environment.PRODUCTION,
-        state = ApplicationState(State.PENDING_GATEKEEPER_APPROVAL, None)
+        state = ApplicationState(State.PENDING_GATEKEEPER_APPROVAL, None, None)
       )
       val document = Jsoup.parse(renderPage(application).body)
 
@@ -127,7 +127,7 @@ class ChangeApplicationDetailsSpec extends CommonViewSpec
         None,
         grantLength,
         Environment.PRODUCTION,
-        state = ApplicationState(State.PENDING_REQUESTER_VERIFICATION, None)
+        state = ApplicationState(State.PENDING_REQUESTER_VERIFICATION, None, None)
       )
       val document = Jsoup.parse(renderPage(application).body)
 
@@ -137,7 +137,7 @@ class ChangeApplicationDetailsSpec extends CommonViewSpec
     "not display the option to change the app name if in prod with state production" in {
 
       val application =
-        Application(applicationId, clientId, "An App Name", LocalDateTime.now(ZoneOffset.UTC), Some(LocalDateTime.now(ZoneOffset.UTC)), None, grantLength, Environment.PRODUCTION, state = ApplicationState(State.PRODUCTION, None))
+        Application(applicationId, clientId, "An App Name", LocalDateTime.now(ZoneOffset.UTC), Some(LocalDateTime.now(ZoneOffset.UTC)), None, grantLength, Environment.PRODUCTION, state = ApplicationState(State.PRODUCTION, None, None))
       val document = Jsoup.parse(renderPage(application).body)
 
       elementExistsByText(document, "label", "Application name") shouldBe false

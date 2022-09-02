@@ -21,6 +21,7 @@ import java.time.{LocalDateTime, ZoneOffset}
 case class ApplicationState(
  name: State,
  requestedByEmailAddress: Option[String],
+ requestedByName: Option[String],
  verificationCode: Option[String] = None,
  updatedOn: LocalDateTime = LocalDateTime.now(ZoneOffset.UTC)
 ) {
@@ -34,17 +35,20 @@ object ApplicationState {
 
   implicit val format = Json.format[ApplicationState]
 
-  val testing = ApplicationState(State.TESTING, None)
+  val testing = ApplicationState(State.TESTING, None, None)
 
-  def pendingGatekeeperApproval(requestedBy: String) =
-    ApplicationState(State.PENDING_GATEKEEPER_APPROVAL, Some(requestedBy))
+  def pendingGatekeeperApproval(requestedByEmail: String, requestedByName: String) =
+    ApplicationState(State.PENDING_GATEKEEPER_APPROVAL, Some(requestedByEmail), Some(requestedByName))
 
-  def pendingRequesterVerification(requestedBy: String, verificationCode: String) =
-    ApplicationState(State.PENDING_REQUESTER_VERIFICATION, Some(requestedBy), Some(verificationCode))
+  def pendingResponsibleIndividualVerification(requestedByEmail: String, requestedByName: String) =
+    ApplicationState(State.PENDING_RESPONSIBLE_INDIVIDUAL_VERIFICATION, Some(requestedByEmail), Some(requestedByName))
 
-  def preProduction(requestedBy: String) =
-    ApplicationState(State.PRE_PRODUCTION, Some(requestedBy), None)
+  def pendingRequesterVerification(requestedByEmail: String, requestedByName: String, verificationCode: String) =
+    ApplicationState(State.PENDING_REQUESTER_VERIFICATION, Some(requestedByEmail), Some(requestedByName), Some(verificationCode))
 
-  def production(requestedBy: String, verificationCode: String) =
-    ApplicationState(State.PRODUCTION, Some(requestedBy), Some(verificationCode))
+  def preProduction(requestedByEmail: String, requestedByName: String) =
+    ApplicationState(State.PRE_PRODUCTION, Some(requestedByEmail), Some(requestedByName), None)
+
+  def production(requestedByEmail: String, requestedByName: String, verificationCode: String) =
+    ApplicationState(State.PRODUCTION, Some(requestedByEmail), Some(requestedByName), Some(verificationCode))
 }

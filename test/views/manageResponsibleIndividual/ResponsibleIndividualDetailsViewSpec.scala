@@ -42,7 +42,7 @@ class ResponsibleIndividualDetailsViewSpec extends CommonViewSpec with WithCSRFA
       Environment.PRODUCTION,
       Some("Description 1"),
       Set.empty,
-      state = ApplicationState.production("user@example.com", ""),
+      state = ApplicationState.production("user@example.com", "user name", ""),
       access = Standard(redirectUris = List("https://red1", "https://red2"), termsAndConditionsUrl = Some("http://tnc-url.com"))
     )
 
