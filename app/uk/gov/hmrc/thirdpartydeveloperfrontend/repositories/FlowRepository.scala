@@ -88,8 +88,6 @@ class FlowRepository @Inject() (mongo: MongoComponent, appConfig: ApplicationCon
       .map(_.wasAcknowledged())
   }
 
-  import scala.reflect.runtime.universe._
-
   def fetchBySessionIdAndFlowType[A <: Flow](sessionId: String)(implicit tt: TypeTag[A], ct: ClassTag[A]): Future[Option[A]] = {
     val flowType = FlowType.from[A]
     collection.find[A](and(equal("sessionId", sessionId), equal("flowType", Codecs.toBson(flowType)))).headOption()
