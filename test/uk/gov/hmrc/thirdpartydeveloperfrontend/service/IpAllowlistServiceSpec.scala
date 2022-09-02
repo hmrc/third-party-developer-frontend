@@ -122,7 +122,6 @@ class IpAllowlistServiceSpec
       val expectedFlow: IpAllowlistFlow = IpAllowlistFlow(sessionId, Set("1.1.1.1/24"))
       FlowRepositoryMock.FetchBySessionIdAndFlowType.thenReturn(sessionId)(existingFlow)
       FlowRepositoryMock.SaveFlow.thenReturnSuccess[IpAllowlistFlow]
-      // when(mockFlowRepository.saveFlow(expectedFlow)).thenReturn(successful(expectedFlow))
 
       val result: IpAllowlistFlow = await(underTest.removeCidrBlock(cidrBlockToRemove, sessionId))
 
