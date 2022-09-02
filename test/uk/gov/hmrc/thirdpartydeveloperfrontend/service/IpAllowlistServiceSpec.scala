@@ -23,7 +23,6 @@ import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.ApplicationUpdateSuccessfu
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.{Application, IpAllowlist}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.flows.FlowType.IP_ALLOW_LIST
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.flows.IpAllowlistFlow
-import uk.gov.hmrc.thirdpartydeveloperfrontend.repositories.FlowRepository
 import uk.gov.hmrc.thirdpartydeveloperfrontend.service.PushPullNotificationsService.PushPullNotificationsConnector
 import uk.gov.hmrc.thirdpartydeveloperfrontend.service.SubscriptionFieldsService.SubscriptionFieldsConnector
 import uk.gov.hmrc.http.{ForbiddenException, HeaderCarrier}
@@ -57,7 +56,7 @@ class IpAllowlistServiceSpec
   "getIpAllowlistFlow" should {
     "return existing flow" in new Setup {
       val expectedFlow: IpAllowlistFlow = IpAllowlistFlow(sessionId, Set("1.1.1.1/24"))
-      FlowRepositoryMock.FetchBySessionIdAndFlowType.thenReturn(sessionId)(expectedFlow)
+      FlowRepositoryMock.FetchBySessionIdAndFlowType.thenReturn[IpAllowlistFlow](sessionId)(expectedFlow)
       FlowRepositoryMock.SaveFlow.thenReturnSuccess[IpAllowlistFlow]
 
       val result: IpAllowlistFlow = await(underTest.getIpAllowlistFlow(anApplication(), sessionId))
@@ -74,7 +73,7 @@ class IpAllowlistServiceSpec
       val result: IpAllowlistFlow = await(underTest.getIpAllowlistFlow(anApplication(ipAllowlist = IpAllowlist(allowlist = ipAllowlist)), sessionId))
 
       result shouldBe expectedFlow
-      FlowRepositoryMock.SaveFlow.verifyCalledWith(expectedFlow)
+      FlowRepositoryMock.SaveFlow.verifyCalledWith[IpAllowlistFlow](expectedFlow)
     }
   }
 
@@ -95,7 +94,7 @@ class IpAllowlistServiceSpec
     "add the cidr block to the existing flow" in new Setup {
       val existingFlow: IpAllowlistFlow = IpAllowlistFlow(sessionId, Set("1.1.1.1/24"))
       val expectedFlow: IpAllowlistFlow = IpAllowlistFlow(sessionId, Set("1.1.1.1/24", newCidrBlock))
-      FlowRepositoryMock.FetchBySessionIdAndFlowType.thenReturn(sessionId)(existingFlow)
+      FlowRepositoryMock.FetchBySessionIdAndFlowType.thenReturn[IpAllowlistFlow](sessionId)(existingFlow)
       FlowRepositoryMock.SaveFlow.thenReturnSuccess[IpAllowlistFlow]
 
       val result: IpAllowlistFlow = await(underTest.addCidrBlock(newCidrBlock, anApplication(), sessionId))
@@ -105,7 +104,7 @@ class IpAllowlistServiceSpec
 
     "add the cidr block to a new flow if it does not exist yet" in new Setup {
       val expectedFlow: IpAllowlistFlow = IpAllowlistFlow(sessionId, Set(newCidrBlock))
-      FlowRepositoryMock.FetchBySessionIdAndFlowType.thenReturnNothing(sessionId)
+      FlowRepositoryMock.FetchBySessionIdAndFlowType.thenReturnNothing[IpAllowlistFlow](sessionId)
       FlowRepositoryMock.SaveFlow.thenReturnSuccess[IpAllowlistFlow]
 
       val result: IpAllowlistFlow = await(underTest.addCidrBlock(newCidrBlock, anApplication(), sessionId))
@@ -120,7 +119,7 @@ class IpAllowlistServiceSpec
     "remove cidr block from the existing flow" in new Setup {
       val existingFlow: IpAllowlistFlow = IpAllowlistFlow(sessionId, Set("1.1.1.1/24", cidrBlockToRemove))
       val expectedFlow: IpAllowlistFlow = IpAllowlistFlow(sessionId, Set("1.1.1.1/24"))
-      FlowRepositoryMock.FetchBySessionIdAndFlowType.thenReturn(sessionId)(existingFlow)
+      FlowRepositoryMock.FetchBySessionIdAndFlowType.thenReturn[IpAllowlistFlow](sessionId)(existingFlow)
       FlowRepositoryMock.SaveFlow.thenReturnSuccess[IpAllowlistFlow]
 
       val result: IpAllowlistFlow = await(underTest.removeCidrBlock(cidrBlockToRemove, sessionId))
@@ -143,7 +142,7 @@ class IpAllowlistServiceSpec
     "save the allowlist in TPA" in new Setup {
       val app: Application = anApplication()
       val existingFlow: IpAllowlistFlow = IpAllowlistFlow(sessionId, Set("1.1.1.1/24"))
-      FlowRepositoryMock.FetchBySessionIdAndFlowType.thenReturn(sessionId)(existingFlow)
+      FlowRepositoryMock.FetchBySessionIdAndFlowType.thenReturn[IpAllowlistFlow](sessionId)(existingFlow)
       when(mockThirdPartyApplicationConnector.updateIpAllowlist(app.id, app.ipAllowlist.required, existingFlow.allowlist))
         .thenReturn(successful(ApplicationUpdateSuccessful))
       FlowRepositoryMock.DeleteBySessionIdAndFlowType.thenReturnSuccess(sessionId, IP_ALLOW_LIST)
@@ -157,7 +156,7 @@ class IpAllowlistServiceSpec
 
     "fail when activating an empty allowlist" in new Setup {
       val existingFlow: IpAllowlistFlow = IpAllowlistFlow(sessionId, Set())
-      FlowRepositoryMock.FetchBySessionIdAndFlowType.thenReturn(sessionId)(existingFlow)
+      FlowRepositoryMock.FetchBySessionIdAndFlowType.thenReturn[IpAllowlistFlow](sessionId)(existingFlow)
 
       val expectedException: ForbiddenException = intercept[ForbiddenException] {
         await(underTest.activateIpAllowlist(anApplication(), sessionId))
@@ -168,7 +167,7 @@ class IpAllowlistServiceSpec
     }
 
     "fail when no flow exists for the given session ID" in new Setup {
-      FlowRepositoryMock.FetchBySessionIdAndFlowType.thenReturnNothing(sessionId)
+      FlowRepositoryMock.FetchBySessionIdAndFlowType.thenReturnNothing[IpAllowlistFlow](sessionId)
 
       val expectedException: IllegalStateException = intercept[IllegalStateException] {
         await(underTest.activateIpAllowlist(anApplication(), sessionId))

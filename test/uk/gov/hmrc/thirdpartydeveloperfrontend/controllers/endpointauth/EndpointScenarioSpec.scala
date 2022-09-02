@@ -22,7 +22,6 @@ import play.api.http.Status.OK
 import play.api.inject.bind
 import play.api.inject.guice.GuiceApplicationBuilder
 import play.api.libs.crypto.CookieSigner
-import play.api.libs.json.OFormat
 import play.api.test.Helpers.{redirectLocation, route, status}
 import play.api.test.{CSRFTokenHelper, FakeRequest, Writeables}
 import uk.gov.hmrc.apiplatform.modules.mfa.connectors.ThirdPartyDeveloperMfaConnector
@@ -39,7 +38,6 @@ import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.connectors.ApiType.
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.connectors.{AddTeamMemberRequest, ChangePassword, CombinedApi, TicketCreated, UserAuthenticationResponse}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.{UpdateProfileRequest, User, UserId}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.emailpreferences.{APICategoryDisplayDetails, EmailPreferences}
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.flows.FlowType.{EMAIL_PREFERENCES_V2, GET_PRODUCTION_CREDENTIALS, IP_ALLOW_LIST, NEW_APPLICATION_EMAIL_PREFERENCES_V2}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.flows.{EmailPreferencesFlowV2, IpAllowlistFlow, NewApplicationEmailPreferencesFlowV2}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.subscriptions.ApiSubscriptionFields.SaveSubscriptionFieldsSuccessResponse
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.subscriptions.Fields
@@ -112,7 +110,7 @@ abstract class EndpointScenarioSpec extends AsyncHmrcSpec with GuiceOneAppPerSui
   when(tpaProductionConnector.addClientSecrets(*[ApplicationId], *[ClientSecretRequest])(*)).thenReturn(Future.successful(("1","2")))
   when(tpaSandboxConnector.deleteClientSecret(*[ApplicationId], *, *)(*)).thenReturn(Future.successful(ApplicationUpdateSuccessful))
   when(tpaProductionConnector.deleteClientSecret(*[ApplicationId], *, *)(*)).thenReturn(Future.successful(ApplicationUpdateSuccessful))
-  when(apmConnector.addTeamMember(*[ApplicationId],*[AddTeamMemberRequest])(*)).thenReturn(Future.successful())
+  when(apmConnector.addTeamMember(*[ApplicationId],*[AddTeamMemberRequest])(*)).thenReturn(Future.successful(()))
   when(apmConnector.subscribeToApi(*[ApplicationId],*[ApiIdentifier])(*)).thenReturn(Future.successful(ApplicationUpdateSuccessful))
   when(productionSubsFieldsConnector.saveFieldValues(*[ClientId], *[ApiContext], *[ApiVersion], *[Fields.Alias])(*)).thenReturn(Future.successful(SaveSubscriptionFieldsSuccessResponse))
   when(sandboxSubsFieldsConnector.saveFieldValues(*[ClientId], *[ApiContext], *[ApiVersion], *[Fields.Alias])(*)).thenReturn(Future.successful(SaveSubscriptionFieldsSuccessResponse))
@@ -123,20 +121,33 @@ abstract class EndpointScenarioSpec extends AsyncHmrcSpec with GuiceOneAppPerSui
   when(apmConnector.fetchUpliftableSubscriptions(*[ApplicationId])(*)).thenReturn(Future.successful(Set(ApiIdentifier(apiContext, apiVersion))))
   when(tpaProductionConnector.requestUplift(*[ApplicationId], *[UpliftRequest])(*)).thenReturn(Future.successful(ApplicationUpliftSuccessful))
   when(deskproConnector.createTicket(*)(*)).thenReturn(Future.successful(TicketCreated))
-  when(flowRepository.updateLastUpdated(*)).thenReturn(Future.successful())
-  when(flowRepository.fetchBySessionIdAndFlowType(*[String], eqTo(GET_PRODUCTION_CREDENTIALS))(*[OFormat[GetProductionCredentialsFlow]])).thenReturn(Future.successful(Some(
+  when(flowRepository.updateLastUpdated(*)).thenReturn(Future.successful(()))
+
+  import scala.reflect.runtime.universe._
+  import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.flows._
+
+  def mockFetchBySessionIdAndFlowType[A <: Flow](a: A)(implicit tt: TypeTag[A]) = {
+    when(flowRepository.fetchBySessionIdAndFlowType[A](*[String])(eqTo(tt),*)).thenReturn(
+      Future.successful(Some(a))
+    )
+  }
+  mockFetchBySessionIdAndFlowType[GetProductionCredentialsFlow](
     GetProductionCredentialsFlow(sessionId, Some(SellResellOrDistribute("sell")), Some(ApiSubscriptions(Map(ApiIdentifier(apiContext, apiVersion) -> true))))
-  )))
-  when(flowRepository.fetchBySessionIdAndFlowType(*[String], eqTo(IP_ALLOW_LIST))(*[OFormat[IpAllowlistFlow]])).thenReturn(Future.successful(Some(IpAllowlistFlow(sessionId, Set("1.2.3.4")))))
-  when(flowRepository.fetchBySessionIdAndFlowType(*[String], eqTo(EMAIL_PREFERENCES_V2))(*[OFormat[IpAllowlistFlow]])).thenReturn(Future.successful(Some(EmailPreferencesFlowV2(
-    sessionId, Set.empty, Map(), Set.empty, List.empty))))
-  when(flowRepository.fetchBySessionIdAndFlowType(*[String], eqTo(NEW_APPLICATION_EMAIL_PREFERENCES_V2))(*[OFormat[IpAllowlistFlow]])).thenReturn(Future.successful(Some(NewApplicationEmailPreferencesFlowV2(
-    sessionId, EmailPreferences.noPreferences, applicationId, Set.empty, Set.empty, Set.empty))))
+  )
+  mockFetchBySessionIdAndFlowType[IpAllowlistFlow](
+    IpAllowlistFlow(sessionId, Set("1.2.3.4"))
+  )
+  mockFetchBySessionIdAndFlowType[NewApplicationEmailPreferencesFlowV2](
+    NewApplicationEmailPreferencesFlowV2(sessionId, EmailPreferences.noPreferences, applicationId, Set.empty, Set.empty, Set.empty)
+  )
+  mockFetchBySessionIdAndFlowType[EmailPreferencesFlowV2](
+    EmailPreferencesFlowV2(sessionId, Set.empty, Map(), Set.empty, List.empty)
+  )
   when(flowRepository.deleteBySessionIdAndFlowType(*,*)).thenReturn(Future.successful(true))
-  when(flowRepository.saveFlow(isA[GetProductionCredentialsFlow])(*[OFormat[GetProductionCredentialsFlow]])).thenReturn(Future.successful(GetProductionCredentialsFlow(sessionId, None, None)))
-  when(flowRepository.saveFlow(isA[IpAllowlistFlow])(*[OFormat[IpAllowlistFlow]])).thenReturn(Future.successful(IpAllowlistFlow(sessionId, Set.empty)))
-  when(flowRepository.saveFlow(isA[NewApplicationEmailPreferencesFlowV2])(*[OFormat[NewApplicationEmailPreferencesFlowV2]])).thenReturn(Future.successful(NewApplicationEmailPreferencesFlowV2(sessionId, EmailPreferences.noPreferences, applicationId, Set.empty, Set.empty, Set.empty)))
-  when(flowRepository.saveFlow(isA[EmailPreferencesFlowV2])(*[OFormat[EmailPreferencesFlowV2]])).thenReturn(Future.successful(EmailPreferencesFlowV2(sessionId, Set(category), Map.empty, Set.empty, List.empty)))
+  when(flowRepository.saveFlow[GetProductionCredentialsFlow](isA[GetProductionCredentialsFlow])).thenReturn(Future.successful(GetProductionCredentialsFlow(sessionId, None, None)))
+  when(flowRepository.saveFlow[IpAllowlistFlow](isA[IpAllowlistFlow])).thenReturn(Future.successful(IpAllowlistFlow(sessionId, Set.empty)))
+  when(flowRepository.saveFlow[NewApplicationEmailPreferencesFlowV2](isA[NewApplicationEmailPreferencesFlowV2])).thenReturn(Future.successful(NewApplicationEmailPreferencesFlowV2(sessionId, EmailPreferences.noPreferences, applicationId, Set.empty, Set.empty, Set.empty)))
+  when(flowRepository.saveFlow[EmailPreferencesFlowV2](isA[EmailPreferencesFlowV2])).thenReturn(Future.successful(EmailPreferencesFlowV2(sessionId, Set(category), Map.empty, Set.empty, List.empty)))
   when(tpdConnector.fetchEmailForResetCode(*)(*)).thenReturn(Future.successful(userEmail))
   when(tpdConnector.requestReset(*)(*)).thenReturn(Future.successful(OK))
   when(tpdConnector.reset(*)(*)).thenReturn(Future.successful(OK))
@@ -147,8 +158,8 @@ abstract class EndpointScenarioSpec extends AsyncHmrcSpec with GuiceOneAppPerSui
   when(tpdConnector.verify(*)(*)).thenReturn(Future.successful(OK))
   when(tpaProductionConnector.verify(*)(*)).thenReturn(Future.successful(ApplicationVerificationSuccessful))
   when(tpdConnector.resendVerificationEmail(*)(*)).thenReturn(Future.successful(OK))
-  when(tpaSandboxConnector.deleteApplication(*[ApplicationId])(*)).thenReturn(Future.successful())
-  when(tpaProductionConnector.deleteApplication(*[ApplicationId])(*)).thenReturn(Future.successful())
+  when(tpaSandboxConnector.deleteApplication(*[ApplicationId])(*)).thenReturn(Future.successful(()))
+  when(tpaProductionConnector.deleteApplication(*[ApplicationId])(*)).thenReturn(Future.successful(()))
   when(thirdPartyApplicationSubmissionsConnector.fetchResponsibleIndividualVerification(*[String])(*)).thenReturn(Future.successful(Some(responsibleIndividualVerification)))
   when(thirdPartyApplicationSubmissionsConnector.fetchLatestExtendedSubmission(*[ApplicationId])(*)).thenReturn(Future.successful(Some(extendedSubmission)))
   when(thirdPartyApplicationSubmissionsConnector.fetchSubmission(*[Submission.Id])(*)).thenReturn(Future.successful(Some(extendedSubmission)))
@@ -162,8 +173,8 @@ abstract class EndpointScenarioSpec extends AsyncHmrcSpec with GuiceOneAppPerSui
   when(apmConnector.fetchCombinedApisVisibleToUser(*[UserId])(*)).thenReturn(Future.successful(Right(List(CombinedApi("my service", "display name", List.empty, REST_API)))))
   when(tpdConnector.changePassword(*[ChangePassword])(*)).thenReturn(Future.successful(1))
   when(thirdPartyDeveloperMfaConnector.verifyMfa(*[UserId], *[String])(*)).thenReturn(Future.successful(true))
-  when(thirdPartyDeveloperMfaConnector.enableMfa(*[UserId])(*)).thenReturn(Future.successful())
-  when(thirdPartyDeveloperMfaConnector.removeMfaById(*[UserId], *[MfaId])(*)).thenReturn(Future.successful())
+  when(thirdPartyDeveloperMfaConnector.enableMfa(*[UserId])(*)).thenReturn(Future.successful(()))
+  when(thirdPartyDeveloperMfaConnector.removeMfaById(*[UserId], *[MfaId])(*)).thenReturn(Future.successful(()))
   when(thirdPartyDeveloperMfaConnector.createMfaSecret(*[UserId])(*)).thenReturn(Future.successful("secret"))
 
   private def populatePathTemplateWithValues(pathTemplate: String, values: Map[String,String]): String = {
@@ -441,7 +452,9 @@ abstract class EndpointScenarioSpec extends AsyncHmrcSpec with GuiceOneAppPerSui
         val expectedResponse = getExpectedResponse(requestValues.endpoint)
         s"return $expectedResponse for $requestValues" in {
           val result = callEndpoint(requestValues)
-          result shouldBe expectedResponse
+          withClue(s"Testing ${requestValues.endpoint}") {
+            result shouldBe expectedResponse
+          }
         }
       }
     }

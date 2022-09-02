@@ -26,7 +26,6 @@ import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.SellRe
 import cats.implicits._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.flows.FlowType
 
-
 @Singleton
 class GetProductionCredentialsFlowService @Inject()(
   val flowRepository: FlowRepository
@@ -34,7 +33,7 @@ class GetProductionCredentialsFlowService @Inject()(
 
   def fetchFlow(developerSession: DeveloperSession): Future[GetProductionCredentialsFlow] =
     flowRepository.fetchBySessionIdAndFlowType[GetProductionCredentialsFlow](developerSession.session.sessionId) flatMap {
-      case Some(flow: GetProductionCredentialsFlow) => flow.pure[Future]
+      case Some(flow) => flow.pure[Future]
       case None       => val newFlowObject = GetProductionCredentialsFlow.create(developerSession.session.sessionId)
                          flowRepository.saveFlow[GetProductionCredentialsFlow](newFlowObject)
     }
