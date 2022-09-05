@@ -6,7 +6,7 @@ object AppDependencies {
   def apply() : Seq[ModuleID] = compile ++ test
 
   lazy val cucumberVersion = "6.2.2"
-  lazy val seleniumVersion = "2.53.1"
+  lazy val seleniumVersion = "4.2.0"
   lazy val enumeratumVersion = "1.5.12"
   lazy val bootstrapVersion = "5.24.0"
   lazy val mongoVersion = "0.70.0"
@@ -50,6 +50,10 @@ object AppDependencies {
     "io.cucumber"                 %  "cucumber-junit"                 % cucumberVersion,
     "io.cucumber"                 %  "cucumber-java8"                 % cucumberVersion,
     "org.seleniumhq.selenium"     %  "selenium-java"                  % seleniumVersion,
-    "com.assertthat"              %  "selenium-shutterbug"            % "0.2"
+    "org.seleniumhq.selenium"     %  "selenium-remote-driver"         % seleniumVersion,
+    "org.seleniumhq.selenium"     %  "selenium-firefox-driver"        % seleniumVersion,
+    "org.seleniumhq.selenium"     %  "selenium-chrome-driver"         % seleniumVersion,
+    "org.scalatestplus"           %% "selenium-4-2"                   % "3.2.13.0",
+    "com.github.tomakehurst"      %  "wiremock-jre8-standalone"       % "2.31.0",
   ).map(_ % "component")
 }
