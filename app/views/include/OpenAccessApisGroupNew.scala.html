@@ -1,0 +1,75 @@
+@*
+ * Copyright 2022 HM Revenue & Customs
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ *@
+
+@import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.views.SubscriptionRedirect
+@import views.helper.IdFormatter
+@import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.apidefinitions.APIAccessType
+@import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.CollaboratorRole
+@import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.Application
+@import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.apidefinitions.ApiContext
+@import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.subscriptions.ApiData
+
+@this()
+
+@(
+  role: CollaboratorRole,
+  app: Application,
+  openAccessApis: Map[ApiContext, ApiData]
+)(
+  implicit messagesProvider: MessagesProvider,
+  applicationConfig: ApplicationConfig,
+  request: play.api.mvc.Request[Any]
+)
+
+<div class="govuk-accordion" data-module="govuk-accordion" id="accordion-default">
+  @openAccessApis.toList.map { case (apiContext, apiData) =>
+    <div class="govuk-accordion__section">
+      <div class="govuk-accordion__section-header">
+        <h2 class="govuk-accordion__section-heading">
+          <span class="govuk-accordion__section-button" id="accordion-default-heading-1">
+            @apiData.name
+          </span>
+        </h2>
+      </div>
+
+      <div id="accordion-default-content-4" class="govuk-accordion__section-content" aria-labelledby="accordion-default-heading-4">
+        @apiData.versions.toList.map { case (apiVersion, versionData) =>
+          @defining(s"${apiData.name} ${apiVersion.value} (${versionData.status.displayedStatus})") { apiVersionFullName =>
+            <div class="govuk-grid-row">
+              <div class="govuk-grid-column-one-half">
+                <div class="govuk-form-group govuk-!-margin-bottom-0">
+                  <p class='govuk-body govuk-!-padding-top-2'>
+                    <a href="@applicationConfig.apiDocumentationFrontendUrl/api-documentation/docs/api/service/@apiData.serviceName/@apiVersion.value"" aria-label="@apiVersionFullName." data-api-link>
+                      @{apiVersion.value} (@versionData.status.displayedStatus)
+                    </a>
+                  </p>
+                </div>
+              </div>
+              <div class="govuk-grid-column-one-quarter govuk-!-text-align-right">
+                <p class='govuk-body govuk-!-padding-top-2'>
+                </p>
+              </div>
+              <div class="govuk-grid-column-one-quarter govuk-!-text-align-right govuk-!-padding-0">
+                <div class="govuk-form-group govuk-!-margin-bottom-0">
+                </div>
+              </div>
+            </div>
+          }
+        }
+      </div>
+    </div>
+  }
+</div>
