@@ -58,27 +58,17 @@
     <h2 class="govuk-heading-m">
       @{api.name} @{api.version.value} @{api.displayedStatus}
     </h2>
-    <table class="govuk-table">
-      <thead class="govuk-table__head">
-        <tr class="govuk-table__row">
-          <th class="govuk-table__header col-35">Name</th>
-          <th class="govuk-table__header col-60">Configuration</th>
-          <td class="govuk-table__header"></td>
-        </tr>
-      </thead>
-      <tbody class="govuk-table__body">
+    <dl class="govuk-summary-list govuk-!-margin-bottom-9">
         @for(field <- api.subsValues.toList) {
-          <tr class="govuk-table__row">
-            <td class="govuk-table__cell">@{field.shortDescription}</td>
-            <td class="govuk-table__cell">@{field.value}</td>
-            <td class="govuk-table__cell">
-              @if(field.canWrite) {
-                <a class="govuk-link govuk-link--no-visited-state" href="@{routes.ManageSubscriptions.editApiMetadataFieldPage(app.id, api.context, api.version, field.name, LeftHandNavigation)}" id="@{IdFormatter.identifier(api.context, api.version)}-@{field.name}-submit">Edit</a>
-              }
-            </td>
-          </tr>
+        <div class="govuk-summary-list__row">
+            <dt class="govuk-summary-list__key">@{field.shortDescription}</dt>
+            <dd class="govuk-summary-list__value">@{field.value}</dd>
+            @if(field.canWrite) {
+            <dd class="govuk-summary-list__actions"><a class="govuk-link" href="@{routes.ManageSubscriptions.editApiMetadataFieldPage(app.id, api.context, api.version, field.name, LeftHandNavigation)}" id="@{IdFormatter.identifier(api.context, api.version)}-@{field.name}-submit">Edit<span class="govuk-visually-hidden">@{field.value}</span></a></dd>
+            }
+        </div>
         }
-      </tbody>
-    </table>
+    </dl>
   }
 }
+
