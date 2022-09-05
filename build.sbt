@@ -67,8 +67,7 @@ lazy val microservice = Project(appName, file("."))
     Test / testOptions := Seq(Tests.Argument(TestFrameworks.ScalaTest, "-eT"))
   )
   .configs(IntegrationTest)
-  .settings(inConfig(IntegrationTest)(Defaults.itSettings): _*)
-  .settings(inConfig(IntegrationTest)(BloopDefaults.configSettings))
+  .settings(inConfig(IntegrationTest)(Defaults.itSettings ++ BloopDefaults.configSettings))
   .settings(
     IntegrationTest / testOptions := Seq(Tests.Argument(TestFrameworks.ScalaTest, "-eT")),
     IntegrationTest / unmanagedSourceDirectories ++= Seq(baseDirectory.value / "it", baseDirectory.value / "test-utils"),
@@ -76,8 +75,7 @@ lazy val microservice = Project(appName, file("."))
     IntegrationTest / parallelExecution := false
   )
   .configs(ComponentTest)
-  .settings(inConfig(ComponentTest)(Defaults.testSettings): _*)
-  .settings(inConfig(ComponentTest)(BloopDefaults.configSettings))
+  .settings(inConfig(ComponentTest)(Defaults.testSettings ++ BloopDefaults.configSettings))
   .settings(
     ComponentTest / testOptions := Seq(Tests.Argument(TestFrameworks.ScalaTest, "-eT")),
     ComponentTest / testOptions += Tests.Setup(() => System.setProperty("javascript.enabled", "true")),
