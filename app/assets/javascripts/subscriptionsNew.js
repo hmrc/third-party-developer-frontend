@@ -1,4 +1,15 @@
 (function () {
+  function getParents(elem) {
+    var parents = [];
+
+    while(elem.parentNode && elem.parentNode.nodeName.toLowerCase() != 'body') {
+      elem = elem.parentNode;
+      parents.push(elem);
+    }
+
+    return parents;
+  }
+  
   function subscribe(event) {
     var input = this;
     var form = this.form;
@@ -19,6 +30,13 @@
 
         document.getElementById(input.id).checked = true;
         document.getElementById(offButton).checked = false;
+
+        const topLevelElement = getParents(form).find((node) => node.id.endsWith("-accordian-section"));
+        const test = topLevelElement.querySelector('.subscription-count');
+        const count = test.innerText.substr(0, test.innerText.indexOf(' '));
+        const newCount = parseInt(count) + 1;
+        const subscription = newCount === 1 ? 'subscription' : 'subscriptions';
+        test.innerText = `${newCount} ${subscription}`;
       }
     });
 
@@ -49,10 +67,17 @@
 
     XHR.addEventListener("load", (event) => {
       if(XHR.status == 200) {
-        const nButton = input.id.substr(0, input.id.length-3) + 'on';
+        const onButton = input.id.substr(0, input.id.length-3) + 'on';
 
         document.getElementById(input.id).checked = true;
-        document.getElementById(offButton).checked = false;
+        document.getElementById(onButton).checked = false;
+
+        const topLevelElement = getParents(form).find((node) => node.id.endsWith("-accordian-section"));
+        const test = topLevelElement.querySelector('.subscription-count');
+        const count = test.innerText.substr(0, test.innerText.indexOf(' '));
+        const newCount = parseInt(count) - 1;
+        const subscription = newCount === 1 ? 'subscription' : 'subscriptions';
+        test.innerText = `${newCount} ${subscription}`;
       }
     });
 
