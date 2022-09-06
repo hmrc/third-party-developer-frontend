@@ -51,10 +51,8 @@ class ResponsibleIndividualVerificationService @Inject()(
           for {
             riVerification <- ET.fromOptionF(tpaSubmissionsConnector.fetchResponsibleIndividualVerification(code), ErrorDetails("riverification001", s"No responsibleIndividualVerification record found for ${code}")) 
             application    <- ET.fromOptionF(applicationService.fetchByApplicationId(riVerification.applicationId), ErrorDetails("riverification002", s"No application record found for ${riVerification.applicationId}"))
-            submitterEmail <- ET.fromOption(application.application.state.requestedByEmailAddress, ErrorDetails("riverification003", "requestedByEmailAddress not found"))
-            submitterName  <- ET.fromOption(application.application.state.requestedByName, ErrorDetails("riverification004", "requestedByName not found"))
             _              <- ET.liftF(applicationService.acceptResponsibleIndividualVerification(riVerification.applicationId, code))
-            _              =  sendDeskproTicketForTermsOfUse(riVerification, submitterName, submitterEmail)
+            _              <- ET.liftF(sendDeskproTicketForTermsOfUse(riVerification, application.application.state.requestedByName, application.application.state.requestedByEmailAddress))
           } yield riVerification
         )
         .value
@@ -68,18 +66,20 @@ class ResponsibleIndividualVerificationService @Inject()(
     }
   }
 
-  private def sendDeskproTicketForTermsOfUse(riVerification: ResponsibleIndividualVerification, submitterName: String, submitterEmail: String)(implicit hc: HeaderCarrier) = {
+  private def sendDeskproTicketForTermsOfUse(riVerification: ResponsibleIndividualVerification, submitterName: Option[String], submitterEmail: Option[String])(implicit hc: HeaderCarrier) = {
  
     riVerification match {
       // Only send deskpro ticket for a ResponsibleIndividualVerification of type 'terms of use'
       case riv: ResponsibleIndividualToUVerification => { 
         val appName = riVerification.applicationName
         val appId = riVerification.applicationId
+        val requestorName: String = submitterName.getOrElse(throw new RuntimeException("requestedByName not found"))
+        val requesterEmail: String = submitterEmail.getOrElse(throw new RuntimeException("requestedByEmailAddress not found"))
 
-        val ticket = DeskproTicket.createForRequestProductionCredentials(submitterName, submitterEmail, appName, appId)
-        deskproConnector.createTicket(ticket)
+        val ticket = DeskproTicket.createForRequestProductionCredentials(requestorName, requesterEmail, appName, appId)
+        deskproConnector.createTicket(ticket).map(Some(_))
       }
-      case _ =>
+      case _ =>  Future.successful(None)
     }
   }
 }

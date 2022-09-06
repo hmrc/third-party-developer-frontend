@@ -97,7 +97,7 @@ trait HasApplication extends HasAppDeploymentEnvironment with HasUserWithRole wi
   lazy val submissionId = Submission.Id.random
   lazy val submissionIndex = 1
   lazy val responsibleIndividual = ResponsibleIndividual.build("mr responsible", "ri@example.com")
-  lazy val responsibleIndividualVerification = ResponsibleIndividualToUVerification(responsibleIndividualVerificationId, applicationId, submissionId, submissionIndex, applicationName, createdOn, INITIAL)
+  lazy val responsibleIndividualVerification = ResponsibleIndividualUpdateVerification(responsibleIndividualVerificationId, applicationId, submissionId, submissionIndex, applicationName, createdOn, responsibleIndividual, "admin@example.com", "Mr Admin", INITIAL)
   lazy val responsibleIndividualVerificationWithDetails = ResponsibleIndividualVerificationWithDetails(
     responsibleIndividualVerification, responsibleIndividual, "mr submitter", "submitter@example.com"
   )
