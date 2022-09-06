@@ -172,10 +172,9 @@ abstract class EndpointScenarioSpec extends AsyncHmrcSpec with GuiceOneAppPerSui
   when(tpdConnector.removeEmailPreferences(*[UserId])(*)).thenReturn(Future.successful(true))
   when(apmConnector.fetchCombinedApisVisibleToUser(*[UserId])(*)).thenReturn(Future.successful(Right(List(CombinedApi("my service", "display name", List.empty, REST_API)))))
   when(tpdConnector.changePassword(*[ChangePassword])(*)).thenReturn(Future.successful(1))
-  when(thirdPartyDeveloperMfaConnector.verifyMfa(*[UserId], *[String])(*)).thenReturn(Future.successful(true))
-  when(thirdPartyDeveloperMfaConnector.enableMfa(*[UserId])(*)).thenReturn(Future.successful(()))
+  when(thirdPartyDeveloperMfaConnector.verifyMfa(*[UserId], *[MfaId], *[String])(*)).thenReturn(Future.successful(true))
   when(thirdPartyDeveloperMfaConnector.removeMfaById(*[UserId], *[MfaId])(*)).thenReturn(Future.successful(()))
-  when(thirdPartyDeveloperMfaConnector.createMfaSecret(*[UserId])(*)).thenReturn(Future.successful("secret"))
+  when(thirdPartyDeveloperMfaConnector.createMfaSecret(*[UserId])(*)).thenReturn(Future.successful(registerAuthAppResponse))
 
   private def populatePathTemplateWithValues(pathTemplate: String, values: Map[String,String]): String = {
     //TODO fail test if path contains parameters that aren't supplied by the values map
@@ -253,6 +252,8 @@ abstract class EndpointScenarioSpec extends AsyncHmrcSpec with GuiceOneAppPerSui
       case Endpoint("GET",  "/developer/application-verification") => Map("code" -> "1324")
       case Endpoint("GET",  "/developer/profile/email-preferences/apis") => Map("category" -> "AGENTS")
       case Endpoint(_,      "/developer/submissions/responsible-individual-verification") => Map("code" -> "code123")
+      case Endpoint("GET",  "/developer/profile/protect-account/access-code") => Map("mfaId" -> mfaId.value.toString)
+      case Endpoint("POST", "/developer/profile/protect-account/enable") => Map("mfaId" -> mfaId.value.toString)
       case Endpoint(_,      "/developer/profile/protect-account/remove-by-id") => Map("mfaId" -> mfaId.value.toString)
       case Endpoint(_,      "/developer/profile/email-preferences/topics-from-subscriptions") => Map("context" -> applicationId.value)
       case Endpoint(_,      "/developer/profile/email-preferences/apis-from-subscriptions") => Map("context" -> applicationId.value)

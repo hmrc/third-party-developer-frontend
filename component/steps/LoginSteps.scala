@@ -26,6 +26,7 @@ import pages._
 import play.api.http.Status._
 import play.api.libs.json.{Format, Json}
 import stubs.{DeveloperStub, MfaStub, Stubs}
+import uk.gov.hmrc.apiplatform.modules.mfa.models.MfaId
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.connectors.{LoginRequest, PasswordResetRequest, UserAuthenticationResponse}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.{Developer, LoggedInState, Session}
 import utils.ComponentTestDeveloperBuilder
@@ -67,6 +68,7 @@ class LoginSteps extends ScalaDsl with EN with Matchers with NavigationSugar wit
 
     val password = result("Password")
     val developer = buildDeveloper(emailAddress = result("Email address"), firstName = result("First name"), lastName = result("Last name"))
+    val mfaId = MfaId.random
 
     DeveloperStub.findUserIdByEmailAddress(developer.email)
     Stubs.setupPostRequest("/check-password", NO_CONTENT)
@@ -79,13 +81,11 @@ class LoginSteps extends ScalaDsl with EN with Matchers with NavigationSugar wit
 
     DeveloperStub.setupGettingDeveloperByEmail(developer)
 
-    MfaStub.setupGettingMfaSecret(developer)
+    MfaStub.setupGettingMfaSecret(developer, mfaId)
 
-    MfaStub.setupVerificationOfAccessCode(developer)
+    MfaStub.setupVerificationOfAccessCode(developer, mfaId)
 
     DeveloperStub.setUpGetCombinedApis()
-
-    MfaStub.setupEnablingMfa(developer)
   }
 
 
