@@ -1,4 +1,7 @@
 (function () {
+  const incrementFunction = function(num) { return num + 1; }
+  const decrementFunction = function(num) { return num - 1; }
+
   function getParents(elem) {
     var parents = [];
 
@@ -8,6 +11,15 @@
     }
 
     return parents;
+  }
+
+  function updateSubscriptionCount(form, countUpdateFunction) {
+    const topLevelElement = getParents(form).find((node) => node.id.endsWith("-accordian-section"));
+    const test = topLevelElement.querySelector('.subscription-count');
+    const count = test.innerText.substr(0, test.innerText.indexOf(' '));
+    const newCount = countUpdateFunction(parseInt(count));
+    const subscription = newCount === 1 ? 'subscription' : 'subscriptions';
+    test.innerText = `${newCount} ${subscription}`;
   }
   
   function subscribe(event) {
@@ -31,12 +43,7 @@
         document.getElementById(input.id).checked = true;
         document.getElementById(offButton).checked = false;
 
-        const topLevelElement = getParents(form).find((node) => node.id.endsWith("-accordian-section"));
-        const test = topLevelElement.querySelector('.subscription-count');
-        const count = test.innerText.substr(0, test.innerText.indexOf(' '));
-        const newCount = parseInt(count) + 1;
-        const subscription = newCount === 1 ? 'subscription' : 'subscriptions';
-        test.innerText = `${newCount} ${subscription}`;
+        updateSubscriptionCount(form, incrementFunction);
       }
     });
 
@@ -72,12 +79,7 @@
         document.getElementById(input.id).checked = true;
         document.getElementById(onButton).checked = false;
 
-        const topLevelElement = getParents(form).find((node) => node.id.endsWith("-accordian-section"));
-        const test = topLevelElement.querySelector('.subscription-count');
-        const count = test.innerText.substr(0, test.innerText.indexOf(' '));
-        const newCount = parseInt(count) - 1;
-        const subscription = newCount === 1 ? 'subscription' : 'subscriptions';
-        test.innerText = `${newCount} ${subscription}`;
+        updateSubscriptionCount(form, decrementFunction);
       }
     });
 
