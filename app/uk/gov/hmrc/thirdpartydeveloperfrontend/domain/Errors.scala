@@ -18,6 +18,7 @@ package uk.gov.hmrc.thirdpartydeveloperfrontend.domain
 
 import play.api.libs.json.Json
 
+class UserNotFound extends RuntimeException("User not found")
 class InvalidCredentials extends RuntimeException("Login failed")
 class InvalidEmail extends RuntimeException("Invalid email")
 class LockedAccount extends RuntimeException("Account is locked")

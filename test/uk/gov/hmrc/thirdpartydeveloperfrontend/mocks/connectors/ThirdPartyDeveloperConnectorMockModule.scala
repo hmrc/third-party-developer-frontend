@@ -34,8 +34,8 @@ trait ThirdPartyDeveloperConnectorMockModule extends MockitoSugar with ArgumentM
     }
 
     object FetchDeveloper {
-      def thenReturn(userId: UserId)(developer: Developer) =
-        when(aMock.fetchDeveloper(eqTo(userId))(*)).thenReturn(successful(Some(developer)))
+      def thenReturn(userId: UserId)(developer: Option[Developer]) =
+        when(aMock.fetchDeveloper(eqTo(userId))(*)).thenReturn(successful(developer))
     }
   }
 }

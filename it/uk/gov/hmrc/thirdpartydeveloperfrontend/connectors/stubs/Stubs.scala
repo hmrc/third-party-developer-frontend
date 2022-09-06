@@ -17,16 +17,14 @@
 package uk.gov.hmrc.thirdpartydeveloperfrontend.connectors.stubs
 
 import java.net.URLEncoder
-
 import com.github.tomakehurst.wiremock.client.WireMock._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.connectors.EncryptedJson
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.apidefinitions.{ApiContext, ApiIdentifier, ApiVersion}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.ApplicationNameValidationJson.ApplicationNameValidationResult
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.{Application, ApplicationToken, ClientId, Environment}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.connectors.UserAuthenticationResponse
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.{Registration, Session, UpdateProfileRequest}
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.{Developer, Registration, Session, UpdateProfileRequest}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.services.ApiDefinitionsJsonFormatters._
-
 import play.api.http.Status._
 import play.api.libs.json.{Json, Writes}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.connectors.PasswordResetRequest
@@ -217,6 +215,19 @@ object ThirdPartyDeveloperStub {
           aResponse()
             .withStatus(OK)
             .withBody(Json.toJson(UserAuthenticationResponse(false, false, None, session)).toString())
+            .withHeader("content-type", "application/json")
+        )
+    )
+  }
+
+  def fetchDeveloper(developer: Developer) = {
+    stubFor(
+      get(urlPathEqualTo("/developer"))
+        .withQueryParam("developerId", equalTo(developer.userId.asText))
+        .willReturn(
+          aResponse()
+            .withStatus(OK)
+            .withBody(Json.toJson(developer).toString())
             .withHeader("content-type", "application/json")
         )
     )

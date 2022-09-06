@@ -15,12 +15,12 @@ object MfaStub {
   private val accessCode = "123456"
   val nonce = "iamanoncevalue"
 
-  def stubAuthenticateTotpSuccess()(implicit encryptedJson: EncryptedJson): Unit = {
+  def stubAuthenticateTotpSuccess(mfaId: MfaId)(implicit encryptedJson: EncryptedJson): Unit = {
     val session = Session(TestContext.sessionIdForloggedInDeveloper, TestContext.developer, LoggedInState.LOGGED_IN)
 
     stubFor(
-      post(urlEqualTo("/authenticate-totp"))
-      .withRequestBody(equalToJson(encryptedJson.toSecretRequestJson(TotpAuthenticationRequest("john.smith@example.com", accessCode, nonce)).toString()))
+      post(urlEqualTo("/authenticate-auth-app"))
+      .withRequestBody(equalToJson(encryptedJson.toSecretRequestJson(TotpAuthenticationRequest("john.smith@example.com", accessCode, nonce, mfaId)).toString()))
         .willReturn(
           aResponse()
             .withStatus(OK)
@@ -54,14 +54,6 @@ object MfaStub {
         .willReturn(aResponse()
           .withStatus(OK)
           .withBody(Json.toJson(RegisterAuthAppResponse("mySecret", mfaId)).toString())))
-  }
-
-  def setupGettingDeveloperByEmail(developer: Developer): Unit = {
-    stubFor(get(urlPathEqualTo("/developer"))
-      .withQueryParam("developerId", equalTo(developer.userId.asText))
-      .willReturn(aResponse()
-        .withStatus(OK)
-        .withBody(Json.toJson(developer).toString())))
   }
 
 

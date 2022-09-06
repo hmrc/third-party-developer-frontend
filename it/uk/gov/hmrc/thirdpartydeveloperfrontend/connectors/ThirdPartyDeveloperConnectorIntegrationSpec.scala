@@ -23,6 +23,7 @@ import play.api.inject.bind
 import play.api.inject.guice.GuiceApplicationBuilder
 import play.api.libs.json.{JsValue, Json}
 import play.api.{Application, Configuration, Mode}
+import uk.gov.hmrc.apiplatform.modules.mfa.models.MfaId
 import uk.gov.hmrc.http.{HeaderCarrier, UpstreamErrorResponse}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.builder.DeveloperBuilder
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.connectors._
@@ -55,7 +56,8 @@ class ThirdPartyDeveloperConnectorIntegrationSpec extends BaseConnectorIntegrati
     val loginRequest = LoginRequest(userEmail, userPassword, mfaMandatedForUser = false, None)
     val totp = "123456"
     val nonce = "ABC-123"
-    val totpAuthenticationRequest = TotpAuthenticationRequest(userEmail, totp, nonce)
+    val mfaId = MfaId.random
+    val totpAuthenticationRequest = TotpAuthenticationRequest(userEmail, totp, nonce, mfaId)
 
     val payloadEncryption: PayloadEncryption = app.injector.instanceOf[PayloadEncryption]
     val encryptedLoginRequest: JsValue = Json.toJson(SecretRequest(payloadEncryption.encrypt(loginRequest).as[String]))
@@ -534,7 +536,7 @@ class ThirdPartyDeveloperConnectorIntegrationSpec extends BaseConnectorIntegrati
   "authenticateTotp" should {
     "return the session containing the user when the TOTP and nonce are valid" in new Setup {
       stubFor(
-        post(urlEqualTo("/authenticate-totp"))
+        post(urlEqualTo("/authenticate-auth-app"))
           .withRequestBody(equalToJson(encryptedTotpAuthenticationRequest.toString))
           .willReturn(
             aResponse()
@@ -557,13 +559,13 @@ class ThirdPartyDeveloperConnectorIntegrationSpec extends BaseConnectorIntegrati
 
       val result: Session = await(underTest.authenticateTotp(totpAuthenticationRequest))
 
-      verify(1, postRequestedFor(urlMatching("/authenticate-totp")).withRequestBody(equalToJson(encryptedTotpAuthenticationRequest.toString)))
+      verify(1, postRequestedFor(urlMatching("/authenticate-auth-app")).withRequestBody(equalToJson(encryptedTotpAuthenticationRequest.toString)))
       result shouldBe Session(sessionId, buildDeveloper(emailAddress = userEmail), LoggedInState.LOGGED_IN)
     }
 
     "throw Invalid credentials when the credentials are invalid" in new Setup {
       stubFor(
-        post(urlEqualTo("/authenticate-totp"))
+        post(urlEqualTo("/authenticate-auth-app"))
           .withRequestBody(equalToJson(encryptedTotpAuthenticationRequest.toString))
           .willReturn(
             aResponse()
@@ -577,7 +579,7 @@ class ThirdPartyDeveloperConnectorIntegrationSpec extends BaseConnectorIntegrati
 
     "throw InvalidEmail when the email is not found" in new Setup {
       stubFor(
-        post(urlEqualTo("/authenticate-totp"))
+        post(urlEqualTo("/authenticate-auth-app"))
           .withRequestBody(equalToJson(encryptedTotpAuthenticationRequest.toString))
           .willReturn(
             aResponse()

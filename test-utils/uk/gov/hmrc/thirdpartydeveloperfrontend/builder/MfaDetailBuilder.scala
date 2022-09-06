@@ -21,12 +21,12 @@ import uk.gov.hmrc.apiplatform.modules.mfa.models.{AuthenticatorAppMfaDetailSumm
 import java.time.LocalDateTime
 
 trait MfaDetailBuilder {
-  val verifiedAuthenticatorAppMfaDetails = buildAuthenticatorAppMfaDetails(name = "name", verified = true)
+  val verifiedAuthenticatorAppMfaDetail = buildAuthenticatorAppMfaDetail(name = "name", verified = true)
 
 
-  def buildAuthenticatorAppMfaDetails(name: String,
-                                      verified: Boolean,
-                                      createdOn: LocalDateTime = LocalDateTime.now) ={
+  def buildAuthenticatorAppMfaDetail(name: String,
+                                     verified: Boolean,
+                                     createdOn: LocalDateTime = LocalDateTime.now) ={
     AuthenticatorAppMfaDetailSummary(MfaId.random, name, createdOn, verified)
   }
 }
