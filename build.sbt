@@ -29,7 +29,7 @@ lazy val microservice = Project(appName, file("."))
   .settings(
     Concat.groups := Seq(
       "javascripts/apis-app.js" -> group(
-        (baseDirectory.value / "app" / "assets" / "javascripts") ** "*.js"
+        (baseDirectory.value / "app" / "assets" / "javascripts" / "combine") ** "*.js"
       )
     ),
     uglifyCompressOptions := Seq(
