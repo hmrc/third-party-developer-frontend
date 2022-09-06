@@ -22,9 +22,9 @@ POST        /email-preferences/topics-from-subscriptions                        
 
 GET         /protect-account                                                                     uk.gov.hmrc.apiplatform.modules.mfa.controllers.profile.ProtectAccount.getProtectAccount
 GET         /protect-account/setup                                                               uk.gov.hmrc.apiplatform.modules.mfa.controllers.profile.ProtectAccount.getQrCode
-GET         /protect-account/access-code                                                         uk.gov.hmrc.apiplatform.modules.mfa.controllers.profile.ProtectAccount.getAccessCodePage
+GET         /protect-account/access-code                                                         uk.gov.hmrc.apiplatform.modules.mfa.controllers.profile.ProtectAccount.getAccessCodePage(mfaId: uk.gov.hmrc.apiplatform.modules.mfa.models.MfaId)
 GET         /protect-account/complete                                                            uk.gov.hmrc.apiplatform.modules.mfa.controllers.profile.ProtectAccount.getProtectAccountCompletedPage
-POST        /protect-account/enable                                                              uk.gov.hmrc.apiplatform.modules.mfa.controllers.profile.ProtectAccount.protectAccount
+POST        /protect-account/enable                                                              uk.gov.hmrc.apiplatform.modules.mfa.controllers.profile.ProtectAccount.protectAccount(mfaId: uk.gov.hmrc.apiplatform.modules.mfa.models.MfaId)
 GET         /protect-account/remove-by-id                                                        uk.gov.hmrc.apiplatform.modules.mfa.controllers.profile.ProtectAccount.get2SVRemovalByIdAccessCodePage(mfaId: uk.gov.hmrc.apiplatform.modules.mfa.models.MfaId)
 POST        /protect-account/remove-by-id                                                        uk.gov.hmrc.apiplatform.modules.mfa.controllers.profile.ProtectAccount.remove2SVById(mfaId: uk.gov.hmrc.apiplatform.modules.mfa.models.MfaId)
 GET         /protect-account/remove-by-id/complete                                               uk.gov.hmrc.apiplatform.modules.mfa.controllers.profile.ProtectAccount.get2SVRemovalByIdCompletePage

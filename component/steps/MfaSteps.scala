@@ -115,6 +115,7 @@ class MfaSteps extends ScalaDsl with EN with Matchers with NavigationSugar with 
   def setUpDeveloperStub(developer: Developer, password: String, deviceSessionId: Option[UUID], deviceSessionFound: Boolean) ={
     webDriver.manage().deleteAllCookies()
     val mfaEnabled = MfaDetailHelper.isAuthAppMfaVerified(developer.mfaDetails)
+    val mfaId = developer.mfaDetails.head.id
     val accessCodeRequired = deviceSessionId.isEmpty && mfaEnabled
 
     TestContext.sessionIdForloggedInDeveloper =
@@ -128,7 +129,7 @@ class MfaSteps extends ScalaDsl with EN with Matchers with NavigationSugar with 
     }
 
     MfaStub.stubRemoveMfaById(developer, authenticatorAppMfaDetails.id)
-    MfaStub.setupVerificationOfAccessCode(developer)
+    MfaStub.setupVerificationOfAccessCode(developer, mfaId)
     DeveloperStub.findUserIdByEmailAddress(developer.email)
     Stubs.setupPostRequest("/check-password", NO_CONTENT)
 

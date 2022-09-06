@@ -195,7 +195,7 @@ class ThirdPartyDeveloperMfaConnectorIntegrationSpec extends BaseConnectorIntegr
     val verifyMfaRequest = VerifyMfaRequest(code)
 
     "return false if verification fails due to InvalidCode" in new Setup {
-      val url = s"/developer/${userId.value}/mfa/verification"
+      val url = s"/developer/${userId.value}/mfa/${mfaId.value}/verification"
 
       stubFor(
         post(urlPathEqualTo(url))
@@ -205,11 +205,11 @@ class ThirdPartyDeveloperMfaConnectorIntegrationSpec extends BaseConnectorIntegr
               .withStatus(BAD_REQUEST)
           )
       )
-      await(underTest.verifyMfa(userId, code)) shouldBe false
+      await(underTest.verifyMfa(userId, mfaId, code)) shouldBe false
     }
 
     "return true if verification is successful" in new Setup {
-      val url = s"/developer/${userId.value}/mfa/verification"
+      val url = s"/developer/${userId.value}/mfa/${mfaId.value}/verification"
 
       stubFor(
         post(urlPathEqualTo(url))
@@ -219,11 +219,11 @@ class ThirdPartyDeveloperMfaConnectorIntegrationSpec extends BaseConnectorIntegr
               .withStatus(OK)
           )
       )
-      await(underTest.verifyMfa(userId, code)) shouldBe true
+      await(underTest.verifyMfa(userId, mfaId, code)) shouldBe true
     }
 
-    "throw if verification fails due to error" in new Setup {
-      val url = s"/developer/${userId.value}/mfa/verification"
+    "throw if verification fails due to error in backend" in new Setup {
+      val url = s"/developer/${userId.value}/mfa/${mfaId.value}/verification"
 
       stubFor(
         post(urlPathEqualTo(url))
@@ -234,21 +234,8 @@ class ThirdPartyDeveloperMfaConnectorIntegrationSpec extends BaseConnectorIntegr
           )
       )
       intercept[UpstreamErrorResponse] {
-        await(underTest.verifyMfa(userId, code))
+        await(underTest.verifyMfa(userId, mfaId, code))
       }
-    }
-  }
-
-  "enableMFA" should {
-    "return no_content if successfully enabled" in new Setup {
-      stubFor(
-        put(urlPathEqualTo(s"/developer/${userId.value}/mfa/enable"))
-          .willReturn(
-            aResponse()
-              .withStatus(NO_CONTENT)
-          )
-      )
-      await(underTest.enableMfa(userId))
     }
   }
 

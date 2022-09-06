@@ -4,6 +4,7 @@ import com.github.tomakehurst.wiremock.client.WireMock.{aResponse, delete, equal
 import play.api.http.Status.{NO_CONTENT, OK}
 import play.api.libs.json.Json
 import steps.{MfaSecret, TestContext}
+import uk.gov.hmrc.apiplatform.modules.mfa.connectors.ThirdPartyDeveloperMfaConnector.RegisterAuthAppResponse
 import uk.gov.hmrc.apiplatform.modules.mfa.models.MfaId
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.connectors.{TotpAuthenticationRequest, VerifyMfaRequest}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.{Developer, LoggedInState, Session}
@@ -28,9 +29,9 @@ object MfaStub {
     )
   }
 
-  def setupVerificationOfAccessCode(developer: Developer): Unit = {
+  def setupVerificationOfAccessCode(developer: Developer, mfaId: MfaId): Unit = {
     stubFor(
-      post(urlPathEqualTo(s"/developer/${developer.userId.value}/mfa/verification"))
+      post(urlPathEqualTo(s"/developer/${developer.userId.value}/mfa/${mfaId.value}/verification"))
         .withRequestBody(equalTo(Json.toJson(VerifyMfaRequest(accessCode)).toString()))
         .willReturn(aResponse()
           .withStatus(NO_CONTENT)
@@ -45,20 +46,14 @@ object MfaStub {
         ))
   }
 
-  def setupEnablingMfa(developer: Developer): Unit = {
-    stubFor(
-      put(urlPathEqualTo(s"/developer/${developer.userId.value}/mfa/enable"))
-        .willReturn(aResponse()
-          .withStatus(OK)
-        ))
-  }
+  def setupGettingMfaSecret(developer: Developer, mfaId: MfaId): Unit = {
+    import uk.gov.hmrc.apiplatform.modules.mfa.connectors.ThirdPartyDeveloperMfaConnector.registerAuthAppResponseFormat
 
-  def setupGettingMfaSecret(developer: Developer): Unit = {
     stubFor(
-      post(urlPathEqualTo(s"/developer/${developer.userId.value}/mfa"))
+      post(urlPathEqualTo(s"/developer/${developer.userId.value}/mfa/auth-app"))
         .willReturn(aResponse()
           .withStatus(OK)
-          .withBody(Json.toJson(MfaSecret("mySecret")).toString())))
+          .withBody(Json.toJson(RegisterAuthAppResponse("mySecret", mfaId)).toString())))
   }
 
   def setupGettingDeveloperByEmail(developer: Developer): Unit = {

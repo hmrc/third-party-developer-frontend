@@ -34,46 +34,42 @@ class MFAServiceSpec extends AsyncHmrcSpec {
     val totpCode = "12345678"
     val connector = mock[ThirdPartyDeveloperMfaConnector]
 
-    when(connector.enableMfa(eqTo(userId))(*)).thenReturn(successful(()))
     when(connector.removeMfaById(eqTo(userId), eqTo(mfaId))(*)).thenReturn(successful(()))
 
     val service = new MFAService(connector)
   }
 
   trait FailedTotpVerification extends Setup {
-    when(connector.verifyMfa(eqTo(userId), eqTo(totpCode))(*)).thenReturn(successful(false))
+    when(connector.verifyMfa(eqTo(userId), eqTo(mfaId), eqTo(totpCode))(*)).thenReturn(successful(false))
   }
 
   trait SuccessfulTotpVerification extends Setup {
-    when(connector.verifyMfa(eqTo(userId), eqTo(totpCode))(*)).thenReturn(successful(true))
+    when(connector.verifyMfa(eqTo(userId), eqTo(mfaId), eqTo(totpCode))(*)).thenReturn(successful(true))
   }
 
   "enableMfa" should {
     "return failed totp when totp verification fails" in new FailedTotpVerification {
-      val result = await(service.enableMfa(userId, totpCode)(HeaderCarrier()))
+      when(connector.verifyMfa(eqTo(userId), eqTo(mfaId), eqTo(totpCode))(*))
+        .thenReturn(successful(false))
+      val result = await(service.enableMfa(userId, mfaId, totpCode)(HeaderCarrier()))
       result.totpVerified shouldBe false
     }
 
-    "not call enable mfa when totp verification fails" in new FailedTotpVerification {
-      await(service.enableMfa(userId, totpCode)(HeaderCarrier()))
-      verify(connector, never).enableMfa(eqTo(userId))(*)
-    }
-
     "return successful totp when totp verification passes" in new SuccessfulTotpVerification {
-      val result = await(service.enableMfa(userId, totpCode)(HeaderCarrier()))
+      when(connector.verifyMfa(eqTo(userId), eqTo(mfaId), eqTo(totpCode))(*))
+        .thenReturn(successful(true))
+
+      val result = await(service.enableMfa(userId, mfaId, totpCode)(HeaderCarrier()))
+
+      verify(connector).verifyMfa(eqTo(userId), eqTo(mfaId), eqTo(totpCode))(*)
       result.totpVerified shouldBe true
     }
 
-    "enable MFA totp when totp verification passes" in new SuccessfulTotpVerification {
-      await(service.enableMfa(userId, totpCode)(HeaderCarrier()))
-      verify(connector, times(1)).enableMfa(eqTo(userId))(*)
-    }
-
     "throw exception if update fails" in new SuccessfulTotpVerification {
-      when(connector.enableMfa(eqTo(userId))(*))
+      when(connector.verifyMfa(eqTo(userId), eqTo(mfaId), eqTo(totpCode))(*))
         .thenReturn(failed(UpstreamErrorResponse("failed to enable MFA", INTERNAL_SERVER_ERROR, INTERNAL_SERVER_ERROR)))
 
-      intercept[UpstreamErrorResponse](await(service.enableMfa(userId, totpCode)(HeaderCarrier())))
+      intercept[UpstreamErrorResponse](await(service.enableMfa(userId, mfaId, totpCode)(HeaderCarrier())))
     }
   }
 
