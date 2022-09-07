@@ -75,6 +75,12 @@ class ApplicationService @Inject() (
     connectorWrapper.productionApplicationConnector.applicationUpdate(applicationId, request)
   }
 
+  def declineResponsibleIndividualVerification(applicationId: ApplicationId, code: String)(implicit hc: HeaderCarrier): Future[ApplicationUpdateSuccessful] = {
+    // TODO - add correct command
+    val request = ChangeResponsibleIndividualToOther(code, LocalDateTime.now(clock))
+    connectorWrapper.productionApplicationConnector.applicationUpdate(applicationId, request)
+  }
+
   def verifyResponsibleIndividual(application: Application, userId: UserId, requesterName: String, riName: String, riEmail: String)(implicit hc: HeaderCarrier): Future[ApplicationUpdateSuccessful] = {
     val request = VerifyResponsibleIndividual(userId,  LocalDateTime.now(clock), requesterName, riName, riEmail)
     connectorWrapper.forEnvironment(application.deployedTo).thirdPartyApplicationConnector.applicationUpdate(application.id, request)

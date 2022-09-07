@@ -94,24 +94,25 @@ class VerifyResponsibleIndividualController @Inject() (
   }
 
   def verifyAction(code: String) = Action.async { implicit request =>
-    lazy val success = (verified: Boolean, riVerification: ResponsibleIndividualVerification) => 
-      if(verified)
-        Ok(responsibleIndividualAcceptedView(VerifyResponsibleIndividualController.ViewModel(riVerification.applicationId, riVerification.applicationName, code)))
-      else
-        Ok(responsibleIndividualDeclinedView(VerifyResponsibleIndividualController.ViewModel(riVerification.applicationId, riVerification.applicationName, code)))
-
     def getVerified(verifyAnswer: String): Boolean = {
       verifyAnswer == "yes"
     }  
 
     def handleValidForm(form: VerifyResponsibleIndividualController.HasVerifiedForm) = {
       val verified: Boolean =  getVerified(form.verified)
-      responsibleIndividualVerificationService
-        .verifyResponsibleIndividual(code, verified)
-        .map(_ match {
-          case Right(riVerification) => success(verified, riVerification)
-          case Left(ErrorDetails(_, msg)) => Ok(responsibleIndividualErrorView(msg)) 
-        })
+      if (verified) {
+        responsibleIndividualVerificationService.accept(code)
+          .map(_ match {
+            case Right(riVerification) => Ok(responsibleIndividualAcceptedView(VerifyResponsibleIndividualController.ViewModel(riVerification.applicationId, riVerification.applicationName, code)))
+            case Left(ErrorDetails(_, msg)) => Ok(responsibleIndividualErrorView(msg)) 
+          })
+      } else {
+        responsibleIndividualVerificationService.decline(code)
+          .map(_ match {
+            case Right(riVerification) => Ok(responsibleIndividualDeclinedView(VerifyResponsibleIndividualController.ViewModel(riVerification.applicationId, riVerification.applicationName, code)))
+            case Left(ErrorDetails(_, msg)) => Ok(responsibleIndividualErrorView(msg)) 
+          })
+      }
     }
 
     def handleInvalidForm(form: Form[VerifyResponsibleIndividualController.HasVerifiedForm]) = {

@@ -133,7 +133,7 @@ class VerifyResponsibleIndividualControllerSpec
 
   "verifyAction" should {
     "succeed when RI has accepted" in new Setup {
-      ResponsibleIndividualVerificationServiceMock.VerifyResponsibleIndividual.thenReturns(riVerification)
+      ResponsibleIndividualVerificationServiceMock.Accept.thenReturns(riVerification)
       private val request = loggedInRequest.withFormUrlEncodedBody("verified" -> "yes")
 
       val result = controller.verifyAction(code)(request.withCSRFToken)
@@ -142,7 +142,7 @@ class VerifyResponsibleIndividualControllerSpec
     }
 
     "succeed when RI has declined" in new Setup {
-      ResponsibleIndividualVerificationServiceMock.VerifyResponsibleIndividual.thenReturns(riVerification)
+      ResponsibleIndividualVerificationServiceMock.Decline.thenReturns(riVerification)
       private val request = loggedInRequest.withFormUrlEncodedBody("verified" -> "no")
 
       val result = controller.verifyAction(code)(request.withCSRFToken)
