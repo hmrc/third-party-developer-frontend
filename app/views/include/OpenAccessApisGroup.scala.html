@@ -24,55 +24,52 @@
 
 @this()
 
-@(role: CollaboratorRole,
-    app: Application,
-    openAccessApis: Map[ApiContext, ApiData]
+@(
+  role: CollaboratorRole,
+  app: Application,
+  openAccessApis: Map[ApiContext, ApiData]
 )(
-    implicit messagesProvider: MessagesProvider, applicationConfig: ApplicationConfig, request: play.api.mvc.Request[Any])
+  implicit messagesProvider: MessagesProvider,
+  applicationConfig: ApplicationConfig,
+  request: play.api.mvc.Request[Any]
+)
 
-<ul class="subscriptions-group">
-    @openAccessApis.toList.map { case (apiContext, apiData) =>
-        <li class="accordion accordion--stacked"
-            data-accordion
-            data-accordion-animate
-            aria-expanded="false">
-            <div class="accordion__row">
-                <div class="accordion__row__left">
-                    <a id="@apiData.serviceName" href=""
-                    class="accordion__button link--no-underline bold-small" data-accordion-button role="button"
-                    aria-expanded="false">
-                        <i class="arrow arrow--right accordion__indicator {arrow--expand}" data-accordion-arrow aria-hidden="true"></i>
-                        <span>@apiData.name</span>
+<div class="govuk-accordion" data-module="govuk-accordion" id="accordion-default">
+  @openAccessApis.toList.map { case (apiContext, apiData) =>
+    <div class="govuk-accordion__section">
+      <div class="govuk-accordion__section-header">
+        <h2 class="govuk-accordion__section-heading">
+          <span class="govuk-accordion__section-button" id="accordion-default-heading-1">
+            @apiData.name
+          </span>
+        </h2>
+      </div>
+
+      <div id="accordion-default-content-4" class="govuk-accordion__section-content" aria-labelledby="accordion-default-heading-4">
+        @apiData.versions.toList.map { case (apiVersion, versionData) =>
+          @defining(s"${apiData.name} ${apiVersion.value} (${versionData.status.displayedStatus})") { apiVersionFullName =>
+            <div class="govuk-grid-row">
+              <div class="govuk-grid-column-one-half">
+                <div class="govuk-form-group govuk-!-margin-bottom-0">
+                  <p class='govuk-body govuk-!-padding-top-2'>
+                    <a href="@applicationConfig.apiDocumentationFrontendUrl/api-documentation/docs/api/service/@apiData.serviceName/@apiVersion.value"" aria-label="@apiVersionFullName." data-api-link>
+                      @{apiVersion.value} (@versionData.status.displayedStatus)
                     </a>
+                  </p>
                 </div>
-                <div class="accordion__row__right">
+              </div>
+              <div class="govuk-grid-column-one-quarter govuk-!-text-align-right">
+                <p class='govuk-body govuk-!-padding-top-2'>
+                </p>
+              </div>
+              <div class="govuk-grid-column-one-quarter govuk-!-text-align-right govuk-!-padding-0">
+                <div class="govuk-form-group govuk-!-margin-bottom-0">
                 </div>
+              </div>
             </div>
-
-            <div class="accordion__body conditionallyHide" data-accordion-body aria-hidden="true">
-                <ul>
-                    @apiData.versions.toList.map { case (apiVersion, versionData) =>
-                        @defining(s"${apiData.name} ${apiVersion.value} (${versionData.status.displayedStatus})") { apiVersionFullName =>
-                            <li class="accordion__body__row api-subscriber">
-                                <div class="accordion__body__row accordion__body__row--no-border ">
-                                    <div class="accordion__body__row__left">
-                                        <a href="@applicationConfig.apiDocumentationFrontendUrl/api-documentation/docs/api/service/@apiData.serviceName/@apiVersion.value" aria-label="@apiVersionFullName." data-api-link>
-                                            <span>
-                                                <span>@{apiVersion.value}</span><span style="width: 60%;display: inline-block;">(@versionData.status.displayedStatus)</span>
-                                            </span>
-                                        </a>
-                                    </div>
-                                    <div id="@IdFormatter.identifier(apiContext, apiVersion)-state" class="accordion__body__row__right api-subscriber__state-container subscription-error"></div>
-                                    <div class="accordion__body__row__right">
-                                      <div class="toggle float--right">
-                                      </div>
-                                    </div>
-                                </div>
-                            </li>
-                        }
-                    }
-                </ul>
-            </div>
-        </li>
-    }
-</ul>
+          }
+        }
+      </div>
+    </div>
+  }
+</div>
