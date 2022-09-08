@@ -39,14 +39,14 @@
 
 <div class="govuk-accordion" data-module="govuk-accordion" id="accordion-default">
   @apisSubscriptions.map { case apiSubscription =>
-    <div class="govuk-accordion__section">
+    <div class="govuk-accordion__section" id="@apiSubscription.apiServiceName-accordian-section">
       <div class="govuk-accordion__section-header">
         <h2 class="govuk-accordion__section-heading">
           <span class="govuk-accordion__section-button" id="accordion-default-heading-1">
             @apiSubscription.apiHumanReadableAppName
           </span>
         </h2>
-        <div class="govuk-accordion__section-summary govuk-body" id="accordion-with-summary-sections-summary-1">
+        <div class="govuk-accordion__section-summary subscription-count govuk-body" id="accordion-with-summary-sections-summary-1">
           @apiSubscription.subscriptionNumberText
         </div>
       </div>
@@ -64,24 +64,37 @@
                 </div>
               </div>
               <div class="govuk-grid-column-one-quarter govuk-!-text-align-right">
-                <p class='govuk-body govuk-!-padding-top-2'>
-                  <a
-                    id="@IdFormatter.identifier(api.context, api.apiVersion.version)-request-@if(api.subscribed) {unsubscribe} else {subscribe}"
-                    href="@controllers.routes.SubscriptionsController.changeLockedApiSubscription(app.id, api.name, api.context, api.apiVersion.version, afterSubscriptionRedirectTo.toString)"
-                    aria-label="Request to @if(api.subscribed) {unsubscribe from} else {subscribe to} @apiVersionFullName">
-                      Request change
-                  </a>
-                </p>
+                @if(app.hasLockedSubscriptions && role.isAdministrator) {
+                  <p class='govuk-body govuk-!-padding-top-2'>
+                    <a
+                      id="@IdFormatter.identifier(api.context, api.apiVersion.version)-request-@if(api.subscribed) {unsubscribe} else {subscribe}"
+                      href="@controllers.routes.SubscriptionsController.changeLockedApiSubscription(app.id, api.name, api.context, api.apiVersion.version, afterSubscriptionRedirectTo.toString)"
+                      aria-label="Request to @if(api.subscribed) {unsubscribe from} else {subscribe to} @apiVersionFullName">
+                        Request change
+                    </a>
+                  </p>
+                } else if (api.isPrivate && role.isAdministrator) {
+                  <p class='govuk-body govuk-!-padding-top-2'>
+                    <a
+                      id="@IdFormatter.identifier(api.context, api.apiVersion.version)-request-@if(api.subscribed) {unsubscribe} else {subscribe}"
+                      href="@controllers.routes.SubscriptionsController.changePrivateApiSubscription(app.id, api.name, api.context, api.apiVersion.version, afterSubscriptionRedirectTo.toString)"
+                      aria-label="Request to @if(api.subscribed) {unsubscribe from} else {subscribe to} @apiVersionFullName">
+                        Request change
+                    </a>
+                  </p>
+                } else {
+                  <p class='govuk-body govuk-!-padding-top-2'></p>
+                }
               </div>
               <div class="govuk-grid-column-one-quarter govuk-!-text-align-right govuk-!-padding-0">
                 <div class="govuk-form-group govuk-!-margin-bottom-0">
                   @helper.form(action = controllers.routes.SubscriptionsController.changeApiSubscription(app.id, api.context, api.apiVersion.version, afterSubscriptionRedirectTo.toString), 'class -> "slider") {
                     @helper.CSRF.formField
-                    <fieldset id="@IdFormatter.identifier(api.context, api.apiVersion.version)-toggle">
+                    <fieldset id="@IdFormatter.identifier(api.context, api.apiVersion.version)-toggle" @if(app.hasLockedSubscriptions || api.isPrivate) { disabled } aria-live="assertive">
                       <div class="slider__radios slider__radios--font-fix">
-                        <input class="slider__on" id="@IdFormatter.identifier(api.context, api.apiVersion.version)-on" name="@IdFormatter.identifier(api.context, api.apiVersion.version)-on" type="radio" value="true" @if(api.subscribed) {checked} else {}>
+                        <input class="slider__on" id="@IdFormatter.identifier(api.context, api.apiVersion.version)-on" name="subscribed" type="radio" value="true" @if(api.subscribed) {checked} else {}>
                         <label class="govuk-label govuk-radios__label slider__on--label" for="@IdFormatter.identifier(api.context, api.apiVersion.version)-on">On</label>
-                        <input class="slider__off" id="@IdFormatter.identifier(api.context, api.apiVersion.version)-off" name="@IdFormatter.identifier(api.context, api.apiVersion.version)-off" type="radio" value="false" @if(!api.subscribed) {checked} else {}>
+                        <input class="slider__off" id="@IdFormatter.identifier(api.context, api.apiVersion.version)-off" name="subscribed" type="radio" value="false" @if(!api.subscribed) {checked} else {}>
                         <label class="govuk-label govuk-radios__label slider__off--label" for="@IdFormatter.identifier(api.context, api.apiVersion.version)-off">Off</label>
                       </div>
                     </fieldset>
