@@ -23,8 +23,9 @@
 @import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.apidefinitions.APIAccessType
 @import include._
 @import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.APISubscriptions
+@import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.CollaboratorRole
 
-@this(devMain: DevMain)
+@this(devMain: DevMain2)
 @(
     applicationId: ApplicationId,
     role: CollaboratorRole,
@@ -37,7 +38,6 @@
     applicationConfig: ApplicationConfig
 )
 
-@import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.CollaboratorRole
 @pageHeading = @{ "Turn off API subscriptions you don’t need" }
 
 @devMain(
@@ -50,7 +50,7 @@
 
   @subscriptions match {
     case Nil => {
-      <h1 class="heading-xlarge">@pageHeading</h1>
+      <h1 class="govuk-heading-l">@pageHeading</h1>
 
       <div class="govuk-inset-text">We can’t load your API subscriptions at the moment. Please
         <a class="govuk-link govuk-link--no-visited-state" href="@{controllers.checkpages.routes.ApplicationCheck.apiSubscriptionsPage(applicationId)}">try again</a> later
@@ -60,80 +60,81 @@
       @helper.form(action = uk.gov.hmrc.apiplatform.modules.uplift.controllers.routes.UpliftJourneyController.saveApiSubscriptionsSubmit(applicationId), 'class -> "form") {
         @helper.CSRF.formField
         <div class="form-group @if(errorForm.errors("apiSubscriptions").nonEmpty){form-group-error}">
-          <h1 class="heading-xlarge">@pageHeading</h1>
+          <h1 class="govuk-heading-l">@pageHeading</h1>
 
           @fieldError(errorForm.errors, "apiSubscriptions", true)
-        
-          <ul class="subscriptions-group">
+          
+          <div class="govuk-accordion" data-module="govuk-accordion" id="accordion-default">
             @subscriptions.map { case apiSubscription =>
-              <li class="accordion accordion--stacked {accordion--expanded}" data-accordion data-accordion-animate {data-accordion-expanded="" aria-expanded="true"}>
-                <div class="accordion__row">
-                  <div class="accordion__row__left">
-                      <a id="@apiSubscription.apiServiceName" href="/developer/applications/@{applicationId.value}?tab=subscriptions&serviceName=@apiSubscription.apiServiceName"
-                      class="accordion__button link--no-underline bold-small" data-accordion-button role="button"
-                          @if(apiSubscription.isExpanded) {data-accordion-expanded="" aria-expanded="true"} else {aria-expanded="false"}>
-                          <i class="arrow arrow--right accordion__indicator @if(apiSubscription.isExpanded) {arrow--expand}" data-accordion-arrow aria-hidden="true"></i>
-                          <span>@apiSubscription.apiHumanReadableAppName</span>
-                      </a>
+              <div class="govuk-accordion__section" id="@apiSubscription.apiServiceName-accordian-section">
+                <div class="govuk-accordion__section-header">
+                  <h2 class="govuk-accordion__section-heading">
+                    <span class="govuk-accordion__section-button" id="accordion-default-heading-1">
+                      @apiSubscription.apiHumanReadableAppName
+                    </span>
+                  </h2>
+                  <div class="govuk-accordion__section-summary subscription-count govuk-body" id="accordion-with-summary-sections-summary-1">
+                    @apiSubscription.subscriptionNumberText
                   </div>
                 </div>
-              
-                <div class="accordion__body" data-accordion-body {aria-hidden="false"}>
-                  <ul>
-                    @apiSubscription.subscriptions.map { case api =>
-                      @defining(s"${apiSubscription.apiHumanReadableAppName} ${api.apiVersion.version.value} (${api.apiVersion.displayedStatus})") { apiVersionFullName =>
-                        <li class="accordion__body__row api-subscriber">
-                          <div class="accordion__body__row accordion__body__row--no-border ">
-                            <div class="accordion__body__row__left">
-                              @if(api.requiresTrust) {
-                                <span>@{api.apiVersion.version.value} (@{api.apiVersion.displayedStatus})</span>
-                              } else {
-                                <a href="@applicationConfig.apiDocumentationFrontendUrl/api-documentation/docs/api/service/@api.serviceName/@api.apiVersion.version.value" aria-label="@apiVersionFullName. You are @if(!api.subscribed) {not} subscribed" data-api-link>
-                                @if(api.apiVersion.accessType == APIAccessType.PRIVATE) {
-                                  <span>
-                                      <span>@api.apiVersion.version.value</span><span style="width: 60%;display: inline-block;">(@api.apiVersion.displayedAccessType @api.apiVersion.displayedStatus)</span>
-                                  </span>
+                <div id="accordion-default-content-4" class="govuk-accordion__section-content" aria-labelledby="accordion-default-heading-4">
+                  @apiSubscription.subscriptions.map { case api =>
+                    @defining(s"${apiSubscription.apiHumanReadableAppName} ${api.apiVersion.version.value} (${api.apiVersion.displayedStatus})") { apiVersionFullName =>
+                      <div class="govuk-grid-row">
+                        <div class="govuk-grid-column-one-half">
+                          <div class="govuk-form-group govuk-!-margin-bottom-0">
+                            <p class='govuk-body govuk-!-padding-top-2'>
+                              <a href="@applicationConfig.apiDocumentationFrontendUrl/api-documentation/docs/api/service/@api.serviceName/@api.apiVersion.version.value" aria-label="@apiVersionFullName. You are @if(!api.subscribed) {not} subscribed" data-api-link>
+                                @if(api.requiresTrust) {
+                                  <span>@{api.apiVersion.version.value} (@{api.apiVersion.displayedStatus})</span>
                                 } else {
-                                  <span>
-                                    <span>@api.apiVersion.version.value</span><span style="width: 60%;display: inline-block;">(@api.apiVersion.displayedStatus)</span>
-                                  </span>
+                                  <a href="@applicationConfig.apiDocumentationFrontendUrl/api-documentation/docs/api/service/@api.serviceName/@api.apiVersion.version.value" aria-label="@apiVersionFullName. You are @if(!api.subscribed) {not} subscribed" data-api-link>
+                                  @if(api.apiVersion.accessType == APIAccessType.PRIVATE) {
+                                    <span>
+                                        <span>@api.apiVersion.version.value</span><span style="width: 60%;display: inline-block;">(@api.apiVersion.displayedAccessType @api.apiVersion.displayedStatus)</span>
+                                    </span>
+                                  } else {
+                                    <span>
+                                      <span>@api.apiVersion.version.value</span><span style="width: 60%;display: inline-block;">(@api.apiVersion.displayedStatus)</span>
+                                    </span>
+                                  }
+                                  </a>
                                 }
-                                </a>
-                              }
-                            </div>
-    
-                            @defining(IdFormatter.identifier(api.context, api.apiVersion.version)) { apiLabel => 
-                              <div id="@apiLabel-state" class="accordion__body__row__right api-subscriber__state-container subscription-error"></div>
-        
-                                <div class="accordion__body__row__right">
-                                  <div class="toggle float--right">
-                                    <div class="slider">
-                                      <fieldset id="@apiLabel-toggle" aria-live="assertive">
-                                        <div class="slider__radios">
-                                          <input id="@apiLabel-on" class="slider__on" type="radio" name="@apiLabel-subscribed" value="true" @if(api.subscribed) { checked } />
-                                          <label for="@apiLabel-on" class="slider__on--label">Yes</label>
-                                          <input id="@apiLabel-off" class="slider__off" type="radio" name="@apiLabel-subscribed" value="false" @if(!api.subscribed) { checked } />
-                                          <label for="@apiLabel-off" class="slider__off--label">No</label>
-                                        </div>
-                                      </fieldset>
+                              </a>
+                            </p>
+                          </div>
+                        </div>
+                        <div class="govuk-grid-column-one-quarter govuk-!-text-align-right">
+                            <p class='govuk-body govuk-!-padding-top-2'></p>
+                        </div>
+                        <div class="govuk-grid-column-one-quarter govuk-!-text-align-right govuk-!-padding-0">
+                          @defining(IdFormatter.identifier(api.context, api.apiVersion.version)) { apiLabel => 
+                            <div class="govuk-form-group govuk-!-margin-bottom-0">
+                              <div class="slider">
+                                <fieldset id="@apiLabel-toggle" aria-live="assertive">
+                                    <div class="slider__radios slider__radios--font-fix">
+                                      <input class="slider__on" id="@apiLabel-on" name="@apiLabel-subscribed" type="radio" value="true" aria-label="You have now subscribed to @apiVersionFullName" @if(api.subscribed) {checked} else {}>
+                                      <label class="govuk-label govuk-radios__label slider__on--label" for="@apiLabel-on" aria-label="@if(api.subscribed){You are subscribed to @apiVersionFullName} else {You are not subscribed to @apiVersionFullName}">Yes</label>
+                                      <input class="slider__off" id="@apiLabel-off" name="@apiLabel-subscribed" type="radio" value="false" aria-label="You have now unsubscribed to @apiVersionFullName" @if(!api.subscribed) {checked} else {}>
+                                      <label class="govuk-label govuk-radios__label slider__off--label" for="@apiLabel-off" aria-label="@if(api.subscribed){Select to unsubscribe} else {Unsubscribed}">No</label>
                                     </div>
-                                  </div>
+                                  </fieldset>
                                 </div>
-                              </div>
-                            }
-                          </li>
-                        }
-                      }
-                    </ul>
-                  </div>
-                </li>
-              }
-          </ul>
+                            </div>
+                          }
+                        </div>
+                      </div>
+                    }
+                  }
+                </div>
+              </div>
+            }
+          </div>
         </div>
 
-        <div>
-          <button id="submit" class="button" type="submit">Save and continue</button>
-          <a href="@uk.gov.hmrc.apiplatform.modules.uplift.controllers.routes.UpliftJourneyController.confirmApiSubscriptionsPage(applicationId)" class="secondary-button">
+        <div class="govuk-button-group">
+          <button id="submit" class="govuk-button" data-module="govuk-button" type="submit">Save and continue</button>
+          <a href="@uk.gov.hmrc.apiplatform.modules.uplift.controllers.routes.UpliftJourneyController.confirmApiSubscriptionsPage(applicationId)" class="govuk-link">
             Cancel
           </a>
         </div>
