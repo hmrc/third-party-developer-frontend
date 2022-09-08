@@ -71,7 +71,6 @@ class Password @Inject()(val auditService: AuditService,
         _ => Ok(checkEmailView(data.emailaddress))
       } recover {
         case _ : UnverifiedAccount => Forbidden(forgotPasswordView(ForgotPasswordForm.accountUnverified(requestForm, data.emailaddress)))
-          .withSession("email" -> data.emailaddress)
         case UpstreamErrorResponse(_,NOT_FOUND,_,_) => Ok(checkEmailView(data.emailaddress))
       }
     )
