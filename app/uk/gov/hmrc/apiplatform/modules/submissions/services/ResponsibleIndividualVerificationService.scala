@@ -60,8 +60,7 @@ class ResponsibleIndividualVerificationService @Inject()(
     (
       for {
         riVerification <- ET.fromOptionF(tpaSubmissionsConnector.fetchResponsibleIndividualVerification(code), ErrorDetails("riverification001", s"No responsibleIndividualVerification record found for ${code}")) 
-        _              <- ET.fromEitherF(tpaSubmissionsConnector.responsibleIndividualDecline(code))
-//        _              <- ET.liftF(applicationService.declineResponsibleIndividualVerification(riVerification.applicationId, code))
+        _              <- ET.liftF(applicationService.declineResponsibleIndividualVerification(riVerification.applicationId, code))
       } yield riVerification
     )
     .value

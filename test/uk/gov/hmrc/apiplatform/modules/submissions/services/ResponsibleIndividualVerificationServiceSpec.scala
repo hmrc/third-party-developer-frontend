@@ -111,8 +111,8 @@ class ResponsibleIndividualVerificationServiceSpec extends AsyncHmrcSpec
   "decline" should {
     "successfully return a riVerification record for decline" in new Setup {
       when(mockSubmissionsConnector.fetchResponsibleIndividualVerification(eqTo(code))(*)).thenReturn(successful(Some(riVerification)))
-      when(mockSubmissionsConnector.responsibleIndividualDecline(eqTo(code))(*)).thenReturn(successful(Right(riVerification)))
-      
+      ApplicationServiceMock.declineResponsibleIndividualVerification(applicationId, code)
+    
       val result = await(underTest.decline(code))
       
       result shouldBe 'Right
