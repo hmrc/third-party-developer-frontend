@@ -65,7 +65,7 @@
               </div>
               <div class="govuk-grid-column-one-quarter govuk-!-text-align-right">
                 @if(app.hasLockedSubscriptions && role.isAdministrator) {
-                  <p class='govuk-body govuk-!-padding-top-2'>
+                  <p class='govuk-body govuk-!-padding-top-2 request-change-link'>
                     <a
                       id="@IdFormatter.identifier(api.context, api.apiVersion.version)-request-@if(api.subscribed) {unsubscribe} else {subscribe}"
                       href="@controllers.routes.SubscriptionsController.changeLockedApiSubscription(app.id, api.name, api.context, api.apiVersion.version, afterSubscriptionRedirectTo.toString)"
@@ -74,7 +74,7 @@
                     </a>
                   </p>
                 } else if (api.isPrivate && role.isAdministrator) {
-                  <p class='govuk-body govuk-!-padding-top-2'>
+                  <p class='govuk-body govuk-!-padding-top-2 request-change-link'>
                     <a
                       id="@IdFormatter.identifier(api.context, api.apiVersion.version)-request-@if(api.subscribed) {unsubscribe} else {subscribe}"
                       href="@controllers.routes.SubscriptionsController.changePrivateApiSubscription(app.id, api.name, api.context, api.apiVersion.version, afterSubscriptionRedirectTo.toString)"
