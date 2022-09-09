@@ -59,7 +59,7 @@ class ResponsibleIndividualVerificationService @Inject()(
   def decline(code: String)(implicit hc: HeaderCarrier): Future[Either[ErrorDetails, ResponsibleIndividualVerification]] = {
     (
       for {
-        riVerification <- ET.fromOptionF(tpaSubmissionsConnector.fetchResponsibleIndividualVerification(code), ErrorDetails("riverification001", s"No responsibleIndividualVerification record found for ${code}")) 
+        riVerification <- ET.fromOptionF(tpaSubmissionsConnector.fetchResponsibleIndividualVerification(code), ErrorDetails("riverification003", s"No responsibleIndividualVerification record found for ${code}")) 
         _              <- ET.liftF(applicationService.declineResponsibleIndividualVerification(riVerification.applicationId, code))
       } yield riVerification
     )

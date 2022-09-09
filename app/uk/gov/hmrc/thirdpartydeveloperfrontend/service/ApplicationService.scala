@@ -76,7 +76,6 @@ class ApplicationService @Inject() (
   }
 
   def declineResponsibleIndividualVerification(applicationId: ApplicationId, code: String)(implicit hc: HeaderCarrier): Future[ApplicationUpdateSuccessful] = {
-    // TODO - add correct command
     val request = DeclineResponsibleIndividual(code, LocalDateTime.now(clock))
     connectorWrapper.productionApplicationConnector.applicationUpdate(applicationId, request)
   }
