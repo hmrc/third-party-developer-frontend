@@ -16,6 +16,7 @@
 
 package uk.gov.hmrc.thirdpartydeveloperfrontend.service
 
+import uk.gov.hmrc.apiplatform.modules.mfa.models.MfaId
 import uk.gov.hmrc.apiplatform.modules.mfa.service.MfaMandateService
 import uk.gov.hmrc.thirdpartydeveloperfrontend.builder.DeveloperBuilder
 import uk.gov.hmrc.thirdpartydeveloperfrontend.connectors.ThirdPartyDeveloperConnector
@@ -44,6 +45,7 @@ class SessionServiceSpec extends AsyncHmrcSpec with DeveloperBuilder with LocalU
     val password = "Password1!"
     val totp = "123456"
     val nonce = "ABC-123"
+    val mfaId = MfaId.random
     val developer = buildDeveloper(emailAddress = email)
     val sessionId = "sessionId"
     val deviceSessionId = UUID.randomUUID()
@@ -88,16 +90,16 @@ class SessionServiceSpec extends AsyncHmrcSpec with DeveloperBuilder with LocalU
 
   "authenticateTotp" should {
     "return the new session from the connector when the authentication succeeds" in new Setup {
-      when(underTest.thirdPartyDeveloperConnector.authenticateTotp(TotpAuthenticationRequest(email, totp, nonce))).thenReturn(successful(session))
+      when(underTest.thirdPartyDeveloperConnector.authenticateTotp(TotpAuthenticationRequest(email, totp, nonce, mfaId))).thenReturn(successful(session))
 
-      await(underTest.authenticateTotp(email, totp, nonce)) shouldBe session
+      await(underTest.authenticateTotp(email, totp, nonce, mfaId)) shouldBe session
     }
 
     "propagate the exception when the connector fails" in new Setup {
-      when(underTest.thirdPartyDeveloperConnector.authenticateTotp(TotpAuthenticationRequest(email, totp, nonce)))
+      when(underTest.thirdPartyDeveloperConnector.authenticateTotp(TotpAuthenticationRequest(email, totp, nonce, mfaId)))
         .thenThrow(new RuntimeException)
 
-      intercept[RuntimeException](await(underTest.authenticateTotp(email, totp, nonce)))
+      intercept[RuntimeException](await(underTest.authenticateTotp(email, totp, nonce, mfaId)))
     }
   }
 

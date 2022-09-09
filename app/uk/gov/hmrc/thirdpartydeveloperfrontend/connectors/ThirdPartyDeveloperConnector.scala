@@ -74,7 +74,7 @@ class ThirdPartyDeveloperConnector @Inject()(http: HttpClient, encryptedJson: En
   def authenticateTotp(totpAuthenticationRequest: TotpAuthenticationRequest)(implicit hc: HeaderCarrier): Future[Session] = metrics.record(api) {
     encryptedJson.secretRequest(
       totpAuthenticationRequest,
-      http.POST[SecretRequest, ErrorOr[Session]](s"$serviceBaseUrl/authenticate-totp", _))
+      http.POST[SecretRequest, ErrorOr[Session]](s"$serviceBaseUrl/authenticate-auth-app", _))
       .map {
         case Right(response) => response
         case Left(UpstreamErrorResponse(_, BAD_REQUEST, _, _)) => throw new InvalidCredentials

@@ -38,7 +38,7 @@ class ProtectedAccountWithMfaViewSpec extends CommonViewSpec with WithCSRFAddTok
 
     "render the page with user mfa details list" in {
       val createdOnTimestamp: LocalDateTime = LocalDateTime.of(2022, 8, 2, 15, 20)
-      val mfaDetails = List(buildAuthenticatorAppMfaDetails("Google Authenticator", createdOn = createdOnTimestamp, verified = true))
+      val mfaDetails = List(buildAuthenticatorAppMfaDetail("Google Authenticator", createdOn = createdOnTimestamp, verified = true))
       val developer: Developer = buildDeveloper(mfaDetails = mfaDetails)
       val session: Session = Session("sessionId", developer, LoggedInState.LOGGED_IN)
       implicit val developerSession: DeveloperSession = DeveloperSession(session)
@@ -60,7 +60,7 @@ class ProtectedAccountWithMfaViewSpec extends CommonViewSpec with WithCSRFAddTok
 
     "render the page without the name when name equals AUTHENTICATOR_APP" in {
       val createdOnTimestamp: LocalDateTime = LocalDateTime.of(2022, 8, 2, 15, 20)
-      val mfaDetails = List(buildAuthenticatorAppMfaDetails("AUTHENTICATOR_APP", createdOn = createdOnTimestamp, verified = true))
+      val mfaDetails = List(buildAuthenticatorAppMfaDetail("AUTHENTICATOR_APP", createdOn = createdOnTimestamp, verified = true))
       val developer: Developer = buildDeveloper(mfaDetails = mfaDetails)
       val session: Session = Session("sessionId", developer, LoggedInState.LOGGED_IN)
       implicit val developerSession: DeveloperSession = DeveloperSession(session)
@@ -75,7 +75,7 @@ class ProtectedAccountWithMfaViewSpec extends CommonViewSpec with WithCSRFAddTok
 
     "render the page without createdOn field when the createdOn date is before 01 August 2022" in {
       val createdOnTimestamp: LocalDateTime = LocalDateTime.of(2022, 7, 2, 15, 20)
-      val mfaDetails = List(buildAuthenticatorAppMfaDetails("Google Authenticator", createdOn = createdOnTimestamp, verified = true))
+      val mfaDetails = List(buildAuthenticatorAppMfaDetail("Google Authenticator", createdOn = createdOnTimestamp, verified = true))
       val developer: Developer = buildDeveloper(mfaDetails = mfaDetails)
       val session: Session = Session("sessionId", developer, LoggedInState.LOGGED_IN)
       implicit val developerSession: DeveloperSession = DeveloperSession(session)

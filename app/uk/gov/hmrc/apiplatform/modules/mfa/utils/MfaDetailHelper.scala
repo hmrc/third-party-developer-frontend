@@ -16,7 +16,7 @@
 
 package uk.gov.hmrc.apiplatform.modules.mfa.utils
 
-import uk.gov.hmrc.apiplatform.modules.mfa.models.{MfaDetail, MfaType}
+import uk.gov.hmrc.apiplatform.modules.mfa.models.{AuthenticatorAppMfaDetailSummary, MfaDetail, MfaType}
 
 object MfaDetailHelper {
 
@@ -24,5 +24,10 @@ object MfaDetailHelper {
     //TODO: This will be modified when the SMS authentication is added.
     mfaDetails
       .exists(x => x.mfaType == MfaType.AUTHENTICATOR_APP && x.verified)
+  }
+
+  def getAuthAppMfaVerified(mfaDetails: List[MfaDetail]): AuthenticatorAppMfaDetailSummary = {
+    mfaDetails.filter(x => x.mfaType == MfaType.AUTHENTICATOR_APP && x.verified)
+      .head.asInstanceOf[AuthenticatorAppMfaDetailSummary]
   }
 }

@@ -21,10 +21,10 @@ import play.api.libs.crypto.CookieSigner
 import play.api.mvc.Cookie
 import play.api.test.FakeRequest
 import uk.gov.hmrc.apiplatform.modules.mfa.connectors.ThirdPartyDeveloperMfaConnector.RegisterAuthAppResponse
-import uk.gov.hmrc.apiplatform.modules.mfa.models.MfaId
 import uk.gov.hmrc.apiplatform.modules.submissions.domain.models.ResponsibleIndividualVerificationState.INITIAL
 import uk.gov.hmrc.apiplatform.modules.submissions.domain.models.Submission.Status.Granted
 import uk.gov.hmrc.apiplatform.modules.submissions.domain.models._
+import uk.gov.hmrc.thirdpartydeveloperfrontend.builder.MfaDetailBuilder
 import uk.gov.hmrc.thirdpartydeveloperfrontend.connectors.ThirdPartyDeveloperConnector.CoreUserDetails
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.apidefinitions.APIAccessType.PUBLIC
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.apidefinitions.APIStatus.STABLE
@@ -41,7 +41,7 @@ import java.util.UUID
 import scala.concurrent.Future
 
 
-trait HasApplication extends HasAppDeploymentEnvironment with HasUserWithRole with HasAppState {
+trait HasApplication extends HasAppDeploymentEnvironment with HasUserWithRole with HasAppState with MfaDetailBuilder {
   val applicationId = ApplicationId.random
   val clientId = ClientId.random
   val applicationName = "my app"
@@ -101,7 +101,7 @@ trait HasApplication extends HasAppDeploymentEnvironment with HasUserWithRole wi
   lazy val responsibleIndividualVerificationWithDetails = ResponsibleIndividualVerificationWithDetails(
     responsibleIndividualVerification, responsibleIndividual, "mr submitter", "submitter@example.com"
   )
-  lazy val mfaId = MfaId.random
+  lazy val mfaId = verifiedAuthenticatorAppMfaDetail.id
   lazy val registerAuthAppResponse = RegisterAuthAppResponse("secret", mfaId)
 }
 
@@ -126,7 +126,7 @@ trait IsNewJourneyStandardApplicationWithoutSubmission extends HasApplication {
   def checkInformation = None
 }
 
-trait HasUserWithRole extends MockConnectors {
+trait HasUserWithRole extends MockConnectors with MfaDetailBuilder {
   lazy val userEmail = "user@example.com"
   lazy val userId = UserId.random
   lazy val userFirstName = "Bob"
@@ -138,7 +138,7 @@ trait HasUserWithRole extends MockConnectors {
 
   def describeUserRole: String
   def developer = Developer(
-    userId, userEmail, userFirstName, userLastName, None, List.empty, EmailPreferences.noPreferences
+    userId, userEmail, userFirstName, userLastName, None, List(verifiedAuthenticatorAppMfaDetail), EmailPreferences.noPreferences
   )
   def maybeCollaborator: Option[Collaborator]
 }
