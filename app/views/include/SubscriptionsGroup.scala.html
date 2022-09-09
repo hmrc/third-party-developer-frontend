@@ -107,9 +107,9 @@
                                         <fieldset id="@IdFormatter.identifier(api.context, api.apiVersion.version)-toggle" @if(app.hasLockedSubscriptions || api.isPrivate) { disabled } aria-live="assertive">
                                             <legend class="govuk-visually-hidden">subscribe to @apiVersionFullName</legend>
                                             <div class="slider__radios">
-                                            <input id="@IdFormatter.identifier(api.context, api.apiVersion.version)-on" class="slider__on" type="radio" name="subscribed" value="true" aria-label="You have now subscribed to @apiVersionFullName" @if(api.subscribed) { checked } />
+                                            <input id="@IdFormatter.identifier(api.context, api.apiVersion.version)-on" class="slider__on" type="radio" name="subscribed" value="true" @if(api.subscribed) { checked } />
                                             <label for="@IdFormatter.identifier(api.context, api.apiVersion.version)-on" class="slider__on--label">Yes</label>
-                                            <input id="@IdFormatter.identifier(api.context, api.apiVersion.version)-off" class="slider__off" type="radio" name="subscribed" value="false" aria-label="You have now unsubscribed to @apiVersionFullName" @if(!api.subscribed) { checked } />
+                                            <input id="@IdFormatter.identifier(api.context, api.apiVersion.version)-off" class="slider__off" type="radio" name="subscribed" value="false" @if(!api.subscribed) { checked } />
                                             <label for="@IdFormatter.identifier(api.context, api.apiVersion.version)-off" class="slider__off--label">No</label>
                                           </div>
                                           <input type="submit" value="Save" class="button">
