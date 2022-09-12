@@ -44,7 +44,7 @@ import views.html.include.ChangeSubscriptionConfirmationView
 import scala.concurrent.{ExecutionContext, Future}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.apidefinitions.ApiIdentifier
 import play.api.mvc.Call
-import uk.gov.hmrc.play.bootstrap.controller.WithDefaultFormBinding
+import uk.gov.hmrc.play.bootstrap.controller.WithUnsafeDefaultFormBinding
 
 @Singleton
 class SubscriptionsController @Inject()(
@@ -66,7 +66,7 @@ class SubscriptionsController @Inject()(
   fraudPreventionConfig: FraudPreventionConfig
 )(implicit val ec: ExecutionContext, val appConfig: ApplicationConfig, val environmentNameService: EnvironmentNameService)
   extends ApplicationController(mcc)
-    with ApplicationHelper with FraudPreventionNavLinkHelper with WithDefaultFormBinding {
+    with ApplicationHelper with FraudPreventionNavLinkHelper with WithUnsafeDefaultFormBinding {
 
   private def canManagePrivateApiSubscriptionsAction(applicationId: ApplicationId)(fun: ApplicationRequest[AnyContent] => Future[Result]) =
     checkActionForAllStates(SupportsSubscriptions, AdministratorOnly)(applicationId)(fun)

@@ -35,7 +35,7 @@ import views.html._
 import scala.concurrent.{ExecutionContext, Future}
 import uk.gov.hmrc.http.UpstreamErrorResponse
 import uk.gov.hmrc.apiplatform.modules.common.services.ApplicationLogger
-import uk.gov.hmrc.play.bootstrap.controller.WithDefaultFormBinding
+import uk.gov.hmrc.play.bootstrap.controller.WithUnsafeDefaultFormBinding
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendBaseController
 
 @Singleton
@@ -53,7 +53,7 @@ class Password @Inject()(val auditService: AuditService,
                          signInView: SignInView
                         )
                         (implicit val ec: ExecutionContext, val appConfig: ApplicationConfig)
-  extends LoggedOutController(mcc) with PasswordChange with ApplicationLogger with WithDefaultFormBinding {
+  extends LoggedOutController(mcc) with PasswordChange with ApplicationLogger with WithUnsafeDefaultFormBinding {
 
   import ErrorFormBuilder.GlobalError
 

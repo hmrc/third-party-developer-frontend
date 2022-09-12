@@ -32,7 +32,7 @@ import uk.gov.hmrc.apiplatform.modules.mfa.connectors.ThirdPartyDeveloperMfaConn
 import uk.gov.hmrc.apiplatform.modules.mfa.models.MfaId
 import uk.gov.hmrc.apiplatform.modules.mfa.service.{MFAService, MfaMandateService}
 import uk.gov.hmrc.apiplatform.modules.mfa.utils.MfaDetailHelper
-import uk.gov.hmrc.play.bootstrap.controller.WithDefaultFormBinding
+import uk.gov.hmrc.play.bootstrap.controller.WithUnsafeDefaultFormBinding
 import uk.gov.hmrc.thirdpartydeveloperfrontend.qr.{OtpAuthUri, QRCode}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.service.SessionService
 import views.html.protectaccount._
@@ -62,7 +62,7 @@ class ProtectAccount @Inject()(
 )(
   implicit val ec: ExecutionContext,
   val appConfig: ApplicationConfig
-) extends LoggedInController(mcc) with WithDefaultFormBinding {
+) extends LoggedInController(mcc) with WithUnsafeDefaultFormBinding {
 
   private val scale = 4
   val qrCode = QRCode(scale)

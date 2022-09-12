@@ -43,7 +43,7 @@ import uk.gov.hmrc.apiplatform.modules.uplift.services.UpliftJourneyService
 import uk.gov.hmrc.thirdpartydeveloperfrontend.config.UpliftJourneyConfig
 import uk.gov.hmrc.thirdpartydeveloperfrontend.config.{On, OnDemand}
 import play.api.mvc.Request
-import uk.gov.hmrc.play.bootstrap.controller.WithDefaultFormBinding
+import uk.gov.hmrc.play.bootstrap.controller.WithUnsafeDefaultFormBinding
 
 import scala.util.Try
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.controllers.BadRequestWithErrorMessage
@@ -91,7 +91,7 @@ class UpliftJourneyController @Inject() (val errorHandler: ErrorHandler,
                      (implicit val ec: ExecutionContext, val appConfig: ApplicationConfig)
   extends ApplicationController(mcc)
      with CanUseCheckActions
-     with WithDefaultFormBinding {
+     with WithUnsafeDefaultFormBinding {
 
   import UpliftJourneyController._
 

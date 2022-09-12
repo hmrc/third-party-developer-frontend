@@ -35,7 +35,7 @@ import uk.gov.hmrc.thirdpartydeveloperfrontend.config.ErrorHandler
 import uk.gov.hmrc.apiplatform.modules.submissions.views.html.{ResponsibleIndividualAcceptedView, ResponsibleIndividualDeclinedView, ResponsibleIndividualErrorView, VerifyResponsibleIndividualView}
 import uk.gov.hmrc.apiplatform.modules.submissions.services.ResponsibleIndividualVerificationService
 import uk.gov.hmrc.apiplatform.modules.submissions.domain.models.{ErrorDetails, ResponsibleIndividualVerification}
-import uk.gov.hmrc.play.bootstrap.controller.WithDefaultFormBinding
+import uk.gov.hmrc.play.bootstrap.controller.WithUnsafeDefaultFormBinding
 
 object VerifyResponsibleIndividualController {
   case class ViewModel (
@@ -72,7 +72,7 @@ class VerifyResponsibleIndividualController @Inject() (
   val appConfig: ApplicationConfig
 ) extends ApplicationController(mcc)
   with EitherTHelper[String]
-  with WithDefaultFormBinding{
+  with WithUnsafeDefaultFormBinding{
   
   import cats.implicits._
   import cats.instances.future.catsStdInstancesForFuture
