@@ -14,28 +14,33 @@
  * limitations under the License.
  *@
 
-@import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.views.BackButtonWithJavaScript
-@import views.html.include.DevMain2
-@import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.DeveloperSession
 @import uk.gov.hmrc.apiplatform.modules.mfa.controllers.profile.routes
 @import uk.gov.hmrc.apiplatform.modules.mfa.models.MfaDetail
-@import java.time.format.DateTimeFormatter;
-@import java.time.LocalDateTime;
+@import uk.gov.hmrc.apiplatform.modules.mfa.utils.MfaDetailHelper.{isAuthAppMfaVerified, isSmsMfaVerified}
+@import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.DeveloperSession
+@import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.views.BackButtonWithJavaScript
+@import views.html.include.DevMain2
+@import uk.gov.hmrc.apiplatform.modules.mfa.views.html.SecurityPreferencesNoItemsView
+@import uk.gov.hmrc.apiplatform.modules.mfa.views.html.SecurityPreferencesItemsView
 
-@this(devMain: DevMain2, securityPreferencesWithMfaView: SecurityPreferencesWithMfaView)
-@(mfaDetails: List[MfaDetail])(implicit request: play.api.mvc.Request[Any], loggedIn: DeveloperSession, appConfig: ApplicationConfig, messages: Messages)
+@this(devMain: DevMain2, itemsView: SecurityPreferencesItemsView, noItemsView :SecurityPreferencesNoItemsView)
+
+@(mfaDetails: List[MfaDetail])( implicit request: play.api.mvc.Request[Any], loggedIn: DeveloperSession, appConfig: ApplicationConfig, messages: Messages)
 
 @devMain(
-  title = "Protected account",
-  userFullName = loggedIn.loggedInName,
-  back = BackButtonWithJavaScript,
-  developerSession = Some(loggedIn)
+    title = "Your security preferences",
+    userFullName = loggedIn.loggedInName,
+    back = BackButtonWithJavaScript,
+    developerSession = Some(loggedIn)
 ) {
 
     <h1 class="govuk-heading-l">Your security preferences</h1>
 
-    if(mfaDetails.nonEmpty){
-    securityPreferencesWithMfaView()
-     }
+    @if(mfaDetails.nonEmpty) {
+        @itemsView(mfaDetails)
+    } else {@noItemsView()}
+
+     @if(isAuthAppMfaVerified(mfaDetails) && !isSmsMfaVerified(mfaDetails)){<p class="govuk-body" id="no-sms-mfa"><a href="#">Get access codes by text message</a></p>}
+    @if(isSmsMfaVerified(mfaDetails) && !isAuthAppMfaVerified(mfaDetails)){<p class="govuk-body" id="no-auth-app-mfa"><a href="@routes.ProtectAccount.getQrCode()">Get access codes by an authenticator app</a></p>}
 
 }

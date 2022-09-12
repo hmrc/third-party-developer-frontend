@@ -22,10 +22,7 @@
 @this()
 @(mfaDetails: List[MfaDetail])()
 
-
-    <h1 class="govuk-heading-l">Your security preferences</h1>
-
-    <p class="govuk-body govuk-!-margin-bottom-6">This is how you get your access codes.</p>
+    <p class="govuk-body govuk-!-margin-bottom-6" id="description">This is how you get your access codes.</p>
     <table class="govuk-table">
         <tbody class="govuk-table__body">
         @for((mfaDetail, idx) <- mfaDetails.zipWithIndex) {
@@ -34,14 +31,12 @@
                 <td class="govuk-table__cell govuk-!-width-one-half" id="nameAndCreatedOn-@{idx}">
                     @if(mfaDetail.name != "AUTHENTICATOR_APP"){
                         @{mfaDetail.name}<br>
-                        }
-                    @{
-                        val dataMigratedOn = LocalDateTime.of(2022,8,1,0,0)
-                        val createdOn = mfaDetail.createdOn
-                        if (createdOn.isAfter(dataMigratedOn)) {
-                                <span class="govuk-hint">Added {DateTimeFormatter.ofPattern("dd MMMM yyyy HH:mm").format(createdOn)}</span>
-                        }
                     }
+
+                    @if(mfaDetail.createdOn.isAfter(LocalDateTime.of(2022,8,1,0,0))) {
+                            <span class="govuk-hint" id="date-hint-@{idx}">Added @DateTimeFormatter.ofPattern("dd MMMM yyyy HH:mm").format(mfaDetail.createdOn)</span>
+                    }
+
                 </td>
                 <td class="govuk-table__cell" id="removeMfaLink-@{idx}"><a id="submit" type="submit" href="@routes.ProtectAccount.get2SVRemovalByIdAccessCodePage(mfaDetail.id)">Remove</a></td>
             </tr>

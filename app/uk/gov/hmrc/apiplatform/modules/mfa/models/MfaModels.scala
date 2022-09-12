@@ -43,6 +43,11 @@ object MfaType extends Enum[MfaType] with PlayJsonEnum[MfaType] {
   case object AUTHENTICATOR_APP extends MfaType {
     override def asText: String = "Authenticator App"
   }
+
+  case object SMS extends MfaType {
+    override def asText: String = "Sms Text"
+  }
+
 }
 
 sealed trait MfaDetail {
@@ -60,12 +65,22 @@ case class AuthenticatorAppMfaDetailSummary(override val id: MfaId,
   override val mfaType: MfaType = MfaType.AUTHENTICATOR_APP
 }
 
+case class SmsMfaDetailSummary(override val id: MfaId = MfaId.random,
+                               override val name: String,
+                               override val createdOn: LocalDateTime,
+                               mobileNumber: String,
+                               verified: Boolean = false) extends MfaDetail {
+  override val mfaType: MfaType = MfaType.SMS
+}
+
 object MfaDetailFormats {
 
   implicit val authenticatorAppMfaDetailFormat: OFormat[AuthenticatorAppMfaDetailSummary] = Json.format[AuthenticatorAppMfaDetailSummary]
+  implicit val smsMfaDetailSummaryFormat: OFormat[SmsMfaDetailSummary] = Json.format[SmsMfaDetailSummary]
 
   implicit val mfaDetailFormat: OFormat[MfaDetail] = Union.from[MfaDetail]("mfaType")
     .and[AuthenticatorAppMfaDetailSummary](MfaType.AUTHENTICATOR_APP.toString)
+    .and[SmsMfaDetailSummary](MfaType.SMS.toString)
     .format
 
 }
