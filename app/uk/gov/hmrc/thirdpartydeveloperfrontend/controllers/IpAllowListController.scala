@@ -28,7 +28,7 @@ import play.api.libs.crypto.CookieSigner
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents, Result}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.service._
 import uk.gov.hmrc.http.ForbiddenException
-import uk.gov.hmrc.play.bootstrap.controller.WithDefaultFormBinding
+import uk.gov.hmrc.play.bootstrap.controller.WithUnsafeDefaultFormBinding
 import views.html.ipAllowlist._
 
 import scala.concurrent.Future.successful
@@ -55,7 +55,7 @@ class IpAllowListController @Inject()(
     removeIpAllowlistSuccessView: RemoveIpAllowlistSuccessView,
     removeCidrBlockView: RemoveCidrBlockView
 )(implicit val ec: ExecutionContext, val appConfig: ApplicationConfig)
-    extends ApplicationController(mcc) with WithDefaultFormBinding {
+    extends ApplicationController(mcc) with WithUnsafeDefaultFormBinding {
 
   private def canViewIpAllowlistAction(applicationId: ApplicationId)(fun: ApplicationRequest[AnyContent] => Future[Result]): Action[AnyContent] =
     checkActionForApprovedApps(SupportsIpAllowlist, TeamMembersOnly)(applicationId)(fun)
