@@ -32,7 +32,6 @@ case class ChangeResponsibleIndividualToSelf(instigator: UserId, timestamp: Loca
 case class ChangeResponsibleIndividualToOther(code: String, timestamp: LocalDateTime) extends ApplicationUpdate
 case class VerifyResponsibleIndividual(instigator: UserId, timestamp: LocalDateTime, requesterName: String, riName: String, riEmail: String) extends ApplicationUpdate
 case class DeclineResponsibleIndividual(code: String, timestamp: LocalDateTime) extends ApplicationUpdate
-case class DeclineApplicationApprovalRequest(requestedBy: String, reasons: String, timestamp: LocalDateTime) extends ApplicationUpdate
 
 trait ApplicationUpdateFormatters {
   implicit val changePrivacyPolicyLocationFormatter = Json.format[ChangeProductionApplicationPrivacyPolicyLocation]
@@ -41,7 +40,6 @@ trait ApplicationUpdateFormatters {
   implicit val changeResponsibleIndividualToOtherFormatter = Json.format[ChangeResponsibleIndividualToOther]
   implicit val verifyResponsibleIndividualFormatter = Json.format[VerifyResponsibleIndividual]
   implicit val declineResponsibleIndividualFormatter = Json.format[DeclineResponsibleIndividual]
-  implicit val declineApplicationApprovalRequestFormatter = Json.format[DeclineApplicationApprovalRequest]
 
   implicit val applicationUpdateRequestFormatter = Union.from[ApplicationUpdate]("updateType")
     .and[ChangeProductionApplicationPrivacyPolicyLocation]("changeProductionApplicationPrivacyPolicyLocation")
@@ -50,6 +48,5 @@ trait ApplicationUpdateFormatters {
     .and[ChangeResponsibleIndividualToOther]("changeResponsibleIndividualToOther")
     .and[VerifyResponsibleIndividual]("verifyResponsibleIndividual")
     .and[DeclineResponsibleIndividual]("declineResponsibleIndividual")
-    .and[DeclineApplicationApprovalRequest]("declineApplicationApprovalRequest")
     .format
 }

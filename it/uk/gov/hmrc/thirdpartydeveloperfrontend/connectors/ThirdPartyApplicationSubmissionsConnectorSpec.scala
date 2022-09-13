@@ -341,40 +341,4 @@ class ThirdPartyApplicationSubmissionsConnectorSpec
       result.value shouldBe riVerification
     }
   }
-
-  "responsibleIndividualDecline" should {
-    val url = "/approvals/responsible-individual-decline"
-
-    "return OK with and return the riVerification" in new Setup {
-      stubFor(
-        post(urlEqualTo(url))
-        .withJsonRequestBody(ResponsibleIndividualVerificationRequest(code))
-        .willReturn(
-          aResponse()
-            .withStatus(OK)
-            .withJsonBody(riVerification)
-        )
-      )
-
-      val result = await(connector.responsibleIndividualDecline(code))
-
-      result shouldBe 'Right
-      result.right.get shouldBe riVerification
-    }
-
-    "return with a BAD_REQUEST error" in new Setup {
-      stubFor(
-        post(urlEqualTo(url))
-        .withJsonRequestBody(ResponsibleIndividualVerificationRequest(code))
-        .willReturn(
-          aResponse()
-            .withStatus(BAD_REQUEST)
-        )
-      )
-
-      intercept[RuntimeException] {
-        await(connector.responsibleIndividualDecline(code))
-      }
-    }
-  }
 }
