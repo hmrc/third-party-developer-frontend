@@ -81,7 +81,7 @@ object DeveloperStub extends ComponentTestDeveloperBuilder {
   }
 
 
-  def setupGettingDeveloperByEmail(developer: Developer): Unit = {
+  def setupGettingDeveloperByUserId(developer: Developer): Unit = {
     stubFor(get(urlPathEqualTo("/developer"))
       .withQueryParam("developerId", equalTo(developer.userId.asText))
       .willReturn(aResponse()

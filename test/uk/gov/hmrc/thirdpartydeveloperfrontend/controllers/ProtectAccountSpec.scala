@@ -53,7 +53,7 @@ class ProtectAccountSpec extends BaseControllerSpec with WithCSRFAddToken with D
     val secret = "ABCDEFGH"
     val issuer = "HMRC Developer Hub"
     val sessionId = "sessionId"
-    val mfaId = verifiedAuthenticatorAppMfaDetails.id
+    val mfaId = verifiedAuthenticatorAppMfaDetail.id
     val loggedInDeveloper = buildDeveloper()
     val qrImage = "qrImage"
     val otpUri = new URI("OTPURI")
@@ -109,7 +109,7 @@ class ProtectAccountSpec extends BaseControllerSpec with WithCSRFAddToken with D
   trait SetupProtectedAccount extends Setup {
     when(underTest.thirdPartyDeveloperConnector.fetchDeveloper(eqTo(loggedInDeveloper.userId))(*))
       .thenReturn(successful(Some(
-        buildDeveloper(emailAddress = loggedInDeveloper.email, organisation = None, mfaDetails = List(verifiedAuthenticatorAppMfaDetails))))
+        buildDeveloper(emailAddress = loggedInDeveloper.email, organisation = None, mfaDetails = List(verifiedAuthenticatorAppMfaDetail))))
       )
   }
 

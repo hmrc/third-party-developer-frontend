@@ -40,27 +40,28 @@ class MfaSteps extends ScalaDsl with EN with Matchers with NavigationSugar with 
   implicit val webDriver: WebDriver = Env.driver
 
   private val accessCode = "123456"
+  private val mfaId = authenticatorAppMfaDetails.id
   private val deviceCookieName = "DEVICE_SESS_ID"
   private val deviceCookieValue = "a6b5b0cca96fef5ffc66edffd514a9239b46b4e869fc10f6-9193-42b4-97f2-87886c972ad4"
 
 
   When("""^I enter the correct access code during 2SVSetup with mfaMandated '(.*)'$""") { (mfaMandated: String) =>
     val isMfaMandated = java.lang.Boolean.parseBoolean(mfaMandated)
-    MfaStub.stubAuthenticateTotpSuccess()
+    MfaStub.stubAuthenticateTotpSuccess(mfaId)
     MfaStub.stubUpliftAuthSession(isMfaMandated)
     Setup2svEnterAccessCodePage.enterAccessCode(accessCode)
     Setup2svEnterAccessCodePage.clickContinue()
   }
 
   When("""^I enter the correct access code during remove2SV then click continue$""") {
-    MfaStub.stubAuthenticateTotpSuccess()
+    MfaStub.stubAuthenticateTotpSuccess(mfaId)
     MfaRemovePage.enterAccessCode(accessCode)
     MfaRemovePage.clickContinue()
   }
 
 
   When("""^I enter the correct access code and click remember me for 7 days then click continue$""") {
-     MfaStub.stubAuthenticateTotpSuccess()
+    MfaStub.stubAuthenticateTotpSuccess(mfaId)
     Login2svEnterAccessCodePage.enterAccessCode(accessCode, rememberMe = true)
     DeviceSessionStub.createDeviceSession(staticUserId, CREATED)
     Login2svEnterAccessCodePage.clickContinue()
@@ -68,7 +69,7 @@ class MfaSteps extends ScalaDsl with EN with Matchers with NavigationSugar with 
   }
 
   When("""^I enter the correct access code and do NOT click remember me for 7 days then click continue$""") {
-    MfaStub.stubAuthenticateTotpSuccess()
+    MfaStub.stubAuthenticateTotpSuccess(mfaId)
     Login2svEnterAccessCodePage.enterAccessCode(accessCode)
     Login2svEnterAccessCodePage.clickContinue()
   }
@@ -115,7 +116,6 @@ class MfaSteps extends ScalaDsl with EN with Matchers with NavigationSugar with 
   def setUpDeveloperStub(developer: Developer, password: String, deviceSessionId: Option[UUID], deviceSessionFound: Boolean) ={
     webDriver.manage().deleteAllCookies()
     val mfaEnabled = MfaDetailHelper.isAuthAppMfaVerified(developer.mfaDetails)
-    val mfaId = developer.mfaDetails.head.id
     val accessCodeRequired = deviceSessionId.isEmpty && mfaEnabled
 
     TestContext.sessionIdForloggedInDeveloper =
@@ -128,14 +128,16 @@ class MfaSteps extends ScalaDsl with EN with Matchers with NavigationSugar with 
       case None => ()
     }
 
-    MfaStub.stubRemoveMfaById(developer, authenticatorAppMfaDetails.id)
-    MfaStub.setupVerificationOfAccessCode(developer, mfaId)
+    if (mfaEnabled) {
+      MfaStub.stubRemoveMfaById(developer, mfaId)
+      MfaStub.setupVerificationOfAccessCode(developer, mfaId)
+    }
     DeveloperStub.findUserIdByEmailAddress(developer.email)
     Stubs.setupPostRequest("/check-password", NO_CONTENT)
 
     TestContext.developer = developer
 
-    DeveloperStub.setupGettingDeveloperByEmail(developer)
+    DeveloperStub.setupGettingDeveloperByUserId(developer)
 
     DeveloperStub.setUpGetCombinedApis()
   }

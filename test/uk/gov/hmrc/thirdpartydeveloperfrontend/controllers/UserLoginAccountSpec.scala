@@ -17,7 +17,7 @@
 package uk.gov.hmrc.thirdpartydeveloperfrontend.controllers
 
 import java.util.UUID
-import uk.gov.hmrc.thirdpartydeveloperfrontend.builder.DeveloperBuilder
+import uk.gov.hmrc.thirdpartydeveloperfrontend.builder.{DeveloperBuilder, MfaDetailBuilder}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.config.ErrorHandler
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.connectors.{TicketCreated, UserAuthenticationResponse}
@@ -41,13 +41,18 @@ import views.html.UserDidNotAdd2SVView
 import views.html.Add2SVView
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.LocalUserIdTracker
 import _root_.uk.gov.hmrc.thirdpartydeveloperfrontend.mocks.connectors.{ThirdPartyDeveloperConnectorMockModule, ThirdPartyDeveloperMfaConnectorMockModule}
+import uk.gov.hmrc.apiplatform.modules.mfa.models.MfaId
 import uk.gov.hmrc.apiplatform.modules.mfa.service.MfaMandateService
 import uk.gov.hmrc.thirdpartydeveloperfrontend.security.CookieEncoding
 
-class UserLoginAccountSpec extends BaseControllerSpec with WithCSRFAddToken with DeveloperBuilder with LocalUserIdTracker with CookieEncoding {
+
+class UserLoginAccountSpec extends BaseControllerSpec with WithCSRFAddToken
+  with DeveloperBuilder with LocalUserIdTracker with CookieEncoding with MfaDetailBuilder {
+
   trait Setup extends SessionServiceMock with ThirdPartyDeveloperConnectorMockModule with ThirdPartyDeveloperMfaConnectorMockModule {
 
-    val developer = buildDeveloper()
+    val developer = buildDeveloper(mfaDetails = List(verifiedAuthenticatorAppMfaDetail))
+    val mfaId = verifiedAuthenticatorAppMfaDetail.id
     val session = Session(UUID.randomUUID().toString, developer, LoggedInState.LOGGED_IN)
     val user = DeveloperSession(session)
     val emailFieldName: String = "emailaddress"
@@ -74,9 +79,11 @@ class UserLoginAccountSpec extends BaseControllerSpec with WithCSRFAddToken with
     val userDidNotAdd2SVView = app.injector.instanceOf[UserDidNotAdd2SVView]
     val add2SVView = app.injector.instanceOf[Add2SVView]
 
+    val errorHandler = app.injector.instanceOf[ErrorHandler]
+
     val underTest = new UserLoginAccount(
       mock[AuditService],
-      mock[ErrorHandler],
+      errorHandler,
       mock[ApplicationService],
       mock[SubscriptionFieldsService],
       TPDMock.aMock,
@@ -105,14 +112,14 @@ class UserLoginAccountSpec extends BaseControllerSpec with WithCSRFAddToken with
                          resultShowAdminMfaMandateMessage: Future[Boolean]): Unit = {
 
       when(underTest.sessionService.authenticate(eqTo(email), eqTo(password), eqTo(Some(deviceSessionId)))(*))
-        .thenReturn(result.map(x => (x, user.developer.userId)) )
+        .thenReturn(result.map(x => (x, user.developer.userId)))
 
       when(underTest.mfaMandateService.showAdminMfaMandatedMessage(*[UserId])(*))
         .thenReturn(resultShowAdminMfaMandateMessage)
     }
 
-    def mockAuthenticateTotp(email: String, totp: String, nonce: String, result: Future[Session]): Unit =
-      when(underTest.sessionService.authenticateTotp(eqTo(email), eqTo(totp), eqTo(nonce))(*))
+    def mockAuthenticateTotp(email: String, totp: String, nonce: String, mfaId: MfaId, result: Future[Session]): Unit =
+      when(underTest.sessionService.authenticateTotp(eqTo(email), eqTo(totp), eqTo(nonce), eqTo(mfaId))(*))
         .thenReturn(result)
 
     def mockLogout(): Unit =
@@ -120,49 +127,124 @@ class UserLoginAccountSpec extends BaseControllerSpec with WithCSRFAddToken with
         .thenReturn(Future.successful(NO_CONTENT))
 
     when(underTest.sessionService.authenticate(*, *, *)(*)).thenReturn(failed(new InvalidCredentials))
-    when(underTest.sessionService.authenticateTotp(*, *, *)(*)).thenReturn(failed(new InvalidCredentials))
+    when(underTest.sessionService.authenticateTotp(*, *, *, *[MfaId])(*)).thenReturn(failed(new InvalidCredentials))
 
     def mockAudit(auditAction: AuditAction, result: Future[AuditResult]): Unit =
       when(underTest.auditService.audit(eqTo(auditAction), eqTo(Map.empty))(*)).thenReturn(result)
   }
 
-  trait SetupWithUserAuthenticationResponse extends Setup {
-    val userAuthenticationResponse = UserAuthenticationResponse(accessCodeRequired = false, mfaEnabled = false, session = Some(session))
+  trait SetupWithUserAuthRespRequiringMfaAndMfaEnabled extends Setup {
+    val userAuthRespNotRequiringMfaAndMfaEnabled = UserAuthenticationResponse(accessCodeRequired = false, mfaEnabled = true, session = Some(session))
   }
 
-  trait SetupWithuserAuthenticationResponseWithMfaEnablementRequired extends Setup {
+  trait SetupWithUserAuthRespNotRequiringMfa extends Setup {
+    val userAuthRespNotRequiringMfa = UserAuthenticationResponse(accessCodeRequired = false, mfaEnabled = false, session = Some(session))
+
+    def testWhenMfaMandatedIs(mfaMandated: Boolean) = {
+      mockAuthenticate(user.email, userPassword, successful(userAuthRespNotRequiringMfa), resultShowAdminMfaMandateMessage = successful(mfaMandated))
+      mockAudit(LoginSucceeded, successful(AuditResult.Success))
+
+      val request = FakeRequest()
+        .withCookies(deviceSessionCookie)
+        .withSession(sessionParams: _*)
+        .withFormUrlEncodedBody((emailFieldName, user.email), (passwordFieldName, userPassword))
+
+      val result = underTest.authenticate()(request)
+
+      status(result) shouldBe SEE_OTHER
+
+      redirectLocation(result) shouldBe Some(routes.UserLoginAccount.get2svRecommendationPage.url)
+
+      verify(underTest.auditService, times(1)).audit(
+        eqTo(LoginSucceeded), eqTo(Map("developerEmail" -> user.email, "developerFullName" -> user.displayedName)))(*)
+    }
+  }
+
+  trait SetupWithUserAuthResRequiringMfaEnablement extends Setup {
     val sessionPartLoggedInEnablingMfa = Session(UUID.randomUUID().toString, developer, LoggedInState.PART_LOGGED_IN_ENABLING_MFA)
 
-    val userAuthenticationResponseWithMfaEnablementRequired = UserAuthenticationResponse(
-        accessCodeRequired = false,
-        mfaEnabled = false,
-        nonce = None,
-        session = Some(sessionPartLoggedInEnablingMfa))
+    val userAuthRespRequiringMfaEnablement = UserAuthenticationResponse(
+      accessCodeRequired = false,
+      mfaEnabled = false,
+      session = Some(sessionPartLoggedInEnablingMfa))
   }
 
-  trait SetupWithuserAuthenticationWith2SVResponse extends Setup {
-    val userAuthenticationWith2SVResponse = UserAuthenticationResponse(
+  trait SetupWithUserAuthRespRequiringMfaAccessCode extends Setup {
+    val userAuthRespRequiringMfaAccessCode = UserAuthenticationResponse(
       accessCodeRequired = true,
       mfaEnabled = true,
       nonce = Some(nonce),
       session = None)
   }
 
+  trait SetupWithUserAuthRespWithInconsistentState extends Setup {
+    val userAuthRespWithInconsistentState = UserAuthenticationResponse(
+      accessCodeRequired = true, // should be false if we already have a login session
+      mfaEnabled = true,
+      session = Some(session))
+  }
+
   trait PartLogged extends Setup {
     def loggedInState: LoggedInState = LoggedInState.PART_LOGGED_IN_ENABLING_MFA
+
     fetchSessionByIdReturns(sessionId, Session(sessionId, loggedInDeveloper, loggedInState))
   }
 
   trait LoggedIn extends Setup {
     def loggedInState: LoggedInState = LoggedInState.LOGGED_IN
+
     fetchSessionByIdReturns(sessionId, Session(sessionId, loggedInDeveloper, loggedInState))
   }
-  
-  "authenticate" should {
 
-    "display the 2-step verification code page when logging in with 2SV configured" in new SetupWithuserAuthenticationWith2SVResponse {
-      mockAuthenticate(user.developer.email, userPassword, successful(userAuthenticationWith2SVResponse), successful(false))
+  "authenticate with username and password" should {
+
+    "display list applications page after successfully logging in with MFA enabled but access code not required" in new SetupWithUserAuthRespRequiringMfaAndMfaEnabled {
+      mockAuthenticate(user.email, userPassword, successful(userAuthRespNotRequiringMfaAndMfaEnabled), successful(false))
       mockAudit(LoginSucceeded, successful(AuditResult.Success))
+
+      private val request = FakeRequest()
+        .withCookies(deviceSessionCookie)
+        .withSession(sessionParams: _*)
+        .withFormUrlEncodedBody((emailFieldName, user.email), (passwordFieldName, userPassword))
+
+      private val result = underTest.authenticate()(request)
+
+      status(result) shouldBe SEE_OTHER
+
+      redirectLocation(result) shouldBe Some(routes.ManageApplications.manageApps().url)
+
+      verify(underTest.auditService, times(1)).audit(
+        eqTo(LoginSucceeded), eqTo(Map("developerEmail" -> user.email, "developerFullName" -> user.displayedName)))(*)
+    }
+
+    "display the MFA recommendation page after successfully logging in with MFA not enabled but mandated" in new SetupWithUserAuthRespNotRequiringMfa {
+      testWhenMfaMandatedIs(true)
+    }
+
+    "display the MFA recommendation page after successfully logging in with MFA not enabled and not mandated" in new SetupWithUserAuthRespNotRequiringMfa {
+      testWhenMfaMandatedIs(false)
+    }
+
+    "display the 2-step protect account page after successfully logging in with MFA not enabled but mandated" in new SetupWithUserAuthResRequiringMfaEnablement {
+      mockAuthenticate(user.email, userPassword, successful(userAuthRespRequiringMfaEnablement), resultShowAdminMfaMandateMessage = successful(true))
+      mockAudit(LoginSucceeded, successful(AuditResult.Success))
+
+      private val request = FakeRequest()
+        .withCookies(deviceSessionCookie)
+        .withSession(sessionParams: _*)
+        .withFormUrlEncodedBody((emailFieldName, user.email), (passwordFieldName, userPassword))
+
+      private val result = underTest.authenticate()(request)
+
+      status(result) shouldBe SEE_OTHER
+
+      redirectLocation(result) shouldBe Some(uk.gov.hmrc.apiplatform.modules.mfa.controllers.profile.routes.ProtectAccount.getProtectAccount().url)
+    }
+
+    "display the enter access code page after successfully logging in with MFA configured" in new SetupWithUserAuthRespRequiringMfaAccessCode {
+      mockAuthenticate(user.developer.email, userPassword, successful(userAuthRespRequiringMfaAccessCode), successful(false))
+      mockAudit(LoginSucceeded, successful(AuditResult.Success))
+      TPDMock.FetchDeveloper.thenReturn(user.developer.userId)(Some(developer))
 
       private val request = FakeRequest()
         .withCookies(deviceSessionCookie)
@@ -171,75 +253,38 @@ class UserLoginAccountSpec extends BaseControllerSpec with WithCSRFAddToken with
 
       private val result = addToken(underTest.authenticate())(request)
 
-      redirectLocation(result) shouldBe Some(routes.UserLoginAccount.enterTotp().url)
+      status(result) shouldBe SEE_OTHER
+
+      redirectLocation(result) shouldBe Some(routes.UserLoginAccount.enterTotp(mfaId).url)
     }
 
-    "display the enter access code page" in new SetupWithuserAuthenticationWith2SVResponse {
-      mockAuthenticate(user.email, userPassword, successful(userAuthenticationWith2SVResponse), successful(false))
-      mockAudit(LoginSucceeded, successful(AuditResult.Success))
-
-      private val request = FakeRequest()
-        .withSession(sessionParams: _*)
-
-      private val result = addToken(underTest.enterTotp())(request)
-
-      status(result) shouldBe OK
-
-      contentAsString(result) should include("Enter your access code")
-    }
-
-    "Redirect to the display the Add 2-step Verification suggestion page when successfully logging in without having 2SV configured" in new SetupWithUserAuthenticationResponse {
-      mockAuthenticate(user.email, userPassword, successful(userAuthenticationResponse), successful(true))
-      mockAudit(LoginSucceeded, successful(AuditResult.Success))
+    "display the login page when fetch developer fails" in new SetupWithUserAuthRespRequiringMfaAccessCode {
+      mockAuthenticate(user.developer.email, userPassword, successful(userAuthRespRequiringMfaAccessCode), successful(false))
+      TPDMock.FetchDeveloper.thenReturn(user.developer.userId)(None)
 
       private val request = FakeRequest()
         .withCookies(deviceSessionCookie)
         .withSession(sessionParams: _*)
         .withFormUrlEncodedBody((emailFieldName, user.email), (passwordFieldName, userPassword))
 
-      private val result = underTest.authenticate()(request)
+      private val result = addToken(underTest.authenticate())(request)
 
-      status(result) shouldBe SEE_OTHER
+      status(result) shouldBe INTERNAL_SERVER_ERROR
+      contentAsString(result) should include("Sorry, we’re experiencing technical difficulties")
 
-      redirectLocation(result) shouldBe Some(routes.UserLoginAccount.get2svRecommendationPage.url)
-
-      verify(underTest.auditService, times(1)).audit(
-        eqTo(LoginSucceeded), eqTo(Map("developerEmail" -> user.email, "developerFullName" -> user.displayedName)))(*)
     }
 
-    "display the Add 2-step Verification suggestion page when successfully logging in with not 2SV enabled and not 2SV configured" in new SetupWithUserAuthenticationResponse {
-      mockAuthenticate(user.email, userPassword, successful(userAuthenticationResponse), successful(false))
-      mockAudit(LoginSucceeded, successful(AuditResult.Success))
+    "default case" in new SetupWithUserAuthRespWithInconsistentState {
+      mockAuthenticate(user.developer.email, userPassword, successful(userAuthRespWithInconsistentState), successful(false))
 
       private val request = FakeRequest()
         .withCookies(deviceSessionCookie)
         .withSession(sessionParams: _*)
         .withFormUrlEncodedBody((emailFieldName, user.email), (passwordFieldName, userPassword))
 
-      private val result = underTest.authenticate()(request)
+      private val result = addToken(underTest.authenticate())(request)
 
-      status(result) shouldBe SEE_OTHER
-
-      redirectLocation(result) shouldBe Some(routes.UserLoginAccount.get2svRecommendationPage.url)
-
-      verify(underTest.auditService, times(1)).audit(
-        eqTo(LoginSucceeded), eqTo(Map("developerEmail" -> user.email, "developerFullName" -> user.displayedName)))(*)
-    }
-
-    "display the 2-step protect account page when successfully logging in without having 2SV configured and is 2SV mandated" in new SetupWithuserAuthenticationResponseWithMfaEnablementRequired {
-      mockAuthenticate(user.email, userPassword, successful(userAuthenticationResponseWithMfaEnablementRequired), successful(true))
-      mockAudit(LoginSucceeded, successful(AuditResult.Success))
-
-      private val request = FakeRequest()
-        .withCookies(deviceSessionCookie)
-        .withSession(sessionParams: _*)
-        .withFormUrlEncodedBody((emailFieldName, user.email), (passwordFieldName, userPassword))
-
-      private val result = underTest.authenticate()(request)
-
-      status(result) shouldBe SEE_OTHER
-
-      redirectLocation(result) shouldBe Some("/developer/profile/protect-account")
+      status(result) shouldBe INTERNAL_SERVER_ERROR
     }
 
     "return the login page when the password is incorrect" in new Setup {
@@ -302,20 +347,36 @@ class UserLoginAccountSpec extends BaseControllerSpec with WithCSRFAddToken with
     }
   }
 
+  "enterTotp" should {
+    "display the enter access code page" in new SetupWithUserAuthRespRequiringMfaAccessCode {
+      mockAuthenticate(user.email, userPassword, successful(userAuthRespRequiringMfaAccessCode), successful(false))
+      mockAudit(LoginSucceeded, successful(AuditResult.Success))
+
+      private val request = FakeRequest()
+        .withSession(sessionParams: _*)
+
+      private val result = addToken(underTest.enterTotp(mfaId))(request)
+
+      status(result) shouldBe OK
+
+      contentAsString(result) should include("Enter your access code")
+    }
+  }
+
   "authenticateTotp" should {
 
     "return the manage Applications page when the credentials are correct" in new Setup {
-      mockAuthenticateTotp(user.email, totp, nonce, successful(session))
+      mockAuthenticateTotp(user.email, totp, nonce, mfaId, successful(session))
       mockAudit(LoginSucceeded, successful(AuditResult.Success))
 
       private val request = FakeRequest()
         .withSession(sessionParams :+ "emailAddress" -> user.email :+ "nonce" -> nonce: _*)
         .withFormUrlEncodedBody(("accessCode", totp))
 
-      private val result = underTest.authenticateTotp()(request)
+      private val result = underTest.authenticateTotp(mfaId)(request)
 
       status(result) shouldBe SEE_OTHER
-      redirectLocation(result) shouldBe Some("/developer/applications")
+      redirectLocation(result) shouldBe Some(routes.ManageApplications.manageApps().url)
       verify(underTest.auditService, times(1)).audit(
         eqTo(LoginSucceeded), eqTo(Map("developerEmail" -> user.email, "developerFullName" -> user.displayedName)))(*)
     }
@@ -325,7 +386,7 @@ class UserLoginAccountSpec extends BaseControllerSpec with WithCSRFAddToken with
         .withSession(sessionParams :+ "emailAddress" -> user.email :+ "nonce" -> nonce: _*)
         .withFormUrlEncodedBody(("accessCode", "654321"))
 
-      private val result =  addToken(underTest.authenticateTotp())(request)
+      private val result =  addToken(underTest.authenticateTotp(mfaId))(request)
 
       status(result) shouldBe UNAUTHORIZED
       contentAsString(result) should include("You have entered an incorrect access code")
@@ -368,7 +429,7 @@ class UserLoginAccountSpec extends BaseControllerSpec with WithCSRFAddToken with
 
       val userId = UserId.random
       TPDMock.FindUserId.thenReturn(user.email)(userId)
-      TPDMock.FetchDeveloper.thenReturn(userId)(developer)
+      TPDMock.FetchDeveloper.thenReturn(userId)(Some(developer))
       when(underTest.applicationService.request2SVRemoval(*, eqTo(user.email))(*))
         .thenReturn(Future.successful(TicketCreated))
 
@@ -393,9 +454,9 @@ class UserLoginAccountSpec extends BaseControllerSpec with WithCSRFAddToken with
     }
   }
 
-  "login" should {
-    "show the sign-in page" when {
-      "Not logged in" in new Setup {
+  "login" when {
+    "not logged in" should {
+      "show the sign-in page" in new Setup {
         private val request = FakeRequest()
 
         private val result = addToken(underTest.login())(request)
@@ -403,8 +464,10 @@ class UserLoginAccountSpec extends BaseControllerSpec with WithCSRFAddToken with
         status(result) shouldBe OK
         contentAsString(result) should include("Sign in")
       }
+    }
 
-      "Part logged in" in new SetupWithuserAuthenticationResponseWithMfaEnablementRequired {
+    "partially logged in" should {
+      "show the sign-in page" in new SetupWithUserAuthResRequiringMfaEnablement {
         when(underTest.sessionService.fetch(eqTo(sessionPartLoggedInEnablingMfa.sessionId))(*))
           .thenReturn(Future.successful(Some(sessionPartLoggedInEnablingMfa)))
 
@@ -419,8 +482,8 @@ class UserLoginAccountSpec extends BaseControllerSpec with WithCSRFAddToken with
       }
     }
 
-    "Redirect to the XXX page" when {
-      "already logged in" in new Setup {
+    "already logged in" should {
+      "show the list applications page" in new Setup {
         when(underTest.sessionService.fetch(eqTo(session.sessionId))(*))
           .thenReturn(Future.successful(Some(session)))
 
@@ -431,36 +494,36 @@ class UserLoginAccountSpec extends BaseControllerSpec with WithCSRFAddToken with
         private val result = addToken(underTest.login())(loggedInRequest)
 
         status(result) shouldBe SEE_OTHER
-        redirectLocation(result) shouldBe Some("/developer/applications")
+        redirectLocation(result) shouldBe Some(routes.ManageApplications.manageApps().url)
+      }
+    }
+  }
+
+  "get2svRecommendationPage" when {
+    "a user for whom MFA will be mandated in the future logs in" should {
+      "show the MFA recommendation with 10 days warning as daysTillAdminMfaMandate is configured" in new LoggedIn {
+        when(underTest.mfaMandateService.showAdminMfaMandatedMessage(*[UserId])(*))
+          .thenReturn(Future.successful(true))
+
+        private val daysInTheFuture = 10
+        when(underTest.mfaMandateService.daysTillAdminMfaMandate)
+          .thenReturn(Some(daysInTheFuture))
+
+        private val request = FakeRequest().withLoggedIn(underTest, implicitly)(sessionId)
+
+        private val result = underTest.get2svRecommendationPage()(request)
+
+        status(result) shouldBe OK
+
+        contentAsString(result) should include("Add 2-step verification")
+        contentAsString(result) should include("If you are the Administrator of an application you have 10 days until 2-step verification is mandatory")
+
+        verify(underTest.mfaMandateService).showAdminMfaMandatedMessage(eqTo(loggedInDeveloper.userId))(*)
       }
     }
 
-    "Given a user with MFA enabled" when {
-      "they have logged in when MFA is mandated in the future" should {
-        "be shown the MFA recommendation with 10 days warning" in new LoggedIn {
-          when(underTest.mfaMandateService.showAdminMfaMandatedMessage(*[UserId])(*))
-            .thenReturn(Future.successful(true))
-
-          private val daysInTheFuture = 10
-          when(underTest.mfaMandateService.daysTillAdminMfaMandate)
-            .thenReturn(Some(daysInTheFuture))
-
-          private val request = FakeRequest().withLoggedIn(underTest, implicitly)(sessionId)
-
-          private val result = underTest.get2svRecommendationPage()(request)
-
-          status(result) shouldBe OK
-
-          contentAsString(result) should include("Add 2-step verification")
-          contentAsString(result) should include("If you are the Administrator of an application you have 10 days until 2-step verification is mandatory")
-
-          verify(underTest.mfaMandateService).showAdminMfaMandatedMessage(eqTo(loggedInDeveloper.userId))(*)
-        }
-      }
-    }
-
-    "they have logged in when MFA is mandated yet" should {
-      "they have logged in when MFA is mandated is not configured" in new LoggedIn {
+    "a user for whom MFA is already mandated logs in" should {
+      "not show MFA recommendation with 10 days warning as daysTillAdminMfaMandate is not configured" in new LoggedIn {
         when(underTest.mfaMandateService.showAdminMfaMandatedMessage(*[UserId])(*))
           .thenReturn(Future.successful(true))
 

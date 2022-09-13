@@ -29,6 +29,8 @@ case class MfaId(value: UUID) extends AnyVal
 
 object MfaId {
   def random: MfaId = MfaId(UUID.randomUUID())
+
+  implicit val mfaIdFormat = Json.valueFormat[MfaId]
 }
 
 sealed trait MfaType extends EnumEntry {
@@ -59,7 +61,6 @@ case class AuthenticatorAppMfaDetailSummary(override val id: MfaId,
 }
 
 object MfaDetailFormats {
-  implicit val mfaIdFormat= Json.valueFormat[MfaId]
 
   implicit val authenticatorAppMfaDetailFormat: OFormat[AuthenticatorAppMfaDetailSummary] = Json.format[AuthenticatorAppMfaDetailSummary]
 

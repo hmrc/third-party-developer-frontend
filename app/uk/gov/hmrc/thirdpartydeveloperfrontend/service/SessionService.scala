@@ -16,6 +16,7 @@
 
 package uk.gov.hmrc.thirdpartydeveloperfrontend.service
 
+import uk.gov.hmrc.apiplatform.modules.mfa.models.MfaId
 import uk.gov.hmrc.apiplatform.modules.mfa.service.MfaMandateService
 import uk.gov.hmrc.thirdpartydeveloperfrontend.connectors.ThirdPartyDeveloperConnector
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.connectors.{LoginRequest, TotpAuthenticationRequest, UserAuthenticationResponse}
@@ -42,8 +43,8 @@ class SessionService @Inject()(val thirdPartyDeveloperConnector: ThirdPartyDevel
     } yield (response, coreUser.id)
   }
 
-  def authenticateTotp(emailAddress: String, totp: String, nonce: String)(implicit hc: HeaderCarrier): Future[Session] = {
-    thirdPartyDeveloperConnector.authenticateTotp(TotpAuthenticationRequest(emailAddress, totp, nonce))
+  def authenticateTotp(emailAddress: String, totp: String, nonce: String, mfaId: MfaId)(implicit hc: HeaderCarrier): Future[Session] = {
+    thirdPartyDeveloperConnector.authenticateTotp(TotpAuthenticationRequest(emailAddress, totp, nonce, mfaId))
   }
 
   def fetch(sessionId: String)(implicit hc: HeaderCarrier): Future[Option[Session]] =

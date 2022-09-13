@@ -36,8 +36,13 @@ import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.UserId
 import uk.gov.hmrc.thirdpartydeveloperfrontend.connectors.ThirdPartyDeveloperConnector.FindUserIdRequest
 import uk.gov.hmrc.thirdpartydeveloperfrontend.connectors.ThirdPartyDeveloperConnector.JsonFormatters.FindUserIdRequestWrites
 import play.api.libs.json.Json
+import uk.gov.hmrc.thirdpartydeveloperfrontend.builder.{DeveloperBuilder, MfaDetailBuilder}
+import uk.gov.hmrc.thirdpartydeveloperfrontend.connectors.stubs.ThirdPartyDeveloperStub.fetchDeveloper
+import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.LocalUserIdTracker
 
-class LoginCSRFIntegrationSpec extends BaseConnectorIntegrationSpec with GuiceOneAppPerSuite with BeforeAndAfterEach {
+class LoginCSRFIntegrationSpec extends BaseConnectorIntegrationSpec with GuiceOneAppPerSuite
+  with BeforeAndAfterEach with DeveloperBuilder with LocalUserIdTracker with MfaDetailBuilder {
+
   private lazy val config = Configuration(
     "play.filters.csrf.token.sign" -> false,
     "microservice.services.third-party-developer.port" -> stubPort,
@@ -81,13 +86,15 @@ class LoginCSRFIntegrationSpec extends BaseConnectorIntegrationSpec with GuiceOn
   }
 
   trait Setup {
-    val userId = UserId.random
     val userEmail = "thirdpartydeveloper@example.com"
+    val userId = idOf(userEmail)
     val userPassword = "password1!"
     val headers = Headers(AUTHORIZATION -> "AUTH_TOKEN")
     val loginRequest = FakeRequest(POST, "/developer/login").withHeaders(headers)
     val loginRequestWithCSRF = new FakeRequest(addCSRFToken(FakeRequest(POST, "/developer/login").withHeaders(headers)))
     val csrftoken = CSRF.getToken(loginRequestWithCSRF)
+    val developer = buildDeveloper(emailAddress = userEmail, mfaDetails = List(verifiedAuthenticatorAppMfaDetail))
+    val mfaId = verifiedAuthenticatorAppMfaDetail.id
   }
 
   "CSRF handling for login" when {
@@ -180,13 +187,14 @@ class LoginCSRFIntegrationSpec extends BaseConnectorIntegrationSpec with GuiceOn
 
         setupThirdPartyDeveloperFindUserIdByEmailAddress(userEmail, userId)
         setupThirdPartyApplicationSearchApplicationByUserIdStub(userId)
+        fetchDeveloper(developer)
 
         private val request = loginRequestWithCSRF.withFormUrlEncodedBody("emailaddress" -> userEmail, "password" -> userPassword, "csrfToken" -> csrftoken.get.value)
 
         private val result = route(app, request).get
 
         status(result) shouldBe SEE_OTHER
-        redirectLocation(result) shouldBe Some(routes.UserLoginAccount.enterTotp().url)
+        redirectLocation(result) shouldBe Some(routes.UserLoginAccount.enterTotp(mfaId).url)
       }
     }
   }
