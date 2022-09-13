@@ -39,7 +39,7 @@ class SecurityPreferencesItemsViewSpec extends CommonViewSpec with WithCSRFAddTo
 
 
     "show 'auth app row' when list contains only auth app mfa details with created on after migration date" in {
-      val mainView = securityPreferencesItemsView.apply(List(authAppMfaDetail))
+      val mainView = securityPreferencesItemsView.render(List(authAppMfaDetail))
      val document = Jsoup.parse(mainView.body)
       document.getElementById("description").text shouldBe "This is how you get your access codes."
       verifyMfaRow(document, authAppMfaDetail, 0, shouldShowCreatedDate = true)

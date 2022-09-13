@@ -34,4 +34,6 @@ object MfaDetailHelper {
     mfaDetails.filter(x => x.mfaType == MfaType.AUTHENTICATOR_APP && x.verified)
       .head.asInstanceOf[AuthenticatorAppMfaDetailSummary]
   }
+
+
 }

@@ -259,6 +259,8 @@ abstract class EndpointScenarioSpec extends AsyncHmrcSpec with GuiceOneAppPerSui
       case Endpoint(_,      "/developer/profile/email-preferences/topics-from-subscriptions") => Map("context" -> applicationId.value)
       case Endpoint(_,      "/developer/profile/email-preferences/apis-from-subscriptions") => Map("context" -> applicationId.value)
       case Endpoint("POST", "/developer/profile/email-preferences/no-apis-from-subscriptions") => Map("context" -> applicationId.value)
+      case Endpoint("GET",  "/developer/profile/security-preferences/auth-app/access-code") => Map("mfaId" -> mfaId.value.toString)
+      case Endpoint("POST", "/developer/profile/security-preferences/auth-app/enable") => Map("mfaId" -> mfaId.value.toString)
 
       case _ => Map.empty
     }
@@ -334,6 +336,7 @@ abstract class EndpointScenarioSpec extends AsyncHmrcSpec with GuiceOneAppPerSui
       case Endpoint("POST", "/developer/submissions/:sid/question/:qid") => Map("submit-action" -> "acknowledgement")
       case Endpoint("POST", "/developer/submissions/:sid/question/:qid/update") => Map("submit-action" -> "acknowledgement")
       case Endpoint("POST", "/developer/submissions/application/:aid/cancel-request") => Map("submit-action" -> "cancel-request")
+      case Endpoint("POST", "/developer/profile/security-preferences/auth-app/enable") => Map("accessCode" -> "123456")
       case _ => Map.empty
     }
   }
@@ -418,6 +421,7 @@ abstract class EndpointScenarioSpec extends AsyncHmrcSpec with GuiceOneAppPerSui
       case Endpoint("POST", "/developer/profile/email-preferences/categories") => Redirect(s"/developer/profile/email-preferences/apis?category=${category}")
       case Endpoint("POST", "/developer/submissions/:sid/question/:qid") => Redirect(s"/developer/submissions/application/${applicationId.value}/production-credentials-checklist")
       case Endpoint("POST", "/developer/submissions/:sid/question/:qid/update") => Redirect(s"/developer/submissions/application/${applicationId.value}/check-answers")
+      case Endpoint("POST", "/developer/profile/security-preferences/auth-app/enable") => Redirect(s"/developer/profile/security-preferences/auth-app/setup/complete")
       case _ => Success()
     }
   }
