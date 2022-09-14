@@ -113,10 +113,10 @@
                               <div class="slider">
                                 <fieldset id="@apiLabel-toggle" aria-live="assertive">
                                     <div class="slider__radios slider__radios--font-fix">
-                                      <input class="slider__on" id="@apiLabel-on" name="@apiLabel-subscribed" type="radio" value="true" aria-label="You have now subscribed to @apiVersionFullName" @if(api.subscribed) {checked} else {}>
-                                      <label class="govuk-label govuk-radios__label slider__on--label" for="@apiLabel-on" aria-label="@if(api.subscribed){You are subscribed to @apiVersionFullName} else {You are not subscribed to @apiVersionFullName}">Yes</label>
-                                      <input class="slider__off" id="@apiLabel-off" name="@apiLabel-subscribed" type="radio" value="false" aria-label="You have now unsubscribed to @apiVersionFullName" @if(!api.subscribed) {checked} else {}>
-                                      <label class="govuk-label govuk-radios__label slider__off--label" for="@apiLabel-off" aria-label="@if(api.subscribed){Select to unsubscribe} else {Unsubscribed}">No</label>
+                                      <input class="slider__on" id="@apiLabel-on" name="@apiLabel-subscribed" type="radio" value="true">
+                                      <label class="govuk-label govuk-radios__label slider__on--label" for="@apiLabel-on">Yes</label>
+                                      <input class="slider__off" id="@apiLabel-off" name="@apiLabel-subscribed" type="radio" value="false">
+                                      <label class="govuk-label govuk-radios__label slider__off--label" for="@apiLabel-off">No</label>
                                     </div>
                                   </fieldset>
                                 </div>
