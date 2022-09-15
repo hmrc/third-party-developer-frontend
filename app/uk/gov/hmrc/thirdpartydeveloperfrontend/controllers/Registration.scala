@@ -31,7 +31,7 @@ import views.html._
 import scala.concurrent.{ExecutionContext, Future}
 import scala.util.control.NonFatal
 import uk.gov.hmrc.apiplatform.modules.common.services.ApplicationLogger
-import uk.gov.hmrc.play.bootstrap.controller.WithDefaultFormBinding
+import uk.gov.hmrc.play.bootstrap.controller.WithUnsafeDefaultFormBinding
 
 @Singleton
 class Registration @Inject()(override val sessionService: SessionService,
@@ -47,7 +47,7 @@ class Registration @Inject()(override val sessionService: SessionService,
                              resendConfirmationView: ResendConfirmationView
                              )
                             (implicit val ec: ExecutionContext, val appConfig: ApplicationConfig)
-  extends LoggedOutController(mcc) with ApplicationLogger with WithDefaultFormBinding {
+  extends LoggedOutController(mcc) with ApplicationLogger with WithUnsafeDefaultFormBinding {
 
   import ErrorFormBuilder.GlobalError
   import play.api.data._

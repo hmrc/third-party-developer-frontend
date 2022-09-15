@@ -26,7 +26,7 @@ import javax.inject.{Inject, Singleton}
 import play.api.data.Form
 import play.api.libs.crypto.CookieSigner
 import play.api.mvc.{AnyContent, MessagesControllerComponents, Result}
-import uk.gov.hmrc.play.bootstrap.controller.WithDefaultFormBinding
+import uk.gov.hmrc.play.bootstrap.controller.WithUnsafeDefaultFormBinding
 import uk.gov.hmrc.thirdpartydeveloperfrontend.service._
 import views.html._
 
@@ -47,7 +47,7 @@ class DeleteApplication @Inject() (
     deleteSubordinateApplicationCompleteView: DeleteSubordinateApplicationCompleteView
 )(implicit val ec: ExecutionContext, val appConfig: ApplicationConfig)
     extends ApplicationController(mcc)
-    with WithDefaultFormBinding {
+    with WithUnsafeDefaultFormBinding {
 
   private def canDeleteApplicationAction(applicationId: ApplicationId)(fun: ApplicationRequest[AnyContent] => Future[Result]) =
     checkActionForApprovedApps(SupportsDeletion, AdministratorOnly)(applicationId)(fun)

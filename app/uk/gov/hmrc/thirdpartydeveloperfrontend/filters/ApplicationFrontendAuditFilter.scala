@@ -21,19 +21,21 @@ import javax.inject.{Inject, Named}
 import play.api.Configuration
 import uk.gov.hmrc.play.audit.http.connector.AuditConnector
 import uk.gov.hmrc.play.bootstrap.config.{ControllerConfigs, HttpAuditEvent}
-import uk.gov.hmrc.play.bootstrap.frontend.filters.DefaultFrontendAuditFilter
+import uk.gov.hmrc.play.bootstrap.frontend.filters.{DefaultFrontendAuditFilter, RequestHeaderAuditing}
 
 import scala.concurrent.ExecutionContext
 
 class ApplicationFrontendAuditFilter @Inject()(
-                                            val configuration: Configuration,
-                                            controllerConfigs: ControllerConfigs,
-                                            override val auditConnector: AuditConnector,
-                                            auditEvent: HttpAuditEvent,
-                                            override val mat: Materializer,
-                                            @Named("appName") appName: String
-                                          )(override implicit val ec: ExecutionContext)
-  extends DefaultFrontendAuditFilter(configuration, controllerConfigs, auditConnector, auditEvent, mat) {
+  val configuration: Configuration,
+  controllerConfigs: ControllerConfigs,
+  override val auditConnector: AuditConnector,
+  auditEvent: HttpAuditEvent,
+  override val mat: Materializer,
+  @Named("appName") appName: String,
+  requestHeaderAuditing: RequestHeaderAuditing
+)(
+  override implicit val ec: ExecutionContext
+) extends DefaultFrontendAuditFilter(configuration, controllerConfigs, auditConnector, auditEvent, requestHeaderAuditing, mat) {
 
   override def controllerNeedsAuditing(controllerName: String): Boolean =
     controllerConfigs.get(controllerName).auditing

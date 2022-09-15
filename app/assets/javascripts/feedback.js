@@ -7,6 +7,7 @@
     feedbackDiv.style.display = "block";
     feedbackButton.setAttribute("aria-expanded", true);
   }
+
   function closeSurvey() {
     var feedbackSurvey = document.getElementById("feedback");
     var feedbackDiv = document.getElementById("survey");
@@ -15,6 +16,7 @@
     feedbackDiv.style.display = "none";
     feedbackButton.setAttribute("aria-expanded", false);
   }
+  
   document.querySelector("#show-survey").addEventListener("click", showSurvey);
   document.querySelector("#close-survey").addEventListener("click", closeSurvey);
 })();
