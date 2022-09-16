@@ -96,7 +96,7 @@ class SubscriptionsGroupSpec
     }
 
     lazy val toggle = body.getElementById("test-1_0-toggle")
-    lazy val requestChangeLink = Option(body.getElementsByClass("accordion__body__row__right--link").first)
+    lazy val requestChangeLink = Option(body.getElementsByClass("request-change-link").first)
   }
 
   "subscriptionsGroup" when {

@@ -94,11 +94,14 @@
     XHR.send(urlEncodedData);
   }
 
-  document.querySelectorAll(".slider__on").forEach(slider => {
+  document.querySelectorAll(".slider__on-submit").forEach(slider => {
     slider.addEventListener("click", subscribe);
   });
 
-  document.querySelectorAll(".slider__off").forEach(slider => {
+  document.querySelectorAll(".slider__off-submit").forEach(slider => {
     slider.addEventListener("click", unsubscribe);
   });
+
+  // Overwrite the function responsible for setting the initial accordion closed or open state based on previous interaction.
+  window.GOVUKFrontend.Accordion.prototype.setInitialState = () => {};
 })();
