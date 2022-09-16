@@ -175,6 +175,7 @@ abstract class EndpointScenarioSpec extends AsyncHmrcSpec with GuiceOneAppPerSui
   when(thirdPartyDeveloperMfaConnector.verifyMfa(*[UserId], *[MfaId], *[String])(*)).thenReturn(Future.successful(true))
   when(thirdPartyDeveloperMfaConnector.removeMfaById(*[UserId], *[MfaId])(*)).thenReturn(Future.successful(()))
   when(thirdPartyDeveloperMfaConnector.createMfaSecret(*[UserId])(*)).thenReturn(Future.successful(registerAuthAppResponse))
+  when(thirdPartyDeveloperMfaConnector.changeName(*[UserId], *[MfaId], *[String])(*)).thenReturn(Future.successful(true))
 
   private def populatePathTemplateWithValues(pathTemplate: String, values: Map[String,String]): String = {
     //TODO fail test if path contains parameters that aren't supplied by the values map
@@ -261,6 +262,8 @@ abstract class EndpointScenarioSpec extends AsyncHmrcSpec with GuiceOneAppPerSui
       case Endpoint("POST", "/developer/profile/email-preferences/no-apis-from-subscriptions") => Map("context" -> applicationId.value)
       case Endpoint("GET",  "/developer/profile/security-preferences/auth-app/access-code") => Map("mfaId" -> mfaId.value.toString)
       case Endpoint("POST", "/developer/profile/security-preferences/auth-app/enable") => Map("mfaId" -> mfaId.value.toString)
+      case Endpoint("GET", "/developer/profile/security-preferences/auth-app/name") => Map("mfaId" -> mfaId.value.toString)
+      case Endpoint("POST", "/developer/profile/security-preferences/auth-app/name") => Map("mfaId" -> mfaId.value.toString)
 
       case _ => Map.empty
     }
@@ -337,6 +340,7 @@ abstract class EndpointScenarioSpec extends AsyncHmrcSpec with GuiceOneAppPerSui
       case Endpoint("POST", "/developer/submissions/:sid/question/:qid/update") => Map("submit-action" -> "acknowledgement")
       case Endpoint("POST", "/developer/submissions/application/:aid/cancel-request") => Map("submit-action" -> "cancel-request")
       case Endpoint("POST", "/developer/profile/security-preferences/auth-app/enable") => Map("accessCode" -> "123456")
+      case Endpoint("POST", "/developer/profile/security-preferences/auth-app/name") => Map("name" -> "appName")
       case _ => Map.empty
     }
   }
@@ -421,7 +425,8 @@ abstract class EndpointScenarioSpec extends AsyncHmrcSpec with GuiceOneAppPerSui
       case Endpoint("POST", "/developer/profile/email-preferences/categories") => Redirect(s"/developer/profile/email-preferences/apis?category=${category}")
       case Endpoint("POST", "/developer/submissions/:sid/question/:qid") => Redirect(s"/developer/submissions/application/${applicationId.value}/production-credentials-checklist")
       case Endpoint("POST", "/developer/submissions/:sid/question/:qid/update") => Redirect(s"/developer/submissions/application/${applicationId.value}/check-answers")
-      case Endpoint("POST", "/developer/profile/security-preferences/auth-app/enable") => Redirect(s"/developer/profile/security-preferences/auth-app/setup/complete")
+      case Endpoint("POST", "/developer/profile/security-preferences/auth-app/enable") => Redirect(s"/developer/profile/security-preferences/auth-app/name?mfaId=${mfaId.value.toString}")
+      case Endpoint("POST", "/developer/profile/security-preferences/auth-app/name") => Redirect(s"/developer/profile/security-preferences/auth-app/setup/complete")
       case _ => Success()
     }
   }

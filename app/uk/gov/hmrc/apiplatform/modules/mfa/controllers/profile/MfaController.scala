@@ -120,10 +120,14 @@ class MfaController @Inject()(
   }
 
   def nameChangeAction(mfaId: MfaId): Action[AnyContent] = atLeastPartLoggedInEnablingMfaAction { implicit request =>
+
     MfaNameChangeForm.form.bindFromRequest.fold(
       form => Future.successful(BadRequest(nameChangeView(form, mfaId))),
       form => {
-        Future.successful(Redirect(uk.gov.hmrc.apiplatform.modules.mfa.controllers.profile.routes.MfaController.authAppSetupCompletedPage()))
+        thirdPartyDeveloperMfaConnector.changeName(request.userId, mfaId, form.name) map {
+          case true => Redirect(uk.gov.hmrc.apiplatform.modules.mfa.controllers.profile.routes.MfaController.authAppSetupCompletedPage())
+          case false => InternalServerError("Failed to change MFA name")
+        }
       }
     )
   }

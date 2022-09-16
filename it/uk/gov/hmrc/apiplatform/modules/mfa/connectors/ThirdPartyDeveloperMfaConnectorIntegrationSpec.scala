@@ -26,7 +26,7 @@ import uk.gov.hmrc.apiplatform.modules.mfa.models.{DeviceSession, DeviceSessionI
 import uk.gov.hmrc.http.{HeaderCarrier, UpstreamErrorResponse}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.builder.DeveloperBuilder
 import uk.gov.hmrc.thirdpartydeveloperfrontend.connectors._
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.connectors._
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.connectors.{_}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.{LocalUserIdTracker, WireMockExtensions}
 
 import java.util.UUID
@@ -259,6 +259,55 @@ class ThirdPartyDeveloperMfaConnectorIntegrationSpec extends BaseConnectorIntegr
         .willReturn(aResponse().withStatus(INTERNAL_SERVER_ERROR)))
 
       intercept[UpstreamErrorResponse](await(underTest.removeMfaById(userId, mfaId))).statusCode shouldBe INTERNAL_SERVER_ERROR
+    }
+  }
+
+  "change MFA name" should {
+    val updatedName = "updated name"
+    val changeMfaNameRequest = ChangeMfaNameRequest(updatedName)
+
+    "return true if call to backend is successful" in new Setup {
+      val url = s"/developer/${userId.value}/mfa/${mfaId.value}/name"
+
+      stubFor(
+        post(urlPathEqualTo(url))
+          .withJsonRequestBody(changeMfaNameRequest)
+          .willReturn(
+            aResponse()
+              .withStatus(NO_CONTENT)
+          )
+      )
+      await(underTest.changeName(userId, mfaId, updatedName)) shouldBe true
+    }
+
+    "return false if call to backend returns Bad Request" in new Setup {
+      val url = s"/developer/${userId.value}/mfa/${mfaId.value}/name"
+
+      stubFor(
+        post(urlPathEqualTo(url))
+          .withJsonRequestBody(changeMfaNameRequest)
+          .willReturn(
+            aResponse()
+              .withStatus(BAD_REQUEST)
+          )
+      )
+      await(underTest.changeName(userId, mfaId, updatedName)) shouldBe false
+    }
+
+    "throw UpstreamErrorResponse if call to backend returns error" in new Setup {
+      val url = s"/developer/${userId.value}/mfa/${mfaId.value}/name"
+
+      stubFor(
+        post(urlPathEqualTo(url))
+          .withJsonRequestBody(changeMfaNameRequest)
+          .willReturn(
+            aResponse()
+              .withStatus(INTERNAL_SERVER_ERROR)
+          )
+      )
+      intercept[UpstreamErrorResponse]{
+        await(underTest.changeName(userId, mfaId, updatedName))
+      }
     }
   }
 }

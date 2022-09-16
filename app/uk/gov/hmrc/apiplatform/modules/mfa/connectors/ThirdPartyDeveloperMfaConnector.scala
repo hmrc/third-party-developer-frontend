@@ -26,7 +26,7 @@ import uk.gov.hmrc.http._
 import uk.gov.hmrc.play.http.metrics.common.API
 import uk.gov.hmrc.thirdpartydeveloperfrontend.config.ApplicationConfig
 import uk.gov.hmrc.thirdpartydeveloperfrontend.connectors.{CommonResponseHandlers, ConnectorMetrics}
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.connectors.VerifyMfaRequest
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.connectors.{VerifyMfaRequest}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers._
 
 import javax.inject.{Inject, Singleton}
@@ -71,6 +71,17 @@ class ThirdPartyDeveloperMfaConnector @Inject()(http: HttpClient, config: Applic
     metrics.record(api) {
       http.DELETE[ErrorOrUnit](s"$serviceBaseUrl/developer/${userId.value}/mfa/${mfaId.value}")
         .map(throwOrUnit)
+    }
+  }
+
+  def changeName(userId: UserId, mfaId: MfaId, updatedName: String)(implicit hc: HeaderCarrier): Future[Boolean] = {
+    metrics.record(api) {
+      http.POST[ChangeMfaNameRequest, ErrorOrUnit](s"$serviceBaseUrl/developer/${userId.value}/mfa/${mfaId.value}/name", ChangeMfaNameRequest(updatedName))
+        .map {
+          case Right(()) => true
+          case Left(UpstreamErrorResponse(_,BAD_REQUEST,_,_)) => false
+          case Left(err) => throw err
+        }
     }
   }
 

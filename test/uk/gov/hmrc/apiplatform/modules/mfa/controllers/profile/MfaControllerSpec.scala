@@ -261,7 +261,7 @@ class MfaControllerSpec extends BaseControllerSpec with WithCSRFAddToken with De
     }
 
     "enableAuthApp()" should {
-      "return auth app completed view when user is logged in and enable mfa successful" in new SetupSuccessfulStart2SV with LoggedIn {
+      "return change name view when user is logged in and enable mfa successful" in new SetupSuccessfulStart2SV with LoggedIn {
         when(underTest.mfaService.enableMfa(*[UserId], *[MfaId],*)(*)).thenReturn(Future.successful(MFAResponse(true)))
 
         val result = addToken(underTest.enableAuthApp(mfaId))(accessCodeRequest(correctCode))
@@ -270,7 +270,7 @@ class MfaControllerSpec extends BaseControllerSpec with WithCSRFAddToken with De
         redirectLocation(result) shouldBe Some(s"/developer/profile/security-preferences/auth-app/name?mfaId=${mfaId.value.toString}")
       }
 
-      "return auth app completed view when user is part logged in and enable mfa successful" in new SetupSuccessfulStart2SV with PartLogged {
+      "return change name view when user is part logged in and enable mfa successful" in new SetupSuccessfulStart2SV with PartLogged {
         when(underTest.mfaService.enableMfa(*[UserId], *[MfaId],*)(*)).thenReturn(Future.successful(MFAResponse(true)))
 
         val result = addToken(underTest.enableAuthApp(mfaId))(accessCodeRequest(correctCode))
@@ -346,6 +346,47 @@ class MfaControllerSpec extends BaseControllerSpec with WithCSRFAddToken with De
 
         status(result) shouldBe Status.SEE_OTHER
         redirectLocation(result) shouldBe Some("/developer/login")
+      }
+    }
+
+    "nameChangeAction()" should {
+      val updatedName = "updated name"
+      "return auth app completed view when user is logged in and call to backend is successful" in new SetupSuccessfulStart2SV with LoggedIn {
+        when(underTest.thirdPartyDeveloperMfaConnector.changeName(*[UserId], *[MfaId], *)(*)).thenReturn(Future.successful(true))
+
+        val result = addToken(underTest.nameChangeAction(mfaId))(nameChangeRequest(updatedName))
+
+        status(result) shouldBe SEE_OTHER
+        redirectLocation(result) shouldBe Some(s"/developer/profile/security-preferences/auth-app/setup/complete")
+      }
+
+
+      "return auth app completed view when user is part logged in and call to backend is successful" in new SetupSuccessfulStart2SV with PartLogged {
+        when(underTest.thirdPartyDeveloperMfaConnector.changeName(*[UserId], *[MfaId], *)(*)).thenReturn(Future.successful(true))
+
+        val result = addToken(underTest.nameChangeAction(mfaId))(nameChangeRequest(updatedName))
+
+        status(result) shouldBe SEE_OTHER
+        redirectLocation(result) shouldBe Some(s"/developer/profile/security-preferences/auth-app/setup/complete")
+      }
+
+      "return error page when user is logged in and call to backend fails" in new SetupSuccessfulStart2SV with LoggedIn {
+        when(underTest.thirdPartyDeveloperMfaConnector.changeName(*[UserId], *[MfaId], *)(*)).thenReturn(Future.successful(false))
+
+        val result = addToken(underTest.nameChangeAction(mfaId))(nameChangeRequest(updatedName))
+
+        status(result) shouldBe INTERNAL_SERVER_ERROR
+      }
+
+      "return name change view with errors when user is logged in and form is invalid" in new SetupSuccessfulStart2SV with LoggedIn {
+        val result = addToken(underTest.nameChangeAction(mfaId))(nameChangeRequest("a"))
+
+        status(result) shouldBe BAD_REQUEST
+        val doc = Jsoup.parse(contentAsString(result))
+        validateNameChangePage(doc)
+        doc.getElementById("data-field-error-name").text() shouldBe "Error: The name must be more than 3 characters in length"
+
+        verifyZeroInteractions(underTest.thirdPartyDeveloperMfaConnector)
       }
     }
 
