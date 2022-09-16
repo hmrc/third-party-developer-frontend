@@ -14,7 +14,7 @@
   }
 
   function updateSubscriptionCount(form, countUpdateFunction) {
-    const topLevelElement = getParents(form).find((node) => node.id.endsWith("-accordian-section"));
+    const topLevelElement = getParents(form).find((node) => node.id.endsWith("-accordion-section"));
     const test = topLevelElement.querySelector('.subscription-count');
     const count = test.innerText.substr(0, test.innerText.indexOf(' '));
     const newCount = countUpdateFunction(parseInt(count));

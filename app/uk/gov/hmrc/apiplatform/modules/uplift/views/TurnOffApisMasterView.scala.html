@@ -66,7 +66,7 @@
           
           <div class="govuk-accordion" data-module="govuk-accordion" id="accordion-default">
             @subscriptions.map { case apiSubscription =>
-              <div class="govuk-accordion__section" id="@apiSubscription.apiServiceName-accordian-section">
+              <div class="govuk-accordion__section" id="@apiSubscription.apiServiceName-accordion-section">
                 <div class="govuk-accordion__section-header">
                   <h2 class="govuk-accordion__section-heading">
                     <span class="govuk-accordion__section-button" id="accordion-default-heading-1">
@@ -113,9 +113,9 @@
                               <div class="slider">
                                 <fieldset id="@apiLabel-toggle" aria-live="assertive">
                                     <div class="slider__radios slider__radios--font-fix">
-                                      <input class="slider__on" id="@apiLabel-on" name="@apiLabel-subscribed" type="radio" value="true">
+                                      <input class="slider__on slider__on-submit" id="@apiLabel-on" name="@apiLabel-subscribed" type="radio" value="true" @if(api.subscribed) {checked} else {}>
                                       <label class="govuk-label govuk-radios__label slider__on--label" for="@apiLabel-on">Yes</label>
-                                      <input class="slider__off" id="@apiLabel-off" name="@apiLabel-subscribed" type="radio" value="false">
+                                      <input class="slider__off slider__off-submit" id="@apiLabel-off" name="@apiLabel-subscribed" type="radio" value="false" @if(!api.subscribed) {checked} else {}>
                                       <label class="govuk-label govuk-radios__label slider__off--label" for="@apiLabel-off">No</label>
                                     </div>
                                   </fieldset>
