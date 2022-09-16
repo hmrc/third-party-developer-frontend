@@ -28,7 +28,7 @@
 @import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.checkpages.routes
 @import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.GroupedSubscriptions
 
-@this(devMain: DevMain, subscriptionGroups: SubscriptionGroups)
+@this(devMain: DevMain2, subscriptionGroups: SubscriptionGroups)
 @(
     app: Application, 
     role: CollaboratorRole,
@@ -55,16 +55,18 @@
 
     @if(errorForm.isDefined) { @errorSummary(errorForm.get) }
 
-    <h1 class="heading-xlarge">@pageHeading</h1>
-    <p>You must subscribe to an API so your application can access it. You’ll receive notifications about its lifecycle events, such as new version introductions and old version retirements.</p>
-    <div class="notice">
-        <i class="icon icon-important">
-            <span class="visually-hidden">Warning</span>
-        </i>
-        <strong class="bold-small">
-            After you submit this application for checking, for security reasons we must review and approve any further changes to API subscriptions
-        </strong>
+    <h1 class="govuk-heading-l">@pageHeading</h1>
+
+    <p class="govuk-body">You must subscribe to an API so your application can access it. You’ll receive notifications about its lifecycle events, such as new version introductions and old version retirements.</p>
+
+    <div class="govuk-warning-text">
+      <span class="govuk-warning-text__icon" aria-hidden="true">!</span>
+      <strong class="govuk-warning-text__text">
+        <span class="govuk-warning-text__assistive">Warning</span>
+          After you submit this application for checking, for security reasons we must review and approve any further changes to API subscriptions
+      </strong>
     </div>
+
     @subscriptions match {
         case Some(groupedSubscriptions) => {
             @subscriptionGroups(role: CollaboratorRole, groupedSubscriptions, openAccessApis, app, APPLICATION_CHECK_PAGE, true)
@@ -73,7 +75,9 @@
             @helper.form(action = submitAction, 'class -> "form") {
                 @helper.CSRF.formField
                 <div class="form-group">
-                    <button id="submit" class="button" type="submit">Save and continue</button>
+                  <button class="govuk-button" data-module="govuk-button" type="submit">
+                    Save and continue
+                  </button>
                 </div>
             }
         }
