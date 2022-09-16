@@ -14,9 +14,11 @@
  * limitations under the License.
  *@
 
+@import uk.gov.hmrc.apiplatform.modules.mfa.controllers.profile.routes
+
 @this()
 @()
 
 <p class="govuk-body govuk-!-margin-bottom-6" id="paragraph">You need to set up additional security so only you can sign in.</p>
-<p class="govuk-body"><a class="govuk-button" id="button" href="#">Continue</a></p>
+<p class="govuk-body"><a class="govuk-button" id="button" href="@routes.MfaController.authAppStart()">Continue</a></p>
 
