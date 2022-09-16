@@ -23,7 +23,6 @@ import uk.gov.hmrc.apiplatform.modules.mfa.models.MfaId
 import uk.gov.hmrc.apiplatform.modules.mfa.service.MFAService
 import uk.gov.hmrc.apiplatform.modules.mfa.views.html.SecurityPreferencesView
 import uk.gov.hmrc.apiplatform.modules.mfa.views.html.authapp.{AccessCodeView, AuthAppSetupCompletedView, AuthAppStartView, NameChangeView, QrCodeView}
-import uk.gov.hmrc.play.bootstrap.controller.WithDefaultFormBinding
 import uk.gov.hmrc.thirdpartydeveloperfrontend.config.{ApplicationConfig, ErrorHandler}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.connectors.ThirdPartyDeveloperConnector
 import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.{FormKeys, LoggedInController}
@@ -34,6 +33,7 @@ import uk.gov.hmrc.thirdpartydeveloperfrontend.service.SessionService
 import play.api.data.Form
 import play.api.data.Forms._
 import uk.gov.hmrc.apiplatform.modules.mfa.forms.{MfaAccessCodeForm, MfaNameChangeForm}
+import uk.gov.hmrc.play.bootstrap.controller.WithUnsafeDefaultFormBinding
 
 import javax.inject.{Inject, Singleton}
 import scala.concurrent.{ExecutionContext, Future}
@@ -56,7 +56,7 @@ class MfaController @Inject()(
                                nameChangeView: NameChangeView
 
 )(implicit val ec: ExecutionContext,
-  val appConfig: ApplicationConfig) extends LoggedInController(mcc) with WithDefaultFormBinding {
+  val appConfig: ApplicationConfig) extends LoggedInController(mcc) with WithUnsafeDefaultFormBinding {
 
 
   def securityPreferences: Action[AnyContent] = atLeastPartLoggedInEnablingMfaAction { implicit request =>
