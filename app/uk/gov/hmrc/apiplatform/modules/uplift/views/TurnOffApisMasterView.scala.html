@@ -73,8 +73,7 @@
                       @apiSubscription.apiHumanReadableAppName
                     </span>
                   </h2>
-                  <div class="govuk-accordion__section-summary subscription-count govuk-body" id="accordion-with-summary-sections-summary-1">
-                    @apiSubscription.subscriptionNumberText
+                  <div class="govuk-accordion__section-summary" id="accordion-with-summary-sections-summary-1">
                   </div>
                 </div>
                 <div id="accordion-default-content-4" class="govuk-accordion__section-content" aria-labelledby="accordion-default-heading-4">
@@ -113,9 +112,9 @@
                               <div class="slider">
                                 <fieldset id="@apiLabel-toggle" aria-live="assertive">
                                     <div class="slider__radios slider__radios--font-fix">
-                                      <input class="slider__on slider__on-submit" id="@apiLabel-on" name="@apiLabel-subscribed" type="radio" value="true" @if(api.subscribed) {checked} else {}>
+                                      <input class="slider__on" id="@apiLabel-on" name="@apiLabel-subscribed" type="radio" value="true" @if(api.subscribed) {checked} else {}>
                                       <label class="govuk-label govuk-radios__label slider__on--label" for="@apiLabel-on">Yes</label>
-                                      <input class="slider__off slider__off-submit" id="@apiLabel-off" name="@apiLabel-subscribed" type="radio" value="false" @if(!api.subscribed) {checked} else {}>
+                                      <input class="slider__off" id="@apiLabel-off" name="@apiLabel-subscribed" type="radio" value="false" @if(!api.subscribed) {checked} else {}>
                                       <label class="govuk-label govuk-radios__label slider__off--label" for="@apiLabel-off">No</label>
                                     </div>
                                   </fieldset>
