@@ -33,8 +33,13 @@ class AuthAppSetupCompletedViewSpec extends CommonViewSpec with WithCSRFAddToken
     "render correctly when form is valid" in {
       val mainView = authAppSetupCompletedView.apply()(FakeRequest().withCSRFToken, loggedIn, appConfig, stubMessages())
       val document = Jsoup.parse(mainView.body)
-      document.getElementById("page-heading").text shouldBe "You have successfully set up 2-step verification"
+      document.getElementById("page-heading").text shouldBe "You can now get access codes by authenticator app"
+      document.getElementById("smartphone-text").text should include("Keep the app on your smartphone or tablet")
+      document.getElementById("medium-heading").text shouldBe "You need to set up additional security"
+      document.getElementById("body").text shouldBe "You need to add text messages to get access codes as an alternative to your authenticator app."
       document.getElementById("submit").text shouldBe "Continue"
+      document.getElementById("link").text shouldBe "I can't do this right now"
+      document.getElementById("link").attr("href") shouldBe "/developer/applications"
     }
 
   }

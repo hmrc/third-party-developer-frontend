@@ -24,15 +24,20 @@
 @()(implicit request: play.api.mvc.Request[Any], loggedIn: DeveloperSession, appConfig: ApplicationConfig, messages: Messages)
 
 @devMain(
-  title = "Protect account complete",
+  title = "You can now get access codes by authenticator app",
   userFullName = loggedIn.loggedInName,
   developerSession = Some(loggedIn)
 ) {
-  <h1 class="govuk-heading-l" id="page-heading">You have successfully set up 2-step verification</h1>
+  <h1 class="govuk-heading-l" id="page-heading">You can now get access codes by authenticator app</h1>
 
-  <h2 class="govuk-heading-m" id="medium-heading">Keep the app on your smartphone or tablet</h2>
+    <p class="govuk-body govuk-!-margin-top-5" id="smartphone-text">Keep the app on your smartphone or tablet.<br>Every time you sign in we will request an access code.</p>
 
-  <p class="govuk-body" id="body">You'll need a new access code every time you sign in.</p>
+    <h2 class="govuk-heading-m" id="medium-heading">You need to set up additional security</h2>
+    <p class="govuk-body" id="body">You need to add text messages to get access codes as an alternative to your authenticator app.</p>
 
-  <a id="submit" class="govuk-button" href="@request.session.get("access_uri").getOrElse(routes.ManageApplications.manageApps())">Continue</a>
+    <a id="submit" class="govuk-button" href="#">Continue</a>
+    <br>
+    <p class="govuk-body">
+        <a id="link" class="govuk-link" href="@request.session.get("access_uri").getOrElse(routes.ManageApplications.manageApps())">I can't do this right now</a>
+    </p>
 }

@@ -41,7 +41,7 @@
 
     <div class="govuk-form-group @if(form.errors("accessCode").nonEmpty){govuk-form-group--error}">
       <label class="govuk-label govuk-!-font-weight-bold" for="accessCode" id="access-code-label">Access code</label>
-      <div id="access-code-hint" class="govuk-hint">This is the 6 digit code from your authenticator app.</div>
+      <div id="access-code-hint" class="govuk-hint">This is the 6 digit code from your authenticator app</div>
       @fieldError2(form.errors, "accessCode")
       <input
         type="text"

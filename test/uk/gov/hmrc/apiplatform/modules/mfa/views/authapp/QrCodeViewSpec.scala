@@ -38,7 +38,7 @@ class QrCodeViewSpec extends CommonViewSpec with WithCSRFAddToken with Developer
 
       val mainView = qrCodeView.apply("secret", "qrcodeImg", MfaId(UUID.randomUUID()))( FakeRequest().withCSRFToken, loggedIn, appConfig, stubMessages())
       val document = Jsoup.parse(mainView.body)
-      document.getElementById("page-heading").text shouldBe "Set up 2-step verification"
+      document.getElementById("page-heading").text shouldBe "Set up your authenticator app"
       document.getElementById("submit").text shouldBe "Continue"
     }
 

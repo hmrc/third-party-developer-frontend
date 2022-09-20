@@ -436,7 +436,7 @@ class MfaControllerSpec extends BaseControllerSpec with WithCSRFAddToken with De
   }
 
   def validateQrCodePage(dom: Document): Assertion = {
-    dom.getElementById("page-heading").text shouldBe "Set up 2-step verification"
+    dom.getElementById("page-heading").text shouldBe "Set up your authenticator app"
     dom.getElementById("secret").html() shouldBe "abcd efgh"
     dom.getElementById("qrCode").attr("src") shouldBe qrImage
   }
@@ -454,7 +454,7 @@ class MfaControllerSpec extends BaseControllerSpec with WithCSRFAddToken with De
   }
 
   def validateAuthAppCompletedPage(dom: Document) = {
-    dom.getElementById("page-heading").text shouldBe "You have successfully set up 2-step verification"
+    dom.getElementById("page-heading").text shouldBe "You can now get access codes by authenticator app"
   }
 
 }
