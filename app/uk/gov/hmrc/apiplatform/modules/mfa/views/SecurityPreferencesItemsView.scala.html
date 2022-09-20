@@ -29,13 +29,11 @@
             <tr class="govuk-table__row">
                 <td class="govuk-table__cell" id="mfaType-@{idx}"><strong>@{mfaDetail.mfaType.asText}</strong></td>
                 <td class="govuk-table__cell govuk-!-width-one-half" id="nameAndCreatedOn-@{idx}">
-                    @if(mfaDetail.name != "AUTHENTICATOR_APP"){
-                        @{mfaDetail.name}<br>
-                    }
 
-                    @if(mfaDetail.createdOn.isAfter(LocalDateTime.of(2022,8,1,0,0))) {
-                            <span class="govuk-hint" id="date-hint-@{idx}">Added @DateTimeFormatter.ofPattern("dd MMMM yyyy HH:mm").format(mfaDetail.createdOn)</span>
-                    }
+                    @{mfaDetail.name}<br>
+
+                <span class="govuk-hint" id="date-hint-@{idx}">Added @DateTimeFormatter.ofPattern("dd MMMM yyyy HH:mm").format(mfaDetail.createdOn)</span>
+
 
                 </td>
                 <td class="govuk-table__cell" id="removeMfaLink-@{idx}"><a id="submit" type="submit" href="@routes.ProtectAccount.get2SVRemovalByIdAccessCodePage(mfaDetail.id)">Remove</a></td>

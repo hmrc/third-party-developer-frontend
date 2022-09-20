@@ -50,7 +50,7 @@ class ProtectedAccountWithMfaViewSpec extends CommonViewSpec with WithCSRFAddTok
       elementExistsByText(document, "h1", "Account protection") shouldBe true
       elementExistsByText(document, "p", "This is how you get your access codes.") shouldBe true
       elementExistsById(document, "mfaType-0") shouldBe true
-      elementExistsContainsText(document, "td", "Authenticator App") shouldBe true
+      elementExistsContainsText(document, "td", "Authenticator app") shouldBe true
       elementExistsById(document, "nameAndCreatedOn-0") shouldBe true
       elementExistsContainsText(document, "td", "Google Authenticator") shouldBe true
       elementExistsContainsText(document, "td", "Added 02 August 2022 15:20") shouldBe true

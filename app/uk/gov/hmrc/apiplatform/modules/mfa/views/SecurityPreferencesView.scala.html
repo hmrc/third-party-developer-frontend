@@ -37,10 +37,12 @@
     <h1 class="govuk-heading-l" id="page-heading">Your security preferences</h1>
 
     @if(mfaDetails.nonEmpty) {
+
         @itemsView(mfaDetails)
+        @if(isAuthAppMfaVerified(mfaDetails) && !isSmsMfaVerified(mfaDetails)){<p class="govuk-body" id="no-sms-mfa"><a href="#">Get access codes by text message</a></p>}
+        @if(isSmsMfaVerified(mfaDetails) && !isAuthAppMfaVerified(mfaDetails)){<p class="govuk-body" id="no-auth-app-mfa"><a href="@routes.MfaController.authAppStart()">Get access codes by an authenticator app</a></p>}
+
     } else {@noItemsView()}
 
-     @if(isAuthAppMfaVerified(mfaDetails) && !isSmsMfaVerified(mfaDetails)){<p class="govuk-body" id="no-sms-mfa"><a href="#">Get access codes by text message</a></p>}
-    @if(isSmsMfaVerified(mfaDetails) && !isAuthAppMfaVerified(mfaDetails)){<p class="govuk-body" id="no-auth-app-mfa"><a href="@routes.MfaController.authAppStart()">Get access codes by an authenticator app</a></p>}
 
 }

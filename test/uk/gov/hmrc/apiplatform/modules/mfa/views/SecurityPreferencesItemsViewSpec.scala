@@ -42,42 +42,40 @@ class SecurityPreferencesItemsViewSpec extends CommonViewSpec with WithCSRFAddTo
       val mainView = securityPreferencesItemsView.render(List(authAppMfaDetail))
      val document = Jsoup.parse(mainView.body)
       document.getElementById("description").text shouldBe "This is how you get your access codes."
-      verifyMfaRow(document, authAppMfaDetail, 0, shouldShowCreatedDate = true)
+      verifyMfaRow(document, authAppMfaDetail, 0)
     }
 
     "show 'auth app row' when list contains only auth app mfa details with created on before migration date" in {
       val authAppMfaDetailWithCreatedOnInPast = authAppMfaDetail.copy(createdOn = LocalDateTime.of(2022,7,20,0,0))
-      val mainView = securityPreferencesItemsView.apply(List(authAppMfaDetailWithCreatedOnInPast))
+      val mainView = securityPreferencesItemsView.apply(List(authAppMfaDetailWithCreatedOnInPast))()
       val document = Jsoup.parse(mainView.body)
-      verifyMfaRow(document, authAppMfaDetailWithCreatedOnInPast, 0, shouldShowCreatedDate = false)
+      verifyMfaRow(document, authAppMfaDetailWithCreatedOnInPast, 0)
     }
 
     "show 'sms detail row' when list contains only sms mfa details with created on after migration date" in {
-      val mainView = securityPreferencesItemsView.apply(List(smsMfaDetail))
+      val mainView = securityPreferencesItemsView.apply(List(smsMfaDetail))()
       val document = Jsoup.parse(mainView.body)
       document.getElementById("description").text shouldBe "This is how you get your access codes."
-      verifyMfaRow(document, smsMfaDetail, 0, shouldShowCreatedDate = true)
+      verifyMfaRow(document, smsMfaDetail, 0)
     }
 
     "show 'sms detail row' and 'auth app row' when list contains auth app and sms mfa details with created on after migration date" in {
-      val mainView = securityPreferencesItemsView.apply(List(authAppMfaDetail,smsMfaDetail))
+      val mainView = securityPreferencesItemsView.apply(List(authAppMfaDetail,smsMfaDetail))()
       val document = Jsoup.parse(mainView.body)
       document.getElementById("description").text shouldBe "This is how you get your access codes."
-      verifyMfaRow(document, authAppMfaDetail, 0, shouldShowCreatedDate = true)
-      verifyMfaRow(document, smsMfaDetail, 1, shouldShowCreatedDate = true)
+      verifyMfaRow(document, authAppMfaDetail, 0)
+      verifyMfaRow(document, smsMfaDetail, 1)
     }
   }
 
-  def verifyMfaRow(document: Document, mfaDetail: MfaDetail, rowId: Int, shouldShowCreatedDate: Boolean) ={
+  def verifyMfaRow(document: Document, mfaDetail: MfaDetail, rowId: Int) ={
     document.getElementById("description").text shouldBe "This is how you get your access codes."
     val mfaTypeField = Option(document.getElementById(s"mfaType-$rowId"))
     mfaTypeField should not be None
     mfaTypeField.get.text shouldBe mfaDetail.mfaType.asText
-    if(shouldShowCreatedDate){
-      document.getElementById(s"date-hint-$rowId").text shouldBe s"Added ${DateTimeFormatter.ofPattern("dd MMMM yyyy HH:mm").format(mfaDetail.createdOn)}"
-    } else {
-      Option(document.getElementById(s"date-hint-$rowId")) shouldBe None
-    }
+
+    document.getElementById(s"date-hint-$rowId").text shouldBe s"Added ${DateTimeFormatter.ofPattern("dd MMMM yyyy HH:mm").format(mfaDetail.createdOn)}"
+
     document.getElementById(s"removeMfaLink-$rowId").text shouldBe "Remove"
 
   }

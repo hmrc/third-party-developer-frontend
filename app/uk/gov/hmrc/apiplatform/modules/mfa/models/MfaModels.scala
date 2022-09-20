@@ -41,11 +41,11 @@ object MfaType extends Enum[MfaType] with PlayJsonEnum[MfaType] {
   val values: immutable.IndexedSeq[MfaType] = findValues
 
   case object AUTHENTICATOR_APP extends MfaType {
-    override def asText: String = "Authenticator App"
+    override def asText: String = "Authenticator app"
   }
 
   case object SMS extends MfaType {
-    override def asText: String = "Sms Text"
+    override def asText: String = "Text message"
   }
 
 }

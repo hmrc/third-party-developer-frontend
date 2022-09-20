@@ -26,7 +26,7 @@ import uk.gov.hmrc.http._
 import uk.gov.hmrc.play.http.metrics.common.API
 import uk.gov.hmrc.thirdpartydeveloperfrontend.config.ApplicationConfig
 import uk.gov.hmrc.thirdpartydeveloperfrontend.connectors.{CommonResponseHandlers, ConnectorMetrics}
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.connectors.{VerifyMfaRequest}
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.connectors.VerifyMfaRequest
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers._
 
 import javax.inject.{Inject, Singleton}
