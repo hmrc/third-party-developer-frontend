@@ -25,7 +25,7 @@
 @import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.routes
 @import java.time.Clock
 
-@this(devMain: DevMain2, leftHandNav: LeftHandNav, clock: Clock)
+@this(devMain: DevMain, leftHandNav: LeftHandNav, clock: Clock)
 
 
 @(model: ManageApplicationsViewModel)(implicit request: play.api.mvc.Request[Any], loggedIn: DeveloperSession, messagesProvider: MessagesProvider, appConfig: ApplicationConfig, navSection: String = "manage-applications", environmentNameService: EnvironmentNameService)

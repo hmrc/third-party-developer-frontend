@@ -14,216 +14,69 @@
  * limitations under the License.
  *@
 
-@import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.views.{BackButton, BackButtonToUrl, BackButtonWithJavaScript, FeedbackBanner, NoBackButton}
-@import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.controllers.Crumb
-@import play.twirl.api.HtmlFormat
-@import views.html.include.FeedbackBannerView
-@import views.html.layouts.GovUkTemplate
-@import uk.gov.hmrc.play.views.html.layouts.{BetaBanner, Footer, Head, HeaderNav, MainContentHeader, ServiceInfo}
-@import uk.gov.hmrc.play.views.html.helpers.ReportAProblemLink
-@import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.DeveloperSession
-
-@this(layoutsHead: Head,
-        layoutsFooter: Footer,
-        layoutsHeaderNav: HeaderNav,
-        layoutsBetaBanner: BetaBanner,
-        layoutsServiceInfo: ServiceInfo,
-        layoutsMainContentHeader: MainContentHeader,
-        helpersReportAProblemLink: ReportAProblemLink,
-        govUkTemplate: GovUkTemplate,
-        feedbackBannerView: FeedbackBannerView
+ @import uk.gov.hmrc.hmrcfrontend.views.html.helpers.HmrcTrackingConsentSnippet
+ @import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.views.{BackButton, FeedbackBanner, NoBackButton, StaticNavLinks, UserNavLinks}
+ @import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.controllers.Crumb
+ @import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.DeveloperSession
+ @import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.views.GenericFeedbackBanner
+ @import play.twirl.api.HtmlFormat
+ @import templates._
+ 
+ @this(
+   govUkWrapper: govUkWrapper,
+   hmrcTrackingConsentSnippet: HmrcTrackingConsentSnippet
+ )
+ 
+ @(
+  title: String,
+  navTitleLink: Option[play.api.mvc.Call] = None,
+  userFullName: Option[String] = None,
+  isRegistering: Boolean = false,
+  breadcrumbs: Seq[Crumb] = Seq.empty,
+  leftNav: Option[Html] = None,
+  fullWidth: Boolean = false,
+  back: BackButton = NoBackButton,
+  fullWidthContent: Boolean = false,
+  feedbackBanner: Option[FeedbackBanner] = Some(GenericFeedbackBanner)
+)(
+  mainContent: Html
+)(
+  implicit request: Request[_],
+  messages: Messages,
+  applicationConfig: ApplicationConfig
 )
-
-@(title: String,
-    navTitle: Option[String] = None,
-    navTitleLink: Option[play.api.mvc.Call] = None,
-    headerNavLinks: Html = HtmlFormat.empty,
-    contentHeader: Option[Html] = None,
-    sidebar: Option[Html] = None,
-    serviceInfoContent : Option[Html] = None,
-    fullWidthBanner: Option[Html] = None,
-    leftNav: Option[Html] = None,
-    breadcrumbs: Seq[Crumb] = Seq.empty,
-    back: BackButton = NoBackButton,
-    fullWidthContent: Boolean = false,
-    developerSession: Option[DeveloperSession],
-    feedbackBanner: Option[FeedbackBanner] = None
-)(mainContent: Html = HtmlFormat.empty)(implicit messagesProvider: MessagesProvider, applicationConfig: ApplicationConfig, request: play.api.mvc.Request[Any])
-
-@head = {
-    @layoutsHead(
-        linkElem = None,
-        headScripts = None
-    )
-    <link rel="stylesheet" href='@routes.Assets.versioned("stylesheets/main.css")'/>
-    <meta data-title="@applicationConfig.title"/>
+ 
+@scripts = {
+  <script src='@routes.Assets.versioned("lib/govuk-frontend/govuk/all.js")'></script>
+  <script src='@routes.Assets.versioned("javascripts/subscriptionsNew.js")' type="text/javascript"></script> 
+  <script>window.GOVUKFrontend.initAll();</script>
+  @hmrcTrackingConsentSnippet()
 }
-
-
-@insideHeader = {
-    @layoutsHeaderNav(
-        navTitle = navTitle.map(t => s"HMRC $t"),
-        navTitleLink = navTitleLink,
-        showBetaLink = false,
-        navLinks = Some(headerNavLinks)
-    )
+ 
+@userBanner = {
+  <div class="subnav-auth">
+    <ul id="proposition-links" class="govuk-list subnav-auth-links">
+      @headerNavLinks(UserNavLinks(userFullName, isRegistering), anchorClass=Some("link-style"))
+    </ul>
+  </div>
 }
-
-@afterHeader = {}
-
-@scriptElem = {
-    <script src='@routes.Assets.versioned("javascripts/apis-app.min.js")' type="text/javascript"></script>
-
-    @if(developerSession.isDefined){
-        <script type="text/javascript">
-            window.GOVUK.timeoutDialog({
-                timeout:  @applicationConfig.sessionTimeoutInSeconds,
-                countdown: 120,
-                message: 'For your security, we need to sign you out.\n' +
-                        'Any information you’ve entered won’t be saved.\n' +
-                        'We’ll sign you out in',
-                keepAliveUrl: '/developer/keep-alive',
-                signOutUrl: '/developer/logout',
-                keepAliveButtonText: 'Stay signed in',
-                signOutButtonText: 'Sign out',
-            });
-        </script>
-    }
-    <script src='@routes.Assets.versioned("javascripts/subscriptions.js")' type="text/javascript"></script> 
+ 
+@govUkWrapper(
+  title = s"$title - HMRC Developer Hub - GOV.UK",
+  navTitle = Some(applicationConfig.title),
+  navTitleLink = navTitleLink,
+  headerNavLinks = headerNavLinks(
+    StaticNavLinks(applicationConfig.apiDocumentationFrontendUrl, applicationConfig.thirdPartyDeveloperFrontendUrl)
+  ),
+  Some(HtmlFormat.empty),
+  breadcrumbs = breadcrumbs,
+  leftNav = leftNav,
+  fullWidth = fullWidth,
+  back = back,
+  fullWidthContent = fullWidthContent,
+  developerSession = None,
+  navLinks = UserNavLinks(userFullName, isRegistering),
+  feedbackBanner = feedbackBanner
+) {
+  @mainContent
 }
-
-@bodyEnd = {
-    @layoutsFooter(
-        analyticsToken = applicationConfig.analyticsToken,
-        analyticsHost = applicationConfig.analyticsHost,
-        ssoUrl = None,
-        scriptElem = Some(scriptElem),
-        gaCalls = None
-    )
-}
-
-@footerTop = {}
-@footerLinks = {
-
-<ul class="platform-help-links">
-    <li><a href="/api-documentation/docs/help/cookies" target="_blank" rel="noopener noreferrer" data-sso="false" data-journey-click="footer:Click:Cookies">@Messages("footer.links.cookies.text")</a></li>
-    <li><a href="/api-documentation/docs/help/privacy" target="_blank" rel="noopener noreferrer" data-sso="false" data-journey-click="footer:Click:Privacy policy">@Messages("footer.links.privacy_policy.text")</a></li>
-    <li><a href='/api-documentation/docs/help/terms-and-conditions' target="_blank" rel="noopener noreferrer" data-sso="false" data-journey-click="footer:Click:Terms and conditions">@Messages("footer.links.terms_and_conditions.text")</a></li>
-    <li><a href='@Messages("footer.links.help_page.url")' target="_blank" rel="noopener noreferrer" data-sso="false" data-journey-click="footer:Click:Help">@Messages("footer.links.help_page.text")</a></li>
-    <li><a href='@{applicationConfig.platformFrontendHost}/accessibility-statement/hmrc-developer-hub?referrerUrl=@{helper.urlEncode(request.uri)}' rel="noopener noreferrer" data-sso="false" data-journey-click="footer:Click:AccessibilityStatement">Accessibility statement</a></li>
-</ul>
-}
-
-@banner = {
-    <div class="banner">
-        @include.breadcrumbs(breadcrumbs)
-        @backLink
-
-        @if(back == NoBackButton && breadcrumbs.isEmpty){
-            <p>&nbsp;</p>
-        }
-
-        @serviceInfoContent
-    </div>
-}
-
-@betaBanner = {
-    @layoutsBetaBanner(
-        userLoggedIn = false,
-        betaFeedbackUrl = applicationConfig.betaFeedbackUrl,
-        betaFeedbackUnauthenticatedUrl = applicationConfig.betaFeedbackUnauthenticatedUrl,
-        showFeedbackLinkInBetaBanner = true
-    )
-}
-
-@serviceInfo = {
-    @if(serviceInfoContent.isDefined) {
-        @layoutsServiceInfo(
-            betaBanner = banner,
-            includeGridWrapper = false,
-            includeHMRCBranding = false,
-            serviceInfoContent = None
-        )
-    }
-}
-
-@mainContentHeader = {
-    @if(contentHeader.isDefined) {
-        @layoutsMainContentHeader(contentHeader = contentHeader.getOrElse(HtmlFormat.empty))
-    }
-}
-
-@getHelpForm = @{helpersReportAProblemLink(applicationConfig.reportAProblemPartialUrl, applicationConfig.reportAProblemNonJSUrl)}
-
-@backLink = {
-    @back match {
-        case BackButtonToUrl(url) => {
-            <a href="@url" class="link-back">Back</a>
-        }
-        case  BackButtonWithJavaScript => {
-            <a href="javascript:history.back()" class="link-back">Back</a>
-        }
-        case  NoBackButton => {}
-    }
-}
-
-@contentWithLeftNav = {
-    <div class="column-one-quarter">
-        @leftNav.getOrElse(HtmlFormat.empty)
-    </div>
-    <div class="column-three-quarters">
-        <div id="content">
-            @mainContentHeader
-            @mainContent
-            @sidebar
-        </div>
-    </div>
-    @getHelpForm
-}
-
-@content = {
-    <div class="@if(fullWidthContent) {column-full} else {column-three-quarters}">
-        <div id="content">
-            @mainContentHeader
-            @mainContent
-            @sidebar
-            @getHelpForm
-        </div>
-    </div>
-}
-
-@bodyContent = {
-    <noscript><iframe src="https://www.googletagmanager.com/ns.html?id=GTM-TSFTCWZ"
-                      height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
-
-    @if(fullWidthBanner.isDefined) {
-        <section class="full-width-banner">
-            @fullWidthBanner
-        </section>
-    }
-
-    <main id="wrapper" role="main">
-        <div class="centered-content">
-            @serviceInfo
-        </div>
-        <div class="centered-content">
-            <div class="grid-row">
-                @if(leftNav.isDefined) { @contentWithLeftNav } else { @content }
-            </div>
-        </div>
-        @feedbackBanner match {
-            case Some(fb) => {
-                @feedbackBannerView(fb)
-            }
-            case _ => {}
-        }
-    </main>
-}
-
-@govUkTemplate(title = Some(title), None)(head = head,
-    bodyEnd = bodyEnd,
-    insideHeader = insideHeader,
-    afterHeader = afterHeader,
-    footerTop = footerTop,
-    footerLinks = Some(footerLinks),
-    nav = true)(bodyContent)

@@ -17,7 +17,7 @@
 @import views.html.include.teamMembers._
 @import uk.gov.hmrc.thirdpartydeveloperfrontend.helpers.string._
 @import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.CollaboratorRole
-@import views.html.include.DevMain2
+@import views.html.include.DevMain
 @import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.views.BackButtonWithJavaScript
 @import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.views.Link
 @import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.Application
@@ -25,7 +25,7 @@
 @import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.ApplicationId
 @import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.checkpages.routes
 
-@this(devMain: DevMain2)
+@this(devMain: DevMain)
 
 @(app: Application, role: CollaboratorRole, loggedIn: DeveloperSession)(
         implicit request: play.api.mvc.Request[Any], messages: Messages,applicationConfig: ApplicationConfig)

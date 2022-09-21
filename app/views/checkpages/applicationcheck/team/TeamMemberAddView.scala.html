@@ -18,11 +18,11 @@
 @import views.html.include.teamMembers.addTeamMemberPartial
 @import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.views.BackButtonWithJavaScript
 @import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.controllers.ApplicationViewModel
-@import views.html.include.DevMain2
+@import views.html.include.DevMain
 @import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.controllers.AddTeamMemberPageMode.ApplicationCheck
 @import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.AddTeamMemberForm
 
-@this(devMain: DevMain2)
+@this(devMain: DevMain)
 
 @(applicationViewModel: ApplicationViewModel, form: Form[AddTeamMemberForm], loggedIn: DeveloperSession)(
         implicit request: play.api.mvc.Request[Any], messages: Messages,applicationConfig: ApplicationConfig)

@@ -22,7 +22,7 @@
 @import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.ApplicationId
 @import uk.gov.hmrc.apiplatform.modules.uplift.controllers.UpliftJourneyController.SellResellOrDistributeForm
 
-@this(devMain: DevMain2WithFormErrors)
+@this(devMain: DevMainWithFormErrors)
 
 @(applicationId: ApplicationId, form: Form[SellResellOrDistributeForm])(implicit request: play.api.mvc.Request[Any], loggedIn: DeveloperSession, messagesProvider: MessagesProvider, appConfig: ApplicationConfig)
 
