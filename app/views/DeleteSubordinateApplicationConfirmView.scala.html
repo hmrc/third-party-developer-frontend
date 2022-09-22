@@ -34,7 +34,7 @@
 ) {
   <h1 class="govuk-heading-l">Are you sure you want us to delete your application?</h1>
 
-  @appEnvironment2(app)
+  @appEnvironment(app)
 
   @helper.form(action = routes.DeleteApplication.deleteSubordinateApplicationAction(app.id), 'class -> "form") {
     <br>

@@ -50,7 +50,7 @@
   )
 ) {
 
-  @errorSummaryForFormErrors2(viewModel.errors)
+  @errorSummaryForFormErrors(viewModel.errors)
 
   <span class="govuk-caption-l">@pageHeading</span>
   <br>
@@ -71,7 +71,7 @@
         @{viewModel.field.hint}
       </div>
 
-      @fieldError2(viewModel.field.errors, viewModel.field.name.value)
+      @fieldError(viewModel.field.errors, viewModel.field.name.value)
       <input
         type="text"
         name="@{viewModel.field.name.value}"

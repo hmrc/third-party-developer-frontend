@@ -50,7 +50,7 @@
             Do you want to add a privacy policy to your application?
           </h1>
         </legend>
-        @fieldError2(form.errors, "hasUrl")
+        @fieldError(form.errors, "hasUrl")
         <div id="hasUrl" class="govuk-radios @if(form.errors("hasUrl").nonEmpty) {govuk-form-group--error}">
           <div class="govuk-radios__item" data-target="privacy-policy">
             <input class="govuk-radios__input" type="radio" id="yes" name="hasUrl" value="true" data-journey-val="Yes" @if(form.data.get("hasUrl") == Some("true")) {checked}>
@@ -61,7 +61,7 @@
               <label class="govuk-label" for="privacyPolicyURL" id="privacyPolicyURL-label">
                 Privacy policy URL
               </label>
-              @fieldError2(form.errors, "privacyPolicyURL")
+              @fieldError(form.errors, "privacyPolicyURL")
               <input
                 type="text"
                 id="privacyPolicyURL"

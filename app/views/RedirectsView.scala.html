@@ -43,7 +43,7 @@
 ) {
   <h1 class="govuk-heading-l">Manage redirect URIs</h1>
 
-  @appEnvironment2(application)
+  @appEnvironment(application)
   <br>
 
   @defining(application.permits(loggedIn.developer, SandboxOrAdmin)) { developerCanModifyApp =>

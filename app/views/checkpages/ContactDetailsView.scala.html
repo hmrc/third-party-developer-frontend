@@ -61,7 +61,7 @@
     
     <div class="govuk-form-group @if(form.errors("fullname").nonEmpty){govuk-form-group--error}">
       <label class="govuk-label" for="fullname" id="fullname-label">Full name</label>
-        @fieldError2(form.errors, "fullname", true)
+        @fieldError(form.errors, "fullname", true)
       <input
         type="text"
         id="fullname"
@@ -74,7 +74,7 @@
     </div>
     <div class="govuk-form-group @if(form.errors("email").nonEmpty){govuk-form-group--error}">
       <label class="govuk-label" for="email" id="email-label">Email address</label>
-      @fieldError2(form.errors, "email", true)
+      @fieldError(form.errors, "email", true)
       <input
         type="text"
         id="email"
@@ -87,7 +87,7 @@
     </div>
     <div class="govuk-form-group @if(form.errors("telephone").nonEmpty){govuk-form-group--error}">
       <label class="govuk-label" for="telephone" id="telephone-label">Telephone number</label>
-      @fieldError2(form.errors, "telephone", true)
+      @fieldError(form.errors, "telephone", true)
       <input
         type="text"
         id="telephone"

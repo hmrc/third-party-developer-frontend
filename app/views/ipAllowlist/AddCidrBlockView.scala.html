@@ -66,7 +66,7 @@
       }
     </h1>
 
-    @appEnvironment2(app)
+    @appEnvironment(app)
 
     <br>
 
@@ -95,7 +95,7 @@
         <label class="govuk-label" for="ipAddress">IP address</label>
         <div class="govuk-hint" id="ip-address-hint">The IP address includes a netmask, for example 1.1.1.1/24</div>
         <span id="ip-address-hint-error" class="govuk-error-message">
-          <span class="govuk-visually-hidden">Error:</span> @fieldError2(form.errors, "ipAddress")
+          <span class="govuk-visually-hidden">Error:</span> @fieldError(form.errors, "ipAddress")
         </span>
         <input class="govuk-input @if(form.errors("ipAddress").nonEmpty) {govuk-input--error}" type="text" id="ipAddress" name="ipAddress" aria-describedby="ip-address-hint ip-address-hint-error">
       </div>

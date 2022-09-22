@@ -59,7 +59,7 @@
       <fieldset class="govuk-fieldset">
         @if(form("termsOfUseAgreed").value.isEmpty || form("termsOfUseAgreed").value.contains("false")) {
           @defining(DateTimeFormatter.ofLocalizedDate(FormatStyle.LONG)) { dateFormatter =>
-            @fieldError2(form.errors, "termsOfUseAgreed", true)
+            @fieldError(form.errors, "termsOfUseAgreed", true)
             <div class="govuk-checkboxes">
               <div class="govuk-checkboxes__item">
                 <input type="checkbox" id="termsOfUseAgreed" class="govuk-checkboxes__input" name="termsOfUseAgreed" value="true"/>

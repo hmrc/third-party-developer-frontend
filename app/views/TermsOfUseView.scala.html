@@ -50,7 +50,7 @@
 ) {
   <h1 id="terms-of-use-header" class="govuk-heading-l">@title</h1>
 
-  @appEnvironment2(app)
+  @appEnvironment(app)
   <br>
 
   @if(app.termsOfUseStatus == AGREED) {
@@ -70,7 +70,7 @@
       @helper.CSRF.formField
       <div class="govuk-form-group @if(form.errors("termsOfUseAgreed").nonEmpty){form-group-error}">
         <fieldset class="govuk-fieldset" aria-describedby="terms-agreed-error">
-          @fieldError2(form.errors, "termsOfUseAgreed", true)
+          @fieldError(form.errors, "termsOfUseAgreed", true)
           <div class="govuk-checkboxes">
             <div class="govuk-checkboxes__item">
               <input class="govuk-checkboxes__input" type="checkbox" id="termsOfUseAgreed" name="termsOfUseAgreed" value="true"/>

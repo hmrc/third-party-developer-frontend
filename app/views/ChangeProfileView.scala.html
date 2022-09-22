@@ -42,7 +42,7 @@
     @helper.CSRF.formField
     <div class="govuk-form-group @if(form.errors("firstname").nonEmpty) {govuk-form-group--error}">
         <label class="govuk-label govuk-!-font-weight-bold" for="firstname" id="firstname-label">First name</label>
-        @fieldError2(form.errors, "firstname")
+        @fieldError(form.errors, "firstname")
         <input type="text"
                 id="firstname"
                 name="firstname"
@@ -51,7 +51,7 @@
     </div>
     <div class="govuk-form-group @if(form.errors("lastname").nonEmpty) {govuk-form-group--error}">
         <label class="govuk-label govuk-!-font-weight-bold" for="lastname" id="lastname-label">Last name</label>
-        @fieldError2(form.errors, "lastname")
+        @fieldError(form.errors, "lastname")
         <input type="text"
                 id="lastname"
                 name="lastname"
@@ -60,7 +60,7 @@
     </div>
     <div class="govuk-form-group @if(form.errors("organisation").nonEmpty) {govuk-form-group--error}">
         <label class="govuk-label govuk-!-font-weight-bold" for="organisation" id="organisation-label">Organisation (optional)</label>
-        @fieldError2(form.errors, "organisation")
+        @fieldError(form.errors, "organisation")
         <input type="text"
                 id="organisation"
                 name="organisation"

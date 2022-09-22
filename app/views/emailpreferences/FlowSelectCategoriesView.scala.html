@@ -51,7 +51,7 @@
         <div id="which-api-cat-hint" class="govuk-hint">
           Select all that apply.
         </div>
-        @fieldError2(form.errors, "taxRegime")
+        @fieldError(form.errors, "taxRegime")
         <div class="govuk-checkboxes" data-module="govuk-checkboxes">
           @for(category <- categories){
             <div class="govuk-checkboxes__item">

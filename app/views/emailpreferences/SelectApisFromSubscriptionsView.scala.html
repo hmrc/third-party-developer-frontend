@@ -50,7 +50,7 @@
       @helper.form(action = routes.EmailPreferencesController.selectApisFromSubscriptionsAction(applicationId), 'class -> "form", 'id -> "emailPreferencesApisForm") {
         @helper.CSRF.formField
         <a name="error.selectedapis.nonselected.field"></a>
-        @fieldError2(form.errors, "category")
+        @fieldError(form.errors, "category")
         <div class="govuk-checkboxes" data-module="govuk-checkboxes">
           @for(api <- apis) {
             <div class="govuk-checkboxes__item">

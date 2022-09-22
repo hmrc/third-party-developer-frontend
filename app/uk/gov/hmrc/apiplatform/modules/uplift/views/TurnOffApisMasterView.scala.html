@@ -61,7 +61,7 @@
         <div class="form-group @if(errorForm.errors("apiSubscriptions").nonEmpty){form-group-error}">
           <h1 class="govuk-heading-l">@pageHeading</h1>
 
-          @fieldError2(errorForm.errors, "apiSubscriptions", true)
+          @fieldError(errorForm.errors, "apiSubscriptions", true)
           
           <div class="govuk-accordion" data-module="govuk-accordion" id="accordion-default">
             @subscriptions.map { case apiSubscription =>

@@ -46,7 +46,7 @@
         <legend id="confirmation" class="govuk-fieldset__legend">
           Are you sure you want us to delete your account?
         </legend>
-        @fieldError2(form.errors, "confirmation", form.error("confirmation").isEmpty)
+        @fieldError(form.errors, "confirmation", form.error("confirmation").isEmpty)
         <div class="govuk-radios govuk-radios--inline">
           <div class="govuk-radios__item">
             <input type="radio" class="govuk-radios__input" name="confirmation" id="deleteAccountYes" value="true"/>

@@ -45,7 +45,7 @@
 ) {
   <h1 class="govuk-heading-l">Change application details</h1>
 
-  @appEnvironment2(app)
+  @appEnvironment(app)
 
   <br>
 
@@ -58,7 +58,7 @@
           Application name
         </label>
         <span id="application-name-error" class="govuk-error-message">
-          <span class="govuk-visually-hidden">Error:</span> @fieldError2(form.errors, "applicationName", form.error("submissionError").isEmpty)
+          <span class="govuk-visually-hidden">Error:</span> @fieldError(form.errors, "applicationName", form.error("submissionError").isEmpty)
         </span>
         <input
           type="text"
@@ -78,7 +78,7 @@
         Application description (optional)
         <div id="description-label-hint" class="govuk-hint">We will not show this to users.</div>
         <span id="description-label-error" class="govuk-error-message">
-          <span class="govuk-visually-hidden">Error:</span> @fieldError2(form.errors, "description", form.error("submissionError").isEmpty)
+          <span class="govuk-visually-hidden">Error:</span> @fieldError(form.errors, "description", form.error("submissionError").isEmpty)
         </span>
       </label>
       <textarea
@@ -119,7 +119,7 @@
         We will show this to users when your application requests access to their data, making them more likely to agree.
       </div>
       <span id="terms-conditions-error" class="govuk-error-message">
-        <span class="govuk-visually-hidden">Error:</span> @fieldError2(form.errors, "termsAndConditionsUrl", form.error("submissionError").isEmpty)
+        <span class="govuk-visually-hidden">Error:</span> @fieldError(form.errors, "termsAndConditionsUrl", form.error("submissionError").isEmpty)
       </span>
       <input
         type="text"

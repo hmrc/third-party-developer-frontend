@@ -50,7 +50,7 @@
         First name
       </label>
       <span id="first-name-error" class="govuk-error-message">
-        <span class="govuk-visually-hidden">Error:</span> @fieldError2(form.errors, "firstname", true)
+        <span class="govuk-visually-hidden">Error:</span> @fieldError(form.errors, "firstname", true)
       </span>
       <input 
         type="text"
@@ -69,7 +69,7 @@
         Last name
       </label>
       <span id="last-name-error" class="govuk-error-message">
-        <span class="govuk-visually-hidden">Error:</span> @fieldError2(form.errors, "lastname", true)
+        <span class="govuk-visually-hidden">Error:</span> @fieldError(form.errors, "lastname", true)
       </span>
       <input 
         type="text"
@@ -88,7 +88,7 @@
         Organisation (optional)
       </label>
       <span id="organisation-name-error" class="govuk-error-message">
-        <span class="govuk-visually-hidden">Error:</span> @fieldError2(form.errors, "organisation", true)
+        <span class="govuk-visually-hidden">Error:</span> @fieldError(form.errors, "organisation", true)
       </span>
       <input 
         type="text"
@@ -107,7 +107,7 @@
         Email address
       </label>
       <span id="email-address-error" class="govuk-error-message">
-        <span class="govuk-visually-hidden">Error:</span> @fieldError2(form.errors, "emailaddress", form.error("submissionError").isEmpty)
+        <span class="govuk-visually-hidden">Error:</span> @fieldError(form.errors, "emailaddress", form.error("submissionError").isEmpty)
       </span>
       <input 
         type="text"
@@ -121,7 +121,7 @@
       />
     </div>
 
-    @include.passwords2("Create password", "Confirm password", form)
+    @include.passwords("Create password", "Confirm password", form)
 
     <p class="govuk-body">
       By creating an account you agree to our

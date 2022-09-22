@@ -51,7 +51,7 @@
       <div class="govuk-form-group @if(form.errors("applicationName").nonEmpty) {govuk-form-group--error}">
 
         <p id="verified-error" class="govuk-error-message">
-          <span class="govuk-visually-hidden">Error: </span> @fieldError2(form.errors, "applicationName", form.error("submissionError").isEmpty)
+          <span class="govuk-visually-hidden">Error: </span> @fieldError(form.errors, "applicationName", form.error("submissionError").isEmpty)
         </p>
 
         <p class="govuk-body">

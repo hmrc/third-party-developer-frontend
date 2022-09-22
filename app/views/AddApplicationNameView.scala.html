@@ -51,7 +51,7 @@
     }
     <div class="govuk-form-group @if(form.errors("applicationName").nonEmpty) {govuk-form-group--error}">
       <label class="govuk-label" for="applicationName" id="applicationName-label">Application name</label>
-      @fieldError2(form.errors, "applicationName", form.error("submissionError").isEmpty)
+      @fieldError(form.errors, "applicationName", form.error("submissionError").isEmpty)
       <input
         type="text"
         id="applicationName"

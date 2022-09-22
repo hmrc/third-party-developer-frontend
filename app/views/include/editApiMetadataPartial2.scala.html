@@ -43,7 +43,7 @@
               @{field.description}
             </label>
             <span id="@fieldName-hint" class="govuk-hint">@{field.hint}</span>
-            @fieldError2(field.errors, fieldName)
+            @fieldError(field.errors, fieldName)
             <input
               type="text"
               name="@{fieldName}"
