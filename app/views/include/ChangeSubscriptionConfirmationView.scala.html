@@ -76,7 +76,7 @@
         </legend>
         <div id="confirm" class="govuk-radios govuk-radios--inline" data-module="govuk-radios">
           @helper.CSRF.formField
-          @fieldError(form.errors, "confirm")
+          @fieldError2(form.errors, "confirm")
           <div class="govuk-radios__item">
             <input id="confirm-yes" class="govuk-radios__input" type="radio" name="confirm" value="true">
             <label class="govuk-label govuk-radios__label" for="confirm-yes">Yes</label>

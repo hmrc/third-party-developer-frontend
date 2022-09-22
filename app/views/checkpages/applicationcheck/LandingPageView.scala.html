@@ -62,7 +62,7 @@
         <tbody class="govuk-table__body">
           <tr class="govuk-table__row @if(form.errors("apiSubscriptionsConfirmed").nonEmpty) {form-group-error}">
             <td id="apiSubscriptions" class="govuk-table__cell">
-              @include.fieldError(form.errors, "apiSubscriptions")
+              @include.fieldError2(form.errors, "apiSubscriptions")
               <a class="govuk-link govuk-link--no-visited-state" id="apiSubscriptionsCompleted" href="@controllers.checkpages.routes.ApplicationCheck.apiSubscriptionsPage(app.id)">
                 Confirm the APIs your application uses
               </a>
@@ -79,7 +79,7 @@
           @if(applicationView.hasSubscriptionsFields){
             <tr class="govuk-table__row @if(form.errors("apiSubscriptionConfigurationsConfirmed").nonEmpty) {form-group-error}">
               <td id="apiSubscriptionConfigurations" class="govuk-table__cell">
-                @include.fieldError(form.errors, "apiSubscriptionConfigurations")
+                @include.fieldError2(form.errors, "apiSubscriptionConfigurations")
                 <a class="govuk-link govuk-link--no-visited-state" id="apiSubscriptionConfigurationsCompleted" href="@controllers.routes.ManageSubscriptions.subscriptionConfigurationStart(app.id)">
                   Configure your API subscriptions
                 </a>
@@ -96,7 +96,7 @@
 
           <tr class="govuk-table__row @if(form.errors("contactDetails").nonEmpty){form-group-error}">
             <td id="contactDetails" class="govuk-table__cell">
-              @include.fieldError(form.errors,"contactDetails")
+              @include.fieldError2(form.errors,"contactDetails")
               <a class="govuk-link govuk-link--no-visited-state" id="contactDetailsCompleted" href="@controllers.checkpages.routes.ApplicationCheck.contactPage(app.id)">
                 Who to contact about your application
               </a>
@@ -112,7 +112,7 @@
 
           <tr class="govuk-table__row @if(form.errors("teamConfirmed").nonEmpty){form-group-error}">
             <td id="teamConfirmed" class="govuk-table__cell">
-              @include.fieldError(form.errors,"teamConfirmed")
+              @include.fieldError2(form.errors,"teamConfirmed")
               <a class="govuk-link govuk-link--no-visited-state" id="teamConfirmedCompleted" href="@controllers.checkpages.routes.ApplicationCheck.team(app.id)">
                 Tell us your team members
               </a>
@@ -128,7 +128,7 @@
 
           <tr class="govuk-table__row @if(form.errors("confirmedName").nonEmpty){form-group-error}">
             <td id="confirmedName" class="govuk-table__cell">
-              @include.fieldError(form.errors,"confirmedName")
+              @include.fieldError2(form.errors,"confirmedName")
               <a class="govuk-link govuk-link--no-visited-state" id="confirmedNameCompleted" href="@controllers.checkpages.routes.ApplicationCheck.namePage(app.id)">
                 Confirm the name of your software
               </a>
@@ -163,7 +163,7 @@
         <tbody class="govuk-table__body">
           <tr class="govuk-table__row @if(form.errors("providedPolicyURL").nonEmpty){form-group-error}">
             <td id="providedPolicyURL" class="govuk-table__cell">
-              @include.fieldError(form.errors,"providedPolicyURL")
+              @include.fieldError2(form.errors,"providedPolicyURL")
               <a class="govuk-link govuk-link--no-visited-state" id="providedPolicyURLCompleted" href="@controllers.checkpages.routes.ApplicationCheck.privacyPolicyPage(app.id)">
                 Tell us if your application has a privacy policy
               </a>
@@ -179,7 +179,7 @@
 
           <tr class="govuk-table__row @if(form.errors("providedTermsAndConditionsURL").nonEmpty){form-group-error}">
             <td id="providedTermsAndConditionsURL" class="govuk-table__cell">
-              @include.fieldError(form.errors,"providedTermsAndConditionsURL")
+              @include.fieldError2(form.errors,"providedTermsAndConditionsURL")
               <a class="govuk-link govuk-link--no-visited-state" id="providedTermsAndConditionsURLCompleted" href="@controllers.checkpages.routes.ApplicationCheck.termsAndConditionsPage(app.id)">
                 Tell us if your application has terms and conditions
               </a>
@@ -195,7 +195,7 @@
 
           <tr class="govuk-table__row @if(form.errors("agreeTermsOfUse").nonEmpty){form-group-error}">
             <td id="agreeTermsOfUse" class="govuk-table__cell">
-              @include.fieldError(form.errors,"agreeTermsOfUse")
+              @include.fieldError2(form.errors,"agreeTermsOfUse")
               <a class="govuk-link govuk-link--no-visited-state" id="termsOfUseAgreementsCompleted" href="@controllers.checkpages.routes.ApplicationCheck.termsOfUsePage(app.id)">
                 Agree to our terms of use
               </a>
