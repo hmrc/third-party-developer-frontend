@@ -45,10 +45,7 @@ class BreadcrumbsSpec extends AsyncHmrcSpec with GuiceOneServerPerSuite with Sha
       val document = Jsoup.parse(contentAsString(page))
       val breadcrumbText = document.body.select("li").text()
 
-      println(breadcrumbText)
-
       breadcrumbText shouldBe List("Home", "View all applications", "An Application Name", "Another Breadcrumb").mkString(" ")
-
     }
   }
 
