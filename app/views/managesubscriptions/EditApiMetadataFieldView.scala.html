@@ -40,7 +40,7 @@
 @pageHeading = @{ s"${viewModel.apiName} ${viewModel.apiVersion.value} ${viewModel.displayedStatus}" }
 
 @devMain(
-  title = pageHeading,
+  title = viewModel.field.description,
   userFullName = loggedIn.loggedInName,
   developerSession = Some(loggedIn),
   breadcrumbs = Seq(
