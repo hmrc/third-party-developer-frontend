@@ -137,7 +137,6 @@ class DeletePrincipalApplicationSpec
       status(result) shouldBe OK
       val body = contentAsString(result)
 
-      body should include("Delete application")
       body should include("Request submitted")
       verify(underTest.applicationService).requestPrincipalApplicationDeletion(eqTo(loggedInDeveloper), eqTo(application))(*)
     }
