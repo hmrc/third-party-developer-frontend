@@ -25,7 +25,7 @@
 @import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.APISubscriptions
 @import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.CollaboratorRole
 
-@this(devMain: DevMain2)
+@this(devMain: DevMain2WithFormErrors)
 @(
     applicationId: ApplicationId,
     role: CollaboratorRole,
@@ -41,13 +41,12 @@
 @pageHeading = @{ "Turn off API subscriptions you don’t need" }
 
 @devMain(
-    title = pageHeading,
-    userFullName = loggedIn.loggedInName,
-    back = BackButtonWithJavaScript,
-    developerSession = Some(loggedIn)
+  form = errorForm,
+  title = pageHeading,
+  userFullName = loggedIn.loggedInName,
+  back = BackButtonWithJavaScript,
+  developerSession = Some(loggedIn)
 ) {
-  @errorSummary(errorForm)
-
   @subscriptions match {
     case Nil => {
       <h1 class="govuk-heading-l">@pageHeading</h1>
@@ -62,7 +61,7 @@
         <div class="form-group @if(errorForm.errors("apiSubscriptions").nonEmpty){form-group-error}">
           <h1 class="govuk-heading-l">@pageHeading</h1>
 
-          @fieldError(errorForm.errors, "apiSubscriptions", true)
+          @fieldError2(errorForm.errors, "apiSubscriptions", true)
           
           <div class="govuk-accordion" data-module="govuk-accordion" id="accordion-default">
             @subscriptions.map { case apiSubscription =>
