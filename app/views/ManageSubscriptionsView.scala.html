@@ -30,19 +30,24 @@
 @import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.subscriptions.ApiData
 @import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers._
 
-@this(devMain: DevMain, subscriptionGroups: SubscriptionGroups, leftHandNav: LeftHandNav)
+@this(devMain: DevMain2, subscriptionGroups: SubscriptionGroups, leftHandNav: LeftHandNav)
 
 @(
-    role: CollaboratorRole, 
-    data: PageData, 
-    form: Form[uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.EditApplicationForm], 
-    applicationView: ApplicationViewModel, 
-    subscriptions: Option[GroupedSubscriptions], 
-    openAccessApis: Map[ApiContext, ApiData],
-    id: ApplicationId,
-    fraudPreventionNavLinkViewModel: Option[FraudPreventionNavLinkViewModel]
+  role: CollaboratorRole,
+  data: PageData, 
+  form: Form[uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.EditApplicationForm], 
+  applicationView: ApplicationViewModel, 
+  subscriptions: Option[GroupedSubscriptions], 
+  openAccessApis: Map[ApiContext, ApiData],
+  id: ApplicationId,
+  fraudPreventionNavLinkViewModel: Option[FraudPreventionNavLinkViewModel]
 )(
-    implicit request: play.api.mvc.Request[Any], loggedIn: DeveloperSession, messagesProvider: MessagesProvider, applicationConfig: ApplicationConfig, navSection: String = "subscriptions")
+  implicit request: play.api.mvc.Request[Any],
+  loggedIn: DeveloperSession,
+  messagesProvider: MessagesProvider,
+  applicationConfig: ApplicationConfig,
+  navSection: String = "subscriptions"
+)
 
 @app = @{applicationView.application}
 
@@ -62,32 +67,37 @@
     leftNav = Some(leftHandNav(Option(applicationView), Option(navSection), Map.empty, fraudPreventionNavLinkViewModel)),
     developerSession = Some(loggedIn)
 ) {
-    <h1 class="heading-xlarge">Manage API subscriptions</h1>
+    <h1 class="govuk-heading-l">Manage API subscriptions</h1>
 
-    @appEnvironment(app)
-    <br>
+    @appEnvironment2(app)
+    
+    <hr class="govuk-section-break govuk-section-break--m govuk-section-break--visible">
 
     @subscriptions match {
         case Some(groupedSubscriptions) => {
-            <p>You must subscribe to an API so your application can access it.
-                You’ll receive notifications about its lifecycle events, such as new version introductions
-                and old version retirements.</p>
+            <p class="govuk-body">
+              You must subscribe to an API so your application can access it.
+              You’ll receive notifications about its lifecycle events, such as new version introductions
+              and old version retirements.
+            </p>
 
-            <p>Learn more about our APIs in @Link.toInternalPage(url = s"${applicationConfig.apiDocumentationFrontendUrl}/api-documentation/docs/api", value = Some("API documentation")).toHtml.</p>
+            <p class="govuk-body">
+              Learn more about our APIs in @Link.toInternalPage(url = s"${applicationConfig.apiDocumentationFrontendUrl}/api-documentation/docs/api", value = Some("API documentation")).toHtml.
+            </p>
 
             @if(role.isAdministrator && isPendingOrActiveProductionApplication(app)) {
-                <p class="panel panel-border-wide">For security reasons we must review any API subscription changes. This takes up to 2 working days.</p>
+                <p class="govuk-inset-text">For security reasons we must review any API subscription changes. This takes up to 2 working days.</p>
             }
 
             @if(role.isDeveloper && isPendingOrActiveProductionApplication(app)) {
-                <p class="panel panel-border-wide">You need admin rights to make API subscription changes.</p>
+                <p class="govuk-inset-text">You need admin rights to make API subscription changes.</p>
             }
 
             @subscriptionGroups(role, groupedSubscriptions, openAccessApis, app, API_SUBSCRIPTIONS_PAGE, true)
         }
 
         case _ => {
-            <p class="panel panel-border-wide">We can’t load your API subscriptions at the moment.<br>
+            <p class="govuk-body">We can’t load your API subscriptions at the moment.<br>
             Please <a href="@{controllers.routes.SubscriptionsController.manageSubscriptions(id)}">try again</a> later</p>
         }
     }

@@ -121,7 +121,6 @@ POST        /applications/:id/responsible-individual/change/other               
 GET         /applications/:id/responsible-individual/change/other/requested                              uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.ManageResponsibleIndividualController.showResponsibleIndividualChangeToOtherRequested(id: ApplicationId)
 
 GET         /applications/:id/subscriptions                                                              uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.SubscriptionsController.manageSubscriptions(id: ApplicationId)
-GET         /applications/:id/subscriptionsNew                                                           uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.SubscriptionsController.manageSubscriptionsNew(id: ApplicationId)
 
 POST        /applications/:id/change-subscription                                                        uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.SubscriptionsController.changeApiSubscription(id: ApplicationId, context: ApiContext, version: ApiVersion, redirectTo: String)
 
