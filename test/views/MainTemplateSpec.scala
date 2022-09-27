@@ -20,6 +20,7 @@ import org.jsoup.Jsoup
 import uk.gov.hmrc.thirdpartydeveloperfrontend.builder.DeveloperBuilder
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.{DeveloperSession, LoggedInState, Session}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.views.{GenericFeedbackBanner, NoBackButton}
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.controllers.Crumb
 import play.twirl.api.{Html, HtmlFormat}
 import play.api.test.FakeRequest
 import views.helper.CommonViewSpec
@@ -41,23 +42,20 @@ class MainTemplateSpec extends CommonViewSpec with DeveloperBuilder with LocalUs
 
       val view: Html = mainView.render(
         title = "Test",
-        navTitle = None,
         navTitleLink = None,
-        headerNavLinks = HtmlFormat.empty,
-        contentHeader = None,
-        sidebar = None,
-        serviceInfoContent = None,
-        fullWidthBanner = None,
-        leftNav = None,
+        userFullName = None,
+        isRegistering = false,
         breadcrumbs = Seq.empty,
+        leftNav = None,
+        fullWidth = true,
         back = NoBackButton,
-        fullWidthContent = false,
-        developerSession = Some(developerSession),
+        fullWidthContent = true,
+        feedbackBanner = Some(GenericFeedbackBanner),
         mainContent = HtmlFormat.empty,
-        messagesProvider = messagesProvider,
-        applicationConfig = appConfig,
         request = request,
-        feedbackBanner = Some(GenericFeedbackBanner))
+        messages = messagesProvider.messages,
+        applicationConfig = appConfig
+      )
 
       view.body should include("data-title=\"Application Title")
 
@@ -65,7 +63,6 @@ class MainTemplateSpec extends CommonViewSpec with DeveloperBuilder with LocalUs
 
       elementExistsById(document, "feedback") shouldBe true
       document.getElementById("feedback-title").text() shouldBe "Your feedback helps us improve our service"
-
     }
   }
 }

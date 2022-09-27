@@ -17,11 +17,11 @@
 @import include._
 @import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.controllers.Crumb
 @import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.DeveloperSession
-@import views.html.include.DevMain2
+@import views.html.include.DevMain
 @import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.routes
 @import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.DeleteProfileForm
 
-@this(devMain: DevMain2WithFormErrors, leftHandNav: LeftHandNav)
+@this(devMain: DevMainWithFormErrors, leftHandNav: LeftHandNav)
 
 @(form: Form[DeleteProfileForm])(implicit request: play.api.mvc.Request[Any], loggedIn: DeveloperSession, appConfig: ApplicationConfig, messagesProvider: MessagesProvider, navSection: String = "manage-profile")
 
@@ -46,7 +46,7 @@
         <legend id="confirmation" class="govuk-fieldset__legend">
           Are you sure you want us to delete your account?
         </legend>
-        @fieldError2(form.errors, "confirmation", form.error("confirmation").isEmpty)
+        @fieldError(form.errors, "confirmation", form.error("confirmation").isEmpty)
         <div class="govuk-radios govuk-radios--inline">
           <div class="govuk-radios__item">
             <input type="radio" class="govuk-radios__input" name="confirmation" id="deleteAccountYes" value="true"/>

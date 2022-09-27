@@ -21,7 +21,7 @@
 @import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers
 @import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.DeleteRedirectConfirmationForm
 
-@this(devMain: DevMain2WithFormErrors, leftHandNav: LeftHandNav)
+@this(devMain: DevMainWithFormErrors, leftHandNav: LeftHandNav)
 
 @(applicationViewModel: ApplicationViewModel, form: Form[DeleteRedirectConfirmationForm], redirectUri: String)(implicit request: play.api.mvc.Request[Any], loggedIn: DeveloperSession, messages: Messages, applicationConfig: ApplicationConfig, navSection: String = "redirects")
 
@@ -42,7 +42,7 @@
 ) {
   <h1 class="govuk-heading-l">Delete a redirect URI</h1>
 
-  @appEnvironment2(application)
+  @appEnvironment(application)
   <br>
 
   <h2 class="govuk-heading-m">Redirect URI</h2>
@@ -57,7 +57,7 @@
         @helper.CSRF.formField
         <input id="redirectUri" name="redirectUri" class="form-control" hidden aria-hidden="true" type="text" value="@redirectUri">
         <span id="deleteRedirectConfirm-error" class="govuk-error-message">
-          <span class="govuk-visually-hidden">Error:</span> @fieldError2(form.errors, "deleteRedirectConfirm")
+          <span class="govuk-visually-hidden">Error:</span> @fieldError(form.errors, "deleteRedirectConfirm")
         </span>
         <div class="govuk-radios govuk-radios--inline">
           <div class="govuk-radios__item">

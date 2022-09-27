@@ -17,14 +17,14 @@
 @import include._
 @import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.controllers.Crumb
 @import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.controllers.EditManageSubscription._
-@import views.html.include.DevMain2
+@import views.html.include.DevMain
 @import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.Application
 @import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.DeveloperSession
 @import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.controllers.SaveSubsFieldsPageMode
 @import views.helper.IdFormatter
 @import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.routes
 
-@this(devMain: DevMain2)
+@this(devMain: DevMain)
 
 @(
   app: Application,
@@ -50,7 +50,7 @@
   )
 ) {
 
-  @errorSummaryForFormErrors2(viewModel.errors)
+  @errorSummaryForFormErrors(viewModel.errors)
 
   <span class="govuk-caption-l">@pageHeading</span>
   <br>
@@ -71,7 +71,7 @@
         @{viewModel.field.hint}
       </div>
 
-      @fieldError2(viewModel.field.errors, viewModel.field.name.value)
+      @fieldError(viewModel.field.errors, viewModel.field.name.value)
       <input
         type="text"
         name="@{viewModel.field.name.value}"

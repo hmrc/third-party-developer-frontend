@@ -21,7 +21,7 @@
 @import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.views.BackButtonToUrl
 @import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.ResponsibleIndividualChangeToOtherForm
 
-@this(devMain: DevMain2WithFormErrors)
+@this(devMain: DevMainWithFormErrors)
 
 @(app: Application, form: Form[ResponsibleIndividualChangeToOtherForm])(implicit request: play.api.mvc.Request[Any], loggedIn: DeveloperSession, messages: Messages, applicationConfig: ApplicationConfig)
 
@@ -47,7 +47,7 @@
             <label class="govuk-label" for="name">
                 First and last name
             </label>
-            @fieldError2(form.errors, "name")
+            @fieldError(form.errors, "name")
             <input class="govuk-input govuk-!-width-one-half" id="name" value="@form.data.getOrElse("name", "")" name="name" type="text">
         </div>
 
@@ -58,7 +58,7 @@
             <div id="event-name-hint" class="govuk-hint">
                 Cannot be a shared mailbox.
             </div>
-            @fieldError2(form.errors, "email")
+            @fieldError(form.errors, "email")
             <input class="govuk-input govuk-!-width-three-quarters" id="email" value="@form.data.getOrElse("email", "")"name="email" type="text">
         </div>
 

@@ -15,11 +15,11 @@
  *@
 
 @import include._
-@import views.html.include.DevMain2
+@import views.html.include.DevMain
 @import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.DeveloperSession
 @import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.routes
 
-@this(devMain: DevMain2)
+@this(devMain: DevMain)
 
 @()(implicit request: play.api.mvc.Request[Any], loggedIn: DeveloperSession, appConfig: ApplicationConfig, messages: Messages, navSection: String = "protect-account")
 

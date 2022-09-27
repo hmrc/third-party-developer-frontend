@@ -17,13 +17,13 @@
 @import include._
 @import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.controllers.Crumb
 @import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.controllers.EditManageSubscription._
-@import views.html.include.DevMain2
+@import views.html.include.DevMain
 @import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.Application
 @import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.controllers.SaveSubsFieldsPageMode
 @import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.DeveloperSession
 @import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.routes
 
-@this(devMain: DevMain2)
+@this(devMain: DevMain)
 
 @(
   app: Application,
@@ -48,14 +48,14 @@
     Crumb.application(app)
   )
 ) {
-  @errorSummaryForFormErrors2(viewModel.errors)
+  @errorSummaryForFormErrors(viewModel.errors)
   <h1 class="govuk-heading-l">@{pageHeading}</h1>
 
-  @appEnvironment2(app)
+  @appEnvironment(app)
 
   <br>
 
-  @editApiMetadataPartial2(
+  @editApiMetadataPartial(
     app,
     viewModel,
     routes.ManageSubscriptions.saveSubscriptionFields(app.id, viewModel.apiContext, viewModel.apiVersion, mode)

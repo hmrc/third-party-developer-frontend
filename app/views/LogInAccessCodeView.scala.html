@@ -20,7 +20,7 @@
 @import include._
 @import uk.gov.hmrc.apiplatform.modules.mfa.models.MfaId
 
-@this(devMain: DevMain2WithFormErrors)
+@this(devMain: DevMainWithFormErrors)
 
 @(form: Form[MfaAccessCodeForm], mfaId: MfaId)(implicit messages: Messages, request: play.api.mvc.Request[Any], appConfig: ApplicationConfig)
 
@@ -38,7 +38,7 @@
     <p class="govuk-body">This is the 6 digit code from your authentication app.</p>
     <div class="govuk-form-group @if(form.errors("accessCode").nonEmpty){form-group-error govuk-form-group--error}">
       <label class="govuk-label" for="accessCode" id="access-code-label">Access code</label>
-      @fieldError2(form.errors, "accessCode", true)
+      @fieldError(form.errors, "accessCode", true)
       <input 
         type="text"
         autocomplete="off"

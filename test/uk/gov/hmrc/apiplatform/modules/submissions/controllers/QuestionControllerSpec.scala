@@ -47,7 +47,6 @@ import uk.gov.hmrc.apiplatform.modules.submissions.domain.models.QuestionnaireSt
 import java.time.ZoneOffset
 import java.time.LocalDateTime
 import uk.gov.hmrc.apiplatform.modules.submissions.domain.models.PossibleAnswer
-import views.html.include.errorSummary
 import uk.gov.hmrc.apiplatform.modules.submissions.domain.models.ErrorInfo
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.controllers.NoSubscriptionFieldsRefinerBehaviour
 

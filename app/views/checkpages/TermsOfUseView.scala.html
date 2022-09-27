@@ -23,7 +23,7 @@
 @import java.time.format.DateTimeFormatter
 @import java.time.format.FormatStyle
 
-@this(devMain: DevMain2WithFormErrors)
+@this(devMain: DevMainWithFormErrors)
 
 @(applicationViewModel: ApplicationViewModel, form: Form[TermsOfUseForm], submitButtonLabel: String, submitAction: Call, landingPageRoute: Call, termsOfUseVersion: TermsOfUseVersion)(implicit request: play.api.mvc.Request[Any], loggedIn: DeveloperSession, messagesProvider: MessagesProvider, applicationConfig: ApplicationConfig)
 
@@ -59,7 +59,7 @@
       <fieldset class="govuk-fieldset">
         @if(form("termsOfUseAgreed").value.isEmpty || form("termsOfUseAgreed").value.contains("false")) {
           @defining(DateTimeFormatter.ofLocalizedDate(FormatStyle.LONG)) { dateFormatter =>
-            @fieldError2(form.errors, "termsOfUseAgreed", true)
+            @fieldError(form.errors, "termsOfUseAgreed", true)
             <div class="govuk-checkboxes">
               <div class="govuk-checkboxes__item">
                 <input type="checkbox" id="termsOfUseAgreed" class="govuk-checkboxes__input" name="termsOfUseAgreed" value="true"/>

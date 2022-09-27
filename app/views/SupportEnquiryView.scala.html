@@ -18,7 +18,7 @@
 @import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.controllers.Crumb
 @import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.routes
 
-@this(devMain: DevMain2WithFormErrors)
+@this(devMain: DevMainWithFormErrors)
 
 @(loggedIn: Option[String], form: Form[uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.SupportEnquiryForm])(implicit request: play.api.mvc.Request[Any], messages: Messages, appConfig: ApplicationConfig)
 
@@ -57,7 +57,7 @@
 
       <div id="fullname" class="govuk-form-group @if(form.errors("fullname").nonEmpty){govuk-form-group--error}">
         <label class="govuk-label" for="fullname-field" id="fullname-label">Full name</label>
-        @fieldError2(form.errors, "fullname", true)
+        @fieldError(form.errors, "fullname", true)
         <input
           id="fullname-field"
           type="text"
@@ -70,7 +70,7 @@
 
       <div id="emailaddress" class="govuk-form-group @if(form.errors("emailaddress").nonEmpty){govuk-form-group--error}">
         <label class="govuk-label" for="emailaddress-field" id="emailaddress-label">Email address</label>
-        @fieldError2(form.errors, "emailaddress", true)
+        @fieldError(form.errors, "emailaddress", true)
         <input
           id="emailaddress-field"
           type="text"
@@ -86,7 +86,7 @@
 
       <div id="comments" class="govuk-form-group @if(form.errors("comments").nonEmpty){govuk-form-group--error}">
         <label class="govuk-label" for="comments-field" id="comments-label">What do you need help with?</label>
-        @fieldError2(form.errors, "comments", true)
+        @fieldError(form.errors, "comments", true)
         <p id="help-input-hint" class="govuk-hint">Don't include any personal or financial information. For example, National Insurance or credit card numbers.</p>
         <textarea id="comments-field"
         class="js-char-count govuk-textarea @if(form.errors("comments").nonEmpty){govuk-input--error}"

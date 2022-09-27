@@ -22,7 +22,7 @@
 @import uk.gov.hmrc.apiplatform.modules.submissions.controllers.VerifyResponsibleIndividualController.HasVerifiedForm
 @import uk.gov.hmrc.apiplatform.modules.submissions.controllers.VerifyResponsibleIndividualController.ViewModel
 
-@this(devMain: DevMain2WithFormErrors)
+@this(devMain: DevMainWithFormErrors)
 
 @(model: ViewModel, form: Form[HasVerifiedForm])(
   implicit request: play.api.mvc.Request[Any], messagesProvider: MessagesProvider, applicationConfig: ApplicationConfig
@@ -54,7 +54,7 @@
       </ul>
 
       <p id="verified-error" class="govuk-error-message">
-        <span class="govuk-visually-hidden">Error: </span> @fieldError2(form.errors, "verified", form.error("submissionError").isEmpty)
+        <span class="govuk-visually-hidden">Error: </span> @fieldError(form.errors, "verified", form.error("submissionError").isEmpty)
       </p>
 
       <div class="govuk-radios govuk-radios--inline">

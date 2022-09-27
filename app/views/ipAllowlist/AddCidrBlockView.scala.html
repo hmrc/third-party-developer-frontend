@@ -16,14 +16,13 @@
 
 @import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.views.{BackButtonWithJavaScript, NoBackButton}
 @import include._
-@import views.html.include.DevMain
 @import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.DeveloperSession
 @import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.Application
 @import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.flows.IpAllowlistFlow
 @import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.controllers.Crumb
 @import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.routes
 
-@this(devMain: DevMain2WithFormErrors)
+@this(devMain: DevMainWithFormErrors)
 
 @(app: Application, ipAllowlistFlow: IpAllowlistFlow, form: Form[uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.AddCidrBlockForm])(
   implicit request: play.api.mvc.Request[Any], loggedIn: DeveloperSession, messages: Messages, applicationConfig: ApplicationConfig
@@ -67,7 +66,7 @@
       }
     </h1>
 
-    @appEnvironment2(app)
+    @appEnvironment(app)
 
     <br>
 

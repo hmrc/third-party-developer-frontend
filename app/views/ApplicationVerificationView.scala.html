@@ -23,16 +23,13 @@
 
 @(success: Boolean)(implicit request: play.api.mvc.Request[Any], messagesProvider: MessagesProvider, applicationConfig: ApplicationConfig)
 
-@main(title = applicationConfig.title,
-  navTitle = Some(applicationConfig.title),
+@main(
+  title = applicationConfig.title,
   navTitleLink = None,
   breadcrumbs = Seq(
     Crumb("Email verified"),
     Crumb.home
-  ),
-  headerNavLinks = headerNavLinks(StaticNavLinks(applicationConfig.apiDocumentationFrontendUrl, applicationConfig.thirdPartyDeveloperFrontendUrl)),
-  serviceInfoContent = Some(HtmlFormat.empty),
-  developerSession = None
+  )
 ) {
   @if(success) {
     <div class="govuk-panel govuk-panel--confirmation">

@@ -21,7 +21,7 @@
 @import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.controllers.ApplicationViewModel
 @import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.DeveloperSession
 
-@this(devMain: DevMain2WithFormErrors, leftHandNav: LeftHandNav)
+@this(devMain: DevMainWithFormErrors, leftHandNav: LeftHandNav)
 
 @(applicationViewModel: ApplicationViewModel, form: Form[ChangeRedirectForm])(implicit request: play.api.mvc.Request[Any], loggedIn: DeveloperSession, messages: Messages, applicationConfig: ApplicationConfig, navSection: String = "redirects")
 
@@ -42,7 +42,7 @@
 ) {
   <h1 class="govuk-heading-l">Change a redirect URI</h1>
 
-  @appEnvironment2(application)
+  @appEnvironment(application)
   <br>
 
   @helper.form(action = controllers.routes.Redirects.changeRedirectAction(application.id), 'class -> "form") {
@@ -53,7 +53,7 @@
         Must be a valid <a class="govuk-link" href="/api-documentation/docs/reference-guide#redirect-uris" target="_self" data-sso="false">redirect URI</a>.
       </div>
       <span id="newRedirectUri-error" class="govuk-error-message">
-        <span class="govuk-visually-hidden">Error:</span> @fieldError2(form.errors, "newRedirectUri")
+        <span class="govuk-visually-hidden">Error:</span> @fieldError(form.errors, "newRedirectUri")
       </span>
       <input class="govuk-input @if(form.errors("newRedirectUri").nonEmpty) {govuk-input--error}" type="text" id="newRedirectUri" name="newRedirectUri" value="@form.data.get("newRedirectUri")">
       <label class="govuk-visually-hidden" aria-hidden="true" for="originalRedirectUri">

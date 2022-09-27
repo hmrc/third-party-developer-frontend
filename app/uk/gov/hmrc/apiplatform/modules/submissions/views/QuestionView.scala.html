@@ -23,7 +23,7 @@
 @import play.api.mvc.Request
 @import uk.gov.hmrc.apiplatform.modules.submissions.controllers.QuestionsController.ViewErrorInfo
 
-@this(devMain: DevMain2)(implicit applicationConfig: ApplicationConfig)
+@this(devMain: DevMain)(implicit applicationConfig: ApplicationConfig)
 
 @(question: Question, applicationId: ApplicationId, submitAction: Call, currentAnswers: Option[ActualAnswer], errorInfo: Option[ViewErrorInfo])(implicit request: Request[Any], messages: Messages, loggedIn: DeveloperSession)
 

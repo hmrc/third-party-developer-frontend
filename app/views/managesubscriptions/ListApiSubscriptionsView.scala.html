@@ -20,11 +20,11 @@
 @import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.controllers.Crumb
 @import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.ManageSubscriptions.ApiDetails
 @import views.helper.IdFormatter
-@import views.html.include.appEnvironment2
-@import views.html.include.DevMain2
+@import views.html.include.appEnvironment
+@import views.html.include.DevMain
 @import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.routes
 
-@this(devMain: DevMain2)
+@this(devMain: DevMain)
 
 @(app: Application, details: Seq[ApiDetails])(
   implicit request: play.api.mvc.Request[Any],
@@ -48,7 +48,7 @@
 ) {
   <h1 class="govuk-heading-l">@pageHeading</h1>
 
-  @appEnvironment2(app)
+  @appEnvironment(app)
 
   <br>
 

@@ -30,7 +30,7 @@
 @import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.subscriptions.ApiData
 @import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers._
 
-@this(devMain: DevMain2, subscriptionGroups: SubscriptionGroups, leftHandNav: LeftHandNav)
+@this(devMain: DevMain, subscriptionGroups: SubscriptionGroups, leftHandNav: LeftHandNav)
 
 @(
   role: CollaboratorRole,
@@ -69,7 +69,7 @@
 ) {
     <h1 class="govuk-heading-l">Manage API subscriptions</h1>
 
-    @appEnvironment2(app)
+    @appEnvironment(app)
     
     <hr class="govuk-section-break govuk-section-break--m govuk-section-break--visible">
 

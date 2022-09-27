@@ -21,7 +21,7 @@
 @import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.Details.ApplicationNameModel
 @import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.routes
 
-@this(devMain: DevMain2WithFormErrors)
+@this(devMain: DevMainWithFormErrors)
 
 @(form: Form[uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.ChangeOfApplicationNameForm], model: ApplicationNameModel)(
   implicit request: play.api.mvc.Request[Any], loggedIn: DeveloperSession, messagesProvider: MessagesProvider, applicationConfig: ApplicationConfig
@@ -51,7 +51,7 @@
       <div class="govuk-form-group @if(form.errors("applicationName").nonEmpty) {govuk-form-group--error}">
 
         <p id="verified-error" class="govuk-error-message">
-          <span class="govuk-visually-hidden">Error: </span> @fieldError2(form.errors, "applicationName", form.error("submissionError").isEmpty)
+          <span class="govuk-visually-hidden">Error: </span> @fieldError(form.errors, "applicationName", form.error("submissionError").isEmpty)
         </p>
 
         <p class="govuk-body">

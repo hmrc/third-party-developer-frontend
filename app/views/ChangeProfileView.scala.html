@@ -17,10 +17,10 @@
 @import include._
 @import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.controllers.Crumb
 @import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.DeveloperSession
-@import views.html.include.DevMain2
+@import views.html.include.DevMain
 @import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.routes
 
-@this(devMain: DevMain2WithFormErrors, leftHandNav: LeftHandNav)
+@this(devMain: DevMainWithFormErrors, leftHandNav: LeftHandNav)
 
 @(form: Form[uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.ProfileForm])(implicit request: play.api.mvc.Request[Any], loggedIn: DeveloperSession, appConfig: ApplicationConfig, messagesProvider: MessagesProvider, navSection: String = "manage-profile")
 
@@ -42,7 +42,7 @@
     @helper.CSRF.formField
     <div class="govuk-form-group @if(form.errors("firstname").nonEmpty) {govuk-form-group--error}">
         <label class="govuk-label govuk-!-font-weight-bold" for="firstname" id="firstname-label">First name</label>
-        @fieldError2(form.errors, "firstname")
+        @fieldError(form.errors, "firstname")
         <input type="text"
                 id="firstname"
                 name="firstname"
@@ -51,7 +51,7 @@
     </div>
     <div class="govuk-form-group @if(form.errors("lastname").nonEmpty) {govuk-form-group--error}">
         <label class="govuk-label govuk-!-font-weight-bold" for="lastname" id="lastname-label">Last name</label>
-        @fieldError2(form.errors, "lastname")
+        @fieldError(form.errors, "lastname")
         <input type="text"
                 id="lastname"
                 name="lastname"
@@ -60,7 +60,7 @@
     </div>
     <div class="govuk-form-group @if(form.errors("organisation").nonEmpty) {govuk-form-group--error}">
         <label class="govuk-label govuk-!-font-weight-bold" for="organisation" id="organisation-label">Organisation (optional)</label>
-        @fieldError2(form.errors, "organisation")
+        @fieldError(form.errors, "organisation")
         <input type="text"
                 id="organisation"
                 name="organisation"

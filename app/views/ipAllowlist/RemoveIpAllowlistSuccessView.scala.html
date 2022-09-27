@@ -15,13 +15,12 @@
  *@
 
 @import include._
-@import views.html.include.DevMain
 @import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.Application
 @import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.DeveloperSession
 @import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.controllers.Crumb
 @import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.routes
 
-@this(devMain: DevMain2)
+@this(devMain: DevMain)
 
 @(app: Application)(
 implicit request: play.api.mvc.Request[Any], loggedIn: DeveloperSession, messages: Messages, applicationConfig: ApplicationConfig)
@@ -49,7 +48,7 @@ implicit request: play.api.mvc.Request[Any], loggedIn: DeveloperSession, message
     </div>
 
     <br>
-    @appEnvironment2(app)
+    @appEnvironment(app)
     <br>
 
     <p class="govuk-body">

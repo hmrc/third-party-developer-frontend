@@ -19,7 +19,7 @@
 @import include._
 @import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.controllers.Crumb
 
-@this(devMain: DevMain2WithFormErrors)
+@this(devMain: DevMainWithFormErrors)
 
 @(form: Form[uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.AddApplicationNameForm], environment: Environment
 )(implicit request: play.api.mvc.Request[Any], loggedIn: DeveloperSession, messagesProvider: MessagesProvider, appConfig: ApplicationConfig)
@@ -51,7 +51,7 @@
     }
     <div class="govuk-form-group @if(form.errors("applicationName").nonEmpty) {govuk-form-group--error}">
       <label class="govuk-label" for="applicationName" id="applicationName-label">Application name</label>
-      @fieldError2(form.errors, "applicationName", form.error("submissionError").isEmpty)
+      @fieldError(form.errors, "applicationName", form.error("submissionError").isEmpty)
       <input
         type="text"
         id="applicationName"

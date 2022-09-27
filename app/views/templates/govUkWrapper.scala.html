@@ -18,7 +18,6 @@
 @import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.controllers.Crumb
 @import play.twirl.api.HtmlFormat
 @import views.html.include.FeedbackBannerView
-@import uk.gov.hmrc.play.views.html.helpers.ReportAProblemLink
 @import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.DeveloperSession
 @import uk.gov.hmrc.hmrcfrontend.views.html.helpers.HmrcTrackingConsentSnippet
 
@@ -27,7 +26,6 @@
 @import templates._
 @import views.templates._
 
-@import uk.gov.hmrc.play.views.html.layouts._
 @import uk.gov.hmrc.hmrcfrontend.views.html.components._
 @import uk.gov.hmrc.hmrcfrontend.views.html.helpers._
 @import uk.gov.hmrc.hmrcfrontend.views.viewmodels.language.En
@@ -82,6 +80,9 @@
 
 @head = {
   <link href='@routes.Assets.versioned("stylesheets/main.css")' media="screen" rel="stylesheet" type="text/css" />
+  @if(navTitle.isDefined) {
+    <meta data-title="@navTitle.get"/>
+  }
   @hmrcTrackingConsentSnippet()
   @timeoutBlock
 }
@@ -100,7 +101,7 @@
 
 @beforeContentBlock = {
   <div class="before-content-banner">
-    @include.breadcrumbs2(breadcrumbs: _*)
+    @include.breadcrumbs(breadcrumbs: _*)
     @backLink
     @serviceInfoContent
   </div>

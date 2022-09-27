@@ -20,7 +20,7 @@
 @import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.controllers.Crumb
 @import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.DeveloperSession
 
-@this(devMain: DevMain2)
+@this(devMain: DevMain)
 
 @(app: Application, roleOfLoggedIn: CollaboratorRole)(
         implicit request: play.api.mvc.Request[Any], loggedIn: DeveloperSession, messages: Messages, applicationConfig: ApplicationConfig)
@@ -42,7 +42,7 @@
     <div class="ip-allowlist">
         <h1 class="govuk-heading-l">IP allow list</h1>
 
-        @appEnvironment2(app)
+        @appEnvironment(app)
 
         <br>
 

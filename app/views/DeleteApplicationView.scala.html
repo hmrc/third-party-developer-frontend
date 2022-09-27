@@ -22,7 +22,7 @@
 @import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.Environment
 @import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.routes
 
-@this(devMain: DevMain2)
+@this(devMain: DevMain)
 
 @(app: Application, roleOfLoggedIn: CollaboratorRole)(
 implicit request: play.api.mvc.Request[Any], loggedIn: DeveloperSession, messagesProvider: MessagesProvider, applicationConfig: ApplicationConfig)
@@ -35,7 +35,7 @@ implicit request: play.api.mvc.Request[Any], loggedIn: DeveloperSession, message
 ) {
   <h1 class="govuk-heading-l">Delete application</h1>
 
-  @appEnvironment2(app)
+  @appEnvironment(app)
 
   <br>
 

@@ -18,12 +18,12 @@
 @import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.emailpreferences.APICategoryDisplayDetails
 @import include._
 @import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.views.BackButtonWithJavaScript
-@import views.html.include.DevMain2
+@import views.html.include.DevMain
 @import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.flows.EmailPreferencesFlowV2
 @import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.profile.routes
 @import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.TaxRegimeEmailPreferencesForm
 
-@this(devMain: DevMain2WithFormErrors)
+@this(devMain: DevMainWithFormErrors)
 
 @(form: Form[TaxRegimeEmailPreferencesForm], categories: List[APICategoryDisplayDetails], selectedCategories: Set[String])(implicit messages: Messages, loggedIn: DeveloperSession, request: play.api.mvc.Request[Any], appConfig: ApplicationConfig)
 
@@ -51,7 +51,7 @@
         <div id="which-api-cat-hint" class="govuk-hint">
           Select all that apply.
         </div>
-        @fieldError2(form.errors, "taxRegime")
+        @fieldError(form.errors, "taxRegime")
         <div class="govuk-checkboxes" data-module="govuk-checkboxes">
           @for(category <- categories){
             <div class="govuk-checkboxes__item">
