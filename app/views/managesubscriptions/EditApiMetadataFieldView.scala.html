@@ -38,9 +38,11 @@
 )
 
 @pageHeading = @{ s"${viewModel.apiName} ${viewModel.apiVersion.value} ${viewModel.displayedStatus}" }
+@pageTitle = @{viewModel.field.description}
+
 
 @devMain(
-  title = pageHeading,
+  title = pageTitle,
   userFullName = loggedIn.loggedInName,
   developerSession = Some(loggedIn),
   breadcrumbs = Seq(
@@ -64,7 +66,7 @@
     <div class="govuk-form-group @if(viewModel.field.errors.nonEmpty){form-group-error}">
       <h1 class="govuk-label-wrapper">
         <label class="govuk-label govuk-label--l" for="@{viewModel.field.name.value}">
-          @{viewModel.field.description}
+          @pageTitle
         </label>
       </h1>
       <div id="@{viewModel.field.name.value}-hint" class="govuk-hint">

@@ -23,14 +23,17 @@
 @(app: Application)(
   implicit request: play.api.mvc.Request[Any], loggedIn: DeveloperSession, messagesProvider: MessagesProvider, applicationConfig: ApplicationConfig
 )
+@pageTitle = @{"Request submitted"}
 
 @devMain(
-  title = "Delete application",
+  title = pageTitle,
   userFullName = loggedIn.loggedInName,
   developerSession = Some(loggedIn)
 ) {
   <div class="govuk-box-highlight">
-    <h1 class="govuk-heading-l govuk-highlight-text">Request submitted</h1>
+    <h1 class="govuk-heading-l govuk-highlight-text">
+        @pageTitle
+    </h1>
   </div>
 
   <p class="govuk-body">You have requested to delete your application.</p>
