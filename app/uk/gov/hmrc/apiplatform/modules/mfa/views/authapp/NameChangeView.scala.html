@@ -16,13 +16,13 @@
 
 @import include._
 @import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.views.BackButtonWithJavaScript
-@import views.html.include.DevMain2
+@import views.html.include.DevMain
 @import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.DeveloperSession
 @import uk.gov.hmrc.apiplatform.modules.mfa.controllers.profile.routes
 @import uk.gov.hmrc.apiplatform.modules.mfa.models.MfaId
 @import uk.gov.hmrc.apiplatform.modules.mfa.forms.MfaNameChangeForm
 
-@this(devMain: DevMain2WithFormErrors)
+@this(devMain: DevMainWithFormErrors)
 
 @(form: Form[MfaNameChangeForm], mfaId: MfaId)(implicit messages: Messages, request: play.api.mvc.Request[Any], loggedIn: DeveloperSession, appConfig: ApplicationConfig)
 
@@ -43,7 +43,7 @@
 
     <div class="govuk-form-group @if(form.errors("name").nonEmpty){govuk-form-group--error}">
       <label class="govuk-label govuk-!-font-weight-bold" for="name" id="name-label">App Name</label>
-      @fieldError2(form.errors, "name")
+      @fieldError(form.errors, "name")
       <input
         type="text"
         autocomplete="off"

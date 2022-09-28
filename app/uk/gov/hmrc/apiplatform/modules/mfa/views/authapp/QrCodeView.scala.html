@@ -15,12 +15,12 @@
  *@
 
 @import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.views.BackButtonWithJavaScript
-@import views.html.include.DevMain2
+@import views.html.include.DevMain
 @import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.DeveloperSession
 @import uk.gov.hmrc.apiplatform.modules.mfa.controllers.profile.routes
 @import uk.gov.hmrc.apiplatform.modules.mfa.models.MfaId
 
-@this(devMain: DevMain2)
+@this(devMain: DevMain)
 
 @(secret: String, qrImg: String, mfaId: MfaId)(implicit request: play.api.mvc.Request[Any], loggedIn: DeveloperSession, appConfig: ApplicationConfig, messages: Messages)
 
