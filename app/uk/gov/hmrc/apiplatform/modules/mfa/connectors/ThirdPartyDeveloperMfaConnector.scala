@@ -74,6 +74,17 @@ class ThirdPartyDeveloperMfaConnector @Inject()(http: HttpClient, config: Applic
     }
   }
 
+  def changeName(userId: UserId, mfaId: MfaId, updatedName: String)(implicit hc: HeaderCarrier): Future[Boolean] = {
+    metrics.record(api) {
+      http.POST[ChangeMfaNameRequest, ErrorOrUnit](s"$serviceBaseUrl/developer/${userId.value}/mfa/${mfaId.value}/name", ChangeMfaNameRequest(updatedName))
+        .map {
+          case Right(()) => true
+          case Left(UpstreamErrorResponse(_,BAD_REQUEST,_,_)) => false
+          case Left(err) => throw err
+        }
+    }
+  }
+
   def createDeviceSession(userId: UserId)(implicit hc: HeaderCarrier): Future[Option[DeviceSession]] = metrics.record(api) {
       http.POST[String ,ErrorOr[DeviceSession]](s"$serviceBaseUrl/device-session/user/${userId.value}", "")
       .map {

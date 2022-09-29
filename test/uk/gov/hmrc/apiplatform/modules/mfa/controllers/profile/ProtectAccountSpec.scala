@@ -14,15 +14,8 @@
  * limitations under the License.
  */
 
-package uk.gov.hmrc.thirdpartydeveloperfrontend.controllers
+package uk.gov.hmrc.apiplatform.modules.mfa.controllers.profile
 
-import java.net.URI
-import uk.gov.hmrc.thirdpartydeveloperfrontend.builder.{DeveloperBuilder, MfaDetailBuilder}
-import uk.gov.hmrc.thirdpartydeveloperfrontend.config.ErrorHandler
-import uk.gov.hmrc.thirdpartydeveloperfrontend.connectors.ThirdPartyDeveloperConnector
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.connectors.UpdateLoggedInStateRequest
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.{LoggedInState, Session}
-import uk.gov.hmrc.thirdpartydeveloperfrontend.mocks.service.SessionServiceMock
 import org.jsoup.Jsoup
 import org.scalatest.Assertion
 import play.api.http.Status
@@ -33,19 +26,24 @@ import play.api.test.Helpers._
 import play.filters.csrf.CSRF.TokenProvider
 import uk.gov.hmrc.apiplatform.modules.mfa.connectors.ThirdPartyDeveloperMfaConnector
 import uk.gov.hmrc.apiplatform.modules.mfa.connectors.ThirdPartyDeveloperMfaConnector.RegisterAuthAppResponse
-import uk.gov.hmrc.apiplatform.modules.mfa.controllers.profile.ProtectAccount
 import uk.gov.hmrc.apiplatform.modules.mfa.models.MfaId
 import uk.gov.hmrc.apiplatform.modules.mfa.service.{MFAResponse, MFAService, MfaMandateService}
+import uk.gov.hmrc.thirdpartydeveloperfrontend.builder.{DeveloperBuilder, MfaDetailBuilder}
+import uk.gov.hmrc.thirdpartydeveloperfrontend.config.ErrorHandler
+import uk.gov.hmrc.thirdpartydeveloperfrontend.connectors.ThirdPartyDeveloperConnector
+import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.BaseControllerSpec
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.connectors.UpdateLoggedInStateRequest
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.{LoggedInState, Session, UserId}
+import uk.gov.hmrc.thirdpartydeveloperfrontend.mocks.service.SessionServiceMock
 import uk.gov.hmrc.thirdpartydeveloperfrontend.qr.{OtpAuthUri, QRCode}
-import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.WithCSRFAddToken
+import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.{LocalUserIdTracker, WithCSRFAddToken}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.WithLoggedInSession._
 import views.html.protectaccount._
 
+import java.net.URI
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 import scala.concurrent.Future.successful
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.UserId
-import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.LocalUserIdTracker
 
 class ProtectAccountSpec extends BaseControllerSpec with WithCSRFAddToken with DeveloperBuilder with LocalUserIdTracker with MfaDetailBuilder {
 
