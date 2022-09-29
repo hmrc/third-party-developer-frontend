@@ -14,29 +14,23 @@ ipAllowlist.cidrBlock.invalid = Enter a CIDR notation in the correct format, for
 ipAllowlist.cidrBlock.invalid.private = You must use a public network range
 ipAllowlist.cidrBlock.invalid.range = Enter a CIDR notation with the correct netmask range. We accept netmask ranges between 24 and 32
 
-firstname.error.required.field=Provide your first name
-firstname.error.required.global=Provide your first name
+firstname.error.required.field=Enter your first name
+firstname.error.required.global=Enter your first name
 
 firstname.error.maxLength.field=Provide a first name with fewer than 30 letters
 firstname.error.maxLength.global=Provide a first name with fewer than 30 letters
 
-firstname.error.required.field.heading = Provide your first name
-firstname.error.maxLength.field.heading = Provide a first name with fewer than 30 letters
-
-lastname.error.required.field=Provide your last name
-lastname.error.required.global=Provide your last name
+lastname.error.required.field=Enter your last name
+lastname.error.required.global=Enter your last name
 
 lastname.error.maxLength.field=Provide a last name with fewer than 30 letters
 lastname.error.maxLength.global=Provide a last name with fewer than 30 letters
 
-lastname.error.required.field.heading = Provide your last name
-lastname.error.maxLength.field.heading = Provide a last name with fewer than 30 letters
+emailaddress.error.required.field=Enter your email address
+emailaddress.error.required.global=Enter your email address
 
-emailaddress.error.required.field=Provide your email address
-emailaddress.error.required.global=Provide your email address
-
-emailaddress.error.not.valid.field=Provide a valid email address
-emailaddress.error.not.valid.global=Provide a valid email address
+emailaddress.error.not.valid.field=Enter an email address in the correct format, like name@example.com
+emailaddress.error.not.valid.global=Enter an email address in the correct format, like name@example.com
 
 emailaddress.already.registered.global=Choose an email address that is not already registered
 emailaddress.already.registered.field=Choose an email address that is not already registered
@@ -47,17 +41,17 @@ emailaddress.error.maxLength.global=Provide an email address with fewer than 320
 termsofuse.error.required.global=You must agree to our terms of use
 termsofuse.error.required.field=You must agree to our terms of use
 
-password.error.required.field=Create and confirm your password
-password.error.required.global=Create and confirm your password
-password.error.not.valid.field=Your password must have at least 12 characters and contain at least one number, lowercase letter, uppercase letter and special character
-password.error.not.valid.global=Choose a password that follows our rules
+password.error.required.field=Enter a password
+password.error.required.global=Enter a password
+password.error.not.valid.field=Enter a new password in the correct format
+password.error.not.valid.global=Enter a new password in the correct format
 password.error.no.match.field=Your passwords do not match
 password.error.no.match.global=Your passwords do not match
 
-loginpassword.error.required.field=Provide your password
+loginpassword.error.required.field=Enter your password
 
-currentpassword.error.required.field=Provide your old password
-currentpassword.error.required.global=Provide your old password
+currentpassword.error.required.field=Enter your current Developer Hub password
+currentpassword.error.required.global=Enter your current Developer Hub password
 
 currentpassword.invalid.field = Your old password is incorrect
 currentpassword.invalid.global = Your old password is incorrect
