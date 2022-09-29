@@ -16,17 +16,16 @@
 
 package uk.gov.hmrc.apiplatform.modules.submissions.services
 
-import javax.inject.{Inject, Singleton}
-import uk.gov.hmrc.http.HeaderCarrier
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.connectors.DeskproTicket
-import uk.gov.hmrc.thirdpartydeveloperfrontend.connectors.DeskproConnector
-import uk.gov.hmrc.thirdpartydeveloperfrontend.service.ApplicationService
-import scala.concurrent.Future
-import scala.concurrent.ExecutionContext
-import uk.gov.hmrc.apiplatform.modules.submissions.domain.models.{ErrorDetails, ResponsibleIndividualVerification}
 import uk.gov.hmrc.apiplatform.modules.common.services.EitherTHelper
 import uk.gov.hmrc.apiplatform.modules.submissions.connectors.ThirdPartyApplicationSubmissionsConnector
-import uk.gov.hmrc.apiplatform.modules.submissions.domain.models.ResponsibleIndividualToUVerification
+import uk.gov.hmrc.apiplatform.modules.submissions.domain.models.{ErrorDetails, ResponsibleIndividualToUVerification, ResponsibleIndividualVerification}
+import uk.gov.hmrc.http.HeaderCarrier
+import uk.gov.hmrc.thirdpartydeveloperfrontend.connectors.DeskproConnector
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.connectors.DeskproTicket
+import uk.gov.hmrc.thirdpartydeveloperfrontend.service.ApplicationService
+
+import javax.inject.{Inject, Singleton}
+import scala.concurrent.{ExecutionContext, Future}
 
 @Singleton
 class ResponsibleIndividualVerificationService @Inject()(

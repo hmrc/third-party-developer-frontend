@@ -168,6 +168,9 @@ delete.redirect.confirmation.no.choice.field = Tell us if you want to delete thi
 accessCode.invalid.name.field = You have entered an invalid access code
 accessCode.invalid.name.global = You have entered an invalid access code
 
+mfaName.invalid.name.field = The name must be more than 3 characters in length
+mfaName.invalid.name.global = The name must be more than 3 characters in length
+
 error.selectedcategories.nonselected.field = Select a category you are interested in
 error.selectedcategories.nonselected.global = Select a category you are interested in
 

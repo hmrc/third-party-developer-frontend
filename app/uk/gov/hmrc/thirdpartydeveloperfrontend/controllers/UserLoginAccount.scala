@@ -22,6 +22,7 @@ import play.api.libs.crypto.CookieSigner
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents, Request, Result, Session => PlaySession}
 import uk.gov.hmrc.apiplatform.modules.common.services.ApplicationLogger
 import uk.gov.hmrc.apiplatform.modules.mfa.connectors.ThirdPartyDeveloperMfaConnector
+import uk.gov.hmrc.apiplatform.modules.mfa.forms.MfaAccessCodeForm
 import uk.gov.hmrc.apiplatform.modules.mfa.models.{DeviceSession, MfaId}
 import uk.gov.hmrc.apiplatform.modules.mfa.service.MfaMandateService
 import uk.gov.hmrc.apiplatform.modules.mfa.utils.MfaDetailHelper
@@ -114,6 +115,7 @@ class UserLoginAccount @Inject()(val auditService: AuditService,
                                 playSession: PlaySession,
                                 userId: UserId)(implicit request: Request[AnyContent]): Future[Result] = {
 
+
     // In each case retain the Play session so that 'access_uri' query param, if set, is used at the end of the 2SV reminder flow
     (userAuthenticationResponse.session, userAuthenticationResponse.accessCodeRequired) match {
       case (Some(session), false) if session.loggedInState.isLoggedIn =>
@@ -146,17 +148,40 @@ class UserLoginAccount @Inject()(val auditService: AuditService,
       case (None, true) =>
         // TODO: delete device session cookie --- If Device cookie is going to be refreshed / recreated do we need to delete it?
         thirdPartyDeveloperConnector.fetchDeveloper(userId) map {
-          case Some(developer: Developer) =>
-            val authAppMfaId = MfaDetailHelper.getAuthAppMfaVerified(developer.mfaDetails).id
-            Redirect(
-              routes.UserLoginAccount.enterTotp(authAppMfaId), SEE_OTHER
-            ).withSession(
-              playSession + ("emailAddress" -> login.emailaddress) + ("nonce" -> userAuthenticationResponse.nonce.get)
-            )
+          case Some(developer: Developer) => handleMfaChoices(developer, playSession, login.emailaddress, userAuthenticationResponse.nonce.getOrElse(""))
           case None => throw new UserNotFound
         }
 
     }
+  }
+
+  private def handleMfaChoices(developer: Developer, playSession: PlaySession, emailAddress: String, nonce: String) ={
+
+    def handleAuthAppFlow()  ={
+      val authAppMfaId = MfaDetailHelper.getAuthAppMfaVerified(developer.mfaDetails).id
+      Redirect(
+        routes.UserLoginAccount.enterTotp(authAppMfaId), SEE_OTHER
+      ).withSession(
+        playSession + ("emailAddress" -> emailAddress) + ("nonce" -> nonce)
+      )
+    }
+
+    def handleSMSFlow() ={
+      NotImplemented("This is not implemented yet")
+    }
+
+    def handleMfaChoiceFlow() ={
+      NotImplemented("This is not implemented yet")
+    }
+
+    (MfaDetailHelper.isAuthAppMfaVerified(developer.mfaDetails), MfaDetailHelper.isSmsMfaVerified(developer.mfaDetails)) match {
+      case (true, false) => handleAuthAppFlow()
+      case (false, true) => handleSMSFlow
+      case (true, true) => // handleMfaChoiceFlow
+      handleAuthAppFlow()
+      case (false, false) => InternalServerError("Access code required but mfa not set up")
+    }
+
   }
 
   def authenticate: Action[AnyContent] = Action.async { implicit request =>
@@ -262,17 +287,3 @@ class UserLoginAccount @Inject()(val auditService: AuditService,
     } yield Ok(protectAccountNoAccessCodeCompleteView())
   }
 }
-
-
-final case class MfaAccessCodeForm(accessCode: String, rememberMe: Boolean)
-
-object MfaAccessCodeForm {
-  def form: Form[MfaAccessCodeForm] = Form(
-    mapping(
-      "accessCode" -> text.verifying(FormKeys.accessCodeInvalidKey, s => s.matches("^[0-9]{6}$")),
-      "rememberMe" -> boolean
-
-    )(MfaAccessCodeForm.apply)(MfaAccessCodeForm.unapply)
-  )
-}
-

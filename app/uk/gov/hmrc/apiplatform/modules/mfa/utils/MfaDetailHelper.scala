@@ -21,13 +21,19 @@ import uk.gov.hmrc.apiplatform.modules.mfa.models.{AuthenticatorAppMfaDetailSumm
 object MfaDetailHelper {
 
   def isAuthAppMfaVerified(mfaDetails: List[MfaDetail]): Boolean = {
-    //TODO: This will be modified when the SMS authentication is added.
     mfaDetails
       .exists(x => x.mfaType == MfaType.AUTHENTICATOR_APP && x.verified)
+  }
+
+  def isSmsMfaVerified(mfaDetails: List[MfaDetail]): Boolean = {
+    mfaDetails
+      .exists(x => x.mfaType == MfaType.SMS && x.verified)
   }
 
   def getAuthAppMfaVerified(mfaDetails: List[MfaDetail]): AuthenticatorAppMfaDetailSummary = {
     mfaDetails.filter(x => x.mfaType == MfaType.AUTHENTICATOR_APP && x.verified)
       .head.asInstanceOf[AuthenticatorAppMfaDetailSummary]
   }
+
+
 }
