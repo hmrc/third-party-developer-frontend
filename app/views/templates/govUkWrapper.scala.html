@@ -44,7 +44,8 @@
   hmrcTrackingConsentSnippet: HmrcTrackingConsentSnippet
 )
 
-@(title: String,
+@(
+  title: String,
   navTitle: Option[String] = None,
   navTitleLink: Option[play.api.mvc.Call] = None,
   headerNavLinks: Html = HtmlFormat.empty,
@@ -61,7 +62,8 @@
   bodyEndBlock: Option[Html] = None,
   feedbackBanner: Option[FeedbackBanner] = None,
   fullWidth: Boolean = false,
-  timeout: Boolean = true
+  timeout: Boolean = true,
+  additionalScriptsBlock: Option[Html] = None
 )(contentBlock: Html)(implicit request: Request[_], messages: Messages)
 
 @timeoutBlock = {
@@ -157,10 +159,12 @@
 @scripts = {
   <script src='@routes.Assets.versioned("lib/govuk-frontend/govuk/all.js")'></script>
   <script src='@routes.Assets.versioned("lib/hmrc-frontend/hmrc/all.js")'></script>
-  <script src='@routes.Assets.versioned("javascripts/subscriptionsNew.js")' type="text/javascript"></script> 
+  <script src='@routes.Assets.versioned("javascripts/subscriptions.js")' type="text/javascript"></script> 
   <script>window.GOVUKFrontend.initAll();</script>
   <script>window.HMRCFrontend.initAll();</script>
   <script src='@routes.Assets.versioned("javascripts/feedback.js")' type="text/javascript"></script>
+
+  @additionalScriptsBlock
 }
 
 @bodyEndDefault = {
