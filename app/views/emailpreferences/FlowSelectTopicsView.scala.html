@@ -19,11 +19,11 @@
 @import include._
 @import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.views.BackButtonWithJavaScript
 @import uk.gov.hmrc.urls.Link
-@import views.html.include.DevMain2
+@import views.html.include.DevMain
 @import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.profile.routes
 @import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.SelectedTopicsEmailPreferencesForm
 
-@this(devMain: DevMain2WithFormErrors)
+@this(devMain: DevMainWithFormErrors)
 
 @(form: Form[SelectedTopicsEmailPreferencesForm], selectedTopics: Set[String])(implicit messages: Messages, loggedIn: DeveloperSession, request: play.api.mvc.Request[Any], appConfig: ApplicationConfig)
 
@@ -53,7 +53,7 @@
         @helper.CSRF.formField
         <div class="govuk-form-group @if(form.errors("topic").nonEmpty){govuk-form-group--error}">
 
-          @fieldError2(form.errors, "topic")
+          @fieldError(form.errors, "topic")
           <a name="topic"></a>
           <div class="govuk-checkboxes" data-module="govuk-checkboxes">
               @for(topic <- List(BUSINESS_AND_POLICY, TECHNICAL, RELEASE_SCHEDULES).sortBy(_.displayOrder)) {

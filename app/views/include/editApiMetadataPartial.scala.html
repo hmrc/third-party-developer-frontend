@@ -15,7 +15,6 @@
  *@
 
 @import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.controllers.EditManageSubscription.EditApiConfigurationViewModel
-@import views.html.include.fieldError
 @import views.helper.IdFormatter
 @import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.Application
 
@@ -30,40 +29,38 @@
 
 @helper.form(
   action = formPostUrl,
-  'class -> "fields-subscription") {
+  'class -> "fields-subscription"
+) {
 
   @helper.CSRF.formField
 
   @for((field, idx) <- viewModel.fields.zipWithIndex) {
     @if(field.canWrite) {
-
       @defining(field.name.value) { fieldName =>
-      @defining(field.value.value) { fieldValue =>
-          <div class="form-group @if(field.errors.nonEmpty){form-group-error}">
-
-            @fieldError(field.errors, fieldName)
-
-            <label class="form-label" for="@fieldName">
+        @defining(field.value.value) { fieldValue =>
+          <div class="govuk-form-group @if(field.errors.nonEmpty){govuk-form-group--error}">
+            <label class="govuk-label" for="@fieldName">
               @{field.description}
             </label>
-            <span class="form-hint">@{field.hint}</span>
-
-            <input type="text"
+            <span id="@fieldName-hint" class="govuk-hint">@{field.hint}</span>
+            @fieldError(field.errors, fieldName)
+            <input
+              type="text"
               name="@{fieldName}"
               value="@{fieldValue}"
-              class="form-input input--medium @if(field.errors.nonEmpty){form-control-error}"
-              id="@{fieldName}" />
+              class="govuk-input input--medium @if(field.errors.nonEmpty){govuk-input--error}"
+              id="@{fieldName}"
+            />
           </div>
-      }}
+        }
+      } 
     }
   }
 
- <div class="form-group">
-  <button id="@{IdFormatter.identifier(viewModel.apiContext, viewModel.apiVersion)}-submit" class="button submit-button" type="submit">Save changes</button>
-
-  @if(skipLink.isDefined){
-   <a href="@{skipLink.get}" class="secondary-button">I'll do this later</a>
-  }
-
- </div>
+  <div class="govuk-button-group">
+    <button id="@{IdFormatter.identifier(viewModel.apiContext, viewModel.apiVersion)}-submit" class="govuk-button" type="submit">Save changes</button>
+    @if(skipLink.isDefined){
+      <a href="@{skipLink.get}" class="govuk-link govuk-link--no-visited-state">I'll do this later</a>
+    }
+  </div>
 }

@@ -17,14 +17,14 @@
 @import include._
 @import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.controllers.Crumb
 @import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.controllers.EditManageSubscription._
-@import views.html.include.DevMain2
+@import views.html.include.DevMain
 @import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.Application
 @import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.DeveloperSession
 @import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.controllers.SaveSubsFieldsPageMode
 @import views.helper.IdFormatter
 @import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.routes
 
-@this(devMain: DevMain2)
+@this(devMain: DevMain)
 
 @(
   app: Application,
@@ -38,9 +38,11 @@
 )
 
 @pageHeading = @{ s"${viewModel.apiName} ${viewModel.apiVersion.value} ${viewModel.displayedStatus}" }
+@pageTitle = @{viewModel.field.description}
+
 
 @devMain(
-  title = pageHeading,
+  title = pageTitle,
   userFullName = loggedIn.loggedInName,
   developerSession = Some(loggedIn),
   breadcrumbs = Seq(
@@ -50,7 +52,7 @@
   )
 ) {
 
-  @errorSummaryForFormErrors2(viewModel.errors)
+  @errorSummaryForFormErrors(viewModel.errors)
 
   <span class="govuk-caption-l">@pageHeading</span>
   <br>
@@ -64,14 +66,14 @@
     <div class="govuk-form-group @if(viewModel.field.errors.nonEmpty){form-group-error}">
       <h1 class="govuk-label-wrapper">
         <label class="govuk-label govuk-label--l" for="@{viewModel.field.name.value}">
-          @{viewModel.field.description}
+          @pageTitle
         </label>
       </h1>
       <div id="@{viewModel.field.name.value}-hint" class="govuk-hint">
         @{viewModel.field.hint}
       </div>
 
-      @fieldError2(viewModel.field.errors, viewModel.field.name.value)
+      @fieldError(viewModel.field.errors, viewModel.field.name.value)
       <input
         type="text"
         name="@{viewModel.field.name.value}"

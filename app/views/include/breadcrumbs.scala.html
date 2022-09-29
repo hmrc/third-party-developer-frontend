@@ -15,28 +15,28 @@
  *@
 
 @import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.controllers.Crumb
-@(crumbs: Seq[Crumb])
+@(crumbs: Crumb*)
 
 @if(crumbs.nonEmpty) {
   @*
   Note: The crumbs are in reverse order. The current page is FIRST, the top level link is LAST.
   *@
-  <nav class="breadcrumbs" aria-label="Breadcrumbs">
-    <ol itemscope itemtype="http://schema.org/BreadcrumbList">
+  <div class="govuk-breadcrumbs">
+    <ol class="govuk-breadcrumbs__list">
       @defining(crumbs.tail) { linkableCrumbs =>
         @linkableCrumbs.reverse.map { crumb =>
-          <li itemprop="itemListElement" itemscope itemtype="http://schema.org/ListItem" @if(crumb.url.isEmpty){ @crumb.dataAttribute.getOrElse("") }>
+          <li class="govuk-breadcrumbs__list-item" @if(crumb.url.isEmpty){ @crumb.dataAttribute.getOrElse("") }>
             @if(crumb.url.nonEmpty){
-              <a href="@crumb.url" itemprop="item" @crumb.dataAttribute.getOrElse("")><span itemprop="name">@crumb.name</span></a>
-            }else{
+              <a class="govuk-breadcrumbs__link" href="@crumb.url" @crumb.dataAttribute.getOrElse("")>@crumb.name</a>
+            } else{
               @crumb.name
             }
           </li>
         }
       }
-      <li itemprop="itemListElement" itemscope itemtype="http://schema.org/ListItem" @if(crumbs.head.dataAttribute.isDefined) {@crumbs.head.dataAttribute}>
-        <span itemprop="name">@crumbs.head.name</span>
+      <li class="govuk-breadcrumbs__list-item" @if(crumbs.head.dataAttribute.isDefined) {@crumbs.head.dataAttribute.get}>
+        @crumbs.head.name
       </li>
     </ol>
-  </nav>
+  </div>
 }

@@ -15,14 +15,14 @@
  *@
 
 @import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.views.BackButtonWithJavaScript
-@import views.html.include.DevMain2
+@import views.html.include.DevMain
 @import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.DeveloperSession
 @import uk.gov.hmrc.apiplatform.modules.mfa.controllers.profile.routes
 @import uk.gov.hmrc.apiplatform.modules.mfa.models.MfaDetail
 @import java.time.format.DateTimeFormatter;
 @import java.time.LocalDateTime;
 
-@this(devMain: DevMain2)
+@this(devMain: DevMain)
 @(mfaDetails: List[MfaDetail])(implicit request: play.api.mvc.Request[Any], loggedIn: DeveloperSession, appConfig: ApplicationConfig, messages: Messages)
 
 @devMain(

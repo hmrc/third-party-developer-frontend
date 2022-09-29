@@ -17,11 +17,11 @@
 @import include._
 @import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.controllers.Crumb
 @import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.controllers.ApplicationViewModel
-@import views.html.include.DevMain2
+@import views.html.include.DevMain
 @import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.DeveloperSession
 @import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.routes
 
-@this(devMain: DevMain2WithFormErrors, leftHandNav: LeftHandNav)
+@this(devMain: DevMainWithFormErrors, leftHandNav: LeftHandNav)
 
 @(applicationView: ApplicationViewModel, form: Form[uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.RemoveTeamMemberConfirmationForm], email: String = "")(
         implicit request: play.api.mvc.Request[Any], messages: Messages, applicationConfig: ApplicationConfig, navSection: String = "manage-team", loggedIn: DeveloperSession)
@@ -45,7 +45,7 @@
 ) {
   <h1 class="govuk-heading-l">Manage team members</h1>
 
-  @appEnvironment2(app)
+  @appEnvironment(app)
   <br>
 
   <h2 class="govuk-heading-m">Team member</h2>
@@ -60,7 +60,7 @@
           <h3 class="govuk-fieldset__heading">Are you sure you want to remove this team member from this application?</h3>
         </legend>
         <span id="remove-team-member-error" class="govuk-error-message">
-          <span class="govuk-visually-hidden">Error:</span> @fieldError2(form.errors, "confirm", form.error("submissionError").isEmpty)
+          <span class="govuk-visually-hidden">Error:</span> @fieldError(form.errors, "confirm", form.error("submissionError").isEmpty)
         </span>
         <div class="govuk-radios govuk-radios--inline">
           <div class="govuk-radios__item">

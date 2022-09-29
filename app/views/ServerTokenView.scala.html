@@ -20,7 +20,7 @@
 @import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.DeveloperSession
 @import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.routes
 
-@this(devMain: DevMain2)
+@this(devMain: DevMain)
 
 @(app: Application, serverToken: String)(
   implicit request: play.api.mvc.Request[Any], loggedIn: DeveloperSession, messagesProvider: MessagesProvider, applicationConfig: ApplicationConfig
@@ -85,7 +85,7 @@
   </div>
 
   <br>
-  @appEnvironment2(app)
+  @appEnvironment(app)
   <br>
 
   <div class="grid-row">

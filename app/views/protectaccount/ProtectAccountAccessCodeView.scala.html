@@ -16,13 +16,13 @@
 
 @import include._
 @import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.views.BackButtonWithJavaScript
-@import views.html.include.DevMain2
+@import views.html.include.DevMain
 @import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.DeveloperSession
 @import uk.gov.hmrc.apiplatform.modules.mfa.controllers.profile.routes
 @import uk.gov.hmrc.apiplatform.modules.mfa.controllers.profile.ProtectAccountForm
 @import uk.gov.hmrc.apiplatform.modules.mfa.models.MfaId
 
-@this(devMain: DevMain2WithFormErrors)
+@this(devMain: DevMainWithFormErrors)
 
 @(form: Form[ProtectAccountForm], mfaId: MfaId)(implicit messages: Messages, request: play.api.mvc.Request[Any], loggedIn: DeveloperSession, appConfig: ApplicationConfig)
 
@@ -38,12 +38,12 @@
 
   @helper.form(action = routes.ProtectAccount.protectAccount(mfaId)){
     @helper.CSRF.formField
-    @fieldError2(form.errors, "invalidCredentials", true)
+    @fieldError(form.errors, "invalidCredentials", true)
 
     <div class="govuk-form-group @if(form.errors("accessCode").nonEmpty){govuk-form-group--error}">
       <label class="govuk-label govuk-!-font-weight-bold" for="accessCode" id="access-code-label">Access code</label>
       <div id="access-code-hint" class="govuk-hint">This is the 6 digit code from your authenticator app.</div>
-      @fieldError2(form.errors, "accessCode", true)
+      @fieldError(form.errors, "accessCode", true)
       <input
         type="text"
         autocomplete="off"

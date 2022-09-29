@@ -22,9 +22,8 @@
 @import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.controllers.AddTeamMemberPageMode.ManageTeamMembers
 @import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.controllers.ApplicationViewModel
 @import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.controllers.FraudPreventionNavLinkViewModel
-@import views.html.include.DevMain
 
-@this(devMain: DevMain2WithFormErrors, leftHandNav: LeftHandNav)
+@this(devMain: DevMainWithFormErrors, leftHandNav: LeftHandNav)
 
 @(applicationView: ApplicationViewModel, form: Form[uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.AddTeamMemberForm], loggedIn: DeveloperSession, fraudPreventionNavLinkViewModel: Option[FraudPreventionNavLinkViewModel])(
 implicit request: play.api.mvc.Request[Any], messages: Messages, applicationConfig: ApplicationConfig, navSection: String = "manage-team")
@@ -47,7 +46,7 @@ implicit request: play.api.mvc.Request[Any], messages: Messages, applicationConf
 ) {
   <h1 class="govuk-heading-l">Add a team member</h1>
 
-  @appEnvironment2(app)
+  @appEnvironment(app)
   <br>
 
   <h2 class="govuk-heading-m">Team member</h2>

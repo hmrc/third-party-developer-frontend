@@ -22,12 +22,9 @@
 
 @()(implicit request: play.api.mvc.Request[Any], messages: Messages, applicationConfig: ApplicationConfig)
 
-@main(title = applicationConfig.title,
-    navTitle = Some(applicationConfig.title),
-    navTitleLink = Some(Call("GET", "/api-documentation")),
-    headerNavLinks = headerNavLinks(StaticNavLinks(applicationConfig.apiDocumentationFrontendUrl, applicationConfig.thirdPartyDeveloperFrontendUrl)),
-    serviceInfoContent = Some(HtmlFormat.empty),
-    developerSession = None
+@main(
+  title = applicationConfig.title,
+  navTitleLink = Some(Call("GET", "/api-documentation"))
 ) {
-  <h1>Forbidden</h1>
+  <h1 class="govuk-heading-l">Forbidden</h1>
 }

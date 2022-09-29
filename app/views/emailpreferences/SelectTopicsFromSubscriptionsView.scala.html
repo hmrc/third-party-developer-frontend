@@ -20,11 +20,11 @@
 @import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.views.BackButtonWithJavaScript
 @import uk.gov.hmrc.urls.Link
 @import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.ApplicationId
-@import views.html.include.DevMain2
+@import views.html.include.DevMain
 @import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.SelectTopicsFromSubscriptionsForm
 @import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.profile.routes
 
-@this(devMain: DevMain2WithFormErrors)
+@this(devMain: DevMainWithFormErrors)
 
 @(form: Form[SelectTopicsFromSubscriptionsForm], selectedTopics: Set[String], applicationId: ApplicationId)(implicit messages: Messages, loggedIn: DeveloperSession, request: play.api.mvc.Request[Any], appConfig: ApplicationConfig)
 
@@ -47,7 +47,7 @@
       <p class="govuk-body">
         We’ll only send you information about the APIs you are interested in.
       </p>
-        @fieldError2(form.errors, "category")
+        @fieldError(form.errors, "category")
       <div id="select-topic-hint" class="govuk-hint">Select all that apply.</div>
       @helper.form(action = routes.EmailPreferencesController.selectTopicsFromSubscriptionsAction(applicationId), 'class -> "form", 'id -> "emailPreferencesTopicsForm") {
         @helper.CSRF.formField

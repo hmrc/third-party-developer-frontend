@@ -264,6 +264,7 @@ class CheckYourAnswersSpec
         )
       )
     )
+
     private val requestWithFormBody = loggedInRequest.withFormUrlEncodedBody()
 
     val expectedCheckInformation: CheckInformation = application.checkInformation.getOrElse(CheckInformation()).copy(confirmedName = false)
@@ -272,6 +273,7 @@ class CheckYourAnswersSpec
       .thenAnswer((i: InvocationOnMock) => {
         failed(new ApplicationAlreadyExists)
       })
+
     givenUpdateCheckInformationSucceeds(application, expectedCheckInformation)
 
     private val result = addToken(underTest.answersPageAction(appId))(requestWithFormBody)
@@ -279,8 +281,8 @@ class CheckYourAnswersSpec
     status(result) shouldBe CONFLICT
     verify(underTest.applicationService).updateCheckInformation(eqTo(application), eqTo(expectedCheckInformation))(*)
 
-    private val errorMessageElement = Jsoup.parse(contentAsString(result)).select("td#confirmedName span.error-message")
-    errorMessageElement.text() shouldBe "That application name already exists. Enter a unique name for your application."
+    private val errorMessageElement = Jsoup.parse(contentAsString(result)).select("td#confirmedName span.govuk-error-message")
+    errorMessageElement.text() shouldBe "Error: That application name already exists. Enter a unique name for your application."
   }
 
   "check your answers submitted" should {

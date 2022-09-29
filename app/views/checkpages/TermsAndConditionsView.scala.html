@@ -21,7 +21,7 @@
 @import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.Application
 @import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.DeveloperSession
 
-@this(devMain: DevMain2WithFormErrors)
+@this(devMain: DevMainWithFormErrors)
 
 @(app: Application, form: Form[TermsAndConditionsForm], submitAction: Call)(implicit request: play.api.mvc.Request[Any], loggedIn: DeveloperSession, messages: Messages, applicationConfig: ApplicationConfig, navSection: String = "credentials")
 
@@ -49,7 +49,7 @@
             Do you want to add terms and conditions to your application?
           </h1>
         </legend>
-        @fieldError2(form.errors, "hasUrl")
+        @fieldError(form.errors, "hasUrl")
         <div id="hasUrl" class="govuk-radios @if(form.errors("hasUrl").nonEmpty) {govuk-form-group--error}">
           <div class="govuk-radios__item" data-target="terms-and-conditions">
             <input class="govuk-radios__input" type="radio" id="yes" name="hasUrl" value="true" data-journey-val="Yes" @if(form.data.get("hasUrl") == Some("true")) {checked}>
@@ -60,7 +60,7 @@
               <label class="govuk-label" for="termsAndConditionsURL" id="termsAndConditionsURL-label">
                 Terms & conditions URL 
               </label>
-              @fieldError2(form.errors, "termsAndConditionsURL")
+              @fieldError(form.errors, "termsAndConditionsURL")
               <input
                 type="text"
                 id="termsAndConditionsURL"

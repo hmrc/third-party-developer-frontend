@@ -22,7 +22,7 @@
 @import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.ApplicationId
 @import uk.gov.hmrc.apiplatform.modules.uplift.controllers.UpliftJourneyController.SellResellOrDistributeForm
 
-@this(devMain: DevMain2WithFormErrors)
+@this(devMain: DevMainWithFormErrors)
 
 @(applicationId: ApplicationId, form: Form[SellResellOrDistributeForm])(implicit request: play.api.mvc.Request[Any], loggedIn: DeveloperSession, messagesProvider: MessagesProvider, appConfig: ApplicationConfig)
 
@@ -43,7 +43,7 @@
                     @pageHeading
                 </h1>
             </legend>
-            @fieldError2(form.errors, "answer")
+            @fieldError(form.errors, "answer")
             <div class="govuk-radios govuk-radios--inline">
                 @helper.CSRF.formField
                 <div class="govuk-radios__item">
