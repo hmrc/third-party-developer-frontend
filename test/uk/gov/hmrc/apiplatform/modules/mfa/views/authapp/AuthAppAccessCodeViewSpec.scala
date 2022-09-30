@@ -20,7 +20,7 @@ import org.jsoup.Jsoup
 import play.api.test.{FakeRequest, StubMessagesFactory}
 import uk.gov.hmrc.apiplatform.modules.mfa.forms.MfaAccessCodeForm
 import uk.gov.hmrc.apiplatform.modules.mfa.models.MfaId
-import uk.gov.hmrc.apiplatform.modules.mfa.views.html.authapp.AccessCodeView
+import uk.gov.hmrc.apiplatform.modules.mfa.views.html.authapp.AuthAppAccessCodeView
 import uk.gov.hmrc.thirdpartydeveloperfrontend.builder.{DeveloperBuilder, DeveloperSessionBuilder}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.{DeveloperSession, LoggedInState}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.{LocalUserIdTracker, WithCSRFAddToken}
@@ -29,12 +29,12 @@ import views.helper.CommonViewSpec
 import java.util.UUID
 
 
-class AccessCodeViewSpec extends CommonViewSpec with WithCSRFAddToken with DeveloperSessionBuilder with DeveloperBuilder with LocalUserIdTracker with StubMessagesFactory {
+class AuthAppAccessCodeViewSpec extends CommonViewSpec with WithCSRFAddToken with DeveloperSessionBuilder with DeveloperBuilder with LocalUserIdTracker with StubMessagesFactory {
   implicit val request = FakeRequest()
-  val accessCodeView = app.injector.instanceOf[AccessCodeView]
+  val accessCodeView = app.injector.instanceOf[AuthAppAccessCodeView]
   implicit val loggedIn: DeveloperSession = buildDeveloperSession( loggedInState = LoggedInState.LOGGED_IN, buildDeveloper("developer@example.com", "Joe", "Bloggs"))
 
-  "AccessCodeView view" should {
+  "AuthAppAccessCodeView view" should {
     "render correctly when form is valid" in {
 
       val mainView = accessCodeView.apply(MfaAccessCodeForm.form, MfaId(UUID.randomUUID()))(stubMessages(), FakeRequest().withCSRFToken, loggedIn, appConfig)
@@ -43,6 +43,7 @@ class AccessCodeViewSpec extends CommonViewSpec with WithCSRFAddToken with Devel
       document.getElementById("submit").text shouldBe "Continue"
       Option(document.getElementById("data-field-error-accessCode")) shouldBe None
     }
+
     "render correctly when form is invalid" in {
 
       val mainView = accessCodeView.apply(MfaAccessCodeForm.form.withError("accessCode" , "You have entered an incorrect access code"), MfaId(UUID.randomUUID()))(stubMessages(), FakeRequest().withCSRFToken, loggedIn, appConfig)
@@ -50,9 +51,6 @@ class AccessCodeViewSpec extends CommonViewSpec with WithCSRFAddToken with Devel
       document.getElementById("page-heading").text shouldBe "Enter your access code"
       document.getElementById("submit").text shouldBe "Continue"
       document.getElementById("data-field-error-accessCode").text() shouldBe "Error: You have entered an incorrect access code"
-
-
     }
-
   }
 }

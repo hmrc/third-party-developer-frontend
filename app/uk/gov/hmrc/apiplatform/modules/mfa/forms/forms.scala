@@ -20,6 +20,8 @@ import play.api.data.Form
 import play.api.data.Forms.{boolean, mapping, nonEmptyText, optional, text}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.FormKeys
 
+import java.util.regex.Pattern
+
 final case class MfaAccessCodeForm(accessCode: String, rememberMe: Boolean)
 
 object MfaAccessCodeForm {
@@ -40,4 +42,29 @@ object MfaNameChangeForm {
     (MfaNameChangeForm.apply)(MfaNameChangeForm.unapply)
   )
 }
+
+final case class MobileNumberForm(mobileNumber: String )
+
+object MobileNumberForm {
+  def form: Form[MobileNumberForm] = Form(
+    mapping("mobileNumber" -> text.verifying(FormKeys.mobileNumberInvaliddKey, s => isValidPhoneNumber(s)))
+    (MobileNumberForm.apply)(MobileNumberForm.unapply)
+  )
+
+  def isValidPhoneNumber(phoneNumber: String): Boolean = {
+    Pattern.compile("^((\\+44)|(0))?\\d{10}$").matcher(phoneNumber).matches()
+  }
+}
+
+//final case class SmsAccessCodeForm(accessCode: String, mobileNumber: String)
+//
+//object SmsAccessCodeForm {
+//  def form: Form[SmsAccessCodeForm] = Form(
+//    mapping(
+//      "accessCode" -> text.verifying(FormKeys.accessCodeInvalidKey, s => s.matches("^[0-9]{6}$")),
+//      "mobileNumber" -> text
+//
+//    )(SmsAccessCodeForm.apply)(SmsAccessCodeForm.unapply)
+//  )
+//}
 

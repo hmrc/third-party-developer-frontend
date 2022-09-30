@@ -19,20 +19,22 @@ package uk.gov.hmrc.apiplatform.modules.mfa.controllers.profile
 import play.api.libs.crypto.CookieSigner
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents, Result}
 import uk.gov.hmrc.apiplatform.modules.mfa.connectors.ThirdPartyDeveloperMfaConnector
-import uk.gov.hmrc.apiplatform.modules.mfa.models.MfaId
+import uk.gov.hmrc.apiplatform.modules.mfa.models.{MfaId, SmsMfaDetailSummary}
 import uk.gov.hmrc.apiplatform.modules.mfa.service.MFAService
 import uk.gov.hmrc.apiplatform.modules.mfa.views.html.SecurityPreferencesView
-import uk.gov.hmrc.apiplatform.modules.mfa.views.html.authapp.{AccessCodeView, AuthAppSetupCompletedView, AuthAppStartView, NameChangeView, QrCodeView}
+import uk.gov.hmrc.apiplatform.modules.mfa.views.html.authapp.{AuthAppAccessCodeView, AuthAppSetupCompletedView, AuthAppStartView, NameChangeView, QrCodeView}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.config.{ApplicationConfig, ErrorHandler}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.connectors.ThirdPartyDeveloperConnector
-import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.{FormKeys, LoggedInController}
+import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.{FormKeys, LoggedInController, UserRequest}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.connectors.UpdateLoggedInStateRequest
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.{Developer, LoggedInState}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.qr.{OtpAuthUri, QRCode}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.service.SessionService
 import play.api.data.Form
 import play.api.data.Forms._
-import uk.gov.hmrc.apiplatform.modules.mfa.forms.{MfaAccessCodeForm, MfaNameChangeForm}
+import uk.gov.hmrc.apiplatform.modules.mfa.forms.{MfaAccessCodeForm, MfaNameChangeForm, MobileNumberForm}
+import uk.gov.hmrc.apiplatform.modules.mfa.utils.MfaDetailHelper.getSmsMfa
+import uk.gov.hmrc.apiplatform.modules.mfa.views.html.sms.{MobileNumberView, SmsAccessCodeView}
 import uk.gov.hmrc.play.bootstrap.controller.WithUnsafeDefaultFormBinding
 
 import javax.inject.{Inject, Singleton}
@@ -50,10 +52,12 @@ class MfaController @Inject()(
                                val cookieSigner: CookieSigner,
                                val securityPreferencesView: SecurityPreferencesView,
                                authAppStartView: AuthAppStartView,
-                               accessCodeView: AccessCodeView,
+                               authAppAccessCodeView: AuthAppAccessCodeView,
                                qrCodeView: QrCodeView,
                                authAppSetupCompletedView: AuthAppSetupCompletedView,
-                               nameChangeView: NameChangeView
+                               nameChangeView: NameChangeView,
+                               mobileNumberView: MobileNumberView,
+                               smsAccessCodeView: SmsAccessCodeView
 
 )(implicit val ec: ExecutionContext,
   val appConfig: ApplicationConfig) extends LoggedInController(mcc) with WithUnsafeDefaultFormBinding {
@@ -74,16 +78,15 @@ class MfaController @Inject()(
   val qrCode = QRCode(scale)
 
   def setupAuthApp: Action[AnyContent] = atLeastPartLoggedInEnablingMfaAction { implicit request =>
-    thirdPartyDeveloperMfaConnector.createMfaSecret(request.userId).map(registerAuthAppResponse => {
+    thirdPartyDeveloperMfaConnector.createMfaAuthApp(request.userId).map(registerAuthAppResponse => {
       val uri = otpAuthUri(registerAuthAppResponse.secret.toLowerCase, "HMRC Developer Hub", request.developerSession.email)
       val qrImg = qrCode.generateDataImageBase64(uri.toString)
       Ok(qrCodeView(registerAuthAppResponse.secret.toLowerCase().grouped(4).mkString(" "), qrImg, registerAuthAppResponse.mfaId))
     })
   }
 
-
-  def getAccessCodePage(mfaId: MfaId): Action[AnyContent] = atLeastPartLoggedInEnablingMfaAction { implicit request =>
-    Future.successful(Ok(accessCodeView(MfaAccessCodeForm.form, mfaId)))
+  def authAppAccessCodePage(mfaId: MfaId): Action[AnyContent] = atLeastPartLoggedInEnablingMfaAction { implicit request =>
+    Future.successful(Ok(authAppAccessCodeView(MfaAccessCodeForm.form, mfaId)))
   }
 
   def enableAuthApp(mfaId: MfaId): Action[AnyContent] = atLeastPartLoggedInEnablingMfaAction { implicit request =>
@@ -99,11 +102,11 @@ class MfaController @Inject()(
         .fill(form)
         .withError(key = "accessCode", message = "You have entered an incorrect access code")
 
-      BadRequest(accessCodeView(mfaAccessCodeForm, mfaId))
+      BadRequest(authAppAccessCodeView(mfaAccessCodeForm, mfaId))
     }
 
     MfaAccessCodeForm.form.bindFromRequest.fold(
-      form => Future.successful(BadRequest(accessCodeView(form, mfaId))),
+      form => Future.successful(BadRequest(authAppAccessCodeView(form, mfaId))),
       form => {
         for {
           mfaResponse <- mfaService.enableMfa(request.userId, mfaId, form.accessCode)
@@ -135,6 +138,34 @@ class MfaController @Inject()(
   def authAppSetupCompletedPage: Action[AnyContent] = atLeastPartLoggedInEnablingMfaAction { implicit request =>
     Future.successful(Ok(authAppSetupCompletedView()))
   }
+
+  def setupSms: Action[AnyContent] = atLeastPartLoggedInEnablingMfaAction { implicit request =>
+      Future.successful(Ok(mobileNumberView(MobileNumberForm.form)))
+  }
+
+  def setupSmsAction: Action[AnyContent] = atLeastPartLoggedInEnablingMfaAction { implicit request =>
+    MobileNumberForm.form.bindFromRequest.fold(
+      form => Future.successful(BadRequest(mobileNumberView(form))),
+      form => thirdPartyDeveloperMfaConnector.createMfaSms(request.userId, form.mobileNumber)
+              .map(smsDetail => Redirect(uk.gov.hmrc.apiplatform.modules.mfa.controllers.profile.routes.MfaController.smsAccessCodePage(smsDetail.id)))
+    )
+  }
+
+  def smsAccessCodePage(mfaId: MfaId): Action[AnyContent] = atLeastPartLoggedInEnablingMfaAction { implicit request =>
+    Future.successful(Ok(smsAccessCodeView(MfaAccessCodeForm.form, mfaId, getSmsMobileNumberFromRequest(request))))
+  }
+
+  def smsAccessCodeAction(mfaId: MfaId): Action[AnyContent] = atLeastPartLoggedInEnablingMfaAction { implicit request =>
+    MfaAccessCodeForm.form.bindFromRequest.fold(
+      form => Future.successful(BadRequest(smsAccessCodeView(form, mfaId, getSmsMobileNumberFromRequest(request)))),
+      form => thirdPartyDeveloperMfaConnector.verifyMfa(request.userId, mfaId, form.accessCode) map {
+        case true => Ok("all done")
+        case false => InternalServerError("error!!")
+      }
+    )
+  }
+
+  private def getSmsMobileNumberFromRequest(request: UserRequest[AnyContent]) = getSmsMfa(request.developerSession.developer.mfaDetails).mobileNumber
 
 }
 
