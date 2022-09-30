@@ -73,7 +73,7 @@
         }
 
         &:focus + label {
-          outline: 3px solid #ffbf47;
+          outline: 3px solid $govuk-focus-colour;
         }
       }
     }
