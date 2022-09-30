@@ -20,11 +20,11 @@
 @import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.DeveloperSession
 @import uk.gov.hmrc.apiplatform.modules.mfa.controllers.profile.routes
 @import uk.gov.hmrc.apiplatform.modules.mfa.models.MfaId
-@import uk.gov.hmrc.apiplatform.modules.mfa.forms.MfaAccessCodeForm
+@import uk.gov.hmrc.apiplatform.modules.mfa.forms.SmsAccessCodeForm
 
 @this(devMain: DevMainWithFormErrors)
 
-@(form: Form[MfaAccessCodeForm], mfaId: MfaId, mobileNumber: String)(implicit messages: Messages, request: play.api.mvc.Request[Any], loggedIn: DeveloperSession, appConfig: ApplicationConfig)
+@(form: Form[SmsAccessCodeForm], mfaId: MfaId, mobileNumber: String)(implicit messages: Messages, request: play.api.mvc.Request[Any], loggedIn: DeveloperSession, appConfig: ApplicationConfig)
 
 @devMain(
     form,
@@ -58,7 +58,7 @@
             />
         </div>
 
-        <input id="rememberMe" name="rememberMe" type="hidden" value="false"/>
+        <input id="mobileNumber" name="mobileNumber" type="hidden" value="@mobileNumber"/>
         <button id="submit" class="govuk-button" type="submit">Continue</button>
     }
 

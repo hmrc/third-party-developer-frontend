@@ -56,15 +56,15 @@ object MobileNumberForm {
   }
 }
 
-//final case class SmsAccessCodeForm(accessCode: String, mobileNumber: String)
-//
-//object SmsAccessCodeForm {
-//  def form: Form[SmsAccessCodeForm] = Form(
-//    mapping(
-//      "accessCode" -> text.verifying(FormKeys.accessCodeInvalidKey, s => s.matches("^[0-9]{6}$")),
-//      "mobileNumber" -> text
-//
-//    )(SmsAccessCodeForm.apply)(SmsAccessCodeForm.unapply)
-//  )
-//}
+final case class SmsAccessCodeForm(accessCode: String, mobileNumber: String)
+
+object SmsAccessCodeForm {
+  def form: Form[SmsAccessCodeForm] = Form(
+    mapping(
+      "accessCode" -> text.verifying(FormKeys.accessCodeInvalidKey, s => s.matches("^[0-9]{6}$")),
+      "mobileNumber" -> text
+
+    )(SmsAccessCodeForm.apply)(SmsAccessCodeForm.unapply)
+  )
+}
 

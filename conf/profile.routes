@@ -42,6 +42,7 @@ GET         /security-preferences/sms/setup                                     
 POST        /security-preferences/sms/setup                                                     uk.gov.hmrc.apiplatform.modules.mfa.controllers.profile.MfaController.setupSmsAction
 GET         /security-preferences/sms/access-code                                               uk.gov.hmrc.apiplatform.modules.mfa.controllers.profile.MfaController.smsAccessCodePage(mfaId: uk.gov.hmrc.apiplatform.modules.mfa.models.MfaId)
 POST        /security-preferences/sms/access-code                                               uk.gov.hmrc.apiplatform.modules.mfa.controllers.profile.MfaController.smsAccessCodeAction(mfaId: uk.gov.hmrc.apiplatform.modules.mfa.models.MfaId)
+GET         /security-preferences/sms/setup/complete                                            uk.gov.hmrc.apiplatform.modules.mfa.controllers.profile.MfaController.smsSetupCompletedPage
 
 GET         /password                                                                            uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.profile.Profile.showPasswordPage
 POST        /password                                                                            uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.profile.Profile.updatePassword
