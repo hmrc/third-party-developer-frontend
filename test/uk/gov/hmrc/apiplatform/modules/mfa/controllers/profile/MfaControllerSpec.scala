@@ -29,7 +29,8 @@ import uk.gov.hmrc.apiplatform.modules.mfa.connectors.ThirdPartyDeveloperMfaConn
 import uk.gov.hmrc.apiplatform.modules.mfa.models.MfaId
 import uk.gov.hmrc.apiplatform.modules.mfa.service.{MFAResponse, MFAService}
 import uk.gov.hmrc.apiplatform.modules.mfa.views.html.SecurityPreferencesView
-import uk.gov.hmrc.apiplatform.modules.mfa.views.html.authapp.{AccessCodeView, AuthAppSetupCompletedView, AuthAppStartView, NameChangeView, QrCodeView}
+import uk.gov.hmrc.apiplatform.modules.mfa.views.html.authapp.{AuthAppAccessCodeView, AuthAppSetupCompletedView, AuthAppStartView, NameChangeView, QrCodeView}
+import uk.gov.hmrc.apiplatform.modules.mfa.views.html.sms.{MobileNumberView, SmsAccessCodeView}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.builder.{DeveloperBuilder, MfaDetailBuilder}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.config.ErrorHandler
 import uk.gov.hmrc.thirdpartydeveloperfrontend.connectors.ThirdPartyDeveloperConnector
@@ -62,10 +63,12 @@ class MfaControllerSpec extends BaseControllerSpec with WithCSRFAddToken with De
 
     val securityPreferencesView = app.injector.instanceOf[SecurityPreferencesView]
     val authAppStartView = app.injector.instanceOf[AuthAppStartView]
-    val accessCodeView = app.injector.instanceOf[AccessCodeView]
+    val accessCodeView = app.injector.instanceOf[AuthAppAccessCodeView]
     val qrCodeView = app.injector.instanceOf[QrCodeView]
     val authAppSetupCompletedView = app.injector.instanceOf[AuthAppSetupCompletedView]
     val nameChangeView = app.injector.instanceOf[NameChangeView]
+    val mobileNumberView = app.injector.instanceOf[MobileNumberView]
+    val smsAccessCodeView = app.injector.instanceOf[SmsAccessCodeView]
 
     val underTest: MfaController = new MfaController(
       mock[ThirdPartyDeveloperConnector],
@@ -81,8 +84,10 @@ class MfaControllerSpec extends BaseControllerSpec with WithCSRFAddToken with De
       accessCodeView,
       qrCodeView,
       authAppSetupCompletedView,
-      nameChangeView
-    ){
+      nameChangeView,
+      mobileNumberView,
+      smsAccessCodeView
+    ) {
       override val qrCode: QRCode = mock[QRCode]
     }
 
@@ -96,14 +101,13 @@ class MfaControllerSpec extends BaseControllerSpec with WithCSRFAddToken with De
         .withFormUrlEncodedBody("accessCode" -> code)
     }
 
-
-  def nameChangeRequest(name: String): FakeRequest[AnyContentAsFormUrlEncoded] = {
-    FakeRequest()
-      .withLoggedIn(underTest, implicitly)(sessionId)
-      .withSession("csrfToken" -> app.injector.instanceOf[TokenProvider].generateToken)
-      .withFormUrlEncodedBody("name" -> name)
+    def nameChangeRequest(name: String): FakeRequest[AnyContentAsFormUrlEncoded] = {
+      FakeRequest()
+        .withLoggedIn(underTest, implicitly)(sessionId)
+        .withSession("csrfToken" -> app.injector.instanceOf[TokenProvider].generateToken)
+        .withFormUrlEncodedBody("name" -> name)
+    }
   }
-}
 
   trait SetupUnprotectedAccount extends Setup {
     when(underTest.thirdPartyDeveloperConnector.fetchDeveloper(eqTo(loggedInDeveloper.userId))(*))
@@ -122,7 +126,7 @@ class MfaControllerSpec extends BaseControllerSpec with WithCSRFAddToken with De
 
     when(underTest.otpAuthUri.apply(secret.toLowerCase(), issuer, loggedInDeveloper.email)).thenReturn(otpUri)
     when(underTest.qrCode.generateDataImageBase64(otpUri.toString)).thenReturn(qrImage)
-    when(underTest.thirdPartyDeveloperMfaConnector.createMfaSecret(eqTo(loggedInDeveloper.userId))(*))
+    when(underTest.thirdPartyDeveloperMfaConnector.createMfaAuthApp(eqTo(loggedInDeveloper.userId))(*))
       .thenReturn(successful(registerAuthAppResponse))
   }
 
@@ -133,7 +137,6 @@ class MfaControllerSpec extends BaseControllerSpec with WithCSRFAddToken with De
   trait LoggedIn extends Setup {
     override def loggedInState: LoggedInState = LoggedInState.LOGGED_IN
   }
-
 
   "MfaController" when {
 
@@ -233,12 +236,12 @@ class MfaControllerSpec extends BaseControllerSpec with WithCSRFAddToken with De
 
     "getAccessCodePage()" should {
       "return access code view when user is logged in" in new SetupSuccessfulStart2SV with LoggedIn {
-        val result = addToken(underTest.getAccessCodePage(mfaId))(accessCodeRequest(correctCode))
+        val result = addToken(underTest.authAppAccessCodePage(mfaId))(accessCodeRequest(correctCode))
         shouldReturnOK(result, validateAccessCodePage)
       }
 
       "return access code view when user is part logged in" in new SetupSuccessfulStart2SV with PartLogged {
-        val result = addToken(underTest.getAccessCodePage(mfaId))(accessCodeRequest(correctCode))
+        val result = addToken(underTest.authAppAccessCodePage(mfaId))(accessCodeRequest(correctCode))
         shouldReturnOK(result, validateAccessCodePage)
       }
 
@@ -253,7 +256,7 @@ class MfaControllerSpec extends BaseControllerSpec with WithCSRFAddToken with De
           .withSession("csrfToken" -> app.injector.instanceOf[TokenProvider].generateToken)
           .withFormUrlEncodedBody("accessCode" -> correctCode)
 
-        private val result: Future[Result] = addToken(underTest.getAccessCodePage(mfaId))(request)
+        private val result: Future[Result] = addToken(underTest.authAppAccessCodePage(mfaId))(request)
 
         status(result) shouldBe Status.SEE_OTHER
         redirectLocation(result) shouldBe Some("/developer/login")
@@ -262,7 +265,7 @@ class MfaControllerSpec extends BaseControllerSpec with WithCSRFAddToken with De
 
     "enableAuthApp()" should {
       "return change name view when user is logged in and enable mfa successful" in new SetupSuccessfulStart2SV with LoggedIn {
-        when(underTest.mfaService.enableMfa(*[UserId], *[MfaId],*)(*)).thenReturn(Future.successful(MFAResponse(true)))
+        when(underTest.mfaService.enableMfa(*[UserId], *[MfaId], *)(*)).thenReturn(Future.successful(MFAResponse(true)))
 
         val result = addToken(underTest.enableAuthApp(mfaId))(accessCodeRequest(correctCode))
 
@@ -271,7 +274,7 @@ class MfaControllerSpec extends BaseControllerSpec with WithCSRFAddToken with De
       }
 
       "return change name view when user is part logged in and enable mfa successful" in new SetupSuccessfulStart2SV with PartLogged {
-        when(underTest.mfaService.enableMfa(*[UserId], *[MfaId],*)(*)).thenReturn(Future.successful(MFAResponse(true)))
+        when(underTest.mfaService.enableMfa(*[UserId], *[MfaId], *)(*)).thenReturn(Future.successful(MFAResponse(true)))
 
         val result = addToken(underTest.enableAuthApp(mfaId))(accessCodeRequest(correctCode))
 
@@ -280,7 +283,7 @@ class MfaControllerSpec extends BaseControllerSpec with WithCSRFAddToken with De
       }
 
       "return access code view with errors when user is logged in and enable mfa fails" in new SetupSuccessfulStart2SV with LoggedIn {
-        when(underTest.mfaService.enableMfa(*[UserId], *[MfaId],*)(*)).thenReturn(Future.successful(MFAResponse(false)))
+        when(underTest.mfaService.enableMfa(*[UserId], *[MfaId], *)(*)).thenReturn(Future.successful(MFAResponse(false)))
 
         val result = addToken(underTest.enableAuthApp(mfaId))(accessCodeRequest(correctCode))
 
@@ -292,7 +295,7 @@ class MfaControllerSpec extends BaseControllerSpec with WithCSRFAddToken with De
       }
 
       "return access code view with errors when user is logged in and submitted form is invalid" in new SetupSuccessfulStart2SV with LoggedIn {
-        when(underTest.mfaService.enableMfa(*[UserId], *[MfaId],*)(*)).thenReturn(Future.successful(MFAResponse(false)))
+        when(underTest.mfaService.enableMfa(*[UserId], *[MfaId], *)(*)).thenReturn(Future.successful(MFAResponse(false)))
 
         val result = addToken(underTest.enableAuthApp(mfaId))(accessCodeRequest("INVALID_CODE"))
 
@@ -420,14 +423,14 @@ class MfaControllerSpec extends BaseControllerSpec with WithCSRFAddToken with De
 
   }
 
-  def shouldReturnOK(result : Future[Result], f: Document => Assertion) = {
+  def shouldReturnOK(result: Future[Result], f: Document => Assertion) = {
     status(result) shouldBe 200
     val doc = Jsoup.parse(contentAsString(result))
     f(doc)
 
   }
 
-  def validateSecurityPreferences(dom: Document) ={
+  def validateSecurityPreferences(dom: Document) = {
     dom.getElementById("page-heading").text shouldBe "Your security preferences"
   }
 

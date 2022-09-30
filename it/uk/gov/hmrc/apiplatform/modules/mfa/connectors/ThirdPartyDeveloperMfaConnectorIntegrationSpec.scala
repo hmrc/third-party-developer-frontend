@@ -21,14 +21,18 @@ import org.scalatestplus.play.guice.GuiceOneAppPerSuite
 import play.api.http.Status._
 import play.api.inject.bind
 import play.api.inject.guice.GuiceApplicationBuilder
+import play.api.libs.json.Json
 import play.api.{Application, Configuration, Mode}
-import uk.gov.hmrc.apiplatform.modules.mfa.models.{DeviceSession, DeviceSessionInvalid, MfaId}
+import uk.gov.hmrc.apiplatform.modules.mfa.connectors.ThirdPartyDeveloperMfaConnector.RegisterAuthAppResponse
+import uk.gov.hmrc.apiplatform.modules.mfa.models.{DeviceSession, DeviceSessionInvalid, MfaId, SmsMfaDetailSummary}
 import uk.gov.hmrc.http.{HeaderCarrier, UpstreamErrorResponse}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.builder.DeveloperBuilder
 import uk.gov.hmrc.thirdpartydeveloperfrontend.connectors._
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.connectors.{_}
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.connectors._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.{LocalUserIdTracker, WireMockExtensions}
+import uk.gov.hmrc.apiplatform.modules.mfa.models.MfaDetailFormats.smsMfaDetailSummaryFormat
 
+import java.time.LocalDateTime
 import java.util.UUID
 
 class ThirdPartyDeveloperMfaConnectorIntegrationSpec extends BaseConnectorIntegrationSpec
@@ -76,10 +80,11 @@ class ThirdPartyDeveloperMfaConnectorIntegrationSpec extends BaseConnectorIntegr
             aResponse()
               .withStatus(CREATED)
               .withHeader("Content-Type", "application/json")
-              .withBody(s"""{
-                           |  "deviceSessionId": "$deviceSessionId",
-                           |  "userId": "${userId.value}"
-                           |}""".stripMargin)
+              .withBody(
+                s"""{
+                   |  "deviceSessionId": "$deviceSessionId",
+                   |  "userId": "${userId.value}"
+                   |}""".stripMargin)
           )
       )
       val result = await(underTest.createDeviceSession(userId))
@@ -125,10 +130,11 @@ class ThirdPartyDeveloperMfaConnectorIntegrationSpec extends BaseConnectorIntegr
             aResponse()
               .withStatus(OK)
               .withHeader("Content-Type", "application/json")
-              .withBody(s"""{
-                           |  "deviceSessionId": "$deviceSessionId",
-                           |  "userId": "${userId.value}"
-                           |}""".stripMargin)
+              .withBody(
+                s"""{
+                   |  "deviceSessionId": "$deviceSessionId",
+                   |  "userId": "${userId.value}"
+                   |}""".stripMargin)
           )
       )
 
@@ -183,10 +189,85 @@ class ThirdPartyDeveloperMfaConnectorIntegrationSpec extends BaseConnectorIntegr
               .withStatus(INTERNAL_SERVER_ERROR)
           )
       )
-      intercept[UpstreamErrorResponse]{
+      intercept[UpstreamErrorResponse] {
         await(underTest.deleteDeviceSession(deviceSessionId.toString))
       }.statusCode shouldBe INTERNAL_SERVER_ERROR
 
+    }
+  }
+
+  "createMfaAuthApp" should {
+    "return 201 with RegisterAuthAppResponse" in new Setup {
+      val url = s"/developer/${userId.value}/mfa/auth-app"
+      val response = RegisterAuthAppResponse("secret", mfaId)
+
+      stubFor(
+        post(urlPathEqualTo(url))
+          .willReturn(
+            aResponse()
+              .withStatus(CREATED)
+              .withBody(Json.toJson(response).toString)
+          )
+      )
+      await(underTest.createMfaAuthApp(userId)) shouldBe response
+    }
+
+    "return 404 with RegisterAuthAppResponse" in new Setup {
+      val url = s"/developer/${userId.value}/mfa/auth-app"
+      stubFor(
+        post(urlPathEqualTo(url))
+          .willReturn(
+            aResponse()
+              .withStatus(NOT_FOUND)
+          )
+      )
+      intercept[UpstreamErrorResponse](await(underTest.createMfaAuthApp(userId))).statusCode shouldBe NOT_FOUND
+    }
+  }
+
+  "createMfaSms" should {
+    val mobileNumber = "0123456789"
+    val request = CreateMfaSmsRequest(mobileNumber)
+    val response = SmsMfaDetailSummary(name = "Text message", createdOn = LocalDateTime.now, mobileNumber = mobileNumber)
+
+    "return 201 with SmsMfaDetailSummary" in new Setup {
+      val url = s"/developer/${userId.value}/mfa/sms"
+      stubFor(
+        post(urlPathEqualTo(url))
+          .withJsonRequestBody(request)
+          .willReturn(
+            aResponse()
+              .withStatus(CREATED)
+              .withBody(Json.toJson(response).toString)
+          )
+      )
+      await(underTest.createMfaSms(userId, mobileNumber)) shouldBe response
+    }
+
+    "return 400 when invalid number is passed to TPD" in new Setup {
+      val url = s"/developer/${userId.value}/mfa/sms"
+      stubFor(
+        post(urlPathEqualTo(url))
+          .withJsonRequestBody(request)
+          .willReturn(
+            aResponse()
+              .withStatus(BAD_REQUEST)
+          )
+      )
+      intercept[UpstreamErrorResponse](await(underTest.createMfaSms(userId, mobileNumber))).statusCode shouldBe BAD_REQUEST
+    }
+
+    "return 404 when user is not found" in new Setup {
+      val url = s"/developer/${userId.value}/mfa/sms"
+      stubFor(
+        post(urlPathEqualTo(url))
+          .withJsonRequestBody(request)
+          .willReturn(
+            aResponse()
+              .withStatus(NOT_FOUND)
+          )
+      )
+      intercept[UpstreamErrorResponse](await(underTest.createMfaSms(userId, mobileNumber))).statusCode shouldBe NOT_FOUND
     }
   }
 
@@ -199,7 +280,7 @@ class ThirdPartyDeveloperMfaConnectorIntegrationSpec extends BaseConnectorIntegr
 
       stubFor(
         post(urlPathEqualTo(url))
-        .withJsonRequestBody(verifyMfaRequest)
+          .withJsonRequestBody(verifyMfaRequest)
           .willReturn(
             aResponse()
               .withStatus(BAD_REQUEST)
@@ -213,7 +294,7 @@ class ThirdPartyDeveloperMfaConnectorIntegrationSpec extends BaseConnectorIntegr
 
       stubFor(
         post(urlPathEqualTo(url))
-        .withJsonRequestBody(verifyMfaRequest)
+          .withJsonRequestBody(verifyMfaRequest)
           .willReturn(
             aResponse()
               .withStatus(OK)
@@ -227,7 +308,7 @@ class ThirdPartyDeveloperMfaConnectorIntegrationSpec extends BaseConnectorIntegr
 
       stubFor(
         post(urlPathEqualTo(url))
-        .withJsonRequestBody(verifyMfaRequest)
+          .withJsonRequestBody(verifyMfaRequest)
           .willReturn(
             aResponse()
               .withStatus(INTERNAL_SERVER_ERROR)
@@ -305,7 +386,7 @@ class ThirdPartyDeveloperMfaConnectorIntegrationSpec extends BaseConnectorIntegr
               .withStatus(INTERNAL_SERVER_ERROR)
           )
       )
-      intercept[UpstreamErrorResponse]{
+      intercept[UpstreamErrorResponse] {
         await(underTest.changeName(userId, mfaId, updatedName))
       }
     }

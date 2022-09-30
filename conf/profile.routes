@@ -32,12 +32,16 @@ GET         /protect-account/remove-by-id/complete                              
 GET         /security-preferences                                                                uk.gov.hmrc.apiplatform.modules.mfa.controllers.profile.MfaController.securityPreferences
 GET         /security-preferences/auth-app/start                                                 uk.gov.hmrc.apiplatform.modules.mfa.controllers.profile.MfaController.authAppStart
 GET         /security-preferences/auth-app/setup                                                 uk.gov.hmrc.apiplatform.modules.mfa.controllers.profile.MfaController.setupAuthApp
-GET         /security-preferences/auth-app/access-code                                           uk.gov.hmrc.apiplatform.modules.mfa.controllers.profile.MfaController.getAccessCodePage(mfaId: uk.gov.hmrc.apiplatform.modules.mfa.models.MfaId)
+GET         /security-preferences/auth-app/access-code                                           uk.gov.hmrc.apiplatform.modules.mfa.controllers.profile.MfaController.authAppAccessCodePage(mfaId: uk.gov.hmrc.apiplatform.modules.mfa.models.MfaId)
 POST        /security-preferences/auth-app/enable                                                uk.gov.hmrc.apiplatform.modules.mfa.controllers.profile.MfaController.enableAuthApp(mfaId: uk.gov.hmrc.apiplatform.modules.mfa.models.MfaId)
 GET         /security-preferences/auth-app/name                                                  uk.gov.hmrc.apiplatform.modules.mfa.controllers.profile.MfaController.nameChangePage(mfaId: uk.gov.hmrc.apiplatform.modules.mfa.models.MfaId)
 POST        /security-preferences/auth-app/name                                                  uk.gov.hmrc.apiplatform.modules.mfa.controllers.profile.MfaController.nameChangeAction(mfaId: uk.gov.hmrc.apiplatform.modules.mfa.models.MfaId)
 GET         /security-preferences/auth-app/setup/complete                                        uk.gov.hmrc.apiplatform.modules.mfa.controllers.profile.MfaController.authAppSetupCompletedPage
 
+GET         /security-preferences/sms/setup                                                     uk.gov.hmrc.apiplatform.modules.mfa.controllers.profile.MfaController.setupSms
+POST        /security-preferences/sms/setup                                                     uk.gov.hmrc.apiplatform.modules.mfa.controllers.profile.MfaController.setupSmsAction
+GET         /security-preferences/sms/access-code                                               uk.gov.hmrc.apiplatform.modules.mfa.controllers.profile.MfaController.smsAccessCodePage(mfaId: uk.gov.hmrc.apiplatform.modules.mfa.models.MfaId)
+POST        /security-preferences/sms/access-code                                               uk.gov.hmrc.apiplatform.modules.mfa.controllers.profile.MfaController.smsAccessCodeAction(mfaId: uk.gov.hmrc.apiplatform.modules.mfa.models.MfaId)
 
 GET         /password                                                                            uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.profile.Profile.showPasswordPage
 POST        /password                                                                            uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.profile.Profile.updatePassword

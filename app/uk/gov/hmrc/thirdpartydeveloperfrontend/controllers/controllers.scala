@@ -151,6 +151,9 @@ package object controllers {
     val mfaNameChangeInvaliddKey = "mfaName.invalid.name.field"
     val mfaNameChangeInvalidGlobalKey = "mfaName.invalid.name.global"
 
+    val mobileNumberInvaliddKey = "mobileNumber.invalid.number.field"
+    val mobileNumberInvalidGlobalKey = "mobileNumber.invalid.number.global"
+
     val selectedCategoryNonSelectedKey = "error.selectedcategories.nonselected.field"
     val selectedCategoryNonSelectedGlobalKey = "error.selectedcategories.nonselected.global"
 
