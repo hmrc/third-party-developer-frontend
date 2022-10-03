@@ -19,21 +19,22 @@ package uk.gov.hmrc.apiplatform.modules.mfa.controllers.profile
 import play.api.libs.crypto.CookieSigner
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents, Result}
 import uk.gov.hmrc.apiplatform.modules.mfa.connectors.ThirdPartyDeveloperMfaConnector
-import uk.gov.hmrc.apiplatform.modules.mfa.models.{MfaId, SmsMfaDetailSummary}
+import uk.gov.hmrc.apiplatform.modules.mfa.models.{MfaId, MfaType}
 import uk.gov.hmrc.apiplatform.modules.mfa.service.MFAService
-import uk.gov.hmrc.apiplatform.modules.mfa.views.html.SecurityPreferencesView
+import uk.gov.hmrc.apiplatform.modules.mfa.views.html.{SecurityPreferencesView, SelectMfaView}
 import uk.gov.hmrc.apiplatform.modules.mfa.views.html.authapp.{AuthAppAccessCodeView, AuthAppSetupCompletedView, AuthAppStartView, NameChangeView, QrCodeView}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.config.{ApplicationConfig, ErrorHandler}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.connectors.ThirdPartyDeveloperConnector
-import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.{FormKeys, LoggedInController, UserRequest}
+import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.LoggedInController
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.connectors.UpdateLoggedInStateRequest
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.{Developer, LoggedInState}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.qr.{OtpAuthUri, QRCode}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.service.SessionService
 import play.api.data.Form
 import play.api.data.Forms._
-import uk.gov.hmrc.apiplatform.modules.mfa.forms.{MfaAccessCodeForm, MfaNameChangeForm, MobileNumberForm, SmsAccessCodeForm}
-import uk.gov.hmrc.apiplatform.modules.mfa.utils.MfaDetailHelper.{getSmsMfa, isAuthAppMfaVerified, isSmsMfaVerified}
+import uk.gov.hmrc.apiplatform.modules.mfa.forms.{MfaAccessCodeForm, MfaNameChangeForm, MobileNumberForm, SelectMfaForm, SmsAccessCodeForm}
+import uk.gov.hmrc.apiplatform.modules.mfa.models.MfaType.{AUTHENTICATOR_APP, SMS}
+import uk.gov.hmrc.apiplatform.modules.mfa.utils.MfaDetailHelper.{isAuthAppMfaVerified, isSmsMfaVerified}
 import uk.gov.hmrc.apiplatform.modules.mfa.views.html.sms.{MobileNumberView, SmsAccessCodeView, SmsSetupCompletedView}
 import uk.gov.hmrc.play.bootstrap.controller.WithUnsafeDefaultFormBinding
 
@@ -58,17 +59,34 @@ class MfaController @Inject()(
                                nameChangeView: NameChangeView,
                                mobileNumberView: MobileNumberView,
                                smsAccessCodeView: SmsAccessCodeView,
-                               smsSetupCompletedView: SmsSetupCompletedView
+                               smsSetupCompletedView: SmsSetupCompletedView,
+                               selectMfaView: SelectMfaView
 
 )(implicit val ec: ExecutionContext,
   val appConfig: ApplicationConfig) extends LoggedInController(mcc) with WithUnsafeDefaultFormBinding {
-
 
   def securityPreferences: Action[AnyContent] = atLeastPartLoggedInEnablingMfaAction { implicit request =>
     thirdPartyDeveloperConnector.fetchDeveloper(request.userId).map {
       case Some(developer: Developer) => Ok(securityPreferencesView(developer.mfaDetails.filter(_.verified)))
       case None => InternalServerError("unable to obtain User information")
     }
+  }
+
+  def selectMfaPage: Action[AnyContent] = atLeastPartLoggedInEnablingMfaAction { implicit request =>
+    Future.successful(Ok(selectMfaView(SelectMfaForm.form)))
+  }
+
+  def selectMfaAction: Action[AnyContent] = atLeastPartLoggedInEnablingMfaAction { implicit request =>
+
+    SelectMfaForm.form.bindFromRequest.fold(
+      form => Future.successful(BadRequest(selectMfaView(form))),
+      form => {
+        MfaType.withNameInsensitive(form.mfaType) match {
+          case SMS => Future.successful(Redirect(uk.gov.hmrc.apiplatform.modules.mfa.controllers.profile.routes.MfaController.setupSms()))
+          case AUTHENTICATOR_APP => Future.successful(Redirect(uk.gov.hmrc.apiplatform.modules.mfa.controllers.profile.routes.MfaController.authAppStart()))
+        }
+      }
+    )
   }
 
   def authAppStart: Action[AnyContent] = atLeastPartLoggedInEnablingMfaAction { implicit request =>

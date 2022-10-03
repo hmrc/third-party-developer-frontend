@@ -1,18 +1,19 @@
 @*
-* Copyright 2022 HM Revenue & Customs
-*
-* Licensed under the Apache License, Version 2.0 (the "License");
-* you may not use this file except in compliance with the License.
-* You may obtain a copy of the License at
-*
-* http://www.apache.org/licenses/LICENSE-2.0
-*
-* Unless required by applicable law or agreed to in writing, software
-* distributed under the License is distributed on an "AS IS" BASIS,
-* WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-* See the License for the specific language governing permissions and
-* limitations under the License.
-*@
+ * Copyright 2022 HM Revenue & Customs
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ *@
+
 @import include._
 @import views.html.include.DevMain
 @import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.DeveloperSession
@@ -29,11 +30,11 @@
     developerSession = Some(loggedIn)
 ) {
     <h1 class="govuk-heading-l" id="page-heading">You can now get access codes by authenticator app</h1>
-    <p class="govuk-body" id="body">Keep the app on your smartphone or tablet.</p>
-    <p class="govuk-body" id="body">Every time you sign in we will request an access code.</p>
+    <p class="govuk-body" id="body">Keep the app on your smartphone or tablet.
+        <br>Every time you sign in we will request an access code.</p>
+
 
     @if(showAddSms) {
-
         <h2 class="govuk-heading-m" id="medium-heading">You need to set up additional security</h2>
         <p class="govuk-body" id="body">
             You need to add text messages to get access codes as an alternative to your authenticator app.</p>
@@ -51,6 +52,4 @@
         <a id="submit" class="govuk-button" href="@request.session.get("access_uri").getOrElse(uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.routes.ManageApplications.manageApps())">
             Continue</a>
     }
-
-
 }

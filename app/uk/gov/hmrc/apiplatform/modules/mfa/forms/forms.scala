@@ -68,3 +68,16 @@ object SmsAccessCodeForm {
   )
 }
 
+final case class SelectMfaForm(mfaType: String)
+
+object SelectMfaForm {
+
+  def form: Form[SelectMfaForm] = Form(
+    mapping(
+    "mfaType" -> text
+    )
+  (SelectMfaForm.apply)(SelectMfaForm.unapply)
+  )
+}
+
+
