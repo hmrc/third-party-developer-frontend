@@ -24,7 +24,7 @@
 
 @this(devMain: DevMainWithFormErrors)
 
-@(form: Form[SmsAccessCodeForm], mfaId: MfaId, mobileNumber: String)(implicit messages: Messages, request: play.api.mvc.Request[Any], loggedIn: DeveloperSession, appConfig: ApplicationConfig)
+@(form: Form[SmsAccessCodeForm], mfaId: MfaId)(implicit flash: Flash, messages: Messages, request: play.api.mvc.Request[Any], loggedIn: DeveloperSession, appConfig: ApplicationConfig)
 
 @devMain(
     form,
@@ -36,7 +36,7 @@
 ) {
     <h1 class="govuk-heading-l" id="page-heading">Enter your access code</h1>
     <p class="govuk-body">
-        We have sent a 6 digit access code to <span class="govuk-!-font-weight-bold">@mobileNumber</span></p>
+        We have sent a 6 digit access code to <span class="govuk-!-font-weight-bold">@flash.get("mobileNumber").getOrElse("xxx")</span></p>
     <p class="govuk-body">It may take a few minutes to arrive</p>
     <p class="govuk-body">If you have a UK phone number your 6-digit code will arrive from the phone number 60 551.</p>
 
@@ -58,7 +58,7 @@
             />
         </div>
 
-        <input id="mobileNumber" name="mobileNumber" type="hidden" value="@mobileNumber"/>
+        <input id="mobileNumber" name="mobileNumber" type="hidden" value="@flash.get("mobileNumber").getOrElse("xxx")"/>
         <button id="submit" class="govuk-button" type="submit">Continue</button>
     }
 
