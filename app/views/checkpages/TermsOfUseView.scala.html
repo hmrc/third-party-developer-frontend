@@ -55,20 +55,22 @@
 
     @termsOfUseVersion.getTermsOfUseAsHtml()
 
-    <div class="govuk-form-group @if(form.errors("termsOfUseAgreed").nonEmpty){govuk-form-group--error}">
-      <fieldset class="govuk-fieldset">
-        @if(form("termsOfUseAgreed").value.isEmpty || form("termsOfUseAgreed").value.contains("false")) {
-          @defining(DateTimeFormatter.ofLocalizedDate(FormatStyle.LONG)) { dateFormatter =>
-            @fieldError(form.errors, "termsOfUseAgreed", true)
-            <div class="govuk-checkboxes">
-              <div class="govuk-checkboxes__item">
-                <input type="checkbox" id="termsOfUseAgreed" class="govuk-checkboxes__input" name="termsOfUseAgreed" value="true"/>
-                <label for="termsOfUseAgreed" class="govuk-label govuk-checkboxes__label">I agree to the terms of use</label>
+    <div class="govuk-grid-column-full">
+      <div class="govuk-form-group govuk-!-margin-top-6 @if(form.errors("termsOfUseAgreed").nonEmpty){govuk-form-group--error}">
+        <fieldset class="govuk-fieldset">
+          @if(form("termsOfUseAgreed").value.isEmpty || form("termsOfUseAgreed").value.contains("false")) {
+            @defining(DateTimeFormatter.ofLocalizedDate(FormatStyle.LONG)) { dateFormatter =>
+              @fieldError(form.errors, "termsOfUseAgreed", true)
+              <div class="govuk-checkboxes">
+                <div class="govuk-checkboxes__item">
+                  <input type="checkbox" id="termsOfUseAgreed" class="govuk-checkboxes__input" name="termsOfUseAgreed" value="true"/>
+                  <label for="termsOfUseAgreed" class="govuk-label govuk-checkboxes__label">I agree to the terms of use</label>
+                </div>
               </div>
-            </div>
+            }
           }
-        }
-      </fieldset>
+        </fieldset>
+      </div>
     </div>
 
     <div class="govuk-button-group">
