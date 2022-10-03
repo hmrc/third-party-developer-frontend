@@ -28,9 +28,9 @@ import uk.gov.hmrc.apiplatform.modules.mfa.connectors.ThirdPartyDeveloperMfaConn
 import uk.gov.hmrc.apiplatform.modules.mfa.connectors.ThirdPartyDeveloperMfaConnector.RegisterAuthAppResponse
 import uk.gov.hmrc.apiplatform.modules.mfa.models.MfaId
 import uk.gov.hmrc.apiplatform.modules.mfa.service.{MFAResponse, MFAService}
-import uk.gov.hmrc.apiplatform.modules.mfa.views.html.SecurityPreferencesView
+import uk.gov.hmrc.apiplatform.modules.mfa.views.html.{SecurityPreferencesView, SelectMfaView}
 import uk.gov.hmrc.apiplatform.modules.mfa.views.html.authapp.{AuthAppAccessCodeView, AuthAppSetupCompletedView, AuthAppStartView, NameChangeView, QrCodeView}
-import uk.gov.hmrc.apiplatform.modules.mfa.views.html.sms.{MobileNumberView, SmsAccessCodeView}
+import uk.gov.hmrc.apiplatform.modules.mfa.views.html.sms.{MobileNumberView, SmsAccessCodeView, SmsSetupCompletedView}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.builder.{DeveloperBuilder, MfaDetailBuilder}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.config.ErrorHandler
 import uk.gov.hmrc.thirdpartydeveloperfrontend.connectors.ThirdPartyDeveloperConnector
@@ -69,6 +69,8 @@ class MfaControllerSpec extends BaseControllerSpec with WithCSRFAddToken with De
     val nameChangeView = app.injector.instanceOf[NameChangeView]
     val mobileNumberView = app.injector.instanceOf[MobileNumberView]
     val smsAccessCodeView = app.injector.instanceOf[SmsAccessCodeView]
+    val smsSetupCompletedView = app.injector.instanceOf[SmsSetupCompletedView]
+    val selectMfaView = app.injector.instanceOf[SelectMfaView]
 
     val underTest: MfaController = new MfaController(
       mock[ThirdPartyDeveloperConnector],
@@ -86,7 +88,9 @@ class MfaControllerSpec extends BaseControllerSpec with WithCSRFAddToken with De
       authAppSetupCompletedView,
       nameChangeView,
       mobileNumberView,
-      smsAccessCodeView
+      smsAccessCodeView,
+      smsSetupCompletedView: SmsSetupCompletedView,
+      selectMfaView: SelectMfaView
     ) {
       override val qrCode: QRCode = mock[QRCode]
     }

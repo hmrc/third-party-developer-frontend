@@ -18,8 +18,9 @@ package uk.gov.hmrc.apiplatform.modules.mfa.views.sms
 
 import org.jsoup.Jsoup
 import org.jsoup.nodes.Document
+import play.api.mvc.Flash
 import play.api.test.{FakeRequest, StubMessagesFactory}
-import uk.gov.hmrc.apiplatform.modules.mfa.forms.MfaAccessCodeForm
+import uk.gov.hmrc.apiplatform.modules.mfa.forms.{MfaAccessCodeForm, SmsAccessCodeForm}
 import uk.gov.hmrc.apiplatform.modules.mfa.models.MfaId
 import uk.gov.hmrc.apiplatform.modules.mfa.views.html.sms.SmsAccessCodeView
 import uk.gov.hmrc.thirdpartydeveloperfrontend.builder.{DeveloperBuilder, DeveloperSessionBuilder}
@@ -33,6 +34,7 @@ class SmsAccessCodeViewSpec extends CommonViewSpec
   with WithCSRFAddToken with DeveloperSessionBuilder
   with DeveloperBuilder with LocalUserIdTracker with StubMessagesFactory {
 
+  implicit val flash = Flash(Map("mobileNumber" -> "0123456789"))
   implicit val request = FakeRequest()
   implicit val loggedIn: DeveloperSession = buildDeveloperSession(loggedInState = LoggedInState.LOGGED_IN,
     buildDeveloper("developer@example.com", "Joe", "Bloggs"))
@@ -49,8 +51,7 @@ class SmsAccessCodeViewSpec extends CommonViewSpec
 
   "SmsAccessCodeView" should {
     "render correctly when form is valid" in new Setup {
-      val mainView = accessCodeView.apply(MfaAccessCodeForm.form,
-        MfaId(UUID.randomUUID()), mobileNumber)(stubMessages(), FakeRequest().withCSRFToken, loggedIn, appConfig)
+      val mainView = accessCodeView.apply(SmsAccessCodeForm.form, MfaId(UUID.randomUUID()))(flash, stubMessages(), FakeRequest().withCSRFToken, loggedIn, appConfig)
       val document = Jsoup.parse(mainView.body)
 
       verifyPageElements(document)
@@ -58,8 +59,8 @@ class SmsAccessCodeViewSpec extends CommonViewSpec
     }
 
     "render correctly when form is invalid" in new Setup {
-      val mainView = accessCodeView.apply(MfaAccessCodeForm.form.withError("accessCode", "You have entered an incorrect access code"),
-        MfaId(UUID.randomUUID()), mobileNumber)(stubMessages(), FakeRequest().withCSRFToken, loggedIn, appConfig)
+      val mainView = accessCodeView.apply(SmsAccessCodeForm.form.withError("accessCode", "You have entered an incorrect access code"),
+        MfaId(UUID.randomUUID()))(flash, stubMessages(), FakeRequest().withCSRFToken, loggedIn, appConfig)
       val document = Jsoup.parse(mainView.body)
 
       verifyPageElements(document)
