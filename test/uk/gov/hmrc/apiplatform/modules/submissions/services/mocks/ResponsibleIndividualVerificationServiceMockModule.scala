@@ -36,12 +36,21 @@ trait ResponsibleIndividualVerificationServiceMockModule extends MockitoSugar wi
       }
     }
 
-    object VerifyResponsibleIndividual {
+    object Accept {
       def thenReturns(out: ResponsibleIndividualVerification) =
-        when(aMock.verifyResponsibleIndividual(*, *)(*)).thenReturn(successful(Right(out)))
+        when(aMock.accept(*)(*)).thenReturn(successful(Right(out)))
 
       def thenReturnFailure() = {
-        when(aMock.verifyResponsibleIndividual(*, *)(*)).thenReturn(successful(Left(ErrorDetails("code", "nope"))))
+        when(aMock.accept(*)(*)).thenReturn(successful(Left(ErrorDetails("code", "nope"))))
+      }
+    }
+
+    object Decline {
+      def thenReturns(out: ResponsibleIndividualVerification) =
+        when(aMock.decline(*)(*)).thenReturn(successful(Right(out)))
+
+      def thenReturnFailure() = {
+        when(aMock.decline(*)(*)).thenReturn(successful(Left(ErrorDetails("code", "nope"))))
       }
     }
   }

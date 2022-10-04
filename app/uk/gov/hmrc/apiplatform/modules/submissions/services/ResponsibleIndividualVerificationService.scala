@@ -42,30 +42,29 @@ class ResponsibleIndividualVerificationService @Inject()(
     tpaSubmissionsConnector.fetchResponsibleIndividualVerification(code)
   }
 
-  def verifyResponsibleIndividual(code: String, verified: Boolean)(implicit hc: HeaderCarrier): Future[Either[ErrorDetails, ResponsibleIndividualVerification]] = {
-    verified match {
-      case true => // Responsible individual has accepted
-        (
-          for {
-            riVerification <- ET.fromOptionF(tpaSubmissionsConnector.fetchResponsibleIndividualVerification(code), ErrorDetails("riverification001", s"No responsibleIndividualVerification record found for ${code}")) 
-            application    <- ET.fromOptionF(applicationService.fetchByApplicationId(riVerification.applicationId), ErrorDetails("riverification002", s"No application record found for ${riVerification.applicationId}"))
-            _              <- ET.liftF(applicationService.acceptResponsibleIndividualVerification(riVerification.applicationId, code))
-            _              <- ET.liftF(sendDeskproTicketForTermsOfUse(riVerification, application.application.state.requestedByName, application.application.state.requestedByEmailAddress))
-          } yield riVerification
-        )
-        .value
-      case false => // Responsible individual has declined
-        (
-          for {
-            riVerification <- ET.fromEitherF(tpaSubmissionsConnector.responsibleIndividualDecline(code))
-          } yield riVerification
-        )
-        .value
-    }
+  def accept(code: String)(implicit hc: HeaderCarrier): Future[Either[ErrorDetails, ResponsibleIndividualVerification]] = {
+    (
+      for {
+        riVerification <- ET.fromOptionF(tpaSubmissionsConnector.fetchResponsibleIndividualVerification(code), ErrorDetails("riverification001", s"No responsibleIndividualVerification record found for ${code}")) 
+        application    <- ET.fromOptionF(applicationService.fetchByApplicationId(riVerification.applicationId), ErrorDetails("riverification002", s"No application record found for ${riVerification.applicationId}"))
+        _              <- ET.liftF(applicationService.acceptResponsibleIndividualVerification(riVerification.applicationId, code))
+        _              <- ET.liftF(sendDeskproTicketForTermsOfUse(riVerification, application.application.state.requestedByName, application.application.state.requestedByEmailAddress))
+      } yield riVerification
+    )
+    .value
+  }
+
+  def decline(code: String)(implicit hc: HeaderCarrier): Future[Either[ErrorDetails, ResponsibleIndividualVerification]] = {
+    (
+      for {
+        riVerification <- ET.fromOptionF(tpaSubmissionsConnector.fetchResponsibleIndividualVerification(code), ErrorDetails("riverification003", s"No responsibleIndividualVerification record found for ${code}")) 
+        _              <- ET.liftF(applicationService.declineResponsibleIndividualVerification(riVerification.applicationId, code))
+      } yield riVerification
+    )
+    .value
   }
 
   private def sendDeskproTicketForTermsOfUse(riVerification: ResponsibleIndividualVerification, submitterName: Option[String], submitterEmail: Option[String])(implicit hc: HeaderCarrier) = {
- 
     riVerification match {
       // Only send deskpro ticket for a ResponsibleIndividualVerification of type 'terms of use'
       case riv: ResponsibleIndividualToUVerification => { 

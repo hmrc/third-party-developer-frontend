@@ -71,14 +71,14 @@ class ResponsibleIndividualVerificationServiceSpec extends AsyncHmrcSpec
     }
   }
 
-  "verifyResponsibleIndividual" should {
+  "accept" should {
     "successfully return a riVerification record for accept and create a deskpro ticket with correct details" in new Setup {
       when(mockSubmissionsConnector.fetchResponsibleIndividualVerification(eqTo(code))(*)).thenReturn(successful(Some(riVerification)))
       ApplicationServiceMock.fetchByApplicationIdReturns(applicationId, application)
       ApplicationServiceMock.acceptResponsibleIndividualVerification(applicationId, code)
       when(mockDeskproConnector.createTicket(*)(*)).thenReturn(successful(TicketCreated))
 
-      val result = await(underTest.verifyResponsibleIndividual(code, true))
+      val result = await(underTest.accept(code))
       
       result shouldBe 'Right
       result.right.value shouldBe riVerification
@@ -100,17 +100,20 @@ class ResponsibleIndividualVerificationServiceSpec extends AsyncHmrcSpec
       ApplicationServiceMock.fetchByApplicationIdReturns(applicationId, application)
       ApplicationServiceMock.acceptResponsibleIndividualVerification(applicationId, code)
       
-      val result = await(underTest.verifyResponsibleIndividual(code, true))
+      val result = await(underTest.accept(code))
       
       result shouldBe 'Right
       result.right.value shouldBe riUpdateVerification
       verify(mockDeskproConnector, never).createTicket(*)(*)
     }
+  }
 
+  "decline" should {
     "successfully return a riVerification record for decline" in new Setup {
-      when(mockSubmissionsConnector.responsibleIndividualDecline(eqTo(code))(*)).thenReturn(successful(Right(riVerification)))
-      
-      val result = await(underTest.verifyResponsibleIndividual(code, false))
+      when(mockSubmissionsConnector.fetchResponsibleIndividualVerification(eqTo(code))(*)).thenReturn(successful(Some(riVerification)))
+      ApplicationServiceMock.declineResponsibleIndividualVerification(applicationId, code)
+    
+      val result = await(underTest.decline(code))
       
       result shouldBe 'Right
       result.right.value shouldBe riVerification
