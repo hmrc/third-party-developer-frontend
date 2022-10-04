@@ -148,6 +148,9 @@ package object controllers {
     val accessCodeInvalidKey = "accessCode.invalid.name.field"
     val accessCodeInvalidGlobalKey = "accessCode.invalid.name.global"
 
+    val selectMfaInvalidKey = "selectMfa.invalid.mfaType.field"
+    val selectMfaInvalidGlobalKey = "selectMfa.invalid.mfaType.global"
+
     val mfaNameChangeInvaliddKey = "mfaName.invalid.name.field"
     val mfaNameChangeInvalidGlobalKey = "mfaName.invalid.name.global"
 

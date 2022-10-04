@@ -18,6 +18,7 @@ package uk.gov.hmrc.apiplatform.modules.mfa.forms
 
 import play.api.data.Form
 import play.api.data.Forms.{boolean, mapping, nonEmptyText, optional, text}
+import uk.gov.hmrc.apiplatform.modules.mfa.models.MfaType
 import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.FormKeys
 
 import java.util.regex.Pattern
@@ -74,10 +75,21 @@ object SelectMfaForm {
 
   def form: Form[SelectMfaForm] = Form(
     mapping(
-    "mfaType" -> text
+    "mfaType" -> text.verifying(FormKeys.selectMfaInvalidKey, s => verifyMfaType(s))
     )
   (SelectMfaForm.apply)(SelectMfaForm.unapply)
   )
+
+  def verifyMfaType(mfaType: String) = {
+    val validMfaType: Option[MfaType] = MfaType.values.find(v => v.entryName.equalsIgnoreCase(mfaType))
+    validMfaType match {
+      case Some(value) => true
+      case None => false
+    }
+  }
+
 }
+
+
 
 
