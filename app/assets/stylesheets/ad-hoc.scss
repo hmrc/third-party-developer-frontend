@@ -1,3 +1,5 @@
+@import "lib/govuk-frontend/govuk/all";
+
 .header__menu .header__menu__proposition-links {
   float: none;
 }
@@ -358,6 +360,9 @@ tr.teamMembers, th {
       background-color: $light-grey;
       color: black;
       box-shadow: 0 2px 0 black;
+      &:focus {
+        background-color: $govuk-focus-colour;
+      }
     }
   }
   #survey {
@@ -373,6 +378,9 @@ tr.teamMembers, th {
       background-color: $light-grey;
       color: black;
       box-shadow: 0 2px 0 grey;
+      &:focus {
+        background-color: $govuk-focus-colour;
+      }
     }
   }
 }
