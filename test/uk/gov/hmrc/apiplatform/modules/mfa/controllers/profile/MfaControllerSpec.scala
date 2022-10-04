@@ -398,14 +398,28 @@ class MfaControllerSpec extends BaseControllerSpec with WithCSRFAddToken with De
     }
 
     "authAppSetupCompletedPage()" should {
-      "return auth app setup complete view when user is logged in" in new SetupSuccessfulStart2SV with LoggedIn {
+      "return auth app setup complete view when user is logged in and fetchDeveloper returns a devveloper" in new SetupSuccessfulStart2SV with LoggedIn {
         private val request = FakeRequest().withLoggedIn(underTest, implicitly)(sessionId)
+        when(underTest.thirdPartyDeveloperConnector.fetchDeveloper(eqTo(loggedInDeveloper.userId))(*))
+          .thenReturn(successful(Some(loggedInDeveloper)))
         val result = addToken(underTest.authAppSetupCompletedPage())(request)
         shouldReturnOK(result, validateAuthAppCompletedPage)
       }
 
+      "return InternalServerError when user is logged in and fetchDeveloper returns None" in new SetupSuccessfulStart2SV with LoggedIn {
+        private val request = FakeRequest().withLoggedIn(underTest, implicitly)(sessionId)
+        when(underTest.thirdPartyDeveloperConnector.fetchDeveloper(eqTo(loggedInDeveloper.userId))(*))
+          .thenReturn(successful(None))
+        val result = addToken(underTest.authAppSetupCompletedPage())(request)
+        status(result) shouldBe Status.INTERNAL_SERVER_ERROR
+      }
+
       "return auth app setup complete view when user is part logged in" in new SetupSuccessfulStart2SV with PartLogged {
         private val request = FakeRequest().withLoggedIn(underTest, implicitly)(sessionId)
+
+        when(underTest.thirdPartyDeveloperConnector.fetchDeveloper(eqTo(loggedInDeveloper.userId))(*))
+          .thenReturn(successful(Some(loggedInDeveloper)))
+
         val result = addToken(underTest.authAppSetupCompletedPage())(request)
         shouldReturnOK(result, validateAuthAppCompletedPage)
       }
@@ -431,7 +445,6 @@ class MfaControllerSpec extends BaseControllerSpec with WithCSRFAddToken with De
     status(result) shouldBe 200
     val doc = Jsoup.parse(contentAsString(result))
     f(doc)
-
   }
 
   def validateSecurityPreferences(dom: Document) = {
@@ -457,7 +470,6 @@ class MfaControllerSpec extends BaseControllerSpec with WithCSRFAddToken with De
     dom.getElementById("paragraph").text shouldBe "Use a name that will help you remember the app when you sign in."
     dom.getElementById("name-label").text shouldBe "App Name"
     dom.getElementById("submit").text shouldBe "Continue"
-
   }
 
   def validateAuthAppCompletedPage(dom: Document) = {

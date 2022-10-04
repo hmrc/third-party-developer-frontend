@@ -65,6 +65,9 @@ class MfaController @Inject()(
 )(implicit val ec: ExecutionContext,
   val appConfig: ApplicationConfig) extends LoggedInController(mcc) with WithUnsafeDefaultFormBinding {
 
+  private val scale = 4
+  val qrCode = QRCode(scale)
+
   def securityPreferences: Action[AnyContent] = atLeastPartLoggedInEnablingMfaAction { implicit request =>
     thirdPartyDeveloperConnector.fetchDeveloper(request.userId).map {
       case Some(developer: Developer) => Ok(securityPreferencesView(developer.mfaDetails.filter(_.verified)))
@@ -92,9 +95,6 @@ class MfaController @Inject()(
   def authAppStart: Action[AnyContent] = atLeastPartLoggedInEnablingMfaAction { implicit request =>
     Future.successful(Ok(authAppStartView()))
   }
-
-  private val scale = 4
-  val qrCode = QRCode(scale)
 
   def setupAuthApp: Action[AnyContent] = atLeastPartLoggedInEnablingMfaAction { implicit request =>
     thirdPartyDeveloperMfaConnector.createMfaAuthApp(request.userId).map(registerAuthAppResponse => {
@@ -129,10 +129,7 @@ class MfaController @Inject()(
       form => {
         for {
           mfaResponse <- mfaService.enableMfa(request.userId, mfaId, form.accessCode)
-          result = {
-            if (mfaResponse.totpVerified) logonAndComplete()
-            else invalidCode(form)
-          }
+          result = if (mfaResponse.totpVerified) logonAndComplete() else invalidCode(form)
         } yield result
       })
   }
@@ -197,7 +194,6 @@ class MfaController @Inject()(
       case None => InternalServerError("Unable to obtain User information")
     }
   }
-
 }
 
 

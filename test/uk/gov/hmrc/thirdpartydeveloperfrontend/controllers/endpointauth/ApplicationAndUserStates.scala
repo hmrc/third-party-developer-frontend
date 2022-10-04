@@ -102,6 +102,7 @@ trait HasApplication extends HasAppDeploymentEnvironment with HasUserWithRole wi
     responsibleIndividualVerification, responsibleIndividual, "mr submitter", "submitter@example.com"
   )
   lazy val mfaId = verifiedAuthenticatorAppMfaDetail.id
+  lazy val smsMfaId = verifiedSmsMfaDetail.id
   lazy val registerAuthAppResponse = RegisterAuthAppResponse("secret", mfaId)
 }
 
