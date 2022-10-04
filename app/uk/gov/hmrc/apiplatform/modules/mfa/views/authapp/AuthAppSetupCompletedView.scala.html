@@ -22,7 +22,7 @@
 
 @this(devMain: DevMain)
 
-@(showAddSms: Boolean)(implicit request: play.api.mvc.Request[Any], loggedIn: DeveloperSession, appConfig: ApplicationConfig, messages: Messages)
+@(showSmsText: Boolean)(implicit request: play.api.mvc.Request[Any], loggedIn: DeveloperSession, appConfig: ApplicationConfig, messages: Messages)
 
 @devMain(
     title = "You can now get access codes by authenticator app",
@@ -32,7 +32,7 @@
     <h1 class="govuk-heading-l" id="page-heading">You can now get access codes by authenticator app</h1>
     <p class="govuk-body" id="paragraph">Keep the app on your smartphone or tablet. <br>Every time you sign in we will request an access code.</p>
 
-    @if(showAddSms) {
+    @if(showSmsText) {
         <h2 class="govuk-heading-m" id="medium-heading">You need to set up additional security</h2>
         <p class="govuk-body" id="body">
             You need to add text messages to get access codes as an alternative to your authenticator app.</p>

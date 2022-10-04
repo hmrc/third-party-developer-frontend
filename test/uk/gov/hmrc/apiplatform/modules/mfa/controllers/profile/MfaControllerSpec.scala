@@ -111,6 +111,13 @@ class MfaControllerSpec extends BaseControllerSpec with WithCSRFAddToken with De
         .withSession("csrfToken" -> app.injector.instanceOf[TokenProvider].generateToken)
         .withFormUrlEncodedBody("name" -> name)
     }
+
+    def selectMfaRequest(mfaType: String): FakeRequest[AnyContentAsFormUrlEncoded] = {
+      FakeRequest()
+        .withLoggedIn(underTest, implicitly)(sessionId)
+        .withSession("csrfToken" -> app.injector.instanceOf[TokenProvider].generateToken)
+        .withFormUrlEncodedBody("mfaType" -> mfaType)
+    }
   }
 
   trait SetupUnprotectedAccount extends Setup {
@@ -144,7 +151,103 @@ class MfaControllerSpec extends BaseControllerSpec with WithCSRFAddToken with De
 
   "MfaController" when {
 
-    "securityPreferences()" should {
+    "selectMfaPage()" should {
+      "return 200 and show the Select MFA page when user is Logged in" in new SetupSecurityPreferences with LoggedIn {
+        shouldReturnOK(addToken(underTest.selectMfaPage())(selectMfaRequest("SMS")), validateSelectMfaPage)
+      }
+
+      "return 200 and show the Select MFA page when user is Part Logged in" in new SetupSecurityPreferences with PartLogged {
+        shouldReturnOK(addToken(underTest.selectMfaPage())(selectMfaRequest("SMS")), validateSelectMfaPage)
+      }
+
+      "redirect to the login page when user is not logged in" in new SetupSecurityPreferences with LoggedIn {
+        val invalidSessionId = "notASessionId"
+        when(underTest.sessionService.fetch(eqTo(invalidSessionId))(*))
+          .thenReturn(Future.successful(None))
+
+        private val request =
+          FakeRequest()
+            .withLoggedIn(underTest, implicitly)(invalidSessionId)
+            .withSession("csrfToken" -> app.injector.instanceOf[TokenProvider].generateToken)
+            .withFormUrlEncodedBody("mfaType" -> "SMS")
+
+        private val result = addToken(underTest.selectMfaPage())(request)
+
+        status(result) shouldBe Status.SEE_OTHER
+        redirectLocation(result) shouldBe Some("/developer/login")
+      }
+    }
+
+    "selectMfaAction()" should {
+
+      "redirect to setup sms page when user is logged in and mfaType is SMS" in new SetupSuccessfulStart2SV with LoggedIn {
+        val result = addToken(underTest.selectMfaAction())(selectMfaRequest("SMS"))
+
+        status(result) shouldBe SEE_OTHER
+        redirectLocation(result) shouldBe Some(s"/developer/profile/security-preferences/sms/setup")
+      }
+
+      "redirect to setup sms page when user is part logged in and mfaType is SMS" in new SetupSuccessfulStart2SV with PartLogged {
+        val result = addToken(underTest.selectMfaAction())(selectMfaRequest("SMS"))
+
+        status(result) shouldBe SEE_OTHER
+        redirectLocation(result) shouldBe Some(s"/developer/profile/security-preferences/sms/setup")
+      }
+
+      "redirect to setup Auth App page when user is logged in and mfaType is AUTHENTICATOR_APP" in new SetupSuccessfulStart2SV with LoggedIn {
+        val result = addToken(underTest.selectMfaAction())(selectMfaRequest("AUTHENTICATOR_APP"))
+
+        status(result) shouldBe SEE_OTHER
+        redirectLocation(result) shouldBe Some(s"/developer/profile/security-preferences/auth-app/start")
+      }
+
+      "redirect to setup Auth App page when user is part logged in and mfaType is AUTHENTICATOR_APP" in new SetupSuccessfulStart2SV with PartLogged {
+        val result = addToken(underTest.selectMfaAction())(selectMfaRequest("AUTHENTICATOR_APP"))
+
+        status(result) shouldBe SEE_OTHER
+        redirectLocation(result) shouldBe Some(s"/developer/profile/security-preferences/auth-app/start")
+      }
+
+      "return errors when user is logged in and mfaType is invalid on the form" in new SetupSuccessfulStart2SV with LoggedIn {
+        val result = addToken(underTest.selectMfaAction())(selectMfaRequest("INVALID_MFA_TYPE"))
+
+        status(result) shouldBe BAD_REQUEST
+        val doc = Jsoup.parse(contentAsString(result))
+        validateSelectMfaPage(doc)
+        doc.getElementById("data-field-error-mfaType").text() shouldBe "Error: It must be a valid MFA Type"
+      }
+//
+//      "return access code view with errors when user is logged in and submitted form is invalid" in new SetupSuccessfulStart2SV with LoggedIn {
+//        when(underTest.mfaService.enableMfa(*[UserId], *[MfaId], *)(*)).thenReturn(Future.successful(MFAResponse(false)))
+//
+//        val result = addToken(underTest.enableAuthApp(mfaId))(accessCodeRequest("INVALID_CODE"))
+//
+//        status(result) shouldBe BAD_REQUEST
+//        val doc = Jsoup.parse(contentAsString(result))
+//        validateAccessCodePage(doc)
+//        doc.getElementById("data-field-error-accessCode").text() shouldBe "Error: You have entered an invalid access code"
+//
+//      }
+//
+//      "redirect to the login page when user is not logged in" in new SetupSuccessfulStart2SV with LoggedIn {
+//        val invalidSessionId = "notASessionId"
+//
+//        when(underTest.sessionService.fetch(eqTo(invalidSessionId))(*))
+//          .thenReturn(Future.successful(None))
+//
+//        private val request = FakeRequest()
+//          .withLoggedIn(underTest, implicitly)(invalidSessionId)
+//          .withSession("csrfToken" -> app.injector.instanceOf[TokenProvider].generateToken)
+//          .withFormUrlEncodedBody("accessCode" -> correctCode)
+//
+//        private val result: Future[Result] = addToken(underTest.enableAuthApp(mfaId))(request)
+//
+//        status(result) shouldBe Status.SEE_OTHER
+//        redirectLocation(result) shouldBe Some("/developer/login")
+//      }
+    }
+
+      "securityPreferences()" should {
       "return 200 and show the Security Preferences page when user is Logged in" in new SetupSecurityPreferences with LoggedIn {
         private val request = FakeRequest().withLoggedIn(underTest, implicitly)(sessionId)
         shouldReturnOK(underTest.securityPreferences()(request), validateSecurityPreferences)
@@ -445,6 +548,10 @@ class MfaControllerSpec extends BaseControllerSpec with WithCSRFAddToken with De
     status(result) shouldBe 200
     val doc = Jsoup.parse(contentAsString(result))
     f(doc)
+  }
+
+  def validateSelectMfaPage(dom: Document) = {
+    dom.getElementById("page-heading").text shouldBe "How do you want to get access codes?"
   }
 
   def validateSecurityPreferences(dom: Document) = {

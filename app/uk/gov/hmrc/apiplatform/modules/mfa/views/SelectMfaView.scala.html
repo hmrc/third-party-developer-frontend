@@ -19,6 +19,7 @@
 @import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.DeveloperSession
 @import uk.gov.hmrc.apiplatform.modules.mfa.forms.SelectMfaForm
 @import uk.gov.hmrc.apiplatform.modules.mfa.controllers.profile.routes
+@import views.html.include.fieldError
 
 @this(devMain: DevMain)
 
@@ -33,10 +34,11 @@
 ) {
     @helper.form(action = routes.MfaController.selectMfaAction()){
         @helper.CSRF.formField
+        @fieldError(form.errors, "mfaType")
         <div class="govuk-form-group">
             <fieldset class="govuk-fieldset" aria-describedby="select-mfa-hint">
                 <legend class="govuk-fieldset__legend govuk-fieldset__legend--l">
-                    <h1 class="govuk-fieldset__heading">
+                    <h1 id="page-heading" class="govuk-fieldset__heading">
                         How do you want to get access codes?
                     </h1>
                 </legend>
@@ -45,12 +47,12 @@
                 <div class="govuk-radios govuk-radios--inline" data-module="govuk-radios">
                     <div class="govuk-radios__item">
                         <input class="govuk-radios__input" id="sms-mfa" name="mfaType" type="radio" value="SMS" checked>
-                        <label class="govuk-label govuk-radios__label govuk-!-font-weight-bold" for="sms-mfa">Text message</label>
+                        <label class="govuk-label govuk-radios__label govuk-!-font-weight-bold" id="sms-mfa-label" for="sms-mfa">Text message</label>
                         <div id="sms-item-hint" class="govuk-hint govuk-radios__hint">Get codes sent to a mobile phone.</div>
                     </div>
                     <div class="govuk-radios__item">
                         <input class="govuk-radios__input" id="auth-app-mfa" name="mfaType" type="radio" value="AUTHENTICATOR_APP">
-                        <label class="govuk-label govuk-radios__label govuk-!-font-weight-bold" for="auth-app-mfa">
+                        <label class="govuk-label govuk-radios__label govuk-!-font-weight-bold" id="auth-app-mfa-label" for="auth-app-mfa">
                             Authenticator app for smartphone or tablet
                         </label>
                         <div id="auth-app-item-hint" class="govuk-hint govuk-radios__hint">

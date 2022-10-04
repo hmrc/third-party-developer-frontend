@@ -80,7 +80,6 @@ class MfaController @Inject()(
   }
 
   def selectMfaAction: Action[AnyContent] = atLeastPartLoggedInEnablingMfaAction { implicit request =>
-
     SelectMfaForm.form.bindFromRequest.fold(
       form => Future.successful(BadRequest(selectMfaView(form))),
       form => {
