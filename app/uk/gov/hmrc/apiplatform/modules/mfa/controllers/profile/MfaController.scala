@@ -171,10 +171,7 @@ class MfaController @Inject()(
   }
 
   def smsAccessCodePage(mfaId: MfaId): Action[AnyContent] = atLeastPartLoggedInEnablingMfaAction { implicit request =>
-    thirdPartyDeveloperConnector.fetchDeveloper(request.userId).map {
-      case Some(developer: Developer) => Ok(smsAccessCodeView(SmsAccessCodeForm.form, mfaId))
-      case None => InternalServerError("Unable to obtain User information")
-    }
+    Future.successful(Ok(smsAccessCodeView(SmsAccessCodeForm.form, mfaId)))
   }
 
   def smsAccessCodeAction(mfaId: MfaId): Action[AnyContent] = atLeastPartLoggedInEnablingMfaAction { implicit request =>
