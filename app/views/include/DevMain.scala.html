@@ -35,7 +35,8 @@
   back: BackButton = NoBackButton,
   fullWidthContent: Boolean = false,
   developerSession: Option[DeveloperSession],
-  feedbackBanner: Option[FeedbackBanner] = Some(GenericFeedbackBanner)
+  feedbackBanner: Option[FeedbackBanner] = Some(GenericFeedbackBanner),
+  additionalScriptsBlock: Option[Html] = None
 )(mainContent: Html)(
   implicit request: Request[_],
   messages: Messages,
@@ -44,7 +45,7 @@
 
 @scripts = {
   <script src='@routes.Assets.versioned("lib/govuk-frontend/govuk/all.js")'></script>
-  <script src='@routes.Assets.versioned("javascripts/subscriptionsNew.js")' type="text/javascript"></script> 
+  <script src='@routes.Assets.versioned("javascripts/subscriptions.js")' type="text/javascript"></script>
   <script>window.GOVUKFrontend.initAll();</script>
   @hmrcTrackingConsentSnippet()
 }
@@ -73,7 +74,8 @@
   fullWidthContent = fullWidthContent,
   developerSession = developerSession,
   navLinks = UserNavLinks(userFullName, isRegistering),
-  feedbackBanner = feedbackBanner
+  feedbackBanner = feedbackBanner,
+  additionalScriptsBlock = additionalScriptsBlock
 ) {
   @mainContent
 }
