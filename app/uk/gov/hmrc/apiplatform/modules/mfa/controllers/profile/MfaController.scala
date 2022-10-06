@@ -69,9 +69,10 @@ class MfaController @Inject()(
   val qrCode = QRCode(scale)
 
   def securityPreferences: Action[AnyContent] = atLeastPartLoggedInEnablingMfaAction { implicit request =>
+    val errorMessage = "Unable to obtain User information"
     thirdPartyDeveloperConnector.fetchDeveloper(request.userId).map {
       case Some(developer: Developer) => Ok(securityPreferencesView(developer.mfaDetails.filter(_.verified)))
-      case None => InternalServerError("unable to obtain User information")
+      case None => InternalServerError(errorHandler.standardErrorTemplate(errorMessage, errorMessage, errorMessage))
     }
   }
 
@@ -138,22 +139,23 @@ class MfaController @Inject()(
   }
 
   def nameChangeAction(mfaId: MfaId): Action[AnyContent] = atLeastPartLoggedInEnablingMfaAction { implicit request =>
-
+    val errorMessage = "Failed to change MFA name"
     MfaNameChangeForm.form.bindFromRequest.fold(
       form => Future.successful(BadRequest(nameChangeView(form, mfaId))),
       form => {
         thirdPartyDeveloperMfaConnector.changeName(request.userId, mfaId, form.name) map {
           case true => Redirect(uk.gov.hmrc.apiplatform.modules.mfa.controllers.profile.routes.MfaController.authAppSetupCompletedPage())
-          case false => InternalServerError("Failed to change MFA name")
+          case false => InternalServerError(errorHandler.standardErrorTemplate(errorMessage, errorMessage, errorMessage))
         }
       }
     )
   }
 
   def authAppSetupCompletedPage: Action[AnyContent] = atLeastPartLoggedInEnablingMfaAction { implicit request =>
+    val errorMessage = "Unable to obtain user information"
     thirdPartyDeveloperConnector.fetchDeveloper(request.userId).map {
       case Some(developer: Developer) => Ok(authAppSetupCompletedView(!isSmsMfaVerified(developer.mfaDetails)))
-      case None => InternalServerError("Unable to obtain User information")
+      case None => InternalServerError(errorHandler.standardErrorTemplate(errorMessage, errorMessage, errorMessage))
     }
   }
 
@@ -175,19 +177,21 @@ class MfaController @Inject()(
   }
 
   def smsAccessCodeAction(mfaId: MfaId): Action[AnyContent] = atLeastPartLoggedInEnablingMfaAction { implicit request =>
+    val errorMessage = "Unable to verify SMS access code"
     SmsAccessCodeForm.form.bindFromRequest.fold(
       form => Future.successful(BadRequest(smsAccessCodeView(form, mfaId))),
       form => thirdPartyDeveloperMfaConnector.verifyMfa(request.userId, mfaId, form.accessCode) map {
         case true => Redirect(uk.gov.hmrc.apiplatform.modules.mfa.controllers.profile.routes.MfaController.smsSetupCompletedPage())
-        case false => InternalServerError("Unable to verify SMS access code")
+        case false => InternalServerError(errorHandler.standardErrorTemplate(errorMessage, errorMessage, errorMessage))
       }
     )
   }
 
   def smsSetupCompletedPage: Action[AnyContent] = atLeastPartLoggedInEnablingMfaAction { implicit request =>
+    val errorMessage = "Unable to obtain User information"
     thirdPartyDeveloperConnector.fetchDeveloper(request.userId).map {
       case Some(developer: Developer) => Ok(smsSetupCompletedView(!isAuthAppMfaVerified(developer.mfaDetails)))
-      case None => InternalServerError("Unable to obtain User information")
+      case None => InternalServerError(errorHandler.standardErrorTemplate(errorMessage, errorMessage, errorMessage))
     }
   }
 }

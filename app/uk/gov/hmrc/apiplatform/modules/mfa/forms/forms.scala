@@ -64,7 +64,6 @@ object SmsAccessCodeForm {
     mapping(
       "accessCode" -> text.verifying(FormKeys.accessCodeInvalidKey, s => s.matches("^[0-9]{6}$")),
       "mobileNumber" -> text
-
     )(SmsAccessCodeForm.apply)(SmsAccessCodeForm.unapply)
   )
 }
@@ -81,8 +80,7 @@ object SelectMfaForm {
   )
 
   def verifyMfaType(mfaType: String) = {
-    val validMfaType: Option[MfaType] = MfaType.values.find(v => v.entryName.equalsIgnoreCase(mfaType))
-    validMfaType match {
+    MfaType.values.find(v => v.entryName.equalsIgnoreCase(mfaType)) match {
       case Some(value) => true
       case None => false
     }

@@ -27,6 +27,6 @@
   title = applicationConfig.title,
   navTitleLink = Some(Call("GET", "/api-documentation"))
 ) {
-  <h1 class="govuk-heading-xl">@heading</h1>
-  <p class="govuk-body">@message</p>
+  <h1 class="govuk-heading-xl" id="page-heading">@heading</h1>
+  <p class="govuk-body" id="message">@message</p>
 }
