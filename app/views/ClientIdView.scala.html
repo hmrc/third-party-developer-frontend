@@ -27,6 +27,10 @@
 
 @clientId = @{app.clientId.value}
 
+@additionalScripts = {
+  <script src='@routes.Assets.versioned("javascripts/copy-button.js")' type="text/javascript"></script>
+}
+
 @devMain(
   title = "Client ID",
   userFullName = loggedIn.loggedInName,
@@ -36,7 +40,8 @@
     Crumb.viewAllApplications,
     Crumb.home
   ),
-  developerSession = Some(loggedIn)
+  developerSession = Some(loggedIn),
+  additionalScriptsBlock = Some(additionalScripts)
 ) {
   <h1 class="govuk-heading-l">Client ID</h1>
 
@@ -66,5 +71,4 @@
   <p class="govuk-body">Generate a client secret and use it with your client ID to test your application in the sandbox.</p>
 
   <a id="continue" class="govuk-button" href="@controllers.routes.Credentials.clientSecrets(app.id)">Continue</a>
-  <script src='@Assets.versioned("javascripts/copy-button.js")' type="text/javascript"></script> 
 }
