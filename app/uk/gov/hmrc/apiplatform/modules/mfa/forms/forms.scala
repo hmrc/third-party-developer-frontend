@@ -53,7 +53,7 @@ object MobileNumberForm {
   )
 
   def isValidPhoneNumber(phoneNumber: String): Boolean = {
-    Pattern.compile("^((\\+44)|(0))?\\d{10}$").matcher(phoneNumber).matches()
+    Pattern.compile("[+()-0123456789\\s]+").matcher(phoneNumber).matches()
   }
 }
 
