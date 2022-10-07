@@ -23,7 +23,7 @@ import play.api.inject.bind
 import play.api.inject.guice.GuiceApplicationBuilder
 import play.api.libs.json.Json
 import play.api.{Application, Configuration, Mode}
-import uk.gov.hmrc.apiplatform.modules.mfa.connectors.ThirdPartyDeveloperMfaConnector.RegisterAuthAppResponse
+import uk.gov.hmrc.apiplatform.modules.mfa.connectors.ThirdPartyDeveloperMfaConnector.{RegisterAuthAppResponse, RegisterSmsResponse}
 import uk.gov.hmrc.apiplatform.modules.mfa.models.{DeviceSession, DeviceSessionInvalid, MfaId, SmsMfaDetailSummary}
 import uk.gov.hmrc.http.{HeaderCarrier, UpstreamErrorResponse}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.builder.DeveloperBuilder
@@ -199,7 +199,7 @@ class ThirdPartyDeveloperMfaConnectorIntegrationSpec extends BaseConnectorIntegr
   "createMfaAuthApp" should {
     "return 201 with RegisterAuthAppResponse" in new Setup {
       val url = s"/developer/${userId.value}/mfa/auth-app"
-      val response = RegisterAuthAppResponse("secret", mfaId)
+      val response = RegisterAuthAppResponse(mfaId, "secret")
 
       stubFor(
         post(urlPathEqualTo(url))
@@ -228,9 +228,9 @@ class ThirdPartyDeveloperMfaConnectorIntegrationSpec extends BaseConnectorIntegr
   "createMfaSms" should {
     val mobileNumber = "0123456789"
     val request = CreateMfaSmsRequest(mobileNumber)
-    val response = SmsMfaDetailSummary(name = "Text message", createdOn = LocalDateTime.now, mobileNumber = mobileNumber)
+    val response = RegisterSmsResponse(mfaId = MfaId.random, mobileNumber = mobileNumber)
 
-    "return 201 with SmsMfaDetailSummary" in new Setup {
+    "return 201 with RegisterSmsResponse" in new Setup {
       val url = s"/developer/${userId.value}/mfa/sms"
       stubFor(
         post(urlPathEqualTo(url))

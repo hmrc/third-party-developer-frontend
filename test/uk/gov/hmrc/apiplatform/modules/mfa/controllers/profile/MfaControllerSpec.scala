@@ -25,7 +25,7 @@ import play.api.test.FakeRequest
 import play.api.test.Helpers._
 import play.filters.csrf.CSRF.TokenProvider
 import uk.gov.hmrc.apiplatform.modules.mfa.connectors.ThirdPartyDeveloperMfaConnector
-import uk.gov.hmrc.apiplatform.modules.mfa.connectors.ThirdPartyDeveloperMfaConnector.RegisterAuthAppResponse
+import uk.gov.hmrc.apiplatform.modules.mfa.connectors.ThirdPartyDeveloperMfaConnector.{RegisterAuthAppResponse, RegisterSmsResponse}
 import uk.gov.hmrc.apiplatform.modules.mfa.models.MfaId
 import uk.gov.hmrc.apiplatform.modules.mfa.service.{MFAResponse, MFAService}
 import uk.gov.hmrc.apiplatform.modules.mfa.views.html.authapp._
@@ -99,6 +99,8 @@ class MfaControllerSpec extends BaseControllerSpec with WithCSRFAddToken with De
     fetchSessionByIdReturns(sessionId, Session(sessionId, loggedInDeveloper, loggedInState))
     updateUserFlowSessionsReturnsSuccessfully(sessionId)
 
+    val registerSmsResponse: RegisterSmsResponse = RegisterSmsResponse(mfaId = smsMfaId, mobileNumber = verifiedSmsMfaDetail.mobileNumber)
+
     def validateRedirectResult(result: Future[Result]) = {
       status(result) shouldBe Status.SEE_OTHER
       redirectLocation(result) shouldBe Some("/developer/login")
@@ -110,16 +112,14 @@ class MfaControllerSpec extends BaseControllerSpec with WithCSRFAddToken with De
         .thenReturn(Future.successful(None))
 
       val request = FakeRequest()
-        .withSession("csrfToken" -> app.injector.instanceOf[TokenProvider].generateToken)
         .withLoggedIn(underTest, implicitly)(invalidSessionId)
+        .withCSRFToken
 
       if (formFieldMap.isEmpty) request else request.withFormUrlEncodedBody(formFieldMap.toSeq: _*)
     }
 
     def createRequest() = {
-      FakeRequest()
-        .withLoggedIn(underTest, implicitly)(sessionId)
-        .withSession("csrfToken" -> app.injector.instanceOf[TokenProvider].generateToken)
+      FakeRequest().withLoggedIn(underTest, implicitly)(sessionId).withCSRFToken
     }
 
     def accessCodeRequest(code: String): FakeRequest[AnyContentAsFormUrlEncoded] = {
@@ -156,7 +156,7 @@ class MfaControllerSpec extends BaseControllerSpec with WithCSRFAddToken with De
   }
 
   trait SetupSuccessfulStart2SV extends Setup {
-    val registerAuthAppResponse = RegisterAuthAppResponse(secret, authAppMfaId)
+    val registerAuthAppResponse = RegisterAuthAppResponse(authAppMfaId, secret)
 
     when(underTest.otpAuthUri.apply(secret.toLowerCase(), issuer, loggedInDeveloper.email)).thenReturn(otpUri)
     when(underTest.qrCode.generateDataImageBase64(otpUri.toString)).thenReturn(qrImage)
@@ -280,12 +280,12 @@ class MfaControllerSpec extends BaseControllerSpec with WithCSRFAddToken with De
       "redirect to access code page when user is Logged in and form is valid and call to connector is successful" in
         new SetupSecurityPreferences with LoggedIn {
           when(underTest.thirdPartyDeveloperMfaConnector.createMfaSms(*[UserId], eqTo(mobileNumber))(*))
-            .thenReturn(Future.successful(verifiedSmsMfaDetail))
+            .thenReturn(Future.successful(registerSmsResponse))
 
           private val result = underTest.setupSmsAction()(mobileNumberRequest())
 
           status(result) shouldBe Status.SEE_OTHER
-          redirectLocation(result) shouldBe Some(s"/developer/profile/security-preferences/sms/access-code?mfaId=${verifiedSmsMfaDetail.id.value.toString}")
+          redirectLocation(result) shouldBe Some(s"/developer/profile/security-preferences/sms/access-code?mfaId=${smsMfaId.value.toString}")
 
           verify(underTest.thirdPartyDeveloperMfaConnector).createMfaSms(*[UserId], eqTo(mobileNumber))(*)
         }
@@ -293,12 +293,12 @@ class MfaControllerSpec extends BaseControllerSpec with WithCSRFAddToken with De
       "redirect to access code page when user is Part Logged in and form is valid and call to connector is successful" in
         new SetupSecurityPreferences with PartLogged {
           when(underTest.thirdPartyDeveloperMfaConnector.createMfaSms(*[UserId], eqTo(mobileNumber))(*))
-            .thenReturn(Future.successful(verifiedSmsMfaDetail))
+            .thenReturn(Future.successful(registerSmsResponse))
 
           private val result = underTest.setupSmsAction()(mobileNumberRequest())
 
           status(result) shouldBe Status.SEE_OTHER
-          redirectLocation(result) shouldBe Some(s"/developer/profile/security-preferences/sms/access-code?mfaId=${verifiedSmsMfaDetail.id.value.toString}")
+          redirectLocation(result) shouldBe Some(s"/developer/profile/security-preferences/sms/access-code?mfaId=${smsMfaId.value.toString}")
 
           verify(underTest.thirdPartyDeveloperMfaConnector).createMfaSms(*[UserId], eqTo(mobileNumber))(*)
         }

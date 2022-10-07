@@ -34,10 +34,4 @@ object MfaDetailHelper {
     mfaDetails.filter(x => x.mfaType == MfaType.AUTHENTICATOR_APP && x.verified)
       .head.asInstanceOf[AuthenticatorAppMfaDetailSummary]
   }
-
-  def getSmsMfa(mfaDetails: List[MfaDetail]): SmsMfaDetailSummary = {
-    mfaDetails.filter(x => x.mfaType == MfaType.SMS)
-      .head.asInstanceOf[SmsMfaDetailSummary]
-  }
-
 }
