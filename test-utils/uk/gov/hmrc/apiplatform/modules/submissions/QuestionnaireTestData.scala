@@ -129,7 +129,7 @@ trait QuestionnaireTestData {
       hintText = StatementText("For example https://example.com").some,
       absence = ("My organisation doesn't have a website", Fail).some,
       validation = TextValidation.Url.some,
-      errorInfo = ErrorInfo("Enter the URL, like https://example.com","URL cannot be blank").some
+      errorInfo = ErrorInfo("Enter a URL in the correct format, like https://example.com","Enter a URL in the correct format, like https://example.com").some
     )
 
     val question2 = ChooseOneOfQuestion(
