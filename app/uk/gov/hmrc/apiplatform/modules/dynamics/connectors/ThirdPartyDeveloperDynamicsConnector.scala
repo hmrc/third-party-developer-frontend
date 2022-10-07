@@ -24,7 +24,6 @@ import uk.gov.hmrc.thirdpartydeveloperfrontend.connectors.CommonResponseHandlers
 
 import javax.inject.{Inject, Singleton}
 import scala.concurrent.{ExecutionContext, Future}
-import scala.util.control.NonFatal
 
 case class Ticket(ticketNumber: String, title: String, description: Option[String], statusCode: Int, id: String)
 
@@ -45,12 +44,8 @@ class ThirdPartyDeveloperDynamicsConnector @Inject() (
   )(implicit ec: ExecutionContext)
     extends CommonResponseHandlers {
 
-  def getTickets()(implicit hc: HeaderCarrier): Future[Either[Throwable, List[Ticket]]] = {
+  def getTickets()(implicit hc: HeaderCarrier): Future[List[Ticket]] = {
     http.GET[List[Ticket]](s"${configuration.thirdPartyDeveloperUrl}/incidents")
-      .map(Right(_))
-      .recover {
-        case NonFatal(e) => Left(e)
-      }
   }
 
   def createTicket(customerId: String, title: String, description: String)(implicit hc: HeaderCarrier): Future[Either[String, Unit]] = {

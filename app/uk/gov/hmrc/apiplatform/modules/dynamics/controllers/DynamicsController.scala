@@ -18,7 +18,7 @@ package uk.gov.hmrc.apiplatform.modules.dynamics.controllers
 
 import play.api.libs.crypto.CookieSigner
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
-import uk.gov.hmrc.apiplatform.modules.dynamics.connectors.ThirdPartyDeveloperDynamicsConnector
+import uk.gov.hmrc.apiplatform.modules.dynamics.connectors.{ThirdPartyDeveloperDynamicsConnector, Ticket}
 import uk.gov.hmrc.apiplatform.modules.dynamics.model.AddTicketForm
 import uk.gov.hmrc.apiplatform.modules.dynamics.views.html._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.config.{ApplicationConfig, ErrorHandler}
@@ -42,9 +42,10 @@ class DynamicsController @Inject() (
     extends LoggedInController(mcc) {
 
   def tickets: Action[AnyContent] = loggedInAction { implicit request =>
-    thirdPartyDeveloperDynamicsConnector.getTickets().flatMap {
-      case Right(tickets) => Future.successful(Ok(ticketsView(tickets)))
-      case _              => Future.successful(BadRequest("Cannot find tickets"))
+    thirdPartyDeveloperDynamicsConnector.getTickets().map { tickets: List[Ticket] =>
+      Ok(ticketsView(tickets))
+    } recover {
+      case _ => InternalServerError(errorHandler.standardErrorTemplate("", "MS Dynamics Tickets", "Cannot get tickets"))
     }
   }
 
@@ -57,7 +58,7 @@ class DynamicsController @Inject() (
       form => Future.successful(BadRequest(addTicketView(form))),
       form => {
         thirdPartyDeveloperDynamicsConnector.createTicket(form.customerId, form.title, form.description).map {
-          case Right(_) => Redirect(uk.gov.hmrc.apiplatform.modules.dynamics.controllers.routes.DynamicsController.tickets())
+          case Right(_)           => Redirect(uk.gov.hmrc.apiplatform.modules.dynamics.controllers.routes.DynamicsController.tickets())
           case Left(errorMessage) =>
             val createIncidentForm = AddTicketForm
               .form

@@ -24,6 +24,7 @@ import play.api.inject.guice.GuiceApplicationBuilder
 import play.api.libs.crypto.CookieSigner
 import play.api.test.Helpers.{redirectLocation, route, status}
 import play.api.test.{CSRFTokenHelper, FakeRequest, Writeables}
+import uk.gov.hmrc.apiplatform.modules.dynamics.connectors.ThirdPartyDeveloperDynamicsConnector
 import uk.gov.hmrc.apiplatform.modules.mfa.connectors.ThirdPartyDeveloperMfaConnector
 import uk.gov.hmrc.apiplatform.modules.mfa.models.{MfaAction, MfaId, MfaType}
 import uk.gov.hmrc.apiplatform.modules.submissions.connectors.ThirdPartyApplicationSubmissionsConnector
@@ -83,6 +84,7 @@ abstract class EndpointScenarioSpec extends AsyncHmrcSpec with GuiceOneAppPerSui
     .overrides(bind[ProductionPushPullNotificationsConnector].toInstance(productionPushPullNotificationsConnector))
     .overrides(bind[ThirdPartyApplicationSubmissionsConnector].toInstance(thirdPartyApplicationSubmissionsConnector))
     .overrides(bind[ThirdPartyDeveloperMfaConnector].toInstance(thirdPartyDeveloperMfaConnector))
+    .overrides(bind[ThirdPartyDeveloperDynamicsConnector].toInstance(thirdPartyDeveloperDynamicsConnector))
     .in(Mode.Test)
     .build()
   }
@@ -178,6 +180,8 @@ abstract class EndpointScenarioSpec extends AsyncHmrcSpec with GuiceOneAppPerSui
   when(thirdPartyDeveloperMfaConnector.changeName(*[UserId], *[MfaId], *[String])(*)).thenReturn(Future.successful(true))
   when(thirdPartyDeveloperMfaConnector.createMfaSms(*[UserId], *[String])(*)).thenReturn(Future.successful(registerSmsResponse))
   when(thirdPartyDeveloperMfaConnector.sendSms(*[UserId], *[MfaId])(*)).thenReturn(Future.successful(true))
+  when(thirdPartyDeveloperDynamicsConnector.getTickets()(*)).thenReturn(Future.successful(List.empty))
+  when(thirdPartyDeveloperDynamicsConnector.createTicket(*[String], *[String], *[String])(*)).thenReturn(Future.successful(Right(())))
 
   private def populatePathTemplateWithValues(pathTemplate: String, values: Map[String,String]): String = {
     //TODO fail test if path contains parameters that aren't supplied by the values map
@@ -349,6 +353,7 @@ abstract class EndpointScenarioSpec extends AsyncHmrcSpec with GuiceOneAppPerSui
       case Endpoint("POST", "/developer/profile/security-preferences/auth-app/name") => Map("name" -> "appName")
       case Endpoint("POST", "/developer/profile/security-preferences/sms/setup") => Map("mobileNumber" -> "0123456789")
       case Endpoint("POST", "/developer/profile/security-preferences/sms/access-code") => Map("accessCode" -> "123456", "mobileNumber" -> "0123456789")
+      case Endpoint("POST", "/developer/poc-dynamics/tickets/add") => Map("customerId" -> "11111111-1111-1111-1111-111111111111", "title" -> "title", "description" -> "desc")
       case _ => Map.empty
     }
   }
@@ -439,6 +444,7 @@ abstract class EndpointScenarioSpec extends AsyncHmrcSpec with GuiceOneAppPerSui
       case Endpoint("POST", "/developer/profile/security-preferences/sms/setup") => Redirect(s"/developer/profile/security-preferences/sms/access-code?mfaId=${smsMfaId.value.toString}&mfaAction=CREATE")
       case Endpoint("POST", "/developer/profile/security-preferences/sms/access-code") => Redirect(s"/developer/profile/security-preferences/sms/setup/complete")
       case Endpoint("GET", "/developer/profile/security-preferences/remove-mfa") => Redirect(s"/developer/profile/security-preferences/sms/access-code?mfaId=${smsMfaId.value.toString}&mfaAction=REMOVE")
+      case Endpoint("POST", "/developer/poc-dynamics/tickets/add") => Redirect("/developer/poc-dynamics/tickets")
       case _ => Success()
     }
   }

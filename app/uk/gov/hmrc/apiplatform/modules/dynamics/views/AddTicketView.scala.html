@@ -32,10 +32,11 @@
     developerSession = Some(loggedIn)
 ) {
 
-    <h1 class="govuk-heading-l">MS Dynamics Add Ticket</h1>
+    <h1 id="page-heading" class="govuk-heading-l">MS Dynamics Add Ticket</h1>
   
     @helper.form(action = routes.DynamicsController.addTicketAction()) {
         @helper.CSRF.formField
+      
         <div @if(form.errors("dynamics").nonEmpty){class="govuk-form-group--error"}>
             <span class="govuk-error-message">
                 <span class="govuk-visually-hidden">Error:</span>
@@ -46,10 +47,13 @@
                 @fieldError(form.errors, "customerId")
                 <input
                     type="text"
+                    autocomplete="off"
                     id="customerId"
                     name="customerId"
                     value="@form.data.getOrElse("customerId", "")"
                     class="govuk-input @if(form.errors("customerId").nonEmpty){govuk-input--error}"
+                    aria-required="true"
+                    aria-describedby="access-code-hint"
                 />
             </div>
             <div class="govuk-form-group @if(form.errors("title").nonEmpty) {govuk-form-group--error}">
@@ -57,10 +61,13 @@
                 @fieldError(form.errors, "title")
                 <input
                     type="text"
+                    autocomplete="off"
                     id="title"
                     name="title"
                     value="@form.data.getOrElse("title", "")"
                     class="govuk-input @if(form.errors("title").nonEmpty){govuk-input--error}"
+                    aria-required="true"
+                    aria-describedby="access-code-hint"
                 />
             </div>
             <div class="govuk-form-group @if(form.errors("description").nonEmpty) {govuk-form-group--error}">
@@ -68,10 +75,13 @@
                 @fieldError(form.errors, "description")
                 <input
                     type="text"
+                    autocomplete="off"
                     id="description"
                     name="description"
                     value="@form.data.getOrElse("description", "")"
                     class="govuk-input @if(form.errors("description").nonEmpty){govuk-input--error}"
+                    aria-required="true"
+                    aria-describedby="access-code-hint"
                 />
             </div>
         </div>
