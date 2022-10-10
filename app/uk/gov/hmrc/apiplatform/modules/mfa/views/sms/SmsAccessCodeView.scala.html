@@ -1,0 +1,65 @@
+@*
+ * Copyright 2022 HM Revenue & Customs
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ *@
+
+@import include._
+@import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.views.BackButtonWithJavaScript
+@import views.html.include.DevMain
+@import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.DeveloperSession
+@import uk.gov.hmrc.apiplatform.modules.mfa.controllers.profile.routes
+@import uk.gov.hmrc.apiplatform.modules.mfa.models.MfaId
+@import uk.gov.hmrc.apiplatform.modules.mfa.forms.SmsAccessCodeForm
+
+@this(devMain: DevMainWithFormErrors)
+
+@(form: Form[SmsAccessCodeForm], mfaId: MfaId)(implicit flash: Flash, messages: Messages, request: play.api.mvc.Request[Any], loggedIn: DeveloperSession, appConfig: ApplicationConfig)
+
+@devMain(
+    form,
+    title = "Enter your access code",
+    userFullName = loggedIn.loggedInName,
+    back = BackButtonWithJavaScript,
+    isRegistering = true,
+    developerSession = Some(loggedIn)
+) {
+    <h1 class="govuk-heading-l" id="page-heading">Enter your access code</h1>
+    <p class="govuk-body">
+        We have sent a 6 digit access code to <span class="govuk-!-font-weight-bold">@flash.get("mobileNumber").getOrElse(form.data.get("mobileNumber"))</span></p>
+    <p class="govuk-body">It may take a few minutes to arrive</p>
+    <p class="govuk-body">If you have a UK phone number your 6-digit code will arrive from the phone number 60 551.</p>
+
+    @helper.form(action = routes.MfaController.smsAccessCodeAction(mfaId)) {
+        @helper.CSRF.formField
+
+        <div class="govuk-form-group @if(form.errors("accessCode").nonEmpty) {govuk-form-group--error}">
+            <label class="govuk-label govuk-!-font-weight-bold" for="accessCode" id="access-code-label">Access code</label>
+            @fieldError(form.errors, "accessCode")
+            <input
+            type="text"
+            autocomplete="off"
+            id="accessCode"
+            name="accessCode"
+            value="@form.data.getOrElse("accessCode", "")"
+            class="govuk-input @if(form.errors("accessCode").nonEmpty) {govuk-input--error}"
+            aria-required="true"
+            aria-describedby="access-code-hint"
+            />
+        </div>
+
+        <input id="mobileNumber" name="mobileNumber" type="hidden" value="@flash.get("mobileNumber").getOrElse(form.data.get("mobileNumber"))"/>
+        <button id="submit" class="govuk-button" type="submit">Continue</button>
+    }
+
+}

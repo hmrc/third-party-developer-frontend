@@ -18,7 +18,10 @@ package uk.gov.hmrc.apiplatform.modules.mfa.forms
 
 import play.api.data.Form
 import play.api.data.Forms.{boolean, mapping, nonEmptyText, optional, text}
+import uk.gov.hmrc.apiplatform.modules.mfa.models.MfaType
 import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.FormKeys
+
+import java.util.regex.Pattern
 
 final case class MfaAccessCodeForm(accessCode: String, rememberMe: Boolean)
 
@@ -40,4 +43,51 @@ object MfaNameChangeForm {
     (MfaNameChangeForm.apply)(MfaNameChangeForm.unapply)
   )
 }
+
+final case class MobileNumberForm(mobileNumber: String )
+
+object MobileNumberForm {
+  def form: Form[MobileNumberForm] = Form(
+    mapping("mobileNumber" -> text.verifying(FormKeys.mobileNumberInvaliddKey, s => isValidPhoneNumber(s)))
+    (MobileNumberForm.apply)(MobileNumberForm.unapply)
+  )
+
+  def isValidPhoneNumber(phoneNumber: String): Boolean = {
+    Pattern.compile("[+()-0123456789\\s]+").matcher(phoneNumber).matches()
+  }
+}
+
+final case class SmsAccessCodeForm(accessCode: String, mobileNumber: String)
+
+object SmsAccessCodeForm {
+  def form: Form[SmsAccessCodeForm] = Form(
+    mapping(
+      "accessCode" -> text.verifying(FormKeys.accessCodeInvalidKey, s => s.matches("^[0-9]{6}$")),
+      "mobileNumber" -> text
+    )(SmsAccessCodeForm.apply)(SmsAccessCodeForm.unapply)
+  )
+}
+
+final case class SelectMfaForm(mfaType: String)
+
+object SelectMfaForm {
+
+  def form: Form[SelectMfaForm] = Form(
+    mapping(
+    "mfaType" -> text.verifying(FormKeys.selectMfaInvalidKey, s => verifyMfaType(s))
+    )
+  (SelectMfaForm.apply)(SelectMfaForm.unapply)
+  )
+
+  def verifyMfaType(mfaType: String) = {
+    MfaType.values.find(v => v.entryName.equalsIgnoreCase(mfaType)) match {
+      case Some(value) => true
+      case None => false
+    }
+  }
+
+}
+
+
+
 

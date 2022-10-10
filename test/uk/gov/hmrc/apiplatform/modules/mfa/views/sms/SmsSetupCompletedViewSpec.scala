@@ -14,18 +14,18 @@
  * limitations under the License.
  */
 
-package uk.gov.hmrc.apiplatform.modules.mfa.views.authapp
+package uk.gov.hmrc.apiplatform.modules.mfa.views.sms
 
 import org.jsoup.Jsoup
 import play.api.mvc.AnyContentAsEmpty
 import play.api.test.{FakeRequest, StubMessagesFactory}
-import uk.gov.hmrc.apiplatform.modules.mfa.views.html.authapp.AuthAppSetupCompletedView
+import uk.gov.hmrc.apiplatform.modules.mfa.views.html.sms.SmsSetupCompletedView
 import uk.gov.hmrc.thirdpartydeveloperfrontend.builder.{DeveloperBuilder, DeveloperSessionBuilder}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.{DeveloperSession, LoggedInState}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.{LocalUserIdTracker, WithCSRFAddToken}
 import views.helper.CommonViewSpec
 
-class AuthAppSetupCompletedViewSpec extends CommonViewSpec
+class SmsSetupCompletedViewSpec extends CommonViewSpec
   with WithCSRFAddToken
   with DeveloperSessionBuilder
   with DeveloperBuilder
@@ -38,30 +38,30 @@ class AuthAppSetupCompletedViewSpec extends CommonViewSpec
       LoggedInState.LOGGED_IN,
     buildDeveloper("developer@example.com", "Joe", "Bloggs")
   )
-  val authAppSetupCompletedView: AuthAppSetupCompletedView = app.injector.instanceOf[AuthAppSetupCompletedView]
+  val smsSetupCompletedView: SmsSetupCompletedView = app.injector.instanceOf[SmsSetupCompletedView]
 
-  "AuthAppSetupCompletedView" should {
-    "render correctly when form is valid and showSmsText flag is false" in {
-      val mainView = authAppSetupCompletedView.apply(false)(FakeRequest().withCSRFToken, loggedIn, appConfig, stubMessages())
+  "SmsSetupCompletedView" should {
+    "render correctly when form is valid and showAuthAppText flag is false" in {
+      val mainView = smsSetupCompletedView.apply(false)(FakeRequest().withCSRFToken, loggedIn, appConfig, stubMessages())
       val document = Jsoup.parse(mainView.body)
 
-      document.getElementById("page-heading").text shouldBe "You can now get access codes by authenticator app"
-      document.getElementById("paragraph").text should startWith("Keep the app on your smartphone or tablet.")
-      document.getElementById("body").text shouldBe "You'll be able to choose between getting access codes by text or your authenticator app."
+      document.getElementById("page-heading").text shouldBe "You can now get access codes by text"
+      document.getElementById("paragraph").text shouldBe "Every time you sign in we will request an access code."
+
+      document.getElementById("body").text shouldBe "You can choose between getting access codes by text or your authenticator app."
       document.getElementById("submit").text shouldBe "Continue"
       document.getElementById("submit").attr("href") shouldBe "/developer/applications"
     }
 
-    "render correctly when form is valid and showSmsText flag is true" in {
-      val mainView = authAppSetupCompletedView.apply(true)(FakeRequest().withCSRFToken, loggedIn, appConfig, stubMessages())
+    "render correctly when form is valid and showAuthAppText flag is true" in {
+      val mainView = smsSetupCompletedView.apply(true)(FakeRequest().withCSRFToken, loggedIn, appConfig, stubMessages())
       val document = Jsoup.parse(mainView.body)
-      document.getElementById("page-heading").text shouldBe "You can now get access codes by authenticator app"
-      document.getElementById("paragraph").text should startWith("Keep the app on your smartphone or tablet.")
+      document.getElementById("page-heading").text shouldBe "You can now get access codes by text"
+      document.getElementById("paragraph").text shouldBe "Every time you sign in we will request an access code."
 
-      document.getElementById("body").text shouldBe "You need to add text messages to get access codes as an alternative to your authenticator app."
-      document.getElementById("medium-heading").text shouldBe "You need to set up additional security"
+      document.getElementById("body").text shouldBe "You need to add an authenticator app to get access codes as an alternative to text."
       document.getElementById("submit").text shouldBe "Continue"
-      document.getElementById("submit").attr("href") shouldBe "/developer/profile/security-preferences/sms/setup"
+      document.getElementById("submit").attr("href") shouldBe "/developer/profile/security-preferences/auth-app/start"
       document.getElementById("link").text shouldBe "I can't do this right now"
       document.getElementById("link").attr("href") shouldBe "/developer/applications"
     }

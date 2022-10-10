@@ -1,0 +1,64 @@
+@*
+ * Copyright 2022 HM Revenue & Customs
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ *@
+
+@import include._
+@import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.views.BackButtonWithJavaScript
+@import views.html.include.DevMain
+@import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.DeveloperSession
+@import uk.gov.hmrc.apiplatform.modules.mfa.controllers.profile.routes
+@import uk.gov.hmrc.apiplatform.modules.mfa.forms.MobileNumberForm
+
+@this(devMain: DevMainWithFormErrors)
+
+@(form: Form[MobileNumberForm])(implicit messages: Messages, request: play.api.mvc.Request[Any], loggedIn: DeveloperSession, appConfig: ApplicationConfig)
+
+@devMain(
+  form,
+  title = "Enter a mobile phone number",
+  userFullName = loggedIn.loggedInName,
+  back = BackButtonWithJavaScript,
+  isRegistering = true,
+  developerSession = Some(loggedIn)
+) {
+  <h1 class="govuk-heading-l" id="page-heading">Enter a mobile phone number</h1>
+
+  <p class="govuk-hint" id="mobileNumber-hint">We will send an access code to this phone number by text message.</p>
+
+  <p class="govuk-body" id="paragraph">Include your area code. The UK area code is +44, for example, +448081570192.</p>
+
+  @helper.form(action = routes.MfaController.setupSmsAction){
+    @helper.CSRF.formField
+
+    <div class="govuk-form-group @if(form.errors("name").nonEmpty){govuk-form-group--error}">
+      <label class="govuk-label govuk-!-font-weight-bold" for="mobileNumber" id="mobileNumber-label">Phone number including area code</label>
+      @fieldError(form.errors, "mobileNumber")
+      <input
+        type="text"
+        autocomplete="off"
+        id="mobileNumber"
+        name="mobileNumber"
+        value="@form.data.getOrElse("mobileNumber", "")"
+        class="govuk-input @if(form.errors("mobileNumber").nonEmpty){govuk-input--error}"
+        aria-required="true"
+        aria-describedby="mobileNumber-hint"
+      />
+    </div>
+
+
+    <button id="submit" class="govuk-button" type="submit">Continue</button>
+  }
+
+}

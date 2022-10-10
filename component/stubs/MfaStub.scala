@@ -53,7 +53,7 @@ object MfaStub {
       post(urlPathEqualTo(s"/developer/${developer.userId.value}/mfa/auth-app"))
         .willReturn(aResponse()
           .withStatus(OK)
-          .withBody(Json.toJson(RegisterAuthAppResponse("mySecret", mfaId)).toString())))
+          .withBody(Json.toJson(RegisterAuthAppResponse(mfaId, "mySecret")).toString())))
   }
 
 
