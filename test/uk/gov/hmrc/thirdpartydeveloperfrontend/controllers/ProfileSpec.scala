@@ -20,12 +20,13 @@ import uk.gov.hmrc.thirdpartydeveloperfrontend.builder.DeveloperBuilder
 import uk.gov.hmrc.thirdpartydeveloperfrontend.config.ErrorHandler
 import uk.gov.hmrc.thirdpartydeveloperfrontend.connectors.ThirdPartyDeveloperConnector
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.connectors.ChangePassword
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.{LoggedInState, Session, UpdateProfileRequest}
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.{Developer, LoggedInState, Session, UpdateProfileRequest}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.InvalidCredentials
 import uk.gov.hmrc.thirdpartydeveloperfrontend.mocks.service.{ApplicationServiceMock, SessionServiceMock}
 import org.jsoup.Jsoup
 import org.mockito.ArgumentCaptor
 import play.api.http.Status.OK
+import play.api.mvc.AnyContentAsEmpty
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
 import play.filters.csrf.CSRF.TokenProvider
@@ -69,16 +70,16 @@ class ProfileSpec extends BaseControllerSpec with WithCSRFAddToken with Develope
       profileDeleteSubmittedView
     )
 
-    val loggedInDeveloper = buildDeveloper()
-
+    val loggedInDeveloper: Developer = buildDeveloper()
     val sessionId = "sessionId"
+
+    def createRequest: FakeRequest[AnyContentAsEmpty.type] =
+      FakeRequest().withLoggedIn(underTest, implicitly)(sessionId).withCSRFToken
   }
 
   "updateProfile" should {
     "update profile with normalized firstname and lastname" in new Setup {
-      val request = FakeRequest()
-        .withLoggedIn(underTest, implicitly)(sessionId)
-        .withFormUrlEncodedBody(
+      val request = createRequest.withFormUrlEncodedBody(
           ("firstname", "  first  "), // with whitespaces before and after
           ("lastname", "  last  ") // with whitespaces before and after
         )
@@ -99,10 +100,7 @@ class ProfileSpec extends BaseControllerSpec with WithCSRFAddToken with Develope
     }
 
     "fail and send an audit event while changing the password if old password is incorrect" in new Setup {
-      val request = FakeRequest()
-        .withLoggedIn(underTest, implicitly)(sessionId)
-        .withSession("csrfToken" -> app.injector.instanceOf[TokenProvider].generateToken)
-        .withFormUrlEncodedBody(
+      val request = createRequest.withFormUrlEncodedBody(
           ("currentpassword", "oldPassword"),
           ("password", "StrongNewPwd!2"),
           ("confirmpassword", "StrongNewPwd!2")
@@ -123,10 +121,7 @@ class ProfileSpec extends BaseControllerSpec with WithCSRFAddToken with Develope
     }
 
     "Password updated should have correct page title" in new Setup {
-      val request = FakeRequest()
-        .withLoggedIn(underTest, implicitly)(sessionId)
-        .withSession("csrfToken" -> app.injector.instanceOf[TokenProvider].generateToken)
-        .withFormUrlEncodedBody(
+      val request = createRequest.withFormUrlEncodedBody(
           ("currentpassword", "oldPassword"),
           ("password", "StrongNewPwd!2"),
           ("confirmpassword", "StrongNewPwd!2")
@@ -142,7 +137,6 @@ class ProfileSpec extends BaseControllerSpec with WithCSRFAddToken with Develope
       status(result) shouldBe OK
       val dom = Jsoup.parse(contentAsString(result))
       dom.getElementsByClass("govuk-panel__title").get(0).text shouldEqual "Password changed"
-
     }
   }
 }

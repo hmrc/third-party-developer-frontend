@@ -18,9 +18,9 @@ package uk.gov.hmrc.apiplatform.modules.mfa.connectors
 
 import play.api.Logging
 import play.api.http.Status._
-import play.api.libs.json.Json
-import uk.gov.hmrc.apiplatform.modules.mfa.connectors.ThirdPartyDeveloperMfaConnector.RegisterAuthAppResponse
-import uk.gov.hmrc.apiplatform.modules.mfa.models.{DeviceSession, DeviceSessionInvalid, MfaId}
+import play.api.libs.json.{Json, OFormat}
+import uk.gov.hmrc.apiplatform.modules.mfa.connectors.ThirdPartyDeveloperMfaConnector.{RegisterAuthAppResponse, RegisterSmsResponse}
+import uk.gov.hmrc.apiplatform.modules.mfa.models.{DeviceSession, DeviceSessionInvalid, MfaId, SmsMfaDetailSummary}
 import uk.gov.hmrc.http.HttpReads.Implicits._
 import uk.gov.hmrc.http._
 import uk.gov.hmrc.play.http.metrics.common.API
@@ -28,17 +28,18 @@ import uk.gov.hmrc.thirdpartydeveloperfrontend.config.ApplicationConfig
 import uk.gov.hmrc.thirdpartydeveloperfrontend.connectors.{CommonResponseHandlers, ConnectorMetrics}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.connectors.VerifyMfaRequest
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers._
+import uk.gov.hmrc.apiplatform.modules.mfa.models.MfaDetailFormats.smsMfaDetailSummaryFormat
 
 import javax.inject.{Inject, Singleton}
 import scala.concurrent.{ExecutionContext, Future}
 
-
-
 object ThirdPartyDeveloperMfaConnector {
 
-  case class RegisterAuthAppResponse(secret: String, mfaId: MfaId)
-  implicit val registerAuthAppResponseFormat = Json.format[RegisterAuthAppResponse]
+  case class RegisterAuthAppResponse(mfaId: MfaId, secret: String)
+  case class RegisterSmsResponse(mfaId: MfaId, mobileNumber: String)
 
+  implicit val registerAuthAppResponseFormat: OFormat[RegisterAuthAppResponse] = Json.format[RegisterAuthAppResponse]
+  implicit val registerSmsResponseFormat: OFormat[RegisterSmsResponse] = Json.format[RegisterSmsResponse]
 }
 
 @Singleton
@@ -46,13 +47,17 @@ class ThirdPartyDeveloperMfaConnector @Inject()(http: HttpClient, config: Applic
                                             )(implicit val ec: ExecutionContext) extends CommonResponseHandlers with Logging {
 
   lazy val serviceBaseUrl: String = config.thirdPartyDeveloperUrl
-  val api = API("third-party-developer")
+  val api: API = API("third-party-developer")
 
-
-
-  def createMfaSecret(userId: UserId)(implicit hc: HeaderCarrier): Future[RegisterAuthAppResponse] = {
+  def createMfaAuthApp(userId: UserId)(implicit hc: HeaderCarrier): Future[RegisterAuthAppResponse] = {
     metrics.record(api) {
       http.POSTEmpty[RegisterAuthAppResponse](s"$serviceBaseUrl/developer/${userId.value}/mfa/auth-app")
+    }
+  }
+
+  def createMfaSms(userId: UserId, mobileNumber: String)(implicit hc: HeaderCarrier): Future[RegisterSmsResponse] = {
+    metrics.record(api) {
+      http.POST[CreateMfaSmsRequest, RegisterSmsResponse](s"$serviceBaseUrl/developer/${userId.value}/mfa/sms", CreateMfaSmsRequest(mobileNumber))
     }
   }
 
@@ -119,6 +124,5 @@ class ThirdPartyDeveloperMfaConnector @Inject()(http: HttpClient, config: Applic
         case Left(err) => throw err
       }
   }
-
 }
 
