@@ -20,7 +20,7 @@ import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.apidefinitions.{Api
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.{ApplicationId, ClientId, Environment}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.controllers.{AddTeamMemberPageMode, SaveSubsFieldsPageMode}
 import play.api.mvc.{PathBindable, QueryStringBindable}
-import uk.gov.hmrc.apiplatform.modules.mfa.models.MfaId
+import uk.gov.hmrc.apiplatform.modules.mfa.models.{MfaAction, MfaId, MfaType}
 
 import java.util.UUID
 
@@ -163,4 +163,36 @@ package object binders {
         mode.toString.toLowerCase
       }
     }
+
+  implicit def mfaTypeQueryStringBindable(implicit textBinder: QueryStringBindable[String]) = new QueryStringBindable[MfaType] {
+    override def bind(key: String, params: Map[String, Seq[String]]): Option[Either[String, MfaType]] = {
+      for {
+        mfaType <- textBinder.bind("mfaType", params)
+      } yield {
+        mfaType match {
+          case Right(mfaType) => Right(MfaType.withNameInsensitive(mfaType))
+          case _              => Left("Unable to bind Mfa Type")
+        }
+      }
+    }
+    override def unbind(key: String, mfaType: MfaType): String = {
+      textBinder.unbind("mfaType", mfaType.toString)
+    }
+  }
+
+  implicit def mfaActionQueryStringBindable(implicit textBinder: QueryStringBindable[String]) = new QueryStringBindable[MfaAction] {
+    override def bind(key: String, params: Map[String, Seq[String]]): Option[Either[String, MfaAction]] = {
+      for {
+        mfaAction <- textBinder.bind("mfaAction", params)
+      } yield {
+        mfaAction match {
+          case Right(mfaAction) => Right(MfaAction.withNameInsensitive(mfaAction))
+          case _              => Left("Unable to bind Mfa Action")
+        }
+      }
+    }
+    override def unbind(key: String, mfaAction: MfaAction): String = {
+      textBinder.unbind("mfaAction", mfaAction.toString)
+    }
+  }
 }
