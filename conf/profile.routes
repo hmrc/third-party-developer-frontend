@@ -33,7 +33,6 @@ GET         /security-preferences                                               
 GET         /security-preferences/select-mfa                                                     uk.gov.hmrc.apiplatform.modules.mfa.controllers.profile.MfaController.selectMfaPage
 POST        /security-preferences/select-mfa                                                     uk.gov.hmrc.apiplatform.modules.mfa.controllers.profile.MfaController.selectMfaAction
 
-
 GET         /security-preferences/auth-app/start                                                 uk.gov.hmrc.apiplatform.modules.mfa.controllers.profile.MfaController.authAppStart
 GET         /security-preferences/auth-app/setup                                                 uk.gov.hmrc.apiplatform.modules.mfa.controllers.profile.MfaController.setupAuthApp
 GET         /security-preferences/auth-app/access-code                                           uk.gov.hmrc.apiplatform.modules.mfa.controllers.profile.MfaController.authAppAccessCodePage(mfaId: uk.gov.hmrc.apiplatform.modules.mfa.models.MfaId)

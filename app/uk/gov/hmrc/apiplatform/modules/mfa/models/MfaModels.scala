@@ -24,7 +24,6 @@ import java.time.LocalDateTime
 import java.util.UUID
 import scala.collection.immutable
 
-
 case class MfaId(value: UUID) extends AnyVal
 
 object MfaId {
@@ -58,18 +57,17 @@ sealed trait MfaDetail {
   def verified: Boolean
 }
 
-case class AuthenticatorAppMfaDetailSummary(override val id: MfaId,
-                                            override val name: String,
-                                            override val createdOn: LocalDateTime,
-                                            verified: Boolean = false) extends MfaDetail {
+case class AuthenticatorAppMfaDetailSummary(override val id: MfaId, override val name: String, override val createdOn: LocalDateTime, verified: Boolean = false) extends MfaDetail {
   override val mfaType: MfaType = MfaType.AUTHENTICATOR_APP
 }
 
-case class SmsMfaDetailSummary(override val id: MfaId = MfaId.random,
-                               override val name: String,
-                               override val createdOn: LocalDateTime,
-                               mobileNumber: String,
-                               verified: Boolean = false) extends MfaDetail {
+case class SmsMfaDetailSummary(
+    override val id: MfaId = MfaId.random,
+    override val name: String,
+    override val createdOn: LocalDateTime,
+    mobileNumber: String,
+    verified: Boolean = false)
+    extends MfaDetail {
   override val mfaType: MfaType = MfaType.SMS
 }
 
@@ -83,4 +81,14 @@ object MfaDetailFormats {
     .and[SmsMfaDetailSummary](MfaType.SMS.toString)
     .format
 
+}
+
+sealed trait MfaAction extends EnumEntry
+
+object MfaAction extends Enum[MfaAction] with PlayJsonEnum[MfaAction] {
+  val values: immutable.IndexedSeq[MfaAction] = findValues
+
+  case object CREATE extends MfaAction
+
+  case object REMOVE extends MfaAction
 }
