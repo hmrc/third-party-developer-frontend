@@ -51,7 +51,7 @@
         id="mobileNumber"
         name="mobileNumber"
         value="@form.data.getOrElse("mobileNumber", "")"
-        class="govuk-input @if(form.errors("mobileNumber").nonEmpty){govuk-input--error}"
+        class="govuk-input govuk-input--width-20 @if(form.errors("mobileNumber").nonEmpty){govuk-input--error}"
         aria-required="true"
         aria-describedby="mobileNumber-hint"
       />
