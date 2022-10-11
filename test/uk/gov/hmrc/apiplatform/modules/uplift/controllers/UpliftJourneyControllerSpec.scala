@@ -375,6 +375,7 @@ class UpliftJourneyControllerSpec extends BaseControllerSpec
       titleOf(result) shouldBe "Before you start - HMRC Developer Hub - GOV.UK"
 
       contentAsString(result) should include("Before you start")
+      contentAsString(result) should include("You have 6 months to complete your request")
     }
   }
 }
