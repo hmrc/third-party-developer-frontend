@@ -21,7 +21,7 @@ import org.jsoup.nodes.Document
 import play.api.mvc.Flash
 import play.api.test.{FakeRequest, StubMessagesFactory}
 import uk.gov.hmrc.apiplatform.modules.mfa.forms.{MfaAccessCodeForm, SmsAccessCodeForm}
-import uk.gov.hmrc.apiplatform.modules.mfa.models.MfaId
+import uk.gov.hmrc.apiplatform.modules.mfa.models.{MfaAction, MfaId}
 import uk.gov.hmrc.apiplatform.modules.mfa.views.html.sms.SmsAccessCodeView
 import uk.gov.hmrc.thirdpartydeveloperfrontend.builder.{DeveloperBuilder, DeveloperSessionBuilder}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.{DeveloperSession, LoggedInState}
@@ -51,7 +51,7 @@ class SmsAccessCodeViewSpec extends CommonViewSpec
 
   "SmsAccessCodeView" should {
     "render correctly when form is valid" in new Setup {
-      val mainView = accessCodeView.apply(SmsAccessCodeForm.form, MfaId(UUID.randomUUID()))(flash, stubMessages(), FakeRequest().withCSRFToken, loggedIn, appConfig)
+      val mainView = accessCodeView.apply(SmsAccessCodeForm.form, MfaId(UUID.randomUUID()), MfaAction.CREATE)(flash, stubMessages(), FakeRequest().withCSRFToken, loggedIn, appConfig)
       val document = Jsoup.parse(mainView.body)
 
       verifyPageElements(document)
@@ -60,7 +60,7 @@ class SmsAccessCodeViewSpec extends CommonViewSpec
 
     "render correctly when form is invalid" in new Setup {
       val mainView = accessCodeView.apply(SmsAccessCodeForm.form.withError("accessCode", "You have entered an incorrect access code"),
-        MfaId(UUID.randomUUID()))(flash, stubMessages(), FakeRequest().withCSRFToken, loggedIn, appConfig)
+        MfaId(UUID.randomUUID()), MfaAction.CREATE)(flash, stubMessages(), FakeRequest().withCSRFToken, loggedIn, appConfig)
       val document = Jsoup.parse(mainView.body)
 
       verifyPageElements(document)

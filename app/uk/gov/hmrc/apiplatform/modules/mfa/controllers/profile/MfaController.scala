@@ -20,8 +20,8 @@ import play.api.libs.crypto.CookieSigner
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents, Request, Result}
 import uk.gov.hmrc.apiplatform.modules.mfa.connectors.ThirdPartyDeveloperMfaConnector
 import uk.gov.hmrc.apiplatform.modules.mfa.models.{MfaAction, MfaId, MfaType}
-import uk.gov.hmrc.apiplatform.modules.mfa.service.MFAService
-import uk.gov.hmrc.apiplatform.modules.mfa.views.html.{SecurityPreferencesView, SelectMfaView}
+import uk.gov.hmrc.apiplatform.modules.mfa.service.{MfaResponse, MfaService}
+import uk.gov.hmrc.apiplatform.modules.mfa.views.html.{RemoveMfaCompletedView, SecurityPreferencesView, SelectMfaView}
 import uk.gov.hmrc.apiplatform.modules.mfa.views.html.authapp.{AuthAppAccessCodeView, AuthAppSetupCompletedView, AuthAppStartView, NameChangeView, QrCodeView}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.config.{ApplicationConfig, ErrorHandler}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.connectors.ThirdPartyDeveloperConnector
@@ -48,7 +48,7 @@ class MfaController @Inject() (
     val thirdPartyDeveloperConnector: ThirdPartyDeveloperConnector,
     val thirdPartyDeveloperMfaConnector: ThirdPartyDeveloperMfaConnector,
     val otpAuthUri: OtpAuthUri,
-    val mfaService: MFAService,
+    val mfaService: MfaService,
     val sessionService: SessionService,
     mcc: MessagesControllerComponents,
     val errorHandler: ErrorHandler,
@@ -62,7 +62,8 @@ class MfaController @Inject() (
     mobileNumberView: MobileNumberView,
     smsAccessCodeView: SmsAccessCodeView,
     smsSetupCompletedView: SmsSetupCompletedView,
-    selectMfaView: SelectMfaView
+    selectMfaView: SelectMfaView,
+    removeMfaCompletedView: RemoveMfaCompletedView
   )(implicit val ec: ExecutionContext,
     val appConfig: ApplicationConfig)
     extends LoggedInController(mcc)
@@ -104,11 +105,11 @@ class MfaController @Inject() (
     })
   }
 
-  def authAppAccessCodePage(mfaId: MfaId): Action[AnyContent] = atLeastPartLoggedInEnablingMfaAction { implicit request =>
-    Future.successful(Ok(authAppAccessCodeView(MfaAccessCodeForm.form, mfaId)))
+  def authAppAccessCodePage(mfaId: MfaId, mfaAction: MfaAction): Action[AnyContent] = atLeastPartLoggedInEnablingMfaAction { implicit request =>
+    Future.successful(Ok(authAppAccessCodeView(MfaAccessCodeForm.form, mfaId, mfaAction)))
   }
 
-  def enableAuthApp(mfaId: MfaId): Action[AnyContent] = atLeastPartLoggedInEnablingMfaAction { implicit request =>
+  def enableAuthApp(mfaId: MfaId, mfaAction: MfaAction): Action[AnyContent] = atLeastPartLoggedInEnablingMfaAction { implicit request =>
     def logonAndComplete(): Result = {
       thirdPartyDeveloperConnector.updateSessionLoggedInState(request.sessionId, UpdateLoggedInStateRequest(LoggedInState.LOGGED_IN))
       Redirect(routes.MfaController.nameChangePage(mfaId))
@@ -120,11 +121,11 @@ class MfaController @Inject() (
         .fill(form)
         .withError(key = "accessCode", message = "You have entered an incorrect access code")
 
-      BadRequest(authAppAccessCodeView(mfaAccessCodeForm, mfaId))
+      BadRequest(authAppAccessCodeView(mfaAccessCodeForm, mfaId, mfaAction))
     }
 
     MfaAccessCodeForm.form.bindFromRequest.fold(
-      form => Future.successful(BadRequest(authAppAccessCodeView(form, mfaId))),
+      form => Future.successful(BadRequest(authAppAccessCodeView(form, mfaId, mfaAction))),
       form =>
         for {
           mfaResponse <- mfaService.enableMfa(request.userId, mfaId, form.accessCode)
@@ -166,23 +167,29 @@ class MfaController @Inject() (
       form =>
         thirdPartyDeveloperMfaConnector.createMfaSms(request.userId, form.mobileNumber)
           .map(response =>
-            Redirect(routes.MfaController.smsAccessCodePage(response.mfaId))
+            Redirect(routes.MfaController.smsAccessCodePage(response.mfaId, MfaAction.CREATE))
               .flashing("mobileNumber" -> response.mobileNumber)
           )
     )
   }
 
-  def smsAccessCodePage(mfaId: MfaId): Action[AnyContent] = atLeastPartLoggedInEnablingMfaAction { implicit request =>
-    Future.successful(Ok(smsAccessCodeView(SmsAccessCodeForm.form, mfaId)))
+  def smsAccessCodePage(mfaId: MfaId, mfaAction: MfaAction): Action[AnyContent] = atLeastPartLoggedInEnablingMfaAction { implicit request =>
+    Future.successful(Ok(smsAccessCodeView(SmsAccessCodeForm.form, mfaId, mfaAction)))
   }
 
-  def smsAccessCodeAction(mfaId: MfaId): Action[AnyContent] = atLeastPartLoggedInEnablingMfaAction { implicit request =>
+  def smsAccessCodeAction(mfaId: MfaId, mfaAction: MfaAction): Action[AnyContent] = atLeastPartLoggedInEnablingMfaAction { implicit request =>
     SmsAccessCodeForm.form.bindFromRequest.fold(
-      form => Future.successful(BadRequest(smsAccessCodeView(form, mfaId))),
+      form => Future.successful(BadRequest(smsAccessCodeView(form, mfaId, mfaAction))),
       form =>
-        thirdPartyDeveloperMfaConnector.verifyMfa(request.userId, mfaId, form.accessCode) map {
-          case true  => Redirect(routes.MfaController.smsSetupCompletedPage())
-          case false => internalServerErrorTemplate("Unable to verify SMS access code")
+        mfaAction match {
+          case CREATE => thirdPartyDeveloperMfaConnector.verifyMfa(request.userId, mfaId, form.accessCode) map {
+              case true  => Redirect(routes.MfaController.smsSetupCompletedPage())
+              case false => internalServerErrorTemplate("Unable to verify SMS access code")
+            }
+          case REMOVE => mfaService.removeMfaById(request.userId, mfaId, form.accessCode) map {
+              case MfaResponse(true)  => Ok(removeMfaCompletedView())
+              case MfaResponse(false) => internalServerErrorTemplate("Unable to verify SMS access code")
+            }
         }
     )
   }
@@ -191,6 +198,16 @@ class MfaController @Inject() (
     thirdPartyDeveloperConnector.fetchDeveloper(request.userId).map {
       case Some(developer: Developer) => Ok(smsSetupCompletedView(!isAuthAppMfaVerified(developer.mfaDetails)))
       case None                       => internalServerErrorTemplate("Unable to obtain User information")
+    }
+  }
+
+  def removeMfa(mfaId: MfaId, mfaType: MfaType): Action[AnyContent] = {
+    mfaType match {
+      case AUTHENTICATOR_APP => authAppAccessCodePage(mfaId, MfaAction.REMOVE)
+      case SMS               => {
+        // TODO: Send SMS
+        smsAccessCodePage(mfaId, MfaAction.REMOVE)
+      }
     }
   }
 

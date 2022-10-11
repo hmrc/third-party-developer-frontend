@@ -27,7 +27,7 @@ import uk.gov.hmrc.apiplatform.modules.mfa.controllers.profile._
 import uk.gov.hmrc.apiplatform.modules.mfa.connectors.ThirdPartyDeveloperMfaConnector
 import uk.gov.hmrc.apiplatform.modules.mfa.connectors.ThirdPartyDeveloperMfaConnector.RegisterAuthAppResponse
 import uk.gov.hmrc.apiplatform.modules.mfa.models.MfaId
-import uk.gov.hmrc.apiplatform.modules.mfa.service.{MFAResponse, MFAService, MfaMandateService}
+import uk.gov.hmrc.apiplatform.modules.mfa.service.{MfaResponse, MfaService, MfaMandateService}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.builder.{DeveloperBuilder, MfaDetailBuilder}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.config.ErrorHandler
 import uk.gov.hmrc.thirdpartydeveloperfrontend.connectors.ThirdPartyDeveloperConnector
@@ -69,7 +69,7 @@ class ProtectAccountSpec extends BaseControllerSpec with WithCSRFAddToken with D
       mock[ThirdPartyDeveloperConnector],
       mock[ThirdPartyDeveloperMfaConnector],
       mock[OtpAuthUri],
-      mock[MFAService],
+      mock[MfaService],
       sessionServiceMock,
       mcc,
       mock[ErrorHandler],
@@ -129,19 +129,19 @@ class ProtectAccountSpec extends BaseControllerSpec with WithCSRFAddToken with D
   }
 
   trait SetupFailedVerification extends Setup {
-    when(underTest.mfaService.enableMfa(any[UserId], any[MfaId], any[String])(*)).thenReturn(Future.successful(MFAResponse(false)))
+    when(underTest.mfaService.enableMfa(any[UserId], any[MfaId], any[String])(*)).thenReturn(Future.successful(MfaResponse(false)))
   }
 
   trait SetupSuccessfulVerification extends Setup {
-    when(underTest.mfaService.enableMfa(eqTo(loggedInDeveloper.userId), eqTo(mfaId), eqTo(correctCode))(*)).thenReturn(Future.successful(MFAResponse(true)))
+    when(underTest.mfaService.enableMfa(eqTo(loggedInDeveloper.userId), eqTo(mfaId), eqTo(correctCode))(*)).thenReturn(Future.successful(MfaResponse(true)))
   }
 
   trait SetupFailedRemoval extends Setup {
-    when(underTest.mfaService.removeMfaById(any[UserId], any[MfaId], any[String])(*)).thenReturn(Future.successful(MFAResponse(false)))
+    when(underTest.mfaService.removeMfaById(any[UserId], any[MfaId], any[String])(*)).thenReturn(Future.successful(MfaResponse(false)))
   }
 
   trait SetupSuccessfulRemoval extends Setup {
-    when(underTest.mfaService.removeMfaById(eqTo(loggedInDeveloper.userId), eqTo(mfaId), eqTo(correctCode))(*)).thenReturn(Future.successful(MFAResponse(true)))
+    when(underTest.mfaService.removeMfaById(eqTo(loggedInDeveloper.userId), eqTo(mfaId), eqTo(correctCode))(*)).thenReturn(Future.successful(MfaResponse(true)))
   }
 
   "Given a user is not logged in" when {

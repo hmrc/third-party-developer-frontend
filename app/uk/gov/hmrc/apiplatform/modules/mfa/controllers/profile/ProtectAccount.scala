@@ -30,7 +30,7 @@ import play.api.libs.crypto.CookieSigner
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents, Result}
 import uk.gov.hmrc.apiplatform.modules.mfa.connectors.ThirdPartyDeveloperMfaConnector
 import uk.gov.hmrc.apiplatform.modules.mfa.models.MfaId
-import uk.gov.hmrc.apiplatform.modules.mfa.service.{MFAService, MfaMandateService}
+import uk.gov.hmrc.apiplatform.modules.mfa.service.{MfaService, MfaMandateService}
 import uk.gov.hmrc.apiplatform.modules.mfa.utils.MfaDetailHelper
 import uk.gov.hmrc.play.bootstrap.controller.WithUnsafeDefaultFormBinding
 import uk.gov.hmrc.thirdpartydeveloperfrontend.qr.{OtpAuthUri, QRCode}
@@ -43,22 +43,22 @@ import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.FormKeys
 
 @Singleton
 class ProtectAccount @Inject()(
-  val thirdPartyDeveloperConnector: ThirdPartyDeveloperConnector,
-  val thirdPartyDeveloperMfaConnector: ThirdPartyDeveloperMfaConnector,
-  val otpAuthUri: OtpAuthUri,
-  val mfaService: MFAService,
-  val sessionService: SessionService,
-  mcc: MessagesControllerComponents,
-  val errorHandler: ErrorHandler,
-  val mfaMandateService: MfaMandateService,
-  val cookieSigner: CookieSigner,
-  protectAccountSetupView: ProtectAccountSetupView,
-  protectAccountView: ProtectAccountView,
-  protectAccountAccessCodeView: ProtectAccountAccessCodeView,
-  protectAccountCompletedView: ProtectAccountCompletedView,
-  protectedAccountWithMfaDetailsView: ProtectedAccountWithMfaView,
-  protectedAccountMfaRemovalByIdAccessCodeView: ProtectedAccountMfaRemovalByIdAccessCodeView,
-  protectedAccountRemovalCompleteView: ProtectedAccountRemovalCompleteView
+                                val thirdPartyDeveloperConnector: ThirdPartyDeveloperConnector,
+                                val thirdPartyDeveloperMfaConnector: ThirdPartyDeveloperMfaConnector,
+                                val otpAuthUri: OtpAuthUri,
+                                val mfaService: MfaService,
+                                val sessionService: SessionService,
+                                mcc: MessagesControllerComponents,
+                                val errorHandler: ErrorHandler,
+                                val mfaMandateService: MfaMandateService,
+                                val cookieSigner: CookieSigner,
+                                protectAccountSetupView: ProtectAccountSetupView,
+                                protectAccountView: ProtectAccountView,
+                                protectAccountAccessCodeView: ProtectAccountAccessCodeView,
+                                protectAccountCompletedView: ProtectAccountCompletedView,
+                                protectedAccountWithMfaDetailsView: ProtectedAccountWithMfaView,
+                                protectedAccountMfaRemovalByIdAccessCodeView: ProtectedAccountMfaRemovalByIdAccessCodeView,
+                                protectedAccountRemovalCompleteView: ProtectedAccountRemovalCompleteView
 )(implicit val ec: ExecutionContext, val appConfig: ApplicationConfig)
   extends LoggedInController(mcc) with WithUnsafeDefaultFormBinding {
   val qrCode: QRCode = QRCode(scale = 4)

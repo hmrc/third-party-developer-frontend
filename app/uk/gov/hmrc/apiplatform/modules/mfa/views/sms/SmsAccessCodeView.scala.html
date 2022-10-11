@@ -21,10 +21,11 @@
 @import uk.gov.hmrc.apiplatform.modules.mfa.controllers.profile.routes
 @import uk.gov.hmrc.apiplatform.modules.mfa.models.MfaId
 @import uk.gov.hmrc.apiplatform.modules.mfa.forms.SmsAccessCodeForm
+@import uk.gov.hmrc.apiplatform.modules.mfa.models.MfaAction
 
 @this(devMain: DevMainWithFormErrors)
 
-@(form: Form[SmsAccessCodeForm], mfaId: MfaId)(implicit flash: Flash, messages: Messages, request: play.api.mvc.Request[Any], loggedIn: DeveloperSession, appConfig: ApplicationConfig)
+@(form: Form[SmsAccessCodeForm], mfaId: MfaId, mfaAction: MfaAction)(implicit flash: Flash, messages: Messages, request: play.api.mvc.Request[Any], loggedIn: DeveloperSession, appConfig: ApplicationConfig)
 
 @devMain(
     form,
@@ -40,7 +41,7 @@
     <p class="govuk-body">It may take a few minutes to arrive</p>
     <p class="govuk-body">If you have a UK phone number your 6-digit code will arrive from the phone number 60 551.</p>
 
-    @helper.form(action = routes.MfaController.smsAccessCodeAction(mfaId)) {
+    @helper.form(action = routes.MfaController.smsAccessCodeAction(mfaId, mfaAction)) {
         @helper.CSRF.formField
 
         <div class="govuk-form-group @if(form.errors("accessCode").nonEmpty) {govuk-form-group--error}">
