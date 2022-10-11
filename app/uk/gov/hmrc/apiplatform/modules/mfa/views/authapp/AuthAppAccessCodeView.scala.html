@@ -49,7 +49,7 @@
         id="accessCode"
         name="accessCode"
         value="@form.data.getOrElse("accessCode", "")"
-        class="govuk-input @if(form.errors("accessCode").nonEmpty){govuk-input--error}"
+        class="govuk-input govuk-input--width-20 @if(form.errors("accessCode").nonEmpty){govuk-input--error}"
         aria-required="true"
         aria-describedby="access-code-hint"
       />
