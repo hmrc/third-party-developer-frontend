@@ -145,11 +145,17 @@ package object controllers {
     val selectAClientSecretKey = "select.client.secret.field"
     val selectFewerClientSecretsKey = "select.fewer.client.secrets.field"
 
-    val accessCodeInvalidKey = "accessCode.invalid.name.field"
-    val accessCodeInvalidGlobalKey = "accessCode.invalid.name.global"
+    val accessCodeInvalidKey = "accessCode.invalid.number.field"
+    val accessCodeInvalidGlobalKey = "accessCode.invalid.number.global"
+
+    val selectMfaInvalidKey = "selectMfa.invalid.mfaType.field"
+    val selectMfaInvalidGlobalKey = "selectMfa.invalid.mfaType.global"
 
     val mfaNameChangeInvaliddKey = "mfaName.invalid.name.field"
     val mfaNameChangeInvalidGlobalKey = "mfaName.invalid.name.global"
+
+    val mobileNumberInvaliddKey = "mobileNumber.invalid.number.field"
+    val mobileNumberInvalidGlobalKey = "mobileNumber.invalid.number.global"
 
     val selectedCategoryNonSelectedKey = "error.selectedcategories.nonselected.field"
     val selectedCategoryNonSelectedGlobalKey = "error.selectedcategories.nonselected.global"

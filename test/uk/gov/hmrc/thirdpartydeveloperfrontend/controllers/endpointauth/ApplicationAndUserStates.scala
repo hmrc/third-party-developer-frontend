@@ -20,7 +20,7 @@ import cats.data.NonEmptyList
 import play.api.libs.crypto.CookieSigner
 import play.api.mvc.Cookie
 import play.api.test.FakeRequest
-import uk.gov.hmrc.apiplatform.modules.mfa.connectors.ThirdPartyDeveloperMfaConnector.RegisterAuthAppResponse
+import uk.gov.hmrc.apiplatform.modules.mfa.connectors.ThirdPartyDeveloperMfaConnector.{RegisterAuthAppResponse, RegisterSmsResponse}
 import uk.gov.hmrc.apiplatform.modules.submissions.domain.models.ResponsibleIndividualVerificationState.INITIAL
 import uk.gov.hmrc.apiplatform.modules.submissions.domain.models.Submission.Status.Granted
 import uk.gov.hmrc.apiplatform.modules.submissions.domain.models._
@@ -102,7 +102,9 @@ trait HasApplication extends HasAppDeploymentEnvironment with HasUserWithRole wi
     responsibleIndividualVerification, responsibleIndividual, "mr submitter", "submitter@example.com"
   )
   lazy val mfaId = verifiedAuthenticatorAppMfaDetail.id
-  lazy val registerAuthAppResponse = RegisterAuthAppResponse("secret", mfaId)
+  lazy val smsMfaId = verifiedSmsMfaDetail.id
+  lazy val registerAuthAppResponse = RegisterAuthAppResponse(mfaId, "secret")
+  lazy val registerSmsResponse = RegisterSmsResponse(smsMfaId, verifiedSmsMfaDetail.mobileNumber)
 }
 
 trait IsOldJourneyStandardApplication extends HasApplication {

@@ -18,26 +18,36 @@
 @import views.html.include.DevMain
 @import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.DeveloperSession
 @import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.routes
+@import uk.gov.hmrc.apiplatform.modules.mfa.controllers.profile.routes
 
 @this(devMain: DevMain)
 
-@()(implicit request: play.api.mvc.Request[Any], loggedIn: DeveloperSession, appConfig: ApplicationConfig, messages: Messages)
+@(showSmsText: Boolean)(implicit request: play.api.mvc.Request[Any], loggedIn: DeveloperSession, appConfig: ApplicationConfig, messages: Messages)
 
 @devMain(
-  title = "You can now get access codes by authenticator app",
-  userFullName = loggedIn.loggedInName,
-  developerSession = Some(loggedIn)
+    title = "You can now get access codes by authenticator app",
+    userFullName = loggedIn.loggedInName,
+    developerSession = Some(loggedIn)
 ) {
-  <h1 class="govuk-heading-l" id="page-heading">You can now get access codes by authenticator app</h1>
+    <h1 class="govuk-heading-l" id="page-heading">You can now get access codes by authenticator app</h1>
+    <p class="govuk-body" id="paragraph">Keep the app on your smartphone or tablet. <br>Every time you sign in we will request an access code.</p>
 
-    <p class="govuk-body govuk-!-margin-top-5" id="smartphone-text">Keep the app on your smartphone or tablet.<br>Every time you sign in we will request an access code.</p>
+    @if(showSmsText) {
+        <h2 class="govuk-heading-m" id="medium-heading">You need to set up additional security</h2>
+        <p class="govuk-body" id="body">
+            You need to add text messages to get access codes as an alternative to your authenticator app.</p>
 
-    <h2 class="govuk-heading-m" id="medium-heading">You need to set up additional security</h2>
-    <p class="govuk-body" id="body">You need to add text messages to get access codes as an alternative to your authenticator app.</p>
+        <a id="submit" class="govuk-button" href="@request.session.get("access_uri").getOrElse(uk.gov.hmrc.apiplatform.modules.mfa.controllers.profile.routes.MfaController.setupSms())">
+            Continue</a>
+        <br>
+        <p class="govuk-body">
+            <a id="link" class="govuk-link" href="@request.session.get("access_uri").getOrElse(uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.routes.ManageApplications.manageApps())">
+                I can't do this right now</a>
+        </p>
 
-    <a id="submit" class="govuk-button" href="#">Continue</a>
-    <br>
-    <p class="govuk-body">
-        <a id="link" class="govuk-link" href="@request.session.get("access_uri").getOrElse(routes.ManageApplications.manageApps())">I can't do this right now</a>
-    </p>
+    } else {
+        <p class="govuk-body" id="body">You'll be able to choose between getting access codes by text or your authenticator app.</p>
+        <a id="submit" class="govuk-button" href="@request.session.get("access_uri").getOrElse(uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.routes.ManageApplications.manageApps())">
+            Continue</a>
+    }
 }

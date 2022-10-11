@@ -23,3 +23,10 @@ case class ChangeMfaNameRequest(name: String)
 object ChangeMfaNameRequest {
   implicit val format = Json.format[ChangeMfaNameRequest]
 }
+
+case class CreateMfaSmsRequest(mobileNumber: String)
+
+object CreateMfaSmsRequest {
+  implicit val formatCreateMfaSmsRequest = Json.format[CreateMfaSmsRequest]
+}
+
