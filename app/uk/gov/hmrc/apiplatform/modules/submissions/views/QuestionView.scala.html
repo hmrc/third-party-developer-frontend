@@ -67,8 +67,8 @@
 
 @renderParagraphCompoundFragment(cs: CompoundFragment) = { <p class="govuk-body">@renderCompoundFragment(cs)</p> }
 
-@renderHint(nbsf: NonBulletStatementFragment) = {
-  <div id="non-bullet-statement-fragment-hint" class="govuk-hint">@renderNonBulletStatementFragment(nbsf)</div>
+@renderHint(nbsf: NonBulletStatementFragment,id: String) = {
+  <div id="hint-@{id}" class="govuk-hint">@renderNonBulletStatementFragment(nbsf)</div>
 }
 
 @renderStatement(statement: Statement) = {
@@ -95,7 +95,7 @@
 }
 
 @renderRadioQuestionChoice(choice: PossibleAnswer, actualAnswer: Option[SingleChoiceAnswer]) = {
-  @defining( if(Some(choice.value) == actualAnswer.map(_.value)) """checked="checked"""" else "") { checked => 
+  @defining( if(Some(choice.value) == actualAnswer.map(_.value)) """checked="checked"""" else "") { checked =>
     <div class="govuk-radios__item">
       <input class="govuk-radios__input" type="radio" id="@{choiceAsId(choice)}" name="answer" value="@{choice.value}" @{checked}
         data-journey-val="@{choice.value}">
@@ -105,7 +105,7 @@
 }
 
 @renderCheckboxChoice(choice: PossibleAnswer, actualAnswer: Option[MultipleChoiceAnswer]) = {
-  @defining( if(actualAnswer.map(_.values).getOrElse(Set.empty).contains(choice.value)) """checked="checked"""" else "") { checked => 
+  @defining( if(actualAnswer.map(_.values).getOrElse(Set.empty).contains(choice.value)) """checked="checked"""" else "") { checked =>
     <div class="govuk-checkboxes__item">
       <input class="govuk-checkboxes__input" id="@{choiceAsId(choice)}" name="answer" type="checkbox"
         value="@{choice.value}" @{checked}>
@@ -138,9 +138,9 @@
         </h1>
       </legend>
       @if(question.hintText.isDefined) {
-        @renderHint(question.hintText.get)
+        @renderHint(question.hintText.get, question.id.value)
       }
-      <div class="govuk-checkboxes" data-module="govuk-checkboxes" id="question-@{question.id.value}-id">
+      <div class="govuk-checkboxes" data-module="govuk-checkboxes" id="question-@{question.id.value}-id" @if(question.hintText.isDefined){aria-describedby="hint-@{question.id.value}"}>
         @{
         val a = currentAnswers match {
           case Some(mca @ MultipleChoiceAnswer(_)) => Some(mca)
@@ -166,9 +166,9 @@
         </h1>
       </legend>
       @if(question.hintText.isDefined) {
-        @renderHint(question.hintText.get)
+        @renderHint(question.hintText.get, question.id.value)
       }
-      <div class='govuk-radios @{if(inline) " govuk-radios--inline" else "" }' id="question-@{question.id.value}-id">
+      <div class='govuk-radios @{if(inline) " govuk-radios--inline" else "" }' id="question-@{question.id.value}-id" @if(question.hintText.isDefined){aria-describedby="hint-@{question.id.value}"}>
         @{
         val a = currentAnswers match {
           case Some(sca @ SingleChoiceAnswer(_)) => Some(sca)
@@ -199,14 +199,14 @@
         </label>
       }
       @if(question.hintText.isDefined) {
-        @renderHint(question.hintText.get)
+        @renderHint(question.hintText.get, question.id.value)
       }
       @if(errorInfo.isDefined) {
       <p id="question-error" class="govuk-error-message">
         <span class="govuk-visually-hidden">Error:</span>@errorInfo.get.message
       </p>
       }
-      <input class="govuk-input" id="question-@{question.id.value}-id" name="answer" type="text" value="@actualValue" aria-describedby="non-bullet-statement-fragment-hint">
+      <input class="govuk-input" id="question-@{question.id.value}-id" name="answer" type="text" value="@actualValue" @if(question.hintText.isDefined){aria-describedby="hint-@{question.id.value}"}>
     </div>
   }
 
@@ -216,7 +216,7 @@
 }
 
 @renderAcknowledgementOnly(question: AcknowledgementOnly) = {
-    <button id="submit" class="govuk-button" type="submit" name="submit-action" value="acknowledgement">Continue</button>  
+    <button id="submit" class="govuk-button" type="submit" name="submit-action" value="acknowledgement">Continue</button>
 }
 
 @renderQuestionType(question: Question) = @{

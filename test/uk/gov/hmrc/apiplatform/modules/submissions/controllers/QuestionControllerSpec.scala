@@ -50,12 +50,12 @@ import uk.gov.hmrc.apiplatform.modules.submissions.domain.models.PossibleAnswer
 import uk.gov.hmrc.apiplatform.modules.submissions.domain.models.ErrorInfo
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.controllers.NoSubscriptionFieldsRefinerBehaviour
 
-class QuestionControllerSpec 
+class QuestionControllerSpec
   extends BaseControllerSpec
     with SampleSession
     with SampleApplication
     with SubscriptionTestHelperSugar
-    with WithCSRFAddToken 
+    with WithCSRFAddToken
     with DeveloperBuilder
     with LocalUserIdTracker
     with SubmissionsTestData {
@@ -68,13 +68,13 @@ class QuestionControllerSpec
     val sessionParams = Seq("csrfToken" -> app.injector.instanceOf[CSRF.TokenProvider].generateToken)
 
     fetchSessionByIdReturns(sessionId, session)
-    
+
     updateUserFlowSessionsReturnsSuccessfully(sessionId)
   }
 
   trait HasAppInTestingState {
     self: HasSubscriptions with ApplicationActionServiceMock with ApplicationServiceMock =>
-      
+
     givenApplicationAction(
       ApplicationWithSubscriptionData(
         testingApp.copy(id = applicationId),
@@ -84,11 +84,11 @@ class QuestionControllerSpec
       loggedInDeveloper,
       List(aSubscription)
     )
-    
+
     fetchByApplicationIdReturns(applicationId, sampleApp)
   }
 
-  trait Setup 
+  trait Setup
     extends ApplicationServiceMock
     with ApplicationActionServiceMock
     with ApmConnectorMockModule
@@ -139,16 +139,17 @@ class QuestionControllerSpec
       contentAsString(result) contains(formSubmissionLink) shouldBe true withClue(s"(HTML content did not contain $formSubmissionLink)")
       contentAsString(result) contains("Email address") shouldBe true withClue("HTML content did not contain label")
       contentAsString(result) contains("Cannot be a shared mailbox") shouldBe true withClue("HTML content did not contain hintText")
+      contentAsString(result) contains(s"""aria-describedby="hint-${testQuestionIdsOfInterest.responsibleIndividualEmailId.value}"""") shouldBe true withClue("HTML content did not contain describeBy")
       contentAsString(result) contains("We will email a verification link to the responsible individual that expires in 10 working days.") shouldBe true withClue("HTML content did not contain afterStatement")
       contentAsString(result) contains("<title>")
     }
-    
+
     "display fail and show error in title when applicable" in new Setup {
       SubmissionServiceMock.Fetch.thenReturns(aSubmission.withIncompleteProgress)
-      
+
       val formSubmissionLink = s"${aSubmission.id.value}/question/${testQuestionIdsOfInterest.responsibleIndividualEmailId.value}"
       val result = controller.showQuestion(aSubmission.id, testQuestionIdsOfInterest.responsibleIndividualEmailId, None, Some(ErrorInfo("blah", "message")))(loggedInRequest.withCSRFToken)
-      
+
       status(result) shouldBe BAD_REQUEST
       contentAsString(result) contains("<title>Error:") shouldBe true withClue("Page title should contain `Error: ` prefix")
     }
@@ -169,7 +170,7 @@ class QuestionControllerSpec
 
       val formSubmissionLink = s"${aSubmission.id.value}/question/${questionId.value}/update"
       val result = controller.updateQuestion(aSubmission.id, questionId)(loggedInRequest.withCSRFToken)
-      
+
       status(result) shouldBe OK
       contentAsString(result) contains(formSubmissionLink) shouldBe true withClue(s"(HTML content did not contain $formSubmissionLink)")
     }
@@ -195,7 +196,7 @@ class QuestionControllerSpec
       status(result) shouldBe SEE_OTHER
       redirectLocation(result) shouldBe Some(s"/developer/submissions/${aSubmission.id.value}/question/${question2Id.value}")
     }
-    
+
     "fail if invalid answer provided and returns custom error message" in new Setup {
       SubmissionServiceMock.Fetch.thenReturns(aSubmission.withIncompleteProgress)
       SubmissionServiceMock.RecordAnswer.thenReturnsNone()
@@ -212,7 +213,7 @@ class QuestionControllerSpec
 
       val expectedErrorSummary = errorInfo.summary
       body should include(expectedErrorSummary)
-      
+
       val expectedErrorMessage = errorInfo.message.getOrElse(errorInfo.summary)
       body should include(expectedErrorMessage)
     }
@@ -233,11 +234,11 @@ class QuestionControllerSpec
 
       val expectedErrorSummary = errorInfo.summary
       body should include(expectedErrorSummary)
-      
+
       val expectedErrorMessage = errorInfo.message.getOrElse(errorInfo.summary)
       body should include(expectedErrorMessage)
     }
-    
+
     "fail if no answer field in form" in new Setup {
       SubmissionServiceMock.Fetch.thenReturns(aSubmission.withIncompleteProgress)
       private val request = loggedInRequest.withFormUrlEncodedBody("submit-action" -> "save")
@@ -287,18 +288,18 @@ class QuestionControllerSpec
       .hasCompletelyAnsweredWith(completeAnswersToQuestions)
       .withCompletedProgress
 
-      val modifiedAnswersToQuestions = fullyAnsweredSubmission.submission.latestInstance.answersToQuestions - 
+      val modifiedAnswersToQuestions = fullyAnsweredSubmission.submission.latestInstance.answersToQuestions -
         OrganisationDetails.question2c.id ++ Map(
           OrganisationDetails.question2.id -> SingleChoiceAnswer("Unique Taxpayer Reference (UTR)")
         )
 
-      val modifiedProgress = Map(OrganisationDetails.questionnaire.id -> 
-        QuestionnaireProgress(QuestionnaireState.InProgress, 
+      val modifiedProgress = Map(OrganisationDetails.questionnaire.id ->
+        QuestionnaireProgress(QuestionnaireState.InProgress,
           List(
-            OrganisationDetails.questionRI1.id, 
-            OrganisationDetails.questionRI2.id, 
-            OrganisationDetails.question1.id, 
-            OrganisationDetails.question2.id, 
+            OrganisationDetails.questionRI1.id,
+            OrganisationDetails.questionRI2.id,
+            OrganisationDetails.question1.id,
+            OrganisationDetails.question2.id,
             OrganisationDetails.question2b.id
           )
         )
