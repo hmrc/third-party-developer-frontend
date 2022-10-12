@@ -27,11 +27,12 @@ import uk.gov.hmrc.thirdpartydeveloperfrontend.config.{ApplicationConfig, ErrorH
 import uk.gov.hmrc.thirdpartydeveloperfrontend.connectors.ThirdPartyDeveloperConnector
 import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.LoggedInController
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.connectors.UpdateLoggedInStateRequest
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.{Developer, LoggedInState}
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.{Developer, DeveloperSession, LoggedInState, UserId}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.qr.{OtpAuthUri, QRCode}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.service.SessionService
 import play.api.data.Form
 import play.api.data.Forms._
+import play.api.i18n.Messages
 import uk.gov.hmrc.apiplatform.modules.mfa.controllers.profile.routes._
 import uk.gov.hmrc.apiplatform.modules.mfa.forms.{MfaAccessCodeForm, MfaNameChangeForm, MobileNumberForm, SelectMfaForm, SmsAccessCodeForm}
 import uk.gov.hmrc.apiplatform.modules.mfa.models.MfaAction.{CREATE, REMOVE}
@@ -109,7 +110,7 @@ class MfaController @Inject() (
     Future.successful(Ok(authAppAccessCodeView(MfaAccessCodeForm.form, mfaId, mfaAction)))
   }
 
-  def enableAuthApp(mfaId: MfaId, mfaAction: MfaAction): Action[AnyContent] = atLeastPartLoggedInEnablingMfaAction { implicit request =>
+  def authAppAccessCodeAction(mfaId: MfaId, mfaAction: MfaAction): Action[AnyContent] = atLeastPartLoggedInEnablingMfaAction { implicit request =>
     def logonAndComplete(): Result = {
       thirdPartyDeveloperConnector.updateSessionLoggedInState(request.sessionId, UpdateLoggedInStateRequest(LoggedInState.LOGGED_IN))
       Redirect(routes.MfaController.nameChangePage(mfaId))
@@ -127,10 +128,13 @@ class MfaController @Inject() (
     MfaAccessCodeForm.form.bindFromRequest.fold(
       form => Future.successful(BadRequest(authAppAccessCodeView(form, mfaId, mfaAction))),
       form =>
-        for {
-          mfaResponse <- mfaService.enableMfa(request.userId, mfaId, form.accessCode)
-          result = if (mfaResponse.totpVerified) logonAndComplete() else invalidCode(form)
-        } yield result
+        mfaAction match {
+          case REMOVE => handleRemoveMfa(request.userId, mfaId, form.accessCode)
+          case CREATE => for {
+              mfaResponse <- mfaService.enableMfa(request.userId, mfaId, form.accessCode)
+              result = if (mfaResponse.totpVerified) logonAndComplete() else invalidCode(form)
+            } yield result
+        }
     )
   }
 
@@ -186,10 +190,7 @@ class MfaController @Inject() (
               case true  => Redirect(routes.MfaController.smsSetupCompletedPage())
               case false => internalServerErrorTemplate("Unable to verify SMS access code")
             }
-          case REMOVE => mfaService.removeMfaById(request.userId, mfaId, form.accessCode) map {
-              case MfaResponse(true)  => Ok(removeMfaCompletedView())
-              case MfaResponse(false) => internalServerErrorTemplate("Unable to verify SMS access code")
-            }
+          case REMOVE => handleRemoveMfa(request.userId, mfaId, form.accessCode)
         }
     )
   }
@@ -201,13 +202,23 @@ class MfaController @Inject() (
     }
   }
 
-  def removeMfa(mfaId: MfaId, mfaType: MfaType): Action[AnyContent] = {
+  def removeMfa(mfaId: MfaId, mfaType: MfaType): Action[AnyContent] = loggedInAction { implicit request =>
     mfaType match {
-      case AUTHENTICATOR_APP => authAppAccessCodePage(mfaId, MfaAction.REMOVE)
-      case SMS               => {
-        // TODO: Send SMS
-        smsAccessCodePage(mfaId, MfaAction.REMOVE)
-      }
+      case AUTHENTICATOR_APP => Future.successful(Redirect(routes.MfaController.authAppAccessCodePage(mfaId, MfaAction.REMOVE)))
+      case SMS               =>
+        thirdPartyDeveloperMfaConnector.sendSms(request.userId, mfaId).map {
+          case true  => Redirect(routes.MfaController.smsAccessCodePage(mfaId, MfaAction.REMOVE))
+          case false => internalServerErrorTemplate("Failed to send SMS")
+        }
+    }
+  }
+
+  private def handleRemoveMfa(userId: UserId, mfaId: MfaId,accessCode: String)(
+    implicit request: Request[_], loggedIn: DeveloperSession, messages: Messages) = {
+
+    mfaService.removeMfaById(userId, mfaId, accessCode) map {
+      case MfaResponse(true)  => Ok(removeMfaCompletedView())
+      case MfaResponse(false) => internalServerErrorTemplate("Unable to verify access code")
     }
   }
 

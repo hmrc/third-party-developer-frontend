@@ -320,6 +320,49 @@ class ThirdPartyDeveloperMfaConnectorIntegrationSpec extends BaseConnectorIntegr
     }
   }
 
+  "sendSms" should {
+    "return false if it fails to send sms" in new Setup {
+      val url = s"/developer/${userId.value}/mfa/${mfaId.value}/send-sms"
+
+      stubFor(
+        post(urlPathEqualTo(url))
+          .willReturn(
+            aResponse()
+              .withStatus(BAD_REQUEST)
+          )
+      )
+      await(underTest.sendSms(userId, mfaId)) shouldBe false
+    }
+
+    "return true when sms is successfully sent" in new Setup {
+      val url = s"/developer/${userId.value}/mfa/${mfaId.value}/send-sms"
+
+      stubFor(
+        post(urlPathEqualTo(url))
+          .willReturn(
+            aResponse()
+              .withStatus(OK)
+          )
+      )
+      await(underTest.sendSms(userId, mfaId)) shouldBe true
+    }
+
+    "throw if it fails to send sms due to error in backend" in new Setup {
+      val url = s"/developer/${userId.value}/mfa/${mfaId.value}/send-sms"
+
+      stubFor(
+        post(urlPathEqualTo(url))
+          .willReturn(
+            aResponse()
+              .withStatus(INTERNAL_SERVER_ERROR)
+          )
+      )
+      intercept[UpstreamErrorResponse] {
+        await(underTest.sendSms(userId, mfaId)) shouldBe false
+      }
+    }
+  }
+
   "removeMfaById" should {
     "return OK on successful removal" in new Setup {
       stubFor(delete(urlPathEqualTo(s"/developer/${userId.value}/mfa/${mfaId.value}"))

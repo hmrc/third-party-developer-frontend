@@ -72,6 +72,17 @@ class ThirdPartyDeveloperMfaConnector @Inject()(http: HttpClient, config: Applic
     }
   }
 
+  def sendSms(userId: UserId, mfaId: MfaId)(implicit hc: HeaderCarrier): Future[Boolean] = {
+    metrics.record(api) {
+      http.POSTEmpty[ErrorOrUnit](s"$serviceBaseUrl/developer/${userId.value}/mfa/${mfaId.value}/send-sms")
+        .map {
+          case Right(()) => true
+          case Left(UpstreamErrorResponse(_,BAD_REQUEST,_,_)) => false
+          case Left(err) => throw err
+        }
+    }
+  }
+
   def removeMfaById(userId: UserId, mfaId: MfaId)(implicit hc: HeaderCarrier): Future[Unit] = {
     metrics.record(api) {
       http.DELETE[ErrorOrUnit](s"$serviceBaseUrl/developer/${userId.value}/mfa/${mfaId.value}")
