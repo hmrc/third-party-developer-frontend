@@ -43,22 +43,22 @@ import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.FormKeys
 
 @Singleton
 class ProtectAccount @Inject()(
-                                val thirdPartyDeveloperConnector: ThirdPartyDeveloperConnector,
-                                val thirdPartyDeveloperMfaConnector: ThirdPartyDeveloperMfaConnector,
-                                val otpAuthUri: OtpAuthUri,
-                                val mfaService: MfaService,
-                                val sessionService: SessionService,
-                                mcc: MessagesControllerComponents,
-                                val errorHandler: ErrorHandler,
-                                val mfaMandateService: MfaMandateService,
-                                val cookieSigner: CookieSigner,
-                                protectAccountSetupView: ProtectAccountSetupView,
-                                protectAccountView: ProtectAccountView,
-                                protectAccountAccessCodeView: ProtectAccountAccessCodeView,
-                                protectAccountCompletedView: ProtectAccountCompletedView,
-                                protectedAccountWithMfaDetailsView: ProtectedAccountWithMfaView,
-                                protectedAccountMfaRemovalByIdAccessCodeView: ProtectedAccountMfaRemovalByIdAccessCodeView,
-                                protectedAccountRemovalCompleteView: ProtectedAccountRemovalCompleteView
+  val thirdPartyDeveloperConnector: ThirdPartyDeveloperConnector,
+  val thirdPartyDeveloperMfaConnector: ThirdPartyDeveloperMfaConnector,
+  val otpAuthUri: OtpAuthUri,
+  val mfaService: MfaService,
+  val sessionService: SessionService,
+  mcc: MessagesControllerComponents,
+  val errorHandler: ErrorHandler,
+  val mfaMandateService: MfaMandateService,
+  val cookieSigner: CookieSigner,
+  protectAccountSetupView: ProtectAccountSetupView,
+  protectAccountView: ProtectAccountView,
+  protectAccountAccessCodeView: ProtectAccountAccessCodeView,
+  protectAccountCompletedView: ProtectAccountCompletedView,
+  protectedAccountWithMfaDetailsView: ProtectedAccountWithMfaView,
+  protectedAccountMfaRemovalByIdAccessCodeView: ProtectedAccountMfaRemovalByIdAccessCodeView,
+  protectedAccountRemovalCompleteView: ProtectedAccountRemovalCompleteView
 )(implicit val ec: ExecutionContext, val appConfig: ApplicationConfig)
   extends LoggedInController(mcc) with WithUnsafeDefaultFormBinding {
   val qrCode: QRCode = QRCode(scale = 4)
@@ -92,7 +92,7 @@ class ProtectAccount @Inject()(
 
     def logonAndComplete(): Result = {
       thirdPartyDeveloperConnector.updateSessionLoggedInState(request.sessionId, UpdateLoggedInStateRequest(LoggedInState.LOGGED_IN))
-      Redirect(uk.gov.hmrc.apiplatform.modules.mfa.controllers.profile.routes.ProtectAccount.getProtectAccountCompletedPage())
+      Redirect(routes.ProtectAccount.getProtectAccountCompletedPage())
     }
 
     def invalidCode(form: ProtectAccountForm): Result = {
@@ -122,7 +122,7 @@ class ProtectAccount @Inject()(
           .map(r =>
             if (r.totpVerified) {
               removeDeviceSessionCookieFromResult(
-                Redirect(uk.gov.hmrc.apiplatform.modules.mfa.controllers.profile.routes.ProtectAccount.get2SVRemovalByIdCompletePage())
+                Redirect(routes.ProtectAccount.get2SVRemovalByIdCompletePage())
               )
             } else {
               val protectAccountForm = ProtectAccountForm.form.fill(form)

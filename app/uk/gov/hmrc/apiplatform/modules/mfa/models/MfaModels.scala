@@ -62,12 +62,12 @@ case class AuthenticatorAppMfaDetailSummary(override val id: MfaId, override val
 }
 
 case class SmsMfaDetailSummary(
-    override val id: MfaId = MfaId.random,
-    override val name: String,
-    override val createdOn: LocalDateTime,
-    mobileNumber: String,
-    verified: Boolean = false)
-    extends MfaDetail {
+  override val id: MfaId = MfaId.random,
+  override val name: String,
+  override val createdOn: LocalDateTime,
+  mobileNumber: String,
+  verified: Boolean = false)
+  extends MfaDetail {
   override val mfaType: MfaType = MfaType.SMS
 }
 

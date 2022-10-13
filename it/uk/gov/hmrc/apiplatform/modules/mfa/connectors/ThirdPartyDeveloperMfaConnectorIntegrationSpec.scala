@@ -24,15 +24,13 @@ import play.api.inject.guice.GuiceApplicationBuilder
 import play.api.libs.json.Json
 import play.api.{Application, Configuration, Mode}
 import uk.gov.hmrc.apiplatform.modules.mfa.connectors.ThirdPartyDeveloperMfaConnector.{RegisterAuthAppResponse, RegisterSmsResponse}
-import uk.gov.hmrc.apiplatform.modules.mfa.models.{DeviceSession, DeviceSessionInvalid, MfaId, SmsMfaDetailSummary}
+import uk.gov.hmrc.apiplatform.modules.mfa.models.{DeviceSession, DeviceSessionInvalid, MfaId}
 import uk.gov.hmrc.http.{HeaderCarrier, UpstreamErrorResponse}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.builder.DeveloperBuilder
 import uk.gov.hmrc.thirdpartydeveloperfrontend.connectors._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.connectors._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.{LocalUserIdTracker, WireMockExtensions}
-import uk.gov.hmrc.apiplatform.modules.mfa.models.MfaDetailFormats.smsMfaDetailSummaryFormat
 
-import java.time.LocalDateTime
 import java.util.UUID
 
 class ThirdPartyDeveloperMfaConnectorIntegrationSpec extends BaseConnectorIntegrationSpec
