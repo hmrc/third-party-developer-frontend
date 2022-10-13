@@ -115,7 +115,6 @@ class UserLoginAccount @Inject()(val auditService: AuditService,
                                 playSession: PlaySession,
                                 userId: UserId)(implicit request: Request[AnyContent]): Future[Result] = {
 
-
     // In each case retain the Play session so that 'access_uri' query param, if set, is used at the end of the 2SV reminder flow
     (userAuthenticationResponse.session, userAuthenticationResponse.accessCodeRequired) match {
       case (Some(session), false) if session.loggedInState.isLoggedIn =>
