@@ -218,8 +218,6 @@ private[connectors] object ThirdPartyApplicationConnectorDomain {
 
   case class TPAClientSecret(id: String, name: String, secret: Option[String], createdOn: LocalDateTime, lastAccess: Option[LocalDateTime])
 
-  case class DeleteClientSecretRequest(actorEmailAddress: String)
-
   case class UpdateIpAllowlistRequest(required: Boolean, allowlist: Set[String])
 }
 
