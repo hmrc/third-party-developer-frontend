@@ -22,7 +22,7 @@ import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.apidefinitions._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.Environment.{PRODUCTION, SANDBOX}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.connectors.{DeskproTicket, TicketResult}
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.{DeveloperSession, UserId}
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.{Developer, DeveloperSession, UserId}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.subscriptions._
 
 import javax.inject.{Inject, Singleton}
@@ -108,15 +108,15 @@ class ApplicationService @Inject() (
     subscriptionService.isSubscribedToApi(applicationId,apiIdentifier)
   }
 
-  def addClientSecret(application: Application, actorEmailAddress: String)(implicit hc: HeaderCarrier): Future[(String, String)] = {
-    connectorWrapper.forEnvironment(application.deployedTo).thirdPartyApplicationConnector.addClientSecrets(application.id, ClientSecretRequest(actorEmailAddress))
+  def addClientSecret(application: Application, developer: Developer)(implicit hc: HeaderCarrier): Future[(String, String)] = {
+    connectorWrapper.forEnvironment(application.deployedTo).thirdPartyApplicationConnector.addClientSecrets(application.id, ClientSecretRequest(developer.userId, developer.email, LocalDateTime.now(clock)))
   }
 
-  def deleteClientSecret(application: Application, clientSecretId: String, actorEmailAddress: String)(implicit hc: HeaderCarrier): Future[ApplicationUpdateSuccessful] =
+  def deleteClientSecret(application: Application, userId: UserId, clientSecretId: String, actorEmailAddress: String)(implicit hc: HeaderCarrier): Future[ApplicationUpdateSuccessful] =
     connectorWrapper
       .forEnvironment(application.deployedTo)
       .thirdPartyApplicationConnector
-      .deleteClientSecret(application.id, clientSecretId, actorEmailAddress)
+      .applicationUpdate(application.id, RemoveClientSecret(userId , actorEmailAddress , clientSecretId, LocalDateTime.now(clock)))
 
   def updateCheckInformation(application: Application, checkInformation: CheckInformation)(implicit hc: HeaderCarrier): Future[ApplicationUpdateSuccessful] = {
     connectorWrapper.forEnvironment(application.deployedTo).thirdPartyApplicationConnector.updateApproval(application.id, checkInformation)

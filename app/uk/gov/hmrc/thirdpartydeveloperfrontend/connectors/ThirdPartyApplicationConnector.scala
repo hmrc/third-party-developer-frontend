@@ -161,7 +161,7 @@ abstract class ThirdPartyApplicationConnector(config: ApplicationConfig, metrics
   }
 
   def addClientSecrets(id: ApplicationId, clientSecretRequest: ClientSecretRequest)(implicit hc: HeaderCarrier): Future[(String, String)] = metrics.record(api) {
-   http.POST[ClientSecretRequest, Either[UpstreamErrorResponse, AddClientSecretResponse]](s"$serviceBaseUrl/application/${id.value}/client-secret", clientSecretRequest)
+   http.PATCH[ClientSecretRequest, Either[UpstreamErrorResponse, AddClientSecretResponse]](s"$serviceBaseUrl/application/${id.value}/client-secret-new", clientSecretRequest)
     .map( _ match {
       case Right(response) => { 
         val newSecret: TPAClientSecret = response.clientSecrets.last
@@ -172,18 +172,6 @@ abstract class ThirdPartyApplicationConnector(config: ApplicationConfig, metrics
       case Left(err) => throw err
     })
   }
-
-
-  def deleteClientSecret(applicationId: ApplicationId, clientSecretId: String, actorEmailAddress: String)(implicit hc: HeaderCarrier): Future[ApplicationUpdateSuccessful] =
-    metrics.record(api) {
-
-      http.POST[DeleteClientSecretRequest, ErrorOrUnit](s"$serviceBaseUrl/application/${applicationId.value}/client-secret/$clientSecretId", DeleteClientSecretRequest(actorEmailAddress))
-      .map(throwOrOptionOf)
-      .map(_ match {
-        case Some(_)  => ApplicationUpdateSuccessful
-        case None     => throw new ApplicationNotFound
-      })
-    }
 
   def validateName(name: String, selfApplicationId: Option[ApplicationId])(implicit hc: HeaderCarrier): Future[ApplicationNameValidation] = {
     val body = ApplicationNameValidationRequest(name, selfApplicationId)
