@@ -27,10 +27,8 @@ import play.api.http.Status._
 import uk.gov.hmrc.http._
 import uk.gov.hmrc.play.http.metrics.common.API
 import ThirdPartyApplicationConnectorJsonFormatters._
-import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.CollaboratorTracker
-import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.LocalUserIdTracker
+import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.{CollaboratorTracker, FixedClock, LocalUserIdTracker, WireMockExtensions}
 import org.scalatestplus.play.guice.GuiceOneAppPerSuite
-import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.WireMockExtensions
 import play.api.Configuration
 import play.api.inject.guice.GuiceApplicationBuilder
 import play.api.inject.bind
@@ -43,7 +41,9 @@ import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.apidefinitions.ApiI
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.UserId
 
 
-class ThirdPartyApplicationConnectorSpec extends BaseConnectorIntegrationSpec with GuiceOneAppPerSuite with WireMockExtensions with CollaboratorTracker with LocalUserIdTracker {
+class ThirdPartyApplicationConnectorSpec extends BaseConnectorIntegrationSpec with GuiceOneAppPerSuite with WireMockExtensions
+  with CollaboratorTracker with LocalUserIdTracker with FixedClock {
+  
   private val apiKey: String = UUID.randomUUID().toString
   private val clientId = ClientId(UUID.randomUUID().toString)
   private val applicationId = ApplicationId("applicationId")
@@ -474,7 +474,9 @@ class ThirdPartyApplicationConnectorSpec extends BaseConnectorIntegrationSpec wi
       TPAClientSecret(clientSecretId, "secret-name", clientSecretValue, LocalDateTime.now(ZoneOffset.UTC), None)
 
     val actorEmailAddress = "john.requestor@example.com"
-    val clientSecretRequest = ClientSecretRequest(actorEmailAddress)
+    val userId = idOf(actorEmailAddress)
+    val timestamp = LocalDateTime.now(clock)
+    val clientSecretRequest = ClientSecretRequest(userId, actorEmailAddress, timestamp)
     val url = s"/application/${applicationId.value}/client-secret"
 
     "generate the client secret" in new Setup {
@@ -489,7 +491,7 @@ class ThirdPartyApplicationConnectorSpec extends BaseConnectorIntegrationSpec wi
         )
 
       stubFor(
-        post(urlEqualTo(url))
+        patch(urlEqualTo(url))
         .withJsonRequestBody(clientSecretRequest)
         .willReturn(
             aResponse()
@@ -505,7 +507,7 @@ class ThirdPartyApplicationConnectorSpec extends BaseConnectorIntegrationSpec wi
 
     "throw an ApplicationNotFound exception when the application does not exist" in new Setup {
       stubFor(
-        post(urlEqualTo(url))
+        patch(urlEqualTo(url))
         .withJsonRequestBody(clientSecretRequest)
         .willReturn(
             aResponse()
@@ -519,7 +521,7 @@ class ThirdPartyApplicationConnectorSpec extends BaseConnectorIntegrationSpec wi
 
     "throw a ClientSecretLimitExceeded exception when the max number of client secret has been exceeded" in new Setup {
       stubFor(
-        post(urlEqualTo(url))
+        patch(urlEqualTo(url))
         .withJsonRequestBody(clientSecretRequest)
         .willReturn(
             aResponse()
@@ -528,41 +530,6 @@ class ThirdPartyApplicationConnectorSpec extends BaseConnectorIntegrationSpec wi
       ) 
       intercept[ClientSecretLimitExceeded] {
         await(connector.addClientSecrets(applicationId, clientSecretRequest))
-      }
-    }
-  }
-
-  "deleteClientSecret" should {
-    val applicationId = ApplicationId(UUID.randomUUID().toString())
-    val clientSecretId = UUID.randomUUID().toString
-    val actorEmailAddress = "john.requestor@example.com"
-    val expectedDeleteClientSecretRequest = DeleteClientSecretRequest(actorEmailAddress)
-    val url = s"/application/${applicationId.value}/client-secret/$clientSecretId"
-
-    "delete a client secret" in new Setup {
-      stubFor(
-        post(urlEqualTo(url))
-        .withJsonRequestBody(expectedDeleteClientSecretRequest)
-        .willReturn(
-            aResponse()
-            .withStatus(OK)
-        )
-      ) 
-      val result = await(connector.deleteClientSecret(applicationId, clientSecretId, actorEmailAddress))
-      result shouldEqual ApplicationUpdateSuccessful
-    }
-
-    "return ApplicationNotFound response in case of a 404 on backend " in new Setup {
-      stubFor(
-        post(urlEqualTo(url))
-        .withJsonRequestBody(expectedDeleteClientSecretRequest)
-        .willReturn(
-            aResponse()
-            .withStatus(NOT_FOUND)
-        )
-      ) 
-      intercept[ApplicationNotFound] {
-        await(connector.deleteClientSecret(applicationId, clientSecretId, actorEmailAddress))
       }
     }
   }

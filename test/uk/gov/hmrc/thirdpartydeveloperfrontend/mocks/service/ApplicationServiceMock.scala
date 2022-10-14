@@ -20,7 +20,7 @@ import java.util.UUID
 
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications._
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.DeveloperSession
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.{DeveloperSession, UserId}
 import org.mockito.{ArgumentMatchersSugar, MockitoSugar}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.service.ApplicationService
 
@@ -88,23 +88,23 @@ trait ApplicationServiceMock extends MockitoSugar with ArgumentMatchersSugar wit
     when(applicationServiceMock.updateCheckInformation(eqTo(app), eqTo(checkInfo))(*))
       .thenReturn(successful(ApplicationUpdateSuccessful))
 
-  def givenAddClientSecretReturns(application: Application, email: String) = {
+  def givenAddClientSecretReturns(application: Application, userId: UserId, email: String) = {
     val newSecretId = UUID.randomUUID().toString
     val newSecret = UUID.randomUUID().toString
 
-    when(applicationServiceMock.addClientSecret(eqTo(application), eqTo(email))(*))
+    when(applicationServiceMock.addClientSecret(eqTo(application), eqTo(userId), eqTo(email))(*))
       .thenReturn(successful((newSecretId, newSecret)))
   }
 
-  def givenAddClientSecretFailsWith(application: Application, email: String, exception: Exception) = {
-    when(applicationServiceMock.addClientSecret(eqTo(application), eqTo(email))(*))
+  def givenAddClientSecretFailsWith(application: Application, userId: UserId, email: String, exception: Exception) = {
+    when(applicationServiceMock.addClientSecret(eqTo(application), eqTo(userId), eqTo(email))(*))
       .thenReturn(failed(exception))
   }
 
-  def givenDeleteClientSecretSucceeds(application: Application, clientSecretId: String, email: String) = {
+  def givenDeleteClientSecretSucceeds(application: Application, clientSecretId: String, userId: UserId, email: String) = {
     when(
       applicationServiceMock
-        .deleteClientSecret(eqTo(application), eqTo(clientSecretId), eqTo(email))(*)
+        .deleteClientSecret(eqTo(application), eqTo(userId), eqTo(clientSecretId), eqTo(email))(*)
     ).thenReturn(successful(ApplicationUpdateSuccessful))
   }
 
