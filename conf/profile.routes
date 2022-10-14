@@ -30,8 +30,8 @@ POST        /protect-account/remove-by-id                                       
 GET         /protect-account/remove-by-id/complete                                               uk.gov.hmrc.apiplatform.modules.mfa.controllers.profile.ProtectAccount.get2SVRemovalByIdCompletePage
 
 GET         /security-preferences                                                                uk.gov.hmrc.apiplatform.modules.mfa.controllers.profile.MfaController.securityPreferences
-GET         /security-preferences/select-mfa                                                     uk.gov.hmrc.apiplatform.modules.mfa.controllers.profile.MfaController.selectMfaPage
-POST        /security-preferences/select-mfa                                                     uk.gov.hmrc.apiplatform.modules.mfa.controllers.profile.MfaController.selectMfaAction
+GET         /security-preferences/select-mfa                                                     uk.gov.hmrc.apiplatform.modules.mfa.controllers.profile.MfaController.selectMfaPage(mfaAction: uk.gov.hmrc.apiplatform.modules.mfa.models.MfaAction)
+POST        /security-preferences/select-mfa                                                     uk.gov.hmrc.apiplatform.modules.mfa.controllers.profile.MfaController.selectMfaAction(mfaAction: uk.gov.hmrc.apiplatform.modules.mfa.models.MfaAction)
 GET         /security-preferences/remove-mfa                                                     uk.gov.hmrc.apiplatform.modules.mfa.controllers.profile.MfaController.removeMfa(mfaId: uk.gov.hmrc.apiplatform.modules.mfa.models.MfaId, mfaType: uk.gov.hmrc.apiplatform.modules.mfa.models.MfaType)
 
 GET         /security-preferences/auth-app/start                                                 uk.gov.hmrc.apiplatform.modules.mfa.controllers.profile.MfaController.authAppStart

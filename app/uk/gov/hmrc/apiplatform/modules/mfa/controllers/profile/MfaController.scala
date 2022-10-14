@@ -37,8 +37,9 @@ import uk.gov.hmrc.apiplatform.modules.mfa.controllers.profile.routes._
 import uk.gov.hmrc.apiplatform.modules.mfa.forms.{MfaAccessCodeForm, MfaNameChangeForm, MobileNumberForm, SelectMfaForm, SmsAccessCodeForm}
 import uk.gov.hmrc.apiplatform.modules.mfa.models.MfaAction.{CREATE, REMOVE}
 import uk.gov.hmrc.apiplatform.modules.mfa.models.MfaType.{AUTHENTICATOR_APP, SMS}
-import uk.gov.hmrc.apiplatform.modules.mfa.utils.MfaDetailHelper.{isAuthAppMfaVerified, isSmsMfaVerified}
+import uk.gov.hmrc.apiplatform.modules.mfa.utils.MfaDetailHelper.{getMfaDetailByType, isAuthAppMfaVerified, isSmsMfaVerified}
 import uk.gov.hmrc.apiplatform.modules.mfa.views.html.sms.{MobileNumberView, SmsAccessCodeView, SmsSetupCompletedView}
+import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.play.bootstrap.controller.WithUnsafeDefaultFormBinding
 
 import javax.inject.{Inject, Singleton}
@@ -78,20 +79,40 @@ class MfaController @Inject() (
     }
   }
 
-  def selectMfaPage: Action[AnyContent] = atLeastPartLoggedInEnablingMfaAction { implicit request =>
-    Future.successful(Ok(selectMfaView(SelectMfaForm.form)))
+  def selectMfaPage(mfaAction: MfaAction): Action[AnyContent] = atLeastPartLoggedInEnablingMfaAction { implicit request =>
+    Future.successful(Ok(selectMfaView(SelectMfaForm.form, mfaAction)))
   }
 
-  def selectMfaAction: Action[AnyContent] = atLeastPartLoggedInEnablingMfaAction { implicit request =>
+  def selectMfaAction(mfaAction: MfaAction): Action[AnyContent] = atLeastPartLoggedInEnablingMfaAction { implicit request =>
     SelectMfaForm.form.bindFromRequest.fold(
-      form => Future.successful(BadRequest(selectMfaView(form))),
+      form => Future.successful(BadRequest(selectMfaView(form, mfaAction))),
       form => {
-        MfaType.withNameInsensitive(form.mfaType) match {
-          case SMS               => Future.successful(Redirect(routes.MfaController.setupSms()))
-          case AUTHENTICATOR_APP => Future.successful(Redirect(routes.MfaController.authAppStart()))
+        mfaAction match {
+          case CREATE => setupSelectedMfa(form.mfaType)
+          case REMOVE => removeSelectedMfa(request.userId, form.mfaType)
         }
       }
     )
+  }
+
+  private def setupSelectedMfa(mfaType: String) = {
+    MfaType.withNameInsensitive(mfaType) match {
+      case SMS               => Future.successful(Redirect(routes.MfaController.setupSms()))
+      case AUTHENTICATOR_APP => Future.successful(Redirect(routes.MfaController.authAppStart()))
+    }
+  }
+
+  private def removeSelectedMfa(userId: UserId, mfaTypeStr: String)(implicit request: Request[_], hc: HeaderCarrier, messages: Messages) = {
+    thirdPartyDeveloperConnector.fetchDeveloper(userId).map {
+      case None                       => internalServerErrorTemplate("Unable to obtain user information")
+      case Some(developer: Developer) =>
+        val mfaType = MfaType.withNameInsensitive(mfaTypeStr)
+        val mfaDetail = getMfaDetailByType(mfaType, developer.mfaDetails)
+        mfaType match {
+        case SMS               => Redirect(routes.MfaController.smsAccessCodePage(mfaDetail.id, MfaAction.REMOVE))
+        case AUTHENTICATOR_APP => Redirect(routes.MfaController.authAppAccessCodePage(mfaDetail.id, MfaAction.REMOVE))
+      }
+    }
   }
 
   def authAppStart: Action[AnyContent] = atLeastPartLoggedInEnablingMfaAction { implicit request =>

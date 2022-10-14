@@ -16,7 +16,7 @@
 
 package uk.gov.hmrc.apiplatform.modules.mfa.utils
 
-import uk.gov.hmrc.apiplatform.modules.mfa.models.{AuthenticatorAppMfaDetailSummary, MfaDetail, MfaType, SmsMfaDetailSummary}
+import uk.gov.hmrc.apiplatform.modules.mfa.models.{AuthenticatorAppMfaDetailSummary, MfaDetail, MfaType}
 
 object MfaDetailHelper {
 
@@ -33,5 +33,9 @@ object MfaDetailHelper {
   def getAuthAppMfaVerified(mfaDetails: List[MfaDetail]): AuthenticatorAppMfaDetailSummary = {
     mfaDetails.filter(x => x.mfaType == MfaType.AUTHENTICATOR_APP && x.verified)
       .head.asInstanceOf[AuthenticatorAppMfaDetailSummary]
+  }
+
+  def getMfaDetailByType(mfaType: MfaType, details: List[MfaDetail]): MfaDetail = {
+    details.filter(_.mfaType == mfaType).head
   }
 }
