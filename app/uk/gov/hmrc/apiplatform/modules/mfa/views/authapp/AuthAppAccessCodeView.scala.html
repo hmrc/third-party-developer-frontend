@@ -21,10 +21,11 @@
 @import uk.gov.hmrc.apiplatform.modules.mfa.controllers.profile.routes
 @import uk.gov.hmrc.apiplatform.modules.mfa.models.MfaId
 @import uk.gov.hmrc.apiplatform.modules.mfa.forms.MfaAccessCodeForm
+@import uk.gov.hmrc.apiplatform.modules.mfa.models.MfaAction
 
 @this(devMain: DevMainWithFormErrors)
 
-@(form: Form[MfaAccessCodeForm], mfaId: MfaId)(implicit messages: Messages, request: play.api.mvc.Request[Any], loggedIn: DeveloperSession, appConfig: ApplicationConfig)
+@(form: Form[MfaAccessCodeForm], mfaId: MfaId, mfaAction: MfaAction)(implicit messages: Messages, request: play.api.mvc.Request[Any], loggedIn: DeveloperSession, appConfig: ApplicationConfig)
 
 @devMain(
   form,
@@ -36,7 +37,7 @@
 ) {
   <h1 class="govuk-heading-l" id="page-heading">Enter your access code</h1>
 
-  @helper.form(action = routes.MfaController.enableAuthApp(mfaId)){
+  @helper.form(action = routes.MfaController.authAppAccessCodeAction(mfaId, mfaAction)){
     @helper.CSRF.formField
 
     <div class="govuk-form-group @if(form.errors("accessCode").nonEmpty){govuk-form-group--error}">

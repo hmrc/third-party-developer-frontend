@@ -26,21 +26,21 @@ import scala.concurrent.Future.successful
 import scala.concurrent.{ExecutionContext, Future}
 
 @Singleton
-class MFAService @Inject()(thirdPartyDeveloperMfaConnector: ThirdPartyDeveloperMfaConnector)(implicit val ec: ExecutionContext) {
+class MfaService @Inject()(thirdPartyDeveloperMfaConnector: ThirdPartyDeveloperMfaConnector)(implicit val ec: ExecutionContext) {
 
-  def enableMfa(userId: UserId, mfaId: MfaId, totpCode: String)(implicit hc: HeaderCarrier): Future[MFAResponse] = {
+  def enableMfa(userId: UserId, mfaId: MfaId, totpCode: String)(implicit hc: HeaderCarrier): Future[MfaResponse] = {
     thirdPartyDeveloperMfaConnector.verifyMfa(userId, mfaId, totpCode) flatMap {
-      case true => successful(MFAResponse(true))
-      case _ => successful(MFAResponse(false))
+      case true => successful(MfaResponse(true))
+      case _ => successful(MfaResponse(false))
     }
   }
 
-  def removeMfaById(userId: UserId, mfaId: MfaId, totpCode: String)(implicit hc: HeaderCarrier): Future[MFAResponse] = {
+  def removeMfaById(userId: UserId, mfaId: MfaId, totpCode: String)(implicit hc: HeaderCarrier): Future[MfaResponse] = {
     thirdPartyDeveloperMfaConnector.verifyMfa(userId, mfaId, totpCode) flatMap {
-      case true => thirdPartyDeveloperMfaConnector.removeMfaById(userId, mfaId).map(_ => MFAResponse(true))
-      case _ => successful(MFAResponse(false))
+      case true => thirdPartyDeveloperMfaConnector.removeMfaById(userId, mfaId).map(_ => MfaResponse(true))
+      case _ => successful(MfaResponse(false))
     }
   }
 }
 
-case class MFAResponse(totpVerified: Boolean)
+case class MfaResponse(totpVerified: Boolean)

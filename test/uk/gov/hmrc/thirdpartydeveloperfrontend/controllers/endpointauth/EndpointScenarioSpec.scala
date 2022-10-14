@@ -25,7 +25,7 @@ import play.api.libs.crypto.CookieSigner
 import play.api.test.Helpers.{redirectLocation, route, status}
 import play.api.test.{CSRFTokenHelper, FakeRequest, Writeables}
 import uk.gov.hmrc.apiplatform.modules.mfa.connectors.ThirdPartyDeveloperMfaConnector
-import uk.gov.hmrc.apiplatform.modules.mfa.models.MfaId
+import uk.gov.hmrc.apiplatform.modules.mfa.models.{MfaAction, MfaId, MfaType}
 import uk.gov.hmrc.apiplatform.modules.submissions.connectors.ThirdPartyApplicationSubmissionsConnector
 import uk.gov.hmrc.apiplatform.modules.submissions.domain.models.{Question, Submission}
 import uk.gov.hmrc.apiplatform.modules.uplift.domain.models.{ApiSubscriptions, GetProductionCredentialsFlow}
@@ -177,6 +177,7 @@ abstract class EndpointScenarioSpec extends AsyncHmrcSpec with GuiceOneAppPerSui
   when(thirdPartyDeveloperMfaConnector.createMfaAuthApp(*[UserId])(*)).thenReturn(Future.successful(registerAuthAppResponse))
   when(thirdPartyDeveloperMfaConnector.changeName(*[UserId], *[MfaId], *[String])(*)).thenReturn(Future.successful(true))
   when(thirdPartyDeveloperMfaConnector.createMfaSms(*[UserId], *[String])(*)).thenReturn(Future.successful(registerSmsResponse))
+  when(thirdPartyDeveloperMfaConnector.sendSms(*[UserId], *[MfaId])(*)).thenReturn(Future.successful(true))
 
   private def populatePathTemplateWithValues(pathTemplate: String, values: Map[String,String]): String = {
     //TODO fail test if path contains parameters that aren't supplied by the values map
@@ -261,12 +262,13 @@ abstract class EndpointScenarioSpec extends AsyncHmrcSpec with GuiceOneAppPerSui
       case Endpoint(_,      "/developer/profile/email-preferences/topics-from-subscriptions") => Map("context" -> applicationId.value)
       case Endpoint(_,      "/developer/profile/email-preferences/apis-from-subscriptions") => Map("context" -> applicationId.value)
       case Endpoint("POST", "/developer/profile/email-preferences/no-apis-from-subscriptions") => Map("context" -> applicationId.value)
-      case Endpoint("GET",  "/developer/profile/security-preferences/auth-app/access-code") => Map("mfaId" -> mfaId.value.toString)
-      case Endpoint("POST", "/developer/profile/security-preferences/auth-app/enable") => Map("mfaId" -> mfaId.value.toString)
+      case Endpoint("GET",  "/developer/profile/security-preferences/auth-app/access-code") => Map("mfaId" -> mfaId.value.toString, "mfaAction" -> MfaAction.CREATE.toString)
+      case Endpoint("POST", "/developer/profile/security-preferences/auth-app/access-code") => Map("mfaId" -> mfaId.value.toString, "mfaAction" -> MfaAction.CREATE.toString)
       case Endpoint("GET", "/developer/profile/security-preferences/auth-app/name") => Map("mfaId" -> mfaId.value.toString)
       case Endpoint("POST", "/developer/profile/security-preferences/auth-app/name") => Map("mfaId" -> mfaId.value.toString)
-      case Endpoint("GET",  "/developer/profile/security-preferences/sms/access-code") => Map("mfaId" -> smsMfaId.value.toString)
-      case Endpoint("POST",  "/developer/profile/security-preferences/sms/access-code") => Map("mfaId" -> smsMfaId.value.toString)
+      case Endpoint("GET",  "/developer/profile/security-preferences/sms/access-code") => Map("mfaId" -> smsMfaId.value.toString, "mfaAction" -> MfaAction.CREATE.toString)
+      case Endpoint("POST",  "/developer/profile/security-preferences/sms/access-code") => Map("mfaId" -> smsMfaId.value.toString, "mfaAction" -> MfaAction.CREATE.toString)
+      case Endpoint("GET",  "/developer/profile/security-preferences/remove-mfa") => Map("mfaId" -> smsMfaId.value.toString, "mfaType" -> MfaType.SMS.toString)
 
       case _ => Map.empty
     }
@@ -343,7 +345,7 @@ abstract class EndpointScenarioSpec extends AsyncHmrcSpec with GuiceOneAppPerSui
       case Endpoint("POST", "/developer/submissions/:sid/question/:qid/update") => Map("submit-action" -> "acknowledgement")
       case Endpoint("POST", "/developer/submissions/application/:aid/cancel-request") => Map("submit-action" -> "cancel-request")
       case Endpoint("POST", "/developer/profile/security-preferences/select-mfa") => Map("mfaType" -> "SMS")
-      case Endpoint("POST", "/developer/profile/security-preferences/auth-app/enable") => Map("accessCode" -> "123456")
+      case Endpoint("POST", "/developer/profile/security-preferences/auth-app/access-code") => Map("accessCode" -> "123456")
       case Endpoint("POST", "/developer/profile/security-preferences/auth-app/name") => Map("name" -> "appName")
       case Endpoint("POST", "/developer/profile/security-preferences/sms/setup") => Map("mobileNumber" -> "0123456789")
       case Endpoint("POST", "/developer/profile/security-preferences/sms/access-code") => Map("accessCode" -> "123456", "mobileNumber" -> "0123456789")
@@ -432,10 +434,11 @@ abstract class EndpointScenarioSpec extends AsyncHmrcSpec with GuiceOneAppPerSui
       case Endpoint("POST", "/developer/submissions/:sid/question/:qid") => Redirect(s"/developer/submissions/application/${applicationId.value}/production-credentials-checklist")
       case Endpoint("POST", "/developer/submissions/:sid/question/:qid/update") => Redirect(s"/developer/submissions/application/${applicationId.value}/check-answers")
       case Endpoint("POST", "/developer/profile/security-preferences/select-mfa") => Redirect(s"/developer/profile/security-preferences/sms/setup")
-      case Endpoint("POST", "/developer/profile/security-preferences/auth-app/enable") => Redirect(s"/developer/profile/security-preferences/auth-app/name?mfaId=${mfaId.value.toString}")
+      case Endpoint("POST", "/developer/profile/security-preferences/auth-app/access-code") => Redirect(s"/developer/profile/security-preferences/auth-app/name?mfaId=${mfaId.value.toString}")
       case Endpoint("POST", "/developer/profile/security-preferences/auth-app/name") => Redirect(s"/developer/profile/security-preferences/auth-app/setup/complete")
-      case Endpoint("POST", "/developer/profile/security-preferences/sms/setup") => Redirect(s"/developer/profile/security-preferences/sms/access-code?mfaId=${smsMfaId.value.toString}")
+      case Endpoint("POST", "/developer/profile/security-preferences/sms/setup") => Redirect(s"/developer/profile/security-preferences/sms/access-code?mfaId=${smsMfaId.value.toString}&mfaAction=CREATE")
       case Endpoint("POST", "/developer/profile/security-preferences/sms/access-code") => Redirect(s"/developer/profile/security-preferences/sms/setup/complete")
+      case Endpoint("GET", "/developer/profile/security-preferences/remove-mfa") => Redirect(s"/developer/profile/security-preferences/sms/access-code?mfaId=${smsMfaId.value.toString}&mfaAction=REMOVE")
       case _ => Success()
     }
   }

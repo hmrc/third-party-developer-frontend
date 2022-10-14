@@ -30,7 +30,7 @@ import play.api.libs.crypto.CookieSigner
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents, Result}
 import uk.gov.hmrc.apiplatform.modules.mfa.connectors.ThirdPartyDeveloperMfaConnector
 import uk.gov.hmrc.apiplatform.modules.mfa.models.MfaId
-import uk.gov.hmrc.apiplatform.modules.mfa.service.{MFAService, MfaMandateService}
+import uk.gov.hmrc.apiplatform.modules.mfa.service.{MfaService, MfaMandateService}
 import uk.gov.hmrc.apiplatform.modules.mfa.utils.MfaDetailHelper
 import uk.gov.hmrc.play.bootstrap.controller.WithUnsafeDefaultFormBinding
 import uk.gov.hmrc.thirdpartydeveloperfrontend.qr.{OtpAuthUri, QRCode}
@@ -46,7 +46,7 @@ class ProtectAccount @Inject()(
   val thirdPartyDeveloperConnector: ThirdPartyDeveloperConnector,
   val thirdPartyDeveloperMfaConnector: ThirdPartyDeveloperMfaConnector,
   val otpAuthUri: OtpAuthUri,
-  val mfaService: MFAService,
+  val mfaService: MfaService,
   val sessionService: SessionService,
   mcc: MessagesControllerComponents,
   val errorHandler: ErrorHandler,
@@ -92,7 +92,7 @@ class ProtectAccount @Inject()(
 
     def logonAndComplete(): Result = {
       thirdPartyDeveloperConnector.updateSessionLoggedInState(request.sessionId, UpdateLoggedInStateRequest(LoggedInState.LOGGED_IN))
-      Redirect(uk.gov.hmrc.apiplatform.modules.mfa.controllers.profile.routes.ProtectAccount.getProtectAccountCompletedPage())
+      Redirect(routes.ProtectAccount.getProtectAccountCompletedPage())
     }
 
     def invalidCode(form: ProtectAccountForm): Result = {
@@ -122,7 +122,7 @@ class ProtectAccount @Inject()(
           .map(r =>
             if (r.totpVerified) {
               removeDeviceSessionCookieFromResult(
-                Redirect(uk.gov.hmrc.apiplatform.modules.mfa.controllers.profile.routes.ProtectAccount.get2SVRemovalByIdCompletePage())
+                Redirect(routes.ProtectAccount.get2SVRemovalByIdCompletePage())
               )
             } else {
               val protectAccountForm = ProtectAccountForm.form.fill(form)

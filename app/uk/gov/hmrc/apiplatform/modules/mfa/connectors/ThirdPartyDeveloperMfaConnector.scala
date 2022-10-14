@@ -20,7 +20,7 @@ import play.api.Logging
 import play.api.http.Status._
 import play.api.libs.json.{Json, OFormat}
 import uk.gov.hmrc.apiplatform.modules.mfa.connectors.ThirdPartyDeveloperMfaConnector.{RegisterAuthAppResponse, RegisterSmsResponse}
-import uk.gov.hmrc.apiplatform.modules.mfa.models.{DeviceSession, DeviceSessionInvalid, MfaId, SmsMfaDetailSummary}
+import uk.gov.hmrc.apiplatform.modules.mfa.models.{DeviceSession, DeviceSessionInvalid, MfaId}
 import uk.gov.hmrc.http.HttpReads.Implicits._
 import uk.gov.hmrc.http._
 import uk.gov.hmrc.play.http.metrics.common.API
@@ -28,7 +28,6 @@ import uk.gov.hmrc.thirdpartydeveloperfrontend.config.ApplicationConfig
 import uk.gov.hmrc.thirdpartydeveloperfrontend.connectors.{CommonResponseHandlers, ConnectorMetrics}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.connectors.VerifyMfaRequest
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers._
-import uk.gov.hmrc.apiplatform.modules.mfa.models.MfaDetailFormats.smsMfaDetailSummaryFormat
 
 import javax.inject.{Inject, Singleton}
 import scala.concurrent.{ExecutionContext, Future}
@@ -72,6 +71,17 @@ class ThirdPartyDeveloperMfaConnector @Inject()(http: HttpClient, config: Applic
     }
   }
 
+  def sendSms(userId: UserId, mfaId: MfaId)(implicit hc: HeaderCarrier): Future[Boolean] = {
+    metrics.record(api) {
+      http.POSTEmpty[ErrorOrUnit](s"$serviceBaseUrl/developer/${userId.value}/mfa/${mfaId.value}/send-sms")
+        .map {
+          case Right(()) => true
+          case Left(UpstreamErrorResponse(_,BAD_REQUEST,_,_)) => false
+          case Left(err) => throw err
+        }
+    }
+  }
+
   def removeMfaById(userId: UserId, mfaId: MfaId)(implicit hc: HeaderCarrier): Future[Unit] = {
     metrics.record(api) {
       http.DELETE[ErrorOrUnit](s"$serviceBaseUrl/developer/${userId.value}/mfa/${mfaId.value}")
@@ -103,7 +113,6 @@ class ThirdPartyDeveloperMfaConnector @Inject()(http: HttpClient, config: Applic
           logger.error(s"Error creating Device Session - ${err.getMessage()}")
           throw err
         }
-
       }
   }
 

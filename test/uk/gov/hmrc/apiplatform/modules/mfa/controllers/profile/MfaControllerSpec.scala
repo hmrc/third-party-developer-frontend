@@ -23,14 +23,13 @@ import play.api.http.Status
 import play.api.mvc.{AnyContentAsFormUrlEncoded, Result}
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
-import play.filters.csrf.CSRF.TokenProvider
 import uk.gov.hmrc.apiplatform.modules.mfa.connectors.ThirdPartyDeveloperMfaConnector
 import uk.gov.hmrc.apiplatform.modules.mfa.connectors.ThirdPartyDeveloperMfaConnector.{RegisterAuthAppResponse, RegisterSmsResponse}
-import uk.gov.hmrc.apiplatform.modules.mfa.models.MfaId
-import uk.gov.hmrc.apiplatform.modules.mfa.service.{MFAResponse, MFAService}
+import uk.gov.hmrc.apiplatform.modules.mfa.models.{MfaAction, MfaId, MfaType}
+import uk.gov.hmrc.apiplatform.modules.mfa.service.{MfaResponse, MfaService}
 import uk.gov.hmrc.apiplatform.modules.mfa.views.html.authapp._
 import uk.gov.hmrc.apiplatform.modules.mfa.views.html.sms.{MobileNumberView, SmsAccessCodeView, SmsSetupCompletedView}
-import uk.gov.hmrc.apiplatform.modules.mfa.views.html.{SecurityPreferencesView, SelectMfaView}
+import uk.gov.hmrc.apiplatform.modules.mfa.views.html.{RemoveMfaCompletedView, SecurityPreferencesView, SelectMfaView}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.builder.{DeveloperBuilder, MfaDetailBuilder}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.config.ErrorHandler
 import uk.gov.hmrc.thirdpartydeveloperfrontend.connectors.ThirdPartyDeveloperConnector
@@ -74,12 +73,13 @@ class MfaControllerSpec extends BaseControllerSpec with WithCSRFAddToken with De
     val smsSetupCompletedView = app.injector.instanceOf[SmsSetupCompletedView]
     val selectMfaView = app.injector.instanceOf[SelectMfaView]
     val errorHandler = app.injector.instanceOf[ErrorHandler]
+    val removeMfaCompletedView = app.injector.instanceOf[RemoveMfaCompletedView]
 
     val underTest: MfaController = new MfaController(
       mock[ThirdPartyDeveloperConnector],
       mock[ThirdPartyDeveloperMfaConnector],
       mock[OtpAuthUri],
-      mock[MFAService],
+      mock[MfaService],
       sessionServiceMock,
       mcc,
       errorHandler,
@@ -93,7 +93,8 @@ class MfaControllerSpec extends BaseControllerSpec with WithCSRFAddToken with De
       mobileNumberView,
       smsAccessCodeView,
       smsSetupCompletedView: SmsSetupCompletedView,
-      selectMfaView: SelectMfaView
+      selectMfaView: SelectMfaView,
+      removeMfaCompletedView: RemoveMfaCompletedView
     ) { override val qrCode: QRCode = mock[QRCode] }
 
     fetchSessionByIdReturns(sessionId, Session(sessionId, loggedInDeveloper, loggedInState))
@@ -101,7 +102,7 @@ class MfaControllerSpec extends BaseControllerSpec with WithCSRFAddToken with De
 
     val registerSmsResponse: RegisterSmsResponse = RegisterSmsResponse(mfaId = smsMfaId, mobileNumber = verifiedSmsMfaDetail.mobileNumber)
 
-    def validateRedirectResult(result: Future[Result]) = {
+    def validateRedirectToLoginPage(result: Future[Result]) = {
       status(result) shouldBe Status.SEE_OTHER
       redirectLocation(result) shouldBe Some("/developer/login")
     }
@@ -122,7 +123,7 @@ class MfaControllerSpec extends BaseControllerSpec with WithCSRFAddToken with De
       FakeRequest().withLoggedIn(underTest, implicitly)(sessionId).withCSRFToken
     }
 
-    def accessCodeRequest(code: String): FakeRequest[AnyContentAsFormUrlEncoded] = {
+    def authAppAccessCodeRequest(code: String): FakeRequest[AnyContentAsFormUrlEncoded] = {
       createRequest().withFormUrlEncodedBody("accessCode" -> code)
     }
 
@@ -151,8 +152,8 @@ class MfaControllerSpec extends BaseControllerSpec with WithCSRFAddToken with De
   trait SetupSecurityPreferences extends Setup {
     when(underTest.thirdPartyDeveloperConnector.fetchDeveloper(eqTo(loggedInDeveloper.userId))(*))
       .thenReturn(successful(Some(
-        buildDeveloper(emailAddress = loggedInDeveloper.email, organisation = None, mfaDetails = List(verifiedAuthenticatorAppMfaDetail))))
-      )
+        buildDeveloper(emailAddress = loggedInDeveloper.email, organisation = None, mfaDetails = List(verifiedAuthenticatorAppMfaDetail))
+      )))
   }
 
   trait SetupSuccessfulStart2SV extends Setup {
@@ -174,7 +175,7 @@ class MfaControllerSpec extends BaseControllerSpec with WithCSRFAddToken with De
 
   "MfaController" when {
 
-    "selectMfaPage()" should {
+    "selectMfaPage" should {
       "return 200 and show the Select MFA page when user is Logged in" in new SetupSecurityPreferences with LoggedIn {
         shouldReturnOK(addToken(underTest.selectMfaPage())(selectMfaRequest("SMS")), validateSelectMfaPage)
       }
@@ -185,11 +186,11 @@ class MfaControllerSpec extends BaseControllerSpec with WithCSRFAddToken with De
 
       "redirect to the login page when user is not logged in" in new SetupSecurityPreferences with LoggedIn {
         private val result = addToken(underTest.selectMfaPage())(createRequestWithInvalidSession(Map("mfaType" -> "SMS")))
-        validateRedirectResult(result)
+        validateRedirectToLoginPage(result)
       }
     }
 
-    "selectMfaAction()" should {
+    "selectMfaAction" should {
 
       "redirect to setup sms page when user is logged in and mfaType is SMS" in new SetupSuccessfulStart2SV with LoggedIn {
         val result = addToken(underTest.selectMfaAction())(selectMfaRequest("SMS"))
@@ -230,11 +231,11 @@ class MfaControllerSpec extends BaseControllerSpec with WithCSRFAddToken with De
 
       "redirect to the login page when user is not logged in" in new SetupSuccessfulStart2SV with LoggedIn {
         private val result = addToken(underTest.selectMfaAction())(createRequestWithInvalidSession(Map("mfaType" -> "SMS")))
-        validateRedirectResult(result)
+        validateRedirectToLoginPage(result)
       }
     }
 
-    "securityPreferences()" should {
+    "securityPreferences" should {
       "return 200 and show the Security Preferences page when user is Logged in" in new SetupSecurityPreferences with LoggedIn {
         private val request = FakeRequest().withLoggedIn(underTest, implicitly)(sessionId)
         shouldReturnOK(underTest.securityPreferences()(request), validateSecurityPreferences)
@@ -247,7 +248,7 @@ class MfaControllerSpec extends BaseControllerSpec with WithCSRFAddToken with De
 
       "redirect to the login page when user is not logged in" in new SetupSecurityPreferences with LoggedIn {
         private val result = addToken(underTest.securityPreferences())(createRequestWithInvalidSession())
-        validateRedirectResult(result)
+        validateRedirectToLoginPage(result)
       }
 
       "redirect to the login page when third party developer returns None for User " in new LoggedIn {
@@ -261,7 +262,7 @@ class MfaControllerSpec extends BaseControllerSpec with WithCSRFAddToken with De
       }
     }
 
-    "setupSms()" should {
+    "setupSms" should {
       "return 200 and show the mobile number view when user is Logged in" in new SetupSecurityPreferences with LoggedIn {
         shouldReturnOK(addToken(underTest.setupSms())(mobileNumberRequest()), validateMobileNumberView)
       }
@@ -272,11 +273,11 @@ class MfaControllerSpec extends BaseControllerSpec with WithCSRFAddToken with De
 
       "redirect to the login page when user is not logged in" in new SetupSuccessfulStart2SV with LoggedIn {
         private val result = addToken(underTest.setupSms)(createRequestWithInvalidSession(Map("mobileNumber" -> "07771234567")))
-        validateRedirectResult(result)
+        validateRedirectToLoginPage(result)
       }
     }
 
-    "setupSmsAction()" should {
+    "setupSmsAction" should {
       "redirect to access code page when user is Logged in and form is valid and call to connector is successful" in
         new SetupSecurityPreferences with LoggedIn {
           when(underTest.thirdPartyDeveloperMfaConnector.createMfaSms(*[UserId], eqTo(mobileNumber))(*))
@@ -285,7 +286,7 @@ class MfaControllerSpec extends BaseControllerSpec with WithCSRFAddToken with De
           private val result = underTest.setupSmsAction()(mobileNumberRequest())
 
           status(result) shouldBe Status.SEE_OTHER
-          redirectLocation(result) shouldBe Some(s"/developer/profile/security-preferences/sms/access-code?mfaId=${smsMfaId.value.toString}")
+          redirectLocation(result) shouldBe Some(s"/developer/profile/security-preferences/sms/access-code?mfaId=${smsMfaId.value.toString}&mfaAction=CREATE")
 
           verify(underTest.thirdPartyDeveloperMfaConnector).createMfaSms(*[UserId], eqTo(mobileNumber))(*)
         }
@@ -298,16 +299,16 @@ class MfaControllerSpec extends BaseControllerSpec with WithCSRFAddToken with De
           private val result = underTest.setupSmsAction()(mobileNumberRequest())
 
           status(result) shouldBe Status.SEE_OTHER
-          redirectLocation(result) shouldBe Some(s"/developer/profile/security-preferences/sms/access-code?mfaId=${smsMfaId.value.toString}")
+          redirectLocation(result) shouldBe Some(s"/developer/profile/security-preferences/sms/access-code?mfaId=${smsMfaId.value.toString}&mfaAction=CREATE")
 
           verify(underTest.thirdPartyDeveloperMfaConnector).createMfaSms(*[UserId], eqTo(mobileNumber))(*)
         }
 
       "redirect to login page when user is not logged in" in new SetupSecurityPreferences with LoggedIn {
-          private val result = addToken(underTest.setupSmsAction)(createRequestWithInvalidSession(Map("mobileNumber" -> "07771234567")))
-          validateRedirectResult(result)
-          verifyZeroInteractions(underTest.thirdPartyDeveloperMfaConnector)
-        }
+        private val result = addToken(underTest.setupSmsAction)(createRequestWithInvalidSession(Map("mobileNumber" -> "07771234567")))
+        validateRedirectToLoginPage(result)
+        verifyZeroInteractions(underTest.thirdPartyDeveloperMfaConnector)
+      }
 
       "return Bad Request when user is logged in and mobile number is invalid on the form" in new SetupSuccessfulStart2SV with LoggedIn {
         val request = createRequest().withFormUrlEncodedBody("mobileNumber" -> "INVALID_NUMBER")
@@ -323,31 +324,32 @@ class MfaControllerSpec extends BaseControllerSpec with WithCSRFAddToken with De
       }
     }
 
-    "smsAccessCodePage()" should {
+    "smsAccessCodePage" should {
       "return sms access code view when user is logged in" in new SetupSuccessfulStart2SV with LoggedIn {
-        val result = addToken(underTest.smsAccessCodePage(authAppMfaId))(smsAccessCodeRequest(correctCode))
-        shouldReturnOK(result, validateAccessCodePage)
+        val result = addToken(underTest.smsAccessCodePage(authAppMfaId, MfaAction.CREATE))(smsAccessCodeRequest(correctCode))
+        shouldReturnOK(result, validateAuthAppAccessCodePage)
       }
 
       "return sms access code view when user is part logged in" in new SetupSuccessfulStart2SV with PartLogged {
-        val result = addToken(underTest.smsAccessCodePage(authAppMfaId))(smsAccessCodeRequest(correctCode))
-        shouldReturnOK(result, validateAccessCodePage)
+        val result = addToken(underTest.smsAccessCodePage(authAppMfaId, MfaAction.CREATE))(smsAccessCodeRequest(correctCode))
+        shouldReturnOK(result, validateAuthAppAccessCodePage)
       }
 
       "redirect to the login page when user is not logged in" in new SetupSecurityPreferences with LoggedIn {
-        private val result = addToken(underTest.smsAccessCodePage(authAppMfaId))(
-          createRequestWithInvalidSession(Map("accessCode" -> "code", "mobileNumber" -> mobileNumber)))
-        validateRedirectResult(result)
+        private val result = addToken(underTest.smsAccessCodePage(authAppMfaId, MfaAction.CREATE))(
+          createRequestWithInvalidSession(Map("accessCode" -> "code", "mobileNumber" -> mobileNumber))
+        )
+        validateRedirectToLoginPage(result)
       }
     }
 
-    "smsAccessCodeAction()" should {
+    "smsAccessCodeAction for CREATE" should {
       "redirect to sms setup completed page when user is Logged in and form is valid and call to connector returns true" in
         new SetupSecurityPreferences with LoggedIn {
           when(underTest.thirdPartyDeveloperMfaConnector.verifyMfa(*[UserId], eqTo(smsMfaId), eqTo(correctCode))(*))
             .thenReturn(Future.successful(true))
 
-          private val result = underTest.smsAccessCodeAction(smsMfaId)(smsAccessCodeRequest(correctCode))
+          private val result = underTest.smsAccessCodeAction(smsMfaId, MfaAction.CREATE)(smsAccessCodeRequest(correctCode))
 
           status(result) shouldBe Status.SEE_OTHER
           redirectLocation(result) shouldBe Some(s"/developer/profile/security-preferences/sms/setup/complete")
@@ -360,7 +362,7 @@ class MfaControllerSpec extends BaseControllerSpec with WithCSRFAddToken with De
           when(underTest.thirdPartyDeveloperMfaConnector.verifyMfa(*[UserId], eqTo(smsMfaId), eqTo(correctCode))(*))
             .thenReturn(Future.successful(true))
 
-          private val result = underTest.smsAccessCodeAction(smsMfaId)(smsAccessCodeRequest(correctCode))
+          private val result = underTest.smsAccessCodeAction(smsMfaId, MfaAction.CREATE)(smsAccessCodeRequest(correctCode))
 
           status(result) shouldBe Status.SEE_OTHER
           redirectLocation(result) shouldBe Some(s"/developer/profile/security-preferences/sms/setup/complete")
@@ -369,16 +371,17 @@ class MfaControllerSpec extends BaseControllerSpec with WithCSRFAddToken with De
         }
 
       "redirect to login page when user is not logged in" in new SetupSecurityPreferences with LoggedIn {
-          private val result = addToken(underTest.smsAccessCodeAction(authAppMfaId))(
-            createRequestWithInvalidSession(Map("mobileNumber" -> "07771234567", "accessCode" -> correctCode)))
-          validateRedirectResult(result)
-          verifyZeroInteractions(underTest.thirdPartyDeveloperMfaConnector)
-        }
+        private val result = addToken(underTest.smsAccessCodeAction(authAppMfaId, MfaAction.CREATE))(
+          createRequestWithInvalidSession(Map("mobileNumber" -> "07771234567", "accessCode" -> correctCode))
+        )
+        validateRedirectToLoginPage(result)
+        verifyZeroInteractions(underTest.thirdPartyDeveloperMfaConnector)
+      }
 
       "return Bad Request when user is logged in and access code is invalid on the form" in new SetupSuccessfulStart2SV with LoggedIn {
         val request = createRequest().withFormUrlEncodedBody("mobileNumber" -> mobileNumber, "accessCode" -> "INVALID")
 
-        val result = addToken(underTest.smsAccessCodeAction(smsMfaId))(request)
+        val result = addToken(underTest.smsAccessCodeAction(smsMfaId, MfaAction.CREATE))(request)
 
         status(result) shouldBe BAD_REQUEST
         val doc = Jsoup.parse(contentAsString(result))
@@ -393,14 +396,64 @@ class MfaControllerSpec extends BaseControllerSpec with WithCSRFAddToken with De
           when(underTest.thirdPartyDeveloperMfaConnector.verifyMfa(*[UserId], eqTo(smsMfaId), eqTo(correctCode))(*))
             .thenReturn(Future.successful(false))
 
-          private val result = underTest.smsAccessCodeAction(smsMfaId)(smsAccessCodeRequest(correctCode))
+          private val result = underTest.smsAccessCodeAction(smsMfaId, MfaAction.CREATE)(smsAccessCodeRequest(correctCode))
 
           validateErrorTemplateView(result, "Unable to verify SMS access code")
           verify(underTest.thirdPartyDeveloperMfaConnector).verifyMfa(*[UserId], eqTo(smsMfaId), eqTo(correctCode))(*)
         }
     }
 
-    "smsSetupCompletedPage()" should {
+    "smsAccessCodeAction for REMOVE" should {
+      "redirect to remove mfa completed page when user is Logged in and call to connector returns true" in
+        new SetupSecurityPreferences with LoggedIn {
+
+          when(underTest.mfaService.removeMfaById(*[UserId], eqTo(smsMfaId), eqTo(correctCode))(*))
+            .thenReturn(Future.successful(MfaResponse(true)))
+
+          private val result = underTest.smsAccessCodeAction(smsMfaId, MfaAction.REMOVE)(smsAccessCodeRequest(correctCode))
+
+          status(result) shouldBe Status.OK
+          val doc = Jsoup.parse(contentAsString(result))
+          doc.getElementById("panel-title").text shouldBe "You've removed this security preference"
+
+          verify(underTest.thirdPartyDeveloperMfaConnector, times(0)).verifyMfa(*[UserId], eqTo(smsMfaId), eqTo(correctCode))(*)
+          verify(underTest.mfaService).removeMfaById(*[UserId], eqTo(smsMfaId), eqTo(correctCode))(*)
+        }
+
+      "redirect to login page when user is not logged in" in new SetupSecurityPreferences with LoggedIn {
+        private val result = addToken(underTest.smsAccessCodeAction(authAppMfaId, MfaAction.REMOVE))(
+          createRequestWithInvalidSession(Map("mobileNumber" -> "07771234567", "accessCode" -> correctCode))
+        )
+        validateRedirectToLoginPage(result)
+        verifyZeroInteractions(underTest.thirdPartyDeveloperMfaConnector)
+      }
+
+      "return Bad Request when user is logged in and access code is invalid on the form" in new SetupSuccessfulStart2SV with LoggedIn {
+        val request = createRequest().withFormUrlEncodedBody("mobileNumber" -> mobileNumber, "accessCode" -> "INVALID")
+        val result = addToken(underTest.smsAccessCodeAction(smsMfaId, MfaAction.REMOVE))(request)
+
+        status(result) shouldBe BAD_REQUEST
+        val doc = Jsoup.parse(contentAsString(result))
+        validateSmsAccessCodeView(doc)
+        doc.getElementById("data-field-error-accessCode").text() shouldBe "Error: You have entered an invalid access code"
+
+        verifyZeroInteractions(underTest.thirdPartyDeveloperMfaConnector)
+      }
+
+      "return error page when user is Logged in and form is valid and call to connector returns false" in
+        new SetupSecurityPreferences with LoggedIn {
+          when(underTest.mfaService.removeMfaById(*[UserId], eqTo(smsMfaId), eqTo(correctCode))(*))
+            .thenReturn(Future.successful(MfaResponse(false)))
+
+          private val result = underTest.smsAccessCodeAction(smsMfaId, MfaAction.REMOVE)(smsAccessCodeRequest(correctCode))
+
+          validateErrorTemplateView(result, "Unable to verify access code")
+          verify(underTest.thirdPartyDeveloperMfaConnector, times(0)).verifyMfa(*[UserId], eqTo(smsMfaId), eqTo(correctCode))(*)
+          verify(underTest.mfaService).removeMfaById(*[UserId], eqTo(smsMfaId), eqTo(correctCode))(*)
+        }
+    }
+
+    "smsSetupCompletedPage" should {
       "return sms setup complete view when user is logged in and fetchDeveloper returns a developer" in new SetupSuccessfulStart2SV with LoggedIn {
         when(underTest.thirdPartyDeveloperConnector.fetchDeveloper(eqTo(loggedInDeveloper.userId))(*))
           .thenReturn(successful(Some(loggedInDeveloper)))
@@ -427,11 +480,11 @@ class MfaControllerSpec extends BaseControllerSpec with WithCSRFAddToken with De
 
       "redirect to the login page when user is not logged in" in new SetupSuccessfulStart2SV with LoggedIn {
         private val result = addToken(underTest.smsSetupCompletedPage())(createRequestWithInvalidSession())
-        validateRedirectResult(result)
+        validateRedirectToLoginPage(result)
       }
     }
 
-    "authAppStart() is called it" should {
+    "authAppStart is called it" should {
       "return 200 and show the Auth App Start page when user is logged in" in new SetupSecurityPreferences with LoggedIn {
         shouldReturnOK(underTest.authAppStart()(createRequest()), validateAuthAppStartPage)
       }
@@ -442,11 +495,11 @@ class MfaControllerSpec extends BaseControllerSpec with WithCSRFAddToken with De
 
       "redirect to the login page when user is not logged in" in new SetupSecurityPreferences with LoggedIn {
         private val result = addToken(underTest.authAppStart())(createRequestWithInvalidSession())
-        validateRedirectResult(result)
+        validateRedirectToLoginPage(result)
       }
     }
 
-    "setupAuthApp()" should {
+    "setupAuthApp" should {
       "return qrCodeView with secret from third party developer when user is logged in" in new SetupSuccessfulStart2SV with LoggedIn {
         shouldReturnOK(underTest.setupAuthApp()(createRequest()), validateQrCodePage)
       }
@@ -457,78 +510,129 @@ class MfaControllerSpec extends BaseControllerSpec with WithCSRFAddToken with De
 
       "redirect to the login page when user is not logged in" in new SetupSuccessfulStart2SV with LoggedIn {
         private val result = addToken(underTest.setupAuthApp())(createRequestWithInvalidSession())
-        validateRedirectResult(result)
+        validateRedirectToLoginPage(result)
       }
     }
 
-    "getAccessCodePage()" should {
+    "getAccessCodePage" should {
       "return access code view when user is logged in" in new SetupSuccessfulStart2SV with LoggedIn {
-        val result = addToken(underTest.authAppAccessCodePage(authAppMfaId))(accessCodeRequest(correctCode))
-        shouldReturnOK(result, validateAccessCodePage)
+        val result = addToken(underTest.authAppAccessCodePage(authAppMfaId, MfaAction.CREATE))(authAppAccessCodeRequest(correctCode))
+        shouldReturnOK(result, validateAuthAppAccessCodePage)
       }
 
       "return access code view when user is part logged in" in new SetupSuccessfulStart2SV with PartLogged {
-        val result = addToken(underTest.authAppAccessCodePage(authAppMfaId))(accessCodeRequest(correctCode))
-        shouldReturnOK(result, validateAccessCodePage)
+        val result = addToken(underTest.authAppAccessCodePage(authAppMfaId, MfaAction.CREATE))(authAppAccessCodeRequest(correctCode))
+        shouldReturnOK(result, validateAuthAppAccessCodePage)
       }
 
       "redirect to the login page when user is not logged in" in new SetupSuccessfulStart2SV with LoggedIn {
-        private val result = addToken(underTest.authAppAccessCodePage(authAppMfaId))(
-          createRequestWithInvalidSession(Map("accessCode" -> correctCode)))
-        validateRedirectResult(result)
+        private val result = addToken(underTest.authAppAccessCodePage(authAppMfaId, MfaAction.CREATE))(
+          createRequestWithInvalidSession(Map("accessCode" -> correctCode))
+        )
+        validateRedirectToLoginPage(result)
       }
     }
 
-    "enableAuthApp()" should {
+    "authAppAccessCodeAction For CREATE" should {
       "return change name view when user is logged in and enable mfa successful" in new SetupSuccessfulStart2SV with LoggedIn {
-        when(underTest.mfaService.enableMfa(*[UserId], *[MfaId], *)(*)).thenReturn(Future.successful(MFAResponse(true)))
+        when(underTest.mfaService.enableMfa(*[UserId], *[MfaId], *)(*)).thenReturn(Future.successful(MfaResponse(true)))
 
-        val result = addToken(underTest.enableAuthApp(authAppMfaId))(accessCodeRequest(correctCode))
+        val result = addToken(underTest.authAppAccessCodeAction(authAppMfaId, MfaAction.CREATE))(authAppAccessCodeRequest(correctCode))
 
         status(result) shouldBe SEE_OTHER
         redirectLocation(result) shouldBe Some(s"/developer/profile/security-preferences/auth-app/name?mfaId=${authAppMfaId.value.toString}")
       }
 
       "return change name view when user is part logged in and enable mfa successful" in new SetupSuccessfulStart2SV with PartLogged {
-        when(underTest.mfaService.enableMfa(*[UserId], *[MfaId], *)(*)).thenReturn(Future.successful(MFAResponse(true)))
+        when(underTest.mfaService.enableMfa(*[UserId], *[MfaId], *)(*)).thenReturn(Future.successful(MfaResponse(true)))
 
-        val result = addToken(underTest.enableAuthApp(authAppMfaId))(accessCodeRequest(correctCode))
+        val result = addToken(underTest.authAppAccessCodeAction(authAppMfaId, MfaAction.CREATE))(authAppAccessCodeRequest(correctCode))
 
         status(result) shouldBe SEE_OTHER
         redirectLocation(result) shouldBe Some(s"/developer/profile/security-preferences/auth-app/name?mfaId=${authAppMfaId.value.toString}")
       }
 
       "return access code view with errors when user is logged in and enable mfa fails" in new SetupSuccessfulStart2SV with LoggedIn {
-        when(underTest.mfaService.enableMfa(*[UserId], *[MfaId], *)(*)).thenReturn(Future.successful(MFAResponse(false)))
+        when(underTest.mfaService.enableMfa(*[UserId], *[MfaId], *)(*)).thenReturn(Future.successful(MfaResponse(false)))
 
-        val result = addToken(underTest.enableAuthApp(authAppMfaId))(accessCodeRequest(correctCode))
+        val result = addToken(underTest.authAppAccessCodeAction(authAppMfaId, MfaAction.CREATE))(authAppAccessCodeRequest(correctCode))
 
         status(result) shouldBe BAD_REQUEST
         val doc = Jsoup.parse(contentAsString(result))
-        validateAccessCodePage(doc)
+        validateAuthAppAccessCodePage(doc)
         doc.getElementById("data-field-error-accessCode").text() shouldBe "Error: You have entered an incorrect access code"
       }
 
       "return access code view with errors when user is logged in and submitted form is invalid" in new SetupSuccessfulStart2SV with LoggedIn {
-        when(underTest.mfaService.enableMfa(*[UserId], *[MfaId], *)(*)).thenReturn(Future.successful(MFAResponse(false)))
+        when(underTest.mfaService.enableMfa(*[UserId], *[MfaId], *)(*)).thenReturn(Future.successful(MfaResponse(false)))
 
-        val result = addToken(underTest.enableAuthApp(authAppMfaId))(accessCodeRequest("INVALID_CODE"))
+        val result = addToken(underTest.authAppAccessCodeAction(authAppMfaId, MfaAction.CREATE))(authAppAccessCodeRequest("INVALID_CODE"))
 
         status(result) shouldBe BAD_REQUEST
         val doc = Jsoup.parse(contentAsString(result))
-        validateAccessCodePage(doc)
+        validateAuthAppAccessCodePage(doc)
         doc.getElementById("data-field-error-accessCode").text() shouldBe "Error: You have entered an invalid access code"
       }
 
       "redirect to the login page when user is not logged in" in new SetupSuccessfulStart2SV with LoggedIn {
-        private val result = addToken(underTest.enableAuthApp(authAppMfaId))(
-          createRequestWithInvalidSession(Map("accessCode" -> correctCode)))
-        validateRedirectResult(result)
+        private val result = addToken(underTest.authAppAccessCodeAction(authAppMfaId, MfaAction.CREATE))(
+          createRequestWithInvalidSession(Map("accessCode" -> correctCode))
+        )
+        validateRedirectToLoginPage(result)
       }
     }
 
-    "getNameChangePage()" should {
+    "autAppAccessCodeAction for REMOVE" should {
+      "redirect to remove mfa completed page when user is Logged in and call to connector returns true" in
+        new SetupSecurityPreferences with LoggedIn {
 
+          when(underTest.mfaService.removeMfaById(*[UserId], eqTo(authAppMfaId), eqTo(correctCode))(*))
+            .thenReturn(Future.successful(MfaResponse(true)))
+
+          private val result = underTest.authAppAccessCodeAction(authAppMfaId, MfaAction.REMOVE)(authAppAccessCodeRequest(correctCode))
+
+          status(result) shouldBe Status.OK
+          val doc = Jsoup.parse(contentAsString(result))
+          doc.getElementById("panel-title").text shouldBe "You've removed this security preference"
+
+          verify(underTest.thirdPartyDeveloperMfaConnector, times(0)).verifyMfa(*[UserId], eqTo(authAppMfaId), eqTo(correctCode))(*)
+          verify(underTest.mfaService).removeMfaById(*[UserId], eqTo(authAppMfaId), eqTo(correctCode))(*)
+        }
+
+      "redirect to login page when user is not logged in" in new SetupSecurityPreferences with LoggedIn {
+        private val result = addToken(underTest.authAppAccessCodeAction(authAppMfaId, MfaAction.REMOVE))(
+          createRequestWithInvalidSession(Map("accessCode" -> correctCode))
+        )
+        validateRedirectToLoginPage(result)
+        verifyZeroInteractions(underTest.thirdPartyDeveloperMfaConnector)
+      }
+
+      "return Bad Request when user is logged in and access code is invalid on the form" in new SetupSuccessfulStart2SV with LoggedIn {
+        val request = createRequest().withFormUrlEncodedBody("accessCode" -> "INVALID")
+        val result = addToken(underTest.authAppAccessCodeAction(authAppMfaId, MfaAction.REMOVE))(request)
+
+        status(result) shouldBe BAD_REQUEST
+        val doc = Jsoup.parse(contentAsString(result))
+        validateSmsAccessCodeView(doc)
+        doc.getElementById("data-field-error-accessCode").text() shouldBe "Error: You have entered an invalid access code"
+
+        verifyZeroInteractions(underTest.thirdPartyDeveloperMfaConnector)
+      }
+
+      "return error page when user is Logged in and form is valid and call to connector returns false" in
+        new SetupSecurityPreferences with LoggedIn {
+          when(underTest.mfaService.removeMfaById(*[UserId], eqTo(authAppMfaId), eqTo(correctCode))(*))
+            .thenReturn(Future.successful(MfaResponse(false)))
+
+          private val result = underTest.authAppAccessCodeAction(authAppMfaId, MfaAction.REMOVE)(authAppAccessCodeRequest(correctCode))
+
+          validateErrorTemplateView(result, "Unable to verify access code")
+          verify(underTest.thirdPartyDeveloperMfaConnector, times(0)).verifyMfa(*[UserId], eqTo(authAppMfaId), eqTo(correctCode))(*)
+          verify(underTest.mfaService).removeMfaById(*[UserId], eqTo(authAppMfaId), eqTo(correctCode))(*)
+        }
+    }
+
+    "getNameChangePage" should {
       "return name change view when user is logged in" in new SetupSuccessfulStart2SV with LoggedIn {
         val result = addToken(underTest.nameChangePage(authAppMfaId))(nameChangeRequest("app name"))
         shouldReturnOK(result, validateNameChangePage)
@@ -541,11 +645,11 @@ class MfaControllerSpec extends BaseControllerSpec with WithCSRFAddToken with De
 
       "redirect to the login page when user is not logged in" in new SetupSuccessfulStart2SV with LoggedIn {
         private val result = addToken(underTest.nameChangePage(authAppMfaId))(createRequestWithInvalidSession())
-        validateRedirectResult(result)
+        validateRedirectToLoginPage(result)
       }
     }
 
-    "nameChangeAction()" should {
+    "nameChangeAction" should {
       val updatedName = "updated name"
       "return auth app completed view when user is logged in and call to backend is successful" in new SetupSuccessfulStart2SV with LoggedIn {
         when(underTest.thirdPartyDeveloperMfaConnector.changeName(*[UserId], *[MfaId], *)(*)).thenReturn(Future.successful(true))
@@ -586,12 +690,13 @@ class MfaControllerSpec extends BaseControllerSpec with WithCSRFAddToken with De
 
       "redirect to login page when user is not logged in" in new SetupSuccessfulStart2SV with LoggedIn {
         private val result = addToken(underTest.nameChangeAction(authAppMfaId))(
-          createRequestWithInvalidSession(Map("name" -> "some-name")))
-        validateRedirectResult(result)
+          createRequestWithInvalidSession(Map("name" -> "some-name"))
+        )
+        validateRedirectToLoginPage(result)
       }
     }
 
-    "authAppSetupCompletedPage()" should {
+    "authAppSetupCompletedPage" should {
       "return auth app setup complete view when user is logged in and fetchDeveloper returns a developer" in new SetupSuccessfulStart2SV with LoggedIn {
         when(underTest.thirdPartyDeveloperConnector.fetchDeveloper(eqTo(loggedInDeveloper.userId))(*))
           .thenReturn(successful(Some(loggedInDeveloper)))
@@ -618,8 +723,37 @@ class MfaControllerSpec extends BaseControllerSpec with WithCSRFAddToken with De
 
       "redirect to the login page when user is not logged in" in new SetupSuccessfulStart2SV with LoggedIn {
         private val result = addToken(underTest.authAppSetupCompletedPage())(createRequestWithInvalidSession())
-        validateRedirectResult(result)
+        validateRedirectToLoginPage(result)
       }
+    }
+  }
+
+  "removeMfa" should {
+    "redirect to auth app code access page when user is logged in" in new SetupSuccessfulStart2SV with LoggedIn {
+      val result = addToken(underTest.removeMfa(authAppMfaId, MfaType.AUTHENTICATOR_APP))(createRequest())
+
+      status(result) shouldBe Status.SEE_OTHER
+      redirectLocation(result) shouldBe Some(
+        s"/developer/profile/security-preferences/auth-app/access-code?mfaId=${authAppMfaId.value.toString}&mfaAction=${MfaAction.REMOVE.toString}"
+      )
+    }
+
+    "redirect to the login page when user is not logged in" in new SetupSuccessfulStart2SV with LoggedIn {
+      private val result = addToken(underTest.removeMfa(authAppMfaId, MfaType.AUTHENTICATOR_APP))(createRequestWithInvalidSession())
+      validateRedirectToLoginPage(result)
+    }
+
+    "redirect to the login page when user is part logged in" in new SetupSuccessfulStart2SV with PartLogged {
+      private val result = addToken(underTest.removeMfa(authAppMfaId, MfaType.AUTHENTICATOR_APP))(authAppAccessCodeRequest(correctCode))
+      validateRedirectToLoginPage(result)
+    }
+
+    "return error page when send sms fails" in new SetupSuccessfulStart2SV with LoggedIn {
+      when(underTest.thirdPartyDeveloperMfaConnector.sendSms(*[UserId], *[MfaId])(*)).thenReturn(Future.successful(false))
+
+      val result = addToken(underTest.removeMfa(smsMfaId, MfaType.SMS))(createRequest())
+
+      validateErrorTemplateView(result, "Failed to send SMS")
     }
   }
 
@@ -659,7 +793,7 @@ class MfaControllerSpec extends BaseControllerSpec with WithCSRFAddToken with De
     dom.getElementById("qrCode").attr("src") shouldBe qrImage
   }
 
-  def validateAccessCodePage(dom: Document) = {
+  def validateAuthAppAccessCodePage(dom: Document) = {
     dom.getElementById("page-heading").text shouldBe "Enter your access code"
   }
 

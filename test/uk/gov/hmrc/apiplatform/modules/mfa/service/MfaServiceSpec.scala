@@ -26,7 +26,7 @@ import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.AsyncHmrcSpec
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future.{failed, successful}
 
-class MFAServiceSpec extends AsyncHmrcSpec {
+class MfaServiceSpec extends AsyncHmrcSpec {
 
   trait Setup {
     val userId = UserId.random
@@ -36,7 +36,7 @@ class MFAServiceSpec extends AsyncHmrcSpec {
 
     when(connector.removeMfaById(eqTo(userId), eqTo(mfaId))(*)).thenReturn(successful(()))
 
-    val service = new MFAService(connector)
+    val service = new MfaService(connector)
   }
 
   trait FailedTotpVerification extends Setup {
@@ -75,7 +75,7 @@ class MFAServiceSpec extends AsyncHmrcSpec {
 
   "removeMfaById" should {
     "return failed totp when totp verification fails" in new FailedTotpVerification {
-      val result: MFAResponse = await(service.removeMfaById(userId, mfaId, totpCode)(HeaderCarrier()))
+      val result: MfaResponse = await(service.removeMfaById(userId, mfaId, totpCode)(HeaderCarrier()))
       result.totpVerified shouldBe false
     }
 
@@ -85,7 +85,7 @@ class MFAServiceSpec extends AsyncHmrcSpec {
     }
 
     "return successful totp when totp verification passes" in new SuccessfulTotpVerification {
-      val result: MFAResponse = await(service.removeMfaById(userId, mfaId, totpCode)(HeaderCarrier()))
+      val result: MfaResponse = await(service.removeMfaById(userId, mfaId, totpCode)(HeaderCarrier()))
 
       result.totpVerified shouldBe true
     }
