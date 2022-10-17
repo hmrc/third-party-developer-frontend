@@ -477,7 +477,7 @@ class ThirdPartyApplicationConnectorSpec extends BaseConnectorIntegrationSpec wi
     val userId = idOf(actorEmailAddress)
     val timestamp = LocalDateTime.now(clock)
     val clientSecretRequest = ClientSecretRequest(userId, actorEmailAddress, timestamp)
-    val url = s"/application/${applicationId.value}/client-secret-new"
+    val url = s"/application/${applicationId.value}/client-secret"
 
     "generate the client secret" in new Setup {
       val newClientSecretId = UUID.randomUUID().toString
@@ -498,7 +498,7 @@ class ThirdPartyApplicationConnectorSpec extends BaseConnectorIntegrationSpec wi
             .withStatus(OK)
             .withJsonBody(response)
         )
-      ) 
+      )
       val result = await(connector.addClientSecrets(applicationId, clientSecretRequest))
 
       result._1 shouldEqual newClientSecretId
