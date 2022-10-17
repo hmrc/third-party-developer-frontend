@@ -21,10 +21,11 @@
 @import uk.gov.hmrc.apiplatform.modules.mfa.controllers.profile.routes
 @import views.html.include.fieldError
 @import uk.gov.hmrc.apiplatform.modules.mfa.models.MfaAction
+@import uk.gov.hmrc.apiplatform.modules.mfa.models.MfaId
 
 @this(devMain: DevMain)
 
-@(form: Form[SelectMfaForm], mfaAction: MfaAction)(implicit request: play.api.mvc.Request[Any], loggedIn: DeveloperSession, appConfig: ApplicationConfig, messages: Messages)
+@(form: Form[SelectMfaForm], mfaAction: MfaAction, mfaId: Option[MfaId])(implicit request: play.api.mvc.Request[Any], loggedIn: DeveloperSession, appConfig: ApplicationConfig, messages: Messages)
 
 @devMain(
     title = "How do you want to get access codes?",
@@ -33,7 +34,7 @@
     isRegistering = true,
     developerSession = Some(loggedIn)
 ) {
-    @helper.form(action = routes.MfaController.selectMfaAction(mfaAction: MfaAction)){
+    @helper.form(action = routes.MfaController.selectMfaAction(mfaId, mfaAction: MfaAction)){
         @helper.CSRF.formField
         @fieldError(form.errors, "mfaType")
         <div class="govuk-form-group">

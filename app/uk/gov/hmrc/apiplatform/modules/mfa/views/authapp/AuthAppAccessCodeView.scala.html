@@ -25,7 +25,7 @@
 
 @this(devMain: DevMainWithFormErrors)
 
-@(form: Form[MfaAccessCodeForm], mfaId: MfaId, mfaAction: MfaAction)(implicit messages: Messages, request: play.api.mvc.Request[Any], loggedIn: DeveloperSession, appConfig: ApplicationConfig)
+@(form: Form[MfaAccessCodeForm], mfaId: MfaId, mfaAction: MfaAction, mfaIdToRemove: Option[MfaId])(implicit messages: Messages, request: play.api.mvc.Request[Any], loggedIn: DeveloperSession, appConfig: ApplicationConfig)
 
 @devMain(
   form,
@@ -37,7 +37,7 @@
 ) {
   <h1 class="govuk-heading-l" id="page-heading">Enter your access code</h1>
 
-  @helper.form(action = routes.MfaController.authAppAccessCodeAction(mfaId, mfaAction)){
+  @helper.form(action = routes.MfaController.authAppAccessCodeAction(mfaId, mfaAction, mfaIdToRemove)){
     @helper.CSRF.formField
 
     <div class="govuk-form-group @if(form.errors("accessCode").nonEmpty){govuk-form-group--error}">

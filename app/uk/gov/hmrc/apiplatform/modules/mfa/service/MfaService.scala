@@ -35,9 +35,9 @@ class MfaService @Inject()(thirdPartyDeveloperMfaConnector: ThirdPartyDeveloperM
     }
   }
 
-  def removeMfaById(userId: UserId, mfaId: MfaId, totpCode: String)(implicit hc: HeaderCarrier): Future[MfaResponse] = {
-    thirdPartyDeveloperMfaConnector.verifyMfa(userId, mfaId, totpCode) flatMap {
-      case true => thirdPartyDeveloperMfaConnector.removeMfaById(userId, mfaId).map(_ => MfaResponse(true))
+  def removeMfaById(userId: UserId, mfaIdToVerify: MfaId, totpCode: String, mfaIdToRemove: MfaId)(implicit hc: HeaderCarrier): Future[MfaResponse] = {
+    thirdPartyDeveloperMfaConnector.verifyMfa(userId, mfaIdToVerify, totpCode) flatMap {
+      case true => thirdPartyDeveloperMfaConnector.removeMfaById(userId, mfaIdToRemove).map(_ => MfaResponse(true))
       case _ => successful(MfaResponse(false))
     }
   }
