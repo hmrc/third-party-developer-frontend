@@ -20,6 +20,10 @@ import uk.gov.hmrc.apiplatform.modules.mfa.models.{AuthenticatorAppMfaDetailSumm
 
 object MfaDetailHelper {
 
+  def hasVerifiedSmsAndAuthApp(mfaDetails: List[MfaDetail]): Boolean = {
+    isAuthAppMfaVerified(mfaDetails) && isSmsMfaVerified(mfaDetails)
+  }
+
   def isAuthAppMfaVerified(mfaDetails: List[MfaDetail]): Boolean = {
     mfaDetails
       .exists(x => x.mfaType == MfaType.AUTHENTICATOR_APP && x.verified)

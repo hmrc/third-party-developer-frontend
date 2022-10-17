@@ -37,7 +37,8 @@ import uk.gov.hmrc.apiplatform.modules.mfa.controllers.profile.routes._
 import uk.gov.hmrc.apiplatform.modules.mfa.forms.{MfaAccessCodeForm, MfaNameChangeForm, MobileNumberForm, SelectMfaForm, SmsAccessCodeForm}
 import uk.gov.hmrc.apiplatform.modules.mfa.models.MfaAction.{CREATE, REMOVE}
 import uk.gov.hmrc.apiplatform.modules.mfa.models.MfaType.{AUTHENTICATOR_APP, SMS}
-import uk.gov.hmrc.apiplatform.modules.mfa.utils.MfaDetailHelper.{getMfaDetailByType, isAuthAppMfaVerified, isSmsMfaVerified}
+import uk.gov.hmrc.apiplatform.modules.mfa.utils.MfaDetailHelper
+import uk.gov.hmrc.apiplatform.modules.mfa.utils.MfaDetailHelper.{getMfaDetailByType, hasVerifiedSmsAndAuthApp, isAuthAppMfaVerified, isSmsMfaVerified}
 import uk.gov.hmrc.apiplatform.modules.mfa.views.html.sms.{MobileNumberView, SmsAccessCodeView, SmsSetupCompletedView}
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.play.bootstrap.controller.WithUnsafeDefaultFormBinding
@@ -224,10 +225,23 @@ class MfaController @Inject() (
   }
 
   def removeMfa(mfaId: MfaId, mfaType: MfaType): Action[AnyContent] = loggedInAction { implicit request =>
+    thirdPartyDeveloperConnector.fetchDeveloper(request.userId).flatMap {
+      case Some(developer: Developer) =>
+        val mfaDetails = developer.mfaDetails
+        mfaDetails.size match {
+          case 1 => removeMfaUserWithOneMfaMethod(mfaId, mfaType, request.userId)
+          case 2 if hasVerifiedSmsAndAuthApp(mfaDetails) => Future.successful(Redirect(routes.MfaController.selectMfaPage(MfaAction.REMOVE)))
+          case _ => Future.successful(internalServerErrorTemplate("MFA setup not valid"))
+        }
+      case None => Future.successful(internalServerErrorTemplate("Unable to obtain User information"))
+    }
+  }
+
+  private def removeMfaUserWithOneMfaMethod(mfaId: MfaId, mfaType: MfaType, userId: UserId)(implicit hc: HeaderCarrier, request: Request[_]): Future[Result] = {
     mfaType match {
       case AUTHENTICATOR_APP => Future.successful(Redirect(routes.MfaController.authAppAccessCodePage(mfaId, MfaAction.REMOVE)))
       case SMS               =>
-        thirdPartyDeveloperMfaConnector.sendSms(request.userId, mfaId).map {
+        thirdPartyDeveloperMfaConnector.sendSms(userId, mfaId).map {
           case true  => Redirect(routes.MfaController.smsAccessCodePage(mfaId, MfaAction.REMOVE))
           case false => internalServerErrorTemplate("Failed to send SMS")
         }
