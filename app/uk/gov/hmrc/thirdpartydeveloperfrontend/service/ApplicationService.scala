@@ -108,15 +108,15 @@ class ApplicationService @Inject() (
     subscriptionService.isSubscribedToApi(applicationId,apiIdentifier)
   }
 
-  def addClientSecret(application: Application, actorEmailAddress: String)(implicit hc: HeaderCarrier): Future[(String, String)] = {
-    connectorWrapper.forEnvironment(application.deployedTo).thirdPartyApplicationConnector.addClientSecrets(application.id, ClientSecretRequest(actorEmailAddress))
+  def addClientSecret(application: Application, userId: UserId, actorEmailAddress: String)(implicit hc: HeaderCarrier): Future[(String, String)] = {
+    connectorWrapper.forEnvironment(application.deployedTo).thirdPartyApplicationConnector.addClientSecrets(application.id, ClientSecretRequest(userId, actorEmailAddress, LocalDateTime.now(clock)))
   }
 
-  def deleteClientSecret(application: Application, clientSecretId: String, actorEmailAddress: String)(implicit hc: HeaderCarrier): Future[ApplicationUpdateSuccessful] =
+  def deleteClientSecret(application: Application, userId: UserId, clientSecretId: String, actorEmailAddress: String)(implicit hc: HeaderCarrier): Future[ApplicationUpdateSuccessful] =
     connectorWrapper
       .forEnvironment(application.deployedTo)
       .thirdPartyApplicationConnector
-      .deleteClientSecret(application.id, clientSecretId, actorEmailAddress)
+      .applicationUpdate(application.id, RemoveClientSecret(userId , actorEmailAddress , clientSecretId, LocalDateTime.now(clock)))
 
   def updateCheckInformation(application: Application, checkInformation: CheckInformation)(implicit hc: HeaderCarrier): Future[ApplicationUpdateSuccessful] = {
     connectorWrapper.forEnvironment(application.deployedTo).thirdPartyApplicationConnector.updateApproval(application.id, checkInformation)
@@ -300,7 +300,6 @@ object ApplicationService {
     def verify(verificationCode: String)(implicit hc: HeaderCarrier): Future[ApplicationVerificationResponse]
     def updateApproval(id: ApplicationId, approvalInformation: CheckInformation)(implicit hc: HeaderCarrier): Future[ApplicationUpdateSuccessful]
     def addClientSecrets(id: ApplicationId, clientSecretRequest: ClientSecretRequest)(implicit hc: HeaderCarrier): Future[(String, String)]
-    def deleteClientSecret(applicationId: ApplicationId, clientSecretId: String, actorEmailAddress: String)(implicit hc: HeaderCarrier): Future[ApplicationUpdateSuccessful]
     def validateName(name: String, selfApplicationId: Option[ApplicationId])(implicit hc: HeaderCarrier): Future[ApplicationNameValidation]
     def deleteApplication(applicationId: ApplicationId)(implicit hc: HeaderCarrier): Future[Unit]
     def unsubscribeFromApi(applicationId: ApplicationId, apiIdentifier: ApiIdentifier)(implicit hc: HeaderCarrier): Future[ApplicationUpdateSuccessful]

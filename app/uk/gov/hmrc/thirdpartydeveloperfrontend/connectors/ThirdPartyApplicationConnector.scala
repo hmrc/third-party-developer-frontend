@@ -95,12 +95,12 @@ abstract class ThirdPartyApplicationConnector(config: ApplicationConfig, metrics
       val request = DeleteCollaboratorRequest(teamMemberToDelete, adminsToEmail, true)
 
       http.POST[DeleteCollaboratorRequest, ErrorOrUnit](url, request)
-      .map(_ match {
-        case Right(_)                                               => ApplicationUpdateSuccessful
-        case Left(UpstreamErrorResponse(_, FORBIDDEN, _, _))        => throw new ApplicationNeedsAdmin
-        case Left(UpstreamErrorResponse(_, NOT_FOUND, _, _))        => throw new ApplicationNotFound
-        case Left(err)                                              => throw err
-      })
+        .map {
+          case Right(_) => ApplicationUpdateSuccessful
+          case Left(UpstreamErrorResponse(_, FORBIDDEN, _, _)) => throw new ApplicationNeedsAdmin
+          case Left(UpstreamErrorResponse(_, NOT_FOUND, _, _)) => throw new ApplicationNotFound
+          case Left(err) => throw err
+        }
     }
   
   def fetchApplicationById(id: ApplicationId)(implicit hc: HeaderCarrier): Future[Option[Application]] =
@@ -115,93 +115,81 @@ abstract class ThirdPartyApplicationConnector(config: ApplicationConfig, metrics
   def unsubscribeFromApi(applicationId: ApplicationId, apiIdentifier: ApiIdentifier)(implicit hc: HeaderCarrier): Future[ApplicationUpdateSuccessful] =
     metrics.record(api) {
       http.DELETE[ErrorOrUnit](s"$serviceBaseUrl/application/${applicationId.value}/subscription?context=${apiIdentifier.context.value}&version=${apiIdentifier.version.value}")
-     .map(throwOrOptionOf)
-      .map(_ match {
-        case Some(_)  => ApplicationUpdateSuccessful
-        case None     => throw new ApplicationNotFound
-      })
+        .map(throwOrOptionOf)
+        .map {
+          case Some(_) => ApplicationUpdateSuccessful
+          case None => throw new ApplicationNotFound
+        }
     }
 
   def fetchCredentials(id: ApplicationId)(implicit hc: HeaderCarrier): Future[ApplicationToken] = metrics.record(api) {
       http.GET[Option[ApplicationToken]](s"$serviceBaseUrl/application/${id.value}/credentials")
-      .map(_ match {
-        case Some(applicationToken)  => applicationToken
-        case None     => throw new ApplicationNotFound
-      })
+        .map {
+          case Some(applicationToken) => applicationToken
+          case None => throw new ApplicationNotFound
+        }
   }
 
 
   def requestUplift(applicationId: ApplicationId, upliftRequest: UpliftRequest)(implicit hc: HeaderCarrier): Future[ApplicationUpliftSuccessful] = metrics.record(api) {
     http.POST[UpliftRequest, ErrorOrUnit](s"$serviceBaseUrl/application/${applicationId.value}/request-uplift", upliftRequest)
-    .map(_ match {
-      case Right(_) => ApplicationUpliftSuccessful
-      case Left(UpstreamErrorResponse(_, CONFLICT, _, _))   => throw new ApplicationAlreadyExists
-      case Left(UpstreamErrorResponse(_, NOT_FOUND, _, _))  => throw new ApplicationNotFound
-      case Left(err) => throw err
-    })
+      .map {
+        case Right(_) => ApplicationUpliftSuccessful
+        case Left(UpstreamErrorResponse(_, CONFLICT, _, _)) => throw new ApplicationAlreadyExists
+        case Left(UpstreamErrorResponse(_, NOT_FOUND, _, _)) => throw new ApplicationNotFound
+        case Left(err) => throw err
+      }
   }
 
   def verify(verificationCode: String)(implicit hc: HeaderCarrier): Future[ApplicationVerificationResponse] = metrics.record(api) {
     http.POSTEmpty[ErrorOrUnit](s"$serviceBaseUrl/verify-uplift/$verificationCode")
-    .map(_ match {
-      case Right(_)                                        => ApplicationVerificationSuccessful
-      case Left(UpstreamErrorResponse(_,BAD_REQUEST, _,_)) => ApplicationVerificationFailed
-      case Left(UpstreamErrorResponse(_,NOT_FOUND, _, _))  => throw new ApplicationNotFound
-      case Left(err)                                       => throw err
-    })
+      .map {
+        case Right(_) => ApplicationVerificationSuccessful
+        case Left(UpstreamErrorResponse(_, BAD_REQUEST, _, _)) => ApplicationVerificationFailed
+        case Left(UpstreamErrorResponse(_, NOT_FOUND, _, _)) => throw new ApplicationNotFound
+        case Left(err) => throw err
+      }
   }
 
   def updateApproval(id: ApplicationId, approvalInformation: CheckInformation)(implicit hc: HeaderCarrier): Future[ApplicationUpdateSuccessful] = metrics.record(api) {
     http.POST[CheckInformation, ErrorOrUnit](s"$serviceBaseUrl/application/${id.value}/check-information", approvalInformation)
-     .map(throwOrOptionOf)
-      .map(_ match {
-        case Some(_)  => ApplicationUpdateSuccessful
-        case None     => throw new ApplicationNotFound
-      })
+      .map(throwOrOptionOf)
+      .map {
+        case Some(_) => ApplicationUpdateSuccessful
+        case None => throw new ApplicationNotFound
+      }
   }
 
   def addClientSecrets(id: ApplicationId, clientSecretRequest: ClientSecretRequest)(implicit hc: HeaderCarrier): Future[(String, String)] = metrics.record(api) {
-   http.POST[ClientSecretRequest, Either[UpstreamErrorResponse, AddClientSecretResponse]](s"$serviceBaseUrl/application/${id.value}/client-secret", clientSecretRequest)
-    .map( _ match {
-      case Right(response) => { 
-        val newSecret: TPAClientSecret = response.clientSecrets.last
-        ((newSecret.id, newSecret.secret.get))
-      }
-      case Left(UpstreamErrorResponse(_,FORBIDDEN,_,_))   => throw new ClientSecretLimitExceeded
-      case Left(UpstreamErrorResponse(_,NOT_FOUND,_,_))   => throw new ApplicationNotFound
-      case Left(err) => throw err
-    })
+   http.PATCH[ClientSecretRequest, Either[UpstreamErrorResponse, AddClientSecretResponse]](s"$serviceBaseUrl/application/${id.value}/client-secret", clientSecretRequest)
+     .map {
+       case Right(response) => {
+         val newSecret: TPAClientSecret = response.clientSecrets.last
+         ((newSecret.id, newSecret.secret.get))
+       }
+       case Left(UpstreamErrorResponse(_, FORBIDDEN, _, _)) => throw new ClientSecretLimitExceeded
+       case Left(UpstreamErrorResponse(_, NOT_FOUND, _, _)) => throw new ApplicationNotFound
+       case Left(err) => throw err
+     }
   }
-
-
-  def deleteClientSecret(applicationId: ApplicationId, clientSecretId: String, actorEmailAddress: String)(implicit hc: HeaderCarrier): Future[ApplicationUpdateSuccessful] =
-    metrics.record(api) {
-
-      http.POST[DeleteClientSecretRequest, ErrorOrUnit](s"$serviceBaseUrl/application/${applicationId.value}/client-secret/$clientSecretId", DeleteClientSecretRequest(actorEmailAddress))
-      .map(throwOrOptionOf)
-      .map(_ match {
-        case Some(_)  => ApplicationUpdateSuccessful
-        case None     => throw new ApplicationNotFound
-      })
-    }
 
   def validateName(name: String, selfApplicationId: Option[ApplicationId])(implicit hc: HeaderCarrier): Future[ApplicationNameValidation] = {
     val body = ApplicationNameValidationRequest(name, selfApplicationId)
 
     http.POST[ApplicationNameValidationRequest, Option[ApplicationNameValidationResult]](s"$serviceBaseUrl/application/name/validate", body)
-      .map(_ match {
-        case Some(x)  => ApplicationNameValidation(x)
-        case None     => throw new ApplicationNotFound
-      })
+      .map {
+        case Some(x) => ApplicationNameValidation(x)
+        case None => throw new ApplicationNotFound
+      }
   }
 
   def updateIpAllowlist(applicationId: ApplicationId, required: Boolean, ipAllowlist: Set[String])(implicit hc: HeaderCarrier): Future[ApplicationUpdateSuccessful] = metrics.record(api) {
     http.PUT[UpdateIpAllowlistRequest, ErrorOrUnit](s"$serviceBaseUrl/application/${applicationId.value}/ipAllowlist", UpdateIpAllowlistRequest(required, ipAllowlist))
       .map(throwOrOptionOf)
-      .map(_ match {
-        case Some(_)  => ApplicationUpdateSuccessful
-        case None     => throw new ApplicationNotFound
-      })
+      .map {
+        case Some(_) => ApplicationUpdateSuccessful
+        case None => throw new ApplicationNotFound
+      }
   }
 
   def deleteApplication(applicationId: ApplicationId)(implicit hc: HeaderCarrier): Future[Unit] = {
@@ -229,8 +217,6 @@ private[connectors] object ThirdPartyApplicationConnectorDomain {
   case class AddClientSecretResponse(clientId: ClientId, accessToken: String, clientSecrets: List[TPAClientSecret])
 
   case class TPAClientSecret(id: String, name: String, secret: Option[String], createdOn: LocalDateTime, lastAccess: Option[LocalDateTime])
-
-  case class DeleteClientSecretRequest(actorEmailAddress: String)
 
   case class UpdateIpAllowlistRequest(required: Boolean, allowlist: Set[String])
 }

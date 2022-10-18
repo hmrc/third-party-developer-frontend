@@ -28,7 +28,7 @@ import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.FixedClock
 // import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.subscriptions.ApiSubscriptionFields
 import uk.gov.hmrc.thirdpartydeveloperfrontend.service.SubscriptionFieldsService.SubscriptionFieldsConnector
-import uk.gov.hmrc.http.{HeaderCarrier}
+import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.AsyncHmrcSpec
 
 import scala.concurrent.ExecutionContext.Implicits.global
@@ -37,13 +37,13 @@ import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.subscriptions.Versi
 import uk.gov.hmrc.thirdpartydeveloperfrontend.service.PushPullNotificationsService.PushPullNotificationsConnector
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.LocalUserIdTracker
 
-class ApplicationServiceClientSecretSpec extends AsyncHmrcSpec with SubscriptionsBuilder with ApplicationBuilder with LocalUserIdTracker {
+class ApplicationServiceClientSecretSpec extends AsyncHmrcSpec with SubscriptionsBuilder with ApplicationBuilder with LocalUserIdTracker with FixedClock {
 
   val versionOne = ApiVersion("1.0")
   val versionTwo = ApiVersion("2.0")
   val grantLength = Period.ofDays(547)
 
-  trait Setup extends FixedClock {
+  trait Setup  {
     implicit val hc: HeaderCarrier = HeaderCarrier()
 
     private val mockAppConfig = mock[ApplicationConfig]
@@ -108,22 +108,24 @@ class ApplicationServiceClientSecretSpec extends AsyncHmrcSpec with Subscription
   val productionApplicationId = ApplicationId("Application ID")
   val productionClientId = ClientId(s"client-id-${randomUUID().toString}")
   val productionApplication: Application =
-    Application(productionApplicationId, productionClientId, "name", LocalDateTime.now(ZoneOffset.UTC), Some(LocalDateTime.now(ZoneOffset.UTC)), None, grantLength,
+    Application(productionApplicationId, productionClientId, "name", LocalDateTime.now(clock), Some(LocalDateTime.now(ZoneOffset.UTC)), None, grantLength,
       Environment.PRODUCTION, Some("description"), Set())
 
   "addClientSecret" should {
     val newClientSecretId = UUID.randomUUID().toString
     val newClientSecret = UUID.randomUUID().toString
     val actorEmailAddress = "john.requestor@example.com"
+    val userId = idOf(actorEmailAddress)
+    val timestamp = LocalDateTime.now(clock)
 
     "add a client secret for app in production environment" in new Setup {
 
       theProductionConnectorthenReturnTheApplication(productionApplicationId, productionApplication)
 
-      when(mockProductionApplicationConnector.addClientSecrets(productionApplicationId, ClientSecretRequest(actorEmailAddress)))
+      when(mockProductionApplicationConnector.addClientSecrets(productionApplicationId, ClientSecretRequest(userId, actorEmailAddress, timestamp)))
         .thenReturn(successful((newClientSecretId, newClientSecret)))
 
-      private val updatedToken = await(applicationService.addClientSecret(productionApplication, actorEmailAddress))
+      private val updatedToken = await(applicationService.addClientSecret(productionApplication, userId, actorEmailAddress))
 
       updatedToken._1 shouldBe newClientSecretId
       updatedToken._2 shouldBe newClientSecret
@@ -133,11 +135,11 @@ class ApplicationServiceClientSecretSpec extends AsyncHmrcSpec with Subscription
 
       theProductionConnectorthenReturnTheApplication(productionApplicationId, productionApplication)
 
-      when(mockProductionApplicationConnector.addClientSecrets(productionApplicationId, ClientSecretRequest(actorEmailAddress)))
+      when(mockProductionApplicationConnector.addClientSecrets(productionApplicationId, ClientSecretRequest(userId, actorEmailAddress, timestamp)))
         .thenReturn(failed(new ClientSecretLimitExceeded))
 
       intercept[ClientSecretLimitExceeded] {
-        await(applicationService.addClientSecret(productionApplication, actorEmailAddress))
+        await(applicationService.addClientSecret(productionApplication, userId, actorEmailAddress))
       }
     }
   }
@@ -145,18 +147,21 @@ class ApplicationServiceClientSecretSpec extends AsyncHmrcSpec with Subscription
   "deleteClientSecret" should {
     val applicationId = ApplicationId(UUID.randomUUID().toString())
     val actorEmailAddress = "john.requestor@example.com"
+    val userId = idOf(actorEmailAddress)
     val secretToDelete = UUID.randomUUID().toString
+    val timestamp = LocalDateTime.now(clock)
 
     "delete a client secret" in new Setup {
 
       val application = productionApplication.copy(id = applicationId)
+      val removeClientSecretRequest = RemoveClientSecret(userId, actorEmailAddress, secretToDelete, timestamp)
 
       theProductionConnectorthenReturnTheApplication(applicationId, application)
 
-      when(mockProductionApplicationConnector.deleteClientSecret(eqTo(applicationId), eqTo(secretToDelete), eqTo(actorEmailAddress))(*))
+      when(mockProductionApplicationConnector.applicationUpdate(eqTo(applicationId), eqTo(removeClientSecretRequest))(*))
         .thenReturn(successful(ApplicationUpdateSuccessful))
 
-      await(applicationService.deleteClientSecret(application, secretToDelete, actorEmailAddress)) shouldBe ApplicationUpdateSuccessful
+      await(applicationService.deleteClientSecret(application, userId, secretToDelete, actorEmailAddress)) shouldBe ApplicationUpdateSuccessful
     }
   }
 }

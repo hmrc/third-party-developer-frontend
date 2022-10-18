@@ -30,23 +30,27 @@ case class ChangeProductionApplicationPrivacyPolicyLocation(instigator: UserId, 
 case class ChangeProductionApplicationTermsAndConditionsLocation(instigator: UserId, timestamp: LocalDateTime, newLocation: TermsAndConditionsLocation) extends ApplicationUpdate
 case class ChangeResponsibleIndividualToSelf(instigator: UserId, timestamp: LocalDateTime, name: String, email: String) extends ApplicationUpdate
 case class ChangeResponsibleIndividualToOther(code: String, timestamp: LocalDateTime) extends ApplicationUpdate
-case class VerifyResponsibleIndividual(instigator: UserId, timestamp: LocalDateTime, requesterName: String, riName: String, riEmail: String) extends ApplicationUpdate
 case class DeclineResponsibleIndividual(code: String, timestamp: LocalDateTime) extends ApplicationUpdate
+case class RemoveClientSecret(instigator: UserId, email: String, clientSecretId: String, timestamp: LocalDateTime) extends ApplicationUpdate
+case class VerifyResponsibleIndividual(instigator: UserId, timestamp: LocalDateTime, requesterName: String, riName: String, riEmail: String) extends ApplicationUpdate
 
 trait ApplicationUpdateFormatters {
   implicit val changePrivacyPolicyLocationFormatter = Json.format[ChangeProductionApplicationPrivacyPolicyLocation]
   implicit val changeTermsAndConditionsLocationFormatter = Json.format[ChangeProductionApplicationTermsAndConditionsLocation]
   implicit val changeResponsibleIndividualToSelfFormatter = Json.format[ChangeResponsibleIndividualToSelf]
   implicit val changeResponsibleIndividualToOtherFormatter = Json.format[ChangeResponsibleIndividualToOther]
-  implicit val verifyResponsibleIndividualFormatter = Json.format[VerifyResponsibleIndividual]
   implicit val declineResponsibleIndividualFormatter = Json.format[DeclineResponsibleIndividual]
+  implicit val removeClientSecretFormatter = Json.format[RemoveClientSecret]
+  implicit val verifyResponsibleIndividualFormatter = Json.format[VerifyResponsibleIndividual]
+
 
   implicit val applicationUpdateRequestFormatter = Union.from[ApplicationUpdate]("updateType")
     .and[ChangeProductionApplicationPrivacyPolicyLocation]("changeProductionApplicationPrivacyPolicyLocation")
     .and[ChangeProductionApplicationTermsAndConditionsLocation]("changeProductionApplicationTermsAndConditionsLocation")
     .and[ChangeResponsibleIndividualToSelf]("changeResponsibleIndividualToSelf")
     .and[ChangeResponsibleIndividualToOther]("changeResponsibleIndividualToOther")
-    .and[VerifyResponsibleIndividual]("verifyResponsibleIndividual")
     .and[DeclineResponsibleIndividual]("declineResponsibleIndividual")
+    .and[RemoveClientSecret]("removeClientSecret")
+    .and[VerifyResponsibleIndividual]("verifyResponsibleIndividual")
     .format
 }
