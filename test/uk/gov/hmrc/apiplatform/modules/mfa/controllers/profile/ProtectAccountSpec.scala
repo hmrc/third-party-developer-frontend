@@ -129,19 +129,23 @@ class ProtectAccountSpec extends BaseControllerSpec with WithCSRFAddToken with D
   }
 
   trait SetupFailedVerification extends Setup {
-    when(underTest.mfaService.enableMfa(any[UserId], any[MfaId], any[String])(*)).thenReturn(Future.successful(MfaResponse(false)))
+    when(underTest.mfaService.enableMfa(any[UserId], any[MfaId], any[String])(*))
+      .thenReturn(Future.successful(MfaResponse(false)))
   }
 
   trait SetupSuccessfulVerification extends Setup {
-    when(underTest.mfaService.enableMfa(eqTo(loggedInDeveloper.userId), eqTo(mfaId), eqTo(correctCode))(*)).thenReturn(Future.successful(MfaResponse(true)))
+    when(underTest.mfaService.enableMfa(eqTo(loggedInDeveloper.userId), eqTo(mfaId), eqTo(correctCode))(*))
+      .thenReturn(Future.successful(MfaResponse(true)))
   }
 
   trait SetupFailedRemoval extends Setup {
-    when(underTest.mfaService.removeMfaById(any[UserId], any[MfaId], any[String])(*)).thenReturn(Future.successful(MfaResponse(false)))
+    when(underTest.mfaService.removeMfaById(any[UserId], any[MfaId], any[String], any[MfaId])(*))
+      .thenReturn(Future.successful(MfaResponse(false)))
   }
 
   trait SetupSuccessfulRemoval extends Setup {
-    when(underTest.mfaService.removeMfaById(eqTo(loggedInDeveloper.userId), eqTo(mfaId), eqTo(correctCode))(*)).thenReturn(Future.successful(MfaResponse(true)))
+    when(underTest.mfaService.removeMfaById(eqTo(loggedInDeveloper.userId), eqTo(mfaId), eqTo(correctCode), eqTo(mfaId))(*))
+      .thenReturn(Future.successful(MfaResponse(true)))
   }
 
   "Given a user is not logged in" when {

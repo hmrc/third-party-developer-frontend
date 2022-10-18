@@ -22,8 +22,7 @@ case class ManageApplicationsViewModel(
     sandboxApplicationSummaries: Seq[ApplicationSummary],
     productionApplicationSummaries: Seq[ApplicationSummary],
     upliftableApplicationIds: Set[ApplicationId],
-    hasAppsThatCannotBeUplifted: Boolean
-) {
+    hasAppsThatCannotBeUplifted: Boolean) {
   lazy val hasPriviledgedApplications = sandboxApplicationSummaries.exists(_.accessType.isPriviledged) || productionApplicationSummaries.exists(_.accessType.isPriviledged)
   lazy val hasAppsThatCanBeUplifted = upliftableApplicationIds.nonEmpty
 

@@ -75,23 +75,23 @@ class MfaServiceSpec extends AsyncHmrcSpec {
 
   "removeMfaById" should {
     "return failed totp when totp verification fails" in new FailedTotpVerification {
-      val result: MfaResponse = await(service.removeMfaById(userId, mfaId, totpCode)(HeaderCarrier()))
+      val result: MfaResponse = await(service.removeMfaById(userId, mfaId, totpCode, mfaId)(HeaderCarrier()))
       result.totpVerified shouldBe false
     }
 
     "not call remove mfa when totp verification fails" in new FailedTotpVerification {
-      await(service.removeMfaById(userId, mfaId, totpCode)(HeaderCarrier()))
+      await(service.removeMfaById(userId, mfaId, totpCode, mfaId)(HeaderCarrier()))
       verify(connector, never).removeMfaById(eqTo(userId), eqTo(mfaId))(*)
     }
 
     "return successful totp when totp verification passes" in new SuccessfulTotpVerification {
-      val result: MfaResponse = await(service.removeMfaById(userId, mfaId, totpCode)(HeaderCarrier()))
+      val result: MfaResponse = await(service.removeMfaById(userId, mfaId, totpCode, mfaId)(HeaderCarrier()))
 
       result.totpVerified shouldBe true
     }
 
     "remove MFA when totp verification passes" in new SuccessfulTotpVerification {
-      await(service.removeMfaById(userId, mfaId, totpCode)(HeaderCarrier()))
+      await(service.removeMfaById(userId, mfaId, totpCode, mfaId)(HeaderCarrier()))
 
       verify(connector, times(1)).removeMfaById(eqTo(userId), eqTo(mfaId))(*)
     }
@@ -100,7 +100,7 @@ class MfaServiceSpec extends AsyncHmrcSpec {
       when(connector.removeMfaById(eqTo(userId), eqTo(mfaId))(*))
         .thenReturn(failed(UpstreamErrorResponse("failed to remove MFA", INTERNAL_SERVER_ERROR, INTERNAL_SERVER_ERROR)))
 
-      intercept[UpstreamErrorResponse](await(service.removeMfaById(userId, mfaId, totpCode)(HeaderCarrier())))
+      intercept[UpstreamErrorResponse](await(service.removeMfaById(userId, mfaId, totpCode,mfaId)(HeaderCarrier())))
     }
   }
 }
