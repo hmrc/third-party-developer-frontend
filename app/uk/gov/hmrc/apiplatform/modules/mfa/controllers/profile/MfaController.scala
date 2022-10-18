@@ -38,7 +38,7 @@ import uk.gov.hmrc.apiplatform.modules.mfa.forms.{MfaAccessCodeForm, MfaNameChan
 import uk.gov.hmrc.apiplatform.modules.mfa.models.MfaAction.{CREATE, REMOVE}
 import uk.gov.hmrc.apiplatform.modules.mfa.models.MfaType.{AUTHENTICATOR_APP, SMS}
 import uk.gov.hmrc.apiplatform.modules.mfa.utils.MfaDetailHelper
-import uk.gov.hmrc.apiplatform.modules.mfa.utils.MfaDetailHelper.{getMfaDetailByType, hasVerifiedSmsAndAuthApp, isAuthAppMfaVerified, isSmsMfaVerified}
+import uk.gov.hmrc.apiplatform.modules.mfa.utils.MfaDetailHelper.{getMfaDetailByType, hasVerifiedSmsAndAuthApp, isAuthAppMfaVerified, isSmsMfaVerified, numberOfVerifiedMfa, countAndHasSmsAndAuthApp}
 import uk.gov.hmrc.apiplatform.modules.mfa.views.html.sms.{MobileNumberView, SmsAccessCodeView, SmsSetupCompletedView}
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.play.bootstrap.controller.WithUnsafeDefaultFormBinding
@@ -237,10 +237,10 @@ class MfaController @Inject() (
     thirdPartyDeveloperConnector.fetchDeveloper(request.userId).flatMap {
       case Some(developer: Developer) =>
         val mfaDetails = developer.mfaDetails
-        mfaDetails.size match {
-          case 1 => removeMfaUserWithOneMfaMethod(mfaId, mfaType, request.userId)
-          case 2 if hasVerifiedSmsAndAuthApp(mfaDetails) => Future.successful(Redirect(routes.MfaController.selectMfaPage(Some(mfaId), MfaAction.REMOVE)))
-          case _ => Future.successful(internalServerErrorTemplate("MFA setup not valid"))
+        countAndHasSmsAndAuthApp(mfaDetails) match {
+          case (1, false) => removeMfaUserWithOneMfaMethod(mfaId, mfaType, request.userId)
+          case (2, true) => Future.successful(Redirect(routes.MfaController.selectMfaPage(Some(mfaId), MfaAction.REMOVE)))
+          case (_, _) => Future.successful(internalServerErrorTemplate("MFA setup not valid"))
         }
       case None => Future.successful(internalServerErrorTemplate("Unable to obtain User information"))
     }

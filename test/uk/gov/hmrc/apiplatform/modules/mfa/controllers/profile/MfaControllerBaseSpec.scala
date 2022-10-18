@@ -166,6 +166,20 @@ class MfaControllerBaseSpec extends BaseControllerSpec
       )))
   }
 
+  trait SetupWithUnverifiedSmsSecurityPreferences extends Setup {
+    when(underTest.thirdPartyDeveloperConnector.fetchDeveloper(eqTo(loggedInDeveloper.userId))(*))
+      .thenReturn(successful(Some(
+        buildDeveloper(emailAddress = loggedInDeveloper.email, organisation = None, mfaDetails = List(verifiedSmsMfaDetail.copy(verified = false)))
+      )))
+  }
+
+  trait SetupSmsAndAuthAppSecurityPreferences extends Setup {
+    when(underTest.thirdPartyDeveloperConnector.fetchDeveloper(eqTo(loggedInDeveloper.userId))(*))
+      .thenReturn(successful(Some(
+        buildDeveloper(emailAddress = loggedInDeveloper.email, organisation = None, mfaDetails = List(verifiedSmsMfaDetail, verifiedAuthenticatorAppMfaDetail))
+      )))
+  }
+
   trait SetupSuccessfulStart2SV extends Setup {
     val registerAuthAppResponse = RegisterAuthAppResponse(authAppMfaId, secret)
 
