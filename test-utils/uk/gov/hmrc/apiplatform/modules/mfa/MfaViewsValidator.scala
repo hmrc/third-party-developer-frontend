@@ -24,7 +24,6 @@ import play.api.mvc.Result
 import play.api.test.Helpers.{contentAsString, status}
 import play.api.test.Helpers._
 import org.scalatest.matchers.should.Matchers._
-
 import scala.concurrent.Future
 
 trait MfaViewsValidator {

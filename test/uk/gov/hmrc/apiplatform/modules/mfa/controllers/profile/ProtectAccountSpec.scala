@@ -23,7 +23,6 @@ import play.api.http.Status.{BAD_REQUEST, SEE_OTHER}
 import play.api.mvc.{AnyContentAsEmpty, AnyContentAsFormUrlEncoded, Result}
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
-import uk.gov.hmrc.apiplatform.modules.mfa.controllers.profile._
 import uk.gov.hmrc.apiplatform.modules.mfa.connectors.ThirdPartyDeveloperMfaConnector
 import uk.gov.hmrc.apiplatform.modules.mfa.connectors.ThirdPartyDeveloperMfaConnector.RegisterAuthAppResponse
 import uk.gov.hmrc.apiplatform.modules.mfa.models.MfaId

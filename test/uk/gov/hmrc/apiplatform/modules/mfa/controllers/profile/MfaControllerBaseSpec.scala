@@ -16,7 +16,6 @@
 
 package uk.gov.hmrc.apiplatform.modules.mfa.controllers.profile
 
-import org.scalatest.matchers.should.Matchers._
 import play.api.http.Status
 import play.api.mvc.{AnyContentAsFormUrlEncoded, Result}
 import play.api.test.FakeRequest

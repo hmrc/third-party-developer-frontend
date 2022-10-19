@@ -48,7 +48,6 @@ object MfaDetailHelper {
   }
 
   def numberOfVerifiedMfa(mfaDetails: List[MfaDetail]): Int = {
-    mfaDetails
-      .count(x => x.verified)
+    mfaDetails.count(x => x.verified)
   }
 }

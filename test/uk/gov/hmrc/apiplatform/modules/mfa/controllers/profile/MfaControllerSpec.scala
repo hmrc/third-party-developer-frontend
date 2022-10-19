@@ -21,7 +21,7 @@ import play.api.http.Status
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
 import uk.gov.hmrc.apiplatform.modules.mfa.models.{MfaAction, MfaId, MfaType}
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.{LoggedInState, UserId}
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.UserId
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.WithLoggedInSession._
 
 import scala.concurrent.Future

@@ -37,8 +37,7 @@ import uk.gov.hmrc.apiplatform.modules.mfa.controllers.profile.routes._
 import uk.gov.hmrc.apiplatform.modules.mfa.forms.{MfaAccessCodeForm, MfaNameChangeForm, MobileNumberForm, SelectMfaForm, SmsAccessCodeForm}
 import uk.gov.hmrc.apiplatform.modules.mfa.models.MfaAction.{CREATE, REMOVE}
 import uk.gov.hmrc.apiplatform.modules.mfa.models.MfaType.{AUTHENTICATOR_APP, SMS}
-import uk.gov.hmrc.apiplatform.modules.mfa.utils.MfaDetailHelper
-import uk.gov.hmrc.apiplatform.modules.mfa.utils.MfaDetailHelper.{getMfaDetailByType, hasVerifiedSmsAndAuthApp, isAuthAppMfaVerified, isSmsMfaVerified, numberOfVerifiedMfa, countAndHasSmsAndAuthApp}
+import uk.gov.hmrc.apiplatform.modules.mfa.utils.MfaDetailHelper.{getMfaDetailByType, isAuthAppMfaVerified, isSmsMfaVerified, countAndHasSmsAndAuthApp}
 import uk.gov.hmrc.apiplatform.modules.mfa.views.html.sms.{MobileNumberView, SmsAccessCodeView, SmsSetupCompletedView}
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.play.bootstrap.controller.WithUnsafeDefaultFormBinding
