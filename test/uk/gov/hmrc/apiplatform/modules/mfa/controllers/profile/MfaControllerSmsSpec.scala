@@ -217,6 +217,16 @@ class MfaControllerSmsSpec extends MfaControllerBaseSpec {
         verify(underTest.thirdPartyDeveloperMfaConnector, times(0)).verifyMfa(*[UserId], eqTo(smsMfaId), eqTo(correctCode))(*)
         verify(underTest.mfaService).removeMfaById(*[UserId], eqTo(smsMfaId), eqTo(correctCode), eqTo(smsMfaId))(*)
       }
+
+    "return error page when user is Logged in and form is valid and mfaIdToRemove is None" in
+      new SetupAuthAppSecurityPreferences with LoggedIn {
+        private val result = underTest.smsAccessCodeAction(smsMfaId, MfaAction.REMOVE, None)(smsAccessCodeRequest(correctCode))
+
+        validateErrorTemplateView(result, "Unable to find Mfa to remove")
+
+        verify(underTest.thirdPartyDeveloperMfaConnector, times(0)).verifyMfa(*[UserId], eqTo(smsMfaId), eqTo(correctCode))(*)
+        verify(underTest.mfaService, times(0)).removeMfaById(*[UserId], eqTo(smsMfaId), eqTo(correctCode), eqTo(smsMfaId))(*)
+      }
   }
 
   "smsSetupCompletedPage" should {

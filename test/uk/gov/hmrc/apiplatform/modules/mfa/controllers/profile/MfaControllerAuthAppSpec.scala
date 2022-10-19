@@ -174,6 +174,16 @@ class MfaControllerAuthAppSpec extends MfaControllerBaseSpec {
         verify(underTest.thirdPartyDeveloperMfaConnector, times(0)).verifyMfa(*[UserId], eqTo(authAppMfaId), eqTo(correctCode))(*)
         verify(underTest.mfaService).removeMfaById(*[UserId], eqTo(authAppMfaId), eqTo(correctCode), eqTo(authAppMfaId))(*)
       }
+
+    "return error page when user is Logged in and form is valid and call to connector returns true and mfaIdToRemove is None" in
+      new SetupAuthAppSecurityPreferences with LoggedIn {
+        private val result = underTest.authAppAccessCodeAction(authAppMfaId, MfaAction.REMOVE, None)(authAppAccessCodeRequest(correctCode))
+
+        validateErrorTemplateView(result, "Unable to find Mfa to remove")
+
+        verify(underTest.thirdPartyDeveloperMfaConnector, times(0)).verifyMfa(*[UserId], eqTo(authAppMfaId), eqTo(correctCode))(*)
+        verify(underTest.mfaService, times(0)).removeMfaById(*[UserId], eqTo(authAppMfaId), eqTo(correctCode), eqTo(authAppMfaId))(*)
+      }
   }
 
   "getNameChangePage" should {

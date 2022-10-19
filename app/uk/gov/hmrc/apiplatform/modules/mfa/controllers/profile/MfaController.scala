@@ -265,7 +265,7 @@ class MfaController @Inject() (
           case MfaResponse(true)  => Ok(removeMfaCompletedView())
           case MfaResponse(false) => internalServerErrorTemplate("Unable to verify access code")
         }
-      case None => Future.successful(internalServerErrorTemplate("Unable find Mfa to remove"))
+      case None => Future.successful(internalServerErrorTemplate("Unable to find Mfa to remove"))
     }
   }
 
