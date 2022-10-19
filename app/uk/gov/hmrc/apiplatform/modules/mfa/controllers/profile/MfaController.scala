@@ -102,21 +102,26 @@ class MfaController @Inject() (
     }
   }
 
-  private def removeSelectedMfa(userId: UserId, mfaTypeStr: String, mfaIdToRemove: Option[MfaId])
+  private def removeSelectedMfa(userId: UserId, mfaTypeForAuthentication: String, mfaIdForRemoval: Option[MfaId])
                                (implicit request: Request[_], hc: HeaderCarrier, messages: Messages) = {
+
+    def authenticateToRemoveMfa(mfaType: MfaType, mfaIdForAuthentication: MfaId) = {
+      mfaType match {
+        case SMS =>
+          thirdPartyDeveloperMfaConnector.sendSms(userId, mfaIdForAuthentication) map {
+            case true => Redirect(routes.MfaController.smsAccessCodePage(mfaIdForAuthentication, MfaAction.REMOVE, mfaIdForRemoval))
+            case false => internalServerErrorTemplate("Failed to send SMS")
+          }
+        case AUTHENTICATOR_APP => Future.successful(Redirect(routes.MfaController.authAppAccessCodePage(mfaIdForAuthentication, MfaAction.REMOVE, mfaIdForRemoval)))
+      }
+    }
+
     thirdPartyDeveloperConnector.fetchDeveloper(userId) flatMap {
       case None                       => Future.successful(internalServerErrorTemplate("Unable to obtain user information"))
       case Some(developer: Developer) =>
-        val mfaType = MfaType.withNameInsensitive(mfaTypeStr)
-        val mfaDetail = getMfaDetailByType(mfaType, developer.mfaDetails)
-        mfaType match {
-        case SMS               =>
-          thirdPartyDeveloperMfaConnector.sendSms(userId, mfaDetail.id) map {
-            case true  => Redirect(routes.MfaController.smsAccessCodePage(mfaDetail.id, MfaAction.REMOVE, mfaIdToRemove))
-            case false => internalServerErrorTemplate("Failed to send SMS")
-          }
-        case AUTHENTICATOR_APP => Future.successful(Redirect(routes.MfaController.authAppAccessCodePage(mfaDetail.id, MfaAction.REMOVE, mfaIdToRemove)))
-      }
+        val mfaType = MfaType.withNameInsensitive(mfaTypeForAuthentication)
+        val mfaIdForAuthentication = getMfaDetailByType(mfaType, developer.mfaDetails).id
+        authenticateToRemoveMfa(mfaType, mfaIdForAuthentication)
     }
   }
 
@@ -132,12 +137,12 @@ class MfaController @Inject() (
     })
   }
 
-  def authAppAccessCodePage(mfaId: MfaId, mfaAction: MfaAction, mfaIdToRemove: Option[MfaId]): Action[AnyContent] =
+  def authAppAccessCodePage(mfaId: MfaId, mfaAction: MfaAction, mfaIdForRemoval: Option[MfaId]): Action[AnyContent] =
     atLeastPartLoggedInEnablingMfaAction { implicit request =>
-      Future.successful(Ok(authAppAccessCodeView(MfaAccessCodeForm.form, mfaId, mfaAction, mfaIdToRemove)))
+      Future.successful(Ok(authAppAccessCodeView(MfaAccessCodeForm.form, mfaId, mfaAction, mfaIdForRemoval)))
   }
 
-  def authAppAccessCodeAction(mfaId: MfaId, mfaAction: MfaAction, mfaIdToRemove: Option[MfaId]): Action[AnyContent] =
+  def authAppAccessCodeAction(mfaId: MfaId, mfaAction: MfaAction, mfaIdForRemoval: Option[MfaId]): Action[AnyContent] =
     atLeastPartLoggedInEnablingMfaAction { implicit request =>
       def logonAndComplete(): Result = {
         thirdPartyDeveloperConnector.updateSessionLoggedInState(request.sessionId, UpdateLoggedInStateRequest(LoggedInState.LOGGED_IN))
@@ -150,14 +155,14 @@ class MfaController @Inject() (
           .fill(form)
           .withError(key = "accessCode", message = "You have entered an incorrect access code")
 
-        BadRequest(authAppAccessCodeView(mfaAccessCodeForm, mfaId, mfaAction, mfaIdToRemove))
+        BadRequest(authAppAccessCodeView(mfaAccessCodeForm, mfaId, mfaAction, mfaIdForRemoval))
       }
 
       MfaAccessCodeForm.form.bindFromRequest.fold(
-        form => Future.successful(BadRequest(authAppAccessCodeView(form, mfaId, mfaAction, mfaIdToRemove))),
+        form => Future.successful(BadRequest(authAppAccessCodeView(form, mfaId, mfaAction, mfaIdForRemoval))),
         form =>
           mfaAction match {
-            case REMOVE => handleRemoveMfa(request.userId, form.accessCode, mfaId, mfaIdToRemove)
+            case REMOVE => handleRemoveMfa(request.userId, form.accessCode, mfaId, mfaIdForRemoval)
             case CREATE => for {
                 mfaResponse <- mfaService.enableMfa(request.userId, mfaId, form.accessCode)
                 result = if (mfaResponse.totpVerified) logonAndComplete() else invalidCode(form)
@@ -205,22 +210,22 @@ class MfaController @Inject() (
     )
   }
 
-  def smsAccessCodePage(mfaId: MfaId, mfaAction: MfaAction, mfaIdToRemove: Option[MfaId]): Action[AnyContent] =
+  def smsAccessCodePage(mfaId: MfaId, mfaAction: MfaAction, mfaIdForRemoval: Option[MfaId]): Action[AnyContent] =
     atLeastPartLoggedInEnablingMfaAction { implicit request =>
-      Future.successful(Ok(smsAccessCodeView(SmsAccessCodeForm.form, mfaId, mfaAction, mfaIdToRemove)))
+      Future.successful(Ok(smsAccessCodeView(SmsAccessCodeForm.form, mfaId, mfaAction, mfaIdForRemoval)))
   }
 
-  def smsAccessCodeAction(mfaId: MfaId, mfaAction: MfaAction, mfaIdToRemove: Option[MfaId]): Action[AnyContent] =
+  def smsAccessCodeAction(mfaId: MfaId, mfaAction: MfaAction, mfaIdForRemoval: Option[MfaId]): Action[AnyContent] =
     atLeastPartLoggedInEnablingMfaAction { implicit request =>
       SmsAccessCodeForm.form.bindFromRequest.fold(
-        form => Future.successful(BadRequest(smsAccessCodeView(form, mfaId, mfaAction, mfaIdToRemove))),
+        form => Future.successful(BadRequest(smsAccessCodeView(form, mfaId, mfaAction, mfaIdForRemoval))),
         form =>
           mfaAction match {
             case CREATE => thirdPartyDeveloperMfaConnector.verifyMfa(request.userId, mfaId, form.accessCode) map {
                 case true  => Redirect(routes.MfaController.smsSetupCompletedPage())
                 case false => internalServerErrorTemplate("Unable to verify SMS access code")
             }
-          case REMOVE => handleRemoveMfa(request.userId, form.accessCode, mfaId, mfaIdToRemove)
+          case REMOVE => handleRemoveMfa(request.userId, form.accessCode, mfaId, mfaIdForRemoval)
         }
     )
   }
@@ -235,8 +240,7 @@ class MfaController @Inject() (
   def removeMfa(mfaId: MfaId, mfaType: MfaType): Action[AnyContent] = loggedInAction { implicit request =>
     thirdPartyDeveloperConnector.fetchDeveloper(request.userId).flatMap {
       case Some(developer: Developer) =>
-        val mfaDetails = developer.mfaDetails
-        countAndHasSmsAndAuthApp(mfaDetails) match {
+        countAndHasSmsAndAuthApp(developer.mfaDetails) match {
           case (1, false) => removeMfaUserWithOneMfaMethod(mfaId, mfaType, request.userId)
           case (2, true) => Future.successful(Redirect(routes.MfaController.selectMfaPage(Some(mfaId), MfaAction.REMOVE)))
           case (_, _) => Future.successful(internalServerErrorTemplate("MFA setup not valid"))
@@ -256,9 +260,9 @@ class MfaController @Inject() (
     }
   }
 
-  private def handleRemoveMfa(userId: UserId, accessCode: String, mfaIdToVerify: MfaId,  mfaIdToRemove: Option[MfaId])
+  private def handleRemoveMfa(userId: UserId, accessCode: String, mfaIdToVerify: MfaId, mfaIdForRemoval: Option[MfaId])
                              (implicit request: Request[_], loggedIn: DeveloperSession, messages: Messages): Future[Result] = {
-    mfaIdToRemove match {
+    mfaIdForRemoval match {
       case Some(mfaId) =>
         mfaService.removeMfaById(userId, mfaIdToVerify, accessCode, mfaId) map {
           case MfaResponse(true)  => Ok(removeMfaCompletedView())

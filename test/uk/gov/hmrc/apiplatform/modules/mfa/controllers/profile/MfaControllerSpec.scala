@@ -98,7 +98,7 @@ class MfaControllerSpec extends MfaControllerBaseSpec {
           status(result) shouldBe SEE_OTHER
           redirectLocation(result) shouldBe
             Some(s"/developer/profile/security-preferences/auth-app/access-code?mfaId=${authAppMfaId.value.toString}&" +
-              s"mfaAction=${MfaAction.REMOVE.toString}&mfaIdToRemove=${authAppMfaId.value.toString}")
+              s"mfaAction=${MfaAction.REMOVE.toString}&mfaIdForRemoval=${authAppMfaId.value.toString}")
         }
 
       "redirect to Sms access code page when mfa to be deleted is Auth App and mfa authentication method is Sms" in
@@ -110,7 +110,7 @@ class MfaControllerSpec extends MfaControllerBaseSpec {
           status(result) shouldBe SEE_OTHER
           redirectLocation(result) shouldBe
             Some(s"/developer/profile/security-preferences/sms/access-code?mfaId=${smsMfaId.value.toString}&" +
-              s"mfaAction=${MfaAction.REMOVE.toString}&mfaIdToRemove=${authAppMfaId.value.toString}")
+              s"mfaAction=${MfaAction.REMOVE.toString}&mfaIdForRemoval=${authAppMfaId.value.toString}")
         }
 
       "redirect to Sms access code page when mfa to be deleted is Sms and mfa authentication method is Sms" in
@@ -122,7 +122,7 @@ class MfaControllerSpec extends MfaControllerBaseSpec {
           status(result) shouldBe SEE_OTHER
           redirectLocation(result) shouldBe
             Some(s"/developer/profile/security-preferences/sms/access-code?mfaId=${smsMfaId.value.toString}&" +
-              s"mfaAction=${MfaAction.REMOVE.toString}&mfaIdToRemove=${smsMfaId.value.toString}")
+              s"mfaAction=${MfaAction.REMOVE.toString}&mfaIdForRemoval=${smsMfaId.value.toString}")
         }
 
       "redirect to Auth App access code page when mfa to be deleted is Sms and mfa authentication method is Auth App" in
@@ -132,7 +132,7 @@ class MfaControllerSpec extends MfaControllerBaseSpec {
           status(result) shouldBe SEE_OTHER
           redirectLocation(result) shouldBe
             Some(s"/developer/profile/security-preferences/auth-app/access-code?mfaId=${authAppMfaId.value.toString}&" +
-              s"mfaAction=${MfaAction.REMOVE.toString}&mfaIdToRemove=${smsMfaId.value.toString}")
+              s"mfaAction=${MfaAction.REMOVE.toString}&mfaIdForRemoval=${smsMfaId.value.toString}")
         }
 
       "return error when send sms fails and mfa to be deleted is Sms and mfa authentication method is Sms" in
@@ -189,7 +189,7 @@ class MfaControllerSpec extends MfaControllerBaseSpec {
         status(result) shouldBe Status.SEE_OTHER
         redirectLocation(result) shouldBe Some(
           s"/developer/profile/security-preferences/auth-app/access-code?mfaId=${authAppMfaId.value.toString}&" +
-            s"mfaAction=${MfaAction.REMOVE.toString}&mfaIdToRemove=${authAppMfaId.value.toString}"
+            s"mfaAction=${MfaAction.REMOVE.toString}&mfaIdForRemoval=${authAppMfaId.value.toString}"
         )
       }
 

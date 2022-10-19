@@ -175,7 +175,7 @@ class MfaControllerAuthAppSpec extends MfaControllerBaseSpec {
         verify(underTest.mfaService).removeMfaById(*[UserId], eqTo(authAppMfaId), eqTo(correctCode), eqTo(authAppMfaId))(*)
       }
 
-    "return error page when user is Logged in and form is valid and call to connector returns true and mfaIdToRemove is None" in
+    "return error page when user is Logged in and form is valid and call to connector returns true and mfaIdForRemoval is None" in
       new SetupAuthAppSecurityPreferences with LoggedIn {
         private val result = underTest.authAppAccessCodeAction(authAppMfaId, MfaAction.REMOVE, None)(authAppAccessCodeRequest(correctCode))
 

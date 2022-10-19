@@ -218,7 +218,7 @@ class MfaControllerSmsSpec extends MfaControllerBaseSpec {
         verify(underTest.mfaService).removeMfaById(*[UserId], eqTo(smsMfaId), eqTo(correctCode), eqTo(smsMfaId))(*)
       }
 
-    "return error page when user is Logged in and form is valid and mfaIdToRemove is None" in
+    "return error page when user is Logged in and form is valid and mfaIdForRemoval is None" in
       new SetupAuthAppSecurityPreferences with LoggedIn {
         private val result = underTest.smsAccessCodeAction(smsMfaId, MfaAction.REMOVE, None)(smsAccessCodeRequest(correctCode))
 
