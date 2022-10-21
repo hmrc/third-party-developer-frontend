@@ -37,7 +37,7 @@
 ) {
   @helper.form(action = uk.gov.hmrc.apiplatform.modules.uplift.controllers.routes.UpliftJourneyController.sellResellOrDistributeYourSoftwareAction(applicationId), 'class -> "form") {
     <div class="govuk-form-group @if(form.errors("answer").nonEmpty) {govuk-form-group--error}">
-        <fieldset id="answer" class="govuk-fieldset" role="group" aria-describedby="answer-error">
+        <fieldset id="answer-fieldset" class="govuk-fieldset" role="group" aria-describedby="answer-error">
             <legend class="govuk-fieldset__legend govuk-fieldset__legend--l">
                 <h1 class="govuk-fieldset__heading">
                     @pageHeading
@@ -47,7 +47,7 @@
             <div class="govuk-radios govuk-radios--inline">
                 @helper.CSRF.formField
                 <div class="govuk-radios__item">
-                    <input class="govuk-radios__input" id="distribute-question-yes" name="answer" type="radio" value="Yes" @if(form.data.get("answer") == Some("Yes")) {checked}>
+                    <input class="govuk-radios__input" id="answer" name="answer" type="radio" value="Yes" @if(form.data.get("answer") == Some("Yes")) {checked}>
                     <label class="govuk-label govuk-radios__label" for="distribute-question-yes">
                         Yes
                     </label>
