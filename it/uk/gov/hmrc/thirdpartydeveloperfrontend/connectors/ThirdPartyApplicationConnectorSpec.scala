@@ -43,7 +43,7 @@ import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.UserId
 
 class ThirdPartyApplicationConnectorSpec extends BaseConnectorIntegrationSpec with GuiceOneAppPerSuite with WireMockExtensions
   with CollaboratorTracker with LocalUserIdTracker with FixedClock {
-  
+
   private val apiKey: String = UUID.randomUUID().toString
   private val clientId = ClientId(UUID.randomUUID().toString)
   private val applicationId = ApplicationId("applicationId")

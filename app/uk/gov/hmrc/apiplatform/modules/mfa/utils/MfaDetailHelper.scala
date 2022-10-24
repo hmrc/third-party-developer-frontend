@@ -16,7 +16,7 @@
 
 package uk.gov.hmrc.apiplatform.modules.mfa.utils
 
-import uk.gov.hmrc.apiplatform.modules.mfa.models.{AuthenticatorAppMfaDetailSummary, MfaDetail, MfaType, SmsMfaDetailSummary}
+import uk.gov.hmrc.apiplatform.modules.mfa.models.{AuthenticatorAppMfaDetailSummary, MfaDetail, MfaType}
 
 object MfaDetailHelper {
 
@@ -33,5 +33,21 @@ object MfaDetailHelper {
   def getAuthAppMfaVerified(mfaDetails: List[MfaDetail]): AuthenticatorAppMfaDetailSummary = {
     mfaDetails.filter(x => x.mfaType == MfaType.AUTHENTICATOR_APP && x.verified)
       .head.asInstanceOf[AuthenticatorAppMfaDetailSummary]
+  }
+
+  def getMfaDetailByType(mfaType: MfaType, details: List[MfaDetail]): MfaDetail = {
+    details.filter(_.mfaType == mfaType).head
+  }
+
+  def countAndHasSmsAndAuthApp(mfaDetails: List[MfaDetail]): (Int, Boolean) = {
+    (numberOfVerifiedMfa(mfaDetails), hasVerifiedSmsAndAuthApp(mfaDetails))
+  }
+
+  def hasVerifiedSmsAndAuthApp(mfaDetails: List[MfaDetail]): Boolean = {
+    isAuthAppMfaVerified(mfaDetails) && isSmsMfaVerified(mfaDetails)
+  }
+
+  def numberOfVerifiedMfa(mfaDetails: List[MfaDetail]): Int = {
+    mfaDetails.count(x => x.verified)
   }
 }

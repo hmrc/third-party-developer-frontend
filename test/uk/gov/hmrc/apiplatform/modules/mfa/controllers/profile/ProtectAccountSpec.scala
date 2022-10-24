@@ -23,7 +23,6 @@ import play.api.http.Status.{BAD_REQUEST, SEE_OTHER}
 import play.api.mvc.{AnyContentAsEmpty, AnyContentAsFormUrlEncoded, Result}
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
-import uk.gov.hmrc.apiplatform.modules.mfa.controllers.profile._
 import uk.gov.hmrc.apiplatform.modules.mfa.connectors.ThirdPartyDeveloperMfaConnector
 import uk.gov.hmrc.apiplatform.modules.mfa.connectors.ThirdPartyDeveloperMfaConnector.RegisterAuthAppResponse
 import uk.gov.hmrc.apiplatform.modules.mfa.models.MfaId
@@ -129,19 +128,23 @@ class ProtectAccountSpec extends BaseControllerSpec with WithCSRFAddToken with D
   }
 
   trait SetupFailedVerification extends Setup {
-    when(underTest.mfaService.enableMfa(any[UserId], any[MfaId], any[String])(*)).thenReturn(Future.successful(MfaResponse(false)))
+    when(underTest.mfaService.enableMfa(any[UserId], any[MfaId], any[String])(*))
+      .thenReturn(Future.successful(MfaResponse(false)))
   }
 
   trait SetupSuccessfulVerification extends Setup {
-    when(underTest.mfaService.enableMfa(eqTo(loggedInDeveloper.userId), eqTo(mfaId), eqTo(correctCode))(*)).thenReturn(Future.successful(MfaResponse(true)))
+    when(underTest.mfaService.enableMfa(eqTo(loggedInDeveloper.userId), eqTo(mfaId), eqTo(correctCode))(*))
+      .thenReturn(Future.successful(MfaResponse(true)))
   }
 
   trait SetupFailedRemoval extends Setup {
-    when(underTest.mfaService.removeMfaById(any[UserId], any[MfaId], any[String])(*)).thenReturn(Future.successful(MfaResponse(false)))
+    when(underTest.mfaService.removeMfaById(any[UserId], any[MfaId], any[String], any[MfaId])(*))
+      .thenReturn(Future.successful(MfaResponse(false)))
   }
 
   trait SetupSuccessfulRemoval extends Setup {
-    when(underTest.mfaService.removeMfaById(eqTo(loggedInDeveloper.userId), eqTo(mfaId), eqTo(correctCode))(*)).thenReturn(Future.successful(MfaResponse(true)))
+    when(underTest.mfaService.removeMfaById(eqTo(loggedInDeveloper.userId), eqTo(mfaId), eqTo(correctCode), eqTo(mfaId))(*))
+      .thenReturn(Future.successful(MfaResponse(true)))
   }
 
   "Given a user is not logged in" when {
