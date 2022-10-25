@@ -19,10 +19,11 @@
 @import uk.gov.hmrc.apiplatform.modules.mfa.forms.MfaAccessCodeForm
 @import include._
 @import uk.gov.hmrc.apiplatform.modules.mfa.models.MfaId
+@import uk.gov.hmrc.apiplatform.modules.mfa.models.MfaType
 
 @this(devMain: DevMainWithFormErrors)
 
-@(form: Form[MfaAccessCodeForm], mfaId: MfaId)(implicit messages: Messages, request: play.api.mvc.Request[Any], appConfig: ApplicationConfig)
+@(form: Form[MfaAccessCodeForm], mfaId: MfaId, mfaType: MfaType)(implicit messages: Messages, request: play.api.mvc.Request[Any], appConfig: ApplicationConfig)
 
 @devMain(
   form,
@@ -33,7 +34,7 @@
 ) {
   <h1 class="govuk-heading-l">Enter your access code</h1>
 
-  @helper.form(action = routes.UserLoginAccount.authenticateTotp(mfaId)){
+  @helper.form(action = routes.UserLoginAccount.authenticateAccessCode(mfaId, mfaType)){
     @helper.CSRF.formField
     <p class="govuk-body">This is the 6 digit code from your authentication app.</p>
     <div class="govuk-form-group @if(form.errors("accessCode").nonEmpty){form-group-error govuk-form-group--error}">

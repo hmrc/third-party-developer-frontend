@@ -57,7 +57,7 @@ class ThirdPartyDeveloperConnectorIntegrationSpec extends BaseConnectorIntegrati
     val totp = "123456"
     val nonce = "ABC-123"
     val mfaId = MfaId.random
-    val totpAuthenticationRequest = TotpAuthenticationRequest(userEmail, totp, nonce, mfaId)
+    val totpAuthenticationRequest = AccessCodeAuthenticationRequest(userEmail, totp, nonce, mfaId)
 
     val payloadEncryption: PayloadEncryption = app.injector.instanceOf[PayloadEncryption]
     val encryptedLoginRequest: JsValue = Json.toJson(SecretRequest(payloadEncryption.encrypt(loginRequest).as[String]))
@@ -557,7 +557,7 @@ class ThirdPartyDeveloperConnectorIntegrationSpec extends BaseConnectorIntegrati
           )
       )
 
-      val result: Session = await(underTest.authenticateTotp(totpAuthenticationRequest))
+      val result: Session = await(underTest.authenticateMfaAccessCode(totpAuthenticationRequest))
 
       verify(1, postRequestedFor(urlMatching("/authenticate-auth-app")).withRequestBody(equalToJson(encryptedTotpAuthenticationRequest.toString)))
       result shouldBe Session(sessionId, buildDeveloper(emailAddress = userEmail), LoggedInState.LOGGED_IN)
@@ -574,7 +574,7 @@ class ThirdPartyDeveloperConnectorIntegrationSpec extends BaseConnectorIntegrati
           )
       )
 
-      intercept[InvalidCredentials](await(underTest.authenticateTotp(totpAuthenticationRequest)))
+      intercept[InvalidCredentials](await(underTest.authenticateMfaAccessCode(totpAuthenticationRequest)))
     }
 
     "throw InvalidEmail when the email is not found" in new Setup {
@@ -588,7 +588,7 @@ class ThirdPartyDeveloperConnectorIntegrationSpec extends BaseConnectorIntegrati
           )
       )
 
-      intercept[InvalidEmail](await(underTest.authenticateTotp(totpAuthenticationRequest)))
+      intercept[InvalidEmail](await(underTest.authenticateMfaAccessCode(totpAuthenticationRequest)))
     }
   }
 }

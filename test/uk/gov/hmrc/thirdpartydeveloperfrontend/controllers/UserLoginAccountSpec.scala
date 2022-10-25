@@ -31,17 +31,16 @@ import uk.gov.hmrc.thirdpartydeveloperfrontend.service.AuditAction._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.service._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.WithCSRFAddToken
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.WithLoggedInSession._
-import views.html.{AccountLockedView, LogInAccessCodeView, SignInView}
+import views.html.{AccountLockedView, Add2SVView, AuthAppLoginAccessCodeView, SignInView, SmsLoginAccessCodeView, UserDidNotAdd2SVView}
 import views.html.protectaccount.{ProtectAccountNoAccessCodeCompleteView, ProtectAccountNoAccessCodeView}
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 import scala.concurrent.Future._
-import views.html.UserDidNotAdd2SVView
-import views.html.Add2SVView
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.LocalUserIdTracker
 import _root_.uk.gov.hmrc.thirdpartydeveloperfrontend.mocks.connectors.{ThirdPartyDeveloperConnectorMockModule, ThirdPartyDeveloperMfaConnectorMockModule}
-import uk.gov.hmrc.apiplatform.modules.mfa.models.MfaId
+import uk.gov.hmrc.apiplatform.modules.mfa.models.MfaType.AUTHENTICATOR_APP
+import uk.gov.hmrc.apiplatform.modules.mfa.models.{MfaId, MfaType}
 import uk.gov.hmrc.apiplatform.modules.mfa.service.MfaMandateService
 import uk.gov.hmrc.thirdpartydeveloperfrontend.security.CookieEncoding
 
@@ -73,7 +72,8 @@ class UserLoginAccountSpec extends BaseControllerSpec with WithCSRFAddToken
 
     val signInView = app.injector.instanceOf[SignInView]
     val accountLockedView = app.injector.instanceOf[AccountLockedView]
-    val logInAccessCodeView = app.injector.instanceOf[LogInAccessCodeView]
+    val authApploginAccessCodeView = app.injector.instanceOf[AuthAppLoginAccessCodeView]
+    val smsLoginAccessCodeView = app.injector.instanceOf[SmsLoginAccessCodeView]
     val protectAccountNoAccessCodeView = app.injector.instanceOf[ProtectAccountNoAccessCodeView]
     val protectAccountNoAccessCodeCompleteView = app.injector.instanceOf[ProtectAccountNoAccessCodeCompleteView]
     val userDidNotAdd2SVView = app.injector.instanceOf[UserDidNotAdd2SVView]
@@ -94,7 +94,8 @@ class UserLoginAccountSpec extends BaseControllerSpec with WithCSRFAddToken
       cookieSigner,
       signInView,
       accountLockedView,
-      logInAccessCodeView,
+      authApploginAccessCodeView,
+      smsLoginAccessCodeView,
       protectAccountNoAccessCodeView,
       protectAccountNoAccessCodeCompleteView,
       userDidNotAdd2SVView,
@@ -119,7 +120,7 @@ class UserLoginAccountSpec extends BaseControllerSpec with WithCSRFAddToken
     }
 
     def mockAuthenticateTotp(email: String, totp: String, nonce: String, mfaId: MfaId, result: Future[Session]): Unit =
-      when(underTest.sessionService.authenticateTotp(eqTo(email), eqTo(totp), eqTo(nonce), eqTo(mfaId))(*))
+      when(underTest.sessionService.authenticateAccessCode(eqTo(email), eqTo(totp), eqTo(nonce), eqTo(mfaId))(*))
         .thenReturn(result)
 
     def mockLogout(): Unit =
@@ -127,7 +128,7 @@ class UserLoginAccountSpec extends BaseControllerSpec with WithCSRFAddToken
         .thenReturn(Future.successful(NO_CONTENT))
 
     when(underTest.sessionService.authenticate(*, *, *)(*)).thenReturn(failed(new InvalidCredentials))
-    when(underTest.sessionService.authenticateTotp(*, *, *, *[MfaId])(*)).thenReturn(failed(new InvalidCredentials))
+    when(underTest.sessionService.authenticateAccessCode(*, *, *, *[MfaId])(*)).thenReturn(failed(new InvalidCredentials))
 
     def mockAudit(auditAction: AuditAction, result: Future[AuditResult]): Unit =
       when(underTest.auditService.audit(eqTo(auditAction), eqTo(Map.empty))(*)).thenReturn(result)
@@ -255,7 +256,7 @@ class UserLoginAccountSpec extends BaseControllerSpec with WithCSRFAddToken
 
       status(result) shouldBe SEE_OTHER
 
-      redirectLocation(result) shouldBe Some(routes.UserLoginAccount.enterTotp(mfaId).url)
+      redirectLocation(result) shouldBe Some(routes.UserLoginAccount.loginAccessCodePage(mfaId, AUTHENTICATOR_APP).url)
     }
 
     "display the login page when fetch developer fails" in new SetupWithUserAuthRespRequiringMfaAccessCode {
@@ -347,7 +348,7 @@ class UserLoginAccountSpec extends BaseControllerSpec with WithCSRFAddToken
     }
   }
 
-  "enterTotp" should {
+  "loginAccessCodePage for AUTHENTICATOR_APP" should {
     "display the enter access code page" in new SetupWithUserAuthRespRequiringMfaAccessCode {
       mockAuthenticate(user.email, userPassword, successful(userAuthRespRequiringMfaAccessCode), successful(false))
       mockAudit(LoginSucceeded, successful(AuditResult.Success))
@@ -355,7 +356,7 @@ class UserLoginAccountSpec extends BaseControllerSpec with WithCSRFAddToken
       private val request = FakeRequest()
         .withSession(sessionParams: _*)
 
-      private val result = addToken(underTest.enterTotp(mfaId))(request)
+      private val result = addToken(underTest.loginAccessCodePage(mfaId, AUTHENTICATOR_APP))(request)
 
       status(result) shouldBe OK
 
@@ -363,7 +364,7 @@ class UserLoginAccountSpec extends BaseControllerSpec with WithCSRFAddToken
     }
   }
 
-  "authenticateTotp" should {
+  "authenticateAccessCode" should {
 
     "return the manage Applications page when the credentials are correct" in new Setup {
       mockAuthenticateTotp(user.email, totp, nonce, mfaId, successful(session))
@@ -373,7 +374,7 @@ class UserLoginAccountSpec extends BaseControllerSpec with WithCSRFAddToken
         .withSession(sessionParams :+ "emailAddress" -> user.email :+ "nonce" -> nonce: _*)
         .withFormUrlEncodedBody(("accessCode", totp))
 
-      private val result = underTest.authenticateTotp(mfaId)(request)
+      private val result = underTest.authenticateAccessCode(mfaId, AUTHENTICATOR_APP)(request)
 
       status(result) shouldBe SEE_OTHER
       redirectLocation(result) shouldBe Some(routes.ManageApplications.manageApps().url)
@@ -386,7 +387,7 @@ class UserLoginAccountSpec extends BaseControllerSpec with WithCSRFAddToken
         .withSession(sessionParams :+ "emailAddress" -> user.email :+ "nonce" -> nonce: _*)
         .withFormUrlEncodedBody(("accessCode", "654321"))
 
-      private val result =  addToken(underTest.authenticateTotp(mfaId))(request)
+      private val result =  addToken(underTest.authenticateAccessCode(mfaId, AUTHENTICATOR_APP))(request)
 
       status(result) shouldBe UNAUTHORIZED
       contentAsString(result) should include("You have entered an incorrect access code")

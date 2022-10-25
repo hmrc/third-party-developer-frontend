@@ -6,7 +6,7 @@ import play.api.libs.json.Json
 import steps.{MfaSecret, TestContext}
 import uk.gov.hmrc.apiplatform.modules.mfa.connectors.ThirdPartyDeveloperMfaConnector.RegisterAuthAppResponse
 import uk.gov.hmrc.apiplatform.modules.mfa.models.MfaId
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.connectors.{TotpAuthenticationRequest, VerifyMfaRequest}
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.connectors.{AccessCodeAuthenticationRequest, VerifyMfaRequest}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.{Developer, LoggedInState, Session}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.connectors.EncryptedJson
 
@@ -20,7 +20,7 @@ object MfaStub {
 
     stubFor(
       post(urlEqualTo("/authenticate-auth-app"))
-      .withRequestBody(equalToJson(encryptedJson.toSecretRequestJson(TotpAuthenticationRequest("john.smith@example.com", accessCode, nonce, mfaId)).toString()))
+      .withRequestBody(equalToJson(encryptedJson.toSecretRequestJson(AccessCodeAuthenticationRequest("john.smith@example.com", accessCode, nonce, mfaId)).toString()))
         .willReturn(
           aResponse()
             .withStatus(OK)

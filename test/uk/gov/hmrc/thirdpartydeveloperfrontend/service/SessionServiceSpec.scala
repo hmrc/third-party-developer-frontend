@@ -20,7 +20,7 @@ import uk.gov.hmrc.apiplatform.modules.mfa.models.MfaId
 import uk.gov.hmrc.apiplatform.modules.mfa.service.MfaMandateService
 import uk.gov.hmrc.thirdpartydeveloperfrontend.builder.DeveloperBuilder
 import uk.gov.hmrc.thirdpartydeveloperfrontend.connectors.ThirdPartyDeveloperConnector
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.connectors.{LoginRequest, TotpAuthenticationRequest, UserAuthenticationResponse}
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.connectors.{LoginRequest, AccessCodeAuthenticationRequest, UserAuthenticationResponse}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.{LoggedInState, Session, SessionInvalid}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.repositories.FlowRepository
 import uk.gov.hmrc.http.HeaderCarrier
@@ -90,16 +90,16 @@ class SessionServiceSpec extends AsyncHmrcSpec with DeveloperBuilder with LocalU
 
   "authenticateTotp" should {
     "return the new session from the connector when the authentication succeeds" in new Setup {
-      when(underTest.thirdPartyDeveloperConnector.authenticateTotp(TotpAuthenticationRequest(email, totp, nonce, mfaId))).thenReturn(successful(session))
+      when(underTest.thirdPartyDeveloperConnector.authenticateMfaAccessCode(AccessCodeAuthenticationRequest(email, totp, nonce, mfaId))).thenReturn(successful(session))
 
-      await(underTest.authenticateTotp(email, totp, nonce, mfaId)) shouldBe session
+      await(underTest.authenticateAccessCode(email, totp, nonce, mfaId)) shouldBe session
     }
 
     "propagate the exception when the connector fails" in new Setup {
-      when(underTest.thirdPartyDeveloperConnector.authenticateTotp(TotpAuthenticationRequest(email, totp, nonce, mfaId)))
+      when(underTest.thirdPartyDeveloperConnector.authenticateMfaAccessCode(AccessCodeAuthenticationRequest(email, totp, nonce, mfaId)))
         .thenThrow(new RuntimeException)
 
-      intercept[RuntimeException](await(underTest.authenticateTotp(email, totp, nonce, mfaId)))
+      intercept[RuntimeException](await(underTest.authenticateAccessCode(email, totp, nonce, mfaId)))
     }
   }
 

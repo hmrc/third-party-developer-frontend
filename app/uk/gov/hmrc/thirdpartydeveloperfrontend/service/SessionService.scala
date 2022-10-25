@@ -19,7 +19,7 @@ package uk.gov.hmrc.thirdpartydeveloperfrontend.service
 import uk.gov.hmrc.apiplatform.modules.mfa.models.MfaId
 import uk.gov.hmrc.apiplatform.modules.mfa.service.MfaMandateService
 import uk.gov.hmrc.thirdpartydeveloperfrontend.connectors.ThirdPartyDeveloperConnector
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.connectors.{LoginRequest, TotpAuthenticationRequest, UserAuthenticationResponse}
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.connectors.{LoginRequest, AccessCodeAuthenticationRequest, UserAuthenticationResponse}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.{Session, SessionInvalid, UserId}
 
 import javax.inject.{Inject, Singleton}
@@ -43,8 +43,8 @@ class SessionService @Inject()(val thirdPartyDeveloperConnector: ThirdPartyDevel
     } yield (response, coreUser.id)
   }
 
-  def authenticateTotp(emailAddress: String, totp: String, nonce: String, mfaId: MfaId)(implicit hc: HeaderCarrier): Future[Session] = {
-    thirdPartyDeveloperConnector.authenticateTotp(TotpAuthenticationRequest(emailAddress, totp, nonce, mfaId))
+  def authenticateAccessCode(emailAddress: String, accessCode: String, nonce: String, mfaId: MfaId)(implicit hc: HeaderCarrier): Future[Session] = {
+    thirdPartyDeveloperConnector.authenticateMfaAccessCode(AccessCodeAuthenticationRequest(emailAddress, accessCode, nonce, mfaId))
   }
 
   def fetch(sessionId: String)(implicit hc: HeaderCarrier): Future[Option[Session]] =
