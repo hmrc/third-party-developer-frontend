@@ -32,6 +32,10 @@ class ErrorHandler @Inject()(val messagesApi: MessagesApi,
                             (implicit val appConfig: ApplicationConfig)
   extends FrontendErrorHandler {
 
+  def standardErrorTemplate(message: String)(implicit request: Request[_]): HtmlFormat.Appendable = {
+    standardErrorTemplate(message, message, message)
+  }
+
   override def standardErrorTemplate(pageTitle: String, heading: String, message: String)(implicit request: Request[_]): HtmlFormat.Appendable = {
     errorTemplateView(pageTitle, heading, message)
   }

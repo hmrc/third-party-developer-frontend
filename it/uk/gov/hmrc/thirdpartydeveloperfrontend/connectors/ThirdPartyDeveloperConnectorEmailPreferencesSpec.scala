@@ -29,7 +29,7 @@ import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.emailpreferences.Em
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.emailpreferences.TaxRegimeInterests
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.emailpreferences.EmailTopic._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.connectors.LoginRequest
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.connectors.TotpAuthenticationRequest
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.connectors.AccessCodeAuthenticationRequest
 import play.api.http.HeaderNames
 import uk.gov.hmrc.apiplatform.modules.mfa.models.MfaId
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.UserId
@@ -58,7 +58,7 @@ class ThirdPartyDeveloperConnectorEmailPreferencesSpec extends BaseConnectorInte
     val totp = "123456"
     val nonce = "ABC-123"
     val mfaId = MfaId.random
-    val totpAuthenticationRequest = TotpAuthenticationRequest(userEmail, totp, nonce, mfaId)
+    val totpAuthenticationRequest = AccessCodeAuthenticationRequest(userEmail, totp, nonce, mfaId)
 
     val payloadEncryption: PayloadEncryption = app.injector.instanceOf[PayloadEncryption]
     val encryptedLoginRequest: JsValue = Json.toJson(SecretRequest(payloadEncryption.encrypt(loginRequest).as[String]))

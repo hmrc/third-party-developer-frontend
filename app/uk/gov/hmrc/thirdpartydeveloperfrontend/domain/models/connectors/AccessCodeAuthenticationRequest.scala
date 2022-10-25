@@ -19,8 +19,8 @@ package uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.connectors
 import play.api.libs.json.{Json, OFormat}
 import uk.gov.hmrc.apiplatform.modules.mfa.models.MfaId
 
-case class TotpAuthenticationRequest(email: String, totp: String, nonce: String, mfaId: MfaId)
+case class AccessCodeAuthenticationRequest(email: String, accessCode: String, nonce: String, mfaId: MfaId)
 
-object TotpAuthenticationRequest {
-  implicit val format: OFormat[TotpAuthenticationRequest] = Json.format[TotpAuthenticationRequest]
+object AccessCodeAuthenticationRequest {
+  implicit val format: OFormat[AccessCodeAuthenticationRequest] = Json.format[AccessCodeAuthenticationRequest]
 }
