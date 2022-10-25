@@ -111,7 +111,7 @@
       @helper.form(action = routes.IpAllowListController.editIpAllowlistAction(app.id)) {
         @helper.CSRF.formField
         <div class="govuk-form-group @if(form.errors("confirm").nonEmpty) {govuk-form-group--error}">
-          <fieldset id="confirm" class="govuk-fieldset" aria-describedby="add-ip-error">
+          <fieldset id="confirm-fieldset" class="govuk-fieldset" aria-describedby="add-ip-error">
             <legend class="govuk-fieldset__legend govuk-fieldset__legend--m">
               <h2 class="govuk-fieldset__heading">
                 Do you want to add another IP address?
@@ -122,8 +122,8 @@
             </span>
             <div class="govuk-radios govuk-radios--inline">
               <div class="govuk-radios__item">
-                <input class="govuk-radios__input" id="yes" type="radio" name="confirm" value="Yes">
-                <label class="govuk-label govuk-radios__label" for="yes">Yes</label>
+                <input class="govuk-radios__input" id="confirm" type="radio" name="confirm" value="Yes">
+                <label class="govuk-label govuk-radios__label" for="confirm">Yes</label>
               </div>
               <div class="govuk-radios__item">
                 <input class="govuk-radios__input" id="no" type="radio" name="confirm" value="No">

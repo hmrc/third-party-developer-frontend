@@ -40,7 +40,7 @@
   <br>
   @helper.form(action = routes.DeleteApplication.requestDeletePrincipalApplicationAction(app.id), 'class -> "form") {
     <div class="govuk-form-group @if(form.errors("deleteConfirm").nonEmpty) {govuk-form-group--erro}">
-      <fieldset id="deleteConfirm" class="govuk-fieldset" role="group">
+      <fieldset id="deleteConfirm-fieldSet" class="govuk-fieldset" role="group">
         <legend class="govuk-fieldset__legend govuk-fieldset__legend--m">
           <h2 class="govuk-heading-m">Are you sure you want us to delete this application?</h2>
         </legend>
@@ -48,8 +48,8 @@
         <div class="govuk-radios govuk-radios--inline" data-module="govuk-radios">
           @helper.CSRF.formField
           <div class="govuk-radios__item">
-            <input id="yes" class="govuk-radios__input" type="radio" name="deleteConfirm" value="Yes">
-            <label class="govuk-label govuk-radios__label" for="yes">Yes</label>
+            <input id="deleteConfirm" class="govuk-radios__input" type="radio" name="deleteConfirm" value="Yes">
+            <label class="govuk-label govuk-radios__label" for="deleteConfirm">Yes</label>
           </div>
           <div class="govuk-radios__item">
             <input id="no" class="govuk-radios__input" type="radio" name="deleteConfirm" value="No">

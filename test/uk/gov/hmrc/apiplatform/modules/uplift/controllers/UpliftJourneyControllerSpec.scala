@@ -52,9 +52,9 @@ class UpliftJourneyControllerSpec extends BaseControllerSpec
                 with LocalUserIdTracker {
 
   trait Setup
-    extends ApplicationServiceMock 
-    with ApplicationActionServiceMock 
-    with ApmConnectorMockModule 
+    extends ApplicationServiceMock
+    with ApplicationActionServiceMock
+    with ApmConnectorMockModule
     with GetProductionCredentialsFlowServiceMockModule
     with UpliftJourneyServiceMockModule
     with SessionServiceMock {
@@ -165,7 +165,7 @@ class UpliftJourneyControllerSpec extends BaseControllerSpec
 
     "render the confirm apis view containing 1 upliftable api as there is only 1 upliftable api available to the application" in new Setup {
 
-      UpliftJourneyServiceMock.ApiSubscriptionData.thenReturns(Set("test-api-1 - 1.0"), false) 
+      UpliftJourneyServiceMock.ApiSubscriptionData.thenReturns(Set("test-api-1 - 1.0"), false)
 
       private val result = controller.confirmApiSubscriptionsPage(appId)(loggedInRequest.withCSRFToken)
 
@@ -262,7 +262,7 @@ class UpliftJourneyControllerSpec extends BaseControllerSpec
 
       contentAsString(result) should include("Turn off API subscriptions you don’t need")
     }
-    
+
   }
 
   "sellResellOrDistributeYourSoftware" should {
@@ -289,8 +289,8 @@ class UpliftJourneyControllerSpec extends BaseControllerSpec
       contentAsString(result) should include("Will you sell, resell or distribute your software?")
 
       val document = Jsoup.parse(contentAsString(result))
-      document.getElementById("distribute-question-yes") shouldNot be(null)
-      document.getElementById("distribute-question-yes").hasAttr("checked") shouldBe true
+      document.getElementById("answer") shouldNot be(null)
+      document.getElementById("answer").hasAttr("checked") shouldBe true
     }
 
     "render the 'sell resell or distribute your software view' with the answer 'No' selected" in new Setup {
@@ -339,7 +339,7 @@ class UpliftJourneyControllerSpec extends BaseControllerSpec
     "store the answer 'No' from the 'sell resell or distribute your software view' and redirect to next page" in new Setup {
 
       val testSellResellOrDistribute = SellResellOrDistribute("No")
-      
+
       GPCFlowServiceMock.StoreSellResellOrDistribute.thenReturns(testSellResellOrDistribute, GetProductionCredentialsFlow("", Some(testSellResellOrDistribute), None))
       UpliftJourneyServiceMock.StoreDefaultSubscriptionsInFlow.thenReturns()
 

@@ -62,7 +62,7 @@ class DeletePrincipalApplicationConfirmSpec extends CommonViewSpec with WithCSRF
       val document = Jsoup.parse(page.body)
       elementExistsByText(document, "h1", "Delete application") shouldBe true
       elementExistsByText(document, "h2", "Are you sure you want us to delete this application?") shouldBe true
-      elementIdentifiedByAttrWithValueContainsText(document, "label", "for", "yes", "Yes") shouldBe true
+      elementIdentifiedByAttrWithValueContainsText(document, "label", "for", "deleteConfirm", "Yes") shouldBe true
       elementIdentifiedByAttrWithValueContainsText(document, "label", "for", "no", "No") shouldBe true
     }
 
@@ -77,7 +77,7 @@ class DeletePrincipalApplicationConfirmSpec extends CommonViewSpec with WithCSRF
       document.body().toString.contains("Confirmation error message") shouldBe true
       elementExistsByText(document, "h1", "Delete application") shouldBe true
       elementExistsByText(document, "h2", "Are you sure you want us to delete this application?") shouldBe true
-      elementIdentifiedByAttrWithValueContainsText(document, "label", "for", "yes", "Yes") shouldBe true
+      elementIdentifiedByAttrWithValueContainsText(document, "label", "for", "deleteConfirm", "Yes") shouldBe true
       elementIdentifiedByAttrWithValueContainsText(document, "label", "for", "no", "No") shouldBe true
     }
   }
