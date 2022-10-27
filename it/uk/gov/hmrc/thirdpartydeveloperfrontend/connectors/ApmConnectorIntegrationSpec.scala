@@ -1,6 +1,5 @@
 package uk.gov.hmrc.thirdpartydeveloperfrontend.connectors
 
-import com.github.tomakehurst.wiremock.client.WireMock._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.connectors._
 import org.scalatestplus.play.guice.GuiceOneAppPerSuite
 import play.api.http.Status._
@@ -11,22 +10,23 @@ import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.http.UpstreamErrorResponse
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.UserId
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.emailpreferences.APICategoryDisplayDetails
-import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.WireMockExtensions
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.{Application, ApplicationId, ApplicationWithSubscriptionData, ClientId, Environment}
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.{Application, ApplicationId, ApplicationUpdateFormatters, ApplicationWithSubscriptionData, ClientId, CollaboratorActor, Environment, SubscribeToApi}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.apidefinitions.ApiIdentifier
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.apidefinitions.ApiContext
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.apidefinitions.ApiVersion
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.ApplicationUpdateSuccessful
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.ApplicationNotFound
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.connectors.ApiType.REST_API
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.services.{ApiDefinitionsJsonFormatters, CombinedApiJsonFormatters}
+import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.{LocalUserIdTracker, WireMockExtensions}
 import play.api.libs.json.Json
+import uk.gov.hmrc.thirdpartydeveloperfrontend.builder.ApplicationBuilder
 import uk.gov.hmrc.thirdpartydeveloperfrontend.connectors.stubs.ApiPlatformMicroserviceStub
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.subscriptions.{ApiData, ApiSubscriptionFields, FieldName}
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.subscriptions.ApiData
 
 import java.time.{LocalDateTime, Period}
 
-class ApmConnectorIntegrationSpec extends BaseConnectorIntegrationSpec with GuiceOneAppPerSuite with WireMockExtensions  with ApmConnectorJsonFormatters {
+class ApmConnectorIntegrationSpec extends BaseConnectorIntegrationSpec with GuiceOneAppPerSuite with WireMockExtensions with ApmConnectorJsonFormatters
+  with ApplicationUpdateFormatters with ApplicationBuilder with LocalUserIdTracker {
 
   private val stubConfig = Configuration(
     "microservice.services.api-platform-microservice.port" -> stubPort
@@ -163,24 +163,41 @@ class ApmConnectorIntegrationSpec extends BaseConnectorIntegrationSpec with Guic
     }
   }
 
-  "subscribe to api" should {
-    val applicationId = ApplicationId.random
-    val apiIdentifier = ApiIdentifier(ApiContext("app1"), ApiVersion("2.0"))
+  "application update" should {
 
     "subscribe application to an api" in new Setup {
+      val applicationId = ApplicationId.random
+      val apiIdentifier = ApiIdentifier(ApiContext("app1"), ApiVersion("2.0"))
+      val actor = CollaboratorActor("dev@example.com")
+      val subscribeToApi = SubscribeToApi(actor, apiIdentifier, LocalDateTime.now())
+      val application = buildApplication("any")
+      ApiPlatformMicroserviceStub.stubApplicationUpdate(applicationId, subscribeToApi, application)
+      
+      val result = await(underTest.updateApplication(applicationId, subscribeToApi))
 
+      result shouldBe application
+    }
+  }
+
+  "subscribe to api" should {
+    val applicationId = ApplicationId.random
+    val actor = CollaboratorActor("dev@example.com")
+    val apiIdentifier = ApiIdentifier(ApiContext("app1"), ApiVersion("2.0"))
+    val subscribeToApi = SubscribeToApi(actor, apiIdentifier, LocalDateTime.now())
+
+    "subscribe application to an api" in new Setup {
       ApiPlatformMicroserviceStub
-        .stubSubscribeToApi(applicationId, apiIdentifier)
-      val result = await(underTest.subscribeToApi(applicationId, apiIdentifier))
+        .stubSubscribeToApi(applicationId, subscribeToApi)
+      val result = await(underTest.subscribeToApi(applicationId, subscribeToApi))
 
       result shouldBe ApplicationUpdateSuccessful
     }
 
     "throw ApplicationNotFound if the application cannot be found" in new Setup {
       ApiPlatformMicroserviceStub
-        .stubSubscribeToApiFailure(applicationId, apiIdentifier)
+        .stubSubscribeToApiFailure(applicationId, subscribeToApi)
       intercept[ApplicationNotFound](
-        await(underTest.subscribeToApi(applicationId, apiIdentifier))
+        await(underTest.subscribeToApi(applicationId, subscribeToApi))
       )
     }
   }

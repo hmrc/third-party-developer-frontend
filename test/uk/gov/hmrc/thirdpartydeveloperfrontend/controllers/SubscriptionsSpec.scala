@@ -95,6 +95,7 @@ class SubscriptionsSpec extends BaseControllerSpec with WithCSRFAddToken with Lo
     val sessionParams = Seq("csrfToken" -> app.injector.instanceOf[TokenProvider].generateToken)
     val loggedOutRequest: FakeRequest[AnyContentAsEmpty.type] = FakeRequest().withSession(sessionParams: _*)
     val loggedInRequest: FakeRequest[AnyContentAsEmpty.type] = FakeRequest().withLoggedIn(underTest, implicitly)(sessionId).withSession(sessionParams: _*)
+    val actor = CollaboratorActor(loggedInDeveloper.developer.email)
   }
 
   "subscriptions" should {
@@ -197,7 +198,7 @@ class SubscriptionsSpec extends BaseControllerSpec with WithCSRFAddToken with Lo
 
         fetchByApplicationIdReturns(appId, app)
         givenApplicationAction(ApplicationWithSubscriptionData(app, asSubscriptions(List.empty), asFields(List.empty)), loggedInDeveloper, List.empty)
-        givenSubscribeToApiSucceeds(app, apiIdentifier)
+        givenSubscribeToApiSucceeds(app, actor, apiIdentifier)
         givenUpdateCheckInformationSucceeds(app)
 
         val result = underTest.changeApiSubscription(app.id, apiContext, apiVersion, redirectTo)(request)
@@ -205,7 +206,7 @@ class SubscriptionsSpec extends BaseControllerSpec with WithCSRFAddToken with Lo
         status(result) shouldBe SEE_OTHER
         redirectLocation(result) shouldBe Some(routes.Details.details(app.id).url)
 
-        verify(applicationServiceMock).subscribeToApi(eqTo(app), eqTo(apiIdentifier))(*)
+        verify(applicationServiceMock).subscribeToApi(eqTo(app), eqTo(actor), eqTo(apiIdentifier))(*)
         verify(applicationServiceMock, never).updateCheckInformation(eqTo(app), any[CheckInformation])(*)
       }
 
@@ -218,7 +219,7 @@ class SubscriptionsSpec extends BaseControllerSpec with WithCSRFAddToken with Lo
 
         fetchByApplicationIdReturns(appId, app)
         givenApplicationAction(ApplicationWithSubscriptionData(app, asSubscriptions(List.empty), asFields(List.empty)), loggedInDeveloper, List.empty)
-        ungivenSubscribeToApiSucceeds(app, apiIdentifier)
+        givenUnsubscribeFromApiSucceeds(app, actor, apiIdentifier)
         givenUpdateCheckInformationSucceeds(app)
 
         val result = underTest.changeApiSubscription(app.id, apiContext, apiVersion, redirectTo)(request)
@@ -226,7 +227,7 @@ class SubscriptionsSpec extends BaseControllerSpec with WithCSRFAddToken with Lo
         status(result) shouldBe SEE_OTHER
         redirectLocation(result) shouldBe Some(routes.Details.details(app.id).url)
 
-        verify(applicationServiceMock).unsubscribeFromApi(eqTo(app), eqTo(apiIdentifier))(*)
+        verify(applicationServiceMock).unsubscribeFromApi(eqTo(app), eqTo(actor), eqTo(apiIdentifier))(*)
         verify(applicationServiceMock, never).updateCheckInformation(eqTo(app), any[CheckInformation])(*)
       }
 
@@ -239,14 +240,14 @@ class SubscriptionsSpec extends BaseControllerSpec with WithCSRFAddToken with Lo
 
         fetchByApplicationIdReturns(appId, app)
         givenApplicationAction(ApplicationWithSubscriptionData(app, asSubscriptions(List.empty), asFields(List.empty)), loggedInDeveloper, List.empty)
-        ungivenSubscribeToApiSucceeds(app, apiIdentifier)
+        givenUnsubscribeFromApiSucceeds(app, actor, apiIdentifier)
         givenUpdateCheckInformationSucceeds(app)
 
         val result = underTest.changeApiSubscription(app.id, apiContext, apiVersion, redirectTo)(request)
 
         status(result) shouldBe BAD_REQUEST
 
-        verify(applicationServiceMock, never).unsubscribeFromApi(eqTo(app), eqTo(apiIdentifier))(*)
+        verify(applicationServiceMock, never).unsubscribeFromApi(eqTo(app), eqTo(actor), eqTo(apiIdentifier))(*)
         verify(applicationServiceMock, never).updateCheckInformation(eqTo(app), any[CheckInformation])(*)
       }
     }
@@ -261,7 +262,7 @@ class SubscriptionsSpec extends BaseControllerSpec with WithCSRFAddToken with Lo
 
         fetchByApplicationIdReturns(appId, app)
         givenApplicationAction(ApplicationWithSubscriptionData(app, asSubscriptions(List.empty), asFields(List.empty)), loggedInDeveloper, List.empty)
-        givenSubscribeToApiSucceeds(app, apiIdentifier)
+        givenSubscribeToApiSucceeds(app, actor, apiIdentifier)
         givenUpdateCheckInformationSucceeds(app)
 
         val result = underTest.changeApiSubscription(app.id, apiContext, apiVersion, redirectTo)(request)
@@ -269,7 +270,7 @@ class SubscriptionsSpec extends BaseControllerSpec with WithCSRFAddToken with Lo
         status(result) shouldBe SEE_OTHER
         redirectLocation(result) shouldBe Some(routes.Details.details(app.id).url)
 
-        verify(applicationServiceMock).subscribeToApi(eqTo(app), eqTo(apiIdentifier))(*)
+        verify(applicationServiceMock).subscribeToApi(eqTo(app), eqTo(actor), eqTo(apiIdentifier))(*)
         verify(applicationServiceMock).updateCheckInformation(eqTo(app), any[CheckInformation])(*)
       }
 
@@ -283,7 +284,7 @@ class SubscriptionsSpec extends BaseControllerSpec with WithCSRFAddToken with Lo
         fetchByApplicationIdReturns(appId, app)
 
         givenApplicationAction(ApplicationWithSubscriptionData(app, asSubscriptions(List.empty), asFields(List.empty)), loggedInDeveloper, List.empty)
-        ungivenSubscribeToApiSucceeds(app, apiIdentifier)
+        givenUnsubscribeFromApiSucceeds(app, actor, apiIdentifier)
         givenUpdateCheckInformationSucceeds(app)
 
         val result = underTest.changeApiSubscription(app.id, apiContext, apiVersion, redirectTo)(request)
@@ -291,7 +292,7 @@ class SubscriptionsSpec extends BaseControllerSpec with WithCSRFAddToken with Lo
         status(result) shouldBe SEE_OTHER
         redirectLocation(result) shouldBe Some(routes.Details.details(app.id).url)
 
-        verify(applicationServiceMock).unsubscribeFromApi(eqTo(app), eqTo(apiIdentifier))(*)
+        verify(applicationServiceMock).unsubscribeFromApi(eqTo(app), eqTo(actor), eqTo(apiIdentifier))(*)
         verify(applicationServiceMock).updateCheckInformation(eqTo(app), any[CheckInformation])(*)
       }
 
@@ -305,14 +306,14 @@ class SubscriptionsSpec extends BaseControllerSpec with WithCSRFAddToken with Lo
         fetchByApplicationIdReturns(appId, app)
 
         givenApplicationAction(ApplicationWithSubscriptionData(app, asSubscriptions(List.empty), asFields(List.empty)), loggedInDeveloper, List.empty)
-        ungivenSubscribeToApiSucceeds(app, apiIdentifier)
+        givenUnsubscribeFromApiSucceeds(app, actor, apiIdentifier)
         givenUpdateCheckInformationSucceeds(app)
 
         val result = underTest.changeApiSubscription(app.id, apiContext, apiVersion, redirectTo)(request)
 
         status(result) shouldBe BAD_REQUEST
 
-        verify(applicationServiceMock, never).unsubscribeFromApi(eqTo(app), eqTo(apiIdentifier))(*)
+        verify(applicationServiceMock, never).unsubscribeFromApi(eqTo(app), eqTo(actor), eqTo(apiIdentifier))(*)
         verify(applicationServiceMock, never).updateCheckInformation(eqTo(app), any[CheckInformation])(*)
       }
     }

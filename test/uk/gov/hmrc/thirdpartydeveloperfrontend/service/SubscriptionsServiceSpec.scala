@@ -114,21 +114,40 @@ class SubscriptionsServiceSpec extends AsyncHmrcSpec with SubscriptionsBuilder w
 
 
   "Subscribe to API" should {
-    "with no subscription fields definitions" in new Setup {
+    "succeed with no subscription fields definitions" in new Setup {
 
-      private val context = ApiContext("api1")
-      private val version = versionOne
-
-      private val subscription = ApiIdentifier(context, version)
+      private val actor = CollaboratorActor("dev@example.com")
+      private val apiIdentifier = ApiIdentifier(ApiContext("api1"), versionOne)
+      private val timestamp = LocalDateTime.now()
+      private val subscription = SubscribeToApi(actor, apiIdentifier, timestamp)
 
       theProductionConnectorthenReturnTheApplication(productionApplicationId, productionApplication)
 
       when(mockApmConnector.subscribeToApi(eqTo(productionApplicationId), eqTo(subscription))(*))
         .thenReturn(successful(ApplicationUpdateSuccessful))
 
-      await(subscriptionsService.subscribeToApi(productionApplication, subscription)) shouldBe ApplicationUpdateSuccessful
+      await(subscriptionsService.subscribeToApi(productionApplicationId, subscription)) shouldBe ApplicationUpdateSuccessful
 
       verify(mockApmConnector).subscribeToApi(eqTo(productionApplicationId), eqTo(subscription))(*)
+    }
+  }
+
+  "Unsubscribe from API" should {
+    "succeed using the updateApplication endpoint" in new Setup {
+
+      private val actor = CollaboratorActor("dev@example.com")
+      private val apiIdentifier = ApiIdentifier(ApiContext("api1"), versionOne)
+      private val timestamp = LocalDateTime.now()
+      private val unsubscribeFromApi = UnsubscribeFromApi(actor, apiIdentifier, timestamp)
+
+      theProductionConnectorthenReturnTheApplication(productionApplicationId, productionApplication)
+
+      when(mockApmConnector.updateApplication(eqTo(productionApplicationId), eqTo(unsubscribeFromApi))(*))
+        .thenReturn(successful(productionApplication))
+
+      await(subscriptionsService.unsubscribeFromApi(productionApplicationId, unsubscribeFromApi)) shouldBe ApplicationUpdateSuccessful
+
+      verify(mockApmConnector).updateApplication(eqTo(productionApplicationId), eqTo(unsubscribeFromApi))(*)
     }
   }
 }  

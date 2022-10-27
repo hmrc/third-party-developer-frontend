@@ -122,7 +122,8 @@ class SubscriptionsController @Inject()(
         case Some(subscribe) =>
           def service = if (subscribe) applicationService.subscribeToApi _ else applicationService.unsubscribeFromApi _
 
-          service(request.application, apiIdentifier) andThen { case _ => updateCheckInformation(request.application) }
+          val actor = CollaboratorActor(request.developerSession.developer.email)
+          service(request.application, actor, apiIdentifier) andThen { case _ => updateCheckInformation(request.application) }
         case _ =>
           Future.successful(redirect(redirectTo, applicationId))
       }
@@ -174,7 +175,7 @@ class SubscriptionsController @Inject()(
                                   apiVersion: ApiVersion,
                                   redirectTo: String): Action[AnyContent] =
     canManageLockedApiSubscriptionsAction(applicationId) {
-      val call: Call = routes.SubscriptionsController.changeLockedApiSubscriptionAction(applicationId, apiName, apiContext, apiVersion, redirectTo.toString)
+      val call: Call = routes.SubscriptionsController.changeLockedApiSubscriptionAction(applicationId, apiName, apiContext, apiVersion, redirectTo)
       requestChangeApiSubscription(applicationId, apiName, apiContext, apiVersion, redirectTo, call)
     }
 

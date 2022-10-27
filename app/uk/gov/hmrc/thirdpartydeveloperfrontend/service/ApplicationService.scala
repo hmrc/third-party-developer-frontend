@@ -95,13 +95,16 @@ class ApplicationService @Inject() (
   type ApiMap[V] = Map[ApiContext, Map[ApiVersion, V]]
   type FieldMap[V] = ApiMap[Map[FieldName,V]]
 
-  def subscribeToApi(application: Application, apiIdentifier: ApiIdentifier)(implicit hc: HeaderCarrier): Future[ApplicationUpdateSuccessful] = {
-    subscriptionService.subscribeToApi(application, apiIdentifier)
+  def subscribeToApi(application: Application, actor: CollaboratorActor, apiIdentifier: ApiIdentifier)
+                    (implicit hc: HeaderCarrier): Future[ApplicationUpdateSuccessful] = {
+    val request = SubscribeToApi(actor, apiIdentifier, LocalDateTime.now(clock))
+    subscriptionService.subscribeToApi(application.id, request)
   }
 
-  def unsubscribeFromApi(application: Application, apiIdentifier: ApiIdentifier)(implicit hc: HeaderCarrier): Future[ApplicationUpdateSuccessful] = {
-    val connectors = connectorWrapper.forEnvironment(application.deployedTo)
-    connectors.thirdPartyApplicationConnector.unsubscribeFromApi(application.id, apiIdentifier)
+  def unsubscribeFromApi(application: Application, actor: CollaboratorActor, apiIdentifier: ApiIdentifier)
+                        (implicit hc: HeaderCarrier): Future[ApplicationUpdateSuccessful] = {
+    val request = UnsubscribeFromApi(actor, apiIdentifier, LocalDateTime.now(clock))
+    subscriptionService.unsubscribeFromApi(application.id, request)
   }
 
   def isSubscribedToApi(applicationId: ApplicationId, apiIdentifier: ApiIdentifier)(implicit hc: HeaderCarrier): Future[Boolean] = {
@@ -305,6 +308,5 @@ object ApplicationService {
     def addClientSecrets(id: ApplicationId, clientSecretRequest: ClientSecretRequest)(implicit hc: HeaderCarrier): Future[(String, String)]
     def validateName(name: String, selfApplicationId: Option[ApplicationId])(implicit hc: HeaderCarrier): Future[ApplicationNameValidation]
     def applicationUpdate(applicationId: ApplicationId, request: ApplicationUpdate)(implicit hc: HeaderCarrier): Future[ApplicationUpdateSuccessful]
-    def unsubscribeFromApi(applicationId: ApplicationId, apiIdentifier: ApiIdentifier)(implicit hc: HeaderCarrier): Future[ApplicationUpdateSuccessful]
   }
 }

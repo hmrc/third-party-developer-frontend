@@ -18,9 +18,10 @@ package uk.gov.hmrc.thirdpartydeveloperfrontend.service
 
 import uk.gov.hmrc.thirdpartydeveloperfrontend.connectors.DeskproConnector
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.apidefinitions.ApiVersion
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.{Application, ApplicationId}
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.{Application, ApplicationId, ApplicationUpdate, SubscribeToApi, UnsubscribeFromApi}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.connectors.{DeskproTicket, TicketResult}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.DeveloperSession
+
 import javax.inject.{Inject, Singleton}
 import uk.gov.hmrc.http.HeaderCarrier
 
@@ -29,6 +30,7 @@ import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.apidefinitions._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.ApplicationUpdateSuccessful
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.subscriptions.FieldName
 import uk.gov.hmrc.thirdpartydeveloperfrontend.connectors.ApmConnector
+
 import scala.concurrent.ExecutionContext
 
 @Singleton
@@ -56,8 +58,12 @@ class SubscriptionsService @Inject() (
   type ApiMap[V] = Map[ApiContext, Map[ApiVersion, V]]
   type FieldMap[V] = ApiMap[Map[FieldName,V]]
 
-  def subscribeToApi(application: Application, apiIdentifier: ApiIdentifier)(implicit hc: HeaderCarrier): Future[ApplicationUpdateSuccessful] = {
-    apmConnector.subscribeToApi(application.id, apiIdentifier)
+  def subscribeToApi(applicationId: ApplicationId, request: SubscribeToApi)(implicit hc: HeaderCarrier): Future[ApplicationUpdateSuccessful] = {
+    apmConnector.subscribeToApi(applicationId, request)
+  }
+  
+  def unsubscribeFromApi(applicationId: ApplicationId, request: UnsubscribeFromApi)(implicit hc: HeaderCarrier): Future[ApplicationUpdateSuccessful] = {
+    apmConnector.updateApplication(applicationId, request).map { _: Application => ApplicationUpdateSuccessful}
   }
   
   def isSubscribedToApi(applicationId: ApplicationId, apiIdentifier: ApiIdentifier)(implicit hc: HeaderCarrier): Future[Boolean] = {
@@ -72,7 +78,8 @@ class SubscriptionsService @Inject() (
 object SubscriptionsService {
   
   trait SubscriptionsConnector {
-    def subscribeToApi(applicationId: ApplicationId, apiIdentifier: ApiIdentifier)(implicit hc: HeaderCarrier): Future[ApplicationUpdateSuccessful]
+    def updateApplication(applicationId: ApplicationId, request: ApplicationUpdate)(implicit hc: HeaderCarrier): Future[Application]
+    def subscribeToApi(applicationId: ApplicationId, request: SubscribeToApi)(implicit hc: HeaderCarrier): Future[ApplicationUpdateSuccessful]
   }
 }
 

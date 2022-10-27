@@ -24,8 +24,6 @@ import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.emailpreferences.AP
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.subscriptions.ApiSubscriptionFields.SubscriptionFieldDefinition
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.subscriptions.{ApiData, FieldName}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.{ApplicationNotFound, ApplicationUpdateSuccessful, TeamMemberAlreadyExists}
-import play.api.http.ContentTypes.JSON
-import play.api.http.HeaderNames.CONTENT_TYPE
 import play.api.http.Status.{CONFLICT, NOT_FOUND}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.service.OpenAccessApiService.OpenAccessApisConnector
 import uk.gov.hmrc.thirdpartydeveloperfrontend.service.SubscriptionsService.SubscriptionsConnector
@@ -54,6 +52,7 @@ object ApmConnector {
 class ApmConnector @Inject()(http: HttpClient, config: ApmConnector.Config, metrics: ConnectorMetrics)(implicit ec: ExecutionContext)
   extends SubscriptionsConnector
     with OpenAccessApisConnector
+    with ApplicationUpdateFormatters
     with CommonResponseHandlers {
 
   import ApmConnector._
@@ -105,9 +104,13 @@ class ApmConnector @Inject()(http: HttpClient, config: ApmConnector.Config, metr
         case NonFatal(e) => Left(e)
       }
 
-  def subscribeToApi(applicationId: ApplicationId, apiIdentifier: ApiIdentifier)
+  def updateApplication(applicationId: ApplicationId, request: ApplicationUpdate)(implicit hc: HeaderCarrier): Future[Application] = metrics.record(api) {
+    http.PATCH[ApplicationUpdate, Application](s"${config.serviceBaseUrl}/applications/${applicationId.value}", request)
+  }
+
+  def subscribeToApi(applicationId: ApplicationId, subscribeToApi: SubscribeToApi)
                     (implicit hc: HeaderCarrier): Future[ApplicationUpdateSuccessful] = metrics.record(api) {
-    http.POST[ApiIdentifier, ErrorOrUnit](s"${config.serviceBaseUrl}/applications/${applicationId.value}/subscriptions", apiIdentifier, Seq(CONTENT_TYPE -> JSON))
+    http.POST[SubscribeToApi, ErrorOrUnit](s"${config.serviceBaseUrl}/applications/${applicationId.value}/subscriptionsAppUpdate", subscribeToApi)
       .map(throwOrOptionOf)
       .map {
         case Some(_) => ApplicationUpdateSuccessful
@@ -137,7 +140,7 @@ class ApmConnector @Inject()(http: HttpClient, config: ApmConnector.Config, metr
 
   def fetchAllApis(environment: Environment)(implicit hc: HeaderCarrier): Future[Map[ApiContext, ApiData]] =
     metrics.record(api) {
-      http.GET[Map[ApiContext, ApiData]](s"${config.serviceBaseUrl}/api-definitions/all", Seq("environment" -> environment.toString()))
+      http.GET[Map[ApiContext, ApiData]](s"${config.serviceBaseUrl}/api-definitions/all", Seq("environment" -> environment.toString))
     }
 
   def upliftApplicationV1(applicationId: ApplicationId, subs: Set[ApiIdentifier])(implicit hc: HeaderCarrier): Future[ApplicationId] = metrics.record(api) {
