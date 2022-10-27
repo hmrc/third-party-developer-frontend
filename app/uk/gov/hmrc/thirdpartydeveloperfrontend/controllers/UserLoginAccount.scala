@@ -36,7 +36,7 @@ import uk.gov.hmrc.thirdpartydeveloperfrontend.connectors.ThirdPartyDeveloperCon
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.connectors.UserAuthenticationResponse
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.controllers.MfaMandateDetails
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.{Developer, DeveloperSession, UserId}
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.{Developer, DeveloperSession, Session, UserId}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.service.AuditAction._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.service._
 import views.html._
@@ -170,7 +170,7 @@ class UserLoginAccount @Inject() (
       val authAppMfaDetail = MfaDetailHelper.getAuthAppMfaVerified(developer.mfaDetails)
       Future.successful(
         Redirect(routes.UserLoginAccount.loginAccessCodePage(authAppMfaDetail.id, AUTHENTICATOR_APP), SEE_OTHER)
-        .withSession(playSession + ("emailAddress" -> emailAddress) + ("nonce" -> nonce))
+          .withSession(playSession + ("emailAddress" -> emailAddress) + ("nonce" -> nonce))
       )
     }
 
@@ -242,7 +242,7 @@ class UserLoginAccount @Inject() (
     Future.successful(
       mfaType match {
         case AUTHENTICATOR_APP => Ok(authAppLoginAccessCodeView(MfaAccessCodeForm.form, mfaId, mfaType))
-        case SMS => Ok(smsLoginAccessCodeView(MfaAccessCodeForm.form, mfaId, mfaType))
+        case SMS               => Ok(smsLoginAccessCodeView(MfaAccessCodeForm.form, mfaId, mfaType))
       }
     )
   }
@@ -250,34 +250,34 @@ class UserLoginAccount @Inject() (
   def authenticateAccessCode(mfaId: MfaId, mfaType: MfaType): Action[AnyContent] = Action.async { implicit request =>
     val email: String = request.session.get("emailAddress").get
 
+    def handleRememberMe(form: MfaAccessCodeForm, session: Session) = {
+      if (form.rememberMe) {
+        thirdPartyDeveloperMfaConnector.createDeviceSession(session.developer.userId) flatMap {
+          case Some(deviceSession: DeviceSession) => loginSucceeded(request)
+              .map(r => withSessionAndDeviceCookies(r, session.sessionId, deviceSession.deviceSessionId.toString))
+          case _                                  => successful(InternalServerError(""))
+        }
+      } else { loginSucceeded(request).map(r => withSessionCookie(r, session.sessionId)) }
+    }
+
     def handleAuthentication(email: String, form: MfaAccessCodeForm, mfaType: MfaType) = {
       sessionService.authenticateAccessCode(email, form.accessCode, request.session.get("nonce").get, mfaId)
         .flatMap { session =>
-            audit(LoginSucceeded, DeveloperSession.apply(session))
-            //create device session if 7 days checkbox clicked (from form)  then create cookie
-            if (form.rememberMe) {
-              thirdPartyDeveloperMfaConnector.createDeviceSession(session.developer.userId) flatMap {
-                case Some(deviceSession: DeviceSession) =>
-                  loginSucceeded(request).map(r =>
-                    withSessionAndDeviceCookies(r, session.sessionId, deviceSession.deviceSessionId.toString))
-                case _ => successful(InternalServerError(""))
-              }
-            } else {
-              loginSucceeded(request).map(r => withSessionCookie(r, session.sessionId))
-            }
+          audit(LoginSucceeded, DeveloperSession.apply(session))
+          handleRememberMe(form, session)
         } recover {
         case _: InvalidCredentials =>
           logger.warn("Login failed due to invalid access code")
           audit(LoginFailedDueToInvalidAccessCode, Map("developerEmail" -> email))
           handleAccessCodeError(form, mfaId, mfaType)
-      }
+        }
     }
 
     def handleFormWithErrors(formWithErrors: Form[MfaAccessCodeForm], mfaId: MfaId, mfaType: MfaType) = {
       Future.successful(
         mfaType match {
           case AUTHENTICATOR_APP => BadRequest(authAppLoginAccessCodeView(formWithErrors, mfaId, mfaType))
-          case SMS => BadRequest(smsLoginAccessCodeView(formWithErrors, mfaId, mfaType))
+          case SMS               => BadRequest(smsLoginAccessCodeView(formWithErrors, mfaId, mfaType))
         }
       )
     }
@@ -313,20 +313,14 @@ class UserLoginAccount @Inject() (
     val email = request.session.get("emailAddress").getOrElse("")
 
     def findName: Future[Option[String]] =
-      (
-        for {
-          details <- OptionT(thirdPartyDeveloperConnector.findUserId(email))
-          developer <- OptionT(thirdPartyDeveloperConnector.fetchDeveloper(details.id))
-        } yield s"${developer.firstName} ${developer.lastName}"
-      )
-        .value
+      (for {
+        details <- OptionT(thirdPartyDeveloperConnector.findUserId(email))
+        developer <- OptionT(thirdPartyDeveloperConnector.fetchDeveloper(details.id))
+      } yield s"${developer.firstName} ${developer.lastName}").value
 
     for {
       oName <- findName
-      _ <- applicationService.request2SVRemoval(
-             name = oName.getOrElse("Unknown"),
-             email
-           )
+      _ <- applicationService.request2SVRemoval(name = oName.getOrElse("Unknown"), email)
     } yield Ok(protectAccountNoAccessCodeCompleteView())
   }
 }
