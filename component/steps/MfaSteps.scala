@@ -47,21 +47,21 @@ class MfaSteps extends ScalaDsl with EN with Matchers with NavigationSugar with 
 
   When("""^I enter the correct access code during 2SVSetup with mfaMandated '(.*)'$""") { (mfaMandated: String) =>
     val isMfaMandated = java.lang.Boolean.parseBoolean(mfaMandated)
-    MfaStub.stubAuthenticateTotpSuccess(mfaId)
+    MfaStub.stubAuthenticateAccessCodeSuccess(mfaId)
     MfaStub.stubUpliftAuthSession(isMfaMandated)
     Setup2svEnterAccessCodePage.enterAccessCode(accessCode)
     Setup2svEnterAccessCodePage.clickContinue()
   }
 
   When("""^I enter the correct access code during remove2SV then click continue$""") {
-    MfaStub.stubAuthenticateTotpSuccess(mfaId)
+    MfaStub.stubAuthenticateAccessCodeSuccess(mfaId)
     MfaRemovePage.enterAccessCode(accessCode)
     MfaRemovePage.clickContinue()
   }
 
 
   When("""^I enter the correct access code and click remember me for 7 days then click continue$""") {
-    MfaStub.stubAuthenticateTotpSuccess(mfaId)
+    MfaStub.stubAuthenticateAccessCodeSuccess(mfaId)
     Login2svEnterAccessCodePage.enterAccessCode(accessCode, rememberMe = true)
     DeviceSessionStub.createDeviceSession(staticUserId, CREATED)
     Login2svEnterAccessCodePage.clickContinue()
@@ -69,7 +69,7 @@ class MfaSteps extends ScalaDsl with EN with Matchers with NavigationSugar with 
   }
 
   When("""^I enter the correct access code and do NOT click remember me for 7 days then click continue$""") {
-    MfaStub.stubAuthenticateTotpSuccess(mfaId)
+    MfaStub.stubAuthenticateAccessCodeSuccess(mfaId)
     Login2svEnterAccessCodePage.enterAccessCode(accessCode)
     Login2svEnterAccessCodePage.clickContinue()
   }

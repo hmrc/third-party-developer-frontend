@@ -55,10 +55,10 @@ class ThirdPartyDeveloperConnectorEmailPreferencesSpec extends BaseConnectorInte
     val userPassword = "password1!"
     val sessionId = "sessionId"
     val loginRequest = LoginRequest(userEmail, userPassword, mfaMandatedForUser = false, None)
-    val totp = "123456"
+    val accessCode = "123456"
     val nonce = "ABC-123"
     val mfaId = MfaId.random
-    val totpAuthenticationRequest = AccessCodeAuthenticationRequest(userEmail, totp, nonce, mfaId)
+    val totpAuthenticationRequest = AccessCodeAuthenticationRequest(userEmail, accessCode, nonce, mfaId)
 
     val payloadEncryption: PayloadEncryption = app.injector.instanceOf[PayloadEncryption]
     val encryptedLoginRequest: JsValue = Json.toJson(SecretRequest(payloadEncryption.encrypt(loginRequest).as[String]))

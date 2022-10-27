@@ -54,19 +54,17 @@ class ThirdPartyDeveloperConnectorIntegrationSpec extends BaseConnectorIntegrati
     val userPassword = "password1!"
     val sessionId = "sessionId"
     val loginRequest = LoginRequest(userEmail, userPassword, mfaMandatedForUser = false, None)
-    val totp = "123456"
+    val accessCode = "123456"
     val nonce = "ABC-123"
     val mfaId = MfaId.random
-    val totpAuthenticationRequest = AccessCodeAuthenticationRequest(userEmail, totp, nonce, mfaId)
+    val accessCodeAuthenticationRequest = AccessCodeAuthenticationRequest(userEmail, accessCode, nonce, mfaId)
 
     val payloadEncryption: PayloadEncryption = app.injector.instanceOf[PayloadEncryption]
     val encryptedLoginRequest: JsValue = Json.toJson(SecretRequest(payloadEncryption.encrypt(loginRequest).as[String]))
-    val encryptedTotpAuthenticationRequest: JsValue = Json.toJson(SecretRequest(payloadEncryption.encrypt(totpAuthenticationRequest).as[String]))
+    val encryptedTotpAuthenticationRequest: JsValue = Json.toJson(SecretRequest(payloadEncryption.encrypt(accessCodeAuthenticationRequest).as[String]))
     val underTest: ThirdPartyDeveloperConnector = app.injector.instanceOf[ThirdPartyDeveloperConnector]
-
   }
 
-  
   "verify" should {
     "successfully verify a developer" in new Setup {
       val code = "A1234"
@@ -161,7 +159,7 @@ class ThirdPartyDeveloperConnectorIntegrationSpec extends BaseConnectorIntegrati
     }
   }
 
-  
+
   "updateSessionLoggedInState" should {
     val sessionId = "sessionId"
     val url = s"/session/$sessionId/loggedInState/LOGGED_IN"
@@ -309,7 +307,7 @@ class ThirdPartyDeveloperConnectorIntegrationSpec extends BaseConnectorIntegrati
   "accountSetupQuestions" should {
     val developer = buildDeveloper()
     val baseUrl = s"/developer/account-setup/${developer.userId.value}"
-    
+
     "successfully complete a developer account setup" in new Setup {
       stubFor(
         post(urlPathEqualTo(s"$baseUrl/complete"))
@@ -371,7 +369,7 @@ class ThirdPartyDeveloperConnectorIntegrationSpec extends BaseConnectorIntegrati
 
     "throw Invalid Credentials if the response is Unauthorised" in new Setup {
       val encryptedBody = SecretRequest(payloadEncryption.encrypt(payload).as[String])
-      
+
       stubFor(
         post(urlPathEqualTo("/change-password"))
         .withJsonRequestBody(encryptedBody)
@@ -385,7 +383,7 @@ class ThirdPartyDeveloperConnectorIntegrationSpec extends BaseConnectorIntegrati
 
     "throw Unverified Account if the response is Forbidden" in new Setup {
       val encryptedBody = SecretRequest(payloadEncryption.encrypt(payload).as[String])
-      
+
       stubFor(
         post(urlPathEqualTo("/change-password"))
         .withJsonRequestBody(encryptedBody)
@@ -399,7 +397,7 @@ class ThirdPartyDeveloperConnectorIntegrationSpec extends BaseConnectorIntegrati
 
     "throw Locked Account if the response is Locked" in new Setup {
       val encryptedBody = SecretRequest(payloadEncryption.encrypt(payload).as[String])
-      
+
       stubFor(
         post(urlPathEqualTo("/change-password"))
         .withJsonRequestBody(encryptedBody)
@@ -533,10 +531,10 @@ class ThirdPartyDeveloperConnectorIntegrationSpec extends BaseConnectorIntegrati
     }
   }
 
-  "authenticateTotp" should {
-    "return the session containing the user when the TOTP and nonce are valid" in new Setup {
+  "authenticateMfaAccessCode" should {
+    "return the session containing the user when the accessCode and nonce are valid" in new Setup {
       stubFor(
-        post(urlEqualTo("/authenticate-auth-app"))
+        post(urlEqualTo("/authenticate-mfa"))
           .withRequestBody(equalToJson(encryptedTotpAuthenticationRequest.toString))
           .willReturn(
             aResponse()
@@ -557,15 +555,15 @@ class ThirdPartyDeveloperConnectorIntegrationSpec extends BaseConnectorIntegrati
           )
       )
 
-      val result: Session = await(underTest.authenticateMfaAccessCode(totpAuthenticationRequest))
+      val result: Session = await(underTest.authenticateMfaAccessCode(accessCodeAuthenticationRequest))
 
-      verify(1, postRequestedFor(urlMatching("/authenticate-auth-app")).withRequestBody(equalToJson(encryptedTotpAuthenticationRequest.toString)))
+      verify(1, postRequestedFor(urlMatching("/authenticate-mfa")).withRequestBody(equalToJson(encryptedTotpAuthenticationRequest.toString)))
       result shouldBe Session(sessionId, buildDeveloper(emailAddress = userEmail), LoggedInState.LOGGED_IN)
     }
 
     "throw Invalid credentials when the credentials are invalid" in new Setup {
       stubFor(
-        post(urlEqualTo("/authenticate-auth-app"))
+        post(urlEqualTo("/authenticate-mfa"))
           .withRequestBody(equalToJson(encryptedTotpAuthenticationRequest.toString))
           .willReturn(
             aResponse()
@@ -574,12 +572,12 @@ class ThirdPartyDeveloperConnectorIntegrationSpec extends BaseConnectorIntegrati
           )
       )
 
-      intercept[InvalidCredentials](await(underTest.authenticateMfaAccessCode(totpAuthenticationRequest)))
+      intercept[InvalidCredentials](await(underTest.authenticateMfaAccessCode(accessCodeAuthenticationRequest)))
     }
 
     "throw InvalidEmail when the email is not found" in new Setup {
       stubFor(
-        post(urlEqualTo("/authenticate-auth-app"))
+        post(urlEqualTo("/authenticate-mfa"))
           .withRequestBody(equalToJson(encryptedTotpAuthenticationRequest.toString))
           .willReturn(
             aResponse()
@@ -588,7 +586,7 @@ class ThirdPartyDeveloperConnectorIntegrationSpec extends BaseConnectorIntegrati
           )
       )
 
-      intercept[InvalidEmail](await(underTest.authenticateMfaAccessCode(totpAuthenticationRequest)))
+      intercept[InvalidEmail](await(underTest.authenticateMfaAccessCode(accessCodeAuthenticationRequest)))
     }
   }
 }

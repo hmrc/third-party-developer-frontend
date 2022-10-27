@@ -15,11 +15,11 @@ object MfaStub {
   private val accessCode = "123456"
   val nonce = "iamanoncevalue"
 
-  def stubAuthenticateTotpSuccess(mfaId: MfaId)(implicit encryptedJson: EncryptedJson): Unit = {
+  def stubAuthenticateAccessCodeSuccess(mfaId: MfaId)(implicit encryptedJson: EncryptedJson): Unit = {
     val session = Session(TestContext.sessionIdForloggedInDeveloper, TestContext.developer, LoggedInState.LOGGED_IN)
 
     stubFor(
-      post(urlEqualTo("/authenticate-auth-app"))
+      post(urlEqualTo("/authenticate-mfa"))
       .withRequestBody(equalToJson(encryptedJson.toSecretRequestJson(AccessCodeAuthenticationRequest("john.smith@example.com", accessCode, nonce, mfaId)).toString()))
         .willReturn(
           aResponse()
