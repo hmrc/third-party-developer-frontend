@@ -35,9 +35,6 @@ import play.api.inject.bind
 import play.api.Mode
 import play.api.libs.json.Json
 import play.api.{Application => PlayApplication}
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.apidefinitions.ApiContext
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.apidefinitions.ApiVersion
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.apidefinitions.ApiIdentifier
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.UserId
 
 class ThirdPartyApplicationConnectorSpec extends BaseConnectorIntegrationSpec with GuiceOneAppPerSuite with WireMockExtensions
@@ -263,39 +260,6 @@ class ThirdPartyApplicationConnectorSpec extends BaseConnectorIntegrationSpec wi
       )
       intercept[ApplicationNotFound](
         await(connector.fetchCredentials(applicationId))
-      )
-    }
-  }
-
-  "unsubscribe from api" should {
-    val context       = ApiContext("app1")
-    val version       = ApiVersion("2.0")
-    val apiIdentifier = ApiIdentifier(context, version)
-    val url           = s"/application/${applicationId.value}/subscription?context=${context.value}&version=${version.value}"
-
-    "unsubscribe application from an api" in new Setup {
-      stubFor(
-        delete(urlEqualTo(url))
-          .willReturn(
-            aResponse()
-              .withStatus(OK)
-          )
-      )
-      val result = await(connector.unsubscribeFromApi(applicationId, apiIdentifier))
-
-      result shouldBe ApplicationUpdateSuccessful
-    }
-
-    "throw ApplicationNotFound if the application cannot be found" in new Setup {
-      stubFor(
-        delete(urlEqualTo(url))
-          .willReturn(
-            aResponse()
-              .withStatus(NOT_FOUND)
-          )
-      )
-      intercept[ApplicationNotFound](
-        await(connector.unsubscribeFromApi(applicationId, apiIdentifier))
       )
     }
   }

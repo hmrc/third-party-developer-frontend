@@ -37,8 +37,6 @@ import uk.gov.hmrc.thirdpartydeveloperfrontend.service.AuditAction.{AccountDelet
 class ApplicationService @Inject() (
     apmConnector: ApmConnector,
     connectorWrapper: ConnectorsWrapper,
-    subscriptionFieldsService: SubscriptionFieldsService,
-    subscriptionService: SubscriptionsService,
     deskproConnector: DeskproConnector,
     developerConnector: ThirdPartyDeveloperConnector,
     sandboxApplicationConnector: ThirdPartyApplicationSandboxConnector,
@@ -105,19 +103,6 @@ class ApplicationService @Inject() (
 
   type ApiMap[V]   = Map[ApiContext, Map[ApiVersion, V]]
   type FieldMap[V] = ApiMap[Map[FieldName, V]]
-
-  def subscribeToApi(application: Application, apiIdentifier: ApiIdentifier)(implicit hc: HeaderCarrier): Future[ApplicationUpdateSuccessful] = {
-    subscriptionService.subscribeToApi(application, apiIdentifier)
-  }
-
-  def unsubscribeFromApi(application: Application, apiIdentifier: ApiIdentifier)(implicit hc: HeaderCarrier): Future[ApplicationUpdateSuccessful] = {
-    val connectors = connectorWrapper.forEnvironment(application.deployedTo)
-    connectors.thirdPartyApplicationConnector.unsubscribeFromApi(application.id, apiIdentifier)
-  }
-
-  def isSubscribedToApi(applicationId: ApplicationId, apiIdentifier: ApiIdentifier)(implicit hc: HeaderCarrier): Future[Boolean] = {
-    subscriptionService.isSubscribedToApi(applicationId, apiIdentifier)
-  }
 
   def addClientSecret(application: Application, actor: CollaboratorActor)(implicit hc: HeaderCarrier): Future[(String, String)] = {
     connectorWrapper.forEnvironment(application.deployedTo).thirdPartyApplicationConnector.addClientSecrets(application.id, ClientSecretRequest(actor, LocalDateTime.now(clock)))
@@ -332,6 +317,5 @@ object ApplicationService {
     def addClientSecrets(id: ApplicationId, clientSecretRequest: ClientSecretRequest)(implicit hc: HeaderCarrier): Future[(String, String)]
     def validateName(name: String, selfApplicationId: Option[ApplicationId])(implicit hc: HeaderCarrier): Future[ApplicationNameValidation]
     def applicationUpdate(applicationId: ApplicationId, request: ApplicationUpdate)(implicit hc: HeaderCarrier): Future[ApplicationUpdateSuccessful]
-    def unsubscribeFromApi(applicationId: ApplicationId, apiIdentifier: ApiIdentifier)(implicit hc: HeaderCarrier): Future[ApplicationUpdateSuccessful]
   }
 }

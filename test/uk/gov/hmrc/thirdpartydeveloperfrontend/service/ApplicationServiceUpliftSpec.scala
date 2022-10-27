@@ -50,15 +50,11 @@ class ApplicationServiceUpliftSpec extends AsyncHmrcSpec with LocalUserIdTracker
 
     val mockProductionApplicationConnector: ThirdPartyApplicationProductionConnector = mock[ThirdPartyApplicationProductionConnector]
     val mockSandboxApplicationConnector: ThirdPartyApplicationSandboxConnector       = mock[ThirdPartyApplicationSandboxConnector]
+    val mockProductionSubscriptionFieldsConnector: SubscriptionFieldsConnector       = mock[SubscriptionFieldsConnector]
+    val mockSandboxSubscriptionFieldsConnector: SubscriptionFieldsConnector          = mock[SubscriptionFieldsConnector]
+    val mockPushPullNotificationsConnector: PushPullNotificationsConnector           = mock[PushPullNotificationsConnector]
 
-    val mockSubscriptionsService: SubscriptionsService = mock[SubscriptionsService]
-
-    val mockProductionSubscriptionFieldsConnector: SubscriptionFieldsConnector = mock[SubscriptionFieldsConnector]
-    val mockSandboxSubscriptionFieldsConnector: SubscriptionFieldsConnector    = mock[SubscriptionFieldsConnector]
-    val mockPushPullNotificationsConnector: PushPullNotificationsConnector     = mock[PushPullNotificationsConnector]
-
-    val mockSubscriptionFieldsService: SubscriptionFieldsService = mock[SubscriptionFieldsService]
-    val mockDeskproConnector: DeskproConnector                   = mock[DeskproConnector]
+    val mockDeskproConnector: DeskproConnector = mock[DeskproConnector]
 
     val mockDeveloperConnector: ThirdPartyDeveloperConnector = mock[ThirdPartyDeveloperConnector]
 
@@ -77,8 +73,6 @@ class ApplicationServiceUpliftSpec extends AsyncHmrcSpec with LocalUserIdTracker
     val applicationService = new ApplicationService(
       mockApmConnector,
       connectorsWrapper,
-      mockSubscriptionFieldsService,
-      mockSubscriptionsService,
       mockDeskproConnector,
       mockDeveloperConnector,
       mockSandboxApplicationConnector,

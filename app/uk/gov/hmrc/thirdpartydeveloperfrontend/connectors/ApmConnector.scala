@@ -20,8 +20,6 @@ import javax.inject.{Inject, Singleton}
 import scala.concurrent.{ExecutionContext, Future}
 import scala.util.control.NonFatal
 
-import play.api.http.ContentTypes.JSON
-import play.api.http.HeaderNames.CONTENT_TYPE
 import play.api.http.Status.{CONFLICT, NOT_FOUND}
 import uk.gov.hmrc.http.HttpReads.Implicits._
 import uk.gov.hmrc.http.{HeaderCarrier, HttpClient, UpstreamErrorResponse}
@@ -55,6 +53,7 @@ object ApmConnector {
 class ApmConnector @Inject() (http: HttpClient, config: ApmConnector.Config, metrics: ConnectorMetrics)(implicit ec: ExecutionContext)
     extends SubscriptionsConnector
     with OpenAccessApisConnector
+    with ApplicationUpdateFormatters
     with CommonResponseHandlers {
 
   import ApmConnector._
@@ -108,8 +107,12 @@ class ApmConnector @Inject() (http: HttpClient, config: ApmConnector.Config, met
         case NonFatal(e) => Left(e)
       }
 
-  def subscribeToApi(applicationId: ApplicationId, apiIdentifier: ApiIdentifier)(implicit hc: HeaderCarrier): Future[ApplicationUpdateSuccessful] = metrics.record(api) {
-    http.POST[ApiIdentifier, ErrorOrUnit](s"${config.serviceBaseUrl}/applications/${applicationId.value}/subscriptions", apiIdentifier, Seq(CONTENT_TYPE -> JSON))
+  def updateApplication(applicationId: ApplicationId, request: ApplicationUpdate)(implicit hc: HeaderCarrier): Future[Application] = metrics.record(api) {
+    http.PATCH[ApplicationUpdate, Application](s"${config.serviceBaseUrl}/applications/${applicationId.value}", request)
+  }
+
+  def subscribeToApi(applicationId: ApplicationId, subscribeToApi: SubscribeToApi)(implicit hc: HeaderCarrier): Future[ApplicationUpdateSuccessful] = metrics.record(api) {
+    http.POST[SubscribeToApi, ErrorOrUnit](s"${config.serviceBaseUrl}/applications/${applicationId.value}/subscriptionsAppUpdate", subscribeToApi)
       .map(throwOrOptionOf)
       .map {
         case Some(_) => ApplicationUpdateSuccessful
@@ -139,7 +142,7 @@ class ApmConnector @Inject() (http: HttpClient, config: ApmConnector.Config, met
 
   def fetchAllApis(environment: Environment)(implicit hc: HeaderCarrier): Future[Map[ApiContext, ApiData]] =
     metrics.record(api) {
-      http.GET[Map[ApiContext, ApiData]](s"${config.serviceBaseUrl}/api-definitions/all", Seq("environment" -> environment.toString()))
+      http.GET[Map[ApiContext, ApiData]](s"${config.serviceBaseUrl}/api-definitions/all", Seq("environment" -> environment.toString))
     }
 
   def upliftApplicationV1(applicationId: ApplicationId, subs: Set[ApiIdentifier])(implicit hc: HeaderCarrier): Future[ApplicationId] = metrics.record(api) {

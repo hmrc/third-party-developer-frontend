@@ -21,6 +21,7 @@ import java.time.LocalDateTime
 import play.api.libs.json.{Format, Json}
 import uk.gov.hmrc.play.json.Union
 
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.apidefinitions.ApiIdentifier
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.UserId
 
 trait ApplicationUpdate {
@@ -43,6 +44,8 @@ case class ChangeResponsibleIndividualToSelf(instigator: UserId, timestamp: Loca
 case class ChangeResponsibleIndividualToOther(code: String, timestamp: LocalDateTime)                                                                   extends ApplicationUpdate
 case class DeclineResponsibleIndividual(code: String, timestamp: LocalDateTime)                                                                         extends ApplicationUpdate
 case class RemoveClientSecret(actor: CollaboratorActor, clientSecretId: String, timestamp: LocalDateTime)                                               extends ApplicationUpdate
+case class SubscribeToApi(actor: CollaboratorActor, apiIdentifier: ApiIdentifier, timestamp: LocalDateTime)                                             extends ApplicationUpdate
+case class UnsubscribeFromApi(actor: CollaboratorActor, apiIdentifier: ApiIdentifier, timestamp: LocalDateTime)                                         extends ApplicationUpdate
 case class VerifyResponsibleIndividual(instigator: UserId, timestamp: LocalDateTime, requesterName: String, riName: String, riEmail: String)            extends ApplicationUpdate
 case class DeleteApplicationByCollaborator(instigator: UserId, reasons: String, timestamp: LocalDateTime)                                               extends ApplicationUpdate
 
@@ -53,6 +56,8 @@ trait ApplicationUpdateFormatters {
   implicit val changeResponsibleIndividualToOtherFormatter = Json.format[ChangeResponsibleIndividualToOther]
   implicit val declineResponsibleIndividualFormatter       = Json.format[DeclineResponsibleIndividual]
   implicit val removeClientSecretFormatter                 = Json.format[RemoveClientSecret]
+  implicit val subscribeToApiFormatter                     = Json.format[SubscribeToApi]
+  implicit val unsubscribeFromApiFormatter                 = Json.format[UnsubscribeFromApi]
   implicit val verifyResponsibleIndividualFormatter        = Json.format[VerifyResponsibleIndividual]
   implicit val deleteApplicationByCollaboratorFormatter    = Json.format[DeleteApplicationByCollaborator]
 
@@ -63,6 +68,8 @@ trait ApplicationUpdateFormatters {
     .and[ChangeResponsibleIndividualToOther]("changeResponsibleIndividualToOther")
     .and[DeclineResponsibleIndividual]("declineResponsibleIndividual")
     .and[RemoveClientSecret]("removeClientSecret")
+    .and[SubscribeToApi]("subscribeToApi")
+    .and[UnsubscribeFromApi]("unsubscribeFromApi")
     .and[VerifyResponsibleIndividual]("verifyResponsibleIndividual")
     .and[DeleteApplicationByCollaborator]("deleteApplicationByCollaborator")
     .format

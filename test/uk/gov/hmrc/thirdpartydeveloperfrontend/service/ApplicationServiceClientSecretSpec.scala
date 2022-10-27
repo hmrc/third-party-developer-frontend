@@ -28,17 +28,13 @@ import uk.gov.hmrc.thirdpartydeveloperfrontend.builder._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.config.ApplicationConfig
 import uk.gov.hmrc.thirdpartydeveloperfrontend.connectors._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain._
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.apidefinitions._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications._
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.subscriptions.VersionSubscription
 import uk.gov.hmrc.thirdpartydeveloperfrontend.service.PushPullNotificationsService.PushPullNotificationsConnector
 import uk.gov.hmrc.thirdpartydeveloperfrontend.service.SubscriptionFieldsService.SubscriptionFieldsConnector
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.{AsyncHmrcSpec, FixedClock, LocalUserIdTracker}
 
-class ApplicationServiceClientSecretSpec extends AsyncHmrcSpec with SubscriptionsBuilder with ApplicationBuilder with LocalUserIdTracker with FixedClock {
+class ApplicationServiceClientSecretSpec extends AsyncHmrcSpec with ApplicationBuilder with LocalUserIdTracker with FixedClock {
 
-  val versionOne  = ApiVersion("1.0")
-  val versionTwo  = ApiVersion("2.0")
   val grantLength = Period.ofDays(547)
 
   trait Setup {
@@ -51,7 +47,6 @@ class ApplicationServiceClientSecretSpec extends AsyncHmrcSpec with Subscription
 
     val mockSandboxApplicationConnector: ThirdPartyApplicationSandboxConnector =
       mock[ThirdPartyApplicationSandboxConnector]
-    val mockSubscriptionsService: SubscriptionsService                         = mock[SubscriptionsService]
 
     val mockProductionSubscriptionFieldsConnector: SubscriptionFieldsConnector = mock[SubscriptionFieldsConnector]
     val mockSandboxSubscriptionFieldsConnector: SubscriptionFieldsConnector    = mock[SubscriptionFieldsConnector]
@@ -71,15 +66,12 @@ class ApplicationServiceClientSecretSpec extends AsyncHmrcSpec with Subscription
       mockAppConfig
     )
 
-    val mockSubscriptionFieldsService: SubscriptionFieldsService = mock[SubscriptionFieldsService]
-    val mockDeskproConnector: DeskproConnector                   = mock[DeskproConnector]
-    val mockApmConnector: ApmConnector                           = mock[ApmConnector]
+    val mockDeskproConnector: DeskproConnector = mock[DeskproConnector]
+    val mockApmConnector: ApmConnector         = mock[ApmConnector]
 
     val applicationService = new ApplicationService(
       mockApmConnector,
       connectorsWrapper,
-      mockSubscriptionFieldsService,
-      mockSubscriptionsService,
       mockDeskproConnector,
       mockDeveloperConnector,
       mockSandboxApplicationConnector,
@@ -100,9 +92,6 @@ class ApplicationServiceClientSecretSpec extends AsyncHmrcSpec with Subscription
         .thenReturn(successful(Some(application)))
     }
   }
-
-  def version(version: ApiVersion, status: APIStatus, subscribed: Boolean): VersionSubscription =
-    VersionSubscription(ApiVersionDefinition(version, status), subscribed)
 
   val productionApplicationId = ApplicationId("Application ID")
   val productionClientId      = ClientId(s"client-id-${randomUUID().toString}")

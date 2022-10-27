@@ -123,7 +123,8 @@ abstract class EndpointScenarioSpec extends AsyncHmrcSpec with GuiceOneAppPerSui
   when(tpaProductionConnector.fetchTermsOfUseInvitations()(*)).thenReturn(Future.successful(List.empty))
 
   when(apmConnector.addTeamMember(*[ApplicationId], *[AddTeamMemberRequest])(*)).thenReturn(Future.successful(()))
-  when(apmConnector.subscribeToApi(*[ApplicationId], *[ApiIdentifier])(*)).thenReturn(Future.successful(ApplicationUpdateSuccessful))
+  when(apmConnector.updateApplication(*[ApplicationId], *[ApplicationUpdate])(*)).thenReturn(Future.successful(application))
+  when(apmConnector.subscribeToApi(*[ApplicationId], *[SubscribeToApi])(*)).thenReturn(Future.successful(ApplicationUpdateSuccessful))
   when(productionSubsFieldsConnector.saveFieldValues(*[ClientId], *[ApiContext], *[ApiVersion], *[Fields.Alias])(*)).thenReturn(Future.successful(
     SaveSubscriptionFieldsSuccessResponse
   ))

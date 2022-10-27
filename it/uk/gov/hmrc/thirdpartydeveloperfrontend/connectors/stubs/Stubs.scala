@@ -21,7 +21,17 @@ import com.github.tomakehurst.wiremock.client.WireMock._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.connectors.EncryptedJson
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.apidefinitions.{ApiContext, ApiIdentifier, ApiVersion}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.ApplicationNameValidationJson.ApplicationNameValidationResult
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.{Application, ApplicationId, ApplicationToken, ApplicationWithSubscriptionData, ClientId, Environment}
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.{
+  Application,
+  ApplicationId,
+  ApplicationToken,
+  ApplicationUpdate,
+  ApplicationUpdateFormatters,
+  ApplicationWithSubscriptionData,
+  ClientId,
+  Environment,
+  SubscribeToApi
+}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.connectors.{PasswordResetRequest, UserAuthenticationResponse}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.{Developer, Registration, Session, UpdateProfileRequest, UserId}
 import play.api.http.Status._
@@ -106,8 +116,6 @@ object DeveloperStub {
 }
 
 object ApplicationStub {
-
-  implicit val apiIdentifierFormat = Json.format[ApiIdentifier]
 
   def setupApplicationNameValidation() = {
     val validNameResult = ApplicationNameValidationResult(None)
@@ -266,9 +274,7 @@ object ApiSubscriptionFieldsStub {
   }
 }
 
-object ApiPlatformMicroserviceStub {
-
-  implicit val apiIdentifierFormat = Json.format[ApiIdentifier]
+object ApiPlatformMicroserviceStub extends ApplicationUpdateFormatters {
 
   def stubFetchAllPossibleSubscriptions(applicationId: ApplicationId, body: String) = {
     stubFor(
@@ -347,7 +353,7 @@ object ApiPlatformMicroserviceStub {
     }
 
     stubFor(
-      get(urlEqualTo("/combined-rest-xml-apis/developer/api1"))
+      get(urlEqualTo("/combined-rest-xml-apis/api1"))
         .willReturn(response)
     )
   }
@@ -374,10 +380,22 @@ object ApiPlatformMicroserviceStub {
     )
   }
 
-  def stubSubscribeToApi(applicationId: ApplicationId, apiIdentifier: ApiIdentifier) = {
+  def stubApplicationUpdate(applicationId: ApplicationId, applicationUpdate: ApplicationUpdate, application: Application) = {
     stubFor(
-      post(urlPathEqualTo(s"/applications/${applicationId.value}/subscriptions"))
-        .withJsonRequestBody(apiIdentifier)
+      patch(urlPathEqualTo(s"/applications/${applicationId.value}"))
+        .withJsonRequestBody(applicationUpdate)
+        .willReturn(
+          aResponse()
+            .withStatus(OK)
+            .withBody(Json.toJson(application).toString)
+        )
+    )
+  }
+
+  def stubSubscribeToApi(applicationId: ApplicationId, subscribeToApi: SubscribeToApi) = {
+    stubFor(
+      post(urlPathEqualTo(s"/applications/${applicationId.value}/subscriptionsAppUpdate"))
+        .withJsonRequestBody(subscribeToApi)
         .willReturn(
           aResponse()
             .withStatus(OK)
@@ -385,10 +403,10 @@ object ApiPlatformMicroserviceStub {
     )
   }
 
-  def stubSubscribeToApiFailure(applicationId: ApplicationId, apiIdentifier: ApiIdentifier) = {
+  def stubSubscribeToApiFailure(applicationId: ApplicationId, subscribeToApi: SubscribeToApi) = {
     stubFor(
-      post(urlPathEqualTo(s"/applications/${applicationId.value}/subscriptions"))
-        .withJsonRequestBody(apiIdentifier)
+      post(urlPathEqualTo(s"/applications/${applicationId.value}/subscriptionsAppUpdate"))
+        .withJsonRequestBody(subscribeToApi)
         .willReturn(
           aResponse()
             .withStatus(NOT_FOUND)

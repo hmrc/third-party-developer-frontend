@@ -28,21 +28,14 @@ import uk.gov.hmrc.thirdpartydeveloperfrontend.builder._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.config.ApplicationConfig
 import uk.gov.hmrc.thirdpartydeveloperfrontend.connectors._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain._
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.apidefinitions.APIStatus._
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.apidefinitions._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.connectors.{DeskproTicket, TicketCreated}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.{User, UserId}
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.subscriptions.ApiSubscriptionFields._
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.subscriptions.VersionSubscription
 import uk.gov.hmrc.thirdpartydeveloperfrontend.service.PushPullNotificationsService.PushPullNotificationsConnector
 import uk.gov.hmrc.thirdpartydeveloperfrontend.service.SubscriptionFieldsService.SubscriptionFieldsConnector
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.{AsyncHmrcSpec, FixedClock, LocalUserIdTracker}
 
-class ApplicationServiceTeamMembersSpec extends AsyncHmrcSpec with SubscriptionsBuilder with ApplicationBuilder with LocalUserIdTracker {
-
-  val versionOne = ApiVersion("1.0")
-  val versionTwo = ApiVersion("2.0")
+class ApplicationServiceTeamMembersSpec extends AsyncHmrcSpec with ApplicationBuilder with LocalUserIdTracker {
 
   trait Setup extends FixedClock {
     implicit val hc: HeaderCarrier = HeaderCarrier()
@@ -67,14 +60,11 @@ class ApplicationServiceTeamMembersSpec extends AsyncHmrcSpec with Subscriptions
       mock[ApplicationConfig]
     )
 
-    val mockSubscriptionFieldsService: SubscriptionFieldsService = mock[SubscriptionFieldsService]
-    val mockDeskproConnector: DeskproConnector                   = mock[DeskproConnector]
+    val mockDeskproConnector: DeskproConnector = mock[DeskproConnector]
 
     val applicationService = new ApplicationService(
       mock[ApmConnector],
       connectorsWrapper,
-      mockSubscriptionFieldsService,
-      mock[SubscriptionsService],
       mockDeskproConnector,
       mockDeveloperConnector,
       mockSandboxApplicationConnector,
@@ -95,9 +85,6 @@ class ApplicationServiceTeamMembersSpec extends AsyncHmrcSpec with Subscriptions
         .thenReturn(successful(Some(application)))
     }
   }
-
-  def version(version: ApiVersion, status: APIStatus, subscribed: Boolean): VersionSubscription =
-    VersionSubscription(ApiVersionDefinition(version, status), subscribed)
 
   val productionApplicationId = ApplicationId("Application ID")
   val productionClientId      = ClientId(s"client-id-${randomUUID().toString}")
@@ -130,48 +117,6 @@ class ApplicationServiceTeamMembersSpec extends AsyncHmrcSpec with Subscriptions
       Environment.SANDBOX,
       Some("description")
     )
-
-  def subStatusWithoutFieldValues(
-      appId: ApplicationId,
-      clientId: ClientId,
-      name: String,
-      context: ApiContext,
-      version: ApiVersion,
-      status: APIStatus = STABLE,
-      subscribed: Boolean = false,
-      requiresTrust: Boolean = false
-    ): APISubscriptionStatus =
-    APISubscriptionStatus(
-      name = name,
-      serviceName = name,
-      context = context,
-      apiVersion = ApiVersionDefinition(version, status),
-      subscribed = subscribed,
-      requiresTrust = requiresTrust,
-      fields = emptySubscriptionFieldsWrapper(appId, clientId, context, version)
-    )
-
-  def subStatus(
-      appId: ApplicationId,
-      clientId: ClientId,
-      name: String,
-      context: String,
-      version: ApiVersion,
-      status: APIStatus = STABLE,
-      subscribed: Boolean = false,
-      requiresTrust: Boolean = false,
-      subscriptionFieldWithValues: List[SubscriptionFieldValue] = List.empty
-    ): APISubscriptionStatus = {
-    APISubscriptionStatus(
-      name = name,
-      serviceName = name,
-      context = ApiContext(context),
-      apiVersion = ApiVersionDefinition(version, status),
-      subscribed = subscribed,
-      requiresTrust = requiresTrust,
-      fields = SubscriptionFieldsWrapper(appId, clientId, ApiContext(context), version, subscriptionFieldWithValues)
-    )
-  }
 
   "remove teamMember" should {
     val email         = "john.bloggs@example.com"

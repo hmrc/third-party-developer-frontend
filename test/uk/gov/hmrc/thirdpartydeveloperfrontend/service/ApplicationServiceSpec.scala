@@ -33,26 +33,19 @@ import uk.gov.hmrc.thirdpartydeveloperfrontend.config.ApplicationConfig
 import uk.gov.hmrc.thirdpartydeveloperfrontend.connectors._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.EditApplicationForm
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain._
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.apidefinitions.APIStatus._
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.apidefinitions._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.connectors.{DeskproTicket, TicketCreated}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.{LoggedInState, UserId}
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.subscriptions.ApiSubscriptionFields._
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.subscriptions.VersionSubscription
 import uk.gov.hmrc.thirdpartydeveloperfrontend.service.PushPullNotificationsService.PushPullNotificationsConnector
 import uk.gov.hmrc.thirdpartydeveloperfrontend.service.SubscriptionFieldsService.SubscriptionFieldsConnector
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.{AsyncHmrcSpec, FixedClock, LocalUserIdTracker}
 
 class ApplicationServiceSpec extends AsyncHmrcSpec
-    with SubscriptionsBuilder
     with ApplicationBuilder
     with LocalUserIdTracker
     with DeveloperSessionBuilder
     with DeveloperBuilder {
 
-  val versionOne  = ApiVersion("1.0")
-  val versionTwo  = ApiVersion("2.0")
   val grantLength = Period.ofDays(547)
 
   trait Setup extends FixedClock {
@@ -65,7 +58,6 @@ class ApplicationServiceSpec extends AsyncHmrcSpec
 
     val mockSandboxApplicationConnector: ThirdPartyApplicationSandboxConnector =
       mock[ThirdPartyApplicationSandboxConnector]
-    val mockSubscriptionsService: SubscriptionsService                         = mock[SubscriptionsService]
 
     val mockProductionSubscriptionFieldsConnector: SubscriptionFieldsConnector = mock[SubscriptionFieldsConnector]
     val mockSandboxSubscriptionFieldsConnector: SubscriptionFieldsConnector    = mock[SubscriptionFieldsConnector]
@@ -85,15 +77,12 @@ class ApplicationServiceSpec extends AsyncHmrcSpec
       mockAppConfig
     )
 
-    val mockSubscriptionFieldsService: SubscriptionFieldsService = mock[SubscriptionFieldsService]
-    val mockDeskproConnector: DeskproConnector                   = mock[DeskproConnector]
-    val mockApmConnector: ApmConnector                           = mock[ApmConnector]
+    val mockDeskproConnector: DeskproConnector = mock[DeskproConnector]
+    val mockApmConnector: ApmConnector         = mock[ApmConnector]
 
     val applicationService = new ApplicationService(
       mockApmConnector,
       connectorsWrapper,
-      mockSubscriptionFieldsService,
-      mockSubscriptionsService,
       mockDeskproConnector,
       mockDeveloperConnector,
       mockSandboxApplicationConnector,
@@ -114,9 +103,6 @@ class ApplicationServiceSpec extends AsyncHmrcSpec
         .thenReturn(successful(Some(application)))
     }
   }
-
-  def version(version: ApiVersion, status: APIStatus, subscribed: Boolean): VersionSubscription =
-    VersionSubscription(ApiVersionDefinition(version, status), subscribed)
 
   val productionApplicationId = ApplicationId("Application ID")
   val productionClientId      = ClientId(s"client-id-${randomUUID().toString}")
@@ -149,64 +135,6 @@ class ApplicationServiceSpec extends AsyncHmrcSpec
       Environment.SANDBOX,
       Some("description")
     )
-
-  def subStatusWithoutFieldValues(
-      appId: ApplicationId,
-      clientId: ClientId,
-      name: String,
-      context: ApiContext,
-      version: ApiVersion,
-      status: APIStatus = STABLE,
-      subscribed: Boolean = false,
-      requiresTrust: Boolean = false
-    ): APISubscriptionStatus =
-    APISubscriptionStatus(
-      name = name,
-      serviceName = name,
-      context = context,
-      apiVersion = ApiVersionDefinition(version, status),
-      subscribed = subscribed,
-      requiresTrust = requiresTrust,
-      fields = emptySubscriptionFieldsWrapper(appId, clientId, context, version)
-    )
-
-  def subStatus(
-      appId: ApplicationId,
-      clientId: ClientId,
-      name: String,
-      context: String,
-      version: ApiVersion,
-      status: APIStatus = STABLE,
-      subscribed: Boolean = false,
-      requiresTrust: Boolean = false,
-      subscriptionFieldWithValues: List[SubscriptionFieldValue] = List.empty
-    ): APISubscriptionStatus = {
-    APISubscriptionStatus(
-      name = name,
-      serviceName = name,
-      context = ApiContext(context),
-      apiVersion = ApiVersionDefinition(version, status),
-      subscribed = subscribed,
-      requiresTrust = requiresTrust,
-      fields = SubscriptionFieldsWrapper(appId, clientId, ApiContext(context), version, subscriptionFieldWithValues)
-    )
-  }
-
-  "Unsubscribe from API" should {
-    "unsubscribe application from an API version" in new Setup {
-      private val context       = ApiContext("api1")
-      private val version       = versionOne
-      private val apiIdentifier = ApiIdentifier(context, version)
-
-      theProductionConnectorthenReturnTheApplication(productionApplicationId, productionApplication)
-      when(mockProductionApplicationConnector.unsubscribeFromApi(productionApplicationId, apiIdentifier))
-        .thenReturn(successful(ApplicationUpdateSuccessful))
-      when(mockProductionSubscriptionFieldsConnector.deleteFieldValues(productionClientId, context, version))
-        .thenReturn(successful(FieldsDeleteSuccessResult))
-
-      await(applicationService.unsubscribeFromApi(productionApplication, apiIdentifier)) shouldBe ApplicationUpdateSuccessful
-    }
-  }
 
   "Update" should {
     val applicationId   = ApplicationId("applicationId")

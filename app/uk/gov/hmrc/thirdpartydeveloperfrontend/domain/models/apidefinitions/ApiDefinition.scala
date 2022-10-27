@@ -84,6 +84,10 @@ trait HasApiIdentifier {
 
 case class ApiIdentifier(context: ApiContext, version: ApiVersion)
 
+object ApiIdentifier {
+  implicit val formatApiIdentifier = Json.format[ApiIdentifier]
+}
+
 // TODO - 5090 - Add new open access class
 case class APISubscriptionStatus(
     name: String,

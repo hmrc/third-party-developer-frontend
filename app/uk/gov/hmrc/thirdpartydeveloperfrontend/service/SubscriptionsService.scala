@@ -16,6 +16,7 @@
 
 package uk.gov.hmrc.thirdpartydeveloperfrontend.service
 
+import java.time.{Clock, LocalDateTime}
 import javax.inject.{Inject, Singleton}
 import scala.concurrent.{ExecutionContext, Future}
 
@@ -24,7 +25,7 @@ import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.thirdpartydeveloperfrontend.connectors.{ApmConnector, DeskproConnector}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.ApplicationUpdateSuccessful
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.apidefinitions.{ApiVersion, _}
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.{Application, ApplicationId}
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.connectors.{DeskproTicket, TicketResult}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.DeveloperSession
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.subscriptions.FieldName
@@ -34,7 +35,8 @@ class SubscriptionsService @Inject() (
     deskproConnector: DeskproConnector,
     apmConnector: ApmConnector,
     subscriptionFieldsService: SubscriptionFieldsService,
-    auditService: AuditService
+    auditService: AuditService,
+    clock: Clock
   )(implicit ec: ExecutionContext
   ) {
 
@@ -60,8 +62,14 @@ class SubscriptionsService @Inject() (
   type ApiMap[V]   = Map[ApiContext, Map[ApiVersion, V]]
   type FieldMap[V] = ApiMap[Map[FieldName, V]]
 
-  def subscribeToApi(application: Application, apiIdentifier: ApiIdentifier)(implicit hc: HeaderCarrier): Future[ApplicationUpdateSuccessful] = {
-    apmConnector.subscribeToApi(application.id, apiIdentifier)
+  def subscribeToApi(applicationId: ApplicationId, actor: CollaboratorActor, apiIdentifier: ApiIdentifier)(implicit hc: HeaderCarrier): Future[ApplicationUpdateSuccessful] = {
+    val request = SubscribeToApi(actor, apiIdentifier, LocalDateTime.now(clock))
+    apmConnector.subscribeToApi(applicationId, request)
+  }
+
+  def unsubscribeFromApi(applicationId: ApplicationId, actor: CollaboratorActor, apiIdentifier: ApiIdentifier)(implicit hc: HeaderCarrier): Future[ApplicationUpdateSuccessful] = {
+    val request = UnsubscribeFromApi(actor, apiIdentifier, LocalDateTime.now(clock))
+    apmConnector.updateApplication(applicationId, request).map { _: Application => ApplicationUpdateSuccessful }
   }
 
   def isSubscribedToApi(applicationId: ApplicationId, apiIdentifier: ApiIdentifier)(implicit hc: HeaderCarrier): Future[Boolean] = {
@@ -76,6 +84,7 @@ class SubscriptionsService @Inject() (
 object SubscriptionsService {
 
   trait SubscriptionsConnector {
-    def subscribeToApi(applicationId: ApplicationId, apiIdentifier: ApiIdentifier)(implicit hc: HeaderCarrier): Future[ApplicationUpdateSuccessful]
+    def updateApplication(applicationId: ApplicationId, request: ApplicationUpdate)(implicit hc: HeaderCarrier): Future[Application]
+    def subscribeToApi(applicationId: ApplicationId, request: SubscribeToApi)(implicit hc: HeaderCarrier): Future[ApplicationUpdateSuccessful]
   }
 }

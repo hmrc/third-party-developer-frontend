@@ -119,16 +119,6 @@ abstract class ThirdPartyApplicationConnector(config: ApplicationConfig, metrics
       Future.successful(None)
     }
 
-  def unsubscribeFromApi(applicationId: ApplicationId, apiIdentifier: ApiIdentifier)(implicit hc: HeaderCarrier): Future[ApplicationUpdateSuccessful] =
-    metrics.record(api) {
-      http.DELETE[ErrorOrUnit](s"$serviceBaseUrl/application/${applicationId.value}/subscription?context=${apiIdentifier.context.value}&version=${apiIdentifier.version.value}")
-        .map(throwOrOptionOf)
-        .map {
-          case Some(_) => ApplicationUpdateSuccessful
-          case None    => throw new ApplicationNotFound
-        }
-    }
-
   def fetchCredentials(id: ApplicationId)(implicit hc: HeaderCarrier): Future[ApplicationToken] = metrics.record(api) {
     http.GET[Option[ApplicationToken]](s"$serviceBaseUrl/application/${id.value}/credentials")
       .map {
