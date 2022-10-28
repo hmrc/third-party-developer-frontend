@@ -40,4 +40,5 @@ object State extends PlayEnum[State] {
   final case object PENDING_REQUESTER_VERIFICATION               extends State
   final case object PRE_PRODUCTION                               extends State
   final case object PRODUCTION                                   extends State
+  final case object DELETED                                      extends State
 }
