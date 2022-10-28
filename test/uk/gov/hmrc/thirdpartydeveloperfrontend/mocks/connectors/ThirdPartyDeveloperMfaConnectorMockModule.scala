@@ -16,15 +16,23 @@
 
 package uk.gov.hmrc.thirdpartydeveloperfrontend.mocks.connectors
 
+import org.mockito.stubbing.ScalaOngoingStubbing
 import org.mockito.{ArgumentMatchersSugar, MockitoSugar}
 import uk.gov.hmrc.apiplatform.modules.mfa.connectors.ThirdPartyDeveloperMfaConnector
+import uk.gov.hmrc.apiplatform.modules.mfa.models.MfaId
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.UserId
+
+import scala.concurrent.Future
+import scala.concurrent.Future.successful
 
 trait ThirdPartyDeveloperMfaConnectorMockModule extends MockitoSugar with ArgumentMatchersSugar {
-  
 
   object TPDMFAMock {
     val aMock = mock[ThirdPartyDeveloperMfaConnector]
 
-
+    object SendSms {
+      def thenReturn(userId: UserId, mfaId: MfaId)(flag: Boolean): ScalaOngoingStubbing[Future[Boolean]] =
+        when(aMock.sendSms(eqTo(userId), eqTo(mfaId))(*)).thenReturn(successful(flag))
+    }
   }
 }
