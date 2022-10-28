@@ -40,10 +40,6 @@ object MfaDetailHelper {
       .head.asInstanceOf[SmsMfaDetailSummary]
   }
 
-  def getMfaDetailById(mfaId: MfaId, mfaDetails: List[MfaDetail]): MfaDetail = {
-    mfaDetails.filter(x => x.id == mfaId && x.verified).head
-  }
-
   def getMfaDetailByType(mfaType: MfaType, details: List[MfaDetail]): MfaDetail = {
     details.filter(_.mfaType == mfaType).head
   }
