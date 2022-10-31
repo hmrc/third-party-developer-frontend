@@ -25,7 +25,7 @@ import uk.gov.hmrc.apiplatform.modules.mfa.connectors.ThirdPartyDeveloperMfaConn
 import uk.gov.hmrc.apiplatform.modules.mfa.controllers.profile.routes
 import uk.gov.hmrc.apiplatform.modules.mfa.forms.MfaAccessCodeForm
 import uk.gov.hmrc.apiplatform.modules.mfa.models.MfaType.{AUTHENTICATOR_APP, SMS}
-import uk.gov.hmrc.apiplatform.modules.mfa.models.{DeviceSession, MfaId, MfaType}
+import uk.gov.hmrc.apiplatform.modules.mfa.models.{AuthenticatorAppMfaDetailSummary, DeviceSession, MfaId, MfaType, SmsMfaDetailSummary}
 import uk.gov.hmrc.apiplatform.modules.mfa.service.MfaMandateService
 import uk.gov.hmrc.apiplatform.modules.mfa.utils.MfaDetailHelper
 import uk.gov.hmrc.http.HeaderCarrier
@@ -157,16 +157,14 @@ class UserLoginAccount @Inject()(val auditService: AuditService,
 
   private def handleMfaChoices(developer: Developer, playSession: PlaySession, emailAddress: String, nonce: String)(implicit hc: HeaderCarrier) = {
 
-    def handleAuthAppFlow() = {
-      val authAppMfaDetail = MfaDetailHelper.getAuthAppMfaVerified(developer.mfaDetails)
+    def handleAuthAppFlow(authAppDetail: AuthenticatorAppMfaDetailSummary) = {
       Future.successful(
-        Redirect(routes.UserLoginAccount.loginAccessCodePage(authAppMfaDetail.id, AUTHENTICATOR_APP), SEE_OTHER)
+        Redirect(routes.UserLoginAccount.loginAccessCodePage(authAppDetail.id, AUTHENTICATOR_APP), SEE_OTHER)
           .withSession(playSession + ("emailAddress" -> emailAddress) + ("nonce" -> nonce))
       )
     }
 
-    def handleSmsFlow() = {
-      val smsMfaDetail = MfaDetailHelper.getSmsMfaVerified(developer.mfaDetails)
+    def handleSmsFlow(smsMfaDetail: SmsMfaDetailSummary) = {
       thirdPartyDeveloperMfaConnector.sendSms(developer.userId, smsMfaDetail.id).map {
         case true =>
           Redirect(routes.UserLoginAccount.loginAccessCodePage(smsMfaDetail.id, SMS), SEE_OTHER)
@@ -181,12 +179,11 @@ class UserLoginAccount @Inject()(val auditService: AuditService,
       Future.successful(NotImplemented("This is not implemented yet"))
     }
 
-    (MfaDetailHelper.isAuthAppMfaVerified(developer.mfaDetails), MfaDetailHelper.isSmsMfaVerified(developer.mfaDetails)) match {
-      case (true, false) => handleAuthAppFlow()
-      case (false, true) => handleSmsFlow()
-      case (true, true) => // handleMfaChoiceFlow
-      handleAuthAppFlow()
-      case (false, false) => Future.successful(InternalServerError("Access code required but mfa not set up"))
+    (MfaDetailHelper.getAuthAppMfaVerified(developer.mfaDetails), MfaDetailHelper.getSmsMfaVerified(developer.mfaDetails)) match {
+      case (Some(x: AuthenticatorAppMfaDetailSummary), None) => handleAuthAppFlow(x)
+      case (None, Some(x: SmsMfaDetailSummary)) => handleSmsFlow(x)
+      case (Some(authApp: AuthenticatorAppMfaDetailSummary), Some(_: SmsMfaDetailSummary)) => handleAuthAppFlow(authApp)
+      case (None, None) => Future.successful(InternalServerError("Access code required but mfa not set up"))
     }
   }
 

@@ -30,14 +30,12 @@ object MfaDetailHelper {
       .exists(x => x.mfaType == MfaType.SMS && x.verified)
   }
 
-  def getAuthAppMfaVerified(mfaDetails: List[MfaDetail]): AuthenticatorAppMfaDetailSummary = {
-    mfaDetails.filter(x => x.mfaType == MfaType.AUTHENTICATOR_APP && x.verified)
-      .head.asInstanceOf[AuthenticatorAppMfaDetailSummary]
+  def getAuthAppMfaVerified(mfaDetails: List[MfaDetail]): Option[AuthenticatorAppMfaDetailSummary] = {
+    mfaDetails.find(x => x.mfaType == MfaType.AUTHENTICATOR_APP && x.verified).map(_.asInstanceOf[AuthenticatorAppMfaDetailSummary])
   }
 
-  def getSmsMfaVerified(mfaDetails: List[MfaDetail]): SmsMfaDetailSummary = {
-    mfaDetails.filter(x => x.mfaType == MfaType.SMS && x.verified)
-      .head.asInstanceOf[SmsMfaDetailSummary]
+  def getSmsMfaVerified(mfaDetails: List[MfaDetail]): Option[SmsMfaDetailSummary] = {
+    mfaDetails.find(x => x.mfaType == MfaType.SMS && x.verified).map(_.asInstanceOf[SmsMfaDetailSummary])
   }
 
   def getMfaDetailByType(mfaType: MfaType, details: List[MfaDetail]): MfaDetail = {
