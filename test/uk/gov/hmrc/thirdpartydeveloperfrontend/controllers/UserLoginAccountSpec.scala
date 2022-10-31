@@ -279,6 +279,22 @@ class UserLoginAccountSpec extends BaseControllerSpec with WithCSRFAddToken
       redirectLocation(result) shouldBe Some(routes.UserLoginAccount.loginAccessCodePage(smsMfaId, SMS).url)
     }
 
+    "return error when MFA configured as SMS and it fails to send the sms" in new SetupWithUserAuthRespRequiringMfaAccessCode {
+      mockAuthenticate(user.developer.email, userPassword, successful(userAuthRespRequiringMfaAccessCode), successful(false))
+      mockAudit(LoginSucceeded, successful(AuditResult.Success))
+      TPDMock.FetchDeveloper.thenReturn(user.developer.userId)(Some(developerWithSmsMfa))
+      TPDMFAMock.SendSms.thenReturn(user.developer.userId, smsMfaId)(flag = false)
+
+      private val request = FakeRequest()
+        .withCookies(deviceSessionCookie)
+        .withSession(sessionParams: _*)
+        .withFormUrlEncodedBody((emailFieldName, user.email), (passwordFieldName, userPassword))
+
+      private val result = addToken(underTest.authenticate())(request)
+
+      status(result) shouldBe INTERNAL_SERVER_ERROR
+    }
+
     "display the login page when fetch developer fails" in new SetupWithUserAuthRespRequiringMfaAccessCode {
       mockAuthenticate(user.developer.email, userPassword, successful(userAuthRespRequiringMfaAccessCode), successful(false))
       TPDMock.FetchDeveloper.thenReturn(user.developer.userId)(None)
@@ -319,6 +335,16 @@ class UserLoginAccountSpec extends BaseControllerSpec with WithCSRFAddToken
       contentAsString(result) should include("Provide a valid email or password")
       verify(underTest.auditService, times(1)).audit(
         eqTo(LoginFailedDueToInvalidPassword), eqTo(Map("developerEmail" -> user.email)))(*)
+    }
+
+    "return the login page when the password is invalid" in new Setup {
+      private val request = FakeRequest()
+        .withSession(sessionParams: _*)
+        .withFormUrlEncodedBody((emailFieldName, user.email), (passwordFieldName, " "))
+      private val result = addToken(underTest.authenticate())(request)
+
+      status(result) shouldBe BAD_REQUEST
+      contentAsString(result) should include("Enter your password")
     }
 
     "return the login page when the email has not been registered" in new Setup {
@@ -433,6 +459,17 @@ class UserLoginAccountSpec extends BaseControllerSpec with WithCSRFAddToken
         eqTo(LoginFailedDueToInvalidAccessCode), eqTo(Map("developerEmail" -> user.email)))(*)
     }
 
+    "return the error page when mfa method is AUTHENTICATOR_APP and access code is invalid" in new Setup {
+      private val request = FakeRequest()
+        .withSession(sessionParams :+ "emailAddress" -> user.email :+ "nonce" -> nonce: _*)
+        .withFormUrlEncodedBody(("accessCode", "123xx"))
+
+      private val result =  addToken(underTest.authenticateAccessCode(authAppMfaId, AUTHENTICATOR_APP))(request)
+
+      status(result) shouldBe BAD_REQUEST
+      contentAsString(result) should include("You have entered an invalid access code")
+    }
+
     "return the manage Applications page when the credentials are correct and mfa method is SMS" in new Setup {
       mockAuthenticateAccessCode(user.email, accessCode, nonce, smsMfaId, successful(session))
       mockAudit(LoginSucceeded, successful(AuditResult.Success))
@@ -460,6 +497,17 @@ class UserLoginAccountSpec extends BaseControllerSpec with WithCSRFAddToken
       contentAsString(result) should include("You have entered an incorrect access code")
       verify(underTest.auditService, times(1)).audit(
         eqTo(LoginFailedDueToInvalidAccessCode), eqTo(Map("developerEmail" -> user.email)))(*)
+    }
+
+    "return the error page when mfa method is SMS and access code is invalid" in new Setup {
+      private val request = FakeRequest()
+        .withSession(sessionParams :+ "emailAddress" -> user.email :+ "nonce" -> nonce: _*)
+        .withFormUrlEncodedBody(("accessCode", "123xxx"))
+
+      private val result =  addToken(underTest.authenticateAccessCode(smsMfaId, SMS))(request)
+
+      status(result) shouldBe BAD_REQUEST
+      contentAsString(result) should include("You have entered an invalid access code")
     }
   }
 
