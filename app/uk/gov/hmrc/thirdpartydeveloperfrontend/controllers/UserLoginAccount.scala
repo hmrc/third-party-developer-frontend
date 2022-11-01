@@ -16,14 +16,13 @@
 
 package uk.gov.hmrc.thirdpartydeveloperfrontend.controllers
 
-import play.api.data.Form
-import play.api.data.Forms._
 import play.api.libs.crypto.CookieSigner
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents, Request, Result, Session => PlaySession}
 import uk.gov.hmrc.apiplatform.modules.common.services.ApplicationLogger
 import uk.gov.hmrc.apiplatform.modules.mfa.connectors.ThirdPartyDeveloperMfaConnector
 import uk.gov.hmrc.apiplatform.modules.mfa.forms.MfaAccessCodeForm
-import uk.gov.hmrc.apiplatform.modules.mfa.models.{DeviceSession, MfaId}
+import uk.gov.hmrc.apiplatform.modules.mfa.models.MfaType.{AUTHENTICATOR_APP, SMS}
+import uk.gov.hmrc.apiplatform.modules.mfa.models.{AuthenticatorAppMfaDetailSummary, DeviceSession, MfaId, MfaType, SmsMfaDetailSummary}
 import uk.gov.hmrc.apiplatform.modules.mfa.service.MfaMandateService
 import uk.gov.hmrc.apiplatform.modules.mfa.utils.MfaDetailHelper
 import uk.gov.hmrc.http.HeaderCarrier
@@ -33,7 +32,7 @@ import uk.gov.hmrc.thirdpartydeveloperfrontend.connectors.ThirdPartyDeveloperCon
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.connectors.UserAuthenticationResponse
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.controllers.MfaMandateDetails
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.{Developer, DeveloperSession, UserId}
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.{Developer, DeveloperSession, Session, UserId}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.service.AuditAction._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.service._
 import views.html._
@@ -69,7 +68,8 @@ class UserLoginAccount @Inject()(val auditService: AuditService,
                                  val cookieSigner : CookieSigner,
                                  signInView: SignInView,
                                  accountLockedView: AccountLockedView,
-                                 logInAccessCodeView: LogInAccessCodeView,
+                                 authAppLoginAccessCodeView: AuthAppLoginAccessCodeView,
+                                 smsLoginAccessCodeView: SmsLoginAccessCodeView,
                                  protectAccountNoAccessCodeView: ProtectAccountNoAccessCodeView,
                                  protectAccountNoAccessCodeCompleteView: ProtectAccountNoAccessCodeCompleteView,
                                  userDidNotAdd2SVView: UserDidNotAdd2SVView,
@@ -95,7 +95,6 @@ class UserLoginAccount @Inject()(val auditService: AuditService,
     } yield Locked(accountLockedView())
   }
 
-
   def get2SVNotSetPage(): Action[AnyContent] = loggedInAction { implicit request =>
     successful(Ok(userDidNotAdd2SVView()))
   }
@@ -109,12 +108,10 @@ class UserLoginAccount @Inject()(val auditService: AuditService,
     }
   }
 
-
   private def routeToLoginOr2SV(login: LoginForm,
                                 userAuthenticationResponse: UserAuthenticationResponse,
                                 playSession: PlaySession,
                                 userId: UserId)(implicit request: Request[AnyContent]): Future[Result] = {
-
 
     // In each case retain the Play session so that 'access_uri' query param, if set, is used at the end of the 2SV reminder flow
     (userAuthenticationResponse.session, userAuthenticationResponse.accessCodeRequired) match {
@@ -147,7 +144,7 @@ class UserLoginAccount @Inject()(val auditService: AuditService,
 
       case (None, true) =>
         // TODO: delete device session cookie --- If Device cookie is going to be refreshed / recreated do we need to delete it?
-        thirdPartyDeveloperConnector.fetchDeveloper(userId) map {
+        thirdPartyDeveloperConnector.fetchDeveloper(userId) flatMap {
           case Some(developer: Developer) => handleMfaChoices(developer, playSession, login.emailaddress, userAuthenticationResponse.nonce.getOrElse(""))
           case None => throw new UserNotFound
         }
@@ -155,33 +152,36 @@ class UserLoginAccount @Inject()(val auditService: AuditService,
     }
   }
 
-  private def handleMfaChoices(developer: Developer, playSession: PlaySession, emailAddress: String, nonce: String) ={
+  private def handleMfaChoices(developer: Developer, playSession: PlaySession, emailAddress: String, nonce: String)(implicit hc: HeaderCarrier) = {
 
-    def handleAuthAppFlow()  ={
-      val authAppMfaId = MfaDetailHelper.getAuthAppMfaVerified(developer.mfaDetails).id
-      Redirect(
-        routes.UserLoginAccount.enterTotp(authAppMfaId), SEE_OTHER
-      ).withSession(
-        playSession + ("emailAddress" -> emailAddress) + ("nonce" -> nonce)
+    def handleAuthAppFlow(authAppDetail: AuthenticatorAppMfaDetailSummary) = {
+      Future.successful(
+        Redirect(routes.UserLoginAccount.loginAccessCodePage(authAppDetail.id, AUTHENTICATOR_APP), SEE_OTHER)
+          .withSession(playSession + ("emailAddress" -> emailAddress) + ("nonce" -> nonce))
       )
     }
 
-    def handleSMSFlow() ={
-      NotImplemented("This is not implemented yet")
+    def handleSmsFlow(smsMfaDetail: SmsMfaDetailSummary) = {
+      thirdPartyDeveloperMfaConnector.sendSms(developer.userId, smsMfaDetail.id).map {
+        case true =>
+          Redirect(routes.UserLoginAccount.loginAccessCodePage(smsMfaDetail.id, SMS), SEE_OTHER)
+            .withSession(playSession + ("emailAddress" -> emailAddress) + ("nonce" -> nonce))
+            .flashing("mobileNumber" -> smsMfaDetail.mobileNumber)
+
+        case false => InternalServerError("Failed to send SMS")
+      }
     }
 
-    def handleMfaChoiceFlow() ={
-      NotImplemented("This is not implemented yet")
+    def handleMfaChoiceFlow() = {
+      Future.successful(NotImplemented("This is not implemented yet"))
     }
 
-    (MfaDetailHelper.isAuthAppMfaVerified(developer.mfaDetails), MfaDetailHelper.isSmsMfaVerified(developer.mfaDetails)) match {
-      case (true, false) => handleAuthAppFlow()
-      case (false, true) => handleSMSFlow
-      case (true, true) => // handleMfaChoiceFlow
-      handleAuthAppFlow()
-      case (false, false) => InternalServerError("Access code required but mfa not set up")
+    (MfaDetailHelper.getAuthAppMfaVerified(developer.mfaDetails), MfaDetailHelper.getSmsMfaVerified(developer.mfaDetails)) match {
+      case (Some(x: AuthenticatorAppMfaDetailSummary), None) => handleAuthAppFlow(x)
+      case (None, Some(x: SmsMfaDetailSummary)) => handleSmsFlow(x)
+      case (Some(authApp: AuthenticatorAppMfaDetailSummary), Some(_: SmsMfaDetailSummary)) => handleAuthAppFlow(authApp)
+      case (None, None) => Future.successful(InternalServerError("Access code required but mfa not set up"))
     }
-
   }
 
   def authenticate: Action[AnyContent] = Action.async { implicit request =>
@@ -222,36 +222,63 @@ class UserLoginAccount @Inject()(val auditService: AuditService,
     )
   }
 
-  def enterTotp(mfaId: MfaId): Action[AnyContent] = Action.async { implicit request =>
-      Future.successful(Ok(logInAccessCodeView(MfaAccessCodeForm.form, mfaId)))
+  def loginAccessCodePage(mfaId: MfaId, mfaType: MfaType): Action[AnyContent] = Action.async { implicit request =>
+    Future.successful(
+      mfaType match {
+        case AUTHENTICATOR_APP => Ok(authAppLoginAccessCodeView(MfaAccessCodeForm.form, mfaId, mfaType))
+        case SMS => Ok(smsLoginAccessCodeView(MfaAccessCodeForm.form, mfaId, mfaType))
+      }
+    )
   }
 
-  def authenticateTotp(mfaId: MfaId): Action[AnyContent] = Action.async { implicit request =>
-    MfaAccessCodeForm.form.bindFromRequest.fold(
-      errors => successful(BadRequest(logInAccessCodeView(errors, mfaId))),
-      validForm => {
-        val email = request.session.get("emailAddress").get
-        sessionService.authenticateTotp(email, validForm.accessCode, request.session.get("nonce").get, mfaId) flatMap { session =>
-          audit(LoginSucceeded, DeveloperSession.apply(session))
-          //create device session if 7 days checkbox clicked (from form)  then create cookie
-          if(validForm.rememberMe) {
-            thirdPartyDeveloperMfaConnector.createDeviceSession(session.developer.userId) flatMap {
-              case Some(deviceSession: DeviceSession) =>
-                loginSucceeded(request).map(r => withSessionAndDeviceCookies(r, session.sessionId, deviceSession.deviceSessionId.toString))
-              case _ => successful(InternalServerError(""))
-            }
-          }else {
-            loginSucceeded(request).map(r => withSessionCookie(r, session.sessionId))
-          }
+  def authenticateAccessCode(mfaId: MfaId, mfaType: MfaType): Action[AnyContent] = Action.async { implicit request =>
+    val email: String = request.session.get("emailAddress").get
 
-
-        } recover {
-          case _: InvalidCredentials =>
-            logger.warn("Login failed due to invalid access code")
-            audit(LoginFailedDueToInvalidAccessCode, Map("developerEmail" -> email))
-            Unauthorized(logInAccessCodeView(MfaAccessCodeForm.form.fill(validForm).withError("accessCode", "You have entered an incorrect access code"), mfaId))
+    def handleRememberMe(form: MfaAccessCodeForm, session: Session) = {
+      if (form.rememberMe) {
+        thirdPartyDeveloperMfaConnector.createDeviceSession(session.developer.userId) flatMap {
+          case Some(deviceSession: DeviceSession) => loginSucceeded(request)
+              .map(r => withSessionAndDeviceCookies(r, session.sessionId, deviceSession.deviceSessionId.toString))
+          case _                                  => successful(InternalServerError(""))
         }
+      } else { loginSucceeded(request).map(r => withSessionCookie(r, session.sessionId)) }
+    }
+
+    def handleAuthentication(email: String, form: MfaAccessCodeForm, mfaType: MfaType) = {
+      sessionService.authenticateAccessCode(email, form.accessCode, request.session.get("nonce").get, mfaId)
+        .flatMap { session =>
+          audit(LoginSucceeded, DeveloperSession.apply(session))
+          handleRememberMe(form, session)
+        } recover {
+        case _: InvalidCredentials =>
+          logger.warn("Login failed due to invalid access code")
+          audit(LoginFailedDueToInvalidAccessCode, Map("developerEmail" -> email))
+          handleAccessCodeError(form, mfaId, mfaType)
+        }
+    }
+
+    def handleFormWithErrors(formWithErrors: Form[MfaAccessCodeForm], mfaId: MfaId, mfaType: MfaType) = {
+      Future.successful(
+        mfaType match {
+          case AUTHENTICATOR_APP => BadRequest(authAppLoginAccessCodeView(formWithErrors, mfaId, mfaType))
+          case SMS => BadRequest(smsLoginAccessCodeView(formWithErrors, mfaId, mfaType))
+        }
+      )
+    }
+
+    def handleAccessCodeError(form: MfaAccessCodeForm, mfaId: MfaId, mfaType: MfaType) = {
+      mfaType match {
+        case AUTHENTICATOR_APP => Unauthorized(authAppLoginAccessCodeView(MfaAccessCodeForm.form.fill(form)
+          .withError("accessCode", "You have entered an incorrect access code"), mfaId, mfaType))
+
+        case SMS => Unauthorized(smsLoginAccessCodeView(MfaAccessCodeForm.form.fill(form)
+          .withError("accessCode", "You have entered an incorrect access code"), mfaId, mfaType))
       }
+    }
+
+    MfaAccessCodeForm.form.bindFromRequest.fold(
+      errors => handleFormWithErrors(errors, mfaId, mfaType),
+      validForm => handleAuthentication(email, validForm, mfaType)
     )
   }
 

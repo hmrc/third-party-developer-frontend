@@ -16,8 +16,8 @@ POST        /login                                                              
 GET         /login/2SV-help                                                                              uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.UserLoginAccount.get2SVHelpConfirmationPage
 POST        /login/2SV-help                                                                              uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.UserLoginAccount.confirm2SVHelp
 GET         /login/2SV-help/complete                                                                     uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.UserLoginAccount.get2SVHelpCompletionPage
-GET         /login-totp                                                                                  uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.UserLoginAccount.enterTotp(mfaId: uk.gov.hmrc.apiplatform.modules.mfa.models.MfaId)
-POST        /login-totp                                                                                  uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.UserLoginAccount.authenticateTotp(mfaId: uk.gov.hmrc.apiplatform.modules.mfa.models.MfaId)
+GET         /login-mfa                                                                                   uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.UserLoginAccount.loginAccessCodePage(mfaId: uk.gov.hmrc.apiplatform.modules.mfa.models.MfaId, mfaType: uk.gov.hmrc.apiplatform.modules.mfa.models.MfaType)
+POST        /login-mfa                                                                                   uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.UserLoginAccount.authenticateAccessCode(mfaId: uk.gov.hmrc.apiplatform.modules.mfa.models.MfaId, mfaType: uk.gov.hmrc.apiplatform.modules.mfa.models.MfaType)
 GET         /login/2SV-not-set                                                                           uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.UserLoginAccount.get2SVNotSetPage
 
 GET         /logout                                                                                      uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.UserLogoutAccount.logout

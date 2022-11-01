@@ -39,7 +39,6 @@ import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.connectors.ApiType.
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.connectors.{AddTeamMemberRequest, ChangePassword, CombinedApi, TicketCreated, UserAuthenticationResponse}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.{UpdateProfileRequest, User, UserId}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.emailpreferences.{APICategoryDisplayDetails, EmailPreferences}
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.flows.{EmailPreferencesFlowV2, IpAllowlistFlow, NewApplicationEmailPreferencesFlowV2}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.subscriptions.ApiSubscriptionFields.SaveSubscriptionFieldsSuccessResponse
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.subscriptions.Fields
 import uk.gov.hmrc.thirdpartydeveloperfrontend.repositories.FlowRepository
@@ -155,7 +154,7 @@ abstract class EndpointScenarioSpec extends AsyncHmrcSpec with GuiceOneAppPerSui
   when(tpdConnector.authenticate(*)(*)).thenReturn(Future.successful(UserAuthenticationResponse(false, false, None, Some(session))))
   when(tpdConnector.fetchSession(eqTo(sessionId))(*)).thenReturn(Future.successful(session))
   when(tpdConnector.deleteSession(eqTo(sessionId))(*)).thenReturn(Future.successful(OK))
-  when(tpdConnector.authenticateTotp(*)(*)).thenReturn(Future.successful(session))
+  when(tpdConnector.authenticateMfaAccessCode(*)(*)).thenReturn(Future.successful(session))
   when(tpdConnector.verify(*)(*)).thenReturn(Future.successful(OK))
   when(tpaProductionConnector.verify(*)(*)).thenReturn(Future.successful(ApplicationVerificationSuccessful))
   when(tpdConnector.resendVerificationEmail(*)(*)).thenReturn(Future.successful(OK))
@@ -254,7 +253,7 @@ abstract class EndpointScenarioSpec extends AsyncHmrcSpec with GuiceOneAppPerSui
       case Endpoint("GET",  "/developer/applications/:id/ip-allowlist/remove") => Map("cidrBlock" -> "192.168.1.2/8")
       case Endpoint("POST", "/developer/applications/:id/ip-allowlist/remove") => Map("cidrBlock" -> "192.168.1.2/8")
       case Endpoint("GET",  "/developer/verification") => Map("code" -> "CODE123")
-      case Endpoint(_,      "/developer/login-totp") => Map("mfaId" -> mfaId.value.toString)
+      case Endpoint(_,      "/developer/login-mfa") => Map("mfaId" -> mfaId.value.toString, "mfaType" -> MfaType.AUTHENTICATOR_APP.toString)
       case Endpoint("GET",  "/developer/reset-password-link") => Map("code" -> "1324")
       case Endpoint("GET",  "/developer/application-verification") => Map("code" -> "1324")
       case Endpoint("GET",  "/developer/profile/email-preferences/apis") => Map("category" -> "AGENTS")
@@ -284,7 +283,7 @@ abstract class EndpointScenarioSpec extends AsyncHmrcSpec with GuiceOneAppPerSui
       case Endpoint("POST", "/developer/registration") => Map("firstname" -> userFirstName, "lastname" -> userLastName, "emailaddress" -> userEmail, "password" -> userPassword, "confirmpassword" -> userPassword)
       case Endpoint("POST", "/developer/login") => Map("emailaddress" -> userEmail, "password" -> userPassword)
       case Endpoint("POST", "/developer/forgot-password") => Map("emailaddress" -> userEmail)
-      case Endpoint("POST", "/developer/login-totp") => Map("accessCode" -> "123456", "rememberMe" -> "false")
+      case Endpoint("POST", "/developer/login-mfa") => Map("accessCode" -> "123456", "rememberMe" -> "false")
       case Endpoint("POST", "/developer/reset-password") => Map("password" -> userPassword, "confirmpassword" -> userPassword)
       case Endpoint("POST", "/developer/support") => Map("fullname" -> userFullName, "emailaddress" -> userEmail, "comments" -> "I am very cross about something")
       case Endpoint("POST", "/developer/applications/:id/check-your-answers/terms-and-conditions") => Map("hasUrl" -> "true", "termsAndConditionsURL" -> "https://example.com/tcs")
@@ -368,7 +367,7 @@ abstract class EndpointScenarioSpec extends AsyncHmrcSpec with GuiceOneAppPerSui
       case Endpoint("GET",  "/developer/login/2SV-help") => Redirect("/developer/applications")
       case Endpoint("POST", "/developer/login/2SV-help") => Redirect("/developer/applications")
       case Endpoint("GET",  "/developer/login/2SV-help/complete") => Redirect("/developer/applications")
-      case Endpoint("POST", "/developer/login-totp") => Redirect("/developer/applications")
+      case Endpoint("POST", "/developer/login-mfa") => Redirect("/developer/applications")
       case Endpoint("POST", "/developer/logout/survey") => Redirect("/developer/logout")
       case Endpoint("GET",  "/developer/locked") => Locked()
       case Endpoint("GET",  "/developer/forgot-password") => Redirect("/developer/applications")
