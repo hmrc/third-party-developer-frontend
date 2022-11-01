@@ -18,6 +18,7 @@ package uk.gov.hmrc.apiplatform.modules.mfa.forms
 
 import play.api.data.Form
 import play.api.data.Forms.{boolean, mapping, nonEmptyText, optional, text}
+import uk.gov.hmrc.apiplatform.modules.mfa.forms.SelectMfaForm.verifyMfaType
 import uk.gov.hmrc.apiplatform.modules.mfa.models.MfaType
 import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.FormKeys
 
@@ -85,7 +86,18 @@ object SelectMfaForm {
       case None => false
     }
   }
+}
 
+final case class SelectLoginMfaForm(mfaId: String)
+
+object SelectLoginMfaForm {
+
+  def form: Form[SelectLoginMfaForm] = Form(
+    mapping(
+      "mfaId" -> nonEmptyText
+    )
+    (SelectLoginMfaForm.apply)(SelectLoginMfaForm.unapply)
+  )
 }
 
 

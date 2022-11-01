@@ -20,9 +20,9 @@ import play.api.libs.crypto.CookieSigner
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents, Request, Result, Session => PlaySession}
 import uk.gov.hmrc.apiplatform.modules.common.services.ApplicationLogger
 import uk.gov.hmrc.apiplatform.modules.mfa.connectors.ThirdPartyDeveloperMfaConnector
-import uk.gov.hmrc.apiplatform.modules.mfa.forms.MfaAccessCodeForm
+import uk.gov.hmrc.apiplatform.modules.mfa.forms.{MfaAccessCodeForm, SelectLoginMfaForm, SelectMfaForm}
 import uk.gov.hmrc.apiplatform.modules.mfa.models.MfaType.{AUTHENTICATOR_APP, SMS}
-import uk.gov.hmrc.apiplatform.modules.mfa.models.{AuthenticatorAppMfaDetailSummary, DeviceSession, MfaId, MfaType, SmsMfaDetailSummary}
+import uk.gov.hmrc.apiplatform.modules.mfa.models.{AuthenticatorAppMfaDetailSummary, DeviceSession, MfaDetail, MfaId, MfaType, SmsMfaDetailSummary}
 import uk.gov.hmrc.apiplatform.modules.mfa.service.MfaMandateService
 import uk.gov.hmrc.apiplatform.modules.mfa.utils.MfaDetailHelper
 import uk.gov.hmrc.http.HeaderCarrier
@@ -70,6 +70,7 @@ class UserLoginAccount @Inject()(val auditService: AuditService,
                                  accountLockedView: AccountLockedView,
                                  authAppLoginAccessCodeView: AuthAppLoginAccessCodeView,
                                  smsLoginAccessCodeView: SmsLoginAccessCodeView,
+                                 selectLoginMfaView: SelectLoginMfaView,
                                  protectAccountNoAccessCodeView: ProtectAccountNoAccessCodeView,
                                  protectAccountNoAccessCodeCompleteView: ProtectAccountNoAccessCodeCompleteView,
                                  userDidNotAdd2SVView: UserDidNotAdd2SVView,
@@ -152,36 +153,43 @@ class UserLoginAccount @Inject()(val auditService: AuditService,
     }
   }
 
+  private def handleAuthAppFlow(authAppDetail: AuthenticatorAppMfaDetailSummary, session: PlaySession)(implicit hc: HeaderCarrier) = {
+    Future.successful(
+      Redirect(routes.UserLoginAccount.loginAccessCodePage(authAppDetail.id, AUTHENTICATOR_APP), SEE_OTHER).withSession(session)
+    )
+  }
+
+  private def handleSmsFlow(userId: UserId, smsMfaDetail: SmsMfaDetailSummary, session: PlaySession)(implicit hc: HeaderCarrier) = {
+    thirdPartyDeveloperMfaConnector.sendSms(userId, smsMfaDetail.id).map {
+      case true =>
+        Redirect(routes.UserLoginAccount.loginAccessCodePage(smsMfaDetail.id, SMS), SEE_OTHER)
+          .withSession(session).flashing("mobileNumber" -> smsMfaDetail.mobileNumber)
+
+      case false => InternalServerError("Failed to send SMS")
+    }
+  }
+
+  private def handleMfaChoiceFlow(authAppMfaId: MfaId, smsMfaId: MfaId, nonce: String) = {
+    Future.successful(Redirect(routes.UserLoginAccount.selectLoginMfaPage(authAppMfaId, smsMfaId, nonce), SEE_OTHER))
+  }
+
   private def handleMfaChoices(developer: Developer, playSession: PlaySession, emailAddress: String, nonce: String)(implicit hc: HeaderCarrier) = {
-
-    def handleAuthAppFlow(authAppDetail: AuthenticatorAppMfaDetailSummary) = {
-      Future.successful(
-        Redirect(routes.UserLoginAccount.loginAccessCodePage(authAppDetail.id, AUTHENTICATOR_APP), SEE_OTHER)
-          .withSession(playSession + ("emailAddress" -> emailAddress) + ("nonce" -> nonce))
-      )
-    }
-
-    def handleSmsFlow(smsMfaDetail: SmsMfaDetailSummary) = {
-      thirdPartyDeveloperMfaConnector.sendSms(developer.userId, smsMfaDetail.id).map {
-        case true =>
-          Redirect(routes.UserLoginAccount.loginAccessCodePage(smsMfaDetail.id, SMS), SEE_OTHER)
-            .withSession(playSession + ("emailAddress" -> emailAddress) + ("nonce" -> nonce))
-            .flashing("mobileNumber" -> smsMfaDetail.mobileNumber)
-
-        case false => InternalServerError("Failed to send SMS")
-      }
-    }
-
-    def handleMfaChoiceFlow() = {
-      Future.successful(NotImplemented("This is not implemented yet"))
-    }
+    val session: PlaySession = playSession + ("emailAddress" -> emailAddress) + ("nonce" -> nonce)
 
     (MfaDetailHelper.getAuthAppMfaVerified(developer.mfaDetails), MfaDetailHelper.getSmsMfaVerified(developer.mfaDetails)) match {
-      case (Some(x: AuthenticatorAppMfaDetailSummary), None) => handleAuthAppFlow(x)
-      case (None, Some(x: SmsMfaDetailSummary)) => handleSmsFlow(x)
-      case (Some(authApp: AuthenticatorAppMfaDetailSummary), Some(_: SmsMfaDetailSummary)) => handleAuthAppFlow(authApp)
+      case (Some(x: AuthenticatorAppMfaDetailSummary), None) => handleAuthAppFlow(x, session)
+      case (None, Some(x: SmsMfaDetailSummary)) => handleSmsFlow(developer.userId, x, session)
+      case (Some(authAppMfa: AuthenticatorAppMfaDetailSummary), Some(smsMfa: SmsMfaDetailSummary)) => handleMfaChoiceFlow(authAppMfa.id, smsMfa.id, nonce)
       case (None, None) => Future.successful(InternalServerError("Access code required but mfa not set up"))
     }
+  }
+
+  def selectLoginMfaPage(authAppMfaId: MfaId, smsMfaId: MfaId, nonce: String): Action[AnyContent] = Action.async { implicit request =>
+    Future.successful(Ok(selectLoginMfaView(SelectLoginMfaForm.form, authAppMfaId, smsMfaId, nonce)))
+  }
+
+  def selectLoginMfaAction(): Action[AnyContent] = Action.async { implicit request =>
+    Future.successful(Ok)
   }
 
   def authenticate: Action[AnyContent] = Action.async { implicit request =>
