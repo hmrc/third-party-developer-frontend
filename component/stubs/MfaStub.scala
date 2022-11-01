@@ -1,9 +1,9 @@
 package stubs
 
-import com.github.tomakehurst.wiremock.client.WireMock.{aResponse, delete, equalTo, equalToJson, get, post, put, stubFor, urlEqualTo, urlPathEqualTo}
+import com.github.tomakehurst.wiremock.client.WireMock.{aResponse, delete, equalTo, equalToJson, post, stubFor, urlEqualTo, urlPathEqualTo}
 import play.api.http.Status.{NO_CONTENT, OK}
 import play.api.libs.json.Json
-import steps.{MfaSecret, TestContext}
+import steps.TestContext
 import uk.gov.hmrc.apiplatform.modules.mfa.connectors.ThirdPartyDeveloperMfaConnector.RegisterAuthAppResponse
 import uk.gov.hmrc.apiplatform.modules.mfa.models.MfaId
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.connectors.{AccessCodeAuthenticationRequest, VerifyMfaRequest}

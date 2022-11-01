@@ -16,13 +16,10 @@
 
 package uk.gov.hmrc.thirdpartydeveloperfrontend.controllers
 
-import play.api.data.Form
-import play.api.data.Forms._
 import play.api.libs.crypto.CookieSigner
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents, Request, Result, Session => PlaySession}
 import uk.gov.hmrc.apiplatform.modules.common.services.ApplicationLogger
 import uk.gov.hmrc.apiplatform.modules.mfa.connectors.ThirdPartyDeveloperMfaConnector
-import uk.gov.hmrc.apiplatform.modules.mfa.controllers.profile.routes
 import uk.gov.hmrc.apiplatform.modules.mfa.forms.MfaAccessCodeForm
 import uk.gov.hmrc.apiplatform.modules.mfa.models.MfaType.{AUTHENTICATOR_APP, SMS}
 import uk.gov.hmrc.apiplatform.modules.mfa.models.{AuthenticatorAppMfaDetailSummary, DeviceSession, MfaId, MfaType, SmsMfaDetailSummary}
