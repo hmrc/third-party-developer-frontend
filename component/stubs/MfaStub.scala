@@ -1,12 +1,12 @@
 package stubs
 
-import com.github.tomakehurst.wiremock.client.WireMock.{aResponse, delete, equalTo, equalToJson, get, post, put, stubFor, urlEqualTo, urlPathEqualTo}
+import com.github.tomakehurst.wiremock.client.WireMock.{aResponse, delete, equalTo, equalToJson, post, stubFor, urlEqualTo, urlPathEqualTo}
 import play.api.http.Status.{NO_CONTENT, OK}
 import play.api.libs.json.Json
-import steps.{MfaSecret, TestContext}
+import steps.TestContext
 import uk.gov.hmrc.apiplatform.modules.mfa.connectors.ThirdPartyDeveloperMfaConnector.RegisterAuthAppResponse
 import uk.gov.hmrc.apiplatform.modules.mfa.models.MfaId
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.connectors.{TotpAuthenticationRequest, VerifyMfaRequest}
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.connectors.{AccessCodeAuthenticationRequest, VerifyMfaRequest}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.{Developer, LoggedInState, Session}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.connectors.EncryptedJson
 
@@ -15,12 +15,12 @@ object MfaStub {
   private val accessCode = "123456"
   val nonce = "iamanoncevalue"
 
-  def stubAuthenticateTotpSuccess(mfaId: MfaId)(implicit encryptedJson: EncryptedJson): Unit = {
+  def stubAuthenticateAccessCodeSuccess(mfaId: MfaId)(implicit encryptedJson: EncryptedJson): Unit = {
     val session = Session(TestContext.sessionIdForloggedInDeveloper, TestContext.developer, LoggedInState.LOGGED_IN)
 
     stubFor(
-      post(urlEqualTo("/authenticate-auth-app"))
-      .withRequestBody(equalToJson(encryptedJson.toSecretRequestJson(TotpAuthenticationRequest("john.smith@example.com", accessCode, nonce, mfaId)).toString()))
+      post(urlEqualTo("/authenticate-mfa"))
+      .withRequestBody(equalToJson(encryptedJson.toSecretRequestJson(AccessCodeAuthenticationRequest("john.smith@example.com", accessCode, nonce, mfaId)).toString()))
         .willReturn(
           aResponse()
             .withStatus(OK)

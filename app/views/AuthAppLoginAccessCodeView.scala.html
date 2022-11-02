@@ -19,10 +19,11 @@
 @import uk.gov.hmrc.apiplatform.modules.mfa.forms.MfaAccessCodeForm
 @import include._
 @import uk.gov.hmrc.apiplatform.modules.mfa.models.MfaId
+@import uk.gov.hmrc.apiplatform.modules.mfa.models.MfaType
 
 @this(devMain: DevMainWithFormErrors)
 
-@(form: Form[MfaAccessCodeForm], mfaId: MfaId)(implicit messages: Messages, request: play.api.mvc.Request[Any], appConfig: ApplicationConfig)
+@(form: Form[MfaAccessCodeForm], mfaId: MfaId, mfaType: MfaType)(implicit messages: Messages, request: play.api.mvc.Request[Any], appConfig: ApplicationConfig)
 
 @devMain(
   form,
@@ -31,11 +32,11 @@
   back = BackButtonWithJavaScript,
   developerSession = None
 ) {
-  <h1 class="govuk-heading-l">Enter your access code</h1>
+  <h1 class="govuk-heading-l" id="page-heading">Enter your access code</h1>
 
-  @helper.form(action = routes.UserLoginAccount.authenticateTotp(mfaId)){
+  @helper.form(action = routes.UserLoginAccount.authenticateAccessCode(mfaId, mfaType)){
     @helper.CSRF.formField
-    <p class="govuk-body">This is the 6 digit code from your authentication app.</p>
+    <p class="govuk-body" id="paragraph-1">This is the 6 digit code from your authentication app.</p>
     <div class="govuk-form-group @if(form.errors("accessCode").nonEmpty){form-group-error govuk-form-group--error}">
       <label class="govuk-label" for="accessCode" id="access-code-label">Access code</label>
       @fieldError(form.errors, "accessCode", true)
@@ -51,14 +52,14 @@
       />
 
       <p class="govuk-body">
-        <a class="govuk-link" href="@routes.UserLoginAccount.get2SVHelpConfirmationPage">I cannot get an access code</a>
+        <a class="govuk-link" id="help-page-link" href="@routes.UserLoginAccount.get2SVHelpConfirmationPage">I cannot get an access code</a>
       </p>
 
         <div class="govuk-checkboxes" data-module="govuk-checkboxes">
 
             <div class="govuk-checkboxes__item">
                 <input class="govuk-checkboxes__input" id="rememberMe" type="checkbox" name="rememberMe" value="true">
-                <label class="govuk-label govuk-checkboxes__label" for="rememberMe">
+                <label class="govuk-label govuk-checkboxes__label" id="rememberMe-label" for="rememberMe" >
                 Remember me for 7 days
                 </label>
             </div>
