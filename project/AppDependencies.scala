@@ -47,11 +47,11 @@ object AppDependencies {
     "io.cucumber"                 %% "cucumber-scala"                 % cucumberVersion,
     "io.cucumber"                 %  "cucumber-junit"                 % cucumberVersion,
     "io.cucumber"                 %  "cucumber-java8"                 % cucumberVersion,
-    "org.seleniumhq.selenium"     %  "selenium-java"                  % seleniumVersion,
     "org.seleniumhq.selenium"     %  "selenium-remote-driver"         % seleniumVersion,
     "org.seleniumhq.selenium"     %  "selenium-firefox-driver"        % seleniumVersion,
     "org.seleniumhq.selenium"     %  "selenium-chrome-driver"         % seleniumVersion,
     "org.scalatestplus"           %% "selenium-4-2"                   % "3.2.13.0",
     "com.github.tomakehurst"      %  "wiremock-jre8-standalone"       % "2.31.0",
+    "uk.gov.hmrc"                 %% "webdriver-factory"              % "0.38.0"
   ).map(_ % "component")
 }
