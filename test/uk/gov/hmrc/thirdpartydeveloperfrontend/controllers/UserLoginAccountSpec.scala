@@ -31,7 +31,7 @@ import uk.gov.hmrc.thirdpartydeveloperfrontend.service.AuditAction._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.service._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.WithCSRFAddToken
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.WithLoggedInSession._
-import views.html.{AccountLockedView, Add2SVView, AuthAppLoginAccessCodeView, SignInView, SmsLoginAccessCodeView, UserDidNotAdd2SVView}
+import views.html.{AccountLockedView, Add2SVView, AuthAppLoginAccessCodeView, SelectLoginMfaView, SignInView, SmsLoginAccessCodeView, UserDidNotAdd2SVView}
 import views.html.protectaccount.{ProtectAccountNoAccessCodeCompleteView, ProtectAccountNoAccessCodeView}
 
 import scala.concurrent.ExecutionContext.Implicits.global
@@ -76,6 +76,7 @@ class UserLoginAccountSpec extends BaseControllerSpec with WithCSRFAddToken
     val accountLockedView = app.injector.instanceOf[AccountLockedView]
     val authApploginAccessCodeView = app.injector.instanceOf[AuthAppLoginAccessCodeView]
     val smsLoginAccessCodeView = app.injector.instanceOf[SmsLoginAccessCodeView]
+    val selectLoginMfaView = app.injector.instanceOf[SelectLoginMfaView]
     val protectAccountNoAccessCodeView = app.injector.instanceOf[ProtectAccountNoAccessCodeView]
     val protectAccountNoAccessCodeCompleteView = app.injector.instanceOf[ProtectAccountNoAccessCodeCompleteView]
     val userDidNotAdd2SVView = app.injector.instanceOf[UserDidNotAdd2SVView]
@@ -98,6 +99,7 @@ class UserLoginAccountSpec extends BaseControllerSpec with WithCSRFAddToken
       accountLockedView,
       authApploginAccessCodeView,
       smsLoginAccessCodeView,
+      selectLoginMfaView,
       protectAccountNoAccessCodeView,
       protectAccountNoAccessCodeCompleteView,
       userDidNotAdd2SVView,

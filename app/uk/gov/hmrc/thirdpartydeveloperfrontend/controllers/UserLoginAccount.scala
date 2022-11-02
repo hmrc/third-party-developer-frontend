@@ -21,10 +21,12 @@ import play.api.mvc.{Action, AnyContent, MessagesControllerComponents, Request, 
 import uk.gov.hmrc.apiplatform.modules.common.services.ApplicationLogger
 import uk.gov.hmrc.apiplatform.modules.mfa.connectors.ThirdPartyDeveloperMfaConnector
 import uk.gov.hmrc.apiplatform.modules.mfa.forms.{MfaAccessCodeForm, SelectLoginMfaForm, SelectMfaForm}
+import uk.gov.hmrc.apiplatform.modules.mfa.models.MfaAction.{CREATE, REMOVE}
 import uk.gov.hmrc.apiplatform.modules.mfa.models.MfaType.{AUTHENTICATOR_APP, SMS}
 import uk.gov.hmrc.apiplatform.modules.mfa.models.{AuthenticatorAppMfaDetailSummary, DeviceSession, MfaDetail, MfaId, MfaType, SmsMfaDetailSummary}
 import uk.gov.hmrc.apiplatform.modules.mfa.service.MfaMandateService
 import uk.gov.hmrc.apiplatform.modules.mfa.utils.MfaDetailHelper
+import uk.gov.hmrc.apiplatform.modules.mfa.utils.MfaDetailHelper.getMfaDetailById
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.play.audit.http.connector.AuditResult
 import uk.gov.hmrc.thirdpartydeveloperfrontend.config.{ApplicationConfig, ErrorHandler}
@@ -169,27 +171,54 @@ class UserLoginAccount @Inject()(val auditService: AuditService,
     }
   }
 
-  private def handleMfaChoiceFlow(authAppMfaId: MfaId, smsMfaId: MfaId, nonce: String) = {
-    Future.successful(Redirect(routes.UserLoginAccount.selectLoginMfaPage(authAppMfaId, smsMfaId, nonce), SEE_OTHER))
+  private def handleMfaChoiceFlow(userId: UserId, authAppMfaId: MfaId, smsMfaId: MfaId, session: PlaySession) = {
+    Future.successful(Redirect(routes.UserLoginAccount.selectLoginMfaPage(authAppMfaId, smsMfaId), SEE_OTHER)
+      .withSession(session + ("userId"-> userId.value.toString)))
   }
 
   private def handleMfaChoices(developer: Developer, playSession: PlaySession, emailAddress: String, nonce: String)(implicit hc: HeaderCarrier) = {
     val session: PlaySession = playSession + ("emailAddress" -> emailAddress) + ("nonce" -> nonce)
 
     (MfaDetailHelper.getAuthAppMfaVerified(developer.mfaDetails), MfaDetailHelper.getSmsMfaVerified(developer.mfaDetails)) match {
+      case (None, None) => Future.successful(InternalServerError("Access code required but mfa not set up"))
       case (Some(x: AuthenticatorAppMfaDetailSummary), None) => handleAuthAppFlow(x, session)
       case (None, Some(x: SmsMfaDetailSummary)) => handleSmsFlow(developer.userId, x, session)
-      case (Some(authAppMfa: AuthenticatorAppMfaDetailSummary), Some(smsMfa: SmsMfaDetailSummary)) => handleMfaChoiceFlow(authAppMfa.id, smsMfa.id, nonce)
-      case (None, None) => Future.successful(InternalServerError("Access code required but mfa not set up"))
+      case (Some(authAppMfa: AuthenticatorAppMfaDetailSummary), Some(smsMfa: SmsMfaDetailSummary)) =>
+        handleMfaChoiceFlow(developer.userId, authAppMfa.id, smsMfa.id, session)
     }
   }
 
-  def selectLoginMfaPage(authAppMfaId: MfaId, smsMfaId: MfaId, nonce: String): Action[AnyContent] = Action.async { implicit request =>
-    Future.successful(Ok(selectLoginMfaView(SelectLoginMfaForm.form, authAppMfaId, smsMfaId, nonce)))
+  def selectLoginMfaPage(authAppMfaId: MfaId, smsMfaId: MfaId): Action[AnyContent] = Action.async { implicit request =>
+    Future.successful(Ok(selectLoginMfaView(SelectLoginMfaForm.form, authAppMfaId, smsMfaId)))
   }
 
   def selectLoginMfaAction(): Action[AnyContent] = Action.async { implicit request =>
-    Future.successful(Ok)
+
+    def handleSelectedMfa(userId: UserId, mfaDetail: Option[MfaDetail]) = {
+      mfaDetail match {
+        case Some(x: MfaDetail) =>
+          x.mfaType match {
+            case AUTHENTICATOR_APP => handleAuthAppFlow(x.asInstanceOf[AuthenticatorAppMfaDetailSummary], request.session)
+            case SMS => handleSmsFlow(userId, x.asInstanceOf[SmsMfaDetailSummary], request.session)
+          }
+        case _ => successful(InternalServerError("Access code required but mfa not set up"))
+      }
+    }
+
+    def handleMfaLogin(form: SelectLoginMfaForm) = {
+      val userId = UserId(UUID.fromString(request.session.get("userId").get))
+
+      thirdPartyDeveloperConnector.fetchDeveloper(userId) flatMap {
+        case Some(developer: Developer) =>
+          handleSelectedMfa(userId, getMfaDetailById(MfaId(UUID.fromString(form.mfaId)), developer.mfaDetails))
+        case None => throw new UserNotFound
+      }
+    }
+
+    SelectLoginMfaForm.form.bindFromRequest.fold(
+      hasErrors => successful(BadRequest(s"Error while selecting mfaId: ${hasErrors.errors.toString()}")),
+      form => handleMfaLogin(form)
+    )
   }
 
   def authenticate: Action[AnyContent] = Action.async { implicit request =>
