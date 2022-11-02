@@ -25,25 +25,27 @@ import com.github.tomakehurst.wiremock.WireMockServer
 import com.github.tomakehurst.wiremock.client.WireMock
 import com.github.tomakehurst.wiremock.core.WireMockConfiguration._
 import io.cucumber.scala.{EN, ScalaDsl, Scenario}
+import org.scalatest.matchers.should.Matchers
 import org.apache.commons.io.FileUtils
 import org.openqa.selenium.{Dimension, OutputType, TakesScreenshot, WebDriver}
-import org.openqa.selenium.chrome.{ChromeOptions, ChromeDriver}
-import org.openqa.selenium.remote.{DesiredCapabilities, RemoteWebDriver}
 import play.api.Mode
 import play.api.inject.guice.GuiceApplicationBuilder
 import play.api.test.TestServer
 import play.core.server.ServerConfig
 import stubs.AuditStub
-import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.BrowserStackCaps
 
 import scala.util.{Properties, Try}
 import uk.gov.hmrc.apiplatform.modules.common.services.ApplicationLogger
-import org.openqa.selenium.firefox.FirefoxOptions
+
+import org.openqa.selenium.chrome.ChromeOptions
+import uk.gov.hmrc.webdriver.SingletonDriver
+import org.openqa.selenium.chrome.ChromeDriver
 import org.openqa.selenium.firefox.FirefoxDriver
-import org.scalatest.matchers.should.Matchers
+import org.openqa.selenium.firefox.FirefoxOptions
+import org.openqa.selenium.remote.RemoteWebDriver
 
 
-trait Env extends ScalaDsl with EN with Matchers with BrowserStackCaps with ApplicationLogger {
+trait Env extends ScalaDsl with EN with Matchers with ApplicationLogger {
   var passedTestCount: Int = 0
   var failedTestCount: Int = 0
   // please do not change this port as it is used for acceptance tests
@@ -65,40 +67,20 @@ trait Env extends ScalaDsl with EN with Matchers with BrowserStackCaps with Appl
       shutdown()
     }
   }
-  val driver: WebDriver = createWebDriver
+  lazy val driver: WebDriver = createWebDriver()
 
-  lazy val createWebDriver: WebDriver = {
-    Properties.propOrElse("test_driver", "chrome") match {
-      case "chrome" => createChromeDriver()
-      case "firefox" => createFirefoxDriver()
+  private lazy val  browser = Properties.propOrElse("browser","chrome")
+  private lazy val accessibilityTest = Properties.propOrElse("accessibility.test","false") == "true"
+
+  private def createWebDriver(): WebDriver = {
+    val driver = browser match {
+      case "chrome" => if(accessibilityTest) SingletonDriver.getInstance() else createChromeDriver()
       case "remote-chrome" => createRemoteChromeDriver()
+      case "firefox" => createFirefoxDriver()
       case "remote-firefox" => createRemoteFirefoxDriver()
-      case other => throw new IllegalArgumentException(s"target browser $other not recognised")
     }
-  }
-
-  def createRemoteChromeDriver() = {
-    val browserOptions: ChromeOptions = new ChromeOptions()
-
-    val driver = new RemoteWebDriver(new URL(s"http://localhost:4444/wd/hub"), browserOptions)
     driver.manage().deleteAllCookies()
-    driver.manage().window().setSize(windowSize)
-    driver
-  }
-
-  def createRemoteFirefoxDriver() = {
-    val browserOptions = new FirefoxOptions().setAcceptInsecureCerts(true)
-    new RemoteWebDriver(new URL(s"http://localhost:4444/wd/hub"), browserOptions)
-  }
-
-  def createChromeDriver(): WebDriver = {
-    val options = new ChromeOptions()
-    options.addArguments("--headless")
-    options.addArguments("--proxy-server='direct://'")
-    options.addArguments("--proxy-bypass-list=*")
-
-    val driver = new ChromeDriver(options)
-    driver.manage().window().setSize(windowSize)
+    driver.manage().window().setSize(new Dimension(1280, 720))
     driver
   }
 
@@ -106,6 +88,29 @@ trait Env extends ScalaDsl with EN with Matchers with BrowserStackCaps with Appl
     val options = new FirefoxOptions().setAcceptInsecureCerts(true)
     new FirefoxDriver(options)
   }
+
+  def createRemoteFirefoxDriver() = {
+    val browserOptions = new FirefoxOptions().setAcceptInsecureCerts(true)
+    new RemoteWebDriver(new URL(s"http://localhost:4444/wd/hub"), browserOptions)
+  }
+
+  private def createChromeDriver(): WebDriver = {
+    val options = new ChromeOptions()
+    options.addArguments("--headless")
+    options.addArguments("--proxy-server='direct://'")
+    options.addArguments("--proxy-bypass-list=*")
+    new ChromeDriver(options)
+  }
+
+  private def createRemoteChromeDriver() = {
+    val browserOptions: ChromeOptions = new ChromeOptions()
+    browserOptions.addArguments("--headless")
+    browserOptions.addArguments("--proxy-server='direct://'")
+    browserOptions.addArguments("--proxy-bypass-list=*")
+
+    new RemoteWebDriver(new URL("http://localhost:4444/wd/hub"), browserOptions)
+  }
+
 
   def javascriptEnabled: Boolean = {
     val jsEnabled: String = System.getProperty("javascriptEnabled", "true")
@@ -131,7 +136,6 @@ trait Env extends ScalaDsl with EN with Matchers with BrowserStackCaps with Appl
     AuditStub.setupAudit()
     driver.manage().deleteAllCookies()
   }
-
 
   After(order = 1) { _ =>
     if (wireMockServer.isRunning) WireMock.reset()

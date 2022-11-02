@@ -12,12 +12,12 @@ import uk.gov.hmrc.DefaultBuildSettings._
 import uk.gov.hmrc.SbtAutoBuildPlugin
 import uk.gov.hmrc.sbtdistributables.SbtDistributablesPlugin
 import uk.gov.hmrc.sbtdistributables.SbtDistributablesPlugin._
-
+import scala.util.Properties
 import bloop.integrations.sbt.BloopDefaults
 
 bloopAggregateSourceDependencies in Global := true
 
-import scala.util.Properties
+
 
 lazy val appName = "third-party-developer-frontend"
 
@@ -78,11 +78,9 @@ lazy val microservice = Project(appName, file("."))
   .settings(inConfig(ComponentTest)(Defaults.testSettings ++ BloopDefaults.configSettings))
   .settings(
     ComponentTest / testOptions := Seq(Tests.Argument(TestFrameworks.ScalaTest, "-eT")),
-    ComponentTest / testOptions += Tests.Setup(() => System.setProperty("javascript.enabled", "true")),
     ComponentTest / unmanagedSourceDirectories ++= Seq(baseDirectory.value / "component", baseDirectory.value / "test-utils"),
     ComponentTest / unmanagedResourceDirectories += baseDirectory.value / "test",
     ComponentTest / unmanagedResourceDirectories += baseDirectory.value / "target" / "web" / "public" / "test",
-    ComponentTest / testGrouping := oneForkedJvmPerTest((definedTests in ComponentTest).value),
     ComponentTest / parallelExecution := false
   )
   .settings(majorVersion := 0)
@@ -109,14 +107,3 @@ lazy val microservice = Project(appName, file("."))
 
 lazy val ComponentTest = config("component") extend Test
 lazy val TemplateTest = config("tt") extend Test
-
-def oneForkedJvmPerTest(tests: Seq[TestDefinition]): Seq[Group] =
-  tests map { test =>
-    Group(
-      test.name,
-      Seq(test),
-      SubProcess(
-        ForkOptions().withRunJVMOptions(Vector(s"-Dtest.name={test.name}", s"-Dtest_driver=${Properties.propOrElse("test_driver", "chrome")}"))
-      )
-    )
-  }
