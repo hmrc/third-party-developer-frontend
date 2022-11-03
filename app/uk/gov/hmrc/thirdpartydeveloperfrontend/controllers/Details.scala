@@ -153,6 +153,9 @@ class Details @Inject() (
 
       case State.PRODUCTION =>
         successful(appDetailsPage)
+
+      case State.DELETED =>
+        successful(BadRequest)
     }
   }
 
