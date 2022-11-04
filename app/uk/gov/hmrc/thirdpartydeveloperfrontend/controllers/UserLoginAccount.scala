@@ -194,14 +194,10 @@ class UserLoginAccount @Inject()(val auditService: AuditService,
 
   def selectLoginMfaAction(): Action[AnyContent] = Action.async { implicit request =>
 
-    def handleSelectedMfa(userId: UserId, mfaDetail: Option[MfaDetail]) = {
+    def handleSelectedMfa(userId: UserId, mfaDetail: MfaDetail) = {
       mfaDetail match {
-        case Some(x: MfaDetail) =>
-          x.mfaType match {
-            case AUTHENTICATOR_APP => handleAuthAppFlow(x.asInstanceOf[AuthenticatorAppMfaDetailSummary], request.session)
-            case SMS => handleSmsFlow(userId, x.asInstanceOf[SmsMfaDetailSummary], request.session)
-          }
-        case _ => successful(InternalServerError("Access code required but mfa not set up"))
+        case x: AuthenticatorAppMfaDetailSummary => handleAuthAppFlow(x, request.session)
+        case x: SmsMfaDetailSummary => handleSmsFlow(userId, x, request.session)
       }
     }
 
@@ -210,8 +206,10 @@ class UserLoginAccount @Inject()(val auditService: AuditService,
 
       thirdPartyDeveloperConnector.fetchDeveloper(userId) flatMap {
         case Some(developer: Developer) =>
-          handleSelectedMfa(userId, getMfaDetailById(MfaId(UUID.fromString(form.mfaId)), developer.mfaDetails))
-        case None => throw new UserNotFound
+          getMfaDetailById(MfaId(UUID.fromString(form.mfaId)), developer.mfaDetails)
+            .map(mfaDetail => handleSelectedMfa(userId, mfaDetail))
+            .getOrElse(successful(InternalServerError("Access code required but mfa not set up")))
+        case None => successful(NotFound("User not found"))
       }
     }
 

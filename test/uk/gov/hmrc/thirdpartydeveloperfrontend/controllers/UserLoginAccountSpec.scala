@@ -469,6 +469,50 @@ class UserLoginAccountSpec extends BaseControllerSpec with WithCSRFAddToken
       redirectLocation(result) shouldBe Some(routes.UserLoginAccount.loginAccessCodePage(smsMfaId, MfaType.SMS).url)
     }
 
+    "return error when user is not found" in new Setup {
+      TPDMock.FetchDeveloper.thenReturn(user.developer.userId)(None)
+
+      private val request = FakeRequest()
+        .withSession(sessionParams
+          :+ "userId" -> user.developer.userId.value.toString
+          :+ "emailAddress" -> user.email :+ "nonce" -> nonce: _*)
+        .withFormUrlEncodedBody(("mfaId", authAppMfaId.value.toString))
+
+      private val result = underTest.selectLoginMfaAction()(request)
+
+      status(result) shouldBe NOT_FOUND
+      contentAsString(result) should include("User not found")
+    }
+
+    "return error when mfaId is not valid" in new Setup {
+      TPDMock.FetchDeveloper.thenReturn(user.developer.userId)(Some(developerWithAuthAppAndSmsMfa))
+
+      private val request = FakeRequest()
+        .withSession(sessionParams
+          :+ "userId" -> user.developer.userId.value.toString
+          :+ "emailAddress" -> user.email :+ "nonce" -> nonce: _*)
+        .withFormUrlEncodedBody(("mfaId", ""))
+
+      private val result = underTest.selectLoginMfaAction()(request)
+
+      status(result) shouldBe BAD_REQUEST
+      contentAsString(result) should include("Error while selecting mfaId")
+    }
+
+    "return error when mfaDetail not found against the mfaId" in new Setup {
+      TPDMock.FetchDeveloper.thenReturn(user.developer.userId)(Some(developerWithAuthAppAndSmsMfa))
+
+      private val request = FakeRequest()
+        .withSession(sessionParams
+          :+ "userId" -> user.developer.userId.value.toString
+          :+ "emailAddress" -> user.email :+ "nonce" -> nonce: _*)
+        .withFormUrlEncodedBody(("mfaId", UUID.randomUUID().toString))
+
+      private val result = underTest.selectLoginMfaAction()(request)
+
+      status(result) shouldBe INTERNAL_SERVER_ERROR
+      contentAsString(result) should include("Access code required but mfa not set up")
+    }
   }
 
   "loginAccessCodePage" should {
