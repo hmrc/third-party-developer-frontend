@@ -41,7 +41,7 @@ trait MfaViewsValidator {
   }
 
   def validateSmsAccessCodeView(dom: Document) = {
-    dom.getElementById("page-heading").text shouldBe "Enter your access code"
+    dom.getElementById("page-heading").text shouldBe "Enter the access code"
   }
 
   def validateMobileNumberView(dom: Document) = {

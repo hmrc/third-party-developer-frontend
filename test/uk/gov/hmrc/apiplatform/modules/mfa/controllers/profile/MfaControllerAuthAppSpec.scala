@@ -157,7 +157,7 @@ class MfaControllerAuthAppSpec extends MfaControllerBaseSpec {
 
       status(result) shouldBe BAD_REQUEST
       val doc = Jsoup.parse(contentAsString(result))
-      validateSmsAccessCodeView(doc)
+      validateAuthAppAccessCodePage(doc)
       doc.getElementById("data-field-error-accessCode").text() shouldBe "Error: You have entered an invalid access code"
 
       verifyZeroInteractions(underTest.thirdPartyDeveloperMfaConnector)
