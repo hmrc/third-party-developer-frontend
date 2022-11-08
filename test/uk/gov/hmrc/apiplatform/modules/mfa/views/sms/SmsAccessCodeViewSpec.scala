@@ -44,7 +44,7 @@ class SmsAccessCodeViewSpec extends CommonViewSpec
     val mobileNumber = "0123456789"
 
     def verifyPageElements(document: Document) = {
-      document.getElementById("page-heading").text shouldBe "Enter your access code"
+      document.getElementById("page-heading").text shouldBe "Enter the access code"
       document.getElementById("submit").text shouldBe "Continue"
     }
   }

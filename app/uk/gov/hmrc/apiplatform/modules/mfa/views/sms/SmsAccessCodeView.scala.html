@@ -28,13 +28,13 @@
 
 @devMain(
     form,
-    title = "Enter your access code",
+    title = "Enter the access code",
     userFullName = loggedIn.loggedInName,
     back = BackButtonWithJavaScript,
     isRegistering = true,
     developerSession = Some(loggedIn)
 ) {
-    <h1 class="govuk-heading-l" id="page-heading">Enter your access code</h1>
+    <h1 class="govuk-heading-l" id="page-heading">Enter the access code</h1>
     <p class="govuk-body">
         We have sent a 6 digit access code to <span class="govuk-!-font-weight-bold">@flash.get("mobileNumber").getOrElse(form.data.get("mobileNumber"))</span></p>
     <p class="govuk-body">It may take a few minutes to arrive</p>

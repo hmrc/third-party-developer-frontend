@@ -93,12 +93,12 @@ class MfaControllerSmsSpec extends MfaControllerBaseSpec {
   "smsAccessCodePage" should {
     "return sms access code view when user is logged in" in new SetupSuccessfulStart2SV with LoggedIn {
       val result = addToken(underTest.smsAccessCodePage(authAppMfaId, MfaAction.CREATE, None))(smsAccessCodeRequest(correctCode))
-      shouldReturnOK(result, validateAuthAppAccessCodePage)
+      shouldReturnOK(result, validateSmsAccessCodeView)
     }
 
     "return sms access code view when user is part logged in" in new SetupSuccessfulStart2SV with PartLogged {
       val result = addToken(underTest.smsAccessCodePage(authAppMfaId, MfaAction.CREATE, None))(smsAccessCodeRequest(correctCode))
-      shouldReturnOK(result, validateAuthAppAccessCodePage)
+      shouldReturnOK(result, validateSmsAccessCodeView)
     }
 
     "redirect to the login page when user is not logged in" in new SetupAuthAppSecurityPreferences with LoggedIn {
