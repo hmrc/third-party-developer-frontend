@@ -30,6 +30,8 @@ class UnauthenticatedUserEndpointScenarioSpec extends EndpointScenarioSpec
       case Endpoint(_,      "/developer/registration") => getEndpointSuccessResponse(endpoint)
       case Endpoint("GET",  "/developer/login-mfa") => Success()
       case Endpoint("POST", "/developer/login-mfa") => Error("java.util.NoSuchElementException: None.get")
+      case Endpoint("GET",  "/developer/login/select-mfa") => Success()
+      case Endpoint("POST", "/developer/login/select-mfa") => Error("java.util.NoSuchElementException: None.get")
       case Endpoint("GET",  "/developer/application-verification") => Success()
       case Endpoint(_,      "/developer/login/2SV-help") => Success()
       case Endpoint("GET",  "/developer/login/2SV-help/complete") => Success()

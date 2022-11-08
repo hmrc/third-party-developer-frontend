@@ -31,7 +31,7 @@ import uk.gov.hmrc.thirdpartydeveloperfrontend.service.AuditAction._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.service._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.WithCSRFAddToken
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.WithLoggedInSession._
-import views.html.{AccountLockedView, Add2SVView, AuthAppLoginAccessCodeView, SignInView, SmsLoginAccessCodeView, UserDidNotAdd2SVView}
+import views.html.{AccountLockedView, Add2SVView, AuthAppLoginAccessCodeView, SelectLoginMfaView, SignInView, SmsLoginAccessCodeView, UserDidNotAdd2SVView}
 import views.html.protectaccount.{ProtectAccountNoAccessCodeCompleteView, ProtectAccountNoAccessCodeView}
 
 import scala.concurrent.ExecutionContext.Implicits.global
@@ -40,7 +40,7 @@ import scala.concurrent.Future._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.LocalUserIdTracker
 import _root_.uk.gov.hmrc.thirdpartydeveloperfrontend.mocks.connectors.{ThirdPartyDeveloperConnectorMockModule, ThirdPartyDeveloperMfaConnectorMockModule}
 import uk.gov.hmrc.apiplatform.modules.mfa.models.MfaType.{AUTHENTICATOR_APP, SMS}
-import uk.gov.hmrc.apiplatform.modules.mfa.models.MfaId
+import uk.gov.hmrc.apiplatform.modules.mfa.models.{MfaId, MfaType}
 import uk.gov.hmrc.apiplatform.modules.mfa.service.MfaMandateService
 import uk.gov.hmrc.thirdpartydeveloperfrontend.security.CookieEncoding
 
@@ -50,8 +50,9 @@ class UserLoginAccountSpec extends BaseControllerSpec with WithCSRFAddToken
 
   trait Setup extends SessionServiceMock with ThirdPartyDeveloperConnectorMockModule with ThirdPartyDeveloperMfaConnectorMockModule {
 
-    val developerWithAuthAppMfa = buildDeveloper(mfaDetails = List(verifiedAuthenticatorAppMfaDetail, verifiedSmsMfaDetail))
+    val developerWithAuthAppMfa = buildDeveloper(mfaDetails = List(verifiedAuthenticatorAppMfaDetail))
     val developerWithSmsMfa = buildDeveloper(mfaDetails = List(verifiedSmsMfaDetail))
+    val developerWithAuthAppAndSmsMfa = buildDeveloper(mfaDetails = List(verifiedAuthenticatorAppMfaDetail, verifiedSmsMfaDetail))
     val authAppMfaId = verifiedAuthenticatorAppMfaDetail.id
     val smsMfaId = verifiedSmsMfaDetail.id
     val session = Session(UUID.randomUUID().toString, developerWithAuthAppMfa, LoggedInState.LOGGED_IN)
@@ -76,6 +77,7 @@ class UserLoginAccountSpec extends BaseControllerSpec with WithCSRFAddToken
     val accountLockedView = app.injector.instanceOf[AccountLockedView]
     val authApploginAccessCodeView = app.injector.instanceOf[AuthAppLoginAccessCodeView]
     val smsLoginAccessCodeView = app.injector.instanceOf[SmsLoginAccessCodeView]
+    val selectLoginMfaView = app.injector.instanceOf[SelectLoginMfaView]
     val protectAccountNoAccessCodeView = app.injector.instanceOf[ProtectAccountNoAccessCodeView]
     val protectAccountNoAccessCodeCompleteView = app.injector.instanceOf[ProtectAccountNoAccessCodeCompleteView]
     val userDidNotAdd2SVView = app.injector.instanceOf[UserDidNotAdd2SVView]
@@ -98,6 +100,7 @@ class UserLoginAccountSpec extends BaseControllerSpec with WithCSRFAddToken
       accountLockedView,
       authApploginAccessCodeView,
       smsLoginAccessCodeView,
+      selectLoginMfaView,
       protectAccountNoAccessCodeView,
       protectAccountNoAccessCodeCompleteView,
       userDidNotAdd2SVView,
@@ -295,6 +298,23 @@ class UserLoginAccountSpec extends BaseControllerSpec with WithCSRFAddToken
       status(result) shouldBe INTERNAL_SERVER_ERROR
     }
 
+    "display select MFA method page after successful login with both MFA methods configured" in new SetupWithUserAuthRespRequiringMfaAccessCode {
+      mockAuthenticate(user.developer.email, userPassword, successful(userAuthRespRequiringMfaAccessCode), successful(false))
+      mockAudit(LoginSucceeded, successful(AuditResult.Success))
+      TPDMock.FetchDeveloper.thenReturn(user.developer.userId)(Some(developerWithAuthAppAndSmsMfa))
+
+      private val request = FakeRequest()
+        .withCookies(deviceSessionCookie)
+        .withSession(("userId" -> user.developer.userId.value.toString) +: sessionParams: _*)
+        .withFormUrlEncodedBody((emailFieldName, user.email), (passwordFieldName, userPassword))
+
+      private val result = addToken(underTest.authenticate())(request)
+
+      status(result) shouldBe SEE_OTHER
+
+      redirectLocation(result) shouldBe Some(routes.UserLoginAccount.selectLoginMfaPage(authAppMfaId, smsMfaId).url)
+    }
+
     "display the login page when fetch developer fails" in new SetupWithUserAuthRespRequiringMfaAccessCode {
       mockAuthenticate(user.developer.email, userPassword, successful(userAuthRespRequiringMfaAccessCode), successful(false))
       TPDMock.FetchDeveloper.thenReturn(user.developer.userId)(None)
@@ -391,6 +411,107 @@ class UserLoginAccountSpec extends BaseControllerSpec with WithCSRFAddToken
       contentAsString(result) should include("You've entered details that do not match our records. Reset your password to sign in.")
       verify(underTest.auditService, times(1)).audit(
         eqTo(LoginFailedDueToLockedAccount), eqTo(Map("developerEmail" -> user.email)))(*)
+    }
+  }
+
+  "selectLoginAccessPage" should {
+
+    "display both SMS and Authenticator App MFA methods to select for login" in new SetupWithUserAuthRespRequiringMfaAccessCode {
+      mockAuthenticate(user.developer.email, userPassword, successful(userAuthRespRequiringMfaAccessCode), successful(false))
+      mockAudit(LoginSucceeded, successful(AuditResult.Success))
+
+      private val request = FakeRequest()
+        .withSession(sessionParams: _*)
+
+      private val result = addToken(underTest.selectLoginMfaPage(authAppMfaId, smsMfaId))(request)
+
+      status(result) shouldBe OK
+      val content: String = contentAsString(result)
+
+      content should include("How do you want to get access codes?")
+      content should include("Text message")
+      content should include("Get codes sent to a mobile phone.")
+      content should include("Authenticator app for smartphone or tablet")
+      content should include("Get codes generated by an authenticator app on your mobile device such as a smartphone or tablet.")
+    }
+  }
+
+  "selectLoginMfaAction" should {
+
+    "return Authenticator App access code page when mfa method is AUTHENTICATOR_APP" in new Setup {
+      TPDMock.FetchDeveloper.thenReturn(user.developer.userId)(Some(developerWithAuthAppAndSmsMfa))
+
+      private val request = FakeRequest()
+        .withSession(sessionParams
+          :+ "userId" -> user.developer.userId.value.toString
+          :+ "emailAddress" -> user.email :+ "nonce" -> nonce: _*)
+        .withFormUrlEncodedBody(("mfaId", authAppMfaId.value.toString))
+
+      private val result = underTest.selectLoginMfaAction()(request)
+
+      status(result) shouldBe SEE_OTHER
+      redirectLocation(result) shouldBe Some(routes.UserLoginAccount.loginAccessCodePage(authAppMfaId, MfaType.AUTHENTICATOR_APP).url)
+    }
+
+    "return Sms access code page when mfa method is SMS" in new Setup {
+      TPDMock.FetchDeveloper.thenReturn(user.developer.userId)(Some(developerWithAuthAppAndSmsMfa))
+      TPDMFAMock.SendSms.thenReturn(user.developer.userId, smsMfaId)(flag = true)
+
+      private val request = FakeRequest()
+        .withSession(sessionParams
+          :+ "userId" -> user.developer.userId.value.toString
+          :+ "emailAddress" -> user.email :+ "nonce" -> nonce: _*)
+        .withFormUrlEncodedBody(("mfaId", smsMfaId.value.toString))
+
+      private val result = underTest.selectLoginMfaAction()(request)
+
+      status(result) shouldBe SEE_OTHER
+      redirectLocation(result) shouldBe Some(routes.UserLoginAccount.loginAccessCodePage(smsMfaId, MfaType.SMS).url)
+    }
+
+    "return error when user is not found" in new Setup {
+      TPDMock.FetchDeveloper.thenReturn(user.developer.userId)(None)
+
+      private val request = FakeRequest()
+        .withSession(sessionParams
+          :+ "userId" -> user.developer.userId.value.toString
+          :+ "emailAddress" -> user.email :+ "nonce" -> nonce: _*)
+        .withFormUrlEncodedBody(("mfaId", authAppMfaId.value.toString))
+
+      private val result = underTest.selectLoginMfaAction()(request)
+
+      status(result) shouldBe NOT_FOUND
+      contentAsString(result) should include("User not found")
+    }
+
+    "return error when mfaId is not valid" in new Setup {
+      TPDMock.FetchDeveloper.thenReturn(user.developer.userId)(Some(developerWithAuthAppAndSmsMfa))
+
+      private val request = FakeRequest()
+        .withSession(sessionParams
+          :+ "userId" -> user.developer.userId.value.toString
+          :+ "emailAddress" -> user.email :+ "nonce" -> nonce: _*)
+        .withFormUrlEncodedBody(("mfaId", ""))
+
+      private val result = underTest.selectLoginMfaAction()(request)
+
+      status(result) shouldBe BAD_REQUEST
+      contentAsString(result) should include("Error while selecting mfaId")
+    }
+
+    "return error when mfaDetail not found against the mfaId" in new Setup {
+      TPDMock.FetchDeveloper.thenReturn(user.developer.userId)(Some(developerWithAuthAppAndSmsMfa))
+
+      private val request = FakeRequest()
+        .withSession(sessionParams
+          :+ "userId" -> user.developer.userId.value.toString
+          :+ "emailAddress" -> user.email :+ "nonce" -> nonce: _*)
+        .withFormUrlEncodedBody(("mfaId", UUID.randomUUID().toString))
+
+      private val result = underTest.selectLoginMfaAction()(request)
+
+      status(result) shouldBe INTERNAL_SERVER_ERROR
+      contentAsString(result) should include("Access code required but mfa not set up")
     }
   }
 

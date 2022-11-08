@@ -101,9 +101,9 @@ trait HasApplication extends HasAppDeploymentEnvironment with HasUserWithRole wi
   lazy val responsibleIndividualVerificationWithDetails = ResponsibleIndividualVerificationWithDetails(
     responsibleIndividualVerification, responsibleIndividual, "mr submitter", "submitter@example.com"
   )
-  lazy val mfaId = verifiedAuthenticatorAppMfaDetail.id
+  lazy val authAppMfaId = verifiedAuthenticatorAppMfaDetail.id
   lazy val smsMfaId = verifiedSmsMfaDetail.id
-  lazy val registerAuthAppResponse = RegisterAuthAppResponse(mfaId, "secret")
+  lazy val registerAuthAppResponse = RegisterAuthAppResponse(authAppMfaId, "secret")
   lazy val registerSmsResponse = RegisterSmsResponse(smsMfaId, verifiedSmsMfaDetail.mobileNumber)
 }
 
@@ -190,7 +190,8 @@ trait UserIsAuthenticated extends HasUserSession with UpdatesRequest {
     ).withSession(
       ("email" , userEmail),
       ("emailAddress" , userEmail),
-      ("nonce" , "123")
+      ("nonce" , "123"),
+      ("userId" , developer.userId.value.toString)
     )
   }
 }
