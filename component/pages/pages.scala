@@ -155,6 +155,11 @@ case object Login2svEnterAccessCodePage extends FormPage {
   }
 }
 
+case object AuthAppStartPage extends FormPage {
+  override val pageHeading: String = "You need an authenticator app on your device"
+  override val url: String = s"${Env.host}/developer/profile/security-preferences/auth-app/start"
+}
+
 case object ProtectAccountPage extends FormPage {
   override val pageHeading: String = "Account protection"
   override val url: String = s"${Env.host}/developer/profile/protect-account"
@@ -191,8 +196,8 @@ case object MfaRemovalCompletePage extends FormPage {
 }
 
 case object Setup2svQrPage extends FormPage {
-  override val pageHeading: String = "Set up 2-step verification"
-  override val url: String = s"${Env.host}/developer/profile/protect-account/setup"
+  override val pageHeading: String = "Set up your authenticator app"
+  override val url: String = s"${Env.host}/developer/profile/security-preferences/auth-app/setup"
 }
 
 case object Setup2svEnterAccessCodePage extends FormPage {
@@ -208,6 +213,11 @@ case object Setup2svEnterAccessCodePage extends FormPage {
 
     Form.populate(formData)
   }
+}
+
+case object CreateNameForAuthAppPage extends FormPage {
+  override val pageHeading: String = "Create a name for your authenticator app"
+  override val url: String = s"${Env.host}/developer/profile/security-preferences/auth-app/name"
 }
 
 case object ProtectAccountCompletePage extends FormPage {

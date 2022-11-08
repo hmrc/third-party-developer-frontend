@@ -34,12 +34,14 @@ Feature: MFA Setup
     When I click on the button with id 'submit'
     Then I am on the 'Recommend Mfa' page
     When I click on the button with id 'submit'
-    Then I am on the 'Protect Account' page
+    Then I am on the 'Authenticator App Start Page' page
     When I click on the button with id 'submit'
     Then I am on the 'Setup 2SV QR' page
     When I click on the button with id 'submit'
     Then I am on the 'Setup 2SV Enter Access Code' page
     When I enter the correct access code during 2SVSetup with mfaMandated 'false'
+    Then I am on the 'Create name for Authenticator App' page
+    When I click on the button with id 'submit'
     Then I am on the 'Protect Account Complete' page
     When I click on the button with id 'submit'
     Given I am on the 'No Applications' page
