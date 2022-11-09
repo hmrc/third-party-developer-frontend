@@ -48,6 +48,7 @@ class MfaSteps extends ScalaDsl with EN with Matchers with NavigationSugar with 
   When("""^I enter the correct access code during 2SVSetup with mfaMandated '(.*)'$""") { (mfaMandated: String) =>
     val isMfaMandated = java.lang.Boolean.parseBoolean(mfaMandated)
     MfaStub.stubAuthenticateAccessCodeSuccess(mfaId)
+//    MfaStub.setupVerificationOfAccessCode(TestContext.developer, mfaId)
     MfaStub.stubUpliftAuthSession(isMfaMandated)
     Setup2svEnterAccessCodePage.enterAccessCode(accessCode)
     Setup2svEnterAccessCodePage.clickContinue()
@@ -74,6 +75,14 @@ class MfaSteps extends ScalaDsl with EN with Matchers with NavigationSugar with 
     Login2svEnterAccessCodePage.clickContinue()
   }
 
+  Then("""^I enter an authenticator app name and click continue$""") { () =>
+
+    val authAppName = "someName"
+    MfaStub.stubMfaAuthAppNameChange(TestContext.developer, mfaId, authAppName)
+    CreateNameForAuthAppPage.enterName(authAppName)
+    CreateNameForAuthAppPage.clickContinue()
+  }
+
   Then("""My device session is set$""") { () =>
     val deviceSessionCookie = webDriver.manage().getCookieNamed(deviceCookieName)
     deviceSessionCookie should not be null
@@ -95,7 +104,7 @@ class MfaSteps extends ScalaDsl with EN with Matchers with NavigationSugar with 
         lastName = result("Last name"),
         mfaDetails = List(authenticatorAppMfaDetails))
 
-   setUpDeveloperStub(developer, password, None, false)
+   setUpDeveloperStub(developer, password, None, deviceSessionFound = false)
 
   }
 

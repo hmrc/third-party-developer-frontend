@@ -4,6 +4,7 @@ import com.github.tomakehurst.wiremock.client.WireMock.{aResponse, delete, equal
 import play.api.http.Status.{NO_CONTENT, OK}
 import play.api.libs.json.Json
 import steps.TestContext
+import uk.gov.hmrc.apiplatform.modules.mfa.connectors.ChangeMfaNameRequest
 import uk.gov.hmrc.apiplatform.modules.mfa.connectors.ThirdPartyDeveloperMfaConnector.RegisterAuthAppResponse
 import uk.gov.hmrc.apiplatform.modules.mfa.models.MfaId
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.connectors.{AccessCodeAuthenticationRequest, VerifyMfaRequest}
@@ -27,6 +28,15 @@ object MfaStub {
             .withBody(Json.toJson(session).toString())
         )
     )
+  }
+
+  def stubMfaAuthAppNameChange(developer: Developer, mfaId: MfaId, authAppName: String): Unit = {
+    stubFor(
+      post(urlPathEqualTo(s"/developer/${developer.userId.value}/mfa/${mfaId.value}/name"))
+        .withRequestBody(equalTo(Json.toJson(ChangeMfaNameRequest(authAppName)).toString()))
+        .willReturn(aResponse()
+          .withStatus(NO_CONTENT)
+        ))
   }
 
   def setupVerificationOfAccessCode(developer: Developer, mfaId: MfaId): Unit = {

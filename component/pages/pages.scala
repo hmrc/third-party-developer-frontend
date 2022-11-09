@@ -206,7 +206,7 @@ case object Setup2svEnterAccessCodePage extends FormPage {
   }
 
   override val pageHeading: String = "Enter your access code"
-  override val url: String = s"${Env.host}/developer/profile/protect-account/access-code"
+  override val url: String = s"${Env.host}/developer/profile/security-preferences/auth-app/access-code"
 
   def enterAccessCode(accessCode: String) = {
     val formData = Map("accessCode" -> accessCode)
@@ -216,8 +216,19 @@ case object Setup2svEnterAccessCodePage extends FormPage {
 }
 
 case object CreateNameForAuthAppPage extends FormPage {
+  def enterName(name: String) = Form.populate(Map("name" -> name))(webDriver)
+
+  def clickContinue() = {
+    click on id("submit")
+  }
+
   override val pageHeading: String = "Create a name for your authenticator app"
   override val url: String = s"${Env.host}/developer/profile/security-preferences/auth-app/name"
+}
+
+case object AuthenticatorAppSetupCompletePage extends FormPage {
+  override val pageHeading: String = "You can now get access codes by authenticator app"
+  override val url: String = s"${Env.host}/developer/profile/security-preferences/auth-app/setup/complete"
 }
 
 case object ProtectAccountCompletePage extends FormPage {
