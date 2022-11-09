@@ -63,6 +63,7 @@ class ProtectAccount @Inject()(
   extends LoggedInController(mcc) with WithUnsafeDefaultFormBinding {
   val qrCode: QRCode = QRCode(scale = 4)
 
+  @deprecated("please use `setupAuthApp` in MfaController")
   def getQrCode: Action[AnyContent] = atLeastPartLoggedInEnablingMfaAction { implicit request =>
     thirdPartyDeveloperMfaConnector.createMfaAuthApp(request.userId).map(registerAuthAppResponse => {
       val uri = otpAuthUri(registerAuthAppResponse.secret.toLowerCase, "HMRC Developer Hub", request.developerSession.email)
@@ -71,6 +72,7 @@ class ProtectAccount @Inject()(
     })
   }
 
+  @deprecated("please use `authAppStart` in MfaController")
   def getProtectAccount: Action[AnyContent] = atLeastPartLoggedInEnablingMfaAction { implicit request =>
     thirdPartyDeveloperConnector.fetchDeveloper(request.userId).map {
       case Some(developer: Developer) => if (MfaDetailHelper.isAuthAppMfaVerified(developer.mfaDetails)) {
@@ -80,10 +82,13 @@ class ProtectAccount @Inject()(
     }
   }
 
+
+  @deprecated("please use `authAppAccessCodePage` in MfaController")
   def getAccessCodePage(mfaId: MfaId): Action[AnyContent] = atLeastPartLoggedInEnablingMfaAction { implicit request =>
     Future.successful(Ok(protectAccountAccessCodeView(ProtectAccountForm.form, mfaId)))
   }
 
+  @deprecated("please use `authAppSetupCompletedPage` in MfaController")
   def getProtectAccountCompletedPage: Action[AnyContent] = atLeastPartLoggedInEnablingMfaAction { implicit request =>
     Future.successful(Ok(protectAccountCompletedView()))
   }

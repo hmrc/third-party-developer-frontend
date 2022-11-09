@@ -48,7 +48,6 @@ class MfaSteps extends ScalaDsl with EN with Matchers with NavigationSugar with 
   When("""^I enter the correct access code during 2SVSetup with mfaMandated '(.*)'$""") { (mfaMandated: String) =>
     val isMfaMandated = java.lang.Boolean.parseBoolean(mfaMandated)
     MfaStub.stubAuthenticateAccessCodeSuccess(mfaId)
-//    MfaStub.setupVerificationOfAccessCode(TestContext.developer, mfaId)
     MfaStub.stubUpliftAuthSession(isMfaMandated)
     Setup2svEnterAccessCodePage.enterAccessCode(accessCode)
     Setup2svEnterAccessCodePage.clickContinue()

@@ -269,10 +269,10 @@ abstract class EndpointScenarioSpec extends AsyncHmrcSpec with GuiceOneAppPerSui
       case Endpoint("GET",  "/developer/profile/security-preferences/auth-app/name") => Map("mfaId" -> authAppMfaId.value.toString)
       case Endpoint("POST", "/developer/profile/security-preferences/auth-app/name") => Map("mfaId" -> authAppMfaId.value.toString)
       case Endpoint("GET",  "/developer/profile/security-preferences/sms/access-code") => Map("mfaId" -> smsMfaId.value.toString, "mfaAction" -> MfaAction.CREATE.toString, "mfaIdForRemoval" -> smsMfaId.value.toString)
-      case Endpoint("POST", "/developer/profile/security-preferences/sms/access-code") => Map("mfaId" -> smsMfaId.value.toString, "mfaAction" -> MfaAction.CREATE.toString, "mfaIdForRemoval" -> smsMfaId.value.toString)
-      case Endpoint("GET",  "/developer/profile/security-preferences/remove-mfa") => Map("mfaId" -> smsMfaId.value.toString, "mfaType" -> MfaType.SMS.toString)
-      case Endpoint("GET",  "/developer/profile/security-preferences/select-mfa") => Map("mfaId" -> smsMfaId.value.toString, "mfaAction" -> MfaAction.CREATE.toString)
-      case Endpoint("POST", "/developer/profile/security-preferences/select-mfa") => Map("mfaId" -> smsMfaId.value.toString, "mfaAction" -> MfaAction.CREATE.toString)
+      case Endpoint("POST", "/developer/profile/security-preferences/sms/access-code") => Map("mfaId" -> smsMfaId.value.toString, "mfaAction" -> MfaAction.CREATE.toString, "mfaIdForRemoval" -> authAppMfaId.value.toString)
+      case Endpoint("GET",  "/developer/profile/security-preferences/remove-mfa") => Map("mfaId" -> authAppMfaId.value.toString, "mfaType" -> MfaType.AUTHENTICATOR_APP.toString)
+      case Endpoint("GET",  "/developer/profile/security-preferences/select-mfa") => Map("mfaId" -> authAppMfaId.value.toString, "mfaAction" -> MfaAction.CREATE.toString)
+      case Endpoint("POST", "/developer/profile/security-preferences/select-mfa") => Map("mfaId" -> authAppMfaId.value.toString, "mfaAction" -> MfaAction.CREATE.toString)
       case Endpoint("GET",  "/developer/login/select-mfa") => Map("authAppMfaId" -> authAppMfaId.value.toString, "smsMfaId" -> smsMfaId.value.toString)
 
       case _ => Map.empty
@@ -445,7 +445,7 @@ abstract class EndpointScenarioSpec extends AsyncHmrcSpec with GuiceOneAppPerSui
       case Endpoint("POST", "/developer/profile/security-preferences/auth-app/name") => Redirect(s"/developer/profile/security-preferences/auth-app/setup/complete")
       case Endpoint("POST", "/developer/profile/security-preferences/sms/setup") => Redirect(s"/developer/profile/security-preferences/sms/access-code?mfaId=${smsMfaId.value.toString}&mfaAction=CREATE")
       case Endpoint("POST", "/developer/profile/security-preferences/sms/access-code") => Redirect(s"/developer/profile/security-preferences/sms/setup/complete")
-      case Endpoint("GET",  "/developer/profile/security-preferences/remove-mfa") => Redirect(s"/developer/profile/security-preferences/sms/access-code?mfaId=${smsMfaId.value.toString}&mfaAction=REMOVE&mfaIdForRemoval=${smsMfaId.value.toString}")
+      case Endpoint("GET",  "/developer/profile/security-preferences/remove-mfa") => Redirect(s"/developer/profile/security-preferences/auth-app/access-code?mfaId=${authAppMfaId.value.toString}&mfaAction=REMOVE&mfaIdForRemoval=${authAppMfaId.value.toString}")
       case Endpoint("POST", "/developer/poc-dynamics/tickets/add") => Redirect("/developer/poc-dynamics/tickets")
       case Endpoint("POST", "/developer/login/select-mfa") => Redirect(s"/developer/login-mfa?mfaId=${authAppMfaId.value.toString}&mfaType=${MfaType.AUTHENTICATOR_APP.toString}")
       case _ => Success()

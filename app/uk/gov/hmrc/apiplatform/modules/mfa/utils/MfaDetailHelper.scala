@@ -42,19 +42,16 @@ object MfaDetailHelper {
     details.find(detail => detail.id == mfaId)
   }
 
-  def getMfaDetailByType(mfaType: MfaType, details: List[MfaDetail]): MfaDetail = {
-    details.filter(_.mfaType == mfaType).head
+  def isMfaDetailVerified(mfaId: MfaId, details: List[MfaDetail]): Boolean = {
+    details.find(detail => detail.id == mfaId).exists(_.verified)
   }
 
-  def countAndHasSmsAndAuthApp(mfaDetails: List[MfaDetail]): (Int, Boolean) = {
-    (numberOfVerifiedMfa(mfaDetails), hasVerifiedSmsAndAuthApp(mfaDetails))
+  def getMfaDetailByType(mfaType: MfaType, details: List[MfaDetail]): MfaDetail = {
+    details.filter(_.mfaType == mfaType).head
   }
 
   def hasVerifiedSmsAndAuthApp(mfaDetails: List[MfaDetail]): Boolean = {
     isAuthAppMfaVerified(mfaDetails) && isSmsMfaVerified(mfaDetails)
   }
 
-  def numberOfVerifiedMfa(mfaDetails: List[MfaDetail]): Int = {
-    mfaDetails.count(x => x.verified)
-  }
 }
