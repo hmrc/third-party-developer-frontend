@@ -218,10 +218,6 @@ case object Setup2svEnterAccessCodePage extends FormPage {
 case object CreateNameForAuthAppPage extends FormPage {
   def enterName(name: String) = Form.populate(Map("name" -> name))(webDriver)
 
-  def clickContinue() = {
-    click on id("submit")
-  }
-
   override val pageHeading: String = "Create a name for your authenticator app"
   override val url: String = s"${Env.host}/developer/profile/security-preferences/auth-app/name"
 }

@@ -82,6 +82,7 @@ class LoginSteps extends ScalaDsl with EN with Matchers with NavigationSugar wit
     val mfaId = authenticatorAppMfaDetails.id
     MfaStub.setupGettingMfaSecret(developer, mfaId)
     MfaStub.setupVerificationOfAccessCode(developer, mfaId)
+    MfaStub.stubMfaAuthAppNameChange(TestContext.developer, mfaId, "SomeAuthApp")
 
     DeveloperStub.setUpGetCombinedApis()
   }

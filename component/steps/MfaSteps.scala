@@ -75,12 +75,9 @@ class MfaSteps extends ScalaDsl with EN with Matchers with NavigationSugar with 
     Login2svEnterAccessCodePage.clickContinue()
   }
 
-  Then("""^I enter an authenticator app name and click continue$""") { () =>
-
-    val authAppName = "someName"
-    MfaStub.stubMfaAuthAppNameChange(TestContext.developer, mfaId, authAppName)
+  Then("""^I enter an authenticator app name$""") { () =>
+    val authAppName = "SomeAuthApp"
     CreateNameForAuthAppPage.enterName(authAppName)
-    CreateNameForAuthAppPage.clickContinue()
   }
 
   Then("""My device session is set$""") { () =>
