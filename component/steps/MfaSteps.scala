@@ -74,6 +74,11 @@ class MfaSteps extends ScalaDsl with EN with Matchers with NavigationSugar with 
     Login2svEnterAccessCodePage.clickContinue()
   }
 
+  Then("""^I enter an authenticator app name$""") { () =>
+    val authAppName = "SomeAuthApp"
+    CreateNameForAuthAppPage.enterName(authAppName)
+  }
+
   Then("""My device session is set$""") { () =>
     val deviceSessionCookie = webDriver.manage().getCookieNamed(deviceCookieName)
     deviceSessionCookie should not be null
@@ -95,7 +100,7 @@ class MfaSteps extends ScalaDsl with EN with Matchers with NavigationSugar with 
         lastName = result("Last name"),
         mfaDetails = List(authenticatorAppMfaDetails))
 
-   setUpDeveloperStub(developer, password, None, false)
+   setUpDeveloperStub(developer, password, None, deviceSessionFound = false)
 
   }
 

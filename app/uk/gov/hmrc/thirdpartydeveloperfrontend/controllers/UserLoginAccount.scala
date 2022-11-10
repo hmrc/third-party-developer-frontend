@@ -20,8 +20,8 @@ import play.api.libs.crypto.CookieSigner
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents, Request, Result, Session => PlaySession}
 import uk.gov.hmrc.apiplatform.modules.common.services.ApplicationLogger
 import uk.gov.hmrc.apiplatform.modules.mfa.connectors.ThirdPartyDeveloperMfaConnector
-import uk.gov.hmrc.apiplatform.modules.mfa.forms.{MfaAccessCodeForm, SelectLoginMfaForm, SelectMfaForm}
-import uk.gov.hmrc.apiplatform.modules.mfa.models.MfaAction.{CREATE, REMOVE}
+import uk.gov.hmrc.apiplatform.modules.mfa.forms.{MfaAccessCodeForm, SelectLoginMfaForm}
+
 import uk.gov.hmrc.apiplatform.modules.mfa.models.MfaType.{AUTHENTICATOR_APP, SMS}
 import uk.gov.hmrc.apiplatform.modules.mfa.models.{AuthenticatorAppMfaDetailSummary, DeviceSession, MfaDetail, MfaId, MfaType, SmsMfaDetailSummary}
 import uk.gov.hmrc.apiplatform.modules.mfa.service.MfaMandateService
@@ -140,7 +140,7 @@ class UserLoginAccount @Inject()(val auditService: AuditService,
       case (Some(session), false) if session.loggedInState.isPartLoggedInEnablingMFA =>
         successful(
           withSessionCookie(
-            Redirect(uk.gov.hmrc.apiplatform.modules.mfa.controllers.profile.routes.ProtectAccount.getProtectAccount().url).withSession(playSession),
+            Redirect(uk.gov.hmrc.apiplatform.modules.mfa.controllers.profile.routes.MfaController.authAppStart().url).withSession(playSession),
             session.sessionId
           )
         )

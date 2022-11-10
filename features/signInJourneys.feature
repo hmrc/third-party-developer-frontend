@@ -22,22 +22,25 @@ Feature: Sign in
     And I click on the button with id 'submit'
     Then I am on the 'Email preferences' page
 
-  Scenario: Signing with a valid credentials, no mfa enabled and with a production admin app and the mandate date is in the past
+  Scenario: Signing with a valid credentials, no mfa enabled and with a production admin app and the mandated date is in the past
     Given application with name 'My Admin Production App' can be created
     Given I navigate to the 'Sign in' page
     And I enter all the fields:
       | email address          | password         |
       | john.smith@example.com | StrongPassword1! |
     When I click on the button with id 'submit'
-    Then I am on the 'Protect Account' page
+    Then I am on the 'Authenticator App Start Page' page
     When I click on the button with id 'submit'
     Then I am on the 'Setup 2SV QR' page
     When I click on the button with id 'submit'
     Then I am on the 'Setup 2SV Enter Access Code' page
     When I enter the correct access code during 2SVSetup with mfaMandated 'true'
-    Then I am on the 'Protect Account Complete' page
-    Given 'john.smith@example.com' session is uplifted to LoggedIn
+    Then I am on the 'Create name for Authenticator App' page
+    And  I enter an authenticator app name
     When I click on the button with id 'submit'
+    Then I am on the 'Authenticator App Setup Complete' page
+    Given 'john.smith@example.com' session is uplifted to LoggedIn
+    When I click on the button with id 'link'
     Then I am on the 'View all applications' page
 
   Scenario: Signing with a valid credentials and no MFA mandated or setup, start using our rest APIs

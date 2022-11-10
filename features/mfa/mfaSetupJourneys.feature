@@ -34,15 +34,19 @@ Feature: MFA Setup
     When I click on the button with id 'submit'
     Then I am on the 'Recommend Mfa' page
     When I click on the button with id 'submit'
-    Then I am on the 'Protect Account' page
+    Then I am on the 'Authenticator App Start Page' page
     When I click on the button with id 'submit'
     Then I am on the 'Setup 2SV QR' page
     When I click on the button with id 'submit'
     Then I am on the 'Setup 2SV Enter Access Code' page
     When I enter the correct access code during 2SVSetup with mfaMandated 'false'
-    Then I am on the 'Protect Account Complete' page
+    Then I am on the 'Create name for Authenticator App' page
+    And  I enter an authenticator app name
     When I click on the button with id 'submit'
-    Given I am on the 'No Applications' page
+    Then I am on the 'Authenticator App Setup Complete' page
+    And I click on the button with id 'link'
+    Given 'john.smith@example.com' session is uplifted to LoggedIn
+    And I am on the 'No Applications' page
     Then My device session is not set
     When I click on the radio button with id 'get-emails'
     And I click on the button with id 'submit'

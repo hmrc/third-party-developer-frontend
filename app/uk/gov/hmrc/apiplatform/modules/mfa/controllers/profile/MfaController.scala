@@ -16,13 +16,21 @@
 
 package uk.gov.hmrc.apiplatform.modules.mfa.controllers.profile
 
+import play.api.i18n.Messages
 import play.api.libs.crypto.CookieSigner
-import play.api.mvc.{Action, AnyContent, MessagesControllerComponents, Request, Result}
+import play.api.mvc._
 import uk.gov.hmrc.apiplatform.modules.mfa.connectors.ThirdPartyDeveloperMfaConnector
+import uk.gov.hmrc.apiplatform.modules.mfa.forms._
+import uk.gov.hmrc.apiplatform.modules.mfa.models.MfaAction.{CREATE, REMOVE}
+import uk.gov.hmrc.apiplatform.modules.mfa.models.MfaType.{AUTHENTICATOR_APP, SMS}
 import uk.gov.hmrc.apiplatform.modules.mfa.models.{MfaAction, MfaId, MfaType}
 import uk.gov.hmrc.apiplatform.modules.mfa.service.{MfaResponse, MfaService}
+import uk.gov.hmrc.apiplatform.modules.mfa.utils.MfaDetailHelper._
+import uk.gov.hmrc.apiplatform.modules.mfa.views.html.authapp._
+import uk.gov.hmrc.apiplatform.modules.mfa.views.html.sms.{MobileNumberView, SmsAccessCodeView, SmsSetupCompletedView}
 import uk.gov.hmrc.apiplatform.modules.mfa.views.html.{RemoveMfaCompletedView, SecurityPreferencesView, SelectMfaView}
-import uk.gov.hmrc.apiplatform.modules.mfa.views.html.authapp.{AuthAppAccessCodeView, AuthAppSetupCompletedView, AuthAppStartView, NameChangeView, QrCodeView}
+import uk.gov.hmrc.http.HeaderCarrier
+import uk.gov.hmrc.play.bootstrap.controller.WithUnsafeDefaultFormBinding
 import uk.gov.hmrc.thirdpartydeveloperfrontend.config.{ApplicationConfig, ErrorHandler}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.connectors.ThirdPartyDeveloperConnector
 import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.LoggedInController
@@ -30,17 +38,6 @@ import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.connectors.UpdateLo
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.{Developer, DeveloperSession, LoggedInState, UserId}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.qr.{OtpAuthUri, QRCode}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.service.SessionService
-import play.api.data.Form
-import play.api.data.Forms._
-import play.api.i18n.Messages
-import uk.gov.hmrc.apiplatform.modules.mfa.controllers.profile.routes._
-import uk.gov.hmrc.apiplatform.modules.mfa.forms.{MfaAccessCodeForm, MfaNameChangeForm, MobileNumberForm, SelectMfaForm, SmsAccessCodeForm}
-import uk.gov.hmrc.apiplatform.modules.mfa.models.MfaAction.{CREATE, REMOVE}
-import uk.gov.hmrc.apiplatform.modules.mfa.models.MfaType.{AUTHENTICATOR_APP, SMS}
-import uk.gov.hmrc.apiplatform.modules.mfa.utils.MfaDetailHelper.{getMfaDetailByType, isAuthAppMfaVerified, isSmsMfaVerified, countAndHasSmsAndAuthApp}
-import uk.gov.hmrc.apiplatform.modules.mfa.views.html.sms.{MobileNumberView, SmsAccessCodeView, SmsSetupCompletedView}
-import uk.gov.hmrc.http.HeaderCarrier
-import uk.gov.hmrc.play.bootstrap.controller.WithUnsafeDefaultFormBinding
 
 import javax.inject.{Inject, Singleton}
 import scala.concurrent.{ExecutionContext, Future}
@@ -240,9 +237,9 @@ class MfaController @Inject() (
   def removeMfa(mfaId: MfaId, mfaType: MfaType): Action[AnyContent] = loggedInAction { implicit request =>
     thirdPartyDeveloperConnector.fetchDeveloper(request.userId).flatMap {
       case Some(developer: Developer) =>
-        countAndHasSmsAndAuthApp(developer.mfaDetails) match {
-          case (1, false) => removeMfaUserWithOneMfaMethod(mfaId, mfaType, request.userId)
-          case (2, true) => Future.successful(Redirect(routes.MfaController.selectMfaPage(Some(mfaId), MfaAction.REMOVE)))
+        (isMfaDetailVerified(mfaId, developer.mfaDetails), hasVerifiedSmsAndAuthApp(developer.mfaDetails)) match {
+          case (true, false) => removeMfaUserWithOneMfaMethod(mfaId, mfaType, request.userId)
+          case (true, true) => Future.successful(Redirect(routes.MfaController.selectMfaPage(Some(mfaId), MfaAction.REMOVE)))
           case (_, _) => Future.successful(internalServerErrorTemplate("MFA setup not valid"))
         }
       case None => Future.successful(internalServerErrorTemplate("Unable to obtain User information"))
