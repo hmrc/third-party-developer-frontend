@@ -53,10 +53,10 @@ class MfaSteps extends ScalaDsl with EN with Matchers with NavigationSugar with 
     Setup2svEnterAccessCodePage.clickContinue()
   }
 
-  When("""^I enter the correct access code during remove2SV then click continue$""") {
+  When("""^I enter the correct access code during Auth App removal then click continue$""") {
     MfaStub.stubAuthenticateAccessCodeSuccess(mfaId)
-    MfaRemovePage.enterAccessCode(accessCode)
-    MfaRemovePage.clickContinue()
+    AuthAppAccessCodePage.enterAccessCode(accessCode)
+    AuthAppAccessCodePage.clickContinue()
   }
 
 

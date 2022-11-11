@@ -64,20 +64,17 @@ class CommonSteps extends ScalaDsl with EN with Matchers with NavigationSugar wi
     "Account deletion request submitted" -> AccountDeletionRequestSubmittedPage,
     "Recommend Mfa" -> RecommendMfaPage,
     "Recommend Mfa Skip Acknowledge" -> RecommendMfaSkipAcknowledgePage,
-    "Protect Account" -> ProtectAccountPage,
+    "2SV removal complete" -> MfaRemovalCompletePage,
     "Setup 2SV QR" -> Setup2svQrPage,
     "Setup 2SV Enter Access Code" -> Setup2svEnterAccessCodePage,
-    "Protect Account Complete" -> ProtectAccountCompletePage,
-    "Account protection" -> AccountProtectionPage,
-    "Confirm 2SV removal"-> MfaConfirmRemovalPage,
-    "2SV remove"-> MfaRemovePage,
-    "2SV removal complete" -> MfaRemovalCompletePage,
     "Password reset confirmation" -> PasswordResetConfirmationPage,
     "You have reset your password" -> YouHaveResetYourPasswordPage,
     "Reset password link no longer valid" -> ResetPasswordLinkNoLongerValidPage,
     "Authenticator App Start Page" -> AuthAppStartPage,
+    "Authenticator App Access Code Page" -> AuthAppAccessCodePage,
     "Create name for Authenticator App" -> CreateNameForAuthAppPage,
-    "Authenticator App Setup Complete" -> AuthenticatorAppSetupCompletePage
+    "Authenticator App Setup Complete" -> AuthenticatorAppSetupCompletePage,
+    "Security preferences" -> SecurityPreferencesPage
   )
 
   Given( """^I navigate to the '(.*)' page$""") { (pageName: String) =>

@@ -246,6 +246,10 @@ class MfaController @Inject() (
     }
   }
 
+  def removeMfaCompletedPage(): Action[AnyContent] = atLeastPartLoggedInEnablingMfaAction { implicit request =>
+    Future.successful(Ok(removeMfaCompletedView()))
+  }
+
   private def removeMfaUserWithOneMfaMethod(mfaId: MfaId, mfaType: MfaType, userId: UserId)(implicit hc: HeaderCarrier, request: Request[_]): Future[Result] = {
     mfaType match {
       case AUTHENTICATOR_APP => Future.successful(Redirect(routes.MfaController.authAppAccessCodePage(mfaId, MfaAction.REMOVE, Some(mfaId))))
@@ -262,7 +266,7 @@ class MfaController @Inject() (
     mfaIdForRemoval match {
       case Some(mfaId) =>
         mfaService.removeMfaById(userId, mfaIdToVerify, accessCode, mfaId) map {
-          case MfaResponse(true)  => Ok(removeMfaCompletedView())
+          case MfaResponse(true)  => Redirect(routes.MfaController.removeMfaCompletedPage())
           case MfaResponse(false) => internalServerErrorTemplate("Unable to verify access code")
         }
       case None => Future.successful(internalServerErrorTemplate("Unable to find Mfa to remove"))

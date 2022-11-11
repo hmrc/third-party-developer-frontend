@@ -21,12 +21,12 @@ import play.api.mvc.{Action, AnyContent, MessagesControllerComponents, Request, 
 import uk.gov.hmrc.apiplatform.modules.common.services.ApplicationLogger
 import uk.gov.hmrc.apiplatform.modules.mfa.connectors.ThirdPartyDeveloperMfaConnector
 import uk.gov.hmrc.apiplatform.modules.mfa.forms.{MfaAccessCodeForm, SelectLoginMfaForm}
-
 import uk.gov.hmrc.apiplatform.modules.mfa.models.MfaType.{AUTHENTICATOR_APP, SMS}
 import uk.gov.hmrc.apiplatform.modules.mfa.models.{AuthenticatorAppMfaDetailSummary, DeviceSession, MfaDetail, MfaId, MfaType, SmsMfaDetailSummary}
 import uk.gov.hmrc.apiplatform.modules.mfa.service.MfaMandateService
 import uk.gov.hmrc.apiplatform.modules.mfa.utils.MfaDetailHelper
 import uk.gov.hmrc.apiplatform.modules.mfa.utils.MfaDetailHelper.getMfaDetailById
+import uk.gov.hmrc.apiplatform.modules.mfa.views.html.{RequestMfaRemovalCompleteView, RequestMfaRemovalView}
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.play.audit.http.connector.AuditResult
 import uk.gov.hmrc.thirdpartydeveloperfrontend.config.{ApplicationConfig, ErrorHandler}
@@ -38,7 +38,6 @@ import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.{Develop
 import uk.gov.hmrc.thirdpartydeveloperfrontend.service.AuditAction._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.service._
 import views.html._
-import views.html.protectaccount._
 
 import java.util.UUID
 import javax.inject.{Inject, Singleton}
@@ -73,8 +72,8 @@ class UserLoginAccount @Inject()(val auditService: AuditService,
                                  authAppLoginAccessCodeView: AuthAppLoginAccessCodeView,
                                  smsLoginAccessCodeView: SmsLoginAccessCodeView,
                                  selectLoginMfaView: SelectLoginMfaView,
-                                 protectAccountNoAccessCodeView: ProtectAccountNoAccessCodeView,
-                                 protectAccountNoAccessCodeCompleteView: ProtectAccountNoAccessCodeCompleteView,
+                                 requestMfaRemovalView: RequestMfaRemovalView,
+                                 requestMfaRemovalCompleteView: RequestMfaRemovalCompleteView,
                                  userDidNotAdd2SVView: UserDidNotAdd2SVView,
                                  add2SVView: Add2SVView
                                 )
@@ -318,11 +317,11 @@ class UserLoginAccount @Inject()(val auditService: AuditService,
   }
 
   def get2SVHelpConfirmationPage(): Action[AnyContent] = loggedOutAction { implicit request =>
-    successful(Ok(protectAccountNoAccessCodeView()))
+    successful(Ok(requestMfaRemovalView()))
   }
 
   def get2SVHelpCompletionPage(): Action[AnyContent] = loggedOutAction { implicit request =>
-    successful(Ok(protectAccountNoAccessCodeCompleteView()))
+    successful(Ok(requestMfaRemovalCompleteView()))
   }
 
   def confirm2SVHelp(): Action[AnyContent] = loggedOutAction { implicit request =>
@@ -346,6 +345,6 @@ class UserLoginAccount @Inject()(val auditService: AuditService,
                  name = oName.getOrElse("Unknown"),
                  email
                )
-    } yield Ok(protectAccountNoAccessCodeCompleteView())
+    } yield Ok(requestMfaRemovalCompleteView())
   }
 }

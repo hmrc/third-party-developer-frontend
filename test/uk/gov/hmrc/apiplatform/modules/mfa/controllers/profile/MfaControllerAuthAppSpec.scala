@@ -135,9 +135,8 @@ class MfaControllerAuthAppSpec extends MfaControllerBaseSpec {
 
         private val result = underTest.authAppAccessCodeAction(authAppMfaId, MfaAction.REMOVE, Some(authAppMfaId))(authAppAccessCodeRequest(correctCode))
 
-        status(result) shouldBe Status.OK
-        val doc = Jsoup.parse(contentAsString(result))
-        doc.getElementById("panel-title").text shouldBe "You've removed this security preference"
+        status(result) shouldBe Status.SEE_OTHER
+        redirectLocation(result) shouldBe Some(s"/developer/profile/security-preferences/remove-mfa/complete")
 
         verify(underTest.thirdPartyDeveloperMfaConnector, times(0)).verifyMfa(*[UserId], eqTo(authAppMfaId), eqTo(correctCode))(*)
         verify(underTest.mfaService).removeMfaById(*[UserId], eqTo(authAppMfaId), eqTo(correctCode), eqTo(authAppMfaId))(*)
