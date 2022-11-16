@@ -27,7 +27,7 @@ import uk.gov.hmrc.apiplatform.modules.mfa.models.{MfaAction, MfaId, MfaType}
 import uk.gov.hmrc.apiplatform.modules.mfa.service.{MfaResponse, MfaService}
 import uk.gov.hmrc.apiplatform.modules.mfa.utils.MfaDetailHelper._
 import uk.gov.hmrc.apiplatform.modules.mfa.views.html.authapp._
-import uk.gov.hmrc.apiplatform.modules.mfa.views.html.sms.{MobileNumberView, SmsAccessCodeView, SmsSetupCompletedView}
+import uk.gov.hmrc.apiplatform.modules.mfa.views.html.sms.{MobileNumberView, SmsAccessCodeView, SmsSetupSkippedView, SmsSetupCompletedView}
 import uk.gov.hmrc.apiplatform.modules.mfa.views.html.{RemoveMfaCompletedView, SecurityPreferencesView, SelectMfaView}
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.play.bootstrap.controller.WithUnsafeDefaultFormBinding
@@ -61,6 +61,7 @@ class MfaController @Inject() (
   mobileNumberView: MobileNumberView,
   smsAccessCodeView: SmsAccessCodeView,
   smsSetupCompletedView: SmsSetupCompletedView,
+  smsSetupSkippedView: SmsSetupSkippedView,
   selectMfaView: SelectMfaView,
   removeMfaCompletedView: RemoveMfaCompletedView
   )(implicit val ec: ExecutionContext,
@@ -189,6 +190,10 @@ class MfaController @Inject() (
       case Some(developer: Developer) => Ok(authAppSetupCompletedView(!isSmsMfaVerified(developer.mfaDetails)))
       case None                       => internalServerErrorTemplate("Unable to obtain user information")
     }
+  }
+
+  def smsSetupSkippedPage: Action[AnyContent] = atLeastPartLoggedInEnablingMfaAction { implicit request =>
+    Future.successful(Ok(smsSetupSkippedView()))
   }
 
   def setupSms: Action[AnyContent] = atLeastPartLoggedInEnablingMfaAction { implicit request =>

@@ -46,6 +46,8 @@ Feature: MFA Setup
     Then I am on the 'Authenticator App Setup Complete' page
     And I click on the button with id 'link'
     Given 'john.smith@example.com' session is uplifted to LoggedIn
+    And I am on the 'Sms Mfa Setup Skipped' page
+    And I click on the button with id 'submit'
     And I am on the 'No Applications' page
     Then My device session is not set
     When I click on the radio button with id 'get-emails'

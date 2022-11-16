@@ -63,7 +63,7 @@ class AuthAppSetupCompletedViewSpec extends CommonViewSpec
       document.getElementById("submit").text shouldBe "Continue"
       document.getElementById("submit").attr("href") shouldBe "/developer/profile/security-preferences/sms/setup"
       document.getElementById("link").text shouldBe "I can't do this right now"
-      document.getElementById("link").attr("href") shouldBe "/developer/applications"
+      document.getElementById("link").attr("href") shouldBe "/developer/profile/security-preferences/sms/setup/skip"
     }
   }
 }

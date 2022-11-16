@@ -170,6 +170,11 @@ case object AccountProtectionPage extends FormPage {
   override val url: String = s"${Env.host}/developer/profile/protect-account"
 }
 
+case object SmsSetupSkippedPage extends FormPage {
+  override val pageHeading: String = "Get access codes by text later"
+  override val url: String = s"${Env.host}/developer/profile/security-preferences/sms/setup/skip"
+}
+
 case object MfaConfirmRemovalPage extends FormPage {
   override val pageHeading: String = "Are you sure you want to remove 2-step verification?"
   override val url: String = s"${Env.host}/developer/profile/protect-account/confirm-removal"
