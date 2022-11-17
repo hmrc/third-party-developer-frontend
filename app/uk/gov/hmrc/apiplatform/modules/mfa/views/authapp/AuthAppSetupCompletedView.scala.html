@@ -41,7 +41,7 @@
             Continue</a>
         <br>
         <p class="govuk-body">
-            <a id="link" class="govuk-link" href="@request.session.get("access_uri").getOrElse(uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.routes.ManageApplications.manageApps())">
+            <a id="link" class="govuk-link" href="@request.session.get("access_uri").getOrElse(uk.gov.hmrc.apiplatform.modules.mfa.controllers.profile.routes.MfaController.smsSetupSkippedPage())">
                 I can't do this right now</a>
         </p>
 

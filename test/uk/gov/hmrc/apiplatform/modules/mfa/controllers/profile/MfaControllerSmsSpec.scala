@@ -90,6 +90,29 @@ class MfaControllerSmsSpec extends MfaControllerBaseSpec {
     }
   }
 
+  "smsSetupSkippedPage" should {
+    "return sms setup skipped view when user is logged in" in new SetupSuccessfulStart2SV with LoggedIn {
+      when(underTest.thirdPartyDeveloperConnector.fetchDeveloper(eqTo(loggedInDeveloper.userId))(*))
+        .thenReturn(successful(Some(loggedInDeveloper)))
+
+      val result = addToken(underTest.smsSetupCompletedPage())(createRequest())
+        shouldReturnOK(result, validateSmsCompletedPage)
+    }
+
+    "return sms setup skipped view when user is part logged in" in new SetupSuccessfulStart2SV with PartLogged {
+      when(underTest.thirdPartyDeveloperConnector.fetchDeveloper(eqTo(loggedInDeveloper.userId))(*))
+        .thenReturn(successful(Some(loggedInDeveloper)))
+
+      val result = addToken(underTest.smsSetupCompletedPage())(createRequest())
+      shouldReturnOK(result, validateSmsCompletedPage)
+    }
+
+    "return sms setup skipped view when user is not logged in" in new SetupSuccessfulStart2SV with PartLogged {
+      val result = addToken(underTest.smsSetupCompletedPage())(createRequestWithInvalidSession())
+      validateRedirectToLoginPage(result)
+    }
+  }
+
   "smsAccessCodePage" should {
     "return sms access code view when user is logged in" in new SetupSuccessfulStart2SV with LoggedIn {
       val result = addToken(underTest.smsAccessCodePage(authAppMfaId, MfaAction.CREATE, None))(smsAccessCodeRequest(correctCode))

@@ -41,6 +41,8 @@ Feature: Sign in
     Then I am on the 'Authenticator App Setup Complete' page
     Given 'john.smith@example.com' session is uplifted to LoggedIn
     When I click on the button with id 'link'
+    And I am on the 'Sms Mfa Setup Skipped' page
+    And I click on the button with id 'submit'
     Then I am on the 'View all applications' page
 
   Scenario: Signing with a valid credentials and no MFA mandated or setup, start using our rest APIs
