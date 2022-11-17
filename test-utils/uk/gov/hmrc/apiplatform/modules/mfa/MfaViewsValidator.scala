@@ -36,6 +36,10 @@ trait MfaViewsValidator {
     f(doc)
   }
 
+  def validateSmsSetupSkippedView(dom: Document) = {
+    dom.getElementById("page-heading").text shouldBe "Get access codes by text later"
+  }
+
   def validateSmsCompletedPage(dom: Document) = {
     dom.getElementById("page-heading").text shouldBe "You can now get access codes by text"
   }
