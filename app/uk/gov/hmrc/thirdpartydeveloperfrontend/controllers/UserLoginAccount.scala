@@ -269,24 +269,24 @@ class UserLoginAccount @Inject()(val auditService: AuditService,
   def authenticateAccessCode(mfaId: MfaId, mfaType: MfaType): Action[AnyContent] = Action.async { implicit request =>
     val email: String = request.session.get("emailAddress").get
 
-    def handleLoginSuccess(session: Session, resultF: Future[Result] => Future[Result]) ={
+    def handleMfaSetupReminder(session: Session) ={
       val verifiedMfaDetailsOfOtherTypes = session.developer.mfaDetails.filter(_.verified).filterNot(_.mfaType==mfaType)
 
-      if(verifiedMfaDetailsOfOtherTypes.isEmpty) {
-        mfaType match {
-          case AUTHENTICATOR_APP => resultF.apply(successful(Redirect(uk.gov.hmrc.apiplatform.modules.mfa.controllers.profile.routes.MfaController.smsSetupReminderPage())))
-          case  SMS => resultF.apply(loginSucceeded(request))
+      (verifiedMfaDetailsOfOtherTypes.nonEmpty, mfaType) match {
+          case (true, AUTHENTICATOR_APP) => successful(Redirect(uk.gov.hmrc.apiplatform.modules.mfa.controllers.profile.routes.MfaController.smsSetupReminderPage()))
+          case (true, SMS) => loginSucceeded(request)
+          case _ =>  loginSucceeded(request)
         }
-      } else resultF.apply(loginSucceeded(request))
     }
 
     def handleRememberMe(form: MfaAccessCodeForm, session: Session): Future[Result] = {
+
       if (form.rememberMe) {
         thirdPartyDeveloperMfaConnector.createDeviceSession(session.developer.userId) flatMap {
-          case Some(deviceSession: DeviceSession) => handleLoginSuccess(session, r => r.map(withSessionAndDeviceCookies(_, session.sessionId, deviceSession.deviceSessionId.toString)))
+          case Some(deviceSession: DeviceSession) => handleMfaSetupReminder(session).map(withSessionAndDeviceCookies(_, session.sessionId, deviceSession.deviceSessionId.toString))
           case _                                  => successful(InternalServerError(""))
         }
-      } else { handleLoginSuccess(session,  r => r.map(withSessionCookie(_, session.sessionId))) }
+      } else handleMfaSetupReminder(session).map(withSessionCookie(_, session.sessionId))
     }
 
     def handleAuthentication(email: String, form: MfaAccessCodeForm, mfaType: MfaType) = {
