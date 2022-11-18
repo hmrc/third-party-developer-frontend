@@ -56,6 +56,7 @@ class UserLoginAccountSpec extends BaseControllerSpec with WithCSRFAddToken
     val authAppMfaId = verifiedAuthenticatorAppMfaDetail.id
     val smsMfaId = verifiedSmsMfaDetail.id
     val session = Session(UUID.randomUUID().toString, developerWithAuthAppMfa, LoggedInState.LOGGED_IN)
+    val sessionContainsDeveloperWithAuthAppAndSmsMfa = session.copy(developer = developerWithAuthAppAndSmsMfa)
     val user = DeveloperSession(session)
     val emailFieldName: String = "emailaddress"
     val passwordFieldName: String = "password"
@@ -136,7 +137,7 @@ class UserLoginAccountSpec extends BaseControllerSpec with WithCSRFAddToken
     when(underTest.sessionService.authenticateAccessCode(*, *, *, *[MfaId])(*)).thenReturn(failed(new InvalidCredentials))
 
     def mockAudit(auditAction: AuditAction, result: Future[AuditResult]): Unit =
-      when(underTest.auditService.audit(eqTo(auditAction), eqTo(Map.empty))(*)).thenReturn(result)
+      when(underTest.auditService.audit(eqTo(auditAction), *)(*)).thenReturn(result)
   }
 
   trait SetupWithUserAuthRespRequiringMfaAndMfaEnabled extends Setup {
@@ -562,7 +563,7 @@ class UserLoginAccountSpec extends BaseControllerSpec with WithCSRFAddToken
       private val result = underTest.authenticateAccessCode(authAppMfaId, AUTHENTICATOR_APP)(request)
 
       status(result) shouldBe SEE_OTHER
-      redirectLocation(result) shouldBe Some(routes.ManageApplications.manageApps().url)
+      redirectLocation(result) shouldBe Some(uk.gov.hmrc.apiplatform.modules.mfa.controllers.profile.routes.MfaController.smsSetupReminderPage().url)
       verify(underTest.auditService, times(1)).audit(
         eqTo(LoginSucceeded), eqTo(Map("developerEmail" -> user.email, "developerFullName" -> user.displayedName)))(*)
     }
@@ -629,6 +630,22 @@ class UserLoginAccountSpec extends BaseControllerSpec with WithCSRFAddToken
 
       status(result) shouldBe BAD_REQUEST
       contentAsString(result) should include("You have entered an invalid access code")
+    }
+
+    "return the manage Applications page when user have both MFA methods setup and selected mfa method is SMS" in new Setup {
+      mockAuthenticateAccessCode(user.email, accessCode, nonce, smsMfaId, successful(sessionContainsDeveloperWithAuthAppAndSmsMfa))
+      mockAudit(LoginSucceeded, successful(AuditResult.Success))
+
+      private val request = FakeRequest()
+        .withSession(sessionParams :+ "emailAddress" -> user.email :+ "nonce" -> nonce: _*)
+        .withFormUrlEncodedBody(("accessCode", accessCode))
+
+      private val result = underTest.authenticateAccessCode(smsMfaId, SMS)(request)
+
+      status(result) shouldBe SEE_OTHER
+      redirectLocation(result) shouldBe Some(routes.ManageApplications.manageApps().url)
+      verify(underTest.auditService, times(1)).audit(
+        eqTo(LoginSucceeded), eqTo(Map("developerEmail" -> user.email, "developerFullName" -> user.displayedName)))(*)
     }
   }
 

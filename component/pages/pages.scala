@@ -170,6 +170,11 @@ case object AccountProtectionPage extends FormPage {
   override val url: String = s"${Env.host}/developer/profile/protect-account"
 }
 
+case object SmsSetupReminderPage extends FormPage {
+  override val pageHeading: String = "Get access codes by text"
+  override val url: String = s"${Env.host}/developer/profile/security-preferences/sms/setup/reminder"
+}
+
 case object SmsSetupSkippedPage extends FormPage {
   override val pageHeading: String = "Get access codes by text later"
   override val url: String = s"${Env.host}/developer/profile/security-preferences/sms/setup/skip"

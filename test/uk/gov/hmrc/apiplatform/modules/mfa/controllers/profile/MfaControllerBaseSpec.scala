@@ -26,7 +26,7 @@ import uk.gov.hmrc.apiplatform.modules.mfa.connectors.ThirdPartyDeveloperMfaConn
 import uk.gov.hmrc.apiplatform.modules.mfa.service.MfaService
 import uk.gov.hmrc.apiplatform.modules.mfa.views.html.{RemoveMfaCompletedView, SecurityPreferencesView, SelectMfaView}
 import uk.gov.hmrc.apiplatform.modules.mfa.views.html.authapp.{AuthAppAccessCodeView, AuthAppSetupCompletedView, AuthAppStartView, NameChangeView, QrCodeView}
-import uk.gov.hmrc.apiplatform.modules.mfa.views.html.sms.{MobileNumberView, SmsAccessCodeView, SmsSetupCompletedView, SmsSetupSkippedView}
+import uk.gov.hmrc.apiplatform.modules.mfa.views.html.sms.{MobileNumberView, SmsAccessCodeView, SmsSetupCompletedView, SmsSetupReminderView, SmsSetupSkippedView}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.builder.{DeveloperBuilder, MfaDetailBuilder}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.config.ErrorHandler
 import uk.gov.hmrc.thirdpartydeveloperfrontend.connectors.ThirdPartyDeveloperConnector
@@ -72,6 +72,7 @@ class MfaControllerBaseSpec extends BaseControllerSpec
     val smsAccessCodeView = app.injector.instanceOf[SmsAccessCodeView]
     val smsSetupCompletedView = app.injector.instanceOf[SmsSetupCompletedView]
     val smsSetupSkippedView = app.injector.instanceOf[SmsSetupSkippedView]
+    val smsSetupReminderView = app.injector.instanceOf[SmsSetupReminderView]
     val selectMfaView = app.injector.instanceOf[SelectMfaView]
     val errorHandler = app.injector.instanceOf[ErrorHandler]
     val removeMfaCompletedView = app.injector.instanceOf[RemoveMfaCompletedView]
@@ -95,6 +96,7 @@ class MfaControllerBaseSpec extends BaseControllerSpec
       smsAccessCodeView,
       smsSetupCompletedView: SmsSetupCompletedView,
       smsSetupSkippedView: SmsSetupSkippedView,
+      smsSetupReminderView: SmsSetupReminderView,
       selectMfaView: SelectMfaView,
       removeMfaCompletedView: RemoveMfaCompletedView
     ) {

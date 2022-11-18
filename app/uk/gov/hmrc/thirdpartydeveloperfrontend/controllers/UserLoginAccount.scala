@@ -269,10 +269,10 @@ class UserLoginAccount @Inject()(val auditService: AuditService,
   def authenticateAccessCode(mfaId: MfaId, mfaType: MfaType): Action[AnyContent] = Action.async { implicit request =>
     val email: String = request.session.get("emailAddress").get
 
-    def handleMfaSetupReminder(session: Session) ={
+    def handleMfaSetupReminder(session: Session) = {
       val verifiedMfaDetailsOfOtherTypes = session.developer.mfaDetails.filter(_.verified).filterNot(_.mfaType==mfaType)
 
-      (verifiedMfaDetailsOfOtherTypes.nonEmpty, mfaType) match {
+      (verifiedMfaDetailsOfOtherTypes.isEmpty, mfaType) match {
           case (true, AUTHENTICATOR_APP) => successful(Redirect(uk.gov.hmrc.apiplatform.modules.mfa.controllers.profile.routes.MfaController.smsSetupReminderPage()))
           case (true, SMS) => loginSucceeded(request)
           case _ =>  loginSucceeded(request)

@@ -369,7 +369,7 @@ abstract class EndpointScenarioSpec extends AsyncHmrcSpec with GuiceOneAppPerSui
       case Endpoint("GET",  "/developer/login/2SV-help") => Redirect("/developer/applications")
       case Endpoint("POST", "/developer/login/2SV-help") => Redirect("/developer/applications")
       case Endpoint("GET",  "/developer/login/2SV-help/complete") => Redirect("/developer/applications")
-      case Endpoint("POST", "/developer/login-mfa") => Redirect("/developer/applications")
+      case Endpoint("POST", "/developer/login-mfa") => Redirect("/developer/profile/security-preferences/sms/setup/reminder")
       case Endpoint("POST", "/developer/logout/survey") => Redirect("/developer/logout")
       case Endpoint("GET",  "/developer/locked") => Locked()
       case Endpoint("GET",  "/developer/forgot-password") => Redirect("/developer/applications")
