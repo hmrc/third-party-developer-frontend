@@ -274,14 +274,10 @@ class UserLoginAccount @Inject()(val auditService: AuditService,
 
       if(verifiedMfaDetailsOfOtherTypes.isEmpty) {
         mfaType match {
-          case AUTHENTICATOR_APP =>
-            resultF.apply(successful(Redirect(uk.gov.hmrc.apiplatform.modules.mfa.controllers.profile.routes.MfaController.smsSetupReminderPage())))
-          case  SMS =>
-            resultF.apply(loginSucceeded(request))
+          case AUTHENTICATOR_APP => resultF.apply(successful(Redirect(uk.gov.hmrc.apiplatform.modules.mfa.controllers.profile.routes.MfaController.smsSetupReminderPage())))
+          case  SMS => resultF.apply(loginSucceeded(request))
         }
-      } else {
-          resultF.apply(loginSucceeded(request))
-      }
+      } else resultF.apply(loginSucceeded(request))
     }
 
     def handleRememberMe(form: MfaAccessCodeForm, session: Session): Future[Result] = {
@@ -294,39 +290,35 @@ class UserLoginAccount @Inject()(val auditService: AuditService,
     }
 
     def handleAuthentication(email: String, form: MfaAccessCodeForm, mfaType: MfaType) = {
-      sessionService.authenticateAccessCode(email, form.accessCode, request.session.get("nonce").get, mfaId)
-        .flatMap { session =>
-          audit(LoginSucceeded, DeveloperSession.apply(session))
-          handleRememberMe(form, session)
-        } recover {
+      (for{
+        session   <- sessionService.authenticateAccessCode(email, form.accessCode, request.session.get("nonce").get, mfaId)
+        _         <-  audit(LoginSucceeded, DeveloperSession.apply(session))
+        result    <- handleRememberMe(form, session)
+      } yield result)
+      .recover {
         case _: InvalidCredentials =>
           logger.warn("Login failed due to invalid access code")
           audit(LoginFailedDueToInvalidAccessCode, Map("developerEmail" -> email))
           handleAccessCodeError(form, mfaId, mfaType)
-        }
+      }
     }
 
-    def handleFormWithErrors(formWithErrors: Form[MfaAccessCodeForm], mfaId: MfaId, mfaType: MfaType) = {
-      successful(
-        mfaType match {
+    def handleFormWithErrors(formWithErrors: Form[MfaAccessCodeForm], mfaId: MfaId, mfaType: MfaType) = mfaType match {
           case AUTHENTICATOR_APP => BadRequest(authAppLoginAccessCodeView(formWithErrors, mfaId, mfaType))
           case SMS => BadRequest(smsLoginAccessCodeView(formWithErrors, mfaId, mfaType))
         }
-      )
-    }
 
     def handleAccessCodeError(form: MfaAccessCodeForm, mfaId: MfaId, mfaType: MfaType) = {
       mfaType match {
         case AUTHENTICATOR_APP => Unauthorized(authAppLoginAccessCodeView(MfaAccessCodeForm.form.fill(form)
           .withError("accessCode", "You have entered an incorrect access code"), mfaId, mfaType))
-
         case SMS => Unauthorized(smsLoginAccessCodeView(MfaAccessCodeForm.form.fill(form)
           .withError("accessCode", "You have entered an incorrect access code"), mfaId, mfaType))
       }
     }
 
     MfaAccessCodeForm.form.bindFromRequest.fold(
-      errors => handleFormWithErrors(errors, mfaId, mfaType),
+      errors => successful(handleFormWithErrors(errors, mfaId, mfaType)),
       validForm => handleAuthentication(email, validForm, mfaType)
     )
   }
