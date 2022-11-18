@@ -78,7 +78,8 @@ class CommonSteps extends ScalaDsl with EN with Matchers with NavigationSugar wi
     "Authenticator App Start Page" -> AuthAppStartPage,
     "Create name for Authenticator App" -> CreateNameForAuthAppPage,
     "Authenticator App Setup Complete" -> AuthenticatorAppSetupCompletePage,
-    "Sms Mfa Setup Skipped" -> SmsSetupSkippedPage
+    "Sms Mfa Setup Skipped" -> SmsSetupSkippedPage,
+    "Sms Mfa Setup Reminder" -> SmsSetupReminderPage
   )
 
   Given( """^I navigate to the '(.*)' page$""") { (pageName: String) =>

@@ -90,6 +90,29 @@ class MfaControllerSmsSpec extends MfaControllerBaseSpec {
     }
   }
 
+  "smsSetupReminderPage" should {
+    "return sms setup reminder view when user is logged in with only Authenticator App MFA setup" in new SetupSuccessfulStart2SV with LoggedIn {
+      when(underTest.thirdPartyDeveloperConnector.fetchDeveloper(eqTo(loggedInDeveloper.userId))(*))
+        .thenReturn(successful(Some(loggedInDeveloper)))
+
+      val result = addToken(underTest.smsSetupReminderPage())(createRequest())
+      shouldReturnOK(result, validateSmsSetupReminderView)
+    }
+
+    "return sms setup reminder view when user is part logged in with only Authenticator App MFA setup" in new SetupSuccessfulStart2SV with PartLogged {
+      when(underTest.thirdPartyDeveloperConnector.fetchDeveloper(eqTo(loggedInDeveloper.userId))(*))
+        .thenReturn(successful(Some(loggedInDeveloper)))
+
+      val result = addToken(underTest.smsSetupReminderPage())(createRequest())
+      shouldReturnOK(result, validateSmsSetupReminderView)
+    }
+
+    "redirect to login page when user is not logged in" in new SetupSuccessfulStart2SV with PartLogged {
+      val result = addToken(underTest.smsSetupReminderPage())(createRequestWithInvalidSession())
+      validateRedirectToLoginPage(result)
+    }
+  }
+
   "smsSetupSkippedPage" should {
     "return sms setup skipped view when user is logged in" in new SetupSuccessfulStart2SV with LoggedIn {
       when(underTest.thirdPartyDeveloperConnector.fetchDeveloper(eqTo(loggedInDeveloper.userId))(*))
@@ -107,7 +130,7 @@ class MfaControllerSmsSpec extends MfaControllerBaseSpec {
       shouldReturnOK(result, validateSmsCompletedPage)
     }
 
-    "return sms setup skipped view when user is not logged in" in new SetupSuccessfulStart2SV with PartLogged {
+    "redirect to login page when user is not logged in" in new SetupSuccessfulStart2SV with PartLogged {
       val result = addToken(underTest.smsSetupCompletedPage())(createRequestWithInvalidSession())
       validateRedirectToLoginPage(result)
     }

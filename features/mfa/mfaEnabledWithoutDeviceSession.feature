@@ -17,6 +17,10 @@ Feature: MFA Enabled Journey User with No Device Session
     Then My device session is not set
     When I enter the correct access code and click remember me for 7 days then click continue
     Then My device session is set
+    And I am on the 'Sms Mfa Setup Reminder' page
+    And I click on the button with id 'link'
+    And I am on the 'Sms Mfa Setup Skipped' page
+    And I click on the button with id 'submit'
     Given I am on the 'No Applications' page
     When I click on the radio button with id 'get-emails'
     And I click on the button with id 'submit'
@@ -31,6 +35,10 @@ Feature: MFA Enabled Journey User with No Device Session
     Given I am on the 'Enter Access Code' page
     Then My device session is not set
     When I enter the correct access code and do NOT click remember me for 7 days then click continue
+    And I am on the 'Sms Mfa Setup Reminder' page
+    And I click on the button with id 'link'
+    And I am on the 'Sms Mfa Setup Skipped' page
+    And I click on the button with id 'submit'
     Given I am on the 'No Applications' page
     Then My device session is not set
     When I click on the radio button with id 'get-emails'
