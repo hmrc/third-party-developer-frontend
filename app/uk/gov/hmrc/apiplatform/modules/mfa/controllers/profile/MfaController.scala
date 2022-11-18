@@ -63,6 +63,8 @@ class MfaController @Inject() (
   smsSetupCompletedView: SmsSetupCompletedView,
   smsSetupSkippedView: SmsSetupSkippedView,
   smsSetupReminderView: SmsSetupReminderView,
+  authAppSetupSkippedView: AuthAppSetupSkippedView,
+  authAppSetupReminderView: AuthAppSetupReminderView,
   selectMfaView: SelectMfaView,
   removeMfaCompletedView: RemoveMfaCompletedView
   )(implicit val ec: ExecutionContext,
@@ -184,6 +186,14 @@ class MfaController @Inject() (
         }
       }
     )
+  }
+
+  def authAppSetupSkippedPage: Action[AnyContent] = atLeastPartLoggedInEnablingMfaAction { implicit request =>
+    Future.successful(Ok(authAppSetupSkippedView()))
+  }
+
+  def authAppSetupReminderPage: Action[AnyContent] = atLeastPartLoggedInEnablingMfaAction { implicit request =>
+    Future.successful(Ok(authAppSetupReminderView()))
   }
 
   def authAppSetupCompletedPage: Action[AnyContent] = atLeastPartLoggedInEnablingMfaAction { implicit request =>
