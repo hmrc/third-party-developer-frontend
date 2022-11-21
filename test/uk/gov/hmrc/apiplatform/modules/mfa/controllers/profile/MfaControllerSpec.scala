@@ -183,13 +183,25 @@ class MfaControllerSpec extends MfaControllerBaseSpec {
     }
 
     "removeMfa" should {
-      "redirect to auth app code access page when user removes auth app and is logged in" in new SetupAuthAppSecurityPreferences with LoggedIn {
+      "redirect to auth app code access page when a logged in user removes auth app" in new SetupAuthAppSecurityPreferences with LoggedIn {
         val result = addToken(underTest.removeMfa(authAppMfaId, MfaType.AUTHENTICATOR_APP))(createRequest())
 
         status(result) shouldBe Status.SEE_OTHER
         redirectLocation(result) shouldBe Some(
           s"/developer/profile/security-preferences/auth-app/access-code?mfaId=${authAppMfaId.value.toString}&" +
             s"mfaAction=${MfaAction.REMOVE.toString}&mfaIdForRemoval=${authAppMfaId.value.toString}"
+        )
+      }
+
+      "redirect to sms access code page when a logged in user removes sms" in new SetupSmsSecurityPreferences with LoggedIn {
+        when(underTest.thirdPartyDeveloperMfaConnector.sendSms(*[UserId], *[MfaId])(*)).thenReturn(Future.successful(true))
+
+        val result = addToken(underTest.removeMfa(smsMfaId, MfaType.SMS))(createRequest())
+
+        status(result) shouldBe Status.SEE_OTHER
+        redirectLocation(result) shouldBe Some(
+          s"/developer/profile/security-preferences/sms/access-code?mfaId=${smsMfaId.value.toString}&" +
+            s"mfaAction=${MfaAction.REMOVE.toString}&mfaIdForRemoval=${smsMfaId.value.toString}"
         )
       }
 

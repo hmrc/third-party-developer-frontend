@@ -247,5 +247,5 @@ class LeftHandNavSpec extends CommonViewSpec
     elementExistsByText(document, "a", "Manage profile") &&
       elementExistsByText(document, "a", "Email preferences") &&
       elementExistsByText(document, "a", "Change password") &&
-      elementExistsByText(document, "a", "Account protection")
+      elementExistsByText(document, "a", "Security preferences")
 }

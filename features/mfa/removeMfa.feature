@@ -20,9 +20,9 @@ Feature: Remove MFA. User with MFA enabled and Existing Device Session
     When I click on the radio button with id 'get-emails'
     And I click on the button with id 'submit'
     Then I am on the 'Email preferences' page
-    Given I navigate to the 'Account protection' page
-    Then I am on the 'Account protection' page
+    Given I navigate to the 'Security preferences' page
+    Then I am on the 'Security preferences' page
     And I click on the button with id 'submit'
-    Then I am on the '2SV remove' page
-    When I enter the correct access code during remove2SV then click continue
+    Then I am on the 'Authenticator App Access Code Page' page
+    When I enter the correct access code during Auth App removal then click continue
     Then I am on the '2SV removal complete' page

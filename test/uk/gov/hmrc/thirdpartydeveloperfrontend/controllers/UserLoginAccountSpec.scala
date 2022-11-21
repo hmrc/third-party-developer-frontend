@@ -32,7 +32,6 @@ import uk.gov.hmrc.thirdpartydeveloperfrontend.service._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.WithCSRFAddToken
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.WithLoggedInSession._
 import views.html.{AccountLockedView, Add2SVView, AuthAppLoginAccessCodeView, SelectLoginMfaView, SignInView, SmsLoginAccessCodeView, UserDidNotAdd2SVView}
-import views.html.protectaccount.{ProtectAccountNoAccessCodeCompleteView, ProtectAccountNoAccessCodeView}
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
@@ -42,6 +41,7 @@ import _root_.uk.gov.hmrc.thirdpartydeveloperfrontend.mocks.connectors.{ThirdPar
 import uk.gov.hmrc.apiplatform.modules.mfa.models.MfaType.{AUTHENTICATOR_APP, SMS}
 import uk.gov.hmrc.apiplatform.modules.mfa.models.{MfaId, MfaType}
 import uk.gov.hmrc.apiplatform.modules.mfa.service.MfaMandateService
+import uk.gov.hmrc.apiplatform.modules.mfa.views.html.{RequestMfaRemovalCompleteView, RequestMfaRemovalView}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.security.CookieEncoding
 
 
@@ -79,8 +79,8 @@ class UserLoginAccountSpec extends BaseControllerSpec with WithCSRFAddToken
     val authApploginAccessCodeView = app.injector.instanceOf[AuthAppLoginAccessCodeView]
     val smsLoginAccessCodeView = app.injector.instanceOf[SmsLoginAccessCodeView]
     val selectLoginMfaView = app.injector.instanceOf[SelectLoginMfaView]
-    val protectAccountNoAccessCodeView = app.injector.instanceOf[ProtectAccountNoAccessCodeView]
-    val protectAccountNoAccessCodeCompleteView = app.injector.instanceOf[ProtectAccountNoAccessCodeCompleteView]
+    val requestMfaRemovalView = app.injector.instanceOf[RequestMfaRemovalView]
+    val requestMfaRemovalCompleteView = app.injector.instanceOf[RequestMfaRemovalCompleteView]
     val userDidNotAdd2SVView = app.injector.instanceOf[UserDidNotAdd2SVView]
     val add2SVView = app.injector.instanceOf[Add2SVView]
 
@@ -102,8 +102,8 @@ class UserLoginAccountSpec extends BaseControllerSpec with WithCSRFAddToken
       authApploginAccessCodeView,
       smsLoginAccessCodeView,
       selectLoginMfaView,
-      protectAccountNoAccessCodeView,
-      protectAccountNoAccessCodeCompleteView,
+      requestMfaRemovalView,
+      requestMfaRemovalCompleteView,
       userDidNotAdd2SVView,
       add2SVView
     )
@@ -232,7 +232,7 @@ class UserLoginAccountSpec extends BaseControllerSpec with WithCSRFAddToken
       testWhenMfaMandatedIs(false)
     }
 
-    "display the 2-step protect account page after successfully logging in with MFA not enabled but mandated" in new SetupWithUserAuthResRequiringMfaEnablement {
+    "display the 2-step start page after successfully logging in with MFA not enabled but mandated" in new SetupWithUserAuthResRequiringMfaEnablement {
       mockAuthenticate(user.email, userPassword, successful(userAuthRespRequiringMfaEnablement), resultShowAdminMfaMandateMessage = successful(true))
       mockAudit(LoginSucceeded, successful(AuditResult.Success))
 
