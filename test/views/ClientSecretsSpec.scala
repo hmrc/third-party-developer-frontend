@@ -146,7 +146,7 @@ class ClientSecretsSpec extends CommonViewSpec with WithCSRFAddToken with Collab
       val document: Document = Jsoup.parse(page.body)
       elementExistsByText(document, "button", "Generate another client secret") shouldBe false
       elementExistsByText(document, "p", "You have the maximum number of client secrets for your application. You need to delete a client secret before you can generate a new one.") shouldBe true
-      elementExistsByText(document, "a", "Delete secret") shouldBe true
+      elementExistsByText(document, "a", "Delete") shouldBe true
     }
   }
 }
