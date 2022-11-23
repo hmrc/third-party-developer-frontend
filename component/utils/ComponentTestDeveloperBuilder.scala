@@ -1,6 +1,6 @@
 package utils
 
-import uk.gov.hmrc.apiplatform.modules.mfa.models.{AuthenticatorAppMfaDetailSummary, MfaDetail, MfaId}
+import uk.gov.hmrc.apiplatform.modules.mfa.models.{AuthenticatorAppMfaDetailSummary, MfaDetail, MfaId, SmsMfaDetailSummary}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.{Developer, UserId}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.emailpreferences.EmailPreferences
 
@@ -10,6 +10,7 @@ import java.util.UUID
 trait ComponentTestDeveloperBuilder {
   val staticUserId= UserId(UUID.fromString("11edcde7-c619-4bc1-bb6a-84dc14ea25cd"))
   val authenticatorAppMfaDetails = AuthenticatorAppMfaDetailSummary(MfaId.random, "name", LocalDateTime.now, verified = true)
+  val smsMfaDetails = SmsMfaDetailSummary(MfaId.random, "name", LocalDateTime.now, "+447890123456", verified = true)
 
   def buildDeveloper( emailAddress: String = "something@example.com",
                       firstName: String = "John",

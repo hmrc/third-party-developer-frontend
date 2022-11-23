@@ -25,7 +25,7 @@ import uk.gov.hmrc.apiplatform.modules.mfa.connectors.ThirdPartyDeveloperMfaConn
 import uk.gov.hmrc.apiplatform.modules.mfa.connectors.ThirdPartyDeveloperMfaConnector.{RegisterAuthAppResponse, RegisterSmsResponse}
 import uk.gov.hmrc.apiplatform.modules.mfa.service.MfaService
 import uk.gov.hmrc.apiplatform.modules.mfa.views.html.{RemoveMfaCompletedView, SecurityPreferencesView, SelectMfaView}
-import uk.gov.hmrc.apiplatform.modules.mfa.views.html.authapp.{AuthAppAccessCodeView, AuthAppSetupCompletedView, AuthAppStartView, NameChangeView, QrCodeView}
+import uk.gov.hmrc.apiplatform.modules.mfa.views.html.authapp.{AuthAppAccessCodeView, AuthAppSetupCompletedView, AuthAppSetupReminderView, AuthAppSetupSkippedView, AuthAppStartView, NameChangeView, QrCodeView}
 import uk.gov.hmrc.apiplatform.modules.mfa.views.html.sms.{MobileNumberView, SmsAccessCodeView, SmsSetupCompletedView, SmsSetupReminderView, SmsSetupSkippedView}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.builder.{DeveloperBuilder, MfaDetailBuilder}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.config.ErrorHandler
@@ -73,9 +73,12 @@ class MfaControllerBaseSpec extends BaseControllerSpec
     val smsSetupCompletedView = app.injector.instanceOf[SmsSetupCompletedView]
     val smsSetupSkippedView = app.injector.instanceOf[SmsSetupSkippedView]
     val smsSetupReminderView = app.injector.instanceOf[SmsSetupReminderView]
+    val authAppSkippedView = app.injector.instanceOf[AuthAppSetupSkippedView]
+    val authAppSetupReminderView = app.injector.instanceOf[AuthAppSetupReminderView]
     val selectMfaView = app.injector.instanceOf[SelectMfaView]
     val errorHandler = app.injector.instanceOf[ErrorHandler]
     val removeMfaCompletedView = app.injector.instanceOf[RemoveMfaCompletedView]
+
 
     val underTest: MfaController = new MfaController(
       mock[ThirdPartyDeveloperConnector],
@@ -97,6 +100,8 @@ class MfaControllerBaseSpec extends BaseControllerSpec
       smsSetupCompletedView: SmsSetupCompletedView,
       smsSetupSkippedView: SmsSetupSkippedView,
       smsSetupReminderView: SmsSetupReminderView,
+      authAppSkippedView: AuthAppSetupSkippedView,
+      authAppSetupReminderView: AuthAppSetupReminderView,
       selectMfaView: SelectMfaView,
       removeMfaCompletedView: RemoveMfaCompletedView
     ) {

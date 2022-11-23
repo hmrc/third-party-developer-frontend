@@ -45,6 +45,21 @@ object TableMisuseAdapters {
 class CommonSteps extends ScalaDsl with EN with Matchers with NavigationSugar with CustomMatchers {
   implicit val webDriver: WebDriver = Env.driver
 
+  val mfaPages = Map("Authenticator App Start Page" -> AuthAppStartPage,
+    "Create name for Authenticator App" -> CreateNameForAuthAppPage,
+    "Authenticator App Setup Skipped" -> AuthenticatorAppSetupSkippedPage,
+    "Authenticator App Setup Complete" -> AuthenticatorAppSetupCompletePage,
+    "Authenticator App Access Code" -> AuthenticatorAppAccessCodePage,
+    "Select MFA" -> SelectMfaPage,
+    "Sms mobile number" -> SmsMobileNumberPage,
+    "Sms Mfa Setup Skipped" -> SmsSetupSkippedPage,
+    "Sms Mfa Setup Reminder" -> SmsSetupReminderPage,
+    "Sms Access Code" -> SmsAccessCodePage,
+    "Sms Setup Complete" -> SmsSetupCompletePage,
+    "Security preferences" -> SecurityPreferencesPage,
+    "2SV removal complete" -> MfaRemovalCompletePage,
+    "Setup 2SV QR" -> Setup2svQrPage)
+
   val pages: Map[String, WebPage] = Map(
     "Registration" -> RegistrationPage,
     "View all applications" -> ManageApplicationPage,
@@ -64,21 +79,10 @@ class CommonSteps extends ScalaDsl with EN with Matchers with NavigationSugar wi
     "Account deletion request submitted" -> AccountDeletionRequestSubmittedPage,
     "Recommend Mfa" -> RecommendMfaPage,
     "Recommend Mfa Skip Acknowledge" -> RecommendMfaSkipAcknowledgePage,
-    "2SV removal complete" -> MfaRemovalCompletePage,
-    "Setup 2SV QR" -> Setup2svQrPage,
-    "Setup 2SV Enter Access Code" -> Setup2svEnterAccessCodePage,
     "Password reset confirmation" -> PasswordResetConfirmationPage,
     "You have reset your password" -> YouHaveResetYourPasswordPage,
-    "Reset password link no longer valid" -> ResetPasswordLinkNoLongerValidPage,
-    "Authenticator App Start Page" -> AuthAppStartPage,
-    "Authenticator App Access Code Page" -> AuthAppAccessCodePage,
-    "Create name for Authenticator App" -> CreateNameForAuthAppPage,
-    "Authenticator App Setup Complete" -> AuthenticatorAppSetupCompletePage,
-    "Security preferences" -> SecurityPreferencesPage,
-    "Authenticator App Setup Complete" -> AuthenticatorAppSetupCompletePage,
-    "Sms Mfa Setup Skipped" -> SmsSetupSkippedPage,
-    "Sms Mfa Setup Reminder" -> SmsSetupReminderPage
-  )
+    "Reset password link no longer valid" -> ResetPasswordLinkNoLongerValidPage
+  ) ++ mfaPages
 
   Given( """^I navigate to the '(.*)' page$""") { (pageName: String) =>
     withClue(s"Fail to load page: $pageName")(goOn(pages(pageName)))

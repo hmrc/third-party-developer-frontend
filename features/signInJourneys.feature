@@ -3,8 +3,8 @@ Feature: Sign in
 
   Background:
     Given I am registered with
-      | Email address          | Password         | First name | Last name |
-      | john.smith@example.com | StrongPassword1! | John       | Smith     |
+      | Email address          | Password         | First name | Last name | Mfa Setup |
+      | john.smith@example.com | StrongPassword1! | John       | Smith     |           |
     And I have no application assigned to my email 'john.smith@example.com'
 
   Scenario: Signing with a valid credentials and no MFA mandated or setup, select email preferences
@@ -33,7 +33,7 @@ Feature: Sign in
     When I click on the button with id 'submit'
     Then I am on the 'Setup 2SV QR' page
     When I click on the button with id 'submit'
-    Then I am on the 'Setup 2SV Enter Access Code' page
+    Then I am on the 'Authenticator App Access Code' page
     When I enter the correct access code during 2SVSetup with mfaMandated 'true'
     Then I am on the 'Create name for Authenticator App' page
     And  I enter an authenticator app name

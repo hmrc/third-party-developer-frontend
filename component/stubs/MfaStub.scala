@@ -4,8 +4,8 @@ import com.github.tomakehurst.wiremock.client.WireMock.{aResponse, delete, equal
 import play.api.http.Status.{NO_CONTENT, OK}
 import play.api.libs.json.Json
 import steps.TestContext
-import uk.gov.hmrc.apiplatform.modules.mfa.connectors.ChangeMfaNameRequest
-import uk.gov.hmrc.apiplatform.modules.mfa.connectors.ThirdPartyDeveloperMfaConnector.RegisterAuthAppResponse
+import uk.gov.hmrc.apiplatform.modules.mfa.connectors.{ChangeMfaNameRequest, CreateMfaSmsRequest}
+import uk.gov.hmrc.apiplatform.modules.mfa.connectors.ThirdPartyDeveloperMfaConnector.{RegisterAuthAppResponse, RegisterSmsResponse}
 import uk.gov.hmrc.apiplatform.modules.mfa.models.MfaId
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.connectors.{AccessCodeAuthenticationRequest, VerifyMfaRequest}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.{Developer, LoggedInState, Session}
@@ -16,7 +16,7 @@ object MfaStub {
   private val accessCode = "123456"
   val nonce = "iamanoncevalue"
 
-  def stubAuthenticateAccessCodeSuccess(mfaId: MfaId)(implicit encryptedJson: EncryptedJson): Unit = {
+  def stubMfaAccessCodeSuccess(mfaId: MfaId)(implicit encryptedJson: EncryptedJson): Unit = {
     val session = Session(TestContext.sessionIdForloggedInDeveloper, TestContext.developer, LoggedInState.LOGGED_IN)
 
     stubFor(
@@ -54,6 +54,17 @@ object MfaStub {
         .willReturn(aResponse()
           .withStatus(NO_CONTENT)
         ))
+  }
+
+  def setupSmsAccessCode(developer: Developer, mfaId: MfaId, mobileNumber: String): Unit = {
+    import uk.gov.hmrc.apiplatform.modules.mfa.connectors.ThirdPartyDeveloperMfaConnector.registerSmsResponseFormat
+
+    stubFor(
+      post(urlEqualTo(s"/developer/${developer.userId.value}/mfa/sms"))
+        .withRequestBody(equalToJson(Json.toJson(CreateMfaSmsRequest(mobileNumber)).toString()))
+        .willReturn(aResponse()
+          .withStatus(OK)
+          .withBody(Json.toJson(RegisterSmsResponse(mfaId, mobileNumber)).toString())))
   }
 
   def setupGettingMfaSecret(developer: Developer, mfaId: MfaId): Unit = {

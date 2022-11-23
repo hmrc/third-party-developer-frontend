@@ -48,7 +48,7 @@ class LoginSteps extends ScalaDsl with EN with Matchers with NavigationSugar wit
 
   implicit val webDriver: WebDriver = Env.driver
 
-  // private val accessCode = "123456"
+  private val mobileNumber = "+447890123456"
 
   Given("""^I am successfully logged in with '(.*)' and '(.*)'$""") { (email: String, password: String) =>
     goOn(SignInPage.default)
@@ -68,21 +68,35 @@ class LoginSteps extends ScalaDsl with EN with Matchers with NavigationSugar wit
     val password = result("Password")
     val developer = buildDeveloper(emailAddress = result("Email address"), firstName = result("First name"), lastName = result("Last name"))
 
+    val mfaSetup = result("Mfa Setup")
+
+    val authAppMfaId = authenticatorAppMfaDetails.id
+    val smsMfaId = smsMfaDetails.id
+//    mfaSetup match {
+//      case "AUTHENTICATOR_APP" =>
+        MfaStub.setupGettingMfaSecret(developer, authAppMfaId)
+        MfaStub.setupVerificationOfAccessCode(developer, authAppMfaId)
+        MfaStub.stubMfaAuthAppNameChange(developer, authAppMfaId, "SomeAuthApp")
+
+//      case "SMS" =>
+        MfaStub.setupSmsAccessCode(developer, smsMfaId, mobileNumber)
+        MfaStub.setupVerificationOfAccessCode(developer, smsMfaId)
+
+//      case _  =>
+//        MfaStub.setupGettingMfaSecret(developer, authAppMfaId)
+//        MfaStub.setupVerificationOfAccessCode(developer, authAppMfaId)
+//        MfaStub.stubMfaAuthAppNameChange(developer, authAppMfaId, "SomeAuthApp")
+//    }
+    TestContext.developer = developer
+
     DeveloperStub.findUserIdByEmailAddress(developer.email)
     Stubs.setupPostRequest("/check-password", NO_CONTENT)
     Stubs.setupPostRequest("/authenticate", UNAUTHORIZED)
-    
-    TestContext.developer = developer
 
     TestContext.sessionIdForloggedInDeveloper = setupLoggedOrPartLoggedInDeveloper(developer, password, LoggedInState.LOGGED_IN)
     TestContext.sessionIdForMfaMandatingUser = setupLoggedOrPartLoggedInDeveloper(developer, password, LoggedInState.PART_LOGGED_IN_ENABLING_MFA)
 
     DeveloperStub.setupGettingDeveloperByUserId(developer)
-
-    val mfaId = authenticatorAppMfaDetails.id
-    MfaStub.setupGettingMfaSecret(developer, mfaId)
-    MfaStub.setupVerificationOfAccessCode(developer, mfaId)
-    MfaStub.stubMfaAuthAppNameChange(TestContext.developer, mfaId, "SomeAuthApp")
 
     DeveloperStub.setUpGetCombinedApis()
   }
