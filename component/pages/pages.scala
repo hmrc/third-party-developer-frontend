@@ -42,7 +42,6 @@ trait FormPage extends WebPage with ApplicationLogger {
     header.findElements(By.linkText("Sign in")) shouldBe empty
   }
 
-
   private def dataAttribute(className: String) = webDriver.findElement(By.cssSelector(className))
 
   def globalErrors = webDriver.findElements(By.cssSelector("[data-global-error]"))
@@ -160,14 +159,19 @@ case object AuthAppStartPage extends FormPage {
   override val url: String = s"${Env.host}/developer/profile/security-preferences/auth-app/start"
 }
 
-case object ProtectAccountPage extends FormPage {
-  override val pageHeading: String = "Account protection"
-  override val url: String = s"${Env.host}/developer/profile/protect-account"
-}
+case object AuthAppAccessCodePage extends FormPage {
+  def clickContinue() = {
+    click on id("submit")
+  }
 
-case object AccountProtectionPage extends FormPage {
-  override val pageHeading: String = "Account protection"
-  override val url: String = s"${Env.host}/developer/profile/protect-account"
+  override val pageHeading: String = "Enter your access code"
+  override val url: String = s"${Env.host}/developer/profile/security-preferences/auth-app/access-code"
+
+  def enterAccessCode(accessCode: String) = {
+    val formData = Map("accessCode" -> accessCode)
+
+    Form.populate(formData)
+  }
 }
 
 case object SmsSetupReminderPage extends FormPage {
@@ -180,29 +184,9 @@ case object SmsSetupSkippedPage extends FormPage {
   override val url: String = s"${Env.host}/developer/profile/security-preferences/sms/setup/skip"
 }
 
-case object MfaConfirmRemovalPage extends FormPage {
-  override val pageHeading: String = "Are you sure you want to remove 2-step verification?"
-  override val url: String = s"${Env.host}/developer/profile/protect-account/confirm-removal"
-}
-
-case object MfaRemovePage extends FormPage {
-  def clickContinue() = {
-    click on id("submit")
-  }
-
-  override val pageHeading: String = "Enter your access code"
-  override val url: String = s"${Env.host}/developer/profile/protect-account/remove-by-id"
-
-  def enterAccessCode(accessCode: String) = {
-    val formData = Map("accessCode" -> accessCode)
-
-    Form.populate(formData)
-  }
-}
-
 case object MfaRemovalCompletePage extends FormPage {
   override val pageHeading: String = "You've removed this security preference"
-  override val url: String = s"${Env.host}/developer/profile/protect-account/remove/complete"
+  override val url: String = s"${Env.host}/developer/profile/security-preferences/remove-mfa/complete"
 }
 
 case object Setup2svQrPage extends FormPage {
@@ -232,14 +216,14 @@ case object CreateNameForAuthAppPage extends FormPage {
   override val url: String = s"${Env.host}/developer/profile/security-preferences/auth-app/name"
 }
 
+case object SecurityPreferencesPage extends FormPage {
+  override val pageHeading: String = "Your security preferences"
+  override val url: String = s"${Env.host}/developer/profile/security-preferences"
+}
+
 case object AuthenticatorAppSetupCompletePage extends FormPage {
   override val pageHeading: String = "You can now get access codes by authenticator app"
   override val url: String = s"${Env.host}/developer/profile/security-preferences/auth-app/setup/complete"
-}
-
-case object ProtectAccountCompletePage extends FormPage {
-  override val pageHeading: String = "You have successfully set up 2-step verification"
-  override val url: String = s"${Env.host}/developer/profile/protect-account/enable"
 }
 
 case object PasswordResetConfirmationPage extends FormPage {

@@ -17,8 +17,7 @@
 package uk.gov.hmrc.apiplatform.modules.mfa.forms
 
 import play.api.data.Form
-import play.api.data.Forms.{boolean, mapping, nonEmptyText, optional, text}
-import uk.gov.hmrc.apiplatform.modules.mfa.forms.SelectMfaForm.verifyMfaType
+import play.api.data.Forms.{boolean, mapping, nonEmptyText, text}
 import uk.gov.hmrc.apiplatform.modules.mfa.models.MfaType
 import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.FormKeys
 

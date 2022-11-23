@@ -30,8 +30,8 @@ object Crumb {
   val viewAllApplications =
     Crumb("View all applications",s"${routes.ManageApplications.manageApps}", Some("data-breadcrumb-manage-app"))
 
-  val protectAccount =
-    Crumb("Protect account",s"${uk.gov.hmrc.apiplatform.modules.mfa.controllers.profile.routes.ProtectAccount.getProtectAccount}", Some("data-breadcrumb-protect-account"))
+    val securityPreferences =
+      Crumb("Security preferences",s"${uk.gov.hmrc.apiplatform.modules.mfa.controllers.profile.routes.MfaController.securityPreferences()}", Some("data-breadcrumb-security-preferences"))
 
   val signIn =
     Crumb("Sign in",s"${routes.UserLoginAccount.login()}", Some("data-breadcrumb-sign-in"))
