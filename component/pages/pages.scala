@@ -219,7 +219,7 @@ case object SmsAccessCodePage extends FormPage {
     click on id("submit")
   }
 
-  override val pageHeading: String = "Enter your access code"
+  override val pageHeading: String = "Enter the access code"
   override val url: String = s"${Env.host}/developer/profile/security-preferences/sms/access-code"
 
   def enterAccessCode(accessCode: String) = {

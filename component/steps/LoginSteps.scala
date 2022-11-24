@@ -72,21 +72,21 @@ class LoginSteps extends ScalaDsl with EN with Matchers with NavigationSugar wit
 
     val authAppMfaId = authenticatorAppMfaDetails.id
     val smsMfaId = smsMfaDetails.id
-//    mfaSetup match {
-//      case "AUTHENTICATOR_APP" =>
+    mfaSetup match {
+      case "AUTHENTICATOR_APP" =>
         MfaStub.setupGettingMfaSecret(developer, authAppMfaId)
         MfaStub.setupVerificationOfAccessCode(developer, authAppMfaId)
         MfaStub.stubMfaAuthAppNameChange(developer, authAppMfaId, "SomeAuthApp")
 
-//      case "SMS" =>
+      case "SMS" =>
         MfaStub.setupSmsAccessCode(developer, smsMfaId, mobileNumber)
         MfaStub.setupVerificationOfAccessCode(developer, smsMfaId)
 
-//      case _  =>
-//        MfaStub.setupGettingMfaSecret(developer, authAppMfaId)
-//        MfaStub.setupVerificationOfAccessCode(developer, authAppMfaId)
-//        MfaStub.stubMfaAuthAppNameChange(developer, authAppMfaId, "SomeAuthApp")
-//    }
+      case _  =>
+        MfaStub.setupGettingMfaSecret(developer, authAppMfaId)
+        MfaStub.setupVerificationOfAccessCode(developer, authAppMfaId)
+        MfaStub.stubMfaAuthAppNameChange(developer, authAppMfaId, "SomeAuthApp")
+    }
     TestContext.developer = developer
 
     DeveloperStub.findUserIdByEmailAddress(developer.email)
