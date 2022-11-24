@@ -82,7 +82,6 @@ class ApmConnectorIntegrationSpec extends BaseConnectorIntegrationSpec with Guic
     }
   }
 
-
   "fetchCombinedApi" should {
     "retrieve an CombinedApi based on a serviceName" in new Setup {
       val serviceName = "api1"

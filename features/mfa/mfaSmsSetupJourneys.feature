@@ -39,15 +39,13 @@ Feature: MFA Sms Setup
     Then I am on the 'Sms mobile number' page
     When  I enter the mobile number then click continue
     Then I am on the 'Sms Access Code' page
-#    When I enter the correct Sms access code then click continue
-#    Then I am on the 'Sms Setup Complete' page
-#    And I click on the button with id 'link'
-#    Given 'john.smith@example.com' session is uplifted to LoggedIn
-#    And I am on the 'Authenticator App Setup Skipped' page
-#    And I click on the button with id 'submit'
-#    And I am on the 'No Applications' page
-#    Then My device session is not set
-#    When I click on the radio button with id 'get-emails'
-#    And I click on the button with id 'submit'
-#    Then I am on the 'Email preferences' page
+    When I enter the correct Sms access code then click continue
+    Then I am on the 'Sms Setup Complete' page
+    And I click on the button with id 'link'
+    Given 'john.smith@example.com' session is uplifted to LoggedIn
+    And I am on the 'No Applications' page
+    Then My device session is not set
+    When I click on the radio button with id 'get-emails'
+    And I click on the button with id 'submit'
+    Then I am on the 'Email preferences' page
     

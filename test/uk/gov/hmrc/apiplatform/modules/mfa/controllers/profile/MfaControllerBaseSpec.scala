@@ -79,7 +79,6 @@ class MfaControllerBaseSpec extends BaseControllerSpec
     val errorHandler = app.injector.instanceOf[ErrorHandler]
     val removeMfaCompletedView = app.injector.instanceOf[RemoveMfaCompletedView]
 
-
     val underTest: MfaController = new MfaController(
       mock[ThirdPartyDeveloperConnector],
       mock[ThirdPartyDeveloperMfaConnector],
