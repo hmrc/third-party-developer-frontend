@@ -51,6 +51,7 @@ trait ApplicationsJsonFormatters extends ApiDefinitionsJsonFormatters with Local
     val formatTOUA = Json.format[TermsOfUseAgreement]
   }
 
+
   implicit val formatTermsOfUseAgreement = TOUAHelper.formatTOUA
 
   implicit val formatCollaborator = Json.format[Collaborator]

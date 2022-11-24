@@ -21,15 +21,20 @@ import com.github.tomakehurst.wiremock.client.WireMock._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.connectors.EncryptedJson
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.apidefinitions.{ApiContext, ApiIdentifier, ApiVersion}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.ApplicationNameValidationJson.ApplicationNameValidationResult
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.{Application, ApplicationToken, ClientId, Environment}
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.connectors.UserAuthenticationResponse
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.{Developer, Registration, Session, UpdateProfileRequest}
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.{Application, ApplicationId, ApplicationToken, ApplicationWithSubscriptionData, ClientId, Environment}
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.connectors.{CombinedApiCategory, PasswordResetRequest, UserAuthenticationResponse}
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.{Developer, Registration, Session, UpdateProfileRequest, UserId}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.services.ApiDefinitionsJsonFormatters._
 import play.api.http.Status._
 import play.api.libs.json.{Json, Writes}
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.connectors.PasswordResetRequest
 import uk.gov.hmrc.apiplatform.modules.common.services.ApplicationLogger
 import org.scalatest.matchers.should.Matchers
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.emailpreferences.APICategoryDisplayDetails
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.subscriptions.{AccessRequirements, ApiCategory, ApiData, ApiSubscriptionFields, DevhubAccessRequirement, DevhubAccessRequirements, FieldName}
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.services.CombinedApiJsonFormatters
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.services.ApiDefinitionsJsonFormatters._
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.services.ApplicationsJsonFormatters._
+import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.WireMockExtensions.withJsonRequestBodySyntax
 
 object Stubs extends ApplicationLogger {
 
@@ -100,6 +105,8 @@ object DeveloperStub {
 }
 
 object ApplicationStub {
+
+  implicit val apiIdentifierFormat = Json.format[ApiIdentifier]
   def setupApplicationNameValidation() = {
     val validNameResult = ApplicationNameValidationResult(None)
 
@@ -254,4 +261,143 @@ object ApiSubscriptionFieldsStub {
   private def fieldDefinitionsUrl(apiContext: ApiContext, version: ApiVersion) = {
     s"/definition/context/${apiContext.value}/version/${version.value}"
   }
+}
+
+object ApiPlatformMicroserviceStub {
+
+
+  implicit val apiIdentifierFormat = Json.format[ApiIdentifier]
+
+
+
+  def stubFetchAllPossibleSubscriptions(applicationId: ApplicationId, body: String) = {
+    stubFor(
+      get(urlEqualTo(s"/api-definitions?applicationId=${applicationId.value}"))
+        .willReturn(
+          aResponse()
+            .withStatus(OK)
+            .withBody(body)
+            .withHeader("content-type", "application/json")
+        )
+      )
+  }
+  def stubFetchAllPossibleSubscriptionsFailure(applicationId: ApplicationId) = {
+    stubFor(
+      get(urlEqualTo(s"/api-definitions?applicationId=${applicationId.value}"))
+        .willReturn(
+          aResponse()
+            .withStatus(INTERNAL_SERVER_ERROR)
+
+        )
+    )
+  }
+
+
+
+  def stubFetchApplicationById(applicationId: ApplicationId, data: ApplicationWithSubscriptionData) = {
+    stubFor(
+      get(urlEqualTo(s"/applications/${applicationId.value}"))
+        .willReturn(
+          aResponse()
+            .withStatus(OK)
+            .withBody(Json.toJson(data).toString())
+            .withHeader("content-type", "application/json")
+        )
+    )
+  }
+
+  def stubFetchApplicationByIdFailure(applicationId: ApplicationId) = {
+    stubFor(
+      get(urlEqualTo(s"/applications/${applicationId.value}"))
+        .willReturn(
+          aResponse()
+            .withStatus(NOT_FOUND)
+        )
+    )
+  }
+
+
+  def stubFetchAllCombinedAPICategories(categories: List[APICategoryDisplayDetails]) ={
+    stubFor(
+      get(urlEqualTo("/api-categories/combined"))
+        .willReturn(
+          aResponse()
+            .withStatus(OK)
+            .withBody(Json.toJson(categories).toString())
+        )
+    )
+  }
+
+  def stubCombinedApiByServiceName(serviceName: String, body: String) = {
+    stubFor(
+      get(urlEqualTo(s"/combined-rest-xml-apis/$serviceName"))
+        .willReturn(
+          aResponse()
+            .withStatus(OK)
+            .withBody(body)
+            .withHeader("content-type", "application/json")
+        )
+    )
+  }
+
+
+  def stubCombinedApiByServiceNameFailure(status: Int) ={
+  val response = status match {
+    case INTERNAL_SERVER_ERROR => aResponse()
+      .withStatus(INTERNAL_SERVER_ERROR)
+    case NOT_FOUND => aResponse()
+      .withStatus(NOT_FOUND)
+      .withHeader("Content-Type", "application/json")
+  }
+
+    stubFor(
+      get(urlEqualTo("/combined-rest-xml-apis/developer/api1"))
+        .willReturn(response)
+    )
+  }
+
+  def stubFetchApiDefinitionsVisibleToUserFailure(userId: UserId) = {
+    stubFor(
+      get(urlEqualTo(s"/combined-api-definitions?developerId=${userId.asText}"))
+        .willReturn(
+          aResponse()
+            .withStatus(INTERNAL_SERVER_ERROR)
+        )
+    )
+  }
+
+  def stubFetchApiDefinitionsVisibleToUser(userId: UserId, body: String) = {
+    stubFor(
+      get(urlEqualTo(s"/combined-api-definitions?developerId=${userId.asText}"))
+        .willReturn(
+          aResponse()
+            .withStatus(OK)
+            .withBody(body)
+            .withHeader("content-type", "application/json")
+        )
+    )
+  }
+
+  def stubSubscribeToApi(applicationId: ApplicationId, apiIdentifier: ApiIdentifier) ={
+    stubFor(
+      post(urlPathEqualTo(s"/applications/${applicationId.value}/subscriptions"))
+        .withJsonRequestBody(apiIdentifier)
+        .willReturn(
+          aResponse()
+            .withStatus(OK)
+        )
+    )
+  }
+
+  def stubSubscribeToApiFailure(applicationId: ApplicationId, apiIdentifier: ApiIdentifier) ={
+    stubFor(
+      post(urlPathEqualTo(s"/applications/${applicationId.value}/subscriptions"))
+        .withJsonRequestBody(apiIdentifier)
+        .willReturn(
+          aResponse()
+            .withStatus(NOT_FOUND)
+        )
+    )
+  }
+
 }
