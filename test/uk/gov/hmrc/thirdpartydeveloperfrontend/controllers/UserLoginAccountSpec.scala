@@ -55,9 +55,10 @@ class UserLoginAccountSpec extends BaseControllerSpec with WithCSRFAddToken
     val developerWithAuthAppAndSmsMfa = buildDeveloper(mfaDetails = List(verifiedAuthenticatorAppMfaDetail, verifiedSmsMfaDetail))
     val authAppMfaId = verifiedAuthenticatorAppMfaDetail.id
     val smsMfaId = verifiedSmsMfaDetail.id
-    val session = Session(UUID.randomUUID().toString, developerWithAuthAppMfa, LoggedInState.LOGGED_IN)
-    val sessionContainsDeveloperWithAuthAppAndSmsMfa = session.copy(developer = developerWithAuthAppAndSmsMfa)
-    val user = DeveloperSession(session)
+    val sessionWithAuthAppMfa = Session(UUID.randomUUID().toString, developerWithAuthAppMfa, LoggedInState.LOGGED_IN)
+    val sessionWithSmsMfa = Session(UUID.randomUUID().toString, developerWithSmsMfa, LoggedInState.LOGGED_IN)
+    val sessionContainsDeveloperWithAuthAppAndSmsMfa = sessionWithAuthAppMfa.copy(developer = developerWithAuthAppAndSmsMfa)
+    val user = DeveloperSession(sessionWithAuthAppMfa)
     val emailFieldName: String = "emailaddress"
     val passwordFieldName: String = "password"
     val userPassword = "Password1!"
@@ -130,7 +131,7 @@ class UserLoginAccountSpec extends BaseControllerSpec with WithCSRFAddToken
         .thenReturn(result)
 
     def mockLogout(): Unit =
-      when(underTest.sessionService.destroy(eqTo(session.sessionId))(*))
+      when(underTest.sessionService.destroy(eqTo(sessionWithAuthAppMfa.sessionId))(*))
         .thenReturn(Future.successful(NO_CONTENT))
 
     when(underTest.sessionService.authenticate(*, *, *)(*)).thenReturn(failed(new InvalidCredentials))
@@ -141,11 +142,11 @@ class UserLoginAccountSpec extends BaseControllerSpec with WithCSRFAddToken
   }
 
   trait SetupWithUserAuthRespRequiringMfaAndMfaEnabled extends Setup {
-    val userAuthRespNotRequiringMfaAndMfaEnabled = UserAuthenticationResponse(accessCodeRequired = false, mfaEnabled = true, session = Some(session))
+    val userAuthRespNotRequiringMfaAndMfaEnabled = UserAuthenticationResponse(accessCodeRequired = false, mfaEnabled = true, session = Some(sessionWithAuthAppMfa))
   }
 
   trait SetupWithUserAuthRespNotRequiringMfa extends Setup {
-    val userAuthRespNotRequiringMfa = UserAuthenticationResponse(accessCodeRequired = false, mfaEnabled = false, session = Some(session))
+    val userAuthRespNotRequiringMfa = UserAuthenticationResponse(accessCodeRequired = false, mfaEnabled = false, session = Some(sessionWithAuthAppMfa))
 
     def testWhenMfaMandatedIs(mfaMandated: Boolean) = {
       mockAuthenticate(user.email, userPassword, successful(userAuthRespNotRequiringMfa), resultShowAdminMfaMandateMessage = successful(mfaMandated))
@@ -188,7 +189,7 @@ class UserLoginAccountSpec extends BaseControllerSpec with WithCSRFAddToken
     val userAuthRespWithInconsistentState = UserAuthenticationResponse(
       accessCodeRequired = true, // should be false if we already have a login session
       mfaEnabled = true,
-      session = Some(session))
+      session = Some(sessionWithAuthAppMfa))
   }
 
   trait PartLogged extends Setup {
@@ -552,8 +553,8 @@ class UserLoginAccountSpec extends BaseControllerSpec with WithCSRFAddToken
 
   "authenticateAccessCode" should {
 
-    "return the manage Applications page when the credentials are correct and mfa method is AUTHENTICATOR_APP" in new Setup {
-      mockAuthenticateAccessCode(user.email, accessCode, nonce, authAppMfaId, successful(session))
+    "return the Sms Setup Reminder page when the credentials are correct and mfa method is AUTHENTICATOR_APP" in new Setup {
+      mockAuthenticateAccessCode(user.email, accessCode, nonce, authAppMfaId, successful(sessionWithAuthAppMfa))
       mockAudit(LoginSucceeded, successful(AuditResult.Success))
 
       private val request = FakeRequest()
@@ -564,6 +565,22 @@ class UserLoginAccountSpec extends BaseControllerSpec with WithCSRFAddToken
 
       status(result) shouldBe SEE_OTHER
       redirectLocation(result) shouldBe Some(uk.gov.hmrc.apiplatform.modules.mfa.controllers.profile.routes.MfaController.smsSetupReminderPage().url)
+      verify(underTest.auditService, times(1)).audit(
+        eqTo(LoginSucceeded), eqTo(Map("developerEmail" -> user.email, "developerFullName" -> user.displayedName)))(*)
+    }
+
+    "return the AuthApp Setup Reminder page when the credentials are correct and mfa method is SMS" in new Setup {
+      mockAuthenticateAccessCode(user.email, accessCode, nonce, smsMfaId, successful(sessionWithSmsMfa))
+      mockAudit(LoginSucceeded, successful(AuditResult.Success))
+
+      private val request = FakeRequest()
+        .withSession(sessionParams :+ "emailAddress" -> user.email :+ "nonce" -> nonce: _*)
+        .withFormUrlEncodedBody(("accessCode", accessCode))
+
+      private val result = underTest.authenticateAccessCode(smsMfaId, SMS)(request)
+
+      status(result) shouldBe SEE_OTHER
+      redirectLocation(result) shouldBe Some(uk.gov.hmrc.apiplatform.modules.mfa.controllers.profile.routes.MfaController.authAppSetupReminderPage().url)
       verify(underTest.auditService, times(1)).audit(
         eqTo(LoginSucceeded), eqTo(Map("developerEmail" -> user.email, "developerFullName" -> user.displayedName)))(*)
     }
@@ -593,7 +610,7 @@ class UserLoginAccountSpec extends BaseControllerSpec with WithCSRFAddToken
     }
 
     "return the manage Applications page when the credentials are correct and mfa method is SMS" in new Setup {
-      mockAuthenticateAccessCode(user.email, accessCode, nonce, smsMfaId, successful(session))
+      mockAuthenticateAccessCode(user.email, accessCode, nonce, smsMfaId, successful(sessionWithAuthAppMfa))
       mockAudit(LoginSucceeded, successful(AuditResult.Success))
 
       private val request = FakeRequest()
@@ -702,9 +719,9 @@ class UserLoginAccountSpec extends BaseControllerSpec with WithCSRFAddToken
   "accountLocked" should {
     "destroy session when locked" in new Setup {
       mockLogout()
-      private val request = FakeRequest().withLoggedIn(underTest, implicitly)(session.sessionId)
+      private val request = FakeRequest().withLoggedIn(underTest, implicitly)(sessionWithAuthAppMfa.sessionId)
       await(underTest.accountLocked()(request))
-      verify(underTest.sessionService, atLeastOnce).destroy(eqTo(session.sessionId))(*)
+      verify(underTest.sessionService, atLeastOnce).destroy(eqTo(sessionWithAuthAppMfa.sessionId))(*)
     }
   }
 
@@ -738,11 +755,11 @@ class UserLoginAccountSpec extends BaseControllerSpec with WithCSRFAddToken
 
     "already logged in" should {
       "show the list applications page" in new Setup {
-        when(underTest.sessionService.fetch(eqTo(session.sessionId))(*))
-          .thenReturn(Future.successful(Some(session)))
+        when(underTest.sessionService.fetch(eqTo(sessionWithAuthAppMfa.sessionId))(*))
+          .thenReturn(Future.successful(Some(sessionWithAuthAppMfa)))
 
         private val loggedInRequest = FakeRequest()
-          .withLoggedIn(underTest, implicitly)(session.sessionId)
+          .withLoggedIn(underTest, implicitly)(sessionWithAuthAppMfa.sessionId)
           .withSession(sessionParams: _*)
 
         private val result = addToken(underTest.login())(loggedInRequest)

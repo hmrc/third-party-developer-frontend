@@ -3,8 +3,8 @@ Feature:
 
   Background:
     Given I am registered with
-      | Email address          | Password         | First name | Last name |
-      | john.smith@example.com | StrongPassword1! | John       | Smith     |
+      | Email address          | Password         | First name | Last name | Mfa Setup |
+      | john.smith@example.com | StrongPassword1! | John       | Smith     |           |
     And I have no application assigned to my email 'john.smith@example.com'
 
     @APIS-1467

@@ -33,6 +33,8 @@ POST        /security-preferences/auth-app/access-code                          
 GET         /security-preferences/auth-app/name                                                  uk.gov.hmrc.apiplatform.modules.mfa.controllers.profile.MfaController.nameChangePage(mfaId: uk.gov.hmrc.apiplatform.modules.mfa.models.MfaId)
 POST        /security-preferences/auth-app/name                                                  uk.gov.hmrc.apiplatform.modules.mfa.controllers.profile.MfaController.nameChangeAction(mfaId: uk.gov.hmrc.apiplatform.modules.mfa.models.MfaId)
 GET         /security-preferences/auth-app/setup/complete                                        uk.gov.hmrc.apiplatform.modules.mfa.controllers.profile.MfaController.authAppSetupCompletedPage
+GET         /security-preferences/auth-app/setup/reminder                                        uk.gov.hmrc.apiplatform.modules.mfa.controllers.profile.MfaController.authAppSetupReminderPage
+GET         /security-preferences/auth-app/setup/skip                                            uk.gov.hmrc.apiplatform.modules.mfa.controllers.profile.MfaController.authAppSetupSkippedPage
 
 GET         /security-preferences/sms/setup                                                     uk.gov.hmrc.apiplatform.modules.mfa.controllers.profile.MfaController.setupSms
 POST        /security-preferences/sms/setup                                                     uk.gov.hmrc.apiplatform.modules.mfa.controllers.profile.MfaController.setupSmsAction

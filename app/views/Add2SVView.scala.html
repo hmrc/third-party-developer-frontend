@@ -19,6 +19,7 @@
 @import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.controllers.MfaMandateDetails
 @import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.DeveloperSession
 @import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.views.BackButtonWithJavaScript
+@import uk.gov.hmrc.apiplatform.modules.mfa.models.MfaAction
 
 @this(devMain: DevMain)
 
@@ -35,7 +36,7 @@
   <p class="govuk-body">Use 2-step verification to protect your Developer Hub account and application details from being compromised.</p>
 
   <p class="govuk-body">
-    <a id="submit" class="govuk-button" href="@uk.gov.hmrc.apiplatform.modules.mfa.controllers.profile.routes.MfaController.authAppStart()">Continue</a>
+    <a id="submit" class="govuk-button" href="@uk.gov.hmrc.apiplatform.modules.mfa.controllers.profile.routes.MfaController.selectMfaPage(None, MfaAction.CREATE)">Continue</a>
   </p>
 
   @{if(mfaMandateDetails.showAdminMfaMandatedMessage)

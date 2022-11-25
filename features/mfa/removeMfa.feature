@@ -3,8 +3,8 @@ Feature: Remove MFA. User with MFA enabled and Existing Device Session
 
   Background:
     Given I am mfaEnabled and with a DeviceSession registered with
-      | Email address          | Password         | First name | Last name |
-      | john.smith@example.com | StrongPassword1! | John       | Smith     |
+      | Email address          | Password         | First name | Last name | Mfa Setup         |
+      | john.smith@example.com | StrongPassword1! | John       | Smith     | AUTHENTICATOR_APP |
     And I have no application assigned to my email 'john.smith@example.com'
 
 #   MFA already setup, device session exists, mfa not mandated
@@ -23,6 +23,6 @@ Feature: Remove MFA. User with MFA enabled and Existing Device Session
     Given I navigate to the 'Security preferences' page
     Then I am on the 'Security preferences' page
     And I click on the button with id 'submit'
-    Then I am on the 'Authenticator App Access Code Page' page
+    Then I am on the 'Authenticator App Access Code' page
     When I enter the correct access code during Auth App removal then click continue
     Then I am on the '2SV removal complete' page
