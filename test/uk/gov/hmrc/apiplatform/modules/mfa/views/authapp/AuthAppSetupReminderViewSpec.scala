@@ -48,7 +48,7 @@ class AuthAppSetupReminderViewSpec extends CommonViewSpec
       document.getElementById("page-heading").text shouldBe "Get access codes by an authenticator app"
       document.getElementById("paragraph-1").text shouldBe "Use an authenticator app to get access codes as an alternative to text."
       document.getElementById("submit").text shouldBe "Continue"
-      document.getElementById("submit").attr("href") shouldBe "/developer/profile/security-preferences/auth-app/setup"
+      document.getElementById("submit").attr("href") shouldBe "/developer/profile/security-preferences/auth-app/start"
       document.getElementById("link").text shouldBe "I can't do this right now"
       document.getElementById("link").attr("href") shouldBe "/developer/profile/security-preferences/auth-app/setup/skip"
     }
