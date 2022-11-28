@@ -144,20 +144,18 @@ class ApplicationServiceClientSecretSpec extends AsyncHmrcSpec with Subscription
   }
 
   "deleteClientSecret" should {
-    val applicationId = ApplicationId(UUID.randomUUID().toString())
+    val applicationId = ApplicationId.random
     val actorEmailAddress = "john.requestor@example.com"
     val userId = idOf(actorEmailAddress)
     val secretToDelete = UUID.randomUUID().toString
-    val timestamp = LocalDateTime.now(clock)
 
     "delete a client secret" in new Setup {
 
       val application = productionApplication.copy(id = applicationId)
-      val removeClientSecretRequest = RemoveClientSecret(userId, actorEmailAddress, secretToDelete, timestamp)
 
       theProductionConnectorthenReturnTheApplication(applicationId, application)
 
-      when(mockProductionApplicationConnector.applicationUpdate(eqTo(applicationId), eqTo(removeClientSecretRequest))(*))
+      when(mockProductionApplicationConnector.deleteClientSecret(eqTo(applicationId), eqTo(secretToDelete), eqTo(actorEmailAddress))(*))
         .thenReturn(successful(ApplicationUpdateSuccessful))
 
       await(applicationService.deleteClientSecret(application, userId, secretToDelete, actorEmailAddress)) shouldBe ApplicationUpdateSuccessful
