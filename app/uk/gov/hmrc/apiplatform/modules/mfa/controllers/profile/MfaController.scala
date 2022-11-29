@@ -234,12 +234,17 @@ class MfaController @Inject() (
 
   def smsAccessCodeAction(mfaId: MfaId, mfaAction: MfaAction, mfaIdForRemoval: Option[MfaId]): Action[AnyContent] =
     atLeastPartLoggedInEnablingMfaAction { implicit request =>
+      def logonAndComplete(): Result = {
+        thirdPartyDeveloperConnector.updateSessionLoggedInState(request.sessionId, UpdateLoggedInStateRequest(LoggedInState.LOGGED_IN))
+        Redirect(routes.MfaController.smsSetupCompletedPage())
+      }
+
       SmsAccessCodeForm.form.bindFromRequest.fold(
         form => Future.successful(BadRequest(smsAccessCodeView(form, mfaId, mfaAction, mfaIdForRemoval))),
         form =>
           mfaAction match {
             case CREATE => thirdPartyDeveloperMfaConnector.verifyMfa(request.userId, mfaId, form.accessCode) map {
-                case true  => Redirect(routes.MfaController.smsSetupCompletedPage())
+                case true  => logonAndComplete()
                 case false => internalServerErrorTemplate("Unable to verify SMS access code")
             }
           case REMOVE => handleRemoveMfa(request.userId, form.accessCode, mfaId, mfaIdForRemoval)

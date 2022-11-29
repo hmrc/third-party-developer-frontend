@@ -22,7 +22,7 @@ import uk.gov.hmrc.apiplatform.modules.common.services.ApplicationLogger
 import uk.gov.hmrc.apiplatform.modules.mfa.connectors.ThirdPartyDeveloperMfaConnector
 import uk.gov.hmrc.apiplatform.modules.mfa.forms.{MfaAccessCodeForm, SelectLoginMfaForm}
 import uk.gov.hmrc.apiplatform.modules.mfa.models.MfaType.{AUTHENTICATOR_APP, SMS}
-import uk.gov.hmrc.apiplatform.modules.mfa.models.{AuthenticatorAppMfaDetailSummary, DeviceSession, MfaDetail, MfaId, MfaType, SmsMfaDetailSummary}
+import uk.gov.hmrc.apiplatform.modules.mfa.models.{AuthenticatorAppMfaDetailSummary, DeviceSession, MfaAction, MfaDetail, MfaId, MfaType, SmsMfaDetailSummary}
 import uk.gov.hmrc.apiplatform.modules.mfa.service.MfaMandateService
 import uk.gov.hmrc.apiplatform.modules.mfa.utils.MfaDetailHelper
 import uk.gov.hmrc.apiplatform.modules.mfa.utils.MfaDetailHelper.getMfaDetailById
@@ -103,7 +103,7 @@ class UserLoginAccount @Inject()(val auditService: AuditService,
     successful(Ok(userDidNotAdd2SVView()))
   }
 
-  def get2svRecommendationPage(): Action[AnyContent] = loggedInAction {
+  def get2svRecommendationPage(): Action[AnyContent] = atLeastPartLoggedInEnablingMfaAction {
     implicit request => {
       for {
         showAdminMfaMandateMessage <- mfaMandateService.showAdminMfaMandatedMessage(request.userId)
@@ -141,7 +141,7 @@ class UserLoginAccount @Inject()(val auditService: AuditService,
       case (Some(session), false) if session.loggedInState.isPartLoggedInEnablingMFA =>
         successful(
           withSessionCookie(
-            Redirect(uk.gov.hmrc.apiplatform.modules.mfa.controllers.profile.routes.MfaController.authAppStart().url).withSession(playSession),
+            Redirect(routes.UserLoginAccount.get2svRecommendationPage(), SEE_OTHER).withSession(playSession),
             session.sessionId
           )
         )

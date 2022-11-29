@@ -29,12 +29,17 @@ Feature: Sign in
       | email address          | password         |
       | john.smith@example.com | StrongPassword1! |
     When I click on the button with id 'submit'
+    Then I am on the 'Recommend Mfa' page
+    When I click on the button with id 'submit'
+    Then I am on the 'Select MFA' page
+    Then I click on the radio button with id 'auth-app-mfa'
+    When I click on the button with id 'submit'
     Then I am on the 'Authenticator App Start Page' page
     When I click on the button with id 'submit'
     Then I am on the 'Setup 2SV QR' page
     When I click on the button with id 'submit'
     Then I am on the 'Authenticator App Access Code' page
-    When I enter the correct access code during 2SVSetup with mfaMandated 'true'
+    When I enter the correct access code during 2SVSetup with mfaMandated 'false'
     Then I am on the 'Create name for Authenticator App' page
     And  I enter an authenticator app name
     When I click on the button with id 'submit'
