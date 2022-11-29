@@ -116,7 +116,7 @@ class ApplicationService @Inject() (
     connectorWrapper
       .forEnvironment(application.deployedTo)
       .thirdPartyApplicationConnector
-      .applicationUpdate(application.id, RemoveClientSecret(userId , actorEmailAddress , clientSecretId, LocalDateTime.now(clock)))
+      .deleteClientSecret(application.id, clientSecretId, actorEmailAddress)
 
   def updateCheckInformation(application: Application, checkInformation: CheckInformation)(implicit hc: HeaderCarrier): Future[ApplicationUpdateSuccessful] = {
     connectorWrapper.forEnvironment(application.deployedTo).thirdPartyApplicationConnector.updateApproval(application.id, checkInformation)
