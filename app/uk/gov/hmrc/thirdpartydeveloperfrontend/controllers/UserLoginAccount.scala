@@ -103,7 +103,7 @@ class UserLoginAccount @Inject()(val auditService: AuditService,
   def get2svRecommendationPage(): Action[AnyContent] = atLeastPartLoggedInEnablingMfaAction {
     implicit request => {
       for {
-        isAdminOnProductionApp <- appsByTeamMember.fetchProductionSummmariesByAdmin(request.userId).map(_.nonEmpty)
+        isAdminOnProductionApp <- appsByTeamMember.fetchProductionSummariesByAdmin(request.userId).map(_.nonEmpty)
       }  yield (Ok(add2SVView(isAdminOnProductionApp)))
     }
   }

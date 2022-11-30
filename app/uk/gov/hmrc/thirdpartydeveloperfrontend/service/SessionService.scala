@@ -35,7 +35,7 @@ class SessionService @Inject()(val thirdPartyDeveloperConnector: ThirdPartyDevel
   def authenticate(emailAddress: String, password: String, deviceSessionId: Option[UUID])(implicit hc: HeaderCarrier): Future[(UserAuthenticationResponse, UserId)] = {
     for {
       coreUser <- thirdPartyDeveloperConnector.findUserId(emailAddress).map(_.getOrElse(throw new InvalidEmail))
-      mfaMandatedForUser <- appsByTeamMember.fetchProductionSummmariesByAdmin(coreUser.id).map(_.nonEmpty)
+      mfaMandatedForUser <- appsByTeamMember.fetchProductionSummariesByAdmin(coreUser.id).map(_.nonEmpty)
       response <- thirdPartyDeveloperConnector.authenticate(LoginRequest(emailAddress, password, mfaMandatedForUser, deviceSessionId))
     } yield (response, coreUser.id)
   }

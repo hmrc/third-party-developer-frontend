@@ -48,15 +48,12 @@ class Add2SVSpec extends CommonViewSpec with WithCSRFAddToken with DeveloperBuil
       page.body should not include "I can't do this right now"
     }
 
-    "not be displayed when user is an admin" in {
+    "displayed when user is an admin" in {
       val page = renderPage(false)
-
 
       page.contentType should include("text/html")
       page.body should include("I can't do this right now")
     }
-
-
 
   }
 }
