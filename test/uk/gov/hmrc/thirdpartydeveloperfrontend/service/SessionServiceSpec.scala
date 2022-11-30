@@ -17,10 +17,9 @@
 package uk.gov.hmrc.thirdpartydeveloperfrontend.service
 
 import uk.gov.hmrc.apiplatform.modules.mfa.models.MfaId
-import uk.gov.hmrc.apiplatform.modules.mfa.service.MfaMandateService
 import uk.gov.hmrc.thirdpartydeveloperfrontend.builder.DeveloperBuilder
 import uk.gov.hmrc.thirdpartydeveloperfrontend.connectors.ThirdPartyDeveloperConnector
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.connectors.{LoginRequest, AccessCodeAuthenticationRequest, UserAuthenticationResponse}
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.connectors.{AccessCodeAuthenticationRequest, LoginRequest, UserAuthenticationResponse}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.{LoggedInState, Session, SessionInvalid}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.repositories.FlowRepository
 import uk.gov.hmrc.http.HeaderCarrier
@@ -29,15 +28,16 @@ import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.AsyncHmrcSpec
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future.{failed, successful}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.UserId
+import uk.gov.hmrc.thirdpartydeveloperfrontend.mocks.service.AppsByTeamMemberServiceMock
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.LocalUserIdTracker
 
 import java.util.UUID
 
-class SessionServiceSpec extends AsyncHmrcSpec with DeveloperBuilder with LocalUserIdTracker {
+class SessionServiceSpec extends AsyncHmrcSpec with DeveloperBuilder with LocalUserIdTracker with  AppsByTeamMemberServiceMock {
   trait Setup {
     implicit val hc: HeaderCarrier = HeaderCarrier()
 
-    val underTest = new SessionService(mock[ThirdPartyDeveloperConnector], mock[MfaMandateService], mock[FlowRepository])
+    val underTest = new SessionService(mock[ThirdPartyDeveloperConnector], appsByTeamMemberServiceMock, mock[FlowRepository])
 
     val email = "thirdpartydeveloper@example.com"
     val userId = UserId.random
@@ -51,12 +51,45 @@ class SessionServiceSpec extends AsyncHmrcSpec with DeveloperBuilder with LocalU
     val deviceSessionId = UUID.randomUUID()
     val session = Session(sessionId, developer, LoggedInState.LOGGED_IN)
     val userAuthenticationResponse = UserAuthenticationResponse(accessCodeRequired = false, mfaEnabled = false, session = Some(session))
+
+    val applicationsWhereUserIsAdminInProduction =
+      Seq(
+        ApplicationWithSubscriptionIds(
+          applicationId,
+          clientId,
+          "myName",
+          LocalDateTime.now,
+          Some(LocalDateTime.now),
+          None,
+          grantLength,
+          Environment.PRODUCTION,
+          collaborators = Set(email.asAdministratorCollaborator),
+          subscriptions = Set.empty
+        )
+      )
+
+    val applicationsWhereUserIsDeveloperInProduction =
+      Seq(
+        ApplicationWithSubscriptionIds(
+          applicationId,
+          clientId,
+          "myName",
+          LocalDateTime.now,
+          Some(LocalDateTime.now),
+          None,
+          grantLength,
+          Environment.PRODUCTION,
+          collaborators = Set(email.asDeveloperCollaborator),
+          subscriptions = Set.empty
+        )
+      )
+
   }
 
   "authenticate" should {
     "return the user authentication response from the connector when the authentication succeeds and mfaMandatedForUser is false" in new Setup {
       when(underTest.thirdPartyDeveloperConnector.findUserId(eqTo(email))(*)).thenReturn(successful(Some(ThirdPartyDeveloperConnector.CoreUserDetails(email, userId))))
-      when(underTest.mfaMandateService.isMfaMandatedForUser(*[UserId])(*)).thenReturn(successful(false))
+      appsByTeamMemberServiceMock.
       when(underTest.thirdPartyDeveloperConnector.authenticate(*)(*))
         .thenReturn(successful(userAuthenticationResponse))
 

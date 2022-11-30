@@ -16,7 +16,6 @@
 
 package uk.gov.hmrc.apiplatform.modules.mfa.controllers.profile
 
-import play.api.i18n.Messages
 import play.api.libs.crypto.CookieSigner
 import play.api.mvc._
 import uk.gov.hmrc.apiplatform.modules.mfa.connectors.ThirdPartyDeveloperMfaConnector
@@ -27,7 +26,7 @@ import uk.gov.hmrc.apiplatform.modules.mfa.models.{MfaAction, MfaId, MfaType}
 import uk.gov.hmrc.apiplatform.modules.mfa.service.{MfaResponse, MfaService}
 import uk.gov.hmrc.apiplatform.modules.mfa.utils.MfaDetailHelper._
 import uk.gov.hmrc.apiplatform.modules.mfa.views.html.authapp._
-import uk.gov.hmrc.apiplatform.modules.mfa.views.html.sms.{MobileNumberView, SmsAccessCodeView, SmsSetupCompletedView, SmsSetupReminderView, SmsSetupSkippedView}
+import uk.gov.hmrc.apiplatform.modules.mfa.views.html.sms._
 import uk.gov.hmrc.apiplatform.modules.mfa.views.html.{RemoveMfaCompletedView, SecurityPreferencesView, SelectMfaView}
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.play.bootstrap.controller.WithUnsafeDefaultFormBinding
@@ -104,7 +103,7 @@ class MfaController @Inject() (
   }
 
   private def removeSelectedMfa(userId: UserId, mfaTypeForAuthentication: String, mfaIdForRemoval: Option[MfaId])
-                               (implicit request: Request[_], hc: HeaderCarrier, messages: Messages) = {
+                               (implicit request: Request[_], hc: HeaderCarrier) = {
 
     def authenticateToRemoveMfa(mfaType: MfaType, mfaIdForAuthentication: MfaId) = {
       mfaType match {
@@ -287,7 +286,7 @@ class MfaController @Inject() (
   }
 
   private def handleRemoveMfa(userId: UserId, accessCode: String, mfaIdToVerify: MfaId, mfaIdForRemoval: Option[MfaId])
-                             (implicit request: Request[_], loggedIn: DeveloperSession, messages: Messages): Future[Result] = {
+                             (implicit request: Request[_], loggedIn: DeveloperSession): Future[Result] = {
     mfaIdForRemoval match {
       case Some(mfaId) =>
         mfaService.removeMfaById(userId, mfaIdToVerify, accessCode, mfaId) map {

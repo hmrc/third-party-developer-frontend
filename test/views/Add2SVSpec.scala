@@ -18,7 +18,6 @@ package views
 
 import uk.gov.hmrc.thirdpartydeveloperfrontend.builder._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.{DeveloperSession, LoggedInState, Session}
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.controllers.MfaMandateDetails
 import play.api.test.FakeRequest
 import play.twirl.api.Html
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.WithCSRFAddToken
@@ -26,7 +25,6 @@ import views.helper.CommonViewSpec
 import views.html.Add2SVView
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.LocalUserIdTracker
 
-import java.time.LocalDate
 class Add2SVSpec extends CommonViewSpec with WithCSRFAddToken with DeveloperBuilder with DeveloperSessionBuilder with LocalUserIdTracker {
 
   val add2SVView = app.injector.instanceOf[Add2SVView]
@@ -38,38 +36,27 @@ class Add2SVSpec extends CommonViewSpec with WithCSRFAddToken with DeveloperBuil
   val session = Session("sessionId", developer, LoggedInState.LOGGED_IN)
   implicit val developerSession = DeveloperSession(session)
 
-  private def renderPage(mfaMandateDetails: MfaMandateDetails): Html = {
-    add2SVView.render(mfaMandateDetails, messagesProvider, developerSession, request, appConfig)
+  private def renderPage(isAdminOnProductionApp: Boolean): Html = {
+    add2SVView.render(isAdminOnProductionApp,  messagesProvider, developerSession, request, appConfig)
   }
 
-  "MFA Admin warning" should {
-    "not be displayed" in {
-      val page = renderPage(MfaMandateDetails(showAdminMfaMandatedMessage = false, daysTillAdminMfaMandate = 0))
+  "I Cant do this right now" should {
+    "not be displayed when user is an admin" in {
+      val page = renderPage(true)
 
       page.contentType should include("text/html")
-      page.body should not include "If you are the Administrator of an application you have"
+      page.body should not include "I can't do this right now"
     }
 
-    "is displayed with plural 'days remaining'" in {
-      when(appConfig.dateOfAdminMfaMandate).thenReturn(Some(LocalDate.now().plusDays(1)))
+    "not be displayed when user is an admin" in {
+      val page = renderPage(false)
 
-      val daysRemaining = 10
-      val page = renderPage(MfaMandateDetails(showAdminMfaMandatedMessage = true, daysTillAdminMfaMandate = daysRemaining))
 
       page.contentType should include("text/html")
-
-      page.body should include(s"If you are the Administrator of an application you have $daysRemaining days until 2-step verification is mandatory")
+      page.body should include("I can't do this right now")
     }
 
-    "is displayed with singular 'day remaining'" in {
-      when(appConfig.dateOfAdminMfaMandate).thenReturn(Some(LocalDate.now().plusDays(1)))
 
-      val daysRemaining = 1
-      val page = renderPage(MfaMandateDetails(showAdminMfaMandatedMessage = true, daysTillAdminMfaMandate = daysRemaining))
 
-      page.contentType should include("text/html")
-
-      page.body should include(s"If you are the Administrator of an application you have $daysRemaining day until 2-step verification is mandatory")
-    }
   }
 }
