@@ -67,13 +67,6 @@ class ApplicationConfig @Inject()(config: Configuration) extends ServicesConfig(
   lazy val reportProblemHost: String =
     config.underlying.getString("report-a-problem.base.url") + config.underlying.getString("urls.report-a-problem.problem")
 
-//  lazy val dateOfAdminMfaMandate: Option[LocalDate] = {
-//    config.getOptional[String]("dateOfAdminMfaMandate") match {
-//      case Some(s) => MfaMandateService.parseLocalDate(s)
-//      case None => None
-//    }
-//  }
-
   // API Subscription Fields
   val apiSubscriptionFieldsProductionUrl = apiSubscriptionFieldsUrl("api-subscription-fields-production")
   val apiSubscriptionFieldsProductionApiKey = getConfString("api-subscription-fields-production.api-key", "")
