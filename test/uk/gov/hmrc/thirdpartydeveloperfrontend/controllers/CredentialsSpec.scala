@@ -33,7 +33,7 @@ import play.filters.csrf.CSRF.TokenProvider
 import uk.gov.hmrc.thirdpartydeveloperfrontend.service.AuditService
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.WithLoggedInSession._
-import views.html.{ClientIdView, ClientSecretsView, CredentialsView, ServerTokenView}
+import views.html.{ClientIdView, ClientSecretsGeneratedView, ClientSecretsView, CredentialsView, ServerTokenView}
 import views.html.editapplication.DeleteClientSecretView
 
 import scala.concurrent.ExecutionContext.Implicits.global
@@ -107,6 +107,7 @@ class CredentialsSpec
     val clientSecretsView = app.injector.instanceOf[ClientSecretsView]
     val serverTokenView = app.injector.instanceOf[ServerTokenView]
     val deleteClientSecretView = app.injector.instanceOf[DeleteClientSecretView]
+    val clientSecretsGeneratedView = app.injector.instanceOf[ClientSecretsGeneratedView]
 
     val underTest = new Credentials(
       mockErrorHandler,
@@ -121,7 +122,8 @@ class CredentialsSpec
       clientIdView,
       clientSecretsView,
       serverTokenView,
-      deleteClientSecretView
+      deleteClientSecretView,
+      clientSecretsGeneratedView
     )
 
     val application = createApplication()
