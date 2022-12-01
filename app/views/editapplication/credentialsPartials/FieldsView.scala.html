@@ -54,11 +54,6 @@
     <thead class="govuk-table__head">
       <tr class="govuk-table__row">
         <th scope="col" class="govuk-table__header">Client secret</th>
-        <th scope="col" class="govuk-table__header">
-          <span class="govuk-visually-hidden">
-            Copy button column
-          </span>
-        </th>
         <th scope="col" class="govuk-table__header">Created</th>
         <th scope="col" class="govuk-table__header">Last used</th>
         <th scope="col" class="govuk-table__header">Delete</th>
@@ -73,21 +68,6 @@
                 <span id="copy-to-clip" value="@{flash.get("newSecret").get}">@{flash.get("newSecret").get}</span>
               } else {
                 ••••••••••••••••••••••••••••••••@{secret.name.takeRight(4)}
-              }
-            </td>
-            <td class="govuk-table__cell center-table-text">
-              @if(isNewSecret && secret.id == flash.get("newSecretId").getOrElse("")){
-                <a
-                  href="#"
-                  id="copy-to-clip-button"
-                  class="govuk-button govuk-!-margin-bottom-0"
-                  title="Copies @accessibleText into the system clipboard."
-                  value="@{flash.get("newSecret").get}"
-                  aria-live="polite"
-                  aria-label="Copy @accessibleText to clipboard"
-                >
-                  Copy
-                </a>
               }
             </td>
             <td class="govuk-table__cell center-table-text">
@@ -111,34 +91,34 @@
     </tbody>
   </table>
 
-    @if(!isNewSecret) {
-      <br>
-      <p class="govuk-body">Your application must have at least one client secret. If you need to, you can generate a new client secret and delete old ones.</p>
-    }
-
-    <h2 class="govuk-heading-m">Rotate your client secret regularly</h2>
-    <p class="govuk-body">
-      Rotate your application’s client secret to shorten the period an access key is active, reducing the impact to your business if it is compromised.
-    </p>
-    <p class="govuk-body">
-      To rotate your client secret:
-    </p>
-    <ol class="govuk-list govuk-list--number">
-      <li>
-        Generate a new client secret, in addition to the one used by your application
-      </li>
-      <li>
-        Update your application to use the new client secret
-      </li>
-      <li>
-        Check that your application is working with the new client secret
-      </li>
-      <li>
-        Delete the inactive client secret
-      </li>
-    </ol>
-
+    @if(!isNewSecret && clientSecrets.size == 1) {
+          <br>
+          <p class="govuk-body">Your application must have at least one client secret. If you need to, you can generate a new client secret and delete old ones.</p>
+        }
     @if(clientSecrets.size < 5) {
+        <h2 class="govuk-heading-m">Rotate your client secret regularly</h2>
+        <p class="govuk-body">
+          Rotate your application’s client secret to shorten the period an access key is active, reducing the impact to your business if it is compromised.
+        </p>
+        <p class="govuk-body">
+          To rotate your client secret:
+        </p>
+        <ol class="govuk-list govuk-list--number">
+          <li>
+            Generate a new client secret, in addition to the one used by your application
+          </li>
+          <li>
+            Update your application to use the new client secret
+          </li>
+          <li>
+            Check that your application is working with the new client secret
+          </li>
+          <li>
+            Delete the inactive client secret
+          </li>
+        </ol>
+
+
         <p class="govuk-body">You can have up to 5 client secrets at any time.</p>
         <div>
           @helper.form(action = controllers.routes.Credentials.addClientSecret(app.id), 'class -> "form") {

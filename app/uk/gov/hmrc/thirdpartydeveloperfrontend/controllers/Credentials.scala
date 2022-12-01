@@ -30,7 +30,7 @@ import play.api.libs.crypto.CookieSigner
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents, Result}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.service._
 import uk.gov.hmrc.http.ForbiddenException
-import views.html.{ClientIdView, ClientSecretsView, CredentialsView, ServerTokenView}
+import views.html.{ClientIdView, ClientSecretsGeneratedView, ClientSecretsView, CredentialsView, ServerTokenView}
 import views.html.editapplication.DeleteClientSecretView
 
 import java.time.LocalDateTime
@@ -51,7 +51,8 @@ class Credentials @Inject() (
     clientIdView: ClientIdView,
     clientSecretsView: ClientSecretsView,
     serverTokenView: ServerTokenView,
-    deleteClientSecretView: DeleteClientSecretView
+    deleteClientSecretView: DeleteClientSecretView,
+    clientSecretsGeneratedView: ClientSecretsGeneratedView
 )(implicit val ec: ExecutionContext, val appConfig: ApplicationConfig)
     extends ApplicationController(mcc) {
 
@@ -85,8 +86,7 @@ class Credentials @Inject() (
     canChangeClientSecrets(applicationId) { implicit request =>
       val developer = request.developerSession.developer
       applicationService.addClientSecret(request.application, developer.userId, developer.email).map { response =>
-        Redirect(routes.Credentials.clientSecrets(applicationId))
-          .flashing("newSecretId" -> response._1, "newSecret" -> response._2)
+        Ok(clientSecretsGeneratedView(request.application, applicationId, response._2))
       } recover {
         case _: ApplicationNotFound       => NotFound(errorHandler.notFoundTemplate)
         case _: ForbiddenException        => Forbidden(errorHandler.badRequestTemplate)
