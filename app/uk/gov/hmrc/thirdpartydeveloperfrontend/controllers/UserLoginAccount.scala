@@ -26,6 +26,8 @@ import uk.gov.hmrc.apiplatform.modules.mfa.models.{AuthenticatorAppMfaDetailSumm
 import uk.gov.hmrc.apiplatform.modules.mfa.service.MfaMandateService
 import uk.gov.hmrc.apiplatform.modules.mfa.utils.MfaDetailHelper
 import uk.gov.hmrc.apiplatform.modules.mfa.utils.MfaDetailHelper.getMfaDetailById
+import uk.gov.hmrc.apiplatform.modules.mfa.views.html.authapp.AuthAppLoginAccessCodeView
+import uk.gov.hmrc.apiplatform.modules.mfa.views.html.sms.SmsLoginAccessCodeView
 import uk.gov.hmrc.apiplatform.modules.mfa.views.html.{RequestMfaRemovalCompleteView, RequestMfaRemovalView}
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.play.audit.http.connector.AuditResult
