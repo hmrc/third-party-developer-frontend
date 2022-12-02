@@ -144,13 +144,13 @@ case object RecommendMfaSkipAcknowledgePage extends FormPage {
   override val url: String = s"${Env.host}/developer/login/2SV-not-set"
 }
 
-case object Login2svEnterAccessCodePage extends FormPage {
+case object AuthAppLoginAccessCodePage extends FormPage {
   def clickContinue() = {
     click on id("submit")
   }
 
   override val pageHeading: String = "Enter your access code"
-  override val url: String = s"${Env.host}/developer/login-totp"
+  override val url: String = s"${Env.host}/developer/login-mfa?mfaId=13eae037-7b76-4bfd-8f77-feebd0611ebb&mfaType=AUTHENTICATOR_APP"
 
   def enterAccessCode(accessCode: String, rememberMe: Boolean = false) = {
     val formData = Map("accessCode" -> accessCode, "rememberMe" -> s"$rememberMe")
@@ -159,21 +159,26 @@ case object Login2svEnterAccessCodePage extends FormPage {
   }
 }
 
+case object AuthAppSetupReminderPage extends FormPage {
+  override val pageHeading: String = "Get access codes by an authenticator app"
+  override val url: String = s"${Env.host}/developer/profile/security-preferences/auth-app/setup/reminder"
+}
+
 case object AuthAppStartPage extends FormPage {
   override val pageHeading: String = "You need an authenticator app on your device"
   override val url: String = s"${Env.host}/developer/profile/security-preferences/auth-app/start"
 }
 
-case object AuthAppAccessCodePage extends FormPage {
+case object SmsLoginAccessCodePage extends FormPage {
   def clickContinue() = {
     click on id("submit")
   }
 
-  override val pageHeading: String = "Enter your access code"
-  override val url: String = s"${Env.host}/developer/profile/security-preferences/auth-app/access-code"
+  override val pageHeading: String = "Enter the access code"
+  override val url: String = s"${Env.host}/developer/login-mfa?mfaId=6a3b98f1-a2c0-488b-bf0b-cfc86ccfe24d&mfaType=SMS"
 
-  def enterAccessCode(accessCode: String) = {
-    val formData = Map("accessCode" -> accessCode)
+  def enterAccessCode(accessCode: String, rememberMe: Boolean = false) = {
+    val formData = Map("accessCode" -> accessCode, "rememberMe" -> s"$rememberMe")
 
     Form.populate(formData)
   }

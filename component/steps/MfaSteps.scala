@@ -26,6 +26,7 @@ import pages._
 import play.api.http.Status._
 import play.api.libs.json.Json
 import stubs.{DeveloperStub, DeviceSessionStub, MfaStub, Stubs}
+import uk.gov.hmrc.apiplatform.modules.mfa.models.MfaId
 import uk.gov.hmrc.apiplatform.modules.mfa.utils.MfaDetailHelper
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.connectors.{LoginRequest, UserAuthenticationResponse}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.{Developer, LoggedInState, Session}
@@ -72,18 +73,30 @@ class MfaSteps extends ScalaDsl with EN with Matchers with NavigationSugar with 
     SmsAccessCodePage.clickContinue()
   }
 
-  When("""^I enter the correct access code and click remember me for 7 days then click continue$""") {
-    MfaStub.stubMfaAccessCodeSuccess(authAppMfaId)
-    Login2svEnterAccessCodePage.enterAccessCode(accessCode, rememberMe = true)
+  When("""^I enter the correct access code for SMS and click remember me for 7 days then click continue$""") {
+    MfaStub.stubMfaAccessCodeSuccess(smsMfaId)
+    SmsLoginAccessCodePage.enterAccessCode(accessCode, rememberMe = true)
     DeviceSessionStub.createDeviceSession(staticUserId, CREATED)
-    Login2svEnterAccessCodePage.clickContinue()
-
+    SmsLoginAccessCodePage.clickContinue()
   }
 
-  When("""^I enter the correct access code and do NOT click remember me for 7 days then click continue$""") {
+  When("""^I enter the correct access code SMS and do NOT click remember me for 7 days then click continue$""") {
+    MfaStub.stubMfaAccessCodeSuccess(smsMfaId)
+    SmsLoginAccessCodePage.enterAccessCode(accessCode)
+    SmsLoginAccessCodePage.clickContinue()
+  }
+
+  When("""^I enter the correct access code for Authenticator App and click remember me for 7 days then click continue$""") {
     MfaStub.stubMfaAccessCodeSuccess(authAppMfaId)
-    Login2svEnterAccessCodePage.enterAccessCode(accessCode)
-    Login2svEnterAccessCodePage.clickContinue()
+    AuthAppLoginAccessCodePage.enterAccessCode(accessCode, rememberMe = true)
+    DeviceSessionStub.createDeviceSession(staticUserId, CREATED)
+    AuthAppLoginAccessCodePage.clickContinue()
+  }
+
+  When("""^I enter the correct access code Authenticator App and do NOT click remember me for 7 days then click continue$""") {
+    MfaStub.stubMfaAccessCodeSuccess(authAppMfaId)
+    AuthAppLoginAccessCodePage.enterAccessCode(accessCode)
+    AuthAppLoginAccessCodePage.clickContinue()
   }
 
   Then("""^I enter an authenticator app name$""") { () =>
@@ -100,7 +113,24 @@ class MfaSteps extends ScalaDsl with EN with Matchers with NavigationSugar with 
     authCookie shouldBe null
   }
 
-  Given("""^I am mfaEnabled without a DeviceSession and registered with$"""){  data: DataTable =>
+  Given("""^I have SMS enabled as MFA method, without a DeviceSession and registered with$""") { data: DataTable =>
+    val result: Map[String, String] = data.asScalaRawMaps[String, String].head
+
+    val password = result("Password")
+
+    val developer = buildDeveloper(emailAddress = result("Email address"),
+      firstName = result("First name"),
+      lastName = result("Last name"),
+      mfaDetails = List(smsMfaDetails))
+
+    setUpDeveloperStub(developer, smsMfaId, password, None, deviceSessionFound = false)
+
+    MfaStub.stubSendSms(developer, smsMfaId)
+    MfaStub.setupSmsAccessCode(developer, smsMfaId, mobileNumber)
+    MfaStub.setupVerificationOfAccessCode(developer, smsMfaId)
+  }
+
+  Given("""^I have Authenticator App enabled as MFA method, without a DeviceSession and registered with$"""){  data: DataTable =>
     val result: Map[String,String] = data.asScalaRawMaps[String, String].head
   
     val password = result("Password")
@@ -110,7 +140,7 @@ class MfaSteps extends ScalaDsl with EN with Matchers with NavigationSugar with 
         lastName = result("Last name"),
         mfaDetails = List(authenticatorAppMfaDetails))
 
-   setUpDeveloperStub(developer, password, None, deviceSessionFound = false)
+   setUpDeveloperStub(developer, authAppMfaId, password, None, deviceSessionFound = false)
 
   }
 
@@ -124,13 +154,13 @@ class MfaSteps extends ScalaDsl with EN with Matchers with NavigationSugar with 
           lastName = result("Last name"),
           mfaDetails = List(authenticatorAppMfaDetails))
 
-   setUpDeveloperStub(developer, password, Some(DeviceSessionStub.staticDeviceSessionId), true)
+   setUpDeveloperStub(developer, authAppMfaId, password, Some(DeviceSessionStub.staticDeviceSessionId), true)
 
   }
 
-  def setUpDeveloperStub(developer: Developer, password: String, deviceSessionId: Option[UUID], deviceSessionFound: Boolean) ={
+  def setUpDeveloperStub(developer: Developer, mfaId: MfaId, password: String, deviceSessionId: Option[UUID], deviceSessionFound: Boolean) ={
     webDriver.manage().deleteAllCookies()
-    val mfaEnabled = MfaDetailHelper.isAuthAppMfaVerified(developer.mfaDetails)
+    val mfaEnabled = MfaDetailHelper.isAuthAppMfaVerified(developer.mfaDetails) || MfaDetailHelper.isSmsMfaVerified(developer.mfaDetails)
     val accessCodeRequired = deviceSessionId.isEmpty && mfaEnabled
 
     TestContext.sessionIdForloggedInDeveloper =
@@ -144,8 +174,8 @@ class MfaSteps extends ScalaDsl with EN with Matchers with NavigationSugar with 
     }
 
     if (mfaEnabled) {
-      MfaStub.stubRemoveMfaById(developer, authAppMfaId)
-      MfaStub.setupVerificationOfAccessCode(developer, authAppMfaId)
+      MfaStub.stubRemoveMfaById(developer, mfaId)
+      MfaStub.setupVerificationOfAccessCode(developer, mfaId)
     }
     DeveloperStub.findUserIdByEmailAddress(developer.email)
     Stubs.setupPostRequest("/check-password", NO_CONTENT)

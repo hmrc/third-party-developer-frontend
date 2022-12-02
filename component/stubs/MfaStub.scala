@@ -56,6 +56,14 @@ object MfaStub {
         ))
   }
 
+  def stubSendSms(developer: Developer, mfaId: MfaId): Unit = {
+    stubFor(
+      post(urlEqualTo(s"/developer/${developer.userId.value}/mfa/${mfaId.value}/send-sms"))
+        .willReturn(aResponse()
+          .withStatus(OK)
+        ))
+  }
+
   def setupSmsAccessCode(developer: Developer, mfaId: MfaId, mobileNumber: String): Unit = {
     import uk.gov.hmrc.apiplatform.modules.mfa.connectors.ThirdPartyDeveloperMfaConnector.registerSmsResponseFormat
 

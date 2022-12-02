@@ -45,7 +45,6 @@ object TestContext {
 
 class LoginSteps extends ScalaDsl with EN with Matchers with NavigationSugar with PageSugar with CustomMatchers with ComponentTestDeveloperBuilder  {
 
-
   implicit val webDriver: WebDriver = Env.driver
 
   private val mobileNumber = "+447890123456"
@@ -100,7 +99,6 @@ class LoginSteps extends ScalaDsl with EN with Matchers with NavigationSugar wit
 
     DeveloperStub.setUpGetCombinedApis()
   }
-
 
   Given("""^'(.*)' session is uplifted to LoggedIn$""") { email: String =>
     if (email != TestContext.developer.email) {
