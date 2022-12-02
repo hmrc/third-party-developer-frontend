@@ -262,8 +262,7 @@ class CredentialsSpec
 
       val result = underTest.addClientSecret(applicationId)(loggedInRequest)
 
-      status(result) shouldBe SEE_OTHER
-      redirectLocation(result) shouldBe Some(s"/developer/applications/${applicationId.value}/client-secrets")
+      status(result) shouldBe OK
       verify(underTest.applicationService).addClientSecret(eqTo(application), eqTo(loggedInDeveloper.developer.userId), eqTo(loggedInDeveloper.email))(*)
     }
 
