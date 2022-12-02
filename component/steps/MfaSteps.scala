@@ -30,22 +30,17 @@ import uk.gov.hmrc.apiplatform.modules.mfa.models.MfaId
 import uk.gov.hmrc.apiplatform.modules.mfa.utils.MfaDetailHelper
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.connectors.{LoginRequest, UserAuthenticationResponse}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.{Developer, LoggedInState, Session}
-import utils.ComponentTestDeveloperBuilder
+import utils.MfaData
 
 import java.util.UUID
 
 
 class MfaSteps extends ScalaDsl with EN with Matchers with NavigationSugar with PageSugar
-  with CustomMatchers with ComponentTestDeveloperBuilder {
+  with CustomMatchers with MfaData {
 
   implicit val webDriver: WebDriver = Env.driver
 
-  private val accessCode = "123456"
-  private val mobileNumber = "+447890123456"
-  private val authAppMfaId = authenticatorAppMfaDetails.id
-  private val smsMfaId = smsMfaDetails.id
-  private val deviceCookieName = "DEVICE_SESS_ID"
-  private val deviceCookieValue = "a6b5b0cca96fef5ffc66edffd514a9239b46b4e869fc10f6-9193-42b4-97f2-87886c972ad4"
+
 
 
   When("""^I enter the correct access code during 2SVSetup with mfaMandated '(.*)'$""") { (mfaMandated: String) =>
@@ -75,28 +70,28 @@ class MfaSteps extends ScalaDsl with EN with Matchers with NavigationSugar with 
 
   When("""^I enter the correct access code for SMS and click remember me for 7 days then click continue$""") {
     MfaStub.stubMfaAccessCodeSuccess(smsMfaId)
-    SmsLoginAccessCodePage.enterAccessCode(accessCode, rememberMe = true)
+    SmsLoginAccessCodePage.page.enterAccessCode(accessCode, rememberMe = true)
     DeviceSessionStub.createDeviceSession(staticUserId, CREATED)
-    SmsLoginAccessCodePage.clickContinue()
+    SmsLoginAccessCodePage.page.clickContinue()
   }
 
   When("""^I enter the correct access code SMS and do NOT click remember me for 7 days then click continue$""") {
     MfaStub.stubMfaAccessCodeSuccess(smsMfaId)
-    SmsLoginAccessCodePage.enterAccessCode(accessCode)
-    SmsLoginAccessCodePage.clickContinue()
+    SmsLoginAccessCodePage.page.enterAccessCode(accessCode)
+    SmsLoginAccessCodePage.page.clickContinue()
   }
 
   When("""^I enter the correct access code for Authenticator App and click remember me for 7 days then click continue$""") {
     MfaStub.stubMfaAccessCodeSuccess(authAppMfaId)
-    AuthAppLoginAccessCodePage.enterAccessCode(accessCode, rememberMe = true)
+    AuthAppLoginAccessCodePage.page.enterAccessCode(accessCode, rememberMe = true)
     DeviceSessionStub.createDeviceSession(staticUserId, CREATED)
-    AuthAppLoginAccessCodePage.clickContinue()
+    AuthAppLoginAccessCodePage.page.clickContinue()
   }
 
   When("""^I enter the correct access code Authenticator App and do NOT click remember me for 7 days then click continue$""") {
     MfaStub.stubMfaAccessCodeSuccess(authAppMfaId)
-    AuthAppLoginAccessCodePage.enterAccessCode(accessCode)
-    AuthAppLoginAccessCodePage.clickContinue()
+    AuthAppLoginAccessCodePage.page.enterAccessCode(accessCode)
+    AuthAppLoginAccessCodePage.page.clickContinue()
   }
 
   Then("""^I enter an authenticator app name$""") { () =>
