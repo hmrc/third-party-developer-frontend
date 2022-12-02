@@ -24,10 +24,10 @@ import play.api.test.{FakeRequest, StubMessagesFactory}
 import play.twirl.api.Html
 import uk.gov.hmrc.apiplatform.modules.mfa.forms.MfaAccessCodeForm
 import uk.gov.hmrc.apiplatform.modules.mfa.models.{MfaId, MfaType}
+import uk.gov.hmrc.apiplatform.modules.mfa.views.html.sms.SmsLoginAccessCodeView
 import uk.gov.hmrc.thirdpartydeveloperfrontend.builder.{DeveloperBuilder, DeveloperSessionBuilder}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.{LocalUserIdTracker, WithCSRFAddToken}
 import views.helper.CommonViewSpec
-import views.html.SmsLoginAccessCodeView
 
 import java.util.UUID
 
