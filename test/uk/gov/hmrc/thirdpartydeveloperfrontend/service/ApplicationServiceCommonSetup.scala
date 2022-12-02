@@ -56,8 +56,6 @@ abstract class ApplicationServiceCommonSetup extends AsyncHmrcSpec
     )
 
     val mockApmConnector: ApmConnector = mock[ApmConnector]
-    val mockSubscriptionFieldsService: SubscriptionFieldsService = mock[SubscriptionFieldsService]
-    val mockSubscriptionsService: SubscriptionsService = mock[SubscriptionsService]
     val mockDeskproConnector: DeskproConnector = mock[DeskproConnector]
     val mockDeveloperConnector: ThirdPartyDeveloperConnector = mock[ThirdPartyDeveloperConnector]
     val mockAuditService: AuditService = mock[AuditService]
@@ -65,8 +63,6 @@ abstract class ApplicationServiceCommonSetup extends AsyncHmrcSpec
     val applicationService = new ApplicationService(
       mockApmConnector,
       connectorsWrapper,
-      mockSubscriptionFieldsService,
-      mockSubscriptionsService,
       mockDeskproConnector,
       mockDeveloperConnector,
       mockSandboxApplicationConnector,

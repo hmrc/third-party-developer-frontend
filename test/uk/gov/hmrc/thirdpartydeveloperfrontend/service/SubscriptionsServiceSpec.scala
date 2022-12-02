@@ -23,16 +23,15 @@ import uk.gov.hmrc.thirdpartydeveloperfrontend.connectors._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.apidefinitions._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications._
-import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.AsyncHmrcSpec
+import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.{AsyncHmrcSpec, FixedClock, LocalUserIdTracker}
 
 import scala.concurrent.Future.successful
 import scala.concurrent.ExecutionContext.Implicits.global
 import uk.gov.hmrc.thirdpartydeveloperfrontend.service.PushPullNotificationsService.PushPullNotificationsConnector
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.thirdpartydeveloperfrontend.service.SubscriptionFieldsService.SubscriptionFieldsConnector
-import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.LocalUserIdTracker
 
-class SubscriptionsServiceSpec extends AsyncHmrcSpec with SubscriptionsBuilder with ApplicationBuilder with LocalUserIdTracker {
+class SubscriptionsServiceSpec extends AsyncHmrcSpec with SubscriptionsBuilder with ApplicationBuilder with LocalUserIdTracker with FixedClock {
 
   val versionOne = ApiVersion("1.0")
   val versionTwo = ApiVersion("2.0")
@@ -61,7 +60,8 @@ class SubscriptionsServiceSpec extends AsyncHmrcSpec with SubscriptionsBuilder w
       mockDeskproConnector,
       mockApmConnector,
       mockSubscriptionFieldsService,
-      mockAuditService
+      mockAuditService,
+      clock
     )
 
     def theProductionConnectorthenReturnTheApplication(applicationId: ApplicationId, application: Application): Unit = {
@@ -118,7 +118,7 @@ class SubscriptionsServiceSpec extends AsyncHmrcSpec with SubscriptionsBuilder w
 
       private val actor = CollaboratorActor("dev@example.com")
       private val apiIdentifier = ApiIdentifier(ApiContext("api1"), versionOne)
-      private val timestamp = LocalDateTime.now()
+      private val timestamp = LocalDateTime.now(clock)
       private val subscription = SubscribeToApi(actor, apiIdentifier, timestamp)
 
       theProductionConnectorthenReturnTheApplication(productionApplicationId, productionApplication)
@@ -126,7 +126,7 @@ class SubscriptionsServiceSpec extends AsyncHmrcSpec with SubscriptionsBuilder w
       when(mockApmConnector.subscribeToApi(eqTo(productionApplicationId), eqTo(subscription))(*))
         .thenReturn(successful(ApplicationUpdateSuccessful))
 
-      await(subscriptionsService.subscribeToApi(productionApplicationId, subscription)) shouldBe ApplicationUpdateSuccessful
+      await(subscriptionsService.subscribeToApi(productionApplicationId, actor, apiIdentifier)) shouldBe ApplicationUpdateSuccessful
 
       verify(mockApmConnector).subscribeToApi(eqTo(productionApplicationId), eqTo(subscription))(*)
     }
@@ -137,7 +137,7 @@ class SubscriptionsServiceSpec extends AsyncHmrcSpec with SubscriptionsBuilder w
 
       private val actor = CollaboratorActor("dev@example.com")
       private val apiIdentifier = ApiIdentifier(ApiContext("api1"), versionOne)
-      private val timestamp = LocalDateTime.now()
+      private val timestamp = LocalDateTime.now(clock)
       private val unsubscribeFromApi = UnsubscribeFromApi(actor, apiIdentifier, timestamp)
 
       theProductionConnectorthenReturnTheApplication(productionApplicationId, productionApplication)
@@ -145,9 +145,9 @@ class SubscriptionsServiceSpec extends AsyncHmrcSpec with SubscriptionsBuilder w
       when(mockApmConnector.updateApplication(eqTo(productionApplicationId), eqTo(unsubscribeFromApi))(*))
         .thenReturn(successful(productionApplication))
 
-      await(subscriptionsService.unsubscribeFromApi(productionApplicationId, unsubscribeFromApi)) shouldBe ApplicationUpdateSuccessful
+      await(subscriptionsService.unsubscribeFromApi(productionApplicationId, actor, apiIdentifier)) shouldBe ApplicationUpdateSuccessful
 
       verify(mockApmConnector).updateApplication(eqTo(productionApplicationId), eqTo(unsubscribeFromApi))(*)
     }
   }
-}  
+}

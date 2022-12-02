@@ -39,8 +39,6 @@ import java.time.{Clock, LocalDateTime}
 class ApplicationService @Inject() (
     apmConnector: ApmConnector,
     connectorWrapper: ConnectorsWrapper,
-    subscriptionFieldsService: SubscriptionFieldsService,
-    subscriptionService: SubscriptionsService,
     deskproConnector: DeskproConnector,
     developerConnector: ThirdPartyDeveloperConnector,
     sandboxApplicationConnector: ThirdPartyApplicationSandboxConnector,
@@ -94,22 +92,6 @@ class ApplicationService @Inject() (
 
   type ApiMap[V] = Map[ApiContext, Map[ApiVersion, V]]
   type FieldMap[V] = ApiMap[Map[FieldName,V]]
-
-  def subscribeToApi(application: Application, actor: CollaboratorActor, apiIdentifier: ApiIdentifier)
-                    (implicit hc: HeaderCarrier): Future[ApplicationUpdateSuccessful] = {
-    val request = SubscribeToApi(actor, apiIdentifier, LocalDateTime.now(clock))
-    subscriptionService.subscribeToApi(application.id, request)
-  }
-
-  def unsubscribeFromApi(application: Application, actor: CollaboratorActor, apiIdentifier: ApiIdentifier)
-                        (implicit hc: HeaderCarrier): Future[ApplicationUpdateSuccessful] = {
-    val request = UnsubscribeFromApi(actor, apiIdentifier, LocalDateTime.now(clock))
-    subscriptionService.unsubscribeFromApi(application.id, request)
-  }
-
-  def isSubscribedToApi(applicationId: ApplicationId, apiIdentifier: ApiIdentifier)(implicit hc: HeaderCarrier): Future[Boolean] = {
-    subscriptionService.isSubscribedToApi(applicationId,apiIdentifier)
-  }
 
   def addClientSecret(application: Application, actor: CollaboratorActor)(implicit hc: HeaderCarrier): Future[(String, String)] = {
     connectorWrapper.forEnvironment(application.deployedTo).thirdPartyApplicationConnector.addClientSecrets(application.id, ClientSecretRequest(actor, LocalDateTime.now(clock)))

@@ -25,7 +25,6 @@ import org.mockito.{ArgumentMatchersSugar, MockitoSugar}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.service.ApplicationService
 
 import scala.concurrent.Future.{failed, successful}
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.apidefinitions.ApiIdentifier
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.TestApplications
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.CollaboratorTracker
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.LocalUserIdTracker
@@ -51,21 +50,6 @@ trait ApplicationServiceMock extends MockitoSugar with ArgumentMatchersSugar wit
 
   def fetchCredentialsReturns(application: Application, tokens: ApplicationToken): Unit =
     when(applicationServiceMock.fetchCredentials(eqTo(application))(*)).thenReturn(successful(tokens))
-
-  def givenSubscribeToApiSucceeds(app: Application, actor: CollaboratorActor, apiIdentifier: ApiIdentifier) =
-    when(applicationServiceMock.subscribeToApi(eqTo(app), eqTo(actor), eqTo(apiIdentifier))(*)).thenReturn(successful(ApplicationUpdateSuccessful))
-
-  def givenSubscribeToApiSucceeds() =
-    when(applicationServiceMock.subscribeToApi(*, *, *)(*)).thenReturn(successful(ApplicationUpdateSuccessful))
-
-  def givenUnsubscribeFromApiSucceeds(app: Application, actor: CollaboratorActor, apiIdentifier: ApiIdentifier) =
-    when(applicationServiceMock.unsubscribeFromApi(eqTo(app), eqTo(actor), eqTo(apiIdentifier))(*)).thenReturn(successful(ApplicationUpdateSuccessful))
-
-  def givenAppIsSubscribedToApi(appId: ApplicationId, apiIdentifier: ApiIdentifier) =
-    when(applicationServiceMock.isSubscribedToApi(eqTo(appId), eqTo(apiIdentifier))(*)).thenReturn(successful(true))
-
-  def givenAppIsNotSubscribedToApi(appId: ApplicationId, apiIdentifier: ApiIdentifier) =
-    when(applicationServiceMock.isSubscribedToApi(eqTo(appId), eqTo(apiIdentifier))(*)).thenReturn(successful(false))
 
   def givenApplicationNameIsValid() =
     when(applicationServiceMock.isApplicationNameValid(*, *, *[Option[ApplicationId]])(*)).thenReturn(successful(Valid))
