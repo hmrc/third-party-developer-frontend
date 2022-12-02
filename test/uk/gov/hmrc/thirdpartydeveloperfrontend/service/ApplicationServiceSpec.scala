@@ -16,26 +16,101 @@
 
 package uk.gov.hmrc.thirdpartydeveloperfrontend.service
 
-import java.time.{LocalDateTime, ZoneOffset}
+import java.time.{LocalDateTime, Period, ZoneOffset}
 import java.util.UUID.randomUUID
 import uk.gov.hmrc.thirdpartydeveloperfrontend.builder._
+import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.{AsyncHmrcSpec, FixedClock, LocalUserIdTracker}
+import uk.gov.hmrc.thirdpartydeveloperfrontend.config.ApplicationConfig
+import uk.gov.hmrc.thirdpartydeveloperfrontend.connectors._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.EditApplicationForm
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.connectors.{DeskproTicket, TicketCreated}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.{LoggedInState, UserId}
 import org.mockito.ArgumentCaptor
-import uk.gov.hmrc.http.ForbiddenException
+import uk.gov.hmrc.thirdpartydeveloperfrontend.service.SubscriptionFieldsService.SubscriptionFieldsConnector
+import uk.gov.hmrc.http.{ForbiddenException, HeaderCarrier}
 import uk.gov.hmrc.play.audit.http.connector.AuditResult.Success
 
+import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future.{failed, successful}
+import uk.gov.hmrc.thirdpartydeveloperfrontend.service.PushPullNotificationsService.PushPullNotificationsConnector
 import org.mockito.captor.ArgCaptor
 
 import scala.concurrent.Future
 
-class ApplicationServiceSpec extends ApplicationServiceCommonSetup with DeveloperSessionBuilder with DeveloperBuilder {
+class ApplicationServiceSpec extends AsyncHmrcSpec
+  with ApplicationBuilder
+  with LocalUserIdTracker
+  with DeveloperSessionBuilder
+  with DeveloperBuilder {
 
-  trait Setup extends CommonSetup
+  val grantLength = Period.ofDays(547)
+
+  trait Setup extends FixedClock {
+    implicit val hc: HeaderCarrier = HeaderCarrier()
+
+    private val mockAppConfig = mock[ApplicationConfig]
+
+    val mockProductionApplicationConnector: ThirdPartyApplicationProductionConnector =
+      mock[ThirdPartyApplicationProductionConnector]
+    val mockSandboxApplicationConnector: ThirdPartyApplicationSandboxConnector =
+      mock[ThirdPartyApplicationSandboxConnector]
+
+    val mockProductionSubscriptionFieldsConnector: SubscriptionFieldsConnector = mock[SubscriptionFieldsConnector]
+    val mockSandboxSubscriptionFieldsConnector: SubscriptionFieldsConnector = mock[SubscriptionFieldsConnector]
+    val mockPushPullNotificationsConnector: PushPullNotificationsConnector = mock[PushPullNotificationsConnector]
+
+    val mockDeveloperConnector: ThirdPartyDeveloperConnector = mock[ThirdPartyDeveloperConnector]
+
+    val mockAuditService: AuditService = mock[AuditService]
+
+    val connectorsWrapper = new ConnectorsWrapper(
+      mockSandboxApplicationConnector,
+      mockProductionApplicationConnector,
+      mockSandboxSubscriptionFieldsConnector,
+      mockProductionSubscriptionFieldsConnector,
+      mockPushPullNotificationsConnector,
+      mockPushPullNotificationsConnector,
+      mockAppConfig
+    )
+
+    val mockDeskproConnector: DeskproConnector = mock[DeskproConnector]
+    val mockApmConnector: ApmConnector = mock[ApmConnector]
+
+    val applicationService = new ApplicationService(
+      mockApmConnector,
+      connectorsWrapper,
+      mockDeskproConnector,
+      mockDeveloperConnector,
+      mockSandboxApplicationConnector,
+      mockProductionApplicationConnector,
+      mockAuditService,
+      clock
+    )
+
+    def theProductionConnectorthenReturnTheApplication(applicationId: ApplicationId, application: Application): Unit = {
+      when(mockProductionApplicationConnector.fetchApplicationById(applicationId))
+        .thenReturn(successful(Some(application)))
+      when(mockSandboxApplicationConnector.fetchApplicationById(applicationId)).thenReturn(successful(None))
+    }
+
+    def theSandboxConnectorthenReturnTheApplication(applicationId: ApplicationId, application: Application): Unit = {
+      when(mockProductionApplicationConnector.fetchApplicationById(applicationId)).thenReturn(successful(None))
+      when(mockSandboxApplicationConnector.fetchApplicationById(applicationId))
+        .thenReturn(successful(Some(application)))
+    }
+  }
+
+
+  val productionApplicationId = ApplicationId("Application ID")
+  val productionClientId = ClientId(s"client-id-${randomUUID().toString}")
+  val productionApplication: Application =
+    Application(productionApplicationId, productionClientId, "name", LocalDateTime.now(ZoneOffset.UTC), Some(LocalDateTime.now(ZoneOffset.UTC)), None, grantLength, Environment.PRODUCTION, Some("description"), Set())
+  val sandboxApplicationId = ApplicationId("Application ID")
+  val sandboxClientId = ClientId("Client ID")
+  val sandboxApplication: Application =
+    Application(sandboxApplicationId, sandboxClientId, "name", LocalDateTime.now(ZoneOffset.UTC), Some(LocalDateTime.now(ZoneOffset.UTC)), None, grantLength, Environment.SANDBOX, Some("description"))
 
   "Update" should {
     val applicationId = ApplicationId("applicationId")

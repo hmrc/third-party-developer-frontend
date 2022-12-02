@@ -16,7 +16,19 @@
 
 package uk.gov.hmrc.thirdpartydeveloperfrontend.service
 
+import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.{AsyncHmrcSpec, FixedClock, LocalUserIdTracker}
+import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.thirdpartydeveloperfrontend.builder._
+import uk.gov.hmrc.thirdpartydeveloperfrontend.connectors.ApmConnector
+
+import scala.concurrent.ExecutionContext.Implicits.global
+import uk.gov.hmrc.thirdpartydeveloperfrontend.connectors.ThirdPartyApplicationProductionConnector
+import uk.gov.hmrc.thirdpartydeveloperfrontend.connectors.ThirdPartyApplicationSandboxConnector
+import uk.gov.hmrc.thirdpartydeveloperfrontend.service.SubscriptionFieldsService.SubscriptionFieldsConnector
+import uk.gov.hmrc.thirdpartydeveloperfrontend.service.PushPullNotificationsService.PushPullNotificationsConnector
+import uk.gov.hmrc.thirdpartydeveloperfrontend.config.ApplicationConfig
+import uk.gov.hmrc.thirdpartydeveloperfrontend.connectors.DeskproConnector
+import uk.gov.hmrc.thirdpartydeveloperfrontend.connectors.ThirdPartyDeveloperConnector
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.ApplicationId
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.LoggedInState
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.connectors.DeskproTicket
@@ -33,9 +45,47 @@ import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.apidefinitions.ApiI
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.apidefinitions.ApiVersion
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.apidefinitions.ApiContext
 
-class ApplicationServiceUpliftSpec extends ApplicationServiceCommonSetup with DeveloperSessionBuilder with DeveloperBuilder {
+class ApplicationServiceUpliftSpec extends AsyncHmrcSpec with LocalUserIdTracker with  DeveloperSessionBuilder with DeveloperBuilder {
+  trait Setup extends FixedClock {
+    implicit val hc: HeaderCarrier = HeaderCarrier()
 
-  trait Setup extends CommonSetup
+    private val mockAppConfig = mock[ApplicationConfig]
+
+    val mockApmConnector: ApmConnector = mock[ApmConnector]
+
+    val mockProductionApplicationConnector: ThirdPartyApplicationProductionConnector = mock[ThirdPartyApplicationProductionConnector]
+    val mockSandboxApplicationConnector: ThirdPartyApplicationSandboxConnector = mock[ThirdPartyApplicationSandboxConnector]
+    val mockProductionSubscriptionFieldsConnector: SubscriptionFieldsConnector = mock[SubscriptionFieldsConnector]
+    val mockSandboxSubscriptionFieldsConnector: SubscriptionFieldsConnector = mock[SubscriptionFieldsConnector]
+    val mockPushPullNotificationsConnector: PushPullNotificationsConnector = mock[PushPullNotificationsConnector]
+
+    val mockDeskproConnector: DeskproConnector = mock[DeskproConnector]
+
+    val mockDeveloperConnector: ThirdPartyDeveloperConnector = mock[ThirdPartyDeveloperConnector]
+
+    val mockAuditService: AuditService = mock[AuditService]
+
+    val connectorsWrapper = new ConnectorsWrapper(
+      mockSandboxApplicationConnector,
+      mockProductionApplicationConnector,
+      mockSandboxSubscriptionFieldsConnector,
+      mockProductionSubscriptionFieldsConnector,
+      mockPushPullNotificationsConnector,
+      mockPushPullNotificationsConnector,
+      mockAppConfig
+    )
+
+    val applicationService = new ApplicationService(
+      mockApmConnector,
+      connectorsWrapper,
+      mockDeskproConnector,
+      mockDeveloperConnector,
+      mockSandboxApplicationConnector,
+      mockProductionApplicationConnector,
+      mockAuditService,
+      clock
+    )
+  }
 
   implicit class ApiIdentifierSyntax(val context: String) {
     def asIdentifier(version: String): ApiIdentifier = ApiIdentifier(ApiContext(context), ApiVersion(version))
