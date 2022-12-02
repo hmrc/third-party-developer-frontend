@@ -108,15 +108,15 @@ class ApplicationService @Inject() (
     subscriptionService.isSubscribedToApi(applicationId,apiIdentifier)
   }
 
-  def addClientSecret(application: Application, userId: UserId, actorEmailAddress: String)(implicit hc: HeaderCarrier): Future[(String, String)] = {
-    connectorWrapper.forEnvironment(application.deployedTo).thirdPartyApplicationConnector.addClientSecrets(application.id, ClientSecretRequest(userId, actorEmailAddress, LocalDateTime.now(clock)))
+  def addClientSecret(application: Application, actor: CollaboratorActor)(implicit hc: HeaderCarrier): Future[(String, String)] = {
+    connectorWrapper.forEnvironment(application.deployedTo).thirdPartyApplicationConnector.addClientSecrets(application.id, ClientSecretRequest(actor, LocalDateTime.now(clock)))
   }
 
-  def deleteClientSecret(application: Application, userId: UserId, clientSecretId: String, actorEmailAddress: String)(implicit hc: HeaderCarrier): Future[ApplicationUpdateSuccessful] =
+  def deleteClientSecret(application: Application, actor: CollaboratorActor, clientSecretId: String)(implicit hc: HeaderCarrier): Future[ApplicationUpdateSuccessful] =
     connectorWrapper
       .forEnvironment(application.deployedTo)
       .thirdPartyApplicationConnector
-      .deleteClientSecret(application.id, clientSecretId, actorEmailAddress)
+      .applicationUpdate(application.id, RemoveClientSecret(actor, clientSecretId, LocalDateTime.now(clock)))
 
   def updateCheckInformation(application: Application, checkInformation: CheckInformation)(implicit hc: HeaderCarrier): Future[ApplicationUpdateSuccessful] = {
     connectorWrapper.forEnvironment(application.deployedTo).thirdPartyApplicationConnector.updateApproval(application.id, checkInformation)

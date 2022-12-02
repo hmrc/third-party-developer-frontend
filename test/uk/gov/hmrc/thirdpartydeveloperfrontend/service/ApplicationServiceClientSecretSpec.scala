@@ -113,18 +113,17 @@ class ApplicationServiceClientSecretSpec extends AsyncHmrcSpec with Subscription
   "addClientSecret" should {
     val newClientSecretId = UUID.randomUUID().toString
     val newClientSecret = UUID.randomUUID().toString
-    val actorEmailAddress = "john.requestor@example.com"
-    val userId = idOf(actorEmailAddress)
+    val actor = CollaboratorActor("john.requestor@example.com")
     val timestamp = LocalDateTime.now(clock)
 
     "add a client secret for app in production environment" in new Setup {
 
       theProductionConnectorthenReturnTheApplication(productionApplicationId, productionApplication)
 
-      when(mockProductionApplicationConnector.addClientSecrets(productionApplicationId, ClientSecretRequest(userId, actorEmailAddress, timestamp)))
+      when(mockProductionApplicationConnector.addClientSecrets(productionApplicationId, ClientSecretRequest(actor, timestamp)))
         .thenReturn(successful((newClientSecretId, newClientSecret)))
 
-      private val updatedToken = await(applicationService.addClientSecret(productionApplication, userId, actorEmailAddress))
+      private val updatedToken = await(applicationService.addClientSecret(productionApplication, actor))
 
       updatedToken._1 shouldBe newClientSecretId
       updatedToken._2 shouldBe newClientSecret
@@ -134,31 +133,32 @@ class ApplicationServiceClientSecretSpec extends AsyncHmrcSpec with Subscription
 
       theProductionConnectorthenReturnTheApplication(productionApplicationId, productionApplication)
 
-      when(mockProductionApplicationConnector.addClientSecrets(productionApplicationId, ClientSecretRequest(userId, actorEmailAddress, timestamp)))
+      when(mockProductionApplicationConnector.addClientSecrets(productionApplicationId, ClientSecretRequest(actor, timestamp)))
         .thenReturn(failed(new ClientSecretLimitExceeded))
 
       intercept[ClientSecretLimitExceeded] {
-        await(applicationService.addClientSecret(productionApplication, userId, actorEmailAddress))
+        await(applicationService.addClientSecret(productionApplication, actor))
       }
     }
   }
 
   "deleteClientSecret" should {
     val applicationId = ApplicationId.random
-    val actorEmailAddress = "john.requestor@example.com"
-    val userId = idOf(actorEmailAddress)
+    val actor = CollaboratorActor("john.requestor@example.com")
     val secretToDelete = UUID.randomUUID().toString
+    val timestamp = LocalDateTime.now(clock)
 
     "delete a client secret" in new Setup {
 
       val application = productionApplication.copy(id = applicationId)
+      val removeClientSecretRequest = RemoveClientSecret(actor, secretToDelete, timestamp)
 
       theProductionConnectorthenReturnTheApplication(applicationId, application)
 
-      when(mockProductionApplicationConnector.deleteClientSecret(eqTo(applicationId), eqTo(secretToDelete), eqTo(actorEmailAddress))(*))
+      when(mockProductionApplicationConnector.applicationUpdate(eqTo(applicationId), eqTo(removeClientSecretRequest))(*))
         .thenReturn(successful(ApplicationUpdateSuccessful))
 
-      await(applicationService.deleteClientSecret(application, userId, secretToDelete, actorEmailAddress)) shouldBe ApplicationUpdateSuccessful
+      await(applicationService.deleteClientSecret(application, actor, secretToDelete)) shouldBe ApplicationUpdateSuccessful
     }
   }
 }

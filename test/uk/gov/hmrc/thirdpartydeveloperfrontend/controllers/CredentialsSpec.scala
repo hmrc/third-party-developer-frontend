@@ -140,6 +140,7 @@ class CredentialsSpec
     val sessionParams: Seq[(String, String)] = Seq("csrfToken" -> app.injector.instanceOf[TokenProvider].generateToken)
     val loggedOutRequest: FakeRequest[AnyContentAsEmpty.type] = FakeRequest().withSession(sessionParams: _*)
     val loggedInRequest: FakeRequest[AnyContentAsEmpty.type] = FakeRequest().withLoggedIn(underTest, implicitly)(sessionId).withSession(sessionParams: _*)
+    val actor = CollaboratorActor(loggedInDeveloper.email)
   }
 
   "The credentials page" should {
@@ -258,17 +259,17 @@ class CredentialsSpec
   "addClientSecret" should {
     "add the client secret" in new Setup {
       def createApplication() = createConfiguredApplication(applicationId, ADMINISTRATOR)
-      givenAddClientSecretReturns(application, loggedInDeveloper.developer.userId, loggedInDeveloper.email)
+      givenAddClientSecretReturns(application, actor)
 
       val result = underTest.addClientSecret(applicationId)(loggedInRequest)
 
       status(result) shouldBe OK
-      verify(underTest.applicationService).addClientSecret(eqTo(application), eqTo(loggedInDeveloper.developer.userId), eqTo(loggedInDeveloper.email))(*)
+      verify(underTest.applicationService).addClientSecret(eqTo(application), eqTo(actor))(*)
     }
 
     "display the error when the maximum limit of secret has been exceeded in a production app" in new Setup {
       def createApplication() = createConfiguredApplication(applicationId, ADMINISTRATOR, environment = Environment.PRODUCTION)
-      givenAddClientSecretFailsWith(application, loggedInDeveloper.developer.userId, loggedInDeveloper.email, new ClientSecretLimitExceeded)
+      givenAddClientSecretFailsWith(application, actor, new ClientSecretLimitExceeded)
 
       val result = underTest.addClientSecret(applicationId)(loggedInRequest)
 
@@ -277,7 +278,7 @@ class CredentialsSpec
 
     "display the error when the maximum limit of secret has been exceeded for sandbox app" in new Setup {
       def createApplication() = createConfiguredApplication(applicationId, ADMINISTRATOR, environment = Environment.SANDBOX)
-      givenAddClientSecretFailsWith(application, loggedInDeveloper.developer.userId, loggedInDeveloper.email, new ClientSecretLimitExceeded)
+      givenAddClientSecretFailsWith(application, actor, new ClientSecretLimitExceeded)
 
       val result = underTest.addClientSecret(applicationId)(loggedInRequest)
 
@@ -299,7 +300,7 @@ class CredentialsSpec
       val result = underTest.addClientSecret(applicationId)(loggedInRequest)
 
       status(result) shouldBe FORBIDDEN
-      verify(underTest.applicationService, never).addClientSecret(any[Application], any[UserId], any[String])(*)
+      verify(underTest.applicationService, never).addClientSecret(any[Application], any[CollaboratorActor])(*)
     }
 
     "display the error page when the application has not reached production state" in new Setup {
@@ -308,7 +309,7 @@ class CredentialsSpec
       val result = (underTest.addClientSecret(applicationId)(loggedInRequest))
 
       status(result) shouldBe BAD_REQUEST
-      verify(underTest.applicationService, never).addClientSecret(any[Application], any[UserId], any[String])(*)
+      verify(underTest.applicationService, never).addClientSecret(any[Application], any[CollaboratorActor])(*)
     }
 
     "return to the login page when the user is not logged in" in new Setup {
@@ -318,7 +319,7 @@ class CredentialsSpec
 
       status(result) shouldBe SEE_OTHER
       redirectLocation(result) shouldBe Some("/developer/login")
-      verify(underTest.applicationService, never).addClientSecret(any[Application], any[UserId], any[String])(*)
+      verify(underTest.applicationService, never).addClientSecret(any[Application], any[CollaboratorActor])(*)
     }
   }
 
@@ -362,7 +363,7 @@ class CredentialsSpec
     "delete the selected client secret" in new Setup {
       def createApplication() = createConfiguredApplication(applicationId, ADMINISTRATOR)
 
-      givenDeleteClientSecretSucceeds(application, clientSecretId, loggedInDeveloper.developer.userId, loggedInDeveloper.email)
+      givenDeleteClientSecretSucceeds(application, actor, clientSecretId)
 
       val result = underTest.deleteClientSecretAction(applicationId, clientSecretId)(loggedInRequest)
 
