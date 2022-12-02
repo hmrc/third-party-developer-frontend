@@ -100,13 +100,12 @@ class ClientSecretsSpec extends CommonViewSpec with WithCSRFAddToken with Collab
     }
 
     "show copy button when a new client secret has just been added" in new Setup {
-      val oneClientSecret = Seq(clientSecret1)
       val page = clientSecretsGeneratedView.render(application, application.id, clientSecret1.id, request, developer, messagesProvider, appConfig)
 
       page.contentType should include("text/html")
 
       val document: Document = Jsoup.parse(page.body)
-      elementExistsByText(document, "a", "Copy client secret") shouldBe true
+      elementContainsText(document, "a", "Copy client secret") shouldBe true
       elementContainsText(document, "p", "We only show you a new client secret once to help keep your data secure.\n   Copy the client secret immediately.") shouldBe true
     }
 
