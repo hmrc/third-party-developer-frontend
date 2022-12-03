@@ -105,8 +105,8 @@ class ClientSecretsSpec extends CommonViewSpec with WithCSRFAddToken with Collab
       page.contentType should include("text/html")
 
       val document: Document = Jsoup.parse(page.body)
-      elementContainsText(document, "a", "Copy client secret") shouldBe true
-      elementContainsText(document, "p", "We only show you a new client secret once to help keep your data secure.\n   Copy the client secret immediately.") shouldBe true
+      elementContainsText(document, "p", "Copy client secret") shouldBe true
+      elementExistsByText(document, "p", "We only show you a new client secret once to help keep your data secure. Copy the client secret immediately.") shouldBe true
     }
 
     "not show copy button when a new client secret has not just been added" in new Setup {
