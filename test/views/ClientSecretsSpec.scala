@@ -28,7 +28,7 @@ import play.api.test.FakeRequest
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.builder._
 import views.helper.CommonViewSpec
-import views.html.ClientSecretsView
+import views.html.{ClientSecretsGeneratedView, ClientSecretsView}
 
 import scala.collection.JavaConverters._
 
@@ -38,6 +38,7 @@ class ClientSecretsSpec extends CommonViewSpec with WithCSRFAddToken with Collab
 
   trait Setup {
     val clientSecretsView = app.injector.instanceOf[ClientSecretsView]
+    val clientSecretsGeneratedView = app.injector.instanceOf[ClientSecretsGeneratedView]
 
     def elementExistsByText(doc: Document, elementType: String, elementText: String): Boolean = {
       doc.select(elementType).asScala.exists(node => node.text.trim == elementText)
@@ -99,18 +100,13 @@ class ClientSecretsSpec extends CommonViewSpec with WithCSRFAddToken with Collab
     }
 
     "show copy button when a new client secret has just been added" in new Setup {
-      val oneClientSecret = Seq(clientSecret1)
-      val newClientSecretValue = UUID.randomUUID().toString
-      val flash = Flash(Map("newSecretId" -> clientSecret1.id, "newSecret" -> newClientSecretValue))
-
-      val page = clientSecretsView.render(application, oneClientSecret, request, developer, messagesProvider, appConfig, flash)
+      val page = clientSecretsGeneratedView.render(application, application.id, clientSecret1.id, request, developer, messagesProvider, appConfig)
 
       page.contentType should include("text/html")
 
       val document: Document = Jsoup.parse(page.body)
-      elementExistsByText(document, "a", "Copy") shouldBe true
-      elementContainsText(document, "div", "Copy the client secret immediately.") shouldBe true
-      elementContainsText(document, "div", "We only show you a new client secret once to help keep your data secure.") shouldBe true
+      elementContainsText(document, "p", "Copy client secret") shouldBe true
+      elementExistsByText(document, "p", "We only show you a new client secret once to help keep your data secure. Copy the client secret immediately.") shouldBe true
     }
 
     "not show copy button when a new client secret has not just been added" in new Setup {
@@ -123,7 +119,7 @@ class ClientSecretsSpec extends CommonViewSpec with WithCSRFAddToken with Collab
       val document: Document = Jsoup.parse(page.body)
       elementExistsByText(document, "a", "Copy") shouldBe false
       elementContainsText(document, "p", "Copy the client secret immediately.") shouldBe false
-      elementExistsByText(document, "p", "We only show you a new client secret once to help keep your data secure.") shouldBe true
+      elementExistsByText(document, "p", "Your application must have at least one client secret. If you need to, you can generate a new client secret and delete old ones.") shouldBe true
     }
 
     "show generate another client secret button and delete button when the app has more than one client secret" in new Setup {
@@ -134,7 +130,7 @@ class ClientSecretsSpec extends CommonViewSpec with WithCSRFAddToken with Collab
 
       val document: Document = Jsoup.parse(page.body)
       elementExistsByText(document, "button", "Generate another client secret") shouldBe true
-      elementExistsByText(document, "a", "Delete secret") shouldBe true
+      elementExistsByText(document, "a", "Delete") shouldBe true
     }
 
     "not show generate another client secret button when the app has reached the limit of 5 client secrets" in new Setup {
@@ -145,8 +141,8 @@ class ClientSecretsSpec extends CommonViewSpec with WithCSRFAddToken with Collab
 
       val document: Document = Jsoup.parse(page.body)
       elementExistsByText(document, "button", "Generate another client secret") shouldBe false
-      elementExistsByText(document, "p", "You cannot have more than 5 client secrets.") shouldBe true
-      elementExistsByText(document, "a", "Delete secret") shouldBe true
+      elementExistsByText(document, "p", "You have the maximum number of client secrets for your application. You need to delete a client secret before you can generate a new one.") shouldBe true
+      elementExistsByText(document, "a", "Delete") shouldBe true
     }
   }
 }
