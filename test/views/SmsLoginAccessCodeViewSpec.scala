@@ -24,10 +24,10 @@ import play.api.test.{FakeRequest, StubMessagesFactory}
 import play.twirl.api.Html
 import uk.gov.hmrc.apiplatform.modules.mfa.forms.MfaAccessCodeForm
 import uk.gov.hmrc.apiplatform.modules.mfa.models.{MfaId, MfaType}
+import uk.gov.hmrc.apiplatform.modules.mfa.views.html.sms.SmsLoginAccessCodeView
 import uk.gov.hmrc.thirdpartydeveloperfrontend.builder.{DeveloperBuilder, DeveloperSessionBuilder}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.{LocalUserIdTracker, WithCSRFAddToken}
 import views.helper.CommonViewSpec
-import views.html.SmsLoginAccessCodeView
 
 import java.util.UUID
 
@@ -48,6 +48,7 @@ class SmsLoginAccessCodeViewSpec extends CommonViewSpec
       document.getElementById("paragraph-1").text shouldBe "We have sent a 6 digit access code to 0123456789"
       document.getElementById("paragraph-2").text shouldBe "It may take a few minutes to arrive"
       document.getElementById("paragraph-3").text shouldBe "If you have a UK phone number your 6-digit code will arrive from the phone number 60 551."
+      document.getElementById("rememberMe-label").text shouldBe "Remember me for 7 days"
       document.getElementById("submit").text shouldBe "Continue"
     }
   }

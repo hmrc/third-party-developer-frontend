@@ -57,13 +57,14 @@ object MobileNumberForm {
   }
 }
 
-final case class SmsAccessCodeForm(accessCode: String, mobileNumber: String)
+final case class SmsAccessCodeForm(accessCode: String, mobileNumber: String, rememberMe: Boolean)
 
 object SmsAccessCodeForm {
   def form: Form[SmsAccessCodeForm] = Form(
     mapping(
       "accessCode" -> text.verifying(FormKeys.accessCodeInvalidKey, s => s.matches("^[0-9]{6}$")),
-      "mobileNumber" -> text
+      "mobileNumber" -> text,
+      "rememberMe" -> boolean
     )(SmsAccessCodeForm.apply)(SmsAccessCodeForm.unapply)
   )
 }

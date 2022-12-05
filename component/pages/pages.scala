@@ -17,8 +17,10 @@
 package pages
 
 import org.openqa.selenium.By
-import uk.gov.hmrc.apiplatform.modules.common.services.ApplicationLogger
 import steps.{Env, Form}
+import uk.gov.hmrc.apiplatform.modules.common.services.ApplicationLogger
+import uk.gov.hmrc.apiplatform.modules.mfa.models.MfaType
+import utils.MfaData
 
 trait FormPage extends WebPage with ApplicationLogger {
   val pageHeading: String
@@ -144,13 +146,17 @@ case object RecommendMfaSkipAcknowledgePage extends FormPage {
   override val url: String = s"${Env.host}/developer/login/2SV-not-set"
 }
 
-case object Login2svEnterAccessCodePage extends FormPage {
+
+case object AuthAppLoginAccessCodePage extends MfaData {
+  val page =  LoginAccessCodePage(authAppMfaId.value.toString, MfaType.AUTHENTICATOR_APP, "Enter your access code")
+}
+case class LoginAccessCodePage(mfaId: String,  mfaType: MfaType, headingVal: String) extends FormPage {
   def clickContinue() = {
     click on id("submit")
   }
 
-  override val pageHeading: String = "Enter your access code"
-  override val url: String = s"${Env.host}/developer/login-totp"
+  override val pageHeading: String = headingVal
+  override val url: String = s"${Env.host}/developer/login-mfa?mfaId=${mfaId}&mfaType=${mfaType.asText}"
 
   def enterAccessCode(accessCode: String, rememberMe: Boolean = false) = {
     val formData = Map("accessCode" -> accessCode, "rememberMe" -> s"$rememberMe")
@@ -159,24 +165,20 @@ case object Login2svEnterAccessCodePage extends FormPage {
   }
 }
 
+case object AuthAppSetupReminderPage extends FormPage {
+  override val pageHeading: String = "Get access codes by an authenticator app"
+  override val url: String = s"${Env.host}/developer/profile/security-preferences/auth-app/setup/reminder"
+}
+
 case object AuthAppStartPage extends FormPage {
   override val pageHeading: String = "You need an authenticator app on your device"
   override val url: String = s"${Env.host}/developer/profile/security-preferences/auth-app/start"
 }
 
-case object AuthAppAccessCodePage extends FormPage {
-  def clickContinue() = {
-    click on id("submit")
-  }
 
-  override val pageHeading: String = "Enter your access code"
-  override val url: String = s"${Env.host}/developer/profile/security-preferences/auth-app/access-code"
 
-  def enterAccessCode(accessCode: String) = {
-    val formData = Map("accessCode" -> accessCode)
-
-    Form.populate(formData)
-  }
+case object SmsLoginAccessCodePage extends MfaData {
+  val page = LoginAccessCodePage(smsMfaId.value.toString, MfaType.SMS, "Enter the access code")
 }
 
 case object SmsSetupReminderPage extends FormPage {
