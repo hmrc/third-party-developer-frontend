@@ -24,7 +24,7 @@
 
 @this(devMain: DevMainWithFormErrors)
 
-@(form: Form[MfaAccessCodeForm], mfaId: MfaId, mfaAction: MfaAction, mfaIdForRemoval: Option[MfaId])(implicit messages: Messages, request: play.api.mvc.Request[Any], loggedIn: DeveloperSession, appConfig: ApplicationConfig)
+@(form: Form[MfaAccessCodeForm], mfaId: MfaId, mfaAction: MfaAction, mfaIdForRemoval: Option[MfaId], userHasMultipleMfa: Boolean)(implicit messages: Messages, request: play.api.mvc.Request[Any], loggedIn: DeveloperSession, appConfig: ApplicationConfig)
 
 @devMain(
   form,
@@ -55,7 +55,9 @@
       />
     </div>
       <input id="rememberMe" name="rememberMe" type="hidden" value="false"/>
-
+      @if(userHasMultipleMfa){
+          <p class="govuk-body" id="try-another-option">Problems receiving this code? <a href="@routes.MfaController.selectMfaPage(None, mfaAction)">Try another option</a></p>
+      }
     <button id="submit" class="govuk-button" type="submit">Continue</button>
   }
 

@@ -44,21 +44,23 @@ class AuthAppAccessCodeViewSpec extends CommonViewSpec
     "render correctly when form is valid" in {
 
       val mainView = authAppAccessCodeView.apply(MfaAccessCodeForm.form, MfaId(UUID.randomUUID()),
-        MfaAction.CREATE, None)(stubMessages(), FakeRequest().withCSRFToken, loggedIn, appConfig)
+        MfaAction.CREATE, None, userHasMultipleMfa = false)(stubMessages(), FakeRequest().withCSRFToken, loggedIn, appConfig)
       val document = Jsoup.parse(mainView.body)
       document.getElementById("page-heading").text shouldBe "Enter your access code"
       document.getElementById("submit").text shouldBe "Continue"
       Option(document.getElementById("data-field-error-accessCode")) shouldBe None
+      Option(document.getElementById("try-another-option")) shouldBe None
     }
 
     "render correctly when form is invalid" in {
 
       val mainView = authAppAccessCodeView.apply(MfaAccessCodeForm.form.withError("accessCode" ,
-        "You have entered an incorrect access code"), MfaId(UUID.randomUUID()), MfaAction.CREATE, None)(stubMessages(), FakeRequest().withCSRFToken, loggedIn, appConfig)
+        "You have entered an incorrect access code"), MfaId(UUID.randomUUID()), MfaAction.CREATE, None, userHasMultipleMfa = false)(stubMessages(), FakeRequest().withCSRFToken, loggedIn, appConfig)
       val document = Jsoup.parse(mainView.body)
       document.getElementById("page-heading").text shouldBe "Enter your access code"
       document.getElementById("submit").text shouldBe "Continue"
       document.getElementById("data-field-error-accessCode").text() shouldBe "Error: You have entered an incorrect access code"
+      Option(document.getElementById("try-another-option")) shouldBe None
     }
   }
 }
