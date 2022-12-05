@@ -52,23 +52,21 @@ class SmsAccessCodeViewSpec extends CommonViewSpec
   "SmsAccessCodeView" should {
     "render correctly when form is valid" in new Setup {
       val mainView = smsAccessCodeView.apply(SmsAccessCodeForm.form, MfaId(UUID.randomUUID()),
-        MfaAction.CREATE, None, userHasMultipleMfa = false)(flash, stubMessages(), FakeRequest().withCSRFToken, loggedIn, appConfig)
+        MfaAction.CREATE, None)(flash, stubMessages(), FakeRequest().withCSRFToken, loggedIn, appConfig)
       val document = Jsoup.parse(mainView.body)
 
       verifyPageElements(document)
       Option(document.getElementById("data-field-error-accessCode")) shouldBe None
-      Option(document.getElementById("try-another-option")) shouldBe None
     }
 
     "render correctly when form is invalid" in new Setup {
       val mainView = smsAccessCodeView.apply(SmsAccessCodeForm.form.withError("accessCode",
         "You have entered an incorrect access code"),
-        MfaId(UUID.randomUUID()), MfaAction.CREATE, None, userHasMultipleMfa = false)(flash, stubMessages(), FakeRequest().withCSRFToken, loggedIn, appConfig)
+        MfaId(UUID.randomUUID()), MfaAction.CREATE, None)(flash, stubMessages(), FakeRequest().withCSRFToken, loggedIn, appConfig)
       val document = Jsoup.parse(mainView.body)
 
       verifyPageElements(document)
       document.getElementById("data-field-error-accessCode").text() shouldBe "Error: You have entered an incorrect access code"
-      Option(document.getElementById("try-another-option")) shouldBe None
     }
   }
 }

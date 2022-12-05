@@ -50,6 +50,7 @@ class AuthAppLoginAccessCodeViewSpec extends CommonViewSpec
       document.getElementById("help-page-link").text shouldBe "I cannot get an access code"
       document.getElementById("rememberMe-label").text shouldBe "Remember me for 7 days"
       document.getElementById("submit").text shouldBe "Continue"
+      Option(document.getElementById("try-another-option")) shouldBe None
     }
   }
 
@@ -57,7 +58,7 @@ class AuthAppLoginAccessCodeViewSpec extends CommonViewSpec
 
     "render correctly when form is valid" in new Setup {
       val mainView: Html = authAppLoginAccessCodeView.apply(MfaAccessCodeForm.form, MfaId(UUID.randomUUID()),
-        MfaType.AUTHENTICATOR_APP)(stubMessages(), FakeRequest().withCSRFToken, appConfig)
+        MfaType.AUTHENTICATOR_APP, userHasMultipleMfa = false)(stubMessages(), FakeRequest().withCSRFToken, appConfig)
 
       val document: Document = Jsoup.parse(mainView.body)
 
@@ -68,7 +69,7 @@ class AuthAppLoginAccessCodeViewSpec extends CommonViewSpec
     "render correctly when form is invalid" in new Setup {
       val mainView: Html = authAppLoginAccessCodeView.apply(MfaAccessCodeForm.form
         .withError("accessCode","You have entered an incorrect access code"),
-          MfaId(UUID.randomUUID()), MfaType.AUTHENTICATOR_APP)(stubMessages(), FakeRequest().withCSRFToken, appConfig)
+          MfaId(UUID.randomUUID()), MfaType.AUTHENTICATOR_APP, userHasMultipleMfa = false)(stubMessages(), FakeRequest().withCSRFToken, appConfig)
 
       val document: Document = Jsoup.parse(mainView.body)
 

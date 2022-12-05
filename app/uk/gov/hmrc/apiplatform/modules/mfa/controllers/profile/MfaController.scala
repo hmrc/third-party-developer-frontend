@@ -241,7 +241,7 @@ class MfaController @Inject() (
     atLeastPartLoggedInEnablingMfaAction { implicit request =>
       def logonAndComplete(): Result = {
         thirdPartyDeveloperConnector.updateSessionLoggedInState(request.sessionId, UpdateLoggedInStateRequest(LoggedInState.LOGGED_IN))
-        Redirect(routes.MfaController.smsSetupCompletedPage)
+        Redirect(routes.MfaController.smsSetupCompletedPage())
       }
 
       SmsAccessCodeForm.form.bindFromRequest.fold(
