@@ -168,8 +168,8 @@ class ApplicationService @Inject() (
 
     if (environment == Environment.SANDBOX && requesterRole == CollaboratorRole.ADMINISTRATOR && application.access.accessType == AccessType.STANDARD) {
 
-      val request = DeleteApplicationByCollaborator(instigator, reasons, LocalDateTime.now(clock))
-      applicationConnectorFor(application).applicationUpdate(application.id, request)
+      val deleteRequest = DeleteApplicationByCollaborator(instigator, reasons, LocalDateTime.now(clock))
+      applicationConnectorFor(application).applicationUpdate(application.id, deleteRequest)
 
     } else {
       Future.failed(new ForbiddenException("Only standard subordinate applications can be deleted by admins"))
@@ -304,7 +304,7 @@ object ApplicationService {
     def updateApproval(id: ApplicationId, approvalInformation: CheckInformation)(implicit hc: HeaderCarrier): Future[ApplicationUpdateSuccessful]
     def addClientSecrets(id: ApplicationId, clientSecretRequest: ClientSecretRequest)(implicit hc: HeaderCarrier): Future[(String, String)]
     def validateName(name: String, selfApplicationId: Option[ApplicationId])(implicit hc: HeaderCarrier): Future[ApplicationNameValidation]
-    def deleteApplication(applicationId: ApplicationId)(implicit hc: HeaderCarrier): Future[Unit]
+    def applicationUpdate(applicationId: ApplicationId, request: ApplicationUpdate)(implicit hc: HeaderCarrier): Future[ApplicationUpdateSuccessful]
     def unsubscribeFromApi(applicationId: ApplicationId, apiIdentifier: ApiIdentifier)(implicit hc: HeaderCarrier): Future[ApplicationUpdateSuccessful]
   }
 }
