@@ -158,15 +158,18 @@ class ApplicationService @Inject() (
     }
   }
 
-  def deleteSubordinateApplication(requester: DeveloperSession, application: Application)(implicit hc: HeaderCarrier): Future[Unit] = {
+  def deleteSubordinateApplication(requester: DeveloperSession, application: Application)(implicit hc: HeaderCarrier): Future[ApplicationUpdateSuccessful] = {
 
     val requesterEmail = requester.email
     val environment = application.deployedTo
     val requesterRole = roleForApplication(application, requesterEmail)
+    val reasons = "Subordinate application deleted by DevHub user"
+    val instigator = requester.developer.userId
 
     if (environment == Environment.SANDBOX && requesterRole == CollaboratorRole.ADMINISTRATOR && application.access.accessType == AccessType.STANDARD) {
 
-      applicationConnectorFor(application).deleteApplication(application.id)
+      val request = DeleteApplicationByCollaborator(instigator, reasons, LocalDateTime.now(clock))
+      applicationConnectorFor(application).applicationUpdate(application.id, request)
 
     } else {
       Future.failed(new ForbiddenException("Only standard subordinate applications can be deleted by admins"))
