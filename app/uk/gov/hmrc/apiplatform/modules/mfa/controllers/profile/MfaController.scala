@@ -146,17 +146,17 @@ class MfaController @Inject() (
   }
 
   def authAppAccessCodeAction(mfaId: MfaId, mfaAction: MfaAction, mfaIdForRemoval: Option[MfaId]): Action[AnyContent] =
-  atLeastPartLoggedInEnablingMfaAction { implicit request =>
-    def logonAndComplete(): Result = {
-      thirdPartyDeveloperConnector.updateSessionLoggedInState(request.sessionId, UpdateLoggedInStateRequest(LoggedInState.LOGGED_IN))
-      Redirect(routes.MfaController.nameChangePage(mfaId))
-    }
+    atLeastPartLoggedInEnablingMfaAction { implicit request =>
+      def logonAndComplete(): Result = {
+        thirdPartyDeveloperConnector.updateSessionLoggedInState(request.sessionId, UpdateLoggedInStateRequest(LoggedInState.LOGGED_IN))
+        Redirect(routes.MfaController.nameChangePage(mfaId))
+      }
 
-    def invalidCode(form: MfaAccessCodeForm): Result = {
-      val mfaAccessCodeForm = MfaAccessCodeForm
-        .form
-        .fill(form)
-        .withError(key = "accessCode", message = "You have entered an incorrect access code")
+      def invalidCode(form: MfaAccessCodeForm): Result = {
+        val mfaAccessCodeForm = MfaAccessCodeForm
+          .form
+          .fill(form)
+          .withError(key = "accessCode", message = "You have entered an incorrect access code")
 
       BadRequest(authAppAccessCodeView(mfaAccessCodeForm, mfaId, mfaAction, mfaIdForRemoval,
         hasMultipleMfaMethods(request.developerSession.developer))
@@ -183,13 +183,13 @@ class MfaController @Inject() (
 
   def nameChangeAction(mfaId: MfaId): Action[AnyContent] = atLeastPartLoggedInEnablingMfaAction { implicit request =>
     MfaNameChangeForm.form.bindFromRequest.fold(
-    form => Future.successful(BadRequest(nameChangeView(form, mfaId))),
-    form => {
-      thirdPartyDeveloperMfaConnector.changeName(request.userId, mfaId, form.name) map {
-        case true  => Redirect(routes.MfaController.authAppSetupCompletedPage())
-        case false => internalServerErrorTemplate("Failed to change MFA name")
+      form => Future.successful(BadRequest(nameChangeView(form, mfaId))),
+      form => {
+        thirdPartyDeveloperMfaConnector.changeName(request.userId, mfaId, form.name) map {
+          case true  => Redirect(routes.MfaController.authAppSetupCompletedPage())
+          case false => internalServerErrorTemplate("Failed to change MFA name")
+        }
       }
-    }
     )
   }
 

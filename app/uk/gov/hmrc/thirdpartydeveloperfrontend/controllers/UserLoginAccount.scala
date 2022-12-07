@@ -25,7 +25,6 @@ import uk.gov.hmrc.apiplatform.modules.mfa.models.MfaType.{AUTHENTICATOR_APP, SM
 import uk.gov.hmrc.apiplatform.modules.mfa.models._
 import uk.gov.hmrc.apiplatform.modules.mfa.utils.MfaDetailHelper
 import uk.gov.hmrc.apiplatform.modules.mfa.utils.MfaDetailHelper.{getMfaDetailById, getMfaDetailByType, hasVerifiedSmsAndAuthApp}
-import uk.gov.hmrc.apiplatform.modules.mfa.utils.MfaDetailHelper.getMfaDetailById
 import uk.gov.hmrc.apiplatform.modules.mfa.views.html.authapp.AuthAppLoginAccessCodeView
 import uk.gov.hmrc.apiplatform.modules.mfa.views.html.sms.SmsLoginAccessCodeView
 import uk.gov.hmrc.apiplatform.modules.mfa.views.html.{RequestMfaRemovalCompleteView, RequestMfaRemovalView}
@@ -298,7 +297,7 @@ class UserLoginAccount @Inject()(val auditService: AuditService,
     val email: String = request.session.get("emailAddress").get
 
     def handleMfaSetupReminder(session: Session) = {
-      val verifiedMfaDetailsOfOtherTypes = session.developer.mfaDetails.filter(_.verified).filterNot(_.mfaType==mfaType)
+      val verifiedMfaDetailsOfOtherTypes = session.developer.mfaDetails.filter(_.verified).filterNot(_.mfaType == mfaType)
 
       (verifiedMfaDetailsOfOtherTypes.isEmpty, mfaType) match {
           case (true, AUTHENTICATOR_APP) => successful(Redirect(uk.gov.hmrc.apiplatform.modules.mfa.controllers.profile.routes.MfaController.smsSetupReminderPage()))
@@ -374,9 +373,8 @@ class UserLoginAccount @Inject()(val auditService: AuditService,
         for {
           details   <- OptionT(thirdPartyDeveloperConnector.findUserId(email))
           developer <- OptionT(thirdPartyDeveloperConnector.fetchDeveloper(details.id))
-        } yield s"${developer.firstName } ${developer.lastName}"
-      )
-      .value
+        } yield s"${developer.firstName} ${developer.lastName}"
+      ).value
 
     for {
       oName <- findName
