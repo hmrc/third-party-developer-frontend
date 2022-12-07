@@ -154,9 +154,9 @@ class UserLoginAccount @Inject()(val auditService: AuditService,
     }
   }
 
-  private def handleAuthAppFlow(authAppDetail: AuthenticatorAppMfaDetailSummary, session: PlaySession)(implicit hc: HeaderCarrier) = {
+  private def handleAuthAppFlow(userId: UserId, authAppDetail: AuthenticatorAppMfaDetailSummary, session: PlaySession)(implicit hc: HeaderCarrier) = {
     successful(
-      Redirect(routes.UserLoginAccount.loginAccessCodePage(authAppDetail.id, AUTHENTICATOR_APP), SEE_OTHER).withSession(session)
+      Redirect(routes.UserLoginAccount.loginAccessCodePage(authAppDetail.id, AUTHENTICATOR_APP), SEE_OTHER).withSession(session + ("userId" -> userId.value.toString))
     )
   }
 
@@ -164,7 +164,8 @@ class UserLoginAccount @Inject()(val auditService: AuditService,
     thirdPartyDeveloperMfaConnector.sendSms(userId, smsMfaDetail.id).map {
       case true =>
         Redirect(routes.UserLoginAccount.loginAccessCodePage(smsMfaDetail.id, SMS), SEE_OTHER)
-          .withSession(session).flashing("mobileNumber" -> smsMfaDetail.mobileNumber)
+          .withSession(session + ("userId" -> userId.value.toString))
+          .flashing("mobileNumber" -> smsMfaDetail.mobileNumber)
 
       case false => InternalServerError("Failed to send SMS")
     }
@@ -180,7 +181,7 @@ class UserLoginAccount @Inject()(val auditService: AuditService,
 
     (MfaDetailHelper.getAuthAppMfaVerified(developer.mfaDetails), MfaDetailHelper.getSmsMfaVerified(developer.mfaDetails)) match {
       case (None, None) => successful(InternalServerError("Access code required but mfa not set up"))
-      case (Some(x: AuthenticatorAppMfaDetailSummary), None) => handleAuthAppFlow(x, session)
+      case (Some(x: AuthenticatorAppMfaDetailSummary), None) => handleAuthAppFlow(developer.userId, x, session)
       case (None, Some(x: SmsMfaDetailSummary)) => handleSmsFlow(developer.userId, x, session)
       case (Some(authAppMfa: AuthenticatorAppMfaDetailSummary), Some(smsMfa: SmsMfaDetailSummary)) =>
         handleMfaChoiceFlow(developer.userId, authAppMfa.id, smsMfa.id, session)
@@ -195,7 +196,7 @@ class UserLoginAccount @Inject()(val auditService: AuditService,
 
     def handleSelectedMfa(userId: UserId, mfaDetail: MfaDetail) = {
       mfaDetail match {
-        case x: AuthenticatorAppMfaDetailSummary => handleAuthAppFlow(x, request.session)
+        case x: AuthenticatorAppMfaDetailSummary => handleAuthAppFlow(userId, x, request.session)
         case x: SmsMfaDetailSummary => handleSmsFlow(userId, x, request.session)
       }
     }

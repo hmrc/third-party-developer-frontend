@@ -146,17 +146,17 @@ case object RecommendMfaSkipAcknowledgePage extends FormPage {
   override val url: String = s"${Env.host}/developer/login/2SV-not-set"
 }
 
-
 case object AuthAppLoginAccessCodePage extends MfaData {
   val page =  LoginAccessCodePage(authAppMfaId.value.toString, MfaType.AUTHENTICATOR_APP, "Enter your access code")
 }
+
 case class LoginAccessCodePage(mfaId: String,  mfaType: MfaType, headingVal: String) extends FormPage {
   def clickContinue() = {
     click on id("submit")
   }
 
   override val pageHeading: String = headingVal
-  override val url: String = s"${Env.host}/developer/login-mfa?mfaId=${mfaId}&mfaType=${mfaType.asText}"
+  override val url: String = s"${Env.host}/developer/login-mfa?mfaId=${mfaId}&mfaType=${mfaType.toString}"
 
   def enterAccessCode(accessCode: String, rememberMe: Boolean = false) = {
     val formData = Map("accessCode" -> accessCode, "rememberMe" -> s"$rememberMe")
