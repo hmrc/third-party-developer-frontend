@@ -78,7 +78,7 @@
             </td>
               <td class="govuk-table__cell center-table-text">
                 @if(allowDeletion) {
-                  <a class="govuk-link" href="@controllers.routes.Credentials.deleteClientSecret(app.id, secret.id)">
+                  <a class="govuk-link" id="delete-client-secret-@(i+1)" href="@controllers.routes.Credentials.deleteClientSecret(app.id, secret.id)">
                     Delete <span class="govuk-visually-hidden">client secret ending in @{secret.name.takeRight(4)}</span>
                   </a>
                 } else {
