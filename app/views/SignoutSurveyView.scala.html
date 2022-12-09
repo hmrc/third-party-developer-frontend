@@ -63,10 +63,10 @@
     <div class="govuk-form-group">
       <label class="govuk-fieldset__legend govuk-!-font-weight-bold" for="@improvementSuggestionsKey">
         <p class="govuk-body" id="@improvementSuggestionsKey-label">How could we improve the @(applicationConfig.title)?</p>
-        <span class="govuk-hint" id="@improvementSuggestionsKey-note">
-          Don’t include any sensitive information. For example, National Insurance or credit card numbers. HMRC cannot reply to questions posted here.
-        </span>
       </label>
+      <div id=" id="improvementSuggestions-note" class="govuk-hint">
+        Don’t include any sensitive information. For example, National Insurance or credit card numbers. HMRC cannot reply to questions posted here.
+      </div>
 
       <input type="hidden" class="govuk-visually-hidden" name="email" value='@loggedIn.email'>
 
