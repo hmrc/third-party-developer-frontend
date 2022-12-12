@@ -21,6 +21,7 @@ import uk.gov.hmrc.thirdpartydeveloperfrontend.builder._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.mocks.service.ApplicationServiceMock
 import uk.gov.hmrc.thirdpartydeveloperfrontend.mocks.service.ApplicationActionServiceMock
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.ApplicationUpdateSuccessful
 import uk.gov.hmrc.thirdpartydeveloperfrontend.connectors.ThirdPartyApplicationProductionConnector
 import org.mockito.MockitoSugar
 import org.mockito.ArgumentMatchersSugar
@@ -45,7 +46,7 @@ trait TPAProductionConnectorMockModule extends MockitoSugar with ArgumentMatcher
 
     object DeleteApplication {
       def willReturn() =
-        when(aMock.deleteApplication(*[ApplicationId])(*)).thenReturn(successful(()))
+        when(aMock.applicationUpdate(*[ApplicationId], *)(*)).thenReturn(successful(ApplicationUpdateSuccessful))
     }
   }
 }
@@ -79,6 +80,7 @@ class CancelRequestControllerSpec
     with SubmissionServiceMockModule
     with HasSessionDeveloperFlow
     with HasSubscriptions
+    with FixedClock
     {
 
     val confirmCancelRequestForProductionCredentialsView = app.injector.instanceOf[ConfirmCancelRequestForProductionCredentialsView]
@@ -94,7 +96,8 @@ class CancelRequestControllerSpec
       SubmissionServiceMock.aMock,
       TPAProductionConnectorMock.aMock,
       confirmCancelRequestForProductionCredentialsView,
-      cancelledRequestForProductionCredentialsView
+      cancelledRequestForProductionCredentialsView,
+      clock
     )
 
     val loggedInRequest = FakeRequest().withLoggedIn(controller, implicitly)(sessionId).withSession(sessionParams: _*)

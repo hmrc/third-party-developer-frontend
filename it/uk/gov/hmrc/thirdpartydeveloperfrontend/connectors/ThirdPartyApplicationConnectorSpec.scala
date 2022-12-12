@@ -643,34 +643,5 @@ class ThirdPartyApplicationConnectorSpec extends BaseConnectorIntegrationSpec wi
     }
   }
 
-   "deleteApplication" should {
-    val url = s"/application/${applicationId.value}/delete"
-
-    "successfully delete the application" in new Setup {
-      stubFor(
-        post(urlEqualTo(url))
-        .willReturn(
-            aResponse()
-            .withStatus(NO_CONTENT)
-        )
-      )
-      val result = await(connector.deleteApplication(applicationId))
-      result shouldEqual (())
-    }
-
-    "throw exception response if error on back end" in new Setup {
-      stubFor(
-        post(urlEqualTo(url))
-        .willReturn(
-            aResponse()
-            .withStatus(INTERNAL_SERVER_ERROR)
-        )
-      )
-      intercept[Exception] {
-        await(connector.deleteApplication(applicationId))
-      }.getMessage shouldBe "error deleting application"
-    }
-  }
-
   private def aClientSecret() = ClientSecret(randomUUID.toString, randomUUID.toString, LocalDateTime.now())
 }

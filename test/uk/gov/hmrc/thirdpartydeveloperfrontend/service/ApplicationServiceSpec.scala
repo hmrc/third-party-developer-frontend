@@ -317,23 +317,21 @@ class ApplicationServiceSpec extends AsyncHmrcSpec
     val sandboxApp = sandboxApplication.copy(collaborators = teamMembers)
     val invalidROPCApp = sandboxApplication.copy(collaborators = teamMembers, access = ROPC())
     val productionApp = productionApplication.copy(collaborators = teamMembers)
-
+    val reasons = "Subordinate application deleted by DevHub user"
     val expectedMessage = "Only standard subordinate applications can be deleted by admins"
 
     "delete standard subordinate application when requested by an admin" in new Setup {
 
-      when(mockSandboxApplicationConnector.deleteApplication(*[ApplicationId])(*))
-        .thenReturn(successful(successful(())))
+      val request = DeleteApplicationByCollaborator(adminRequester.developer.userId, reasons, LocalDateTime.now(clock))
+      when(mockSandboxApplicationConnector.applicationUpdate(sandboxApp.id, request))
+        .thenReturn(Future.successful(ApplicationUpdateSuccessful))
 
       await(applicationService.deleteSubordinateApplication(adminRequester, sandboxApp))
 
-      verify(mockSandboxApplicationConnector).deleteApplication(eqTo(sandboxApplicationId))(eqTo(hc))
+      verify(mockSandboxApplicationConnector).applicationUpdate(eqTo(sandboxApplicationId), eqTo(request))(eqTo(hc))
     }
 
     "throw an exception when a subordinate application is requested to be deleted by a developer" in new Setup {
-
-      when(mockSandboxApplicationConnector.deleteApplication(*[ApplicationId])(*))
-        .thenReturn(failed(new ForbiddenException(expectedMessage)))
 
       private val exception = intercept[ForbiddenException](
         await(applicationService.deleteSubordinateApplication(developerRequester, sandboxApp))
@@ -343,9 +341,6 @@ class ApplicationServiceSpec extends AsyncHmrcSpec
 
     "throw an exception when a production application is requested to be deleted by a developer" in new Setup {
 
-      when(mockSandboxApplicationConnector.deleteApplication(*[ApplicationId])(*))
-        .thenReturn(failed(new ForbiddenException(expectedMessage)))
-
       private val exception = intercept[ForbiddenException](
         await(applicationService.deleteSubordinateApplication(developerRequester, productionApp))
       )
@@ -353,9 +348,6 @@ class ApplicationServiceSpec extends AsyncHmrcSpec
     }
 
     "throw an exception when a ROPC application is requested to be deleted by a developer" in new Setup {
-
-      when(mockSandboxApplicationConnector.deleteApplication(*[ApplicationId])(*))
-        .thenReturn(failed(new ForbiddenException(expectedMessage)))
 
       private val exception = intercept[ForbiddenException](
         await(applicationService.deleteSubordinateApplication(developerRequester, invalidROPCApp))
