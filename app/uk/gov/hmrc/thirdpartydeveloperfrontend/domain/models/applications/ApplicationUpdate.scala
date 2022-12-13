@@ -17,7 +17,7 @@
 package uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications
 
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.UserId
-import play.api.libs.json.Json
+import play.api.libs.json.{Format, Json}
 import uk.gov.hmrc.play.json.Union
 
 import java.time.LocalDateTime
@@ -26,12 +26,21 @@ trait ApplicationUpdate {
   def timestamp: LocalDateTime
 }
 
+case class CollaboratorActor(email: String)
+
+object CollaboratorActor {
+  implicit val collaboratorActorFormat = Format[CollaboratorActor](
+    Json.reads[CollaboratorActor],
+    collaboratorActor => Json.obj("email" -> collaboratorActor.email, "actorType" -> "COLLABORATOR")
+  )
+}
+
 case class ChangeProductionApplicationPrivacyPolicyLocation(instigator: UserId, timestamp: LocalDateTime, newLocation: PrivacyPolicyLocation) extends ApplicationUpdate
 case class ChangeProductionApplicationTermsAndConditionsLocation(instigator: UserId, timestamp: LocalDateTime, newLocation: TermsAndConditionsLocation) extends ApplicationUpdate
 case class ChangeResponsibleIndividualToSelf(instigator: UserId, timestamp: LocalDateTime, name: String, email: String) extends ApplicationUpdate
 case class ChangeResponsibleIndividualToOther(code: String, timestamp: LocalDateTime) extends ApplicationUpdate
 case class DeclineResponsibleIndividual(code: String, timestamp: LocalDateTime) extends ApplicationUpdate
-case class RemoveClientSecret(instigator: UserId, email: String, clientSecretId: String, timestamp: LocalDateTime) extends ApplicationUpdate
+case class RemoveClientSecret(actor: CollaboratorActor, clientSecretId: String, timestamp: LocalDateTime) extends ApplicationUpdate
 case class VerifyResponsibleIndividual(instigator: UserId, timestamp: LocalDateTime, requesterName: String, riName: String, riEmail: String) extends ApplicationUpdate
 case class DeleteApplicationByCollaborator(instigator: UserId, reasons: String, timestamp: LocalDateTime) extends ApplicationUpdate
 

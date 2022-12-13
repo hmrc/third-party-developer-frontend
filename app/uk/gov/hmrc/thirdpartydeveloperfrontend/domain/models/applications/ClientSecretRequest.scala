@@ -20,7 +20,7 @@ import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.UserId
 
 import java.time.LocalDateTime
 
-case class ClientSecretRequest(userId: UserId, actorEmailAddress: String, timestamp: LocalDateTime)
+case class ClientSecretRequest(actor: CollaboratorActor, timestamp: LocalDateTime)
 
 object ClientSecretRequest {
   import play.api.libs.json.Json

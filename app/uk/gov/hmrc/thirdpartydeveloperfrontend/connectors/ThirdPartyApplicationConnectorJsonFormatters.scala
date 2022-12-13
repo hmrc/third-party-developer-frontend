@@ -16,7 +16,7 @@
 
 package uk.gov.hmrc.thirdpartydeveloperfrontend.connectors
 
-import uk.gov.hmrc.thirdpartydeveloperfrontend.connectors.ThirdPartyApplicationConnectorDomain.{AddClientSecretResponse, DeleteClientSecretRequest, TPAClientSecret, UpdateIpAllowlistRequest}
+import uk.gov.hmrc.thirdpartydeveloperfrontend.connectors.ThirdPartyApplicationConnectorDomain.{AddClientSecretResponse, TPAClientSecret, UpdateIpAllowlistRequest}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.services.{ApiDefinitionsJsonFormatters, SubscriptionsJsonFormatters}
 import play.api.libs.json.{Format, Json}
 
@@ -26,6 +26,5 @@ private[connectors] object ThirdPartyApplicationConnectorJsonFormatters
 
   implicit val formatTPAClientSecret: Format[TPAClientSecret] = Json.format[TPAClientSecret]
   implicit val formatAddClientSecretResponse: Format[AddClientSecretResponse] = Json.format[AddClientSecretResponse]
-  implicit val formatDeleteClientSecretRequest: Format[DeleteClientSecretRequest] = Json.format[DeleteClientSecretRequest]
   implicit val formatUpdateIpAllowlistRequest: Format[UpdateIpAllowlistRequest] = Json.format[UpdateIpAllowlistRequest]
 }

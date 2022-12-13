@@ -21,7 +21,7 @@ import uk.gov.hmrc.thirdpartydeveloperfrontend.config.ErrorHandler
 import uk.gov.hmrc.thirdpartydeveloperfrontend.connectors.ThirdPartyDeveloperConnector
 import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.Credentials.serverTokenCutoffDate
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain._
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.ApplicationId
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.{ApplicationId, CollaboratorActor}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.Capabilities.{ChangeClientSecret, ViewCredentials}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.Permissions.{SandboxOrAdmin, TeamMembersOnly}
 
@@ -85,7 +85,7 @@ class Credentials @Inject() (
   def addClientSecret(applicationId: ApplicationId): Action[AnyContent] =
     canChangeClientSecrets(applicationId) { implicit request =>
       val developer = request.developerSession.developer
-      applicationService.addClientSecret(request.application, developer.userId, developer.email).map { response =>
+      applicationService.addClientSecret(request.application, CollaboratorActor(developer.email)).map { response =>
         Ok(clientSecretsGeneratedView(request.application, applicationId, response._2))
       } recover {
         case _: ApplicationNotFound       => NotFound(errorHandler.notFoundTemplate)
@@ -106,7 +106,7 @@ class Credentials @Inject() (
   def deleteClientSecretAction(applicationId: ApplicationId, clientSecretId: String): Action[AnyContent] =
     canChangeClientSecrets(applicationId) { implicit request =>
       applicationService
-        .deleteClientSecret(request.application, request.developerSession.developer.userId, clientSecretId, request.developerSession.email)
+        .deleteClientSecret(request.application, CollaboratorActor(request.developerSession.email), clientSecretId)
         .map(_ => Redirect(routes.Credentials.clientSecrets(applicationId)))
     }
 }
