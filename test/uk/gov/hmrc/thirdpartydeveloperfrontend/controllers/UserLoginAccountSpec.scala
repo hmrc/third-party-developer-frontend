@@ -22,7 +22,7 @@ import uk.gov.hmrc.thirdpartydeveloperfrontend.config.ErrorHandler
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.connectors.{TicketCreated, UserAuthenticationResponse}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.{DeveloperSession, LoggedInState, Session, UserId}
-import uk.gov.hmrc.thirdpartydeveloperfrontend.mocks.service.SessionServiceMock
+import uk.gov.hmrc.thirdpartydeveloperfrontend.mocks.service.{AppsByTeamMemberServiceMock, SessionServiceMock}
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
 import play.filters.csrf.CSRF.TokenProvider
@@ -40,17 +40,19 @@ import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.LocalUserIdTracker
 import _root_.uk.gov.hmrc.thirdpartydeveloperfrontend.mocks.connectors.{ThirdPartyDeveloperConnectorMockModule, ThirdPartyDeveloperMfaConnectorMockModule}
 import uk.gov.hmrc.apiplatform.modules.mfa.models.MfaType.{AUTHENTICATOR_APP, SMS}
 import uk.gov.hmrc.apiplatform.modules.mfa.models.{MfaId, MfaType}
-import uk.gov.hmrc.apiplatform.modules.mfa.service.MfaMandateService
 import uk.gov.hmrc.apiplatform.modules.mfa.views.html.authapp.AuthAppLoginAccessCodeView
 import uk.gov.hmrc.apiplatform.modules.mfa.views.html.sms.SmsLoginAccessCodeView
 import uk.gov.hmrc.apiplatform.modules.mfa.views.html.{RequestMfaRemovalCompleteView, RequestMfaRemovalView}
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.{ApplicationId, ApplicationWithSubscriptionIds, ClientId, Environment}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.security.CookieEncoding
+
+import java.time.{LocalDateTime, Period}
 
 
 class UserLoginAccountSpec extends BaseControllerSpec with WithCSRFAddToken
   with DeveloperBuilder with LocalUserIdTracker with CookieEncoding with MfaDetailBuilder {
 
-  trait Setup extends SessionServiceMock with ThirdPartyDeveloperConnectorMockModule with ThirdPartyDeveloperMfaConnectorMockModule {
+  trait Setup extends SessionServiceMock with ThirdPartyDeveloperConnectorMockModule with ThirdPartyDeveloperMfaConnectorMockModule with AppsByTeamMemberServiceMock {
 
     val developerWithAuthAppMfa = buildDeveloper(mfaDetails = List(verifiedAuthenticatorAppMfaDetail))
     val developerWithSmsMfa = buildDeveloper(mfaDetails = List(verifiedSmsMfaDetail))
@@ -67,15 +69,11 @@ class UserLoginAccountSpec extends BaseControllerSpec with WithCSRFAddToken
     val accessCode = "123456"
     val nonce = "ABC-123"
 
-    private val daysRemaining = 10
-
     val deviceSessionId = UUID.randomUUID()
     val deviceSessionCookie = createDeviceCookie(deviceSessionId.toString)
 
     val sessionId = "sessionId"
     val loggedInDeveloper = buildDeveloper()
-
-    val mfaMandateService: MfaMandateService = mock[MfaMandateService]
 
     val signInView = app.injector.instanceOf[SignInView]
     val accountLockedView = app.injector.instanceOf[AccountLockedView]
@@ -98,7 +96,7 @@ class UserLoginAccountSpec extends BaseControllerSpec with WithCSRFAddToken
       sessionServiceMock,
       TPDMFAMock.aMock,
       mcc,
-      mfaMandateService,
+      appsByTeamMemberServiceMock,
       cookieSigner,
       signInView,
       accountLockedView,
@@ -113,8 +111,25 @@ class UserLoginAccountSpec extends BaseControllerSpec with WithCSRFAddToken
 
     updateUserFlowSessionsReturnsSuccessfully(sessionId)
 
-    when(mfaMandateService.daysTillAdminMfaMandate).thenReturn(Some(daysRemaining))
-    when(mfaMandateService.showAdminMfaMandatedMessage(*[UserId])(*)).thenReturn(successful(true))
+    val applicationId = ApplicationId("myId")
+    val clientId = ClientId("myClientId")
+    val grantLength: Period = Period.ofDays(547)
+
+    val applicationsWhereUserIsAdminInProduction =
+      Seq(
+        ApplicationWithSubscriptionIds(
+          applicationId,
+          clientId,
+          "myName",
+          LocalDateTime.now,
+          Some(LocalDateTime.now),
+          None,
+          grantLength,
+          Environment.PRODUCTION,
+          collaborators = Set(user.email.asAdministratorCollaborator),
+          subscriptions = Set.empty
+        )
+      )
 
     val sessionParams: Seq[(String, String)] = Seq("csrfToken" -> app.injector.instanceOf[TokenProvider].generateToken)
 
@@ -123,9 +138,6 @@ class UserLoginAccountSpec extends BaseControllerSpec with WithCSRFAddToken
 
       when(underTest.sessionService.authenticate(eqTo(email), eqTo(password), eqTo(Some(deviceSessionId)))(*))
         .thenReturn(result.map(x => (x, user.developer.userId)))
-
-      when(underTest.mfaMandateService.showAdminMfaMandatedMessage(*[UserId])(*))
-        .thenReturn(resultShowAdminMfaMandateMessage)
     }
 
     def mockAuthenticateAccessCode(email: String, accessCode: String, nonce: String, mfaId: MfaId, result: Future[Session]): Unit =
@@ -248,7 +260,7 @@ class UserLoginAccountSpec extends BaseControllerSpec with WithCSRFAddToken
 
       status(result) shouldBe SEE_OTHER
 
-      redirectLocation(result) shouldBe Some(uk.gov.hmrc.apiplatform.modules.mfa.controllers.profile.routes.MfaController.authAppStart().url)
+      redirectLocation(result) shouldBe Some(routes.UserLoginAccount.get2svRecommendationPage().url)
     }
 
     "display the enter access code page after successfully logging in with MFA configured as AUTHENTICATOR_APP" in new SetupWithUserAuthRespRequiringMfaAccessCode {
@@ -774,13 +786,8 @@ class UserLoginAccountSpec extends BaseControllerSpec with WithCSRFAddToken
 
   "get2svRecommendationPage" when {
     "a user for whom MFA will be mandated in the future logs in" should {
-      "show the MFA recommendation with 10 days warning as daysTillAdminMfaMandate is configured" in new LoggedIn {
-        when(underTest.mfaMandateService.showAdminMfaMandatedMessage(*[UserId])(*))
-          .thenReturn(Future.successful(true))
-
-        private val daysInTheFuture = 10
-        when(underTest.mfaMandateService.daysTillAdminMfaMandate)
-          .thenReturn(Some(daysInTheFuture))
+      "show the MFA recommendation" in new LoggedIn {
+        fetchProductionSummariesByAdmin(user.developer.userId, applicationsWhereUserIsAdminInProduction)
 
         private val request = FakeRequest().withLoggedIn(underTest, implicitly)(sessionId)
 
@@ -789,20 +796,12 @@ class UserLoginAccountSpec extends BaseControllerSpec with WithCSRFAddToken
         status(result) shouldBe OK
 
         contentAsString(result) should include("Add 2-step verification")
-        contentAsString(result) should include("If you are the Administrator of an application you have 10 days until 2-step verification is mandatory")
-
-        verify(underTest.mfaMandateService).showAdminMfaMandatedMessage(eqTo(loggedInDeveloper.userId))(*)
       }
     }
 
     "a user for whom MFA is already mandated logs in" should {
-      "not show MFA recommendation with 10 days warning as daysTillAdminMfaMandate is not configured" in new LoggedIn {
-        when(underTest.mfaMandateService.showAdminMfaMandatedMessage(*[UserId])(*))
-          .thenReturn(Future.successful(true))
-
-        private val mfaMandateNotConfigured = None
-        when(underTest.mfaMandateService.daysTillAdminMfaMandate)
-          .thenReturn(mfaMandateNotConfigured)
+      "not show MFA recommendation" in new LoggedIn {
+        fetchProductionSummariesByAdmin(user.developer.userId, applicationsWhereUserIsAdminInProduction)
 
         private val request = FakeRequest().withLoggedIn(underTest, implicitly)(sessionId)
 
@@ -812,8 +811,6 @@ class UserLoginAccountSpec extends BaseControllerSpec with WithCSRFAddToken
 
         contentAsString(result) should include("Add 2-step verification")
         contentAsString(result) should include("Use 2-step verification to protect your Developer Hub account and application details from being compromised.")
-
-        verify(underTest.mfaMandateService).showAdminMfaMandatedMessage(eqTo(loggedInDeveloper.userId))(*)
       }
     }
   }

@@ -27,6 +27,10 @@ import uk.gov.hmrc.thirdpartydeveloperfrontend.service.AppsByTeamMemberService
 trait AppsByTeamMemberServiceMock extends MockitoSugar with ArgumentMatchersSugar {
   val appsByTeamMemberServiceMock = mock[AppsByTeamMemberService]
 
+  def fetchProductionSummariesByAdmin(userId: UserId, apps: Seq[ApplicationWithSubscriptionIds]) = {
+    when(appsByTeamMemberServiceMock.fetchProductionSummariesByAdmin(eqTo(userId))(*)).thenReturn(successful(apps))
+  }
+
   def fetchAppsByTeamMemberReturns(environment: Environment)(apps: Seq[ApplicationWithSubscriptionIds]) = 
     when(appsByTeamMemberServiceMock.fetchAppsByTeamMember(eqTo(environment))(*[UserId])(*))
     .thenReturn(successful(apps.map(_.copy(deployedTo = environment))))

@@ -18,10 +18,8 @@ package uk.gov.hmrc.thirdpartydeveloperfrontend.config
 
 import javax.inject.{Inject, Singleton}
 import play.api.{ConfigLoader, Configuration}
-import uk.gov.hmrc.apiplatform.modules.mfa.service.MfaMandateService
 import uk.gov.hmrc.play.bootstrap.config.ServicesConfig
 
-import java.time.LocalDate
 
 @Singleton
 class ApplicationConfig @Inject()(config: Configuration) extends ServicesConfig(config) {
@@ -68,13 +66,6 @@ class ApplicationConfig @Inject()(config: Configuration) extends ServicesConfig(
 
   lazy val reportProblemHost: String =
     config.underlying.getString("report-a-problem.base.url") + config.underlying.getString("urls.report-a-problem.problem")
-
-  lazy val dateOfAdminMfaMandate: Option[LocalDate] = {
-    config.getOptional[String]("dateOfAdminMfaMandate") match {
-      case Some(s) => MfaMandateService.parseLocalDate(s)
-      case None => None
-    }
-  }
 
   // API Subscription Fields
   val apiSubscriptionFieldsProductionUrl = apiSubscriptionFieldsUrl("api-subscription-fields-production")

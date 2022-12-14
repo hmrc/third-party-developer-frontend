@@ -84,7 +84,6 @@ class ManageResponsibleIndividualController @Inject()(
         val allowChanges = request.role.isAdministrator
         val adminEmails = request.application.collaborators.filter(_.role.isAdministrator).map(_.emailAddress).toList
         val userIsResponsibleIndividual = request.developerSession.email == responsibleIndividual.emailAddress.value
-
         val viewModel = ViewModel(environment, responsibleIndividual.fullName.value, responsibleIndividualHistoryItems, allowChanges, adminEmails, userIsResponsibleIndividual)
         successful(Ok(responsibleIndividualDetailsView(request.application, viewModel)))
       }

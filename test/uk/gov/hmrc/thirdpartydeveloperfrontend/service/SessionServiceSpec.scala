@@ -17,27 +17,29 @@
 package uk.gov.hmrc.thirdpartydeveloperfrontend.service
 
 import uk.gov.hmrc.apiplatform.modules.mfa.models.MfaId
-import uk.gov.hmrc.apiplatform.modules.mfa.service.MfaMandateService
 import uk.gov.hmrc.thirdpartydeveloperfrontend.builder.DeveloperBuilder
 import uk.gov.hmrc.thirdpartydeveloperfrontend.connectors.ThirdPartyDeveloperConnector
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.connectors.{LoginRequest, AccessCodeAuthenticationRequest, UserAuthenticationResponse}
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.connectors.{AccessCodeAuthenticationRequest, LoginRequest, UserAuthenticationResponse}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.{LoggedInState, Session, SessionInvalid}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.repositories.FlowRepository
 import uk.gov.hmrc.http.HeaderCarrier
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.{ApplicationId, ApplicationWithSubscriptionIds, ClientId, Environment}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.AsyncHmrcSpec
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future.{failed, successful}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.UserId
+import uk.gov.hmrc.thirdpartydeveloperfrontend.mocks.service.AppsByTeamMemberServiceMock
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.LocalUserIdTracker
 
+import java.time.{LocalDateTime, Period}
 import java.util.UUID
 
-class SessionServiceSpec extends AsyncHmrcSpec with DeveloperBuilder with LocalUserIdTracker {
+class SessionServiceSpec extends AsyncHmrcSpec with DeveloperBuilder with LocalUserIdTracker with  AppsByTeamMemberServiceMock {
   trait Setup {
     implicit val hc: HeaderCarrier = HeaderCarrier()
 
-    val underTest = new SessionService(mock[ThirdPartyDeveloperConnector], mock[MfaMandateService], mock[FlowRepository])
+    val underTest = new SessionService(mock[ThirdPartyDeveloperConnector], appsByTeamMemberServiceMock, mock[FlowRepository])
 
     val email = "thirdpartydeveloper@example.com"
     val userId = UserId.random
@@ -51,40 +53,74 @@ class SessionServiceSpec extends AsyncHmrcSpec with DeveloperBuilder with LocalU
     val deviceSessionId = UUID.randomUUID()
     val session = Session(sessionId, developer, LoggedInState.LOGGED_IN)
     val userAuthenticationResponse = UserAuthenticationResponse(accessCodeRequired = false, mfaEnabled = false, session = Some(session))
+
+    val applicationId = ApplicationId("myId")
+    val clientId = ClientId("myClientId")
+    val grantLength: Period = Period.ofDays(547)
+
+    val applicationsWhereUserIsDeveloperInProduction =
+      Seq(
+        ApplicationWithSubscriptionIds(
+          applicationId,
+          clientId,
+          "myName",
+          LocalDateTime.now,
+          Some(LocalDateTime.now),
+          None,
+          grantLength,
+          Environment.PRODUCTION,
+          collaborators = Set(email.asDeveloperCollaborator),
+          subscriptions = Set.empty
+        )
+      )
+    val applicationsWhereUserIsAdminInProduction =
+      Seq(
+        ApplicationWithSubscriptionIds(
+          applicationId,
+          clientId,
+          "myName",
+          LocalDateTime.now,
+          Some(LocalDateTime.now),
+          None,
+          grantLength,
+          Environment.PRODUCTION,
+          collaborators = Set(email.asAdministratorCollaborator),
+          subscriptions = Set.empty
+        )
+      )
+
   }
 
   "authenticate" should {
-    "return the user authentication response from the connector when the authentication succeeds and mfaMandatedForUser is false" in new Setup {
+    "return the user authentication response from the connector when the authentication succeeds and user is not admin on production application" in new Setup {
       when(underTest.thirdPartyDeveloperConnector.findUserId(eqTo(email))(*)).thenReturn(successful(Some(ThirdPartyDeveloperConnector.CoreUserDetails(email, userId))))
-      when(underTest.mfaMandateService.isMfaMandatedForUser(*[UserId])(*)).thenReturn(successful(false))
-      when(underTest.thirdPartyDeveloperConnector.authenticate(*)(*))
-        .thenReturn(successful(userAuthenticationResponse))
-
+      fetchProductionSummariesByAdmin(userId, applicationsWhereUserIsDeveloperInProduction)
+      when(underTest.thirdPartyDeveloperConnector.authenticate(*)(*)).thenReturn(successful(userAuthenticationResponse))
       await(underTest.authenticate(email, password, Some(deviceSessionId))) shouldBe ((userAuthenticationResponse, userId))
 
-      verify(underTest.mfaMandateService).isMfaMandatedForUser(userId)
-      verify(underTest.thirdPartyDeveloperConnector).authenticate(LoginRequest(email, password, mfaMandatedForUser = false, Some(deviceSessionId)))
+      verify(appsByTeamMemberServiceMock).fetchProductionSummariesByAdmin(eqTo(userId))(*)
+      verify(underTest.thirdPartyDeveloperConnector).authenticate(*)(*)
     }
 
-    "return the user authentication response from the connector when the authentication succeeds and mfaMandatedForUser is true" in new Setup {
+    "return the user authentication response from the connector when the authentication succeeds and user is an admin on production application" in new Setup {
       when(underTest.thirdPartyDeveloperConnector.findUserId(eqTo(email))(*)).thenReturn(successful(Some(ThirdPartyDeveloperConnector.CoreUserDetails(email, userId))))
-      when(underTest.mfaMandateService.isMfaMandatedForUser(*[UserId])(*)).thenReturn(successful(true))
+      fetchProductionSummariesByAdmin(userId, applicationsWhereUserIsAdminInProduction)
       when(underTest.thirdPartyDeveloperConnector.authenticate(*)(*))
         .thenReturn(successful(userAuthenticationResponse))
 
       await(underTest.authenticate(email, password, Some(deviceSessionId))) shouldBe ((userAuthenticationResponse, userId))
 
-      verify(underTest.mfaMandateService).isMfaMandatedForUser(userId)
-      verify(underTest.thirdPartyDeveloperConnector).authenticate(LoginRequest(email, password, mfaMandatedForUser = true, Some(deviceSessionId)))
+      verify(appsByTeamMemberServiceMock).fetchProductionSummariesByAdmin(eqTo(userId))(*)
+      verify(underTest.thirdPartyDeveloperConnector).authenticate(*)(*)
     }
 
     "propagate the exception when the connector fails" in new Setup {
       when(underTest.thirdPartyDeveloperConnector.findUserId(eqTo(email))(*)).thenReturn(successful(Some(ThirdPartyDeveloperConnector.CoreUserDetails(email, userId))))
-      when(underTest.mfaMandateService.isMfaMandatedForUser(*[UserId])(*)).thenReturn(successful(true))
+      fetchProductionSummariesByAdmin(userId, applicationsWhereUserIsDeveloperInProduction)
       when(underTest.thirdPartyDeveloperConnector.authenticate(*)(*))
         .thenThrow(new RuntimeException("this one"))
 
-      intercept[RuntimeException](await(underTest.authenticate(email, password, Some(deviceSessionId)))).getMessage() shouldBe "this one"
+      intercept[RuntimeException](await(underTest.authenticate(email, password, Some(deviceSessionId)))).getMessage shouldBe "this one"
     }
   }
 

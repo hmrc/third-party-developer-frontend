@@ -22,8 +22,7 @@ import uk.gov.hmrc.apiplatform.modules.common.services.ApplicationLogger
 import uk.gov.hmrc.apiplatform.modules.mfa.connectors.ThirdPartyDeveloperMfaConnector
 import uk.gov.hmrc.apiplatform.modules.mfa.forms.{MfaAccessCodeForm, SelectLoginMfaForm}
 import uk.gov.hmrc.apiplatform.modules.mfa.models.MfaType.{AUTHENTICATOR_APP, SMS}
-import uk.gov.hmrc.apiplatform.modules.mfa.models.{AuthenticatorAppMfaDetailSummary, DeviceSession, MfaDetail, MfaId, MfaType, SmsMfaDetailSummary}
-import uk.gov.hmrc.apiplatform.modules.mfa.service.MfaMandateService
+import uk.gov.hmrc.apiplatform.modules.mfa.models._
 import uk.gov.hmrc.apiplatform.modules.mfa.utils.MfaDetailHelper
 import uk.gov.hmrc.apiplatform.modules.mfa.utils.MfaDetailHelper.getMfaDetailById
 import uk.gov.hmrc.apiplatform.modules.mfa.views.html.authapp.AuthAppLoginAccessCodeView
@@ -35,7 +34,6 @@ import uk.gov.hmrc.thirdpartydeveloperfrontend.config.{ApplicationConfig, ErrorH
 import uk.gov.hmrc.thirdpartydeveloperfrontend.connectors.ThirdPartyDeveloperConnector
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.connectors.UserAuthenticationResponse
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.controllers.MfaMandateDetails
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.{Developer, DeveloperSession, Session, UserId}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.service.AuditAction._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.service._
@@ -67,7 +65,7 @@ class UserLoginAccount @Inject()(val auditService: AuditService,
                                  val sessionService: SessionService,
                                  val thirdPartyDeveloperMfaConnector: ThirdPartyDeveloperMfaConnector,
                                  mcc: MessagesControllerComponents,
-                                 val mfaMandateService: MfaMandateService,
+                                 val appsByTeamMember: AppsByTeamMemberService,
                                  val cookieSigner : CookieSigner,
                                  signInView: SignInView,
                                  accountLockedView: AccountLockedView,
@@ -85,7 +83,6 @@ class UserLoginAccount @Inject()(val auditService: AuditService,
   import play.api.data._
 
   val loginForm: Form[LoginForm] = LoginForm.form
-  val changePasswordForm: Form[ChangePasswordForm] = ChangePasswordForm.form
 
   def login: Action[AnyContent] = loggedOutAction { implicit request =>
     successful(Ok(signInView("Sign in", loginForm)))
@@ -103,12 +100,11 @@ class UserLoginAccount @Inject()(val auditService: AuditService,
     successful(Ok(userDidNotAdd2SVView()))
   }
 
-  def get2svRecommendationPage(): Action[AnyContent] = loggedInAction {
+  def get2svRecommendationPage(): Action[AnyContent] = atLeastPartLoggedInEnablingMfaAction {
     implicit request => {
       for {
-        showAdminMfaMandateMessage <- mfaMandateService.showAdminMfaMandatedMessage(request.userId)
-        mfaMandateDetails = MfaMandateDetails(showAdminMfaMandateMessage, mfaMandateService.daysTillAdminMfaMandate.getOrElse(0))
-      }  yield (Ok(add2SVView(mfaMandateDetails)))
+        isAdminOnProductionApp <- appsByTeamMember.fetchProductionSummariesByAdmin(request.userId).map(_.nonEmpty)
+      }  yield (Ok(add2SVView(isAdminOnProductionApp)))
     }
   }
 
@@ -141,7 +137,7 @@ class UserLoginAccount @Inject()(val auditService: AuditService,
       case (Some(session), false) if session.loggedInState.isPartLoggedInEnablingMFA =>
         successful(
           withSessionCookie(
-            Redirect(uk.gov.hmrc.apiplatform.modules.mfa.controllers.profile.routes.MfaController.authAppStart().url).withSession(playSession),
+            Redirect(routes.UserLoginAccount.get2svRecommendationPage(), SEE_OTHER).withSession(playSession),
             session.sessionId
           )
         )
@@ -156,7 +152,7 @@ class UserLoginAccount @Inject()(val auditService: AuditService,
     }
   }
 
-  private def handleAuthAppFlow(authAppDetail: AuthenticatorAppMfaDetailSummary, session: PlaySession)(implicit hc: HeaderCarrier) = {
+  private def handleAuthAppFlow(authAppDetail: AuthenticatorAppMfaDetailSummary, session: PlaySession) = {
     successful(
       Redirect(routes.UserLoginAccount.loginAccessCodePage(authAppDetail.id, AUTHENTICATOR_APP), SEE_OTHER).withSession(session)
     )
