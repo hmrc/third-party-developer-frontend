@@ -25,13 +25,13 @@ class NewJourneyNotOnAppTeamProdStatusProductionEndpointScenarioSpec extends End
 
   override def getExpectedResponse(endpoint: Endpoint): Response = {
     endpoint match {
-      case Endpoint("GET",  "/developer/applications/add/:id") => BadRequest()
-      case Endpoint("GET",  "/developer/applications/add/production") => BadRequest()
-      case Endpoint("GET",  "/developer/applications/add/switch") => BadRequest()
-      case Endpoint("POST", "/developer/registration") => BadRequest()
-      case Endpoint("GET",  "/developer/registration") => Redirect(s"/developer/applications")
-      case Endpoint("GET",  "/developer/reset-password/error") => BadRequest()
-      case Endpoint(_, path) if path.contains(":id") || path.contains(":aid") || path.contains(":sid") => NotFound()
+      case Endpoint("GET",  "/developer/applications/add/:id", _) => BadRequest()
+      case Endpoint("GET",  "/developer/applications/add/production", _) => BadRequest()
+      case Endpoint("GET",  "/developer/applications/add/switch", _) => BadRequest()
+      case Endpoint("POST", "/developer/registration", _) => BadRequest()
+      case Endpoint("GET",  "/developer/registration", _) => Redirect(s"/developer/applications")
+      case Endpoint("GET",  "/developer/reset-password/error", _) => BadRequest()
+      case Endpoint(_, path, _) if path.contains(":id") || path.contains(":aid") || path.contains(":sid") => NotFound()
       case _ => getEndpointSuccessResponse(endpoint)
     }
   }
