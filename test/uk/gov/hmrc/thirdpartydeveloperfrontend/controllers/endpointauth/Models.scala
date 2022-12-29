@@ -44,12 +44,13 @@ case class RequestValues(endpoint: Endpoint,
 
     val queryString = queryParams.map(kv => s"${kv._1}=${kv._2}").mkString("&")
     if (queryString.nonEmpty) {
-      path += s"?${queryString}"
+      path += s"?$queryString"
     }
 
-    s"${endpoint.verb} $path" + (postBody.isEmpty match {
-      case true  => "\n\twith no body"
-      case false => s"\n\twith body ${Json.toJson(postBody)}"
+    s"${endpoint.verb} $path" + (postBody.nonEmpty match {
+      case true                             => s"\n\twith body ${Json.toJson(postBody)}"
+      case false if endpoint.verb == "POST" => "\n\twith no body"
+      case false                            => ""
     }) + s"\n\tcalling method ${endpoint.method.replaceAll("(\\S*\\.)*", "")}"
   }
 }
