@@ -20,7 +20,6 @@ import org.jsoup.Jsoup
 import uk.gov.hmrc.thirdpartydeveloperfrontend.builder.DeveloperBuilder
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.{DeveloperSession, LoggedInState, Session}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.views.{GenericFeedbackBanner, NoBackButton}
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.controllers.Crumb
 import play.twirl.api.{Html, HtmlFormat}
 import play.api.test.FakeRequest
 import views.helper.CommonViewSpec

@@ -16,7 +16,6 @@ import org.scalatestplus.play.guice.GuiceOneAppPerSuite
 import play.api.libs.json.{Format, OFormat}
 import play.api.test.{DefaultAwaitTimeout, FutureAwaits}
 import uk.gov.hmrc.mongo.play.json.Codecs
-import uk.gov.hmrc.thirdpartydeveloperfrontend.repositories.MongoFormatters._
 
 import java.time.LocalDateTime
 import scala.concurrent.ExecutionContext.Implicits.global

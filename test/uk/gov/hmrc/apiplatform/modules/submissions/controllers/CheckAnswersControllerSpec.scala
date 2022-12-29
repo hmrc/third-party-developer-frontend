@@ -36,7 +36,7 @@ import play.api.test.Helpers._
 import play.filters.csrf.CSRF
 import uk.gov.hmrc.apiplatform.modules.submissions.services.RequestProductionCredentials
 import uk.gov.hmrc.apiplatform.modules.submissions.views.html.ProductionCredentialsRequestReceivedView
-import uk.gov.hmrc.apiplatform.modules.submissions.domain.models.{ExtendedSubmission, NoAnswer, QuestionnaireProgress, SingleChoiceAnswer, Submission}
+import uk.gov.hmrc.apiplatform.modules.submissions.domain.models.{ExtendedSubmission, NoAnswer, QuestionnaireProgress, SingleChoiceAnswer}
 import uk.gov.hmrc.apiplatform.modules.submissions.domain.models.QuestionnaireState.Completed
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.AsIdsHelpers._
 import uk.gov.hmrc.apiplatform.modules.submissions.domain.models.QuestionnaireState.InProgress

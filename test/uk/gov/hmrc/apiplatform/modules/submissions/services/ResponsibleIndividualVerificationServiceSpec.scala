@@ -29,7 +29,7 @@ import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.connectors.TicketCr
 import uk.gov.hmrc.apiplatform.modules.submissions.connectors.ThirdPartyApplicationSubmissionsConnector
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.connectors.DeskproTicket
 import org.mockito.captor.ArgCaptor
-import uk.gov.hmrc.apiplatform.modules.submissions.domain.models.{ResponsibleIndividualToUVerification, ResponsibleIndividualUpdateVerification, ResponsibleIndividualVerificationId, ResponsibleIndividualVerificationWithDetails, Submission, ResponsibleIndividualVerificationState}
+import uk.gov.hmrc.apiplatform.modules.submissions.domain.models.{ResponsibleIndividualToUVerification, ResponsibleIndividualUpdateVerification, ResponsibleIndividualVerificationId, Submission, ResponsibleIndividualVerificationState}
 import java.time.{LocalDateTime, ZoneOffset}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.mocks.service.ApplicationServiceMock
 

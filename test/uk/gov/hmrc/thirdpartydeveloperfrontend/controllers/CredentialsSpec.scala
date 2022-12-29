@@ -41,7 +41,6 @@ import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.LocalUserIdTracker
 import uk.gov.hmrc.thirdpartydeveloperfrontend.builder._
 
 import java.time.{LocalDateTime, ZoneOffset}
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.UserId
 
 class CredentialsSpec
     extends BaseControllerSpec

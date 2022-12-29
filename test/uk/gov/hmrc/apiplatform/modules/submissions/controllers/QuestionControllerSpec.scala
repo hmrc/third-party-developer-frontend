@@ -18,7 +18,6 @@ package uk.gov.hmrc.apiplatform.modules.submissions.controllers
 
 import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.{BaseControllerSpec, SubscriptionTestHelperSugar}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.builder.{DeveloperBuilder, SampleApplication, SampleSession}
-import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.SubscriptionTestHelperSugar
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.{LocalUserIdTracker, WithCSRFAddToken}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.mocks.service.ApplicationServiceMock
 import uk.gov.hmrc.thirdpartydeveloperfrontend.mocks.service.ApplicationActionServiceMock
@@ -48,7 +47,6 @@ import java.time.ZoneOffset
 import java.time.LocalDateTime
 import uk.gov.hmrc.apiplatform.modules.submissions.domain.models.PossibleAnswer
 import uk.gov.hmrc.apiplatform.modules.submissions.domain.models.ErrorInfo
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.controllers.NoSubscriptionFieldsRefinerBehaviour
 
 class QuestionControllerSpec
   extends BaseControllerSpec
