@@ -49,7 +49,7 @@
 
       <p id="topics-hint" class="govuk-hint">Select all that apply.</p>
 
-      @helper.form(action = routes.EmailPreferencesController.flowSelectTopicsAction(), 'class -> "form", 'id -> "emailPreferencesTopicsForm") {
+      @helper.form(action = routes.EmailPreferencesController.flowSelectTopicsAction, 'class -> "form", 'id -> "emailPreferencesTopicsForm") {
         @helper.CSRF.formField
         <div class="govuk-form-group @if(form.errors("topic").nonEmpty){govuk-form-group--error}">
 

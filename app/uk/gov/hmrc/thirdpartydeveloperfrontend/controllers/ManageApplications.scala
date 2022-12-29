@@ -49,7 +49,7 @@ class ManageApplications @Inject() (
       upliftableApplicationIds    = upliftData.upliftableApplicationIds
       productionAppSummaries      <- appsByTeamMember.fetchProductionSummariesByTeamMember(request.userId)
     } yield (sandboxApplicationSummaries, productionAppSummaries) match {
-      case (Nil, Nil) => Redirect(uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.noapplications.routes.NoApplications.noApplicationsPage())
+      case (Nil, Nil) => Redirect(uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.noapplications.routes.NoApplications.noApplicationsPage)
       case _          => Ok(manageApplicationsView(
         ManageApplicationsViewModel(sandboxApplicationSummaries, productionAppSummaries, upliftableApplicationIds, upliftData.hasAppsThatCannotBeUplifted)
       ))

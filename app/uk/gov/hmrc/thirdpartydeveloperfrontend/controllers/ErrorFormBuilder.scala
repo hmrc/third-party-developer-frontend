@@ -27,7 +27,7 @@ object ErrorFormBuilder {
     //to test it
     def emailAddressAlreadyInUse = form.
       withError("submissionError", "true").
-      withError(emailaddressField, emailalreadyInUseKey, routes.UserLoginAccount.login()).
+      withError(emailaddressField, emailalreadyInUseKey, routes.UserLoginAccount.login).
       withGlobalError(emailaddressAlreadyInUseGlobalKey)
 
     def isEmailAddressAlreadyUse: Boolean =

@@ -65,7 +65,7 @@
 ) {
   @if(needToChoose) {
 
-    @helper.form(action = controllers.addapplication.routes.AddApplication.chooseApplicationToUpliftAction()) {
+    @helper.form(action = controllers.addapplication.routes.AddApplication.chooseApplicationToUpliftAction) {
       @helper.CSRF.formField
       <div class="govuk-form-group @if(form.errors("applicationId").nonEmpty) {govuk-form-group--error}">
         <fieldset class="govuk-fieldset">

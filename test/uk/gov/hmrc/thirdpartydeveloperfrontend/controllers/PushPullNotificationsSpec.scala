@@ -155,7 +155,7 @@ class PushPullNotificationsSpec
 
     def redirectsToLogin(result: Future[Result]) = {
       status(result) shouldBe SEE_OTHER
-      redirectLocation(result) shouldBe Some(routes.UserLoginAccount.login().url)
+      redirectLocation(result) shouldBe Some(routes.UserLoginAccount.login.url)
     }
 
     def showPushSecretsShouldRenderThePage(application: Application) = {

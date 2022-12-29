@@ -31,10 +31,10 @@ object Crumb {
     Crumb("View all applications",s"${routes.ManageApplications.manageApps}", Some("data-breadcrumb-manage-app"))
 
     val securityPreferences =
-      Crumb("Security preferences",s"${uk.gov.hmrc.apiplatform.modules.mfa.controllers.profile.routes.MfaController.securityPreferences()}", Some("data-breadcrumb-security-preferences"))
+      Crumb("Security preferences",s"${uk.gov.hmrc.apiplatform.modules.mfa.controllers.profile.routes.MfaController.securityPreferences}", Some("data-breadcrumb-security-preferences"))
 
   val signIn =
-    Crumb("Sign in",s"${routes.UserLoginAccount.login()}", Some("data-breadcrumb-sign-in"))
+    Crumb("Sign in",s"${routes.UserLoginAccount.login}", Some("data-breadcrumb-sign-in"))
 
   def application(application: Application) =
     Crumb(s"${application.name}", s"${routes.Details.details(application.id)}", Some("data-breadcrumb-app-name"))
@@ -42,9 +42,9 @@ object Crumb {
   def applicationMetadata(application: Application) =
     Crumb("Subscription configuration", s"${routes.ManageSubscriptions.listApiSubscriptions(application.id)}", Some("data-breadcrumb-app-metadata"))
 
-  def manageProfile = Crumb("Manage profile", s"${profile.routes.Profile.showProfile()}", Some("data-breadcrumb-manage-profile"))
+  def manageProfile = Crumb("Manage profile", s"${profile.routes.Profile.showProfile}", Some("data-breadcrumb-manage-profile"))
 
-  def emailPreferences = Crumb("Email preferences", s"${profile.routes.EmailPreferencesController.emailPreferencesSummaryPage()}", Some("data-breadcrumb-email-preferences"))
+  def emailPreferences = Crumb("Email preferences", s"${profile.routes.EmailPreferencesController.emailPreferencesSummaryPage}", Some("data-breadcrumb-email-preferences"))
 
   def ipAllowlist(application: Application) = Crumb("IP allow list", s"${routes.IpAllowListController.viewIpAllowlist(application.id)}", Some("data-breadcrumb-ip-allowlist"))
 }

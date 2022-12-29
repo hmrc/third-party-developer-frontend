@@ -107,7 +107,7 @@ class PasswordSpec extends BaseControllerSpec with WithCSRFAddToken {
       mockConnectorUnverifiedForValidateReset(developerCode)
       val result = addToken(underTest.validateReset(developerCode))(request)
       status(result) shouldBe SEE_OTHER
-      redirectLocation(result) should be(Some(routes.Password.resetPasswordError().url))
+      redirectLocation(result) should be(Some(routes.Password.resetPasswordError.url))
       await(result).newFlash.get.get("error").mkString shouldBe "UnverifiedAccount"
     }
 
@@ -115,7 +115,7 @@ class PasswordSpec extends BaseControllerSpec with WithCSRFAddToken {
       mockConnectorInvalidResetCodeForValidateReset(developerCode)
       val result = addToken(underTest.validateReset(developerCode))(request)
       status(result) shouldBe SEE_OTHER
-      redirectLocation(result) should be(Some(routes.Password.resetPasswordError().url))
+      redirectLocation(result) should be(Some(routes.Password.resetPasswordError.url))
       await(result).newFlash.get.get("error").mkString shouldBe "InvalidResetCode"
     }
 
@@ -190,7 +190,7 @@ class PasswordSpec extends BaseControllerSpec with WithCSRFAddToken {
     "redirect to an error page if no email is found to reset password" in new Setup {
       val result = addToken(underTest.resetPasswordChange())(request)
       status(result) shouldBe SEE_OTHER
-      redirectLocation(result) should be(Some(routes.Password.resetPasswordError().url))
+      redirectLocation(result) should be(Some(routes.Password.resetPasswordError.url))
     }
 
   }

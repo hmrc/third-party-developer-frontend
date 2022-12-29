@@ -168,7 +168,7 @@ class AddApplicationProductionSwitchSpec
       val result = underTest.addApplicationProductionSwitch()(loggedInRequest)
 
       status(result) shouldBe SEE_OTHER
-      redirectLocation(result).value shouldBe uk.gov.hmrc.apiplatform.modules.uplift.controllers.routes.UpliftJourneyController.confirmApiSubscriptionsAction(summaries.head.id).toString()
+      redirectLocation(result).value shouldBe uk.gov.hmrc.apiplatform.modules.uplift.controllers.routes.UpliftJourneyController.confirmApiSubscriptionsAction(summaries.head.id).toString
     }
     
     "return ok when all apps are upliftable" in new Setup {

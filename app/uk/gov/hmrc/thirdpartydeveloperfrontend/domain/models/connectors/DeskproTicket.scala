@@ -139,7 +139,7 @@ object DeskproTicket extends FieldTransformer {
       email = supportEnquiry.email,
       subject = s"$appTitle: Support Enquiry",
       message = message,
-      referrer = routes.Support.submitSupportEnquiry().url,
+      referrer = routes.Support.submitSupportEnquiry.url,
       userAgent = request.headers.get("User-Agent").getOrElse("n/a")
     )
   }
@@ -148,14 +148,14 @@ object DeskproTicket extends FieldTransformer {
     val message =
       s"""I '$email' want my Developer Hub account to be deleted"""
 
-    DeskproTicket(name, email, "Request for developer account to be deleted", message, profile.routes.Profile.deleteAccount().url)
+    DeskproTicket(name, email, "Request for developer account to be deleted", message, profile.routes.Profile.deleteAccount.url)
   }
 
   def removeDeveloper2SV(name: String, email: String): DeskproTicket = {
     val message =
       s"""I '$email' want my 2SV to be removed"""
 
-    DeskproTicket(name, email, "Request for 2SV to be removed", message, routes.UserLoginAccount.confirm2SVHelp().url)
+    DeskproTicket(name, email, "Request for 2SV to be removed", message, routes.UserLoginAccount.confirm2SVHelp.url)
   }
 
   def createForRequestChangeOfProductionApplicationName(requestorName: String, requestorEmail: String, previousApplicationName: String, newApplicationName: String, applicationId: ApplicationId): DeskproTicket = {

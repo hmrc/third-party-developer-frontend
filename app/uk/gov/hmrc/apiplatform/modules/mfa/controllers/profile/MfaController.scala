@@ -97,8 +97,8 @@ class MfaController @Inject() (
 
   private def setupSelectedMfa(mfaType: String) = {
     MfaType.withNameInsensitive(mfaType) match {
-      case SMS               => Future.successful(Redirect(routes.MfaController.setupSms()))
-      case AUTHENTICATOR_APP => Future.successful(Redirect(routes.MfaController.authAppStart()))
+      case SMS               => Future.successful(Redirect(routes.MfaController.setupSms))
+      case AUTHENTICATOR_APP => Future.successful(Redirect(routes.MfaController.authAppStart))
     }
   }
 
@@ -180,7 +180,7 @@ class MfaController @Inject() (
       form => Future.successful(BadRequest(nameChangeView(form, mfaId))),
       form => {
         thirdPartyDeveloperMfaConnector.changeName(request.userId, mfaId, form.name) map {
-          case true  => Redirect(routes.MfaController.authAppSetupCompletedPage())
+          case true  => Redirect(routes.MfaController.authAppSetupCompletedPage)
           case false => internalServerErrorTemplate("Failed to change MFA name")
         }
       }
@@ -235,7 +235,7 @@ class MfaController @Inject() (
     atLeastPartLoggedInEnablingMfaAction { implicit request =>
       def logonAndComplete(): Result = {
         thirdPartyDeveloperConnector.updateSessionLoggedInState(request.sessionId, UpdateLoggedInStateRequest(LoggedInState.LOGGED_IN))
-        Redirect(routes.MfaController.smsSetupCompletedPage())
+        Redirect(routes.MfaController.smsSetupCompletedPage)
       }
 
       SmsAccessCodeForm.form.bindFromRequest.fold(
@@ -290,7 +290,7 @@ class MfaController @Inject() (
     mfaIdForRemoval match {
       case Some(mfaId) =>
         mfaService.removeMfaById(userId, mfaIdToVerify, accessCode, mfaId) map {
-          case MfaResponse(true)  => Redirect(routes.MfaController.removeMfaCompletedPage())
+          case MfaResponse(true)  => Redirect(routes.MfaController.removeMfaCompletedPage)
           case MfaResponse(false) => internalServerErrorTemplate("Unable to verify access code")
         }
       case None => Future.successful(internalServerErrorTemplate("Unable to find Mfa to remove"))

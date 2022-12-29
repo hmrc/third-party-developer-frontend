@@ -132,7 +132,7 @@ class ManageTeamSpec
       val result = underTest.manageTeam(appId)(loggedOutRequest)
 
       status(result) shouldBe SEE_OTHER
-      redirectLocation(result) shouldBe Some(routes.UserLoginAccount.login().url)
+      redirectLocation(result) shouldBe Some(routes.UserLoginAccount.login.url)
     }
   }
 
@@ -156,7 +156,7 @@ class ManageTeamSpec
       val result = underTest.addTeamMember(appId)(loggedOutRequest)
 
       status(result) shouldBe SEE_OTHER
-      redirectLocation(result) shouldBe Some(routes.UserLoginAccount.login().url)
+      redirectLocation(result) shouldBe Some(routes.UserLoginAccount.login.url)
       verify(applicationServiceMock, never).addTeamMember(*, *, *)(*)
     }
   }
@@ -221,7 +221,7 @@ class ManageTeamSpec
       val result = underTest.addTeamMemberAction(appId, ManageTeamMembers)(loggedOutRequest.withCSRFToken.withFormUrlEncodedBody("email" -> email, "role" -> role.toString))
 
       status(result) shouldBe SEE_OTHER
-      redirectLocation(result) shouldBe Some(routes.UserLoginAccount.login().url)
+      redirectLocation(result) shouldBe Some(routes.UserLoginAccount.login.url)
       verify(applicationServiceMock, never).addTeamMember(*, *, *)(*)
     }
   }
@@ -262,7 +262,7 @@ class ManageTeamSpec
       val result = underTest.removeTeamMember(appId, teamMemberEmailHash)(loggedOutRequest.withCSRFToken.withFormUrlEncodedBody("email" -> teamMemberEmail))
 
       status(result) shouldBe SEE_OTHER
-      redirectLocation(result) shouldBe Some(routes.UserLoginAccount.login().url)
+      redirectLocation(result) shouldBe Some(routes.UserLoginAccount.login.url)
     }
 
     "reject invalid email address" in new Setup {
@@ -333,7 +333,7 @@ class ManageTeamSpec
           underTest.removeTeamMemberAction(appId)(loggedOutRequest.withCSRFToken.withFormUrlEncodedBody("email" -> teamMemberEmail, "confirm" -> "Yes"))
 
         status(result) shouldBe SEE_OTHER
-        redirectLocation(result) shouldBe Some(routes.UserLoginAccount.login().url)
+        redirectLocation(result) shouldBe Some(routes.UserLoginAccount.login.url)
         verify(applicationServiceMock, never).removeTeamMember(any[Application], *, *)(*)
       }
     }
