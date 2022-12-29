@@ -2,22 +2,16 @@ import com.typesafe.sbt.digest.Import._
 import com.typesafe.sbt.uglify.Import._
 import com.typesafe.sbt.web.Import._
 import net.ground5hark.sbt.concat.Import._
-import play.core.PlayVersion
-import play.sbt.PlayImport._
 import play.sbt.routes.RoutesKeys.routesGenerator
 import sbt.Keys._
-import sbt.Tests.{Group, SubProcess}
 import sbt.{Resolver, _}
 import uk.gov.hmrc.DefaultBuildSettings._
 import uk.gov.hmrc.SbtAutoBuildPlugin
 import uk.gov.hmrc.sbtdistributables.SbtDistributablesPlugin
 import uk.gov.hmrc.sbtdistributables.SbtDistributablesPlugin._
-import scala.util.Properties
 import bloop.integrations.sbt.BloopDefaults
 
-bloopAggregateSourceDependencies in Global := true
-
-
+Global / bloopAggregateSourceDependencies := true
 
 lazy val appName = "third-party-developer-frontend"
 
@@ -36,7 +30,6 @@ lazy val microservice = Project(appName, file("."))
       "unused=true",
       "dead_code=true"
     ),
-    // includeFilter in uglify := GlobFilter("apis-*.js"),
     uglify / includeFilter := GlobFilter("apis-*.js"),
     pipelineStages := Seq(digest),
     Assets / pipelineStages := Seq(
