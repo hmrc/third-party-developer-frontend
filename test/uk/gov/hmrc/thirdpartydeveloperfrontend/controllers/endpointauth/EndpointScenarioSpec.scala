@@ -41,6 +41,7 @@ import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.{UpdateP
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.emailpreferences.{APICategoryDisplayDetails, EmailPreferences}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.subscriptions.ApiSubscriptionFields.SaveSubscriptionFieldsSuccessResponse
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.subscriptions.Fields
+import uk.gov.hmrc.thirdpartydeveloperfrontend.helpers.ExcludeFromCoverage
 import uk.gov.hmrc.thirdpartydeveloperfrontend.repositories.FlowRepository
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.AsyncHmrcSpec
 
@@ -472,7 +473,7 @@ abstract class EndpointScenarioSpec extends AsyncHmrcSpec with GuiceOneAppPerSui
       .flatMap(populateRequestValues(_))
       .toSet foreach { requestValues: RequestValues => {
         val expectedResponse = getExpectedResponse(requestValues.endpoint)
-        s"return $expectedResponse for $requestValues" in {
+        s"return $expectedResponse for $requestValues" taggedAs ExcludeFromCoverage in {
           val result = callEndpoint(requestValues)
           withClue(s"Testing ${requestValues.endpoint}") {
             result shouldBe expectedResponse
