@@ -33,13 +33,13 @@
 
   <p class="govuk-body">We will remove 2-step verification so you can sign in to your account.</p>
   <p class="govuk-body">We'll email you within 2 working days.</p>
-  <p class="govuk-body">In the meantime, if you can get an access code you can still <a class="govuk-link" href="@routes.UserLoginAccount.login()">sign in</a> to your account.</p>
+  <p class="govuk-body">In the meantime, if you can get an access code you can still <a class="govuk-link" href="@routes.UserLoginAccount.login">sign in</a> to your account.</p>
 
-  @helper.form(action = routes.UserLoginAccount.confirm2SVHelp(), 'class -> "form") {
+  @helper.form(action = routes.UserLoginAccount.confirm2SVHelp, 'class -> "form") {
     @helper.CSRF.formField
     <div class="govuk-button-group">
       <button id="submit" class="govuk-button" type="submit">Continue</button>
-      <a id="cancel" class="govuk-button govuk-button--secondary" href="@routes.UserLoginAccount.login()">Cancel</a>
+      <a id="cancel" class="govuk-button govuk-button--secondary" href="@routes.UserLoginAccount.login">Cancel</a>
     </div>
   }
 }

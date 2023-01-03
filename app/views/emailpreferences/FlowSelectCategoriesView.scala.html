@@ -38,7 +38,7 @@
   back = BackButtonWithJavaScript,
   developerSession = Some(loggedIn)
 ) {
-  @helper.form(action = routes.EmailPreferencesController.flowSelectCategoriesAction(), 'class -> "form", 'id -> "emailPreferencesCategoriesForm") {
+  @helper.form(action = routes.EmailPreferencesController.flowSelectCategoriesAction, 'class -> "form", 'id -> "emailPreferencesCategoriesForm") {
     @helper.CSRF.formField
     <a name="taxRegime"></a>
     <div class="govuk-form-group @if(form.errors("taxRegime").nonEmpty){govuk-form-group--error}">
@@ -69,7 +69,7 @@
     <button id="selectCategories" class="govuk-button" type="submit">Continue</button>
   }
 
-  @helper.form(action = routes.EmailPreferencesController.flowSelectNoCategoriesAction(), 'class -> "form", 'id -> "emailPreferencesNoCategoriesForm") {
+  @helper.form(action = routes.EmailPreferencesController.flowSelectNoCategoriesAction, 'class -> "form", 'id -> "emailPreferencesNoCategoriesForm") {
     @helper.CSRF.formField
     <button id="noSelectCategories" class="govuk-link govuk-link--no-visited-state link-button govuk-!-font-size-19" type="submit" style="padding-left: 0">I'm not interested in any of these categories</button>
   }

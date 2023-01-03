@@ -19,7 +19,7 @@ package uk.gov.hmrc.thirdpartydeveloperfrontend.service
 import uk.gov.hmrc.apiplatform.modules.mfa.models.MfaId
 import uk.gov.hmrc.thirdpartydeveloperfrontend.builder.DeveloperBuilder
 import uk.gov.hmrc.thirdpartydeveloperfrontend.connectors.ThirdPartyDeveloperConnector
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.connectors.{AccessCodeAuthenticationRequest, LoginRequest, UserAuthenticationResponse}
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.connectors.{AccessCodeAuthenticationRequest, UserAuthenticationResponse}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.{LoggedInState, Session, SessionInvalid}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.repositories.FlowRepository
 import uk.gov.hmrc.http.HeaderCarrier

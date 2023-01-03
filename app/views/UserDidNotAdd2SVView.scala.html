@@ -34,5 +34,5 @@
   <p class="govuk-body">You didn't set up 2-step verification today.</p>
   <p class="govuk-body">We'll remind you next time you sign in.</p>
 
-  <a id="submit" class="govuk-button" href="@request.session.get("access_uri").getOrElse(routes.ManageApplications.manageApps())">Continue</a>
+  <a id="submit" class="govuk-button" href="@request.session.get("access_uri").getOrElse(routes.ManageApplications.manageApps)">Continue</a>
 }

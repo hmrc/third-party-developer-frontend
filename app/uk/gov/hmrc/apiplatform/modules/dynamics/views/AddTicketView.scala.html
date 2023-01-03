@@ -34,7 +34,7 @@
 
     <h1 id="page-heading" class="govuk-heading-l">MS Dynamics Add Ticket</h1>
   
-    @helper.form(action = routes.DynamicsController.addTicketAction()) {
+    @helper.form(action = routes.DynamicsController.addTicketAction) {
         @helper.CSRF.formField
       
         <div @if(form.errors("dynamics").nonEmpty){class="govuk-form-group--error"}>

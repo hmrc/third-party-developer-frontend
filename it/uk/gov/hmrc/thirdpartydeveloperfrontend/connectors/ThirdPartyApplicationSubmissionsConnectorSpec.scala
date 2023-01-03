@@ -10,7 +10,6 @@ import play.api.Mode
 import play.api.{Application => PlayApplication}
 import com.github.tomakehurst.wiremock.client.WireMock._
 import play.api.http.Status._
-import play.api.libs.json.{Format, Json}
 import uk.gov.hmrc.apiplatform.modules.submissions.connectors.ThirdPartyApplicationSubmissionsConnector
 import uk.gov.hmrc.apiplatform.modules.submissions.connectors.ThirdPartyApplicationSubmissionsConnector._
 import uk.gov.hmrc.http.HeaderCarrier

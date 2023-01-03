@@ -118,7 +118,7 @@ class DynamicsControllerSpec extends BaseControllerSpec with DeveloperSessionBui
         val result = underTest.addTicketAction()(addTicketRequest(customerId, title, description))
 
         status(result) shouldBe SEE_OTHER
-        redirectLocation(result) shouldBe Some(routes.DynamicsController.tickets().toString)
+        redirectLocation(result) shouldBe Some(routes.DynamicsController.tickets.toString)
       }
 
       "show the add ticket form with errors when ticket creation fails" in new Setup {

@@ -17,9 +17,8 @@
 package uk.gov.hmrc.apiplatform.modules.mfa.views
 
 import org.jsoup.Jsoup
-import org.jsoup.nodes.Document
 import play.api.test.FakeRequest
-import uk.gov.hmrc.apiplatform.modules.mfa.models.{AuthenticatorAppMfaDetailSummary, MfaDetail, MfaId, SmsMfaDetailSummary}
+import uk.gov.hmrc.apiplatform.modules.mfa.models.{AuthenticatorAppMfaDetailSummary, MfaId, SmsMfaDetailSummary}
 import uk.gov.hmrc.apiplatform.modules.mfa.views.html.SecurityPreferencesView
 import uk.gov.hmrc.thirdpartydeveloperfrontend.builder.DeveloperBuilder
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.{DeveloperSession, LoggedInState, Session}

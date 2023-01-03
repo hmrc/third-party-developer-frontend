@@ -8,22 +8,22 @@ object AppDependencies {
   lazy val cucumberVersion = "6.2.2"
   lazy val seleniumVersion = "4.2.0"
   lazy val enumeratumVersion = "1.5.12"
-  lazy val bootstrapVersion = "7.3.0"
-  lazy val mongoVersion = "0.70.0"
+  lazy val bootstrapVersion = "7.12.0"
+  lazy val mongoVersion = "0.74.0"
 
   val testScope = "test, it, component"
 
   lazy val compile = Seq(
     ws,
     "uk.gov.hmrc"                 %% "bootstrap-frontend-play-28"     % bootstrapVersion,
-    "uk.gov.hmrc"                 %% "play-frontend-hmrc"             % "3.24.0-play-28",
+    "uk.gov.hmrc"                 %% "play-frontend-hmrc"             % "5.3.0-play-28",
     "uk.gov.hmrc.mongo"           %% "hmrc-mongo-play-28"             % mongoVersion,
-    "uk.gov.hmrc"                 %% "url-builder"                    % "3.6.0-play-28",
-    "uk.gov.hmrc"                 %% "play-json-union-formatter"      % "1.15.0-play-28",
+    "uk.gov.hmrc"                 %% "url-builder"                    % "3.7.0-play-28",
+    "uk.gov.hmrc"                 %% "play-json-union-formatter"      % "1.17.0-play-28",
     "uk.gov.hmrc"                 %% "http-metrics"                   % "2.5.0-play-28",
     "uk.gov.hmrc"                 %% "json-encryption"                % "5.1.0-play-28",
-    "uk.gov.hmrc"                 %% "emailaddress"                   % "3.6.0",
-    "uk.gov.hmrc"                 %% "play-conditional-form-mapping"  % "1.11.0-play-28",
+    "uk.gov.hmrc"                 %% "emailaddress"                   % "3.7.0",
+    "uk.gov.hmrc"                 %% "play-conditional-form-mapping"  % "1.12.0-play-28",
     "commons-net"                 %  "commons-net"                    % "3.6",
     "com.beachape"                %% "enumeratum"                     % enumeratumVersion,
     "com.beachape"                %% "enumeratum-play"                % enumeratumVersion,

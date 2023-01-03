@@ -48,7 +48,7 @@ trait DevHubAuthorization extends FrontendHeaderCarrierProvider with CookieEncod
     new ActionRefiner[MessagesRequest, UserRequest] {
       def executionContext = ec
       def refine[A](msgRequest: MessagesRequest[A]): Future[Either[Result, UserRequest[A]]] = {
-        lazy val loginRedirect = Redirect(routes.UserLoginAccount.login())
+        lazy val loginRedirect = Redirect(routes.UserLoginAccount.login)
 
         implicit val request = msgRequest
 
@@ -110,7 +110,7 @@ trait ExtendedDevHubAuthorization extends DevHubAuthorization {
 
   def loginSucceeded(request: RequestHeader): Future[Result] = {
     logger.info(s"loginSucceeded - access_uri ${request.session.get("access_uri")}")
-    val uri = request.session.get("access_uri").getOrElse(routes.ManageApplications.manageApps().url)
+    val uri = request.session.get("access_uri").getOrElse(routes.ManageApplications.manageApps.url)
     Future.successful(Redirect(uri).withNewSession)
   }
 

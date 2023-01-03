@@ -61,8 +61,8 @@ class NoApplications @Inject()(
     NoApplicationsChoiceForm.form.bindFromRequest().fold(
       hasErrors => Future.successful(BadRequest(noApplicationsChoiceView(hasErrors))),
       formData => formData.choice.getOrElse("") match {
-        case "get-emails" => Future.successful(Redirect(uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.profile.routes.EmailPreferencesController.emailPreferencesSummaryPage()))
-        case "use-apis" => Future.successful(Redirect(routes.NoApplications.startUsingRestApisPage()))
+        case "get-emails" => Future.successful(Redirect(uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.profile.routes.EmailPreferencesController.emailPreferencesSummaryPage))
+        case "use-apis" => Future.successful(Redirect(routes.NoApplications.startUsingRestApisPage))
         case _ => Future.successful(InternalServerError(errorHandler.internalServerErrorTemplate))
       })
   }

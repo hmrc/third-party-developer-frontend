@@ -50,7 +50,7 @@ object LoginForm {
       .withError(
         FormKeys.emailaddressField,
         FormKeys.accountUnverifiedKey,
-        routes.Registration.resendVerification()
+        routes.Registration.resendVerification
       )
       .withGlobalError(FormKeys.accountUnverifiedGlobalKey)
   }
@@ -74,7 +74,7 @@ object PasswordResetForm {
       .withError(
         FormKeys.passwordField,
         FormKeys.accountUnverifiedKey,
-        routes.Registration.resendVerification()
+        routes.Registration.resendVerification
       )
       .withGlobalError(FormKeys.accountUnverifiedGlobalKey)
   }
@@ -143,7 +143,7 @@ object ForgotPasswordForm {
       .withError(
         FormKeys.emailaddressField,
         FormKeys.accountUnverifiedKey,
-        routes.Registration.resendVerification()
+        routes.Registration.resendVerification
       )
       .withGlobalError(FormKeys.accountUnverifiedGlobalKey)
   }
@@ -166,7 +166,7 @@ object ChangePasswordForm {
       .withError(
         FormKeys.passwordField,
         FormKeys.accountUnverifiedKey,
-        routes.Registration.resendVerification()
+        routes.Registration.resendVerification
       )
       .withGlobalError(FormKeys.accountUnverifiedGlobalKey)
   }

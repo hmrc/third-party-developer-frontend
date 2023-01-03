@@ -768,7 +768,7 @@ class DetailsSpec
 
     def redirectsToLogin(result: Future[Result]) = {
       status(result) shouldBe SEE_OTHER
-      redirectLocation(result) shouldBe Some(routes.UserLoginAccount.login().url)
+      redirectLocation(result) shouldBe Some(routes.UserLoginAccount.login.url)
     }
 
     def detailsShouldRenderThePage(application: Application, hasChangeButton: Boolean = true, hasTermsOfUseAgreement: Boolean = true) = {

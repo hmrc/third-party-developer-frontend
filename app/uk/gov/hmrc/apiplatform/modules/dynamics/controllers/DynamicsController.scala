@@ -58,7 +58,7 @@ class DynamicsController @Inject() (
       form => Future.successful(BadRequest(addTicketView(form))),
       form => {
         thirdPartyDeveloperDynamicsConnector.createTicket(form.customerId, form.title, form.description).map {
-          case Right(_)           => Redirect(uk.gov.hmrc.apiplatform.modules.dynamics.controllers.routes.DynamicsController.tickets())
+          case Right(_)           => Redirect(uk.gov.hmrc.apiplatform.modules.dynamics.controllers.routes.DynamicsController.tickets)
           case Left(errorMessage) =>
             val createIncidentForm = AddTicketForm
               .form

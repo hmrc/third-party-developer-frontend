@@ -36,7 +36,7 @@ import uk.gov.hmrc.http.{ForbiddenException, HeaderCarrier}
 import uk.gov.hmrc.play.audit.http.connector.AuditResult.Success
 
 import scala.concurrent.ExecutionContext.Implicits.global
-import scala.concurrent.Future.{failed, successful}
+import scala.concurrent.Future.successful
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.subscriptions.VersionSubscription
 import uk.gov.hmrc.thirdpartydeveloperfrontend.service.PushPullNotificationsService.PushPullNotificationsConnector
 import org.mockito.captor.ArgCaptor

@@ -1,6 +1,5 @@
 package uk.gov.hmrc.thirdpartydeveloperfrontend.connectors
 
-import com.github.tomakehurst.wiremock.client.WireMock._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.connectors._
 import org.scalatestplus.play.guice.GuiceOneAppPerSuite
 import play.api.http.Status._
@@ -19,10 +18,9 @@ import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.apidefinitions.ApiV
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.ApplicationUpdateSuccessful
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.ApplicationNotFound
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.connectors.ApiType.REST_API
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.services.{ApiDefinitionsJsonFormatters, CombinedApiJsonFormatters}
 import play.api.libs.json.Json
 import uk.gov.hmrc.thirdpartydeveloperfrontend.connectors.stubs.ApiPlatformMicroserviceStub
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.subscriptions.{ApiData, ApiSubscriptionFields, FieldName}
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.subscriptions.ApiData
 
 import java.time.{LocalDateTime, Period}
 

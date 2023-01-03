@@ -233,7 +233,7 @@ class UserLoginAccountSpec extends BaseControllerSpec with WithCSRFAddToken
 
       status(result) shouldBe SEE_OTHER
 
-      redirectLocation(result) shouldBe Some(routes.ManageApplications.manageApps().url)
+      redirectLocation(result) shouldBe Some(routes.ManageApplications.manageApps.url)
 
       verify(underTest.auditService, times(1)).audit(
         eqTo(LoginSucceeded), eqTo(Map("developerEmail" -> user.email, "developerFullName" -> user.displayedName)))(*)
@@ -260,7 +260,7 @@ class UserLoginAccountSpec extends BaseControllerSpec with WithCSRFAddToken
 
       status(result) shouldBe SEE_OTHER
 
-      redirectLocation(result) shouldBe Some(routes.UserLoginAccount.get2svRecommendationPage().url)
+      redirectLocation(result) shouldBe Some(routes.UserLoginAccount.get2svRecommendationPage.url)
     }
 
     "display the enter access code page after successfully logging in with MFA configured as AUTHENTICATOR_APP" in new SetupWithUserAuthRespRequiringMfaAccessCode {
@@ -578,7 +578,7 @@ class UserLoginAccountSpec extends BaseControllerSpec with WithCSRFAddToken
       private val result = underTest.authenticateAccessCode(authAppMfaId, AUTHENTICATOR_APP)(request)
 
       status(result) shouldBe SEE_OTHER
-      redirectLocation(result) shouldBe Some(uk.gov.hmrc.apiplatform.modules.mfa.controllers.profile.routes.MfaController.smsSetupReminderPage().url)
+      redirectLocation(result) shouldBe Some(uk.gov.hmrc.apiplatform.modules.mfa.controllers.profile.routes.MfaController.smsSetupReminderPage.url)
       verify(underTest.auditService, times(1)).audit(
         eqTo(LoginSucceeded), eqTo(Map("developerEmail" -> user.email, "developerFullName" -> user.displayedName)))(*)
     }
@@ -594,7 +594,7 @@ class UserLoginAccountSpec extends BaseControllerSpec with WithCSRFAddToken
       private val result = underTest.authenticateAccessCode(smsMfaId, SMS)(request)
 
       status(result) shouldBe SEE_OTHER
-      redirectLocation(result) shouldBe Some(uk.gov.hmrc.apiplatform.modules.mfa.controllers.profile.routes.MfaController.authAppSetupReminderPage().url)
+      redirectLocation(result) shouldBe Some(uk.gov.hmrc.apiplatform.modules.mfa.controllers.profile.routes.MfaController.authAppSetupReminderPage.url)
       verify(underTest.auditService, times(1)).audit(
         eqTo(LoginSucceeded), eqTo(Map("developerEmail" -> user.email, "developerFullName" -> user.displayedName)))(*)
     }
@@ -634,7 +634,7 @@ class UserLoginAccountSpec extends BaseControllerSpec with WithCSRFAddToken
       private val result = underTest.authenticateAccessCode(smsMfaId, SMS)(request)
 
       status(result) shouldBe SEE_OTHER
-      redirectLocation(result) shouldBe Some(routes.ManageApplications.manageApps().url)
+      redirectLocation(result) shouldBe Some(routes.ManageApplications.manageApps.url)
       verify(underTest.auditService, times(1)).audit(
         eqTo(LoginSucceeded), eqTo(Map("developerEmail" -> user.email, "developerFullName" -> user.displayedName)))(*)
     }
@@ -674,7 +674,7 @@ class UserLoginAccountSpec extends BaseControllerSpec with WithCSRFAddToken
       private val result = underTest.authenticateAccessCode(smsMfaId, SMS)(request)
 
       status(result) shouldBe SEE_OTHER
-      redirectLocation(result) shouldBe Some(routes.ManageApplications.manageApps().url)
+      redirectLocation(result) shouldBe Some(routes.ManageApplications.manageApps.url)
       verify(underTest.auditService, times(1)).audit(
         eqTo(LoginSucceeded), eqTo(Map("developerEmail" -> user.email, "developerFullName" -> user.displayedName)))(*)
     }
@@ -779,7 +779,7 @@ class UserLoginAccountSpec extends BaseControllerSpec with WithCSRFAddToken
         private val result = addToken(underTest.login())(loggedInRequest)
 
         status(result) shouldBe SEE_OTHER
-        redirectLocation(result) shouldBe Some(routes.ManageApplications.manageApps().url)
+        redirectLocation(result) shouldBe Some(routes.ManageApplications.manageApps.url)
       }
     }
   }

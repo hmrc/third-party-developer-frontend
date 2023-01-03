@@ -31,11 +31,11 @@
   <h1 class="govuk-heading-l" id="page-heading">Get access codes by text</h1>
     <p class="govuk-body" id="paragraph-1">Use your mobile or tablet to get access codes as an alternative to your<br>authenticator app.</p>
 
-    <a id="submit" class="govuk-button" href="@request.session.get("access_uri").getOrElse(routes.MfaController.setupSms())">
+    <a id="submit" class="govuk-button" href="@request.session.get("access_uri").getOrElse(routes.MfaController.setupSms)">
         Continue</a>
 
     <p class="govuk-body">
-        <a id="link" class="govuk-link" href="@request.session.get("access_uri").getOrElse(routes.MfaController.smsSetupSkippedPage())">
+        <a id="link" class="govuk-link" href="@request.session.get("access_uri").getOrElse(routes.MfaController.smsSetupSkippedPage)">
             I can't do this right now</a>
     </p>
 }

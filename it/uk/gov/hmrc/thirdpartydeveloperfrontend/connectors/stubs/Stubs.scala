@@ -22,16 +22,13 @@ import uk.gov.hmrc.thirdpartydeveloperfrontend.connectors.EncryptedJson
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.apidefinitions.{ApiContext, ApiIdentifier, ApiVersion}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.ApplicationNameValidationJson.ApplicationNameValidationResult
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.{Application, ApplicationId, ApplicationToken, ApplicationWithSubscriptionData, ClientId, Environment}
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.connectors.{CombinedApiCategory, PasswordResetRequest, UserAuthenticationResponse}
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.connectors.{PasswordResetRequest, UserAuthenticationResponse}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.{Developer, Registration, Session, UpdateProfileRequest, UserId}
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.services.ApiDefinitionsJsonFormatters._
 import play.api.http.Status._
 import play.api.libs.json.{Json, Writes}
 import uk.gov.hmrc.apiplatform.modules.common.services.ApplicationLogger
 import org.scalatest.matchers.should.Matchers
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.emailpreferences.APICategoryDisplayDetails
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.subscriptions.{AccessRequirements, ApiCategory, ApiData, ApiSubscriptionFields, DevhubAccessRequirement, DevhubAccessRequirements, FieldName}
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.services.CombinedApiJsonFormatters
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.services.ApiDefinitionsJsonFormatters._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.services.ApplicationsJsonFormatters._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.WireMockExtensions.withJsonRequestBodySyntax
