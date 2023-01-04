@@ -16,7 +16,9 @@
 
 package uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.endpointauth
 
-case class Endpoint(verb: String, pathTemplate: String)
+import play.api.libs.json.Json
+
+case class Endpoint(verb: String, pathTemplate: String, method: String)
 
 sealed trait Response
 case class Success() extends Response
@@ -29,21 +31,26 @@ case class NotFound() extends Response
 case class Error(errorMsg: String) extends Response
 case class Unexpected(status: Int) extends Response
 
-case class RequestValues(endpoint: Endpoint, pathValues: Map[String,String] = Map.empty, queryParams: Map[String,String] = Map.empty, postBody: Map[String,String] = Map.empty) {
-  override def toString() = {
+case class RequestValues(endpoint: Endpoint,
+                         pathValues: Map[String, String] = Map.empty,
+                         queryParams: Map[String, String] = Map.empty,
+                         postBody: Map[String, String] = Map.empty) {
+
+  override def toString = {
     var path = endpoint.pathTemplate
-    for((name,value) <- pathValues) {
-      path = path.replace(s":${name}", value)
+    for ((name, value) <- pathValues) {
+      path = path.replace(s":$name", value)
     }
 
     val queryString = queryParams.map(kv => s"${kv._1}=${kv._2}").mkString("&")
-    if (!queryString.isEmpty) {
-      path += s"?${queryString}"
+    if (queryString.nonEmpty) {
+      path += s"?$queryString"
     }
 
-    s"${endpoint.verb} $path" + (postBody.isEmpty match {
-      case true => ""
-      case false => s" with body ${postBody}"
-    })
+    s"${endpoint.verb} $path" + (postBody.nonEmpty match {
+      case true                             => s"\n\twith body ${Json.toJson(postBody)}"
+      case false if endpoint.verb == "POST" => "\n\twith no body"
+      case false                            => ""
+    }) + s"\n\tcalling method ${endpoint.method.replaceAll("(\\S*\\.)*", "")}"
   }
 }
