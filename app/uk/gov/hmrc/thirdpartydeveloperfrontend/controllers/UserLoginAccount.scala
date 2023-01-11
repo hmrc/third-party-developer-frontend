@@ -24,7 +24,7 @@ import uk.gov.hmrc.apiplatform.modules.mfa.forms.{MfaAccessCodeForm, SelectLogin
 import uk.gov.hmrc.apiplatform.modules.mfa.models.MfaType.{AUTHENTICATOR_APP, SMS}
 import uk.gov.hmrc.apiplatform.modules.mfa.models._
 import uk.gov.hmrc.apiplatform.modules.mfa.utils.MfaDetailHelper
-import uk.gov.hmrc.apiplatform.modules.mfa.utils.MfaDetailHelper.getMfaDetailById
+import uk.gov.hmrc.apiplatform.modules.mfa.utils.MfaDetailHelper.{getMfaDetailById, getMfaDetailByType, hasVerifiedSmsAndAuthApp}
 import uk.gov.hmrc.apiplatform.modules.mfa.views.html.authapp.AuthAppLoginAccessCodeView
 import uk.gov.hmrc.apiplatform.modules.mfa.views.html.sms.SmsLoginAccessCodeView
 import uk.gov.hmrc.apiplatform.modules.mfa.views.html.{RequestMfaRemovalCompleteView, RequestMfaRemovalView}
@@ -83,6 +83,7 @@ class UserLoginAccount @Inject()(val auditService: AuditService,
   import play.api.data._
 
   val loginForm: Form[LoginForm] = LoginForm.form
+  val changePasswordForm: Form[ChangePasswordForm] = ChangePasswordForm.form
 
   def login: Action[AnyContent] = loggedOutAction { implicit request =>
     successful(Ok(signInView("Sign in", loginForm)))
@@ -118,7 +119,7 @@ class UserLoginAccount @Inject()(val auditService: AuditService,
       case (Some(session), false) if session.loggedInState.isLoggedIn =>
         audit(LoginSucceeded, DeveloperSession.apply(session))
         // If "remember me" was ticked on a previous login, MFA will be enabled but the access code is not required
-        if(userAuthenticationResponse.mfaEnabled) {
+        if (userAuthenticationResponse.mfaEnabled) {
           successful(
             withSessionCookie(
               Redirect(routes.ManageApplications.manageApps, SEE_OTHER).withSession(playSession),
@@ -137,7 +138,7 @@ class UserLoginAccount @Inject()(val auditService: AuditService,
       case (Some(session), false) if session.loggedInState.isPartLoggedInEnablingMFA =>
         successful(
           withSessionCookie(
-            Redirect(routes.UserLoginAccount.get2svRecommendationPage, SEE_OTHER).withSession(playSession),
+            Redirect(uk.gov.hmrc.apiplatform.modules.mfa.controllers.profile.routes.MfaController.authAppStart.url).withSession(playSession),
             session.sessionId
           )
         )
@@ -152,9 +153,9 @@ class UserLoginAccount @Inject()(val auditService: AuditService,
     }
   }
 
-  private def handleAuthAppFlow(authAppDetail: AuthenticatorAppMfaDetailSummary, session: PlaySession) = {
+  private def handleAuthAppFlow(userId: UserId, authAppDetail: AuthenticatorAppMfaDetailSummary, session: PlaySession)(implicit hc: HeaderCarrier) = {
     successful(
-      Redirect(routes.UserLoginAccount.loginAccessCodePage(authAppDetail.id, AUTHENTICATOR_APP), SEE_OTHER).withSession(session)
+      Redirect(routes.UserLoginAccount.loginAccessCodePage(authAppDetail.id, AUTHENTICATOR_APP), SEE_OTHER).withSession(session + ("userId" -> userId.value.toString))
     )
   }
 
@@ -162,7 +163,8 @@ class UserLoginAccount @Inject()(val auditService: AuditService,
     thirdPartyDeveloperMfaConnector.sendSms(userId, smsMfaDetail.id).map {
       case true =>
         Redirect(routes.UserLoginAccount.loginAccessCodePage(smsMfaDetail.id, SMS), SEE_OTHER)
-          .withSession(session).flashing("mobileNumber" -> smsMfaDetail.mobileNumber)
+          .withSession(session + ("userId" -> userId.value.toString))
+          .flashing("mobileNumber" -> smsMfaDetail.mobileNumber)
 
       case false => InternalServerError("Failed to send SMS")
     }
@@ -170,7 +172,7 @@ class UserLoginAccount @Inject()(val auditService: AuditService,
 
   private def handleMfaChoiceFlow(userId: UserId, authAppMfaId: MfaId, smsMfaId: MfaId, session: PlaySession) = {
     successful(Redirect(routes.UserLoginAccount.selectLoginMfaPage(authAppMfaId, smsMfaId), SEE_OTHER)
-      .withSession(session + ("userId"-> userId.value.toString)))
+      .withSession(session + ("userId" -> userId.value.toString)))
   }
 
   private def handleMfaChoices(developer: Developer, playSession: PlaySession, emailAddress: String, nonce: String)(implicit hc: HeaderCarrier) = {
@@ -178,7 +180,7 @@ class UserLoginAccount @Inject()(val auditService: AuditService,
 
     (MfaDetailHelper.getAuthAppMfaVerified(developer.mfaDetails), MfaDetailHelper.getSmsMfaVerified(developer.mfaDetails)) match {
       case (None, None) => successful(InternalServerError("Access code required but mfa not set up"))
-      case (Some(x: AuthenticatorAppMfaDetailSummary), None) => handleAuthAppFlow(x, session)
+      case (Some(x: AuthenticatorAppMfaDetailSummary), None) => handleAuthAppFlow(developer.userId, x, session)
       case (None, Some(x: SmsMfaDetailSummary)) => handleSmsFlow(developer.userId, x, session)
       case (Some(authAppMfa: AuthenticatorAppMfaDetailSummary), Some(smsMfa: SmsMfaDetailSummary)) =>
         handleMfaChoiceFlow(developer.userId, authAppMfa.id, smsMfa.id, session)
@@ -193,7 +195,7 @@ class UserLoginAccount @Inject()(val auditService: AuditService,
 
     def handleSelectedMfa(userId: UserId, mfaDetail: MfaDetail) = {
       mfaDetail match {
-        case x: AuthenticatorAppMfaDetailSummary => handleAuthAppFlow(x, request.session)
+        case x: AuthenticatorAppMfaDetailSummary => handleAuthAppFlow(userId, x, request.session)
         case x: SmsMfaDetailSummary => handleSmsFlow(userId, x, request.session)
       }
     }
@@ -254,20 +256,48 @@ class UserLoginAccount @Inject()(val auditService: AuditService,
     )
   }
 
-  def loginAccessCodePage(mfaId: MfaId, mfaType: MfaType): Action[AnyContent] = Action.async { implicit request =>
-    successful(
-      mfaType match {
-        case AUTHENTICATOR_APP => Ok(authAppLoginAccessCodeView(MfaAccessCodeForm.form, mfaId, mfaType))
-        case SMS => Ok(smsLoginAccessCodeView(MfaAccessCodeForm.form, mfaId, mfaType))
+  def tryAnotherOption(): Action[AnyContent] = Action.async { implicit request =>
+    val userId = UserId(UUID.fromString(request.session.get("userId").get))
+
+    thirdPartyDeveloperConnector.fetchDeveloper(userId)
+      .flatMap {
+        case Some(developer: Developer) => {}
+         if(hasVerifiedSmsAndAuthApp(developer.mfaDetails)){
+           val authAppMfaId = getMfaDetailByType(MfaType.AUTHENTICATOR_APP, developer.mfaDetails)
+           val smsMfaId = getMfaDetailByType(MfaType.SMS, developer.mfaDetails)
+           successful(Ok(selectLoginMfaView(SelectLoginMfaForm.form, authAppMfaId.id, smsMfaId.id)))
+         } else{
+           logger.warn("Inconsistent state of user mfa")
+           successful(InternalServerError(errorHandler.internalServerErrorTemplate))
+         }
+
+        case None => successful(NotFound("User not found"))
       }
-    )
   }
+
+  def loginAccessCodePage(mfaId: MfaId, mfaType: MfaType): Action[AnyContent] = Action.async { implicit request =>
+    val userId = UserId(UUID.fromString(request.session.get("userId").get))
+
+    def handleMfaType(userHasMultipleMfa: Boolean) = {
+      mfaType match {
+        case AUTHENTICATOR_APP => Ok(authAppLoginAccessCodeView(MfaAccessCodeForm.form, mfaId, mfaType, userHasMultipleMfa))
+        case SMS => Ok(smsLoginAccessCodeView(MfaAccessCodeForm.form, mfaId, mfaType, userHasMultipleMfa))
+      }
+    }
+
+    thirdPartyDeveloperConnector.fetchDeveloper(userId).map {
+        case Some(developer: Developer) => handleMfaType(hasMultipleMfaMethods(developer))
+        case None                       => handleMfaType(false)
+      }
+  }
+
+  private def hasMultipleMfaMethods(developer: Developer): Boolean = hasVerifiedSmsAndAuthApp(developer.mfaDetails)
 
   def authenticateAccessCode(mfaId: MfaId, mfaType: MfaType): Action[AnyContent] = Action.async { implicit request =>
     val email: String = request.session.get("emailAddress").get
 
     def handleMfaSetupReminder(session: Session) = {
-      val verifiedMfaDetailsOfOtherTypes = session.developer.mfaDetails.filter(_.verified).filterNot(_.mfaType==mfaType)
+      val verifiedMfaDetailsOfOtherTypes = session.developer.mfaDetails.filter(_.verified).filterNot(_.mfaType == mfaType)
 
       (verifiedMfaDetailsOfOtherTypes.isEmpty, mfaType) match {
           case (true, AUTHENTICATOR_APP) => successful(Redirect(uk.gov.hmrc.apiplatform.modules.mfa.controllers.profile.routes.MfaController.smsSetupReminderPage))
@@ -287,35 +317,39 @@ class UserLoginAccount @Inject()(val auditService: AuditService,
     }
 
     def handleAuthentication(email: String, form: MfaAccessCodeForm, mfaType: MfaType) = {
-      (for{
+      (for {
         session   <- sessionService.authenticateAccessCode(email, form.accessCode, request.session.get("nonce").get, mfaId)
         _         <-  audit(LoginSucceeded, DeveloperSession.apply(session))
         result    <- handleRememberMe(form, session)
       } yield result)
-      .recover {
-        case _: InvalidCredentials =>
-          logger.warn("Login failed due to invalid access code")
-          audit(LoginFailedDueToInvalidAccessCode, Map("developerEmail" -> email))
-          handleAccessCodeError(form, mfaId, mfaType)
-      }
+        .recover {
+          case _: InvalidCredentials =>
+            logger.warn("Login failed due to invalid access code")
+            audit(LoginFailedDueToInvalidAccessCode, Map("developerEmail" -> email))
+            handleAccessCodeError(form, mfaId, mfaType, userHasMultipleMfa = false)
+        }
     }
 
-    def handleFormWithErrors(formWithErrors: Form[MfaAccessCodeForm], mfaId: MfaId, mfaType: MfaType) = mfaType match {
-          case AUTHENTICATOR_APP => BadRequest(authAppLoginAccessCodeView(formWithErrors, mfaId, mfaType))
-          case SMS => BadRequest(smsLoginAccessCodeView(formWithErrors, mfaId, mfaType))
-        }
+    def handleFormWithErrors(formWithErrors: Form[MfaAccessCodeForm], mfaId: MfaId, mfaType: MfaType, userHasMultipleMfa: Boolean) = mfaType match {
+      case AUTHENTICATOR_APP => BadRequest(authAppLoginAccessCodeView(formWithErrors, mfaId, mfaType, userHasMultipleMfa))
+      case SMS               => BadRequest(smsLoginAccessCodeView(formWithErrors, mfaId, mfaType, userHasMultipleMfa))
+    }
 
-    def handleAccessCodeError(form: MfaAccessCodeForm, mfaId: MfaId, mfaType: MfaType) = {
+    def handleAccessCodeError(form: MfaAccessCodeForm, mfaId: MfaId, mfaType: MfaType, userHasMultipleMfa: Boolean) = {
       mfaType match {
-        case AUTHENTICATOR_APP => Unauthorized(authAppLoginAccessCodeView(MfaAccessCodeForm.form.fill(form)
-          .withError("accessCode", "You have entered an incorrect access code"), mfaId, mfaType))
-        case SMS => Unauthorized(smsLoginAccessCodeView(MfaAccessCodeForm.form.fill(form)
-          .withError("accessCode", "You have entered an incorrect access code"), mfaId, mfaType))
+        case AUTHENTICATOR_APP => Unauthorized(authAppLoginAccessCodeView(
+            MfaAccessCodeForm.form.fill(form).withError("accessCode", "You have entered an incorrect access code"),
+            mfaId, mfaType, userHasMultipleMfa)
+        )
+        case SMS               => Unauthorized(smsLoginAccessCodeView(
+            MfaAccessCodeForm.form.fill(form).withError("accessCode", "You have entered an incorrect access code"),
+            mfaId, mfaType, userHasMultipleMfa)
+        )
       }
     }
 
     MfaAccessCodeForm.form.bindFromRequest.fold(
-      errors => successful(handleFormWithErrors(errors, mfaId, mfaType)),
+      errors => successful(handleFormWithErrors(errors, mfaId, mfaType, userHasMultipleMfa = false)),
       validForm => handleAuthentication(email, validForm, mfaType)
     )
   }
@@ -339,9 +373,8 @@ class UserLoginAccount @Inject()(val auditService: AuditService,
         for {
           details   <- OptionT(thirdPartyDeveloperConnector.findUserId(email))
           developer <- OptionT(thirdPartyDeveloperConnector.fetchDeveloper(details.id))
-        } yield s"${developer.firstName } ${developer.lastName}"
-      )
-      .value
+        } yield s"${developer.firstName} ${developer.lastName}"
+      ).value
 
     for {
       oName <- findName

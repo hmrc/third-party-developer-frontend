@@ -440,6 +440,7 @@ abstract class EndpointScenarioSpec extends AsyncHmrcSpec with GuiceOneAppPerSui
       case Endpoint("GET",  "/developer/profile/security-preferences/remove-mfa", _) => Redirect(s"/developer/profile/security-preferences/auth-app/access-code?mfaId=${authAppMfaId.value.toString}&mfaAction=REMOVE&mfaIdForRemoval=${authAppMfaId.value.toString}")
       case Endpoint("POST", "/developer/poc-dynamics/tickets/add", _) => Redirect("/developer/poc-dynamics/tickets")
       case Endpoint("POST", "/developer/login/select-mfa", _) => Redirect(s"/developer/login-mfa?mfaId=${authAppMfaId.value.toString}&mfaType=${MfaType.AUTHENTICATOR_APP.toString}")
+      case Endpoint("GET",  "/developer/login/select-mfa/try-another-option", _) => Unexpected(500)
       case _ => Success()
     }
   }

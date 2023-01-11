@@ -50,6 +50,7 @@ class SmsLoginAccessCodeViewSpec extends CommonViewSpec
       document.getElementById("paragraph-3").text shouldBe "If you have a UK phone number your 6-digit code will arrive from the phone number 60 551."
       document.getElementById("rememberMe-label").text shouldBe "Remember me for 7 days"
       document.getElementById("submit").text shouldBe "Continue"
+      Option(document.getElementById("try-another-option")) shouldBe None
     }
   }
 
@@ -57,7 +58,7 @@ class SmsLoginAccessCodeViewSpec extends CommonViewSpec
 
     "render correctly when form is valid" in new Setup {
       val mainView: Html = smsLoginAccessCodeView.apply(MfaAccessCodeForm.form,
-        MfaId(UUID.randomUUID()), MfaType.SMS)(flash, stubMessages(), FakeRequest().withCSRFToken, appConfig)
+        MfaId(UUID.randomUUID()), MfaType.SMS, userHasMultipleMfa = false)(flash, stubMessages(), FakeRequest().withCSRFToken, appConfig)
 
       val document: Document = Jsoup.parse(mainView.body)
 
@@ -68,7 +69,7 @@ class SmsLoginAccessCodeViewSpec extends CommonViewSpec
     "render correctly when form is invalid" in new Setup {
       val mainView: Html = smsLoginAccessCodeView.apply(MfaAccessCodeForm.form.withError("accessCode",
         "You have entered an incorrect access code"),
-        MfaId(UUID.randomUUID()), MfaType.SMS)(flash, stubMessages(), FakeRequest().withCSRFToken, appConfig)
+        MfaId(UUID.randomUUID()), MfaType.SMS, userHasMultipleMfa = false)(flash, stubMessages(), FakeRequest().withCSRFToken, appConfig)
 
       val document: Document = Jsoup.parse(mainView.body)
 

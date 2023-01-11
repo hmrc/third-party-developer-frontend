@@ -17,12 +17,13 @@
 @import include._
 @import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.views.BackButtonWithJavaScript
 @import uk.gov.hmrc.apiplatform.modules.mfa.models.MfaId
+@import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.routes
 @import uk.gov.hmrc.apiplatform.modules.mfa.forms.MfaAccessCodeForm
 @import uk.gov.hmrc.apiplatform.modules.mfa.models.MfaType
 
 @this(devMain: DevMainWithFormErrors)
 
-@(form: Form[MfaAccessCodeForm], mfaId: MfaId, mfaType: MfaType)(implicit flash: Flash, messages: Messages, request: play.api.mvc.Request[Any], appConfig: ApplicationConfig)
+@(form: Form[MfaAccessCodeForm], mfaId: MfaId, mfaType: MfaType, userHasMultipleMfa: Boolean)(implicit flash: Flash, messages: Messages, request: play.api.mvc.Request[Any], appConfig: ApplicationConfig)
 @devMain(
     form,
     title = "Enter the access code",
@@ -36,7 +37,7 @@
     <p class="govuk-body" id="paragraph-2">It may take a few minutes to arrive</p>
     <p class="govuk-body" id="paragraph-3">If you have a UK phone number your 6-digit code will arrive from the phone number 60 551.</p>
 
-    @helper.form(action = uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.routes.UserLoginAccount.authenticateAccessCode(mfaId, mfaType)){
+    @helper.form(action = routes.UserLoginAccount.authenticateAccessCode(mfaId, mfaType)){
         @helper.CSRF.formField
 
         <div class="govuk-form-group @if(form.errors("accessCode").nonEmpty) {govuk-form-group--error}">
@@ -64,6 +65,10 @@
             </div>
         </div>
         <br/>
+
+        @if(userHasMultipleMfa){
+            <p class="govuk-body" id="try-another-option">Problems receiving this code? <a href="@routes.UserLoginAccount.tryAnotherOption">Try another option</a></p>
+        }
         <button id="submit" class="govuk-button" type="submit">Continue</button>
     }
 }

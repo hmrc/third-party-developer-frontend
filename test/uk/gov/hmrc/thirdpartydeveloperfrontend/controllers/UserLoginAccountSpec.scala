@@ -131,7 +131,10 @@ class UserLoginAccountSpec extends BaseControllerSpec with WithCSRFAddToken
         )
       )
 
-    val sessionParams: Seq[(String, String)] = Seq("csrfToken" -> app.injector.instanceOf[TokenProvider].generateToken)
+    val sessionParams: Seq[(String, String)] = Seq(
+      "userId" -> user.developer.userId.value.toString,
+      "csrfToken" -> app.injector.instanceOf[TokenProvider].generateToken
+    )
 
     def mockAuthenticate(email: String, password: String, result: Future[UserAuthenticationResponse],
                          resultShowAdminMfaMandateMessage: Future[Boolean]): Unit = {
@@ -260,7 +263,7 @@ class UserLoginAccountSpec extends BaseControllerSpec with WithCSRFAddToken
 
       status(result) shouldBe SEE_OTHER
 
-      redirectLocation(result) shouldBe Some(routes.UserLoginAccount.get2svRecommendationPage.url)
+      redirectLocation(result) shouldBe Some(uk.gov.hmrc.apiplatform.modules.mfa.controllers.profile.routes.MfaController.authAppStart.url)
     }
 
     "display the enter access code page after successfully logging in with MFA configured as AUTHENTICATOR_APP" in new SetupWithUserAuthRespRequiringMfaAccessCode {
@@ -536,6 +539,7 @@ class UserLoginAccountSpec extends BaseControllerSpec with WithCSRFAddToken
     "display the enter access code page for Authenticator App" in new SetupWithUserAuthRespRequiringMfaAccessCode {
       mockAuthenticate(user.email, userPassword, successful(userAuthRespRequiringMfaAccessCode), successful(false))
       mockAudit(LoginSucceeded, successful(AuditResult.Success))
+      TPDMock.FetchDeveloper.thenReturn(user.developer.userId)(Some(developerWithAuthAppMfa))
 
       private val request = FakeRequest()
         .withSession(sessionParams: _*)
@@ -550,6 +554,7 @@ class UserLoginAccountSpec extends BaseControllerSpec with WithCSRFAddToken
     "display the enter access code page for SMS" in new SetupWithUserAuthRespRequiringMfaAccessCode {
       mockAuthenticate(user.email, userPassword, successful(userAuthRespRequiringMfaAccessCode), successful(false))
       mockAudit(LoginSucceeded, successful(AuditResult.Success))
+      TPDMock.FetchDeveloper.thenReturn(user.developer.userId)(Some(developerWithSmsMfa))
 
       private val request = FakeRequest()
         .withSession(sessionParams: _*)

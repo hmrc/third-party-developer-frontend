@@ -156,7 +156,7 @@ case class LoginAccessCodePage(mfaId: String,  mfaType: MfaType, headingVal: Str
   }
 
   override val pageHeading: String = headingVal
-  override val url: String = s"${Env.host}/developer/login-mfa?mfaId=${mfaId}&mfaType=${mfaType.asText}"
+  override val url: String = s"${Env.host}/developer/login-mfa?mfaId=${mfaId}&mfaType=${mfaType.toString}"
 
   def enterAccessCode(accessCode: String, rememberMe: Boolean = false) = {
     val formData = Map("accessCode" -> accessCode, "rememberMe" -> s"$rememberMe")

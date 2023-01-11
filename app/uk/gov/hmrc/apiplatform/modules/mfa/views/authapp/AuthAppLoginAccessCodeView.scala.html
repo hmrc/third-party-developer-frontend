@@ -23,7 +23,7 @@
 
 @this(devMain: DevMainWithFormErrors)
 
-@(form: Form[MfaAccessCodeForm], mfaId: MfaId, mfaType: MfaType)(implicit messages: Messages, request: play.api.mvc.Request[Any], appConfig: ApplicationConfig)
+@(form: Form[MfaAccessCodeForm], mfaId: MfaId, mfaType: MfaType, userHasMultipleMfa: Boolean)(implicit messages: Messages, request: play.api.mvc.Request[Any], appConfig: ApplicationConfig)
 
 @devMain(
   form,
@@ -65,7 +65,9 @@
 
         </div>
     </div>
-
+      @if(userHasMultipleMfa){
+          <p class="govuk-body" id="try-another-option">Problems receiving this code? <a href="@routes.UserLoginAccount.tryAnotherOption">Try another option</a></p>
+      }
     <button id="submit" class="govuk-button" type="submit">Continue</button>
   }
 }
