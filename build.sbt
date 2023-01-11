@@ -5,6 +5,7 @@ import net.ground5hark.sbt.concat.Import._
 import play.sbt.routes.RoutesKeys.routesGenerator
 import sbt.Keys._
 import sbt.{Resolver, _}
+import uk.gov.hmrc.DefaultBuildSettings
 import uk.gov.hmrc.DefaultBuildSettings._
 import uk.gov.hmrc.SbtAutoBuildPlugin
 import uk.gov.hmrc.sbtdistributables.SbtDistributablesPlugin
@@ -60,7 +61,8 @@ lazy val microservice = Project(appName, file("."))
     Test / testOptions := Seq(Tests.Argument(TestFrameworks.ScalaTest, "-eT"))
   )
   .configs(IntegrationTest)
-  .settings(inConfig(IntegrationTest)(Defaults.itSettings ++ BloopDefaults.configSettings))
+  .settings(DefaultBuildSettings.integrationTestSettings())
+  .settings(inConfig(IntegrationTest)(BloopDefaults.configSettings))
   .settings(
     IntegrationTest / testOptions := Seq(Tests.Argument(TestFrameworks.ScalaTest, "-eT")),
     IntegrationTest / unmanagedSourceDirectories ++= Seq(baseDirectory.value / "it", baseDirectory.value / "test-utils"),
@@ -69,6 +71,7 @@ lazy val microservice = Project(appName, file("."))
   )
   .configs(ComponentTest)
   .settings(inConfig(ComponentTest)(Defaults.testSettings ++ BloopDefaults.configSettings))
+  .settings(headerSettings(ComponentTest) ++ automateHeaderSettings(ComponentTest))
   .settings(
     ComponentTest / testOptions := Seq(Tests.Argument(TestFrameworks.ScalaTest, "-eT")),
     ComponentTest / unmanagedSourceDirectories ++= Seq(baseDirectory.value / "component", baseDirectory.value / "test-utils"),
