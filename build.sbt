@@ -44,7 +44,6 @@ lazy val microservice = Project(appName, file("."))
   .settings(defaultSettings(): _*)
   .settings(ScoverageSettings(): _*)
   .settings(
-    targetJvm := "jvm-1.8",
     libraryDependencies ++= AppDependencies(),
     retrieveManaged := true,
     routesGenerator := InjectedRoutesGenerator,
