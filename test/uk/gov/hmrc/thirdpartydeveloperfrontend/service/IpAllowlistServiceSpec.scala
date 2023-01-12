@@ -34,19 +34,19 @@ import org.scalatest.matchers.should.Matchers
 import uk.gov.hmrc.apiplatform.modules.uplift.services.mocks.FlowRepositoryMockModule
 
 class IpAllowlistServiceSpec
-    extends AsyncHmrcSpec 
-    with Matchers 
+    extends AsyncHmrcSpec
+    with Matchers
     with TestApplications
     with CollaboratorTracker
-    with DeveloperBuilder 
+    with DeveloperBuilder
     with LocalUserIdTracker {
 
   trait Setup extends FlowRepositoryMockModule {
     implicit val hc: HeaderCarrier = HeaderCarrier()
-    val sessionId: String = randomUUID.toString
+    val sessionId: String          = randomUUID.toString
 
     val mockThirdPartyApplicationConnector: ThirdPartyApplicationConnector = mock[ThirdPartyApplicationConnector]
-    val mockConnectorsWrapper: ConnectorsWrapper = mock[ConnectorsWrapper]
+    val mockConnectorsWrapper: ConnectorsWrapper                           = mock[ConnectorsWrapper]
     when(mockConnectorsWrapper.forEnvironment(*))
       .thenReturn(Connectors(mockThirdPartyApplicationConnector, mock[SubscriptionFieldsConnector], mock[PushPullNotificationsConnector]))
 
@@ -65,7 +65,7 @@ class IpAllowlistServiceSpec
     }
 
     "create new flow if it does not exist" in new Setup {
-      val ipAllowlist = Set("1.1.1.1/24")
+      val ipAllowlist                   = Set("1.1.1.1/24")
       val expectedFlow: IpAllowlistFlow = IpAllowlistFlow(sessionId, ipAllowlist)
       FlowRepositoryMock.FetchBySessionIdAndFlowType.thenReturnNothing[IpAllowlistFlow](sessionId)
       FlowRepositoryMock.SaveFlow.thenReturnSuccess[IpAllowlistFlow]
@@ -140,7 +140,7 @@ class IpAllowlistServiceSpec
 
   "activateIpAllowlist" should {
     "save the allowlist in TPA" in new Setup {
-      val app: Application = anApplication()
+      val app: Application              = anApplication()
       val existingFlow: IpAllowlistFlow = IpAllowlistFlow(sessionId, Set("1.1.1.1/24"))
       FlowRepositoryMock.FetchBySessionIdAndFlowType.thenReturn[IpAllowlistFlow](sessionId)(existingFlow)
       when(mockThirdPartyApplicationConnector.updateIpAllowlist(app.id, app.ipAllowlist.required, existingFlow.allowlist))

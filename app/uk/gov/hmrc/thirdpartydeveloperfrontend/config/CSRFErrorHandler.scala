@@ -24,7 +24,8 @@ import play.filters.csrf.CSRF
 
 import scala.concurrent.Future
 
-class  CSRFErrorHandler @Inject()(errorHandler: ErrorHandler) extends CSRF.ErrorHandler {
+class CSRFErrorHandler @Inject() (errorHandler: ErrorHandler) extends CSRF.ErrorHandler {
+
   override def handle(req: RequestHeader, msg: String): Future[Result] = {
     val login = uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.routes.UserLoginAccount.login
 

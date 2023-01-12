@@ -28,13 +28,11 @@ import views.helper.CommonViewSpec
 
 import java.util.UUID
 
-
 class NameChangeViewSpec extends CommonViewSpec with WithCSRFAddToken with DeveloperSessionBuilder
-  with DeveloperBuilder with LocalUserIdTracker with StubMessagesFactory {
-  implicit val request = FakeRequest()
-  val nameChangeView = app.injector.instanceOf[NameChangeView]
-  implicit val loggedIn: DeveloperSession = buildDeveloperSession(loggedInState = LoggedInState.LOGGED_IN,
-    buildDeveloper("developer@example.com", "Joe", "Bloggs"))
+    with DeveloperBuilder with LocalUserIdTracker with StubMessagesFactory {
+  implicit val request                    = FakeRequest()
+  val nameChangeView                      = app.injector.instanceOf[NameChangeView]
+  implicit val loggedIn: DeveloperSession = buildDeveloperSession(loggedInState = LoggedInState.LOGGED_IN, buildDeveloper("developer@example.com", "Joe", "Bloggs"))
 
   "NameChangeView view" should {
     "render correctly when form is valid" in {
@@ -49,14 +47,17 @@ class NameChangeViewSpec extends CommonViewSpec with WithCSRFAddToken with Devel
     }
     "render correctly when form is invalid" in {
 
-      val mainView = nameChangeView.apply(MfaNameChangeForm.form.withError("name" , "The name must be more than 3 characters in length"),
-        MfaId(UUID.randomUUID()))(stubMessages(), FakeRequest().withCSRFToken, loggedIn, appConfig)
+      val mainView = nameChangeView.apply(MfaNameChangeForm.form.withError("name", "The name must be more than 3 characters in length"), MfaId(UUID.randomUUID()))(
+        stubMessages(),
+        FakeRequest().withCSRFToken,
+        loggedIn,
+        appConfig
+      )
       val document = Jsoup.parse(mainView.body)
       document.getElementById("page-heading").text shouldBe "Create a name for your authenticator app"
       document.getElementById("paragraph").text shouldBe "Use a name that will help you remember the app when you sign in."
       document.getElementById("submit").text shouldBe "Continue"
       document.getElementById("data-field-error-name").text() shouldBe "Error: The name must be more than 3 characters in length"
-
 
     }
 

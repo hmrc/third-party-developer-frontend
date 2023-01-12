@@ -23,17 +23,18 @@ import org.mockito.{ArgumentMatchersSugar, MockitoSugar}
 import scala.concurrent.Future.successful
 
 trait ThirdPartyDeveloperConnectorMockModule extends MockitoSugar with ArgumentMatchersSugar {
-  
 
   object TPDMock {
     val aMock = mock[ThirdPartyDeveloperConnector]
 
     object FindUserId {
+
       def thenReturn(email: String)(userId: UserId) =
         when(aMock.findUserId(eqTo(email))(*)).thenReturn(successful(Some(ThirdPartyDeveloperConnector.CoreUserDetails(email, userId))))
     }
 
     object FetchDeveloper {
+
       def thenReturn(userId: UserId)(developer: Option[Developer]) =
         when(aMock.fetchDeveloper(eqTo(userId))(*)).thenReturn(successful(developer))
     }

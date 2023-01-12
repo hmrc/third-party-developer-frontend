@@ -24,14 +24,14 @@ import java.security.MessageDigest
 trait CookieEncoding {
   implicit val appConfig: ApplicationConfig
 
-  private[security] lazy val cookieName = "PLAY2AUTH_SESS_ID"
-  private[security] lazy val cookieSecureOption: Boolean = appConfig.securedCookie
-  private[security] lazy val cookieHttpOnlyOption: Boolean = true
+  private[security] lazy val cookieName                         = "PLAY2AUTH_SESS_ID"
+  private[security] lazy val cookieSecureOption: Boolean        = appConfig.securedCookie
+  private[security] lazy val cookieHttpOnlyOption: Boolean      = true
   private[security] lazy val cookieDomainOption: Option[String] = None
-  private[security] lazy val cookiePathOption: String = "/"
-  private[security] lazy val cookieMaxAge = Some(86400) // Hardcoded to 24 Hours until we fix the timeout dialog.
+  private[security] lazy val cookiePathOption: String           = "/"
+  private[security] lazy val cookieMaxAge                       = Some(86400) // Hardcoded to 24 Hours until we fix the timeout dialog.
 
-  private[security] lazy val devicecookieName = "DEVICE_SESS_ID"
+  private[security] lazy val devicecookieName   = "DEVICE_SESS_ID"
   private[security] lazy val devicecookieMaxAge = Some(604800) // Hardcoded to 7 Days
 
   val cookieSigner: CookieSigner
@@ -59,7 +59,6 @@ trait CookieEncoding {
       cookieHttpOnlyOption
     )
   }
-
 
   def encodeCookie(token: String): String = {
     cookieSigner.sign(token) + token

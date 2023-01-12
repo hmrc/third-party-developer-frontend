@@ -32,13 +32,13 @@ class SessionTimeoutFilterWithWhitelistSpec extends AsyncHmrcSpec with GuiceOneA
 
   trait Setup {
     implicit val m = app.materializer
-    val config = SessionTimeoutFilterConfig(timeoutDuration = Duration.ofSeconds(1), onlyWipeAuthToken = false)
+    val config     = SessionTimeoutFilterConfig(timeoutDuration = Duration.ofSeconds(1), onlyWipeAuthToken = false)
 
     val nextOperationFunction = mock[RequestHeader => Future[Result]]
-    val whitelistedUrl = uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.routes.UserLoginAccount.login.url
-    val otherUrl = "/applications"
-    val accessUri = "http://redirect.to/here"
-    val bearerToken = "Bearer Token"
+    val whitelistedUrl        = uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.routes.UserLoginAccount.login.url
+    val otherUrl              = "/applications"
+    val accessUri             = "http://redirect.to/here"
+    val bearerToken           = "Bearer Token"
 
     val filter = new SessionTimeoutFilterWithWhitelist(config) {
       override val whitelistedCalls = Set(WhitelistedCall(whitelistedUrl, "GET"))
@@ -49,8 +49,8 @@ class SessionTimeoutFilterWithWhitelistSpec extends AsyncHmrcSpec with GuiceOneA
       Future.successful(Results.Ok.withSession(headers.session + ("authToken" -> bearerToken)))
     })
 
-    def now = Instant.now()
-    def nowInMillis: String = now.toEpochMilli.toString
+    def now                   = Instant.now()
+    def nowInMillis: String   = now.toEpochMilli.toString
     def twoSecondsAgo: String = now.minusSeconds(2).toEpochMilli.toString
   }
 

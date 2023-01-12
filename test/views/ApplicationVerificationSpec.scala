@@ -27,7 +27,6 @@ import views.html.ApplicationVerificationView
 
 class ApplicationVerificationSpec extends CommonViewSpec with WithCSRFAddToken {
 
-
   val applicationVerification = app.injector.instanceOf[ApplicationVerificationView]
   "Application verification page" should {
 

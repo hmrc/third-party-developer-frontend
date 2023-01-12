@@ -30,8 +30,8 @@ import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.LocalUserIdTracker
 import java.time.{LocalDateTime, ZoneOffset}
 
 class DeletePrincipalApplicationCompleteSpec extends CommonViewSpec with WithCSRFAddToken with DeveloperBuilder
-  with LocalUserIdTracker
-  with DeveloperSessionBuilder {
+    with LocalUserIdTracker
+    with DeveloperSessionBuilder {
 
   val deletePrincipalApplicationCompleteView = app.injector.instanceOf[DeletePrincipalApplicationCompleteView]
 
@@ -40,10 +40,10 @@ class DeletePrincipalApplicationCompleteSpec extends CommonViewSpec with WithCSR
 
       val request = FakeRequest().withCSRFToken
 
-      val appId = ApplicationId("1234")
-      val clientId = ClientId("clientId123")
+      val appId             = ApplicationId("1234")
+      val clientId          = ClientId("clientId123")
       val loggedInDeveloper = buildDeveloperSession(loggedInState = LoggedInState.LOGGED_IN, buildDeveloper("developer@example.com", "John", "Doe", None))
-      val application = Application(
+      val application       = Application(
         appId,
         clientId,
         "App name 1",

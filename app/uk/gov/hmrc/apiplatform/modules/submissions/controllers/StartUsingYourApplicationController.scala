@@ -40,7 +40,7 @@ object StartUsingYourApplicationController {
 }
 
 @Singleton
-class StartUsingYourApplicationController @Inject()(
+class StartUsingYourApplicationController @Inject() (
     val errorHandler: ErrorHandler,
     val sessionService: SessionService,
     val applicationActionService: ApplicationActionService,
@@ -49,12 +49,13 @@ class StartUsingYourApplicationController @Inject()(
     val cookieSigner: CookieSigner,
     val apmConnector: ApmConnector,
     val submissionService: SubmissionService,
-    startUsingYourApplicationView: StartUsingYourApplicationView)
-      (implicit val ec: ExecutionContext, val appConfig: ApplicationConfig)
-  extends ApplicationController(mcc)
-     with CanUseCheckActions
-     with EitherTHelper[String]
-     with SubmissionActionBuilders {
+    startUsingYourApplicationView: StartUsingYourApplicationView
+  )(implicit val ec: ExecutionContext,
+    val appConfig: ApplicationConfig
+  ) extends ApplicationController(mcc)
+    with CanUseCheckActions
+    with EitherTHelper[String]
+    with SubmissionActionBuilders {
 
   def startUsingYourApplicationPage(productionAppId: ApplicationId) = checkActionForPreProduction(SupportsSubscriptions, AdministratorOnly)(productionAppId) { implicit request =>
     successful(Ok(startUsingYourApplicationView(ViewModel(productionAppId, request.application.name, request.hasSubscriptionFields))))
@@ -62,8 +63,8 @@ class StartUsingYourApplicationController @Inject()(
 
   def startUsingYourApplicationAction(productionAppId: ApplicationId) = checkActionForPreProduction(SupportsSubscriptions, AdministratorOnly)(productionAppId) { implicit request =>
     val userEmail = request.developerSession.developer.email
-    val failure = BadRequest(errorHandler.badRequestTemplate)
-    val success = Redirect(uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.routes.ManageApplications.manageApps)
-    submissionService.confirmSetupComplete(productionAppId, userEmail).map((esu: Either[String,Unit]) => esu.fold(_ => failure, _ => success))
+    val failure   = BadRequest(errorHandler.badRequestTemplate)
+    val success   = Redirect(uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.routes.ManageApplications.manageApps)
+    submissionService.confirmSetupComplete(productionAppId, userEmail).map((esu: Either[String, Unit]) => esu.fold(_ => failure, _ => success))
   }
 }

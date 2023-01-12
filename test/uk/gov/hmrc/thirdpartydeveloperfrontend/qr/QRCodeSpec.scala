@@ -29,25 +29,25 @@ class QRCodeSpec extends AsyncHmrcSpec {
    *
    * To avoid this breaking tests in future, this test now checks the decoded image RGBA data instead.
    * The data generated during the test is decoded and compared with test PNG files in the resources.
-   * 
+   *
    * For reference, the Base64 encoding of the QR image for "Test" is:
    * Java 8:  iVBORw0KGgoAAAANSUhEUgAAABcAAAAXCAIAAABvSEP3AAAAnklEQVR42q2TUQ7AIAhDuf+lt+wLLY+qcSYzmkHBtsTzx4rvo5UREeOOkRkxYc+ZskNkrYP1BV0jzT/T3QEKvH+JgpWR6ZYXZr7hiDVqXRBx7JcxTXQZA+ScKL55Y5kJpVrW+IW523cKQoDShosqvPbiNcLnHMw0HlhTw4VQa66LaTSkqF/8NErlWmarFzPiuzONdADNy5nuMlWj+/UCt7Jrv4IzAM8AAAAASUVORK5CYII=
    * Java 11: iVBORw0KGgoAAAANSUhEUgAAABcAAAAXCAIAAABvSEP3AAAAu0lEQVR4Xq2OgQ7EIAxC/f+fvourUlrQXC4jman0wRyfNzTm55TEM+NUZQsyobU7nKzeUrrl/yWj5GXHKhkhr7sq9U0LS2n2WaVFlYR7BWu1nBTEL8o/xLDc7WAG0OZsCUtPDrSTU3PgQLpSB5+VDO/gsuA3wZwDuDYYlEzA6wzLirkYWhHkXzvcK2LQa7aszq1c78D92v+AuXO0NddLC3MWSLJlPFQBYKaFhRiujQFQWlRAT0kG+iv+0xe3smu/cFffegAAAABJRU5ErkJggg==
-   * 
+   *
    * These can be viewed in a browser by using the following HTML (see QRCodeView.scala.html):
    * <img id="qrCode" alt="QR Code" src="data:image/png;base64,encoded-string-here">
    */
   def testQrCodeImages(actualInImageBase64: String, expectedImageFileName: String) = {
-    val actualImageData = ImageIO.read(new ByteArrayInputStream(Base64.getDecoder.decode(actualInImageBase64)))
+    val actualImageData   = ImageIO.read(new ByteArrayInputStream(Base64.getDecoder.decode(actualInImageBase64)))
       .getData.getDataBuffer
     val expectedImageData = ImageIO.read(getClass.getResourceAsStream(expectedImageFileName))
       .getData.getDataBuffer
-    
-    val actualSize = actualImageData.getSize
+
+    val actualSize   = actualImageData.getSize
     val expectedSize = expectedImageData.getSize
     withClue("Image sizes do not match:") { actualSize shouldBe expectedSize }
-    
-    val actualContents = List.tabulate(actualSize)(actualImageData.getElem)
+
+    val actualContents   = List.tabulate(actualSize)(actualImageData.getElem)
     val expectedContents = List.tabulate(expectedSize)(expectedImageData.getElem)
     withClue("Image contents do not match:") { actualContents shouldBe expectedContents }
   }
@@ -55,16 +55,16 @@ class QRCodeSpec extends AsyncHmrcSpec {
   "generateDataImageBase64" should {
     "generate a base64 encoded image of a QR code" in {
       val httpImgData = QRCode().generateDataImageBase64("Test")
-      
+
       val prefix :: imageInBase64 :: Nil = httpImgData.split(",", 2).toList
       println(s"******** imageInBase64 = ${imageInBase64}")
       prefix shouldBe "data:image/png;base64"
       testQrCodeImages(imageInBase64, "/qrCodeImages/Small_QR_Code.png")
     }
-    
+
     "generate a base64 encoded image of a barcode from the supplied text with the specified scale" in {
       val httpImgData = QRCode(5).generateDataImageBase64("QRCode test text")
-      
+
       val prefix :: imageInBase64 :: Nil = httpImgData.split(",", 2).toList
       prefix shouldBe "data:image/png;base64"
       testQrCodeImages(imageInBase64, "/qrCodeImages/Large_QR_Code.png")

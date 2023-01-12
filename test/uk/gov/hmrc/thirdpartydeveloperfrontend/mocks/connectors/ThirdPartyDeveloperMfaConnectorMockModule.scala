@@ -31,6 +31,7 @@ trait ThirdPartyDeveloperMfaConnectorMockModule extends MockitoSugar with Argume
     val aMock = mock[ThirdPartyDeveloperMfaConnector]
 
     object SendSms {
+
       def thenReturn(userId: UserId, mfaId: MfaId)(flag: Boolean): ScalaOngoingStubbing[Future[Boolean]] =
         when(aMock.sendSms(eqTo(userId), eqTo(mfaId))(*)).thenReturn(successful(flag))
     }

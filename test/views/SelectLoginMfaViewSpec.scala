@@ -29,16 +29,16 @@ import views.html.SelectLoginMfaView
 import scala.collection.JavaConverters._
 
 class SelectLoginMfaViewSpec extends CommonViewSpec
-  with WithCSRFAddToken
-  with DeveloperSessionBuilder
-  with DeveloperBuilder
-  with LocalUserIdTracker with StubMessagesFactory {
+    with WithCSRFAddToken
+    with DeveloperSessionBuilder
+    with DeveloperBuilder
+    with LocalUserIdTracker with StubMessagesFactory {
 
   implicit val request: FakeRequest[AnyContentAsEmpty.type] = FakeRequest()
 
   val selectLoginMfaView: SelectLoginMfaView = app.injector.instanceOf[SelectLoginMfaView]
-  val authAppMfaId: MfaId = MfaId.random
-  val smsMfaId: MfaId = MfaId.random
+  val authAppMfaId: MfaId                    = MfaId.random
+  val smsMfaId: MfaId                        = MfaId.random
 
   "SelectLoginMfaView" should {
     "render correctly with Text Message selected as default" in {

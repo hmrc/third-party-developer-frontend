@@ -23,20 +23,21 @@ import javax.inject.{Inject, Singleton}
 import play.api.libs.crypto.CookieSigner
 import play.api.libs.json._
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
-import uk.gov.hmrc.thirdpartydeveloperfrontend.service.{ApplicationService, SessionService, ApplicationActionService}
+import uk.gov.hmrc.thirdpartydeveloperfrontend.service.{ApplicationActionService, ApplicationService, SessionService}
 
 import scala.concurrent.{ExecutionContext, Future}
 
 @Singleton
-class Navigation @Inject()(
+class Navigation @Inject() (
     val sessionService: SessionService,
     val errorHandler: ErrorHandler,
     val applicationService: ApplicationService,
     val applicationActionService: ApplicationActionService,
     mcc: MessagesControllerComponents,
-    val cookieSigner : CookieSigner)
-    (implicit val ec: ExecutionContext, val appConfig: ApplicationConfig)
-    extends ApplicationController(mcc) {
+    val cookieSigner: CookieSigner
+  )(implicit val ec: ExecutionContext,
+    val appConfig: ApplicationConfig
+  ) extends ApplicationController(mcc) {
 
   def navLinks: Action[AnyContent] = maybeAtLeastPartLoggedInEnablingMfa { implicit request: MaybeUserRequest[AnyContent] =>
     val username = request.developerSession.flatMap(_.loggedInName)

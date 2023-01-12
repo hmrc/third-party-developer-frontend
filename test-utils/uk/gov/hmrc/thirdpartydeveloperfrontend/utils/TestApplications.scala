@@ -25,7 +25,7 @@ import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.UserId
 import scala.util.Random
 
 trait TestApplications {
-  self : CollaboratorTracker =>
+  self: CollaboratorTracker =>
 
   private def randomString(length: Int) = Random.alphanumeric.take(length).mkString
 
@@ -34,9 +34,16 @@ trait TestApplications {
       clientId: ClientId = ClientId(randomString(28)),
       adminEmail: String = "admin@example.com",
       developerEmail: String = "developer@example.com"
-  ): Application = {
+    ): Application = {
 
-    anApplication(appId, clientId, environment = Environment.SANDBOX, state = ApplicationState(State.PRODUCTION, None, None), adminEmail = adminEmail, developerEmail = developerEmail)
+    anApplication(
+      appId,
+      clientId,
+      environment = Environment.SANDBOX,
+      state = ApplicationState(State.PRODUCTION, None, None),
+      adminEmail = adminEmail,
+      developerEmail = developerEmail
+    )
   }
 
   def anApplication(
@@ -49,7 +56,7 @@ trait TestApplications {
       developerEmail: String = "developer@example.com",
       access: Access = standardAccess(),
       ipAllowlist: IpAllowlist = IpAllowlist()
-  ): Application = {
+    ): Application = {
 
     Application(
       id = appId,
@@ -84,7 +91,7 @@ trait TestApplications {
       redirectUris: List[String] = List("https://redirect1", "https://redirect2"),
       termsAndConditionsUrl: Option[String] = Some("http://example.com/terms"),
       privacyPolicyUrl: Option[String] = Some("http://example.com/privacy")
-  ): Standard = {
+    ): Standard = {
 
     Standard(redirectUris, termsAndConditionsUrl, privacyPolicyUrl)
   }
@@ -132,4 +139,3 @@ trait TestApplications {
     final def withPrivacyPolicyUrl(url: Option[String]): Application = app.copy(access = standardAccess.copy(privacyPolicyUrl = url))
   }
 }
-

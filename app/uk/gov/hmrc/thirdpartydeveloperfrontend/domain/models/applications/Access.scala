@@ -21,13 +21,13 @@ import uk.gov.hmrc.play.json.Union
 import play.api.libs.json.Json
 
 case class ImportantSubmissionData(
-  organisationUrl: Option[String] = None,
-  responsibleIndividual: ResponsibleIndividual,
-  serverLocations: Set[ServerLocation],
-  termsAndConditionsLocation: TermsAndConditionsLocation,
-  privacyPolicyLocation: PrivacyPolicyLocation,
-  termsOfUseAcceptances: List[TermsOfUseAcceptance]
-)
+    organisationUrl: Option[String] = None,
+    responsibleIndividual: ResponsibleIndividual,
+    serverLocations: Set[ServerLocation],
+    termsAndConditionsLocation: TermsAndConditionsLocation,
+    privacyPolicyLocation: PrivacyPolicyLocation,
+    termsOfUseAcceptances: List[TermsOfUseAcceptance]
+  )
 
 object ImportantSubmissionData {
   implicit val format = Json.format[ImportantSubmissionData]
@@ -42,9 +42,10 @@ sealed trait Access {
 object Access {
   import play.api.libs.json.Json
 
-  implicit val formatStandard = Json.format[Standard]
+  implicit val formatStandard   = Json.format[Standard]
   implicit val formatPrivileged = Json.format[Privileged]
-  implicit val formatROPC = Json.format[ROPC]
+  implicit val formatROPC       = Json.format[ROPC]
+
   implicit val format = Union.from[Access]("accessType")
     .and[Standard](AccessType.STANDARD.toString)
     .and[Privileged](AccessType.PRIVILEGED.toString)
@@ -53,18 +54,17 @@ object Access {
 }
 
 case class Standard(
-  redirectUris: List[String] = List.empty,
-  termsAndConditionsUrl: Option[String] = None,
-  privacyPolicyUrl: Option[String] = None,
-  overrides: Set[OverrideFlag] = Set.empty,
-  sellResellOrDistribute: Option[SellResellOrDistribute] = None,
-  importantSubmissionData: Option[ImportantSubmissionData] = None
-) extends Access {
+    redirectUris: List[String] = List.empty,
+    termsAndConditionsUrl: Option[String] = None,
+    privacyPolicyUrl: Option[String] = None,
+    overrides: Set[OverrideFlag] = Set.empty,
+    sellResellOrDistribute: Option[SellResellOrDistribute] = None,
+    importantSubmissionData: Option[ImportantSubmissionData] = None
+  ) extends Access {
   override val accessType = AccessType.STANDARD
 
   lazy val hasSubmissions: Boolean = importantSubmissionData.nonEmpty
 }
-
 
 case class Privileged(scopes: Set[String] = Set.empty) extends Access {
   override val accessType = AccessType.PRIVILEGED

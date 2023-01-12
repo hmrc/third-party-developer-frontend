@@ -38,15 +38,15 @@ object ThirdPartyDeveloperMfaConnector {
   case class RegisterSmsResponse(mfaId: MfaId, mobileNumber: String)
 
   implicit val registerAuthAppResponseFormat: OFormat[RegisterAuthAppResponse] = Json.format[RegisterAuthAppResponse]
-  implicit val registerSmsResponseFormat: OFormat[RegisterSmsResponse] = Json.format[RegisterSmsResponse]
+  implicit val registerSmsResponseFormat: OFormat[RegisterSmsResponse]         = Json.format[RegisterSmsResponse]
 }
 
 @Singleton
-class ThirdPartyDeveloperMfaConnector @Inject()(http: HttpClient, config: ApplicationConfig, metrics: ConnectorMetrics
-                                            )(implicit val ec: ExecutionContext) extends CommonResponseHandlers with Logging {
+class ThirdPartyDeveloperMfaConnector @Inject() (http: HttpClient, config: ApplicationConfig, metrics: ConnectorMetrics)(implicit val ec: ExecutionContext)
+    extends CommonResponseHandlers with Logging {
 
   lazy val serviceBaseUrl: String = config.thirdPartyDeveloperUrl
-  val api: API = API("third-party-developer")
+  val api: API                    = API("third-party-developer")
 
   def createMfaAuthApp(userId: UserId)(implicit hc: HeaderCarrier): Future[RegisterAuthAppResponse] = {
     metrics.record(api) {
@@ -64,9 +64,9 @@ class ThirdPartyDeveloperMfaConnector @Inject()(http: HttpClient, config: Applic
     metrics.record(api) {
       http.POST[VerifyMfaRequest, ErrorOrUnit](s"$serviceBaseUrl/developer/${userId.value}/mfa/${mfaId.value}/verification", VerifyMfaRequest(code))
         .map {
-          case Right(()) => true
-          case Left(UpstreamErrorResponse(_,BAD_REQUEST,_,_)) => false
-          case Left(err) => throw err
+          case Right(())                                         => true
+          case Left(UpstreamErrorResponse(_, BAD_REQUEST, _, _)) => false
+          case Left(err)                                         => throw err
         }
     }
   }
@@ -75,9 +75,9 @@ class ThirdPartyDeveloperMfaConnector @Inject()(http: HttpClient, config: Applic
     metrics.record(api) {
       http.POSTEmpty[ErrorOrUnit](s"$serviceBaseUrl/developer/${userId.value}/mfa/${mfaId.value}/send-sms")
         .map {
-          case Right(()) => true
-          case Left(UpstreamErrorResponse(_,BAD_REQUEST,_,_)) => false
-          case Left(err) => throw err
+          case Right(())                                         => true
+          case Left(UpstreamErrorResponse(_, BAD_REQUEST, _, _)) => false
+          case Left(err)                                         => throw err
         }
     }
   }
@@ -93,23 +93,23 @@ class ThirdPartyDeveloperMfaConnector @Inject()(http: HttpClient, config: Applic
     metrics.record(api) {
       http.POST[ChangeMfaNameRequest, ErrorOrUnit](s"$serviceBaseUrl/developer/${userId.value}/mfa/${mfaId.value}/name", ChangeMfaNameRequest(updatedName))
         .map {
-          case Right(()) => true
-          case Left(UpstreamErrorResponse(_,BAD_REQUEST,_,_)) => false
-          case Left(err) => throw err
+          case Right(())                                         => true
+          case Left(UpstreamErrorResponse(_, BAD_REQUEST, _, _)) => false
+          case Left(err)                                         => throw err
         }
     }
   }
 
   def createDeviceSession(userId: UserId)(implicit hc: HeaderCarrier): Future[Option[DeviceSession]] = metrics.record(api) {
-      http.POST[String ,ErrorOr[DeviceSession]](s"$serviceBaseUrl/device-session/user/${userId.value}", "")
+    http.POST[String, ErrorOr[DeviceSession]](s"$serviceBaseUrl/device-session/user/${userId.value}", "")
       .map {
-        case Right(response) => Some(response)
+        case Right(response)                                 => Some(response)
         // treat session not found as successfully destroyed
-        case Left(UpstreamErrorResponse(_,NOT_FOUND,_,_)) => {
+        case Left(UpstreamErrorResponse(_, NOT_FOUND, _, _)) => {
           logger.error(s"Error creating Device Session - NOT FOUND returned from TPD")
           None
         }
-        case Left(err) => {
+        case Left(err)                                       => {
           logger.error(s"Error creating Device Session - ${err.getMessage()}")
           throw err
         }
@@ -120,18 +120,17 @@ class ThirdPartyDeveloperMfaConnector @Inject()(http: HttpClient, config: Applic
     http.GET[Option[DeviceSession]](s"$serviceBaseUrl/device-session/$deviceSessionId/user/${userId.value}")
       .map {
         case Some(deviceSession) => deviceSession
-        case None => throw new DeviceSessionInvalid
+        case None                => throw new DeviceSessionInvalid
       }
   }
 
   def deleteDeviceSession(deviceSessionId: String)(implicit hc: HeaderCarrier): Future[Int] = metrics.record(api) {
     http.DELETE[ErrorOr[HttpResponse]](s"$serviceBaseUrl/device-session/$deviceSessionId")
       .map {
-        case Right(response) => response.status
+        case Right(response)                                 => response.status
         // treat session not found as successfully destroyed
-        case Left(UpstreamErrorResponse(_,NOT_FOUND,_,_)) => NO_CONTENT
-        case Left(err) => throw err
+        case Left(UpstreamErrorResponse(_, NOT_FOUND, _, _)) => NO_CONTENT
+        case Left(err)                                       => throw err
       }
   }
 }
-

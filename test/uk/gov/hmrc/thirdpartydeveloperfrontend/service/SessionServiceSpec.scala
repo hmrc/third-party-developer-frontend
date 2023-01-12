@@ -35,27 +35,28 @@ import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.LocalUserIdTracker
 import java.time.{LocalDateTime, Period}
 import java.util.UUID
 
-class SessionServiceSpec extends AsyncHmrcSpec with DeveloperBuilder with LocalUserIdTracker with  AppsByTeamMemberServiceMock {
+class SessionServiceSpec extends AsyncHmrcSpec with DeveloperBuilder with LocalUserIdTracker with AppsByTeamMemberServiceMock {
+
   trait Setup {
     implicit val hc: HeaderCarrier = HeaderCarrier()
 
     val underTest = new SessionService(mock[ThirdPartyDeveloperConnector], appsByTeamMemberServiceMock, mock[FlowRepository])
 
-    val email = "thirdpartydeveloper@example.com"
-    val userId = UserId.random
-    val encodedEmail = "thirdpartydeveloper%40example.com"
-    val password = "Password1!"
-    val accessCode = "123456"
-    val nonce = "ABC-123"
-    val mfaId = MfaId.random
-    val developer = buildDeveloper(emailAddress = email)
-    val sessionId = "sessionId"
-    val deviceSessionId = UUID.randomUUID()
-    val session = Session(sessionId, developer, LoggedInState.LOGGED_IN)
+    val email                      = "thirdpartydeveloper@example.com"
+    val userId                     = UserId.random
+    val encodedEmail               = "thirdpartydeveloper%40example.com"
+    val password                   = "Password1!"
+    val accessCode                 = "123456"
+    val nonce                      = "ABC-123"
+    val mfaId                      = MfaId.random
+    val developer                  = buildDeveloper(emailAddress = email)
+    val sessionId                  = "sessionId"
+    val deviceSessionId            = UUID.randomUUID()
+    val session                    = Session(sessionId, developer, LoggedInState.LOGGED_IN)
     val userAuthenticationResponse = UserAuthenticationResponse(accessCodeRequired = false, mfaEnabled = false, session = Some(session))
 
-    val applicationId = ApplicationId("myId")
-    val clientId = ClientId("myClientId")
+    val applicationId       = ApplicationId("myId")
+    val clientId            = ClientId("myClientId")
     val grantLength: Period = Period.ofDays(547)
 
     val applicationsWhereUserIsDeveloperInProduction =
@@ -73,6 +74,7 @@ class SessionServiceSpec extends AsyncHmrcSpec with DeveloperBuilder with LocalU
           subscriptions = Set.empty
         )
       )
+
     val applicationsWhereUserIsAdminInProduction =
       Seq(
         ApplicationWithSubscriptionIds(

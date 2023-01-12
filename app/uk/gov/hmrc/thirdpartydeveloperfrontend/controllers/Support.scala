@@ -29,16 +29,17 @@ import views.html.{SupportEnquiryView, SupportThankyouView}
 import scala.concurrent.{ExecutionContext, Future}
 
 @Singleton
-class Support @Inject()(val deskproService: DeskproService,
-                        val sessionService: SessionService,
-                        val errorHandler: ErrorHandler,
-                        mcc: MessagesControllerComponents,
-                        val cookieSigner : CookieSigner,
-                        supportEnquiryView: SupportEnquiryView,
-                        supportThankyouView: SupportThankyouView
-                       )
-                       (implicit val ec: ExecutionContext, val appConfig: ApplicationConfig)
-  extends BaseController(mcc) {
+class Support @Inject() (
+    val deskproService: DeskproService,
+    val sessionService: SessionService,
+    val errorHandler: ErrorHandler,
+    mcc: MessagesControllerComponents,
+    val cookieSigner: CookieSigner,
+    supportEnquiryView: SupportEnquiryView,
+    supportThankyouView: SupportThankyouView
+  )(implicit val ec: ExecutionContext,
+    val appConfig: ApplicationConfig
+  ) extends BaseController(mcc) {
 
   val supportForm: Form[SupportEnquiryForm] = SupportEnquiryForm.form
 
@@ -59,7 +60,8 @@ class Support @Inject()(val deskproService: DeskproService,
     val displayName = fullyloggedInDeveloper.map(_.displayedName)
     requestForm.fold(
       formWithErrors => Future.successful(BadRequest(supportEnquiryView(displayName, formWithErrors))),
-      formData => deskproService.submitSupportEnquiry(formData).map { _ => Redirect(routes.Support.thankyou.url, SEE_OTHER) })
+      formData => deskproService.submitSupportEnquiry(formData).map { _ => Redirect(routes.Support.thankyou.url, SEE_OTHER) }
+    )
   }
 
   def thankyou = maybeAtLeastPartLoggedInEnablingMfa { implicit request =>

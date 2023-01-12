@@ -28,7 +28,7 @@ object ApiSubscriptionFields {
       hint: String,
       `type`: String,
       access: AccessRequirements
-  )
+    )
 
   case class SubscriptionFieldValue(definition: SubscriptionFieldDefinition, value: FieldValue)
 
@@ -44,7 +44,7 @@ object ApiSubscriptionFields {
       apiContext: ApiContext,
       apiVersion: ApiVersion,
       fields: List[SubscriptionFieldValue]
-  )
+    )
 
   sealed trait ServiceSaveSubscriptionFieldsResponse
 

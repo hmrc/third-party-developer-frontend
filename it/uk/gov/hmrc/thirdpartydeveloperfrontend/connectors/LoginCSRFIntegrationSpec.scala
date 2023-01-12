@@ -42,22 +42,22 @@ import uk.gov.hmrc.thirdpartydeveloperfrontend.connectors.stubs.ThirdPartyDevelo
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.LocalUserIdTracker
 
 class LoginCSRFIntegrationSpec extends BaseConnectorIntegrationSpec with GuiceOneAppPerSuite
-  with BeforeAndAfterEach with DeveloperBuilder with LocalUserIdTracker with MfaDetailBuilder {
+    with BeforeAndAfterEach with DeveloperBuilder with LocalUserIdTracker with MfaDetailBuilder {
 
   private lazy val config = Configuration(
-    "play.filters.csrf.token.sign" -> false,
-    "microservice.services.third-party-developer.port" -> stubPort,
-    "microservice.services.third-party-application-production.port" -> stubPort,
-    "microservice.services.third-party-application-sandbox.port" -> stubPort,
-    "microservice.services.api-definition.port" -> stubPort,
-    "microservice.services.api-documentation-frontend.port" -> stubPort,
-    "microservice.services.third-party-developer-frontend.port" -> 9685,
-    "microservice.services.hmrc-deskpro.port" -> stubPort,
-    "microservice.services.api-subscription-fields-production.port" -> stubPort,
-    "microservice.services.api-subscription-fields-sandbox.port" -> stubPort,
-    "microservice.services.api-platform-microservice.port" -> stubPort,
+    "play.filters.csrf.token.sign"                                      -> false,
+    "microservice.services.third-party-developer.port"                  -> stubPort,
+    "microservice.services.third-party-application-production.port"     -> stubPort,
+    "microservice.services.third-party-application-sandbox.port"        -> stubPort,
+    "microservice.services.api-definition.port"                         -> stubPort,
+    "microservice.services.api-documentation-frontend.port"             -> stubPort,
+    "microservice.services.third-party-developer-frontend.port"         -> 9685,
+    "microservice.services.hmrc-deskpro.port"                           -> stubPort,
+    "microservice.services.api-subscription-fields-production.port"     -> stubPort,
+    "microservice.services.api-subscription-fields-sandbox.port"        -> stubPort,
+    "microservice.services.api-platform-microservice.port"              -> stubPort,
     "microservice.services.push-pull-notifications-api-production.port" -> stubPort,
-    "microservice.services.push-pull-notifications-api-sandbox.port" -> stubPort
+    "microservice.services.push-pull-notifications-api-sandbox.port"    -> stubPort
   )
 
   override def fakeApplication(): Application =
@@ -67,13 +67,13 @@ class LoginCSRFIntegrationSpec extends BaseConnectorIntegrationSpec with GuiceOn
       .in(Mode.Test)
       .build()
 
-  override val stubPort = sys.env.getOrElse("WIREMOCK", "11111").toInt
-  override val stubHost = "localhost"
-  override val wireMockUrl = s"http://$stubHost:$stubPort"
+  override val stubPort       = sys.env.getOrElse("WIREMOCK", "11111").toInt
+  override val stubHost       = "localhost"
+  override val wireMockUrl    = s"http://$stubHost:$stubPort"
   override val wireMockServer = new WireMockServer(wireMockConfig().port(stubPort))
-  val sessionId = "1234567890"
+  val sessionId               = "1234567890"
 
-  private val contentType = "Content-Type"
+  private val contentType                = "Content-Type"
   private val contentTypeApplicationJson = "application/json"
 
   override def beforeEach() {
@@ -87,22 +87,22 @@ class LoginCSRFIntegrationSpec extends BaseConnectorIntegrationSpec with GuiceOn
   }
 
   trait Setup {
-    val userEmail = "thirdpartydeveloper@example.com"
-    val userId = idOf(userEmail)
-    val userPassword = "password1!"
-    val headers = Headers(AUTHORIZATION -> "AUTH_TOKEN")
-    val loginRequest = FakeRequest(POST, "/developer/login").withHeaders(headers)
+    val userEmail            = "thirdpartydeveloper@example.com"
+    val userId               = idOf(userEmail)
+    val userPassword         = "password1!"
+    val headers              = Headers(AUTHORIZATION -> "AUTH_TOKEN")
+    val loginRequest         = FakeRequest(POST, "/developer/login").withHeaders(headers)
     val loginRequestWithCSRF = new FakeRequest(addCSRFToken(FakeRequest(POST, "/developer/login").withHeaders(headers)))
-    val csrftoken = CSRF.getToken(loginRequestWithCSRF)
-    val developer = buildDeveloper(emailAddress = userEmail, mfaDetails = List(verifiedAuthenticatorAppMfaDetail))
-    val mfaId = verifiedAuthenticatorAppMfaDetail.id
+    val csrftoken            = CSRF.getToken(loginRequestWithCSRF)
+    val developer            = buildDeveloper(emailAddress = userEmail, mfaDetails = List(verifiedAuthenticatorAppMfaDetail))
+    val mfaId                = verifiedAuthenticatorAppMfaDetail.id
   }
 
   "CSRF handling for login" when {
     "there is no CSRF token" should {
       "redirect back to the login page" in new Setup {
         private val request = loginRequest.withFormUrlEncodedBody("emailaddress" -> userEmail, "password" -> userPassword)
-        private val result = route(app, request).get
+        private val result  = route(app, request).get
 
         status(result) shouldBe SEE_OTHER
         redirectLocation(result) shouldBe Some("/developer/login")
@@ -112,7 +112,7 @@ class LoginCSRFIntegrationSpec extends BaseConnectorIntegrationSpec with GuiceOn
     "there is no CSRF token in the request body but it is present in the headers" should {
       "redirect back to the login page" in new Setup {
         private val request = addCSRFToken(loginRequest.withFormUrlEncodedBody("emailaddress" -> userEmail, "password" -> userPassword))
-        private val result = route(app, request).get
+        private val result  = route(app, request).get
 
         status(result) shouldBe SEE_OTHER
         redirectLocation(result) shouldBe Some("/developer/login")
@@ -122,7 +122,7 @@ class LoginCSRFIntegrationSpec extends BaseConnectorIntegrationSpec with GuiceOn
     "there is a CSRF token in the request body but not in the headers" should {
       "redirect back to the login page" in new Setup {
         private val request = loginRequest.withFormUrlEncodedBody("emailaddress" -> userEmail, "password" -> userPassword, "csrfToken" -> "test")
-        private val result = route(app, request).get
+        private val result  = route(app, request).get
 
         status(result) shouldBe SEE_OTHER
         redirectLocation(result) shouldBe Some("/developer/login")
@@ -138,21 +138,21 @@ class LoginCSRFIntegrationSpec extends BaseConnectorIntegrationSpec with GuiceOn
                 .withStatus(OK)
                 .withHeader(contentType, contentTypeApplicationJson)
                 .withBody(s"""
-                   |{
-                   |  "accessCodeRequired": false,
-                   |  "mfaEnabled": false,
-                   |  "session": {
-                   |    "sessionId": "$sessionId",
-                   |    "loggedInState": "LOGGED_IN",
-                   |    "developer": {
-                   |      "userId":"${userId.value}",
-                   |      "email":"$userEmail",
-                   |      "firstName":"John",
-                   |      "lastName": "Doe",
-                   |      "emailPreferences": { "interests" : [], "topics": [] }
-                   |    }
-                   |  }
-                   |}""".stripMargin)
+                             |{
+                             |  "accessCodeRequired": false,
+                             |  "mfaEnabled": false,
+                             |  "session": {
+                             |    "sessionId": "$sessionId",
+                             |    "loggedInState": "LOGGED_IN",
+                             |    "developer": {
+                             |      "userId":"${userId.value}",
+                             |      "email":"$userEmail",
+                             |      "firstName":"John",
+                             |      "lastName": "Doe",
+                             |      "emailPreferences": { "interests" : [], "topics": [] }
+                             |    }
+                             |  }
+                             |}""".stripMargin)
             )
         )
 
@@ -178,11 +178,11 @@ class LoginCSRFIntegrationSpec extends BaseConnectorIntegrationSpec with GuiceOn
                 .withStatus(OK)
                 .withHeader(contentType, contentTypeApplicationJson)
                 .withBody(s"""
-                   |{
-                   |  "accessCodeRequired": true,
-                   |  "mfaEnabled": true,
-                   |  "nonce": "123456"
-                   |}""".stripMargin)
+                             |{
+                             |  "accessCodeRequired": true,
+                             |  "mfaEnabled": true,
+                             |  "nonce": "123456"
+                             |}""".stripMargin)
             )
         )
 

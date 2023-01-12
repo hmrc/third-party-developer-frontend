@@ -62,10 +62,14 @@ object Stubs extends ApplicationLogger {
         .willReturn(aResponse().withStatus(status))
     )
 
-  def setupEncryptedPostRequest[T](path: String, data: T, status: Int, response: String)(
-      implicit writes: Writes[T],
+  def setupEncryptedPostRequest[T](
+      path: String,
+      data: T,
+      status: Int,
+      response: String
+    )(implicit writes: Writes[T],
       encryptedJson: EncryptedJson
-  ) =
+    ) =
     stubFor(
       post(urlPathEqualTo(path))
         .withRequestBody(equalToJson(encryptedJson.toSecretRequestJson(data).toString()))
@@ -104,6 +108,7 @@ object DeveloperStub {
 object ApplicationStub {
 
   implicit val apiIdentifierFormat = Json.format[ApiIdentifier]
+
   def setupApplicationNameValidation() = {
     val validNameResult = ApplicationNameValidationResult(None)
 
@@ -184,7 +189,7 @@ object ApplicationStub {
 }
 
 object DeskproStub extends Matchers {
-  val deskproPath: String = "/deskpro/ticket"
+  val deskproPath: String         = "/deskpro/ticket"
   val deskproFeedbackPath: String = "/deskpro/feedback"
 
   def setupTicketCreation(status: Int = OK) = {
@@ -197,7 +202,7 @@ object DeskproStub extends Matchers {
 }
 
 object AuditStub extends Matchers {
-  val auditPath: String = "/write/audit"
+  val auditPath: String       = "/write/audit"
   val mergedAuditPath: String = "/write/audit/merged"
 
   def setupAudit(status: Int = NO_CONTENT, data: Option[String] = None) = {
@@ -212,6 +217,7 @@ object AuditStub extends Matchers {
 }
 
 object ThirdPartyDeveloperStub {
+
   def configureAuthenticate(session: Option[Session]) = {
     stubFor(
       post(urlEqualTo("/authenticate"))
@@ -262,10 +268,7 @@ object ApiSubscriptionFieldsStub {
 
 object ApiPlatformMicroserviceStub {
 
-
   implicit val apiIdentifierFormat = Json.format[ApiIdentifier]
-
-
 
   def stubFetchAllPossibleSubscriptions(applicationId: ApplicationId, body: String) = {
     stubFor(
@@ -276,20 +279,18 @@ object ApiPlatformMicroserviceStub {
             .withBody(body)
             .withHeader("content-type", "application/json")
         )
-      )
+    )
   }
+
   def stubFetchAllPossibleSubscriptionsFailure(applicationId: ApplicationId) = {
     stubFor(
       get(urlEqualTo(s"/api-definitions?applicationId=${applicationId.value}"))
         .willReturn(
           aResponse()
             .withStatus(INTERNAL_SERVER_ERROR)
-
         )
     )
   }
-
-
 
   def stubFetchApplicationById(applicationId: ApplicationId, data: ApplicationWithSubscriptionData) = {
     stubFor(
@@ -313,8 +314,7 @@ object ApiPlatformMicroserviceStub {
     )
   }
 
-
-  def stubFetchAllCombinedAPICategories(categories: List[APICategoryDisplayDetails]) ={
+  def stubFetchAllCombinedAPICategories(categories: List[APICategoryDisplayDetails]) = {
     stubFor(
       get(urlEqualTo("/api-categories/combined"))
         .willReturn(
@@ -337,15 +337,14 @@ object ApiPlatformMicroserviceStub {
     )
   }
 
-
-  def stubCombinedApiByServiceNameFailure(status: Int) ={
-  val response = status match {
-    case INTERNAL_SERVER_ERROR => aResponse()
-      .withStatus(INTERNAL_SERVER_ERROR)
-    case NOT_FOUND => aResponse()
-      .withStatus(NOT_FOUND)
-      .withHeader("Content-Type", "application/json")
-  }
+  def stubCombinedApiByServiceNameFailure(status: Int) = {
+    val response = status match {
+      case INTERNAL_SERVER_ERROR => aResponse()
+          .withStatus(INTERNAL_SERVER_ERROR)
+      case NOT_FOUND             => aResponse()
+          .withStatus(NOT_FOUND)
+          .withHeader("Content-Type", "application/json")
+    }
 
     stubFor(
       get(urlEqualTo("/combined-rest-xml-apis/developer/api1"))
@@ -375,7 +374,7 @@ object ApiPlatformMicroserviceStub {
     )
   }
 
-  def stubSubscribeToApi(applicationId: ApplicationId, apiIdentifier: ApiIdentifier) ={
+  def stubSubscribeToApi(applicationId: ApplicationId, apiIdentifier: ApiIdentifier) = {
     stubFor(
       post(urlPathEqualTo(s"/applications/${applicationId.value}/subscriptions"))
         .withJsonRequestBody(apiIdentifier)
@@ -386,7 +385,7 @@ object ApiPlatformMicroserviceStub {
     )
   }
 
-  def stubSubscribeToApiFailure(applicationId: ApplicationId, apiIdentifier: ApiIdentifier) ={
+  def stubSubscribeToApiFailure(applicationId: ApplicationId, apiIdentifier: ApiIdentifier) = {
     stubFor(
       post(urlPathEqualTo(s"/applications/${applicationId.value}/subscriptions"))
         .withJsonRequestBody(apiIdentifier)

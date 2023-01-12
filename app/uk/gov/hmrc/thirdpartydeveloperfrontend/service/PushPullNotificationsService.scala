@@ -23,7 +23,7 @@ import uk.gov.hmrc.http.HeaderCarrier
 import scala.concurrent.Future
 
 @Singleton
-class PushPullNotificationsService @Inject()(connectorsWrapper: ConnectorsWrapper) {
+class PushPullNotificationsService @Inject() (connectorsWrapper: ConnectorsWrapper) {
 
   def fetchPushSecrets(application: Application)(implicit hc: HeaderCarrier): Future[Seq[String]] = {
     val connector: PushPullNotificationsConnector = connectorsWrapper.forEnvironment(application.deployedTo).pushPullNotificationsConnector
@@ -32,6 +32,7 @@ class PushPullNotificationsService @Inject()(connectorsWrapper: ConnectorsWrappe
 }
 
 object PushPullNotificationsService {
+
   trait PushPullNotificationsConnector {
     def fetchPushSecrets(clientId: ClientId)(implicit hc: HeaderCarrier): Future[Seq[String]]
   }

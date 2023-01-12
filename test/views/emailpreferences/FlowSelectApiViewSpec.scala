@@ -37,19 +37,22 @@ import scala.collection.JavaConverters._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.connectors.ApiType
 
 class FlowSelectApiViewSpec extends CommonViewSpec
-  with WithCSRFAddToken
-  with LocalUserIdTracker
-  with DeveloperSessionBuilder
-  with DeveloperBuilder {
+    with WithCSRFAddToken
+    with LocalUserIdTracker
+    with DeveloperSessionBuilder
+    with DeveloperBuilder {
 
   trait Setup {
+
     val developerSessionWithoutEmailPreferences: DeveloperSession = {
       buildDeveloperSession(loggedInState = LoggedInState.LOGGED_IN, buildDeveloper("email@example.com", "First Name", "Last Name", None))
     }
-    val form = mock[Form[SelectedApisEmailPreferencesForm]]
-    val currentCategory = APICategoryDisplayDetails("CATEGORY1", "Category 1")
-    val apis = Set("api1", "api2")
-    val emailpreferencesFlow: EmailPreferencesFlowV2 = EmailPreferencesFlowV2(developerSessionWithoutEmailPreferences.session.sessionId, apis, Map(currentCategory.category -> apis), Set.empty, List.empty)
+    val form                                                      = mock[Form[SelectedApisEmailPreferencesForm]]
+    val currentCategory                                           = APICategoryDisplayDetails("CATEGORY1", "Category 1")
+    val apis                                                      = Set("api1", "api2")
+
+    val emailpreferencesFlow: EmailPreferencesFlowV2          =
+      EmailPreferencesFlowV2(developerSessionWithoutEmailPreferences.session.sessionId, apis, Map(currentCategory.category -> apis), Set.empty, List.empty)
     implicit val request: FakeRequest[AnyContentAsEmpty.type] = FakeRequest().withCSRFToken
 
     val flowSelectApiView: FlowSelectApiView = app.injector.instanceOf[FlowSelectApiView]
@@ -64,14 +67,13 @@ class FlowSelectApiViewSpec extends CommonViewSpec
     SelectSpecificApiRadio.`val`() shouldBe "SOME_APIS"
     document.getElementById("individual-api-description").text() shouldBe s"Select specific APIs. You will not get emails about new $currentCategory APIs"
 
-
-
     apis.foreach(api => {
       val checkbox = document.getElementById(api.serviceName)
       checkbox.attr("name") shouldBe "selectedApi[]"
       checkbox.`val`() shouldBe api.serviceName
 
-      val expectedText =  if(api.apiType==ApiType.XML_API){s"${api.displayName} - XML API"} else s"${api.displayName}" 
+      val expectedText = if (api.apiType == ApiType.XML_API) { s"${api.displayName} - XML API" }
+      else s"${api.displayName}"
 
       document.select(s"label[for=${api.serviceName}]").text shouldBe expectedText
 
@@ -94,7 +96,7 @@ class FlowSelectApiViewSpec extends CommonViewSpec
     // check checkboxes are displayed
     validateCheckboxItemsAgainstApis(document, apis, expectedCategory.name)
 
-    //check category hidden field and value
+    // check category hidden field and value
     document.getElementById("current-category").`val`() shouldBe expectedCategory.category
 
     // Check submit button is correct
@@ -102,17 +104,19 @@ class FlowSelectApiViewSpec extends CommonViewSpec
   }
 
   "Email Preferences Select Api view page" should {
-    val apiList = List(CombinedApi("api1", "Api One", List(CombinedApiCategory("category1"), CombinedApiCategory("category1")), REST_API),
+    val apiList  = List(
+      CombinedApi("api1", "Api One", List(CombinedApiCategory("category1"), CombinedApiCategory("category1")), REST_API),
       CombinedApi("api2", "Api Two", List(CombinedApiCategory("category2"), CombinedApiCategory("category4")), REST_API),
-      CombinedApi("api3", "Api Three", List(CombinedApiCategory("category3"), CombinedApiCategory("category2")), REST_API))
+      CombinedApi("api3", "Api Three", List(CombinedApiCategory("category3"), CombinedApiCategory("category2")), REST_API)
+    )
     val userApis = Set("api1", "api2")
 
     "render the api categories selection Page with no check boxes selected when no user selected categories passed into the view" in new Setup {
       when(form.errors).thenReturn(Seq.empty)
       when(form.errors(any[String])).thenReturn(Seq.empty)
 
-      val page: Html = flowSelectApiView.render(form,  currentCategory, apiList, Set.empty, messagesProvider.messages, developerSessionWithoutEmailPreferences, request, appConfig)
-      
+      val page: Html = flowSelectApiView.render(form, currentCategory, apiList, Set.empty, messagesProvider.messages, developerSessionWithoutEmailPreferences, request, appConfig)
+
       val document: Document = Jsoup.parse(page.body)
       validateStaticElements(document, apiList, currentCategory)
       Option(document.getElementById("error-summary-display")).isDefined shouldBe false
@@ -124,10 +128,10 @@ class FlowSelectApiViewSpec extends CommonViewSpec
       when(form.errors(any[String])).thenReturn(Seq.empty)
 
       val selectedApis = emailpreferencesFlow.selectedAPIs.getOrElse(currentCategory.category, Set.empty)
-      
-      val page: Html = flowSelectApiView.render(form,  currentCategory, apiList, selectedApis, messagesProvider.messages, developerSessionWithoutEmailPreferences, request, appConfig)
-     
-      val document: Document = Jsoup.parse(page.body)
+
+      val page: Html = flowSelectApiView.render(form, currentCategory, apiList, selectedApis, messagesProvider.messages, developerSessionWithoutEmailPreferences, request, appConfig)
+
+      val document: Document          = Jsoup.parse(page.body)
       validateStaticElements(document, apiList, currentCategory)
       Option(document.getElementById("error-summary-display")).isDefined shouldBe false
       val selectedBoxes: Seq[Element] = document.select("input[type=checkbox][checked]").asScala.toList
@@ -140,10 +144,10 @@ class FlowSelectApiViewSpec extends CommonViewSpec
       when(form.errors(any[String])).thenReturn(Seq.empty)
 
       val selectedApis = userApis
-      
+
       val page: Html = flowSelectApiView.render(form, currentCategory, apiList, selectedApis, messagesProvider.messages, developerSessionWithoutEmailPreferences, request, appConfig)
-     
-      val document: Document = Jsoup.parse(page.body)
+
+      val document: Document          = Jsoup.parse(page.body)
       validateStaticElements(document, apiList, currentCategory)
       Option(document.getElementById("error-summary-display")).isDefined shouldBe false
       val selectedBoxes: Seq[Element] = document.select("input[type=checkbox][checked]").asScala.toList
@@ -156,10 +160,10 @@ class FlowSelectApiViewSpec extends CommonViewSpec
       when(form.errors(any[String])).thenReturn(Seq(FormError.apply(FormKeys.selectedApisNonSelectedKey, "message")))
 
       val selectedApis = emailpreferencesFlow.selectedAPIs.getOrElse(currentCategory.category, Set.empty)
-      
-      val page: Html = flowSelectApiView.render(form,  currentCategory, apiList, selectedApis, messagesProvider.messages, developerSessionWithoutEmailPreferences, request, appConfig)
-     
-      val document: Document = Jsoup.parse(page.body)
+
+      val page: Html = flowSelectApiView.render(form, currentCategory, apiList, selectedApis, messagesProvider.messages, developerSessionWithoutEmailPreferences, request, appConfig)
+
+      val document: Document          = Jsoup.parse(page.body)
       validateStaticElements(document, apiList, currentCategory)
       Option(document.getElementById("error-summary-display")).isDefined shouldBe true
       val selectedBoxes: Seq[Element] = document.select("input[type=checkbox][checked]").asScala.toList

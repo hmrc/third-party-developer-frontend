@@ -30,13 +30,14 @@ import uk.gov.hmrc.apiplatform.modules.submissions.domain.models.Submission
 
 class ApplicationSpec extends AnyFunSpec with Matchers with DeveloperBuilder with LocalUserIdTracker {
 
-  val developer = buildDeveloper(emailAddress = "developerEmail", firstName = "DEVELOPER    ", lastName = "developerLast")
+  val developer             = buildDeveloper(emailAddress = "developerEmail", firstName = "DEVELOPER    ", lastName = "developerLast")
   val developerCollaborator = developer.email.asDeveloperCollaborator
-  val administrator = buildDeveloper(emailAddress = "administratorEmail", firstName = "ADMINISTRATOR", lastName = "administratorLast")
+  val administrator         = buildDeveloper(emailAddress = "administratorEmail", firstName = "ADMINISTRATOR", lastName = "administratorLast")
 
   val productionApplicationState: ApplicationState = ApplicationState.production(requestedByEmail = "other email", requestedByName = "name", verificationCode = "123")
-  val testingApplicationState: ApplicationState = ApplicationState.testing
-  val responsibleIndividual = ResponsibleIndividual.build("Mr Responsible", "ri@example.com")
+  val testingApplicationState: ApplicationState    = ApplicationState.testing
+  val responsibleIndividual                        = ResponsibleIndividual.build("Mr Responsible", "ri@example.com")
+
   val importantSubmissionData = ImportantSubmissionData(
     Some("http://example.com"),
     responsibleIndividual,
@@ -212,36 +213,36 @@ class ApplicationSpec extends AnyFunSpec with Matchers with DeveloperBuilder wit
 
   describe("Application.grantLengthDisplayValue") {
     val thousandDays = 1000
-    val app = createApp(Environment.PRODUCTION, Standard(), productionApplicationState)
+    val app          = createApp(Environment.PRODUCTION, Standard(), productionApplicationState)
 
-    it ("should return '1 month' display value for 30 days grant length") {
+    it("should return '1 month' display value for 30 days grant length") {
       app.copy(grantLength = Period.ofDays(30)).grantLengthDisplayValue() shouldBe "1 month"
     }
-    it ("should return '3 months' display value for 90 days grant length")  {
+    it("should return '3 months' display value for 90 days grant length") {
       app.copy(grantLength = Period.ofDays(90)).grantLengthDisplayValue() shouldBe "3 months"
     }
-    it ("should return '6 months' display value for 180 days grant length") {
+    it("should return '6 months' display value for 180 days grant length") {
       app.copy(grantLength = Period.ofDays(180)).grantLengthDisplayValue() shouldBe "6 months"
     }
-    it ("should return '1 year' display value for 365 days grant length") {
+    it("should return '1 year' display value for 365 days grant length") {
       app.copy(grantLength = Period.ofDays(365)).grantLengthDisplayValue() shouldBe "1 year"
     }
-    it ("should return '18 months' display value for 547 days grant length") {
+    it("should return '18 months' display value for 547 days grant length") {
       app.copy(grantLength = Period.ofDays(547)).grantLengthDisplayValue() shouldBe "18 months"
     }
-    it ("should return '3 years' display value for 1095 days grant length") {
+    it("should return '3 years' display value for 1095 days grant length") {
       app.copy(grantLength = Period.ofDays(1095)).grantLengthDisplayValue() shouldBe "3 years"
     }
-    it ("should return '5 years' display value for 1825 days grant length") {
+    it("should return '5 years' display value for 1825 days grant length") {
       app.copy(grantLength = Period.ofDays(1825)).grantLengthDisplayValue() shouldBe "5 years"
     }
-    it ("should return '10 years' display value for 3650 days grant length") {
+    it("should return '10 years' display value for 3650 days grant length") {
       app.copy(grantLength = Period.ofDays(3650)).grantLengthDisplayValue() shouldBe "10 years"
     }
-    it ("should return '100 years' display value for 36500 days grant length") {
+    it("should return '100 years' display value for 36500 days grant length") {
       app.copy(grantLength = Period.ofDays(36500)).grantLengthDisplayValue() shouldBe "100 years"
     }
-    it ("should return '33 months' display value for 1000 days grant length") {
+    it("should return '33 months' display value for 1000 days grant length") {
       app.copy(grantLength = Period.ofDays(thousandDays)).grantLengthDisplayValue() shouldBe "33 months"
     }
   }

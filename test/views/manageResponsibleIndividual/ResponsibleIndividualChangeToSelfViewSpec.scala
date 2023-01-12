@@ -26,11 +26,11 @@ import views.helper.CommonViewSpec
 import views.html.manageResponsibleIndividual.ResponsibleIndividualChangeToSelfView
 
 class ResponsibleIndividualChangeToSelfViewSpec extends CommonViewSpec with WithCSRFAddToken
-  with DeveloperBuilder with LocalUserIdTracker with DeveloperSessionBuilder with TestApplications {
+    with DeveloperBuilder with LocalUserIdTracker with DeveloperSessionBuilder with TestApplications {
 
   "Responsible Individual Change To Self View" should {
     val application = anApplication()
-    val view = app.injector.instanceOf[ResponsibleIndividualChangeToSelfView]
+    val view        = app.injector.instanceOf[ResponsibleIndividualChangeToSelfView]
 
     def renderPage() = {
       val request = FakeRequest().withCSRFToken

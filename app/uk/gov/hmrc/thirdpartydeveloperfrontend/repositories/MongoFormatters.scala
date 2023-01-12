@@ -27,12 +27,12 @@ import java.time.LocalDateTime
 
 object MongoFormatters extends CombinedApiJsonFormatters {
 
-  implicit val dateFormat: Format[LocalDateTime] = MongoJavatimeFormats.localDateTimeFormat
+  implicit val dateFormat: Format[LocalDateTime]               = MongoJavatimeFormats.localDateTimeFormat
   implicit val formatIpAllowlistFlow: OFormat[IpAllowlistFlow] = Json.format[IpAllowlistFlow]
 
-  implicit val formatEmailPreferencesFlow: OFormat[EmailPreferencesFlowV2] = Json.format[EmailPreferencesFlowV2]
+  implicit val formatEmailPreferencesFlow: OFormat[EmailPreferencesFlowV2]                             = Json.format[EmailPreferencesFlowV2]
   implicit val formatNewApplicationEmailPreferencesFlow: OFormat[NewApplicationEmailPreferencesFlowV2] = Json.format[NewApplicationEmailPreferencesFlowV2]
-  implicit val formatGetProdCredsFlow: OFormat[GetProductionCredentialsFlow] = Json.format[GetProductionCredentialsFlow]
+  implicit val formatGetProdCredsFlow: OFormat[GetProductionCredentialsFlow]                           = Json.format[GetProductionCredentialsFlow]
 
   implicit val formatFlow: OFormat[Flow] = Union.from[Flow]("flowType")
     .and[IpAllowlistFlow](FlowType.IP_ALLOW_LIST.toString)

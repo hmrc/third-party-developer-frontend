@@ -33,7 +33,6 @@ object Stubs extends ApplicationLogger {
     )
   }
 
-  
   def setupDeleteRequest(path: String, status: Int) =
     stubFor(delete(urlEqualTo(path)).willReturn(aResponse().withStatus(status)))
 
@@ -43,7 +42,7 @@ object Stubs extends ApplicationLogger {
   def setupPutRequest(path: String, status: Int, response: String) =
     stubFor(
       put(urlEqualTo(path))
-      .willReturn(aResponse().withStatus(status).withBody(response))
+        .willReturn(aResponse().withStatus(status).withBody(response))
     )
 
   def setupPostRequest(path: String, status: Int, response: String) =
@@ -59,10 +58,14 @@ object Stubs extends ApplicationLogger {
         .willReturn(aResponse().withStatus(status))
     )
 
-  def setupEncryptedPostRequest[T](path: String, data: T, status: Int, response: String)(
-      implicit writes: Writes[T],
+  def setupEncryptedPostRequest[T](
+      path: String,
+      data: T,
+      status: Int,
+      response: String
+    )(implicit writes: Writes[T],
       encryptedJson: EncryptedJson
-  ) =
+    ) =
     stubFor(
       post(urlPathEqualTo(path))
         .withRequestBody(equalToJson(encryptedJson.toSecretRequestJson(data).toString()))
@@ -71,7 +74,7 @@ object Stubs extends ApplicationLogger {
 }
 
 object DeskproStub extends Matchers {
-  val deskproPath: String = "/deskpro/ticket"
+  val deskproPath: String         = "/deskpro/ticket"
   val deskproFeedbackPath: String = "/deskpro/feedback"
 
   def setupTicketCreation(status: Int = OK) = {
@@ -84,7 +87,7 @@ object DeskproStub extends Matchers {
 }
 
 object AuditStub extends Matchers {
-  val auditPath: String = "/write/audit"
+  val auditPath: String       = "/write/audit"
   val mergedAuditPath: String = "/write/audit/merged"
 
   def setupAudit(status: Int = NO_CONTENT, data: Option[String] = None) = {

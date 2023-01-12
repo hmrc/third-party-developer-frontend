@@ -176,7 +176,7 @@ class MfaControllerSpec extends MfaControllerBaseSpec {
           .thenReturn(successful(None))
 
         private val request = FakeRequest().withLoggedIn(underTest, implicitly)(sessionId)
-        val result = underTest.securityPreferences()(request)
+        val result          = underTest.securityPreferences()(request)
 
         validateErrorTemplateView(result, "Unable to obtain User information")
       }

@@ -19,15 +19,15 @@ package uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications
 import java.time.{LocalDateTime, ZoneOffset}
 
 case class ApplicationState(
- name: State,
- requestedByEmailAddress: Option[String],
- requestedByName: Option[String],
- verificationCode: Option[String] = None,
- updatedOn: LocalDateTime = LocalDateTime.now(ZoneOffset.UTC)
-) {
-  def isInTesting = name.isInTesting
+    name: State,
+    requestedByEmailAddress: Option[String],
+    requestedByName: Option[String],
+    verificationCode: Option[String] = None,
+    updatedOn: LocalDateTime = LocalDateTime.now(ZoneOffset.UTC)
+  ) {
+  def isInTesting       = name.isInTesting
   def isPendingApproval = name.isPendingApproval
-  def isApproved = name.isApproved
+  def isApproved        = name.isApproved
 }
 
 object ApplicationState {

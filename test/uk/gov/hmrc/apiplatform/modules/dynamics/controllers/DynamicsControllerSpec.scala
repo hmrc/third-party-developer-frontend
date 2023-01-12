@@ -36,12 +36,12 @@ import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future._
 
 class DynamicsControllerSpec extends BaseControllerSpec with DeveloperSessionBuilder with WithCSRFAddToken
-  with DeveloperBuilder with LocalUserIdTracker {
+    with DeveloperBuilder with LocalUserIdTracker {
 
   trait Setup extends SessionServiceMock {
-    val ticketsView = app.injector.instanceOf[TicketsView]
+    val ticketsView   = app.injector.instanceOf[TicketsView]
     val addTicketView = app.injector.instanceOf[AddTicketView]
-    val errorHandler = app.injector.instanceOf[ErrorHandler]
+    val errorHandler  = app.injector.instanceOf[ErrorHandler]
 
     val underTest: DynamicsController = new DynamicsController(
       mock[ThirdPartyDeveloperDynamicsConnector],
@@ -53,33 +53,33 @@ class DynamicsControllerSpec extends BaseControllerSpec with DeveloperSessionBui
       cookieSigner
     )
 
-    val tickets = List(
+    val tickets     = List(
       Ticket("CAS-1", "Title1", Some("Desc1"), 0, "id1"),
       Ticket("CAS-2", "Title2", None, 1, "id2")
     )
-    val customerId = UUID.randomUUID().toString
-    val title = "The Title"
+    val customerId  = UUID.randomUUID().toString
+    val title       = "The Title"
     val description = "The description"
-    
+
     val sessionId = UUID.randomUUID().toString
-    val session = Session(sessionId, buildDeveloper(), LoggedInState.LOGGED_IN)
+    val session   = Session(sessionId, buildDeveloper(), LoggedInState.LOGGED_IN)
     when(sessionServiceMock.fetch(eqTo(sessionId))(*)).thenReturn(successful(Some(session)))
     when(sessionServiceMock.updateUserFlowSessions(sessionId)).thenReturn(successful(()))
-    val request = FakeRequest().withLoggedIn(underTest, implicitly)(sessionId)
-    
+    val request   = FakeRequest().withLoggedIn(underTest, implicitly)(sessionId)
+
     def addTicketRequest(customerId: String, title: String, description: String): FakeRequest[AnyContentAsFormUrlEncoded] = {
       request
         .withCSRFToken
         .withFormUrlEncodedBody("customerId" -> customerId, "title" -> title, "description" -> description)
     }
   }
-  
+
   "DynamicsController" when {
 
     "getTickets()" should {
       "show the tickets page" in new Setup {
         when(underTest.thirdPartyDeveloperDynamicsConnector.getTickets()(*)).thenReturn(successful(tickets))
-        
+
         val result = underTest.tickets()(request)
 
         status(result) shouldBe OK

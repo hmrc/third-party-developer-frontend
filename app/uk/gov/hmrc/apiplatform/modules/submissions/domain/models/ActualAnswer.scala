@@ -18,7 +18,7 @@ package uk.gov.hmrc.apiplatform.modules.submissions.domain.models
 
 sealed trait ActualAnswer
 case class MultipleChoiceAnswer(values: Set[String]) extends ActualAnswer
-case class SingleChoiceAnswer(value: String) extends ActualAnswer
-case class TextAnswer(value: String) extends ActualAnswer
-case object AcknowledgedAnswer extends ActualAnswer
-case object NoAnswer extends ActualAnswer
+case class SingleChoiceAnswer(value: String)         extends ActualAnswer
+case class TextAnswer(value: String)                 extends ActualAnswer
+case object AcknowledgedAnswer                       extends ActualAnswer
+case object NoAnswer                                 extends ActualAnswer

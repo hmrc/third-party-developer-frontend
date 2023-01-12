@@ -27,7 +27,8 @@ import uk.gov.hmrc.http.HeaderCarrier
 import scala.concurrent.Future
 
 @Singleton
-class DeskproService @Inject()(val deskproConnector: DeskproConnector, val appConfig: ApplicationConfig) {
+class DeskproService @Inject() (val deskproConnector: DeskproConnector, val appConfig: ApplicationConfig) {
+
   def submitSurvey(survey: SignOutSurveyForm)(implicit request: Request[AnyRef], hc: HeaderCarrier): Future[TicketId] = {
     val feedback = Feedback.createFromSurvey(survey, Option(appConfig.title))
     deskproConnector.createFeedback(feedback)
@@ -38,4 +39,3 @@ class DeskproService @Inject()(val deskproConnector: DeskproConnector, val appCo
     deskproConnector.createTicket(ticket)
   }
 }
-

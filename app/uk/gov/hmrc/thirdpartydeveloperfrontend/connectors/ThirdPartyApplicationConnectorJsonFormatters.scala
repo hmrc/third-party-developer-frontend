@@ -24,7 +24,7 @@ private[connectors] object ThirdPartyApplicationConnectorJsonFormatters
     extends SubscriptionsJsonFormatters
     with ApiDefinitionsJsonFormatters {
 
-  implicit val formatTPAClientSecret: Format[TPAClientSecret] = Json.format[TPAClientSecret]
-  implicit val formatAddClientSecretResponse: Format[AddClientSecretResponse] = Json.format[AddClientSecretResponse]
+  implicit val formatTPAClientSecret: Format[TPAClientSecret]                   = Json.format[TPAClientSecret]
+  implicit val formatAddClientSecretResponse: Format[AddClientSecretResponse]   = Json.format[AddClientSecretResponse]
   implicit val formatUpdateIpAllowlistRequest: Format[UpdateIpAllowlistRequest] = Json.format[UpdateIpAllowlistRequest]
 }

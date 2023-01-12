@@ -26,14 +26,14 @@ import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.{LocalUserIdTracker, WithCS
 import views.helper.CommonViewSpec
 
 class AuthAppSetupSkippedViewSpec extends CommonViewSpec
-  with WithCSRFAddToken
-  with DeveloperSessionBuilder
-  with DeveloperBuilder
-  with LocalUserIdTracker with StubMessagesFactory {
+    with WithCSRFAddToken
+    with DeveloperSessionBuilder
+    with DeveloperBuilder
+    with LocalUserIdTracker with StubMessagesFactory {
 
   implicit val request: FakeRequest[AnyContentAsEmpty.type] = FakeRequest()
 
-  implicit val loggedIn: DeveloperSession = buildDeveloperSession(
+  implicit val loggedIn: DeveloperSession          = buildDeveloperSession(
     loggedInState =
       LoggedInState.LOGGED_IN,
     buildDeveloper("developer@example.com", "Joe", "Bloggs")

@@ -37,7 +37,7 @@ class EmailValidationSpec extends AsyncHmrcSpec {
 
     "generate an error when max length exceeded" in {
       val email = ("abc" * 105) + "@example.com"
-      val res = testForm.bind(Map("emailaddress" -> email))
+      val res   = testForm.bind(Map("emailaddress" -> email))
       res.errors shouldBe List(
         FormError("emailaddress", "emailaddress.error.maxLength.field")
       )
@@ -53,11 +53,11 @@ class EmailValidationSpec extends AsyncHmrcSpec {
     }
 
     val notValidEmailAddresses = Map(
-      "Abc.example.com" -> "no @ character",
-      "A@b@c@example.com" -> "only one @ is allowed outside quotation marks",
+      "Abc.example.com"                           -> "no @ character",
+      "A@b@c@example.com"                         -> "only one @ is allowed outside quotation marks",
       """a\"b(c)d,e:f;g<h>i[j\\k]l@example.com""" -> "none of the special characters in this local part are allowed outside quotation marks",
-      "john.doe@example..com" -> "double dot after @",
-      "john.doe@example." -> "dot at the end"
+      "john.doe@example..com"                     -> "double dot after @",
+      "john.doe@example."                         -> "dot at the end"
     )
 
     notValidEmailAddresses foreach {

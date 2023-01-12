@@ -32,7 +32,7 @@ import scala.concurrent.{ExecutionContext, Future}
 
 trait DevHubAuthorization extends FrontendHeaderCarrierProvider with CookieEncoding with ApplicationLogger {
   self: BaseController =>
-    
+
   implicit val appConfig: ApplicationConfig
 
   val sessionService: SessionService
@@ -40,31 +40,32 @@ trait DevHubAuthorization extends FrontendHeaderCarrierProvider with CookieEncod
   object DeveloperSessionFilter {
     type Type = DeveloperSession => Boolean
 
-    val alwaysTrueFilter: DeveloperSessionFilter.Type = _ => true
+    val alwaysTrueFilter: DeveloperSessionFilter.Type         = _ => true
     val onlyTrueIfLoggedInFilter: DeveloperSessionFilter.Type = _.loggedInState == LoggedInState.LOGGED_IN
   }
 
   def loggedInActionRefiner(filter: DeveloperSessionFilter.Type = DeveloperSessionFilter.onlyTrueIfLoggedInFilter): ActionRefiner[MessagesRequest, UserRequest] =
     new ActionRefiner[MessagesRequest, UserRequest] {
       def executionContext = ec
+
       def refine[A](msgRequest: MessagesRequest[A]): Future[Either[Result, UserRequest[A]]] = {
         lazy val loginRedirect = Redirect(routes.UserLoginAccount.login)
 
         implicit val request = msgRequest
 
         OptionT(loadSession)
-        .filter(filter)
-        .toRight(loginRedirect)
-        .flatMap(ds => {
-          EitherT.liftF[Future, Result, UserRequest[A]](
-            sessionService.updateUserFlowSessions(ds.session.sessionId)
-            .map(_ => new UserRequest(ds, msgRequest))
-          )
-        })
-        .value
+          .filter(filter)
+          .toRight(loginRedirect)
+          .flatMap(ds => {
+            EitherT.liftF[Future, Result, UserRequest[A]](
+              sessionService.updateUserFlowSessions(ds.session.sessionId)
+                .map(_ => new UserRequest(ds, msgRequest))
+            )
+          })
+          .value
       }
     }
-      
+
   def atLeastPartLoggedInEnablingMfaAction(block: UserRequest[AnyContent] => Future[Result]): Action[AnyContent] =
     Action.async { implicit request =>
       loggedInActionRefiner(DeveloperSessionFilter.alwaysTrueFilter).invokeBlock(request, block)
@@ -85,7 +86,7 @@ trait DevHubAuthorization extends FrontendHeaderCarrierProvider with CookieEncod
 
   private[security] def loadSession[A](implicit ec: ExecutionContext, request: Request[A]): Future[Option[DeveloperSession]] = {
     (for {
-      cookie <- request.cookies.get(cookieName)
+      cookie    <- request.cookies.get(cookieName)
       sessionId <- decodeCookie(cookie.value)
     } yield fetchDeveloperSession(sessionId))
       .getOrElse(Future.successful(None))
@@ -100,6 +101,7 @@ trait DevHubAuthorization extends FrontendHeaderCarrierProvider with CookieEncod
 
 trait ExtendedDevHubAuthorization extends DevHubAuthorization {
   self: BaseController =>
+
   def loggedOutAction(body: MessagesRequest[AnyContent] => Future[Result])(implicit ec: ExecutionContext): Action[AnyContent] = Action.async {
     implicit request: MessagesRequest[AnyContent] =>
       loadSession.flatMap {
@@ -113,7 +115,6 @@ trait ExtendedDevHubAuthorization extends DevHubAuthorization {
     val uri = request.session.get("access_uri").getOrElse(routes.ManageApplications.manageApps.url)
     Future.successful(Redirect(uri).withNewSession)
   }
-
 
   def withSessionCookie(result: Result, sessionId: String): Result = {
     result.withCookies(createCookie(sessionId))

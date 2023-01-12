@@ -29,44 +29,59 @@ import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.connectors.TicketCr
 import uk.gov.hmrc.apiplatform.modules.submissions.connectors.ThirdPartyApplicationSubmissionsConnector
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.connectors.DeskproTicket
 import org.mockito.captor.ArgCaptor
-import uk.gov.hmrc.apiplatform.modules.submissions.domain.models.{ResponsibleIndividualToUVerification, ResponsibleIndividualUpdateVerification, ResponsibleIndividualVerificationId, Submission, ResponsibleIndividualVerificationState}
+import uk.gov.hmrc.apiplatform.modules.submissions.domain.models.{
+  ResponsibleIndividualToUVerification,
+  ResponsibleIndividualUpdateVerification,
+  ResponsibleIndividualVerificationId,
+  ResponsibleIndividualVerificationState,
+  Submission
+}
 import java.time.{LocalDateTime, ZoneOffset}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.mocks.service.ApplicationServiceMock
 
-class ResponsibleIndividualVerificationServiceSpec extends AsyncHmrcSpec 
-  with CollaboratorTracker 
-  with LocalUserIdTracker
-  with ApplicationServiceMock
-  with TestApplications  {
+class ResponsibleIndividualVerificationServiceSpec extends AsyncHmrcSpec
+    with CollaboratorTracker
+    with LocalUserIdTracker
+    with ApplicationServiceMock
+    with TestApplications {
 
   trait Setup {
-    implicit val hc = HeaderCarrier()
+    implicit val hc   = HeaderCarrier()
     val applicationId = ApplicationId.random
-    val application = aStandardPendingResponsibleIndividualVerificationApplication()
-    val code = "12345678"
-    val riVerification = ResponsibleIndividualToUVerification(ResponsibleIndividualVerificationId(code), applicationId, Submission.Id.random, 0, "App name", LocalDateTime.now(ZoneOffset.UTC), ResponsibleIndividualVerificationState.INITIAL)
+    val application   = aStandardPendingResponsibleIndividualVerificationApplication()
+    val code          = "12345678"
+
+    val riVerification        = ResponsibleIndividualToUVerification(
+      ResponsibleIndividualVerificationId(code),
+      applicationId,
+      Submission.Id.random,
+      0,
+      "App name",
+      LocalDateTime.now(ZoneOffset.UTC),
+      ResponsibleIndividualVerificationState.INITIAL
+    )
     val responsibleIndividual = ResponsibleIndividual.build("bob example", "bob@example.com")
 
     val mockSubmissionsConnector: ThirdPartyApplicationSubmissionsConnector = mock[ThirdPartyApplicationSubmissionsConnector]
-    val mockDeskproConnector = mock[DeskproConnector]
-    val underTest = new ResponsibleIndividualVerificationService(mockSubmissionsConnector, ApplicationServiceMock.applicationServiceMock, mockDeskproConnector)
+    val mockDeskproConnector                                                = mock[DeskproConnector]
+    val underTest                                                           = new ResponsibleIndividualVerificationService(mockSubmissionsConnector, ApplicationServiceMock.applicationServiceMock, mockDeskproConnector)
   }
 
   "fetchResponsibleIndividualVerification" should {
     "successfully return a riVerification record" in new Setup {
       when(mockSubmissionsConnector.fetchResponsibleIndividualVerification(eqTo(code))(*)).thenReturn(successful(Some(riVerification)))
-      
+
       val result = await(underTest.fetchResponsibleIndividualVerification(code))
-      
+
       result.isDefined shouldBe true
       result.get shouldBe riVerification
     }
 
     "return 'None' where no riVerification record found" in new Setup {
       when(mockSubmissionsConnector.fetchResponsibleIndividualVerification(eqTo(code))(*)).thenReturn(successful(None))
-      
+
       val result = await(underTest.fetchResponsibleIndividualVerification(code))
-      
+
       result.isDefined shouldBe false
     }
   }
@@ -79,7 +94,7 @@ class ResponsibleIndividualVerificationServiceSpec extends AsyncHmrcSpec
       when(mockDeskproConnector.createTicket(*)(*)).thenReturn(successful(TicketCreated))
 
       val result = await(underTest.accept(code))
-      
+
       result shouldBe 'Right
       result.right.value shouldBe riVerification
 
@@ -89,19 +104,30 @@ class ResponsibleIndividualVerificationServiceSpec extends AsyncHmrcSpec
       deskproTicket.subject shouldBe "New application submitted for checking"
       deskproTicket.name shouldBe application.state.requestedByName.get
       deskproTicket.email shouldBe application.state.requestedByEmailAddress.get
-      deskproTicket.message should include (riVerification.applicationName)
-      deskproTicket.referrer should include (s"/application/${riVerification.applicationId.value}/check-answers")
+      deskproTicket.message should include(riVerification.applicationName)
+      deskproTicket.referrer should include(s"/application/${riVerification.applicationId.value}/check-answers")
     }
 
     "successfully return a riVerification record for accept but don't create a deskpro ticket for an update" in new Setup {
-      val riUpdateVerification = ResponsibleIndividualUpdateVerification(ResponsibleIndividualVerificationId(code), applicationId, Submission.Id.random, 0, "App name", LocalDateTime.now(ZoneOffset.UTC), responsibleIndividual, "Mr Admin", "admin@example.com", ResponsibleIndividualVerificationState.INITIAL)
- 
+      val riUpdateVerification = ResponsibleIndividualUpdateVerification(
+        ResponsibleIndividualVerificationId(code),
+        applicationId,
+        Submission.Id.random,
+        0,
+        "App name",
+        LocalDateTime.now(ZoneOffset.UTC),
+        responsibleIndividual,
+        "Mr Admin",
+        "admin@example.com",
+        ResponsibleIndividualVerificationState.INITIAL
+      )
+
       when(mockSubmissionsConnector.fetchResponsibleIndividualVerification(eqTo(code))(*)).thenReturn(successful(Some(riUpdateVerification)))
       ApplicationServiceMock.fetchByApplicationIdReturns(applicationId, application)
       ApplicationServiceMock.acceptResponsibleIndividualVerification(applicationId, code)
-      
+
       val result = await(underTest.accept(code))
-      
+
       result shouldBe 'Right
       result.right.value shouldBe riUpdateVerification
       verify(mockDeskproConnector, never).createTicket(*)(*)
@@ -112,9 +138,9 @@ class ResponsibleIndividualVerificationServiceSpec extends AsyncHmrcSpec
     "successfully return a riVerification record for decline" in new Setup {
       when(mockSubmissionsConnector.fetchResponsibleIndividualVerification(eqTo(code))(*)).thenReturn(successful(Some(riVerification)))
       ApplicationServiceMock.declineResponsibleIndividualVerification(applicationId, code)
-    
+
       val result = await(underTest.decline(code))
-      
+
       result shouldBe 'Right
       result.right.value shouldBe riVerification
       verify(mockDeskproConnector, never).createTicket(*)(*)

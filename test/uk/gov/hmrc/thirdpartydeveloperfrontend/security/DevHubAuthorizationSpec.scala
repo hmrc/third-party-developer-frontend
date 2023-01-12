@@ -19,7 +19,7 @@ package uk.gov.hmrc.thirdpartydeveloperfrontend.security
 import cats.implicits._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.config.ApplicationConfig
 import uk.gov.hmrc.thirdpartydeveloperfrontend.config.ErrorHandler
-import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.{BaseController, BaseControllerSpec, routes}
+import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.{routes, BaseController, BaseControllerSpec}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.{DeveloperSession, LoggedInState}
 import play.api.libs.crypto.CookieSigner
 import uk.gov.hmrc.thirdpartydeveloperfrontend.builder._
@@ -35,16 +35,16 @@ import scala.concurrent.Future.successful
 import org.scalatest.matchers.should.Matchers
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.LocalUserIdTracker
 
-class DevHubAuthorizationSpec extends BaseControllerSpec with Matchers  with LocalUserIdTracker
-  with DeveloperSessionBuilder
-  with DeveloperBuilder {
+class DevHubAuthorizationSpec extends BaseControllerSpec with Matchers with LocalUserIdTracker
+    with DeveloperSessionBuilder
+    with DeveloperBuilder {
+
   class TestDevHubAuthorization(mcc: MessagesControllerComponents)(implicit val appConfig: ApplicationConfig, val ec: ExecutionContext)
       extends BaseController(mcc)
-      with ExtendedDevHubAuthorization
-      {
+      with ExtendedDevHubAuthorization {
     override val sessionService: SessionService = mock[SessionService]
-    override val errorHandler: ErrorHandler = mock[ErrorHandler]
-    override val cookieSigner: CookieSigner = app.injector.instanceOf[CookieSigner]
+    override val errorHandler: ErrorHandler     = mock[ErrorHandler]
+    override val cookieSigner: CookieSigner     = app.injector.instanceOf[CookieSigner]
   }
 
   class Setup(developerSession: Option[DeveloperSession]) {
@@ -57,8 +57,8 @@ class DevHubAuthorizationSpec extends BaseControllerSpec with Matchers  with Loc
 
     val atLeastPartLoggedInAction = underTest.atLeastPartLoggedInEnablingMfaAction { _ => Future.successful(Ok(EmptyContent())) }
 
-    val request = FakeRequest().withCookies(underTest.createCookie(sessionId))
-    val requestWithNoCookie = FakeRequest()
+    val request                  = FakeRequest().withCookies(underTest.createCookie(sessionId))
+    val requestWithNoCookie      = FakeRequest()
     val requestWithInvalidCookie = FakeRequest().withCookies(Cookie("PLAY2AUTH_SESS_ID", "InvalidCookieValue"))
     val requestWithNoRealSession = FakeRequest().withCookies(underTest.createCookie(sessionId))
 
@@ -66,7 +66,7 @@ class DevHubAuthorizationSpec extends BaseControllerSpec with Matchers  with Loc
     when(underTest.sessionService.updateUserFlowSessions(*)).thenReturn(successful(()))
   }
 
-  val loggedInDeveloperSession = buildDeveloperSession(loggedInState = LoggedInState.LOGGED_IN, buildDeveloper("Email", "firstName", "lastName"))
+  val loggedInDeveloperSession     = buildDeveloperSession(loggedInState = LoggedInState.LOGGED_IN, buildDeveloper("Email", "firstName", "lastName"))
   val partLoggedInDeveloperSession = buildDeveloperSession(loggedInState = LoggedInState.PART_LOGGED_IN_ENABLING_MFA, buildDeveloper("Email", "firstName", "lastName"))
 
   "DebHubAuthWrapper" when {

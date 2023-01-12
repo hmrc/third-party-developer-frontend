@@ -58,31 +58,29 @@ object CancelRequestController {
 
 @Singleton
 class CancelRequestController @Inject() (
-  val errorHandler: ErrorHandler,
-  val cookieSigner: CookieSigner,
-  val sessionService: SessionService,
-  val applicationActionService: ApplicationActionService,
-  val applicationService: ApplicationService,
-  mcc: MessagesControllerComponents,
-  val submissionService: SubmissionService,
-  productionApplicationConnector: ThirdPartyApplicationProductionConnector,
-  confirmCancelRequestForProductionCredentialsView: ConfirmCancelRequestForProductionCredentialsView,
-  cancelledRequestForProductionCredentialsView: CancelledRequestForProductionCredentialsView,
-  clock: Clock
-)
-(
-  implicit val ec: ExecutionContext,
-  val appConfig: ApplicationConfig
-) extends ApplicationController(mcc)
-  with EitherTHelper[String]
-  with SubmissionActionBuilders {
-  
+    val errorHandler: ErrorHandler,
+    val cookieSigner: CookieSigner,
+    val sessionService: SessionService,
+    val applicationActionService: ApplicationActionService,
+    val applicationService: ApplicationService,
+    mcc: MessagesControllerComponents,
+    val submissionService: SubmissionService,
+    productionApplicationConnector: ThirdPartyApplicationProductionConnector,
+    confirmCancelRequestForProductionCredentialsView: ConfirmCancelRequestForProductionCredentialsView,
+    cancelledRequestForProductionCredentialsView: CancelledRequestForProductionCredentialsView,
+    clock: Clock
+  )(implicit val ec: ExecutionContext,
+    val appConfig: ApplicationConfig
+  ) extends ApplicationController(mcc)
+    with EitherTHelper[String]
+    with SubmissionActionBuilders {
+
   import cats.implicits._
   import cats.instances.future.catsStdInstancesForFuture
   import SubmissionActionBuilders.ApplicationStateFilter
 
-  private val exec = ec
-  private val ET = new EitherTHelper[Result] { implicit val ec: ExecutionContext = exec }
+  private val exec   = ec
+  private val ET     = new EitherTHelper[Result] { implicit val ec: ExecutionContext = exec }
   private val failed = (err: String) => BadRequestWithErrorMessage(err)
 
   def cancelRequestForProductionCredentialsPage(appId: ApplicationId) = withApplicationSubmission(ApplicationStateFilter.notProduction)(appId) { implicit request =>
@@ -91,30 +89,31 @@ class CancelRequestController @Inject() (
 
   def cancelRequestForProductionCredentialsAction(appId: ApplicationId) = withApplicationSubmission(ApplicationStateFilter.notProduction)(appId) { implicit request =>
     lazy val goBackToRegularPage =
-      if(request.submissionRequest.extSubmission.submission.status.isAnsweredCompletely) {
+      if (request.submissionRequest.extSubmission.submission.status.isAnsweredCompletely) {
         Redirect(uk.gov.hmrc.apiplatform.modules.submissions.controllers.routes.CheckAnswersController.checkAnswersPage(appId))
       } else {
         Redirect(uk.gov.hmrc.apiplatform.modules.submissions.controllers.routes.ProdCredsChecklistController.productionCredentialsChecklistPage(appId))
       }
 
     val isValidSubmit: (String) => Boolean = (s) => s == "cancel-request" || s == "dont-cancel-request"
-    val formValues = request.body.asFormUrlEncoded.get.filterNot(_._1 == "csrfToken")
-    val reasons = "DevHub user cancelled request for production credentials"
-    val instigator = request.userId
-    val deleteRequest = DeleteApplicationByCollaborator(instigator, reasons, LocalDateTime.now(clock))
+    val formValues                         = request.body.asFormUrlEncoded.get.filterNot(_._1 == "csrfToken")
+    val reasons                            = "DevHub user cancelled request for production credentials"
+    val instigator                         = request.userId
+    val deleteRequest                      = DeleteApplicationByCollaborator(instigator, reasons, LocalDateTime.now(clock))
 
-    val x = (
-      for {
-        submitAction           <- ET.fromOption(
-                                    formValues.get("submit-action")
-                                      .flatMap(_.headOption)
-                                      .filter(isValidSubmit), 
-                                    failed("Bad form data")
-                                  )
-        cancelAction           <- ET.cond(submitAction == "cancel-request", submitAction, goBackToRegularPage )
-        _                      <- ET.liftF(productionApplicationConnector.applicationUpdate(appId, deleteRequest))
-      } yield Ok(cancelledRequestForProductionCredentialsView(request.application.name))
-    )
+    val x =
+      (
+        for {
+          submitAction <- ET.fromOption(
+                            formValues.get("submit-action")
+                              .flatMap(_.headOption)
+                              .filter(isValidSubmit),
+                            failed("Bad form data")
+                          )
+          cancelAction <- ET.cond(submitAction == "cancel-request", submitAction, goBackToRegularPage)
+          _            <- ET.liftF(productionApplicationConnector.applicationUpdate(appId, deleteRequest))
+        } yield Ok(cancelledRequestForProductionCredentialsView(request.application.name))
+      )
     x.fold[Result](identity, identity)
   }
 }

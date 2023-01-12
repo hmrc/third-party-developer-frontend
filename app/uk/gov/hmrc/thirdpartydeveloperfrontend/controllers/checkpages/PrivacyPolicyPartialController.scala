@@ -38,13 +38,13 @@ trait PrivacyPolicyPartialController extends WithUnsafeDefaultFormBinding {
       case std: Standard =>
         val form = PrivacyPolicyForm(hasUrl(std.privacyPolicyUrl, app.checkInformation.map(_.providedPrivacyPolicyURL)), std.privacyPolicyUrl)
         Ok(privacyPolicyView(app, PrivacyPolicyForm.form.fill(form), privacyPolicyActionRoute(app.id)))
-      case _ => Ok(privacyPolicyView(app, PrivacyPolicyForm.form, privacyPolicyActionRoute(app.id)))
+      case _             => Ok(privacyPolicyView(app, PrivacyPolicyForm.form, privacyPolicyActionRoute(app.id)))
     })
   }
 
   def privacyPolicyAction(appId: ApplicationId): Action[AnyContent] = canUseChecksAction(appId) { implicit request =>
     val requestForm = PrivacyPolicyForm.form.bindFromRequest
-    val app = request.application
+    val app         = request.application
 
     def withFormErrors(form: Form[PrivacyPolicyForm]) = {
       Future.successful(BadRequest(privacyPolicyView(app, form, privacyPolicyActionRoute(app.id))))

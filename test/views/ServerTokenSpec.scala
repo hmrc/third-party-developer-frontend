@@ -32,7 +32,8 @@ import views.html.ServerTokenView
 import java.time.LocalDateTime
 import scala.collection.JavaConverters._
 
-class ServerTokenSpec extends CommonViewSpec with WithCSRFAddToken with CollaboratorTracker with LocalUserIdTracker with DeveloperSessionBuilder with DeveloperBuilder{
+class ServerTokenSpec extends CommonViewSpec with WithCSRFAddToken with CollaboratorTracker with LocalUserIdTracker with DeveloperSessionBuilder with DeveloperBuilder {
+
   trait Setup {
     val appConfig: ApplicationConfig = mock[ApplicationConfig]
 
@@ -42,7 +43,7 @@ class ServerTokenSpec extends CommonViewSpec with WithCSRFAddToken with Collabor
   }
 
   "Server token page" should {
-    val request = FakeRequest().withCSRFToken
+    val request   = FakeRequest().withCSRFToken
     val developer = buildDeveloperSession(loggedInState = LoggedInState.LOGGED_IN, buildDeveloperWithRandomId("Test", "Test", "Test", None))
 
     val application = Application(
@@ -63,7 +64,7 @@ class ServerTokenSpec extends CommonViewSpec with WithCSRFAddToken with Collabor
 
     "render" in new Setup {
       val serverTokenView = app.injector.instanceOf[ServerTokenView]
-      val page: Html = serverTokenView.render(application, randomUUID.toString, request, developer, messagesProvider, appConfig)
+      val page: Html      = serverTokenView.render(application, randomUUID.toString, request, developer, messagesProvider, appConfig)
 
       page.contentType should include("text/html")
       val document: Document = Jsoup.parse(page.body)

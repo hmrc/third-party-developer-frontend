@@ -22,11 +22,12 @@ import java.nio.charset.StandardCharsets
 import play.api.libs.json.{Format, Json}
 
 case class DeveloperSession(session: Session) {
-  val developer: Developer = session.developer
-  val email: String = developer.email
+  val developer: Developer         = session.developer
+  val email: String                = developer.email
   val loggedInState: LoggedInState = session.loggedInState
 
   val displayedName: String = s"${developer.firstName} ${developer.lastName}"
+
   val displayedNameEncoded: String =
     URLEncoder.encode(displayedName, StandardCharsets.UTF_8.toString)
 
@@ -45,7 +46,7 @@ object DeveloperSession {
       loggedInState: LoggedInState,
       sessionId: String,
       developer: Developer
-  ): DeveloperSession = {
+    ): DeveloperSession = {
     new DeveloperSession(
       Session(sessionId = sessionId, developer = developer, loggedInState = loggedInState)
     )

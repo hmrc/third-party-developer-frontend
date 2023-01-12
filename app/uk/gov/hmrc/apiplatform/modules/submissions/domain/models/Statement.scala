@@ -18,11 +18,10 @@ package uk.gov.hmrc.apiplatform.modules.submissions.domain.models
 
 import cats.data.NonEmptyList
 
-
 sealed trait StatementFragment
-sealed trait NonBulletStatementFragment extends StatementFragment
-sealed trait SimpleStatementFragment extends NonBulletStatementFragment
-case class StatementText(text: String) extends SimpleStatementFragment
+sealed trait NonBulletStatementFragment             extends StatementFragment
+sealed trait SimpleStatementFragment                extends NonBulletStatementFragment
+case class StatementText(text: String)              extends SimpleStatementFragment
 case class StatementLink(text: String, url: String) extends SimpleStatementFragment
 
 case class StatementBullets(bullets: NonEmptyList[NonBulletStatementFragment]) extends StatementFragment
@@ -42,4 +41,3 @@ case class Statement(fragments: NonEmptyList[StatementFragment])
 object Statement {
   def apply(fragment: StatementFragment, fragments: StatementFragment*) = new Statement(NonEmptyList.of(fragment, fragments: _*))
 }
-

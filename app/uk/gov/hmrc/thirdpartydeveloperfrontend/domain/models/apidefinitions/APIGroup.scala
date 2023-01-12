@@ -23,7 +23,7 @@ sealed trait APIGroup extends EnumEntry
 object APIGroup extends PlayEnum[APIGroup] {
   val values = findValues
 
-  final case object API       extends APIGroup
-  final case object TEST_API  extends APIGroup
-  final case object EXAMPLE   extends APIGroup
+  final case object API      extends APIGroup
+  final case object TEST_API extends APIGroup
+  final case object EXAMPLE  extends APIGroup
 }

@@ -35,11 +35,12 @@ import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.controllers.Applica
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.apidefinitions.APIStatus
 
 @Singleton
-class UpliftLogic @Inject()(
-  apmConnector: ApmConnector,
-  sandboxApplicationConnector: ThirdPartyApplicationSandboxConnector,
-  appsByTeamMember: AppsByTeamMemberService
-)(implicit ec: ExecutionContext) {
+class UpliftLogic @Inject() (
+    apmConnector: ApmConnector,
+    sandboxApplicationConnector: ThirdPartyApplicationSandboxConnector,
+    appsByTeamMember: AppsByTeamMemberService
+  )(implicit ec: ExecutionContext
+  ) {
 
   import UpliftLogic._
 
@@ -49,37 +50,38 @@ class UpliftLogic @Inject()(
 
   def aUsersSandboxAdminSummariesAndUpliftIds(userId: UserId)(implicit hc: HeaderCarrier): Future[UpliftLogic.Data] = {
     // Concurrent requests
-    val fApisAvailableInProd = apmConnector.fetchUpliftableApiIdentifiers
+    val fApisAvailableInProd  = apmConnector.fetchUpliftableApiIdentifiers
     val fAllSandboxApiDetails = apmConnector.fetchAllApis(Environment.SANDBOX)
-    val fAllSummaries = appsByTeamMember.fetchSandboxSummariesByTeamMember(userId)
-    
+    val fAllSummaries         = appsByTeamMember.fetchSandboxSummariesByTeamMember(userId)
+
     for {
-      apisAvailableInProd     <- fApisAvailableInProd
-      sandboxApis             <- fAllSandboxApiDetails
-      allSummaries            <- fAllSummaries
+      apisAvailableInProd    <- fApisAvailableInProd
+      sandboxApis            <- fAllSandboxApiDetails
+      allSummaries           <- fAllSummaries
       possibleUpliftSummaries = allSummaries.filter(s => s.role.isAdministrator && s.accessType.isStandard)
-      
+
       subscriptionsForApps = getSubscriptionsByApp(possibleUpliftSummaries)
 
       upliftableAppIds = filterAppsHavingRealAndAvailableSubscriptions(sandboxApis, apisAvailableInProd, subscriptionsForApps).keySet
-      invalidAppIds = possibleUpliftSummaries.map(_.id).toSet -- upliftableAppIds
+      invalidAppIds    = possibleUpliftSummaries.map(_.id).toSet -- upliftableAppIds
     } yield UpliftLogic.Data(allSummaries.toList, upliftableAppIds, invalidAppIds)
   }
 }
 
 object UpliftLogic {
+
   case class Data(
-    sandboxApplicationSummaries: List[ApplicationSummary],
-    upliftableApplicationIds: Set[ApplicationId],
-    notUpliftableApplicationIds: Set[ApplicationId]
-  ) {
-    lazy val upliftableSummaries = sandboxApplicationSummaries.filter(s => upliftableApplicationIds.contains(s.id))
+      sandboxApplicationSummaries: List[ApplicationSummary],
+      upliftableApplicationIds: Set[ApplicationId],
+      notUpliftableApplicationIds: Set[ApplicationId]
+    ) {
+    lazy val upliftableSummaries         = sandboxApplicationSummaries.filter(s => upliftableApplicationIds.contains(s.id))
     lazy val hasAppsThatCannotBeUplifted = notUpliftableApplicationIds.nonEmpty
   }
 
   def contextsOfTestSupportAndExampleApis(apis: Map[ApiContext, ApiData]): Set[ApiContext] = {
     ApiData.filterApis(d => d.isTestSupport || d.categories.contains(ApiCategory.EXAMPLE))(apis)
-    .keySet
+      .keySet
   }
 
   def apiIdentifiersOfRetiredApis(apis: Map[ApiContext, ApiData]): Set[ApiIdentifier] = {
@@ -87,22 +89,22 @@ object UpliftLogic {
   }
 
   def filterAppsHavingRealAndAvailableSubscriptions(
-    sandboxApis: Map[ApiContext, ApiData],
-    apisAvailableInProd: Set[ApiIdentifier], 
-    subscriptionsByApplication: Map[ApplicationId, Set[ApiIdentifier]]
-  ): Map[ApplicationId, Set[ApiIdentifier]] = {
-  
+      sandboxApis: Map[ApiContext, ApiData],
+      apisAvailableInProd: Set[ApiIdentifier],
+      subscriptionsByApplication: Map[ApplicationId, Set[ApiIdentifier]]
+    ): Map[ApplicationId, Set[ApiIdentifier]] = {
+
     val excludedContexts = contextsOfTestSupportAndExampleApis(sandboxApis)
-    val retiredVersions = apiIdentifiersOfRetiredApis(sandboxApis)
-    
-    subscriptionsByApplication.flatMap { 
+    val retiredVersions  = apiIdentifiersOfRetiredApis(sandboxApis)
+
+    subscriptionsByApplication.flatMap {
       case (id, subs) =>
         val realApis = subs.filterNot(id => excludedContexts.contains(id.context) || retiredVersions.contains(id))
-        
-        if(realApis.nonEmpty && realApis.subsetOf(apisAvailableInProd) )
-          Map(id -> realApis) 
+
+        if (realApis.nonEmpty && realApis.subsetOf(apisAvailableInProd))
+          Map(id -> realApis)
         else
-          Map.empty[ApplicationId, Set[ApiIdentifier]] 
+          Map.empty[ApplicationId, Set[ApiIdentifier]]
     }
   }
 }

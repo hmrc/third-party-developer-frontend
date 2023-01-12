@@ -34,13 +34,14 @@ import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.Collab
 @Singleton
 class AppsByTeamMemberService @Inject() (
     connectorWrapper: ConnectorsWrapper
-)(implicit val ec: ExecutionContext) {
+  )(implicit val ec: ExecutionContext
+  ) {
 
   def fetchAppsByTeamMember(environment: Environment)(userId: UserId)(implicit hc: HeaderCarrier): Future[Seq[ApplicationWithSubscriptionIds]] = {
     connectorWrapper.forEnvironment(environment).thirdPartyApplicationConnector.fetchByTeamMember(userId).map(_.sorted)
   }
 
-  def fetchByTeamMemberWithRole(environment: Environment)(requiredRole: CollaboratorRole)(userId: UserId)(implicit hc: HeaderCarrier): Future[Seq[ApplicationWithSubscriptionIds]] = 
+  def fetchByTeamMemberWithRole(environment: Environment)(requiredRole: CollaboratorRole)(userId: UserId)(implicit hc: HeaderCarrier): Future[Seq[ApplicationWithSubscriptionIds]] =
     fetchAppsByTeamMember(environment)(userId).map { apps =>
       apps.filter(_.isUserACollaboratorOfRole(userId, requiredRole))
     }
@@ -64,7 +65,7 @@ class AppsByTeamMemberService @Inject() (
   def fetchAllSummariesByTeamMember(userId: UserId)(implicit hc: HeaderCarrier): Future[(Seq[ApplicationSummary], Seq[ApplicationSummary])] = {
     for {
       productionSummaries <- fetchProductionSummariesByTeamMember(userId)
-      sandboxSummaries <- fetchSandboxSummariesByTeamMember(userId)
+      sandboxSummaries    <- fetchSandboxSummariesByTeamMember(userId)
     } yield (sandboxSummaries, productionSummaries)
   }
 }

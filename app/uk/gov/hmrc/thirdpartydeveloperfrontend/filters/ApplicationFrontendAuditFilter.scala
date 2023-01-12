@@ -25,17 +25,17 @@ import uk.gov.hmrc.play.bootstrap.frontend.filters.{DefaultFrontendAuditFilter, 
 
 import scala.concurrent.ExecutionContext
 
-class ApplicationFrontendAuditFilter @Inject()(
-  val configuration: Configuration,
-  controllerConfigs: ControllerConfigs,
-  override val auditConnector: AuditConnector,
-  auditEvent: HttpAuditEvent,
-  override val mat: Materializer,
-  @Named("appName") appName: String,
-  requestHeaderAuditing: RequestHeaderAuditing
-)(
-  override implicit val ec: ExecutionContext
-) extends DefaultFrontendAuditFilter(configuration, controllerConfigs, auditConnector, auditEvent, requestHeaderAuditing, mat) {
+class ApplicationFrontendAuditFilter @Inject() (
+    val configuration: Configuration,
+    controllerConfigs: ControllerConfigs,
+    override val auditConnector: AuditConnector,
+    auditEvent: HttpAuditEvent,
+    override val mat: Materializer,
+    @Named("appName") appName: String,
+    requestHeaderAuditing: RequestHeaderAuditing
+  )(
+    override implicit val ec: ExecutionContext
+  ) extends DefaultFrontendAuditFilter(configuration, controllerConfigs, auditConnector, auditEvent, requestHeaderAuditing, mat) {
 
   override def controllerNeedsAuditing(controllerName: String): Boolean =
     controllerConfigs.get(controllerName).auditing

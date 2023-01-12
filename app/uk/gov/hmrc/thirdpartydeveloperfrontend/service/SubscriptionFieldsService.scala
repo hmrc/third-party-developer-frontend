@@ -18,7 +18,7 @@ package uk.gov.hmrc.thirdpartydeveloperfrontend.service
 
 import cats.implicits._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.apidefinitions.{ApiContext, ApiIdentifier, ApiVersion}
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.{Application, ClientId, Environment, CollaboratorRole}
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.{Application, ClientId, CollaboratorRole, Environment}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.subscriptions.ApiSubscriptionFields._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.subscriptions.{DevhubAccessLevel, FieldValue, Fields}
 import javax.inject.{Inject, Singleton}
@@ -33,9 +33,15 @@ import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.subscriptions.Field
 @Singleton
 class SubscriptionFieldsService @Inject() (connectorsWrapper: ConnectorsWrapper, apmConnector: ApmConnector)(implicit val ec: ExecutionContext) {
 
-  def saveFieldValues(role: CollaboratorRole, application: Application, apiContext: ApiContext, apiVersion: ApiVersion, oldValues: Seq[SubscriptionFieldValue], newValues: Fields.Alias)(
-      implicit hc: HeaderCarrier
-  ): Future[ServiceSaveSubscriptionFieldsResponse] = {
+  def saveFieldValues(
+      role: CollaboratorRole,
+      application: Application,
+      apiContext: ApiContext,
+      apiVersion: ApiVersion,
+      oldValues: Seq[SubscriptionFieldValue],
+      newValues: Fields.Alias
+    )(implicit hc: HeaderCarrier
+    ): Future[ServiceSaveSubscriptionFieldsResponse] = {
     case object AccessDenied
 
     def isAllowedToAndCreateNewValue(oldValue: SubscriptionFieldValue, newValue: FieldValue) = {
@@ -47,7 +53,7 @@ class SubscriptionFieldsService @Inject() (connectorsWrapper: ConnectorsWrapper,
     }
 
     def doConnectorSave(valuesToSave: Seq[SubscriptionFieldValue]) = {
-      val connector = connectorsWrapper.forEnvironment(application.deployedTo).apiSubscriptionFieldsConnector
+      val connector    = connectorsWrapper.forEnvironment(application.deployedTo).apiSubscriptionFieldsConnector
       val fieldsToSave = valuesToSave.map(v => (v.definition.name -> v.value)).toMap
 
       connector.saveFieldValues(application.clientId, apiContext, apiVersion, fieldsToSave)
@@ -74,26 +80,34 @@ class SubscriptionFieldsService @Inject() (connectorsWrapper: ConnectorsWrapper,
     apmConnector.fetchAllPossibleSubscriptions(applicationId)
   }
 
-  def fetchAllFieldDefinitions(environment: Environment)(implicit hc: HeaderCarrier): Future[Map[ApiContext,Map[ApiVersion, Map[FieldName, SubscriptionFieldDefinition]]]] = {
+  def fetchAllFieldDefinitions(environment: Environment)(implicit hc: HeaderCarrier): Future[Map[ApiContext, Map[ApiVersion, Map[FieldName, SubscriptionFieldDefinition]]]] = {
     apmConnector.getAllFieldDefinitions(environment)
   }
 }
 
 object SubscriptionFieldsService {
+
   trait SubscriptionFieldsConnector {
     def fetchFieldValues(clientId: ClientId, context: ApiContext, version: ApiVersion)(implicit hc: HeaderCarrier): Future[Seq[SubscriptionFieldValue]]
 
-    def fetchFieldsValuesWithPrefetchedDefinitions(clientId: ClientId, apiIdentifier: ApiIdentifier, definitionsCache: DefinitionsByApiVersion)(
-        implicit hc: HeaderCarrier
-    ): Future[Seq[SubscriptionFieldValue]]
+    def fetchFieldsValuesWithPrefetchedDefinitions(
+        clientId: ClientId,
+        apiIdentifier: ApiIdentifier,
+        definitionsCache: DefinitionsByApiVersion
+      )(implicit hc: HeaderCarrier
+      ): Future[Seq[SubscriptionFieldValue]]
 
     def fetchAllFieldDefinitions()(implicit hc: HeaderCarrier): Future[DefinitionsByApiVersion]
 
     def fetchFieldDefinitions(apiContext: ApiContext, apiVersion: ApiVersion)(implicit hc: HeaderCarrier): Future[Seq[SubscriptionFieldDefinition]]
 
-    def saveFieldValues(clientId: ClientId, apiContext: ApiContext, apiVersion: ApiVersion, fields: Fields.Alias)(
-        implicit hc: HeaderCarrier
-    ): Future[ConnectorSaveSubscriptionFieldsResponse]
+    def saveFieldValues(
+        clientId: ClientId,
+        apiContext: ApiContext,
+        apiVersion: ApiVersion,
+        fields: Fields.Alias
+      )(implicit hc: HeaderCarrier
+      ): Future[ConnectorSaveSubscriptionFieldsResponse]
 
     def deleteFieldValues(clientId: ClientId, apiContext: ApiContext, apiVersion: ApiVersion)(implicit hc: HeaderCarrier): Future[FieldsDeleteResult]
   }
@@ -106,5 +120,5 @@ object SubscriptionFieldsService {
 
   sealed trait AccessValidation
   case class ValidateAgainstRole(role: CollaboratorRole) extends AccessValidation
-  case object SkipRoleValidation extends AccessValidation
+  case object SkipRoleValidation                         extends AccessValidation
 }

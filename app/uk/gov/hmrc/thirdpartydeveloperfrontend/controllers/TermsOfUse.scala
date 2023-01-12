@@ -43,8 +43,9 @@ class TermsOfUse @Inject() (
     val cookieSigner: CookieSigner,
     termsOfUseView: TermsOfUseView,
     termsOfUseVersionService: TermsOfUseVersionService
-)(implicit val ec: ExecutionContext, val appConfig: ApplicationConfig)
-    extends ApplicationController(mcc)
+  )(implicit val ec: ExecutionContext,
+    val appConfig: ApplicationConfig
+  ) extends ApplicationController(mcc)
     with ApplicationHelper {
 
   def canChangeTermsOfUseAction(applicationId: ApplicationId)(fun: ApplicationRequest[AnyContent] => Future[Result]): Action[AnyContent] =
@@ -66,9 +67,10 @@ class TermsOfUse @Inject() (
   def agreeTermsOfUse(id: ApplicationId) = canChangeTermsOfUseAction(id) { implicit request =>
     def handleValidForm(app: Application, form: TermsOfUseForm) = {
       if (app.termsOfUseStatus == TermsOfUseStatus.AGREEMENT_REQUIRED) {
-        val information = app.checkInformation.getOrElse(CheckInformation())
+        val information        = app.checkInformation.getOrElse(CheckInformation())
         val updatedInformation = information.copy(
-          termsOfUseAgreements = information.termsOfUseAgreements :+ TermsOfUseAgreement(request.developerSession.email, LocalDateTime.now(ZoneOffset.UTC), termsOfUseVersionService.getLatest().toString)
+          termsOfUseAgreements =
+            information.termsOfUseAgreements :+ TermsOfUseAgreement(request.developerSession.email, LocalDateTime.now(ZoneOffset.UTC), termsOfUseVersionService.getLatest().toString)
         )
 
         applicationService

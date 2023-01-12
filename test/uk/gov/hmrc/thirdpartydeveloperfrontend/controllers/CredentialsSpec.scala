@@ -51,13 +51,14 @@ class CredentialsSpec
     with LocalUserIdTracker {
 
   val applicationId = ApplicationId(UUID.randomUUID().toString())
-  val appTokens = ApplicationToken(List(aClientSecret("secret1"), aClientSecret("secret2")), "token")
+  val appTokens     = ApplicationToken(List(aClientSecret("secret1"), aClientSecret("secret2")), "token")
 
   trait ApplicationProvider {
     def createApplication(): Application
   }
 
   trait BasicApplicationProvider extends ApplicationProvider {
+
     def createApplication() =
       Application(
         applicationId,
@@ -85,7 +86,7 @@ class CredentialsSpec
       access: Access = Standard(),
       environment: Environment = Environment.PRODUCTION,
       createdOn: LocalDateTime = LocalDateTime.now(ZoneOffset.UTC)
-  ) =
+    ) =
     Application(
       applicationId,
       clientId,
@@ -101,11 +102,11 @@ class CredentialsSpec
     )
 
   trait Setup extends ApplicationServiceMock with ApplicationActionServiceMock with SessionServiceMock with ApplicationProvider {
-    val credentialsView = app.injector.instanceOf[CredentialsView]
-    val clientIdView = app.injector.instanceOf[ClientIdView]
-    val clientSecretsView = app.injector.instanceOf[ClientSecretsView]
-    val serverTokenView = app.injector.instanceOf[ServerTokenView]
-    val deleteClientSecretView = app.injector.instanceOf[DeleteClientSecretView]
+    val credentialsView            = app.injector.instanceOf[CredentialsView]
+    val clientIdView               = app.injector.instanceOf[ClientIdView]
+    val clientSecretsView          = app.injector.instanceOf[ClientSecretsView]
+    val serverTokenView            = app.injector.instanceOf[ServerTokenView]
+    val deleteClientSecretView     = app.injector.instanceOf[DeleteClientSecretView]
     val clientSecretsGeneratedView = app.injector.instanceOf[ClientSecretsGeneratedView]
 
     val underTest = new Credentials(
@@ -125,7 +126,7 @@ class CredentialsSpec
       clientSecretsGeneratedView
     )
 
-    val application = createApplication()
+    val application                     = createApplication()
     val applicationWithSubscriptionData = ApplicationWithSubscriptionData(application)
 
     implicit val hc = HeaderCarrier()
@@ -136,10 +137,10 @@ class CredentialsSpec
     updateUserFlowSessionsReturnsSuccessfully(sessionId)
     givenApplicationUpdateSucceeds()
 
-    val sessionParams: Seq[(String, String)] = Seq("csrfToken" -> app.injector.instanceOf[TokenProvider].generateToken)
+    val sessionParams: Seq[(String, String)]                  = Seq("csrfToken" -> app.injector.instanceOf[TokenProvider].generateToken)
     val loggedOutRequest: FakeRequest[AnyContentAsEmpty.type] = FakeRequest().withSession(sessionParams: _*)
-    val loggedInRequest: FakeRequest[AnyContentAsEmpty.type] = FakeRequest().withLoggedIn(underTest, implicitly)(sessionId).withSession(sessionParams: _*)
-    val actor = CollaboratorActor(loggedInDeveloper.email)
+    val loggedInRequest: FakeRequest[AnyContentAsEmpty.type]  = FakeRequest().withLoggedIn(underTest, implicitly)(sessionId).withSession(sessionParams: _*)
+    val actor                                                 = CollaboratorActor(loggedInDeveloper.email)
   }
 
   "The credentials page" should {
@@ -356,7 +357,7 @@ class CredentialsSpec
   }
 
   "deleteClientSecretAction" should {
-    val applicationId = ApplicationId(UUID.randomUUID().toString())
+    val applicationId          = ApplicationId(UUID.randomUUID().toString())
     val clientSecretId: String = UUID.randomUUID().toString
 
     "delete the selected client secret" in new Setup {

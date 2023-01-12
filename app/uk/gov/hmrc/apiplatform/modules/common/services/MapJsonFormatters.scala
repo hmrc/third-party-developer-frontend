@@ -23,13 +23,12 @@ trait MapJsonFormatters {
 
   implicit def listMapReads[K, V](implicit keyReads: KeyReads[K], readsV: Reads[V]): Reads[ListMap[K, V]] = new Reads[ListMap[K, V]] {
     type Errors = Seq[(JsPath, Seq[JsonValidationError])]
-    
+
     def process(in: Map[String, JsValue]): JsResult[V] = {
-      if(in.size != 1) {
+      if (in.size != 1) {
         JsError(Seq(JsPath() -> Seq(JsonValidationError("error.expected.map.with.one.entry"))))
-      }
-      else {
-        val key = in.keySet.head
+      } else {
+        val key   = in.keySet.head
         val value = in(key)
 
         readsV.reads(value)
@@ -40,30 +39,31 @@ trait MapJsonFormatters {
 
     def reads(json: JsValue) = json match {
       case JsArray(jsValues) =>
-        jsValues.foldLeft[Either[Errors, ListMap[K,V]]](Right(ListMap.empty)) {
+        jsValues.foldLeft[Either[Errors, ListMap[K, V]]](Right(ListMap.empty)) {
           case (acc, JsObject(fs)) => (acc, process(fs.toMap)) match {
-            case (Right(vs), JsSuccess(v, _)) => keyReads.readKey(fs.keySet.head) match {
-              case JsSuccess(key, _) => Right(vs + (key -> v) )
-              case JsError(e) => Left(locate(e, fs.keySet.head))
+              case (Right(vs), JsSuccess(v, _)) => keyReads.readKey(fs.keySet.head) match {
+                  case JsSuccess(key, _) => Right(vs + (key -> v))
+                  case JsError(e)        => Left(locate(e, fs.keySet.head))
+                }
+              case (Right(_), JsError(e))       => Left(locate(e, fs.keySet.head))
+              case (Left(e), _: JsSuccess[_])   => Left(e)
+              case (Left(e1), JsError(e2))      => Left(e1 ++ locate(e2, fs.keySet.head))
             }
-            case (Right(_), JsError(e)) => Left(locate(e, fs.keySet.head))
-            case (Left(e), _: JsSuccess[_]) => Left(e)
-            case (Left(e1), JsError(e2)) => Left(e1 ++ locate(e2, fs.keySet.head))
-          }
-          
+
           case (acc, _) => Left(Seq(JsPath() -> Seq(JsonValidationError("error.expected.jsobject"))))
         }
-        .fold(JsError.apply, res => JsSuccess(res))
+          .fold(JsError.apply, res => JsSuccess(res))
 
       case _ => JsError(Seq(JsPath() -> Seq(JsonValidationError("error.expected.jsobject"))))
     }
   }
 
-  implicit def listMapWrites[K,V](implicit keyWrites: KeyWrites[K], formatV: Writes[V]): Writes[ListMap[K, V]] =
-    new Writes[ListMap[K,V]] {
-      def writes(o: ListMap[K,V]): JsValue = {
+  implicit def listMapWrites[K, V](implicit keyWrites: KeyWrites[K], formatV: Writes[V]): Writes[ListMap[K, V]] =
+    new Writes[ListMap[K, V]] {
+
+      def writes(o: ListMap[K, V]): JsValue = {
         JsArray(o.map {
-            case (k,v) => JsObject(Seq((keyWrites.writeKey(k), formatV.writes(v))) )
+          case (k, v) => JsObject(Seq((keyWrites.writeKey(k), formatV.writes(v))))
         }.toSeq)
       }
     }

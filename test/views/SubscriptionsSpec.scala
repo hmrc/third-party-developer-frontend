@@ -34,14 +34,15 @@ import java.time.LocalDateTime
 import scala.collection.JavaConverters._
 
 class SubscriptionsSpec extends CommonViewSpec
-  with WithCSRFAddToken
-  with LocalUserIdTracker
-  with DeveloperSessionBuilder
-  with DeveloperBuilder {
+    with WithCSRFAddToken
+    with LocalUserIdTracker
+    with DeveloperSessionBuilder
+    with DeveloperBuilder {
 
   val manageSubscriptions = app.injector.instanceOf[ManageSubscriptionsView]
 
   trait Setup {
+
     def elementExistsByText(doc: Document, elementType: String, elementText: String): Boolean = {
       doc.select(elementType).asScala.exists(node => node.text.trim == elementText)
     }
@@ -68,10 +69,11 @@ class SubscriptionsSpec extends CommonViewSpec
   "Subscriptions page" should {
     val developer = buildDeveloperSession(loggedInState = LoggedInState.LOGGED_IN, buildDeveloperWithRandomId("Test", "Test", "Test", None))
 
-    val productionApplicationPendingGatekeeperApproval = buildApplication(ApplicationState.pendingGatekeeperApproval("somebody@example.com", "somebody"), Environment.PRODUCTION)
-    val productionApplicationPendingRequesterVerification = buildApplication(ApplicationState.pendingRequesterVerification("somebody@example.com", "somebody", ""), Environment.PRODUCTION)
-    val productionApplication = buildApplication(ApplicationState.production("somebody@example.com", "somebody", ""), Environment.PRODUCTION)
-    val productionApplicationTesting = buildApplication(ApplicationState.testing, Environment.PRODUCTION)
+    val productionApplicationPendingGatekeeperApproval    = buildApplication(ApplicationState.pendingGatekeeperApproval("somebody@example.com", "somebody"), Environment.PRODUCTION)
+    val productionApplicationPendingRequesterVerification =
+      buildApplication(ApplicationState.pendingRequesterVerification("somebody@example.com", "somebody", ""), Environment.PRODUCTION)
+    val productionApplication                             = buildApplication(ApplicationState.production("somebody@example.com", "somebody", ""), Environment.PRODUCTION)
+    val productionApplicationTesting                      = buildApplication(ApplicationState.testing, Environment.PRODUCTION)
 
     val sandboxApplicationTesting = buildApplication(ApplicationState.testing, Environment.SANDBOX)
 

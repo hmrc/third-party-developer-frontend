@@ -23,20 +23,22 @@ import play.api.mvc.{Request, RequestHeader, Result}
 import play.twirl.api.HtmlFormat
 import uk.gov.hmrc.play.bootstrap.frontend.http.FrontendErrorHandler
 import views.html.{ErrorTemplate, ForbiddenTemplate}
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.{ApplicationNotFound, ApiContextVersionNotFound}
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.{ApiContextVersionNotFound, ApplicationNotFound}
+
 @Singleton
-class ErrorHandler @Inject()(val messagesApi: MessagesApi,
-                             val configuration: Configuration,
-                             errorTemplateView: ErrorTemplate,
-                             forbiddenTemplateView: ForbiddenTemplate)
-                            (implicit val appConfig: ApplicationConfig)
-  extends FrontendErrorHandler {
+class ErrorHandler @Inject() (
+    val messagesApi: MessagesApi,
+    val configuration: Configuration,
+    errorTemplateView: ErrorTemplate,
+    forbiddenTemplateView: ForbiddenTemplate
+  )(implicit val appConfig: ApplicationConfig
+  ) extends FrontendErrorHandler {
 
   override def standardErrorTemplate(pageTitle: String, heading: String, message: String)(implicit request: Request[_]): HtmlFormat.Appendable = {
     errorTemplateView(pageTitle, heading, message)
   }
 
-  def forbiddenTemplate(implicit request : Request[_]) = {
+  def forbiddenTemplate(implicit request: Request[_]) = {
     forbiddenTemplateView()
   }
 
@@ -44,9 +46,9 @@ class ErrorHandler @Inject()(val messagesApi: MessagesApi,
     implicit val r: Request[String] = Request(rh, "")
 
     ex match {
-      case _: ApplicationNotFound => play.api.mvc.Results.NotFound(notFoundTemplate)
+      case _: ApplicationNotFound       => play.api.mvc.Results.NotFound(notFoundTemplate)
       case _: ApiContextVersionNotFound => play.api.mvc.Results.NotFound(notFoundTemplate)
-      case _ => super.resolveError(rh, ex)
+      case _                            => super.resolveError(rh, ex)
     }
   }
 }

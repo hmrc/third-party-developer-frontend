@@ -27,14 +27,15 @@ import views.helper.CommonViewSpec
 import views.html.{ChangeProfileView, ProfileView}
 
 class ProfileSpec extends CommonViewSpec
-  with WithCSRFAddToken
-  with LocalUserIdTracker
-  with DeveloperSessionBuilder
-  with DeveloperBuilder {
+    with WithCSRFAddToken
+    with LocalUserIdTracker
+    with DeveloperSessionBuilder
+    with DeveloperBuilder {
 
   private val request = FakeRequest().withCSRFToken
 
-  val developer = buildDeveloperSession(loggedInState = LoggedInState.LOGGED_IN, buildDeveloperWithRandomId("developer@example.com", "FirstName", "LastName", Some("TestOrganisation")))
+  val developer =
+    buildDeveloperSession(loggedInState = LoggedInState.LOGGED_IN, buildDeveloperWithRandomId("developer@example.com", "FirstName", "LastName", Some("TestOrganisation")))
 
   "Profile page" should {
     val profileView = app.injector.instanceOf[ProfileView]

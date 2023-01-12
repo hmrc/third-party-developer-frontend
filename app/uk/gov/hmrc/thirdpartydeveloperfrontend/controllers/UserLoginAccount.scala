@@ -57,32 +57,33 @@ trait Auditing {
 }
 
 @Singleton
-class UserLoginAccount @Inject()(val auditService: AuditService,
-                                 val errorHandler: ErrorHandler,
-                                 val applicationService: ApplicationService,
-                                 val subscriptionFieldsService: SubscriptionFieldsService,
-                                 val thirdPartyDeveloperConnector: ThirdPartyDeveloperConnector,
-                                 val sessionService: SessionService,
-                                 val thirdPartyDeveloperMfaConnector: ThirdPartyDeveloperMfaConnector,
-                                 mcc: MessagesControllerComponents,
-                                 val appsByTeamMember: AppsByTeamMemberService,
-                                 val cookieSigner : CookieSigner,
-                                 signInView: SignInView,
-                                 accountLockedView: AccountLockedView,
-                                 authAppLoginAccessCodeView: AuthAppLoginAccessCodeView,
-                                 smsLoginAccessCodeView: SmsLoginAccessCodeView,
-                                 selectLoginMfaView: SelectLoginMfaView,
-                                 requestMfaRemovalView: RequestMfaRemovalView,
-                                 requestMfaRemovalCompleteView: RequestMfaRemovalCompleteView,
-                                 userDidNotAdd2SVView: UserDidNotAdd2SVView,
-                                 add2SVView: Add2SVView
-                                )
-                                (implicit val ec: ExecutionContext, val appConfig: ApplicationConfig)
-  extends LoggedOutController(mcc) with Auditing with ApplicationLogger {
+class UserLoginAccount @Inject() (
+    val auditService: AuditService,
+    val errorHandler: ErrorHandler,
+    val applicationService: ApplicationService,
+    val subscriptionFieldsService: SubscriptionFieldsService,
+    val thirdPartyDeveloperConnector: ThirdPartyDeveloperConnector,
+    val sessionService: SessionService,
+    val thirdPartyDeveloperMfaConnector: ThirdPartyDeveloperMfaConnector,
+    mcc: MessagesControllerComponents,
+    val appsByTeamMember: AppsByTeamMemberService,
+    val cookieSigner: CookieSigner,
+    signInView: SignInView,
+    accountLockedView: AccountLockedView,
+    authAppLoginAccessCodeView: AuthAppLoginAccessCodeView,
+    smsLoginAccessCodeView: SmsLoginAccessCodeView,
+    selectLoginMfaView: SelectLoginMfaView,
+    requestMfaRemovalView: RequestMfaRemovalView,
+    requestMfaRemovalCompleteView: RequestMfaRemovalCompleteView,
+    userDidNotAdd2SVView: UserDidNotAdd2SVView,
+    add2SVView: Add2SVView
+  )(implicit val ec: ExecutionContext,
+    val appConfig: ApplicationConfig
+  ) extends LoggedOutController(mcc) with Auditing with ApplicationLogger {
 
   import play.api.data._
 
-  val loginForm: Form[LoginForm] = LoginForm.form
+  val loginForm: Form[LoginForm]                   = LoginForm.form
   val changePasswordForm: Form[ChangePasswordForm] = ChangePasswordForm.form
 
   def login: Action[AnyContent] = loggedOutAction { implicit request =>
@@ -92,8 +93,8 @@ class UserLoginAccount @Inject()(val auditService: AuditService,
   def accountLocked: Action[AnyContent] = Action.async { implicit request =>
     for {
       _ <- extractSessionIdFromCookie(request)
-        .map(sessionService.destroy)
-        .getOrElse(successful(()))
+             .map(sessionService.destroy)
+             .getOrElse(successful(()))
     } yield Locked(accountLockedView())
   }
 
@@ -102,17 +103,21 @@ class UserLoginAccount @Inject()(val auditService: AuditService,
   }
 
   def get2svRecommendationPage(): Action[AnyContent] = atLeastPartLoggedInEnablingMfaAction {
-    implicit request => {
-      for {
-        isAdminOnProductionApp <- appsByTeamMember.fetchProductionSummariesByAdmin(request.userId).map(_.nonEmpty)
-      }  yield (Ok(add2SVView(isAdminOnProductionApp)))
-    }
+    implicit request =>
+      {
+        for {
+          isAdminOnProductionApp <- appsByTeamMember.fetchProductionSummariesByAdmin(request.userId).map(_.nonEmpty)
+        } yield (Ok(add2SVView(isAdminOnProductionApp)))
+      }
   }
 
-  private def routeToLoginOr2SV(login: LoginForm,
-                                userAuthenticationResponse: UserAuthenticationResponse,
-                                playSession: PlaySession,
-                                userId: UserId)(implicit request: Request[AnyContent]): Future[Result] = {
+  private def routeToLoginOr2SV(
+      login: LoginForm,
+      userAuthenticationResponse: UserAuthenticationResponse,
+      playSession: PlaySession,
+      userId: UserId
+    )(implicit request: Request[AnyContent]
+    ): Future[Result] = {
 
     // In each case retain the Play session so that 'access_uri' query param, if set, is used at the end of the 2SV reminder flow
     (userAuthenticationResponse.session, userAuthenticationResponse.accessCodeRequired) match {
@@ -147,7 +152,7 @@ class UserLoginAccount @Inject()(val auditService: AuditService,
         // TODO: delete device session cookie --- If Device cookie is going to be refreshed / recreated do we need to delete it?
         thirdPartyDeveloperConnector.fetchDeveloper(userId) flatMap {
           case Some(developer: Developer) => handleMfaChoices(developer, playSession, login.emailaddress, userAuthenticationResponse.nonce.getOrElse(""))
-          case None => throw new UserNotFound
+          case None                       => throw new UserNotFound
         }
 
     }
@@ -179,9 +184,9 @@ class UserLoginAccount @Inject()(val auditService: AuditService,
     val session: PlaySession = playSession + ("emailAddress" -> emailAddress) + ("nonce" -> nonce)
 
     (MfaDetailHelper.getAuthAppMfaVerified(developer.mfaDetails), MfaDetailHelper.getSmsMfaVerified(developer.mfaDetails)) match {
-      case (None, None) => successful(InternalServerError("Access code required but mfa not set up"))
-      case (Some(x: AuthenticatorAppMfaDetailSummary), None) => handleAuthAppFlow(developer.userId, x, session)
-      case (None, Some(x: SmsMfaDetailSummary)) => handleSmsFlow(developer.userId, x, session)
+      case (None, None)                                                                            => successful(InternalServerError("Access code required but mfa not set up"))
+      case (Some(x: AuthenticatorAppMfaDetailSummary), None)                                       => handleAuthAppFlow(developer.userId, x, session)
+      case (None, Some(x: SmsMfaDetailSummary))                                                    => handleSmsFlow(developer.userId, x, session)
       case (Some(authAppMfa: AuthenticatorAppMfaDetailSummary), Some(smsMfa: SmsMfaDetailSummary)) =>
         handleMfaChoiceFlow(developer.userId, authAppMfa.id, smsMfa.id, session)
     }
@@ -192,11 +197,10 @@ class UserLoginAccount @Inject()(val auditService: AuditService,
   }
 
   def selectLoginMfaAction(): Action[AnyContent] = Action.async { implicit request =>
-
     def handleSelectedMfa(userId: UserId, mfaDetail: MfaDetail) = {
       mfaDetail match {
         case x: AuthenticatorAppMfaDetailSummary => handleAuthAppFlow(userId, x, request.session)
-        case x: SmsMfaDetailSummary => handleSmsFlow(userId, x, request.session)
+        case x: SmsMfaDetailSummary              => handleSmsFlow(userId, x, request.session)
       }
     }
 
@@ -208,7 +212,7 @@ class UserLoginAccount @Inject()(val auditService: AuditService,
           getMfaDetailById(MfaId(UUID.fromString(form.mfaId)), developer.mfaDetails)
             .map(mfaDetail => handleSelectedMfa(userId, mfaDetail))
             .getOrElse(successful(InternalServerError("Access code required but mfa not set up")))
-        case None => successful(NotFound("User not found"))
+        case None                       => successful(NotFound("User not found"))
       }
     }
 
@@ -223,36 +227,37 @@ class UserLoginAccount @Inject()(val auditService: AuditService,
 
     requestForm.fold(
       errors => successful(BadRequest(signInView("Sign in", errors))),
-      login => {
-        val deviceSessionId = request.cookies.get("DEVICE_SESS_ID").flatMap(x => decodeCookie(x.value)).map(UUID.fromString)
-        for {
-          (userAuthenticationResponse, userId) <- sessionService.authenticate(login.emailaddress, login.password, deviceSessionId)
-          response <- routeToLoginOr2SV(login, userAuthenticationResponse, request.session, userId)
-        } yield response
-      } recover {
-        case _: InvalidEmail =>
-          logger.warn("Login failed due to invalid Email")
-          audit(LoginFailedDueToInvalidEmail, Map("developerEmail" -> login.emailaddress))
-          Unauthorized(signInView("Sign in", LoginForm.invalidCredentials(requestForm, login.emailaddress)))
-        case _: InvalidCredentials =>
-          logger.warn("Login failed due to invalid credentials")
-          audit(LoginFailedDueToInvalidPassword, Map("developerEmail" -> login.emailaddress))
-          Unauthorized(signInView("Sign in", LoginForm.invalidCredentials(requestForm, login.emailaddress)))
-        case _: LockedAccount =>
-          logger.warn("Login failed account locked")
-          audit(LoginFailedDueToLockedAccount, Map("developerEmail" -> login.emailaddress))
-          Locked(accountLockedView())
-        case _: UnverifiedAccount =>
-          logger.warn("Login failed unverified account")
-          Forbidden(signInView("Sign in", LoginForm.accountUnverified(requestForm, login.emailaddress)))
-            .withSession("email" -> login.emailaddress)
-        case _: UserNotFound =>
-          logger.warn("Login failed due to user not found")
-          InternalServerError(errorHandler.internalServerErrorTemplate)
-        case _: MatchError =>
-          logger.warn("Inconsistent response from server")
-          InternalServerError(errorHandler.internalServerErrorTemplate)
-      }
+      login =>
+        {
+          val deviceSessionId = request.cookies.get("DEVICE_SESS_ID").flatMap(x => decodeCookie(x.value)).map(UUID.fromString)
+          for {
+            (userAuthenticationResponse, userId) <- sessionService.authenticate(login.emailaddress, login.password, deviceSessionId)
+            response                             <- routeToLoginOr2SV(login, userAuthenticationResponse, request.session, userId)
+          } yield response
+        } recover {
+          case _: InvalidEmail       =>
+            logger.warn("Login failed due to invalid Email")
+            audit(LoginFailedDueToInvalidEmail, Map("developerEmail" -> login.emailaddress))
+            Unauthorized(signInView("Sign in", LoginForm.invalidCredentials(requestForm, login.emailaddress)))
+          case _: InvalidCredentials =>
+            logger.warn("Login failed due to invalid credentials")
+            audit(LoginFailedDueToInvalidPassword, Map("developerEmail" -> login.emailaddress))
+            Unauthorized(signInView("Sign in", LoginForm.invalidCredentials(requestForm, login.emailaddress)))
+          case _: LockedAccount      =>
+            logger.warn("Login failed account locked")
+            audit(LoginFailedDueToLockedAccount, Map("developerEmail" -> login.emailaddress))
+            Locked(accountLockedView())
+          case _: UnverifiedAccount  =>
+            logger.warn("Login failed unverified account")
+            Forbidden(signInView("Sign in", LoginForm.accountUnverified(requestForm, login.emailaddress)))
+              .withSession("email" -> login.emailaddress)
+          case _: UserNotFound       =>
+            logger.warn("Login failed due to user not found")
+            InternalServerError(errorHandler.internalServerErrorTemplate)
+          case _: MatchError         =>
+            logger.warn("Inconsistent response from server")
+            InternalServerError(errorHandler.internalServerErrorTemplate)
+        }
     )
   }
 
@@ -261,15 +266,16 @@ class UserLoginAccount @Inject()(val auditService: AuditService,
 
     thirdPartyDeveloperConnector.fetchDeveloper(userId)
       .flatMap {
-        case Some(developer: Developer) => {}
-         if(hasVerifiedSmsAndAuthApp(developer.mfaDetails)){
-           val authAppMfaId = getMfaDetailByType(MfaType.AUTHENTICATOR_APP, developer.mfaDetails)
-           val smsMfaId = getMfaDetailByType(MfaType.SMS, developer.mfaDetails)
-           successful(Ok(selectLoginMfaView(SelectLoginMfaForm.form, authAppMfaId.id, smsMfaId.id)))
-         } else{
-           logger.warn("Inconsistent state of user mfa")
-           successful(InternalServerError(errorHandler.internalServerErrorTemplate))
-         }
+        case Some(developer: Developer) =>
+          {}
+          if (hasVerifiedSmsAndAuthApp(developer.mfaDetails)) {
+            val authAppMfaId = getMfaDetailByType(MfaType.AUTHENTICATOR_APP, developer.mfaDetails)
+            val smsMfaId     = getMfaDetailByType(MfaType.SMS, developer.mfaDetails)
+            successful(Ok(selectLoginMfaView(SelectLoginMfaForm.form, authAppMfaId.id, smsMfaId.id)))
+          } else {
+            logger.warn("Inconsistent state of user mfa")
+            successful(InternalServerError(errorHandler.internalServerErrorTemplate))
+          }
 
         case None => successful(NotFound("User not found"))
       }
@@ -281,14 +287,14 @@ class UserLoginAccount @Inject()(val auditService: AuditService,
     def handleMfaType(userHasMultipleMfa: Boolean) = {
       mfaType match {
         case AUTHENTICATOR_APP => Ok(authAppLoginAccessCodeView(MfaAccessCodeForm.form, mfaId, mfaType, userHasMultipleMfa))
-        case SMS => Ok(smsLoginAccessCodeView(MfaAccessCodeForm.form, mfaId, mfaType, userHasMultipleMfa))
+        case SMS               => Ok(smsLoginAccessCodeView(MfaAccessCodeForm.form, mfaId, mfaType, userHasMultipleMfa))
       }
     }
 
     thirdPartyDeveloperConnector.fetchDeveloper(userId).map {
-        case Some(developer: Developer) => handleMfaType(hasMultipleMfaMethods(developer))
-        case None                       => handleMfaType(false)
-      }
+      case Some(developer: Developer) => handleMfaType(hasMultipleMfaMethods(developer))
+      case None                       => handleMfaType(false)
+    }
   }
 
   private def hasMultipleMfaMethods(developer: Developer): Boolean = hasVerifiedSmsAndAuthApp(developer.mfaDetails)
@@ -300,10 +306,10 @@ class UserLoginAccount @Inject()(val auditService: AuditService,
       val verifiedMfaDetailsOfOtherTypes = session.developer.mfaDetails.filter(_.verified).filterNot(_.mfaType == mfaType)
 
       (verifiedMfaDetailsOfOtherTypes.isEmpty, mfaType) match {
-          case (true, AUTHENTICATOR_APP) => successful(Redirect(uk.gov.hmrc.apiplatform.modules.mfa.controllers.profile.routes.MfaController.smsSetupReminderPage))
-          case (true, SMS) => successful(Redirect(uk.gov.hmrc.apiplatform.modules.mfa.controllers.profile.routes.MfaController.authAppSetupReminderPage))
-          case _ =>  loginSucceeded(request)
-        }
+        case (true, AUTHENTICATOR_APP) => successful(Redirect(uk.gov.hmrc.apiplatform.modules.mfa.controllers.profile.routes.MfaController.smsSetupReminderPage))
+        case (true, SMS)               => successful(Redirect(uk.gov.hmrc.apiplatform.modules.mfa.controllers.profile.routes.MfaController.authAppSetupReminderPage))
+        case _                         => loginSucceeded(request)
+      }
     }
 
     def handleRememberMe(form: MfaAccessCodeForm, session: Session): Future[Result] = {
@@ -318,9 +324,9 @@ class UserLoginAccount @Inject()(val auditService: AuditService,
 
     def handleAuthentication(email: String, form: MfaAccessCodeForm, mfaType: MfaType, userHasMultipleMfa: Boolean) = {
       (for {
-        session   <- sessionService.authenticateAccessCode(email, form.accessCode, request.session.get("nonce").get, mfaId)
-        _         <-  audit(LoginSucceeded, DeveloperSession.apply(session))
-        result    <- handleRememberMe(form, session)
+        session <- sessionService.authenticateAccessCode(email, form.accessCode, request.session.get("nonce").get, mfaId)
+        _       <- audit(LoginSucceeded, DeveloperSession.apply(session))
+        result  <- handleRememberMe(form, session)
       } yield result)
         .recover {
           case _: InvalidCredentials =>
@@ -339,12 +345,16 @@ class UserLoginAccount @Inject()(val auditService: AuditService,
       mfaType match {
         case AUTHENTICATOR_APP => Unauthorized(authAppLoginAccessCodeView(
             MfaAccessCodeForm.form.fill(form).withError("accessCode", "You have entered an incorrect access code"),
-            mfaId, mfaType, userHasMultipleMfa)
-        )
+            mfaId,
+            mfaType,
+            userHasMultipleMfa
+          ))
         case SMS               => Unauthorized(smsLoginAccessCodeView(
             MfaAccessCodeForm.form.fill(form).withError("accessCode", "You have entered an incorrect access code"),
-            mfaId, mfaType, userHasMultipleMfa)
-        )
+            mfaId,
+            mfaType,
+            userHasMultipleMfa
+          ))
       }
     }
 

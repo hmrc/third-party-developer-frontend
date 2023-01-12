@@ -38,13 +38,13 @@ trait LocalUserIdTracker extends UserIdTracker {
 object GlobalUserIdTracker extends LocalUserIdTracker
 
 trait CollaboratorTracker {
-  self : UserIdTracker =>
-  
+  self: UserIdTracker =>
+
   def collaboratorOf(email: String, role: CollaboratorRole): Collaborator = Collaborator(email, role, idOf(email))
 
   implicit class CollaboratorSyntax(value: String) {
-    def asAdministratorCollaborator = collaboratorOf(value, ADMINISTRATOR)
-    def asDeveloperCollaborator = collaboratorOf(value, DEVELOPER)
-    def asCollaborator(role:CollaboratorRole) = collaboratorOf(value, role)
+    def asAdministratorCollaborator            = collaboratorOf(value, ADMINISTRATOR)
+    def asDeveloperCollaborator                = collaboratorOf(value, DEVELOPER)
+    def asCollaborator(role: CollaboratorRole) = collaboratorOf(value, role)
   }
 }

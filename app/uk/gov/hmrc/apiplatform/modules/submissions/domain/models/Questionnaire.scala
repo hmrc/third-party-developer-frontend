@@ -21,19 +21,20 @@ import play.api.libs.json.Json
 
 object AskWhen {
   import Submission.AnswersToQuestions
-  
+
   type Context = Map[String, String]
-  
+
   object Context {
+
     object Keys {
-      val VAT_OR_ITSA = "VAT_OR_ITSA"
+      val VAT_OR_ITSA       = "VAT_OR_ITSA"
       val IN_HOUSE_SOFTWARE = "IN_HOUSE_SOFTWARE" // Stored on Application
-    } 
+    }
   }
 
   def shouldAsk(context: Context, answersToQuestions: AnswersToQuestions)(askWhen: AskWhen): Boolean = {
     askWhen match {
-      case AlwaysAsk => true
+      case AlwaysAsk                                 => true
       case AskWhenContext(contextKey, expectedValue) => context.get(contextKey).map(_.equalsIgnoreCase(expectedValue)).getOrElse(false)
       case AskWhenAnswer(questionId, expectedAnswer) => answersToQuestions.get(questionId).map(_ == expectedAnswer).getOrElse(false)
     }
@@ -41,11 +42,12 @@ object AskWhen {
 }
 
 sealed trait AskWhen
-case class AskWhenContext(contextKey: String, expectedValue: String) extends AskWhen
+case class AskWhenContext(contextKey: String, expectedValue: String)                 extends AskWhen
 case class AskWhenAnswer(questionId: Question.Id, expectedValue: SingleChoiceAnswer) extends AskWhen
-case object AlwaysAsk extends AskWhen
+case object AlwaysAsk                                                                extends AskWhen
 
 object AskWhenAnswer {
+
   def apply(question: SingleChoiceQuestion, expectedValue: String): AskWhen = {
     require(question.choices.find(qc => qc.value == expectedValue).isDefined)
     AskWhenAnswer(question.id, SingleChoiceAnswer(expectedValue))
@@ -55,17 +57,17 @@ object AskWhenAnswer {
 case class QuestionItem(question: Question, askWhen: AskWhen)
 
 object QuestionItem {
-  def apply(question: Question): QuestionItem = QuestionItem(question, AlwaysAsk)
+  def apply(question: Question): QuestionItem                   = QuestionItem(question, AlwaysAsk)
   def apply(question: Question, askWhen: AskWhen): QuestionItem = new QuestionItem(question, askWhen)
 }
 
 object Questionnaire {
   case class Label(value: String) extends AnyVal
-  case class Id(value: String) extends AnyVal
+  case class Id(value: String)    extends AnyVal
 
   object Label {
     implicit val format = Json.valueFormat[Label]
-  }  
+  }
 
   object Id {
     def random = Questionnaire.Id(java.util.UUID.randomUUID.toString)
@@ -75,10 +77,10 @@ object Questionnaire {
 }
 
 case class Questionnaire(
-  id: Questionnaire.Id,
-  label: Questionnaire.Label,
-  questions: NonEmptyList[QuestionItem]
-) {
-  def hasQuestion(qid: Question.Id): Boolean = question(qid).isDefined
+    id: Questionnaire.Id,
+    label: Questionnaire.Label,
+    questions: NonEmptyList[QuestionItem]
+  ) {
+  def hasQuestion(qid: Question.Id): Boolean       = question(qid).isDefined
   def question(qid: Question.Id): Option[Question] = questions.find(_.question.id == qid).map(_.question)
 }

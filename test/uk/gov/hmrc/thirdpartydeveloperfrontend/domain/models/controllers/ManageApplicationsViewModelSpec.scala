@@ -42,7 +42,7 @@ class ManageApplicationsViewModelSpec extends AnyWordSpec with Matchers {
         Environment.SANDBOX,
         Set.empty
       )
-      
+
     val notYetLiveProductionApp =
       ApplicationSummary(
         ApplicationId(""),

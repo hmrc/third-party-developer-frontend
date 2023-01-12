@@ -39,42 +39,42 @@ import scala.concurrent.ExecutionContext.Implicits.global
 import uk.gov.hmrc.apiplatform.modules.uplift.services.mocks._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.SubscriptionTestHelperSugar
 import scala.concurrent.Future
-import uk.gov.hmrc.thirdpartydeveloperfrontend.config.{UpliftJourneyConfig, On}
+import uk.gov.hmrc.thirdpartydeveloperfrontend.config.{On, UpliftJourneyConfig}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.SellResellOrDistribute
 
 class UpliftJourneyControllerSpec extends BaseControllerSpec
-                with SampleSession
-                with SampleApplication
-                with SubscriptionTestHelperSugar
-                with WithCSRFAddToken
-                with SubscriptionsBuilder
-                with DeveloperBuilder
-                with LocalUserIdTracker {
+    with SampleSession
+    with SampleApplication
+    with SubscriptionTestHelperSugar
+    with WithCSRFAddToken
+    with SubscriptionsBuilder
+    with DeveloperBuilder
+    with LocalUserIdTracker {
 
   trait Setup
-    extends ApplicationServiceMock
-    with ApplicationActionServiceMock
-    with ApmConnectorMockModule
-    with GetProductionCredentialsFlowServiceMockModule
-    with UpliftJourneyServiceMockModule
-    with SessionServiceMock {
+      extends ApplicationServiceMock
+      with ApplicationActionServiceMock
+      with ApmConnectorMockModule
+      with GetProductionCredentialsFlowServiceMockModule
+      with UpliftJourneyServiceMockModule
+      with SessionServiceMock {
 
     def titleOf(result: Future[Result]) = {
       val titleRegEx = """<title[^>]*>(.*)</title>""".r
-      val title = titleRegEx.findFirstMatchIn(contentAsString(result)).map(_.group(1))
+      val title      = titleRegEx.findFirstMatchIn(contentAsString(result)).map(_.group(1))
       title.isDefined shouldBe true
       title.get
     }
 
     implicit val hc = HeaderCarrier()
 
-    val confirmApisView = app.injector.instanceOf[ConfirmApisView]
-    val turnOffApisMasterView = app.injector.instanceOf[TurnOffApisMasterView]
+    val confirmApisView                    = app.injector.instanceOf[ConfirmApisView]
+    val turnOffApisMasterView              = app.injector.instanceOf[TurnOffApisMasterView]
     val sellResellOrDistributeSoftwareView = app.injector.instanceOf[SellResellOrDistributeSoftwareView]
-    val weWillCheckYourAnswersView = app.injector.instanceOf[WeWillCheckYourAnswersView]
-    val beforeYouStartView = app.injector.instanceOf[BeforeYouStartView]
+    val weWillCheckYourAnswersView         = app.injector.instanceOf[WeWillCheckYourAnswersView]
+    val beforeYouStartView                 = app.injector.instanceOf[BeforeYouStartView]
 
-    val mockUpliftJourneyConfig = mock[UpliftJourneyConfig]
+    val mockUpliftJourneyConfig     = mock[UpliftJourneyConfig]
     val sr20UpliftJourneySwitchMock = new UpliftJourneySwitch(mockUpliftJourneyConfig)
 
     val controller = new UpliftJourneyController(
@@ -96,20 +96,20 @@ class UpliftJourneyControllerSpec extends BaseControllerSpec
     )
 
     val appName: String = "app"
-    val apiVersion = ApiVersion("version")
+    val apiVersion      = ApiVersion("version")
 
     val developer = buildDeveloper()
     val sessionId = "sessionId"
-    val session = Session(sessionId, developer, LoggedInState.LOGGED_IN)
+    val session   = Session(sessionId, developer, LoggedInState.LOGGED_IN)
 
     val loggedInDeveloper = DeveloperSession(session)
 
     fetchSessionByIdReturns(sessionId, session)
     updateUserFlowSessionsReturnsSuccessfully(sessionId)
 
-    val sessionParams = Seq("csrfToken" -> app.injector.instanceOf[TokenProvider].generateToken)
+    val sessionParams    = Seq("csrfToken" -> app.injector.instanceOf[TokenProvider].generateToken)
     val loggedOutRequest = FakeRequest().withSession(sessionParams: _*)
-    val loggedInRequest = FakeRequest().withLoggedIn(controller, implicitly)(sessionId).withSession(sessionParams: _*)
+    val loggedInRequest  = FakeRequest().withLoggedIn(controller, implicitly)(sessionId).withSession(sessionParams: _*)
 
     val apiIdentifier1 = ApiIdentifier(ApiContext("test-api-context-1"), ApiVersion("1.0"))
     val apiIdentifier2 = ApiIdentifier(ApiContext("test-api-context-2"), ApiVersion("1.0"))
@@ -136,27 +136,45 @@ class UpliftJourneyControllerSpec extends BaseControllerSpec
       fields = emptyFields
     )
 
-    val singleApi: Map[ApiContext,ApiData] = Map(
+    val singleApi: Map[ApiContext, ApiData] = Map(
       ApiContext("test-api-context-1") ->
-        ApiData("test-api-context-1", "test-api-context-1", true, Map(ApiVersion("1.0") ->
-          VersionData(APIStatus.STABLE, APIAccess(APIAccessType.PUBLIC))), List(ApiCategory.EXAMPLE))
+        ApiData(
+          "test-api-context-1",
+          "test-api-context-1",
+          true,
+          Map(ApiVersion("1.0") ->
+            VersionData(APIStatus.STABLE, APIAccess(APIAccessType.PUBLIC))),
+          List(ApiCategory.EXAMPLE)
+        )
     )
 
-    val multipleApis: Map[ApiContext,ApiData] = Map(
+    val multipleApis: Map[ApiContext, ApiData] = Map(
       ApiContext("test-api-context-1") ->
-        ApiData("test-api-context-1", "test-api-context-1", true, Map(ApiVersion("1.0") ->
-          VersionData(APIStatus.STABLE, APIAccess(APIAccessType.PUBLIC))), List(ApiCategory.EXAMPLE)),
+        ApiData(
+          "test-api-context-1",
+          "test-api-context-1",
+          true,
+          Map(ApiVersion("1.0") ->
+            VersionData(APIStatus.STABLE, APIAccess(APIAccessType.PUBLIC))),
+          List(ApiCategory.EXAMPLE)
+        ),
       ApiContext("test-api-context-2") ->
-        ApiData("test-api-context-2", "test-api-context-2", true, Map(ApiVersion("1.0") ->
-          VersionData(APIStatus.STABLE, APIAccess(APIAccessType.PUBLIC))), List(ApiCategory.EXAMPLE))
+        ApiData(
+          "test-api-context-2",
+          "test-api-context-2",
+          true,
+          Map(ApiVersion("1.0") ->
+            VersionData(APIStatus.STABLE, APIAccess(APIAccessType.PUBLIC))),
+          List(ApiCategory.EXAMPLE)
+        )
     )
 
     fetchByApplicationIdReturns(appId, sampleApp)
-    givenApplicationAction(ApplicationWithSubscriptionData(sampleApp,
-      asSubscriptions(List(testAPISubscriptionStatus1)),
-      asFields(List.empty)),
+    givenApplicationAction(
+      ApplicationWithSubscriptionData(sampleApp, asSubscriptions(List(testAPISubscriptionStatus1)), asFields(List.empty)),
       loggedInDeveloper,
-      List(testAPISubscriptionStatus1))
+      List(testAPISubscriptionStatus1)
+    )
 
     ApmConnectorMock.FetchAllApis.willReturn(singleApi)
   }
@@ -182,7 +200,7 @@ class UpliftJourneyControllerSpec extends BaseControllerSpec
 
       status(result) shouldBe OK
 
-      contentAsString(result) should not include("Change my API subscriptions")
+      contentAsString(result) should not include ("Change my API subscriptions")
     }
 
     "render the confirm apis view with the 'Change my API subscriptions' link as there is more than 1 upliftable api available to the application" in new Setup {
@@ -208,8 +226,8 @@ class UpliftJourneyControllerSpec extends BaseControllerSpec
       GPCFlowServiceMock.StoreApiSubscriptions.thenReturns(GetProductionCredentialsFlow("", None, None))
 
       private val result = controller.saveApiSubscriptionsSubmit(appId)(loggedInRequest.withCSRFToken.withFormUrlEncodedBody(
-        "test_api_context_1-1_0-subscribed" -> "true")
-      )
+        "test_api_context_1-1_0-subscribed" -> "true"
+      ))
 
       status(result) shouldBe SEE_OTHER
       redirectLocation(result) shouldBe Some(s"/developer/applications/${appId.value}/confirm-subscriptions")
@@ -224,8 +242,8 @@ class UpliftJourneyControllerSpec extends BaseControllerSpec
       GPCFlowServiceMock.StoreApiSubscriptions.thenReturns(GetProductionCredentialsFlow("", None, None))
 
       private val result = controller.saveApiSubscriptionsSubmit(appId)(loggedInRequest.withCSRFToken.withFormUrlEncodedBody(
-        "test_api_context_1-1_0-subscribed" -> "false")
-      )
+        "test_api_context_1-1_0-subscribed" -> "false"
+      ))
 
       status(result) shouldBe OK
       contentAsString(result) should include("You need at least 1 API subscription")

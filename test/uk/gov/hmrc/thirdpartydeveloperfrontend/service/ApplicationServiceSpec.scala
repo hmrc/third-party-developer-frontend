@@ -44,14 +44,14 @@ import org.mockito.captor.ArgCaptor
 import scala.concurrent.Future
 
 class ApplicationServiceSpec extends AsyncHmrcSpec
-  with SubscriptionsBuilder
-  with ApplicationBuilder
-  with LocalUserIdTracker
-  with DeveloperSessionBuilder
-  with DeveloperBuilder {
+    with SubscriptionsBuilder
+    with ApplicationBuilder
+    with LocalUserIdTracker
+    with DeveloperSessionBuilder
+    with DeveloperBuilder {
 
-  val versionOne = ApiVersion("1.0")
-  val versionTwo = ApiVersion("2.0")
+  val versionOne  = ApiVersion("1.0")
+  val versionTwo  = ApiVersion("2.0")
   val grantLength = Period.ofDays(547)
 
   trait Setup extends FixedClock {
@@ -61,13 +61,14 @@ class ApplicationServiceSpec extends AsyncHmrcSpec
 
     val mockProductionApplicationConnector: ThirdPartyApplicationProductionConnector =
       mock[ThirdPartyApplicationProductionConnector]
+
     val mockSandboxApplicationConnector: ThirdPartyApplicationSandboxConnector =
       mock[ThirdPartyApplicationSandboxConnector]
-    val mockSubscriptionsService: SubscriptionsService = mock[SubscriptionsService]
+    val mockSubscriptionsService: SubscriptionsService                         = mock[SubscriptionsService]
 
     val mockProductionSubscriptionFieldsConnector: SubscriptionFieldsConnector = mock[SubscriptionFieldsConnector]
-    val mockSandboxSubscriptionFieldsConnector: SubscriptionFieldsConnector = mock[SubscriptionFieldsConnector]
-    val mockPushPullNotificationsConnector: PushPullNotificationsConnector = mock[PushPullNotificationsConnector]
+    val mockSandboxSubscriptionFieldsConnector: SubscriptionFieldsConnector    = mock[SubscriptionFieldsConnector]
+    val mockPushPullNotificationsConnector: PushPullNotificationsConnector     = mock[PushPullNotificationsConnector]
 
     val mockDeveloperConnector: ThirdPartyDeveloperConnector = mock[ThirdPartyDeveloperConnector]
 
@@ -84,8 +85,8 @@ class ApplicationServiceSpec extends AsyncHmrcSpec
     )
 
     val mockSubscriptionFieldsService: SubscriptionFieldsService = mock[SubscriptionFieldsService]
-    val mockDeskproConnector: DeskproConnector = mock[DeskproConnector]
-    val mockApmConnector: ApmConnector = mock[ApmConnector]
+    val mockDeskproConnector: DeskproConnector                   = mock[DeskproConnector]
+    val mockApmConnector: ApmConnector                           = mock[ApmConnector]
 
     val applicationService = new ApplicationService(
       mockApmConnector,
@@ -117,13 +118,36 @@ class ApplicationServiceSpec extends AsyncHmrcSpec
     VersionSubscription(ApiVersionDefinition(version, status), subscribed)
 
   val productionApplicationId = ApplicationId("Application ID")
-  val productionClientId = ClientId(s"client-id-${randomUUID().toString}")
+  val productionClientId      = ClientId(s"client-id-${randomUUID().toString}")
+
   val productionApplication: Application =
-    Application(productionApplicationId, productionClientId, "name", LocalDateTime.now(ZoneOffset.UTC), Some(LocalDateTime.now(ZoneOffset.UTC)), None, grantLength, Environment.PRODUCTION, Some("description"), Set())
-  val sandboxApplicationId = ApplicationId("Application ID")
-  val sandboxClientId = ClientId("Client ID")
+    Application(
+      productionApplicationId,
+      productionClientId,
+      "name",
+      LocalDateTime.now(ZoneOffset.UTC),
+      Some(LocalDateTime.now(ZoneOffset.UTC)),
+      None,
+      grantLength,
+      Environment.PRODUCTION,
+      Some("description"),
+      Set()
+    )
+  val sandboxApplicationId               = ApplicationId("Application ID")
+  val sandboxClientId                    = ClientId("Client ID")
+
   val sandboxApplication: Application =
-    Application(sandboxApplicationId, sandboxClientId, "name", LocalDateTime.now(ZoneOffset.UTC), Some(LocalDateTime.now(ZoneOffset.UTC)), None, grantLength, Environment.SANDBOX, Some("description"))
+    Application(
+      sandboxApplicationId,
+      sandboxClientId,
+      "name",
+      LocalDateTime.now(ZoneOffset.UTC),
+      Some(LocalDateTime.now(ZoneOffset.UTC)),
+      None,
+      grantLength,
+      Environment.SANDBOX,
+      Some("description")
+    )
 
   def subStatusWithoutFieldValues(
       appId: ApplicationId,
@@ -134,7 +158,7 @@ class ApplicationServiceSpec extends AsyncHmrcSpec
       status: APIStatus = STABLE,
       subscribed: Boolean = false,
       requiresTrust: Boolean = false
-  ): APISubscriptionStatus =
+    ): APISubscriptionStatus =
     APISubscriptionStatus(
       name = name,
       serviceName = name,
@@ -155,7 +179,7 @@ class ApplicationServiceSpec extends AsyncHmrcSpec
       subscribed: Boolean = false,
       requiresTrust: Boolean = false,
       subscriptionFieldWithValues: List[SubscriptionFieldValue] = List.empty
-  ): APISubscriptionStatus = {
+    ): APISubscriptionStatus = {
     APISubscriptionStatus(
       name = name,
       serviceName = name,
@@ -169,9 +193,9 @@ class ApplicationServiceSpec extends AsyncHmrcSpec
 
   "Unsubscribe from API" should {
     "unsubscribe application from an API version" in new Setup {
-      private val context = ApiContext("api1")
-      private val version = versionOne
-      private val apiIdentifier = ApiIdentifier(context,version)
+      private val context       = ApiContext("api1")
+      private val version       = versionOne
+      private val apiIdentifier = ApiIdentifier(context, version)
 
       theProductionConnectorthenReturnTheApplication(productionApplicationId, productionApplication)
       when(mockProductionApplicationConnector.unsubscribeFromApi(productionApplicationId, apiIdentifier))
@@ -184,13 +208,23 @@ class ApplicationServiceSpec extends AsyncHmrcSpec
   }
 
   "Update" should {
-    val applicationId = ApplicationId("applicationId")
-    val clientId = ClientId("clientId")
+    val applicationId   = ApplicationId("applicationId")
+    val clientId        = ClientId("clientId")
     val applicationName = "applicationName"
-    val application = Application(applicationId, clientId, applicationName, LocalDateTime.now(ZoneOffset.UTC), Some(LocalDateTime.now(ZoneOffset.UTC)), None, grantLength, Environment.PRODUCTION, None)
+    val application     = Application(
+      applicationId,
+      clientId,
+      applicationName,
+      LocalDateTime.now(ZoneOffset.UTC),
+      Some(LocalDateTime.now(ZoneOffset.UTC)),
+      None,
+      grantLength,
+      Environment.PRODUCTION,
+      None
+    )
 
     "truncate the description to 250 characters on update request" in new Setup {
-      private val longDescription = "abcde" * 100
+      private val longDescription     = "abcde" * 100
       private val editApplicationForm = EditApplicationForm(applicationId, "name", Some(longDescription), grantLength = "12 months")
 
       UpdateApplicationRequest.from(editApplicationForm, application).description.get.length shouldBe 250
@@ -210,8 +244,8 @@ class ApplicationServiceSpec extends AsyncHmrcSpec
 
   "Update Privacy Policy Location" should {
     "call the TPA connector correctly" in new Setup {
-      val userId = UserId.random
-      val newLocation = PrivacyPolicyLocation.Url("http://example.com")
+      val userId            = UserId.random
+      val newLocation       = PrivacyPolicyLocation.Url("http://example.com")
       val applicationUpdate = ChangeProductionApplicationPrivacyPolicyLocation(userId, LocalDateTime.now(clock), newLocation)
       when(mockProductionApplicationConnector.applicationUpdate(productionApplicationId, applicationUpdate)).thenReturn(Future.successful(ApplicationUpdateSuccessful))
 
@@ -223,8 +257,8 @@ class ApplicationServiceSpec extends AsyncHmrcSpec
 
   "Update Terms and Conditions Location" should {
     "call the TPA connector correctly" in new Setup {
-      val userId = UserId.random
-      val newLocation = TermsAndConditionsLocation.Url("http://example.com")
+      val userId            = UserId.random
+      val newLocation       = TermsAndConditionsLocation.Url("http://example.com")
       val applicationUpdate = ChangeProductionApplicationTermsAndConditionsLocation(userId, LocalDateTime.now(clock), newLocation)
       when(mockProductionApplicationConnector.applicationUpdate(productionApplicationId, applicationUpdate)).thenReturn(Future.successful(ApplicationUpdateSuccessful))
 
@@ -236,10 +270,10 @@ class ApplicationServiceSpec extends AsyncHmrcSpec
 
   "verifyResponsibleIndividual" should {
     "call the TPA connector correctly" in new Setup {
-      val userId = UserId.random
-      val riName = "ri name"
-      val riEmail = "ri@example.com"
-      val requesterName = "ms admin"
+      val userId            = UserId.random
+      val riName            = "ri name"
+      val riEmail           = "ri@example.com"
+      val requesterName     = "ms admin"
       val applicationUpdate = VerifyResponsibleIndividual(userId, LocalDateTime.now(clock), requesterName, riName, riEmail)
       when(mockProductionApplicationConnector.applicationUpdate(productionApplicationId, applicationUpdate)).thenReturn(Future.successful(ApplicationUpdateSuccessful))
 
@@ -251,14 +285,14 @@ class ApplicationServiceSpec extends AsyncHmrcSpec
 
   "request application deletion" should {
 
-    val adminEmail = "admin@example.com"
-    val adminRequester = buildDeveloperSession(loggedInState = LoggedInState.LOGGED_IN, buildDeveloper(adminEmail, "firstname", "lastname", None))
-    val developerEmail = "developer@example.com"
-    val developerRequester = buildDeveloperSession(loggedInState = LoggedInState.LOGGED_IN, buildDeveloper(developerEmail, "firstname", "lastname", None))
-    val teamMembers = Set(adminEmail.asAdministratorCollaborator, developerEmail.asDeveloperCollaborator)
-    val sandboxApp = sandboxApplication.copy(collaborators = teamMembers)
-    val productionApp = productionApplication.copy(collaborators = teamMembers)
-    val subject = "Request to delete an application"
+    val adminEmail                            = "admin@example.com"
+    val adminRequester                        = buildDeveloperSession(loggedInState = LoggedInState.LOGGED_IN, buildDeveloper(adminEmail, "firstname", "lastname", None))
+    val developerEmail                        = "developer@example.com"
+    val developerRequester                    = buildDeveloperSession(loggedInState = LoggedInState.LOGGED_IN, buildDeveloper(developerEmail, "firstname", "lastname", None))
+    val teamMembers                           = Set(adminEmail.asAdministratorCollaborator, developerEmail.asDeveloperCollaborator)
+    val sandboxApp                            = sandboxApplication.copy(collaborators = teamMembers)
+    val productionApp                         = productionApplication.copy(collaborators = teamMembers)
+    val subject                               = "Request to delete an application"
     val captor: ArgumentCaptor[DeskproTicket] = ArgumentCaptor.forClass(classOf[DeskproTicket])
 
     "create a deskpro ticket and audit record for an Admin in a Sandbox app" in new Setup {
@@ -309,16 +343,16 @@ class ApplicationServiceSpec extends AsyncHmrcSpec
 
   "delete subordinate application" should {
 
-    val adminEmail = "admin@example.com"
-    val adminRequester = buildDeveloperSession(loggedInState = LoggedInState.LOGGED_IN, buildDeveloper(adminEmail, "firstname", "lastname", None))
-    val developerEmail = "developer@example.com"
+    val adminEmail         = "admin@example.com"
+    val adminRequester     = buildDeveloperSession(loggedInState = LoggedInState.LOGGED_IN, buildDeveloper(adminEmail, "firstname", "lastname", None))
+    val developerEmail     = "developer@example.com"
     val developerRequester = buildDeveloperSession(loggedInState = LoggedInState.LOGGED_IN, buildDeveloper(developerEmail, "firstname", "lastname", None))
-    val teamMembers = Set(adminEmail.asAdministratorCollaborator, developerEmail.asDeveloperCollaborator)
-    val sandboxApp = sandboxApplication.copy(collaborators = teamMembers)
-    val invalidROPCApp = sandboxApplication.copy(collaborators = teamMembers, access = ROPC())
-    val productionApp = productionApplication.copy(collaborators = teamMembers)
-    val reasons = "Subordinate application deleted by DevHub user"
-    val expectedMessage = "Only standard subordinate applications can be deleted by admins"
+    val teamMembers        = Set(adminEmail.asAdministratorCollaborator, developerEmail.asDeveloperCollaborator)
+    val sandboxApp         = sandboxApplication.copy(collaborators = teamMembers)
+    val invalidROPCApp     = sandboxApplication.copy(collaborators = teamMembers, access = ROPC())
+    val productionApp      = productionApplication.copy(collaborators = teamMembers)
+    val reasons            = "Subordinate application deleted by DevHub user"
+    val expectedMessage    = "Only standard subordinate applications can be deleted by admins"
 
     "delete standard subordinate application when requested by an admin" in new Setup {
 
@@ -360,7 +394,7 @@ class ApplicationServiceSpec extends AsyncHmrcSpec
   "request 2SV removal" should {
 
     val email = "testy@example.com"
-    val name = "Bob"
+    val name  = "Bob"
 
     "correctly create a deskpro ticket and audit record" in new Setup {
       val ticketCaptor = ArgCaptor[DeskproTicket]
@@ -371,7 +405,7 @@ class ApplicationServiceSpec extends AsyncHmrcSpec
 
       await(applicationService.request2SVRemoval(name, email))
 
-      verify(mockDeskproConnector, times(1)).createTicket(ticketCaptor )(eqTo(hc))
+      verify(mockDeskproConnector, times(1)).createTicket(ticketCaptor)(eqTo(hc))
       ticketCaptor.value.email shouldBe email
       ticketCaptor.value.name shouldBe name
 
@@ -381,9 +415,9 @@ class ApplicationServiceSpec extends AsyncHmrcSpec
 
   "userLogoutSurveyCompleted" should {
 
-    val email = "testy@example.com"
-    val name = "John Smith"
-    val rating = "5"
+    val email                  = "testy@example.com"
+    val name                   = "John Smith"
+    val rating                 = "5"
     val improvementSuggestions = "Test"
 
     "audit user logout survey" in new Setup {
@@ -399,7 +433,7 @@ class ApplicationServiceSpec extends AsyncHmrcSpec
   "validate application name" should {
     "call the application connector validate method in sandbox" in new Setup {
       private val applicationName = "applicationName"
-      private val applicationId = ApplicationId(randomUUID().toString)
+      private val applicationId   = ApplicationId(randomUUID().toString)
 
       when(mockSandboxApplicationConnector.validateName(*, *[Option[ApplicationId]])(*))
         .thenReturn(successful(Valid))
@@ -414,7 +448,7 @@ class ApplicationServiceSpec extends AsyncHmrcSpec
 
     "call the application connector validate method in production" in new Setup {
       private val applicationName = "applicationName"
-      private val applicationId = ApplicationId(randomUUID().toString)
+      private val applicationId   = ApplicationId(randomUUID().toString)
 
       when(mockProductionApplicationConnector.validateName(*, *[Option[ApplicationId]])(*))
         .thenReturn(successful(Valid))
@@ -432,7 +466,7 @@ class ApplicationServiceSpec extends AsyncHmrcSpec
 
   "requestProductionApplicationNameChange" should {
 
-    val adminEmail = "admin@example.com"
+    val adminEmail     = "admin@example.com"
     val adminRequester = buildDeveloperSession(loggedInState = LoggedInState.LOGGED_IN, buildDeveloper(adminEmail, "firstname", "lastname", None))
 
     "correctly create a deskpro ticket" in new Setup {
@@ -442,16 +476,16 @@ class ApplicationServiceSpec extends AsyncHmrcSpec
 
       private val result =
         await(applicationService.requestProductonApplicationNameChange(productionApplication, applicationName, adminRequester.displayedName, adminRequester.email))
-     
+
       result shouldBe TicketCreated
     }
   }
 
   "updateResponsibleIndividual" should {
     "call the TPA connector correctly" in new Setup {
-      val userId = UserId.random
-      val riName = "Mr Responsible"
-      val riEmail = "ri@example.com"
+      val userId            = UserId.random
+      val riName            = "Mr Responsible"
+      val riEmail           = "ri@example.com"
       val applicationUpdate = ChangeResponsibleIndividualToSelf(userId, LocalDateTime.now(clock), riName, riEmail)
       when(mockProductionApplicationConnector.applicationUpdate(productionApplicationId, applicationUpdate)).thenReturn(Future.successful(ApplicationUpdateSuccessful))
 

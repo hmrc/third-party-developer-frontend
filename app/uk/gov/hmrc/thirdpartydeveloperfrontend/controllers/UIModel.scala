@@ -39,14 +39,15 @@ case class APISubscriptions(apiHumanReadableAppName: String, apiServiceName: Str
 }
 
 object APISubscriptions {
+
   def groupSubscriptions(subscriptions: Seq[APISubscriptionStatus]): Option[GroupedSubscriptions] = {
     val EXAMPLE_API_NAME = "api-example-microservice"
 
     if (subscriptions.nonEmpty) {
       val subscriptionGroups = subscriptions.groupBy(_.isTestSupport)
-      val testApis = subscriptionGroups.get(true).map(groupSubscriptionsByServiceName).getOrElse(Seq.empty).sortBy(_.apiHumanReadableAppName)
-      val apis = subscriptionGroups.get(false).map(groupSubscriptionsByServiceName).getOrElse(Seq.empty).sortBy(_.apiHumanReadableAppName)
-      val exampleApis = apis.find(sub => sub.apiServiceName == EXAMPLE_API_NAME)
+      val testApis           = subscriptionGroups.get(true).map(groupSubscriptionsByServiceName).getOrElse(Seq.empty).sortBy(_.apiHumanReadableAppName)
+      val apis               = subscriptionGroups.get(false).map(groupSubscriptionsByServiceName).getOrElse(Seq.empty).sortBy(_.apiHumanReadableAppName)
+      val exampleApis        = apis.find(sub => sub.apiServiceName == EXAMPLE_API_NAME)
       Some(GroupedSubscriptions(testApis, apis.filter(sub => sub.apiServiceName != EXAMPLE_API_NAME), exampleApis))
     } else {
       None

@@ -21,6 +21,7 @@ import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.AsyncHmrcSpec
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.ApplicationId
 
 class FormValidationSpec extends AsyncHmrcSpec {
+
   private def buildValidateNoErrors[T](bind: Map[String, String] => Form[T])(formData: Map[String, String]): Unit = {
     val boundForm = bind(formData)
     boundForm.errors shouldBe List()
@@ -85,7 +86,7 @@ class FormValidationSpec extends AsyncHmrcSpec {
     }
 
     "validate password and generate error if empty" in {
-      val boundForm = ChangePasswordForm.form.bind(validChangePasswordForm + ("password" -> ""))
+      val boundForm            = ChangePasswordForm.form.bind(validChangePasswordForm + ("password" -> ""))
       val invalidPasswordError = FormError("password", List("password.error.not.valid.field"))
       val missingPasswordError = FormError("password", List("password.error.required.field"))
       boundForm.errors shouldBe List(invalidPasswordError, missingPasswordError)
@@ -114,7 +115,7 @@ class FormValidationSpec extends AsyncHmrcSpec {
     }
 
     "validate password and generate error if empty" in {
-      val boundForm = PasswordResetForm.form.bind(validPasswordResetForm + ("password" -> ""))
+      val boundForm            = PasswordResetForm.form.bind(validPasswordResetForm + ("password" -> ""))
       val invalidPasswordError = FormError("password", List("password.error.not.valid.field"))
       val missingPasswordError = FormError("password", List("password.error.required.field"))
       boundForm.errors shouldBe List(invalidPasswordError, missingPasswordError)
@@ -136,10 +137,10 @@ class FormValidationSpec extends AsyncHmrcSpec {
 
   "RegistrationForm " should {
     val validRegistrationForm = Map(
-      "firstname" -> "john",
-      "lastname" -> "smith",
-      "emailaddress" -> "john.smith@example.com",
-      "password" -> "A1@wwwwwwwww",
+      "firstname"       -> "john",
+      "lastname"        -> "smith",
+      "emailaddress"    -> "john.smith@example.com",
+      "password"        -> "A1@wwwwwwwww",
       "confirmpassword" -> "A1@wwwwwwwww"
     )
 
@@ -158,10 +159,10 @@ class FormValidationSpec extends AsyncHmrcSpec {
     "validate all fields with error" in {
       val boundForm = RegistrationForm.form.bind(
         validRegistrationForm
-          + ("firstname" -> "")
-          + ("lastname" -> "")
-          + ("emailaddress" -> "")
-          + ("password" -> "")
+          + ("firstname"       -> "")
+          + ("lastname"        -> "")
+          + ("emailaddress"    -> "")
+          + ("password"        -> "")
           + ("confirmpassword" -> "")
       )
       boundForm.errors shouldBe List(
@@ -181,7 +182,7 @@ class FormValidationSpec extends AsyncHmrcSpec {
     }
 
     "validate password and generate error when empty" in {
-      val boundForm = RegistrationForm.form.bind(validRegistrationForm + ("password" -> ""))
+      val boundForm            = RegistrationForm.form.bind(validRegistrationForm + ("password" -> ""))
       val invalidPasswordError = FormError("password", List("password.error.not.valid.field"))
       val missingPasswordError = FormError("password", List("password.error.required.field"))
       boundForm.errors shouldBe List(invalidPasswordError, missingPasswordError)
@@ -223,14 +224,14 @@ class FormValidationSpec extends AsyncHmrcSpec {
 
   "EditApplicationForm " should {
     val validEditApplicationForm = Map(
-      "applicationId" -> "Application ID",
-      "applicationName" -> "Application name",
+      "applicationId"           -> "Application ID",
+      "applicationName"         -> "Application name",
       "originalApplicationName" -> "Application name",
-      "description" -> "Application description",
-      "redirectUris[0]" -> "https://redirect-url.gov.uk",
-      "privacyPolicyUrl" -> "http://redirectprivacy-policy.gov.uk",
-      "termsAndConditionsUrl" -> "http://termsandconditions.gov.uk",
-      "grantLength" -> "12 months"
+      "description"             -> "Application description",
+      "redirectUris[0]"         -> "https://redirect-url.gov.uk",
+      "privacyPolicyUrl"        -> "http://redirectprivacy-policy.gov.uk",
+      "termsAndConditionsUrl"   -> "http://termsandconditions.gov.uk",
+      "grantLength"             -> "12 months"
     )
 
     "validate a valid form" in {
@@ -248,8 +249,8 @@ class FormValidationSpec extends AsyncHmrcSpec {
     "validate a valid form with empty optional fields" in {
       val boundForm = EditApplicationForm.form.bind(
         validEditApplicationForm +
-          ("description" -> "",
-          "privacyPolicyUrl" -> "",
+          ("description"          -> "",
+          "privacyPolicyUrl"      -> "",
           "termsAndConditionsUrl" -> "")
       )
       boundForm.errors shouldBe List()
@@ -313,7 +314,7 @@ class FormValidationSpec extends AsyncHmrcSpec {
       val signoutSurveyFormWithTooLongImprovement = validFormData + ("improvementSuggestions" -> "a" * 2001)
 
       val boundForm = SignOutSurveyForm.form.bind(signoutSurveyFormWithTooLongImprovement)
-      val err = boundForm.errors.head
+      val err       = boundForm.errors.head
       err.key shouldBe "improvementSuggestions"
       err.messages shouldBe List("error.maxLength")
     }
@@ -322,7 +323,7 @@ class FormValidationSpec extends AsyncHmrcSpec {
       val signoutSurveyFormWithNoImprovementField = validFormData - "improvementSuggestions"
 
       val boundForm = SignOutSurveyForm.form.bind(signoutSurveyFormWithNoImprovementField)
-      val err = boundForm.errors.head
+      val err       = boundForm.errors.head
       err.key shouldBe "improvementSuggestions"
       err.messages shouldBe List("error.required")
     }
@@ -336,8 +337,8 @@ class FormValidationSpec extends AsyncHmrcSpec {
     "reject any rating outside of the 1 to 5 range" in {
       Seq(("-1", "error.min"), ("0", "error.min"), ("6", "error.max")).foreach(Function.tupled((x: String, err: String) => {
         val ratingSignoutSurveyForm = validFormData + ("rating" -> x)
-        val boundForm = SignOutSurveyForm.form.bind(ratingSignoutSurveyForm)
-        val error = boundForm.errors.head
+        val boundForm               = SignOutSurveyForm.form.bind(ratingSignoutSurveyForm)
+        val error                   = boundForm.errors.head
         error.key shouldBe "rating"
         error.messages shouldBe List(err)
       }))
@@ -359,49 +360,49 @@ class FormValidationSpec extends AsyncHmrcSpec {
     }
 
     "reject when comments with more than 3000 charaters" in {
-      val formData = validFormData + ("comments" -> "a" * 3001)
+      val formData  = validFormData + ("comments" -> "a" * 3001)
       val boundForm = SupportEnquiryForm.form.bind(formData)
-      val err = boundForm.errors.head
+      val err       = boundForm.errors.head
       err.key shouldBe "comments"
       err.messages shouldBe List("comments.error.maxLength.field")
     }
 
     "reject a form that has missing comments" in {
-      val formData = validFormData - "comments"
+      val formData  = validFormData - "comments"
       val boundForm = SupportEnquiryForm.form.bind(formData)
-      val err = boundForm.errors.head
+      val err       = boundForm.errors.head
       err.key shouldBe "comments"
       err.messages shouldBe List("error.required")
     }
 
     "reject a form that has missing name" in {
-      val formData = validFormData - "fullname"
+      val formData  = validFormData - "fullname"
       val boundForm = SupportEnquiryForm.form.bind(formData)
-      val err = boundForm.errors.head
+      val err       = boundForm.errors.head
       err.key shouldBe "fullname"
       err.messages shouldBe List("error.required")
     }
 
     "reject a form that when the name is too long" in {
-      val formData = validFormData + ("fullname" -> "a" * 101)
+      val formData  = validFormData + ("fullname" -> "a" * 101)
       val boundForm = SupportEnquiryForm.form.bind(formData)
-      val err = boundForm.errors.head
+      val err       = boundForm.errors.head
       err.key shouldBe "fullname"
       err.messages shouldBe List("fullname.error.maxLength.field")
     }
 
     "reject a form that has missing email address" in {
-      val formData = validFormData - "emailaddress"
+      val formData  = validFormData - "emailaddress"
       val boundForm = SupportEnquiryForm.form.bind(formData)
-      val err = boundForm.errors.head
+      val err       = boundForm.errors.head
       err.key shouldBe "emailaddress"
       err.messages shouldBe List("error.required")
     }
 
     "reject a form that when the email is too long" in {
-      val formData = validFormData + ("emailaddress" -> s"${"a" * 320}@example.com")
+      val formData  = validFormData + ("emailaddress" -> s"${"a" * 320}@example.com")
       val boundForm = SupportEnquiryForm.form.bind(formData)
-      val err = boundForm.errors.head
+      val err       = boundForm.errors.head
       err.key shouldBe "emailaddress"
       err.messages shouldBe List("emailaddress.error.maxLength.field")
     }
@@ -421,33 +422,33 @@ class FormValidationSpec extends AsyncHmrcSpec {
     }
 
     "reject a form when the first name is too long" in {
-      val formData = validFormData + ("firstname" -> "a" * 31)
+      val formData  = validFormData + ("firstname" -> "a" * 31)
       val boundForm = ProfileForm.form.bind(formData)
-      val err = boundForm.errors.head
+      val err       = boundForm.errors.head
       err.key shouldBe "firstname"
       err.messages shouldBe List("firstname.error.maxLength.field")
     }
 
     "reject a form when the first name is empty" in {
-      val formData = validFormData + ("firstname" -> "")
+      val formData  = validFormData + ("firstname" -> "")
       val boundForm = ProfileForm.form.bind(formData)
-      val err = boundForm.errors.head
+      val err       = boundForm.errors.head
       err.key shouldBe "firstname"
       err.messages shouldBe List("firstname.error.required.field")
     }
 
     "reject a form when the last name is too long" in {
-      val formData = validFormData + ("lastname" -> "a" * 31)
+      val formData  = validFormData + ("lastname" -> "a" * 31)
       val boundForm = ProfileForm.form.bind(formData)
-      val err = boundForm.errors.head
+      val err       = boundForm.errors.head
       err.key shouldBe "lastname"
       err.messages shouldBe List("lastname.error.maxLength.field")
     }
 
     "reject a form when the last name is empty" in {
-      val formData = validFormData + ("lastname" -> "")
+      val formData  = validFormData + ("lastname" -> "")
       val boundForm = ProfileForm.form.bind(formData)
-      val err = boundForm.errors.head
+      val err       = boundForm.errors.head
       err.key shouldBe "lastname"
       err.messages shouldBe List("lastname.error.required.field")
     }
@@ -478,8 +479,8 @@ class FormValidationSpec extends AsyncHmrcSpec {
 
     "reject a form when now topic is supplied" in {
       val formDataWithoutTopic = Map("applicationId" -> ApplicationId.random.value)
-      val boundForm = SelectTopicsFromSubscriptionsForm.form.bind(formDataWithoutTopic)
-      val err = boundForm.errors.head
+      val boundForm            = SelectTopicsFromSubscriptionsForm.form.bind(formDataWithoutTopic)
+      val err                  = boundForm.errors.head
       err.key shouldBe "topic"
       err.messages shouldBe List("error.selectedtopics.nonselected.field")
     }
@@ -500,7 +501,7 @@ class FormValidationSpec extends AsyncHmrcSpec {
 
     "reject form with invalid url" in {
       val invalidFormDataWithBadUrl = Map("privacyPolicyUrl" -> "not a url", "isInDesktop" -> "false")
-      val boundForm = ChangeOfPrivacyPolicyLocationForm.form.bind(invalidFormDataWithBadUrl)
+      val boundForm                 = ChangeOfPrivacyPolicyLocationForm.form.bind(invalidFormDataWithBadUrl)
       boundForm.errors.head.key shouldBe ""
       boundForm.errors.head.messages shouldBe List("application.privacypolicylocation.invalid.badurl")
     }
@@ -521,7 +522,7 @@ class FormValidationSpec extends AsyncHmrcSpec {
 
     "reject form with invalid url" in {
       val invalidFormDataWithBadUrl = Map("termsAndConditionsUrl" -> "not a url", "isInDesktop" -> "false")
-      val boundForm = ChangeOfTermsAndConditionsLocationForm.form.bind(invalidFormDataWithBadUrl)
+      val boundForm                 = ChangeOfTermsAndConditionsLocationForm.form.bind(invalidFormDataWithBadUrl)
       boundForm.errors.head.key shouldBe ""
       boundForm.errors.head.messages shouldBe List("application.termsconditionslocation.invalid.badurl")
     }

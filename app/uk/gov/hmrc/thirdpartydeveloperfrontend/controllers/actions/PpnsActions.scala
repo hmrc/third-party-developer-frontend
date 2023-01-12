@@ -27,8 +27,8 @@ trait PpnsActions {
   self: ApplicationController =>
 
   private def subscribedToApiWithPpnsFieldFilter(
-    implicit ec: ExecutionContext
-  ): ActionFilter[ApplicationRequest] = new ActionFilter[ApplicationRequest] {
+      implicit ec: ExecutionContext
+    ): ActionFilter[ApplicationRequest] = new ActionFilter[ApplicationRequest] {
     override protected def executionContext: ExecutionContext = ec
 
     override protected def filter[A](request: ApplicationRequest[A]): Future[Option[Result]] = {
@@ -42,17 +42,22 @@ trait PpnsActions {
     }
   }
 
-  def subscribedToApiWithPpnsFieldAction(applicationId: ApplicationId, capability: Capability, permissions: Permission)
-                                        (block: ApplicationRequest[AnyContent] => Future[Result]): Action[AnyContent] = {
+  def subscribedToApiWithPpnsFieldAction(
+      applicationId: ApplicationId,
+      capability: Capability,
+      permissions: Permission
+    )(
+      block: ApplicationRequest[AnyContent] => Future[Result]
+    ): Action[AnyContent] = {
     Action.async { implicit request =>
       (
         loggedInActionRefiner() andThen
-        applicationRequestRefiner(applicationId) andThen
-        capabilityFilter(capability) andThen
-        permissionFilter(permissions) andThen
-        subscribedToApiWithPpnsFieldFilter
+          applicationRequestRefiner(applicationId) andThen
+          capabilityFilter(capability) andThen
+          permissionFilter(permissions) andThen
+          subscribedToApiWithPpnsFieldFilter
       )
-      .invokeBlock(request, block)  
+        .invokeBlock(request, block)
     }
   }
 }

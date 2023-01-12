@@ -16,7 +16,6 @@
 
 package uk.gov.hmrc.thirdpartydeveloperfrontend.controllers
 
-
 import play.api.libs.crypto.CookieSigner
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
 import uk.gov.hmrc.apiplatform.modules.uplift.services.UpliftLogic
@@ -39,20 +38,22 @@ class ManageApplications @Inject() (
     upliftLogic: UpliftLogic,
     manageApplicationsView: ManageApplicationsView,
     mcc: MessagesControllerComponents
-    )(implicit val ec: ExecutionContext, val appConfig: ApplicationConfig, val environmentNameService: EnvironmentNameService)
-  extends LoggedInController(mcc) with LocalDateTimeFormatters {
+  )(implicit val ec: ExecutionContext,
+    val appConfig: ApplicationConfig,
+    val environmentNameService: EnvironmentNameService
+  ) extends LoggedInController(mcc) with LocalDateTimeFormatters {
 
   def manageApps: Action[AnyContent] = loggedInAction { implicit request =>
     for {
-      upliftData                  <- upliftLogic.aUsersSandboxAdminSummariesAndUpliftIds(request.userId)
+      upliftData                 <- upliftLogic.aUsersSandboxAdminSummariesAndUpliftIds(request.userId)
       sandboxApplicationSummaries = upliftData.sandboxApplicationSummaries
       upliftableApplicationIds    = upliftData.upliftableApplicationIds
-      productionAppSummaries      <- appsByTeamMember.fetchProductionSummariesByTeamMember(request.userId)
+      productionAppSummaries     <- appsByTeamMember.fetchProductionSummariesByTeamMember(request.userId)
     } yield (sandboxApplicationSummaries, productionAppSummaries) match {
       case (Nil, Nil) => Redirect(uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.noapplications.routes.NoApplications.noApplicationsPage)
       case _          => Ok(manageApplicationsView(
-        ManageApplicationsViewModel(sandboxApplicationSummaries, productionAppSummaries, upliftableApplicationIds, upliftData.hasAppsThatCannotBeUplifted)
-      ))
+          ManageApplicationsViewModel(sandboxApplicationSummaries, productionAppSummaries, upliftableApplicationIds, upliftData.hasAppsThatCannotBeUplifted)
+        ))
     }
   }
 

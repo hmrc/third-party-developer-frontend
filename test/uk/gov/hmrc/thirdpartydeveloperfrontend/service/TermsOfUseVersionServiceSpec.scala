@@ -27,18 +27,19 @@ import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.{HmrcSpec, LocalUserIdTrack
 
 import java.time.LocalDateTime
 
-class TermsOfUseVersionServiceSpec extends HmrcSpec with ApplicationBuilder with LocalUserIdTracker{
+class TermsOfUseVersionServiceSpec extends HmrcSpec with ApplicationBuilder with LocalUserIdTracker {
+
   trait Setup extends TermsOfUseServiceMock {
     implicit val hc: HeaderCarrier = HeaderCarrier()
 
     val upliftJourneySwitch = mock[UpliftJourneySwitch]
-    val request = FakeRequest()
-    val email = "test@example.com"
-    val application = buildApplication(email)
-    val underTest = new TermsOfUseVersionService(upliftJourneySwitch, termsOfUseServiceMock)
+    val request             = FakeRequest()
+    val email               = "test@example.com"
+    val application         = buildApplication(email)
+    val underTest           = new TermsOfUseVersionService(upliftJourneySwitch, termsOfUseServiceMock)
 
     def givenUpliftJourneySwitchIsOff = when(upliftJourneySwitch.shouldUseV2(*)).thenReturn(false)
-    def givenUpliftJourneySwitchIsOn = when(upliftJourneySwitch.shouldUseV2(*)).thenReturn(true)
+    def givenUpliftJourneySwitchIsOn  = when(upliftJourneySwitch.shouldUseV2(*)).thenReturn(true)
   }
 
   "getLatest" should {

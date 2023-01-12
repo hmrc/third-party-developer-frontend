@@ -32,11 +32,11 @@ import java.time.LocalDateTime
 import scala.collection.JavaConverters._
 
 class PushSecretsViewSpec extends CommonViewSpec
-  with WithCSRFAddToken
-  with CollaboratorTracker
-  with LocalUserIdTracker
-  with DeveloperSessionBuilder
-  with DeveloperBuilder {
+    with WithCSRFAddToken
+    with CollaboratorTracker
+    with LocalUserIdTracker
+    with DeveloperSessionBuilder
+    with DeveloperBuilder {
 
   trait Setup {
     val pushSecretsView: PushSecretsView = app.injector.instanceOf[PushSecretsView]
@@ -47,10 +47,10 @@ class PushSecretsViewSpec extends CommonViewSpec
   }
 
   "Push secrets page" should {
-    val request = FakeRequest().withCSRFToken
+    val request   = FakeRequest().withCSRFToken
     val developer = buildDeveloperSession(loggedInState = LoggedInState.LOGGED_IN, buildDeveloper("Test", "Test", "Test", None))
 
-    val application = Application(
+    val application                       = Application(
       ApplicationId("Test Application ID"),
       ClientId("Test Application Client ID"),
       "Test Application",

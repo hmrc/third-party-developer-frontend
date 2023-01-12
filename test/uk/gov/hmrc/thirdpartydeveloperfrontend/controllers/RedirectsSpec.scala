@@ -35,30 +35,30 @@ import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils._
 
-class RedirectsSpec 
+class RedirectsSpec
     extends BaseControllerSpec
-    with WithCSRFAddToken 
+    with WithCSRFAddToken
     with TestApplications
     with CollaboratorTracker
-    with DeveloperBuilder 
+    with DeveloperBuilder
     with LocalUserIdTracker {
-  
+
   trait Setup extends ApplicationServiceMock with SessionServiceMock with ApplicationActionServiceMock {
     val applicationId = "1234"
-    val clientId = ClientId("clientId123")
+    val clientId      = ClientId("clientId123")
 
     val developer = buildDeveloper()
     val sessionId = "sessionId"
-    val session = Session(sessionId, developer, LoggedInState.LOGGED_IN)
+    val session   = Session(sessionId, developer, LoggedInState.LOGGED_IN)
 
     val loggedInDeveloper = DeveloperSession(session)
 
     val redirectUris = List("https://www.example.com", "https://localhost:8080")
 
-    val redirectsView = app.injector.instanceOf[RedirectsView]
-    val addRedirectView = app.injector.instanceOf[AddRedirectView]
+    val redirectsView                  = app.injector.instanceOf[RedirectsView]
+    val addRedirectView                = app.injector.instanceOf[AddRedirectView]
     val deleteRedirectConfirmationView = app.injector.instanceOf[DeleteRedirectConfirmationView]
-    val changeRedirectView = app.injector.instanceOf[ChangeRedirectView]
+    val changeRedirectView             = app.injector.instanceOf[ChangeRedirectView]
 
     val underTest = new Redirects(
       mockErrorHandler,
@@ -76,9 +76,9 @@ class RedirectsSpec
 
     implicit val hc = HeaderCarrier()
 
-    val sessionParams = Seq("csrfToken" -> app.injector.instanceOf[TokenProvider].generateToken)
+    val sessionParams    = Seq("csrfToken" -> app.injector.instanceOf[TokenProvider].generateToken)
     val loggedOutRequest = FakeRequest().withSession(sessionParams: _*)
-    val loggedInRequest = FakeRequest().withLoggedIn(underTest, implicitly)(sessionId).withSession(sessionParams: _*)
+    val loggedInRequest  = FakeRequest().withLoggedIn(underTest, implicitly)(sessionId).withSession(sessionParams: _*)
 
     fetchSessionByIdReturns(sessionId, session)
     updateUserFlowSessionsReturnsSuccessfully(sessionId)
@@ -130,7 +130,7 @@ class RedirectsSpec
       givenApplicationExists(application)
 
       val request = loggedInRequest.withCSRFToken.withFormUrlEncodedBody("redirectUri" -> redirectUri)
-      val result = underTest.addRedirectAction(application.id)(request)
+      val result  = underTest.addRedirectAction(application.id)(request)
 
       status(result) shouldBe BAD_REQUEST
 
@@ -143,7 +143,7 @@ class RedirectsSpec
       givenApplicationExists(application)
 
       val request = loggedInRequest.withCSRFToken.withFormUrlEncodedBody("redirectUri" -> redirectUriToAdd)
-      val result = underTest.addRedirectAction(application.id)(request)
+      val result  = underTest.addRedirectAction(application.id)(request)
 
       val argument: ArgumentCaptor[UpdateApplicationRequest] = ArgumentCaptor.forClass(classOf[UpdateApplicationRequest])
 
@@ -159,7 +159,7 @@ class RedirectsSpec
       givenApplicationExists(application)
 
       val request = loggedInRequest.withCSRFToken.withFormUrlEncodedBody("redirectUri" -> redirectUriToDelete)
-      val result = underTest.deleteRedirect(application.id)(request)
+      val result  = underTest.deleteRedirect(application.id)(request)
 
       status(result) shouldBe resultStatus
 
@@ -423,12 +423,12 @@ class RedirectsSpec
   "changeRedirectAction" should {
 
     "return the redirect page for an admin with a production application when submitted a changed uri" in new Setup {
-      val application = anApplication(adminEmail = loggedInDeveloper.email).withRedirectUris(redirectUris)
+      val application         = anApplication(adminEmail = loggedInDeveloper.email).withRedirectUris(redirectUris)
       val originalRedirectUri = redirectUris.head
-      val newRedirectUri = "https://localhost:1111"
+      val newRedirectUri      = "https://localhost:1111"
       givenApplicationExists(application)
 
-      val result = underTest.changeRedirectAction(application.id)(
+      val result                                             = underTest.changeRedirectAction(application.id)(
         loggedInRequest.withCSRFToken.withFormUrlEncodedBody("originalRedirectUri" -> originalRedirectUri, "newRedirectUri" -> newRedirectUri)
       )
       val argument: ArgumentCaptor[UpdateApplicationRequest] = ArgumentCaptor.forClass(classOf[UpdateApplicationRequest])

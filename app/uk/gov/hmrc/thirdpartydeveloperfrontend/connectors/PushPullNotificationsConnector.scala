@@ -44,17 +44,18 @@ abstract class AbstractPushPullNotificationsConnector(implicit ec: ExecutionCont
   val authorizationKey: String
 
   val api: API = API("push-pull-notifications-api")
+
   def http: HttpClient =
     if (useProxy) proxiedHttpClient.withHeaders(apiKey) else httpClient
 
   def fetchPushSecrets(clientId: ClientId)(implicit hc: HeaderCarrier): Future[Seq[String]] = {
     import cats.implicits._
     OptionT(getWithAuthorization[Option[Seq[PushSecret]]](s"$serviceBaseUrl/client/${clientId.value}/secrets"))
-    .map(ps => ps.map(_.value))
-    .getOrElse(Seq.empty)
+      .map(ps => ps.map(_.value))
+      .getOrElse(Seq.empty)
   }
 
-  private def getWithAuthorization[A](url:String)(implicit rd: HttpReads[A], hc: HeaderCarrier): Future[A] = {
+  private def getWithAuthorization[A](url: String)(implicit rd: HttpReads[A], hc: HeaderCarrier): Future[A] = {
     retry {
       http.GET[A](url, Seq.empty, Seq(HeaderNames.AUTHORIZATION -> authorizationKey))
     }
@@ -69,34 +70,34 @@ private[connectors] case class PushSecret(value: String)
 
 @Singleton
 class SandboxPushPullNotificationsConnector @Inject() (
-                                                     val appConfig: ApplicationConfig,
-                                                     val httpClient: HttpClient,
-                                                     val proxiedHttpClient: ProxiedHttpClient,
-                                                     val actorSystem: ActorSystem,
-                                                     val futureTimeout: FutureTimeoutSupport
-                                                   )(implicit val ec: ExecutionContext)
-  extends AbstractPushPullNotificationsConnector {
+    val appConfig: ApplicationConfig,
+    val httpClient: HttpClient,
+    val proxiedHttpClient: ProxiedHttpClient,
+    val actorSystem: ActorSystem,
+    val futureTimeout: FutureTimeoutSupport
+  )(implicit val ec: ExecutionContext
+  ) extends AbstractPushPullNotificationsConnector {
 
   val environment: Environment = Environment.SANDBOX
-  val serviceBaseUrl: String = appConfig.ppnsSandboxUrl
-  val useProxy: Boolean = appConfig.ppnsSandboxUseProxy
-  val apiKey: String = appConfig.ppnsSandboxApiKey
+  val serviceBaseUrl: String   = appConfig.ppnsSandboxUrl
+  val useProxy: Boolean        = appConfig.ppnsSandboxUseProxy
+  val apiKey: String           = appConfig.ppnsSandboxApiKey
   val authorizationKey: String = appConfig.ppnsSandboxAuthorizationKey
 }
 
 @Singleton
 class ProductionPushPullNotificationsConnector @Inject() (
-                                                        val appConfig: ApplicationConfig,
-                                                        val httpClient: HttpClient,
-                                                        val proxiedHttpClient: ProxiedHttpClient,
-                                                        val actorSystem: ActorSystem,
-                                                        val futureTimeout: FutureTimeoutSupport
-                                                      )(implicit val ec: ExecutionContext)
-  extends AbstractPushPullNotificationsConnector {
+    val appConfig: ApplicationConfig,
+    val httpClient: HttpClient,
+    val proxiedHttpClient: ProxiedHttpClient,
+    val actorSystem: ActorSystem,
+    val futureTimeout: FutureTimeoutSupport
+  )(implicit val ec: ExecutionContext
+  ) extends AbstractPushPullNotificationsConnector {
 
   val environment: Environment = Environment.PRODUCTION
-  val serviceBaseUrl: String = appConfig.ppnsProductionUrl
-  val useProxy: Boolean = appConfig.ppnsProductionUseProxy
-  val apiKey: String = appConfig.ppnsProductionApiKey
+  val serviceBaseUrl: String   = appConfig.ppnsProductionUrl
+  val useProxy: Boolean        = appConfig.ppnsProductionUseProxy
+  val apiKey: String           = appConfig.ppnsProductionApiKey
   val authorizationKey: String = appConfig.ppnsProductionAuthorizationKey
 }

@@ -31,28 +31,37 @@ import uk.gov.hmrc.apiplatform.modules.common.services.EitherTHelper
 import uk.gov.hmrc.apiplatform.modules.submissions.connectors.ThirdPartyApplicationSubmissionsConnector
 
 @Singleton
-class RequestProductionCredentials @Inject()(
-  tpaConnector: ThirdPartyApplicationSubmissionsConnector,
-  deskproConnector: DeskproConnector
-)(
-  implicit val ec: ExecutionContext
-) {
+class RequestProductionCredentials @Inject() (
+    tpaConnector: ThirdPartyApplicationSubmissionsConnector,
+    deskproConnector: DeskproConnector
+  )(implicit val ec: ExecutionContext
+  ) {
 
   private val ET = EitherTHelper.make[ErrorDetails]
 
-  def requestProductionCredentials(applicationId: ApplicationId, requestedBy: DeveloperSession, requesterIsResponsibleIndividual: Boolean)(implicit hc: HeaderCarrier): Future[Either[ErrorDetails, Application]] = {
+  def requestProductionCredentials(
+      applicationId: ApplicationId,
+      requestedBy: DeveloperSession,
+      requesterIsResponsibleIndividual: Boolean
+    )(implicit hc: HeaderCarrier
+    ): Future[Either[ErrorDetails, Application]] = {
     (
       for {
-        app           <- ET.fromEitherF(tpaConnector.requestApproval(applicationId, requestedBy.displayedName, requestedBy.email))
-        _             <- ET.liftF(createDeskproTicketIfNeeded(app, requestedBy, requesterIsResponsibleIndividual))
+        app <- ET.fromEitherF(tpaConnector.requestApproval(applicationId, requestedBy.displayedName, requestedBy.email))
+        _   <- ET.liftF(createDeskproTicketIfNeeded(app, requestedBy, requesterIsResponsibleIndividual))
       } yield app
     )
-    .value
+      .value
   }
 
-  private def createDeskproTicketIfNeeded(app: Application, requestedBy: DeveloperSession, requesterIsResponsibleIndividual: Boolean)(implicit hc: HeaderCarrier): Future[Option[TicketResult]] = {
+  private def createDeskproTicketIfNeeded(
+      app: Application,
+      requestedBy: DeveloperSession,
+      requesterIsResponsibleIndividual: Boolean
+    )(implicit hc: HeaderCarrier
+    ): Future[Option[TicketResult]] = {
     if (requesterIsResponsibleIndividual) {
-      val ticket         = DeskproTicket.createForRequestProductionCredentials(requestedBy.displayedName, requestedBy.email, app.name, app.id)
+      val ticket = DeskproTicket.createForRequestProductionCredentials(requestedBy.displayedName, requestedBy.email, app.name, app.id)
       deskproConnector.createTicket(ticket).map(Some(_))
     } else {
       Future.successful(None)

@@ -18,7 +18,8 @@ package uk.gov.hmrc.apiplatform.modules.uplift.domain.models
 
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.apidefinitions.ApiIdentifier
 
-  case class ApiSubscriptionsFlow(subscriptions: Map[ApiIdentifier, Boolean]) {
-    def isSelected(id: ApiIdentifier): Boolean = 
-      subscriptions.get(id).getOrElse(false)
-  }
+case class ApiSubscriptionsFlow(subscriptions: Map[ApiIdentifier, Boolean]) {
+
+  def isSelected(id: ApiIdentifier): Boolean =
+    subscriptions.get(id).getOrElse(false)
+}

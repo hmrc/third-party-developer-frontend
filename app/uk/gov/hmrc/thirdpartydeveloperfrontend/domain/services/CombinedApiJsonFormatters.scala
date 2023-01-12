@@ -22,5 +22,5 @@ import play.api.libs.json.{Format, Json}
 trait CombinedApiJsonFormatters {
 
   implicit val categoryFormat: Format[CombinedApiCategory] = Json.format[CombinedApiCategory]
-  implicit val combinedApiFormat: Format[CombinedApi] = Json.format[CombinedApi]
+  implicit val combinedApiFormat: Format[CombinedApi]      = Json.format[CombinedApi]
 }

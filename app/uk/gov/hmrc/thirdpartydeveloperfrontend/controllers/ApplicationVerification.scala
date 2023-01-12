@@ -28,13 +28,16 @@ import views.html.ApplicationVerificationView
 import scala.concurrent.ExecutionContext
 
 @Singleton
-class ApplicationVerification @Inject()(service: ApplicationService,
-                                        val sessionService: SessionService,
-                                        val errorHandler: ErrorHandler,
-                                        mcc: MessagesControllerComponents,
-                                        val cookieSigner: CookieSigner,
-                                        applicationVerificationView: ApplicationVerificationView)
-                                       (implicit val ec: ExecutionContext, val appConfig: ApplicationConfig) extends LoggedOutController(mcc) {
+class ApplicationVerification @Inject() (
+    service: ApplicationService,
+    val sessionService: SessionService,
+    val errorHandler: ErrorHandler,
+    mcc: MessagesControllerComponents,
+    val cookieSigner: CookieSigner,
+    applicationVerificationView: ApplicationVerificationView
+  )(implicit val ec: ExecutionContext,
+    val appConfig: ApplicationConfig
+  ) extends LoggedOutController(mcc) {
 
   def verifyUplift(code: String) = Action.async { implicit request =>
     service.verify(code) map {

@@ -33,29 +33,29 @@ import uk.gov.hmrc.apiplatform.modules.common.services.ApplicationLogger
 import scala.util.Success
 
 @Singleton
-class DeskproConnector @Inject()(http: HttpClient, config: ApplicationConfig, metrics: ConnectorMetrics)(implicit val ec: ExecutionContext) 
-extends CommonResponseHandlers with ApplicationLogger {
+class DeskproConnector @Inject() (http: HttpClient, config: ApplicationConfig, metrics: ConnectorMetrics)(implicit val ec: ExecutionContext)
+    extends CommonResponseHandlers with ApplicationLogger {
 
   lazy val serviceBaseUrl: String = config.deskproUrl
-  val api = API("deskpro")
+  val api                         = API("deskpro")
 
   def createTicket(deskproTicket: DeskproTicket)(implicit hc: HeaderCarrier): Future[TicketResult] = metrics.record(api) {
 
-    http.POST[DeskproTicket,ErrorOrUnit](requestUrl("/deskpro/ticket"), deskproTicket)
-    .map(throwOr(TicketCreated))
-    .andThen {
-      case Success(_) => logger.info(s"Deskpro ticket '${deskproTicket.subject}' created successfully")
-    }
-    .recover {
-      case NonFatal(e) =>
-        logger.error(s"Deskpro ticket creation failed for: $deskproTicket", e)
-        throw new DeskproTicketCreationFailed(e.getMessage)
-    }
+    http.POST[DeskproTicket, ErrorOrUnit](requestUrl("/deskpro/ticket"), deskproTicket)
+      .map(throwOr(TicketCreated))
+      .andThen {
+        case Success(_) => logger.info(s"Deskpro ticket '${deskproTicket.subject}' created successfully")
+      }
+      .recover {
+        case NonFatal(e) =>
+          logger.error(s"Deskpro ticket creation failed for: $deskproTicket", e)
+          throw new DeskproTicketCreationFailed(e.getMessage)
+      }
   }
 
   def createFeedback(feedback: Feedback)(implicit hc: HeaderCarrier): Future[TicketId] = metrics.record(api) {
     http.POST[Feedback, Option[TicketId]](requestUrl("/deskpro/feedback"), feedback)
-    .map(_.fold(throw UpstreamErrorResponse("Create Feedback failed", 404, 500))(x => x))
+      .map(_.fold(throw UpstreamErrorResponse("Create Feedback failed", 404, 500))(x => x))
   }
 
   override def toString = "DeskproConnector()"

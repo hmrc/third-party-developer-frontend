@@ -27,21 +27,19 @@ import views.helper.CommonViewSpec
 
 import java.util.UUID
 
-
 class QrCodeViewSpec extends CommonViewSpec with WithCSRFAddToken with DeveloperSessionBuilder with DeveloperBuilder with LocalUserIdTracker with StubMessagesFactory {
-  implicit val request = FakeRequest()
-  val qrCodeView = app.injector.instanceOf[QrCodeView]
-  implicit val loggedIn: DeveloperSession = buildDeveloperSession( loggedInState = LoggedInState.LOGGED_IN, buildDeveloper("developer@example.com", "Joe", "Bloggs"))
+  implicit val request                    = FakeRequest()
+  val qrCodeView                          = app.injector.instanceOf[QrCodeView]
+  implicit val loggedIn: DeveloperSession = buildDeveloperSession(loggedInState = LoggedInState.LOGGED_IN, buildDeveloper("developer@example.com", "Joe", "Bloggs"))
 
   "QrCodeView view" should {
     "render correctly when form is valid" in {
 
-      val mainView = qrCodeView.apply("secret", "qrcodeImg", MfaId(UUID.randomUUID()))( FakeRequest().withCSRFToken, loggedIn, appConfig, stubMessages())
+      val mainView = qrCodeView.apply("secret", "qrcodeImg", MfaId(UUID.randomUUID()))(FakeRequest().withCSRFToken, loggedIn, appConfig, stubMessages())
       val document = Jsoup.parse(mainView.body)
       document.getElementById("page-heading").text shouldBe "Set up your authenticator app"
       document.getElementById("submit").text shouldBe "Continue"
     }
-
 
   }
 }

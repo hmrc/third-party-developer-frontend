@@ -44,7 +44,6 @@ object ApplicationId {
 
 case class ClientId(value: String) extends AnyVal
 
-
 object ClientId {
   import play.api.libs.json.Json
   implicit val clientIdFormat: Format[ClientId] = Json.valueFormat[ClientId]
@@ -70,11 +69,10 @@ trait BaseApplication {
   def checkInformation: Option[CheckInformation]
   def ipAllowlist: IpAllowlist
 
-  def role(email: String): Option[CollaboratorRole] = collaborators.find(_.emailAddress == email).map(_.role)
+  def role(email: String): Option[CollaboratorRole]                 = collaborators.find(_.emailAddress == email).map(_.role)
   def roleForCollaborator(userId: UserId): Option[CollaboratorRole] = collaborators.find(_.userId == userId).map(_.role)
 
   def isUserACollaboratorOfRole(userId: UserId, requiredRole: CollaboratorRole): Boolean = roleForCollaborator(userId).fold(false)(_ == requiredRole)
-
 
   def adminEmails: Set[String] = collaborators.filter(_.role.isAdministrator).map(_.emailAddress)
 
@@ -103,7 +101,7 @@ trait BaseApplication {
   def hasResponsibleIndividual = {
     access match {
       case Standard(_, _, _, _, _, Some(_)) => true
-      case _ => false
+      case _                                => false
     }
   }
 
@@ -121,7 +119,7 @@ trait BaseApplication {
 
   def isPermittedToEditAppDetails(developer: Developer): Boolean = allows(SupportsDetails, developer, SandboxOnly)
 
-  def isPermittedToEditProductionAppDetails(developer: Developer): Boolean = allows(SupportsDetails, developer, ProductionAndAdmin)
+  def isPermittedToEditProductionAppDetails(developer: Developer): Boolean   = allows(SupportsDetails, developer, ProductionAndAdmin)
   def isProductionAppButEditDetailsNotAllowed(developer: Developer): Boolean = allows(SupportsDetails, developer, ProductionAndDeveloper)
 
   def isPermittedToAgreeToTermsOfUse(developer: Developer): Boolean = allows(SupportsDetails, developer, ProductionAndAdmin)
@@ -165,27 +163,27 @@ trait BaseApplication {
     case _           => false
   }
 
-  def isInTesting = state.isInTesting
-  def isPendingApproval = state.isPendingApproval
-  def isApproved = state.isApproved
+  def isInTesting            = state.isInTesting
+  def isPendingApproval      = state.isPendingApproval
+  def isApproved             = state.isApproved
   def hasLockedSubscriptions = deployedTo.isProduction && !isInTesting
 
   def findCollaboratorByHash(teamMemberHash: String): Option[Collaborator] = {
     collaborators.find(c => c.emailAddress.toSha256 == teamMemberHash)
   }
 
-  def grantLengthDisplayValue() : String = {
+  def grantLengthDisplayValue(): String = {
     grantLength match {
-      case GrantLength.MONTH =>  "1 month"
-      case GrantLength.THREE_MONTHS =>  "3 months"
-      case GrantLength.SIX_MONTHS =>  "6 months"
-      case GrantLength.ONE_YEAR =>  "1 year"
-      case GrantLength.EIGHTEEN_MONTHS =>  "18 months"
-      case GrantLength.THREE_YEARS =>  "3 years"
-      case GrantLength.FIVE_YEARS =>  "5 years"
-      case GrantLength.TEN_YEARS =>  "10 years"
-      case GrantLength.HUNDRED_YEARS =>  "100 years"
-      case _ => s"${Math.round(grantLength.getDays/30)} months"
+      case GrantLength.MONTH           => "1 month"
+      case GrantLength.THREE_MONTHS    => "3 months"
+      case GrantLength.SIX_MONTHS      => "6 months"
+      case GrantLength.ONE_YEAR        => "1 year"
+      case GrantLength.EIGHTEEN_MONTHS => "18 months"
+      case GrantLength.THREE_YEARS     => "3 years"
+      case GrantLength.FIVE_YEARS      => "5 years"
+      case GrantLength.TEN_YEARS       => "10 years"
+      case GrantLength.HUNDRED_YEARS   => "100 years"
+      case _                           => s"${Math.round(grantLength.getDays / 30)} months"
     }
   }
 }
@@ -204,14 +202,14 @@ case class Application(
     val access: Access = Standard(),
     val state: ApplicationState = ApplicationState.testing,
     val checkInformation: Option[CheckInformation] = None,
-    val ipAllowlist: IpAllowlist = IpAllowlist())
-    extends BaseApplication
+    val ipAllowlist: IpAllowlist = IpAllowlist()
+  ) extends BaseApplication
 
 object Application {
   import play.api.libs.json.Json
 
   implicit val applicationFormat: OFormat[Application] = Json.format[Application]
-  implicit val ordering: Ordering[Application] = Ordering.by(_.name)
+  implicit val ordering: Ordering[Application]         = Ordering.by(_.name)
 }
 
 case class ApplicationWithSubscriptionIds(
@@ -229,15 +227,15 @@ case class ApplicationWithSubscriptionIds(
     val state: ApplicationState = ApplicationState.testing,
     val checkInformation: Option[CheckInformation] = None,
     val ipAllowlist: IpAllowlist = IpAllowlist(),
-    val subscriptions: Set[ApiIdentifier] = Set.empty)
-    extends BaseApplication
+    val subscriptions: Set[ApiIdentifier] = Set.empty
+  ) extends BaseApplication
 
 object ApplicationWithSubscriptionIds extends LocalDateTimeFormatters {
   import play.api.libs.json.Json
   import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.services.ApiDefinitionsJsonFormatters._
 
   implicit val applicationWithSubsIdsReads: Reads[ApplicationWithSubscriptionIds] = Json.reads[ApplicationWithSubscriptionIds]
-  implicit val ordering: Ordering[ApplicationWithSubscriptionIds] = Ordering.by(_.name)
+  implicit val ordering: Ordering[ApplicationWithSubscriptionIds]                 = Ordering.by(_.name)
 
   def from(app: Application) =
     ApplicationWithSubscriptionIds(

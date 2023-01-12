@@ -23,6 +23,6 @@ import play.api.libs.json.Json
 object BadRequestWithErrorMessage {
   private case class ErrorMessage(errorMessage: String)
   private implicit val writes = Json.writes[ErrorMessage]
-  
+
   def apply(message: String): Result = BadRequest(Json.toJson(ErrorMessage(message)))
 }

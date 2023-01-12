@@ -34,11 +34,12 @@ import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.LocalUserIdTracker
 
 class ManageTeamViewSpec extends CommonViewSpec with WithCSRFAddToken with DeveloperBuilder with LocalUserIdTracker with DeveloperSessionBuilder {
 
-  val appId = ApplicationId("1234")
-  val clientId = ClientId("clientId123")
+  val appId             = ApplicationId("1234")
+  val clientId          = ClientId("clientId123")
   val loggedInDeveloper = buildDeveloperSession(loggedInState = LoggedInState.LOGGED_IN, buildDeveloper("admin@example.com", "firstName1", "lastName1"))
-  val collaborator = buildDeveloperSession(loggedInState = LoggedInState.LOGGED_IN, buildDeveloper("developer@example.com", "firstName2", "lastName2"))
-  val collaborators = Set(loggedInDeveloper.email.asAdministratorCollaborator, collaborator.email.asDeveloperCollaborator)
+  val collaborator      = buildDeveloperSession(loggedInState = LoggedInState.LOGGED_IN, buildDeveloper("developer@example.com", "firstName2", "lastName2"))
+  val collaborators     = Set(loggedInDeveloper.email.asAdministratorCollaborator, collaborator.email.asDeveloperCollaborator)
+
   val application = Application(
     appId,
     clientId,
@@ -60,7 +61,8 @@ class ManageTeamViewSpec extends CommonViewSpec with WithCSRFAddToken with Devel
     def renderPage(role: CollaboratorRole, form: Form[AddTeamMemberForm] = AddTeamMemberForm.form) = {
       val request = FakeRequest().withCSRFToken
 
-      manageTeamView.render(ApplicationViewModel(application, hasSubscriptionsFields = false, hasPpnsFields = false),
+      manageTeamView.render(
+        ApplicationViewModel(application, hasSubscriptionsFields = false, hasPpnsFields = false),
         role,
         form,
         Some(createFraudPreventionNavLinkViewModel(isVisible = true, "some/url")),
@@ -68,7 +70,8 @@ class ManageTeamViewSpec extends CommonViewSpec with WithCSRFAddToken with Devel
         messagesProvider,
         appConfig,
         "nav-section",
-        loggedInDeveloper)
+        loggedInDeveloper
+      )
     }
 
     "show Add and Remove buttons for Admin" in {
@@ -79,7 +82,7 @@ class ManageTeamViewSpec extends CommonViewSpec with WithCSRFAddToken with Devel
       elementExistsByText(document, "strong", "Warning You need admin rights to add or remove team members.") shouldBe false
       elementExistsByText(document, "td", loggedInDeveloper.email) shouldBe true
       elementExistsByText(document, "td", collaborator.email) shouldBe true
-      linkExistsWithHref(document,uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.routes.ManageTeam.removeTeamMember(appId, collaborator.email.toSha256).url) shouldBe true
+      linkExistsWithHref(document, uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.routes.ManageTeam.removeTeamMember(appId, collaborator.email.toSha256).url) shouldBe true
     }
 
     "not show Add and Remove buttons for Developer" in {
@@ -90,7 +93,7 @@ class ManageTeamViewSpec extends CommonViewSpec with WithCSRFAddToken with Devel
       elementExistsByText(document, "strong", "Warning You need admin rights to add or remove team members.") shouldBe true
       elementExistsByText(document, "td", loggedInDeveloper.email) shouldBe true
       elementExistsByText(document, "td", collaborator.email) shouldBe true
-      linkExistsWithHref(document,uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.routes.ManageTeam.removeTeamMember(appId, collaborator.email.toSha256).url) shouldBe false
+      linkExistsWithHref(document, uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.routes.ManageTeam.removeTeamMember(appId, collaborator.email.toSha256).url) shouldBe false
     }
   }
 }

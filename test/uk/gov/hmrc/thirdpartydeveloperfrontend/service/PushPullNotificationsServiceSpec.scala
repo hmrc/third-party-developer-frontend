@@ -33,10 +33,10 @@ class PushPullNotificationsServiceSpec extends AsyncHmrcSpec {
 
   trait Setup {
     implicit val hc: HeaderCarrier = HeaderCarrier()
-    val clientId: ClientId = ClientId(UUID.randomUUID.toString)
-    val grantLength: Period = Period.ofDays(547)
+    val clientId: ClientId         = ClientId(UUID.randomUUID.toString)
+    val grantLength: Period        = Period.ofDays(547)
 
-    val anApplication: Application = Application(
+    val anApplication: Application                                     = Application(
       ApplicationId("appId"),
       clientId,
       "App name 1",
@@ -47,7 +47,7 @@ class PushPullNotificationsServiceSpec extends AsyncHmrcSpec {
       deployedTo = PRODUCTION
     )
     val pushPullNotificationsConnector: PushPullNotificationsConnector = mock[PushPullNotificationsConnector]
-    val mockConnectorsWrapper: ConnectorsWrapper = mock[ConnectorsWrapper]
+    val mockConnectorsWrapper: ConnectorsWrapper                       = mock[ConnectorsWrapper]
     when(mockConnectorsWrapper.forEnvironment(*))
       .thenReturn(Connectors(mock[ThirdPartyApplicationConnector], mock[SubscriptionFieldsConnector], pushPullNotificationsConnector))
 

@@ -21,7 +21,9 @@ import play.api.test.FakeRequest
 import uk.gov.hmrc.thirdpartydeveloperfrontend.security.CookieEncoding
 
 object WithLoggedInSession {
+
   implicit class AuthFakeRequest[A](fakeRequest: FakeRequest[A]) {
+
     def withLoggedIn(implicit cookieEncoding: CookieEncoding, cookieSigner: CookieSigner): String => FakeRequest[A] = { id =>
       fakeRequest.withCookies(cookieEncoding.createCookie(id))
     }

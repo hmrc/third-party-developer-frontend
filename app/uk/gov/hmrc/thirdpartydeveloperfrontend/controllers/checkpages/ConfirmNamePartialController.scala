@@ -38,7 +38,7 @@ trait ConfirmNamePartialController {
 
   def nameAction(appId: ApplicationId): Action[AnyContent] = canUseChecksAction(appId) { implicit request =>
     val requestForm = NameForm.form.bindFromRequest
-    val app = request.application
+    val app         = request.application
 
     def withFormErrors(form: Form[NameForm]) = {
       Future.successful(BadRequest(confirmNameView(app, form, nameActionRoute(appId))))
@@ -56,7 +56,7 @@ trait ConfirmNamePartialController {
       applicationService
         .isApplicationNameValid(form.applicationName, app.deployedTo, Some(app.id))
         .flatMap({
-          case Valid =>
+          case Valid            =>
             val information = app.checkInformation.getOrElse(CheckInformation())
             for {
               _ <- updateNameIfChanged(form)

@@ -48,15 +48,20 @@ class Redirects @Inject() (
     deleteRedirectConfirmationView: DeleteRedirectConfirmationView,
     changeRedirectView: ChangeRedirectView,
     val fraudPreventionConfig: FraudPreventionConfig
-)(implicit val ec: ExecutionContext, val appConfig: ApplicationConfig)
-    extends ApplicationController(mcc) with FraudPreventionNavLinkHelper with WithUnsafeDefaultFormBinding {
+  )(implicit val ec: ExecutionContext,
+    val appConfig: ApplicationConfig
+  ) extends ApplicationController(mcc) with FraudPreventionNavLinkHelper with WithUnsafeDefaultFormBinding {
 
   def canChangeRedirectInformationAction(applicationId: ApplicationId)(fun: ApplicationRequest[AnyContent] => Future[Result]): Action[AnyContent] =
     checkActionForApprovedApps(SupportsRedirects, SandboxOrAdmin)(applicationId)(fun)
 
   def redirects(applicationId: ApplicationId) = checkActionForApprovedApps(SupportsRedirects, TeamMembersOnly)(applicationId) { implicit request =>
     val appAccess = request.application.access.asInstanceOf[Standard]
-    successful(Ok(redirectsView(applicationViewModelFromApplicationRequest, appAccess.redirectUris, createOptionalFraudPreventionNavLinkViewModel(request.application, request.subscriptions, fraudPreventionConfig))))
+    successful(Ok(redirectsView(
+      applicationViewModelFromApplicationRequest,
+      appAccess.redirectUris,
+      createOptionalFraudPreventionNavLinkViewModel(request.application, request.subscriptions, fraudPreventionConfig)
+    )))
   }
 
   def addRedirect(applicationId: ApplicationId) = canChangeRedirectInformationAction(applicationId) { implicit request =>
@@ -102,7 +107,7 @@ class Redirects @Inject() (
           applicationService
             .update(UpdateApplicationRequest.from(application, form))
             .map(_ => Redirect(routes.Redirects.redirects(application.id)))
-        case _ => successful(Redirect(routes.Redirects.redirects(application.id)))
+        case _           => successful(Redirect(routes.Redirects.redirects(application.id)))
       }
     }
 
@@ -134,7 +139,7 @@ class Redirects @Inject() (
                   .withError("newRedirectUri", "redirect.uri.duplicate")
               )
             else updateUris()
-          case _ => successful(Redirect(routes.Details.details(applicationId)))
+          case _             => successful(Redirect(routes.Details.details(applicationId)))
         }
       }
     }

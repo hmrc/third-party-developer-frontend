@@ -45,8 +45,9 @@ class DeleteApplication @Inject() (
     deletePrincipalApplicationCompleteView: DeletePrincipalApplicationCompleteView,
     deleteSubordinateApplicationConfirmView: DeleteSubordinateApplicationConfirmView,
     deleteSubordinateApplicationCompleteView: DeleteSubordinateApplicationCompleteView
-)(implicit val ec: ExecutionContext, val appConfig: ApplicationConfig)
-    extends ApplicationController(mcc)
+  )(implicit val ec: ExecutionContext,
+    val appConfig: ApplicationConfig
+  ) extends ApplicationController(mcc)
     with WithUnsafeDefaultFormBinding {
 
   private def canDeleteApplicationAction(applicationId: ApplicationId)(fun: ApplicationRequest[AnyContent] => Future[Result]) =
@@ -79,7 +80,7 @@ class DeleteApplication @Inject() (
           applicationService
             .requestPrincipalApplicationDeletion(request.developerSession, application)
             .map(_ => Ok(deletePrincipalApplicationCompleteView(application)))
-        case _ => Future(Redirect(routes.Details.details(applicationId)))
+        case _           => Future(Redirect(routes.Details.details(applicationId)))
       }
     }
 

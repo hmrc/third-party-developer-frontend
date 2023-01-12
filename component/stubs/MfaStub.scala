@@ -30,14 +30,14 @@ import uk.gov.hmrc.thirdpartydeveloperfrontend.connectors.EncryptedJson
 object MfaStub {
 
   private val accessCode = "123456"
-  val nonce = "iamanoncevalue"
+  val nonce              = "iamanoncevalue"
 
   def stubMfaAccessCodeSuccess(mfaId: MfaId)(implicit encryptedJson: EncryptedJson): Unit = {
     val session = Session(TestContext.sessionIdForloggedInDeveloper, TestContext.developer, LoggedInState.LOGGED_IN)
 
     stubFor(
       post(urlEqualTo("/authenticate-mfa"))
-      .withRequestBody(equalToJson(encryptedJson.toSecretRequestJson(AccessCodeAuthenticationRequest("john.smith@example.com", accessCode, nonce, mfaId)).toString()))
+        .withRequestBody(equalToJson(encryptedJson.toSecretRequestJson(AccessCodeAuthenticationRequest("john.smith@example.com", accessCode, nonce, mfaId)).toString()))
         .willReturn(
           aResponse()
             .withStatus(OK)
@@ -51,8 +51,8 @@ object MfaStub {
       post(urlPathEqualTo(s"/developer/${developer.userId.value}/mfa/${mfaId.value}/name"))
         .withRequestBody(equalTo(Json.toJson(ChangeMfaNameRequest(authAppName)).toString()))
         .willReturn(aResponse()
-          .withStatus(NO_CONTENT)
-        ))
+          .withStatus(NO_CONTENT))
+    )
   }
 
   def setupVerificationOfAccessCode(developer: Developer, mfaId: MfaId): Unit = {
@@ -60,24 +60,24 @@ object MfaStub {
       post(urlPathEqualTo(s"/developer/${developer.userId.value}/mfa/${mfaId.value}/verification"))
         .withRequestBody(equalTo(Json.toJson(VerifyMfaRequest(accessCode)).toString()))
         .willReturn(aResponse()
-          .withStatus(NO_CONTENT)
-        ))
+          .withStatus(NO_CONTENT))
+    )
   }
 
   def stubRemoveMfaById(developer: Developer, mfaId: MfaId): Unit = {
     stubFor(
       delete(urlPathEqualTo(s"/developer/${developer.userId.value}/mfa/${mfaId.value}"))
         .willReturn(aResponse()
-          .withStatus(NO_CONTENT)
-        ))
+          .withStatus(NO_CONTENT))
+    )
   }
 
   def stubSendSms(developer: Developer, mfaId: MfaId): Unit = {
     stubFor(
       post(urlEqualTo(s"/developer/${developer.userId.value}/mfa/${mfaId.value}/send-sms"))
         .willReturn(aResponse()
-          .withStatus(OK)
-        ))
+          .withStatus(OK))
+    )
   }
 
   def setupSmsAccessCode(developer: Developer, mfaId: MfaId, mobileNumber: String): Unit = {
@@ -88,7 +88,8 @@ object MfaStub {
         .withRequestBody(equalToJson(Json.toJson(CreateMfaSmsRequest(mobileNumber)).toString()))
         .willReturn(aResponse()
           .withStatus(OK)
-          .withBody(Json.toJson(RegisterSmsResponse(mfaId, mobileNumber)).toString())))
+          .withBody(Json.toJson(RegisterSmsResponse(mfaId, mobileNumber)).toString()))
+    )
   }
 
   def setupGettingMfaSecret(developer: Developer, mfaId: MfaId): Unit = {
@@ -98,18 +99,18 @@ object MfaStub {
       post(urlPathEqualTo(s"/developer/${developer.userId.value}/mfa/auth-app"))
         .willReturn(aResponse()
           .withStatus(OK)
-          .withBody(Json.toJson(RegisterAuthAppResponse(mfaId, "mySecret")).toString())))
+          .withBody(Json.toJson(RegisterAuthAppResponse(mfaId, "mySecret")).toString()))
+    )
   }
 
-
-  def stubUpliftAuthSession(isMfaMandated: Boolean) ={
-    val sessionId = if(isMfaMandated) TestContext.sessionIdForMfaMandatingUser else TestContext.sessionIdForloggedInDeveloper
-    val session = Session(sessionId, TestContext.developer, LoggedInState.LOGGED_IN)
+  def stubUpliftAuthSession(isMfaMandated: Boolean) = {
+    val sessionId = if (isMfaMandated) TestContext.sessionIdForMfaMandatingUser else TestContext.sessionIdForloggedInDeveloper
+    val session   = Session(sessionId, TestContext.developer, LoggedInState.LOGGED_IN)
 
     Stubs.setupPutRequest(s"/session/$sessionId/loggedInState/LOGGED_IN", OK, Json.toJson(session).toString())
   }
 
-  def setupMfaMandated() ={
+  def setupMfaMandated() = {
     val session = Session(TestContext.sessionIdForMfaMandatingUser, TestContext.developer, LoggedInState.LOGGED_IN)
 
     Stubs.setupRequest(s"/session/${TestContext.sessionIdForMfaMandatingUser}", OK, Json.toJson(session).toString())

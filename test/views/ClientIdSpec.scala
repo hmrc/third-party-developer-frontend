@@ -31,9 +31,9 @@ import uk.gov.hmrc.thirdpartydeveloperfrontend.builder._
 import scala.collection.JavaConverters._
 
 class ClientIdSpec extends CommonViewSpec with WithCSRFAddToken with CollaboratorTracker
-  with LocalUserIdTracker
-  with DeveloperSessionBuilder
-  with DeveloperBuilder {
+    with LocalUserIdTracker
+    with DeveloperSessionBuilder
+    with DeveloperBuilder {
 
   trait Setup {
     val clientIdView = app.injector.instanceOf[ClientIdView]
@@ -44,7 +44,7 @@ class ClientIdSpec extends CommonViewSpec with WithCSRFAddToken with Collaborato
   }
 
   "Client ID page" should {
-    val request = FakeRequest().withCSRFToken
+    val request   = FakeRequest().withCSRFToken
     val developer = buildDeveloperSession(loggedInState = LoggedInState.LOGGED_IN, buildDeveloper("Test", "Test", "Test", None))
 
     val application = Application(

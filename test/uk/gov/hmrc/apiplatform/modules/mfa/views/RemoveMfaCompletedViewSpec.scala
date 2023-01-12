@@ -25,14 +25,13 @@ import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.LocalUserIdTracker
 import views.helper.CommonViewSpec
 
 class RemoveMfaCompletedViewSpec extends CommonViewSpec
-  with DeveloperSessionBuilder
-  with DeveloperBuilder
-  with LocalUserIdTracker
-  with StubMessagesFactory {
+    with DeveloperSessionBuilder
+    with DeveloperBuilder
+    with LocalUserIdTracker
+    with StubMessagesFactory {
 
   implicit val loggedIn: DeveloperSession =
-    buildDeveloperSession(loggedInState = LoggedInState.LOGGED_IN,
-    buildDeveloper("developer@example.com", "John", "Smith"))
+    buildDeveloperSession(loggedInState = LoggedInState.LOGGED_IN, buildDeveloper("developer@example.com", "John", "Smith"))
 
   val removeMfaCompletedView: RemoveMfaCompletedView = app.injector.instanceOf[RemoveMfaCompletedView]
 

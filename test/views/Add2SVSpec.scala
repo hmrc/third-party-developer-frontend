@@ -30,14 +30,14 @@ class Add2SVSpec extends CommonViewSpec with WithCSRFAddToken with DeveloperBuil
   val add2SVView = app.injector.instanceOf[Add2SVView]
 
   implicit val loggedInDeveloper = buildDeveloperSession(loggedInState = LoggedInState.LOGGED_IN, buildDeveloper("admin@example.com", "firstName1", "lastName1", None))
-  implicit val request = FakeRequest().withCSRFToken
+  implicit val request           = FakeRequest().withCSRFToken
 
-  val developer = buildDeveloper()
-  val session = Session("sessionId", developer, LoggedInState.LOGGED_IN)
+  val developer                 = buildDeveloper()
+  val session                   = Session("sessionId", developer, LoggedInState.LOGGED_IN)
   implicit val developerSession = DeveloperSession(session)
 
   private def renderPage(isAdminOnProductionApp: Boolean): Html = {
-    add2SVView.render(isAdminOnProductionApp,  messagesProvider, developerSession, request, appConfig)
+    add2SVView.render(isAdminOnProductionApp, messagesProvider, developerSession, request, appConfig)
   }
 
   "I Cant do this right now" should {

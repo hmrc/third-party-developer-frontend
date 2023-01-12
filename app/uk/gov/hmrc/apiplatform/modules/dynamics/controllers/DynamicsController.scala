@@ -38,8 +38,8 @@ class DynamicsController @Inject() (
     val errorHandler: ErrorHandler,
     val cookieSigner: CookieSigner
   )(implicit val ec: ExecutionContext,
-    val appConfig: ApplicationConfig)
-    extends LoggedInController(mcc) {
+    val appConfig: ApplicationConfig
+  ) extends LoggedInController(mcc) {
 
   def tickets: Action[AnyContent] = loggedInAction { implicit request =>
     thirdPartyDeveloperDynamicsConnector.getTickets().map { tickets: List[Ticket] =>

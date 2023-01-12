@@ -27,7 +27,7 @@ import views.html.RegistrationView
 class RegistrationSpec extends CommonViewSpec with WithCSRFAddToken {
   "Registration page" should {
     val registrationView = app.injector.instanceOf[RegistrationView]
-    val request = FakeRequest().withCSRFToken
+    val request          = FakeRequest().withCSRFToken
 
     "render with no errors when the form is valid" in {
       val page = registrationView.render(RegistrationForm.form, request, messagesProvider, appConfig)

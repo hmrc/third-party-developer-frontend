@@ -29,9 +29,9 @@ import scala.concurrent.Future.{failed, successful}
 class MfaServiceSpec extends AsyncHmrcSpec {
 
   trait Setup {
-    val userId = UserId.random
-    val mfaId = MfaId.random
-    val totpCode = "12345678"
+    val userId    = UserId.random
+    val mfaId     = MfaId.random
+    val totpCode  = "12345678"
     val connector = mock[ThirdPartyDeveloperMfaConnector]
 
     when(connector.removeMfaById(eqTo(userId), eqTo(mfaId))(*)).thenReturn(successful(()))
@@ -100,7 +100,7 @@ class MfaServiceSpec extends AsyncHmrcSpec {
       when(connector.removeMfaById(eqTo(userId), eqTo(mfaId))(*))
         .thenReturn(failed(UpstreamErrorResponse("failed to remove MFA", INTERNAL_SERVER_ERROR, INTERNAL_SERVER_ERROR)))
 
-      intercept[UpstreamErrorResponse](await(service.removeMfaById(userId, mfaId, totpCode,mfaId)(HeaderCarrier())))
+      intercept[UpstreamErrorResponse](await(service.removeMfaById(userId, mfaId, totpCode, mfaId)(HeaderCarrier())))
     }
   }
 }

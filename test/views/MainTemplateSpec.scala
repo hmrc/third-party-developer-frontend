@@ -30,11 +30,11 @@ import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.ViewHelpers.elementExistsBy
 class MainTemplateSpec extends CommonViewSpec with DeveloperBuilder with LocalUserIdTracker {
 
   "MainTemplateSpec" should {
-    val mainView = app.injector.instanceOf[Main]
-    val developer = buildDeveloper()
-    val session = Session("sessionId", developer, LoggedInState.LOGGED_IN)
+    val mainView                  = app.injector.instanceOf[Main]
+    val developer                 = buildDeveloper()
+    val session                   = Session("sessionId", developer, LoggedInState.LOGGED_IN)
     implicit val developerSession = DeveloperSession(session)
-    implicit val request = FakeRequest()
+    implicit val request          = FakeRequest()
 
     "Application title meta data set by configuration" in {
       when(appConfig.title).thenReturn("Application Title")

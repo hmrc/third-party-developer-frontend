@@ -27,16 +27,16 @@ import views.helper.CommonViewSpec
 import views.html.ProfileDeleteConfirmationView
 
 class ProfileDeleteConfirmationSpec extends CommonViewSpec
-  with WithCSRFAddToken
-  with LocalUserIdTracker
-  with DeveloperSessionBuilder
-  with DeveloperBuilder {
+    with WithCSRFAddToken
+    with LocalUserIdTracker
+    with DeveloperSessionBuilder
+    with DeveloperBuilder {
 
   val profileDeleteConfirmation = app.injector.instanceOf[ProfileDeleteConfirmationView]
 
   "Profile delete confirmation page" should {
-    val developer = buildDeveloper("Test", "Test", "Test", None)
-    val developerSession = buildDeveloperSession( loggedInState = LoggedInState.LOGGED_IN, developer)
+    val developer        = buildDeveloper("Test", "Test", "Test", None)
+    val developerSession = buildDeveloperSession(loggedInState = LoggedInState.LOGGED_IN, developer)
 
     "render with no errors" in {
       val request = FakeRequest().withCSRFToken

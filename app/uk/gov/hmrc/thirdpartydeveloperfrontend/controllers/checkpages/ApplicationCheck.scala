@@ -61,8 +61,9 @@ class ApplicationCheck @Inject() (
     val termsAndConditionsView: TermsAndConditionsView,
     val termsOfUseVersionService: TermsOfUseVersionService,
     val clock: Clock
-)(implicit val ec: ExecutionContext, val appConfig: ApplicationConfig)
-    extends ApplicationController(mcc)
+  )(implicit val ec: ExecutionContext,
+    val appConfig: ApplicationConfig
+  ) extends ApplicationController(mcc)
     with ApplicationHelper
     with CanUseCheckActions
     with ConfirmNamePartialController
@@ -144,14 +145,14 @@ class ApplicationCheck @Inject() (
     RemoveTeamMemberCheckPageConfirmationForm.form.bindFromRequest.fold(handleInvalidForm, handleValidForm)
   }
 
-  protected def landingPageRoute(appId: ApplicationId): Call = routes.ApplicationCheck.requestCheckPage(appId)
-  protected def nameActionRoute(appId: ApplicationId): Call = routes.ApplicationCheck.nameAction(appId)
-  protected def contactActionRoute(appId: ApplicationId): Call = routes.ApplicationCheck.contactAction(appId)
-  protected def apiSubscriptionsActionRoute(appId: ApplicationId): Call = routes.ApplicationCheck.apiSubscriptionsAction(appId)
-  protected def privacyPolicyActionRoute(appId: ApplicationId): Call = routes.ApplicationCheck.privacyPolicyAction(appId)
+  protected def landingPageRoute(appId: ApplicationId): Call              = routes.ApplicationCheck.requestCheckPage(appId)
+  protected def nameActionRoute(appId: ApplicationId): Call               = routes.ApplicationCheck.nameAction(appId)
+  protected def contactActionRoute(appId: ApplicationId): Call            = routes.ApplicationCheck.contactAction(appId)
+  protected def apiSubscriptionsActionRoute(appId: ApplicationId): Call   = routes.ApplicationCheck.apiSubscriptionsAction(appId)
+  protected def privacyPolicyActionRoute(appId: ApplicationId): Call      = routes.ApplicationCheck.privacyPolicyAction(appId)
   protected def termsAndConditionsActionRoute(appId: ApplicationId): Call = routes.ApplicationCheck.termsAndConditionsAction(appId)
-  protected def termsOfUseActionRoute(appId: ApplicationId): Call = routes.ApplicationCheck.termsOfUseAction(appId)
-  protected def submitButtonLabel = "Save and return"
+  protected def termsOfUseActionRoute(appId: ApplicationId): Call         = routes.ApplicationCheck.termsOfUseAction(appId)
+  protected def submitButtonLabel                                         = "Save and return"
 }
 
 case class TermsAndConditionsForm(urlPresent: Option[String], termsAndConditionsURL: Option[String])
@@ -161,7 +162,7 @@ object TermsAndConditionsForm {
 
   def form: Form[TermsAndConditionsForm] = Form(
     mapping(
-      "hasUrl" -> optional(text).verifying(tNcUrlNoChoiceKey, s => s.isDefined),
+      "hasUrl"                -> optional(text).verifying(tNcUrlNoChoiceKey, s => s.isDefined),
       "termsAndConditionsURL" -> mandatoryIfTrue(
         "hasUrl",
         text.verifying(tNcUrlInvalidKey, s => s.isEmpty || isValidUrl(s)).verifying(tNcUrlRequiredKey, _.nonEmpty)
@@ -177,7 +178,7 @@ object PrivacyPolicyForm {
 
   def form: Form[PrivacyPolicyForm] = Form(
     mapping(
-      "hasUrl" -> optional(text).verifying(privacyPolicyUrlNoChoiceKey, s => s.isDefined),
+      "hasUrl"           -> optional(text).verifying(privacyPolicyUrlNoChoiceKey, s => s.isDefined),
       "privacyPolicyURL" -> mandatoryIfTrue(
         "hasUrl",
         text.verifying(privacyPolicyUrlInvalidKey, s => s.isEmpty || isValidUrl(s)).verifying(privacyPolicyUrlRequiredKey, _.nonEmpty)
@@ -214,10 +215,11 @@ case class ContactForm(fullname: String, email: String, telephone: String)
 
 object ContactForm {
   import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers._
+
   def form: Form[ContactForm] = Form(
     mapping(
-      "fullname" -> fullnameValidator,
-      "email" -> emailValidator(),
+      "fullname"  -> fullnameValidator,
+      "email"     -> emailValidator(),
       "telephone" -> telephoneValidator
     )(ContactForm.apply)(ContactForm.unapply)
   )
@@ -226,6 +228,7 @@ object ContactForm {
 case class DummySubscriptionsForm(hasNonExampleSubscription: Boolean)
 
 object DummySubscriptionsForm {
+
   def form: Form[DummySubscriptionsForm] = Form(
     mapping(
       "hasNonExampleSubscription" -> boolean

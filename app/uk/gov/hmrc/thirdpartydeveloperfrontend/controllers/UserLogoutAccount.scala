@@ -40,8 +40,9 @@ class UserLogoutAccount @Inject() (
     val cookieSigner: CookieSigner,
     signoutSurveyView: SignoutSurveyView,
     logoutConfirmationView: LogoutConfirmationView
-)(implicit val ec: ExecutionContext, val appConfig: ApplicationConfig)
-    extends LoggedInController(mcc)
+  )(implicit val ec: ExecutionContext,
+    val appConfig: ApplicationConfig
+  ) extends LoggedInController(mcc)
     with ExtendedDevHubAuthorization
     with ApplicationLogger {
 
@@ -57,7 +58,7 @@ class UserLogoutAccount @Inject() (
         val res: Future[TicketId] = deskproService.submitSurvey(form)
         res.onComplete {
           case Failure(_) => logger.error("Failed to create deskpro ticket")
-          case _ => ()
+          case _          => ()
         }
 
         applicationService
@@ -65,7 +66,7 @@ class UserLogoutAccount @Inject() (
           .flatMap(_ => {
             Future.successful(Redirect(routes.UserLogoutAccount.logout))
           })
-      case None =>
+      case None       =>
         logger.error("Survey form invalid.")
         Future.successful(Redirect(routes.UserLogoutAccount.logout))
     }

@@ -97,8 +97,8 @@ class ValidatorsSpec extends AsyncHmrcSpec with ScalaCheckPropertyChecks with Ma
     def passwordPaddedToLength(n: Int) =
       for {
         required <- requiredCharacters
-        padding <- Gen.listOfN(Math.max(0, n - required.length), asciiPrintable)
-        padded = required ++ padding
+        padding  <- Gen.listOfN(Math.max(0, n - required.length), asciiPrintable)
+        padded    = required ++ padding
         shuffled <- shuffle(padded)
       } yield shuffled.mkString
 
@@ -110,7 +110,7 @@ class ValidatorsSpec extends AsyncHmrcSpec with ScalaCheckPropertyChecks with Ma
 
     val passwordNotValidError = FormError("password", "password.error.not.valid.field")
     val passwordRequiredError = FormError("password", "password.error.required.field")
-    val testForm = Form("password" -> passwordValidator)
+    val testForm              = Form("password" -> passwordValidator)
 
     def passwordErrors(password: String) = testForm.bind(Map("password" -> password)).errors
 
@@ -177,21 +177,21 @@ class ValidatorsSpec extends AsyncHmrcSpec with ScalaCheckPropertyChecks with Ma
     val form = Form(single("redirectUri" -> redirectUriValidator))
 
     val invalidCases = Map(
-      "fragment in http url" -> "http://example.com#test",
-      "fragment in https url" -> "https://example.com#test",
+      "fragment in http url"      -> "http://example.com#test",
+      "fragment in https url"     -> "https://example.com#test",
       "fragment in localhost url" -> "http://localhost#test",
-      "invalid url" -> "random",
-      "not https" -> "http://example.com",
-      "invalid localhost" -> "http://localhost.example.com"
+      "invalid url"               -> "random",
+      "not https"                 -> "http://example.com",
+      "invalid localhost"         -> "http://localhost.example.com"
     )
 
     val validCases = Map(
-      "localhost" -> "http://localhost",
+      "localhost"           -> "http://localhost",
       "localhost with port" -> "http://localhost:8080",
       "localhost with path" -> "http://localhost:8080/some/path",
-      "https url" -> "https://example.com",
-      "oob" -> "urn:ietf:wg:oauth:2.0:oob",
-      "oob auto" -> "urn:ietf:wg:oauth:2.0:oob:auto"
+      "https url"           -> "https://example.com",
+      "oob"                 -> "urn:ietf:wg:oauth:2.0:oob",
+      "oob auto"            -> "urn:ietf:wg:oauth:2.0:oob:auto"
     )
 
     for ((k, v) <- invalidCases) {

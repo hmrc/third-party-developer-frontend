@@ -31,7 +31,7 @@ trait NavigationSugar extends WebBrowser with Eventually with Assertions with Ma
   when(mockAppConfig.jsonEncryptionKey).thenReturn("czV2OHkvQj9FKEgrTWJQZVNoVm1ZcTN0Nnc5eiRDJkY=")
 
   implicit override val patienceConfig = PatienceConfig(timeout = scaled(Span(3, Seconds)), interval = scaled(Span(100, Millis)))
-  implicit val encryptedJson = new EncryptedJson(new PayloadEncryption(new LocalCrypto(mockAppConfig)))
+  implicit val encryptedJson           = new EncryptedJson(new PayloadEncryption(new LocalCrypto(mockAppConfig)))
 
   def goOn(page: WebPage)(implicit webDriver: WebDriver) = {
     go(page)
@@ -44,7 +44,7 @@ trait NavigationSugar extends WebBrowser with Eventually with Assertions with Ma
 
   def on(page: WebPage)(implicit webDriver: WebDriver) = {
     eventually {
-      find(tagName("body"))  //.filter(_ => page.isCurrentPage)
+      find(tagName("body")) // .filter(_ => page.isCurrentPage)
     }
     withClue(s"Currently in page: $currentUrl " + find(tagName("h1")).map(_.text).fold(" - ")(h1 => s", with title '$h1' - ")) {
       assert(page.isCurrentPage, s"Page was not loaded: ${page.url}")

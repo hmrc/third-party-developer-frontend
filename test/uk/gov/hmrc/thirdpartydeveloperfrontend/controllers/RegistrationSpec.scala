@@ -24,7 +24,7 @@ import org.mockito.ArgumentCaptor
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
 import play.filters.csrf.CSRF.TokenProvider
-import uk.gov.hmrc.http.{BadRequestException}
+import uk.gov.hmrc.http.BadRequestException
 import views.html._
 
 import scala.concurrent.ExecutionContext.Implicits.global
@@ -36,12 +36,12 @@ class RegistrationSpec extends BaseControllerSpec {
   var userPassword = "Password1!"
 
   trait Setup extends SessionServiceMock {
-    val registrationView = app.injector.instanceOf[RegistrationView]
-    val signInView = app.injector.instanceOf[SignInView]
-    val accountVerifiedView = app.injector.instanceOf[AccountVerifiedView]
+    val registrationView            = app.injector.instanceOf[RegistrationView]
+    val signInView                  = app.injector.instanceOf[SignInView]
+    val accountVerifiedView         = app.injector.instanceOf[AccountVerifiedView]
     val expiredVerificationLinkView = app.injector.instanceOf[ExpiredVerificationLinkView]
-    val confirmationView = app.injector.instanceOf[ConfirmationView]
-    val resendConfirmationView = app.injector.instanceOf[ResendConfirmationView]
+    val confirmationView            = app.injector.instanceOf[ConfirmationView]
+    val resendConfirmationView      = app.injector.instanceOf[ResendConfirmationView]
 
     val underTest = new Registration(
       sessionServiceMock,
@@ -64,7 +64,7 @@ class RegistrationSpec extends BaseControllerSpec {
     "register with normalized firstname, lastname, email and organisation" in new Setup {
       val request = FakeRequest().withSession(sessionParams: _*).withFormUrlEncodedBody(
         ("firstname", "   first  "), // with whitespaces before and after
-        ("lastname", "  last  "), // with whitespaces before and after
+        ("lastname", "  last  "),    // with whitespaces before and after
         ("emailaddress", "email@example.com"),
         ("password", "VALID@1q2w3e"),
         ("confirmpassword", "VALID@1q2w3e"),
@@ -88,7 +88,7 @@ class RegistrationSpec extends BaseControllerSpec {
     "register with no organisation" in new Setup {
       val request = FakeRequest().withSession(sessionParams: _*).withFormUrlEncodedBody(
         ("firstname", "   first  "), // with whitespaces before and after
-        ("lastname", "  last  "), // with whitespaces before and after
+        ("lastname", "  last  "),    // with whitespaces before and after
         ("emailaddress", "email@example.com"),
         ("password", "VALID@1q2w3e"),
         ("confirmpassword", "VALID@1q2w3e")
@@ -124,21 +124,21 @@ class RegistrationSpec extends BaseControllerSpec {
     }
 
     "redirect the user to confirmation page when resending verification" in new Setup {
-      val email = "john.smith@example.com"
+      val email            = "john.smith@example.com"
       val newSessionParams = Seq(("email", email), sessionParams.head)
-      val request = FakeRequest().withSession(newSessionParams: _*)
+      val request          = FakeRequest().withSession(newSessionParams: _*)
       when(underTest.connector.resendVerificationEmail(eqTo(email))(*)).thenReturn(successful(NO_CONTENT))
-      val result = underTest.resendVerification()(request)
+      val result           = underTest.resendVerification()(request)
 
       status(result) shouldBe SEE_OTHER
     }
 
     "show error page when resending verification fails" in new Setup {
-      val email = "john.smith@example.com"
+      val email            = "john.smith@example.com"
       val newSessionParams = Seq(("email", email), sessionParams.head)
-      val request = FakeRequest().withSession(newSessionParams: _*)
+      val request          = FakeRequest().withSession(newSessionParams: _*)
       when(underTest.connector.resendVerificationEmail(eqTo(email))(*)).thenReturn(failed(UpstreamErrorResponse("Bang", NOT_FOUND)))
-      val result = underTest.resendVerification()(request)
+      val result           = underTest.resendVerification()(request)
 
       status(result) shouldBe NOT_FOUND
     }

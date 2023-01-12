@@ -24,6 +24,7 @@ import play.api.data.Forms.{boolean, mapping}
 case class TermsOfUseForm(termsOfUseAgreed: Boolean)
 
 object TermsOfUseForm {
+
   def form: Form[TermsOfUseForm] = Form(
     mapping(
       "termsOfUseAgreed" -> boolean.verifying(termsOfUseAgreeKey, b => b)

@@ -35,11 +35,11 @@ class DeletePrincipalApplicationConfirmSpec extends CommonViewSpec with WithCSRF
 
   "delete application confirm page" should {
 
-    val request = FakeRequest().withCSRFToken
-    val appId = ApplicationId("1234")
-    val clientId = ClientId("clientId123")
-    val loggedInDeveloper = buildDeveloperSession( loggedInState = LoggedInState.LOGGED_IN, buildDeveloper("developer@example.com", "John", "Doe"))
-    val application = Application(
+    val request           = FakeRequest().withCSRFToken
+    val appId             = ApplicationId("1234")
+    val clientId          = ClientId("clientId123")
+    val loggedInDeveloper = buildDeveloperSession(loggedInState = LoggedInState.LOGGED_IN, buildDeveloper("developer@example.com", "John", "Doe"))
+    val application       = Application(
       appId,
       clientId,
       "App name 1",

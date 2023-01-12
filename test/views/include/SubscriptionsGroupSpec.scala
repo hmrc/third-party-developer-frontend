@@ -32,10 +32,10 @@ import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.{CollaboratorTracker, Local
 
 import java.time.{LocalDateTime, ZoneOffset}
 
-class SubscriptionsGroupSpec 
-    extends CommonViewSpec 
-    with WithCSRFAddToken 
-    with SubscriptionsBuilder 
+class SubscriptionsGroupSpec
+    extends CommonViewSpec
+    with WithCSRFAddToken
+    with SubscriptionsBuilder
     with CollaboratorTracker
     with LocalUserIdTracker
     with DeveloperSessionBuilder
@@ -45,13 +45,12 @@ class SubscriptionsGroupSpec
 
   val loggedInDeveloper = buildDeveloperSession(loggedInState = LoggedInState.LOGGED_IN, buildDeveloper("givenname.familyname@example.com", "Givenname", "Familyname"))
 
-
-  val applicationId = ApplicationId("1234")
-  val clientId = ClientId("clientId123")
+  val applicationId   = ApplicationId("1234")
+  val clientId        = ClientId("clientId123")
   val applicationName = "Test Application"
-  val apiName = "Test API"
-  val apiContext = ApiContext("test")
-  val apiVersion = ApiVersion("1.0")
+  val apiName         = "Test API"
+  val apiContext      = ApiContext("test")
+  val apiVersion      = ApiVersion("1.0")
 
   val emptyFields = emptySubscriptionFieldsWrapper(applicationId, clientId, apiContext, apiVersion)
 
@@ -62,6 +61,7 @@ class SubscriptionsGroupSpec
   val subscriptionsGroup = app.injector.instanceOf[SubscriptionsGroup]
 
   case class Page(role: CollaboratorRole, environment: Environment, state: ApplicationState) {
+
     lazy val body: Document = {
       val application = Application(
         applicationId,
@@ -95,7 +95,7 @@ class SubscriptionsGroupSpec
       )
     }
 
-    lazy val toggle = body.getElementById("test-1_0-toggle")
+    lazy val toggle            = body.getElementById("test-1_0-toggle")
     lazy val requestChangeLink = Option(body.getElementsByClass("request-change-link").first)
   }
 

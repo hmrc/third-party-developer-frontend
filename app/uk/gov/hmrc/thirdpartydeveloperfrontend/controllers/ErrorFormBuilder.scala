@@ -24,11 +24,9 @@ object ErrorFormBuilder {
 
     import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.FormKeys._
 
-    //to test it
-    def emailAddressAlreadyInUse = form.
-      withError("submissionError", "true").
-      withError(emailaddressField, emailalreadyInUseKey, routes.UserLoginAccount.login).
-      withGlobalError(emailaddressAlreadyInUseGlobalKey)
+    // to test it
+    def emailAddressAlreadyInUse =
+      form.withError("submissionError", "true").withError(emailaddressField, emailalreadyInUseKey, routes.UserLoginAccount.login).withGlobalError(emailaddressAlreadyInUseGlobalKey)
 
     def isEmailAddressAlreadyUse: Boolean =
       form.errors(emailaddressField).flatMap(_.messages) == List(emailalreadyInUseKey)
@@ -47,7 +45,7 @@ object ErrorFormBuilder {
       val errors = form.globalErrors.filter(_.messages.last == passwordNoMatchGlobalKey).seq
       errors match {
         case _ :: Nil => form.withError(passwordField, passwordNoMatchKey).withError(confirmapasswordField, passwordNoMatchKey)
-        case _ => form
+        case _        => form
       }
     }
 
@@ -55,7 +53,7 @@ object ErrorFormBuilder {
       val errors: Seq[FormError] = form.errors.filter(_.key == field).seq
       errors match {
         case s if s.nonEmpty => formKeysMap.get(s.last.message).map(form.withGlobalError(_)).getOrElse(form)
-        case _ => form
+        case _               => form
       }
     }
   }

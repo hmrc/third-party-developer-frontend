@@ -41,11 +41,11 @@ import uk.gov.hmrc.apiplatform.modules.submissions.SubmissionsTestData
 import uk.gov.hmrc.apiplatform.modules.submissions.controllers.ProdCredsChecklistController.{DummyForm, ViewModel}
 
 class ProdCredsChecklistControllerSpec
-  extends BaseControllerSpec
+    extends BaseControllerSpec
     with SampleSession
     with SampleApplication
     with SubscriptionTestHelperSugar
-    with WithCSRFAddToken 
+    with WithCSRFAddToken
     with DeveloperBuilder
     with LocalUserIdTracker {
 
@@ -57,13 +57,13 @@ class ProdCredsChecklistControllerSpec
     val sessionParams = Seq("csrfToken" -> app.injector.instanceOf[CSRF.TokenProvider].generateToken)
 
     fetchSessionByIdReturns(sessionId, session)
-    
+
     updateUserFlowSessionsReturnsSuccessfully(sessionId)
   }
 
   trait HasAppInTestingState {
     self: HasSubscriptions with ApplicationActionServiceMock with ApplicationServiceMock =>
-      
+
     givenApplicationAction(
       ApplicationWithSubscriptionData(
         testingApp,
@@ -77,18 +77,19 @@ class ProdCredsChecklistControllerSpec
     fetchByApplicationIdReturns(appId, testingApp)
   }
 
-  trait Setup 
-    extends ApplicationServiceMock
-    with ApplicationActionServiceMock
-    with ApmConnectorMockModule
-    with SubmissionServiceMockModule
-    with HasSessionDeveloperFlow
-    with HasSubscriptions
-    with HasAppInTestingState
-    with SubmissionsTestData {
+  trait Setup
+      extends ApplicationServiceMock
+      with ApplicationActionServiceMock
+      with ApmConnectorMockModule
+      with SubmissionServiceMockModule
+      with HasSessionDeveloperFlow
+      with HasSubscriptions
+      with HasAppInTestingState
+      with SubmissionsTestData {
 
     val productionCredentialsChecklistView = mock[ProductionCredentialsChecklistView]
-    when(productionCredentialsChecklistView.apply(*[ViewModel], *)(*, *, *,*)).thenReturn(play.twirl.api.HtmlFormat.empty)
+    when(productionCredentialsChecklistView.apply(*[ViewModel], *)(*, *, *, *)).thenReturn(play.twirl.api.HtmlFormat.empty)
+
     val controller = new ProdCredsChecklistController(
       mockErrorHandler,
       sessionServiceMock,
@@ -106,7 +107,7 @@ class ProdCredsChecklistControllerSpec
 
   trait HasAppInProductionState {
     self: Setup with ApplicationActionServiceMock with ApplicationServiceMock =>
-      
+
     givenApplicationAction(
       ApplicationWithSubscriptionData(
         sampleApp,
@@ -116,10 +117,9 @@ class ProdCredsChecklistControllerSpec
       loggedInDeveloper,
       List(aSubscription)
     )
-    
+
     fetchByApplicationIdReturns(appId, sampleApp)
   }
-
 
   "productionCredentialsChecklist" should {
     "fail with NOT FOUND" in new Setup {
@@ -143,11 +143,11 @@ class ProdCredsChecklistControllerSpec
     "return success when form is valid and incomplete" in new Setup {
       SubmissionServiceMock.FetchLatestExtendedSubmission.thenReturns(answeringSubmission.withIncompleteProgress)
       val formCaptor = ArgCaptor[Form[DummyForm]]
-      val result = controller.productionCredentialsChecklistAction(appId)(loggedInRequest.withCSRFToken)
+      val result     = controller.productionCredentialsChecklistAction(appId)(loggedInRequest.withCSRFToken)
 
       status(result) shouldBe OK
 
-      verify(productionCredentialsChecklistView).apply(*, formCaptor.capture)(*,*,*,*)
+      verify(productionCredentialsChecklistView).apply(*, formCaptor.capture)(*, *, *, *)
       val form = formCaptor.value
       form.errors.size shouldBe 3
       form.errors("development practices").head.messages shouldBe Seq("Complete the development practices section")

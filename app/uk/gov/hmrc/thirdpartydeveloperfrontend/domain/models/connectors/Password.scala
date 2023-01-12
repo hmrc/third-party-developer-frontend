@@ -19,11 +19,13 @@ package uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.connectors
 import play.api.libs.json.Json
 
 case class PasswordReset(email: String, newPassword: String)
+
 object PasswordReset {
   implicit val format = Json.format[PasswordReset]
 }
 
-case class ChangePassword(email:String, oldPassword:String, newPassword:String)
+case class ChangePassword(email: String, oldPassword: String, newPassword: String)
+
 object ChangePassword {
   implicit val format = Json.format[ChangePassword]
 }

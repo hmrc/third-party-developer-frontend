@@ -21,6 +21,7 @@ sealed trait Capability {
 }
 
 object Capabilities {
+
   trait StandardAppCapability extends Capability {
     final def hasCapability(app: BaseApplication): Boolean = app.access.accessType.isStandard
   }

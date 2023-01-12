@@ -25,25 +25,25 @@ class GlobalErrorSpec extends AsyncHmrcSpec {
   "firstnameGlobal" should {
 
     "add a global form error 'firstname.error.required.global' when a field form error 'firstname.error.required.field'" in {
-      val testForm = Form("firstname" -> firstnameValidator).bind(Map("firstname" -> ""))
+      val testForm              = Form("firstname" -> firstnameValidator).bind(Map("firstname" -> ""))
       val boundWithGlobalErrors = testForm.firstnameGlobal()
       boundWithGlobalErrors.globalErrors shouldBe Seq(FormError("", "firstname.error.required.global"))
     }
 
     "add a global form error 'firstname.error.maxLength.global' when a field form error 'firstname.error.maxLength.field'" in {
-      val testForm = Form("firstname" -> firstnameValidator).bind(Map("firstname" -> "01234567890123456789012345678901"))
+      val testForm              = Form("firstname" -> firstnameValidator).bind(Map("firstname" -> "01234567890123456789012345678901"))
       val boundWithGlobalErrors = testForm.firstnameGlobal()
       boundWithGlobalErrors.globalErrors shouldBe Seq(FormError("", "firstname.error.maxLength.global"))
     }
 
     "add a global form error 'firstname.error.required.global' when 2 field form errors 'firstname.error.maxLength.field' and 'firstname.error.required.field'" in {
-      val testForm = Form("firstname" -> firstnameValidator).bind(Map("firstname" -> "                               "))
+      val testForm              = Form("firstname" -> firstnameValidator).bind(Map("firstname" -> "                               "))
       val boundWithGlobalErrors = testForm.firstnameGlobal()
       boundWithGlobalErrors.globalErrors shouldBe Seq(FormError("", "firstname.error.required.global"))
     }
 
     "not add global form error when a valid value is provided" in {
-      val testForm = Form("firstname" -> firstnameValidator).bind(Map("firstname" -> "testName"))
+      val testForm              = Form("firstname" -> firstnameValidator).bind(Map("firstname" -> "testName"))
       val boundWithGlobalErrors = testForm.firstnameGlobal()
       boundWithGlobalErrors.globalErrors shouldBe Seq()
     }
@@ -52,25 +52,25 @@ class GlobalErrorSpec extends AsyncHmrcSpec {
   "emailaddressGlobal" should {
 
     "add a global form error 'emailaddress.error.required.global' when 2 field form error 'emailaddress.error.not.valid.field' and 'emailaddress.error.required.field'" in {
-      val testForm = Form("emailaddress" -> emailValidator()).bind(Map("emailaddress" -> ""))
+      val testForm              = Form("emailaddress" -> emailValidator()).bind(Map("emailaddress" -> ""))
       val boundWithGlobalErrors = testForm.emailaddressGlobal()
       boundWithGlobalErrors.globalErrors shouldBe Seq(FormError("", "emailaddress.error.required.global"))
     }
 
     "add a global form error 'emailaddress.error.not.valid.global' when a field form error 'emailaddress.error.not.valid.field'" in {
-      val testForm = Form("emailaddress" -> emailValidator()).bind(Map("emailaddress" -> "test@"))
+      val testForm              = Form("emailaddress" -> emailValidator()).bind(Map("emailaddress" -> "test@"))
       val boundWithGlobalErrors = testForm.emailaddressGlobal()
       boundWithGlobalErrors.globalErrors shouldBe Seq(FormError("", "emailaddress.error.not.valid.global"))
     }
 
     "add a global form error 'emailaddress.error.not.valid.global' when a field form error 'emailaddress.error.not.valid.field' for string of spaces" in {
-      val testForm = Form("emailaddress" -> emailValidator()).bind(Map("emailaddress" -> "     "))
+      val testForm              = Form("emailaddress" -> emailValidator()).bind(Map("emailaddress" -> "     "))
       val boundWithGlobalErrors = testForm.emailaddressGlobal()
       boundWithGlobalErrors.globalErrors shouldBe Seq(FormError("", "emailaddress.error.not.valid.global"))
     }
 
     "not add global form error when a valid value is provided" in {
-      val testForm = Form("emailaddress" -> emailValidator()).bind(Map("emailaddress" -> "someTest@example.com"))
+      val testForm              = Form("emailaddress" -> emailValidator()).bind(Map("emailaddress" -> "someTest@example.com"))
       val boundWithGlobalErrors = testForm.emailaddressGlobal()
       boundWithGlobalErrors.globalErrors shouldBe Seq()
     }
@@ -94,10 +94,10 @@ class GlobalErrorSpec extends AsyncHmrcSpec {
 
       val boundWithErrors = RegistrationForm.form.bind(
         Map(
-          "firstname" -> "john",
-          "lastname" -> "smith",
-          "emailaddress" -> "john@example.com",
-          "password" -> "A1@wwwwwwwww",
+          "firstname"       -> "john",
+          "lastname"        -> "smith",
+          "emailaddress"    -> "john@example.com",
+          "password"        -> "A1@wwwwwwwww",
           "confirmpassword" -> "www"
         )
       )

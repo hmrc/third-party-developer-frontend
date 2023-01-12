@@ -40,7 +40,7 @@ import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.LocalUserIdTracker
 class SupportSpec extends BaseControllerSpec with WithCSRFAddToken with DeveloperBuilder with LocalUserIdTracker {
 
   trait Setup extends SessionServiceMock {
-    val supportEnquiryView = app.injector.instanceOf[SupportEnquiryView]
+    val supportEnquiryView  = app.injector.instanceOf[SupportEnquiryView]
     val supportThankYouView = app.injector.instanceOf[SupportThankyouView]
 
     val underTest = new Support(
@@ -51,10 +51,10 @@ class SupportSpec extends BaseControllerSpec with WithCSRFAddToken with Develope
       cookieSigner,
       supportEnquiryView,
       supportThankYouView
-      )
+    )
 
     val sessionParams = Seq("csrfToken" -> app.injector.instanceOf[TokenProvider].generateToken)
-    val developer = buildDeveloper(emailAddress = "thirdpartydeveloper@example.com")
+    val developer     = buildDeveloper(emailAddress = "thirdpartydeveloper@example.com")
 
     val sessionId = "sessionId"
   }
@@ -70,7 +70,7 @@ class SupportSpec extends BaseControllerSpec with WithCSRFAddToken with Develope
 
       val result = addToken(underTest.raiseSupportEnquiry())(request)
 
-      assertFullNameAndEmail(result,"John Doe", "thirdpartydeveloper@example.com")
+      assertFullNameAndEmail(result, "John Doe", "thirdpartydeveloper@example.com")
     }
 
     "support form fields are blank when not logged in" in new Setup {
@@ -92,16 +92,17 @@ class SupportSpec extends BaseControllerSpec with WithCSRFAddToken with Develope
 
       val result = addToken(underTest.raiseSupportEnquiry())(request)
 
-      assertFullNameAndEmail(result, "","")
+      assertFullNameAndEmail(result, "", "")
     }
 
     "submit request with name, email & comments from form" in new Setup {
       val request = FakeRequest()
         .withSession(sessionParams: _*)
         .withFormUrlEncodedBody(
-          "fullname" -> "Peter Smith",
+          "fullname"     -> "Peter Smith",
           "emailaddress" -> "peter@example.com",
-          "comments" -> "A+++, good seller, would buy again")
+          "comments"     -> "A+++, good seller, would buy again"
+        )
 
       val captor: ArgumentCaptor[SupportEnquiryForm] = ArgumentCaptor.forClass(classOf[SupportEnquiryForm])
       when(underTest.deskproService.submitSupportEnquiry(captor.capture())(any[Request[AnyRef]], *)).thenReturn(successful(TicketCreated))
@@ -121,9 +122,10 @@ class SupportSpec extends BaseControllerSpec with WithCSRFAddToken with Develope
         .withSession(sessionParams: _*)
         .withFormUrlEncodedBody(
           "fullname" -> "Peter Smith",
-          "comments" -> "A+++, good seller, would buy again")
+          "comments" -> "A+++, good seller, would buy again"
+        )
 
-     val result = addToken(underTest.submitSupportEnquiry())(request)
+      val result = addToken(underTest.submitSupportEnquiry())(request)
       status(result) shouldBe 400
     }
   }

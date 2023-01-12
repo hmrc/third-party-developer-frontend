@@ -42,11 +42,11 @@ class UserLogoutAccountSpec extends BaseControllerSpec with WithCSRFAddToken wit
   trait Setup extends SessionServiceMock {
     val developer = buildDeveloper()
     val sessionId = UUID.randomUUID().toString
-    val session = Session(sessionId, developer, LoggedInState.LOGGED_IN)
+    val session   = Session(sessionId, developer, LoggedInState.LOGGED_IN)
 
     val developerSession: DeveloperSession = DeveloperSession(session)
 
-    val signoutSurveyView = app.injector.instanceOf[SignoutSurveyView]
+    val signoutSurveyView      = app.injector.instanceOf[SignoutSurveyView]
     val logoutConfirmationView = app.injector.instanceOf[LogoutConfirmationView]
 
     val underTest = new UserLogoutAccount(
@@ -85,7 +85,7 @@ class UserLogoutAccountSpec extends BaseControllerSpec with WithCSRFAddToken wit
 
     "display the logout confirmation page when the user calls logout" in new Setup {
       val request = loggedInRequestWithCsrfToken
-      val result = underTest.logout()(request)
+      val result  = underTest.logout()(request)
 
       status(result) shouldBe 200
 
@@ -94,7 +94,7 @@ class UserLogoutAccountSpec extends BaseControllerSpec with WithCSRFAddToken wit
 
     "display the logout confirmation page when a user that is not signed in attempts to log out" in new Setup {
       val request = FakeRequest()
-      val result = underTest.logout()(request)
+      val result  = underTest.logout()(request)
 
       status(result) shouldBe 200
       contentAsString(result) should include("You are now signed out")
@@ -102,7 +102,7 @@ class UserLogoutAccountSpec extends BaseControllerSpec with WithCSRFAddToken wit
 
     "destroy session on logout" in new Setup {
       implicit val request = loggedInRequestWithCsrfToken.withSession("access_uri" -> "https://www.example.com")
-      val result = await(underTest.logout()(request))
+      val result           = await(underTest.logout()(request))
 
       verify(underTest.sessionService, atLeastOnce).destroy(eqTo(session.sessionId))(*)
       result.session.data shouldBe Map.empty
@@ -124,7 +124,7 @@ class UserLogoutAccountSpec extends BaseControllerSpec with WithCSRFAddToken wit
       givenUserLoggedIn()
 
       val request = loggedInRequestWithCsrfToken
-      val result = addToken(underTest.logoutSurvey())(request)
+      val result  = addToken(underTest.logoutSurvey())(request)
 
       status(result) shouldBe 200
 
@@ -137,7 +137,7 @@ class UserLogoutAccountSpec extends BaseControllerSpec with WithCSRFAddToken wit
       val request = notLoggedInRequestWithCsrfToken.withFormUrlEncodedBody(
         "blah" -> "thing"
       )
-      val result = underTest.logoutSurveyAction()(request)
+      val result  = underTest.logoutSurveyAction()(request)
 
       status(result) shouldBe 303
       redirectLocation(result) shouldBe Some("/developer/login")
@@ -152,13 +152,13 @@ class UserLogoutAccountSpec extends BaseControllerSpec with WithCSRFAddToken wit
       when(underTest.applicationService.userLogoutSurveyCompleted(*, *, *, *)(*))
         .thenReturn(Future.successful(Success))
 
-      val form =
+      val form    =
         SignOutSurveyForm(Some(2), "no suggestions", s"${developerSession.developer.firstName} ${developerSession.developer.lastName}", developerSession.email, isJavascript = true)
       val request = loggedInRequestWithCsrfToken.withFormUrlEncodedBody(
-        "rating" -> form.rating.get.toString,
-        "email" -> form.email,
-        "name" -> form.name,
-        "isJavascript" -> form.isJavascript.toString,
+        "rating"                 -> form.rating.get.toString,
+        "email"                  -> form.email,
+        "name"                   -> form.name,
+        "isJavascript"           -> form.isJavascript.toString,
         "improvementSuggestions" -> form.improvementSuggestions
       )
 
@@ -182,7 +182,7 @@ class UserLogoutAccountSpec extends BaseControllerSpec with WithCSRFAddToken wit
       when(underTest.applicationService.userLogoutSurveyCompleted(*, *, *, *)(*))
         .thenReturn(Future.successful(Success))
 
-      val form = SignOutSurveyForm(
+      val form    = SignOutSurveyForm(
         None,
         "no suggestions",
         s"${developerSession.developer.firstName} ${developerSession.developer.lastName}",
@@ -190,10 +190,10 @@ class UserLogoutAccountSpec extends BaseControllerSpec with WithCSRFAddToken wit
         isJavascript = true
       )
       val request = loggedInRequestWithCsrfToken.withFormUrlEncodedBody(
-        "rating" -> form.rating.getOrElse("").toString,
-        "email" -> form.email,
-        "name" -> form.name,
-        "isJavascript" -> form.isJavascript.toString,
+        "rating"                 -> form.rating.getOrElse("").toString,
+        "email"                  -> form.email,
+        "name"                   -> form.name,
+        "isJavascript"           -> form.isJavascript.toString,
         "improvementSuggestions" -> form.improvementSuggestions
       )
 

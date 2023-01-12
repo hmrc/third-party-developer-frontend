@@ -16,14 +16,27 @@
 
 package uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models
 
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.{Application, ApplicationId, ClientId, Environment, ImportantSubmissionData, PrivacyPolicyLocation, ResponsibleIndividual, ServerLocation, Standard, TermsAndConditionsLocation, TermsOfUseAcceptance}
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.{
+  Application,
+  ApplicationId,
+  ClientId,
+  Environment,
+  ImportantSubmissionData,
+  PrivacyPolicyLocation,
+  ResponsibleIndividual,
+  ServerLocation,
+  Standard,
+  TermsAndConditionsLocation,
+  TermsOfUseAcceptance
+}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.HmrcSpec
 
 import java.time.{LocalDateTime, Period}
 
 class ApplicationSpec extends HmrcSpec {
-  val url = "http://example.com"
+  val url            = "http://example.com"
   val standardAccess = Standard()
+
   val importantSubmissionData = ImportantSubmissionData(
     None,
     ResponsibleIndividual(ResponsibleIndividual.Name("bob"), ResponsibleIndividual.EmailAddress("bob")),
@@ -32,7 +45,18 @@ class ApplicationSpec extends HmrcSpec {
     PrivacyPolicyLocation.NoneProvided,
     List.empty[TermsOfUseAcceptance]
   )
-  val baseApplication = Application(ApplicationId.random, ClientId("client"), "name", LocalDateTime.now(), Some(LocalDateTime.now()), None, Period.ofDays(1), Environment.PRODUCTION, access = standardAccess)
+
+  val baseApplication = Application(
+    ApplicationId.random,
+    ClientId("client"),
+    "name",
+    LocalDateTime.now(),
+    Some(LocalDateTime.now()),
+    None,
+    Period.ofDays(1),
+    Environment.PRODUCTION,
+    access = standardAccess
+  )
 
   "privacy policy location" should {
     "be correct for old journey app when no location supplied" in {
@@ -48,11 +72,13 @@ class ApplicationSpec extends HmrcSpec {
       application.privacyPolicyLocation shouldBe PrivacyPolicyLocation.Url(url)
     }
     "be correct for new journey app when location was in desktop app" in {
-      val application = baseApplication.copy(access = Standard(importantSubmissionData = Some(importantSubmissionData.copy(privacyPolicyLocation = PrivacyPolicyLocation.InDesktopSoftware))))
+      val application =
+        baseApplication.copy(access = Standard(importantSubmissionData = Some(importantSubmissionData.copy(privacyPolicyLocation = PrivacyPolicyLocation.InDesktopSoftware))))
       application.privacyPolicyLocation shouldBe PrivacyPolicyLocation.InDesktopSoftware
     }
     "be correct for new journey app when location was not supplied" in {
-      val application = baseApplication.copy(access = Standard(importantSubmissionData = Some(importantSubmissionData.copy(privacyPolicyLocation = PrivacyPolicyLocation.NoneProvided))))
+      val application =
+        baseApplication.copy(access = Standard(importantSubmissionData = Some(importantSubmissionData.copy(privacyPolicyLocation = PrivacyPolicyLocation.NoneProvided))))
       application.privacyPolicyLocation shouldBe PrivacyPolicyLocation.NoneProvided
     }
   }
@@ -67,15 +93,18 @@ class ApplicationSpec extends HmrcSpec {
       application.termsAndConditionsLocation shouldBe TermsAndConditionsLocation.Url(url)
     }
     "be correct for new journey app when location was url" in {
-      val application = baseApplication.copy(access = Standard(importantSubmissionData = Some(importantSubmissionData.copy(termsAndConditionsLocation = TermsAndConditionsLocation.Url(url)))))
+      val application =
+        baseApplication.copy(access = Standard(importantSubmissionData = Some(importantSubmissionData.copy(termsAndConditionsLocation = TermsAndConditionsLocation.Url(url)))))
       application.termsAndConditionsLocation shouldBe TermsAndConditionsLocation.Url(url)
     }
     "be correct for new journey app when location was in desktop app" in {
-      val application = baseApplication.copy(access = Standard(importantSubmissionData = Some(importantSubmissionData.copy(termsAndConditionsLocation = TermsAndConditionsLocation.InDesktopSoftware))))
+      val application =
+        baseApplication.copy(access = Standard(importantSubmissionData = Some(importantSubmissionData.copy(termsAndConditionsLocation = TermsAndConditionsLocation.InDesktopSoftware))))
       application.termsAndConditionsLocation shouldBe TermsAndConditionsLocation.InDesktopSoftware
     }
     "be correct for new journey app when location was not supplied" in {
-      val application = baseApplication.copy(access = Standard(importantSubmissionData = Some(importantSubmissionData.copy(termsAndConditionsLocation = TermsAndConditionsLocation.NoneProvided))))
+      val application =
+        baseApplication.copy(access = Standard(importantSubmissionData = Some(importantSubmissionData.copy(termsAndConditionsLocation = TermsAndConditionsLocation.NoneProvided))))
       application.termsAndConditionsLocation shouldBe TermsAndConditionsLocation.NoneProvided
     }
   }

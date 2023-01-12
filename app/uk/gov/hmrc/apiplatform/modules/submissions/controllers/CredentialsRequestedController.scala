@@ -16,7 +16,6 @@
 
 package uk.gov.hmrc.apiplatform.modules.submissions.controllers
 
-
 import uk.gov.hmrc.thirdpartydeveloperfrontend.config.ApplicationConfig
 import uk.gov.hmrc.thirdpartydeveloperfrontend.config.ErrorHandler
 import uk.gov.hmrc.thirdpartydeveloperfrontend.connectors.ApmConnector
@@ -42,13 +41,14 @@ import uk.gov.hmrc.apiplatform.modules.submissions.domain.models.AskWhen
 import uk.gov.hmrc.apiplatform.modules.submissions.controllers.models.AnswersViewModel
 
 object CredentialsRequestedController {
-  case class CredentialsRequestedViewModel (
-    appId: ApplicationId, 
-    appName: String, 
-    subscriptions: Seq[APISubscriptionStatus],
-    sellResellOrDistribute: String,
-    answersViewModel: AnswersViewModel.ViewModel
-  )
+
+  case class CredentialsRequestedViewModel(
+      appId: ApplicationId,
+      appName: String,
+      subscriptions: Seq[APISubscriptionStatus],
+      sellResellOrDistribute: String,
+      answersViewModel: AnswersViewModel.ViewModel
+    )
 }
 
 @Singleton
@@ -61,41 +61,45 @@ class CredentialsRequestedController @Inject() (
     val cookieSigner: CookieSigner,
     val apmConnector: ApmConnector,
     val submissionService: SubmissionService,
-    credentialsRequestedView: CredentialsRequestedView)
-    (implicit val ec: ExecutionContext, val appConfig: ApplicationConfig)
-  extends ApplicationController(mcc)
-     with CanUseCheckActions
-     with EitherTHelper[String]
-     with SubmissionActionBuilders {
+    credentialsRequestedView: CredentialsRequestedView
+  )(implicit val ec: ExecutionContext,
+    val appConfig: ApplicationConfig
+  ) extends ApplicationController(mcc)
+    with CanUseCheckActions
+    with EitherTHelper[String]
+    with SubmissionActionBuilders {
 
-
-  import SubmissionActionBuilders.{ApplicationStateFilter,RoleFilter}
+  import SubmissionActionBuilders.{ApplicationStateFilter, RoleFilter}
   import cats.implicits._
   import cats.instances.future.catsStdInstancesForFuture
   import CredentialsRequestedController.CredentialsRequestedViewModel
 
   val redirectToGetProdCreds = (applicationId: ApplicationId) => Redirect(routes.ProdCredsChecklistController.productionCredentialsChecklistPage(applicationId))
 
-   /*, Read/Write and State details */ 
-  def credentialsRequestedPage(productionAppId: ApplicationId) = withApplicationAndSubmissionInSpecifiedState(ApplicationStateFilter.pendingApproval, RoleFilter.isTeamMember, SubmissionStatusFilter.submittedGrantedOrDeclined)(redirectToGetProdCreds(productionAppId))(productionAppId) { implicit request =>
+  /*, Read/Write and State details */
+  def credentialsRequestedPage(productionAppId: ApplicationId) = withApplicationAndSubmissionInSpecifiedState(
+    ApplicationStateFilter.pendingApproval,
+    RoleFilter.isTeamMember,
+    SubmissionStatusFilter.submittedGrantedOrDeclined
+  )(redirectToGetProdCreds(productionAppId))(productionAppId) { implicit request =>
     val failed = (err: String) => BadRequestWithErrorMessage(err)
-    
+
     val success = (viewModel: CredentialsRequestedViewModel) => {
       val err = request.msgRequest.flash.get("error")
       Ok(credentialsRequestedView(viewModel, err))
     }
 
     def convertToViewModel(application: Application, submission: Submission, subscriptions: List[APISubscriptionStatus], answersViewModel: ViewModel): CredentialsRequestedViewModel = {
-      val inHouse = submission.context.get(AskWhen.Context.Keys.IN_HOUSE_SOFTWARE)
-      val sellResellOrDistribute = if(inHouse == Some("No")) "Yes" else "No"
-      val selectedSubscriptions = subscriptions.filter(s => s.subscribed)
+      val inHouse                = submission.context.get(AskWhen.Context.Keys.IN_HOUSE_SOFTWARE)
+      val sellResellOrDistribute = if (inHouse == Some("No")) "Yes" else "No"
+      val selectedSubscriptions  = subscriptions.filter(s => s.subscribed)
       CredentialsRequestedViewModel(application.id, application.name, selectedSubscriptions, sellResellOrDistribute, answersViewModel)
     }
 
     val vm = for {
-      extSubmission       <- fromOptionF(submissionService.fetchLatestExtendedSubmission(productionAppId), "No submission and/or application found")
-      answersViewModel    =  convertSubmissionToViewModel(extSubmission)(request.application.id, request.application.name)
-      viewModel           =  convertToViewModel(request.application, extSubmission.submission, request.subscriptions, answersViewModel)
+      extSubmission   <- fromOptionF(submissionService.fetchLatestExtendedSubmission(productionAppId), "No submission and/or application found")
+      answersViewModel = convertSubmissionToViewModel(extSubmission)(request.application.id, request.application.name)
+      viewModel        = convertToViewModel(request.application, extSubmission.submission, request.subscriptions, answersViewModel)
     } yield viewModel
 
     vm.fold[Result](failed, success)

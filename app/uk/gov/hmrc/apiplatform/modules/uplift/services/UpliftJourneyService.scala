@@ -32,87 +32,94 @@ import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.apidefinitions.ApiC
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.UpliftData
 
 @Singleton
-class UpliftJourneyService @Inject()(
+class UpliftJourneyService @Inject() (
     flowService: GetProductionCredentialsFlowService,
     apmConnector: ApmConnector
-)( implicit val ec: ExecutionContext ) extends EitherTHelper[String] {
+  )(implicit val ec: ExecutionContext
+  ) extends EitherTHelper[String] {
   import cats.instances.future.catsStdInstancesForFuture
 
   def confirmAndUplift(sandboxAppId: ApplicationId, developerSession: DeveloperSession, useV2: Boolean)(implicit hc: HeaderCarrier): Future[Either[String, ApplicationId]] =
-    if(useV2) 
+    if (useV2)
       confirmAndUpliftV2(sandboxAppId, developerSession)
     else
       confirmAndUpliftV1(sandboxAppId, developerSession)
 
-
   def confirmAndUpliftV1(sandboxAppId: ApplicationId, developerSession: DeveloperSession)(implicit hc: HeaderCarrier): Future[Either[String, ApplicationId]] =
     (
       for {
-        flow                    <- liftF(flowService.fetchFlow(developerSession))
-        subscriptionFlow        <- fromOption(flow.apiSubscriptions, "No subscriptions set")
+        flow             <- liftF(flowService.fetchFlow(developerSession))
+        subscriptionFlow <- fromOption(flow.apiSubscriptions, "No subscriptions set")
 
-        apiIdsToSubscribeTo     <- liftF(apmConnector.fetchUpliftableSubscriptions(sandboxAppId).map(_.filter(subscriptionFlow.isSelected)))
-        _                       <- cond(apiIdsToSubscribeTo.nonEmpty, (), "No apis found to subscribe to")
-        upliftedAppId           <- liftF(apmConnector.upliftApplicationV1(sandboxAppId, apiIdsToSubscribeTo))
+        apiIdsToSubscribeTo <- liftF(apmConnector.fetchUpliftableSubscriptions(sandboxAppId).map(_.filter(subscriptionFlow.isSelected)))
+        _                   <- cond(apiIdsToSubscribeTo.nonEmpty, (), "No apis found to subscribe to")
+        upliftedAppId       <- liftF(apmConnector.upliftApplicationV1(sandboxAppId, apiIdsToSubscribeTo))
       } yield upliftedAppId
     )
-    .value
-
+      .value
 
   def confirmAndUpliftV2(sandboxAppId: ApplicationId, developerSession: DeveloperSession)(implicit hc: HeaderCarrier): Future[Either[String, ApplicationId]] =
     (
       for {
-        flow                    <- liftF(flowService.fetchFlow(developerSession))
-        sellResellOrDistribute  <- fromOption(flow.sellResellOrDistribute, "No sell or resell or distribute set")
-        subscriptionFlow        <- fromOption(flow.apiSubscriptions, "No subscriptions set")
+        flow                   <- liftF(flowService.fetchFlow(developerSession))
+        sellResellOrDistribute <- fromOption(flow.sellResellOrDistribute, "No sell or resell or distribute set")
+        subscriptionFlow       <- fromOption(flow.apiSubscriptions, "No subscriptions set")
 
-        apiIdsToSubscribeTo     <- liftF(apmConnector.fetchUpliftableSubscriptions(sandboxAppId).map(_.filter(subscriptionFlow.isSelected)))
-        _                       <- cond(apiIdsToSubscribeTo.nonEmpty, (), "No apis found to subscribe to")
-        upliftData               = UpliftData(sellResellOrDistribute, apiIdsToSubscribeTo, developerSession.developer.email)
-        upliftedAppId           <- liftF(apmConnector.upliftApplicationV2(sandboxAppId, upliftData))
+        apiIdsToSubscribeTo <- liftF(apmConnector.fetchUpliftableSubscriptions(sandboxAppId).map(_.filter(subscriptionFlow.isSelected)))
+        _                   <- cond(apiIdsToSubscribeTo.nonEmpty, (), "No apis found to subscribe to")
+        upliftData           = UpliftData(sellResellOrDistribute, apiIdsToSubscribeTo, developerSession.developer.email)
+        upliftedAppId       <- liftF(apmConnector.upliftApplicationV2(sandboxAppId, upliftData))
       } yield upliftedAppId
     )
-    .value
+      .value
 
-  def changeApiSubscriptions(sandboxAppId: ApplicationId, developerSession: DeveloperSession, subscriptions: List[APISubscriptionStatus])(implicit hc: HeaderCarrier): Future[List[APISubscriptionStatus]] = 
+  def changeApiSubscriptions(
+      sandboxAppId: ApplicationId,
+      developerSession: DeveloperSession,
+      subscriptions: List[APISubscriptionStatus]
+    )(implicit hc: HeaderCarrier
+    ): Future[List[APISubscriptionStatus]] =
     (
       for {
-        flow                          <- flowService.fetchFlow(developerSession)
-        subscriptionFlow               = flow.apiSubscriptions.getOrElse(ApiSubscriptions())
-        upliftableApiIds              <- apmConnector.fetchUpliftableSubscriptions(sandboxAppId)
-        subscriptionsWithFlowAdjusted  = subscriptions.filter(SubscriptionsFilter(upliftableApiIds, subscriptionFlow))
+        flow                         <- flowService.fetchFlow(developerSession)
+        subscriptionFlow              = flow.apiSubscriptions.getOrElse(ApiSubscriptions())
+        upliftableApiIds             <- apmConnector.fetchUpliftableSubscriptions(sandboxAppId)
+        subscriptionsWithFlowAdjusted = subscriptions.filter(SubscriptionsFilter(upliftableApiIds, subscriptionFlow))
       } yield subscriptionsWithFlowAdjusted
     )
 
-
-
-  def storeDefaultSubscriptionsInFlow(sandboxAppId: ApplicationId, developerSession: DeveloperSession)(implicit hc: HeaderCarrier): Future[ApiSubscriptions] = 
+  def storeDefaultSubscriptionsInFlow(sandboxAppId: ApplicationId, developerSession: DeveloperSession)(implicit hc: HeaderCarrier): Future[ApiSubscriptions] =
     for {
       upliftableSubscriptions <- apmConnector.fetchUpliftableSubscriptions(sandboxAppId)
       apiSubscriptions         = ApiSubscriptions(upliftableSubscriptions.map(id => (id, true)).toMap)
       _                       <- flowService.storeApiSubscriptions(apiSubscriptions, developerSession)
     } yield apiSubscriptions
 
-  def apiSubscriptionData(sandboxAppId: ApplicationId, developerSession: DeveloperSession, subscriptions: List[APISubscriptionStatus])(implicit hc: HeaderCarrier): Future[(Set[String], Boolean)] = {
+  def apiSubscriptionData(
+      sandboxAppId: ApplicationId,
+      developerSession: DeveloperSession,
+      subscriptions: List[APISubscriptionStatus]
+    )(implicit hc: HeaderCarrier
+    ): Future[(Set[String], Boolean)] = {
     def getApiNameForContext(apiContext: ApiContext) =
       subscriptions
-      .find(_.context == apiContext )
-      .map(_.name)
+        .find(_.context == apiContext)
+        .map(_.name)
 
     for {
       upliftableApiIds <- apmConnector.fetchUpliftableSubscriptions(sandboxAppId)
       flow             <- flowService.fetchFlow(developerSession)
       subscriptionFlow  = flow.apiSubscriptions.getOrElse(ApiSubscriptions())
     } yield {
-      val data: Set[String] = (
-        for {
-          subscription <- upliftableApiIds.filter(subscriptionFlow.isSelected)
-          name         <- getApiNameForContext(subscription.context)
-        }
-        yield {
-          s"$name - ${subscription.version.value}"
-        }
-      )
+      val data: Set[String] =
+        (
+          for {
+            subscription <- upliftableApiIds.filter(subscriptionFlow.isSelected)
+            name         <- getApiNameForContext(subscription.context)
+          } yield {
+            s"$name - ${subscription.version.value}"
+          }
+        )
 
       (data, upliftableApiIds.size > 1)
     }

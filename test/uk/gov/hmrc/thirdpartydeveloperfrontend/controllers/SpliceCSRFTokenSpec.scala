@@ -27,14 +27,14 @@ class SpliceCSRFTokenSpec @Inject() (csrfConfigProvider: CSRFConfigProvider) ext
 
   trait Setup {
     implicit val requestHeaderWithToken = mock[RequestHeader]
-    val csrfConfig = csrfConfigProvider.get
-    val token = Token(csrfConfig.tokenName, "token")
+    val csrfConfig                      = csrfConfigProvider.get
+    val token                           = Token(csrfConfig.tokenName, "token")
   }
 
   "SpliceCSRFTokenSpec" should {
     "fail if no CSRF token in scope" in {
       implicit val request = FakeRequest()
-      val caught = intercept[RuntimeException] {
+      val caught           = intercept[RuntimeException] {
         SpliceCSRFToken(Call(method = "POST", url = "https://example.com/abcd"))
       }
       caught.getMessage shouldBe "No CSRF token present!"

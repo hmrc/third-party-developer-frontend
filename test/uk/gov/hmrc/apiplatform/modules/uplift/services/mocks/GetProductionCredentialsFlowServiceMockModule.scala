@@ -18,7 +18,7 @@ package uk.gov.hmrc.apiplatform.modules.uplift.services.mocks
 
 import org.mockito.{ArgumentMatchersSugar, MockitoSugar}
 import org.mockito.verification.VerificationMode
-import scala.concurrent.Future.{successful, failed}
+import scala.concurrent.Future.{failed, successful}
 import uk.gov.hmrc.apiplatform.modules.uplift.domain.models._
 import uk.gov.hmrc.apiplatform.modules.uplift.services.GetProductionCredentialsFlowService
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.SellResellOrDistribute
@@ -35,15 +35,17 @@ trait GetProductionCredentialsFlowServiceMockModule extends MockitoSugar with Ar
     def verifyZeroInteractions() = MockitoSugar.verifyZeroInteractions(aMock)
 
     object FetchFlow {
+
       def thenReturns(out: GetProductionCredentialsFlow) =
         when(aMock.fetchFlow(*)).thenReturn(successful(out))
-        
+
       def thenFail(ex: Exception) = {
         when(aMock.fetchFlow(*)).thenReturn(failed(ex))
       }
     }
 
     object StoreSellResellOrDistribute {
+
       def thenReturns(in: SellResellOrDistribute, out: GetProductionCredentialsFlow) = {
         when(aMock.storeSellResellOrDistribute(eqTo(in), *)).thenReturn(successful(out))
       }
@@ -54,22 +56,24 @@ trait GetProductionCredentialsFlowServiceMockModule extends MockitoSugar with Ar
     }
 
     object FindSellResellOrDistribute {
-      def thenReturnsYes() = 
+
+      def thenReturnsYes() =
         when(aMock.findSellResellOrDistribute(*)).thenReturn(successful(Some(SellResellOrDistribute("Yes"))))
-        
-      def thenReturnsNo() = 
+
+      def thenReturnsNo() =
         when(aMock.findSellResellOrDistribute(*)).thenReturn(successful(Some(SellResellOrDistribute("No"))))
-        
-      def thenReturnsNone() = 
+
+      def thenReturnsNone() =
         when(aMock.findSellResellOrDistribute(*)).thenReturn(successful(None))
     }
 
     object StoreApiSubscriptions {
+
       def thenReturns(out: GetProductionCredentialsFlow) =
         when(aMock.storeApiSubscriptions(*, *)).thenReturn(successful(out))
-        
+
       def thenFail(ex: Exception) = {
-        when(aMock.storeApiSubscriptions(*,*)).thenReturn(failed(ex))
+        when(aMock.storeApiSubscriptions(*, *)).thenReturn(failed(ex))
       }
 
     }

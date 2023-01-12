@@ -31,7 +31,15 @@ import uk.gov.hmrc.apiplatform.modules.submissions.connectors.ThirdPartyApplicat
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.apiplatform.modules.submissions.domain.services.SubmissionsFrontendJsonFormatters
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.services.ApplicationsJsonFormatters
-import uk.gov.hmrc.apiplatform.modules.submissions.domain.models.{ErrorDetails, ResponsibleIndividualVerification, ResponsibleIndividualToUVerification, ResponsibleIndividualVerificationId, ResponsibleIndividualVerificationWithDetails, Submission, ResponsibleIndividualVerificationState}
+import uk.gov.hmrc.apiplatform.modules.submissions.domain.models.{
+  ErrorDetails,
+  ResponsibleIndividualToUVerification,
+  ResponsibleIndividualVerification,
+  ResponsibleIndividualVerificationId,
+  ResponsibleIndividualVerificationState,
+  ResponsibleIndividualVerificationWithDetails,
+  Submission
+}
 import uk.gov.hmrc.apiplatform.modules.submissions.SubmissionsTestData
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.{ApplicationId, ResponsibleIndividual}
 import java.time.{LocalDateTime, ZoneOffset}
@@ -47,14 +55,14 @@ class ThirdPartyApplicationSubmissionsConnectorSpec
     with TestApplications
     with ApplicationsJsonFormatters {
   private val apiKey = UUID.randomUUID().toString
-  private val code = "123456789"
+  private val code   = "123456789"
 
   private val stubConfig = Configuration(
-    "microservice.services.third-party-application-production.port" -> stubPort,
+    "microservice.services.third-party-application-production.port"      -> stubPort,
     "microservice.services.third-party-application-production.use-proxy" -> false,
-    "microservice.services.third-party-application-production.api-key" -> apiKey
+    "microservice.services.third-party-application-production.api-key"   -> apiKey
   )
- 
+
   override def fakeApplication(): PlayApplication =
     GuiceApplicationBuilder()
       .configure(stubConfig)
@@ -64,28 +72,36 @@ class ThirdPartyApplicationSubmissionsConnectorSpec
 
   trait Setup {
     implicit val hc = HeaderCarrier()
-    
+
     val connector = app.injector.instanceOf[ThirdPartyApplicationSubmissionsConnector]
 
-    val riVerification: ResponsibleIndividualVerification = ResponsibleIndividualToUVerification(ResponsibleIndividualVerificationId(code), ApplicationId.random, Submission.Id.random, 0, "App name", LocalDateTime.now(ZoneOffset.UTC), ResponsibleIndividualVerificationState.INITIAL)
-    val responsibleIndividual = ResponsibleIndividual.build("bob example", "bob@example.com")
-    val riVerificationWithDetails = ResponsibleIndividualVerificationWithDetails(riVerification, responsibleIndividual, "Rick Deckard", "rick@submitter.com")
+    val riVerification: ResponsibleIndividualVerification = ResponsibleIndividualToUVerification(
+      ResponsibleIndividualVerificationId(code),
+      ApplicationId.random,
+      Submission.Id.random,
+      0,
+      "App name",
+      LocalDateTime.now(ZoneOffset.UTC),
+      ResponsibleIndividualVerificationState.INITIAL
+    )
+    val responsibleIndividual                             = ResponsibleIndividual.build("bob example", "bob@example.com")
+    val riVerificationWithDetails                         = ResponsibleIndividualVerificationWithDetails(riVerification, responsibleIndividual, "Rick Deckard", "rick@submitter.com")
 
     val extendedSubmission = answeringSubmission.withIncompleteProgress
   }
-    
+
   "recordAnswer" should {
-    val url = s"/submissions/${submissionId.value}/question/${questionId.value}"
+    val url     = s"/submissions/${submissionId.value}/question/${questionId.value}"
     val answers = List("Yes")
 
     "return with an error" in new Setup {
       stubFor(
         post(urlEqualTo(url))
-        .withJsonRequestBody(OutboundRecordAnswersRequest(answers))
-        .willReturn(
-          aResponse()
-            .withStatus(INTERNAL_SERVER_ERROR)
-        )
+          .withJsonRequestBody(OutboundRecordAnswersRequest(answers))
+          .willReturn(
+            aResponse()
+              .withStatus(INTERNAL_SERVER_ERROR)
+          )
       )
 
       val result = await(connector.recordAnswer(submissionId, questionId, answers))
@@ -96,12 +112,12 @@ class ThirdPartyApplicationSubmissionsConnectorSpec
     "return OK with the submission" in new Setup {
       stubFor(
         post(urlEqualTo(url))
-        .withJsonRequestBody(OutboundRecordAnswersRequest(answers))
-        .willReturn(
-          aResponse()
-            .withStatus(OK)
-            .withJsonBody(extendedSubmission)
-        )
+          .withJsonRequestBody(OutboundRecordAnswersRequest(answers))
+          .willReturn(
+            aResponse()
+              .withStatus(OK)
+              .withJsonBody(extendedSubmission)
+          )
       )
 
       val result = await(connector.recordAnswer(submissionId, questionId, answers))
@@ -118,10 +134,10 @@ class ThirdPartyApplicationSubmissionsConnectorSpec
     "return NOT FOUND with empty response body" in new Setup {
       stubFor(
         get(urlEqualTo(url))
-        .willReturn(
+          .willReturn(
             aResponse()
-            .withStatus(NOT_FOUND)
-        )
+              .withStatus(NOT_FOUND)
+          )
       )
 
       val result = await(connector.fetchSubmission(submissionId))
@@ -132,11 +148,11 @@ class ThirdPartyApplicationSubmissionsConnectorSpec
     "return OK with a submission body" in new Setup {
       stubFor(
         get(urlEqualTo(url))
-        .willReturn(
+          .willReturn(
             aResponse()
-            .withStatus(OK)
-            .withJsonBody(extendedSubmission)
-        )
+              .withStatus(OK)
+              .withJsonBody(extendedSubmission)
+          )
       )
 
       val result = await(connector.fetchSubmission(submissionId))
@@ -151,10 +167,10 @@ class ThirdPartyApplicationSubmissionsConnectorSpec
     "return NOT FOUND with empty response body" in new Setup {
       stubFor(
         get(urlEqualTo(url))
-        .willReturn(
+          .willReturn(
             aResponse()
-            .withStatus(NOT_FOUND)
-        )
+              .withStatus(NOT_FOUND)
+          )
       )
 
       val result = await(connector.fetchLatestSubmission(applicationId))
@@ -165,11 +181,11 @@ class ThirdPartyApplicationSubmissionsConnectorSpec
     "return OK with a submission body" in new Setup {
       stubFor(
         get(urlEqualTo(url))
-        .willReturn(
+          .willReturn(
             aResponse()
-            .withStatus(OK)
-            .withJsonBody(answeredSubmission)
-        )
+              .withStatus(OK)
+              .withJsonBody(answeredSubmission)
+          )
       )
 
       val result = await(connector.fetchLatestSubmission(applicationId))
@@ -184,10 +200,10 @@ class ThirdPartyApplicationSubmissionsConnectorSpec
     "return NOT FOUND with empty response body" in new Setup {
       stubFor(
         get(urlEqualTo(url))
-        .willReturn(
+          .willReturn(
             aResponse()
-            .withStatus(NOT_FOUND)
-        )
+              .withStatus(NOT_FOUND)
+          )
       )
 
       val result = await(connector.fetchLatestExtendedSubmission(applicationId))
@@ -198,11 +214,11 @@ class ThirdPartyApplicationSubmissionsConnectorSpec
     "return OK with a submission body" in new Setup {
       stubFor(
         get(urlEqualTo(url))
-        .willReturn(
+          .willReturn(
             aResponse()
-            .withStatus(OK)
-            .withJsonBody(extendedSubmission)
-        )
+              .withStatus(OK)
+              .withJsonBody(extendedSubmission)
+          )
       )
 
       val result = await(connector.fetchLatestExtendedSubmission(applicationId))
@@ -212,9 +228,9 @@ class ThirdPartyApplicationSubmissionsConnectorSpec
   }
 
   "confirmSetupComplete" should {
-    val app = aStandardApplication
+    val app   = aStandardApplication
     val email = "bob@example.com"
-    val url = s"/application/${app.id.value}/confirm-setup-complete"
+    val url   = s"/application/${app.id.value}/confirm-setup-complete"
 
     "return successfully if TPA returns OK" in new Setup {
       stubFor(
@@ -248,20 +264,20 @@ class ThirdPartyApplicationSubmissionsConnectorSpec
   }
 
   "requestApproval" should {
-    val app = aStandardApplication
-    val url = s"/approvals/application/${app.id.value}/request"
-    val name = "bob example"
+    val app   = aStandardApplication
+    val url   = s"/approvals/application/${app.id.value}/request"
+    val name  = "bob example"
     val email = "bob@spongepants.com"
 
     "return application with OK" in new Setup {
       stubFor(
         post(urlEqualTo(url))
-        .withJsonRequestBody(ApprovalsRequest(name, email))
-        .willReturn(
-          aResponse()
-            .withStatus(OK)
-            .withJsonBody(app)
-        )
+          .withJsonRequestBody(ApprovalsRequest(name, email))
+          .willReturn(
+            aResponse()
+              .withStatus(OK)
+              .withJsonBody(app)
+          )
       )
 
       val result = await(connector.requestApproval(app.id, name, email))
@@ -275,12 +291,12 @@ class ThirdPartyApplicationSubmissionsConnectorSpec
 
       stubFor(
         post(urlEqualTo(url))
-        .withJsonRequestBody(ApprovalsRequest(name, email))
-        .willReturn(
-          aResponse()
-            .withStatus(PRECONDITION_FAILED)
-            .withJsonBody(ErrorDetails("code123", msg))
-        )
+          .withJsonRequestBody(ApprovalsRequest(name, email))
+          .willReturn(
+            aResponse()
+              .withStatus(PRECONDITION_FAILED)
+              .withJsonBody(ErrorDetails("code123", msg))
+          )
       )
 
       val result = await(connector.requestApproval(app.id, name, email))
@@ -294,12 +310,12 @@ class ThirdPartyApplicationSubmissionsConnectorSpec
 
       stubFor(
         post(urlEqualTo(url))
-        .withJsonRequestBody(ApprovalsRequest(name, email))
-        .willReturn(
-          aResponse()
-            .withStatus(CONFLICT)
-            .withJsonBody(ErrorDetails("code123", msg))
-        )
+          .withJsonRequestBody(ApprovalsRequest(name, email))
+          .willReturn(
+            aResponse()
+              .withStatus(CONFLICT)
+              .withJsonBody(ErrorDetails("code123", msg))
+          )
       )
 
       val result = await(connector.requestApproval(app.id, name, email))
@@ -311,11 +327,11 @@ class ThirdPartyApplicationSubmissionsConnectorSpec
     "return with a BAD_REQUEST error" in new Setup {
       stubFor(
         post(urlEqualTo(url))
-        .withJsonRequestBody(ApprovalsRequest(name, email))
-        .willReturn(
-          aResponse()
-            .withStatus(BAD_REQUEST)
-        )
+          .withJsonRequestBody(ApprovalsRequest(name, email))
+          .willReturn(
+            aResponse()
+              .withStatus(BAD_REQUEST)
+          )
       )
 
       intercept[RuntimeException] {
@@ -330,10 +346,10 @@ class ThirdPartyApplicationSubmissionsConnectorSpec
     "return NOT FOUND with empty response body" in new Setup {
       stubFor(
         get(urlEqualTo(url))
-        .willReturn(
+          .willReturn(
             aResponse()
-            .withStatus(NOT_FOUND)
-        )
+              .withStatus(NOT_FOUND)
+          )
       )
 
       val result = await(connector.fetchResponsibleIndividualVerification(code))
@@ -344,11 +360,11 @@ class ThirdPartyApplicationSubmissionsConnectorSpec
     "return OK with a responsible individual verification body" in new Setup {
       stubFor(
         get(urlEqualTo(url))
-        .willReturn(
+          .willReturn(
             aResponse()
-            .withStatus(OK)
-            .withJsonBody(riVerification)
-        )
+              .withStatus(OK)
+              .withJsonBody(riVerification)
+          )
       )
 
       val result = await(connector.fetchResponsibleIndividualVerification(code))

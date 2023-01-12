@@ -27,8 +27,8 @@ sealed trait Environment extends EnumEntry {
 object Environment extends PlayEnum[Environment] {
   val values = findValues
 
-  final case object PRODUCTION  extends Environment
-  final case object SANDBOX     extends Environment
+  final case object PRODUCTION extends Environment
+  final case object SANDBOX    extends Environment
 
   def from(env: String) = values.find(e => e.toString == env.toUpperCase)
 

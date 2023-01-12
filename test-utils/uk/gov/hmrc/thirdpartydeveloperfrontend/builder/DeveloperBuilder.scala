@@ -24,22 +24,25 @@ import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.{CollaboratorTracker, UserI
 trait DeveloperBuilder extends CollaboratorTracker {
   self: UserIdTracker =>
 
-def buildDeveloperWithRandomId( emailAddress: String = "something@example.com",
-                                firstName: String = "John",
-                                lastName: String = "Doe",
-                                organisation: Option[String] = None,
-                                mfaDetails: List[MfaDetail] = List.empty,
-                                emailPreferences: EmailPreferences = EmailPreferences.noPreferences) ={
-  buildDeveloper(emailAddress, firstName, lastName, organisation, mfaDetails, emailPreferences).copy(userId = UserId.random)
-}
+  def buildDeveloperWithRandomId(
+      emailAddress: String = "something@example.com",
+      firstName: String = "John",
+      lastName: String = "Doe",
+      organisation: Option[String] = None,
+      mfaDetails: List[MfaDetail] = List.empty,
+      emailPreferences: EmailPreferences = EmailPreferences.noPreferences
+    ) = {
+    buildDeveloper(emailAddress, firstName, lastName, organisation, mfaDetails, emailPreferences).copy(userId = UserId.random)
+  }
 
-  def buildDeveloper( emailAddress: String = "something@example.com",
-                      firstName: String = "John",
-                      lastName: String = "Doe",
-                      organisation: Option[String] = None,
-                      mfaDetails: List[MfaDetail] = List.empty,
-                      emailPreferences: EmailPreferences = EmailPreferences.noPreferences
-  ): Developer = {
+  def buildDeveloper(
+      emailAddress: String = "something@example.com",
+      firstName: String = "John",
+      lastName: String = "Doe",
+      organisation: Option[String] = None,
+      mfaDetails: List[MfaDetail] = List.empty,
+      emailPreferences: EmailPreferences = EmailPreferences.noPreferences
+    ): Developer = {
     Developer(
       idOf(emailAddress),
       emailAddress,

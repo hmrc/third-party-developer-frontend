@@ -18,13 +18,15 @@ package uk.gov.hmrc.thirdpartydeveloperfrontend.domain
 
 import play.api.libs.json.Json
 
-class UserNotFound extends RuntimeException("User not found")
+class UserNotFound       extends RuntimeException("User not found")
 class InvalidCredentials extends RuntimeException("Login failed")
-class InvalidEmail extends RuntimeException("Invalid email")
-class LockedAccount extends RuntimeException("Account is locked")
-class UnverifiedAccount extends RuntimeException("Account is unverified")
-class InvalidResetCode extends RuntimeException("Invalid reset code")
+class InvalidEmail       extends RuntimeException("Invalid email")
+class LockedAccount      extends RuntimeException("Account is locked")
+class UnverifiedAccount  extends RuntimeException("Account is unverified")
+class InvalidResetCode   extends RuntimeException("Invalid reset code")
+
 class DeskproTicketCreationFailed(reason: String) extends RuntimeException(s"Failed to create deskpro ticket: $reason") {
+
   lazy val displayMessage =
     """Sorry, we're experiencing technical difficulties.
       |Your name has not been submitted. Please try again later.

@@ -38,24 +38,25 @@ import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.LocalUserIdTracker
 
 class ApplicationServiceClientSecretSpec extends AsyncHmrcSpec with SubscriptionsBuilder with ApplicationBuilder with LocalUserIdTracker with FixedClock {
 
-  val versionOne = ApiVersion("1.0")
-  val versionTwo = ApiVersion("2.0")
+  val versionOne  = ApiVersion("1.0")
+  val versionTwo  = ApiVersion("2.0")
   val grantLength = Period.ofDays(547)
 
-  trait Setup  {
+  trait Setup {
     implicit val hc: HeaderCarrier = HeaderCarrier()
 
     private val mockAppConfig = mock[ApplicationConfig]
 
     val mockProductionApplicationConnector: ThirdPartyApplicationProductionConnector =
       mock[ThirdPartyApplicationProductionConnector]
+
     val mockSandboxApplicationConnector: ThirdPartyApplicationSandboxConnector =
       mock[ThirdPartyApplicationSandboxConnector]
-    val mockSubscriptionsService: SubscriptionsService = mock[SubscriptionsService]
+    val mockSubscriptionsService: SubscriptionsService                         = mock[SubscriptionsService]
 
     val mockProductionSubscriptionFieldsConnector: SubscriptionFieldsConnector = mock[SubscriptionFieldsConnector]
-    val mockSandboxSubscriptionFieldsConnector: SubscriptionFieldsConnector = mock[SubscriptionFieldsConnector]
-    val mockPushPullNotificationsConnector: PushPullNotificationsConnector = mock[PushPullNotificationsConnector]
+    val mockSandboxSubscriptionFieldsConnector: SubscriptionFieldsConnector    = mock[SubscriptionFieldsConnector]
+    val mockPushPullNotificationsConnector: PushPullNotificationsConnector     = mock[PushPullNotificationsConnector]
 
     val mockDeveloperConnector: ThirdPartyDeveloperConnector = mock[ThirdPartyDeveloperConnector]
 
@@ -72,8 +73,8 @@ class ApplicationServiceClientSecretSpec extends AsyncHmrcSpec with Subscription
     )
 
     val mockSubscriptionFieldsService: SubscriptionFieldsService = mock[SubscriptionFieldsService]
-    val mockDeskproConnector: DeskproConnector = mock[DeskproConnector]
-    val mockApmConnector: ApmConnector = mock[ApmConnector]
+    val mockDeskproConnector: DeskproConnector                   = mock[DeskproConnector]
+    val mockApmConnector: ApmConnector                           = mock[ApmConnector]
 
     val applicationService = new ApplicationService(
       mockApmConnector,
@@ -105,16 +106,27 @@ class ApplicationServiceClientSecretSpec extends AsyncHmrcSpec with Subscription
     VersionSubscription(ApiVersionDefinition(version, status), subscribed)
 
   val productionApplicationId = ApplicationId("Application ID")
-  val productionClientId = ClientId(s"client-id-${randomUUID().toString}")
+  val productionClientId      = ClientId(s"client-id-${randomUUID().toString}")
+
   val productionApplication: Application =
-    Application(productionApplicationId, productionClientId, "name", LocalDateTime.now(clock), Some(LocalDateTime.now(ZoneOffset.UTC)), None, grantLength,
-      Environment.PRODUCTION, Some("description"), Set())
+    Application(
+      productionApplicationId,
+      productionClientId,
+      "name",
+      LocalDateTime.now(clock),
+      Some(LocalDateTime.now(ZoneOffset.UTC)),
+      None,
+      grantLength,
+      Environment.PRODUCTION,
+      Some("description"),
+      Set()
+    )
 
   "addClientSecret" should {
     val newClientSecretId = UUID.randomUUID().toString
-    val newClientSecret = UUID.randomUUID().toString
-    val actor = CollaboratorActor("john.requestor@example.com")
-    val timestamp = LocalDateTime.now(clock)
+    val newClientSecret   = UUID.randomUUID().toString
+    val actor             = CollaboratorActor("john.requestor@example.com")
+    val timestamp         = LocalDateTime.now(clock)
 
     "add a client secret for app in production environment" in new Setup {
 
@@ -143,14 +155,14 @@ class ApplicationServiceClientSecretSpec extends AsyncHmrcSpec with Subscription
   }
 
   "deleteClientSecret" should {
-    val applicationId = ApplicationId.random
-    val actor = CollaboratorActor("john.requestor@example.com")
+    val applicationId  = ApplicationId.random
+    val actor          = CollaboratorActor("john.requestor@example.com")
     val secretToDelete = UUID.randomUUID().toString
-    val timestamp = LocalDateTime.now(clock)
+    val timestamp      = LocalDateTime.now(clock)
 
     "delete a client secret" in new Setup {
 
-      val application = productionApplication.copy(id = applicationId)
+      val application               = productionApplication.copy(id = applicationId)
       val removeClientSecretRequest = RemoveClientSecret(actor, secretToDelete, timestamp)
 
       theProductionConnectorthenReturnTheApplication(applicationId, application)

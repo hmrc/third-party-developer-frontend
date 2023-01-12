@@ -30,10 +30,10 @@ import views.helper.CommonViewSpec
 import scala.collection.JavaConverters._
 
 class SelectMfaViewSpec extends CommonViewSpec
-  with WithCSRFAddToken
-  with DeveloperSessionBuilder
-  with DeveloperBuilder
-  with LocalUserIdTracker with StubMessagesFactory {
+    with WithCSRFAddToken
+    with DeveloperSessionBuilder
+    with DeveloperBuilder
+    with LocalUserIdTracker with StubMessagesFactory {
 
   implicit val request: FakeRequest[AnyContentAsEmpty.type] = FakeRequest()
 
@@ -42,7 +42,7 @@ class SelectMfaViewSpec extends CommonViewSpec
       LoggedInState.LOGGED_IN,
     buildDeveloper("developer@example.com", "Joe", "Bloggs")
   )
-  val selectMfaViewView: SelectMfaView = app.injector.instanceOf[SelectMfaView]
+  val selectMfaViewView: SelectMfaView    = app.injector.instanceOf[SelectMfaView]
 
   "SelectMfaView" should {
     "render correctly with Text Message selected as default" in {

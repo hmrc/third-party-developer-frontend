@@ -28,8 +28,8 @@ import play.api.Configuration
 class ProxiedHttpClientSpec extends AsyncHmrcSpec with GuiceOneServerPerSuite {
 
   val stubConfig = Configuration(
-    "metrics.enabled" -> false,
-    "auditing.enabled" -> false,
+    "metrics.enabled"                       -> false,
+    "auditing.enabled"                      -> false,
     "proxy.proxyRequiredForThisEnvironment" -> false
   )
 
@@ -40,7 +40,7 @@ class ProxiedHttpClientSpec extends AsyncHmrcSpec with GuiceOneServerPerSuite {
 
   trait Setup {
     val apiKey: String = UUID.randomUUID().toString
-    val url = "http://example.com"
+    val url            = "http://example.com"
 
     val underTest: ProxiedHttpClient = app.injector.instanceOf[ProxiedHttpClient]
   }

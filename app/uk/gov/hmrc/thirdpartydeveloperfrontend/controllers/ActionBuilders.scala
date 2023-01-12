@@ -48,7 +48,7 @@ trait ApplicationActionBuilders extends BaseActionBuilders {
         import cats.implicits._
 
         applicationActionService.process(applicationId, request)
-        .toRight(NotFound(errorHandler.notFoundTemplate(Request(request, request.developerSession)))).value
+          .toRight(NotFound(errorHandler.notFoundTemplate(Request(request, request.developerSession)))).value
       }
     }
 
@@ -109,4 +109,3 @@ trait ApplicationActionBuilders extends BaseActionBuilders {
   def permissionFilter(permission: Permission)(implicit ec: ExecutionContext) =
     forbiddenWhenNotFilter(req => permission.hasPermissions(req.application, req.developerSession.developer))
 }
-

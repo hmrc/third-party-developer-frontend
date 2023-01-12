@@ -40,7 +40,7 @@ object TermsOfUseResponsesController {
 }
 
 @Singleton
-class TermsOfUseResponsesController @Inject()(
+class TermsOfUseResponsesController @Inject() (
     val errorHandler: ErrorHandler,
     val sessionService: SessionService,
     val applicationActionService: ApplicationActionService,
@@ -49,28 +49,28 @@ class TermsOfUseResponsesController @Inject()(
     val cookieSigner: CookieSigner,
     val apmConnector: ApmConnector,
     val submissionService: SubmissionService,
-    termsOfUseResponsesView: TermsOfUseResponsesView)
-                                             (implicit val ec: ExecutionContext, val appConfig: ApplicationConfig)
-  extends ApplicationController(mcc)
-     with CanUseCheckActions
-     with EitherTHelper[String]
-     with SubmissionActionBuilders {
-
+    termsOfUseResponsesView: TermsOfUseResponsesView
+  )(implicit val ec: ExecutionContext,
+    val appConfig: ApplicationConfig
+  ) extends ApplicationController(mcc)
+    with CanUseCheckActions
+    with EitherTHelper[String]
+    with SubmissionActionBuilders {
 
   import TermsOfUseResponsesController.TermsOfUseResponsesViewModel
 
   def termsOfUseResponsesPage(applicationId: ApplicationId) = checkActionForApprovedApps(SupportsSubscriptions, AdministratorOnly)(applicationId) { implicit request =>
     val failed = (err: String) => BadRequestWithErrorMessage(err)
-    
+
     val success = (viewModel: TermsOfUseResponsesViewModel) => {
       val err = request.msgRequest.flash.get("error")
       Ok(termsOfUseResponsesView(viewModel, err))
     }
 
     val vm = for {
-      extSubmission       <- fromOptionF(submissionService.fetchLatestExtendedSubmission(applicationId), "No submission and/or application found")
-      answersViewModel    =  convertSubmissionToViewModel(extSubmission)(request.application.id, request.application.name)
-      viewModel           =  TermsOfUseResponsesViewModel(request.application.name, answersViewModel)
+      extSubmission   <- fromOptionF(submissionService.fetchLatestExtendedSubmission(applicationId), "No submission and/or application found")
+      answersViewModel = convertSubmissionToViewModel(extSubmission)(request.application.id, request.application.name)
+      viewModel        = TermsOfUseResponsesViewModel(request.application.name, answersViewModel)
     } yield viewModel
 
     vm.fold[Result](failed, success)

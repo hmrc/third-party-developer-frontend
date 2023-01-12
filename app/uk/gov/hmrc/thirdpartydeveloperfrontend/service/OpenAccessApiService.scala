@@ -27,11 +27,13 @@ import uk.gov.hmrc.thirdpartydeveloperfrontend.connectors.ApmConnector
 
 @Singleton
 class OpenAccessApiService @Inject() (openAccessApisConnector: ApmConnector)(implicit val ec: ExecutionContext) {
-  def fetchAllOpenAccessApis(environment: Environment)(implicit hc: HeaderCarrier): Future[Map[ApiContext, ApiData]] = 
+
+  def fetchAllOpenAccessApis(environment: Environment)(implicit hc: HeaderCarrier): Future[Map[ApiContext, ApiData]] =
     openAccessApisConnector.fetchAllOpenAccessApis(environment)
 }
 
 object OpenAccessApiService {
+
   trait OpenAccessApisConnector {
     def fetchAllOpenAccessApis(environment: Environment)(implicit hc: HeaderCarrier): Future[Map[ApiContext, ApiData]]
   }

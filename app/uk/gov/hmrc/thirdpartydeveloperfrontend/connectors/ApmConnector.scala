@@ -51,8 +51,8 @@ object ApmConnector {
 }
 
 @Singleton
-class ApmConnector @Inject()(http: HttpClient, config: ApmConnector.Config, metrics: ConnectorMetrics)(implicit ec: ExecutionContext)
-  extends SubscriptionsConnector
+class ApmConnector @Inject() (http: HttpClient, config: ApmConnector.Config, metrics: ConnectorMetrics)(implicit ec: ExecutionContext)
+    extends SubscriptionsConnector
     with OpenAccessApisConnector
     with CommonResponseHandlers {
 
@@ -64,10 +64,12 @@ class ApmConnector @Inject()(http: HttpClient, config: ApmConnector.Config, metr
   def fetchApplicationById(applicationId: ApplicationId)(implicit hc: HeaderCarrier): Future[Option[ApplicationWithSubscriptionData]] =
     http.GET[Option[ApplicationWithSubscriptionData]](s"${config.serviceBaseUrl}/applications/${applicationId.value}")
 
-  def getAllFieldDefinitions(environment: Environment)
-                            (implicit hc: HeaderCarrier): Future[Map[ApiContext, Map[ApiVersion, Map[FieldName, SubscriptionFieldDefinition]]]] = {
+  def getAllFieldDefinitions(environment: Environment)(implicit hc: HeaderCarrier): Future[Map[ApiContext, Map[ApiVersion, Map[FieldName, SubscriptionFieldDefinition]]]] = {
 
-    http.GET[Map[ApiContext, Map[ApiVersion, Map[FieldName, SubscriptionFieldDefinition]]]](s"${config.serviceBaseUrl}/subscription-fields", Seq("environment" -> environment.toString))
+    http.GET[Map[ApiContext, Map[ApiVersion, Map[FieldName, SubscriptionFieldDefinition]]]](
+      s"${config.serviceBaseUrl}/subscription-fields",
+      Seq("environment" -> environment.toString)
+    )
   }
 
   def fetchAllPossibleSubscriptions(applicationId: ApplicationId)(implicit hc: HeaderCarrier): Future[Map[ApiContext, ApiData]] = {
@@ -105,23 +107,22 @@ class ApmConnector @Inject()(http: HttpClient, config: ApmConnector.Config, metr
         case NonFatal(e) => Left(e)
       }
 
-  def subscribeToApi(applicationId: ApplicationId, apiIdentifier: ApiIdentifier)
-                    (implicit hc: HeaderCarrier): Future[ApplicationUpdateSuccessful] = metrics.record(api) {
+  def subscribeToApi(applicationId: ApplicationId, apiIdentifier: ApiIdentifier)(implicit hc: HeaderCarrier): Future[ApplicationUpdateSuccessful] = metrics.record(api) {
     http.POST[ApiIdentifier, ErrorOrUnit](s"${config.serviceBaseUrl}/applications/${applicationId.value}/subscriptions", apiIdentifier, Seq(CONTENT_TYPE -> JSON))
       .map(throwOrOptionOf)
       .map {
         case Some(_) => ApplicationUpdateSuccessful
-        case None => throw new ApplicationNotFound
+        case None    => throw new ApplicationNotFound
       }
   }
 
   def addTeamMember(applicationId: ApplicationId, addTeamMember: AddTeamMemberRequest)(implicit hc: HeaderCarrier): Future[Unit] = metrics.record(api) {
     http.POST[AddTeamMemberRequest, ErrorOrUnit](s"${config.serviceBaseUrl}/applications/${applicationId.value}/collaborators", addTeamMember)
       .map {
-        case Left(UpstreamErrorResponse(_, CONFLICT, _, _)) => throw new TeamMemberAlreadyExists
+        case Left(UpstreamErrorResponse(_, CONFLICT, _, _))  => throw new TeamMemberAlreadyExists
         case Left(UpstreamErrorResponse(_, NOT_FOUND, _, _)) => throw new ApplicationNotFound
-        case Left(err) => throw err
-        case Right(_) => ()
+        case Left(err)                                       => throw err
+        case Right(_)                                        => ()
       }
   }
 

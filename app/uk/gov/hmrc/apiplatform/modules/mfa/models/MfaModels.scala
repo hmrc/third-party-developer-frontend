@@ -62,19 +62,19 @@ case class AuthenticatorAppMfaDetailSummary(override val id: MfaId, override val
 }
 
 case class SmsMfaDetailSummary(
-  override val id: MfaId = MfaId.random,
-  override val name: String,
-  override val createdOn: LocalDateTime,
-  mobileNumber: String,
-  verified: Boolean = false)
-  extends MfaDetail {
+    override val id: MfaId = MfaId.random,
+    override val name: String,
+    override val createdOn: LocalDateTime,
+    mobileNumber: String,
+    verified: Boolean = false
+  ) extends MfaDetail {
   override val mfaType: MfaType = MfaType.SMS
 }
 
 object MfaDetailFormats {
 
   implicit val authenticatorAppMfaDetailFormat: OFormat[AuthenticatorAppMfaDetailSummary] = Json.format[AuthenticatorAppMfaDetailSummary]
-  implicit val smsMfaDetailSummaryFormat: OFormat[SmsMfaDetailSummary] = Json.format[SmsMfaDetailSummary]
+  implicit val smsMfaDetailSummaryFormat: OFormat[SmsMfaDetailSummary]                    = Json.format[SmsMfaDetailSummary]
 
   implicit val mfaDetailFormat: OFormat[MfaDetail] = Union.from[MfaDetail]("mfaType")
     .and[AuthenticatorAppMfaDetailSummary](MfaType.AUTHENTICATOR_APP.toString)

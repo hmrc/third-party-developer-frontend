@@ -16,7 +16,7 @@
 
 package uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications
 
-import play.api.libs.json.{OFormat}
+import play.api.libs.json.OFormat
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.services.LocalDateTimeFormatters
 
 import java.time.LocalDateTime

@@ -31,8 +31,9 @@ import uk.gov.hmrc.play.http.metrics.common.API
 
 class PushPullNotificationsConnectorIntegrationSpec extends BaseConnectorIntegrationSpec with GuiceOneAppPerSuite {
   private val authorizationKey = randomUUID.toString
+
   private val stubConfig = Configuration(
-    "microservice.services.push-pull-notifications-api-production.port" -> stubPort,
+    "microservice.services.push-pull-notifications-api-production.port"             -> stubPort,
     "microservice.services.push-pull-notifications-api-production.authorizationKey" -> authorizationKey
   )
 

@@ -21,25 +21,23 @@ import play.api.libs.json._
 import uk.gov.hmrc.play.json.Union
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.services.LocalDateTimeFormatters
 
-
-
 trait BaseSubmissionsJsonFormatters extends GroupOfQuestionnairesJsonFormatters with LocalDateTimeFormatters {
-  implicit val keyReadsQuestionnaireId: KeyReads[Questionnaire.Id] = key => JsSuccess(Questionnaire.Id(key))
+  implicit val keyReadsQuestionnaireId: KeyReads[Questionnaire.Id]   = key => JsSuccess(Questionnaire.Id(key))
   implicit val keyWritesQuestionnaireId: KeyWrites[Questionnaire.Id] = _.value
 
-  implicit val stateWrites : Writes[QuestionnaireState] = Writes {
+  implicit val stateWrites: Writes[QuestionnaireState] = Writes {
     case QuestionnaireState.NotStarted    => JsString("NotStarted")
     case QuestionnaireState.InProgress    => JsString("InProgress")
     case QuestionnaireState.NotApplicable => JsString("NotApplicable")
     case QuestionnaireState.Completed     => JsString("Completed")
   }
-  
-  implicit val stateReads : Reads[QuestionnaireState] = Reads {
-    case JsString("NotStarted") => JsSuccess(QuestionnaireState.NotStarted)
-    case JsString("InProgress") => JsSuccess(QuestionnaireState.InProgress)
+
+  implicit val stateReads: Reads[QuestionnaireState] = Reads {
+    case JsString("NotStarted")    => JsSuccess(QuestionnaireState.NotStarted)
+    case JsString("InProgress")    => JsSuccess(QuestionnaireState.InProgress)
     case JsString("NotApplicable") => JsSuccess(QuestionnaireState.NotApplicable)
-    case JsString("Completed") => JsSuccess(QuestionnaireState.Completed)
-    case _ => JsError("Failed to parse QuestionnaireState value")
+    case JsString("Completed")     => JsSuccess(QuestionnaireState.Completed)
+    case _                         => JsError("Failed to parse QuestionnaireState value")
   }
 
   implicit val questionnaireProgressFormat = Json.format[QuestionnaireProgress]
@@ -52,13 +50,13 @@ trait BaseSubmissionsJsonFormatters extends GroupOfQuestionnairesJsonFormatters 
 trait SubmissionsFrontendJsonFormatters extends BaseSubmissionsJsonFormatters {
   import Submission.Status._
 
-  implicit val rejectedStatusFormat = Json.format[Declined]
-  implicit val acceptedStatusFormat = Json.format[Granted]
+  implicit val rejectedStatusFormat             = Json.format[Declined]
+  implicit val acceptedStatusFormat             = Json.format[Granted]
   implicit val acceptedWithWarningsStatusFormat = Json.format[GrantedWithWarnings]
-  implicit val submittedStatusFormat = Json.format[Submitted]
-  implicit val answeringStatusFormat = Json.format[Answering]
-  implicit val createdStatusFormat = Json.format[Created]
-  
+  implicit val submittedStatusFormat            = Json.format[Submitted]
+  implicit val answeringStatusFormat            = Json.format[Answering]
+  implicit val createdStatusFormat              = Json.format[Created]
+
   implicit val submissionStatus = Union.from[Submission.Status]("Submission.StatusType")
     .and[Declined]("declined")
     .and[Granted]("granted")
@@ -69,9 +67,9 @@ trait SubmissionsFrontendJsonFormatters extends BaseSubmissionsJsonFormatters {
     .format
 
   implicit val submissionInstanceFormat = Json.format[Submission.Instance]
-  implicit val submissionFormat = Json.format[Submission]
+  implicit val submissionFormat         = Json.format[Submission]
   implicit val extendedSubmissionFormat = Json.format[ExtendedSubmission]
-  implicit val markedSubmissionFormat = Json.format[MarkedSubmission]
+  implicit val markedSubmissionFormat   = Json.format[MarkedSubmission]
 }
 
 object SubmissionsFrontendJsonFormatters extends SubmissionsFrontendJsonFormatters

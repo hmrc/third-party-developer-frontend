@@ -23,48 +23,56 @@ sealed trait Permission {
 }
 
 object Permissions {
+
   case object SandboxOrAdmin extends Permission {
+
     override def hasPermissions(app: BaseApplication, developer: Developer): Boolean =
       (app.deployedTo, app.role(developer.email)) match {
-        case (Environment.SANDBOX, _) => true
+        case (Environment.SANDBOX, _)                  => true
         case (_, Some(CollaboratorRole.ADMINISTRATOR)) => true
-        case _ => false
+        case _                                         => false
       }
   }
 
   case object ProductionAndAdmin extends Permission {
+
     override def hasPermissions(app: BaseApplication, developer: Developer): Boolean =
       (app.deployedTo, app.role(developer.email)) match {
         case (Environment.PRODUCTION, Some(CollaboratorRole.ADMINISTRATOR)) => true
-        case _ => false
+        case _                                                              => false
       }
   }
 
   case object ProductionAndDeveloper extends Permission {
+
     override def hasPermissions(app: BaseApplication, developer: Developer): Boolean =
       (app.deployedTo, app.role(developer.email)) match {
         case (Environment.PRODUCTION, Some(CollaboratorRole.DEVELOPER)) => true
-        case _ => false
+        case _                                                          => false
       }
   }
 
   case object SandboxOnly extends Permission {
+
     override def hasPermissions(app: BaseApplication, developer: Developer): Boolean =
       app.deployedTo match {
         case Environment.SANDBOX => true
-        case _ => false
+        case _                   => false
       }
   }
 
   case object AdministratorOnly extends Permission {
+
     override def hasPermissions(app: BaseApplication, developer: Developer): Boolean =
       app.role(developer.email).contains(CollaboratorRole.ADMINISTRATOR)
   }
 
   case object TeamMembersOnly extends Permission {
+
     override def hasPermissions(app: BaseApplication, developer: Developer): Boolean =
       app.role(developer.email).isDefined
   }
+
   case object Unrestricted extends Permission {
     override def hasPermissions(app: BaseApplication, developer: Developer): Boolean = true
   }

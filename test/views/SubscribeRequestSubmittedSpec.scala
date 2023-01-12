@@ -35,13 +35,13 @@ class SubscribeRequestSubmittedSpec extends CommonViewSpec with WithCSRFAddToken
   "Subscribe request submitted page" should {
     "render with no errors" in {
       val appConfig = mock[ApplicationConfig]
-      val request = FakeRequest().withCSRFToken
+      val request   = FakeRequest().withCSRFToken
 
-      val appId = ApplicationId("1234")
-      val apiName = "Test API"
-      val apiVersion = ApiVersion("1.0")
-      val clientId = ClientId("clientId123")
-      val developer = buildDeveloperSession(loggedInState = LoggedInState.LOGGED_IN, buildDeveloperWithRandomId("email@example.com", "First Name", "Last Name", None))
+      val appId       = ApplicationId("1234")
+      val apiName     = "Test API"
+      val apiVersion  = ApiVersion("1.0")
+      val clientId    = ClientId("clientId123")
+      val developer   = buildDeveloperSession(loggedInState = LoggedInState.LOGGED_IN, buildDeveloperWithRandomId("email@example.com", "First Name", "Last Name", None))
       val application = Application(
         appId,
         clientId,

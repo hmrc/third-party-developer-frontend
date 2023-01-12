@@ -30,6 +30,7 @@ import uk.gov.hmrc.apiplatform.modules.submissions.config.ThirdPartyApplicationS
 import java.time.Clock
 
 class ConfigurationModule extends AbstractModule {
+
   override def configure(): Unit = {
     bind(classOf[ConnectorMetrics]).to(classOf[ConnectorMetricsImpl])
     bind(classOf[SessionTimeoutFilter]).to(classOf[SessionTimeoutFilterWithWhitelist])

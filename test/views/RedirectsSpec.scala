@@ -23,7 +23,7 @@ import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.LoggedIn
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.controllers.ApplicationViewModel
 import org.jsoup.Jsoup
 import play.api.test.FakeRequest
-import uk.gov.hmrc.thirdpartydeveloperfrontend.builder.{DeveloperSessionBuilder, DeveloperBuilder}
+import uk.gov.hmrc.thirdpartydeveloperfrontend.builder.{DeveloperBuilder, DeveloperSessionBuilder}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.ViewHelpers._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils._
 import views.helper.CommonViewSpec
@@ -31,10 +31,11 @@ import views.html.RedirectsView
 
 class RedirectsSpec extends CommonViewSpec with WithCSRFAddToken with CollaboratorTracker with LocalUserIdTracker with DeveloperSessionBuilder with DeveloperBuilder {
 
-  val appId = ApplicationId("1234")
-  val clientId = ClientId("clientId123")
+  val appId             = ApplicationId("1234")
+  val clientId          = ClientId("clientId123")
   val loggedInDeveloper = buildDeveloperSession(loggedInState = LoggedInState.LOGGED_IN, buildDeveloperWithRandomId("developer@example.com", "John", "Doe"))
-  val loggedInDev = buildDeveloperSession(loggedInState = LoggedInState.LOGGED_IN, buildDeveloperWithRandomId("developer2@example.com", "Billy", "Fontaine"))
+  val loggedInDev       = buildDeveloperSession(loggedInState = LoggedInState.LOGGED_IN, buildDeveloperWithRandomId("developer2@example.com", "Billy", "Fontaine"))
+
   val application = Application(
     appId,
     clientId,
@@ -54,12 +55,12 @@ class RedirectsSpec extends CommonViewSpec with WithCSRFAddToken with Collaborat
     val redirectLimit = 5
 
     def renderPageWithRedirectUris(role: CollaboratorRole, numberOfRedirectUris: Int) = {
-      val request = FakeRequest().withCSRFToken
-      val redirects = 1 to numberOfRedirectUris map (num => s"http://localhost:$num")
+      val request        = FakeRequest().withCSRFToken
+      val redirects      = 1 to numberOfRedirectUris map (num => s"http://localhost:$num")
       val standardAccess = Standard(redirectUris = redirects.toList, termsAndConditionsUrl = None)
 
       val applicationWithRedirects = application.copy(access = standardAccess)
-      val user = if (role.isAdministrator) {
+      val user                     = if (role.isAdministrator) {
         loggedInDeveloper
       } else {
         loggedInDev
@@ -71,7 +72,12 @@ class RedirectsSpec extends CommonViewSpec with WithCSRFAddToken with Collaborat
         ApplicationViewModel(applicationWithRedirects, hasSubscriptionsFields = false, hasPpnsFields = false),
         redirects,
         Some(createFraudPreventionNavLinkViewModel(isVisible = true, "some/url")),
-        request, user, messagesProvider, appConfig, "redirects")
+        request,
+        user,
+        messagesProvider,
+        appConfig,
+        "redirects"
+      )
     }
 
     def renderPageForStandardApplicationAsAdminWithRedirectUris(numberOfRedirectUris: Int) = {

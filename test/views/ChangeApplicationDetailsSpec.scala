@@ -31,40 +31,48 @@ import views.helper.CommonViewSpec
 import views.html.ChangeDetailsView
 
 class ChangeApplicationDetailsSpec extends CommonViewSpec
-  with WithCSRFAddToken
-  with LocalUserIdTracker
-  with DeveloperSessionBuilder
-  with DeveloperBuilder {
+    with WithCSRFAddToken
+    with LocalUserIdTracker
+    with DeveloperSessionBuilder
+    with DeveloperBuilder {
 
   val changeDetails = app.injector.instanceOf[ChangeDetailsView]
   val applicationId = ApplicationId("1234")
-  val clientId = ClientId("clientId123")
+  val clientId      = ClientId("clientId123")
 
   "change application details page" should {
 
     def renderPage(application: Application) = {
 
-      val loggedIn = buildDeveloperSession(loggedInState = LoggedInState.LOGGED_IN, buildDeveloper("admin@example.com", "firstName1", "lastName1", None))
-      val request = FakeRequest().withCSRFToken
-      val privacyPolicyUrl = application.privacyPolicyLocation match {
+      val loggedIn              = buildDeveloperSession(loggedInState = LoggedInState.LOGGED_IN, buildDeveloper("admin@example.com", "firstName1", "lastName1", None))
+      val request               = FakeRequest().withCSRFToken
+      val privacyPolicyUrl      = application.privacyPolicyLocation match {
         case PrivacyPolicyLocation.Url(url) => Some(url)
-        case _ => None
+        case _                              => None
       }
       val termsAndConditionsUrl = application.termsAndConditionsLocation match {
         case TermsAndConditionsLocation.Url(url) => Some(url)
-        case _ => None
+        case _                                   => None
       }
 
       val form = EditApplicationForm.form.fill(
         EditApplicationForm(application.id, application.name, application.description, privacyPolicyUrl, termsAndConditionsUrl, "12 months")
       )
 
-      changeDetails.render(form, ApplicationViewModel(application, hasSubscriptionsFields = false, hasPpnsFields = false), request, loggedIn, messagesProvider, appConfig, "nav-section")
+      changeDetails.render(
+        form,
+        ApplicationViewModel(application, hasSubscriptionsFields = false, hasPpnsFields = false),
+        request,
+        loggedIn,
+        messagesProvider,
+        appConfig,
+        "nav-section"
+      )
     }
 
     def formGroupWithLabelIsPrepopulated(doc: Document, labelText: String, inputValue: String) = {
 
-      val label = doc.getElementsContainingText(labelText).last()
+      val label              = doc.getElementsContainingText(labelText).last()
       val inputValueForLabel = label.parents().first().select("input").attr("value")
 
       inputValueForLabel == inputValue
@@ -72,8 +80,17 @@ class ChangeApplicationDetailsSpec extends CommonViewSpec
 
     "render" in {
 
-      val application = Application(applicationId, clientId, "An App Name", LocalDateTime.now(ZoneOffset.UTC), Some(LocalDateTime.now(ZoneOffset.UTC)), None, Period.ofDays(547), Environment.SANDBOX)
-      val document = Jsoup.parse(renderPage(application).body)
+      val application = Application(
+        applicationId,
+        clientId,
+        "An App Name",
+        LocalDateTime.now(ZoneOffset.UTC),
+        Some(LocalDateTime.now(ZoneOffset.UTC)),
+        None,
+        Period.ofDays(547),
+        Environment.SANDBOX
+      )
+      val document    = Jsoup.parse(renderPage(application).body)
 
       elementExistsByText(document, "h1", "Change application details") shouldBe true
 
@@ -84,13 +101,24 @@ class ChangeApplicationDetailsSpec extends CommonViewSpec
     }
 
     "pre-populate existing data fields" in {
-      val aDescription = Some("a helpful description")
-      val aPrivacyPolicyURL = Some("a privacy policy url")
+      val aDescription           = Some("a helpful description")
+      val aPrivacyPolicyURL      = Some("a privacy policy url")
       val aTermsAndConditionsURL = Some("a terms and conditions url")
-      val standardAccess = Standard(privacyPolicyUrl = aPrivacyPolicyURL, termsAndConditionsUrl = aTermsAndConditionsURL)
-      val application =
-        Application(applicationId, clientId, "An App Name", LocalDateTime.now(ZoneOffset.UTC), Some(LocalDateTime.now(ZoneOffset.UTC)), None, grantLength, Environment.SANDBOX, description = aDescription, access = standardAccess)
-      val document = Jsoup.parse(renderPage(application).body)
+      val standardAccess         = Standard(privacyPolicyUrl = aPrivacyPolicyURL, termsAndConditionsUrl = aTermsAndConditionsURL)
+      val application            =
+        Application(
+          applicationId,
+          clientId,
+          "An App Name",
+          LocalDateTime.now(ZoneOffset.UTC),
+          Some(LocalDateTime.now(ZoneOffset.UTC)),
+          None,
+          grantLength,
+          Environment.SANDBOX,
+          description = aDescription,
+          access = standardAccess
+        )
+      val document               = Jsoup.parse(renderPage(application).body)
 
       formGroupWithLabelIsPrepopulated(document, "Application name", "An App Name") shouldBe true
       textareaExistsWithText(document, "description", aDescription.get) shouldBe true
@@ -111,7 +139,7 @@ class ChangeApplicationDetailsSpec extends CommonViewSpec
         Environment.PRODUCTION,
         state = ApplicationState(State.PENDING_GATEKEEPER_APPROVAL, None, None)
       )
-      val document = Jsoup.parse(renderPage(application).body)
+      val document    = Jsoup.parse(renderPage(application).body)
 
       elementExistsByText(document, "label", "Application name") shouldBe false
     }
@@ -129,7 +157,7 @@ class ChangeApplicationDetailsSpec extends CommonViewSpec
         Environment.PRODUCTION,
         state = ApplicationState(State.PENDING_REQUESTER_VERIFICATION, None, None)
       )
-      val document = Jsoup.parse(renderPage(application).body)
+      val document    = Jsoup.parse(renderPage(application).body)
 
       elementExistsByText(document, "label", "Application name") shouldBe false
     }
@@ -137,8 +165,18 @@ class ChangeApplicationDetailsSpec extends CommonViewSpec
     "not display the option to change the app name if in prod with state production" in {
 
       val application =
-        Application(applicationId, clientId, "An App Name", LocalDateTime.now(ZoneOffset.UTC), Some(LocalDateTime.now(ZoneOffset.UTC)), None, grantLength, Environment.PRODUCTION, state = ApplicationState(State.PRODUCTION, None, None))
-      val document = Jsoup.parse(renderPage(application).body)
+        Application(
+          applicationId,
+          clientId,
+          "An App Name",
+          LocalDateTime.now(ZoneOffset.UTC),
+          Some(LocalDateTime.now(ZoneOffset.UTC)),
+          None,
+          grantLength,
+          Environment.PRODUCTION,
+          state = ApplicationState(State.PRODUCTION, None, None)
+        )
+      val document    = Jsoup.parse(renderPage(application).body)
 
       elementExistsByText(document, "label", "Application name") shouldBe false
     }

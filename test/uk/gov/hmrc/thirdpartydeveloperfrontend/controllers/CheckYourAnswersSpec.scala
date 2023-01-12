@@ -44,7 +44,7 @@ import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future.{failed, successful}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.LocalUserIdTracker
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.DeveloperSession
-import java.time.{LocalDateTime, ZoneOffset, Clock, Instant}
+import java.time.{Clock, Instant, LocalDateTime, ZoneOffset}
 
 class CheckYourAnswersSpec
     extends BaseControllerSpec
@@ -54,19 +54,18 @@ class CheckYourAnswersSpec
     with SampleApplication
     with SubscriptionTestHelperSugar
     with WithCSRFAddToken
-    with SubscriptionsBuilder
-{
+    with SubscriptionsBuilder {
 
   private def aClientSecret() = ClientSecret(randomUUID.toString, randomUUID.toString, LocalDateTime.now())
 
   val appName: String = "app"
-  val apiVersion = ApiVersion("version")
+  val apiVersion      = ApiVersion("version")
 
-  val anotherCollaboratorEmail = "collaborator@example.com"
+  val anotherCollaboratorEmail               = "collaborator@example.com"
   val hashedAnotherCollaboratorEmail: String = anotherCollaboratorEmail.toSha256
 
-  val testing: ApplicationState = ApplicationState.testing.copy(updatedOn = LocalDateTime.now.minusMinutes(1))
-  val production: ApplicationState = ApplicationState.production("thirdpartydeveloper@example.com", "thirdpartydeveloper", "ABCD")
+  val testing: ApplicationState         = ApplicationState.testing.copy(updatedOn = LocalDateTime.now.minusMinutes(1))
+  val production: ApplicationState      = ApplicationState.production("thirdpartydeveloper@example.com", "thirdpartydeveloper", "ABCD")
   val pendingApproval: ApplicationState = ApplicationState.pendingGatekeeperApproval("thirdpartydeveloper@example.com", "thirdpartydeveloper")
 
   val appTokens = ApplicationToken(List(aClientSecret(), aClientSecret()), "token")
@@ -119,18 +118,19 @@ class CheckYourAnswersSpec
   val groupedSubsSubscribedToNothing = GroupedSubscriptions(testApis = Seq.empty, apis = Seq.empty, exampleApi = None)
 
   trait Setup extends ApplicationServiceMock with ApplicationActionServiceMock with SessionServiceMock with TermsOfUseVersionServiceMock {
-    val checkYourAnswersView = app.injector.instanceOf[CheckYourAnswersView]
-    val landingPageView = app.injector.instanceOf[LandingPageView]
-    val teamView = app.injector.instanceOf[TeamView]
-    val teamMemberAddView = app.injector.instanceOf[TeamMemberAddView]
+    val checkYourAnswersView             = app.injector.instanceOf[CheckYourAnswersView]
+    val landingPageView                  = app.injector.instanceOf[LandingPageView]
+    val teamView                         = app.injector.instanceOf[TeamView]
+    val teamMemberAddView                = app.injector.instanceOf[TeamMemberAddView]
     val teamMemberRemoveConfirmationView = app.injector.instanceOf[TeamMemberRemoveConfirmationView]
-    val termsOfUseView = app.injector.instanceOf[TermsOfUseView]
-    val confirmNameView = app.injector.instanceOf[ConfirmNameView]
-    val termsAndConditionsView = app.injector.instanceOf[TermsAndConditionsView]
-    val privacyPolicyView = app.injector.instanceOf[PrivacyPolicyView]
-    val apiSubscriptionsViewTemplate = app.injector.instanceOf[ApiSubscriptionsView]
-    val contactDetailsView = app.injector.instanceOf[ContactDetailsView]
-    val clock = Clock.fixed(Instant.now(), ZoneOffset.UTC)
+    val termsOfUseView                   = app.injector.instanceOf[TermsOfUseView]
+    val confirmNameView                  = app.injector.instanceOf[ConfirmNameView]
+    val termsAndConditionsView           = app.injector.instanceOf[TermsAndConditionsView]
+    val privacyPolicyView                = app.injector.instanceOf[PrivacyPolicyView]
+    val apiSubscriptionsViewTemplate     = app.injector.instanceOf[ApiSubscriptionsView]
+    val contactDetailsView               = app.injector.instanceOf[ContactDetailsView]
+    val clock                            = Clock.fixed(Instant.now(), ZoneOffset.UTC)
+
     val underTest = new CheckYourAnswers(
       mockErrorHandler,
       applicationServiceMock,
@@ -167,7 +167,7 @@ class CheckYourAnswersSpec
 
     givenUpdateCheckInformationSucceeds(sampleApp)
 
-    val context = ApiContext("apiContent")
+    val context     = ApiContext("apiContent")
     val emptyFields = emptySubscriptionFieldsWrapper(appId, clientId, context, apiVersion)
 
     val subscriptions = Seq(
@@ -195,10 +195,10 @@ class CheckYourAnswersSpec
 
     implicit val hc = HeaderCarrier()
 
-    val sessionParams: Seq[(String, String)] = Seq("csrfToken" -> app.injector.instanceOf[TokenProvider].generateToken)
+    val sessionParams: Seq[(String, String)]                  = Seq("csrfToken" -> app.injector.instanceOf[TokenProvider].generateToken)
     val loggedOutRequest: FakeRequest[AnyContentAsEmpty.type] = FakeRequest().withSession(sessionParams: _*)
-    val loggedInRequest: FakeRequest[AnyContentAsEmpty.type] = FakeRequest().withLoggedIn(underTest, implicitly)(sessionId).withSession(sessionParams: _*)
-    val loggedInRequestWithFormBody = loggedInRequest.withFormUrlEncodedBody()
+    val loggedInRequest: FakeRequest[AnyContentAsEmpty.type]  = FakeRequest().withLoggedIn(underTest, implicitly)(sessionId).withSession(sessionParams: _*)
+    val loggedInRequestWithFormBody                           = loggedInRequest.withFormUrlEncodedBody()
 
     val defaultCheckInformation = CheckInformation(contactDetails = Some(ContactDetails("Tester", "tester@example.com", "12345678")))
 
@@ -209,7 +209,7 @@ class CheckYourAnswersSpec
         state: ApplicationState = testing,
         checkInformation: Option[CheckInformation] = None,
         access: Access = Standard()
-    ): Application = {
+      ): Application = {
 
       val collaborators = Set(
         loggedInDeveloper.email.asCollaborator(userRole),
@@ -237,6 +237,7 @@ class CheckYourAnswersSpec
 
       application
     }
+
     def mockRequestUplift() {
       when(underTest.applicationService.requestUplift(eqTo(appId), any[String], any[DeveloperSession])(*))
         .thenReturn(successful(ApplicationUpliftSuccessful))
@@ -250,6 +251,7 @@ class CheckYourAnswersSpec
   }
 
   "validate failure when application name already exists" in new Setup {
+
     private val application = givenApplicationExists(
       checkInformation = Some(
         CheckInformation(

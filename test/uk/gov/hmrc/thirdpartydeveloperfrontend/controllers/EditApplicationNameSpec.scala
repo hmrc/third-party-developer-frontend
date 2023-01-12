@@ -41,12 +41,12 @@ import java.time.LocalDateTime
 import java.util.UUID.randomUUID
 import scala.concurrent.ExecutionContext.Implicits.global
 
-class EditApplicationNameSpec 
-    extends BaseControllerSpec 
+class EditApplicationNameSpec
+    extends BaseControllerSpec
     with ApplicationActionServiceMock
     with SampleSession
-    with SampleApplication 
-    with SubscriptionTestHelperSugar 
+    with SampleApplication
+    with SubscriptionTestHelperSugar
     with WithCSRFAddToken
     with DeveloperBuilder
     with LocalUserIdTracker {
@@ -54,17 +54,17 @@ class EditApplicationNameSpec
   val tokens: ApplicationToken = ApplicationToken(List(aClientSecret(), aClientSecret()), "token")
 
   trait Setup extends UpliftLogicMock with ApplicationServiceMock with ApmConnectorMockModule with SessionServiceMock with EmailPreferencesServiceMock {
-    val accessTokenSwitchView = app.injector.instanceOf[AccessTokenSwitchView]
+    val accessTokenSwitchView                     = app.injector.instanceOf[AccessTokenSwitchView]
     val usingPrivilegedApplicationCredentialsView = app.injector.instanceOf[UsingPrivilegedApplicationCredentialsView]
-    val tenDaysWarningView = app.injector.instanceOf[TenDaysWarningView]
-    val addApplicationStartSubordinateView = app.injector.instanceOf[AddApplicationStartSubordinateView]
-    val addApplicationStartPrincipalView = app.injector.instanceOf[AddApplicationStartPrincipalView]
-    val addApplicationSubordinateSuccessView = app.injector.instanceOf[AddApplicationSubordinateSuccessView]
-    val addApplicationNameView = app.injector.instanceOf[AddApplicationNameView]
-    val chooseApplicationToUpliftView = app.injector.instanceOf[ChooseApplicationToUpliftView]
+    val tenDaysWarningView                        = app.injector.instanceOf[TenDaysWarningView]
+    val addApplicationStartSubordinateView        = app.injector.instanceOf[AddApplicationStartSubordinateView]
+    val addApplicationStartPrincipalView          = app.injector.instanceOf[AddApplicationStartPrincipalView]
+    val addApplicationSubordinateSuccessView      = app.injector.instanceOf[AddApplicationSubordinateSuccessView]
+    val addApplicationNameView                    = app.injector.instanceOf[AddApplicationNameView]
+    val chooseApplicationToUpliftView             = app.injector.instanceOf[ChooseApplicationToUpliftView]
 
     val beforeYouStartView: BeforeYouStartView = app.injector.instanceOf[BeforeYouStartView]
-    val sr20UpliftJourneySwitchMock = mock[UpliftJourneySwitch]
+    val sr20UpliftJourneySwitchMock            = mock[UpliftJourneySwitch]
 
     val flowServiceMock = mock[GetProductionCredentialsFlowService]
 

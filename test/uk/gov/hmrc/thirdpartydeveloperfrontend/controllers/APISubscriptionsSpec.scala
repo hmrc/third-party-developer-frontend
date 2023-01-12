@@ -22,15 +22,15 @@ import uk.gov.hmrc.thirdpartydeveloperfrontend.utils._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.builder._
 
 class APISubscriptionsSpec
-  extends AsyncHmrcSpec
-  with LocalUserIdTracker
-  with DeveloperBuilder
-  with SampleSession
-  with SampleApplication
-  with SubscriptionTestHelperSugar {
+    extends AsyncHmrcSpec
+    with LocalUserIdTracker
+    with DeveloperBuilder
+    with SampleSession
+    with SampleApplication
+    with SubscriptionTestHelperSugar {
 
   "groupSubscriptions" should {
-    val publicAccess = Some(APIAccess(APIAccessType.PUBLIC))
+    val publicAccess  = Some(APIAccess(APIAccessType.PUBLIC))
     val privateAccess = Some(APIAccess(APIAccessType.PRIVATE))
 
     "split Private Beta APIs from public APIs " in {
@@ -130,9 +130,9 @@ class APISubscriptionsSpec
   }
 
   "subscriptionNumberText" should {
-    val apiName = "Individual Employment"
+    val apiName     = "Individual Employment"
     val serviceName = "individual-employment"
-    val context = ApiContext("individual-employment-context")
+    val context     = ApiContext("individual-employment-context")
 
     "use plural in subscription number if there is no subscription" in {
       val api = apiSubscription(
@@ -178,10 +178,10 @@ class APISubscriptionsSpec
   }
 
   "ajaxSubscriptionResponse" should {
-    val api1Name = "Individual Employment"
+    val api1Name    = "Individual Employment"
     val api1Context = employmentContext
     val api1Service = "individual-employment"
-    val api2Name = "Individual Tax"
+    val api2Name    = "Individual Tax"
     val api2Context = taxContext
     val api2Service = "individual-tax"
 

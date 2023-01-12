@@ -22,13 +22,14 @@ import uk.gov.hmrc.apiplatform.modules.submissions.connectors.ThirdPartyApplicat
 import scala.concurrent.Future.successful
 import uk.gov.hmrc.apiplatform.modules.submissions.SubmissionsTestData
 import uk.gov.hmrc.http.HeaderCarrier
-import uk.gov.hmrc.apiplatform.modules.submissions.domain.models.{Submission,Question}
+import uk.gov.hmrc.apiplatform.modules.submissions.domain.models.{Question, Submission}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.ApplicationId
 
 class SubmissionServiceSpec extends AsyncHmrcSpec {
+
   trait Setup extends SubmissionsTestData {
     implicit val hc = HeaderCarrier()
-    
+
     val mockSubmissionsConnector = mock[ThirdPartyApplicationSubmissionsConnector]
 
     val underTest = new SubmissionService(
@@ -41,7 +42,7 @@ class SubmissionServiceSpec extends AsyncHmrcSpec {
       when(mockSubmissionsConnector.fetchSubmission(*[Submission.Id])(*)).thenReturn(successful(Some(completelyAnswerExtendedSubmission)))
 
       val result = await(underTest.fetch(completelyAnswerExtendedSubmission.submission.id))
-      
+
       result shouldBe 'defined
       result.get.submission.id shouldBe completelyAnswerExtendedSubmission.submission.id
     }
@@ -50,7 +51,7 @@ class SubmissionServiceSpec extends AsyncHmrcSpec {
       when(mockSubmissionsConnector.fetchLatestSubmission(*[ApplicationId])(*)).thenReturn(successful(Some(aSubmission)))
 
       val result = await(underTest.fetchLatestSubmission(aSubmission.applicationId))
-      
+
       result shouldBe 'defined
       result.get.id shouldBe aSubmission.id
     }
@@ -59,7 +60,7 @@ class SubmissionServiceSpec extends AsyncHmrcSpec {
       when(mockSubmissionsConnector.fetchLatestExtendedSubmission(*[ApplicationId])(*)).thenReturn(successful(Some(completelyAnswerExtendedSubmission)))
 
       val result = await(underTest.fetchLatestExtendedSubmission(completelyAnswerExtendedSubmission.submission.applicationId))
-      
+
       result shouldBe 'defined
       result.get.submission.id shouldBe completelyAnswerExtendedSubmission.submission.id
     }
@@ -68,7 +69,7 @@ class SubmissionServiceSpec extends AsyncHmrcSpec {
       when(mockSubmissionsConnector.recordAnswer(*[Submission.Id], *[Question.Id], *)(*)).thenReturn(successful(Right(answeringSubmission.withIncompleteProgress())))
 
       val result = await(underTest.recordAnswer(completelyAnswerExtendedSubmission.submission.id, questionId, List("")))
-      
+
       // result shouldBe 'defined
       result.isRight shouldBe true
     }
@@ -76,7 +77,7 @@ class SubmissionServiceSpec extends AsyncHmrcSpec {
 
   "confirmSetupComplete" should {
     val emailAddress = "user@example.com"
-    val err = "nope"
+    val err          = "nope"
 
     "return without errors if TPA connector call was successful" in new Setup {
       when(mockSubmissionsConnector.confirmSetupComplete(applicationId, emailAddress)).thenReturn(successful(Right()))

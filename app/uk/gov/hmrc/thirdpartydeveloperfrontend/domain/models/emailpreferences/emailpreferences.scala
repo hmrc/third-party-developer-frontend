@@ -43,22 +43,27 @@ object EmailTopic extends StringEnum[EmailTopic] with StringPlayJsonValueEnum[Em
   val values = findValues
 
   case object BUSINESS_AND_POLICY
-    extends EmailTopic("BUSINESS_AND_POLICY", "Business and policy", "Policy compliance, legislative changes and business guidance support", 1)
+      extends EmailTopic("BUSINESS_AND_POLICY", "Business and policy", "Policy compliance, legislative changes and business guidance support", 1)
+
   case object TECHNICAL
-    extends EmailTopic("TECHNICAL", "Technical", "Specifications, service guides, bug fixes and known errors", 2)
+      extends EmailTopic("TECHNICAL", "Technical", "Specifications, service guides, bug fixes and known errors", 2)
+
   case object RELEASE_SCHEDULES
-    extends EmailTopic("RELEASE_SCHEDULES", "Release schedules", "Notifications about planned releases and outages", 3)
+      extends EmailTopic("RELEASE_SCHEDULES", "Release schedules", "Notifications about planned releases and outages", 3)
+
   case object EVENT_INVITES
-    extends EmailTopic(
-      "EVENT_INVITES",
-      "Event invites",
-      "Get invites to knowledge share events and user research opportunities",
-      Byte.MaxValue) // Event Invites is displayed separately, after the other topics
+      extends EmailTopic(
+        "EVENT_INVITES",
+        "Event invites",
+        "Get invites to knowledge share events and user research opportunities",
+        Byte.MaxValue
+      ) // Event Invites is displayed separately, after the other topics
 
 }
 
 // TODO - make category an APICategory
 case class APICategoryDisplayDetails(category: String, name: String) {
+
   def toAPICategory(): ApiCategory = {
     ApiCategory(category)
   }

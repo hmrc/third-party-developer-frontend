@@ -30,14 +30,15 @@ import views.html.DeleteApplicationView
 import java.time.{LocalDateTime, ZoneOffset}
 
 class DeleteApplicationSpec extends CommonViewSpec with WithCSRFAddToken with CollaboratorTracker with LocalUserIdTracker
-  with DeveloperSessionBuilder
-  with DeveloperBuilder {
+    with DeveloperSessionBuilder
+    with DeveloperBuilder {
 
   val deleteApplicationView = app.injector.instanceOf[DeleteApplicationView]
-  val appId = ApplicationId("1234")
-  val clientId = ClientId("clientId123")
-  val loggedInDeveloper = buildDeveloperSession(loggedInState = LoggedInState.LOGGED_IN, buildDeveloper("developer@example.com", "John", "Doe", None))
-  val application = Application(
+  val appId                 = ApplicationId("1234")
+  val clientId              = ClientId("clientId123")
+  val loggedInDeveloper     = buildDeveloperSession(loggedInState = LoggedInState.LOGGED_IN, buildDeveloper("developer@example.com", "John", "Doe", None))
+
+  val application             = Application(
     appId,
     clientId,
     "App name 1",
@@ -51,9 +52,9 @@ class DeleteApplicationSpec extends CommonViewSpec with WithCSRFAddToken with Co
     state = ApplicationState.production(loggedInDeveloper.email, loggedInDeveloper.displayedName, ""),
     access = Standard(redirectUris = List("https://red1", "https://red2"), termsAndConditionsUrl = Some("http://tnc-url.com"))
   )
-  val prodAppId = ApplicationId("prod123")
-  val sandboxAppId = ApplicationId("sand123")
-  val prodApp: Application = application.copy(id = prodAppId)
+  val prodAppId               = ApplicationId("prod123")
+  val sandboxAppId            = ApplicationId("sand123")
+  val prodApp: Application    = application.copy(id = prodAppId)
   val sandboxApp: Application = application.copy(id = sandboxAppId, deployedTo = Environment.SANDBOX)
 
   "delete application page" should {

@@ -28,7 +28,6 @@ import views.html.checkpages.ApiSubscriptionsView
 
 import scala.concurrent.Future
 
-
 trait ApiSubscriptionsPartialController {
   self: ApplicationController with CanUseCheckActions =>
 
@@ -43,10 +42,10 @@ trait ApiSubscriptionsPartialController {
   }
 
   def apiSubscriptionsAction(appId: ApplicationId): Action[AnyContent] = canUseChecksAction(appId) { implicit request =>
-    val app = request.application
+    val app              = request.application
     val subscriptionData = asSubscriptionData(request)
-    val openAccessApis = request.openAccessApis
-    val information = app.checkInformation.getOrElse(CheckInformation())
+    val openAccessApis   = request.openAccessApis
+    val information      = app.checkInformation.getOrElse(CheckInformation())
 
     // Grouped subscriptons removed API-EXAMPLE-MICROSERVICE before this code is ever executed
     def hasNonExampleSubscription(subscriptionData: SubscriptionData) =
@@ -67,7 +66,8 @@ trait ApiSubscriptionsPartialController {
       subscriptionData: SubscriptionData,
       openAccessApis: Map[ApiContext, ApiData],
       form: Option[Form[DummySubscriptionsForm]] = None
-  )(implicit request: ApplicationRequest[AnyContent]) = {
+    )(implicit request: ApplicationRequest[AnyContent]
+    ) = {
     apiSubscriptionsViewTemplate(
       app,
       subscriptionData.role,

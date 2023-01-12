@@ -35,7 +35,7 @@ import scala.concurrent.Future.successful
 import scala.concurrent.{ExecutionContext, Future}
 
 @Singleton
-class IpAllowListController @Inject()(
+class IpAllowListController @Inject() (
     val errorHandler: ErrorHandler,
     val applicationService: ApplicationService,
     val applicationActionService: ApplicationActionService,
@@ -54,8 +54,9 @@ class IpAllowListController @Inject()(
     removeIpAllowlistView: RemoveIpAllowlistView,
     removeIpAllowlistSuccessView: RemoveIpAllowlistSuccessView,
     removeCidrBlockView: RemoveCidrBlockView
-)(implicit val ec: ExecutionContext, val appConfig: ApplicationConfig)
-    extends ApplicationController(mcc) with WithUnsafeDefaultFormBinding {
+  )(implicit val ec: ExecutionContext,
+    val appConfig: ApplicationConfig
+  ) extends ApplicationController(mcc) with WithUnsafeDefaultFormBinding {
 
   private def canViewIpAllowlistAction(applicationId: ApplicationId)(fun: ApplicationRequest[AnyContent] => Future[Result]): Action[AnyContent] =
     checkActionForApprovedApps(SupportsIpAllowlist, TeamMembersOnly)(applicationId)(fun)
@@ -91,7 +92,7 @@ class IpAllowListController @Inject()(
     def handleValidForm(form: AddAnotherCidrBlockConfirmForm): Future[Result] = {
       form.confirm match {
         case Some("Yes") => successful(Redirect(routes.IpAllowListController.addCidrBlock(applicationId)))
-        case _ => successful(Redirect(routes.IpAllowListController.reviewIpAllowlist(applicationId)))
+        case _           => successful(Redirect(routes.IpAllowListController.reviewIpAllowlist(applicationId)))
       }
     }
 

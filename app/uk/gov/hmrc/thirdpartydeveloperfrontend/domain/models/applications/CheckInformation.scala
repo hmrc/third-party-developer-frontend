@@ -16,14 +16,16 @@
 
 package uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications
 
-case class CheckInformation(confirmedName: Boolean = false,
-                            apiSubscriptionsConfirmed: Boolean = false,
-                            apiSubscriptionConfigurationsConfirmed: Boolean = false,
-                            contactDetails: Option[ContactDetails] = None,
-                            providedPrivacyPolicyURL: Boolean = false,
-                            providedTermsAndConditionsURL: Boolean = false,
-                            teamConfirmed: Boolean = false,
-                            termsOfUseAgreements: List[TermsOfUseAgreement] = List.empty)
+case class CheckInformation(
+    confirmedName: Boolean = false,
+    apiSubscriptionsConfirmed: Boolean = false,
+    apiSubscriptionConfigurationsConfirmed: Boolean = false,
+    contactDetails: Option[ContactDetails] = None,
+    providedPrivacyPolicyURL: Boolean = false,
+    providedTermsAndConditionsURL: Boolean = false,
+    teamConfirmed: Boolean = false,
+    termsOfUseAgreements: List[TermsOfUseAgreement] = List.empty
+  )
 
 object CheckInformation {
   import play.api.libs.json.Json

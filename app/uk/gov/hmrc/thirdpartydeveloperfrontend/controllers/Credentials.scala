@@ -53,8 +53,9 @@ class Credentials @Inject() (
     serverTokenView: ServerTokenView,
     deleteClientSecretView: DeleteClientSecretView,
     clientSecretsGeneratedView: ClientSecretsGeneratedView
-)(implicit val ec: ExecutionContext, val appConfig: ApplicationConfig)
-    extends ApplicationController(mcc) {
+  )(implicit val ec: ExecutionContext,
+    val appConfig: ApplicationConfig
+  ) extends ApplicationController(mcc) {
 
   private def canViewClientCredentialsPage(applicationId: ApplicationId)(fun: ApplicationRequest[AnyContent] => Future[Result]): Action[AnyContent] =
     checkActionForApprovedApps(ViewCredentials, TeamMembersOnly)(applicationId)(fun)

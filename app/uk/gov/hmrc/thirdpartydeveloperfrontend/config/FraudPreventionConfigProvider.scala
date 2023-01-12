@@ -26,15 +26,15 @@ import com.google.inject.Provider
 case class FraudPreventionConfig(enabled: Boolean, apisWithFraudPrevention: List[String], uri: String)
 
 @Singleton
-class FraudPreventionConfigProvider @Inject()(config: Configuration) extends Provider[FraudPreventionConfig] {
+class FraudPreventionConfigProvider @Inject() (config: Configuration) extends Provider[FraudPreventionConfig] {
 
-    override def get(): FraudPreventionConfig = {
+  override def get(): FraudPreventionConfig = {
 
-      val enabled:Boolean = config.underlying.getBoolean("fraudPreventionLink.enabled")
-      val apisWithFraudPrevention: List[String] = config.underlying.getStringList("fraudPreventionLink.apisWithFraudPrevention").asScala.toList
-      val uri: String = config.underlying.getString("fraudPreventionLink.uri")
+    val enabled: Boolean                      = config.underlying.getBoolean("fraudPreventionLink.enabled")
+    val apisWithFraudPrevention: List[String] = config.underlying.getStringList("fraudPreventionLink.apisWithFraudPrevention").asScala.toList
+    val uri: String                           = config.underlying.getString("fraudPreventionLink.uri")
 
-      val result = FraudPreventionConfig(enabled, apisWithFraudPrevention, uri)
-      result
-    }
+    val result = FraudPreventionConfig(enabled, apisWithFraudPrevention, uri)
+    result
+  }
 }

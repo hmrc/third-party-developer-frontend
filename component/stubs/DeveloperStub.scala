@@ -28,7 +28,6 @@ import utils.ComponentTestDeveloperBuilder
 
 object DeveloperStub extends ComponentTestDeveloperBuilder {
 
-
   def register(registration: Registration, status: Int)(implicit encryptedJson: EncryptedJson) =
     stubFor(
       post(urlMatching(s"/developer"))
@@ -81,7 +80,7 @@ object DeveloperStub extends ComponentTestDeveloperBuilder {
     )
   }
 
-  def stubResetPasswordJourney(email: String,code: String) {
+  def stubResetPasswordJourney(email: String, code: String) {
     fetchEmailForResetCode(email, code)
     resetPassword()
   }
@@ -95,7 +94,6 @@ object DeveloperStub extends ComponentTestDeveloperBuilder {
         )
     )
   }
-
 
   def setupGettingDeveloperByUserId(developer: Developer): Unit = {
     stubFor(get(urlPathEqualTo("/developer"))
@@ -112,7 +110,7 @@ object DeveloperStub extends ComponentTestDeveloperBuilder {
         .withBody("[]")))
   }
 
-  def fetchEmailForResetCode(email: String,code: String) = {
+  def fetchEmailForResetCode(email: String, code: String) = {
     stubFor(
       get(urlPathEqualTo("/reset-password"))
         .willReturn(

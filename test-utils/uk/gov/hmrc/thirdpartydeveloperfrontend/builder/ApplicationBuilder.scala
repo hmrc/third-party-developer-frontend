@@ -30,8 +30,8 @@ trait ApplicationBuilder extends CollaboratorTracker {
 
   def buildApplication(appOwnerEmail: String): Application = {
 
-    val appId = ApplicationId("appid-" + randomUUID.toString)
-    val clientId = ClientId("clientid-" + randomUUID.toString)
+    val appId        = ApplicationId("appid-" + randomUUID.toString)
+    val clientId     = ClientId("clientid-" + randomUUID.toString)
     val appOwnerName = "App owner name"
 
     Application(
@@ -63,8 +63,7 @@ trait ApplicationBuilder extends CollaboratorTracker {
     ApplicationWithSubscriptionData(application)
   }
 
-
-  def buildSubscriptions(apiContext: ApiContext, apiVersion: ApiVersion): Set[ApiIdentifier] = 
+  def buildSubscriptions(apiContext: ApiContext, apiVersion: ApiVersion): Set[ApiIdentifier] =
     Set(
       ApiIdentifier(apiContext, apiVersion)
     )
@@ -73,9 +72,11 @@ trait ApplicationBuilder extends CollaboratorTracker {
     Map(apiContext -> Map(apiVersion -> fields))
   }
 
-  def buildApplicationWithSubscriptionData(apiContext: ApiContext = ApiContext.random,
-                                          apiVersion: ApiVersion = ApiVersion.random,
-                                          fields: Fields.Alias = Map(FieldName.random -> FieldValue.random, FieldName.random -> FieldValue.random)): ApplicationWithSubscriptionData = {
+  def buildApplicationWithSubscriptionData(
+      apiContext: ApiContext = ApiContext.random,
+      apiVersion: ApiVersion = ApiVersion.random,
+      fields: Fields.Alias = Map(FieldName.random -> FieldValue.random, FieldName.random -> FieldValue.random)
+    ): ApplicationWithSubscriptionData = {
     ApplicationWithSubscriptionData(
       buildApplication("email@example.com"),
       buildSubscriptions(apiContext, apiVersion),

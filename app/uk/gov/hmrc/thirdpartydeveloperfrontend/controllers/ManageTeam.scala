@@ -56,8 +56,9 @@ class ManageTeam @Inject() (
     teamMemberAddView: TeamMemberAddView,
     removeTeamMemberView: RemoveTeamMemberView,
     val fraudPreventionConfig: FraudPreventionConfig
-)(implicit val ec: ExecutionContext, val appConfig: ApplicationConfig)
-    extends ApplicationController(mcc) with FraudPreventionNavLinkHelper with WithUnsafeDefaultFormBinding {
+  )(implicit val ec: ExecutionContext,
+    val appConfig: ApplicationConfig
+  ) extends ApplicationController(mcc) with FraudPreventionNavLinkHelper with WithUnsafeDefaultFormBinding {
 
   private def whenAppSupportsTeamMembers(applicationId: ApplicationId)(fun: ApplicationRequest[AnyContent] => Future[Result]): Action[AnyContent] =
     checkActionForApprovedApps(SupportsTeamMembers, TeamMembersOnly)(applicationId)(fun)
@@ -67,7 +68,6 @@ class ManageTeam @Inject() (
       checkActionForApprovedOrTestingApps(SupportsTeamMembers, AdministratorOnly)(applicationId)(fun)
     else
       checkActionForApprovedApps(SupportsTeamMembers, AdministratorOnly)(applicationId)(fun)
-
 
   def manageTeam(applicationId: ApplicationId, error: Option[String] = None) = whenAppSupportsTeamMembers(applicationId) { implicit request =>
     val view = manageTeamView(applicationViewModelFromApplicationRequest, request.role, AddTeamMemberForm.form, createFraudNavModel(fraudPreventionConfig))
@@ -86,10 +86,10 @@ class ManageTeam @Inject() (
         case CheckYourAnswers  => checkpages.routes.CheckYourAnswers.team(applicationId)
       }
 
-      def handleAddTeamMemberView(a: ApplicationViewModel, f: Form[AddTeamMemberForm], ds:DeveloperSession)={
-        addTeamMemberView.apply(a,f,ds, createFraudNavModel(fraudPreventionConfig))
+      def handleAddTeamMemberView(a: ApplicationViewModel, f: Form[AddTeamMemberForm], ds: DeveloperSession) = {
+        addTeamMemberView.apply(a, f, ds, createFraudNavModel(fraudPreventionConfig))
       }
-      
+
       def createBadRequestResult(formWithErrors: Form[AddTeamMemberForm]): Result = {
         val viewFunction: (ApplicationViewModel, Form[AddTeamMemberForm], DeveloperSession) => Html = addTeamMemberPageMode match {
           case ManageTeamMembers => handleAddTeamMemberView
@@ -129,7 +129,7 @@ class ManageTeam @Inject() (
     application.findCollaboratorByHash(teamMemberHash) match {
       case Some(collaborator) =>
         successful(Ok(removeTeamMemberView(applicationViewModelFromApplicationRequest, RemoveTeamMemberConfirmationForm.form, collaborator.emailAddress)))
-      case None => successful(Redirect(routes.ManageTeam.manageTeam(applicationId, None)))
+      case None               => successful(Redirect(routes.ManageTeam.manageTeam(applicationId, None)))
     }
   }
 
@@ -140,7 +140,7 @@ class ManageTeam @Inject() (
           applicationService
             .removeTeamMember(request.application, form.email, request.developerSession.email)
             .map(_ => Redirect(routes.ManageTeam.manageTeam(applicationId, None)))
-        case _ => successful(Redirect(routes.ManageTeam.manageTeam(applicationId, None)))
+        case _           => successful(Redirect(routes.ManageTeam.manageTeam(applicationId, None)))
       }
     }
 

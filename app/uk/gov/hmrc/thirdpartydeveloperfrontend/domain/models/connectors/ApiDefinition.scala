@@ -20,19 +20,20 @@ import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.apidefinitions.ApiC
 import play.api.libs.json.Json
 
 /*
- * requiresTrust, isTestSupport and versions fields have been deliberately left out as they are not currently required. Adding them back in here should mean 
+ * requiresTrust, isTestSupport and versions fields have been deliberately left out as they are not currently required. Adding them back in here should mean
  * they are automatically deserialised as part of the call to api-platform-microservice.
  */
 case class ExtendedApiDefinition(serviceName: String, name: String, description: String, context: ApiContext, categories: List[String])
 
 object ExtendedApiDefinition {
-    implicit val formatExtendedApiDefinition = Json.format[ExtendedApiDefinition]
-    def toApiDefinition(apiDefinition: ExtendedApiDefinition): ApiDefinition ={
-        ApiDefinition(apiDefinition.serviceName, apiDefinition.name, apiDefinition.description, apiDefinition.context, apiDefinition.categories)
-    }
+  implicit val formatExtendedApiDefinition = Json.format[ExtendedApiDefinition]
+
+  def toApiDefinition(apiDefinition: ExtendedApiDefinition): ApiDefinition = {
+    ApiDefinition(apiDefinition.serviceName, apiDefinition.name, apiDefinition.description, apiDefinition.context, apiDefinition.categories)
+  }
 }
 case class ApiDefinition(serviceName: String, name: String, description: String, context: ApiContext, categories: List[String])
 
 object ApiDefinition {
-    implicit val formatApiDefinition = Json.format[ApiDefinition]
+  implicit val formatApiDefinition = Json.format[ApiDefinition]
 }

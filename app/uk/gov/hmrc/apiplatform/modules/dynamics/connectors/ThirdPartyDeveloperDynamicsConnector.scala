@@ -41,8 +41,8 @@ object CreateIncidentRequest {
 class ThirdPartyDeveloperDynamicsConnector @Inject() (
     http: HttpClient,
     configuration: ApplicationConfig
-  )(implicit ec: ExecutionContext)
-    extends CommonResponseHandlers {
+  )(implicit ec: ExecutionContext
+  ) extends CommonResponseHandlers {
 
   def getTickets()(implicit hc: HeaderCarrier): Future[List[Ticket]] = {
     http.GET[List[Ticket]](s"${configuration.thirdPartyDeveloperUrl}/incidents")

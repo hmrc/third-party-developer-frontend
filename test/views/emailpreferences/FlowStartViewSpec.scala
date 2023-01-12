@@ -27,14 +27,15 @@ import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.{LocalUserIdTracker, WithCS
 import views.html.emailpreferences.FlowStartView
 
 class FlowStartViewSpec extends CommonViewSpec
-  with WithCSRFAddToken
-  with LocalUserIdTracker
-  with DeveloperSessionBuilder
-  with DeveloperBuilder {
+    with WithCSRFAddToken
+    with LocalUserIdTracker
+    with DeveloperSessionBuilder
+    with DeveloperBuilder {
 
   trait Setup {
-    val developerSessionWithoutEmailPreferences =
-      buildDeveloperSession( loggedInState = LoggedInState.LOGGED_IN, buildDeveloper("email@example.com", "First Name", "Last Name", None))
+
+    val developerSessionWithoutEmailPreferences               =
+      buildDeveloperSession(loggedInState = LoggedInState.LOGGED_IN, buildDeveloper("email@example.com", "First Name", "Last Name", None))
     implicit val request: FakeRequest[AnyContentAsEmpty.type] = FakeRequest().withCSRFToken
 
     val flowStartView = app.injector.instanceOf[FlowStartView]
@@ -49,14 +50,14 @@ class FlowStartViewSpec extends CommonViewSpec
 
   "Email Preferences Start view page" should {
     "render results table when email preferences have been selected" in new Setup {
-      val page = flowStartView.render(messagesProvider.messages, developerSessionWithoutEmailPreferences, request, appConfig)
+      val page     = flowStartView.render(messagesProvider.messages, developerSessionWithoutEmailPreferences, request, appConfig)
       val document = Jsoup.parse(page.body)
 
       document.getElementById("pageHeading").text() should be("Email preferences")
       document.getElementById("firstSentence").text() should be("Manage your email preferences and choose the types of emails you want to receive from us.")
 
-      document.select("p#info-heading").text() should be ("Having a Developer Hub account means you will receive mandatory emails about:")
-      document.select("p#info-footer").text() should be ("Emails from the Developer Hub and the Software Developer Support Team may include links and attachments.")
+      document.select("p#info-heading").text() should be("Having a Developer Hub account means you will receive mandatory emails about:")
+      document.select("p#info-footer").text() should be("Emails from the Developer Hub and the Software Developer Support Team may include links and attachments.")
 
       val elements = document.select("ul#info > li")
       elements.get(0).text() shouldBe "important notices and service updates"
@@ -65,12 +66,12 @@ class FlowStartViewSpec extends CommonViewSpec
 
       // Check form is configured correctly
       val form = document.getElementById("emailPreferencesStartForm")
-      form.attr("method") should be ("GET")
+      form.attr("method") should be("GET")
 
-     form.attr("action") should be ("/developer/profile/email-preferences/categories")
+      form.attr("action") should be("/developer/profile/email-preferences/categories")
 
       // Check submit button is correct
-      document.getElementById("submit").text should be ("Continue")
+      document.getElementById("submit").text should be("Continue")
     }
 
   }

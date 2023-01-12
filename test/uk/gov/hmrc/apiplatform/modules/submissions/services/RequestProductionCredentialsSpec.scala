@@ -33,33 +33,33 @@ import uk.gov.hmrc.apiplatform.modules.submissions.connectors.ThirdPartyApplicat
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.connectors.DeskproTicket
 import org.mockito.captor.ArgCaptor
 
-class RequestProductionCredentialsSpec extends AsyncHmrcSpec 
-  with CollaboratorTracker 
-  with LocalUserIdTracker
-  with TestApplications  {
+class RequestProductionCredentialsSpec extends AsyncHmrcSpec
+    with CollaboratorTracker
+    with LocalUserIdTracker
+    with TestApplications {
 
   trait Setup {
-    implicit val hc = HeaderCarrier()
-    val applicationId = ApplicationId.random
+    implicit val hc                                                         = HeaderCarrier()
+    val applicationId                                                       = ApplicationId.random
     val mockSubmissionsConnector: ThirdPartyApplicationSubmissionsConnector = mock[ThirdPartyApplicationSubmissionsConnector]
 
-    val email: String = "test@example.com"
-    val name: String = "bob example"
+    val email: String    = "test@example.com"
+    val name: String     = "bob example"
     val developerSession = mock[DeveloperSession]
     when(developerSession.email).thenReturn(email)
     when(developerSession.displayedName).thenReturn(name)
 
     val mockDeskproConnector = mock[DeskproConnector]
-    val underTest = new RequestProductionCredentials(mockSubmissionsConnector, mockDeskproConnector)
+    val underTest            = new RequestProductionCredentials(mockSubmissionsConnector, mockDeskproConnector)
   }
 
   "requestProductionCredentials" should {
     "successfully create a ticket if requester is responsible individual" in new Setup {
-      val app = anApplication(developerEmail = email)
+      val app    = anApplication(developerEmail = email)
       when(mockSubmissionsConnector.requestApproval(eqTo(applicationId), eqTo(name), eqTo(email))(*)).thenReturn(successful(Right(app)))
       when(mockDeskproConnector.createTicket(*)(*)).thenReturn(successful(TicketCreated))
       val result = await(underTest.requestProductionCredentials(applicationId, developerSession, true))
-      
+
       result.right.value shouldBe app
 
       val ticketCapture = ArgCaptor[DeskproTicket]
@@ -68,7 +68,7 @@ class RequestProductionCredentialsSpec extends AsyncHmrcSpec
     }
 
     "not create a ticket if requester is not responsible individual" in new Setup {
-      val app = anApplication(developerEmail = email)
+      val app    = anApplication(developerEmail = email)
       when(mockSubmissionsConnector.requestApproval(eqTo(applicationId), eqTo(name), eqTo(email))(*)).thenReturn(successful(Right(app)))
       val result = await(underTest.requestProductionCredentials(applicationId, developerSession, false))
 
@@ -79,7 +79,7 @@ class RequestProductionCredentialsSpec extends AsyncHmrcSpec
 
     "fails to create a ticket if the application is not found" in new Setup {
       when(mockSubmissionsConnector.requestApproval(eqTo(applicationId), eqTo(name), eqTo(email))(*)).thenThrow(new ApplicationNotFound())
-      
+
       intercept[ApplicationNotFound] {
         await(underTest.requestProductionCredentials(applicationId, developerSession, true))
       }
@@ -88,7 +88,7 @@ class RequestProductionCredentialsSpec extends AsyncHmrcSpec
 
     "fails to create a ticket if application already exists" in new Setup {
       when(mockSubmissionsConnector.requestApproval(eqTo(applicationId), eqTo(name), eqTo(email))(*)).thenThrow(new ApplicationAlreadyExists())
-      
+
       intercept[ApplicationAlreadyExists] {
         await(underTest.requestProductionCredentials(applicationId, developerSession, true))
       }

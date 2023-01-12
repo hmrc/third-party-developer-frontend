@@ -25,22 +25,23 @@ import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.apidefinitions.APIS
 
 trait FraudPreventionNavLinkHelper {
 
-
-  def createFraudNavModel(fraudPreventionConfig: FraudPreventionConfig)(implicit request: ApplicationRequest[_])= {
+  def createFraudNavModel(fraudPreventionConfig: FraudPreventionConfig)(implicit request: ApplicationRequest[_]) = {
     createOptionalFraudPreventionNavLinkViewModel(request.application, request.subscriptions, fraudPreventionConfig)
   }
-    
-    def createOptionalFraudPreventionNavLinkViewModel(application: Application,
-                                                      subscriptions: List[APISubscriptionStatus],
-                                                      fraudPreventionConfig: FraudPreventionConfig): Option[FraudPreventionNavLinkViewModel]= {
-      if(fraudPreventionConfig.enabled) {
-        val apis = fraudPreventionConfig.apisWithFraudPrevention
-        val isProduction = application.deployedTo == Environment.PRODUCTION
-        val shouldBeVisible = subscriptions.exists(x => apis.contains(x.serviceName) && x.subscribed && isProduction)
-        Some(FraudPreventionNavLinkViewModel(shouldBeVisible, fraudPreventionConfig.uri))
-      }else{
-        None
-      }
 
+  def createOptionalFraudPreventionNavLinkViewModel(
+      application: Application,
+      subscriptions: List[APISubscriptionStatus],
+      fraudPreventionConfig: FraudPreventionConfig
+    ): Option[FraudPreventionNavLinkViewModel] = {
+    if (fraudPreventionConfig.enabled) {
+      val apis            = fraudPreventionConfig.apisWithFraudPrevention
+      val isProduction    = application.deployedTo == Environment.PRODUCTION
+      val shouldBeVisible = subscriptions.exists(x => apis.contains(x.serviceName) && x.subscribed && isProduction)
+      Some(FraudPreventionNavLinkViewModel(shouldBeVisible, fraudPreventionConfig.uri))
+    } else {
+      None
     }
+
+  }
 }

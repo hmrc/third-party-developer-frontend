@@ -26,7 +26,7 @@ import org.jsoup.nodes.{Document, Element}
 import play.api.mvc.AnyContentAsEmpty
 import play.api.test.FakeRequest
 import play.twirl.api.HtmlFormat.Appendable
-import uk.gov.hmrc.thirdpartydeveloperfrontend.builder.{DeveloperSessionBuilder, DeveloperBuilder}
+import uk.gov.hmrc.thirdpartydeveloperfrontend.builder.{DeveloperBuilder, DeveloperSessionBuilder}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.Details.{Agreement, TermsOfUseViewModel}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.{TestApplications, WithCSRFAddToken}
 import views.helper.CommonViewSpec
@@ -37,10 +37,10 @@ import java.time.{LocalDateTime, ZoneOffset}
 import java.time.format.DateTimeFormatter
 
 class DetailsViewSpec
-    extends CommonViewSpec 
-    with TestApplications 
-    with CollaboratorTracker 
-    with LocalUserIdTracker 
+    extends CommonViewSpec
+    with TestApplications
+    with CollaboratorTracker
+    with LocalUserIdTracker
     with WithCSRFAddToken
     with DeveloperSessionBuilder
     with DeveloperBuilder {
@@ -48,32 +48,33 @@ class DetailsViewSpec
   val detailsView = app.injector.instanceOf[DetailsView]
 
   case class Page(doc: Appendable) {
-    lazy val body: Document = Jsoup.parse(doc.body)
-    lazy val environmentName: Element = body.getElementById("environmentName")
-    lazy val warning: Element = body.getElementById("terms-of-use-header")
-    lazy val termsOfUse: Element = body.getElementById("termsOfUse")
-    lazy val agreementDetails: Element = body.getElementById("termsOfUseAgreementDetails")
-    lazy val readLink: Element = body.getElementById("termsOfUseReadLink")
-    lazy val changePrivacyPolicyLocationLink: Element = body.getElementById("changePrivacyPolicyLocation")
+    lazy val body: Document                             = Jsoup.parse(doc.body)
+    lazy val environmentName: Element                   = body.getElementById("environmentName")
+    lazy val warning: Element                           = body.getElementById("terms-of-use-header")
+    lazy val termsOfUse: Element                        = body.getElementById("termsOfUse")
+    lazy val agreementDetails: Element                  = body.getElementById("termsOfUseAgreementDetails")
+    lazy val readLink: Element                          = body.getElementById("termsOfUseReadLink")
+    lazy val changePrivacyPolicyLocationLink: Element   = body.getElementById("changePrivacyPolicyLocation")
     lazy val changeTermsConditionsLocationLink: Element = body.getElementById("changeTermsAndConditionsLocation")
-    lazy val changingAppDetailsAdminList: Element = body.getElementById("changingAppDetailsAdminList")
+    lazy val changingAppDetailsAdminList: Element       = body.getElementById("changingAppDetailsAdminList")
   }
 
   val termsOfUseViewModel = TermsOfUseViewModel(true, true, Some(Agreement("user@example.com", LocalDateTime.now)))
-  val adminEmail = "admin@example.com"
+  val adminEmail          = "admin@example.com"
 
-  implicit val loggedIn: DeveloperSession = buildDeveloperSession( loggedInState = LoggedInState.LOGGED_IN, buildDeveloper("developer@example.com", "Joe", "Bloggs"))
+  implicit val loggedIn: DeveloperSession = buildDeveloperSession(loggedInState = LoggedInState.LOGGED_IN, buildDeveloper("developer@example.com", "Joe", "Bloggs"))
+
   trait LoggedInUserIsAdmin {
-    implicit val loggedIn: DeveloperSession = buildDeveloperSession( loggedInState = LoggedInState.LOGGED_IN, buildDeveloper(adminEmail, "Joe", "Bloggs"))
+    implicit val loggedIn: DeveloperSession = buildDeveloperSession(loggedInState = LoggedInState.LOGGED_IN, buildDeveloper(adminEmail, "Joe", "Bloggs"))
   }
 
   "Application details view" when {
     implicit val request: FakeRequest[AnyContentAsEmpty.type] = FakeRequest()
-    implicit val navSection: String = "details"
+    implicit val navSection: String                           = "details"
 
     "rendering Environment " when {
       "managing a principal application" should {
-        val deployedTo = Environment.PRODUCTION
+        val deployedTo  = Environment.PRODUCTION
         val application = anApplication(environment = deployedTo)
 
         "Show Production when environment is Production" in {
@@ -91,7 +92,7 @@ class DetailsViewSpec
       }
 
       "managing a subordinate application" should {
-        val deployedTo = Environment.SANDBOX
+        val deployedTo  = Environment.SANDBOX
         val application = anApplication(environment = deployedTo)
 
         "Show Sandbox when environment is Sandbox" in {
@@ -111,7 +112,7 @@ class DetailsViewSpec
 
     "showing Change links for Privacy Policy and Terms & Conditions locations" when {
       "managing a sandbox application" should {
-        val deployedTo = Environment.SANDBOX
+        val deployedTo                       = Environment.SANDBOX
         val termsOfUseViewModelForSandboxApp = termsOfUseViewModel.copy(exists = false)
 
         "show nothing when a developer" in {
@@ -157,7 +158,7 @@ class DetailsViewSpec
 
     "showing Terms of Use details" when {
       "managing a sandbox application" should {
-        val deployedTo = Environment.SANDBOX
+        val deployedTo                       = Environment.SANDBOX
         val termsOfUseViewModelForSandboxApp = termsOfUseViewModel.copy(exists = false)
 
         "show nothing when a developer" in {
@@ -181,7 +182,7 @@ class DetailsViewSpec
         val deployedTo = Environment.PRODUCTION
 
         "the app is a privileged app" should {
-          val access = Privileged()
+          val access                        = Privileged()
           val termsOfUseViewModelForPrivApp = termsOfUseViewModel.copy(exists = false)
 
           "show nothing when a developer" in {
@@ -203,12 +204,12 @@ class DetailsViewSpec
         }
 
         "the app is an ROPC app" should {
-          val access = ROPC()
+          val access                        = ROPC()
           val termsOfUseViewModelForRopcApp = termsOfUseViewModel.copy(exists = false)
 
           "show nothing when a developer" in {
             val application = anApplication(environment = deployedTo, access = access)
-            val page = Page(detailsView(ApplicationViewModel(application, hasSubscriptionsFields = false, hasPpnsFields = false), termsOfUseViewModelForRopcApp))
+            val page        = Page(detailsView(ApplicationViewModel(application, hasSubscriptionsFields = false, hasPpnsFields = false), termsOfUseViewModelForRopcApp))
 
             page.termsOfUse shouldBe null
           }
@@ -227,7 +228,7 @@ class DetailsViewSpec
 
           "the user is a developer" should {
             "show 'not agreed' and have no link to read and agree when the terms of use have not been agreed" in {
-              val checkInformation = CheckInformation(termsOfUseAgreements = List.empty)
+              val checkInformation             = CheckInformation(termsOfUseAgreements = List.empty)
               val termsOfUseViewModelNotAgreed = termsOfUseViewModel.copy(agreement = None)
 
               val application = anApplication(environment = deployedTo, access = access)
@@ -240,11 +241,11 @@ class DetailsViewSpec
             }
 
             "show agreement details and have no link to read when the terms of use have been agreed" in {
-              val emailAddress = "user@example.com"
-              val timeStamp = LocalDateTime.now(ZoneOffset.UTC)
+              val emailAddress      = "user@example.com"
+              val timeStamp         = LocalDateTime.now(ZoneOffset.UTC)
               val expectedTimeStamp = DateTimeFormatter.ofPattern("dd MMMM yyyy").format(timeStamp)
-              val version = "1.0"
-              val checkInformation = CheckInformation(termsOfUseAgreements = List(TermsOfUseAgreement(emailAddress, timeStamp, version)))
+              val version           = "1.0"
+              val checkInformation  = CheckInformation(termsOfUseAgreements = List(TermsOfUseAgreement(emailAddress, timeStamp, version)))
 
               val application = anApplication(environment = deployedTo, access = access)
                 .withCheckInformation(checkInformation)
@@ -259,7 +260,7 @@ class DetailsViewSpec
           "the user is an administrator" should {
 
             "show 'not agreed', have a button to read and agree and show a warning when the terms of use have not been agreed" in new LoggedInUserIsAdmin {
-              val checkInformation = CheckInformation(termsOfUseAgreements = List.empty)
+              val checkInformation             = CheckInformation(termsOfUseAgreements = List.empty)
               val termsOfUseViewModelNotAgreed = termsOfUseViewModel.copy(agreement = None)
 
               val application = anApplication(environment = deployedTo, access = access)
@@ -274,11 +275,11 @@ class DetailsViewSpec
             }
 
             "show agreement details, have a link to read and not show a warning when the terms of use have been agreed" in new LoggedInUserIsAdmin {
-              val emailAddress = "user@example.com"
-              val timeStamp = LocalDateTime.now(ZoneOffset.UTC)
+              val emailAddress      = "user@example.com"
+              val timeStamp         = LocalDateTime.now(ZoneOffset.UTC)
               val expectedTimeStamp = DateTimeFormatter.ofPattern("dd MMMM yyyy").format(timeStamp)
-              val version = "1.0"
-              val checkInformation = CheckInformation(termsOfUseAgreements = List(applications.TermsOfUseAgreement(emailAddress, timeStamp, version)))
+              val version           = "1.0"
+              val checkInformation  = CheckInformation(termsOfUseAgreements = List(applications.TermsOfUseAgreement(emailAddress, timeStamp, version)))
 
               val application = anApplication(environment = deployedTo, access = access)
                 .withCheckInformation(checkInformation)

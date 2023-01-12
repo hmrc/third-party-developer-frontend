@@ -30,20 +30,20 @@ import uk.gov.hmrc.thirdpartydeveloperfrontend.security.CookieEncoding
 
 trait LoggedInRequestTestHelper extends SessionServiceMock with CookieEncoding with DeveloperBuilder with LocalUserIdTracker {
   this: BaseControllerSpec =>
-    val sessionService = mock[SessionService]
+  val sessionService = mock[SessionService]
 
-    val developer = buildDeveloper()
-    val sessionId = "sessionId"
-    val session = Session(sessionId, developer, LoggedInState.LOGGED_IN)
+  val developer = buildDeveloper()
+  val sessionId = "sessionId"
+  val session   = Session(sessionId, developer, LoggedInState.LOGGED_IN)
 
-    fetchSessionByIdReturns(sessionId, session)
-    updateUserFlowSessionsReturnsSuccessfully(sessionId)
-   
-    private val sessionParams = Seq(
-      "csrfToken" -> app.injector.instanceOf[TokenProvider].generateToken
-    )
+  fetchSessionByIdReturns(sessionId, session)
+  updateUserFlowSessionsReturnsSuccessfully(sessionId)
 
-    lazy val loggedInRequest: FakeRequest[AnyContentAsEmpty.type] = FakeRequest()
-      .withLoggedIn(this, implicitly)(sessionId)
-      .withSession(sessionParams: _*)
+  private val sessionParams = Seq(
+    "csrfToken" -> app.injector.instanceOf[TokenProvider].generateToken
+  )
+
+  lazy val loggedInRequest: FakeRequest[AnyContentAsEmpty.type] = FakeRequest()
+    .withLoggedIn(this, implicitly)(sessionId)
+    .withSession(sessionParams: _*)
 }

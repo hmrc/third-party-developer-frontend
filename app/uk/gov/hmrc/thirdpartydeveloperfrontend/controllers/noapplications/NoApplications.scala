@@ -30,41 +30,44 @@ import views.html.noapplications._
 import javax.inject.{Inject, Singleton}
 import scala.concurrent.{ExecutionContext, Future}
 
-object NoApplications{
+object NoApplications {
   final case class NoApplicationsChoiceForm(choice: Option[String])
 
   object NoApplicationsChoiceForm {
+
     def form: Form[NoApplicationsChoiceForm] = Form(mapping("choice" -> optional(text)
-      .verifying(FormKeys.noApplicationsChoiceRequiredKey, s => s.isDefined))(NoApplicationsChoiceForm.apply)(NoApplicationsChoiceForm.unapply)
-    )
+      .verifying(FormKeys.noApplicationsChoiceRequiredKey, s => s.isDefined))(NoApplicationsChoiceForm.apply)(NoApplicationsChoiceForm.unapply))
 
   }
 }
 
 @Singleton
-class NoApplications @Inject()(
-                                val errorHandler: ErrorHandler,
-                                val sessionService: SessionService,
-                                val cookieSigner: CookieSigner,
-                                startUsingRestApisView: StartUsingRestApisView,
-                                noApplicationsChoiceView: NoApplicationsChoiceView,
-                                mcc: MessagesControllerComponents
-                              )(implicit val ec: ExecutionContext, val appConfig: ApplicationConfig, val environmentNameService: EnvironmentNameService)
-  extends LoggedInController(mcc) {
+class NoApplications @Inject() (
+    val errorHandler: ErrorHandler,
+    val sessionService: SessionService,
+    val cookieSigner: CookieSigner,
+    startUsingRestApisView: StartUsingRestApisView,
+    noApplicationsChoiceView: NoApplicationsChoiceView,
+    mcc: MessagesControllerComponents
+  )(implicit val ec: ExecutionContext,
+    val appConfig: ApplicationConfig,
+    val environmentNameService: EnvironmentNameService
+  ) extends LoggedInController(mcc) {
 
   def noApplicationsPage: Action[AnyContent] = loggedInAction { implicit request =>
     Future.successful(Ok(noApplicationsChoiceView(NoApplicationsChoiceForm.form)))
   }
 
   def noApplicationsAction: Action[AnyContent] = loggedInAction { implicit request =>
-
     NoApplicationsChoiceForm.form.bindFromRequest().fold(
       hasErrors => Future.successful(BadRequest(noApplicationsChoiceView(hasErrors))),
-      formData => formData.choice.getOrElse("") match {
-        case "get-emails" => Future.successful(Redirect(uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.profile.routes.EmailPreferencesController.emailPreferencesSummaryPage))
-        case "use-apis" => Future.successful(Redirect(routes.NoApplications.startUsingRestApisPage))
-        case _ => Future.successful(InternalServerError(errorHandler.internalServerErrorTemplate))
-      })
+      formData =>
+        formData.choice.getOrElse("") match {
+          case "get-emails" => Future.successful(Redirect(uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.profile.routes.EmailPreferencesController.emailPreferencesSummaryPage))
+          case "use-apis"   => Future.successful(Redirect(routes.NoApplications.startUsingRestApisPage))
+          case _            => Future.successful(InternalServerError(errorHandler.internalServerErrorTemplate))
+        }
+    )
   }
 
   def startUsingRestApisPage: Action[AnyContent] = loggedInAction { implicit request =>

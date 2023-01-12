@@ -18,20 +18,19 @@ package uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.views
 
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.CheckInformation
 
-case class CheckInformationForm(apiSubscriptionsComplete: Boolean = false,
-                                apiSubscriptionConfigurationsComplete: Boolean = false,
-                                contactDetailsComplete: Boolean = false,
-                                teamConfirmedComplete: Boolean = false,
-                                confirmedNameComplete: Boolean = false,
-                                providedPrivacyPolicyURLComplete: Boolean = false,
-                                providedTermsAndConditionsURLComplete: Boolean = false,
-                                termsOfUseAgreementComplete: Boolean = false)
-
-
-
-
+case class CheckInformationForm(
+    apiSubscriptionsComplete: Boolean = false,
+    apiSubscriptionConfigurationsComplete: Boolean = false,
+    contactDetailsComplete: Boolean = false,
+    teamConfirmedComplete: Boolean = false,
+    confirmedNameComplete: Boolean = false,
+    providedPrivacyPolicyURLComplete: Boolean = false,
+    providedTermsAndConditionsURLComplete: Boolean = false,
+    termsOfUseAgreementComplete: Boolean = false
+  )
 
 object CheckInformationForm {
+
   def fromCheckInformation(checkInformation: CheckInformation) = {
     CheckInformationForm(
       confirmedNameComplete = checkInformation.confirmedName,

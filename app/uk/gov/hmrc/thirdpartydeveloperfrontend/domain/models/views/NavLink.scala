@@ -25,6 +25,7 @@ object NavLink {
 }
 
 case object StaticNavLinks {
+
   def apply(apiDocumentationFrontendUrl: String, thirdPartyDeveloperFrontendUrl: String) = {
     Seq(
       NavLink("Documentation", s"$apiDocumentationFrontendUrl/api-documentation/docs/using-the-hub"),
@@ -39,14 +40,14 @@ case object UserNavLinks {
 
   def apply(userFullName: Option[String], isRegistering: Boolean = false) =
     (userFullName, isRegistering) match {
-      case (_, true) => Seq.empty
+      case (_, true)       => Seq.empty
       case (Some(name), _) => loggedInNavLinks(name)
-      case (_, _) => loggedOutNavLinks
+      case (_, _)          => loggedOutNavLinks
     }
 
   private def loggedInNavLinks(userFullName: String) = List(
-    NavLink(userFullName,"/developer/profile", isSensitive = true),
-    NavLink("Sign out","/developer/logout/survey")
+    NavLink(userFullName, "/developer/profile", isSensitive = true),
+    NavLink("Sign out", "/developer/logout/survey")
   )
 
   private val loggedOutNavLinks = List(

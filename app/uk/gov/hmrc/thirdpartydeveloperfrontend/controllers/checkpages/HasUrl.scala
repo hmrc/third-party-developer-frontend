@@ -17,11 +17,12 @@
 package uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.checkpages
 
 object HasUrl {
+
   def hasUrl(url: Option[String], hasCheckedUrl: Option[Boolean]) = {
     (url, hasCheckedUrl) match {
-      case (Some(_), _) => Some("true")
+      case (Some(_), _)       => Some("true")
       case (None, Some(true)) => Some("false")
-      case _ => None
+      case _                  => None
     }
   }
 }

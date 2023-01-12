@@ -28,14 +28,16 @@ import scala.concurrent.ExecutionContext
 import scala.concurrent.Future.successful
 
 @Singleton
-class SessionController @Inject()(val auditService: AuditService,
-                        val sessionService: SessionService,
-                        val connector: ThirdPartyDeveloperConnector,
-                        val errorHandler: ErrorHandler,
-                        mcc: MessagesControllerComponents,
-                        val cookieSigner : CookieSigner)
-                         (implicit val ec: ExecutionContext, val appConfig: ApplicationConfig)
-  extends LoggedInController(mcc) with PasswordChange {
+class SessionController @Inject() (
+    val auditService: AuditService,
+    val sessionService: SessionService,
+    val connector: ThirdPartyDeveloperConnector,
+    val errorHandler: ErrorHandler,
+    mcc: MessagesControllerComponents,
+    val cookieSigner: CookieSigner
+  )(implicit val ec: ExecutionContext,
+    val appConfig: ApplicationConfig
+  ) extends LoggedInController(mcc) with PasswordChange {
 
   def keepAlive(): Action[AnyContent] = loggedInAction { _ =>
     successful(NoContent)

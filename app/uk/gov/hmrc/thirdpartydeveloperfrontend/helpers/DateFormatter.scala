@@ -21,9 +21,9 @@ import java.time.temporal.ChronoUnit
 import java.time.{Clock, LocalDateTime}
 
 object DateFormatter {
-  val shortFormatter: DateTimeFormatter = DateTimeFormatter.ofPattern("d MMM yyyy")
+  val shortFormatter: DateTimeFormatter    = DateTimeFormatter.ofPattern("d MMM yyyy")
   val standardFormatter: DateTimeFormatter = DateTimeFormatter.ofPattern("d MMMM yyyy")
-  val initialLastAccessDate = LocalDateTime.of(2019, 6, 25, 0, 0) // scalastyle:ignore magic.number
+  val initialLastAccessDate                = LocalDateTime.of(2019, 6, 25, 0, 0) // scalastyle:ignore magic.number
 
   def formatDateWithShortPattern(dateTime: LocalDateTime): String = {
     shortFormatter.format(dateTime)
@@ -35,7 +35,7 @@ object DateFormatter {
 
   def formatLastAccessDate(maybeLastAccess: Option[LocalDateTime], createdOnDate: LocalDateTime, clock: Clock): Option[String] = {
     def formatDateValue(lastAccessDate: LocalDateTime) = {
-     if (ChronoUnit.DAYS.between(initialLastAccessDate.toLocalDate, lastAccessDate.toLocalDate) > 0) {
+      if (ChronoUnit.DAYS.between(initialLastAccessDate.toLocalDate, lastAccessDate.toLocalDate) > 0) {
         standardFormatter.format(lastAccessDate)
       } else {
         s"more than ${ChronoUnit.MONTHS.between(lastAccessDate.toLocalDate, LocalDateTime.now(clock).toLocalDate)} months ago"

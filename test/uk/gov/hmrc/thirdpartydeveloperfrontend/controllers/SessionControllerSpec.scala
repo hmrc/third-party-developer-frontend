@@ -35,6 +35,7 @@ import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.LocalUserIdTracker
 class SessionControllerSpec extends BaseControllerSpec with DeveloperBuilder with LocalUserIdTracker {
 
   trait Setup extends SessionServiceMock {
+
     val sessionController = new SessionController(
       mock[AuditService],
       sessionServiceMock,
@@ -48,16 +49,16 @@ class SessionControllerSpec extends BaseControllerSpec with DeveloperBuilder wit
   "keepAlive" should {
     "reset the session if logged in" in new Setup {
 
-      val developer = buildDeveloper()
-      val sessionId = UUID.randomUUID().toString
-      val session = Session(sessionId, developer, LoggedInState.LOGGED_IN)
+      val developer                            = buildDeveloper()
+      val sessionId                            = UUID.randomUUID().toString
+      val session                              = Session(sessionId, developer, LoggedInState.LOGGED_IN)
       val sessionParams: Seq[(String, String)] = Seq("csrfToken" -> app.injector.instanceOf[TokenProvider].generateToken)
 
       fetchSessionByIdReturns(sessionId, session)
       updateUserFlowSessionsReturnsSuccessfully(sessionId)
 
       val loggedInRequest = FakeRequest()
-        .withLoggedIn(sessionController,implicitly)(session.sessionId)
+        .withLoggedIn(sessionController, implicitly)(session.sessionId)
         .withSession(sessionParams: _*)
 
       val result = sessionController.keepAlive()(loggedInRequest)

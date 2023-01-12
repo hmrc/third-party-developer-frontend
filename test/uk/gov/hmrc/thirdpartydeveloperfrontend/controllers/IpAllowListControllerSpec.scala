@@ -47,7 +47,7 @@ class IpAllowListControllerSpec
     with LocalUserIdTracker {
 
   trait Setup extends ApplicationServiceMock with SessionServiceMock {
-    implicit val hc: HeaderCarrier = HeaderCarrier()
+    implicit val hc: HeaderCarrier                 = HeaderCarrier()
     val mockIpAllowlistService: IpAllowlistService = mock[IpAllowlistService]
 
     val underTest = new IpAllowListController(
@@ -71,14 +71,14 @@ class IpAllowListControllerSpec
       app.injector.instanceOf[RemoveCidrBlockView]
     )
 
-    val sessionId = "sessionId"
+    val sessionId       = "sessionId"
     val loggedInRequest = FakeRequest().withLoggedIn(underTest, implicitly)(sessionId)
 
-    val admin: Developer = buildDeveloper(emailAddress = "admin@example.com")
+    val admin: Developer     = buildDeveloper(emailAddress = "admin@example.com")
     val developer: Developer = buildDeveloper(emailAddress = "developer@example.com")
 
     val anApplicationWithoutIpAllowlist: Application = anApplication(adminEmail = admin.email, developerEmail = developer.email)
-    val anApplicationWithIpAllowlist: Application = anApplicationWithoutIpAllowlist.copy(ipAllowlist = IpAllowlist(allowlist = Set("1.1.1.0/24")))
+    val anApplicationWithIpAllowlist: Application    = anApplicationWithoutIpAllowlist.copy(ipAllowlist = IpAllowlist(allowlist = Set("1.1.1.0/24")))
 
     def givenTheUserIsLoggedInAs(user: Developer): DeveloperSession = {
       val session = Session(sessionId, user, LoggedInState.LOGGED_IN)
@@ -231,7 +231,7 @@ class IpAllowListControllerSpec
       status(result) shouldBe OK
       val body: String = contentAsString(result)
       body should include("Edit your IP allow list")
-      body should not include("Remove your IP allow list")
+      body should not include ("Remove your IP allow list")
       verifyIpAllowlistSurveyIsPresent(body)
     }
 

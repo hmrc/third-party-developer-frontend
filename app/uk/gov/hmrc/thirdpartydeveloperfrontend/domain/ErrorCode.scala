@@ -23,9 +23,9 @@ sealed trait ErrorCode extends EnumEntry
 object ErrorCode extends PlayEnum[ErrorCode] {
   val values = findValues
 
-  final case object LOCKED_ACCOUNT        extends ErrorCode
-  final case object BAD_REQUEST           extends ErrorCode
-  final case object INVALID_PASSWORD      extends ErrorCode
-  final case object PASSWORD_REQUIRED     extends ErrorCode
-  final case object USER_ALREADY_EXISTS   extends ErrorCode
+  final case object LOCKED_ACCOUNT      extends ErrorCode
+  final case object BAD_REQUEST         extends ErrorCode
+  final case object INVALID_PASSWORD    extends ErrorCode
+  final case object PASSWORD_REQUIRED   extends ErrorCode
+  final case object USER_ALREADY_EXISTS extends ErrorCode
 }

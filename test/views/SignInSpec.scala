@@ -28,10 +28,10 @@ import views.helper.CommonViewSpec
 import views.html.SignInView
 
 class SignInSpec extends CommonViewSpec
-  with WithCSRFAddToken
-  with LocalUserIdTracker
-  with DeveloperSessionBuilder
-  with DeveloperBuilder{
+    with WithCSRFAddToken
+    with LocalUserIdTracker
+    with DeveloperSessionBuilder
+    with DeveloperBuilder {
 
   val signInView = app.injector.instanceOf[SignInView]
 
@@ -44,16 +44,16 @@ class SignInSpec extends CommonViewSpec
     }
 
     "show an error when email address is invalid" in {
-      val error = "Email error"
+      val error       = "Email error"
       val invalidForm = LoginForm.form.withError("emailaddress", error)
-      val document = Jsoup.parse(renderPage(form = invalidForm).body)
+      val document    = Jsoup.parse(renderPage(form = invalidForm).body)
       elementExistsById(document, "data-field-error-emailaddress") shouldBe true
     }
 
     "show an error when password is invalid" in {
-      val error = "Password error"
+      val error       = "Password error"
       val invalidForm = LoginForm.form.withError("password", error)
-      val document = Jsoup.parse(renderPage(form = invalidForm).body)
+      val document    = Jsoup.parse(renderPage(form = invalidForm).body)
       elementExistsById(document, "data-field-error-password") shouldBe true
     }
   }

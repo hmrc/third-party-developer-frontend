@@ -28,12 +28,12 @@ import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.apidefinitions.APIA
 
 object APIDefinition {
   private val nonNumericOrPeriodRegex = "[^\\d^.]*"
-  private val fallback = Array(1, 0, 0)
+  private val fallback                = Array(1, 0, 0)
 
   private def versionSorter(v1: ApiVersionDefinition, v2: ApiVersionDefinition) = {
     val v1Parts = Try(v1.version.value.replaceAll(nonNumericOrPeriodRegex, "").split("\\.").map(_.toInt)).getOrElse(fallback)
     val v2Parts = Try(v2.version.value.replaceAll(nonNumericOrPeriodRegex, "").split("\\.").map(_.toInt)).getOrElse(fallback)
-    val pairs = v1Parts.zip(v2Parts)
+    val pairs   = v1Parts.zip(v2Parts)
 
     val firstUnequalPair = pairs.find { case (one, two) => one != two }
     firstUnequalPair.fold(v1.version.value.length > v2.version.value.length) { case (a, b) => a > b }
@@ -43,7 +43,6 @@ object APIDefinition {
     versionSorter(v1.version, v2.version)
   }
 }
-
 
 case class ApiVersionDefinition(version: ApiVersion, status: APIStatus, access: Option[APIAccess] = None) {
   val displayedStatus = status.displayedStatus
@@ -97,11 +96,12 @@ case class APISubscriptionStatus(
     requiresTrust: Boolean,
     fields: SubscriptionFieldsWrapper,
     isTestSupport: Boolean = false
-) extends HasApiIdentifier {
+  ) extends HasApiIdentifier {
+
   def isPrivate: Boolean = {
     apiVersion.accessType match {
       case PRIVATE => true
-      case PUBLIC => false
+      case PUBLIC  => false
     }
   }
 
@@ -110,9 +110,16 @@ case class APISubscriptionStatus(
 
 case class APISubscriptionStatusWithSubscriptionFields(name: String, context: ApiContext, apiVersion: ApiVersionDefinition, fields: SubscriptionFieldsWrapper)
 
-case class APISubscriptionStatusWithWritableSubscriptionField(name: String, context: ApiContext, apiVersion: ApiVersionDefinition, subscriptionFieldValue: SubscriptionFieldValue, oldValues: SubscriptionFieldsWrapper)
+case class APISubscriptionStatusWithWritableSubscriptionField(
+    name: String,
+    context: ApiContext,
+    apiVersion: ApiVersionDefinition,
+    subscriptionFieldValue: SubscriptionFieldValue,
+    oldValues: SubscriptionFieldsWrapper
+  )
 
 object APISubscriptionStatusWithSubscriptionFields {
+
   def apply(fields: List[APISubscriptionStatus]): List[APISubscriptionStatusWithSubscriptionFields] = {
 
     def toAPISubscriptionStatusWithSubscriptionFields(apiSubscriptionStatus: APISubscriptionStatus): Option[APISubscriptionStatusWithSubscriptionFields] = {
@@ -126,4 +133,3 @@ object APISubscriptionStatusWithSubscriptionFields {
     fields.flatMap(toAPISubscriptionStatusWithSubscriptionFields)
   }
 }
-

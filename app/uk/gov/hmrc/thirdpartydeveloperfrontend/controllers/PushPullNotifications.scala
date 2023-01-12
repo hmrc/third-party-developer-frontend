@@ -32,22 +32,23 @@ import scala.concurrent.ExecutionContext
 
 @Singleton
 class PushPullNotifications @Inject() (
-                                        override val sessionService: SessionService,
-                                        override val applicationService: ApplicationService,
-                                        override val errorHandler: ErrorHandler,
-                                        override val cookieSigner: CookieSigner,
-                                        override val applicationActionService: ApplicationActionService,
-                                        mcc: MessagesControllerComponents,
-                                        pushSecretsView: PushSecretsView,
-                                        pushPullNotificationsService: PushPullNotificationsService
-                                      )(implicit override val ec: ExecutionContext, override val appConfig: ApplicationConfig)
-  extends ApplicationController(mcc) with PpnsActions {
+    override val sessionService: SessionService,
+    override val applicationService: ApplicationService,
+    override val errorHandler: ErrorHandler,
+    override val cookieSigner: CookieSigner,
+    override val applicationActionService: ApplicationActionService,
+    mcc: MessagesControllerComponents,
+    pushSecretsView: PushSecretsView,
+    pushPullNotificationsService: PushPullNotificationsService
+  )(implicit override val ec: ExecutionContext,
+    override val appConfig: ApplicationConfig
+  ) extends ApplicationController(mcc) with PpnsActions {
 
-    def showPushSecrets(applicationId: ApplicationId): Action[AnyContent] = subscribedToApiWithPpnsFieldAction(applicationId, ViewPushSecret, SandboxOrAdmin) {
+  def showPushSecrets(applicationId: ApplicationId): Action[AnyContent] = subscribedToApiWithPpnsFieldAction(applicationId, ViewPushSecret, SandboxOrAdmin) {
     implicit request: ApplicationRequest[AnyContent] =>
       pushPullNotificationsService.fetchPushSecrets(request.application) map { pushSecrets =>
         NonEmptyList.fromList(pushSecrets.toList)
           .fold(NotFound(errorHandler.notFoundTemplate))(nonEmptySecrets => Ok(pushSecretsView(request.application, nonEmptySecrets)))
-    }
+      }
   }
 }

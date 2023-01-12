@@ -29,22 +29,23 @@ class TicketsViewSpec extends CommonViewSpec with DeveloperSessionBuilder with D
 
   trait Setup {
     val ticketsView = app.injector.instanceOf[TicketsView]
+
     val tickets = List(
       Ticket("CAS-1", "Title1", Some("Desc1"), 0, "id1"),
       Ticket("CAS-2", "Title2", None, 1, "id2")
     )
 
-    implicit val request = FakeRequest()
+    implicit val request                    = FakeRequest()
     implicit val loggedIn: DeveloperSession = buildDeveloperSession(LoggedInState.LOGGED_IN, buildDeveloper())
-    implicit val messages = stubMessages()
+    implicit val messages                   = stubMessages()
   }
-  
+
   "TicketsView" should {
     "render correctly" in new Setup {
       val mainView = ticketsView.apply(tickets)
-      
+
       val document = Jsoup.parse(mainView.body)
-      
+
       document.getElementById("page-heading").text shouldBe "MS Dynamics Tickets"
       document.getElementsByTag("caption").text shouldBe "Latest 10 tickets"
       document.getElementsByTag("tr").size() shouldBe 3

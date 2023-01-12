@@ -65,8 +65,9 @@ class CheckYourAnswers @Inject() (
     val contactDetailsView: ContactDetailsView,
     val termsOfUseVersionService: TermsOfUseVersionService,
     val clock: Clock
-)(implicit val ec: ExecutionContext, val appConfig: ApplicationConfig)
-    extends ApplicationController(mcc)
+  )(implicit val ec: ExecutionContext,
+    val appConfig: ApplicationConfig
+  ) extends ApplicationController(mcc)
     with ApplicationHelper
     with CanUseCheckActions
     with ConfirmNamePartialController
@@ -98,7 +99,7 @@ class CheckYourAnswers @Inject() (
       .recover {
         case e: DeskproTicketCreationFailed =>
           val checkYourAnswersData = CheckYourAnswersData(accessLevel, request.application, request.subscriptions)
-          val requestForm = CheckYourAnswersForm.form.fillAndValidate(DummyCheckYourAnswersForm("dummy"))
+          val requestForm          = CheckYourAnswersForm.form.fillAndValidate(DummyCheckYourAnswersForm("dummy"))
           InternalServerError(checkYourAnswersView(checkYourAnswersData, requestForm.withError("submitError", e.displayMessage)))
       }
       .recover {
@@ -174,7 +175,7 @@ case class CheckYourSubscriptionData(
     apiVersion: ApiVersion,
     displayedStatus: String,
     fields: Seq[Field]
-)
+  )
 
 case class CheckYourAnswersData(
     appId: ApplicationId,
@@ -187,9 +188,10 @@ case class CheckYourAnswersData(
     termsAndConditionsLocation: TermsAndConditionsLocation,
     acceptedTermsOfUse: Boolean,
     subscriptions: Seq[CheckYourSubscriptionData]
-)
+  )
 
 object CheckYourAnswersData {
+
   def apply(accessLevel: DevhubAccessLevel, application: Application, subs: Seq[APISubscriptionStatus]): CheckYourAnswersData = {
     val contactDetails: Option[ContactDetails] = application.checkInformation.flatMap(_.contactDetails)
 

@@ -32,35 +32,35 @@ import scala.concurrent.ExecutionContext
 import scala.concurrent.ExecutionContext.Implicits.global
 
 class SubscriptionFieldsConnectorProxySpec extends AsyncHmrcSpec with BeforeAndAfterEach with GuiceOneAppPerSuite {
-  private val baseUrl = "https://example.com"
+  private val baseUrl         = "https://example.com"
   private val environmentName = "ENVIRONMENT"
 
-  implicit val hc = HeaderCarrier()
-  val clientId: ClientId = ClientId(UUID.randomUUID().toString)
-  val apiContext: ApiContext = ApiContext("i-am-a-test")
-  val apiVersion: ApiVersion = ApiVersion("1.0")
+  implicit val hc                  = HeaderCarrier()
+  val clientId: ClientId           = ClientId(UUID.randomUUID().toString)
+  val apiContext: ApiContext       = ApiContext("i-am-a-test")
+  val apiVersion: ApiVersion       = ApiVersion("1.0")
   private val futureTimeoutSupport = new FutureTimeoutSupportImpl
 
   class Setup(proxyEnabled: Boolean = false) {
-    val testApiKey: String = UUID.randomUUID().toString
-    val mockHttpClient: HttpClient = mock[HttpClient]
+    val testApiKey: String                       = UUID.randomUUID().toString
+    val mockHttpClient: HttpClient               = mock[HttpClient]
     val mockProxiedHttpClient: ProxiedHttpClient = mock[ProxiedHttpClient]
-    val mockEnvironment: Environment = mock[Environment]
-    val mockAppConfig: ApplicationConfig = mock[ApplicationConfig]
+    val mockEnvironment: Environment             = mock[Environment]
+    val mockAppConfig: ApplicationConfig         = mock[ApplicationConfig]
 
     when(mockEnvironment.toString).thenReturn(environmentName)
     when(mockProxiedHttpClient.withHeaders(*)).thenReturn(mockProxiedHttpClient)
 
     val connector: AbstractSubscriptionFieldsConnector = new AbstractSubscriptionFieldsConnector {
-      val httpClient = mockHttpClient
-      val proxiedHttpClient = mockProxiedHttpClient
-      val serviceBaseUrl = baseUrl
-      val useProxy = proxyEnabled
-      val environment = mockEnvironment
-      val apiKey = testApiKey
-      val actorSystem = app.actorSystem
-      val futureTimeout = futureTimeoutSupport
-      val appConfig = mockAppConfig
+      val httpClient                    = mockHttpClient
+      val proxiedHttpClient             = mockProxiedHttpClient
+      val serviceBaseUrl                = baseUrl
+      val useProxy                      = proxyEnabled
+      val environment                   = mockEnvironment
+      val apiKey                        = testApiKey
+      val actorSystem                   = app.actorSystem
+      val futureTimeout                 = futureTimeoutSupport
+      val appConfig                     = mockAppConfig
       implicit val ec: ExecutionContext = global
     }
   }

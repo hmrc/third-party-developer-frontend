@@ -37,7 +37,8 @@ class ConnectorsWrapper @Inject() (
     @Named("PPNS-SANDBOX") val sandboxPushPullNotificationsConnector: PushPullNotificationsConnector,
     @Named("PPNS-PRODUCTION") val productionPushPullNotificationsConnector: PushPullNotificationsConnector,
     applicationConfig: ApplicationConfig
-)(implicit val ec: ExecutionContext) {
+  )(implicit val ec: ExecutionContext
+  ) {
 
   def forEnvironment(environment: Environment): Connectors = {
     environment match {
@@ -48,19 +49,21 @@ class ConnectorsWrapper @Inject() (
 
   def fetchApplicationById(id: ApplicationId)(implicit hc: HeaderCarrier): Future[Option[Application]] = {
     val productionApplicationFuture = productionApplicationConnector.fetchApplicationById(id)
-    val sandboxApplicationFuture = sandboxApplicationConnector.fetchApplicationById(id) recover {
+    val sandboxApplicationFuture    = sandboxApplicationConnector.fetchApplicationById(id) recover {
       case _ => None
     }
 
     for {
       productionApplication <- productionApplicationFuture
-      sandboxApplication <- sandboxApplicationFuture
+      sandboxApplication    <- sandboxApplicationFuture
     } yield {
       productionApplication.orElse(sandboxApplication)
     }
   }
 }
 
-case class Connectors(thirdPartyApplicationConnector: ThirdPartyApplicationConnector,
-                      apiSubscriptionFieldsConnector: SubscriptionFieldsConnector,
-                      pushPullNotificationsConnector: PushPullNotificationsConnector)
+case class Connectors(
+    thirdPartyApplicationConnector: ThirdPartyApplicationConnector,
+    apiSubscriptionFieldsConnector: SubscriptionFieldsConnector,
+    pushPullNotificationsConnector: PushPullNotificationsConnector
+  )

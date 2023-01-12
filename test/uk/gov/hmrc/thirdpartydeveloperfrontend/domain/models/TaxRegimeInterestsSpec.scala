@@ -24,8 +24,8 @@ class TaxRegimeInterestsSpec extends AnyWordSpec with Matchers {
   val regime = "A Regime"
 
   "tax regime interests add works" in {
-    val tri = TaxRegimeInterests(regime, Set("a","b","c"))
+    val tri = TaxRegimeInterests(regime, Set("a", "b", "c"))
 
-    tri.addService("d").services should contain allOf("a","b","c","d")
+    tri.addService("d").services should contain allOf ("a", "b", "c", "d")
   }
 }

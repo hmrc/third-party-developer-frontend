@@ -24,7 +24,7 @@ object SaveSubsFieldsPageMode extends PlayEnum[SaveSubsFieldsPageMode] {
   val values = findValues
 
   final case object LeftHandNavigation extends SaveSubsFieldsPageMode
-  final case object CheckYourAnswers extends SaveSubsFieldsPageMode
+  final case object CheckYourAnswers   extends SaveSubsFieldsPageMode
 
   def from(mode: String) = values.find(e => e.toString.toLowerCase == mode)
 

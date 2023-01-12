@@ -48,6 +48,7 @@ class ApplicationServiceTeamMembersSpec extends AsyncHmrcSpec with Subscriptions
 
     val mockProductionApplicationConnector: ThirdPartyApplicationProductionConnector =
       mock[ThirdPartyApplicationProductionConnector]
+
     val mockSandboxApplicationConnector: ThirdPartyApplicationSandboxConnector =
       mock[ThirdPartyApplicationSandboxConnector]
 
@@ -66,7 +67,7 @@ class ApplicationServiceTeamMembersSpec extends AsyncHmrcSpec with Subscriptions
     )
 
     val mockSubscriptionFieldsService: SubscriptionFieldsService = mock[SubscriptionFieldsService]
-    val mockDeskproConnector: DeskproConnector = mock[DeskproConnector]
+    val mockDeskproConnector: DeskproConnector                   = mock[DeskproConnector]
 
     val applicationService = new ApplicationService(
       mock[ApmConnector],
@@ -98,13 +99,36 @@ class ApplicationServiceTeamMembersSpec extends AsyncHmrcSpec with Subscriptions
     VersionSubscription(ApiVersionDefinition(version, status), subscribed)
 
   val productionApplicationId = ApplicationId("Application ID")
-  val productionClientId = ClientId(s"client-id-${randomUUID().toString}")
+  val productionClientId      = ClientId(s"client-id-${randomUUID().toString}")
+
   val productionApplication: Application =
-    Application(productionApplicationId, productionClientId, "name", LocalDateTime.now(ZoneOffset.UTC), Some(LocalDateTime.now(ZoneOffset.UTC)), None, grantLength = Period.ofDays(547), Environment.PRODUCTION, Some("description"), Set())
-  val sandboxApplicationId = ApplicationId("Application ID")
-  val sandboxClientId = ClientId("Client ID")
+    Application(
+      productionApplicationId,
+      productionClientId,
+      "name",
+      LocalDateTime.now(ZoneOffset.UTC),
+      Some(LocalDateTime.now(ZoneOffset.UTC)),
+      None,
+      grantLength = Period.ofDays(547),
+      Environment.PRODUCTION,
+      Some("description"),
+      Set()
+    )
+  val sandboxApplicationId               = ApplicationId("Application ID")
+  val sandboxClientId                    = ClientId("Client ID")
+
   val sandboxApplication: Application =
-    Application(sandboxApplicationId, sandboxClientId, "name", LocalDateTime.now(ZoneOffset.UTC), Some(LocalDateTime.now(ZoneOffset.UTC)), None, grantLength = Period.ofDays(547), Environment.SANDBOX, Some("description"))
+    Application(
+      sandboxApplicationId,
+      sandboxClientId,
+      "name",
+      LocalDateTime.now(ZoneOffset.UTC),
+      Some(LocalDateTime.now(ZoneOffset.UTC)),
+      None,
+      grantLength = Period.ofDays(547),
+      Environment.SANDBOX,
+      Some("description")
+    )
 
   def subStatusWithoutFieldValues(
       appId: ApplicationId,
@@ -115,7 +139,7 @@ class ApplicationServiceTeamMembersSpec extends AsyncHmrcSpec with Subscriptions
       status: APIStatus = STABLE,
       subscribed: Boolean = false,
       requiresTrust: Boolean = false
-  ): APISubscriptionStatus =
+    ): APISubscriptionStatus =
     APISubscriptionStatus(
       name = name,
       serviceName = name,
@@ -136,7 +160,7 @@ class ApplicationServiceTeamMembersSpec extends AsyncHmrcSpec with Subscriptions
       subscribed: Boolean = false,
       requiresTrust: Boolean = false,
       subscriptionFieldWithValues: List[SubscriptionFieldValue] = List.empty
-  ): APISubscriptionStatus = {
+    ): APISubscriptionStatus = {
     APISubscriptionStatus(
       name = name,
       serviceName = name,
@@ -149,8 +173,8 @@ class ApplicationServiceTeamMembersSpec extends AsyncHmrcSpec with Subscriptions
   }
 
   "remove teamMember" should {
-    val email = "john.bloggs@example.com"
-    val admin = "admin@example.com"
+    val email         = "john.bloggs@example.com"
+    val admin         = "admin@example.com"
     val adminsToEmail = Set.empty[String]
 
     "remove teamMember successfully from production" in new Setup {
@@ -203,10 +227,10 @@ class ApplicationServiceTeamMembersSpec extends AsyncHmrcSpec with Subscriptions
 
     "include correct set of admins to email" in new Setup {
 
-      private val verifiedAdmin = "verified@example.com".asAdministratorCollaborator
-      private val unverifiedAdmin = "unverified@example.com".asAdministratorCollaborator
-      private val removerAdmin = "admin.email@example.com".asAdministratorCollaborator
-      private val verifiedDeveloper = "developer@example.com".asDeveloperCollaborator
+      private val verifiedAdmin      = "verified@example.com".asAdministratorCollaborator
+      private val unverifiedAdmin    = "unverified@example.com".asAdministratorCollaborator
+      private val removerAdmin       = "admin.email@example.com".asAdministratorCollaborator
+      private val verifiedDeveloper  = "developer@example.com".asDeveloperCollaborator
       private val teamMemberToRemove = "to.remove@example.com".asAdministratorCollaborator
 
       val nonRemoverAdmins = Seq(
@@ -234,7 +258,7 @@ class ApplicationServiceTeamMembersSpec extends AsyncHmrcSpec with Subscriptions
   }
 
   "request delete developer" should {
-    val developerName = "Testy McTester"
+    val developerName  = "Testy McTester"
     val developerEmail = "testy@example.com"
 
     "correctly create a deskpro ticket and audit record" in new Setup {

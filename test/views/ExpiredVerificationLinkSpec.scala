@@ -27,7 +27,7 @@ class ExpiredVerificationLinkSpec extends CommonViewSpec with WithCSRFAddToken {
   "Expired verification link page" should {
 
     val expiredVerificationLinkView = app.injector.instanceOf[ExpiredVerificationLinkView]
-    val request = FakeRequest().withCSRFToken
+    val request                     = FakeRequest().withCSRFToken
 
     "render" in {
       val page = expiredVerificationLinkView.render(request, messagesProvider, appConfig)

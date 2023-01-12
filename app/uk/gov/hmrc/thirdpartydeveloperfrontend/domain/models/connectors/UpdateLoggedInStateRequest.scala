@@ -24,4 +24,3 @@ case class UpdateLoggedInStateRequest(loggedInState: LoggedInState)
 object UpdateLoggedInStateRequest {
   implicit val format = Json.format[UpdateLoggedInStateRequest]
 }
-

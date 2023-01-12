@@ -25,9 +25,9 @@ import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.{LocalUserIdTracker, WithCS
 import views.helper.CommonViewSpec
 
 class AuthAppStartViewSpec extends CommonViewSpec with WithCSRFAddToken with DeveloperSessionBuilder with DeveloperBuilder with LocalUserIdTracker with StubMessagesFactory {
-  implicit val request = FakeRequest()
-  val authAppStartView = app.injector.instanceOf[AuthAppStartView]
-  implicit val loggedIn: DeveloperSession = buildDeveloperSession( loggedInState = LoggedInState.LOGGED_IN, buildDeveloper("developer@example.com", "Joe", "Bloggs"))
+  implicit val request                    = FakeRequest()
+  val authAppStartView                    = app.injector.instanceOf[AuthAppStartView]
+  implicit val loggedIn: DeveloperSession = buildDeveloperSession(loggedInState = LoggedInState.LOGGED_IN, buildDeveloper("developer@example.com", "Joe", "Bloggs"))
 
   "AuthAppStartView view" should {
     "render correctly when form is valid" in {

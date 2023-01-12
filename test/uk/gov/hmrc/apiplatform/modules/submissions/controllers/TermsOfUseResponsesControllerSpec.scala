@@ -35,7 +35,7 @@ import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.{LocalUserIdTracker, WithCS
 import scala.concurrent.ExecutionContext.Implicits.global
 
 class TermsOfUseResponsesControllerSpec
-  extends BaseControllerSpec
+    extends BaseControllerSpec
     with SampleSession
     with SampleApplication
     with SubscriptionTestHelperSugar
@@ -57,7 +57,7 @@ class TermsOfUseResponsesControllerSpec
   }
 
   trait Setup
-    extends ApplicationServiceMock
+      extends ApplicationServiceMock
       with ApplicationActionServiceMock
       with ApmConnectorMockModule
       with SubmissionServiceMockModule

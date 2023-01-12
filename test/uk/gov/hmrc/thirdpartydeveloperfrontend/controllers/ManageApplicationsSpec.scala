@@ -96,7 +96,6 @@ class ManageApplicationsSpec
       contentAsString(result) should not include "Sign in"
     }
 
-
     "redirect to the no Applications page when the user logged in and no applications returned for user" in new Setup {
       aUsersUplfitableAndNotUpliftableAppsReturns(List.empty, List.empty, List.empty)
       fetchProductionSummariesByTeamMemberReturns(List.empty)
@@ -106,7 +105,6 @@ class ManageApplicationsSpec
       status(result) shouldBe SEE_OTHER
       headers(result).get("LOCATION").getOrElse("") shouldBe "/developer/no-applications"
     }
-
 
     "return to the login page when the user is not logged in" in new Setup {
       val request = FakeRequest()

@@ -31,11 +31,11 @@ import views.html.CredentialsView
 import scala.collection.JavaConverters._
 
 class CredentialsSpec extends CommonViewSpec
-  with WithCSRFAddToken
-  with CollaboratorTracker
-  with LocalUserIdTracker
-  with DeveloperSessionBuilder
-  with DeveloperBuilder {
+    with WithCSRFAddToken
+    with CollaboratorTracker
+    with LocalUserIdTracker
+    with DeveloperSessionBuilder
+    with DeveloperBuilder {
 
   trait Setup {
     val credentialsView = app.injector.instanceOf[CredentialsView]
@@ -46,7 +46,7 @@ class CredentialsSpec extends CommonViewSpec
   }
 
   "Credentials page" should {
-    val request = FakeRequest().withCSRFToken
+    val request   = FakeRequest().withCSRFToken
     val developer = buildDeveloperSession(loggedInState = LoggedInState.LOGGED_IN, buildDeveloper("Test", "Test", "Test", None))
 
     val application = Application(
@@ -78,7 +78,7 @@ class CredentialsSpec extends CommonViewSpec
 
     "display the credentials page for non admins if the app is in sandbox" in new Setup {
       val developerApp: Application = sandboxApplication.copy(collaborators = Set(developer.email.asDeveloperCollaborator))
-      val page: Html = credentialsView.render(developerApp, request, developer, messagesProvider, appConfig)
+      val page: Html                = credentialsView.render(developerApp, request, developer, messagesProvider, appConfig)
 
       page.contentType should include("text/html")
       val document: Document = Jsoup.parse(page.body)
@@ -88,7 +88,7 @@ class CredentialsSpec extends CommonViewSpec
 
     "tell the user they don't have access to credentials when the logged in user is not an admin and the app is not in sandbox" in new Setup {
       val developerApp: Application = application.copy(collaborators = Set(developer.email.asDeveloperCollaborator))
-      val page: Html = credentialsView.render(developerApp, request, developer, messagesProvider, appConfig)
+      val page: Html                = credentialsView.render(developerApp, request, developer, messagesProvider, appConfig)
 
       page.contentType should include("text/html")
       val document: Document = Jsoup.parse(page.body)

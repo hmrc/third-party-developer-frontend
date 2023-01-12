@@ -33,13 +33,14 @@ import views.html.emailpreferences.SelectTopicsFromSubscriptionsView
 import scala.collection.JavaConverters._
 
 class SelectTopicsFromSubscriptionsViewSpec extends CommonViewSpec
-  with WithCSRFAddToken
-  with LocalUserIdTracker
-  with DeveloperSessionBuilder
-  with DeveloperBuilder {
+    with WithCSRFAddToken
+    with LocalUserIdTracker
+    with DeveloperSessionBuilder
+    with DeveloperBuilder {
 
   trait Setup {
-    val developerSessionWithoutEmailPreferences =
+
+    val developerSessionWithoutEmailPreferences               =
       buildDeveloperSession(loggedInState = LoggedInState.LOGGED_IN, buildDeveloper("email@example.com", "First Name", "Last Name", None))
     implicit val request: FakeRequest[AnyContentAsEmpty.type] = FakeRequest().withCSRFToken
 
@@ -82,7 +83,7 @@ class SelectTopicsFromSubscriptionsViewSpec extends CommonViewSpec
   "Email Preferences Select Topics view page" should {
 
     "render the topics selection Page with no check boxes selected when no user selected topics passed into the view" in new Setup {
-      val page =
+      val page     =
         viewUnderTest.render(
           SelectTopicsFromSubscriptionsForm.form,
           Set.empty,
@@ -90,28 +91,30 @@ class SelectTopicsFromSubscriptionsViewSpec extends CommonViewSpec
           messagesProvider.messages,
           developerSessionWithoutEmailPreferences,
           request,
-          appConfig)
+          appConfig
+        )
       val document = Jsoup.parse(page.body)
       validateStaticElements(document, applicationId)
       document.select("input[type=checkbox][checked]").asScala.toList shouldBe List.empty
     }
 
-     "render the topics selection Page with boxes selected when user selected topics passed to the view" in new Setup {
-       val usersTopics = Set(BUSINESS_AND_POLICY.value, EVENT_INVITES.value)
-       val page =
-         viewUnderTest.render(
-           SelectTopicsFromSubscriptionsForm.form,
-           usersTopics,
-           applicationId,
-           messagesProvider.messages,
-           developerSessionWithoutEmailPreferences,
-           request,
-           appConfig)
-       val document = Jsoup.parse(page.body)
-       validateStaticElements(document, applicationId)
+    "render the topics selection Page with boxes selected when user selected topics passed to the view" in new Setup {
+      val usersTopics = Set(BUSINESS_AND_POLICY.value, EVENT_INVITES.value)
+      val page        =
+        viewUnderTest.render(
+          SelectTopicsFromSubscriptionsForm.form,
+          usersTopics,
+          applicationId,
+          messagesProvider.messages,
+          developerSessionWithoutEmailPreferences,
+          request,
+          appConfig
+        )
+      val document    = Jsoup.parse(page.body)
+      validateStaticElements(document, applicationId)
 
-       val selectedBoxes = document.select("input[type=checkbox][checked]").asScala.toList
-       selectedBoxes.map(_.attr("value")) should contain allElementsOf usersTopics
-     }
+      val selectedBoxes = document.select("input[type=checkbox][checked]").asScala.toList
+      selectedBoxes.map(_.attr("value")) should contain allElementsOf usersTopics
+    }
   }
 }

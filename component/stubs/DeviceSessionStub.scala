@@ -17,7 +17,7 @@
 package stubs
 
 import com.github.tomakehurst.wiremock.client.WireMock._
-import play.api.http.Status.{OK, NOT_FOUND}
+import play.api.http.Status.{NOT_FOUND, OK}
 import play.api.libs.json.Json
 import uk.gov.hmrc.apiplatform.modules.mfa.models.DeviceSession
 
@@ -34,16 +34,18 @@ object DeviceSessionStub {
           aResponse()
             .withStatus(OK)
             .withBody(Json.toJson(DeviceSession(deviceSessionId = staticDeviceSessionId, userId)).toString())
-        ))
+        )
+    )
   }
 
-    def getDeviceSessionNotFound(userId: UserId): Any = {
+  def getDeviceSessionNotFound(userId: UserId): Any = {
     stubFor(
       get(urlMatching(s"/device-session/$staticDeviceSessionId/user/${userId.value}"))
         .willReturn(
           aResponse()
             .withStatus(NOT_FOUND)
-        ))
+        )
+    )
   }
 
   def createDeviceSession(userId: UserId, status: Int) =
@@ -53,6 +55,5 @@ object DeviceSessionStub {
           .withBody(Json.toJson(DeviceSession(deviceSessionId = staticDeviceSessionId, userId)).toString())
           .withStatus(status))
     )
-
 
 }

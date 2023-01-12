@@ -32,7 +32,9 @@ import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.LocalUserIdTracker
 import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.profile.routes.Profile
 
 class NavigationSpec extends BaseControllerSpec with DeveloperBuilder with LocalUserIdTracker {
+
   class Setup(loggedInState: Option[LoggedInState]) extends ApplicationServiceMock with SessionServiceMock with ApplicationActionServiceMock {
+
     val underTest = new Navigation(
       sessionServiceMock,
       mock[ErrorHandler],
@@ -42,9 +44,9 @@ class NavigationSpec extends BaseControllerSpec with DeveloperBuilder with Local
       cookieSigner
     )
 
-    val developer = buildDeveloper()
-    val sessionId = "sessionId"
-    val session = Session(sessionId, developer, LoggedInState.LOGGED_IN)
+    val developer         = buildDeveloper()
+    val sessionId         = "sessionId"
+    val session           = Session(sessionId, developer, LoggedInState.LOGGED_IN)
     val loggedInDeveloper = DeveloperSession(session)
 
     var userPassword = "Password1!"
@@ -56,12 +58,11 @@ class NavigationSpec extends BaseControllerSpec with DeveloperBuilder with Local
     private val request =
       if (loggedInState.isDefined) {
         FakeRequest().withLoggedIn(underTest, implicitly)(sessionId)
-      }
-      else {
+      } else {
         FakeRequest()
       }
 
-    val result = underTest.navLinks()(request)
+    val result              = underTest.navLinks()(request)
     val links: Seq[NavLink] = contentAsJson(result).as[Seq[NavLink]]
   }
 

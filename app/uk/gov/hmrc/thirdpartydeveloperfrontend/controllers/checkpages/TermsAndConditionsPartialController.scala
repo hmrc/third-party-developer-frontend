@@ -37,13 +37,13 @@ trait TermsAndConditionsPartialController {
       case std: Standard =>
         val form = TermsAndConditionsForm(hasUrl(std.termsAndConditionsUrl, app.checkInformation.map(_.providedTermsAndConditionsURL)), std.termsAndConditionsUrl)
         Ok(termsAndConditionsView(app, TermsAndConditionsForm.form.fill(form), termsAndConditionsActionRoute(app.id)))
-      case _ => Ok(termsAndConditionsView(app, TermsAndConditionsForm.form, termsAndConditionsActionRoute(app.id)))
+      case _             => Ok(termsAndConditionsView(app, TermsAndConditionsForm.form, termsAndConditionsActionRoute(app.id)))
     })
   }
 
   def termsAndConditionsAction(appId: ApplicationId): Action[AnyContent] = canUseChecksAction(appId) { implicit request =>
     val requestForm = TermsAndConditionsForm.form.bindFromRequest
-    val app = request.application
+    val app         = request.application
 
     def withFormErrors(form: Form[TermsAndConditionsForm]) = {
       Future.successful(BadRequest(termsAndConditionsView(app, form, termsAndConditionsActionRoute(app.id))))

@@ -30,16 +30,16 @@ import views.html.AddApplicationNameView
 import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.AddApplicationNameForm
 
 class AddApplicationNameSpec extends CommonViewSpec
-  with WithCSRFAddToken
-  with LocalUserIdTracker
-  with DeveloperSessionBuilder
-  with DeveloperBuilder {
+    with WithCSRFAddToken
+    with LocalUserIdTracker
+    with DeveloperSessionBuilder
+    with DeveloperBuilder {
 
   val addApplicationNameView = app.injector.instanceOf[AddApplicationNameView]
-  val loggedInDeveloper = buildDeveloperSession(loggedInState = LoggedInState.LOGGED_IN, buildDeveloper("admin@example.com", "firstName1", "lastName1", None))
+  val loggedInDeveloper      = buildDeveloperSession(loggedInState = LoggedInState.LOGGED_IN, buildDeveloper("admin@example.com", "firstName1", "lastName1", None))
   val subordinateEnvironment = Environment.SANDBOX
-  val appId = ApplicationId("1234")
-  val principalEnvironment = Environment.PRODUCTION
+  val appId                  = ApplicationId("1234")
+  val principalEnvironment   = Environment.PRODUCTION
 
   "Add application page in subordinate" should {
 
@@ -49,9 +49,9 @@ class AddApplicationNameSpec extends CommonViewSpec
     }
 
     "show an error when application name is invalid" in {
-      val error = "An error"
+      val error               = "An error"
       val formWithInvalidName = AddApplicationNameForm.form.withError("applicationName", error)
-      val document = Jsoup.parse(renderPage(formWithInvalidName).body)
+      val document            = Jsoup.parse(renderPage(formWithInvalidName).body)
       elementExistsById(document, "data-field-error-applicationName") shouldBe true
     }
   }
@@ -63,9 +63,9 @@ class AddApplicationNameSpec extends CommonViewSpec
     }
 
     "show an error when application name is invalid" in {
-      val error = "An error"
+      val error               = "An error"
       val formWithInvalidName = AddApplicationNameForm.form.withError("applicationName", error)
-      val document = Jsoup.parse(renderPage(formWithInvalidName).body)
+      val document            = Jsoup.parse(renderPage(formWithInvalidName).body)
       elementExistsById(document, "data-field-error-applicationName") shouldBe true
     }
   }

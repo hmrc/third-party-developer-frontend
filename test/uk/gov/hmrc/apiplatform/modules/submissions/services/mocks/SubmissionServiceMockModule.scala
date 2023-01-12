@@ -24,29 +24,32 @@ import uk.gov.hmrc.apiplatform.modules.submissions.domain.models._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.ApplicationId
 
 trait SubmissionServiceMockModule extends MockitoSugar with ArgumentMatchersSugar {
-  
+
   protected trait BaseSubmissionServiceMock {
     def aMock: SubmissionService
 
     object FetchLatestSubmission {
+
       def thenReturns(out: Submission) =
         when(aMock.fetchLatestSubmission(*[ApplicationId])(*)).thenReturn(successful(Some(out)))
-        
+
       def thenReturnsNone() = {
         when(aMock.fetchLatestSubmission(*[ApplicationId])(*)).thenReturn(successful(None))
       }
     }
 
     object FetchLatestExtendedSubmission {
+
       def thenReturns(out: ExtendedSubmission) =
         when(aMock.fetchLatestExtendedSubmission(*[ApplicationId])(*)).thenReturn(successful(Some(out)))
-        
+
       def thenReturnsNone() = {
         when(aMock.fetchLatestExtendedSubmission(*[ApplicationId])(*)).thenReturn(successful(None))
       }
     }
 
     object Fetch {
+
       def thenReturns(out: ExtendedSubmission) = {
         when(aMock.fetch(*[Submission.Id])(*)).thenReturn(successful(Some(out)))
       }
@@ -57,6 +60,7 @@ trait SubmissionServiceMockModule extends MockitoSugar with ArgumentMatchersSuga
     }
 
     object RecordAnswer {
+
       def thenReturns(out: ExtendedSubmission) = {
         when(aMock.recordAnswer(*[Submission.Id], *[Question.Id], *)(*)).thenReturn(successful(Right(out)))
       }
@@ -67,9 +71,11 @@ trait SubmissionServiceMockModule extends MockitoSugar with ArgumentMatchersSuga
     }
 
     object ConfirmSetupComplete {
+
       def thenReturnSuccessFor(applicationId: ApplicationId, userEmailAddress: String) = {
         when(aMock.confirmSetupComplete(eqTo(applicationId), eqTo(userEmailAddress))(*)).thenReturn(successful(Right(())))
       }
+
       def thenReturnFailure() = {
         when(aMock.confirmSetupComplete(*[ApplicationId], *[String])(*)).thenReturn(successful(Left("nope")))
       }

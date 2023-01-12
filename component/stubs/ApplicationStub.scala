@@ -26,6 +26,7 @@ import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.{Appli
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.UserId
 
 object ApplicationStub {
+
   def setupApplicationNameValidation() = {
     val validNameResult = ApplicationNameValidationResult(None)
 
@@ -128,4 +129,3 @@ object ApplicationStub {
     }
   }
 }
-

@@ -26,6 +26,7 @@ import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.apidefinitions.APIS
 import uk.gov.hmrc.apiplatform.modules.uplift.services.UpliftJourneyService
 
 trait UpliftJourneyServiceMockModule extends MockitoSugar with ArgumentMatchersSugar {
+
   protected trait BaseUpliftJourneyServiceMock {
     def aMock: UpliftJourneyService
 
@@ -36,12 +37,13 @@ trait UpliftJourneyServiceMockModule extends MockitoSugar with ArgumentMatchersS
     def verifyZeroInteractions() = MockitoSugar.verifyZeroInteractions(aMock)
 
     object ApiSubscriptionData {
-    
+
       def thenReturns(in: Set[String], bool: Boolean) =
-        when(aMock.apiSubscriptionData(*[ApplicationId], *, *)(*)).thenReturn(successful((in,bool)))
+        when(aMock.apiSubscriptionData(*[ApplicationId], *, *)(*)).thenReturn(successful((in, bool)))
     }
 
     object StoreDefaultSubscriptionsInFlow {
+
       def thenReturns() =
         when(aMock.storeDefaultSubscriptionsInFlow(*[ApplicationId], *)(*)).thenReturn(successful(mock[ApiSubscriptions]))
     }
@@ -56,7 +58,7 @@ trait UpliftJourneyServiceMockModule extends MockitoSugar with ArgumentMatchersS
       def thenReturns(out: List[APISubscriptionStatus]) = when(aMock.changeApiSubscriptions(*[ApplicationId], *, *)(*)).thenReturn(successful(out))
     }
   }
-  
+
   object UpliftJourneyServiceMock extends BaseUpliftJourneyServiceMock {
     val aMock = mock[UpliftJourneyService](withSettings.lenient())
   }

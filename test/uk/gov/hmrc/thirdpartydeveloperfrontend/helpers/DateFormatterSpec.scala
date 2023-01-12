@@ -25,7 +25,8 @@ import java.time.temporal.ChronoUnit
 
 class DateFormatterSpec extends AsyncHmrcSpec with BeforeAndAfterAll {
   val fixedTimeNow: LocalDateTime = LocalDateTime.parse("2019-09-01T00:30:00.000")
-  val fixedClock= Clock.fixed(fixedTimeNow.toInstant(ZoneOffset.UTC), ZoneOffset.UTC)
+  val fixedClock                  = Clock.fixed(fixedTimeNow.toInstant(ZoneOffset.UTC), ZoneOffset.UTC)
+
   override def beforeAll(): Unit = {
     super.beforeAll()
   }
@@ -51,19 +52,19 @@ class DateFormatterSpec extends AsyncHmrcSpec with BeforeAndAfterAll {
   "formatLastAccessDate" should {
     "use long date format for dates after the initial last access date" in {
       val lastAccessDate = initialLastAccessDate.plusDays(1)
-      val createdOnDate = lastAccessDate.minusHours(1)
+      val createdOnDate  = lastAccessDate.minusHours(1)
       DateFormatter.formatLastAccessDate(Some(lastAccessDate), createdOnDate, fixedClock) shouldBe Some("26 June 2019")
     }
 
     "use inexact format for dates before the initial last access date" in {
       val lastAccessDate = initialLastAccessDate.minusDays(1)
-      val createdOnDate = lastAccessDate.minusHours(1)
+      val createdOnDate  = lastAccessDate.minusHours(1)
       DateFormatter.formatLastAccessDate(Some(lastAccessDate), createdOnDate, fixedClock) shouldBe Some("more than 2 months ago")
     }
 
     "use inexact format for dates on the initial last access date" in {
       val lastAccessDate = initialLastAccessDate.plusHours(3)
-      val createdOnDate = lastAccessDate.minusHours(1)
+      val createdOnDate  = lastAccessDate.minusHours(1)
       DateFormatter.formatLastAccessDate(Some(lastAccessDate), createdOnDate, fixedClock) shouldBe Some("more than 2 months ago")
     }
 
@@ -79,7 +80,7 @@ class DateFormatterSpec extends AsyncHmrcSpec with BeforeAndAfterAll {
 
     "return None if the last access date is within a second of the created date" in {
       val createdDate = initialLastAccessDate.plusHours(3)
-      DateFormatter.formatLastAccessDate(Some(createdDate.plus(900, ChronoUnit.MILLIS)), createdDate, fixedClock) shouldBe None // scalastyle:ignore magic.number
+      DateFormatter.formatLastAccessDate(Some(createdDate.plus(900, ChronoUnit.MILLIS)), createdDate, fixedClock) shouldBe None  // scalastyle:ignore magic.number
       DateFormatter.formatLastAccessDate(Some(createdDate.minus(900, ChronoUnit.MILLIS)), createdDate, fixedClock) shouldBe None // scalastyle:ignore magic.number
     }
   }

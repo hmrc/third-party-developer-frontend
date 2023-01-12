@@ -38,11 +38,11 @@ import uk.gov.hmrc.thirdpartydeveloperfrontend.builder.SampleSession
 import uk.gov.hmrc.apiplatform.modules.submissions.SubmissionsTestData
 
 class CredentialsRequestedControllerSpec
-  extends BaseControllerSpec
+    extends BaseControllerSpec
     with SampleSession
     with SampleApplication
     with SubscriptionTestHelperSugar
-    with WithCSRFAddToken 
+    with WithCSRFAddToken
     with DeveloperBuilder
     with LocalUserIdTracker {
 
@@ -54,13 +54,13 @@ class CredentialsRequestedControllerSpec
     val sessionParams = Seq("csrfToken" -> app.injector.instanceOf[CSRF.TokenProvider].generateToken)
 
     fetchSessionByIdReturns(sessionId, session)
-    
+
     updateUserFlowSessionsReturnsSuccessfully(sessionId)
   }
 
   trait HasAppInTestingState {
     self: HasSubscriptions with ApplicationActionServiceMock with ApplicationServiceMock =>
-      
+
     givenApplicationAction(
       ApplicationWithSubscriptionData(
         submittedApp,
@@ -74,15 +74,15 @@ class CredentialsRequestedControllerSpec
     fetchByApplicationIdReturns(appId, submittedApp)
   }
 
-  trait Setup 
-    extends ApplicationServiceMock
-    with ApplicationActionServiceMock
-    with ApmConnectorMockModule
-    with SubmissionServiceMockModule
-    with HasSessionDeveloperFlow
-    with HasSubscriptions
-    with HasAppInTestingState
-    with SubmissionsTestData {
+  trait Setup
+      extends ApplicationServiceMock
+      with ApplicationActionServiceMock
+      with ApmConnectorMockModule
+      with SubmissionServiceMockModule
+      with HasSessionDeveloperFlow
+      with HasSubscriptions
+      with HasAppInTestingState
+      with SubmissionsTestData {
 
     val credentialsRequestedView = app.injector.instanceOf[CredentialsRequestedView]
 

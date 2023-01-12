@@ -43,15 +43,15 @@ import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.CollaboratorTracker
 import org.scalatestplus.play.guice.GuiceOneAppPerSuite
 import uk.gov.hmrc.thirdpartydeveloperfrontend.builder._
 
-class PushPullNotificationsSpec 
-    extends BaseControllerSpec 
-    with WithCSRFAddToken 
+class PushPullNotificationsSpec
+    extends BaseControllerSpec
+    with WithCSRFAddToken
     with SampleSession
     with SampleApplication
-    with SubscriptionTestHelperSugar 
+    with SubscriptionTestHelperSugar
     with TestApplications
     with CollaboratorTracker
-    with DeveloperBuilder 
+    with DeveloperBuilder
     with LocalUserIdTracker
     with GuiceOneAppPerSuite {
 
@@ -123,7 +123,7 @@ class PushPullNotificationsSpec
   }
 
   trait Setup extends ApplicationServiceMock with ApplicationActionServiceMock {
-    private val pushSecretsView = app.injector.instanceOf[PushSecretsView]
+    private val pushSecretsView                  = app.injector.instanceOf[PushSecretsView]
     private val pushPullNotificationsServiceMock = mock[PushPullNotificationsService]
 
     val underTest = new PushPullNotifications(
@@ -141,7 +141,7 @@ class PushPullNotificationsSpec
 
     val developer = buildDeveloper()
     val sessionId = "sessionId"
-    val session = Session(sessionId, developer, LoggedInState.LOGGED_IN)
+    val session   = Session(sessionId, developer, LoggedInState.LOGGED_IN)
 
     val loggedInDeveloper = DeveloperSession(session)
 
@@ -149,9 +149,9 @@ class PushPullNotificationsSpec
       .thenReturn(successful(Some(session)))
     when(underTest.sessionService.updateUserFlowSessions(sessionId)).thenReturn(successful(()))
 
-    val sessionParams = Seq("csrfToken" -> app.injector.instanceOf[TokenProvider].generateToken)
+    val sessionParams    = Seq("csrfToken" -> app.injector.instanceOf[TokenProvider].generateToken)
     val loggedOutRequest = FakeRequest().withSession(sessionParams: _*)
-    val loggedInRequest = FakeRequest().withLoggedIn(underTest, implicitly)(sessionId).withSession(sessionParams: _*)
+    val loggedInRequest  = FakeRequest().withLoggedIn(underTest, implicitly)(sessionId).withSession(sessionParams: _*)
 
     def redirectsToLogin(result: Future[Result]) = {
       status(result) shouldBe SEE_OTHER
@@ -159,10 +159,10 @@ class PushPullNotificationsSpec
     }
 
     def showPushSecretsShouldRenderThePage(application: Application) = {
-      val subscriptionStatus: APISubscriptionStatus = exampleSubscriptionWithFields("ppns", 1)
+      val subscriptionStatus: APISubscriptionStatus                     = exampleSubscriptionWithFields("ppns", 1)
       val newFields: List[ApiSubscriptionFields.SubscriptionFieldValue] = subscriptionStatus.fields.fields
         .map(fieldValue => fieldValue.copy(definition = fieldValue.definition.copy(`type` = "PPNSField")))
-      val subsData = List(subscriptionStatus.copy(fields = subscriptionStatus.fields.copy(fields = newFields)))
+      val subsData                                                      = List(subscriptionStatus.copy(fields = subscriptionStatus.fields.copy(fields = newFields)))
 
       givenApplicationAction(ApplicationWithSubscriptionData(application, asSubscriptions(subsData), asFields(subsData)), loggedInDeveloper, subsData)
 

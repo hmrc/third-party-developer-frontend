@@ -27,19 +27,14 @@ case class ApiSubscriptions(subscriptions: Map[ApiIdentifier, Boolean] = Map.emp
 }
 
 object ApiSubscriptions {
-  implicit val keyReadsApiIdentifier: KeyReads[ApiIdentifier] = key => 
+
+  implicit val keyReadsApiIdentifier: KeyReads[ApiIdentifier] = key =>
     key.split("###").toList match {
       case c :: v :: tail => JsSuccess(ApiIdentifier(ApiContext(c), ApiVersion(v.replace("_", "."))))
-      case _ => JsError(s"Cannot raise $key to an ApiIdentifier")
+      case _              => JsError(s"Cannot raise $key to an ApiIdentifier")
     }
 
   implicit val keyWritesApiIdentifier: KeyWrites[ApiIdentifier] = { id => s"${id.context.value}###${id.version.value.replace(".", "_")}" }
 
   implicit val format: Format[ApiSubscriptions] = Json.format[ApiSubscriptions]
 }
-
-
-
-
-
-

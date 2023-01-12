@@ -44,13 +44,13 @@ import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.LocalUserIdTracker
 class ProfileSpec extends BaseControllerSpec with WithCSRFAddToken with DeveloperBuilder with LocalUserIdTracker {
 
   trait Setup extends ApplicationServiceMock with SessionServiceMock {
-    val changeProfileView = app.injector.instanceOf[ChangeProfileView]
-    val profileView = app.injector.instanceOf[ProfileView]
-    val profileUpdatedView = app.injector.instanceOf[ProfileUpdatedView]
-    val changeProfilePasswordView = app.injector.instanceOf[ChangeProfilePasswordView]
-    val passwordUpdatedView = app.injector.instanceOf[PasswordUpdatedView]
+    val changeProfileView             = app.injector.instanceOf[ChangeProfileView]
+    val profileView                   = app.injector.instanceOf[ProfileView]
+    val profileUpdatedView            = app.injector.instanceOf[ProfileUpdatedView]
+    val changeProfilePasswordView     = app.injector.instanceOf[ChangeProfilePasswordView]
+    val passwordUpdatedView           = app.injector.instanceOf[PasswordUpdatedView]
     val profileDeleteConfirmationView = app.injector.instanceOf[ProfileDeleteConfirmationView]
-    val profileDeleteSubmittedView = app.injector.instanceOf[ProfileDeleteSubmittedView]
+    val profileDeleteSubmittedView    = app.injector.instanceOf[ProfileDeleteSubmittedView]
 
     val underTest = new Profile(
       applicationServiceMock,
@@ -70,7 +70,7 @@ class ProfileSpec extends BaseControllerSpec with WithCSRFAddToken with Develope
     )
 
     val loggedInDeveloper: Developer = buildDeveloper()
-    val sessionId = "sessionId"
+    val sessionId                    = "sessionId"
 
     def createRequest: FakeRequest[AnyContentAsEmpty.type] =
       FakeRequest().withLoggedIn(underTest, implicitly)(sessionId).withCSRFToken
@@ -79,9 +79,9 @@ class ProfileSpec extends BaseControllerSpec with WithCSRFAddToken with Develope
   "updateProfile" should {
     "update profile with normalized firstname and lastname" in new Setup {
       val request = createRequest.withFormUrlEncodedBody(
-          ("firstname", "  first  "), // with whitespaces before and after
-          ("lastname", "  last  ") // with whitespaces before and after
-        )
+        ("firstname", "  first  "), // with whitespaces before and after
+        ("lastname", "  last  ")    // with whitespaces before and after
+      )
 
       val requestCaptor: ArgumentCaptor[UpdateProfileRequest] = ArgumentCaptor.forClass(classOf[UpdateProfileRequest])
 
@@ -100,10 +100,10 @@ class ProfileSpec extends BaseControllerSpec with WithCSRFAddToken with Develope
 
     "fail and send an audit event while changing the password if old password is incorrect" in new Setup {
       val request = createRequest.withFormUrlEncodedBody(
-          ("currentpassword", "oldPassword"),
-          ("password", "StrongNewPwd!2"),
-          ("confirmpassword", "StrongNewPwd!2")
-        )
+        ("currentpassword", "oldPassword"),
+        ("password", "StrongNewPwd!2"),
+        ("confirmpassword", "StrongNewPwd!2")
+      )
 
       updateUserFlowSessionsReturnsSuccessfully(sessionId)
       when(underTest.sessionService.fetch(eqTo(sessionId))(*))
@@ -121,10 +121,10 @@ class ProfileSpec extends BaseControllerSpec with WithCSRFAddToken with Develope
 
     "Password updated should have correct page title" in new Setup {
       val request = createRequest.withFormUrlEncodedBody(
-          ("currentpassword", "oldPassword"),
-          ("password", "StrongNewPwd!2"),
-          ("confirmpassword", "StrongNewPwd!2")
-        )
+        ("currentpassword", "oldPassword"),
+        ("password", "StrongNewPwd!2"),
+        ("confirmpassword", "StrongNewPwd!2")
+      )
 
       updateUserFlowSessionsReturnsSuccessfully(sessionId)
       when(underTest.sessionService.fetch(eqTo(sessionId))(*)).thenReturn(Future.successful(Some(Session(sessionId, loggedInDeveloper, LoggedInState.LOGGED_IN))))

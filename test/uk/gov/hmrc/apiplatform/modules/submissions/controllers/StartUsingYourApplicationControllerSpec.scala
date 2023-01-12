@@ -35,13 +35,13 @@ import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.WithLoggedInSession._
 import scala.concurrent.ExecutionContext.Implicits.global
 
 class StartUsingYourApplicationControllerSpec extends BaseControllerSpec
-  with SampleSession
-  with SampleApplication
-  with SubscriptionTestHelperSugar
-  with WithCSRFAddToken
-  with DeveloperBuilder
-  with LocalUserIdTracker
-  with SubmissionsTestData {
+    with SampleSession
+    with SampleApplication
+    with SubscriptionTestHelperSugar
+    with WithCSRFAddToken
+    with DeveloperBuilder
+    with LocalUserIdTracker
+    with SubmissionsTestData {
 
   trait HasSessionDeveloperFlow {
     val sessionParams = Seq("csrfToken" -> app.injector.instanceOf[CSRF.TokenProvider].generateToken)
@@ -56,10 +56,10 @@ class StartUsingYourApplicationControllerSpec extends BaseControllerSpec
       with ApmConnectorMockModule
       with SubmissionServiceMockModule
       with HasSessionDeveloperFlow {
-    val view = app.injector.instanceOf[StartUsingYourApplicationView]
+    val view        = app.injector.instanceOf[StartUsingYourApplicationView]
     implicit val hc = HeaderCarrier()
 
-    val underTest = new StartUsingYourApplicationController(
+    val underTest       = new StartUsingYourApplicationController(
       mockErrorHandler,
       sessionServiceMock,
       applicationActionServiceMock,
@@ -70,7 +70,7 @@ class StartUsingYourApplicationControllerSpec extends BaseControllerSpec
       SubmissionServiceMock.aMock,
       view
     )
-    val applicationId = ApplicationId.random
+    val applicationId   = ApplicationId.random
     val loggedInRequest = FakeRequest().withLoggedIn(underTest, implicitly)(sessionId).withSession(sessionParams: _*)
   }
 

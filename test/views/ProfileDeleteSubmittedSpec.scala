@@ -26,10 +26,10 @@ import views.helper.CommonViewSpec
 import views.html.ProfileDeleteSubmittedView
 
 class ProfileDeleteSubmittedSpec extends CommonViewSpec
-  with WithCSRFAddToken
-  with LocalUserIdTracker
-  with DeveloperSessionBuilder
-  with DeveloperBuilder {
+    with WithCSRFAddToken
+    with LocalUserIdTracker
+    with DeveloperSessionBuilder
+    with DeveloperBuilder {
 
   "Profile delete submitted page" should {
     val profileDeleteSubmittedView = app.injector.instanceOf[ProfileDeleteSubmittedView]
@@ -37,7 +37,7 @@ class ProfileDeleteSubmittedSpec extends CommonViewSpec
     "render with no errors" in {
       val request = FakeRequest().withCSRFToken
 
-      val developer = buildDeveloperSession( loggedInState = LoggedInState.LOGGED_IN, buildDeveloperWithRandomId("Test", "Test", "Test", None))
+      val developer = buildDeveloperSession(loggedInState = LoggedInState.LOGGED_IN, buildDeveloperWithRandomId("Test", "Test", "Test", None))
 
       val page = profileDeleteSubmittedView.render(request, developer, appConfig, messagesProvider, "details")
       page.contentType should include("text/html")

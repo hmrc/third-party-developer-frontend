@@ -24,20 +24,22 @@ import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.UserId
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.apidefinitions.ApiIdentifier
 
 case class ApplicationSummary(
-                               id: ApplicationId,
-                               name: String,
-                               role: CollaboratorRole,
-                               termsOfUseStatus: TermsOfUseStatus,
-                               state: State,
-                               lastAccess: Option[LocalDateTime],
-                               grantLength: Period,
-                               serverTokenUsed: Boolean = false,
-                               createdOn: LocalDateTime,
-                               accessType: AccessType,
-                               environment: Environment,
-                               subscriptionIds: Set[ApiIdentifier])
+    id: ApplicationId,
+    name: String,
+    role: CollaboratorRole,
+    termsOfUseStatus: TermsOfUseStatus,
+    state: State,
+    lastAccess: Option[LocalDateTime],
+    grantLength: Period,
+    serverTokenUsed: Boolean = false,
+    createdOn: LocalDateTime,
+    accessType: AccessType,
+    environment: Environment,
+    subscriptionIds: Set[ApiIdentifier]
+  )
 
 object ApplicationSummary {
+
   def from(app: Application, userId: UserId): ApplicationSummary = {
 
     val role = app.roleForCollaborator(userId).getOrElse(throw new NotFoundException("Role not found"))

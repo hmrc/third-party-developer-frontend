@@ -26,8 +26,9 @@ import views.helper.CommonViewSpec
 import views.html.include.FeedbackBannerView
 
 class FeedbackBannerViewSpec extends CommonViewSpec with WithCSRFAddToken {
+
   trait Setup {
-    val appConfig: ApplicationConfig = mock[ApplicationConfig]
+    val appConfig: ApplicationConfig           = mock[ApplicationConfig]
     val feedbackBannerView: FeedbackBannerView = new FeedbackBannerView(appConfig)
   }
 

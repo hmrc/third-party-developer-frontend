@@ -31,9 +31,10 @@ import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.WireMockExtensions
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.EmailAlreadyInUse
 
 class ThirdPartyDeveloperConnectorEncryptionSpec extends BaseConnectorIntegrationSpec with GuiceOneAppPerSuite with WireMockExtensions {
+
   private val stubConfig = Configuration(
     "microservice.services.third-party-developer.port" -> stubPort,
-    "json.encryption.key" -> "czV2OHkvQj9FKEgrTWJQZVNoVm1ZcTN0Nnc5eiRDJkY="
+    "json.encryption.key"                              -> "czV2OHkvQj9FKEgrTWJQZVNoVm1ZcTN0Nnc5eiRDJkY="
   )
 
   override def fakeApplication(): Application =
@@ -45,7 +46,7 @@ class ThirdPartyDeveloperConnectorEncryptionSpec extends BaseConnectorIntegratio
 
   trait Setup {
     implicit val hc = HeaderCarrier()
-    val underTest = app.injector.instanceOf[ThirdPartyDeveloperConnector]
+    val underTest   = app.injector.instanceOf[ThirdPartyDeveloperConnector]
   }
 
   "register" should {
@@ -70,7 +71,7 @@ class ThirdPartyDeveloperConnectorEncryptionSpec extends BaseConnectorIntegratio
 
     "fail to register a developer when the email address is already in use" in new Setup {
       val registrationToTest = Registration("first", "last", "email@example.com", "password")
-      val secretPayload = SecretRequest("yLR5YLduz4B2c79v3eSrnUuk71jBNoOOytn5CgYL/JbxxGVgD/JJVZAwF5fm/z3LTxtUsa9G6WSLb9F5Sh4YNTQuTO4Cm+8EtimKAMofV6BnHESgQTR9x1Ebgznq7UM9")
+      val secretPayload      = SecretRequest("yLR5YLduz4B2c79v3eSrnUuk71jBNoOOytn5CgYL/JbxxGVgD/JJVZAwF5fm/z3LTxtUsa9G6WSLb9F5Sh4YNTQuTO4Cm+8EtimKAMofV6BnHESgQTR9x1Ebgznq7UM9")
 
       stubFor(
         post(urlEqualTo("/developer"))
@@ -101,7 +102,7 @@ class ThirdPartyDeveloperConnectorEncryptionSpec extends BaseConnectorIntegratio
           .withRequestBody(equalTo("""{"data":"SnD4DUOHcofAQ4I47oLWPJphsTSdnsNimDZYxGLBsNk="}"""))
       )
     }
-   }
+  }
 
   "reset-password" should {
     "send request with encrypted payload" in new Setup {

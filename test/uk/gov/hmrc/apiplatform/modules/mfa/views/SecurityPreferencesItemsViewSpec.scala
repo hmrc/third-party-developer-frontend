@@ -28,27 +28,25 @@ import views.helper.CommonViewSpec
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
 
-
 class SecurityPreferencesItemsViewSpec extends CommonViewSpec with WithCSRFAddToken with DeveloperBuilder with LocalUserIdTracker {
-  implicit val request = FakeRequest()
+  implicit val request             = FakeRequest()
   val securityPreferencesItemsView = app.injector.instanceOf[SecurityPreferencesItemsView]
-  val authAppMfaDetail = AuthenticatorAppMfaDetailSummary(MfaId(java.util.UUID.randomUUID()), "name", LocalDateTime.of(2022, 9, 1, 0, 0), verified = true)
-  val smsMfaDetail = SmsMfaDetailSummary(MfaId(java.util.UUID.randomUUID()), "name", LocalDateTime.of(2022, 9, 1, 0, 0), mobileNumber = "1234567890", verified = true)
+  val authAppMfaDetail             = AuthenticatorAppMfaDetailSummary(MfaId(java.util.UUID.randomUUID()), "name", LocalDateTime.of(2022, 9, 1, 0, 0), verified = true)
+  val smsMfaDetail                 = SmsMfaDetailSummary(MfaId(java.util.UUID.randomUUID()), "name", LocalDateTime.of(2022, 9, 1, 0, 0), mobileNumber = "1234567890", verified = true)
 
   "SecurityPreferencesItems view" should {
 
-
     "show 'auth app row' when list contains only auth app mfa details with created on after migration date" in {
       val mainView = securityPreferencesItemsView.render(List(authAppMfaDetail))
-     val document = Jsoup.parse(mainView.body)
+      val document = Jsoup.parse(mainView.body)
       document.getElementById("description").text shouldBe "This is how you get your access codes."
       verifyMfaRow(document, authAppMfaDetail, 0, shouldShowCreatedDate = true)
     }
 
     "show 'auth app row' when list contains only auth app mfa details with created on before migration date" in {
-      val authAppMfaDetailWithCreatedOnInPast = authAppMfaDetail.copy(createdOn = LocalDateTime.of(2022,7,20,0,0))
-      val mainView = securityPreferencesItemsView.apply(List(authAppMfaDetailWithCreatedOnInPast))()
-      val document = Jsoup.parse(mainView.body)
+      val authAppMfaDetailWithCreatedOnInPast = authAppMfaDetail.copy(createdOn = LocalDateTime.of(2022, 7, 20, 0, 0))
+      val mainView                            = securityPreferencesItemsView.apply(List(authAppMfaDetailWithCreatedOnInPast))()
+      val document                            = Jsoup.parse(mainView.body)
       verifyMfaRow(document, authAppMfaDetailWithCreatedOnInPast, 0, shouldShowCreatedDate = false)
     }
 
@@ -60,7 +58,7 @@ class SecurityPreferencesItemsViewSpec extends CommonViewSpec with WithCSRFAddTo
     }
 
     "show 'sms detail row' and 'auth app row' when list contains auth app and sms mfa details with created on after migration date" in {
-      val mainView = securityPreferencesItemsView.apply(List(authAppMfaDetail,smsMfaDetail))()
+      val mainView = securityPreferencesItemsView.apply(List(authAppMfaDetail, smsMfaDetail))()
       val document = Jsoup.parse(mainView.body)
       document.getElementById("description").text shouldBe "This is how you get your access codes."
       verifyMfaRow(document, authAppMfaDetail, 0, shouldShowCreatedDate = true)
@@ -68,13 +66,13 @@ class SecurityPreferencesItemsViewSpec extends CommonViewSpec with WithCSRFAddTo
     }
   }
 
-  def verifyMfaRow(document: Document, mfaDetail: MfaDetail, rowId: Int, shouldShowCreatedDate: Boolean) ={
+  def verifyMfaRow(document: Document, mfaDetail: MfaDetail, rowId: Int, shouldShowCreatedDate: Boolean) = {
     document.getElementById("description").text shouldBe "This is how you get your access codes."
     val mfaTypeField = Option(document.getElementById(s"mfaType-$rowId"))
     mfaTypeField should not be None
     mfaTypeField.get.text shouldBe mfaDetail.mfaType.asText
 
-    if(shouldShowCreatedDate){
+    if (shouldShowCreatedDate) {
       document.getElementById(s"date-hint-$rowId").text shouldBe s"Added ${DateTimeFormatter.ofPattern("dd MMMM yyyy HH:mm").format(mfaDetail.createdOn)}"
     } else {
       Option(document.getElementById(s"date-hint-$rowId")) shouldBe None

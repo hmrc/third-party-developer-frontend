@@ -20,18 +20,18 @@ import uk.gov.hmrc.thirdpartydeveloperfrontend.config.ApplicationConfig
 import javax.inject.{Inject, Singleton}
 
 @Singleton
-class EnvironmentNameService @Inject()(appConfig: ApplicationConfig) {
-  
+class EnvironmentNameService @Inject() (appConfig: ApplicationConfig) {
+
   def subordinateIsSandbox = appConfig.nameOfSubordinateEnvironment == "Sandbox"
-  
+
   def principalIsProduction = appConfig.nameOfPrincipalEnvironment == "Production"
-  
+
   private def theSandbox = "the sandbox"
 
   def subordinateEnvName = appConfig.nameOfSubordinateEnvironment.toLowerCase()
 
-  def subordinateWording = 
-      if(subordinateIsSandbox)
-        theSandbox
-      else subordinateEnvName
+  def subordinateWording =
+    if (subordinateIsSandbox)
+      theSandbox
+    else subordinateEnvName
 }
