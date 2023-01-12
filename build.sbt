@@ -2,6 +2,7 @@ import com.typesafe.sbt.digest.Import._
 import com.typesafe.sbt.uglify.Import._
 import com.typesafe.sbt.web.Import._
 import net.ground5hark.sbt.concat.Import._
+import org.scalafmt.sbt.ScalafmtPlugin
 import play.sbt.routes.RoutesKeys.routesGenerator
 import sbt.Keys._
 import sbt.{Resolver, _}
@@ -69,7 +70,7 @@ lazy val microservice = Project(appName, file("."))
     IntegrationTest / parallelExecution := false
   )
   .configs(ComponentTest)
-  .settings(inConfig(ComponentTest)(Defaults.testSettings ++ BloopDefaults.configSettings))
+  .settings(inConfig(ComponentTest)(Defaults.testSettings ++ BloopDefaults.configSettings ++ ScalafmtPlugin.scalafmtConfigSettings))
   .settings(headerSettings(ComponentTest) ++ automateHeaderSettings(ComponentTest))
   .settings(
     ComponentTest / testOptions := Seq(Tests.Argument(TestFrameworks.ScalaTest, "-eT")),
