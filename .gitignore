@@ -2,6 +2,7 @@
 
 !.gitignore
 !.scalafmt.conf
+!.scalafix.conf
 
 conf/local.conf
 db
