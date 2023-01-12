@@ -16,8 +16,9 @@
 
 package uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.connectors
 
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.apidefinitions.ApiContext
 import play.api.libs.json.Json
+
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.apidefinitions.ApiContext
 
 /*
  * requiresTrust, isTestSupport and versions fields have been deliberately left out as they are not currently required. Adding them back in here should mean

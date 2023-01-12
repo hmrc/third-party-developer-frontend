@@ -16,14 +16,16 @@
 
 package uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.checkpages
 
+import scala.concurrent.Future
+
+import views.html.checkpages.TermsAndConditionsView
+
+import play.api.data.Form
+import play.api.mvc.{Action, AnyContent, Call}
+
 import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.ApplicationController
 import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.checkpages.HasUrl._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.{ApplicationId, CheckInformation, Standard, UpdateApplicationRequest}
-import play.api.data.Form
-import play.api.mvc.{Action, AnyContent, Call}
-import views.html.checkpages.TermsAndConditionsView
-
-import scala.concurrent.Future
 
 trait TermsAndConditionsPartialController {
   self: ApplicationController with CanUseCheckActions =>

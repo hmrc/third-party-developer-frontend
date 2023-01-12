@@ -16,25 +16,26 @@
 
 package views
 
-import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.routes
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications._
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.{DeveloperSession, LoggedInState}
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.controllers.ApplicationViewModel
+import java.time.format.DateTimeFormatter
+import java.time.{LocalDateTime, ZoneOffset}
+
 import org.jsoup.Jsoup
 import org.jsoup.nodes.{Document, Element}
+import views.helper.CommonViewSpec
+import views.html.DetailsView
+
 import play.api.mvc.AnyContentAsEmpty
 import play.api.test.FakeRequest
 import play.twirl.api.HtmlFormat.Appendable
+
 import uk.gov.hmrc.thirdpartydeveloperfrontend.builder.{DeveloperBuilder, DeveloperSessionBuilder}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.Details.{Agreement, TermsOfUseViewModel}
-import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.{TestApplications, WithCSRFAddToken}
-import views.helper.CommonViewSpec
-import views.html.DetailsView
-import uk.gov.hmrc.thirdpartydeveloperfrontend.utils._
-
-import java.time.{LocalDateTime, ZoneOffset}
-import java.time.format.DateTimeFormatter
+import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.routes
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications._
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.controllers.ApplicationViewModel
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.{DeveloperSession, LoggedInState}
+import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.{TestApplications, WithCSRFAddToken, _}
 
 class DetailsViewSpec
     extends CommonViewSpec

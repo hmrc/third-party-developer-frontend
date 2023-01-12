@@ -17,17 +17,19 @@
 package views
 
 import java.time.{LocalDateTime, Period, ZoneOffset}
+
+import org.jsoup.Jsoup
+import views.helper.CommonViewSpec
+import views.html.DeletePrincipalApplicationConfirmView
+
+import play.api.test.FakeRequest
+
+import uk.gov.hmrc.thirdpartydeveloperfrontend.builder.{DeveloperBuilder, DeveloperSessionBuilder}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.DeletePrincipalApplicationForm
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.LoggedInState
-import org.jsoup.Jsoup
-import play.api.test.FakeRequest
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.ViewHelpers.{elementExistsByText, elementIdentifiedByAttrWithValueContainsText}
-import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.WithCSRFAddToken
-import views.helper.CommonViewSpec
-import views.html.DeletePrincipalApplicationConfirmView
-import uk.gov.hmrc.thirdpartydeveloperfrontend.builder.{DeveloperBuilder, DeveloperSessionBuilder}
-import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.LocalUserIdTracker
+import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.{LocalUserIdTracker, WithCSRFAddToken}
 
 class DeletePrincipalApplicationConfirmSpec extends CommonViewSpec with WithCSRFAddToken with DeveloperBuilder with LocalUserIdTracker with DeveloperSessionBuilder {
 

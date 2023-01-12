@@ -16,20 +16,18 @@
 
 package uk.gov.hmrc.apiplatform.modules.uplift.services
 
+import scala.concurrent.ExecutionContext.Implicits.global
+
+import org.mockito.MockitoSugar
+
+import uk.gov.hmrc.apiplatform.modules.uplift.domain.models._
+import uk.gov.hmrc.apiplatform.modules.uplift.services.mocks.FlowRepositoryMockModule
 import uk.gov.hmrc.thirdpartydeveloperfrontend.builder._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.SubscriptionTestHelperSugar
-import uk.gov.hmrc.apiplatform.modules.uplift.domain.models._
-
-import scala.concurrent.ExecutionContext.Implicits.global
-import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.AsyncHmrcSpec
-import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.LocalUserIdTracker
-import org.mockito.MockitoSugar
-import uk.gov.hmrc.thirdpartydeveloperfrontend.utils._
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.{ResponsibleIndividual, SellResellOrDistribute}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.LoggedInState
-import uk.gov.hmrc.apiplatform.modules.uplift.services.mocks.FlowRepositoryMockModule
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.SellResellOrDistribute
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.ResponsibleIndividual
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.flows.FlowType
+import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.{AsyncHmrcSpec, LocalUserIdTracker, _}
 
 class GetProductionCredentialsFlowServiceSpec
     extends AsyncHmrcSpec

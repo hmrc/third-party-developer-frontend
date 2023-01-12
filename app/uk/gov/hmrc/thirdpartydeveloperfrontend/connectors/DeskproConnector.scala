@@ -16,21 +16,19 @@
 
 package uk.gov.hmrc.thirdpartydeveloperfrontend.connectors
 
+import javax.inject.{Inject, Singleton}
+import scala.concurrent.{ExecutionContext, Future}
+import scala.util.Success
+import scala.util.control.NonFatal
+
+import uk.gov.hmrc.http.HttpReads.Implicits._
+import uk.gov.hmrc.http.{HeaderCarrier, HttpClient, UpstreamErrorResponse}
+import uk.gov.hmrc.play.http.metrics.common.API
+
+import uk.gov.hmrc.apiplatform.modules.common.services.ApplicationLogger
 import uk.gov.hmrc.thirdpartydeveloperfrontend.config.ApplicationConfig
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.connectors._
-import javax.inject.{Inject, Singleton}
-import uk.gov.hmrc.http.HeaderCarrier
-import uk.gov.hmrc.http.HttpClient
-import uk.gov.hmrc.play.http.metrics.common.API
-
-import scala.concurrent.{ExecutionContext, Future}
-import scala.util.control.NonFatal
-import uk.gov.hmrc.http.UpstreamErrorResponse
-import uk.gov.hmrc.http.HttpReads.Implicits._
-import uk.gov.hmrc.apiplatform.modules.common.services.ApplicationLogger
-
-import scala.util.Success
 
 @Singleton
 class DeskproConnector @Inject() (http: HttpClient, config: ApplicationConfig, metrics: ConnectorMetrics)(implicit val ec: ExecutionContext)

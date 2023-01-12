@@ -16,8 +16,8 @@
 
 package uk.gov.hmrc.apiplatform.modules.submissions.domain.models
 
-import scala.collection.immutable.ListSet
-import scala.collection.immutable.ListMap
+import scala.collection.immutable.{ListMap, ListSet}
+
 import play.api.libs.json.Json
 
 sealed trait Question {

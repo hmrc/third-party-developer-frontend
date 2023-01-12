@@ -16,24 +16,22 @@
 
 package uk.gov.hmrc.thirdpartydeveloperfrontend.service
 
+import java.time.{LocalDateTime, Period}
+import java.util.UUID
+import scala.concurrent.ExecutionContext.Implicits.global
+import scala.concurrent.Future.{failed, successful}
+
+import uk.gov.hmrc.http.HeaderCarrier
+
 import uk.gov.hmrc.apiplatform.modules.mfa.models.MfaId
 import uk.gov.hmrc.thirdpartydeveloperfrontend.builder.DeveloperBuilder
 import uk.gov.hmrc.thirdpartydeveloperfrontend.connectors.ThirdPartyDeveloperConnector
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.connectors.{AccessCodeAuthenticationRequest, UserAuthenticationResponse}
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.{LoggedInState, Session, SessionInvalid}
-import uk.gov.hmrc.thirdpartydeveloperfrontend.repositories.FlowRepository
-import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.{ApplicationId, ApplicationWithSubscriptionIds, ClientId, Environment}
-import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.AsyncHmrcSpec
-
-import scala.concurrent.ExecutionContext.Implicits.global
-import scala.concurrent.Future.{failed, successful}
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.UserId
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.connectors.{AccessCodeAuthenticationRequest, UserAuthenticationResponse}
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.{LoggedInState, Session, SessionInvalid, UserId}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.mocks.service.AppsByTeamMemberServiceMock
-import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.LocalUserIdTracker
-
-import java.time.{LocalDateTime, Period}
-import java.util.UUID
+import uk.gov.hmrc.thirdpartydeveloperfrontend.repositories.FlowRepository
+import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.{AsyncHmrcSpec, LocalUserIdTracker}
 
 class SessionServiceSpec extends AsyncHmrcSpec with DeveloperBuilder with LocalUserIdTracker with AppsByTeamMemberServiceMock {
 

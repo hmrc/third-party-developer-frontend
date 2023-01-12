@@ -16,18 +16,20 @@
 
 package uk.gov.hmrc.thirdpartydeveloperfrontend.controllers
 
+import javax.inject.{Inject, Singleton}
+import scala.concurrent.ExecutionContext
+
+import views.helper.EnvironmentNameService
+import views.html._
+
 import play.api.libs.crypto.CookieSigner
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
+
 import uk.gov.hmrc.apiplatform.modules.uplift.services.UpliftLogic
 import uk.gov.hmrc.thirdpartydeveloperfrontend.config.{ApplicationConfig, ErrorHandler}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.controllers.ManageApplicationsViewModel
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.services.LocalDateTimeFormatters
 import uk.gov.hmrc.thirdpartydeveloperfrontend.service._
-import views.helper.EnvironmentNameService
-import views.html._
-
-import javax.inject.{Inject, Singleton}
-import scala.concurrent.ExecutionContext
 
 @Singleton
 class ManageApplications @Inject() (

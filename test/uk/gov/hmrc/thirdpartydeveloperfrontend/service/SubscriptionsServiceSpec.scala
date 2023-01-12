@@ -18,19 +18,19 @@ package uk.gov.hmrc.thirdpartydeveloperfrontend.service
 
 import java.time.{LocalDateTime, Period, ZoneOffset}
 import java.util.UUID.randomUUID
+import scala.concurrent.ExecutionContext.Implicits.global
+import scala.concurrent.Future.successful
+
+import uk.gov.hmrc.http.HeaderCarrier
+
 import uk.gov.hmrc.thirdpartydeveloperfrontend.builder._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.connectors._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.apidefinitions._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications._
-import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.AsyncHmrcSpec
-
-import scala.concurrent.Future.successful
-import scala.concurrent.ExecutionContext.Implicits.global
 import uk.gov.hmrc.thirdpartydeveloperfrontend.service.PushPullNotificationsService.PushPullNotificationsConnector
-import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.thirdpartydeveloperfrontend.service.SubscriptionFieldsService.SubscriptionFieldsConnector
-import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.LocalUserIdTracker
+import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.{AsyncHmrcSpec, LocalUserIdTracker}
 
 class SubscriptionsServiceSpec extends AsyncHmrcSpec with SubscriptionsBuilder with ApplicationBuilder with LocalUserIdTracker {
 

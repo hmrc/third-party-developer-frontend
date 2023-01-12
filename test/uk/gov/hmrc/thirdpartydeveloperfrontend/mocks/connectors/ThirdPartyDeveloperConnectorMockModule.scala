@@ -16,11 +16,12 @@
 
 package uk.gov.hmrc.thirdpartydeveloperfrontend.mocks.connectors
 
-import uk.gov.hmrc.thirdpartydeveloperfrontend.connectors.ThirdPartyDeveloperConnector
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.{Developer, UserId}
+import scala.concurrent.Future.successful
+
 import org.mockito.{ArgumentMatchersSugar, MockitoSugar}
 
-import scala.concurrent.Future.successful
+import uk.gov.hmrc.thirdpartydeveloperfrontend.connectors.ThirdPartyDeveloperConnector
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.{Developer, UserId}
 
 trait ThirdPartyDeveloperConnectorMockModule extends MockitoSugar with ArgumentMatchersSugar {
 

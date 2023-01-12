@@ -18,12 +18,14 @@ package views
 
 import org.jsoup.Jsoup
 import org.jsoup.nodes.Document
-import play.api.test.FakeRequest
-import play.twirl.api.Html
-import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.ViewHelpers._
-import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.WithCSRFAddToken
 import views.helper.CommonViewSpec
 import views.html.ApplicationVerificationView
+
+import play.api.test.FakeRequest
+import play.twirl.api.Html
+
+import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.ViewHelpers._
+import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.WithCSRFAddToken
 
 class ApplicationVerificationSpec extends CommonViewSpec with WithCSRFAddToken {
 

@@ -16,11 +16,11 @@
 
 package uk.gov.hmrc.thirdpartydeveloperfrontend.domain.services
 
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.{Application, CheckInformation, Standard, TermsOfUseAcceptance, TermsOfUseAgreement}
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.services.TermsOfUseService.TermsOfUseAgreementDetails
-
 import java.time.LocalDateTime
 import javax.inject.Singleton
+
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.{Application, CheckInformation, Standard, TermsOfUseAcceptance, TermsOfUseAgreement}
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.services.TermsOfUseService.TermsOfUseAgreementDetails
 
 object TermsOfUseService {
   case class TermsOfUseAgreementDetails(emailAddress: String, name: Option[String], date: LocalDateTime, version: Option[String])

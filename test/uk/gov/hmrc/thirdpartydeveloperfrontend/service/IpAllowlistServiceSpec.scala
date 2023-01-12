@@ -17,7 +17,15 @@
 package uk.gov.hmrc.thirdpartydeveloperfrontend.service
 
 import java.util.UUID.randomUUID
+import scala.concurrent.ExecutionContext.Implicits.global
+import scala.concurrent.Future.successful
 
+import org.scalatest.matchers.should.Matchers
+
+import uk.gov.hmrc.http.{ForbiddenException, HeaderCarrier}
+
+import uk.gov.hmrc.apiplatform.modules.uplift.services.mocks.FlowRepositoryMockModule
+import uk.gov.hmrc.thirdpartydeveloperfrontend.builder.DeveloperBuilder
 import uk.gov.hmrc.thirdpartydeveloperfrontend.connectors.ThirdPartyApplicationConnector
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.ApplicationUpdateSuccessful
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.{Application, IpAllowlist}
@@ -25,13 +33,7 @@ import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.flows.FlowType.IP_A
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.flows.IpAllowlistFlow
 import uk.gov.hmrc.thirdpartydeveloperfrontend.service.PushPullNotificationsService.PushPullNotificationsConnector
 import uk.gov.hmrc.thirdpartydeveloperfrontend.service.SubscriptionFieldsService.SubscriptionFieldsConnector
-import uk.gov.hmrc.http.{ForbiddenException, HeaderCarrier}
-import scala.concurrent.ExecutionContext.Implicits.global
-import scala.concurrent.Future.successful
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils._
-import uk.gov.hmrc.thirdpartydeveloperfrontend.builder.DeveloperBuilder
-import org.scalatest.matchers.should.Matchers
-import uk.gov.hmrc.apiplatform.modules.uplift.services.mocks.FlowRepositoryMockModule
 
 class IpAllowlistServiceSpec
     extends AsyncHmrcSpec

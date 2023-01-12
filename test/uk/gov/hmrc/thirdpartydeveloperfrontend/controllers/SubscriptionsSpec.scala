@@ -16,33 +16,32 @@
 
 package uk.gov.hmrc.thirdpartydeveloperfrontend.controllers
 
+import java.time.LocalDateTime
 import java.util.UUID.randomUUID
-import uk.gov.hmrc.thirdpartydeveloperfrontend.builder.DeveloperBuilder
+import scala.concurrent.ExecutionContext.Implicits.global
+import scala.concurrent.Future
+import scala.concurrent.Future.successful
+
+import views.helper.EnvironmentNameService
+import views.html.include.ChangeSubscriptionConfirmationView
+import views.html.{AddAppSubscriptionsView, ManageSubscriptionsView, SubscribeRequestSubmittedView, UnsubscribeRequestSubmittedView}
+
+import play.api.mvc.{AnyContentAsEmpty, AnyContentAsFormUrlEncoded, Result}
+import play.api.test.FakeRequest
+import play.api.test.Helpers._
+import play.filters.csrf.CSRF.TokenProvider
+import uk.gov.hmrc.http.HeaderCarrier
+
+import uk.gov.hmrc.thirdpartydeveloperfrontend.builder.{DeveloperBuilder, _}
+import uk.gov.hmrc.thirdpartydeveloperfrontend.config.FraudPreventionConfig
 import uk.gov.hmrc.thirdpartydeveloperfrontend.connectors.ThirdPartyDeveloperConnector
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.apidefinitions.{ApiContext, ApiIdentifier, ApiVersion}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.connectors.TicketResult
 import uk.gov.hmrc.thirdpartydeveloperfrontend.mocks.service.{ApplicationActionServiceMock, ApplicationServiceMock, SessionServiceMock}
-import play.api.mvc.{AnyContentAsEmpty, AnyContentAsFormUrlEncoded, Result}
-import play.api.test.FakeRequest
-import play.api.test.Helpers._
-import play.filters.csrf.CSRF.TokenProvider
 import uk.gov.hmrc.thirdpartydeveloperfrontend.service._
-import uk.gov.hmrc.http.HeaderCarrier
-import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.WithCSRFAddToken
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.WithLoggedInSession._
-import views.helper.EnvironmentNameService
-import views.html.{AddAppSubscriptionsView, ManageSubscriptionsView, SubscribeRequestSubmittedView, UnsubscribeRequestSubmittedView}
-import views.html.include.ChangeSubscriptionConfirmationView
-
-import scala.concurrent.ExecutionContext.Implicits.global
-import scala.concurrent.Future
-import scala.concurrent.Future.successful
-import uk.gov.hmrc.thirdpartydeveloperfrontend.utils._
-import uk.gov.hmrc.thirdpartydeveloperfrontend.builder._
-import uk.gov.hmrc.thirdpartydeveloperfrontend.config.FraudPreventionConfig
-
-import java.time.LocalDateTime
+import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.{WithCSRFAddToken, _}
 
 class SubscriptionsSpec extends BaseControllerSpec with WithCSRFAddToken with LocalUserIdTracker with DeveloperBuilder with SampleSession with SampleApplications
     with SubscriptionTestHelperSugar {

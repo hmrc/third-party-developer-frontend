@@ -16,37 +16,28 @@
 
 package uk.gov.hmrc.apiplatform.modules.submissions.controllers
 
-import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.{BaseControllerSpec, SubscriptionTestHelperSugar}
-import uk.gov.hmrc.thirdpartydeveloperfrontend.builder.{DeveloperBuilder, SampleApplication, SampleSession}
-import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.{LocalUserIdTracker, WithCSRFAddToken}
-import uk.gov.hmrc.thirdpartydeveloperfrontend.mocks.service.ApplicationServiceMock
-import uk.gov.hmrc.thirdpartydeveloperfrontend.mocks.service.ApplicationActionServiceMock
-import uk.gov.hmrc.thirdpartydeveloperfrontend.mocks.connectors.ApmConnectorMockModule
-import uk.gov.hmrc.apiplatform.modules.submissions.services.mocks.SubmissionServiceMockModule
-import uk.gov.hmrc.http.HeaderCarrier
-import uk.gov.hmrc.apiplatform.modules.submissions.views.html.CheckAnswersView
-import uk.gov.hmrc.apiplatform.modules.submissions.views.html.QuestionView
-import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.WithLoggedInSession._
-
+import java.time.{LocalDateTime, ZoneOffset}
 import scala.concurrent.ExecutionContext.Implicits.global
-import uk.gov.hmrc.apiplatform.modules.submissions.SubmissionsTestData
-import uk.gov.hmrc.apiplatform.modules.submissions.domain.models.Question
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.ApplicationWithSubscriptionData
+
+import cats.data.NonEmptyList
+import org.scalatest.AppendedClues
+
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
 import play.filters.csrf.CSRF
-import org.scalatest.AppendedClues
-import uk.gov.hmrc.apiplatform.modules.submissions.domain.models.Submission
-import uk.gov.hmrc.apiplatform.modules.submissions.domain.models.SingleChoiceAnswer
-import uk.gov.hmrc.apiplatform.modules.submissions.domain.models.ExtendedSubmission
-import cats.data.NonEmptyList
-import uk.gov.hmrc.apiplatform.modules.submissions.domain.models.QuestionnaireProgress
-import uk.gov.hmrc.apiplatform.modules.submissions.domain.models.QuestionnaireState
+import uk.gov.hmrc.http.HeaderCarrier
 
-import java.time.ZoneOffset
-import java.time.LocalDateTime
-import uk.gov.hmrc.apiplatform.modules.submissions.domain.models.PossibleAnswer
-import uk.gov.hmrc.apiplatform.modules.submissions.domain.models.ErrorInfo
+import uk.gov.hmrc.apiplatform.modules.submissions.SubmissionsTestData
+import uk.gov.hmrc.apiplatform.modules.submissions.domain.models._
+import uk.gov.hmrc.apiplatform.modules.submissions.services.mocks.SubmissionServiceMockModule
+import uk.gov.hmrc.apiplatform.modules.submissions.views.html.{CheckAnswersView, QuestionView}
+import uk.gov.hmrc.thirdpartydeveloperfrontend.builder.{DeveloperBuilder, SampleApplication, SampleSession}
+import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.{BaseControllerSpec, SubscriptionTestHelperSugar}
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.ApplicationWithSubscriptionData
+import uk.gov.hmrc.thirdpartydeveloperfrontend.mocks.connectors.ApmConnectorMockModule
+import uk.gov.hmrc.thirdpartydeveloperfrontend.mocks.service.{ApplicationActionServiceMock, ApplicationServiceMock}
+import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.WithLoggedInSession._
+import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.{LocalUserIdTracker, WithCSRFAddToken}
 
 class QuestionControllerSpec
     extends BaseControllerSpec

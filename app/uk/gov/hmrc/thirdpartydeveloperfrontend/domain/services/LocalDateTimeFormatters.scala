@@ -16,9 +16,9 @@
 
 package uk.gov.hmrc.thirdpartydeveloperfrontend.domain.services
 
-import play.api.libs.json.{EnvReads, EnvWrites, Format}
-
 import java.time.LocalDateTime
+
+import play.api.libs.json.{EnvReads, EnvWrites, Format}
 
 trait LocalDateTimeFormatters extends EnvReads with EnvWrites {
 

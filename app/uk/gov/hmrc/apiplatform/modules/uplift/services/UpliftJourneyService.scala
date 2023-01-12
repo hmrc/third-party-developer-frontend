@@ -16,20 +16,18 @@
 
 package uk.gov.hmrc.apiplatform.modules.uplift.services
 
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.DeveloperSession
-import scala.concurrent.Future
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.ApplicationId
-import uk.gov.hmrc.apiplatform.modules.uplift.domain.models.ApiSubscriptions
-import uk.gov.hmrc.thirdpartydeveloperfrontend.connectors.ApmConnector
 import javax.inject.{Inject, Singleton}
-import uk.gov.hmrc.apiplatform.modules.common.services.EitherTHelper
+import scala.concurrent.{ExecutionContext, Future}
+
 import uk.gov.hmrc.http.HeaderCarrier
-import scala.concurrent.ExecutionContext
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.apidefinitions.APISubscriptionStatus
-import uk.gov.hmrc.apiplatform.modules.uplift.domain.models._
+
+import uk.gov.hmrc.apiplatform.modules.common.services.EitherTHelper
+import uk.gov.hmrc.apiplatform.modules.uplift.domain.models.{ApiSubscriptions, _}
 import uk.gov.hmrc.apiplatform.modules.uplift.domain.services._
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.apidefinitions.ApiContext
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.UpliftData
+import uk.gov.hmrc.thirdpartydeveloperfrontend.connectors.ApmConnector
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.apidefinitions.{APISubscriptionStatus, ApiContext}
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.{ApplicationId, UpliftData}
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.DeveloperSession
 
 @Singleton
 class UpliftJourneyService @Inject() (

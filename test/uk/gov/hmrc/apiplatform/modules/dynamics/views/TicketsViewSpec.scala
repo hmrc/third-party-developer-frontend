@@ -17,13 +17,15 @@
 package uk.gov.hmrc.apiplatform.modules.dynamics.views
 
 import org.jsoup.Jsoup
+import views.helper.CommonViewSpec
+
 import play.api.test.{FakeRequest, StubMessagesFactory}
+
 import uk.gov.hmrc.apiplatform.modules.dynamics.connectors.Ticket
 import uk.gov.hmrc.apiplatform.modules.dynamics.views.html.TicketsView
 import uk.gov.hmrc.thirdpartydeveloperfrontend.builder.{DeveloperBuilder, DeveloperSessionBuilder}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.{DeveloperSession, LoggedInState}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.LocalUserIdTracker
-import views.helper.CommonViewSpec
 
 class TicketsViewSpec extends CommonViewSpec with DeveloperSessionBuilder with DeveloperBuilder with LocalUserIdTracker with StubMessagesFactory {
 

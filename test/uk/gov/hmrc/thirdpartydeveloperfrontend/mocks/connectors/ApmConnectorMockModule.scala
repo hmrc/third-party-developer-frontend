@@ -16,9 +16,10 @@
 
 package uk.gov.hmrc.thirdpartydeveloperfrontend.mocks.connectors
 
+import scala.concurrent.Future.{failed, successful}
+
 import org.mockito.{ArgumentMatchersSugar, MockitoSugar}
 
-import scala.concurrent.Future.{failed, successful}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.connectors.ApmConnector
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.apidefinitions.{ApiContext, ApiIdentifier}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.ApplicationId

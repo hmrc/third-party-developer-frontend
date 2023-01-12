@@ -16,13 +16,19 @@
 
 package uk.gov.hmrc.apiplatform.modules.dynamics.controllers
 
+import java.util.UUID
+import scala.concurrent.ExecutionContext.Implicits.global
+import scala.concurrent.Future._
+
 import org.jsoup.Jsoup
+
 import play.api.mvc.AnyContentAsFormUrlEncoded
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
+import uk.gov.hmrc.http.UpstreamErrorResponse
+
 import uk.gov.hmrc.apiplatform.modules.dynamics.connectors.{ThirdPartyDeveloperDynamicsConnector, Ticket}
 import uk.gov.hmrc.apiplatform.modules.dynamics.views.html.{AddTicketView, TicketsView}
-import uk.gov.hmrc.http.UpstreamErrorResponse
 import uk.gov.hmrc.thirdpartydeveloperfrontend.builder.{DeveloperBuilder, DeveloperSessionBuilder}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.config.ErrorHandler
 import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.BaseControllerSpec
@@ -30,10 +36,6 @@ import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.{LoggedI
 import uk.gov.hmrc.thirdpartydeveloperfrontend.mocks.service.SessionServiceMock
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.WithLoggedInSession._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.{LocalUserIdTracker, WithCSRFAddToken}
-
-import java.util.UUID
-import scala.concurrent.ExecutionContext.Implicits.global
-import scala.concurrent.Future._
 
 class DynamicsControllerSpec extends BaseControllerSpec with DeveloperSessionBuilder with WithCSRFAddToken
     with DeveloperBuilder with LocalUserIdTracker {

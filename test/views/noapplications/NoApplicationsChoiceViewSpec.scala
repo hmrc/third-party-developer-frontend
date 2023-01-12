@@ -17,15 +17,17 @@
 package views.noapplications
 
 import org.jsoup.Jsoup
+import views.helper.CommonViewSpec
+import views.html.noapplications.NoApplicationsChoiceView
+
 import play.api.mvc.AnyContentAsEmpty
 import play.api.test.FakeRequest
+
 import uk.gov.hmrc.thirdpartydeveloperfrontend.builder.{DeveloperBuilder, DeveloperSessionBuilder}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.noapplications.NoApplications.NoApplicationsChoiceForm
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.LoggedInState
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.ViewHelpers._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.{LocalUserIdTracker, WithCSRFAddToken}
-import views.helper.CommonViewSpec
-import views.html.noapplications.NoApplicationsChoiceView
 
 class NoApplicationsChoiceViewSpec extends CommonViewSpec with WithCSRFAddToken with LocalUserIdTracker with DeveloperSessionBuilder with DeveloperBuilder {
 

@@ -16,12 +16,13 @@
 
 package uk.gov.hmrc.thirdpartydeveloperfrontend.helpers
 
-import uk.gov.hmrc.thirdpartydeveloperfrontend.helpers.DateFormatter.initialLastAccessDate
-import org.scalatest.BeforeAndAfterAll
-import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.AsyncHmrcSpec
-
-import java.time.{Clock, LocalDateTime, ZoneOffset}
 import java.time.temporal.ChronoUnit
+import java.time.{Clock, LocalDateTime, ZoneOffset}
+
+import org.scalatest.BeforeAndAfterAll
+
+import uk.gov.hmrc.thirdpartydeveloperfrontend.helpers.DateFormatter.initialLastAccessDate
+import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.AsyncHmrcSpec
 
 class DateFormatterSpec extends AsyncHmrcSpec with BeforeAndAfterAll {
   val fixedTimeNow: LocalDateTime = LocalDateTime.parse("2019-09-01T00:30:00.000")

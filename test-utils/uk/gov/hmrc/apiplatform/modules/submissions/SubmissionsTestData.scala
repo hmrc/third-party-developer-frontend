@@ -16,14 +16,14 @@
 
 package uk.gov.hmrc.apiplatform.modules.submissions
 
-import uk.gov.hmrc.apiplatform.modules.submissions.domain.models._
-import uk.gov.hmrc.apiplatform.modules.submissions.domain.models.AskWhen.Context.Keys
+import java.time.{LocalDateTime, ZoneOffset}
+import scala.util.Random
+
 import cats.data.NonEmptyList
 
-import scala.util.Random
+import uk.gov.hmrc.apiplatform.modules.submissions.domain.models.AskWhen.Context.Keys
+import uk.gov.hmrc.apiplatform.modules.submissions.domain.models._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.ApplicationId
-
-import java.time.{LocalDateTime, ZoneOffset}
 
 trait StatusTestDataHelper {
 

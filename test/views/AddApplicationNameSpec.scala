@@ -16,18 +16,19 @@
 
 package views
 
+import org.jsoup.Jsoup
+import views.helper.CommonViewSpec
+import views.html.AddApplicationNameView
+
+import play.api.data.Form
+import play.api.test.FakeRequest
+
+import uk.gov.hmrc.thirdpartydeveloperfrontend.builder._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.AddApplicationNameForm
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.{ApplicationId, Environment}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.LoggedInState
-import org.jsoup.Jsoup
-import play.api.data.Form
-import play.api.test.FakeRequest
-import uk.gov.hmrc.thirdpartydeveloperfrontend.builder._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.ViewHelpers._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.{LocalUserIdTracker, WithCSRFAddToken}
-import views.helper.CommonViewSpec
-import views.html.AddApplicationNameView
-import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.AddApplicationNameForm
 
 class AddApplicationNameSpec extends CommonViewSpec
     with WithCSRFAddToken

@@ -17,10 +17,12 @@
 package uk.gov.hmrc.thirdpartydeveloperfrontend.controllers
 
 import javax.inject.Inject
+
 import play.api.mvc.{Call, RequestHeader}
 import play.api.test.FakeRequest
 import play.filters.csrf.CSRF.{Token, TokenInfo}
 import play.filters.csrf.CSRFConfigProvider
+
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.AsyncHmrcSpec
 
 class SpliceCSRFTokenSpec @Inject() (csrfConfigProvider: CSRFConfigProvider) extends AsyncHmrcSpec {

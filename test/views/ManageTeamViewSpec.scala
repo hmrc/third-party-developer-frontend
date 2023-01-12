@@ -16,21 +16,23 @@
 
 package views
 
-import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.AddTeamMemberForm
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications._
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.LoggedInState
-import uk.gov.hmrc.thirdpartydeveloperfrontend.helpers.string._
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.controllers.ApplicationViewModel
-import org.jsoup.Jsoup
-import play.api.data.Form
-import play.api.test.FakeRequest
 import java.time.{LocalDateTime, ZoneOffset}
-import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.ViewHelpers.{elementExistsByText, linkExistsWithHref}
-import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.WithCSRFAddToken
+
+import org.jsoup.Jsoup
 import views.helper.CommonViewSpec
 import views.html.manageTeamViews.ManageTeamView
+
+import play.api.data.Form
+import play.api.test.FakeRequest
+
 import uk.gov.hmrc.thirdpartydeveloperfrontend.builder.{DeveloperBuilder, DeveloperSessionBuilder}
-import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.LocalUserIdTracker
+import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.AddTeamMemberForm
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications._
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.controllers.ApplicationViewModel
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.LoggedInState
+import uk.gov.hmrc.thirdpartydeveloperfrontend.helpers.string._
+import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.ViewHelpers.{elementExistsByText, linkExistsWithHref}
+import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.{LocalUserIdTracker, WithCSRFAddToken}
 
 class ManageTeamViewSpec extends CommonViewSpec with WithCSRFAddToken with DeveloperBuilder with LocalUserIdTracker with DeveloperSessionBuilder {
 

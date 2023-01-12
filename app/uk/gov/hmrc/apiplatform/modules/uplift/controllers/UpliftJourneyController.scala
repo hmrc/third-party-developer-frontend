@@ -16,38 +16,30 @@
 
 package uk.gov.hmrc.apiplatform.modules.uplift.controllers
 
-import uk.gov.hmrc.thirdpartydeveloperfrontend.config.ApplicationConfig
-import uk.gov.hmrc.thirdpartydeveloperfrontend.config.ErrorHandler
-import uk.gov.hmrc.thirdpartydeveloperfrontend.connectors.ApmConnector
-import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.checkpages.{CanUseCheckActions, DummySubscriptionsForm}
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.apidefinitions.APISubscriptionStatus
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.ApplicationId
-import uk.gov.hmrc.apiplatform.modules.uplift.domain.models.ApiSubscriptions
-import play.api.data.Forms._
-import play.api.data.{Form, FormError}
-import play.api.libs.crypto.CookieSigner
-import play.api.mvc.{Action, AnyContent, MessagesControllerComponents, Result}
-import uk.gov.hmrc.thirdpartydeveloperfrontend.service.{ApplicationActionService, ApplicationService, SessionService}
-import views.helper.IdFormatter
-import uk.gov.hmrc.apiplatform.modules.uplift.views.html._
-import uk.gov.hmrc.apiplatform.modules.uplift.services.GetProductionCredentialsFlowService
-import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.checkpages
-
 import javax.inject.{Inject, Singleton}
 import scala.concurrent.Future.successful
 import scala.concurrent.{ExecutionContext, Future}
-import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.ApplicationController
-import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.APISubscriptions
-import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.FormKeys
-import uk.gov.hmrc.apiplatform.modules.uplift.services.UpliftJourneyService
-import uk.gov.hmrc.thirdpartydeveloperfrontend.config.UpliftJourneyConfig
-import uk.gov.hmrc.thirdpartydeveloperfrontend.config.{On, OnDemand}
-import play.api.mvc.Request
+import scala.util.Try
+
+import views.helper.IdFormatter
+
+import play.api.data.Forms._
+import play.api.data.{Form, FormError}
+import play.api.libs.crypto.CookieSigner
+import play.api.mvc.{Action, AnyContent, MessagesControllerComponents, Request, Result}
 import uk.gov.hmrc.play.bootstrap.controller.WithUnsafeDefaultFormBinding
 
-import scala.util.Try
+import uk.gov.hmrc.apiplatform.modules.uplift.domain.models.ApiSubscriptions
+import uk.gov.hmrc.apiplatform.modules.uplift.services.{GetProductionCredentialsFlowService, UpliftJourneyService}
+import uk.gov.hmrc.apiplatform.modules.uplift.views.html._
+import uk.gov.hmrc.thirdpartydeveloperfrontend.config.{ApplicationConfig, ErrorHandler, On, OnDemand, UpliftJourneyConfig}
+import uk.gov.hmrc.thirdpartydeveloperfrontend.connectors.ApmConnector
+import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.checkpages.{CanUseCheckActions, DummySubscriptionsForm}
+import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.{APISubscriptions, ApplicationController, FormKeys, checkpages}
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.apidefinitions.APISubscriptionStatus
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.{ApplicationId, SellResellOrDistribute}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.controllers.BadRequestWithErrorMessage
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.SellResellOrDistribute
+import uk.gov.hmrc.thirdpartydeveloperfrontend.service.{ApplicationActionService, ApplicationService, SessionService}
 
 object UpliftJourneyController {
 

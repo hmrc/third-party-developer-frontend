@@ -16,16 +16,17 @@
 
 package uk.gov.hmrc.thirdpartydeveloperfrontend.service
 
-import uk.gov.hmrc.thirdpartydeveloperfrontend.config.ApplicationConfig
+import java.net.URLDecoder
+import java.nio.charset.StandardCharsets
 import javax.inject.{Inject, Singleton}
+import scala.concurrent.{ExecutionContext, Future}
+
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.play.audit.AuditExtensions.auditHeaderCarrier
 import uk.gov.hmrc.play.audit.http.connector.{AuditConnector, AuditResult}
 import uk.gov.hmrc.play.audit.model.DataEvent
 
-import scala.concurrent.{ExecutionContext, Future}
-import java.net.URLDecoder
-import java.nio.charset.StandardCharsets
+import uk.gov.hmrc.thirdpartydeveloperfrontend.config.ApplicationConfig
 
 @Singleton
 class AuditService @Inject() (auditConnector: AuditConnector, appConfig: ApplicationConfig)(implicit val ec: ExecutionContext) {

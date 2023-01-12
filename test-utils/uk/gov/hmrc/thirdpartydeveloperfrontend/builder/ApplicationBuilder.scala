@@ -16,14 +16,13 @@
 
 package uk.gov.hmrc.thirdpartydeveloperfrontend.builder
 
-import java.time.{Period, ZoneOffset}
+import java.time.{LocalDateTime, Period, ZoneOffset}
 import java.util.UUID.randomUUID
-import java.time.LocalDateTime
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications._
+
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.apidefinitions._
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.subscriptions.{FieldName, FieldValue, Fields}
-import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.CollaboratorTracker
-import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.UserIdTracker
+import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.{CollaboratorTracker, UserIdTracker}
 
 trait ApplicationBuilder extends CollaboratorTracker {
   self: UserIdTracker =>

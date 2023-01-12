@@ -16,11 +16,11 @@
 
 package uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.actions
 
-import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.ApplicationController
-import scala.concurrent.ExecutionContext
+import scala.concurrent.{ExecutionContext, Future}
+
 import play.api.mvc.{Action, ActionFilter, AnyContent, Result}
-import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.ApplicationRequest
-import scala.concurrent.Future
+
+import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.{ApplicationController, ApplicationRequest}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications._
 
 trait PpnsActions {

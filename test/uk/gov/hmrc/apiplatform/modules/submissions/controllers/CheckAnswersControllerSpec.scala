@@ -16,35 +16,33 @@
 
 package uk.gov.hmrc.apiplatform.modules.submissions.controllers
 
-import org.mockito.captor.ArgCaptor
-import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.{BaseControllerSpec, SubscriptionTestHelperSugar}
-import uk.gov.hmrc.thirdpartydeveloperfrontend.builder.{DeveloperBuilder, SampleApplication, SampleSession}
-import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.{LocalUserIdTracker, WithCSRFAddToken}
-import uk.gov.hmrc.thirdpartydeveloperfrontend.mocks.service.ApplicationServiceMock
-import uk.gov.hmrc.thirdpartydeveloperfrontend.mocks.service.ApplicationActionServiceMock
-import uk.gov.hmrc.thirdpartydeveloperfrontend.mocks.connectors.ApmConnectorMockModule
-import uk.gov.hmrc.apiplatform.modules.submissions.services.mocks.SubmissionServiceMockModule
-import uk.gov.hmrc.http.HeaderCarrier
-import uk.gov.hmrc.apiplatform.modules.submissions.views.html.CheckAnswersView
-import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.WithLoggedInSession._
-
 import scala.concurrent.ExecutionContext.Implicits.global
-import uk.gov.hmrc.apiplatform.modules.submissions.SubmissionsTestData
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.ApplicationWithSubscriptionData
+import scala.concurrent.Future.{failed, successful}
+
+import org.mockito.captor.ArgCaptor
+
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
 import play.filters.csrf.CSRF
-import uk.gov.hmrc.apiplatform.modules.submissions.services.RequestProductionCredentials
-import uk.gov.hmrc.apiplatform.modules.submissions.views.html.ProductionCredentialsRequestReceivedView
-import uk.gov.hmrc.apiplatform.modules.submissions.domain.models.{ExtendedSubmission, NoAnswer, QuestionnaireProgress, SingleChoiceAnswer}
-import uk.gov.hmrc.apiplatform.modules.submissions.domain.models.QuestionnaireState.Completed
-import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.AsIdsHelpers._
-import uk.gov.hmrc.apiplatform.modules.submissions.domain.models.QuestionnaireState.InProgress
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.DeveloperSession
+import uk.gov.hmrc.http.HeaderCarrier
 
-import scala.concurrent.Future.{failed, successful}
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.ApplicationNotFound
+import uk.gov.hmrc.apiplatform.modules.submissions.SubmissionsTestData
 import uk.gov.hmrc.apiplatform.modules.submissions.controllers.CheckAnswersController.ProdCredsRequestReceivedViewModel
+import uk.gov.hmrc.apiplatform.modules.submissions.domain.models.QuestionnaireState.{Completed, InProgress}
+import uk.gov.hmrc.apiplatform.modules.submissions.domain.models.{ExtendedSubmission, NoAnswer, QuestionnaireProgress, SingleChoiceAnswer}
+import uk.gov.hmrc.apiplatform.modules.submissions.services.RequestProductionCredentials
+import uk.gov.hmrc.apiplatform.modules.submissions.services.mocks.SubmissionServiceMockModule
+import uk.gov.hmrc.apiplatform.modules.submissions.views.html.{CheckAnswersView, ProductionCredentialsRequestReceivedView}
+import uk.gov.hmrc.thirdpartydeveloperfrontend.builder.{DeveloperBuilder, SampleApplication, SampleSession}
+import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.{BaseControllerSpec, SubscriptionTestHelperSugar}
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.ApplicationNotFound
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.ApplicationWithSubscriptionData
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.DeveloperSession
+import uk.gov.hmrc.thirdpartydeveloperfrontend.mocks.connectors.ApmConnectorMockModule
+import uk.gov.hmrc.thirdpartydeveloperfrontend.mocks.service.{ApplicationActionServiceMock, ApplicationServiceMock}
+import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.AsIdsHelpers._
+import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.WithLoggedInSession._
+import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.{LocalUserIdTracker, WithCSRFAddToken}
 
 class CheckAnswersControllerSpec
     extends BaseControllerSpec

@@ -17,9 +17,11 @@
 package views.templates
 
 import javax.inject.{Inject, Singleton}
+
+import views.html.helper
+
 import play.api.Configuration
 import play.api.mvc.Request
-import views.html.helper
 
 @Singleton
 class FooterConfig @Inject() (config: Configuration) {

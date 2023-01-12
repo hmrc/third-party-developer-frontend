@@ -17,16 +17,18 @@
 package uk.gov.hmrc.thirdpartydeveloperfrontend.domain
 
 import java.time.{LocalDateTime, Period}
+
+import org.scalatest.funspec.AnyFunSpec
+import org.scalatest.matchers.should.Matchers
+
+import uk.gov.hmrc.apiplatform.modules.submissions.domain.models.Submission
 import uk.gov.hmrc.thirdpartydeveloperfrontend.builder.DeveloperBuilder
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.Capabilities.{ChangeClientSecret, ViewCredentials}
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.Permissions.SandboxOrAdmin
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.Developer
 import uk.gov.hmrc.thirdpartydeveloperfrontend.helpers.string._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.LocalUserIdTracker
-import org.scalatest.matchers.should.Matchers
-import org.scalatest.funspec.AnyFunSpec
-import uk.gov.hmrc.apiplatform.modules.submissions.domain.models.Submission
 
 class ApplicationSpec extends AnyFunSpec with Matchers with DeveloperBuilder with LocalUserIdTracker {
 

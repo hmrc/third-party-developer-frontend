@@ -16,18 +16,20 @@
 
 package uk.gov.hmrc.thirdpartydeveloperfrontend.config
 
+import java.time.Clock
+
 import akka.pattern.FutureTimeoutSupport
 import com.google.inject.AbstractModule
 import com.google.inject.name.Names.named
+
+import uk.gov.hmrc.play.bootstrap.filters.frontend.SessionTimeoutFilter
+
+import uk.gov.hmrc.apiplatform.modules.submissions.config.ThirdPartyApplicationSubmissionsConnectorConfigProvider
+import uk.gov.hmrc.apiplatform.modules.submissions.connectors.ThirdPartyApplicationSubmissionsConnector
 import uk.gov.hmrc.thirdpartydeveloperfrontend.connectors._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.helpers.FutureTimeoutSupportImpl
 import uk.gov.hmrc.thirdpartydeveloperfrontend.service.PushPullNotificationsService.PushPullNotificationsConnector
 import uk.gov.hmrc.thirdpartydeveloperfrontend.service.SubscriptionFieldsService.SubscriptionFieldsConnector
-import uk.gov.hmrc.play.bootstrap.filters.frontend.SessionTimeoutFilter
-import uk.gov.hmrc.apiplatform.modules.submissions.connectors.ThirdPartyApplicationSubmissionsConnector
-import uk.gov.hmrc.apiplatform.modules.submissions.config.ThirdPartyApplicationSubmissionsConnectorConfigProvider
-
-import java.time.Clock
 
 class ConfigurationModule extends AbstractModule {
 

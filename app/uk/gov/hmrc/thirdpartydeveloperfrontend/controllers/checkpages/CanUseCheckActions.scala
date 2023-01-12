@@ -16,13 +16,14 @@
 
 package uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.checkpages
 
+import scala.concurrent.Future
+
+import play.api.mvc.{Action, AnyContent, Result}
+
 import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.{ApplicationController, ApplicationRequest}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.ApplicationId
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.Capabilities.SupportsAppChecks
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.Permissions.AdministratorOnly
-import play.api.mvc.{Action, AnyContent, Result}
-
-import scala.concurrent.Future
 
 trait CanUseCheckActions {
   self: ApplicationController =>

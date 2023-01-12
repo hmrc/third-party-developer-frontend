@@ -16,25 +16,25 @@
 
 package views
 
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.controllers.{ApplicationSummary, ManageApplicationsViewModel}
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.apidefinitions.AccessType
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.{ApplicationId, CollaboratorRole, State, TermsOfUseStatus}
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.LoggedInState
+import java.time.{LocalDateTime, ZoneOffset}
+
 import org.jsoup.Jsoup
 import org.jsoup.nodes.Document
-import play.api.test.FakeRequest
-import uk.gov.hmrc.thirdpartydeveloperfrontend.builder.{DeveloperBuilder, DeveloperSessionBuilder}
+import views.helper.{CommonViewSpec, EnvironmentNameService}
+import views.html.ManageApplicationsView
+import views.html.noapplications.StartUsingRestApisView
 
-import java.time.{LocalDateTime, ZoneOffset}
+import play.api.test.FakeRequest
+
+import uk.gov.hmrc.thirdpartydeveloperfrontend.builder.{DeveloperBuilder, DeveloperSessionBuilder}
+import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.addapplication.routes.{AddApplication => AddApplicationRoutes}
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.apidefinitions.AccessType
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.{ApplicationId, CollaboratorRole, Environment, State, TermsOfUseStatus}
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.controllers.{ApplicationSummary, ManageApplicationsViewModel}
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.LoggedInState
+import uk.gov.hmrc.thirdpartydeveloperfrontend.helpers.DateFormatter
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.ViewHelpers.{elementExistsByText, elementIdentifiedByAttrContainsText}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.{LocalUserIdTracker, WithCSRFAddToken}
-import views.helper.CommonViewSpec
-import views.html.ManageApplicationsView
-import views.helper.EnvironmentNameService
-import uk.gov.hmrc.thirdpartydeveloperfrontend.helpers.DateFormatter
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.Environment
-import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.addapplication.routes.{AddApplication => AddApplicationRoutes}
-import views.html.noapplications.StartUsingRestApisView
 
 class ViewAllApplicationsPageSpec extends CommonViewSpec
     with WithCSRFAddToken

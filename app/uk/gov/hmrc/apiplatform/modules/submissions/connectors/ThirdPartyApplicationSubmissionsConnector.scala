@@ -16,18 +16,19 @@
 
 package uk.gov.hmrc.apiplatform.modules.submissions.connectors
 
-import uk.gov.hmrc.thirdpartydeveloperfrontend.connectors.ConnectorMetrics
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications._
-import uk.gov.hmrc.apiplatform.modules.submissions.domain.models._
-import uk.gov.hmrc.apiplatform.modules.submissions.domain.services._
+import javax.inject.{Inject, Singleton}
+import scala.concurrent.{ExecutionContext, Future}
+import scala.util.{Success, Try}
+
 import play.api.libs.json.{JsValue, Json}
 import uk.gov.hmrc.http.HttpReads.Implicits._
 import uk.gov.hmrc.http.{HeaderCarrier, HttpClient, HttpResponse, UpstreamErrorResponse}
 import uk.gov.hmrc.play.http.metrics.common.API
 
-import javax.inject.{Inject, Singleton}
-import scala.concurrent.{ExecutionContext, Future}
-import scala.util.{Success, Try}
+import uk.gov.hmrc.apiplatform.modules.submissions.domain.models._
+import uk.gov.hmrc.apiplatform.modules.submissions.domain.services._
+import uk.gov.hmrc.thirdpartydeveloperfrontend.connectors.ConnectorMetrics
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications._
 
 object ThirdPartyApplicationSubmissionsConnector {
   case class Config(serviceBaseUrl: String, apiKey: String)

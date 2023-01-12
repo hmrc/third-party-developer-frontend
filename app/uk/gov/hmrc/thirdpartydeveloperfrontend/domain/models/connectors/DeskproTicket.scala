@@ -16,11 +16,12 @@
 
 package uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.connectors
 
+import play.api.libs.json.Json
+import play.api.mvc.Request
+
 import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.apidefinitions.ApiVersion
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.{ApplicationId, CollaboratorRole, Environment}
-import play.api.libs.json.Json
-import play.api.mvc.Request
 
 case class DeskproTicket(
     name: String,

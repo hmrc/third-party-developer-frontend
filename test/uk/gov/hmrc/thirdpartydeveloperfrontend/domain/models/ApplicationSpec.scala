@@ -16,22 +16,10 @@
 
 package uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models
 
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.{
-  Application,
-  ApplicationId,
-  ClientId,
-  Environment,
-  ImportantSubmissionData,
-  PrivacyPolicyLocation,
-  ResponsibleIndividual,
-  ServerLocation,
-  Standard,
-  TermsAndConditionsLocation,
-  TermsOfUseAcceptance
-}
-import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.HmrcSpec
-
 import java.time.{LocalDateTime, Period}
+
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications._
+import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.HmrcSpec
 
 class ApplicationSpec extends HmrcSpec {
   val url            = "http://example.com"

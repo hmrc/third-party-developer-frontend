@@ -16,12 +16,12 @@
 
 package uk.gov.hmrc.thirdpartydeveloperfrontend.domain.services
 
+import java.time.{LocalDateTime, Period, ZoneOffset}
+
 import uk.gov.hmrc.apiplatform.modules.submissions.domain.models.Submission
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.services.TermsOfUseService.TermsOfUseAgreementDetails
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.HmrcSpec
-
-import java.time.{LocalDateTime, Period, ZoneOffset}
 
 class TermsOfUseServiceSpec extends HmrcSpec {
 

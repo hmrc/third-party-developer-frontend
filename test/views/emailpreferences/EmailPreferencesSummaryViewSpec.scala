@@ -16,16 +16,18 @@
 
 package views.emailpreferences
 
-import views.helper.CommonViewSpec
 import org.jsoup.Jsoup
 import org.jsoup.nodes.Document
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.LoggedInState
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.emailpreferences.{APICategoryDisplayDetails, EmailPreferences, EmailTopic, TaxRegimeInterests}
+import views.helper.CommonViewSpec
+import views.html.emailpreferences.EmailPreferencesSummaryView
+
 import play.api.mvc.AnyContentAsEmpty
 import play.api.test.FakeRequest
+
 import uk.gov.hmrc.thirdpartydeveloperfrontend.builder.{DeveloperBuilder, DeveloperSessionBuilder}
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.LoggedInState
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.emailpreferences.{APICategoryDisplayDetails, EmailPreferences, EmailTopic, TaxRegimeInterests}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.{LocalUserIdTracker, WithCSRFAddToken}
-import views.html.emailpreferences.EmailPreferencesSummaryView
 
 class EmailPreferencesSummaryViewSpec extends CommonViewSpec
     with WithCSRFAddToken

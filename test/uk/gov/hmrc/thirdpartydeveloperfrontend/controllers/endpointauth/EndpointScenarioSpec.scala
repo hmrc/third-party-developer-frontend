@@ -16,7 +16,12 @@
 
 package uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.endpointauth
 
+import java.time.LocalDateTime
+import scala.concurrent.Future
+import scala.io.Source
+
 import org.scalatestplus.play.guice.GuiceOneAppPerSuite
+
 import play.api.Mode
 import play.api.http.Status.OK
 import play.api.inject.bind
@@ -24,6 +29,7 @@ import play.api.inject.guice.GuiceApplicationBuilder
 import play.api.libs.crypto.CookieSigner
 import play.api.test.Helpers.{redirectLocation, route, status}
 import play.api.test.{CSRFTokenHelper, FakeRequest, Writeables}
+
 import uk.gov.hmrc.apiplatform.modules.dynamics.connectors.ThirdPartyDeveloperDynamicsConnector
 import uk.gov.hmrc.apiplatform.modules.mfa.connectors.ThirdPartyDeveloperMfaConnector
 import uk.gov.hmrc.apiplatform.modules.mfa.models.{MfaAction, MfaId, MfaType}
@@ -31,7 +37,6 @@ import uk.gov.hmrc.apiplatform.modules.submissions.connectors.ThirdPartyApplicat
 import uk.gov.hmrc.apiplatform.modules.submissions.domain.models.{Question, Submission}
 import uk.gov.hmrc.apiplatform.modules.uplift.domain.models.{ApiSubscriptions, GetProductionCredentialsFlow}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.connectors._
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.{ApplicationUpdateSuccessful, ApplicationUpliftSuccessful}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.apidefinitions.{ApiContext, ApiIdentifier, ApiVersion}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.ApplicationNameValidationJson.ApplicationNameValidationResult
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications._
@@ -41,13 +46,10 @@ import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.{UpdateP
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.emailpreferences.{APICategoryDisplayDetails, EmailPreferences}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.subscriptions.ApiSubscriptionFields.SaveSubscriptionFieldsSuccessResponse
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.subscriptions.Fields
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.{ApplicationUpdateSuccessful, ApplicationUpliftSuccessful}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.helpers.ExcludeFromCoverage
 import uk.gov.hmrc.thirdpartydeveloperfrontend.repositories.FlowRepository
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.AsyncHmrcSpec
-
-import java.time.LocalDateTime
-import scala.concurrent.Future
-import scala.io.Source
 
 object EndpointScenarioSpec {
 

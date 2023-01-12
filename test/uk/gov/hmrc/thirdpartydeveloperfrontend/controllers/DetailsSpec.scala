@@ -16,46 +16,36 @@
 
 package uk.gov.hmrc.thirdpartydeveloperfrontend.controllers
 
-import uk.gov.hmrc.thirdpartydeveloperfrontend.builder.DeveloperBuilder
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain._
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications._
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.{DeveloperSession, LoggedInState, Session, UserId}
-import uk.gov.hmrc.thirdpartydeveloperfrontend.mocks.service._
+import java.time.LocalDateTime
+import scala.concurrent.ExecutionContext.Implicits.global
+import scala.concurrent.Future
+import scala.concurrent.Future._
+
 import org.jsoup.Jsoup
 import org.mockito.captor.ArgCaptor
+import views.html._
+import views.html.application.PendingApprovalView
+import views.html.checkpages.applicationcheck.UnauthorisedAppDetailsView
+
 import play.api.libs.json.Json
 import play.api.mvc.Result
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
 import play.filters.csrf.CSRF.TokenProvider
-import uk.gov.hmrc.thirdpartydeveloperfrontend.service.SessionService
 import uk.gov.hmrc.http.HeaderCarrier
-import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.ViewHelpers._
-import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.WithCSRFAddToken
-import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.WithLoggedInSession._
-import views.html.{ChangeDetailsView, ChangeOfApplicationNameConfirmationView, DetailsView, RequestChangeOfApplicationNameView, UpdatePrivacyPolicyLocationView}
-import views.html.{
-  ChangeDetailsView,
-  ChangeOfApplicationNameConfirmationView,
-  DetailsView,
-  RequestChangeOfApplicationNameView,
-  UpdatePrivacyPolicyLocationView,
-  UpdateTermsAndConditionsLocationView
-}
-import views.html.application.PendingApprovalView
-import views.html.checkpages.applicationcheck.UnauthorisedAppDetailsView
 
-import scala.concurrent.ExecutionContext.Implicits.global
-import scala.concurrent.Future
-import scala.concurrent.Future._
-import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.LocalUserIdTracker
-import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.TestApplications
-import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.CollaboratorTracker
 import uk.gov.hmrc.apiplatform.modules.submissions.services.mocks.SubmissionServiceMockModule
+import uk.gov.hmrc.thirdpartydeveloperfrontend.builder.DeveloperBuilder
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain._
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.connectors.TicketCreated
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.{DeveloperSession, LoggedInState, Session, UserId}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.services.TermsOfUseService.TermsOfUseAgreementDetails
-
-import java.time.LocalDateTime
+import uk.gov.hmrc.thirdpartydeveloperfrontend.mocks.service._
+import uk.gov.hmrc.thirdpartydeveloperfrontend.service.SessionService
+import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.ViewHelpers._
+import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.WithLoggedInSession._
+import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.{CollaboratorTracker, LocalUserIdTracker, TestApplications, WithCSRFAddToken}
 
 class DetailsSpec
     extends BaseControllerSpec

@@ -16,25 +16,23 @@
 
 package uk.gov.hmrc.apiplatform.modules.mfa.controllers.profile
 
+import java.net.URI
+import scala.concurrent.ExecutionContext.Implicits.global
+import scala.concurrent.Future
+import scala.concurrent.Future.successful
+
 import play.api.http.Status
 import play.api.mvc.{AnyContentAsFormUrlEncoded, Result}
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
+
 import uk.gov.hmrc.apiplatform.modules.mfa.MfaViewsValidator
 import uk.gov.hmrc.apiplatform.modules.mfa.connectors.ThirdPartyDeveloperMfaConnector
 import uk.gov.hmrc.apiplatform.modules.mfa.connectors.ThirdPartyDeveloperMfaConnector.{RegisterAuthAppResponse, RegisterSmsResponse}
 import uk.gov.hmrc.apiplatform.modules.mfa.service.MfaService
-import uk.gov.hmrc.apiplatform.modules.mfa.views.html.{RemoveMfaCompletedView, SecurityPreferencesView, SelectMfaView}
-import uk.gov.hmrc.apiplatform.modules.mfa.views.html.authapp.{
-  AuthAppAccessCodeView,
-  AuthAppSetupCompletedView,
-  AuthAppSetupReminderView,
-  AuthAppSetupSkippedView,
-  AuthAppStartView,
-  NameChangeView,
-  QrCodeView
-}
+import uk.gov.hmrc.apiplatform.modules.mfa.views.html.authapp._
 import uk.gov.hmrc.apiplatform.modules.mfa.views.html.sms.{MobileNumberView, SmsAccessCodeView, SmsSetupCompletedView, SmsSetupReminderView, SmsSetupSkippedView}
+import uk.gov.hmrc.apiplatform.modules.mfa.views.html.{RemoveMfaCompletedView, SecurityPreferencesView, SelectMfaView}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.builder.{DeveloperBuilder, MfaDetailBuilder}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.config.ErrorHandler
 import uk.gov.hmrc.thirdpartydeveloperfrontend.connectors.ThirdPartyDeveloperConnector
@@ -44,11 +42,6 @@ import uk.gov.hmrc.thirdpartydeveloperfrontend.mocks.service.SessionServiceMock
 import uk.gov.hmrc.thirdpartydeveloperfrontend.qr.{OtpAuthUri, QRCode}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.WithLoggedInSession.AuthFakeRequest
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.{LocalUserIdTracker, WithCSRFAddToken}
-
-import java.net.URI
-import scala.concurrent.Future
-import scala.concurrent.Future.successful
-import scala.concurrent.ExecutionContext.Implicits.global
 
 class MfaControllerBaseSpec extends BaseControllerSpec
     with WithCSRFAddToken

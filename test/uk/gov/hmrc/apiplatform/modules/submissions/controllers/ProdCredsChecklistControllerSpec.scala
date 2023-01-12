@@ -16,29 +16,26 @@
 
 package uk.gov.hmrc.apiplatform.modules.submissions.controllers
 
-import org.mockito.captor.ArgCaptor
-import play.api.data.Form
-import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.BaseControllerSpec
-import uk.gov.hmrc.thirdpartydeveloperfrontend.mocks.service.ApplicationServiceMock
-import uk.gov.hmrc.thirdpartydeveloperfrontend.mocks.service.ApplicationActionServiceMock
-import uk.gov.hmrc.thirdpartydeveloperfrontend.mocks.connectors.ApmConnectorMockModule
-import uk.gov.hmrc.apiplatform.modules.submissions.services.mocks.SubmissionServiceMockModule
-import play.api.test.Helpers._
-import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.WithLoggedInSession._
-
 import scala.concurrent.ExecutionContext.Implicits.global
-import uk.gov.hmrc.apiplatform.modules.submissions.views.html.ProductionCredentialsChecklistView
-import uk.gov.hmrc.thirdpartydeveloperfrontend.builder.DeveloperBuilder
-import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.LocalUserIdTracker
+
+import org.mockito.captor.ArgCaptor
+
+import play.api.data.Form
 import play.api.test.FakeRequest
+import play.api.test.Helpers._
 import play.filters.csrf.CSRF
-import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.WithCSRFAddToken
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.ApplicationWithSubscriptionData
-import uk.gov.hmrc.thirdpartydeveloperfrontend.builder.SampleApplication
-import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.SubscriptionTestHelperSugar
-import uk.gov.hmrc.thirdpartydeveloperfrontend.builder.SampleSession
+
 import uk.gov.hmrc.apiplatform.modules.submissions.SubmissionsTestData
 import uk.gov.hmrc.apiplatform.modules.submissions.controllers.ProdCredsChecklistController.{DummyForm, ViewModel}
+import uk.gov.hmrc.apiplatform.modules.submissions.services.mocks.SubmissionServiceMockModule
+import uk.gov.hmrc.apiplatform.modules.submissions.views.html.ProductionCredentialsChecklistView
+import uk.gov.hmrc.thirdpartydeveloperfrontend.builder.{DeveloperBuilder, SampleApplication, SampleSession}
+import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.{BaseControllerSpec, SubscriptionTestHelperSugar}
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.ApplicationWithSubscriptionData
+import uk.gov.hmrc.thirdpartydeveloperfrontend.mocks.connectors.ApmConnectorMockModule
+import uk.gov.hmrc.thirdpartydeveloperfrontend.mocks.service.{ApplicationActionServiceMock, ApplicationServiceMock}
+import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.WithLoggedInSession._
+import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.{LocalUserIdTracker, WithCSRFAddToken}
 
 class ProdCredsChecklistControllerSpec
     extends BaseControllerSpec

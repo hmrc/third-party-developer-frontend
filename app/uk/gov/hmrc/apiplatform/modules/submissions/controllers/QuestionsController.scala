@@ -17,25 +17,23 @@
 package uk.gov.hmrc.apiplatform.modules.submissions.controllers
 
 import javax.inject.{Inject, Singleton}
-import play.api.mvc.MessagesControllerComponents
-import scala.concurrent.ExecutionContext
-import uk.gov.hmrc.thirdpartydeveloperfrontend.config.ApplicationConfig
-import uk.gov.hmrc.thirdpartydeveloperfrontend.config.ErrorHandler
-import uk.gov.hmrc.thirdpartydeveloperfrontend.service.{ApplicationActionService, ApplicationService, SessionService}
-import play.api.libs.crypto.CookieSigner
-import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.ApplicationController
-import uk.gov.hmrc.apiplatform.modules.submissions.views.html._
-import uk.gov.hmrc.apiplatform.modules.submissions.domain.models._
-import uk.gov.hmrc.apiplatform.modules.submissions.services.SubmissionService
-import uk.gov.hmrc.apiplatform.modules.submissions.domain.services.SubmissionsFrontendJsonFormatters._
-
 import scala.concurrent.Future.successful
+import scala.concurrent.{ExecutionContext, Future}
+
+import cats.data.NonEmptyList
+
+import play.api.libs.crypto.CookieSigner
+import play.api.libs.json.Json
+import play.api.mvc.{MessagesControllerComponents, _}
 
 import uk.gov.hmrc.apiplatform.modules.common.services.EitherTHelper
-import play.api.mvc._
-import play.api.libs.json.Json
-import cats.data.NonEmptyList
-import scala.concurrent.Future
+import uk.gov.hmrc.apiplatform.modules.submissions.domain.models._
+import uk.gov.hmrc.apiplatform.modules.submissions.domain.services.SubmissionsFrontendJsonFormatters._
+import uk.gov.hmrc.apiplatform.modules.submissions.services.SubmissionService
+import uk.gov.hmrc.apiplatform.modules.submissions.views.html._
+import uk.gov.hmrc.thirdpartydeveloperfrontend.config.{ApplicationConfig, ErrorHandler}
+import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.ApplicationController
+import uk.gov.hmrc.thirdpartydeveloperfrontend.service.{ApplicationActionService, ApplicationService, SessionService}
 
 object QuestionsController {
   case class ErrorMessage(message: String)

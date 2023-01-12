@@ -16,13 +16,14 @@
 
 package uk.gov.hmrc.apiplatform.modules.mfa.models
 
-import enumeratum.{Enum, EnumEntry, PlayJsonEnum}
-import play.api.libs.json.{Json, OFormat}
-import uk.gov.hmrc.play.json.Union
-
 import java.time.LocalDateTime
 import java.util.UUID
 import scala.collection.immutable
+
+import enumeratum.{Enum, EnumEntry, PlayJsonEnum}
+
+import play.api.libs.json.{Json, OFormat}
+import uk.gov.hmrc.play.json.Union
 
 case class MfaId(value: UUID) extends AnyVal
 

@@ -16,30 +16,31 @@
 
 package uk.gov.hmrc.thirdpartydeveloperfrontend.controllers
 
-import uk.gov.hmrc.thirdpartydeveloperfrontend.builder.DeveloperBuilder
-import uk.gov.hmrc.thirdpartydeveloperfrontend.config.ErrorHandler
-import uk.gov.hmrc.thirdpartydeveloperfrontend.connectors.ThirdPartyDeveloperConnector
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.connectors.ChangePassword
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.{Developer, LoggedInState, Session, UpdateProfileRequest}
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.InvalidCredentials
-import uk.gov.hmrc.thirdpartydeveloperfrontend.mocks.service.{ApplicationServiceMock, SessionServiceMock}
+import scala.concurrent.ExecutionContext.Implicits.global
+import scala.concurrent.Future
+import scala.concurrent.Future.failed
+
 import org.jsoup.Jsoup
 import org.mockito.ArgumentCaptor
+import views.html._
+
 import play.api.http.Status.OK
 import play.api.mvc.AnyContentAsEmpty
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
+
+import uk.gov.hmrc.thirdpartydeveloperfrontend.builder.DeveloperBuilder
+import uk.gov.hmrc.thirdpartydeveloperfrontend.config.ErrorHandler
+import uk.gov.hmrc.thirdpartydeveloperfrontend.connectors.ThirdPartyDeveloperConnector
+import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.profile.Profile
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.InvalidCredentials
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.connectors.ChangePassword
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.{Developer, LoggedInState, Session, UpdateProfileRequest}
+import uk.gov.hmrc.thirdpartydeveloperfrontend.mocks.service.{ApplicationServiceMock, SessionServiceMock}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.service.AuditAction.PasswordChangeFailedDueToInvalidCredentials
 import uk.gov.hmrc.thirdpartydeveloperfrontend.service.AuditService
-import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.WithCSRFAddToken
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.WithLoggedInSession._
-import views.html._
-
-import scala.concurrent.ExecutionContext.Implicits.global
-import scala.concurrent.Future
-import scala.concurrent.Future.failed
-import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.profile.Profile
-import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.LocalUserIdTracker
+import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.{LocalUserIdTracker, WithCSRFAddToken}
 
 class ProfileSpec extends BaseControllerSpec with WithCSRFAddToken with DeveloperBuilder with LocalUserIdTracker {
 

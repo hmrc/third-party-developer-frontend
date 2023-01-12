@@ -16,23 +16,18 @@
 
 package uk.gov.hmrc.apiplatform.modules.uplift.services
 
-import uk.gov.hmrc.thirdpartydeveloperfrontend.service.AppsByTeamMemberService
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.ApplicationId
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.apidefinitions.ApiContext
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.UserId
-import uk.gov.hmrc.thirdpartydeveloperfrontend.connectors.ApmConnector
 import javax.inject.{Inject, Singleton}
-import uk.gov.hmrc.thirdpartydeveloperfrontend.connectors.ThirdPartyApplicationSandboxConnector
-import scala.concurrent.Future
+import scala.concurrent.{ExecutionContext, Future}
+
 import uk.gov.hmrc.http.HeaderCarrier
-import scala.concurrent.ExecutionContext
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.apidefinitions.ApiContext
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.subscriptions.ApiData
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.subscriptions.ApiCategory
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.apidefinitions.ApiIdentifier
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.Environment
+
+import uk.gov.hmrc.thirdpartydeveloperfrontend.connectors.{ApmConnector, ThirdPartyApplicationSandboxConnector}
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.apidefinitions.{APIStatus, ApiContext, ApiIdentifier}
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.{ApplicationId, Environment}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.controllers.ApplicationSummary
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.apidefinitions.APIStatus
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.UserId
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.subscriptions.{ApiCategory, ApiData}
+import uk.gov.hmrc.thirdpartydeveloperfrontend.service.AppsByTeamMemberService
 
 @Singleton
 class UpliftLogic @Inject() (

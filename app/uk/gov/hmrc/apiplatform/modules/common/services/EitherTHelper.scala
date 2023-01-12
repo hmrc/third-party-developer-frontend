@@ -16,8 +16,8 @@
 
 package uk.gov.hmrc.apiplatform.modules.common.services
 
-import scala.concurrent.ExecutionContext
-import scala.concurrent.Future
+import scala.concurrent.{ExecutionContext, Future}
+
 import cats.data.EitherT
 import cats.instances.future.catsStdInstancesForFuture
 

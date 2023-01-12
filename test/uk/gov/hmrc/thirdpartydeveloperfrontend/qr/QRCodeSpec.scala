@@ -16,11 +16,11 @@
 
 package uk.gov.hmrc.thirdpartydeveloperfrontend.qr
 
-import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.AsyncHmrcSpec
-
 import java.io.ByteArrayInputStream
 import java.util.Base64
 import javax.imageio.ImageIO
+
+import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.AsyncHmrcSpec
 
 class QRCodeSpec extends AsyncHmrcSpec {
 

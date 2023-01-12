@@ -16,17 +16,19 @@
 
 package uk.gov.hmrc.thirdpartydeveloperfrontend.config
 
+import java.time.{Duration, Instant}
+import scala.concurrent.ExecutionContext.Implicits.global
+import scala.concurrent.Future
+
 import org.mockito.invocation.InvocationOnMock
 import org.scalatest.concurrent.ScalaFutures.whenReady
 import org.scalatestplus.play.guice.GuiceOneAppPerSuite
-import uk.gov.hmrc.play.bootstrap.frontend.filters.SessionTimeoutFilterConfig
+
 import play.api.mvc._
 import play.api.test.FakeRequest
-import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.{AsyncHmrcSpec, SharedMetricsClearDown}
+import uk.gov.hmrc.play.bootstrap.frontend.filters.SessionTimeoutFilterConfig
 
-import scala.concurrent.ExecutionContext.Implicits.global
-import scala.concurrent.Future
-import java.time.{Duration, Instant}
+import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.{AsyncHmrcSpec, SharedMetricsClearDown}
 
 class SessionTimeoutFilterWithWhitelistSpec extends AsyncHmrcSpec with GuiceOneAppPerSuite with SharedMetricsClearDown {
 

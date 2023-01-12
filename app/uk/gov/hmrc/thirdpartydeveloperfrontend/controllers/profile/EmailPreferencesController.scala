@@ -16,27 +16,25 @@
 
 package uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.profile
 
-import uk.gov.hmrc.thirdpartydeveloperfrontend.config.ApplicationConfig
-import uk.gov.hmrc.thirdpartydeveloperfrontend.config.ErrorHandler
-import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers._
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.ApplicationId
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.connectors.CombinedApi
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.emailpreferences.APICategoryDisplayDetails
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.emailpreferences.EmailPreferences
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.flows.{FlowType, NewApplicationEmailPreferencesFlowV2}
+import javax.inject.Inject
+import scala.concurrent.Future.successful
+import scala.concurrent.{ExecutionContext, Future}
+
+import views.emailpreferences.EmailPreferencesSummaryViewData
+import views.html.emailpreferences._
+
 import play.api.data.Form
 import play.api.libs.crypto.CookieSigner
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents, Result}
 import play.twirl.api.Html
-import uk.gov.hmrc.thirdpartydeveloperfrontend.service.{EmailPreferencesService, SessionService}
-import views.emailpreferences.EmailPreferencesSummaryViewData
-import views.html.emailpreferences._
-import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers._
 
-import javax.inject.Inject
-import scala.concurrent.Future.successful
-import scala.concurrent.{ExecutionContext, Future}
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.connectors.ApiType
+import uk.gov.hmrc.thirdpartydeveloperfrontend.config.{ApplicationConfig, ErrorHandler}
+import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers._
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.ApplicationId
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.connectors.{ApiType, CombinedApi}
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.emailpreferences.{APICategoryDisplayDetails, EmailPreferences}
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.flows.{FlowType, NewApplicationEmailPreferencesFlowV2}
+import uk.gov.hmrc.thirdpartydeveloperfrontend.service.{EmailPreferencesService, SessionService}
 
 class EmailPreferencesController @Inject() (
     val sessionService: SessionService,

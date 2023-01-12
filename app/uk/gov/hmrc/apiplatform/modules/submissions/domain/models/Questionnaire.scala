@@ -17,6 +17,7 @@
 package uk.gov.hmrc.apiplatform.modules.submissions.domain.models
 
 import cats.data.NonEmptyList
+
 import play.api.libs.json.Json
 
 object AskWhen {

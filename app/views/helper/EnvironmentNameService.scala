@@ -16,8 +16,9 @@
 
 package views.helper
 
-import uk.gov.hmrc.thirdpartydeveloperfrontend.config.ApplicationConfig
 import javax.inject.{Inject, Singleton}
+
+import uk.gov.hmrc.thirdpartydeveloperfrontend.config.ApplicationConfig
 
 @Singleton
 class EnvironmentNameService @Inject() (appConfig: ApplicationConfig) {

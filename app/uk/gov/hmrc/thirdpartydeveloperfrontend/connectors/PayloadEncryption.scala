@@ -16,13 +16,14 @@
 
 package uk.gov.hmrc.thirdpartydeveloperfrontend.connectors
 
-import uk.gov.hmrc.thirdpartydeveloperfrontend.config.ApplicationConfig
 import javax.inject.{Inject, Singleton}
+import scala.concurrent.Future
+
 import play.api.libs.json._
 import uk.gov.hmrc.crypto._
 import uk.gov.hmrc.crypto.json.{JsonDecryptor, JsonEncryptor}
 
-import scala.concurrent.Future
+import uk.gov.hmrc.thirdpartydeveloperfrontend.config.ApplicationConfig
 
 @Singleton
 class PayloadEncryption @Inject() (localCrypto: LocalCrypto) {

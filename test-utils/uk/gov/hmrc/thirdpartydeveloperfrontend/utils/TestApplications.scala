@@ -18,11 +18,11 @@ package uk.gov.hmrc.thirdpartydeveloperfrontend.utils
 
 import java.time.{LocalDateTime, Period, ZoneOffset}
 import java.util.UUID.randomUUID
+import scala.util.Random
+
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.apidefinitions.AccessType
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.UserId
-
-import scala.util.Random
 
 trait TestApplications {
   self: CollaboratorTracker =>

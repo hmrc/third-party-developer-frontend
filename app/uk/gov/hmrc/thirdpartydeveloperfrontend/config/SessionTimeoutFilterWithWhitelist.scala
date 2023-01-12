@@ -16,12 +16,13 @@
 
 package uk.gov.hmrc.thirdpartydeveloperfrontend.config
 
-import akka.stream.Materializer
 import javax.inject.Inject
+import scala.concurrent.{ExecutionContext, Future}
+
+import akka.stream.Materializer
+
 import play.api.mvc._
 import uk.gov.hmrc.play.bootstrap.frontend.filters.{SessionTimeoutFilter, SessionTimeoutFilterConfig}
-
-import scala.concurrent.{ExecutionContext, Future}
 
 case class WhitelistedCall(uri: String, method: String)
 

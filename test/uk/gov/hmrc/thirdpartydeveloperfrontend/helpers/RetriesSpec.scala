@@ -17,19 +17,20 @@
 package uk.gov.hmrc.thirdpartydeveloperfrontend.helpers
 
 import java.util.concurrent.TimeUnit
+import scala.concurrent.Future.failed
+import scala.concurrent.duration.FiniteDuration
+import scala.concurrent.{ExecutionContext, Future}
+import scala.util.Random
 
 import akka.actor.{ActorSystem, Scheduler}
 import akka.pattern.FutureTimeoutSupport
-import uk.gov.hmrc.thirdpartydeveloperfrontend.config.ApplicationConfig
+import org.scalatestplus.play.guice.GuiceOneAppPerTest
+
 import play.api.inject.guice.GuiceApplicationBuilder
 import uk.gov.hmrc.http.BadRequestException
-import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.AsyncHmrcSpec
 
-import scala.concurrent.{ExecutionContext, Future}
-import scala.concurrent.Future.failed
-import scala.concurrent.duration.FiniteDuration
-import scala.util.Random
-import org.scalatestplus.play.guice.GuiceOneAppPerTest
+import uk.gov.hmrc.thirdpartydeveloperfrontend.config.ApplicationConfig
+import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.AsyncHmrcSpec
 
 class RetriesSpec extends AsyncHmrcSpec with GuiceOneAppPerTest {
 

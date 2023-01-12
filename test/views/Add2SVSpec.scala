@@ -16,14 +16,15 @@
 
 package views
 
-import uk.gov.hmrc.thirdpartydeveloperfrontend.builder._
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.{DeveloperSession, LoggedInState, Session}
-import play.api.test.FakeRequest
-import play.twirl.api.Html
-import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.WithCSRFAddToken
 import views.helper.CommonViewSpec
 import views.html.Add2SVView
-import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.LocalUserIdTracker
+
+import play.api.test.FakeRequest
+import play.twirl.api.Html
+
+import uk.gov.hmrc.thirdpartydeveloperfrontend.builder._
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.{DeveloperSession, LoggedInState, Session}
+import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.{LocalUserIdTracker, WithCSRFAddToken}
 
 class Add2SVSpec extends CommonViewSpec with WithCSRFAddToken with DeveloperBuilder with DeveloperSessionBuilder with LocalUserIdTracker {
 

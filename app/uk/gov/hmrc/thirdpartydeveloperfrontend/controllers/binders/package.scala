@@ -16,13 +16,14 @@
 
 package uk.gov.hmrc.thirdpartydeveloperfrontend.controllers
 
+import java.util.UUID
+
+import play.api.mvc.{PathBindable, QueryStringBindable}
+
+import uk.gov.hmrc.apiplatform.modules.mfa.models.{MfaAction, MfaId, MfaType}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.apidefinitions.{ApiContext, ApiVersion}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.{ApplicationId, ClientId, Environment}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.controllers.{AddTeamMemberPageMode, SaveSubsFieldsPageMode}
-import play.api.mvc.{PathBindable, QueryStringBindable}
-import uk.gov.hmrc.apiplatform.modules.mfa.models.{MfaAction, MfaId, MfaType}
-
-import java.util.UUID
 
 package object binders {
 

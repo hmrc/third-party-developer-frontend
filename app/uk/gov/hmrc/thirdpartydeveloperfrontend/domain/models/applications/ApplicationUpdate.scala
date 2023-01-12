@@ -16,11 +16,12 @@
 
 package uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications
 
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.UserId
+import java.time.LocalDateTime
+
 import play.api.libs.json.{Format, Json}
 import uk.gov.hmrc.play.json.Union
 
-import java.time.LocalDateTime
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.UserId
 
 trait ApplicationUpdate {
   def timestamp: LocalDateTime

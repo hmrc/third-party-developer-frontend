@@ -16,28 +16,28 @@
 
 package uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.checkpages
 
-import uk.gov.hmrc.thirdpartydeveloperfrontend.config.ApplicationConfig
-import uk.gov.hmrc.thirdpartydeveloperfrontend.config.ErrorHandler
-import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers._
-import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.FormKeys._
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.{ApplicationId, CheckInformation}
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.views.CheckInformationForm
-
+import java.time.Clock
 import javax.inject.{Inject, Singleton}
+import scala.concurrent.Future.successful
+import scala.concurrent.{ExecutionContext, Future}
+
+import uk.gov.voa.play.form.ConditionalMappings._
+import views.html.checkpages._
+import views.html.checkpages.applicationcheck.team.{TeamMemberAddView, TeamMemberRemoveConfirmationView, TeamView}
+import views.html.checkpages.applicationcheck.{LandingPageView, UnauthorisedAppDetailsView}
+import views.html.editapplication.NameSubmittedView
+
 import play.api.data.Form
 import play.api.data.Forms.{boolean, mapping, optional, text}
 import play.api.libs.crypto.CookieSigner
 import play.api.mvc._
-import uk.gov.hmrc.thirdpartydeveloperfrontend.service.{ApplicationActionService, ApplicationService, SessionService, TermsOfUseVersionService}
-import uk.gov.voa.play.form.ConditionalMappings._
-import views.html.checkpages._
-import views.html.checkpages.applicationcheck.{LandingPageView, UnauthorisedAppDetailsView}
-import views.html.checkpages.applicationcheck.team.{TeamMemberAddView, TeamMemberRemoveConfirmationView, TeamView}
-import views.html.editapplication.NameSubmittedView
 
-import java.time.Clock
-import scala.concurrent.{ExecutionContext, Future}
-import scala.concurrent.Future.successful
+import uk.gov.hmrc.thirdpartydeveloperfrontend.config.{ApplicationConfig, ErrorHandler}
+import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.FormKeys._
+import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers._
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.{ApplicationId, CheckInformation}
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.views.CheckInformationForm
+import uk.gov.hmrc.thirdpartydeveloperfrontend.service.{ApplicationActionService, ApplicationService, SessionService, TermsOfUseVersionService}
 
 @Singleton
 class ApplicationCheck @Inject() (

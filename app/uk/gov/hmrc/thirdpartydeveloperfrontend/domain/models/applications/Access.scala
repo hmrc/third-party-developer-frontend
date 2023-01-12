@@ -16,9 +16,10 @@
 
 package uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications
 
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.apidefinitions.AccessType
-import uk.gov.hmrc.play.json.Union
 import play.api.libs.json.Json
+import uk.gov.hmrc.play.json.Union
+
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.apidefinitions.AccessType
 
 case class ImportantSubmissionData(
     organisationUrl: Option[String] = None,

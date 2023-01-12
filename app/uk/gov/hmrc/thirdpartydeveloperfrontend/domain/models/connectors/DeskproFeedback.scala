@@ -16,11 +16,12 @@
 
 package uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.connectors
 
-import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.SignOutSurveyForm
 import play.api.libs.json.Json
 import play.api.mvc.Request
 import play.mvc.Http.HeaderNames.REFERER
 import uk.gov.hmrc.http.HeaderCarrier
+
+import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.SignOutSurveyForm
 
 case class Feedback(
     name: String,

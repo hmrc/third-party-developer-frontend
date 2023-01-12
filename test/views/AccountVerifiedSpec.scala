@@ -16,9 +16,10 @@
 
 package views
 
-import play.api.test.FakeRequest
 import views.helper.CommonViewSpec
 import views.html.AccountVerifiedView
+
+import play.api.test.FakeRequest
 
 class AccountVerifiedSpec extends CommonViewSpec {
 

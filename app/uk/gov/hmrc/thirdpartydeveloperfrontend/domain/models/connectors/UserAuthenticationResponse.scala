@@ -16,8 +16,9 @@
 
 package uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.connectors
 
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.Session
 import play.api.libs.json.Json
+
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.Session
 
 case class UserAuthenticationResponse(accessCodeRequired: Boolean, mfaEnabled: Boolean, nonce: Option[String] = None, session: Option[Session] = None)
 

@@ -17,15 +17,17 @@
 package views
 
 import org.jsoup.Jsoup
+import views.helper.CommonViewSpec
+import views.html.ForgotPasswordView
+
 import play.api.data.Form
 import play.api.test.{FakeRequest, StubMessagesFactory}
+
 import uk.gov.hmrc.thirdpartydeveloperfrontend.builder.{DeveloperBuilder, DeveloperSessionBuilder}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.ForgotPasswordForm
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.{DeveloperSession, LoggedInState}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.ViewHelpers._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.{LocalUserIdTracker, WithCSRFAddToken}
-import views.helper.CommonViewSpec
-import views.html.ForgotPasswordView
 
 class ForgotPasswordViewSpec extends CommonViewSpec
     with WithCSRFAddToken

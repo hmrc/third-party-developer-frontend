@@ -17,12 +17,14 @@
 package uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.controllers
 
 import java.time.{LocalDateTime, Period, ZoneOffset}
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications._
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.apidefinitions.AccessType
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.State._
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.CollaboratorRole.DEVELOPER
-import org.scalatest.wordspec.AnyWordSpec
+
 import org.scalatest.matchers.should.Matchers
+import org.scalatest.wordspec.AnyWordSpec
+
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.apidefinitions.AccessType
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.CollaboratorRole.DEVELOPER
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.State._
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications._
 
 class ManageApplicationsViewModelSpec extends AnyWordSpec with Matchers {
   val grantLength = Period.ofDays(547)

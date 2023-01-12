@@ -16,8 +16,10 @@
 
 package uk.gov.hmrc.thirdpartydeveloperfrontend.filters
 
-import com.kenshoo.play.metrics.MetricsFilter
 import javax.inject.{Inject, Singleton}
+
+import com.kenshoo.play.metrics.MetricsFilter
+
 import play.api.Configuration
 import play.api.http.HttpFilters
 import play.api.mvc.EssentialFilter

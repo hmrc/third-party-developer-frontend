@@ -16,21 +16,21 @@
 
 package uk.gov.hmrc.thirdpartydeveloperfrontend.mocks.service
 
-import cats.data.OptionT
-import cats.implicits._
-import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.ApplicationRequest
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.apidefinitions.APISubscriptionStatus
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.{Application, ApplicationId, ApplicationWithSubscriptionData}
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.DeveloperSession
-import org.mockito.{ArgumentMatchersSugar, MockitoSugar}
-import uk.gov.hmrc.thirdpartydeveloperfrontend.service.ApplicationActionService
-import uk.gov.hmrc.http.HeaderCarrier
-
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.apidefinitions.ApiContext
+
+import cats.data.OptionT
+import cats.implicits._
+import org.mockito.{ArgumentMatchersSugar, MockitoSugar}
+
+import uk.gov.hmrc.http.HeaderCarrier
+
+import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.{ApplicationRequest, UserRequest}
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.apidefinitions.{APISubscriptionStatus, ApiContext}
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.{Application, ApplicationId, ApplicationWithSubscriptionData}
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.DeveloperSession
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.subscriptions.ApiData
-import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.UserRequest
+import uk.gov.hmrc.thirdpartydeveloperfrontend.service.ApplicationActionService
 
 trait ApplicationActionServiceMock extends MockitoSugar with ArgumentMatchersSugar {
   val applicationActionServiceMock = mock[ApplicationActionService]

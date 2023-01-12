@@ -16,10 +16,11 @@
 
 package uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications
 
-import play.api.libs.json.OFormat
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.services.LocalDateTimeFormatters
-
 import java.time.LocalDateTime
+
+import play.api.libs.json.OFormat
+
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.services.LocalDateTimeFormatters
 
 case class TermsOfUseAgreement(emailAddress: String, timeStamp: LocalDateTime, version: String)
 

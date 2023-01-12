@@ -17,20 +17,20 @@
 package uk.gov.hmrc.thirdpartydeveloperfrontend.controllers
 
 import java.util.UUID
+import scala.concurrent.ExecutionContext.Implicits.global
+
+import play.api.test.FakeRequest
+import play.api.test.Helpers.{redirectLocation, _}
+import play.filters.csrf.CSRF.TokenProvider
 
 import uk.gov.hmrc.thirdpartydeveloperfrontend.builder.DeveloperBuilder
 import uk.gov.hmrc.thirdpartydeveloperfrontend.config.ErrorHandler
 import uk.gov.hmrc.thirdpartydeveloperfrontend.connectors.ThirdPartyDeveloperConnector
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.{LoggedInState, Session}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.mocks.service.SessionServiceMock
-import play.api.test.FakeRequest
-import play.api.test.Helpers.{redirectLocation, _}
-import play.filters.csrf.CSRF.TokenProvider
 import uk.gov.hmrc.thirdpartydeveloperfrontend.service.AuditService
-import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.WithLoggedInSession._
-
-import scala.concurrent.ExecutionContext.Implicits.global
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.LocalUserIdTracker
+import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.WithLoggedInSession._
 
 class SessionControllerSpec extends BaseControllerSpec with DeveloperBuilder with LocalUserIdTracker {
 

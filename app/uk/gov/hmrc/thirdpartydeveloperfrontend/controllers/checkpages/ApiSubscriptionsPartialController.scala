@@ -16,17 +16,19 @@
 
 package uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.checkpages
 
-import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.{APISubscriptions, ApplicationController, ApplicationRequest}
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.{Application, ApplicationId, CheckInformation}
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.controllers.SubscriptionData
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.apidefinitions.ApiContext
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.subscriptions.ApiData
-import play.api.data.Form
-import play.api.mvc.{Action, AnyContent, Call}
+import scala.concurrent.Future
+
 import views.html.checkpages.ApiSubscriptionsView
 
-import scala.concurrent.Future
+import play.api.data.Form
+import play.api.mvc.{Action, AnyContent, Call}
+
+import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.{APISubscriptions, ApplicationController, ApplicationRequest}
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.apidefinitions.ApiContext
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.{Application, ApplicationId, CheckInformation}
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.controllers.SubscriptionData
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.subscriptions.ApiData
 
 trait ApiSubscriptionsPartialController {
   self: ApplicationController with CanUseCheckActions =>

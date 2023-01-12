@@ -19,18 +19,20 @@ package views
 import java.time.{LocalDateTime, Period, ZoneOffset}
 import java.util.UUID
 import java.util.UUID.randomUUID
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications._
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.LoggedInState
+import scala.collection.JavaConverters._
+
 import org.jsoup.Jsoup
 import org.jsoup.nodes.Document
-import play.api.mvc.Flash
-import play.api.test.FakeRequest
-import uk.gov.hmrc.thirdpartydeveloperfrontend.utils._
-import uk.gov.hmrc.thirdpartydeveloperfrontend.builder._
 import views.helper.CommonViewSpec
 import views.html.{ClientSecretsGeneratedView, ClientSecretsView}
 
-import scala.collection.JavaConverters._
+import play.api.mvc.Flash
+import play.api.test.FakeRequest
+
+import uk.gov.hmrc.thirdpartydeveloperfrontend.builder._
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications._
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.LoggedInState
+import uk.gov.hmrc.thirdpartydeveloperfrontend.utils._
 
 class ClientSecretsSpec extends CommonViewSpec with WithCSRFAddToken with CollaboratorTracker with LocalUserIdTracker
     with DeveloperSessionBuilder

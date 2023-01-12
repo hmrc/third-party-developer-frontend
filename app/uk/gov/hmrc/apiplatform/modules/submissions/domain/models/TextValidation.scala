@@ -16,10 +16,11 @@
 
 package uk.gov.hmrc.apiplatform.modules.submissions.domain.models
 
+import scala.util.{Success, Try}
+
 import org.apache.commons.validator.routines.EmailValidator
+
 import play.api.libs.json.Json
-import scala.util.Try
-import scala.util.Success
 
 sealed trait TextValidation {
   def isValid(text: String): Boolean = this.validate(text).isRight

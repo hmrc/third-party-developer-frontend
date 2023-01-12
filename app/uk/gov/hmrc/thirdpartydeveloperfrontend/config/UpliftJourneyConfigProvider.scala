@@ -16,10 +16,9 @@
 
 package uk.gov.hmrc.thirdpartydeveloperfrontend.config
 
-import play.api.Configuration
+import javax.inject.{Inject, Singleton}
 
-import javax.inject.Inject
-import javax.inject.Singleton
+import play.api.Configuration
 
 sealed trait NewJourneyFeature
 final case object Off      extends NewJourneyFeature

@@ -16,12 +16,12 @@
 
 package uk.gov.hmrc.thirdpartydeveloperfrontend.config
 
-import play.api.Configuration
-
-import javax.inject.Inject
-import javax.inject.Singleton
+import javax.inject.{Inject, Singleton}
 import scala.collection.JavaConverters._
+
 import com.google.inject.Provider
+
+import play.api.Configuration
 
 case class FraudPreventionConfig(enabled: Boolean, apisWithFraudPrevention: List[String], uri: String)
 

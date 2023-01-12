@@ -16,13 +16,15 @@
 
 package uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.checkpages
 
-import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.ApplicationController
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.{ApplicationId, CheckInformation, ContactDetails}
-import play.api.data.Form
-import play.api.mvc.{Action, AnyContent, Call}
+import scala.concurrent.Future
+
 import views.html.checkpages.ContactDetailsView
 
-import scala.concurrent.Future
+import play.api.data.Form
+import play.api.mvc.{Action, AnyContent, Call}
+
+import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.ApplicationController
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.{ApplicationId, CheckInformation, ContactDetails}
 
 trait ContactDetailsPartialController {
   self: ApplicationController with CanUseCheckActions =>

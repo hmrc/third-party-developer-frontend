@@ -16,20 +16,21 @@
 
 package uk.gov.hmrc.thirdpartydeveloperfrontend.controllers
 
+import scala.concurrent.ExecutionContext.Implicits.global
+import scala.concurrent.Future.{failed, successful}
+
+import org.mockito.ArgumentCaptor
+import views.html._
+
+import play.api.test.FakeRequest
+import play.api.test.Helpers._
+import play.filters.csrf.CSRF.TokenProvider
+import uk.gov.hmrc.http.{BadRequestException, UpstreamErrorResponse}
+
 import uk.gov.hmrc.thirdpartydeveloperfrontend.connectors.ThirdPartyDeveloperConnector
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.RegistrationSuccessful
 import uk.gov.hmrc.thirdpartydeveloperfrontend.mocks.service.SessionServiceMock
-import org.mockito.ArgumentCaptor
-import play.api.test.FakeRequest
-import play.api.test.Helpers._
-import play.filters.csrf.CSRF.TokenProvider
-import uk.gov.hmrc.http.BadRequestException
-import views.html._
-
-import scala.concurrent.ExecutionContext.Implicits.global
-import scala.concurrent.Future.{failed, successful}
-import uk.gov.hmrc.http.UpstreamErrorResponse
 
 class RegistrationSpec extends BaseControllerSpec {
 

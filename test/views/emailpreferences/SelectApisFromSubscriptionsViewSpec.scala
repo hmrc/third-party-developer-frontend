@@ -16,24 +16,26 @@
 
 package views.emailpreferences
 
+import scala.collection.JavaConverters._
+
+import org.jsoup.Jsoup
+import org.jsoup.nodes.{Document, Element}
+import views.helper.CommonViewSpec
+import views.html.emailpreferences.SelectApisFromSubscriptionsView
+
+import play.api.data.{Form, FormError}
+import play.api.mvc.AnyContentAsEmpty
+import play.api.test.FakeRequest
+import play.twirl.api.Html
+
+import uk.gov.hmrc.thirdpartydeveloperfrontend.builder.{DeveloperBuilder, DeveloperSessionBuilder}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.{FormKeys, SelectApisFromSubscriptionsForm}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.ApplicationId
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.connectors.ApiType.REST_API
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.connectors.{CombinedApi, CombinedApiCategory}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.{DeveloperSession, LoggedInState}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.flows.NewApplicationEmailPreferencesFlowV2
-import org.jsoup.Jsoup
-import org.jsoup.nodes.{Document, Element}
-import play.api.data.{Form, FormError}
-import play.api.mvc.AnyContentAsEmpty
-import play.api.test.FakeRequest
-import play.twirl.api.Html
-import uk.gov.hmrc.thirdpartydeveloperfrontend.builder.{DeveloperBuilder, DeveloperSessionBuilder}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.{LocalUserIdTracker, WithCSRFAddToken}
-import views.helper.CommonViewSpec
-import views.html.emailpreferences.SelectApisFromSubscriptionsView
-
-import scala.collection.JavaConverters._
 
 class SelectApisFromSubscriptionsViewSpec extends CommonViewSpec
     with WithCSRFAddToken

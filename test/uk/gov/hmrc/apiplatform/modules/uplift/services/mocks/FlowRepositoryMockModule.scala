@@ -16,13 +16,13 @@
 
 package uk.gov.hmrc.apiplatform.modules.uplift.services.mocks
 
-import org.mockito.MockitoSugar
-import org.mockito.ArgumentMatchersSugar
 import scala.concurrent.Future.successful
-import uk.gov.hmrc.thirdpartydeveloperfrontend.repositories.FlowRepository
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.flows.FlowType
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.flows.Flow
 import scala.reflect.runtime.universe._
+
+import org.mockito.{ArgumentMatchersSugar, MockitoSugar}
+
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.flows.{Flow, FlowType}
+import uk.gov.hmrc.thirdpartydeveloperfrontend.repositories.FlowRepository
 
 trait FlowRepositoryMockModule extends MockitoSugar with ArgumentMatchersSugar {
 

@@ -16,16 +16,17 @@
 
 package uk.gov.hmrc.thirdpartydeveloperfrontend.controllers
 
-import uk.gov.hmrc.thirdpartydeveloperfrontend.config.ApplicationConfig
-import uk.gov.hmrc.thirdpartydeveloperfrontend.config.ErrorHandler
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.{ApplicationVerificationFailed, ApplicationVerificationSuccessful}
 import javax.inject.{Inject, Singleton}
-import play.api.libs.crypto.CookieSigner
-import play.api.mvc.MessagesControllerComponents
-import uk.gov.hmrc.thirdpartydeveloperfrontend.service.{ApplicationService, SessionService}
+import scala.concurrent.ExecutionContext
+
 import views.html.ApplicationVerificationView
 
-import scala.concurrent.ExecutionContext
+import play.api.libs.crypto.CookieSigner
+import play.api.mvc.MessagesControllerComponents
+
+import uk.gov.hmrc.thirdpartydeveloperfrontend.config.{ApplicationConfig, ErrorHandler}
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.{ApplicationVerificationFailed, ApplicationVerificationSuccessful}
+import uk.gov.hmrc.thirdpartydeveloperfrontend.service.{ApplicationService, SessionService}
 
 @Singleton
 class ApplicationVerification @Inject() (

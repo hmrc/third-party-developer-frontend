@@ -16,10 +16,12 @@
 
 package uk.gov.hmrc.thirdpartydeveloperfrontend.security
 
-import uk.gov.hmrc.thirdpartydeveloperfrontend.config.ApplicationConfig
+import java.security.MessageDigest
+
 import play.api.libs.crypto.CookieSigner
 import play.api.mvc.Cookie
-import java.security.MessageDigest
+
+import uk.gov.hmrc.thirdpartydeveloperfrontend.config.ApplicationConfig
 
 trait CookieEncoding {
   implicit val appConfig: ApplicationConfig

@@ -16,9 +16,11 @@
 
 package uk.gov.hmrc.thirdpartydeveloperfrontend.mocks.service
 
-import uk.gov.hmrc.thirdpartydeveloperfrontend.config.ErrorHandler
 import org.mockito.{ArgumentMatchersSugar, MockitoSugar}
+
 import play.twirl.api.Html
+
+import uk.gov.hmrc.thirdpartydeveloperfrontend.config.ErrorHandler
 
 trait ErrorHandlerMock extends MockitoSugar with ArgumentMatchersSugar {
   val mockErrorHandler = mock[ErrorHandler]

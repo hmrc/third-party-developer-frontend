@@ -16,8 +16,7 @@
 
 package uk.gov.hmrc.thirdpartydeveloperfrontend.utils
 
-import com.github.tomakehurst.wiremock.client.MappingBuilder
-import com.github.tomakehurst.wiremock.client.ResponseDefinitionBuilder
+import com.github.tomakehurst.wiremock.client.{MappingBuilder, ResponseDefinitionBuilder}
 
 trait WireMockExtensions {
 

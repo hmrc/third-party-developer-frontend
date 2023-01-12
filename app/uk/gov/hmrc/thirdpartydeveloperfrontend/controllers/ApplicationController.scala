@@ -16,11 +16,13 @@
 
 package uk.gov.hmrc.thirdpartydeveloperfrontend.controllers
 
-import uk.gov.hmrc.thirdpartydeveloperfrontend.service.ApplicationService
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.controllers.ApplicationViewModel
-import play.api.mvc.{Action, AnyContent, MessagesControllerComponents, Result}
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications._
 import scala.concurrent.Future
+
+import play.api.mvc.{Action, AnyContent, MessagesControllerComponents, Result}
+
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications._
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.controllers.ApplicationViewModel
+import uk.gov.hmrc.thirdpartydeveloperfrontend.service.ApplicationService
 
 abstract class ApplicationController(mcc: MessagesControllerComponents)
     extends LoggedInController(mcc)

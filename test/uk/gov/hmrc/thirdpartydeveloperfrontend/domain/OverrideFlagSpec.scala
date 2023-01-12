@@ -16,8 +16,9 @@
 
 package uk.gov.hmrc.thirdpartydeveloperfrontend.domain
 
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.OverrideFlag
 import play.api.libs.json.{JsError, JsString, Json}
+
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.OverrideFlag
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.AsyncHmrcSpec
 
 class OverrideFlagSpec extends AsyncHmrcSpec {

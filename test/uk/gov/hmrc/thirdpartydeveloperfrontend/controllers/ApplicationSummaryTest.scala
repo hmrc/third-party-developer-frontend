@@ -17,12 +17,14 @@
 package uk.gov.hmrc.thirdpartydeveloperfrontend.controllers
 
 import java.time.{LocalDateTime, Period}
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications._
-import uk.gov.hmrc.thirdpartydeveloperfrontend.utils._
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.Environment.{PRODUCTION, SANDBOX}
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.controllers.ApplicationSummary
+
 import org.scalatest.matchers.should.Matchers
 import org.scalatest.wordspec.AnyWordSpec
+
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.Environment.{PRODUCTION, SANDBOX}
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications._
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.controllers.ApplicationSummary
+import uk.gov.hmrc.thirdpartydeveloperfrontend.utils._
 
 class ApplicationSummaryTest extends AnyWordSpec with Matchers with CollaboratorTracker with LocalUserIdTracker {
 

@@ -16,20 +16,22 @@
 
 package uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.noapplications
 
+import scala.concurrent.ExecutionContext.Implicits.global
+
+import views.helper.EnvironmentNameService
+import views.html.noapplications.{NoApplicationsChoiceView, StartUsingRestApisView}
+
 import play.api.mvc.AnyContentAsEmpty
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
 import play.filters.csrf.CSRF.TokenProvider
+
 import uk.gov.hmrc.thirdpartydeveloperfrontend.builder.{DeveloperBuilder, SampleApplication, SampleSession}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.config.ErrorHandler
 import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.{BaseControllerSpec, SubscriptionTestHelperSugar}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.mocks.service._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.WithLoggedInSession._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.{LocalUserIdTracker, WithCSRFAddToken}
-import views.helper.EnvironmentNameService
-import views.html.noapplications.{NoApplicationsChoiceView, StartUsingRestApisView}
-
-import scala.concurrent.ExecutionContext.Implicits.global
 
 class NoApplicationsSpec
     extends BaseControllerSpec

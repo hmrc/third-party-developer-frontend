@@ -16,22 +16,21 @@
 
 package uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications
 
+import java.time.{LocalDateTime, Period}
+import java.util.UUID
+
 import play.api.libs.json.{Format, OFormat, Reads}
 
-import java.time.{LocalDateTime, Period}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.apidefinitions.AccessType.STANDARD
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.apidefinitions.ApiIdentifier
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.Capabilities.{ChangeClientSecret, SupportsDetails, ViewPushSecret}
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.CollaboratorRole.ADMINISTRATOR
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.Environment._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.Permissions.{ProductionAndAdmin, ProductionAndDeveloper, SandboxOnly, SandboxOrAdmin}
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.CollaboratorRole.ADMINISTRATOR
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.State.{PENDING_GATEKEEPER_APPROVAL, PENDING_REQUESTER_VERIFICATION, TESTING}
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.Developer
-import uk.gov.hmrc.thirdpartydeveloperfrontend.helpers.string.Digest
-
-import java.util.UUID
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.UserId
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.apidefinitions.ApiIdentifier
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.{Developer, UserId}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.services.LocalDateTimeFormatters
+import uk.gov.hmrc.thirdpartydeveloperfrontend.helpers.string.Digest
 
 case class ApplicationId(value: String) extends AnyVal
 

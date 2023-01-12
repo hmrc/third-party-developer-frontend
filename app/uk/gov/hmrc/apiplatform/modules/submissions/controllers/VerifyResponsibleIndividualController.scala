@@ -17,30 +17,27 @@
 package uk.gov.hmrc.apiplatform.modules.submissions.controllers
 
 import javax.inject.{Inject, Singleton}
-import play.api.mvc.MessagesControllerComponents
-
 import scala.concurrent.ExecutionContext
-import uk.gov.hmrc.thirdpartydeveloperfrontend.config.ApplicationConfig
-import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.ApplicationController
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.ApplicationId
+
 import play.api.data.Form
 import play.api.data.Forms._
-import uk.gov.hmrc.apiplatform.modules.common.services.EitherTHelper
-import play.api.mvc.Result
-import uk.gov.hmrc.thirdpartydeveloperfrontend.service.SessionService
-import uk.gov.hmrc.thirdpartydeveloperfrontend.service.ApplicationActionService
-import uk.gov.hmrc.thirdpartydeveloperfrontend.service.ApplicationService
 import play.api.libs.crypto.CookieSigner
-import uk.gov.hmrc.thirdpartydeveloperfrontend.config.ErrorHandler
+import play.api.mvc.{MessagesControllerComponents, Result}
+import uk.gov.hmrc.play.bootstrap.controller.WithUnsafeDefaultFormBinding
+
+import uk.gov.hmrc.apiplatform.modules.common.services.EitherTHelper
+import uk.gov.hmrc.apiplatform.modules.submissions.domain.models.{ErrorDetails, ResponsibleIndividualVerification}
+import uk.gov.hmrc.apiplatform.modules.submissions.services.ResponsibleIndividualVerificationService
 import uk.gov.hmrc.apiplatform.modules.submissions.views.html.{
   ResponsibleIndividualAcceptedView,
   ResponsibleIndividualDeclinedView,
   ResponsibleIndividualErrorView,
   VerifyResponsibleIndividualView
 }
-import uk.gov.hmrc.apiplatform.modules.submissions.services.ResponsibleIndividualVerificationService
-import uk.gov.hmrc.apiplatform.modules.submissions.domain.models.{ErrorDetails, ResponsibleIndividualVerification}
-import uk.gov.hmrc.play.bootstrap.controller.WithUnsafeDefaultFormBinding
+import uk.gov.hmrc.thirdpartydeveloperfrontend.config.{ApplicationConfig, ErrorHandler}
+import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.ApplicationController
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.ApplicationId
+import uk.gov.hmrc.thirdpartydeveloperfrontend.service.{ApplicationActionService, ApplicationService, SessionService}
 
 object VerifyResponsibleIndividualController {
 

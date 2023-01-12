@@ -20,13 +20,12 @@ import java.awt.image.BufferedImage
 import java.io.ByteArrayOutputStream
 import java.nio.charset.StandardCharsets
 import java.util.Base64
+import javax.imageio.ImageIO
+import scala.collection.JavaConverters._
 
-import com.google.zxing.{BarcodeFormat, EncodeHintType}
 import com.google.zxing.qrcode.QRCodeWriter
 import com.google.zxing.qrcode.decoder.ErrorCorrectionLevel
-import javax.imageio.ImageIO
-
-import scala.collection.JavaConverters._
+import com.google.zxing.{BarcodeFormat, EncodeHintType}
 
 case class QRCode(scale: Int = 1) {
   private val pixels = Array.fill(scale)(QRCode.white)

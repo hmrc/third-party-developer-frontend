@@ -16,35 +16,32 @@
 
 package uk.gov.hmrc.thirdpartydeveloperfrontend.controllers
 
-import uk.gov.hmrc.thirdpartydeveloperfrontend.builder.DeveloperBuilder
-import uk.gov.hmrc.thirdpartydeveloperfrontend.config.ErrorHandler
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications._
-import uk.gov.hmrc.thirdpartydeveloperfrontend.mocks.service._
-import play.api.mvc.AnyContentAsEmpty
-import play.api.test.FakeRequest
-import play.api.test.Helpers.{redirectLocation, _}
-import uk.gov.hmrc.thirdpartydeveloperfrontend.service.AuditService
-import uk.gov.hmrc.http.HeaderCarrier
-import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.WithCSRFAddToken
-import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.WithLoggedInSession._
+import scala.concurrent.ExecutionContext.Implicits.global
+import scala.concurrent.Future
+
 import views.helper.EnvironmentNameService
 import views.html._
-import uk.gov.hmrc.thirdpartydeveloperfrontend.mocks.connectors.ApmConnectorMockModule
 
-import scala.concurrent.ExecutionContext.Implicits.global
-import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.LocalUserIdTracker
-import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.addapplication.AddApplication
-import uk.gov.hmrc.thirdpartydeveloperfrontend.builder._
-import uk.gov.hmrc.thirdpartydeveloperfrontend.config.UpliftJourneyConfig
-import uk.gov.hmrc.thirdpartydeveloperfrontend.config.{Off, On, OnDemand}
-import play.api.mvc.Headers
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.controllers.ApplicationSummary
-import uk.gov.hmrc.apiplatform.modules.uplift.views.html.BeforeYouStartView
-import uk.gov.hmrc.apiplatform.modules.uplift.services.GetProductionCredentialsFlowService
-import uk.gov.hmrc.apiplatform.modules.uplift.services.mocks.UpliftLogicMock
+import play.api.mvc.{AnyContentAsEmpty, Headers}
+import play.api.test.FakeRequest
+import play.api.test.Helpers.{redirectLocation, _}
+import uk.gov.hmrc.http.HeaderCarrier
+
 import uk.gov.hmrc.apiplatform.modules.uplift.controllers.UpliftJourneySwitch
 import uk.gov.hmrc.apiplatform.modules.uplift.domain.models.GetProductionCredentialsFlow
-import scala.concurrent.Future
+import uk.gov.hmrc.apiplatform.modules.uplift.services.GetProductionCredentialsFlowService
+import uk.gov.hmrc.apiplatform.modules.uplift.services.mocks.UpliftLogicMock
+import uk.gov.hmrc.apiplatform.modules.uplift.views.html.BeforeYouStartView
+import uk.gov.hmrc.thirdpartydeveloperfrontend.builder.{DeveloperBuilder, _}
+import uk.gov.hmrc.thirdpartydeveloperfrontend.config.{ErrorHandler, Off, On, OnDemand, UpliftJourneyConfig}
+import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.addapplication.AddApplication
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications._
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.controllers.ApplicationSummary
+import uk.gov.hmrc.thirdpartydeveloperfrontend.mocks.connectors.ApmConnectorMockModule
+import uk.gov.hmrc.thirdpartydeveloperfrontend.mocks.service._
+import uk.gov.hmrc.thirdpartydeveloperfrontend.service.AuditService
+import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.WithLoggedInSession._
+import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.{LocalUserIdTracker, WithCSRFAddToken}
 
 class AddApplicationStartSpec
     extends BaseControllerSpec

@@ -16,21 +16,18 @@
 
 package uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.actions
 
-import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.ApplicationWithSubscriptionFieldsRequest
-import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.ApplicationWithSubscriptionFieldPageRequest
-import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.ApplicationWithFieldDefinitionsRequest
-import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.ApplicationWithWritableSubscriptionField
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.controllers.NoSubscriptionFieldsRefinerBehaviour
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications._
-import play.api.mvc.{Action, ActionRefiner, AnyContent, Result}
-import scala.concurrent.Future
-import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.ApplicationController
-import scala.concurrent.ExecutionContext
+import scala.concurrent.{ExecutionContext, Future}
+
 import cats.data.NonEmptyList
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.apidefinitions._
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.subscriptions.DevhubAccessLevel
+
+import play.api.mvc.{Action, ActionRefiner, AnyContent, Result}
+
 import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.ManageSubscriptions.toDetails
-import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.ApplicationRequest
+import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.{ApplicationRequest, _}
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.apidefinitions._
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications._
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.controllers.NoSubscriptionFieldsRefinerBehaviour
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.subscriptions.DevhubAccessLevel
 
 trait SubscriptionFieldsActions {
   self: ApplicationController =>

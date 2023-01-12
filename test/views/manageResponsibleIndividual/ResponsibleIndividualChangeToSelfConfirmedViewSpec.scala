@@ -17,12 +17,14 @@
 package views.manageResponsibleIndividual
 
 import org.jsoup.Jsoup
+import views.helper.CommonViewSpec
+import views.html.manageResponsibleIndividual.ResponsibleIndividualChangeToSelfConfirmedView
+
 import play.api.test.FakeRequest
+
 import uk.gov.hmrc.thirdpartydeveloperfrontend.builder.{DeveloperBuilder, DeveloperSessionBuilder}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.LoggedInState
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.{LocalUserIdTracker, TestApplications, WithCSRFAddToken}
-import views.helper.CommonViewSpec
-import views.html.manageResponsibleIndividual.ResponsibleIndividualChangeToSelfConfirmedView
 
 class ResponsibleIndividualChangeToSelfConfirmedViewSpec extends CommonViewSpec with WithCSRFAddToken
     with DeveloperBuilder with LocalUserIdTracker with DeveloperSessionBuilder with TestApplications {

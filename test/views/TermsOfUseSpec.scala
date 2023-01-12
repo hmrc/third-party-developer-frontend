@@ -16,21 +16,23 @@
 
 package views
 
+import java.time.format.DateTimeFormatter
 import java.time.{LocalDateTime, Period, ZoneOffset}
-import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.TermsOfUseForm
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications._
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.LoggedInState
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.controllers.ApplicationViewModel
+
 import org.jsoup.Jsoup
-import play.api.test.FakeRequest
-import play.twirl.api.HtmlFormat.Appendable
-import uk.gov.hmrc.thirdpartydeveloperfrontend.builder.{DeveloperBuilder, DeveloperSessionBuilder}
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.TermsOfUseVersion
-import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.{LocalUserIdTracker, WithCSRFAddToken}
 import views.helper.CommonViewSpec
 import views.html.TermsOfUseView
 
-import java.time.format.DateTimeFormatter
+import play.api.test.FakeRequest
+import play.twirl.api.HtmlFormat.Appendable
+
+import uk.gov.hmrc.thirdpartydeveloperfrontend.builder.{DeveloperBuilder, DeveloperSessionBuilder}
+import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.TermsOfUseForm
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.TermsOfUseVersion
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications._
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.controllers.ApplicationViewModel
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.LoggedInState
+import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.{LocalUserIdTracker, WithCSRFAddToken}
 
 class TermsOfUseSpec extends CommonViewSpec
     with WithCSRFAddToken

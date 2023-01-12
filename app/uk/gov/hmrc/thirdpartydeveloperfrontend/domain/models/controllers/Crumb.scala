@@ -16,8 +16,8 @@
 
 package uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.controllers
 
-import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.config.ApplicationConfig
+import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.Application
 
 case class Crumb(name: String, url: String = "", dataAttribute: Option[String] = None)

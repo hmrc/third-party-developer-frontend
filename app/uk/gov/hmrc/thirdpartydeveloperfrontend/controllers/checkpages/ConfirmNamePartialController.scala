@@ -16,14 +16,16 @@
 
 package uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.checkpages
 
+import scala.concurrent.Future
+
+import views.html.checkpages.ConfirmNameView
+
+import play.api.data.Form
+import play.api.mvc.{Action, AnyContent, Call, Result}
+
 import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.ApplicationController
 import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.FormKeys.appNameField
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications._
-import play.api.data.Form
-import play.api.mvc.{Action, AnyContent, Call, Result}
-import views.html.checkpages.ConfirmNameView
-
-import scala.concurrent.Future
 
 trait ConfirmNamePartialController {
   self: ApplicationController with CanUseCheckActions =>

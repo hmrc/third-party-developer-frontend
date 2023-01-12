@@ -18,6 +18,7 @@ package uk.gov.hmrc.thirdpartydeveloperfrontend.utils
 
 import play.api.libs.crypto.CookieSigner
 import play.api.test.FakeRequest
+
 import uk.gov.hmrc.thirdpartydeveloperfrontend.security.CookieEncoding
 
 object WithLoggedInSession {

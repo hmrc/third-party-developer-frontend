@@ -16,15 +16,17 @@
 
 package views.emailpreferences
 
-import views.helper.CommonViewSpec
 import org.jsoup.Jsoup
 import org.jsoup.nodes.Document
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.LoggedInState
+import views.helper.CommonViewSpec
+import views.html.emailpreferences.FlowStartView
+
 import play.api.mvc.AnyContentAsEmpty
 import play.api.test.FakeRequest
+
 import uk.gov.hmrc.thirdpartydeveloperfrontend.builder.{DeveloperBuilder, DeveloperSessionBuilder}
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.LoggedInState
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.{LocalUserIdTracker, WithCSRFAddToken}
-import views.html.emailpreferences.FlowStartView
 
 class FlowStartViewSpec extends CommonViewSpec
     with WithCSRFAddToken

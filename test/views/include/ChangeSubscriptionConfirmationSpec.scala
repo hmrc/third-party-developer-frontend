@@ -16,23 +16,25 @@
 
 package views.include
 
+import java.time.{LocalDateTime, ZoneOffset}
+
+import org.jsoup.Jsoup
+import views.helper.CommonViewSpec
+import views.html.include.ChangeSubscriptionConfirmationView
+
+import play.api.data.Form
+import play.api.mvc.Call
+import play.api.test.FakeRequest
+
+import uk.gov.hmrc.thirdpartydeveloperfrontend.builder.{DeveloperBuilder, DeveloperSessionBuilder}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.ChangeSubscriptionConfirmationForm
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.apidefinitions.{ApiContext, ApiVersion}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications._
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.controllers.ApplicationViewModel
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.LoggedInState
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.views.SubscriptionRedirect
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.controllers.ApplicationViewModel
-import org.jsoup.Jsoup
-import play.api.data.Form
-import play.api.test.FakeRequest
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.ViewHelpers.elementExistsByText
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils._
-import views.helper.CommonViewSpec
-import views.html.include.ChangeSubscriptionConfirmationView
-import play.api.mvc.Call
-import uk.gov.hmrc.thirdpartydeveloperfrontend.builder.{DeveloperBuilder, DeveloperSessionBuilder}
-
-import java.time.{LocalDateTime, ZoneOffset}
 
 class ChangeSubscriptionConfirmationSpec extends CommonViewSpec
     with WithCSRFAddToken

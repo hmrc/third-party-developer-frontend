@@ -16,13 +16,15 @@
 
 package views
 
-import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.RegistrationForm
 import org.jsoup.Jsoup
-import play.api.test.FakeRequest
-import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.ViewHelpers._
-import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.WithCSRFAddToken
 import views.helper.CommonViewSpec
 import views.html.RegistrationView
+
+import play.api.test.FakeRequest
+
+import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.RegistrationForm
+import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.ViewHelpers._
+import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.WithCSRFAddToken
 
 class RegistrationSpec extends CommonViewSpec with WithCSRFAddToken {
   "Registration page" should {

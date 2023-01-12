@@ -16,15 +16,16 @@
 
 package uk.gov.hmrc.apiplatform.modules.mfa
 
+import scala.concurrent.Future
+
 import org.jsoup.Jsoup
 import org.jsoup.nodes.Document
 import org.scalatest.Assertion
+import org.scalatest.matchers.should.Matchers._
+
 import play.api.http.Status
 import play.api.mvc.Result
-import play.api.test.Helpers.{contentAsString, status}
-import play.api.test.Helpers._
-import org.scalatest.matchers.should.Matchers._
-import scala.concurrent.Future
+import play.api.test.Helpers.{contentAsString, status, _}
 
 trait MfaViewsValidator {
 

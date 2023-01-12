@@ -16,15 +16,16 @@
 
 package uk.gov.hmrc.thirdpartydeveloperfrontend.service
 
+import javax.inject.{Inject, Singleton}
+import scala.concurrent.Future
+
+import play.api.mvc.Request
+import uk.gov.hmrc.http.HeaderCarrier
+
 import uk.gov.hmrc.thirdpartydeveloperfrontend.config.ApplicationConfig
 import uk.gov.hmrc.thirdpartydeveloperfrontend.connectors.DeskproConnector
 import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.{SignOutSurveyForm, SupportEnquiryForm}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.connectors.{DeskproTicket, Feedback, TicketId, TicketResult}
-import javax.inject.{Inject, Singleton}
-import play.api.mvc.Request
-import uk.gov.hmrc.http.HeaderCarrier
-
-import scala.concurrent.Future
 
 @Singleton
 class DeskproService @Inject() (val deskproConnector: DeskproConnector, val appConfig: ApplicationConfig) {

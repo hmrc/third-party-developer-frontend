@@ -17,8 +17,8 @@
 package uk.gov.hmrc.apiplatform.modules.submissions.controllers
 
 import play.api.mvc.PathBindable
-import uk.gov.hmrc.apiplatform.modules.submissions.domain.models.Question
-import uk.gov.hmrc.apiplatform.modules.submissions.domain.models.Submission
+
+import uk.gov.hmrc.apiplatform.modules.submissions.domain.models.{Question, Submission}
 
 package object binders {
 

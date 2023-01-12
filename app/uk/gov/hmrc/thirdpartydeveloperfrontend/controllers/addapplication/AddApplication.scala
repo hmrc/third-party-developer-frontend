@@ -16,36 +16,36 @@
 
 package uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.addapplication
 
-import uk.gov.hmrc.thirdpartydeveloperfrontend.config.ApplicationConfig
-import uk.gov.hmrc.thirdpartydeveloperfrontend.config.ErrorHandler
-import uk.gov.hmrc.thirdpartydeveloperfrontend.connectors.ApmConnector
-import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers._
-import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.{checkpages => controllercheckpages}
-import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.FormKeys.appNameField
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.ApplicationCreatedResponse
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.Error._
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.apidefinitions.APISubscriptionStatus
-import uk.gov.hmrc.apiplatform.modules.uplift.services._
-import uk.gov.hmrc.apiplatform.modules.uplift.domain.models._
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.Environment.{PRODUCTION, SANDBOX}
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications._
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.controllers.ApplicationSummary
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.emailpreferences.EmailPreferences
+import javax.inject.{Inject, Singleton}
+import scala.concurrent.Future.successful
+import scala.concurrent.{ExecutionContext, Future}
+
+import views.helper.EnvironmentNameService
+import views.html._
+
 import play.api.data.Form
 import play.api.libs.crypto.CookieSigner
 import play.api.libs.json.Json
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
-import uk.gov.hmrc.thirdpartydeveloperfrontend.service._
 import uk.gov.hmrc.http.HeaderCarrier
-import views.helper.EnvironmentNameService
-import views.html._
 
-import javax.inject.{Inject, Singleton}
-import scala.concurrent.Future.successful
-import scala.concurrent.{ExecutionContext, Future}
-import uk.gov.hmrc.apiplatform.modules.uplift.views.html.BeforeYouStartView
-import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.UserRequest
 import uk.gov.hmrc.apiplatform.modules.uplift.controllers.UpliftJourneySwitch
+import uk.gov.hmrc.apiplatform.modules.uplift.domain.models._
+import uk.gov.hmrc.apiplatform.modules.uplift.services._
+import uk.gov.hmrc.apiplatform.modules.uplift.views.html.BeforeYouStartView
+import uk.gov.hmrc.thirdpartydeveloperfrontend.config.{ApplicationConfig, ErrorHandler}
+import uk.gov.hmrc.thirdpartydeveloperfrontend.connectors.ApmConnector
+import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.FormKeys.appNameField
+import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.{UserRequest, _}
+import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.{checkpages => controllercheckpages}
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.ApplicationCreatedResponse
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.Error._
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.apidefinitions.APISubscriptionStatus
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.Environment.{PRODUCTION, SANDBOX}
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications._
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.controllers.ApplicationSummary
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.emailpreferences.EmailPreferences
+import uk.gov.hmrc.thirdpartydeveloperfrontend.service._
 
 @Singleton
 class AddApplication @Inject() (

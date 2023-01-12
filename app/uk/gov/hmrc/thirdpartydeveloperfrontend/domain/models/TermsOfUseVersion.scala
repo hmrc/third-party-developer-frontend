@@ -17,6 +17,7 @@
 package uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models
 
 import _root_.views.html.partials
+
 import uk.gov.hmrc.thirdpartydeveloperfrontend.config.ApplicationConfig
 
 object TermsOfUseVersion {

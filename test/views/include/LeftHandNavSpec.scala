@@ -16,23 +16,23 @@
 
 package views.include
 
+import java.time.{LocalDateTime, ZoneOffset}
+
+import org.jsoup.Jsoup
+import org.jsoup.nodes.Document
+import views.helper.CommonViewSpec
+import views.html.include.LeftHandNav
+
+import play.api.test.FakeRequest
+import play.twirl.api.Html
+
+import uk.gov.hmrc.thirdpartydeveloperfrontend.builder.{DeveloperBuilder, DeveloperSessionBuilder}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.Credentials.serverTokenCutoffDate
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.controllers.{ApplicationViewModel, FraudPreventionNavLinkViewModel, LeftHandNavFlags}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.LoggedInState
-import uk.gov.hmrc.thirdpartydeveloperfrontend.builder.{DeveloperBuilder, DeveloperSessionBuilder}
-
-import org.jsoup.Jsoup
-import org.jsoup.nodes.Document
-import play.api.test.FakeRequest
-import play.twirl.api.Html
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.ViewHelpers._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils._
-import views.helper.CommonViewSpec
-import views.html.include.LeftHandNav
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.controllers.LeftHandNavFlags
-
-import java.time.{LocalDateTime, ZoneOffset}
 
 class LeftHandNavSpec extends CommonViewSpec
     with WithCSRFAddToken

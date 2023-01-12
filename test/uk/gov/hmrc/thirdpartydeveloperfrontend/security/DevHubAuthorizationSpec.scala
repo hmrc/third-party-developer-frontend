@@ -16,23 +16,24 @@
 
 package uk.gov.hmrc.thirdpartydeveloperfrontend.security
 
-import cats.implicits._
-import uk.gov.hmrc.thirdpartydeveloperfrontend.config.ApplicationConfig
-import uk.gov.hmrc.thirdpartydeveloperfrontend.config.ErrorHandler
-import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.{routes, BaseController, BaseControllerSpec}
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.{DeveloperSession, LoggedInState}
-import play.api.libs.crypto.CookieSigner
-import uk.gov.hmrc.thirdpartydeveloperfrontend.builder._
-import play.api.mvc.{Cookie, MessagesControllerComponents}
-import play.api.mvc.Results._
-import play.api.test.FakeRequest
-import play.api.test.Helpers._
-import uk.gov.hmrc.thirdpartydeveloperfrontend.service.SessionService
-
-import scala.concurrent.{ExecutionContext, Future}
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future.successful
+import scala.concurrent.{ExecutionContext, Future}
+
+import cats.implicits._
 import org.scalatest.matchers.should.Matchers
+
+import play.api.libs.crypto.CookieSigner
+import play.api.mvc.Results._
+import play.api.mvc.{Cookie, MessagesControllerComponents}
+import play.api.test.FakeRequest
+import play.api.test.Helpers._
+
+import uk.gov.hmrc.thirdpartydeveloperfrontend.builder._
+import uk.gov.hmrc.thirdpartydeveloperfrontend.config.{ApplicationConfig, ErrorHandler}
+import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.{BaseController, BaseControllerSpec, routes}
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.{DeveloperSession, LoggedInState}
+import uk.gov.hmrc.thirdpartydeveloperfrontend.service.SessionService
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.LocalUserIdTracker
 
 class DevHubAuthorizationSpec extends BaseControllerSpec with Matchers with LocalUserIdTracker

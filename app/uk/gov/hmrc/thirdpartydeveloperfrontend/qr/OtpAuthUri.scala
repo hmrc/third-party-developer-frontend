@@ -17,7 +17,6 @@
 package uk.gov.hmrc.thirdpartydeveloperfrontend.qr
 
 import java.net.URI
-
 import javax.inject.Inject
 
 class OtpAuthUri @Inject() () {

@@ -17,6 +17,11 @@
 package uk.gov.hmrc.thirdpartydeveloperfrontend.service
 
 import java.time.{LocalDateTime, Period}
+import scala.concurrent.ExecutionContext.Implicits.global
+import scala.concurrent.Future
+
+import uk.gov.hmrc.http.HeaderCarrier
+
 import uk.gov.hmrc.thirdpartydeveloperfrontend.builder.SubscriptionsBuilder
 import uk.gov.hmrc.thirdpartydeveloperfrontend.connectors.{ApmConnector, ThirdPartyApplicationConnector}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.apidefinitions.{ApiContext, ApiVersion}
@@ -30,11 +35,7 @@ import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.subscriptions.Devhu
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.subscriptions.{AccessRequirements, DevhubAccessRequirements, FieldValue, Fields}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.mocks.connectors.SubscriptionFieldsConnectorMock
 import uk.gov.hmrc.thirdpartydeveloperfrontend.service.PushPullNotificationsService.PushPullNotificationsConnector
-import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.AsyncHmrcSpec
-
-import scala.concurrent.ExecutionContext.Implicits.global
-import scala.concurrent.Future
 
 class SubscriptionFieldsServiceSpec extends AsyncHmrcSpec with SubscriptionsBuilder {
 

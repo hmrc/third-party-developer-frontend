@@ -16,23 +16,24 @@
 
 package uk.gov.hmrc.thirdpartydeveloperfrontend.connectors
 
+import javax.inject.{Inject, Singleton}
+import scala.concurrent.{ExecutionContext, Future}
+
 import akka.actor.ActorSystem
 import akka.pattern.FutureTimeoutSupport
+import cats.data.OptionT
+
+import play.api.http.HeaderNames
+import play.api.libs.json.{Json, Reads}
+import uk.gov.hmrc.http.HttpReads.Implicits._
+import uk.gov.hmrc.http.{HeaderCarrier, HttpClient, HttpReads}
+import uk.gov.hmrc.play.http.metrics.common.API
+
 import uk.gov.hmrc.thirdpartydeveloperfrontend.config.ApplicationConfig
 import uk.gov.hmrc.thirdpartydeveloperfrontend.connectors.PushPullNotificationsConnector.readsPushSecret
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.{ClientId, Environment}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.helpers.Retries
-import javax.inject.{Inject, Singleton}
-import play.api.libs.json.{Json, Reads}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.service.PushPullNotificationsService.PushPullNotificationsConnector
-import uk.gov.hmrc.http.{HeaderCarrier, HttpReads}
-import uk.gov.hmrc.http.HttpClient
-import uk.gov.hmrc.play.http.metrics.common.API
-
-import scala.concurrent.{ExecutionContext, Future}
-import cats.data.OptionT
-import uk.gov.hmrc.http.HttpReads.Implicits._
-import play.api.http.HeaderNames
 
 abstract class AbstractPushPullNotificationsConnector(implicit ec: ExecutionContext) extends PushPullNotificationsConnector with Retries {
   protected val httpClient: HttpClient

@@ -16,19 +16,15 @@
 
 package uk.gov.hmrc.apiplatform.modules.submissions.services
 
-import uk.gov.hmrc.thirdpartydeveloperfrontend.connectors.DeskproConnector
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.{ApplicationId, ResponsibleIndividual}
-import uk.gov.hmrc.http.HeaderCarrier
-import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.AsyncHmrcSpec
+import java.time.{LocalDateTime, ZoneOffset}
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future.successful
-import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.TestApplications
-import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.CollaboratorTracker
-import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.LocalUserIdTracker
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.connectors.TicketCreated
-import uk.gov.hmrc.apiplatform.modules.submissions.connectors.ThirdPartyApplicationSubmissionsConnector
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.connectors.DeskproTicket
+
 import org.mockito.captor.ArgCaptor
+
+import uk.gov.hmrc.http.HeaderCarrier
+
+import uk.gov.hmrc.apiplatform.modules.submissions.connectors.ThirdPartyApplicationSubmissionsConnector
 import uk.gov.hmrc.apiplatform.modules.submissions.domain.models.{
   ResponsibleIndividualToUVerification,
   ResponsibleIndividualUpdateVerification,
@@ -36,8 +32,11 @@ import uk.gov.hmrc.apiplatform.modules.submissions.domain.models.{
   ResponsibleIndividualVerificationState,
   Submission
 }
-import java.time.{LocalDateTime, ZoneOffset}
+import uk.gov.hmrc.thirdpartydeveloperfrontend.connectors.DeskproConnector
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.{ApplicationId, ResponsibleIndividual}
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.connectors.{DeskproTicket, TicketCreated}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.mocks.service.ApplicationServiceMock
+import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.{AsyncHmrcSpec, CollaboratorTracker, LocalUserIdTracker, TestApplications}
 
 class ResponsibleIndividualVerificationServiceSpec extends AsyncHmrcSpec
     with CollaboratorTracker

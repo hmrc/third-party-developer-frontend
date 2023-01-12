@@ -16,11 +16,12 @@
 
 package uk.gov.hmrc.apiplatform.modules.submissions.domain.models
 
-import java.util.UUID
-import cats.data.NonEmptyList
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.ApplicationId
-
 import java.time.LocalDateTime
+import java.util.UUID
+
+import cats.data.NonEmptyList
+
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.ApplicationId
 
 sealed trait QuestionnaireState
 

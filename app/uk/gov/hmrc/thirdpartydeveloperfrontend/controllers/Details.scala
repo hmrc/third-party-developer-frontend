@@ -16,50 +16,40 @@
 
 package uk.gov.hmrc.thirdpartydeveloperfrontend.controllers
 
-import uk.gov.hmrc.thirdpartydeveloperfrontend.config.ApplicationConfig
-import uk.gov.hmrc.thirdpartydeveloperfrontend.config.ErrorHandler
-import uk.gov.hmrc.thirdpartydeveloperfrontend.config.FraudPreventionConfig
-import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.FormKeys.appNameField
-import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.checkpages.{CheckYourAnswersData, CheckYourAnswersForm, DummyCheckYourAnswersForm}
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain._
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications._
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.Capabilities.SupportsDetails
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.Permissions.{ProductionAndAdmin, SandboxOnly}
-
+import java.time.LocalDateTime
 import javax.inject.{Inject, Singleton}
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.controllers.ApplicationViewModel
-import play.api.data.Form
-import play.api.libs.crypto.CookieSigner
-import play.api.mvc._
-import uk.gov.hmrc.thirdpartydeveloperfrontend.service._
-import views.html.{
-  ChangeDetailsView,
-  ChangeOfApplicationNameConfirmationView,
-  DetailsView,
-  RequestChangeOfApplicationNameView,
-  UpdatePrivacyPolicyLocationView,
-  UpdateTermsAndConditionsLocationView
-}
+import scala.concurrent.Future.successful
+import scala.concurrent.{ExecutionContext, Future}
+
+import cats.data.OptionT
+import cats.instances.future.catsStdInstancesForFuture
+import views.html._
 import views.html.application.PendingApprovalView
 import views.html.checkpages.applicationcheck.UnauthorisedAppDetailsView
 
-import scala.concurrent.{ExecutionContext, Future}
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.subscriptions.DevhubAccessLevel
-import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.fraudprevention.FraudPreventionNavLinkHelper
-import uk.gov.hmrc.apiplatform.modules.submissions.services.SubmissionService
-import cats.data.OptionT
-import cats.instances.future.catsStdInstancesForFuture
-
-import scala.concurrent.Future.successful
-import uk.gov.hmrc.apiplatform.modules.submissions.domain.models.Submission
+import play.api.data.Form
+import play.api.libs.crypto.CookieSigner
+import play.api.mvc._
 import uk.gov.hmrc.play.bootstrap.controller.WithUnsafeDefaultFormBinding
+
+import uk.gov.hmrc.apiplatform.modules.submissions.domain.models.Submission
+import uk.gov.hmrc.apiplatform.modules.submissions.services.SubmissionService
+import uk.gov.hmrc.thirdpartydeveloperfrontend.config.{ApplicationConfig, ErrorHandler, FraudPreventionConfig}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.Details.{Agreement, ApplicationNameModel, TermsOfUseViewModel}
+import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.FormKeys.appNameField
+import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.checkpages.{CheckYourAnswersData, CheckYourAnswersForm, DummyCheckYourAnswersForm}
+import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.fraudprevention.FraudPreventionNavLinkHelper
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.TermsOfUseVersion
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.Capabilities.SupportsDetails
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.Permissions.{ProductionAndAdmin, SandboxOnly}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.PrivacyPolicyLocation.NoneProvided
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications._
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.controllers.ApplicationViewModel
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.subscriptions.DevhubAccessLevel
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.services.TermsOfUseService
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.services.TermsOfUseService.TermsOfUseAgreementDetails
-
-import java.time.LocalDateTime
+import uk.gov.hmrc.thirdpartydeveloperfrontend.service._
 
 object Details {
   case class Agreement(who: String, when: LocalDateTime)

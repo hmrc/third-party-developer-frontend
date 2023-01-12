@@ -17,12 +17,15 @@
 package uk.gov.hmrc.thirdpartydeveloperfrontend.config
 
 import javax.inject.{Inject, Singleton}
+
+import views.html.{ErrorTemplate, ForbiddenTemplate}
+
 import play.api.Configuration
 import play.api.i18n.MessagesApi
 import play.api.mvc.{Request, RequestHeader, Result}
 import play.twirl.api.HtmlFormat
 import uk.gov.hmrc.play.bootstrap.frontend.http.FrontendErrorHandler
-import views.html.{ErrorTemplate, ForbiddenTemplate}
+
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.{ApiContextVersionNotFound, ApplicationNotFound}
 
 @Singleton

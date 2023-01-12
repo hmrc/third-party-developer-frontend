@@ -18,25 +18,25 @@ package uk.gov.hmrc.thirdpartydeveloperfrontend.connectors
 
 import java.net.URLEncoder.encode
 import java.util.UUID
+import javax.inject.{Inject, Singleton}
+import scala.concurrent.{ExecutionContext, Future}
+
 import akka.actor.ActorSystem
 import akka.pattern.FutureTimeoutSupport
+
+import play.api.http.Status.{BAD_REQUEST, CREATED, NOT_FOUND, NO_CONTENT, OK}
+import play.api.libs.json.{JsSuccess, Json}
+import uk.gov.hmrc.http.{HeaderCarrier, HttpClient, HttpResponse, UpstreamErrorResponse}
+
+import uk.gov.hmrc.apiplatform.modules.common.services.ApplicationLogger
 import uk.gov.hmrc.thirdpartydeveloperfrontend.config.ApplicationConfig
+import uk.gov.hmrc.thirdpartydeveloperfrontend.connectors.SubscriptionFieldsConnectorDomain._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.apidefinitions.{ApiContext, ApiIdentifier, ApiVersion}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.{ClientId, Environment}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.subscriptions.ApiSubscriptionFields._
-import uk.gov.hmrc.thirdpartydeveloperfrontend.helpers.Retries
-import javax.inject.{Inject, Singleton}
-import play.api.http.Status.{BAD_REQUEST, CREATED, NOT_FOUND, NO_CONTENT, OK}
-import play.api.libs.json.{JsSuccess, Json}
-import uk.gov.hmrc.thirdpartydeveloperfrontend.service.SubscriptionFieldsService.{DefinitionsByApiVersion, SubscriptionFieldsConnector}
-import uk.gov.hmrc.http.{HeaderCarrier, HttpResponse}
-import uk.gov.hmrc.http.HttpClient
-import uk.gov.hmrc.apiplatform.modules.common.services.ApplicationLogger
-
-import scala.concurrent.{ExecutionContext, Future}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.subscriptions._
-import SubscriptionFieldsConnectorDomain._
-import uk.gov.hmrc.http.UpstreamErrorResponse
+import uk.gov.hmrc.thirdpartydeveloperfrontend.helpers.Retries
+import uk.gov.hmrc.thirdpartydeveloperfrontend.service.SubscriptionFieldsService.{DefinitionsByApiVersion, SubscriptionFieldsConnector}
 
 abstract class AbstractSubscriptionFieldsConnector(implicit ec: ExecutionContext) extends SubscriptionFieldsConnector with Retries with ApplicationLogger {
   protected val httpClient: HttpClient

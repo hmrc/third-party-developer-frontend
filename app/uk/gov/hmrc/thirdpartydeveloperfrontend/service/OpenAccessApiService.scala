@@ -16,14 +16,15 @@
 
 package uk.gov.hmrc.thirdpartydeveloperfrontend.service
 
+import javax.inject.{Inject, Singleton}
+import scala.concurrent.{ExecutionContext, Future}
+
+import uk.gov.hmrc.http.HeaderCarrier
+
+import uk.gov.hmrc.thirdpartydeveloperfrontend.connectors.ApmConnector
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.apidefinitions._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications._
-import javax.inject.{Inject, Singleton}
-
-import scala.concurrent.{ExecutionContext, Future}
-import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.subscriptions.ApiData
-import uk.gov.hmrc.thirdpartydeveloperfrontend.connectors.ApmConnector
 
 @Singleton
 class OpenAccessApiService @Inject() (openAccessApisConnector: ApmConnector)(implicit val ec: ExecutionContext) {

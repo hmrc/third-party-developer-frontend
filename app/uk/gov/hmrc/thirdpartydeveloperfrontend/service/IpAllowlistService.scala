@@ -16,15 +16,16 @@
 
 package uk.gov.hmrc.thirdpartydeveloperfrontend.service
 
+import javax.inject.{Inject, Singleton}
+import scala.concurrent.{ExecutionContext, Future}
+
+import uk.gov.hmrc.http.{ForbiddenException, HeaderCarrier}
+
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.ApplicationUpdateSuccessful
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.Application
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.flows.FlowType.IP_ALLOW_LIST
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.flows.IpAllowlistFlow
-import javax.inject.{Inject, Singleton}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.repositories.FlowRepository
-import uk.gov.hmrc.http.{ForbiddenException, HeaderCarrier}
-
-import scala.concurrent.{ExecutionContext, Future}
 
 @Singleton
 class IpAllowlistService @Inject() (flowRepository: FlowRepository, connectorWrapper: ConnectorsWrapper)(implicit val ec: ExecutionContext) {

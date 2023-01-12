@@ -17,18 +17,16 @@
 package uk.gov.hmrc.thirdpartydeveloperfrontend.mocks.service
 
 import java.util.UUID
+import scala.concurrent.Future.{failed, successful}
+
+import org.mockito.{ArgumentMatchersSugar, MockitoSugar}
 
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain._
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.apidefinitions.ApiIdentifier
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.DeveloperSession
-import org.mockito.{ArgumentMatchersSugar, MockitoSugar}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.service.ApplicationService
-
-import scala.concurrent.Future.{failed, successful}
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.apidefinitions.ApiIdentifier
-import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.TestApplications
-import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.CollaboratorTracker
-import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.LocalUserIdTracker
+import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.{CollaboratorTracker, LocalUserIdTracker, TestApplications}
 
 trait ApplicationServiceMock extends MockitoSugar with ArgumentMatchersSugar with TestApplications with CollaboratorTracker with LocalUserIdTracker {
   val applicationServiceMock = mock[ApplicationService]

@@ -16,13 +16,14 @@
 
 package uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers
 
+import java.{util => ju}
+
+import play.api.libs.functional.syntax._
 import play.api.libs.json.{Format, JsPath, Json, Reads}
+
 import uk.gov.hmrc.apiplatform.modules.mfa.models.MfaDetail
 import uk.gov.hmrc.apiplatform.modules.mfa.models.MfaDetailFormats._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.emailpreferences.EmailPreferences
-import play.api.libs.functional.syntax._
-
-import java.{util => ju}
 
 case class UserId(value: ju.UUID) extends AnyVal {
   def asText = value.toString

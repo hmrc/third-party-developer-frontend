@@ -16,35 +16,34 @@
 
 package uk.gov.hmrc.apiplatform.modules.submissions.controllers
 
-import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.BaseControllerSpec
-import uk.gov.hmrc.thirdpartydeveloperfrontend.mocks.service.ApplicationServiceMock
-import uk.gov.hmrc.thirdpartydeveloperfrontend.mocks.service.ApplicationActionServiceMock
-import uk.gov.hmrc.thirdpartydeveloperfrontend.mocks.connectors.ApmConnectorMockModule
-import uk.gov.hmrc.apiplatform.modules.submissions.services.mocks.ResponsibleIndividualVerificationServiceMockModule
-import play.api.test.Helpers._
-import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.WithLoggedInSession._
-
+import java.time.{LocalDateTime, ZoneOffset}
 import scala.concurrent.ExecutionContext.Implicits.global
+
+import play.api.test.FakeRequest
+import play.api.test.Helpers._
+import play.filters.csrf.CSRF
+
+import uk.gov.hmrc.apiplatform.modules.submissions.SubmissionsTestData
+import uk.gov.hmrc.apiplatform.modules.submissions.domain.models.{
+  ResponsibleIndividualToUVerification,
+  ResponsibleIndividualVerificationId,
+  ResponsibleIndividualVerificationState,
+  Submission
+}
+import uk.gov.hmrc.apiplatform.modules.submissions.services.mocks.ResponsibleIndividualVerificationServiceMockModule
 import uk.gov.hmrc.apiplatform.modules.submissions.views.html.{
   ResponsibleIndividualAcceptedView,
   ResponsibleIndividualDeclinedView,
   ResponsibleIndividualErrorView,
   VerifyResponsibleIndividualView
 }
-import uk.gov.hmrc.thirdpartydeveloperfrontend.builder.DeveloperBuilder
-import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.LocalUserIdTracker
-import play.api.test.FakeRequest
-import play.filters.csrf.CSRF
-import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.WithCSRFAddToken
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.ApplicationWithSubscriptionData
-import uk.gov.hmrc.thirdpartydeveloperfrontend.builder.SampleApplication
-import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.SubscriptionTestHelperSugar
-import uk.gov.hmrc.thirdpartydeveloperfrontend.builder.SampleSession
-import uk.gov.hmrc.apiplatform.modules.submissions.SubmissionsTestData
-import uk.gov.hmrc.apiplatform.modules.submissions.domain.models.{ResponsibleIndividualToUVerification, ResponsibleIndividualVerificationId, ResponsibleIndividualVerificationState}
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.ApplicationId
-import uk.gov.hmrc.apiplatform.modules.submissions.domain.models.Submission
-import java.time.{LocalDateTime, ZoneOffset}
+import uk.gov.hmrc.thirdpartydeveloperfrontend.builder.{DeveloperBuilder, SampleApplication, SampleSession}
+import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.{BaseControllerSpec, SubscriptionTestHelperSugar}
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.{ApplicationId, ApplicationWithSubscriptionData}
+import uk.gov.hmrc.thirdpartydeveloperfrontend.mocks.connectors.ApmConnectorMockModule
+import uk.gov.hmrc.thirdpartydeveloperfrontend.mocks.service.{ApplicationActionServiceMock, ApplicationServiceMock}
+import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.WithLoggedInSession._
+import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.{LocalUserIdTracker, WithCSRFAddToken}
 
 class VerifyResponsibleIndividualControllerSpec
     extends BaseControllerSpec

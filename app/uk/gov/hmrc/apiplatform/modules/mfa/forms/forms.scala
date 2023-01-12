@@ -16,12 +16,13 @@
 
 package uk.gov.hmrc.apiplatform.modules.mfa.forms
 
+import java.util.regex.Pattern
+
 import play.api.data.Form
 import play.api.data.Forms.{boolean, mapping, nonEmptyText, text}
+
 import uk.gov.hmrc.apiplatform.modules.mfa.models.MfaType
 import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.FormKeys
-
-import java.util.regex.Pattern
 
 final case class MfaAccessCodeForm(accessCode: String, rememberMe: Boolean)
 

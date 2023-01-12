@@ -16,14 +16,15 @@
 
 package uk.gov.hmrc.thirdpartydeveloperfrontend.service
 
+import javax.inject.{Inject, Singleton}
+
 import play.api.mvc.{AnyContent, Request}
+
 import uk.gov.hmrc.apiplatform.modules.uplift.controllers.UpliftJourneySwitch
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.TermsOfUseVersion
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.Application
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.services.TermsOfUseService
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.services.TermsOfUseService.TermsOfUseAgreementDetails
-
-import javax.inject.{Inject, Singleton}
 
 @Singleton
 class TermsOfUseVersionService @Inject() (upliftJourneySwitch: UpliftJourneySwitch, termsOfUseService: TermsOfUseService) {

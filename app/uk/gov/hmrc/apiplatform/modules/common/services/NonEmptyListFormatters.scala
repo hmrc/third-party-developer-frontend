@@ -16,8 +16,9 @@
 
 package uk.gov.hmrc.apiplatform.modules.common.services
 
-import play.api.libs.json._
 import cats.data.{NonEmptyList => NEL}
+
+import play.api.libs.json._
 
 trait NonEmptyListFormatters {
 

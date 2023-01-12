@@ -16,19 +16,20 @@
 
 package uk.gov.hmrc.thirdpartydeveloperfrontend.security
 
+import scala.concurrent.{ExecutionContext, Future}
+
+import cats.data.{EitherT, OptionT}
 import cats.implicits._
-import uk.gov.hmrc.thirdpartydeveloperfrontend.config.ApplicationConfig
-import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.{routes, BaseController, MaybeUserRequest, UserRequest}
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.{DeveloperSession, LoggedInState}
+
 import play.api.mvc._
-import uk.gov.hmrc.thirdpartydeveloperfrontend.service.SessionService
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendHeaderCarrierProvider
-import cats.data.OptionT
-import cats.data.EitherT
-import uk.gov.hmrc.apiplatform.modules.common.services.ApplicationLogger
 
-import scala.concurrent.{ExecutionContext, Future}
+import uk.gov.hmrc.apiplatform.modules.common.services.ApplicationLogger
+import uk.gov.hmrc.thirdpartydeveloperfrontend.config.ApplicationConfig
+import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.{BaseController, MaybeUserRequest, UserRequest, routes}
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.{DeveloperSession, LoggedInState}
+import uk.gov.hmrc.thirdpartydeveloperfrontend.service.SessionService
 
 trait DevHubAuthorization extends FrontendHeaderCarrierProvider with CookieEncoding with ApplicationLogger {
   self: BaseController =>

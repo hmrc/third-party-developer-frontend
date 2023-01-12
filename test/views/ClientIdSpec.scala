@@ -17,18 +17,20 @@
 package views
 
 import java.time.{LocalDateTime, Period}
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications._
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.LoggedInState
+import scala.collection.JavaConverters._
+
 import org.jsoup.Jsoup
 import org.jsoup.nodes.Document
-import play.api.test.FakeRequest
-import play.twirl.api.Html
-import uk.gov.hmrc.thirdpartydeveloperfrontend.utils._
 import views.helper.CommonViewSpec
 import views.html.ClientIdView
-import uk.gov.hmrc.thirdpartydeveloperfrontend.builder._
 
-import scala.collection.JavaConverters._
+import play.api.test.FakeRequest
+import play.twirl.api.Html
+
+import uk.gov.hmrc.thirdpartydeveloperfrontend.builder._
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications._
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.LoggedInState
+import uk.gov.hmrc.thirdpartydeveloperfrontend.utils._
 
 class ClientIdSpec extends CommonViewSpec with WithCSRFAddToken with CollaboratorTracker
     with LocalUserIdTracker

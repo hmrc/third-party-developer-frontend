@@ -16,15 +16,16 @@
 
 package uk.gov.hmrc.apiplatform.modules.uplift.services
 
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.DeveloperSession
 import javax.inject.{Inject, Singleton}
-import uk.gov.hmrc.thirdpartydeveloperfrontend.repositories.FlowRepository
-
 import scala.concurrent.{ExecutionContext, Future}
+
+import cats.implicits._
+
 import uk.gov.hmrc.apiplatform.modules.uplift.domain.models._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.SellResellOrDistribute
-import cats.implicits._
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.DeveloperSession
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.flows.FlowType
+import uk.gov.hmrc.thirdpartydeveloperfrontend.repositories.FlowRepository
 
 @Singleton
 class GetProductionCredentialsFlowService @Inject() (

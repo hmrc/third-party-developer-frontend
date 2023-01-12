@@ -16,9 +16,9 @@
 
 package uk.gov.hmrc.thirdpartydeveloperfrontend.builder
 
-import uk.gov.hmrc.apiplatform.modules.mfa.models.{AuthenticatorAppMfaDetailSummary, MfaId, SmsMfaDetailSummary}
-
 import java.time.LocalDateTime
+
+import uk.gov.hmrc.apiplatform.modules.mfa.models.{AuthenticatorAppMfaDetailSummary, MfaId, SmsMfaDetailSummary}
 
 trait MfaDetailBuilder {
   val verifiedAuthenticatorAppMfaDetail = buildAuthenticatorAppMfaDetail(name = "Auth App", verified = true)

@@ -16,30 +16,21 @@
 
 package uk.gov.hmrc.apiplatform.modules.submissions.controllers
 
-import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.UserRequest
-import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.BaseController
-import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.ApplicationActionBuilders
-import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.HasApplication
-import uk.gov.hmrc.apiplatform.modules.submissions.domain.models._
+import scala.concurrent.Future.successful
+import scala.concurrent.{ExecutionContext, Future}
 
-import scala.concurrent.ExecutionContext
-import play.api.mvc.ActionRefiner
-
-import scala.concurrent.Future
-import play.api.mvc._
-import uk.gov.hmrc.apiplatform.modules.common.services.EitherTHelper
 import cats.implicits._
 import cats.instances.future.catsStdInstancesForFuture
-import uk.gov.hmrc.apiplatform.modules.submissions.domain.models.Submission.Status
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.Application
-import uk.gov.hmrc.apiplatform.modules.submissions.services.SubmissionService
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.ApplicationId
-import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.ApplicationRequest
 
-import scala.concurrent.Future.successful
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.State
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.CollaboratorRole
+import play.api.mvc.{ActionRefiner, _}
+
+import uk.gov.hmrc.apiplatform.modules.common.services.EitherTHelper
+import uk.gov.hmrc.apiplatform.modules.submissions.domain.models.Submission.Status
+import uk.gov.hmrc.apiplatform.modules.submissions.domain.models._
+import uk.gov.hmrc.apiplatform.modules.submissions.services.SubmissionService
+import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.{ApplicationActionBuilders, ApplicationRequest, BaseController, HasApplication, UserRequest}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.apidefinitions.APISubscriptionStatus
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.{Application, ApplicationId, CollaboratorRole, State}
 
 class SubmissionRequest[A](val extSubmission: ExtendedSubmission, val userRequest: UserRequest[A]) extends UserRequest[A](userRequest.developerSession, userRequest.msgRequest) {
   lazy val submission         = extSubmission.submission

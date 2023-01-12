@@ -16,9 +16,11 @@
 
 package uk.gov.hmrc.apiplatform.modules.uplift.services.mocks
 
-import org.mockito.{ArgumentMatchersSugar, MockitoSugar}
-import org.mockito.verification.VerificationMode
 import scala.concurrent.Future.{failed, successful}
+
+import org.mockito.verification.VerificationMode
+import org.mockito.{ArgumentMatchersSugar, MockitoSugar}
+
 import uk.gov.hmrc.apiplatform.modules.uplift.domain.models._
 import uk.gov.hmrc.apiplatform.modules.uplift.services.GetProductionCredentialsFlowService
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.SellResellOrDistribute

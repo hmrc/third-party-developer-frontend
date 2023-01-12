@@ -16,17 +16,19 @@
 
 package uk.gov.hmrc.apiplatform.modules.mfa.views
 
+import java.time.LocalDateTime
+import java.time.format.DateTimeFormatter
+
 import org.jsoup.Jsoup
 import org.jsoup.nodes.Document
+import views.helper.CommonViewSpec
+
 import play.api.test.FakeRequest
+
 import uk.gov.hmrc.apiplatform.modules.mfa.models.{AuthenticatorAppMfaDetailSummary, MfaDetail, MfaId, SmsMfaDetailSummary}
 import uk.gov.hmrc.apiplatform.modules.mfa.views.html.SecurityPreferencesItemsView
 import uk.gov.hmrc.thirdpartydeveloperfrontend.builder.DeveloperBuilder
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.{LocalUserIdTracker, WithCSRFAddToken}
-import views.helper.CommonViewSpec
-
-import java.time.LocalDateTime
-import java.time.format.DateTimeFormatter
 
 class SecurityPreferencesItemsViewSpec extends CommonViewSpec with WithCSRFAddToken with DeveloperBuilder with LocalUserIdTracker {
   implicit val request             = FakeRequest()

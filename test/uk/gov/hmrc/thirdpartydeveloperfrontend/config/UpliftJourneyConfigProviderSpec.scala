@@ -17,6 +17,7 @@
 package uk.gov.hmrc.thirdpartydeveloperfrontend.config
 
 import play.api.Configuration
+
 import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.BaseControllerSpec
 
 class UpliftJourneyConfigSpec extends BaseControllerSpec {

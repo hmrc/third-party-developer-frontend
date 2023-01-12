@@ -17,6 +17,9 @@
 package uk.gov.hmrc.thirdpartydeveloperfrontend.controllers
 
 import cats.data.NonEmptyList
+
+import play.api.mvc._
+
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.apidefinitions.{
   APISubscriptionStatus,
   APISubscriptionStatusWithSubscriptionFields,
@@ -25,7 +28,6 @@ import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.apidefinitions.{
 }
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.DeveloperSession
-import play.api.mvc._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.subscriptions.ApiData
 
 class UserRequest[A](val developerSession: DeveloperSession, val msgRequest: MessagesRequest[A]) extends MessagesRequest[A](msgRequest, msgRequest.messagesApi) {

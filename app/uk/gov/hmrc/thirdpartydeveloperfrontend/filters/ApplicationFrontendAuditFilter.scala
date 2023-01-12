@@ -16,14 +16,15 @@
 
 package uk.gov.hmrc.thirdpartydeveloperfrontend.filters
 
-import akka.stream.Materializer
 import javax.inject.{Inject, Named}
+import scala.concurrent.ExecutionContext
+
+import akka.stream.Materializer
+
 import play.api.Configuration
 import uk.gov.hmrc.play.audit.http.connector.AuditConnector
 import uk.gov.hmrc.play.bootstrap.config.{ControllerConfigs, HttpAuditEvent}
 import uk.gov.hmrc.play.bootstrap.frontend.filters.{DefaultFrontendAuditFilter, RequestHeaderAuditing}
-
-import scala.concurrent.ExecutionContext
 
 class ApplicationFrontendAuditFilter @Inject() (
     val configuration: Configuration,

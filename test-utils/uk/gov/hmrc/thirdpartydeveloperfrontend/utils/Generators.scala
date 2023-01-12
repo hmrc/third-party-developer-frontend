@@ -16,10 +16,10 @@
 
 package uk.gov.hmrc.thirdpartydeveloperfrontend.utils
 
+import scala.util.Random
+
 import org.scalacheck.Arbitrary.arbitrary
 import org.scalacheck.Gen
-
-import scala.util.Random
 
 object Generators {
 

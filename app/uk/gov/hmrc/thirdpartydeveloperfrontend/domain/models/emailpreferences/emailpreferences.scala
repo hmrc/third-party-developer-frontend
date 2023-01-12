@@ -16,9 +16,11 @@
 
 package uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.emailpreferences
 
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.subscriptions.ApiCategory
 import enumeratum.values.{StringEnum, StringEnumEntry, StringPlayJsonValueEnum}
+
 import play.api.libs.json.Json
+
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.subscriptions.ApiCategory
 
 case class TaxRegimeInterests(regime: String, services: Set[String]) {
   def addService(serviceName: String): TaxRegimeInterests = copy(services = services ++ Set(serviceName))

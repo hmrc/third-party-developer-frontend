@@ -16,21 +16,22 @@
 
 package views.include
 
+import java.time.{LocalDateTime, ZoneOffset}
+
+import org.jsoup.Jsoup
+import org.jsoup.nodes.Document
+import views.helper.CommonViewSpec
+import views.html.include.SubscriptionsGroup
+
+import play.api.test.FakeRequest
+
 import uk.gov.hmrc.thirdpartydeveloperfrontend.builder.{DeveloperBuilder, DeveloperSessionBuilder, SubscriptionsBuilder}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.APISubscriptions
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.apidefinitions._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.LoggedInState
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.views.SubscriptionRedirect
-import org.jsoup.Jsoup
-import org.jsoup.nodes.Document
-import play.api.test.FakeRequest
-import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.WithCSRFAddToken
-import views.helper.CommonViewSpec
-import views.html.include.SubscriptionsGroup
-import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.{CollaboratorTracker, LocalUserIdTracker}
-
-import java.time.{LocalDateTime, ZoneOffset}
+import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.{CollaboratorTracker, LocalUserIdTracker, WithCSRFAddToken}
 
 class SubscriptionsGroupSpec
     extends CommonViewSpec
