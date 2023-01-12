@@ -171,6 +171,7 @@ trait BaseApplication {
     collaborators.find(c => c.emailAddress.toSha256 == teamMemberHash)
   }
 
+  // scalastyle:off cyclomatic.complexity
   def grantLengthDisplayValue(): String = {
     grantLength match {
       case GrantLength.MONTH           => "1 month"
@@ -185,6 +186,7 @@ trait BaseApplication {
       case _                           => s"${Math.round(grantLength.getDays / 30)} months"
     }
   }
+  // scalastyle:on cyclomatic.complexity
 }
 
 case class Application(

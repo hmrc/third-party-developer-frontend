@@ -96,10 +96,11 @@ object UpliftLogic {
       case (id, subs) =>
         val realApis = subs.filterNot(id => excludedContexts.contains(id.context) || retiredVersions.contains(id))
 
-        if (realApis.nonEmpty && realApis.subsetOf(apisAvailableInProd))
+        if (realApis.nonEmpty && realApis.subsetOf(apisAvailableInProd)) {
           Map(id -> realApis)
-        else
+        } else {
           Map.empty[ApplicationId, Set[ApiIdentifier]]
+        }
     }
   }
 }

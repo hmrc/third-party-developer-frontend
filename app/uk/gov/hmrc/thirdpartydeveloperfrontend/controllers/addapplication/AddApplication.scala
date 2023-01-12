@@ -122,10 +122,11 @@ class AddApplication @Inject() (
   def addApplicationProductionSwitch(): Action[AnyContent] = loggedInAction { implicit request =>
     def chooseApplicationToUplift(upliftableSummaries: Seq[ApplicationSummary], showFluff: Boolean): Action[AnyContent] = loggedInAction { implicit request =>
       val form =
-        if (upliftableSummaries.size == 1) // TODO - and only one API sub
+        if (upliftableSummaries.size == 1) { // TODO - and only one API sub
           ChooseApplicationToUpliftForm.form.fill(ChooseApplicationToUpliftForm(upliftableSummaries.head.id))
-        else
+        } else {
           ChooseApplicationToUpliftForm.form
+        }
 
       successful(Ok(chooseApplicationToUpliftView(form, upliftableSummaries, showFluff)))
     }

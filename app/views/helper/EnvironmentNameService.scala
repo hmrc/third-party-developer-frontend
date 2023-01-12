@@ -32,7 +32,6 @@ class EnvironmentNameService @Inject() (appConfig: ApplicationConfig) {
   def subordinateEnvName = appConfig.nameOfSubordinateEnvironment.toLowerCase()
 
   def subordinateWording =
-    if (subordinateIsSandbox)
-      theSandbox
+    if (subordinateIsSandbox) theSandbox
     else subordinateEnvName
 }

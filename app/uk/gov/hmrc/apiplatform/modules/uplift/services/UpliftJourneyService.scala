@@ -38,10 +38,8 @@ class UpliftJourneyService @Inject() (
   import cats.instances.future.catsStdInstancesForFuture
 
   def confirmAndUplift(sandboxAppId: ApplicationId, developerSession: DeveloperSession, useV2: Boolean)(implicit hc: HeaderCarrier): Future[Either[String, ApplicationId]] =
-    if (useV2)
-      confirmAndUpliftV2(sandboxAppId, developerSession)
-    else
-      confirmAndUpliftV1(sandboxAppId, developerSession)
+    if (useV2) confirmAndUpliftV2(sandboxAppId, developerSession)
+    else confirmAndUpliftV1(sandboxAppId, developerSession)
 
   def confirmAndUpliftV1(sandboxAppId: ApplicationId, developerSession: DeveloperSession)(implicit hc: HeaderCarrier): Future[Either[String, ApplicationId]] =
     (

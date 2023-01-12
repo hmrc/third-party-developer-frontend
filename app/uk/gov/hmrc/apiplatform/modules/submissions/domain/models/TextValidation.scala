@@ -33,10 +33,11 @@ sealed trait TextValidation {
       }
 
     case TextValidation.Email =>
-      if (TextValidation.emailValidator.isValid(text))
+      if (TextValidation.emailValidator.isValid(text)) {
         Right(text)
-      else
+      } else {
         Left(s"$text is not a valid email")
+      }
 
     case TextValidation.MatchRegex(regex) => {
       val matcher = regex.r

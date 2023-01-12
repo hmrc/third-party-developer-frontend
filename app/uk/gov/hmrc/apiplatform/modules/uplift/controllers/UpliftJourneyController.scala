@@ -133,7 +133,7 @@ class UpliftJourneyController @Inject() (
           case (name, isSubscribed) => (name.replace("-subscribed", "") -> isSubscribed)
         }
 
-    lazy val atLeastOneSubscription = formSubmittedSubscriptions.values.exists(_ == true)
+    lazy val atLeastOneSubscription = formSubmittedSubscriptions.values.exists(identity)
 
     if (atLeastOneSubscription) {
       for {

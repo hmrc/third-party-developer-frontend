@@ -131,13 +131,13 @@ class Redirects @Inject() (
       else {
         request.application.access match {
           case app: Standard =>
-            if (app.redirectUris.contains(form.newRedirectUri))
+            if (app.redirectUris.contains(form.newRedirectUri)) {
               handleInvalidForm(
                 ChangeRedirectForm.form
                   .fill(form)
                   .withError("newRedirectUri", "redirect.uri.duplicate")
               )
-            else updateUris()
+            } else updateUris()
           case _             => successful(Redirect(routes.Details.details(applicationId)))
         }
       }

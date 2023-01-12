@@ -198,10 +198,11 @@ class QuestionsController @Inject() (
 
       lazy val toCheckAnswers = uk.gov.hmrc.apiplatform.modules.submissions.controllers.routes.CheckAnswersController.checkAnswersPage(request.submission.applicationId)
       lazy val toNextQuestion = (nextQuestionId: Question.Id) =>
-        if (hasQuestionBeenAnswered(nextQuestionId))
+        if (hasQuestionBeenAnswered(nextQuestionId)) {
           uk.gov.hmrc.apiplatform.modules.submissions.controllers.routes.CheckAnswersController.checkAnswersPage(request.submission.applicationId)
-        else
+        } else {
           uk.gov.hmrc.apiplatform.modules.submissions.controllers.routes.QuestionsController.updateQuestion(submissionId, nextQuestionId)
+        }
 
       successful(Redirect(nextQuestion.fold(toCheckAnswers)(toNextQuestion)))
     }

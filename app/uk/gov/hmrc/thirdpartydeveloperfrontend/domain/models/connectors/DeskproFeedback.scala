@@ -42,6 +42,7 @@ object Feedback extends FieldTransformer {
 
   implicit val formats = Json.format[Feedback]
 
+  // scalastyle:off parameter.number
   def create(
       name: String,
       email: String,
@@ -68,6 +69,7 @@ object Feedback extends FieldTransformer {
       sessionIdFrom(hc),
       service
     )
+  // scalastyle:on parameter.number
 
   def createFromSurvey(survey: SignOutSurveyForm, title: Option[String])(implicit hc: HeaderCarrier, request: Request[AnyRef]): Feedback = {
 

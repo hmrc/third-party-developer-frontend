@@ -93,6 +93,7 @@ class Details @Inject() (
   def canChangeDetailsAndIsApprovedAction(applicationId: ApplicationId)(fun: ApplicationRequest[AnyContent] => Future[Result]): Action[AnyContent] =
     checkActionForApprovedApps(SupportsDetails, SandboxOnly)(applicationId)(fun)
 
+  // scalastyle:off cyclomatic.complexity method.length
   def details(applicationId: ApplicationId): Action[AnyContent] = whenTeamMemberOnApp(applicationId) { implicit request =>
     val accessLevel          = DevhubAccessLevel.fromRole(request.role)
     val checkYourAnswersData = CheckYourAnswersData(accessLevel, request.application, request.subscriptions)
@@ -111,10 +112,11 @@ class Details @Inject() (
     request.application.state.name match {
       case State.TESTING =>
         lazy val oldJourney =
-          if (request.role.isAdministrator)
+          if (request.role.isAdministrator) {
             Redirect(uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.checkpages.routes.ApplicationCheck.requestCheckPage(request.application.id))
-          else
+          } else {
             Ok(unauthorisedAppDetailsView(request.application.name, request.application.adminEmails))
+          }
 
         lazy val newUpliftJourney = (s: Submission) =>
           if (request.role.isAdministrator) {
@@ -157,6 +159,7 @@ class Details @Inject() (
         successful(BadRequest)
     }
   }
+  // scalastyle:on cyclomatic.complexity method.length
 
   private def buildTermsOfUseViewModel()(implicit request: ApplicationRequest[AnyContent]): TermsOfUseViewModel = {
     val application = request.application

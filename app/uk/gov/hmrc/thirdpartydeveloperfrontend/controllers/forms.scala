@@ -23,6 +23,8 @@ import play.api.data.{Form, FormError}
 
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.{Application, ApplicationId, PrivacyPolicyLocation, TermsAndConditionsLocation}
 
+// scalastyle:off number.of.types
+
 trait ConfirmPassword {
   val password: String
   val confirmPassword: String
@@ -690,3 +692,5 @@ object ResponsibleIndividualChangeToOtherForm {
     )(ResponsibleIndividualChangeToOtherForm.apply)(ResponsibleIndividualChangeToOtherForm.unapply)
   )
 }
+
+// scalastyle:on number.of.types

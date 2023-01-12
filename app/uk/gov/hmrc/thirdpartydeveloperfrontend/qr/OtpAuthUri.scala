@@ -24,6 +24,6 @@ class OtpAuthUri @Inject() () {
   def apply(secret: String, issuer: String, user: String) = {
     val params = Map("secret" -> secret, "issuer" -> issuer)
     val query  = params.map(pair => pair._1 + "=" + pair._2).mkString("&")
-    new URI("otpauth", "totp", s"/$issuer:$user", query, null)
+    new URI("otpauth", "totp", s"/$issuer:$user", query, null) // scalastyle:ignore null
   }
 }
