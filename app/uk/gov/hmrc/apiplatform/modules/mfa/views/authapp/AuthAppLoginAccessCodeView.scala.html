@@ -34,7 +34,7 @@
 ) {
   <h1 class="govuk-heading-l" id="page-heading">Enter your access code</h1>
 
-  @helper.form(action = routes.UserLoginAccount.authenticateAccessCode(mfaId, mfaType)){
+  @helper.form(action = routes.UserLoginAccount.authenticateAccessCode(mfaId, mfaType, userHasMultipleMfa)){
     @helper.CSRF.formField
     <p class="govuk-body" id="paragraph-1">This is the 6 digit code from your authentication app.</p>
     <div class="govuk-form-group @if(form.errors("accessCode").nonEmpty){form-group-error govuk-form-group--error}">

@@ -293,7 +293,7 @@ class UserLoginAccount @Inject()(val auditService: AuditService,
 
   private def hasMultipleMfaMethods(developer: Developer): Boolean = hasVerifiedSmsAndAuthApp(developer.mfaDetails)
 
-  def authenticateAccessCode(mfaId: MfaId, mfaType: MfaType): Action[AnyContent] = Action.async { implicit request =>
+  def authenticateAccessCode(mfaId: MfaId, mfaType: MfaType, userHasMultipleMfa: Boolean): Action[AnyContent] = Action.async { implicit request =>
     val email: String = request.session.get("emailAddress").get
 
     def handleMfaSetupReminder(session: Session) = {
@@ -316,7 +316,7 @@ class UserLoginAccount @Inject()(val auditService: AuditService,
       } else handleMfaSetupReminder(session).map(withSessionCookie(_, session.sessionId))
     }
 
-    def handleAuthentication(email: String, form: MfaAccessCodeForm, mfaType: MfaType) = {
+    def handleAuthentication(email: String, form: MfaAccessCodeForm, mfaType: MfaType, userHasMultipleMfa: Boolean) = {
       (for {
         session   <- sessionService.authenticateAccessCode(email, form.accessCode, request.session.get("nonce").get, mfaId)
         _         <-  audit(LoginSucceeded, DeveloperSession.apply(session))
@@ -326,7 +326,7 @@ class UserLoginAccount @Inject()(val auditService: AuditService,
           case _: InvalidCredentials =>
             logger.warn("Login failed due to invalid access code")
             audit(LoginFailedDueToInvalidAccessCode, Map("developerEmail" -> email))
-            handleAccessCodeError(form, mfaId, mfaType, userHasMultipleMfa = false)
+            handleAccessCodeError(form, mfaId, mfaType, userHasMultipleMfa)
         }
     }
 
@@ -349,8 +349,8 @@ class UserLoginAccount @Inject()(val auditService: AuditService,
     }
 
     MfaAccessCodeForm.form.bindFromRequest.fold(
-      errors => successful(handleFormWithErrors(errors, mfaId, mfaType, userHasMultipleMfa = false)),
-      validForm => handleAuthentication(email, validForm, mfaType)
+      errors => successful(handleFormWithErrors(errors, mfaId, mfaType, userHasMultipleMfa)),
+      validForm => handleAuthentication(email, validForm, mfaType, userHasMultipleMfa)
     )
   }
 

@@ -580,7 +580,7 @@ class UserLoginAccountSpec extends BaseControllerSpec with WithCSRFAddToken
         .withSession(sessionParams :+ "emailAddress" -> user.email :+ "nonce" -> nonce: _*)
         .withFormUrlEncodedBody(("accessCode", accessCode))
 
-      private val result = underTest.authenticateAccessCode(authAppMfaId, AUTHENTICATOR_APP)(request)
+      private val result = underTest.authenticateAccessCode(authAppMfaId, AUTHENTICATOR_APP, userHasMultipleMfa = false)(request)
 
       status(result) shouldBe SEE_OTHER
       redirectLocation(result) shouldBe Some(uk.gov.hmrc.apiplatform.modules.mfa.controllers.profile.routes.MfaController.smsSetupReminderPage.url)
@@ -596,7 +596,7 @@ class UserLoginAccountSpec extends BaseControllerSpec with WithCSRFAddToken
         .withSession(sessionParams :+ "emailAddress" -> user.email :+ "nonce" -> nonce: _*)
         .withFormUrlEncodedBody(("accessCode", accessCode))
 
-      private val result = underTest.authenticateAccessCode(smsMfaId, SMS)(request)
+      private val result = underTest.authenticateAccessCode(smsMfaId, SMS, userHasMultipleMfa = false)(request)
 
       status(result) shouldBe SEE_OTHER
       redirectLocation(result) shouldBe Some(uk.gov.hmrc.apiplatform.modules.mfa.controllers.profile.routes.MfaController.authAppSetupReminderPage.url)
@@ -609,7 +609,7 @@ class UserLoginAccountSpec extends BaseControllerSpec with WithCSRFAddToken
         .withSession(sessionParams :+ "emailAddress" -> user.email :+ "nonce" -> nonce: _*)
         .withFormUrlEncodedBody(("accessCode", "654321"))
 
-      private val result =  addToken(underTest.authenticateAccessCode(authAppMfaId, AUTHENTICATOR_APP))(request)
+      private val result =  addToken(underTest.authenticateAccessCode(authAppMfaId, AUTHENTICATOR_APP, userHasMultipleMfa = false))(request)
 
       status(result) shouldBe UNAUTHORIZED
       contentAsString(result) should include("You have entered an incorrect access code")
@@ -622,7 +622,7 @@ class UserLoginAccountSpec extends BaseControllerSpec with WithCSRFAddToken
         .withSession(sessionParams :+ "emailAddress" -> user.email :+ "nonce" -> nonce: _*)
         .withFormUrlEncodedBody(("accessCode", "123xx"))
 
-      private val result =  addToken(underTest.authenticateAccessCode(authAppMfaId, AUTHENTICATOR_APP))(request)
+      private val result =  addToken(underTest.authenticateAccessCode(authAppMfaId, AUTHENTICATOR_APP, userHasMultipleMfa = false))(request)
 
       status(result) shouldBe BAD_REQUEST
       contentAsString(result) should include("You have entered an invalid access code")
@@ -636,7 +636,7 @@ class UserLoginAccountSpec extends BaseControllerSpec with WithCSRFAddToken
         .withSession(sessionParams :+ "emailAddress" -> user.email :+ "nonce" -> nonce: _*)
         .withFormUrlEncodedBody(("accessCode", accessCode))
 
-      private val result = underTest.authenticateAccessCode(smsMfaId, SMS)(request)
+      private val result = underTest.authenticateAccessCode(smsMfaId, SMS, userHasMultipleMfa = false)(request)
 
       status(result) shouldBe SEE_OTHER
       redirectLocation(result) shouldBe Some(routes.ManageApplications.manageApps.url)
@@ -649,7 +649,7 @@ class UserLoginAccountSpec extends BaseControllerSpec with WithCSRFAddToken
         .withSession(sessionParams :+ "emailAddress" -> user.email :+ "nonce" -> nonce: _*)
         .withFormUrlEncodedBody(("accessCode", "654321"))
 
-      private val result =  addToken(underTest.authenticateAccessCode(smsMfaId, SMS))(request)
+      private val result =  addToken(underTest.authenticateAccessCode(smsMfaId, SMS, userHasMultipleMfa = false))(request)
 
       status(result) shouldBe UNAUTHORIZED
       contentAsString(result) should include("You have entered an incorrect access code")
@@ -662,7 +662,7 @@ class UserLoginAccountSpec extends BaseControllerSpec with WithCSRFAddToken
         .withSession(sessionParams :+ "emailAddress" -> user.email :+ "nonce" -> nonce: _*)
         .withFormUrlEncodedBody(("accessCode", "123xxx"))
 
-      private val result =  addToken(underTest.authenticateAccessCode(smsMfaId, SMS))(request)
+      private val result =  addToken(underTest.authenticateAccessCode(smsMfaId, SMS, userHasMultipleMfa = false))(request)
 
       status(result) shouldBe BAD_REQUEST
       contentAsString(result) should include("You have entered an invalid access code")
@@ -676,7 +676,7 @@ class UserLoginAccountSpec extends BaseControllerSpec with WithCSRFAddToken
         .withSession(sessionParams :+ "emailAddress" -> user.email :+ "nonce" -> nonce: _*)
         .withFormUrlEncodedBody(("accessCode", accessCode))
 
-      private val result = underTest.authenticateAccessCode(smsMfaId, SMS)(request)
+      private val result = underTest.authenticateAccessCode(smsMfaId, SMS, userHasMultipleMfa = true)(request)
 
       status(result) shouldBe SEE_OTHER
       redirectLocation(result) shouldBe Some(routes.ManageApplications.manageApps.url)
