@@ -18,23 +18,24 @@ package uk.gov.hmrc.apiplatform.modules.mfa.views.sms
 
 import org.jsoup.Jsoup
 import org.jsoup.nodes.Document
+import views.helper.CommonViewSpec
+
 import play.api.test.{FakeRequest, StubMessagesFactory}
+
 import uk.gov.hmrc.apiplatform.modules.mfa.forms.MobileNumberForm
 import uk.gov.hmrc.apiplatform.modules.mfa.views.html.sms.MobileNumberView
 import uk.gov.hmrc.thirdpartydeveloperfrontend.builder.{DeveloperBuilder, DeveloperSessionBuilder}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.{DeveloperSession, LoggedInState}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.{LocalUserIdTracker, WithCSRFAddToken}
-import views.helper.CommonViewSpec
-
 
 class MobileNumberViewSpec extends CommonViewSpec with WithCSRFAddToken with DeveloperSessionBuilder
-  with DeveloperBuilder with LocalUserIdTracker with StubMessagesFactory {
+    with DeveloperBuilder with LocalUserIdTracker with StubMessagesFactory {
 
   implicit val request = FakeRequest()
+
   implicit val loggedIn: DeveloperSession =
-    buildDeveloperSession(loggedInState = LoggedInState.LOGGED_IN,
-      buildDeveloper("developer@example.com", "Joe", "Bloggs"))
-  val mobileNumberView = app.injector.instanceOf[MobileNumberView]
+    buildDeveloperSession(loggedInState = LoggedInState.LOGGED_IN, buildDeveloper("developer@example.com", "Joe", "Bloggs"))
+  val mobileNumberView                    = app.injector.instanceOf[MobileNumberView]
 
   trait Setup {
 
@@ -50,7 +51,7 @@ class MobileNumberViewSpec extends CommonViewSpec with WithCSRFAddToken with Dev
   "MobileNumberView" should {
 
     "render correctly when form is valid" in new Setup {
-      val mainView = mobileNumberView.apply(MobileNumberForm.form)(stubMessages(), FakeRequest().withCSRFToken, loggedIn, appConfig)
+      val mainView           = mobileNumberView.apply(MobileNumberForm.form)(stubMessages(), FakeRequest().withCSRFToken, loggedIn, appConfig)
       val document: Document = Jsoup.parse(mainView.body)
       verifyPageElements(document)
       Option(document.getElementById("data-field-error-mobileNumber")) shouldBe None
@@ -58,7 +59,8 @@ class MobileNumberViewSpec extends CommonViewSpec with WithCSRFAddToken with Dev
 
     "render correctly when form is invalid" in new Setup {
       val mainView = mobileNumberView.apply(
-        MobileNumberForm.form.withError("mobileNumber", "It must be a valid mobile number"))(stubMessages(), FakeRequest().withCSRFToken, loggedIn, appConfig)
+        MobileNumberForm.form.withError("mobileNumber", "It must be a valid mobile number")
+      )(stubMessages(), FakeRequest().withCSRFToken, loggedIn, appConfig)
       val document = Jsoup.parse(mainView.body)
       verifyPageElements(document)
       document.getElementById("data-field-error-mobileNumber").text() shouldBe "Error: It must be a valid mobile number"

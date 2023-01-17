@@ -16,7 +16,6 @@
 
 package uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications
 
-
 case class OverrideFlag(overrideType: String)
 
 object OverrideFlag {
@@ -24,10 +23,10 @@ object OverrideFlag {
 
   val reads = Reads[OverrideFlag] {
     case JsString(value) => JsSuccess(OverrideFlag(value))
-    case o: JsObject => Json.reads[OverrideFlag].reads(o)
-    case _ => JsError()
+    case o: JsObject     => Json.reads[OverrideFlag].reads(o)
+    case _               => JsError()
   }
 
-  val writes = Json.writes[OverrideFlag]
+  val writes          = Json.writes[OverrideFlag]
   implicit val format = Format(reads, writes)
 }

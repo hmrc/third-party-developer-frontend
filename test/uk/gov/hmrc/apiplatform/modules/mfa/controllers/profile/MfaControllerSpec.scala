@@ -16,16 +16,18 @@
 
 package uk.gov.hmrc.apiplatform.modules.mfa.controllers.profile
 
+import scala.concurrent.Future
+import scala.concurrent.Future.successful
+
 import org.jsoup.Jsoup
+
 import play.api.http.Status
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
+
 import uk.gov.hmrc.apiplatform.modules.mfa.models.{MfaAction, MfaId, MfaType}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.UserId
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.WithLoggedInSession._
-
-import scala.concurrent.Future
-import scala.concurrent.Future.successful
 
 class MfaControllerSpec extends MfaControllerBaseSpec {
 
@@ -176,7 +178,7 @@ class MfaControllerSpec extends MfaControllerBaseSpec {
           .thenReturn(successful(None))
 
         private val request = FakeRequest().withLoggedIn(underTest, implicitly)(sessionId)
-        val result = underTest.securityPreferences()(request)
+        val result          = underTest.securityPreferences()(request)
 
         validateErrorTemplateView(result, "Unable to obtain User information")
       }

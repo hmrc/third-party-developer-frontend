@@ -16,27 +16,29 @@
 
 package views
 
-import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.DeleteProfileForm
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.LoggedInState
 import org.jsoup.Jsoup
-import play.api.test.FakeRequest
-import uk.gov.hmrc.thirdpartydeveloperfrontend.builder.{DeveloperBuilder, DeveloperSessionBuilder}
-import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.ViewHelpers._
-import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.{LocalUserIdTracker, WithCSRFAddToken}
 import views.helper.CommonViewSpec
 import views.html.ProfileDeleteConfirmationView
 
+import play.api.test.FakeRequest
+
+import uk.gov.hmrc.thirdpartydeveloperfrontend.builder.{DeveloperBuilder, DeveloperSessionBuilder}
+import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.DeleteProfileForm
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.LoggedInState
+import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.ViewHelpers._
+import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.{LocalUserIdTracker, WithCSRFAddToken}
+
 class ProfileDeleteConfirmationSpec extends CommonViewSpec
-  with WithCSRFAddToken
-  with LocalUserIdTracker
-  with DeveloperSessionBuilder
-  with DeveloperBuilder {
+    with WithCSRFAddToken
+    with LocalUserIdTracker
+    with DeveloperSessionBuilder
+    with DeveloperBuilder {
 
   val profileDeleteConfirmation = app.injector.instanceOf[ProfileDeleteConfirmationView]
 
   "Profile delete confirmation page" should {
-    val developer = buildDeveloper("Test", "Test", "Test", None)
-    val developerSession = buildDeveloperSession( loggedInState = LoggedInState.LOGGED_IN, developer)
+    val developer        = buildDeveloper("Test", "Test", "Test", None)
+    val developerSession = buildDeveloperSession(loggedInState = LoggedInState.LOGGED_IN, developer)
 
     "render with no errors" in {
       val request = FakeRequest().withCSRFToken

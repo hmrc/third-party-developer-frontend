@@ -23,4 +23,4 @@ case class ApplicationWithSubscriptionData(
     application: Application,
     subscriptions: Set[ApiIdentifier] = Set.empty,
     subscriptionFieldValues: Map[ApiContext, Map[ApiVersion, Fields.Alias]] = Map.empty
-)
+  )

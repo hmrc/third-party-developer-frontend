@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 HM Revenue & Customs
+ * Copyright 2023 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -119,12 +119,12 @@ object AddApplicationSuccessPage extends FormPage {
 
 case object AccountDeletionConfirmationPage extends FormPage {
   override val pageHeading: String = "Delete account"
-  override val url: String = s"${Env.host}/developer/profile/delete"
+  override val url: String         = s"${Env.host}/developer/profile/delete"
 }
 
 case object AccountDeletionRequestSubmittedPage extends FormPage {
   override val pageHeading: String = "Request submitted"
-  override val url: String = s"${Env.host}/developer/profile/delete"
+  override val url: String         = s"${Env.host}/developer/profile/delete"
 }
 
 case class SignInPage(override val pageHeading: String = "Sign in") extends FormPage {
@@ -133,30 +133,31 @@ case class SignInPage(override val pageHeading: String = "Sign in") extends Form
 
 case object SelectMfaPage extends FormPage {
   override val pageHeading: String = "How do you want to get access codes?"
-  override val url: String = s"${Env.host}/developer/login/select-mfa"
+  override val url: String         = s"${Env.host}/developer/login/select-mfa"
 }
 
 case object RecommendMfaPage extends FormPage {
   override val pageHeading: String = "Add 2-step verification"
-  override val url: String = s"${Env.host}/developer/login/2sv-recommendation"
+  override val url: String         = s"${Env.host}/developer/login/2sv-recommendation"
 }
 
 case object RecommendMfaSkipAcknowledgePage extends FormPage {
   override val pageHeading: String = "Add 2-step verification"
-  override val url: String = s"${Env.host}/developer/login/2SV-not-set"
+  override val url: String         = s"${Env.host}/developer/login/2SV-not-set"
 }
-
 
 case object AuthAppLoginAccessCodePage extends MfaData {
-  val page =  LoginAccessCodePage(authAppMfaId.value.toString, MfaType.AUTHENTICATOR_APP, "Enter your access code")
+  val page = LoginAccessCodePage(authAppMfaId.value.toString, MfaType.AUTHENTICATOR_APP, "Enter your access code")
 }
-case class LoginAccessCodePage(mfaId: String,  mfaType: MfaType, headingVal: String) extends FormPage {
+
+case class LoginAccessCodePage(mfaId: String, mfaType: MfaType, headingVal: String) extends FormPage {
+
   def clickContinue() = {
     click on id("submit")
   }
 
   override val pageHeading: String = headingVal
-  override val url: String = s"${Env.host}/developer/login-mfa?mfaId=${mfaId}&mfaType=${mfaType.toString}"
+  override val url: String         = s"${Env.host}/developer/login-mfa?mfaId=${mfaId}&mfaType=${mfaType.toString}"
 
   def enterAccessCode(accessCode: String, rememberMe: Boolean = false) = {
     val formData = Map("accessCode" -> accessCode, "rememberMe" -> s"$rememberMe")
@@ -167,15 +168,13 @@ case class LoginAccessCodePage(mfaId: String,  mfaType: MfaType, headingVal: Str
 
 case object AuthAppSetupReminderPage extends FormPage {
   override val pageHeading: String = "Get access codes by an authenticator app"
-  override val url: String = s"${Env.host}/developer/profile/security-preferences/auth-app/setup/reminder"
+  override val url: String         = s"${Env.host}/developer/profile/security-preferences/auth-app/setup/reminder"
 }
 
 case object AuthAppStartPage extends FormPage {
   override val pageHeading: String = "You need an authenticator app on your device"
-  override val url: String = s"${Env.host}/developer/profile/security-preferences/auth-app/start"
+  override val url: String         = s"${Env.host}/developer/profile/security-preferences/auth-app/start"
 }
-
-
 
 case object SmsLoginAccessCodePage extends MfaData {
   val page = LoginAccessCodePage(smsMfaId.value.toString, MfaType.SMS, "Enter the access code")
@@ -183,31 +182,32 @@ case object SmsLoginAccessCodePage extends MfaData {
 
 case object SmsSetupReminderPage extends FormPage {
   override val pageHeading: String = "Get access codes by text"
-  override val url: String = s"${Env.host}/developer/profile/security-preferences/sms/setup/reminder"
+  override val url: String         = s"${Env.host}/developer/profile/security-preferences/sms/setup/reminder"
 }
 
 case object SmsSetupSkippedPage extends FormPage {
   override val pageHeading: String = "Get access codes by text later"
-  override val url: String = s"${Env.host}/developer/profile/security-preferences/sms/setup/skip"
+  override val url: String         = s"${Env.host}/developer/profile/security-preferences/sms/setup/skip"
 }
 
 case object MfaRemovalCompletePage extends FormPage {
   override val pageHeading: String = "You've removed this security preference"
-  override val url: String = s"${Env.host}/developer/profile/security-preferences/remove-mfa/complete"
+  override val url: String         = s"${Env.host}/developer/profile/security-preferences/remove-mfa/complete"
 }
 
 case object Setup2svQrPage extends FormPage {
   override val pageHeading: String = "Set up your authenticator app"
-  override val url: String = s"${Env.host}/developer/profile/security-preferences/auth-app/setup"
+  override val url: String         = s"${Env.host}/developer/profile/security-preferences/auth-app/setup"
 }
 
 case object AuthenticatorAppAccessCodePage extends FormPage {
+
   def clickContinue() = {
     click on id("submit")
   }
 
   override val pageHeading: String = "Enter your access code"
-  override val url: String = s"${Env.host}/developer/profile/security-preferences/auth-app/access-code"
+  override val url: String         = s"${Env.host}/developer/profile/security-preferences/auth-app/access-code"
 
   def enterAccessCode(accessCode: String) = {
     val formData = Map("accessCode" -> accessCode)
@@ -217,12 +217,13 @@ case object AuthenticatorAppAccessCodePage extends FormPage {
 }
 
 case object SmsAccessCodePage extends FormPage {
+
   def clickContinue() = {
     click on id("submit")
   }
 
   override val pageHeading: String = "Enter the access code"
-  override val url: String = s"${Env.host}/developer/profile/security-preferences/sms/access-code"
+  override val url: String         = s"${Env.host}/developer/profile/security-preferences/sms/access-code"
 
   def enterAccessCode(accessCode: String) = {
     val formData = Map("accessCode" -> accessCode)
@@ -235,14 +236,14 @@ case object CreateNameForAuthAppPage extends FormPage {
   def enterName(name: String) = Form.populate(Map("name" -> name))(webDriver)
 
   override val pageHeading: String = "Create a name for your authenticator app"
-  override val url: String = s"${Env.host}/developer/profile/security-preferences/auth-app/name"
+  override val url: String         = s"${Env.host}/developer/profile/security-preferences/auth-app/name"
 }
 
 case object SmsMobileNumberPage extends FormPage {
   def enterMobileNumber(mobileNumber: String) = Form.populate(Map("mobileNumber" -> mobileNumber))(webDriver)
 
   override val pageHeading: String = "Enter a mobile phone number"
-  override val url: String = s"${Env.host}/developer/profile/security-preferences/sms/setup"
+  override val url: String         = s"${Env.host}/developer/profile/security-preferences/sms/setup"
 
   def clickContinue() = {
     click on id("submit")
@@ -251,32 +252,32 @@ case object SmsMobileNumberPage extends FormPage {
 
 case object SecurityPreferencesPage extends FormPage {
   override val pageHeading: String = "Your security preferences"
-  override val url: String = s"${Env.host}/developer/profile/security-preferences"
+  override val url: String         = s"${Env.host}/developer/profile/security-preferences"
 }
 
 case object AuthenticatorAppSetupSkippedPage extends FormPage {
   override val pageHeading: String = "Get access codes by authenticator app later"
-  override val url: String = s"${Env.host}/developer/profile/security-preferences/auth-app/setup/skip"
+  override val url: String         = s"${Env.host}/developer/profile/security-preferences/auth-app/setup/skip"
 }
 
 case object AuthenticatorAppSetupCompletePage extends FormPage {
   override val pageHeading: String = "You can now get access codes by authenticator app"
-  override val url: String = s"${Env.host}/developer/profile/security-preferences/auth-app/setup/complete"
+  override val url: String         = s"${Env.host}/developer/profile/security-preferences/auth-app/setup/complete"
 }
 
 case object SmsSetupCompletePage extends FormPage {
   override val pageHeading: String = "You can now get access codes by text"
-  override val url: String = s"${Env.host}/developer/profile/security-preferences/sms/setup/complete"
+  override val url: String         = s"${Env.host}/developer/profile/security-preferences/sms/setup/complete"
 }
 
 case object PasswordResetConfirmationPage extends FormPage {
   override val pageHeading: String = "Password reset email sent"
-  override val url: String = s"${Env.host}/developer/developer/forgot-password"
+  override val url: String         = s"${Env.host}/developer/developer/forgot-password"
 }
 
 case class ResetPasswordPage(code: String) extends FormPage {
   override val pageHeading: String = "Create a new password"
-  override val url: String = s"${Env.host}/developer/reset-password"
+  override val url: String         = s"${Env.host}/developer/reset-password"
 }
 
 object YouHaveResetYourPasswordPage extends FormPage {
@@ -295,7 +296,7 @@ case object SignOutSurveyPage extends FormPage {
 }
 
 object SignInPage {
-  val default = SignInPage("Sign in")
+  val default       = SignInPage("Sign in")
   val passwordReset = SignInPage("You have reset your password")
 }
 
@@ -313,7 +314,7 @@ case class VerificationLink(verificationCode: String) extends WebLink {
 
 case class VerificationPage(verificationCode: String) extends FormPage {
   override val pageHeading: String = "Email address verified"
-  override val url: String = s"${Env.host}/developer/verification?code=$verificationCode"
+  override val url: String         = s"${Env.host}/developer/verification?code=$verificationCode"
 }
 
 case class SubscriptionLink(id: String) extends WebLink {
@@ -339,5 +340,3 @@ case class DeleteApplicationCompletePage(id: String) extends FormPage {
   override val pageHeading = "Request submitted"
   override val url: String = s"${Env.host}/developer/applications/$id/delete"
 }
-
-

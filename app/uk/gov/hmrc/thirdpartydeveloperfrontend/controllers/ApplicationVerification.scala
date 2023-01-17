@@ -16,25 +16,29 @@
 
 package uk.gov.hmrc.thirdpartydeveloperfrontend.controllers
 
-import uk.gov.hmrc.thirdpartydeveloperfrontend.config.ApplicationConfig
-import uk.gov.hmrc.thirdpartydeveloperfrontend.config.ErrorHandler
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.{ApplicationVerificationFailed, ApplicationVerificationSuccessful}
 import javax.inject.{Inject, Singleton}
-import play.api.libs.crypto.CookieSigner
-import play.api.mvc.MessagesControllerComponents
-import uk.gov.hmrc.thirdpartydeveloperfrontend.service.{ApplicationService, SessionService}
-import views.html.ApplicationVerificationView
-
 import scala.concurrent.ExecutionContext
 
+import views.html.ApplicationVerificationView
+
+import play.api.libs.crypto.CookieSigner
+import play.api.mvc.MessagesControllerComponents
+
+import uk.gov.hmrc.thirdpartydeveloperfrontend.config.{ApplicationConfig, ErrorHandler}
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.{ApplicationVerificationFailed, ApplicationVerificationSuccessful}
+import uk.gov.hmrc.thirdpartydeveloperfrontend.service.{ApplicationService, SessionService}
+
 @Singleton
-class ApplicationVerification @Inject()(service: ApplicationService,
-                                        val sessionService: SessionService,
-                                        val errorHandler: ErrorHandler,
-                                        mcc: MessagesControllerComponents,
-                                        val cookieSigner: CookieSigner,
-                                        applicationVerificationView: ApplicationVerificationView)
-                                       (implicit val ec: ExecutionContext, val appConfig: ApplicationConfig) extends LoggedOutController(mcc) {
+class ApplicationVerification @Inject() (
+    service: ApplicationService,
+    val sessionService: SessionService,
+    val errorHandler: ErrorHandler,
+    mcc: MessagesControllerComponents,
+    val cookieSigner: CookieSigner,
+    applicationVerificationView: ApplicationVerificationView
+  )(implicit val ec: ExecutionContext,
+    val appConfig: ApplicationConfig
+  ) extends LoggedOutController(mcc) {
 
   def verifyUplift(code: String) = Action.async { implicit request =>
     service.verify(code) map {

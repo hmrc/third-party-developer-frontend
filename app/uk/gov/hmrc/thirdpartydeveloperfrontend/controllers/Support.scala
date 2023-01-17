@@ -16,29 +16,31 @@
 
 package uk.gov.hmrc.thirdpartydeveloperfrontend.controllers
 
-import uk.gov.hmrc.thirdpartydeveloperfrontend.config.ApplicationConfig
-import uk.gov.hmrc.thirdpartydeveloperfrontend.config.ErrorHandler
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.DeveloperSession
 import javax.inject.{Inject, Singleton}
+import scala.concurrent.{ExecutionContext, Future}
+
+import views.html.{SupportEnquiryView, SupportThankyouView}
+
 import play.api.data.Form
 import play.api.libs.crypto.CookieSigner
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
-import uk.gov.hmrc.thirdpartydeveloperfrontend.service.{DeskproService, SessionService}
-import views.html.{SupportEnquiryView, SupportThankyouView}
 
-import scala.concurrent.{ExecutionContext, Future}
+import uk.gov.hmrc.thirdpartydeveloperfrontend.config.{ApplicationConfig, ErrorHandler}
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.DeveloperSession
+import uk.gov.hmrc.thirdpartydeveloperfrontend.service.{DeskproService, SessionService}
 
 @Singleton
-class Support @Inject()(val deskproService: DeskproService,
-                        val sessionService: SessionService,
-                        val errorHandler: ErrorHandler,
-                        mcc: MessagesControllerComponents,
-                        val cookieSigner : CookieSigner,
-                        supportEnquiryView: SupportEnquiryView,
-                        supportThankyouView: SupportThankyouView
-                       )
-                       (implicit val ec: ExecutionContext, val appConfig: ApplicationConfig)
-  extends BaseController(mcc) {
+class Support @Inject() (
+    val deskproService: DeskproService,
+    val sessionService: SessionService,
+    val errorHandler: ErrorHandler,
+    mcc: MessagesControllerComponents,
+    val cookieSigner: CookieSigner,
+    supportEnquiryView: SupportEnquiryView,
+    supportThankyouView: SupportThankyouView
+  )(implicit val ec: ExecutionContext,
+    val appConfig: ApplicationConfig
+  ) extends BaseController(mcc) {
 
   val supportForm: Form[SupportEnquiryForm] = SupportEnquiryForm.form
 
@@ -59,7 +61,8 @@ class Support @Inject()(val deskproService: DeskproService,
     val displayName = fullyloggedInDeveloper.map(_.displayedName)
     requestForm.fold(
       formWithErrors => Future.successful(BadRequest(supportEnquiryView(displayName, formWithErrors))),
-      formData => deskproService.submitSupportEnquiry(formData).map { _ => Redirect(routes.Support.thankyou.url, SEE_OTHER) })
+      formData => deskproService.submitSupportEnquiry(formData).map { _ => Redirect(routes.Support.thankyou.url, SEE_OTHER) }
+    )
   }
 
   def thankyou = maybeAtLeastPartLoggedInEnablingMfa { implicit request =>

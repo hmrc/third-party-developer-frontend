@@ -17,7 +17,15 @@
 package uk.gov.hmrc.thirdpartydeveloperfrontend.service
 
 import java.util.UUID.randomUUID
+import scala.concurrent.ExecutionContext.Implicits.global
+import scala.concurrent.Future.successful
 
+import org.scalatest.matchers.should.Matchers
+
+import uk.gov.hmrc.http.{ForbiddenException, HeaderCarrier}
+
+import uk.gov.hmrc.apiplatform.modules.uplift.services.mocks.FlowRepositoryMockModule
+import uk.gov.hmrc.thirdpartydeveloperfrontend.builder.DeveloperBuilder
 import uk.gov.hmrc.thirdpartydeveloperfrontend.connectors.ThirdPartyApplicationConnector
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.ApplicationUpdateSuccessful
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.{Application, IpAllowlist}
@@ -25,28 +33,22 @@ import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.flows.FlowType.IP_A
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.flows.IpAllowlistFlow
 import uk.gov.hmrc.thirdpartydeveloperfrontend.service.PushPullNotificationsService.PushPullNotificationsConnector
 import uk.gov.hmrc.thirdpartydeveloperfrontend.service.SubscriptionFieldsService.SubscriptionFieldsConnector
-import uk.gov.hmrc.http.{ForbiddenException, HeaderCarrier}
-import scala.concurrent.ExecutionContext.Implicits.global
-import scala.concurrent.Future.successful
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils._
-import uk.gov.hmrc.thirdpartydeveloperfrontend.builder.DeveloperBuilder
-import org.scalatest.matchers.should.Matchers
-import uk.gov.hmrc.apiplatform.modules.uplift.services.mocks.FlowRepositoryMockModule
 
 class IpAllowlistServiceSpec
-    extends AsyncHmrcSpec 
-    with Matchers 
+    extends AsyncHmrcSpec
+    with Matchers
     with TestApplications
     with CollaboratorTracker
-    with DeveloperBuilder 
+    with DeveloperBuilder
     with LocalUserIdTracker {
 
   trait Setup extends FlowRepositoryMockModule {
     implicit val hc: HeaderCarrier = HeaderCarrier()
-    val sessionId: String = randomUUID.toString
+    val sessionId: String          = randomUUID.toString
 
     val mockThirdPartyApplicationConnector: ThirdPartyApplicationConnector = mock[ThirdPartyApplicationConnector]
-    val mockConnectorsWrapper: ConnectorsWrapper = mock[ConnectorsWrapper]
+    val mockConnectorsWrapper: ConnectorsWrapper                           = mock[ConnectorsWrapper]
     when(mockConnectorsWrapper.forEnvironment(*))
       .thenReturn(Connectors(mockThirdPartyApplicationConnector, mock[SubscriptionFieldsConnector], mock[PushPullNotificationsConnector]))
 
@@ -65,7 +67,7 @@ class IpAllowlistServiceSpec
     }
 
     "create new flow if it does not exist" in new Setup {
-      val ipAllowlist = Set("1.1.1.1/24")
+      val ipAllowlist                   = Set("1.1.1.1/24")
       val expectedFlow: IpAllowlistFlow = IpAllowlistFlow(sessionId, ipAllowlist)
       FlowRepositoryMock.FetchBySessionIdAndFlowType.thenReturnNothing[IpAllowlistFlow](sessionId)
       FlowRepositoryMock.SaveFlow.thenReturnSuccess[IpAllowlistFlow]
@@ -140,7 +142,7 @@ class IpAllowlistServiceSpec
 
   "activateIpAllowlist" should {
     "save the allowlist in TPA" in new Setup {
-      val app: Application = anApplication()
+      val app: Application              = anApplication()
       val existingFlow: IpAllowlistFlow = IpAllowlistFlow(sessionId, Set("1.1.1.1/24"))
       FlowRepositoryMock.FetchBySessionIdAndFlowType.thenReturn[IpAllowlistFlow](sessionId)(existingFlow)
       when(mockThirdPartyApplicationConnector.updateIpAllowlist(app.id, app.ipAllowlist.required, existingFlow.allowlist))

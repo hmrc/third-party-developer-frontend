@@ -16,15 +16,17 @@
 
 package uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.checkpages
 
-import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.ApplicationController
-import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.checkpages.HasUrl._
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.{ApplicationId, CheckInformation, Standard, UpdateApplicationRequest}
+import scala.concurrent.Future
+
+import views.html.checkpages.PrivacyPolicyView
+
 import play.api.data.Form
 import play.api.mvc.{Action, AnyContent, Call}
 import uk.gov.hmrc.play.bootstrap.controller.WithUnsafeDefaultFormBinding
-import views.html.checkpages.PrivacyPolicyView
 
-import scala.concurrent.Future
+import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.ApplicationController
+import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.checkpages.HasUrl._
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.{ApplicationId, CheckInformation, Standard, UpdateApplicationRequest}
 
 trait PrivacyPolicyPartialController extends WithUnsafeDefaultFormBinding {
   self: ApplicationController with CanUseCheckActions =>
@@ -38,13 +40,13 @@ trait PrivacyPolicyPartialController extends WithUnsafeDefaultFormBinding {
       case std: Standard =>
         val form = PrivacyPolicyForm(hasUrl(std.privacyPolicyUrl, app.checkInformation.map(_.providedPrivacyPolicyURL)), std.privacyPolicyUrl)
         Ok(privacyPolicyView(app, PrivacyPolicyForm.form.fill(form), privacyPolicyActionRoute(app.id)))
-      case _ => Ok(privacyPolicyView(app, PrivacyPolicyForm.form, privacyPolicyActionRoute(app.id)))
+      case _             => Ok(privacyPolicyView(app, PrivacyPolicyForm.form, privacyPolicyActionRoute(app.id)))
     })
   }
 
   def privacyPolicyAction(appId: ApplicationId): Action[AnyContent] = canUseChecksAction(appId) { implicit request =>
     val requestForm = PrivacyPolicyForm.form.bindFromRequest
-    val app = request.application
+    val app         = request.application
 
     def withFormErrors(form: Form[PrivacyPolicyForm]) = {
       Future.successful(BadRequest(privacyPolicyView(app, form, privacyPolicyActionRoute(app.id))))

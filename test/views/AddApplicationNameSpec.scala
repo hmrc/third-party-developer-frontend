@@ -16,30 +16,31 @@
 
 package views
 
+import org.jsoup.Jsoup
+import views.helper.CommonViewSpec
+import views.html.AddApplicationNameView
+
+import play.api.data.Form
+import play.api.test.FakeRequest
+
+import uk.gov.hmrc.thirdpartydeveloperfrontend.builder._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.AddApplicationNameForm
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.{ApplicationId, Environment}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.LoggedInState
-import org.jsoup.Jsoup
-import play.api.data.Form
-import play.api.test.FakeRequest
-import uk.gov.hmrc.thirdpartydeveloperfrontend.builder._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.ViewHelpers._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.{LocalUserIdTracker, WithCSRFAddToken}
-import views.helper.CommonViewSpec
-import views.html.AddApplicationNameView
-import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.AddApplicationNameForm
 
 class AddApplicationNameSpec extends CommonViewSpec
-  with WithCSRFAddToken
-  with LocalUserIdTracker
-  with DeveloperSessionBuilder
-  with DeveloperBuilder {
+    with WithCSRFAddToken
+    with LocalUserIdTracker
+    with DeveloperSessionBuilder
+    with DeveloperBuilder {
 
   val addApplicationNameView = app.injector.instanceOf[AddApplicationNameView]
-  val loggedInDeveloper = buildDeveloperSession(loggedInState = LoggedInState.LOGGED_IN, buildDeveloper("admin@example.com", "firstName1", "lastName1", None))
+  val loggedInDeveloper      = buildDeveloperSession(loggedInState = LoggedInState.LOGGED_IN, buildDeveloper("admin@example.com", "firstName1", "lastName1", None))
   val subordinateEnvironment = Environment.SANDBOX
-  val appId = ApplicationId("1234")
-  val principalEnvironment = Environment.PRODUCTION
+  val appId                  = ApplicationId("1234")
+  val principalEnvironment   = Environment.PRODUCTION
 
   "Add application page in subordinate" should {
 
@@ -49,9 +50,9 @@ class AddApplicationNameSpec extends CommonViewSpec
     }
 
     "show an error when application name is invalid" in {
-      val error = "An error"
+      val error               = "An error"
       val formWithInvalidName = AddApplicationNameForm.form.withError("applicationName", error)
-      val document = Jsoup.parse(renderPage(formWithInvalidName).body)
+      val document            = Jsoup.parse(renderPage(formWithInvalidName).body)
       elementExistsById(document, "data-field-error-applicationName") shouldBe true
     }
   }
@@ -63,9 +64,9 @@ class AddApplicationNameSpec extends CommonViewSpec
     }
 
     "show an error when application name is invalid" in {
-      val error = "An error"
+      val error               = "An error"
       val formWithInvalidName = AddApplicationNameForm.form.withError("applicationName", error)
-      val document = Jsoup.parse(renderPage(formWithInvalidName).body)
+      val document            = Jsoup.parse(renderPage(formWithInvalidName).body)
       elementExistsById(document, "data-field-error-applicationName") shouldBe true
     }
   }

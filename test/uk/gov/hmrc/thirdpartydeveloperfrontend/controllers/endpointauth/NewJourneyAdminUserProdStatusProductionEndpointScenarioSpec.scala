@@ -17,31 +17,32 @@
 package uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.endpointauth
 
 class NewJourneyAdminUserProdStatusProductionEndpointScenarioSpec extends EndpointScenarioSpec
-  with IsNewJourneyStandardApplication
-  with UserIsAdmin
-  with UserIsAuthenticated
-  with AppDeployedToProductionEnvironment
-  with AppHasProductionStatus {
+    with IsNewJourneyStandardApplication
+    with UserIsAdmin
+    with UserIsAuthenticated
+    with AppDeployedToProductionEnvironment
+    with AppHasProductionStatus {
 
   override def getExpectedResponse(endpoint: Endpoint): Response = {
     endpoint match {
-      case Endpoint("GET",  "/developer/registration", _) => Redirect("/developer/applications")
-      case Endpoint("POST", "/developer/registration", _) => BadRequest()
-      case Endpoint("GET",  "/developer/reset-password/error", _) => BadRequest()
-      case Endpoint("GET",  "/developer/applications/:id/add/success", _) => NotFound()
-      case Endpoint(_,      "/developer/applications/:id/details/change", _) => Forbidden()
-      case Endpoint("POST", "/developer/applications/:id/change-subscription", _) => BadRequest()
-      case Endpoint("GET",  "/developer/applications/:id/request-check/appDetails", _) => getEndpointSuccessResponse(endpoint)
-      case Endpoint("GET",  "/developer/applications/:id/request-check/submitted", _) => getEndpointSuccessResponse(endpoint)
-      case Endpoint("POST", "/developer/applications/:id/delete-subordinate", _) => Error("uk.gov.hmrc.http.ForbiddenException: Only standard subordinate applications can be deleted by admins")
-      case Endpoint(_,      "/developer/submissions/application/:aid/production-credentials-checklist", _) => BadRequest() // must be in 'testing' state
-      case Endpoint(_,      "/developer/submissions/application/:aid/cancel-request", _) => BadRequest() // must not be in production state
-      case Endpoint("GET",  "/developer/submissions/application/:aid/check-answers", _) => BadRequest() // must be in testing state
-      case Endpoint("GET",  "/developer/submissions/application/:aid/view-answers", _) => BadRequest() // must not be in pending approval state
-      case Endpoint("GET",  "/developer/submissions/application/:aid/submit-request", _) => BadRequest() // must be in testing state
-      case Endpoint(_,      "/developer/submissions/application/:aid/start-using-your-application", _) => NotFound() // must be in pre-production state
-      case Endpoint(_, path, _) if path.startsWith("/developer/applications/:id/request-check") => BadRequest()
-      case Endpoint(_, path, _) if path.startsWith("/developer/applications/:id/check-your-answers") => BadRequest()
+      case Endpoint("GET", "/developer/registration", _)                                              => Redirect("/developer/applications")
+      case Endpoint("POST", "/developer/registration", _)                                             => BadRequest()
+      case Endpoint("GET", "/developer/reset-password/error", _)                                      => BadRequest()
+      case Endpoint("GET", "/developer/applications/:id/add/success", _)                              => NotFound()
+      case Endpoint(_, "/developer/applications/:id/details/change", _)                               => Forbidden()
+      case Endpoint("POST", "/developer/applications/:id/change-subscription", _)                     => BadRequest()
+      case Endpoint("GET", "/developer/applications/:id/request-check/appDetails", _)                 => getEndpointSuccessResponse(endpoint)
+      case Endpoint("GET", "/developer/applications/:id/request-check/submitted", _)                  => getEndpointSuccessResponse(endpoint)
+      case Endpoint("POST", "/developer/applications/:id/delete-subordinate", _)                      =>
+        Error("uk.gov.hmrc.http.ForbiddenException: Only standard subordinate applications can be deleted by admins")
+      case Endpoint(_, "/developer/submissions/application/:aid/production-credentials-checklist", _) => BadRequest() // must be in 'testing' state
+      case Endpoint(_, "/developer/submissions/application/:aid/cancel-request", _)                   => BadRequest() // must not be in production state
+      case Endpoint("GET", "/developer/submissions/application/:aid/check-answers", _)                => BadRequest() // must be in testing state
+      case Endpoint("GET", "/developer/submissions/application/:aid/view-answers", _)                 => BadRequest() // must not be in pending approval state
+      case Endpoint("GET", "/developer/submissions/application/:aid/submit-request", _)               => BadRequest() // must be in testing state
+      case Endpoint(_, "/developer/submissions/application/:aid/start-using-your-application", _)     => NotFound()   // must be in pre-production state
+      case Endpoint(_, path, _) if path.startsWith("/developer/applications/:id/request-check")       => BadRequest()
+      case Endpoint(_, path, _) if path.startsWith("/developer/applications/:id/check-your-answers")  => BadRequest()
 
       case _ => getEndpointSuccessResponse(endpoint)
     }

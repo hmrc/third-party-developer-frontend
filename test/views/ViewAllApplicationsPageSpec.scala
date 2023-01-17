@@ -16,31 +16,31 @@
 
 package views
 
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.controllers.{ApplicationSummary, ManageApplicationsViewModel}
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.apidefinitions.AccessType
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.{ApplicationId, CollaboratorRole, State, TermsOfUseStatus}
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.LoggedInState
+import java.time.{LocalDateTime, ZoneOffset}
+
 import org.jsoup.Jsoup
 import org.jsoup.nodes.Document
-import play.api.test.FakeRequest
-import uk.gov.hmrc.thirdpartydeveloperfrontend.builder.{DeveloperBuilder, DeveloperSessionBuilder}
-
-import java.time.{LocalDateTime, ZoneOffset}
-import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.ViewHelpers.{elementExistsByText, elementIdentifiedByAttrContainsText}
-import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.{LocalUserIdTracker, WithCSRFAddToken}
-import views.helper.CommonViewSpec
+import views.helper.{CommonViewSpec, EnvironmentNameService}
 import views.html.ManageApplicationsView
-import views.helper.EnvironmentNameService
-import uk.gov.hmrc.thirdpartydeveloperfrontend.helpers.DateFormatter
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.Environment
-import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.addapplication.routes.{AddApplication => AddApplicationRoutes}
 import views.html.noapplications.StartUsingRestApisView
 
+import play.api.test.FakeRequest
+
+import uk.gov.hmrc.thirdpartydeveloperfrontend.builder.{DeveloperBuilder, DeveloperSessionBuilder}
+import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.addapplication.routes.{AddApplication => AddApplicationRoutes}
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.apidefinitions.AccessType
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.{ApplicationId, CollaboratorRole, Environment, State, TermsOfUseStatus}
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.controllers.{ApplicationSummary, ManageApplicationsViewModel}
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.LoggedInState
+import uk.gov.hmrc.thirdpartydeveloperfrontend.helpers.DateFormatter
+import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.ViewHelpers.{elementExistsByText, elementIdentifiedByAttrContainsText}
+import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.{LocalUserIdTracker, WithCSRFAddToken}
+
 class ViewAllApplicationsPageSpec extends CommonViewSpec
-  with WithCSRFAddToken
-  with LocalUserIdTracker
-  with DeveloperSessionBuilder
-  with DeveloperBuilder {
+    with WithCSRFAddToken
+    with LocalUserIdTracker
+    with DeveloperSessionBuilder
+    with DeveloperBuilder {
 
   def isGreenAddProductionApplicationButtonVisible(document: Document): Boolean = {
     val href = AddApplicationRoutes.addApplicationPrincipal.url
@@ -53,7 +53,7 @@ class ViewAllApplicationsPageSpec extends CommonViewSpec
   val environmentNameService = new EnvironmentNameService(appConfig)
 
   trait EnvNames {
-    def principalCapitalized = principal.capitalize
+    def principalCapitalized   = principal.capitalize
     def subordinateCapitalized = subordinate.capitalize
     def principal: String
     def subordinate: String
@@ -61,26 +61,26 @@ class ViewAllApplicationsPageSpec extends CommonViewSpec
   }
 
   trait ProdAndET extends EnvNames {
-    val principal = "Production"
-    val subordinate = "Sandbox"
+    val principal          = "Production"
+    val subordinate        = "Sandbox"
     val subordinateWording = "the sandbox"
   }
 
   trait QaAndDev extends EnvNames {
-    val principal = "QA"
-    val subordinate = "Development"
+    val principal          = "QA"
+    val subordinate        = "Development"
     val subordinateWording = "development"
   }
-  
+
   trait Setup {
     self: EnvNames =>
 
-    def showsHeading()(implicit document: Document) = 
+    def showsHeading()(implicit document: Document) =
       elementExistsByText(document, "h1", "View all applications") shouldBe true
 
     def showsAppName(appName: String)(implicit document: Document) =
       elementIdentifiedByAttrContainsText(document, "a", "data-app-name", appName) shouldBe true
-      
+
     def showsSubordinateAppsHeading()(implicit document: Document) =
       elementExistsByText(document, "th", s"$subordinateCapitalized applications") shouldBe true
 
@@ -92,8 +92,8 @@ class ViewAllApplicationsPageSpec extends CommonViewSpec
 
     def hidesPrincipalAppsHeading()(implicit document: Document) =
       elementExistsByText(document, "th", s"$principalCapitalized applications") shouldBe false
-    
-    def showsGetCredentialsButton()(implicit document: Document) = 
+
+    def showsGetCredentialsButton()(implicit document: Document) =
       isGreenAddProductionApplicationButtonVisible(document) shouldBe true
 
     def hidesGetCredentialsButton()(implicit document: Document) =
@@ -118,34 +118,43 @@ class ViewAllApplicationsPageSpec extends CommonViewSpec
   "view all applications page" can {
 
     def renderPage(sandboxAppSummaries: Seq[ApplicationSummary], productionAppSummaries: Seq[ApplicationSummary], upliftableApplicationIds: Set[ApplicationId]) = {
-      val request = FakeRequest()
-      val loggedIn = buildDeveloperSession(loggedInState = LoggedInState.LOGGED_IN, buildDeveloperWithRandomId("developer@example.com", "firstName", "lastname"))
+      val request                = FakeRequest()
+      val loggedIn               = buildDeveloperSession(loggedInState = LoggedInState.LOGGED_IN, buildDeveloperWithRandomId("developer@example.com", "firstName", "lastname"))
       val manageApplicationsView = app.injector.instanceOf[ManageApplicationsView]
 
-      manageApplicationsView.render(ManageApplicationsViewModel(sandboxAppSummaries, productionAppSummaries, upliftableApplicationIds, false), request, loggedIn, messagesProvider, appConfig, "nav-section", environmentNameService)
+      manageApplicationsView.render(
+        ManageApplicationsViewModel(sandboxAppSummaries, productionAppSummaries, upliftableApplicationIds, false),
+        request,
+        loggedIn,
+        messagesProvider,
+        appConfig,
+        "nav-section",
+        environmentNameService
+      )
     }
 
     val applicationId = ApplicationId("1111")
-    val appName = "App name 1"
-    val appUserRole = CollaboratorRole.ADMINISTRATOR
-    val appCreatedOn = LocalDateTime.now(ZoneOffset.UTC).minusDays(1)
+    val appName       = "App name 1"
+    val appUserRole   = CollaboratorRole.ADMINISTRATOR
+    val appCreatedOn  = LocalDateTime.now(ZoneOffset.UTC).minusDays(1)
     val appLastAccess = Some(appCreatedOn)
 
     val sandboxAppSummaries = Seq(
-        ApplicationSummary(
-          applicationId,
-          appName,
-          appUserRole,
-          TermsOfUseStatus.NOT_APPLICABLE,
-          State.TESTING,
-          appLastAccess,
-          grantLength,
-          false,
-          appCreatedOn,
-          AccessType.STANDARD,
-          Environment.SANDBOX,
-          Set.empty
-        ))
+      ApplicationSummary(
+        applicationId,
+        appName,
+        appUserRole,
+        TermsOfUseStatus.NOT_APPLICABLE,
+        State.TESTING,
+        appLastAccess,
+        grantLength,
+        false,
+        appCreatedOn,
+        AccessType.STANDARD,
+        Environment.SANDBOX,
+        Set.empty
+      )
+    )
 
     val productionAppSummaries = Seq(
       ApplicationSummary(
@@ -168,13 +177,13 @@ class ViewAllApplicationsPageSpec extends CommonViewSpec
 
       "show the heading when there is a sandbox app" in new ProdAndET with Setup {
         implicit val document = Jsoup.parse(renderPage(sandboxAppSummaries, Seq.empty, Set(applicationId)).body)
-        
+
         showsHeading()
       }
 
       "show the heading when there is a production app" in new ProdAndET with Setup {
         implicit val document = Jsoup.parse(renderPage(Seq.empty, productionAppSummaries, Set(applicationId)).body)
-        
+
         showsHeading()
       }
     }
@@ -182,7 +191,7 @@ class ViewAllApplicationsPageSpec extends CommonViewSpec
     "show the applications page with correct app headings" should {
       "work in Prod/Sandbox with prod and sandbox apps" in new ProdAndET with Setup {
         implicit val document = Jsoup.parse(renderPage(sandboxAppSummaries, productionAppSummaries, Set(applicationId)).body)
-        
+
         showsAppName(appName)
         showsSubordinateAppsHeading()
         showsPrincipalAppsHeading()
@@ -190,7 +199,7 @@ class ViewAllApplicationsPageSpec extends CommonViewSpec
 
       "work in Prod/Sandbox with prod apps" in new ProdAndET with Setup {
         implicit val document = Jsoup.parse(renderPage(Seq.empty, productionAppSummaries, Set(applicationId)).body)
-        
+
         showsAppName(appName)
         hidesSubordinateAppsHeading()
         showsPrincipalAppsHeading()
@@ -198,7 +207,7 @@ class ViewAllApplicationsPageSpec extends CommonViewSpec
 
       "work in Prod/Sandbox with sandbox apps" in new ProdAndET with Setup {
         implicit val document = Jsoup.parse(renderPage(sandboxAppSummaries, Seq.empty, Set(applicationId)).body)
-        
+
         showsAppName(appName)
         showsSubordinateAppsHeading()
         hidesPrincipalAppsHeading()
@@ -206,7 +215,7 @@ class ViewAllApplicationsPageSpec extends CommonViewSpec
 
       "work in Qa/Dev with appropriate heading labels" in new QaAndDev with Setup {
         implicit val document = Jsoup.parse(renderPage(sandboxAppSummaries, productionAppSummaries, Set(applicationId)).body)
-        
+
         showsAppName(appName)
         showsSubordinateAppsHeading()
         showsPrincipalAppsHeading()
@@ -216,18 +225,18 @@ class ViewAllApplicationsPageSpec extends CommonViewSpec
     "handling application information" should {
       "show no api called and user role" in new ProdAndET with Setup {
         implicit val document = Jsoup.parse(renderPage(sandboxAppSummaries, Seq.empty, Set(applicationId)).body)
-        
+
         showsAppName(appName)
         elementIdentifiedByAttrContainsText(document, "td", "data-app-lastAccess", "No API called") shouldBe true
         elementIdentifiedByAttrContainsText(document, "td", "data-app-user-role", "Admin") shouldBe true
       }
 
       "show the last access and user role" in new ProdAndET with Setup {
-        val datetime = LocalDateTime.now(ZoneOffset.UTC)
-        val datetimeText = DateFormatter.standardFormatter.format(datetime)
-        val calledApp = sandboxAppSummaries.map(_.copy(lastAccess = Some(datetime)))
+        val datetime          = LocalDateTime.now(ZoneOffset.UTC)
+        val datetimeText      = DateFormatter.standardFormatter.format(datetime)
+        val calledApp         = sandboxAppSummaries.map(_.copy(lastAccess = Some(datetime)))
         implicit val document = Jsoup.parse(renderPage(calledApp, Seq.empty, Set(applicationId)).body)
-        
+
         showsAppName(appName)
         elementIdentifiedByAttrContainsText(document, "td", "data-app-lastAccess", "No API called") shouldBe false
         elementIdentifiedByAttrContainsText(document, "td", "data-app-lastAccess", datetimeText) shouldBe true
@@ -243,17 +252,17 @@ class ViewAllApplicationsPageSpec extends CommonViewSpec
         showsGetCredentialsButton()
         showsAfterTestingMessage()
       }
-      
+
       "hides when sandbox app is not upliftable" in new ProdAndET with Setup {
         implicit val document = Jsoup.parse(renderPage(sandboxAppSummaries, Seq.empty, Set.empty).body)
-        
+
         hidesGetCredentialsButton()
         hidesAfterTestingMessage()
       }
 
       "hides when production app is present even when upliftable sandbox app is present" in new ProdAndET with Setup {
         implicit val document = Jsoup.parse(renderPage(sandboxAppSummaries, productionAppSummaries, Set(applicationId)).body)
-        
+
         hidesGetCredentialsButton()
         hidesAfterTestingMessage()
       }
@@ -261,7 +270,7 @@ class ViewAllApplicationsPageSpec extends CommonViewSpec
 
     "handling of privileged applications" should {
       "show using privileged application credentials text if user is a collaborator on at least one privileged application" in new ProdAndET with Setup {
-        val priviledgedAppSummaries = productionAppSummaries.map(_.copy(accessType=AccessType.PRIVILEGED))
+        val priviledgedAppSummaries = productionAppSummaries.map(_.copy(accessType = AccessType.PRIVILEGED))
 
         implicit val document = Jsoup.parse(renderPage(Seq.empty, priviledgedAppSummaries, Set(applicationId)).body)
 
@@ -283,13 +292,13 @@ class ViewAllApplicationsPageSpec extends CommonViewSpec
   "welcome to your account page" should {
 
     def renderPage(appSummaries: Seq[ApplicationSummary]) = {
-      val request = FakeRequest().withCSRFToken
-      val loggedIn = buildDeveloperSession( loggedInState = LoggedInState.LOGGED_IN, buildDeveloperWithRandomId("developer@example.com", "firstName", "lastname"))
+      val request                                = FakeRequest().withCSRFToken
+      val loggedIn                               = buildDeveloperSession(loggedInState = LoggedInState.LOGGED_IN, buildDeveloperWithRandomId("developer@example.com", "firstName", "lastname"))
       val addApplicationSubordinateEmptyNestView = app.injector.instanceOf[StartUsingRestApisView]
 
       addApplicationSubordinateEmptyNestView.render(request, loggedIn, messagesProvider, appConfig, "nav-section", environmentNameService)
     }
-    
+
     "show the empty nest page when there are no applications when environment is Prod/Sandbox" in new ProdAndET with Setup {
       val appSummaries = Seq()
 

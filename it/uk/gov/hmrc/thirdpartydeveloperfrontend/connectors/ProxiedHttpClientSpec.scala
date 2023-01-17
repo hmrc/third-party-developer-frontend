@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 HM Revenue & Customs
+ * Copyright 2023 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -28,8 +28,8 @@ import play.api.Configuration
 class ProxiedHttpClientSpec extends AsyncHmrcSpec with GuiceOneServerPerSuite {
 
   val stubConfig = Configuration(
-    "metrics.enabled" -> false,
-    "auditing.enabled" -> false,
+    "metrics.enabled"                       -> false,
+    "auditing.enabled"                      -> false,
     "proxy.proxyRequiredForThisEnvironment" -> false
   )
 
@@ -40,7 +40,7 @@ class ProxiedHttpClientSpec extends AsyncHmrcSpec with GuiceOneServerPerSuite {
 
   trait Setup {
     val apiKey: String = UUID.randomUUID().toString
-    val url = "http://example.com"
+    val url            = "http://example.com"
 
     val underTest: ProxiedHttpClient = app.injector.instanceOf[ProxiedHttpClient]
   }

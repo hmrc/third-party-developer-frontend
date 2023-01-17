@@ -23,18 +23,22 @@ object GlobalSection {
   private def a(em: String)(found: String => String, notFound: () => String) = {
     (globalKeys.contains(em), globalToField.get(em)) match {
       case (true, Some(s)) => found(s)
-      case _ => notFound()
+      case _               => notFound()
     }
   }
 
   def dataAttribute(errorMessage: String): String = a(errorMessage)(
-    k => s"data-global-error-$k", () => "data-global-error-undefined")
+    k => s"data-global-error-$k",
+    () => "data-global-error-undefined"
+  )
 
   def errorField(errorMessage: String): String = a(errorMessage)(
-    k => s"$k", () => "#section-undefined")
+    k => s"$k",
+    () => "#section-undefined"
+  )
 
   def anchor(errorMessage: String): String = a(errorMessage)(
-    k => s"#$k", () => "#section-undefined")
+    k => s"#$k",
+    () => "#section-undefined"
+  )
 }
-
-

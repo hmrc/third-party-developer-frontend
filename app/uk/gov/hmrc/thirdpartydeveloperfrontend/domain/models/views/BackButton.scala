@@ -19,5 +19,5 @@ package uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.views
 trait BackButton
 
 case class BackButtonToUrl(url: String) extends BackButton
-case object BackButtonWithJavaScript extends BackButton
-case object NoBackButton extends BackButton
+case object BackButtonWithJavaScript    extends BackButton
+case object NoBackButton                extends BackButton

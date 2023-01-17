@@ -15,18 +15,19 @@
  */
 
 package uk.gov.hmrc.thirdpartydeveloperfrontend.helpers
+
 import java.util.concurrent.TimeUnit
+import javax.inject.Inject
+import scala.concurrent.duration._
+import scala.concurrent.{ExecutionContext, Future}
 
 import akka.actor.ActorSystem
 import akka.pattern.FutureTimeoutSupport
-import uk.gov.hmrc.thirdpartydeveloperfrontend.config.ApplicationConfig
-import javax.inject.Inject
+
 import uk.gov.hmrc.http.BadRequestException
 
 import uk.gov.hmrc.apiplatform.modules.common.services.ApplicationLogger
-
-import scala.concurrent.{ExecutionContext, Future}
-import scala.concurrent.duration._
+import uk.gov.hmrc.thirdpartydeveloperfrontend.config.ApplicationConfig
 
 trait Retries extends ApplicationLogger {
 
@@ -43,7 +44,7 @@ trait Retries extends ApplicationLogger {
       block.recoverWith {
         case ex: BadRequestException if previousRetryAttempts < appConfig.retryCount => {
           val retryAttempt = previousRetryAttempts + 1
-          val delay = FiniteDuration(appConfig.retryDelayMilliseconds, TimeUnit.MILLISECONDS)
+          val delay        = FiniteDuration(appConfig.retryDelayMilliseconds, TimeUnit.MILLISECONDS)
           logger.warn(s"Retry attempt $retryAttempt of ${appConfig.retryCount} in $delay due to '${ex.getMessage}'")
           futureTimeout.after(delay, actorSystem.scheduler)(loop(retryAttempt)(block))
         }

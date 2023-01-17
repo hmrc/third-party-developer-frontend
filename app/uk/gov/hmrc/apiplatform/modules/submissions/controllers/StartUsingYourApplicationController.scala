@@ -16,8 +16,13 @@
 
 package uk.gov.hmrc.apiplatform.modules.submissions.controllers
 
+import javax.inject.{Inject, Singleton}
+import scala.concurrent.ExecutionContext
+import scala.concurrent.Future.successful
+
 import play.api.libs.crypto.CookieSigner
 import play.api.mvc.MessagesControllerComponents
+
 import uk.gov.hmrc.apiplatform.modules.common.services.EitherTHelper
 import uk.gov.hmrc.apiplatform.modules.submissions.controllers.StartUsingYourApplicationController.ViewModel
 import uk.gov.hmrc.apiplatform.modules.submissions.services.SubmissionService
@@ -26,21 +31,17 @@ import uk.gov.hmrc.thirdpartydeveloperfrontend.config.{ApplicationConfig, ErrorH
 import uk.gov.hmrc.thirdpartydeveloperfrontend.connectors.ApmConnector
 import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.ApplicationController
 import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.checkpages.CanUseCheckActions
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.Capabilities.SupportsSubscriptions
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.ApplicationId
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.Capabilities.SupportsSubscriptions
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.Permissions.AdministratorOnly
 import uk.gov.hmrc.thirdpartydeveloperfrontend.service.{ApplicationActionService, ApplicationService, SessionService}
-
-import javax.inject.{Inject, Singleton}
-import scala.concurrent.ExecutionContext
-import scala.concurrent.Future.successful
 
 object StartUsingYourApplicationController {
   case class ViewModel(appId: ApplicationId, appName: String, showApiConfig: Boolean)
 }
 
 @Singleton
-class StartUsingYourApplicationController @Inject()(
+class StartUsingYourApplicationController @Inject() (
     val errorHandler: ErrorHandler,
     val sessionService: SessionService,
     val applicationActionService: ApplicationActionService,
@@ -49,12 +50,13 @@ class StartUsingYourApplicationController @Inject()(
     val cookieSigner: CookieSigner,
     val apmConnector: ApmConnector,
     val submissionService: SubmissionService,
-    startUsingYourApplicationView: StartUsingYourApplicationView)
-      (implicit val ec: ExecutionContext, val appConfig: ApplicationConfig)
-  extends ApplicationController(mcc)
-     with CanUseCheckActions
-     with EitherTHelper[String]
-     with SubmissionActionBuilders {
+    startUsingYourApplicationView: StartUsingYourApplicationView
+  )(implicit val ec: ExecutionContext,
+    val appConfig: ApplicationConfig
+  ) extends ApplicationController(mcc)
+    with CanUseCheckActions
+    with EitherTHelper[String]
+    with SubmissionActionBuilders {
 
   def startUsingYourApplicationPage(productionAppId: ApplicationId) = checkActionForPreProduction(SupportsSubscriptions, AdministratorOnly)(productionAppId) { implicit request =>
     successful(Ok(startUsingYourApplicationView(ViewModel(productionAppId, request.application.name, request.hasSubscriptionFields))))
@@ -62,8 +64,8 @@ class StartUsingYourApplicationController @Inject()(
 
   def startUsingYourApplicationAction(productionAppId: ApplicationId) = checkActionForPreProduction(SupportsSubscriptions, AdministratorOnly)(productionAppId) { implicit request =>
     val userEmail = request.developerSession.developer.email
-    val failure = BadRequest(errorHandler.badRequestTemplate)
-    val success = Redirect(uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.routes.ManageApplications.manageApps)
-    submissionService.confirmSetupComplete(productionAppId, userEmail).map((esu: Either[String,Unit]) => esu.fold(_ => failure, _ => success))
+    val failure   = BadRequest(errorHandler.badRequestTemplate)
+    val success   = Redirect(uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.routes.ManageApplications.manageApps)
+    submissionService.confirmSetupComplete(productionAppId, userEmail).map((esu: Either[String, Unit]) => esu.fold(_ => failure, _ => success))
   }
 }

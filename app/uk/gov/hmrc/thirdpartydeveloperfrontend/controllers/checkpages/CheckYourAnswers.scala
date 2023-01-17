@@ -16,32 +16,31 @@
 
 package uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.checkpages
 
-import uk.gov.hmrc.thirdpartydeveloperfrontend.config.ApplicationConfig
-import uk.gov.hmrc.thirdpartydeveloperfrontend.config.ErrorHandler
-import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers._
-import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.FormKeys.applicationNameAlreadyExistsKey
-import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.ManageSubscriptions.Field
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.{ApplicationAlreadyExists, DeskproTicketCreationFailed}
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.apidefinitions.{APISubscriptionStatus, _}
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications._
-
+import java.time.Clock
 import javax.inject.{Inject, Singleton}
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.controllers.ApplicationViewModel
-import play.api.data.Form
-import play.api.libs.crypto.CookieSigner
-import play.api.mvc._
-import uk.gov.hmrc.thirdpartydeveloperfrontend.service.{ApplicationActionService, ApplicationService, SessionService, TermsOfUseVersionService}
+import scala.concurrent.Future.successful
+import scala.concurrent.{ExecutionContext, Future}
+
 import views.html.checkpages._
 import views.html.checkpages.applicationcheck.LandingPageView
 import views.html.checkpages.applicationcheck.team.{TeamMemberAddView, TeamMemberRemoveConfirmationView}
 import views.html.checkpages.checkyouranswers.CheckYourAnswersView
 import views.html.checkpages.checkyouranswers.team.TeamView
 
-import scala.concurrent.{ExecutionContext, Future}
-import scala.concurrent.Future.successful
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.subscriptions.DevhubAccessLevel
+import play.api.data.Form
+import play.api.libs.crypto.CookieSigner
+import play.api.mvc._
 
-import java.time.Clock
+import uk.gov.hmrc.thirdpartydeveloperfrontend.config.{ApplicationConfig, ErrorHandler}
+import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.FormKeys.applicationNameAlreadyExistsKey
+import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.ManageSubscriptions.Field
+import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers._
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.apidefinitions.{APISubscriptionStatus, _}
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications._
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.controllers.ApplicationViewModel
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.subscriptions.DevhubAccessLevel
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.{ApplicationAlreadyExists, DeskproTicketCreationFailed}
+import uk.gov.hmrc.thirdpartydeveloperfrontend.service.{ApplicationActionService, ApplicationService, SessionService, TermsOfUseVersionService}
 
 @Singleton
 class CheckYourAnswers @Inject() (
@@ -65,8 +64,9 @@ class CheckYourAnswers @Inject() (
     val contactDetailsView: ContactDetailsView,
     val termsOfUseVersionService: TermsOfUseVersionService,
     val clock: Clock
-)(implicit val ec: ExecutionContext, val appConfig: ApplicationConfig)
-    extends ApplicationController(mcc)
+  )(implicit val ec: ExecutionContext,
+    val appConfig: ApplicationConfig
+  ) extends ApplicationController(mcc)
     with ApplicationHelper
     with CanUseCheckActions
     with ConfirmNamePartialController
@@ -98,7 +98,7 @@ class CheckYourAnswers @Inject() (
       .recover {
         case e: DeskproTicketCreationFailed =>
           val checkYourAnswersData = CheckYourAnswersData(accessLevel, request.application, request.subscriptions)
-          val requestForm = CheckYourAnswersForm.form.fillAndValidate(DummyCheckYourAnswersForm("dummy"))
+          val requestForm          = CheckYourAnswersForm.form.fillAndValidate(DummyCheckYourAnswersForm("dummy"))
           InternalServerError(checkYourAnswersView(checkYourAnswersData, requestForm.withError("submitError", e.displayMessage)))
       }
       .recover {
@@ -174,7 +174,7 @@ case class CheckYourSubscriptionData(
     apiVersion: ApiVersion,
     displayedStatus: String,
     fields: Seq[Field]
-)
+  )
 
 case class CheckYourAnswersData(
     appId: ApplicationId,
@@ -187,9 +187,10 @@ case class CheckYourAnswersData(
     termsAndConditionsLocation: TermsAndConditionsLocation,
     acceptedTermsOfUse: Boolean,
     subscriptions: Seq[CheckYourSubscriptionData]
-)
+  )
 
 object CheckYourAnswersData {
+
   def apply(accessLevel: DevhubAccessLevel, application: Application, subs: Seq[APISubscriptionStatus]): CheckYourAnswersData = {
     val contactDetails: Option[ContactDetails] = application.checkInformation.flatMap(_.contactDetails)
 

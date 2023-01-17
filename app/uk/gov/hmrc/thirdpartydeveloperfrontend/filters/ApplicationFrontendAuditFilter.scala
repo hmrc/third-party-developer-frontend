@@ -16,26 +16,27 @@
 
 package uk.gov.hmrc.thirdpartydeveloperfrontend.filters
 
-import akka.stream.Materializer
 import javax.inject.{Inject, Named}
+import scala.concurrent.ExecutionContext
+
+import akka.stream.Materializer
+
 import play.api.Configuration
 import uk.gov.hmrc.play.audit.http.connector.AuditConnector
 import uk.gov.hmrc.play.bootstrap.config.{ControllerConfigs, HttpAuditEvent}
 import uk.gov.hmrc.play.bootstrap.frontend.filters.{DefaultFrontendAuditFilter, RequestHeaderAuditing}
 
-import scala.concurrent.ExecutionContext
-
-class ApplicationFrontendAuditFilter @Inject()(
-  val configuration: Configuration,
-  controllerConfigs: ControllerConfigs,
-  override val auditConnector: AuditConnector,
-  auditEvent: HttpAuditEvent,
-  override val mat: Materializer,
-  @Named("appName") appName: String,
-  requestHeaderAuditing: RequestHeaderAuditing
-)(
-  override implicit val ec: ExecutionContext
-) extends DefaultFrontendAuditFilter(configuration, controllerConfigs, auditConnector, auditEvent, requestHeaderAuditing, mat) {
+class ApplicationFrontendAuditFilter @Inject() (
+    val configuration: Configuration,
+    controllerConfigs: ControllerConfigs,
+    override val auditConnector: AuditConnector,
+    auditEvent: HttpAuditEvent,
+    override val mat: Materializer,
+    @Named("appName") appName: String,
+    requestHeaderAuditing: RequestHeaderAuditing
+  )(
+    override implicit val ec: ExecutionContext
+  ) extends DefaultFrontendAuditFilter(configuration, controllerConfigs, auditConnector, auditEvent, requestHeaderAuditing, mat) {
 
   override def controllerNeedsAuditing(controllerName: String): Boolean =
     controllerConfigs.get(controllerName).auditing

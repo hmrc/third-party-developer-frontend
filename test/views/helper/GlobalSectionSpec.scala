@@ -22,15 +22,15 @@ class GlobalSectionSpec extends AsyncHmrcSpec {
 
   "dataAttribute" should {
     Seq(
-      "firstname.error.required.global" -> "data-global-error-firstname",
-      "firstname.error.maxLength.global" -> "data-global-error-firstname",
-      "lastname.error.required.global" -> "data-global-error-lastname",
-      "lastname.error.maxLength.global" -> "data-global-error-lastname",
-      "emailaddress.error.required.global" -> "data-global-error-emailaddress",
-      "emailaddress.error.not.valid.global" -> "data-global-error-emailaddress",
-      "password.error.required.global" -> "data-global-error-password",
-      "password.error.not.valid.global" -> "data-global-error-password",
-      "password.error.no.match.global" -> "data-global-error-password",
+      "firstname.error.required.global"        -> "data-global-error-firstname",
+      "firstname.error.maxLength.global"       -> "data-global-error-firstname",
+      "lastname.error.required.global"         -> "data-global-error-lastname",
+      "lastname.error.maxLength.global"        -> "data-global-error-lastname",
+      "emailaddress.error.required.global"     -> "data-global-error-emailaddress",
+      "emailaddress.error.not.valid.global"    -> "data-global-error-emailaddress",
+      "password.error.required.global"         -> "data-global-error-password",
+      "password.error.not.valid.global"        -> "data-global-error-password",
+      "password.error.no.match.global"         -> "data-global-error-password",
       "emailaddress.already.registered.global" -> "data-global-error-emailaddress"
     ).foreach {
       case (k, v) =>
@@ -50,15 +50,15 @@ class GlobalSectionSpec extends AsyncHmrcSpec {
 
   "anchor" should {
     Seq(
-      "firstname.error.required.global" -> "#firstname",
-      "firstname.error.maxLength.global" -> "#firstname",
-      "lastname.error.required.global" -> "#lastname",
-      "lastname.error.maxLength.global" -> "#lastname",
-      "emailaddress.error.required.global" -> "#emailaddress",
-      "emailaddress.error.not.valid.global" -> "#emailaddress",
-      "password.error.required.global" -> "#password",
-      "password.error.not.valid.global" -> "#password",
-      "password.error.no.match.global" -> "#password",
+      "firstname.error.required.global"        -> "#firstname",
+      "firstname.error.maxLength.global"       -> "#firstname",
+      "lastname.error.required.global"         -> "#lastname",
+      "lastname.error.maxLength.global"        -> "#lastname",
+      "emailaddress.error.required.global"     -> "#emailaddress",
+      "emailaddress.error.not.valid.global"    -> "#emailaddress",
+      "password.error.required.global"         -> "#password",
+      "password.error.not.valid.global"        -> "#password",
+      "password.error.no.match.global"         -> "#password",
       "emailaddress.already.registered.global" -> "#emailaddress"
     ).foreach {
       case (k, v) =>

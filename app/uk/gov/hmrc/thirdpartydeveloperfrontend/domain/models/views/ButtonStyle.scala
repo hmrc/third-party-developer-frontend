@@ -18,5 +18,5 @@ package uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.views
 
 trait AnchorStyle
 
-case object Link extends AnchorStyle
+case object Link   extends AnchorStyle
 case object Button extends AnchorStyle

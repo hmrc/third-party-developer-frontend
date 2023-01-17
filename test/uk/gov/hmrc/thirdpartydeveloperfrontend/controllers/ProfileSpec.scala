@@ -16,41 +16,42 @@
 
 package uk.gov.hmrc.thirdpartydeveloperfrontend.controllers
 
-import uk.gov.hmrc.thirdpartydeveloperfrontend.builder.DeveloperBuilder
-import uk.gov.hmrc.thirdpartydeveloperfrontend.config.ErrorHandler
-import uk.gov.hmrc.thirdpartydeveloperfrontend.connectors.ThirdPartyDeveloperConnector
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.connectors.ChangePassword
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.{Developer, LoggedInState, Session, UpdateProfileRequest}
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.InvalidCredentials
-import uk.gov.hmrc.thirdpartydeveloperfrontend.mocks.service.{ApplicationServiceMock, SessionServiceMock}
+import scala.concurrent.ExecutionContext.Implicits.global
+import scala.concurrent.Future
+import scala.concurrent.Future.failed
+
 import org.jsoup.Jsoup
 import org.mockito.ArgumentCaptor
+import views.html._
+
 import play.api.http.Status.OK
 import play.api.mvc.AnyContentAsEmpty
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
+
+import uk.gov.hmrc.thirdpartydeveloperfrontend.builder.DeveloperBuilder
+import uk.gov.hmrc.thirdpartydeveloperfrontend.config.ErrorHandler
+import uk.gov.hmrc.thirdpartydeveloperfrontend.connectors.ThirdPartyDeveloperConnector
+import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.profile.Profile
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.InvalidCredentials
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.connectors.ChangePassword
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.{Developer, LoggedInState, Session, UpdateProfileRequest}
+import uk.gov.hmrc.thirdpartydeveloperfrontend.mocks.service.{ApplicationServiceMock, SessionServiceMock}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.service.AuditAction.PasswordChangeFailedDueToInvalidCredentials
 import uk.gov.hmrc.thirdpartydeveloperfrontend.service.AuditService
-import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.WithCSRFAddToken
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.WithLoggedInSession._
-import views.html._
-
-import scala.concurrent.ExecutionContext.Implicits.global
-import scala.concurrent.Future
-import scala.concurrent.Future.failed
-import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.profile.Profile
-import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.LocalUserIdTracker
+import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.{LocalUserIdTracker, WithCSRFAddToken}
 
 class ProfileSpec extends BaseControllerSpec with WithCSRFAddToken with DeveloperBuilder with LocalUserIdTracker {
 
   trait Setup extends ApplicationServiceMock with SessionServiceMock {
-    val changeProfileView = app.injector.instanceOf[ChangeProfileView]
-    val profileView = app.injector.instanceOf[ProfileView]
-    val profileUpdatedView = app.injector.instanceOf[ProfileUpdatedView]
-    val changeProfilePasswordView = app.injector.instanceOf[ChangeProfilePasswordView]
-    val passwordUpdatedView = app.injector.instanceOf[PasswordUpdatedView]
+    val changeProfileView             = app.injector.instanceOf[ChangeProfileView]
+    val profileView                   = app.injector.instanceOf[ProfileView]
+    val profileUpdatedView            = app.injector.instanceOf[ProfileUpdatedView]
+    val changeProfilePasswordView     = app.injector.instanceOf[ChangeProfilePasswordView]
+    val passwordUpdatedView           = app.injector.instanceOf[PasswordUpdatedView]
     val profileDeleteConfirmationView = app.injector.instanceOf[ProfileDeleteConfirmationView]
-    val profileDeleteSubmittedView = app.injector.instanceOf[ProfileDeleteSubmittedView]
+    val profileDeleteSubmittedView    = app.injector.instanceOf[ProfileDeleteSubmittedView]
 
     val underTest = new Profile(
       applicationServiceMock,
@@ -70,7 +71,7 @@ class ProfileSpec extends BaseControllerSpec with WithCSRFAddToken with Develope
     )
 
     val loggedInDeveloper: Developer = buildDeveloper()
-    val sessionId = "sessionId"
+    val sessionId                    = "sessionId"
 
     def createRequest: FakeRequest[AnyContentAsEmpty.type] =
       FakeRequest().withLoggedIn(underTest, implicitly)(sessionId).withCSRFToken
@@ -79,9 +80,9 @@ class ProfileSpec extends BaseControllerSpec with WithCSRFAddToken with Develope
   "updateProfile" should {
     "update profile with normalized firstname and lastname" in new Setup {
       val request = createRequest.withFormUrlEncodedBody(
-          ("firstname", "  first  "), // with whitespaces before and after
-          ("lastname", "  last  ") // with whitespaces before and after
-        )
+        ("firstname", "  first  "), // with whitespaces before and after
+        ("lastname", "  last  ")    // with whitespaces before and after
+      )
 
       val requestCaptor: ArgumentCaptor[UpdateProfileRequest] = ArgumentCaptor.forClass(classOf[UpdateProfileRequest])
 
@@ -100,10 +101,10 @@ class ProfileSpec extends BaseControllerSpec with WithCSRFAddToken with Develope
 
     "fail and send an audit event while changing the password if old password is incorrect" in new Setup {
       val request = createRequest.withFormUrlEncodedBody(
-          ("currentpassword", "oldPassword"),
-          ("password", "StrongNewPwd!2"),
-          ("confirmpassword", "StrongNewPwd!2")
-        )
+        ("currentpassword", "oldPassword"),
+        ("password", "StrongNewPwd!2"),
+        ("confirmpassword", "StrongNewPwd!2")
+      )
 
       updateUserFlowSessionsReturnsSuccessfully(sessionId)
       when(underTest.sessionService.fetch(eqTo(sessionId))(*))
@@ -121,10 +122,10 @@ class ProfileSpec extends BaseControllerSpec with WithCSRFAddToken with Develope
 
     "Password updated should have correct page title" in new Setup {
       val request = createRequest.withFormUrlEncodedBody(
-          ("currentpassword", "oldPassword"),
-          ("password", "StrongNewPwd!2"),
-          ("confirmpassword", "StrongNewPwd!2")
-        )
+        ("currentpassword", "oldPassword"),
+        ("password", "StrongNewPwd!2"),
+        ("confirmpassword", "StrongNewPwd!2")
+      )
 
       updateUserFlowSessionsReturnsSuccessfully(sessionId)
       when(underTest.sessionService.fetch(eqTo(sessionId))(*)).thenReturn(Future.successful(Some(Session(sessionId, loggedInDeveloper, LoggedInState.LOGGED_IN))))

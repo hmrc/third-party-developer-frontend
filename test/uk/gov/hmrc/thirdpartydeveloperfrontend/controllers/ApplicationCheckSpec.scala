@@ -16,35 +16,35 @@
 
 package uk.gov.hmrc.thirdpartydeveloperfrontend.controllers
 
+import java.time.{Clock, Instant, LocalDateTime, ZoneOffset}
 import java.util.UUID.randomUUID
-import uk.gov.hmrc.thirdpartydeveloperfrontend.builder._
-import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.checkpages.ApplicationCheck
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.CollaboratorRole.{ADMINISTRATOR, DEVELOPER}
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.ApplicationUpliftSuccessful
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.apidefinitions._
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.{ApplicationId, _}
-import uk.gov.hmrc.thirdpartydeveloperfrontend.helpers.string._
-import uk.gov.hmrc.thirdpartydeveloperfrontend.mocks.service._
+import scala.concurrent.ExecutionContext.Implicits.global
+import scala.concurrent.Future
+import scala.concurrent.Future.successful
+
 import org.jsoup.Jsoup
+import views.html.checkpages._
+import views.html.checkpages.applicationcheck.team.{TeamMemberAddView, TeamMemberRemoveConfirmationView, TeamView}
+import views.html.checkpages.applicationcheck.{LandingPageView, UnauthorisedAppDetailsView}
+import views.html.editapplication.NameSubmittedView
+
 import play.api.mvc.{AnyContentAsEmpty, Result}
 import play.api.test.FakeRequest
 import play.api.test.Helpers.{redirectLocation, _}
 import play.filters.csrf.CSRF.TokenProvider
 import uk.gov.hmrc.http.HeaderCarrier
-import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.WithCSRFAddToken
-import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.WithLoggedInSession._
-import views.html.checkpages._
-import views.html.checkpages.applicationcheck.{LandingPageView, UnauthorisedAppDetailsView}
-import views.html.checkpages.applicationcheck.team.{TeamMemberAddView, TeamMemberRemoveConfirmationView, TeamView}
-import views.html.editapplication.NameSubmittedView
 
-import scala.concurrent.ExecutionContext.Implicits.global
-import scala.concurrent.Future
-import scala.concurrent.Future.successful
-import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.LocalUserIdTracker
+import uk.gov.hmrc.thirdpartydeveloperfrontend.builder._
+import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.checkpages.ApplicationCheck
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.ApplicationUpliftSuccessful
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.apidefinitions._
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.CollaboratorRole.{ADMINISTRATOR, DEVELOPER}
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.{ApplicationId, _}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.DeveloperSession
-
-import java.time.{Clock, Instant, LocalDateTime, ZoneOffset}
+import uk.gov.hmrc.thirdpartydeveloperfrontend.helpers.string._
+import uk.gov.hmrc.thirdpartydeveloperfrontend.mocks.service._
+import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.WithLoggedInSession._
+import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.{LocalUserIdTracker, WithCSRFAddToken}
 
 class ApplicationCheckSpec
     extends BaseControllerSpec
@@ -61,18 +61,19 @@ class ApplicationCheckSpec
   val appName: String = "app"
 
   val exampleContext = ApiContext("exampleContext")
-  val version = ApiVersion("version")
+  val version        = ApiVersion("version")
 
-  val anotherCollaboratorEmail = "collaborator@example.com"
+  val anotherCollaboratorEmail    = "collaborator@example.com"
   val yetAnotherCollaboratorEmail = "collaborator2@example.com"
 
-  val testing: ApplicationState = ApplicationState.testing.copy(updatedOn = LocalDateTime.now(ZoneOffset.UTC).minusMinutes(1))
-  val production: ApplicationState = ApplicationState.production("thirdpartydeveloper@example.com", "thirdpartydeveloper", "ABCD")
+  val testing: ApplicationState         = ApplicationState.testing.copy(updatedOn = LocalDateTime.now(ZoneOffset.UTC).minusMinutes(1))
+  val production: ApplicationState      = ApplicationState.production("thirdpartydeveloper@example.com", "thirdpartydeveloper", "ABCD")
   val pendingApproval: ApplicationState = ApplicationState.pendingGatekeeperApproval("thirdpartydeveloper@example.com", "thirdpartydeveloper")
 
   val emptyFields = emptySubscriptionFieldsWrapper(appId, clientId, exampleContext, ApiVersion("api-example-microservice"))
 
   val appTokens: ApplicationToken = ApplicationToken(List(aClientSecret(), aClientSecret()), "token")
+
   val exampleApiSubscription: Some[APISubscriptions] = Some(
     APISubscriptions(
       "Example API",
@@ -104,6 +105,7 @@ class ApplicationCheckSpec
   }
 
   trait BasicApplicationProvider extends ApplicationProvider {
+
     def createApplication() =
       Application(
         appId,
@@ -131,7 +133,7 @@ class ApplicationCheckSpec
       state: ApplicationState = testing,
       checkInformation: Option[CheckInformation] = None,
       access: Access = Standard()
-  ): Application = {
+    ): Application = {
 
     Application(
       appId,
@@ -156,7 +158,7 @@ class ApplicationCheckSpec
       state: ApplicationState = testing,
       checkInformation: Option[CheckInformation] = None,
       access: Access = Standard()
-  ): Application = {
+    ): Application = {
 
     // this is to ensure we always have one ADMINISTRATOR
     val anotherRole = if (userRole.isAdministrator) DEVELOPER else ADMINISTRATOR
@@ -173,7 +175,7 @@ class ApplicationCheckSpec
       appId: ApplicationId = appId,
       clientId: ClientId = clientId,
       state: ApplicationState = testing
-  ): Application = {
+    ): Application = {
 
     val collaborators = Set(
       loggedInDeveloper.email.asCollaborator(ADMINISTRATOR),
@@ -196,23 +198,23 @@ class ApplicationCheckSpec
     )
   }
 
-
   trait BaseSetup extends ApplicationServiceMock with ApplicationActionServiceMock with SessionServiceMock with ApplicationProvider with TermsOfUseVersionServiceMock {
-    val landingPageView = app.injector.instanceOf[LandingPageView]
-    val unauthorisedAppDetailsView = app.injector.instanceOf[UnauthorisedAppDetailsView]
-    val nameSubmittedView = app.injector.instanceOf[NameSubmittedView]
-    val teamView = app.injector.instanceOf[TeamView]
-    val teamMemberAddView = app.injector.instanceOf[TeamMemberAddView]
+    val landingPageView                  = app.injector.instanceOf[LandingPageView]
+    val unauthorisedAppDetailsView       = app.injector.instanceOf[UnauthorisedAppDetailsView]
+    val nameSubmittedView                = app.injector.instanceOf[NameSubmittedView]
+    val teamView                         = app.injector.instanceOf[TeamView]
+    val teamMemberAddView                = app.injector.instanceOf[TeamMemberAddView]
     val teamMemberRemoveConfirmationView = app.injector.instanceOf[TeamMemberRemoveConfirmationView]
-    val termsOfUseView = app.injector.instanceOf[TermsOfUseView]
-    val confirmNameView = app.injector.instanceOf[ConfirmNameView]
-    val contactDetailsView = app.injector.instanceOf[ContactDetailsView]
-    val apiSubscriptionsViewTemplate = app.injector.instanceOf[ApiSubscriptionsView]
-    val privacyPolicyView = app.injector.instanceOf[PrivacyPolicyView]
-    val termsAndConditionsView = app.injector.instanceOf[TermsAndConditionsView]
+    val termsOfUseView                   = app.injector.instanceOf[TermsOfUseView]
+    val confirmNameView                  = app.injector.instanceOf[ConfirmNameView]
+    val contactDetailsView               = app.injector.instanceOf[ContactDetailsView]
+    val apiSubscriptionsViewTemplate     = app.injector.instanceOf[ApiSubscriptionsView]
+    val privacyPolicyView                = app.injector.instanceOf[PrivacyPolicyView]
+    val termsAndConditionsView           = app.injector.instanceOf[TermsAndConditionsView]
 
     val applicationCheck = app.injector.instanceOf[ApplicationCheck]
-    val clock = Clock.fixed(Instant.now(), ZoneOffset.UTC)
+    val clock            = Clock.fixed(Instant.now(), ZoneOffset.UTC)
+
     val underTest = new ApplicationCheck(
       mockErrorHandler,
       applicationServiceMock,
@@ -253,10 +255,10 @@ class ApplicationCheckSpec
 
     givenApplicationNameIsValid()
 
-    val sessionParams: Seq[(String, String)] = Seq("csrfToken" -> app.injector.instanceOf[TokenProvider].generateToken)
+    val sessionParams: Seq[(String, String)]                  = Seq("csrfToken" -> app.injector.instanceOf[TokenProvider].generateToken)
     val loggedOutRequest: FakeRequest[AnyContentAsEmpty.type] = FakeRequest().withSession(sessionParams: _*)
-    val loggedInRequest: FakeRequest[AnyContentAsEmpty.type] = FakeRequest().withLoggedIn(underTest, implicitly)(sessionId).withSession(sessionParams: _*)
-    val loggedInRequestWithFormBody = loggedInRequest.withFormUrlEncodedBody()
+    val loggedInRequest: FakeRequest[AnyContentAsEmpty.type]  = FakeRequest().withLoggedIn(underTest, implicitly)(sessionId).withSession(sessionParams: _*)
+    val loggedInRequestWithFormBody                           = loggedInRequest.withFormUrlEncodedBody()
 
     def idAttributeOnCheckedInput(result: Future[Result]): String = Jsoup.parse(contentAsString(result)).select("input[checked]").attr("id")
 
@@ -267,6 +269,7 @@ class ApplicationCheckSpec
   }
 
   trait SetupWithSubs extends BaseSetup {
+
     def setupApplicationWithSubs(a: Application, s: List[APISubscriptionStatus]): Unit = {
       givenApplicationAction(ApplicationWithSubscriptionData(application, asSubscriptions(s), asFields((s))), loggedInDeveloper, s)
     }
@@ -309,7 +312,7 @@ class ApplicationCheckSpec
     }
     "return forbidden when not logged in" in new Setup {
       def createApplication() = createPartiallyConfigurableApplication()
-      private val result = underTest.credentialsRequested(appId)(loggedOutRequest)
+      private val result      = underTest.credentialsRequested(appId)(loggedOutRequest)
 
       status(result) shouldBe SEE_OTHER
       redirectLocation(result) shouldBe Some(s"/developer/login")
@@ -558,7 +561,7 @@ class ApplicationCheckSpec
   "api subscriptions review" should {
     "return page" in new SetupWithSubs {
       def createApplication() = createPartiallyConfigurableApplication()
-      val subsData = List(exampleSubscriptionWithoutFields("api1"), exampleSubscriptionWithoutFields("api2"))
+      val subsData            = List(exampleSubscriptionWithoutFields("api1"), exampleSubscriptionWithoutFields("api2"))
       setupApplicationWithSubs(application, subsData)
 
       private val result = addToken(underTest.apiSubscriptionsPage(application.id))(loggedInRequest)
@@ -570,7 +573,7 @@ class ApplicationCheckSpec
 
     "return a bad request when application is new submission based uplift" in new SetupWithSubs {
       def createApplication() = createFakeApplicationWithImporantSubmissionData()
-      val subsData = List(exampleSubscriptionWithoutFields("api1"), exampleSubscriptionWithoutFields("api2"))
+      val subsData            = List(exampleSubscriptionWithoutFields("api1"), exampleSubscriptionWithoutFields("api2"))
       setupApplicationWithSubs(application, subsData)
 
       private val result = addToken(underTest.apiSubscriptionsPage(application.id))(loggedInRequest)
@@ -580,7 +583,7 @@ class ApplicationCheckSpec
 
     "success action" in new SetupWithSubs {
       def createApplication() = createPartiallyConfigurableApplication()
-      val subsData = List(exampleSubscriptionWithoutFields("api1"), exampleSubscriptionWithoutFields("api2"))
+      val subsData            = List(exampleSubscriptionWithoutFields("api1"), exampleSubscriptionWithoutFields("api2"))
       setupApplicationWithSubs(application, subsData)
 
       private val result = addToken(underTest.apiSubscriptionsAction(appId))(loggedInRequestWithFormBody)
@@ -742,7 +745,7 @@ class ApplicationCheckSpec
 
       private val requestWithFormBody = loggedInRequest.withFormUrlEncodedBody("applicationName" -> "My First Tax App")
 
-      private val result = addToken(underTest.nameAction(appId))(requestWithFormBody)
+      private val result                = addToken(underTest.nameAction(appId))(requestWithFormBody)
       private val expectedUpdateRequest =
         UpdateApplicationRequest(application.id, application.deployedTo, "My First Tax App", application.description, application.access)
 
@@ -758,7 +761,7 @@ class ApplicationCheckSpec
 
       private val requestWithFormBody = loggedInRequest.withFormUrlEncodedBody("applicationName" -> "app")
 
-      private val result = addToken(underTest.nameAction(appId))(requestWithFormBody)
+      private val result                = addToken(underTest.nameAction(appId))(requestWithFormBody)
       private val expectedUpdateRequest =
         UpdateApplicationRequest(application.id, application.deployedTo, application.name, application.description, application.access)
 
@@ -772,7 +775,7 @@ class ApplicationCheckSpec
     }
 
     "Validation failure name is blank action" in new Setup {
-      def createApplication() = createPartiallyConfigurableApplication()
+      def createApplication()         = createPartiallyConfigurableApplication()
       private val requestWithFormBody = loggedInRequest.withFormUrlEncodedBody("applicationName" -> "")
 
       private val result = addToken(underTest.nameAction(appId))(requestWithFormBody)
@@ -890,7 +893,7 @@ class ApplicationCheckSpec
 
     "return page with yes pre-selected when the step has not been completed but a URL has already been provided" in new Setup {
       lazy val checkInformation = defaultCheckInformation.copy(providedPrivacyPolicyURL = false)
-      lazy val access = Standard().copy(privacyPolicyUrl = Some("http://privacypolicy.example.com"))
+      lazy val access           = Standard().copy(privacyPolicyUrl = Some("http://privacypolicy.example.com"))
 
       def createApplication() = createPartiallyConfigurableApplication(access = access, checkInformation = Some(checkInformation))
 
@@ -902,8 +905,8 @@ class ApplicationCheckSpec
 
     "return page with yes pre-selected when the step was previously completed with a URL" in new Setup {
       lazy val checkInformation = defaultCheckInformation.copy(providedPrivacyPolicyURL = true)
-      lazy val access = Standard().copy(privacyPolicyUrl = Some("http://privacypolicy.example.com"))
-      def createApplication() = createPartiallyConfigurableApplication(access = access, checkInformation = Some(checkInformation))
+      lazy val access           = Standard().copy(privacyPolicyUrl = Some("http://privacypolicy.example.com"))
+      def createApplication()   = createPartiallyConfigurableApplication(access = access, checkInformation = Some(checkInformation))
 
       private val result = addToken(underTest.privacyPolicyPage(appId))(loggedInRequest)
 
@@ -913,7 +916,7 @@ class ApplicationCheckSpec
 
     "return page with no pre-selected when the step was previously completed with no URL" in new Setup {
       lazy val checkInformation = defaultCheckInformation.copy(providedPrivacyPolicyURL = true)
-      def createApplication() = createPartiallyConfigurableApplication(checkInformation = Some(checkInformation))
+      def createApplication()   = createPartiallyConfigurableApplication(checkInformation = Some(checkInformation))
 
       private val result = addToken(underTest.privacyPolicyPage(appId))(loggedInRequest)
       status(result) shouldBe OK
@@ -925,8 +928,8 @@ class ApplicationCheckSpec
 
       private val loggedInRequestWithUrls = loggedInRequest.withFormUrlEncodedBody("hasUrl" -> "true", "privacyPolicyURL" -> "http://privacypolicy.example.com")
 
-      private val result = addToken(underTest.privacyPolicyAction(appId))(loggedInRequestWithUrls)
-      private val standardAccess = Standard(privacyPolicyUrl = Some("http://privacypolicy.example.com"))
+      private val result                = addToken(underTest.privacyPolicyAction(appId))(loggedInRequestWithUrls)
+      private val standardAccess        = Standard(privacyPolicyUrl = Some("http://privacypolicy.example.com"))
       private val expectedUpdateRequest =
         UpdateApplicationRequest(application.id, application.deployedTo, application.name, application.description, standardAccess)
 
@@ -942,9 +945,9 @@ class ApplicationCheckSpec
 
       private val loggedInRequestWithUrls = loggedInRequest.withFormUrlEncodedBody("hasUrl" -> "false")
 
-      private val result = addToken(underTest.privacyPolicyAction(application.id))(loggedInRequestWithUrls)
+      private val result                   = addToken(underTest.privacyPolicyAction(application.id))(loggedInRequestWithUrls)
       private val standardAccess: Standard = Standard(privacyPolicyUrl = None)
-      private val expectedUpdateRequest =
+      private val expectedUpdateRequest    =
         UpdateApplicationRequest(application.id, application.deployedTo, application.name, application.description, standardAccess)
 
       await(result) // await before verify
@@ -957,7 +960,7 @@ class ApplicationCheckSpec
     }
 
     "fail validation when privacy policy url is invalid" in new Setup {
-      def createApplication() = createPartiallyConfigurableApplication()
+      def createApplication()             = createPartiallyConfigurableApplication()
       private val loggedInRequestWithUrls = loggedInRequest.withFormUrlEncodedBody("hasUrl" -> "true", "privacyPolicyURL" -> "invalid url")
 
       private val result = addToken(underTest.privacyPolicyAction(appId))(loggedInRequestWithUrls)
@@ -965,7 +968,7 @@ class ApplicationCheckSpec
     }
 
     "fail validation when privacy policy url is missing" in new Setup {
-      def createApplication() = createPartiallyConfigurableApplication()
+      def createApplication()             = createPartiallyConfigurableApplication()
       private val loggedInRequestWithUrls = loggedInRequest.withFormUrlEncodedBody("hasUrl" -> "true")
 
       private val result = addToken(underTest.privacyPolicyAction(appId))(loggedInRequestWithUrls)
@@ -1042,8 +1045,8 @@ class ApplicationCheckSpec
 
     "return page with yes pre-selected when the step has not been completed but a URL has already been provided" in new Setup {
       lazy val checkInformation = defaultCheckInformation.copy(providedTermsAndConditionsURL = false)
-      lazy val access = Standard().copy(termsAndConditionsUrl = Some("http://termsandconds.example.com"))
-      def createApplication() = createPartiallyConfigurableApplication(access = access, checkInformation = Some(checkInformation))
+      lazy val access           = Standard().copy(termsAndConditionsUrl = Some("http://termsandconds.example.com"))
+      def createApplication()   = createPartiallyConfigurableApplication(access = access, checkInformation = Some(checkInformation))
 
       private val result = addToken(underTest.termsAndConditionsPage(appId))(loggedInRequest)
 
@@ -1053,8 +1056,8 @@ class ApplicationCheckSpec
 
     "return page with yes pre-selected when the step was previously completed with a URL" in new Setup {
       lazy val checkInformation = defaultCheckInformation.copy(providedTermsAndConditionsURL = true)
-      lazy val access = Standard().copy(termsAndConditionsUrl = Some("http://termsandconds.example.com"))
-      def createApplication() = createPartiallyConfigurableApplication(access = access, checkInformation = Some(checkInformation))
+      lazy val access           = Standard().copy(termsAndConditionsUrl = Some("http://termsandconds.example.com"))
+      def createApplication()   = createPartiallyConfigurableApplication(access = access, checkInformation = Some(checkInformation))
 
       private val result = addToken(underTest.termsAndConditionsPage(appId))(loggedInRequest)
 
@@ -1064,7 +1067,7 @@ class ApplicationCheckSpec
 
     "return page with no pre-selected when the step was previously completed with no URL" in new Setup {
       lazy val checkInformation = defaultCheckInformation.copy(providedTermsAndConditionsURL = true)
-      def createApplication() = createPartiallyConfigurableApplication(checkInformation = Some(checkInformation))
+      def createApplication()   = createPartiallyConfigurableApplication(checkInformation = Some(checkInformation))
 
       private val result = addToken(underTest.termsAndConditionsPage(appId))(loggedInRequest)
 
@@ -1078,8 +1081,8 @@ class ApplicationCheckSpec
       private val loggedInRequestWithUrls =
         loggedInRequest.withFormUrlEncodedBody("hasUrl" -> "true", "termsAndConditionsURL" -> "http://termsAndConditionsURL.example.com")
 
-      private val result = addToken(underTest.termsAndConditionsAction(application.id))(loggedInRequestWithUrls)
-      private val standardAccess = Standard(termsAndConditionsUrl = Some("http://termsAndConditionsURL.example.com"))
+      private val result                = addToken(underTest.termsAndConditionsAction(application.id))(loggedInRequestWithUrls)
+      private val standardAccess        = Standard(termsAndConditionsUrl = Some("http://termsAndConditionsURL.example.com"))
       private val expectedUpdateRequest =
         UpdateApplicationRequest(application.id, application.deployedTo, application.name, application.description, standardAccess)
 
@@ -1096,8 +1099,8 @@ class ApplicationCheckSpec
 
       private val loggedInRequestWithUrls = loggedInRequest.withFormUrlEncodedBody("hasUrl" -> "false")
 
-      private val result = addToken(underTest.termsAndConditionsAction(appId))(loggedInRequestWithUrls)
-      private val standardAccess = Standard(termsAndConditionsUrl = None)
+      private val result                = addToken(underTest.termsAndConditionsAction(appId))(loggedInRequestWithUrls)
+      private val standardAccess        = Standard(termsAndConditionsUrl = None)
       private val expectedUpdateRequest =
         UpdateApplicationRequest(application.id, application.deployedTo, application.name, application.description, standardAccess)
 
@@ -1110,7 +1113,7 @@ class ApplicationCheckSpec
     }
 
     "fail validation when terms and conditions url is invalid but hasUrl true" in new Setup {
-      def createApplication() = createPartiallyConfigurableApplication()
+      def createApplication()             = createPartiallyConfigurableApplication()
       private val loggedInRequestWithUrls = loggedInRequest.withFormUrlEncodedBody("hasUrl" -> "true", "termsAndConditionsURL" -> "invalid url")
 
       private val result = addToken(underTest.termsAndConditionsAction(appId))(loggedInRequestWithUrls)
@@ -1118,7 +1121,7 @@ class ApplicationCheckSpec
     }
 
     "fail validation when terms and conditions url is missing but hasUrl true" in new Setup {
-      def createApplication() = createPartiallyConfigurableApplication()
+      def createApplication()             = createPartiallyConfigurableApplication()
       private val loggedInRequestWithUrls = loggedInRequest.withFormUrlEncodedBody("hasUrl" -> "true")
 
       private val result = addToken(underTest.termsAndConditionsAction(appId))(loggedInRequestWithUrls)
@@ -1179,7 +1182,7 @@ class ApplicationCheckSpec
 
       def createApplication() = createPartiallyConfigurableApplication()
       returnTermsOfUseVersionForApplication
-      private val result = addToken(underTest.termsOfUsePage(appId))(loggedInRequest)
+      private val result      = addToken(underTest.termsOfUsePage(appId))(loggedInRequest)
 
       status(result) shouldBe OK
       contentAsString(result) should include("Agree to our terms of use")
@@ -1234,7 +1237,7 @@ class ApplicationCheckSpec
     }
 
     "successful terms of use action" in new Setup {
-      def createApplication() = createPartiallyConfigurableApplication()
+      def createApplication()         = createPartiallyConfigurableApplication()
       private val requestWithFormBody = loggedInRequest.withFormUrlEncodedBody("termsOfUseAgreed" -> "true")
 
       private val result = addToken(underTest.termsOfUseAction(appId))(requestWithFormBody)

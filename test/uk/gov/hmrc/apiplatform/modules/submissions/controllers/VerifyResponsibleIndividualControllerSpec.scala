@@ -16,37 +16,41 @@
 
 package uk.gov.hmrc.apiplatform.modules.submissions.controllers
 
-import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.BaseControllerSpec
-import uk.gov.hmrc.thirdpartydeveloperfrontend.mocks.service.ApplicationServiceMock
-import uk.gov.hmrc.thirdpartydeveloperfrontend.mocks.service.ApplicationActionServiceMock
-import uk.gov.hmrc.thirdpartydeveloperfrontend.mocks.connectors.ApmConnectorMockModule
-import uk.gov.hmrc.apiplatform.modules.submissions.services.mocks.ResponsibleIndividualVerificationServiceMockModule
-import play.api.test.Helpers._
-import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.WithLoggedInSession._
-
-import scala.concurrent.ExecutionContext.Implicits.global
-import uk.gov.hmrc.apiplatform.modules.submissions.views.html.{VerifyResponsibleIndividualView, ResponsibleIndividualAcceptedView, ResponsibleIndividualDeclinedView, ResponsibleIndividualErrorView}
-import uk.gov.hmrc.thirdpartydeveloperfrontend.builder.DeveloperBuilder
-import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.LocalUserIdTracker
-import play.api.test.FakeRequest
-import play.filters.csrf.CSRF
-import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.WithCSRFAddToken
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.ApplicationWithSubscriptionData
-import uk.gov.hmrc.thirdpartydeveloperfrontend.builder.SampleApplication
-import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.SubscriptionTestHelperSugar
-import uk.gov.hmrc.thirdpartydeveloperfrontend.builder.SampleSession
-import uk.gov.hmrc.apiplatform.modules.submissions.SubmissionsTestData
-import uk.gov.hmrc.apiplatform.modules.submissions.domain.models.{ResponsibleIndividualToUVerification, ResponsibleIndividualVerificationId, ResponsibleIndividualVerificationState}
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.ApplicationId
-import uk.gov.hmrc.apiplatform.modules.submissions.domain.models.Submission
 import java.time.{LocalDateTime, ZoneOffset}
+import scala.concurrent.ExecutionContext.Implicits.global
+
+import play.api.test.FakeRequest
+import play.api.test.Helpers._
+import play.filters.csrf.CSRF
+
+import uk.gov.hmrc.apiplatform.modules.submissions.SubmissionsTestData
+import uk.gov.hmrc.apiplatform.modules.submissions.domain.models.{
+  ResponsibleIndividualToUVerification,
+  ResponsibleIndividualVerificationId,
+  ResponsibleIndividualVerificationState,
+  Submission
+}
+import uk.gov.hmrc.apiplatform.modules.submissions.services.mocks.ResponsibleIndividualVerificationServiceMockModule
+import uk.gov.hmrc.apiplatform.modules.submissions.views.html.{
+  ResponsibleIndividualAcceptedView,
+  ResponsibleIndividualDeclinedView,
+  ResponsibleIndividualErrorView,
+  VerifyResponsibleIndividualView
+}
+import uk.gov.hmrc.thirdpartydeveloperfrontend.builder.{DeveloperBuilder, SampleApplication, SampleSession}
+import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.{BaseControllerSpec, SubscriptionTestHelperSugar}
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.{ApplicationId, ApplicationWithSubscriptionData}
+import uk.gov.hmrc.thirdpartydeveloperfrontend.mocks.connectors.ApmConnectorMockModule
+import uk.gov.hmrc.thirdpartydeveloperfrontend.mocks.service.{ApplicationActionServiceMock, ApplicationServiceMock}
+import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.WithLoggedInSession._
+import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.{LocalUserIdTracker, WithCSRFAddToken}
 
 class VerifyResponsibleIndividualControllerSpec
-  extends BaseControllerSpec
+    extends BaseControllerSpec
     with SampleSession
     with SampleApplication
     with SubscriptionTestHelperSugar
-    with WithCSRFAddToken 
+    with WithCSRFAddToken
     with DeveloperBuilder
     with LocalUserIdTracker {
 
@@ -58,13 +62,13 @@ class VerifyResponsibleIndividualControllerSpec
     val sessionParams = Seq("csrfToken" -> app.injector.instanceOf[CSRF.TokenProvider].generateToken)
 
     fetchSessionByIdReturns(sessionId, session)
-    
+
     updateUserFlowSessionsReturnsSuccessfully(sessionId)
   }
 
   trait HasAppInTestingState {
     self: HasSubscriptions with ApplicationActionServiceMock with ApplicationServiceMock =>
-      
+
     givenApplicationAction(
       ApplicationWithSubscriptionData(
         submittedApp,
@@ -78,20 +82,20 @@ class VerifyResponsibleIndividualControllerSpec
     fetchByApplicationIdReturns(appId, submittedApp)
   }
 
-  trait Setup 
-    extends ApplicationServiceMock
-    with ApplicationActionServiceMock
-    with ApmConnectorMockModule
-    with ResponsibleIndividualVerificationServiceMockModule
-    with HasSessionDeveloperFlow
-    with HasSubscriptions
-    with HasAppInTestingState
-    with SubmissionsTestData {
+  trait Setup
+      extends ApplicationServiceMock
+      with ApplicationActionServiceMock
+      with ApmConnectorMockModule
+      with ResponsibleIndividualVerificationServiceMockModule
+      with HasSessionDeveloperFlow
+      with HasSubscriptions
+      with HasAppInTestingState
+      with SubmissionsTestData {
 
-    val verifyResponsibleIndividualView = app.injector.instanceOf[VerifyResponsibleIndividualView]
+    val verifyResponsibleIndividualView   = app.injector.instanceOf[VerifyResponsibleIndividualView]
     val responsibleIndividualAcceptedView = app.injector.instanceOf[ResponsibleIndividualAcceptedView]
     val responsibleIndividualDeclinedView = app.injector.instanceOf[ResponsibleIndividualDeclinedView]
-    val responsibleIndividualErrorView = app.injector.instanceOf[ResponsibleIndividualErrorView]
+    val responsibleIndividualErrorView    = app.injector.instanceOf[ResponsibleIndividualErrorView]
 
     val controller = new VerifyResponsibleIndividualController(
       mockErrorHandler,
@@ -108,7 +112,16 @@ class VerifyResponsibleIndividualControllerSpec
     )
 
     val code = "12345678"
-    val riVerification = ResponsibleIndividualToUVerification(ResponsibleIndividualVerificationId(code), ApplicationId.random, Submission.Id.random, 0, "App name", LocalDateTime.now(ZoneOffset.UTC), ResponsibleIndividualVerificationState.INITIAL)
+
+    val riVerification = ResponsibleIndividualToUVerification(
+      ResponsibleIndividualVerificationId(code),
+      ApplicationId.random,
+      Submission.Id.random,
+      0,
+      "App name",
+      LocalDateTime.now(ZoneOffset.UTC),
+      ResponsibleIndividualVerificationState.INITIAL
+    )
 
     val loggedInRequest = FakeRequest().withLoggedIn(controller, implicitly)(sessionId).withSession(sessionParams: _*)
   }
@@ -150,7 +163,7 @@ class VerifyResponsibleIndividualControllerSpec
       status(result) shouldBe OK
     }
 
-   "bad request when RI has not selected a radio button" in new Setup {
+    "bad request when RI has not selected a radio button" in new Setup {
       ResponsibleIndividualVerificationServiceMock.FetchResponsibleIndividualVerification.thenReturns(riVerification)
 
       val result = controller.verifyAction(code)(loggedInRequest.withCSRFToken)

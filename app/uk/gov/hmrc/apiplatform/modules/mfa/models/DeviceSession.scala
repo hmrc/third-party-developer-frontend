@@ -16,10 +16,11 @@
 
 package uk.gov.hmrc.apiplatform.modules.mfa.models
 
-import play.api.libs.json.Json
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.UserId
-
 import java.util.UUID
+
+import play.api.libs.json.Json
+
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.UserId
 
 case class DeviceSession(deviceSessionId: UUID, userId: UserId)
 

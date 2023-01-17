@@ -23,6 +23,6 @@ sealed trait APIAccessType extends EnumEntry
 object APIAccessType extends PlayEnum[APIAccessType] {
   val values = findValues
 
-  final case object PRIVATE   extends APIAccessType
-  final case object PUBLIC    extends APIAccessType
+  final case object PRIVATE extends APIAccessType
+  final case object PUBLIC  extends APIAccessType
 }

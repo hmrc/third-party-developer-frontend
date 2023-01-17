@@ -19,25 +19,27 @@ package views
 import java.time.{LocalDateTime, Period, ZoneOffset}
 import java.util.UUID
 import java.util.UUID.randomUUID
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications._
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.LoggedInState
+import scala.collection.JavaConverters._
+
 import org.jsoup.Jsoup
 import org.jsoup.nodes.Document
-import play.api.mvc.Flash
-import play.api.test.FakeRequest
-import uk.gov.hmrc.thirdpartydeveloperfrontend.utils._
-import uk.gov.hmrc.thirdpartydeveloperfrontend.builder._
 import views.helper.CommonViewSpec
 import views.html.{ClientSecretsGeneratedView, ClientSecretsView}
 
-import scala.collection.JavaConverters._
+import play.api.mvc.Flash
+import play.api.test.FakeRequest
+
+import uk.gov.hmrc.thirdpartydeveloperfrontend.builder._
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications._
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.LoggedInState
+import uk.gov.hmrc.thirdpartydeveloperfrontend.utils._
 
 class ClientSecretsSpec extends CommonViewSpec with WithCSRFAddToken with CollaboratorTracker with LocalUserIdTracker
-  with DeveloperSessionBuilder
-  with DeveloperBuilder {
+    with DeveloperSessionBuilder
+    with DeveloperBuilder {
 
   trait Setup {
-    val clientSecretsView = app.injector.instanceOf[ClientSecretsView]
+    val clientSecretsView          = app.injector.instanceOf[ClientSecretsView]
     val clientSecretsGeneratedView = app.injector.instanceOf[ClientSecretsGeneratedView]
 
     def elementExistsByText(doc: Document, elementType: String, elementText: String): Boolean = {
@@ -52,7 +54,7 @@ class ClientSecretsSpec extends CommonViewSpec with WithCSRFAddToken with Collab
   }
 
   "Client secrets page" should {
-    val request = FakeRequest().withCSRFToken
+    val request   = FakeRequest().withCSRFToken
     val developer = buildDeveloperSession(loggedInState = LoggedInState.LOGGED_IN, buildDeveloper("Test", "Test", "Test", None))
 
     val clientSecret1 = ClientSecret(randomUUID.toString, "", LocalDateTime.now(ZoneOffset.UTC))
@@ -79,7 +81,7 @@ class ClientSecretsSpec extends CommonViewSpec with WithCSRFAddToken with Collab
 
     "show generate a client secret button but no delete button when the app does not have any client secrets yet" in new Setup {
       val emptyClientSecrets = Seq.empty
-      val page = clientSecretsView.render(application, emptyClientSecrets, request, developer, messagesProvider, appConfig, Flash())
+      val page               = clientSecretsView.render(application, emptyClientSecrets, request, developer, messagesProvider, appConfig, Flash())
 
       page.contentType should include("text/html")
 
@@ -90,7 +92,7 @@ class ClientSecretsSpec extends CommonViewSpec with WithCSRFAddToken with Collab
 
     "show generate another client secret button but no delete button when the app has only one client secret" in new Setup {
       val oneClientSecret = Seq(clientSecret1)
-      val page = clientSecretsView.render(application, oneClientSecret, request, developer, messagesProvider, appConfig, Flash())
+      val page            = clientSecretsView.render(application, oneClientSecret, request, developer, messagesProvider, appConfig, Flash())
 
       page.contentType should include("text/html")
 
@@ -119,12 +121,16 @@ class ClientSecretsSpec extends CommonViewSpec with WithCSRFAddToken with Collab
       val document: Document = Jsoup.parse(page.body)
       elementExistsByText(document, "a", "Copy") shouldBe false
       elementContainsText(document, "p", "Copy the client secret immediately.") shouldBe false
-      elementExistsByText(document, "p", "Your application must have at least one client secret. If you need to, you can generate a new client secret and delete old ones.") shouldBe true
+      elementExistsByText(
+        document,
+        "p",
+        "Your application must have at least one client secret. If you need to, you can generate a new client secret and delete old ones."
+      ) shouldBe true
     }
 
     "show generate another client secret button and delete button when the app has more than one client secret" in new Setup {
       val twoClientSecrets = Seq(clientSecret1, clientSecret2)
-      val page = clientSecretsView.render(application, twoClientSecrets, request, developer, messagesProvider, appConfig, Flash())
+      val page             = clientSecretsView.render(application, twoClientSecrets, request, developer, messagesProvider, appConfig, Flash())
 
       page.contentType should include("text/html")
 
@@ -135,13 +141,17 @@ class ClientSecretsSpec extends CommonViewSpec with WithCSRFAddToken with Collab
 
     "not show generate another client secret button when the app has reached the limit of 5 client secrets" in new Setup {
       val twoClientSecrets = Seq(clientSecret1, clientSecret2, clientSecret3, clientSecret4, clientSecret5)
-      val page = clientSecretsView.render(application, twoClientSecrets, request, developer, messagesProvider, appConfig, Flash())
+      val page             = clientSecretsView.render(application, twoClientSecrets, request, developer, messagesProvider, appConfig, Flash())
 
       page.contentType should include("text/html")
 
       val document: Document = Jsoup.parse(page.body)
       elementExistsByText(document, "button", "Generate another client secret") shouldBe false
-      elementExistsByText(document, "p", "You have the maximum number of client secrets for your application. You need to delete a client secret before you can generate a new one.") shouldBe true
+      elementExistsByText(
+        document,
+        "p",
+        "You have the maximum number of client secrets for your application. You need to delete a client secret before you can generate a new one."
+      ) shouldBe true
       elementContainsText(document, "a", "Delete") shouldBe true
     }
   }

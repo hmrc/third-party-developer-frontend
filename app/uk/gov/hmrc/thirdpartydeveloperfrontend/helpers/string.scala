@@ -15,9 +15,11 @@
  */
 
 package uk.gov.hmrc.thirdpartydeveloperfrontend.helpers
+
 import java.security.MessageDigest
 
 package object string {
+
   implicit class Digest(x: String) {
     def toSha256: String = MessageDigest.getInstance("SHA-256").digest(x.getBytes).map("%02x".format(_)).mkString
   }

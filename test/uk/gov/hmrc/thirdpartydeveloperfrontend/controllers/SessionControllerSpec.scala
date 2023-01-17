@@ -17,24 +17,25 @@
 package uk.gov.hmrc.thirdpartydeveloperfrontend.controllers
 
 import java.util.UUID
+import scala.concurrent.ExecutionContext.Implicits.global
+
+import play.api.test.FakeRequest
+import play.api.test.Helpers.{redirectLocation, _}
+import play.filters.csrf.CSRF.TokenProvider
 
 import uk.gov.hmrc.thirdpartydeveloperfrontend.builder.DeveloperBuilder
 import uk.gov.hmrc.thirdpartydeveloperfrontend.config.ErrorHandler
 import uk.gov.hmrc.thirdpartydeveloperfrontend.connectors.ThirdPartyDeveloperConnector
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.{LoggedInState, Session}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.mocks.service.SessionServiceMock
-import play.api.test.FakeRequest
-import play.api.test.Helpers.{redirectLocation, _}
-import play.filters.csrf.CSRF.TokenProvider
 import uk.gov.hmrc.thirdpartydeveloperfrontend.service.AuditService
-import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.WithLoggedInSession._
-
-import scala.concurrent.ExecutionContext.Implicits.global
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.LocalUserIdTracker
+import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.WithLoggedInSession._
 
 class SessionControllerSpec extends BaseControllerSpec with DeveloperBuilder with LocalUserIdTracker {
 
   trait Setup extends SessionServiceMock {
+
     val sessionController = new SessionController(
       mock[AuditService],
       sessionServiceMock,
@@ -48,16 +49,16 @@ class SessionControllerSpec extends BaseControllerSpec with DeveloperBuilder wit
   "keepAlive" should {
     "reset the session if logged in" in new Setup {
 
-      val developer = buildDeveloper()
-      val sessionId = UUID.randomUUID().toString
-      val session = Session(sessionId, developer, LoggedInState.LOGGED_IN)
+      val developer                            = buildDeveloper()
+      val sessionId                            = UUID.randomUUID().toString
+      val session                              = Session(sessionId, developer, LoggedInState.LOGGED_IN)
       val sessionParams: Seq[(String, String)] = Seq("csrfToken" -> app.injector.instanceOf[TokenProvider].generateToken)
 
       fetchSessionByIdReturns(sessionId, session)
       updateUserFlowSessionsReturnsSuccessfully(sessionId)
 
       val loggedInRequest = FakeRequest()
-        .withLoggedIn(sessionController,implicitly)(session.sessionId)
+        .withLoggedIn(sessionController, implicitly)(session.sessionId)
         .withSession(sessionParams: _*)
 
       val result = sessionController.keepAlive()(loggedInRequest)

@@ -16,18 +16,19 @@
 
 package uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.checkpages
 
-import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.{APISubscriptions, ApplicationController, ApplicationRequest}
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.{Application, ApplicationId, CheckInformation}
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.controllers.SubscriptionData
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.apidefinitions.ApiContext
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.subscriptions.ApiData
-import play.api.data.Form
-import play.api.mvc.{Action, AnyContent, Call}
-import views.html.checkpages.ApiSubscriptionsView
-
 import scala.concurrent.Future
 
+import views.html.checkpages.ApiSubscriptionsView
+
+import play.api.data.Form
+import play.api.mvc.{Action, AnyContent, Call}
+
+import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.{APISubscriptions, ApplicationController, ApplicationRequest}
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.apidefinitions.ApiContext
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.{Application, ApplicationId, CheckInformation}
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.controllers.SubscriptionData
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.subscriptions.ApiData
 
 trait ApiSubscriptionsPartialController {
   self: ApplicationController with CanUseCheckActions =>
@@ -43,10 +44,10 @@ trait ApiSubscriptionsPartialController {
   }
 
   def apiSubscriptionsAction(appId: ApplicationId): Action[AnyContent] = canUseChecksAction(appId) { implicit request =>
-    val app = request.application
+    val app              = request.application
     val subscriptionData = asSubscriptionData(request)
-    val openAccessApis = request.openAccessApis
-    val information = app.checkInformation.getOrElse(CheckInformation())
+    val openAccessApis   = request.openAccessApis
+    val information      = app.checkInformation.getOrElse(CheckInformation())
 
     // Grouped subscriptons removed API-EXAMPLE-MICROSERVICE before this code is ever executed
     def hasNonExampleSubscription(subscriptionData: SubscriptionData) =
@@ -67,7 +68,8 @@ trait ApiSubscriptionsPartialController {
       subscriptionData: SubscriptionData,
       openAccessApis: Map[ApiContext, ApiData],
       form: Option[Form[DummySubscriptionsForm]] = None
-  )(implicit request: ApplicationRequest[AnyContent]) = {
+    )(implicit request: ApplicationRequest[AnyContent]
+    ) = {
     apiSubscriptionsViewTemplate(
       app,
       subscriptionData.role,

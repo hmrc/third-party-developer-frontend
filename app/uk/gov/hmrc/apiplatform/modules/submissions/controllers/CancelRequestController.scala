@@ -16,29 +16,23 @@
 
 package uk.gov.hmrc.apiplatform.modules.submissions.controllers
 
+import java.time.{Clock, LocalDateTime}
 import javax.inject.{Inject, Singleton}
-import play.api.mvc.MessagesControllerComponents
+import scala.concurrent.{ExecutionContext, Future}
 
-import scala.concurrent.ExecutionContext
-import uk.gov.hmrc.thirdpartydeveloperfrontend.config.ApplicationConfig
-import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.ApplicationController
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.ApplicationId
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.DeleteApplicationByCollaborator
 import play.api.data.Form
+import play.api.libs.crypto.CookieSigner
+import play.api.mvc.{MessagesControllerComponents, Result}
+
 import uk.gov.hmrc.apiplatform.modules.common.services.EitherTHelper
 import uk.gov.hmrc.apiplatform.modules.submissions.services.SubmissionService
-import play.api.mvc.Result
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.controllers.BadRequestWithErrorMessage
-import uk.gov.hmrc.thirdpartydeveloperfrontend.service.SessionService
-import uk.gov.hmrc.thirdpartydeveloperfrontend.service.ApplicationActionService
-import uk.gov.hmrc.thirdpartydeveloperfrontend.service.ApplicationService
-import play.api.libs.crypto.CookieSigner
-import uk.gov.hmrc.thirdpartydeveloperfrontend.config.ErrorHandler
 import uk.gov.hmrc.apiplatform.modules.submissions.views.html.{CancelledRequestForProductionCredentialsView, ConfirmCancelRequestForProductionCredentialsView}
+import uk.gov.hmrc.thirdpartydeveloperfrontend.config.{ApplicationConfig, ErrorHandler}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.connectors.ThirdPartyApplicationProductionConnector
-
-import java.time.{Clock, LocalDateTime}
-import scala.concurrent.Future
+import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.ApplicationController
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.{ApplicationId, DeleteApplicationByCollaborator}
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.controllers.BadRequestWithErrorMessage
+import uk.gov.hmrc.thirdpartydeveloperfrontend.service.{ApplicationActionService, ApplicationService, SessionService}
 
 object CancelRequestController {
   case class DummyForm(dummy: String = "dummy")
@@ -58,31 +52,29 @@ object CancelRequestController {
 
 @Singleton
 class CancelRequestController @Inject() (
-  val errorHandler: ErrorHandler,
-  val cookieSigner: CookieSigner,
-  val sessionService: SessionService,
-  val applicationActionService: ApplicationActionService,
-  val applicationService: ApplicationService,
-  mcc: MessagesControllerComponents,
-  val submissionService: SubmissionService,
-  productionApplicationConnector: ThirdPartyApplicationProductionConnector,
-  confirmCancelRequestForProductionCredentialsView: ConfirmCancelRequestForProductionCredentialsView,
-  cancelledRequestForProductionCredentialsView: CancelledRequestForProductionCredentialsView,
-  clock: Clock
-)
-(
-  implicit val ec: ExecutionContext,
-  val appConfig: ApplicationConfig
-) extends ApplicationController(mcc)
-  with EitherTHelper[String]
-  with SubmissionActionBuilders {
-  
+    val errorHandler: ErrorHandler,
+    val cookieSigner: CookieSigner,
+    val sessionService: SessionService,
+    val applicationActionService: ApplicationActionService,
+    val applicationService: ApplicationService,
+    mcc: MessagesControllerComponents,
+    val submissionService: SubmissionService,
+    productionApplicationConnector: ThirdPartyApplicationProductionConnector,
+    confirmCancelRequestForProductionCredentialsView: ConfirmCancelRequestForProductionCredentialsView,
+    cancelledRequestForProductionCredentialsView: CancelledRequestForProductionCredentialsView,
+    clock: Clock
+  )(implicit val ec: ExecutionContext,
+    val appConfig: ApplicationConfig
+  ) extends ApplicationController(mcc)
+    with EitherTHelper[String]
+    with SubmissionActionBuilders {
+
   import cats.implicits._
   import cats.instances.future.catsStdInstancesForFuture
   import SubmissionActionBuilders.ApplicationStateFilter
 
-  private val exec = ec
-  private val ET = new EitherTHelper[Result] { implicit val ec: ExecutionContext = exec }
+  private val exec   = ec
+  private val ET     = new EitherTHelper[Result] { implicit val ec: ExecutionContext = exec }
   private val failed = (err: String) => BadRequestWithErrorMessage(err)
 
   def cancelRequestForProductionCredentialsPage(appId: ApplicationId) = withApplicationSubmission(ApplicationStateFilter.notProduction)(appId) { implicit request =>
@@ -91,30 +83,31 @@ class CancelRequestController @Inject() (
 
   def cancelRequestForProductionCredentialsAction(appId: ApplicationId) = withApplicationSubmission(ApplicationStateFilter.notProduction)(appId) { implicit request =>
     lazy val goBackToRegularPage =
-      if(request.submissionRequest.extSubmission.submission.status.isAnsweredCompletely) {
+      if (request.submissionRequest.extSubmission.submission.status.isAnsweredCompletely) {
         Redirect(uk.gov.hmrc.apiplatform.modules.submissions.controllers.routes.CheckAnswersController.checkAnswersPage(appId))
       } else {
         Redirect(uk.gov.hmrc.apiplatform.modules.submissions.controllers.routes.ProdCredsChecklistController.productionCredentialsChecklistPage(appId))
       }
 
     val isValidSubmit: (String) => Boolean = (s) => s == "cancel-request" || s == "dont-cancel-request"
-    val formValues = request.body.asFormUrlEncoded.get.filterNot(_._1 == "csrfToken")
-    val reasons = "DevHub user cancelled request for production credentials"
-    val instigator = request.userId
-    val deleteRequest = DeleteApplicationByCollaborator(instigator, reasons, LocalDateTime.now(clock))
+    val formValues                         = request.body.asFormUrlEncoded.get.filterNot(_._1 == "csrfToken")
+    val reasons                            = "DevHub user cancelled request for production credentials"
+    val instigator                         = request.userId
+    val deleteRequest                      = DeleteApplicationByCollaborator(instigator, reasons, LocalDateTime.now(clock))
 
-    val x = (
-      for {
-        submitAction           <- ET.fromOption(
-                                    formValues.get("submit-action")
-                                      .flatMap(_.headOption)
-                                      .filter(isValidSubmit), 
-                                    failed("Bad form data")
-                                  )
-        cancelAction           <- ET.cond(submitAction == "cancel-request", submitAction, goBackToRegularPage )
-        _                      <- ET.liftF(productionApplicationConnector.applicationUpdate(appId, deleteRequest))
-      } yield Ok(cancelledRequestForProductionCredentialsView(request.application.name))
-    )
+    val x =
+      (
+        for {
+          submitAction <- ET.fromOption(
+                            formValues.get("submit-action")
+                              .flatMap(_.headOption)
+                              .filter(isValidSubmit),
+                            failed("Bad form data")
+                          )
+          cancelAction <- ET.cond(submitAction == "cancel-request", submitAction, goBackToRegularPage)
+          _            <- ET.liftF(productionApplicationConnector.applicationUpdate(appId, deleteRequest))
+        } yield Ok(cancelledRequestForProductionCredentialsView(request.application.name))
+      )
     x.fold[Result](identity, identity)
   }
 }

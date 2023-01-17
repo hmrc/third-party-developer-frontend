@@ -16,18 +16,20 @@
 
 package views
 
-import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.RegistrationForm
 import org.jsoup.Jsoup
-import play.api.test.FakeRequest
-import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.ViewHelpers._
-import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.WithCSRFAddToken
 import views.helper.CommonViewSpec
 import views.html.RegistrationView
+
+import play.api.test.FakeRequest
+
+import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.RegistrationForm
+import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.ViewHelpers._
+import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.WithCSRFAddToken
 
 class RegistrationSpec extends CommonViewSpec with WithCSRFAddToken {
   "Registration page" should {
     val registrationView = app.injector.instanceOf[RegistrationView]
-    val request = FakeRequest().withCSRFToken
+    val request          = FakeRequest().withCSRFToken
 
     "render with no errors when the form is valid" in {
       val page = registrationView.render(RegistrationForm.form, request, messagesProvider, appConfig)

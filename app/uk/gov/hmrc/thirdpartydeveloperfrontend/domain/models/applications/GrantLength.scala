@@ -19,13 +19,13 @@ package uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications
 import java.time.Period
 
 object GrantLength {
-  val MONTH: Period = Period.ofDays(30)
-  val THREE_MONTHS: Period = Period.ofDays(90)
-  val SIX_MONTHS: Period = Period.ofDays(180)
-  val ONE_YEAR: Period = Period.ofDays(365)
+  val MONTH: Period           = Period.ofDays(30)
+  val THREE_MONTHS: Period    = Period.ofDays(90)
+  val SIX_MONTHS: Period      = Period.ofDays(180)
+  val ONE_YEAR: Period        = Period.ofDays(365)
   val EIGHTEEN_MONTHS: Period = Period.ofDays(547)
-  val THREE_YEARS: Period = Period.ofDays(1095)
-  val FIVE_YEARS: Period = Period.ofDays(1825)
-  val TEN_YEARS: Period = Period.ofDays(3650)
-  val HUNDRED_YEARS: Period = Period.ofDays(36500)
+  val THREE_YEARS: Period     = Period.ofDays(1095)
+  val FIVE_YEARS: Period      = Period.ofDays(1825)
+  val TEN_YEARS: Period       = Period.ofDays(3650)
+  val HUNDRED_YEARS: Period   = Period.ofDays(36500)
 }

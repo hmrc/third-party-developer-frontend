@@ -16,8 +16,9 @@
 
 package uk.gov.hmrc.thirdpartydeveloperfrontend.config
 
-import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.BaseControllerSpec
 import play.api.Configuration
+
+import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.BaseControllerSpec
 
 class FraudPreventionConfigProviderSpec extends BaseControllerSpec {
 
@@ -25,7 +26,7 @@ class FraudPreventionConfigProviderSpec extends BaseControllerSpec {
 
     "throw exception when there is no app config setting present" in {
 
-      val testConfig = Configuration.from(Map("fraudPreventionLink.enabled" -> "testval" ))
+      val testConfig = Configuration.from(Map("fraudPreventionLink.enabled" -> "testval"))
 
       intercept[RuntimeException] {
         new FraudPreventionConfigProvider(testConfig).get().enabled
@@ -35,10 +36,9 @@ class FraudPreventionConfigProviderSpec extends BaseControllerSpec {
 
     "be false when fraudPreventionLink.linkEnabled is false" in {
       val fraudPreventionApis = List("vat-api")
-      val uri = "uri"
-      val testConfig = Configuration.from(Map("fraudPreventionLink.enabled" -> "false",
-        "fraudPreventionLink.apisWithFraudPrevention" -> fraudPreventionApis,
-        "fraudPreventionLink.uri" -> uri))
+      val uri                 = "uri"
+      val testConfig          =
+        Configuration.from(Map("fraudPreventionLink.enabled" -> "false", "fraudPreventionLink.apisWithFraudPrevention" -> fraudPreventionApis, "fraudPreventionLink.uri" -> uri))
 
       val underTest = new FraudPreventionConfigProvider(testConfig).get()
 

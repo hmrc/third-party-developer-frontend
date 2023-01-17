@@ -16,31 +16,30 @@
 
 package uk.gov.hmrc.thirdpartydeveloperfrontend.controllers
 
-import uk.gov.hmrc.thirdpartydeveloperfrontend.builder.DeveloperBuilder
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.ApplicationUpdateSuccessful
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.{TermsOfUseVersion, applications}
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications._
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.Environment.{PRODUCTION, SANDBOX}
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.CollaboratorRole.ADMINISTRATOR
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.{LoggedInState, Session}
-import uk.gov.hmrc.thirdpartydeveloperfrontend.mocks.service.{ApplicationActionServiceMock, ApplicationServiceMock, SessionServiceMock, TermsOfUseVersionServiceMock}
+import java.time.format.DateTimeFormatter
+import java.time.{LocalDateTime, ZoneOffset}
+import scala.concurrent.ExecutionContext.Implicits.global
+import scala.concurrent.Future
+import scala.concurrent.Future.successful
+
 import org.mockito.ArgumentCaptor
+import views.html.TermsOfUseView
+
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
 import play.filters.csrf.CSRF.TokenProvider
 import uk.gov.hmrc.http.HeaderCarrier
-import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.WithCSRFAddToken
+
+import uk.gov.hmrc.thirdpartydeveloperfrontend.builder.DeveloperBuilder
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.ApplicationUpdateSuccessful
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.CollaboratorRole.ADMINISTRATOR
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.Environment.{PRODUCTION, SANDBOX}
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications._
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.{DeveloperSession, LoggedInState, Session}
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.{TermsOfUseVersion, applications}
+import uk.gov.hmrc.thirdpartydeveloperfrontend.mocks.service.{ApplicationActionServiceMock, ApplicationServiceMock, SessionServiceMock, TermsOfUseVersionServiceMock}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.WithLoggedInSession._
-import views.html.TermsOfUseView
-
-import scala.concurrent.ExecutionContext.Implicits.global
-import scala.concurrent.Future
-import scala.concurrent.Future.successful
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.DeveloperSession
-import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.LocalUserIdTracker
-
-import java.time.format.DateTimeFormatter
-import java.time.{LocalDateTime, ZoneOffset}
+import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.{LocalUserIdTracker, WithCSRFAddToken}
 
 class TermsOfUseSpec
     extends BaseControllerSpec
@@ -64,13 +63,13 @@ class TermsOfUseSpec
     )
 
     val loggedInDeveloper = buildDeveloper()
-    val sessionId = "sessionId"
-    val session = Session(sessionId, loggedInDeveloper, LoggedInState.LOGGED_IN)
-    val sessionParams = Seq("csrfToken" -> app.injector.instanceOf[TokenProvider].generateToken)
-    val developerSession = DeveloperSession(session)
+    val sessionId         = "sessionId"
+    val session           = Session(sessionId, loggedInDeveloper, LoggedInState.LOGGED_IN)
+    val sessionParams     = Seq("csrfToken" -> app.injector.instanceOf[TokenProvider].generateToken)
+    val developerSession  = DeveloperSession(session)
 
     val loggedOutRequest = FakeRequest().withSession(sessionParams: _*)
-    val loggedInRequest = FakeRequest().withLoggedIn(underTest, implicitly)(sessionId).withSession(sessionParams: _*)
+    val loggedInRequest  = FakeRequest().withLoggedIn(underTest, implicitly)(sessionId).withSession(sessionParams: _*)
 
     val appId = ApplicationId("1234")
 
@@ -81,7 +80,7 @@ class TermsOfUseSpec
         environment: Environment = PRODUCTION,
         checkInformation: Option[CheckInformation] = None,
         access: Access = Standard()
-    ) = {
+      ) = {
       val application = Application(
         appId,
         ClientId("clientId"),
@@ -113,7 +112,7 @@ class TermsOfUseSpec
       when(underTest.appConfig.thirdPartyDeveloperFrontendUrl).thenReturn("http://tpdf")
 
       val request = FakeRequest()
-      val result = underTest.termsOfUsePartial()(request)
+      val result  = underTest.termsOfUsePartial()(request)
 
       status(result) shouldBe OK
     }
@@ -125,22 +124,22 @@ class TermsOfUseSpec
       val checkInformation = CheckInformation(termsOfUseAgreements = List.empty)
       returnTermsOfUseVersionForApplication
       givenApplicationExists(checkInformation = Some(checkInformation))
-      val result = addToken(underTest.termsOfUse(appId))(loggedInRequest)
+      val result           = addToken(underTest.termsOfUse(appId))(loggedInRequest)
       status(result) shouldBe OK
       contentAsString(result) should include("Agree to our terms of use")
       contentAsString(result) should not include "Terms of use accepted on"
     }
 
     "render the page for an administrator on a standard production app when the ToU have been agreed" in new Setup {
-      val email = "email@exmaple.com"
-      val timeStamp = LocalDateTime.now(ZoneOffset.UTC)
+      val email             = "email@exmaple.com"
+      val timeStamp         = LocalDateTime.now(ZoneOffset.UTC)
       val expectedTimeStamp = DateTimeFormatter.ofPattern("dd MMMM yyyy").format(timeStamp)
-      val version = "1.0"
+      val version           = "1.0"
 
       val checkInformation = CheckInformation(termsOfUseAgreements = List(TermsOfUseAgreement(email, timeStamp, version)))
       returnTermsOfUseVersionForApplication
       givenApplicationExists(checkInformation = Some(checkInformation))
-      val result = addToken(underTest.termsOfUse(appId))(loggedInRequest)
+      val result           = addToken(underTest.termsOfUse(appId))(loggedInRequest)
       status(result) shouldBe OK
       contentAsString(result) should include("Terms of use")
       contentAsString(result) should include(s"Terms of use accepted on $expectedTimeStamp by $email.")
@@ -155,26 +154,26 @@ class TermsOfUseSpec
     "return the ROPC page for a ROPC app" in new Setup {
       givenApplicationExists(access = ROPC())
       val result = addToken(underTest.termsOfUse(appId))(loggedInRequest)
-      status(result) shouldBe BAD_REQUEST //FORBIDDEN
+      status(result) shouldBe BAD_REQUEST // FORBIDDEN
     }
 
     "return the privileged page for a privileged app" in new Setup {
       givenApplicationExists(access = Privileged())
       val result = addToken(underTest.termsOfUse(appId))(loggedInRequest)
-      status(result) shouldBe BAD_REQUEST //FORBIDDEN
+      status(result) shouldBe BAD_REQUEST // FORBIDDEN
     }
   }
 
   "agreeTermsOfUse" should {
 
     "record the terms of use agreement for an administrator on a standard production app" in new Setup {
-      val application = givenApplicationExists()
+      val application                              = givenApplicationExists()
       returnLatestTermsOfUseVersion
       val captor: ArgumentCaptor[CheckInformation] = ArgumentCaptor.forClass(classOf[CheckInformation])
       when(underTest.applicationService.updateCheckInformation(eqTo(application), captor.capture())(*)).thenReturn(Future.successful(ApplicationUpdateSuccessful))
 
       val request = loggedInRequest.withFormUrlEncodedBody("termsOfUseAgreed" -> "true")
-      val result = addToken(underTest.agreeTermsOfUse(appId))(request)
+      val result  = addToken(underTest.agreeTermsOfUse(appId))(request)
       status(result) shouldBe SEE_OTHER
       redirectLocation(result) shouldBe Some("/developer/applications/1234/details")
 
@@ -196,7 +195,7 @@ class TermsOfUseSpec
       givenApplicationExists(checkInformation = Some(checkInformation))
 
       val request = loggedInRequest.withFormUrlEncodedBody("termsOfUseAgreed" -> "true")
-      val result = addToken(underTest.agreeTermsOfUse(appId))(request)
+      val result  = addToken(underTest.agreeTermsOfUse(appId))(request)
       status(result) shouldBe BAD_REQUEST
       verify(underTest.applicationService, never).updateCheckInformation(*, *)(*)
     }
@@ -204,15 +203,15 @@ class TermsOfUseSpec
     "return a bad request for a ROPC app" in new Setup {
       givenApplicationExists(access = ROPC())
       val request = loggedInRequest.withFormUrlEncodedBody("termsOfUseAgreed" -> "true")
-      val result = addToken(underTest.agreeTermsOfUse(appId))(request)
-      status(result) shouldBe BAD_REQUEST //FORBIDDEN
+      val result  = addToken(underTest.agreeTermsOfUse(appId))(request)
+      status(result) shouldBe BAD_REQUEST // FORBIDDEN
     }
 
     "return a bad request for a Privileged app" in new Setup {
       givenApplicationExists(access = Privileged())
       val request = loggedInRequest.withFormUrlEncodedBody("termsOfUseAgreed" -> "true")
-      val result = addToken(underTest.agreeTermsOfUse(appId))(request)
-      status(result) shouldBe BAD_REQUEST //FORBIDDEN
+      val result  = addToken(underTest.agreeTermsOfUse(appId))(request)
+      status(result) shouldBe BAD_REQUEST // FORBIDDEN
     }
   }
 }

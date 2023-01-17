@@ -16,31 +16,32 @@
 
 package uk.gov.hmrc.thirdpartydeveloperfrontend.controllers
 
+import scala.concurrent.ExecutionContext.Implicits.global
+import scala.concurrent.Future
+import scala.concurrent.Future.successful
+
+import org.jsoup.Jsoup
+import org.mockito.ArgumentCaptor
+import views.html.{SupportEnquiryView, SupportThankyouView}
+
+import play.api.mvc.{Request, Result}
+import play.api.test.FakeRequest
+import play.api.test.Helpers._
+import play.filters.csrf.CSRF.TokenProvider
+
 import uk.gov.hmrc.thirdpartydeveloperfrontend.builder.DeveloperBuilder
 import uk.gov.hmrc.thirdpartydeveloperfrontend.config.ErrorHandler
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.connectors.TicketCreated
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.{LoggedInState, Session}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.mocks.service.SessionServiceMock
-import org.jsoup.Jsoup
-import org.mockito.ArgumentCaptor
-import play.api.mvc.{Request, Result}
-import play.api.test.FakeRequest
-import play.api.test.Helpers._
-import play.filters.csrf.CSRF.TokenProvider
 import uk.gov.hmrc.thirdpartydeveloperfrontend.service.DeskproService
-import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.WithCSRFAddToken
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.WithLoggedInSession._
-import views.html.{SupportEnquiryView, SupportThankyouView}
-
-import scala.concurrent.ExecutionContext.Implicits.global
-import scala.concurrent.Future
-import scala.concurrent.Future.successful
-import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.LocalUserIdTracker
+import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.{LocalUserIdTracker, WithCSRFAddToken}
 
 class SupportSpec extends BaseControllerSpec with WithCSRFAddToken with DeveloperBuilder with LocalUserIdTracker {
 
   trait Setup extends SessionServiceMock {
-    val supportEnquiryView = app.injector.instanceOf[SupportEnquiryView]
+    val supportEnquiryView  = app.injector.instanceOf[SupportEnquiryView]
     val supportThankYouView = app.injector.instanceOf[SupportThankyouView]
 
     val underTest = new Support(
@@ -51,10 +52,10 @@ class SupportSpec extends BaseControllerSpec with WithCSRFAddToken with Develope
       cookieSigner,
       supportEnquiryView,
       supportThankYouView
-      )
+    )
 
     val sessionParams = Seq("csrfToken" -> app.injector.instanceOf[TokenProvider].generateToken)
-    val developer = buildDeveloper(emailAddress = "thirdpartydeveloper@example.com")
+    val developer     = buildDeveloper(emailAddress = "thirdpartydeveloper@example.com")
 
     val sessionId = "sessionId"
   }
@@ -70,7 +71,7 @@ class SupportSpec extends BaseControllerSpec with WithCSRFAddToken with Develope
 
       val result = addToken(underTest.raiseSupportEnquiry())(request)
 
-      assertFullNameAndEmail(result,"John Doe", "thirdpartydeveloper@example.com")
+      assertFullNameAndEmail(result, "John Doe", "thirdpartydeveloper@example.com")
     }
 
     "support form fields are blank when not logged in" in new Setup {
@@ -92,16 +93,17 @@ class SupportSpec extends BaseControllerSpec with WithCSRFAddToken with Develope
 
       val result = addToken(underTest.raiseSupportEnquiry())(request)
 
-      assertFullNameAndEmail(result, "","")
+      assertFullNameAndEmail(result, "", "")
     }
 
     "submit request with name, email & comments from form" in new Setup {
       val request = FakeRequest()
         .withSession(sessionParams: _*)
         .withFormUrlEncodedBody(
-          "fullname" -> "Peter Smith",
+          "fullname"     -> "Peter Smith",
           "emailaddress" -> "peter@example.com",
-          "comments" -> "A+++, good seller, would buy again")
+          "comments"     -> "A+++, good seller, would buy again"
+        )
 
       val captor: ArgumentCaptor[SupportEnquiryForm] = ArgumentCaptor.forClass(classOf[SupportEnquiryForm])
       when(underTest.deskproService.submitSupportEnquiry(captor.capture())(any[Request[AnyRef]], *)).thenReturn(successful(TicketCreated))
@@ -121,9 +123,10 @@ class SupportSpec extends BaseControllerSpec with WithCSRFAddToken with Develope
         .withSession(sessionParams: _*)
         .withFormUrlEncodedBody(
           "fullname" -> "Peter Smith",
-          "comments" -> "A+++, good seller, would buy again")
+          "comments" -> "A+++, good seller, would buy again"
+        )
 
-     val result = addToken(underTest.submitSupportEnquiry())(request)
+      val result = addToken(underTest.submitSupportEnquiry())(request)
       status(result) shouldBe 400
     }
   }

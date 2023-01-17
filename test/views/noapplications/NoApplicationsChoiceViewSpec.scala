@@ -17,24 +17,26 @@
 package views.noapplications
 
 import org.jsoup.Jsoup
+import views.helper.CommonViewSpec
+import views.html.noapplications.NoApplicationsChoiceView
+
 import play.api.mvc.AnyContentAsEmpty
 import play.api.test.FakeRequest
+
 import uk.gov.hmrc.thirdpartydeveloperfrontend.builder.{DeveloperBuilder, DeveloperSessionBuilder}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.noapplications.NoApplications.NoApplicationsChoiceForm
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.LoggedInState
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.ViewHelpers._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.{LocalUserIdTracker, WithCSRFAddToken}
-import views.helper.CommonViewSpec
-import views.html.noapplications.NoApplicationsChoiceView
 
-class NoApplicationsChoiceViewSpec extends CommonViewSpec with WithCSRFAddToken with LocalUserIdTracker with DeveloperSessionBuilder with DeveloperBuilder{
+class NoApplicationsChoiceViewSpec extends CommonViewSpec with WithCSRFAddToken with LocalUserIdTracker with DeveloperSessionBuilder with DeveloperBuilder {
 
   trait Setup {
     implicit val request: FakeRequest[AnyContentAsEmpty.type] = FakeRequest().withCSRFToken
 
     val noApplicationsChoiceView: NoApplicationsChoiceView = app.injector.instanceOf[NoApplicationsChoiceView]
-    val developerSession = buildDeveloperSession(loggedInState = LoggedInState.LOGGED_IN, buildDeveloper("email@example.com", "Joe", "Bloggs", None))
-    
+    val developerSession                                   = buildDeveloperSession(loggedInState = LoggedInState.LOGGED_IN, buildDeveloper("email@example.com", "Joe", "Bloggs", None))
+
   }
 
   "No application page" should {
@@ -63,7 +65,7 @@ class NoApplicationsChoiceViewSpec extends CommonViewSpec with WithCSRFAddToken 
 
     "render with errors" in new Setup {
       val formWithErrors = NoApplicationsChoiceForm.form.withError("no.applications.choice.error.required.field", "Please select an option")
-      val page = noApplicationsChoiceView.render(formWithErrors, request, developerSession, messagesProvider, appConfig)
+      val page           = noApplicationsChoiceView.render(formWithErrors, request, developerSession, messagesProvider, appConfig)
 
       page.contentType should include("text/html")
 

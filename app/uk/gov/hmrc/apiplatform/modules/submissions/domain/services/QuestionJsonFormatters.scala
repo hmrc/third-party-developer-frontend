@@ -25,30 +25,30 @@ trait QuestionJsonFormatters extends StatementJsonFormatters with MapJsonFormatt
 
   implicit val jsonFormatWording = Json.valueFormat[Wording]
 
-  implicit val markWrites : Writes[Mark] = Writes {
+  implicit val markWrites: Writes[Mark] = Writes {
     case Fail => JsString("fail")
     case Warn => JsString("warn")
     case Pass => JsString("pass")
   }
-  
-  implicit val markReads : Reads[Mark] = Reads {
+
+  implicit val markReads: Reads[Mark] = Reads {
     case JsString("fail") => JsSuccess(Fail)
     case JsString("warn") => JsSuccess(Warn)
     case JsString("pass") => JsSuccess(Pass)
-    case _ => JsError("Failed to parse Mark value")
+    case _                => JsError("Failed to parse Mark value")
   }
 
-  implicit val keyReadsQuestionId: KeyReads[Question.Id] = key => JsSuccess(Question.Id(key))
+  implicit val keyReadsQuestionId: KeyReads[Question.Id]   = key => JsSuccess(Question.Id(key))
   implicit val keyWritesQuestionId: KeyWrites[Question.Id] = _.value
 
-  implicit val keyReadsPossibleAnswer: KeyReads[PossibleAnswer] = key => JsSuccess(PossibleAnswer(key))
+  implicit val keyReadsPossibleAnswer: KeyReads[PossibleAnswer]   = key => JsSuccess(PossibleAnswer(key))
   implicit val keyWritesPossibleAnswer: KeyWrites[PossibleAnswer] = _.value
-  
+
   implicit val jsonListMapKV = listMapReads[PossibleAnswer, Mark]
 
-  implicit val jsonFormatPossibleAnswer = Json.valueFormat[PossibleAnswer]
-  implicit val jsonFormatTextQuestion = Json.format[TextQuestion]
-  implicit val jsonFormatYesNoQuestion = Json.format[YesNoQuestion]
+  implicit val jsonFormatPossibleAnswer      = Json.valueFormat[PossibleAnswer]
+  implicit val jsonFormatTextQuestion        = Json.format[TextQuestion]
+  implicit val jsonFormatYesNoQuestion       = Json.format[YesNoQuestion]
   implicit val jsonFormatChooseOneOfQuestion = Json.format[ChooseOneOfQuestion]
   implicit val jsonFormatMultiChoiceQuestion = Json.format[MultiChoiceQuestion]
   implicit val jsonFormatAcknowledgementOnly = Json.format[AcknowledgementOnly]

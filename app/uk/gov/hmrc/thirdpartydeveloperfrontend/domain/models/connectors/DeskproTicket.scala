@@ -16,11 +16,12 @@
 
 package uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.connectors
 
-import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers._
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.apidefinitions.ApiVersion
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.{ApplicationId, Environment, CollaboratorRole}
 import play.api.libs.json.Json
 import play.api.mvc.Request
+
+import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers._
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.apidefinitions.ApiVersion
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.{ApplicationId, CollaboratorRole, Environment}
 
 case class DeskproTicket(
     name: String,
@@ -33,7 +34,7 @@ case class DeskproTicket(
     areaOfTax: String = "",
     sessionId: String = "",
     javascriptEnabled: String = ""
-)
+  )
 
 object DeskproTicket extends FieldTransformer {
   implicit val format = Json.format[DeskproTicket]
@@ -79,11 +80,11 @@ object DeskproTicket extends FieldTransformer {
       applicationId: ApplicationId,
       apiName: String,
       apiVersion: ApiVersion
-  ): DeskproTicket = {
+    ): DeskproTicket = {
     val message = s"""I '$requestorEmail' want my application '$applicationName'
-                  |identified by '${applicationId.value}'
-                  |to be subscribed to the API '$apiName'
-                  |with version '${apiVersion.value}'""".stripMargin
+                     |identified by '${applicationId.value}'
+                     |to be subscribed to the API '$apiName'
+                     |with version '${apiVersion.value}'""".stripMargin
 
     DeskproTicket(requestorName, requestorEmail, "Request to subscribe to an API", message, routes.SubscriptionsController.manageSubscriptions(applicationId).url)
   }
@@ -95,11 +96,11 @@ object DeskproTicket extends FieldTransformer {
       applicationId: ApplicationId,
       apiName: String,
       apiVersion: ApiVersion
-  ): DeskproTicket = {
+    ): DeskproTicket = {
     val message = s"""I '$requestorEmail' want my application '$applicationName'
-                  |identified by '${applicationId.value}'
-                  |to be unsubscribed from the API '$apiName'
-                  |with version '${apiVersion.value}'""".stripMargin
+                     |identified by '${applicationId.value}'
+                     |to be unsubscribed from the API '$apiName'
+                     |with version '${apiVersion.value}'""".stripMargin
 
     DeskproTicket(requestorName, requestorEmail, "Request to unsubscribe from an API", message, routes.SubscriptionsController.manageSubscriptions(applicationId).url)
   }
@@ -111,11 +112,11 @@ object DeskproTicket extends FieldTransformer {
       environment: Environment,
       applicationName: String,
       applicationId: ApplicationId
-  ): DeskproTicket = {
+    ): DeskproTicket = {
 
     val actor = role match {
       case CollaboratorRole.ADMINISTRATOR => "an administrator"
-      case _                  => "a developer"
+      case _                              => "a developer"
     }
 
     val message =
@@ -158,7 +159,13 @@ object DeskproTicket extends FieldTransformer {
     DeskproTicket(name, email, "Request for 2SV to be removed", message, routes.UserLoginAccount.confirm2SVHelp.url)
   }
 
-  def createForRequestChangeOfProductionApplicationName(requestorName: String, requestorEmail: String, previousApplicationName: String, newApplicationName: String, applicationId: ApplicationId): DeskproTicket = {
+  def createForRequestChangeOfProductionApplicationName(
+      requestorName: String,
+      requestorEmail: String,
+      previousApplicationName: String,
+      newApplicationName: String,
+      applicationId: ApplicationId
+    ): DeskproTicket = {
     val message =
       s"""$requestorName wants to change the application name for $applicationId from $previousApplicationName to $newApplicationName.
          |Check if the new application name meets the naming guidelines and update Gatekeeper within 2 working days.
@@ -172,7 +179,7 @@ object DeskproTicket extends FieldTransformer {
       message,
       uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.routes.Details.requestChangeOfAppName(applicationId).url
     )
-  }  
+  }
 }
 
 sealed trait TicketResult

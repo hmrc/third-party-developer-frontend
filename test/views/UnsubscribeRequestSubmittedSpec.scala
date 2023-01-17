@@ -16,31 +16,34 @@
 
 package views
 
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.apidefinitions.ApiVersion
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications._
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.LoggedInState
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.controllers.ApplicationViewModel
-import org.jsoup.Jsoup
-import play.api.test.FakeRequest
-import uk.gov.hmrc.thirdpartydeveloperfrontend.builder.{DeveloperBuilder, DeveloperSessionBuilder}
-
 import java.time.{LocalDateTime, ZoneOffset}
-import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.ViewHelpers._
-import uk.gov.hmrc.thirdpartydeveloperfrontend.utils._
+
+import org.jsoup.Jsoup
 import views.helper.CommonViewSpec
 import views.html.UnsubscribeRequestSubmittedView
 
-class UnsubscribeRequestSubmittedSpec extends CommonViewSpec with WithCSRFAddToken with CollaboratorTracker with LocalUserIdTracker with DeveloperSessionBuilder with DeveloperBuilder {
+import play.api.test.FakeRequest
+
+import uk.gov.hmrc.thirdpartydeveloperfrontend.builder.{DeveloperBuilder, DeveloperSessionBuilder}
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.apidefinitions.ApiVersion
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications._
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.controllers.ApplicationViewModel
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.LoggedInState
+import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.ViewHelpers._
+import uk.gov.hmrc.thirdpartydeveloperfrontend.utils._
+
+class UnsubscribeRequestSubmittedSpec extends CommonViewSpec with WithCSRFAddToken with CollaboratorTracker with LocalUserIdTracker with DeveloperSessionBuilder
+    with DeveloperBuilder {
   "Unsubscribe request submitted page" should {
     "render with no errors" in {
 
       val request = FakeRequest().withCSRFToken
 
-      val appId = ApplicationId("1234")
-      val apiName = "Test API"
-      val apiVersion = ApiVersion("1.0")
-      val clientId = ClientId("clientId123")
-      val developer = buildDeveloperSession(loggedInState = LoggedInState.LOGGED_IN, buildDeveloperWithRandomId("email@example.com", "First Name", "Last Name", None ))
+      val appId       = ApplicationId("1234")
+      val apiName     = "Test API"
+      val apiVersion  = ApiVersion("1.0")
+      val clientId    = ClientId("clientId123")
+      val developer   = buildDeveloperSession(loggedInState = LoggedInState.LOGGED_IN, buildDeveloperWithRandomId("email@example.com", "First Name", "Last Name", None))
       val application = Application(
         appId,
         clientId,
@@ -59,7 +62,16 @@ class UnsubscribeRequestSubmittedSpec extends CommonViewSpec with WithCSRFAddTok
       val unsubscribeRequestSubmittedView = app.injector.instanceOf[UnsubscribeRequestSubmittedView]
 
       val page =
-        unsubscribeRequestSubmittedView.render(ApplicationViewModel(application, false, false), apiName, apiVersion, request, developer, messagesProvider, appConfig, "subscriptions")
+        unsubscribeRequestSubmittedView.render(
+          ApplicationViewModel(application, false, false),
+          apiName,
+          apiVersion,
+          request,
+          developer,
+          messagesProvider,
+          appConfig,
+          "subscriptions"
+        )
       page.contentType should include("text/html")
 
       val document = Jsoup.parse(page.body)

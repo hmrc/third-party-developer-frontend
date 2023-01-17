@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 HM Revenue & Customs
+ * Copyright 2023 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -40,10 +40,10 @@ object TestContext {
   var developer: Developer = _
 
   var sessionIdForloggedInDeveloper: String = ""
-  var sessionIdForMfaMandatingUser: String = ""
+  var sessionIdForMfaMandatingUser: String  = ""
 }
 
-class LoginSteps extends ScalaDsl with EN with Matchers with NavigationSugar with PageSugar with CustomMatchers with ComponentTestDeveloperBuilder  {
+class LoginSteps extends ScalaDsl with EN with Matchers with NavigationSugar with PageSugar with CustomMatchers with ComponentTestDeveloperBuilder {
 
   implicit val webDriver: WebDriver = Env.driver
 
@@ -62,15 +62,15 @@ class LoginSteps extends ScalaDsl with EN with Matchers with NavigationSugar wit
   }
 
   Given("""^I am registered with$""") { data: DataTable =>
-    val result: Map[String,String] = data.asScalaRawMaps[String, String].head
+    val result: Map[String, String] = data.asScalaRawMaps[String, String].head
 
-    val password = result("Password")
+    val password  = result("Password")
     val developer = buildDeveloper(emailAddress = result("Email address"), firstName = result("First name"), lastName = result("Last name"))
 
     val mfaSetup = result("Mfa Setup")
 
     val authAppMfaId = authenticatorAppMfaDetails.id
-    val smsMfaId = smsMfaDetails.id
+    val smsMfaId     = smsMfaDetails.id
     mfaSetup match {
       case "AUTHENTICATOR_APP" =>
         MfaStub.setupGettingMfaSecret(developer, authAppMfaId)
@@ -81,7 +81,7 @@ class LoginSteps extends ScalaDsl with EN with Matchers with NavigationSugar wit
         MfaStub.setupSmsAccessCode(developer, smsMfaId, mobileNumber)
         MfaStub.setupVerificationOfAccessCode(developer, smsMfaId)
 
-      case _  =>
+      case _ =>
         MfaStub.setupGettingMfaSecret(developer, authAppMfaId)
         MfaStub.setupVerificationOfAccessCode(developer, authAppMfaId)
         MfaStub.stubMfaAuthAppNameChange(developer, authAppMfaId, "SomeAuthApp")
@@ -139,15 +139,14 @@ class LoginSteps extends ScalaDsl with EN with Matchers with NavigationSugar wit
     }
   }
 
-
-  Then("""^I should be sent an email with a link to reset for '(.*)'$""") { email : String =>
+  Then("""^I should be sent an email with a link to reset for '(.*)'$""") { email: String =>
     DeveloperStub.verifyResetPassword(PasswordResetRequest(email))
   }
-  
+
   Given("""^I click on a valid password reset link for code '(.*)'$""") { resetPwdCode: String =>
     val email = "bob@example.com"
     DeveloperStub.stubResetPasswordJourney(email, resetPwdCode)
-    
+
     webDriver.manage().deleteAllCookies()
     goTo(s"http://localhost:${Env.port}/developer/reset-password-link?code='$resetPwdCode'")
   }
@@ -158,22 +157,22 @@ class LoginSteps extends ScalaDsl with EN with Matchers with NavigationSugar wit
     webDriver.manage().deleteAllCookies()
     goTo(s"http://localhost:${Env.port}/developer/reset-password-link?code='$invalidResetPwdCode'")
   }
-  
-  Then( """^I am on the 'Reset Password' page with code '(.*)'$""") { resetPwdCode: String =>
+
+  Then("""^I am on the 'Reset Password' page with code '(.*)'$""") { resetPwdCode: String =>
     eventually {
-      withClue(s"Fail to be on page: 'Reset Password'")(on(ResetPasswordPage(resetPwdCode))) }
+      withClue(s"Fail to be on page: 'Reset Password'")(on(ResetPasswordPage(resetPwdCode)))
     }
-  
+  }
+
   def setupLoggedOrPartLoggedInDeveloper(developer: Developer, password: String, loggedInState: LoggedInState): String = {
     val sessionId = "sessionId_" + loggedInState.toString
 
-    val session = Session(sessionId, developer, loggedInState)
-    val userAuthenticationResponse = UserAuthenticationResponse(accessCodeRequired = false, mfaEnabled= false, session = Some(session))
+    val session                    = Session(sessionId, developer, loggedInState)
+    val userAuthenticationResponse = UserAuthenticationResponse(accessCodeRequired = false, mfaEnabled = false, session = Some(session))
 
     val mfaMandatedForUser = loggedInState == LoggedInState.PART_LOGGED_IN_ENABLING_MFA
 
-    Stubs.setupEncryptedPostRequest("/authenticate", LoginRequest(developer.email, password, mfaMandatedForUser, None),
-      OK, Json.toJson(userAuthenticationResponse).toString())
+    Stubs.setupEncryptedPostRequest("/authenticate", LoginRequest(developer.email, password, mfaMandatedForUser, None), OK, Json.toJson(userAuthenticationResponse).toString())
 
     Stubs.setupRequest(s"/session/$sessionId", OK, Json.toJson(session).toString())
     Stubs.setupDeleteRequest(s"/session/$sessionId", OK)

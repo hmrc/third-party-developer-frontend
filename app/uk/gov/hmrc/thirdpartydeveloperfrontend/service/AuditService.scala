@@ -16,19 +16,20 @@
 
 package uk.gov.hmrc.thirdpartydeveloperfrontend.service
 
-import uk.gov.hmrc.thirdpartydeveloperfrontend.config.ApplicationConfig
+import java.net.URLDecoder
+import java.nio.charset.StandardCharsets
 import javax.inject.{Inject, Singleton}
+import scala.concurrent.{ExecutionContext, Future}
+
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.play.audit.AuditExtensions.auditHeaderCarrier
 import uk.gov.hmrc.play.audit.http.connector.{AuditConnector, AuditResult}
 import uk.gov.hmrc.play.audit.model.DataEvent
 
-import scala.concurrent.{ExecutionContext, Future}
-import java.net.URLDecoder
-import java.nio.charset.StandardCharsets
+import uk.gov.hmrc.thirdpartydeveloperfrontend.config.ApplicationConfig
 
 @Singleton
-class AuditService @Inject()(auditConnector: AuditConnector, appConfig: ApplicationConfig)(implicit val ec: ExecutionContext) {
+class AuditService @Inject() (auditConnector: AuditConnector, appConfig: ApplicationConfig)(implicit val ec: ExecutionContext) {
 
   def audit(action: AuditAction, data: Map[String, String] = Map.empty)(implicit hc: HeaderCarrier): Future[AuditResult] =
     auditConnector.sendEvent(DataEvent(
@@ -39,12 +40,12 @@ class AuditService @Inject()(auditConnector: AuditConnector, appConfig: Applicat
     ))
 
   def userContext(hc: HeaderCarrier): Seq[(String, String)] = {
-    def mapHeader(oldKey: String, newKey: String): Option[(String, String)] = 
+    def mapHeader(oldKey: String, newKey: String): Option[(String, String)] =
       hc.extraHeaders.toMap
         .get(oldKey)
         .map(value => newKey -> URLDecoder.decode(value, StandardCharsets.UTF_8.toString))
 
-    val developerEmail = mapHeader("X-email-address", "developerEmail")
+    val developerEmail    = mapHeader("X-email-address", "developerEmail")
     val developerFullName = mapHeader("X-name", "developerFullName")
 
     Seq(developerEmail, developerFullName).flatten
@@ -54,70 +55,72 @@ class AuditService @Inject()(auditConnector: AuditConnector, appConfig: Applicat
 sealed trait AuditAction {
   val auditType: String
   val name: String
-  val tags: Map[String, String] = Map.empty
+  val tags: Map[String, String]    = Map.empty
   val details: Map[String, String] = Map.empty
 }
 
 object AuditAction {
 
   case class ApplicationUpliftRequestDeniedDueToInvalidCredentials(applicationId: String) extends AuditAction {
-    val name = "Application uplift to production request has been denied, due to invalid credentials"
+    val name      = "Application uplift to production request has been denied, due to invalid credentials"
     val auditType = "ApplicationUpliftRequestDeniedDueToInvalidCredentials"
+
     override val details = Map(
       "applicationId" -> applicationId
     )
   }
 
   case class PasswordChangeFailedDueToInvalidCredentials(email: String) extends AuditAction {
-    val name = "Password change request has been denied, due to invalid credentials"
+    val name      = "Password change request has been denied, due to invalid credentials"
     val auditType = "PasswordChangeFailedDueToInvalidCredentials"
+
     override val tags = Map(
       "developerEmail" -> email
     )
   }
 
   case object LoginSucceeded extends AuditAction {
-    override val name: String = "Login successful"
+    override val name: String      = "Login successful"
     override val auditType: String = "LoginSucceeded"
   }
 
   case object LoginFailedDueToInvalidEmail extends AuditAction {
-    val name = "Login failed due to invalid email address"
+    val name      = "Login failed due to invalid email address"
     val auditType = "LoginFailedDueToInvalidEmail"
   }
 
   case object LoginFailedDueToInvalidPassword extends AuditAction {
-    val name = "Login failed due to invalid password"
+    val name      = "Login failed due to invalid password"
     val auditType = "LoginFailedDueToInvalidPassword"
   }
 
   case object LoginFailedDueToInvalidAccessCode extends AuditAction {
-    val name = "Login failed due to invalid access code"
+    val name      = "Login failed due to invalid access code"
     val auditType = "LoginFailedDueToInvalidAccessCode"
   }
 
   case object LoginFailedDueToLockedAccount extends AuditAction {
-    val name = "Login failed due to locked account"
+    val name      = "Login failed due to locked account"
     val auditType = "LoginFailedDueToLockedAccount"
   }
 
   case object AccountDeletionRequested extends AuditAction {
-    val name = "Developer has requested an account deletion"
+    val name      = "Developer has requested an account deletion"
     val auditType = "AccountDeletionRequested"
   }
 
   case object Remove2SVRequested extends AuditAction {
-    val name = "Developer has requested 2SV removal"
+    val name      = "Developer has requested 2SV removal"
     val auditType = "Remove2SVRequested"
   }
 
   case object ApplicationDeletionRequested extends AuditAction {
-    override val name: String = "Developer has requested application deletion"
+    override val name: String      = "Developer has requested application deletion"
     override val auditType: String = "ApplicationDeletionRequest"
   }
 
   case object UserLogoutSurveyCompleted extends AuditAction {
-    val name = "Developer has submitted log out survey"
+    val name      = "Developer has submitted log out survey"
     val auditType = "LogOutSurveySubmission"
   }
 }

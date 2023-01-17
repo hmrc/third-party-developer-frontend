@@ -16,15 +16,17 @@
 
 package views.include
 
-import java.time.Period
+import java.time.{LocalDateTime, Period, ZoneOffset}
+
+import org.jsoup.Jsoup
+import org.scalatestplus.play.guice.GuiceOneServerPerSuite
+
+import play.api.test.Helpers.{contentAsString, contentType}
+import play.twirl.api.Html
+
 import uk.gov.hmrc.thirdpartydeveloperfrontend.config.ApplicationConfig
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.{Application, ApplicationId, ClientId, Environment}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.controllers.Crumb
-import org.jsoup.Jsoup
-import org.scalatestplus.play.guice.GuiceOneServerPerSuite
-import play.api.test.Helpers.{contentAsString, contentType}
-import play.twirl.api.Html
-import java.time.{LocalDateTime, ZoneOffset}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.{AsyncHmrcSpec, SharedMetricsClearDown}
 
 class BreadcrumbsSpec extends AsyncHmrcSpec with GuiceOneServerPerSuite with SharedMetricsClearDown {
@@ -35,14 +37,23 @@ class BreadcrumbsSpec extends AsyncHmrcSpec with GuiceOneServerPerSuite with Sha
     "render in the right order" in {
 
       val applicationName = "An Application Name"
-      val application = Application(ApplicationId("appId123"), ClientId("clientId123"), applicationName, LocalDateTime.now(ZoneOffset.UTC), Some(LocalDateTime.now(ZoneOffset.UTC)), None, grantLength = Period.ofDays(547), Environment.PRODUCTION)
-      val crumbs = Array(Crumb("Another Breadcrumb"), Crumb.application(application), Crumb.viewAllApplications, Crumb.home(appConfig))
+      val application     = Application(
+        ApplicationId("appId123"),
+        ClientId("clientId123"),
+        applicationName,
+        LocalDateTime.now(ZoneOffset.UTC),
+        Some(LocalDateTime.now(ZoneOffset.UTC)),
+        None,
+        grantLength = Period.ofDays(547),
+        Environment.PRODUCTION
+      )
+      val crumbs          = Array(Crumb("Another Breadcrumb"), Crumb.application(application), Crumb.viewAllApplications, Crumb.home(appConfig))
 
       val page: Html = views.html.include.breadcrumbs.render(crumbs)
 
       contentType(page) shouldBe "text/html"
 
-      val document = Jsoup.parse(contentAsString(page))
+      val document       = Jsoup.parse(contentAsString(page))
       val breadcrumbText = document.body.select("li").text()
 
       breadcrumbText shouldBe List("Home", "View all applications", "An Application Name", "Another Breadcrumb").mkString(" ")

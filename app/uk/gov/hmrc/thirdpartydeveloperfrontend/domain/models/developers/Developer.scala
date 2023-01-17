@@ -16,14 +16,14 @@
 
 package uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers
 
+import java.{util => ju}
+
+import play.api.libs.functional.syntax._
 import play.api.libs.json.{Format, JsPath, Json, Reads}
+
 import uk.gov.hmrc.apiplatform.modules.mfa.models.MfaDetail
 import uk.gov.hmrc.apiplatform.modules.mfa.models.MfaDetailFormats._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.emailpreferences.EmailPreferences
-import play.api.libs.functional.syntax._
-
-import java.{util => ju}
-
 
 case class UserId(value: ju.UUID) extends AnyVal {
   def asText = value.toString
@@ -37,27 +37,27 @@ object UserId {
 }
 
 case class Developer(
-  userId: UserId,
-  email: String,
-  firstName: String,
-  lastName: String,
-  organisation: Option[String] = None,
-  mfaDetails: List[MfaDetail] = List.empty,
-  emailPreferences: EmailPreferences = EmailPreferences.noPreferences
-)
+    userId: UserId,
+    email: String,
+    firstName: String,
+    lastName: String,
+    organisation: Option[String] = None,
+    mfaDetails: List[MfaDetail] = List.empty,
+    emailPreferences: EmailPreferences = EmailPreferences.noPreferences
+  )
 
 object Developer {
 
   val developerReads: Reads[Developer] = (
-      (JsPath \ "userId").read[UserId] and
+    (JsPath \ "userId").read[UserId] and
       (JsPath \ "email").read[String] and
       (JsPath \ "firstName").read[String] and
       (JsPath \ "lastName").read[String] and
       (JsPath \ "organisation").readNullable[String] and
       ((JsPath \ "mfaDetails").read[List[MfaDetail]] or Reads.pure(List.empty[MfaDetail])) and
-      ((JsPath \ "emailPreferences").read[EmailPreferences] or Reads.pure(EmailPreferences.noPreferences))) (Developer.apply _)
+      ((JsPath \ "emailPreferences").read[EmailPreferences] or Reads.pure(EmailPreferences.noPreferences))
+  )(Developer.apply _)
 
-  val developerWrites = Json.writes[Developer]
+  val developerWrites          = Json.writes[Developer]
   implicit val formatDeveloper = Format(developerReads, developerWrites)
 }
-

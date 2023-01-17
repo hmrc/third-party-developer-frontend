@@ -17,29 +17,35 @@
 package uk.gov.hmrc.thirdpartydeveloperfrontend.service
 
 import java.time.{LocalDateTime, Period}
+import scala.concurrent.ExecutionContext.Implicits.global
+import scala.concurrent.Future
+
+import uk.gov.hmrc.http.HeaderCarrier
+
 import uk.gov.hmrc.thirdpartydeveloperfrontend.builder.SubscriptionsBuilder
 import uk.gov.hmrc.thirdpartydeveloperfrontend.connectors.{ApmConnector, ThirdPartyApplicationConnector}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.apidefinitions.{ApiContext, ApiVersion}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications._
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.subscriptions.ApiSubscriptionFields.{SaveSubscriptionFieldsAccessDeniedResponse, SaveSubscriptionFieldsSuccessResponse, SubscriptionFieldValue}
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.subscriptions.ApiSubscriptionFields.{
+  SaveSubscriptionFieldsAccessDeniedResponse,
+  SaveSubscriptionFieldsSuccessResponse,
+  SubscriptionFieldValue
+}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.subscriptions.DevhubAccessRequirement.NoOne
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.subscriptions.{AccessRequirements, DevhubAccessRequirements, FieldValue, Fields}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.mocks.connectors.SubscriptionFieldsConnectorMock
 import uk.gov.hmrc.thirdpartydeveloperfrontend.service.PushPullNotificationsService.PushPullNotificationsConnector
-import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.AsyncHmrcSpec
-
-import scala.concurrent.ExecutionContext.Implicits.global
-import scala.concurrent.Future
 
 class SubscriptionFieldsServiceSpec extends AsyncHmrcSpec with SubscriptionsBuilder {
 
-  val apiContext: ApiContext = ApiContext("sub-ser-test")
-  val apiVersion: ApiVersion = ApiVersion("1.0")
-  val versionOne: ApiVersion = ApiVersion("version-1")
-  val applicationName: String = "third-party-application"
+  val apiContext: ApiContext       = ApiContext("sub-ser-test")
+  val apiVersion: ApiVersion       = ApiVersion("1.0")
+  val versionOne: ApiVersion       = ApiVersion("version-1")
+  val applicationName: String      = "third-party-application"
   val applicationId: ApplicationId = ApplicationId("application-id")
-  val clientId = ClientId("clientId")
+  val clientId                     = ClientId("clientId")
+
   val application =
     Application(applicationId, clientId, applicationName, LocalDateTime.now(), Some(LocalDateTime.now()), None, grantLength = Period.ofDays(547), Environment.PRODUCTION)
 
@@ -49,10 +55,10 @@ class SubscriptionFieldsServiceSpec extends AsyncHmrcSpec with SubscriptionsBuil
 
     implicit val hc: HeaderCarrier = HeaderCarrier()
 
-    val mockConnectorsWrapper: ConnectorsWrapper = mock[ConnectorsWrapper]
+    val mockConnectorsWrapper: ConnectorsWrapper                           = mock[ConnectorsWrapper]
     val mockThirdPartyApplicationConnector: ThirdPartyApplicationConnector = mock[ThirdPartyApplicationConnector]
     val mockPushPullNotificationsConnector: PushPullNotificationsConnector = mock[PushPullNotificationsConnector]
-    val mockApmConnector: ApmConnector = mock[ApmConnector]
+    val mockApmConnector: ApmConnector                                     = mock[ApmConnector]
 
     val underTest = new SubscriptionFieldsService(mockConnectorsWrapper, mockApmConnector)
 
@@ -87,7 +93,7 @@ class SubscriptionFieldsServiceSpec extends AsyncHmrcSpec with SubscriptionsBuil
         SubscriptionFieldValue(definition2, FieldValue("oldValue2"))
       )
 
-      val newValue1 = FieldValue("newValue")
+      val newValue1                  = FieldValue("newValue")
       val newValuesMap: Fields.Alias = Map(definition1.name -> newValue1)
 
       when(mockSubscriptionFieldsConnector.saveFieldValues(*[ClientId], *[ApiContext], *[ApiVersion], *)(*))

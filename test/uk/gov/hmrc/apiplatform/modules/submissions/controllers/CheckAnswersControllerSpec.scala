@@ -16,100 +16,98 @@
 
 package uk.gov.hmrc.apiplatform.modules.submissions.controllers
 
-import org.mockito.captor.ArgCaptor
-import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.{BaseControllerSpec, SubscriptionTestHelperSugar}
-import uk.gov.hmrc.thirdpartydeveloperfrontend.builder.{DeveloperBuilder, SampleApplication, SampleSession}
-import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.{LocalUserIdTracker, WithCSRFAddToken}
-import uk.gov.hmrc.thirdpartydeveloperfrontend.mocks.service.ApplicationServiceMock
-import uk.gov.hmrc.thirdpartydeveloperfrontend.mocks.service.ApplicationActionServiceMock
-import uk.gov.hmrc.thirdpartydeveloperfrontend.mocks.connectors.ApmConnectorMockModule
-import uk.gov.hmrc.apiplatform.modules.submissions.services.mocks.SubmissionServiceMockModule
-import uk.gov.hmrc.http.HeaderCarrier
-import uk.gov.hmrc.apiplatform.modules.submissions.views.html.CheckAnswersView
-import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.WithLoggedInSession._
-
 import scala.concurrent.ExecutionContext.Implicits.global
-import uk.gov.hmrc.apiplatform.modules.submissions.SubmissionsTestData
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.ApplicationWithSubscriptionData
+import scala.concurrent.Future.{failed, successful}
+
+import org.mockito.captor.ArgCaptor
+
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
 import play.filters.csrf.CSRF
-import uk.gov.hmrc.apiplatform.modules.submissions.services.RequestProductionCredentials
-import uk.gov.hmrc.apiplatform.modules.submissions.views.html.ProductionCredentialsRequestReceivedView
-import uk.gov.hmrc.apiplatform.modules.submissions.domain.models.{ExtendedSubmission, NoAnswer, QuestionnaireProgress, SingleChoiceAnswer}
-import uk.gov.hmrc.apiplatform.modules.submissions.domain.models.QuestionnaireState.Completed
-import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.AsIdsHelpers._
-import uk.gov.hmrc.apiplatform.modules.submissions.domain.models.QuestionnaireState.InProgress
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.DeveloperSession
+import uk.gov.hmrc.http.HeaderCarrier
 
-import scala.concurrent.Future.{failed, successful}
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.ApplicationNotFound
+import uk.gov.hmrc.apiplatform.modules.submissions.SubmissionsTestData
 import uk.gov.hmrc.apiplatform.modules.submissions.controllers.CheckAnswersController.ProdCredsRequestReceivedViewModel
+import uk.gov.hmrc.apiplatform.modules.submissions.domain.models.QuestionnaireState.{Completed, InProgress}
+import uk.gov.hmrc.apiplatform.modules.submissions.domain.models.{ExtendedSubmission, NoAnswer, QuestionnaireProgress, SingleChoiceAnswer}
+import uk.gov.hmrc.apiplatform.modules.submissions.services.RequestProductionCredentials
+import uk.gov.hmrc.apiplatform.modules.submissions.services.mocks.SubmissionServiceMockModule
+import uk.gov.hmrc.apiplatform.modules.submissions.views.html.{CheckAnswersView, ProductionCredentialsRequestReceivedView}
+import uk.gov.hmrc.thirdpartydeveloperfrontend.builder.{DeveloperBuilder, SampleApplication, SampleSession}
+import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.{BaseControllerSpec, SubscriptionTestHelperSugar}
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.ApplicationNotFound
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.ApplicationWithSubscriptionData
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.DeveloperSession
+import uk.gov.hmrc.thirdpartydeveloperfrontend.mocks.connectors.ApmConnectorMockModule
+import uk.gov.hmrc.thirdpartydeveloperfrontend.mocks.service.{ApplicationActionServiceMock, ApplicationServiceMock}
+import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.AsIdsHelpers._
+import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.WithLoggedInSession._
+import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.{LocalUserIdTracker, WithCSRFAddToken}
 
-class CheckAnswersControllerSpec 
+class CheckAnswersControllerSpec
     extends BaseControllerSpec
     with SampleSession
     with SampleApplication
     with SubscriptionTestHelperSugar
-    with WithCSRFAddToken 
+    with WithCSRFAddToken
     with DeveloperBuilder
     with LocalUserIdTracker
     with SubmissionsTestData {
 
-    trait HasSubscriptions {
-      val aSubscription = exampleSubscriptionWithoutFields("prefix")
-    }
+  trait HasSubscriptions {
+    val aSubscription = exampleSubscriptionWithoutFields("prefix")
+  }
 
-    trait HasSessionDeveloperFlow {
-      val sessionParams = Seq("csrfToken" -> app.injector.instanceOf[CSRF.TokenProvider].generateToken)
+  trait HasSessionDeveloperFlow {
+    val sessionParams = Seq("csrfToken" -> app.injector.instanceOf[CSRF.TokenProvider].generateToken)
 
-      fetchSessionByIdReturns(sessionId, session)
-      
-      updateUserFlowSessionsReturnsSuccessfully(sessionId)
-    }
+    fetchSessionByIdReturns(sessionId, session)
 
-    trait HasAppInTestingState {
-      self: HasSubscriptions with ApplicationActionServiceMock with ApplicationServiceMock =>
-      
-      givenApplicationAction(
-        ApplicationWithSubscriptionData(
-          testingApp.copy(id = applicationId),
-          asSubscriptions(List(aSubscription)),
-          asFields(List.empty)
-        ),
-        loggedInDeveloper,
-        List(aSubscription)
-      )
-      
-      fetchByApplicationIdReturns(applicationId, sampleApp)
-    }      
+    updateUserFlowSessionsReturnsSuccessfully(sessionId)
+  }
 
-  trait Setup 
-    extends ApplicationServiceMock
-    with ApplicationActionServiceMock
-    with ApmConnectorMockModule
-    with SubmissionServiceMockModule
-    with HasSubscriptions
-    with HasSessionDeveloperFlow
-    with HasAppInTestingState {
+  trait HasAppInTestingState {
+    self: HasSubscriptions with ApplicationActionServiceMock with ApplicationServiceMock =>
+
+    givenApplicationAction(
+      ApplicationWithSubscriptionData(
+        testingApp.copy(id = applicationId),
+        asSubscriptions(List(aSubscription)),
+        asFields(List.empty)
+      ),
+      loggedInDeveloper,
+      List(aSubscription)
+    )
+
+    fetchByApplicationIdReturns(applicationId, sampleApp)
+  }
+
+  trait Setup
+      extends ApplicationServiceMock
+      with ApplicationActionServiceMock
+      with ApmConnectorMockModule
+      with SubmissionServiceMockModule
+      with HasSubscriptions
+      with HasSessionDeveloperFlow
+      with HasAppInTestingState {
 
     implicit val hc = HeaderCarrier()
 
-    val mockApmConnector = ApmConnectorMock.aMock
+    val mockApmConnector     = ApmConnectorMock.aMock
     val mockRequestProdCreds = mock[RequestProductionCredentials]
 
-    val completedProgress = List(DevelopmentPractices.questionnaire, CustomersAuthorisingYourSoftware.questionnaire, OrganisationDetails.questionnaire)
-        .map(q => q.id -> QuestionnaireProgress(Completed, q.questions.asIds)).toMap
+    val completedProgress           = List(DevelopmentPractices.questionnaire, CustomersAuthorisingYourSoftware.questionnaire, OrganisationDetails.questionnaire)
+      .map(q => q.id -> QuestionnaireProgress(Completed, q.questions.asIds)).toMap
     val completedExtendedSubmission = ExtendedSubmission(aSubmission, completedProgress)
 
-    val incompleteProgress = List(DevelopmentPractices.questionnaire, CustomersAuthorisingYourSoftware.questionnaire, OrganisationDetails.questionnaire)
-        .map(q => q.id -> QuestionnaireProgress(InProgress, q.questions.asIds)).toMap
+    val incompleteProgress           = List(DevelopmentPractices.questionnaire, CustomersAuthorisingYourSoftware.questionnaire, OrganisationDetails.questionnaire)
+      .map(q => q.id -> QuestionnaireProgress(InProgress, q.questions.asIds)).toMap
     val incompleteExtendedSubmission = ExtendedSubmission(aSubmission, incompleteProgress)
 
-    val checkAnswersView = mock[CheckAnswersView]
-    when(checkAnswersView.apply(*,*,*)(*, *, *, *)).thenReturn(play.twirl.api.HtmlFormat.empty)
+    val checkAnswersView                         = mock[CheckAnswersView]
+    when(checkAnswersView.apply(*, *, *)(*, *, *, *)).thenReturn(play.twirl.api.HtmlFormat.empty)
     val productionCredentialsRequestReceivedView = mock[ProductionCredentialsRequestReceivedView]
-    val viewModelCaptor = ArgCaptor[ProdCredsRequestReceivedViewModel]
+    val viewModelCaptor                          = ArgCaptor[ProdCredsRequestReceivedViewModel]
     when(productionCredentialsRequestReceivedView.apply(*)(*, *, *, *)).thenReturn(play.twirl.api.HtmlFormat.empty)
 
     val underTest = new CheckAnswersController(
@@ -191,7 +189,7 @@ class CheckAnswersControllerSpec
 
     "don't display verification email text if requester is the Responsible Individual" in new Setup {
       when(mockRequestProdCreds.requestProductionCredentials(eqTo(applicationId), *[DeveloperSession], *)(*)).thenReturn(successful(Right(sampleApp)))
-      val answers = answersToQuestions.updated(testQuestionIdsOfInterest.responsibleIndividualIsRequesterId, SingleChoiceAnswer("Yes"))
+      val answers       = answersToQuestions.updated(testQuestionIdsOfInterest.responsibleIndividualIsRequesterId, SingleChoiceAnswer("Yes"))
       val extSubmission = ExtendedSubmission(answeredSubmission.hasCompletelyAnsweredWith(answers), completedProgress)
       SubmissionServiceMock.FetchLatestExtendedSubmission.thenReturns(extSubmission)
 
@@ -203,7 +201,7 @@ class CheckAnswersControllerSpec
 
     "do display verification email text if requester is not the Responsible Individual" in new Setup {
       when(mockRequestProdCreds.requestProductionCredentials(eqTo(applicationId), *[DeveloperSession], *)(*)).thenReturn(successful(Right(sampleApp)))
-      val answers = answersToQuestions.updated(testQuestionIdsOfInterest.responsibleIndividualIsRequesterId, SingleChoiceAnswer("No"))
+      val answers       = answersToQuestions.updated(testQuestionIdsOfInterest.responsibleIndividualIsRequesterId, SingleChoiceAnswer("No"))
       val extSubmission = ExtendedSubmission(answeredSubmission.hasCompletelyAnsweredWith(answers), completedProgress)
       SubmissionServiceMock.FetchLatestExtendedSubmission.thenReturns(extSubmission)
 
@@ -215,7 +213,7 @@ class CheckAnswersControllerSpec
 
     "don't display verification email text if requester is Responsible Individual question not answered" in new Setup {
       when(mockRequestProdCreds.requestProductionCredentials(eqTo(applicationId), *[DeveloperSession], *)(*)).thenReturn(successful(Right(sampleApp)))
-      val answers = answersToQuestions.updated(testQuestionIdsOfInterest.responsibleIndividualIsRequesterId, NoAnswer)
+      val answers       = answersToQuestions.updated(testQuestionIdsOfInterest.responsibleIndividualIsRequesterId, NoAnswer)
       val extSubmission = ExtendedSubmission(answeredSubmission.hasCompletelyAnsweredWith(answers), completedProgress)
       SubmissionServiceMock.FetchLatestExtendedSubmission.thenReturns(extSubmission)
 

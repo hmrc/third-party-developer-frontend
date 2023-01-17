@@ -16,15 +16,17 @@
 
 package uk.gov.hmrc.apiplatform.modules.mfa.controllers.profile
 
+import scala.concurrent.Future
+import scala.concurrent.Future.successful
+
 import org.jsoup.Jsoup
+
 import play.api.http.Status
 import play.api.test.Helpers._
+
 import uk.gov.hmrc.apiplatform.modules.mfa.models.MfaAction
 import uk.gov.hmrc.apiplatform.modules.mfa.service.MfaResponse
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.UserId
-
-import scala.concurrent.Future
-import scala.concurrent.Future.successful
 
 class MfaControllerSmsSpec extends MfaControllerBaseSpec {
 
@@ -119,7 +121,7 @@ class MfaControllerSmsSpec extends MfaControllerBaseSpec {
         .thenReturn(successful(Some(loggedInDeveloper)))
 
       val result = addToken(underTest.smsSetupCompletedPage())(createRequest())
-        shouldReturnOK(result, validateSmsCompletedPage)
+      shouldReturnOK(result, validateSmsCompletedPage)
     }
 
     "return sms setup skipped view when user is part logged in" in new SetupSuccessfulStart2SV with PartLogged {
@@ -241,7 +243,7 @@ class MfaControllerSmsSpec extends MfaControllerBaseSpec {
 
     "return Bad Request when user is logged in and access code is invalid on the form" in new SetupSuccessfulStart2SV with LoggedIn {
       val request = createRequest().withFormUrlEncodedBody("mobileNumber" -> mobileNumber, "accessCode" -> "INVALID")
-      val result = addToken(underTest.smsAccessCodeAction(smsMfaId, MfaAction.REMOVE, Some(smsMfaId)))(request)
+      val result  = addToken(underTest.smsAccessCodeAction(smsMfaId, MfaAction.REMOVE, Some(smsMfaId)))(request)
 
       status(result) shouldBe BAD_REQUEST
       val doc = Jsoup.parse(contentAsString(result))

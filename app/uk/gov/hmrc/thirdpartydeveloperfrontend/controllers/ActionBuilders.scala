@@ -16,15 +16,15 @@
 
 package uk.gov.hmrc.thirdpartydeveloperfrontend.controllers
 
-import uk.gov.hmrc.thirdpartydeveloperfrontend.config.ApplicationConfig
-import uk.gov.hmrc.thirdpartydeveloperfrontend.config.ErrorHandler
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.{ApplicationId, Capability, Permission, State}
-import play.api.mvc._
+import scala.concurrent.{ExecutionContext, Future}
+
 import play.api.mvc.Results._
+import play.api.mvc._
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.play.http.HeaderCarrierConverter
 
-import scala.concurrent.{ExecutionContext, Future}
+import uk.gov.hmrc.thirdpartydeveloperfrontend.config.{ApplicationConfig, ErrorHandler}
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.{ApplicationId, Capability, Permission, State}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.service.ApplicationActionService
 
 trait BaseActionBuilders {
@@ -48,7 +48,7 @@ trait ApplicationActionBuilders extends BaseActionBuilders {
         import cats.implicits._
 
         applicationActionService.process(applicationId, request)
-        .toRight(NotFound(errorHandler.notFoundTemplate(Request(request, request.developerSession)))).value
+          .toRight(NotFound(errorHandler.notFoundTemplate(Request(request, request.developerSession)))).value
       }
     }
 
@@ -109,4 +109,3 @@ trait ApplicationActionBuilders extends BaseActionBuilders {
   def permissionFilter(permission: Permission)(implicit ec: ExecutionContext) =
     forbiddenWhenNotFilter(req => permission.hasPermissions(req.application, req.developerSession.developer))
 }
-

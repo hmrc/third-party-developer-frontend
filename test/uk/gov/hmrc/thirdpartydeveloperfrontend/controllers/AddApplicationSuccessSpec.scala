@@ -16,34 +16,33 @@
 
 package uk.gov.hmrc.thirdpartydeveloperfrontend.controllers
 
-import uk.gov.hmrc.thirdpartydeveloperfrontend.builder._
-import uk.gov.hmrc.thirdpartydeveloperfrontend.config.ErrorHandler
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications._
-import uk.gov.hmrc.thirdpartydeveloperfrontend.mocks.service._
+import java.time.{LocalDateTime, ZoneOffset}
+import scala.concurrent.ExecutionContext.Implicits.global
+import scala.concurrent.Future
+
+import views.helper.EnvironmentNameService
+import views.html._
+
 import play.api.mvc.{AnyContentAsEmpty, Result}
 import play.api.test.FakeRequest
 import play.api.test.Helpers.{redirectLocation, _}
 import play.filters.csrf.CSRF.TokenProvider
-import uk.gov.hmrc.thirdpartydeveloperfrontend.service.AuditService
 import uk.gov.hmrc.http.HeaderCarrier
-import java.time.LocalDateTime
-import java.time.ZoneOffset
-import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.WithCSRFAddToken
-import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.WithLoggedInSession._
-import views.helper.EnvironmentNameService
-import views.html._
-import uk.gov.hmrc.thirdpartydeveloperfrontend.mocks.connectors.ApmConnectorMockModule
 
-import scala.concurrent.ExecutionContext.Implicits.global
-import scala.concurrent.Future
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.apidefinitions.CombinedApiTestDataHelper
-import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.LocalUserIdTracker
-import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.addapplication.AddApplication
-import uk.gov.hmrc.thirdpartydeveloperfrontend.builder._
-import uk.gov.hmrc.apiplatform.modules.uplift.views.html.BeforeYouStartView
+import uk.gov.hmrc.apiplatform.modules.uplift.controllers.UpliftJourneySwitch
 import uk.gov.hmrc.apiplatform.modules.uplift.services.GetProductionCredentialsFlowService
 import uk.gov.hmrc.apiplatform.modules.uplift.services.mocks.UpliftLogicMock
-import uk.gov.hmrc.apiplatform.modules.uplift.controllers.UpliftJourneySwitch
+import uk.gov.hmrc.apiplatform.modules.uplift.views.html.BeforeYouStartView
+import uk.gov.hmrc.thirdpartydeveloperfrontend.builder._
+import uk.gov.hmrc.thirdpartydeveloperfrontend.config.ErrorHandler
+import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.addapplication.AddApplication
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.apidefinitions.CombinedApiTestDataHelper
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications._
+import uk.gov.hmrc.thirdpartydeveloperfrontend.mocks.connectors.ApmConnectorMockModule
+import uk.gov.hmrc.thirdpartydeveloperfrontend.mocks.service._
+import uk.gov.hmrc.thirdpartydeveloperfrontend.service.AuditService
+import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.WithLoggedInSession._
+import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.{LocalUserIdTracker, WithCSRFAddToken}
 
 class AddApplicationSuccessSpec
     extends BaseControllerSpec
@@ -85,19 +84,20 @@ class AddApplicationSuccessSpec
     access = Standard(redirectUris = List("https://red3", "https://red4"), termsAndConditionsUrl = Some("http://tnc-url.com"))
   )
 
-  trait Setup extends UpliftLogicMock with ApplicationServiceMock with ApmConnectorMockModule with ApplicationActionServiceMock with SessionServiceMock with EmailPreferencesServiceMock with CombinedApiTestDataHelper {
-    val accessTokenSwitchView = app.injector.instanceOf[AccessTokenSwitchView]
+  trait Setup extends UpliftLogicMock with ApplicationServiceMock with ApmConnectorMockModule with ApplicationActionServiceMock with SessionServiceMock
+      with EmailPreferencesServiceMock with CombinedApiTestDataHelper {
+    val accessTokenSwitchView                     = app.injector.instanceOf[AccessTokenSwitchView]
     val usingPrivilegedApplicationCredentialsView = app.injector.instanceOf[UsingPrivilegedApplicationCredentialsView]
-    val tenDaysWarningView = app.injector.instanceOf[TenDaysWarningView]
-    val addApplicationStartSubordinateView = app.injector.instanceOf[AddApplicationStartSubordinateView]
-    val addApplicationStartPrincipalView = app.injector.instanceOf[AddApplicationStartPrincipalView]
-    val addApplicationSubordinateSuccessView = app.injector.instanceOf[AddApplicationSubordinateSuccessView]
-    val addApplicationNameView = app.injector.instanceOf[AddApplicationNameView]
-    val chooseApplicationToUpliftView = app.injector.instanceOf[ChooseApplicationToUpliftView]
-    implicit val environmentNameService = new EnvironmentNameService(appConfig)
+    val tenDaysWarningView                        = app.injector.instanceOf[TenDaysWarningView]
+    val addApplicationStartSubordinateView        = app.injector.instanceOf[AddApplicationStartSubordinateView]
+    val addApplicationStartPrincipalView          = app.injector.instanceOf[AddApplicationStartPrincipalView]
+    val addApplicationSubordinateSuccessView      = app.injector.instanceOf[AddApplicationSubordinateSuccessView]
+    val addApplicationNameView                    = app.injector.instanceOf[AddApplicationNameView]
+    val chooseApplicationToUpliftView             = app.injector.instanceOf[ChooseApplicationToUpliftView]
+    implicit val environmentNameService           = new EnvironmentNameService(appConfig)
 
     val beforeYouStartView: BeforeYouStartView = app.injector.instanceOf[BeforeYouStartView]
-    val sr20UpliftJourneySwitchMock = mock[UpliftJourneySwitch]
+    val sr20UpliftJourneySwitchMock            = mock[UpliftJourneySwitch]
 
     val flowServiceMock = mock[GetProductionCredentialsFlowService]
 
@@ -182,7 +182,7 @@ class AddApplicationSuccessSpec
     "return the page with the user is logged in and the environment is Development" in new Setup {
       when(appConfig.nameOfPrincipalEnvironment).thenReturn("QA")
       when(appConfig.nameOfSubordinateEnvironment).thenReturn("Development")
-      
+
       // Have the lookup for subscribed apis not already in email preferences return an empty List so that we follow
       // the original route through this journey.
       fetchAPIDetailsReturns(List.empty)
@@ -219,7 +219,7 @@ class AddApplicationSuccessSpec
 
   private def titleOf(result: Future[Result]) = {
     val titleRegEx = """<title[^>]*>(.*)</title>""".r
-    val title = titleRegEx.findFirstMatchIn(contentAsString(result)).map(_.group(1))
+    val title      = titleRegEx.findFirstMatchIn(contentAsString(result)).map(_.group(1))
     title.isDefined shouldBe true
     title.get
   }

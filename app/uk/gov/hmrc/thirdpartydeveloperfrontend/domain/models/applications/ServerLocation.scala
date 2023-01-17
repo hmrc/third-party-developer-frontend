@@ -22,16 +22,16 @@ import uk.gov.hmrc.play.json.Union
 sealed trait ServerLocation
 
 object ServerLocation {
-  case object InUK extends ServerLocation
-  case object InEEA extends ServerLocation
-  case object OutsideEEAWithAdequacy extends ServerLocation
+  case object InUK                      extends ServerLocation
+  case object InEEA                     extends ServerLocation
+  case object OutsideEEAWithAdequacy    extends ServerLocation
   case object OutsideEEAWithoutAdequacy extends ServerLocation
 
-  implicit val inUkFormat = Json.format[InUK.type]
-  implicit val inEEAFormat = Json.format[InEEA.type]
-  implicit val outsideEEAWithAdequacyFormat = Json.format[OutsideEEAWithAdequacy.type]
+  implicit val inUkFormat                      = Json.format[InUK.type]
+  implicit val inEEAFormat                     = Json.format[InEEA.type]
+  implicit val outsideEEAWithAdequacyFormat    = Json.format[OutsideEEAWithAdequacy.type]
   implicit val outsideEEAWithoutAdequacyFormat = Json.format[OutsideEEAWithoutAdequacy.type]
-  
+
   implicit val format = Union.from[ServerLocation]("serverLocation")
     .and[InUK.type]("inUK")
     .and[InEEA.type]("inEEA")

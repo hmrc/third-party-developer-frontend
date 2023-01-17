@@ -16,27 +16,29 @@
 
 package views.ppns
 
-import cats.data.NonEmptyList
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications._
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.LoggedInState
-import org.jsoup.Jsoup
-import org.jsoup.nodes.Document
-import play.api.test.FakeRequest
-import play.twirl.api.Html
-import uk.gov.hmrc.thirdpartydeveloperfrontend.builder.{DeveloperBuilder, DeveloperSessionBuilder}
-import uk.gov.hmrc.thirdpartydeveloperfrontend.utils._
-import views.helper.CommonViewSpec
-import views.html.ppns.PushSecretsView
-
 import java.time.LocalDateTime
 import scala.collection.JavaConverters._
 
+import cats.data.NonEmptyList
+import org.jsoup.Jsoup
+import org.jsoup.nodes.Document
+import views.helper.CommonViewSpec
+import views.html.ppns.PushSecretsView
+
+import play.api.test.FakeRequest
+import play.twirl.api.Html
+
+import uk.gov.hmrc.thirdpartydeveloperfrontend.builder.{DeveloperBuilder, DeveloperSessionBuilder}
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications._
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.LoggedInState
+import uk.gov.hmrc.thirdpartydeveloperfrontend.utils._
+
 class PushSecretsViewSpec extends CommonViewSpec
-  with WithCSRFAddToken
-  with CollaboratorTracker
-  with LocalUserIdTracker
-  with DeveloperSessionBuilder
-  with DeveloperBuilder {
+    with WithCSRFAddToken
+    with CollaboratorTracker
+    with LocalUserIdTracker
+    with DeveloperSessionBuilder
+    with DeveloperBuilder {
 
   trait Setup {
     val pushSecretsView: PushSecretsView = app.injector.instanceOf[PushSecretsView]
@@ -47,10 +49,10 @@ class PushSecretsViewSpec extends CommonViewSpec
   }
 
   "Push secrets page" should {
-    val request = FakeRequest().withCSRFToken
+    val request   = FakeRequest().withCSRFToken
     val developer = buildDeveloperSession(loggedInState = LoggedInState.LOGGED_IN, buildDeveloper("Test", "Test", "Test", None))
 
-    val application = Application(
+    val application                       = Application(
       ApplicationId("Test Application ID"),
       ClientId("Test Application Client ID"),
       "Test Application",

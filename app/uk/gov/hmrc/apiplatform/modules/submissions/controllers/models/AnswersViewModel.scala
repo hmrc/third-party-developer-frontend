@@ -17,8 +17,9 @@
 package uk.gov.hmrc.apiplatform.modules.submissions.controllers.models
 
 import cats.data.NonEmptyList
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.ApplicationId
+
 import uk.gov.hmrc.apiplatform.modules.submissions.domain.models._
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.ApplicationId
 
 object AnswersViewModel {
   case class ViewQuestion(id: Question.Id, text: String, answer: String)
@@ -26,25 +27,25 @@ object AnswersViewModel {
   case class ViewModel(appId: ApplicationId, appName: String, submissionId: Submission.Id, questionnaires: List[ViewQuestionnaire])
 
   private def convertAnswer(answer: ActualAnswer): Option[String] = answer match {
-    case SingleChoiceAnswer(value) => Some(value)
-    case TextAnswer(value) => Some(value)
+    case SingleChoiceAnswer(value)    => Some(value)
+    case TextAnswer(value)            => Some(value)
     case MultipleChoiceAnswer(values) => Some(values.mkString)
-    case NoAnswer => Some("n/a")
-    case AcknowledgedAnswer => None
+    case NoAnswer                     => Some("n/a")
+    case AcknowledgedAnswer           => None
   }
-  
+
   private def convertQuestion(submission: Submission)(item: QuestionItem): Option[ViewQuestion] = {
     val id = item.question.id
-    
+
     submission.latestInstance.answersToQuestions.get(id).flatMap(convertAnswer).map(answer =>
       ViewQuestion(id, item.question.wording.value, answer)
     )
   }
-  
+
   private def convertQuestionnaire(extSubmission: ExtendedSubmission)(questionnaire: Questionnaire): Option[ViewQuestionnaire] = {
     val progress = extSubmission.questionnaireProgress.get(questionnaire.id).get
-    val state = QuestionnaireState.describe(progress.state)
-    
+    val state    = QuestionnaireState.describe(progress.state)
+
     val questions = questionnaire.questions
       .map(convertQuestion(extSubmission.submission))
       .collect { case Some(x) => x }

@@ -16,10 +16,17 @@
 
 package uk.gov.hmrc.thirdpartydeveloperfrontend.controllers
 
+import java.time.LocalDate
+import scala.concurrent.ExecutionContext.Implicits.global
+import scala.concurrent.Future
+
+import views.html._
+
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
 import play.filters.csrf.CSRF.TokenProvider
 import uk.gov.hmrc.http.HeaderCarrier
+
 import uk.gov.hmrc.thirdpartydeveloperfrontend.builder.DeveloperBuilder
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.connectors.TicketCreated
@@ -27,25 +34,20 @@ import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.{Develop
 import uk.gov.hmrc.thirdpartydeveloperfrontend.mocks.service._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.WithLoggedInSession._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.{LocalUserIdTracker, TestApplications, WithCSRFAddToken}
-import views.html._
 
-import java.time.LocalDate
-import scala.concurrent.ExecutionContext.Implicits.global
-import scala.concurrent.Future
-
-class DeletePrincipalApplicationSpec 
-    extends BaseControllerSpec 
-    with WithCSRFAddToken 
-    with TestApplications 
-    with ErrorHandlerMock 
+class DeletePrincipalApplicationSpec
+    extends BaseControllerSpec
+    with WithCSRFAddToken
+    with TestApplications
+    with ErrorHandlerMock
     with DeveloperBuilder
     with LocalUserIdTracker {
-      
+
   trait Setup extends ApplicationServiceMock with ApplicationActionServiceMock with SessionServiceMock {
-    val deleteApplicationView = app.injector.instanceOf[DeleteApplicationView]
-    val deletePrincipalApplicationConfirmView = app.injector.instanceOf[DeletePrincipalApplicationConfirmView]
-    val deletePrincipalApplicationCompleteView = app.injector.instanceOf[DeletePrincipalApplicationCompleteView]
-    val deleteSubordinateApplicationConfirmView = app.injector.instanceOf[DeleteSubordinateApplicationConfirmView]
+    val deleteApplicationView                    = app.injector.instanceOf[DeleteApplicationView]
+    val deletePrincipalApplicationConfirmView    = app.injector.instanceOf[DeletePrincipalApplicationConfirmView]
+    val deletePrincipalApplicationCompleteView   = app.injector.instanceOf[DeletePrincipalApplicationCompleteView]
+    val deleteSubordinateApplicationConfirmView  = app.injector.instanceOf[DeleteSubordinateApplicationConfirmView]
     val deleteSubordinateApplicationCompleteView = app.injector.instanceOf[DeleteSubordinateApplicationCompleteView]
 
     val underTest = new DeleteApplication(
@@ -62,13 +64,13 @@ class DeletePrincipalApplicationSpec
       deleteSubordinateApplicationCompleteView
     )
 
-    val appId = ApplicationId("1234")
-    val clientId = ClientId("clientIdzzz")
+    val appId           = ApplicationId("1234")
+    val clientId        = ClientId("clientIdzzz")
     val appName: String = "Application Name"
 
     val developer = buildDeveloper()
     val sessionId = "sessionId"
-    val session = Session(sessionId, developer, LoggedInState.LOGGED_IN)
+    val session   = Session(sessionId, developer, LoggedInState.LOGGED_IN)
 
     val loggedInDeveloper = DeveloperSession(session)
 
@@ -93,7 +95,7 @@ class DeletePrincipalApplicationSpec
     fetchSessionByIdReturns(sessionId, session)
     updateUserFlowSessionsReturnsSuccessfully(sessionId)
 
-    val sessionParams = Seq("csrfToken" -> app.injector.instanceOf[TokenProvider].generateToken)
+    val sessionParams   = Seq("csrfToken" -> app.injector.instanceOf[TokenProvider].generateToken)
     val loggedInRequest = FakeRequest().withLoggedIn(underTest, implicitly)(sessionId).withSession(sessionParams: _*)
   }
 

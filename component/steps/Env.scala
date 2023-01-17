@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 HM Revenue & Customs
+ * Copyright 2023 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,7 +15,6 @@
  */
 
 package steps
-
 
 import java.io.{File, IOException}
 import java.net.URL
@@ -44,39 +43,39 @@ import org.openqa.selenium.firefox.FirefoxDriver
 import org.openqa.selenium.firefox.FirefoxOptions
 import org.openqa.selenium.remote.RemoteWebDriver
 
-
 trait Env extends ScalaDsl with EN with Matchers with ApplicationLogger {
   var passedTestCount: Int = 0
   var failedTestCount: Int = 0
   // please do not change this port as it is used for acceptance tests
   // when the service is run with "service manager"
-  val port = 6001
-  val host = s"http://localhost:$port"
-  val stubPort = sys.env.getOrElse("WIREMOCK_PORT", "11111").toInt
-  val stubHost = "localhost"
-  val wireMockUrl = s"http://$stubHost:$stubPort"
+  val port                 = 6001
+  val host                 = s"http://localhost:$port"
+  val stubPort             = sys.env.getOrElse("WIREMOCK_PORT", "11111").toInt
+  val stubHost             = "localhost"
+  val wireMockUrl          = s"http://$stubHost:$stubPort"
 
   private val wireMockConfiguration = wireMockConfig().port(stubPort)
 
-  val wireMockServer = new WireMockServer(wireMockConfiguration)
+  val wireMockServer     = new WireMockServer(wireMockConfiguration)
   var server: TestServer = null
-  lazy val windowSize = new Dimension(1280, 720)
+  lazy val windowSize    = new Dimension(1280, 720)
 
   Runtime.getRuntime addShutdownHook new Thread {
+
     override def run() {
       shutdown()
     }
   }
   lazy val driver: WebDriver = createWebDriver()
 
-  private lazy val  browser = Properties.propOrElse("browser","chrome")
-  private lazy val accessibilityTest = Properties.propOrElse("accessibility.test","false") == "true"
+  private lazy val browser           = Properties.propOrElse("browser", "chrome")
+  private lazy val accessibilityTest = Properties.propOrElse("accessibility.test", "false") == "true"
 
   private def createWebDriver(): WebDriver = {
     val driver = browser match {
-      case "chrome" => if(accessibilityTest) SingletonDriver.getInstance() else createChromeDriver()
-      case "remote-chrome" => createRemoteChromeDriver()
-      case "firefox" => createFirefoxDriver()
+      case "chrome"         => if (accessibilityTest) SingletonDriver.getInstance() else createChromeDriver()
+      case "remote-chrome"  => createRemoteChromeDriver()
+      case "firefox"        => createFirefoxDriver()
       case "remote-firefox" => createRemoteFirefoxDriver()
     }
     driver.manage().deleteAllCookies()
@@ -111,7 +110,6 @@ trait Env extends ScalaDsl with EN with Matchers with ApplicationLogger {
     new RemoteWebDriver(new URL("http://localhost:4444/wd/hub"), browserOptions)
   }
 
-
   def javascriptEnabled: Boolean = {
     val jsEnabled: String = System.getProperty("javascriptEnabled", "true")
     if (jsEnabled == null) System.getProperties.setProperty("javascriptEnabled", "true")
@@ -144,7 +142,7 @@ trait Env extends ScalaDsl with EN with Matchers with ApplicationLogger {
   After(order = 2) { scenario =>
     if (scenario.isFailed) {
       val srcFile: Array[Byte] = Env.driver.asInstanceOf[TakesScreenshot].getScreenshotAs(OutputType.BYTES)
-      val screenShot: String = "./target/screenshots/" + Calendar.getInstance().getTime + ".png"
+      val screenShot: String   = "./target/screenshots/" + Calendar.getInstance().getTime + ".png"
       try {
         FileUtils.copyFile(Env.driver.asInstanceOf[TakesScreenshot].getScreenshotAs(OutputType.FILE), new File(screenShot))
       } catch {
@@ -154,8 +152,7 @@ trait Env extends ScalaDsl with EN with Matchers with ApplicationLogger {
     }
     if (scenario.getStatus.equals("passed")) {
       passedTestCount = passedTestCount + 1
-    }
-    else if (scenario.getStatus.equals("failed")) {
+    } else if (scenario.getStatus.equals("failed")) {
       failedTestCount = failedTestCount + 1
     }
     logger.info("\n*******************************************************************************************************")
@@ -170,19 +167,19 @@ trait Env extends ScalaDsl with EN with Matchers with ApplicationLogger {
       GuiceApplicationBuilder()
         .configure(
           Map(
-            "dateOfAdminMfaMandate" -> "2001-01-01",
-            "microservice.services.third-party-developer.port" -> 11111,
-            "microservice.services.third-party-application-production.port" -> 11111,
-            "microservice.services.third-party-application-sandbox.port" -> 11111,
-            "microservice.services.api-definition.port" -> 11111,
-            "microservice.services.api-documentation-frontend.port" -> 11111,
-            "microservice.services.third-party-developer-frontend.port" -> 9685,
-            "microservice.services.hmrc-deskpro.port" -> 11111,
-            "microservice.services.api-subscription-fields-production.port" -> 11111,
-            "microservice.services.api-subscription-fields-sandbox.port" -> 11111,
-            "microservice.services.api-platform-microservice.port" -> 11111,
+            "dateOfAdminMfaMandate"                                             -> "2001-01-01",
+            "microservice.services.third-party-developer.port"                  -> 11111,
+            "microservice.services.third-party-application-production.port"     -> 11111,
+            "microservice.services.third-party-application-sandbox.port"        -> 11111,
+            "microservice.services.api-definition.port"                         -> 11111,
+            "microservice.services.api-documentation-frontend.port"             -> 11111,
+            "microservice.services.third-party-developer-frontend.port"         -> 9685,
+            "microservice.services.hmrc-deskpro.port"                           -> 11111,
+            "microservice.services.api-subscription-fields-production.port"     -> 11111,
+            "microservice.services.api-subscription-fields-sandbox.port"        -> 11111,
+            "microservice.services.api-platform-microservice.port"              -> 11111,
             "microservice.services.push-pull-notifications-api-production.port" -> 11111,
-            "microservice.services.push-pull-notifications-api-sandbox.port" -> 11111
+            "microservice.services.push-pull-notifications-api-sandbox.port"    -> 11111
           )
         )
         .in(Mode.Prod)

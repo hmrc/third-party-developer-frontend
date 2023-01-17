@@ -16,38 +16,41 @@
 
 package uk.gov.hmrc.thirdpartydeveloperfrontend.controllers
 
+import javax.inject.{Inject, Singleton}
+import scala.concurrent.ExecutionContext
+
 import cats.data.NonEmptyList
-import uk.gov.hmrc.thirdpartydeveloperfrontend.config.ApplicationConfig
-import uk.gov.hmrc.thirdpartydeveloperfrontend.config.ErrorHandler
+import views.html.ppns.PushSecretsView
+
+import play.api.libs.crypto.CookieSigner
+import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
+
+import uk.gov.hmrc.thirdpartydeveloperfrontend.config.{ApplicationConfig, ErrorHandler}
+import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.actions.PpnsActions
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.ApplicationId
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.Capabilities.ViewPushSecret
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.Permissions.SandboxOrAdmin
-import javax.inject.{Inject, Singleton}
-import play.api.libs.crypto.CookieSigner
-import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.service.{ApplicationActionService, ApplicationService, PushPullNotificationsService, SessionService}
-import views.html.ppns.PushSecretsView
-import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.actions.PpnsActions
-import scala.concurrent.ExecutionContext
 
 @Singleton
 class PushPullNotifications @Inject() (
-                                        override val sessionService: SessionService,
-                                        override val applicationService: ApplicationService,
-                                        override val errorHandler: ErrorHandler,
-                                        override val cookieSigner: CookieSigner,
-                                        override val applicationActionService: ApplicationActionService,
-                                        mcc: MessagesControllerComponents,
-                                        pushSecretsView: PushSecretsView,
-                                        pushPullNotificationsService: PushPullNotificationsService
-                                      )(implicit override val ec: ExecutionContext, override val appConfig: ApplicationConfig)
-  extends ApplicationController(mcc) with PpnsActions {
+    override val sessionService: SessionService,
+    override val applicationService: ApplicationService,
+    override val errorHandler: ErrorHandler,
+    override val cookieSigner: CookieSigner,
+    override val applicationActionService: ApplicationActionService,
+    mcc: MessagesControllerComponents,
+    pushSecretsView: PushSecretsView,
+    pushPullNotificationsService: PushPullNotificationsService
+  )(implicit override val ec: ExecutionContext,
+    override val appConfig: ApplicationConfig
+  ) extends ApplicationController(mcc) with PpnsActions {
 
-    def showPushSecrets(applicationId: ApplicationId): Action[AnyContent] = subscribedToApiWithPpnsFieldAction(applicationId, ViewPushSecret, SandboxOrAdmin) {
+  def showPushSecrets(applicationId: ApplicationId): Action[AnyContent] = subscribedToApiWithPpnsFieldAction(applicationId, ViewPushSecret, SandboxOrAdmin) {
     implicit request: ApplicationRequest[AnyContent] =>
       pushPullNotificationsService.fetchPushSecrets(request.application) map { pushSecrets =>
         NonEmptyList.fromList(pushSecrets.toList)
           .fold(NotFound(errorHandler.notFoundTemplate))(nonEmptySecrets => Ok(pushSecretsView(request.application, nonEmptySecrets)))
-    }
+      }
   }
 }

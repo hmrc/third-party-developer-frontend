@@ -16,47 +16,47 @@
 
 package uk.gov.hmrc.thirdpartydeveloperfrontend.controllers
 
-import uk.gov.hmrc.thirdpartydeveloperfrontend.builder.DeveloperBuilder
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.{DeveloperSession, LoggedInState, Session}
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.CollaboratorRole.{ADMINISTRATOR, DEVELOPER}
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.controllers.AddTeamMemberPageMode.ManageTeamMembers
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.{ApplicationNotFound, ApplicationUpdateSuccessful, TeamMemberAlreadyExists}
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications._
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.controllers.AddTeamMemberPageMode
-import uk.gov.hmrc.thirdpartydeveloperfrontend.helpers.string._
-import uk.gov.hmrc.thirdpartydeveloperfrontend.mocks.service.{ApplicationActionServiceMock, ApplicationServiceMock, SessionServiceMock}
+import java.time.LocalDateTime
+import scala.concurrent.ExecutionContext.Implicits.global
+import scala.concurrent.Future
+import scala.concurrent.Future.{failed, successful}
+
+import views.html.checkpages.applicationcheck.team.TeamMemberAddView
+import views.html.manageTeamViews.{AddTeamMemberView, ManageTeamView, RemoveTeamMemberView}
+
 import play.api.mvc.Result
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
 import play.filters.csrf.CSRF.TokenProvider
-import uk.gov.hmrc.thirdpartydeveloperfrontend.service.AuditService
 import uk.gov.hmrc.http.HeaderCarrier
-import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.{TestApplications, WithCSRFAddToken}
+
+import uk.gov.hmrc.thirdpartydeveloperfrontend.builder.{DeveloperBuilder, _}
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.CollaboratorRole.{ADMINISTRATOR, DEVELOPER}
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications._
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.controllers.AddTeamMemberPageMode
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.controllers.AddTeamMemberPageMode.ManageTeamMembers
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.{DeveloperSession, LoggedInState, Session}
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.{ApplicationNotFound, ApplicationUpdateSuccessful, TeamMemberAlreadyExists}
+import uk.gov.hmrc.thirdpartydeveloperfrontend.helpers.string._
+import uk.gov.hmrc.thirdpartydeveloperfrontend.mocks.service.{ApplicationActionServiceMock, ApplicationServiceMock, SessionServiceMock}
+import uk.gov.hmrc.thirdpartydeveloperfrontend.service.AuditService
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.WithLoggedInSession._
-import views.html.checkpages.applicationcheck.team.TeamMemberAddView
-import views.html.manageTeamViews.{AddTeamMemberView, ManageTeamView, RemoveTeamMemberView}
+import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.{LocalUserIdTracker, TestApplications, WithCSRFAddToken}
 
-import scala.concurrent.ExecutionContext.Implicits.global
-import scala.concurrent.Future
-import scala.concurrent.Future.{failed, successful}
-import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.LocalUserIdTracker
-import uk.gov.hmrc.thirdpartydeveloperfrontend.builder._
-
-import java.time.LocalDateTime
-
-class ManageTeamSpec 
-    extends BaseControllerSpec 
+class ManageTeamSpec
+    extends BaseControllerSpec
     with SampleSession
     with SampleApplication
-    with SubscriptionTestHelperSugar 
+    with SubscriptionTestHelperSugar
     with WithCSRFAddToken
-    with TestApplications 
+    with TestApplications
     with DeveloperBuilder
     with LocalUserIdTracker {
+
   trait Setup extends ApplicationServiceMock with SessionServiceMock with ApplicationActionServiceMock {
-    val manageTeamView = app.injector.instanceOf[ManageTeamView]
-    val addTeamMemberView = app.injector.instanceOf[AddTeamMemberView]
-    val teamMemberAddView = app.injector.instanceOf[TeamMemberAddView]
+    val manageTeamView       = app.injector.instanceOf[ManageTeamView]
+    val addTeamMemberView    = app.injector.instanceOf[AddTeamMemberView]
+    val teamMemberAddView    = app.injector.instanceOf[TeamMemberAddView]
     val removeTeamMemberView = app.injector.instanceOf[RemoveTeamMemberView]
 
     val underTest = new ManageTeam(
@@ -78,32 +78,37 @@ class ManageTeamSpec
 
     val developer = buildDeveloper()
     val sessionId = "sessionId"
-    val session = Session(sessionId, developer, LoggedInState.LOGGED_IN)
+    val session   = Session(sessionId, developer, LoggedInState.LOGGED_IN)
 
     val loggedInDeveloper = DeveloperSession(session)
 
     fetchSessionByIdReturns(sessionId, session)
     updateUserFlowSessionsReturnsSuccessfully(sessionId)
-    when(applicationServiceMock.addTeamMember(*,*,*)(*))
+    when(applicationServiceMock.addTeamMember(*, *, *)(*))
       .thenReturn(successful(()))
-    when(applicationServiceMock.removeTeamMember(*,*, eqTo(loggedInDeveloper.email))(*))
+    when(applicationServiceMock.removeTeamMember(*, *, eqTo(loggedInDeveloper.email))(*))
       .thenReturn(successful(ApplicationUpdateSuccessful))
 
-    val sessionParams = Seq("csrfToken" -> app.injector.instanceOf[TokenProvider].generateToken)
+    val sessionParams    = Seq("csrfToken" -> app.injector.instanceOf[TokenProvider].generateToken)
     val loggedOutRequest = FakeRequest().withSession(sessionParams: _*)
-    val loggedInRequest = FakeRequest().withLoggedIn(underTest, implicitly)(sessionId).withSession(sessionParams: _*)
+    val loggedInRequest  = FakeRequest().withLoggedIn(underTest, implicitly)(sessionId).withSession(sessionParams: _*)
 
     def givenTheApplicationExistWithUserRole(
         appId: ApplicationId,
         userRole: CollaboratorRole,
         state: ApplicationState = ApplicationState.production("test", "test", "test"),
         additionalTeamMembers: Seq[Collaborator] = Seq()
-    ) = {
+      ) = {
 
       val developerSession = DeveloperSession(session)
 
       val collaborators = aStandardApplication.collaborators ++ additionalTeamMembers ++ Set(developerSession.email.asCollaborator(userRole))
-      val application = aStandardApplication.copy(id = appId, collaborators = collaborators, createdOn = LocalDateTime.parse("2018-04-06T09:00"), lastAccess = Some(LocalDateTime.parse("2018-04-06T09:00")))
+      val application   = aStandardApplication.copy(
+        id = appId,
+        collaborators = collaborators,
+        createdOn = LocalDateTime.parse("2018-04-06T09:00"),
+        lastAccess = Some(LocalDateTime.parse("2018-04-06T09:00"))
+      )
 
       givenApplicationAction(application, developerSession)
       fetchCredentialsReturns(application, tokens())
@@ -163,11 +168,11 @@ class ManageTeamSpec
 
   "addTeamMemberAction" should {
     val email = "user@example.com"
-    val role = CollaboratorRole.ADMINISTRATOR
+    val role  = CollaboratorRole.ADMINISTRATOR
 
     "add a team member when logged in as an admin" in new Setup {
       val application = givenTheApplicationExistWithUserRole(appId, ADMINISTRATOR)
-      val result = underTest.addTeamMemberAction(appId, ManageTeamMembers)(loggedInRequest.withCSRFToken.withFormUrlEncodedBody("email" -> email, "role" -> role.toString))
+      val result      = underTest.addTeamMemberAction(appId, ManageTeamMembers)(loggedInRequest.withCSRFToken.withFormUrlEncodedBody("email" -> email, "role" -> role.toString))
 
       status(result) shouldBe SEE_OTHER
       redirectLocation(result) shouldBe Some(routes.ManageTeam.manageTeam(appId, None).url)
@@ -178,7 +183,7 @@ class ManageTeamSpec
       val application = givenTheApplicationExistWithUserRole(appId, ADMINISTRATOR)
       when(applicationServiceMock.addTeamMember(eqTo(application), *, *)(*))
         .thenReturn(failed(new TeamMemberAlreadyExists))
-      val result = underTest.addTeamMemberAction(appId, ManageTeamMembers)(loggedInRequest.withCSRFToken.withFormUrlEncodedBody("email" -> email, "role" -> role.toString))
+      val result      = underTest.addTeamMemberAction(appId, ManageTeamMembers)(loggedInRequest.withCSRFToken.withFormUrlEncodedBody("email" -> email, "role" -> role.toString))
 
       status(result) shouldBe BAD_REQUEST
       verify(applicationServiceMock).addTeamMember(eqTo(application), eqTo(loggedInDeveloper.email), *)(*)
@@ -189,7 +194,7 @@ class ManageTeamSpec
       val application = givenTheApplicationExistWithUserRole(appId, ADMINISTRATOR)
       when(applicationServiceMock.addTeamMember(eqTo(application), *, *)(*))
         .thenReturn(failed(new ApplicationNotFound))
-      val result = underTest.addTeamMemberAction(appId, ManageTeamMembers)(loggedInRequest.withCSRFToken.withFormUrlEncodedBody("email" -> email, "role" -> role.toString))
+      val result      = underTest.addTeamMemberAction(appId, ManageTeamMembers)(loggedInRequest.withCSRFToken.withFormUrlEncodedBody("email" -> email, "role" -> role.toString))
 
       status(result) shouldBe NOT_FOUND
       verify(applicationServiceMock).addTeamMember(eqTo(application), eqTo(loggedInDeveloper.email), *)(*)
@@ -200,7 +205,7 @@ class ManageTeamSpec
       val application = givenTheApplicationExistWithUserRole(appId, ADMINISTRATOR)
       when(applicationServiceMock.addTeamMember(eqTo(application), *, *)(*))
         .thenReturn(failed(new ApplicationNotFound))
-      val result =
+      val result      =
         underTest.addTeamMemberAction(appId, ManageTeamMembers)(loggedInRequest.withCSRFToken.withFormUrlEncodedBody("email" -> "notAnEmailAddress", "role" -> role.toString))
 
       status(result) shouldBe BAD_REQUEST
@@ -227,8 +232,8 @@ class ManageTeamSpec
   }
 
   "removeTeamMember" should {
-    val teamMemberEmail = "teamMemberToDelete@example.com"
-    val teamMemberEmailHash = teamMemberEmail.toSha256
+    val teamMemberEmail       = "teamMemberToDelete@example.com"
+    val teamMemberEmailHash   = teamMemberEmail.toSha256
     val additionalTeamMembers = Seq(
       "email1@example.com".asDeveloperCollaborator,
       "email2@example.com".asDeveloperCollaborator,
@@ -280,7 +285,7 @@ class ManageTeamSpec
     "logged in as an admin" should {
       "remove a team member when given the correct email and confirmation is 'Yes'" in new Setup {
         val application = givenTheApplicationExistWithUserRole(appId, ADMINISTRATOR)
-        val result = underTest.removeTeamMemberAction(appId)(loggedInRequest.withCSRFToken.withFormUrlEncodedBody("email" -> teamMemberEmail, "confirm" -> "Yes"))
+        val result      = underTest.removeTeamMemberAction(appId)(loggedInRequest.withCSRFToken.withFormUrlEncodedBody("email" -> teamMemberEmail, "confirm" -> "Yes"))
 
         status(result) shouldBe SEE_OTHER
         redirectLocation(result) shouldBe Some(routes.ManageTeam.manageTeam(appId, None).url)
@@ -289,7 +294,7 @@ class ManageTeamSpec
 
       "redirect to the team members page without removing a team member when the confirmation in 'No'" in new Setup {
         val application = givenTheApplicationExistWithUserRole(appId, ADMINISTRATOR)
-        val result =
+        val result      =
           underTest.removeTeamMemberAction(appId)(loggedInRequest.withCSRFToken.withFormUrlEncodedBody("email" -> teamMemberEmail, "confirm" -> "No"))
 
         status(result) shouldBe SEE_OTHER
@@ -299,7 +304,7 @@ class ManageTeamSpec
 
       "return 400 Bad Request when no confirmation is given" in new Setup {
         val application = givenTheApplicationExistWithUserRole(appId, ADMINISTRATOR)
-        val result = underTest.removeTeamMemberAction(appId)(loggedInRequest.withCSRFToken.withFormUrlEncodedBody("email" -> teamMemberEmail))
+        val result      = underTest.removeTeamMemberAction(appId)(loggedInRequest.withCSRFToken.withFormUrlEncodedBody("email" -> teamMemberEmail))
 
         status(result) shouldBe BAD_REQUEST
         verify(applicationServiceMock, never).removeTeamMember(eqTo(application), eqTo(teamMemberEmail), eqTo(loggedInDeveloper.email))(*)
@@ -307,7 +312,7 @@ class ManageTeamSpec
 
       "show 400 Bad Request when no email is given" in new Setup {
         val application = givenTheApplicationExistWithUserRole(appId, ADMINISTRATOR)
-        val result = underTest.removeTeamMemberAction(appId)(loggedInRequest.withCSRFToken.withFormUrlEncodedBody("confirm" -> "Yes"))
+        val result      = underTest.removeTeamMemberAction(appId)(loggedInRequest.withCSRFToken.withFormUrlEncodedBody("confirm" -> "Yes"))
 
         status(result) shouldBe BAD_REQUEST
         verify(applicationServiceMock, never).removeTeamMember(eqTo(application), eqTo(teamMemberEmail), eqTo(loggedInDeveloper.email))(*)
@@ -348,7 +353,7 @@ class ManageTeamSpec
         val pageNumber = 1
 
         val apiVersion = exampleSubscriptionWithFields("api1", 1)
-        val subsData = Seq(
+        val subsData   = Seq(
           apiVersion
         )
 

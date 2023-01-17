@@ -17,24 +17,26 @@
 package views
 
 import org.jsoup.Jsoup
+import views.helper.CommonViewSpec
+import views.html.include.Main
+
+import play.api.test.FakeRequest
+import play.twirl.api.{Html, HtmlFormat}
+
 import uk.gov.hmrc.thirdpartydeveloperfrontend.builder.DeveloperBuilder
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.{DeveloperSession, LoggedInState, Session}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.views.{GenericFeedbackBanner, NoBackButton}
-import play.twirl.api.{Html, HtmlFormat}
-import play.api.test.FakeRequest
-import views.helper.CommonViewSpec
-import views.html.include.Main
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.LocalUserIdTracker
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.ViewHelpers.elementExistsById
 
 class MainTemplateSpec extends CommonViewSpec with DeveloperBuilder with LocalUserIdTracker {
 
   "MainTemplateSpec" should {
-    val mainView = app.injector.instanceOf[Main]
-    val developer = buildDeveloper()
-    val session = Session("sessionId", developer, LoggedInState.LOGGED_IN)
+    val mainView                  = app.injector.instanceOf[Main]
+    val developer                 = buildDeveloper()
+    val session                   = Session("sessionId", developer, LoggedInState.LOGGED_IN)
     implicit val developerSession = DeveloperSession(session)
-    implicit val request = FakeRequest()
+    implicit val request          = FakeRequest()
 
     "Application title meta data set by configuration" in {
       when(appConfig.title).thenReturn("Application Title")

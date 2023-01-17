@@ -16,34 +16,35 @@
 
 package uk.gov.hmrc.thirdpartydeveloperfrontend.helpers
 
+import play.api.mvc.AnyContentAsEmpty
+import play.api.test.FakeRequest
+import play.filters.csrf.CSRF.TokenProvider
+
 import uk.gov.hmrc.thirdpartydeveloperfrontend.builder.DeveloperBuilder
 import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.BaseControllerSpec
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.{LoggedInState, Session}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.mocks.service.SessionServiceMock
-import play.api.mvc.AnyContentAsEmpty
-import play.api.test.FakeRequest
-import play.filters.csrf.CSRF.TokenProvider
-import uk.gov.hmrc.thirdpartydeveloperfrontend.service.SessionService
-import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.WithLoggedInSession._
-import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.LocalUserIdTracker
 import uk.gov.hmrc.thirdpartydeveloperfrontend.security.CookieEncoding
+import uk.gov.hmrc.thirdpartydeveloperfrontend.service.SessionService
+import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.LocalUserIdTracker
+import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.WithLoggedInSession._
 
 trait LoggedInRequestTestHelper extends SessionServiceMock with CookieEncoding with DeveloperBuilder with LocalUserIdTracker {
   this: BaseControllerSpec =>
-    val sessionService = mock[SessionService]
+  val sessionService = mock[SessionService]
 
-    val developer = buildDeveloper()
-    val sessionId = "sessionId"
-    val session = Session(sessionId, developer, LoggedInState.LOGGED_IN)
+  val developer = buildDeveloper()
+  val sessionId = "sessionId"
+  val session   = Session(sessionId, developer, LoggedInState.LOGGED_IN)
 
-    fetchSessionByIdReturns(sessionId, session)
-    updateUserFlowSessionsReturnsSuccessfully(sessionId)
-   
-    private val sessionParams = Seq(
-      "csrfToken" -> app.injector.instanceOf[TokenProvider].generateToken
-    )
+  fetchSessionByIdReturns(sessionId, session)
+  updateUserFlowSessionsReturnsSuccessfully(sessionId)
 
-    lazy val loggedInRequest: FakeRequest[AnyContentAsEmpty.type] = FakeRequest()
-      .withLoggedIn(this, implicitly)(sessionId)
-      .withSession(sessionParams: _*)
+  private val sessionParams = Seq(
+    "csrfToken" -> app.injector.instanceOf[TokenProvider].generateToken
+  )
+
+  lazy val loggedInRequest: FakeRequest[AnyContentAsEmpty.type] = FakeRequest()
+    .withLoggedIn(this, implicitly)(sessionId)
+    .withSession(sessionParams: _*)
 }

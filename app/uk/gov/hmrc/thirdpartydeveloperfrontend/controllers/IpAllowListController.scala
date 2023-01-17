@@ -16,26 +16,26 @@
 
 package uk.gov.hmrc.thirdpartydeveloperfrontend.controllers
 
-import uk.gov.hmrc.thirdpartydeveloperfrontend.config.ApplicationConfig
-import uk.gov.hmrc.thirdpartydeveloperfrontend.config.ErrorHandler
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.ApplicationId
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.Capabilities.SupportsIpAllowlist
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.Permissions.{SandboxOrAdmin, TeamMembersOnly}
-
 import javax.inject.{Inject, Singleton}
-import play.api.data.Form
-import play.api.libs.crypto.CookieSigner
-import play.api.mvc.{Action, AnyContent, MessagesControllerComponents, Result}
-import uk.gov.hmrc.thirdpartydeveloperfrontend.service._
-import uk.gov.hmrc.http.ForbiddenException
-import uk.gov.hmrc.play.bootstrap.controller.WithUnsafeDefaultFormBinding
-import views.html.ipAllowlist._
-
 import scala.concurrent.Future.successful
 import scala.concurrent.{ExecutionContext, Future}
 
+import views.html.ipAllowlist._
+
+import play.api.data.Form
+import play.api.libs.crypto.CookieSigner
+import play.api.mvc.{Action, AnyContent, MessagesControllerComponents, Result}
+import uk.gov.hmrc.http.ForbiddenException
+import uk.gov.hmrc.play.bootstrap.controller.WithUnsafeDefaultFormBinding
+
+import uk.gov.hmrc.thirdpartydeveloperfrontend.config.{ApplicationConfig, ErrorHandler}
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.ApplicationId
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.Capabilities.SupportsIpAllowlist
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.Permissions.{SandboxOrAdmin, TeamMembersOnly}
+import uk.gov.hmrc.thirdpartydeveloperfrontend.service._
+
 @Singleton
-class IpAllowListController @Inject()(
+class IpAllowListController @Inject() (
     val errorHandler: ErrorHandler,
     val applicationService: ApplicationService,
     val applicationActionService: ApplicationActionService,
@@ -54,8 +54,9 @@ class IpAllowListController @Inject()(
     removeIpAllowlistView: RemoveIpAllowlistView,
     removeIpAllowlistSuccessView: RemoveIpAllowlistSuccessView,
     removeCidrBlockView: RemoveCidrBlockView
-)(implicit val ec: ExecutionContext, val appConfig: ApplicationConfig)
-    extends ApplicationController(mcc) with WithUnsafeDefaultFormBinding {
+  )(implicit val ec: ExecutionContext,
+    val appConfig: ApplicationConfig
+  ) extends ApplicationController(mcc) with WithUnsafeDefaultFormBinding {
 
   private def canViewIpAllowlistAction(applicationId: ApplicationId)(fun: ApplicationRequest[AnyContent] => Future[Result]): Action[AnyContent] =
     checkActionForApprovedApps(SupportsIpAllowlist, TeamMembersOnly)(applicationId)(fun)
@@ -91,7 +92,7 @@ class IpAllowListController @Inject()(
     def handleValidForm(form: AddAnotherCidrBlockConfirmForm): Future[Result] = {
       form.confirm match {
         case Some("Yes") => successful(Redirect(routes.IpAllowListController.addCidrBlock(applicationId)))
-        case _ => successful(Redirect(routes.IpAllowListController.reviewIpAllowlist(applicationId)))
+        case _           => successful(Redirect(routes.IpAllowListController.reviewIpAllowlist(applicationId)))
       }
     }
 

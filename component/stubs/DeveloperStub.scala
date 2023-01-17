@@ -1,3 +1,19 @@
+/*
+ * Copyright 2023 HM Revenue & Customs
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package stubs
 
 import com.github.tomakehurst.wiremock.client.WireMock.{aResponse, equalTo, equalToJson, get, post, postRequestedFor, stubFor, urlEqualTo, urlMatching, urlPathEqualTo, verify}
@@ -11,7 +27,6 @@ import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.{Develop
 import utils.ComponentTestDeveloperBuilder
 
 object DeveloperStub extends ComponentTestDeveloperBuilder {
-
 
   def register(registration: Registration, status: Int)(implicit encryptedJson: EncryptedJson) =
     stubFor(
@@ -65,7 +80,7 @@ object DeveloperStub extends ComponentTestDeveloperBuilder {
     )
   }
 
-  def stubResetPasswordJourney(email: String,code: String) {
+  def stubResetPasswordJourney(email: String, code: String) {
     fetchEmailForResetCode(email, code)
     resetPassword()
   }
@@ -79,7 +94,6 @@ object DeveloperStub extends ComponentTestDeveloperBuilder {
         )
     )
   }
-
 
   def setupGettingDeveloperByUserId(developer: Developer): Unit = {
     stubFor(get(urlPathEqualTo("/developer"))
@@ -96,7 +110,7 @@ object DeveloperStub extends ComponentTestDeveloperBuilder {
         .withBody("[]")))
   }
 
-  def fetchEmailForResetCode(email: String,code: String) = {
+  def fetchEmailForResetCode(email: String, code: String) = {
     stubFor(
       get(urlPathEqualTo("/reset-password"))
         .willReturn(

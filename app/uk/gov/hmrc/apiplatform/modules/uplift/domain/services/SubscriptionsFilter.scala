@@ -16,12 +16,12 @@
 
 package uk.gov.hmrc.apiplatform.modules.uplift.domain.services
 
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.apidefinitions.ApiIdentifier
 import uk.gov.hmrc.apiplatform.modules.uplift.domain.models.ApiSubscriptions
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.apidefinitions.APISubscriptionStatus
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.apidefinitions.{APISubscriptionStatus, ApiIdentifier}
 
 object SubscriptionsFilter {
-    def apply(upliftableApiIds: Set[ApiIdentifier], subscriptionsFromFlow: ApiSubscriptions): (APISubscriptionStatus) => Boolean = (s) => {
+
+  def apply(upliftableApiIds: Set[ApiIdentifier], subscriptionsFromFlow: ApiSubscriptions): (APISubscriptionStatus) => Boolean = (s) => {
     upliftableApiIds.contains(s.apiIdentifier) && subscriptionsFromFlow.subscriptions.applyOrElse[ApiIdentifier, Boolean](s.apiIdentifier, _ => false)
   }
 }

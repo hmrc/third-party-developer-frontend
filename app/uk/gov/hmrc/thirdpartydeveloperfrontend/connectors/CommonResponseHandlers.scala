@@ -16,13 +16,13 @@
 
 package uk.gov.hmrc.thirdpartydeveloperfrontend.connectors
 
-import uk.gov.hmrc.http.UpstreamErrorResponse
 import play.api.http.Status._
+import uk.gov.hmrc.http.UpstreamErrorResponse
 
 trait CommonResponseHandlers {
-  
+
   type ErrorOr[A] = Either[UpstreamErrorResponse, A]
-  
+
   type ErrorOrUnit = Either[UpstreamErrorResponse, Unit]
 
   val throwOrUnit = throwOr(()) _
@@ -30,13 +30,13 @@ trait CommonResponseHandlers {
   def throwOr[A](successValue: A)(either: ErrorOrUnit): A =
     either match {
       case Left(err) => throw err
-      case Right(_) => successValue
+      case Right(_)  => successValue
     }
 
   def throwOrOptionOf[A](either: ErrorOr[A]): Option[A] =
     either match {
-      case Right(a) => Some(a)
+      case Right(a)                                        => Some(a)
       case Left(UpstreamErrorResponse(_, NOT_FOUND, _, _)) => None
-      case Left(err) => throw err
+      case Left(err)                                       => throw err
     }
 }

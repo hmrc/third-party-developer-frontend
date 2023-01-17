@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 HM Revenue & Customs
+ * Copyright 2023 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -32,10 +32,11 @@ import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.{InvalidCredentials, Inval
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.{LocalUserIdTracker, WireMockExtensions}
 
 class ThirdPartyDeveloperConnectorIntegrationSpec extends BaseConnectorIntegrationSpec
-  with GuiceOneAppPerSuite with DeveloperBuilder with LocalUserIdTracker with WireMockExtensions {
+    with GuiceOneAppPerSuite with DeveloperBuilder with LocalUserIdTracker with WireMockExtensions {
+
   private val stubConfig = Configuration(
     "microservice.services.third-party-developer.port" -> stubPort,
-    "json.encryption.key" -> "czV2OHkvQj9FKEgrTWJQZVNoVm1ZcTN0Nnc5eiRDJkY="
+    "json.encryption.key"                              -> "czV2OHkvQj9FKEgrTWJQZVNoVm1ZcTN0Nnc5eiRDJkY="
   )
 
   override def fakeApplication(): Application =
@@ -49,20 +50,20 @@ class ThirdPartyDeveloperConnectorIntegrationSpec extends BaseConnectorIntegrati
     implicit val hc: HeaderCarrier = HeaderCarrier()
 
     val userEmail = "thirdpartydeveloper@example.com"
-    val userId = idOf(userEmail)
+    val userId    = idOf(userEmail)
 
-    val userPassword = "password1!"
-    val sessionId = "sessionId"
-    val loginRequest = LoginRequest(userEmail, userPassword, mfaMandatedForUser = false, None)
-    val accessCode = "123456"
-    val nonce = "ABC-123"
-    val mfaId = MfaId.random
+    val userPassword                    = "password1!"
+    val sessionId                       = "sessionId"
+    val loginRequest                    = LoginRequest(userEmail, userPassword, mfaMandatedForUser = false, None)
+    val accessCode                      = "123456"
+    val nonce                           = "ABC-123"
+    val mfaId                           = MfaId.random
     val accessCodeAuthenticationRequest = AccessCodeAuthenticationRequest(userEmail, accessCode, nonce, mfaId)
 
-    val payloadEncryption: PayloadEncryption = app.injector.instanceOf[PayloadEncryption]
-    val encryptedLoginRequest: JsValue = Json.toJson(SecretRequest(payloadEncryption.encrypt(loginRequest).as[String]))
+    val payloadEncryption: PayloadEncryption        = app.injector.instanceOf[PayloadEncryption]
+    val encryptedLoginRequest: JsValue              = Json.toJson(SecretRequest(payloadEncryption.encrypt(loginRequest).as[String]))
     val encryptedTotpAuthenticationRequest: JsValue = Json.toJson(SecretRequest(payloadEncryption.encrypt(accessCodeAuthenticationRequest).as[String]))
-    val underTest: ThirdPartyDeveloperConnector = app.injector.instanceOf[ThirdPartyDeveloperConnector]
+    val underTest: ThirdPartyDeveloperConnector     = app.injector.instanceOf[ThirdPartyDeveloperConnector]
   }
 
   "verify" should {
@@ -90,16 +91,16 @@ class ThirdPartyDeveloperConnectorIntegrationSpec extends BaseConnectorIntegrati
               .withStatus(OK)
               .withHeader("Content-Type", "application/json")
               .withBody(s"""{
-                 |  "sessionId": "$sessionId",
-                 |  "loggedInState": "LOGGED_IN",
-                 |  "developer": {
-                 |    "userId":"${userId.value}",
-                 |    "email":"$userEmail",
-                 |    "firstName":"John",
-                 |    "lastName": "Doe",
-                 |    "emailPreferences": { "interests" : [], "topics": [] }
-                 |  }
-                 |}""".stripMargin)
+                           |  "sessionId": "$sessionId",
+                           |  "loggedInState": "LOGGED_IN",
+                           |  "developer": {
+                           |    "userId":"${userId.value}",
+                           |    "email":"$userEmail",
+                           |    "firstName":"John",
+                           |    "lastName": "Doe",
+                           |    "emailPreferences": { "interests" : [], "topics": [] }
+                           |  }
+                           |}""".stripMargin)
           )
       )
 
@@ -159,14 +160,13 @@ class ThirdPartyDeveloperConnectorIntegrationSpec extends BaseConnectorIntegrati
     }
   }
 
-
   "updateSessionLoggedInState" should {
     val sessionId = "sessionId"
-    val url = s"/session/$sessionId/loggedInState/LOGGED_IN"
+    val url       = s"/session/$sessionId/loggedInState/LOGGED_IN"
 
     "update session logged in state" in new Setup {
       val updateLoggedInStateRequest = UpdateLoggedInStateRequest(LoggedInState.LOGGED_IN)
-      val session = Session(sessionId, buildDeveloper(), LoggedInState.LOGGED_IN)
+      val session                    = Session(sessionId, buildDeveloper(), LoggedInState.LOGGED_IN)
 
       stubFor(
         put(urlEqualTo(url))
@@ -189,7 +189,7 @@ class ThirdPartyDeveloperConnectorIntegrationSpec extends BaseConnectorIntegrati
               .withStatus(NOT_FOUND)
           )
       )
-      intercept[SessionInvalid]{
+      intercept[SessionInvalid] {
         await(underTest.updateSessionLoggedInState(sessionId, updateLoggedInStateRequest))
       }
     }
@@ -199,11 +199,11 @@ class ThirdPartyDeveloperConnectorIntegrationSpec extends BaseConnectorIntegrati
 
     "update profile" in new Setup {
       val updateProfileRequest = UpdateProfileRequest("First", "Last")
-      val url = s"/developer/${userId.asText}"
+      val url                  = s"/developer/${userId.asText}"
 
       stubFor(
         post(urlEqualTo(url))
-        .withJsonRequestBody(updateProfileRequest)
+          .withJsonRequestBody(updateProfileRequest)
           .willReturn(
             aResponse()
               .withStatus(OK)
@@ -215,13 +215,13 @@ class ThirdPartyDeveloperConnectorIntegrationSpec extends BaseConnectorIntegrati
 
   "Resend verification" should {
     "send verification mail" in new Setup {
-      val email = "john.smith@example.com"
+      val email            = "john.smith@example.com"
       implicit val writes1 = Json.writes[ThirdPartyDeveloperConnector.FindUserIdRequest]
       implicit val writes2 = Json.writes[ThirdPartyDeveloperConnector.FindUserIdResponse]
 
       stubFor(
         post(urlEqualTo("/developers/find-user-id"))
-        .withJsonRequestBody(ThirdPartyDeveloperConnector.FindUserIdRequest(email))
+          .withJsonRequestBody(ThirdPartyDeveloperConnector.FindUserIdRequest(email))
           .willReturn(
             aResponse()
               .withStatus(OK)
@@ -240,7 +240,7 @@ class ThirdPartyDeveloperConnectorIntegrationSpec extends BaseConnectorIntegrati
   }
 
   "Reset password" should {
-    val email = "user@example.com"
+    val email   = "user@example.com"
     val request = PasswordResetRequest(email)
 
     "successfully request reset" in new Setup {
@@ -289,7 +289,7 @@ class ThirdPartyDeveloperConnectorIntegrationSpec extends BaseConnectorIntegrati
 
     "successfully reset password" in new Setup {
       val passwordReset = PasswordReset("user@example.com", "newPassword")
-      val payload = Json.toJson(passwordReset)
+      val payload       = Json.toJson(passwordReset)
       val encryptedBody = SecretRequest(payloadEncryption.encrypt(payload).as[String])
 
       stubFor(
@@ -306,7 +306,7 @@ class ThirdPartyDeveloperConnectorIntegrationSpec extends BaseConnectorIntegrati
 
   "accountSetupQuestions" should {
     val developer = buildDeveloper()
-    val baseUrl = s"/developer/account-setup/${developer.userId.value}"
+    val baseUrl   = s"/developer/account-setup/${developer.userId.value}"
 
     "successfully complete a developer account setup" in new Setup {
       stubFor(
@@ -324,7 +324,7 @@ class ThirdPartyDeveloperConnectorIntegrationSpec extends BaseConnectorIntegrati
       private val request = AccountSetupRequest(roles = Some(List("aRole")), rolesOther = Some("otherRole"))
       stubFor(
         put(urlPathEqualTo(s"$baseUrl/roles"))
-        .withJsonRequestBody(request)
+          .withJsonRequestBody(request)
           .willReturn(
             aResponse()
               .withStatus(OK)
@@ -338,7 +338,7 @@ class ThirdPartyDeveloperConnectorIntegrationSpec extends BaseConnectorIntegrati
       private val request = AccountSetupRequest(services = Some(List("aService")), servicesOther = Some("otherService"))
       stubFor(
         put(urlPathEqualTo(s"$baseUrl/services"))
-        .withJsonRequestBody(request)
+          .withJsonRequestBody(request)
           .willReturn(
             aResponse()
               .withStatus(OK)
@@ -352,7 +352,7 @@ class ThirdPartyDeveloperConnectorIntegrationSpec extends BaseConnectorIntegrati
       private val request = AccountSetupRequest(targets = Some(List("aTarget")), targetsOther = Some("otherTargets"))
       stubFor(
         put(urlPathEqualTo(s"$baseUrl/targets"))
-        .withJsonRequestBody(request)
+          .withJsonRequestBody(request)
           .willReturn(
             aResponse()
               .withStatus(OK)
@@ -365,14 +365,14 @@ class ThirdPartyDeveloperConnectorIntegrationSpec extends BaseConnectorIntegrati
 
   "change password" should {
     val changePasswordRequest = ChangePassword("email@example.com", "oldPassword123", "newPassword321")
-    val payload = Json.toJson(changePasswordRequest)
+    val payload               = Json.toJson(changePasswordRequest)
 
     "throw Invalid Credentials if the response is Unauthorised" in new Setup {
       val encryptedBody = SecretRequest(payloadEncryption.encrypt(payload).as[String])
 
       stubFor(
         post(urlPathEqualTo("/change-password"))
-        .withJsonRequestBody(encryptedBody)
+          .withJsonRequestBody(encryptedBody)
           .willReturn(
             aResponse()
               .withStatus(UNAUTHORIZED)
@@ -386,7 +386,7 @@ class ThirdPartyDeveloperConnectorIntegrationSpec extends BaseConnectorIntegrati
 
       stubFor(
         post(urlPathEqualTo("/change-password"))
-        .withJsonRequestBody(encryptedBody)
+          .withJsonRequestBody(encryptedBody)
           .willReturn(
             aResponse()
               .withStatus(FORBIDDEN)
@@ -400,7 +400,7 @@ class ThirdPartyDeveloperConnectorIntegrationSpec extends BaseConnectorIntegrati
 
       stubFor(
         post(urlPathEqualTo("/change-password"))
-        .withJsonRequestBody(encryptedBody)
+          .withJsonRequestBody(encryptedBody)
           .willReturn(
             aResponse()
               .withStatus(LOCKED)
@@ -421,28 +421,32 @@ class ThirdPartyDeveloperConnectorIntegrationSpec extends BaseConnectorIntegrati
               .withStatus(OK)
               .withHeader("Content-Type", "application/json")
               .withBody(s"""
-                 |{
-                 |  "accessCodeRequired": false,
-                 |  "mfaEnabled": false,
-                 |  "session": {
-                 |    "sessionId": "$sessionId",
-                 |    "loggedInState": "LOGGED_IN",
-                 |    "developer": {
-                 |      "userId":"${userId.value}",
-                 |      "email":"$userEmail",
-                 |      "firstName":"John",
-                 |      "lastName": "Doe",
-                 |      "emailPreferences": { "interests" : [], "topics": [] }
-                 |    }
-                 |  }
-                 |}""".stripMargin)
+                           |{
+                           |  "accessCodeRequired": false,
+                           |  "mfaEnabled": false,
+                           |  "session": {
+                           |    "sessionId": "$sessionId",
+                           |    "loggedInState": "LOGGED_IN",
+                           |    "developer": {
+                           |      "userId":"${userId.value}",
+                           |      "email":"$userEmail",
+                           |      "firstName":"John",
+                           |      "lastName": "Doe",
+                           |      "emailPreferences": { "interests" : [], "topics": [] }
+                           |    }
+                           |  }
+                           |}""".stripMargin)
           )
       )
 
       val result: UserAuthenticationResponse = await(underTest.authenticate(loginRequest))
 
       verify(1, postRequestedFor(urlMatching("/authenticate")).withRequestBody(equalToJson(encryptedLoginRequest.toString)))
-      result shouldBe UserAuthenticationResponse(accessCodeRequired = false, mfaEnabled= false, session = Some(Session(sessionId, buildDeveloper(userEmail), LoggedInState.LOGGED_IN)))
+      result shouldBe UserAuthenticationResponse(
+        accessCodeRequired = false,
+        mfaEnabled = false,
+        session = Some(Session(sessionId, buildDeveloper(userEmail), LoggedInState.LOGGED_IN))
+      )
     }
 
     "return the nonce when the credentials are valid and MFA is enabled" in new Setup {
@@ -455,11 +459,11 @@ class ThirdPartyDeveloperConnectorIntegrationSpec extends BaseConnectorIntegrati
               .withStatus(OK)
               .withHeader("Content-Type", "application/json")
               .withBody(s"""
-                 |{
-                 |  "accessCodeRequired": true,
-                 |  "mfaEnabled": true,
-                 |  "nonce": "$nonce"
-                 |}""".stripMargin)
+                           |{
+                           |  "accessCodeRequired": true,
+                           |  "mfaEnabled": true,
+                           |  "nonce": "$nonce"
+                           |}""".stripMargin)
           )
       )
 
@@ -541,17 +545,17 @@ class ThirdPartyDeveloperConnectorIntegrationSpec extends BaseConnectorIntegrati
               .withStatus(OK)
               .withHeader("Content-Type", "application/json")
               .withBody(s"""
-                 |{
-                 |  "sessionId": "$sessionId",
-                 |  "loggedInState": "LOGGED_IN",
-                 |  "developer": {
-                 |    "userId":"${userId.value}",
-                 |    "email":"$userEmail",
-                 |    "firstName":"John",
-                 |    "lastName": "Doe",
-                 |    "emailPreferences": { "interests" : [], "topics": [] }
-                 |  }
-                 |}""".stripMargin)
+                           |{
+                           |  "sessionId": "$sessionId",
+                           |  "loggedInState": "LOGGED_IN",
+                           |  "developer": {
+                           |    "userId":"${userId.value}",
+                           |    "email":"$userEmail",
+                           |    "firstName":"John",
+                           |    "lastName": "Doe",
+                           |    "emailPreferences": { "interests" : [], "topics": [] }
+                           |  }
+                           |}""".stripMargin)
           )
       )
 

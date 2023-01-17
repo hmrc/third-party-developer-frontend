@@ -21,20 +21,17 @@ import play.api.libs.json.Json
 case class Endpoint(verb: String, pathTemplate: String, method: String)
 
 sealed trait Response
-case class Success() extends Response
+case class Success()                  extends Response
 case class Redirect(location: String) extends Response
-case class BadRequest() extends Response
-case class Locked() extends Response
-case class Unauthorized() extends Response
-case class Forbidden() extends Response
-case class NotFound() extends Response
-case class Error(errorMsg: String) extends Response
-case class Unexpected(status: Int) extends Response
+case class BadRequest()               extends Response
+case class Locked()                   extends Response
+case class Unauthorized()             extends Response
+case class Forbidden()                extends Response
+case class NotFound()                 extends Response
+case class Error(errorMsg: String)    extends Response
+case class Unexpected(status: Int)    extends Response
 
-case class RequestValues(endpoint: Endpoint,
-                         pathValues: Map[String, String] = Map.empty,
-                         queryParams: Map[String, String] = Map.empty,
-                         postBody: Map[String, String] = Map.empty) {
+case class RequestValues(endpoint: Endpoint, pathValues: Map[String, String] = Map.empty, queryParams: Map[String, String] = Map.empty, postBody: Map[String, String] = Map.empty) {
 
   override def toString = {
     var path = endpoint.pathTemplate

@@ -16,55 +16,54 @@
 
 package uk.gov.hmrc.thirdpartydeveloperfrontend.controllers
 
-import uk.gov.hmrc.thirdpartydeveloperfrontend.config.ApplicationConfig
-import uk.gov.hmrc.thirdpartydeveloperfrontend.config.ErrorHandler
-import uk.gov.hmrc.thirdpartydeveloperfrontend.config.FraudPreventionConfig
-import uk.gov.hmrc.thirdpartydeveloperfrontend.connectors.ThirdPartyDeveloperConnector
-import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.fraudprevention.FraudPreventionNavLinkHelper
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.apidefinitions.{ApiContext, ApiVersion}
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications._
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.Capabilities.{ManageLockedSubscriptions, SupportsSubscriptions}
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.Permissions.{AdministratorOnly, TeamMembersOnly}
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.DeveloperSession
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.views.SubscriptionRedirect
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.views.SubscriptionRedirect._
-
 import javax.inject.{Inject, Singleton}
+import scala.concurrent.{ExecutionContext, Future}
+
+import views.helper.EnvironmentNameService
+import views.html.include.ChangeSubscriptionConfirmationView
+import views.html.{AddAppSubscriptionsView, ManageSubscriptionsView, SubscribeRequestSubmittedView, UnsubscribeRequestSubmittedView}
+
 import play.api.data.Form
 import play.api.libs.crypto.CookieSigner
 import play.api.libs.json.Json
-import play.api.mvc.{Action, AnyContent, MessagesControllerComponents, Result}
+import play.api.mvc.{Action, AnyContent, Call, MessagesControllerComponents, Result}
 import play.twirl.api.Html
-import uk.gov.hmrc.thirdpartydeveloperfrontend.service._
 import uk.gov.hmrc.http.HeaderCarrier
-import views.helper.EnvironmentNameService
-import views.html.{AddAppSubscriptionsView, ManageSubscriptionsView, SubscribeRequestSubmittedView, UnsubscribeRequestSubmittedView}
-import views.html.include.ChangeSubscriptionConfirmationView
-
-import scala.concurrent.{ExecutionContext, Future}
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.apidefinitions.ApiIdentifier
-import play.api.mvc.Call
 import uk.gov.hmrc.play.bootstrap.controller.WithUnsafeDefaultFormBinding
 
+import uk.gov.hmrc.thirdpartydeveloperfrontend.config.{ApplicationConfig, ErrorHandler, FraudPreventionConfig}
+import uk.gov.hmrc.thirdpartydeveloperfrontend.connectors.ThirdPartyDeveloperConnector
+import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.fraudprevention.FraudPreventionNavLinkHelper
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.apidefinitions.{ApiContext, ApiIdentifier, ApiVersion}
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.Capabilities.{ManageLockedSubscriptions, SupportsSubscriptions}
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.Permissions.{AdministratorOnly, TeamMembersOnly}
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications._
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.DeveloperSession
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.views.SubscriptionRedirect
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.views.SubscriptionRedirect._
+import uk.gov.hmrc.thirdpartydeveloperfrontend.service._
+
 @Singleton
-class SubscriptionsController @Inject()(
-  val developerConnector: ThirdPartyDeveloperConnector,
-  val auditService: AuditService,
-  val errorHandler: ErrorHandler,
-  val applicationService: ApplicationService,
-  val subscriptionsService: SubscriptionsService,
-  val applicationActionService: ApplicationActionService,
-  val sessionService: SessionService,
-  mcc: MessagesControllerComponents,
-  val cookieSigner: CookieSigner,
-  manageSubscriptionsView: ManageSubscriptionsView,
-  addAppSubscriptionsView: AddAppSubscriptionsView,
-  changeSubscriptionConfirmationView: ChangeSubscriptionConfirmationView,
-  unsubscribeRequestSubmittedView: UnsubscribeRequestSubmittedView,
-  subscribeRequestSubmittedView: SubscribeRequestSubmittedView,
-  fraudPreventionConfig: FraudPreventionConfig
-)(implicit val ec: ExecutionContext, val appConfig: ApplicationConfig, val environmentNameService: EnvironmentNameService)
-  extends ApplicationController(mcc)
+class SubscriptionsController @Inject() (
+    val developerConnector: ThirdPartyDeveloperConnector,
+    val auditService: AuditService,
+    val errorHandler: ErrorHandler,
+    val applicationService: ApplicationService,
+    val subscriptionsService: SubscriptionsService,
+    val applicationActionService: ApplicationActionService,
+    val sessionService: SessionService,
+    mcc: MessagesControllerComponents,
+    val cookieSigner: CookieSigner,
+    manageSubscriptionsView: ManageSubscriptionsView,
+    addAppSubscriptionsView: AddAppSubscriptionsView,
+    changeSubscriptionConfirmationView: ChangeSubscriptionConfirmationView,
+    unsubscribeRequestSubmittedView: UnsubscribeRequestSubmittedView,
+    subscribeRequestSubmittedView: SubscribeRequestSubmittedView,
+    fraudPreventionConfig: FraudPreventionConfig
+  )(implicit val ec: ExecutionContext,
+    val appConfig: ApplicationConfig,
+    val environmentNameService: EnvironmentNameService
+  ) extends ApplicationController(mcc)
     with ApplicationHelper with FraudPreventionNavLinkHelper with WithUnsafeDefaultFormBinding {
 
   private def canManagePrivateApiSubscriptionsAction(applicationId: ApplicationId)(fun: ApplicationRequest[AnyContent] => Future[Result]) =
@@ -81,7 +80,16 @@ class SubscriptionsController @Inject()(
       request.application,
       request.developerSession,
       (role: CollaboratorRole, data: PageData, form: Form[EditApplicationForm]) => {
-        manageSubscriptionsView(role, data, form, applicationViewModelFromApplicationRequest, data.subscriptions, data.openAccessApis ,data.app.id, createOptionalFraudPreventionNavLinkViewModel(request.application, request.subscriptions, fraudPreventionConfig))
+        manageSubscriptionsView(
+          role,
+          data,
+          form,
+          applicationViewModelFromApplicationRequest,
+          data.subscriptions,
+          data.openAccessApis,
+          data.app.id,
+          createOptionalFraudPreventionNavLinkViewModel(request.application, request.subscriptions, fraudPreventionConfig)
+        )
       }
     )
   }
@@ -96,11 +104,14 @@ class SubscriptionsController @Inject()(
     )
   }
 
-  def renderSubscriptions(application: Application, user: DeveloperSession, renderHtml: (CollaboratorRole, PageData, Form[EditApplicationForm]) => Html)(
-    implicit request: ApplicationRequest[AnyContent]
-  ): Future[Result] = {
+  def renderSubscriptions(
+      application: Application,
+      user: DeveloperSession,
+      renderHtml: (CollaboratorRole, PageData, Form[EditApplicationForm]) => Html
+    )(implicit request: ApplicationRequest[AnyContent]
+    ): Future[Result] = {
     val subsData = APISubscriptions.groupSubscriptions(request.subscriptions)
-    val form = EditApplicationForm.withData(request.application)
+    val form     = EditApplicationForm.withData(request.application)
 
     val html = renderHtml(request.role, PageData(request.application, subsData, request.openAccessApis), form)
 
@@ -123,7 +134,7 @@ class SubscriptionsController @Inject()(
           def service = if (subscribe) applicationService.subscribeToApi _ else applicationService.unsubscribeFromApi _
 
           service(request.application, apiIdentifier) andThen { case _ => updateCheckInformation(request.application) }
-        case _ =>
+        case _               =>
           Future.successful(redirect(redirectTo, applicationId))
       }
 
@@ -140,15 +151,17 @@ class SubscriptionsController @Inject()(
       ChangeSubscriptionForm.form.bindFromRequest.fold(handleInvalidForm, handleValidForm);
     }
 
-  def requestChangeApiSubscription(applicationId: ApplicationId,
-                                   apiName: String,
-                                   apiContext: ApiContext,
-                                   apiVersion: ApiVersion,
-                                   redirectTo: String,
-                                   call: Call): ApplicationRequest[AnyContent] => Future[Result] =
+  def requestChangeApiSubscription(
+      applicationId: ApplicationId,
+      apiName: String,
+      apiContext: ApiContext,
+      apiVersion: ApiVersion,
+      redirectTo: String,
+      call: Call
+    ): ApplicationRequest[AnyContent] => Future[Result] =
     (request: ApplicationRequest[AnyContent]) => {
       val apiIdentifier = ApiIdentifier(apiContext, apiVersion)
-      implicit val r = request
+      implicit val r    = request
 
       applicationService
         .isSubscribedToApi(request.application.id, apiIdentifier)
@@ -168,32 +181,26 @@ class SubscriptionsController @Inject()(
         )
     }
 
-  def changeLockedApiSubscription(applicationId: ApplicationId,
-                                  apiName: String,
-                                  apiContext: ApiContext,
-                                  apiVersion: ApiVersion,
-                                  redirectTo: String): Action[AnyContent] =
+  def changeLockedApiSubscription(applicationId: ApplicationId, apiName: String, apiContext: ApiContext, apiVersion: ApiVersion, redirectTo: String): Action[AnyContent] =
     canManageLockedApiSubscriptionsAction(applicationId) {
       val call: Call = routes.SubscriptionsController.changeLockedApiSubscriptionAction(applicationId, apiName, apiContext, apiVersion, redirectTo.toString)
       requestChangeApiSubscription(applicationId, apiName, apiContext, apiVersion, redirectTo, call)
     }
 
-  def changePrivateApiSubscription(applicationId: ApplicationId,
-                                   apiName: String,
-                                   apiContext: ApiContext,
-                                   apiVersion: ApiVersion,
-                                   redirectTo: String): Action[AnyContent] =
+  def changePrivateApiSubscription(applicationId: ApplicationId, apiName: String, apiContext: ApiContext, apiVersion: ApiVersion, redirectTo: String): Action[AnyContent] =
     canManagePrivateApiSubscriptionsAction(applicationId) {
       val call: Call = routes.SubscriptionsController.changePrivateApiSubscriptionAction(applicationId, apiName, apiContext, apiVersion, redirectTo)
       requestChangeApiSubscription(applicationId, apiName, apiContext, apiVersion, redirectTo, call)
     }
 
-  def requestChangeApiSubscriptionAction(applicationId: ApplicationId,
-                                         apiName: String,
-                                         apiContext: ApiContext,
-                                         apiVersion: ApiVersion,
-                                         redirectTo: String,
-                                         call: Call): ApplicationRequest[AnyContent] => Future[Result] =
+  def requestChangeApiSubscriptionAction(
+      applicationId: ApplicationId,
+      apiName: String,
+      apiContext: ApiContext,
+      apiVersion: ApiVersion,
+      redirectTo: String,
+      call: Call
+    ): ApplicationRequest[AnyContent] => Future[Result] =
     (request: ApplicationRequest[AnyContent]) => {
       val apiIdentifier = ApiIdentifier(apiContext, apiVersion)
 
@@ -220,7 +227,16 @@ class SubscriptionsController @Inject()(
         Future.successful(
           BadRequest(
             changeSubscriptionConfirmationView(
-              applicationViewModelFromApplicationRequest, formWithErrors, apiName, apiContext, apiVersion, subscribed, redirectTo, call))
+              applicationViewModelFromApplicationRequest,
+              formWithErrors,
+              apiName,
+              apiContext,
+              apiVersion,
+              subscribed,
+              redirectTo,
+              call
+            )
+          )
         )
 
       applicationService
@@ -228,21 +244,13 @@ class SubscriptionsController @Inject()(
         .flatMap(subscribed => ChangeSubscriptionConfirmationForm.form.bindFromRequest.fold(handleInvalidForm(subscribed), handleValidForm(subscribed)))
     }
 
-  def changeLockedApiSubscriptionAction(applicationId: ApplicationId,
-                                        apiName: String,
-                                        apiContext: ApiContext,
-                                        apiVersion: ApiVersion,
-                                        redirectTo: String): Action[AnyContent] =
+  def changeLockedApiSubscriptionAction(applicationId: ApplicationId, apiName: String, apiContext: ApiContext, apiVersion: ApiVersion, redirectTo: String): Action[AnyContent] =
     canManageLockedApiSubscriptionsAction(applicationId) {
       val call: Call = routes.SubscriptionsController.changeLockedApiSubscriptionAction(applicationId, apiName, apiContext, apiVersion, redirectTo)
       requestChangeApiSubscriptionAction(applicationId, apiName, apiContext, apiVersion, redirectTo, call)
     }
 
-  def changePrivateApiSubscriptionAction(applicationId: ApplicationId,
-                                         apiName: String,
-                                         apiContext: ApiContext,
-                                         apiVersion: ApiVersion,
-                                         redirectTo: String): Action[AnyContent] =
+  def changePrivateApiSubscriptionAction(applicationId: ApplicationId, apiName: String, apiContext: ApiContext, apiVersion: ApiVersion, redirectTo: String): Action[AnyContent] =
     canManagePrivateApiSubscriptionsAction(applicationId) {
       val call: Call = routes.SubscriptionsController.changePrivateApiSubscriptionAction(applicationId, apiName, apiContext, apiVersion, redirectTo)
       requestChangeApiSubscriptionAction(applicationId, apiName, apiContext, apiVersion, redirectTo, call)

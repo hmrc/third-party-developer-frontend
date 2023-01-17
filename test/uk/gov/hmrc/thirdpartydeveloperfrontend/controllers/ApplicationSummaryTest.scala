@@ -17,32 +17,45 @@
 package uk.gov.hmrc.thirdpartydeveloperfrontend.controllers
 
 import java.time.{LocalDateTime, Period}
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications._
-import uk.gov.hmrc.thirdpartydeveloperfrontend.utils._
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.Environment.{PRODUCTION, SANDBOX}
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.controllers.ApplicationSummary
+
 import org.scalatest.matchers.should.Matchers
 import org.scalatest.wordspec.AnyWordSpec
+
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.Environment.{PRODUCTION, SANDBOX}
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications._
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.controllers.ApplicationSummary
+import uk.gov.hmrc.thirdpartydeveloperfrontend.utils._
 
 class ApplicationSummaryTest extends AnyWordSpec with Matchers with CollaboratorTracker with LocalUserIdTracker {
 
   "from" should {
     val user = "foo@bar.com".asDeveloperCollaborator
 
-    val serverTokenApplication =
-      new Application(ApplicationId(""), ClientId(""), "", LocalDateTime.now, Some(LocalDateTime.now), Some(LocalDateTime.now), grantLength = Period.ofDays(547), PRODUCTION, collaborators = Set(user))
-    val noServerTokenApplication = new Application(ApplicationId(""), ClientId(""), "", LocalDateTime.now, Some(LocalDateTime.now), None, grantLength = Period.ofDays(547), PRODUCTION, collaborators = Set(user))
+    val serverTokenApplication   =
+      new Application(
+        ApplicationId(""),
+        ClientId(""),
+        "",
+        LocalDateTime.now,
+        Some(LocalDateTime.now),
+        Some(LocalDateTime.now),
+        grantLength = Period.ofDays(547),
+        PRODUCTION,
+        collaborators = Set(user)
+      )
+    val noServerTokenApplication =
+      new Application(ApplicationId(""), ClientId(""), "", LocalDateTime.now, Some(LocalDateTime.now), None, grantLength = Period.ofDays(547), PRODUCTION, collaborators = Set(user))
 
     "set serverTokenUsed if application has a date set for lastAccessTokenUsage" in {
       val summary = ApplicationSummary.from(serverTokenApplication.copy(deployedTo = SANDBOX), user.userId)
 
-      summary.serverTokenUsed shouldBe(true)
+      summary.serverTokenUsed shouldBe (true)
     }
 
     "not set serverTokenUsed if application does not have a date set for lastAccessTokenUsage" in {
       val summary = ApplicationSummary.from(noServerTokenApplication.copy(deployedTo = SANDBOX), user.userId)
 
-      summary.serverTokenUsed shouldBe(false)
+      summary.serverTokenUsed shouldBe (false)
     }
   }
 }

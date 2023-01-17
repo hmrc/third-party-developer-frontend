@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 HM Revenue & Customs
+ * Copyright 2023 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -34,7 +34,7 @@ class ThirdPartyDeveloperDynamicsConnectorISpec extends BaseConnectorIntegration
 
   private val stubConfig = Configuration(
     "microservice.services.third-party-developer.port" -> stubPort,
-    "json.encryption.key" -> "czV2OHkvQj9FKEgrTWJQZVNoVm1ZcTN0Nnc5eiRDJkY="
+    "json.encryption.key"                              -> "czV2OHkvQj9FKEgrTWJQZVNoVm1ZcTN0Nnc5eiRDJkY="
   )
 
   override def fakeApplication(): Application =
@@ -54,8 +54,8 @@ class ThirdPartyDeveloperDynamicsConnectorISpec extends BaseConnectorIntegration
       Ticket("CAS-2", "Title2", None, 1, "id2")
     )
 
-    val customerId = UUID.randomUUID().toString
-    val title = "The Title"
+    val customerId  = UUID.randomUUID().toString
+    val title       = "The Title"
     val description = "The description"
 
     val createIncidentRequest = CreateIncidentRequest(s"/accounts($customerId)", title, description)

@@ -16,27 +16,32 @@
 
 package uk.gov.hmrc.thirdpartydeveloperfrontend.service
 
-import uk.gov.hmrc.apiplatform.modules.mfa.models.MfaId
+import java.util.UUID
+import javax.inject.{Inject, Singleton}
+import scala.concurrent.{ExecutionContext, Future}
+
 import uk.gov.hmrc.http.HeaderCarrier
+
+import uk.gov.hmrc.apiplatform.modules.mfa.models.MfaId
 import uk.gov.hmrc.thirdpartydeveloperfrontend.connectors.ThirdPartyDeveloperConnector
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.InvalidEmail
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.connectors.{AccessCodeAuthenticationRequest, LoginRequest, UserAuthenticationResponse}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.{Session, SessionInvalid, UserId}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.repositories.FlowRepository
 
-import java.util.UUID
-import javax.inject.{Inject, Singleton}
-import scala.concurrent.{ExecutionContext, Future}
-
 @Singleton
-class SessionService @Inject()(val thirdPartyDeveloperConnector: ThirdPartyDeveloperConnector,
-                               val appsByTeamMember: AppsByTeamMemberService,
-                               val flowRepository: FlowRepository)(implicit val ec: ExecutionContext) {
+class SessionService @Inject() (
+    val thirdPartyDeveloperConnector: ThirdPartyDeveloperConnector,
+    val appsByTeamMember: AppsByTeamMemberService,
+    val flowRepository: FlowRepository
+  )(implicit val ec: ExecutionContext
+  ) {
+
   def authenticate(emailAddress: String, password: String, deviceSessionId: Option[UUID])(implicit hc: HeaderCarrier): Future[(UserAuthenticationResponse, UserId)] = {
     for {
-      coreUser <- thirdPartyDeveloperConnector.findUserId(emailAddress).map(_.getOrElse(throw new InvalidEmail))
+      coreUser           <- thirdPartyDeveloperConnector.findUserId(emailAddress).map(_.getOrElse(throw new InvalidEmail))
       mfaMandatedForUser <- appsByTeamMember.fetchProductionSummariesByAdmin(coreUser.id).map(_.nonEmpty)
-      response <- thirdPartyDeveloperConnector.authenticate(LoginRequest(emailAddress, password, mfaMandatedForUser, deviceSessionId))
+      response           <- thirdPartyDeveloperConnector.authenticate(LoginRequest(emailAddress, password, mfaMandatedForUser, deviceSessionId))
     } yield (response, coreUser.id)
   }
 

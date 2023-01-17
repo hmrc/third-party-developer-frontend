@@ -16,36 +16,39 @@
 
 package views.emailpreferences
 
-import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.TaxRegimeEmailPreferencesForm
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.LoggedInState
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.emailpreferences.APICategoryDisplayDetails
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.flows.EmailPreferencesFlowV2
+import scala.collection.JavaConverters._
+
 import org.jsoup.Jsoup
 import org.jsoup.nodes.Document
+import views.helper.CommonViewSpec
+import views.html.emailpreferences.FlowSelectCategoriesView
+
 import play.api.data.Form
 import play.api.mvc.AnyContentAsEmpty
 import play.api.test.FakeRequest
 import play.twirl.api.Html
+
 import uk.gov.hmrc.thirdpartydeveloperfrontend.builder.{DeveloperBuilder, DeveloperSessionBuilder}
+import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.TaxRegimeEmailPreferencesForm
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.LoggedInState
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.emailpreferences.APICategoryDisplayDetails
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.flows.EmailPreferencesFlowV2
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.ViewHelpers._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.{LocalUserIdTracker, WithCSRFAddToken}
-import views.helper.CommonViewSpec
-import views.html.emailpreferences.FlowSelectCategoriesView
-
-import scala.collection.JavaConverters._
 
 class FlowSelectCategoriesViewSpec extends CommonViewSpec
-  with WithCSRFAddToken
-  with LocalUserIdTracker
-  with DeveloperSessionBuilder
-  with DeveloperBuilder {
+    with WithCSRFAddToken
+    with LocalUserIdTracker
+    with DeveloperSessionBuilder
+    with DeveloperBuilder {
 
   trait Setup {
     val form = mock[Form[TaxRegimeEmailPreferencesForm]]
 
     val developerSessionWithoutEmailPreferences =
       buildDeveloperSession(loggedInState = LoggedInState.LOGGED_IN, buildDeveloper("email@example.com", "First Name", "Last Name", None))
-    val emailPreferencesFlow =
+
+    val emailPreferencesFlow                                  =
       EmailPreferencesFlowV2(developerSessionWithoutEmailPreferences.session.sessionId, Set("api1", "api2"), Map.empty, Set.empty, List.empty)
     implicit val request: FakeRequest[AnyContentAsEmpty.type] = FakeRequest().withCSRFToken
 
@@ -90,7 +93,7 @@ class FlowSelectCategoriesViewSpec extends CommonViewSpec
 
   "Email Preferences Select Categories view page" should {
     val categoriesFromAPM = List(APICategoryDisplayDetails("api1", "Api One"), APICategoryDisplayDetails("api2", "Api Two"), APICategoryDisplayDetails("api3", "Api Three"))
-    val usersCategories = Set("api1", "api2")
+    val usersCategories   = Set("api1", "api2")
 
     "render the api categories selection Page with no check boxes selected when no user selected categories passed into the view" in new Setup {
       override val request = FakeRequest().withCSRFToken
@@ -105,7 +108,8 @@ class FlowSelectCategoriesViewSpec extends CommonViewSpec
           messagesProvider.messages,
           developerSessionWithoutEmailPreferences,
           request,
-          appConfig)
+          appConfig
+        )
 
       val document = Jsoup.parse(page.body)
       validateStaticElements(document, categoriesFromAPM)
@@ -126,7 +130,8 @@ class FlowSelectCategoriesViewSpec extends CommonViewSpec
           messagesProvider.messages,
           developerSessionWithoutEmailPreferences,
           request,
-          appConfig)
+          appConfig
+        )
 
       page.contentType should include("text/html")
 
@@ -151,9 +156,10 @@ class FlowSelectCategoriesViewSpec extends CommonViewSpec
           messagesProvider.messages,
           developerSessionWithoutEmailPreferences,
           request,
-          appConfig)
+          appConfig
+        )
 
-      val document = Jsoup.parse(page.body)
+      val document      = Jsoup.parse(page.body)
       validateStaticElements(document, categoriesFromAPM)
       elementIdentifiedByAttrWithValueContainsText(document, "h2", "id", "error-summary-title", "There is a problem") shouldBe false
       val selectedBoxes = document.select("input[type=checkbox][checked]").asScala.toList

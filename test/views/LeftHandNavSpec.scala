@@ -17,32 +17,35 @@
 package views
 
 import java.time.{LocalDateTime, Period, ZoneOffset}
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications._
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.Environment.PRODUCTION
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.LoggedInState
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.controllers.ApplicationViewModel
+import scala.collection.JavaConverters._
+
 import org.jsoup.Jsoup
 import org.jsoup.nodes.Document
-import play.api.test.FakeRequest
-import uk.gov.hmrc.thirdpartydeveloperfrontend.builder.{DeveloperSessionBuilder, DeveloperBuilder}
 import views.helper.CommonViewSpec
 import views.html.include.LeftHandNav
 
-import scala.collection.JavaConverters._
+import play.api.test.FakeRequest
+
+import uk.gov.hmrc.thirdpartydeveloperfrontend.builder.{DeveloperBuilder, DeveloperSessionBuilder}
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.Environment.PRODUCTION
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications._
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.controllers.ApplicationViewModel
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.LoggedInState
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.{CollaboratorTracker, LocalUserIdTracker}
+
 class LeftHandNavSpec extends CommonViewSpec with CollaboratorTracker with LocalUserIdTracker with DeveloperSessionBuilder with DeveloperBuilder {
 
   val leftHandNavView = app.injector.instanceOf[LeftHandNav]
 
   trait Setup {
-    val now = LocalDateTime.now(ZoneOffset.UTC)
-    val applicationId = ApplicationId("std-app-id")
-    val clientId = ClientId("std-client-id")
-    implicit val request = FakeRequest()
-    implicit val loggedIn = buildDeveloperSession(loggedInState = LoggedInState.LOGGED_IN, buildDeveloperWithRandomId( "user@example.com", "Test", "Test", None))
-    val standardApplication = Application(applicationId, clientId, "name", now, Some(now), None, Period.ofDays(547), PRODUCTION, access = Standard())
+    val now                   = LocalDateTime.now(ZoneOffset.UTC)
+    val applicationId         = ApplicationId("std-app-id")
+    val clientId              = ClientId("std-client-id")
+    implicit val request      = FakeRequest()
+    implicit val loggedIn     = buildDeveloperSession(loggedInState = LoggedInState.LOGGED_IN, buildDeveloperWithRandomId("user@example.com", "Test", "Test", None))
+    val standardApplication   = Application(applicationId, clientId, "name", now, Some(now), None, Period.ofDays(547), PRODUCTION, access = Standard())
     val privilegedApplication = Application(applicationId, clientId, "name", now, Some(now), None, Period.ofDays(547), PRODUCTION, access = Privileged())
-    val ropcApplication = Application(applicationId, clientId, "name", now, Some(now), None, Period.ofDays(547), PRODUCTION, access = ROPC())
+    val ropcApplication       = Application(applicationId, clientId, "name", now, Some(now), None, Period.ofDays(547), PRODUCTION, access = ROPC())
 
     def elementExistsById(doc: Document, id: String) = doc.select(s"#$id").asScala.nonEmpty
   }
@@ -105,24 +108,28 @@ class LeftHandNavSpec extends CommonViewSpec with CollaboratorTracker with Local
     }
 
     "include link to push secrets when the application has PPNS fields and the user is an admin or the application is sandbox" in new Setup {
-      val prodAppAsAdmin = standardApplication.copy(deployedTo = Environment.PRODUCTION, collaborators = Set(loggedIn.email.asAdministratorCollaborator))
+      val prodAppAsAdmin  = standardApplication.copy(deployedTo = Environment.PRODUCTION, collaborators = Set(loggedIn.email.asAdministratorCollaborator))
       val sandboxAppAsDev = standardApplication.copy(deployedTo = Environment.SANDBOX, collaborators = Set(loggedIn.email.asDeveloperCollaborator))
 
-      val prodAppAsAdminDocument: Document = Jsoup.parse(leftHandNavView(Some(ApplicationViewModel(prodAppAsAdmin, hasSubscriptionsFields = true, hasPpnsFields = true)), Some("")).body)
-      val sandboxAppAsDevDocument: Document = Jsoup.parse(leftHandNavView(Some(ApplicationViewModel(sandboxAppAsDev, hasSubscriptionsFields = true, hasPpnsFields = true)), Some("")).body)
+      val prodAppAsAdminDocument: Document  =
+        Jsoup.parse(leftHandNavView(Some(ApplicationViewModel(prodAppAsAdmin, hasSubscriptionsFields = true, hasPpnsFields = true)), Some("")).body)
+      val sandboxAppAsDevDocument: Document =
+        Jsoup.parse(leftHandNavView(Some(ApplicationViewModel(sandboxAppAsDev, hasSubscriptionsFields = true, hasPpnsFields = true)), Some("")).body)
 
       elementExistsById(prodAppAsAdminDocument, "nav-manage-push-secrets") shouldBe true
       elementExistsById(sandboxAppAsDevDocument, "nav-manage-push-secrets") shouldBe true
     }
 
     "not include link to push secrets when the application does not have PPNS fields, or it does, but the user is only a developer for a production app" in new Setup {
-      val prodAppAsAdmin = standardApplication.copy(deployedTo = Environment.PRODUCTION, collaborators = Set(loggedIn.email.asAdministratorCollaborator))
+      val prodAppAsAdmin  = standardApplication.copy(deployedTo = Environment.PRODUCTION, collaborators = Set(loggedIn.email.asAdministratorCollaborator))
       val sandboxAppAsDev = standardApplication.copy(deployedTo = Environment.SANDBOX, collaborators = Set(loggedIn.email.asDeveloperCollaborator))
-      val prodAppAsDev = standardApplication.copy(deployedTo = Environment.PRODUCTION, collaborators = Set(loggedIn.email.asDeveloperCollaborator))
+      val prodAppAsDev    = standardApplication.copy(deployedTo = Environment.PRODUCTION, collaborators = Set(loggedIn.email.asDeveloperCollaborator))
 
-      val prodAppAsAdminDocument: Document = Jsoup.parse(leftHandNavView(Some(ApplicationViewModel(prodAppAsAdmin, hasSubscriptionsFields = true, hasPpnsFields = false)), Some("")).body)
-      val sandboxAppAsDevDocument: Document = Jsoup.parse(leftHandNavView(Some(ApplicationViewModel(sandboxAppAsDev, hasSubscriptionsFields = true, hasPpnsFields = false)), Some("")).body)
-      val prodAppAsDevDocument: Document = Jsoup.parse(leftHandNavView(Some(ApplicationViewModel(prodAppAsDev, hasSubscriptionsFields = true, hasPpnsFields = true)), Some("")).body)
+      val prodAppAsAdminDocument: Document  =
+        Jsoup.parse(leftHandNavView(Some(ApplicationViewModel(prodAppAsAdmin, hasSubscriptionsFields = true, hasPpnsFields = false)), Some("")).body)
+      val sandboxAppAsDevDocument: Document =
+        Jsoup.parse(leftHandNavView(Some(ApplicationViewModel(sandboxAppAsDev, hasSubscriptionsFields = true, hasPpnsFields = false)), Some("")).body)
+      val prodAppAsDevDocument: Document    = Jsoup.parse(leftHandNavView(Some(ApplicationViewModel(prodAppAsDev, hasSubscriptionsFields = true, hasPpnsFields = true)), Some("")).body)
 
       elementExistsById(prodAppAsAdminDocument, "nav-manage-push-secrets") shouldBe false
       elementExistsById(sandboxAppAsDevDocument, "nav-manage-push-secrets") shouldBe false
@@ -130,14 +137,22 @@ class LeftHandNavSpec extends CommonViewSpec with CollaboratorTracker with Local
     }
 
     "include links to manage Responsible Individual if the app is approved and has a RI" in new Setup {
-      val responsibleIndividual = ResponsibleIndividual.build("Mr Responsible", "ri@example.com")
+      val responsibleIndividual   = ResponsibleIndividual.build("Mr Responsible", "ri@example.com")
       val importantSubmissionData = ImportantSubmissionData(
-        None, responsibleIndividual, Set.empty, TermsAndConditionsLocation.InDesktopSoftware, PrivacyPolicyLocation.InDesktopSoftware, List.empty
+        None,
+        responsibleIndividual,
+        Set.empty,
+        TermsAndConditionsLocation.InDesktopSoftware,
+        PrivacyPolicyLocation.InDesktopSoftware,
+        List.empty
       )
 
       val application =
-        standardApplication.copy(deployedTo = Environment.PRODUCTION, state = ApplicationState.production("", "", ""),
-          access = Standard(importantSubmissionData = Some(importantSubmissionData)))
+        standardApplication.copy(
+          deployedTo = Environment.PRODUCTION,
+          state = ApplicationState.production("", "", ""),
+          access = Standard(importantSubmissionData = Some(importantSubmissionData))
+        )
 
       val document: Document = Jsoup.parse(leftHandNavView(Some(ApplicationViewModel(application, hasSubscriptionsFields = false, hasPpnsFields = false)), Some("")).body)
 

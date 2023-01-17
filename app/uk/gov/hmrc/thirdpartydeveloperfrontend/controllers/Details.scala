@@ -16,56 +16,55 @@
 
 package uk.gov.hmrc.thirdpartydeveloperfrontend.controllers
 
-import uk.gov.hmrc.thirdpartydeveloperfrontend.config.ApplicationConfig
-import uk.gov.hmrc.thirdpartydeveloperfrontend.config.ErrorHandler
-import uk.gov.hmrc.thirdpartydeveloperfrontend.config.FraudPreventionConfig
-import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.FormKeys.appNameField
-import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.checkpages.{CheckYourAnswersData, CheckYourAnswersForm, DummyCheckYourAnswersForm}
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain._
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications._
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.Capabilities.SupportsDetails
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.Permissions.{ProductionAndAdmin, SandboxOnly}
-
+import java.time.LocalDateTime
 import javax.inject.{Inject, Singleton}
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.controllers.ApplicationViewModel
-import play.api.data.Form
-import play.api.libs.crypto.CookieSigner
-import play.api.mvc._
-import uk.gov.hmrc.thirdpartydeveloperfrontend.service._
-import views.html.{ChangeDetailsView, DetailsView, UpdatePrivacyPolicyLocationView, UpdateTermsAndConditionsLocationView, RequestChangeOfApplicationNameView, ChangeOfApplicationNameConfirmationView}
+import scala.concurrent.Future.successful
+import scala.concurrent.{ExecutionContext, Future}
+
+import cats.data.OptionT
+import cats.instances.future.catsStdInstancesForFuture
+import views.html._
 import views.html.application.PendingApprovalView
 import views.html.checkpages.applicationcheck.UnauthorisedAppDetailsView
 
-import scala.concurrent.{ExecutionContext, Future}
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.subscriptions.DevhubAccessLevel
-import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.fraudprevention.FraudPreventionNavLinkHelper
-import uk.gov.hmrc.apiplatform.modules.submissions.services.SubmissionService
-import cats.data.OptionT
-import cats.instances.future.catsStdInstancesForFuture
-
-import scala.concurrent.Future.successful
-import uk.gov.hmrc.apiplatform.modules.submissions.domain.models.Submission
+import play.api.data.Form
+import play.api.libs.crypto.CookieSigner
+import play.api.mvc._
 import uk.gov.hmrc.play.bootstrap.controller.WithUnsafeDefaultFormBinding
+
+import uk.gov.hmrc.apiplatform.modules.submissions.domain.models.Submission
+import uk.gov.hmrc.apiplatform.modules.submissions.services.SubmissionService
+import uk.gov.hmrc.thirdpartydeveloperfrontend.config.{ApplicationConfig, ErrorHandler, FraudPreventionConfig}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.Details.{Agreement, ApplicationNameModel, TermsOfUseViewModel}
+import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.FormKeys.appNameField
+import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.checkpages.{CheckYourAnswersData, CheckYourAnswersForm, DummyCheckYourAnswersForm}
+import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.fraudprevention.FraudPreventionNavLinkHelper
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.TermsOfUseVersion
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.Capabilities.SupportsDetails
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.Permissions.{ProductionAndAdmin, SandboxOnly}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.PrivacyPolicyLocation.NoneProvided
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications._
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.controllers.ApplicationViewModel
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.subscriptions.DevhubAccessLevel
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.services.TermsOfUseService
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.services.TermsOfUseService.TermsOfUseAgreementDetails
-
-import java.time.LocalDateTime
+import uk.gov.hmrc.thirdpartydeveloperfrontend.service._
 
 object Details {
   case class Agreement(who: String, when: LocalDateTime)
+
   case class TermsOfUseViewModel(
-    exists: Boolean,
-    appUsesOldVersion: Boolean,
-    agreement: Option[Agreement]
-  ) {
+      exists: Boolean,
+      appUsesOldVersion: Boolean,
+      agreement: Option[Agreement]
+    ) {
     lazy val agreementNeeded = exists && !agreement.isDefined
   }
   case class ApplicationNameModel(application: Application)
   case class PrivacyPolicyLocationModel(applicationId: ApplicationId, privacyPolicyUrl: String, isInDesktop: Boolean)
 }
+
 @Singleton
 class Details @Inject() (
     val errorHandler: ErrorHandler,
@@ -85,18 +84,20 @@ class Details @Inject() (
     val fraudPreventionConfig: FraudPreventionConfig,
     submissionService: SubmissionService,
     termsOfUseService: TermsOfUseService
-)(implicit val ec: ExecutionContext, val appConfig: ApplicationConfig)
-    extends ApplicationController(mcc)
-      with FraudPreventionNavLinkHelper
-      with WithUnsafeDefaultFormBinding {
+  )(implicit val ec: ExecutionContext,
+    val appConfig: ApplicationConfig
+  ) extends ApplicationController(mcc)
+    with FraudPreventionNavLinkHelper
+    with WithUnsafeDefaultFormBinding {
 
   def canChangeDetailsAndIsApprovedAction(applicationId: ApplicationId)(fun: ApplicationRequest[AnyContent] => Future[Result]): Action[AnyContent] =
     checkActionForApprovedApps(SupportsDetails, SandboxOnly)(applicationId)(fun)
 
+  // scalastyle:off cyclomatic.complexity method.length
   def details(applicationId: ApplicationId): Action[AnyContent] = whenTeamMemberOnApp(applicationId) { implicit request =>
-    val accessLevel = DevhubAccessLevel.fromRole(request.role)
+    val accessLevel          = DevhubAccessLevel.fromRole(request.role)
     val checkYourAnswersData = CheckYourAnswersData(accessLevel, request.application, request.subscriptions)
-    def appDetailsPage = Ok(
+    def appDetailsPage       = Ok(
       detailsView(
         applicationViewModelFromApplicationRequest,
         buildTermsOfUseViewModel,
@@ -111,14 +112,15 @@ class Details @Inject() (
     request.application.state.name match {
       case State.TESTING =>
         lazy val oldJourney =
-          if (request.role.isAdministrator)
+          if (request.role.isAdministrator) {
             Redirect(uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.checkpages.routes.ApplicationCheck.requestCheckPage(request.application.id))
-          else
+          } else {
             Ok(unauthorisedAppDetailsView(request.application.name, request.application.adminEmails))
+          }
 
         lazy val newUpliftJourney = (s: Submission) =>
           if (request.role.isAdministrator) {
-            if(s.status.isAnsweredCompletely) {
+            if (s.status.isAnsweredCompletely) {
               Redirect(uk.gov.hmrc.apiplatform.modules.submissions.controllers.routes.CheckAnswersController.checkAnswersPage(applicationId))
             } else {
               Redirect(uk.gov.hmrc.apiplatform.modules.submissions.controllers.routes.ProdCredsChecklistController.productionCredentialsChecklistPage(applicationId))
@@ -130,7 +132,7 @@ class Details @Inject() (
         OptionT(submissionService.fetchLatestSubmission(applicationId)).fold(oldJourney)(newUpliftJourney)
 
       case State.PENDING_RESPONSIBLE_INDIVIDUAL_VERIFICATION | State.PENDING_GATEKEEPER_APPROVAL | State.PENDING_REQUESTER_VERIFICATION => {
-        lazy val oldJourney = 
+        lazy val oldJourney =
           Ok(
             pendingApprovalView(
               checkYourAnswersData,
@@ -138,16 +140,15 @@ class Details @Inject() (
             )
           )
 
-
         lazy val newUpliftJourney = (s: Submission) =>
           Redirect(uk.gov.hmrc.apiplatform.modules.submissions.controllers.routes.CredentialsRequestedController.credentialsRequestedPage(applicationId))
 
-        OptionT(submissionService.fetchLatestSubmission(applicationId)).fold(oldJourney)(newUpliftJourney)    
+        OptionT(submissionService.fetchLatestSubmission(applicationId)).fold(oldJourney)(newUpliftJourney)
       }
 
       case State.PRE_PRODUCTION =>
         successful(request.queryString.contains("forceAppDetails") match {
-          case true => appDetailsPage
+          case true  => appDetailsPage
           case false => Redirect(uk.gov.hmrc.apiplatform.modules.submissions.controllers.routes.StartUsingYourApplicationController.startUsingYourApplicationPage(applicationId))
         })
 
@@ -158,19 +159,20 @@ class Details @Inject() (
         successful(BadRequest)
     }
   }
+  // scalastyle:on cyclomatic.complexity method.length
 
   private def buildTermsOfUseViewModel()(implicit request: ApplicationRequest[AnyContent]): TermsOfUseViewModel = {
     val application = request.application
 
     val latestTermsOfUseAgreementDetails = termsOfUseService.getAgreementDetails(application).lastOption
 
-    val hasTermsOfUse = ! application.deployedTo.isSandbox && application.access.accessType.isStandard
+    val hasTermsOfUse = !application.deployedTo.isSandbox && application.access.accessType.isStandard
     latestTermsOfUseAgreementDetails match {
       case Some(TermsOfUseAgreementDetails(emailAddress, maybeName, date, maybeVersionString)) => {
         val maybeVersion = maybeVersionString.flatMap(TermsOfUseVersion.fromVersionString(_))
         TermsOfUseViewModel(hasTermsOfUse, maybeVersion.contains(TermsOfUseVersion.OLD_JOURNEY), Some(Agreement(maybeName.getOrElse(emailAddress), date)))
       }
-      case _ => TermsOfUseViewModel(hasTermsOfUse, false, None)
+      case _                                                                                   => TermsOfUseViewModel(hasTermsOfUse, false, None)
     }
   }
 
@@ -178,8 +180,7 @@ class Details @Inject() (
     Future.successful(Ok(changeDetailsView(EditApplicationForm.withData(request.application), applicationViewModelFromApplicationRequest)))
   }
 
-  private def updateApplication(updateRequest: UpdateApplicationRequest)
-                               (implicit request: ApplicationRequest[AnyContent]): Future[ApplicationUpdateSuccessful] = {
+  private def updateApplication(updateRequest: UpdateApplicationRequest)(implicit request: ApplicationRequest[AnyContent]): Future[ApplicationUpdateSuccessful] = {
     applicationService.update(updateRequest)
   }
 
@@ -220,11 +221,11 @@ class Details @Inject() (
   def updatePrivacyPolicyLocation(applicationId: ApplicationId): Action[AnyContent] = canChangeProductionDetailsAndIsApprovedAction(applicationId) { implicit request =>
     val application = request.application
     application.access match {
-      case Standard(_,_,_,_,_,Some(ImportantSubmissionData(_, _, _, _, privacyPolicyLocation, _))) =>
+      case Standard(_, _, _, _, _, Some(ImportantSubmissionData(_, _, _, _, privacyPolicyLocation, _))) =>
         Future.successful(Ok(updatePrivacyPolicyLocationView(ChangeOfPrivacyPolicyLocationForm.withNewJourneyData(privacyPolicyLocation), applicationId)))
-      case Standard(_,_,maybePrivacyPolicyUrl,_,_,None) =>
+      case Standard(_, _, maybePrivacyPolicyUrl, _, _, None)                                            =>
         Future.successful(Ok(updatePrivacyPolicyLocationView(ChangeOfPrivacyPolicyLocationForm.withOldJourneyData(maybePrivacyPolicyUrl), applicationId)))
-      case _ => Future.successful(BadRequest)
+      case _                                                                                            => Future.successful(BadRequest)
     }
   }
 
@@ -236,8 +237,8 @@ class Details @Inject() (
 
       val oldLocation = application.access match {
         case Standard(_, _, _, _, _, Some(ImportantSubmissionData(_, _, _, _, privacyPolicyLocation, _))) => privacyPolicyLocation
-        case Standard(_, _, Some(privacyPolicyUrl), _, _, None) => PrivacyPolicyLocation.Url(privacyPolicyUrl)
-        case _ => NoneProvided
+        case Standard(_, _, Some(privacyPolicyUrl), _, _, None)                                           => PrivacyPolicyLocation.Url(privacyPolicyUrl)
+        case _                                                                                            => NoneProvided
       }
       val newLocation = form.toLocation
 
@@ -261,11 +262,11 @@ class Details @Inject() (
   def updateTermsAndConditionsLocation(applicationId: ApplicationId): Action[AnyContent] = canChangeProductionDetailsAndIsApprovedAction(applicationId) { implicit request =>
     val application = request.application
     application.access match {
-      case Standard(_,_,_,_,_,Some(ImportantSubmissionData(_, _, _, termsAndConditionsLocation, _, _))) =>
+      case Standard(_, _, _, _, _, Some(ImportantSubmissionData(_, _, _, termsAndConditionsLocation, _, _))) =>
         Future.successful(Ok(updateTermsAndConditionsLocationView(ChangeOfTermsAndConditionsLocationForm.withNewJourneyData(termsAndConditionsLocation), applicationId)))
-      case Standard(_,maybeTermsAndConditionsUrl,_,_,_,None) =>
+      case Standard(_, maybeTermsAndConditionsUrl, _, _, _, None)                                            =>
         Future.successful(Ok(updateTermsAndConditionsLocationView(ChangeOfTermsAndConditionsLocationForm.withOldJourneyData(maybeTermsAndConditionsUrl), applicationId)))
-      case _ => Future.successful(BadRequest)
+      case _                                                                                                 => Future.successful(BadRequest)
     }
   }
 
@@ -277,8 +278,8 @@ class Details @Inject() (
 
       val oldLocation = application.access match {
         case Standard(_, _, _, _, _, Some(ImportantSubmissionData(_, _, _, termsAndConditionsLocation, _, _))) => termsAndConditionsLocation
-        case Standard(_,Some(termsAndConditionsUrl),_,_,_,None) => TermsAndConditionsLocation.Url(termsAndConditionsUrl)
-        case _ => NoneProvided
+        case Standard(_, Some(termsAndConditionsUrl), _, _, _, None)                                           => TermsAndConditionsLocation.Url(termsAndConditionsUrl)
+        case _                                                                                                 => NoneProvided
       }
       val newLocation = form.toLocation
 
@@ -299,51 +300,51 @@ class Details @Inject() (
     ChangeOfTermsAndConditionsLocationForm.form.bindFromRequest.fold(handleInvalidForm, handleValidForm)
   }
 
-
   private def errorView(id: ApplicationId, form: Form[EditApplicationForm], applicationViewModel: ApplicationViewModel)(implicit request: ApplicationRequest[_]): Future[Result] =
     Future.successful(BadRequest(changeDetailsView(form, applicationViewModel)))
 
   def requestChangeOfAppName(applicationId: ApplicationId): Action[AnyContent] = canChangeProductionDetailsAndIsApprovedAction(applicationId) { implicit request =>
-      Future.successful(Ok(requestChangeOfApplicationNameView(ChangeOfApplicationNameForm.withData(request.application.name), ApplicationNameModel(request.application))))
+    Future.successful(Ok(requestChangeOfApplicationNameView(ChangeOfApplicationNameForm.withData(request.application.name), ApplicationNameModel(request.application))))
   }
 
   def requestChangeOfAppNameAction(applicationId: ApplicationId): Action[AnyContent] = canChangeProductionDetailsAndIsApprovedAction(applicationId) { implicit request =>
-      val application = request.application
+    val application = request.application
 
-      def handleValidForm(form: ChangeOfApplicationNameForm): Future[Result] = {
-        val requestForm = ChangeOfApplicationNameForm.form.bindFromRequest
-        val newApplicationName = form.applicationName.trim()
+    def handleValidForm(form: ChangeOfApplicationNameForm): Future[Result] = {
+      val requestForm        = ChangeOfApplicationNameForm.form.bindFromRequest
+      val newApplicationName = form.applicationName.trim()
 
-        if (newApplicationName.equalsIgnoreCase(application.name)) {
+      if (newApplicationName.equalsIgnoreCase(application.name)) {
 
-          def unchangedNameCheckForm: Form[ChangeOfApplicationNameForm] =
-            requestForm.withError(appNameField, "application.name.unchanged.error")
-          Future.successful(BadRequest(requestChangeOfApplicationNameView(unchangedNameCheckForm, ApplicationNameModel(request.application))))
+        def unchangedNameCheckForm: Form[ChangeOfApplicationNameForm] =
+          requestForm.withError(appNameField, "application.name.unchanged.error")
+        Future.successful(BadRequest(requestChangeOfApplicationNameView(unchangedNameCheckForm, ApplicationNameModel(request.application))))
 
-        } else {
+      } else {
 
-          applicationService
-            .isApplicationNameValid(newApplicationName, application.deployedTo, Some(applicationId))
-            .flatMap({
+        applicationService
+          .isApplicationNameValid(newApplicationName, application.deployedTo, Some(applicationId))
+          .flatMap({
 
-              case Valid =>
-                for {
-                  _ <- applicationService.requestProductonApplicationNameChange(application, newApplicationName, request.developerSession.displayedName, request.developerSession.email)
-                } yield Ok(changeOfApplicationNameConfirmationView(ApplicationNameModel(request.application), newApplicationName))
+            case Valid =>
+              for {
+                _ <-
+                  applicationService.requestProductonApplicationNameChange(application, newApplicationName, request.developerSession.displayedName, request.developerSession.email)
+              } yield Ok(changeOfApplicationNameConfirmationView(ApplicationNameModel(request.application), newApplicationName))
 
-              case invalid: Invalid =>
-                def invalidNameCheckForm: Form[ChangeOfApplicationNameForm] =
-                  requestForm.withError(appNameField, invalid.validationErrorMessageKey)
+            case invalid: Invalid =>
+              def invalidNameCheckForm: Form[ChangeOfApplicationNameForm] =
+                requestForm.withError(appNameField, invalid.validationErrorMessageKey)
 
-                Future.successful(BadRequest(requestChangeOfApplicationNameView(invalidNameCheckForm, ApplicationNameModel(request.application))))
+              Future.successful(BadRequest(requestChangeOfApplicationNameView(invalidNameCheckForm, ApplicationNameModel(request.application))))
           })
-        }
       }
+    }
 
-      def handleInvalidForm(formWithErrors: Form[ChangeOfApplicationNameForm]): Future[Result] =
-        Future.successful(BadRequest(requestChangeOfApplicationNameView(formWithErrors, ApplicationNameModel(request.application))))
+    def handleInvalidForm(formWithErrors: Form[ChangeOfApplicationNameForm]): Future[Result] =
+      Future.successful(BadRequest(requestChangeOfApplicationNameView(formWithErrors, ApplicationNameModel(request.application))))
 
-      ChangeOfApplicationNameForm.form.bindFromRequest.fold(handleInvalidForm, handleValidForm)
+    ChangeOfApplicationNameForm.form.bindFromRequest.fold(handleInvalidForm, handleValidForm)
   }
 
 }

@@ -16,22 +16,21 @@
 
 package uk.gov.hmrc.thirdpartydeveloperfrontend.builder
 
-import java.time.{Period, ZoneOffset}
+import java.time.{LocalDateTime, Period, ZoneOffset}
 import java.util.UUID.randomUUID
-import java.time.LocalDateTime
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications._
+
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.apidefinitions._
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.subscriptions.{FieldName, FieldValue, Fields}
-import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.CollaboratorTracker
-import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.UserIdTracker
+import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.{CollaboratorTracker, UserIdTracker}
 
 trait ApplicationBuilder extends CollaboratorTracker {
   self: UserIdTracker =>
 
   def buildApplication(appOwnerEmail: String): Application = {
 
-    val appId = ApplicationId("appid-" + randomUUID.toString)
-    val clientId = ClientId("clientid-" + randomUUID.toString)
+    val appId        = ApplicationId("appid-" + randomUUID.toString)
+    val clientId     = ClientId("clientid-" + randomUUID.toString)
     val appOwnerName = "App owner name"
 
     Application(
@@ -63,8 +62,7 @@ trait ApplicationBuilder extends CollaboratorTracker {
     ApplicationWithSubscriptionData(application)
   }
 
-
-  def buildSubscriptions(apiContext: ApiContext, apiVersion: ApiVersion): Set[ApiIdentifier] = 
+  def buildSubscriptions(apiContext: ApiContext, apiVersion: ApiVersion): Set[ApiIdentifier] =
     Set(
       ApiIdentifier(apiContext, apiVersion)
     )
@@ -73,9 +71,11 @@ trait ApplicationBuilder extends CollaboratorTracker {
     Map(apiContext -> Map(apiVersion -> fields))
   }
 
-  def buildApplicationWithSubscriptionData(apiContext: ApiContext = ApiContext.random,
-                                          apiVersion: ApiVersion = ApiVersion.random,
-                                          fields: Fields.Alias = Map(FieldName.random -> FieldValue.random, FieldName.random -> FieldValue.random)): ApplicationWithSubscriptionData = {
+  def buildApplicationWithSubscriptionData(
+      apiContext: ApiContext = ApiContext.random,
+      apiVersion: ApiVersion = ApiVersion.random,
+      fields: Fields.Alias = Map(FieldName.random -> FieldValue.random, FieldName.random -> FieldValue.random)
+    ): ApplicationWithSubscriptionData = {
     ApplicationWithSubscriptionData(
       buildApplication("email@example.com"),
       buildSubscriptions(apiContext, apiVersion),

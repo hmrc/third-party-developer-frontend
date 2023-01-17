@@ -16,29 +16,31 @@
 
 package views
 
+import scala.collection.JavaConverters._
+
 import org.jsoup.Jsoup
+import views.helper.CommonViewSpec
+import views.html.SelectLoginMfaView
+
 import play.api.mvc.AnyContentAsEmpty
 import play.api.test.{FakeRequest, StubMessagesFactory}
+
 import uk.gov.hmrc.apiplatform.modules.mfa.forms.SelectLoginMfaForm
 import uk.gov.hmrc.apiplatform.modules.mfa.models.MfaId
 import uk.gov.hmrc.thirdpartydeveloperfrontend.builder.{DeveloperBuilder, DeveloperSessionBuilder}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.{LocalUserIdTracker, WithCSRFAddToken}
-import views.helper.CommonViewSpec
-import views.html.SelectLoginMfaView
-
-import scala.collection.JavaConverters._
 
 class SelectLoginMfaViewSpec extends CommonViewSpec
-  with WithCSRFAddToken
-  with DeveloperSessionBuilder
-  with DeveloperBuilder
-  with LocalUserIdTracker with StubMessagesFactory {
+    with WithCSRFAddToken
+    with DeveloperSessionBuilder
+    with DeveloperBuilder
+    with LocalUserIdTracker with StubMessagesFactory {
 
   implicit val request: FakeRequest[AnyContentAsEmpty.type] = FakeRequest()
 
   val selectLoginMfaView: SelectLoginMfaView = app.injector.instanceOf[SelectLoginMfaView]
-  val authAppMfaId: MfaId = MfaId.random
-  val smsMfaId: MfaId = MfaId.random
+  val authAppMfaId: MfaId                    = MfaId.random
+  val smsMfaId: MfaId                        = MfaId.random
 
   "SelectLoginMfaView" should {
     "render correctly with Text Message selected as default" in {

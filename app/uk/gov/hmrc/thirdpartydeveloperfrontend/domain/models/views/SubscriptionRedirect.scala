@@ -23,7 +23,7 @@ sealed trait SubscriptionRedirect extends EnumEntry
 object SubscriptionRedirect extends PlayEnum[SubscriptionRedirect] {
   val values = findValues
 
-  final case object MANAGE_PAGE extends SubscriptionRedirect
+  final case object MANAGE_PAGE            extends SubscriptionRedirect
   final case object APPLICATION_CHECK_PAGE extends SubscriptionRedirect
   final case object API_SUBSCRIPTIONS_PAGE extends SubscriptionRedirect
 }

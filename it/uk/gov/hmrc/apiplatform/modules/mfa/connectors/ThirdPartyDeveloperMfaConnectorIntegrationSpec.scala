@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 HM Revenue & Customs
+ * Copyright 2023 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -34,10 +34,11 @@ import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.{LocalUserIdTracker, WireMo
 import java.util.UUID
 
 class ThirdPartyDeveloperMfaConnectorIntegrationSpec extends BaseConnectorIntegrationSpec
-  with GuiceOneAppPerSuite with DeveloperBuilder with LocalUserIdTracker with WireMockExtensions {
+    with GuiceOneAppPerSuite with DeveloperBuilder with LocalUserIdTracker with WireMockExtensions {
+
   private val stubConfig = Configuration(
     "microservice.services.third-party-developer.port" -> stubPort,
-    "json.encryption.key" -> "czV2OHkvQj9FKEgrTWJQZVNoVm1ZcTN0Nnc5eiRDJkY="
+    "json.encryption.key"                              -> "czV2OHkvQj9FKEgrTWJQZVNoVm1ZcTN0Nnc5eiRDJkY="
   )
 
   override def fakeApplication(): Application =
@@ -51,16 +52,16 @@ class ThirdPartyDeveloperMfaConnectorIntegrationSpec extends BaseConnectorIntegr
     implicit val hc: HeaderCarrier = HeaderCarrier()
 
     val userEmail = "thirdpartydeveloper@example.com"
-    val userId = idOf(userEmail)
-    val mfaId = MfaId.random
+    val userId    = idOf(userEmail)
+    val mfaId     = MfaId.random
 
-    val userPassword = "password1!"
-    val sessionId = "sessionId"
-    val loginRequest = LoginRequest(userEmail, userPassword, mfaMandatedForUser = false, None)
-    val deviceSessionId = UUID.randomUUID()
-    val deviceSession = DeviceSession(deviceSessionId, userId)
+    val userPassword           = "password1!"
+    val sessionId              = "sessionId"
+    val loginRequest           = LoginRequest(userEmail, userPassword, mfaMandatedForUser = false, None)
+    val deviceSessionId        = UUID.randomUUID()
+    val deviceSession          = DeviceSession(deviceSessionId, userId)
     val createDeviceSessionUrl = s"/device-session/user/${userId.value}"
-    val fetchDeviceSessionUrl = s"/device-session/$deviceSessionId/user/${userId.value}"
+    val fetchDeviceSessionUrl  = s"/device-session/$deviceSessionId/user/${userId.value}"
     val deleteDeviceSessionUrl = s"/device-session/$deviceSessionId"
 
     val underTest: ThirdPartyDeveloperMfaConnector = app.injector.instanceOf[ThirdPartyDeveloperMfaConnector]
@@ -82,7 +83,8 @@ class ThirdPartyDeveloperMfaConnectorIntegrationSpec extends BaseConnectorIntegr
                 s"""{
                    |  "deviceSessionId": "$deviceSessionId",
                    |  "userId": "${userId.value}"
-                   |}""".stripMargin)
+                   |}""".stripMargin
+              )
           )
       )
       val result = await(underTest.createDeviceSession(userId))
@@ -132,7 +134,8 @@ class ThirdPartyDeveloperMfaConnectorIntegrationSpec extends BaseConnectorIntegr
                 s"""{
                    |  "deviceSessionId": "$deviceSessionId",
                    |  "userId": "${userId.value}"
-                   |}""".stripMargin)
+                   |}""".stripMargin
+              )
           )
       )
 
@@ -196,7 +199,7 @@ class ThirdPartyDeveloperMfaConnectorIntegrationSpec extends BaseConnectorIntegr
 
   "createMfaAuthApp" should {
     "return 201 with RegisterAuthAppResponse" in new Setup {
-      val url = s"/developer/${userId.value}/mfa/auth-app"
+      val url      = s"/developer/${userId.value}/mfa/auth-app"
       val response = RegisterAuthAppResponse(mfaId, "secret")
 
       stubFor(
@@ -225,8 +228,8 @@ class ThirdPartyDeveloperMfaConnectorIntegrationSpec extends BaseConnectorIntegr
 
   "createMfaSms" should {
     val mobileNumber = "0123456789"
-    val request = CreateMfaSmsRequest(mobileNumber)
-    val response = RegisterSmsResponse(mfaId = MfaId.random, mobileNumber = mobileNumber)
+    val request      = CreateMfaSmsRequest(mobileNumber)
+    val response     = RegisterSmsResponse(mfaId = MfaId.random, mobileNumber = mobileNumber)
 
     "return 201 with RegisterSmsResponse" in new Setup {
       val url = s"/developer/${userId.value}/mfa/sms"
@@ -270,7 +273,7 @@ class ThirdPartyDeveloperMfaConnectorIntegrationSpec extends BaseConnectorIntegr
   }
 
   "verify MFA" should {
-    val code = "12341234"
+    val code             = "12341234"
     val verifyMfaRequest = VerifyMfaRequest(code)
 
     "return false if verification fails due to InvalidCode" in new Setup {
@@ -385,7 +388,7 @@ class ThirdPartyDeveloperMfaConnectorIntegrationSpec extends BaseConnectorIntegr
   }
 
   "change MFA name" should {
-    val updatedName = "updated name"
+    val updatedName          = "updated name"
     val changeMfaNameRequest = ChangeMfaNameRequest(updatedName)
 
     "return true if call to backend is successful" in new Setup {

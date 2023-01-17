@@ -16,53 +16,56 @@
 
 package uk.gov.hmrc.thirdpartydeveloperfrontend.service
 
+import javax.inject.{Inject, Singleton}
+import scala.concurrent.{ExecutionContext, Future}
+
 import cats.data.OptionT
+
+import uk.gov.hmrc.http.HeaderCarrier
+
 import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.{ApplicationRequest, UserRequest}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.apidefinitions._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.subscriptions.ApiSubscriptionFields._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.subscriptions._
-import uk.gov.hmrc.http.HeaderCarrier
-
-import javax.inject.{Inject, Singleton}
-import scala.concurrent.{ExecutionContext, Future}
 
 @Singleton
-class ApplicationActionService @Inject()(
-  applicationService: ApplicationService,
-  subscriptionFieldsService: SubscriptionFieldsService,
-  openAccessApisService: OpenAccessApiService
-)(implicit ec: ExecutionContext)  {
+class ApplicationActionService @Inject() (
+    applicationService: ApplicationService,
+    subscriptionFieldsService: SubscriptionFieldsService,
+    openAccessApisService: OpenAccessApiService
+  )(implicit ec: ExecutionContext
+  ) {
 
   def process[A](applicationId: ApplicationId, userRequest: UserRequest[A])(implicit hc: HeaderCarrier): OptionT[Future, ApplicationRequest[A]] = {
     import cats.implicits._
 
     for {
-        applicationWithSubs <- OptionT(applicationService.fetchByApplicationId(applicationId))
-        application = applicationWithSubs.application
-        environment = application.deployedTo
-        fieldDefinitions <- OptionT.liftF(subscriptionFieldsService.fetchAllFieldDefinitions(environment))
-        openAccessApis <- OptionT.liftF(openAccessApisService.fetchAllOpenAccessApis(environment))
-        subscriptionData <- OptionT.liftF(subscriptionFieldsService.fetchAllPossibleSubscriptions(applicationId))
-        subs = toApiSubscriptionStatusList(applicationWithSubs, fieldDefinitions, subscriptionData)
-        role <- OptionT.fromOption[Future](application.role(userRequest.developerSession.developer.email))
-      } yield
-        new ApplicationRequest(application, environment, subs, openAccessApis, role, userRequest)
+      applicationWithSubs <- OptionT(applicationService.fetchByApplicationId(applicationId))
+      application          = applicationWithSubs.application
+      environment          = application.deployedTo
+      fieldDefinitions    <- OptionT.liftF(subscriptionFieldsService.fetchAllFieldDefinitions(environment))
+      openAccessApis      <- OptionT.liftF(openAccessApisService.fetchAllOpenAccessApis(environment))
+      subscriptionData    <- OptionT.liftF(subscriptionFieldsService.fetchAllPossibleSubscriptions(applicationId))
+      subs                 = toApiSubscriptionStatusList(applicationWithSubs, fieldDefinitions, subscriptionData)
+      role                <- OptionT.fromOption[Future](application.role(userRequest.developerSession.developer.email))
+    } yield new ApplicationRequest(application, environment, subs, openAccessApis, role, userRequest)
   }
 
   def toApiSubscriptionStatusList(
-    application: ApplicationWithSubscriptionData,
-    subscriptionFieldDefinitions: Map[ApiContext, Map[ApiVersion, Map[FieldName, SubscriptionFieldDefinition]]],
-    summaryApiDefinitions: Map[ApiContext, ApiData] ): List[APISubscriptionStatus] = {
+      application: ApplicationWithSubscriptionData,
+      subscriptionFieldDefinitions: Map[ApiContext, Map[ApiVersion, Map[FieldName, SubscriptionFieldDefinition]]],
+      summaryApiDefinitions: Map[ApiContext, ApiData]
+    ): List[APISubscriptionStatus] = {
 
     def handleContext(context: ApiContext, cdata: ApiData): List[APISubscriptionStatus] = {
       def handleVersion(version: ApiVersion, vdata: VersionData): APISubscriptionStatus = {
         def zipDefinitionsAndValues(): List[SubscriptionFieldValue] = {
           val fieldNameToDefinition = subscriptionFieldDefinitions.getOrElse(context, Map.empty).getOrElse(version, Map.empty)
-          val fieldNameToValue = application.subscriptionFieldValues.getOrElse(context, Map.empty).getOrElse(version, Map.empty)
+          val fieldNameToValue      = application.subscriptionFieldValues.getOrElse(context, Map.empty).getOrElse(version, Map.empty)
 
           fieldNameToDefinition.toList.map {
-            case (n,d) => SubscriptionFieldValue(d, fieldNameToValue.getOrElse(n, FieldValue.empty))
+            case (n, d) => SubscriptionFieldValue(d, fieldNameToValue.getOrElse(n, FieldValue.empty))
           }
         }
 
@@ -75,7 +78,7 @@ class ApplicationActionService @Inject()(
             status = vdata.status,
             access = Some(vdata.access)
           ),
-          subscribed = application.subscriptions.contains(ApiIdentifier(context,version)),
+          subscribed = application.subscriptions.contains(ApiIdentifier(context, version)),
           requiresTrust = false, // Because these are filtered out
           fields = SubscriptionFieldsWrapper(
             applicationId = application.application.id,
@@ -91,12 +94,12 @@ class ApplicationActionService @Inject()(
       val orderDescending: Ordering[ApiVersion] = (x: ApiVersion, y: ApiVersion) => y.value.compareTo(x.value)
 
       cdata.versions.toList.sortBy(_._1)(orderDescending).map {
-        case (k,v) => handleVersion(k,v)
+        case (k, v) => handleVersion(k, v)
       }
     }
 
     summaryApiDefinitions.toList.flatMap {
-      case (k,v) => handleContext(k,v)
+      case (k, v) => handleContext(k, v)
     }
   }
 

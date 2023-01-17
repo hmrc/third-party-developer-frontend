@@ -16,29 +16,32 @@
 
 package views.emailpreferences
 
+import scala.collection.JavaConverters._
+
+import org.jsoup.Jsoup
+import org.jsoup.nodes.Document
+import views.helper.CommonViewSpec
+import views.html.emailpreferences.FlowSelectTopicsView
+
+import play.api.mvc.AnyContentAsEmpty
+import play.api.test.FakeRequest
+
+import uk.gov.hmrc.thirdpartydeveloperfrontend.builder.{DeveloperBuilder, DeveloperSessionBuilder}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.SelectedTopicsEmailPreferencesForm
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.LoggedInState
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.emailpreferences.EmailTopic
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.emailpreferences.EmailTopic.{BUSINESS_AND_POLICY, EVENT_INVITES}
-import org.jsoup.Jsoup
-import org.jsoup.nodes.Document
-import play.api.mvc.AnyContentAsEmpty
-import play.api.test.FakeRequest
-import uk.gov.hmrc.thirdpartydeveloperfrontend.builder.{DeveloperBuilder, DeveloperSessionBuilder}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.{LocalUserIdTracker, WithCSRFAddToken}
-import views.helper.CommonViewSpec
-import views.html.emailpreferences.FlowSelectTopicsView
-
-import scala.collection.JavaConverters._
 
 class FlowSelectTopicsViewSpec extends CommonViewSpec
-  with WithCSRFAddToken
-  with LocalUserIdTracker
-  with DeveloperSessionBuilder
-  with DeveloperBuilder {
+    with WithCSRFAddToken
+    with LocalUserIdTracker
+    with DeveloperSessionBuilder
+    with DeveloperBuilder {
 
   trait Setup {
-    val developerSessionWithoutEmailPreferences =
+
+    val developerSessionWithoutEmailPreferences               =
       buildDeveloperSession(loggedInState = LoggedInState.LOGGED_IN, buildDeveloper("email@example.com", "First Name", "Last Name", None))
     implicit val request: FakeRequest[AnyContentAsEmpty.type] = FakeRequest().withCSRFToken
 
@@ -80,14 +83,15 @@ class FlowSelectTopicsViewSpec extends CommonViewSpec
   "Email Preferences Select Topics view page" should {
 
     "render the topics selection Page with no check boxes selected when no user selected topics passed into the view" in new Setup {
-      val page =
+      val page     =
         flowSelectTopicsView.render(
           SelectedTopicsEmailPreferencesForm.form,
           Set.empty,
           messagesProvider.messages,
           developerSessionWithoutEmailPreferences,
           request,
-          appConfig)
+          appConfig
+        )
       val document = Jsoup.parse(page.body)
       validateStaticElements(document)
       document.select("input[type=checkbox][checked]").asScala.toList shouldBe List.empty
@@ -95,10 +99,16 @@ class FlowSelectTopicsViewSpec extends CommonViewSpec
 
     "render the topics selection Page with boxes selected when user selected topics passed to the view" in new Setup {
       val usersTopics = Set(BUSINESS_AND_POLICY.value, EVENT_INVITES.value)
-      val page =
+      val page        =
         flowSelectTopicsView.render(
-          SelectedTopicsEmailPreferencesForm.form, usersTopics, messagesProvider.messages, developerSessionWithoutEmailPreferences, request, appConfig)
-      val document = Jsoup.parse(page.body)
+          SelectedTopicsEmailPreferencesForm.form,
+          usersTopics,
+          messagesProvider.messages,
+          developerSessionWithoutEmailPreferences,
+          request,
+          appConfig
+        )
+      val document    = Jsoup.parse(page.body)
       validateStaticElements(document)
 
       val selectedBoxes = document.select("input[type=checkbox][checked]").asScala.toList

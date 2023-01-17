@@ -21,6 +21,6 @@ import play.api.mvc.Call
 sealed trait NoSubscriptionFieldsRefinerBehaviour
 
 object NoSubscriptionFieldsRefinerBehaviour {
-  case object BadRequest extends NoSubscriptionFieldsRefinerBehaviour
+  case object BadRequest         extends NoSubscriptionFieldsRefinerBehaviour
   case class Redirect(url: Call) extends NoSubscriptionFieldsRefinerBehaviour
 }

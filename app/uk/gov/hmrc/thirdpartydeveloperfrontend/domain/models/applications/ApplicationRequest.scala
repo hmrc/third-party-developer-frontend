@@ -16,16 +16,17 @@
 
 package uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications
 
-import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers._
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.DeveloperSession
 import play.api.libs.json.Json
+
+import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.apidefinitions.ApiIdentifier
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.DeveloperSession
 
 case class UpliftData(
-  sellResellOrDistribute: SellResellOrDistribute,
-  subscriptions: Set[ApiIdentifier],
-  requestedBy: String
-)
+    sellResellOrDistribute: SellResellOrDistribute,
+    subscriptions: Set[ApiIdentifier],
+    requestedBy: String
+  )
 
 object UpliftData {
   import play.api.libs.json.{Format, Json}
@@ -43,7 +44,7 @@ case class CreateApplicationRequest(
     description: Option[String],
     collaborators: List[Collaborator],
     access: Access = Standard(List.empty, None, None, Set.empty)
-)
+  )
 
 object CreateApplicationRequest extends ApplicationRequest {
   implicit val format = Json.format[CreateApplicationRequest]
@@ -62,7 +63,7 @@ case class UpdateApplicationRequest(
     name: String,
     description: Option[String],
     access: Access
-)
+  )
 
 object UpdateApplicationRequest extends ApplicationRequest {
 

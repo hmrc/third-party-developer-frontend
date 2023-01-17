@@ -16,32 +16,31 @@
 
 package uk.gov.hmrc.thirdpartydeveloperfrontend.connectors
 
+import play.api.libs.json.{JsSuccess, Json}
+
+import uk.gov.hmrc.thirdpartydeveloperfrontend.connectors.SubscriptionFieldsConnectorDomain.{ApiFieldDefinitions, FieldDefinition}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.apidefinitions.{ApiContext, ApiVersion}
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.subscriptions.{AccessRequirements, DevhubAccessRequirements}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.subscriptions.DevhubAccessRequirement.NoOne
-import play.api.libs.json.{Json, JsSuccess}
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.subscriptions.{AccessRequirements, DevhubAccessRequirements, FieldName}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.AsyncHmrcSpec
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.subscriptions.FieldName
-import uk.gov.hmrc.thirdpartydeveloperfrontend.connectors.SubscriptionFieldsConnectorDomain.ApiFieldDefinitions
-import uk.gov.hmrc.thirdpartydeveloperfrontend.connectors.SubscriptionFieldsConnectorDomain.FieldDefinition
 
 class ApiFieldDefinitionsSpec extends AsyncHmrcSpec {
 
   private def basicFieldDefinitionJson =
     """{
-       |    "apiContext": "my-context",
-       |    "apiVersion": "1.0",
-       |    "fieldDefinitions": [
-       |        {
-       |            "name": "field-name",
-       |            "description": "my-description",
-       |            "shortDescription": "my-shortDescription",
-       |            "hint": "my-hint",
-       |            "type": "STRING",
-       |            "access": {}
-       |        }
-       |    ]
-       |}""".stripMargin
+      |    "apiContext": "my-context",
+      |    "apiVersion": "1.0",
+      |    "fieldDefinitions": [
+      |        {
+      |            "name": "field-name",
+      |            "description": "my-description",
+      |            "shortDescription": "my-shortDescription",
+      |            "hint": "my-hint",
+      |            "type": "STRING",
+      |            "access": {}
+      |        }
+      |    ]
+      |}""".stripMargin
 
   private val basicFieldDefinition: ApiFieldDefinitions = {
     ApiFieldDefinitions(

@@ -17,11 +17,17 @@
 package uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.controllers
 
 import org.apache.commons.lang3.StringUtils
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.apidefinitions.{APISubscriptionStatusWithSubscriptionFields, APISubscriptionStatusWithWritableSubscriptionField, ApiContext, ApiVersion}
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.CollaboratorRole
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.subscriptions.{FieldName, FieldValue}
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.subscriptions.DevhubAccessLevel
+
 import play.api.data.FormError
+
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.apidefinitions.{
+  APISubscriptionStatusWithSubscriptionFields,
+  APISubscriptionStatusWithWritableSubscriptionField,
+  ApiContext,
+  ApiVersion
+}
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.CollaboratorRole
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.subscriptions.{DevhubAccessLevel, FieldName, FieldValue}
 
 object EditManageSubscription {
 
@@ -32,7 +38,7 @@ object EditManageSubscription {
       displayedStatus: String,
       fields: Seq[SubscriptionFieldViewModel],
       errors: Seq[FormError]
-  )
+    )
 
   case class EditApiConfigurationFieldViewModel(
       apiName: String,
@@ -41,7 +47,7 @@ object EditManageSubscription {
       displayedStatus: String,
       field: SubscriptionFieldViewModel,
       errors: Seq[FormError]
-  )
+    )
 
   case class SubscriptionFieldViewModel(
       name: FieldName,
@@ -49,24 +55,26 @@ object EditManageSubscription {
       hint: String,
       canWrite: Boolean,
       value: FieldValue,
-      errors: Seq[FormError])
+      errors: Seq[FormError]
+    )
 
   object EditApiConfigurationViewModel {
+
     def toViewModel(
         apiSubscription: APISubscriptionStatusWithSubscriptionFields,
         role: CollaboratorRole,
         formErrors: Seq[FormError],
         postedFormValues: Map[FieldName, FieldValue]
-    ): EditApiConfigurationViewModel = {
+      ): EditApiConfigurationViewModel = {
 
       val fieldsViewModel = apiSubscription.fields.fields
         .map(field => {
           val accessLevel = DevhubAccessLevel.fromRole(role)
-          val canWrite = field.definition.access.devhub.satisfiesWrite(accessLevel)
+          val canWrite    = field.definition.access.devhub.satisfiesWrite(accessLevel)
           val fieldErrors = formErrors.filter(e => e.key == field.definition.name.value)
 
           val newValue = if (canWrite) {
-            postedFormValues.getOrElse(field.definition.name,field.value)
+            postedFormValues.getOrElse(field.definition.name, field.value)
           } else {
             field.value
           }
@@ -86,19 +94,20 @@ object EditManageSubscription {
   }
 
   object EditApiConfigurationFieldViewModel {
+
     def toViewModel(
         apiSubscription: APISubscriptionStatusWithWritableSubscriptionField,
         role: CollaboratorRole,
         formErrors: Seq[FormError],
         postedFormValues: Map[FieldName, FieldValue]
-    ): EditApiConfigurationFieldViewModel = {
+      ): EditApiConfigurationFieldViewModel = {
       val fieldsViewModel = apiSubscription.subscriptionFieldValue.value
-      val accessLevel = DevhubAccessLevel.fromRole(role)
-      val canWrite = apiSubscription.subscriptionFieldValue.definition.access.devhub.satisfiesWrite(accessLevel)
-      val fieldErrors = formErrors.filter(e => e.key == apiSubscription.subscriptionFieldValue.definition.name.value)
+      val accessLevel     = DevhubAccessLevel.fromRole(role)
+      val canWrite        = apiSubscription.subscriptionFieldValue.definition.access.devhub.satisfiesWrite(accessLevel)
+      val fieldErrors     = formErrors.filter(e => e.key == apiSubscription.subscriptionFieldValue.definition.name.value)
 
       val newValue = if (canWrite) {
-        postedFormValues.getOrElse(apiSubscription.subscriptionFieldValue.definition.name,fieldsViewModel)
+        postedFormValues.getOrElse(apiSubscription.subscriptionFieldValue.definition.name, fieldsViewModel)
       } else {
         fieldsViewModel
       }
@@ -115,7 +124,8 @@ object EditManageSubscription {
           hintText,
           canWrite,
           newValue,
-          fieldErrors)
+          fieldErrors
+        )
 
       EditApiConfigurationFieldViewModel(
         apiSubscription.name,

@@ -18,12 +18,14 @@ package uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.connectors
 
 import play.api.libs.json.Json
 
-case class AccountSetupRequest(roles: Option[List[String]] = None,
-                               rolesOther: Option[String] = None,
-                               services: Option[List[String]] = None,
-                               servicesOther: Option[String] = None,
-                               targets: Option[List[String]] = None,
-                               targetsOther: Option[String] = None)
+case class AccountSetupRequest(
+    roles: Option[List[String]] = None,
+    rolesOther: Option[String] = None,
+    services: Option[List[String]] = None,
+    servicesOther: Option[String] = None,
+    targets: Option[List[String]] = None,
+    targetsOther: Option[String] = None
+  )
 
 object AccountSetupRequest {
   implicit val format = Json.format[AccountSetupRequest]

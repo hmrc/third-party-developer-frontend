@@ -17,15 +17,17 @@
 package uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models
 
 import _root_.views.html.partials
+
 import uk.gov.hmrc.thirdpartydeveloperfrontend.config.ApplicationConfig
 
 object TermsOfUseVersion {
+
   def fromVersionString(version: String): Option[TermsOfUseVersion] = version match {
     case "1.0" => Some(OLD_JOURNEY) // some older apps in QA agreed to this version of the ToU
     case "1.1" => Some(OLD_JOURNEY) // some older apps in QA agreed to this version of the ToU
     case "1.2" => Some(OLD_JOURNEY)
     case "2.0" => Some(NEW_JOURNEY)
-    case _ => None
+    case _     => None
   }
 
   case object OLD_JOURNEY extends TermsOfUseVersion
@@ -34,7 +36,7 @@ object TermsOfUseVersion {
   val latest = NEW_JOURNEY
 }
 
-sealed abstract class TermsOfUseVersion  {
+sealed abstract class TermsOfUseVersion {
   import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.TermsOfUseVersion._
 
   def getTermsOfUseAsHtml()(implicit applicationConfig: ApplicationConfig) = this match {
@@ -47,6 +49,3 @@ sealed abstract class TermsOfUseVersion  {
     case NEW_JOURNEY => "2.0"
   }
 }
-
-
-

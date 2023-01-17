@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 HM Revenue & Customs
+ * Copyright 2023 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -52,8 +52,8 @@ class DeskproConnectorIntegrationSpec extends BaseConnectorIntegrationSpec with 
   "DeskproConnector" when {
 
     "Creating a Deskpro ticket" should {
-      val ticket = DeskproTicket.createForUplift("Joe Bloggs", "joe.bloggs@example.com", "Test App", ApplicationId("appId"))
-      val ticketPath = "/deskpro/ticket"
+      val ticket       = DeskproTicket.createForUplift("Joe Bloggs", "joe.bloggs@example.com", "Test App", ApplicationId("appId"))
+      val ticketPath   = "/deskpro/ticket"
       val expectedBody = Json.toJson(ticket).toString()
 
       "create a ticket when DeskPro returns Ok (200)" in new Setup {

@@ -17,7 +17,6 @@
 package uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications
 
 import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.FormKeys.{applicationNameAlreadyExistsKey, applicationNameInvalidKey}
-
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.ApplicationNameValidationJson.ApplicationNameValidationResult
 
 sealed trait ApplicationNameValidation
@@ -25,6 +24,7 @@ sealed trait ApplicationNameValidation
 case object Valid extends ApplicationNameValidation
 
 object ApplicationNameValidation {
+
   def apply(applicationNameValidationResult: ApplicationNameValidationResult): ApplicationNameValidation = {
     applicationNameValidationResult.errors match {
       case Some(errors) => Invalid(errors.invalidName, errors.duplicateName)
@@ -33,16 +33,17 @@ object ApplicationNameValidation {
   }
 }
 
-case class Invalid(invalidName: Boolean, duplicateName: Boolean) extends ApplicationNameValidation{
+case class Invalid(invalidName: Boolean, duplicateName: Boolean) extends ApplicationNameValidation {
+
   def validationErrorMessageKey: String = {
     (invalidName, duplicateName) match {
       case (true, _) => applicationNameInvalidKey
-      case _ => applicationNameAlreadyExistsKey
+      case _         => applicationNameAlreadyExistsKey
     }
   }
 }
 
 object Invalid {
-  def invalidName = Invalid(invalidName = true, duplicateName = false)
+  def invalidName   = Invalid(invalidName = true, duplicateName = false)
   def duplicateName = Invalid(invalidName = false, duplicateName = true)
 }

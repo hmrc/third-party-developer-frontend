@@ -16,11 +16,12 @@
 
 package uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications
 
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.UserId
+import java.time.LocalDateTime
+
 import play.api.libs.json.{Format, Json}
 import uk.gov.hmrc.play.json.Union
 
-import java.time.LocalDateTime
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.UserId
 
 trait ApplicationUpdate {
   def timestamp: LocalDateTime
@@ -29,31 +30,31 @@ trait ApplicationUpdate {
 case class CollaboratorActor(email: String)
 
 object CollaboratorActor {
+
   implicit val collaboratorActorFormat = Format[CollaboratorActor](
     Json.reads[CollaboratorActor],
     collaboratorActor => Json.obj("email" -> collaboratorActor.email, "actorType" -> "COLLABORATOR")
   )
 }
 
-case class ChangeProductionApplicationPrivacyPolicyLocation(instigator: UserId, timestamp: LocalDateTime, newLocation: PrivacyPolicyLocation) extends ApplicationUpdate
+case class ChangeProductionApplicationPrivacyPolicyLocation(instigator: UserId, timestamp: LocalDateTime, newLocation: PrivacyPolicyLocation)           extends ApplicationUpdate
 case class ChangeProductionApplicationTermsAndConditionsLocation(instigator: UserId, timestamp: LocalDateTime, newLocation: TermsAndConditionsLocation) extends ApplicationUpdate
-case class ChangeResponsibleIndividualToSelf(instigator: UserId, timestamp: LocalDateTime, name: String, email: String) extends ApplicationUpdate
-case class ChangeResponsibleIndividualToOther(code: String, timestamp: LocalDateTime) extends ApplicationUpdate
-case class DeclineResponsibleIndividual(code: String, timestamp: LocalDateTime) extends ApplicationUpdate
-case class RemoveClientSecret(actor: CollaboratorActor, clientSecretId: String, timestamp: LocalDateTime) extends ApplicationUpdate
-case class VerifyResponsibleIndividual(instigator: UserId, timestamp: LocalDateTime, requesterName: String, riName: String, riEmail: String) extends ApplicationUpdate
-case class DeleteApplicationByCollaborator(instigator: UserId, reasons: String, timestamp: LocalDateTime) extends ApplicationUpdate
+case class ChangeResponsibleIndividualToSelf(instigator: UserId, timestamp: LocalDateTime, name: String, email: String)                                 extends ApplicationUpdate
+case class ChangeResponsibleIndividualToOther(code: String, timestamp: LocalDateTime)                                                                   extends ApplicationUpdate
+case class DeclineResponsibleIndividual(code: String, timestamp: LocalDateTime)                                                                         extends ApplicationUpdate
+case class RemoveClientSecret(actor: CollaboratorActor, clientSecretId: String, timestamp: LocalDateTime)                                               extends ApplicationUpdate
+case class VerifyResponsibleIndividual(instigator: UserId, timestamp: LocalDateTime, requesterName: String, riName: String, riEmail: String)            extends ApplicationUpdate
+case class DeleteApplicationByCollaborator(instigator: UserId, reasons: String, timestamp: LocalDateTime)                                               extends ApplicationUpdate
 
 trait ApplicationUpdateFormatters {
-  implicit val changePrivacyPolicyLocationFormatter = Json.format[ChangeProductionApplicationPrivacyPolicyLocation]
-  implicit val changeTermsAndConditionsLocationFormatter = Json.format[ChangeProductionApplicationTermsAndConditionsLocation]
-  implicit val changeResponsibleIndividualToSelfFormatter = Json.format[ChangeResponsibleIndividualToSelf]
+  implicit val changePrivacyPolicyLocationFormatter        = Json.format[ChangeProductionApplicationPrivacyPolicyLocation]
+  implicit val changeTermsAndConditionsLocationFormatter   = Json.format[ChangeProductionApplicationTermsAndConditionsLocation]
+  implicit val changeResponsibleIndividualToSelfFormatter  = Json.format[ChangeResponsibleIndividualToSelf]
   implicit val changeResponsibleIndividualToOtherFormatter = Json.format[ChangeResponsibleIndividualToOther]
-  implicit val declineResponsibleIndividualFormatter = Json.format[DeclineResponsibleIndividual]
-  implicit val removeClientSecretFormatter = Json.format[RemoveClientSecret]
-  implicit val verifyResponsibleIndividualFormatter = Json.format[VerifyResponsibleIndividual]
-  implicit val deleteApplicationByCollaboratorFormatter = Json.format[DeleteApplicationByCollaborator]
-
+  implicit val declineResponsibleIndividualFormatter       = Json.format[DeclineResponsibleIndividual]
+  implicit val removeClientSecretFormatter                 = Json.format[RemoveClientSecret]
+  implicit val verifyResponsibleIndividualFormatter        = Json.format[VerifyResponsibleIndividual]
+  implicit val deleteApplicationByCollaboratorFormatter    = Json.format[DeleteApplicationByCollaborator]
 
   implicit val applicationUpdateRequestFormatter = Union.from[ApplicationUpdate]("updateType")
     .and[ChangeProductionApplicationPrivacyPolicyLocation]("changeProductionApplicationPrivacyPolicyLocation")

@@ -16,38 +16,38 @@
 
 package views.include
 
+import java.time.{LocalDateTime, ZoneOffset}
+
+import org.jsoup.Jsoup
+import org.jsoup.nodes.Document
+import views.helper.CommonViewSpec
+import views.html.include.LeftHandNav
+
+import play.api.test.FakeRequest
+import play.twirl.api.Html
+
+import uk.gov.hmrc.thirdpartydeveloperfrontend.builder.{DeveloperBuilder, DeveloperSessionBuilder}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.Credentials.serverTokenCutoffDate
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.controllers.{ApplicationViewModel, FraudPreventionNavLinkViewModel, LeftHandNavFlags}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.LoggedInState
-import uk.gov.hmrc.thirdpartydeveloperfrontend.builder.{DeveloperBuilder, DeveloperSessionBuilder}
-
-import org.jsoup.Jsoup
-import org.jsoup.nodes.Document
-import play.api.test.FakeRequest
-import play.twirl.api.Html
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.ViewHelpers._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils._
-import views.helper.CommonViewSpec
-import views.html.include.LeftHandNav
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.controllers.LeftHandNavFlags
-
-import java.time.{LocalDateTime, ZoneOffset}
 
 class LeftHandNavSpec extends CommonViewSpec
-  with WithCSRFAddToken
-  with CollaboratorTracker
-  with LocalUserIdTracker
-  with DeveloperSessionBuilder
-  with DeveloperBuilder {
+    with WithCSRFAddToken
+    with CollaboratorTracker
+    with LocalUserIdTracker
+    with DeveloperSessionBuilder
+    with DeveloperBuilder {
 
   trait Setup {
     val leftHandNavView = app.injector.instanceOf[LeftHandNav]
 
     val request = FakeRequest().withCSRFToken
 
-    val applicationId = ApplicationId("1234")
-    val clientId = ClientId("clientId123")
+    val applicationId   = ApplicationId("1234")
+    val clientId        = ClientId("clientId123")
     val applicationName = "Test Application"
 
     val loggedInDeveloper = buildDeveloperSession(loggedInState = LoggedInState.LOGGED_IN, buildDeveloper("givenname.familyname@example.com", "Givenname", "Familyname"))
@@ -67,13 +67,15 @@ class LeftHandNavSpec extends CommonViewSpec
       access = Standard(redirectUris = List("https://red1", "https://red2"), termsAndConditionsUrl = Some("http://tnc-url.com"))
     )
 
-    val applicationViewModelWithApiSubscriptions = ApplicationViewModel(application, hasSubscriptionsFields = true, hasPpnsFields = false)
+    val applicationViewModelWithApiSubscriptions   = ApplicationViewModel(application, hasSubscriptionsFields = true, hasPpnsFields = false)
     val applicationViewModelWithNoApiSubscriptions = ApplicationViewModel(application, hasSubscriptionsFields = false, hasPpnsFields = false)
 
-    def leftHandNavRender(viewModel: Option[ApplicationViewModel],
-                          navSection: Option[String],
-                          flags: Map[String, Boolean] = Map.empty,
-                          fraudPreventionNavLinkViewModel: Option[FraudPreventionNavLinkViewModel] = None) = {
+    def leftHandNavRender(
+        viewModel: Option[ApplicationViewModel],
+        navSection: Option[String],
+        flags: Map[String, Boolean] = Map.empty,
+        fraudPreventionNavLinkViewModel: Option[FraudPreventionNavLinkViewModel] = None
+      ) = {
       leftHandNavView.render(viewModel, navSection, flags, fraudPreventionNavLinkViewModel, request, loggedInDeveloper, appConfig)
     }
   }
@@ -99,11 +101,9 @@ class LeftHandNavSpec extends CommonViewSpec
       }
 
       "render Fraud prevention link when isVisible is true" in new Setup {
-        val uri = "some/link"
-        val page: Html = leftHandNavRender(Some(applicationViewModelWithApiSubscriptions),
-          Some("details"),
-          Map.empty,
-          Some(createFraudPreventionNavLinkViewModel(isVisible = true, uri)))
+        val uri        = "some/link"
+        val page: Html =
+          leftHandNavRender(Some(applicationViewModelWithApiSubscriptions), Some("details"), Map.empty, Some(createFraudPreventionNavLinkViewModel(isVisible = true, uri)))
 
         page.contentType should include("text/html")
 
@@ -112,14 +112,10 @@ class LeftHandNavSpec extends CommonViewSpec
         elementIdentifiedByAttrContainsText(document, "nav-fraud-prevention", "href", uri)
       }
 
-
-
-
-
       "NOT display server token link for old apps" in new Setup {
         val oldAppWithoutSubsFields =
           ApplicationViewModel(application.copy(createdOn = serverTokenCutoffDate.minusDays(1)), hasSubscriptionsFields = false, hasPpnsFields = false)
-        val page = leftHandNavRender(Some(oldAppWithoutSubsFields), Some("details"))
+        val page                    = leftHandNavRender(Some(oldAppWithoutSubsFields), Some("details"))
 
         page.contentType should include("text/html")
 
@@ -149,7 +145,7 @@ class LeftHandNavSpec extends CommonViewSpec
       "NOT display server token link for old apps" in new Setup {
         val oldAppWithSubsFields =
           ApplicationViewModel(application.copy(createdOn = serverTokenCutoffDate.minusDays(1)), hasSubscriptionsFields = true, hasPpnsFields = false)
-        val page = leftHandNavRender(Some(oldAppWithSubsFields), Some("details"))
+        val page                 = leftHandNavRender(Some(oldAppWithSubsFields), Some("details"))
 
         page.contentType should include("text/html")
 

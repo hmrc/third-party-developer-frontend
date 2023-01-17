@@ -17,32 +17,34 @@
 package uk.gov.hmrc.apiplatform.modules.dynamics.views
 
 import org.jsoup.Jsoup
+import views.helper.CommonViewSpec
+
 import play.api.test.{FakeRequest, StubMessagesFactory}
+
 import uk.gov.hmrc.apiplatform.modules.dynamics.model.AddTicketForm
 import uk.gov.hmrc.apiplatform.modules.dynamics.views.html.AddTicketView
 import uk.gov.hmrc.thirdpartydeveloperfrontend.builder.{DeveloperBuilder, DeveloperSessionBuilder}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.{DeveloperSession, LoggedInState}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.{LocalUserIdTracker, WithCSRFAddToken}
-import views.helper.CommonViewSpec
 
 class AddTicketViewSpec extends CommonViewSpec with DeveloperSessionBuilder with WithCSRFAddToken
-  with DeveloperBuilder with LocalUserIdTracker with StubMessagesFactory {
+    with DeveloperBuilder with LocalUserIdTracker with StubMessagesFactory {
 
   trait Setup {
     val addTicketView = app.injector.instanceOf[AddTicketView]
 
-    implicit val request = FakeRequest().withCSRFToken
+    implicit val request                    = FakeRequest().withCSRFToken
     implicit val loggedIn: DeveloperSession = buildDeveloperSession(LoggedInState.LOGGED_IN, buildDeveloper())
-    implicit val messages = stubMessages()
+    implicit val messages                   = stubMessages()
   }
-    
+
   "AddTicketView" should {
-    
+
     "render correctly when form is valid" in new Setup {
       val mainView = addTicketView.apply(AddTicketForm.form)
-      
+
       val document = Jsoup.parse(mainView.body)
-      
+
       document.getElementById("page-heading").text shouldBe "MS Dynamics Add Ticket"
       Option(document.getElementById("data-field-error-ticketNumber")) shouldBe None
       Option(document.getElementById("data-field-error-title")) shouldBe None
@@ -56,9 +58,9 @@ class AddTicketViewSpec extends CommonViewSpec with DeveloperSessionBuilder with
         .withError("customerId", "Invalid Customer ID")
         .withError("title", "This field is required")
         .withError("description", "Required field"))
-      
+
       val document = Jsoup.parse(mainView.body)
-      
+
       document.getElementById("page-heading").text shouldBe "MS Dynamics Add Ticket"
       document.getElementById("data-field-error-dynamics").text() shouldBe "Error: Failed API call"
       document.getElementById("data-field-error-customerId").text() shouldBe "Error: Invalid Customer ID"

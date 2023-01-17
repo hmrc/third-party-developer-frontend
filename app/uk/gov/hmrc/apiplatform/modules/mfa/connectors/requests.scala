@@ -29,4 +29,3 @@ case class CreateMfaSmsRequest(mobileNumber: String)
 object CreateMfaSmsRequest {
   implicit val formatCreateMfaSmsRequest = Json.format[CreateMfaSmsRequest]
 }
-

@@ -16,28 +16,26 @@
 
 package uk.gov.hmrc.apiplatform.modules.submissions.controllers
 
-import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.BaseControllerSpec
-import uk.gov.hmrc.thirdpartydeveloperfrontend.builder._
-import uk.gov.hmrc.thirdpartydeveloperfrontend.utils._
-import uk.gov.hmrc.thirdpartydeveloperfrontend.mocks.service.ApplicationServiceMock
-import uk.gov.hmrc.thirdpartydeveloperfrontend.mocks.service.ApplicationActionServiceMock
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.ApplicationUpdateSuccessful
-import uk.gov.hmrc.thirdpartydeveloperfrontend.connectors.ThirdPartyApplicationProductionConnector
-import org.mockito.MockitoSugar
-import org.mockito.ArgumentMatchersSugar
-import scala.concurrent.Future.successful
 import scala.concurrent.ExecutionContext.Implicits.global
-import uk.gov.hmrc.apiplatform.modules.submissions.services.mocks.SubmissionServiceMockModule
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.ApplicationId
-import uk.gov.hmrc.apiplatform.modules.submissions.views.html._
+import scala.concurrent.Future.successful
+
+import org.mockito.{ArgumentMatchersSugar, MockitoSugar}
+
 import play.api.test.FakeRequest
-import play.filters.csrf.CSRF
-import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.WithCSRFAddToken
-import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.WithLoggedInSession._
 import play.api.test.Helpers._
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications._
-import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.SubscriptionTestHelperSugar
+import play.filters.csrf.CSRF
+
 import uk.gov.hmrc.apiplatform.modules.submissions.SubmissionsTestData
+import uk.gov.hmrc.apiplatform.modules.submissions.services.mocks.SubmissionServiceMockModule
+import uk.gov.hmrc.apiplatform.modules.submissions.views.html._
+import uk.gov.hmrc.thirdpartydeveloperfrontend.builder._
+import uk.gov.hmrc.thirdpartydeveloperfrontend.connectors.ThirdPartyApplicationProductionConnector
+import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.{BaseControllerSpec, SubscriptionTestHelperSugar}
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.ApplicationUpdateSuccessful
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.{ApplicationId, _}
+import uk.gov.hmrc.thirdpartydeveloperfrontend.mocks.service.{ApplicationActionServiceMock, ApplicationServiceMock}
+import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.WithLoggedInSession._
+import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.{WithCSRFAddToken, _}
 
 trait TPAProductionConnectorMockModule extends MockitoSugar with ArgumentMatchersSugar {
 
@@ -45,6 +43,7 @@ trait TPAProductionConnectorMockModule extends MockitoSugar with ArgumentMatcher
     val aMock = mock[ThirdPartyApplicationProductionConnector]
 
     object DeleteApplication {
+
       def willReturn() =
         when(aMock.applicationUpdate(*[ApplicationId], *)(*)).thenReturn(successful(ApplicationUpdateSuccessful))
     }
@@ -52,11 +51,11 @@ trait TPAProductionConnectorMockModule extends MockitoSugar with ArgumentMatcher
 }
 
 class CancelRequestControllerSpec
-  extends BaseControllerSpec
+    extends BaseControllerSpec
     with SampleSession
     with SampleApplication
     with SubscriptionTestHelperSugar
-    with WithCSRFAddToken 
+    with WithCSRFAddToken
     with DeveloperBuilder
     with LocalUserIdTracker
     with SubmissionsTestData {
@@ -69,22 +68,21 @@ class CancelRequestControllerSpec
     val sessionParams = Seq("csrfToken" -> app.injector.instanceOf[CSRF.TokenProvider].generateToken)
 
     fetchSessionByIdReturns(sessionId, session)
-    
+
     updateUserFlowSessionsReturnsSuccessfully(sessionId)
   }
-  
-  trait Setup 
-    extends ApplicationServiceMock
-    with ApplicationActionServiceMock
-    with TPAProductionConnectorMockModule
-    with SubmissionServiceMockModule
-    with HasSessionDeveloperFlow
-    with HasSubscriptions
-    with FixedClock
-    {
+
+  trait Setup
+      extends ApplicationServiceMock
+      with ApplicationActionServiceMock
+      with TPAProductionConnectorMockModule
+      with SubmissionServiceMockModule
+      with HasSessionDeveloperFlow
+      with HasSubscriptions
+      with FixedClock {
 
     val confirmCancelRequestForProductionCredentialsView = app.injector.instanceOf[ConfirmCancelRequestForProductionCredentialsView]
-    val cancelledRequestForProductionCredentialsView = app.injector.instanceOf[CancelledRequestForProductionCredentialsView]
+    val cancelledRequestForProductionCredentialsView     = app.injector.instanceOf[CancelledRequestForProductionCredentialsView]
 
     val controller = new CancelRequestController(
       mockErrorHandler,
@@ -107,7 +105,7 @@ class CancelRequestControllerSpec
 
   trait HasAppInProductionState {
     self: Setup with ApplicationActionServiceMock with ApplicationServiceMock =>
-      
+
     givenApplicationAction(
       ApplicationWithSubscriptionData(
         sampleApp,
@@ -117,13 +115,13 @@ class CancelRequestControllerSpec
       loggedInDeveloper,
       List(aSubscription)
     )
-    
+
     fetchByApplicationIdReturns(appId, sampleApp)
   }
 
   trait HasAppInTestingState {
     self: Setup with ApplicationActionServiceMock with ApplicationServiceMock =>
-      
+
     givenApplicationAction(
       ApplicationWithSubscriptionData(
         testingApp,
@@ -137,7 +135,6 @@ class CancelRequestControllerSpec
     fetchByApplicationIdReturns(appId, testingApp)
   }
 
-
   "CancelRequestController" should {
     "cancelRequestForProductionCredentialsPage returns the page" in new Setup with HasSubscriptions with HasAppInTestingState {
       SubmissionServiceMock.FetchLatestExtendedSubmission.thenReturns(extendedSubmission)
@@ -147,21 +144,21 @@ class CancelRequestControllerSpec
 
       contentAsString(result) should include("Are you sure you want to cancel your request for production credentials")
     }
-    
+
     "cancelRequestForProductionCredentialsPage fails when app is not in testing state" in new Setup with HasSubscriptions with HasAppInProductionState {
       SubmissionServiceMock.FetchLatestExtendedSubmission.thenReturns(extendedSubmission)
 
       val result = controller.cancelRequestForProductionCredentialsPage(appId)(loggedInRequest.withCSRFToken)
       status(result) shouldBe BAD_REQUEST
     }
-    
+
     "cancelRequestForProductionCredentialsPage fails when no submission exists" in new Setup with HasSubscriptions with HasAppInTestingState {
       SubmissionServiceMock.FetchLatestExtendedSubmission.thenReturnsNone()
 
       val result = controller.cancelRequestForProductionCredentialsPage(appId)(loggedInRequest.withCSRFToken)
       status(result) shouldBe NOT_FOUND
     }
-    
+
     "cancelRequestForProductionCredentialsAction when cancelling the request" in new Setup with HasSubscriptions with HasAppInTestingState {
       SubmissionServiceMock.FetchLatestExtendedSubmission.thenReturns(extendedSubmission)
 
@@ -184,7 +181,7 @@ class CancelRequestControllerSpec
 
       status(result) shouldBe BAD_REQUEST
     }
-    
+
     "cancelRequestForProductionCredentialsAction when rejecting the cancellation" in new Setup with HasSubscriptions with HasAppInTestingState {
       SubmissionServiceMock.FetchLatestExtendedSubmission.thenReturns(extendedSubmission)
 

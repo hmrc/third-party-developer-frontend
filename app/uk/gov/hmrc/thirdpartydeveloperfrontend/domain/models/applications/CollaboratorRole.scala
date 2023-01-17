@@ -19,18 +19,19 @@ package uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications
 import enumeratum.{EnumEntry, PlayEnum}
 
 sealed trait CollaboratorRole extends EnumEntry {
-  def isDeveloper: Boolean = this == CollaboratorRole.DEVELOPER
-  def isAdministrator: Boolean = this == CollaboratorRole.ADMINISTRATOR
+  def isDeveloper: Boolean        = this == CollaboratorRole.DEVELOPER
+  def isAdministrator: Boolean    = this == CollaboratorRole.ADMINISTRATOR
   def is(other: CollaboratorRole) = this == other
 }
 
 object CollaboratorRole extends PlayEnum[CollaboratorRole] {
   val values = findValues
 
-  final case object DEVELOPER       extends CollaboratorRole
-  final case object ADMINISTRATOR   extends CollaboratorRole
+  final case object DEVELOPER     extends CollaboratorRole
+  final case object ADMINISTRATOR extends CollaboratorRole
 
   def from(role: Option[String]) = role match {
     case Some(r) => values.find(e => e.toString == r.toUpperCase)
-    case _ => Some(CollaboratorRole.DEVELOPER)}
+    case _       => Some(CollaboratorRole.DEVELOPER)
+  }
 }

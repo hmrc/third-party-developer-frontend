@@ -16,31 +16,31 @@
 
 package uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.fraudprevention
 
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.controllers.FraudPreventionNavLinkViewModel
 import uk.gov.hmrc.thirdpartydeveloperfrontend.config.FraudPreventionConfig
 import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.ApplicationRequest
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.Environment
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.Application
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.apidefinitions.APISubscriptionStatus
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.{Application, Environment}
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.controllers.FraudPreventionNavLinkViewModel
 
 trait FraudPreventionNavLinkHelper {
 
-
-  def createFraudNavModel(fraudPreventionConfig: FraudPreventionConfig)(implicit request: ApplicationRequest[_])= {
+  def createFraudNavModel(fraudPreventionConfig: FraudPreventionConfig)(implicit request: ApplicationRequest[_]) = {
     createOptionalFraudPreventionNavLinkViewModel(request.application, request.subscriptions, fraudPreventionConfig)
   }
-    
-    def createOptionalFraudPreventionNavLinkViewModel(application: Application,
-                                                      subscriptions: List[APISubscriptionStatus],
-                                                      fraudPreventionConfig: FraudPreventionConfig): Option[FraudPreventionNavLinkViewModel]= {
-      if(fraudPreventionConfig.enabled) {
-        val apis = fraudPreventionConfig.apisWithFraudPrevention
-        val isProduction = application.deployedTo == Environment.PRODUCTION
-        val shouldBeVisible = subscriptions.exists(x => apis.contains(x.serviceName) && x.subscribed && isProduction)
-        Some(FraudPreventionNavLinkViewModel(shouldBeVisible, fraudPreventionConfig.uri))
-      }else{
-        None
-      }
 
+  def createOptionalFraudPreventionNavLinkViewModel(
+      application: Application,
+      subscriptions: List[APISubscriptionStatus],
+      fraudPreventionConfig: FraudPreventionConfig
+    ): Option[FraudPreventionNavLinkViewModel] = {
+    if (fraudPreventionConfig.enabled) {
+      val apis            = fraudPreventionConfig.apisWithFraudPrevention
+      val isProduction    = application.deployedTo == Environment.PRODUCTION
+      val shouldBeVisible = subscriptions.exists(x => apis.contains(x.serviceName) && x.subscribed && isProduction)
+      Some(FraudPreventionNavLinkViewModel(shouldBeVisible, fraudPreventionConfig.uri))
+    } else {
+      None
     }
+
+  }
 }

@@ -16,51 +16,51 @@
 
 package uk.gov.hmrc.thirdpartydeveloperfrontend.controllers
 
+import java.time.LocalDateTime
 import java.util.UUID.randomUUID
-import uk.gov.hmrc.thirdpartydeveloperfrontend.builder.DeveloperBuilder
+import scala.concurrent.ExecutionContext.Implicits.global
+import scala.concurrent.Future
+import scala.concurrent.Future.successful
+
+import views.helper.EnvironmentNameService
+import views.html.include.ChangeSubscriptionConfirmationView
+import views.html.{AddAppSubscriptionsView, ManageSubscriptionsView, SubscribeRequestSubmittedView, UnsubscribeRequestSubmittedView}
+
+import play.api.mvc.{AnyContentAsEmpty, AnyContentAsFormUrlEncoded, Result}
+import play.api.test.FakeRequest
+import play.api.test.Helpers._
+import play.filters.csrf.CSRF.TokenProvider
+import uk.gov.hmrc.http.HeaderCarrier
+
+import uk.gov.hmrc.thirdpartydeveloperfrontend.builder.{DeveloperBuilder, _}
+import uk.gov.hmrc.thirdpartydeveloperfrontend.config.FraudPreventionConfig
 import uk.gov.hmrc.thirdpartydeveloperfrontend.connectors.ThirdPartyDeveloperConnector
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.apidefinitions.{ApiContext, ApiIdentifier, ApiVersion}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.connectors.TicketResult
 import uk.gov.hmrc.thirdpartydeveloperfrontend.mocks.service.{ApplicationActionServiceMock, ApplicationServiceMock, SessionServiceMock}
-import play.api.mvc.{AnyContentAsEmpty, AnyContentAsFormUrlEncoded, Result}
-import play.api.test.FakeRequest
-import play.api.test.Helpers._
-import play.filters.csrf.CSRF.TokenProvider
 import uk.gov.hmrc.thirdpartydeveloperfrontend.service._
-import uk.gov.hmrc.http.HeaderCarrier
-import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.WithCSRFAddToken
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.WithLoggedInSession._
-import views.helper.EnvironmentNameService
-import views.html.{AddAppSubscriptionsView, ManageSubscriptionsView, SubscribeRequestSubmittedView, UnsubscribeRequestSubmittedView}
-import views.html.include.ChangeSubscriptionConfirmationView
+import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.{WithCSRFAddToken, _}
 
-import scala.concurrent.ExecutionContext.Implicits.global
-import scala.concurrent.Future
-import scala.concurrent.Future.successful
-import uk.gov.hmrc.thirdpartydeveloperfrontend.utils._
-import uk.gov.hmrc.thirdpartydeveloperfrontend.builder._
-import uk.gov.hmrc.thirdpartydeveloperfrontend.config.FraudPreventionConfig
+class SubscriptionsSpec extends BaseControllerSpec with WithCSRFAddToken with LocalUserIdTracker with DeveloperBuilder with SampleSession with SampleApplications
+    with SubscriptionTestHelperSugar {
 
-import java.time.LocalDateTime
-
-class SubscriptionsSpec extends BaseControllerSpec with WithCSRFAddToken with LocalUserIdTracker with DeveloperBuilder with SampleSession with SampleApplications with SubscriptionTestHelperSugar {
-
-  val apiName = "api-1"
-  val apiVersion = ApiVersion("1.0")
-  val apiContext = ApiContext("Context")
+  val apiName       = "api-1"
+  val apiVersion    = ApiVersion("1.0")
+  val apiContext    = ApiContext("Context")
   val apiIdentifier = ApiIdentifier(apiContext, apiVersion)
   val displayStatus = "Status"
 
   val tokens: ApplicationToken = ApplicationToken(List(aClientSecret(), aClientSecret()), "token")
 
   trait Setup extends ApplicationServiceMock with SessionServiceMock with ApplicationActionServiceMock {
-    val manageSubscriptionsView = app.injector.instanceOf[ManageSubscriptionsView]
-    val addAppSubscriptionsView = app.injector.instanceOf[AddAppSubscriptionsView]
+    val manageSubscriptionsView            = app.injector.instanceOf[ManageSubscriptionsView]
+    val addAppSubscriptionsView            = app.injector.instanceOf[AddAppSubscriptionsView]
     val changeSubscriptionConfirmationView = app.injector.instanceOf[ChangeSubscriptionConfirmationView]
-    val unsubscribeRequestSubmittedView = app.injector.instanceOf[UnsubscribeRequestSubmittedView]
-    val subscribeRequestSubmittedView = app.injector.instanceOf[SubscribeRequestSubmittedView]
-    implicit val environmentNameService = new EnvironmentNameService(appConfig)
+    val unsubscribeRequestSubmittedView    = app.injector.instanceOf[UnsubscribeRequestSubmittedView]
+    val subscribeRequestSubmittedView      = app.injector.instanceOf[SubscribeRequestSubmittedView]
+    implicit val environmentNameService    = new EnvironmentNameService(appConfig)
 
     val underTest = new SubscriptionsController(
       mock[ThirdPartyDeveloperConnector],
@@ -92,9 +92,9 @@ class SubscriptionsSpec extends BaseControllerSpec with WithCSRFAddToken with Lo
       exampleSubscriptionWithFields("api2", 1)
     )
 
-    val sessionParams = Seq("csrfToken" -> app.injector.instanceOf[TokenProvider].generateToken)
+    val sessionParams                                         = Seq("csrfToken" -> app.injector.instanceOf[TokenProvider].generateToken)
     val loggedOutRequest: FakeRequest[AnyContentAsEmpty.type] = FakeRequest().withSession(sessionParams: _*)
-    val loggedInRequest: FakeRequest[AnyContentAsEmpty.type] = FakeRequest().withLoggedIn(underTest, implicitly)(sessionId).withSession(sessionParams: _*)
+    val loggedInRequest: FakeRequest[AnyContentAsEmpty.type]  = FakeRequest().withLoggedIn(underTest, implicitly)(sessionId).withSession(sessionParams: _*)
   }
 
   "subscriptions" should {
@@ -172,7 +172,7 @@ class SubscriptionsSpec extends BaseControllerSpec with WithCSRFAddToken with Lo
   "changeApiSubscription" when {
     def forbiddenSubscriptionChange(app: => Application): Unit = {
       "return 400 Bad Request" in new Setup {
-        val redirectTo = "MANAGE_PAGE"
+        val redirectTo                                       = "MANAGE_PAGE"
         val request: FakeRequest[AnyContentAsFormUrlEncoded] = FakeRequest(
           "POST",
           s"developer/applications/${app.id}/change-subscription?name=$apiName&context=${apiContext.value}&version=${apiVersion.value}&redirectTo=$redirectTo"
@@ -189,7 +189,7 @@ class SubscriptionsSpec extends BaseControllerSpec with WithCSRFAddToken with Lo
 
     def allowedSubscriptionChange(app: => Application): Unit = {
       "successfully subscribe to an API and redirect" in new Setup {
-        val redirectTo = "MANAGE_PAGE"
+        val redirectTo                                       = "MANAGE_PAGE"
         val request: FakeRequest[AnyContentAsFormUrlEncoded] = FakeRequest(
           "POST",
           s"developer/applications/${app.id}/change-subscription?name=$apiName&context=${apiContext.value}&version=${apiVersion.value}&redirectTo=$redirectTo"
@@ -210,7 +210,7 @@ class SubscriptionsSpec extends BaseControllerSpec with WithCSRFAddToken with Lo
       }
 
       "successfully unsubscribe from an API and redirect" in new Setup {
-        val redirectTo = "MANAGE_PAGE"
+        val redirectTo                                       = "MANAGE_PAGE"
         val request: FakeRequest[AnyContentAsFormUrlEncoded] = FakeRequest(
           "POST",
           s"developer/applications/${app.id}/change-subscription?name=$apiName&context=${apiContext.value}&version=${apiVersion.value}&redirectTo=$redirectTo"
@@ -231,7 +231,7 @@ class SubscriptionsSpec extends BaseControllerSpec with WithCSRFAddToken with Lo
       }
 
       "return a Bad Request without changing the subscription when requesting a change to the subscription when the form is invalid" in new Setup {
-        val redirectTo = "APPLICATION_CHECK_PAGE"
+        val redirectTo                                       = "APPLICATION_CHECK_PAGE"
         val request: FakeRequest[AnyContentAsFormUrlEncoded] = FakeRequest(
           "POST",
           s"developer/applications/${app.id}/change-subscription?name=$apiName&context=${apiContext.value}&version=${apiVersion.value}&redirectTo=$redirectTo"
@@ -253,7 +253,7 @@ class SubscriptionsSpec extends BaseControllerSpec with WithCSRFAddToken with Lo
 
     def allowedSubscriptionChangeWithCheckUpdate(app: => Application): Unit = {
       "successfully subscribe to an API, update the check information and redirect" in new Setup {
-        val redirectTo = "MANAGE_PAGE"
+        val redirectTo                                       = "MANAGE_PAGE"
         val request: FakeRequest[AnyContentAsFormUrlEncoded] = FakeRequest(
           "POST",
           s"developer/applications/${app.id}/change-subscription?name=$apiName&context=${apiContext.value}&version=${apiVersion.value}&redirectTo=$redirectTo"
@@ -274,7 +274,7 @@ class SubscriptionsSpec extends BaseControllerSpec with WithCSRFAddToken with Lo
       }
 
       "successfully unsubscribe from an API, update the check information and redirect" in new Setup {
-        val redirectTo = "MANAGE_PAGE"
+        val redirectTo                                       = "MANAGE_PAGE"
         val request: FakeRequest[AnyContentAsFormUrlEncoded] = FakeRequest(
           "POST",
           s"developer/applications/${app.id}/change-subscription?name=$apiName&context=${apiContext.value}&version=${apiVersion.value}&redirectTo=$redirectTo"
@@ -296,7 +296,7 @@ class SubscriptionsSpec extends BaseControllerSpec with WithCSRFAddToken with Lo
       }
 
       "return a Bad Request without changing the subscription or check information when requesting a change to the subscription when the form is invalid" in new Setup {
-        val redirectTo = "APPLICATION_CHECK_PAGE"
+        val redirectTo                                       = "APPLICATION_CHECK_PAGE"
         val request: FakeRequest[AnyContentAsFormUrlEncoded] = FakeRequest(
           "POST",
           s"developer/applications/${app.id}/change-subscription?name=$apiName&context=${apiContext.value}&version=${apiVersion.value}&redirectTo=$redirectTo"
@@ -330,7 +330,7 @@ class SubscriptionsSpec extends BaseControllerSpec with WithCSRFAddToken with Lo
   "changeLockedApiSubscription" when {
     def checkBadLockedSubscriptionChangeRequest(app: => Application, expectedStatus: Int): Unit = {
       s"return $expectedStatus" in new Setup {
-        val redirectTo = "MANAGE_PAGE"
+        val redirectTo                                   = "MANAGE_PAGE"
         val request: FakeRequest[AnyContentAsEmpty.type] = FakeRequest(
           "GET",
           s"developer/applications/${app.id}/change-locked-subscription?name=$apiName&context=${apiContext.value}&version=${apiVersion.value}&redirectTo=$redirectTo"
@@ -359,7 +359,7 @@ class SubscriptionsSpec extends BaseControllerSpec with WithCSRFAddToken with Lo
 
     def allowedLockedSubscriptionChangeRequest(app: => Application): Unit = {
       "render the subscribe to locked subscription page when changing an unsubscribed api" in new Setup {
-        val redirectTo = "MANAGE_PAGE"
+        val redirectTo                                   = "MANAGE_PAGE"
         val request: FakeRequest[AnyContentAsEmpty.type] = FakeRequest(
           "GET",
           s"developer/applications/${app.id}/change-locked-subscription?name=$apiName&context=${apiContext.value}&version=${apiVersion.value}&redirectTo=$redirectTo"
@@ -379,7 +379,7 @@ class SubscriptionsSpec extends BaseControllerSpec with WithCSRFAddToken with Lo
       }
 
       "render the unsubscribe from locked subscription page when changing a subscribed api" in new Setup {
-        val redirectTo = "MANAGE_PAGE"
+        val redirectTo                                   = "MANAGE_PAGE"
         val request: FakeRequest[AnyContentAsEmpty.type] = FakeRequest(
           "GET",
           s"developer/applications/${app.id}/change-locked-subscription?name=$apiName&context=${apiContext.value}&version=${apiVersion.value}&redirectTo=$redirectTo"
@@ -416,7 +416,7 @@ class SubscriptionsSpec extends BaseControllerSpec with WithCSRFAddToken with Lo
   "changeLockedApiSubscriptionAction" when {
     def forbiddenLockedSubscriptionChangeRequest(app: => Application): Unit = {
       "return 403 Forbidden" in new Setup {
-        val redirectTo = "MANAGE_PAGE"
+        val redirectTo                                       = "MANAGE_PAGE"
         val request: FakeRequest[AnyContentAsFormUrlEncoded] = FakeRequest(
           "POST",
           s"developer/applications/${app.id}/change-locked-subscription?name=$apiName&context=${apiContext.value}&version=${apiVersion.value}&redirectTo=$redirectTo"
@@ -437,7 +437,7 @@ class SubscriptionsSpec extends BaseControllerSpec with WithCSRFAddToken with Lo
 
     def badLockedSubscriptionChangeRequest(app: => Application): Unit = {
       "return 400 Bad Request" in new Setup {
-        val redirectTo = "MANAGE_PAGE"
+        val redirectTo                                       = "MANAGE_PAGE"
         val request: FakeRequest[AnyContentAsFormUrlEncoded] = FakeRequest(
           "POST",
           s"developer/applications/${app.id}/change-locked-subscription?name=$apiName&context=${apiContext.value}&version=${apiVersion.value}&redirectTo=$redirectTo"
@@ -458,7 +458,7 @@ class SubscriptionsSpec extends BaseControllerSpec with WithCSRFAddToken with Lo
 
     def allowedLockedSubscriptionChangeRequest(app: => Application): Unit = {
       "successfully request to subscribe to the api" in new Setup {
-        val redirectTo = "MANAGE_PAGE"
+        val redirectTo                                       = "MANAGE_PAGE"
         val request: FakeRequest[AnyContentAsFormUrlEncoded] = FakeRequest(
           "POST",
           s"developer/applications/${app.id}/change-locked-subscription?name=$apiName&context=${apiContext.value}&version=${apiVersion.value}&redirectTo=$redirectTo"
@@ -486,7 +486,7 @@ class SubscriptionsSpec extends BaseControllerSpec with WithCSRFAddToken with Lo
       }
 
       "successfully request to unsubscribe from the api" in new Setup {
-        val redirectTo = "MANAGE_PAGE"
+        val redirectTo                                       = "MANAGE_PAGE"
         val request: FakeRequest[AnyContentAsFormUrlEncoded] = FakeRequest(
           "POST",
           s"developer/applications/${app.id}/change-locked-subscription?name=$apiName&context=${apiContext.value}&version=${apiVersion.value}&redirectTo=$redirectTo"
@@ -513,7 +513,7 @@ class SubscriptionsSpec extends BaseControllerSpec with WithCSRFAddToken with Lo
       }
 
       "return a Bad Request without requesting a change to the subscription when the form is invalid" in new Setup {
-        val redirectTo = "APPLICATION_CHECK_PAGE"
+        val redirectTo                                       = "APPLICATION_CHECK_PAGE"
         val request: FakeRequest[AnyContentAsFormUrlEncoded] = FakeRequest(
           "POST",
           s"developer/applications/${app.id}/change-locked-subscription?name=$apiName&context=${apiContext.value}&version=${apiVersion.value}&redirectTo=$redirectTo"
@@ -553,8 +553,8 @@ class SubscriptionsSpec extends BaseControllerSpec with WithCSRFAddToken with Lo
   }
 
   "Authorization" should {
-    val apiContext = ApiContext("api/test")
-    val apiVersion = ApiVersion("1.0")
+    val apiContext    = ApiContext("api/test")
+    val apiVersion    = ApiVersion("1.0")
     val apiAccessType = "PUBLIC"
 
     "unauthorized user should get 404 Not Found on unsubscribe to an API" in new Setup {
@@ -576,7 +576,7 @@ class SubscriptionsSpec extends BaseControllerSpec with WithCSRFAddToken with Lo
 
   private def titleOf(result: Future[Result]) = {
     val titleRegEx = """<title[^>]*>(.*)</title>""".r
-    val title = titleRegEx.findFirstMatchIn(contentAsString(result)).map(_.group(1))
+    val title      = titleRegEx.findFirstMatchIn(contentAsString(result)).map(_.group(1))
     title.isDefined shouldBe true
     title.get
   }

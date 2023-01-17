@@ -16,35 +16,40 @@
 
 package uk.gov.hmrc.apiplatform.modules.mfa.views.authapp
 
+import java.util.UUID
+
 import org.jsoup.Jsoup
+import views.helper.CommonViewSpec
+
 import play.api.test.{FakeRequest, StubMessagesFactory}
+
 import uk.gov.hmrc.apiplatform.modules.mfa.forms.MfaAccessCodeForm
 import uk.gov.hmrc.apiplatform.modules.mfa.models.{MfaAction, MfaId}
 import uk.gov.hmrc.apiplatform.modules.mfa.views.html.authapp.AuthAppAccessCodeView
 import uk.gov.hmrc.thirdpartydeveloperfrontend.builder.{DeveloperBuilder, DeveloperSessionBuilder}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.{DeveloperSession, LoggedInState}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.{LocalUserIdTracker, WithCSRFAddToken}
-import views.helper.CommonViewSpec
-
-import java.util.UUID
 
 class AuthAppAccessCodeViewSpec extends CommonViewSpec
-  with WithCSRFAddToken
-  with DeveloperSessionBuilder
-  with DeveloperBuilder
-  with LocalUserIdTracker
-  with StubMessagesFactory {
+    with WithCSRFAddToken
+    with DeveloperSessionBuilder
+    with DeveloperBuilder
+    with LocalUserIdTracker
+    with StubMessagesFactory {
 
-  implicit val request = FakeRequest()
+  implicit val request      = FakeRequest()
   val authAppAccessCodeView = app.injector.instanceOf[AuthAppAccessCodeView]
+
   implicit val loggedIn: DeveloperSession = buildDeveloperSession(
-    loggedInState = LoggedInState.LOGGED_IN, buildDeveloper("developer@example.com", "Joe", "Bloggs"))
+    loggedInState = LoggedInState.LOGGED_IN,
+    buildDeveloper("developer@example.com", "Joe", "Bloggs")
+  )
 
   "AuthAppAccessCodeView view" should {
     "render correctly when form is valid" in {
 
-      val mainView = authAppAccessCodeView.apply(MfaAccessCodeForm.form, MfaId(UUID.randomUUID()),
-        MfaAction.CREATE, None)(stubMessages(), FakeRequest().withCSRFToken, loggedIn, appConfig)
+      val mainView =
+        authAppAccessCodeView.apply(MfaAccessCodeForm.form, MfaId(UUID.randomUUID()), MfaAction.CREATE, None)(stubMessages(), FakeRequest().withCSRFToken, loggedIn, appConfig)
       val document = Jsoup.parse(mainView.body)
       document.getElementById("page-heading").text shouldBe "Enter your access code"
       document.getElementById("submit").text shouldBe "Continue"
@@ -53,8 +58,12 @@ class AuthAppAccessCodeViewSpec extends CommonViewSpec
 
     "render correctly when form is invalid" in {
 
-      val mainView = authAppAccessCodeView.apply(MfaAccessCodeForm.form.withError("accessCode" ,
-        "You have entered an incorrect access code"), MfaId(UUID.randomUUID()), MfaAction.CREATE, None)(stubMessages(), FakeRequest().withCSRFToken, loggedIn, appConfig)
+      val mainView = authAppAccessCodeView.apply(
+        MfaAccessCodeForm.form.withError("accessCode", "You have entered an incorrect access code"),
+        MfaId(UUID.randomUUID()),
+        MfaAction.CREATE,
+        None
+      )(stubMessages(), FakeRequest().withCSRFToken, loggedIn, appConfig)
       val document = Jsoup.parse(mainView.body)
       document.getElementById("page-heading").text shouldBe "Enter your access code"
       document.getElementById("submit").text shouldBe "Continue"

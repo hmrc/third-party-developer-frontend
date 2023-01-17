@@ -16,39 +16,37 @@
 
 package uk.gov.hmrc.apiplatform.modules.uplift.services
 
+import scala.concurrent.ExecutionContext.Implicits.global
+
+import org.mockito.MockitoSugar
+
+import uk.gov.hmrc.apiplatform.modules.uplift.domain.models._
+import uk.gov.hmrc.apiplatform.modules.uplift.services.mocks.FlowRepositoryMockModule
 import uk.gov.hmrc.thirdpartydeveloperfrontend.builder._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.SubscriptionTestHelperSugar
-import uk.gov.hmrc.apiplatform.modules.uplift.domain.models._
-
-import scala.concurrent.ExecutionContext.Implicits.global
-import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.AsyncHmrcSpec
-import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.LocalUserIdTracker
-import org.mockito.MockitoSugar
-import uk.gov.hmrc.thirdpartydeveloperfrontend.utils._
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.{ResponsibleIndividual, SellResellOrDistribute}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.LoggedInState
-import uk.gov.hmrc.apiplatform.modules.uplift.services.mocks.FlowRepositoryMockModule
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.SellResellOrDistribute
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.ResponsibleIndividual
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.flows.FlowType
+import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.{AsyncHmrcSpec, LocalUserIdTracker, _}
 
 class GetProductionCredentialsFlowServiceSpec
-                extends AsyncHmrcSpec
-                with SampleSession
-                with SampleApplication
-                with SubscriptionTestHelperSugar
-                with SubscriptionsBuilder
-                with FlowRepositoryMockModule
-                with LocalUserIdTracker with DeveloperSessionBuilder with DeveloperBuilder {
+    extends AsyncHmrcSpec
+    with SampleSession
+    with SampleApplication
+    with SubscriptionTestHelperSugar
+    with SubscriptionsBuilder
+    with FlowRepositoryMockModule
+    with LocalUserIdTracker with DeveloperSessionBuilder with DeveloperBuilder {
 
-  trait Setup extends MockitoSugar{
-    val loggedInDeveloper = buildDeveloperSession( loggedInState = LoggedInState.LOGGED_IN, buildDeveloperWithRandomId("dev@example.com", "firstName", "lastName"))
-    val underTest = new GetProductionCredentialsFlowService(FlowRepositoryMock.aMock)
-    val sessionId = "sessionId"
-    val sellResellOrDistribute = SellResellOrDistribute("answer")
-    val responsibleIndividual = ResponsibleIndividual(ResponsibleIndividual.Name("oldname"), ResponsibleIndividual.EmailAddress("old@example.com"))
-    val apiSubscriptions = ApiSubscriptions()
-    val flow = GetProductionCredentialsFlow(sessionId, Some(sellResellOrDistribute), Some(apiSubscriptions))
-    val flowType = FlowType.GET_PRODUCTION_CREDENTIALS
+  trait Setup extends MockitoSugar {
+    val loggedInDeveloper        = buildDeveloperSession(loggedInState = LoggedInState.LOGGED_IN, buildDeveloperWithRandomId("dev@example.com", "firstName", "lastName"))
+    val underTest                = new GetProductionCredentialsFlowService(FlowRepositoryMock.aMock)
+    val sessionId                = "sessionId"
+    val sellResellOrDistribute   = SellResellOrDistribute("answer")
+    val responsibleIndividual    = ResponsibleIndividual(ResponsibleIndividual.Name("oldname"), ResponsibleIndividual.EmailAddress("old@example.com"))
+    val apiSubscriptions         = ApiSubscriptions()
+    val flow                     = GetProductionCredentialsFlow(sessionId, Some(sellResellOrDistribute), Some(apiSubscriptions))
+    val flowType                 = FlowType.GET_PRODUCTION_CREDENTIALS
     val newResponsibleIndividual = ResponsibleIndividual(ResponsibleIndividual.Name("newname"), ResponsibleIndividual.EmailAddress("new@example.com"))
   }
 
@@ -83,7 +81,7 @@ class GetProductionCredentialsFlowServiceSpec
   "findSellResellOrDistribute" should {
     "return the correct details" in new Setup {
       FlowRepositoryMock.FetchBySessionIdAndFlowType.thenReturn(flow)
-      
+
       val result = await(underTest.findSellResellOrDistribute(loggedInDeveloper))
 
       result shouldBe Some(sellResellOrDistribute)

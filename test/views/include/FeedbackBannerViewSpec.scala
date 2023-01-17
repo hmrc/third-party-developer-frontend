@@ -16,18 +16,21 @@
 
 package views.include
 
-import uk.gov.hmrc.thirdpartydeveloperfrontend.config.ApplicationConfig
 import org.jsoup.Jsoup
 import org.jsoup.nodes.Document
-import play.twirl.api.Html
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.views.GenericFeedbackBanner
-import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.WithCSRFAddToken
 import views.helper.CommonViewSpec
 import views.html.include.FeedbackBannerView
 
+import play.twirl.api.Html
+
+import uk.gov.hmrc.thirdpartydeveloperfrontend.config.ApplicationConfig
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.views.GenericFeedbackBanner
+import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.WithCSRFAddToken
+
 class FeedbackBannerViewSpec extends CommonViewSpec with WithCSRFAddToken {
+
   trait Setup {
-    val appConfig: ApplicationConfig = mock[ApplicationConfig]
+    val appConfig: ApplicationConfig           = mock[ApplicationConfig]
     val feedbackBannerView: FeedbackBannerView = new FeedbackBannerView(appConfig)
   }
 

@@ -16,17 +16,23 @@
 
 package uk.gov.hmrc.apiplatform.modules.mfa.controllers.profile
 
+import java.net.URI
+import scala.concurrent.ExecutionContext.Implicits.global
+import scala.concurrent.Future
+import scala.concurrent.Future.successful
+
 import play.api.http.Status
 import play.api.mvc.{AnyContentAsFormUrlEncoded, Result}
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
+
 import uk.gov.hmrc.apiplatform.modules.mfa.MfaViewsValidator
 import uk.gov.hmrc.apiplatform.modules.mfa.connectors.ThirdPartyDeveloperMfaConnector
 import uk.gov.hmrc.apiplatform.modules.mfa.connectors.ThirdPartyDeveloperMfaConnector.{RegisterAuthAppResponse, RegisterSmsResponse}
 import uk.gov.hmrc.apiplatform.modules.mfa.service.MfaService
-import uk.gov.hmrc.apiplatform.modules.mfa.views.html.{RemoveMfaCompletedView, SecurityPreferencesView, SelectMfaView}
-import uk.gov.hmrc.apiplatform.modules.mfa.views.html.authapp.{AuthAppAccessCodeView, AuthAppSetupCompletedView, AuthAppSetupReminderView, AuthAppSetupSkippedView, AuthAppStartView, NameChangeView, QrCodeView}
+import uk.gov.hmrc.apiplatform.modules.mfa.views.html.authapp._
 import uk.gov.hmrc.apiplatform.modules.mfa.views.html.sms.{MobileNumberView, SmsAccessCodeView, SmsSetupCompletedView, SmsSetupReminderView, SmsSetupSkippedView}
+import uk.gov.hmrc.apiplatform.modules.mfa.views.html.{RemoveMfaCompletedView, SecurityPreferencesView, SelectMfaView}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.builder.{DeveloperBuilder, MfaDetailBuilder}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.config.ErrorHandler
 import uk.gov.hmrc.thirdpartydeveloperfrontend.connectors.ThirdPartyDeveloperConnector
@@ -37,47 +43,42 @@ import uk.gov.hmrc.thirdpartydeveloperfrontend.qr.{OtpAuthUri, QRCode}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.WithLoggedInSession.AuthFakeRequest
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.{LocalUserIdTracker, WithCSRFAddToken}
 
-import java.net.URI
-import scala.concurrent.Future
-import scala.concurrent.Future.successful
-import scala.concurrent.ExecutionContext.Implicits.global
-
 class MfaControllerBaseSpec extends BaseControllerSpec
-  with WithCSRFAddToken
-  with DeveloperBuilder
-  with LocalUserIdTracker
-  with MfaDetailBuilder
-  with MfaViewsValidator {
+    with WithCSRFAddToken
+    with DeveloperBuilder
+    with LocalUserIdTracker
+    with MfaDetailBuilder
+    with MfaViewsValidator {
 
   trait Setup extends SessionServiceMock {
-    val secret = "ABCDEFGH"
-    val issuer = "HMRC Developer Hub"
-    val sessionId = "sessionId"
-    val authAppMfaId = verifiedAuthenticatorAppMfaDetail.id
-    val smsMfaId = verifiedSmsMfaDetail.id
+    val secret            = "ABCDEFGH"
+    val issuer            = "HMRC Developer Hub"
+    val sessionId         = "sessionId"
+    val authAppMfaId      = verifiedAuthenticatorAppMfaDetail.id
+    val smsMfaId          = verifiedSmsMfaDetail.id
     val loggedInDeveloper = buildDeveloper()
-    val otpUri = new URI("OTPURI")
-    val correctCode = "123123"
-    val mobileNumber = "07774567891"
+    val otpUri            = new URI("OTPURI")
+    val correctCode       = "123123"
+    val mobileNumber      = "07774567891"
 
     def loggedInState: LoggedInState
 
-    val securityPreferencesView = app.injector.instanceOf[SecurityPreferencesView]
-    val authAppStartView = app.injector.instanceOf[AuthAppStartView]
-    val accessCodeView = app.injector.instanceOf[AuthAppAccessCodeView]
-    val qrCodeView = app.injector.instanceOf[QrCodeView]
+    val securityPreferencesView   = app.injector.instanceOf[SecurityPreferencesView]
+    val authAppStartView          = app.injector.instanceOf[AuthAppStartView]
+    val accessCodeView            = app.injector.instanceOf[AuthAppAccessCodeView]
+    val qrCodeView                = app.injector.instanceOf[QrCodeView]
     val authAppSetupCompletedView = app.injector.instanceOf[AuthAppSetupCompletedView]
-    val nameChangeView = app.injector.instanceOf[NameChangeView]
-    val mobileNumberView = app.injector.instanceOf[MobileNumberView]
-    val smsAccessCodeView = app.injector.instanceOf[SmsAccessCodeView]
-    val smsSetupCompletedView = app.injector.instanceOf[SmsSetupCompletedView]
-    val smsSetupSkippedView = app.injector.instanceOf[SmsSetupSkippedView]
-    val smsSetupReminderView = app.injector.instanceOf[SmsSetupReminderView]
-    val authAppSkippedView = app.injector.instanceOf[AuthAppSetupSkippedView]
-    val authAppSetupReminderView = app.injector.instanceOf[AuthAppSetupReminderView]
-    val selectMfaView = app.injector.instanceOf[SelectMfaView]
-    val errorHandler = app.injector.instanceOf[ErrorHandler]
-    val removeMfaCompletedView = app.injector.instanceOf[RemoveMfaCompletedView]
+    val nameChangeView            = app.injector.instanceOf[NameChangeView]
+    val mobileNumberView          = app.injector.instanceOf[MobileNumberView]
+    val smsAccessCodeView         = app.injector.instanceOf[SmsAccessCodeView]
+    val smsSetupCompletedView     = app.injector.instanceOf[SmsSetupCompletedView]
+    val smsSetupSkippedView       = app.injector.instanceOf[SmsSetupSkippedView]
+    val smsSetupReminderView      = app.injector.instanceOf[SmsSetupReminderView]
+    val authAppSkippedView        = app.injector.instanceOf[AuthAppSetupSkippedView]
+    val authAppSetupReminderView  = app.injector.instanceOf[AuthAppSetupReminderView]
+    val selectMfaView             = app.injector.instanceOf[SelectMfaView]
+    val errorHandler              = app.injector.instanceOf[ErrorHandler]
+    val removeMfaCompletedView    = app.injector.instanceOf[RemoveMfaCompletedView]
 
     val underTest: MfaController = new MfaController(
       mock[ThirdPartyDeveloperConnector],

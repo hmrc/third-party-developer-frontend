@@ -16,32 +16,42 @@
 
 package uk.gov.hmrc.thirdpartydeveloperfrontend.controllers
 
+import java.time.LocalDateTime
+import java.time.format.DateTimeFormatter
+import scala.concurrent.Future.successful
+import scala.concurrent.{ExecutionContext, Future}
+
 import com.google.inject.{Inject, Singleton}
+import views.html.manageResponsibleIndividual._
+
 import play.api.data.Form
 import play.api.libs.crypto.CookieSigner
 import play.api.mvc._
+
 import uk.gov.hmrc.thirdpartydeveloperfrontend.config.{ApplicationConfig, ErrorHandler}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.ManageResponsibleIndividualController.{ResponsibleIndividualHistoryItem, ViewModel, formatDateTime}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.Capabilities.SupportsResponsibleIndividual
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.Permissions.{AdministratorOnly, TeamMembersOnly}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.{ApplicationId, ImportantSubmissionData, Standard, TermsOfUseAcceptance}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.service._
-import views.html.manageResponsibleIndividual.{ResponsibleIndividualChangeToOtherRequestedView, ResponsibleIndividualChangeToOtherView, ResponsibleIndividualChangeToSelfConfirmedView, ResponsibleIndividualChangeToSelfOrOtherView, ResponsibleIndividualChangeToSelfView, ResponsibleIndividualDetailsView}
-
-import java.time.LocalDateTime
-import java.time.format.DateTimeFormatter
-import scala.concurrent.Future.successful
-import scala.concurrent.{ExecutionContext, Future}
 
 object ManageResponsibleIndividualController {
   case class ResponsibleIndividualHistoryItem(name: String, fromDate: String, toDate: String)
-  case class ViewModel(environment: String, responsibleIndividualName: String, history: List[ResponsibleIndividualHistoryItem], allowChanges: Boolean, adminEmails: List[String], userIsResponsibleIndividual: Boolean)
+
+  case class ViewModel(
+      environment: String,
+      responsibleIndividualName: String,
+      history: List[ResponsibleIndividualHistoryItem],
+      allowChanges: Boolean,
+      adminEmails: List[String],
+      userIsResponsibleIndividual: Boolean
+    )
 
   def formatDateTime(localDateTime: LocalDateTime) = localDateTime.format(DateTimeFormatter.ofPattern("d MMMM yyyy"))
 }
 
 @Singleton
-class ManageResponsibleIndividualController @Inject()(
+class ManageResponsibleIndividualController @Inject() (
     val sessionService: SessionService,
     val auditService: AuditService,
     val errorHandler: ErrorHandler,
@@ -55,8 +65,9 @@ class ManageResponsibleIndividualController @Inject()(
     responsibleIndividualChangeToSelfConfirmedView: ResponsibleIndividualChangeToSelfConfirmedView,
     responsibleIndividualChangeToOtherView: ResponsibleIndividualChangeToOtherView,
     responsibleIndividualChangeToOtherRequestedView: ResponsibleIndividualChangeToOtherRequestedView
-)(implicit val ec: ExecutionContext, val appConfig: ApplicationConfig)
-    extends ApplicationController(mcc)
+  )(implicit val ec: ExecutionContext,
+    val appConfig: ApplicationConfig
+  ) extends ApplicationController(mcc)
     with ApplicationHelper {
 
   private val flashKeyNewRiName = "newRiName"
@@ -69,25 +80,26 @@ class ManageResponsibleIndividualController @Inject()(
 
   private def buildResponsibleIndividualHistoryItems(termsOfUseAcceptances: List[TermsOfUseAcceptance]): List[ResponsibleIndividualHistoryItem] = {
     termsOfUseAcceptances match {
-      case Nil => List.empty
-      case first :: Nil => List(ResponsibleIndividualHistoryItem(first.responsibleIndividual.fullName.value, formatDateTime(first.dateTime), "Present"))
-      case first :: second :: others => List(ResponsibleIndividualHistoryItem(first.responsibleIndividual.fullName.value, formatDateTime(first.dateTime), formatDateTime(second.dateTime))) ++
-        buildResponsibleIndividualHistoryItems(second :: others)
+      case Nil                       => List.empty
+      case first :: Nil              => List(ResponsibleIndividualHistoryItem(first.responsibleIndividual.fullName.value, formatDateTime(first.dateTime), "Present"))
+      case first :: second :: others =>
+        List(ResponsibleIndividualHistoryItem(first.responsibleIndividual.fullName.value, formatDateTime(first.dateTime), formatDateTime(second.dateTime))) ++
+          buildResponsibleIndividualHistoryItems(second :: others)
     }
   }
 
   def showResponsibleIndividualDetails(applicationId: ApplicationId): Action[AnyContent] = canViewResponsibleIndividualDetailsAction(applicationId) { implicit request =>
     request.application.access match {
       case Standard(_, _, _, _, _, Some(ImportantSubmissionData(_, responsibleIndividual, _, _, _, termsOfUseAcceptances))) => {
-        val environment = request.application.deployedTo.toString().toLowerCase().capitalize
+        val environment                       = request.application.deployedTo.toString().toLowerCase().capitalize
         val responsibleIndividualHistoryItems = buildResponsibleIndividualHistoryItems(termsOfUseAcceptances).reverse
-        val allowChanges = request.role.isAdministrator
-        val adminEmails = request.application.collaborators.filter(_.role.isAdministrator).map(_.emailAddress).toList
-        val userIsResponsibleIndividual = request.developerSession.email == responsibleIndividual.emailAddress.value
-        val viewModel = ViewModel(environment, responsibleIndividual.fullName.value, responsibleIndividualHistoryItems, allowChanges, adminEmails, userIsResponsibleIndividual)
+        val allowChanges                      = request.role.isAdministrator
+        val adminEmails                       = request.application.collaborators.filter(_.role.isAdministrator).map(_.emailAddress).toList
+        val userIsResponsibleIndividual       = request.developerSession.email == responsibleIndividual.emailAddress.value
+        val viewModel                         = ViewModel(environment, responsibleIndividual.fullName.value, responsibleIndividualHistoryItems, allowChanges, adminEmails, userIsResponsibleIndividual)
         successful(Ok(responsibleIndividualDetailsView(request.application, viewModel)))
       }
-      case _ => successful(BadRequest("Only Standard apps have Responsible Individual details"))
+      case _                                                                                                                => successful(BadRequest("Only Standard apps have Responsible Individual details"))
     }
   }
 
@@ -102,9 +114,9 @@ class ManageResponsibleIndividualController @Inject()(
 
     def handleValidForm(form: ResponsibleIndividualChangeToSelfOrOtherForm): Future[Result] = {
       successful(Redirect(form.who match {
-        case ResponsibleIndividualChangeToSelfOrOtherForm.self => routes.ManageResponsibleIndividualController.showResponsibleIndividualChangeToSelf(applicationId)
+        case ResponsibleIndividualChangeToSelfOrOtherForm.self  => routes.ManageResponsibleIndividualController.showResponsibleIndividualChangeToSelf(applicationId)
         case ResponsibleIndividualChangeToSelfOrOtherForm.other => routes.ManageResponsibleIndividualController.showResponsibleIndividualChangeToOther(applicationId)
-        case _ => throw new AssertionError(s"Unexpected 'who' value in form '${form.who}', should have been caught by form validation")
+        case _                                                  => throw new AssertionError(s"Unexpected 'who' value in form '${form.who}', should have been caught by form validation")
       }))
     }
 
@@ -139,10 +151,15 @@ class ManageResponsibleIndividualController @Inject()(
           val isAlreadyResponsibleIndividual = form.name.equalsIgnoreCase(responsibleIndividual.fullName.value) &&
             form.email.equalsIgnoreCase(responsibleIndividual.emailAddress.value)
           if (isAlreadyResponsibleIndividual) {
-            successful(BadRequest(responsibleIndividualChangeToOtherView(request.application, ResponsibleIndividualChangeToOtherForm.form.fill(form).withGlobalError("responsible_individual.error.nochange"))))
+            successful(BadRequest(responsibleIndividualChangeToOtherView(
+              request.application,
+              ResponsibleIndividualChangeToOtherForm.form.fill(form).withGlobalError("responsible_individual.error.nochange")
+            )))
           } else {
             applicationService.verifyResponsibleIndividual(request.application, request.userId, request.developerSession.displayedName, form.name, form.email)
-              .map(_ => Redirect(routes.ManageResponsibleIndividualController.showResponsibleIndividualChangeToOtherRequested(applicationId)).flashing(flashKeyNewRiName -> form.name))
+              .map(_ =>
+                Redirect(routes.ManageResponsibleIndividualController.showResponsibleIndividualChangeToOtherRequested(applicationId)).flashing(flashKeyNewRiName -> form.name)
+              )
           }
         }
       }

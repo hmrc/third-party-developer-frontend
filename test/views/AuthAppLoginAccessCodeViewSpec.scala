@@ -16,27 +16,29 @@
 
 package views
 
+import java.util.UUID
+
 import org.jsoup.Jsoup
 import org.jsoup.nodes.Document
 import org.scalatest.Assertion
+import views.helper.CommonViewSpec
+
 import play.api.mvc.AnyContentAsEmpty
 import play.api.test.{FakeRequest, StubMessagesFactory}
 import play.twirl.api.Html
+
 import uk.gov.hmrc.apiplatform.modules.mfa.forms.MfaAccessCodeForm
 import uk.gov.hmrc.apiplatform.modules.mfa.models.{MfaId, MfaType}
 import uk.gov.hmrc.apiplatform.modules.mfa.views.html.authapp.AuthAppLoginAccessCodeView
 import uk.gov.hmrc.thirdpartydeveloperfrontend.builder.{DeveloperBuilder, DeveloperSessionBuilder}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.{LocalUserIdTracker, WithCSRFAddToken}
-import views.helper.CommonViewSpec
-
-import java.util.UUID
 
 class AuthAppLoginAccessCodeViewSpec extends CommonViewSpec
-  with WithCSRFAddToken
-  with DeveloperSessionBuilder
-  with DeveloperBuilder
-  with LocalUserIdTracker
-  with StubMessagesFactory {
+    with WithCSRFAddToken
+    with DeveloperSessionBuilder
+    with DeveloperBuilder
+    with LocalUserIdTracker
+    with StubMessagesFactory {
 
   implicit val request: FakeRequest[AnyContentAsEmpty.type] = FakeRequest()
 
@@ -57,8 +59,11 @@ class AuthAppLoginAccessCodeViewSpec extends CommonViewSpec
   "AuthAppLoginAccessCodeView view" should {
 
     "render correctly when form is valid" in new Setup {
-      val mainView: Html = authAppLoginAccessCodeView.apply(MfaAccessCodeForm.form, MfaId(UUID.randomUUID()),
-        MfaType.AUTHENTICATOR_APP, userHasMultipleMfa = false)(stubMessages(), FakeRequest().withCSRFToken, appConfig)
+      val mainView: Html = authAppLoginAccessCodeView.apply(MfaAccessCodeForm.form, MfaId(UUID.randomUUID()), MfaType.AUTHENTICATOR_APP, userHasMultipleMfa = false)(
+        stubMessages(),
+        FakeRequest().withCSRFToken,
+        appConfig
+      )
 
       val document: Document = Jsoup.parse(mainView.body)
 
@@ -67,9 +72,13 @@ class AuthAppLoginAccessCodeViewSpec extends CommonViewSpec
     }
 
     "render correctly when form is invalid" in new Setup {
-      val mainView: Html = authAppLoginAccessCodeView.apply(MfaAccessCodeForm.form
-        .withError("accessCode","You have entered an incorrect access code"),
-          MfaId(UUID.randomUUID()), MfaType.AUTHENTICATOR_APP, userHasMultipleMfa = false)(stubMessages(), FakeRequest().withCSRFToken, appConfig)
+      val mainView: Html = authAppLoginAccessCodeView.apply(
+        MfaAccessCodeForm.form
+          .withError("accessCode", "You have entered an incorrect access code"),
+        MfaId(UUID.randomUUID()),
+        MfaType.AUTHENTICATOR_APP,
+        userHasMultipleMfa = false
+      )(stubMessages(), FakeRequest().withCSRFToken, appConfig)
 
       val document: Document = Jsoup.parse(mainView.body)
 

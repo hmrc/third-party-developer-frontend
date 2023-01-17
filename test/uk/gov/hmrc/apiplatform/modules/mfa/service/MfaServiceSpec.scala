@@ -16,22 +16,23 @@
 
 package uk.gov.hmrc.apiplatform.modules.mfa.service
 
-import play.api.http.Status.INTERNAL_SERVER_ERROR
-import uk.gov.hmrc.apiplatform.modules.mfa.connectors.ThirdPartyDeveloperMfaConnector
-import uk.gov.hmrc.apiplatform.modules.mfa.models.MfaId
-import uk.gov.hmrc.http.{HeaderCarrier, UpstreamErrorResponse}
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.UserId
-import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.AsyncHmrcSpec
-
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future.{failed, successful}
+
+import play.api.http.Status.INTERNAL_SERVER_ERROR
+import uk.gov.hmrc.http.{HeaderCarrier, UpstreamErrorResponse}
+
+import uk.gov.hmrc.apiplatform.modules.mfa.connectors.ThirdPartyDeveloperMfaConnector
+import uk.gov.hmrc.apiplatform.modules.mfa.models.MfaId
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.UserId
+import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.AsyncHmrcSpec
 
 class MfaServiceSpec extends AsyncHmrcSpec {
 
   trait Setup {
-    val userId = UserId.random
-    val mfaId = MfaId.random
-    val totpCode = "12345678"
+    val userId    = UserId.random
+    val mfaId     = MfaId.random
+    val totpCode  = "12345678"
     val connector = mock[ThirdPartyDeveloperMfaConnector]
 
     when(connector.removeMfaById(eqTo(userId), eqTo(mfaId))(*)).thenReturn(successful(()))
@@ -100,7 +101,7 @@ class MfaServiceSpec extends AsyncHmrcSpec {
       when(connector.removeMfaById(eqTo(userId), eqTo(mfaId))(*))
         .thenReturn(failed(UpstreamErrorResponse("failed to remove MFA", INTERNAL_SERVER_ERROR, INTERNAL_SERVER_ERROR)))
 
-      intercept[UpstreamErrorResponse](await(service.removeMfaById(userId, mfaId, totpCode,mfaId)(HeaderCarrier())))
+      intercept[UpstreamErrorResponse](await(service.removeMfaById(userId, mfaId, totpCode, mfaId)(HeaderCarrier())))
     }
   }
 }

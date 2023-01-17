@@ -16,23 +16,22 @@
 
 package uk.gov.hmrc.thirdpartydeveloperfrontend.config
 
+import javax.inject.{Inject, Singleton}
+
 import play.api.Configuration
 
-import javax.inject.Inject
-import javax.inject.Singleton
-
 sealed trait NewJourneyFeature
-final case object Off extends NewJourneyFeature
-final case object On extends NewJourneyFeature
+final case object Off      extends NewJourneyFeature
+final case object On       extends NewJourneyFeature
 final case object OnDemand extends NewJourneyFeature
 
 @Singleton
-class UpliftJourneyConfig @Inject()(config: Configuration) {
+class UpliftJourneyConfig @Inject() (config: Configuration) {
 
-    def status: NewJourneyFeature = 
-        config.get[String]("applicationCheck.canUseNewUpliftJourney") match {
-            case "On" => On
-            case "OnDemand" => OnDemand
-            case _ => Off
-        }
+  def status: NewJourneyFeature =
+    config.get[String]("applicationCheck.canUseNewUpliftJourney") match {
+      case "On"       => On
+      case "OnDemand" => OnDemand
+      case _          => Off
+    }
 }

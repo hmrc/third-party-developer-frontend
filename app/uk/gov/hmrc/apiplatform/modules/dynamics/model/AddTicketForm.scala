@@ -25,11 +25,11 @@ object AddTicketForm {
 
   def form: Form[AddTicketForm] = Form(
     mapping(
-      "customerId" -> text.verifying(
-        "This field is a UUID (e.g. 7e88b5e8-8924-ed11-9db2-0022481a611c)", 
+      "customerId"  -> text.verifying(
+        "This field is a UUID (e.g. 7e88b5e8-8924-ed11-9db2-0022481a611c)",
         s => s.toLowerCase().matches("^[{]?[0-9a-f]{8}-([0-9a-f]{4}-){3}[0-9a-f]{12}[}]?$")
       ),
-      "title" -> nonEmptyText,
+      "title"       -> nonEmptyText,
       "description" -> nonEmptyText
     )(AddTicketForm.apply)(AddTicketForm.unapply)
   )

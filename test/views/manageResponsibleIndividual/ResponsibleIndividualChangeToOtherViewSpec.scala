@@ -17,27 +17,29 @@
 package views.manageResponsibleIndividual
 
 import org.jsoup.Jsoup
+import views.helper.CommonViewSpec
+import views.html.manageResponsibleIndividual.ResponsibleIndividualChangeToOtherView
+
 import play.api.test.FakeRequest
+
 import uk.gov.hmrc.thirdpartydeveloperfrontend.builder.{DeveloperBuilder, DeveloperSessionBuilder}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.ResponsibleIndividualChangeToOtherForm
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.LoggedInState
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.ViewHelpers.{elementExistsByText, linkExistsWithHref}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.{LocalUserIdTracker, TestApplications, WithCSRFAddToken}
-import views.helper.CommonViewSpec
-import views.html.manageResponsibleIndividual.ResponsibleIndividualChangeToOtherView
 
 class ResponsibleIndividualChangeToOtherViewSpec extends CommonViewSpec with WithCSRFAddToken
-  with DeveloperBuilder with LocalUserIdTracker with DeveloperSessionBuilder with TestApplications {
+    with DeveloperBuilder with LocalUserIdTracker with DeveloperSessionBuilder with TestApplications {
 
   "Responsible Individual Change To Other View" should {
     val application = anApplication()
-    val view = app.injector.instanceOf[ResponsibleIndividualChangeToOtherView]
-    val riName = "Mr Responsible"
-    val riEmail = "ri@example.com"
+    val view        = app.injector.instanceOf[ResponsibleIndividualChangeToOtherView]
+    val riName      = "Mr Responsible"
+    val riEmail     = "ri@example.com"
 
     def renderPage() = {
       val request = FakeRequest().withCSRFToken
-      val form = ResponsibleIndividualChangeToOtherForm.form().fill(ResponsibleIndividualChangeToOtherForm(riName, riEmail))
+      val form    = ResponsibleIndividualChangeToOtherForm.form().fill(ResponsibleIndividualChangeToOtherForm(riName, riEmail))
       val session = buildDeveloperSession(LoggedInState.LOGGED_IN, buildDeveloper("admin@example.com", "firstName1", "lastName1"))
 
       view.render(application, form, request, session, messagesProvider.messages, appConfig)

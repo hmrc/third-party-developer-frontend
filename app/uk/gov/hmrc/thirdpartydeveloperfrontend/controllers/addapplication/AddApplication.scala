@@ -16,36 +16,36 @@
 
 package uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.addapplication
 
-import uk.gov.hmrc.thirdpartydeveloperfrontend.config.ApplicationConfig
-import uk.gov.hmrc.thirdpartydeveloperfrontend.config.ErrorHandler
-import uk.gov.hmrc.thirdpartydeveloperfrontend.connectors.ApmConnector
-import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers._
-import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.{checkpages => controllercheckpages}
-import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.FormKeys.appNameField
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.ApplicationCreatedResponse
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.Error._
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.apidefinitions.APISubscriptionStatus
-import uk.gov.hmrc.apiplatform.modules.uplift.services._
-import uk.gov.hmrc.apiplatform.modules.uplift.domain.models._
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.Environment.{PRODUCTION, SANDBOX}
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications._
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.controllers.ApplicationSummary
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.emailpreferences.EmailPreferences
+import javax.inject.{Inject, Singleton}
+import scala.concurrent.Future.successful
+import scala.concurrent.{ExecutionContext, Future}
+
+import views.helper.EnvironmentNameService
+import views.html._
+
 import play.api.data.Form
 import play.api.libs.crypto.CookieSigner
 import play.api.libs.json.Json
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
-import uk.gov.hmrc.thirdpartydeveloperfrontend.service._
 import uk.gov.hmrc.http.HeaderCarrier
-import views.helper.EnvironmentNameService
-import views.html._
 
-import javax.inject.{Inject, Singleton}
-import scala.concurrent.Future.successful
-import scala.concurrent.{ExecutionContext, Future}
-import uk.gov.hmrc.apiplatform.modules.uplift.views.html.BeforeYouStartView
-import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.UserRequest
 import uk.gov.hmrc.apiplatform.modules.uplift.controllers.UpliftJourneySwitch
+import uk.gov.hmrc.apiplatform.modules.uplift.domain.models._
+import uk.gov.hmrc.apiplatform.modules.uplift.services._
+import uk.gov.hmrc.apiplatform.modules.uplift.views.html.BeforeYouStartView
+import uk.gov.hmrc.thirdpartydeveloperfrontend.config.{ApplicationConfig, ErrorHandler}
+import uk.gov.hmrc.thirdpartydeveloperfrontend.connectors.ApmConnector
+import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.FormKeys.appNameField
+import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.{UserRequest, _}
+import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.{checkpages => controllercheckpages}
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.ApplicationCreatedResponse
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.Error._
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.apidefinitions.APISubscriptionStatus
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.Environment.{PRODUCTION, SANDBOX}
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications._
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.controllers.ApplicationSummary
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.emailpreferences.EmailPreferences
+import uk.gov.hmrc.thirdpartydeveloperfrontend.service._
 
 @Singleton
 class AddApplication @Inject() (
@@ -70,32 +70,34 @@ class AddApplication @Inject() (
     upliftJourneySwitch: UpliftJourneySwitch,
     beforeYouStartView: BeforeYouStartView,
     flowService: GetProductionCredentialsFlowService
-)(implicit val ec: ExecutionContext, val appConfig: ApplicationConfig, val environmentNameService: EnvironmentNameService)
-    extends ApplicationController(mcc) {
+  )(implicit val ec: ExecutionContext,
+    val appConfig: ApplicationConfig,
+    val environmentNameService: EnvironmentNameService
+  ) extends ApplicationController(mcc) {
 
-  def accessTokenSwitchPage(): Action[AnyContent] = loggedInAction { implicit request => 
-    successful(Ok(accessTokenSwitchView())) 
+  def accessTokenSwitchPage(): Action[AnyContent] = loggedInAction { implicit request =>
+    successful(Ok(accessTokenSwitchView()))
   }
 
-  def usingPrivilegedApplicationCredentialsPage(): Action[AnyContent] = loggedInAction { implicit request => 
-    successful(Ok(usingPrivilegedApplicationCredentialsView())) 
+  def usingPrivilegedApplicationCredentialsPage(): Action[AnyContent] = loggedInAction { implicit request =>
+    successful(Ok(usingPrivilegedApplicationCredentialsView()))
   }
-  
-  def addApplicationSubordinate(): Action[AnyContent] = loggedInAction { implicit request => 
-    successful(Ok(addApplicationStartSubordinateView())) 
+
+  def addApplicationSubordinate(): Action[AnyContent] = loggedInAction { implicit request =>
+    successful(Ok(addApplicationStartSubordinateView()))
   }
-  
-  def addApplicationPrincipal(): Action[AnyContent] = loggedInAction { implicit request => 
+
+  def addApplicationPrincipal(): Action[AnyContent] = loggedInAction { implicit request =>
     upliftJourneySwitch.performSwitch(
-      addApplicationProductionSwitch()(request),              // new uplift path
-      successful(Ok(addApplicationStartPrincipalView()))      // existing uplift path
+      addApplicationProductionSwitch()(request),         // new uplift path
+      successful(Ok(addApplicationStartPrincipalView())) // existing uplift path
     )
   }
-  
-  def tenDaysWarning(): Action[AnyContent] = loggedInAction { implicit request => 
-    successful(Ok(tenDaysWarningView())) 
+
+  def tenDaysWarning(): Action[AnyContent] = loggedInAction { implicit request =>
+    successful(Ok(tenDaysWarningView()))
   }
-  
+
   def addApplicationName(environment: Environment): Action[AnyContent] = loggedInAction { implicit request =>
     val form = AddApplicationNameForm.form.fill(AddApplicationNameForm(""))
     successful(Ok(addApplicationNameView(form, environment)))
@@ -103,14 +105,14 @@ class AddApplication @Inject() (
 
   def progressOnUpliftJourney(sandboxAppId: ApplicationId): Action[AnyContent] = loggedInAction { implicit request =>
     upliftJourneySwitch.performSwitch(
-      successful(Redirect(uk.gov.hmrc.apiplatform.modules.uplift.controllers.routes.UpliftJourneyController.beforeYouStart(sandboxAppId))),        // new uplift path
-      showConfirmSubscriptionsPage(sandboxAppId)(request)      // existing uplift path
+      successful(Redirect(uk.gov.hmrc.apiplatform.modules.uplift.controllers.routes.UpliftJourneyController.beforeYouStart(sandboxAppId))), // new uplift path
+      showConfirmSubscriptionsPage(sandboxAppId)(request)                                                                                   // existing uplift path
     )
   }
 
   def soleApplicationToUpliftAction(appId: ApplicationId): Action[AnyContent] = loggedInAction { implicit request =>
     (for {
-      upliftData          <- upliftLogic.aUsersSandboxAdminSummariesAndUpliftIds(request.userId)
+      upliftData <- upliftLogic.aUsersSandboxAdminSummariesAndUpliftIds(request.userId)
     } yield upliftData.upliftableSummaries match {
       case summary :: Nil => progressOnUpliftJourney(summary.id)(request)
       case _              => successful(BadRequest(Json.toJson(BadRequestError)))
@@ -119,11 +121,12 @@ class AddApplication @Inject() (
 
   def addApplicationProductionSwitch(): Action[AnyContent] = loggedInAction { implicit request =>
     def chooseApplicationToUplift(upliftableSummaries: Seq[ApplicationSummary], showFluff: Boolean): Action[AnyContent] = loggedInAction { implicit request =>
-      val form = 
-        if(upliftableSummaries.size == 1) // TODO - and only one API sub
+      val form =
+        if (upliftableSummaries.size == 1) { // TODO - and only one API sub
           ChooseApplicationToUpliftForm.form.fill(ChooseApplicationToUpliftForm(upliftableSummaries.head.id))
-        else
+        } else {
           ChooseApplicationToUpliftForm.form
+        }
 
       successful(Ok(chooseApplicationToUpliftView(form, upliftableSummaries, showFluff)))
     }
@@ -132,52 +135,48 @@ class AddApplication @Inject() (
     upliftLogic.aUsersSandboxAdminSummariesAndUpliftIds(request.userId).flatMap { upliftData =>
       flowService.resetFlow(request.developerSession).flatMap { _ =>
         upliftData.upliftableApplicationIds.toList match {
-          case Nil          => successful(BadRequest(Json.toJson(BadRequestError)))
+          case Nil                                                     => successful(BadRequest(Json.toJson(BadRequestError)))
           case appId :: Nil if !upliftData.hasAppsThatCannotBeUplifted => progressOnUpliftJourney(appId)(request)
-          case _ => chooseApplicationToUplift(upliftData.upliftableSummaries, upliftData.hasAppsThatCannotBeUplifted)(request)
+          case _                                                       => chooseApplicationToUplift(upliftData.upliftableSummaries, upliftData.hasAppsThatCannotBeUplifted)(request)
         }
       }
     }
   }
-  
+
   private def showConfirmSubscriptionsPage(sandboxAppId: ApplicationId)(implicit request: UserRequest[_]) = {
     for {
       upliftableSubscriptions <- apmConnector.fetchUpliftableSubscriptions(sandboxAppId)
       apiSubscriptions         = ApiSubscriptions(upliftableSubscriptions.map(id => (id, true)).toMap)
-      _ <- flowService.storeApiSubscriptions(apiSubscriptions, request.developerSession)
-    }
-    yield {
-      Redirect( uk.gov.hmrc.apiplatform.modules.uplift.controllers.routes.UpliftJourneyController.confirmApiSubscriptionsPage(sandboxAppId))
+      _                       <- flowService.storeApiSubscriptions(apiSubscriptions, request.developerSession)
+    } yield {
+      Redirect(uk.gov.hmrc.apiplatform.modules.uplift.controllers.routes.UpliftJourneyController.confirmApiSubscriptionsPage(sandboxAppId))
     }
   }
 
   def chooseApplicationToUpliftAction(): Action[AnyContent] = loggedInAction { implicit request =>
-
     def handleValidForm(validForm: ChooseApplicationToUpliftForm) =
       progressOnUpliftJourney(validForm.applicationId)(request)
 
     def handleInvalidForm(formWithErrors: Form[ChooseApplicationToUpliftForm]) = {
       upliftLogic.aUsersSandboxAdminSummariesAndUpliftIds(request.userId) flatMap { upliftData =>
-
-      ( upliftData.upliftableApplicationIds.size, upliftData.hasAppsThatCannotBeUplifted) match {
+        (upliftData.upliftableApplicationIds.size, upliftData.hasAppsThatCannotBeUplifted) match {
           case (0, _)     => successful(BadRequest(Json.toJson(BadRequestError)))
           case (1, false) => successful(BadRequest(Json.toJson(BadRequestError)))
-          case _  => successful(
-            BadRequest(
-              chooseApplicationToUpliftView(
-                formWithErrors,
-                upliftData.upliftableSummaries.toSeq,
-                upliftData.hasAppsThatCannotBeUplifted
+          case _          => successful(
+              BadRequest(
+                chooseApplicationToUpliftView(
+                  formWithErrors,
+                  upliftData.upliftableSummaries.toSeq,
+                  upliftData.hasAppsThatCannotBeUplifted
+                )
               )
             )
-          )
         }
       }
-    }      
+    }
 
     ChooseApplicationToUpliftForm.form.bindFromRequest().fold(handleInvalidForm, handleValidForm)
   }
-
 
   def editApplicationNameAction(environment: Environment): Action[AnyContent] = loggedInAction { implicit request =>
     val requestForm: Form[AddApplicationNameForm] = AddApplicationNameForm.form.bindFromRequest
@@ -212,11 +211,14 @@ class AddApplication @Inject() (
 
   def addApplicationSuccess(applicationId: ApplicationId): Action[AnyContent] = {
 
-    def subscriptionsNotInUserEmailPreferences(applicationSubscriptions: Seq[APISubscriptionStatus],
-                                               userEmailPreferences: EmailPreferences)(implicit hc: HeaderCarrier): Future[Set[String]] = {
+    def subscriptionsNotInUserEmailPreferences(
+        applicationSubscriptions: Seq[APISubscriptionStatus],
+        userEmailPreferences: EmailPreferences
+      )(implicit hc: HeaderCarrier
+      ): Future[Set[String]] = {
       emailPreferencesService.fetchAPIDetails(applicationSubscriptions.map(_.serviceName).toSet) map { apiDetails =>
         val allInCategories = userEmailPreferences.interests.filter(i => i.services.isEmpty).map(_.regime)
-        val filteredApis = apiDetails.filter(api => api.categories.intersect(allInCategories).isEmpty)
+        val filteredApis    = apiDetails.filter(api => api.categories.intersect(allInCategories).isEmpty)
         filteredApis.map(_.serviceName).diff(userEmailPreferences.interests.flatMap(_.services)).toSet
       }
     }
@@ -228,8 +230,7 @@ class AddApplication @Inject() (
         case SANDBOX    => {
           val alreadySelectedEmailPreferences: Boolean = appRequest.flash.get("emailPreferencesSelected").contains("true")
           subscriptionsNotInUserEmailPreferences(subscriptions.filter(_.subscribed), developerSession.developer.emailPreferences) map { missingSubscriptions =>
-
-            if(alreadySelectedEmailPreferences || missingSubscriptions.isEmpty) {
+            if (alreadySelectedEmailPreferences || missingSubscriptions.isEmpty) {
               Ok(addApplicationSubordinateSuccessView(application.name, applicationId))
             } else {
               Redirect(profile.routes.EmailPreferencesController.selectApisFromSubscriptionsPage(applicationId))

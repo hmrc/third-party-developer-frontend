@@ -16,11 +16,12 @@
 
 package uk.gov.hmrc.thirdpartydeveloperfrontend.mocks.service
 
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.Session
-import org.mockito.{ArgumentMatchersSugar, MockitoSugar}
-import uk.gov.hmrc.thirdpartydeveloperfrontend.service.SessionService
-
 import scala.concurrent.Future.successful
+
+import org.mockito.{ArgumentMatchersSugar, MockitoSugar}
+
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.Session
+import uk.gov.hmrc.thirdpartydeveloperfrontend.service.SessionService
 
 trait SessionServiceMock extends MockitoSugar with ArgumentMatchersSugar {
   val sessionServiceMock = mock[SessionService]

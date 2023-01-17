@@ -16,29 +16,30 @@
 
 package uk.gov.hmrc.apiplatform.modules.mfa.views.sms
 
+import java.util.UUID
+
 import org.jsoup.Jsoup
 import org.jsoup.nodes.Document
+import views.helper.CommonViewSpec
+
 import play.api.mvc.Flash
 import play.api.test.{FakeRequest, StubMessagesFactory}
+
 import uk.gov.hmrc.apiplatform.modules.mfa.forms.SmsAccessCodeForm
 import uk.gov.hmrc.apiplatform.modules.mfa.models.{MfaAction, MfaId}
 import uk.gov.hmrc.apiplatform.modules.mfa.views.html.sms.SmsAccessCodeView
 import uk.gov.hmrc.thirdpartydeveloperfrontend.builder.{DeveloperBuilder, DeveloperSessionBuilder}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.{DeveloperSession, LoggedInState}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.{LocalUserIdTracker, WithCSRFAddToken}
-import views.helper.CommonViewSpec
-
-import java.util.UUID
 
 class SmsAccessCodeViewSpec extends CommonViewSpec
-  with WithCSRFAddToken with DeveloperSessionBuilder
-  with DeveloperBuilder with LocalUserIdTracker with StubMessagesFactory {
+    with WithCSRFAddToken with DeveloperSessionBuilder
+    with DeveloperBuilder with LocalUserIdTracker with StubMessagesFactory {
 
-  implicit val flash = Flash(Map("mobileNumber" -> "0123456789"))
-  implicit val request = FakeRequest()
-  implicit val loggedIn: DeveloperSession = buildDeveloperSession(loggedInState = LoggedInState.LOGGED_IN,
-    buildDeveloper("developer@example.com", "Joe", "Bloggs"))
-  val smsAccessCodeView = app.injector.instanceOf[SmsAccessCodeView]
+  implicit val flash                      = Flash(Map("mobileNumber" -> "0123456789"))
+  implicit val request                    = FakeRequest()
+  implicit val loggedIn: DeveloperSession = buildDeveloperSession(loggedInState = LoggedInState.LOGGED_IN, buildDeveloper("developer@example.com", "Joe", "Bloggs"))
+  val smsAccessCodeView                   = app.injector.instanceOf[SmsAccessCodeView]
 
   trait Setup {
     val mobileNumber = "0123456789"
@@ -51,8 +52,8 @@ class SmsAccessCodeViewSpec extends CommonViewSpec
 
   "SmsAccessCodeView" should {
     "render correctly when form is valid" in new Setup {
-      val mainView = smsAccessCodeView.apply(SmsAccessCodeForm.form, MfaId(UUID.randomUUID()),
-        MfaAction.CREATE, None)(flash, stubMessages(), FakeRequest().withCSRFToken, loggedIn, appConfig)
+      val mainView =
+        smsAccessCodeView.apply(SmsAccessCodeForm.form, MfaId(UUID.randomUUID()), MfaAction.CREATE, None)(flash, stubMessages(), FakeRequest().withCSRFToken, loggedIn, appConfig)
       val document = Jsoup.parse(mainView.body)
 
       verifyPageElements(document)
@@ -60,9 +61,12 @@ class SmsAccessCodeViewSpec extends CommonViewSpec
     }
 
     "render correctly when form is invalid" in new Setup {
-      val mainView = smsAccessCodeView.apply(SmsAccessCodeForm.form.withError("accessCode",
-        "You have entered an incorrect access code"),
-        MfaId(UUID.randomUUID()), MfaAction.CREATE, None)(flash, stubMessages(), FakeRequest().withCSRFToken, loggedIn, appConfig)
+      val mainView = smsAccessCodeView.apply(
+        SmsAccessCodeForm.form.withError("accessCode", "You have entered an incorrect access code"),
+        MfaId(UUID.randomUUID()),
+        MfaAction.CREATE,
+        None
+      )(flash, stubMessages(), FakeRequest().withCSRFToken, loggedIn, appConfig)
       val document = Jsoup.parse(mainView.body)
 
       verifyPageElements(document)

@@ -17,11 +17,13 @@
 package uk.gov.hmrc.apiplatform.modules.submissions.controllers
 
 import play.api.mvc.PathBindable
-import uk.gov.hmrc.apiplatform.modules.submissions.domain.models.Question
-import uk.gov.hmrc.apiplatform.modules.submissions.domain.models.Submission
+
+import uk.gov.hmrc.apiplatform.modules.submissions.domain.models.{Question, Submission}
 
 package object binders {
+
   implicit def questionIdPathBinder(implicit textBinder: PathBindable[String]): PathBindable[Question.Id] = new PathBindable[Question.Id] {
+
     override def bind(key: String, value: String): Either[String, Question.Id] = {
       textBinder.bind(key, value).map(Question.Id(_))
     }
@@ -32,6 +34,7 @@ package object binders {
   }
 
   implicit def submissionIdPathBinder(implicit textBinder: PathBindable[String]): PathBindable[Submission.Id] = new PathBindable[Submission.Id] {
+
     override def bind(key: String, value: String): Either[String, Submission.Id] = {
       textBinder.bind(key, value).map(Submission.Id(_))
     }

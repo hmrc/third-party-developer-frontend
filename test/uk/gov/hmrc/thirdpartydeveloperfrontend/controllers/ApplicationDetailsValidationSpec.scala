@@ -17,12 +17,13 @@
 package uk.gov.hmrc.thirdpartydeveloperfrontend.controllers
 
 import play.api.data.{Form, FormError}
+
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.AsyncHmrcSpec
 
 class ApplicationDetailsValidationSpec extends AsyncHmrcSpec {
 
   "applicationNameValidator" should {
-    val testForm = Form("name" -> applicationNameValidator)
+    val testForm                                     = Form("name" -> applicationNameValidator)
     val applicationNameInvalidKeyLengthAndCharacters = "application.name.invalid.length.and.characters"
 
     "generate no error when valid" in {
@@ -37,7 +38,7 @@ class ApplicationDetailsValidationSpec extends AsyncHmrcSpec {
 
     "should not generator an error at 50 characters" in {
       val name = "a" * 50
-      val res = testForm.bind(Map("name" -> name))
+      val res  = testForm.bind(Map("name" -> name))
 
       res.errors shouldBe List()
     }
@@ -50,7 +51,7 @@ class ApplicationDetailsValidationSpec extends AsyncHmrcSpec {
     }
 
     "generate an error when max length exceeded" in {
-      val name = "a" * 51
+      val name           = "a" * 51
       val expectedErrors = List(FormError("name", applicationNameInvalidKeyLengthAndCharacters))
 
       val res = testForm.bind(Map("name" -> name))
@@ -58,9 +59,9 @@ class ApplicationDetailsValidationSpec extends AsyncHmrcSpec {
     }
 
     "generate an error when non ASCII characters are used" in {
-      val name = "ddɐ ʎǝlsɹɐԀ"
+      val name           = "ddɐ ʎǝlsɹɐԀ"
       val expectedErrors = List(FormError("name", applicationNameInvalidKeyLengthAndCharacters))
-      val res = testForm.bind(Map("name" -> name))
+      val res            = testForm.bind(Map("name" -> name))
       res.errors shouldBe expectedErrors
     }
   }

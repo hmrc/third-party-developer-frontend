@@ -16,16 +16,17 @@
 
 package uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models
 
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.emailpreferences.TaxRegimeInterests
-import org.scalatest.wordspec.AnyWordSpec
 import org.scalatest.matchers.should.Matchers
+import org.scalatest.wordspec.AnyWordSpec
+
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.emailpreferences.TaxRegimeInterests
 
 class TaxRegimeInterestsSpec extends AnyWordSpec with Matchers {
   val regime = "A Regime"
 
   "tax regime interests add works" in {
-    val tri = TaxRegimeInterests(regime, Set("a","b","c"))
+    val tri = TaxRegimeInterests(regime, Set("a", "b", "c"))
 
-    tri.addService("d").services should contain allOf("a","b","c","d")
+    tri.addService("d").services should contain allOf ("a", "b", "c", "d")
   }
 }

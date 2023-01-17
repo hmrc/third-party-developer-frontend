@@ -16,16 +16,18 @@
 
 package uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.checkpages
 
+import java.time.{Clock, LocalDateTime}
+import scala.concurrent.Future
+
+import views.html.checkpages.TermsOfUseView
+
+import play.api.data.Form
+import play.api.mvc.{Action, AnyContent, Call}
+
 import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.{ApplicationController, ApplicationRequest, TermsOfUseForm}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.{ApplicationId, CheckInformation, TermsOfUseAgreement}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.controllers.ApplicationViewModel
-import play.api.data.Form
-import play.api.mvc.{Action, AnyContent, Call}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.service.TermsOfUseVersionService
-import views.html.checkpages.TermsOfUseView
-
-import java.time.{Clock, LocalDateTime}
-import scala.concurrent.Future
 
 trait TermsOfUsePartialController {
   self: ApplicationController with CanUseCheckActions =>
@@ -45,16 +47,16 @@ trait TermsOfUsePartialController {
   }
 
   def termsOfUsePage(appId: ApplicationId): Action[AnyContent] = canUseChecksAction(appId) { implicit request =>
-    val app = request.application
+    val app              = request.application
     val checkInformation = app.checkInformation.getOrElse(CheckInformation())
-    val termsOfUseForm = TermsOfUseForm.fromCheckInformation(checkInformation)
+    val termsOfUseForm   = TermsOfUseForm.fromCheckInformation(checkInformation)
 
     Future.successful(Ok(createTermsOfUse(applicationViewModelFromApplicationRequest, TermsOfUseForm.form.fill(termsOfUseForm))))
   }
 
   def termsOfUseAction(appId: ApplicationId): Action[AnyContent] = canUseChecksAction(appId) { implicit request =>
     val version = termsOfUseVersionService.getLatest().toString
-    val app = request.application
+    val app     = request.application
 
     val requestForm = TermsOfUseForm.form.bindFromRequest
 

@@ -18,25 +18,26 @@ package uk.gov.hmrc.thirdpartydeveloperfrontend.service
 
 import java.time.{LocalDateTime, Period, ZoneOffset}
 import java.util.UUID
+import scala.concurrent.Future.{failed, successful}
+
+import play.api.http.Status.INTERNAL_SERVER_ERROR
+import uk.gov.hmrc.http.{HeaderCarrier, UpstreamErrorResponse}
+
 import uk.gov.hmrc.thirdpartydeveloperfrontend.connectors.ThirdPartyApplicationConnector
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.Environment.PRODUCTION
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.{Application, ApplicationId, ClientId}
-import play.api.http.Status.INTERNAL_SERVER_ERROR
 import uk.gov.hmrc.thirdpartydeveloperfrontend.service.PushPullNotificationsService.PushPullNotificationsConnector
 import uk.gov.hmrc.thirdpartydeveloperfrontend.service.SubscriptionFieldsService.SubscriptionFieldsConnector
-import uk.gov.hmrc.http.{HeaderCarrier, UpstreamErrorResponse}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.AsyncHmrcSpec
-
-import scala.concurrent.Future.{failed, successful}
 
 class PushPullNotificationsServiceSpec extends AsyncHmrcSpec {
 
   trait Setup {
     implicit val hc: HeaderCarrier = HeaderCarrier()
-    val clientId: ClientId = ClientId(UUID.randomUUID.toString)
-    val grantLength: Period = Period.ofDays(547)
+    val clientId: ClientId         = ClientId(UUID.randomUUID.toString)
+    val grantLength: Period        = Period.ofDays(547)
 
-    val anApplication: Application = Application(
+    val anApplication: Application                                     = Application(
       ApplicationId("appId"),
       clientId,
       "App name 1",
@@ -47,7 +48,7 @@ class PushPullNotificationsServiceSpec extends AsyncHmrcSpec {
       deployedTo = PRODUCTION
     )
     val pushPullNotificationsConnector: PushPullNotificationsConnector = mock[PushPullNotificationsConnector]
-    val mockConnectorsWrapper: ConnectorsWrapper = mock[ConnectorsWrapper]
+    val mockConnectorsWrapper: ConnectorsWrapper                       = mock[ConnectorsWrapper]
     when(mockConnectorsWrapper.forEnvironment(*))
       .thenReturn(Connectors(mock[ThirdPartyApplicationConnector], mock[SubscriptionFieldsConnector], pushPullNotificationsConnector))
 

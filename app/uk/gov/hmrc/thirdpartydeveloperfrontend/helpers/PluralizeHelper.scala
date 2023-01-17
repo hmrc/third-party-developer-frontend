@@ -15,8 +15,10 @@
  */
 
 package uk.gov.hmrc.thirdpartydeveloperfrontend.helpers
+
 object PluralizeHelper {
-  def pluralize(count: Int, singular: String, plural: String): String ={
+
+  def pluralize(count: Int, singular: String, plural: String): String = {
     if (count == 1) singular
     else plural
   }

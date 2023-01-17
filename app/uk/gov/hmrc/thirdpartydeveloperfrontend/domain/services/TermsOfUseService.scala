@@ -16,11 +16,11 @@
 
 package uk.gov.hmrc.thirdpartydeveloperfrontend.domain.services
 
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.{Application, CheckInformation, Standard, TermsOfUseAcceptance, TermsOfUseAgreement}
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.services.TermsOfUseService.TermsOfUseAgreementDetails
-
 import java.time.LocalDateTime
 import javax.inject.Singleton
+
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.{Application, CheckInformation, Standard, TermsOfUseAcceptance, TermsOfUseAgreement}
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.services.TermsOfUseService.TermsOfUseAgreementDetails
 
 object TermsOfUseService {
   case class TermsOfUseAgreementDetails(emailAddress: String, name: Option[String], date: LocalDateTime, version: Option[String])
@@ -28,20 +28,25 @@ object TermsOfUseService {
 
 @Singleton
 class TermsOfUseService {
+
   private def getAgreementDetailsFromCheckInformation(checkInformation: CheckInformation): List[TermsOfUseAgreementDetails] = {
     checkInformation.termsOfUseAgreements.map((toua: TermsOfUseAgreement) => TermsOfUseAgreementDetails(toua.emailAddress, None, toua.timeStamp, Some(toua.version)))
   }
 
   private def getAgreementDetailsFromStandardApp(std: Standard): List[TermsOfUseAgreementDetails] = {
-    std.importantSubmissionData.fold[List[TermsOfUseAgreementDetails]](List.empty)(isd => isd.termsOfUseAcceptances
-      .map((toua: TermsOfUseAcceptance) => TermsOfUseAgreementDetails(toua.responsibleIndividual.emailAddress.value, Some(toua.responsibleIndividual.fullName.value), toua.dateTime, None)))
+    std.importantSubmissionData.fold[List[TermsOfUseAgreementDetails]](List.empty)(isd =>
+      isd.termsOfUseAcceptances
+        .map((toua: TermsOfUseAcceptance) =>
+          TermsOfUseAgreementDetails(toua.responsibleIndividual.emailAddress.value, Some(toua.responsibleIndividual.fullName.value), toua.dateTime, None)
+        )
+    )
   }
 
   def getAgreementDetails(application: Application): List[TermsOfUseAgreementDetails] =
     application.checkInformation.fold[List[TermsOfUseAgreementDetails]](List.empty)(getAgreementDetailsFromCheckInformation) ++ (
       application.access match {
         case std: Standard => getAgreementDetailsFromStandardApp(std)
-        case _ => List.empty
+        case _             => List.empty
       }
     )
 }

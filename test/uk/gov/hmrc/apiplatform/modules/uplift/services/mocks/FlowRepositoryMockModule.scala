@@ -16,15 +16,16 @@
 
 package uk.gov.hmrc.apiplatform.modules.uplift.services.mocks
 
-import org.mockito.MockitoSugar
-import org.mockito.ArgumentMatchersSugar
 import scala.concurrent.Future.successful
-import uk.gov.hmrc.thirdpartydeveloperfrontend.repositories.FlowRepository
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.flows.FlowType
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.flows.Flow
 import scala.reflect.runtime.universe._
 
+import org.mockito.{ArgumentMatchersSugar, MockitoSugar}
+
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.flows.{Flow, FlowType}
+import uk.gov.hmrc.thirdpartydeveloperfrontend.repositories.FlowRepository
+
 trait FlowRepositoryMockModule extends MockitoSugar with ArgumentMatchersSugar {
+
   protected trait BaseFlowRepositoryMock {
     def aMock: FlowRepository
 
@@ -33,13 +34,17 @@ trait FlowRepositoryMockModule extends MockitoSugar with ArgumentMatchersSugar {
     def verifyZeroInteractions() = MockitoSugar.verifyZeroInteractions(aMock)
 
     object FetchBySessionIdAndFlowType {
-      def thenReturn[A <: Flow](flow: A)(implicit tt: TypeTag[A]) = when(aMock.fetchBySessionIdAndFlowType[A](*)(eqTo(tt),*)).thenReturn(successful(Some(flow)))
-      def thenReturn[A <: Flow](sessionId: String)(flow: A)(implicit tt: TypeTag[A]) = when(aMock.fetchBySessionIdAndFlowType[A](eqTo(sessionId))(eqTo(tt),*)).thenReturn(successful(Some(flow)))
+      def thenReturn[A <: Flow](flow: A)(implicit tt: TypeTag[A]) = when(aMock.fetchBySessionIdAndFlowType[A](*)(eqTo(tt), *)).thenReturn(successful(Some(flow)))
 
-      def thenReturnNothing[A <: Flow](implicit tt: TypeTag[A]) = when(aMock.fetchBySessionIdAndFlowType[A](*)(eqTo(tt),*)).thenReturn(successful(None))
-      def thenReturnNothing[A <: Flow](sessionId: String)(implicit tt: TypeTag[A]) = when(aMock.fetchBySessionIdAndFlowType[A](eqTo(sessionId))(eqTo(tt),*)).thenReturn(successful(None))
+      def thenReturn[A <: Flow](sessionId: String)(flow: A)(implicit tt: TypeTag[A]) =
+        when(aMock.fetchBySessionIdAndFlowType[A](eqTo(sessionId))(eqTo(tt), *)).thenReturn(successful(Some(flow)))
 
-      def verifyCalledWith[A <: Flow](sessionId: String)(implicit tt: TypeTag[A]) = verify.fetchBySessionIdAndFlowType[A](eqTo(sessionId))(eqTo(tt),*)
+      def thenReturnNothing[A <: Flow](implicit tt: TypeTag[A]) = when(aMock.fetchBySessionIdAndFlowType[A](*)(eqTo(tt), *)).thenReturn(successful(None))
+
+      def thenReturnNothing[A <: Flow](sessionId: String)(implicit tt: TypeTag[A]) =
+        when(aMock.fetchBySessionIdAndFlowType[A](eqTo(sessionId))(eqTo(tt), *)).thenReturn(successful(None))
+
+      def verifyCalledWith[A <: Flow](sessionId: String)(implicit tt: TypeTag[A]) = verify.fetchBySessionIdAndFlowType[A](eqTo(sessionId))(eqTo(tt), *)
     }
 
     object SaveFlow {
@@ -51,10 +56,10 @@ trait FlowRepositoryMockModule extends MockitoSugar with ArgumentMatchersSugar {
     object DeleteBySessionIdAndFlowType {
       def thenReturnSuccess(sessionId: String, flowType: FlowType) = when(aMock.deleteBySessionIdAndFlowType(eqTo(sessionId), eqTo(flowType))).thenReturn(successful(true))
 
-     def verifyCalledWith(sessionId: String, flowType: FlowType) = verify.deleteBySessionIdAndFlowType(eqTo(sessionId), eqTo(flowType))
+      def verifyCalledWith(sessionId: String, flowType: FlowType) = verify.deleteBySessionIdAndFlowType(eqTo(sessionId), eqTo(flowType))
     }
   }
-  
+
   object FlowRepositoryMock extends BaseFlowRepositoryMock {
     val aMock = mock[FlowRepository](withSettings.lenient())
   }

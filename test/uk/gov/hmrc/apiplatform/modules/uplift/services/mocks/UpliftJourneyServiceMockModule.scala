@@ -16,16 +16,18 @@
 
 package uk.gov.hmrc.apiplatform.modules.uplift.services.mocks
 
-import org.mockito.MockitoSugar
-import org.mockito.ArgumentMatchersSugar
-import org.mockito.verification.VerificationMode
 import scala.concurrent.Future.successful
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.ApplicationId
+
+import org.mockito.verification.VerificationMode
+import org.mockito.{ArgumentMatchersSugar, MockitoSugar}
+
 import uk.gov.hmrc.apiplatform.modules.uplift.domain.models._
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.apidefinitions.APISubscriptionStatus
 import uk.gov.hmrc.apiplatform.modules.uplift.services.UpliftJourneyService
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.apidefinitions.APISubscriptionStatus
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.ApplicationId
 
 trait UpliftJourneyServiceMockModule extends MockitoSugar with ArgumentMatchersSugar {
+
   protected trait BaseUpliftJourneyServiceMock {
     def aMock: UpliftJourneyService
 
@@ -36,12 +38,13 @@ trait UpliftJourneyServiceMockModule extends MockitoSugar with ArgumentMatchersS
     def verifyZeroInteractions() = MockitoSugar.verifyZeroInteractions(aMock)
 
     object ApiSubscriptionData {
-    
+
       def thenReturns(in: Set[String], bool: Boolean) =
-        when(aMock.apiSubscriptionData(*[ApplicationId], *, *)(*)).thenReturn(successful((in,bool)))
+        when(aMock.apiSubscriptionData(*[ApplicationId], *, *)(*)).thenReturn(successful((in, bool)))
     }
 
     object StoreDefaultSubscriptionsInFlow {
+
       def thenReturns() =
         when(aMock.storeDefaultSubscriptionsInFlow(*[ApplicationId], *)(*)).thenReturn(successful(mock[ApiSubscriptions]))
     }
@@ -56,7 +59,7 @@ trait UpliftJourneyServiceMockModule extends MockitoSugar with ArgumentMatchersS
       def thenReturns(out: List[APISubscriptionStatus]) = when(aMock.changeApiSubscriptions(*[ApplicationId], *, *)(*)).thenReturn(successful(out))
     }
   }
-  
+
   object UpliftJourneyServiceMock extends BaseUpliftJourneyServiceMock {
     val aMock = mock[UpliftJourneyService](withSettings.lenient())
   }

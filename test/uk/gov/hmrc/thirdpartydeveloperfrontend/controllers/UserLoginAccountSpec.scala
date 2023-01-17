@@ -16,74 +16,73 @@
 
 package uk.gov.hmrc.thirdpartydeveloperfrontend.controllers
 
+import java.time.{LocalDateTime, Period}
 import java.util.UUID
-import uk.gov.hmrc.thirdpartydeveloperfrontend.builder.{DeveloperBuilder, MfaDetailBuilder}
-import uk.gov.hmrc.thirdpartydeveloperfrontend.config.ErrorHandler
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain._
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.connectors.{TicketCreated, UserAuthenticationResponse}
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.{DeveloperSession, LoggedInState, Session, UserId}
-import uk.gov.hmrc.thirdpartydeveloperfrontend.mocks.service.{AppsByTeamMemberServiceMock, SessionServiceMock}
+import scala.concurrent.ExecutionContext.Implicits.global
+import scala.concurrent.Future
+import scala.concurrent.Future._
+
+import _root_.uk.gov.hmrc.thirdpartydeveloperfrontend.mocks.connectors.{ThirdPartyDeveloperConnectorMockModule, ThirdPartyDeveloperMfaConnectorMockModule}
+import views.html.{AccountLockedView, Add2SVView, SelectLoginMfaView, SignInView, UserDidNotAdd2SVView}
+
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
 import play.filters.csrf.CSRF.TokenProvider
 import uk.gov.hmrc.play.audit.http.connector.AuditResult
-import uk.gov.hmrc.thirdpartydeveloperfrontend.service.AuditAction._
-import uk.gov.hmrc.thirdpartydeveloperfrontend.service._
-import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.WithCSRFAddToken
-import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.WithLoggedInSession._
-import views.html.{AccountLockedView, Add2SVView,  SelectLoginMfaView, SignInView,  UserDidNotAdd2SVView}
 
-import scala.concurrent.ExecutionContext.Implicits.global
-import scala.concurrent.Future
-import scala.concurrent.Future._
-import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.LocalUserIdTracker
-import _root_.uk.gov.hmrc.thirdpartydeveloperfrontend.mocks.connectors.{ThirdPartyDeveloperConnectorMockModule, ThirdPartyDeveloperMfaConnectorMockModule}
 import uk.gov.hmrc.apiplatform.modules.mfa.models.MfaType.{AUTHENTICATOR_APP, SMS}
 import uk.gov.hmrc.apiplatform.modules.mfa.models.{MfaId, MfaType}
 import uk.gov.hmrc.apiplatform.modules.mfa.views.html.authapp.AuthAppLoginAccessCodeView
 import uk.gov.hmrc.apiplatform.modules.mfa.views.html.sms.SmsLoginAccessCodeView
 import uk.gov.hmrc.apiplatform.modules.mfa.views.html.{RequestMfaRemovalCompleteView, RequestMfaRemovalView}
+import uk.gov.hmrc.thirdpartydeveloperfrontend.builder.{DeveloperBuilder, MfaDetailBuilder}
+import uk.gov.hmrc.thirdpartydeveloperfrontend.config.ErrorHandler
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.{ApplicationId, ApplicationWithSubscriptionIds, ClientId, Environment}
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.connectors.{TicketCreated, UserAuthenticationResponse}
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.{DeveloperSession, LoggedInState, Session, UserId}
+import uk.gov.hmrc.thirdpartydeveloperfrontend.mocks.service.{AppsByTeamMemberServiceMock, SessionServiceMock}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.security.CookieEncoding
-
-import java.time.{LocalDateTime, Period}
-
+import uk.gov.hmrc.thirdpartydeveloperfrontend.service.AuditAction._
+import uk.gov.hmrc.thirdpartydeveloperfrontend.service._
+import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.WithLoggedInSession._
+import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.{LocalUserIdTracker, WithCSRFAddToken}
 
 class UserLoginAccountSpec extends BaseControllerSpec with WithCSRFAddToken
-  with DeveloperBuilder with LocalUserIdTracker with CookieEncoding with MfaDetailBuilder {
+    with DeveloperBuilder with LocalUserIdTracker with CookieEncoding with MfaDetailBuilder {
 
   trait Setup extends SessionServiceMock with ThirdPartyDeveloperConnectorMockModule with ThirdPartyDeveloperMfaConnectorMockModule with AppsByTeamMemberServiceMock {
 
-    val developerWithAuthAppMfa = buildDeveloper(mfaDetails = List(verifiedAuthenticatorAppMfaDetail))
-    val developerWithSmsMfa = buildDeveloper(mfaDetails = List(verifiedSmsMfaDetail))
-    val developerWithAuthAppAndSmsMfa = buildDeveloper(mfaDetails = List(verifiedAuthenticatorAppMfaDetail, verifiedSmsMfaDetail))
-    val authAppMfaId = verifiedAuthenticatorAppMfaDetail.id
-    val smsMfaId = verifiedSmsMfaDetail.id
-    val sessionWithAuthAppMfa = Session(UUID.randomUUID().toString, developerWithAuthAppMfa, LoggedInState.LOGGED_IN)
-    val sessionWithSmsMfa = Session(UUID.randomUUID().toString, developerWithSmsMfa, LoggedInState.LOGGED_IN)
+    val developerWithAuthAppMfa                      = buildDeveloper(mfaDetails = List(verifiedAuthenticatorAppMfaDetail))
+    val developerWithSmsMfa                          = buildDeveloper(mfaDetails = List(verifiedSmsMfaDetail))
+    val developerWithAuthAppAndSmsMfa                = buildDeveloper(mfaDetails = List(verifiedAuthenticatorAppMfaDetail, verifiedSmsMfaDetail))
+    val authAppMfaId                                 = verifiedAuthenticatorAppMfaDetail.id
+    val smsMfaId                                     = verifiedSmsMfaDetail.id
+    val sessionWithAuthAppMfa                        = Session(UUID.randomUUID().toString, developerWithAuthAppMfa, LoggedInState.LOGGED_IN)
+    val sessionWithSmsMfa                            = Session(UUID.randomUUID().toString, developerWithSmsMfa, LoggedInState.LOGGED_IN)
     val sessionContainsDeveloperWithAuthAppAndSmsMfa = sessionWithAuthAppMfa.copy(developer = developerWithAuthAppAndSmsMfa)
-    val user = DeveloperSession(sessionWithAuthAppMfa)
-    val emailFieldName: String = "emailaddress"
-    val passwordFieldName: String = "password"
-    val userPassword = "Password1!"
-    val accessCode = "123456"
-    val nonce = "ABC-123"
+    val user                                         = DeveloperSession(sessionWithAuthAppMfa)
+    val emailFieldName: String                       = "emailaddress"
+    val passwordFieldName: String                    = "password"
+    val userPassword                                 = "Password1!"
+    val accessCode                                   = "123456"
+    val nonce                                        = "ABC-123"
 
-    val deviceSessionId = UUID.randomUUID()
+    val deviceSessionId     = UUID.randomUUID()
     val deviceSessionCookie = createDeviceCookie(deviceSessionId.toString)
 
-    val sessionId = "sessionId"
+    val sessionId         = "sessionId"
     val loggedInDeveloper = buildDeveloper()
 
-    val signInView = app.injector.instanceOf[SignInView]
-    val accountLockedView = app.injector.instanceOf[AccountLockedView]
-    val authApploginAccessCodeView = app.injector.instanceOf[AuthAppLoginAccessCodeView]
-    val smsLoginAccessCodeView = app.injector.instanceOf[SmsLoginAccessCodeView]
-    val selectLoginMfaView = app.injector.instanceOf[SelectLoginMfaView]
-    val requestMfaRemovalView = app.injector.instanceOf[RequestMfaRemovalView]
+    val signInView                    = app.injector.instanceOf[SignInView]
+    val accountLockedView             = app.injector.instanceOf[AccountLockedView]
+    val authApploginAccessCodeView    = app.injector.instanceOf[AuthAppLoginAccessCodeView]
+    val smsLoginAccessCodeView        = app.injector.instanceOf[SmsLoginAccessCodeView]
+    val selectLoginMfaView            = app.injector.instanceOf[SelectLoginMfaView]
+    val requestMfaRemovalView         = app.injector.instanceOf[RequestMfaRemovalView]
     val requestMfaRemovalCompleteView = app.injector.instanceOf[RequestMfaRemovalCompleteView]
-    val userDidNotAdd2SVView = app.injector.instanceOf[UserDidNotAdd2SVView]
-    val add2SVView = app.injector.instanceOf[Add2SVView]
+    val userDidNotAdd2SVView          = app.injector.instanceOf[UserDidNotAdd2SVView]
+    val add2SVView                    = app.injector.instanceOf[Add2SVView]
 
     val errorHandler = app.injector.instanceOf[ErrorHandler]
 
@@ -111,8 +110,8 @@ class UserLoginAccountSpec extends BaseControllerSpec with WithCSRFAddToken
 
     updateUserFlowSessionsReturnsSuccessfully(sessionId)
 
-    val applicationId = ApplicationId("myId")
-    val clientId = ClientId("myClientId")
+    val applicationId       = ApplicationId("myId")
+    val clientId            = ClientId("myClientId")
     val grantLength: Period = Period.ofDays(547)
 
     val applicationsWhereUserIsAdminInProduction =
@@ -132,12 +131,11 @@ class UserLoginAccountSpec extends BaseControllerSpec with WithCSRFAddToken
       )
 
     val sessionParams: Seq[(String, String)] = Seq(
-      "userId" -> user.developer.userId.value.toString,
+      "userId"    -> user.developer.userId.value.toString,
       "csrfToken" -> app.injector.instanceOf[TokenProvider].generateToken
     )
 
-    def mockAuthenticate(email: String, password: String, result: Future[UserAuthenticationResponse],
-                         resultShowAdminMfaMandateMessage: Future[Boolean]): Unit = {
+    def mockAuthenticate(email: String, password: String, result: Future[UserAuthenticationResponse], resultShowAdminMfaMandateMessage: Future[Boolean]): Unit = {
 
       when(underTest.sessionService.authenticate(eqTo(email), eqTo(password), eqTo(Some(deviceSessionId)))(*))
         .thenReturn(result.map(x => (x, user.developer.userId)))
@@ -181,7 +179,9 @@ class UserLoginAccountSpec extends BaseControllerSpec with WithCSRFAddToken
       redirectLocation(result) shouldBe Some(routes.UserLoginAccount.get2svRecommendationPage.url)
 
       verify(underTest.auditService, times(1)).audit(
-        eqTo(LoginSucceeded), eqTo(Map("developerEmail" -> user.email, "developerFullName" -> user.displayedName)))(*)
+        eqTo(LoginSucceeded),
+        eqTo(Map("developerEmail" -> user.email, "developerFullName" -> user.displayedName))
+      )(*)
     }
   }
 
@@ -191,22 +191,27 @@ class UserLoginAccountSpec extends BaseControllerSpec with WithCSRFAddToken
     val userAuthRespRequiringMfaEnablement = UserAuthenticationResponse(
       accessCodeRequired = false,
       mfaEnabled = false,
-      session = Some(sessionPartLoggedInEnablingMfa))
+      session = Some(sessionPartLoggedInEnablingMfa)
+    )
   }
 
   trait SetupWithUserAuthRespRequiringMfaAccessCode extends Setup {
+
     val userAuthRespRequiringMfaAccessCode = UserAuthenticationResponse(
       accessCodeRequired = true,
       mfaEnabled = true,
       nonce = Some(nonce),
-      session = None)
+      session = None
+    )
   }
 
   trait SetupWithUserAuthRespWithInconsistentState extends Setup {
+
     val userAuthRespWithInconsistentState = UserAuthenticationResponse(
       accessCodeRequired = true, // should be false if we already have a login session
       mfaEnabled = true,
-      session = Some(sessionWithAuthAppMfa))
+      session = Some(sessionWithAuthAppMfa)
+    )
   }
 
   trait PartLogged extends Setup {
@@ -239,7 +244,9 @@ class UserLoginAccountSpec extends BaseControllerSpec with WithCSRFAddToken
       redirectLocation(result) shouldBe Some(routes.ManageApplications.manageApps.url)
 
       verify(underTest.auditService, times(1)).audit(
-        eqTo(LoginSucceeded), eqTo(Map("developerEmail" -> user.email, "developerFullName" -> user.displayedName)))(*)
+        eqTo(LoginSucceeded),
+        eqTo(Map("developerEmail" -> user.email, "developerFullName" -> user.displayedName))
+      )(*)
     }
 
     "display the MFA recommendation page after successfully logging in with MFA not enabled but mandated" in new SetupWithUserAuthRespNotRequiringMfa {
@@ -368,19 +375,21 @@ class UserLoginAccountSpec extends BaseControllerSpec with WithCSRFAddToken
       private val request = FakeRequest()
         .withSession(sessionParams: _*)
         .withFormUrlEncodedBody((emailFieldName, user.email), (passwordFieldName, "wrongPassword1!"))
-      private val result = addToken(underTest.authenticate())(request)
+      private val result  = addToken(underTest.authenticate())(request)
 
       status(result) shouldBe UNAUTHORIZED
       contentAsString(result) should include("Provide a valid email or password")
       verify(underTest.auditService, times(1)).audit(
-        eqTo(LoginFailedDueToInvalidPassword), eqTo(Map("developerEmail" -> user.email)))(*)
+        eqTo(LoginFailedDueToInvalidPassword),
+        eqTo(Map("developerEmail" -> user.email))
+      )(*)
     }
 
     "return the login page when the password is invalid" in new Setup {
       private val request = FakeRequest()
         .withSession(sessionParams: _*)
         .withFormUrlEncodedBody((emailFieldName, user.email), (passwordFieldName, " "))
-      private val result = addToken(underTest.authenticate())(request)
+      private val result  = addToken(underTest.authenticate())(request)
 
       status(result) shouldBe BAD_REQUEST
       contentAsString(result) should include("Enter your password")
@@ -394,12 +403,14 @@ class UserLoginAccountSpec extends BaseControllerSpec with WithCSRFAddToken
         .withCookies(deviceSessionCookie)
         .withSession(sessionParams: _*)
         .withFormUrlEncodedBody((emailFieldName, unregisteredEmail), (passwordFieldName, userPassword))
-      private val result = addToken(underTest.authenticate())(request)
+      private val result  = addToken(underTest.authenticate())(request)
 
       status(result) shouldBe UNAUTHORIZED
       contentAsString(result) should include("Provide a valid email or password")
       verify(underTest.auditService, times(1)).audit(
-        eqTo(LoginFailedDueToInvalidEmail), eqTo(Map("developerEmail" -> unregisteredEmail)))(*)
+        eqTo(LoginFailedDueToInvalidEmail),
+        eqTo(Map("developerEmail" -> unregisteredEmail))
+      )(*)
     }
 
     "return to the login page when the account is unverified" in new Setup {
@@ -409,7 +420,7 @@ class UserLoginAccountSpec extends BaseControllerSpec with WithCSRFAddToken
         .withCookies(deviceSessionCookie)
         .withSession(sessionParams: _*)
         .withFormUrlEncodedBody((emailFieldName, user.email), (passwordFieldName, userPassword))
-      private val result = addToken(underTest.authenticate())(request)
+      private val result  = addToken(underTest.authenticate())(request)
 
       status(result) shouldBe FORBIDDEN
       contentAsString(result) should include("Verify your account using the email we sent. Or get us to resend the verification email")
@@ -429,7 +440,9 @@ class UserLoginAccountSpec extends BaseControllerSpec with WithCSRFAddToken
       status(result) shouldBe LOCKED
       contentAsString(result) should include("You've entered details that do not match our records. Reset your password to sign in.")
       verify(underTest.auditService, times(1)).audit(
-        eqTo(LoginFailedDueToLockedAccount), eqTo(Map("developerEmail" -> user.email)))(*)
+        eqTo(LoginFailedDueToLockedAccount),
+        eqTo(Map("developerEmail" -> user.email))
+      )(*)
     }
   }
 
@@ -462,7 +475,7 @@ class UserLoginAccountSpec extends BaseControllerSpec with WithCSRFAddToken
 
       private val request = FakeRequest()
         .withSession(sessionParams
-          :+ "userId" -> user.developer.userId.value.toString
+          :+ "userId"       -> user.developer.userId.value.toString
           :+ "emailAddress" -> user.email :+ "nonce" -> nonce: _*)
         .withFormUrlEncodedBody(("mfaId", authAppMfaId.value.toString))
 
@@ -478,7 +491,7 @@ class UserLoginAccountSpec extends BaseControllerSpec with WithCSRFAddToken
 
       private val request = FakeRequest()
         .withSession(sessionParams
-          :+ "userId" -> user.developer.userId.value.toString
+          :+ "userId"       -> user.developer.userId.value.toString
           :+ "emailAddress" -> user.email :+ "nonce" -> nonce: _*)
         .withFormUrlEncodedBody(("mfaId", smsMfaId.value.toString))
 
@@ -493,7 +506,7 @@ class UserLoginAccountSpec extends BaseControllerSpec with WithCSRFAddToken
 
       private val request = FakeRequest()
         .withSession(sessionParams
-          :+ "userId" -> user.developer.userId.value.toString
+          :+ "userId"       -> user.developer.userId.value.toString
           :+ "emailAddress" -> user.email :+ "nonce" -> nonce: _*)
         .withFormUrlEncodedBody(("mfaId", authAppMfaId.value.toString))
 
@@ -508,7 +521,7 @@ class UserLoginAccountSpec extends BaseControllerSpec with WithCSRFAddToken
 
       private val request = FakeRequest()
         .withSession(sessionParams
-          :+ "userId" -> user.developer.userId.value.toString
+          :+ "userId"       -> user.developer.userId.value.toString
           :+ "emailAddress" -> user.email :+ "nonce" -> nonce: _*)
         .withFormUrlEncodedBody(("mfaId", ""))
 
@@ -523,7 +536,7 @@ class UserLoginAccountSpec extends BaseControllerSpec with WithCSRFAddToken
 
       private val request = FakeRequest()
         .withSession(sessionParams
-          :+ "userId" -> user.developer.userId.value.toString
+          :+ "userId"       -> user.developer.userId.value.toString
           :+ "emailAddress" -> user.email :+ "nonce" -> nonce: _*)
         .withFormUrlEncodedBody(("mfaId", UUID.randomUUID().toString))
 
@@ -585,7 +598,9 @@ class UserLoginAccountSpec extends BaseControllerSpec with WithCSRFAddToken
       status(result) shouldBe SEE_OTHER
       redirectLocation(result) shouldBe Some(uk.gov.hmrc.apiplatform.modules.mfa.controllers.profile.routes.MfaController.smsSetupReminderPage.url)
       verify(underTest.auditService, times(1)).audit(
-        eqTo(LoginSucceeded), eqTo(Map("developerEmail" -> user.email, "developerFullName" -> user.displayedName)))(*)
+        eqTo(LoginSucceeded),
+        eqTo(Map("developerEmail" -> user.email, "developerFullName" -> user.displayedName))
+      )(*)
     }
 
     "return the AuthApp Setup Reminder page when the credentials are correct and mfa method is SMS" in new Setup {
@@ -601,7 +616,9 @@ class UserLoginAccountSpec extends BaseControllerSpec with WithCSRFAddToken
       status(result) shouldBe SEE_OTHER
       redirectLocation(result) shouldBe Some(uk.gov.hmrc.apiplatform.modules.mfa.controllers.profile.routes.MfaController.authAppSetupReminderPage.url)
       verify(underTest.auditService, times(1)).audit(
-        eqTo(LoginSucceeded), eqTo(Map("developerEmail" -> user.email, "developerFullName" -> user.displayedName)))(*)
+        eqTo(LoginSucceeded),
+        eqTo(Map("developerEmail" -> user.email, "developerFullName" -> user.displayedName))
+      )(*)
     }
 
     "return the error page when mfa method is AUTHENTICATOR_APP and access code is incorrect" in new Setup {
@@ -609,12 +626,14 @@ class UserLoginAccountSpec extends BaseControllerSpec with WithCSRFAddToken
         .withSession(sessionParams :+ "emailAddress" -> user.email :+ "nonce" -> nonce: _*)
         .withFormUrlEncodedBody(("accessCode", "654321"))
 
-      private val result =  addToken(underTest.authenticateAccessCode(authAppMfaId, AUTHENTICATOR_APP, userHasMultipleMfa = false))(request)
+      private val result = addToken(underTest.authenticateAccessCode(authAppMfaId, AUTHENTICATOR_APP, userHasMultipleMfa = false))(request)
 
       status(result) shouldBe UNAUTHORIZED
       contentAsString(result) should include("You have entered an incorrect access code")
       verify(underTest.auditService, times(1)).audit(
-        eqTo(LoginFailedDueToInvalidAccessCode), eqTo(Map("developerEmail" -> user.email)))(*)
+        eqTo(LoginFailedDueToInvalidAccessCode),
+        eqTo(Map("developerEmail" -> user.email))
+      )(*)
     }
 
     "return the error page when mfa method is AUTHENTICATOR_APP and access code is invalid" in new Setup {
@@ -622,7 +641,7 @@ class UserLoginAccountSpec extends BaseControllerSpec with WithCSRFAddToken
         .withSession(sessionParams :+ "emailAddress" -> user.email :+ "nonce" -> nonce: _*)
         .withFormUrlEncodedBody(("accessCode", "123xx"))
 
-      private val result =  addToken(underTest.authenticateAccessCode(authAppMfaId, AUTHENTICATOR_APP, userHasMultipleMfa = false))(request)
+      private val result = addToken(underTest.authenticateAccessCode(authAppMfaId, AUTHENTICATOR_APP, userHasMultipleMfa = false))(request)
 
       status(result) shouldBe BAD_REQUEST
       contentAsString(result) should include("You have entered an invalid access code")
@@ -641,7 +660,9 @@ class UserLoginAccountSpec extends BaseControllerSpec with WithCSRFAddToken
       status(result) shouldBe SEE_OTHER
       redirectLocation(result) shouldBe Some(routes.ManageApplications.manageApps.url)
       verify(underTest.auditService, times(1)).audit(
-        eqTo(LoginSucceeded), eqTo(Map("developerEmail" -> user.email, "developerFullName" -> user.displayedName)))(*)
+        eqTo(LoginSucceeded),
+        eqTo(Map("developerEmail" -> user.email, "developerFullName" -> user.displayedName))
+      )(*)
     }
 
     "return the error page when mfa method is SMS and access code is incorrect" in new Setup {
@@ -649,12 +670,14 @@ class UserLoginAccountSpec extends BaseControllerSpec with WithCSRFAddToken
         .withSession(sessionParams :+ "emailAddress" -> user.email :+ "nonce" -> nonce: _*)
         .withFormUrlEncodedBody(("accessCode", "654321"))
 
-      private val result =  addToken(underTest.authenticateAccessCode(smsMfaId, SMS, userHasMultipleMfa = false))(request)
+      private val result = addToken(underTest.authenticateAccessCode(smsMfaId, SMS, userHasMultipleMfa = false))(request)
 
       status(result) shouldBe UNAUTHORIZED
       contentAsString(result) should include("You have entered an incorrect access code")
       verify(underTest.auditService, times(1)).audit(
-        eqTo(LoginFailedDueToInvalidAccessCode), eqTo(Map("developerEmail" -> user.email)))(*)
+        eqTo(LoginFailedDueToInvalidAccessCode),
+        eqTo(Map("developerEmail" -> user.email))
+      )(*)
     }
 
     "return the error page when mfa method is SMS and access code is invalid" in new Setup {
@@ -662,7 +685,7 @@ class UserLoginAccountSpec extends BaseControllerSpec with WithCSRFAddToken
         .withSession(sessionParams :+ "emailAddress" -> user.email :+ "nonce" -> nonce: _*)
         .withFormUrlEncodedBody(("accessCode", "123xxx"))
 
-      private val result =  addToken(underTest.authenticateAccessCode(smsMfaId, SMS, userHasMultipleMfa = false))(request)
+      private val result = addToken(underTest.authenticateAccessCode(smsMfaId, SMS, userHasMultipleMfa = false))(request)
 
       status(result) shouldBe BAD_REQUEST
       contentAsString(result) should include("You have entered an invalid access code")
@@ -681,7 +704,9 @@ class UserLoginAccountSpec extends BaseControllerSpec with WithCSRFAddToken
       status(result) shouldBe SEE_OTHER
       redirectLocation(result) shouldBe Some(routes.ManageApplications.manageApps.url)
       verify(underTest.auditService, times(1)).audit(
-        eqTo(LoginSucceeded), eqTo(Map("developerEmail" -> user.email, "developerFullName" -> user.displayedName)))(*)
+        eqTo(LoginSucceeded),
+        eqTo(Map("developerEmail" -> user.email, "developerFullName" -> user.displayedName))
+      )(*)
     }
   }
 

@@ -17,23 +17,25 @@
 package views
 
 import java.time.{LocalDateTime, Period}
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications._
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.LoggedInState
-import org.jsoup.Jsoup
-import org.jsoup.nodes.Document
-import play.api.test.FakeRequest
-import play.twirl.api.Html
-import uk.gov.hmrc.thirdpartydeveloperfrontend.utils._
-import views.helper.CommonViewSpec
-import views.html.ClientIdView
-import uk.gov.hmrc.thirdpartydeveloperfrontend.builder._
-
 import scala.collection.JavaConverters._
 
+import org.jsoup.Jsoup
+import org.jsoup.nodes.Document
+import views.helper.CommonViewSpec
+import views.html.ClientIdView
+
+import play.api.test.FakeRequest
+import play.twirl.api.Html
+
+import uk.gov.hmrc.thirdpartydeveloperfrontend.builder._
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications._
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.LoggedInState
+import uk.gov.hmrc.thirdpartydeveloperfrontend.utils._
+
 class ClientIdSpec extends CommonViewSpec with WithCSRFAddToken with CollaboratorTracker
-  with LocalUserIdTracker
-  with DeveloperSessionBuilder
-  with DeveloperBuilder {
+    with LocalUserIdTracker
+    with DeveloperSessionBuilder
+    with DeveloperBuilder {
 
   trait Setup {
     val clientIdView = app.injector.instanceOf[ClientIdView]
@@ -44,7 +46,7 @@ class ClientIdSpec extends CommonViewSpec with WithCSRFAddToken with Collaborato
   }
 
   "Client ID page" should {
-    val request = FakeRequest().withCSRFToken
+    val request   = FakeRequest().withCSRFToken
     val developer = buildDeveloperSession(loggedInState = LoggedInState.LOGGED_IN, buildDeveloper("Test", "Test", "Test", None))
 
     val application = Application(

@@ -16,14 +16,15 @@
 
 package uk.gov.hmrc.apiplatform.modules.dynamics.connectors
 
+import javax.inject.{Inject, Singleton}
+import scala.concurrent.{ExecutionContext, Future}
+
 import play.api.libs.json.{Json, OFormat}
 import uk.gov.hmrc.http.HttpReads.Implicits._
 import uk.gov.hmrc.http.{HeaderCarrier, HttpClient, UpstreamErrorResponse}
+
 import uk.gov.hmrc.thirdpartydeveloperfrontend.config.ApplicationConfig
 import uk.gov.hmrc.thirdpartydeveloperfrontend.connectors.CommonResponseHandlers
-
-import javax.inject.{Inject, Singleton}
-import scala.concurrent.{ExecutionContext, Future}
 
 case class Ticket(ticketNumber: String, title: String, description: Option[String], statusCode: Int, id: String)
 
@@ -41,8 +42,8 @@ object CreateIncidentRequest {
 class ThirdPartyDeveloperDynamicsConnector @Inject() (
     http: HttpClient,
     configuration: ApplicationConfig
-  )(implicit ec: ExecutionContext)
-    extends CommonResponseHandlers {
+  )(implicit ec: ExecutionContext
+  ) extends CommonResponseHandlers {
 
   def getTickets()(implicit hc: HeaderCarrier): Future[List[Ticket]] = {
     http.GET[List[Ticket]](s"${configuration.thirdPartyDeveloperUrl}/incidents")

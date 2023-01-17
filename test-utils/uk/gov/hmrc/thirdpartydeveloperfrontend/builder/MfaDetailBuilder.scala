@@ -16,24 +16,19 @@
 
 package uk.gov.hmrc.thirdpartydeveloperfrontend.builder
 
-import uk.gov.hmrc.apiplatform.modules.mfa.models.{AuthenticatorAppMfaDetailSummary, MfaId, SmsMfaDetailSummary}
-
 import java.time.LocalDateTime
+
+import uk.gov.hmrc.apiplatform.modules.mfa.models.{AuthenticatorAppMfaDetailSummary, MfaId, SmsMfaDetailSummary}
 
 trait MfaDetailBuilder {
   val verifiedAuthenticatorAppMfaDetail = buildAuthenticatorAppMfaDetail(name = "Auth App", verified = true)
-  val verifiedSmsMfaDetail = buildSmsMfaDetail(name = "Text Message", mobileNumber = "0123456789", verified = true)
+  val verifiedSmsMfaDetail              = buildSmsMfaDetail(name = "Text Message", mobileNumber = "0123456789", verified = true)
 
-  def buildAuthenticatorAppMfaDetail(name: String,
-                                     verified: Boolean,
-                                     createdOn: LocalDateTime = LocalDateTime.now) = {
+  def buildAuthenticatorAppMfaDetail(name: String, verified: Boolean, createdOn: LocalDateTime = LocalDateTime.now) = {
     AuthenticatorAppMfaDetailSummary(MfaId.random, name, createdOn, verified)
   }
 
-  def buildSmsMfaDetail(name: String,
-                        mobileNumber: String,
-                        verified: Boolean,
-                        createdOn: LocalDateTime = LocalDateTime.now) = {
+  def buildSmsMfaDetail(name: String, mobileNumber: String, verified: Boolean, createdOn: LocalDateTime = LocalDateTime.now) = {
     SmsMfaDetailSummary(MfaId.random, name, createdOn, mobileNumber, verified)
   }
 }

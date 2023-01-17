@@ -16,32 +16,36 @@
 
 package uk.gov.hmrc.thirdpartydeveloperfrontend.service
 
-import uk.gov.hmrc.thirdpartydeveloperfrontend.connectors.DeskproConnector
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.apidefinitions.ApiVersion
+import javax.inject.{Inject, Singleton}
+import scala.concurrent.{ExecutionContext, Future}
+
+import uk.gov.hmrc.http.HeaderCarrier
+
+import uk.gov.hmrc.thirdpartydeveloperfrontend.connectors.{ApmConnector, DeskproConnector}
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.ApplicationUpdateSuccessful
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.apidefinitions.{ApiVersion, _}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.{Application, ApplicationId}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.connectors.{DeskproTicket, TicketResult}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.DeveloperSession
-import javax.inject.{Inject, Singleton}
-import uk.gov.hmrc.http.HeaderCarrier
-
-import scala.concurrent.Future
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.apidefinitions._
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.ApplicationUpdateSuccessful
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.subscriptions.FieldName
-import uk.gov.hmrc.thirdpartydeveloperfrontend.connectors.ApmConnector
-import scala.concurrent.ExecutionContext
 
 @Singleton
 class SubscriptionsService @Inject() (
-  deskproConnector: DeskproConnector,
-  apmConnector: ApmConnector,
-  subscriptionFieldsService: SubscriptionFieldsService,
-  auditService: AuditService
-)(implicit ec: ExecutionContext) {
+    deskproConnector: DeskproConnector,
+    apmConnector: ApmConnector,
+    subscriptionFieldsService: SubscriptionFieldsService,
+    auditService: AuditService
+  )(implicit ec: ExecutionContext
+  ) {
 
-  private def doRequest(requester: DeveloperSession, application: Application, apiName: String, apiVersion: ApiVersion)(
+  private def doRequest(
+      requester: DeveloperSession,
+      application: Application,
+      apiName: String,
+      apiVersion: ApiVersion
+    )(
       f: (String, String, String, ApplicationId, String, ApiVersion) => DeskproTicket
-  ) = {
+    ) = {
     f(requester.displayedName, requester.email, application.name, application.id, apiName, apiVersion)
   }
 
@@ -53,13 +57,13 @@ class SubscriptionsService @Inject() (
     deskproConnector.createTicket(doRequest(requester, application, apiName, apiVersion)(DeskproTicket.createForApiUnsubscribe))
   }
 
-  type ApiMap[V] = Map[ApiContext, Map[ApiVersion, V]]
-  type FieldMap[V] = ApiMap[Map[FieldName,V]]
+  type ApiMap[V]   = Map[ApiContext, Map[ApiVersion, V]]
+  type FieldMap[V] = ApiMap[Map[FieldName, V]]
 
   def subscribeToApi(application: Application, apiIdentifier: ApiIdentifier)(implicit hc: HeaderCarrier): Future[ApplicationUpdateSuccessful] = {
     apmConnector.subscribeToApi(application.id, apiIdentifier)
   }
-  
+
   def isSubscribedToApi(applicationId: ApplicationId, apiIdentifier: ApiIdentifier)(implicit hc: HeaderCarrier): Future[Boolean] = {
     for {
       app <- apmConnector.fetchApplicationById(applicationId)
@@ -68,11 +72,10 @@ class SubscriptionsService @Inject() (
   }
 
 }
-  
+
 object SubscriptionsService {
-  
+
   trait SubscriptionsConnector {
     def subscribeToApi(applicationId: ApplicationId, apiIdentifier: ApiIdentifier)(implicit hc: HeaderCarrier): Future[ApplicationUpdateSuccessful]
   }
 }
-

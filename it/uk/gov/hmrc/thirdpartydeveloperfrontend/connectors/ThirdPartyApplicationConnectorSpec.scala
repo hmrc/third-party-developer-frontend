@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 HM Revenue & Customs
+ * Copyright 2023 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -40,40 +40,36 @@ import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.apidefinitions.ApiV
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.apidefinitions.ApiIdentifier
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.UserId
 
-
 class ThirdPartyApplicationConnectorSpec extends BaseConnectorIntegrationSpec with GuiceOneAppPerSuite with WireMockExtensions
-  with CollaboratorTracker with LocalUserIdTracker with FixedClock {
+    with CollaboratorTracker with LocalUserIdTracker with FixedClock {
 
   private val apiKey: String = UUID.randomUUID().toString
-  private val clientId = ClientId(UUID.randomUUID().toString)
-  private val applicationId = ApplicationId("applicationId")
-  
+  private val clientId       = ClientId(UUID.randomUUID().toString)
+  private val applicationId  = ApplicationId("applicationId")
+
   private val stubConfig = Configuration(
-    "microservice.services.third-party-application-production.port" -> stubPort,
+    "microservice.services.third-party-application-production.port"      -> stubPort,
     "microservice.services.third-party-application-production.use-proxy" -> false,
-    "microservice.services.third-party-application-production.api-key" -> "",
-
-    "microservice.services.third-party-application-sandbox.port" -> stubPort,
-    "microservice.services.third-party-application-sandbox.use-proxy" -> true,
-    "microservice.services.third-party-application-sandbox.api-key" -> apiKey,
-
-    "proxy.username" -> "test",
-    "proxy.password" -> "test",
-    "proxy.host" -> "localhost",
-    "proxy.port" -> stubPort,
-    "proxy.protocol" -> "http",
-    "proxy.proxyRequiredForThisEnvironment" -> true,
-
-    "hasSandbox" -> true
+    "microservice.services.third-party-application-production.api-key"   -> "",
+    "microservice.services.third-party-application-sandbox.port"         -> stubPort,
+    "microservice.services.third-party-application-sandbox.use-proxy"    -> true,
+    "microservice.services.third-party-application-sandbox.api-key"      -> apiKey,
+    "proxy.username"                                                     -> "test",
+    "proxy.password"                                                     -> "test",
+    "proxy.host"                                                         -> "localhost",
+    "proxy.port"                                                         -> stubPort,
+    "proxy.protocol"                                                     -> "http",
+    "proxy.proxyRequiredForThisEnvironment"                              -> true,
+    "hasSandbox"                                                         -> true
   )
- 
+
   override def fakeApplication(): PlayApplication =
     GuiceApplicationBuilder()
       .configure(stubConfig)
       .overrides(bind[ConnectorMetrics].to[NoopConnectorMetrics])
       .in(Mode.Test)
       .build()
-    
+
   trait BaseSetup {
     def connector: ThirdPartyApplicationConnector
 
@@ -83,8 +79,8 @@ class ThirdPartyApplicationConnectorSpec extends BaseConnectorIntegrationSpec wi
       "My Application",
       Some("Description"),
       Standard(List("http://example.com/redirect"), Some("http://example.com/terms"), Some("http://example.com/privacy"))
-      )
-      
+    )
+
     lazy val createApplicationRequest = new CreateApplicationRequest(
       "My Application",
       connector.environment,
@@ -132,12 +128,12 @@ class ThirdPartyApplicationConnectorSpec extends BaseConnectorIntegrationSpec wi
 
       stubFor(
         post(urlEqualTo(url))
-        .withJsonRequestBody(createApplicationRequest)
-        .willReturn(
+          .withJsonRequestBody(createApplicationRequest)
+          .willReturn(
             aResponse()
-            .withStatus(OK)
-            .withJsonBody(applicationResponse(applicationId, ClientId("appName")))
-        )
+              .withStatus(OK)
+              .withJsonBody(applicationResponse(applicationId, ClientId("appName")))
+          )
       )
 
       val result = await(connector.create(createApplicationRequest))
@@ -153,11 +149,11 @@ class ThirdPartyApplicationConnectorSpec extends BaseConnectorIntegrationSpec wi
 
       stubFor(
         post(urlEqualTo(url))
-        .withJsonRequestBody(updateApplicationRequest)
-        .willReturn(
+          .withJsonRequestBody(updateApplicationRequest)
+          .willReturn(
             aResponse()
-            .withStatus(OK)
-        )
+              .withStatus(OK)
+          )
       )
 
       val result = await(connector.update(applicationId, updateApplicationRequest))
@@ -167,7 +163,7 @@ class ThirdPartyApplicationConnectorSpec extends BaseConnectorIntegrationSpec wi
   }
 
   "applicationUpdate" should {
-    val url = s"/application/${applicationId.value}"
+    val url           = s"/application/${applicationId.value}"
     val updateRequest = ChangeProductionApplicationPrivacyPolicyLocation(UserId.random, LocalDateTime.now, PrivacyPolicyLocation.Url("http://example.com"))
     "successfully update an application using the PATCH endpoint" in new Setup {
       stubFor(
@@ -186,19 +182,19 @@ class ThirdPartyApplicationConnectorSpec extends BaseConnectorIntegrationSpec wi
   }
 
   "fetch application by id" should {
-    val url = s"/application/${applicationId.value}"
+    val url     = s"/application/${applicationId.value}"
     val appName = "app name"
 
     "return an application" in new Setup {
       stubFor(
         get(urlEqualTo(url))
-        .willReturn(
+          .willReturn(
             aResponse()
-            .withStatus(OK)
-            .withJsonBody(applicationResponse(applicationId, clientId, appName))
-        )
+              .withStatus(OK)
+              .withJsonBody(applicationResponse(applicationId, clientId, appName))
+          )
       )
-      
+
       val result = await(connector.fetchApplicationById(applicationId))
 
       result shouldBe defined
@@ -209,10 +205,10 @@ class ThirdPartyApplicationConnectorSpec extends BaseConnectorIntegrationSpec wi
     "return None if the application cannot be found" in new Setup {
       stubFor(
         get(urlEqualTo(url))
-        .willReturn(
+          .willReturn(
             aResponse()
-            .withStatus(NOT_FOUND)
-        )
+              .withStatus(NOT_FOUND)
+          )
       )
 
       val result = await(connector.fetchApplicationById(applicationId))
@@ -222,13 +218,13 @@ class ThirdPartyApplicationConnectorSpec extends BaseConnectorIntegrationSpec wi
 
     "when useProxy is enabled returns an application from proxy" in new ProxiedSetup {
       stubFor(
-        get(urlEqualTo("/third-party-application"+url))
-        .withHeader(ProxiedHttpClient.API_KEY_HEADER_NAME, equalTo(apiKey))
-        .willReturn(
+        get(urlEqualTo("/third-party-application" + url))
+          .withHeader(ProxiedHttpClient.API_KEY_HEADER_NAME, equalTo(apiKey))
+          .willReturn(
             aResponse()
-            .withStatus(OK)
-            .withJsonBody(applicationResponse(applicationId, clientId, appName))
-        )
+              .withStatus(OK)
+              .withJsonBody(applicationResponse(applicationId, clientId, appName))
+          )
       )
 
       val result = await(connector.fetchApplicationById(applicationId))
@@ -241,16 +237,16 @@ class ThirdPartyApplicationConnectorSpec extends BaseConnectorIntegrationSpec wi
 
   "fetch credentials for application" should {
     val tokens = ApplicationToken(List(aClientSecret()), "pToken")
-    val url = s"/application/${applicationId.value}/credentials"
+    val url    = s"/application/${applicationId.value}/credentials"
 
     "return credentials" in new Setup {
       stubFor(
         get(urlEqualTo(url))
-        .willReturn(
+          .willReturn(
             aResponse()
-            .withStatus(OK)
-            .withJsonBody(tokens)
-        )
+              .withStatus(OK)
+              .withJsonBody(tokens)
+          )
       )
       val result = await(connector.fetchCredentials(applicationId))
 
@@ -260,30 +256,30 @@ class ThirdPartyApplicationConnectorSpec extends BaseConnectorIntegrationSpec wi
     "throw ApplicationNotFound if the application cannot be found" in new Setup {
       stubFor(
         get(urlEqualTo(url))
-        .willReturn(
+          .willReturn(
             aResponse()
-            .withStatus(NOT_FOUND)
-        )
+              .withStatus(NOT_FOUND)
+          )
       )
       intercept[ApplicationNotFound](
         await(connector.fetchCredentials(applicationId))
       )
     }
   }
-  
+
   "unsubscribe from api" should {
-    val context = ApiContext("app1")
-    val version = ApiVersion("2.0")
-    val apiIdentifier = ApiIdentifier(context,version)
-    val url = s"/application/${applicationId.value}/subscription?context=${context.value}&version=${version.value}"
+    val context       = ApiContext("app1")
+    val version       = ApiVersion("2.0")
+    val apiIdentifier = ApiIdentifier(context, version)
+    val url           = s"/application/${applicationId.value}/subscription?context=${context.value}&version=${version.value}"
 
     "unsubscribe application from an api" in new Setup {
       stubFor(
         delete(urlEqualTo(url))
-        .willReturn(
+          .willReturn(
             aResponse()
-            .withStatus(OK)
-        )
+              .withStatus(OK)
+          )
       )
       val result = await(connector.unsubscribeFromApi(applicationId, apiIdentifier))
 
@@ -293,10 +289,10 @@ class ThirdPartyApplicationConnectorSpec extends BaseConnectorIntegrationSpec wi
     "throw ApplicationNotFound if the application cannot be found" in new Setup {
       stubFor(
         delete(urlEqualTo(url))
-        .willReturn(
+          .willReturn(
             aResponse()
-            .withStatus(NOT_FOUND)
-        )
+              .withStatus(NOT_FOUND)
+          )
       )
       intercept[ApplicationNotFound](
         await(connector.unsubscribeFromApi(applicationId, apiIdentifier))
@@ -306,15 +302,15 @@ class ThirdPartyApplicationConnectorSpec extends BaseConnectorIntegrationSpec wi
 
   "verifyUplift" should {
     val verificationCode = "aVerificationCode"
-    val url = s"/verify-uplift/$verificationCode"
+    val url              = s"/verify-uplift/$verificationCode"
 
     "return success response in case of a 204 NO CONTENT on backend" in new Setup {
       stubFor(
         post(urlEqualTo(url))
-        .willReturn(
+          .willReturn(
             aResponse()
-            .withStatus(OK)
-        )
+              .withStatus(OK)
+          )
       )
       val result = await(connector.verify(verificationCode))
 
@@ -324,10 +320,10 @@ class ThirdPartyApplicationConnectorSpec extends BaseConnectorIntegrationSpec wi
     "return failure response in case of a 400 on backend" in new Setup {
       stubFor(
         post(urlEqualTo(url))
-        .willReturn(
+          .willReturn(
             aResponse()
-            .withStatus(BAD_REQUEST)
-        )
+              .withStatus(BAD_REQUEST)
+          )
       )
       val result = await(connector.verify(verificationCode))
 
@@ -337,18 +333,18 @@ class ThirdPartyApplicationConnectorSpec extends BaseConnectorIntegrationSpec wi
 
   "requestUplift" should {
     val applicationName = "applicationName"
-    val email = "john.requestor@example.com"
-    val upliftRequest = UpliftRequest(applicationName, email)
-    val url = s"/application/${applicationId.value}/request-uplift"
+    val email           = "john.requestor@example.com"
+    val upliftRequest   = UpliftRequest(applicationName, email)
+    val url             = s"/application/${applicationId.value}/request-uplift"
 
     "return success response in case of a 204 NO CONTENT on backend " in new Setup {
       stubFor(
         post(urlEqualTo(url))
-        .withJsonRequestBody(upliftRequest)
-        .willReturn(
+          .withJsonRequestBody(upliftRequest)
+          .willReturn(
             aResponse()
-            .withStatus(NO_CONTENT)
-        )
+              .withStatus(NO_CONTENT)
+          )
       )
       val result = await(connector.requestUplift(applicationId, upliftRequest))
 
@@ -358,11 +354,11 @@ class ThirdPartyApplicationConnectorSpec extends BaseConnectorIntegrationSpec wi
     "return ApplicationAlreadyExistsResponse response in case of a 409 CONFLICT on backend " in new Setup {
       stubFor(
         post(urlEqualTo(url))
-        .withJsonRequestBody(upliftRequest)
-        .willReturn(
+          .withJsonRequestBody(upliftRequest)
+          .willReturn(
             aResponse()
-            .withStatus(CONFLICT)
-        )
+              .withStatus(CONFLICT)
+          )
       )
       intercept[ApplicationAlreadyExists] {
         await(connector.requestUplift(applicationId, upliftRequest))
@@ -372,11 +368,11 @@ class ThirdPartyApplicationConnectorSpec extends BaseConnectorIntegrationSpec wi
     "return ApplicationNotFound response in case of a 404 on backend " in new Setup {
       stubFor(
         post(urlEqualTo(url))
-        .withJsonRequestBody(upliftRequest)
-        .willReturn(
+          .withJsonRequestBody(upliftRequest)
+          .willReturn(
             aResponse()
-            .withStatus(NOT_FOUND)
-        )
+              .withStatus(NOT_FOUND)
+          )
       )
       intercept[ApplicationNotFound] {
         await(connector.requestUplift(applicationId, upliftRequest))
@@ -386,16 +382,16 @@ class ThirdPartyApplicationConnectorSpec extends BaseConnectorIntegrationSpec wi
 
   "updateApproval" should {
     val updateRequest = CheckInformation(contactDetails = Some(ContactDetails("name", "email", "telephone")))
-    val url = s"/application/${applicationId.value}/check-information"
+    val url           = s"/application/${applicationId.value}/check-information"
 
     "return success response in case of a 204 on backend " in new Setup {
       stubFor(
         post(urlEqualTo(url))
-        .withJsonRequestBody(updateRequest)
-        .willReturn(
+          .withJsonRequestBody(updateRequest)
+          .willReturn(
             aResponse()
-            .withStatus(NO_CONTENT)
-        )
+              .withStatus(NO_CONTENT)
+          )
       )
       val result = await(connector.updateApproval(applicationId, updateRequest))
       result shouldEqual ApplicationUpdateSuccessful
@@ -404,11 +400,11 @@ class ThirdPartyApplicationConnectorSpec extends BaseConnectorIntegrationSpec wi
     "return ApplicationNotFound response in case of a 404 on backend " in new Setup {
       stubFor(
         post(urlEqualTo(url))
-        .withJsonRequestBody(updateRequest)
-        .willReturn(
+          .withJsonRequestBody(updateRequest)
+          .willReturn(
             aResponse()
-            .withStatus(NOT_FOUND)
-        )
+              .withStatus(NOT_FOUND)
+          )
       )
       intercept[ApplicationNotFound] {
         await(connector.updateApproval(applicationId, updateRequest))
@@ -417,18 +413,18 @@ class ThirdPartyApplicationConnectorSpec extends BaseConnectorIntegrationSpec wi
   }
 
   "removeTeamMember" should {
-    val email = "john.bloggs@example.com"
-    val admin = "admin@example.com"
+    val email         = "john.bloggs@example.com"
+    val admin         = "admin@example.com"
     val adminsToEmail = Set("otheradmin@example.com", "anotheradmin@example.com")
-    val url = s"/application/${applicationId.value}/collaborator/delete"
+    val url           = s"/application/${applicationId.value}/collaborator/delete"
 
     "return success" in new Setup {
       stubFor(
         post(urlEqualTo(url))
-        .willReturn(
+          .willReturn(
             aResponse()
-            .withStatus(OK)
-        )
+              .withStatus(OK)
+          )
       )
 
       val result = await(connector.removeTeamMember(applicationId, email, admin, adminsToEmail))
@@ -438,33 +434,33 @@ class ThirdPartyApplicationConnectorSpec extends BaseConnectorIntegrationSpec wi
     "return application needs administrator response" in new Setup {
       stubFor(
         post(urlEqualTo(url))
-        .willReturn(
+          .willReturn(
             aResponse()
-            .withStatus(FORBIDDEN)
-        )
-      ) 
+              .withStatus(FORBIDDEN)
+          )
+      )
       intercept[ApplicationNeedsAdmin](await(connector.removeTeamMember(applicationId, email, admin, adminsToEmail)))
     }
 
     "return application not found response" in new Setup {
       stubFor(
         post(urlEqualTo(url))
-        .willReturn(
+          .willReturn(
             aResponse()
-            .withStatus(NOT_FOUND)
-        )
-      ) 
+              .withStatus(NOT_FOUND)
+          )
+      )
       intercept[ApplicationNotFound](await(connector.removeTeamMember(applicationId, email, admin, adminsToEmail)))
     }
 
     "other upstream error response should be rethrown" in new Setup {
       stubFor(
         post(urlEqualTo(url))
-        .willReturn(
+          .willReturn(
             aResponse()
-            .withStatus(INTERNAL_SERVER_ERROR)
-        )
-      ) 
+              .withStatus(INTERNAL_SERVER_ERROR)
+          )
+      )
       intercept[Exception](await(connector.removeTeamMember(applicationId, email, admin, adminsToEmail)))
     }
   }
@@ -473,16 +469,16 @@ class ThirdPartyApplicationConnectorSpec extends BaseConnectorIntegrationSpec wi
     def tpaClientSecret(clientSecretId: String, clientSecretValue: Option[String] = None): TPAClientSecret =
       TPAClientSecret(clientSecretId, "secret-name", clientSecretValue, LocalDateTime.now(ZoneOffset.UTC), None)
 
-    val actor = CollaboratorActor("john.requestor@example.com")
-    val timestamp = LocalDateTime.now(clock)
+    val actor               = CollaboratorActor("john.requestor@example.com")
+    val timestamp           = LocalDateTime.now(clock)
     val clientSecretRequest = ClientSecretRequest(actor, timestamp)
-    val url = s"/application/${applicationId.value}/client-secret"
+    val url                 = s"/application/${applicationId.value}/client-secret"
 
     "generate the client secret" in new Setup {
-      val newClientSecretId = UUID.randomUUID().toString
+      val newClientSecretId    = UUID.randomUUID().toString
       val newClientSecretValue = UUID.randomUUID().toString
-      val newClientSecret = tpaClientSecret(newClientSecretId, Some(newClientSecretValue))
-      val response =
+      val newClientSecret      = tpaClientSecret(newClientSecretId, Some(newClientSecretValue))
+      val response             =
         AddClientSecretResponse(
           ClientId(UUID.randomUUID().toString),
           UUID.randomUUID().toString,
@@ -491,12 +487,12 @@ class ThirdPartyApplicationConnectorSpec extends BaseConnectorIntegrationSpec wi
 
       stubFor(
         patch(urlEqualTo(url))
-        .withJsonRequestBody(clientSecretRequest)
-        .willReturn(
+          .withJsonRequestBody(clientSecretRequest)
+          .willReturn(
             aResponse()
-            .withStatus(OK)
-            .withJsonBody(response)
-        )
+              .withStatus(OK)
+              .withJsonBody(response)
+          )
       )
       val result = await(connector.addClientSecrets(applicationId, clientSecretRequest))
 
@@ -507,12 +503,12 @@ class ThirdPartyApplicationConnectorSpec extends BaseConnectorIntegrationSpec wi
     "throw an ApplicationNotFound exception when the application does not exist" in new Setup {
       stubFor(
         patch(urlEqualTo(url))
-        .withJsonRequestBody(clientSecretRequest)
-        .willReturn(
+          .withJsonRequestBody(clientSecretRequest)
+          .willReturn(
             aResponse()
-            .withStatus(NOT_FOUND)
-        )
-      ) 
+              .withStatus(NOT_FOUND)
+          )
+      )
       intercept[ApplicationNotFound] {
         await(connector.addClientSecrets(applicationId, clientSecretRequest))
       }
@@ -521,12 +517,12 @@ class ThirdPartyApplicationConnectorSpec extends BaseConnectorIntegrationSpec wi
     "throw a ClientSecretLimitExceeded exception when the max number of client secret has been exceeded" in new Setup {
       stubFor(
         patch(urlEqualTo(url))
-        .withJsonRequestBody(clientSecretRequest)
-        .willReturn(
+          .withJsonRequestBody(clientSecretRequest)
+          .willReturn(
             aResponse()
-            .withStatus(FORBIDDEN)
-        )
-      ) 
+              .withStatus(FORBIDDEN)
+          )
+      )
       intercept[ClientSecretLimitExceeded] {
         await(connector.addClientSecrets(applicationId, clientSecretRequest))
       }
@@ -538,18 +534,18 @@ class ThirdPartyApplicationConnectorSpec extends BaseConnectorIntegrationSpec wi
 
     "returns a valid response" in new Setup {
       val applicationName = "my valid application name"
-      val appId = ApplicationId(randomUUID().toString)
+      val appId           = ApplicationId(randomUUID().toString)
       val expectedRequest = ApplicationNameValidationJson.ApplicationNameValidationRequest(applicationName, Some(appId))
 
       stubFor(
         post(urlEqualTo(url))
-        .withJsonRequestBody(expectedRequest)
-        .willReturn(
+          .withJsonRequestBody(expectedRequest)
+          .willReturn(
             aResponse()
-            .withStatus(OK)
-            .withJsonBody(ApplicationNameValidationJson.ApplicationNameValidationResult(None))
-        )
-      ) 
+              .withStatus(OK)
+              .withJsonBody(ApplicationNameValidationJson.ApplicationNameValidationResult(None))
+          )
+      )
       val result = await(connector.validateName(applicationName, Some(appId)))
       result shouldBe Valid
     }
@@ -561,13 +557,13 @@ class ThirdPartyApplicationConnectorSpec extends BaseConnectorIntegrationSpec wi
 
       stubFor(
         post(urlEqualTo(url))
-        .withJsonRequestBody(expectedRequest)
-        .willReturn(
+          .withJsonRequestBody(expectedRequest)
+          .willReturn(
             aResponse()
-            .withStatus(OK)
-            .withJsonBody(ApplicationNameValidationJson.ApplicationNameValidationResult(Some(ApplicationNameValidationJson.Errors(invalidName = true, duplicateName = false))))
-        )
-      ) 
+              .withStatus(OK)
+              .withJsonBody(ApplicationNameValidationJson.ApplicationNameValidationResult(Some(ApplicationNameValidationJson.Errors(invalidName = true, duplicateName = false))))
+          )
+      )
       val result = await(connector.validateName(applicationName, None))
       result shouldBe Invalid(invalidName = true, duplicateName = false)
     }
@@ -575,18 +571,18 @@ class ThirdPartyApplicationConnectorSpec extends BaseConnectorIntegrationSpec wi
   }
 
   "updateIpAllowlist" should {
-    val allowlist = Set("1.1.1.1/24")
+    val allowlist     = Set("1.1.1.1/24")
     val updateRequest = UpdateIpAllowlistRequest(required = false, allowlist)
-    val url = s"/application/${applicationId.value}/ipAllowlist"
+    val url           = s"/application/${applicationId.value}/ipAllowlist"
 
     "return success response in case of a 204 on backend " in new Setup {
       stubFor(
         put(urlEqualTo(url))
-        .withJsonRequestBody(updateRequest)
-        .willReturn(
+          .withJsonRequestBody(updateRequest)
+          .willReturn(
             aResponse()
-            .withStatus(OK)
-        )
+              .withStatus(OK)
+          )
       )
       val result: ApplicationUpdateSuccessful = await(connector.updateIpAllowlist(applicationId, required = false, allowlist))
       result shouldEqual ApplicationUpdateSuccessful
@@ -595,11 +591,11 @@ class ThirdPartyApplicationConnectorSpec extends BaseConnectorIntegrationSpec wi
     "return ApplicationNotFound response in case of a 404 on backend " in new Setup {
       stubFor(
         put(urlEqualTo(url))
-        .withJsonRequestBody(updateRequest)
-        .willReturn(
+          .withJsonRequestBody(updateRequest)
+          .willReturn(
             aResponse()
-            .withStatus(NOT_FOUND)
-        )
+              .withStatus(NOT_FOUND)
+          )
       )
       intercept[ApplicationNotFound] {
         await(connector.updateIpAllowlist(applicationId, required = false, allowlist))

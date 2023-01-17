@@ -18,15 +18,15 @@ package uk.gov.hmrc.thirdpartydeveloperfrontend.builder
 
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.apidefinitions._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.{Application, ApplicationId, ClientId}
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.subscriptions.{AccessRequirements, FieldName, FieldValue}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.subscriptions.ApiSubscriptionFields.{SubscriptionFieldDefinition, SubscriptionFieldValue, SubscriptionFieldsWrapper}
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.subscriptions.{AccessRequirements, FieldName, FieldValue}
 
 trait SubscriptionsBuilder {
 
   def buildAPISubscriptionStatus(name: String, context: Option[ApiContext] = None, fields: Option[SubscriptionFieldsWrapper] = None): APISubscriptionStatus = {
 
     val contextName = context.getOrElse(ApiContext(s"context-$name"))
-    val version = ApiVersionDefinition(ApiVersion("version"), APIStatus.STABLE)
+    val version     = ApiVersionDefinition(ApiVersion("version"), APIStatus.STABLE)
 
     val f = fields.getOrElse(SubscriptionFieldsWrapper(ApplicationId("fake-appId"), ClientId("fake-clientId"), contextName, version.version, List.empty))
 
@@ -50,8 +50,13 @@ trait SubscriptionsBuilder {
     )
   }
 
-  def buildSubscriptionFieldValue(name: String, value: Option[String] = None, accessRequirements: AccessRequirements = AccessRequirements.Default, hintOverride: Option[String] = None): SubscriptionFieldValue = {
-    val hint = hintOverride.getOrElse(s"hint-$name")
+  def buildSubscriptionFieldValue(
+      name: String,
+      value: Option[String] = None,
+      accessRequirements: AccessRequirements = AccessRequirements.Default,
+      hintOverride: Option[String] = None
+    ): SubscriptionFieldValue = {
+    val hint       = hintOverride.getOrElse(s"hint-$name")
     val definition = SubscriptionFieldDefinition(FieldName(name), s"description-$name", s"shortDescription-$name", hint, "STRING", accessRequirements)
 
     SubscriptionFieldValue(definition, FieldValue(value.getOrElse(s"value-$name")))

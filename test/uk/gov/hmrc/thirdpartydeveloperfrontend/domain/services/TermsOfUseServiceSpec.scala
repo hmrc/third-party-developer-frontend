@@ -16,14 +16,15 @@
 
 package uk.gov.hmrc.thirdpartydeveloperfrontend.domain.services
 
+import java.time.{LocalDateTime, Period, ZoneOffset}
+
 import uk.gov.hmrc.apiplatform.modules.submissions.domain.models.Submission
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.services.TermsOfUseService.TermsOfUseAgreementDetails
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.HmrcSpec
 
-import java.time.{LocalDateTime, Period, ZoneOffset}
-
 class TermsOfUseServiceSpec extends HmrcSpec {
+
   def buildApplication(checkInfoAgreements: Option[List[TermsOfUseAgreement]] = None, standardAppAgreements: Option[List[TermsOfUseAcceptance]] = None) = Application(
     ApplicationId.random,
     ClientId("clientId"),
@@ -36,29 +37,33 @@ class TermsOfUseServiceSpec extends HmrcSpec {
     Some("Description 1"),
     Set.empty,
     state = ApplicationState.production("user@example.com", "user", ""),
-    access = Standard(importantSubmissionData = standardAppAgreements.map(standardAppAgreements => ImportantSubmissionData(
-      Some("http://example.com"),
-      responsibleIndividual,
-      Set.empty,
-      TermsAndConditionsLocation.InDesktopSoftware,
-      PrivacyPolicyLocation.InDesktopSoftware,
-      standardAppAgreements
-    ))),
+    access = Standard(importantSubmissionData =
+      standardAppAgreements.map(standardAppAgreements =>
+        ImportantSubmissionData(
+          Some("http://example.com"),
+          responsibleIndividual,
+          Set.empty,
+          TermsAndConditionsLocation.InDesktopSoftware,
+          PrivacyPolicyLocation.InDesktopSoftware,
+          standardAppAgreements
+        )
+      )
+    ),
     checkInformation = checkInfoAgreements.map(agreements => CheckInformation(termsOfUseAgreements = agreements))
   )
 
-  val timestamp = LocalDateTime.now(ZoneOffset.UTC)
-  val email = "bob@example.com"
-  val name = "Bob Example"
-  val responsibleIndividual = ResponsibleIndividual(ResponsibleIndividual.Name(name), ResponsibleIndividual.EmailAddress(email))
-  val version1_2 = "1.2"
-  val appWithNoAgreements = buildApplication()
-  val checkInfoAgreement = TermsOfUseAgreement(email, timestamp, version1_2)
-  val stdAppAgreement = TermsOfUseAcceptance(responsibleIndividual, timestamp, Submission.Id.random, 0)
+  val timestamp                  = LocalDateTime.now(ZoneOffset.UTC)
+  val email                      = "bob@example.com"
+  val name                       = "Bob Example"
+  val responsibleIndividual      = ResponsibleIndividual(ResponsibleIndividual.Name(name), ResponsibleIndividual.EmailAddress(email))
+  val version1_2                 = "1.2"
+  val appWithNoAgreements        = buildApplication()
+  val checkInfoAgreement         = TermsOfUseAgreement(email, timestamp, version1_2)
+  val stdAppAgreement            = TermsOfUseAcceptance(responsibleIndividual, timestamp, Submission.Id.random, 0)
   val appWithCheckInfoAgreements = buildApplication(Some(List(checkInfoAgreement)))
-  val appWithStdAppAgreements = buildApplication(None, Some(List(stdAppAgreement)))
-  val nonStdApp = buildApplication().copy(access = Privileged())
-  val underTest = new TermsOfUseService()
+  val appWithStdAppAgreements    = buildApplication(None, Some(List(stdAppAgreement)))
+  val nonStdApp                  = buildApplication().copy(access = Privileged())
+  val underTest                  = new TermsOfUseService()
 
   "getAgreementDetails" should {
     "return empty list if no agreements found" in {
@@ -78,12 +83,15 @@ class TermsOfUseServiceSpec extends HmrcSpec {
       agreements.size shouldBe 0
     }
     "return empty list if ImportantSubmissionData is missing" in {
-      val agreements = underTest.getAgreementDetails(appWithStdAppAgreements.copy(access = appWithStdAppAgreements.access.asInstanceOf[Standard].copy(importantSubmissionData = None)))
+      val agreements =
+        underTest.getAgreementDetails(appWithStdAppAgreements.copy(access = appWithStdAppAgreements.access.asInstanceOf[Standard].copy(importantSubmissionData = None)))
       agreements.size shouldBe 0
     }
     "return empty list if ImportantSubmissionData.termsOfUseAcceptances is empty" in {
       val importantSubmissionData = appWithStdAppAgreements.access.asInstanceOf[Standard].importantSubmissionData.get
-      val agreements = underTest.getAgreementDetails(appWithStdAppAgreements.copy(access = appWithStdAppAgreements.access.asInstanceOf[Standard].copy(importantSubmissionData = Some(importantSubmissionData.copy(termsOfUseAcceptances = List.empty)))))
+      val agreements              = underTest.getAgreementDetails(appWithStdAppAgreements.copy(access =
+        appWithStdAppAgreements.access.asInstanceOf[Standard].copy(importantSubmissionData = Some(importantSubmissionData.copy(termsOfUseAcceptances = List.empty)))
+      ))
       agreements.size shouldBe 0
     }
   }

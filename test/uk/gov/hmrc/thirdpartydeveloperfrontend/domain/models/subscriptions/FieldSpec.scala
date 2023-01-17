@@ -19,7 +19,7 @@ package uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.subscriptions
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.HmrcSpec
 
 class FieldSpec extends HmrcSpec {
-  
+
   "FieldName" should {
     "allow creation of random strings" in {
       val fn1 = FieldName.random
@@ -32,9 +32,9 @@ class FieldSpec extends HmrcSpec {
 
     "sort correctly" in {
       val alice = FieldName("Alice")
-      val bob = FieldName("Bob")
+      val bob   = FieldName("Bob")
 
-      List(bob, alice).sorted should contain inOrder (alice,bob)
+      List(bob, alice).sorted should contain inOrder (alice, bob)
     }
   }
 

@@ -16,13 +16,14 @@
 
 package uk.gov.hmrc.thirdpartydeveloperfrontend.connectors
 
-import uk.gov.hmrc.thirdpartydeveloperfrontend.config.ApplicationConfig
 import javax.inject.{Inject, Singleton}
+import scala.concurrent.Future
+
 import play.api.libs.json._
 import uk.gov.hmrc.crypto._
 import uk.gov.hmrc.crypto.json.{JsonDecryptor, JsonEncryptor}
 
-import scala.concurrent.Future
+import uk.gov.hmrc.thirdpartydeveloperfrontend.config.ApplicationConfig
 
 @Singleton
 class PayloadEncryption @Inject() (localCrypto: LocalCrypto) {
@@ -35,7 +36,7 @@ class PayloadEncryption @Inject() (localCrypto: LocalCrypto) {
   }
 
   def decrypt[T](payload: JsValue)(implicit reads: Reads[T]): T = {
-    val decryptor = new JsonDecryptor()(crypto, reads)
+    val decryptor                         = new JsonDecryptor()(crypto, reads)
     val decrypted: JsResult[Protected[T]] = decryptor.reads(payload)
 
     decrypted.asOpt.map(_.decryptedValue).getOrElse(throw new scala.RuntimeException(s"Failed to decrypt payload: [$payload]"))
@@ -43,10 +44,11 @@ class PayloadEncryption @Inject() (localCrypto: LocalCrypto) {
 }
 
 class LocalCrypto @Inject() (applicationConfig: ApplicationConfig) extends CompositeSymmetricCrypto {
+
   override protected val currentCrypto: Encrypter with Decrypter = new AesCrypto {
     override protected val encryptionKey: String = applicationConfig.jsonEncryptionKey
   }
-  override protected val previousCryptos: Seq[Decrypter] = Seq.empty
+  override protected val previousCryptos: Seq[Decrypter]         = Seq.empty
 }
 
 case class SecretRequest(data: String)
@@ -56,6 +58,7 @@ object SecretRequest {
 }
 
 class EncryptedJson @Inject() (payloadEncryption: PayloadEncryption) {
+
   def secretRequestJson[R](payload: JsValue, block: JsValue => Future[R]) = {
     block(toSecretRequestJson(payload))
   }
@@ -64,7 +67,7 @@ class EncryptedJson @Inject() (payloadEncryption: PayloadEncryption) {
     Json.toJson(SecretRequest(payloadEncryption.encrypt(payload).as[String]))
   }
 
-  def secretRequest[I,R](input: I, block: SecretRequest => Future[R])(implicit w: Writes[I]) = {
+  def secretRequest[I, R](input: I, block: SecretRequest => Future[R])(implicit w: Writes[I]) = {
     block(toSecretRequest(w.writes(input)))
   }
 

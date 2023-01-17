@@ -16,46 +16,50 @@
 
 package views.emailpreferences
 
+import scala.collection.JavaConverters._
+
+import org.jsoup.Jsoup
+import org.jsoup.nodes.{Document, Element}
+import views.helper.CommonViewSpec
+import views.html.emailpreferences.SelectApisFromSubscriptionsView
+
+import play.api.data.{Form, FormError}
+import play.api.mvc.AnyContentAsEmpty
+import play.api.test.FakeRequest
+import play.twirl.api.Html
+
+import uk.gov.hmrc.thirdpartydeveloperfrontend.builder.{DeveloperBuilder, DeveloperSessionBuilder}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.{FormKeys, SelectApisFromSubscriptionsForm}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.ApplicationId
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.connectors.ApiType.REST_API
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.connectors.{CombinedApi, CombinedApiCategory}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.{DeveloperSession, LoggedInState}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.flows.NewApplicationEmailPreferencesFlowV2
-import org.jsoup.Jsoup
-import org.jsoup.nodes.{Document, Element}
-import play.api.data.{Form, FormError}
-import play.api.mvc.AnyContentAsEmpty
-import play.api.test.FakeRequest
-import play.twirl.api.Html
-import uk.gov.hmrc.thirdpartydeveloperfrontend.builder.{DeveloperBuilder, DeveloperSessionBuilder}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.{LocalUserIdTracker, WithCSRFAddToken}
-import views.helper.CommonViewSpec
-import views.html.emailpreferences.SelectApisFromSubscriptionsView
-
-import scala.collection.JavaConverters._
 
 class SelectApisFromSubscriptionsViewSpec extends CommonViewSpec
-  with WithCSRFAddToken
-  with LocalUserIdTracker
-  with DeveloperSessionBuilder
-  with DeveloperBuilder {
+    with WithCSRFAddToken
+    with LocalUserIdTracker
+    with DeveloperSessionBuilder
+    with DeveloperBuilder {
 
   trait Setup {
+
     val developerSessionWithoutEmailPreferences: DeveloperSession = {
       buildDeveloperSession(loggedInState = LoggedInState.LOGGED_IN, buildDeveloper("email@example.com", "First Name", "Last Name", None))
     }
-    val form = mock[Form[SelectApisFromSubscriptionsForm]]
-    val apis = Set("api1", "api2")
-    val applicationId = ApplicationId.random
-    val newApplicationEmailPreferencesFlow = NewApplicationEmailPreferencesFlowV2(
-        developerSessionWithoutEmailPreferences.session.sessionId,
-        developerSessionWithoutEmailPreferences.developer.emailPreferences,
-        applicationId,
-        Set.empty,
-        Set.empty,
-        Set.empty
-      )
+    val form                                                      = mock[Form[SelectApisFromSubscriptionsForm]]
+    val apis                                                      = Set("api1", "api2")
+    val applicationId                                             = ApplicationId.random
+
+    val newApplicationEmailPreferencesFlow                    = NewApplicationEmailPreferencesFlowV2(
+      developerSessionWithoutEmailPreferences.session.sessionId,
+      developerSessionWithoutEmailPreferences.developer.emailPreferences,
+      applicationId,
+      Set.empty,
+      Set.empty,
+      Set.empty
+    )
     implicit val request: FakeRequest[AnyContentAsEmpty.type] = FakeRequest().withCSRFToken
 
     val viewUnderTest: SelectApisFromSubscriptionsView = app.injector.instanceOf[SelectApisFromSubscriptionsView]
@@ -94,9 +98,11 @@ class SelectApisFromSubscriptionsViewSpec extends CommonViewSpec
   }
 
   "New Application Email Preferences Select Api view page" should {
-    val missingAPIs = List(CombinedApi("api1", "Api One",   List(CombinedApiCategory("category1"), CombinedApiCategory("category2")), REST_API),
+    val missingAPIs = List(
+      CombinedApi("api1", "Api One", List(CombinedApiCategory("category1"), CombinedApiCategory("category2")), REST_API),
       CombinedApi("api2", "Api Two", List(CombinedApiCategory("category2"), CombinedApiCategory("category4")), REST_API),
-      CombinedApi("api3", "Api Three", List(CombinedApiCategory("category3"), CombinedApiCategory("category2")), REST_API))
+      CombinedApi("api3", "Api Three", List(CombinedApiCategory("category3"), CombinedApiCategory("category2")), REST_API)
+    )
 
     "render the api selection page with APIs that are missing from user's email preferences" in new Setup {
       // Missing APIs = some, Selected APIs = none
@@ -105,51 +111,68 @@ class SelectApisFromSubscriptionsViewSpec extends CommonViewSpec
 
       val page: Html =
         viewUnderTest.render(
-          form, missingAPIs, applicationId, Set.empty, messagesProvider.messages, developerSessionWithoutEmailPreferences, request, appConfig)
-      
+          form,
+          missingAPIs,
+          applicationId,
+          Set.empty,
+          messagesProvider.messages,
+          developerSessionWithoutEmailPreferences,
+          request,
+          appConfig
+        )
+
       val document: Document = Jsoup.parse(page.body)
       validateStaticElements(document, missingAPIs, applicationId)
       Option(document.getElementById("error-summary-display")).isDefined shouldBe false
       document.select("input[type=checkbox][checked]").asScala.toList shouldBe List.empty
     }
 
-     "render the api selection Page with user selected apis passed to the view" in new Setup {
-       when(form.errors).thenReturn(Seq.empty)
-       when(form.errors(any[String])).thenReturn(Seq.empty)
+    "render the api selection Page with user selected apis passed to the view" in new Setup {
+      when(form.errors).thenReturn(Seq.empty)
+      when(form.errors(any[String])).thenReturn(Seq.empty)
 
-       val selectedAPIs = Set("api1")
+      val selectedAPIs = Set("api1")
 
-       val page: Html =
-         viewUnderTest.render(
-           form, missingAPIs, applicationId, selectedAPIs, messagesProvider.messages, developerSessionWithoutEmailPreferences, request, appConfig)
-     
-       val document: Document = Jsoup.parse(page.body)
-       validateStaticElements(document, missingAPIs, applicationId)
-       Option(document.getElementById("error-summary-display")).isDefined shouldBe false
+      val page: Html =
+        viewUnderTest.render(
+          form,
+          missingAPIs,
+          applicationId,
+          selectedAPIs,
+          messagesProvider.messages,
+          developerSessionWithoutEmailPreferences,
+          request,
+          appConfig
+        )
 
-       val selectedBoxes: Seq[Element] = document.select("input[type=checkbox][checked]").asScala.toList
-       selectedBoxes.map(_.attr("value")) should contain allElementsOf selectedAPIs
-     }
+      val document: Document = Jsoup.parse(page.body)
+      validateStaticElements(document, missingAPIs, applicationId)
+      Option(document.getElementById("error-summary-display")).isDefined shouldBe false
 
-     "render the form errors on the page when they exist" in new Setup {
-       when(form.errors).thenReturn(Seq(FormError.apply(FormKeys.selectedApisNonSelectedKey, "message")))
-       when(form.errors(any[String])).thenReturn(Seq(FormError.apply(FormKeys.selectedApisNonSelectedKey, "message")))
+      val selectedBoxes: Seq[Element] = document.select("input[type=checkbox][checked]").asScala.toList
+      selectedBoxes.map(_.attr("value")) should contain allElementsOf selectedAPIs
+    }
 
-       val page: Html =
-         viewUnderTest.render(
-           form,
-           missingAPIs,
-           applicationId,
-           Set.empty,
-           messagesProvider.messages,
-           developerSessionWithoutEmailPreferences,
-           request,
-           appConfig)
-     
-       val document: Document = Jsoup.parse(page.body)
-       validateStaticElements(document, missingAPIs, applicationId)
+    "render the form errors on the page when they exist" in new Setup {
+      when(form.errors).thenReturn(Seq(FormError.apply(FormKeys.selectedApisNonSelectedKey, "message")))
+      when(form.errors(any[String])).thenReturn(Seq(FormError.apply(FormKeys.selectedApisNonSelectedKey, "message")))
 
-       Option(document.getElementById("error-summary-display")).isDefined shouldBe true
-     }
+      val page: Html =
+        viewUnderTest.render(
+          form,
+          missingAPIs,
+          applicationId,
+          Set.empty,
+          messagesProvider.messages,
+          developerSessionWithoutEmailPreferences,
+          request,
+          appConfig
+        )
+
+      val document: Document = Jsoup.parse(page.body)
+      validateStaticElements(document, missingAPIs, applicationId)
+
+      Option(document.getElementById("error-summary-display")).isDefined shouldBe true
+    }
   }
 }

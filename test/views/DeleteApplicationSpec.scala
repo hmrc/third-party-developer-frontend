@@ -16,28 +16,31 @@
 
 package views
 
-import uk.gov.hmrc.thirdpartydeveloperfrontend.builder._
-import java.time.Period
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications._
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.CollaboratorRole.{ADMINISTRATOR, DEVELOPER}
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.LoggedInState
+import java.time.{LocalDateTime, Period, ZoneOffset}
+
 import org.jsoup.Jsoup
-import play.api.test.FakeRequest
-import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.ViewHelpers._
-import uk.gov.hmrc.thirdpartydeveloperfrontend.utils._
 import views.helper.CommonViewSpec
 import views.html.DeleteApplicationView
-import java.time.{LocalDateTime, ZoneOffset}
+
+import play.api.test.FakeRequest
+
+import uk.gov.hmrc.thirdpartydeveloperfrontend.builder._
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.CollaboratorRole.{ADMINISTRATOR, DEVELOPER}
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications._
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.LoggedInState
+import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.ViewHelpers._
+import uk.gov.hmrc.thirdpartydeveloperfrontend.utils._
 
 class DeleteApplicationSpec extends CommonViewSpec with WithCSRFAddToken with CollaboratorTracker with LocalUserIdTracker
-  with DeveloperSessionBuilder
-  with DeveloperBuilder {
+    with DeveloperSessionBuilder
+    with DeveloperBuilder {
 
   val deleteApplicationView = app.injector.instanceOf[DeleteApplicationView]
-  val appId = ApplicationId("1234")
-  val clientId = ClientId("clientId123")
-  val loggedInDeveloper = buildDeveloperSession(loggedInState = LoggedInState.LOGGED_IN, buildDeveloper("developer@example.com", "John", "Doe", None))
-  val application = Application(
+  val appId                 = ApplicationId("1234")
+  val clientId              = ClientId("clientId123")
+  val loggedInDeveloper     = buildDeveloperSession(loggedInState = LoggedInState.LOGGED_IN, buildDeveloper("developer@example.com", "John", "Doe", None))
+
+  val application             = Application(
     appId,
     clientId,
     "App name 1",
@@ -51,9 +54,9 @@ class DeleteApplicationSpec extends CommonViewSpec with WithCSRFAddToken with Co
     state = ApplicationState.production(loggedInDeveloper.email, loggedInDeveloper.displayedName, ""),
     access = Standard(redirectUris = List("https://red1", "https://red2"), termsAndConditionsUrl = Some("http://tnc-url.com"))
   )
-  val prodAppId = ApplicationId("prod123")
-  val sandboxAppId = ApplicationId("sand123")
-  val prodApp: Application = application.copy(id = prodAppId)
+  val prodAppId               = ApplicationId("prod123")
+  val sandboxAppId            = ApplicationId("sand123")
+  val prodApp: Application    = application.copy(id = prodAppId)
   val sandboxApp: Application = application.copy(id = sandboxAppId, deployedTo = Environment.SANDBOX)
 
   "delete application page" should {

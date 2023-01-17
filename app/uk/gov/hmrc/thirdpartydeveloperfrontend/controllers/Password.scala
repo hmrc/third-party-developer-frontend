@@ -16,44 +16,44 @@
 
 package uk.gov.hmrc.thirdpartydeveloperfrontend.controllers
 
-import uk.gov.hmrc.thirdpartydeveloperfrontend.config.ApplicationConfig
-import uk.gov.hmrc.thirdpartydeveloperfrontend.config.ErrorHandler
-import uk.gov.hmrc.thirdpartydeveloperfrontend.connectors.ThirdPartyDeveloperConnector
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain._
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.connectors.{ChangePassword, PasswordReset}
-
 import javax.inject.{Inject, Singleton}
+import scala.concurrent.{ExecutionContext, Future}
+
+import views.html._
+
 import play.api.data.Form
 import play.api.libs.crypto.CookieSigner
 import play.api.mvc._
 import play.twirl.api.HtmlFormat
-import uk.gov.hmrc.thirdpartydeveloperfrontend.service.{AuditService, SessionService}
-import uk.gov.hmrc.thirdpartydeveloperfrontend.service.AuditAction.PasswordChangeFailedDueToInvalidCredentials
-import uk.gov.hmrc.http.HeaderCarrier
-import views.html._
-
-import scala.concurrent.{ExecutionContext, Future}
-import uk.gov.hmrc.http.UpstreamErrorResponse
-import uk.gov.hmrc.apiplatform.modules.common.services.ApplicationLogger
+import uk.gov.hmrc.http.{HeaderCarrier, UpstreamErrorResponse}
 import uk.gov.hmrc.play.bootstrap.controller.WithUnsafeDefaultFormBinding
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendBaseController
 
+import uk.gov.hmrc.apiplatform.modules.common.services.ApplicationLogger
+import uk.gov.hmrc.thirdpartydeveloperfrontend.config.{ApplicationConfig, ErrorHandler}
+import uk.gov.hmrc.thirdpartydeveloperfrontend.connectors.ThirdPartyDeveloperConnector
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain._
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.connectors.{ChangePassword, PasswordReset}
+import uk.gov.hmrc.thirdpartydeveloperfrontend.service.AuditAction.PasswordChangeFailedDueToInvalidCredentials
+import uk.gov.hmrc.thirdpartydeveloperfrontend.service.{AuditService, SessionService}
+
 @Singleton
-class Password @Inject()(val auditService: AuditService,
-                         val sessionService: SessionService,
-                         val connector: ThirdPartyDeveloperConnector,
-                         val errorHandler: ErrorHandler,
-                         mcc: MessagesControllerComponents,
-                         val cookieSigner: CookieSigner,
-                         forgotPasswordView: ForgotPasswordView,
-                         checkEmailView: CheckEmailView,
-                         resetView: ResetView,
-                         resetInvalidView: ResetInvalidView,
-                         resetErrorView: ResetErrorView,
-                         signInView: SignInView
-                        )
-                        (implicit val ec: ExecutionContext, val appConfig: ApplicationConfig)
-  extends LoggedOutController(mcc) with PasswordChange with ApplicationLogger with WithUnsafeDefaultFormBinding {
+class Password @Inject() (
+    val auditService: AuditService,
+    val sessionService: SessionService,
+    val connector: ThirdPartyDeveloperConnector,
+    val errorHandler: ErrorHandler,
+    mcc: MessagesControllerComponents,
+    val cookieSigner: CookieSigner,
+    forgotPasswordView: ForgotPasswordView,
+    checkEmailView: CheckEmailView,
+    resetView: ResetView,
+    resetInvalidView: ResetInvalidView,
+    resetErrorView: ResetErrorView,
+    signInView: SignInView
+  )(implicit val ec: ExecutionContext,
+    val appConfig: ApplicationConfig
+  ) extends LoggedOutController(mcc) with PasswordChange with ApplicationLogger with WithUnsafeDefaultFormBinding {
 
   import ErrorFormBuilder.GlobalError
 
@@ -67,12 +67,13 @@ class Password @Inject()(val auditService: AuditService,
       formWithErrors => {
         Future.successful(BadRequest(forgotPasswordView(formWithErrors.emailaddressGlobal())))
       },
-      data => connector.requestReset(data.emailaddress) map {
-        _ => Ok(checkEmailView(data.emailaddress))
-      } recover {
-        case _ : UnverifiedAccount => Forbidden(forgotPasswordView(ForgotPasswordForm.accountUnverified(requestForm, data.emailaddress)))
-        case UpstreamErrorResponse(_,NOT_FOUND,_,_) => Ok(checkEmailView(data.emailaddress))
-      }
+      data =>
+        connector.requestReset(data.emailaddress) map {
+          _ => Ok(checkEmailView(data.emailaddress))
+        } recover {
+          case _: UnverifiedAccount                      => Forbidden(forgotPasswordView(ForgotPasswordForm.accountUnverified(requestForm, data.emailaddress)))
+          case UpstreamErrorResponse(_, NOT_FOUND, _, _) => Ok(checkEmailView(data.emailaddress))
+        }
     )
   }
 
@@ -80,17 +81,19 @@ class Password @Inject()(val auditService: AuditService,
     connector.fetchEmailForResetCode(code) map {
       email => Redirect(routes.Password.resetPasswordChange).addingToSession("email" -> email)
     } recover {
-      case _: InvalidResetCode => Redirect(routes.Password.resetPasswordError).flashing(
-        "error" -> "InvalidResetCode")
+      case _: InvalidResetCode  => Redirect(routes.Password.resetPasswordError).flashing(
+          "error" -> "InvalidResetCode"
+        )
       case _: UnverifiedAccount => Redirect(routes.Password.resetPasswordError).flashing(
-        "error" -> "UnverifiedAccount"
-      )
+          "error" -> "UnverifiedAccount"
+        )
     }
   }
 
   def resetPasswordChange = Action.async { implicit request =>
     request.session.get("email") match {
-      case None => logger.warn("email not found in session")
+      case None    =>
+        logger.warn("email not found in session")
         Future.successful(Redirect(routes.Password.resetPasswordError).flashing("error" -> "Error"))
       case Some(_) => Future.successful(Ok(resetView(PasswordResetForm.form)))
     }
@@ -101,9 +104,9 @@ class Password @Inject()(val auditService: AuditService,
       case "UnverifiedAccount" =>
         val email = request.flash.get("email").getOrElse("").toString
         Forbidden(forgotPasswordView(ForgotPasswordForm.accountUnverified(ForgotPasswordForm.form, email))).withSession("email" -> email)
-      case "InvalidResetCode" =>
+      case "InvalidResetCode"  =>
         BadRequest(resetInvalidView())
-      case _ =>
+      case _                   =>
         BadRequest(resetErrorView())
     }
   )
@@ -118,7 +121,7 @@ class Password @Inject()(val auditService: AuditService,
           _ => Ok(signInView("You have reset your password", LoginForm.form, endOfJourney = true))
         } recover {
           case _: UnverifiedAccount => Forbidden(resetView(PasswordResetForm.accountUnverified(PasswordResetForm.form, email)))
-            .withSession("email" -> email)
+              .withSession("email" -> email)
         }
       }
     )
@@ -132,9 +135,15 @@ trait PasswordChange {
 
   val connector: ThirdPartyDeveloperConnector
   val auditService: AuditService
-  
-  def processPasswordChange(email: String, success: Result, error: Form[ChangePasswordForm] => HtmlFormat.Appendable)
-                           (implicit request: Request[_], hc: HeaderCarrier, ec: ExecutionContext) = {
+
+  def processPasswordChange(
+      email: String,
+      success: Result,
+      error: Form[ChangePasswordForm] => HtmlFormat.Appendable
+    )(implicit request: Request[_],
+      hc: HeaderCarrier,
+      ec: ExecutionContext
+    ) = {
     ChangePasswordForm.form.bindFromRequest.fold(
       errors => Future.successful(BadRequest(error(errors.currentPasswordGlobal().passwordGlobal().passwordNoMatchField()))),
       data => {
@@ -142,12 +151,12 @@ trait PasswordChange {
         connector.changePassword(payload) map {
           _ => success
         } recover {
-          case _: UnverifiedAccount => Forbidden(error(ChangePasswordForm.accountUnverified(ChangePasswordForm.form, email)))
-            .withSession("email" -> email)
+          case _: UnverifiedAccount  => Forbidden(error(ChangePasswordForm.accountUnverified(ChangePasswordForm.form, email)))
+              .withSession("email" -> email)
           case _: InvalidCredentials =>
             auditService.audit(PasswordChangeFailedDueToInvalidCredentials(email))
             Unauthorized(error(ChangePasswordForm.invalidCredentials(ChangePasswordForm.form)))
-          case _: LockedAccount => Redirect(routes.UserLoginAccount.accountLocked)
+          case _: LockedAccount      => Redirect(routes.UserLoginAccount.accountLocked)
         }
       }
     )

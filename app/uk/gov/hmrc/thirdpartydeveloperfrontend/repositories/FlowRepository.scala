@@ -16,21 +16,23 @@
 
 package uk.gov.hmrc.thirdpartydeveloperfrontend.repositories
 
-import org.mongodb.scala.model.Filters.{and, equal}
-import org.mongodb.scala.model.Indexes.ascending
-import org.mongodb.scala.model.{IndexModel, IndexOptions,UpdateOptions, Updates}
-import uk.gov.hmrc.apiplatform.modules.uplift.domain.models.GetProductionCredentialsFlow
-import uk.gov.hmrc.mongo.MongoComponent
-import uk.gov.hmrc.mongo.play.json.{Codecs, PlayMongoRepository}
-import uk.gov.hmrc.thirdpartydeveloperfrontend.config.ApplicationConfig
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.flows.{EmailPreferencesFlowV2, Flow, FlowType, IpAllowlistFlow, NewApplicationEmailPreferencesFlowV2}
-import uk.gov.hmrc.thirdpartydeveloperfrontend.repositories.MongoFormatters.formatFlow
-import scala.reflect.runtime.universe._
 import java.util.concurrent.TimeUnit
 import javax.inject.{Inject, Singleton}
 import scala.concurrent.{ExecutionContext, Future}
 import scala.reflect.ClassTag
+import scala.reflect.runtime.universe._
 
+import org.mongodb.scala.model.Filters.{and, equal}
+import org.mongodb.scala.model.Indexes.ascending
+import org.mongodb.scala.model.{IndexModel, IndexOptions, UpdateOptions, Updates}
+
+import uk.gov.hmrc.mongo.MongoComponent
+import uk.gov.hmrc.mongo.play.json.{Codecs, PlayMongoRepository}
+
+import uk.gov.hmrc.apiplatform.modules.uplift.domain.models.GetProductionCredentialsFlow
+import uk.gov.hmrc.thirdpartydeveloperfrontend.config.ApplicationConfig
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.flows.{EmailPreferencesFlowV2, Flow, FlowType, IpAllowlistFlow, NewApplicationEmailPreferencesFlowV2}
+import uk.gov.hmrc.thirdpartydeveloperfrontend.repositories.MongoFormatters.formatFlow
 
 @Singleton
 class FlowRepository @Inject() (mongo: MongoComponent, appConfig: ApplicationConfig)(implicit val ec: ExecutionContext)
@@ -67,9 +69,9 @@ class FlowRepository @Inject() (mongo: MongoComponent, appConfig: ApplicationCon
       case Some(_: Flow) =>
         for {
           updatedFlow <- collection.replaceOne(
-            filter = query,
-            replacement = flow
-          ).toFuture().map(_ => flow)
+                           filter = query,
+                           replacement = flow
+                         ).toFuture().map(_ => flow)
 
           _ <- updateLastUpdated(flow.sessionId)
         } yield updatedFlow
@@ -77,7 +79,7 @@ class FlowRepository @Inject() (mongo: MongoComponent, appConfig: ApplicationCon
       case None =>
         for {
           newFlow <- collection.insertOne(flow).toFuture().map(_ => flow)
-          _ <- updateLastUpdated(flow.sessionId)
+          _       <- updateLastUpdated(flow.sessionId)
         } yield newFlow
     }
   }

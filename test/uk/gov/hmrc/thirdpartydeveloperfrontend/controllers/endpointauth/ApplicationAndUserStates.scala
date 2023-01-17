@@ -16,10 +16,16 @@
 
 package uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.endpointauth
 
+import java.time.{LocalDateTime, Period}
+import java.util.UUID
+import scala.concurrent.Future
+
 import cats.data.NonEmptyList
+
 import play.api.libs.crypto.CookieSigner
 import play.api.mvc.Cookie
 import play.api.test.FakeRequest
+
 import uk.gov.hmrc.apiplatform.modules.mfa.connectors.ThirdPartyDeveloperMfaConnector.{RegisterAuthAppResponse, RegisterSmsResponse}
 import uk.gov.hmrc.apiplatform.modules.submissions.domain.models.ResponsibleIndividualVerificationState.INITIAL
 import uk.gov.hmrc.apiplatform.modules.submissions.domain.models.Submission.Status.Granted
@@ -36,111 +42,196 @@ import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.emailpreferences.Em
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.subscriptions.ApiSubscriptionFields.SubscriptionFieldDefinition
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.subscriptions._
 
-import java.time.{LocalDateTime, Period}
-import java.util.UUID
-import scala.concurrent.Future
-
-
 trait HasApplication extends HasAppDeploymentEnvironment with HasUserWithRole with HasAppState with MfaDetailBuilder {
-  val applicationId = ApplicationId.random
-  val clientId = ClientId.random
+  val applicationId   = ApplicationId.random
+  val clientId        = ClientId.random
   val applicationName = "my app"
-  val createdOn = LocalDateTime.of(2020, 1, 1, 0, 0, 0)
+  val createdOn       = LocalDateTime.of(2020, 1, 1, 0, 0, 0)
 
   def describeApplication: String
   def access: Access
   def checkInformation: Option[CheckInformation]
-  def application = Application(
-    applicationId, clientId, applicationName, createdOn, None, None, Period.ofYears(1), environment, None,
+
+  def application             = Application(
+    applicationId,
+    clientId,
+    applicationName,
+    createdOn,
+    None,
+    None,
+    Period.ofYears(1),
+    environment,
+    None,
     maybeCollaborator match {
       case Some(collaborator) => Set(collaborator)
-      case None => Set()
+      case None               => Set()
     },
-    access, state, checkInformation, IpAllowlist(false, Set.empty)
+    access,
+    state,
+    checkInformation,
+    IpAllowlist(false, Set.empty)
   )
-  lazy val redirectUrl = "https://example.com/redirect-here"
-  lazy val apiContext = ApiContext("ctx")
-  lazy val apiVersion = ApiVersion("1.0")
-  lazy val apiIdentifier = ApiIdentifier(apiContext, apiVersion)
-  lazy val apiFieldName = FieldName("my_field")
-  lazy val apiFieldValue = FieldValue("my value")
-  lazy val apiPpnsFieldName = FieldName("my_ppns_field")
-  lazy val apiPpnsFieldValue = FieldValue("my ppns value")
-  lazy val appWithSubsIds = ApplicationWithSubscriptionIds.from(application).copy(subscriptions = Set(apiIdentifier))
-  lazy val privacyPolicyUrl = "http://example.com/priv"
+  lazy val redirectUrl        = "https://example.com/redirect-here"
+  lazy val apiContext         = ApiContext("ctx")
+  lazy val apiVersion         = ApiVersion("1.0")
+  lazy val apiIdentifier      = ApiIdentifier(apiContext, apiVersion)
+  lazy val apiFieldName       = FieldName("my_field")
+  lazy val apiFieldValue      = FieldValue("my value")
+  lazy val apiPpnsFieldName   = FieldName("my_ppns_field")
+  lazy val apiPpnsFieldValue  = FieldValue("my ppns value")
+  lazy val appWithSubsIds     = ApplicationWithSubscriptionIds.from(application).copy(subscriptions = Set(apiIdentifier))
+  lazy val privacyPolicyUrl   = "http://example.com/priv"
   lazy val termsConditionsUrl = "http://example.com/tcs"
-  lazy val category = "category1"
-  lazy val appWithSubsData = ApplicationWithSubscriptionData(application, Set(apiIdentifier), Map(
-    apiContext -> Map(ApiVersion("1.0") -> Map(apiFieldName -> apiFieldValue, apiPpnsFieldName -> apiPpnsFieldValue))
-  ))
+  lazy val category           = "category1"
+
+  lazy val appWithSubsData = ApplicationWithSubscriptionData(
+    application,
+    Set(apiIdentifier),
+    Map(
+      apiContext -> Map(ApiVersion("1.0") -> Map(apiFieldName -> apiFieldValue, apiPpnsFieldName -> apiPpnsFieldValue))
+    )
+  )
   lazy val questionnaireId = Questionnaire.Id.random
-  lazy val question = AcknowledgementOnly(Question.Id.random, Wording("hi"), None)
-  lazy val questionItem = QuestionItem(question)
-  lazy val questionnaire = Questionnaire(questionnaireId, Questionnaire.Label("label"), NonEmptyList.one(questionItem))
-  lazy val questionIdsOfInterest = QuestionIdsOfInterest(Question.Id.random, Question.Id.random, Question.Id.random, Question.Id.random, Question.Id.random, Question.Id.random, Question.Id.random, Question.Id.random, Question.Id.random, Question.Id.random, Question.Id.random)
+  lazy val question        = AcknowledgementOnly(Question.Id.random, Wording("hi"), None)
+  lazy val questionItem    = QuestionItem(question)
+  lazy val questionnaire   = Questionnaire(questionnaireId, Questionnaire.Label("label"), NonEmptyList.one(questionItem))
+
+  lazy val questionIdsOfInterest = QuestionIdsOfInterest(
+    Question.Id.random,
+    Question.Id.random,
+    Question.Id.random,
+    Question.Id.random,
+    Question.Id.random,
+    Question.Id.random,
+    Question.Id.random,
+    Question.Id.random,
+    Question.Id.random,
+    Question.Id.random,
+    Question.Id.random
+  )
   lazy val groupOfQuestionnaires = GroupOfQuestionnaires("heading", NonEmptyList.one(questionnaire))
-  lazy val answersToQuestions = Map(question.id -> TextAnswer("yes"))
-  lazy val submissionInstance = Submission.Instance(submissionIndex, answersToQuestions, NonEmptyList.one(Granted(LocalDateTime.now, "mr jones")))
-  lazy val submission = Submission(submissionId, applicationId, LocalDateTime.now, NonEmptyList.one(groupOfQuestionnaires), questionIdsOfInterest, NonEmptyList.one(submissionInstance), Map.empty)
+  lazy val answersToQuestions    = Map(question.id -> TextAnswer("yes"))
+  lazy val submissionInstance    = Submission.Instance(submissionIndex, answersToQuestions, NonEmptyList.one(Granted(LocalDateTime.now, "mr jones")))
+
+  lazy val submission            = Submission(
+    submissionId,
+    applicationId,
+    LocalDateTime.now,
+    NonEmptyList.one(groupOfQuestionnaires),
+    questionIdsOfInterest,
+    NonEmptyList.one(submissionInstance),
+    Map.empty
+  )
   lazy val questionnaireProgress = QuestionnaireProgress(QuestionnaireState.Completed, List(question.id))
-  lazy val extendedSubmission = ExtendedSubmission(submission, Map(
-    questionnaireId -> questionnaireProgress
-  ))
+
+  lazy val extendedSubmission = ExtendedSubmission(
+    submission,
+    Map(
+      questionnaireId -> questionnaireProgress
+    )
+  )
+
   lazy val subscriptionFieldDefinitions = Map(
-    apiFieldName -> SubscriptionFieldDefinition(apiFieldName, "field desc", "field short desc", "hint", "STRING", AccessRequirements.Default),
+    apiFieldName     -> SubscriptionFieldDefinition(apiFieldName, "field desc", "field short desc", "hint", "STRING", AccessRequirements.Default),
     apiPpnsFieldName -> SubscriptionFieldDefinition(apiPpnsFieldName, "field desc", "field short desc", "hint", "PPNSField", AccessRequirements.Default)
   )
-  lazy val allPossibleSubscriptions = Map(
+
+  lazy val allPossibleSubscriptions            = Map(
     apiContext -> ApiData("service name", "api name", false, Map(apiVersion -> VersionData(STABLE, APIAccess(PUBLIC))), List(ApiCategory("category")))
   )
   lazy val responsibleIndividualVerificationId = ResponsibleIndividualVerificationId(UUID.randomUUID().toString)
-  lazy val submissionId = Submission.Id.random
-  lazy val submissionIndex = 1
-  lazy val responsibleIndividual = ResponsibleIndividual.build("mr responsible", "ri@example.com")
-  lazy val responsibleIndividualVerification = ResponsibleIndividualUpdateVerification(responsibleIndividualVerificationId, applicationId, submissionId, submissionIndex, applicationName, createdOn, responsibleIndividual, "admin@example.com", "Mr Admin", INITIAL)
-  lazy val responsibleIndividualVerificationWithDetails = ResponsibleIndividualVerificationWithDetails(
-    responsibleIndividualVerification, responsibleIndividual, "mr submitter", "submitter@example.com"
+  lazy val submissionId                        = Submission.Id.random
+  lazy val submissionIndex                     = 1
+  lazy val responsibleIndividual               = ResponsibleIndividual.build("mr responsible", "ri@example.com")
+
+  lazy val responsibleIndividualVerification = ResponsibleIndividualUpdateVerification(
+    responsibleIndividualVerificationId,
+    applicationId,
+    submissionId,
+    submissionIndex,
+    applicationName,
+    createdOn,
+    responsibleIndividual,
+    "admin@example.com",
+    "Mr Admin",
+    INITIAL
   )
-  lazy val authAppMfaId = verifiedAuthenticatorAppMfaDetail.id
-  lazy val smsMfaId = verifiedSmsMfaDetail.id
-  lazy val registerAuthAppResponse = RegisterAuthAppResponse(authAppMfaId, "secret")
-  lazy val registerSmsResponse = RegisterSmsResponse(smsMfaId, verifiedSmsMfaDetail.mobileNumber)
+
+  lazy val responsibleIndividualVerificationWithDetails = ResponsibleIndividualVerificationWithDetails(
+    responsibleIndividualVerification,
+    responsibleIndividual,
+    "mr submitter",
+    "submitter@example.com"
+  )
+  lazy val authAppMfaId                                 = verifiedAuthenticatorAppMfaDetail.id
+  lazy val smsMfaId                                     = verifiedSmsMfaDetail.id
+  lazy val registerAuthAppResponse                      = RegisterAuthAppResponse(authAppMfaId, "secret")
+  lazy val registerSmsResponse                          = RegisterSmsResponse(smsMfaId, verifiedSmsMfaDetail.mobileNumber)
 }
 
 trait IsOldJourneyStandardApplication extends HasApplication {
   def describeApplication = "an Old Journey application with Standard access"
-  def access: Access = Standard(List(redirectUrl), None, None, Set.empty, None, None)
-  def checkInformation = Some(CheckInformation(true, true, true, Some(ContactDetails(s"$userFirstName $userLastName", userEmail, "01611234567")), true, true, true,
-    List(TermsOfUseAgreement(userEmail, LocalDateTime.now(), "1.0"))))
+  def access: Access      = Standard(List(redirectUrl), None, None, Set.empty, None, None)
+
+  def checkInformation = Some(CheckInformation(
+    true,
+    true,
+    true,
+    Some(ContactDetails(s"$userFirstName $userLastName", userEmail, "01611234567")),
+    true,
+    true,
+    true,
+    List(TermsOfUseAgreement(userEmail, LocalDateTime.now(), "1.0"))
+  ))
 }
 
 trait IsNewJourneyStandardApplication extends HasApplication {
   def describeApplication = "a New Journey application with Standard access"
-  def access: Access = Standard(List(redirectUrl), None, None, Set.empty, None, Some(ImportantSubmissionData(
-    None, responsibleIndividual, Set.empty, TermsAndConditionsLocation.Url(termsConditionsUrl), PrivacyPolicyLocation.Url(privacyPolicyUrl), List.empty
-  )))
+
+  def access: Access   = Standard(
+    List(redirectUrl),
+    None,
+    None,
+    Set.empty,
+    None,
+    Some(ImportantSubmissionData(
+      None,
+      responsibleIndividual,
+      Set.empty,
+      TermsAndConditionsLocation.Url(termsConditionsUrl),
+      PrivacyPolicyLocation.Url(privacyPolicyUrl),
+      List.empty
+    ))
+  )
   def checkInformation = None
 }
 
 trait IsNewJourneyStandardApplicationWithoutSubmission extends HasApplication {
   def describeApplication = "a New Journey application with Standard access but no submission"
-  def access: Access = Standard(List(redirectUrl), None, None, Set.empty, None, None)
-  def checkInformation = None
+  def access: Access      = Standard(List(redirectUrl), None, None, Set.empty, None, None)
+  def checkInformation    = None
 }
 
 trait HasUserWithRole extends MockConnectors with MfaDetailBuilder {
-  lazy val userEmail = "user@example.com"
-  lazy val userId = UserId.random
+  lazy val userEmail     = "user@example.com"
+  lazy val userId        = UserId.random
   lazy val userFirstName = "Bob"
-  lazy val userLastName = "Example"
-  lazy val userFullName = s"$userFirstName $userLastName"
-  lazy val userPhone = "01611234567"
-  lazy val userPassword = "S3curE-Pa$$w0rd!"
-  lazy val organisation = "Big Corp"
+  lazy val userLastName  = "Example"
+  lazy val userFullName  = s"$userFirstName $userLastName"
+  lazy val userPhone     = "01611234567"
+  lazy val userPassword  = "S3curE-Pa$$w0rd!"
+  lazy val organisation  = "Big Corp"
 
   def describeUserRole: String
+
   def developer = Developer(
-    userId, userEmail, userFirstName, userLastName, None, List(verifiedAuthenticatorAppMfaDetail), EmailPreferences.noPreferences
+    userId,
+    userEmail,
+    userFirstName,
+    userLastName,
+    None,
+    List(verifiedAuthenticatorAppMfaDetail),
+    EmailPreferences.noPreferences
   )
   def maybeCollaborator: Option[Collaborator]
 }
@@ -151,54 +242,55 @@ trait UserIsTeamMember extends HasUserWithRole with HasApplication {
 }
 
 trait UserIsAdmin extends UserIsTeamMember {
-  def describeUserRole = "The user is an Admin on the application team"
+  def describeUserRole  = "The user is an Admin on the application team"
   def maybeCollaborator = Some(Collaborator(userEmail, CollaboratorRole.ADMINISTRATOR, userId))
 }
 
 trait UserIsDeveloper extends UserIsTeamMember {
-  def describeUserRole = "The user is a Developer on the application team"
+  def describeUserRole  = "The user is a Developer on the application team"
   def maybeCollaborator = Some(Collaborator(userEmail, CollaboratorRole.DEVELOPER, userId))
 }
 
 trait UserIsNotOnApplicationTeam extends HasUserWithRole with HasApplication {
-  val otherApp = application.copy(id=ApplicationId.random, collaborators = Set(Collaborator(userEmail, CollaboratorRole.DEVELOPER, userId)))
+  val otherApp            = application.copy(id = ApplicationId.random, collaborators = Set(Collaborator(userEmail, CollaboratorRole.DEVELOPER, userId)))
   val otherAppWithSubsIds = ApplicationWithSubscriptionIds.from(otherApp).copy(subscriptions = Set(apiIdentifier))
   when(tpaProductionConnector.fetchByTeamMember(*[UserId])(*)).thenReturn(Future.successful(List(otherAppWithSubsIds)))
   when(tpaSandboxConnector.fetchByTeamMember(*[UserId])(*)).thenReturn(Future.successful(List(otherAppWithSubsIds)))
-  def describeUserRole = "The user is not a member of the application team"
-  def maybeCollaborator = None
+  def describeUserRole    = "The user is not a member of the application team"
+  def maybeCollaborator   = None
 }
 
 trait HasUserSession extends HasUserWithRole {
   lazy val sessionId = "my session"
   def describeAuthenticationState: String
   def loggedInState: LoggedInState
-  def session = Session(sessionId, developer, loggedInState)
+  def session        = Session(sessionId, developer, loggedInState)
 }
 
 trait UserIsAuthenticated extends HasUserSession with UpdatesRequest {
   def describeAuthenticationState = "and is authenticated"
-  def loggedInState = LoggedInState.LOGGED_IN
+  def loggedInState               = LoggedInState.LOGGED_IN
 
   when(tpdConnector.register(*)(*)).thenReturn(Future.successful(EmailAlreadyInUse))
   when(tpdConnector.findUserId(*)(*)).thenReturn(Future.successful(Some(CoreUserDetails(userEmail, userId))))
 
   implicit val cookieSigner: CookieSigner
+
   override def updateRequestForScenario[T](request: FakeRequest[T]): FakeRequest[T] = {
     request.withCookies(
       Cookie("PLAY2AUTH_SESS_ID", cookieSigner.sign(sessionId) + sessionId, None, "path", None, false, false)
     ).withSession(
-      ("email" , userEmail),
-      ("emailAddress" , userEmail),
-      ("nonce" , "123"),
-      ("userId" , developer.userId.value.toString)
+      ("email", userEmail),
+      ("emailAddress", userEmail),
+      ("nonce", "123"),
+      ("userId", developer.userId.value.toString)
     )
   }
 }
 
 trait UserIsNotAuthenticated extends HasUserSession {
   def describeAuthenticationState = "and is not authenticated"
-  def loggedInState = LoggedInState.PART_LOGGED_IN_ENABLING_MFA
+  def loggedInState               = LoggedInState.PART_LOGGED_IN_ENABLING_MFA
 
   when(tpdConnector.register(*)(*)).thenReturn(Future.successful(RegistrationSuccessful))
   when(tpdConnector.findUserId(*)(*)).thenReturn(Future.successful(None))

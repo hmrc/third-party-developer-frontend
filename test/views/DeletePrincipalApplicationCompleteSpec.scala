@@ -16,22 +16,23 @@
 
 package views
 
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications._
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.LoggedInState
-import org.jsoup.Jsoup
-import play.api.test.FakeRequest
-import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.ViewHelpers.elementExistsByText
-import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.WithCSRFAddToken
-import views.helper.CommonViewSpec
-import views.html.DeletePrincipalApplicationCompleteView
-import uk.gov.hmrc.thirdpartydeveloperfrontend.builder._
-import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.LocalUserIdTracker
-
 import java.time.{LocalDateTime, ZoneOffset}
 
+import org.jsoup.Jsoup
+import views.helper.CommonViewSpec
+import views.html.DeletePrincipalApplicationCompleteView
+
+import play.api.test.FakeRequest
+
+import uk.gov.hmrc.thirdpartydeveloperfrontend.builder._
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications._
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.LoggedInState
+import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.ViewHelpers.elementExistsByText
+import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.{LocalUserIdTracker, WithCSRFAddToken}
+
 class DeletePrincipalApplicationCompleteSpec extends CommonViewSpec with WithCSRFAddToken with DeveloperBuilder
-  with LocalUserIdTracker
-  with DeveloperSessionBuilder {
+    with LocalUserIdTracker
+    with DeveloperSessionBuilder {
 
   val deletePrincipalApplicationCompleteView = app.injector.instanceOf[DeletePrincipalApplicationCompleteView]
 
@@ -40,10 +41,10 @@ class DeletePrincipalApplicationCompleteSpec extends CommonViewSpec with WithCSR
 
       val request = FakeRequest().withCSRFToken
 
-      val appId = ApplicationId("1234")
-      val clientId = ClientId("clientId123")
+      val appId             = ApplicationId("1234")
+      val clientId          = ClientId("clientId123")
       val loggedInDeveloper = buildDeveloperSession(loggedInState = LoggedInState.LOGGED_IN, buildDeveloper("developer@example.com", "John", "Doe", None))
-      val application = Application(
+      val application       = Application(
         appId,
         clientId,
         "App name 1",

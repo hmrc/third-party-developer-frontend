@@ -16,27 +16,28 @@
 
 package uk.gov.hmrc.apiplatform.modules.mfa.views
 
+import java.time.LocalDateTime
+
 import org.jsoup.Jsoup
+import views.helper.CommonViewSpec
+
 import play.api.test.FakeRequest
+
 import uk.gov.hmrc.apiplatform.modules.mfa.models.{AuthenticatorAppMfaDetailSummary, MfaId, SmsMfaDetailSummary}
 import uk.gov.hmrc.apiplatform.modules.mfa.views.html.SecurityPreferencesView
 import uk.gov.hmrc.thirdpartydeveloperfrontend.builder.DeveloperBuilder
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.{DeveloperSession, LoggedInState, Session}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.{LocalUserIdTracker, WithCSRFAddToken}
-import views.helper.CommonViewSpec
-
-import java.time.LocalDateTime
-
 
 class SecurityPreferencesViewSpec extends CommonViewSpec with WithCSRFAddToken with DeveloperBuilder with LocalUserIdTracker {
-  implicit val request = FakeRequest()
+  implicit val request        = FakeRequest()
   val securityPreferencesView = app.injector.instanceOf[SecurityPreferencesView]
 
   "SecurityPreferences view" should {
-    val developer = buildDeveloper()
-    val authAppMfaDetail = AuthenticatorAppMfaDetailSummary(MfaId(java.util.UUID.randomUUID()), "name", LocalDateTime.now(), verified = true)
-    val smsMfaDetail = SmsMfaDetailSummary(MfaId(java.util.UUID.randomUUID()), "name", LocalDateTime.now(), mobileNumber = "1234567890", verified = true)
-    val session = Session("sessionId", developer, LoggedInState.PART_LOGGED_IN_ENABLING_MFA)
+    val developer                 = buildDeveloper()
+    val authAppMfaDetail          = AuthenticatorAppMfaDetailSummary(MfaId(java.util.UUID.randomUUID()), "name", LocalDateTime.now(), verified = true)
+    val smsMfaDetail              = SmsMfaDetailSummary(MfaId(java.util.UUID.randomUUID()), "name", LocalDateTime.now(), mobileNumber = "1234567890", verified = true)
+    val session                   = Session("sessionId", developer, LoggedInState.PART_LOGGED_IN_ENABLING_MFA)
     implicit val developerSession = DeveloperSession(session)
 
     "show suggest 'Get access codes by text message' and display auth app details when developer has only auth app set up" in {
@@ -50,11 +51,8 @@ class SecurityPreferencesViewSpec extends CommonViewSpec with WithCSRFAddToken w
       val mainView = securityPreferencesView.apply(List(smsMfaDetail))
 
       val document = Jsoup.parse(mainView.body)
-     document.getElementById("no-auth-app-mfa").text() should include("Get access codes by an authenticator app")
+      document.getElementById("no-auth-app-mfa").text() should include("Get access codes by an authenticator app")
     }
-
-
-
 
   }
 }

@@ -16,28 +16,26 @@
 
 package uk.gov.hmrc.apiplatform.modules.submissions.controllers
 
+import javax.inject.{Inject, Singleton}
+import scala.concurrent.ExecutionContext
 
-import uk.gov.hmrc.thirdpartydeveloperfrontend.config.ApplicationConfig
-import uk.gov.hmrc.thirdpartydeveloperfrontend.config.ErrorHandler
-import uk.gov.hmrc.thirdpartydeveloperfrontend.connectors.ApmConnector
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.ApplicationId
 import play.api.libs.crypto.CookieSigner
 import play.api.mvc.MessagesControllerComponents
-import uk.gov.hmrc.thirdpartydeveloperfrontend.service.{ApplicationActionService, ApplicationService, SessionService}
-import uk.gov.hmrc.apiplatform.modules.submissions.views.html._
+
 import uk.gov.hmrc.apiplatform.modules.common.services.EitherTHelper
 import uk.gov.hmrc.apiplatform.modules.submissions.controllers.CheckAnswersController.ProdCredsRequestReceivedViewModel
 import uk.gov.hmrc.apiplatform.modules.submissions.controllers.SubmissionActionBuilders.SubmissionStatusFilter
-
-import javax.inject.{Inject, Singleton}
-import scala.concurrent.ExecutionContext
+import uk.gov.hmrc.apiplatform.modules.submissions.controllers.models.AnswersViewModel._
+import uk.gov.hmrc.apiplatform.modules.submissions.domain.models._
+import uk.gov.hmrc.apiplatform.modules.submissions.services.{RequestProductionCredentials, SubmissionService}
+import uk.gov.hmrc.apiplatform.modules.submissions.views.html._
+import uk.gov.hmrc.thirdpartydeveloperfrontend.config.{ApplicationConfig, ErrorHandler}
+import uk.gov.hmrc.thirdpartydeveloperfrontend.connectors.ApmConnector
 import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.ApplicationController
 import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.checkpages.CanUseCheckActions
-import uk.gov.hmrc.apiplatform.modules.submissions.domain.models._
-import uk.gov.hmrc.apiplatform.modules.submissions.services.SubmissionService
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.ApplicationId
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.controllers.BadRequestWithErrorMessage
-import uk.gov.hmrc.apiplatform.modules.submissions.services.RequestProductionCredentials
-import uk.gov.hmrc.apiplatform.modules.submissions.controllers.models.AnswersViewModel._
+import uk.gov.hmrc.thirdpartydeveloperfrontend.service.{ApplicationActionService, ApplicationService, SessionService}
 
 object CheckAnswersController {
   case class ProdCredsRequestReceivedViewModel(appId: ApplicationId, requesterIsResponsibleIndividual: Boolean)
@@ -55,40 +53,49 @@ class CheckAnswersController @Inject() (
     val submissionService: SubmissionService,
     requestProductionCredentials: RequestProductionCredentials,
     checkAnswersView: CheckAnswersView,
-    prodCredsRequestReceivedView: ProductionCredentialsRequestReceivedView)
-    (implicit val ec: ExecutionContext, val appConfig: ApplicationConfig)
-  extends ApplicationController(mcc)
-     with CanUseCheckActions
-     with EitherTHelper[String]
-     with SubmissionActionBuilders {
+    prodCredsRequestReceivedView: ProductionCredentialsRequestReceivedView
+  )(implicit val ec: ExecutionContext,
+    val appConfig: ApplicationConfig
+  ) extends ApplicationController(mcc)
+    with CanUseCheckActions
+    with EitherTHelper[String]
+    with SubmissionActionBuilders {
 
-  import SubmissionActionBuilders.{ApplicationStateFilter,RoleFilter}
+  import SubmissionActionBuilders.{ApplicationStateFilter, RoleFilter}
 
   val redirectToGetProdCreds = (applicationId: ApplicationId) => Redirect(routes.ProdCredsChecklistController.productionCredentialsChecklistPage(applicationId))
 
-   /*, Read/Write and State details */ 
-  def checkAnswersPage(productionAppId: ApplicationId) = withApplicationAndSubmissionInSpecifiedState(ApplicationStateFilter.inTesting, RoleFilter.isAdminRole, SubmissionStatusFilter.answeredCompletely)(redirectToGetProdCreds(productionAppId))(productionAppId) { implicit request =>
+  /*, Read/Write and State details */
+  def checkAnswersPage(productionAppId: ApplicationId) = withApplicationAndSubmissionInSpecifiedState(
+    ApplicationStateFilter.inTesting,
+    RoleFilter.isAdminRole,
+    SubmissionStatusFilter.answeredCompletely
+  )(redirectToGetProdCreds(productionAppId))(productionAppId) { implicit request =>
     submissionService.fetchLatestExtendedSubmission(productionAppId).map(_ match {
       case Some(extSubmission) => {
-        val viewModel = convertSubmissionToViewModel(extSubmission)(request.application.id, request.application.name)
-        val maybePreviousInstance = extSubmission.submission.instances.tail.headOption // previous instance, if there was one
+        val viewModel                   = convertSubmissionToViewModel(extSubmission)(request.application.id, request.application.name)
+        val maybePreviousInstance       = extSubmission.submission.instances.tail.headOption // previous instance, if there was one
         val previousInstanceWasDeclined = maybePreviousInstance.map(_.isDeclined).getOrElse(false)
         Ok(checkAnswersView(viewModel, previousInstanceWasDeclined, request.msgRequest.flash.get("error")))
       }
-      case None => BadRequestWithErrorMessage("No submission and/or application found")
+      case None                => BadRequestWithErrorMessage("No submission and/or application found")
     })
   }
 
-  def checkAnswersAction(productionAppId: ApplicationId) = withApplicationAndSubmissionInSpecifiedState(ApplicationStateFilter.inTesting, RoleFilter.isAdminRole, SubmissionStatusFilter.answeredCompletely)(redirectToGetProdCreds(productionAppId))(productionAppId) { implicit request =>
+  def checkAnswersAction(productionAppId: ApplicationId) = withApplicationAndSubmissionInSpecifiedState(
+    ApplicationStateFilter.inTesting,
+    RoleFilter.isAdminRole,
+    SubmissionStatusFilter.answeredCompletely
+  )(redirectToGetProdCreds(productionAppId))(productionAppId) { implicit request =>
     val responsibleIndividualIsRequesterId = request.submission.questionIdsOfInterest.responsibleIndividualIsRequesterId
-    val requesterIsResponsibleIndividual = request.submission.latestInstance.answersToQuestions.get(responsibleIndividualIsRequesterId) match {
+    val requesterIsResponsibleIndividual   = request.submission.latestInstance.answersToQuestions.get(responsibleIndividualIsRequesterId) match {
       case Some(SingleChoiceAnswer(answer)) => answer == "Yes"
-      case _ => false
+      case _                                => false
     }
     requestProductionCredentials
       .requestProductionCredentials(productionAppId, request.developerSession, requesterIsResponsibleIndividual)
       .map(_ match {
-        case Right(app) => {
+        case Right(app)                 => {
           val viewModel = ProdCredsRequestReceivedViewModel(productionAppId, requesterIsResponsibleIndividual)
           Ok(prodCredsRequestReceivedView(viewModel))
         }

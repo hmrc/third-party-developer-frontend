@@ -17,18 +17,16 @@
 package uk.gov.hmrc.thirdpartydeveloperfrontend.mocks.service
 
 import java.util.UUID
+import scala.concurrent.Future.{failed, successful}
+
+import org.mockito.{ArgumentMatchersSugar, MockitoSugar}
 
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain._
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.apidefinitions.ApiIdentifier
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.DeveloperSession
-import org.mockito.{ArgumentMatchersSugar, MockitoSugar}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.service.ApplicationService
-
-import scala.concurrent.Future.{failed, successful}
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.apidefinitions.ApiIdentifier
-import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.TestApplications
-import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.CollaboratorTracker
-import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.LocalUserIdTracker
+import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.{CollaboratorTracker, LocalUserIdTracker, TestApplications}
 
 trait ApplicationServiceMock extends MockitoSugar with ArgumentMatchersSugar with TestApplications with CollaboratorTracker with LocalUserIdTracker {
   val applicationServiceMock = mock[ApplicationService]
@@ -47,7 +45,6 @@ trait ApplicationServiceMock extends MockitoSugar with ArgumentMatchersSugar wit
 
   def fetchByApplicationIdReturnsNone(id: ApplicationId) =
     when(applicationServiceMock.fetchByApplicationId(eqTo(id))(*)).thenReturn(successful(None))
-
 
   def fetchCredentialsReturns(application: Application, tokens: ApplicationToken): Unit =
     when(applicationServiceMock.fetchCredentials(eqTo(application))(*)).thenReturn(successful(tokens))
@@ -90,7 +87,7 @@ trait ApplicationServiceMock extends MockitoSugar with ArgumentMatchersSugar wit
 
   def givenAddClientSecretReturns(application: Application, actor: CollaboratorActor) = {
     val newSecretId = UUID.randomUUID().toString
-    val newSecret = UUID.randomUUID().toString
+    val newSecret   = UUID.randomUUID().toString
 
     when(applicationServiceMock.addClientSecret(eqTo(application), eqTo(actor))(*))
       .thenReturn(successful((newSecretId, newSecret)))

@@ -16,32 +16,35 @@
 
 package views
 
-import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.{EditApplicationForm, GroupedSubscriptions, PageData}
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications._
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.LoggedInState
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.controllers.ApplicationViewModel
-import org.jsoup.Jsoup
-import org.jsoup.nodes.Document
-import play.api.mvc.AnyContentAsEmpty
-import play.api.test.FakeRequest
-import play.twirl.api.Html
-import uk.gov.hmrc.thirdpartydeveloperfrontend.builder.{DeveloperBuilder, DeveloperSessionBuilder}
-import uk.gov.hmrc.thirdpartydeveloperfrontend.utils._
-import views.helper.CommonViewSpec
-import views.html.ManageSubscriptionsView
-
 import java.time.LocalDateTime
 import scala.collection.JavaConverters._
 
+import org.jsoup.Jsoup
+import org.jsoup.nodes.Document
+import views.helper.CommonViewSpec
+import views.html.ManageSubscriptionsView
+
+import play.api.mvc.AnyContentAsEmpty
+import play.api.test.FakeRequest
+import play.twirl.api.Html
+
+import uk.gov.hmrc.thirdpartydeveloperfrontend.builder.{DeveloperBuilder, DeveloperSessionBuilder}
+import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.{EditApplicationForm, GroupedSubscriptions, PageData}
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications._
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.controllers.ApplicationViewModel
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.LoggedInState
+import uk.gov.hmrc.thirdpartydeveloperfrontend.utils._
+
 class SubscriptionsSpec extends CommonViewSpec
-  with WithCSRFAddToken
-  with LocalUserIdTracker
-  with DeveloperSessionBuilder
-  with DeveloperBuilder {
+    with WithCSRFAddToken
+    with LocalUserIdTracker
+    with DeveloperSessionBuilder
+    with DeveloperBuilder {
 
   val manageSubscriptions = app.injector.instanceOf[ManageSubscriptionsView]
 
   trait Setup {
+
     def elementExistsByText(doc: Document, elementType: String, elementText: String): Boolean = {
       doc.select(elementType).asScala.exists(node => node.text.trim == elementText)
     }
@@ -68,10 +71,11 @@ class SubscriptionsSpec extends CommonViewSpec
   "Subscriptions page" should {
     val developer = buildDeveloperSession(loggedInState = LoggedInState.LOGGED_IN, buildDeveloperWithRandomId("Test", "Test", "Test", None))
 
-    val productionApplicationPendingGatekeeperApproval = buildApplication(ApplicationState.pendingGatekeeperApproval("somebody@example.com", "somebody"), Environment.PRODUCTION)
-    val productionApplicationPendingRequesterVerification = buildApplication(ApplicationState.pendingRequesterVerification("somebody@example.com", "somebody", ""), Environment.PRODUCTION)
-    val productionApplication = buildApplication(ApplicationState.production("somebody@example.com", "somebody", ""), Environment.PRODUCTION)
-    val productionApplicationTesting = buildApplication(ApplicationState.testing, Environment.PRODUCTION)
+    val productionApplicationPendingGatekeeperApproval    = buildApplication(ApplicationState.pendingGatekeeperApproval("somebody@example.com", "somebody"), Environment.PRODUCTION)
+    val productionApplicationPendingRequesterVerification =
+      buildApplication(ApplicationState.pendingRequesterVerification("somebody@example.com", "somebody", ""), Environment.PRODUCTION)
+    val productionApplication                             = buildApplication(ApplicationState.production("somebody@example.com", "somebody", ""), Environment.PRODUCTION)
+    val productionApplicationTesting                      = buildApplication(ApplicationState.testing, Environment.PRODUCTION)
 
     val sandboxApplicationTesting = buildApplication(ApplicationState.testing, Environment.SANDBOX)
 

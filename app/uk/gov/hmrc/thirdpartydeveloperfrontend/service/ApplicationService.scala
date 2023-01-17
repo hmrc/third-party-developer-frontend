@@ -16,24 +16,22 @@
 
 package uk.gov.hmrc.thirdpartydeveloperfrontend.service
 
-import uk.gov.hmrc.thirdpartydeveloperfrontend.connectors._
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain._
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.apidefinitions._
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications._
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.Environment.{PRODUCTION, SANDBOX}
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.connectors.{DeskproTicket, TicketResult}
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.{DeveloperSession, UserId}
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.subscriptions._
-
+import java.time.{Clock, LocalDateTime}
 import javax.inject.{Inject, Singleton}
-import uk.gov.hmrc.thirdpartydeveloperfrontend.service.AuditAction.{AccountDeletionRequested, ApplicationDeletionRequested, Remove2SVRequested, UserLogoutSurveyCompleted}
+import scala.concurrent.{ExecutionContext, Future}
+
 import uk.gov.hmrc.http.{ForbiddenException, HeaderCarrier}
 import uk.gov.hmrc.play.audit.http.connector.AuditResult
 
-import scala.concurrent.{ExecutionContext, Future}
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.connectors.AddTeamMemberRequest
-
-import java.time.{Clock, LocalDateTime}
+import uk.gov.hmrc.thirdpartydeveloperfrontend.connectors._
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain._
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.apidefinitions._
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.Environment.{PRODUCTION, SANDBOX}
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications._
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.connectors.{AddTeamMemberRequest, DeskproTicket, TicketResult}
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.{DeveloperSession, UserId}
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.subscriptions._
+import uk.gov.hmrc.thirdpartydeveloperfrontend.service.AuditAction.{AccountDeletionRequested, ApplicationDeletionRequested, Remove2SVRequested, UserLogoutSurveyCompleted}
 
 @Singleton
 class ApplicationService @Inject() (
@@ -47,7 +45,8 @@ class ApplicationService @Inject() (
     productionApplicationConnector: ThirdPartyApplicationProductionConnector,
     auditService: AuditService,
     clock: Clock
-)(implicit val ec: ExecutionContext) {
+  )(implicit val ec: ExecutionContext
+  ) {
 
   def createForUser(createApplicationRequest: CreateApplicationRequest)(implicit hc: HeaderCarrier): Future[ApplicationCreatedResponse] =
     connectorWrapper.forEnvironment(createApplicationRequest.environment).thirdPartyApplicationConnector.create(createApplicationRequest)
@@ -56,17 +55,22 @@ class ApplicationService @Inject() (
     connectorWrapper.forEnvironment(updateApplicationRequest.environment).thirdPartyApplicationConnector.update(updateApplicationRequest.id, updateApplicationRequest)
 
   def updatePrivacyPolicyLocation(application: Application, userId: UserId, newLocation: PrivacyPolicyLocation)(implicit hc: HeaderCarrier): Future[ApplicationUpdateSuccessful] = {
-    val request = ChangeProductionApplicationPrivacyPolicyLocation(userId,  LocalDateTime.now(clock), newLocation)
+    val request = ChangeProductionApplicationPrivacyPolicyLocation(userId, LocalDateTime.now(clock), newLocation)
     connectorWrapper.forEnvironment(application.deployedTo).thirdPartyApplicationConnector.applicationUpdate(application.id, request)
   }
 
   def updateResponsibleIndividual(application: Application, userId: UserId, fullName: String, emailAddress: String)(implicit hc: HeaderCarrier): Future[ApplicationUpdateSuccessful] = {
-    val request = ChangeResponsibleIndividualToSelf(userId,  LocalDateTime.now(clock), fullName, emailAddress)
+    val request = ChangeResponsibleIndividualToSelf(userId, LocalDateTime.now(clock), fullName, emailAddress)
     connectorWrapper.forEnvironment(application.deployedTo).thirdPartyApplicationConnector.applicationUpdate(application.id, request)
   }
 
-  def updateTermsConditionsLocation(application: Application, userId: UserId, newLocation: TermsAndConditionsLocation)(implicit hc: HeaderCarrier): Future[ApplicationUpdateSuccessful] = {
-    val request = ChangeProductionApplicationTermsAndConditionsLocation(userId,  LocalDateTime.now(clock), newLocation)
+  def updateTermsConditionsLocation(
+      application: Application,
+      userId: UserId,
+      newLocation: TermsAndConditionsLocation
+    )(implicit hc: HeaderCarrier
+    ): Future[ApplicationUpdateSuccessful] = {
+    val request = ChangeProductionApplicationTermsAndConditionsLocation(userId, LocalDateTime.now(clock), newLocation)
     connectorWrapper.forEnvironment(application.deployedTo).thirdPartyApplicationConnector.applicationUpdate(application.id, request)
   }
 
@@ -80,8 +84,15 @@ class ApplicationService @Inject() (
     connectorWrapper.productionApplicationConnector.applicationUpdate(applicationId, request)
   }
 
-  def verifyResponsibleIndividual(application: Application, userId: UserId, requesterName: String, riName: String, riEmail: String)(implicit hc: HeaderCarrier): Future[ApplicationUpdateSuccessful] = {
-    val request = VerifyResponsibleIndividual(userId,  LocalDateTime.now(clock), requesterName, riName, riEmail)
+  def verifyResponsibleIndividual(
+      application: Application,
+      userId: UserId,
+      requesterName: String,
+      riName: String,
+      riEmail: String
+    )(implicit hc: HeaderCarrier
+    ): Future[ApplicationUpdateSuccessful] = {
+    val request = VerifyResponsibleIndividual(userId, LocalDateTime.now(clock), requesterName, riName, riEmail)
     connectorWrapper.forEnvironment(application.deployedTo).thirdPartyApplicationConnector.applicationUpdate(application.id, request)
   }
 
@@ -92,8 +103,8 @@ class ApplicationService @Inject() (
   def fetchCredentials(application: Application)(implicit hc: HeaderCarrier): Future[ApplicationToken] =
     connectorWrapper.forEnvironment(application.deployedTo).thirdPartyApplicationConnector.fetchCredentials(application.id)
 
-  type ApiMap[V] = Map[ApiContext, Map[ApiVersion, V]]
-  type FieldMap[V] = ApiMap[Map[FieldName,V]]
+  type ApiMap[V]   = Map[ApiContext, Map[ApiVersion, V]]
+  type FieldMap[V] = ApiMap[Map[FieldName, V]]
 
   def subscribeToApi(application: Application, apiIdentifier: ApiIdentifier)(implicit hc: HeaderCarrier): Future[ApplicationUpdateSuccessful] = {
     subscriptionService.subscribeToApi(application, apiIdentifier)
@@ -105,7 +116,7 @@ class ApplicationService @Inject() (
   }
 
   def isSubscribedToApi(applicationId: ApplicationId, apiIdentifier: ApiIdentifier)(implicit hc: HeaderCarrier): Future[Boolean] = {
-    subscriptionService.isSubscribedToApi(applicationId,apiIdentifier)
+    subscriptionService.isSubscribedToApi(applicationId, apiIdentifier)
   }
 
   def addClientSecret(application: Application, actor: CollaboratorActor)(implicit hc: HeaderCarrier): Future[(String, String)] = {
@@ -124,34 +135,34 @@ class ApplicationService @Inject() (
 
   def requestUplift(applicationId: ApplicationId, applicationName: String, requestedBy: DeveloperSession)(implicit hc: HeaderCarrier): Future[ApplicationUpliftSuccessful] = {
     for {
-      result <- connectorWrapper.productionApplicationConnector.requestUplift(applicationId, UpliftRequest(applicationName, requestedBy.email))
+      result      <- connectorWrapper.productionApplicationConnector.requestUplift(applicationId, UpliftRequest(applicationName, requestedBy.email))
       upliftTicket = DeskproTicket.createForUplift(requestedBy.displayedName, requestedBy.email, applicationName, applicationId)
-      _ = deskproConnector.createTicket(upliftTicket)
+      _            = deskproConnector.createTicket(upliftTicket)
     } yield result
   }
 
   def requestPrincipalApplicationDeletion(requester: DeveloperSession, application: Application)(implicit hc: HeaderCarrier): Future[TicketResult] = {
 
-    val requesterName = requester.displayedName
+    val requesterName  = requester.displayedName
     val requesterEmail = requester.email
-    val environment = application.deployedTo
-    val requesterRole = roleForApplication(application, requesterEmail)
-    val appId = application.id
+    val environment    = application.deployedTo
+    val requesterRole  = roleForApplication(application, requesterEmail)
+    val appId          = application.id
 
     if (environment.isSandbox || requesterRole.isAdministrator) {
       val deskproTicket = DeskproTicket.createForPrincipalApplicationDeletion(requesterName, requesterEmail, requesterRole, environment, application.name, appId)
 
       for {
         ticketResponse <- deskproConnector.createTicket(deskproTicket)
-        _ <- auditService.audit(
-          ApplicationDeletionRequested,
-          Map(
-            "appId" -> appId.value,
-            "requestedByName" -> requesterName,
-            "requestedByEmailAddress" -> requesterEmail,
-            "timestamp" -> LocalDateTime.now(clock).toString
-          )
-        )
+        _              <- auditService.audit(
+                            ApplicationDeletionRequested,
+                            Map(
+                              "appId"                   -> appId.value,
+                              "requestedByName"         -> requesterName,
+                              "requestedByEmailAddress" -> requesterEmail,
+                              "timestamp"               -> LocalDateTime.now(clock).toString
+                            )
+                          )
       } yield ticketResponse
     } else {
       Future.failed(new ForbiddenException("Developer cannot request to delete a production application"))
@@ -161,10 +172,10 @@ class ApplicationService @Inject() (
   def deleteSubordinateApplication(requester: DeveloperSession, application: Application)(implicit hc: HeaderCarrier): Future[ApplicationUpdateSuccessful] = {
 
     val requesterEmail = requester.email
-    val environment = application.deployedTo
-    val requesterRole = roleForApplication(application, requesterEmail)
-    val reasons = "Subordinate application deleted by DevHub user"
-    val instigator = requester.developer.userId
+    val environment    = application.deployedTo
+    val requesterRole  = roleForApplication(application, requesterEmail)
+    val reasons        = "Subordinate application deleted by DevHub user"
+    val instigator     = requester.developer.userId
 
     if (environment == Environment.SANDBOX && requesterRole == CollaboratorRole.ADMINISTRATOR && application.access.accessType == AccessType.STANDARD) {
 
@@ -178,7 +189,6 @@ class ApplicationService @Inject() (
 
   private def roleForApplication(application: Application, email: String) =
     application.role(email).getOrElse(throw new ApplicationNotFound)
-
 
   def verify(verificationCode: String)(implicit hc: HeaderCarrier): Future[ApplicationVerificationResponse] = {
     connectorWrapper.productionApplicationConnector.verify(verificationCode)
@@ -197,10 +207,10 @@ class ApplicationService @Inject() (
       .filterNot(_ == teamMemberToRemove)
 
     for {
-      otherAdmins <- developerConnector.fetchByEmails(otherAdminEmails)
+      otherAdmins  <- developerConnector.fetchByEmails(otherAdminEmails)
       adminsToEmail = otherAdmins.filter(_.verified.contains(true)).map(_.email).toSet
-      connectors = connectorWrapper.forEnvironment(app.deployedTo)
-      response <- connectors.thirdPartyApplicationConnector.removeTeamMember(app.id, teamMemberToRemove, requestingEmail, adminsToEmail)
+      connectors    = connectorWrapper.forEnvironment(app.deployedTo)
+      response     <- connectors.thirdPartyApplicationConnector.removeTeamMember(app.id, teamMemberToRemove, requestingEmail, adminsToEmail)
     } yield response
   }
 
@@ -209,7 +219,7 @@ class ApplicationService @Inject() (
 
     for {
       ticketResponse <- deskproConnector.createTicket(deleteDeveloperTicket)
-      _ <- auditService.audit(AccountDeletionRequested, Map("requestedByName" -> name, "requestedByEmailAddress" -> email, "timestamp" -> LocalDateTime.now(clock).toString))
+      _              <- auditService.audit(AccountDeletionRequested, Map("requestedByName" -> name, "requestedByEmailAddress" -> email, "timestamp" -> LocalDateTime.now(clock).toString))
     } yield ticketResponse
   }
 
@@ -218,7 +228,7 @@ class ApplicationService @Inject() (
 
     for {
       ticketResponse <- deskproConnector.createTicket(remove2SVTicket)
-      _ <- auditService.audit(Remove2SVRequested, Map("requestedByEmailAddress" -> email, "timestamp" -> LocalDateTime.now(clock).toString))
+      _              <- auditService.audit(Remove2SVRequested, Map("requestedByEmailAddress" -> email, "timestamp" -> LocalDateTime.now(clock).toString))
     } yield ticketResponse
   }
 
@@ -234,11 +244,11 @@ class ApplicationService @Inject() (
     auditService.audit(
       UserLogoutSurveyCompleted,
       Map(
-        "userEmailAddress" -> email,
-        "userName" -> name,
-        "satisfactionRating" -> rating,
+        "userEmailAddress"       -> email,
+        "userName"               -> name,
+        "satisfactionRating"     -> rating,
         "improvementSuggestions" -> improvementSuggestions,
-        "timestamp" -> LocalDateTime.now(clock).toString
+        "timestamp"              -> LocalDateTime.now(clock).toString
       )
     )
   }
@@ -247,7 +257,7 @@ class ApplicationService @Inject() (
 
     def createDeskproTicket(application: Application, newApplicationName: String, requesterName: String, requesterEmail: String) = {
       val previousAppName = application.name
-      val appId = application.id
+      val appId           = application.id
 
       DeskproTicket.createForRequestChangeOfProductionApplicationName(requesterName, requesterEmail, previousAppName, newApplicationName, appId)
     }
@@ -267,36 +277,46 @@ class ApplicationService @Inject() (
 }
 
 object ApplicationService {
-  val filterSubscriptionsForUplift: (Set[ApiIdentifier]) => (Map[ApplicationId, Set[ApiIdentifier]]) => Set[ApplicationId] = 
-    (upliftableApiIdentifiers) => (appSubscriptions) =>
-      appSubscriptions
-      // All non-test non-example subscribed apis are upliftable AND at least one subscribed apis is present
-      .mapValues(apis => apis.subsetOf(upliftableApiIdentifiers) && apis.nonEmpty)
-      .filter{ case (_, isUpliftable) => isUpliftable}
-      .keySet
 
-  val isTestSupportOrExample: (Map[ApiContext, ApiData]) => (ApiIdentifier) => Boolean = 
-    (apis) => (id) => apis.get(id.context) match {
-      case None => false
-      case Some(api) => api.isTestSupport || api.categories.contains(ApiCategory.EXAMPLE)
-    }
+  val filterSubscriptionsForUplift: (Set[ApiIdentifier]) => (Map[ApplicationId, Set[ApiIdentifier]]) => Set[ApplicationId] =
+    (upliftableApiIdentifiers) =>
+      (appSubscriptions) =>
+        appSubscriptions
+          // All non-test non-example subscribed apis are upliftable AND at least one subscribed apis is present
+          .mapValues(apis => apis.subsetOf(upliftableApiIdentifiers) && apis.nonEmpty)
+          .filter { case (_, isUpliftable) => isUpliftable }
+          .keySet
+
+  val isTestSupportOrExample: (Map[ApiContext, ApiData]) => (ApiIdentifier) => Boolean =
+    (apis) =>
+      (id) =>
+        apis.get(id.context) match {
+          case None      => false
+          case Some(api) => api.isTestSupport || api.categories.contains(ApiCategory.EXAMPLE)
+        }
 
   val filterSubscriptionsToRemoveTestAndExampleApis: (Map[ApiContext, ApiData]) => (Map[ApplicationId, Set[ApiIdentifier]]) => Map[ApplicationId, Set[ApiIdentifier]] =
-    (apis) => (subscriptionsByApplication) => {
-      subscriptionsByApplication.flatMap { 
-        case (id, subs) =>
-          val filteredSubs = subs.filterNot(isTestSupportOrExample(apis))
-          if(filteredSubs.isEmpty) Map.empty[ApplicationId, Set[ApiIdentifier]] else Map(id -> filteredSubs)
+    (apis) =>
+      (subscriptionsByApplication) => {
+        subscriptionsByApplication.flatMap {
+          case (id, subs) =>
+            val filteredSubs = subs.filterNot(isTestSupportOrExample(apis))
+            if (filteredSubs.isEmpty) Map.empty[ApplicationId, Set[ApiIdentifier]] else Map(id -> filteredSubs)
+        }
       }
-    }
 
   trait ApplicationConnector {
     def create(request: CreateApplicationRequest)(implicit hc: HeaderCarrier): Future[ApplicationCreatedResponse]
     def update(applicationId: ApplicationId, request: UpdateApplicationRequest)(implicit hc: HeaderCarrier): Future[ApplicationUpdateSuccessful]
     def fetchByTeamMember(userId: UserId)(implicit hc: HeaderCarrier): Future[Seq[ApplicationWithSubscriptionIds]]
-    def removeTeamMember(applicationId: ApplicationId, teamMemberToDelete: String, requestingEmail: String, adminsToEmail: Set[String])(
-        implicit hc: HeaderCarrier
-    ): Future[ApplicationUpdateSuccessful]
+
+    def removeTeamMember(
+        applicationId: ApplicationId,
+        teamMemberToDelete: String,
+        requestingEmail: String,
+        adminsToEmail: Set[String]
+      )(implicit hc: HeaderCarrier
+      ): Future[ApplicationUpdateSuccessful]
     def fetchApplicationById(id: ApplicationId)(implicit hc: HeaderCarrier): Future[Option[Application]]
     def fetchCredentials(id: ApplicationId)(implicit hc: HeaderCarrier): Future[ApplicationToken]
     def requestUplift(applicationId: ApplicationId, upliftRequest: UpliftRequest)(implicit hc: HeaderCarrier): Future[ApplicationUpliftSuccessful]

@@ -16,24 +16,26 @@
 
 package uk.gov.hmrc.thirdpartydeveloperfrontend.mocks.connectors
 
-import uk.gov.hmrc.thirdpartydeveloperfrontend.connectors.ThirdPartyDeveloperConnector
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.{Developer, UserId}
-import org.mockito.{ArgumentMatchersSugar, MockitoSugar}
-
 import scala.concurrent.Future.successful
 
+import org.mockito.{ArgumentMatchersSugar, MockitoSugar}
+
+import uk.gov.hmrc.thirdpartydeveloperfrontend.connectors.ThirdPartyDeveloperConnector
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.{Developer, UserId}
+
 trait ThirdPartyDeveloperConnectorMockModule extends MockitoSugar with ArgumentMatchersSugar {
-  
 
   object TPDMock {
     val aMock = mock[ThirdPartyDeveloperConnector]
 
     object FindUserId {
+
       def thenReturn(email: String)(userId: UserId) =
         when(aMock.findUserId(eqTo(email))(*)).thenReturn(successful(Some(ThirdPartyDeveloperConnector.CoreUserDetails(email, userId))))
     }
 
     object FetchDeveloper {
+
       def thenReturn(userId: UserId)(developer: Option[Developer]) =
         when(aMock.fetchDeveloper(eqTo(userId))(*)).thenReturn(successful(developer))
     }

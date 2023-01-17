@@ -16,32 +16,35 @@
 
 package uk.gov.hmrc.thirdpartydeveloperfrontend.service
 
-import uk.gov.hmrc.thirdpartydeveloperfrontend.config.ApplicationConfig
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.{DeveloperSession, LoggedInState}
+import scala.concurrent.ExecutionContext
+import scala.concurrent.ExecutionContext.Implicits.global
+
 import org.mockito.ArgumentMatcher
-import uk.gov.hmrc.thirdpartydeveloperfrontend.service.AuditAction.{ApplicationUpliftRequestDeniedDueToInvalidCredentials, PasswordChangeFailedDueToInvalidCredentials}
+
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.play.audit.http.connector.AuditConnector
 import uk.gov.hmrc.play.audit.model.DataEvent
-import uk.gov.hmrc.thirdpartydeveloperfrontend.builder._
-import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.{AsyncHmrcSpec, LocalUserIdTracker}
 
-import scala.concurrent.ExecutionContext
-import scala.concurrent.ExecutionContext.Implicits.global
+import uk.gov.hmrc.thirdpartydeveloperfrontend.builder._
+import uk.gov.hmrc.thirdpartydeveloperfrontend.config.ApplicationConfig
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.{DeveloperSession, LoggedInState}
+import uk.gov.hmrc.thirdpartydeveloperfrontend.service.AuditAction.{ApplicationUpliftRequestDeniedDueToInvalidCredentials, PasswordChangeFailedDueToInvalidCredentials}
+import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.{AsyncHmrcSpec, LocalUserIdTracker}
 
 class AuditServiceSpec extends AsyncHmrcSpec with LocalUserIdTracker with DeveloperSessionBuilder with DeveloperBuilder {
 
   val developer: DeveloperSession = buildDeveloperSession(loggedInState = LoggedInState.LOGGED_IN, buildDeveloper("email@example.com", "Paul", "Smith", None))
 
   trait Setup {
+
     implicit val hc = HeaderCarrier().withExtraHeaders(
       "X-email-address" -> developer.email,
-      "X-name" -> developer.displayedName
+      "X-name"          -> developer.displayedName
     )
 
     val mockAuditConnector = mock[AuditConnector]
-    val mockAppConfig = mock[ApplicationConfig]
-    val underTest = new AuditService(mockAuditConnector, mockAppConfig)
+    val mockAppConfig      = mock[ApplicationConfig]
+    val underTest          = new AuditService(mockAuditConnector, mockAppConfig)
 
     def verifyPasswordChangeFailedAuditEventSent(tags: Map[String, String])(implicit hc: HeaderCarrier) = {
 
@@ -68,9 +71,9 @@ class AuditServiceSpec extends AsyncHmrcSpec with LocalUserIdTracker with Develo
         auditSource = "third-party-developer-frontend",
         auditType = "ApplicationUpliftRequestDeniedDueToInvalidCredentials",
         tags = Map(
-          "transactionName" -> "Application uplift to production request has been denied, due to invalid credentials",
+          "transactionName"   -> "Application uplift to production request has been denied, due to invalid credentials",
           "developerFullName" -> developer.displayedName,
-          "developerEmail" -> developer.email
+          "developerEmail"    -> developer.email
         ),
         detail = Map(
           "applicationId" -> "123456"
@@ -99,12 +102,13 @@ class AuditServiceSpec extends AsyncHmrcSpec with LocalUserIdTracker with Develo
 
   private def isSameDataEvent(expected: DataEvent) =
     new ArgumentMatcher[DataEvent] {
+
       override def matches(actual: DataEvent) = actual match {
         case de: DataEvent =>
           de.auditSource == expected.auditSource &&
-            de.auditType == expected.auditType &&
-            expected.tags.toSet.subsetOf(de.tags.toSet) &&
-            expected.detail.toSet.subsetOf(de.detail.toSet)
+          de.auditType == expected.auditType &&
+          expected.tags.toSet.subsetOf(de.tags.toSet) &&
+          expected.detail.toSet.subsetOf(de.detail.toSet)
       }
     }
 }

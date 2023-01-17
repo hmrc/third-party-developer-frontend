@@ -16,18 +16,20 @@
 
 package uk.gov.hmrc.thirdpartydeveloperfrontend.service
 
+import scala.concurrent.ExecutionContext.Implicits.global
+import scala.concurrent.Future
+
+import play.api.test.FakeRequest
+import uk.gov.hmrc.http.HeaderCarrier
+
 import uk.gov.hmrc.thirdpartydeveloperfrontend.config.ApplicationConfig
 import uk.gov.hmrc.thirdpartydeveloperfrontend.connectors.DeskproConnector
 import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.{SignOutSurveyForm, SupportEnquiryForm}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.connectors.{DeskproTicket, Feedback, TicketCreated, TicketId}
-import play.api.test.FakeRequest
-import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.AsyncHmrcSpec
 
-import scala.concurrent.ExecutionContext.Implicits.global
-import scala.concurrent.Future
-
 class DeskproServiceSpec extends AsyncHmrcSpec {
+
   val underTest = new DeskproService(
     mock[DeskproConnector],
     mock[ApplicationConfig]
@@ -42,7 +44,7 @@ class DeskproServiceSpec extends AsyncHmrcSpec {
         when(underTest.deskproConnector.createFeedback(any[Feedback])(*)).thenReturn(Future(TicketId(123)))
 
         implicit val fakeRequest = FakeRequest()
-        implicit val hc = HeaderCarrier()
+        implicit val hc          = HeaderCarrier()
 
         val form = SignOutSurveyForm(Some(5), "Nothing to report", "John Smith", "john@example.com", isJavascript = true)
 
@@ -58,7 +60,7 @@ class DeskproServiceSpec extends AsyncHmrcSpec {
         when(underTest.deskproConnector.createFeedback(any[Feedback])(*)).thenReturn(Future(TicketId(123)))
 
         implicit val fakeRequest = FakeRequest()
-        implicit val hc = HeaderCarrier()
+        implicit val hc          = HeaderCarrier()
 
         val form = SignOutSurveyForm(Some(5), "", "John Smith", "john@example.com", isJavascript = true)
 
@@ -77,7 +79,7 @@ class DeskproServiceSpec extends AsyncHmrcSpec {
         when(underTest.deskproConnector.createTicket(any[DeskproTicket])(*)).thenReturn(Future(TicketCreated))
 
         implicit val fakeRequest = FakeRequest()
-        implicit val hc = HeaderCarrier()
+        implicit val hc          = HeaderCarrier()
 
         val form = SupportEnquiryForm("my name", "myemail@example.com", "my comments")
 

@@ -16,19 +16,20 @@
 
 package uk.gov.hmrc.thirdpartydeveloperfrontend.controllers
 
-import uk.gov.hmrc.thirdpartydeveloperfrontend.config.ApplicationConfig
-import uk.gov.hmrc.thirdpartydeveloperfrontend.config.ErrorHandler
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.connectors.TicketId
 import javax.inject.{Inject, Singleton}
-import play.api.libs.crypto.CookieSigner
-import play.api.mvc.{AnyContent, MessagesControllerComponents, MessagesRequest}
-import uk.gov.hmrc.thirdpartydeveloperfrontend.security.ExtendedDevHubAuthorization
-import uk.gov.hmrc.thirdpartydeveloperfrontend.service.{ApplicationService, DeskproService, SessionService}
-import views.html.{LogoutConfirmationView, SignoutSurveyView}
-import uk.gov.hmrc.apiplatform.modules.common.services.ApplicationLogger
-
 import scala.concurrent.{ExecutionContext, Future}
 import scala.util.Failure
+
+import views.html.{LogoutConfirmationView, SignoutSurveyView}
+
+import play.api.libs.crypto.CookieSigner
+import play.api.mvc.{AnyContent, MessagesControllerComponents, MessagesRequest}
+
+import uk.gov.hmrc.apiplatform.modules.common.services.ApplicationLogger
+import uk.gov.hmrc.thirdpartydeveloperfrontend.config.{ApplicationConfig, ErrorHandler}
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.connectors.TicketId
+import uk.gov.hmrc.thirdpartydeveloperfrontend.security.ExtendedDevHubAuthorization
+import uk.gov.hmrc.thirdpartydeveloperfrontend.service.{ApplicationService, DeskproService, SessionService}
 
 @Singleton
 class UserLogoutAccount @Inject() (
@@ -40,8 +41,9 @@ class UserLogoutAccount @Inject() (
     val cookieSigner: CookieSigner,
     signoutSurveyView: SignoutSurveyView,
     logoutConfirmationView: LogoutConfirmationView
-)(implicit val ec: ExecutionContext, val appConfig: ApplicationConfig)
-    extends LoggedInController(mcc)
+  )(implicit val ec: ExecutionContext,
+    val appConfig: ApplicationConfig
+  ) extends LoggedInController(mcc)
     with ExtendedDevHubAuthorization
     with ApplicationLogger {
 
@@ -57,7 +59,7 @@ class UserLogoutAccount @Inject() (
         val res: Future[TicketId] = deskproService.submitSurvey(form)
         res.onComplete {
           case Failure(_) => logger.error("Failed to create deskpro ticket")
-          case _ => ()
+          case _          => ()
         }
 
         applicationService
@@ -65,7 +67,7 @@ class UserLogoutAccount @Inject() (
           .flatMap(_ => {
             Future.successful(Redirect(routes.UserLogoutAccount.logout))
           })
-      case None =>
+      case None       =>
         logger.error("Survey form invalid.")
         Future.successful(Redirect(routes.UserLogoutAccount.logout))
     }

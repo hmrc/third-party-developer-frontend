@@ -16,15 +16,23 @@
 
 package uk.gov.hmrc.thirdpartydeveloperfrontend.controllers
 
+import java.time.LocalDateTime
+import java.util.UUID.randomUUID
+import scala.concurrent.ExecutionContext.Implicits.global
+
 import org.mockito.Mockito
+import views.helper.EnvironmentNameService
+import views.html._
+
 import play.api.mvc.AnyContentAsEmpty
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
+import uk.gov.hmrc.http.HeaderCarrier
+
 import uk.gov.hmrc.apiplatform.modules.uplift.controllers.UpliftJourneySwitch
 import uk.gov.hmrc.apiplatform.modules.uplift.services.GetProductionCredentialsFlowService
 import uk.gov.hmrc.apiplatform.modules.uplift.services.mocks._
 import uk.gov.hmrc.apiplatform.modules.uplift.views.html.BeforeYouStartView
-import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.thirdpartydeveloperfrontend.builder._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.config.ErrorHandler
 import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.addapplication.AddApplication
@@ -32,21 +40,15 @@ import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.mocks.connectors.ApmConnectorMockModule
 import uk.gov.hmrc.thirdpartydeveloperfrontend.mocks.service._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.service.AuditService
-import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.{LocalUserIdTracker, WithCSRFAddToken}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.WithLoggedInSession._
-import views.helper.EnvironmentNameService
-import views.html._
+import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.{LocalUserIdTracker, WithCSRFAddToken}
 
-import java.time.LocalDateTime
-import java.util.UUID.randomUUID
-import scala.concurrent.ExecutionContext.Implicits.global
-
-class EditApplicationNameSpec 
-    extends BaseControllerSpec 
+class EditApplicationNameSpec
+    extends BaseControllerSpec
     with ApplicationActionServiceMock
     with SampleSession
-    with SampleApplication 
-    with SubscriptionTestHelperSugar 
+    with SampleApplication
+    with SubscriptionTestHelperSugar
     with WithCSRFAddToken
     with DeveloperBuilder
     with LocalUserIdTracker {
@@ -54,17 +56,17 @@ class EditApplicationNameSpec
   val tokens: ApplicationToken = ApplicationToken(List(aClientSecret(), aClientSecret()), "token")
 
   trait Setup extends UpliftLogicMock with ApplicationServiceMock with ApmConnectorMockModule with SessionServiceMock with EmailPreferencesServiceMock {
-    val accessTokenSwitchView = app.injector.instanceOf[AccessTokenSwitchView]
+    val accessTokenSwitchView                     = app.injector.instanceOf[AccessTokenSwitchView]
     val usingPrivilegedApplicationCredentialsView = app.injector.instanceOf[UsingPrivilegedApplicationCredentialsView]
-    val tenDaysWarningView = app.injector.instanceOf[TenDaysWarningView]
-    val addApplicationStartSubordinateView = app.injector.instanceOf[AddApplicationStartSubordinateView]
-    val addApplicationStartPrincipalView = app.injector.instanceOf[AddApplicationStartPrincipalView]
-    val addApplicationSubordinateSuccessView = app.injector.instanceOf[AddApplicationSubordinateSuccessView]
-    val addApplicationNameView = app.injector.instanceOf[AddApplicationNameView]
-    val chooseApplicationToUpliftView = app.injector.instanceOf[ChooseApplicationToUpliftView]
+    val tenDaysWarningView                        = app.injector.instanceOf[TenDaysWarningView]
+    val addApplicationStartSubordinateView        = app.injector.instanceOf[AddApplicationStartSubordinateView]
+    val addApplicationStartPrincipalView          = app.injector.instanceOf[AddApplicationStartPrincipalView]
+    val addApplicationSubordinateSuccessView      = app.injector.instanceOf[AddApplicationSubordinateSuccessView]
+    val addApplicationNameView                    = app.injector.instanceOf[AddApplicationNameView]
+    val chooseApplicationToUpliftView             = app.injector.instanceOf[ChooseApplicationToUpliftView]
 
     val beforeYouStartView: BeforeYouStartView = app.injector.instanceOf[BeforeYouStartView]
-    val sr20UpliftJourneySwitchMock = mock[UpliftJourneySwitch]
+    val sr20UpliftJourneySwitchMock            = mock[UpliftJourneySwitch]
 
     val flowServiceMock = mock[GetProductionCredentialsFlowService]
 

@@ -16,13 +16,14 @@
 
 package uk.gov.hmrc.apiplatform.modules.mfa.models
 
-import enumeratum.{Enum, EnumEntry, PlayJsonEnum}
-import play.api.libs.json.{Json, OFormat}
-import uk.gov.hmrc.play.json.Union
-
 import java.time.LocalDateTime
 import java.util.UUID
 import scala.collection.immutable
+
+import enumeratum.{Enum, EnumEntry, PlayJsonEnum}
+
+import play.api.libs.json.{Json, OFormat}
+import uk.gov.hmrc.play.json.Union
 
 case class MfaId(value: UUID) extends AnyVal
 
@@ -62,19 +63,19 @@ case class AuthenticatorAppMfaDetailSummary(override val id: MfaId, override val
 }
 
 case class SmsMfaDetailSummary(
-  override val id: MfaId = MfaId.random,
-  override val name: String,
-  override val createdOn: LocalDateTime,
-  mobileNumber: String,
-  verified: Boolean = false)
-  extends MfaDetail {
+    override val id: MfaId = MfaId.random,
+    override val name: String,
+    override val createdOn: LocalDateTime,
+    mobileNumber: String,
+    verified: Boolean = false
+  ) extends MfaDetail {
   override val mfaType: MfaType = MfaType.SMS
 }
 
 object MfaDetailFormats {
 
   implicit val authenticatorAppMfaDetailFormat: OFormat[AuthenticatorAppMfaDetailSummary] = Json.format[AuthenticatorAppMfaDetailSummary]
-  implicit val smsMfaDetailSummaryFormat: OFormat[SmsMfaDetailSummary] = Json.format[SmsMfaDetailSummary]
+  implicit val smsMfaDetailSummaryFormat: OFormat[SmsMfaDetailSummary]                    = Json.format[SmsMfaDetailSummary]
 
   implicit val mfaDetailFormat: OFormat[MfaDetail] = Union.from[MfaDetail]("mfaType")
     .and[AuthenticatorAppMfaDetailSummary](MfaType.AUTHENTICATOR_APP.toString)

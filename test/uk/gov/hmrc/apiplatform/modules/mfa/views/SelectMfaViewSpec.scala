@@ -16,24 +16,26 @@
 
 package uk.gov.hmrc.apiplatform.modules.mfa.views
 
+import scala.collection.JavaConverters._
+
 import org.jsoup.Jsoup
+import views.helper.CommonViewSpec
+
 import play.api.mvc.AnyContentAsEmpty
 import play.api.test.{FakeRequest, StubMessagesFactory}
+
 import uk.gov.hmrc.apiplatform.modules.mfa.forms.SelectMfaForm
 import uk.gov.hmrc.apiplatform.modules.mfa.models.MfaAction
 import uk.gov.hmrc.apiplatform.modules.mfa.views.html.SelectMfaView
 import uk.gov.hmrc.thirdpartydeveloperfrontend.builder.{DeveloperBuilder, DeveloperSessionBuilder}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.{DeveloperSession, LoggedInState}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.{LocalUserIdTracker, WithCSRFAddToken}
-import views.helper.CommonViewSpec
-
-import scala.collection.JavaConverters._
 
 class SelectMfaViewSpec extends CommonViewSpec
-  with WithCSRFAddToken
-  with DeveloperSessionBuilder
-  with DeveloperBuilder
-  with LocalUserIdTracker with StubMessagesFactory {
+    with WithCSRFAddToken
+    with DeveloperSessionBuilder
+    with DeveloperBuilder
+    with LocalUserIdTracker with StubMessagesFactory {
 
   implicit val request: FakeRequest[AnyContentAsEmpty.type] = FakeRequest()
 
@@ -42,7 +44,7 @@ class SelectMfaViewSpec extends CommonViewSpec
       LoggedInState.LOGGED_IN,
     buildDeveloper("developer@example.com", "Joe", "Bloggs")
   )
-  val selectMfaViewView: SelectMfaView = app.injector.instanceOf[SelectMfaView]
+  val selectMfaViewView: SelectMfaView    = app.injector.instanceOf[SelectMfaView]
 
   "SelectMfaView" should {
     "render correctly with Text Message selected as default" in {

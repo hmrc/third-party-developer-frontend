@@ -19,17 +19,17 @@ package uk.gov.hmrc.thirdpartydeveloperfrontend.controllers
 import java.time.Period
 
 import akka.stream.Materializer
-import uk.gov.hmrc.thirdpartydeveloperfrontend.config.ApplicationConfig
-import uk.gov.hmrc.thirdpartydeveloperfrontend.config.FraudPreventionConfig
-import uk.gov.hmrc.thirdpartydeveloperfrontend.mocks.service.ErrorHandlerMock
 import org.scalatestplus.play.guice.GuiceOneAppPerSuite
+
 import play.api.Application
 import play.api.i18n.MessagesApi
 import play.api.inject.guice.GuiceApplicationBuilder
 import play.api.libs.crypto.CookieSigner
 import play.api.mvc.MessagesControllerComponents
+
+import uk.gov.hmrc.thirdpartydeveloperfrontend.config.{ApplicationConfig, FraudPreventionConfig}
+import uk.gov.hmrc.thirdpartydeveloperfrontend.mocks.service.{ErrorHandlerMock, SessionServiceMock}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.{AsyncHmrcSpec, SharedMetricsClearDown}
-import uk.gov.hmrc.thirdpartydeveloperfrontend.mocks.service.SessionServiceMock
 
 class BaseControllerSpec
     extends AsyncHmrcSpec
@@ -51,7 +51,7 @@ class BaseControllerSpec
   lazy val messagesApi: MessagesApi = app.injector.instanceOf[MessagesApi]
 
   val mcc: MessagesControllerComponents = app.injector.instanceOf[MessagesControllerComponents]
-  val grantLength: Period = Period.ofDays(547)
+  val grantLength: Period               = Period.ofDays(547)
 
   override def fakeApplication(): Application =
     GuiceApplicationBuilder()

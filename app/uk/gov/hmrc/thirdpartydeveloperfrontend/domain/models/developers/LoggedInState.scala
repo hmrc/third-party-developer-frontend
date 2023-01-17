@@ -19,7 +19,7 @@ package uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers
 import enumeratum.{EnumEntry, PlayEnum}
 
 sealed trait LoggedInState extends EnumEntry {
-  def isLoggedIn: Boolean = this == LoggedInState.LOGGED_IN
+  def isLoggedIn: Boolean                = this == LoggedInState.LOGGED_IN
   def isPartLoggedInEnablingMFA: Boolean = this == LoggedInState.PART_LOGGED_IN_ENABLING_MFA
 }
 

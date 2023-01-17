@@ -17,9 +17,10 @@
 package uk.gov.hmrc.thirdpartydeveloperfrontend.utils
 
 import scala.collection.mutable
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.UserId
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.{Collaborator, CollaboratorRole}
+
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.CollaboratorRole._
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.{Collaborator, CollaboratorRole}
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.UserId
 
 // Trait allows for mix in of either local or global userIdTracker into things like CollaboratorTracker
 trait UserIdTracker {
@@ -38,13 +39,13 @@ trait LocalUserIdTracker extends UserIdTracker {
 object GlobalUserIdTracker extends LocalUserIdTracker
 
 trait CollaboratorTracker {
-  self : UserIdTracker =>
-  
+  self: UserIdTracker =>
+
   def collaboratorOf(email: String, role: CollaboratorRole): Collaborator = Collaborator(email, role, idOf(email))
 
   implicit class CollaboratorSyntax(value: String) {
-    def asAdministratorCollaborator = collaboratorOf(value, ADMINISTRATOR)
-    def asDeveloperCollaborator = collaboratorOf(value, DEVELOPER)
-    def asCollaborator(role:CollaboratorRole) = collaboratorOf(value, role)
+    def asAdministratorCollaborator            = collaboratorOf(value, ADMINISTRATOR)
+    def asDeveloperCollaborator                = collaboratorOf(value, DEVELOPER)
+    def asCollaborator(role: CollaboratorRole) = collaboratorOf(value, role)
   }
 }

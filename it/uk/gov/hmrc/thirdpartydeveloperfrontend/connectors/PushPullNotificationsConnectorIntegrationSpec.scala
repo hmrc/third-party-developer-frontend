@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 HM Revenue & Customs
+ * Copyright 2023 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -31,8 +31,9 @@ import uk.gov.hmrc.play.http.metrics.common.API
 
 class PushPullNotificationsConnectorIntegrationSpec extends BaseConnectorIntegrationSpec with GuiceOneAppPerSuite {
   private val authorizationKey = randomUUID.toString
+
   private val stubConfig = Configuration(
-    "microservice.services.push-pull-notifications-api-production.port" -> stubPort,
+    "microservice.services.push-pull-notifications-api-production.port"             -> stubPort,
     "microservice.services.push-pull-notifications-api-production.authorizationKey" -> authorizationKey
   )
 

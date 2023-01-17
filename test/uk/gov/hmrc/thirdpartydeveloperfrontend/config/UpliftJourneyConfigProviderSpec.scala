@@ -17,6 +17,7 @@
 package uk.gov.hmrc.thirdpartydeveloperfrontend.config
 
 import play.api.Configuration
+
 import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.BaseControllerSpec
 
 class UpliftJourneyConfigSpec extends BaseControllerSpec {
@@ -25,31 +26,31 @@ class UpliftJourneyConfigSpec extends BaseControllerSpec {
 
     "throw exception when there is no app config setting present" in {
 
-        val testConfig = Configuration.from(Map("test.key" -> "testval"))
+      val testConfig = Configuration.from(Map("test.key" -> "testval"))
 
-        intercept[RuntimeException]{
-          new UpliftJourneyConfig(testConfig).status 
-        }.getMessage() contains "No configuration setting found for key 'applicationCheck"
+      intercept[RuntimeException] {
+        new UpliftJourneyConfig(testConfig).status
+      }.getMessage() contains "No configuration setting found for key 'applicationCheck"
 
     }
 
     "be Off when the app config setting is unmatched" in {
 
-        val testConfig = Configuration.from(Map("applicationCheck.canUseNewUpliftJourney" -> "Unmatched"))
+      val testConfig = Configuration.from(Map("applicationCheck.canUseNewUpliftJourney" -> "Unmatched"))
 
-        val underTest = new UpliftJourneyConfig(testConfig)  
-        
-        underTest.status shouldBe Off
-    } 
+      val underTest = new UpliftJourneyConfig(testConfig)
+
+      underTest.status shouldBe Off
+    }
 
     "be Off when the app config setting is Off" in {
 
-        val testConfig = Configuration.from(Map("applicationCheck.canUseNewUpliftJourney" -> "Off"))
+      val testConfig = Configuration.from(Map("applicationCheck.canUseNewUpliftJourney" -> "Off"))
 
-        val underTest = new UpliftJourneyConfig(testConfig)
+      val underTest = new UpliftJourneyConfig(testConfig)
 
-        underTest.status shouldBe Off
-    } 
+      underTest.status shouldBe Off
+    }
 
     "be On when the app config setting is On" in {
 
@@ -58,7 +59,7 @@ class UpliftJourneyConfigSpec extends BaseControllerSpec {
       val underTest = new UpliftJourneyConfig(testConfig)
 
       underTest.status shouldBe On
-    } 
+    }
 
     "be OnDemand when the app config setting is OnDemand" in {
 
@@ -67,6 +68,6 @@ class UpliftJourneyConfigSpec extends BaseControllerSpec {
       val underTest = new UpliftJourneyConfig(testConfig)
 
       underTest.status shouldBe OnDemand
-    } 
-  }   
+    }
+  }
 }

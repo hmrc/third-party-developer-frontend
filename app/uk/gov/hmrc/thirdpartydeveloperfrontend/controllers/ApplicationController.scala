@@ -16,19 +16,19 @@
 
 package uk.gov.hmrc.thirdpartydeveloperfrontend.controllers
 
-import uk.gov.hmrc.thirdpartydeveloperfrontend.service.ApplicationService
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.controllers.ApplicationViewModel
-import play.api.mvc.{Action, AnyContent, Result, MessagesControllerComponents}
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications._
 import scala.concurrent.Future
 
+import play.api.mvc.{Action, AnyContent, MessagesControllerComponents, Result}
 
-abstract class ApplicationController(mcc: MessagesControllerComponents) 
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications._
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.controllers.ApplicationViewModel
+import uk.gov.hmrc.thirdpartydeveloperfrontend.service.ApplicationService
+
+abstract class ApplicationController(mcc: MessagesControllerComponents)
     extends LoggedInController(mcc)
     with ApplicationActionBuilders {
-      
-  val applicationService: ApplicationService
 
+  val applicationService: ApplicationService
 
   def hasPpnsFields(request: ApplicationRequest[_]): Boolean = {
     request.subscriptions.exists(in => in.subscribed && in.fields.fields.exists(field => field.definition.`type` == "PPNSField"))
@@ -41,20 +41,27 @@ abstract class ApplicationController(mcc: MessagesControllerComponents)
     Action.async { implicit request =>
       (
         loggedInActionRefiner() andThen
-        applicationRequestRefiner(applicationId)
+          applicationRequestRefiner(applicationId)
       ).invokeBlock(request, block)
     }
-    
+
   private def checkActionWithStateCheck(
       stateCheck: State => Boolean
-  )(capability: Capability, permissions: Permission)(applicationId: ApplicationId)(block: ApplicationRequest[AnyContent] => Future[Result]): Action[AnyContent] = {
+    )(
+      capability: Capability,
+      permissions: Permission
+    )(
+      applicationId: ApplicationId
+    )(
+      block: ApplicationRequest[AnyContent] => Future[Result]
+    ): Action[AnyContent] = {
     Action.async { implicit request =>
       (
         loggedInActionRefiner() andThen
-        applicationRequestRefiner(applicationId) andThen
-        capabilityFilter(capability) andThen
-        permissionFilter(permissions) andThen
-        approvalFilter(stateCheck)
+          applicationRequestRefiner(applicationId) andThen
+          capabilityFilter(capability) andThen
+          permissionFilter(permissions) andThen
+          approvalFilter(stateCheck)
       ).invokeBlock(request, block)
     }
   }

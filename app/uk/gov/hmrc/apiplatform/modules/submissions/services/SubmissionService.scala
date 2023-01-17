@@ -17,21 +17,26 @@
 package uk.gov.hmrc.apiplatform.modules.submissions.services
 
 import javax.inject.{Inject, Singleton}
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.ApplicationId
 import scala.concurrent.Future
+
 import uk.gov.hmrc.http.HeaderCarrier
-import uk.gov.hmrc.apiplatform.modules.submissions.domain.models._
+
 import uk.gov.hmrc.apiplatform.modules.submissions.connectors.ThirdPartyApplicationSubmissionsConnector
+import uk.gov.hmrc.apiplatform.modules.submissions.domain.models._
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.ApplicationId
 
 @Singleton
 class SubmissionService @Inject() (productionApplicationConnector: ThirdPartyApplicationSubmissionsConnector) {
   def fetchLatestSubmission(appId: ApplicationId)(implicit hc: HeaderCarrier): Future[Option[Submission]] = productionApplicationConnector.fetchLatestSubmission(appId)
-  
-  def fetchLatestExtendedSubmission(appId: ApplicationId)(implicit hc: HeaderCarrier): Future[Option[ExtendedSubmission]] = productionApplicationConnector.fetchLatestExtendedSubmission(appId)
+
+  def fetchLatestExtendedSubmission(appId: ApplicationId)(implicit hc: HeaderCarrier): Future[Option[ExtendedSubmission]] =
+    productionApplicationConnector.fetchLatestExtendedSubmission(appId)
 
   def fetch(id: Submission.Id)(implicit hc: HeaderCarrier): Future[Option[ExtendedSubmission]] = productionApplicationConnector.fetchSubmission(id)
 
-  def recordAnswer(submissionId: Submission.Id, questionId: Question.Id, rawAnswers: List[String])(implicit hc: HeaderCarrier): Future[Either[String, ExtendedSubmission]] = productionApplicationConnector.recordAnswer(submissionId, questionId, rawAnswers)
+  def recordAnswer(submissionId: Submission.Id, questionId: Question.Id, rawAnswers: List[String])(implicit hc: HeaderCarrier): Future[Either[String, ExtendedSubmission]] =
+    productionApplicationConnector.recordAnswer(submissionId, questionId, rawAnswers)
 
-  def confirmSetupComplete(applicationId: ApplicationId, userEmailAddress: String)(implicit hc: HeaderCarrier): Future[Either[String, Unit]] = productionApplicationConnector.confirmSetupComplete(applicationId, userEmailAddress)
+  def confirmSetupComplete(applicationId: ApplicationId, userEmailAddress: String)(implicit hc: HeaderCarrier): Future[Either[String, Unit]] =
+    productionApplicationConnector.confirmSetupComplete(applicationId, userEmailAddress)
 }

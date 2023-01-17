@@ -16,85 +16,95 @@
 
 package uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.actions
 
-import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.ApplicationWithSubscriptionFieldsRequest
-import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.ApplicationWithSubscriptionFieldPageRequest
-import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.ApplicationWithFieldDefinitionsRequest
-import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.ApplicationWithWritableSubscriptionField
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.controllers.NoSubscriptionFieldsRefinerBehaviour
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications._
-import play.api.mvc.{Action, AnyContent, Result, ActionRefiner}
-import scala.concurrent.Future
-import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.ApplicationController
-import scala.concurrent.ExecutionContext
+import scala.concurrent.{ExecutionContext, Future}
+
 import cats.data.NonEmptyList
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.apidefinitions._
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.subscriptions.DevhubAccessLevel
+
+import play.api.mvc.{Action, ActionRefiner, AnyContent, Result}
+
 import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.ManageSubscriptions.toDetails
-import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.ApplicationRequest
+import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.{ApplicationRequest, _}
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.apidefinitions._
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications._
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.controllers.NoSubscriptionFieldsRefinerBehaviour
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.subscriptions.DevhubAccessLevel
 
 trait SubscriptionFieldsActions {
-  self: ApplicationController => 
+  self: ApplicationController =>
 
-  private def subscriptionsBaseActions(applicationId: ApplicationId, noFieldsBehaviour: NoSubscriptionFieldsRefinerBehaviour) = 
+  private def subscriptionsBaseActions(applicationId: ApplicationId, noFieldsBehaviour: NoSubscriptionFieldsRefinerBehaviour) =
     loggedInActionRefiner() andThen
-    applicationRequestRefiner(applicationId) andThen
-    capabilityFilter(Capabilities.EditSubscriptionFields) andThen
-    fieldDefinitionsExistRefiner(noFieldsBehaviour)
+      applicationRequestRefiner(applicationId) andThen
+      capabilityFilter(Capabilities.EditSubscriptionFields) andThen
+      fieldDefinitionsExistRefiner(noFieldsBehaviour)
 
   def subFieldsDefinitionsExistAction(
-    applicationId: ApplicationId,
-    noFieldsBehaviour: NoSubscriptionFieldsRefinerBehaviour = NoSubscriptionFieldsRefinerBehaviour.BadRequest
-  )(block: ApplicationWithFieldDefinitionsRequest[AnyContent] => Future[Result]): Action[AnyContent] = {
+      applicationId: ApplicationId,
+      noFieldsBehaviour: NoSubscriptionFieldsRefinerBehaviour = NoSubscriptionFieldsRefinerBehaviour.BadRequest
+    )(
+      block: ApplicationWithFieldDefinitionsRequest[AnyContent] => Future[Result]
+    ): Action[AnyContent] = {
     Action.async { implicit request =>
       (
         subscriptionsBaseActions(applicationId, noFieldsBehaviour)
       )
-      .invokeBlock(request, block)
+        .invokeBlock(request, block)
     }
   }
 
   def subFieldsDefinitionsExistActionWithPageNumber(
-    applicationId: ApplicationId,
-    pageNumber: Int
-  )(block: ApplicationWithSubscriptionFieldPageRequest[AnyContent] => Future[Result]): Action[AnyContent] = {
+      applicationId: ApplicationId,
+      pageNumber: Int
+    )(
+      block: ApplicationWithSubscriptionFieldPageRequest[AnyContent] => Future[Result]
+    ): Action[AnyContent] = {
     Action.async { implicit request =>
       (
         subscriptionsBaseActions(applicationId, NoSubscriptionFieldsRefinerBehaviour.BadRequest) andThen
-        subscriptionFieldPageRefiner(pageNumber)
+          subscriptionFieldPageRefiner(pageNumber)
       )
-      .invokeBlock(request, block)
+        .invokeBlock(request, block)
     }
   }
 
-  def subFieldsDefinitionsExistActionByApi(applicationId: ApplicationId, context: ApiContext, version: ApiVersion)(
+  def subFieldsDefinitionsExistActionByApi(
+      applicationId: ApplicationId,
+      context: ApiContext,
+      version: ApiVersion
+    )(
       block: ApplicationWithSubscriptionFieldsRequest[AnyContent] => Future[Result]
-  ): Action[AnyContent] = {
+    ): Action[AnyContent] = {
     Action.async { implicit request =>
       (
         subscriptionsBaseActions(applicationId, NoSubscriptionFieldsRefinerBehaviour.BadRequest) andThen
-        subscriptionFieldsRefiner(context, version)
+          subscriptionFieldsRefiner(context, version)
       )
-      .invokeBlock(request, block)
+        .invokeBlock(request, block)
     }
   }
 
-  def singleSubFieldsWritableDefinitionActionByApi(applicationId: ApplicationId, context: ApiContext, version: ApiVersion, fieldName: String)(
+  def singleSubFieldsWritableDefinitionActionByApi(
+      applicationId: ApplicationId,
+      context: ApiContext,
+      version: ApiVersion,
+      fieldName: String
+    )(
       block: ApplicationWithWritableSubscriptionField[AnyContent] => Future[Result]
-  ): Action[AnyContent] = {
+    ): Action[AnyContent] = {
     Action.async { implicit request =>
       (
         subscriptionsBaseActions(applicationId, NoSubscriptionFieldsRefinerBehaviour.BadRequest) andThen
-        subscriptionFieldsRefiner(context, version) andThen
-        writeableSubscriptionFieldRefiner(fieldName)
+          subscriptionFieldsRefiner(context, version) andThen
+          writeableSubscriptionFieldRefiner(fieldName)
       )
-      .invokeBlock(request, block)
+        .invokeBlock(request, block)
     }
   }
 
-      
-  private def fieldDefinitionsExistRefiner(noFieldsBehaviour: NoSubscriptionFieldsRefinerBehaviour)(
-      implicit ec: ExecutionContext
-  ): ActionRefiner[ApplicationRequest, ApplicationWithFieldDefinitionsRequest] = new ActionRefiner[ApplicationRequest, ApplicationWithFieldDefinitionsRequest] {
+  private def fieldDefinitionsExistRefiner(
+      noFieldsBehaviour: NoSubscriptionFieldsRefinerBehaviour
+    )(implicit ec: ExecutionContext
+    ): ActionRefiner[ApplicationRequest, ApplicationWithFieldDefinitionsRequest] = new ActionRefiner[ApplicationRequest, ApplicationWithFieldDefinitionsRequest] {
     override protected def executionContext: ExecutionContext = ec
 
     def refine[A](appRequest: ApplicationRequest[A]): Future[Either[Result, ApplicationWithFieldDefinitionsRequest[A]]] = {
@@ -117,7 +127,10 @@ trait SubscriptionFieldsActions {
     }
   }
 
-  private def subscriptionFieldPageRefiner(pageNumber: Int)(implicit ec: ExecutionContext): ActionRefiner[ApplicationWithFieldDefinitionsRequest, ApplicationWithSubscriptionFieldPageRequest] =
+  private def subscriptionFieldPageRefiner(
+      pageNumber: Int
+    )(implicit ec: ExecutionContext
+    ): ActionRefiner[ApplicationWithFieldDefinitionsRequest, ApplicationWithSubscriptionFieldPageRequest] =
     new ActionRefiner[ApplicationWithFieldDefinitionsRequest, ApplicationWithSubscriptionFieldPageRequest] {
       override protected def executionContext: ExecutionContext = ec
 
@@ -128,7 +141,7 @@ trait SubscriptionFieldsActions {
 
         Future.successful(
           if (pageNumber >= 1 && pageNumber <= details.size) {
-            val apiDetails = details(pageNumber - 1)
+            val apiDetails            = details(pageNumber - 1)
             val apiSubscriptionStatus = request.fieldDefinitions.toList(pageNumber - 1)
 
             Right(new ApplicationWithSubscriptionFieldPageRequest(pageNumber, details.size, apiSubscriptionStatus, apiDetails, request))
@@ -139,9 +152,11 @@ trait SubscriptionFieldsActions {
       }
     }
 
-  private def subscriptionFieldsRefiner(context: ApiContext, version: ApiVersion)(
-      implicit ec: ExecutionContext
-  ): ActionRefiner[ApplicationWithFieldDefinitionsRequest, ApplicationWithSubscriptionFieldsRequest] =
+  private def subscriptionFieldsRefiner(
+      context: ApiContext,
+      version: ApiVersion
+    )(implicit ec: ExecutionContext
+    ): ActionRefiner[ApplicationWithFieldDefinitionsRequest, ApplicationWithSubscriptionFieldsRequest] =
     new ActionRefiner[ApplicationWithFieldDefinitionsRequest, ApplicationWithSubscriptionFieldsRequest] {
       override protected def executionContext: ExecutionContext = ec
 
@@ -159,9 +174,10 @@ trait SubscriptionFieldsActions {
       }
     }
 
-  private def writeableSubscriptionFieldRefiner(fieldName: String)(
-      implicit ec: ExecutionContext
-  ): ActionRefiner[ApplicationWithSubscriptionFieldsRequest, ApplicationWithWritableSubscriptionField] =
+  private def writeableSubscriptionFieldRefiner(
+      fieldName: String
+    )(implicit ec: ExecutionContext
+    ): ActionRefiner[ApplicationWithSubscriptionFieldsRequest, ApplicationWithWritableSubscriptionField] =
     new ActionRefiner[ApplicationWithSubscriptionFieldsRequest, ApplicationWithWritableSubscriptionField] {
       override protected def executionContext: ExecutionContext = ec
 
@@ -172,12 +188,12 @@ trait SubscriptionFieldsActions {
             .filter(d => d.definition.name.value == fieldName)
 
           subscriptionFieldValues match {
-            case Nil => Left(NotFound(errorHandler.notFoundTemplate(request)))
+            case Nil                           => Left(NotFound(errorHandler.notFoundTemplate(request)))
             case subscriptionFieldValue :: Nil => {
               val accessLevel = DevhubAccessLevel.fromRole(request.role)
-              val canWrite = subscriptionFieldValue.definition.access.devhub.satisfiesWrite(accessLevel)
+              val canWrite    = subscriptionFieldValue.definition.access.devhub.satisfiesWrite(accessLevel)
 
-              if (canWrite){
+              if (canWrite) {
                 Right(new ApplicationWithWritableSubscriptionField(
                   APISubscriptionStatusWithWritableSubscriptionField(
                     request.apiSubscription.name,
@@ -186,13 +202,13 @@ trait SubscriptionFieldsActions {
                     subscriptionFieldValue,
                     request.apiSubscription.fields
                   ),
-                    request
-                  ))
+                  request
+                ))
               } else {
                 Left(Forbidden(errorHandler.badRequestTemplate(request)))
               }
             }
-            case _ => throw new RuntimeException(s"Too many APIs match for; fieldName: ${fieldName}")
+            case _                             => throw new RuntimeException(s"Too many APIs match for; fieldName: ${fieldName}")
           }
         })
       }

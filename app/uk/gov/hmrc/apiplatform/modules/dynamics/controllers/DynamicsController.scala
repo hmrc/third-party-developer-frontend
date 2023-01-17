@@ -16,17 +16,18 @@
 
 package uk.gov.hmrc.apiplatform.modules.dynamics.controllers
 
+import javax.inject.{Inject, Singleton}
+import scala.concurrent.{ExecutionContext, Future}
+
 import play.api.libs.crypto.CookieSigner
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
+
 import uk.gov.hmrc.apiplatform.modules.dynamics.connectors.{ThirdPartyDeveloperDynamicsConnector, Ticket}
 import uk.gov.hmrc.apiplatform.modules.dynamics.model.AddTicketForm
 import uk.gov.hmrc.apiplatform.modules.dynamics.views.html._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.config.{ApplicationConfig, ErrorHandler}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.LoggedInController
 import uk.gov.hmrc.thirdpartydeveloperfrontend.service.SessionService
-
-import javax.inject.{Inject, Singleton}
-import scala.concurrent.{ExecutionContext, Future}
 
 @Singleton
 class DynamicsController @Inject() (
@@ -38,8 +39,8 @@ class DynamicsController @Inject() (
     val errorHandler: ErrorHandler,
     val cookieSigner: CookieSigner
   )(implicit val ec: ExecutionContext,
-    val appConfig: ApplicationConfig)
-    extends LoggedInController(mcc) {
+    val appConfig: ApplicationConfig
+  ) extends LoggedInController(mcc) {
 
   def tickets: Action[AnyContent] = loggedInAction { implicit request =>
     thirdPartyDeveloperDynamicsConnector.getTickets().map { tickets: List[Ticket] =>

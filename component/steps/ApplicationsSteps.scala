@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 HM Revenue & Customs
+ * Copyright 2023 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,7 +18,18 @@ package steps
 
 import java.util.UUID.randomUUID
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.Environment.PRODUCTION
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.{Application, ApplicationState, ApplicationToken, ClientSecret, Collaborator, CollaboratorRole, Environment, Privileged, ROPC, Standard}
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.{
+  Application,
+  ApplicationState,
+  ApplicationToken,
+  ClientSecret,
+  Collaborator,
+  CollaboratorRole,
+  Environment,
+  Privileged,
+  ROPC,
+  Standard
+}
 import io.cucumber.datatable.DataTable
 import io.cucumber.scala.{EN, ScalaDsl}
 import io.cucumber.scala.Implicits._
@@ -39,7 +50,7 @@ import utils.ComponentTestDeveloperBuilder
 
 object AppWorld {
   var userApplicationsOnBackend: List[Application] = Nil
-  var tokens: Map[String, ApplicationToken] = Map.empty
+  var tokens: Map[String, ApplicationToken]        = Map.empty
 }
 
 class ApplicationsSteps extends ScalaDsl with EN with Matchers with NavigationSugar with CustomMatchers with PageSugar with ComponentTestDeveloperBuilder {
@@ -49,10 +60,10 @@ class ApplicationsSteps extends ScalaDsl with EN with Matchers with NavigationSu
   implicit val webDriver = Env.driver
 
   val applicationId = ApplicationId("applicationId")
-  val clientId = ClientId("clientId")
+  val clientId      = ClientId("clientId")
 
   val collaboratorEmail = "john.smith@example.com"
-  
+
   private def defaultApp(name: String, environment: String) = Application(
     id = applicationId,
     clientId = clientId,
@@ -86,14 +97,13 @@ class ApplicationsSteps extends ScalaDsl with EN with Matchers with NavigationSu
   }
 
   Given("""^I have no application assigned to my email '(.*)'$""") { (email: String) =>
-
     ApplicationStub.configureUserApplications(staticUserId)
     AppWorld.userApplicationsOnBackend = Nil
   }
 
   And("""^applications have the credentials:$""") { (data: DataTable) =>
     val listOfCredentials = data.asScalaRawMaps[String, String].toList
-    val tuples = listOfCredentials.map { credentials => credentials("id") -> ApplicationToken(splitToSecrets(credentials("prodClientSecrets")), credentials("prodAccessToken")) }
+    val tuples            = listOfCredentials.map { credentials => credentials("id") -> ApplicationToken(splitToSecrets(credentials("prodClientSecrets")), credentials("prodAccessToken")) }
     AppWorld.tokens = tuples.toMap
     ApplicationStub.configureApplicationCredentials(AppWorld.tokens)
   }
@@ -113,7 +123,7 @@ class ApplicationsSteps extends ScalaDsl with EN with Matchers with NavigationSu
         case "PENDING_REQUESTER_VERIFICATION" => ApplicationState.pendingRequesterVerification(email, name, verificationCode)
         case unknownState: String             => fail(s"Unknown state '$unknownState'")
       }
-      val access = app.getOrElse("accessType", "STANDARD") match {
+      val access           = app.getOrElse("accessType", "STANDARD") match {
         case "STANDARD"   => Standard(redirectUris = app.getOrElse("redirectUris", "").split(",").toList.map(_.trim).filter(_.nonEmpty))
         case "PRIVILEGED" => Privileged()
         case "ROPC"       => ROPC()

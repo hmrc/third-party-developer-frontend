@@ -16,28 +16,28 @@
 
 package uk.gov.hmrc.apiplatform.modules.submissions.controllers
 
-import uk.gov.hmrc.thirdpartydeveloperfrontend.config.ApplicationConfig
-import uk.gov.hmrc.thirdpartydeveloperfrontend.config.ErrorHandler
-import uk.gov.hmrc.thirdpartydeveloperfrontend.connectors.ApmConnector
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.ApplicationId
-import play.api.libs.crypto.CookieSigner
-import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
-import uk.gov.hmrc.thirdpartydeveloperfrontend.service.{ApplicationActionService, ApplicationService, SessionService}
-import uk.gov.hmrc.apiplatform.modules.submissions.views.html._
-
 import javax.inject.{Inject, Singleton}
 import scala.concurrent.ExecutionContext
-import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.ApplicationController
-import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.checkpages.CanUseCheckActions
+import scala.concurrent.Future.successful
+
 import cats.data.NonEmptyList
-import uk.gov.hmrc.apiplatform.modules.submissions.domain.models._
-import uk.gov.hmrc.apiplatform.modules.submissions.services.SubmissionService
+
+import play.api.data.Form
+import play.api.libs.crypto.CookieSigner
+import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
+import uk.gov.hmrc.play.bootstrap.controller.WithUnsafeDefaultFormBinding
+
 import uk.gov.hmrc.apiplatform.modules.common.services.EitherTHelper
 import uk.gov.hmrc.apiplatform.modules.submissions.domain.models.QuestionnaireState.NotApplicable
-
-import scala.concurrent.Future.successful
-import play.api.data.Form
-import uk.gov.hmrc.play.bootstrap.controller.WithUnsafeDefaultFormBinding
+import uk.gov.hmrc.apiplatform.modules.submissions.domain.models._
+import uk.gov.hmrc.apiplatform.modules.submissions.services.SubmissionService
+import uk.gov.hmrc.apiplatform.modules.submissions.views.html._
+import uk.gov.hmrc.thirdpartydeveloperfrontend.config.{ApplicationConfig, ErrorHandler}
+import uk.gov.hmrc.thirdpartydeveloperfrontend.connectors.ApmConnector
+import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.ApplicationController
+import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.checkpages.CanUseCheckActions
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.ApplicationId
+import uk.gov.hmrc.thirdpartydeveloperfrontend.service.{ApplicationActionService, ApplicationService, SessionService}
 
 object ProdCredsChecklistController {
   case class DummyForm(dummy: String = "dummy")
@@ -54,7 +54,6 @@ object ProdCredsChecklistController {
     }
   }
 
-
   case class ViewQuestionnaireSummary(label: String, state: String, isComplete: Boolean, id: Questionnaire.Id = Questionnaire.Id.random, nextQuestionUrl: Option[String] = None) {
     lazy val fieldName = label.toLowerCase
   }
@@ -62,10 +61,12 @@ object ProdCredsChecklistController {
   case class ViewModel(appId: ApplicationId, appName: String, groupings: NonEmptyList[ViewGrouping])
 
   def convertToSummary(extSubmission: ExtendedSubmission)(questionnaire: Questionnaire): ViewQuestionnaireSummary = {
-    val progress = extSubmission.questionnaireProgress.get(questionnaire.id).get
-    val state = QuestionnaireState.describe(progress.state)
+    val progress   = extSubmission.questionnaireProgress.get(questionnaire.id).get
+    val state      = QuestionnaireState.describe(progress.state)
     val isComplete = QuestionnaireState.isCompleted(progress.state)
-    val url = progress.questionsToAsk.headOption.map(q => uk.gov.hmrc.apiplatform.modules.submissions.controllers.routes.QuestionsController.showQuestion(extSubmission.submission.id, q).url)
+    val url        = progress.questionsToAsk.headOption.map(q =>
+      uk.gov.hmrc.apiplatform.modules.submissions.controllers.routes.QuestionsController.showQuestion(extSubmission.submission.id, q).url
+    )
     ViewQuestionnaireSummary(questionnaire.label.value, state, isComplete, questionnaire.id, url)
   }
 
@@ -83,9 +84,9 @@ object ProdCredsChecklistController {
 
   def filterGroupingsForEmptyQuestionnaireSummaries(groupings: NonEmptyList[ViewGrouping]): Option[NonEmptyList[ViewGrouping]] = {
     import cats.implicits._
-    
+
     val filterFn: ViewQuestionnaireSummary => Boolean = _.state == QuestionnaireState.describe(NotApplicable)
-    
+
     groupings
       .map(g => {
         val qs = g.questionnaireSummaries.filterNot(filterFn).toNel
@@ -108,21 +109,24 @@ class ProdCredsChecklistController @Inject() (
     val cookieSigner: CookieSigner,
     val apmConnector: ApmConnector,
     val submissionService: SubmissionService,
-    productionCredentialsChecklistView: ProductionCredentialsChecklistView)
-    (implicit val ec: ExecutionContext, val appConfig: ApplicationConfig)
-  extends ApplicationController(mcc)
-     with CanUseCheckActions
-     with EitherTHelper[String]
-     with SubmissionActionBuilders
-     with WithUnsafeDefaultFormBinding {
+    productionCredentialsChecklistView: ProductionCredentialsChecklistView
+  )(implicit val ec: ExecutionContext,
+    val appConfig: ApplicationConfig
+  ) extends ApplicationController(mcc)
+    with CanUseCheckActions
+    with EitherTHelper[String]
+    with SubmissionActionBuilders
+    with WithUnsafeDefaultFormBinding {
 
   import ProdCredsChecklistController._
   import SubmissionActionBuilders.{ApplicationStateFilter, RoleFilter}
 
-  def productionCredentialsChecklistPage(productionAppId: ApplicationId): Action[AnyContent] = withApplicationSubmission(ApplicationStateFilter.inTesting, RoleFilter.isAdminRole)(productionAppId) { implicit request =>
+  def productionCredentialsChecklistPage(
+      productionAppId: ApplicationId
+    ): Action[AnyContent] = withApplicationSubmission(ApplicationStateFilter.inTesting, RoleFilter.isAdminRole)(productionAppId) { implicit request =>
     val show = (viewModel: ViewModel) => {
       filterGroupingsForEmptyQuestionnaireSummaries(viewModel.groupings).fold(
-        BadRequest("No questionnaires applicable") 
+        BadRequest("No questionnaires applicable")
       )(vg =>
         Ok(productionCredentialsChecklistView(viewModel.copy(groupings = vg), DummyForm.form.fillAndValidate(DummyForm("dummy"))))
       )
@@ -132,12 +136,11 @@ class ProdCredsChecklistController @Inject() (
 
   def productionCredentialsChecklistAction(productionAppId: ApplicationId) = withApplicationSubmission(ApplicationStateFilter.inTesting)(productionAppId) { implicit request =>
     def handleValidForm(validForm: DummyForm) = {
-      if(request.extSubmission.submission.status.isAnsweredCompletely) {
+      if (request.extSubmission.submission.status.isAnsweredCompletely) {
         successful(Redirect(uk.gov.hmrc.apiplatform.modules.submissions.controllers.routes.CheckAnswersController.checkAnswersPage(productionAppId)))
-      }
-      else {
+      } else {
         val viewModel = convertSubmissionToViewModel(request.extSubmission)(request.application.id, request.application.name)
-        
+
         successful(
           filterGroupingsForEmptyQuestionnaireSummaries(viewModel.groupings).fold(
             throw new AssertionError("submissions with only n/a questionnaires will be marked as complete")
@@ -152,7 +155,7 @@ class ProdCredsChecklistController @Inject() (
       }
     }
 
-    def handleInvalidForm(formWithErrors: Form[DummyForm]) = 
+    def handleInvalidForm(formWithErrors: Form[DummyForm]) =
       throw new AssertionError("DummyForm has no validation rules and so can never be invalid")
 
     DummyForm.form.bindFromRequest.fold(handleInvalidForm, handleValidForm)

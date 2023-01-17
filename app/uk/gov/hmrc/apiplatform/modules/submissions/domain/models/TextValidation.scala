@@ -16,32 +16,34 @@
 
 package uk.gov.hmrc.apiplatform.modules.submissions.domain.models
 
+import scala.util.{Success, Try}
+
 import org.apache.commons.validator.routines.EmailValidator
+
 import play.api.libs.json.Json
-import scala.util.Try
-import scala.util.Success
 
 sealed trait TextValidation {
   def isValid(text: String): Boolean = this.validate(text).isRight
 
   def validate(text: String): Either[String, String] = this match {
-    case TextValidation.Url => 
-      Try(new java.net.URL(text)) match { 
+    case TextValidation.Url =>
+      Try(new java.net.URL(text)) match {
         case Success(_) => Right(text)
-        case _ => Left(s"$text is not a valid Url")
+        case _          => Left(s"$text is not a valid Url")
       }
 
-    case TextValidation.Email => 
-      if(TextValidation.emailValidator.isValid(text))
+    case TextValidation.Email =>
+      if (TextValidation.emailValidator.isValid(text)) {
         Right(text)
-      else
+      } else {
         Left(s"$text is not a valid email")
+      }
 
     case TextValidation.MatchRegex(regex) => {
       val matcher = regex.r
       text match {
         case matcher(_*) => Right(text)
-        case _ => Left(s"$text does not match expected pattern")
+        case _           => Left(s"$text does not match expected pattern")
       }
     }
   }
@@ -50,15 +52,15 @@ sealed trait TextValidation {
 object TextValidation {
   val emailValidator = EmailValidator.getInstance()
 
-  case object Url extends TextValidation
+  case object Url                      extends TextValidation
   case class MatchRegex(regex: String) extends TextValidation
-  case object Email extends TextValidation
+  case object Email                    extends TextValidation
 
   import uk.gov.hmrc.play.json.Union
 
-  implicit val formatAsUrl = Json.format[Url.type]
+  implicit val formatAsUrl      = Json.format[Url.type]
   implicit val formatMatchRegex = Json.format[MatchRegex]
-  implicit val formatIsEmail = Json.format[Email.type]
+  implicit val formatIsEmail    = Json.format[Email.type]
 
   implicit val formatTextValidation = Union.from[TextValidation]("validationType")
     .and[Url.type]("url")

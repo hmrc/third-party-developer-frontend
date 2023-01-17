@@ -16,73 +16,68 @@
 
 package uk.gov.hmrc.thirdpartydeveloperfrontend.controllers
 
-import uk.gov.hmrc.thirdpartydeveloperfrontend.builder.DeveloperBuilder
-import uk.gov.hmrc.thirdpartydeveloperfrontend.config.ErrorHandler
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications._
-import uk.gov.hmrc.thirdpartydeveloperfrontend.mocks.service._
-import play.api.mvc.AnyContentAsEmpty
-import play.api.test.FakeRequest
-import play.api.test.Helpers._
-import uk.gov.hmrc.thirdpartydeveloperfrontend.service.AuditService
-import uk.gov.hmrc.apiplatform.modules.uplift.domain.models.GetProductionCredentialsFlow
-import uk.gov.hmrc.http.HeaderCarrier
-import uk.gov.hmrc.thirdpartydeveloperfrontend.utils._
-import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.WithLoggedInSession._
+import java.time.{LocalDateTime, ZoneOffset}
+import scala.concurrent.ExecutionContext.Implicits.global
+import scala.concurrent.Future
+
 import views.helper.EnvironmentNameService
 import views.html._
 
-import scala.concurrent.ExecutionContext.Implicits.global
-import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.LocalUserIdTracker
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.controllers.ApplicationSummary
-import uk.gov.hmrc.thirdpartydeveloperfrontend.builder.ApplicationBuilder
+import play.api.mvc.{AnyContentAsEmpty, Result}
+import play.api.test.FakeRequest
+import play.api.test.Helpers._
+import uk.gov.hmrc.http.HeaderCarrier
 
-import scala.concurrent.Future
-import play.api.mvc.Result
-import uk.gov.hmrc.apiplatform.modules.uplift.services.mocks._
-import uk.gov.hmrc.thirdpartydeveloperfrontend.mocks.connectors.ApmConnectorMockModule
-import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.addapplication.AddApplication
-import uk.gov.hmrc.thirdpartydeveloperfrontend.builder._
-import uk.gov.hmrc.apiplatform.modules.uplift.views.html.BeforeYouStartView
 import uk.gov.hmrc.apiplatform.modules.uplift.controllers.UpliftJourneySwitch
-import uk.gov.hmrc.thirdpartydeveloperfrontend.config.UpliftJourneyConfig
+import uk.gov.hmrc.apiplatform.modules.uplift.domain.models.GetProductionCredentialsFlow
 import uk.gov.hmrc.apiplatform.modules.uplift.services.GetProductionCredentialsFlowService
-
-import java.time.LocalDateTime
-import java.time.ZoneOffset
+import uk.gov.hmrc.apiplatform.modules.uplift.services.mocks._
+import uk.gov.hmrc.apiplatform.modules.uplift.views.html.BeforeYouStartView
+import uk.gov.hmrc.thirdpartydeveloperfrontend.builder.{ApplicationBuilder, DeveloperBuilder, _}
+import uk.gov.hmrc.thirdpartydeveloperfrontend.config.{ErrorHandler, UpliftJourneyConfig}
+import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.addapplication.AddApplication
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications._
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.controllers.ApplicationSummary
+import uk.gov.hmrc.thirdpartydeveloperfrontend.mocks.connectors.ApmConnectorMockModule
+import uk.gov.hmrc.thirdpartydeveloperfrontend.mocks.service._
+import uk.gov.hmrc.thirdpartydeveloperfrontend.service.AuditService
+import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.WithLoggedInSession._
+import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.{LocalUserIdTracker, _}
 
 class ChooseApplicationToUpliftActionSpec
-    extends BaseControllerSpec 
+    extends BaseControllerSpec
     with SampleSession
     with SampleApplication
-    with SubscriptionTestHelperSugar 
-    with WithCSRFAddToken 
+    with SubscriptionTestHelperSugar
+    with WithCSRFAddToken
     with DeveloperBuilder
     with LocalUserIdTracker
     with ApplicationBuilder {
 
   val collaborator: Collaborator = loggedInDeveloper.email.asAdministratorCollaborator
 
-  val appCreatedOn = LocalDateTime.now(ZoneOffset.UTC).minusDays(1)
+  val appCreatedOn  = LocalDateTime.now(ZoneOffset.UTC).minusDays(1)
   val appLastAccess = appCreatedOn
 
   val sandboxAppSummaries = (1 to 5).map(_ => buildApplication(loggedInDeveloper.email)).map(ApplicationSummary.from(_, loggedInDeveloper.developer.userId)).toList
 
-  trait Setup extends UpliftLogicMock with AppsByTeamMemberServiceMock with ApplicationServiceMock with ApmConnectorMockModule with ApplicationActionServiceMock with SessionServiceMock with EmailPreferencesServiceMock {
-    val accessTokenSwitchView = app.injector.instanceOf[AccessTokenSwitchView]
+  trait Setup extends UpliftLogicMock with AppsByTeamMemberServiceMock with ApplicationServiceMock with ApmConnectorMockModule with ApplicationActionServiceMock
+      with SessionServiceMock with EmailPreferencesServiceMock {
+    val accessTokenSwitchView                     = app.injector.instanceOf[AccessTokenSwitchView]
     val usingPrivilegedApplicationCredentialsView = app.injector.instanceOf[UsingPrivilegedApplicationCredentialsView]
-    val tenDaysWarningView = app.injector.instanceOf[TenDaysWarningView]
-    val addApplicationStartSubordinateView = app.injector.instanceOf[AddApplicationStartSubordinateView]
-    val addApplicationStartPrincipalView = app.injector.instanceOf[AddApplicationStartPrincipalView]
-    val addApplicationSubordinateSuccessView = app.injector.instanceOf[AddApplicationSubordinateSuccessView]
-    val addApplicationNameView = app.injector.instanceOf[AddApplicationNameView]
-    val chooseApplicationToUpliftView = app.injector.instanceOf[ChooseApplicationToUpliftView]
+    val tenDaysWarningView                        = app.injector.instanceOf[TenDaysWarningView]
+    val addApplicationStartSubordinateView        = app.injector.instanceOf[AddApplicationStartSubordinateView]
+    val addApplicationStartPrincipalView          = app.injector.instanceOf[AddApplicationStartPrincipalView]
+    val addApplicationSubordinateSuccessView      = app.injector.instanceOf[AddApplicationSubordinateSuccessView]
+    val addApplicationNameView                    = app.injector.instanceOf[AddApplicationNameView]
+    val chooseApplicationToUpliftView             = app.injector.instanceOf[ChooseApplicationToUpliftView]
 
     val beforeYouStartView: BeforeYouStartView = app.injector.instanceOf[BeforeYouStartView]
-    val mockUpliftJourneyConfig = mock[UpliftJourneyConfig]
-    val sr20UpliftJourneySwitchMock = new UpliftJourneySwitch(mockUpliftJourneyConfig)
+    val mockUpliftJourneyConfig                = mock[UpliftJourneyConfig]
+    val sr20UpliftJourneySwitchMock            = new UpliftJourneySwitch(mockUpliftJourneyConfig)
 
     val flowServiceMock = mock[GetProductionCredentialsFlowService]
-    
+
     implicit val environmentNameService = new EnvironmentNameService(appConfig)
 
     val underTest = new AddApplication(
@@ -108,7 +103,7 @@ class ChooseApplicationToUpliftActionSpec
       beforeYouStartView,
       flowServiceMock
     )
-    
+
     val hc = HeaderCarrier()
 
     fetchSessionByIdReturns(sessionId, session)
@@ -138,15 +133,16 @@ class ChooseApplicationToUpliftActionSpec
 
     def shouldNotShowAppNamesFor(summaries: Seq[ApplicationSummary])(implicit results: Future[Result]) = {
       summaries.map { summary =>
-        contentAsString(results) should not include(summary.name)
+        contentAsString(results) should not include (summary.name)
       }
     }
 
     def shouldShowMessageAboutNotNeedingProdCreds()(implicit results: Future[Result]) = {
       contentAsString(results) should include("You do not need production credentials")
     }
+
     def shouldNotShowMessageAboutNotNeedingProdCreds()(implicit results: Future[Result]) = {
-      contentAsString(results) should not include("You do not need production credentials")
+      contentAsString(results) should not include ("You do not need production credentials")
     }
   }
 
@@ -163,11 +159,11 @@ class ChooseApplicationToUpliftActionSpec
 
       contentAsString(result) should include("Select the application you want production credentials for")
     }
-    
+
     "go to next stage in journey when one app is selected and uplifted" in new Setup {
-      val summaries = sandboxAppSummaries
+      val summaries    = sandboxAppSummaries
       val sandboxAppId = summaries.head.id
-      
+
       val subsetOfSubscriptions = summaries.head.subscriptionIds.take(1)
       ApmConnectorMock.FetchUpliftableSubscriptions.willReturn(subsetOfSubscriptions)
       aUsersUplfitableAndNotUpliftableAppsReturns(summaries, summaries.map(_.id), List.empty)

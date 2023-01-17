@@ -16,12 +16,13 @@
 
 package uk.gov.hmrc.thirdpartydeveloperfrontend.mocks.service
 
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications._
+import scala.concurrent.Future.successful
+
 import org.mockito.{ArgumentMatchersSugar, MockitoSugar}
 
-import scala.concurrent.Future.successful
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.UserId
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.controllers.ApplicationSummary
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.UserId
 import uk.gov.hmrc.thirdpartydeveloperfrontend.service.AppsByTeamMemberService
 
 trait AppsByTeamMemberServiceMock extends MockitoSugar with ArgumentMatchersSugar {
@@ -31,17 +32,17 @@ trait AppsByTeamMemberServiceMock extends MockitoSugar with ArgumentMatchersSuga
     when(appsByTeamMemberServiceMock.fetchProductionSummariesByAdmin(eqTo(userId))(*)).thenReturn(successful(apps))
   }
 
-  def fetchAppsByTeamMemberReturns(environment: Environment)(apps: Seq[ApplicationWithSubscriptionIds]) = 
+  def fetchAppsByTeamMemberReturns(environment: Environment)(apps: Seq[ApplicationWithSubscriptionIds]) =
     when(appsByTeamMemberServiceMock.fetchAppsByTeamMember(eqTo(environment))(*[UserId])(*))
-    .thenReturn(successful(apps.map(_.copy(deployedTo = environment))))
-    
-  def fetchByTeamMembersWithRoleReturns(apps: Seq[ApplicationWithSubscriptionIds]) = 
+      .thenReturn(successful(apps.map(_.copy(deployedTo = environment))))
+
+  def fetchByTeamMembersWithRoleReturns(apps: Seq[ApplicationWithSubscriptionIds]) =
     when(appsByTeamMemberServiceMock.fetchByTeamMemberWithRole(*)(*)(*[UserId])(*)).thenReturn(successful(apps))
 
-  def fetchProductionSummariesByTeamMemberReturns(summaries: Seq[ApplicationSummary]) = 
+  def fetchProductionSummariesByTeamMemberReturns(summaries: Seq[ApplicationSummary]) =
     when(appsByTeamMemberServiceMock.fetchProductionSummariesByTeamMember(*[UserId])(*)).thenReturn(successful(summaries))
 
-  def fetchSandboxSummariesByTeamMemberReturns(summaries: Seq[ApplicationSummary]) = 
+  def fetchSandboxSummariesByTeamMemberReturns(summaries: Seq[ApplicationSummary]) =
     when(appsByTeamMemberServiceMock.fetchSandboxSummariesByTeamMember(*[UserId])(*)).thenReturn(successful(summaries))
 
   def fetchAllSummariesByTeamMemberReturns(sandbox: Seq[ApplicationSummary], production: Seq[ApplicationSummary]) =

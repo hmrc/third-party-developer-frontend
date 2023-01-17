@@ -16,9 +16,9 @@
 
 package uk.gov.hmrc.thirdpartydeveloperfrontend.utils
 
-import org.jsoup.nodes.{Document, Element}
-
 import scala.collection.JavaConverters._
+
+import org.jsoup.nodes.{Document, Element}
 
 object ViewHelpers {
 
@@ -44,7 +44,7 @@ object ViewHelpers {
     doc.select(s"form[action=$action]").asScala.nonEmpty
   }
 
-  def inputExistsWithValue(doc: Document, id: String,  inputType: String, value: String): Boolean = {
+  def inputExistsWithValue(doc: Document, id: String, inputType: String, value: String): Boolean = {
     doc.select(s"input[id=$id][type=$inputType][value=$value]").asScala.nonEmpty
   }
 

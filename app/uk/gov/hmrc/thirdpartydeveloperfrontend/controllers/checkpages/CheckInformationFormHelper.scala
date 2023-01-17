@@ -16,11 +16,12 @@
 
 package uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.checkpages
 
+import play.api.data.Form
+import play.api.data.Forms.{boolean, ignored, mapping}
+
 import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.{ApplicationController, ApplicationRequest}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.CheckInformation
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.views.CheckInformationForm
-import play.api.data.Form
-import play.api.data.Forms.{boolean, ignored, mapping}
 
 trait CheckInformationFormHelper {
   self: ApplicationController =>
@@ -55,27 +56,30 @@ trait CheckInformationFormHelper {
 
   private def formWithoutSubscriptionConfiguration: Form[CheckInformationForm] = Form(
     mapping(
-      "apiSubscriptionsCompleted" -> boolean.verifying("api.subscriptions.required.field", subsConfirmed => subsConfirmed),
-      "apiSubscriptionConfigurationsCompleted" ->  ignored(false),
-      "contactDetailsCompleted" -> boolean.verifying("contact.details.required.field", cd => cd),
-      "teamConfirmedCompleted" -> boolean.verifying("team.required.field", provided => provided),
-      "confirmedNameCompleted" -> boolean.verifying("confirm.name.required.field", cn => cn),
-      "providedPolicyURLCompleted" -> boolean.verifying("privacy.links.required.field", provided => provided),
+      "apiSubscriptionsCompleted"              -> boolean.verifying("api.subscriptions.required.field", subsConfirmed => subsConfirmed),
+      "apiSubscriptionConfigurationsCompleted" -> ignored(false),
+      "contactDetailsCompleted"                -> boolean.verifying("contact.details.required.field", cd => cd),
+      "teamConfirmedCompleted"                 -> boolean.verifying("team.required.field", provided => provided),
+      "confirmedNameCompleted"                 -> boolean.verifying("confirm.name.required.field", cn => cn),
+      "providedPolicyURLCompleted"             -> boolean.verifying("privacy.links.required.field", provided => provided),
       "providedTermsAndConditionsURLCompleted" -> boolean.verifying("tnc.links.required.field", provided => provided),
-      "termsOfUseAgreementsCompleted" -> boolean.verifying("agree.terms.of.use.required.field", terms => terms)
+      "termsOfUseAgreementsCompleted"          -> boolean.verifying("agree.terms.of.use.required.field", terms => terms)
     )(CheckInformationForm.apply)(CheckInformationForm.unapply)
   )
 
   private def formWithSubscriptionConfiguration: Form[CheckInformationForm] = Form(
     mapping(
-      "apiSubscriptionsCompleted" -> boolean.verifying("api.subscriptions.required.field", subsConfirmed => subsConfirmed),
-      "apiSubscriptionConfigurationsCompleted" -> boolean.verifying("api.subscription.configurations.required.field", subscriptionConfigurationConfirmed => subscriptionConfigurationConfirmed),
-      "contactDetailsCompleted" -> boolean.verifying("contact.details.required.field", cd => cd),
-      "teamConfirmedCompleted" -> boolean.verifying("team.required.field", provided => provided),
-      "confirmedNameCompleted" -> boolean.verifying("confirm.name.required.field", cn => cn),
-      "providedPolicyURLCompleted" -> boolean.verifying("privacy.links.required.field", provided => provided),
+      "apiSubscriptionsCompleted"              -> boolean.verifying("api.subscriptions.required.field", subsConfirmed => subsConfirmed),
+      "apiSubscriptionConfigurationsCompleted" -> boolean.verifying(
+        "api.subscription.configurations.required.field",
+        subscriptionConfigurationConfirmed => subscriptionConfigurationConfirmed
+      ),
+      "contactDetailsCompleted"                -> boolean.verifying("contact.details.required.field", cd => cd),
+      "teamConfirmedCompleted"                 -> boolean.verifying("team.required.field", provided => provided),
+      "confirmedNameCompleted"                 -> boolean.verifying("confirm.name.required.field", cn => cn),
+      "providedPolicyURLCompleted"             -> boolean.verifying("privacy.links.required.field", provided => provided),
       "providedTermsAndConditionsURLCompleted" -> boolean.verifying("tnc.links.required.field", provided => provided),
-      "termsOfUseAgreementsCompleted" -> boolean.verifying("agree.terms.of.use.required.field", terms => terms)
+      "termsOfUseAgreementsCompleted"          -> boolean.verifying("agree.terms.of.use.required.field", terms => terms)
     )(CheckInformationForm.apply)(CheckInformationForm.unapply)
   )
 }

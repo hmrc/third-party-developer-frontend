@@ -16,40 +16,38 @@
 
 package uk.gov.hmrc.apiplatform.modules.uplift.services
 
+import scala.concurrent.ExecutionContext.Implicits.global
+
+import uk.gov.hmrc.http.HeaderCarrier
+
+import uk.gov.hmrc.apiplatform.modules.uplift.domain.models._
+import uk.gov.hmrc.apiplatform.modules.uplift.services.mocks._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.builder._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.SubscriptionTestHelperSugar
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.apidefinitions._
-import uk.gov.hmrc.apiplatform.modules.uplift.domain.models._
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.{ApplicationId, ResponsibleIndividual, SellResellOrDistribute}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.{DeveloperSession, LoggedInState, Session}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.subscriptions.{ApiCategory, ApiData, VersionData}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.mocks.connectors.ApmConnectorMockModule
 import uk.gov.hmrc.thirdpartydeveloperfrontend.mocks.service.{ApplicationActionServiceMock, ApplicationServiceMock, SessionServiceMock}
-import uk.gov.hmrc.http.HeaderCarrier
-
-import scala.concurrent.ExecutionContext.Implicits.global
-import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.AsyncHmrcSpec
-import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.LocalUserIdTracker
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.ApplicationId
-import uk.gov.hmrc.apiplatform.modules.uplift.services.mocks._
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.SellResellOrDistribute
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.ResponsibleIndividual
+import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.{AsyncHmrcSpec, LocalUserIdTracker}
 
 class UpliftJourneyServiceSpec
-                extends AsyncHmrcSpec
-                with SampleSession
-                with SampleApplication
-                with SubscriptionTestHelperSugar
-                with SubscriptionsBuilder
-                with DeveloperBuilder
-                with LocalUserIdTracker {
+    extends AsyncHmrcSpec
+    with SampleSession
+    with SampleApplication
+    with SubscriptionTestHelperSugar
+    with SubscriptionsBuilder
+    with DeveloperBuilder
+    with LocalUserIdTracker {
 
   trait Setup
-    extends ApplicationServiceMock 
-    with ApplicationActionServiceMock 
-    with ApmConnectorMockModule 
-    with GetProductionCredentialsFlowServiceMockModule
-    with UpliftJourneyServiceMockModule
-    with SessionServiceMock {
+      extends ApplicationServiceMock
+      with ApplicationActionServiceMock
+      with ApmConnectorMockModule
+      with GetProductionCredentialsFlowServiceMockModule
+      with UpliftJourneyServiceMockModule
+      with SessionServiceMock {
 
     val sandboxAppId = ApplicationId.random
 
@@ -61,11 +59,11 @@ class UpliftJourneyServiceSpec
     )
 
     val appName: String = "app"
-    val apiVersion = ApiVersion("version")
+    val apiVersion      = ApiVersion("version")
 
     val developer = buildDeveloper()
     val sessionId = "sessionId"
-    val session = Session(sessionId, developer, LoggedInState.LOGGED_IN)
+    val session   = Session(sessionId, developer, LoggedInState.LOGGED_IN)
 
     val loggedInDeveloper = DeveloperSession(session)
 
@@ -104,33 +102,51 @@ class UpliftJourneyServiceSpec
       fields = emptyFields
     )
 
-    val singleApi: Map[ApiContext,ApiData] = Map(
+    val singleApi: Map[ApiContext, ApiData] = Map(
       ApiContext("test-api-context-1") ->
-        ApiData("test-api-context-1", "test-api-context-1", true, Map(ApiVersion("1.0") ->
-          VersionData(APIStatus.STABLE, APIAccess(APIAccessType.PUBLIC))), List(ApiCategory.EXAMPLE))
+        ApiData(
+          "test-api-context-1",
+          "test-api-context-1",
+          true,
+          Map(ApiVersion("1.0") ->
+            VersionData(APIStatus.STABLE, APIAccess(APIAccessType.PUBLIC))),
+          List(ApiCategory.EXAMPLE)
+        )
     )
 
-    val multipleApis: Map[ApiContext,ApiData] = Map(
+    val multipleApis: Map[ApiContext, ApiData] = Map(
       ApiContext("test-api-context-1") ->
-        ApiData("test-api-context-1", "test-api-context-1", true, Map(ApiVersion("1.0") ->
-          VersionData(APIStatus.STABLE, APIAccess(APIAccessType.PUBLIC))), List(ApiCategory.EXAMPLE)),
+        ApiData(
+          "test-api-context-1",
+          "test-api-context-1",
+          true,
+          Map(ApiVersion("1.0") ->
+            VersionData(APIStatus.STABLE, APIAccess(APIAccessType.PUBLIC))),
+          List(ApiCategory.EXAMPLE)
+        ),
       ApiContext("test-api-context-2") ->
-        ApiData("test-api-context-2", "test-api-context-2", true, Map(ApiVersion("1.0") ->
-          VersionData(APIStatus.STABLE, APIAccess(APIAccessType.PUBLIC))), List(ApiCategory.EXAMPLE))
+        ApiData(
+          "test-api-context-2",
+          "test-api-context-2",
+          true,
+          Map(ApiVersion("1.0") ->
+            VersionData(APIStatus.STABLE, APIAccess(APIAccessType.PUBLIC))),
+          List(ApiCategory.EXAMPLE)
+        )
     )
 
-    def toIdentifiers(apis: Map[ApiContext,ApiData]): Set[ApiIdentifier] =
+    def toIdentifiers(apis: Map[ApiContext, ApiData]): Set[ApiIdentifier] =
       apis.flatMap {
         case (context, data) => data.versions.keySet.map(version => ApiIdentifier(context, version))
       }.toSet
 
     ApmConnectorMock.FetchAllApis.willReturn(singleApi)
 
-    val aResponsibleIndividual = ResponsibleIndividual(ResponsibleIndividual.Name("test full name"), ResponsibleIndividual.EmailAddress("test email address"))
-    val sellResellOrDistribute = SellResellOrDistribute("Yes")
+    val aResponsibleIndividual      = ResponsibleIndividual(ResponsibleIndividual.Name("test full name"), ResponsibleIndividual.EmailAddress("test email address"))
+    val sellResellOrDistribute      = SellResellOrDistribute("Yes")
     val doNotSellResellOrDistribute = SellResellOrDistribute("No")
-    val aListOfSubscriptions = ApiSubscriptions(toIdentifiers(multipleApis).map(id => id -> true).toMap)
-    val aSingleSubscriptions = ApiSubscriptions(toIdentifiers(singleApi).map(id => id -> true).toMap)
+    val aListOfSubscriptions        = ApiSubscriptions(toIdentifiers(multipleApis).map(id => id -> true).toMap)
+    val aSingleSubscriptions        = ApiSubscriptions(toIdentifiers(singleApi).map(id => id -> true).toMap)
   }
 
   "confirmAndUplift" should {
@@ -152,7 +168,7 @@ class UpliftJourneyServiceSpec
 
       result.left.value shouldBe "No sell or resell or distribute set"
     }
-    
+
     "fail when missing subscriptions" in new Setup {
       GPCFlowServiceMock.FetchFlow.thenReturns(GetProductionCredentialsFlow("", Some(sellResellOrDistribute), None))
 
@@ -160,7 +176,7 @@ class UpliftJourneyServiceSpec
 
       result.left.value shouldBe "No subscriptions set"
     }
-      
+
     "fail when no upliftable apis found" in new Setup {
       GPCFlowServiceMock.FetchFlow.thenReturns(GetProductionCredentialsFlow("", Some(sellResellOrDistribute), Some(aListOfSubscriptions)))
       ApmConnectorMock.FetchUpliftableSubscriptions.willReturn(Set())
@@ -170,16 +186,17 @@ class UpliftJourneyServiceSpec
       result.left.value shouldBe "No apis found to subscribe to"
     }
   }
-  
+
   "apiSubscriptionData" should {
     "returns the names of apis when flow has selected them ignoring any that are not upliftable" in new Setup {
       GPCFlowServiceMock.FetchFlow.thenReturns(GetProductionCredentialsFlow("", Some(sellResellOrDistribute), Some(aListOfSubscriptions)))
       ApmConnectorMock.FetchUpliftableSubscriptions.willReturn(Set(apiIdentifier1, apiIdentifier2))
-     
-      private val result = await(underTest.apiSubscriptionData(sandboxAppId, loggedInDeveloper, List(testAPISubscriptionStatus1, testAPISubscriptionStatus2, testAPISubscriptionStatus3)))
+
+      private val result =
+        await(underTest.apiSubscriptionData(sandboxAppId, loggedInDeveloper, List(testAPISubscriptionStatus1, testAPISubscriptionStatus2, testAPISubscriptionStatus3)))
 
       result match {
-        case (names, flag) => 
+        case (names, flag) =>
           names.size shouldBe 2
           names.head shouldBe "test-api-1 - 1.0"
           flag shouldBe true
@@ -189,11 +206,12 @@ class UpliftJourneyServiceSpec
     "returns the name of selected api ignoring any that are not upliftable" in new Setup {
       GPCFlowServiceMock.FetchFlow.thenReturns(GetProductionCredentialsFlow("", Some(sellResellOrDistribute), Some(aSingleSubscriptions)))
       ApmConnectorMock.FetchUpliftableSubscriptions.willReturn(Set(apiIdentifier1, apiIdentifier2))
-     
-      private val result = await(underTest.apiSubscriptionData(sandboxAppId, loggedInDeveloper, List(testAPISubscriptionStatus1, testAPISubscriptionStatus2, testAPISubscriptionStatus3)))
+
+      private val result =
+        await(underTest.apiSubscriptionData(sandboxAppId, loggedInDeveloper, List(testAPISubscriptionStatus1, testAPISubscriptionStatus2, testAPISubscriptionStatus3)))
 
       result match {
-        case (names, flag) => 
+        case (names, flag) =>
           names.size shouldBe 1
           names.head shouldBe "test-api-1 - 1.0"
           flag shouldBe true
@@ -203,11 +221,12 @@ class UpliftJourneyServiceSpec
     "returns the name of selected api and false when there is only one upliftable api" in new Setup {
       GPCFlowServiceMock.FetchFlow.thenReturns(GetProductionCredentialsFlow("", Some(sellResellOrDistribute), Some(aSingleSubscriptions)))
       ApmConnectorMock.FetchUpliftableSubscriptions.willReturn(Set(apiIdentifier1))
-     
-      private val result = await(underTest.apiSubscriptionData(sandboxAppId, loggedInDeveloper, List(testAPISubscriptionStatus1, testAPISubscriptionStatus2, testAPISubscriptionStatus3)))
+
+      private val result =
+        await(underTest.apiSubscriptionData(sandboxAppId, loggedInDeveloper, List(testAPISubscriptionStatus1, testAPISubscriptionStatus2, testAPISubscriptionStatus3)))
 
       result match {
-        case (names, flag) => 
+        case (names, flag) =>
           names.size shouldBe 1
           names.head shouldBe "test-api-1 - 1.0"
           flag shouldBe false

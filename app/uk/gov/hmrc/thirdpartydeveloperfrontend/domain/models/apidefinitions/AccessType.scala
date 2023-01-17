@@ -19,16 +19,16 @@ package uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.apidefinitions
 import enumeratum.{EnumEntry, PlayEnum}
 
 sealed trait AccessType extends EnumEntry {
-  def isStandard = this == AccessType.STANDARD
-  def isNotStandard = ! isStandard
+  def isStandard    = this == AccessType.STANDARD
+  def isNotStandard = !isStandard
   def isPriviledged = this == AccessType.PRIVILEGED
-  def isROPC = this == AccessType.ROPC
+  def isROPC        = this == AccessType.ROPC
 }
 
 object AccessType extends PlayEnum[AccessType] {
   val values = findValues
 
-  final case object STANDARD    extends AccessType
-  final case object PRIVILEGED  extends AccessType
-  final case object ROPC        extends AccessType
+  final case object STANDARD   extends AccessType
+  final case object PRIVILEGED extends AccessType
+  final case object ROPC       extends AccessType
 }

@@ -16,73 +16,65 @@
 
 package uk.gov.hmrc.apiplatform.modules.submissions.controllers
 
-import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.UserRequest
-import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.BaseController
-import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.ApplicationActionBuilders
-import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.HasApplication
-import uk.gov.hmrc.apiplatform.modules.submissions.domain.models._
+import scala.concurrent.Future.successful
+import scala.concurrent.{ExecutionContext, Future}
 
-import scala.concurrent.ExecutionContext
-import play.api.mvc.ActionRefiner
-
-import scala.concurrent.Future
-import play.api.mvc._
-import uk.gov.hmrc.apiplatform.modules.common.services.EitherTHelper
 import cats.implicits._
 import cats.instances.future.catsStdInstancesForFuture
-import uk.gov.hmrc.apiplatform.modules.submissions.domain.models.Submission.Status
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.Application
-import uk.gov.hmrc.apiplatform.modules.submissions.services.SubmissionService
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.ApplicationId
-import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.ApplicationRequest
 
-import scala.concurrent.Future.successful
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.State
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.CollaboratorRole
+import play.api.mvc.{ActionRefiner, _}
+
+import uk.gov.hmrc.apiplatform.modules.common.services.EitherTHelper
+import uk.gov.hmrc.apiplatform.modules.submissions.domain.models.Submission.Status
+import uk.gov.hmrc.apiplatform.modules.submissions.domain.models._
+import uk.gov.hmrc.apiplatform.modules.submissions.services.SubmissionService
+import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.{ApplicationActionBuilders, ApplicationRequest, BaseController, HasApplication, UserRequest}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.apidefinitions.APISubscriptionStatus
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.{Application, ApplicationId, CollaboratorRole, State}
 
 class SubmissionRequest[A](val extSubmission: ExtendedSubmission, val userRequest: UserRequest[A]) extends UserRequest[A](userRequest.developerSession, userRequest.msgRequest) {
-  lazy val submission = extSubmission.submission
+  lazy val submission         = extSubmission.submission
   lazy val answersToQuestions = submission.latestInstance.answersToQuestions
 }
 
-class SubmissionApplicationRequest[A](val application: Application, val submissionRequest: SubmissionRequest[A], val subscriptions: List[APISubscriptionStatus]) extends SubmissionRequest[A](submissionRequest.extSubmission, submissionRequest.userRequest) with HasApplication
+class SubmissionApplicationRequest[A](val application: Application, val submissionRequest: SubmissionRequest[A], val subscriptions: List[APISubscriptionStatus])
+    extends SubmissionRequest[A](submissionRequest.extSubmission, submissionRequest.userRequest) with HasApplication
 
 object SubmissionActionBuilders {
-  
+
   object RoleFilter {
     type Type = CollaboratorRole => Boolean
-    val isAdminRole: Type = _.isAdministrator
+    val isAdminRole: Type  = _.isAdministrator
     val isTeamMember: Type = _ => true
   }
 
-  
   object ApplicationStateFilter {
     type Type = State => Boolean
-    val notProduction: Type = !_.isProduction
-    val production: Type = _.isProduction
-    val preProduction: Type = _.isPreProduction
-    val inTesting: Type = _.isInTesting
-    val allAllowed: Type = _ => true
+    val notProduction: Type   = !_.isProduction
+    val production: Type      = _.isProduction
+    val preProduction: Type   = _.isPreProduction
+    val inTesting: Type       = _.isInTesting
+    val allAllowed: Type      = _ => true
     val pendingApproval: Type = _.isPendingApproval
   }
 
   object SubmissionStatusFilter {
     type Type = Status => Boolean
-    val answeredCompletely: Type = _.isAnsweredCompletely
-    val submitted: Type = _.isSubmitted
+    val answeredCompletely: Type         = _.isAnsweredCompletely
+    val submitted: Type                  = _.isSubmitted
     val submittedGrantedOrDeclined: Type = status => status.isSubmitted || status.isGranted || status.isGrantedWithWarnings || status.isDeclined
-    val granted: Type = status => status.isGranted || status.isGrantedWithWarnings
-    val allAllowed: Type = _ => true
+    val granted: Type                    = status => status.isGranted || status.isGrantedWithWarnings
+    val allAllowed: Type                 = _ => true
   }
 }
+
 trait SubmissionActionBuilders {
   self: BaseController with ApplicationActionBuilders =>
 
-  import SubmissionActionBuilders.{SubmissionStatusFilter,ApplicationStateFilter,RoleFilter}
+  import SubmissionActionBuilders.{ApplicationStateFilter, RoleFilter, SubmissionStatusFilter}
 
   val submissionService: SubmissionService
-  
+
   private[this] val ecPassThru = ec
 
   private val E = new EitherTHelper[Result] {
@@ -92,46 +84,49 @@ trait SubmissionActionBuilders {
   private def submissionRefiner(submissionId: Submission.Id)(implicit ec: ExecutionContext): ActionRefiner[UserRequest, SubmissionRequest] =
     new ActionRefiner[UserRequest, SubmissionRequest] {
       def executionContext = ec
+
       def refine[A](input: UserRequest[A]): Future[Either[Result, SubmissionRequest[A]]] = {
         implicit val implicitRequest: MessagesRequest[A] = input
         (
           for {
-            submission <- E.fromOptionF(submissionService.fetch(submissionId), NotFound(errorHandler.notFoundTemplate(input)) )
+            submission <- E.fromOptionF(submissionService.fetch(submissionId), NotFound(errorHandler.notFoundTemplate(input)))
           } yield new SubmissionRequest(submission, input)
         )
-        .value
+          .value
       }
     }
 
   private def submissionApplicationRefiner(implicit ec: ExecutionContext): ActionRefiner[SubmissionRequest, SubmissionApplicationRequest] =
     new ActionRefiner[SubmissionRequest, SubmissionApplicationRequest] {
       override def executionContext = ec
+
       override def refine[A](request: SubmissionRequest[A]): Future[Either[Result, SubmissionApplicationRequest[A]]] = {
         implicit val implicitRequest: MessagesRequest[A] = request
-        
+
         applicationActionService.process(request.submission.applicationId, request.userRequest)
-        .toRight(NotFound(errorHandler.notFoundTemplate(request)))
-        .map(r => new SubmissionApplicationRequest(r.application, request, r.subscriptions))
-        .value
+          .toRight(NotFound(errorHandler.notFoundTemplate(request)))
+          .map(r => new SubmissionApplicationRequest(r.application, request, r.subscriptions))
+          .value
       }
     }
 
   private def applicationSubmissionRefiner(implicit ec: ExecutionContext): ActionRefiner[ApplicationRequest, SubmissionApplicationRequest] =
     new ActionRefiner[ApplicationRequest, SubmissionApplicationRequest] {
       override def executionContext = ec
+
       override def refine[A](request: ApplicationRequest[A]): Future[Either[Result, SubmissionApplicationRequest[A]]] = {
         implicit val implicitRequest: MessagesRequest[A] = request
-        
+
         (
           for {
-            submission <- E.fromOptionF(submissionService.fetchLatestExtendedSubmission(request.application.id), NotFound(errorHandler.notFoundTemplate(request)) )
+            submission <- E.fromOptionF(submissionService.fetchLatestExtendedSubmission(request.application.id), NotFound(errorHandler.notFoundTemplate(request)))
           } yield new SubmissionApplicationRequest(request.application, new SubmissionRequest(submission, request.userRequest), request.subscriptions)
         )
-        .value
+          .value
       }
     }
 
-  private def collaboratorFilter(allowedRoleFilter: RoleFilter.Type): ActionFilter[ApplicationRequest] = 
+  private def collaboratorFilter(allowedRoleFilter: RoleFilter.Type): ActionFilter[ApplicationRequest] =
     new ActionFilter[ApplicationRequest] {
 
       override protected def executionContext: ExecutionContext = ec
@@ -141,12 +136,10 @@ trait SubmissionActionBuilders {
 
         successful(
           thisCollaboratorRole
-          .filter(allowedRoleFilter)
-          .fold[Option[Result]](
-            Some(BadRequest("User is not authorised for this action"))
-          )(
-            _ => None
-          )
+            .filter(allowedRoleFilter)
+            .fold[Option[Result]](
+              Some(BadRequest("User is not authorised for this action"))
+            )(_ => None)
         )
       }
     }
@@ -170,7 +163,7 @@ trait SubmissionActionBuilders {
       override protected def executionContext: ExecutionContext = ec
 
       override protected def filter[A](request: AR[A]): Future[Option[Result]] =
-        if(allowedStateFilter(request.application.state.name)) {
+        if (allowedStateFilter(request.application.state.name)) {
           successful(None)
         } else {
           successful(Some(BadRequest(s"Application is in an incompatible state of ${request.application.state.name}")))
@@ -181,25 +174,44 @@ trait SubmissionActionBuilders {
     Action.async { implicit request =>
       (
         loggedInActionRefiner() andThen
-        submissionRefiner(submissionId) andThen
-        submissionApplicationRefiner
+          submissionRefiner(submissionId) andThen
+          submissionApplicationRefiner
       ).invokeBlock(request, block)
     }
   }
 
-  def withApplicationSubmission(allowedStateFilter: ApplicationStateFilter.Type = ApplicationStateFilter.allAllowed, allowedRoleFilter: RoleFilter.Type = RoleFilter.isTeamMember)(applicationId: ApplicationId)(block: SubmissionApplicationRequest[AnyContent] => Future[Result])(implicit ec: ExecutionContext): Action[AnyContent] = {
+  def withApplicationSubmission(
+      allowedStateFilter: ApplicationStateFilter.Type = ApplicationStateFilter.allAllowed,
+      allowedRoleFilter: RoleFilter.Type = RoleFilter.isTeamMember
+    )(
+      applicationId: ApplicationId
+    )(
+      block: SubmissionApplicationRequest[AnyContent] => Future[Result]
+    )(implicit ec: ExecutionContext
+    ): Action[AnyContent] = {
     Action.async { implicit request =>
       (
         loggedInActionRefiner() andThen
-        applicationRequestRefiner(applicationId) andThen
-        collaboratorFilter(allowedRoleFilter) andThen
-        applicationSubmissionRefiner andThen
-        applicationStateFilter(allowedStateFilter)
-      ).invokeBlock(request,block)
+          applicationRequestRefiner(applicationId) andThen
+          collaboratorFilter(allowedRoleFilter) andThen
+          applicationSubmissionRefiner andThen
+          applicationStateFilter(allowedStateFilter)
+      ).invokeBlock(request, block)
     }
   }
 
-  def withApplicationAndSubmissionInSpecifiedState(allowedStateFilter: ApplicationStateFilter.Type = ApplicationStateFilter.allAllowed, allowedRoleFilter: RoleFilter.Type = RoleFilter.isTeamMember, submissionStatusFilter: SubmissionStatusFilter.Type = SubmissionStatusFilter.allAllowed)(redirectOnNotMatched: => Result)(applicationId: ApplicationId)(block: SubmissionApplicationRequest[AnyContent] => Future[Result])(implicit ec: ExecutionContext): Action[AnyContent] = {
+  def withApplicationAndSubmissionInSpecifiedState(
+      allowedStateFilter: ApplicationStateFilter.Type = ApplicationStateFilter.allAllowed,
+      allowedRoleFilter: RoleFilter.Type = RoleFilter.isTeamMember,
+      submissionStatusFilter: SubmissionStatusFilter.Type = SubmissionStatusFilter.allAllowed
+    )(
+      redirectOnNotMatched: => Result
+    )(
+      applicationId: ApplicationId
+    )(
+      block: SubmissionApplicationRequest[AnyContent] => Future[Result]
+    )(implicit ec: ExecutionContext
+    ): Action[AnyContent] = {
     Action.async { implicit request =>
       (
         loggedInActionRefiner() andThen
@@ -208,7 +220,7 @@ trait SubmissionActionBuilders {
           applicationSubmissionRefiner andThen
           applicationStateFilter(allowedStateFilter) andThen
           submissionFilter[SubmissionApplicationRequest](submissionStatusFilter)(redirectOnNotMatched)
-        ).invokeBlock(request, block)
+      ).invokeBlock(request, block)
     }
   }
 }

@@ -16,27 +16,27 @@
 
 package uk.gov.hmrc.thirdpartydeveloperfrontend.controllers
 
-import uk.gov.hmrc.thirdpartydeveloperfrontend.builder.DeveloperBuilder
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.ApplicationUpdateSuccessful
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.Application
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.{Developer, DeveloperSession, LoggedInState, Session}
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.flows.IpAllowlistFlow
-import uk.gov.hmrc.thirdpartydeveloperfrontend.mocks.service._
-import org.scalatest.Assertion
-import play.api.mvc.Result
-import play.api.test.FakeRequest
-import play.api.test.Helpers._
-import uk.gov.hmrc.thirdpartydeveloperfrontend.service.IpAllowlistService
-import uk.gov.hmrc.http.{ForbiddenException, HeaderCarrier}
-import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.WithLoggedInSession._
-import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.{TestApplications, WithCSRFAddToken}
-import views.html.ipAllowlist._
-
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 import scala.concurrent.Future.{failed, successful}
-import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.LocalUserIdTracker
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.IpAllowlist
+
+import org.scalatest.Assertion
+import views.html.ipAllowlist._
+
+import play.api.mvc.Result
+import play.api.test.FakeRequest
+import play.api.test.Helpers._
+import uk.gov.hmrc.http.{ForbiddenException, HeaderCarrier}
+
+import uk.gov.hmrc.thirdpartydeveloperfrontend.builder.DeveloperBuilder
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.ApplicationUpdateSuccessful
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.{Application, IpAllowlist}
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.{Developer, DeveloperSession, LoggedInState, Session}
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.flows.IpAllowlistFlow
+import uk.gov.hmrc.thirdpartydeveloperfrontend.mocks.service._
+import uk.gov.hmrc.thirdpartydeveloperfrontend.service.IpAllowlistService
+import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.WithLoggedInSession._
+import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.{LocalUserIdTracker, TestApplications, WithCSRFAddToken}
 
 class IpAllowListControllerSpec
     extends BaseControllerSpec
@@ -47,7 +47,7 @@ class IpAllowListControllerSpec
     with LocalUserIdTracker {
 
   trait Setup extends ApplicationServiceMock with SessionServiceMock {
-    implicit val hc: HeaderCarrier = HeaderCarrier()
+    implicit val hc: HeaderCarrier                 = HeaderCarrier()
     val mockIpAllowlistService: IpAllowlistService = mock[IpAllowlistService]
 
     val underTest = new IpAllowListController(
@@ -71,14 +71,14 @@ class IpAllowListControllerSpec
       app.injector.instanceOf[RemoveCidrBlockView]
     )
 
-    val sessionId = "sessionId"
+    val sessionId       = "sessionId"
     val loggedInRequest = FakeRequest().withLoggedIn(underTest, implicitly)(sessionId)
 
-    val admin: Developer = buildDeveloper(emailAddress = "admin@example.com")
+    val admin: Developer     = buildDeveloper(emailAddress = "admin@example.com")
     val developer: Developer = buildDeveloper(emailAddress = "developer@example.com")
 
     val anApplicationWithoutIpAllowlist: Application = anApplication(adminEmail = admin.email, developerEmail = developer.email)
-    val anApplicationWithIpAllowlist: Application = anApplicationWithoutIpAllowlist.copy(ipAllowlist = IpAllowlist(allowlist = Set("1.1.1.0/24")))
+    val anApplicationWithIpAllowlist: Application    = anApplicationWithoutIpAllowlist.copy(ipAllowlist = IpAllowlist(allowlist = Set("1.1.1.0/24")))
 
     def givenTheUserIsLoggedInAs(user: Developer): DeveloperSession = {
       val session = Session(sessionId, user, LoggedInState.LOGGED_IN)
@@ -231,7 +231,7 @@ class IpAllowListControllerSpec
       status(result) shouldBe OK
       val body: String = contentAsString(result)
       body should include("Edit your IP allow list")
-      body should not include("Remove your IP allow list")
+      body should not include ("Remove your IP allow list")
       verifyIpAllowlistSurveyIsPresent(body)
     }
 

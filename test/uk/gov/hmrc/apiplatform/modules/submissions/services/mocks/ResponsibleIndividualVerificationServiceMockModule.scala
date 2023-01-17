@@ -16,27 +16,30 @@
 
 package uk.gov.hmrc.apiplatform.modules.submissions.services.mocks
 
+import scala.concurrent.Future.successful
+
 import org.mockito.{ArgumentMatchersSugar, MockitoSugar}
+
+import uk.gov.hmrc.apiplatform.modules.submissions.domain.models._
 import uk.gov.hmrc.apiplatform.modules.submissions.services.ResponsibleIndividualVerificationService
 
-import scala.concurrent.Future.successful
-import uk.gov.hmrc.apiplatform.modules.submissions.domain.models._
-
 trait ResponsibleIndividualVerificationServiceMockModule extends MockitoSugar with ArgumentMatchersSugar {
-  
+
   protected trait BaseResponsibleIndividualVerificationServiceMock {
     def aMock: ResponsibleIndividualVerificationService
 
     object FetchResponsibleIndividualVerification {
+
       def thenReturns(out: ResponsibleIndividualVerification) =
         when(aMock.fetchResponsibleIndividualVerification(*)(*)).thenReturn(successful(Some(out)))
-        
+
       def thenReturnsNone() = {
         when(aMock.fetchResponsibleIndividualVerification(*)(*)).thenReturn(successful(None))
       }
     }
 
     object Accept {
+
       def thenReturns(out: ResponsibleIndividualVerification) =
         when(aMock.accept(*)(*)).thenReturn(successful(Right(out)))
 
@@ -46,6 +49,7 @@ trait ResponsibleIndividualVerificationServiceMockModule extends MockitoSugar wi
     }
 
     object Decline {
+
       def thenReturns(out: ResponsibleIndividualVerification) =
         when(aMock.decline(*)(*)).thenReturn(successful(Right(out)))
 

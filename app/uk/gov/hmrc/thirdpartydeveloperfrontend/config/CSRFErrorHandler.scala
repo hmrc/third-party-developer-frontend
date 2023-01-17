@@ -17,14 +17,15 @@
 package uk.gov.hmrc.thirdpartydeveloperfrontend.config
 
 import javax.inject.Inject
-import play.api.http.Status.FORBIDDEN
-import play.api.mvc.{RequestHeader, Result}
-import play.api.mvc.Results.Redirect
-import play.filters.csrf.CSRF
-
 import scala.concurrent.Future
 
-class  CSRFErrorHandler @Inject()(errorHandler: ErrorHandler) extends CSRF.ErrorHandler {
+import play.api.http.Status.FORBIDDEN
+import play.api.mvc.Results.Redirect
+import play.api.mvc.{RequestHeader, Result}
+import play.filters.csrf.CSRF
+
+class CSRFErrorHandler @Inject() (errorHandler: ErrorHandler) extends CSRF.ErrorHandler {
+
   override def handle(req: RequestHeader, msg: String): Future[Result] = {
     val login = uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.routes.UserLoginAccount.login
 

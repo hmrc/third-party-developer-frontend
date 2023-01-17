@@ -16,8 +16,7 @@
 
 package uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.subscriptions
 
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.apidefinitions.{ApiVersion, APIStatus, APIAccess, ApiVersionDefinition, ApiContext}
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.apidefinitions.ApiIdentifier
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.apidefinitions._
 
 case class ApiCategory(value: String) extends AnyVal
 
@@ -34,28 +33,30 @@ case class ApiData(
     name: String,
     isTestSupport: Boolean,
     versions: Map[ApiVersion, VersionData],
-    categories: List[ApiCategory])
+    categories: List[ApiCategory]
+  )
 
 object ApiData {
-  def filterApis(contextFilter: ApiData => Boolean)(in: Map[ApiContext,ApiData]): Map[ApiContext,ApiData] = {
+
+  def filterApis(contextFilter: ApiData => Boolean)(in: Map[ApiContext, ApiData]): Map[ApiContext, ApiData] = {
     in.filter {
-      case (c,d) => contextFilter(d)
+      case (c, d) => contextFilter(d)
     }
   }
 
-  def filterApis(contextFilter: ApiData => Boolean, versionFilter: VersionData => Boolean)(in: Map[ApiContext,ApiData]): Map[ApiContext,ApiData] = {
-    def filterVersions(in: Map[ApiVersion,VersionData]): Map[ApiVersion,VersionData] = {
+  def filterApis(contextFilter: ApiData => Boolean, versionFilter: VersionData => Boolean)(in: Map[ApiContext, ApiData]): Map[ApiContext, ApiData] = {
+    def filterVersions(in: Map[ApiVersion, VersionData]): Map[ApiVersion, VersionData] = {
       in.filter {
-        case (v,d) => versionFilter(d)
+        case (v, d) => versionFilter(d)
       }
     }
 
     val empty = Map.empty[ApiContext, ApiData]
 
     in.flatMap {
-      case (c,d) =>
+      case (c, d) =>
         val filteredVersions = filterVersions(d.versions)
-        if(contextFilter(d) && filteredVersions.nonEmpty) {
+        if (contextFilter(d) && filteredVersions.nonEmpty) {
           Map(c -> d.copy(versions = filteredVersions))
         } else {
           empty
@@ -63,9 +64,9 @@ object ApiData {
     }
   }
 
-  def toApiIdentifiers(in: Map[ApiContext,ApiData]): Set[ApiIdentifier] = {
+  def toApiIdentifiers(in: Map[ApiContext, ApiData]): Set[ApiIdentifier] = {
     in.flatMap {
-      case (c,d) => d.versions.keySet.map(v => ApiIdentifier(c,v))
+      case (c, d) => d.versions.keySet.map(v => ApiIdentifier(c, v))
     }.toSet
   }
 }

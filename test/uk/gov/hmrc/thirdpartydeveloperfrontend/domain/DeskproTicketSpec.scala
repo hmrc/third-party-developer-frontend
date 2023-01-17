@@ -16,24 +16,25 @@
 
 package uk.gov.hmrc.thirdpartydeveloperfrontend.domain
 
-import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.SupportEnquiryForm
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.connectors.DeskproTicket
 import play.api.test.FakeRequest
+
+import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.SupportEnquiryForm
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.apidefinitions.ApiVersion
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.ApplicationId
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.connectors.DeskproTicket
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.AsyncHmrcSpec
 
 class DeskproTicketSpec extends AsyncHmrcSpec {
 
   implicit val fakeRequest = FakeRequest()
 
-  val requestorName = "bob example"
-  val requestorEmail = "bob@example.com"
+  val requestorName   = "bob example"
+  val requestorEmail  = "bob@example.com"
   val applicationName = "my app"
-  val applicationId = ApplicationId.random
-  val apiName = "my api"
-  val apiVersion = ApiVersion.random
-  val comments = "very nice"
+  val applicationId   = ApplicationId.random
+  val apiName         = "my api"
+  val apiVersion      = ApiVersion.random
+  val comments        = "very nice"
 
   def checkDeskproTicket(ticket: DeskproTicket, expectedSubject: String, expectedMsg: String) = {
     ticket.message.replaceAll("\\s+", " ") shouldBe expectedMsg
@@ -41,14 +42,17 @@ class DeskproTicketSpec extends AsyncHmrcSpec {
     ticket.email shouldBe requestorEmail
   }
 
-
   "A DeskproTicket created from a support enquiry" should {
     "have the correct details populated" in {
       val form = SupportEnquiryForm(requestorName, requestorEmail, comments)
 
       val ticket = DeskproTicket.createFromSupportEnquiry(form, applicationName)
 
-      checkDeskproTicket(ticket, s"$applicationName: Support Enquiry", s"$requestorEmail has submitted the following support enquiry: $comments Please send them a response within 2 working days. HMRC Developer Hub")
+      checkDeskproTicket(
+        ticket,
+        s"$applicationName: Support Enquiry",
+        s"$requestorEmail has submitted the following support enquiry: $comments Please send them a response within 2 working days. HMRC Developer Hub"
+      )
     }
   }
 
@@ -56,7 +60,11 @@ class DeskproTicketSpec extends AsyncHmrcSpec {
     "have the correct details populated" in {
       val ticket = DeskproTicket.createForApiSubscribe(requestorName, requestorEmail, applicationName, applicationId, apiName, apiVersion)
 
-      checkDeskproTicket(ticket, "Request to subscribe to an API", s"I '$requestorEmail' want my application '$applicationName' identified by '${applicationId.value}' to be subscribed to the API '$apiName' with version '${apiVersion.value}'")
+      checkDeskproTicket(
+        ticket,
+        "Request to subscribe to an API",
+        s"I '$requestorEmail' want my application '$applicationName' identified by '${applicationId.value}' to be subscribed to the API '$apiName' with version '${apiVersion.value}'"
+      )
     }
   }
 
@@ -64,7 +72,11 @@ class DeskproTicketSpec extends AsyncHmrcSpec {
     "have the correct details populated" in {
       val ticket = DeskproTicket.createForApiUnsubscribe(requestorName, requestorEmail, applicationName, applicationId, apiName, apiVersion)
 
-      checkDeskproTicket(ticket, "Request to unsubscribe from an API", s"I '$requestorEmail' want my application '$applicationName' identified by '${applicationId.value}' to be unsubscribed from the API '$apiName' with version '${apiVersion.value}'")
+      checkDeskproTicket(
+        ticket,
+        "Request to unsubscribe from an API",
+        s"I '$requestorEmail' want my application '$applicationName' identified by '${applicationId.value}' to be unsubscribed from the API '$apiName' with version '${apiVersion.value}'"
+      )
     }
   }
 }

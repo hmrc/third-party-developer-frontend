@@ -17,15 +17,21 @@
 package uk.gov.hmrc.thirdpartydeveloperfrontend.controllers
 
 import cats.data.NonEmptyList
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.apidefinitions.{ApiContext, APISubscriptionStatus, APISubscriptionStatusWithSubscriptionFields, APISubscriptionStatusWithWritableSubscriptionField}
+
+import play.api.mvc._
+
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.apidefinitions.{
+  APISubscriptionStatus,
+  APISubscriptionStatusWithSubscriptionFields,
+  APISubscriptionStatusWithWritableSubscriptionField,
+  ApiContext
+}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.DeveloperSession
-import play.api.mvc._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.subscriptions.ApiData
 
-
 class UserRequest[A](val developerSession: DeveloperSession, val msgRequest: MessagesRequest[A]) extends MessagesRequest[A](msgRequest, msgRequest.messagesApi) {
-  lazy val userId = developerSession.developer.userId
+  lazy val userId    = developerSession.developer.userId
   lazy val sessionId = developerSession.session.sessionId
 }
 
@@ -39,26 +45,27 @@ class ApplicationRequest[A](
     val application: Application,
     val deployedTo: Environment,
     val subscriptions: List[APISubscriptionStatus],
-    val openAccessApis: Map[ApiContext,ApiData],
+    val openAccessApis: Map[ApiContext, ApiData],
     val role: CollaboratorRole,
     val userRequest: UserRequest[A]
-) extends UserRequest[A](userRequest.developerSession, userRequest.msgRequest) with HasApplication {
+  ) extends UserRequest[A](userRequest.developerSession, userRequest.msgRequest) with HasApplication {
+
   def hasSubscriptionFields: Boolean = {
     subscriptions.exists(s => s.subscribed && s.fields.fields.nonEmpty)
   }
 }
 
 class ApplicationWithFieldDefinitionsRequest[A](
-  val fieldDefinitions: NonEmptyList[APISubscriptionStatusWithSubscriptionFields],
-  applicationRequest: ApplicationRequest[A]
-) extends ApplicationRequest[A](
-  applicationRequest.application,
-  applicationRequest.deployedTo,
-  applicationRequest.subscriptions,
-  applicationRequest.openAccessApis,
-  applicationRequest.role,
-  applicationRequest.userRequest
-)
+    val fieldDefinitions: NonEmptyList[APISubscriptionStatusWithSubscriptionFields],
+    applicationRequest: ApplicationRequest[A]
+  ) extends ApplicationRequest[A](
+      applicationRequest.application,
+      applicationRequest.deployedTo,
+      applicationRequest.subscriptions,
+      applicationRequest.openAccessApis,
+      applicationRequest.role,
+      applicationRequest.userRequest
+    )
 
 class ApplicationWithSubscriptionFieldPageRequest[A](
     val pageIndex: Int,
@@ -66,33 +73,35 @@ class ApplicationWithSubscriptionFieldPageRequest[A](
     val apiSubscriptionStatus: APISubscriptionStatusWithSubscriptionFields,
     val apiDetails: uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.ManageSubscriptions.ApiDetails,
     applicationRequest: ApplicationRequest[A]
-) extends ApplicationRequest[A](
-  applicationRequest.application,
-  applicationRequest.deployedTo,
-  applicationRequest.subscriptions,
-  applicationRequest.openAccessApis,
-  applicationRequest.role,
-  applicationRequest.userRequest)
+  ) extends ApplicationRequest[A](
+      applicationRequest.application,
+      applicationRequest.deployedTo,
+      applicationRequest.subscriptions,
+      applicationRequest.openAccessApis,
+      applicationRequest.role,
+      applicationRequest.userRequest
+    )
 
 class ApplicationWithSubscriptionFieldsRequest[A](
-  val apiSubscription: APISubscriptionStatusWithSubscriptionFields,
-  applicationRequest: ApplicationRequest[A]
-) extends ApplicationRequest[A](
-  applicationRequest.application,
-  applicationRequest.deployedTo,
-  applicationRequest.subscriptions,
-  applicationRequest.openAccessApis,
-  applicationRequest.role,
-  applicationRequest.userRequest)
+    val apiSubscription: APISubscriptionStatusWithSubscriptionFields,
+    applicationRequest: ApplicationRequest[A]
+  ) extends ApplicationRequest[A](
+      applicationRequest.application,
+      applicationRequest.deployedTo,
+      applicationRequest.subscriptions,
+      applicationRequest.openAccessApis,
+      applicationRequest.role,
+      applicationRequest.userRequest
+    )
 
 class ApplicationWithWritableSubscriptionField[A](
-  val subscriptionWithSubscriptionField: APISubscriptionStatusWithWritableSubscriptionField,
-  applicationRequest: ApplicationRequest[A]
-) extends ApplicationRequest[A](
-  applicationRequest.application,
-  applicationRequest.deployedTo,
-  applicationRequest.subscriptions,
-  applicationRequest.openAccessApis,
-  applicationRequest.role,
-  applicationRequest.userRequest)
-
+    val subscriptionWithSubscriptionField: APISubscriptionStatusWithWritableSubscriptionField,
+    applicationRequest: ApplicationRequest[A]
+  ) extends ApplicationRequest[A](
+      applicationRequest.application,
+      applicationRequest.deployedTo,
+      applicationRequest.subscriptions,
+      applicationRequest.openAccessApis,
+      applicationRequest.role,
+      applicationRequest.userRequest
+    )

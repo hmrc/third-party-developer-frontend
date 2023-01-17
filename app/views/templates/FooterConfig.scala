@@ -17,15 +17,17 @@
 package views.templates
 
 import javax.inject.{Inject, Singleton}
-import play.api.Configuration
-import play.api.mvc.Request
+
 import views.html.helper
 
-@Singleton
-class FooterConfig @Inject()(config: Configuration) {
+import play.api.Configuration
+import play.api.mvc.Request
 
-  private lazy val urlFooterConfig = config.underlying.getConfig("urls.footer")
-  private lazy val baseUrl = config.underlying.getString("apidocumentation.base.url")
+@Singleton
+class FooterConfig @Inject() (config: Configuration) {
+
+  private lazy val urlFooterConfig      = config.underlying.getConfig("urls.footer")
+  private lazy val baseUrl              = config.underlying.getString("apidocumentation.base.url")
   private lazy val accessibilityBaseUrl = config.underlying.getString("accessibility.base.url")
 
   lazy val cookies: String         = baseUrl + urlFooterConfig.getString("cookies")

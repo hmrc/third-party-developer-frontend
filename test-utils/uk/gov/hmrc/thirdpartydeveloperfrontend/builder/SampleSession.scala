@@ -16,17 +16,17 @@
 
 package uk.gov.hmrc.thirdpartydeveloperfrontend.builder
 
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.{Developer, DeveloperSession, Session, LoggedInState}
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.{Developer, DeveloperSession, LoggedInState, Session}
 
 trait SampleSession {
   self: DeveloperBuilder =>
 
-  lazy val developer: Developer = buildDeveloper()
-  lazy val session: Session = Session(sessionId, developer, LoggedInState.LOGGED_IN)
+  lazy val developer: Developer                = buildDeveloper()
+  lazy val session: Session                    = Session(sessionId, developer, LoggedInState.LOGGED_IN)
   lazy val loggedInDeveloper: DeveloperSession = DeveloperSession(session)
-  lazy val sessionId = "sessionId"
+  lazy val sessionId                           = "sessionId"
 
-  val partLoggedInSessionId = "partLoggedInSessionId"
+  val partLoggedInSessionId             = "partLoggedInSessionId"
   lazy val partLoggedInSession: Session = Session(partLoggedInSessionId, developer, LoggedInState.PART_LOGGED_IN_ENABLING_MFA)
 
 }

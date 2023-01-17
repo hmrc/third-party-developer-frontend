@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 HM Revenue & Customs
+ * Copyright 2023 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,7 +20,7 @@ import io.cucumber.datatable.DataTable
 import io.cucumber.scala.Implicits._
 import io.cucumber.scala.{EN, ScalaDsl}
 import matchers.CustomMatchers
-import org.openqa.selenium.{WebDriver, Cookie => SCookie}
+import org.openqa.selenium.{Cookie => SCookie, WebDriver}
 import org.scalatest.matchers.should.Matchers
 import pages._
 import play.api.http.Status._
@@ -34,14 +34,10 @@ import utils.MfaData
 
 import java.util.UUID
 
-
 class MfaSteps extends ScalaDsl with EN with Matchers with NavigationSugar with PageSugar
-  with CustomMatchers with MfaData {
+    with CustomMatchers with MfaData {
 
   implicit val webDriver: WebDriver = Env.driver
-
-
-
 
   When("""^I enter the correct access code during 2SVSetup with mfaMandated '(.*)'$""") { (mfaMandated: String) =>
     val isMfaMandated = java.lang.Boolean.parseBoolean(mfaMandated)
@@ -113,10 +109,7 @@ class MfaSteps extends ScalaDsl with EN with Matchers with NavigationSugar with 
 
     val password = result("Password")
 
-    val developer = buildDeveloper(emailAddress = result("Email address"),
-      firstName = result("First name"),
-      lastName = result("Last name"),
-      mfaDetails = List(smsMfaDetails))
+    val developer = buildDeveloper(emailAddress = result("Email address"), firstName = result("First name"), lastName = result("Last name"), mfaDetails = List(smsMfaDetails))
 
     setUpDeveloperStub(developer, smsMfaId, password, None, deviceSessionFound = false)
 
@@ -125,47 +118,44 @@ class MfaSteps extends ScalaDsl with EN with Matchers with NavigationSugar with 
     MfaStub.setupVerificationOfAccessCode(developer, smsMfaId)
   }
 
-  Given("""^I have Authenticator App enabled as MFA method, without a DeviceSession and registered with$"""){  data: DataTable =>
-    val result: Map[String,String] = data.asScalaRawMaps[String, String].head
-  
+  Given("""^I have Authenticator App enabled as MFA method, without a DeviceSession and registered with$""") { data: DataTable =>
+    val result: Map[String, String] = data.asScalaRawMaps[String, String].head
+
     val password = result("Password")
 
-      val developer = buildDeveloper(emailAddress = result("Email address"),
-        firstName = result("First name"),
-        lastName = result("Last name"),
-        mfaDetails = List(authenticatorAppMfaDetails))
+    val developer =
+      buildDeveloper(emailAddress = result("Email address"), firstName = result("First name"), lastName = result("Last name"), mfaDetails = List(authenticatorAppMfaDetails))
 
-   setUpDeveloperStub(developer, authAppMfaId, password, None, deviceSessionFound = false)
+    setUpDeveloperStub(developer, authAppMfaId, password, None, deviceSessionFound = false)
 
   }
 
-  Given("""^I am mfaEnabled and with a DeviceSession registered with$""") {  data: DataTable =>
-    val result: Map[String,String] = data.asScalaRawMaps[String, String].head
-  
+  Given("""^I am mfaEnabled and with a DeviceSession registered with$""") { data: DataTable =>
+    val result: Map[String, String] = data.asScalaRawMaps[String, String].head
+
     val password = result("Password")
 
-      val developer = buildDeveloper(emailAddress = result("Email address"),
-          firstName = result("First name"),
-          lastName = result("Last name"),
-          mfaDetails = List(authenticatorAppMfaDetails))
+    val developer =
+      buildDeveloper(emailAddress = result("Email address"), firstName = result("First name"), lastName = result("Last name"), mfaDetails = List(authenticatorAppMfaDetails))
 
-   setUpDeveloperStub(developer, authAppMfaId, password, Some(DeviceSessionStub.staticDeviceSessionId), true)
+    setUpDeveloperStub(developer, authAppMfaId, password, Some(DeviceSessionStub.staticDeviceSessionId), true)
 
   }
 
-  def setUpDeveloperStub(developer: Developer, mfaId: MfaId, password: String, deviceSessionId: Option[UUID], deviceSessionFound: Boolean) ={
+  def setUpDeveloperStub(developer: Developer, mfaId: MfaId, password: String, deviceSessionId: Option[UUID], deviceSessionFound: Boolean) = {
     webDriver.manage().deleteAllCookies()
-    val mfaEnabled = MfaDetailHelper.isAuthAppMfaVerified(developer.mfaDetails) || MfaDetailHelper.isSmsMfaVerified(developer.mfaDetails)
+    val mfaEnabled         = MfaDetailHelper.isAuthAppMfaVerified(developer.mfaDetails) || MfaDetailHelper.isSmsMfaVerified(developer.mfaDetails)
     val accessCodeRequired = deviceSessionId.isEmpty && mfaEnabled
 
     TestContext.sessionIdForloggedInDeveloper =
-      setupLoggedOrPartLoggedInDeveloper(developer, password, LoggedInState.LOGGED_IN, deviceSessionId , accessCodeRequired, mfaEnabled)
+      setupLoggedOrPartLoggedInDeveloper(developer, password, LoggedInState.LOGGED_IN, deviceSessionId, accessCodeRequired, mfaEnabled)
 
     deviceSessionId match {
       case Some(_) => deviceSessionId.map(_ =>
-        if(deviceSessionFound) DeviceSessionStub.getDeviceSessionForSessionIdAndUserId(staticUserId)
-        else DeviceSessionStub.getDeviceSessionNotFound(staticUserId))
-      case None => ()
+          if (deviceSessionFound) DeviceSessionStub.getDeviceSessionForSessionIdAndUserId(staticUserId)
+          else DeviceSessionStub.getDeviceSessionNotFound(staticUserId)
+        )
+      case None    => ()
     }
 
     if (mfaEnabled) {
@@ -187,21 +177,32 @@ class MfaSteps extends ScalaDsl with EN with Matchers with NavigationSugar with 
     webDriver.manage().addCookie(cookie)
   }
 
-  def setupLoggedOrPartLoggedInDeveloper(developer: Developer, password: String, loggedInState: LoggedInState, deviceSessionId: Option[UUID], accessCodeRequired: Boolean, mfaEnabled : Boolean): String = {
+  def setupLoggedOrPartLoggedInDeveloper(
+      developer: Developer,
+      password: String,
+      loggedInState: LoggedInState,
+      deviceSessionId: Option[UUID],
+      accessCodeRequired: Boolean,
+      mfaEnabled: Boolean
+    ): String = {
     val sessionId = "sessionId_" + loggedInState.toString
 
     val session = Session(sessionId, developer, loggedInState)
 
-    val actualSession = if(accessCodeRequired) None else Some(session)
+    val actualSession = if (accessCodeRequired) None else Some(session)
 
-    val nonce = if(accessCodeRequired) Some(MfaStub.nonce) else None
+    val nonce = if (accessCodeRequired) Some(MfaStub.nonce) else None
 
     val userAuthenticationResponse = UserAuthenticationResponse(accessCodeRequired, mfaEnabled, session = actualSession, nonce = nonce)
 
     val mfaMandatedForUser = loggedInState == LoggedInState.PART_LOGGED_IN_ENABLING_MFA
 
-    Stubs.setupEncryptedPostRequest("/authenticate", LoginRequest(developer.email, password, mfaMandatedForUser, deviceSessionId),
-      OK, Json.toJson(userAuthenticationResponse).toString())
+    Stubs.setupEncryptedPostRequest(
+      "/authenticate",
+      LoginRequest(developer.email, password, mfaMandatedForUser, deviceSessionId),
+      OK,
+      Json.toJson(userAuthenticationResponse).toString()
+    )
 
     Stubs.setupRequest(s"/session/$sessionId", OK, Json.toJson(session).toString())
     Stubs.setupDeleteRequest(s"/session/$sessionId", OK)

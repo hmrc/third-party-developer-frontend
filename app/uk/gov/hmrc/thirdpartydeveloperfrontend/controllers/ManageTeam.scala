@@ -16,31 +16,29 @@
 
 package uk.gov.hmrc.thirdpartydeveloperfrontend.controllers
 
-import uk.gov.hmrc.thirdpartydeveloperfrontend.config.ApplicationConfig
-import uk.gov.hmrc.thirdpartydeveloperfrontend.config.ErrorHandler
-import uk.gov.hmrc.thirdpartydeveloperfrontend.config.FraudPreventionConfig
-import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.fraudprevention.FraudPreventionNavLinkHelper
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain._
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.{AddCollaborator, ApplicationId, CollaboratorRole}
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.Capabilities.SupportsTeamMembers
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.Permissions.{AdministratorOnly, TeamMembersOnly}
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.controllers.AddTeamMemberPageMode
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.controllers.AddTeamMemberPageMode._
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.DeveloperSession
-
 import javax.inject.{Inject, Singleton}
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.controllers.ApplicationViewModel
+import scala.concurrent.Future.successful
+import scala.concurrent.{ExecutionContext, Future}
+
+import views.html.checkpages.applicationcheck.team.TeamMemberAddView
+import views.html.manageTeamViews.{AddTeamMemberView, ManageTeamView, RemoveTeamMemberView}
+
 import play.api.data.Form
 import play.api.libs.crypto.CookieSigner
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents, Result}
 import play.twirl.api.Html
 import uk.gov.hmrc.play.bootstrap.controller.WithUnsafeDefaultFormBinding
-import uk.gov.hmrc.thirdpartydeveloperfrontend.service._
-import views.html.checkpages.applicationcheck.team.TeamMemberAddView
-import views.html.manageTeamViews.{AddTeamMemberView, ManageTeamView, RemoveTeamMemberView}
 
-import scala.concurrent.{ExecutionContext, Future}
-import scala.concurrent.Future.successful
+import uk.gov.hmrc.thirdpartydeveloperfrontend.config.{ApplicationConfig, ErrorHandler, FraudPreventionConfig}
+import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.fraudprevention.FraudPreventionNavLinkHelper
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain._
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.Capabilities.SupportsTeamMembers
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.Permissions.{AdministratorOnly, TeamMembersOnly}
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.{AddCollaborator, ApplicationId, CollaboratorRole}
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.controllers.AddTeamMemberPageMode._
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.controllers.{AddTeamMemberPageMode, ApplicationViewModel}
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.DeveloperSession
+import uk.gov.hmrc.thirdpartydeveloperfrontend.service._
 
 @Singleton
 class ManageTeam @Inject() (
@@ -56,18 +54,19 @@ class ManageTeam @Inject() (
     teamMemberAddView: TeamMemberAddView,
     removeTeamMemberView: RemoveTeamMemberView,
     val fraudPreventionConfig: FraudPreventionConfig
-)(implicit val ec: ExecutionContext, val appConfig: ApplicationConfig)
-    extends ApplicationController(mcc) with FraudPreventionNavLinkHelper with WithUnsafeDefaultFormBinding {
+  )(implicit val ec: ExecutionContext,
+    val appConfig: ApplicationConfig
+  ) extends ApplicationController(mcc) with FraudPreventionNavLinkHelper with WithUnsafeDefaultFormBinding {
 
   private def whenAppSupportsTeamMembers(applicationId: ApplicationId)(fun: ApplicationRequest[AnyContent] => Future[Result]): Action[AnyContent] =
     checkActionForApprovedApps(SupportsTeamMembers, TeamMembersOnly)(applicationId)(fun)
 
   private def canEditTeamMembers(applicationId: ApplicationId, alsoAllowTestingState: Boolean = false)(fun: ApplicationRequest[AnyContent] => Future[Result]): Action[AnyContent] =
-    if (alsoAllowTestingState)
+    if (alsoAllowTestingState) {
       checkActionForApprovedOrTestingApps(SupportsTeamMembers, AdministratorOnly)(applicationId)(fun)
-    else
+    } else {
       checkActionForApprovedApps(SupportsTeamMembers, AdministratorOnly)(applicationId)(fun)
-
+    }
 
   def manageTeam(applicationId: ApplicationId, error: Option[String] = None) = whenAppSupportsTeamMembers(applicationId) { implicit request =>
     val view = manageTeamView(applicationViewModelFromApplicationRequest, request.role, AddTeamMemberForm.form, createFraudNavModel(fraudPreventionConfig))
@@ -86,10 +85,10 @@ class ManageTeam @Inject() (
         case CheckYourAnswers  => checkpages.routes.CheckYourAnswers.team(applicationId)
       }
 
-      def handleAddTeamMemberView(a: ApplicationViewModel, f: Form[AddTeamMemberForm], ds:DeveloperSession)={
-        addTeamMemberView.apply(a,f,ds, createFraudNavModel(fraudPreventionConfig))
+      def handleAddTeamMemberView(a: ApplicationViewModel, f: Form[AddTeamMemberForm], ds: DeveloperSession) = {
+        addTeamMemberView.apply(a, f, ds, createFraudNavModel(fraudPreventionConfig))
       }
-      
+
       def createBadRequestResult(formWithErrors: Form[AddTeamMemberForm]): Result = {
         val viewFunction: (ApplicationViewModel, Form[AddTeamMemberForm], DeveloperSession) => Html = addTeamMemberPageMode match {
           case ManageTeamMembers => handleAddTeamMemberView
@@ -129,7 +128,7 @@ class ManageTeam @Inject() (
     application.findCollaboratorByHash(teamMemberHash) match {
       case Some(collaborator) =>
         successful(Ok(removeTeamMemberView(applicationViewModelFromApplicationRequest, RemoveTeamMemberConfirmationForm.form, collaborator.emailAddress)))
-      case None => successful(Redirect(routes.ManageTeam.manageTeam(applicationId, None)))
+      case None               => successful(Redirect(routes.ManageTeam.manageTeam(applicationId, None)))
     }
   }
 
@@ -140,7 +139,7 @@ class ManageTeam @Inject() (
           applicationService
             .removeTeamMember(request.application, form.email, request.developerSession.email)
             .map(_ => Redirect(routes.ManageTeam.manageTeam(applicationId, None)))
-        case _ => successful(Redirect(routes.ManageTeam.manageTeam(applicationId, None)))
+        case _           => successful(Redirect(routes.ManageTeam.manageTeam(applicationId, None)))
       }
     }
 

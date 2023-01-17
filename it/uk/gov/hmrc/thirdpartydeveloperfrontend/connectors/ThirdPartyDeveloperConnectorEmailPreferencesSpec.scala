@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 HM Revenue & Customs
+ * Copyright 2023 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -36,9 +36,10 @@ import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.UserId
 import uk.gov.hmrc.thirdpartydeveloperfrontend.connectors.ThirdPartyDeveloperConnector.FindUserIdResponse
 
 class ThirdPartyDeveloperConnectorEmailPreferencesSpec extends BaseConnectorIntegrationSpec with GuiceOneAppPerSuite {
+
   private val stubConfig = Configuration(
     "microservice.services.third-party-developer.port" -> stubPort,
-    "json.encryption.key" -> "czV2OHkvQj9FKEgrTWJQZVNoVm1ZcTN0Nnc5eiRDJkY="
+    "json.encryption.key"                              -> "czV2OHkvQj9FKEgrTWJQZVNoVm1ZcTN0Nnc5eiRDJkY="
   )
 
   override def fakeApplication(): Application =
@@ -51,24 +52,24 @@ class ThirdPartyDeveloperConnectorEmailPreferencesSpec extends BaseConnectorInte
   trait Setup {
     implicit val hc: HeaderCarrier = HeaderCarrier()
 
-    val userEmail = "thirdpartydeveloper@example.com"
-    val userPassword = "password1!"
-    val sessionId = "sessionId"
-    val loginRequest = LoginRequest(userEmail, userPassword, mfaMandatedForUser = false, None)
-    val accessCode = "123456"
-    val nonce = "ABC-123"
-    val mfaId = MfaId.random
+    val userEmail                 = "thirdpartydeveloper@example.com"
+    val userPassword              = "password1!"
+    val sessionId                 = "sessionId"
+    val loginRequest              = LoginRequest(userEmail, userPassword, mfaMandatedForUser = false, None)
+    val accessCode                = "123456"
+    val nonce                     = "ABC-123"
+    val mfaId                     = MfaId.random
     val totpAuthenticationRequest = AccessCodeAuthenticationRequest(userEmail, accessCode, nonce, mfaId)
 
-    val payloadEncryption: PayloadEncryption = app.injector.instanceOf[PayloadEncryption]
-    val encryptedLoginRequest: JsValue = Json.toJson(SecretRequest(payloadEncryption.encrypt(loginRequest).as[String]))
+    val payloadEncryption: PayloadEncryption        = app.injector.instanceOf[PayloadEncryption]
+    val encryptedLoginRequest: JsValue              = Json.toJson(SecretRequest(payloadEncryption.encrypt(loginRequest).as[String]))
     val encryptedTotpAuthenticationRequest: JsValue = Json.toJson(SecretRequest(payloadEncryption.encrypt(totpAuthenticationRequest).as[String]))
-    val underTest: ThirdPartyDeveloperConnector = app.injector.instanceOf[ThirdPartyDeveloperConnector]
+    val underTest: ThirdPartyDeveloperConnector     = app.injector.instanceOf[ThirdPartyDeveloperConnector]
   }
 
   "resendVerificationEmail" should {
     "return" in new Setup {
-      val email = "foo@bar.com"
+      val email  = "foo@bar.com"
       val userId = UserId.random
 
       implicit val writes = Json.writes[FindUserIdResponse]
@@ -82,7 +83,7 @@ class ThirdPartyDeveloperConnectorEmailPreferencesSpec extends BaseConnectorInte
               .withHeader("Content-Type", "application/json")
           )
       )
-      
+
       stubFor(
         post(urlEqualTo(s"/${userId.value}/resend-verification"))
           .willReturn(
@@ -130,15 +131,15 @@ class ThirdPartyDeveloperConnectorEmailPreferencesSpec extends BaseConnectorInte
 
       intercept[InvalidEmail](await(underTest.removeEmailPreferences(userId)))
     }
-  
+
   }
 
   "updateEmailPreferences" should {
-      val emailPreferences = EmailPreferences(List(TaxRegimeInterests("VAT", Set("API1", "API2"))), Set(BUSINESS_AND_POLICY))
-  
-  "return true when NO_CONTENT is returned" in new Setup {
+    val emailPreferences = EmailPreferences(List(TaxRegimeInterests("VAT", Set("API1", "API2"))), Set(BUSINESS_AND_POLICY))
+
+    "return true when NO_CONTENT is returned" in new Setup {
       val userId = UserId.random
-      
+
       stubFor(
         put(urlEqualTo(s"/developer/${userId.value}/email-preferences"))
           .withRequestBody(equalToJson(Json.toJson(emailPreferences).toString()))
@@ -167,6 +168,6 @@ class ThirdPartyDeveloperConnectorEmailPreferencesSpec extends BaseConnectorInte
 
       intercept[InvalidEmail](await(underTest.updateEmailPreferences(userId, emailPreferences)))
     }
-  
+
   }
 }

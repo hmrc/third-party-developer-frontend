@@ -16,38 +16,39 @@
 
 package uk.gov.hmrc.thirdpartydeveloperfrontend.controllers
 
-import uk.gov.hmrc.thirdpartydeveloperfrontend.config.ApplicationConfig
-import uk.gov.hmrc.thirdpartydeveloperfrontend.config.ErrorHandler
-import uk.gov.hmrc.thirdpartydeveloperfrontend.connectors.ThirdPartyDeveloperConnector
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.{EmailAlreadyInUse, RegistrationSuccessful, Registration => RegistrationModel}
-
 import javax.inject.{Inject, Singleton}
-import play.api.libs.crypto.CookieSigner
-import play.api.mvc.{MessagesControllerComponents, Request}
-import uk.gov.hmrc.thirdpartydeveloperfrontend.service.SessionService
-import uk.gov.hmrc.http.{BadRequestException, HeaderCarrier}
-import views.html._
-
 import scala.concurrent.{ExecutionContext, Future}
 import scala.util.control.NonFatal
-import uk.gov.hmrc.apiplatform.modules.common.services.ApplicationLogger
+
+import views.html._
+
+import play.api.libs.crypto.CookieSigner
+import play.api.mvc.{MessagesControllerComponents, Request}
+import uk.gov.hmrc.http.{BadRequestException, HeaderCarrier}
 import uk.gov.hmrc.play.bootstrap.controller.WithUnsafeDefaultFormBinding
 
+import uk.gov.hmrc.apiplatform.modules.common.services.ApplicationLogger
+import uk.gov.hmrc.thirdpartydeveloperfrontend.config.{ApplicationConfig, ErrorHandler}
+import uk.gov.hmrc.thirdpartydeveloperfrontend.connectors.ThirdPartyDeveloperConnector
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.{EmailAlreadyInUse, Registration => RegistrationModel, RegistrationSuccessful}
+import uk.gov.hmrc.thirdpartydeveloperfrontend.service.SessionService
+
 @Singleton
-class Registration @Inject()(override val sessionService: SessionService,
-                             val connector: ThirdPartyDeveloperConnector,
-                             val errorHandler: ErrorHandler,
-                             mcc: MessagesControllerComponents,
-                             val cookieSigner : CookieSigner,
-                             registrationView: RegistrationView,
-                             signInView: SignInView,
-                             accountVerifiedView: AccountVerifiedView,
-                             expiredVerificationLinkView: ExpiredVerificationLinkView,
-                             confirmationView: ConfirmationView,
-                             resendConfirmationView: ResendConfirmationView
-                             )
-                            (implicit val ec: ExecutionContext, val appConfig: ApplicationConfig)
-  extends LoggedOutController(mcc) with ApplicationLogger with WithUnsafeDefaultFormBinding {
+class Registration @Inject() (
+    override val sessionService: SessionService,
+    val connector: ThirdPartyDeveloperConnector,
+    val errorHandler: ErrorHandler,
+    mcc: MessagesControllerComponents,
+    val cookieSigner: CookieSigner,
+    registrationView: RegistrationView,
+    signInView: SignInView,
+    accountVerifiedView: AccountVerifiedView,
+    expiredVerificationLinkView: ExpiredVerificationLinkView,
+    confirmationView: ConfirmationView,
+    resendConfirmationView: ResendConfirmationView
+  )(implicit val ec: ExecutionContext,
+    val appConfig: ApplicationConfig
+  ) extends LoggedOutController(mcc) with ApplicationLogger with WithUnsafeDefaultFormBinding {
 
   import ErrorFormBuilder.GlobalError
   import play.api.data._
@@ -72,7 +73,7 @@ class Registration @Inject()(override val sessionService: SessionService,
             RegistrationModel(userData.firstName.trim, userData.lastName.trim, userData.emailaddress, userData.password, userData.organisation)
           connector.register(registration).map {
             case RegistrationSuccessful => Redirect(routes.Registration.confirmation).addingToSession("email" -> userData.emailaddress)
-            case EmailAlreadyInUse => BadRequest(registrationView(requestForm.emailAddressAlreadyInUse))
+            case EmailAlreadyInUse      => BadRequest(registrationView(requestForm.emailAddressAlreadyInUse))
           }
         }
       )
@@ -82,13 +83,13 @@ class Registration @Inject()(override val sessionService: SessionService,
     implicit request =>
       request.session.get("email").fold(Future.successful(BadRequest(signInView("Sign in", LoginForm.form)))) { email =>
         connector.resendVerificationEmail(email)
-        .map(_ => Redirect(routes.Registration.confirmation))
-        .recover {
-          case NonFatal(e) => {
-            logger.warn(s"resendVerification failed with ${e.getMessage}")
-            NotFound(errorHandler.notFoundTemplate).removingFromSession("email")
+          .map(_ => Redirect(routes.Registration.confirmation))
+          .recover {
+            case NonFatal(e) => {
+              logger.warn(s"resendVerification failed with ${e.getMessage}")
+              NotFound(errorHandler.notFoundTemplate).removingFromSession("email")
+            }
           }
-        }
       }
   }
 

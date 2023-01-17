@@ -16,14 +16,16 @@
 
 package uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.checkpages
 
+import scala.concurrent.Future
+
+import views.html.checkpages.ConfirmNameView
+
+import play.api.data.Form
+import play.api.mvc.{Action, AnyContent, Call, Result}
+
 import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.ApplicationController
 import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.FormKeys.appNameField
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications._
-import play.api.data.Form
-import play.api.mvc.{Action, AnyContent, Call, Result}
-import views.html.checkpages.ConfirmNameView
-
-import scala.concurrent.Future
 
 trait ConfirmNamePartialController {
   self: ApplicationController with CanUseCheckActions =>
@@ -38,7 +40,7 @@ trait ConfirmNamePartialController {
 
   def nameAction(appId: ApplicationId): Action[AnyContent] = canUseChecksAction(appId) { implicit request =>
     val requestForm = NameForm.form.bindFromRequest
-    val app = request.application
+    val app         = request.application
 
     def withFormErrors(form: Form[NameForm]) = {
       Future.successful(BadRequest(confirmNameView(app, form, nameActionRoute(appId))))
@@ -56,7 +58,7 @@ trait ConfirmNamePartialController {
       applicationService
         .isApplicationNameValid(form.applicationName, app.deployedTo, Some(app.id))
         .flatMap({
-          case Valid =>
+          case Valid            =>
             val information = app.checkInformation.getOrElse(CheckInformation())
             for {
               _ <- updateNameIfChanged(form)

@@ -16,30 +16,29 @@
 
 package uk.gov.hmrc.thirdpartydeveloperfrontend.qr
 
+// scalastyle:off illegal.imports
 import java.awt.image.BufferedImage
 import java.io.ByteArrayOutputStream
 import java.nio.charset.StandardCharsets
 import java.util.Base64
+import javax.imageio.ImageIO
+import scala.collection.JavaConverters._
 
-import com.google.zxing.{BarcodeFormat, EncodeHintType}
 import com.google.zxing.qrcode.QRCodeWriter
 import com.google.zxing.qrcode.decoder.ErrorCorrectionLevel
-import javax.imageio.ImageIO
-
-import scala.collection.JavaConverters._
+import com.google.zxing.{BarcodeFormat, EncodeHintType}
+//scalastyle:on illegal.imports
 
 case class QRCode(scale: Int = 1) {
   private val pixels = Array.fill(scale)(QRCode.white)
 
   private def generateImage(text: String): Array[Byte] = {
     val qrCodeWriter = new QRCodeWriter()
-    val byteMatrix = qrCodeWriter.encode(text, BarcodeFormat.QR_CODE, 0,
-      0, QRCode.defaultHintMap)
-    val width = byteMatrix.getWidth
-    val imageSize = width * scale
+    val byteMatrix   = qrCodeWriter.encode(text, BarcodeFormat.QR_CODE, 0, 0, QRCode.defaultHintMap)
+    val width        = byteMatrix.getWidth
+    val imageSize    = width * scale
 
-    val image = new BufferedImage(imageSize, imageSize,
-      BufferedImage.TYPE_INT_RGB)
+    val image = new BufferedImage(imageSize, imageSize, BufferedImage.TYPE_INT_RGB)
 
     for (i <- 0 until width)
       for (j <- 0 until width)
@@ -50,7 +49,7 @@ case class QRCode(scale: Int = 1) {
     val byteArrayOutputStream = new ByteArrayOutputStream()
     ImageIO.write(image, QRCode.pngImageFormat, byteArrayOutputStream)
     byteArrayOutputStream.flush()
-    val imageBytes = byteArrayOutputStream.toByteArray
+    val imageBytes            = byteArrayOutputStream.toByteArray
     byteArrayOutputStream.close()
     imageBytes
   }
@@ -62,12 +61,12 @@ case class QRCode(scale: Int = 1) {
 }
 
 object QRCode {
-  private val white: Int = 0xffffff
+  private val white: Int     = 0xffffff
   private val pngImageFormat = "png"
 
   private val defaultHintMap = Map[EncodeHintType, Any](
-    EncodeHintType.CHARACTER_SET -> StandardCharsets.UTF_8.name(),
-    EncodeHintType.MARGIN -> 1,
+    EncodeHintType.CHARACTER_SET    -> StandardCharsets.UTF_8.name(),
+    EncodeHintType.MARGIN           -> 1,
     EncodeHintType.ERROR_CORRECTION -> ErrorCorrectionLevel.L
   ).asJava
 }

@@ -16,40 +16,41 @@
 
 package views.manageResponsibleIndividual
 
+import java.time.{LocalDateTime, ZoneOffset}
+
 import org.jsoup.Jsoup
-import play.api.test.FakeRequest
-import uk.gov.hmrc.thirdpartydeveloperfrontend.builder.{DeveloperBuilder, DeveloperSessionBuilder}
-import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.ManageResponsibleIndividualController.{ResponsibleIndividualHistoryItem, ViewModel}
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.{Application, ApplicationId, ApplicationState, ClientId, Environment, Standard}
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.LoggedInState
-import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.ViewHelpers._
-import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.{LocalUserIdTracker, WithCSRFAddToken}
 import views.helper.CommonViewSpec
 import views.html.manageResponsibleIndividual.ResponsibleIndividualDetailsView
 
-import java.time.{LocalDateTime, ZoneOffset}
+import play.api.test.FakeRequest
+
+import uk.gov.hmrc.thirdpartydeveloperfrontend.builder.{DeveloperBuilder, DeveloperSessionBuilder}
+import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.ManageResponsibleIndividualController.{ResponsibleIndividualHistoryItem, ViewModel}
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications._
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.LoggedInState
+import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.ViewHelpers._
+import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.{LocalUserIdTracker, WithCSRFAddToken}
 
 class ResponsibleIndividualDetailsViewSpec extends CommonViewSpec with WithCSRFAddToken with DeveloperBuilder with LocalUserIdTracker with DeveloperSessionBuilder {
 
   val application = Application(
-      ApplicationId.random,
-      ClientId("clientId123"),
-      "App name 1",
-      LocalDateTime.now(ZoneOffset.UTC),
-      Some(LocalDateTime.now(ZoneOffset.UTC)),
-      None,
-      grantLength,
-      Environment.PRODUCTION,
-      Some("Description 1"),
-      Set.empty,
-      state = ApplicationState.production("user@example.com", "user name", ""),
-      access = Standard(redirectUris = List("https://red1", "https://red2"), termsAndConditionsUrl = Some("http://tnc-url.com"))
-    )
-
+    ApplicationId.random,
+    ClientId("clientId123"),
+    "App name 1",
+    LocalDateTime.now(ZoneOffset.UTC),
+    Some(LocalDateTime.now(ZoneOffset.UTC)),
+    None,
+    grantLength,
+    Environment.PRODUCTION,
+    Some("Description 1"),
+    Set.empty,
+    state = ApplicationState.production("user@example.com", "user name", ""),
+    access = Standard(redirectUris = List("https://red1", "https://red2"), termsAndConditionsUrl = Some("http://tnc-url.com"))
+  )
 
   "responsible individual details view" should {
-    val view = app.injector.instanceOf[ResponsibleIndividualDetailsView]
-    val environment = "Production"
+    val view          = app.injector.instanceOf[ResponsibleIndividualDetailsView]
+    val environment   = "Production"
     val currentRiName = "Current RI"
 
     def renderPage(viewModel: ViewModel) = {
@@ -64,7 +65,7 @@ class ResponsibleIndividualDetailsViewSpec extends CommonViewSpec with WithCSRFA
         ResponsibleIndividualHistoryItem("ri 1", "from 1", "to 1"),
         ResponsibleIndividualHistoryItem("ri 2", "from 2", "to 2")
       )
-      val document = Jsoup.parse(renderPage(ViewModel(environment, currentRiName, previousRis, true, List(), false)).body)
+      val document    = Jsoup.parse(renderPage(ViewModel(environment, currentRiName, previousRis, true, List(), false)).body)
 
       elementBySelector(document, "#applicationName").map(_.text()) shouldBe Some(application.name)
       elementBySelector(document, "#environment").map(_.text()) shouldBe Some(environment)

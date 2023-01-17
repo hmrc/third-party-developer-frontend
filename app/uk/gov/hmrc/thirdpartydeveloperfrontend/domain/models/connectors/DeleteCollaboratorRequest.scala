@@ -19,10 +19,10 @@ package uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.connectors
 import play.api.libs.json.Json
 
 case class DeleteCollaboratorRequest(
-  email: String,
-  adminsToEmail: Set[String],
-  notifyCollaborator: Boolean
-)
+    email: String,
+    adminsToEmail: Set[String],
+    notifyCollaborator: Boolean
+  )
 
 object DeleteCollaboratorRequest {
   implicit val writesDeleteCollaboratorRequest = Json.writes[DeleteCollaboratorRequest]

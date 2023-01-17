@@ -16,19 +16,20 @@
 
 package uk.gov.hmrc.thirdpartydeveloperfrontend.config
 
-import akka.stream.Materializer
 import javax.inject.Inject
+import scala.concurrent.{ExecutionContext, Future}
+
+import akka.stream.Materializer
+
 import play.api.mvc._
 import uk.gov.hmrc.play.bootstrap.frontend.filters.{SessionTimeoutFilter, SessionTimeoutFilterConfig}
 
-import scala.concurrent.{ExecutionContext, Future}
-
 case class WhitelistedCall(uri: String, method: String)
 
-class SessionTimeoutFilterWithWhitelist @Inject()(config: SessionTimeoutFilterConfig)(implicit ec: ExecutionContext, override val mat: Materializer)
-  extends SessionTimeoutFilter(config) {
+class SessionTimeoutFilterWithWhitelist @Inject() (config: SessionTimeoutFilterConfig)(implicit ec: ExecutionContext, override val mat: Materializer)
+    extends SessionTimeoutFilter(config) {
 
-  val loginUrl = "/developer/login" //routes.UserLoginAccount.login.url
+  val loginUrl                               = "/developer/login" // routes.UserLoginAccount.login.url
   val whitelistedCalls: Set[WhitelistedCall] = Set(WhitelistedCall(loginUrl, "GET"), WhitelistedCall(loginUrl, "POST"))
 
   override def apply(f: (RequestHeader) => Future[Result])(rh: RequestHeader): Future[Result] = {

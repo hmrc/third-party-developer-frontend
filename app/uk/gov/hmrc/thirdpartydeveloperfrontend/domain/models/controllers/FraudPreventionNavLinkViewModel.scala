@@ -16,7 +16,8 @@
 
 package uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.controllers
 
-case class FraudPreventionNavLinkViewModel(isVisible: Boolean, fraudPreventionUrl: String){
+case class FraudPreventionNavLinkViewModel(isVisible: Boolean, fraudPreventionUrl: String) {
+
   def generateLink(applicationId: String): String = {
     fraudPreventionUrl + "/" + applicationId
   }

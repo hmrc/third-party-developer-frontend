@@ -17,18 +17,19 @@
 package uk.gov.hmrc.thirdpartydeveloperfrontend.service
 
 import java.time.{LocalDateTime, Period, ZoneOffset}
-import uk.gov.hmrc.thirdpartydeveloperfrontend.config.ApplicationConfig
-import uk.gov.hmrc.thirdpartydeveloperfrontend.connectors._
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.{Application, ApplicationId, ClientId, Environment}
-import play.api.http.Status
-import uk.gov.hmrc.thirdpartydeveloperfrontend.service.PushPullNotificationsService.PushPullNotificationsConnector
-import uk.gov.hmrc.thirdpartydeveloperfrontend.service.SubscriptionFieldsService.SubscriptionFieldsConnector
-import uk.gov.hmrc.http.{HeaderCarrier, UpstreamErrorResponse}
-import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.AsyncHmrcSpec
-
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 import scala.concurrent.Future.failed
+
+import play.api.http.Status
+import uk.gov.hmrc.http.{HeaderCarrier, UpstreamErrorResponse}
+
+import uk.gov.hmrc.thirdpartydeveloperfrontend.config.ApplicationConfig
+import uk.gov.hmrc.thirdpartydeveloperfrontend.connectors._
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.{Application, ApplicationId, ClientId, Environment}
+import uk.gov.hmrc.thirdpartydeveloperfrontend.service.PushPullNotificationsService.PushPullNotificationsConnector
+import uk.gov.hmrc.thirdpartydeveloperfrontend.service.SubscriptionFieldsService.SubscriptionFieldsConnector
+import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.AsyncHmrcSpec
 
 class ConnectorsWrapperSpec extends AsyncHmrcSpec {
 
@@ -68,13 +69,35 @@ class ConnectorsWrapperSpec extends AsyncHmrcSpec {
   }
 
   val productionApplicationId = ApplicationId("Application ID")
-  val productionClientId = ClientId("hBnFo14C0y4SckYUbcoL2PbFA40a")
-  val grantLength = Period.ofDays(547)
+  val productionClientId      = ClientId("hBnFo14C0y4SckYUbcoL2PbFA40a")
+  val grantLength             = Period.ofDays(547)
+
   val productionApplication =
-    Application(productionApplicationId, productionClientId, "name", LocalDateTime.now(ZoneOffset.UTC), Some(LocalDateTime.now(ZoneOffset.UTC)), None, grantLength, Environment.PRODUCTION, Some("description"))
-  val sandboxApplicationId = ApplicationId("Application ID")
-  val sandboxClientId = ClientId("Client ID")
-  val sandboxApplication = Application(sandboxApplicationId, sandboxClientId, "name", LocalDateTime.now(ZoneOffset.UTC), Some(LocalDateTime.now(ZoneOffset.UTC)), None, grantLength, Environment.SANDBOX, Some("description"))
+    Application(
+      productionApplicationId,
+      productionClientId,
+      "name",
+      LocalDateTime.now(ZoneOffset.UTC),
+      Some(LocalDateTime.now(ZoneOffset.UTC)),
+      None,
+      grantLength,
+      Environment.PRODUCTION,
+      Some("description")
+    )
+  val sandboxApplicationId  = ApplicationId("Application ID")
+  val sandboxClientId       = ClientId("Client ID")
+
+  val sandboxApplication = Application(
+    sandboxApplicationId,
+    sandboxClientId,
+    "name",
+    LocalDateTime.now(ZoneOffset.UTC),
+    Some(LocalDateTime.now(ZoneOffset.UTC)),
+    None,
+    grantLength,
+    Environment.SANDBOX,
+    Some("description")
+  )
 
   "fetchByApplicationId" when {
     "return the application fetched from the production connector when it exists there" in new Setup {

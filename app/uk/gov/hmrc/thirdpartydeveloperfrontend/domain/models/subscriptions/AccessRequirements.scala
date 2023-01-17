@@ -19,16 +19,17 @@ package uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.subscriptions
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.CollaboratorRole
 
 sealed trait DevhubAccessRequirement
+
 object DevhubAccessRequirement {
   final val Default: DevhubAccessRequirement = Anyone
 
-  case object NoOne extends DevhubAccessRequirement
+  case object NoOne     extends DevhubAccessRequirement
   case object AdminOnly extends DevhubAccessRequirement
-  case object Anyone extends DevhubAccessRequirement
+  case object Anyone    extends DevhubAccessRequirement
 }
 
 case class DevhubAccessRequirements private (val read: DevhubAccessRequirement, val write: DevhubAccessRequirement) {
-  def satisfiesRead(dal: DevhubAccessLevel): Boolean = dal.satisfiesRequirement(read) // ReadWrite will be at least as strict.
+  def satisfiesRead(dal: DevhubAccessLevel): Boolean  = dal.satisfiesRequirement(read) // ReadWrite will be at least as strict.
   def satisfiesWrite(dal: DevhubAccessLevel): Boolean = dal.satisfiesRequirement(write)
 }
 
@@ -40,16 +41,16 @@ object DevhubAccessRequirements {
   // Do not allow greater restrictions on read than on write
   // - it would make no sense to allow NoOne read but everyone write or developer write and admin read
   //
-  def apply(read: DevhubAccessRequirement,
-            write: DevhubAccessRequirement = DevhubAccessRequirement.Default): DevhubAccessRequirements = (read,write) match {
+  def apply(read: DevhubAccessRequirement, write: DevhubAccessRequirement = DevhubAccessRequirement.Default): DevhubAccessRequirements = (read, write) match {
 
-    case (NoOne, _)          => new DevhubAccessRequirements(NoOne, NoOne){}
-    case (AdminOnly, Anyone) => new DevhubAccessRequirements(AdminOnly,AdminOnly){}
-    case _                   => new DevhubAccessRequirements(read,write){}
+    case (NoOne, _)          => new DevhubAccessRequirements(NoOne, NoOne) {}
+    case (AdminOnly, Anyone) => new DevhubAccessRequirements(AdminOnly, AdminOnly) {}
+    case _                   => new DevhubAccessRequirements(read, write) {}
   }
 }
 
 case class AccessRequirements(devhub: DevhubAccessRequirements)
+
 object AccessRequirements {
   final val Default = AccessRequirements(devhub = DevhubAccessRequirements.Default)
 }
@@ -60,18 +61,19 @@ sealed trait DevhubAccessLevel {
 
 object DevhubAccessLevel {
 
-  def fromRole(role: CollaboratorRole) : DevhubAccessLevel = role match {
-      case CollaboratorRole.ADMINISTRATOR => DevhubAccessLevel.Admininstator
-      case CollaboratorRole.DEVELOPER => DevhubAccessLevel.Developer
+  def fromRole(role: CollaboratorRole): DevhubAccessLevel = role match {
+    case CollaboratorRole.ADMINISTRATOR => DevhubAccessLevel.Admininstator
+    case CollaboratorRole.DEVELOPER     => DevhubAccessLevel.Developer
   }
 
-  case object Developer extends DevhubAccessLevel
+  case object Developer     extends DevhubAccessLevel
   case object Admininstator extends DevhubAccessLevel
 
   import DevhubAccessRequirement._
+
   def satisfies(requirement: DevhubAccessRequirement)(actual: DevhubAccessLevel): Boolean = (requirement, actual) match {
-    case (NoOne, _) => false
+    case (NoOne, _)             => false
     case (AdminOnly, Developer) => false
-    case _ => true
+    case _                      => true
   }
 }

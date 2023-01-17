@@ -22,20 +22,20 @@ import uk.gov.hmrc.play.json.Union
 sealed trait TermsAndConditionsLocation
 
 object TermsAndConditionsLocation {
-  case object NoneProvided extends TermsAndConditionsLocation
+  case object NoneProvided      extends TermsAndConditionsLocation
   case object InDesktopSoftware extends TermsAndConditionsLocation
   case class Url(value: String) extends TermsAndConditionsLocation
 
   def asText(location: TermsAndConditionsLocation) =
     location match {
-      case TermsAndConditionsLocation.Url(url) => url
+      case TermsAndConditionsLocation.Url(url)          => url
       case TermsAndConditionsLocation.InDesktopSoftware => "In desktop software"
-      case TermsAndConditionsLocation.NoneProvided => "None"
+      case TermsAndConditionsLocation.NoneProvided      => "None"
     }
 
-  implicit val noneProvidedFormat = Json.format[NoneProvided.type]
+  implicit val noneProvidedFormat      = Json.format[NoneProvided.type]
   implicit val inDesktopSoftwareFormat = Json.format[InDesktopSoftware.type]
-  implicit val urlFormat = Json.format[Url]
+  implicit val urlFormat               = Json.format[Url]
 
   implicit val format = Union.from[TermsAndConditionsLocation]("termsAndConditionsType")
     .and[NoneProvided.type]("noneProvided")

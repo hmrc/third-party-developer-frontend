@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 HM Revenue & Customs
+ * Copyright 2023 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,20 +23,18 @@ import org.junit.runner.RunWith
 import steps.Env
 
 @RunWith(classOf[Cucumber])
-  @CucumberOptions(
-    features = Array("features"),
-    glue = Array("steps"),
-    dryRun= false,
-    snippets= CAMELCASE,
-    plugin = Array("pretty",
-      "html:target/component-reports/cucumber",
-      "json:target/component-reports/cucumber.json"
-      ),
-     tags = "not @wip and not @skip"
-  )
+@CucumberOptions(
+  features = Array("features"),
+  glue = Array("steps"),
+  dryRun = false,
+  snippets = CAMELCASE,
+  plugin = Array("pretty", "html:target/component-reports/cucumber", "json:target/component-reports/cucumber.json"),
+  tags = "not @wip and not @skip"
+)
 class FeatureSuite
 
 object FeatureSuite {
+
   @BeforeClass
   def beforeCukesRun() = Env.startServer()
 

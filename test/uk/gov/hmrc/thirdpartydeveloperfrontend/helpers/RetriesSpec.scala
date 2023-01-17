@@ -15,20 +15,22 @@
  */
 
 package uk.gov.hmrc.thirdpartydeveloperfrontend.helpers
+
 import java.util.concurrent.TimeUnit
+import scala.concurrent.Future.failed
+import scala.concurrent.duration.FiniteDuration
+import scala.concurrent.{ExecutionContext, Future}
+import scala.util.Random
 
 import akka.actor.{ActorSystem, Scheduler}
 import akka.pattern.FutureTimeoutSupport
-import uk.gov.hmrc.thirdpartydeveloperfrontend.config.ApplicationConfig
+import org.scalatestplus.play.guice.GuiceOneAppPerTest
+
 import play.api.inject.guice.GuiceApplicationBuilder
 import uk.gov.hmrc.http.BadRequestException
-import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.AsyncHmrcSpec
 
-import scala.concurrent.{ExecutionContext, Future}
-import scala.concurrent.Future.failed
-import scala.concurrent.duration.FiniteDuration
-import scala.util.Random
-import org.scalatestplus.play.guice.GuiceOneAppPerTest
+import uk.gov.hmrc.thirdpartydeveloperfrontend.config.ApplicationConfig
+import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.AsyncHmrcSpec
 
 class RetriesSpec extends AsyncHmrcSpec with GuiceOneAppPerTest {
 
@@ -36,16 +38,18 @@ class RetriesSpec extends AsyncHmrcSpec with GuiceOneAppPerTest {
     val mockAppConfig: ApplicationConfig = mock[ApplicationConfig]
 
     var actualDelay: Option[FiniteDuration] = None
+
     val mockFutureTimeoutSupport: FutureTimeoutSupport = new FutureTimeoutSupport {
+
       override def after[T](duration: FiniteDuration, using: Scheduler)(value: => Future[T])(implicit ec: ExecutionContext): Future[T] = {
         actualDelay = Some(duration)
         value
       }
     }
 
-    private val app = new GuiceApplicationBuilder().configure("metrics.jvm" -> false).build()
+    private val app                       = new GuiceApplicationBuilder().configure("metrics.jvm" -> false).build()
     implicit val actorSystem: ActorSystem = app.actorSystem
-    implicit val ec: ExecutionContext = app.injector.instanceOf[ExecutionContext]
+    implicit val ec: ExecutionContext     = app.injector.instanceOf[ExecutionContext]
 
     def underTest = new RetryTestConnector(mockFutureTimeoutSupport, mockAppConfig)
   }
@@ -58,7 +62,7 @@ class RetriesSpec extends AsyncHmrcSpec with GuiceOneAppPerTest {
     "wait for the configured delay before retrying" in new Setup {
       when(mockAppConfig.retryCount).thenReturn(1)
       private val expectedDelayMilliseconds = Random.nextInt
-      private val expectedDelay = FiniteDuration(expectedDelayMilliseconds, TimeUnit.MILLISECONDS)
+      private val expectedDelay             = FiniteDuration(expectedDelayMilliseconds, TimeUnit.MILLISECONDS)
       when(mockAppConfig.retryDelayMilliseconds).thenReturn(expectedDelayMilliseconds)
 
       intercept[BadRequestException] {
@@ -91,7 +95,7 @@ class RetriesSpec extends AsyncHmrcSpec with GuiceOneAppPerTest {
 
       private val expectedRetries = 0
       when(mockAppConfig.retryCount).thenReturn(expectedRetries)
-      var actualCalls = 0
+      var actualCalls             = 0
 
       intercept[BadRequestException](await(underTest.retry {
         actualCalls += 1
@@ -105,7 +109,7 @@ class RetriesSpec extends AsyncHmrcSpec with GuiceOneAppPerTest {
 
       private val expectedRetries = Random.nextInt(3) + 1
       when(mockAppConfig.retryCount).thenReturn(expectedRetries)
-      var actualCalls = 0
+      var actualCalls             = 0
 
       intercept[RuntimeException](await(underTest.retry {
         actualCalls += 1

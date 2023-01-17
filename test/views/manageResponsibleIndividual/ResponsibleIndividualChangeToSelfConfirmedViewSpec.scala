@@ -17,19 +17,21 @@
 package views.manageResponsibleIndividual
 
 import org.jsoup.Jsoup
-import play.api.test.FakeRequest
-import uk.gov.hmrc.thirdpartydeveloperfrontend.builder.{DeveloperBuilder, DeveloperSessionBuilder}
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.LoggedInState
-import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.{LocalUserIdTracker, TestApplications, WithCSRFAddToken}
 import views.helper.CommonViewSpec
 import views.html.manageResponsibleIndividual.ResponsibleIndividualChangeToSelfConfirmedView
 
+import play.api.test.FakeRequest
+
+import uk.gov.hmrc.thirdpartydeveloperfrontend.builder.{DeveloperBuilder, DeveloperSessionBuilder}
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.LoggedInState
+import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.{LocalUserIdTracker, TestApplications, WithCSRFAddToken}
+
 class ResponsibleIndividualChangeToSelfConfirmedViewSpec extends CommonViewSpec with WithCSRFAddToken
-  with DeveloperBuilder with LocalUserIdTracker with DeveloperSessionBuilder with TestApplications {
+    with DeveloperBuilder with LocalUserIdTracker with DeveloperSessionBuilder with TestApplications {
 
   "Responsible Individual Change To Self Confirmed View" should {
     val application = anApplication()
-    val view = app.injector.instanceOf[ResponsibleIndividualChangeToSelfConfirmedView]
+    val view        = app.injector.instanceOf[ResponsibleIndividualChangeToSelfConfirmedView]
 
     def renderPage() = {
       val request = FakeRequest().withCSRFToken

@@ -16,61 +16,64 @@
 
 package views
 
+import java.time.format.DateTimeFormatter
 import java.time.{LocalDateTime, Period, ZoneOffset}
-import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.TermsOfUseForm
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications._
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.LoggedInState
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.controllers.ApplicationViewModel
+
 import org.jsoup.Jsoup
-import play.api.test.FakeRequest
-import play.twirl.api.HtmlFormat.Appendable
-import uk.gov.hmrc.thirdpartydeveloperfrontend.builder.{DeveloperBuilder, DeveloperSessionBuilder}
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.TermsOfUseVersion
-import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.{LocalUserIdTracker, WithCSRFAddToken}
 import views.helper.CommonViewSpec
 import views.html.TermsOfUseView
 
-import java.time.format.DateTimeFormatter
+import play.api.test.FakeRequest
+import play.twirl.api.HtmlFormat.Appendable
+
+import uk.gov.hmrc.thirdpartydeveloperfrontend.builder.{DeveloperBuilder, DeveloperSessionBuilder}
+import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.TermsOfUseForm
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.TermsOfUseVersion
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications._
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.controllers.ApplicationViewModel
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.LoggedInState
+import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.{LocalUserIdTracker, WithCSRFAddToken}
 
 class TermsOfUseSpec extends CommonViewSpec
-  with WithCSRFAddToken
-  with LocalUserIdTracker
-  with DeveloperSessionBuilder
-  with DeveloperBuilder {
+    with WithCSRFAddToken
+    with LocalUserIdTracker
+    with DeveloperSessionBuilder
+    with DeveloperBuilder {
 
   val termsOfUseView = app.injector.instanceOf[TermsOfUseView]
 
   case class Page(doc: Appendable) {
-    lazy val body = Jsoup.parse(doc.body)
-    lazy val title = body.title
-    lazy val header = body.getElementById("terms-of-use-header")
-    lazy val alert = body.getElementById("termsOfUseAlert")
-    lazy val termsOfUse = body.getElementById("termsOfUse")
+    lazy val body          = Jsoup.parse(doc.body)
+    lazy val title         = body.title
+    lazy val header        = body.getElementById("terms-of-use-header")
+    lazy val alert         = body.getElementById("termsOfUseAlert")
+    lazy val termsOfUse    = body.getElementById("termsOfUse")
     lazy val agreementForm = body.getElementById("termsOfUseForm")
   }
 
   "Terms of use view" when {
-    implicit val request = FakeRequest().withCSRFToken
-    implicit val loggedIn = buildDeveloperSession( loggedInState = LoggedInState.LOGGED_IN, buildDeveloperWithRandomId("developer@example.com", "Joe", "Bloggs"))
+    implicit val request    = FakeRequest().withCSRFToken
+    implicit val loggedIn   = buildDeveloperSession(loggedInState = LoggedInState.LOGGED_IN, buildDeveloperWithRandomId("developer@example.com", "Joe", "Bloggs"))
     implicit val navSection = "details"
 
-    val id = ApplicationId("id")
-    val clientId = ClientId("clientId")
-    val appName = "an application"
-    val createdOn = LocalDateTime.now(ZoneOffset.UTC)
-    val lastAccess = Some(LocalDateTime.now(ZoneOffset.UTC))
+    val id          = ApplicationId("id")
+    val clientId    = ClientId("clientId")
+    val appName     = "an application"
+    val createdOn   = LocalDateTime.now(ZoneOffset.UTC)
+    val lastAccess  = Some(LocalDateTime.now(ZoneOffset.UTC))
     val grantLength = Period.ofDays(547)
-    val deployedTo = Environment.PRODUCTION
+    val deployedTo  = Environment.PRODUCTION
 
     "viewing an agreed application" should {
       trait Setup {
-        val emailAddress = "email@example.com"
-        val timeStamp = LocalDateTime.now(ZoneOffset.UTC)
+        val emailAddress      = "email@example.com"
+        val timeStamp         = LocalDateTime.now(ZoneOffset.UTC)
         val expectedTimeStamp = DateTimeFormatter.ofPattern("dd MMMM yyyy").format(timeStamp)
-        val version = "1.0"
-        val checkInformation = CheckInformation(termsOfUseAgreements = List(TermsOfUseAgreement(emailAddress, timeStamp, version)))
-        val application = Application(id, clientId, appName, createdOn, lastAccess, None, grantLength, deployedTo, checkInformation = Some(checkInformation))
-        val page: Page = Page(termsOfUseView(ApplicationViewModel(application, hasSubscriptionsFields = false, hasPpnsFields = false), TermsOfUseForm.form, TermsOfUseVersion.latest))
+        val version           = "1.0"
+        val checkInformation  = CheckInformation(termsOfUseAgreements = List(TermsOfUseAgreement(emailAddress, timeStamp, version)))
+        val application       = Application(id, clientId, appName, createdOn, lastAccess, None, grantLength, deployedTo, checkInformation = Some(checkInformation))
+        val page: Page        =
+          Page(termsOfUseView(ApplicationViewModel(application, hasSubscriptionsFields = false, hasPpnsFields = false), TermsOfUseForm.form, TermsOfUseVersion.latest))
       }
 
       "set the title and header to 'Terms of use'" in new Setup {
@@ -94,8 +97,9 @@ class TermsOfUseSpec extends CommonViewSpec
     "viewing an unagreed application" should {
       trait Setup {
         val checkInformation = CheckInformation(termsOfUseAgreements = List.empty)
-        val application = Application(id, clientId, appName, createdOn, lastAccess, None, grantLength, deployedTo, checkInformation = Some(checkInformation))
-        val page: Page = Page(termsOfUseView(ApplicationViewModel(application, hasSubscriptionsFields = false, hasPpnsFields = false), TermsOfUseForm.form, TermsOfUseVersion.latest))
+        val application      = Application(id, clientId, appName, createdOn, lastAccess, None, grantLength, deployedTo, checkInformation = Some(checkInformation))
+        val page: Page       =
+          Page(termsOfUseView(ApplicationViewModel(application, hasSubscriptionsFields = false, hasPpnsFields = false), TermsOfUseForm.form, TermsOfUseVersion.latest))
       }
 
       "set the title and header to 'Terms of use'" in new Setup {

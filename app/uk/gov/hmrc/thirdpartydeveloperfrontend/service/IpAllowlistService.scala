@@ -16,25 +16,26 @@
 
 package uk.gov.hmrc.thirdpartydeveloperfrontend.service
 
+import javax.inject.{Inject, Singleton}
+import scala.concurrent.{ExecutionContext, Future}
+
+import uk.gov.hmrc.http.{ForbiddenException, HeaderCarrier}
+
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.ApplicationUpdateSuccessful
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.Application
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.flows.FlowType.IP_ALLOW_LIST
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.flows.IpAllowlistFlow
-import javax.inject.{Inject, Singleton}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.repositories.FlowRepository
-import uk.gov.hmrc.http.{ForbiddenException, HeaderCarrier}
-
-import scala.concurrent.{ExecutionContext, Future}
 
 @Singleton
-class IpAllowlistService @Inject()(flowRepository: FlowRepository, connectorWrapper: ConnectorsWrapper)(implicit val ec: ExecutionContext) {
+class IpAllowlistService @Inject() (flowRepository: FlowRepository, connectorWrapper: ConnectorsWrapper)(implicit val ec: ExecutionContext) {
 
-  private def fetchIpAllowListFlow( sessionId: String, app: Option[Application], createIfNotFound: Boolean = true): Future[IpAllowlistFlow] = {
+  private def fetchIpAllowListFlow(sessionId: String, app: Option[Application], createIfNotFound: Boolean = true): Future[IpAllowlistFlow] = {
     flowRepository.fetchBySessionIdAndFlowType[IpAllowlistFlow](sessionId) map { maybeFlow =>
       (maybeFlow, app, createIfNotFound) match {
-        case (Some(flow: IpAllowlistFlow), _, _) => flow
+        case (Some(flow: IpAllowlistFlow), _, _)  => flow
         case (None, Some(app: Application), true) => IpAllowlistFlow(sessionId, app.ipAllowlist.allowlist)
-        case _ =>  throw new IllegalStateException(s"No IP allowlist flow exists for session ID $sessionId")
+        case _                                    => throw new IllegalStateException(s"No IP allowlist flow exists for session ID $sessionId")
       }
     }
 
@@ -42,7 +43,7 @@ class IpAllowlistService @Inject()(flowRepository: FlowRepository, connectorWrap
 
   def getIpAllowlistFlow(app: Application, sessionId: String): Future[IpAllowlistFlow] = {
     for {
-      flow <- fetchIpAllowListFlow(sessionId, Some(app))
+      flow      <- fetchIpAllowListFlow(sessionId, Some(app))
       savedFlow <- flowRepository.saveFlow(flow)
     } yield savedFlow
   }
@@ -53,25 +54,25 @@ class IpAllowlistService @Inject()(flowRepository: FlowRepository, connectorWrap
 
   def addCidrBlock(cidrBlock: String, app: Application, sessionId: String): Future[IpAllowlistFlow] = {
     for {
-      flow <- fetchIpAllowListFlow(sessionId, Some(app))
+      flow                        <- fetchIpAllowListFlow(sessionId, Some(app))
       updatedFlow: IpAllowlistFlow = flow.copy(allowlist = flow.allowlist + cidrBlock)
-      savedFlow <- flowRepository.saveFlow(updatedFlow)
+      savedFlow                   <- flowRepository.saveFlow(updatedFlow)
     } yield savedFlow
   }
 
   def removeCidrBlock(cidrBlock: String, sessionId: String): Future[IpAllowlistFlow] = {
     for {
-      flow <- fetchIpAllowListFlow(sessionId, None, createIfNotFound = false)
+      flow      <- fetchIpAllowListFlow(sessionId, None, createIfNotFound = false)
       savedFlow <- flowRepository.saveFlow(flow.copy(allowlist = flow.allowlist - cidrBlock))
     } yield savedFlow
   }
 
   def activateIpAllowlist(app: Application, sessionId: String)(implicit hc: HeaderCarrier): Future[ApplicationUpdateSuccessful] = {
     for {
-      flow <- fetchIpAllowListFlow(sessionId, None, createIfNotFound = false)
-      _ = if (flow.allowlist.isEmpty) throw new ForbiddenException(s"IP allowlist for session ID $sessionId cannot be activated because it is empty")
+      flow   <- fetchIpAllowListFlow(sessionId, None, createIfNotFound = false)
+      _       = if (flow.allowlist.isEmpty) throw new ForbiddenException(s"IP allowlist for session ID $sessionId cannot be activated because it is empty")
       result <- connectorWrapper.forEnvironment(app.deployedTo).thirdPartyApplicationConnector.updateIpAllowlist(app.id, app.ipAllowlist.required, flow.allowlist)
-      _ <- flowRepository.deleteBySessionIdAndFlowType(sessionId, IP_ALLOW_LIST)
+      _      <- flowRepository.deleteBySessionIdAndFlowType(sessionId, IP_ALLOW_LIST)
     } yield result
   }
 
@@ -81,7 +82,7 @@ class IpAllowlistService @Inject()(flowRepository: FlowRepository, connectorWrap
     } else {
       for {
         result <- connectorWrapper.forEnvironment(app.deployedTo).thirdPartyApplicationConnector.updateIpAllowlist(app.id, app.ipAllowlist.required, Set.empty)
-        _ <- flowRepository.deleteBySessionIdAndFlowType(sessionId, IP_ALLOW_LIST)
+        _      <- flowRepository.deleteBySessionIdAndFlowType(sessionId, IP_ALLOW_LIST)
       } yield result
     }
   }

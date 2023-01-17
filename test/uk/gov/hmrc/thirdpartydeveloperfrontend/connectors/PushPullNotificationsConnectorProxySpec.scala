@@ -17,51 +17,51 @@
 package uk.gov.hmrc.thirdpartydeveloperfrontend.connectors
 
 import java.util.UUID
+import scala.concurrent.ExecutionContext
+import scala.concurrent.ExecutionContext.Implicits.global
+
+import org.scalatest.BeforeAndAfterEach
+import org.scalatestplus.play.guice.GuiceOneAppPerSuite
+
+import uk.gov.hmrc.http.{HttpClient, _}
 
 import uk.gov.hmrc.thirdpartydeveloperfrontend.config.ApplicationConfig
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.apidefinitions.{ApiContext, ApiVersion}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.{ClientId, Environment}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.helpers.FutureTimeoutSupportImpl
-import org.scalatest.BeforeAndAfterEach
-import org.scalatestplus.play.guice.GuiceOneAppPerSuite
-import uk.gov.hmrc.http._
-import uk.gov.hmrc.http.HttpClient
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.AsyncHmrcSpec
 
-import scala.concurrent.ExecutionContext
-import scala.concurrent.ExecutionContext.Implicits.global
-
 class PushPullNotificationsConnectorProxySpec extends AsyncHmrcSpec with BeforeAndAfterEach with GuiceOneAppPerSuite {
-  private val baseUrl = "https://example.com"
+  private val baseUrl         = "https://example.com"
   private val environmentName = "ENVIRONMENT"
 
-  implicit val hc = HeaderCarrier()
-  val clientId: ClientId = ClientId(UUID.randomUUID().toString)
-  val apiContext: ApiContext = ApiContext("i-am-a-test")
-  val apiVersion: ApiVersion = ApiVersion("1.0")
+  implicit val hc                  = HeaderCarrier()
+  val clientId: ClientId           = ClientId(UUID.randomUUID().toString)
+  val apiContext: ApiContext       = ApiContext("i-am-a-test")
+  val apiVersion: ApiVersion       = ApiVersion("1.0")
   private val futureTimeoutSupport = new FutureTimeoutSupportImpl
 
   class Setup(proxyEnabled: Boolean = false) {
-    val testApiKey: String = UUID.randomUUID().toString
-    val mockHttpClient: HttpClient = mock[HttpClient]
+    val testApiKey: String                       = UUID.randomUUID().toString
+    val mockHttpClient: HttpClient               = mock[HttpClient]
     val mockProxiedHttpClient: ProxiedHttpClient = mock[ProxiedHttpClient]
-    val mockEnvironment: Environment = mock[Environment]
-    val mockAppConfig: ApplicationConfig = mock[ApplicationConfig]
+    val mockEnvironment: Environment             = mock[Environment]
+    val mockAppConfig: ApplicationConfig         = mock[ApplicationConfig]
 
     when(mockEnvironment.toString).thenReturn(environmentName)
     when(mockProxiedHttpClient.withHeaders(*)).thenReturn(mockProxiedHttpClient)
 
     val connector: AbstractPushPullNotificationsConnector = new AbstractPushPullNotificationsConnector {
-      val httpClient = mockHttpClient
-      val proxiedHttpClient = mockProxiedHttpClient
-      val serviceBaseUrl = baseUrl
-      val useProxy = proxyEnabled
-      val environment = mockEnvironment
-      val apiKey = testApiKey
-      val actorSystem = app.actorSystem
-      val futureTimeout = futureTimeoutSupport
-      val appConfig = mockAppConfig
-      val authorizationKey = "random auth key"
+      val httpClient                    = mockHttpClient
+      val proxiedHttpClient             = mockProxiedHttpClient
+      val serviceBaseUrl                = baseUrl
+      val useProxy                      = proxyEnabled
+      val environment                   = mockEnvironment
+      val apiKey                        = testApiKey
+      val actorSystem                   = app.actorSystem
+      val futureTimeout                 = futureTimeoutSupport
+      val appConfig                     = mockAppConfig
+      val authorizationKey              = "random auth key"
       implicit val ec: ExecutionContext = global
     }
   }

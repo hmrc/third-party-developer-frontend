@@ -16,17 +16,20 @@
 
 package uk.gov.hmrc.apiplatform.modules.submissions.config
 
-import uk.gov.hmrc.apiplatform.modules.submissions.connectors.ThirdPartyApplicationSubmissionsConnector.Config
 import javax.inject.{Inject, Provider, Singleton}
+
 import uk.gov.hmrc.play.bootstrap.config.ServicesConfig
+
+import uk.gov.hmrc.apiplatform.modules.submissions.connectors.ThirdPartyApplicationSubmissionsConnector.Config
 
 @Singleton
 class ThirdPartyApplicationSubmissionsConnectorConfigProvider @Inject() (config: ServicesConfig) extends Provider[Config] {
-    override def get(): Config = {
 
-      val serviceBaseUrl: String = config.baseUrl("third-party-application-production")
-      val apiKey: String = config.getConfString("third-party-application-production.api-key", "")
+  override def get(): Config = {
 
-      Config(serviceBaseUrl, apiKey)
-    }
+    val serviceBaseUrl: String = config.baseUrl("third-party-application-production")
+    val apiKey: String         = config.getConfString("third-party-application-production.api-key", "")
+
+    Config(serviceBaseUrl, apiKey)
+  }
 }

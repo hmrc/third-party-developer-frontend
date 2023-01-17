@@ -16,42 +16,40 @@
 
 package uk.gov.hmrc.thirdpartydeveloperfrontend.controllers
 
-import uk.gov.hmrc.thirdpartydeveloperfrontend.builder.DeveloperBuilder
+import scala.concurrent.ExecutionContext.Implicits.global
+import scala.concurrent.Future
+import scala.concurrent.Future._
+
+import org.jsoup.Jsoup
+import org.scalatestplus.play.guice.GuiceOneAppPerSuite
+import views.html.ppns.PushSecretsView
+
+import play.api.mvc.Result
+import play.api.test.FakeRequest
+import play.api.test.Helpers._
+import play.filters.csrf.CSRF.TokenProvider
+import uk.gov.hmrc.http.HeaderCarrier
+
+import uk.gov.hmrc.thirdpartydeveloperfrontend.builder.{DeveloperBuilder, _}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.apidefinitions.APISubscriptionStatus
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.{DeveloperSession, LoggedInState, Session}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.subscriptions.ApiSubscriptionFields
 import uk.gov.hmrc.thirdpartydeveloperfrontend.mocks.service._
-import org.jsoup.Jsoup
-import play.api.mvc.Result
-import play.api.test.Helpers._
-import play.api.test.FakeRequest
-import play.filters.csrf.CSRF.TokenProvider
 import uk.gov.hmrc.thirdpartydeveloperfrontend.service.{PushPullNotificationsService, SessionService}
-import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.ViewHelpers._
-import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.WithCSRFAddToken
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.WithLoggedInSession._
-import views.html.ppns.PushSecretsView
+import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.{CollaboratorTracker, LocalUserIdTracker, TestApplications, WithCSRFAddToken}
 
-import scala.concurrent.ExecutionContext.Implicits.global
-import scala.concurrent.Future
-import scala.concurrent.Future._
-import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.LocalUserIdTracker
-import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.TestApplications
-import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.CollaboratorTracker
-import org.scalatestplus.play.guice.GuiceOneAppPerSuite
-import uk.gov.hmrc.thirdpartydeveloperfrontend.builder._
-
-class PushPullNotificationsSpec 
-    extends BaseControllerSpec 
-    with WithCSRFAddToken 
+class PushPullNotificationsSpec
+    extends BaseControllerSpec
+    with WithCSRFAddToken
     with SampleSession
     with SampleApplication
-    with SubscriptionTestHelperSugar 
+    with SubscriptionTestHelperSugar
     with TestApplications
     with CollaboratorTracker
-    with DeveloperBuilder 
+    with DeveloperBuilder
     with LocalUserIdTracker
     with GuiceOneAppPerSuite {
 
@@ -123,7 +121,7 @@ class PushPullNotificationsSpec
   }
 
   trait Setup extends ApplicationServiceMock with ApplicationActionServiceMock {
-    private val pushSecretsView = app.injector.instanceOf[PushSecretsView]
+    private val pushSecretsView                  = app.injector.instanceOf[PushSecretsView]
     private val pushPullNotificationsServiceMock = mock[PushPullNotificationsService]
 
     val underTest = new PushPullNotifications(
@@ -141,7 +139,7 @@ class PushPullNotificationsSpec
 
     val developer = buildDeveloper()
     val sessionId = "sessionId"
-    val session = Session(sessionId, developer, LoggedInState.LOGGED_IN)
+    val session   = Session(sessionId, developer, LoggedInState.LOGGED_IN)
 
     val loggedInDeveloper = DeveloperSession(session)
 
@@ -149,9 +147,9 @@ class PushPullNotificationsSpec
       .thenReturn(successful(Some(session)))
     when(underTest.sessionService.updateUserFlowSessions(sessionId)).thenReturn(successful(()))
 
-    val sessionParams = Seq("csrfToken" -> app.injector.instanceOf[TokenProvider].generateToken)
+    val sessionParams    = Seq("csrfToken" -> app.injector.instanceOf[TokenProvider].generateToken)
     val loggedOutRequest = FakeRequest().withSession(sessionParams: _*)
-    val loggedInRequest = FakeRequest().withLoggedIn(underTest, implicitly)(sessionId).withSession(sessionParams: _*)
+    val loggedInRequest  = FakeRequest().withLoggedIn(underTest, implicitly)(sessionId).withSession(sessionParams: _*)
 
     def redirectsToLogin(result: Future[Result]) = {
       status(result) shouldBe SEE_OTHER
@@ -159,10 +157,10 @@ class PushPullNotificationsSpec
     }
 
     def showPushSecretsShouldRenderThePage(application: Application) = {
-      val subscriptionStatus: APISubscriptionStatus = exampleSubscriptionWithFields("ppns", 1)
+      val subscriptionStatus: APISubscriptionStatus                     = exampleSubscriptionWithFields("ppns", 1)
       val newFields: List[ApiSubscriptionFields.SubscriptionFieldValue] = subscriptionStatus.fields.fields
         .map(fieldValue => fieldValue.copy(definition = fieldValue.definition.copy(`type` = "PPNSField")))
-      val subsData = List(subscriptionStatus.copy(fields = subscriptionStatus.fields.copy(fields = newFields)))
+      val subsData                                                      = List(subscriptionStatus.copy(fields = subscriptionStatus.fields.copy(fields = newFields)))
 
       givenApplicationAction(ApplicationWithSubscriptionData(application, asSubscriptions(subsData), asFields(subsData)), loggedInDeveloper, subsData)
 

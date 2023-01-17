@@ -16,14 +16,15 @@
 
 package uk.gov.hmrc.thirdpartydeveloperfrontend.connectors
 
-import com.kenshoo.play.metrics.MetricsImpl
 import javax.inject.{Inject, Singleton}
+import scala.concurrent.{ExecutionContext, Future}
+import scala.util.{Failure, Success}
+
+import com.kenshoo.play.metrics.MetricsImpl
+
 import play.api.Configuration
 import play.api.inject.ApplicationLifecycle
 import uk.gov.hmrc.play.http.metrics.common.API
-
-import scala.concurrent.{ExecutionContext, Future}
-import scala.util.{Failure, Success}
 
 sealed trait Timer {
   def stop(): Unit
@@ -34,7 +35,8 @@ trait ConnectorMetrics {
 }
 
 @Singleton
-class ConnectorMetricsImpl @Inject()(lifecycle: ApplicationLifecycle, config: Configuration) extends MetricsImpl(lifecycle, config) with ConnectorMetrics {
+class ConnectorMetricsImpl @Inject() (lifecycle: ApplicationLifecycle, config: Configuration) extends MetricsImpl(lifecycle, config) with ConnectorMetrics {
+
   def record[A](api: API)(f: => Future[A])(implicit ec: ExecutionContext): Future[A] = {
     val timer = startTimer(api)
 

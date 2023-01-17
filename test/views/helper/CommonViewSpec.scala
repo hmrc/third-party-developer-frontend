@@ -19,33 +19,33 @@ package views.helper
 import java.time.Period
 import java.util.Locale
 
-import uk.gov.hmrc.thirdpartydeveloperfrontend.config.ApplicationConfig
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.controllers.FraudPreventionNavLinkViewModel
+import org.scalatest.matchers.should.Matchers
 import org.scalatestplus.play.guice.GuiceOneAppPerSuite
+
 import play.api.Application
 import play.api.i18n.{Lang, MessagesImpl, MessagesProvider}
 import play.api.inject.guice.GuiceApplicationBuilder
 import play.api.mvc.MessagesControllerComponents
+
+import uk.gov.hmrc.thirdpartydeveloperfrontend.config.ApplicationConfig
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.controllers.FraudPreventionNavLinkViewModel
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.{AsyncHmrcSpec, SharedMetricsClearDown}
-import org.scalatest.matchers.should.Matchers
 
 trait CommonViewSpec extends AsyncHmrcSpec with GuiceOneAppPerSuite with SharedMetricsClearDown with Matchers {
-  val mcc = app.injector.instanceOf[MessagesControllerComponents]
-  val messagesApi = mcc.messagesApi
-  val grantLength: Period = Period.ofDays(547)
+  val mcc                                         = app.injector.instanceOf[MessagesControllerComponents]
+  val messagesApi                                 = mcc.messagesApi
+  val grantLength: Period                         = Period.ofDays(547)
   implicit val messagesProvider: MessagesProvider = MessagesImpl(Lang(Locale.ENGLISH), messagesApi)
-  implicit val appConfig: ApplicationConfig = mock[ApplicationConfig]
+  implicit val appConfig: ApplicationConfig       = mock[ApplicationConfig]
 
   def createFraudPreventionNavLinkViewModel(isVisible: Boolean, url: String) = FraudPreventionNavLinkViewModel(isVisible, url)
 
   when(appConfig.nameOfPrincipalEnvironment).thenReturn("Production")
   when(appConfig.nameOfSubordinateEnvironment).thenReturn("Sandbox")
 
-
   override def fakeApplication(): Application =
     GuiceApplicationBuilder()
       .configure(("metrics.jvm", false))
       .build()
-
 
 }

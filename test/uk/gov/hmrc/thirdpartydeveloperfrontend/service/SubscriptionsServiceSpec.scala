@@ -18,24 +18,24 @@ package uk.gov.hmrc.thirdpartydeveloperfrontend.service
 
 import java.time.{LocalDateTime, Period, ZoneOffset}
 import java.util.UUID.randomUUID
+import scala.concurrent.ExecutionContext.Implicits.global
+import scala.concurrent.Future.successful
+
+import uk.gov.hmrc.http.HeaderCarrier
+
 import uk.gov.hmrc.thirdpartydeveloperfrontend.builder._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.connectors._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.apidefinitions._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications._
-import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.AsyncHmrcSpec
-
-import scala.concurrent.Future.successful
-import scala.concurrent.ExecutionContext.Implicits.global
 import uk.gov.hmrc.thirdpartydeveloperfrontend.service.PushPullNotificationsService.PushPullNotificationsConnector
-import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.thirdpartydeveloperfrontend.service.SubscriptionFieldsService.SubscriptionFieldsConnector
-import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.LocalUserIdTracker
+import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.{AsyncHmrcSpec, LocalUserIdTracker}
 
 class SubscriptionsServiceSpec extends AsyncHmrcSpec with SubscriptionsBuilder with ApplicationBuilder with LocalUserIdTracker {
 
-  val versionOne = ApiVersion("1.0")
-  val versionTwo = ApiVersion("2.0")
+  val versionOne          = ApiVersion("1.0")
+  val versionTwo          = ApiVersion("2.0")
   val grantLength: Period = Period.ofDays(547)
 
   trait Setup {
@@ -43,19 +43,20 @@ class SubscriptionsServiceSpec extends AsyncHmrcSpec with SubscriptionsBuilder w
 
     val mockProductionApplicationConnector: ThirdPartyApplicationProductionConnector =
       mock[ThirdPartyApplicationProductionConnector]
+
     val mockSandboxApplicationConnector: ThirdPartyApplicationSandboxConnector =
       mock[ThirdPartyApplicationSandboxConnector]
-    val mockSubscriptionsService: SubscriptionsService = mock[SubscriptionsService]
+    val mockSubscriptionsService: SubscriptionsService                         = mock[SubscriptionsService]
 
     val mockProductionSubscriptionFieldsConnector: SubscriptionFieldsConnector = mock[SubscriptionFieldsConnector]
-    val mockSandboxSubscriptionFieldsConnector: SubscriptionFieldsConnector = mock[SubscriptionFieldsConnector]
-    val mockPushPullNotificationsConnector: PushPullNotificationsConnector = mock[PushPullNotificationsConnector]
+    val mockSandboxSubscriptionFieldsConnector: SubscriptionFieldsConnector    = mock[SubscriptionFieldsConnector]
+    val mockPushPullNotificationsConnector: PushPullNotificationsConnector     = mock[PushPullNotificationsConnector]
 
     val mockAuditService: AuditService = mock[AuditService]
 
     val mockSubscriptionFieldsService: SubscriptionFieldsService = mock[SubscriptionFieldsService]
-    val mockDeskproConnector: DeskproConnector = mock[DeskproConnector]
-    val mockApmConnector: ApmConnector = mock[ApmConnector]
+    val mockDeskproConnector: DeskproConnector                   = mock[DeskproConnector]
+    val mockApmConnector: ApmConnector                           = mock[ApmConnector]
 
     val subscriptionsService = new SubscriptionsService(
       mockDeskproConnector,
@@ -72,22 +73,33 @@ class SubscriptionsServiceSpec extends AsyncHmrcSpec with SubscriptionsBuilder w
 
   }
 
-
   val productionApplicationId = ApplicationId("Application ID")
-  val productionClientId = ClientId(s"client-id-${randomUUID().toString}")
+  val productionClientId      = ClientId(s"client-id-${randomUUID().toString}")
+
   val productionApplication: Application =
-    Application(productionApplicationId, productionClientId, "name", LocalDateTime.now(ZoneOffset.UTC), Some(LocalDateTime.now(ZoneOffset.UTC)), None, grantLength, Environment.PRODUCTION, Some("description"), Set())
+    Application(
+      productionApplicationId,
+      productionClientId,
+      "name",
+      LocalDateTime.now(ZoneOffset.UTC),
+      Some(LocalDateTime.now(ZoneOffset.UTC)),
+      None,
+      grantLength,
+      Environment.PRODUCTION,
+      Some("description"),
+      Set()
+    )
 
   "isSubscribedToApi" should {
     val subscriptions = Set(
-      ApiIdentifier(ApiContext("first context"),versionOne),
-      ApiIdentifier(ApiContext("second context"),versionOne)
+      ApiIdentifier(ApiContext("first context"), versionOne),
+      ApiIdentifier(ApiContext("second context"), versionOne)
     )
-    val appWithData = ApplicationWithSubscriptionData(buildApplication("email@example.com"), subscriptions)
+    val appWithData   = ApplicationWithSubscriptionData(buildApplication("email@example.com"), subscriptions)
 
     "return false when the application has no subscriptions to the requested api version" in new Setup {
-      val apiContext = ApiContext("third context")
-      val apiVersion = ApiVersion("3.0")
+      val apiContext   = ApiContext("third context")
+      val apiVersion   = ApiVersion("3.0")
       val subscription = ApiIdentifier(apiContext, apiVersion)
 
       when(mockApmConnector.fetchApplicationById(*[ApplicationId])(*)).thenReturn(successful(Some(appWithData)))
@@ -99,19 +111,18 @@ class SubscriptionsServiceSpec extends AsyncHmrcSpec with SubscriptionsBuilder w
     }
 
     "return true when the application is subscribed to the requested api version" in new Setup {
-      val apiContext = ApiContext("first context")
-      val apiVersion = versionOne
+      val apiContext   = ApiContext("first context")
+      val apiVersion   = versionOne
       val subscription = ApiIdentifier(apiContext, apiVersion)
 
       when(mockApmConnector.fetchApplicationById(*[ApplicationId])(*)).thenReturn(successful(Some(appWithData)))
-      
+
       private val result =
         await(subscriptionsService.isSubscribedToApi(appWithData.application.id, subscription))
 
       result shouldBe true
     }
   }
-
 
   "Subscribe to API" should {
     "with no subscription fields definitions" in new Setup {
@@ -131,4 +142,4 @@ class SubscriptionsServiceSpec extends AsyncHmrcSpec with SubscriptionsBuilder w
       verify(mockApmConnector).subscribeToApi(eqTo(productionApplicationId), eqTo(subscription))(*)
     }
   }
-}  
+}

@@ -16,26 +16,28 @@
 
 package uk.gov.hmrc.apiplatform.modules.mfa.views.sms
 
+import java.util.UUID
+
 import org.jsoup.Jsoup
 import org.jsoup.nodes.Document
+import views.helper.CommonViewSpec
+
 import play.api.mvc.{AnyContentAsEmpty, Flash}
 import play.api.test.{FakeRequest, StubMessagesFactory}
+
 import uk.gov.hmrc.apiplatform.modules.mfa.forms.MfaAccessCodeForm
 import uk.gov.hmrc.apiplatform.modules.mfa.models.{MfaId, MfaType}
 import uk.gov.hmrc.apiplatform.modules.mfa.views.html.sms.SmsLoginAccessCodeView
 import uk.gov.hmrc.thirdpartydeveloperfrontend.builder.{DeveloperBuilder, DeveloperSessionBuilder}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.{LocalUserIdTracker, WithCSRFAddToken}
-import views.helper.CommonViewSpec
-
-import java.util.UUID
 
 class SmsLoginAccessCodeViewSpec extends CommonViewSpec
-  with WithCSRFAddToken with DeveloperSessionBuilder
-  with DeveloperBuilder with LocalUserIdTracker with StubMessagesFactory {
+    with WithCSRFAddToken with DeveloperSessionBuilder
+    with DeveloperBuilder with LocalUserIdTracker with StubMessagesFactory {
 
-  implicit val flash: Flash = Flash(Map("mobileNumber" -> "0123456789"))
+  implicit val flash: Flash                                 = Flash(Map("mobileNumber" -> "0123456789"))
   implicit val request: FakeRequest[AnyContentAsEmpty.type] = FakeRequest()
-  val smsLoginAccessCodeView: SmsLoginAccessCodeView = app.injector.instanceOf[SmsLoginAccessCodeView]
+  val smsLoginAccessCodeView: SmsLoginAccessCodeView        = app.injector.instanceOf[SmsLoginAccessCodeView]
 
   trait Setup {
     val mobileNumber = "0123456789"
@@ -49,8 +51,12 @@ class SmsLoginAccessCodeViewSpec extends CommonViewSpec
 
   "SmsLoginAccessCodeView" should {
     "render correctly when form is valid" in new Setup {
-      val mainView = smsLoginAccessCodeView.apply(MfaAccessCodeForm.form, MfaId(UUID.randomUUID()),
-        MfaType.SMS, userHasMultipleMfa = true)(flash, stubMessages(), FakeRequest().withCSRFToken, appConfig)
+      val mainView = smsLoginAccessCodeView.apply(MfaAccessCodeForm.form, MfaId(UUID.randomUUID()), MfaType.SMS, userHasMultipleMfa = true)(
+        flash,
+        stubMessages(),
+        FakeRequest().withCSRFToken,
+        appConfig
+      )
 
       val document = Jsoup.parse(mainView.body)
 
@@ -59,9 +65,13 @@ class SmsLoginAccessCodeViewSpec extends CommonViewSpec
     }
 
     "render correctly when form is invalid" in new Setup {
-      val mainView = smsLoginAccessCodeView.apply(MfaAccessCodeForm.form
-        .withError("accessCode","You have entered an incorrect access code"),
-        MfaId(UUID.randomUUID()), MfaType.SMS, userHasMultipleMfa = true)(flash, stubMessages(), FakeRequest().withCSRFToken, appConfig)
+      val mainView = smsLoginAccessCodeView.apply(
+        MfaAccessCodeForm.form
+          .withError("accessCode", "You have entered an incorrect access code"),
+        MfaId(UUID.randomUUID()),
+        MfaType.SMS,
+        userHasMultipleMfa = true
+      )(flash, stubMessages(), FakeRequest().withCSRFToken, appConfig)
 
       val document = Jsoup.parse(mainView.body)
 

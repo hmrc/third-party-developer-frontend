@@ -16,23 +16,24 @@
 
 package uk.gov.hmrc.thirdpartydeveloperfrontend.connectors
 
+import play.api.libs.json.{JsString, JsValue, Json}
+
 import uk.gov.hmrc.thirdpartydeveloperfrontend.config.ApplicationConfig
-import play.api.libs.json.{Json, JsString, JsValue}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.AsyncHmrcSpec
 
 class PayloadEncryptionSpec extends AsyncHmrcSpec {
 
   trait Setup {
-    val mockAppConfig = mock[ApplicationConfig]
+    val mockAppConfig     = mock[ApplicationConfig]
     when(mockAppConfig.jsonEncryptionKey).thenReturn("czV2OHkvQj9FKEgrTWJQZVNoVm1ZcTN0Nnc5eiRDJkY=")
     val payloadEncryption = new PayloadEncryption(new LocalCrypto(mockAppConfig))
   }
 
   "payload encryption" should {
-    val name: String = "firstname"
+    val name: String     = "firstname"
     val lastName: String = "lastname"
 
-    val form = TestForm(name, lastName)
+    val form          = TestForm(name, lastName)
     val encryptedForm = JsString("K6SteWOyCf6TsdT03f0h/sbCPiYct4CjPS4+5LhGyLKhhnbSu401qZkv0lPIDiPo")
 
     "encrypt a payload" in new Setup {

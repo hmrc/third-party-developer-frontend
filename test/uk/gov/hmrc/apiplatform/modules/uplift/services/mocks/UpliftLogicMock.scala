@@ -16,22 +16,20 @@
 
 package uk.gov.hmrc.apiplatform.modules.uplift.services.mocks
 
-
-import org.mockito.MockitoSugar
-import org.mockito.ArgumentMatchersSugar
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.UserId
 import scala.concurrent.Future._
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.controllers.ApplicationSummary
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.ApplicationId
-import uk.gov.hmrc.apiplatform.modules.uplift.services.UpliftLogic
 
+import org.mockito.{ArgumentMatchersSugar, MockitoSugar}
+
+import uk.gov.hmrc.apiplatform.modules.uplift.services.UpliftLogic
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.ApplicationId
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.controllers.ApplicationSummary
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.UserId
 
 class UpliftLogicMock extends MockitoSugar with ArgumentMatchersSugar {
 
   val upliftLogicMock = mock[UpliftLogic]
 
-  def aUsersUplfitableAndNotUpliftableAppsReturns(summaries : List[ApplicationSummary], upliftableAppIds : List[ApplicationId], nonUpliftableAppIds : List[ApplicationId]) = {
-      when(upliftLogicMock.aUsersSandboxAdminSummariesAndUpliftIds(*[UserId])(*)).thenReturn(successful(UpliftLogic.Data(summaries, upliftableAppIds.toSet, nonUpliftableAppIds.toSet)))
+  def aUsersUplfitableAndNotUpliftableAppsReturns(summaries: List[ApplicationSummary], upliftableAppIds: List[ApplicationId], nonUpliftableAppIds: List[ApplicationId]) = {
+    when(upliftLogicMock.aUsersSandboxAdminSummariesAndUpliftIds(*[UserId])(*)).thenReturn(successful(UpliftLogic.Data(summaries, upliftableAppIds.toSet, nonUpliftableAppIds.toSet)))
   }
 }
-

@@ -16,43 +16,44 @@
 
 package views
 
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.{ApplicationId, Environment}
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.LoggedInState
 import org.jsoup.Jsoup
 import org.jsoup.nodes.Document
-import play.api.test.FakeRequest
-import uk.gov.hmrc.thirdpartydeveloperfrontend.builder.{DeveloperBuilder, DeveloperSessionBuilder}
-import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.ViewHelpers._
-import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.{LocalUserIdTracker, WithCSRFAddToken}
 import views.helper.CommonViewSpec
 import views.html.AddApplicationSuccessView
 
+import play.api.test.FakeRequest
+
+import uk.gov.hmrc.thirdpartydeveloperfrontend.builder.{DeveloperBuilder, DeveloperSessionBuilder}
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.{ApplicationId, Environment}
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.LoggedInState
+import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.ViewHelpers._
+import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.{LocalUserIdTracker, WithCSRFAddToken}
+
 class AddApplicationSuccessSpec extends CommonViewSpec
-  with WithCSRFAddToken
-  with LocalUserIdTracker
-  with DeveloperSessionBuilder
-  with DeveloperBuilder
-   {
+    with WithCSRFAddToken
+    with LocalUserIdTracker
+    with DeveloperSessionBuilder
+    with DeveloperBuilder {
 
   val addApplicationSuccess = app.injector.instanceOf[AddApplicationSuccessView]
-  val sandboxMessage = "You can now get your sandbox credentials for testing."
-  val sandboxButton = "Manage API subscriptions"
+  val sandboxMessage        = "You can now get your sandbox credentials for testing."
+  val sandboxButton         = "Manage API subscriptions"
 
   "Add application success page" should {
 
     def testPage(applicationName: String, environment: Environment): Document = {
       val applicationId = ApplicationId("application-id")
-      val loggedIn = buildDeveloperSession( loggedInState = LoggedInState.LOGGED_IN, buildDeveloper("", "", "", None))
-      val request = FakeRequest().withCSRFToken
-      val page = addApplicationSuccess.render(applicationName, applicationId, environment, request, loggedIn, messagesProvider, appConfig, navSection = "nav-section")
-      val document = Jsoup.parse(page.body)
+      val loggedIn      = buildDeveloperSession(loggedInState = LoggedInState.LOGGED_IN, buildDeveloper("", "", "", None))
+      val request       = FakeRequest().withCSRFToken
+      val page          = addApplicationSuccess.render(applicationName, applicationId, environment, request, loggedIn, messagesProvider, appConfig, navSection = "nav-section")
+      val document      = Jsoup.parse(page.body)
       elementExistsByText(document, "h1", s"You added $applicationName") shouldBe true
       document
     }
 
     "allow manage API subscriptions for sandbox application" in {
       val applicationName = "an application name"
-      val document = testPage(applicationName, Environment.SANDBOX)
+      val document        = testPage(applicationName, Environment.SANDBOX)
       elementExistsByText(document, "p", sandboxMessage) shouldBe true
       elementExistsByText(document, "a", sandboxButton) shouldBe true
     }

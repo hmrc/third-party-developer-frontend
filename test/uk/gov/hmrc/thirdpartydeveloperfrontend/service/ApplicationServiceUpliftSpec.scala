@@ -16,35 +16,31 @@
 
 package uk.gov.hmrc.thirdpartydeveloperfrontend.service
 
-import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.{AsyncHmrcSpec, FixedClock, LocalUserIdTracker}
-import uk.gov.hmrc.http.HeaderCarrier
-import uk.gov.hmrc.thirdpartydeveloperfrontend.builder._
-import uk.gov.hmrc.thirdpartydeveloperfrontend.connectors.ApmConnector
-
 import scala.concurrent.ExecutionContext.Implicits.global
-import uk.gov.hmrc.thirdpartydeveloperfrontend.connectors.ThirdPartyApplicationProductionConnector
-import uk.gov.hmrc.thirdpartydeveloperfrontend.connectors.ThirdPartyApplicationSandboxConnector
-import uk.gov.hmrc.thirdpartydeveloperfrontend.service.SubscriptionFieldsService.SubscriptionFieldsConnector
-import uk.gov.hmrc.thirdpartydeveloperfrontend.service.PushPullNotificationsService.PushPullNotificationsConnector
-import uk.gov.hmrc.thirdpartydeveloperfrontend.config.ApplicationConfig
-import uk.gov.hmrc.thirdpartydeveloperfrontend.connectors.DeskproConnector
-import uk.gov.hmrc.thirdpartydeveloperfrontend.connectors.ThirdPartyDeveloperConnector
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.ApplicationId
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.LoggedInState
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.connectors.DeskproTicket
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.UpliftRequest
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.ApplicationUpliftSuccessful
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.connectors.TicketCreated
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.ApplicationAlreadyExists
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.ApplicationNotFound
-
 import scala.concurrent.Future.{failed, successful}
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.ApplicationVerificationSuccessful
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.ApplicationVerificationFailed
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.apidefinitions.ApiIdentifier
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.apidefinitions.ApiVersion
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.apidefinitions.ApiContext
-class ApplicationServiceUpliftSpec extends AsyncHmrcSpec with LocalUserIdTracker with  DeveloperSessionBuilder with DeveloperBuilder {
+
+import uk.gov.hmrc.http.HeaderCarrier
+
+import uk.gov.hmrc.thirdpartydeveloperfrontend.builder._
+import uk.gov.hmrc.thirdpartydeveloperfrontend.config.ApplicationConfig
+import uk.gov.hmrc.thirdpartydeveloperfrontend.connectors.{
+  ApmConnector,
+  DeskproConnector,
+  ThirdPartyApplicationProductionConnector,
+  ThirdPartyApplicationSandboxConnector,
+  ThirdPartyDeveloperConnector
+}
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.apidefinitions.{ApiContext, ApiIdentifier, ApiVersion}
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.{ApplicationId, ApplicationVerificationFailed, ApplicationVerificationSuccessful, UpliftRequest}
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.connectors.{DeskproTicket, TicketCreated}
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.LoggedInState
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.{ApplicationAlreadyExists, ApplicationNotFound, ApplicationUpliftSuccessful}
+import uk.gov.hmrc.thirdpartydeveloperfrontend.service.PushPullNotificationsService.PushPullNotificationsConnector
+import uk.gov.hmrc.thirdpartydeveloperfrontend.service.SubscriptionFieldsService.SubscriptionFieldsConnector
+import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.{AsyncHmrcSpec, FixedClock, LocalUserIdTracker}
+
+class ApplicationServiceUpliftSpec extends AsyncHmrcSpec with LocalUserIdTracker with DeveloperSessionBuilder with DeveloperBuilder {
+
   trait Setup extends FixedClock {
     implicit val hc: HeaderCarrier = HeaderCarrier()
 
@@ -53,16 +49,16 @@ class ApplicationServiceUpliftSpec extends AsyncHmrcSpec with LocalUserIdTracker
     val mockApmConnector: ApmConnector = mock[ApmConnector]
 
     val mockProductionApplicationConnector: ThirdPartyApplicationProductionConnector = mock[ThirdPartyApplicationProductionConnector]
-    val mockSandboxApplicationConnector: ThirdPartyApplicationSandboxConnector = mock[ThirdPartyApplicationSandboxConnector]
+    val mockSandboxApplicationConnector: ThirdPartyApplicationSandboxConnector       = mock[ThirdPartyApplicationSandboxConnector]
 
     val mockSubscriptionsService: SubscriptionsService = mock[SubscriptionsService]
 
     val mockProductionSubscriptionFieldsConnector: SubscriptionFieldsConnector = mock[SubscriptionFieldsConnector]
-    val mockSandboxSubscriptionFieldsConnector: SubscriptionFieldsConnector = mock[SubscriptionFieldsConnector]
-    val mockPushPullNotificationsConnector: PushPullNotificationsConnector = mock[PushPullNotificationsConnector]
+    val mockSandboxSubscriptionFieldsConnector: SubscriptionFieldsConnector    = mock[SubscriptionFieldsConnector]
+    val mockPushPullNotificationsConnector: PushPullNotificationsConnector     = mock[PushPullNotificationsConnector]
 
     val mockSubscriptionFieldsService: SubscriptionFieldsService = mock[SubscriptionFieldsService]
-    val mockDeskproConnector: DeskproConnector = mock[DeskproConnector]
+    val mockDeskproConnector: DeskproConnector                   = mock[DeskproConnector]
 
     val mockDeveloperConnector: ThirdPartyDeveloperConnector = mock[ThirdPartyDeveloperConnector]
 
@@ -94,19 +90,19 @@ class ApplicationServiceUpliftSpec extends AsyncHmrcSpec with LocalUserIdTracker
 
   implicit class ApiIdentifierSyntax(val context: String) {
     def asIdentifier(version: String): ApiIdentifier = ApiIdentifier(ApiContext(context), ApiVersion(version))
-    def asIdentifier(): ApiIdentifier = asIdentifier("1.0")
+    def asIdentifier(): ApiIdentifier                = asIdentifier("1.0")
   }
 
   "filterSubscriptionsForUplift" should {
-    val app1 = ApplicationId("app1")
-    val app2 = ApplicationId("app2")
+    val app1                      = ApplicationId("app1")
+    val app2                      = ApplicationId("app2")
     val appWithNothingButTestApis = ApplicationId("app3")
-    val apiOk1a = "ok1".asIdentifier
-    val apiOk1b = "ok1".asIdentifier("2.0")
-    val apiOk2a = "ok2".asIdentifier
-    val apiOk2b = "ok2".asIdentifier("2.0")
-    val apiUnavailableInProd = "bad21".asIdentifier
-    
+    val apiOk1a                   = "ok1".asIdentifier
+    val apiOk1b                   = "ok1".asIdentifier("2.0")
+    val apiOk2a                   = "ok2".asIdentifier
+    val apiOk2b                   = "ok2".asIdentifier("2.0")
+    val apiUnavailableInProd      = "bad21".asIdentifier
+
     "Do not match apps with apis that cannot be uplifted" in new Setup {
       val appsToApis = Map(
         app1                      -> Set(apiOk1a, apiOk2a),
@@ -121,7 +117,7 @@ class ApplicationServiceUpliftSpec extends AsyncHmrcSpec with LocalUserIdTracker
   }
 
   "requestUplift" should {
-    val applicationId = ApplicationId("applicationId")
+    val applicationId   = ApplicationId("applicationId")
     val applicationName = "applicationName"
 
     val user = buildDeveloperSession(loggedInState = LoggedInState.LOGGED_IN, buildDeveloper("email@example.com", "Firstname", "Lastname", None))
@@ -172,7 +168,8 @@ class ApplicationServiceUpliftSpec extends AsyncHmrcSpec with LocalUserIdTracker
   "verifyUplift" should {
     val verificationCode = "aVerificationCode"
 
-    "verify an uplift successful" in new Setup {ApplicationVerificationSuccessful
+    "verify an uplift successful" in new Setup {
+      ApplicationVerificationSuccessful
       when(mockProductionApplicationConnector.verify(verificationCode)).thenReturn(successful(ApplicationVerificationSuccessful))
       await(applicationService.verify(verificationCode)) shouldBe ApplicationVerificationSuccessful
     }

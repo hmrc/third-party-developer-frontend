@@ -16,13 +16,13 @@
 
 package uk.gov.hmrc.apiplatform.modules.submissions.domain.models
 
-import play.api.libs.json.Format
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.ApplicationId
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.services.LocalDateTimeFormatters
-import uk.gov.hmrc.apiplatform.modules.submissions.domain.models.ResponsibleIndividualVerificationState.ResponsibleIndividualVerificationState
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.ResponsibleIndividual
-
 import java.time.LocalDateTime
+
+import play.api.libs.json.Format
+
+import uk.gov.hmrc.apiplatform.modules.submissions.domain.models.ResponsibleIndividualVerificationState.ResponsibleIndividualVerificationState
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.{ApplicationId, ResponsibleIndividual}
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.services.LocalDateTimeFormatters
 
 case class ResponsibleIndividualVerificationId(value: String) extends AnyVal
 
@@ -70,8 +70,8 @@ object ResponsibleIndividualVerification extends LocalDateTimeFormatters {
   import uk.gov.hmrc.play.json.Union
   implicit val utcReads = DefaultLocalDateTimeReads
 
-  implicit val responsibleIndividualVerificationFormat            = Json.format[ResponsibleIndividualToUVerification]
-  implicit val responsibleIndividualUpdateVerificationFormat      = Json.format[ResponsibleIndividualUpdateVerification]
+  implicit val responsibleIndividualVerificationFormat       = Json.format[ResponsibleIndividualToUVerification]
+  implicit val responsibleIndividualUpdateVerificationFormat = Json.format[ResponsibleIndividualUpdateVerification]
 
   implicit val jsonFormatResponsibleIndividualVerification = Union.from[ResponsibleIndividualVerification]("verificationType")
     .and[ResponsibleIndividualToUVerification]("termsOfUse")
@@ -80,8 +80,8 @@ object ResponsibleIndividualVerification extends LocalDateTimeFormatters {
 
   def getVerificationType(riVerification: ResponsibleIndividualVerification): String = {
     riVerification match {
-      case ritouv: ResponsibleIndividualToUVerification => "termsOfUse"
-      case riuv: ResponsibleIndividualUpdateVerification => "adminUpdate" 
+      case ritouv: ResponsibleIndividualToUVerification  => "termsOfUse"
+      case riuv: ResponsibleIndividualUpdateVerification => "adminUpdate"
     }
   }
 }
