@@ -19,7 +19,6 @@
 @import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.controllers.ApplicationSummary
 @import include._
 @import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.controllers.Crumb
-@import uk.gov.hmrc.urls.Link
 @import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.routes
 
 @this(devMain: DevMainWithFormErrors)
@@ -40,7 +39,7 @@
     If you want production credentials for a different sandbox application, you need to:
   </p>
   <ul class="govuk-list govuk-list--number">
-    <li>@Link.toInternalPage(url = s"${appConfig.apiDocumentationFrontendUrl}/api-documentation/docs/api", value = Some("Review the  API documentation")).toHtml and check which APIs are available in production.</li>
+    <li><a href="@{s"${appConfig.apiDocumentationFrontendUrl}/api-documentation/docs/api"}" class="govuk-link">Review the  API documentation</a> and check which APIs are available in production.</li>
     <li>Update the API subscriptions.</li>
     <li>Request production credentials again.</li>
   </ul>
