@@ -72,12 +72,10 @@
 
       <p class="govuk-body">You can change the APIs you subscribe to in @environmentNameService.subordinateWording at any time.</p>
       <p class="govuk-body">Check the
-          @hmrcNewTabLink(
-            NewTabLink(
-                language = Some(messages.lang.toString),
-                classList = Some("govuk-link"),
+          @hmrcNewTabLink(NewTabLink(
                 href = Some(s"${applicationConfig.apiDocumentationFrontendUrl}/api-documentation/docs/api"),
-                text = "API documentation (opens in a new tab)")) for information about specific APIs.
+                text = "API documentation (opens in a new tab)"))
+          for information about specific APIs.
       </p>
       @if(role.isAdministrator && isPendingOrActiveProductionApplication(app)) {
         <p class="panel panel-border-wide">For security reasons we must review any API subscription changes. This takes up to 2 working days.</p>
