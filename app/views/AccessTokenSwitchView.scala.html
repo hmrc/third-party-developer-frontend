@@ -17,7 +17,6 @@
 @import include._
 @import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.DeveloperSession
 @import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.views.BackButtonWithJavaScript
-@import uk.gov.hmrc.urls.Link
 
 @this(devMain: DevMain)
 
@@ -32,8 +31,10 @@
   <h1 class="govuk-heading-l">Switch to an OAuth 2.0 access token</h1>
 
   <p class="govuk-body">Using application-restricted endpoints with server tokens is now deprecated.</p>
-
-  <p class="govuk-body">To continue using your application, you need @{Link.toInternalPage(url = s"${appConfig.apiDocumentationFrontendUrl}/api-documentation/docs/authorisation/application-restricted-endpoints", value = Some("an OAuth 2.0 access token")).toHtml} to make API calls. OAuth 2.0 access tokens are secure and better protect your data.</p>
+    <p class="govuk-body">To continue using your application, you need
+        <a href="@{s"${appConfig.apiDocumentationFrontendUrl}/api-documentation/docs/authorisation/application-restricted-endpoints"}" class="govuk-link">an OAuth 2.0 access token</a>
+        to make API calls. OAuth 2.0 access tokens are secure and better protect your data.
+    </p>
 
   <p class="govuk-body">Server token retires on:</p>
 
@@ -63,6 +64,6 @@
     <li>Charge Ref Notification</li>
   </ul>
 
-  <p class="govuk-body">@{Link.toInternalPage(url = s"${appConfig.apiDocumentationFrontendUrl}/api-documentation/docs/authorisation/application-restricted-endpoints", value = Some("Get an OAuth 2.0 access token")).toHtml}</p>
+  <p class="govuk-body"><a href=@{s"${appConfig.apiDocumentationFrontendUrl}/api-documentation/docs/authorisation/application-restricted-endpoints"} class="govuk-link">an OAuth 2.0 access token</a></p>
 
 }

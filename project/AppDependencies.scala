@@ -18,7 +18,6 @@ object AppDependencies {
     "uk.gov.hmrc"                 %% "bootstrap-frontend-play-28"     % bootstrapVersion,
     "uk.gov.hmrc"                 %% "play-frontend-hmrc"             % "5.3.0-play-28",
     "uk.gov.hmrc.mongo"           %% "hmrc-mongo-play-28"             % mongoVersion,
-    "uk.gov.hmrc"                 %% "url-builder"                    % "3.7.0-play-28",
     "uk.gov.hmrc"                 %% "play-json-union-formatter"      % "1.17.0-play-28",
     "uk.gov.hmrc"                 %% "http-metrics"                   % "2.5.0-play-28",
     "uk.gov.hmrc"                 %% "json-encryption"                % "5.1.0-play-28",
