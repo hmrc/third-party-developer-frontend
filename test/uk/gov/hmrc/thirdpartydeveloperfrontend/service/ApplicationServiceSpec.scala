@@ -290,7 +290,6 @@ class ApplicationServiceSpec extends AsyncHmrcSpec
     val adminRequester                        = buildDeveloperSession(loggedInState = LoggedInState.LOGGED_IN, buildDeveloper(adminEmail, "firstname", "lastname", None))
     val developerEmail                        = "developer@example.com"
     val developerRequester                    = buildDeveloperSession(loggedInState = LoggedInState.LOGGED_IN, buildDeveloper(developerEmail, "firstname", "lastname", None))
-    val developerUserId                       = developerRequester.developer.userId
     val teamMembers                           = Set(adminEmail.asAdministratorCollaborator, developerEmail.asDeveloperCollaborator)
     val sandboxApp                            = sandboxApplication.copy(collaborators = teamMembers)
     val productionApp                         = productionApplication.copy(collaborators = teamMembers)
@@ -312,7 +311,7 @@ class ApplicationServiceSpec extends AsyncHmrcSpec
 
     "create a deskpro ticket and audit record for a Developer in a Sandbox app" in new Setup {
 
-      when(mockDeskproConnector.createTicket(eqTo(developerUserId.asText), captor.capture())(eqTo(hc)))
+      when(mockDeskproConnector.createTicket(eqTo(developerRequester.developer.userId.asText), captor.capture())(eqTo(hc)))
         .thenReturn(successful(TicketCreated))
       when(mockAuditService.audit(any[AuditAction], any[Map[String, String]])(eqTo(hc)))
         .thenReturn(successful(Success))
