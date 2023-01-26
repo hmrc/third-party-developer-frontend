@@ -20,10 +20,8 @@ import java.time.{LocalDateTime, Period, ZoneOffset}
 import java.util.UUID.randomUUID
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future.{failed, successful}
-
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.play.audit.http.connector.AuditResult.Success
-
 import uk.gov.hmrc.thirdpartydeveloperfrontend.builder._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.config.ApplicationConfig
 import uk.gov.hmrc.thirdpartydeveloperfrontend.connectors._
@@ -32,7 +30,7 @@ import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.apidefinitions.APIS
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.apidefinitions._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.connectors.{DeskproTicket, TicketCreated}
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.User
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.{User, UserId}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.subscriptions.ApiSubscriptionFields._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.subscriptions.VersionSubscription
 import uk.gov.hmrc.thirdpartydeveloperfrontend.service.PushPullNotificationsService.PushPullNotificationsConnector
@@ -259,18 +257,19 @@ class ApplicationServiceTeamMembersSpec extends AsyncHmrcSpec with Subscriptions
   }
 
   "request delete developer" should {
-    val developerName  = "Testy McTester"
-    val developerEmail = "testy@example.com"
+    val developerName   = "Testy McTester"
+    val developerEmail  = "testy@example.com"
+    val developerUserId = UserId.random
 
     "correctly create a deskpro ticket and audit record" in new Setup {
-      when(mockDeskproConnector.createTicket(any[DeskproTicket])(eqTo(hc)))
+      when(mockDeskproConnector.createTicket(any[String], any[DeskproTicket])(eqTo(hc)))
         .thenReturn(successful(TicketCreated))
       when(mockAuditService.audit(any[AuditAction], any[Map[String, String]])(eqTo(hc)))
         .thenReturn(successful(Success))
 
-      await(applicationService.requestDeveloperAccountDeletion(developerName, developerEmail))
+      await(applicationService.requestDeveloperAccountDeletion(developerUserId, developerName, developerEmail))
 
-      verify(mockDeskproConnector, times(1)).createTicket(any[DeskproTicket])(eqTo(hc))
+      verify(mockDeskproConnector, times(1)).createTicket(any[String], any[DeskproTicket])(eqTo(hc))
       verify(mockAuditService, times(1)).audit(any[AuditAction], any[Map[String, String]])(eqTo(hc))
     }
   }

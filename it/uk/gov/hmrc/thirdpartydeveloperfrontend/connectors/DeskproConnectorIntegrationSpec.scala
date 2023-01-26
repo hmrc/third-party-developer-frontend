@@ -66,7 +66,7 @@ class DeskproConnectorIntegrationSpec extends BaseConnectorIntegrationSpec with 
           )
         )
 
-        await(connector.createTicket(ticket)) shouldBe TicketCreated
+        await(connector.createTicket("", ticket)) shouldBe TicketCreated
         verify(1, postRequestedFor(urlEqualTo(ticketPath)).withRequestBody(equalTo(expectedBody)))
       }
     }

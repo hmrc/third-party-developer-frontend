@@ -50,11 +50,11 @@ class SubscriptionsService @Inject() (
   }
 
   def requestApiSubscription(requester: DeveloperSession, application: Application, apiName: String, apiVersion: ApiVersion)(implicit hc: HeaderCarrier): Future[TicketResult] = {
-    deskproConnector.createTicket(doRequest(requester, application, apiName, apiVersion)(DeskproTicket.createForApiSubscribe))
+    deskproConnector.createTicket(requester.developer.userId.asText, doRequest(requester, application, apiName, apiVersion)(DeskproTicket.createForApiSubscribe))
   }
 
   def requestApiUnsubscribe(requester: DeveloperSession, application: Application, apiName: String, apiVersion: ApiVersion)(implicit hc: HeaderCarrier): Future[TicketResult] = {
-    deskproConnector.createTicket(doRequest(requester, application, apiName, apiVersion)(DeskproTicket.createForApiUnsubscribe))
+    deskproConnector.createTicket(requester.developer.userId.asText, doRequest(requester, application, apiName, apiVersion)(DeskproTicket.createForApiUnsubscribe))
   }
 
   type ApiMap[V]   = Map[ApiContext, Map[ApiVersion, V]]

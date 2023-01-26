@@ -88,7 +88,7 @@ class ResponsibleIndividualVerificationService @Inject() (
         val requesterEmail: String = submitterEmail.getOrElse(throw new RuntimeException("requestedByEmailAddress not found"))
 
         val ticket = DeskproTicket.createForRequestProductionCredentials(requestorName, requesterEmail, appName, appId)
-        deskproConnector.createTicket(ticket).map(Some(_))
+        deskproConnector.createTicket(riVerification.id.value, ticket).map(Some(_))
       }
       case _                                         => Future.successful(None)
     }

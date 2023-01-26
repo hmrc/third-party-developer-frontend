@@ -90,7 +90,7 @@ class ResponsibleIndividualVerificationServiceSpec extends AsyncHmrcSpec
       when(mockSubmissionsConnector.fetchResponsibleIndividualVerification(eqTo(code))(*)).thenReturn(successful(Some(riVerification)))
       ApplicationServiceMock.fetchByApplicationIdReturns(applicationId, application)
       ApplicationServiceMock.acceptResponsibleIndividualVerification(applicationId, code)
-      when(mockDeskproConnector.createTicket(*)(*)).thenReturn(successful(TicketCreated))
+      when(mockDeskproConnector.createTicket(*, *)(*)).thenReturn(successful(TicketCreated))
 
       val result = await(underTest.accept(code))
 
@@ -98,7 +98,7 @@ class ResponsibleIndividualVerificationServiceSpec extends AsyncHmrcSpec
       result.right.value shouldBe riVerification
 
       val ticketCapture = ArgCaptor[DeskproTicket]
-      verify(mockDeskproConnector).createTicket(ticketCapture.capture)(*)
+      verify(mockDeskproConnector).createTicket(eqTo(riVerification.id.value), ticketCapture.capture)(*)
       val deskproTicket = ticketCapture.value
       deskproTicket.subject shouldBe "New application submitted for checking"
       deskproTicket.name shouldBe application.state.requestedByName.get
@@ -129,7 +129,7 @@ class ResponsibleIndividualVerificationServiceSpec extends AsyncHmrcSpec
 
       result shouldBe 'Right
       result.right.value shouldBe riUpdateVerification
-      verify(mockDeskproConnector, never).createTicket(*)(*)
+      verify(mockDeskproConnector, never).createTicket(*, *)(*)
     }
   }
 
@@ -142,7 +142,7 @@ class ResponsibleIndividualVerificationServiceSpec extends AsyncHmrcSpec
 
       result shouldBe 'Right
       result.right.value shouldBe riVerification
-      verify(mockDeskproConnector, never).createTicket(*)(*)
+      verify(mockDeskproConnector, never).createTicket(*, *)(*)
     }
   }
 }

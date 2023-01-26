@@ -385,7 +385,7 @@ class DetailsSpec
     "show success page if name changed successfully" in new Setup {
       val approvedApplication = anApplication(adminEmail = loggedInAdmin.email)
       givenApplicationAction(approvedApplication, loggedInAdmin)
-      when(underTest.applicationService.requestProductonApplicationNameChange(*, *, *, *)(*))
+      when(underTest.applicationService.requestProductonApplicationNameChange(*, *, *, *, *)(*))
         .thenReturn(Future.successful(TicketCreated))
 
       private val request = loggedInAdminRequest.withFormUrlEncodedBody("applicationName" -> "Legal new app name")
@@ -393,6 +393,7 @@ class DetailsSpec
       val result = addToken(underTest.requestChangeOfAppNameAction(approvedApplication.id))(request)
 
       status(result) shouldBe OK
+      verify(underTest.applicationService).requestProductonApplicationNameChange(eqTo(loggedInAdmin.developer.userId), *, *, *, *)
       contentAsString(result) should include("We have received your request to change the application name to")
     }
 

@@ -54,7 +54,7 @@ class SupportSpec extends BaseControllerSpec with WithCSRFAddToken with Develope
       supportThankYouView
     )
 
-    val sessionParams = Seq("csrfToken" -> app.injector.instanceOf[TokenProvider].generateToken)
+    val sessionParams: Seq[(String, String)] = Seq("csrfToken" -> app.injector.instanceOf[TokenProvider].generateToken)
     val developer     = buildDeveloper(emailAddress = "thirdpartydeveloper@example.com")
 
     val sessionId = "sessionId"

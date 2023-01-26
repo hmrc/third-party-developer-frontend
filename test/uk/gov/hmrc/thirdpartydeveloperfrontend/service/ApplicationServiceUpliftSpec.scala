@@ -123,7 +123,7 @@ class ApplicationServiceUpliftSpec extends AsyncHmrcSpec with LocalUserIdTracker
     val user = buildDeveloperSession(loggedInState = LoggedInState.LOGGED_IN, buildDeveloper("email@example.com", "Firstname", "Lastname", None))
 
     "request uplift" in new Setup {
-      when(mockDeskproConnector.createTicket(any[DeskproTicket])(eqTo(hc))).thenReturn(successful(TicketCreated))
+      when(mockDeskproConnector.createTicket(any[String], any[DeskproTicket])(eqTo(hc))).thenReturn(successful(TicketCreated))
       when(mockProductionApplicationConnector.requestUplift(applicationId, UpliftRequest(applicationName, user.email)))
         .thenReturn(successful(ApplicationUpliftSuccessful))
       await(applicationService.requestUplift(applicationId, applicationName, user)) shouldBe ApplicationUpliftSuccessful
@@ -133,13 +133,13 @@ class ApplicationServiceUpliftSpec extends AsyncHmrcSpec with LocalUserIdTracker
       val testError = new scala.RuntimeException("deskpro error")
       when(mockProductionApplicationConnector.requestUplift(applicationId, UpliftRequest(applicationName, user.email)))
         .thenReturn(successful(ApplicationUpliftSuccessful))
-      when(mockDeskproConnector.createTicket(any[DeskproTicket])(eqTo(hc))).thenReturn(failed(testError))
+      when(mockDeskproConnector.createTicket(any[String], any[DeskproTicket])(eqTo(hc))).thenReturn(failed(testError))
 
       await(applicationService.requestUplift(applicationId, applicationName, user)) shouldBe ApplicationUpliftSuccessful
     }
 
     "propagate ApplicationAlreadyExistsResponse from connector" in new Setup {
-      when(mockDeskproConnector.createTicket(any[DeskproTicket])(eqTo(hc)))
+      when(mockDeskproConnector.createTicket(any[String], any[DeskproTicket])(eqTo(hc)))
         .thenReturn(successful(TicketCreated))
       when(mockProductionApplicationConnector.requestUplift(applicationId, UpliftRequest(applicationName, user.email)))
         .thenReturn(failed(new ApplicationAlreadyExists))
@@ -152,7 +152,7 @@ class ApplicationServiceUpliftSpec extends AsyncHmrcSpec with LocalUserIdTracker
     }
 
     "propagate ApplicationNotFound from connector" in new Setup {
-      when(mockDeskproConnector.createTicket(any[DeskproTicket])(eqTo(hc)))
+      when(mockDeskproConnector.createTicket(any[String], any[DeskproTicket])(eqTo(hc)))
         .thenReturn(successful(TicketCreated))
       when(mockProductionApplicationConnector.requestUplift(applicationId, UpliftRequest(applicationName, user.email)))
         .thenReturn(failed(new ApplicationNotFound))

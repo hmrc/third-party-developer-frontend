@@ -59,9 +59,10 @@ class Support @Inject() (
   def submitSupportEnquiry = maybeAtLeastPartLoggedInEnablingMfa { implicit request =>
     val requestForm = supportForm.bindFromRequest
     val displayName = fullyloggedInDeveloper.map(_.displayedName)
+    val userId = fullyloggedInDeveloper.map(_.developer.userId.asText).getOrElse("")
     requestForm.fold(
       formWithErrors => Future.successful(BadRequest(supportEnquiryView(displayName, formWithErrors))),
-      formData => deskproService.submitSupportEnquiry(formData).map { _ => Redirect(routes.Support.thankyou.url, SEE_OTHER) }
+      formData => deskproService.submitSupportEnquiry(userId, formData).map { _ => Redirect(routes.Support.thankyou.url, SEE_OTHER) }
     )
   }
 
