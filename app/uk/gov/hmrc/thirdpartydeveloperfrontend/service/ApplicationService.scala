@@ -253,7 +253,14 @@ class ApplicationService @Inject() (
     )
   }
 
-  def requestProductonApplicationNameChange(userId: UserId, application: Application, newApplicationName: String, requesterName: String, requesterEmail: String)(implicit hc: HeaderCarrier) = {
+  def requestProductonApplicationNameChange(
+      userId: UserId,
+      application: Application,
+      newApplicationName: String,
+      requesterName: String,
+      requesterEmail: String
+    )(implicit hc: HeaderCarrier
+    ) = {
 
     def createDeskproTicket(application: Application, newApplicationName: String, requesterName: String, requesterEmail: String) = {
       val previousAppName = application.name

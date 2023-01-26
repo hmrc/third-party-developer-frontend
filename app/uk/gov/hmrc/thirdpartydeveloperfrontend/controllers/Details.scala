@@ -329,7 +329,13 @@ class Details @Inject() (
             case Valid =>
               for {
                 _ <-
-                  applicationService.requestProductonApplicationNameChange(request.developerSession.developer.userId, application, newApplicationName, request.developerSession.displayedName, request.developerSession.email)
+                  applicationService.requestProductonApplicationNameChange(
+                    request.developerSession.developer.userId,
+                    application,
+                    newApplicationName,
+                    request.developerSession.displayedName,
+                    request.developerSession.email
+                  )
               } yield Ok(changeOfApplicationNameConfirmationView(ApplicationNameModel(request.application), newApplicationName))
 
             case invalid: Invalid =>

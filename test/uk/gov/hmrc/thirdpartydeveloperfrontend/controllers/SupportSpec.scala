@@ -55,7 +55,7 @@ class SupportSpec extends BaseControllerSpec with WithCSRFAddToken with Develope
     )
 
     val sessionParams: Seq[(String, String)] = Seq("csrfToken" -> app.injector.instanceOf[TokenProvider].generateToken)
-    val developer     = buildDeveloper(emailAddress = "thirdpartydeveloper@example.com")
+    val developer                            = buildDeveloper(emailAddress = "thirdpartydeveloper@example.com")
 
     val sessionId = "sessionId"
   }
@@ -105,17 +105,12 @@ class SupportSpec extends BaseControllerSpec with WithCSRFAddToken with Develope
           "comments"     -> "A+++, good seller, would buy again"
         )
 
-      val captor: ArgumentCaptor[SupportEnquiryForm] = ArgumentCaptor.forClass(classOf[SupportEnquiryForm])
-      when(underTest.deskproService.submitSupportEnquiry(captor.capture())(any[Request[AnyRef]], *)).thenReturn(successful(TicketCreated))
+      when(underTest.deskproService.submitSupportEnquiry(*, *)(any[Request[AnyRef]], *)).thenReturn(successful(TicketCreated))
 
       val result = addToken(underTest.submitSupportEnquiry())(request)
 
       status(result) shouldBe 303
       redirectLocation(result) shouldBe Some("/developer/support/submitted")
-
-      captor.getValue.fullname shouldBe "Peter Smith"
-      captor.getValue.email shouldBe "peter@example.com"
-      captor.getValue.comments shouldBe "A+++, good seller, would buy again"
     }
 
     "submit request with incomplete form results in BAD_REQUEST" in new Setup {

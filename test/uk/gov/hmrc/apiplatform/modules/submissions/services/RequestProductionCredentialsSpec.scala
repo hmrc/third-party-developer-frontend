@@ -27,7 +27,7 @@ import uk.gov.hmrc.apiplatform.modules.submissions.connectors.ThirdPartyApplicat
 import uk.gov.hmrc.thirdpartydeveloperfrontend.connectors.DeskproConnector
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.ApplicationId
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.connectors.{DeskproTicket, TicketCreated}
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.DeveloperSession
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.{Developer, DeveloperSession, UserId}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.{ApplicationAlreadyExists, ApplicationNotFound}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.{AsyncHmrcSpec, CollaboratorTracker, LocalUserIdTracker, TestApplications}
 
@@ -41,10 +41,16 @@ class RequestProductionCredentialsSpec extends AsyncHmrcSpec
     val applicationId                                                       = ApplicationId.random
     val mockSubmissionsConnector: ThirdPartyApplicationSubmissionsConnector = mock[ThirdPartyApplicationSubmissionsConnector]
 
-    val email: String    = "test@example.com"
-    val name: String     = "bob example"
-    val developerSession = mock[DeveloperSession]
-    val userId           = developerSession.developer.userId
+    val userId: UserId       = UserId.random
+    val email: String        = "test@example.com"
+    val firstName: String    = "bob"
+    val lastName: String     = "example"
+    val name: String         = s"$firstName $lastName"
+    val developer: Developer = Developer(userId, email, firstName, lastName)
+
+    val developerSession: DeveloperSession = mock[DeveloperSession]
+
+    when(developerSession.developer).thenReturn(developer)
     when(developerSession.email).thenReturn(email)
     when(developerSession.displayedName).thenReturn(name)
 

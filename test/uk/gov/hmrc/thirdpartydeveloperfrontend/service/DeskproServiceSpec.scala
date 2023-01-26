@@ -18,8 +18,10 @@ package uk.gov.hmrc.thirdpartydeveloperfrontend.service
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
+
 import play.api.test.FakeRequest
 import uk.gov.hmrc.http.HeaderCarrier
+
 import uk.gov.hmrc.thirdpartydeveloperfrontend.config.ApplicationConfig
 import uk.gov.hmrc.thirdpartydeveloperfrontend.connectors.DeskproConnector
 import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.{SignOutSurveyForm, SupportEnquiryForm}
@@ -73,10 +75,10 @@ class DeskproServiceSpec extends AsyncHmrcSpec {
 
     "A valid Support Enquiry is completed" should {
       "Convert the SupportEnquiryForm into a DeskproTicket and sends it to Deskpro" in {
-        val title = "Title"
+        val title  = "Title"
         val userId = UserId.random
         when(underTest.appConfig.title).thenReturn(title)
-        when(underTest.deskproConnector.createTicket(any[String], any[DeskproTicket])(*)).thenReturn(Future(TicketCreated))
+        when(underTest.deskproConnector.createTicket(*, *)(*)).thenReturn(Future(TicketCreated))
 
         implicit val fakeRequest = FakeRequest()
         implicit val hc          = HeaderCarrier()
@@ -86,7 +88,7 @@ class DeskproServiceSpec extends AsyncHmrcSpec {
         await(underTest.submitSupportEnquiry(userId.asText, form))
 
         val expectedData = DeskproTicket.createFromSupportEnquiry(form, title)
-        verify(underTest.deskproConnector).createTicket(eqTo(userId.asText), expectedData)(hc)
+        verify(underTest.deskproConnector).createTicket(userId.asText, expectedData)(hc)
       }
     }
   }
