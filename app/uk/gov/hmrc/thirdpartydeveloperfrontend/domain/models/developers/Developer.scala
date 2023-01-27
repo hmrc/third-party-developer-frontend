@@ -34,6 +34,8 @@ object UserId {
   implicit val developerIdFormat = Json.valueFormat[UserId]
 
   def random: UserId = UserId(ju.UUID.randomUUID())
+  // The unknown userId is used when the user is not logged in and is raising a support ticket
+  def unknown: UserId = UserId(ju.UUID.fromString("00000000-0000-0000-0000-000000000000"))
 }
 
 case class Developer(

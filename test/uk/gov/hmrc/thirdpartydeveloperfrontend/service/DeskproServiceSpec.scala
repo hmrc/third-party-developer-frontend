@@ -78,17 +78,17 @@ class DeskproServiceSpec extends AsyncHmrcSpec {
         val title  = "Title"
         val userId = UserId.random
         when(underTest.appConfig.title).thenReturn(title)
-        when(underTest.deskproConnector.createTicket(*, *)(*)).thenReturn(Future(TicketCreated))
+        when(underTest.deskproConnector.createTicket(*[UserId], *)(*)).thenReturn(Future(TicketCreated))
 
         implicit val fakeRequest = FakeRequest()
         implicit val hc          = HeaderCarrier()
 
         val form = SupportEnquiryForm("my name", "myemail@example.com", "my comments")
 
-        await(underTest.submitSupportEnquiry(userId.asText, form))
+        await(underTest.submitSupportEnquiry(userId, form))
 
         val expectedData = DeskproTicket.createFromSupportEnquiry(form, title)
-        verify(underTest.deskproConnector).createTicket(userId.asText, expectedData)(hc)
+        verify(underTest.deskproConnector).createTicket(userId, expectedData)(hc)
       }
     }
   }

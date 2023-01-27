@@ -19,9 +19,7 @@ package uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.endpointauth
 import java.time.LocalDateTime
 import scala.concurrent.Future
 import scala.io.Source
-
 import org.scalatestplus.play.guice.GuiceOneAppPerSuite
-
 import play.api.Mode
 import play.api.http.Status.OK
 import play.api.inject.bind
@@ -29,12 +27,11 @@ import play.api.inject.guice.GuiceApplicationBuilder
 import play.api.libs.crypto.CookieSigner
 import play.api.test.Helpers.{redirectLocation, route, status}
 import play.api.test.{CSRFTokenHelper, FakeRequest, Writeables}
-
 import uk.gov.hmrc.apiplatform.modules.dynamics.connectors.ThirdPartyDeveloperDynamicsConnector
 import uk.gov.hmrc.apiplatform.modules.mfa.connectors.ThirdPartyDeveloperMfaConnector
 import uk.gov.hmrc.apiplatform.modules.mfa.models.{MfaAction, MfaId, MfaType}
 import uk.gov.hmrc.apiplatform.modules.submissions.connectors.ThirdPartyApplicationSubmissionsConnector
-import uk.gov.hmrc.apiplatform.modules.submissions.domain.models.{Question, Submission}
+import uk.gov.hmrc.apiplatform.modules.submissions.domain.models.{Question, ResponsibleIndividualVerificationId, Submission}
 import uk.gov.hmrc.apiplatform.modules.uplift.domain.models.{ApiSubscriptions, GetProductionCredentialsFlow}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.connectors._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.apidefinitions.{ApiContext, ApiIdentifier, ApiVersion}
@@ -131,7 +128,8 @@ abstract class EndpointScenarioSpec extends AsyncHmrcSpec with GuiceOneAppPerSui
   when(apmConnector.fetchAllApis(*)(*)).thenReturn(Future.successful(Map.empty))
   when(apmConnector.fetchUpliftableSubscriptions(*[ApplicationId])(*)).thenReturn(Future.successful(Set(ApiIdentifier(apiContext, apiVersion))))
   when(tpaProductionConnector.requestUplift(*[ApplicationId], *[UpliftRequest])(*)).thenReturn(Future.successful(ApplicationUpliftSuccessful))
-  when(deskproConnector.createTicket(*, *)(*)).thenReturn(Future.successful(TicketCreated))
+  when(deskproConnector.createTicket(*[UserId], *)(*)).thenReturn(Future.successful(TicketCreated))
+  when(deskproConnector.createTicket(*[ResponsibleIndividualVerificationId], *)(*)).thenReturn(Future.successful(TicketCreated))
   when(flowRepository.updateLastUpdated(*)).thenReturn(Future.successful(()))
 
   import scala.reflect.runtime.universe._

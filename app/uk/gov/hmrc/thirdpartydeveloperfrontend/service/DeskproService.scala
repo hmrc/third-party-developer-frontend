@@ -18,14 +18,13 @@ package uk.gov.hmrc.thirdpartydeveloperfrontend.service
 
 import javax.inject.{Inject, Singleton}
 import scala.concurrent.Future
-
 import play.api.mvc.Request
 import uk.gov.hmrc.http.HeaderCarrier
-
 import uk.gov.hmrc.thirdpartydeveloperfrontend.config.ApplicationConfig
 import uk.gov.hmrc.thirdpartydeveloperfrontend.connectors.DeskproConnector
 import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.{SignOutSurveyForm, SupportEnquiryForm}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.connectors.{DeskproTicket, Feedback, TicketId, TicketResult}
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.UserId
 
 @Singleton
 class DeskproService @Inject() (val deskproConnector: DeskproConnector, val appConfig: ApplicationConfig) {
@@ -35,8 +34,8 @@ class DeskproService @Inject() (val deskproConnector: DeskproConnector, val appC
     deskproConnector.createFeedback(feedback)
   }
 
-  def submitSupportEnquiry(id: String, supportEnquiry: SupportEnquiryForm)(implicit request: Request[AnyRef], hc: HeaderCarrier): Future[TicketResult] = {
-    val ticket = DeskproTicket.createFromSupportEnquiry(supportEnquiry, appConfig.title)
-    deskproConnector.createTicket(id, ticket)
+  def submitSupportEnquiry(userId: UserId, supportEnquiry: SupportEnquiryForm)(implicit request: Request[AnyRef], hc: HeaderCarrier): Future[TicketResult] = {
+      val ticket = DeskproTicket.createFromSupportEnquiry(supportEnquiry, appConfig.title)
+      deskproConnector.createTicket(userId, ticket)
   }
 }

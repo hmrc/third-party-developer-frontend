@@ -26,6 +26,7 @@ import play.api.libs.json.Json
 import play.api.{Application, Configuration, Mode}
 import uk.gov.hmrc.http.{HeaderCarrier, UpstreamErrorResponse}
 import uk.gov.hmrc.play.http.metrics.common.API
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.UserId
 
 class DeskproConnectorIntegrationSpec extends BaseConnectorIntegrationSpec with GuiceOneAppPerSuite {
   private val stubConfig = Configuration("microservice.services.hmrc-deskpro.port" -> stubPort)
@@ -66,7 +67,7 @@ class DeskproConnectorIntegrationSpec extends BaseConnectorIntegrationSpec with 
           )
         )
 
-        await(connector.createTicket("", ticket)) shouldBe TicketCreated
+        await(connector.createTicket(UserId.random, ticket))
         verify(1, postRequestedFor(urlEqualTo(ticketPath)).withRequestBody(equalTo(expectedBody)))
       }
     }

@@ -745,7 +745,7 @@ class UserLoginAccountSpec extends BaseControllerSpec with WithCSRFAddToken
       val userId = UserId.random
       TPDMock.FindUserId.thenReturn(user.email)(userId)
       TPDMock.FetchDeveloper.thenReturn(userId)(Some(developerWithAuthAppMfa))
-      when(underTest.applicationService.request2SVRemoval(*, *, eqTo(user.email))(*))
+      when(underTest.applicationService.request2SVRemoval(*[UserId], *, eqTo(user.email))(*))
         .thenReturn(Future.successful(TicketCreated))
 
       private val result = addToken(underTest.confirm2SVHelp())(request)
@@ -755,7 +755,7 @@ class UserLoginAccountSpec extends BaseControllerSpec with WithCSRFAddToken
 
       body should include("We have received your request to remove 2-step verification from your account")
       body should include("Request submitted")
-      verify(underTest.applicationService).request2SVRemoval(*, *, eqTo(user.email))(*)
+      verify(underTest.applicationService).request2SVRemoval(*[UserId], *, eqTo(user.email))(*)
     }
   }
 
