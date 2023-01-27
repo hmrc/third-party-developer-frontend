@@ -30,5 +30,7 @@ case class ManageApplicationsViewModel(
   lazy val notYetLiveProductionApplications = productionApplicationSummaries.filterNot(_.state.isApproved)
   lazy val liveProductionApplications       = productionApplicationSummaries.filter(_.state.isApproved)
 
+  lazy val hasLiveProductionApplicationsInvitedToUpgradeToNewTermsOfUse = false
+
   lazy val hasNoLiveProductionApplications = liveProductionApplications.isEmpty
 }
