@@ -19,12 +19,15 @@ package uk.gov.hmrc.thirdpartydeveloperfrontend.controllers
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 import scala.concurrent.Future.successful
+
 import org.jsoup.Jsoup
 import views.html.{SupportEnquiryView, SupportThankyouView}
+
 import play.api.mvc.{Request, Result}
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
 import play.filters.csrf.CSRF.TokenProvider
+
 import uk.gov.hmrc.thirdpartydeveloperfrontend.builder.DeveloperBuilder
 import uk.gov.hmrc.thirdpartydeveloperfrontend.config.ErrorHandler
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.connectors.TicketCreated
@@ -52,7 +55,7 @@ class SupportSpec extends BaseControllerSpec with WithCSRFAddToken with Develope
 
     val sessionParams: Seq[(String, String)] = Seq("csrfToken" -> app.injector.instanceOf[TokenProvider].generateToken)
     val developer                            = buildDeveloper(emailAddress = "thirdpartydeveloper@example.com")
-    val sessionId = "sessionId"
+    val sessionId                            = "sessionId"
   }
 
   "suppport" should {
@@ -93,7 +96,6 @@ class SupportSpec extends BaseControllerSpec with WithCSRFAddToken with Develope
 
     "submit request with name, email & comments from form" in new Setup {
       val request = FakeRequest()
-        .withLoggedIn(underTest, implicitly)(sessionId)
         .withSession(sessionParams: _*)
         .withFormUrlEncodedBody(
           "fullname"     -> "Peter Smith",
@@ -101,7 +103,6 @@ class SupportSpec extends BaseControllerSpec with WithCSRFAddToken with Develope
           "comments"     -> "A+++, good seller, would buy again"
         )
 
-      fetchSessionByIdReturns(sessionId, Session(sessionId, developer, LoggedInState.LOGGED_IN))
       when(underTest.deskproService.submitSupportEnquiry(*[UserId], *)(any[Request[AnyRef]], *)).thenReturn(successful(TicketCreated))
 
       val result = addToken(underTest.submitSupportEnquiry())(request)
@@ -112,14 +113,12 @@ class SupportSpec extends BaseControllerSpec with WithCSRFAddToken with Develope
 
     "submit request with incomplete form results in BAD_REQUEST" in new Setup {
       val request = FakeRequest()
-        .withLoggedIn(underTest, implicitly)(sessionId)
         .withSession(sessionParams: _*)
         .withFormUrlEncodedBody(
           "fullname" -> "Peter Smith",
           "comments" -> "A+++, good seller, would buy again"
         )
 
-      fetchSessionByIdReturns(sessionId, Session(sessionId, developer, LoggedInState.LOGGED_IN))
       val result = addToken(underTest.submitSupportEnquiry())(request)
 
       status(result) shouldBe 400

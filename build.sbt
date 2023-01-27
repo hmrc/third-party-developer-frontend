@@ -51,7 +51,6 @@ lazy val microservice = Project(appName, file("."))
   )
   .settings(playSettings: _*)
   .settings(scalaSettings: _*)
-  .settings(publishingSettings: _*)
   .settings(defaultSettings(): _*)
   .settings(ScoverageSettings(): _*)
   .settings(

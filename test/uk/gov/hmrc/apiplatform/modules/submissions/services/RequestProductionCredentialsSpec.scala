@@ -18,8 +18,11 @@ package uk.gov.hmrc.apiplatform.modules.submissions.services
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future.successful
+
 import org.mockito.captor.ArgCaptor
+
 import uk.gov.hmrc.http.HeaderCarrier
+
 import uk.gov.hmrc.apiplatform.modules.submissions.connectors.ThirdPartyApplicationSubmissionsConnector
 import uk.gov.hmrc.apiplatform.modules.submissions.domain.models.ResponsibleIndividualVerificationId
 import uk.gov.hmrc.thirdpartydeveloperfrontend.connectors.DeskproConnector

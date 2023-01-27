@@ -378,7 +378,7 @@ class UserLoginAccount @Inject() (
     import cats.data.OptionT
     import cats.implicits._
 
-    val email     = request.session.get("emailAddress").getOrElse("")
+    val email = request.session.get("emailAddress").getOrElse("")
 
     def findDeveloper = {
       (for {
@@ -391,13 +391,13 @@ class UserLoginAccount @Inject() (
 
     for {
       developer <- findDeveloper
-      userId = developer.map(d => d.userId).getOrElse(UserId.unknown)
-      fullName = getFullName(developer)
-      _      <- applicationService.request2SVRemoval(
-                  userId,
-                  name = fullName,
-                  email
-                )
+      userId     = developer.map(d => d.userId).getOrElse(UserId.unknown)
+      fullName   = getFullName(developer)
+      _         <- applicationService.request2SVRemoval(
+                     userId,
+                     name = fullName,
+                     email
+                   )
     } yield Ok(requestMfaRemovalCompleteView())
   }
 }

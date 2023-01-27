@@ -18,8 +18,10 @@ package uk.gov.hmrc.thirdpartydeveloperfrontend.service
 
 import javax.inject.{Inject, Singleton}
 import scala.concurrent.Future
+
 import play.api.mvc.Request
 import uk.gov.hmrc.http.HeaderCarrier
+
 import uk.gov.hmrc.thirdpartydeveloperfrontend.config.ApplicationConfig
 import uk.gov.hmrc.thirdpartydeveloperfrontend.connectors.DeskproConnector
 import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.{SignOutSurveyForm, SupportEnquiryForm}
@@ -35,7 +37,7 @@ class DeskproService @Inject() (val deskproConnector: DeskproConnector, val appC
   }
 
   def submitSupportEnquiry(userId: UserId, supportEnquiry: SupportEnquiryForm)(implicit request: Request[AnyRef], hc: HeaderCarrier): Future[TicketResult] = {
-      val ticket = DeskproTicket.createFromSupportEnquiry(supportEnquiry, appConfig.title)
-      deskproConnector.createTicket(userId, ticket)
+    val ticket = DeskproTicket.createFromSupportEnquiry(supportEnquiry, appConfig.title)
+    deskproConnector.createTicket(userId, ticket)
   }
 }

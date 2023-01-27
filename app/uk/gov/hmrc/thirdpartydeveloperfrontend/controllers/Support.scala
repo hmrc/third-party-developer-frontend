@@ -18,10 +18,13 @@ package uk.gov.hmrc.thirdpartydeveloperfrontend.controllers
 
 import javax.inject.{Inject, Singleton}
 import scala.concurrent.{ExecutionContext, Future}
+
 import views.html.{SupportEnquiryView, SupportThankyouView}
+
 import play.api.data.Form
 import play.api.libs.crypto.CookieSigner
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
+
 import uk.gov.hmrc.thirdpartydeveloperfrontend.config.{ApplicationConfig, ErrorHandler}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.{DeveloperSession, UserId}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.service.{DeskproService, SessionService}
@@ -56,7 +59,7 @@ class Support @Inject() (
   def submitSupportEnquiry = maybeAtLeastPartLoggedInEnablingMfa { implicit request =>
     val requestForm = supportForm.bindFromRequest
     val displayName = fullyloggedInDeveloper.map(_.displayedName)
-    val userId = fullyloggedInDeveloper.map(_.developer.userId).getOrElse(UserId.unknown)
+    val userId      = fullyloggedInDeveloper.map(_.developer.userId).getOrElse(UserId.unknown)
 
     requestForm.fold(
       formWithErrors => Future.successful(BadRequest(supportEnquiryView(displayName, formWithErrors))),
