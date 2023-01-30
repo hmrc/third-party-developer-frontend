@@ -69,6 +69,17 @@ object ApplicationStub {
     )
   }
 
+  def setUpTermsOfUseInvitations() = {
+    stubFor(
+      get(urlEqualTo("/terms-of-use"))
+        .willReturn(
+          aResponse
+            .withStatus(OK)
+            .withBody("")
+        )
+    )
+  }
+
   def configureUserApplications(userId: UserId, applications: List[ApplicationWithSubscriptionIds] = Nil, status: Int = OK) = {
     import play.api.libs.json.Json
 
@@ -111,6 +122,15 @@ object ApplicationStub {
         .willReturn(
           aResponse()
             .withBody(Json.toJson(apisUpliftable).toString)
+        )
+    )
+
+    stubFor(
+      get(urlEqualTo("/terms-of-use"))
+        .willReturn(
+          aResponse
+            .withStatus(OK)
+            .withBody("[]")
         )
     )
   }

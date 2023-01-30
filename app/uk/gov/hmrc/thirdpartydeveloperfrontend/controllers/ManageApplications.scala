@@ -30,6 +30,7 @@ import uk.gov.hmrc.thirdpartydeveloperfrontend.config.{ApplicationConfig, ErrorH
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.controllers.ManageApplicationsViewModel
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.services.LocalDateTimeFormatters
 import uk.gov.hmrc.thirdpartydeveloperfrontend.service._
+import uk.gov.hmrc.thirdpartydeveloperfrontend.service.TermsOfUseInvitationService
 
 @Singleton
 class ManageApplications @Inject() (
@@ -39,7 +40,8 @@ class ManageApplications @Inject() (
     appsByTeamMember: AppsByTeamMemberService,
     upliftLogic: UpliftLogic,
     manageApplicationsView: ManageApplicationsView,
-    mcc: MessagesControllerComponents
+    mcc: MessagesControllerComponents,
+    termsOfUseInvitationService: TermsOfUseInvitationService
   )(implicit val ec: ExecutionContext,
     val appConfig: ApplicationConfig,
     val environmentNameService: EnvironmentNameService
@@ -51,10 +53,11 @@ class ManageApplications @Inject() (
       sandboxApplicationSummaries = upliftData.sandboxApplicationSummaries
       upliftableApplicationIds    = upliftData.upliftableApplicationIds
       productionAppSummaries     <- appsByTeamMember.fetchProductionSummariesByTeamMember(request.userId)
+      termsOfUseInvites          <- termsOfUseInvitationService.fetchTermsOfUseInvitations()
     } yield (sandboxApplicationSummaries, productionAppSummaries) match {
       case (Nil, Nil) => Redirect(uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.noapplications.routes.NoApplications.noApplicationsPage)
       case _          => Ok(manageApplicationsView(
-          ManageApplicationsViewModel(sandboxApplicationSummaries, productionAppSummaries, upliftableApplicationIds, upliftData.hasAppsThatCannotBeUplifted)
+          ManageApplicationsViewModel(sandboxApplicationSummaries, productionAppSummaries, upliftableApplicationIds, upliftData.hasAppsThatCannotBeUplifted, termsOfUseInvites)
         ))
     }
   }

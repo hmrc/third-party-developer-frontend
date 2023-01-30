@@ -21,6 +21,7 @@ import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.Enviro
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.connectors.TermsOfUseInvitation
 import scala.concurrent.ExecutionContext
 import uk.gov.hmrc.http.HeaderCarrier
+import scala.concurrent.Future
 
 @Singleton
 class TermsOfUseInvitationService @Inject()(

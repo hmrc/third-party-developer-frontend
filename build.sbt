@@ -63,7 +63,6 @@ lazy val microservice = Project(appName, file("."))
   .settings(
     resolvers += Resolver.typesafeRepo("releases")
   )
-  .settings(SilencerSettings())
   .settings(
     Test / parallelExecution := false,
     Test / fork := false,

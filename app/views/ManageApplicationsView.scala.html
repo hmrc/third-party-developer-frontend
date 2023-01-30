@@ -45,19 +45,23 @@
   leftNav = Some(leftHandNav(None, Option(navSection), flags)),
   developerSession = Some(loggedIn)
 ) {
-  <div class="govuk-notification-banner" role="region" aria-labelledby="govuk-notification-banner-title" data-module="govuk-notification-banner">
-    <div class="govuk-notification-banner__header">
-      <h2 class="govuk-notification-banner__title" id="govuk-notification-banner-title">
-        Important
-      </h2>
-    </div>
-    <div class="govuk-notification-banner__content">
-      <h3 class="govuk-notification-banner__heading">
-        Our terms of use have changed. 
-      </h3>
-      <p class="govuk-body"><a class="govuk-notification-banner__link" href="#">Agree to version 2 of the terms of use</a> for MyCo VAT App by 23 November 2022.</p>
-    </div>
-  </div>
+  @if(model.applicationsThatHaveTermOfUseInvitatations.nonEmpty) {
+    <div class="govuk-notification-banner" role="region" aria-labelledby="govuk-notification-banner-title" data-module="govuk-notification-banner">
+      <div class="govuk-notification-banner__header">
+        <h2 class="govuk-notification-banner__title" id="govuk-notification-banner-title">
+          Important
+        </h2>
+      </div>
+      <div class="govuk-notification-banner__content">
+        <h3 class="govuk-notification-banner__heading">
+          Our terms of use have changed. 
+        </h3>
+        @{model.applicationsThatHaveTermOfUseInvitatations.map(summary => 
+          <p class="govuk-body"><a class="govuk-notification-banner__link" href="#">Agree to version 2 of the terms of use</a> for {summary.name} by 23 November 2022.</p>
+        )}
+      </div>
+</div>
+  }
   
   <h1 class="govuk-heading-l">View all applications</h1>
 
@@ -73,7 +77,7 @@
   @if(!model.hasAppsThatCanBeUplifted && model.hasAppsThatCannotBeUplifted) {
     <h2 class="govuk-heading-m">Getting production credentials</h2>
     <p class="govuk-body">
-      If your application subscribes to an API only available in sandbox, you cannot request production credentials. <a href="@appConfig.apiDocumentationFrontendUrl/api-documentation/docs/api" class="govuk-link">Review the  API documentation</a> to check if an API is available in production
+      If your application subscribes to an API only available in sandbox, you cannot request production credentials. <a href="@appConfig.apiDocumentationFrontendUrl/api-documentation/docs/api" class="govuk-link">Review the API documentation</a> to check if an API is available in production
     </p>
     <p class="govuk-body">
       You will need to test your application before requesting @principalWording credentials.
