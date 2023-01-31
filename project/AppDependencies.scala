@@ -7,7 +7,7 @@ object AppDependencies {
 
   lazy val cucumberVersion = "6.2.2"
   lazy val seleniumVersion = "4.2.0"
-  lazy val enumeratumVersion = "1.5.12"
+  lazy val enumeratumVersion = "1.5.13"
   lazy val bootstrapVersion = "7.12.0"
   lazy val mongoVersion = "0.74.0"
 
@@ -18,7 +18,7 @@ object AppDependencies {
     "uk.gov.hmrc"                 %% "bootstrap-frontend-play-28"     % bootstrapVersion,
     "uk.gov.hmrc"                 %% "play-frontend-hmrc"             % "5.3.0-play-28",
     "uk.gov.hmrc.mongo"           %% "hmrc-mongo-play-28"             % mongoVersion,
-    "uk.gov.hmrc"                 %% "play-json-union-formatter"      % "1.17.0-play-28",
+    "uk.gov.hmrc"                 %% "play-json-union-formatter"      % "1.18.0-play-28",
     "uk.gov.hmrc"                 %% "http-metrics"                   % "2.5.0-play-28",
     "uk.gov.hmrc"                 %% "json-encryption"                % "5.1.0-play-28",
     "uk.gov.hmrc"                 %% "emailaddress"                   % "3.7.0",

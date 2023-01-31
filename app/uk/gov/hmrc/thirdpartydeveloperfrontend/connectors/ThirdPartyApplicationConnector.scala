@@ -34,7 +34,7 @@ import uk.gov.hmrc.thirdpartydeveloperfrontend.domain._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.apidefinitions.ApiIdentifier
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.ApplicationNameValidationJson.{ApplicationNameValidationRequest, ApplicationNameValidationResult}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications._
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.connectors.DeleteCollaboratorRequest
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.connectors.{DeleteCollaboratorRequest, TermsOfUseInvitation}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.UserId
 import uk.gov.hmrc.thirdpartydeveloperfrontend.service.ApplicationService.ApplicationConnector
 
@@ -201,6 +201,12 @@ abstract class ThirdPartyApplicationConnector(config: ApplicationConfig, metrics
 
   def fetchSubscription(applicationId: ApplicationId)(implicit hc: HeaderCarrier): Future[Set[ApiIdentifier]] = {
     http.GET[Set[ApiIdentifier]](s"$serviceBaseUrl/application/${applicationId.value}/subscription")
+  }
+
+  def fetchTermsOfUseInvitations()(implicit hc: HeaderCarrier): Future[List[TermsOfUseInvitation]] = {
+    metrics.record(api) {
+      http.GET[List[TermsOfUseInvitation]](s"$serviceBaseUrl/terms-of-use")
+    }
   }
 }
 

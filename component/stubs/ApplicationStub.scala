@@ -113,6 +113,15 @@ object ApplicationStub {
             .withBody(Json.toJson(apisUpliftable).toString)
         )
     )
+
+    stubFor(
+      get(urlEqualTo("/terms-of-use"))
+        .willReturn(
+          aResponse
+            .withStatus(OK)
+            .withBody("[]")
+        )
+    )
   }
 
   def configureApplicationCredentials(tokens: Map[String, ApplicationToken], status: Int = OK) = {

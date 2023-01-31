@@ -62,7 +62,6 @@ lazy val microservice = Project(appName, file("."))
   .settings(
     resolvers += Resolver.typesafeRepo("releases")
   )
-  .settings(SilencerSettings())
   .settings(
     Test / parallelExecution := false,
     Test / fork := false,
@@ -107,6 +106,14 @@ lazy val microservice = Project(appName, file("."))
       "uk.gov.hmrc.hmrcfrontend.views.html.helpers._",
       "uk.gov.hmrc.thirdpartydeveloperfrontend.controllers",
       "uk.gov.hmrc.thirdpartydeveloperfrontend.config.ApplicationConfig"
+    )
+  )
+  .settings(
+    scalacOptions ++= Seq(
+    "-Wconf:cat=unused&src=views/.*\\.scala:s",
+    "-Wconf:cat=unused&src=.*RoutesPrefix\\.scala:s",
+    "-Wconf:cat=unused&src=.*Routes\\.scala:s",
+    "-Wconf:cat=unused&src=.*ReverseRoutes\\.scala:s"
     )
   )
 

@@ -52,7 +52,8 @@ class ManageApplicationsSpec
 
   private val sessionParams = Seq("csrfToken" -> app.injector.instanceOf[TokenProvider].generateToken)
 
-  trait Setup extends UpliftLogicMock with AppsByTeamMemberServiceMock with ApplicationServiceMock with ApmConnectorMockModule with SessionServiceMock {
+  trait Setup extends UpliftLogicMock with AppsByTeamMemberServiceMock with ApplicationServiceMock with ApmConnectorMockModule with SessionServiceMock
+      with TermsOfUseInvitationServiceMockModule {
     val manageApplicationsView = app.injector.instanceOf[ManageApplicationsView]
 
     implicit val environmentNameService = new EnvironmentNameService(appConfig)
@@ -64,7 +65,8 @@ class ManageApplicationsSpec
       appsByTeamMemberServiceMock,
       upliftLogicMock,
       manageApplicationsView,
-      mcc
+      mcc,
+      TermsOfUseInvitationServiceMock.aMock
     )
 
     fetchSessionByIdReturns(sessionId, session)
@@ -86,6 +88,8 @@ class ManageApplicationsSpec
       aUsersUplfitableAndNotUpliftableAppsReturns(List.empty, List.empty, List.empty)
       fetchProductionSummariesByTeamMemberReturns(List(prodSummary))
 
+      TermsOfUseInvitationServiceMock.FetchTermsOfUseInvitations.thenReturnEmptyList()
+
       private val result = manageApplicationsController.manageApps()(loggedInRequest)
 
       status(result) shouldBe OK
@@ -98,6 +102,8 @@ class ManageApplicationsSpec
     "redirect to the no Applications page when the user logged in and no applications returned for user" in new Setup {
       aUsersUplfitableAndNotUpliftableAppsReturns(List.empty, List.empty, List.empty)
       fetchProductionSummariesByTeamMemberReturns(List.empty)
+
+      TermsOfUseInvitationServiceMock.FetchTermsOfUseInvitations.thenReturnEmptyList()
 
       private val result = manageApplicationsController.manageApps()(loggedInRequest)
 

@@ -119,6 +119,9 @@ abstract class EndpointScenarioSpec extends AsyncHmrcSpec with GuiceOneAppPerSui
   when(tpaProductionConnector.updateIpAllowlist(*[ApplicationId], *[Boolean], *[Set[String]])(*)).thenReturn(Future.successful(ApplicationUpdateSuccessful))
   when(tpaSandboxConnector.addClientSecrets(*[ApplicationId], *[ClientSecretRequest])(*)).thenReturn(Future.successful(("1", "2")))
   when(tpaProductionConnector.addClientSecrets(*[ApplicationId], *[ClientSecretRequest])(*)).thenReturn(Future.successful(("1", "2")))
+
+  when(tpaProductionConnector.fetchTermsOfUseInvitations()(*)).thenReturn(Future.successful(List.empty))
+
   when(apmConnector.addTeamMember(*[ApplicationId], *[AddTeamMemberRequest])(*)).thenReturn(Future.successful(()))
   when(apmConnector.subscribeToApi(*[ApplicationId], *[ApiIdentifier])(*)).thenReturn(Future.successful(ApplicationUpdateSuccessful))
   when(productionSubsFieldsConnector.saveFieldValues(*[ClientId], *[ApiContext], *[ApiVersion], *[Fields.Alias])(*)).thenReturn(Future.successful(
@@ -507,7 +510,9 @@ abstract class EndpointScenarioSpec extends AsyncHmrcSpec with GuiceOneAppPerSui
       case Endpoint("POST", "/developer/poc-dynamics/tickets/add", _)                                                                  => Redirect("/developer/poc-dynamics/tickets")
       case Endpoint("POST", "/developer/login/select-mfa", _)                                                                          => Redirect(s"/developer/login-mfa?mfaId=${authAppMfaId.value.toString}&mfaType=${MfaType.AUTHENTICATOR_APP.toString}")
       case Endpoint("GET", "/developer/login/select-mfa/try-another-option", _)                                                        => Unexpected(500)
+      case Endpoint("GET", "/developer/applications/terms-of-use", _)                                                                  => Success()
       case _                                                                                                                           => Success()
+
     }
   }
 

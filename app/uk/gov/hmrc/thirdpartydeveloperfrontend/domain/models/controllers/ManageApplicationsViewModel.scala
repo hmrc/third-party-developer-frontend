@@ -16,13 +16,17 @@
 
 package uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.controllers
 
+import java.time.Instant
+
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.ApplicationId
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.connectors.TermsOfUseInvitation
 
 case class ManageApplicationsViewModel(
     sandboxApplicationSummaries: Seq[ApplicationSummary],
     productionApplicationSummaries: Seq[ApplicationSummary],
     upliftableApplicationIds: Set[ApplicationId],
-    hasAppsThatCannotBeUplifted: Boolean
+    hasAppsThatCannotBeUplifted: Boolean,
+    termsOfUseInvitations: List[TermsOfUseInvitation]
   ) {
   lazy val hasPriviledgedApplications = sandboxApplicationSummaries.exists(_.accessType.isPriviledged) || productionApplicationSummaries.exists(_.accessType.isPriviledged)
   lazy val hasAppsThatCanBeUplifted   = upliftableApplicationIds.nonEmpty
@@ -30,5 +34,17 @@ case class ManageApplicationsViewModel(
   lazy val notYetLiveProductionApplications = productionApplicationSummaries.filterNot(_.state.isApproved)
   lazy val liveProductionApplications       = productionApplicationSummaries.filter(_.state.isApproved)
 
+  lazy val hasLiveProductionApplicationsInvitedToUpgradeToNewTermsOfUse = false
+
   lazy val hasNoLiveProductionApplications = liveProductionApplications.isEmpty
+
+  lazy val applicationsThatHaveTermOfUseInvitatations =
+    liveProductionApplications
+      .filter(app => termsOfUseInvitations.exists(app.id == _.applicationId))
+      .map(applicationSummary =>
+        TermsOfUseInvitationViewModel(applicationSummary.id, applicationSummary.name, termsOfUseInvitations.find(_.applicationId == applicationSummary.id).get.dueBy)
+      )
+
 }
+
+case class TermsOfUseInvitationViewModel(applicationId: ApplicationId, name: String, dueBy: Instant)
