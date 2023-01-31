@@ -511,7 +511,7 @@ abstract class EndpointScenarioSpec extends AsyncHmrcSpec with GuiceOneAppPerSui
       case Endpoint("GET", "/developer/login/select-mfa/try-another-option", _)                                                        => Unexpected(500)
       case Endpoint("GET", "/developer/applications/terms-of-use", _)                                                                  => Success()
       case _                                                                                                                           => Success()
-      
+
     }
   }
 

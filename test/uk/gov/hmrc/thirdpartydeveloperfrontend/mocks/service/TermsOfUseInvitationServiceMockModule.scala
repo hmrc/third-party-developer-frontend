@@ -16,13 +16,14 @@
 
 package uk.gov.hmrc.thirdpartydeveloperfrontend.mocks.service
 
-import uk.gov.hmrc.thirdpartydeveloperfrontend.service.TermsOfUseInvitationService
+import scala.concurrent.Future.successful
 
 import org.mockito.{ArgumentMatchersSugar, MockitoSugar}
 
-import scala.concurrent.Future.successful
+import uk.gov.hmrc.thirdpartydeveloperfrontend.service.TermsOfUseInvitationService
 
 trait TermsOfUseInvitationServiceMockModule extends MockitoSugar with ArgumentMatchersSugar {
+
   protected trait BaseTermsOfUseInvitationServiceMock {
     def aMock: TermsOfUseInvitationService
 

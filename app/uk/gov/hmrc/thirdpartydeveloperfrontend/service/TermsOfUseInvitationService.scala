@@ -17,18 +17,19 @@
 package uk.gov.hmrc.thirdpartydeveloperfrontend.service
 
 import javax.inject.{Inject, Singleton}
+import scala.concurrent.{ExecutionContext, Future}
+
+import uk.gov.hmrc.http.HeaderCarrier
+
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.Environment
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.connectors.TermsOfUseInvitation
-import scala.concurrent.ExecutionContext
-import uk.gov.hmrc.http.HeaderCarrier
-import scala.concurrent.Future
 
 @Singleton
-class TermsOfUseInvitationService @Inject()(
-  connectorWrapper: ConnectorsWrapper
-)(
-  implicit ec: ExecutionContext
-) {
+class TermsOfUseInvitationService @Inject() (
+    connectorWrapper: ConnectorsWrapper
+  )(implicit ec: ExecutionContext
+  ) {
+
   def fetchTermsOfUseInvitations()(implicit hc: HeaderCarrier): Future[List[TermsOfUseInvitation]] = {
     connectorWrapper.forEnvironment(Environment.PRODUCTION).thirdPartyApplicationConnector.fetchTermsOfUseInvitations()
   }

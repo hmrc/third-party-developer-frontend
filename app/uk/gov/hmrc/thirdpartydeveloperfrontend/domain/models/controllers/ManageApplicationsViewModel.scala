@@ -16,15 +16,16 @@
 
 package uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.controllers
 
+import java.time.Instant
+
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.ApplicationId
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.connectors.TermsOfUseInvitation
-import java.time.Instant
 
 case class ManageApplicationsViewModel(
     sandboxApplicationSummaries: Seq[ApplicationSummary],
     productionApplicationSummaries: Seq[ApplicationSummary],
     upliftableApplicationIds: Set[ApplicationId],
-    hasAppsThatCannotBeUplifted: Boolean, 
+    hasAppsThatCannotBeUplifted: Boolean,
     termsOfUseInvitations: List[TermsOfUseInvitation]
   ) {
   lazy val hasPriviledgedApplications = sandboxApplicationSummaries.exists(_.accessType.isPriviledged) || productionApplicationSummaries.exists(_.accessType.isPriviledged)
@@ -40,7 +41,9 @@ case class ManageApplicationsViewModel(
   lazy val applicationsThatHaveTermOfUseInvitatations =
     liveProductionApplications
       .filter(app => termsOfUseInvitations.exists(app.id == _.applicationId))
-      .map(applicationSummary => TermsOfUseInvitationViewModel(applicationSummary.id, applicationSummary.name, termsOfUseInvitations.find(_.applicationId == applicationSummary.id).get.dueBy))
+      .map(applicationSummary =>
+        TermsOfUseInvitationViewModel(applicationSummary.id, applicationSummary.name, termsOfUseInvitations.find(_.applicationId == applicationSummary.id).get.dueBy)
+      )
 
 }
 
