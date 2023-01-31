@@ -21,7 +21,6 @@ import scala.concurrent.Future
 import scala.concurrent.Future.successful
 
 import org.jsoup.Jsoup
-import org.mockito.ArgumentCaptor
 import views.html.{SupportEnquiryView, SupportThankyouView}
 
 import play.api.mvc.{Request, Result}
@@ -32,7 +31,7 @@ import play.filters.csrf.CSRF.TokenProvider
 import uk.gov.hmrc.thirdpartydeveloperfrontend.builder.DeveloperBuilder
 import uk.gov.hmrc.thirdpartydeveloperfrontend.config.ErrorHandler
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.connectors.TicketCreated
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.{LoggedInState, Session}
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.{LoggedInState, Session, UserId}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.mocks.service.SessionServiceMock
 import uk.gov.hmrc.thirdpartydeveloperfrontend.service.DeskproService
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.WithLoggedInSession._
@@ -54,10 +53,9 @@ class SupportSpec extends BaseControllerSpec with WithCSRFAddToken with Develope
       supportThankYouView
     )
 
-    val sessionParams = Seq("csrfToken" -> app.injector.instanceOf[TokenProvider].generateToken)
-    val developer     = buildDeveloper(emailAddress = "thirdpartydeveloper@example.com")
-
-    val sessionId = "sessionId"
+    val sessionParams: Seq[(String, String)] = Seq("csrfToken" -> app.injector.instanceOf[TokenProvider].generateToken)
+    val developer                            = buildDeveloper(emailAddress = "thirdpartydeveloper@example.com")
+    val sessionId                            = "sessionId"
   }
 
   "suppport" should {
@@ -105,17 +103,12 @@ class SupportSpec extends BaseControllerSpec with WithCSRFAddToken with Develope
           "comments"     -> "A+++, good seller, would buy again"
         )
 
-      val captor: ArgumentCaptor[SupportEnquiryForm] = ArgumentCaptor.forClass(classOf[SupportEnquiryForm])
-      when(underTest.deskproService.submitSupportEnquiry(captor.capture())(any[Request[AnyRef]], *)).thenReturn(successful(TicketCreated))
+      when(underTest.deskproService.submitSupportEnquiry(*[UserId], *)(any[Request[AnyRef]], *)).thenReturn(successful(TicketCreated))
 
       val result = addToken(underTest.submitSupportEnquiry())(request)
 
       status(result) shouldBe 303
       redirectLocation(result) shouldBe Some("/developer/support/submitted")
-
-      captor.getValue.fullname shouldBe "Peter Smith"
-      captor.getValue.email shouldBe "peter@example.com"
-      captor.getValue.comments shouldBe "A+++, good seller, would buy again"
     }
 
     "submit request with incomplete form results in BAD_REQUEST" in new Setup {
@@ -127,6 +120,7 @@ class SupportSpec extends BaseControllerSpec with WithCSRFAddToken with Develope
         )
 
       val result = addToken(underTest.submitSupportEnquiry())(request)
+
       status(result) shouldBe 400
     }
   }

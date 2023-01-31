@@ -84,11 +84,11 @@ class ResponsibleIndividualVerificationService @Inject() (
       case riv: ResponsibleIndividualToUVerification => {
         val appName                = riVerification.applicationName
         val appId                  = riVerification.applicationId
-        val requestorName: String  = submitterName.getOrElse(throw new RuntimeException("requestedByName not found"))
+        val requesterName: String  = submitterName.getOrElse(throw new RuntimeException("requestedByName not found"))
         val requesterEmail: String = submitterEmail.getOrElse(throw new RuntimeException("requestedByEmailAddress not found"))
 
-        val ticket = DeskproTicket.createForRequestProductionCredentials(requestorName, requesterEmail, appName, appId)
-        deskproConnector.createTicket(ticket).map(Some(_))
+        val ticket = DeskproTicket.createForRequestProductionCredentials(requesterName, requesterEmail, appName, appId)
+        deskproConnector.createTicket(riVerification.id, ticket).map(Some(_))
       }
       case _                                         => Future.successful(None)
     }

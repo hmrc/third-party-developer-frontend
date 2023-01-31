@@ -26,9 +26,11 @@ import uk.gov.hmrc.http.{HeaderCarrier, HttpClient, UpstreamErrorResponse}
 import uk.gov.hmrc.play.http.metrics.common.API
 
 import uk.gov.hmrc.apiplatform.modules.common.services.ApplicationLogger
+import uk.gov.hmrc.apiplatform.modules.submissions.domain.models.ResponsibleIndividualVerificationId
 import uk.gov.hmrc.thirdpartydeveloperfrontend.config.ApplicationConfig
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.connectors._
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.UserId
 
 @Singleton
 class DeskproConnector @Inject() (http: HttpClient, config: ApplicationConfig, metrics: ConnectorMetrics)(implicit val ec: ExecutionContext)
@@ -37,8 +39,15 @@ class DeskproConnector @Inject() (http: HttpClient, config: ApplicationConfig, m
   lazy val serviceBaseUrl: String = config.deskproUrl
   val api                         = API("deskpro")
 
-  def createTicket(deskproTicket: DeskproTicket)(implicit hc: HeaderCarrier): Future[TicketResult] = metrics.record(api) {
+  def createTicket(userId: UserId, deskproTicket: DeskproTicket)(implicit hc: HeaderCarrier): Future[TicketResult] = metrics.record(api) {
+    createTicket(userId.asText, "userId", deskproTicket)
+  }
 
+  def createTicket(id: ResponsibleIndividualVerificationId, deskproTicket: DeskproTicket)(implicit hc: HeaderCarrier): Future[TicketResult] = metrics.record(api) {
+    createTicket(id.value, "ResponsibleIndividualVerification", deskproTicket)
+  }
+
+  private def createTicket(id: String, idType: String, deskproTicket: DeskproTicket)(implicit hc: HeaderCarrier): Future[TicketResult] = metrics.record(api) {
     http.POST[DeskproTicket, ErrorOrUnit](requestUrl("/deskpro/ticket"), deskproTicket)
       .map(throwOr(TicketCreated))
       .andThen {
@@ -46,7 +55,7 @@ class DeskproConnector @Inject() (http: HttpClient, config: ApplicationConfig, m
       }
       .recover {
         case NonFatal(e) =>
-          logger.error(s"Deskpro ticket creation failed for: $deskproTicket", e)
+          logger.error(s"Deskpro ticket creation failed for $idType: $id", e)
           throw new DeskproTicketCreationFailed(e.getMessage)
       }
   }

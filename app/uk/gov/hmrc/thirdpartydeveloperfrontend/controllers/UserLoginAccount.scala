@@ -380,20 +380,24 @@ class UserLoginAccount @Inject() (
 
     val email = request.session.get("emailAddress").getOrElse("")
 
-    def findName: Future[Option[String]] =
-      (
-        for {
-          details   <- OptionT(thirdPartyDeveloperConnector.findUserId(email))
-          developer <- OptionT(thirdPartyDeveloperConnector.fetchDeveloper(details.id))
-        } yield s"${developer.firstName} ${developer.lastName}"
-      ).value
+    def findDeveloper = {
+      (for {
+        details   <- OptionT(thirdPartyDeveloperConnector.findUserId(email))
+        developer <- OptionT(thirdPartyDeveloperConnector.fetchDeveloper(details.id))
+      } yield developer).value
+    }
+
+    def getFullName(developer: Option[Developer]) = developer.map(d => s"${d.firstName} ${d.lastName}").getOrElse("Unknown")
 
     for {
-      oName <- findName
-      _     <- applicationService.request2SVRemoval(
-                 name = oName.getOrElse("Unknown"),
-                 email
-               )
+      developer <- findDeveloper
+      userId     = developer.map(d => d.userId).getOrElse(UserId.unknown)
+      fullName   = getFullName(developer)
+      _         <- applicationService.request2SVRemoval(
+                     userId,
+                     name = fullName,
+                     email
+                   )
     } yield Ok(requestMfaRemovalCompleteView())
   }
 }

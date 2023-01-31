@@ -26,6 +26,7 @@ import uk.gov.hmrc.thirdpartydeveloperfrontend.config.ApplicationConfig
 import uk.gov.hmrc.thirdpartydeveloperfrontend.connectors.DeskproConnector
 import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.{SignOutSurveyForm, SupportEnquiryForm}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.connectors.{DeskproTicket, Feedback, TicketId, TicketResult}
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.UserId
 
 @Singleton
 class DeskproService @Inject() (val deskproConnector: DeskproConnector, val appConfig: ApplicationConfig) {
@@ -35,8 +36,8 @@ class DeskproService @Inject() (val deskproConnector: DeskproConnector, val appC
     deskproConnector.createFeedback(feedback)
   }
 
-  def submitSupportEnquiry(supportEnquiry: SupportEnquiryForm)(implicit request: Request[AnyRef], hc: HeaderCarrier): Future[TicketResult] = {
+  def submitSupportEnquiry(userId: UserId, supportEnquiry: SupportEnquiryForm)(implicit request: Request[AnyRef], hc: HeaderCarrier): Future[TicketResult] = {
     val ticket = DeskproTicket.createFromSupportEnquiry(supportEnquiry, appConfig.title)
-    deskproConnector.createTicket(ticket)
+    deskproConnector.createTicket(userId, ticket)
   }
 }

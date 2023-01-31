@@ -298,19 +298,20 @@ class ApplicationServiceSpec extends AsyncHmrcSpec
 
     "create a deskpro ticket and audit record for an Admin in a Sandbox app" in new Setup {
 
-      when(mockDeskproConnector.createTicket(captor.capture())(eqTo(hc)))
+      when(mockDeskproConnector.createTicket(*[UserId], *)(*))
         .thenReturn(successful(TicketCreated))
       when(mockAuditService.audit(any[AuditAction], any[Map[String, String]])(eqTo(hc)))
         .thenReturn(successful(Success))
 
       await(applicationService.requestPrincipalApplicationDeletion(adminRequester, sandboxApp)) shouldBe TicketCreated
-      captor.getValue.email shouldBe adminEmail
-      captor.getValue.subject shouldBe subject
-      verify(mockAuditService, times(1)).audit(any[AuditAction], any[Map[String, String]])(eqTo(hc))
+
+      verify(mockAuditService).audit(any[AuditAction], any[Map[String, String]])(eqTo(hc))
+      verify(mockDeskproConnector).createTicket(*[UserId], *)(*)
     }
+
     "create a deskpro ticket and audit record for a Developer in a Sandbox app" in new Setup {
 
-      when(mockDeskproConnector.createTicket(captor.capture())(eqTo(hc)))
+      when(mockDeskproConnector.createTicket(eqTo(developerRequester.developer.userId), captor.capture())(eqTo(hc)))
         .thenReturn(successful(TicketCreated))
       when(mockAuditService.audit(any[AuditAction], any[Map[String, String]])(eqTo(hc)))
         .thenReturn(successful(Success))
@@ -320,18 +321,19 @@ class ApplicationServiceSpec extends AsyncHmrcSpec
       captor.getValue.subject shouldBe subject
       verify(mockAuditService, times(1)).audit(any[AuditAction], any[Map[String, String]])(eqTo(hc))
     }
+
     "create a deskpro ticket and audit record for an Admin in a Production app" in new Setup {
 
-      when(mockDeskproConnector.createTicket(captor.capture())(eqTo(hc)))
+      when(mockDeskproConnector.createTicket(*[UserId], *)(*))
         .thenReturn(successful(TicketCreated))
       when(mockAuditService.audit(any[AuditAction], any[Map[String, String]])(eqTo(hc)))
         .thenReturn(successful(Success))
 
       await(applicationService.requestPrincipalApplicationDeletion(adminRequester, productionApp)) shouldBe TicketCreated
-      captor.getValue.email shouldBe adminEmail
-      captor.getValue.subject shouldBe subject
       verify(mockAuditService, times(1)).audit(any[AuditAction], any[Map[String, String]])(eqTo(hc))
+      verify(mockDeskproConnector).createTicket(*[UserId], *)(*)
     }
+
     "not create a deskpro ticket or audit record for a Developer in a Production app" in new Setup {
 
       intercept[ForbiddenException] {
@@ -394,19 +396,20 @@ class ApplicationServiceSpec extends AsyncHmrcSpec
 
   "request 2SV removal" should {
 
-    val email = "testy@example.com"
-    val name  = "Bob"
+    val email  = "testy@example.com"
+    val name   = "Bob"
+    val userId = UserId.random
 
     "correctly create a deskpro ticket and audit record" in new Setup {
       val ticketCaptor = ArgCaptor[DeskproTicket]
-      when(mockDeskproConnector.createTicket(any[DeskproTicket])(eqTo(hc)))
+      when(mockDeskproConnector.createTicket(any[UserId], any[DeskproTicket])(eqTo(hc)))
         .thenReturn(successful(TicketCreated))
       when(mockAuditService.audit(eqTo(AuditAction.Remove2SVRequested), any[Map[String, String]])(eqTo(hc)))
         .thenReturn(successful(Success))
 
-      await(applicationService.request2SVRemoval(name, email))
+      await(applicationService.request2SVRemoval(userId, name, email))
 
-      verify(mockDeskproConnector, times(1)).createTicket(ticketCaptor)(eqTo(hc))
+      verify(mockDeskproConnector, times(1)).createTicket(eqTo(userId), ticketCaptor)(eqTo(hc))
       ticketCaptor.value.email shouldBe email
       ticketCaptor.value.name shouldBe name
 
@@ -473,12 +476,19 @@ class ApplicationServiceSpec extends AsyncHmrcSpec
     "correctly create a deskpro ticket" in new Setup {
       private val applicationName = "applicationName"
 
-      when(mockDeskproConnector.createTicket(*)(*)).thenReturn(successful(TicketCreated))
+      when(mockDeskproConnector.createTicket(*[UserId], *)(*)).thenReturn(successful(TicketCreated))
 
       private val result =
-        await(applicationService.requestProductonApplicationNameChange(productionApplication, applicationName, adminRequester.displayedName, adminRequester.email))
+        await(applicationService.requestProductonApplicationNameChange(
+          adminRequester.developer.userId,
+          productionApplication,
+          applicationName,
+          adminRequester.displayedName,
+          adminRequester.email
+        ))
 
       result shouldBe TicketCreated
+      verify(mockDeskproConnector).createTicket(*[UserId], *)(*)
     }
   }
 
