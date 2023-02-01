@@ -29,6 +29,8 @@ sealed trait State extends EnumEntry {
     || this == State.PENDING_RESPONSIBLE_INDIVIDUAL_VERIFICATION)
 
   def isInTesting: Boolean = this == State.TESTING
+
+  def isInTestingOrProduction: Boolean = (this == State.TESTING || this == State.PRODUCTION)
 }
 
 object State extends PlayEnum[State] {

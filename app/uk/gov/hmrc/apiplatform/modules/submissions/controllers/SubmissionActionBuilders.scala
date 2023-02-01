@@ -50,12 +50,13 @@ object SubmissionActionBuilders {
 
   object ApplicationStateFilter {
     type Type = State => Boolean
-    val notProduction: Type   = !_.isProduction
-    val production: Type      = _.isProduction
-    val preProduction: Type   = _.isPreProduction
-    val inTesting: Type       = _.isInTesting
-    val allAllowed: Type      = _ => true
-    val pendingApproval: Type = _.isPendingApproval
+    val notProduction: Type         = !_.isProduction
+    val production: Type            = _.isProduction
+    val preProduction: Type         = _.isPreProduction
+    val inTesting: Type             = _.isInTesting
+    val allAllowed: Type            = _ => true
+    val pendingApproval: Type       = _.isPendingApproval
+    val inTestingOrProduction: Type = _.isInTestingOrProduction
   }
 
   object SubmissionStatusFilter {

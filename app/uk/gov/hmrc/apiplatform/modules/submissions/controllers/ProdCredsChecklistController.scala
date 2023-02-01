@@ -123,7 +123,7 @@ class ProdCredsChecklistController @Inject() (
 
   def productionCredentialsChecklistPage(
       productionAppId: ApplicationId
-    ): Action[AnyContent] = withApplicationSubmission(ApplicationStateFilter.inTesting, RoleFilter.isAdminRole)(productionAppId) { implicit request =>
+    ): Action[AnyContent] = withApplicationSubmission(ApplicationStateFilter.inTestingOrProduction, RoleFilter.isAdminRole)(productionAppId) { implicit request =>
     val show = (viewModel: ViewModel) => {
       filterGroupingsForEmptyQuestionnaireSummaries(viewModel.groupings).fold(
         BadRequest("No questionnaires applicable")
