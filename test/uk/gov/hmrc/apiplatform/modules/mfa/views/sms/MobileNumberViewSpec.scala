@@ -57,13 +57,22 @@ class MobileNumberViewSpec extends CommonViewSpec with WithCSRFAddToken with Dev
       Option(document.getElementById("data-field-error-mobileNumber")) shouldBe None
     }
 
-    "render correctly when form is invalid" in new Setup {
+    "render correctly when phone number is invalid" in new Setup {
       val mainView = mobileNumberView.apply(
         MobileNumberForm.form.withError("mobileNumber", "It must be a valid mobile number")
       )(stubMessages(), FakeRequest().withCSRFToken, loggedIn, appConfig)
       val document = Jsoup.parse(mainView.body)
       verifyPageElements(document)
       document.getElementById("data-field-error-mobileNumber").text() shouldBe "Error: It must be a valid mobile number"
+    }
+
+    "render correctly when phone number length is too short" in new Setup {
+      val mainView = mobileNumberView.apply(
+        MobileNumberForm.form.withError("mobileNumber", "It must be at least 9 characters long")
+      )(stubMessages(), FakeRequest().withCSRFToken, loggedIn, appConfig)
+      val document = Jsoup.parse(mainView.body)
+      verifyPageElements(document)
+      document.getElementById("data-field-error-mobileNumber").text() shouldBe "Error: It must be at least 9 characters long"
     }
   }
 }
