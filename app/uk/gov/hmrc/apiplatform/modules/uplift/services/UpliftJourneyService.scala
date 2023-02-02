@@ -21,6 +21,8 @@ import scala.concurrent.{ExecutionContext, Future}
 
 import uk.gov.hmrc.http.HeaderCarrier
 
+import uk.gov.hmrc.apiplatform.modules.submissions.connectors.ThirdPartyApplicationSubmissionsConnector
+import uk.gov.hmrc.apiplatform.modules.submissions.domain.models.Submission
 import uk.gov.hmrc.apiplatform.modules.common.services.EitherTHelper
 import uk.gov.hmrc.apiplatform.modules.uplift.domain.models.ApiSubscriptions
 import uk.gov.hmrc.apiplatform.modules.uplift.domain.services._
@@ -32,7 +34,8 @@ import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.Develope
 @Singleton
 class UpliftJourneyService @Inject() (
     flowService: GetProductionCredentialsFlowService,
-    apmConnector: ApmConnector
+    apmConnector: ApmConnector,
+    thirdPartyApplicationSubmissionsConnector: ThirdPartyApplicationSubmissionsConnector
   )(implicit val ec: ExecutionContext
   ) extends EitherTHelper[String] {
   import cats.instances.future.catsStdInstancesForFuture
@@ -120,4 +123,19 @@ class UpliftJourneyService @Inject() (
       (data, upliftableApiIds.size > 1)
     }
   }
+
+  def createNewSubmission(appId: ApplicationId, developerSession: DeveloperSession)(implicit hc: HeaderCarrier): Future[Either[String, Submission]] = 
+    (
+      for {
+        flow                   <- liftF(flowService.fetchFlow(developerSession))
+        sellResellOrDistribute <- fromOption(flow.sellResellOrDistribute, "No sell or resell or distribute set")
+
+        // Need to update the application with possible new value of sellResellOrDistribute,
+        // but don't change app apart from that.
+
+        submission             <- fromOptionF(thirdPartyApplicationSubmissionsConnector.createSubmission(appId), "No submission returned")
+      } yield submission
+    )
+    .value
+
 }

@@ -21,6 +21,7 @@ import scala.concurrent.Future.successful
 import scala.concurrent.{ExecutionContext, Future}
 import scala.util.Try
 
+import cats.data.OptionT
 import views.helper.IdFormatter
 
 import play.api.data.Forms._
@@ -29,6 +30,9 @@ import play.api.libs.crypto.CookieSigner
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents, Request, Result}
 import uk.gov.hmrc.play.bootstrap.controller.WithUnsafeDefaultFormBinding
 
+import views.html.checkpages.applicationcheck.UnauthorisedAppDetailsView
+import uk.gov.hmrc.apiplatform.modules.submissions.domain.models.Submission
+import uk.gov.hmrc.apiplatform.modules.submissions.services.SubmissionService
 import uk.gov.hmrc.apiplatform.modules.uplift.domain.models.ApiSubscriptions
 import uk.gov.hmrc.apiplatform.modules.uplift.services.{GetProductionCredentialsFlowService, UpliftJourneyService}
 import uk.gov.hmrc.apiplatform.modules.uplift.views.html._
@@ -39,7 +43,7 @@ import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.{APISubscriptions, Ap
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.apidefinitions.APISubscriptionStatus
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.{ApplicationId, SellResellOrDistribute}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.controllers.BadRequestWithErrorMessage
-import uk.gov.hmrc.thirdpartydeveloperfrontend.service.{ApplicationActionService, ApplicationService, SessionService}
+import uk.gov.hmrc.thirdpartydeveloperfrontend.service.{ApplicationActionService, ApplicationService, SessionService, TermsOfUseInvitationService}
 
 object UpliftJourneyController {
 
@@ -72,6 +76,8 @@ class UpliftJourneyController @Inject() (
     val sessionService: SessionService,
     val applicationActionService: ApplicationActionService,
     val applicationService: ApplicationService,
+    val submissionService: SubmissionService,
+    val termsOfUseInvitationService: TermsOfUseInvitationService,
     upliftJourneyService: UpliftJourneyService,
     mcc: MessagesControllerComponents,
     val cookieSigner: CookieSigner,
@@ -82,6 +88,7 @@ class UpliftJourneyController @Inject() (
     sellResellOrDistributeSoftwareView: SellResellOrDistributeSoftwareView,
     weWillCheckYourAnswersView: WeWillCheckYourAnswersView,
     beforeYouStartView: BeforeYouStartView,
+    unauthorisedAppDetailsView: UnauthorisedAppDetailsView,
     upliftJourneySwitch: UpliftJourneySwitch
   )(implicit val ec: ExecutionContext,
     val appConfig: ApplicationConfig
@@ -188,6 +195,29 @@ class UpliftJourneyController @Inject() (
 
   def beforeYouStart(sandboxAppId: ApplicationId): Action[AnyContent] = whenTeamMemberOnApp(sandboxAppId) { implicit request =>
     successful(Ok(beforeYouStartView(sandboxAppId)))
+  }
+
+  def agreeNewTermsOfUse(appId: ApplicationId): Action[AnyContent] = whenTeamMemberOnApp(appId) { implicit request =>
+    lazy val showSubmission = (s: Submission) =>
+      if (request.role.isAdministrator) {
+        if (s.status.isAnsweredCompletely) {
+          Redirect(uk.gov.hmrc.apiplatform.modules.submissions.controllers.routes.CheckAnswersController.checkAnswersPage(appId))
+        } else {
+          Redirect(uk.gov.hmrc.apiplatform.modules.submissions.controllers.routes.ProdCredsChecklistController.productionCredentialsChecklistPage(appId))
+        }
+      } else {
+        Ok(unauthorisedAppDetailsView(request.application.name, request.application.adminEmails))
+      }
+
+    lazy val showBeforeYouStart =
+      if (request.role.isAdministrator) {
+        Ok(beforeYouStartView(appId))
+      } else {
+        Ok(unauthorisedAppDetailsView(request.application.name, request.application.adminEmails))
+      }
+
+//    OptionT(termsOfUseInvitationService.fetchTermsOfUseInvitation(appId)).fold(BadRequest("This application has not been invited to complete the new terms of use"))()
+    OptionT(submissionService.fetchLatestSubmission(appId)).fold(showBeforeYouStart)(showSubmission)
   }
 
   def weWillCheckYourAnswers(sandboxAppId: ApplicationId): Action[AnyContent] = whenTeamMemberOnApp(sandboxAppId) { implicit request =>

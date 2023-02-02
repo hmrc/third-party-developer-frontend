@@ -80,6 +80,12 @@ class ThirdPartyApplicationSubmissionsConnector @Inject() (
     }
   }
 
+  def createSubmission(applicationId: ApplicationId)(implicit hc: HeaderCarrier): Future[Option[Submission]] = {
+    metrics.record(api) {
+      http.POSTEmpty[Option[Submission]](s"$serviceBaseUrl/submissions/application/${applicationId.value}")
+    }
+  }
+
   def fetchLatestExtendedSubmission(applicationId: ApplicationId)(implicit hc: HeaderCarrier): Future[Option[ExtendedSubmission]] = {
     metrics.record(api) {
       http.GET[Option[ExtendedSubmission]](s"$serviceBaseUrl/submissions/application/${applicationId.value}/extended")
