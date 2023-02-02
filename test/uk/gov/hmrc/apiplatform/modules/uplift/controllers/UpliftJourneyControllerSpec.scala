@@ -27,6 +27,7 @@ import play.api.test.Helpers._
 import play.filters.csrf.CSRF.TokenProvider
 import uk.gov.hmrc.http.HeaderCarrier
 
+import views.html.checkpages.applicationcheck.UnauthorisedAppDetailsView
 import uk.gov.hmrc.apiplatform.modules.uplift.domain.models._
 import uk.gov.hmrc.apiplatform.modules.uplift.services.mocks._
 import uk.gov.hmrc.apiplatform.modules.uplift.views.html._
@@ -41,6 +42,8 @@ import uk.gov.hmrc.thirdpartydeveloperfrontend.mocks.connectors.ApmConnectorMock
 import uk.gov.hmrc.thirdpartydeveloperfrontend.mocks.service.{ApplicationActionServiceMock, ApplicationServiceMock, SessionServiceMock}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.WithLoggedInSession._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.{LocalUserIdTracker, WithCSRFAddToken}
+import uk.gov.hmrc.apiplatform.modules.submissions.services.mocks.SubmissionServiceMockModule
+import uk.gov.hmrc.thirdpartydeveloperfrontend.mocks.service.TermsOfUseInvitationServiceMockModule
 
 class UpliftJourneyControllerSpec extends BaseControllerSpec
     with SampleSession
@@ -53,6 +56,8 @@ class UpliftJourneyControllerSpec extends BaseControllerSpec
 
   trait Setup
       extends ApplicationServiceMock
+      with SubmissionServiceMockModule
+      with TermsOfUseInvitationServiceMockModule
       with ApplicationActionServiceMock
       with ApmConnectorMockModule
       with GetProductionCredentialsFlowServiceMockModule
@@ -73,6 +78,7 @@ class UpliftJourneyControllerSpec extends BaseControllerSpec
     val sellResellOrDistributeSoftwareView = app.injector.instanceOf[SellResellOrDistributeSoftwareView]
     val weWillCheckYourAnswersView         = app.injector.instanceOf[WeWillCheckYourAnswersView]
     val beforeYouStartView                 = app.injector.instanceOf[BeforeYouStartView]
+    val unauthorisedAppDetailsView         = app.injector.instanceOf[UnauthorisedAppDetailsView]
 
     val mockUpliftJourneyConfig     = mock[UpliftJourneyConfig]
     val sr20UpliftJourneySwitchMock = new UpliftJourneySwitch(mockUpliftJourneyConfig)
@@ -82,6 +88,8 @@ class UpliftJourneyControllerSpec extends BaseControllerSpec
       sessionServiceMock,
       applicationActionServiceMock,
       applicationServiceMock,
+      SubmissionServiceMock.aMock,
+      TermsOfUseInvitationServiceMock.aMock,
       UpliftJourneyServiceMock.aMock,
       mcc,
       cookieSigner,
@@ -92,6 +100,7 @@ class UpliftJourneyControllerSpec extends BaseControllerSpec
       sellResellOrDistributeSoftwareView,
       weWillCheckYourAnswersView,
       beforeYouStartView,
+      unauthorisedAppDetailsView,
       sr20UpliftJourneySwitchMock
     )
 

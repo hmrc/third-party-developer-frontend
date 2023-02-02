@@ -20,6 +20,7 @@ import scala.concurrent.ExecutionContext.Implicits.global
 
 import uk.gov.hmrc.http.HeaderCarrier
 
+import uk.gov.hmrc.apiplatform.modules.submissions.connectors.ThirdPartyApplicationSubmissionsConnector
 import uk.gov.hmrc.apiplatform.modules.uplift.domain.models._
 import uk.gov.hmrc.apiplatform.modules.uplift.services.mocks._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.builder._
@@ -53,9 +54,12 @@ class UpliftJourneyServiceSpec
 
     implicit val hc = HeaderCarrier()
 
+    val mockSubmissionsConnector: ThirdPartyApplicationSubmissionsConnector = mock[ThirdPartyApplicationSubmissionsConnector]
+
     val underTest = new UpliftJourneyService(
       GPCFlowServiceMock.aMock,
-      ApmConnectorMock.aMock
+      ApmConnectorMock.aMock,
+      mockSubmissionsConnector
     )
 
     val appName: String = "app"

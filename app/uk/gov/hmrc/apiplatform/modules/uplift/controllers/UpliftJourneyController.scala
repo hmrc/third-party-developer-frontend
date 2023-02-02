@@ -21,7 +21,6 @@ import scala.concurrent.Future.successful
 import scala.concurrent.{ExecutionContext, Future}
 import scala.util.Try
 
-import cats.data.OptionT
 import views.helper.IdFormatter
 
 import play.api.data.Forms._
@@ -31,6 +30,7 @@ import play.api.mvc.{Action, AnyContent, MessagesControllerComponents, Request, 
 import uk.gov.hmrc.play.bootstrap.controller.WithUnsafeDefaultFormBinding
 
 import views.html.checkpages.applicationcheck.UnauthorisedAppDetailsView
+import uk.gov.hmrc.apiplatform.modules.common.services.EitherTHelper
 import uk.gov.hmrc.apiplatform.modules.submissions.domain.models.Submission
 import uk.gov.hmrc.apiplatform.modules.submissions.services.SubmissionService
 import uk.gov.hmrc.apiplatform.modules.uplift.domain.models.ApiSubscriptions
@@ -99,6 +99,9 @@ class UpliftJourneyController @Inject() (
   import UpliftJourneyController._
 
   val sellResellOrDistributeForm: Form[SellResellOrDistributeForm] = SellResellOrDistributeForm.form
+
+  private val exec   = ec
+  private val ET     = new EitherTHelper[Result] { implicit val ec: ExecutionContext = exec }
 
   def confirmApiSubscriptionsPage(sandboxAppId: ApplicationId): Action[AnyContent] = whenTeamMemberOnApp(sandboxAppId) { implicit request =>
     for {
@@ -216,8 +219,14 @@ class UpliftJourneyController @Inject() (
         Ok(unauthorisedAppDetailsView(request.application.name, request.application.adminEmails))
       }
 
-//    OptionT(termsOfUseInvitationService.fetchTermsOfUseInvitation(appId)).fold(BadRequest("This application has not been invited to complete the new terms of use"))()
-    OptionT(submissionService.fetchLatestSubmission(appId)).fold(showBeforeYouStart)(showSubmission)
+    val x =
+      (
+        for {
+          invitation <- ET.fromOptionF(termsOfUseInvitationService.fetchTermsOfUseInvitation(appId), BadRequest("This application has not been invited to complete the new terms of use"))
+          submission <- ET.fromOptionF(submissionService.fetchLatestSubmission(appId), showBeforeYouStart)
+        } yield submission
+      )
+    x.fold[Result](identity, showSubmission)
   }
 
   def weWillCheckYourAnswers(sandboxAppId: ApplicationId): Action[AnyContent] = whenTeamMemberOnApp(sandboxAppId) { implicit request =>
