@@ -21,7 +21,7 @@ import play.api.http.Status.{NO_CONTENT, OK}
 import play.api.libs.json.Json
 import steps.TestContext
 import uk.gov.hmrc.apiplatform.modules.mfa.connectors.{ChangeMfaNameRequest, CreateMfaSmsRequest}
-import uk.gov.hmrc.apiplatform.modules.mfa.connectors.ThirdPartyDeveloperMfaConnector.{RegisterAuthAppResponse, RegisterSmsResponse}
+import uk.gov.hmrc.apiplatform.modules.mfa.connectors.ThirdPartyDeveloperMfaConnector.{RegisterAuthAppResponse, RegisterSmsSuccessResponse}
 import uk.gov.hmrc.apiplatform.modules.mfa.models.MfaId
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.connectors.{AccessCodeAuthenticationRequest, VerifyMfaRequest}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.{Developer, LoggedInState, Session}
@@ -81,14 +81,14 @@ object MfaStub {
   }
 
   def setupSmsAccessCode(developer: Developer, mfaId: MfaId, mobileNumber: String): Unit = {
-    import uk.gov.hmrc.apiplatform.modules.mfa.connectors.ThirdPartyDeveloperMfaConnector.registerSmsResponseFormat
+    import uk.gov.hmrc.apiplatform.modules.mfa.connectors.ThirdPartyDeveloperMfaConnector.registerSmsSuccessResponseFormat
 
     stubFor(
       post(urlEqualTo(s"/developer/${developer.userId.value}/mfa/sms"))
         .withRequestBody(equalToJson(Json.toJson(CreateMfaSmsRequest(mobileNumber)).toString()))
         .willReturn(aResponse()
           .withStatus(OK)
-          .withBody(Json.toJson(RegisterSmsResponse(mfaId, mobileNumber)).toString()))
+          .withBody(Json.toJson(RegisterSmsSuccessResponse(mfaId, mobileNumber)).toString()))
     )
   }
 

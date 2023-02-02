@@ -23,7 +23,7 @@ import play.api.inject.bind
 import play.api.inject.guice.GuiceApplicationBuilder
 import play.api.libs.json.Json
 import play.api.{Application, Configuration, Mode}
-import uk.gov.hmrc.apiplatform.modules.mfa.connectors.ThirdPartyDeveloperMfaConnector.{RegisterAuthAppResponse, RegisterSmsResponse}
+import uk.gov.hmrc.apiplatform.modules.mfa.connectors.ThirdPartyDeveloperMfaConnector.{RegisterAuthAppResponse, RegisterSmsFailureResponse, RegisterSmsSuccessResponse}
 import uk.gov.hmrc.apiplatform.modules.mfa.models.{DeviceSession, DeviceSessionInvalid, MfaId}
 import uk.gov.hmrc.http.{HeaderCarrier, UpstreamErrorResponse}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.builder.DeveloperBuilder
@@ -227,11 +227,12 @@ class ThirdPartyDeveloperMfaConnectorIntegrationSpec extends BaseConnectorIntegr
   }
 
   "createMfaSms" should {
-    val mobileNumber = "0123456789"
-    val request      = CreateMfaSmsRequest(mobileNumber)
-    val response     = RegisterSmsResponse(mfaId = MfaId.random, mobileNumber = mobileNumber)
+    val mobileNumber    = "0123456789"
+    val request         = CreateMfaSmsRequest(mobileNumber)
+    val successResponse = RegisterSmsSuccessResponse(mfaId = MfaId.random, mobileNumber = mobileNumber)
+    val failureResponse = RegisterSmsFailureResponse()
 
-    "return 201 with RegisterSmsResponse" in new Setup {
+    "return 201 with RegisterSmsSuccessResponse" in new Setup {
       val url = s"/developer/${userId.value}/mfa/sms"
       stubFor(
         post(urlPathEqualTo(url))
@@ -239,10 +240,10 @@ class ThirdPartyDeveloperMfaConnectorIntegrationSpec extends BaseConnectorIntegr
           .willReturn(
             aResponse()
               .withStatus(CREATED)
-              .withBody(Json.toJson(response).toString)
+              .withBody(Json.toJson(successResponse).toString)
           )
       )
-      await(underTest.createMfaSms(userId, mobileNumber)) shouldBe response
+      await(underTest.createMfaSms(userId, mobileNumber)) shouldBe successResponse
     }
 
     "return 400 when invalid number is passed to TPD" in new Setup {
@@ -255,7 +256,21 @@ class ThirdPartyDeveloperMfaConnectorIntegrationSpec extends BaseConnectorIntegr
               .withStatus(BAD_REQUEST)
           )
       )
-      intercept[UpstreamErrorResponse](await(underTest.createMfaSms(userId, mobileNumber))).statusCode shouldBe BAD_REQUEST
+      await(underTest.createMfaSms(userId, mobileNumber)) shouldBe failureResponse
+    }
+
+    "return 500 with RegisterSmsFailureResponse when invalid number provided for access codes" in new Setup {
+      val badMobileNumber = "05555555555"
+      val url             = s"/developer/${userId.value}/mfa/sms"
+      stubFor(
+        post(urlPathEqualTo(url))
+          .withJsonRequestBody(CreateMfaSmsRequest(badMobileNumber))
+          .willReturn(
+            aResponse()
+              .withStatus(INTERNAL_SERVER_ERROR)
+          )
+      )
+      await(underTest.createMfaSms(userId, badMobileNumber)) shouldBe failureResponse
     }
 
     "return 404 when user is not found" in new Setup {
@@ -268,7 +283,7 @@ class ThirdPartyDeveloperMfaConnectorIntegrationSpec extends BaseConnectorIntegr
               .withStatus(NOT_FOUND)
           )
       )
-      intercept[UpstreamErrorResponse](await(underTest.createMfaSms(userId, mobileNumber))).statusCode shouldBe NOT_FOUND
+      await(underTest.createMfaSms(userId, mobileNumber)) shouldBe failureResponse
     }
   }
 

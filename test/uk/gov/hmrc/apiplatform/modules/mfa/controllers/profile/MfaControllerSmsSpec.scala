@@ -24,6 +24,7 @@ import org.jsoup.Jsoup
 import play.api.http.Status
 import play.api.test.Helpers._
 
+import uk.gov.hmrc.apiplatform.modules.mfa.connectors.ThirdPartyDeveloperMfaConnector.RegisterSmsFailureResponse
 import uk.gov.hmrc.apiplatform.modules.mfa.models.MfaAction
 import uk.gov.hmrc.apiplatform.modules.mfa.service.MfaResponse
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.UserId
@@ -89,6 +90,23 @@ class MfaControllerSmsSpec extends MfaControllerBaseSpec {
       doc.getElementById("data-field-error-mobileNumber").text() shouldBe "Error: It must be a valid mobile number"
 
       verifyZeroInteractions(underTest.thirdPartyDeveloperMfaConnector)
+    }
+
+    "return Bad Request when user is logged in and mobile number is valid, fails from Notify Service" in new SetupSuccessfulStart2SV with LoggedIn {
+      val badMobileNumber = "05555555555"
+      val request         = createRequest().withFormUrlEncodedBody("mobileNumber" -> badMobileNumber)
+
+      when(underTest.thirdPartyDeveloperMfaConnector.createMfaSms(*[UserId], *)(*))
+        .thenReturn(Future.successful(RegisterSmsFailureResponse()))
+
+      val result = addToken(underTest.setupSmsAction())(request)
+
+      status(result) shouldBe BAD_REQUEST
+      val doc = Jsoup.parse(contentAsString(result))
+      validateMobileNumberView(doc)
+      doc.getElementById("data-field-error-mobileNumber").text() shouldBe "Error: It cannot be used for access codes"
+
+      verify(underTest.thirdPartyDeveloperMfaConnector).createMfaSms(*[UserId], eqTo(badMobileNumber))(*)
     }
   }
 
