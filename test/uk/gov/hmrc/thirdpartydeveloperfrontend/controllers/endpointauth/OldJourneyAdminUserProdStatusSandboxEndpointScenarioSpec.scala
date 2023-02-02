@@ -40,8 +40,7 @@ class OldJourneyAdminUserProdStatusSandboxEndpointScenarioSpec extends EndpointS
       case Endpoint("GET", "/developer/registration", _)                                                     => Redirect("/developer/applications")
       case Endpoint("POST", "/developer/registration", _)                                                    => BadRequest()
       case Endpoint("GET", "/developer/reset-password/error", _)                                             => BadRequest()
-      case Endpoint("GET", "/developer/submissions/application/:aid/production-credentials-checklist", _)    => Success()    // can be in 'production' state for new terms of use
-      case Endpoint("POST", "/developer/submissions/application/:aid/production-credentials-checklist", _)   => BadRequest() 
+      case Endpoint(_, "/developer/submissions/application/:aid/production-credentials-checklist", _)        => Success()    // can be in 'production' state for new terms of use
       case Endpoint(_, "/developer/submissions/application/:aid/cancel-request", _)                          => BadRequest() // must not be in production state
       case Endpoint("GET", "/developer/submissions/application/:aid/check-answers", _)                       => BadRequest() // must be in testing state
       case Endpoint("GET", "/developer/submissions/application/:aid/view-answers", _)                        => BadRequest() // must not be in pending approval state
