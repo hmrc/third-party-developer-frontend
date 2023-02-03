@@ -133,7 +133,7 @@ class UpliftJourneyService @Inject() (
         // Need to update the application with possible new value of sellResellOrDistribute,
         // but don't change app apart from that.
 
-        submission             <- fromOptionF(thirdPartyApplicationSubmissionsConnector.createSubmission(appId), "No submission returned")
+        submission             <- fromOptionF(thirdPartyApplicationSubmissionsConnector.createSubmission(appId, developerSession.email), "No submission returned")
       } yield submission
     )
     .value

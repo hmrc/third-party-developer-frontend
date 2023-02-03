@@ -35,7 +35,7 @@ import uk.gov.hmrc.thirdpartydeveloperfrontend.builder._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.config.{On, UpliftJourneyConfig}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.{BaseControllerSpec, SubscriptionTestHelperSugar}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.apidefinitions._
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.{ApplicationWithSubscriptionData, SellResellOrDistribute}
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.{ApplicationWithSubscriptionData, SellResellOrDistribute, ApplicationState}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.{DeveloperSession, LoggedInState, Session}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.subscriptions.{ApiCategory, ApiData, VersionData}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.mocks.connectors.ApmConnectorMockModule
@@ -112,6 +112,7 @@ class UpliftJourneyControllerSpec extends BaseControllerSpec
     val session   = Session(sessionId, developer, LoggedInState.LOGGED_IN)
 
     val loggedInDeveloper = DeveloperSession(session)
+    val testingApp = sampleApp.copy(state = ApplicationState.testing)
 
     fetchSessionByIdReturns(sessionId, session)
     updateUserFlowSessionsReturnsSuccessfully(sessionId)
@@ -178,9 +179,9 @@ class UpliftJourneyControllerSpec extends BaseControllerSpec
         )
     )
 
-    fetchByApplicationIdReturns(appId, sampleApp)
+    fetchByApplicationIdReturns(appId, testingApp)
     givenApplicationAction(
-      ApplicationWithSubscriptionData(sampleApp, asSubscriptions(List(testAPISubscriptionStatus1)), asFields(List.empty)),
+      ApplicationWithSubscriptionData(testingApp, asSubscriptions(List(testAPISubscriptionStatus1)), asFields(List.empty)),
       loggedInDeveloper,
       List(testAPISubscriptionStatus1)
     )
