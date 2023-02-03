@@ -85,8 +85,7 @@ class ThirdPartyApplicationSubmissionsConnector @Inject() (
 
   def createSubmission(applicationId: ApplicationId, requestedBy: String)(implicit hc: HeaderCarrier): Future[Option[Submission]] = {
     metrics.record(api) {
-      http.POST[CreateSubmissionRequest, Option[Submission]](s"$serviceBaseUrl/submissions/application/${applicationId.value}",
-        CreateSubmissionRequest(requestedBy))
+      http.POST[CreateSubmissionRequest, Option[Submission]](s"$serviceBaseUrl/submissions/application/${applicationId.value}", CreateSubmissionRequest(requestedBy))
     }
   }
 

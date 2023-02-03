@@ -39,7 +39,7 @@ import uk.gov.hmrc.apiplatform.modules.uplift.views.html._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.config.{ApplicationConfig, ErrorHandler, On, OnDemand, UpliftJourneyConfig}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.connectors.ApmConnector
 import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.checkpages.{CanUseCheckActions, DummySubscriptionsForm}
-import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.{APISubscriptions, ApplicationController, FormKeys, checkpages}
+import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.{checkpages, APISubscriptions, ApplicationController, FormKeys}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.apidefinitions.APISubscriptionStatus
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.{ApplicationId, SellResellOrDistribute, State}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.controllers.BadRequestWithErrorMessage
@@ -100,8 +100,8 @@ class UpliftJourneyController @Inject() (
 
   val sellResellOrDistributeForm: Form[SellResellOrDistributeForm] = SellResellOrDistributeForm.form
 
-  private val exec   = ec
-  private val ET     = new EitherTHelper[Result] { implicit val ec: ExecutionContext = exec }
+  private val exec = ec
+  private val ET   = new EitherTHelper[Result] { implicit val ec: ExecutionContext = exec }
 
   def confirmApiSubscriptionsPage(sandboxAppId: ApplicationId): Action[AnyContent] = whenTeamMemberOnApp(sandboxAppId) { implicit request =>
     for {
@@ -179,16 +179,16 @@ class UpliftJourneyController @Inject() (
 
   def sellResellOrDistributeYourSoftwareAction(appId: ApplicationId): Action[AnyContent] = whenTeamMemberOnApp(appId) { implicit request =>
     def storeResultAndGotoApiSubscriptionsPage(ans: String) =
-          for {
-            _ <- flowService.storeSellResellOrDistribute(SellResellOrDistribute(ans), request.developerSession)
-            _ <- upliftJourneyService.storeDefaultSubscriptionsInFlow(appId, request.developerSession)
-          } yield Redirect(uk.gov.hmrc.apiplatform.modules.uplift.controllers.routes.UpliftJourneyController.confirmApiSubscriptionsPage(appId))
+      for {
+        _ <- flowService.storeSellResellOrDistribute(SellResellOrDistribute(ans), request.developerSession)
+        _ <- upliftJourneyService.storeDefaultSubscriptionsInFlow(appId, request.developerSession)
+      } yield Redirect(uk.gov.hmrc.apiplatform.modules.uplift.controllers.routes.UpliftJourneyController.confirmApiSubscriptionsPage(appId))
 
     def createSubmissionAndGotoQuestionnairePage(ans: String) =
-          for {
-            _ <- flowService.storeSellResellOrDistribute(SellResellOrDistribute(ans), request.developerSession)
-            _ <- upliftJourneyService.createNewSubmission(appId, request.developerSession)
-          } yield Redirect(uk.gov.hmrc.apiplatform.modules.submissions.controllers.routes.ProdCredsChecklistController.productionCredentialsChecklistPage(appId))
+      for {
+        _ <- flowService.storeSellResellOrDistribute(SellResellOrDistribute(ans), request.developerSession)
+        _ <- upliftJourneyService.createNewSubmission(appId, request.developerSession)
+      } yield Redirect(uk.gov.hmrc.apiplatform.modules.submissions.controllers.routes.ProdCredsChecklistController.productionCredentialsChecklistPage(appId))
 
     def handleInvalidForm(formWithErrors: Form[SellResellOrDistributeForm]) =
       successful(BadRequest(sellResellOrDistributeSoftwareView(appId, formWithErrors)))
@@ -235,7 +235,8 @@ class UpliftJourneyController @Inject() (
     val x =
       (
         for {
-          invitation <- ET.fromOptionF(termsOfUseInvitationService.fetchTermsOfUseInvitation(appId), BadRequest("This application has not been invited to complete the new terms of use"))
+          invitation <-
+            ET.fromOptionF(termsOfUseInvitationService.fetchTermsOfUseInvitation(appId), BadRequest("This application has not been invited to complete the new terms of use"))
           submission <- ET.fromOptionF(submissionService.fetchLatestSubmission(appId), showBeforeYouStart)
         } yield submission
       )

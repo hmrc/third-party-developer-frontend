@@ -36,7 +36,7 @@ import uk.gov.hmrc.thirdpartydeveloperfrontend.builder._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.config.{On, UpliftJourneyConfig}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.{BaseControllerSpec, SubscriptionTestHelperSugar}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.apidefinitions._
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.{ApplicationWithSubscriptionData, SellResellOrDistribute, ApplicationState, ApplicationId}
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.{ApplicationId, ApplicationState, ApplicationWithSubscriptionData, SellResellOrDistribute}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.{DeveloperSession, LoggedInState, Session}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.subscriptions.{ApiCategory, ApiData, VersionData}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.mocks.connectors.ApmConnectorMockModule
@@ -114,7 +114,7 @@ class UpliftJourneyControllerSpec extends BaseControllerSpec
     val session   = Session(sessionId, developer, LoggedInState.LOGGED_IN)
 
     val loggedInDeveloper = DeveloperSession(session)
-    val testingApp = sampleApp.copy(state = ApplicationState.testing)
+    val testingApp        = sampleApp.copy(state = ApplicationState.testing)
 
     fetchSessionByIdReturns(sessionId, session)
     updateUserFlowSessionsReturnsSuccessfully(sessionId)
@@ -384,13 +384,13 @@ class UpliftJourneyControllerSpec extends BaseControllerSpec
     "store the answer 'Yes' from the 'sell resell or distribute your software view' and redirect to questionnaire when application is Production" in new Setup {
 
       val testSellResellOrDistribute = SellResellOrDistribute("Yes")
-      val prodAppId = ApplicationId.random
-      val prodApp = sampleApp.copy(id = prodAppId)
+      val prodAppId                  = ApplicationId.random
+      val prodApp                    = sampleApp.copy(id = prodAppId)
       fetchByApplicationIdReturns(prodAppId, prodApp)
       givenApplicationAction(
-         ApplicationWithSubscriptionData(prodApp, asSubscriptions(List(testAPISubscriptionStatus1)), asFields(List.empty)),
-         loggedInDeveloper,
-         List(testAPISubscriptionStatus1)
+        ApplicationWithSubscriptionData(prodApp, asSubscriptions(List(testAPISubscriptionStatus1)), asFields(List.empty)),
+        loggedInDeveloper,
+        List(testAPISubscriptionStatus1)
       )
       UpliftJourneyServiceMock.CreateNewSubmission.thenReturns(aSubmission)
       GPCFlowServiceMock.StoreSellResellOrDistribute.thenReturns(testSellResellOrDistribute, GetProductionCredentialsFlow("", Some(testSellResellOrDistribute), None))
@@ -452,7 +452,7 @@ class UpliftJourneyControllerSpec extends BaseControllerSpec
 
       TermsOfUseInvitationServiceMock.FetchTermsOfUseInvitation.thenReturn
       SubmissionServiceMock.FetchLatestSubmission.thenReturns(aSubmission)
-      
+
       private val result = controller.agreeNewTermsOfUse(appId)(loggedInRequest.withCSRFToken)
 
       status(result) shouldBe SEE_OTHER

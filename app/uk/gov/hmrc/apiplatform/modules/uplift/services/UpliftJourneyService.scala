@@ -124,7 +124,7 @@ class UpliftJourneyService @Inject() (
     }
   }
 
-  def createNewSubmission(appId: ApplicationId, developerSession: DeveloperSession)(implicit hc: HeaderCarrier): Future[Either[String, Submission]] = 
+  def createNewSubmission(appId: ApplicationId, developerSession: DeveloperSession)(implicit hc: HeaderCarrier): Future[Either[String, Submission]] =
     (
       for {
         flow                   <- liftF(flowService.fetchFlow(developerSession))
@@ -133,9 +133,9 @@ class UpliftJourneyService @Inject() (
         // Need to update the application with possible new value of sellResellOrDistribute,
         // but don't change app apart from that.
 
-        submission             <- fromOptionF(thirdPartyApplicationSubmissionsConnector.createSubmission(appId, developerSession.email), "No submission returned")
+        submission <- fromOptionF(thirdPartyApplicationSubmissionsConnector.createSubmission(appId, developerSession.email), "No submission returned")
       } yield submission
     )
-    .value
+      .value
 
 }

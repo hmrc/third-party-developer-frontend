@@ -134,7 +134,9 @@ class ProdCredsChecklistController @Inject() (
     successful(show(convertSubmissionToViewModel(request.extSubmission)(request.application.id, request.application.name)))
   }
 
-  def productionCredentialsChecklistAction(productionAppId: ApplicationId) = withApplicationSubmission(ApplicationStateFilter.inTestingOrProduction, RoleFilter.isAdminRole)(productionAppId) { implicit request =>
+  def productionCredentialsChecklistAction(
+      productionAppId: ApplicationId
+    ) = withApplicationSubmission(ApplicationStateFilter.inTestingOrProduction, RoleFilter.isAdminRole)(productionAppId) { implicit request =>
     def handleValidForm(validForm: DummyForm) = {
       if (request.extSubmission.submission.status.isAnsweredCompletely) {
         successful(Redirect(uk.gov.hmrc.apiplatform.modules.submissions.controllers.routes.CheckAnswersController.checkAnswersPage(productionAppId)))
