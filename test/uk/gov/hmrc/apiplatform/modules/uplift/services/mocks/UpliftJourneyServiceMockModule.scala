@@ -21,6 +21,7 @@ import scala.concurrent.Future.successful
 import org.mockito.verification.VerificationMode
 import org.mockito.{ArgumentMatchersSugar, MockitoSugar}
 
+import uk.gov.hmrc.apiplatform.modules.submissions.domain.models.Submission
 import uk.gov.hmrc.apiplatform.modules.uplift.domain.models._
 import uk.gov.hmrc.apiplatform.modules.uplift.services.UpliftJourneyService
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.apidefinitions.APISubscriptionStatus
@@ -57,6 +58,10 @@ trait UpliftJourneyServiceMockModule extends MockitoSugar with ArgumentMatchersS
 
     object ChangeApiSubscriptions {
       def thenReturns(out: List[APISubscriptionStatus]) = when(aMock.changeApiSubscriptions(*[ApplicationId], *, *)(*)).thenReturn(successful(out))
+    }
+
+    object CreateNewSubmission {
+      def thenReturns(out: Submission) = when(aMock.createNewSubmission(*[ApplicationId], *)(*)).thenReturn(successful(Right(out)))
     }
   }
 

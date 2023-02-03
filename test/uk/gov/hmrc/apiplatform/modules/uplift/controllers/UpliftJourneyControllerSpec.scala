@@ -28,6 +28,7 @@ import play.filters.csrf.CSRF.TokenProvider
 import uk.gov.hmrc.http.HeaderCarrier
 
 import views.html.checkpages.applicationcheck.UnauthorisedAppDetailsView
+import uk.gov.hmrc.apiplatform.modules.submissions.SubmissionsTestData
 import uk.gov.hmrc.apiplatform.modules.uplift.domain.models._
 import uk.gov.hmrc.apiplatform.modules.uplift.services.mocks._
 import uk.gov.hmrc.apiplatform.modules.uplift.views.html._
@@ -35,7 +36,7 @@ import uk.gov.hmrc.thirdpartydeveloperfrontend.builder._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.config.{On, UpliftJourneyConfig}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.{BaseControllerSpec, SubscriptionTestHelperSugar}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.apidefinitions._
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.{ApplicationWithSubscriptionData, SellResellOrDistribute, ApplicationState}
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.{ApplicationWithSubscriptionData, SellResellOrDistribute, ApplicationState, ApplicationId}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.{DeveloperSession, LoggedInState, Session}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.subscriptions.{ApiCategory, ApiData, VersionData}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.mocks.connectors.ApmConnectorMockModule
@@ -49,6 +50,7 @@ class UpliftJourneyControllerSpec extends BaseControllerSpec
     with SampleSession
     with SampleApplication
     with SubscriptionTestHelperSugar
+    with SubmissionsTestData
     with WithCSRFAddToken
     with SubscriptionsBuilder
     with DeveloperBuilder
@@ -378,6 +380,29 @@ class UpliftJourneyControllerSpec extends BaseControllerSpec
       status(result) shouldBe SEE_OTHER
       redirectLocation(result) shouldBe Some("/developer/applications/myAppId/confirm-subscriptions")
     }
+
+    "store the answer 'Yes' from the 'sell resell or distribute your software view' and redirect to questionnaire when application is Production" in new Setup {
+
+      val testSellResellOrDistribute = SellResellOrDistribute("Yes")
+      val prodAppId = ApplicationId.random
+      val prodApp = sampleApp.copy(id = prodAppId)
+      fetchByApplicationIdReturns(prodAppId, prodApp)
+      givenApplicationAction(
+         ApplicationWithSubscriptionData(prodApp, asSubscriptions(List(testAPISubscriptionStatus1)), asFields(List.empty)),
+         loggedInDeveloper,
+         List(testAPISubscriptionStatus1)
+      )
+      UpliftJourneyServiceMock.CreateNewSubmission.thenReturns(aSubmission)
+      GPCFlowServiceMock.StoreSellResellOrDistribute.thenReturns(testSellResellOrDistribute, GetProductionCredentialsFlow("", Some(testSellResellOrDistribute), None))
+      UpliftJourneyServiceMock.StoreDefaultSubscriptionsInFlow.thenReturns()
+
+      private val result = controller.sellResellOrDistributeYourSoftwareAction(prodAppId)(loggedInRequest.withCSRFToken.withFormUrlEncodedBody(
+        "answer" -> testSellResellOrDistribute.answer
+      ))
+
+      status(result) shouldBe SEE_OTHER
+      redirectLocation(result) shouldBe Some(s"/developer/submissions/application/${prodAppId.value}/production-credentials-checklist")
+    }
   }
 
   "weWillCheckYourAnswers" should {
@@ -404,6 +429,44 @@ class UpliftJourneyControllerSpec extends BaseControllerSpec
 
       contentAsString(result) should include("Before you start")
       contentAsString(result) should include("You have 6 months to complete your request")
+    }
+  }
+
+  "agreeNewTermsOfUse" should {
+
+    "render the before you start page if no existing submission found" in new Setup {
+
+      TermsOfUseInvitationServiceMock.FetchTermsOfUseInvitation.thenReturn
+      SubmissionServiceMock.FetchLatestSubmission.thenReturnsNone
+
+      private val result = controller.agreeNewTermsOfUse(appId)(loggedInRequest.withCSRFToken)
+
+      status(result) shouldBe OK
+
+      titleOf(result) shouldBe "Before you start - HMRC Developer Hub - GOV.UK"
+
+      contentAsString(result) should include("Before you start")
+    }
+
+    "render the before you start page if an existing submission found" in new Setup {
+
+      TermsOfUseInvitationServiceMock.FetchTermsOfUseInvitation.thenReturn
+      SubmissionServiceMock.FetchLatestSubmission.thenReturns(aSubmission)
+      
+      private val result = controller.agreeNewTermsOfUse(appId)(loggedInRequest.withCSRFToken)
+
+      status(result) shouldBe SEE_OTHER
+      redirectLocation(result) shouldBe Some(s"/developer/submissions/application/${appId.value}/production-credentials-checklist")
+    }
+
+    "return bad request if not invited" in new Setup {
+
+      TermsOfUseInvitationServiceMock.FetchTermsOfUseInvitation.thenReturnNone
+
+      private val result = controller.agreeNewTermsOfUse(appId)(loggedInRequest.withCSRFToken)
+
+      status(result) shouldBe BAD_REQUEST
+      contentAsString(result) should include("This application has not been invited to complete the new terms of use")
     }
   }
 }
