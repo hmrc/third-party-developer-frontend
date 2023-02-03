@@ -18,9 +18,8 @@ package uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.controllers
 
 import java.time.Instant
 
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.ApplicationId
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.{ApplicationId, CollaboratorRole}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.connectors.TermsOfUseInvitation
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.CollaboratorRole
 
 case class ManageApplicationsViewModel(
     sandboxApplicationSummaries: Seq[ApplicationSummary],
