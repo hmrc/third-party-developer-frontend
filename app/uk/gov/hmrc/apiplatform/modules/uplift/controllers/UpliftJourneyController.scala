@@ -41,7 +41,7 @@ import uk.gov.hmrc.thirdpartydeveloperfrontend.connectors.ApmConnector
 import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.checkpages.{CanUseCheckActions, DummySubscriptionsForm}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.{APISubscriptions, ApplicationController, FormKeys, checkpages}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.apidefinitions.APISubscriptionStatus
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.{ApplicationId, SellResellOrDistribute, State}
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.{ApplicationId, SellResellOrDistribute, Environment}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.controllers.BadRequestWithErrorMessage
 import uk.gov.hmrc.thirdpartydeveloperfrontend.service.{ApplicationActionService, ApplicationService, SessionService, TermsOfUseInvitationService}
 
@@ -196,10 +196,9 @@ class UpliftJourneyController @Inject() (
     def handleValidForm(validForm: SellResellOrDistributeForm) = {
       validForm.answer match {
         case Some(answer) =>
-          request.application.state.name match {
-            case State.TESTING    => storeResultAndGotoApiSubscriptionsPage(answer)
-            case State.PRODUCTION => createSubmissionAndGotoQuestionnairePage(answer)
-            case _                => successful(BadRequest("Invalid application state"))
+          request.application.deployedTo match {
+            case Environment.SANDBOX    => storeResultAndGotoApiSubscriptionsPage(answer)
+            case Environment.PRODUCTION => createSubmissionAndGotoQuestionnairePage(answer)
           }
 
         case None => throw new IllegalStateException("Should never get here")
