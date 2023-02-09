@@ -231,15 +231,14 @@ class UpliftJourneyController @Inject() (
         Ok(unauthorisedAppDetailsView(request.application.name, request.application.adminEmails))
       }
 
-    val x =
-      (
-        for {
-          invitation <-
-            ET.fromOptionF(termsOfUseInvitationService.fetchTermsOfUseInvitation(appId), BadRequest("This application has not been invited to complete the new terms of use"))
-          submission <- ET.fromOptionF(submissionService.fetchLatestSubmission(appId), showBeforeYouStart)
-        } yield submission
-      )
-    x.fold[Result](identity, showSubmission)
+    (
+      for {
+        invitation <-
+          ET.fromOptionF(termsOfUseInvitationService.fetchTermsOfUseInvitation(appId), BadRequest("This application has not been invited to complete the new terms of use"))
+        submission <- ET.fromOptionF(submissionService.fetchLatestSubmission(appId), showBeforeYouStart)
+      } yield submission
+    )
+    .fold[Result](identity, showSubmission)
   }
 
   def weWillCheckYourAnswers(sandboxAppId: ApplicationId): Action[AnyContent] = whenTeamMemberOnApp(sandboxAppId) { implicit request =>
