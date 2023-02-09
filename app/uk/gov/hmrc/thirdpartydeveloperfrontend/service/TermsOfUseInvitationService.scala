@@ -21,7 +21,7 @@ import scala.concurrent.{ExecutionContext, Future}
 
 import uk.gov.hmrc.http.HeaderCarrier
 
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.Environment
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.{ApplicationId, Environment}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.connectors.TermsOfUseInvitation
 
 @Singleton
@@ -32,5 +32,9 @@ class TermsOfUseInvitationService @Inject() (
 
   def fetchTermsOfUseInvitations()(implicit hc: HeaderCarrier): Future[List[TermsOfUseInvitation]] = {
     connectorWrapper.forEnvironment(Environment.PRODUCTION).thirdPartyApplicationConnector.fetchTermsOfUseInvitations()
+  }
+
+  def fetchTermsOfUseInvitation(applicationId: ApplicationId)(implicit hc: HeaderCarrier): Future[Option[TermsOfUseInvitation]] = {
+    connectorWrapper.forEnvironment(Environment.PRODUCTION).thirdPartyApplicationConnector.fetchTermsOfUseInvitation(applicationId)
   }
 }

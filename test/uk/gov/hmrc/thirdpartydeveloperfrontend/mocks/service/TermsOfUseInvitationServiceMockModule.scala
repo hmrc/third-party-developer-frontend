@@ -16,10 +16,13 @@
 
 package uk.gov.hmrc.thirdpartydeveloperfrontend.mocks.service
 
+import java.time.Instant
 import scala.concurrent.Future.successful
 
 import org.mockito.{ArgumentMatchersSugar, MockitoSugar}
 
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.ApplicationId
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.connectors.TermsOfUseInvitation
 import uk.gov.hmrc.thirdpartydeveloperfrontend.service.TermsOfUseInvitationService
 
 trait TermsOfUseInvitationServiceMockModule extends MockitoSugar with ArgumentMatchersSugar {
@@ -29,6 +32,14 @@ trait TermsOfUseInvitationServiceMockModule extends MockitoSugar with ArgumentMa
 
     object FetchTermsOfUseInvitations {
       def thenReturnEmptyList() = when(aMock.fetchTermsOfUseInvitations()(*)).thenAnswer(successful(List.empty))
+    }
+
+    object FetchTermsOfUseInvitation {
+
+      def thenReturn() =
+        when(aMock.fetchTermsOfUseInvitation(*[ApplicationId])(*)).thenAnswer(successful(Some(TermsOfUseInvitation(ApplicationId.random, Instant.now, Instant.now, Instant.now))))
+
+      def thenReturnNone() = when(aMock.fetchTermsOfUseInvitation(*[ApplicationId])(*)).thenAnswer(successful(None))
     }
   }
 

@@ -33,6 +33,8 @@ class OldJourneyDevUserProdStatusProductionEndpointScenarioSpec extends Endpoint
       case Endpoint("GET", "/developer/registration", _)                                                     => Redirect("/developer/applications")
       case Endpoint("POST", "/developer/registration", _)                                                    => BadRequest()
       case Endpoint("GET", "/developer/reset-password/error", _)                                             => BadRequest()
+      case Endpoint("POST", "/developer/applications/:id/sell-resell-or-distribute-your-software", _)        =>
+        Redirect(s"/developer/submissions/application/${applicationId.value}/production-credentials-checklist")
       case Endpoint(_, "/developer/submissions/application/:aid/production-credentials-checklist", _)        => BadRequest() // must be in 'testing' state
       case Endpoint(_, "/developer/submissions/application/:aid/cancel-request", _)                          => BadRequest() // must not be in production state
       case Endpoint("GET", "/developer/submissions/application/:aid/check-answers", _)                       => BadRequest() // must be in testing state

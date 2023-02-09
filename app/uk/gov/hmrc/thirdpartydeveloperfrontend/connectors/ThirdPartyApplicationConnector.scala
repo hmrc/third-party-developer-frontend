@@ -208,6 +208,12 @@ abstract class ThirdPartyApplicationConnector(config: ApplicationConfig, metrics
       http.GET[List[TermsOfUseInvitation]](s"$serviceBaseUrl/terms-of-use")
     }
   }
+
+  def fetchTermsOfUseInvitation(applicationId: ApplicationId)(implicit hc: HeaderCarrier): Future[Option[TermsOfUseInvitation]] = {
+    metrics.record(api) {
+      http.GET[Option[TermsOfUseInvitation]](s"$serviceBaseUrl/terms-of-use/application/${applicationId.value}")
+    }
+  }
 }
 
 private[connectors] object ThirdPartyApplicationConnectorDomain {

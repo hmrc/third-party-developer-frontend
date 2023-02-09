@@ -17,9 +17,12 @@
 package uk.gov.hmrc.apiplatform.modules.uplift.services
 
 import scala.concurrent.ExecutionContext.Implicits.global
+import scala.concurrent.Future.successful
 
 import uk.gov.hmrc.http.HeaderCarrier
 
+import uk.gov.hmrc.apiplatform.modules.submissions.SubmissionsTestData
+import uk.gov.hmrc.apiplatform.modules.submissions.connectors.ThirdPartyApplicationSubmissionsConnector
 import uk.gov.hmrc.apiplatform.modules.uplift.domain.models._
 import uk.gov.hmrc.apiplatform.modules.uplift.services.mocks._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.builder._
@@ -36,6 +39,7 @@ class UpliftJourneyServiceSpec
     extends AsyncHmrcSpec
     with SampleSession
     with SampleApplication
+    with SubmissionsTestData
     with SubscriptionTestHelperSugar
     with SubscriptionsBuilder
     with DeveloperBuilder
@@ -50,12 +54,16 @@ class UpliftJourneyServiceSpec
       with SessionServiceMock {
 
     val sandboxAppId = ApplicationId.random
+    val prodAppId = ApplicationId.random
 
     implicit val hc = HeaderCarrier()
 
+    val mockSubmissionsConnector: ThirdPartyApplicationSubmissionsConnector = mock[ThirdPartyApplicationSubmissionsConnector]
+
     val underTest = new UpliftJourneyService(
       GPCFlowServiceMock.aMock,
-      ApmConnectorMock.aMock
+      ApmConnectorMock.aMock,
+      mockSubmissionsConnector
     )
 
     val appName: String = "app"
@@ -231,6 +239,18 @@ class UpliftJourneyServiceSpec
           names.head shouldBe "test-api-1 - 1.0"
           flag shouldBe false
       }
+    }
+  }
+
+  "createNewSubmission" should {
+    "return the new submission when everything is good" in new Setup {
+      val productionAppId = ApplicationId.random
+      GPCFlowServiceMock.FetchFlow.thenReturns(GetProductionCredentialsFlow("", Some(sellResellOrDistribute), Some(aListOfSubscriptions)))
+      when(mockSubmissionsConnector.createSubmission(*[ApplicationId], *)(*)).thenReturn(successful(Some(aSubmission)))
+
+      private val result = await(underTest.createNewSubmission(productionAppId, loggedInDeveloper))
+
+      result.right.value shouldBe aSubmission
     }
   }
 }

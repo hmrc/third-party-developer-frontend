@@ -44,6 +44,9 @@ object ThirdPartyApplicationSubmissionsConnector {
 
   case class ConfirmSetupCompleteRequest(requesterEmailAddress: String)
   implicit val writesConfirmSetupCompleteRequest = Json.writes[ConfirmSetupCompleteRequest]
+
+  case class CreateSubmissionRequest(requestedBy: String)
+  implicit val readsCreateSubmissionRequest = Json.writes[CreateSubmissionRequest]
 }
 
 @Singleton
@@ -77,6 +80,12 @@ class ThirdPartyApplicationSubmissionsConnector @Inject() (
   def fetchLatestSubmission(applicationId: ApplicationId)(implicit hc: HeaderCarrier): Future[Option[Submission]] = {
     metrics.record(api) {
       http.GET[Option[Submission]](s"$serviceBaseUrl/submissions/application/${applicationId.value}")
+    }
+  }
+
+  def createSubmission(applicationId: ApplicationId, requestedBy: String)(implicit hc: HeaderCarrier): Future[Option[Submission]] = {
+    metrics.record(api) {
+      http.POST[CreateSubmissionRequest, Option[Submission]](s"$serviceBaseUrl/submissions/application/${applicationId.value}", CreateSubmissionRequest(requestedBy))
     }
   }
 

@@ -194,6 +194,28 @@ class ThirdPartyApplicationSubmissionsConnectorSpec
     }
   }
 
+  "createSubmission" should {
+    val app   = aStandardApplication
+    val email = "bob@example.com"
+    val url   = s"/submissions/application/${app.id.value}"
+
+    "return successfully if TPA returns OK" in new Setup {
+      stubFor(
+        post(urlEqualTo(url))
+          .withJsonRequestBody(CreateSubmissionRequest(email))
+          .willReturn(
+            aResponse()
+              .withStatus(OK)
+              .withJsonBody(createdSubmission)
+          )
+      )
+
+      val result = await(connector.createSubmission(app.id, email))
+
+      result.value shouldBe createdSubmission
+    }
+  }
+
   "fetchLatestExtendedSubmission" should {
     val url = s"/submissions/application/${applicationId.value}/extended"
 

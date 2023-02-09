@@ -49,6 +49,8 @@ class NewJourneyDevUserProdStatusProductionEndpointScenarioSpec extends Endpoint
       case Endpoint("GET", "/developer/applications/:id/request-check/appDetails", _)                     => Success()
       case Endpoint("GET", "/developer/applications/:id/delete", _)                                       => getEndpointSuccessResponse(endpoint)
       case Endpoint("GET", "/developer/applications/:id/request-check/submitted", _)                      => getEndpointSuccessResponse(endpoint)
+      case Endpoint("POST", "/developer/applications/:id/sell-resell-or-distribute-your-software", _)     =>
+        Redirect(s"/developer/submissions/application/${applicationId.value}/production-credentials-checklist")
       case Endpoint(_, "/developer/submissions/application/:aid/production-credentials-checklist", _)     => BadRequest() // must be in 'testing' state
       case Endpoint(_, "/developer/submissions/application/:aid/cancel-request", _)                       => BadRequest() // must not be in production state
       case Endpoint("GET", "/developer/submissions/application/:aid/check-answers", _)                    => BadRequest() // must be in testing state

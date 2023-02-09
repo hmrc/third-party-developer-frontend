@@ -20,6 +20,7 @@ import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 
 import org.jsoup.Jsoup
+import views.html.checkpages.applicationcheck.UnauthorisedAppDetailsView
 
 import play.api.mvc.Result
 import play.api.test.FakeRequest
@@ -27,6 +28,8 @@ import play.api.test.Helpers._
 import play.filters.csrf.CSRF.TokenProvider
 import uk.gov.hmrc.http.HeaderCarrier
 
+import uk.gov.hmrc.apiplatform.modules.submissions.SubmissionsTestData
+import uk.gov.hmrc.apiplatform.modules.submissions.services.mocks.SubmissionServiceMockModule
 import uk.gov.hmrc.apiplatform.modules.uplift.domain.models._
 import uk.gov.hmrc.apiplatform.modules.uplift.services.mocks._
 import uk.gov.hmrc.apiplatform.modules.uplift.views.html._
@@ -34,11 +37,11 @@ import uk.gov.hmrc.thirdpartydeveloperfrontend.builder._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.config.{On, UpliftJourneyConfig}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.{BaseControllerSpec, SubscriptionTestHelperSugar}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.apidefinitions._
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.{ApplicationWithSubscriptionData, SellResellOrDistribute}
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.{ApplicationId, ApplicationState, ApplicationWithSubscriptionData, SellResellOrDistribute, Environment}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.{DeveloperSession, LoggedInState, Session}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.subscriptions.{ApiCategory, ApiData, VersionData}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.mocks.connectors.ApmConnectorMockModule
-import uk.gov.hmrc.thirdpartydeveloperfrontend.mocks.service.{ApplicationActionServiceMock, ApplicationServiceMock, SessionServiceMock}
+import uk.gov.hmrc.thirdpartydeveloperfrontend.mocks.service.{ApplicationActionServiceMock, ApplicationServiceMock, SessionServiceMock, TermsOfUseInvitationServiceMockModule}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.WithLoggedInSession._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.{LocalUserIdTracker, WithCSRFAddToken}
 
@@ -46,6 +49,7 @@ class UpliftJourneyControllerSpec extends BaseControllerSpec
     with SampleSession
     with SampleApplication
     with SubscriptionTestHelperSugar
+    with SubmissionsTestData
     with WithCSRFAddToken
     with SubscriptionsBuilder
     with DeveloperBuilder
@@ -53,6 +57,8 @@ class UpliftJourneyControllerSpec extends BaseControllerSpec
 
   trait Setup
       extends ApplicationServiceMock
+      with SubmissionServiceMockModule
+      with TermsOfUseInvitationServiceMockModule
       with ApplicationActionServiceMock
       with ApmConnectorMockModule
       with GetProductionCredentialsFlowServiceMockModule
@@ -73,6 +79,7 @@ class UpliftJourneyControllerSpec extends BaseControllerSpec
     val sellResellOrDistributeSoftwareView = app.injector.instanceOf[SellResellOrDistributeSoftwareView]
     val weWillCheckYourAnswersView         = app.injector.instanceOf[WeWillCheckYourAnswersView]
     val beforeYouStartView                 = app.injector.instanceOf[BeforeYouStartView]
+    val unauthorisedAppDetailsView         = app.injector.instanceOf[UnauthorisedAppDetailsView]
 
     val mockUpliftJourneyConfig     = mock[UpliftJourneyConfig]
     val sr20UpliftJourneySwitchMock = new UpliftJourneySwitch(mockUpliftJourneyConfig)
@@ -82,6 +89,8 @@ class UpliftJourneyControllerSpec extends BaseControllerSpec
       sessionServiceMock,
       applicationActionServiceMock,
       applicationServiceMock,
+      SubmissionServiceMock.aMock,
+      TermsOfUseInvitationServiceMock.aMock,
       UpliftJourneyServiceMock.aMock,
       mcc,
       cookieSigner,
@@ -92,6 +101,7 @@ class UpliftJourneyControllerSpec extends BaseControllerSpec
       sellResellOrDistributeSoftwareView,
       weWillCheckYourAnswersView,
       beforeYouStartView,
+      unauthorisedAppDetailsView,
       sr20UpliftJourneySwitchMock
     )
 
@@ -103,6 +113,7 @@ class UpliftJourneyControllerSpec extends BaseControllerSpec
     val session   = Session(sessionId, developer, LoggedInState.LOGGED_IN)
 
     val loggedInDeveloper = DeveloperSession(session)
+    val testingApp        = sampleApp.copy(state = ApplicationState.testing, deployedTo = Environment.SANDBOX)
 
     fetchSessionByIdReturns(sessionId, session)
     updateUserFlowSessionsReturnsSuccessfully(sessionId)
@@ -169,9 +180,9 @@ class UpliftJourneyControllerSpec extends BaseControllerSpec
         )
     )
 
-    fetchByApplicationIdReturns(appId, sampleApp)
+    fetchByApplicationIdReturns(appId, testingApp)
     givenApplicationAction(
-      ApplicationWithSubscriptionData(sampleApp, asSubscriptions(List(testAPISubscriptionStatus1)), asFields(List.empty)),
+      ApplicationWithSubscriptionData(testingApp, asSubscriptions(List(testAPISubscriptionStatus1)), asFields(List.empty)),
       loggedInDeveloper,
       List(testAPISubscriptionStatus1)
     )
@@ -368,6 +379,29 @@ class UpliftJourneyControllerSpec extends BaseControllerSpec
       status(result) shouldBe SEE_OTHER
       redirectLocation(result) shouldBe Some("/developer/applications/myAppId/confirm-subscriptions")
     }
+
+    "store the answer 'Yes' from the 'sell resell or distribute your software view' and redirect to questionnaire when application is Production" in new Setup {
+
+      val testSellResellOrDistribute = SellResellOrDistribute("Yes")
+      val prodAppId                  = ApplicationId.random
+      val prodApp                    = sampleApp.copy(id = prodAppId)
+      fetchByApplicationIdReturns(prodAppId, prodApp)
+      givenApplicationAction(
+        ApplicationWithSubscriptionData(prodApp, asSubscriptions(List(testAPISubscriptionStatus1)), asFields(List.empty)),
+        loggedInDeveloper,
+        List(testAPISubscriptionStatus1)
+      )
+      UpliftJourneyServiceMock.CreateNewSubmission.thenReturns(aSubmission)
+      GPCFlowServiceMock.StoreSellResellOrDistribute.thenReturns(testSellResellOrDistribute, GetProductionCredentialsFlow("", Some(testSellResellOrDistribute), None))
+      UpliftJourneyServiceMock.StoreDefaultSubscriptionsInFlow.thenReturns()
+
+      private val result = controller.sellResellOrDistributeYourSoftwareAction(prodAppId)(loggedInRequest.withCSRFToken.withFormUrlEncodedBody(
+        "answer" -> testSellResellOrDistribute.answer
+      ))
+
+      status(result) shouldBe SEE_OTHER
+      redirectLocation(result) shouldBe Some(s"/developer/submissions/application/${prodAppId.value}/production-credentials-checklist")
+    }
   }
 
   "weWillCheckYourAnswers" should {
@@ -394,6 +428,44 @@ class UpliftJourneyControllerSpec extends BaseControllerSpec
 
       contentAsString(result) should include("Before you start")
       contentAsString(result) should include("You have 6 months to complete your request")
+    }
+  }
+
+  "agreeNewTermsOfUse" should {
+
+    "render the before you start page if no existing submission found" in new Setup {
+
+      TermsOfUseInvitationServiceMock.FetchTermsOfUseInvitation.thenReturn
+      SubmissionServiceMock.FetchLatestSubmission.thenReturnsNone
+
+      private val result = controller.agreeNewTermsOfUse(appId)(loggedInRequest.withCSRFToken)
+
+      status(result) shouldBe OK
+
+      titleOf(result) shouldBe "Before you start - HMRC Developer Hub - GOV.UK"
+
+      contentAsString(result) should include("Before you start")
+    }
+
+    "render the before you start page if an existing submission found" in new Setup {
+
+      TermsOfUseInvitationServiceMock.FetchTermsOfUseInvitation.thenReturn
+      SubmissionServiceMock.FetchLatestSubmission.thenReturns(aSubmission)
+
+      private val result = controller.agreeNewTermsOfUse(appId)(loggedInRequest.withCSRFToken)
+
+      status(result) shouldBe SEE_OTHER
+      redirectLocation(result) shouldBe Some(s"/developer/submissions/application/${appId.value}/production-credentials-checklist")
+    }
+
+    "return bad request if not invited" in new Setup {
+
+      TermsOfUseInvitationServiceMock.FetchTermsOfUseInvitation.thenReturnNone
+
+      private val result = controller.agreeNewTermsOfUse(appId)(loggedInRequest.withCSRFToken)
+
+      status(result) shouldBe BAD_REQUEST
+      contentAsString(result) should include("This application has not been invited to complete the new terms of use")
     }
   }
 }

@@ -22,6 +22,7 @@ import scala.concurrent.{ExecutionContext, Future}
 import scala.util.Try
 
 import views.helper.IdFormatter
+import views.html.checkpages.applicationcheck.UnauthorisedAppDetailsView
 
 import play.api.data.Forms._
 import play.api.data.{Form, FormError}
@@ -29,6 +30,9 @@ import play.api.libs.crypto.CookieSigner
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents, Request, Result}
 import uk.gov.hmrc.play.bootstrap.controller.WithUnsafeDefaultFormBinding
 
+import uk.gov.hmrc.apiplatform.modules.common.services.EitherTHelper
+import uk.gov.hmrc.apiplatform.modules.submissions.domain.models.Submission
+import uk.gov.hmrc.apiplatform.modules.submissions.services.SubmissionService
 import uk.gov.hmrc.apiplatform.modules.uplift.domain.models.ApiSubscriptions
 import uk.gov.hmrc.apiplatform.modules.uplift.services.{GetProductionCredentialsFlowService, UpliftJourneyService}
 import uk.gov.hmrc.apiplatform.modules.uplift.views.html._
@@ -37,9 +41,9 @@ import uk.gov.hmrc.thirdpartydeveloperfrontend.connectors.ApmConnector
 import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.checkpages.{CanUseCheckActions, DummySubscriptionsForm}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.{APISubscriptions, ApplicationController, FormKeys, checkpages}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.apidefinitions.APISubscriptionStatus
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.{ApplicationId, SellResellOrDistribute}
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.{ApplicationId, SellResellOrDistribute, Environment}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.controllers.BadRequestWithErrorMessage
-import uk.gov.hmrc.thirdpartydeveloperfrontend.service.{ApplicationActionService, ApplicationService, SessionService}
+import uk.gov.hmrc.thirdpartydeveloperfrontend.service.{ApplicationActionService, ApplicationService, SessionService, TermsOfUseInvitationService}
 
 object UpliftJourneyController {
 
@@ -72,6 +76,8 @@ class UpliftJourneyController @Inject() (
     val sessionService: SessionService,
     val applicationActionService: ApplicationActionService,
     val applicationService: ApplicationService,
+    val submissionService: SubmissionService,
+    val termsOfUseInvitationService: TermsOfUseInvitationService,
     upliftJourneyService: UpliftJourneyService,
     mcc: MessagesControllerComponents,
     val cookieSigner: CookieSigner,
@@ -82,6 +88,7 @@ class UpliftJourneyController @Inject() (
     sellResellOrDistributeSoftwareView: SellResellOrDistributeSoftwareView,
     weWillCheckYourAnswersView: WeWillCheckYourAnswersView,
     beforeYouStartView: BeforeYouStartView,
+    unauthorisedAppDetailsView: UnauthorisedAppDetailsView,
     upliftJourneySwitch: UpliftJourneySwitch
   )(implicit val ec: ExecutionContext,
     val appConfig: ApplicationConfig
@@ -92,6 +99,9 @@ class UpliftJourneyController @Inject() (
   import UpliftJourneyController._
 
   val sellResellOrDistributeForm: Form[SellResellOrDistributeForm] = SellResellOrDistributeForm.form
+
+  private val exec = ec
+  private val ET   = new EitherTHelper[Result] { implicit val ec: ExecutionContext = exec }
 
   def confirmApiSubscriptionsPage(sandboxAppId: ApplicationId): Action[AnyContent] = whenTeamMemberOnApp(sandboxAppId) { implicit request =>
     for {
@@ -167,17 +177,29 @@ class UpliftJourneyController @Inject() (
     } yield Ok(sellResellOrDistributeSoftwareView(sandboxAppId, form))
   }
 
-  def sellResellOrDistributeYourSoftwareAction(sandboxAppId: ApplicationId): Action[AnyContent] = whenTeamMemberOnApp(sandboxAppId) { implicit request =>
+  def sellResellOrDistributeYourSoftwareAction(appId: ApplicationId): Action[AnyContent] = whenTeamMemberOnApp(appId) { implicit request =>
+    def storeResultAndGotoApiSubscriptionsPage(ans: String) =
+      for {
+        _ <- flowService.storeSellResellOrDistribute(SellResellOrDistribute(ans), request.developerSession)
+        _ <- upliftJourneyService.storeDefaultSubscriptionsInFlow(appId, request.developerSession)
+      } yield Redirect(uk.gov.hmrc.apiplatform.modules.uplift.controllers.routes.UpliftJourneyController.confirmApiSubscriptionsPage(appId))
+
+    def createSubmissionAndGotoQuestionnairePage(ans: String) =
+      for {
+        _ <- flowService.storeSellResellOrDistribute(SellResellOrDistribute(ans), request.developerSession)
+        _ <- upliftJourneyService.createNewSubmission(appId, request.developerSession)
+      } yield Redirect(uk.gov.hmrc.apiplatform.modules.submissions.controllers.routes.ProdCredsChecklistController.productionCredentialsChecklistPage(appId))
+
     def handleInvalidForm(formWithErrors: Form[SellResellOrDistributeForm]) =
-      successful(BadRequest(sellResellOrDistributeSoftwareView(sandboxAppId, formWithErrors)))
+      successful(BadRequest(sellResellOrDistributeSoftwareView(appId, formWithErrors)))
 
     def handleValidForm(validForm: SellResellOrDistributeForm) = {
       validForm.answer match {
         case Some(answer) =>
-          for {
-            _ <- flowService.storeSellResellOrDistribute(SellResellOrDistribute(answer), request.developerSession)
-            _ <- upliftJourneyService.storeDefaultSubscriptionsInFlow(sandboxAppId, request.developerSession)
-          } yield Redirect(uk.gov.hmrc.apiplatform.modules.uplift.controllers.routes.UpliftJourneyController.confirmApiSubscriptionsPage(sandboxAppId))
+          request.application.deployedTo match {
+            case Environment.SANDBOX    => storeResultAndGotoApiSubscriptionsPage(answer)
+            case Environment.PRODUCTION => createSubmissionAndGotoQuestionnairePage(answer)
+          }
 
         case None => throw new IllegalStateException("Should never get here")
       }
@@ -188,6 +210,35 @@ class UpliftJourneyController @Inject() (
 
   def beforeYouStart(sandboxAppId: ApplicationId): Action[AnyContent] = whenTeamMemberOnApp(sandboxAppId) { implicit request =>
     successful(Ok(beforeYouStartView(sandboxAppId)))
+  }
+
+  def agreeNewTermsOfUse(appId: ApplicationId): Action[AnyContent] = whenTeamMemberOnApp(appId) { implicit request =>
+    lazy val showSubmission = (s: Submission) =>
+      if (request.role.isAdministrator) {
+        if (s.status.isAnsweredCompletely) {
+          Redirect(uk.gov.hmrc.apiplatform.modules.submissions.controllers.routes.CheckAnswersController.checkAnswersPage(appId))
+        } else {
+          Redirect(uk.gov.hmrc.apiplatform.modules.submissions.controllers.routes.ProdCredsChecklistController.productionCredentialsChecklistPage(appId))
+        }
+      } else {
+        Ok(unauthorisedAppDetailsView(request.application.name, request.application.adminEmails))
+      }
+
+    lazy val showBeforeYouStart =
+      if (request.role.isAdministrator) {
+        Ok(beforeYouStartView(appId))
+      } else {
+        Ok(unauthorisedAppDetailsView(request.application.name, request.application.adminEmails))
+      }
+
+    (
+      for {
+        invitation <-
+          ET.fromOptionF(termsOfUseInvitationService.fetchTermsOfUseInvitation(appId), BadRequest("This application has not been invited to complete the new terms of use"))
+        submission <- ET.fromOptionF(submissionService.fetchLatestSubmission(appId), showBeforeYouStart)
+      } yield submission
+    )
+    .fold[Result](identity, showSubmission)
   }
 
   def weWillCheckYourAnswers(sandboxAppId: ApplicationId): Action[AnyContent] = whenTeamMemberOnApp(sandboxAppId) { implicit request =>
