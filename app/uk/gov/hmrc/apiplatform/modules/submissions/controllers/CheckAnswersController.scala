@@ -83,7 +83,7 @@ class CheckAnswersController @Inject() (
   }
 
   def checkAnswersAction(productionAppId: ApplicationId) = withApplicationAndSubmissionInSpecifiedState(
-    ApplicationStateFilter.inTesting,
+    ApplicationStateFilter.inTestingOrProduction,
     RoleFilter.isAdminRole,
     SubmissionStatusFilter.answeredCompletely
   )(redirectToGetProdCreds(productionAppId))(productionAppId) { implicit request =>
