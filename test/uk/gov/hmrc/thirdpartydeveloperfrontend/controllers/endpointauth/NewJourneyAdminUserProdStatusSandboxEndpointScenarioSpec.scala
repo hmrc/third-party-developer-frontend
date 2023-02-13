@@ -42,7 +42,8 @@ class NewJourneyAdminUserProdStatusSandboxEndpointScenarioSpec extends EndpointS
         Redirect(s"/developer/submissions/application/${applicationId.value}/production-credentials-checklist")
       case Endpoint(_, "/developer/submissions/application/:aid/production-credentials-checklist", _)        => Success() // can be in 'production' state for new terms of use
       case Endpoint(_, "/developer/submissions/application/:aid/start-using-your-application", _)            => NotFound()
-      case Endpoint("GET", "/developer/submissions/application/:aid/submit-request", _)                      => BadRequest()
+      case Endpoint("GET", "/developer/submissions/application/:aid/submit-request", _)                      =>
+        Redirect(s"/developer/submissions/application/${applicationId.value}/production-credentials-checklist")
       case Endpoint("GET", "/developer/submissions/application/:aid/view-answers", _)                        => BadRequest()
       case Endpoint(_, path, _) if path.startsWith("/developer/applications/:id/check-your-answers")         => BadRequest()
       case Endpoint(_, path, _) if path.startsWith("/developer/applications/:id/details/change")             => Forbidden()
