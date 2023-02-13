@@ -26,7 +26,7 @@ import uk.gov.hmrc.http.HttpReads.Implicits._
 import uk.gov.hmrc.http._
 import uk.gov.hmrc.play.http.metrics.common.API
 
-import uk.gov.hmrc.apiplatform.modules.mfa.connectors.ThirdPartyDeveloperMfaConnector.{RegisterAuthAppResponse, RegisterSmsResponse}
+import uk.gov.hmrc.apiplatform.modules.mfa.connectors.ThirdPartyDeveloperMfaConnector._
 import uk.gov.hmrc.apiplatform.modules.mfa.models.{DeviceSession, DeviceSessionInvalid, MfaId}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.config.ApplicationConfig
 import uk.gov.hmrc.thirdpartydeveloperfrontend.connectors.{CommonResponseHandlers, ConnectorMetrics}
@@ -35,11 +35,14 @@ import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers._
 
 object ThirdPartyDeveloperMfaConnector {
 
-  case class RegisterAuthAppResponse(mfaId: MfaId, secret: String)
-  case class RegisterSmsResponse(mfaId: MfaId, mobileNumber: String)
+  trait RegisterSmsResponse
+  case class RegisterSmsSuccessResponse(mfaId: MfaId, mobileNumber: String) extends RegisterSmsResponse
+  case class RegisterSmsFailureResponse()                                   extends RegisterSmsResponse
 
-  implicit val registerAuthAppResponseFormat: OFormat[RegisterAuthAppResponse] = Json.format[RegisterAuthAppResponse]
-  implicit val registerSmsResponseFormat: OFormat[RegisterSmsResponse]         = Json.format[RegisterSmsResponse]
+  case class RegisterAuthAppResponse(mfaId: MfaId, secret: String)
+
+  implicit val registerAuthAppResponseFormat: OFormat[RegisterAuthAppResponse]       = Json.format[RegisterAuthAppResponse]
+  implicit val registerSmsSuccessResponseFormat: OFormat[RegisterSmsSuccessResponse] = Json.format[RegisterSmsSuccessResponse]
 }
 
 @Singleton
@@ -57,7 +60,8 @@ class ThirdPartyDeveloperMfaConnector @Inject() (http: HttpClient, config: Appli
 
   def createMfaSms(userId: UserId, mobileNumber: String)(implicit hc: HeaderCarrier): Future[RegisterSmsResponse] = {
     metrics.record(api) {
-      http.POST[CreateMfaSmsRequest, RegisterSmsResponse](s"$serviceBaseUrl/developer/${userId.value}/mfa/sms", CreateMfaSmsRequest(mobileNumber))
+      http.POST[CreateMfaSmsRequest, RegisterSmsSuccessResponse](s"$serviceBaseUrl/developer/${userId.value}/mfa/sms", CreateMfaSmsRequest(mobileNumber))
+        .recover { case _ => RegisterSmsFailureResponse() }
     }
   }
 

@@ -25,6 +25,7 @@ import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.play.bootstrap.controller.WithUnsafeDefaultFormBinding
 
 import uk.gov.hmrc.apiplatform.modules.mfa.connectors.ThirdPartyDeveloperMfaConnector
+import uk.gov.hmrc.apiplatform.modules.mfa.connectors.ThirdPartyDeveloperMfaConnector.{RegisterSmsFailureResponse, RegisterSmsSuccessResponse}
 import uk.gov.hmrc.apiplatform.modules.mfa.forms._
 import uk.gov.hmrc.apiplatform.modules.mfa.models.MfaAction.{CREATE, REMOVE}
 import uk.gov.hmrc.apiplatform.modules.mfa.models.MfaType.{AUTHENTICATOR_APP, SMS}
@@ -222,10 +223,16 @@ class MfaController @Inject() (
       form => Future.successful(BadRequest(mobileNumberView(form))),
       form =>
         thirdPartyDeveloperMfaConnector.createMfaSms(request.userId, form.mobileNumber)
-          .map(response =>
-            Redirect(routes.MfaController.smsAccessCodePage(response.mfaId, MfaAction.CREATE, None))
-              .flashing("mobileNumber" -> response.mobileNumber)
-          )
+          .map {
+            case success: RegisterSmsSuccessResponse =>
+              Redirect(routes.MfaController.smsAccessCodePage(success.mfaId, MfaAction.CREATE, None))
+                .flashing("mobileNumber" -> success.mobileNumber)
+            case _: RegisterSmsFailureResponse       =>
+              val errorForm = MobileNumberForm.form
+                .fill(form)
+                .withError(key = "mobileNumber", message = "It cannot be used for access codes")
+              BadRequest(mobileNumberView(errorForm))
+          }
     )
   }
 

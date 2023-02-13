@@ -28,7 +28,7 @@ import play.api.test.Helpers._
 
 import uk.gov.hmrc.apiplatform.modules.mfa.MfaViewsValidator
 import uk.gov.hmrc.apiplatform.modules.mfa.connectors.ThirdPartyDeveloperMfaConnector
-import uk.gov.hmrc.apiplatform.modules.mfa.connectors.ThirdPartyDeveloperMfaConnector.{RegisterAuthAppResponse, RegisterSmsResponse}
+import uk.gov.hmrc.apiplatform.modules.mfa.connectors.ThirdPartyDeveloperMfaConnector.{RegisterAuthAppResponse, RegisterSmsSuccessResponse}
 import uk.gov.hmrc.apiplatform.modules.mfa.service.MfaService
 import uk.gov.hmrc.apiplatform.modules.mfa.views.html.authapp._
 import uk.gov.hmrc.apiplatform.modules.mfa.views.html.sms.{MobileNumberView, SmsAccessCodeView, SmsSetupCompletedView, SmsSetupReminderView, SmsSetupSkippedView}
@@ -111,7 +111,7 @@ class MfaControllerBaseSpec extends BaseControllerSpec
     fetchSessionByIdReturns(sessionId, Session(sessionId, loggedInDeveloper, loggedInState))
     updateUserFlowSessionsReturnsSuccessfully(sessionId)
 
-    val registerSmsResponse: RegisterSmsResponse = RegisterSmsResponse(mfaId = smsMfaId, mobileNumber = verifiedSmsMfaDetail.mobileNumber)
+    val registerSmsResponse: RegisterSmsSuccessResponse = RegisterSmsSuccessResponse(mfaId = smsMfaId, mobileNumber = verifiedSmsMfaDetail.mobileNumber)
 
     def validateRedirectToLoginPage(result: Future[Result]) = {
       status(result) shouldBe Status.SEE_OTHER

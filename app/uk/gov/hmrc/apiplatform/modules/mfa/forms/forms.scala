@@ -41,7 +41,7 @@ final case class MfaNameChangeForm(name: String)
 object MfaNameChangeForm {
 
   def form: Form[MfaNameChangeForm] = Form(
-    mapping("name" -> text.verifying(FormKeys.mfaNameChangeInvaliddKey, s => s.length > 3))(MfaNameChangeForm.apply)(MfaNameChangeForm.unapply)
+    mapping("name" -> text.verifying(FormKeys.mfaNameChangeInvalidKey, s => s.length > 3))(MfaNameChangeForm.apply)(MfaNameChangeForm.unapply)
   )
 }
 
@@ -49,13 +49,18 @@ final case class MobileNumberForm(mobileNumber: String)
 
 object MobileNumberForm {
 
-  def form: Form[MobileNumberForm] = Form(
-    mapping("mobileNumber" -> text.verifying(FormKeys.mobileNumberInvaliddKey, s => isValidPhoneNumber(s)))(MobileNumberForm.apply)(MobileNumberForm.unapply)
-  )
+  private val pattern                  = Pattern.compile("[+()\\-\\d\\s]+")
+  private val minimumPhoneNumberLength = 9
 
-  def isValidPhoneNumber(phoneNumber: String): Boolean = {
-    Pattern.compile("[+()-0123456789\\s]+").matcher(phoneNumber).matches()
+  def form: Form[MobileNumberForm] = {
+    Form(
+      mapping("mobileNumber" -> text
+        .verifying(FormKeys.mobileNumberTooShortKey, s => s.trim.length >= minimumPhoneNumberLength)
+        .verifying(FormKeys.mobileNumberInvalidKey, s => isValidPhoneNumber(s)))(MobileNumberForm.apply)(MobileNumberForm.unapply)
+    )
   }
+
+  def isValidPhoneNumber(phoneNumber: String): Boolean = pattern.matcher(phoneNumber.trim).matches()
 }
 
 final case class SmsAccessCodeForm(accessCode: String, mobileNumber: String, rememberMe: Boolean)

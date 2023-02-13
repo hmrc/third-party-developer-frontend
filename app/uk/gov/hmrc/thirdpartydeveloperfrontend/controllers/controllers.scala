@@ -152,11 +152,14 @@ package object controllers {
     val selectMfaInvalidKey       = "selectMfa.invalid.mfaType.field"
     val selectMfaInvalidGlobalKey = "selectMfa.invalid.mfaType.global"
 
-    val mfaNameChangeInvaliddKey      = "mfaName.invalid.name.field"
+    val mfaNameChangeInvalidKey       = "mfaName.invalid.name.field"
     val mfaNameChangeInvalidGlobalKey = "mfaName.invalid.name.global"
 
-    val mobileNumberInvaliddKey      = "mobileNumber.invalid.number.field"
+    val mobileNumberInvalidKey       = "mobileNumber.invalid.number.field"
     val mobileNumberInvalidGlobalKey = "mobileNumber.invalid.number.global"
+
+    val mobileNumberTooShortKey       = "mobileNumber.too.short.number.field"
+    val mobileNumberTooShortGlobalKey = "mobileNumber.too.short.number.global"
 
     val selectedCategoryNonSelectedKey       = "error.selectedcategories.nonselected.field"
     val selectedCategoryNonSelectedGlobalKey = "error.selectedcategories.nonselected.global"
@@ -201,7 +204,9 @@ package object controllers {
       selectedCategoryNonSelectedKey -> selectedCategoryNonSelectedGlobalKey,
       selectedApisNonSelectedKey     -> selectedApisNonSelectedGlobalKey,
       selectedApiRadioKey            -> selectedApiRadioGlobalKey,
-      selectedTopicsNonSelectedKey   -> selectedTopicsNonSelectedGlobalKey
+      selectedTopicsNonSelectedKey   -> selectedTopicsNonSelectedGlobalKey,
+      mobileNumberInvalidKey         -> mobileNumberInvalidGlobalKey,
+      mobileNumberTooShortKey        -> mobileNumberTooShortGlobalKey
     )
 
     val globalKeys = formKeysMap.values.toSeq
@@ -229,7 +234,9 @@ package object controllers {
       selectedCategoryNonSelectedGlobalKey -> selectedCategoryNonSelectedKey,
       selectedApisNonSelectedGlobalKey     -> selectedApisNonSelectedKey,
       selectedApiRadioGlobalKey            -> selectedApiRadioKey,
-      selectedTopicsNonSelectedGlobalKey   -> selectedTopicsNonSelectedKey
+      selectedTopicsNonSelectedGlobalKey   -> selectedTopicsNonSelectedKey,
+      mobileNumberInvalidGlobalKey         -> mobileNumberInvalidKey,
+      mobileNumberTooShortGlobalKey        -> mobileNumberTooShortKey
     )
   }
 

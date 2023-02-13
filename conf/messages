@@ -168,6 +168,9 @@ mfaName.invalid.name.global = The name must be more than 3 characters in length
 mobileNumber.invalid.number.field = It must be a valid mobile number
 mobileNumber.invalid.number.global = It must be a valid mobile number
 
+mobileNumber.too.short.number.field = It must be at least 9 characters long
+mobileNumber.too.short.number.global = It must be at least 9 characters long
+
 selectMfa.invalid.mfaType.field = It must be a valid MFA Type
 selectMfa.invalid.mfaType.global = It must be a valid MFA Type
 
