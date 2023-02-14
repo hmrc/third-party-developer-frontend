@@ -32,7 +32,7 @@ class OldJourneyAdminUserProdStatusSandboxEndpointScenarioSpec extends EndpointS
       case Endpoint("GET", "/developer/applications/:id/request-check/submitted", _)                         => getEndpointSuccessResponse(endpoint)
       case Endpoint("GET", "/developer/applications/:id/request-check/appDetails", _)                        => getEndpointSuccessResponse(endpoint)
       case Endpoint("GET", "/developer/applications/:id/agree-new-terms-of-use", _)                          =>
-        Redirect(s"/developer/submissions/application/${applicationId.value}/production-credentials-checklist")
+        Redirect(s"/developer/submissions/application/${applicationId.value}/view-answers")
       case Endpoint(_, "/developer/applications/:id/details/terms-of-use", _)                                => BadRequest()
       case Endpoint(_, "/developer/applications/:id/details/change-app-name", _)                             => Forbidden()
       case Endpoint(_, "/developer/applications/:id/details/change-privacy-policy-location", _)              => Forbidden()

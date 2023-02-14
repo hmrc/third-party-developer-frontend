@@ -145,6 +145,17 @@ object Submission {
       case _                                         => false
     }
 
+    def isReadOnly = this match {
+      case _: Submission.Status.Submitted                    => true
+      case _: Submission.Status.Granted                      => true
+      case _: Submission.Status.GrantedWithWarnings          => true
+      case _: Submission.Status.Declined                     => true
+      case _: Submission.Status.Failed                       => true
+      case _: Submission.Status.Warnings                     => true
+      case _: Submission.Status.PendingResponsibleIndividual => true
+      case _                                                 => false
+    }
+
     def isCreated = this match {
       case _: Submission.Status.Created => true
       case _                            => false

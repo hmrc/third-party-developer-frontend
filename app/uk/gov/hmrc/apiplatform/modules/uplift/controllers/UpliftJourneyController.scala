@@ -215,10 +215,14 @@ class UpliftJourneyController @Inject() (
   def agreeNewTermsOfUse(appId: ApplicationId): Action[AnyContent] = whenTeamMemberOnApp(appId) { implicit request =>
     lazy val showSubmission = (s: Submission) =>
       if (request.role.isAdministrator) {
-        if (s.status.isAnsweredCompletely) {
-          Redirect(uk.gov.hmrc.apiplatform.modules.submissions.controllers.routes.CheckAnswersController.checkAnswersPage(appId))
+        if (s.status.isReadOnly) {
+          Redirect(uk.gov.hmrc.apiplatform.modules.submissions.controllers.routes.CredentialsRequestedController.credentialsRequestedPage(appId))
         } else {
-          Redirect(uk.gov.hmrc.apiplatform.modules.submissions.controllers.routes.ProdCredsChecklistController.productionCredentialsChecklistPage(appId))
+          if (s.status.isAnsweredCompletely) {
+            Redirect(uk.gov.hmrc.apiplatform.modules.submissions.controllers.routes.CheckAnswersController.checkAnswersPage(appId))
+          } else {
+            Redirect(uk.gov.hmrc.apiplatform.modules.submissions.controllers.routes.ProdCredsChecklistController.productionCredentialsChecklistPage(appId))
+          }
         }
       } else {
         Ok(unauthorisedAppDetailsView(request.application.name, request.application.adminEmails))

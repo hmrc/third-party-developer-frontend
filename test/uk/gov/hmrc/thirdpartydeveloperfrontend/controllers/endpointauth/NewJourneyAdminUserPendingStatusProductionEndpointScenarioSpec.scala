@@ -33,7 +33,7 @@ class NewJourneyAdminUserPendingStatusProductionEndpointScenarioSpec extends End
       case Endpoint("GET", "/developer/applications/:id/credentials", _)                                 => NotFound()
       case Endpoint("GET", "/developer/applications/:id/details", _)                                     => Redirect(s"/developer/submissions/application/${applicationId.value}/view-answers")
       case Endpoint("GET", "/developer/applications/:id/agree-new-terms-of-use", _)                      =>
-        Redirect(s"/developer/submissions/application/${applicationId.value}/production-credentials-checklist")
+        Redirect(s"/developer/submissions/application/${applicationId.value}/view-answers")
       case Endpoint("POST", "/developer/applications/:id/sell-resell-or-distribute-your-software", _)    =>
         Redirect(s"/developer/submissions/application/${applicationId.value}/production-credentials-checklist")
       case Endpoint(_, "/developer/applications/:id/details/change", _)                                  => Forbidden()
