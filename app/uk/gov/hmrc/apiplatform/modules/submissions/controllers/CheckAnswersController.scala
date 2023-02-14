@@ -107,7 +107,7 @@ class CheckAnswersController @Inject() (
     }
   }
 
-  def requestReceivedPage(productionAppId: ApplicationId) = withApplicationSubmission(ApplicationStateFilter.inTestingOrProduction, RoleFilter.isAdminRole)(productionAppId) { implicit request =>
+  def requestReceivedPage(productionAppId: ApplicationId) = withApplicationSubmission(ApplicationStateFilter.pendingApprovalOrProduction, RoleFilter.isAdminRole)(productionAppId) { implicit request =>
     val requesterIsResponsibleIndividual   = isRequesterResponsibleIndividual(request.submission)
     val isNewTouUplift = request.submission.context.getOrElse(AskWhen.Context.Keys.NEW_TERMS_OF_USE_UPLIFT, "No") == "Yes"
     val isGranted = request.submission.status.isGranted

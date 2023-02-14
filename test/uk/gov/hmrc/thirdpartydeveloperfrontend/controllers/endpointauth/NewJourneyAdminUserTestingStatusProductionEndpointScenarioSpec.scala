@@ -51,6 +51,7 @@ class NewJourneyAdminUserTestingStatusProductionEndpointScenarioSpec extends End
         Redirect(s"/developer/submissions/application/${applicationId.value}/production-credentials-checklist")
       case Endpoint("GET", "/developer/submissions/application/:aid/terms-of-use-responses", _)          => NotFound()
       case Endpoint("GET", "/developer/submissions/application/:aid/view-answers", _)                    => BadRequest()
+      case Endpoint("GET", "/developer/submissions/application/:aid/request-received", _)                => BadRequest()
       case Endpoint(_, path, _) if path.startsWith("/developer/applications/:id/check-your-answers")     => BadRequest()
       case Endpoint(_, path, _) if path.startsWith("/developer/applications/:id/client-secret")          => BadRequest()
       case Endpoint(_, path, _) if path.startsWith("/developer/applications/:id/delete")                 => NotFound()

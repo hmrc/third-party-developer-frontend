@@ -48,7 +48,6 @@ class NewJourneyAdminUserPendingStatusProductionEndpointScenarioSpec extends End
       case Endpoint(_, "/developer/submissions/application/:aid/production-credentials-checklist", _)    => BadRequest()
       case Endpoint(_, "/developer/submissions/application/:aid/start-using-your-application", _)        => NotFound()
       case Endpoint("GET", "/developer/submissions/application/:aid/submit-request", _)                  => BadRequest()
-      case Endpoint("GET", "/developer/submissions/application/:aid/request-received", _)                => BadRequest()
       case Endpoint("GET", "/developer/submissions/application/:aid/terms-of-use-responses", _)          => NotFound()
       case Endpoint(_, path, _) if path.startsWith("/developer/applications/:id/add/subscription")       => BadRequest()
       case Endpoint(_, path, _) if path.startsWith("/developer/applications/:id/api-metadata")           => BadRequest()
