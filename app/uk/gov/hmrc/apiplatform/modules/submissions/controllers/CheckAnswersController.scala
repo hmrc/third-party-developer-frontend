@@ -18,6 +18,7 @@ package uk.gov.hmrc.apiplatform.modules.submissions.controllers
 
 import javax.inject.{Inject, Singleton}
 import scala.concurrent.ExecutionContext
+import scala.concurrent.Future.successful
 
 import play.api.libs.crypto.CookieSigner
 import play.api.mvc.MessagesControllerComponents
@@ -38,7 +39,7 @@ import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.controllers.BadRequ
 import uk.gov.hmrc.thirdpartydeveloperfrontend.service.{ApplicationActionService, ApplicationService, SessionService}
 
 object CheckAnswersController {
-  case class ProdCredsRequestReceivedViewModel(appId: ApplicationId, requesterIsResponsibleIndividual: Boolean)
+  case class ProdCredsRequestReceivedViewModel(appId: ApplicationId, requesterIsResponsibleIndividual: Boolean, isNewTouUplift: Boolean, isGranted: Boolean)
 }
 
 @Singleton
@@ -87,19 +88,30 @@ class CheckAnswersController @Inject() (
     RoleFilter.isAdminRole,
     SubmissionStatusFilter.answeredCompletely
   )(redirectToGetProdCreds(productionAppId))(productionAppId) { implicit request =>
-    val responsibleIndividualIsRequesterId = request.submission.questionIdsOfInterest.responsibleIndividualIsRequesterId
-    val requesterIsResponsibleIndividual   = request.submission.latestInstance.answersToQuestions.get(responsibleIndividualIsRequesterId) match {
-      case Some(SingleChoiceAnswer(answer)) => answer == "Yes"
-      case _                                => false
-    }
+    val requesterIsResponsibleIndividual   = isRequesterResponsibleIndividual(request.submission)
     requestProductionCredentials
       .requestProductionCredentials(productionAppId, request.developerSession, requesterIsResponsibleIndividual)
       .map(_ match {
         case Right(app)                 => {
-          val viewModel = ProdCredsRequestReceivedViewModel(productionAppId, requesterIsResponsibleIndividual)
-          Ok(prodCredsRequestReceivedView(viewModel))
+          Redirect(routes.CheckAnswersController.requestReceivedPage(productionAppId))
         }
         case Left(ErrorDetails(_, msg)) => Redirect(routes.CheckAnswersController.checkAnswersPage(productionAppId)).flashing("error" -> msg)
       })
+  }
+
+  private def isRequesterResponsibleIndividual(submission: Submission) = {
+    val responsibleIndividualIsRequesterId = submission.questionIdsOfInterest.responsibleIndividualIsRequesterId
+    submission.latestInstance.answersToQuestions.get(responsibleIndividualIsRequesterId) match {
+      case Some(SingleChoiceAnswer(answer)) => answer == "Yes"
+      case _                                => false
+    }
+  }
+
+  def requestReceivedPage(productionAppId: ApplicationId) = withApplicationSubmission(ApplicationStateFilter.inTestingOrProduction, RoleFilter.isAdminRole)(productionAppId) { implicit request =>
+    val requesterIsResponsibleIndividual   = isRequesterResponsibleIndividual(request.submission)
+    val isNewTouUplift = request.submission.context.getOrElse(AskWhen.Context.Keys.NEW_TERMS_OF_USE_UPLIFT, "No") == "Yes"
+    val isGranted = request.submission.status.isGranted
+    val viewModel = ProdCredsRequestReceivedViewModel(productionAppId, requesterIsResponsibleIndividual, isNewTouUplift, isGranted)
+    successful(Ok(prodCredsRequestReceivedView(viewModel)))
   }
 }

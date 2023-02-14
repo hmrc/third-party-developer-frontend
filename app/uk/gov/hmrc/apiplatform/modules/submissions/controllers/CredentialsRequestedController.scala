@@ -76,7 +76,7 @@ class CredentialsRequestedController @Inject() (
 
   /*, Read/Write and State details */
   def credentialsRequestedPage(productionAppId: ApplicationId) = withApplicationAndSubmissionInSpecifiedState(
-    ApplicationStateFilter.pendingApproval,
+    ApplicationStateFilter.pendingApprovalOrProduction,
     RoleFilter.isTeamMember,
     SubmissionStatusFilter.submittedGrantedOrDeclined
   )(redirectToGetProdCreds(productionAppId))(productionAppId) { implicit request =>

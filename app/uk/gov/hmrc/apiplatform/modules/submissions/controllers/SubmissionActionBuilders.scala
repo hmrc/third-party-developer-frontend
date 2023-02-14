@@ -50,20 +50,21 @@ object SubmissionActionBuilders {
 
   object ApplicationStateFilter {
     type Type = State => Boolean
-    val notProduction: Type         = !_.isProduction
-    val production: Type            = _.isProduction
-    val preProduction: Type         = _.isPreProduction
-    val inTesting: Type             = _.isInTesting
-    val allAllowed: Type            = _ => true
-    val pendingApproval: Type       = _.isPendingApproval
-    val inTestingOrProduction: Type = _.isInTestingOrProduction
+    val notProduction: Type               = !_.isProduction
+    val production: Type                  = _.isProduction
+    val preProduction: Type               = _.isPreProduction
+    val inTesting: Type                   = _.isInTesting
+    val allAllowed: Type                  = _ => true
+    val pendingApproval: Type             = _.isPendingApproval
+    val pendingApprovalOrProduction: Type = _.isPendingApprovalOrProduction
+    val inTestingOrProduction: Type       = _.isInTestingOrProduction
   }
 
   object SubmissionStatusFilter {
     type Type = Status => Boolean
     val answeredCompletely: Type         = _.isAnsweredCompletely
     val submitted: Type                  = _.isSubmitted
-    val submittedGrantedOrDeclined: Type = status => status.isSubmitted || status.isGranted || status.isGrantedWithWarnings || status.isDeclined
+    val submittedGrantedOrDeclined: Type = status => status.isSubmitted || status.isGranted || status.isGrantedWithWarnings || status.isDeclined || status.isFailed || status.isWarnings || status.isPendingResponsibleIndividual
     val granted: Type                    = status => status.isGranted || status.isGrantedWithWarnings
     val allAllowed: Type                 = _ => true
   }

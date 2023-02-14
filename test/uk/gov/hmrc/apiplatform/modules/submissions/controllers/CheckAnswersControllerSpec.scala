@@ -176,7 +176,8 @@ class CheckAnswersControllerSpec
 
       val result = underTest.checkAnswersAction(applicationId)(loggedInRequest.withCSRFToken)
 
-      status(result) shouldBe OK
+      status(result) shouldBe SEE_OTHER
+      redirectLocation(result) shouldBe Some(s"/developer/submissions/application/${applicationId.value}/request-received")
     }
 
     "fail when production credentials are not requested successfully" in new Setup {
@@ -185,6 +186,7 @@ class CheckAnswersControllerSpec
 
       val result = underTest.checkAnswersAction(applicationId)(loggedInRequest.withCSRFToken)
       status(result) shouldBe SEE_OTHER
+      redirectLocation(result) shouldBe Some(s"/developer/submissions/application/${applicationId.value}/production-credentials-checklist")
     }
 
     "don't display verification email text if requester is the Responsible Individual" in new Setup {
@@ -193,10 +195,10 @@ class CheckAnswersControllerSpec
       val extSubmission = ExtendedSubmission(answeredSubmission.hasCompletelyAnsweredWith(answers), completedProgress)
       SubmissionServiceMock.FetchLatestExtendedSubmission.thenReturns(extSubmission)
 
-      await(underTest.checkAnswersAction(applicationId)(loggedInRequest.withCSRFToken))
+      val result = underTest.checkAnswersAction(applicationId)(loggedInRequest.withCSRFToken)
 
-      verify(productionCredentialsRequestReceivedView).apply(viewModelCaptor.capture)(*, *, *, *)
-      viewModelCaptor.value.requesterIsResponsibleIndividual shouldBe true
+      status(result) shouldBe SEE_OTHER
+      redirectLocation(result) shouldBe Some(s"/developer/submissions/application/${applicationId.value}/request-received")
     }
 
     "do display verification email text if requester is not the Responsible Individual" in new Setup {
@@ -205,10 +207,10 @@ class CheckAnswersControllerSpec
       val extSubmission = ExtendedSubmission(answeredSubmission.hasCompletelyAnsweredWith(answers), completedProgress)
       SubmissionServiceMock.FetchLatestExtendedSubmission.thenReturns(extSubmission)
 
-      await(underTest.checkAnswersAction(applicationId)(loggedInRequest.withCSRFToken))
+      val result = underTest.checkAnswersAction(applicationId)(loggedInRequest.withCSRFToken)
 
-      verify(productionCredentialsRequestReceivedView).apply(viewModelCaptor.capture)(*, *, *, *)
-      viewModelCaptor.value.requesterIsResponsibleIndividual shouldBe false
+      status(result) shouldBe SEE_OTHER
+      redirectLocation(result) shouldBe Some(s"/developer/submissions/application/${applicationId.value}/request-received")
     }
 
     "don't display verification email text if requester is Responsible Individual question not answered" in new Setup {
@@ -217,10 +219,10 @@ class CheckAnswersControllerSpec
       val extSubmission = ExtendedSubmission(answeredSubmission.hasCompletelyAnsweredWith(answers), completedProgress)
       SubmissionServiceMock.FetchLatestExtendedSubmission.thenReturns(extSubmission)
 
-      await(underTest.checkAnswersAction(applicationId)(loggedInRequest.withCSRFToken))
+      val result = underTest.checkAnswersAction(applicationId)(loggedInRequest.withCSRFToken)
 
-      verify(productionCredentialsRequestReceivedView).apply(viewModelCaptor.capture)(*, *, *, *)
-      viewModelCaptor.value.requesterIsResponsibleIndividual shouldBe false
+      status(result) shouldBe SEE_OTHER
+      redirectLocation(result) shouldBe Some(s"/developer/submissions/application/${applicationId.value}/request-received")
     }
   }
 

@@ -38,7 +38,7 @@ class OldJourneyDevUserProdStatusProductionEndpointScenarioSpec extends Endpoint
       case Endpoint(_, "/developer/submissions/application/:aid/production-credentials-checklist", _)        => BadRequest() // must be in 'testing' state
       case Endpoint(_, "/developer/submissions/application/:aid/cancel-request", _)                          => BadRequest() // must not be in production state
       case Endpoint("GET", "/developer/submissions/application/:aid/check-answers", _)                       => BadRequest() // must be in testing state
-      case Endpoint("GET", "/developer/submissions/application/:aid/view-answers", _)                        => BadRequest() // must be in pending approval state
+      case Endpoint("GET", "/developer/submissions/application/:aid/request-received", _)                    => BadRequest()
       case Endpoint("GET", "/developer/submissions/application/:aid/submit-request", _)                      => BadRequest() // must be in testing state
       case Endpoint(_, "/developer/submissions/application/:aid/start-using-your-application", _)            => Forbidden()
       case Endpoint("GET", "/developer/submissions/application/:aid/terms-of-use-responses", _)              => Forbidden()
