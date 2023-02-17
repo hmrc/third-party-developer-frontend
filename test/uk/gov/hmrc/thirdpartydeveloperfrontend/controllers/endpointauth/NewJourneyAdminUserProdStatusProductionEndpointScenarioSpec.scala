@@ -37,6 +37,8 @@ class NewJourneyAdminUserProdStatusProductionEndpointScenarioSpec extends Endpoi
         Error("uk.gov.hmrc.http.ForbiddenException: Only standard subordinate applications can be deleted by admins")
       case Endpoint("GET", "/developer/applications/:id/agree-new-terms-of-use", _)                   =>
         Redirect(s"/developer/submissions/application/${applicationId.value}/view-answers")
+      case Endpoint("GET", "/developer/applications/:id/we-will-check-your-answers", _)               =>
+        Redirect(s"/developer/applications/${applicationId.value}/sell-resell-or-distribute-your-software")
       case Endpoint("POST", "/developer/applications/:id/sell-resell-or-distribute-your-software", _) =>
         Redirect(s"/developer/submissions/application/${applicationId.value}/production-credentials-checklist")
       case Endpoint(_, "/developer/submissions/application/:aid/production-credentials-checklist", _) => Success()    // can be in 'production' state for new terms of use

@@ -245,8 +245,11 @@ class UpliftJourneyController @Inject() (
     .fold[Result](identity, showSubmission)
   }
 
-  def weWillCheckYourAnswers(sandboxAppId: ApplicationId): Action[AnyContent] = whenTeamMemberOnApp(sandboxAppId) { implicit request =>
-    successful(Ok(weWillCheckYourAnswersView(sandboxAppId)))
+  def weWillCheckYourAnswers(appId: ApplicationId): Action[AnyContent] = whenTeamMemberOnApp(appId) { implicit request =>
+    request.application.deployedTo match {
+      case Environment.SANDBOX    => successful(Ok(weWillCheckYourAnswersView(appId)))
+      case Environment.PRODUCTION => successful(Redirect(uk.gov.hmrc.apiplatform.modules.uplift.controllers.routes.UpliftJourneyController.sellResellOrDistributeYourSoftware(appId)))
+    }
   }
 }
 
