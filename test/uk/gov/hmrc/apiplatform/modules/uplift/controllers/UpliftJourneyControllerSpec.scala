@@ -416,7 +416,7 @@ class UpliftJourneyControllerSpec extends BaseControllerSpec
       contentAsString(result) should include("We will check your answers")
     }
 
-    "redirect the 'we will check your answers' page" in new Setup {
+    "redirect to the 'sell resell or distribute' page if a prod app" in new Setup {
       val prodAppId                  = ApplicationId.random
       val prodApp                    = sampleApp.copy(id = prodAppId)
       fetchByApplicationIdReturns(prodAppId, prodApp)
