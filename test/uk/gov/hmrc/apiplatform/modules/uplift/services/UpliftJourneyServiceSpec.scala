@@ -62,6 +62,7 @@ class UpliftJourneyServiceSpec
 
     val underTest = new UpliftJourneyService(
       GPCFlowServiceMock.aMock,
+      ApplicationServiceMock.applicationServiceMock,
       ApmConnectorMock.aMock,
       mockSubmissionsConnector
     )
@@ -246,9 +247,10 @@ class UpliftJourneyServiceSpec
     "return the new submission when everything is good" in new Setup {
       val productionAppId = ApplicationId.random
       GPCFlowServiceMock.FetchFlow.thenReturns(GetProductionCredentialsFlow("", Some(sellResellOrDistribute), Some(aListOfSubscriptions)))
+      ApplicationServiceMock.updateApplicationSuccessful
       when(mockSubmissionsConnector.createSubmission(*[ApplicationId], *)(*)).thenReturn(successful(Some(aSubmission)))
 
-      private val result = await(underTest.createNewSubmission(productionAppId, loggedInDeveloper))
+      private val result = await(underTest.createNewSubmission(productionAppId, sampleApp, loggedInDeveloper))
 
       result.right.value shouldBe aSubmission
     }

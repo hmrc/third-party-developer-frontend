@@ -187,7 +187,7 @@ class UpliftJourneyController @Inject() (
     def createSubmissionAndGotoQuestionnairePage(ans: String) =
       for {
         _ <- flowService.storeSellResellOrDistribute(SellResellOrDistribute(ans), request.developerSession)
-        _ <- upliftJourneyService.createNewSubmission(appId, request.developerSession)
+        _ <- upliftJourneyService.createNewSubmission(appId, request.application, request.developerSession)
       } yield Redirect(uk.gov.hmrc.apiplatform.modules.submissions.controllers.routes.ProdCredsChecklistController.productionCredentialsChecklistPage(appId))
 
     def handleInvalidForm(formWithErrors: Form[SellResellOrDistributeForm]) =
