@@ -51,17 +51,23 @@ trait BaseSubmissionsJsonFormatters extends GroupOfQuestionnairesJsonFormatters 
 trait SubmissionsFrontendJsonFormatters extends BaseSubmissionsJsonFormatters {
   import Submission.Status._
 
-  implicit val rejectedStatusFormat             = Json.format[Declined]
-  implicit val acceptedStatusFormat             = Json.format[Granted]
-  implicit val acceptedWithWarningsStatusFormat = Json.format[GrantedWithWarnings]
-  implicit val submittedStatusFormat            = Json.format[Submitted]
-  implicit val answeringStatusFormat            = Json.format[Answering]
-  implicit val createdStatusFormat              = Json.format[Created]
+  implicit val rejectedStatusFormat                     = Json.format[Declined]
+  implicit val acceptedStatusFormat                     = Json.format[Granted]
+  implicit val acceptedWithWarningsStatusFormat         = Json.format[GrantedWithWarnings]
+  implicit val failedStatusFormat                       = Json.format[Failed]
+  implicit val warningsStatusFormat                     = Json.format[Warnings]
+  implicit val pendingResponsibleIndividualStatusFormat = Json.format[PendingResponsibleIndividual]
+  implicit val submittedStatusFormat                    = Json.format[Submitted]
+  implicit val answeringStatusFormat                    = Json.format[Answering]
+  implicit val createdStatusFormat                      = Json.format[Created]
 
   implicit val submissionStatus = Union.from[Submission.Status]("Submission.StatusType")
     .and[Declined]("declined")
     .and[Granted]("granted")
     .and[GrantedWithWarnings]("grantedWithWarnings")
+    .and[Failed]("failed")
+    .and[Warnings]("warnings")
+    .and[PendingResponsibleIndividual]("pendingResponsibleIndividual")
     .and[Submitted]("submitted")
     .and[Answering]("answering")
     .and[Created]("created")

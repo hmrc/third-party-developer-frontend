@@ -28,6 +28,11 @@ sealed trait State extends EnumEntry {
     || this == State.PENDING_GATEKEEPER_APPROVAL
     || this == State.PENDING_RESPONSIBLE_INDIVIDUAL_VERIFICATION)
 
+  def isPendingApprovalOrProduction: Boolean = (this == State.PENDING_REQUESTER_VERIFICATION
+    || this == State.PENDING_GATEKEEPER_APPROVAL
+    || this == State.PENDING_RESPONSIBLE_INDIVIDUAL_VERIFICATION
+    || this == State.PRODUCTION)
+
   def isInTesting: Boolean = this == State.TESTING
 
   def isInTestingOrProduction: Boolean = (this == State.TESTING || this == State.PRODUCTION)

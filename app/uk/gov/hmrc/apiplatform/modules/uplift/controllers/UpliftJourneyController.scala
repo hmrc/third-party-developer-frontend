@@ -187,7 +187,7 @@ class UpliftJourneyController @Inject() (
     def createSubmissionAndGotoQuestionnairePage(ans: String) =
       for {
         _ <- flowService.storeSellResellOrDistribute(SellResellOrDistribute(ans), request.developerSession)
-        _ <- upliftJourneyService.createNewSubmission(appId, request.developerSession)
+        _ <- upliftJourneyService.createNewSubmission(appId, request.application, request.developerSession)
       } yield Redirect(uk.gov.hmrc.apiplatform.modules.submissions.controllers.routes.ProdCredsChecklistController.productionCredentialsChecklistPage(appId))
 
     def handleInvalidForm(formWithErrors: Form[SellResellOrDistributeForm]) =
@@ -215,10 +215,14 @@ class UpliftJourneyController @Inject() (
   def agreeNewTermsOfUse(appId: ApplicationId): Action[AnyContent] = whenTeamMemberOnApp(appId) { implicit request =>
     lazy val showSubmission = (s: Submission) =>
       if (request.role.isAdministrator) {
-        if (s.status.isAnsweredCompletely) {
-          Redirect(uk.gov.hmrc.apiplatform.modules.submissions.controllers.routes.CheckAnswersController.checkAnswersPage(appId))
+        if (s.status.isReadOnly) {
+          Redirect(uk.gov.hmrc.apiplatform.modules.submissions.controllers.routes.CredentialsRequestedController.credentialsRequestedPage(appId))
         } else {
-          Redirect(uk.gov.hmrc.apiplatform.modules.submissions.controllers.routes.ProdCredsChecklistController.productionCredentialsChecklistPage(appId))
+          if (s.status.isAnsweredCompletely) {
+            Redirect(uk.gov.hmrc.apiplatform.modules.submissions.controllers.routes.CheckAnswersController.checkAnswersPage(appId))
+          } else {
+            Redirect(uk.gov.hmrc.apiplatform.modules.submissions.controllers.routes.ProdCredsChecklistController.productionCredentialsChecklistPage(appId))
+          }
         }
       } else {
         Ok(unauthorisedAppDetailsView(request.application.name, request.application.adminEmails))
@@ -241,8 +245,11 @@ class UpliftJourneyController @Inject() (
     .fold[Result](identity, showSubmission)
   }
 
-  def weWillCheckYourAnswers(sandboxAppId: ApplicationId): Action[AnyContent] = whenTeamMemberOnApp(sandboxAppId) { implicit request =>
-    successful(Ok(weWillCheckYourAnswersView(sandboxAppId)))
+  def weWillCheckYourAnswers(appId: ApplicationId): Action[AnyContent] = whenTeamMemberOnApp(appId) { implicit request =>
+    request.application.deployedTo match {
+      case Environment.SANDBOX    => successful(Ok(weWillCheckYourAnswersView(appId)))
+      case Environment.PRODUCTION => successful(Redirect(uk.gov.hmrc.apiplatform.modules.uplift.controllers.routes.UpliftJourneyController.sellResellOrDistributeYourSoftware(appId)))
+    }
   }
 }
 

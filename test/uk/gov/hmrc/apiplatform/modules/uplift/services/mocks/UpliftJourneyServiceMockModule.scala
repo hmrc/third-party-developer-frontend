@@ -61,7 +61,7 @@ trait UpliftJourneyServiceMockModule extends MockitoSugar with ArgumentMatchersS
     }
 
     object CreateNewSubmission {
-      def thenReturns(out: Submission) = when(aMock.createNewSubmission(*[ApplicationId], *)(*)).thenReturn(successful(Right(out)))
+      def thenReturns(out: Submission) = when(aMock.createNewSubmission(*[ApplicationId], *, *)(*)).thenReturn(successful(Right(out)))
     }
   }
 

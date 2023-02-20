@@ -415,6 +415,22 @@ class UpliftJourneyControllerSpec extends BaseControllerSpec
 
       contentAsString(result) should include("We will check your answers")
     }
+
+    "redirect to the 'sell resell or distribute' page if a prod app" in new Setup {
+      val prodAppId                  = ApplicationId.random
+      val prodApp                    = sampleApp.copy(id = prodAppId)
+      fetchByApplicationIdReturns(prodAppId, prodApp)
+      givenApplicationAction(
+        ApplicationWithSubscriptionData(prodApp, asSubscriptions(List(testAPISubscriptionStatus1)), asFields(List.empty)),
+        loggedInDeveloper,
+        List(testAPISubscriptionStatus1)
+      )
+
+      private val result = controller.weWillCheckYourAnswers(prodAppId)(loggedInRequest.withCSRFToken)
+
+      status(result) shouldBe SEE_OTHER
+      redirectLocation(result) shouldBe Some(s"/developer/applications/${prodAppId.value}/sell-resell-or-distribute-your-software")
+    }
   }
 
   "beforeYouStart" should {
