@@ -461,6 +461,7 @@ class UpliftJourneyControllerSpec extends BaseControllerSpec
       titleOf(result) shouldBe "Before you start - HMRC Developer Hub - GOV.UK"
 
       contentAsString(result) should include("Before you start")
+      contentAsString(result) should include("You must complete the questions by")
     }
 
     "render the before you start page if an existing submission found" in new Setup {
