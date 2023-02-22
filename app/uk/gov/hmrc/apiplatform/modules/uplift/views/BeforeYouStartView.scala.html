@@ -24,7 +24,7 @@
 
 @this(devMain: DevMain)
 
-@(applicationId: ApplicationId)(implicit request: play.api.mvc.Request[Any], loggedIn: DeveloperSession, messagesProvider: MessagesProvider, appConfig: ApplicationConfig)
+@(applicationId: ApplicationId, newTermsOfUseCompletionDate: Option[String])(implicit request: play.api.mvc.Request[Any], loggedIn: DeveloperSession, messagesProvider: MessagesProvider, appConfig: ApplicationConfig)
 
 @title = @{ "Before you start" }
 
@@ -42,7 +42,10 @@
 
     <p class="govuk-body">You will need the name and email address of a responsible individual in your organisation who is accountable for compliance with our <a href="/api-documentation/docs/terms-of-use" class="govuk-link" target="_blank">terms of use (opens in new tab)</a>.</p>
 
-    <p class="govuk-body">You have 6 months to complete your request for production credentials. After that, your progress is deleted and you will need to start again.</p>
-
+    @if(newTermsOfUseCompletionDate.isDefined) {
+      <p class="govuk-body">You must complete the questions by @newTermsOfUseCompletionDate.get to keep using your application.</p>
+    } else {
+      <p class="govuk-body">You have 6 months to complete your request for production credentials. After that, your progress is deleted and you will need to start again.</p>
+    }
     <a class="govuk-button" href="@uk.gov.hmrc.apiplatform.modules.uplift.controllers.routes.UpliftJourneyController.weWillCheckYourAnswers(applicationId)">Continue</a>
 }

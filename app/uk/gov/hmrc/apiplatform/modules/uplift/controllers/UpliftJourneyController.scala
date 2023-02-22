@@ -16,6 +16,9 @@
 
 package uk.gov.hmrc.apiplatform.modules.uplift.controllers
 
+import java.time.format.DateTimeFormatter
+import java.time.ZoneId
+
 import javax.inject.{Inject, Singleton}
 import scala.concurrent.Future.successful
 import scala.concurrent.{ExecutionContext, Future}
@@ -42,6 +45,7 @@ import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.checkpages.{CanUseChe
 import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.{APISubscriptions, ApplicationController, FormKeys, checkpages}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.apidefinitions.APISubscriptionStatus
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.{ApplicationId, SellResellOrDistribute, Environment}
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.connectors.TermsOfUseInvitation
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.controllers.BadRequestWithErrorMessage
 import uk.gov.hmrc.thirdpartydeveloperfrontend.service.{ApplicationActionService, ApplicationService, SessionService, TermsOfUseInvitationService}
 
@@ -209,7 +213,7 @@ class UpliftJourneyController @Inject() (
   }
 
   def beforeYouStart(sandboxAppId: ApplicationId): Action[AnyContent] = whenTeamMemberOnApp(sandboxAppId) { implicit request =>
-    successful(Ok(beforeYouStartView(sandboxAppId)))
+    successful(Ok(beforeYouStartView(sandboxAppId, None)))
   }
 
   def agreeNewTermsOfUse(appId: ApplicationId): Action[AnyContent] = whenTeamMemberOnApp(appId) { implicit request =>
@@ -228,9 +232,10 @@ class UpliftJourneyController @Inject() (
         Ok(unauthorisedAppDetailsView(request.application.name, request.application.adminEmails))
       }
 
-    lazy val showBeforeYouStart =
+    def showBeforeYouStart(invite: TermsOfUseInvitation) =
       if (request.role.isAdministrator) {
-        Ok(beforeYouStartView(appId))
+        val completeDate = DateTimeFormatter.ofPattern("dd MMMM yyyy").withZone(ZoneId.systemDefault()).format(invite.dueBy)
+        Ok(beforeYouStartView(appId, Some(completeDate)))
       } else {
         Ok(unauthorisedAppDetailsView(request.application.name, request.application.adminEmails))
       }
@@ -239,7 +244,7 @@ class UpliftJourneyController @Inject() (
       for {
         invitation <-
           ET.fromOptionF(termsOfUseInvitationService.fetchTermsOfUseInvitation(appId), BadRequest("This application has not been invited to complete the new terms of use"))
-        submission <- ET.fromOptionF(submissionService.fetchLatestSubmission(appId), showBeforeYouStart)
+        submission <- ET.fromOptionF(submissionService.fetchLatestSubmission(appId), showBeforeYouStart(invitation))
       } yield submission
     )
     .fold[Result](identity, showSubmission)
