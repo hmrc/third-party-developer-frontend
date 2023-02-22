@@ -28,6 +28,7 @@ case class ApplicationState(
   def isInTesting       = name.isInTesting
   def isPendingApproval = name.isPendingApproval
   def isApproved        = name.isApproved
+  def isProduction      = name.isProduction
 }
 
 object ApplicationState {
