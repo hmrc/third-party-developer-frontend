@@ -45,6 +45,7 @@ object CredentialsRequestedController {
       appName: String,
       subscriptions: Seq[APISubscriptionStatus],
       sellResellOrDistribute: String,
+      isNewTermsOfUseUplift: Boolean,
       answersViewModel: AnswersViewModel.ViewModel
     )
 }
@@ -91,7 +92,8 @@ class CredentialsRequestedController @Inject() (
       val inHouse                = submission.context.get(AskWhen.Context.Keys.IN_HOUSE_SOFTWARE)
       val sellResellOrDistribute = if (inHouse == Some("No")) "Yes" else "No"
       val selectedSubscriptions  = subscriptions.filter(s => s.subscribed)
-      CredentialsRequestedViewModel(application.id, application.name, selectedSubscriptions, sellResellOrDistribute, answersViewModel)
+      val isNewTermsOfUseUplift  = application.state.isProduction
+      CredentialsRequestedViewModel(application.id, application.name, selectedSubscriptions, sellResellOrDistribute, isNewTermsOfUseUplift, answersViewModel)
     }
 
     val vm = for {
