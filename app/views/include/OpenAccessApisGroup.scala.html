@@ -34,18 +34,20 @@
   request: play.api.mvc.Request[Any]
 )
 
+@displayableContextName(apiContext: ApiContext) = @{apiContext.value.substring(apiContext.value.lastIndexOf('/')+1)}
+
 <div class="govuk-accordion" data-module="govuk-accordion" id="accordion-default">
   @openAccessApis.toList.map { case (apiContext, apiData) =>
-    <div class="govuk-accordion__section" id="@{apiContext.value.substring(apiContext.value.lastIndexOf('/')+1)}-accordion-section">
+    <div class="govuk-accordion__section" id="@displayableContextName(apiContext)-accordion-section">
       <div class="govuk-accordion__section-header">
         <h2 class="govuk-accordion__section-heading">
-          <span class="govuk-accordion__section-button" id="accordion-default-heading-1">
+          <span class="govuk-accordion__section-button" id="@displayableContextName(apiContext)-accordion-heading">
             @apiData.name
           </span>
         </h2>
       </div>
 
-      <div id="accordion-default-content-4" class="govuk-accordion__section-content" aria-labelledby="accordion-default-heading-4">
+      <div id="@displayableContextName(apiContext)-accordion-content" class="govuk-accordion__section-content" aria-labelledby="@displayableContextName(apiContext)-accordion-heading">
         @apiData.versions.toList.map { case (apiVersion, versionData) =>
           @defining(s"${apiData.name} ${apiVersion.value} (${versionData.status.displayedStatus})") { apiVersionFullName =>
             <div class="govuk-grid-row">
