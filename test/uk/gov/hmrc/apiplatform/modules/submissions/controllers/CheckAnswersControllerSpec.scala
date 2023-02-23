@@ -105,7 +105,7 @@ class CheckAnswersControllerSpec
     val incompleteExtendedSubmission = ExtendedSubmission(aSubmission, incompleteProgress)
 
     val checkAnswersView                         = mock[CheckAnswersView]
-    when(checkAnswersView.apply(*, *, *)(*, *, *, *)).thenReturn(play.twirl.api.HtmlFormat.empty)
+    when(checkAnswersView.apply(*, *, *, *)(*, *, *, *)).thenReturn(play.twirl.api.HtmlFormat.empty)
     val productionCredentialsRequestReceivedView = mock[ProductionCredentialsRequestReceivedView]
     val viewModelCaptor                          = ArgCaptor[ProdCredsRequestReceivedViewModel]
     when(productionCredentialsRequestReceivedView.apply(*)(*, *, *, *)).thenReturn(play.twirl.api.HtmlFormat.empty)
@@ -158,14 +158,14 @@ class CheckAnswersControllerSpec
 
       await(underTest.checkAnswersPage(applicationId)(loggedInRequest.withCSRFToken))
 
-      verify(checkAnswersView).apply(*, eqTo(true), *)(*, *, *, *)
+      verify(checkAnswersView).apply(*, eqTo(true), *, *)(*, *, *, *)
     }
     "don't show submission declined text when previous submission was not declined" in new Setup {
       SubmissionServiceMock.FetchLatestExtendedSubmission.thenReturns(answeredSubmission.withCompletedProgress)
 
       await(underTest.checkAnswersPage(applicationId)(loggedInRequest.withCSRFToken))
 
-      verify(checkAnswersView).apply(*, eqTo(false), *)(*, *, *, *)
+      verify(checkAnswersView).apply(*, eqTo(false), *, *)(*, *, *, *)
     }
   }
 
