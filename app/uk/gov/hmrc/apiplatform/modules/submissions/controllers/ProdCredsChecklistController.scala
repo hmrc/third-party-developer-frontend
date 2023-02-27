@@ -36,7 +36,7 @@ import uk.gov.hmrc.thirdpartydeveloperfrontend.config.{ApplicationConfig, ErrorH
 import uk.gov.hmrc.thirdpartydeveloperfrontend.connectors.ApmConnector
 import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.ApplicationController
 import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.checkpages.CanUseCheckActions
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.ApplicationId
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.{ApplicationId, ApplicationState}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.service.{ApplicationActionService, ApplicationService, SessionService}
 
 object ProdCredsChecklistController {
@@ -58,7 +58,7 @@ object ProdCredsChecklistController {
     lazy val fieldName = label.toLowerCase
   }
   case class ViewGrouping(label: String, questionnaireSummaries: NonEmptyList[ViewQuestionnaireSummary])
-  case class ViewModel(appId: ApplicationId, appName: String, groupings: NonEmptyList[ViewGrouping])
+  case class ViewModel(appId: ApplicationId, appName: String, isNewTermsOfUseUplift: Boolean, groupings: NonEmptyList[ViewGrouping])
 
   def convertToSummary(extSubmission: ExtendedSubmission)(questionnaire: Questionnaire): ViewQuestionnaireSummary = {
     val progress   = extSubmission.questionnaireProgress.get(questionnaire.id).get
@@ -77,9 +77,9 @@ object ProdCredsChecklistController {
     )
   }
 
-  def convertSubmissionToViewModel(extSubmission: ExtendedSubmission)(appId: ApplicationId, appName: String): ViewModel = {
+  def convertSubmissionToViewModel(extSubmission: ExtendedSubmission)(appId: ApplicationId, appName: String, appState: ApplicationState): ViewModel = {
     val groupings = extSubmission.submission.groups.map(convertToViewGrouping(extSubmission))
-    ViewModel(appId, appName, groupings)
+    ViewModel(appId, appName, appState.isProduction, groupings)
   }
 
   def filterGroupingsForEmptyQuestionnaireSummaries(groupings: NonEmptyList[ViewGrouping]): Option[NonEmptyList[ViewGrouping]] = {
@@ -131,7 +131,7 @@ class ProdCredsChecklistController @Inject() (
         Ok(productionCredentialsChecklistView(viewModel.copy(groupings = vg), DummyForm.form.fillAndValidate(DummyForm("dummy"))))
       )
     }
-    successful(show(convertSubmissionToViewModel(request.extSubmission)(request.application.id, request.application.name)))
+    successful(show(convertSubmissionToViewModel(request.extSubmission)(request.application.id, request.application.name, request.application.state)))
   }
 
   def productionCredentialsChecklistAction(
@@ -141,7 +141,7 @@ class ProdCredsChecklistController @Inject() (
       if (request.extSubmission.submission.status.isAnsweredCompletely) {
         successful(Redirect(uk.gov.hmrc.apiplatform.modules.submissions.controllers.routes.CheckAnswersController.checkAnswersPage(productionAppId)))
       } else {
-        val viewModel = convertSubmissionToViewModel(request.extSubmission)(request.application.id, request.application.name)
+        val viewModel = convertSubmissionToViewModel(request.extSubmission)(request.application.id, request.application.name, request.application.state)
 
         successful(
           filterGroupingsForEmptyQuestionnaireSummaries(viewModel.groupings).fold(

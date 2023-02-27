@@ -39,7 +39,7 @@ import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.controllers.BadRequ
 import uk.gov.hmrc.thirdpartydeveloperfrontend.service.{ApplicationActionService, ApplicationService, SessionService}
 
 object CheckAnswersController {
-  case class ProdCredsRequestReceivedViewModel(appId: ApplicationId, requesterIsResponsibleIndividual: Boolean, isNewTouUplift: Boolean, isGranted: Boolean)
+  case class ProdCredsRequestReceivedViewModel(appId: ApplicationId, requesterIsResponsibleIndividual: Boolean, isNewTermsOfUseUplift: Boolean, isGranted: Boolean)
 }
 
 @Singleton
@@ -77,7 +77,7 @@ class CheckAnswersController @Inject() (
         val viewModel                   = convertSubmissionToViewModel(extSubmission)(request.application.id, request.application.name)
         val maybePreviousInstance       = extSubmission.submission.instances.tail.headOption // previous instance, if there was one
         val previousInstanceWasDeclined = maybePreviousInstance.map(_.isDeclined).getOrElse(false)
-        Ok(checkAnswersView(viewModel, previousInstanceWasDeclined, request.msgRequest.flash.get("error")))
+        Ok(checkAnswersView(viewModel, previousInstanceWasDeclined, request.application.state.isProduction, request.msgRequest.flash.get("error")))
       }
       case None                => BadRequestWithErrorMessage("No submission and/or application found")
     })
