@@ -49,9 +49,9 @@
   developerSession = Some(loggedIn)
 ) {
   @if(model.applicationsThatHaveTermOfUseInvitatationsOutstanding.nonEmpty) {
-    <div class="govuk-notification-banner" role="region" aria-labelledby="govuk-notification-banner-title" data-module="govuk-notification-banner">
+    <div class="govuk-notification-banner" role="region" aria-labelledby="govuk-notification-banner-title-important" data-module="govuk-notification-banner">
       <div class="govuk-notification-banner__header">
-        <h2 class="govuk-notification-banner__title" id="govuk-notification-banner-title">
+        <h2 class="govuk-notification-banner__title" id="govuk-notification-banner-title-important">
           Important
         </h2>
       </div>
@@ -67,9 +67,9 @@
   }
 
   @if(model.applicationsThatHaveTermOfUseInvitatationsSubmitted.nonEmpty) {
-    <div class="govuk-notification-banner govuk-notification-banner--success" role="alert" aria-labelledby="govuk-notification-banner-title" data-module="govuk-notification-banner" data-disable-auto-focus="true">
+    <div class="govuk-notification-banner govuk-notification-banner--success" role="alert" aria-labelledby="govuk-notification-banner-title-terms-of-use" data-module="govuk-notification-banner" data-disable-auto-focus="true">
       <div class="govuk-notification-banner__header">
-        <h2 class="govuk-notification-banner__title" id="govuk-notification-banner-title">
+        <h2 class="govuk-notification-banner__title" id="govuk-notification-banner-title-terms-of-use">
           Terms of use
         </h2>
       </div>
