@@ -28,6 +28,7 @@ import play.api.http.Status._
 import play.api.libs.json.{Json, Writes}
 import uk.gov.hmrc.apiplatform.modules.common.services.ApplicationLogger
 import org.scalatest.matchers.should.Matchers
+import uk.gov.hmrc.apiplatform.modules.common.domain.models.LaxEmailAddress
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.emailpreferences.APICategoryDisplayDetails
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.services.ApiDefinitionsJsonFormatters._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.services.ApplicationsJsonFormatters._
@@ -86,21 +87,21 @@ object DeveloperStub {
         .willReturn(aResponse().withStatus(status))
     )
 
-  def update(email: String, profile: UpdateProfileRequest, status: Int) =
+  def update(email: LaxEmailAddress, profile: UpdateProfileRequest, status: Int) =
     stubFor(
       post(urlMatching(s"/developer/$email"))
         .withRequestBody(equalToJson(Json.toJson(profile).toString()))
         .willReturn(aResponse().withStatus(status))
     )
 
-  def setupResend(email: String, status: Int) = {
+  def setupResend(email: LaxEmailAddress, status: Int) = {
     stubFor(
       post(urlPathEqualTo(s"/$email/resend-verification"))
         .willReturn(aResponse().withStatus(status))
     )
   }
 
-  def verifyResetPassword(email: String, request: PasswordResetRequest) = {
+  def verifyResetPassword(email: LaxEmailAddress, request: PasswordResetRequest) = {
     verify(1, postRequestedFor(urlPathEqualTo("/password-reset-request")).withRequestBody(matching(Json.toJson(request).toString())))
   }
 }
@@ -151,7 +152,7 @@ object ApplicationStub {
     )
   }
 
-  def configureUserApplications(email: String, applications: List[Application] = Nil, status: Int = OK) = {
+  def configureUserApplications(email: LaxEmailAddress, applications: List[Application] = Nil, status: Int = OK) = {
     val encodedEmail = URLEncoder.encode(email, "UTF-8")
 
     def stubResponse(environment: Environment, applications: List[Application]) = {

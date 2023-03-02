@@ -16,11 +16,11 @@
 
 package uk.gov.hmrc.apiplatform.modules.submissions.services
 
+import uk.gov.hmrc.apiplatform.modules.common.domain.models.LaxEmailAddress
+
 import javax.inject.{Inject, Singleton}
 import scala.concurrent.Future
-
 import uk.gov.hmrc.http.HeaderCarrier
-
 import uk.gov.hmrc.apiplatform.modules.submissions.connectors.ThirdPartyApplicationSubmissionsConnector
 import uk.gov.hmrc.apiplatform.modules.submissions.domain.models._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.ApplicationId
@@ -37,6 +37,6 @@ class SubmissionService @Inject() (productionApplicationConnector: ThirdPartyApp
   def recordAnswer(submissionId: Submission.Id, questionId: Question.Id, rawAnswers: List[String])(implicit hc: HeaderCarrier): Future[Either[String, ExtendedSubmission]] =
     productionApplicationConnector.recordAnswer(submissionId, questionId, rawAnswers)
 
-  def confirmSetupComplete(applicationId: ApplicationId, userEmailAddress: String)(implicit hc: HeaderCarrier): Future[Either[String, Unit]] =
+  def confirmSetupComplete(applicationId: ApplicationId, userEmailAddress: LaxEmailAddress)(implicit hc: HeaderCarrier): Future[Either[String, Unit]] =
     productionApplicationConnector.confirmSetupComplete(applicationId, userEmailAddress)
 }

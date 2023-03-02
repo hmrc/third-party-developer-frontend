@@ -16,7 +16,9 @@
 
 package uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications
 
-case class UpliftRequest(applicationName: String, requestedByEmailAddress: String)
+import uk.gov.hmrc.apiplatform.modules.common.domain.models.LaxEmailAddress
+
+case class UpliftRequest(applicationName: String, requestedByEmailAddress: LaxEmailAddress)
 
 object UpliftRequest {
   import play.api.libs.json.Json

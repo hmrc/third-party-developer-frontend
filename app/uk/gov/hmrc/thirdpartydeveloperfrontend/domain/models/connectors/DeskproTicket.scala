@@ -18,28 +18,29 @@ package uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.connectors
 
 import play.api.libs.json.Json
 import play.api.mvc.Request
-
+import uk.gov.hmrc.apiplatform.modules.common.domain.models.LaxEmailAddress
+import uk.gov.hmrc.apiplatform.modules.common.domain.models.LaxEmailAddress.StringSyntax
 import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.apidefinitions.ApiVersion
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.{ApplicationId, CollaboratorRole, Environment}
 
 case class DeskproTicket(
-    name: String,
-    email: String,
-    subject: String,
-    message: String,
-    referrer: String,
-    userAgent: String = "",
-    authId: String = "",
-    areaOfTax: String = "",
-    sessionId: String = "",
-    javascriptEnabled: String = ""
+                          name: String,
+                          email: LaxEmailAddress,
+                          subject: String,
+                          message: String,
+                          referrer: String,
+                          userAgent: String = "",
+                          authId: String = "",
+                          areaOfTax: String = "",
+                          sessionId: String = "",
+                          javascriptEnabled: String = ""
   )
 
 object DeskproTicket extends FieldTransformer {
   implicit val format = Json.format[DeskproTicket]
 
-  def createForRequestProductionCredentials(requestorName: String, requestorEmail: String, applicationName: String, applicationId: ApplicationId): DeskproTicket = {
+  def createForRequestProductionCredentials(requestorName: String, requestorEmail: LaxEmailAddress, applicationName: String, applicationId: ApplicationId): DeskproTicket = {
     val message =
       s"""$requestorEmail submitted the following application for production use on the Developer Hub:
          |$applicationName
@@ -56,7 +57,7 @@ object DeskproTicket extends FieldTransformer {
     )
   }
 
-  def createForUplift(requestorName: String, requestorEmail: String, applicationName: String, applicationId: ApplicationId): DeskproTicket = {
+  def createForUplift(requestorName: String, requestorEmail: LaxEmailAddress, applicationName: String, applicationId: ApplicationId): DeskproTicket = {
     val message =
       s"""$requestorEmail submitted the following application for production use on the Developer Hub:
          |$applicationName
@@ -75,7 +76,7 @@ object DeskproTicket extends FieldTransformer {
 
   def createForApiSubscribe(
       requestorName: String,
-      requestorEmail: String,
+      requestorEmail: LaxEmailAddress,
       applicationName: String,
       applicationId: ApplicationId,
       apiName: String,
@@ -91,7 +92,7 @@ object DeskproTicket extends FieldTransformer {
 
   def createForApiUnsubscribe(
       requestorName: String,
-      requestorEmail: String,
+      requestorEmail: LaxEmailAddress,
       applicationName: String,
       applicationId: ApplicationId,
       apiName: String,
@@ -107,7 +108,7 @@ object DeskproTicket extends FieldTransformer {
 
   def createForPrincipalApplicationDeletion(
       name: String,
-      requestedByEmail: String,
+      requestedByEmail: LaxEmailAddress,
       role: CollaboratorRole,
       environment: Environment,
       applicationName: String,
@@ -137,7 +138,7 @@ object DeskproTicket extends FieldTransformer {
          |HMRC Developer Hub""".stripMargin
     DeskproTicket(
       name = supportEnquiry.fullname,
-      email = supportEnquiry.email,
+      email = supportEnquiry.email.toLaxEmail,
       subject = s"$appTitle: Support Enquiry",
       message = message,
       referrer = routes.Support.submitSupportEnquiry.url,
@@ -145,14 +146,14 @@ object DeskproTicket extends FieldTransformer {
     )
   }
 
-  def deleteDeveloperAccount(name: String, email: String): DeskproTicket = {
+  def deleteDeveloperAccount(name: String, email: LaxEmailAddress): DeskproTicket = {
     val message =
       s"""I '$email' want my Developer Hub account to be deleted"""
 
     DeskproTicket(name, email, "Request for developer account to be deleted", message, profile.routes.Profile.deleteAccount.url)
   }
 
-  def removeDeveloper2SV(name: String, email: String): DeskproTicket = {
+  def removeDeveloper2SV(name: String, email: LaxEmailAddress): DeskproTicket = {
     val message =
       s"""I '$email' want my 2SV to be removed"""
 
@@ -161,7 +162,7 @@ object DeskproTicket extends FieldTransformer {
 
   def createForRequestChangeOfProductionApplicationName(
       requestorName: String,
-      requestorEmail: String,
+      requestorEmail: LaxEmailAddress,
       previousApplicationName: String,
       newApplicationName: String,
       applicationId: ApplicationId

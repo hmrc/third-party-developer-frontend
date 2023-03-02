@@ -36,6 +36,7 @@ import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.UserId
 import uk.gov.hmrc.thirdpartydeveloperfrontend.connectors.ThirdPartyDeveloperConnector.FindUserIdRequest
 import uk.gov.hmrc.thirdpartydeveloperfrontend.connectors.ThirdPartyDeveloperConnector.JsonFormatters.FindUserIdRequestWrites
 import play.api.libs.json.Json
+import uk.gov.hmrc.apiplatform.modules.common.domain.models.LaxEmailAddress
 import uk.gov.hmrc.apiplatform.modules.mfa.models.MfaType
 import uk.gov.hmrc.thirdpartydeveloperfrontend.builder.{DeveloperBuilder, MfaDetailBuilder}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.connectors.stubs.ThirdPartyDeveloperStub.fetchDeveloper
@@ -200,7 +201,7 @@ class LoginCSRFIntegrationSpec extends BaseConnectorIntegrationSpec with GuiceOn
     }
   }
 
-  private def setupThirdPartyDeveloperFindUserIdByEmailAddress(emailAddress: String, userId: UserId) = {
+  private def setupThirdPartyDeveloperFindUserIdByEmailAddress(emailAddress: LaxEmailAddress, userId: UserId) = {
     stubFor(
       post(urlEqualTo("/developers/find-user-id"))
         .withRequestBody(equalToJson(Json.toJson(FindUserIdRequest(emailAddress)).toString()))

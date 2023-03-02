@@ -17,10 +17,11 @@
 @import include._
 @import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.controllers.Crumb
 @import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.DeveloperSession
+@import uk.gov.hmrc.apiplatform.modules.common.domain.models.LaxEmailAddress
 
 @this(devMain: DevMain)
 
-@(appName: String, adminEmails: Set[String])(
+@(appName: String, adminEmails: Set[LaxEmailAddress])(
   implicit request: play.api.mvc.Request[Any], loggedIn: DeveloperSession, messages: Messages, applicationConfig: ApplicationConfig
 )
 
@@ -52,7 +53,7 @@
     </p>
     <ul class="govuk-list govuk-list--bullet">
       @for(email<-adminEmails) {
-        <li><a class="govuk-link" href="mailto:@{email}">@email</a></li>
+        <li><a class="govuk-link" href="mailto:@{email.text}">@email</a></li>
       }
     </ul>
   }

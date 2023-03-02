@@ -27,6 +27,7 @@ import pages._
 import play.api.http.Status
 import stubs.DeveloperStub
 import org.scalatest.matchers.should.Matchers
+import uk.gov.hmrc.apiplatform.modules.common.domain.models.LaxEmailAddress
 
 object Form extends WebBrowser {
 
@@ -68,7 +69,7 @@ class RegisterSteps extends ScalaDsl with EN with Matchers with NavigationSugar 
   }
 
   Given("""^I expect a resend call from '(.*)'$""") {
-    email: String =>
+    email: LaxEmailAddress =>
       {
         DeveloperStub.setupResend(email, Status.NO_CONTENT)
       }

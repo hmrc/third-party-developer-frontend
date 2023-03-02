@@ -25,8 +25,9 @@
 @import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.DeveloperSession
 @import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.routes
 
-@this(devMain: DevMainWithFormErrors, leftHandNav: LeftHandNav)
+@import uk.gov.hmrc.apiplatform.modules.common.domain.models.LaxEmailAddress
 
+@this(devMain: DevMainWithFormErrors, leftHandNav: LeftHandNav)
 @(applicationView: ApplicationViewModel, role: CollaboratorRole, form: Form[uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.AddTeamMemberForm], fraudPreventionNavLinkViewModel: Option[FraudPreventionNavLinkViewModel])(
         implicit request: play.api.mvc.Request[Any], messagesProvider: MessagesProvider, applicationConfig: ApplicationConfig, navSection: String = "manage-team", loggedIn: DeveloperSession)
 
@@ -52,8 +53,8 @@
 
   <h2 class="govuk-heading-m">Team members</h2>
   @{
-    def createRemoveLink(appId: ApplicationId, emailAddress: String) = {
-      routes.ManageTeam.removeTeamMember(appId, emailAddress.toSha256)
+    def createRemoveLink(appId: ApplicationId, emailAddress: LaxEmailAddress) = {
+      routes.ManageTeam.removeTeamMember(appId, emailAddress.text.toSha256)
     }
     teamList(app, role, loggedIn, routes.ManageTeam.addTeamMember(app.id), Button, createRemoveLink)
   }

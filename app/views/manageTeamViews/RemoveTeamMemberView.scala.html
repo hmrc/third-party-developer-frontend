@@ -20,10 +20,11 @@
 @import views.html.include.DevMain
 @import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.DeveloperSession
 @import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.routes
+@import uk.gov.hmrc.apiplatform.modules.common.domain.models.LaxEmailAddress
 
 @this(devMain: DevMainWithFormErrors, leftHandNav: LeftHandNav)
 
-@(applicationView: ApplicationViewModel, form: Form[uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.RemoveTeamMemberConfirmationForm], email: String = "")(
+@(applicationView: ApplicationViewModel, form: Form[uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.RemoveTeamMemberConfirmationForm], emailAsString: String = "")(
         implicit request: play.api.mvc.Request[Any], messages: Messages, applicationConfig: ApplicationConfig, navSection: String = "manage-team", loggedIn: DeveloperSession)
 
 @titleError = { @if(form.errors.nonEmpty) {Error: } else {}}
@@ -49,11 +50,11 @@
   <br>
 
   <h2 class="govuk-heading-m">Team member</h2>
-  <p class="govuk-body">@email</p>
+  <p class="govuk-body">@emailAsString</p>
 
   @helper.form(action = routes.ManageTeam.removeTeamMemberAction(app.id)) {
     @helper.CSRF.formField
-    <input type="hidden" name="email" value="@email">
+    <input type="hidden" name="email" value="@emailAsString">
     <div class="govuk-form-group @if(form.errors("confirm").nonEmpty) {govuk-form-group--error}">
       <fieldset id="confirm" class="govuk-fieldset" aria-describedby="remove-team-member-error">
         <legend class="govuk-fieldset__legend govuk-fieldset__legend--l">

@@ -19,18 +19,16 @@ package uk.gov.hmrc.thirdpartydeveloperfrontend.controllers
 import javax.inject.{Inject, Singleton}
 import scala.concurrent.{ExecutionContext, Future}
 import scala.util.control.NonFatal
-
 import views.html._
-
 import play.api.libs.crypto.CookieSigner
 import play.api.mvc.{MessagesControllerComponents, Request}
+import uk.gov.hmrc.apiplatform.modules.common.domain.models.LaxEmailAddress.StringSyntax
 import uk.gov.hmrc.http.{BadRequestException, HeaderCarrier}
 import uk.gov.hmrc.play.bootstrap.controller.WithUnsafeDefaultFormBinding
-
 import uk.gov.hmrc.apiplatform.modules.common.services.ApplicationLogger
 import uk.gov.hmrc.thirdpartydeveloperfrontend.config.{ApplicationConfig, ErrorHandler}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.connectors.ThirdPartyDeveloperConnector
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.{EmailAlreadyInUse, Registration => RegistrationModel, RegistrationSuccessful}
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.{EmailAlreadyInUse, RegistrationSuccessful, Registration => RegistrationModel}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.service.SessionService
 
 @Singleton
@@ -70,7 +68,7 @@ class Registration @Inject() (
         },
         userData => {
           val registration =
-            RegistrationModel(userData.firstName.trim, userData.lastName.trim, userData.emailaddress, userData.password, userData.organisation)
+            RegistrationModel(userData.firstName.trim, userData.lastName.trim, userData.emailaddress.toLaxEmail, userData.password, userData.organisation)
           connector.register(registration).map {
             case RegistrationSuccessful => Redirect(routes.Registration.confirmation).addingToSession("email" -> userData.emailaddress)
             case EmailAlreadyInUse      => BadRequest(registrationView(requestForm.emailAddressAlreadyInUse))
@@ -82,7 +80,7 @@ class Registration @Inject() (
   def resendVerification = Action.async {
     implicit request =>
       request.session.get("email").fold(Future.successful(BadRequest(signInView("Sign in", LoginForm.form)))) { email =>
-        connector.resendVerificationEmail(email)
+        connector.resendVerificationEmail(email.toLaxEmail)
           .map(_ => Redirect(routes.Registration.confirmation))
           .recover {
             case NonFatal(e) => {

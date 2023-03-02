@@ -19,17 +19,17 @@ package uk.gov.hmrc.thirdpartydeveloperfrontend.controllers
 import javax.inject.{Inject, Singleton}
 import scala.concurrent.{ExecutionContext, Future}
 import scala.util.Failure
-
 import views.html.{LogoutConfirmationView, SignoutSurveyView}
-
 import play.api.libs.crypto.CookieSigner
 import play.api.mvc.{AnyContent, MessagesControllerComponents, MessagesRequest}
-
+import uk.gov.hmrc.apiplatform.modules.common.domain.models.LaxEmailAddress
+import uk.gov.hmrc.apiplatform.modules.common.domain.models.LaxEmailAddress.StringSyntax
 import uk.gov.hmrc.apiplatform.modules.common.services.ApplicationLogger
 import uk.gov.hmrc.thirdpartydeveloperfrontend.config.{ApplicationConfig, ErrorHandler}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.connectors.TicketId
 import uk.gov.hmrc.thirdpartydeveloperfrontend.security.ExtendedDevHubAuthorization
 import uk.gov.hmrc.thirdpartydeveloperfrontend.service.{ApplicationService, DeskproService, SessionService}
+
 
 @Singleton
 class UserLogoutAccount @Inject() (
@@ -63,7 +63,7 @@ class UserLogoutAccount @Inject() (
         }
 
         applicationService
-          .userLogoutSurveyCompleted(form.email, form.name, form.rating.getOrElse("").toString, form.improvementSuggestions)
+          .userLogoutSurveyCompleted(form.email.toLaxEmail, form.name, form.rating.getOrElse("").toString, form.improvementSuggestions)
           .flatMap(_ => {
             Future.successful(Redirect(routes.UserLogoutAccount.logout))
           })

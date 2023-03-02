@@ -20,7 +20,7 @@ import play.api.data.Forms._
 import play.api.data.format.Formatter
 import play.api.data.validation.{Constraint, Invalid, Valid, ValidationError}
 import play.api.data.{Form, FormError}
-
+import uk.gov.hmrc.apiplatform.modules.common.domain.models.LaxEmailAddress
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.{Application, ApplicationId, PrivacyPolicyLocation, TermsAndConditionsLocation}
 
 // scalastyle:off number.of.types
@@ -160,7 +160,7 @@ case class ChangePasswordForm(currentPassword: String, password: String, confirm
 
 object ChangePasswordForm {
 
-  def accountUnverified[T](form: Form[T], email: String) = {
+  def accountUnverified[T](form: Form[T], email: LaxEmailAddress) = {
     form
       .withError("submissionError", "true")
       .withError(

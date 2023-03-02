@@ -18,14 +18,11 @@ package uk.gov.hmrc.thirdpartydeveloperfrontend
 
 import java.net.URL
 import scala.util.{Failure, Try}
-
 import org.apache.commons.net.util.SubnetUtils
-
-import play.api.data.Forms
+import play.api.data.{Forms, Mapping}
 import play.api.data.Forms.{optional, text}
 import play.api.data.validation.{Constraint, Invalid, Valid, ValidationError, ValidationResult}
 import uk.gov.hmrc.emailaddress.EmailAddress
-
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.Environment
 
 package object controllers {
@@ -279,7 +276,7 @@ package object controllers {
   def textValidator(requiredKey: String, maxLengthKey: String, maxLength: Int = 30) =
     Forms.text.verifying(requiredKey, s => s.trim.length > 0).verifying(maxLengthKey, s => s.trim.length <= maxLength)
 
-  def emailValidator(emailRequiredMessage: String = emailaddressRequiredKey, maxLength: Int = 320) = {
+  def emailValidator(emailRequiredMessage: String = emailaddressRequiredKey, maxLength: Int = 320): Mapping[String] = {
     Forms.text
       .verifying(emailaddressNotValidKey, email => EmailAddress.isValid(email) || email.length == 0)
       .verifying(emailMaxLengthKey, email => email.length <= maxLength)

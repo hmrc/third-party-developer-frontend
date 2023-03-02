@@ -18,9 +18,8 @@ package uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications
 
 import java.time.{LocalDateTime, Period}
 import java.util.UUID
-
 import play.api.libs.json.{Format, OFormat, Reads}
-
+import uk.gov.hmrc.apiplatform.modules.common.domain.models.LaxEmailAddress
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.apidefinitions.AccessType.STANDARD
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.apidefinitions.ApiIdentifier
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.Capabilities.{ChangeClientSecret, SupportsDetails, ViewPushSecret}
@@ -68,12 +67,12 @@ trait BaseApplication {
   def checkInformation: Option[CheckInformation]
   def ipAllowlist: IpAllowlist
 
-  def role(email: String): Option[CollaboratorRole]                 = collaborators.find(_.emailAddress == email).map(_.role)
+  def role(email: LaxEmailAddress): Option[CollaboratorRole]                 = collaborators.find(_.emailAddress == email).map(_.role)
   def roleForCollaborator(userId: UserId): Option[CollaboratorRole] = collaborators.find(_.userId == userId).map(_.role)
 
   def isUserACollaboratorOfRole(userId: UserId, requiredRole: CollaboratorRole): Boolean = roleForCollaborator(userId).fold(false)(_ == requiredRole)
 
-  def adminEmails: Set[String] = collaborators.filter(_.role.isAdministrator).map(_.emailAddress)
+  def adminEmails: Set[LaxEmailAddress] = collaborators.filter(_.role.isAdministrator).map(_.emailAddress)
 
   def termsOfUseAgreements: List[TermsOfUseAgreement] = checkInformation.map(_.termsOfUseAgreements).getOrElse(List.empty)
 
@@ -168,7 +167,7 @@ trait BaseApplication {
   def hasLockedSubscriptions = deployedTo.isProduction && !isInTesting
 
   def findCollaboratorByHash(teamMemberHash: String): Option[Collaborator] = {
-    collaborators.find(c => c.emailAddress.toSha256 == teamMemberHash)
+    collaborators.find(c => c.emailAddress.text.toSha256 == teamMemberHash)
   }
 
   // scalastyle:off cyclomatic.complexity

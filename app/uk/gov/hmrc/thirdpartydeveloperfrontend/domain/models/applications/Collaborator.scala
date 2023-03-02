@@ -16,9 +16,10 @@
 
 package uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications
 
+import uk.gov.hmrc.apiplatform.modules.common.domain.models.LaxEmailAddress
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.UserId
 
-case class Collaborator(emailAddress: String, role: CollaboratorRole, userId: UserId)
+case class Collaborator(emailAddress: LaxEmailAddress, role: CollaboratorRole, userId: UserId)
 
 object Collaborator {
   import play.api.libs.json.Json
@@ -26,7 +27,7 @@ object Collaborator {
   implicit val format = Json.format[Collaborator]
 }
 
-case class AddCollaborator(emailAddress: String, role: CollaboratorRole)
+case class AddCollaborator(emailAddress: LaxEmailAddress, role: CollaboratorRole)
 
 object AddCollaborator {
   import play.api.libs.json.Json

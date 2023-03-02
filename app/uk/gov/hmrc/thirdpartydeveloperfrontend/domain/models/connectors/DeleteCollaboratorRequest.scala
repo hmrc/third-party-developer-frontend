@@ -17,11 +17,12 @@
 package uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.connectors
 
 import play.api.libs.json.Json
+import uk.gov.hmrc.apiplatform.modules.common.domain.models.LaxEmailAddress
 
 case class DeleteCollaboratorRequest(
-    email: String,
-    adminsToEmail: Set[String],
-    notifyCollaborator: Boolean
+                                      email: LaxEmailAddress,
+                                      adminsToEmail: Set[LaxEmailAddress],
+                                      notifyCollaborator: Boolean
   )
 
 object DeleteCollaboratorRequest {

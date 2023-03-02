@@ -17,12 +17,11 @@
 package uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications
 
 import java.time.LocalDateTime
-
 import play.api.libs.json.OFormat
-
+import uk.gov.hmrc.apiplatform.modules.common.domain.models.LaxEmailAddress
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.services.LocalDateTimeFormatters
 
-case class TermsOfUseAgreement(emailAddress: String, timeStamp: LocalDateTime, version: String)
+case class TermsOfUseAgreement(emailAddress: LaxEmailAddress, timeStamp: LocalDateTime, version: String)
 
 object TermsOfUseAgreement extends LocalDateTimeFormatters {
 

@@ -17,9 +17,8 @@
 package uk.gov.hmrc.apiplatform.modules.submissions.domain.models
 
 import java.time.LocalDateTime
-
 import play.api.libs.json.Format
-
+import uk.gov.hmrc.apiplatform.modules.common.domain.models.LaxEmailAddress
 import uk.gov.hmrc.apiplatform.modules.submissions.domain.models.ResponsibleIndividualVerificationState.ResponsibleIndividualVerificationState
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.{ApplicationId, ResponsibleIndividual}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.services.LocalDateTimeFormatters
@@ -53,16 +52,16 @@ case class ResponsibleIndividualToUVerification(
   ) extends ResponsibleIndividualVerification
 
 case class ResponsibleIndividualUpdateVerification(
-    id: ResponsibleIndividualVerificationId,
-    applicationId: ApplicationId,
-    submissionId: Submission.Id,
-    submissionInstance: Int,
-    applicationName: String,
-    createdOn: LocalDateTime,
-    responsibleIndividual: ResponsibleIndividual,
-    requestingAdminName: String,
-    requestingAdminEmail: String,
-    state: ResponsibleIndividualVerificationState
+                                                    id: ResponsibleIndividualVerificationId,
+                                                    applicationId: ApplicationId,
+                                                    submissionId: Submission.Id,
+                                                    submissionInstance: Int,
+                                                    applicationName: String,
+                                                    createdOn: LocalDateTime,
+                                                    responsibleIndividual: ResponsibleIndividual,
+                                                    requestingAdminName: String,
+                                                    requestingAdminEmail: LaxEmailAddress,
+                                                    state: ResponsibleIndividualVerificationState
   ) extends ResponsibleIndividualVerification
 
 object ResponsibleIndividualVerification extends LocalDateTimeFormatters {

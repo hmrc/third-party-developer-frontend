@@ -16,13 +16,13 @@
 
 package uk.gov.hmrc.thirdpartydeveloperfrontend.service
 
+import uk.gov.hmrc.apiplatform.modules.common.domain.models.LaxEmailAddress
+
 import java.time.{Clock, LocalDateTime}
 import javax.inject.{Inject, Singleton}
 import scala.concurrent.{ExecutionContext, Future}
-
 import uk.gov.hmrc.http.{ForbiddenException, HeaderCarrier}
 import uk.gov.hmrc.play.audit.http.connector.AuditResult
-
 import uk.gov.hmrc.thirdpartydeveloperfrontend.connectors._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.apidefinitions._
@@ -59,7 +59,7 @@ class ApplicationService @Inject() (
     connectorWrapper.forEnvironment(application.deployedTo).thirdPartyApplicationConnector.applicationUpdate(application.id, request)
   }
 
-  def updateResponsibleIndividual(application: Application, userId: UserId, fullName: String, emailAddress: String)(implicit hc: HeaderCarrier): Future[ApplicationUpdateSuccessful] = {
+  def updateResponsibleIndividual(application: Application, userId: UserId, fullName: String, emailAddress: LaxEmailAddress)(implicit hc: HeaderCarrier): Future[ApplicationUpdateSuccessful] = {
     val request = ChangeResponsibleIndividualToSelf(userId, LocalDateTime.now(clock), fullName, emailAddress)
     connectorWrapper.forEnvironment(application.deployedTo).thirdPartyApplicationConnector.applicationUpdate(application.id, request)
   }
@@ -89,7 +89,7 @@ class ApplicationService @Inject() (
       userId: UserId,
       requesterName: String,
       riName: String,
-      riEmail: String
+      riEmail: LaxEmailAddress
     )(implicit hc: HeaderCarrier
     ): Future[ApplicationUpdateSuccessful] = {
     val request = VerifyResponsibleIndividual(userId, LocalDateTime.now(clock), requesterName, riName, riEmail)
@@ -159,7 +159,7 @@ class ApplicationService @Inject() (
                             Map(
                               "appId"                   -> appId.value,
                               "requestedByName"         -> requesterName,
-                              "requestedByEmailAddress" -> requesterEmail,
+                              "requestedByEmailAddress" -> requesterEmail.text,
                               "timestamp"               -> LocalDateTime.now(clock).toString
                             )
                           )
@@ -187,19 +187,19 @@ class ApplicationService @Inject() (
     }
   }
 
-  private def roleForApplication(application: Application, email: String) =
+  private def roleForApplication(application: Application, email: LaxEmailAddress) =
     application.role(email).getOrElse(throw new ApplicationNotFound)
 
   def verify(verificationCode: String)(implicit hc: HeaderCarrier): Future[ApplicationVerificationResponse] = {
     connectorWrapper.productionApplicationConnector.verify(verificationCode)
   }
 
-  def addTeamMember(app: Application, requestingEmail: String, teamMember: AddCollaborator)(implicit hc: HeaderCarrier): Future[Unit] = {
+  def addTeamMember(app: Application, requestingEmail: LaxEmailAddress, teamMember: AddCollaborator)(implicit hc: HeaderCarrier): Future[Unit] = {
     val request = AddTeamMemberRequest(teamMember.emailAddress, teamMember.role, Some(requestingEmail))
     apmConnector.addTeamMember(app.id, request)
   }
 
-  def removeTeamMember(app: Application, teamMemberToRemove: String, requestingEmail: String)(implicit hc: HeaderCarrier): Future[ApplicationUpdateSuccessful] = {
+  def removeTeamMember(app: Application, teamMemberToRemove: LaxEmailAddress, requestingEmail: LaxEmailAddress)(implicit hc: HeaderCarrier): Future[ApplicationUpdateSuccessful] = {
     val otherAdminEmails = app.collaborators
       .filter(_.role.isAdministrator)
       .map(_.emailAddress)
@@ -214,21 +214,21 @@ class ApplicationService @Inject() (
     } yield response
   }
 
-  def requestDeveloperAccountDeletion(userId: UserId, name: String, email: String)(implicit hc: HeaderCarrier): Future[TicketResult] = {
+  def requestDeveloperAccountDeletion(userId: UserId, name: String, email: LaxEmailAddress)(implicit hc: HeaderCarrier): Future[TicketResult] = {
     val deleteDeveloperTicket = DeskproTicket.deleteDeveloperAccount(name, email)
 
     for {
       ticketResponse <- deskproConnector.createTicket(userId, deleteDeveloperTicket)
-      _              <- auditService.audit(AccountDeletionRequested, Map("requestedByName" -> name, "requestedByEmailAddress" -> email, "timestamp" -> LocalDateTime.now(clock).toString))
+      _              <- auditService.audit(AccountDeletionRequested, Map("requestedByName" -> name, "requestedByEmailAddress" -> email.text, "timestamp" -> LocalDateTime.now(clock).toString))
     } yield ticketResponse
   }
 
-  def request2SVRemoval(userId: UserId, name: String, email: String)(implicit hc: HeaderCarrier): Future[TicketResult] = {
+  def request2SVRemoval(userId: UserId, name: String, email: LaxEmailAddress)(implicit hc: HeaderCarrier): Future[TicketResult] = {
     val remove2SVTicket = DeskproTicket.removeDeveloper2SV(name, email)
 
     for {
       ticketResponse <- deskproConnector.createTicket(userId, remove2SVTicket)
-      _              <- auditService.audit(Remove2SVRequested, Map("requestedByEmailAddress" -> email, "timestamp" -> LocalDateTime.now(clock).toString))
+      _              <- auditService.audit(Remove2SVRequested, Map("requestedByEmailAddress" -> email.text, "timestamp" -> LocalDateTime.now(clock).toString))
     } yield ticketResponse
   }
 
@@ -239,12 +239,12 @@ class ApplicationService @Inject() (
     }
   }
 
-  def userLogoutSurveyCompleted(email: String, name: String, rating: String, improvementSuggestions: String)(implicit hc: HeaderCarrier): Future[AuditResult] = {
+  def userLogoutSurveyCompleted(email: LaxEmailAddress, name: String, rating: String, improvementSuggestions: String)(implicit hc: HeaderCarrier): Future[AuditResult] = {
 
     auditService.audit(
       UserLogoutSurveyCompleted,
       Map(
-        "userEmailAddress"       -> email,
+        "userEmailAddress"       -> email.text,
         "userName"               -> name,
         "satisfactionRating"     -> rating,
         "improvementSuggestions" -> improvementSuggestions,
@@ -258,11 +258,11 @@ class ApplicationService @Inject() (
       application: Application,
       newApplicationName: String,
       requesterName: String,
-      requesterEmail: String
+      requesterEmail: LaxEmailAddress
     )(implicit hc: HeaderCarrier
     ) = {
 
-    def createDeskproTicket(application: Application, newApplicationName: String, requesterName: String, requesterEmail: String) = {
+    def createDeskproTicket(application: Application, newApplicationName: String, requesterName: String, requesterEmail: LaxEmailAddress) = {
       val previousAppName = application.name
       val appId           = application.id
 
@@ -319,9 +319,9 @@ object ApplicationService {
 
     def removeTeamMember(
         applicationId: ApplicationId,
-        teamMemberToDelete: String,
-        requestingEmail: String,
-        adminsToEmail: Set[String]
+        teamMemberToDelete: LaxEmailAddress,
+        requestingEmail: LaxEmailAddress,
+        adminsToEmail: Set[LaxEmailAddress]
       )(implicit hc: HeaderCarrier
       ): Future[ApplicationUpdateSuccessful]
     def fetchApplicationById(id: ApplicationId)(implicit hc: HeaderCarrier): Future[Option[Application]]

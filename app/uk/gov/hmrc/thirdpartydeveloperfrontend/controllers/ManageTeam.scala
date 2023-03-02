@@ -39,6 +39,8 @@ import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.controllers.AddTeam
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.controllers.{AddTeamMemberPageMode, ApplicationViewModel}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.DeveloperSession
 import uk.gov.hmrc.thirdpartydeveloperfrontend.service._
+import uk.gov.hmrc.apiplatform.modules.common.domain.models.LaxEmailAddress
+import uk.gov.hmrc.apiplatform.modules.common.domain.models.LaxEmailAddress.StringSyntax
 
 @Singleton
 class ManageTeam @Inject() (
@@ -108,7 +110,7 @@ class ManageTeam @Inject() (
 
       def handleValidForm(form: AddTeamMemberForm) = {
         applicationService
-          .addTeamMember(request.application, request.developerSession.email, AddCollaborator(form.email, CollaboratorRole.from(form.role).getOrElse(CollaboratorRole.DEVELOPER)))
+          .addTeamMember(request.application, request.developerSession.email, AddCollaborator(form.email.toLaxEmail, CollaboratorRole.from(form.role).getOrElse(CollaboratorRole.DEVELOPER)))
           .map(_ => Redirect(successRedirect)) recover {
           case _: ApplicationNotFound     => NotFound(errorHandler.notFoundTemplate)
           case _: TeamMemberAlreadyExists => createBadRequestResult(AddTeamMemberForm.form.fill(form).withError("email", "team.member.error.emailAddress.already.exists.field"))
@@ -127,7 +129,7 @@ class ManageTeam @Inject() (
 
     application.findCollaboratorByHash(teamMemberHash) match {
       case Some(collaborator) =>
-        successful(Ok(removeTeamMemberView(applicationViewModelFromApplicationRequest, RemoveTeamMemberConfirmationForm.form, collaborator.emailAddress)))
+        successful(Ok(removeTeamMemberView(applicationViewModelFromApplicationRequest, RemoveTeamMemberConfirmationForm.form, collaborator.emailAddress.text)))
       case None               => successful(Redirect(routes.ManageTeam.manageTeam(applicationId, None)))
     }
   }
@@ -137,7 +139,7 @@ class ManageTeam @Inject() (
       form.confirm match {
         case Some("Yes") =>
           applicationService
-            .removeTeamMember(request.application, form.email, request.developerSession.email)
+            .removeTeamMember(request.application, form.email.toLaxEmail, request.developerSession.email)
             .map(_ => Redirect(routes.ManageTeam.manageTeam(applicationId, None)))
         case _           => successful(Redirect(routes.ManageTeam.manageTeam(applicationId, None)))
       }

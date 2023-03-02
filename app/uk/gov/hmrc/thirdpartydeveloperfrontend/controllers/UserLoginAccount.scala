@@ -20,14 +20,13 @@ import java.util.UUID
 import javax.inject.{Inject, Singleton}
 import scala.concurrent.Future.successful
 import scala.concurrent.{ExecutionContext, Future}
-
 import views.html._
-
 import play.api.libs.crypto.CookieSigner
 import play.api.mvc.{Session => PlaySession, _}
+import uk.gov.hmrc.apiplatform.modules.common.domain.models.LaxEmailAddress
+import uk.gov.hmrc.apiplatform.modules.common.domain.models.LaxEmailAddress.StringSyntax
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.play.audit.http.connector.AuditResult
-
 import uk.gov.hmrc.apiplatform.modules.common.services.ApplicationLogger
 import uk.gov.hmrc.apiplatform.modules.mfa.connectors.ThirdPartyDeveloperMfaConnector
 import uk.gov.hmrc.apiplatform.modules.mfa.forms.{MfaAccessCodeForm, SelectLoginMfaForm}
@@ -54,7 +53,7 @@ trait Auditing {
   }
 
   def audit(auditAction: AuditAction, developer: DeveloperSession)(implicit hc: HeaderCarrier): Future[AuditResult] = {
-    auditService.audit(auditAction, Map("developerEmail" -> developer.email, "developerFullName" -> developer.displayedName))
+    auditService.audit(auditAction, Map("developerEmail" -> developer.email.text, "developerFullName" -> developer.displayedName))
   }
 }
 
@@ -153,7 +152,7 @@ class UserLoginAccount @Inject() (
       case (None, true) =>
         // TODO: delete device session cookie --- If Device cookie is going to be refreshed / recreated do we need to delete it?
         thirdPartyDeveloperConnector.fetchDeveloper(userId) flatMap {
-          case Some(developer: Developer) => handleMfaChoices(developer, playSession, login.emailaddress, userAuthenticationResponse.nonce.getOrElse(""))
+          case Some(developer: Developer) => handleMfaChoices(developer, playSession, login.emailaddress.toLaxEmail, userAuthenticationResponse.nonce.getOrElse(""))
           case None                       => throw new UserNotFound
         }
 
@@ -182,8 +181,8 @@ class UserLoginAccount @Inject() (
       .withSession(session + ("userId" -> userId.value.toString)))
   }
 
-  private def handleMfaChoices(developer: Developer, playSession: PlaySession, emailAddress: String, nonce: String)(implicit hc: HeaderCarrier) = {
-    val session: PlaySession = playSession + ("emailAddress" -> emailAddress) + ("nonce" -> nonce)
+  private def handleMfaChoices(developer: Developer, playSession: PlaySession, emailAddress: LaxEmailAddress, nonce: String)(implicit hc: HeaderCarrier) = {
+    val session: PlaySession = playSession + ("emailAddress" -> emailAddress.text) + ("nonce" -> nonce)
 
     (MfaDetailHelper.getAuthAppMfaVerified(developer.mfaDetails), MfaDetailHelper.getSmsMfaVerified(developer.mfaDetails)) match {
       case (None, None)                                                                            => successful(InternalServerError("Access code required but mfa not set up"))
@@ -229,30 +228,30 @@ class UserLoginAccount @Inject() (
 
     requestForm.fold(
       errors => successful(BadRequest(signInView("Sign in", errors))),
-      login =>
+      loginForm =>
         {
           val deviceSessionId = request.cookies.get("DEVICE_SESS_ID").flatMap(x => decodeCookie(x.value)).map(UUID.fromString)
           for {
-            (userAuthenticationResponse, userId) <- sessionService.authenticate(login.emailaddress, login.password, deviceSessionId)
-            response                             <- routeToLoginOr2SV(login, userAuthenticationResponse, request.session, userId)
+            (userAuthenticationResponse, userId) <- sessionService.authenticate(loginForm.emailaddress.toLaxEmail, loginForm.password, deviceSessionId)
+            response                             <- routeToLoginOr2SV(loginForm, userAuthenticationResponse, request.session, userId)
           } yield response
         } recover {
           case _: InvalidEmail       =>
             logger.warn("Login failed due to invalid Email")
-            audit(LoginFailedDueToInvalidEmail, Map("developerEmail" -> login.emailaddress))
-            Unauthorized(signInView("Sign in", LoginForm.invalidCredentials(requestForm, login.emailaddress)))
+            audit(LoginFailedDueToInvalidEmail, Map("developerEmail" -> loginForm.emailaddress))
+            Unauthorized(signInView("Sign in", LoginForm.invalidCredentials(requestForm, loginForm.emailaddress)))
           case _: InvalidCredentials =>
             logger.warn("Login failed due to invalid credentials")
-            audit(LoginFailedDueToInvalidPassword, Map("developerEmail" -> login.emailaddress))
-            Unauthorized(signInView("Sign in", LoginForm.invalidCredentials(requestForm, login.emailaddress)))
+            audit(LoginFailedDueToInvalidPassword, Map("developerEmail" -> loginForm.emailaddress))
+            Unauthorized(signInView("Sign in", LoginForm.invalidCredentials(requestForm, loginForm.emailaddress)))
           case _: LockedAccount      =>
             logger.warn("Login failed account locked")
-            audit(LoginFailedDueToLockedAccount, Map("developerEmail" -> login.emailaddress))
+            audit(LoginFailedDueToLockedAccount, Map("developerEmail" -> loginForm.emailaddress))
             Locked(accountLockedView())
           case _: UnverifiedAccount  =>
             logger.warn("Login failed unverified account")
-            Forbidden(signInView("Sign in", LoginForm.accountUnverified(requestForm, login.emailaddress)))
-              .withSession("email" -> login.emailaddress)
+            Forbidden(signInView("Sign in", LoginForm.accountUnverified(requestForm, loginForm.emailaddress)))
+              .withSession("email" -> loginForm.emailaddress)
           case _: UserNotFound       =>
             logger.warn("Login failed due to user not found")
             InternalServerError(errorHandler.internalServerErrorTemplate)
@@ -302,7 +301,7 @@ class UserLoginAccount @Inject() (
   private def hasMultipleMfaMethods(developer: Developer): Boolean = hasVerifiedSmsAndAuthApp(developer.mfaDetails)
 
   def authenticateAccessCode(mfaId: MfaId, mfaType: MfaType, userHasMultipleMfa: Boolean): Action[AnyContent] = Action.async { implicit request =>
-    val email: String = request.session.get("emailAddress").get
+    val email: LaxEmailAddress = request.session.get("emailAddress").get.toLaxEmail
 
     def handleMfaSetupReminder(session: Session) = {
       val verifiedMfaDetailsOfOtherTypes = session.developer.mfaDetails.filter(_.verified).filterNot(_.mfaType == mfaType)
@@ -324,7 +323,7 @@ class UserLoginAccount @Inject() (
       } else handleMfaSetupReminder(session).map(withSessionCookie(_, session.sessionId))
     }
 
-    def handleAuthentication(email: String, form: MfaAccessCodeForm, mfaType: MfaType, userHasMultipleMfa: Boolean) = {
+    def handleAuthentication(email: LaxEmailAddress, form: MfaAccessCodeForm, mfaType: MfaType, userHasMultipleMfa: Boolean) = {
       (for {
         session <- sessionService.authenticateAccessCode(email, form.accessCode, request.session.get("nonce").get, mfaId)
         _       <- audit(LoginSucceeded, DeveloperSession.apply(session))
@@ -333,7 +332,7 @@ class UserLoginAccount @Inject() (
         .recover {
           case _: InvalidCredentials =>
             logger.warn("Login failed due to invalid access code")
-            audit(LoginFailedDueToInvalidAccessCode, Map("developerEmail" -> email))
+            audit(LoginFailedDueToInvalidAccessCode, Map("developerEmail" -> email.text))
             handleAccessCodeError(form, mfaId, mfaType, userHasMultipleMfa)
         }
     }
@@ -378,7 +377,8 @@ class UserLoginAccount @Inject() (
     import cats.data.OptionT
     import cats.implicits._
 
-    val email = request.session.get("emailAddress").getOrElse("")
+    val email = request.session.get("emailAddress").map(_.toLaxEmail)
+      .getOrElse(throw new RuntimeException("Unable to get user session data"))// TODO is this ok????
 
     def findDeveloper = {
       (for {

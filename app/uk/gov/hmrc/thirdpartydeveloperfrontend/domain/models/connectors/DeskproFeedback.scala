@@ -19,23 +19,24 @@ package uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.connectors
 import play.api.libs.json.Json
 import play.api.mvc.Request
 import play.mvc.Http.HeaderNames.REFERER
+import uk.gov.hmrc.apiplatform.modules.common.domain.models.LaxEmailAddress
+import uk.gov.hmrc.apiplatform.modules.common.domain.models.LaxEmailAddress.StringSyntax
 import uk.gov.hmrc.http.HeaderCarrier
-
 import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.SignOutSurveyForm
 
 case class Feedback(
-    name: String,
-    email: String,
-    subject: String,
-    rating: String,
-    message: String,
-    referrer: String,
-    javascriptEnabled: String,
-    userAgent: String,
-    authId: String,
-    areaOfTax: String,
-    sessionId: String,
-    service: Option[String]
+                     name: String,
+                     email: LaxEmailAddress,
+                     subject: String,
+                     rating: String,
+                     message: String,
+                     referrer: String,
+                     javascriptEnabled: String,
+                     userAgent: String,
+                     authId: String,
+                     areaOfTax: String,
+                     sessionId: String,
+                     service: Option[String]
   )
 
 object Feedback extends FieldTransformer {
@@ -45,7 +46,7 @@ object Feedback extends FieldTransformer {
   // scalastyle:off parameter.number
   def create(
       name: String,
-      email: String,
+      email: LaxEmailAddress,
       rating: String,
       subject: String,
       message: String,
@@ -75,7 +76,7 @@ object Feedback extends FieldTransformer {
 
     Feedback.create(
       survey.name,
-      survey.email,
+      survey.email.toLaxEmail,
       survey.rating.map(_.toString).getOrElse("-"),
       "Beta feedback submission",
       survey.improvementSuggestions,

@@ -18,18 +18,7 @@ package steps
 
 import java.util.UUID.randomUUID
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.Environment.PRODUCTION
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.{
-  Application,
-  ApplicationState,
-  ApplicationToken,
-  ClientSecret,
-  Collaborator,
-  CollaboratorRole,
-  Environment,
-  Privileged,
-  ROPC,
-  Standard
-}
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.{Application, ApplicationState, ApplicationToken, ClientSecret, Collaborator, CollaboratorRole, Environment, Privileged, ROPC, Standard}
 import io.cucumber.datatable.DataTable
 import io.cucumber.scala.{EN, ScalaDsl}
 import io.cucumber.scala.Implicits._
@@ -40,12 +29,14 @@ import play.api.http.Status._
 import play.api.libs.json.Json
 import stubs._
 import stubs.ApplicationStub.configureUserApplications
+
 import java.time.{LocalDateTime, ZoneOffset}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.ApplicationId
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.ClientId
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.UserId
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.ApplicationWithSubscriptionIds
 import org.scalatest.matchers.should.Matchers
+import uk.gov.hmrc.apiplatform.modules.common.domain.models.LaxEmailAddress
 import utils.ComponentTestDeveloperBuilder
 
 object AppWorld {
@@ -96,7 +87,7 @@ class ApplicationsSteps extends ScalaDsl with EN with Matchers with NavigationSu
     link.getAttribute("href") shouldBe s"${Env.host}/developer/applications/$applicationId/request-check"
   }
 
-  Given("""^I have no application assigned to my email '(.*)'$""") { (email: String) =>
+  Given("""^I have no application assigned to my email '(.*)'$""") { (email: LaxEmailAddress) =>
     ApplicationStub.configureUserApplications(staticUserId)
     AppWorld.userApplicationsOnBackend = Nil
   }
@@ -110,7 +101,7 @@ class ApplicationsSteps extends ScalaDsl with EN with Matchers with NavigationSu
 
   def splitToSecrets(input: String): List[ClientSecret] = input.split(",").map(_.trim).toList.map(s => ClientSecret(randomUUID.toString, s, LocalDateTime.now(ZoneOffset.UTC)))
 
-  Given("""^I have the following applications assigned to my email '(.*)':$""") { (email: String, name: String, data: DataTable) =>
+  Given("""^I have the following applications assigned to my email '(.*)':$""") { (email: LaxEmailAddress, name: String, data: DataTable) =>
     val applications = data.asScalaRawMaps[String, String].toList
 
     val verificationCode = "aVerificationCode"
@@ -153,7 +144,7 @@ class ApplicationsSteps extends ScalaDsl with EN with Matchers with NavigationSu
     configureStubsForApplications(email, AppWorld.userApplicationsOnBackend)
   }
 
-  def configureStubsForApplications(email: String, applications: List[Application]) = {
+  def configureStubsForApplications(email: LaxEmailAddress, applications: List[Application]) = {
 
     ApplicationStub.configureUserApplications(staticUserId, applications.map(ApplicationWithSubscriptionIds.from))
     for (app <- applications) {

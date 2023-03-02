@@ -26,6 +26,7 @@ import pages._
 import play.api.http.Status._
 import play.api.libs.json.{Format, Json}
 import stubs.{DeveloperStub, MfaStub, Stubs}
+import uk.gov.hmrc.apiplatform.modules.common.domain.models.LaxEmailAddress
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.connectors.{LoginRequest, PasswordResetRequest, UserAuthenticationResponse}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.{Developer, LoggedInState, Session}
 import utils.ComponentTestDeveloperBuilder
@@ -49,7 +50,7 @@ class LoginSteps extends ScalaDsl with EN with Matchers with NavigationSugar wit
 
   private val mobileNumber = "+447890123456"
 
-  Given("""^I am successfully logged in with '(.*)' and '(.*)'$""") { (email: String, password: String) =>
+  Given("""^I am successfully logged in with '(.*)' and '(.*)'$""") { (email: LaxEmailAddress, password: String) =>
     goOn(SignInPage.default)
     webDriver.manage().deleteAllCookies()
     webDriver.navigate().refresh()
@@ -100,7 +101,7 @@ class LoginSteps extends ScalaDsl with EN with Matchers with NavigationSugar wit
     DeveloperStub.setUpGetCombinedApis()
   }
 
-  Given("""^'(.*)' session is uplifted to LoggedIn$""") { email: String =>
+  Given("""^'(.*)' session is uplifted to LoggedIn$""") { email: LaxEmailAddress =>
     if (email != TestContext.developer.email) {
       throw new IllegalArgumentException(s"Can only know how to uplift ${TestContext.developer.email}'s session")
     }
@@ -139,7 +140,7 @@ class LoginSteps extends ScalaDsl with EN with Matchers with NavigationSugar wit
     }
   }
 
-  Then("""^I should be sent an email with a link to reset for '(.*)'$""") { email: String =>
+  Then("""^I should be sent an email with a link to reset for '(.*)'$""") { email: LaxEmailAddress =>
     DeveloperStub.verifyResetPassword(PasswordResetRequest(email))
   }
 

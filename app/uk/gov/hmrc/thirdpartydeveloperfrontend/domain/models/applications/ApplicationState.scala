@@ -16,6 +16,8 @@
 
 package uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications
 
+import uk.gov.hmrc.apiplatform.modules.common.domain.models.LaxEmailAddress
+
 import java.time.{LocalDateTime, ZoneOffset}
 
 case class ApplicationState(
@@ -38,18 +40,18 @@ object ApplicationState {
 
   val testing = ApplicationState(State.TESTING, None, None)
 
-  def pendingGatekeeperApproval(requestedByEmail: String, requestedByName: String) =
-    ApplicationState(State.PENDING_GATEKEEPER_APPROVAL, Some(requestedByEmail), Some(requestedByName))
+  def pendingGatekeeperApproval(requestedByEmail: LaxEmailAddress, requestedByName: String) =
+    ApplicationState(State.PENDING_GATEKEEPER_APPROVAL, Some(requestedByEmail.text), Some(requestedByName))
 
-  def pendingResponsibleIndividualVerification(requestedByEmail: String, requestedByName: String) =
-    ApplicationState(State.PENDING_RESPONSIBLE_INDIVIDUAL_VERIFICATION, Some(requestedByEmail), Some(requestedByName))
+  def pendingResponsibleIndividualVerification(requestedByEmail: LaxEmailAddress, requestedByName: String) =
+    ApplicationState(State.PENDING_RESPONSIBLE_INDIVIDUAL_VERIFICATION, Some(requestedByEmail.text), Some(requestedByName))
 
-  def pendingRequesterVerification(requestedByEmail: String, requestedByName: String, verificationCode: String) =
-    ApplicationState(State.PENDING_REQUESTER_VERIFICATION, Some(requestedByEmail), Some(requestedByName), Some(verificationCode))
+  def pendingRequesterVerification(requestedByEmail: LaxEmailAddress, requestedByName: String, verificationCode: String) =
+    ApplicationState(State.PENDING_REQUESTER_VERIFICATION, Some(requestedByEmail.text), Some(requestedByName), Some(verificationCode))
 
-  def preProduction(requestedByEmail: String, requestedByName: String) =
-    ApplicationState(State.PRE_PRODUCTION, Some(requestedByEmail), Some(requestedByName), None)
+  def preProduction(requestedByEmail: LaxEmailAddress, requestedByName: String) =
+    ApplicationState(State.PRE_PRODUCTION, Some(requestedByEmail.text), Some(requestedByName), None)
 
-  def production(requestedByEmail: String, requestedByName: String, verificationCode: String) =
-    ApplicationState(State.PRODUCTION, Some(requestedByEmail), Some(requestedByName), Some(verificationCode))
+  def production(requestedByEmail: LaxEmailAddress, requestedByName: String, verificationCode: String) =
+    ApplicationState(State.PRODUCTION, Some(requestedByEmail.text), Some(requestedByName), Some(verificationCode))
 }

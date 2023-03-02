@@ -18,12 +18,12 @@ package uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers
 
 import java.net.URLEncoder
 import java.nio.charset.StandardCharsets
-
 import play.api.libs.json.{Format, Json}
+import uk.gov.hmrc.apiplatform.modules.common.domain.models.LaxEmailAddress
 
 case class DeveloperSession(session: Session) {
   val developer: Developer         = session.developer
-  val email: String                = developer.email
+  val email: LaxEmailAddress = developer.email
   val loggedInState: LoggedInState = session.loggedInState
 
   val displayedName: String = s"${developer.firstName} ${developer.lastName}"
@@ -59,7 +59,7 @@ case object loggedInDeveloper extends UserStatus
 
 case object AtLeastPartLoggedInEnablingMfa extends UserStatus
 
-case class User(email: String, verified: Option[Boolean])
+case class User(email: LaxEmailAddress, verified: Option[Boolean])
 
 object User {
   implicit val format: Format[User] = Json.format[User]

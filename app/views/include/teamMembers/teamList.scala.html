@@ -21,8 +21,9 @@
 @import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.Application
 @import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.SpliceCSRFToken
 @import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.routes
+@import uk.gov.hmrc.apiplatform.modules.common.domain.models.LaxEmailAddress
 
-@(app: Application,role: CollaboratorRole, loggedIn: DeveloperSession, addTeamMemberUrl: Call, addMemberStyle: AnchorStyle, createRemoveLink : (ApplicationId, String) => Call)(implicit request: play.api.mvc.Request[Any])
+@(app: Application,role: CollaboratorRole, loggedIn: DeveloperSession, addTeamMemberUrl: Call, addMemberStyle: AnchorStyle, createRemoveLink : (ApplicationId, LaxEmailAddress) => Call)(implicit request: play.api.mvc.Request[Any])
 
 @if(role.isDeveloper) {
  <div class="govuk-warning-text">
@@ -55,7 +56,7 @@
     data-teamMember-remove-url="@SpliceCSRFToken(routes.ManageTeam.removeTeamMemberAction(app.id))"
     class="govuk-table__body"
   >
-    @for((teamMember, index) <- app.collaborators.toSeq.sortBy(_.emailAddress).zipWithIndex) {
+    @for((teamMember, index) <- app.collaborators.toSeq.sortBy(_.emailAddress.text).zipWithIndex) {
       <tr class="govuk-table__row" data-teamMember-row="@teamMember.emailAddress">
         <td class="govuk-table__cell center-table-text">@teamMember.emailAddress</td>
         <td class="govuk-table__cell center-table-text">
