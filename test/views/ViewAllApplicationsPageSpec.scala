@@ -38,12 +38,14 @@ import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.{LocalUserIdTracker, WithCS
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.connectors.TermsOfUseInvitation
 import uk.gov.hmrc.apiplatform.modules.submissions.domain.models.Submission
 import java.time.Instant
+import uk.gov.hmrc.apiplatform.modules.submissions.SubmissionsTestData
 
 class ViewAllApplicationsPageSpec extends CommonViewSpec
     with WithCSRFAddToken
     with LocalUserIdTracker
     with DeveloperSessionBuilder
-    with DeveloperBuilder {
+    with DeveloperBuilder
+    with SubmissionsTestData {
 
   def isGreenAddProductionApplicationButtonVisible(document: Document): Boolean = {
     val href = AddApplicationRoutes.addApplicationPrincipal.url
@@ -95,6 +97,12 @@ class ViewAllApplicationsPageSpec extends CommonViewSpec
 
     def hidesTermsOfUseBlueBox()(implicit document: Document) =
       elementExistsByText(document, "h2", "Important") shouldBe false
+
+    def showsTermsOfUseGreenBox()(implicit document: Document) =
+      elementExistsByText(document, "h2", "Terms of use") shouldBe true
+
+    def hidesTermsOfUseGreenBox()(implicit document: Document) =
+      elementExistsByText(document, "h2", "Terms of use") shouldBe false
 
     def hidesSubordinateAppsHeading()(implicit document: Document) =
       elementExistsByText(document, "th", s"$subordinateCapitalized applications") shouldBe false
@@ -148,7 +156,7 @@ class ViewAllApplicationsPageSpec extends CommonViewSpec
       )
     }
 
-    val applicationId = ApplicationId("1111")
+    // val applicationId = ApplicationId("1111")
     val appName       = "App name 1"
     val appUserRole   = CollaboratorRole.ADMINISTRATOR
     val appCreatedOn  = LocalDateTime.now(ZoneOffset.UTC).minusDays(1)
@@ -246,17 +254,44 @@ class ViewAllApplicationsPageSpec extends CommonViewSpec
         showsSubordinateAppsHeading()
         showsPrincipalAppsHeading()
         showsTermsOfUseBlueBox()
+        hidesTermsOfUseGreenBox()
       }
 
-      "work in Qa/Dev with bo invites to display" in new QaAndDev with Setup {
-        val invites = List(TermsOfUseInvitation(applicationId, Instant.now(), Instant.now(), Instant.now()))
-        
+      "work in Qa/Dev with no invites to display" in new QaAndDev with Setup {
         implicit val document = Jsoup.parse(renderPage(sandboxAppSummaries, productionAppSummaries, Set(applicationId), List.empty).body)
 
         showsAppName(appName)
         showsSubordinateAppsHeading()
         showsPrincipalAppsHeading()
         hidesTermsOfUseBlueBox()
+        hidesTermsOfUseGreenBox()
+      }
+    }
+
+    "show the applications page with green terms of use box" should {
+      "work in Qa/Dev with submissions in review" in new QaAndDev with Setup {
+        val invites = List(TermsOfUseInvitation(applicationId, Instant.now(), Instant.now(), Instant.now()))
+        val submissions = List(submittedSubmission)
+        
+        implicit val document = Jsoup.parse(renderPage(sandboxAppSummaries, productionAppSummaries, Set(applicationId), invites, submissions).body)
+
+        showsAppName(appName)
+        showsSubordinateAppsHeading()
+        showsPrincipalAppsHeading()
+        hidesTermsOfUseBlueBox()
+        showsTermsOfUseGreenBox()
+      }
+
+      "work in Qa/Dev with no submissions in review" in new QaAndDev with Setup {
+        val invites = List(TermsOfUseInvitation(applicationId, Instant.now(), Instant.now(), Instant.now()))
+        
+        implicit val document = Jsoup.parse(renderPage(sandboxAppSummaries, productionAppSummaries, Set(applicationId), invites, List.empty).body)
+
+        showsAppName(appName)
+        showsSubordinateAppsHeading()
+        showsPrincipalAppsHeading()
+        showsTermsOfUseBlueBox()
+        hidesTermsOfUseGreenBox()
       }
     }
 
