@@ -8,6 +8,7 @@ telephone.error.required.field=Provide your telephone number
 
 comments.error.required.field=Tell us what you need help with
 comments.error.maxLength.field=You entered too much text - keep it under 3,000 characters
+comments.error.spam.field=Your request looks like spam so cannot be submitted
 
 ipAllowlist.addAnother.confirmation.no.choice.field = Tell us if you want to add another IP address
 ipAllowlist.cidrBlock.invalid = Enter a CIDR notation in the correct format, for example, 1.1.1.0/24

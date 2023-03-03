@@ -18,15 +18,14 @@ package uk.gov.hmrc.thirdpartydeveloperfrontend
 
 import java.net.URL
 import scala.util.{Failure, Try}
-
 import org.apache.commons.net.util.SubnetUtils
-
 import play.api.data.Forms
 import play.api.data.Forms.{optional, text}
 import play.api.data.validation.{Constraint, Invalid, Valid, ValidationError, ValidationResult}
 import uk.gov.hmrc.emailaddress.EmailAddress
-
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.Environment
+
+import scala.util.matching.Regex
 
 package object controllers {
 
@@ -52,6 +51,7 @@ package object controllers {
     val fullnameMaxLengthKey                = "fullname.error.maxLength.field"
     val commentsRequiredKey                 = "comments.error.required.field"
     val commentsMaxLengthKey                = "comments.error.maxLength.field"
+    val commentsSpamKey                     = "comments.error.spam.field"
     val ipAllowlistAddAnotherNoChoiceKey    = "ipAllowlist.addAnother.confirmation.no.choice.field"
     val ipAllowlistInvalidCidrBlockKey      = "ipAllowlist.cidrBlock.invalid"
     val ipAllowlistPrivateCidrBlockKey      = "ipAllowlist.cidrBlock.invalid.private"
@@ -250,7 +250,7 @@ package object controllers {
 
   def telephoneValidator = Forms.text.verifying(telephoneRequiredKey, telephone => telephone.length > 0)
 
-  def commentsValidator = textValidator(commentsRequiredKey, commentsMaxLengthKey, 3000)
+  def commentsValidator = supportRequestValidator(commentsRequiredKey, commentsMaxLengthKey,3000)
 
   def cidrBlockValidator = {
     val privateNetworkRanges = Set(
@@ -278,6 +278,13 @@ package object controllers {
 
   def textValidator(requiredKey: String, maxLengthKey: String, maxLength: Int = 30) =
     Forms.text.verifying(requiredKey, s => s.trim.length > 0).verifying(maxLengthKey, s => s.trim.length <= maxLength)
+
+  def supportRequestValidator(requiredKey: String, maxLengthKey: String, maxLength: Int = 30) = {
+    val spambotCommentRegex = """(?i).*Como.+puedo.+iniciar.*""".r
+
+    textValidator(requiredKey, maxLengthKey, maxLength)
+      .verifying(commentsSpamKey, s => spambotCommentRegex.findFirstMatchIn(s).isEmpty)
+  }
 
   def emailValidator(emailRequiredMessage: String = emailaddressRequiredKey, maxLength: Int = 320) = {
     Forms.text
