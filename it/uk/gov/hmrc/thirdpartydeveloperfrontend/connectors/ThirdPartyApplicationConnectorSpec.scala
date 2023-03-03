@@ -39,6 +39,7 @@ import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.apidefinitions.ApiC
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.apidefinitions.ApiVersion
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.apidefinitions.ApiIdentifier
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.UserId
+import uk.gov.hmrc.apiplatform.modules.common.domain.models.LaxEmailAddress.StringSyntax
 
 class ThirdPartyApplicationConnectorSpec extends BaseConnectorIntegrationSpec with GuiceOneAppPerSuite with WireMockExtensions
     with CollaboratorTracker with LocalUserIdTracker with FixedClock {
@@ -85,7 +86,7 @@ class ThirdPartyApplicationConnectorSpec extends BaseConnectorIntegrationSpec wi
       "My Application",
       connector.environment,
       Some("Description"),
-      List("admin@example.com".asAdministratorCollaborator),
+      List("admin@example.com".toLaxEmail.asAdministratorCollaborator),
       Standard(List("http://example.com/redirect"), Some("http://example.com/terms"), Some("http://example.com/privacy"))
     )
 
@@ -99,7 +100,7 @@ class ThirdPartyApplicationConnectorSpec extends BaseConnectorIntegrationSpec wi
       Period.ofDays(547),
       connector.environment,
       Some("Description"),
-      Set("john@example.com".asAdministratorCollaborator),
+      Set("john@example.com".toLaxEmail.asAdministratorCollaborator),
       Standard(List("http://example.com/redirect"), Some("http://example.com/terms"), Some("http://example.com/privacy")),
       state = ApplicationState(State.PENDING_GATEKEEPER_APPROVAL, Some("john@example.com"), Some("John Dory"))
     )
@@ -333,7 +334,7 @@ class ThirdPartyApplicationConnectorSpec extends BaseConnectorIntegrationSpec wi
 
   "requestUplift" should {
     val applicationName = "applicationName"
-    val email           = "john.requestor@example.com"
+    val email           = "john.requestor@example.com".toLaxEmail
     val upliftRequest   = UpliftRequest(applicationName, email)
     val url             = s"/application/${applicationId.value}/request-uplift"
 
@@ -381,7 +382,7 @@ class ThirdPartyApplicationConnectorSpec extends BaseConnectorIntegrationSpec wi
   }
 
   "updateApproval" should {
-    val updateRequest = CheckInformation(contactDetails = Some(ContactDetails("name", "email", "telephone")))
+    val updateRequest = CheckInformation(contactDetails = Some(ContactDetails("name", "email".toLaxEmail, "telephone")))
     val url           = s"/application/${applicationId.value}/check-information"
 
     "return success response in case of a 204 on backend " in new Setup {
@@ -413,9 +414,9 @@ class ThirdPartyApplicationConnectorSpec extends BaseConnectorIntegrationSpec wi
   }
 
   "removeTeamMember" should {
-    val email         = "john.bloggs@example.com"
-    val admin         = "admin@example.com"
-    val adminsToEmail = Set("otheradmin@example.com", "anotheradmin@example.com")
+    val email         = "john.bloggs@example.com".toLaxEmail
+    val admin         = "admin@example.com".toLaxEmail
+    val adminsToEmail = Set("otheradmin@example.com".toLaxEmail, "anotheradmin@example.com".toLaxEmail)
     val url           = s"/application/${applicationId.value}/collaborator/delete"
 
     "return success" in new Setup {
@@ -469,7 +470,7 @@ class ThirdPartyApplicationConnectorSpec extends BaseConnectorIntegrationSpec wi
     def tpaClientSecret(clientSecretId: String, clientSecretValue: Option[String] = None): TPAClientSecret =
       TPAClientSecret(clientSecretId, "secret-name", clientSecretValue, LocalDateTime.now(ZoneOffset.UTC), None)
 
-    val actor               = CollaboratorActor("john.requestor@example.com")
+    val actor               = CollaboratorActor("john.requestor@example.com".toLaxEmail)
     val timestamp           = LocalDateTime.now(clock)
     val clientSecretRequest = ClientSecretRequest(actor, timestamp)
     val url                 = s"/application/${applicationId.value}/client-secret"

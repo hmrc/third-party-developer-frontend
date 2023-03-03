@@ -150,7 +150,7 @@ trait PasswordChange {
         connector.changePassword(payload) map {
           _ => success
         } recover {
-          case _: UnverifiedAccount  => Forbidden(error(ChangePasswordForm.accountUnverified(ChangePasswordForm.form, email)))
+          case _: UnverifiedAccount  => Forbidden(error(ChangePasswordForm.accountUnverified(ChangePasswordForm.form, email.text)))
               .withSession("email" -> email.text)
           case _: InvalidCredentials =>
             auditService.audit(PasswordChangeFailedDueToInvalidCredentials(email))

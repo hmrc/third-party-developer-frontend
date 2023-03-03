@@ -17,13 +17,11 @@
 package views
 
 import java.time.{LocalDateTime, Period, ZoneOffset}
-
 import org.jsoup.Jsoup
 import views.helper.CommonViewSpec
 import views.html.RedirectsView
-
 import play.api.test.FakeRequest
-
+import uk.gov.hmrc.apiplatform.modules.common.domain.models.LaxEmailAddress.StringSyntax
 import uk.gov.hmrc.thirdpartydeveloperfrontend.builder.{DeveloperBuilder, DeveloperSessionBuilder}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.CollaboratorRole.{ADMINISTRATOR, DEVELOPER}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications._
@@ -36,8 +34,8 @@ class RedirectsSpec extends CommonViewSpec with WithCSRFAddToken with Collaborat
 
   val appId             = ApplicationId("1234")
   val clientId          = ClientId("clientId123")
-  val loggedInDeveloper = buildDeveloperSession(loggedInState = LoggedInState.LOGGED_IN, buildDeveloperWithRandomId("developer@example.com", "John", "Doe"))
-  val loggedInDev       = buildDeveloperSession(loggedInState = LoggedInState.LOGGED_IN, buildDeveloperWithRandomId("developer2@example.com", "Billy", "Fontaine"))
+  val loggedInDeveloper = buildDeveloperWithRandomId("developer@example.com".toLaxEmail, "John", "Doe").loggedIn
+  val loggedInDev       = buildDeveloperWithRandomId("developer2@example.com".toLaxEmail, "Billy", "Fontaine").loggedIn
 
   val application = Application(
     appId,
@@ -50,7 +48,7 @@ class RedirectsSpec extends CommonViewSpec with WithCSRFAddToken with Collaborat
     Environment.PRODUCTION,
     Some("Description 1"),
     Set(loggedInDeveloper.email.asAdministratorCollaborator, loggedInDev.email.asDeveloperCollaborator),
-    state = ApplicationState.production(loggedInDeveloper.email, loggedInDeveloper.displayedName, ""),
+    state = ApplicationState.production(loggedInDeveloper.email.text, loggedInDeveloper.displayedName, ""),
     access = Standard(redirectUris = List.empty, termsAndConditionsUrl = None)
   )
 

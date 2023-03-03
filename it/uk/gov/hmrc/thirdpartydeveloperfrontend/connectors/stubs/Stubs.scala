@@ -153,7 +153,7 @@ object ApplicationStub {
   }
 
   def configureUserApplications(email: LaxEmailAddress, applications: List[Application] = Nil, status: Int = OK) = {
-    val encodedEmail = URLEncoder.encode(email, "UTF-8")
+    val encodedEmail = URLEncoder.encode(email.text, "UTF-8")
 
     def stubResponse(environment: Environment, applications: List[Application]) = {
       stubFor(

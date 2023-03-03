@@ -30,15 +30,16 @@ import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.LoggedInState
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.ViewHelpers._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils._
+import uk.gov.hmrc.apiplatform.modules.common.domain.models.LaxEmailAddress.StringSyntax
 
 class DeleteApplicationSpec extends CommonViewSpec with WithCSRFAddToken with CollaboratorTracker with LocalUserIdTracker
     with DeveloperSessionBuilder
-    with DeveloperBuilder {
+    with DeveloperTestData {
 
   val deleteApplicationView = app.injector.instanceOf[DeleteApplicationView]
   val appId                 = ApplicationId("1234")
   val clientId              = ClientId("clientId123")
-  val loggedInDeveloper     = buildDeveloperSession(loggedInState = LoggedInState.LOGGED_IN, buildDeveloper("developer@example.com", "John", "Doe", None))
+  val loggedInDeveloper     = JoeBloggs.loggedIn
 
   val application             = Application(
     appId,
@@ -51,7 +52,7 @@ class DeleteApplicationSpec extends CommonViewSpec with WithCSRFAddToken with Co
     Environment.PRODUCTION,
     Some("Description 1"),
     Set(loggedInDeveloper.email.asAdministratorCollaborator),
-    state = ApplicationState.production(loggedInDeveloper.email, loggedInDeveloper.displayedName, ""),
+    state = ApplicationState.production(loggedInDeveloper.email.text, loggedInDeveloper.displayedName, ""),
     access = Standard(redirectUris = List("https://red1", "https://red2"), termsAndConditionsUrl = Some("http://tnc-url.com"))
   )
   val prodAppId               = ApplicationId("prod123")
@@ -98,12 +99,12 @@ class DeleteApplicationSpec extends CommonViewSpec with WithCSRFAddToken with Co
           elementIdentifiedByAttrWithValueContainsText(document, "a", "class", "button", "Request deletion") shouldBe false
           elementIdentifiedByAttrWithValueContainsText(document, "a", "class", "button", "Continue") shouldBe false
           elementExistsByText(document, "div", "You cannot delete this application because you're not an administrator.") shouldBe true
-          elementExistsByText(document, "p", s"Ask the administrator ${loggedInDeveloper.email} to delete it.") shouldBe true
+          elementExistsByText(document, "p", s"Ask the administrator ${loggedInDeveloper.email.text} to delete it.") shouldBe true
         }
       }
 
       "there are multiple administrators" in {
-        val extraAdmin = "admin@test.com".asAdministratorCollaborator
+        val extraAdmin = "admin@test.com".toLaxEmail.asAdministratorCollaborator
         Seq(prodApp.copy(collaborators = prodApp.collaborators + extraAdmin), sandboxApp.copy(collaborators = sandboxApp.collaborators + extraAdmin))
           .foreach { application =>
             val request = FakeRequest().withCSRFToken
@@ -117,7 +118,7 @@ class DeleteApplicationSpec extends CommonViewSpec with WithCSRFAddToken with Co
             elementIdentifiedByAttrWithValueContainsText(document, "a", "class", "button", "Continue") shouldBe false
             elementExistsByText(document, "div", "You cannot delete this application because you're not an administrator.") shouldBe true
             elementExistsByText(document, "p", "Ask one of these administrators to delete it:") shouldBe true
-            application.collaborators foreach { admin => elementExistsByText(document, "li", admin.emailAddress) shouldBe true }
+            application.collaborators foreach { admin => elementExistsByText(document, "li", admin.emailAddress.text) shouldBe true }
           }
       }
     }

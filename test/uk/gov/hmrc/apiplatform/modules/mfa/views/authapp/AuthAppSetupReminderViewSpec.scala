@@ -18,29 +18,22 @@ package uk.gov.hmrc.apiplatform.modules.mfa.views.authapp
 
 import org.jsoup.Jsoup
 import views.helper.CommonViewSpec
-
 import play.api.mvc.AnyContentAsEmpty
 import play.api.test.{FakeRequest, StubMessagesFactory}
-
 import uk.gov.hmrc.apiplatform.modules.mfa.views.html.authapp.AuthAppSetupReminderView
-import uk.gov.hmrc.thirdpartydeveloperfrontend.builder.{DeveloperBuilder, DeveloperSessionBuilder}
+import uk.gov.hmrc.thirdpartydeveloperfrontend.builder.{DeveloperTestData, DeveloperSessionBuilder}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.{DeveloperSession, LoggedInState}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.{LocalUserIdTracker, WithCSRFAddToken}
-import uk.gov.hmrc.thirdpartydeveloperfrontend.builder.DeveloperTestData
 
 class AuthAppSetupReminderViewSpec extends CommonViewSpec
     with WithCSRFAddToken
-    with DeveloperSessionBuilder
     with DeveloperTestData
+    with DeveloperSessionBuilder
     with LocalUserIdTracker with StubMessagesFactory {
 
   implicit val request: FakeRequest[AnyContentAsEmpty.type] = FakeRequest()
 
-  implicit val loggedIn: DeveloperSession                = buildDeveloperSession(
-    loggedInState =
-      LoggedInState.LOGGED_IN,
-    JoeBloggs
-  )
+  implicit val loggedIn: DeveloperSession                = JoeBloggs.loggedIn
   val authAppSetupReminderView: AuthAppSetupReminderView = app.injector.instanceOf[AuthAppSetupReminderView]
 
   "AuthAppSetupReminderView" should {

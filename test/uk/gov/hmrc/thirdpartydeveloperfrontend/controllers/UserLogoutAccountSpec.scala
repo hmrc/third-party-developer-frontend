@@ -153,7 +153,7 @@ class UserLogoutAccountSpec extends BaseControllerSpec with WithCSRFAddToken wit
         .thenReturn(Future.successful(Success))
 
       val form    =
-        SignOutSurveyForm(Some(2), "no suggestions", s"${developerSession.developer.firstName} ${developerSession.developer.lastName}", developerSession.email, isJavascript = true)
+        SignOutSurveyForm(Some(2), "no suggestions", s"${developerSession.developer.firstName} ${developerSession.developer.lastName}", developerSession.email.text, isJavascript = true)
       val request = loggedInRequestWithCsrfToken.withFormUrlEncodedBody(
         "rating"                 -> form.rating.get.toString,
         "email"                  -> form.email,
@@ -186,7 +186,7 @@ class UserLogoutAccountSpec extends BaseControllerSpec with WithCSRFAddToken wit
         None,
         "no suggestions",
         s"${developerSession.developer.firstName} ${developerSession.developer.lastName}",
-        developerSession.developer.email,
+        developerSession.developer.email.text,
         isJavascript = true
       )
       val request = loggedInRequestWithCsrfToken.withFormUrlEncodedBody(

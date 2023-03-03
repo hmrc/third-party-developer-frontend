@@ -27,6 +27,7 @@ import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.TermsOfUseVersion
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.services.TermsOfUseService.TermsOfUseAgreementDetails
 import uk.gov.hmrc.thirdpartydeveloperfrontend.mocks.service.TermsOfUseServiceMock
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.{HmrcSpec, LocalUserIdTracker}
+import uk.gov.hmrc.apiplatform.modules.common.domain.models.LaxEmailAddress.StringSyntax
 
 class TermsOfUseVersionServiceSpec extends HmrcSpec with ApplicationBuilder with LocalUserIdTracker {
 
@@ -35,7 +36,7 @@ class TermsOfUseVersionServiceSpec extends HmrcSpec with ApplicationBuilder with
 
     val upliftJourneySwitch = mock[UpliftJourneySwitch]
     val request             = FakeRequest()
-    val email               = "test@example.com"
+    val email               = "test@example.com".toLaxEmail
     val application         = buildApplication(email)
     val underTest           = new TermsOfUseVersionService(upliftJourneySwitch, termsOfUseServiceMock)
 

@@ -25,7 +25,7 @@ import uk.gov.hmrc.apiplatform.modules.mfa.views.html.SecurityPreferencesNoItems
 import uk.gov.hmrc.thirdpartydeveloperfrontend.builder.DeveloperBuilder
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.{LocalUserIdTracker, WithCSRFAddToken}
 
-class SecurityPreferencesNoItemsViewSpec extends CommonViewSpec with WithCSRFAddToken with DeveloperBuilder with LocalUserIdTracker {
+class SecurityPreferencesNoItemsViewSpec extends CommonViewSpec with WithCSRFAddToken {
   implicit val request               = FakeRequest()
   val securityPreferencesNoItemsView = app.injector.instanceOf[SecurityPreferencesNoItemsView]
 

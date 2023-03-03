@@ -30,6 +30,7 @@ import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.connectors._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.{LoggedInState, Session, SessionInvalid, UpdateProfileRequest}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.{InvalidCredentials, InvalidEmail, LockedAccount, UnverifiedAccount}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.{LocalUserIdTracker, WireMockExtensions}
+import uk.gov.hmrc.apiplatform.modules.common.domain.models.LaxEmailAddress.StringSyntax
 
 class ThirdPartyDeveloperConnectorIntegrationSpec extends BaseConnectorIntegrationSpec
     with GuiceOneAppPerSuite with DeveloperBuilder with LocalUserIdTracker with WireMockExtensions {
@@ -49,7 +50,7 @@ class ThirdPartyDeveloperConnectorIntegrationSpec extends BaseConnectorIntegrati
   trait Setup {
     implicit val hc: HeaderCarrier = HeaderCarrier()
 
-    val userEmail = "thirdpartydeveloper@example.com"
+    val userEmail = "thirdpartydeveloper@example.com".toLaxEmail
     val userId    = idOf(userEmail)
 
     val userPassword                    = "password1!"
@@ -215,7 +216,7 @@ class ThirdPartyDeveloperConnectorIntegrationSpec extends BaseConnectorIntegrati
 
   "Resend verification" should {
     "send verification mail" in new Setup {
-      val email            = "john.smith@example.com"
+      val email            = "john.smith@example.com".toLaxEmail
       implicit val writes1 = Json.writes[ThirdPartyDeveloperConnector.FindUserIdRequest]
       implicit val writes2 = Json.writes[ThirdPartyDeveloperConnector.FindUserIdResponse]
 
@@ -240,7 +241,7 @@ class ThirdPartyDeveloperConnectorIntegrationSpec extends BaseConnectorIntegrati
   }
 
   "Reset password" should {
-    val email   = "user@example.com"
+    val email   = "user@example.com".toLaxEmail
     val request = PasswordResetRequest(email)
 
     "successfully request reset" in new Setup {
@@ -288,7 +289,7 @@ class ThirdPartyDeveloperConnectorIntegrationSpec extends BaseConnectorIntegrati
     }
 
     "successfully reset password" in new Setup {
-      val passwordReset = PasswordReset("user@example.com", "newPassword")
+      val passwordReset = PasswordReset("user@example.com".toLaxEmail, "newPassword")
       val payload       = Json.toJson(passwordReset)
       val encryptedBody = SecretRequest(payloadEncryption.encrypt(payload).as[String])
 
@@ -364,7 +365,7 @@ class ThirdPartyDeveloperConnectorIntegrationSpec extends BaseConnectorIntegrati
   }
 
   "change password" should {
-    val changePasswordRequest = ChangePassword("email@example.com", "oldPassword123", "newPassword321")
+    val changePasswordRequest = ChangePassword("email@example.com".toLaxEmail, "oldPassword123", "newPassword321")
     val payload               = Json.toJson(changePasswordRequest)
 
     "throw Invalid Credentials if the response is Unauthorised" in new Setup {

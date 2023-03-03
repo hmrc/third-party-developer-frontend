@@ -20,6 +20,7 @@ import java.time.{LocalDateTime, Period}
 
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.HmrcSpec
+import uk.gov.hmrc.apiplatform.modules.common.domain.models.LaxEmailAddress
 
 class ApplicationSpec extends HmrcSpec {
   val url            = "http://example.com"
@@ -27,7 +28,7 @@ class ApplicationSpec extends HmrcSpec {
 
   val importantSubmissionData = ImportantSubmissionData(
     None,
-    ResponsibleIndividual(ResponsibleIndividual.Name("bob"), ResponsibleIndividual.EmailAddress("bob")),
+    ResponsibleIndividual(ResponsibleIndividual.Name("bob"), LaxEmailAddress("bob")),
     Set.empty[ServerLocation],
     TermsAndConditionsLocation.NoneProvided,
     PrivacyPolicyLocation.NoneProvided,

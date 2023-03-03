@@ -19,16 +19,14 @@ package uk.gov.hmrc.thirdpartydeveloperfrontend.controllers
 import java.time.LocalDateTime
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future.successful
-
 import org.mockito.ArgumentCaptor
 import views.html.manageResponsibleIndividual._
-
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
 import play.filters.csrf.CSRF.TokenProvider
 import play.twirl.api.HtmlFormat
+import uk.gov.hmrc.apiplatform.modules.common.domain.models.LaxEmailAddress
 import uk.gov.hmrc.http.HeaderCarrier
-
 import uk.gov.hmrc.apiplatform.modules.submissions.domain.models.Submission
 import uk.gov.hmrc.thirdpartydeveloperfrontend.builder._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.ManageResponsibleIndividualController.{ResponsibleIndividualHistoryItem, ViewModel}
@@ -146,7 +144,7 @@ class ManageResponsibleIndividualControllerSpec
       val viewModel = captor.getValue
       viewModel.environment shouldBe "Production"
       viewModel.responsibleIndividualName shouldBe responsibleIndividual.fullName.value
-      viewModel.adminEmails shouldBe List(developer.email)
+      viewModel.adminEmails shouldBe List(developer.email.text)
       viewModel.history shouldBe List(
         ResponsibleIndividualHistoryItem(responsibleIndividual.fullName.value, "1 July 2022", "Present"),
         ResponsibleIndividualHistoryItem("Old RI", "1 May 2022", "1 July 2022")
@@ -283,7 +281,7 @@ class ManageResponsibleIndividualControllerSpec
 
   "responsibleIndividualChangeToSelfAction" should {
     "save current users details as the RI" in new Setup {
-      when(applicationServiceMock.updateResponsibleIndividual(*[Application], *[UserId], *, *)(*)).thenReturn(successful(ApplicationUpdateSuccessful))
+      when(applicationServiceMock.updateResponsibleIndividual(*[Application], *[UserId], *, *[LaxEmailAddress])(*)).thenReturn(successful(ApplicationUpdateSuccessful))
       val user = developerSession.email.asCollaborator(ADMINISTRATOR)
 
       givenTheApplicationExistWithUserRole(List(user), List.empty)

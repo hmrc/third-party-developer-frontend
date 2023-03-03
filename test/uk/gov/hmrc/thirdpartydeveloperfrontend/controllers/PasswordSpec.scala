@@ -138,7 +138,7 @@ class PasswordSpec extends BaseControllerSpec with WithCSRFAddToken {
         underTest.processPasswordChange(developerEmail, play.api.mvc.Results.Ok(HtmlFormat.empty), _ => HtmlFormat.empty)(requestWithPassword, mockHeaderCarrier, implicitly)
       
       status(result) shouldBe FORBIDDEN
-      await(result).session(requestWithPassword).get("email").mkString shouldBe developerEmail
+      await(result).session(requestWithPassword).get("email").mkString shouldBe developerEmail.text
     }
 
     "request reset unverified user" in new Setup {
@@ -149,7 +149,7 @@ class PasswordSpec extends BaseControllerSpec with WithCSRFAddToken {
       val result                      = addToken(underTest.requestReset())(requestWithPasswordAndEmail)
       
       status(result) shouldBe FORBIDDEN
-      await(result).session(requestWithPasswordAndEmail).get("email").mkString shouldBe developerEmail
+      await(result).session(requestWithPasswordAndEmail).get("email").mkString shouldBe developerEmail.text
     }
 
     "reset unverified user" in new Setup {
@@ -160,7 +160,7 @@ class PasswordSpec extends BaseControllerSpec with WithCSRFAddToken {
       val result                      = addToken(underTest.resetPassword())(requestWithPasswordAndEmail)
       
       status(result) shouldBe FORBIDDEN
-      await(result).session(requestWithPasswordAndEmail).get("email").mkString shouldBe developerEmail
+      await(result).session(requestWithPasswordAndEmail).get("email").mkString shouldBe developerEmail.text
     }
 
     "show the forgot password page" in new Setup {
@@ -177,7 +177,7 @@ class PasswordSpec extends BaseControllerSpec with WithCSRFAddToken {
       val result           = addToken(underTest.requestReset())(requestWithEmail)
 
       status(result) shouldBe OK
-      contentAsString(result) should include(s"We have sent an email to $developerEmail")
+      contentAsString(result) should include(s"We have sent an email to ${developerEmail.text}")
     }
 
     "show the reset password page with errors for unverified email" in new Setup {

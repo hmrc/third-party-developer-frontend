@@ -22,23 +22,24 @@ import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
 
 import uk.gov.hmrc.apiplatform.modules.submissions.domain.models.Submission
-import uk.gov.hmrc.thirdpartydeveloperfrontend.builder.DeveloperBuilder
+import uk.gov.hmrc.thirdpartydeveloperfrontend.builder.DeveloperTestData
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.Capabilities.{ChangeClientSecret, ViewCredentials}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.Permissions.SandboxOrAdmin
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.Developer
-import uk.gov.hmrc.thirdpartydeveloperfrontend.helpers.string._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.LocalUserIdTracker
+import uk.gov.hmrc.apiplatform.modules.common.domain.models.LaxEmailAddress.StringSyntax
+import uk.gov.hmrc.thirdpartydeveloperfrontend.helpers.string._
 
-class ApplicationSpec extends AnyFunSpec with Matchers with DeveloperBuilder with LocalUserIdTracker {
+class ApplicationSpec extends AnyFunSpec with Matchers with DeveloperTestData with LocalUserIdTracker {
 
-  val developer             = buildDeveloper(emailAddress = "developerEmail", firstName = "DEVELOPER    ", lastName = "developerLast")
+  val developer             = standardDeveloper
   val developerCollaborator = developer.email.asDeveloperCollaborator
-  val administrator         = buildDeveloper(emailAddress = "administratorEmail", firstName = "ADMINISTRATOR", lastName = "administratorLast")
+  val administrator         = adminDeveloper
 
   val productionApplicationState: ApplicationState = ApplicationState.production(requestedByEmail = "other email", requestedByName = "name", verificationCode = "123")
   val testingApplicationState: ApplicationState    = ApplicationState.testing
-  val responsibleIndividual                        = ResponsibleIndividual.build("Mr Responsible", "ri@example.com")
+  val responsibleIndividual                        = ResponsibleIndividual.build("Mr Responsible", "ri@example.com".toLaxEmail)
 
   val importantSubmissionData = ImportantSubmissionData(
     Some("http://example.com"),
@@ -205,7 +206,7 @@ class ApplicationSpec extends AnyFunSpec with Matchers with DeveloperBuilder wit
     val app = createApp(Environment.PRODUCTION, Standard(), productionApplicationState)
 
     it("should find when an email sha matches") {
-      app.findCollaboratorByHash(developer.email.toSha256) shouldBe Some(developerCollaborator)
+      app.findCollaboratorByHash(developer.email.text.toSha256) shouldBe Some(developerCollaborator)
     }
 
     it("should not find when an email sha doesn't match") {

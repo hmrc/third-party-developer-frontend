@@ -27,7 +27,7 @@ import views.html.CredentialsView
 import play.api.test.FakeRequest
 import play.twirl.api.Html
 
-import uk.gov.hmrc.thirdpartydeveloperfrontend.builder.{DeveloperBuilder, DeveloperSessionBuilder}
+import uk.gov.hmrc.thirdpartydeveloperfrontend.builder._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.LoggedInState
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils._
@@ -37,7 +37,7 @@ class CredentialsSpec extends CommonViewSpec
     with CollaboratorTracker
     with LocalUserIdTracker
     with DeveloperSessionBuilder
-    with DeveloperBuilder {
+    with DeveloperTestData {
 
   trait Setup {
     val credentialsView = app.injector.instanceOf[CredentialsView]
@@ -49,7 +49,7 @@ class CredentialsSpec extends CommonViewSpec
 
   "Credentials page" should {
     val request   = FakeRequest().withCSRFToken
-    val developer = buildDeveloperSession(loggedInState = LoggedInState.LOGGED_IN, buildDeveloper("Test", "Test", "Test", None))
+    val developer = standardDeveloper.loggedIn
 
     val application = Application(
       ApplicationId("Test Application ID"),

@@ -57,8 +57,8 @@
     class="govuk-table__body"
   >
     @for((teamMember, index) <- app.collaborators.toSeq.sortBy(_.emailAddress.text).zipWithIndex) {
-      <tr class="govuk-table__row" data-teamMember-row="@teamMember.emailAddress">
-        <td class="govuk-table__cell center-table-text">@teamMember.emailAddress</td>
+      <tr class="govuk-table__row" data-teamMember-row="@teamMember.emailAddress.text">
+        <td class="govuk-table__cell center-table-text">@teamMember.emailAddress.text</td>
         <td class="govuk-table__cell center-table-text">
           @if(teamMember.role.isAdministrator) {
             <span>Admin</span>
@@ -70,7 +70,7 @@
         @if(role.isAdministrator && (teamMember.role.isDeveloper || teamMember.emailAddress != loggedIn.email)) {
           <td class="govuk-table__cell center-table-text">
             <a class="govuk-button govuk-button--secondary govuk-!-margin-0" href="@createRemoveLink(app.id, teamMember.emailAddress).url">
-              Remove <span class="govuk-visually-hidden">@teamMember.emailAddress</span>
+              Remove <span class="govuk-visually-hidden">@teamMember.emailAddress.text</span>
             </a>
           </td>
         } else {

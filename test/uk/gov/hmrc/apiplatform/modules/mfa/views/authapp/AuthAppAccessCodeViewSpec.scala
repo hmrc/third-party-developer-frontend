@@ -17,34 +17,27 @@
 package uk.gov.hmrc.apiplatform.modules.mfa.views.authapp
 
 import java.util.UUID
-
 import org.jsoup.Jsoup
 import views.helper.CommonViewSpec
-
 import play.api.test.{FakeRequest, StubMessagesFactory}
-
 import uk.gov.hmrc.apiplatform.modules.mfa.forms.MfaAccessCodeForm
 import uk.gov.hmrc.apiplatform.modules.mfa.models.{MfaAction, MfaId}
 import uk.gov.hmrc.apiplatform.modules.mfa.views.html.authapp.AuthAppAccessCodeView
-import uk.gov.hmrc.thirdpartydeveloperfrontend.builder.{DeveloperBuilder, DeveloperSessionBuilder}
+import uk.gov.hmrc.thirdpartydeveloperfrontend.builder.{DeveloperTestData, DeveloperSessionBuilder}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.{DeveloperSession, LoggedInState}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.{LocalUserIdTracker, WithCSRFAddToken}
-import uk.gov.hmrc.thirdpartydeveloperfrontend.builder.DeveloperTestData
 
 class AuthAppAccessCodeViewSpec extends CommonViewSpec
     with WithCSRFAddToken
-    with DeveloperSessionBuilder
     with DeveloperTestData
+    with DeveloperSessionBuilder
     with LocalUserIdTracker
     with StubMessagesFactory {
 
   implicit val request      = FakeRequest()
   val authAppAccessCodeView = app.injector.instanceOf[AuthAppAccessCodeView]
 
-  implicit val loggedIn: DeveloperSession = buildDeveloperSession(
-    loggedInState = LoggedInState.LOGGED_IN,
-    JoeBloggs
-  )
+  implicit val loggedIn: DeveloperSession = JoeBloggs.loggedIn
 
   "AuthAppAccessCodeView view" should {
     "render correctly when form is valid" in {

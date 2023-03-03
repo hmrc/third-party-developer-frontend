@@ -16,14 +16,15 @@
 
 package uk.gov.hmrc.thirdpartydeveloperfrontend.service
 
+import uk.gov.hmrc.apiplatform.modules.common.domain.models.LaxEmailAddress
+import uk.gov.hmrc.apiplatform.modules.common.domain.models.LaxEmailAddress.StringSyntax
+
 import java.time.{LocalDateTime, Period, ZoneOffset}
 import java.util.UUID.randomUUID
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future.{failed, successful}
-
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.play.audit.http.connector.AuditResult.Success
-
 import uk.gov.hmrc.thirdpartydeveloperfrontend.builder._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.config.ApplicationConfig
 import uk.gov.hmrc.thirdpartydeveloperfrontend.connectors._
@@ -174,9 +175,9 @@ class ApplicationServiceTeamMembersSpec extends AsyncHmrcSpec with Subscriptions
   }
 
   "remove teamMember" should {
-    val email         = "john.bloggs@example.com"
-    val admin         = "admin@example.com"
-    val adminsToEmail = Set.empty[String]
+    val email         = "john.bloggs@example.com".toLaxEmail
+    val admin         = "admin@example.com".toLaxEmail
+    val adminsToEmail = Set.empty[LaxEmailAddress]
 
     "remove teamMember successfully from production" in new Setup {
       when(mockDeveloperConnector.fetchByEmails(*)(*)).thenReturn(successful(Seq.empty))
@@ -187,7 +188,7 @@ class ApplicationServiceTeamMembersSpec extends AsyncHmrcSpec with Subscriptions
     }
 
     "propagate ApplicationNeedsAdmin from connector from production" in new Setup {
-      when(mockDeveloperConnector.fetchByEmails(*)(*)).thenReturn(successful(Seq.empty))
+      when(mockDeveloperConnector.fetchByEmails(*[Set[LaxEmailAddress]])(*)).thenReturn(successful(Seq.empty))
       theProductionConnectorthenReturnTheApplication(productionApplicationId, productionApplication)
       when(mockProductionApplicationConnector.removeTeamMember(productionApplicationId, email, admin, adminsToEmail))
         .thenReturn(failed(new ApplicationNeedsAdmin))
@@ -195,7 +196,7 @@ class ApplicationServiceTeamMembersSpec extends AsyncHmrcSpec with Subscriptions
     }
 
     "propagate ApplicationNotFound from connector from production" in new Setup {
-      when(mockDeveloperConnector.fetchByEmails(*)(*)).thenReturn(successful(Seq.empty))
+      when(mockDeveloperConnector.fetchByEmails(*[Set[LaxEmailAddress]])(*)).thenReturn(successful(Seq.empty))
       theProductionConnectorthenReturnTheApplication(productionApplicationId, productionApplication)
       when(mockProductionApplicationConnector.removeTeamMember(productionApplicationId, email, admin, adminsToEmail))
         .thenReturn(failed(new ApplicationNotFound))
@@ -203,7 +204,7 @@ class ApplicationServiceTeamMembersSpec extends AsyncHmrcSpec with Subscriptions
     }
 
     "remove teamMember successfully from sandbox" in new Setup {
-      when(mockDeveloperConnector.fetchByEmails(*)(*)).thenReturn(successful(Seq.empty))
+      when(mockDeveloperConnector.fetchByEmails(*[Set[LaxEmailAddress]])(*)).thenReturn(successful(Seq.empty))
       theSandboxConnectorthenReturnTheApplication(sandboxApplicationId, sandboxApplication)
       when(mockSandboxApplicationConnector.removeTeamMember(sandboxApplicationId, email, admin, adminsToEmail))
         .thenReturn(successful(ApplicationUpdateSuccessful))
@@ -211,7 +212,7 @@ class ApplicationServiceTeamMembersSpec extends AsyncHmrcSpec with Subscriptions
     }
 
     "propagate ApplicationNeedsAdmin from connector from sandbox" in new Setup {
-      when(mockDeveloperConnector.fetchByEmails(*)(*)).thenReturn(successful(Seq.empty))
+      when(mockDeveloperConnector.fetchByEmails(*[Set[LaxEmailAddress]])(*)).thenReturn(successful(Seq.empty))
       theSandboxConnectorthenReturnTheApplication(sandboxApplicationId, sandboxApplication)
       when(mockSandboxApplicationConnector.removeTeamMember(sandboxApplicationId, email, admin, adminsToEmail))
         .thenReturn(failed(new ApplicationNeedsAdmin))
@@ -219,7 +220,7 @@ class ApplicationServiceTeamMembersSpec extends AsyncHmrcSpec with Subscriptions
     }
 
     "propagate ApplicationNotFound from connector from sandbox" in new Setup {
-      when(mockDeveloperConnector.fetchByEmails(*)(*)).thenReturn(successful(Seq.empty))
+      when(mockDeveloperConnector.fetchByEmails(*[Set[LaxEmailAddress]])(*)).thenReturn(successful(Seq.empty))
       theSandboxConnectorthenReturnTheApplication(sandboxApplicationId, sandboxApplication)
       when(mockSandboxApplicationConnector.removeTeamMember(sandboxApplicationId, email, admin, adminsToEmail))
         .thenReturn(failed(new ApplicationNotFound))
@@ -228,25 +229,25 @@ class ApplicationServiceTeamMembersSpec extends AsyncHmrcSpec with Subscriptions
 
     "include correct set of admins to email" in new Setup {
 
-      private val verifiedAdmin      = "verified@example.com".asAdministratorCollaborator
-      private val unverifiedAdmin    = "unverified@example.com".asAdministratorCollaborator
-      private val removerAdmin       = "admin.email@example.com".asAdministratorCollaborator
-      private val verifiedDeveloper  = "developer@example.com".asDeveloperCollaborator
-      private val teamMemberToRemove = "to.remove@example.com".asAdministratorCollaborator
+      private val verifiedAdmin      = "verified@example.com".toLaxEmail.asAdministratorCollaborator
+      private val unverifiedAdmin    = "unverified@example.com".toLaxEmail.asAdministratorCollaborator
+      private val removerAdmin       = "admin.email@example.com".toLaxEmail.asAdministratorCollaborator
+      private val verifiedDeveloper  = "developer@example.com".toLaxEmail.asDeveloperCollaborator
+      private val teamMemberToRemove = "to.remove@example.com".toLaxEmail.asAdministratorCollaborator
 
       val nonRemoverAdmins = Seq(
-        User("verified@example.com", Some(true)),
-        User("unverified@example.com", Some(false))
+        User("verified@example.com".toLaxEmail, Some(true)),
+        User("unverified@example.com".toLaxEmail, Some(false))
       )
 
       private val application = productionApplication.copy(collaborators = Set(verifiedAdmin, unverifiedAdmin, removerAdmin, verifiedDeveloper, teamMemberToRemove))
 
       private val response = ApplicationUpdateSuccessful
 
-      when(mockDeveloperConnector.fetchByEmails(eqTo(Set("verified@example.com", "unverified@example.com")))(*))
+      when(mockDeveloperConnector.fetchByEmails(eqTo(Set("verified@example.com".toLaxEmail, "unverified@example.com".toLaxEmail)))(*))
         .thenReturn(successful(nonRemoverAdmins))
       theProductionConnectorthenReturnTheApplication(productionApplicationId, application)
-      when(mockProductionApplicationConnector.removeTeamMember(*[ApplicationId], *, *, *)(*)).thenReturn(successful(response))
+      when(mockProductionApplicationConnector.removeTeamMember(*[ApplicationId], *, *[LaxEmailAddress], *[Set[LaxEmailAddress]])(*)).thenReturn(successful(response))
 
       await(applicationService.removeTeamMember(application, teamMemberToRemove.emailAddress, removerAdmin.emailAddress)) shouldBe response
       verify(mockProductionApplicationConnector).removeTeamMember(
@@ -260,7 +261,7 @@ class ApplicationServiceTeamMembersSpec extends AsyncHmrcSpec with Subscriptions
 
   "request delete developer" should {
     val developerName   = "Testy McTester"
-    val developerEmail  = "testy@example.com"
+    val developerEmail  = "testy@example.com".toLaxEmail
     val developerUserId = UserId.random
 
     "correctly create a deskpro ticket and audit record" in new Setup {

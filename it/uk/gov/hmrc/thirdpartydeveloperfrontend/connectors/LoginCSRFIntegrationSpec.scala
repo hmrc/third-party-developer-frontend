@@ -41,6 +41,7 @@ import uk.gov.hmrc.apiplatform.modules.mfa.models.MfaType
 import uk.gov.hmrc.thirdpartydeveloperfrontend.builder.{DeveloperBuilder, MfaDetailBuilder}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.connectors.stubs.ThirdPartyDeveloperStub.fetchDeveloper
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.LocalUserIdTracker
+import LaxEmailAddress.StringSyntax
 
 class LoginCSRFIntegrationSpec extends BaseConnectorIntegrationSpec with GuiceOneAppPerSuite
     with BeforeAndAfterEach with DeveloperBuilder with LocalUserIdTracker with MfaDetailBuilder {
@@ -88,7 +89,7 @@ class LoginCSRFIntegrationSpec extends BaseConnectorIntegrationSpec with GuiceOn
   }
 
   trait Setup {
-    val userEmail            = "thirdpartydeveloper@example.com"
+    val userEmail            = "thirdpartydeveloper@example.com".toLaxEmail
     val userId               = idOf(userEmail)
     val userPassword         = "password1!"
     val headers              = Headers(AUTHORIZATION -> "AUTH_TOKEN")
@@ -102,7 +103,7 @@ class LoginCSRFIntegrationSpec extends BaseConnectorIntegrationSpec with GuiceOn
   "CSRF handling for login" when {
     "there is no CSRF token" should {
       "redirect back to the login page" in new Setup {
-        private val request = loginRequest.withFormUrlEncodedBody("emailaddress" -> userEmail, "password" -> userPassword)
+        private val request = loginRequest.withFormUrlEncodedBody("emailaddress" -> userEmail.text, "password" -> userPassword)
         private val result  = route(app, request).get
 
         status(result) shouldBe SEE_OTHER
@@ -112,7 +113,7 @@ class LoginCSRFIntegrationSpec extends BaseConnectorIntegrationSpec with GuiceOn
 
     "there is no CSRF token in the request body but it is present in the headers" should {
       "redirect back to the login page" in new Setup {
-        private val request = addCSRFToken(loginRequest.withFormUrlEncodedBody("emailaddress" -> userEmail, "password" -> userPassword))
+        private val request = addCSRFToken(loginRequest.withFormUrlEncodedBody("emailaddress" -> userEmail.text, "password" -> userPassword))
         private val result  = route(app, request).get
 
         status(result) shouldBe SEE_OTHER
@@ -122,7 +123,7 @@ class LoginCSRFIntegrationSpec extends BaseConnectorIntegrationSpec with GuiceOn
 
     "there is a CSRF token in the request body but not in the headers" should {
       "redirect back to the login page" in new Setup {
-        private val request = loginRequest.withFormUrlEncodedBody("emailaddress" -> userEmail, "password" -> userPassword, "csrfToken" -> "test")
+        private val request = loginRequest.withFormUrlEncodedBody("emailaddress" -> userEmail.text, "password" -> userPassword, "csrfToken" -> "test")
         private val result  = route(app, request).get
 
         status(result) shouldBe SEE_OTHER
@@ -160,7 +161,7 @@ class LoginCSRFIntegrationSpec extends BaseConnectorIntegrationSpec with GuiceOn
         setupThirdPartyDeveloperFindUserIdByEmailAddress(userEmail, userId)
         setupThirdPartyApplicationSearchApplicationByUserIdStub(userId)
 
-        private val request = loginRequestWithCSRF.withFormUrlEncodedBody("emailaddress" -> userEmail, "password" -> userPassword, "csrfToken" -> csrftoken.get.value)
+        private val request = loginRequestWithCSRF.withFormUrlEncodedBody("emailaddress" -> userEmail.text, "password" -> userPassword, "csrfToken" -> csrftoken.get.value)
 
         private val result = route(app, request).get
 
@@ -191,7 +192,7 @@ class LoginCSRFIntegrationSpec extends BaseConnectorIntegrationSpec with GuiceOn
         setupThirdPartyApplicationSearchApplicationByUserIdStub(userId)
         fetchDeveloper(developer)
 
-        private val request = loginRequestWithCSRF.withFormUrlEncodedBody("emailaddress" -> userEmail, "password" -> userPassword, "csrfToken" -> csrftoken.get.value)
+        private val request = loginRequestWithCSRF.withFormUrlEncodedBody("emailaddress" -> userEmail.text, "password" -> userPassword, "csrfToken" -> csrftoken.get.value)
 
         private val result = route(app, request).get
 

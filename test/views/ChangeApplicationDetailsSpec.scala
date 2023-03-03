@@ -37,7 +37,7 @@ class ChangeApplicationDetailsSpec extends CommonViewSpec
     with WithCSRFAddToken
     with LocalUserIdTracker
     with DeveloperSessionBuilder
-    with DeveloperBuilder {
+    with DeveloperTestData {
 
   val changeDetails = app.injector.instanceOf[ChangeDetailsView]
   val applicationId = ApplicationId("1234")
@@ -47,7 +47,7 @@ class ChangeApplicationDetailsSpec extends CommonViewSpec
 
     def renderPage(application: Application) = {
 
-      val loggedIn              = buildDeveloperSession(loggedInState = LoggedInState.LOGGED_IN, buildDeveloper("admin@example.com", "firstName1", "lastName1", None))
+      val loggedIn              = adminDeveloper.loggedIn
       val request               = FakeRequest().withCSRFToken
       val privacyPolicyUrl      = application.privacyPolicyLocation match {
         case PrivacyPolicyLocation.Url(url) => Some(url)

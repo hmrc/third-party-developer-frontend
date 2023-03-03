@@ -23,13 +23,14 @@ import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.apidefinitions.ApiV
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.ApplicationId
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.connectors.DeskproTicket
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.AsyncHmrcSpec
+import uk.gov.hmrc.apiplatform.modules.common.domain.models.LaxEmailAddress.StringSyntax
 
 class DeskproTicketSpec extends AsyncHmrcSpec {
 
   implicit val fakeRequest = FakeRequest()
 
   val requestorName   = "bob example"
-  val requestorEmail  = "bob@example.com"
+  val requestorEmail  = "bob@example.com".toLaxEmail
   val applicationName = "my app"
   val applicationId   = ApplicationId.random
   val apiName         = "my api"
@@ -44,7 +45,7 @@ class DeskproTicketSpec extends AsyncHmrcSpec {
 
   "A DeskproTicket created from a support enquiry" should {
     "have the correct details populated" in {
-      val form = SupportEnquiryForm(requestorName, requestorEmail, comments)
+      val form = SupportEnquiryForm(requestorName, requestorEmail.text, comments)
 
       val ticket = DeskproTicket.createFromSupportEnquiry(form, applicationName)
 

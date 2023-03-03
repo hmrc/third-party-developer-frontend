@@ -75,7 +75,7 @@ implicit request: play.api.mvc.Request[Any], loggedIn: DeveloperSession, message
     @defining(app.collaborators.filter(_.role.isAdministrator)) { administrators =>
       @if(administrators.size == 1) {
         <p class="govuk-body">
-          Ask the administrator <a class="govuk-link" href="mailto:@administrators.head.emailAddress">@administrators.head.emailAddress</a> to delete it.
+          Ask the administrator <a class="govuk-link" href="mailto:@administrators.head.emailAddress.text">@administrators.head.emailAddress.text</a> to delete it.
         </p>
       } else {
         <p class="govuk-body">
@@ -84,7 +84,7 @@ implicit request: play.api.mvc.Request[Any], loggedIn: DeveloperSession, message
         <ul class="govuk-list govuk-list--bullet">
           @for(admin <- administrators) {
             <li>
-              <a class="govuk-link" href="mailto:@admin.emailAddress">@admin.emailAddress</a>
+              <a class="govuk-link" href="mailto:@admin.emailAddress.text">@admin.emailAddress.text</a>
             </li>
           }
         </ul>

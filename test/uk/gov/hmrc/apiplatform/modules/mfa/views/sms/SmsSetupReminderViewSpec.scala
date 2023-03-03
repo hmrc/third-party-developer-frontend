@@ -23,10 +23,9 @@ import play.api.mvc.AnyContentAsEmpty
 import play.api.test.{FakeRequest, StubMessagesFactory}
 
 import uk.gov.hmrc.apiplatform.modules.mfa.views.html.sms.SmsSetupReminderView
-import uk.gov.hmrc.thirdpartydeveloperfrontend.builder.{DeveloperBuilder, DeveloperSessionBuilder}
+import uk.gov.hmrc.thirdpartydeveloperfrontend.builder.{DeveloperSessionBuilder, DeveloperTestData}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.{DeveloperSession, LoggedInState}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.{LocalUserIdTracker, WithCSRFAddToken}
-import uk.gov.hmrc.thirdpartydeveloperfrontend.builder.DeveloperTestData
 
 class SmsSetupReminderViewSpec extends CommonViewSpec
     with WithCSRFAddToken
@@ -36,11 +35,8 @@ class SmsSetupReminderViewSpec extends CommonViewSpec
 
   implicit val request: FakeRequest[AnyContentAsEmpty.type] = FakeRequest()
 
-  implicit val loggedIn: DeveloperSession        = buildDeveloperSession(
-    loggedInState =
-      LoggedInState.LOGGED_IN,
-    JoeBloggs
-  )
+  implicit val loggedIn = JoeBloggs.loggedIn
+
   val smsSetupReminderView: SmsSetupReminderView = app.injector.instanceOf[SmsSetupReminderView]
 
   "SmsSetupReminderView" should {

@@ -34,10 +34,10 @@ class AddApplicationNameSpec extends CommonViewSpec
     with WithCSRFAddToken
     with LocalUserIdTracker
     with DeveloperSessionBuilder
-    with DeveloperBuilder {
+    with DeveloperTestData {
 
   val addApplicationNameView = app.injector.instanceOf[AddApplicationNameView]
-  val loggedInDeveloper      = buildDeveloperSession(loggedInState = LoggedInState.LOGGED_IN, buildDeveloper("admin@example.com", "firstName1", "lastName1", None))
+  val loggedInDeveloper      = adminDeveloper.loggedIn
   val subordinateEnvironment = Environment.SANDBOX
   val appId                  = ApplicationId("1234")
   val principalEnvironment   = Environment.PRODUCTION

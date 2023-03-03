@@ -22,6 +22,7 @@ import uk.gov.hmrc.apiplatform.modules.submissions.domain.models.Submission
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.services.TermsOfUseService.TermsOfUseAgreementDetails
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.HmrcSpec
+import uk.gov.hmrc.apiplatform.modules.common.domain.models.LaxEmailAddress.StringSyntax
 
 class TermsOfUseServiceSpec extends HmrcSpec {
 
@@ -53,9 +54,9 @@ class TermsOfUseServiceSpec extends HmrcSpec {
   )
 
   val timestamp                  = LocalDateTime.now(ZoneOffset.UTC)
-  val email                      = "bob@example.com"
+  val email                      = "bob@example.com".toLaxEmail
   val name                       = "Bob Example"
-  val responsibleIndividual      = ResponsibleIndividual(ResponsibleIndividual.Name(name), ResponsibleIndividual.EmailAddress(email))
+  val responsibleIndividual      = ResponsibleIndividual(ResponsibleIndividual.Name(name), email)
   val version1_2                 = "1.2"
   val appWithNoAgreements        = buildApplication()
   val checkInfoAgreement         = TermsOfUseAgreement(email, timestamp, version1_2)

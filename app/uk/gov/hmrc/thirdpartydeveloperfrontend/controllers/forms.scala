@@ -160,7 +160,7 @@ case class ChangePasswordForm(currentPassword: String, password: String, confirm
 
 object ChangePasswordForm {
 
-  def accountUnverified[T](form: Form[T], email: LaxEmailAddress) = {
+  def accountUnverified[T](form: Form[T], email: String) = {
     form
       .withError("submissionError", "true")
       .withError(

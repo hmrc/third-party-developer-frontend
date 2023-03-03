@@ -18,15 +18,12 @@ package uk.gov.hmrc.apiplatform.modules.mfa.views.sms
 
 import org.jsoup.Jsoup
 import views.helper.CommonViewSpec
-
 import play.api.mvc.AnyContentAsEmpty
 import play.api.test.{FakeRequest, StubMessagesFactory}
-
 import uk.gov.hmrc.apiplatform.modules.mfa.views.html.sms.SmsSetupCompletedView
-import uk.gov.hmrc.thirdpartydeveloperfrontend.builder.{DeveloperBuilder, DeveloperSessionBuilder}
+import uk.gov.hmrc.thirdpartydeveloperfrontend.builder.{DeveloperSessionBuilder, DeveloperTestData}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.{DeveloperSession, LoggedInState}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.{LocalUserIdTracker, WithCSRFAddToken}
-import uk.gov.hmrc.thirdpartydeveloperfrontend.builder.DeveloperTestData
 
 class SmsSetupCompletedViewSpec extends CommonViewSpec
     with WithCSRFAddToken
@@ -36,11 +33,7 @@ class SmsSetupCompletedViewSpec extends CommonViewSpec
 
   implicit val request: FakeRequest[AnyContentAsEmpty.type] = FakeRequest()
 
-  implicit val loggedIn: DeveloperSession          = buildDeveloperSession(
-    loggedInState =
-      LoggedInState.LOGGED_IN,
-    JoeBloggs
-  )
+  implicit val loggedIn: DeveloperSession          = JoeBloggs.loggedIn
   val smsSetupCompletedView: SmsSetupCompletedView = app.injector.instanceOf[SmsSetupCompletedView]
 
   "SmsSetupCompletedView" should {

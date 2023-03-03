@@ -18,11 +18,10 @@ package uk.gov.hmrc.thirdpartydeveloperfrontend.builder
 
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.LaxEmailAddress.StringSyntax
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.UserIdTracker
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.DeveloperSession
 
-trait DeveloperTestData extends DeveloperBuilder {
+trait DeveloperSessionTestData extends DeveloperSessionBuilder with DeveloperTestData {
   self : UserIdTracker =>
 
-  lazy val adminDeveloper = buildDeveloper("admin@example.com".toLaxEmail, "firstName1", "lastName1")
-  lazy val JoeBloggs = buildDeveloper("developer@example.com".toLaxEmail, "Joe", "Bloggs")
-  val standardDeveloper = buildDeveloper("developer@example.com".toLaxEmail, "firstName2", "lastName2")
+  val testSessionLoggedIn: DeveloperSession = buildDeveloper("Test".toLaxEmail, "Test", "Test", None).loggedIn
 }

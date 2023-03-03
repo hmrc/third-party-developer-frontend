@@ -26,7 +26,7 @@ import views.html.emailpreferences.SelectTopicsFromSubscriptionsView
 import play.api.mvc.AnyContentAsEmpty
 import play.api.test.FakeRequest
 
-import uk.gov.hmrc.thirdpartydeveloperfrontend.builder.{DeveloperBuilder, DeveloperSessionBuilder}
+import uk.gov.hmrc.thirdpartydeveloperfrontend.builder._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.SelectTopicsFromSubscriptionsForm
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.ApplicationId
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.LoggedInState
@@ -37,13 +37,12 @@ import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.{LocalUserIdTracker, WithCS
 class SelectTopicsFromSubscriptionsViewSpec extends CommonViewSpec
     with WithCSRFAddToken
     with LocalUserIdTracker
-    with DeveloperSessionBuilder
-    with DeveloperBuilder {
+    with DeveloperSessionBuilder  
+    with DeveloperTestData {
 
   trait Setup {
 
-    val developerSessionWithoutEmailPreferences               =
-      buildDeveloperSession(loggedInState = LoggedInState.LOGGED_IN, buildDeveloper("email@example.com", "First Name", "Last Name", None))
+    val developerSessionWithoutEmailPreferences               =  standardDeveloper.loggedIn
     implicit val request: FakeRequest[AnyContentAsEmpty.type] = FakeRequest().withCSRFToken
 
     val applicationId: ApplicationId = ApplicationId.random
