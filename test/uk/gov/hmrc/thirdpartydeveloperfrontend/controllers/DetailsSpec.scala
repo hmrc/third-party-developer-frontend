@@ -20,20 +20,18 @@ import java.time.LocalDateTime
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 import scala.concurrent.Future._
-
 import org.jsoup.Jsoup
 import org.mockito.captor.ArgCaptor
 import views.html._
 import views.html.application.PendingApprovalView
 import views.html.checkpages.applicationcheck.UnauthorisedAppDetailsView
-
 import play.api.libs.json.Json
 import play.api.mvc.Result
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
 import play.filters.csrf.CSRF.TokenProvider
+import uk.gov.hmrc.apiplatform.modules.common.domain.models.LaxEmailAddress.StringSyntax
 import uk.gov.hmrc.http.HeaderCarrier
-
 import uk.gov.hmrc.apiplatform.modules.submissions.services.mocks.SubmissionServiceMockModule
 import uk.gov.hmrc.thirdpartydeveloperfrontend.builder.DeveloperBuilder
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain._
@@ -95,7 +93,7 @@ class DetailsSpec
       }
 
       "return the credentials requested page on an application pending approval" in new Setup {
-        val pendingApprovalApplication = anApplication(adminEmail = loggedInDeveloper.email, state = ApplicationState.pendingGatekeeperApproval("dont-care", "dont-care"))
+        val pendingApprovalApplication = anApplication(adminEmail = loggedInDeveloper.email, state = ApplicationState.pendingGatekeeperApproval("dont-care".toLaxEmail, "dont-care"))
 
         givenApplicationAction(pendingApprovalApplication, loggedInDeveloper)
 
@@ -110,7 +108,7 @@ class DetailsSpec
 
       "return the credentials requested page on an application pending verification" in new Setup {
         val pendingVerificationApplication =
-          anApplication(adminEmail = loggedInDeveloper.email, state = ApplicationState.pendingRequesterVerification("dont-care", "dont-care", "dont-care"))
+          anApplication(adminEmail = loggedInDeveloper.email, state = ApplicationState.pendingRequesterVerification("dont-care".toLaxEmail, "dont-care", "dont-care"))
 
         givenApplicationAction(pendingVerificationApplication, loggedInDeveloper)
 
@@ -125,7 +123,7 @@ class DetailsSpec
 
       "redirect to the Start Using Your Application page on an application in pre-production state" in new Setup {
         val userEmail          = "test@example.con"
-        val preProdApplication = anApplication(adminEmail = loggedInDeveloper.email, state = ApplicationState.preProduction(userEmail, "name"))
+        val preProdApplication = anApplication(adminEmail = loggedInDeveloper.email, state = ApplicationState.preProduction(userEmail.toLaxEmail, "name"))
 
         givenApplicationAction(preProdApplication, loggedInDeveloper)
 
@@ -139,7 +137,7 @@ class DetailsSpec
 
       "display the Application Details page for an application in pre-production state when the forceAppDetails parameter is used" in new Setup {
         val userEmail          = "test@example.con"
-        val preProdApplication = anApplication(adminEmail = loggedInDeveloper.email, state = ApplicationState.preProduction(userEmail, "name"))
+        val preProdApplication = anApplication(adminEmail = loggedInDeveloper.email, state = ApplicationState.preProduction(userEmail.toLaxEmail, "name"))
 
         returnAgreementDetails()
         givenApplicationAction(preProdApplication, loggedInDeveloper)
@@ -505,7 +503,7 @@ class DetailsSpec
         Some(
           ImportantSubmissionData(
             None,
-            ResponsibleIndividual.build("bob example", "bob@example.com"),
+            ResponsibleIndividual.build("bob example", "bob@example.com".toLaxEmail),
             Set.empty,
             TermsAndConditionsLocation.InDesktopSoftware,
             privacyPolicyLocation,
@@ -645,7 +643,7 @@ class DetailsSpec
         Some(
           ImportantSubmissionData(
             None,
-            ResponsibleIndividual.build("bob example", "bob@example.com"),
+            ResponsibleIndividual.build("bob example", "bob@example.com".toLaxEmail),
             Set.empty,
             termsAndConditionsLocation,
             PrivacyPolicyLocation.InDesktopSoftware,
@@ -807,7 +805,7 @@ class DetailsSpec
       givenApplicationAction(application, loggedInDeveloper)
 
       if (hasTermsOfUseAgreement) {
-        returnAgreementDetails(TermsOfUseAgreementDetails("test@example.com", None, LocalDateTime.now, Some("1.2")))
+        returnAgreementDetails(TermsOfUseAgreementDetails("test@example.com".toLaxEmail, None, LocalDateTime.now, Some("1.2")))
       } else {
         returnAgreementDetails()
       }

@@ -16,22 +16,23 @@
 
 package uk.gov.hmrc.thirdpartydeveloperfrontend.utils
 
-import scala.collection.mutable
+import uk.gov.hmrc.apiplatform.modules.common.domain.models.LaxEmailAddress
 
+import scala.collection.mutable
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.CollaboratorRole._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.{Collaborator, CollaboratorRole}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.UserId
 
 // Trait allows for mix in of either local or global userIdTracker into things like CollaboratorTracker
 trait UserIdTracker {
-  def idOf(email: String): UserId
+  def idOf(email: LaxEmailAddress): UserId
 }
 
 // Use this tracker for unit tests and those where there is no need for a shared map across many specs/features
 trait LocalUserIdTracker extends UserIdTracker {
-  private lazy val idsByEmail = mutable.Map[String, UserId]()
+  private lazy val idsByEmail = mutable.Map[LaxEmailAddress, UserId]()
 
-  def idOf(email: String): UserId = idsByEmail.getOrElseUpdate(email, UserId.random)
+  def idOf(email: LaxEmailAddress): UserId = idsByEmail.getOrElseUpdate(email, UserId.random)
 }
 
 // Use this when you want to share the map across files like component tests where
@@ -41,11 +42,11 @@ object GlobalUserIdTracker extends LocalUserIdTracker
 trait CollaboratorTracker {
   self: UserIdTracker =>
 
-  def collaboratorOf(email: String, role: CollaboratorRole): Collaborator = Collaborator(email, role, idOf(email))
+  def collaboratorOf(email: LaxEmailAddress, role: CollaboratorRole): Collaborator = Collaborator(email, role, idOf(email))
 
-  implicit class CollaboratorSyntax(value: String) {
-    def asAdministratorCollaborator            = collaboratorOf(value, ADMINISTRATOR)
-    def asDeveloperCollaborator                = collaboratorOf(value, DEVELOPER)
-    def asCollaborator(role: CollaboratorRole) = collaboratorOf(value, role)
+  implicit class CollaboratorSyntax(email: LaxEmailAddress) {
+    def asAdministratorCollaborator            = collaboratorOf(email, ADMINISTRATOR)
+    def asDeveloperCollaborator                = collaboratorOf(email, DEVELOPER)
+    def asCollaborator(role: CollaboratorRole) = collaboratorOf(email, role)
   }
 }

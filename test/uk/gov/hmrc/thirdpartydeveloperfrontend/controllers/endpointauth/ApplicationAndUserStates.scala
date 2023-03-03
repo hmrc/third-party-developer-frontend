@@ -19,13 +19,12 @@ package uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.endpointauth
 import java.time.{LocalDateTime, Period}
 import java.util.UUID
 import scala.concurrent.Future
-
 import cats.data.NonEmptyList
-
 import play.api.libs.crypto.CookieSigner
 import play.api.mvc.Cookie
 import play.api.test.FakeRequest
-
+import uk.gov.hmrc.apiplatform.modules.common.domain.models.LaxEmailAddress
+import uk.gov.hmrc.apiplatform.modules.common.domain.models.LaxEmailAddress.StringSyntax
 import uk.gov.hmrc.apiplatform.modules.mfa.connectors.ThirdPartyDeveloperMfaConnector.{RegisterAuthAppResponse, RegisterSmsSuccessResponse}
 import uk.gov.hmrc.apiplatform.modules.submissions.domain.models.ResponsibleIndividualVerificationState.INITIAL
 import uk.gov.hmrc.apiplatform.modules.submissions.domain.models.Submission.Status.Granted
@@ -142,7 +141,7 @@ trait HasApplication extends HasAppDeploymentEnvironment with HasUserWithRole wi
   lazy val responsibleIndividualVerificationId = ResponsibleIndividualVerificationId(UUID.randomUUID().toString)
   lazy val submissionId                        = Submission.Id.random
   lazy val submissionIndex                     = 1
-  lazy val responsibleIndividual               = ResponsibleIndividual.build("mr responsible", "ri@example.com")
+  lazy val responsibleIndividual               = ResponsibleIndividual.build("mr responsible", "ri@example.com".toLaxEmail)
 
   lazy val responsibleIndividualVerification = ResponsibleIndividualUpdateVerification(
     responsibleIndividualVerificationId,
@@ -153,7 +152,7 @@ trait HasApplication extends HasAppDeploymentEnvironment with HasUserWithRole wi
     createdOn,
     responsibleIndividual,
     "admin@example.com",
-    "Mr Admin",
+    "Mr Admin".toLaxEmail,
     INITIAL
   )
 
@@ -161,7 +160,7 @@ trait HasApplication extends HasAppDeploymentEnvironment with HasUserWithRole wi
     responsibleIndividualVerification,
     responsibleIndividual,
     "mr submitter",
-    "submitter@example.com"
+    "submitter@example.com".toLaxEmail
   )
   lazy val authAppMfaId                                 = verifiedAuthenticatorAppMfaDetail.id
   lazy val smsMfaId                                     = verifiedSmsMfaDetail.id
@@ -213,7 +212,7 @@ trait IsNewJourneyStandardApplicationWithoutSubmission extends HasApplication {
 }
 
 trait HasUserWithRole extends MockConnectors with MfaDetailBuilder {
-  lazy val userEmail     = "user@example.com"
+  lazy val userEmail: LaxEmailAddress     = "user@example.com".toLaxEmail
   lazy val userId        = UserId.random
   lazy val userFirstName = "Bob"
   lazy val userLastName  = "Example"
@@ -280,8 +279,8 @@ trait UserIsAuthenticated extends HasUserSession with UpdatesRequest {
     request.withCookies(
       Cookie("PLAY2AUTH_SESS_ID", cookieSigner.sign(sessionId) + sessionId, None, "path", None, false, false)
     ).withSession(
-      ("email", userEmail),
-      ("emailAddress", userEmail),
+      ("email", userEmail.text),
+      ("emailAddress", userEmail.text),
       ("nonce", "123"),
       ("userId", developer.userId.value.toString)
     )
@@ -315,11 +314,11 @@ trait HasAppState {
 }
 
 trait AppHasProductionStatus extends HasAppState {
-  def state = ApplicationState.production("requester@example.com", "mr requester", "code123")
+  def state = ApplicationState.production("requester@example.com".toLaxEmail, "mr requester", "code123")
 }
 
 trait AppHasPendingGatekeeperApprovalStatus extends HasAppState {
-  def state = ApplicationState.pendingGatekeeperApproval("requester@example.com", "mr requester")
+  def state = ApplicationState.pendingGatekeeperApproval("requester@example.com".toLaxEmail, "mr requester")
 }
 
 trait AppHasTestingStatus extends HasAppState {
