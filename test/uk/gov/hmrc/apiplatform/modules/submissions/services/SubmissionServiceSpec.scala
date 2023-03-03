@@ -25,6 +25,7 @@ import uk.gov.hmrc.apiplatform.modules.submissions.connectors.ThirdPartyApplicat
 import uk.gov.hmrc.apiplatform.modules.submissions.domain.models.{Question, Submission}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.ApplicationId
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.AsyncHmrcSpec
+import uk.gov.hmrc.apiplatform.modules.common.domain.models.LaxEmailAddress.StringSyntax
 
 class SubmissionServiceSpec extends AsyncHmrcSpec {
 
@@ -77,7 +78,7 @@ class SubmissionServiceSpec extends AsyncHmrcSpec {
   }
 
   "confirmSetupComplete" should {
-    val emailAddress = "user@example.com"
+    val emailAddress = "user@example.com".toLaxEmail
     val err          = "nope"
 
     "return without errors if TPA connector call was successful" in new Setup {
@@ -85,7 +86,7 @@ class SubmissionServiceSpec extends AsyncHmrcSpec {
 
       val result = await(underTest.confirmSetupComplete(applicationId, emailAddress))
 
-      result shouldBe Right()
+      result shouldBe Right(())
     }
 
     "return an error message if TPA connector call fails" in new Setup {

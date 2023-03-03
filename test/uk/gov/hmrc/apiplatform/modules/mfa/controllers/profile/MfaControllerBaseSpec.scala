@@ -191,7 +191,7 @@ class MfaControllerBaseSpec extends BaseControllerSpec
   trait SetupSuccessfulStart2SV extends Setup {
     val registerAuthAppResponse = RegisterAuthAppResponse(authAppMfaId, secret)
 
-    when(underTest.otpAuthUri.apply(secret.toLowerCase(), issuer, loggedInDeveloper.email)).thenReturn(otpUri)
+    when(underTest.otpAuthUri.apply(secret.toLowerCase(), issuer, loggedInDeveloper.email.text)).thenReturn(otpUri)
     when(underTest.qrCode.generateDataImageBase64(otpUri.toString)).thenReturn(qrImage)
     when(underTest.thirdPartyDeveloperMfaConnector.createMfaAuthApp(eqTo(loggedInDeveloper.userId))(*))
       .thenReturn(successful(registerAuthAppResponse))

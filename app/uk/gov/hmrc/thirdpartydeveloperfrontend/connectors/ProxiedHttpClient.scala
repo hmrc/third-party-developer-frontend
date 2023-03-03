@@ -39,7 +39,7 @@ class ProxiedHttpClient @Inject() (config: Configuration, httpAuditing: HttpAudi
     }
   }
 
-  override def wsProxyServer: Option[WSProxyServer] = WSProxyConfiguration("proxy", config)
+  override def wsProxyServer: Option[WSProxyServer] = WSProxyConfiguration.buildWsProxyServer(config)
 
   override def buildRequest(url: String, headers: Seq[(String, String)]): PlayWSRequest = {
     val extraHeaders: Seq[(String, String)] = headers ++

@@ -40,6 +40,7 @@ import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.{TermsOfUseVersion,
 import uk.gov.hmrc.thirdpartydeveloperfrontend.mocks.service.{ApplicationActionServiceMock, ApplicationServiceMock, SessionServiceMock, TermsOfUseVersionServiceMock}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.WithLoggedInSession._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.{LocalUserIdTracker, WithCSRFAddToken}
+import uk.gov.hmrc.apiplatform.modules.common.domain.models.LaxEmailAddress.StringSyntax
 
 class TermsOfUseSpec
     extends BaseControllerSpec
@@ -131,7 +132,7 @@ class TermsOfUseSpec
     }
 
     "render the page for an administrator on a standard production app when the ToU have been agreed" in new Setup {
-      val email             = "email@exmaple.com"
+      val email             = "email@exmaple.com".toLaxEmail
       val timeStamp         = LocalDateTime.now(ZoneOffset.UTC)
       val expectedTimeStamp = DateTimeFormatter.ofPattern("dd MMMM yyyy").format(timeStamp)
       val version           = "1.0"
@@ -191,7 +192,7 @@ class TermsOfUseSpec
     }
 
     "return a bad request if the app already has terms of use agreed" in new Setup {
-      val checkInformation = CheckInformation(termsOfUseAgreements = List(applications.TermsOfUseAgreement("bob@example.com", LocalDateTime.now(ZoneOffset.UTC), "1.0")))
+      val checkInformation = CheckInformation(termsOfUseAgreements = List(applications.TermsOfUseAgreement("bob@example.com".toLaxEmail, LocalDateTime.now(ZoneOffset.UTC), "1.0")))
       givenApplicationExists(checkInformation = Some(checkInformation))
 
       val request = loggedInRequest.withFormUrlEncodedBody("termsOfUseAgreed" -> "true")

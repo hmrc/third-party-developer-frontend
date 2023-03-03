@@ -44,6 +44,7 @@ import uk.gov.hmrc.thirdpartydeveloperfrontend.service.SessionService
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.ViewHelpers._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.WithLoggedInSession._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.{CollaboratorTracker, LocalUserIdTracker, TestApplications, WithCSRFAddToken}
+import uk.gov.hmrc.apiplatform.modules.common.domain.models.LaxEmailAddress.StringSyntax
 
 class DetailsSpec
     extends BaseControllerSpec
@@ -93,7 +94,7 @@ class DetailsSpec
       }
 
       "return the credentials requested page on an application pending approval" in new Setup {
-        val pendingApprovalApplication = anApplication(adminEmail = loggedInDeveloper.email, state = ApplicationState.pendingGatekeeperApproval("dont-care".toLaxEmail, "dont-care"))
+        val pendingApprovalApplication = anApplication(adminEmail = loggedInDeveloper.email, state = ApplicationState.pendingGatekeeperApproval("dont-care", "dont-care"))
 
         givenApplicationAction(pendingApprovalApplication, loggedInDeveloper)
 
@@ -108,7 +109,7 @@ class DetailsSpec
 
       "return the credentials requested page on an application pending verification" in new Setup {
         val pendingVerificationApplication =
-          anApplication(adminEmail = loggedInDeveloper.email, state = ApplicationState.pendingRequesterVerification("dont-care".toLaxEmail, "dont-care", "dont-care"))
+          anApplication(adminEmail = loggedInDeveloper.email, state = ApplicationState.pendingRequesterVerification("dont-care", "dont-care", "dont-care"))
 
         givenApplicationAction(pendingVerificationApplication, loggedInDeveloper)
 
@@ -123,7 +124,7 @@ class DetailsSpec
 
       "redirect to the Start Using Your Application page on an application in pre-production state" in new Setup {
         val userEmail          = "test@example.con"
-        val preProdApplication = anApplication(adminEmail = loggedInDeveloper.email, state = ApplicationState.preProduction(userEmail.toLaxEmail, "name"))
+        val preProdApplication = anApplication(adminEmail = loggedInDeveloper.email, state = ApplicationState.preProduction(userEmail, "name"))
 
         givenApplicationAction(preProdApplication, loggedInDeveloper)
 
@@ -137,7 +138,7 @@ class DetailsSpec
 
       "display the Application Details page for an application in pre-production state when the forceAppDetails parameter is used" in new Setup {
         val userEmail          = "test@example.con"
-        val preProdApplication = anApplication(adminEmail = loggedInDeveloper.email, state = ApplicationState.preProduction(userEmail.toLaxEmail, "name"))
+        val preProdApplication = anApplication(adminEmail = loggedInDeveloper.email, state = ApplicationState.preProduction(userEmail, "name"))
 
         returnAgreementDetails()
         givenApplicationAction(preProdApplication, loggedInDeveloper)
@@ -757,7 +758,7 @@ class DetailsSpec
     implicit val hc: HeaderCarrier = HeaderCarrier()
 
     val developer      = buildDeveloper()
-    val admin          = buildDeveloper(emailAddress = "admin@example.com")
+    val admin          = buildDeveloper(emailAddress = "admin@example.com".toLaxEmail)
     val devSessionId   = "dev sessionId"
     val adminSessionId = "admin sessionId"
     val devSession     = Session(devSessionId, developer, LoggedInState.LOGGED_IN)

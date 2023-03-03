@@ -37,6 +37,7 @@ import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.{Appli
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.connectors.{DeskproTicket, TicketCreated}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.mocks.service.ApplicationServiceMock
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.{AsyncHmrcSpec, CollaboratorTracker, LocalUserIdTracker, TestApplications}
+import uk.gov.hmrc.apiplatform.modules.common.domain.models.LaxEmailAddress.StringSyntax
 
 class ResponsibleIndividualVerificationServiceSpec extends AsyncHmrcSpec
     with CollaboratorTracker
@@ -59,7 +60,7 @@ class ResponsibleIndividualVerificationServiceSpec extends AsyncHmrcSpec
       LocalDateTime.now(ZoneOffset.UTC),
       ResponsibleIndividualVerificationState.INITIAL
     )
-    val responsibleIndividual = ResponsibleIndividual.build("bob example", "bob@example.com")
+    val responsibleIndividual = ResponsibleIndividual.build("bob example", "bob@example.com".toLaxEmail)
 
     val mockSubmissionsConnector: ThirdPartyApplicationSubmissionsConnector = mock[ThirdPartyApplicationSubmissionsConnector]
     val mockDeskproConnector                                                = mock[DeskproConnector]
@@ -117,7 +118,7 @@ class ResponsibleIndividualVerificationServiceSpec extends AsyncHmrcSpec
         LocalDateTime.now(ZoneOffset.UTC),
         responsibleIndividual,
         "Mr Admin",
-        "admin@example.com",
+        "admin@example.com".toLaxEmail,
         ResponsibleIndividualVerificationState.INITIAL
       )
 

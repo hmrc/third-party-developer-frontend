@@ -31,6 +31,7 @@ import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.connectors.{Deskpro
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.{Developer, DeveloperSession, UserId}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.{ApplicationAlreadyExists, ApplicationNotFound}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.{AsyncHmrcSpec, CollaboratorTracker, LocalUserIdTracker, TestApplications}
+import uk.gov.hmrc.apiplatform.modules.common.domain.models.LaxEmailAddress.StringSyntax
 
 class RequestProductionCredentialsSpec extends AsyncHmrcSpec
     with CollaboratorTracker
@@ -43,7 +44,7 @@ class RequestProductionCredentialsSpec extends AsyncHmrcSpec
     val mockSubmissionsConnector: ThirdPartyApplicationSubmissionsConnector = mock[ThirdPartyApplicationSubmissionsConnector]
 
     val userId: UserId       = UserId.random
-    val email: String        = "test@example.com"
+    val email        = "test@example.com".toLaxEmail
     val firstName: String    = "bob"
     val lastName: String     = "example"
     val name: String         = s"$firstName $lastName"

@@ -25,11 +25,12 @@ import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.Enviro
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.controllers.ApplicationSummary
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils._
+import uk.gov.hmrc.apiplatform.modules.common.domain.models.LaxEmailAddress.StringSyntax
 
 class ApplicationSummaryTest extends AnyWordSpec with Matchers with CollaboratorTracker with LocalUserIdTracker {
 
   "from" should {
-    val user = "foo@bar.com".asDeveloperCollaborator
+    val user = "foo@bar.com".toLaxEmail.asDeveloperCollaborator
 
     val serverTokenApplication   =
       new Application(

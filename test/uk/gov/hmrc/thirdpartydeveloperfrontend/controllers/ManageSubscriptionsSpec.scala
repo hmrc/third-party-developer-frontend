@@ -76,7 +76,7 @@ class ManageSubscriptionsSpec
     Environment.SANDBOX,
     Some("Description 1"),
     Set(loggedInDeveloper.email.asCollaborator(role)),
-    state = ApplicationState.production(loggedInDeveloper.email, loggedInDeveloper.displayedName, ""),
+    state = ApplicationState.production(loggedInDeveloper.email.text, loggedInDeveloper.displayedName, ""),
     access = Standard(
       redirectUris = List("https://red1", "https://red2"),
       termsAndConditionsUrl = Some("http://tnc-url.com")

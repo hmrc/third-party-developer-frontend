@@ -46,6 +46,7 @@ import uk.gov.hmrc.thirdpartydeveloperfrontend.helpers.string._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.mocks.service._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.WithLoggedInSession._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.{LocalUserIdTracker, WithCSRFAddToken}
+import uk.gov.hmrc.apiplatform.modules.common.domain.models.LaxEmailAddress.StringSyntax
 
 class CheckYourAnswersSpec
     extends BaseControllerSpec
@@ -62,8 +63,8 @@ class CheckYourAnswersSpec
   val appName: String = "app"
   val apiVersion      = ApiVersion("version")
 
-  val anotherCollaboratorEmail               = "collaborator@example.com"
-  val hashedAnotherCollaboratorEmail: String = anotherCollaboratorEmail.toSha256
+  val anotherCollaboratorEmail               = "collaborator@example.com".toLaxEmail
+  val hashedAnotherCollaboratorEmail: String = anotherCollaboratorEmail.text.toSha256
 
   val testing: ApplicationState         = ApplicationState.testing.copy(updatedOn = LocalDateTime.now.minusMinutes(1))
   val production: ApplicationState      = ApplicationState.production("thirdpartydeveloper@example.com", "thirdpartydeveloper", "ABCD")
@@ -201,7 +202,7 @@ class CheckYourAnswersSpec
     val loggedInRequest: FakeRequest[AnyContentAsEmpty.type]  = FakeRequest().withLoggedIn(underTest, implicitly)(sessionId).withSession(sessionParams: _*)
     val loggedInRequestWithFormBody                           = loggedInRequest.withFormUrlEncodedBody()
 
-    val defaultCheckInformation = CheckInformation(contactDetails = Some(ContactDetails("Tester", "tester@example.com", "12345678")))
+    val defaultCheckInformation = CheckInformation(contactDetails = Some(ContactDetails("Tester", "tester@example.com".toLaxEmail, "12345678")))
 
     def givenApplicationExists(
         appId: ApplicationId = appId,
@@ -259,11 +260,11 @@ class CheckYourAnswersSpec
           confirmedName = true,
           apiSubscriptionsConfirmed = true,
           apiSubscriptionConfigurationsConfirmed = true,
-          Some(ContactDetails("Example Name", "name@example.com", "012346789")),
+          Some(ContactDetails("Example Name", "name@example.com".toLaxEmail, "012346789")),
           providedPrivacyPolicyURL = true,
           providedTermsAndConditionsURL = true,
           teamConfirmed = true,
-          List(TermsOfUseAgreement("test@example.com", LocalDateTime.now(ZoneOffset.UTC), "1.0"))
+          List(TermsOfUseAgreement("test@example.com".toLaxEmail, LocalDateTime.now(ZoneOffset.UTC), "1.0"))
         )
       )
     )
@@ -415,7 +416,7 @@ class CheckYourAnswersSpec
       status(result) shouldBe OK
 
       contentAsString(result) should include("Add members of your organisation and give them permissions to access this application")
-      contentAsString(result) should include(developer.email)
+      contentAsString(result) should include(developer.email.text)
     }
 
     "not return the manage team list page when not logged in" in new Setup {
@@ -476,7 +477,7 @@ class CheckYourAnswersSpec
 
       contentAsString(result) should include("Are you sure you want to remove this team member from your application?")
 
-      contentAsString(result) should include(anotherCollaboratorEmail)
+      contentAsString(result) should include(anotherCollaboratorEmail.text)
     }
 
     "not return the remove team member confirmation page when not logged in" in new Setup {
@@ -491,7 +492,7 @@ class CheckYourAnswersSpec
     "redirect to the team member list when the remove confirmation post is executed" in new Setup {
       val application = givenApplicationExists()
 
-      val request = loggedInRequest.withFormUrlEncodedBody("email" -> anotherCollaboratorEmail)
+      val request = loggedInRequest.withFormUrlEncodedBody("email" -> anotherCollaboratorEmail.text)
 
       private val result = addToken(underTest.teamMemberRemoveAction(appId))(request)
 

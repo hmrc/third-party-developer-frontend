@@ -28,11 +28,12 @@ import uk.gov.hmrc.apiplatform.modules.mfa.views.html.authapp.QrCodeView
 import uk.gov.hmrc.thirdpartydeveloperfrontend.builder.{DeveloperBuilder, DeveloperSessionBuilder}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.{DeveloperSession, LoggedInState}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.{LocalUserIdTracker, WithCSRFAddToken}
+import uk.gov.hmrc.thirdpartydeveloperfrontend.builder.DeveloperTestData
 
-class QrCodeViewSpec extends CommonViewSpec with WithCSRFAddToken with DeveloperSessionBuilder with DeveloperBuilder with LocalUserIdTracker with StubMessagesFactory {
+class QrCodeViewSpec extends CommonViewSpec with WithCSRFAddToken with DeveloperSessionBuilder with DeveloperTestData with LocalUserIdTracker with StubMessagesFactory {
   implicit val request                    = FakeRequest()
   val qrCodeView                          = app.injector.instanceOf[QrCodeView]
-  implicit val loggedIn: DeveloperSession = buildDeveloperSession(loggedInState = LoggedInState.LOGGED_IN, buildDeveloper("developer@example.com", "Joe", "Bloggs"))
+  implicit val loggedIn: DeveloperSession = buildDeveloperSession(loggedInState = LoggedInState.LOGGED_IN, JoeBloggs)
 
   "QrCodeView view" should {
     "render correctly when form is valid" in {

@@ -45,6 +45,7 @@ import uk.gov.hmrc.thirdpartydeveloperfrontend.helpers.string._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.mocks.service._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.WithLoggedInSession._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.{LocalUserIdTracker, WithCSRFAddToken}
+import uk.gov.hmrc.apiplatform.modules.common.domain.models.LaxEmailAddress.StringSyntax
 
 class ApplicationCheckSpec
     extends BaseControllerSpec
@@ -63,8 +64,8 @@ class ApplicationCheckSpec
   val exampleContext = ApiContext("exampleContext")
   val version        = ApiVersion("version")
 
-  val anotherCollaboratorEmail    = "collaborator@example.com"
-  val yetAnotherCollaboratorEmail = "collaborator2@example.com"
+  val anotherCollaboratorEmail    = "collaborator@example.com".toLaxEmail
+  val yetAnotherCollaboratorEmail = "collaborator2@example.com".toLaxEmail
 
   val testing: ApplicationState         = ApplicationState.testing.copy(updatedOn = LocalDateTime.now(ZoneOffset.UTC).minusMinutes(1))
   val production: ApplicationState      = ApplicationState.production("thirdpartydeveloper@example.com", "thirdpartydeveloper", "ABCD")
@@ -93,7 +94,7 @@ class ApplicationCheckSpec
     )
   )
 
-  val defaultCheckInformation: CheckInformation = CheckInformation(contactDetails = Some(ContactDetails("Tester", "tester@example.com", "12345678")))
+  val defaultCheckInformation: CheckInformation = CheckInformation(contactDetails = Some(ContactDetails("Tester", "tester@example.com".toLaxEmail, "12345678")))
 
   val groupedSubsSubscribedToExampleOnly: GroupedSubscriptions = GroupedSubscriptions(testApis = List.empty, apis = List.empty, exampleApi = exampleApiSubscription)
 
@@ -118,7 +119,7 @@ class ApplicationCheckSpec
         Environment.PRODUCTION,
         Some("Description 1"),
         Set(loggedInDeveloper.email.asAdministratorCollaborator),
-        state = ApplicationState.production(loggedInDeveloper.email, loggedInDeveloper.displayedName, ""),
+        state = ApplicationState.production(loggedInDeveloper.email.text, loggedInDeveloper.displayedName, ""),
         access = Standard(
           redirectUris = List("https://red1", "https://red2"),
           termsAndConditionsUrl = Some("http://tnc-url.com")
@@ -397,7 +398,7 @@ class ApplicationCheckSpec
 
     "show contact details step as complete when it has been done" in new Setup {
       def createApplication() = createPartiallyConfigurableApplication(
-        checkInformation = Some(CheckInformation(contactDetails = Some(ContactDetails("Tester", "tester@example.com", "12345678"))))
+        checkInformation = Some(CheckInformation(contactDetails = Some(ContactDetails("Tester", "tester@example.com".toLaxEmail, "12345678"))))
       )
 
       private val result = addToken(underTest.requestCheckPage(appId))(loggedInRequest)
@@ -428,7 +429,7 @@ class ApplicationCheckSpec
     "show agree to terms of use step as complete when it has been done" in new Setup {
       def createApplication() =
         createPartiallyConfigurableApplication(
-          checkInformation = Some(CheckInformation(termsOfUseAgreements = List(TermsOfUseAgreement("test@example.com", LocalDateTime.now(ZoneOffset.UTC), "1.0"))))
+          checkInformation = Some(CheckInformation(termsOfUseAgreements = List(TermsOfUseAgreement("test@example.com".toLaxEmail, LocalDateTime.now(ZoneOffset.UTC), "1.0"))))
         )
 
       private val result = addToken(underTest.requestCheckPage(appId))(loggedInRequest)
@@ -465,11 +466,11 @@ class ApplicationCheckSpec
               confirmedName = true,
               apiSubscriptionsConfirmed = true,
               apiSubscriptionConfigurationsConfirmed = true,
-              Some(ContactDetails("Example Name", "name@example.com", "012346789")),
+              Some(ContactDetails("Example Name", "name@example.com".toLaxEmail, "012346789")),
               providedPrivacyPolicyURL = true,
               providedTermsAndConditionsURL = true,
               teamConfirmed = true,
-              List(TermsOfUseAgreement("test@example.com", LocalDateTime.now(ZoneOffset.UTC), "1.0"))
+              List(TermsOfUseAgreement("test@example.com".toLaxEmail, LocalDateTime.now(ZoneOffset.UTC), "1.0"))
             )
           )
         )
@@ -491,11 +492,11 @@ class ApplicationCheckSpec
               confirmedName = true,
               apiSubscriptionsConfirmed = true,
               apiSubscriptionConfigurationsConfirmed = false,
-              Some(ContactDetails("Example Name", "name@example.com", "012346789")),
+              Some(ContactDetails("Example Name", "name@example.com".toLaxEmail, "012346789")),
               providedPrivacyPolicyURL = true,
               providedTermsAndConditionsURL = true,
               teamConfirmed = true,
-              List(TermsOfUseAgreement("test@example.com", LocalDateTime.now(ZoneOffset.UTC), "1.0"))
+              List(TermsOfUseAgreement("test@example.com".toLaxEmail, LocalDateTime.now(ZoneOffset.UTC), "1.0"))
             )
           )
         )
@@ -1257,7 +1258,7 @@ class ApplicationCheckSpec
       status(result) shouldBe OK
 
       contentAsString(result) should include("Add members of your organisation and give them permissions to access this application")
-      contentAsString(result) should include(developer.email)
+      contentAsString(result) should include(developer.email.text)
     }
 
     "not return the manage team list page when not logged in" in new Setup {
@@ -1309,7 +1310,7 @@ class ApplicationCheckSpec
       redirectLocation(result) shouldBe Some(s"/developer/login")
     }
 
-    val hashedAnotherCollaboratorEmail: String = anotherCollaboratorEmail.toSha256
+    val hashedAnotherCollaboratorEmail: String = anotherCollaboratorEmail.text.toSha256
 
     "return remove team member confirmation page when navigated to" in new Setup {
       def createApplication() = createPartiallyConfigurableApplication()
@@ -1320,7 +1321,7 @@ class ApplicationCheckSpec
 
       contentAsString(result) should include("Are you sure you want to remove this team member from your application?")
 
-      contentAsString(result) should include(anotherCollaboratorEmail)
+      contentAsString(result) should include(anotherCollaboratorEmail.text)
     }
 
     "not return the remove team member confirmation page when not logged in" in new Setup {
@@ -1335,7 +1336,7 @@ class ApplicationCheckSpec
     "redirect to the team member list when the remove confirmation post is executed" in new Setup {
       def createApplication() = createPartiallyConfigurableApplication()
 
-      val request = loggedInRequest.withFormUrlEncodedBody("email" -> anotherCollaboratorEmail)
+      val request = loggedInRequest.withFormUrlEncodedBody("email" -> anotherCollaboratorEmail.text)
 
       private val result = addToken(underTest.teamMemberRemoveAction(appId))(request)
 
@@ -1380,7 +1381,7 @@ class ApplicationCheckSpec
       body should include("Production application")
       body should include("You cannot view this application because you're not an administrator.")
       body should include("Ask the administrator")
-      body should include(anotherCollaboratorEmail)
+      body should include(anotherCollaboratorEmail.text)
     }
 
     "return unauthorised App details page with 2 Admins " in new Setup {
@@ -1400,8 +1401,8 @@ class ApplicationCheckSpec
       body should include("Production application")
       body should include("You cannot view this application because you're not an administrator.")
       body should include("Ask an administrator")
-      body should include(anotherCollaboratorEmail)
-      body should include(yetAnotherCollaboratorEmail)
+      body should include(anotherCollaboratorEmail.text)
+      body should include(yetAnotherCollaboratorEmail.text)
     }
   }
 

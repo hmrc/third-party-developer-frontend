@@ -314,11 +314,11 @@ trait HasAppState {
 }
 
 trait AppHasProductionStatus extends HasAppState {
-  def state = ApplicationState.production("requester@example.com".toLaxEmail, "mr requester", "code123")
+  def state = ApplicationState.production("requester@example.com", "mr requester", "code123")
 }
 
 trait AppHasPendingGatekeeperApprovalStatus extends HasAppState {
-  def state = ApplicationState.pendingGatekeeperApproval("requester@example.com".toLaxEmail, "mr requester")
+  def state = ApplicationState.pendingGatekeeperApproval("requester@example.com", "mr requester")
 }
 
 trait AppHasTestingStatus extends HasAppState {

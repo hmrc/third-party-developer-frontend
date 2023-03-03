@@ -26,6 +26,8 @@ import scala.util.Random
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.apidefinitions.AccessType
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.UserId
+import uk.gov.hmrc.apiplatform.modules.common.domain.models.LaxEmailAddress.StringSyntax
+import uk.gov.hmrc.apiplatform.modules.common.domain.models.LaxEmailAddress
 
 trait TestApplications {
   self: CollaboratorTracker =>
@@ -54,7 +56,7 @@ trait TestApplications {
       clientId: ClientId = ClientId(randomString(28)),
       grantLength: Period = Period.ofDays(547),
       environment: Environment = Environment.PRODUCTION,
-      state: ApplicationState = ApplicationState.production("test@test.com".toLaxEmail, "test name", "test"),
+      state: ApplicationState = ApplicationState.production("test@test.com", "test name", "test"),
       adminEmail: LaxEmailAddress = "admin@example.com".toLaxEmail,
       developerEmail: LaxEmailAddress = "developer@example.com".toLaxEmail,
       access: Access = standardAccess(),
@@ -85,10 +87,10 @@ trait TestApplications {
     anApplication(adminEmail = adminEmail).withState(ApplicationState.testing)
 
   def aStandardPendingApprovalApplication(adminEmail: LaxEmailAddress = "admin@example.com".toLaxEmail): Application =
-    anApplication(adminEmail = adminEmail).withState(ApplicationState.pendingRequesterVerification("test@test.com".toLaxEmail, "test name", "test"))
+    anApplication(adminEmail = adminEmail).withState(ApplicationState.pendingRequesterVerification("test@test.com", "test name", "test"))
 
   def aStandardPendingResponsibleIndividualVerificationApplication(adminEmail: LaxEmailAddress = "admin@example.com".toLaxEmail): Application =
-    anApplication(adminEmail = adminEmail).withState(ApplicationState.pendingResponsibleIndividualVerification("admin@example.com".toLaxEmail, "admin name"))
+    anApplication(adminEmail = adminEmail).withState(ApplicationState.pendingResponsibleIndividualVerification("admin@example.com", "admin name"))
 
   def standardAccess(
       redirectUris: List[String] = List("https://redirect1", "https://redirect2"),

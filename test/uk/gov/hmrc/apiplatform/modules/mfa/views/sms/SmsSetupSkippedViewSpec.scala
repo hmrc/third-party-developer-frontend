@@ -26,11 +26,12 @@ import uk.gov.hmrc.apiplatform.modules.mfa.views.html.sms.SmsSetupSkippedView
 import uk.gov.hmrc.thirdpartydeveloperfrontend.builder.{DeveloperBuilder, DeveloperSessionBuilder}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.{DeveloperSession, LoggedInState}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.{LocalUserIdTracker, WithCSRFAddToken}
+import uk.gov.hmrc.thirdpartydeveloperfrontend.builder.DeveloperTestData
 
 class SmsSetupSkippedViewSpec extends CommonViewSpec
     with WithCSRFAddToken
     with DeveloperSessionBuilder
-    with DeveloperBuilder
+    with DeveloperTestData
     with LocalUserIdTracker with StubMessagesFactory {
 
   implicit val request: FakeRequest[AnyContentAsEmpty.type] = FakeRequest()
@@ -38,7 +39,7 @@ class SmsSetupSkippedViewSpec extends CommonViewSpec
   implicit val loggedIn: DeveloperSession      = buildDeveloperSession(
     loggedInState =
       LoggedInState.LOGGED_IN,
-    buildDeveloper("developer@example.com", "Joe", "Bloggs")
+    JoeBloggs
   )
   val smsSetupSkippedView: SmsSetupSkippedView = app.injector.instanceOf[SmsSetupSkippedView]
 

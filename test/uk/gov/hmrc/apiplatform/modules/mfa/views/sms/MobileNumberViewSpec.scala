@@ -27,14 +27,16 @@ import uk.gov.hmrc.apiplatform.modules.mfa.views.html.sms.MobileNumberView
 import uk.gov.hmrc.thirdpartydeveloperfrontend.builder.{DeveloperBuilder, DeveloperSessionBuilder}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.{DeveloperSession, LoggedInState}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.{LocalUserIdTracker, WithCSRFAddToken}
+import uk.gov.hmrc.apiplatform.modules.common.domain.models.LaxEmailAddress.StringSyntax
+import uk.gov.hmrc.thirdpartydeveloperfrontend.builder.DeveloperTestData
 
 class MobileNumberViewSpec extends CommonViewSpec with WithCSRFAddToken with DeveloperSessionBuilder
-    with DeveloperBuilder with LocalUserIdTracker with StubMessagesFactory {
+    with LocalUserIdTracker with StubMessagesFactory with DeveloperTestData {
 
   implicit val request = FakeRequest()
 
   implicit val loggedIn: DeveloperSession =
-    buildDeveloperSession(loggedInState = LoggedInState.LOGGED_IN, buildDeveloper("developer@example.com", "Joe", "Bloggs"))
+    buildDeveloperSession(loggedInState = LoggedInState.LOGGED_IN, JoeBloggs)
   val mobileNumberView                    = app.injector.instanceOf[MobileNumberView]
 
   trait Setup {

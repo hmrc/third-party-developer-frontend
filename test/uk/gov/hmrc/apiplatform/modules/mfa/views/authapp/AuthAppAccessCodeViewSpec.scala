@@ -29,11 +29,12 @@ import uk.gov.hmrc.apiplatform.modules.mfa.views.html.authapp.AuthAppAccessCodeV
 import uk.gov.hmrc.thirdpartydeveloperfrontend.builder.{DeveloperBuilder, DeveloperSessionBuilder}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.{DeveloperSession, LoggedInState}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.{LocalUserIdTracker, WithCSRFAddToken}
+import uk.gov.hmrc.thirdpartydeveloperfrontend.builder.DeveloperTestData
 
 class AuthAppAccessCodeViewSpec extends CommonViewSpec
     with WithCSRFAddToken
     with DeveloperSessionBuilder
-    with DeveloperBuilder
+    with DeveloperTestData
     with LocalUserIdTracker
     with StubMessagesFactory {
 
@@ -42,7 +43,7 @@ class AuthAppAccessCodeViewSpec extends CommonViewSpec
 
   implicit val loggedIn: DeveloperSession = buildDeveloperSession(
     loggedInState = LoggedInState.LOGGED_IN,
-    buildDeveloper("developer@example.com", "Joe", "Bloggs")
+    JoeBloggs
   )
 
   "AuthAppAccessCodeView view" should {

@@ -37,6 +37,7 @@ import uk.gov.hmrc.thirdpartydeveloperfrontend.mocks.service._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.service.IpAllowlistService
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.WithLoggedInSession._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.{LocalUserIdTracker, TestApplications, WithCSRFAddToken}
+import uk.gov.hmrc.apiplatform.modules.common.domain.models.LaxEmailAddress.StringSyntax
 
 class IpAllowListControllerSpec
     extends BaseControllerSpec
@@ -74,8 +75,8 @@ class IpAllowListControllerSpec
     val sessionId       = "sessionId"
     val loggedInRequest = FakeRequest().withLoggedIn(underTest, implicitly)(sessionId)
 
-    val admin: Developer     = buildDeveloper(emailAddress = "admin@example.com")
-    val developer: Developer = buildDeveloper(emailAddress = "developer@example.com")
+    val admin: Developer     = buildDeveloper(emailAddress = "admin@example.com".toLaxEmail)
+    val developer: Developer = buildDeveloper(emailAddress = "developer@example.com".toLaxEmail)
 
     val anApplicationWithoutIpAllowlist: Application = anApplication(adminEmail = admin.email, developerEmail = developer.email)
     val anApplicationWithIpAllowlist: Application    = anApplicationWithoutIpAllowlist.copy(ipAllowlist = IpAllowlist(allowlist = Set("1.1.1.0/24")))

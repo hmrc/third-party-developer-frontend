@@ -42,6 +42,7 @@ import uk.gov.hmrc.thirdpartydeveloperfrontend.mocks.service.{ApplicationActionS
 import uk.gov.hmrc.thirdpartydeveloperfrontend.service.AuditService
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.WithLoggedInSession._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.{LocalUserIdTracker, TestApplications, WithCSRFAddToken}
+import uk.gov.hmrc.apiplatform.modules.common.domain.models.LaxEmailAddress.StringSyntax
 
 class ManageTeamSpec
     extends BaseControllerSpec
@@ -235,10 +236,10 @@ class ManageTeamSpec
     val teamMemberEmail       = "teamMemberToDelete@example.com"
     val teamMemberEmailHash   = teamMemberEmail.toSha256
     val additionalTeamMembers = Seq(
-      "email1@example.com".asDeveloperCollaborator,
-      "email2@example.com".asDeveloperCollaborator,
-      "email3@example.com".asDeveloperCollaborator,
-      teamMemberEmail.asDeveloperCollaborator
+      "email1@example.com".toLaxEmail.asDeveloperCollaborator,
+      "email2@example.com".toLaxEmail.asDeveloperCollaborator,
+      "email3@example.com".toLaxEmail.asDeveloperCollaborator,
+      teamMemberEmail.toLaxEmail.asDeveloperCollaborator
     )
 
     "show the remove team member page when logged in as an admin" in new Setup {
@@ -280,12 +281,12 @@ class ManageTeamSpec
   }
 
   "removeTeamMemberAction" when {
-    val teamMemberEmail = "teamMember@test.com"
+    val teamMemberEmail = "teamMember@test.com".toLaxEmail
 
     "logged in as an admin" should {
       "remove a team member when given the correct email and confirmation is 'Yes'" in new Setup {
         val application = givenTheApplicationExistWithUserRole(appId, ADMINISTRATOR)
-        val result      = underTest.removeTeamMemberAction(appId)(loggedInRequest.withCSRFToken.withFormUrlEncodedBody("email" -> teamMemberEmail, "confirm" -> "Yes"))
+        val result      = underTest.removeTeamMemberAction(appId)(loggedInRequest.withCSRFToken.withFormUrlEncodedBody("email" -> teamMemberEmail.text, "confirm" -> "Yes"))
 
         status(result) shouldBe SEE_OTHER
         redirectLocation(result) shouldBe Some(routes.ManageTeam.manageTeam(appId, None).url)
@@ -295,7 +296,7 @@ class ManageTeamSpec
       "redirect to the team members page without removing a team member when the confirmation in 'No'" in new Setup {
         val application = givenTheApplicationExistWithUserRole(appId, ADMINISTRATOR)
         val result      =
-          underTest.removeTeamMemberAction(appId)(loggedInRequest.withCSRFToken.withFormUrlEncodedBody("email" -> teamMemberEmail, "confirm" -> "No"))
+          underTest.removeTeamMemberAction(appId)(loggedInRequest.withCSRFToken.withFormUrlEncodedBody("email" -> teamMemberEmail.text, "confirm" -> "No"))
 
         status(result) shouldBe SEE_OTHER
         redirectLocation(result) shouldBe Some(routes.ManageTeam.manageTeam(appId, None).url)
@@ -304,7 +305,7 @@ class ManageTeamSpec
 
       "return 400 Bad Request when no confirmation is given" in new Setup {
         val application = givenTheApplicationExistWithUserRole(appId, ADMINISTRATOR)
-        val result      = underTest.removeTeamMemberAction(appId)(loggedInRequest.withCSRFToken.withFormUrlEncodedBody("email" -> teamMemberEmail))
+        val result      = underTest.removeTeamMemberAction(appId)(loggedInRequest.withCSRFToken.withFormUrlEncodedBody("email" -> teamMemberEmail.text))
 
         status(result) shouldBe BAD_REQUEST
         verify(applicationServiceMock, never).removeTeamMember(eqTo(application), eqTo(teamMemberEmail), eqTo(loggedInDeveloper.email))(*)
@@ -323,7 +324,7 @@ class ManageTeamSpec
       "return 403 Forbidden" in new Setup {
         givenTheApplicationExistWithUserRole(appId, DEVELOPER)
 
-        val result = underTest.removeTeamMemberAction(appId)(loggedInRequest.withFormUrlEncodedBody("email" -> teamMemberEmail, "confirm" -> "Yes"))
+        val result = underTest.removeTeamMemberAction(appId)(loggedInRequest.withFormUrlEncodedBody("email" -> teamMemberEmail.text, "confirm" -> "Yes"))
 
         status(result) shouldBe FORBIDDEN
         verify(applicationServiceMock, never).removeTeamMember(any[Application], *, *)(*)
@@ -335,7 +336,7 @@ class ManageTeamSpec
         givenTheApplicationExistWithUserRole(appId, DEVELOPER)
 
         val result =
-          underTest.removeTeamMemberAction(appId)(loggedOutRequest.withCSRFToken.withFormUrlEncodedBody("email" -> teamMemberEmail, "confirm" -> "Yes"))
+          underTest.removeTeamMemberAction(appId)(loggedOutRequest.withCSRFToken.withFormUrlEncodedBody("email" -> teamMemberEmail.text, "confirm" -> "Yes"))
 
         status(result) shouldBe SEE_OTHER
         redirectLocation(result) shouldBe Some(routes.UserLoginAccount.login.url)

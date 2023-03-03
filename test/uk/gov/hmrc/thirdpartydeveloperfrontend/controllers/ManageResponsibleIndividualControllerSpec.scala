@@ -40,6 +40,7 @@ import uk.gov.hmrc.thirdpartydeveloperfrontend.mocks.service.{ApplicationActionS
 import uk.gov.hmrc.thirdpartydeveloperfrontend.service.AuditService
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.WithLoggedInSession._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.{LocalUserIdTracker, TestApplications, WithCSRFAddToken}
+import uk.gov.hmrc.apiplatform.modules.common.domain.models.LaxEmailAddress.StringSyntax
 
 class ManageResponsibleIndividualControllerSpec
     extends BaseControllerSpec
@@ -96,7 +97,7 @@ class ManageResponsibleIndividualControllerSpec
     val sessionParams         = Seq("csrfToken" -> app.injector.instanceOf[TokenProvider].generateToken)
     val loggedOutRequest      = FakeRequest().withSession(sessionParams: _*)
     val loggedInRequest       = FakeRequest().withLoggedIn(underTest, implicitly)(sessionId).withSession(sessionParams: _*)
-    val responsibleIndividual = ResponsibleIndividual.build("Bob Responsible", "bob@example.com")
+    val responsibleIndividual = ResponsibleIndividual.build("Bob Responsible", "bob@example.com".toLaxEmail)
 
     implicit val hc = HeaderCarrier()
 
@@ -133,7 +134,7 @@ class ManageResponsibleIndividualControllerSpec
       givenTheApplicationExistWithUserRole(
         List(user),
         List(
-          TermsOfUseAcceptance(ResponsibleIndividual.build("Old RI", "oldri@example.com"), LocalDateTime.parse("2022-05-01T12:00:00"), Submission.Id.random, 0),
+          TermsOfUseAcceptance(ResponsibleIndividual.build("Old RI", "oldri@example.com".toLaxEmail), LocalDateTime.parse("2022-05-01T12:00:00"), Submission.Id.random, 0),
           TermsOfUseAcceptance(responsibleIndividual, LocalDateTime.parse("2022-07-01T12:00:00"), Submission.Id.random, 0)
         )
       )
@@ -181,7 +182,7 @@ class ManageResponsibleIndividualControllerSpec
     }
 
     "return an error if user is not a team member" in new Setup {
-      givenTheApplicationExistWithUserRole(List("other@example.com".asCollaborator(ADMINISTRATOR)), List.empty)
+      givenTheApplicationExistWithUserRole(List("other@example.com".toLaxEmail.asAdministratorCollaborator), List.empty)
 
       val result = underTest.showResponsibleIndividualDetails(appId)(loggedInRequest.withCSRFToken)
 
@@ -352,7 +353,7 @@ class ManageResponsibleIndividualControllerSpec
   "responsibleIndividualChangeToOtherAction" should {
     "update responsible individual with new details correctly" in new Setup {
       val name          = "bob"
-      val email         = "bob@example.com"
+      val email         = "bob@example.com".toLaxEmail
       val requesterName = developerSession.displayedName
       when(applicationServiceMock.verifyResponsibleIndividual(*[Application], *[UserId], eqTo(requesterName), eqTo(name), eqTo(email))(*)).thenReturn(successful(
         ApplicationUpdateSuccessful
@@ -361,7 +362,7 @@ class ManageResponsibleIndividualControllerSpec
 
       givenTheApplicationExistWithUserRole(List(user), List.empty)
 
-      val request = loggedInRequest.withCSRFToken.withFormUrlEncodedBody("name" -> name, "email" -> email)
+      val request = loggedInRequest.withCSRFToken.withFormUrlEncodedBody("name" -> name, "email" -> email.text)
       val result  = underTest.responsibleIndividualChangeToOtherAction(appId)(request)
 
       status(result) shouldBe SEE_OTHER
@@ -373,7 +374,7 @@ class ManageResponsibleIndividualControllerSpec
 
       givenTheApplicationExistWithUserRole(List(user), List.empty)
 
-      val request = loggedInRequest.withCSRFToken.withFormUrlEncodedBody("name" -> responsibleIndividual.fullName.value, "email" -> responsibleIndividual.emailAddress.value)
+      val request = loggedInRequest.withCSRFToken.withFormUrlEncodedBody("name" -> responsibleIndividual.fullName.value, "email" -> responsibleIndividual.emailAddress.text)
       val result  = underTest.responsibleIndividualChangeToOtherAction(appId)(request)
 
       status(result) shouldBe BAD_REQUEST

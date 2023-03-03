@@ -50,6 +50,7 @@ import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.{ApplicationUpdateSuccessf
 import uk.gov.hmrc.thirdpartydeveloperfrontend.helpers.ExcludeFromCoverage
 import uk.gov.hmrc.thirdpartydeveloperfrontend.repositories.FlowRepository
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.AsyncHmrcSpec
+import uk.gov.hmrc.apiplatform.modules.common.domain.models.LaxEmailAddress
 
 object EndpointScenarioSpec {
 
@@ -106,8 +107,8 @@ abstract class EndpointScenarioSpec extends AsyncHmrcSpec with GuiceOneAppPerSui
   )))
   when(sandboxPushPullNotificationsConnector.fetchPushSecrets(*[ClientId])(*)).thenReturn(Future.successful(List("secret1")))
   when(productionPushPullNotificationsConnector.fetchPushSecrets(*[ClientId])(*)).thenReturn(Future.successful(List("secret1")))
-  when(tpdConnector.fetchByEmails(*[Set[String]])(*)).thenReturn(Future.successful(List(User(userEmail, Some(true)))))
-  when(tpaSandboxConnector.removeTeamMember(*[ApplicationId], *[String], *[String], *[Set[String]])(*)).thenReturn(Future.successful(ApplicationUpdateSuccessful))
+  when(tpdConnector.fetchByEmails(*[Set[LaxEmailAddress]])(*)).thenReturn(Future.successful(List(User(userEmail, Some(true)))))
+  when(tpaSandboxConnector.removeTeamMember(*[ApplicationId], *[LaxEmailAddress], *[LaxEmailAddress], *[Set[LaxEmailAddress]])(*)).thenReturn(Future.successful(ApplicationUpdateSuccessful))
   when(tpaProductionConnector.validateName(*[String], *[Option[ApplicationId]])(*)).thenReturn(Future.successful(Valid))
   when(tpaProductionConnector.applicationUpdate(*[ApplicationId], *[ApplicationUpdate])(*)).thenReturn(Future.successful(ApplicationUpdateSuccessful))
   when(tpaSandboxConnector.applicationUpdate(*[ApplicationId], *[ApplicationUpdate])(*)).thenReturn(Future.successful(ApplicationUpdateSuccessful))
@@ -322,16 +323,16 @@ abstract class EndpointScenarioSpec extends AsyncHmrcSpec with GuiceOneAppPerSui
   final def getBodyParameterValues(endpoint: Endpoint): Map[String, String] = {
     endpoint match {
       case Endpoint("POST", "/developer/registration", _)                                                                              =>
-        Map("firstname" -> userFirstName, "lastname" -> userLastName, "emailaddress" -> userEmail, "password" -> userPassword, "confirmpassword" -> userPassword)
-      case Endpoint("POST", "/developer/login", _)                                                                                     => Map("emailaddress" -> userEmail, "password" -> userPassword)
-      case Endpoint("POST", "/developer/forgot-password", _)                                                                           => Map("emailaddress" -> userEmail)
+        Map("firstname" -> userFirstName, "lastname" -> userLastName, "emailaddress" -> userEmail.text, "password" -> userPassword, "confirmpassword" -> userPassword)
+      case Endpoint("POST", "/developer/login", _)                                                                                     => Map("emailaddress" -> userEmail.text, "password" -> userPassword)
+      case Endpoint("POST", "/developer/forgot-password", _)                                                                           => Map("emailaddress" -> userEmail.text)
       case Endpoint("POST", "/developer/login-mfa", _)                                                                                 => Map("accessCode" -> "123456", "rememberMe" -> "false")
       case Endpoint("POST", "/developer/reset-password", _)                                                                            => Map("password" -> userPassword, "confirmpassword" -> userPassword)
-      case Endpoint("POST", "/developer/support", _)                                                                                   => Map("fullname" -> userFullName, "emailaddress" -> userEmail, "comments" -> "I am very cross about something")
+      case Endpoint("POST", "/developer/support", _)                                                                                   => Map("fullname" -> userFullName, "emailaddress" -> userEmail.text, "comments" -> "I am very cross about something")
       case Endpoint("POST", "/developer/applications/:id/check-your-answers/terms-and-conditions", _)                                  =>
         Map("hasUrl" -> "true", "termsAndConditionsURL" -> "https://example.com/tcs")
-      case Endpoint("POST", "/developer/applications/:id/team-members/add/:addTeamMemberPageMode", _)                                  => Map("email" -> userEmail, "role" -> "developer")
-      case Endpoint("POST", "/developer/applications/:id/team-members/remove", _)                                                      => Map("email" -> userEmail, "confirm" -> "yes")
+      case Endpoint("POST", "/developer/applications/:id/team-members/add/:addTeamMemberPageMode", _)                                  => Map("email" -> userEmail.text, "role" -> "developer")
+      case Endpoint("POST", "/developer/applications/:id/team-members/remove", _)                                                      => Map("email" -> userEmail.text, "confirm" -> "yes")
       case Endpoint("POST", "/developer/applications/:id/details/change-app-name", _)                                                  => Map("applicationName" -> ("new " + applicationName))
       case Endpoint("POST", "/developer/applications/:id/details/change-privacy-policy-location", _)                                   =>
         Map("privacyPolicyUrl" -> "http://example.com", "isInDesktop" -> "false", "isNewJourney" -> "true")
@@ -347,7 +348,7 @@ abstract class EndpointScenarioSpec extends AsyncHmrcSpec with GuiceOneAppPerSui
       case Endpoint("POST", "/developer/applications/:id/ip-allowlist/change", _)                                                      => Map("confirm" -> "yes")
       case Endpoint("POST", "/developer/applications/:id/responsible-individual/change/self-or-other", _)                              => Map("who" -> "self")
       case Endpoint("POST", "/developer/applications/:id/responsible-individual/change/other", _)                                      =>
-        Map("name" -> (responsibleIndividual.fullName.value + " new"), "email" -> ("new" + responsibleIndividual.emailAddress.value))
+        Map("name" -> (responsibleIndividual.fullName.value + " new"), "email" -> ("new" + responsibleIndividual.emailAddress.text))
       case Endpoint("POST", "/developer/applications/:id/change-subscription", _)                                                      => Map("subscribed" -> "true")
       case Endpoint("POST", "/developer/applications/:id/change-locked-subscription", _)                                               => Map("subscribed" -> "true", "confirm" -> "true")
       case Endpoint("POST", "/developer/applications/:id/change-private-subscription", _)                                              => Map("subscribed" -> "true", "confirm" -> "true")
@@ -369,16 +370,16 @@ abstract class EndpointScenarioSpec extends AsyncHmrcSpec with GuiceOneAppPerSui
           "termsOfUseAgreementComplete"           -> "true"
         )
       case Endpoint("POST", "/developer/applications/:id/request-check/terms-and-conditions", _)                                       => Map("hasUrl" -> "true", "termsAndConditionsURL" -> "https://example.com/tcs")
-      case Endpoint("POST", "/developer/applications/:id/check-your-answers/contact", _)                                               => Map("fullname" -> userFullName, "email" -> userEmail, "telephone" -> userPhone)
+      case Endpoint("POST", "/developer/applications/:id/check-your-answers/contact", _)                                               => Map("fullname" -> userFullName, "email" -> userEmail.text, "telephone" -> userPhone)
       case Endpoint("POST", "/developer/applications/:id/check-your-answers/name", _)                                                  => Map("applicationName" -> applicationName)
       case Endpoint("POST", "/developer/applications/:id/check-your-answers/privacy-policy", _)                                        => Map("hasUrl" -> "true", "privacyPolicyURL" -> "https://example.com/priv")
       case Endpoint("POST", "/developer/applications/:id/check-your-answers/subscriptions", _)                                         => Map()
-      case Endpoint("POST", "/developer/applications/:id/check-your-answers/team/remove", _)                                           => Map("email" -> userEmail)
+      case Endpoint("POST", "/developer/applications/:id/check-your-answers/team/remove", _)                                           => Map("email" -> userEmail.text)
       case Endpoint("POST", "/developer/applications/:id/check-your-answers/terms-of-use", _)                                          => Map("termsOfUseAgreed" -> "true")
-      case Endpoint("POST", "/developer/applications/:id/request-check/contact", _)                                                    => Map("fullname" -> userFullName, "email" -> userEmail, "telephone" -> userPhone)
+      case Endpoint("POST", "/developer/applications/:id/request-check/contact", _)                                                    => Map("fullname" -> userFullName, "email" -> userEmail.text, "telephone" -> userPhone)
       case Endpoint("POST", "/developer/applications/:id/request-check/name", _)                                                       => Map("applicationName" -> applicationName)
       case Endpoint("POST", "/developer/applications/:id/request-check/privacy-policy", _)                                             => Map("hasUrl" -> "true", "privacyPolicyURL" -> "https://example.com/priv")
-      case Endpoint("POST", "/developer/applications/:id/request-check/team/remove", _)                                                => Map("email" -> userEmail)
+      case Endpoint("POST", "/developer/applications/:id/request-check/team/remove", _)                                                => Map("email" -> userEmail.text)
       case Endpoint("POST", "/developer/applications/:id/request-check/terms-of-use", _)                                               => Map("termsOfUseAgreed" -> "true")
       case Endpoint("POST", "/developer/applications/:id/details/change", _)                                                           => Map(
           "applicationId"         -> applicationId.value,

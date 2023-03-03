@@ -23,11 +23,13 @@ import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.apidefinitions._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.subscriptions.{FieldName, FieldValue, Fields}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.{CollaboratorTracker, UserIdTracker}
+import uk.gov.hmrc.apiplatform.modules.common.domain.models.LaxEmailAddress.StringSyntax
+import uk.gov.hmrc.apiplatform.modules.common.domain.models.LaxEmailAddress
 
 trait ApplicationBuilder extends CollaboratorTracker {
   self: UserIdTracker =>
 
-  def buildApplication(appOwnerEmail: String): Application = {
+  def buildApplication(appOwnerEmail: LaxEmailAddress): Application = {
 
     val appId        = ApplicationId("appid-" + randomUUID.toString)
     val clientId     = ClientId("clientid-" + randomUUID.toString)
@@ -44,7 +46,7 @@ trait ApplicationBuilder extends CollaboratorTracker {
       Environment.SANDBOX,
       Some(s"$appId-description"),
       buildCollaborators(Seq(appOwnerEmail)),
-      state = ApplicationState.production(appOwnerEmail, appOwnerName, ""),
+      state = ApplicationState.production(appOwnerEmail.text, appOwnerName, ""),
       access = Standard(
         redirectUris = List("https://red1", "https://red2"),
         termsAndConditionsUrl = Some("http://tnc-url.com")
@@ -52,11 +54,11 @@ trait ApplicationBuilder extends CollaboratorTracker {
     )
   }
 
-  def buildCollaborators(emails: Seq[String]): Set[Collaborator] = {
+  def buildCollaborators(emails: Seq[LaxEmailAddress]): Set[Collaborator] = {
     emails.map(email => email.asAdministratorCollaborator).toSet
   }
 
-  def buildApplicationWithSubscriptionData(appOwnerEmail: String): ApplicationWithSubscriptionData = {
+  def buildApplicationWithSubscriptionData(appOwnerEmail: LaxEmailAddress): ApplicationWithSubscriptionData = {
     val application = buildApplication(appOwnerEmail)
 
     ApplicationWithSubscriptionData(application)
@@ -77,7 +79,7 @@ trait ApplicationBuilder extends CollaboratorTracker {
       fields: Fields.Alias = Map(FieldName.random -> FieldValue.random, FieldName.random -> FieldValue.random)
     ): ApplicationWithSubscriptionData = {
     ApplicationWithSubscriptionData(
-      buildApplication("email@example.com"),
+      buildApplication("email@example.com".toLaxEmail),
       buildSubscriptions(apiContext, apiVersion),
       buildSubscriptionFieldValues(apiContext, apiVersion, fields)
     )
