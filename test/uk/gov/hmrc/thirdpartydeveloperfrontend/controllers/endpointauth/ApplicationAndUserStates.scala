@@ -271,7 +271,7 @@ trait UserIsAuthenticated extends HasUserSession with UpdatesRequest {
   def loggedInState               = LoggedInState.LOGGED_IN
 
   when(tpdConnector.register(*)(*)).thenReturn(Future.successful(EmailAlreadyInUse))
-  when(tpdConnector.findUserId(*)(*)).thenReturn(Future.successful(Some(CoreUserDetails(userEmail, userId))))
+  when(tpdConnector.findUserId(*[LaxEmailAddress])(*)).thenReturn(Future.successful(Some(CoreUserDetails(userEmail, userId))))
 
   implicit val cookieSigner: CookieSigner
 
@@ -292,7 +292,7 @@ trait UserIsNotAuthenticated extends HasUserSession {
   def loggedInState               = LoggedInState.PART_LOGGED_IN_ENABLING_MFA
 
   when(tpdConnector.register(*)(*)).thenReturn(Future.successful(RegistrationSuccessful))
-  when(tpdConnector.findUserId(*)(*)).thenReturn(Future.successful(None))
+  when(tpdConnector.findUserId(*[LaxEmailAddress])(*)).thenReturn(Future.successful(None))
 }
 
 trait HasAppDeploymentEnvironment {

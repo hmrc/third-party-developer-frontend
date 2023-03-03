@@ -52,7 +52,7 @@ class DeskproTicketSpec extends AsyncHmrcSpec {
       checkDeskproTicket(
         ticket,
         s"$applicationName: Support Enquiry",
-        s"$requestorEmail has submitted the following support enquiry: $comments Please send them a response within 2 working days. HMRC Developer Hub"
+        s"${requestorEmail.text} has submitted the following support enquiry: $comments Please send them a response within 2 working days. HMRC Developer Hub"
       )
     }
   }
@@ -64,7 +64,7 @@ class DeskproTicketSpec extends AsyncHmrcSpec {
       checkDeskproTicket(
         ticket,
         "Request to subscribe to an API",
-        s"I '$requestorEmail' want my application '$applicationName' identified by '${applicationId.value}' to be subscribed to the API '$apiName' with version '${apiVersion.value}'"
+        s"I '${requestorEmail.text}' want my application '$applicationName' identified by '${applicationId.value}' to be subscribed to the API '$apiName' with version '${apiVersion.value}'"
       )
     }
   }
@@ -76,7 +76,7 @@ class DeskproTicketSpec extends AsyncHmrcSpec {
       checkDeskproTicket(
         ticket,
         "Request to unsubscribe from an API",
-        s"I '$requestorEmail' want my application '$applicationName' identified by '${applicationId.value}' to be unsubscribed from the API '$apiName' with version '${apiVersion.value}'"
+        s"I '${requestorEmail.text}' want my application '$applicationName' identified by '${applicationId.value}' to be unsubscribed from the API '$apiName' with version '${apiVersion.value}'"
       )
     }
   }

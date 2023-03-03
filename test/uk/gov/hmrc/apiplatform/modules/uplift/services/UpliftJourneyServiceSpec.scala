@@ -16,11 +16,11 @@
 
 package uk.gov.hmrc.apiplatform.modules.uplift.services
 
+import uk.gov.hmrc.apiplatform.modules.common.domain.models.LaxEmailAddress
+
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future.successful
-
 import uk.gov.hmrc.http.HeaderCarrier
-
 import uk.gov.hmrc.apiplatform.modules.submissions.SubmissionsTestData
 import uk.gov.hmrc.apiplatform.modules.submissions.connectors.ThirdPartyApplicationSubmissionsConnector
 import uk.gov.hmrc.apiplatform.modules.uplift.domain.models._
@@ -249,7 +249,7 @@ class UpliftJourneyServiceSpec
       val productionAppId = ApplicationId.random
       GPCFlowServiceMock.FetchFlow.thenReturns(GetProductionCredentialsFlow("", Some(sellResellOrDistribute), Some(aListOfSubscriptions)))
       ApplicationServiceMock.updateApplicationSuccessful
-      when(mockSubmissionsConnector.createSubmission(*[ApplicationId], *)(*)).thenReturn(successful(Some(aSubmission)))
+      when(mockSubmissionsConnector.createSubmission(*[ApplicationId], *[LaxEmailAddress])(*)).thenReturn(successful(Some(aSubmission)))
 
       private val result = await(underTest.createNewSubmission(productionAppId, sampleApp, loggedInDeveloper))
 

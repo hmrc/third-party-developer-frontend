@@ -252,7 +252,7 @@ class DetailsViewSpec
 
               val page = Page(detailsView(ApplicationViewModel(application, hasSubscriptionsFields = false, hasPpnsFields = false), termsOfUseViewModel))
 
-              page.agreementDetails.text shouldBe s"Agreed by $emailAddress on $expectedTimeStamp"
+              page.agreementDetails.text shouldBe s"Agreed by ${emailAddress.text} on $expectedTimeStamp"
               page.readLink shouldBe null
             }
           }
@@ -286,7 +286,7 @@ class DetailsViewSpec
 
               val page = Page(detailsView(ApplicationViewModel(application, hasSubscriptionsFields = false, hasPpnsFields = false), termsOfUseViewModel))
 
-              page.agreementDetails.text shouldBe s"Agreed by $emailAddress on $expectedTimeStamp"
+              page.agreementDetails.text shouldBe s"Agreed by ${emailAddress.text} on $expectedTimeStamp"
               page.readLink.text shouldBe "Read"
               page.readLink.attributes.get("href") shouldBe routes.TermsOfUse.termsOfUse(application.id).url
               page.warning shouldBe null

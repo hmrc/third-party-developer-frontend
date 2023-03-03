@@ -89,7 +89,7 @@ class RegistrationSpec extends BaseControllerSpec {
 
       requestCaptor.getValue.firstName shouldBe "first"
       requestCaptor.getValue.lastName shouldBe "last"
-      requestCaptor.getValue.email shouldBe "email@example.com"
+      requestCaptor.getValue.email.text shouldBe "email@example.com"
       requestCaptor.getValue.password shouldBe "VALID@1q2w3e"
       requestCaptor.getValue.organisation shouldBe Some("org")
     }

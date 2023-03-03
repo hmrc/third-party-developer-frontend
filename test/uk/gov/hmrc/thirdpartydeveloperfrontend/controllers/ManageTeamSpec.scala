@@ -20,16 +20,14 @@ import java.time.LocalDateTime
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 import scala.concurrent.Future.{failed, successful}
-
 import views.html.checkpages.applicationcheck.team.TeamMemberAddView
 import views.html.manageTeamViews.{AddTeamMemberView, ManageTeamView, RemoveTeamMemberView}
-
 import play.api.mvc.Result
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
 import play.filters.csrf.CSRF.TokenProvider
+import uk.gov.hmrc.apiplatform.modules.common.domain.models.LaxEmailAddress
 import uk.gov.hmrc.http.HeaderCarrier
-
 import uk.gov.hmrc.thirdpartydeveloperfrontend.builder.{DeveloperBuilder, _}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.CollaboratorRole.{ADMINISTRATOR, DEVELOPER}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications._
@@ -85,9 +83,9 @@ class ManageTeamSpec
 
     fetchSessionByIdReturns(sessionId, session)
     updateUserFlowSessionsReturnsSuccessfully(sessionId)
-    when(applicationServiceMock.addTeamMember(*, *, *)(*))
+    when(applicationServiceMock.addTeamMember(*, *[LaxEmailAddress], *)(*))
       .thenReturn(successful(()))
-    when(applicationServiceMock.removeTeamMember(*, *, eqTo(loggedInDeveloper.email))(*))
+    when(applicationServiceMock.removeTeamMember(*, *[LaxEmailAddress], eqTo(loggedInDeveloper.email))(*))
       .thenReturn(successful(ApplicationUpdateSuccessful))
 
     val sessionParams    = Seq("csrfToken" -> app.injector.instanceOf[TokenProvider].generateToken)
@@ -163,7 +161,7 @@ class ManageTeamSpec
 
       status(result) shouldBe SEE_OTHER
       redirectLocation(result) shouldBe Some(routes.UserLoginAccount.login.url)
-      verify(applicationServiceMock, never).addTeamMember(*, *, *)(*)
+      verify(applicationServiceMock, never).addTeamMember(*, *[LaxEmailAddress], *)(*)
     }
   }
 
@@ -182,7 +180,7 @@ class ManageTeamSpec
 
     "check if team member already exists on the application" in new Setup {
       val application = givenTheApplicationExistWithUserRole(appId, ADMINISTRATOR)
-      when(applicationServiceMock.addTeamMember(eqTo(application), *, *)(*))
+      when(applicationServiceMock.addTeamMember(eqTo(application), *[LaxEmailAddress], *)(*))
         .thenReturn(failed(new TeamMemberAlreadyExists))
       val result      = underTest.addTeamMemberAction(appId, ManageTeamMembers)(loggedInRequest.withCSRFToken.withFormUrlEncodedBody("email" -> email, "role" -> role.toString))
 
@@ -193,7 +191,7 @@ class ManageTeamSpec
 
     "check if application exists" in new Setup {
       val application = givenTheApplicationExistWithUserRole(appId, ADMINISTRATOR)
-      when(applicationServiceMock.addTeamMember(eqTo(application), *, *)(*))
+      when(applicationServiceMock.addTeamMember(eqTo(application), *[LaxEmailAddress], *)(*))
         .thenReturn(failed(new ApplicationNotFound))
       val result      = underTest.addTeamMemberAction(appId, ManageTeamMembers)(loggedInRequest.withCSRFToken.withFormUrlEncodedBody("email" -> email, "role" -> role.toString))
 
@@ -204,7 +202,7 @@ class ManageTeamSpec
 
     "reject invalid email address" in new Setup {
       val application = givenTheApplicationExistWithUserRole(appId, ADMINISTRATOR)
-      when(applicationServiceMock.addTeamMember(eqTo(application), *, *)(*))
+      when(applicationServiceMock.addTeamMember(eqTo(application), *[LaxEmailAddress], *)(*))
         .thenReturn(failed(new ApplicationNotFound))
       val result      =
         underTest.addTeamMemberAction(appId, ManageTeamMembers)(loggedInRequest.withCSRFToken.withFormUrlEncodedBody("email" -> "notAnEmailAddress", "role" -> role.toString))
@@ -220,7 +218,7 @@ class ManageTeamSpec
       val result = underTest.addTeamMemberAction(appId, ManageTeamMembers)(loggedInRequest.withCSRFToken.withFormUrlEncodedBody("email" -> email, "role" -> role.toString))
 
       status(result) shouldBe FORBIDDEN
-      verify(applicationServiceMock, never).addTeamMember(*, *, *)(*)
+      verify(applicationServiceMock, never).addTeamMember(*, *[LaxEmailAddress], *)(*)
     }
 
     "redirect to login page when logged out" in new Setup {
@@ -228,7 +226,7 @@ class ManageTeamSpec
 
       status(result) shouldBe SEE_OTHER
       redirectLocation(result) shouldBe Some(routes.UserLoginAccount.login.url)
-      verify(applicationServiceMock, never).addTeamMember(*, *, *)(*)
+      verify(applicationServiceMock, never).addTeamMember(*, *[LaxEmailAddress], *)(*)
     }
   }
 
@@ -327,7 +325,7 @@ class ManageTeamSpec
         val result = underTest.removeTeamMemberAction(appId)(loggedInRequest.withFormUrlEncodedBody("email" -> teamMemberEmail.text, "confirm" -> "Yes"))
 
         status(result) shouldBe FORBIDDEN
-        verify(applicationServiceMock, never).removeTeamMember(any[Application], *, *)(*)
+        verify(applicationServiceMock, never).removeTeamMember(*[Application], *[LaxEmailAddress], *[LaxEmailAddress])(*)
       }
     }
 
@@ -340,7 +338,7 @@ class ManageTeamSpec
 
         status(result) shouldBe SEE_OTHER
         redirectLocation(result) shouldBe Some(routes.UserLoginAccount.login.url)
-        verify(applicationServiceMock, never).removeTeamMember(any[Application], *, *)(*)
+        verify(applicationServiceMock, never).removeTeamMember(any[Application], *[LaxEmailAddress], *)(*)
       }
     }
   }

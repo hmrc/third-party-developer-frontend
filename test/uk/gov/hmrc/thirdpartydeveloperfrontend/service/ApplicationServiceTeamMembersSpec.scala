@@ -180,7 +180,7 @@ class ApplicationServiceTeamMembersSpec extends AsyncHmrcSpec with Subscriptions
     val adminsToEmail = Set.empty[LaxEmailAddress]
 
     "remove teamMember successfully from production" in new Setup {
-      when(mockDeveloperConnector.fetchByEmails(*)(*)).thenReturn(successful(Seq.empty))
+      when(mockDeveloperConnector.fetchByEmails(*[Set[LaxEmailAddress]])(*)).thenReturn(successful(Seq.empty))
       theProductionConnectorthenReturnTheApplication(productionApplicationId, productionApplication)
       when(mockProductionApplicationConnector.removeTeamMember(productionApplicationId, email, admin, adminsToEmail))
         .thenReturn(successful(ApplicationUpdateSuccessful))
@@ -247,7 +247,7 @@ class ApplicationServiceTeamMembersSpec extends AsyncHmrcSpec with Subscriptions
       when(mockDeveloperConnector.fetchByEmails(eqTo(Set("verified@example.com".toLaxEmail, "unverified@example.com".toLaxEmail)))(*))
         .thenReturn(successful(nonRemoverAdmins))
       theProductionConnectorthenReturnTheApplication(productionApplicationId, application)
-      when(mockProductionApplicationConnector.removeTeamMember(*[ApplicationId], *, *[LaxEmailAddress], *[Set[LaxEmailAddress]])(*)).thenReturn(successful(response))
+      when(mockProductionApplicationConnector.removeTeamMember(*[ApplicationId], *[LaxEmailAddress], *[LaxEmailAddress], *[Set[LaxEmailAddress]])(*)).thenReturn(successful(response))
 
       await(applicationService.removeTeamMember(application, teamMemberToRemove.emailAddress, removerAdmin.emailAddress)) shouldBe response
       verify(mockProductionApplicationConnector).removeTeamMember(

@@ -153,8 +153,8 @@ class UserLoginAccountSpec extends BaseControllerSpec with WithCSRFAddToken
       when(underTest.sessionService.destroy(eqTo(sessionWithAuthAppMfa.sessionId))(*))
         .thenReturn(Future.successful(NO_CONTENT))
 
-    when(underTest.sessionService.authenticate(*, *, *)(*)).thenReturn(failed(new InvalidCredentials))
-    when(underTest.sessionService.authenticateAccessCode(*, *, *, *[MfaId])(*)).thenReturn(failed(new InvalidCredentials))
+    when(underTest.sessionService.authenticate(*[LaxEmailAddress], *, *)(*)).thenReturn(failed(new InvalidCredentials))
+    when(underTest.sessionService.authenticateAccessCode(*[LaxEmailAddress], *, *, *[MfaId])(*)).thenReturn(failed(new InvalidCredentials))
 
     def mockAudit(auditAction: AuditAction, result: Future[AuditResult]): Unit =
       when(underTest.auditService.audit(eqTo(auditAction), *)(*)).thenReturn(result)
@@ -429,7 +429,7 @@ class UserLoginAccountSpec extends BaseControllerSpec with WithCSRFAddToken
 
       status(result) shouldBe FORBIDDEN
       contentAsString(result) should include("Verify your account using the email we sent. Or get us to resend the verification email")
-      await(result).session(request).get("email").mkString shouldBe user.email
+      await(result).session(request).get("email").mkString shouldBe user.email.text
     }
 
     "display the Account locked page when the account is locked" in new Setup {

@@ -103,7 +103,7 @@ class ResponsibleIndividualVerificationServiceSpec extends AsyncHmrcSpec
       val deskproTicket = ticketCapture.value
       deskproTicket.subject shouldBe "New application submitted for checking"
       deskproTicket.name shouldBe application.state.requestedByName.get
-      deskproTicket.email shouldBe application.state.requestedByEmailAddress.get
+      deskproTicket.email.text shouldBe application.state.requestedByEmailAddress.get
       deskproTicket.message should include(riVerification.applicationName)
       deskproTicket.referrer should include(s"/application/${riVerification.applicationId.value}/check-answers")
     }

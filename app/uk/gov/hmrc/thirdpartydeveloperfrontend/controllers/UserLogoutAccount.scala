@@ -22,7 +22,6 @@ import scala.util.Failure
 import views.html.{LogoutConfirmationView, SignoutSurveyView}
 import play.api.libs.crypto.CookieSigner
 import play.api.mvc.{AnyContent, MessagesControllerComponents, MessagesRequest}
-import uk.gov.hmrc.apiplatform.modules.common.domain.models.LaxEmailAddress
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.LaxEmailAddress.StringSyntax
 import uk.gov.hmrc.apiplatform.modules.common.services.ApplicationLogger
 import uk.gov.hmrc.thirdpartydeveloperfrontend.config.{ApplicationConfig, ErrorHandler}

@@ -20,7 +20,6 @@ import scala.concurrent.Future
 import views.html.checkpages.ContactDetailsView
 import play.api.data.Form
 import play.api.mvc.{Action, AnyContent, Call}
-import uk.gov.hmrc.apiplatform.modules.common.domain.models.LaxEmailAddress
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.LaxEmailAddress.StringSyntax
 import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.ApplicationController
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.{ApplicationId, CheckInformation, ContactDetails}

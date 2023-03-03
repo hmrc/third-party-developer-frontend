@@ -31,7 +31,6 @@ import uk.gov.hmrc.apiplatform.modules.mfa.models.MfaAction.{CREATE, REMOVE}
 import uk.gov.hmrc.apiplatform.modules.mfa.models.MfaType.{AUTHENTICATOR_APP, SMS}
 import uk.gov.hmrc.apiplatform.modules.mfa.models.{MfaAction, MfaId, MfaType}
 import uk.gov.hmrc.apiplatform.modules.mfa.service.{MfaResponse, MfaService}
-import uk.gov.hmrc.apiplatform.modules.mfa.utils.MfaDetailHelper
 import uk.gov.hmrc.apiplatform.modules.mfa.utils.MfaDetailHelper._
 import uk.gov.hmrc.apiplatform.modules.mfa.views.html.authapp._
 import uk.gov.hmrc.apiplatform.modules.mfa.views.html.sms._
@@ -282,10 +281,6 @@ class MfaController @Inject() (
 
   def removeMfaCompletedPage(): Action[AnyContent] = atLeastPartLoggedInEnablingMfaAction { implicit request =>
     Future.successful(Ok(removeMfaCompletedView()))
-  }
-
-  private def hasMultipleMfaMethods(developer: Developer): Boolean = {
-    MfaDetailHelper.hasVerifiedSmsAndAuthApp(developer.mfaDetails)
   }
 
   private def removeMfaUserWithOneMfaMethod(mfaId: MfaId, mfaType: MfaType, userId: UserId)(implicit hc: HeaderCarrier, request: Request[_]): Future[Result] = {
