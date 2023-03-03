@@ -156,7 +156,6 @@ class ViewAllApplicationsPageSpec extends CommonViewSpec
       )
     }
 
-    // val applicationId = ApplicationId("1111")
     val appName       = "App name 1"
     val appUserRole   = CollaboratorRole.ADMINISTRATOR
     val appCreatedOn  = LocalDateTime.now(ZoneOffset.UTC).minusDays(1)
