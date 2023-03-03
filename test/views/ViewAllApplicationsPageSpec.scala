@@ -92,16 +92,16 @@ class ViewAllApplicationsPageSpec extends CommonViewSpec
     def showsPrincipalAppsHeading()(implicit document: Document) =
       elementExistsByText(document, "th", s"$principalCapitalized applications") shouldBe true
 
-    def showsTermsOfUseBlueBox()(implicit document: Document) =
+    def showsTermsOfUseOutstandingBox()(implicit document: Document) =
       elementExistsByText(document, "h2", "Important") shouldBe true
 
-    def hidesTermsOfUseBlueBox()(implicit document: Document) =
+    def hidesTermsOfUseOutstandingBox()(implicit document: Document) =
       elementExistsByText(document, "h2", "Important") shouldBe false
 
-    def showsTermsOfUseGreenBox()(implicit document: Document) =
+    def showsTermsOfUseReviewBox()(implicit document: Document) =
       elementExistsByText(document, "h2", "Terms of use") shouldBe true
 
-    def hidesTermsOfUseGreenBox()(implicit document: Document) =
+    def hidesTermsOfUseReviewBox()(implicit document: Document) =
       elementExistsByText(document, "h2", "Terms of use") shouldBe false
 
     def hidesSubordinateAppsHeading()(implicit document: Document) =
@@ -252,8 +252,8 @@ class ViewAllApplicationsPageSpec extends CommonViewSpec
         showsAppName(appName)
         showsSubordinateAppsHeading()
         showsPrincipalAppsHeading()
-        showsTermsOfUseBlueBox()
-        hidesTermsOfUseGreenBox()
+        showsTermsOfUseOutstandingBox()
+        hidesTermsOfUseReviewBox()
       }
 
       "work in Qa/Dev with no invites to display" in new QaAndDev with Setup {
@@ -262,8 +262,8 @@ class ViewAllApplicationsPageSpec extends CommonViewSpec
         showsAppName(appName)
         showsSubordinateAppsHeading()
         showsPrincipalAppsHeading()
-        hidesTermsOfUseBlueBox()
-        hidesTermsOfUseGreenBox()
+        hidesTermsOfUseOutstandingBox()
+        hidesTermsOfUseReviewBox()
       }
     }
 
@@ -277,8 +277,8 @@ class ViewAllApplicationsPageSpec extends CommonViewSpec
         showsAppName(appName)
         showsSubordinateAppsHeading()
         showsPrincipalAppsHeading()
-        hidesTermsOfUseBlueBox()
-        showsTermsOfUseGreenBox()
+        hidesTermsOfUseOutstandingBox()
+        showsTermsOfUseReviewBox()
       }
 
       "work in Qa/Dev with no submissions in review" in new QaAndDev with Setup {
@@ -289,8 +289,8 @@ class ViewAllApplicationsPageSpec extends CommonViewSpec
         showsAppName(appName)
         showsSubordinateAppsHeading()
         showsPrincipalAppsHeading()
-        showsTermsOfUseBlueBox()
-        hidesTermsOfUseGreenBox()
+        showsTermsOfUseOutstandingBox()
+        hidesTermsOfUseReviewBox()
       }
     }
 
