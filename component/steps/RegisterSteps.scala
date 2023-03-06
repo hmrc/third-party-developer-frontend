@@ -27,7 +27,6 @@ import pages._
 import play.api.http.Status
 import stubs.DeveloperStub
 import org.scalatest.matchers.should.Matchers
-import uk.gov.hmrc.apiplatform.modules.common.domain.models.LaxEmailAddress
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.LaxEmailAddress.StringSyntax
 
 object Form extends WebBrowser {

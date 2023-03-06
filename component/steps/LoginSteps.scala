@@ -26,7 +26,6 @@ import pages._
 import play.api.http.Status._
 import play.api.libs.json.{Format, Json}
 import stubs.{DeveloperStub, MfaStub, Stubs}
-import uk.gov.hmrc.apiplatform.modules.common.domain.models.LaxEmailAddress
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.LaxEmailAddress.StringSyntax
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.connectors.{LoginRequest, PasswordResetRequest, UserAuthenticationResponse}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.{Developer, LoggedInState, Session}

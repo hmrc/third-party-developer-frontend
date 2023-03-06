@@ -373,12 +373,12 @@ class UserLoginAccount @Inject() (
     successful(Ok(requestMfaRemovalCompleteView()))
   }
 
+  // TODO - this whole piece of code looks like it should be handling the lack of an emailAddress much better - perhaps dropping through all the for comp to return a BadRequest
   def confirm2SVHelp(): Action[AnyContent] = loggedOutAction { implicit request =>
     import cats.data.OptionT
     import cats.implicits._
-
-    val email = request.session.get("emailAddress").map(_.toLaxEmail)
-      .getOrElse(throw new RuntimeException("Unable to get user session data"))// TODO is this ok????
+    
+    val email = request.session.get("emailAddress").getOrElse("").toLaxEmail
 
     def findDeveloper = {
       (for {

@@ -28,7 +28,6 @@ import scala.collection.JavaConverters._
 import scala.collection.mutable
 import scala.concurrent.duration._
 import org.scalatest.matchers.should.Matchers
-import uk.gov.hmrc.apiplatform.modules.common.domain.models.LaxEmailAddress
 
 object TableMisuseAdapters {
 
