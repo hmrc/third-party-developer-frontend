@@ -61,8 +61,8 @@ class ManageApplications @Inject() (
       sandboxApplicationSummaries          = upliftData.sandboxApplicationSummaries
       upliftableApplicationIds             = upliftData.upliftableApplicationIds
       productionAppSummaries              <- appsByTeamMember.fetchProductionSummariesByTeamMember(request.userId)
-      termsOfUseInvites                   <- termsOfUseInvitationService.fetchTermsOfUseInvitations()
-      productionApplicationSubmissions    <- Future.sequence(productionAppSummaries.map(prodAppSummary => getSubmission(prodAppSummary.id)).toList).map(_.flatten)
+      termsOfUseInvites                   <- Future.sequence(productionAppSummaries.map(summary => termsOfUseInvitationService.fetchTermsOfUseInvitation(summary.id)).toList).map(_.flatten)
+      productionApplicationSubmissions    <- Future.sequence(termsOfUseInvites.map(invite => getSubmission(invite.applicationId)).toList).map(_.flatten)
     } yield (sandboxApplicationSummaries, productionAppSummaries) match {
       case (Nil, Nil) => Redirect(uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.noapplications.routes.NoApplications.noApplicationsPage)
       case _          => Ok(manageApplicationsView(
