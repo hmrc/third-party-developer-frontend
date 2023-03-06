@@ -180,7 +180,7 @@ class ManageTeamSpec
 
     "check if team member already exists on the application" in new Setup {
       val application = givenTheApplicationExistWithUserRole(appId, ADMINISTRATOR)
-      when(applicationServiceMock.addTeamMember(eqTo(application), *[LaxEmailAddress], *)(*))
+      when(applicationServiceMock.addTeamMember(eqTo(application), *[LaxEmailAddress], *[AddCollaborator])(*))
         .thenReturn(failed(new TeamMemberAlreadyExists))
       val result      = underTest.addTeamMemberAction(appId, ManageTeamMembers)(loggedInRequest.withCSRFToken.withFormUrlEncodedBody("email" -> email, "role" -> role.toString))
 
@@ -338,7 +338,7 @@ class ManageTeamSpec
 
         status(result) shouldBe SEE_OTHER
         redirectLocation(result) shouldBe Some(routes.UserLoginAccount.login.url)
-        verify(applicationServiceMock, never).removeTeamMember(any[Application], *[LaxEmailAddress], *)(*)
+        verify(applicationServiceMock, never).removeTeamMember(any[Application], *[LaxEmailAddress], *[LaxEmailAddress])(*)
       }
     }
   }
