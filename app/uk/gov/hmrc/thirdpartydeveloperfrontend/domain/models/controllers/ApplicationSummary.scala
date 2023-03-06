@@ -22,7 +22,7 @@ import uk.gov.hmrc.http.NotFoundException
 
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.apidefinitions.{AccessType, ApiIdentifier}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications._
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.UserId
+import uk.gov.hmrc.apiplatform.modules.developers.domain.models.UserId
 
 case class ApplicationSummary(
     id: ApplicationId,

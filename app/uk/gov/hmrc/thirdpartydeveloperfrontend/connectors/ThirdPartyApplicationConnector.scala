@@ -19,7 +19,6 @@ package uk.gov.hmrc.thirdpartydeveloperfrontend.connectors
 import javax.inject.{Inject, Singleton}
 import scala.concurrent.{ExecutionContext, Future}
 import scala.util.Success
-import akka.actor.ActorSystem
 import akka.pattern.FutureTimeoutSupport
 import play.api.http.Status._
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.LaxEmailAddress
@@ -33,8 +32,8 @@ import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.apidefinitions.ApiI
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.ApplicationNameValidationJson.{ApplicationNameValidationRequest, ApplicationNameValidationResult}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.connectors.{DeleteCollaboratorRequest, TermsOfUseInvitation}
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.UserId
 import uk.gov.hmrc.thirdpartydeveloperfrontend.service.ApplicationService.ApplicationConnector
+import uk.gov.hmrc.apiplatform.modules.developers.domain.models.UserId
 
 abstract class ThirdPartyApplicationConnector(config: ApplicationConfig, metrics: ConnectorMetrics) extends ApplicationConnector
     with CommonResponseHandlers with ApplicationLogger with HttpErrorFunctions with ApplicationUpdateFormatters {
@@ -232,7 +231,6 @@ private[connectors] object ThirdPartyApplicationConnectorDomain {
 class ThirdPartyApplicationSandboxConnector @Inject() (
     val httpClient: HttpClient,
     val proxiedHttpClient: ProxiedHttpClient,
-    val actorSystem: ActorSystem,
     val futureTimeout: FutureTimeoutSupport,
     val appConfig: ApplicationConfig,
     val metrics: ConnectorMetrics
@@ -251,7 +249,6 @@ class ThirdPartyApplicationSandboxConnector @Inject() (
 class ThirdPartyApplicationProductionConnector @Inject() (
     val httpClient: HttpClient,
     val proxiedHttpClient: ProxiedHttpClient,
-    val actorSystem: ActorSystem,
     val futureTimeout: FutureTimeoutSupport,
     val appConfig: ApplicationConfig,
     val metrics: ConnectorMetrics

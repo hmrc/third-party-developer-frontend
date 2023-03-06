@@ -82,7 +82,7 @@ class SubmissionServiceSpec extends AsyncHmrcSpec {
     val err          = "nope"
 
     "return without errors if TPA connector call was successful" in new Setup {
-      when(mockSubmissionsConnector.confirmSetupComplete(applicationId, emailAddress)).thenReturn(successful(Right()))
+      when(mockSubmissionsConnector.confirmSetupComplete(applicationId, emailAddress)).thenReturn(successful(Right(())))
 
       val result = await(underTest.confirmSetupComplete(applicationId, emailAddress))
 

@@ -32,7 +32,7 @@ import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.connectors.LoginReq
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.connectors.AccessCodeAuthenticationRequest
 import play.api.http.HeaderNames
 import uk.gov.hmrc.apiplatform.modules.mfa.models.MfaId
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.UserId
+import uk.gov.hmrc.apiplatform.modules.developers.domain.models.UserId
 import uk.gov.hmrc.thirdpartydeveloperfrontend.connectors.ThirdPartyDeveloperConnector.FindUserIdResponse
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.LaxEmailAddress.StringSyntax
 

@@ -41,6 +41,7 @@ import uk.gov.hmrc.thirdpartydeveloperfrontend.mocks.service._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.service.AuditService
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.LocalUserIdTracker
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.WithLoggedInSession._
+import uk.gov.hmrc.apiplatform.modules.common.domain.models.Actors
 
 class CredentialsSpec
     extends BaseControllerSpec
@@ -140,7 +141,7 @@ class CredentialsSpec
     val sessionParams: Seq[(String, String)]                  = Seq("csrfToken" -> app.injector.instanceOf[TokenProvider].generateToken)
     val loggedOutRequest: FakeRequest[AnyContentAsEmpty.type] = FakeRequest().withSession(sessionParams: _*)
     val loggedInRequest: FakeRequest[AnyContentAsEmpty.type]  = FakeRequest().withLoggedIn(underTest, implicitly)(sessionId).withSession(sessionParams: _*)
-    val actor                                                 = CollaboratorActor(loggedInDeveloper.email)
+    val actor                                                 = Actors.AppCollaborator(loggedInDeveloper.email)
   }
 
   "The credentials page" should {
@@ -300,7 +301,7 @@ class CredentialsSpec
       val result = underTest.addClientSecret(applicationId)(loggedInRequest)
 
       status(result) shouldBe FORBIDDEN
-      verify(underTest.applicationService, never).addClientSecret(any[Application], any[CollaboratorActor])(*)
+      verify(underTest.applicationService, never).addClientSecret(any[Application], any[Actors.AppCollaborator])(*)
     }
 
     "display the error page when the application has not reached production state" in new Setup {
@@ -309,7 +310,7 @@ class CredentialsSpec
       val result = (underTest.addClientSecret(applicationId)(loggedInRequest))
 
       status(result) shouldBe BAD_REQUEST
-      verify(underTest.applicationService, never).addClientSecret(any[Application], any[CollaboratorActor])(*)
+      verify(underTest.applicationService, never).addClientSecret(any[Application], any[Actors.AppCollaborator])(*)
     }
 
     "return to the login page when the user is not logged in" in new Setup {
@@ -319,7 +320,7 @@ class CredentialsSpec
 
       status(result) shouldBe SEE_OTHER
       redirectLocation(result) shouldBe Some("/developer/login")
-      verify(underTest.applicationService, never).addClientSecret(any[Application], any[CollaboratorActor])(*)
+      verify(underTest.applicationService, never).addClientSecret(any[Application], any[Actors.AppCollaborator])(*)
     }
   }
 

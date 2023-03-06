@@ -35,6 +35,7 @@ import uk.gov.hmrc.thirdpartydeveloperfrontend.service.PushPullNotificationsServ
 import uk.gov.hmrc.thirdpartydeveloperfrontend.service.SubscriptionFieldsService.SubscriptionFieldsConnector
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.{AsyncHmrcSpec, FixedClock, LocalUserIdTracker}
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.LaxEmailAddress.StringSyntax
+import uk.gov.hmrc.apiplatform.modules.common.domain.models.Actors
 
 class ApplicationServiceClientSecretSpec extends AsyncHmrcSpec with SubscriptionsBuilder with ApplicationBuilder with LocalUserIdTracker with FixedClock {
 
@@ -125,7 +126,7 @@ class ApplicationServiceClientSecretSpec extends AsyncHmrcSpec with Subscription
   "addClientSecret" should {
     val newClientSecretId = UUID.randomUUID().toString
     val newClientSecret   = UUID.randomUUID().toString
-    val actor             = CollaboratorActor("john.requestor@example.com".toLaxEmail)
+    val actor             = Actors.AppCollaborator("john.requestor@example.com".toLaxEmail)
     val timestamp         = LocalDateTime.now(clock)
 
     "add a client secret for app in production environment" in new Setup {
@@ -156,7 +157,7 @@ class ApplicationServiceClientSecretSpec extends AsyncHmrcSpec with Subscription
 
   "deleteClientSecret" should {
     val applicationId  = ApplicationId.random
-    val actor          = CollaboratorActor("john.requestor@example.com".toLaxEmail)
+    val actor          = Actors.AppCollaborator("john.requestor@example.com".toLaxEmail)
     val secretToDelete = UUID.randomUUID().toString
     val timestamp      = LocalDateTime.now(clock)
 
