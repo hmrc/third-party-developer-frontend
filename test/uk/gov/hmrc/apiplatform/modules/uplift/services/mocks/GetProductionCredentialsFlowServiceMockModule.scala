@@ -24,6 +24,7 @@ import org.mockito.{ArgumentMatchersSugar, MockitoSugar}
 import uk.gov.hmrc.apiplatform.modules.uplift.domain.models._
 import uk.gov.hmrc.apiplatform.modules.uplift.services.GetProductionCredentialsFlowService
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.SellResellOrDistribute
+import org.mockito.quality.Strictness
 
 trait GetProductionCredentialsFlowServiceMockModule extends MockitoSugar with ArgumentMatchersSugar {
 
@@ -82,6 +83,6 @@ trait GetProductionCredentialsFlowServiceMockModule extends MockitoSugar with Ar
   }
 
   object GPCFlowServiceMock extends BaseGetProductionCredentialsFlowServiceMock {
-    val aMock = mock[GetProductionCredentialsFlowService](withSettings.lenient())
+    val aMock = mock[GetProductionCredentialsFlowService](withSettings.strictness(Strictness.LENIENT))
   }
 }

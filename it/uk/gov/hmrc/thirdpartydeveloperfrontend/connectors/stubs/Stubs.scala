@@ -277,7 +277,7 @@ object ApiPlatformMicroserviceStub {
 
   def stubFetchAllPossibleSubscriptions(applicationId: ApplicationId, body: String) = {
     stubFor(
-      get(urlEqualTo(s"/api-definitions?applicationId=${applicationId.value}"))
+      get(urlEqualTo(s"/api-definitions?applicationId=${applicationId.text}"))
         .willReturn(
           aResponse()
             .withStatus(OK)
@@ -289,7 +289,7 @@ object ApiPlatformMicroserviceStub {
 
   def stubFetchAllPossibleSubscriptionsFailure(applicationId: ApplicationId) = {
     stubFor(
-      get(urlEqualTo(s"/api-definitions?applicationId=${applicationId.value}"))
+      get(urlEqualTo(s"/api-definitions?applicationId=${applicationId.text}"))
         .willReturn(
           aResponse()
             .withStatus(INTERNAL_SERVER_ERROR)
@@ -299,7 +299,7 @@ object ApiPlatformMicroserviceStub {
 
   def stubFetchApplicationById(applicationId: ApplicationId, data: ApplicationWithSubscriptionData) = {
     stubFor(
-      get(urlEqualTo(s"/applications/${applicationId.value}"))
+      get(urlEqualTo(s"/applications/${applicationId.text}"))
         .willReturn(
           aResponse()
             .withStatus(OK)
@@ -311,7 +311,7 @@ object ApiPlatformMicroserviceStub {
 
   def stubFetchApplicationByIdFailure(applicationId: ApplicationId) = {
     stubFor(
-      get(urlEqualTo(s"/applications/${applicationId.value}"))
+      get(urlEqualTo(s"/applications/${applicationId.text}"))
         .willReturn(
           aResponse()
             .withStatus(NOT_FOUND)
@@ -381,7 +381,7 @@ object ApiPlatformMicroserviceStub {
 
   def stubSubscribeToApi(applicationId: ApplicationId, apiIdentifier: ApiIdentifier) = {
     stubFor(
-      post(urlPathEqualTo(s"/applications/${applicationId.value}/subscriptions"))
+      post(urlPathEqualTo(s"/applications/${applicationId.text}/subscriptions"))
         .withJsonRequestBody(apiIdentifier)
         .willReturn(
           aResponse()
@@ -392,7 +392,7 @@ object ApiPlatformMicroserviceStub {
 
   def stubSubscribeToApiFailure(applicationId: ApplicationId, apiIdentifier: ApiIdentifier) = {
     stubFor(
-      post(urlPathEqualTo(s"/applications/${applicationId.value}/subscriptions"))
+      post(urlPathEqualTo(s"/applications/${applicationId.text}/subscriptions"))
         .withJsonRequestBody(apiIdentifier)
         .willReturn(
           aResponse()

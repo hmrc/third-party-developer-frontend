@@ -55,7 +55,7 @@ class SelectTopicsFromSubscriptionsViewSpec extends CommonViewSpec
     // Check form is configured correctly
     val form = document.getElementById("emailPreferencesTopicsForm")
     form.attr("method") should be("POST")
-    form.attr("action") should be(s"/developer/profile/email-preferences/topics-from-subscriptions?context=${applicationId.text}")
+    form.attr("action") should be(s"/developer/profile/email-preferences/topics-from-subscriptions?applicationId=${applicationId.text}")
 
     // check checkboxes are displayed
     validateCheckboxItemsAgainstTopics(document)

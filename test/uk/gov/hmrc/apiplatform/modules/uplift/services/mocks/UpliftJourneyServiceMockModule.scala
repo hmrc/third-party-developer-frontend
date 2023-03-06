@@ -26,6 +26,7 @@ import uk.gov.hmrc.apiplatform.modules.uplift.domain.models._
 import uk.gov.hmrc.apiplatform.modules.uplift.services.UpliftJourneyService
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.apidefinitions.APISubscriptionStatus
 import uk.gov.hmrc.apiplatform.modules.applications.domain.models.ApplicationId
+import org.mockito.quality.Strictness
 
 trait UpliftJourneyServiceMockModule extends MockitoSugar with ArgumentMatchersSugar {
 
@@ -66,6 +67,6 @@ trait UpliftJourneyServiceMockModule extends MockitoSugar with ArgumentMatchersS
   }
 
   object UpliftJourneyServiceMock extends BaseUpliftJourneyServiceMock {
-    val aMock = mock[UpliftJourneyService](withSettings.lenient())
+    val aMock = mock[UpliftJourneyService](withSettings.strictness(Strictness.LENIENT))
   }
 }

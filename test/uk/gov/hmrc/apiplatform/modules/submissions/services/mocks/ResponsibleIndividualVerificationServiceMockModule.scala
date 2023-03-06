@@ -22,6 +22,7 @@ import org.mockito.{ArgumentMatchersSugar, MockitoSugar}
 
 import uk.gov.hmrc.apiplatform.modules.submissions.domain.models._
 import uk.gov.hmrc.apiplatform.modules.submissions.services.ResponsibleIndividualVerificationService
+import org.mockito.quality.Strictness
 
 trait ResponsibleIndividualVerificationServiceMockModule extends MockitoSugar with ArgumentMatchersSugar {
 
@@ -60,6 +61,6 @@ trait ResponsibleIndividualVerificationServiceMockModule extends MockitoSugar wi
   }
 
   object ResponsibleIndividualVerificationServiceMock extends BaseResponsibleIndividualVerificationServiceMock {
-    val aMock = mock[ResponsibleIndividualVerificationService](withSettings.lenient())
+    val aMock = mock[ResponsibleIndividualVerificationService](withSettings.strictness(Strictness.LENIENT))
   }
 }

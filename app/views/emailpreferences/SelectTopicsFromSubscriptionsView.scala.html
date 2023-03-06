@@ -50,7 +50,7 @@
       <div id="select-topic-hint" class="govuk-hint">Select all that apply.</div>
       @helper.form(action = routes.EmailPreferencesController.selectTopicsFromSubscriptionsAction(applicationId), 'class -> "form", 'id -> "emailPreferencesTopicsForm") {
         @helper.CSRF.formField
-        <input type="hidden" class="govuk-visually-hidden" value="@applicationId.value" name="applicationId" />
+        <input type="hidden" class="govuk-visually-hidden" value="@applicationId.text" name="applicationId" />
         <a name="topic"></a>
         <div class="govuk-checkboxes " data-module="govuk-checkboxes">
           @for(topic <- List(BUSINESS_AND_POLICY, TECHNICAL, RELEASE_SCHEDULES).sortBy(_.displayOrder)) {

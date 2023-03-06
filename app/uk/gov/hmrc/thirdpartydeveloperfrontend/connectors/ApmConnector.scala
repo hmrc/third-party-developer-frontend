@@ -64,7 +64,7 @@ class ApmConnector @Inject() (http: HttpClient, config: ApmConnector.Config, met
   val api = API("api-platform-microservice")
 
   def fetchApplicationById(applicationId: ApplicationId)(implicit hc: HeaderCarrier): Future[Option[ApplicationWithSubscriptionData]] =
-    http.GET[Option[ApplicationWithSubscriptionData]](s"${config.serviceBaseUrl}/applications/${applicationId.value}")
+    http.GET[Option[ApplicationWithSubscriptionData]](s"${config.serviceBaseUrl}/applications/${applicationId.text}")
 
   def getAllFieldDefinitions(environment: Environment)(implicit hc: HeaderCarrier): Future[Map[ApiContext, Map[ApiVersion, Map[FieldName, SubscriptionFieldDefinition]]]] = {
 
@@ -110,7 +110,7 @@ class ApmConnector @Inject() (http: HttpClient, config: ApmConnector.Config, met
       }
 
   def subscribeToApi(applicationId: ApplicationId, apiIdentifier: ApiIdentifier)(implicit hc: HeaderCarrier): Future[ApplicationUpdateSuccessful] = metrics.record(api) {
-    http.POST[ApiIdentifier, ErrorOrUnit](s"${config.serviceBaseUrl}/applications/${applicationId.value}/subscriptions", apiIdentifier, Seq(CONTENT_TYPE -> JSON))
+    http.POST[ApiIdentifier, ErrorOrUnit](s"${config.serviceBaseUrl}/applications/${applicationId.text}/subscriptions", apiIdentifier, Seq(CONTENT_TYPE -> JSON))
       .map(throwOrOptionOf)
       .map {
         case Some(_) => ApplicationUpdateSuccessful
@@ -119,7 +119,7 @@ class ApmConnector @Inject() (http: HttpClient, config: ApmConnector.Config, met
   }
 
   def addTeamMember(applicationId: ApplicationId, addTeamMember: AddTeamMemberRequest)(implicit hc: HeaderCarrier): Future[Unit] = metrics.record(api) {
-    http.POST[AddTeamMemberRequest, ErrorOrUnit](s"${config.serviceBaseUrl}/applications/${applicationId.value}/collaborators", addTeamMember)
+    http.POST[AddTeamMemberRequest, ErrorOrUnit](s"${config.serviceBaseUrl}/applications/${applicationId.text}/collaborators", addTeamMember)
       .map {
         case Left(UpstreamErrorResponse(_, CONFLICT, _, _))  => throw new TeamMemberAlreadyExists
         case Left(UpstreamErrorResponse(_, NOT_FOUND, _, _)) => throw new ApplicationNotFound
@@ -135,7 +135,7 @@ class ApmConnector @Inject() (http: HttpClient, config: ApmConnector.Config, met
 
   def fetchUpliftableSubscriptions(applicationId: ApplicationId)(implicit hc: HeaderCarrier): Future[Set[ApiIdentifier]] =
     metrics.record(api) {
-      http.GET[Set[ApiIdentifier]](s"${config.serviceBaseUrl}/applications/${applicationId.value}/upliftableSubscriptions")
+      http.GET[Set[ApiIdentifier]](s"${config.serviceBaseUrl}/applications/${applicationId.text}/upliftableSubscriptions")
     }
 
   def fetchAllApis(environment: Environment)(implicit hc: HeaderCarrier): Future[Map[ApiContext, ApiData]] =
@@ -144,10 +144,10 @@ class ApmConnector @Inject() (http: HttpClient, config: ApmConnector.Config, met
     }
 
   def upliftApplicationV1(applicationId: ApplicationId, subs: Set[ApiIdentifier])(implicit hc: HeaderCarrier): Future[ApplicationId] = metrics.record(api) {
-    http.POST[RequestUpliftV1, ApplicationId](s"${config.serviceBaseUrl}/applications/${applicationId.value}/uplift", RequestUpliftV1(subs))
+    http.POST[RequestUpliftV1, ApplicationId](s"${config.serviceBaseUrl}/applications/${applicationId.text}/uplift", RequestUpliftV1(subs))
   }
 
   def upliftApplicationV2(applicationId: ApplicationId, upliftData: UpliftData)(implicit hc: HeaderCarrier): Future[ApplicationId] = metrics.record(api) {
-    http.POST[RequestUpliftV2, ApplicationId](s"${config.serviceBaseUrl}/applications/${applicationId.value}/uplift", RequestUpliftV2(upliftData))
+    http.POST[RequestUpliftV2, ApplicationId](s"${config.serviceBaseUrl}/applications/${applicationId.text}/uplift", RequestUpliftV2(upliftData))
   }
 }

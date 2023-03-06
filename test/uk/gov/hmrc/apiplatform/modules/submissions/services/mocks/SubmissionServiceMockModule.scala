@@ -22,6 +22,7 @@ import uk.gov.hmrc.apiplatform.modules.common.domain.models.LaxEmailAddress
 import uk.gov.hmrc.apiplatform.modules.submissions.domain.models._
 import uk.gov.hmrc.apiplatform.modules.submissions.services.SubmissionService
 import uk.gov.hmrc.apiplatform.modules.applications.domain.models.ApplicationId
+import org.mockito.quality.Strictness
 
 trait SubmissionServiceMockModule extends MockitoSugar with ArgumentMatchersSugar {
 
@@ -83,6 +84,6 @@ trait SubmissionServiceMockModule extends MockitoSugar with ArgumentMatchersSuga
   }
 
   object SubmissionServiceMock extends BaseSubmissionServiceMock {
-    val aMock = mock[SubmissionService](withSettings.lenient())
+    val aMock = mock[SubmissionService](withSettings.strictness(Strictness.LENIENT))
   }
 }

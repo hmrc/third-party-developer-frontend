@@ -164,7 +164,7 @@ class ThirdPartyApplicationSubmissionsConnectorSpec
   }
 
   "fetchLatestSubmission" should {
-    val url = s"/submissions/application/${applicationId.value}"
+    val url = s"/submissions/application/${applicationId.text}"
 
     "return NOT FOUND with empty response body" in new Setup {
       stubFor(
@@ -219,7 +219,7 @@ class ThirdPartyApplicationSubmissionsConnectorSpec
   }
 
   "fetchLatestExtendedSubmission" should {
-    val url = s"/submissions/application/${applicationId.value}/extended"
+    val url = s"/submissions/application/${applicationId.text}/extended"
 
     "return NOT FOUND with empty response body" in new Setup {
       stubFor(

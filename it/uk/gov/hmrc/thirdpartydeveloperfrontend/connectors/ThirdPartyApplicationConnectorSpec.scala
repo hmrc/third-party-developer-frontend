@@ -145,7 +145,7 @@ class ThirdPartyApplicationConnectorSpec extends BaseConnectorIntegrationSpec wi
   }
 
   "update application" should {
-    val url = s"/application/${applicationId.value}"
+    val url = s"/application/${applicationId.text}"
 
     "successfully update an application" in new Setup {
 
@@ -165,7 +165,7 @@ class ThirdPartyApplicationConnectorSpec extends BaseConnectorIntegrationSpec wi
   }
 
   "applicationUpdate" should {
-    val url           = s"/application/${applicationId.value}"
+    val url           = s"/application/${applicationId.text}"
     val updateRequest = ChangeProductionApplicationPrivacyPolicyLocation(UserId.random, LocalDateTime.now, PrivacyPolicyLocation.Url("http://example.com"))
     "successfully update an application using the PATCH endpoint" in new Setup {
       stubFor(
@@ -184,7 +184,7 @@ class ThirdPartyApplicationConnectorSpec extends BaseConnectorIntegrationSpec wi
   }
 
   "fetch application by id" should {
-    val url     = s"/application/${applicationId.value}"
+    val url     = s"/application/${applicationId.text}"
     val appName = "app name"
 
     "return an application" in new Setup {
@@ -239,7 +239,7 @@ class ThirdPartyApplicationConnectorSpec extends BaseConnectorIntegrationSpec wi
 
   "fetch credentials for application" should {
     val tokens = ApplicationToken(List(aClientSecret()), "pToken")
-    val url    = s"/application/${applicationId.value}/credentials"
+    val url    = s"/application/${applicationId.text}/credentials"
 
     "return credentials" in new Setup {
       stubFor(
@@ -273,7 +273,7 @@ class ThirdPartyApplicationConnectorSpec extends BaseConnectorIntegrationSpec wi
     val context       = ApiContext("app1")
     val version       = ApiVersion("2.0")
     val apiIdentifier = ApiIdentifier(context, version)
-    val url           = s"/application/${applicationId.value}/subscription?context=${context.value}&version=${version.value}"
+    val url           = s"/application/${applicationId.text}/subscription?context=${context.value}&version=${version.value}"
 
     "unsubscribe application from an api" in new Setup {
       stubFor(
@@ -337,7 +337,7 @@ class ThirdPartyApplicationConnectorSpec extends BaseConnectorIntegrationSpec wi
     val applicationName = "applicationName"
     val email           = "john.requestor@example.com".toLaxEmail
     val upliftRequest   = UpliftRequest(applicationName, email)
-    val url             = s"/application/${applicationId.value}/request-uplift"
+    val url             = s"/application/${applicationId.text}/request-uplift"
 
     "return success response in case of a 204 NO CONTENT on backend " in new Setup {
       stubFor(
@@ -384,7 +384,7 @@ class ThirdPartyApplicationConnectorSpec extends BaseConnectorIntegrationSpec wi
 
   "updateApproval" should {
     val updateRequest = CheckInformation(contactDetails = Some(ContactDetails("name", "email".toLaxEmail, "telephone")))
-    val url           = s"/application/${applicationId.value}/check-information"
+    val url           = s"/application/${applicationId.text}/check-information"
 
     "return success response in case of a 204 on backend " in new Setup {
       stubFor(
@@ -418,7 +418,7 @@ class ThirdPartyApplicationConnectorSpec extends BaseConnectorIntegrationSpec wi
     val email         = "john.bloggs@example.com".toLaxEmail
     val admin         = "admin@example.com".toLaxEmail
     val adminsToEmail = Set("otheradmin@example.com".toLaxEmail, "anotheradmin@example.com".toLaxEmail)
-    val url           = s"/application/${applicationId.value}/collaborator/delete"
+    val url           = s"/application/${applicationId.text}/collaborator/delete"
 
     "return success" in new Setup {
       stubFor(
@@ -474,7 +474,7 @@ class ThirdPartyApplicationConnectorSpec extends BaseConnectorIntegrationSpec wi
     val actor               = Actors.AppCollaborator("john.requestor@example.com".toLaxEmail)
     val timestamp           = LocalDateTime.now(clock)
     val clientSecretRequest = ClientSecretRequest(actor, timestamp)
-    val url                 = s"/application/${applicationId.value}/client-secret"
+    val url                 = s"/application/${applicationId.text}/client-secret"
 
     "generate the client secret" in new Setup {
       val newClientSecretId    = UUID.randomUUID().toString
@@ -575,7 +575,7 @@ class ThirdPartyApplicationConnectorSpec extends BaseConnectorIntegrationSpec wi
   "updateIpAllowlist" should {
     val allowlist     = Set("1.1.1.1/24")
     val updateRequest = UpdateIpAllowlistRequest(required = false, allowlist)
-    val url           = s"/application/${applicationId.value}/ipAllowlist"
+    val url           = s"/application/${applicationId.text}/ipAllowlist"
 
     "return success response in case of a 204 on backend " in new Setup {
       stubFor(

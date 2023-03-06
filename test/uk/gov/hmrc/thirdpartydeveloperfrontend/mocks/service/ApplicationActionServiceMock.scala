@@ -32,6 +32,7 @@ import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.{Appli
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.DeveloperSession
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.subscriptions.ApiData
 import uk.gov.hmrc.thirdpartydeveloperfrontend.service.ApplicationActionService
+import org.mockito.quality.Strictness
 
 trait ApplicationActionServiceMock extends MockitoSugar with ArgumentMatchersSugar {
   val applicationActionServiceMock = mock[ApplicationActionService]
@@ -78,6 +79,6 @@ trait ApplicationActionServiceMockModule extends MockitoSugar with ArgumentMatch
   }
 
   object ApplicationActionServiceMock extends BaseApplicationActionServiceMock {
-    val aMock = mock[ApplicationActionService](withSettings.lenient())
+    val aMock = mock[ApplicationActionService](withSettings.strictness(Strictness.LENIENT))
   }
 }

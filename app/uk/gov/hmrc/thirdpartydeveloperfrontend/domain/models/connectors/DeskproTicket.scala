@@ -84,7 +84,7 @@ object DeskproTicket extends FieldTransformer {
       apiVersion: ApiVersion
     ): DeskproTicket = {
     val message = s"""I '${requestorEmail.text}' want my application '$applicationName'
-                     |identified by '${applicationId.value}'
+                     |identified by '${applicationId.text}'
                      |to be subscribed to the API '$apiName'
                      |with version '${apiVersion.value}'""".stripMargin
 
@@ -100,7 +100,7 @@ object DeskproTicket extends FieldTransformer {
       apiVersion: ApiVersion
     ): DeskproTicket = {
     val message = s"""I '${requestorEmail.text}' want my application '$applicationName'
-                     |identified by '${applicationId.value}'
+                     |identified by '${applicationId.text}'
                      |to be unsubscribed from the API '$apiName'
                      |with version '${apiVersion.value}'""".stripMargin
 
@@ -123,7 +123,7 @@ object DeskproTicket extends FieldTransformer {
 
     val message =
       s"""I am $actor on the following ${environment.toString.toLowerCase} application '$applicationName'
-         |and the application id is '${applicationId.value}'. I want it to be deleted from the Developer Hub.""".stripMargin
+         |and the application id is '${applicationId.text}'. I want it to be deleted from the Developer Hub.""".stripMargin
 
     DeskproTicket(name, requestedByEmail, "Request to delete an application", message, routes.DeleteApplication.deleteApplication(applicationId, None).url)
   }

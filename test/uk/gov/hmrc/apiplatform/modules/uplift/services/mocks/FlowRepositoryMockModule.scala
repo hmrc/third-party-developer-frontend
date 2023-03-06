@@ -23,6 +23,7 @@ import org.mockito.{ArgumentMatchersSugar, MockitoSugar}
 
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.flows.{Flow, FlowType}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.repositories.FlowRepository
+import org.mockito.quality.Strictness
 
 trait FlowRepositoryMockModule extends MockitoSugar with ArgumentMatchersSugar {
 
@@ -61,6 +62,6 @@ trait FlowRepositoryMockModule extends MockitoSugar with ArgumentMatchersSugar {
   }
 
   object FlowRepositoryMock extends BaseFlowRepositoryMock {
-    val aMock = mock[FlowRepository](withSettings.lenient())
+    val aMock = mock[FlowRepository](withSettings.strictness(Strictness.LENIENT))
   }
 }

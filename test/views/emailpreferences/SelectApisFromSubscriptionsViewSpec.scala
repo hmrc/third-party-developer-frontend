@@ -84,12 +84,12 @@ class SelectApisFromSubscriptionsViewSpec extends CommonViewSpec
     // Check form is configured correctly
     val form = document.getElementById("emailPreferencesApisForm")
     form.attr("method") should be("POST")
-    form.attr("action") should be(s"/developer/profile/email-preferences/apis-from-subscriptions?context=${applicationId.value}")
+    form.attr("action") should be(s"/developer/profile/email-preferences/apis-from-subscriptions?applicationId=${applicationId.text}")
 
     // check checkboxes are displayed
     validateCheckboxItemsAgainstApis(document, apis)
 
-    document.getElementById("applicationId").`val`() shouldBe applicationId.value
+    document.getElementById("applicationId").`val`() shouldBe applicationId.text
 
     // Check submit button is correct
     document.getElementById("submit").text should be("Continue")
