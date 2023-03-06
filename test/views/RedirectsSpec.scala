@@ -31,6 +31,7 @@ import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.ViewHelpers._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils._
 import uk.gov.hmrc.apiplatform.modules.applications.domain.models.ClientId
 
+import uk.gov.hmrc.apiplatform.modules.applications.domain.models.ClientId
 class RedirectsSpec extends CommonViewSpec with WithCSRFAddToken with CollaboratorTracker with LocalUserIdTracker with DeveloperSessionBuilder with DeveloperBuilder {
 
   val appId             = ApplicationId("1234")

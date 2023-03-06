@@ -40,6 +40,7 @@ import uk.gov.hmrc.apiplatform.modules.common.domain.models.LaxEmailAddress.Stri
 import utils.ComponentTestDeveloperBuilder
 import uk.gov.hmrc.apiplatform.modules.applications.domain.models.ClientId
 
+import uk.gov.hmrc.apiplatform.modules.applications.domain.models.ClientId
 object AppWorld {
   var userApplicationsOnBackend: List[Application] = Nil
   var tokens: Map[String, ApplicationToken]        = Map.empty

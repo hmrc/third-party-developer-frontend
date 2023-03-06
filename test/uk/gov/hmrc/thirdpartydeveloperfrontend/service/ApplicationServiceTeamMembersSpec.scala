@@ -42,6 +42,7 @@ import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.{AsyncHmrcSpec, FixedClock,
 import uk.gov.hmrc.apiplatform.modules.developers.domain.models.UserId
 import uk.gov.hmrc.apiplatform.modules.applications.domain.models.ClientId
 
+import uk.gov.hmrc.apiplatform.modules.applications.domain.models.ClientId
 class ApplicationServiceTeamMembersSpec extends AsyncHmrcSpec with SubscriptionsBuilder with ApplicationBuilder with LocalUserIdTracker {
 
   val versionOne = ApiVersion("1.0")

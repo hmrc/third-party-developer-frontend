@@ -32,6 +32,7 @@ import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.LoggedIn
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.{CollaboratorTracker, LocalUserIdTracker}
 import uk.gov.hmrc.apiplatform.modules.applications.domain.models.ClientId
 
+import uk.gov.hmrc.apiplatform.modules.applications.domain.models.ClientId
 class LeftHandNavSpec extends CommonViewSpec with CollaboratorTracker with LocalUserIdTracker with DeveloperSessionBuilder with DeveloperBuilder {
 
   val leftHandNavView = app.injector.instanceOf[LeftHandNav]

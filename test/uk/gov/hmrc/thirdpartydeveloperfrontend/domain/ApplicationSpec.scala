@@ -32,6 +32,7 @@ import uk.gov.hmrc.apiplatform.modules.common.domain.models.LaxEmailAddress.Stri
 import uk.gov.hmrc.thirdpartydeveloperfrontend.helpers.string._
 import uk.gov.hmrc.apiplatform.modules.applications.domain.models.ClientId
 
+import uk.gov.hmrc.apiplatform.modules.applications.domain.models.ClientId
 class ApplicationSpec extends AnyFunSpec with Matchers with DeveloperTestData with LocalUserIdTracker {
 
   val developer             = standardDeveloper

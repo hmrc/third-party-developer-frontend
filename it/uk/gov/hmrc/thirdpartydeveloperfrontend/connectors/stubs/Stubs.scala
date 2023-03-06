@@ -36,6 +36,7 @@ import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.WireMockExtensions.withJson
 import uk.gov.hmrc.apiplatform.modules.developers.domain.models.UserId
 import uk.gov.hmrc.apiplatform.modules.applications.domain.models.ClientId
 
+import uk.gov.hmrc.apiplatform.modules.applications.domain.models.ClientId
 object Stubs extends ApplicationLogger {
 
   def setupRequest(path: String, status: Int, response: String) = {

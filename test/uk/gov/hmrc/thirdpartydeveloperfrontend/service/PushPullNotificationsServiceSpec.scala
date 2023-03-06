@@ -31,6 +31,7 @@ import uk.gov.hmrc.thirdpartydeveloperfrontend.service.SubscriptionFieldsService
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.AsyncHmrcSpec
 import uk.gov.hmrc.apiplatform.modules.applications.domain.models.ClientId
 
+import uk.gov.hmrc.apiplatform.modules.applications.domain.models.ClientId
 class PushPullNotificationsServiceSpec extends AsyncHmrcSpec {
 
   trait Setup {

@@ -39,6 +39,7 @@ import uk.gov.hmrc.thirdpartydeveloperfrontend.helpers.Retries
 import uk.gov.hmrc.thirdpartydeveloperfrontend.service.SubscriptionFieldsService.{DefinitionsByApiVersion, SubscriptionFieldsConnector}
 import uk.gov.hmrc.apiplatform.modules.applications.domain.models.ClientId
 
+import uk.gov.hmrc.apiplatform.modules.applications.domain.models.ClientId
 abstract class AbstractSubscriptionFieldsConnector(implicit ec: ExecutionContext) extends SubscriptionFieldsConnector with Retries with ApplicationLogger {
   protected val httpClient: HttpClient
   protected val proxiedHttpClient: ProxiedHttpClient

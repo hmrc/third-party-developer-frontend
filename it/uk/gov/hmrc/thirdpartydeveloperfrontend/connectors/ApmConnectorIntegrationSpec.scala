@@ -41,6 +41,7 @@ import uk.gov.hmrc.apiplatform.modules.applications.domain.models.ClientId
 
 import java.time.{LocalDateTime, Period}
 
+import uk.gov.hmrc.apiplatform.modules.applications.domain.models.ClientId
 class ApmConnectorIntegrationSpec extends BaseConnectorIntegrationSpec with GuiceOneAppPerSuite with WireMockExtensions with ApmConnectorJsonFormatters {
 
   private val stubConfig = Configuration(

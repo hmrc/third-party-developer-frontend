@@ -46,6 +46,7 @@ import java.util.UUID
 
 import SubscriptionFieldsConnectorJsonFormatters._
 
+import uk.gov.hmrc.apiplatform.modules.applications.domain.models.ClientId
 class SubscriptionFieldsConnectorSpec extends BaseConnectorIntegrationSpec with GuiceOneAppPerSuite with WireMockExtensions with SubscriptionsBuilder {
   private val apiKey: String = UUID.randomUUID().toString
   private val clientId       = ClientId(UUID.randomUUID().toString)

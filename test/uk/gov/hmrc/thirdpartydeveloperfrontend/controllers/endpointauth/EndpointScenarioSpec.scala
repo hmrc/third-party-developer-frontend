@@ -54,6 +54,7 @@ import uk.gov.hmrc.apiplatform.modules.common.domain.models.LaxEmailAddress
 import uk.gov.hmrc.apiplatform.modules.developers.domain.models.UserId
 import uk.gov.hmrc.apiplatform.modules.applications.domain.models.ClientId
 
+import uk.gov.hmrc.apiplatform.modules.applications.domain.models.ClientId
 object EndpointScenarioSpec {
 
   def parseEndpoint(text: String, pathPrefix: String): Option[Endpoint] = {

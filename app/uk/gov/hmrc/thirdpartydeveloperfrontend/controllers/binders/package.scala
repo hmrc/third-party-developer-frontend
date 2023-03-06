@@ -26,6 +26,7 @@ import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.{Appli
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.controllers.{AddTeamMemberPageMode, SaveSubsFieldsPageMode}
 import uk.gov.hmrc.apiplatform.modules.applications.domain.models.ClientId
 
+import uk.gov.hmrc.apiplatform.modules.applications.domain.models.ClientId
 package object binders {
 
   implicit def clientIdPathBinder(implicit textBinder: PathBindable[String]): PathBindable[ClientId] = new PathBindable[ClientId] {

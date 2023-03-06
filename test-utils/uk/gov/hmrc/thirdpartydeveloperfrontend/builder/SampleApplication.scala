@@ -22,6 +22,7 @@ import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.CollaboratorTracker
 import uk.gov.hmrc.apiplatform.modules.applications.domain.models.ClientId
 
+import uk.gov.hmrc.apiplatform.modules.applications.domain.models.ClientId
 trait SampleApplication {
   self: SampleSession with CollaboratorTracker =>
 

@@ -34,6 +34,7 @@ import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.LoggedIn
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils._
 import uk.gov.hmrc.apiplatform.modules.applications.domain.models.ClientId
 
+import uk.gov.hmrc.apiplatform.modules.applications.domain.models.ClientId
 class SubscriptionsSpec extends CommonViewSpec
     with WithCSRFAddToken
     with LocalUserIdTracker

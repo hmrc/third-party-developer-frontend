@@ -30,6 +30,7 @@ import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.controllers.Crumb
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.{AsyncHmrcSpec, SharedMetricsClearDown}
 import uk.gov.hmrc.apiplatform.modules.applications.domain.models.ClientId
 
+import uk.gov.hmrc.apiplatform.modules.applications.domain.models.ClientId
 class BreadcrumbsSpec extends AsyncHmrcSpec with GuiceOneServerPerSuite with SharedMetricsClearDown {
 
   val appConfig = mock[ApplicationConfig]

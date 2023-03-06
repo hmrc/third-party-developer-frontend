@@ -36,6 +36,7 @@ import uk.gov.hmrc.thirdpartydeveloperfrontend.helpers.Retries
 import uk.gov.hmrc.thirdpartydeveloperfrontend.service.PushPullNotificationsService.PushPullNotificationsConnector
 import uk.gov.hmrc.apiplatform.modules.applications.domain.models.ClientId
 
+import uk.gov.hmrc.apiplatform.modules.applications.domain.models.ClientId
 abstract class AbstractPushPullNotificationsConnector(implicit ec: ExecutionContext) extends PushPullNotificationsConnector with Retries {
   protected val httpClient: HttpClient
   protected val proxiedHttpClient: ProxiedHttpClient

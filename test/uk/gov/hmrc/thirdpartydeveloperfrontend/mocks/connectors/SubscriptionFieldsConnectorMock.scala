@@ -25,6 +25,7 @@ import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.apidefinitions.{Api
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.subscriptions.ApiSubscriptionFields.SubscriptionFieldValue
 import uk.gov.hmrc.apiplatform.modules.applications.domain.models.ClientId
 
+import uk.gov.hmrc.apiplatform.modules.applications.domain.models.ClientId
 trait SubscriptionFieldsConnectorMock extends MockitoSugar with ArgumentMatchersSugar {
   val mockSubscriptionFieldsConnector = mock[AbstractSubscriptionFieldsConnector]
 

@@ -22,6 +22,7 @@ import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.subscriptions.ApiSu
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.subscriptions.{AccessRequirements, FieldName, FieldValue}
 import uk.gov.hmrc.apiplatform.modules.applications.domain.models.ClientId
 
+import uk.gov.hmrc.apiplatform.modules.applications.domain.models.ClientId
 trait SubscriptionsBuilder {
 
   def buildAPISubscriptionStatus(name: String, context: Option[ApiContext] = None, fields: Option[SubscriptionFieldsWrapper] = None): APISubscriptionStatus = {

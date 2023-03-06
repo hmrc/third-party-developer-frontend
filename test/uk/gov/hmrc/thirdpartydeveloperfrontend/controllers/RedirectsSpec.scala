@@ -38,6 +38,7 @@ import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.WithLoggedInSession._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils._
 import uk.gov.hmrc.apiplatform.modules.applications.domain.models.ClientId
 
+import uk.gov.hmrc.apiplatform.modules.applications.domain.models.ClientId
 class RedirectsSpec
     extends BaseControllerSpec
     with WithCSRFAddToken

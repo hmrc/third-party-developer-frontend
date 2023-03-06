@@ -25,6 +25,7 @@ import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.subscriptions.{Fiel
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.AsyncHmrcSpec
 import uk.gov.hmrc.apiplatform.modules.applications.domain.models.ClientId
 
+import uk.gov.hmrc.apiplatform.modules.applications.domain.models.ClientId
 trait SubscriptionTestHelperSugar extends SubscriptionsBuilder {
   self: AsyncHmrcSpec with SampleApplication =>
 

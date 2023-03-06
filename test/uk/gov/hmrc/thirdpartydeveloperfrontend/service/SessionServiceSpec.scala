@@ -36,6 +36,7 @@ import uk.gov.hmrc.apiplatform.modules.common.domain.models.LaxEmailAddress.Stri
 import uk.gov.hmrc.apiplatform.modules.developers.domain.models.UserId
 import uk.gov.hmrc.apiplatform.modules.applications.domain.models.ClientId
 
+import uk.gov.hmrc.apiplatform.modules.applications.domain.models.ClientId
 class SessionServiceSpec extends AsyncHmrcSpec with DeveloperBuilder with LocalUserIdTracker with AppsByTeamMemberServiceMock {
 
   trait Setup {

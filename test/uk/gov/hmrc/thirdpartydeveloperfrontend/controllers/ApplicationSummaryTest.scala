@@ -28,6 +28,7 @@ import uk.gov.hmrc.thirdpartydeveloperfrontend.utils._
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.LaxEmailAddress.StringSyntax
 import uk.gov.hmrc.apiplatform.modules.applications.domain.models.ClientId
 
+import uk.gov.hmrc.apiplatform.modules.applications.domain.models.ClientId
 class ApplicationSummaryTest extends AnyWordSpec with Matchers with CollaboratorTracker with LocalUserIdTracker {
 
   "from" should {

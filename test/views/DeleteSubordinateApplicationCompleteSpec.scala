@@ -31,6 +31,7 @@ import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.ViewHelpers.elementExistsBy
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.{LocalUserIdTracker, WithCSRFAddToken}
 import uk.gov.hmrc.apiplatform.modules.applications.domain.models.ClientId
 
+import uk.gov.hmrc.apiplatform.modules.applications.domain.models.ClientId
 
 class DeleteSubordinateApplicationCompleteSpec extends CommonViewSpec with WithCSRFAddToken with LocalUserIdTracker with DeveloperSessionBuilder with DeveloperTestData {
 

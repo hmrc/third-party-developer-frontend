@@ -20,6 +20,7 @@ import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.apidefinitions.{Api
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.{ApplicationId}
 import uk.gov.hmrc.apiplatform.modules.applications.domain.models.ClientId
 
+import uk.gov.hmrc.apiplatform.modules.applications.domain.models.ClientId
 object ApiSubscriptionFields {
 
   case class SubscriptionFieldDefinition(

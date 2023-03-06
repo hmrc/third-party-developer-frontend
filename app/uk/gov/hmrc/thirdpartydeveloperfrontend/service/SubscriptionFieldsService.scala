@@ -30,6 +30,7 @@ import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.subscriptions.ApiSu
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.subscriptions.{ApiData, DevhubAccessLevel, FieldName, FieldValue, Fields}
 import uk.gov.hmrc.apiplatform.modules.applications.domain.models.ClientId
 
+import uk.gov.hmrc.apiplatform.modules.applications.domain.models.ClientId
 @Singleton
 class SubscriptionFieldsService @Inject() (connectorsWrapper: ConnectorsWrapper, apmConnector: ApmConnector)(implicit val ec: ExecutionContext) {
 

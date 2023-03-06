@@ -38,6 +38,7 @@ import uk.gov.hmrc.thirdpartydeveloperfrontend.service.PushPullNotificationsServ
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.AsyncHmrcSpec
 import uk.gov.hmrc.apiplatform.modules.applications.domain.models.ClientId
 
+import uk.gov.hmrc.apiplatform.modules.applications.domain.models.ClientId
 class SubscriptionFieldsServiceSpec extends AsyncHmrcSpec with SubscriptionsBuilder {
 
   val apiContext: ApiContext       = ApiContext("sub-ser-test")

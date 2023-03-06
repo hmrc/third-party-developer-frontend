@@ -49,6 +49,7 @@ import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.{LocalUserIdTracker, WithCS
 import uk.gov.hmrc.apiplatform.modules.developers.domain.models.UserId
 import uk.gov.hmrc.apiplatform.modules.applications.domain.models.ClientId
 
+import uk.gov.hmrc.apiplatform.modules.applications.domain.models.ClientId
 class UserLoginAccountSpec extends BaseControllerSpec with WithCSRFAddToken
     with DeveloperBuilder with LocalUserIdTracker with CookieEncoding with MfaDetailBuilder {
 
