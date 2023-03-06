@@ -90,7 +90,7 @@ class ManageApplicationsSpec
       aUsersUplfitableAndNotUpliftableAppsReturns(List.empty, List.empty, List.empty)
       fetchProductionSummariesByTeamMemberReturns(List(prodSummary))
 
-      TermsOfUseInvitationServiceMock.FetchTermsOfUseInvitations.thenReturnEmptyList()
+      TermsOfUseInvitationServiceMock.FetchTermsOfUseInvitation.thenReturnNone()
 
       SubmissionServiceMock.FetchLatestSubmission.thenReturnsNone()
 
@@ -107,7 +107,7 @@ class ManageApplicationsSpec
       aUsersUplfitableAndNotUpliftableAppsReturns(List.empty, List.empty, List.empty)
       fetchProductionSummariesByTeamMemberReturns(List.empty)
 
-      TermsOfUseInvitationServiceMock.FetchTermsOfUseInvitations.thenReturnEmptyList()
+      TermsOfUseInvitationServiceMock.FetchTermsOfUseInvitation.thenReturnNone()
 
       private val result = manageApplicationsController.manageApps()(loggedInRequest)
 
