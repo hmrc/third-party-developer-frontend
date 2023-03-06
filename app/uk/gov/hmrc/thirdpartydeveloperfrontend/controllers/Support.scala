@@ -65,8 +65,7 @@ class Support @Inject() (
         logSpamSupportRequest(formWithErrors)
         Future.successful(BadRequest(supportEnquiryView(displayName, formWithErrors)))
       },
-      formData =>
-        deskproService.submitSupportEnquiry(userId, formData).map { _ => Redirect(routes.Support.thankyou.url, SEE_OTHER) }
+      formData => deskproService.submitSupportEnquiry(userId, formData).map { _ => Redirect(routes.Support.thankyou.url, SEE_OTHER) }
     )
   }
 
