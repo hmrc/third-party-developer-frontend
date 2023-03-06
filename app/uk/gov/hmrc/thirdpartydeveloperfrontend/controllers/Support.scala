@@ -24,6 +24,7 @@ import play.api.libs.crypto.CookieSigner
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
 import uk.gov.hmrc.apiplatform.modules.common.services.ApplicationLogger
 import uk.gov.hmrc.thirdpartydeveloperfrontend.config.{ApplicationConfig, ErrorHandler}
+import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.FormKeys.commentsSpamKey
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.{DeveloperSession, UserId}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.service.{DeskproService, SessionService}
 
@@ -71,7 +72,7 @@ class Support @Inject() (
 
   private def logSpamSupportRequest(form: Form[SupportEnquiryForm]) = {
       form.errors("comments").map((formError: FormError) => {
-      if(formError.message == "comments.error.spam.field") {
+      if(formError.message == commentsSpamKey) {
         logger.info("Spam support request attempted")
       }
     })
