@@ -22,7 +22,6 @@ import uk.gov.hmrc.thirdpartydeveloperfrontend.connectors.SubscriptionFieldsConn
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.apidefinitions.ApiContext
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.apidefinitions.ApiIdentifier
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.apidefinitions.ApiVersion
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.ClientId
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.subscriptions.AccessRequirements
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.subscriptions.ApiSubscriptionFields._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.subscriptions.FieldName
@@ -42,7 +41,7 @@ import play.api.libs.json.Writes
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.http._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.WireMockExtensions
-
+import uk.gov.hmrc.apiplatform.modules.applications.domain.models.ClientId
 import java.util.UUID
 
 import SubscriptionFieldsConnectorJsonFormatters._

@@ -32,13 +32,13 @@ import stubs.ApplicationStub.configureUserApplications
 
 import java.time.{LocalDateTime, ZoneOffset}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.ApplicationId
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.ClientId
 import uk.gov.hmrc.apiplatform.modules.developers.domain.models.UserId
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.ApplicationWithSubscriptionIds
 import org.scalatest.matchers.should.Matchers
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.LaxEmailAddress
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.LaxEmailAddress.StringSyntax
 import utils.ComponentTestDeveloperBuilder
+import uk.gov.hmrc.apiplatform.modules.applications.domain.models.ClientId
 
 object AppWorld {
   var userApplicationsOnBackend: List[Application] = Nil

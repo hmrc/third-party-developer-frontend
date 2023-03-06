@@ -25,6 +25,7 @@ import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.subscriptions.{Fiel
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.{CollaboratorTracker, UserIdTracker}
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.LaxEmailAddress.StringSyntax
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.LaxEmailAddress
+import uk.gov.hmrc.apiplatform.modules.applications.domain.models.ClientId
 
 trait ApplicationBuilder extends CollaboratorTracker {
   self: UserIdTracker =>

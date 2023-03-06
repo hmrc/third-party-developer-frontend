@@ -31,6 +31,7 @@ import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.Develope
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.services.LocalDateTimeFormatters
 import uk.gov.hmrc.thirdpartydeveloperfrontend.helpers.string.Digest
 import uk.gov.hmrc.apiplatform.modules.developers.domain.models.UserId
+import uk.gov.hmrc.apiplatform.modules.applications.domain.models.ClientId
 
 case class ApplicationId(value: String) extends AnyVal
 
@@ -39,15 +40,6 @@ object ApplicationId {
   implicit val applicationIdFormat: Format[ApplicationId] = Json.valueFormat[ApplicationId]
 
   def random: ApplicationId = ApplicationId(UUID.randomUUID().toString)
-}
-
-case class ClientId(value: String) extends AnyVal
-
-object ClientId {
-  import play.api.libs.json.Json
-  implicit val clientIdFormat: Format[ClientId] = Json.valueFormat[ClientId]
-
-  def random: ClientId = ClientId(UUID.randomUUID().toString)
 }
 
 trait BaseApplication {

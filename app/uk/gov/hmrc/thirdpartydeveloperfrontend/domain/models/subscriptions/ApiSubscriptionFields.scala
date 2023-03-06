@@ -17,7 +17,8 @@
 package uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.subscriptions
 
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.apidefinitions.{ApiContext, ApiVersion}
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.{ApplicationId, ClientId}
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.{ApplicationId}
+import uk.gov.hmrc.apiplatform.modules.applications.domain.models.ClientId
 
 object ApiSubscriptionFields {
 
