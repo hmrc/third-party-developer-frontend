@@ -243,7 +243,7 @@ class ViewAllApplicationsPageSpec extends CommonViewSpec
       }
     }
 
-    "show the applications page with blue terms of use box" should {
+    "show the applications page with outstanding terms of use box" should {
       "work in Qa/Dev with invites to display" in new QaAndDev with Setup {
         val invites = List(TermsOfUseInvitation(applicationId, Instant.now(), Instant.now(), Instant.now()))
         
@@ -267,7 +267,22 @@ class ViewAllApplicationsPageSpec extends CommonViewSpec
       }
     }
 
-    "show the applications page with green terms of use box" should {
+    "show the applications page with no outstanding terms of use box" should {
+      "work in Qa/Dev with an invite that has granted submissions" in new QaAndDev with Setup {
+        val invites = List(TermsOfUseInvitation(applicationId, Instant.now(), Instant.now(), Instant.now()))
+        val submissions = List(grantedSubmission)
+
+        implicit val document = Jsoup.parse(renderPage(sandboxAppSummaries, productionAppSummaries, Set(applicationId), invites, submissions).body)
+
+        showsAppName(appName)
+        showsSubordinateAppsHeading()
+        showsPrincipalAppsHeading()
+        hidesTermsOfUseOutstandingBox()
+        hidesTermsOfUseReviewBox()
+      }
+    }
+
+    "show the applications page with review terms of use box" should {
       "work in Qa/Dev with submissions in review" in new QaAndDev with Setup {
         val invites = List(TermsOfUseInvitation(applicationId, Instant.now(), Instant.now(), Instant.now()))
         val submissions = List(submittedSubmission)
