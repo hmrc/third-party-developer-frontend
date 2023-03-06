@@ -30,7 +30,8 @@ import uk.gov.hmrc.thirdpartydeveloperfrontend.config.{ApplicationConfig, ErrorH
 import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.ManageResponsibleIndividualController.{ResponsibleIndividualHistoryItem, ViewModel, formatDateTime}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.Capabilities.SupportsResponsibleIndividual
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.Permissions.{AdministratorOnly, TeamMembersOnly}
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.{ApplicationId, ImportantSubmissionData, Standard, TermsOfUseAcceptance}
+import uk.gov.hmrc.apiplatform.modules.applications.domain.models.ApplicationId
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.{ImportantSubmissionData, Standard, TermsOfUseAcceptance}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.service._
 
 

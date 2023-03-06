@@ -23,7 +23,8 @@ import uk.gov.hmrc.http.HeaderCarrier
 
 import uk.gov.hmrc.thirdpartydeveloperfrontend.connectors.{ApmConnector, ThirdPartyApplicationSandboxConnector}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.apidefinitions.{APIStatus, ApiContext, ApiIdentifier}
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.{ApplicationId, Environment}
+import uk.gov.hmrc.apiplatform.modules.applications.domain.models.ApplicationId
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.{Environment}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.controllers.ApplicationSummary
 import uk.gov.hmrc.apiplatform.modules.developers.domain.models.UserId
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.subscriptions.{ApiCategory, ApiData}

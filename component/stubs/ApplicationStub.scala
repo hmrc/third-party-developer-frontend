@@ -22,7 +22,8 @@ import play.api.libs.json.Json
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.services.ApiDefinitionsJsonFormatters._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.apidefinitions.{ApiContext, ApiIdentifier, ApiVersion}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.ApplicationNameValidationJson.ApplicationNameValidationResult
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.{ApplicationId, ApplicationToken, ApplicationWithSubscriptionIds, Environment}
+import uk.gov.hmrc.apiplatform.modules.applications.domain.models.ApplicationId
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.{ApplicationToken, ApplicationWithSubscriptionIds, Environment}
 import uk.gov.hmrc.apiplatform.modules.developers.domain.models.UserId
 
 object ApplicationStub {

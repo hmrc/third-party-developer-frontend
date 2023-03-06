@@ -25,7 +25,7 @@ import uk.gov.hmrc.apiplatform.modules.submissions.domain.models.Submission
 import uk.gov.hmrc.apiplatform.modules.uplift.domain.models._
 import uk.gov.hmrc.apiplatform.modules.uplift.services.UpliftJourneyService
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.apidefinitions.APISubscriptionStatus
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.ApplicationId
+import uk.gov.hmrc.apiplatform.modules.applications.domain.models.ApplicationId
 
 trait UpliftJourneyServiceMockModule extends MockitoSugar with ArgumentMatchersSugar {
 

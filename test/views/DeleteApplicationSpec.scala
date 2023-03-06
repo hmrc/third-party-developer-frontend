@@ -32,14 +32,14 @@ import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.ViewHelpers._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils._
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.LaxEmailAddress.StringSyntax
 import uk.gov.hmrc.apiplatform.modules.applications.domain.models.ClientId
+import uk.gov.hmrc.apiplatform.modules.applications.domain.models.ApplicationId
 
-import uk.gov.hmrc.apiplatform.modules.applications.domain.models.ClientId
 class DeleteApplicationSpec extends CommonViewSpec with WithCSRFAddToken with CollaboratorTracker with LocalUserIdTracker
     with DeveloperSessionBuilder
     with DeveloperTestData {
 
   val deleteApplicationView = app.injector.instanceOf[DeleteApplicationView]
-  val appId                 = ApplicationId("1234")
+  val appId                 = ApplicationId.random
   val clientId              = ClientId("clientId123")
   val loggedInDeveloper     = JoeBloggs.loggedIn
 
@@ -57,8 +57,8 @@ class DeleteApplicationSpec extends CommonViewSpec with WithCSRFAddToken with Co
     state = ApplicationState.production(loggedInDeveloper.email.text, loggedInDeveloper.displayedName, ""),
     access = Standard(redirectUris = List("https://red1", "https://red2"), termsAndConditionsUrl = Some("http://tnc-url.com"))
   )
-  val prodAppId               = ApplicationId("prod123")
-  val sandboxAppId            = ApplicationId("sand123")
+  val prodAppId               = ApplicationId.random
+  val sandboxAppId            = ApplicationId.random
   val prodApp: Application    = application.copy(id = prodAppId)
   val sandboxApp: Application = application.copy(id = sandboxAppId, deployedTo = Environment.SANDBOX)
 

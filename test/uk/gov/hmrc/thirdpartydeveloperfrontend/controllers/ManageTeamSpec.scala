@@ -41,6 +41,7 @@ import uk.gov.hmrc.thirdpartydeveloperfrontend.service.AuditService
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.WithLoggedInSession._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.{LocalUserIdTracker, TestApplications, WithCSRFAddToken}
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.LaxEmailAddress.StringSyntax
+import uk.gov.hmrc.apiplatform.modules.applications.domain.models.ApplicationId
 
 class ManageTeamSpec
     extends BaseControllerSpec

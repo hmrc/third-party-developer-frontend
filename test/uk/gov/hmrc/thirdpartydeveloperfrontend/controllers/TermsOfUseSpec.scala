@@ -42,8 +42,8 @@ import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.WithLoggedInSession._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.{LocalUserIdTracker, WithCSRFAddToken}
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.LaxEmailAddress.StringSyntax
 import uk.gov.hmrc.apiplatform.modules.applications.domain.models.ClientId
+import uk.gov.hmrc.apiplatform.modules.applications.domain.models.ApplicationId
 
-import uk.gov.hmrc.apiplatform.modules.applications.domain.models.ClientId
 class TermsOfUseSpec
     extends BaseControllerSpec
     with WithCSRFAddToken
@@ -74,7 +74,7 @@ class TermsOfUseSpec
     val loggedOutRequest = FakeRequest().withSession(sessionParams: _*)
     val loggedInRequest  = FakeRequest().withLoggedIn(underTest, implicitly)(sessionId).withSession(sessionParams: _*)
 
-    val appId = ApplicationId("1234")
+    val appId = ApplicationId.random
 
     implicit val hc = HeaderCarrier()
 
@@ -178,7 +178,7 @@ class TermsOfUseSpec
       val request = loggedInRequest.withFormUrlEncodedBody("termsOfUseAgreed" -> "true")
       val result  = addToken(underTest.agreeTermsOfUse(appId))(request)
       status(result) shouldBe SEE_OTHER
-      redirectLocation(result) shouldBe Some("/developer/applications/1234/details")
+      redirectLocation(result) shouldBe Some(s"/developer/applications/${application.id.text}/details")
 
       val termsOfUseAgreement = captor.getValue.termsOfUseAgreements.head
       termsOfUseAgreement.emailAddress shouldBe loggedInDeveloper.email

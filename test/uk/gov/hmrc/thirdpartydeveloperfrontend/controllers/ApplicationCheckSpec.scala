@@ -39,7 +39,8 @@ import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.checkpages.Applicatio
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.ApplicationUpliftSuccessful
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.apidefinitions._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.CollaboratorRole.{ADMINISTRATOR, DEVELOPER}
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.{ApplicationId, _}
+import uk.gov.hmrc.apiplatform.modules.applications.domain.models.ApplicationId
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.{_}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.DeveloperSession
 import uk.gov.hmrc.thirdpartydeveloperfrontend.helpers.string._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.mocks.service._
@@ -47,8 +48,8 @@ import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.WithLoggedInSession._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.{LocalUserIdTracker, WithCSRFAddToken}
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.LaxEmailAddress.StringSyntax
 import uk.gov.hmrc.apiplatform.modules.applications.domain.models.ClientId
+import uk.gov.hmrc.apiplatform.modules.applications.domain.models.ApplicationId
 
-import uk.gov.hmrc.apiplatform.modules.applications.domain.models.ClientId
 class ApplicationCheckSpec
     extends BaseControllerSpec
     with WithCSRFAddToken
@@ -59,7 +60,7 @@ class ApplicationCheckSpec
     with SubscriptionTestHelperSugar
     with SubscriptionsBuilder {
 
-  override val appId = ApplicationId("1234")
+  override val appId = ApplicationId.random
 
   val appName: String = "app"
 
@@ -483,7 +484,7 @@ class ApplicationCheckSpec
       private val result = addToken(underTest.requestCheckAction(appId))(loggedInRequestWithFormBody)
 
       status(result) shouldBe SEE_OTHER
-      redirectLocation(result) shouldBe Some(s"/developer/applications/${appId.value}/check-your-answers")
+      redirectLocation(result) shouldBe Some(s"/developer/applications/${appId.text}/check-your-answers")
     }
 
     "successful submit action should take you to the check-your-answers page when no configurations confirmed because none required" in new Setup {
@@ -509,7 +510,7 @@ class ApplicationCheckSpec
       private val result = addToken(underTest.requestCheckAction(appId))(loggedInRequestWithFormBody)
 
       status(result) shouldBe SEE_OTHER
-      redirectLocation(result) shouldBe Some(s"/developer/applications/${appId.value}/check-your-answers")
+      redirectLocation(result) shouldBe Some(s"/developer/applications/${appId.text}/check-your-answers")
     }
 
     "validation failure submit action" in new Setup {
@@ -592,7 +593,7 @@ class ApplicationCheckSpec
       private val result = addToken(underTest.apiSubscriptionsAction(appId))(loggedInRequestWithFormBody)
 
       status(result) shouldBe SEE_OTHER
-      redirectLocation(result) shouldBe Some("/developer/applications/1234/request-check")
+      redirectLocation(result) shouldBe Some(s"/developer/applications/${application.id.text}/request-check")
     }
 
     "return forbidden when accessed without being an admin" in new Setup {
@@ -673,7 +674,7 @@ class ApplicationCheckSpec
       private val result = addToken(underTest.contactAction(appId))(requestWithFormBody)
 
       status(result) shouldBe SEE_OTHER
-      redirectLocation(result) shouldBe Some("/developer/applications/1234/request-check")
+      redirectLocation(result) shouldBe Some(s"/developer/applications/${application.id.text}/request-check")
     }
 
     "Validation failure contact action" in new Setup {
@@ -756,7 +757,7 @@ class ApplicationCheckSpec
       verify(underTest.applicationService).update(eqTo(expectedUpdateRequest))(*)
       verify(underTest.applicationService).updateCheckInformation(eqTo(application), eqTo(defaultCheckInformation.copy(confirmedName = true)))(*)
       status(result) shouldBe SEE_OTHER
-      redirectLocation(result) shouldBe Some("/developer/applications/1234/request-check")
+      redirectLocation(result) shouldBe Some(s"/developer/applications/${application.id.text}/request-check")
     }
 
     "successful name action same names" in new Setup {
@@ -774,7 +775,7 @@ class ApplicationCheckSpec
       verify(underTest.applicationService)
         .updateCheckInformation(eqTo(application), eqTo(defaultCheckInformation.copy(confirmedName = true)))(*)
       status(result) shouldBe SEE_OTHER
-      redirectLocation(result) shouldBe Some("/developer/applications/1234/request-check")
+      redirectLocation(result) shouldBe Some(s"/developer/applications/${application.id.text}/request-check")
     }
 
     "Validation failure name is blank action" in new Setup {
@@ -941,7 +942,7 @@ class ApplicationCheckSpec
       verify(underTest.applicationService)
         .updateCheckInformation(eqTo(application), eqTo(defaultCheckInformation.copy(providedPrivacyPolicyURL = true)))(*)
       status(result) shouldBe SEE_OTHER
-      redirectLocation(result) shouldBe Some("/developer/applications/1234/request-check")
+      redirectLocation(result) shouldBe Some(s"/developer/applications/${application.id.text}/request-check")
     }
     "successfully process when no URL" in new Setup {
       def createApplication() = createPartiallyConfigurableApplication(checkInformation = Some(defaultCheckInformation))
@@ -959,7 +960,7 @@ class ApplicationCheckSpec
       verify(underTest.applicationService)
         .updateCheckInformation(eqTo(application), eqTo(defaultCheckInformation.copy(providedPrivacyPolicyURL = true)))(*)
       status(result) shouldBe SEE_OTHER
-      redirectLocation(result) shouldBe Some("/developer/applications/1234/request-check")
+      redirectLocation(result) shouldBe Some(s"/developer/applications/${application.id.text}/request-check")
     }
 
     "fail validation when privacy policy url is invalid" in new Setup {
@@ -1094,7 +1095,7 @@ class ApplicationCheckSpec
       verify(underTest.applicationService)
         .updateCheckInformation(eqTo(application), eqTo(defaultCheckInformation.copy(providedTermsAndConditionsURL = true)))(*)
       status(result) shouldBe SEE_OTHER
-      redirectLocation(result) shouldBe Some("/developer/applications/1234/request-check")
+      redirectLocation(result) shouldBe Some(s"/developer/applications/${application.id.text}/request-check")
     }
 
     "successfully process when doesn't have url" in new Setup {
@@ -1112,7 +1113,7 @@ class ApplicationCheckSpec
       verify(underTest.applicationService)
         .updateCheckInformation(eqTo(application), eqTo(defaultCheckInformation.copy(providedTermsAndConditionsURL = true)))(*)
       status(result) shouldBe SEE_OTHER
-      redirectLocation(result) shouldBe Some("/developer/applications/1234/request-check")
+      redirectLocation(result) shouldBe Some(s"/developer/applications/${application.id.text}/request-check")
     }
 
     "fail validation when terms and conditions url is invalid but hasUrl true" in new Setup {
@@ -1246,7 +1247,7 @@ class ApplicationCheckSpec
       private val result = addToken(underTest.termsOfUseAction(appId))(requestWithFormBody)
 
       status(result) shouldBe SEE_OTHER
-      redirectLocation(result) shouldBe Some("/developer/applications/1234/request-check")
+      redirectLocation(result) shouldBe Some(s"/developer/applications/${application.id.text}/request-check")
 
     }
   }
@@ -1278,7 +1279,7 @@ class ApplicationCheckSpec
       private val result = addToken(underTest.teamAction(appId))(loggedInRequest)
 
       status(result) shouldBe SEE_OTHER
-      redirectLocation(result) shouldBe Some(s"/developer/applications/${appId.value}/request-check")
+      redirectLocation(result) shouldBe Some(s"/developer/applications/${appId.text}/request-check")
 
       private val expectedCheckInformation = CheckInformation(teamConfirmed = true)
       verify(underTest.applicationService).updateCheckInformation(eqTo(application), eqTo(expectedCheckInformation))(*)
@@ -1344,7 +1345,7 @@ class ApplicationCheckSpec
 
       status(result) shouldBe SEE_OTHER
 
-      redirectLocation(result) shouldBe Some(s"/developer/applications/${appId.value}/request-check/team")
+      redirectLocation(result) shouldBe Some(s"/developer/applications/${appId.text}/request-check/team")
 
       verify(underTest.applicationService).removeTeamMember(eqTo(application), eqTo(anotherCollaboratorEmail), eqTo(loggedInDeveloper.email))(*)
     }
@@ -1355,7 +1356,7 @@ class ApplicationCheckSpec
       private val result = addToken(underTest.teamAction(appId))(loggedInRequest)
 
       status(result) shouldBe SEE_OTHER
-      redirectLocation(result) shouldBe Some(s"/developer/applications/${appId.value}/request-check")
+      redirectLocation(result) shouldBe Some(s"/developer/applications/${appId.text}/request-check")
 
       private val expectedCheckInformation = CheckInformation(teamConfirmed = true)
       verify(underTest.applicationService).updateCheckInformation(eqTo(application), eqTo(expectedCheckInformation))(*)
@@ -1369,7 +1370,7 @@ class ApplicationCheckSpec
       private val result = addToken(underTest.unauthorisedAppDetails(appId))(loggedInRequest)
 
       status(result) shouldBe SEE_OTHER
-      redirectLocation(result) shouldBe Some(s"/developer/applications/${appId.value}/request-check")
+      redirectLocation(result) shouldBe Some(s"/developer/applications/${appId.text}/request-check")
     }
 
     "return unauthorised App details page with one Admin" in new Setup {

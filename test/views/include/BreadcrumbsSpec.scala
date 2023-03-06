@@ -25,12 +25,13 @@ import play.api.test.Helpers.{contentAsString, contentType}
 import play.twirl.api.Html
 
 import uk.gov.hmrc.thirdpartydeveloperfrontend.config.ApplicationConfig
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.{Application, ApplicationId, Environment}
+import uk.gov.hmrc.apiplatform.modules.applications.domain.models.ApplicationId
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.{Application, Environment}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.controllers.Crumb
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.{AsyncHmrcSpec, SharedMetricsClearDown}
 import uk.gov.hmrc.apiplatform.modules.applications.domain.models.ClientId
+import uk.gov.hmrc.apiplatform.modules.applications.domain.models.ApplicationId
 
-import uk.gov.hmrc.apiplatform.modules.applications.domain.models.ClientId
 class BreadcrumbsSpec extends AsyncHmrcSpec with GuiceOneServerPerSuite with SharedMetricsClearDown {
 
   val appConfig = mock[ApplicationConfig]
@@ -40,7 +41,7 @@ class BreadcrumbsSpec extends AsyncHmrcSpec with GuiceOneServerPerSuite with Sha
 
       val applicationName = "An Application Name"
       val application     = Application(
-        ApplicationId("appId123"),
+        ApplicationId.random,
         ClientId("clientId123"),
         applicationName,
         LocalDateTime.now(ZoneOffset.UTC),

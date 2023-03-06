@@ -1,4 +1,4 @@
-@*
+/*
  * Copyright 2023 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -12,12 +12,23 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- *@
+ */
 
-@import uk.gov.hmrc.apiplatform.modules.applications.domain.models.ApplicationId
+package uk.gov.hmrc.apiplatform.modules.applications.domain.models
 
-@(appId: ApplicationId)
+import java.util.UUID
 
-  <div>
-    <a href="@uk.gov.hmrc.apiplatform.modules.submissions.controllers.routes.CancelRequestController.cancelRequestForProductionCredentialsPage(appId)" class="govuk-link">Cancel your request for production credentials</a>
-  </div>
+import play.api.libs.json.Json
+
+/** This file should be in some Application based library
+  */
+
+final case class ApplicationId(value: UUID) extends AnyVal {
+  def text(): String = value.toString()
+}
+
+object ApplicationId {
+  def random: ApplicationId = ApplicationId(java.util.UUID.randomUUID)
+
+  implicit val applicationIdJf = Json.valueFormat[ApplicationId]
+}

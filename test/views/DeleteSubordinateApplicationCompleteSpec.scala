@@ -30,8 +30,8 @@ import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.LoggedIn
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.ViewHelpers.elementExistsByText
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.{LocalUserIdTracker, WithCSRFAddToken}
 import uk.gov.hmrc.apiplatform.modules.applications.domain.models.ClientId
+import uk.gov.hmrc.apiplatform.modules.applications.domain.models.ApplicationId
 
-import uk.gov.hmrc.apiplatform.modules.applications.domain.models.ClientId
 
 class DeleteSubordinateApplicationCompleteSpec extends CommonViewSpec with WithCSRFAddToken with LocalUserIdTracker with DeveloperSessionBuilder with DeveloperTestData {
 
@@ -42,7 +42,7 @@ class DeleteSubordinateApplicationCompleteSpec extends CommonViewSpec with WithC
 
       val request = FakeRequest().withCSRFToken
 
-      val appId             = ApplicationId("1234")
+      val appId             = ApplicationId.random
       val clientId          = ClientId("clientId123")
       val loggedInDeveloper = standardDeveloper.loggedIn
       val application       = Application(

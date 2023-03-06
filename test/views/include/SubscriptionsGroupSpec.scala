@@ -34,8 +34,8 @@ import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.views.SubscriptionR
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.LaxEmailAddress.StringSyntax
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.{CollaboratorTracker, LocalUserIdTracker, WithCSRFAddToken}
 import uk.gov.hmrc.apiplatform.modules.applications.domain.models.ClientId
+import uk.gov.hmrc.apiplatform.modules.applications.domain.models.ApplicationId
 
-import uk.gov.hmrc.apiplatform.modules.applications.domain.models.ClientId
 class SubscriptionsGroupSpec
     extends CommonViewSpec
     with WithCSRFAddToken
@@ -49,7 +49,7 @@ class SubscriptionsGroupSpec
 
   val loggedInDeveloper = buildDeveloper("givenname.familyname@example.com".toLaxEmail, "Givenname", "Familyname").loggedIn
 
-  val applicationId   = ApplicationId("1234")
+  val applicationId   = ApplicationId.random
   val clientId        = ClientId("clientId123")
   val applicationName = "Test Application"
   val apiName         = "Test API"

@@ -17,8 +17,6 @@
 package uk.gov.hmrc.thirdpartydeveloperfrontend.connectors
 
 import java.time.{LocalDateTime, Period, ZoneOffset}
-import java.util.UUID
-import java.util.UUID.randomUUID
 import com.github.tomakehurst.wiremock.client.WireMock._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.connectors.ThirdPartyApplicationConnectorDomain._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain._
@@ -42,15 +40,15 @@ import uk.gov.hmrc.apiplatform.modules.developers.domain.models.UserId
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.LaxEmailAddress.StringSyntax
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.Actors
 import uk.gov.hmrc.apiplatform.modules.applications.domain.models.ClientId
+import uk.gov.hmrc.apiplatform.modules.applications.domain.models.ApplicationId
+import java.util.UUID
 
-import uk.gov.hmrc.apiplatform.modules.applications.domain.models.ClientId
 class ThirdPartyApplicationConnectorSpec extends BaseConnectorIntegrationSpec with GuiceOneAppPerSuite with WireMockExtensions
     with CollaboratorTracker with LocalUserIdTracker with FixedClock {
 
   private val apiKey: String = UUID.randomUUID().toString
   private val clientId       = ClientId(UUID.randomUUID().toString)
-  private val applicationId  = ApplicationId("applicationId")
-
+  private val applicationId  = ApplicationId.random
   private val stubConfig = Configuration(
     "microservice.services.third-party-application-production.port"      -> stubPort,
     "microservice.services.third-party-application-production.use-proxy" -> false,
@@ -78,7 +76,7 @@ class ThirdPartyApplicationConnectorSpec extends BaseConnectorIntegrationSpec wi
     def connector: ThirdPartyApplicationConnector
 
     lazy val updateApplicationRequest = new UpdateApplicationRequest(
-      ApplicationId("My Id"),
+      ApplicationId.random,
       connector.environment,
       "My Application",
       Some("Description"),
@@ -538,7 +536,7 @@ class ThirdPartyApplicationConnectorSpec extends BaseConnectorIntegrationSpec wi
 
     "returns a valid response" in new Setup {
       val applicationName = "my valid application name"
-      val appId           = ApplicationId(randomUUID().toString)
+      val appId           = ApplicationId.random
       val expectedRequest = ApplicationNameValidationJson.ApplicationNameValidationRequest(applicationName, Some(appId))
 
       stubFor(
@@ -607,5 +605,5 @@ class ThirdPartyApplicationConnectorSpec extends BaseConnectorIntegrationSpec wi
     }
   }
 
-  private def aClientSecret() = ClientSecret(randomUUID.toString, randomUUID.toString, LocalDateTime.now())
+  private def aClientSecret() = ClientSecret(UUID.randomUUID.toString, UUID.randomUUID.toString, LocalDateTime.now())
 }

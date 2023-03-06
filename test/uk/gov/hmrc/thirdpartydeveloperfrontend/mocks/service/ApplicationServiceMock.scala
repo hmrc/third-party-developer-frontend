@@ -29,6 +29,7 @@ import uk.gov.hmrc.thirdpartydeveloperfrontend.service.ApplicationService
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.{CollaboratorTracker, LocalUserIdTracker, TestApplications}
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.LaxEmailAddress
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.Actors
+import uk.gov.hmrc.apiplatform.modules.applications.domain.models.ApplicationId
 
 trait ApplicationServiceMock extends MockitoSugar with ArgumentMatchersSugar with TestApplications with CollaboratorTracker with LocalUserIdTracker {
   val applicationServiceMock = mock[ApplicationService]

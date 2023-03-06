@@ -26,21 +26,21 @@ import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.{CollaboratorTracker, UserI
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.LaxEmailAddress.StringSyntax
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.LaxEmailAddress
 import uk.gov.hmrc.apiplatform.modules.applications.domain.models.ClientId
+import uk.gov.hmrc.apiplatform.modules.applications.domain.models.ApplicationId
 
-import uk.gov.hmrc.apiplatform.modules.applications.domain.models.ClientId
 trait ApplicationBuilder extends CollaboratorTracker {
   self: UserIdTracker =>
 
   def buildApplication(appOwnerEmail: LaxEmailAddress): Application = {
 
-    val appId        = ApplicationId("appid-" + randomUUID.toString)
+    val appId        = ApplicationId.random
     val clientId     = ClientId("clientid-" + randomUUID.toString)
     val appOwnerName = "App owner name"
 
     Application(
       appId,
       clientId,
-      s"${appId.value}-name",
+      s"${appId.text}-name",
       LocalDateTime.now(ZoneOffset.UTC),
       Some(LocalDateTime.now(ZoneOffset.UTC)),
       None,

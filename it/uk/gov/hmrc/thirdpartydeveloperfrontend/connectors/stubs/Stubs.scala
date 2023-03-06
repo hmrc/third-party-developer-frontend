@@ -21,7 +21,8 @@ import com.github.tomakehurst.wiremock.client.WireMock._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.connectors.EncryptedJson
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.apidefinitions.{ApiContext, ApiIdentifier, ApiVersion}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.ApplicationNameValidationJson.ApplicationNameValidationResult
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.{Application, ApplicationId, ApplicationToken, ApplicationWithSubscriptionData, Environment}
+import uk.gov.hmrc.apiplatform.modules.applications.domain.models.ApplicationId
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.{Application, ApplicationToken, ApplicationWithSubscriptionData, Environment}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.connectors.{PasswordResetRequest, UserAuthenticationResponse}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.{Developer, Registration, Session, UpdateProfileRequest}
 import play.api.http.Status._
@@ -35,8 +36,8 @@ import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.services.ApplicationsJsonF
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.WireMockExtensions.withJsonRequestBodySyntax
 import uk.gov.hmrc.apiplatform.modules.developers.domain.models.UserId
 import uk.gov.hmrc.apiplatform.modules.applications.domain.models.ClientId
+import uk.gov.hmrc.apiplatform.modules.applications.domain.models.ApplicationId
 
-import uk.gov.hmrc.apiplatform.modules.applications.domain.models.ClientId
 object Stubs extends ApplicationLogger {
 
   def setupRequest(path: String, status: Int, response: String) = {

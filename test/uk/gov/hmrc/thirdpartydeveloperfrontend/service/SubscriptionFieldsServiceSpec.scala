@@ -37,15 +37,15 @@ import uk.gov.hmrc.thirdpartydeveloperfrontend.mocks.connectors.SubscriptionFiel
 import uk.gov.hmrc.thirdpartydeveloperfrontend.service.PushPullNotificationsService.PushPullNotificationsConnector
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.AsyncHmrcSpec
 import uk.gov.hmrc.apiplatform.modules.applications.domain.models.ClientId
+import uk.gov.hmrc.apiplatform.modules.applications.domain.models.ApplicationId
 
-import uk.gov.hmrc.apiplatform.modules.applications.domain.models.ClientId
 class SubscriptionFieldsServiceSpec extends AsyncHmrcSpec with SubscriptionsBuilder {
 
   val apiContext: ApiContext       = ApiContext("sub-ser-test")
   val apiVersion: ApiVersion       = ApiVersion("1.0")
   val versionOne: ApiVersion       = ApiVersion("version-1")
   val applicationName: String      = "third-party-application"
-  val applicationId: ApplicationId = ApplicationId("application-id")
+  val applicationId: ApplicationId = ApplicationId.random
   val clientId                     = ClientId("clientId")
 
   val application =

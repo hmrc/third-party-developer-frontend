@@ -17,8 +17,6 @@
 package uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications
 
 import java.time.{LocalDateTime, Period}
-import java.util.UUID
-import play.api.libs.json.{Format, OFormat, Reads}
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.LaxEmailAddress
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.apidefinitions.AccessType.STANDARD
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.apidefinitions.ApiIdentifier
@@ -31,17 +29,9 @@ import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.Develope
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.services.LocalDateTimeFormatters
 import uk.gov.hmrc.thirdpartydeveloperfrontend.helpers.string.Digest
 import uk.gov.hmrc.apiplatform.modules.developers.domain.models.UserId
-import uk.gov.hmrc.apiplatform.modules.applications.domain.models.ClientId
-
-import uk.gov.hmrc.apiplatform.modules.applications.domain.models.ClientId
-case class ApplicationId(value: String) extends AnyVal
-
-object ApplicationId {
-  import play.api.libs.json.Json
-  implicit val applicationIdFormat: Format[ApplicationId] = Json.valueFormat[ApplicationId]
-
-  def random: ApplicationId = ApplicationId(UUID.randomUUID().toString)
-}
+import uk.gov.hmrc.apiplatform.modules.applications.domain.models.{ApplicationId, ClientId}
+import play.api.libs.json.OFormat
+import play.api.libs.json.Reads
 
 trait BaseApplication {
   val defaultGrantLengthDays = 547

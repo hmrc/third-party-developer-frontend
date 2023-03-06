@@ -48,8 +48,8 @@ import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.WithLoggedInSession._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.{LocalUserIdTracker, WithCSRFAddToken}
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.LaxEmailAddress.StringSyntax
 import uk.gov.hmrc.apiplatform.modules.applications.domain.models.ClientId
+import uk.gov.hmrc.apiplatform.modules.applications.domain.models.ApplicationId
 
-import uk.gov.hmrc.apiplatform.modules.applications.domain.models.ClientId
 class CheckYourAnswersSpec
     extends BaseControllerSpec
     with LocalUserIdTracker
@@ -436,7 +436,7 @@ class CheckYourAnswersSpec
       private val result = addToken(underTest.teamAction(appId))(loggedInRequest)
 
       status(result) shouldBe SEE_OTHER
-      redirectLocation(result) shouldBe Some(s"/developer/applications/${appId.value}/check-your-answers")
+      redirectLocation(result) shouldBe Some(s"/developer/applications/${appId.text}/check-your-answers")
 
       private val expectedCheckInformation = CheckInformation(teamConfirmed = true)
       verify(underTest.applicationService).updateCheckInformation(eqTo(application), eqTo(expectedCheckInformation))(*)
@@ -500,7 +500,7 @@ class CheckYourAnswersSpec
 
       status(result) shouldBe SEE_OTHER
 
-      redirectLocation(result) shouldBe Some(s"/developer/applications/${appId.value}/check-your-answers/team")
+      redirectLocation(result) shouldBe Some(s"/developer/applications/${appId.text}/check-your-answers/team")
 
       verify(underTest.applicationService).removeTeamMember(eqTo(application), eqTo(anotherCollaboratorEmail), eqTo(loggedInDeveloper.email))(*)
     }
@@ -511,7 +511,7 @@ class CheckYourAnswersSpec
       private val result = addToken(underTest.teamAction(appId))(loggedInRequest)
 
       status(result) shouldBe SEE_OTHER
-      redirectLocation(result) shouldBe Some(s"/developer/applications/${appId.value}/check-your-answers")
+      redirectLocation(result) shouldBe Some(s"/developer/applications/${appId.text}/check-your-answers")
 
       private val expectedCheckInformation = CheckInformation(teamConfirmed = true)
       verify(underTest.applicationService).updateCheckInformation(eqTo(application), eqTo(expectedCheckInformation))(*)

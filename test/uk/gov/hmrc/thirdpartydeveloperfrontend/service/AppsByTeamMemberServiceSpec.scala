@@ -34,8 +34,8 @@ import uk.gov.hmrc.thirdpartydeveloperfrontend.service.SubscriptionFieldsService
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.{AsyncHmrcSpec, LocalUserIdTracker}
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.LaxEmailAddress.StringSyntax
 import uk.gov.hmrc.apiplatform.modules.applications.domain.models.ClientId
+import uk.gov.hmrc.apiplatform.modules.applications.domain.models.ApplicationId
 
-import uk.gov.hmrc.apiplatform.modules.applications.domain.models.ClientId
 class AppsByTeamMemberServiceSpec extends AsyncHmrcSpec with SubscriptionsBuilder with ApplicationBuilder with LocalUserIdTracker {
 
   implicit class AppWithSubIdsSyntax(val application: Application) {
@@ -72,7 +72,7 @@ class AppsByTeamMemberServiceSpec extends AsyncHmrcSpec with SubscriptionsBuilde
     val email          = "bob@example.com".toLaxEmail
     val grantLength    = Period.ofDays(547)
     val productionApp1 = ApplicationWithSubscriptionIds(
-      ApplicationId("id1"),
+      ApplicationId.random,
       ClientId("cl-id1"),
       "zapplication",
       LocalDateTime.now,
@@ -83,7 +83,7 @@ class AppsByTeamMemberServiceSpec extends AsyncHmrcSpec with SubscriptionsBuilde
       collaborators = Set(Collaborator(email, CollaboratorRole.ADMINISTRATOR, userId))
     )
     val sandboxApp1    = ApplicationWithSubscriptionIds(
-      ApplicationId("id2"),
+      ApplicationId.random,
       ClientId("cl-id2"),
       "application",
       LocalDateTime.now,
@@ -94,7 +94,7 @@ class AppsByTeamMemberServiceSpec extends AsyncHmrcSpec with SubscriptionsBuilde
       collaborators = Set(Collaborator(email, CollaboratorRole.ADMINISTRATOR, userId))
     )
     val productionApp2 = ApplicationWithSubscriptionIds(
-      ApplicationId("id3"),
+      ApplicationId.random,
       ClientId("cl-id3"),
       "4pplication",
       LocalDateTime.now,

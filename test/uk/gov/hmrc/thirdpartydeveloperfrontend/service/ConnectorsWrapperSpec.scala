@@ -26,13 +26,14 @@ import uk.gov.hmrc.http.{HeaderCarrier, UpstreamErrorResponse}
 
 import uk.gov.hmrc.thirdpartydeveloperfrontend.config.ApplicationConfig
 import uk.gov.hmrc.thirdpartydeveloperfrontend.connectors._
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.{Application, ApplicationId, Environment}
+import uk.gov.hmrc.apiplatform.modules.applications.domain.models.ApplicationId
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.{Application, Environment}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.service.PushPullNotificationsService.PushPullNotificationsConnector
 import uk.gov.hmrc.thirdpartydeveloperfrontend.service.SubscriptionFieldsService.SubscriptionFieldsConnector
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.AsyncHmrcSpec
 import uk.gov.hmrc.apiplatform.modules.applications.domain.models.ClientId
+import uk.gov.hmrc.apiplatform.modules.applications.domain.models.ApplicationId
 
-import uk.gov.hmrc.apiplatform.modules.applications.domain.models.ClientId
 class ConnectorsWrapperSpec extends AsyncHmrcSpec {
 
   val mockAppConfig = mock[ApplicationConfig]
@@ -70,7 +71,7 @@ class ConnectorsWrapperSpec extends AsyncHmrcSpec {
     }
   }
 
-  val productionApplicationId = ApplicationId("Application ID")
+  val productionApplicationId = ApplicationId.random
   val productionClientId      = ClientId("hBnFo14C0y4SckYUbcoL2PbFA40a")
   val grantLength             = Period.ofDays(547)
 
@@ -86,7 +87,7 @@ class ConnectorsWrapperSpec extends AsyncHmrcSpec {
       Environment.PRODUCTION,
       Some("description")
     )
-  val sandboxApplicationId  = ApplicationId("Application ID")
+  val sandboxApplicationId  = ApplicationId.random
   val sandboxClientId       = ClientId("Client ID")
 
   val sandboxApplication = Application(

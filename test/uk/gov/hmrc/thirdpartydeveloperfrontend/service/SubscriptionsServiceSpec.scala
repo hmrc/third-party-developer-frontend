@@ -31,8 +31,8 @@ import uk.gov.hmrc.thirdpartydeveloperfrontend.service.SubscriptionFieldsService
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.{AsyncHmrcSpec, LocalUserIdTracker}
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.LaxEmailAddress.StringSyntax
 import uk.gov.hmrc.apiplatform.modules.applications.domain.models.ClientId
+import uk.gov.hmrc.apiplatform.modules.applications.domain.models.ApplicationId
 
-import uk.gov.hmrc.apiplatform.modules.applications.domain.models.ClientId
 class SubscriptionsServiceSpec extends AsyncHmrcSpec with SubscriptionsBuilder with ApplicationBuilder with LocalUserIdTracker {
 
   val versionOne          = ApiVersion("1.0")
@@ -74,7 +74,7 @@ class SubscriptionsServiceSpec extends AsyncHmrcSpec with SubscriptionsBuilder w
 
   }
 
-  val productionApplicationId = ApplicationId("Application ID")
+  val productionApplicationId = ApplicationId.random
   val productionClientId      = ClientId(s"client-id-${randomUUID().toString}")
 
   val productionApplication: Application =

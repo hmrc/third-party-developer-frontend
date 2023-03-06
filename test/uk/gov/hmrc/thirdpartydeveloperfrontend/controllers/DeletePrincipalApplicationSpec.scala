@@ -35,8 +35,8 @@ import uk.gov.hmrc.thirdpartydeveloperfrontend.mocks.service._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.WithLoggedInSession._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.{LocalUserIdTracker, TestApplications, WithCSRFAddToken}
 import uk.gov.hmrc.apiplatform.modules.applications.domain.models.ClientId
+import uk.gov.hmrc.apiplatform.modules.applications.domain.models.ApplicationId
 
-import uk.gov.hmrc.apiplatform.modules.applications.domain.models.ClientId
 class DeletePrincipalApplicationSpec
     extends BaseControllerSpec
     with WithCSRFAddToken
@@ -66,7 +66,7 @@ class DeletePrincipalApplicationSpec
       deleteSubordinateApplicationCompleteView
     )
 
-    val appId           = ApplicationId("1234")
+    val appId           = ApplicationId.random
     val clientId        = ClientId("clientIdzzz")
     val appName: String = "Application Name"
 
@@ -153,7 +153,7 @@ class DeletePrincipalApplicationSpec
 
       status(result) shouldBe SEE_OTHER
 
-      redirectLocation(result) shouldBe Some(s"/developer/applications/${appId.value}/details")
+      redirectLocation(result) shouldBe Some(s"/developer/applications/${appId.text}/details")
     }
   }
 

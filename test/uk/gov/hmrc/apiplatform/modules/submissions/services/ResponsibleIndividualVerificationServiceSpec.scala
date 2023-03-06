@@ -33,7 +33,8 @@ import uk.gov.hmrc.apiplatform.modules.submissions.domain.models.{
   Submission
 }
 import uk.gov.hmrc.thirdpartydeveloperfrontend.connectors.DeskproConnector
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.{ApplicationId, ResponsibleIndividual}
+import uk.gov.hmrc.apiplatform.modules.applications.domain.models.ApplicationId
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.{ResponsibleIndividual}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.connectors.{DeskproTicket, TicketCreated}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.mocks.service.ApplicationServiceMock
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.{AsyncHmrcSpec, CollaboratorTracker, LocalUserIdTracker, TestApplications}

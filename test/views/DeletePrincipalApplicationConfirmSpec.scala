@@ -31,8 +31,8 @@ import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.LoggedIn
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.ViewHelpers.{elementExistsByText, elementIdentifiedByAttrWithValueContainsText}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.{LocalUserIdTracker, WithCSRFAddToken}
 import uk.gov.hmrc.apiplatform.modules.applications.domain.models.ClientId
+import uk.gov.hmrc.apiplatform.modules.applications.domain.models.ApplicationId
 
-import uk.gov.hmrc.apiplatform.modules.applications.domain.models.ClientId
 class DeletePrincipalApplicationConfirmSpec extends CommonViewSpec with WithCSRFAddToken with LocalUserIdTracker with DeveloperSessionBuilder with DeveloperTestData {
 
   val deletePrincipalApplicationConfirmView = app.injector.instanceOf[DeletePrincipalApplicationConfirmView]
@@ -40,7 +40,7 @@ class DeletePrincipalApplicationConfirmSpec extends CommonViewSpec with WithCSRF
   "delete application confirm page" should {
 
     val request           = FakeRequest().withCSRFToken
-    val appId             = ApplicationId("1234")
+    val appId             = ApplicationId.random
     val clientId          = ClientId("clientId123")
     val loggedInDeveloper = standardDeveloper.loggedIn
     val application       = Application(

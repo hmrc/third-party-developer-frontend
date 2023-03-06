@@ -29,15 +29,15 @@ import uk.gov.hmrc.apiplatform.modules.developers.domain.models.UserId
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.LaxEmailAddress.StringSyntax
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.LaxEmailAddress
 import uk.gov.hmrc.apiplatform.modules.applications.domain.models.ClientId
+import uk.gov.hmrc.apiplatform.modules.applications.domain.models.ApplicationId
 
-import uk.gov.hmrc.apiplatform.modules.applications.domain.models.ClientId
 trait TestApplications {
   self: CollaboratorTracker =>
 
   private def randomString(length: Int) = Random.alphanumeric.take(length).mkString
 
   def aSandboxApplication(
-      appId: ApplicationId = ApplicationId(randomUUID().toString),
+      appId: ApplicationId = ApplicationId.random,
       clientId: ClientId = ClientId(randomString(28)),
       adminEmail: LaxEmailAddress = "admin@example.com".toLaxEmail,
       developerEmail: LaxEmailAddress = "developer@example.com".toLaxEmail
@@ -54,7 +54,7 @@ trait TestApplications {
   }
 
   def anApplication(
-      appId: ApplicationId = ApplicationId(randomUUID().toString),
+      appId: ApplicationId = ApplicationId.random,
       clientId: ClientId = ClientId(randomString(28)),
       grantLength: Period = Period.ofDays(547),
       environment: Environment = Environment.PRODUCTION,

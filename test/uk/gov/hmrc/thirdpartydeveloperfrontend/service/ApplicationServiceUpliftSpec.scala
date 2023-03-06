@@ -23,7 +23,8 @@ import uk.gov.hmrc.thirdpartydeveloperfrontend.builder._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.config.ApplicationConfig
 import uk.gov.hmrc.thirdpartydeveloperfrontend.connectors.{ApmConnector, DeskproConnector, ThirdPartyApplicationProductionConnector, ThirdPartyApplicationSandboxConnector, ThirdPartyDeveloperConnector}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.apidefinitions.{ApiContext, ApiIdentifier, ApiVersion}
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.{ApplicationId, ApplicationVerificationFailed, ApplicationVerificationSuccessful, UpliftRequest}
+import uk.gov.hmrc.apiplatform.modules.applications.domain.models.ApplicationId
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.{ApplicationVerificationFailed, ApplicationVerificationSuccessful, UpliftRequest}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.connectors.{DeskproTicket, TicketCreated}
 import uk.gov.hmrc.apiplatform.modules.developers.domain.models.UserId
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.{ApplicationAlreadyExists, ApplicationNotFound, ApplicationUpliftSuccessful}
@@ -86,9 +87,9 @@ class ApplicationServiceUpliftSpec extends AsyncHmrcSpec with LocalUserIdTracker
   }
 
   "filterSubscriptionsForUplift" should {
-    val app1                      = ApplicationId("app1")
-    val app2                      = ApplicationId("app2")
-    val appWithNothingButTestApis = ApplicationId("app3")
+    val app1                      = ApplicationId.random
+    val app2                      = ApplicationId.random
+    val appWithNothingButTestApis = ApplicationId.random
     val apiOk1a                   = "ok1".asIdentifier
     val apiOk1b                   = "ok1".asIdentifier("2.0")
     val apiOk2a                   = "ok2".asIdentifier
@@ -109,7 +110,7 @@ class ApplicationServiceUpliftSpec extends AsyncHmrcSpec with LocalUserIdTracker
   }
 
   "requestUplift" should {
-    val applicationId   = ApplicationId("applicationId")
+    val applicationId   = ApplicationId.random
     val applicationName = "applicationName"
 
     val user = standardDeveloper.loggedIn

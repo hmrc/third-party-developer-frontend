@@ -33,8 +33,8 @@ import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.LoggedIn
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.ViewHelpers.{elementExistsByText, elementIdentifiedByAttrContainsText, textareaExistsWithText}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.{LocalUserIdTracker, WithCSRFAddToken}
 import uk.gov.hmrc.apiplatform.modules.applications.domain.models.ClientId
+import uk.gov.hmrc.apiplatform.modules.applications.domain.models.ApplicationId
 
-import uk.gov.hmrc.apiplatform.modules.applications.domain.models.ClientId
 class ChangeApplicationDetailsSpec extends CommonViewSpec
     with WithCSRFAddToken
     with LocalUserIdTracker
@@ -42,7 +42,7 @@ class ChangeApplicationDetailsSpec extends CommonViewSpec
     with DeveloperTestData {
 
   val changeDetails = app.injector.instanceOf[ChangeDetailsView]
-  val applicationId = ApplicationId("1234")
+  val applicationId = ApplicationId.random
   val clientId      = ClientId("clientId123")
 
   "change application details page" should {

@@ -31,8 +31,8 @@ import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.LocalUserIdTracker
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.LaxEmailAddress.StringSyntax
 import uk.gov.hmrc.thirdpartydeveloperfrontend.helpers.string._
 import uk.gov.hmrc.apiplatform.modules.applications.domain.models.ClientId
+import uk.gov.hmrc.apiplatform.modules.applications.domain.models.ApplicationId
 
-import uk.gov.hmrc.apiplatform.modules.applications.domain.models.ClientId
 class ApplicationSpec extends AnyFunSpec with Matchers with DeveloperTestData with LocalUserIdTracker {
 
   val developer             = standardDeveloper
@@ -271,7 +271,7 @@ class ApplicationSpec extends AnyFunSpec with Matchers with DeveloperTestData wi
     )
 
     val app = Application(
-      ApplicationId("id"),
+      ApplicationId.random,
       ClientId("clientId"),
       "app name",
       LocalDateTime.now(),

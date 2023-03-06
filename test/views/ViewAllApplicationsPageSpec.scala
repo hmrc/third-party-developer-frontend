@@ -29,7 +29,8 @@ import play.api.test.FakeRequest
 import uk.gov.hmrc.thirdpartydeveloperfrontend.builder.{DeveloperBuilder, DeveloperSessionBuilder}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.addapplication.routes.{AddApplication => AddApplicationRoutes}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.apidefinitions.AccessType
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.{ApplicationId, CollaboratorRole, Environment, State, TermsOfUseStatus}
+import uk.gov.hmrc.apiplatform.modules.applications.domain.models.ApplicationId
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.{CollaboratorRole, Environment, State, TermsOfUseStatus}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.controllers.{ApplicationSummary, ManageApplicationsViewModel}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.LoggedInState
 import uk.gov.hmrc.thirdpartydeveloperfrontend.helpers.DateFormatter
@@ -134,7 +135,7 @@ class ViewAllApplicationsPageSpec extends CommonViewSpec
       )
     }
 
-    val applicationId = ApplicationId("1111")
+    val applicationId = ApplicationId.random
     val appName       = "App name 1"
     val appUserRole   = CollaboratorRole.ADMINISTRATOR
     val appCreatedOn  = LocalDateTime.now(ZoneOffset.UTC).minusDays(1)

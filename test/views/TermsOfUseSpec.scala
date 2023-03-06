@@ -32,8 +32,8 @@ import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.controllers.Applica
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.LoggedInState
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.{LocalUserIdTracker, WithCSRFAddToken}
 import uk.gov.hmrc.apiplatform.modules.applications.domain.models.ClientId
+import uk.gov.hmrc.apiplatform.modules.applications.domain.models.ApplicationId
 
-import uk.gov.hmrc.apiplatform.modules.applications.domain.models.ClientId
 class TermsOfUseSpec extends CommonViewSpec
     with WithCSRFAddToken
     with LocalUserIdTracker
@@ -56,7 +56,7 @@ class TermsOfUseSpec extends CommonViewSpec
     implicit val loggedIn   =  buildDeveloperWithRandomId("developer@example.com".toLaxEmail, "Joe", "Bloggs").loggedIn
     implicit val navSection = "details"
 
-    val id          = ApplicationId("id")
+    val id          = ApplicationId.random
     val clientId    = ClientId("clientId")
     val appName     = "an application"
     val createdOn   = LocalDateTime.now(ZoneOffset.UTC)

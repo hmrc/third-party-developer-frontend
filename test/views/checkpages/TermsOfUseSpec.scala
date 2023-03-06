@@ -35,8 +35,8 @@ import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.LoggedIn
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils._
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.LaxEmailAddress.StringSyntax
 import uk.gov.hmrc.apiplatform.modules.applications.domain.models.ClientId
+import uk.gov.hmrc.apiplatform.modules.applications.domain.models.ApplicationId
 
-import uk.gov.hmrc.apiplatform.modules.applications.domain.models.ClientId
 class TermsOfUseSpec extends CommonViewSpec with WithCSRFAddToken with CollaboratorTracker with LocalUserIdTracker with DeveloperSessionBuilder with DeveloperTestData {
 
   val termsOfUse = app.injector.instanceOf[TermsOfUseView]
@@ -44,7 +44,7 @@ class TermsOfUseSpec extends CommonViewSpec with WithCSRFAddToken with Collabora
   "Terms of use view" must {
     val thirdPartyApplication =
       Application(
-        ApplicationId("APPLICATION_ID"),
+        ApplicationId.random,
         ClientId("CLIENT_ID"),
         "APPLICATION NAME",
         LocalDateTime.now(ZoneOffset.UTC),

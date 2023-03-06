@@ -22,7 +22,8 @@ import play.api.data.Form
 import play.api.mvc.{Action, AnyContent, Call}
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.LaxEmailAddress.StringSyntax
 import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.ApplicationController
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.{ApplicationId, CheckInformation, ContactDetails}
+import uk.gov.hmrc.apiplatform.modules.applications.domain.models.ApplicationId
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.{CheckInformation, ContactDetails}
 
 trait ContactDetailsPartialController {
   self: ApplicationController with CanUseCheckActions =>

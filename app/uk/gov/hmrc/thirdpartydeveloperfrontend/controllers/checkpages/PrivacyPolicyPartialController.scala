@@ -26,7 +26,8 @@ import uk.gov.hmrc.play.bootstrap.controller.WithUnsafeDefaultFormBinding
 
 import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.ApplicationController
 import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.checkpages.HasUrl._
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.{ApplicationId, CheckInformation, Standard, UpdateApplicationRequest}
+import uk.gov.hmrc.apiplatform.modules.applications.domain.models.ApplicationId
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.{CheckInformation, Standard, UpdateApplicationRequest}
 
 trait PrivacyPolicyPartialController extends WithUnsafeDefaultFormBinding {
   self: ApplicationController with CanUseCheckActions =>

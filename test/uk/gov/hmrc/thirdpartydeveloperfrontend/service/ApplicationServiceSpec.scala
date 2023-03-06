@@ -45,8 +45,8 @@ import uk.gov.hmrc.thirdpartydeveloperfrontend.service.SubscriptionFieldsService
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.{AsyncHmrcSpec, FixedClock, LocalUserIdTracker}
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.LaxEmailAddress.StringSyntax
 import uk.gov.hmrc.apiplatform.modules.applications.domain.models.ClientId
+import uk.gov.hmrc.apiplatform.modules.applications.domain.models.ApplicationId
 
-import uk.gov.hmrc.apiplatform.modules.applications.domain.models.ClientId
 class ApplicationServiceSpec extends AsyncHmrcSpec
     with SubscriptionsBuilder
     with ApplicationBuilder
@@ -121,7 +121,7 @@ class ApplicationServiceSpec extends AsyncHmrcSpec
   def version(version: ApiVersion, status: APIStatus, subscribed: Boolean): VersionSubscription =
     VersionSubscription(ApiVersionDefinition(version, status), subscribed)
 
-  val productionApplicationId = ApplicationId("Application ID")
+  val productionApplicationId = ApplicationId.random
   val productionClientId      = ClientId(s"client-id-${randomUUID().toString}")
 
   val productionApplication: Application =
@@ -137,7 +137,7 @@ class ApplicationServiceSpec extends AsyncHmrcSpec
       Some("description"),
       Set()
     )
-  val sandboxApplicationId               = ApplicationId("Application ID")
+  val sandboxApplicationId               = ApplicationId.random
   val sandboxClientId                    = ClientId("Client ID")
 
   val sandboxApplication: Application =
@@ -212,7 +212,7 @@ class ApplicationServiceSpec extends AsyncHmrcSpec
   }
 
   "Update" should {
-    val applicationId   = ApplicationId("applicationId")
+    val applicationId   = ApplicationId.random
     val clientId        = ClientId("clientId")
     val applicationName = "applicationName"
     val application     = Application(
@@ -440,7 +440,7 @@ class ApplicationServiceSpec extends AsyncHmrcSpec
   "validate application name" should {
     "call the application connector validate method in sandbox" in new Setup {
       private val applicationName = "applicationName"
-      private val applicationId   = ApplicationId(randomUUID().toString)
+      private val applicationId   = ApplicationId.random
 
       when(mockSandboxApplicationConnector.validateName(*, *[Option[ApplicationId]])(*))
         .thenReturn(successful(Valid))
@@ -455,7 +455,7 @@ class ApplicationServiceSpec extends AsyncHmrcSpec
 
     "call the application connector validate method in production" in new Setup {
       private val applicationName = "applicationName"
-      private val applicationId   = ApplicationId(randomUUID().toString)
+      private val applicationId   = ApplicationId.random
 
       when(mockProductionApplicationConnector.validateName(*, *[Option[ApplicationId]])(*))
         .thenReturn(successful(Valid))

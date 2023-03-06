@@ -21,7 +21,7 @@ import org.mockito.{ArgumentMatchersSugar, MockitoSugar}
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.LaxEmailAddress
 import uk.gov.hmrc.apiplatform.modules.submissions.domain.models._
 import uk.gov.hmrc.apiplatform.modules.submissions.services.SubmissionService
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.ApplicationId
+import uk.gov.hmrc.apiplatform.modules.applications.domain.models.ApplicationId
 
 trait SubmissionServiceMockModule extends MockitoSugar with ArgumentMatchersSugar {
 

@@ -22,6 +22,7 @@ import play.api.mvc.{Action, ActionFilter, AnyContent, Result}
 
 import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.{ApplicationController, ApplicationRequest}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications._
+import uk.gov.hmrc.apiplatform.modules.applications.domain.models.ApplicationId
 
 trait PpnsActions {
   self: ApplicationController =>

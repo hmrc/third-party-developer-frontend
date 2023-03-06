@@ -32,7 +32,6 @@ import uk.gov.hmrc.thirdpartydeveloperfrontend.helpers.FutureTimeoutSupportImpl
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.AsyncHmrcSpec
 import uk.gov.hmrc.apiplatform.modules.applications.domain.models.ClientId
 
-import uk.gov.hmrc.apiplatform.modules.applications.domain.models.ClientId
 class SubscriptionFieldsConnectorProxySpec extends AsyncHmrcSpec with BeforeAndAfterEach with GuiceOneAppPerSuite {
   private val baseUrl         = "https://example.com"
   private val environmentName = "ENVIRONMENT"

@@ -169,7 +169,7 @@ class ChooseApplicationToUpliftActionSpec
       aUsersUplfitableAndNotUpliftableAppsReturns(summaries, summaries.map(_.id), List.empty)
       when(flowServiceMock.storeApiSubscriptions(*, *)).thenReturn(Future.successful(GetProductionCredentialsFlow("", None, None)))
 
-      val result = underTest.chooseApplicationToUpliftAction()(loggedInRequest.withFormUrlEncodedBody(("applicationId" -> sandboxAppId.value)))
+      val result = underTest.chooseApplicationToUpliftAction()(loggedInRequest.withFormUrlEncodedBody(("applicationId" -> sandboxAppId.text)))
 
       status(result) shouldBe SEE_OTHER
       redirectLocation(result).value shouldBe uk.gov.hmrc.apiplatform.modules.uplift.controllers.routes.UpliftJourneyController.confirmApiSubscriptionsAction(sandboxAppId).toString

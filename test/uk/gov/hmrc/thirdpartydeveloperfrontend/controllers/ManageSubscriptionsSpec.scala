@@ -45,6 +45,7 @@ import uk.gov.hmrc.thirdpartydeveloperfrontend.mocks.service._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.service.{AuditService, SubscriptionFieldsService}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.WithLoggedInSession._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.{LocalUserIdTracker, TestApplications, WithCSRFAddToken}
+import uk.gov.hmrc.apiplatform.modules.applications.domain.models.ApplicationId
 
 class ManageSubscriptionsSpec
     extends BaseControllerSpec
@@ -83,9 +84,9 @@ class ManageSubscriptionsSpec
     )
   )
 
-  val productionApplication = application.copy(deployedTo = Environment.PRODUCTION, id = ApplicationId(appId + "_Prod"))
+  val productionApplication = application.copy(deployedTo = Environment.PRODUCTION, id = ApplicationId.random)
 
-  val privilegedApplication: Application = application.copy(id = ApplicationId("456"), access = Privileged())
+  val privilegedApplication: Application = application.copy(id = ApplicationId.random, access = Privileged())
 
   val tokens: ApplicationToken =
     ApplicationToken(List(aClientSecret(), aClientSecret()), "token")
@@ -434,11 +435,11 @@ class ManageSubscriptionsSpec
 
       "the page mode for saveSubscriptionFields action" when {
         "LeftHandNavigation" should {
-          saveSubscriptionFieldsTest(SaveSubsFieldsPageMode.LeftHandNavigation, s"/developer/applications/${appId.value}/api-metadata")
+          saveSubscriptionFieldsTest(SaveSubsFieldsPageMode.LeftHandNavigation, s"/developer/applications/${appId.text}/api-metadata")
         }
 
         "CheckYourAnswers" should {
-          saveSubscriptionFieldsTest(SaveSubsFieldsPageMode.CheckYourAnswers, s"/developer/applications/${appId.value}/check-your-answers#configurations")
+          saveSubscriptionFieldsTest(SaveSubsFieldsPageMode.CheckYourAnswers, s"/developer/applications/${appId.text}/check-your-answers#configurations")
         }
 
         def saveSubscriptionFieldsTest(mode: SaveSubsFieldsPageMode, expectedRedirectUrl: String): Unit = {
@@ -817,7 +818,7 @@ class ManageSubscriptionsSpec
         private val result = manageSubscriptionController.subscriptionConfigurationStart(appId)(loggedInRequest)
 
         status(result) shouldBe SEE_OTHER
-        redirectLocation(result) shouldBe Some(s"/developer/applications/${appId.value}/add/success")
+        redirectLocation(result) shouldBe Some(s"/developer/applications/${appId.text}/add/success")
       }
     }
 

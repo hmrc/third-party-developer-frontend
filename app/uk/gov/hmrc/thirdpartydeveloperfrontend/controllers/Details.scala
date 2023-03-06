@@ -48,6 +48,7 @@ import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.subscriptions.Devhu
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.services.TermsOfUseService
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.services.TermsOfUseService.TermsOfUseAgreementDetails
 import uk.gov.hmrc.thirdpartydeveloperfrontend.service._
+import uk.gov.hmrc.apiplatform.modules.applications.domain.models.ApplicationId
 
 object Details {
   case class Agreement(who: String, when: LocalDateTime)

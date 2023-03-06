@@ -20,8 +20,8 @@ import com.github.tomakehurst.wiremock.client.WireMock.{aResponse, delete, get, 
 import play.api.http.Status.{NOT_FOUND, NO_CONTENT}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.apidefinitions.{ApiContext, ApiVersion}
 import uk.gov.hmrc.apiplatform.modules.applications.domain.models.ClientId
+import uk.gov.hmrc.apiplatform.modules.applications.domain.models.ApplicationId
 
-import uk.gov.hmrc.apiplatform.modules.applications.domain.models.ClientId
 object ApiSubscriptionFieldsStub {
 
   def setUpDeleteSubscriptionFields(clientId: ClientId, apiContext: ApiContext, apiVersion: ApiVersion) = {

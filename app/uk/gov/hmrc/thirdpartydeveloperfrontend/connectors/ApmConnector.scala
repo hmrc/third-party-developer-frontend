@@ -37,6 +37,7 @@ import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.subscriptions.{ApiD
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.{ApplicationNotFound, ApplicationUpdateSuccessful, TeamMemberAlreadyExists}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.service.OpenAccessApiService.OpenAccessApisConnector
 import uk.gov.hmrc.thirdpartydeveloperfrontend.service.SubscriptionsService.SubscriptionsConnector
+import uk.gov.hmrc.apiplatform.modules.applications.domain.models.ApplicationId
 
 object ApmConnector {
   case class Config(serviceBaseUrl: String)
@@ -74,7 +75,7 @@ class ApmConnector @Inject() (http: HttpClient, config: ApmConnector.Config, met
   }
 
   def fetchAllPossibleSubscriptions(applicationId: ApplicationId)(implicit hc: HeaderCarrier): Future[Map[ApiContext, ApiData]] = {
-    http.GET[Map[ApiContext, ApiData]](s"${config.serviceBaseUrl}/api-definitions", Seq("applicationId" -> applicationId.value))
+    http.GET[Map[ApiContext, ApiData]](s"${config.serviceBaseUrl}/api-definitions", Seq("applicationId" -> applicationId.text))
   }
 
   def fetchAllOpenAccessApis(environment: Environment)(implicit hc: HeaderCarrier): Future[Map[ApiContext, ApiData]] = {

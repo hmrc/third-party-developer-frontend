@@ -20,7 +20,9 @@ import play.api.data.Forms._
 import play.api.data.format.Formatter
 import play.api.data.validation.{Constraint, Invalid, Valid, ValidationError}
 import play.api.data.{Form, FormError}
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.{Application, ApplicationId, PrivacyPolicyLocation, TermsAndConditionsLocation}
+import uk.gov.hmrc.apiplatform.modules.applications.domain.models.ApplicationId
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.{Application, PrivacyPolicyLocation, TermsAndConditionsLocation}
+import java.util.UUID
 
 // scalastyle:off number.of.types
 
@@ -233,8 +235,8 @@ object ChooseApplicationToUpliftForm {
   val form: Form[ChooseApplicationToUpliftForm] = Form(
     mapping(
       "applicationId" -> optional(text).verifying("choose.application.to.uplift.error", s => s.isDefined && !s.get.isEmpty()).transform[ApplicationId](
-        s => ApplicationId(s.get),
-        id => Some(id.value)
+        s => ApplicationId(UUID.fromString(s.get)),
+        id => Some(id.value.toString)
       )
     )(ChooseApplicationToUpliftForm.apply)(ChooseApplicationToUpliftForm.unapply)
   )
@@ -264,7 +266,7 @@ object EditApplicationForm {
 
   val form: Form[EditApplicationForm] = Form(
     mapping(
-      "applicationId"         -> nonEmptyText.transform[ApplicationId](ApplicationId(_), id => id.value),
+      "applicationId"         -> nonEmptyText.transform[ApplicationId](text => ApplicationId(java.util.UUID.fromString(text)), id => id.text),
       "applicationName"       -> applicationNameValidator,
       "description"           -> optional(text),
       "privacyPolicyUrl"      -> optional(privacyPolicyUrlValidator),
@@ -506,7 +508,7 @@ object SelectApisFromSubscriptionsForm {
 
   implicit def applicationIdFormat: Formatter[ApplicationId] = new Formatter[ApplicationId] {
     override val format                                       = Some(("format.uuid", Nil))
-    override def bind(key: String, data: Map[String, String]) = data.get(key).map(ApplicationId(_)).toRight(Seq(FormError(key, "error.required", Nil)))
+    override def bind(key: String, data: Map[String, String]) = data.get(key).map(text => ApplicationId(UUID.fromString(text))).toRight(Seq(FormError(key, "error.required", Nil)))
     override def unbind(key: String, value: ApplicationId)    = Map(key -> value.toString)
   }
 
@@ -532,8 +534,8 @@ object SelectTopicsFromSubscriptionsForm {
 
   implicit def applicationIdFormat: Formatter[ApplicationId] = new Formatter[ApplicationId] {
     override val format                                       = Some(("format.uuid", Nil))
-    override def bind(key: String, data: Map[String, String]) = data.get(key).map(ApplicationId(_)).toRight(Seq(FormError(key, "error.required", Nil)))
-    override def unbind(key: String, value: ApplicationId)    = Map(key -> value.toString)
+    override def bind(key: String, data: Map[String, String]) = data.get(key).map(text => ApplicationId(UUID.fromString(text))).toRight(Seq(FormError(key, "error.required", Nil)))
+    override def unbind(key: String, value: ApplicationId)    = Map(key -> value.text)
   }
 
   def nonEmptyList: Constraint[Seq[String]] = Constraint[Seq[String]]("constraint.required") { o =>

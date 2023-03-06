@@ -37,7 +37,8 @@ import uk.gov.hmrc.thirdpartydeveloperfrontend.builder._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.config.{On, UpliftJourneyConfig}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.{BaseControllerSpec, SubscriptionTestHelperSugar}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.apidefinitions._
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.{ApplicationId, ApplicationState, ApplicationWithSubscriptionData, SellResellOrDistribute, Environment}
+import uk.gov.hmrc.apiplatform.modules.applications.domain.models.ApplicationId
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.{ApplicationState, ApplicationWithSubscriptionData, SellResellOrDistribute, Environment}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.{DeveloperSession, LoggedInState, Session}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.subscriptions.{ApiCategory, ApiData, VersionData}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.mocks.connectors.ApmConnectorMockModule
@@ -241,7 +242,7 @@ class UpliftJourneyControllerSpec extends BaseControllerSpec
       ))
 
       status(result) shouldBe SEE_OTHER
-      redirectLocation(result) shouldBe Some(s"/developer/applications/${appId.value}/confirm-subscriptions")
+      redirectLocation(result) shouldBe Some(s"/developer/applications/${appId.text}/confirm-subscriptions")
     }
 
     "An error screen is shown when all APIs are turned off on the 'Turn off API subscriptions you don’t need' view and 'save and continue' clicked" in new Setup {
@@ -267,7 +268,7 @@ class UpliftJourneyControllerSpec extends BaseControllerSpec
       private val result = controller.confirmApiSubscriptionsAction(appId)(loggedInRequest.withCSRFToken)
 
       status(result) shouldBe SEE_OTHER
-      redirectLocation(result) shouldBe Some(s"/developer/submissions/application/${appId.value}/production-credentials-checklist")
+      redirectLocation(result) shouldBe Some(s"/developer/submissions/application/${appId.text}/production-credentials-checklist")
     }
 
     "The selected apis are not save when 'save and continue' clicked but uplift fails" in new Setup {
@@ -362,7 +363,7 @@ class UpliftJourneyControllerSpec extends BaseControllerSpec
       ))
 
       status(result) shouldBe SEE_OTHER
-      redirectLocation(result) shouldBe Some("/developer/applications/myAppId/confirm-subscriptions")
+      redirectLocation(result) shouldBe Some(s"/developer/applications/${appId.text}/confirm-subscriptions")
     }
 
     "store the answer 'No' from the 'sell resell or distribute your software view' and redirect to next page" in new Setup {
@@ -377,7 +378,7 @@ class UpliftJourneyControllerSpec extends BaseControllerSpec
       ))
 
       status(result) shouldBe SEE_OTHER
-      redirectLocation(result) shouldBe Some("/developer/applications/myAppId/confirm-subscriptions")
+      redirectLocation(result) shouldBe Some(s"/developer/applications/${appId.text}/confirm-subscriptions")
     }
 
     "store the answer 'Yes' from the 'sell resell or distribute your software view' and redirect to questionnaire when application is Production" in new Setup {
@@ -472,7 +473,7 @@ class UpliftJourneyControllerSpec extends BaseControllerSpec
       private val result = controller.agreeNewTermsOfUse(appId)(loggedInRequest.withCSRFToken)
 
       status(result) shouldBe SEE_OTHER
-      redirectLocation(result) shouldBe Some(s"/developer/submissions/application/${appId.value}/production-credentials-checklist")
+      redirectLocation(result) shouldBe Some(s"/developer/submissions/application/${appId.text}/production-credentials-checklist")
     }
 
     "return bad request if not invited" in new Setup {

@@ -31,15 +31,15 @@ import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.controllers.Applica
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.LoggedInState
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.{CollaboratorTracker, LocalUserIdTracker}
 import uk.gov.hmrc.apiplatform.modules.applications.domain.models.ClientId
+import uk.gov.hmrc.apiplatform.modules.applications.domain.models.ApplicationId
 
-import uk.gov.hmrc.apiplatform.modules.applications.domain.models.ClientId
 class LeftHandNavSpec extends CommonViewSpec with CollaboratorTracker with LocalUserIdTracker with DeveloperSessionBuilder with DeveloperBuilder {
 
   val leftHandNavView = app.injector.instanceOf[LeftHandNav]
 
   trait Setup {
     val now                   = LocalDateTime.now(ZoneOffset.UTC)
-    val applicationId         = ApplicationId("std-app-id")
+    val applicationId         = ApplicationId.random
     val clientId              = ClientId("std-client-id")
     implicit val request      = FakeRequest()
     implicit val loggedIn     = buildDeveloperWithRandomId("user@example.com".toLaxEmail, "Test", "Test", None).loggedIn

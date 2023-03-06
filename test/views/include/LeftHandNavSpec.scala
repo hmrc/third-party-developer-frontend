@@ -35,8 +35,8 @@ import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.ViewHelpers._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils._
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.LaxEmailAddress.StringSyntax
 import uk.gov.hmrc.apiplatform.modules.applications.domain.models.ClientId
+import uk.gov.hmrc.apiplatform.modules.applications.domain.models.ApplicationId
 
-import uk.gov.hmrc.apiplatform.modules.applications.domain.models.ClientId
 class LeftHandNavSpec extends CommonViewSpec
     with WithCSRFAddToken
     with CollaboratorTracker
@@ -49,7 +49,7 @@ class LeftHandNavSpec extends CommonViewSpec
 
     val request = FakeRequest().withCSRFToken
 
-    val applicationId   = ApplicationId("1234")
+    val applicationId   = ApplicationId.random
     val clientId        = ClientId("clientId123")
     val applicationName = "Test Application"
 

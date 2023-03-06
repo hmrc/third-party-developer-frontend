@@ -17,7 +17,7 @@
 package uk.gov.hmrc.thirdpartydeveloperfrontend.connectors
 
 import com.github.tomakehurst.wiremock.client.WireMock._
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.ApplicationId
+import uk.gov.hmrc.apiplatform.modules.applications.domain.models.ApplicationId
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.connectors._
 import org.scalatestplus.play.guice.GuiceOneAppPerSuite
 import play.api.inject.bind
@@ -54,7 +54,7 @@ class DeskproConnectorIntegrationSpec extends BaseConnectorIntegrationSpec with 
   "DeskproConnector" when {
 
     "Creating a Deskpro ticket" should {
-      val ticket       = DeskproTicket.createForUplift("Joe Bloggs", "joe.bloggs@example.com".toLaxEmail, "Test App", ApplicationId("appId"))
+      val ticket       = DeskproTicket.createForUplift("Joe Bloggs", "joe.bloggs@example.com".toLaxEmail, "Test App", ApplicationId.random)
       val ticketPath   = "/deskpro/ticket"
       val expectedBody = Json.toJson(ticket).toString()
 

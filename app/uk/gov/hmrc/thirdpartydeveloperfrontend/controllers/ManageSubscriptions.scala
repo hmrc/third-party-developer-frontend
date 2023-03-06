@@ -37,7 +37,8 @@ import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.apidefinitions.{
   ApiContext,
   ApiVersion
 }
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.{Application, ApplicationId, CheckInformation}
+import uk.gov.hmrc.apiplatform.modules.applications.domain.models.ApplicationId
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.{Application, CheckInformation}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.controllers.EditManageSubscription._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.controllers.{NoSubscriptionFieldsRefinerBehaviour, SaveSubsFieldsPageMode}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.subscriptions.ApiSubscriptionFields._

@@ -42,6 +42,7 @@ import uk.gov.hmrc.thirdpartydeveloperfrontend.service.AuditService
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.LocalUserIdTracker
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.WithLoggedInSession._
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.Actors
+import uk.gov.hmrc.apiplatform.modules.applications.domain.models.ApplicationId
 
 class CredentialsSpec
     extends BaseControllerSpec
@@ -51,7 +52,7 @@ class CredentialsSpec
     with DeveloperBuilder
     with LocalUserIdTracker {
 
-  val applicationId = ApplicationId(UUID.randomUUID().toString())
+  val applicationId = ApplicationId.random
   val appTokens     = ApplicationToken(List(aClientSecret("secret1"), aClientSecret("secret2")), "token")
 
   trait ApplicationProvider {
@@ -358,7 +359,7 @@ class CredentialsSpec
   }
 
   "deleteClientSecretAction" should {
-    val applicationId          = ApplicationId(UUID.randomUUID().toString())
+    val applicationId          = ApplicationId.random
     val clientSecretId: String = UUID.randomUUID().toString
 
     "delete the selected client secret" in new Setup {

@@ -32,8 +32,8 @@ import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.LoggedInState
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils._
 import uk.gov.hmrc.apiplatform.modules.applications.domain.models.ClientId
+import uk.gov.hmrc.apiplatform.modules.applications.domain.models.ApplicationId
 
-import uk.gov.hmrc.apiplatform.modules.applications.domain.models.ClientId
 class CredentialsSpec extends CommonViewSpec
     with WithCSRFAddToken
     with CollaboratorTracker
@@ -54,7 +54,7 @@ class CredentialsSpec extends CommonViewSpec
     val developer = standardDeveloper.loggedIn
 
     val application = Application(
-      ApplicationId("Test Application ID"),
+      ApplicationId.random,
       ClientId("Test Application Client ID"),
       "Test Application",
       LocalDateTime.now(),

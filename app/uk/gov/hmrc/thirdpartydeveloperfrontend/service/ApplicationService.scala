@@ -34,6 +34,7 @@ import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.subscriptions._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.service.AuditAction.{AccountDeletionRequested, ApplicationDeletionRequested, Remove2SVRequested, UserLogoutSurveyCompleted}
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.Actors
 import uk.gov.hmrc.apiplatform.modules.developers.domain.models.UserId
+import uk.gov.hmrc.apiplatform.modules.applications.domain.models.ApplicationId
 
 @Singleton
 class ApplicationService @Inject() (
@@ -159,7 +160,7 @@ class ApplicationService @Inject() (
         _              <- auditService.audit(
                             ApplicationDeletionRequested,
                             Map(
-                              "appId"                   -> appId.value,
+                              "appId"                   -> appId.text,
                               "requestedByName"         -> requesterName,
                               "requestedByEmailAddress" -> requesterEmail.text,
                               "timestamp"               -> LocalDateTime.now(clock).toString

@@ -30,11 +30,11 @@ import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.LoggedIn
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.ViewHelpers._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils._
 import uk.gov.hmrc.apiplatform.modules.applications.domain.models.ClientId
+import uk.gov.hmrc.apiplatform.modules.applications.domain.models.ApplicationId
 
-import uk.gov.hmrc.apiplatform.modules.applications.domain.models.ClientId
 class RedirectsSpec extends CommonViewSpec with WithCSRFAddToken with CollaboratorTracker with LocalUserIdTracker with DeveloperSessionBuilder with DeveloperBuilder {
 
-  val appId             = ApplicationId("1234")
+  val appId             = ApplicationId.random
   val clientId          = ClientId("clientId123")
   val loggedInDeveloper = buildDeveloperWithRandomId("developer@example.com".toLaxEmail, "John", "Doe").loggedIn
   val loggedInDev       = buildDeveloperWithRandomId("developer2@example.com".toLaxEmail, "Billy", "Fontaine").loggedIn

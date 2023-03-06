@@ -34,12 +34,14 @@ import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.fraudprevention.Fraud
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.Capabilities.SupportsTeamMembers
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.Permissions.{AdministratorOnly, TeamMembersOnly}
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.{AddCollaborator, ApplicationId, CollaboratorRole}
+import uk.gov.hmrc.apiplatform.modules.applications.domain.models.ApplicationId
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.{AddCollaborator, CollaboratorRole}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.controllers.AddTeamMemberPageMode._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.controllers.{AddTeamMemberPageMode, ApplicationViewModel}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.DeveloperSession
 import uk.gov.hmrc.thirdpartydeveloperfrontend.service._
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.LaxEmailAddress.StringSyntax
+import uk.gov.hmrc.apiplatform.modules.applications.domain.models.ApplicationId
 
 @Singleton
 class ManageTeam @Inject() (

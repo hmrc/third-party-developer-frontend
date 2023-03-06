@@ -24,8 +24,8 @@ import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.services.TermsOfUseService
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.HmrcSpec
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.LaxEmailAddress.StringSyntax
 import uk.gov.hmrc.apiplatform.modules.applications.domain.models.ClientId
+import uk.gov.hmrc.apiplatform.modules.applications.domain.models.ApplicationId
 
-import uk.gov.hmrc.apiplatform.modules.applications.domain.models.ClientId
 class TermsOfUseServiceSpec extends HmrcSpec {
 
   def buildApplication(checkInfoAgreements: Option[List[TermsOfUseAgreement]] = None, standardAppAgreements: Option[List[TermsOfUseAcceptance]] = None) = Application(

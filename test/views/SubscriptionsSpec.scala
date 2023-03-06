@@ -33,8 +33,8 @@ import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.controllers.Applica
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.LoggedInState
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils._
 import uk.gov.hmrc.apiplatform.modules.applications.domain.models.ClientId
+import uk.gov.hmrc.apiplatform.modules.applications.domain.models.ApplicationId
 
-import uk.gov.hmrc.apiplatform.modules.applications.domain.models.ClientId
 class SubscriptionsSpec extends CommonViewSpec
     with WithCSRFAddToken
     with LocalUserIdTracker
@@ -53,7 +53,7 @@ class SubscriptionsSpec extends CommonViewSpec
   }
 
   def buildApplication(applicationState: ApplicationState, environment: Environment): Application = Application(
-    ApplicationId("Test Application ID"),
+    ApplicationId.random,
     ClientId("Test Application Client ID"),
     "Test Application",
     LocalDateTime.now(),
@@ -87,7 +87,7 @@ class SubscriptionsSpec extends CommonViewSpec
         ApplicationViewModel(application, false, false),
         Some(GroupedSubscriptions(Seq.empty, Seq.empty)),
         Map.empty,
-        ApplicationId(""),
+        ApplicationId.random,
         Some(createFraudPreventionNavLinkViewModel(isVisible = true, "some/url")),
         request,
         developer,

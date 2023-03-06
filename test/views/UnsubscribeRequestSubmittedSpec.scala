@@ -33,8 +33,8 @@ import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.ViewHelpers._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils._
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.LaxEmailAddress.StringSyntax
 import uk.gov.hmrc.apiplatform.modules.applications.domain.models.ClientId
+import uk.gov.hmrc.apiplatform.modules.applications.domain.models.ApplicationId
 
-import uk.gov.hmrc.apiplatform.modules.applications.domain.models.ClientId
 class UnsubscribeRequestSubmittedSpec extends CommonViewSpec with WithCSRFAddToken with CollaboratorTracker with LocalUserIdTracker with DeveloperSessionBuilder
     with DeveloperBuilder {
   "Unsubscribe request submitted page" should {
@@ -42,7 +42,7 @@ class UnsubscribeRequestSubmittedSpec extends CommonViewSpec with WithCSRFAddTok
 
       val request = FakeRequest().withCSRFToken
 
-      val appId       = ApplicationId("1234")
+      val appId       = ApplicationId.random
       val apiName     = "Test API"
       val apiVersion  = ApiVersion("1.0")
       val clientId    = ClientId("clientId123")

@@ -31,15 +31,15 @@ import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.LoggedIn
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.ViewHelpers._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils._
 import uk.gov.hmrc.apiplatform.modules.applications.domain.models.ClientId
+import uk.gov.hmrc.apiplatform.modules.applications.domain.models.ApplicationId
 
-import uk.gov.hmrc.apiplatform.modules.applications.domain.models.ClientId
 class SubscribeRequestSubmittedSpec extends CommonViewSpec with WithCSRFAddToken with CollaboratorTracker with LocalUserIdTracker with DeveloperSessionBuilder with DeveloperBuilder {
   "Subscribe request submitted page" should {
     "render with no errors" in {
       val appConfig = mock[ApplicationConfig]
       val request   = FakeRequest().withCSRFToken
 
-      val appId       = ApplicationId("1234")
+      val appId       = ApplicationId.random
       val apiName     = "Test API"
       val apiVersion  = ApiVersion("1.0")
       val clientId    = ClientId("clientId123")

@@ -22,11 +22,13 @@ import play.api.mvc.{PathBindable, QueryStringBindable}
 
 import uk.gov.hmrc.apiplatform.modules.mfa.models.{MfaAction, MfaId, MfaType}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.apidefinitions.{ApiContext, ApiVersion}
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.{ApplicationId, Environment}
+import uk.gov.hmrc.apiplatform.modules.applications.domain.models.ApplicationId
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.{Environment}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.controllers.{AddTeamMemberPageMode, SaveSubsFieldsPageMode}
 import uk.gov.hmrc.apiplatform.modules.applications.domain.models.ClientId
+import uk.gov.hmrc.apiplatform.modules.applications.domain.models.ApplicationId
+import scala.util.Try
 
-import uk.gov.hmrc.apiplatform.modules.applications.domain.models.ClientId
 package object binders {
 
   implicit def clientIdPathBinder(implicit textBinder: PathBindable[String]): PathBindable[ClientId] = new PathBindable[ClientId] {
@@ -40,17 +42,6 @@ package object binders {
     }
   }
 
-  implicit def applicationIdPathBinder(implicit textBinder: PathBindable[String]): PathBindable[ApplicationId] = new PathBindable[ApplicationId] {
-
-    override def bind(key: String, value: String): Either[String, ApplicationId] = {
-      textBinder.bind(key, value).map(ApplicationId(_))
-    }
-
-    override def unbind(key: String, applicationId: ApplicationId): String = {
-      applicationId.value
-    }
-  }
-
   implicit def mfaIdPathBinder(implicit textBinder: PathBindable[String]): PathBindable[MfaId] = new PathBindable[MfaId] {
 
     override def bind(key: String, value: String): Either[String, MfaId] = {
@@ -59,24 +50,6 @@ package object binders {
 
     override def unbind(key: String, mfaId: MfaId): String = {
       mfaId.value.toString
-    }
-  }
-
-  implicit def applicationIdQueryStringBindable(implicit textBinder: QueryStringBindable[String]) = new QueryStringBindable[ApplicationId] {
-
-    override def bind(key: String, params: Map[String, Seq[String]]): Option[Either[String, ApplicationId]] = {
-      for {
-        context <- textBinder.bind("context", params)
-      } yield {
-        context match {
-          case Right(context) => Right(ApplicationId(context))
-          case _              => Left("Unable to bind an api context")
-        }
-      }
-    }
-
-    override def unbind(key: String, context: ApplicationId): String = {
-      textBinder.unbind("context", context.value)
     }
   }
 
@@ -215,6 +188,36 @@ package object binders {
 
     override def unbind(key: String, mfaAction: MfaAction): String = {
       textBinder.unbind("mfaAction", mfaAction.toString)
+    }
+  }
+
+  
+  private def applicationIdFromString(text: String): Either[String, ApplicationId] = {
+    Try(java.util.UUID.fromString(text))
+      .toOption
+      .toRight(s"Cannot accept $text as ApplicationId")
+      .map(ApplicationId(_))
+  }
+
+  implicit def applicationIdPathBinder(implicit textBinder: PathBindable[String]): PathBindable[ApplicationId] = new PathBindable[ApplicationId] {
+
+    override def bind(key: String, value: String): Either[String, ApplicationId] = {
+      textBinder.bind(key, value).flatMap(applicationIdFromString)
+    }
+
+    override def unbind(key: String, applicationId: ApplicationId): String = {
+      applicationId.text
+    }
+  }
+
+  implicit def applicationIdQueryStringBindable(implicit textBinder: QueryStringBindable[String]) = new QueryStringBindable[ApplicationId] {
+
+    override def bind(key: String, params: Map[String, Seq[String]]): Option[Either[String, ApplicationId]] = {
+      textBinder.bind(key, params).map(_.flatMap(applicationIdFromString))
+    }
+
+    override def unbind(key: String, applicationId: ApplicationId): String = {
+      textBinder.unbind(key, applicationId.value.toString())
     }
   }
 }

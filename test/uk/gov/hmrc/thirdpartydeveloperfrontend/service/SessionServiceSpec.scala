@@ -26,7 +26,8 @@ import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.apiplatform.modules.mfa.models.MfaId
 import uk.gov.hmrc.thirdpartydeveloperfrontend.builder.DeveloperBuilder
 import uk.gov.hmrc.thirdpartydeveloperfrontend.connectors.ThirdPartyDeveloperConnector
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.{ApplicationId, ApplicationWithSubscriptionIds, Environment}
+import uk.gov.hmrc.apiplatform.modules.applications.domain.models.ApplicationId
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.{ApplicationWithSubscriptionIds, Environment}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.connectors.{AccessCodeAuthenticationRequest, UserAuthenticationResponse}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.{LoggedInState, Session, SessionInvalid}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.mocks.service.AppsByTeamMemberServiceMock
@@ -35,8 +36,8 @@ import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.{AsyncHmrcSpec, LocalUserId
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.LaxEmailAddress.StringSyntax
 import uk.gov.hmrc.apiplatform.modules.developers.domain.models.UserId
 import uk.gov.hmrc.apiplatform.modules.applications.domain.models.ClientId
+import uk.gov.hmrc.apiplatform.modules.applications.domain.models.ApplicationId
 
-import uk.gov.hmrc.apiplatform.modules.applications.domain.models.ClientId
 class SessionServiceSpec extends AsyncHmrcSpec with DeveloperBuilder with LocalUserIdTracker with AppsByTeamMemberServiceMock {
 
   trait Setup {
@@ -57,7 +58,7 @@ class SessionServiceSpec extends AsyncHmrcSpec with DeveloperBuilder with LocalU
     val session                    = Session(sessionId, developer, LoggedInState.LOGGED_IN)
     val userAuthenticationResponse = UserAuthenticationResponse(accessCodeRequired = false, mfaEnabled = false, session = Some(session))
 
-    val applicationId       = ApplicationId("myId")
+    val applicationId       = ApplicationId.random
     val clientId            = ClientId("myClientId")
     val grantLength: Period = Period.ofDays(547)
 

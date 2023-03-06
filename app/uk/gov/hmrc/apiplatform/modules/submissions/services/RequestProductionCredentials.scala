@@ -25,9 +25,10 @@ import uk.gov.hmrc.apiplatform.modules.common.services.EitherTHelper
 import uk.gov.hmrc.apiplatform.modules.submissions.connectors.ThirdPartyApplicationSubmissionsConnector
 import uk.gov.hmrc.apiplatform.modules.submissions.domain.models.ErrorDetails
 import uk.gov.hmrc.thirdpartydeveloperfrontend.connectors.DeskproConnector
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.{Application, ApplicationId}
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.{Application}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.connectors.{DeskproTicket, TicketResult}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.DeveloperSession
+import uk.gov.hmrc.apiplatform.modules.applications.domain.models.ApplicationId
 
 @Singleton
 class RequestProductionCredentials @Inject() (

@@ -24,7 +24,8 @@ import views.html.AddApplicationSuccessView
 import play.api.test.FakeRequest
 
 import uk.gov.hmrc.thirdpartydeveloperfrontend.builder._
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.{ApplicationId, Environment}
+import uk.gov.hmrc.apiplatform.modules.applications.domain.models.ApplicationId
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.{Environment}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.LoggedInState
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.ViewHelpers._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.{LocalUserIdTracker, WithCSRFAddToken}
@@ -42,7 +43,7 @@ class AddApplicationSuccessSpec extends CommonViewSpec
   "Add application success page" should {
 
     def testPage(applicationName: String, environment: Environment): Document = {
-      val applicationId = ApplicationId("application-id")
+      val applicationId = ApplicationId.random
       val loggedIn      = standardDeveloper.loggedIn
       val request       = FakeRequest().withCSRFToken
       val page          = addApplicationSuccess.render(applicationName, applicationId, environment, request, loggedIn, messagesProvider, appConfig, navSection = "nav-section")

@@ -28,6 +28,7 @@ import uk.gov.hmrc.apiplatform.modules.submissions.domain.models._
 import uk.gov.hmrc.apiplatform.modules.submissions.domain.services._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.connectors.ConnectorMetrics
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications._
+import uk.gov.hmrc.apiplatform.modules.applications.domain.models.ApplicationId
 
 object ThirdPartyApplicationSubmissionsConnector {
   case class Config(serviceBaseUrl: String, apiKey: String)

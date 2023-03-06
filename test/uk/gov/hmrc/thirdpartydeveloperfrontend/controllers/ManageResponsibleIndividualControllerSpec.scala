@@ -220,7 +220,7 @@ class ManageResponsibleIndividualControllerSpec
       val result  = underTest.responsibleIndividualChangeToSelfOrOtherAction(appId)(request)
 
       status(result) shouldBe SEE_OTHER
-      redirectLocation(result) shouldBe Some(s"/developer/applications/${appId.value}/responsible-individual/change/self")
+      redirectLocation(result) shouldBe Some(s"/developer/applications/${appId.text}/responsible-individual/change/self")
     }
 
     "redirect to correct page if user selects 'other'" in new Setup {
@@ -232,7 +232,7 @@ class ManageResponsibleIndividualControllerSpec
       val result  = underTest.responsibleIndividualChangeToSelfOrOtherAction(appId)(request)
 
       status(result) shouldBe SEE_OTHER
-      redirectLocation(result) shouldBe Some(s"/developer/applications/${appId.value}/responsible-individual/change/other")
+      redirectLocation(result) shouldBe Some(s"/developer/applications/${appId.text}/responsible-individual/change/other")
     }
 
     "return error if no choice selected" in new Setup {
@@ -290,7 +290,7 @@ class ManageResponsibleIndividualControllerSpec
       val result = underTest.responsibleIndividualChangeToSelfAction(appId)(loggedInRequest.withCSRFToken)
 
       status(result) shouldBe SEE_OTHER
-      redirectLocation(result) shouldBe Some(s"/developer/applications/${appId.value}/responsible-individual/change/self/confirmed")
+      redirectLocation(result) shouldBe Some(s"/developer/applications/${appId.text}/responsible-individual/change/self/confirmed")
     }
 
     "return error if user is not an admin" in new Setup {
@@ -365,7 +365,7 @@ class ManageResponsibleIndividualControllerSpec
       val result  = underTest.responsibleIndividualChangeToOtherAction(appId)(request)
 
       status(result) shouldBe SEE_OTHER
-      redirectLocation(result) shouldBe Some(s"/developer/applications/${appId.value}/responsible-individual/change/other/requested")
+      redirectLocation(result) shouldBe Some(s"/developer/applications/${appId.text}/responsible-individual/change/other/requested")
     }
 
     "return an error if responsible individual details are not new" in new Setup {

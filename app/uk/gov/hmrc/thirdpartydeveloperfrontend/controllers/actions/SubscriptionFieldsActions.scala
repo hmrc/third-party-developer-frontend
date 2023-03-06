@@ -28,6 +28,7 @@ import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.apidefinitions._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.controllers.NoSubscriptionFieldsRefinerBehaviour
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.subscriptions.DevhubAccessLevel
+import uk.gov.hmrc.apiplatform.modules.applications.domain.models.ApplicationId
 
 trait SubscriptionFieldsActions {
   self: ApplicationController =>

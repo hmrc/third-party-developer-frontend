@@ -43,6 +43,7 @@ import uk.gov.hmrc.thirdpartydeveloperfrontend.mocks.service._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.service.AuditService
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.WithLoggedInSession._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.{LocalUserIdTracker, _}
+import uk.gov.hmrc.apiplatform.modules.applications.domain.models.ApplicationId
 
 class AddApplicationProductionSwitchSpec
     extends BaseControllerSpec

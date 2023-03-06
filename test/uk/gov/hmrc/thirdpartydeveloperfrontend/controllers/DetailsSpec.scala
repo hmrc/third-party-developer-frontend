@@ -819,7 +819,7 @@ class DetailsSpec
       val doc = Jsoup.parse(contentAsString(result))
       // APIS-5669 - temporarily removed Change link
       // linkExistsWithHref(doc, routes.Details.changeDetails(application.id).url) shouldBe hasChangeButton
-      elementIdentifiedByIdContainsText(doc, "applicationId", application.id.value) shouldBe true
+      elementIdentifiedByIdContainsText(doc, "applicationId", application.id.text) shouldBe true
       elementIdentifiedByIdContainsText(doc, "applicationName", application.name) shouldBe true
       elementIdentifiedByIdContainsText(doc, "description", application.description.getOrElse("None")) shouldBe true
       elementIdentifiedByIdContainsText(doc, "privacyPolicyUrl", PrivacyPolicyLocation.asText(application.privacyPolicyLocation)) shouldBe true
@@ -836,7 +836,7 @@ class DetailsSpec
       val doc = Jsoup.parse(contentAsString(result))
       formExistsWithAction(doc, routes.Details.changeDetailsAction(application.id).url) shouldBe true
       linkExistsWithHref(doc, routes.Details.details(application.id).url) shouldBe true
-      inputExistsWithValue(doc, "applicationId", "hidden", application.id.value) shouldBe true
+      inputExistsWithValue(doc, "applicationId", "hidden", application.id.text) shouldBe true
       if (application.deployedTo == Environment.SANDBOX || application.state.name == State.TESTING) {
         inputExistsWithValue(doc, "applicationName", "text", application.name) shouldBe true
       } else {

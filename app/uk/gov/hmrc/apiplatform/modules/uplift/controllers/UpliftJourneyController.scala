@@ -44,10 +44,13 @@ import uk.gov.hmrc.thirdpartydeveloperfrontend.connectors.ApmConnector
 import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.checkpages.{CanUseCheckActions, DummySubscriptionsForm}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.{APISubscriptions, ApplicationController, FormKeys, checkpages}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.apidefinitions.APISubscriptionStatus
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.{ApplicationId, SellResellOrDistribute, Environment}
+import uk.gov.hmrc.apiplatform.modules.applications.domain.models.ApplicationId
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.{SellResellOrDistribute, Environment}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.connectors.TermsOfUseInvitation
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.controllers.BadRequestWithErrorMessage
 import uk.gov.hmrc.thirdpartydeveloperfrontend.service.{ApplicationActionService, ApplicationService, SessionService, TermsOfUseInvitationService}
+import uk.gov.hmrc.apiplatform.modules.applications.domain.models.ApplicationId
+import java.util.UUID
 
 object UpliftJourneyController {
 
@@ -57,7 +60,7 @@ object UpliftJourneyController {
 
     val form: Form[ChooseApplicationToUpliftForm] = Form(
       mapping(
-        "applicationId" -> nonEmptyText.transform[ApplicationId](ApplicationId(_), id => id.value)
+        "applicationId" -> nonEmptyText.transform[ApplicationId](text => ApplicationId(UUID.fromString(text)), id => id.text)
       )(ChooseApplicationToUpliftForm.apply)(ChooseApplicationToUpliftForm.unapply)
     )
   }

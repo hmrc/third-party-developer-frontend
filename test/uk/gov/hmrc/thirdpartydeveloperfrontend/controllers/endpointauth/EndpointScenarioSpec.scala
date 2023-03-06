@@ -53,8 +53,8 @@ import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.AsyncHmrcSpec
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.LaxEmailAddress
 import uk.gov.hmrc.apiplatform.modules.developers.domain.models.UserId
 import uk.gov.hmrc.apiplatform.modules.applications.domain.models.ClientId
+import uk.gov.hmrc.apiplatform.modules.applications.domain.models.ApplicationId
 
-import uk.gov.hmrc.apiplatform.modules.applications.domain.models.ClientId
 object EndpointScenarioSpec {
 
   def parseEndpoint(text: String, pathPrefix: String): Option[Endpoint] = {
@@ -264,8 +264,8 @@ abstract class EndpointScenarioSpec extends AsyncHmrcSpec with GuiceOneAppPerSui
   }
 
   final def getPathParameterValues(): Map[String, String] = Map(
-    "id"                     -> applicationId.value,
-    "aid"                    -> applicationId.value,
+    "id"                     -> applicationId.text,
+    "aid"                    -> applicationId.text,
     "qid"                    -> question.id.value,
     "sid"                    -> submissionId.value,
     "environment"            -> Environment.PRODUCTION.entryName,
@@ -301,9 +301,9 @@ abstract class EndpointScenarioSpec extends AsyncHmrcSpec with GuiceOneAppPerSui
       case Endpoint("GET", "/developer/application-verification", _)                              => Map("code" -> "1324")
       case Endpoint("GET", "/developer/profile/email-preferences/apis", _)                        => Map("category" -> "AGENTS")
       case Endpoint(_, "/developer/submissions/responsible-individual-verification", _)           => Map("code" -> "code123")
-      case Endpoint(_, "/developer/profile/email-preferences/topics-from-subscriptions", _)       => Map("context" -> applicationId.value)
-      case Endpoint(_, "/developer/profile/email-preferences/apis-from-subscriptions", _)         => Map("context" -> applicationId.value)
-      case Endpoint("POST", "/developer/profile/email-preferences/no-apis-from-subscriptions", _) => Map("context" -> applicationId.value)
+      case Endpoint(_, "/developer/profile/email-preferences/topics-from-subscriptions", _)       => Map("context" -> applicationId.text)
+      case Endpoint(_, "/developer/profile/email-preferences/apis-from-subscriptions", _)         => Map("context" -> applicationId.text)
+      case Endpoint("POST", "/developer/profile/email-preferences/no-apis-from-subscriptions", _) => Map("context" -> applicationId.text)
       case Endpoint("GET", "/developer/profile/security-preferences/auth-app/access-code", _)     =>
         Map("mfaId" -> authAppMfaId.value.toString, "mfaAction" -> MfaAction.CREATE.toString, "mfaIdForRemoval" -> authAppMfaId.value.toString)
       case Endpoint("POST", "/developer/profile/security-preferences/auth-app/access-code", _)    =>
@@ -385,20 +385,20 @@ abstract class EndpointScenarioSpec extends AsyncHmrcSpec with GuiceOneAppPerSui
       case Endpoint("POST", "/developer/applications/:id/request-check/team/remove", _)                                                => Map("email" -> userEmail.text)
       case Endpoint("POST", "/developer/applications/:id/request-check/terms-of-use", _)                                               => Map("termsOfUseAgreed" -> "true")
       case Endpoint("POST", "/developer/applications/:id/details/change", _)                                                           => Map(
-          "applicationId"         -> applicationId.value,
+          "applicationId"         -> applicationId.text,
           "applicationName"       -> applicationName,
           "description"           -> "my description",
           "privacyPolicyUrl"      -> privacyPolicyUrl,
           "termsAndConditionsUrl" -> termsConditionsUrl,
           "grantLength"           -> "1"
         )
-      case Endpoint("POST", "/developer/applications/add/switch", _)                                                                   => Map("applicationId" -> applicationId.value)
-      case Endpoint("POST", "/developer/profile/email-preferences/topics-from-subscriptions", _)                                       => Map("topic[]" -> "BUSINESS_AND_POLICY", "applicationId" -> applicationId.value)
+      case Endpoint("POST", "/developer/applications/add/switch", _)                                                                   => Map("applicationId" -> applicationId.text)
+      case Endpoint("POST", "/developer/profile/email-preferences/topics-from-subscriptions", _)                                       => Map("topic[]" -> "BUSINESS_AND_POLICY", "applicationId" -> applicationId.text)
       case Endpoint("POST", "/developer/submissions/responsible-individual-verification", _)                                           => Map("verified" -> "yes")
       case Endpoint("POST", "/developer/profile/delete", _)                                                                            => Map("confirmation" -> "true")
       case Endpoint("POST", "/developer/profile/email-preferences/topics", _)                                                          => Map("topic[]" -> "BUSINESS_AND_POLICY")
       case Endpoint("POST", "/developer/profile/", _)                                                                                  => Map("firstname" -> userFirstName, "lastname" -> userLastName, "organisation" -> organisation)
-      case Endpoint("POST", "/developer/profile/email-preferences/apis-from-subscriptions", _)                                         => Map("selectedApi[]" -> "my api", "applicationId" -> applicationId.value)
+      case Endpoint("POST", "/developer/profile/email-preferences/apis-from-subscriptions", _)                                         => Map("selectedApi[]" -> "my api", "applicationId" -> applicationId.text)
       case Endpoint("POST", "/developer/profile/password", _)                                                                          =>
         Map("currentpassword" -> userPassword, "password" -> (userPassword + "new"), "confirmpassword" -> (userPassword + "new"))
       case Endpoint("POST", "/developer/profile/email-preferences/apis", _)                                                            => Map("apiRadio" -> "1", "selectedApi" -> "api1", "currentCategory" -> category)

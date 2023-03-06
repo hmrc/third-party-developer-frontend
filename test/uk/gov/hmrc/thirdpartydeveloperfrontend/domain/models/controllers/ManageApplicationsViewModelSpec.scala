@@ -25,13 +25,14 @@ import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.apidefinitions.Acce
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.CollaboratorRole.DEVELOPER
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.State._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications._
+import uk.gov.hmrc.apiplatform.modules.applications.domain.models.ApplicationId
 
 class ManageApplicationsViewModelSpec extends AnyWordSpec with Matchers {
   val grantLength = Period.ofDays(547)
   "noProductionApplications" should {
     val sandboxApp =
       ApplicationSummary(
-        ApplicationId(""),
+        ApplicationId.random,
         "",
         CollaboratorRole.DEVELOPER,
         TermsOfUseStatus.AGREED,
@@ -47,7 +48,7 @@ class ManageApplicationsViewModelSpec extends AnyWordSpec with Matchers {
 
     val notYetLiveProductionApp =
       ApplicationSummary(
-        ApplicationId(""),
+        ApplicationId.random,
         "",
         DEVELOPER,
         TermsOfUseStatus.AGREED,

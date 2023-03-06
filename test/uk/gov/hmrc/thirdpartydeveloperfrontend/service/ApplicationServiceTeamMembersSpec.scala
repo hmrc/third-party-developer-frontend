@@ -41,8 +41,8 @@ import uk.gov.hmrc.thirdpartydeveloperfrontend.service.SubscriptionFieldsService
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.{AsyncHmrcSpec, FixedClock, LocalUserIdTracker}
 import uk.gov.hmrc.apiplatform.modules.developers.domain.models.UserId
 import uk.gov.hmrc.apiplatform.modules.applications.domain.models.ClientId
+import uk.gov.hmrc.apiplatform.modules.applications.domain.models.ApplicationId
 
-import uk.gov.hmrc.apiplatform.modules.applications.domain.models.ClientId
 class ApplicationServiceTeamMembersSpec extends AsyncHmrcSpec with SubscriptionsBuilder with ApplicationBuilder with LocalUserIdTracker {
 
   val versionOne = ApiVersion("1.0")
@@ -103,7 +103,7 @@ class ApplicationServiceTeamMembersSpec extends AsyncHmrcSpec with Subscriptions
   def version(version: ApiVersion, status: APIStatus, subscribed: Boolean): VersionSubscription =
     VersionSubscription(ApiVersionDefinition(version, status), subscribed)
 
-  val productionApplicationId = ApplicationId("Application ID")
+  val productionApplicationId = ApplicationId.random
   val productionClientId      = ClientId(s"client-id-${randomUUID().toString}")
 
   val productionApplication: Application =
@@ -119,7 +119,7 @@ class ApplicationServiceTeamMembersSpec extends AsyncHmrcSpec with Subscriptions
       Some("description"),
       Set()
     )
-  val sandboxApplicationId               = ApplicationId("Application ID")
+  val sandboxApplicationId               = ApplicationId.random
   val sandboxClientId                    = ClientId("Client ID")
 
   val sandboxApplication: Application =
