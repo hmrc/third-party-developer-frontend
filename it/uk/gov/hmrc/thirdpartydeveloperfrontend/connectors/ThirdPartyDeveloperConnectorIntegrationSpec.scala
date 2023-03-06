@@ -96,7 +96,7 @@ class ThirdPartyDeveloperConnectorIntegrationSpec extends BaseConnectorIntegrati
                            |  "loggedInState": "LOGGED_IN",
                            |  "developer": {
                            |    "userId":"${userId.value}",
-                           |    "email":"$userEmail",
+                           |    "email":"${userEmail.text}",
                            |    "firstName":"John",
                            |    "lastName": "Doe",
                            |    "emailPreferences": { "interests" : [], "topics": [] }
@@ -430,7 +430,7 @@ class ThirdPartyDeveloperConnectorIntegrationSpec extends BaseConnectorIntegrati
                            |    "loggedInState": "LOGGED_IN",
                            |    "developer": {
                            |      "userId":"${userId.value}",
-                           |      "email":"$userEmail",
+                           |      "email":"${userEmail.text}",
                            |      "firstName":"John",
                            |      "lastName": "Doe",
                            |      "emailPreferences": { "interests" : [], "topics": [] }
@@ -551,7 +551,7 @@ class ThirdPartyDeveloperConnectorIntegrationSpec extends BaseConnectorIntegrati
                            |  "loggedInState": "LOGGED_IN",
                            |  "developer": {
                            |    "userId":"${userId.value}",
-                           |    "email":"$userEmail",
+                           |    "email":"${userEmail.text}",
                            |    "firstName":"John",
                            |    "lastName": "Doe",
                            |    "emailPreferences": { "interests" : [], "topics": [] }
