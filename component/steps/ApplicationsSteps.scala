@@ -37,6 +37,7 @@ import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.UserId
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.ApplicationWithSubscriptionIds
 import org.scalatest.matchers.should.Matchers
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.LaxEmailAddress
+import uk.gov.hmrc.apiplatform.modules.common.domain.models.LaxEmailAddress.StringSyntax
 import utils.ComponentTestDeveloperBuilder
 
 object AppWorld {
@@ -53,7 +54,7 @@ class ApplicationsSteps extends ScalaDsl with EN with Matchers with NavigationSu
   val applicationId = ApplicationId("applicationId")
   val clientId      = ClientId("clientId")
 
-  val collaboratorEmail = "john.smith@example.com"
+  val collaboratorEmail = "john.smith@example.com".toLaxEmail
 
   private def defaultApp(name: String, environment: String) = Application(
     id = applicationId,
@@ -87,7 +88,7 @@ class ApplicationsSteps extends ScalaDsl with EN with Matchers with NavigationSu
     link.getAttribute("href") shouldBe s"${Env.host}/developer/applications/$applicationId/request-check"
   }
 
-  Given("""^I have no application assigned to my email '(.*)'$""") { (email: LaxEmailAddress) =>
+  Given("""^I have no application assigned to my email '(.*)'$""") { (unusedEmail: String) =>
     ApplicationStub.configureUserApplications(staticUserId)
     AppWorld.userApplicationsOnBackend = Nil
   }
@@ -109,9 +110,9 @@ class ApplicationsSteps extends ScalaDsl with EN with Matchers with NavigationSu
     AppWorld.userApplicationsOnBackend = applications map { app: Map[String, String] =>
       val applicationState = app.getOrElse("state", "TESTING") match {
         case "TESTING"                        => ApplicationState.testing
-        case "PRODUCTION"                     => ApplicationState.production(email, name, verificationCode)
-        case "PENDING_GATEKEEPER_APPROVAL"    => ApplicationState.pendingGatekeeperApproval(email, name)
-        case "PENDING_REQUESTER_VERIFICATION" => ApplicationState.pendingRequesterVerification(email, name, verificationCode)
+        case "PRODUCTION"                     => ApplicationState.production(email.text, name, verificationCode)
+        case "PENDING_GATEKEEPER_APPROVAL"    => ApplicationState.pendingGatekeeperApproval(email.text, name)
+        case "PENDING_REQUESTER_VERIFICATION" => ApplicationState.pendingRequesterVerification(email.text, name, verificationCode)
         case unknownState: String             => fail(s"Unknown state '$unknownState'")
       }
       val access           = app.getOrElse("accessType", "STANDARD") match {

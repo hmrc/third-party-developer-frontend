@@ -28,6 +28,7 @@ import play.api.http.Status
 import stubs.DeveloperStub
 import org.scalatest.matchers.should.Matchers
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.LaxEmailAddress
+import uk.gov.hmrc.apiplatform.modules.common.domain.models.LaxEmailAddress.StringSyntax
 
 object Form extends WebBrowser {
 
@@ -65,13 +66,13 @@ class RegisterSteps extends ScalaDsl with EN with Matchers with NavigationSugar 
   }
 
   def createPayload(data: Map[String, String]): Registration = {
-    Registration(data("first name"), data("last name"), data("email address"), data("password"))
+    Registration(data("first name"), data("last name"), data("email address").toLaxEmail, data("password"))
   }
 
   Given("""^I expect a resend call from '(.*)'$""") {
-    email: LaxEmailAddress =>
+    email: String =>
       {
-        DeveloperStub.setupResend(email, Status.NO_CONTENT)
+        DeveloperStub.setupResend(email.toLaxEmail, Status.NO_CONTENT)
       }
   }
 

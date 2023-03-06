@@ -27,6 +27,7 @@ import play.api.http.Status._
 import play.api.libs.json.{Format, Json}
 import stubs.{DeveloperStub, MfaStub, Stubs}
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.LaxEmailAddress
+import uk.gov.hmrc.apiplatform.modules.common.domain.models.LaxEmailAddress.StringSyntax
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.connectors.{LoginRequest, PasswordResetRequest, UserAuthenticationResponse}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.{Developer, LoggedInState, Session}
 import utils.ComponentTestDeveloperBuilder
@@ -50,7 +51,7 @@ class LoginSteps extends ScalaDsl with EN with Matchers with NavigationSugar wit
 
   private val mobileNumber = "+447890123456"
 
-  Given("""^I am successfully logged in with '(.*)' and '(.*)'$""") { (email: LaxEmailAddress, password: String) =>
+  Given("""^I am successfully logged in with '(.*)' and '(.*)'$""") { (email: String, password: String) =>
     goOn(SignInPage.default)
     webDriver.manage().deleteAllCookies()
     webDriver.navigate().refresh()
@@ -66,7 +67,7 @@ class LoginSteps extends ScalaDsl with EN with Matchers with NavigationSugar wit
     val result: Map[String, String] = data.asScalaRawMaps[String, String].head
 
     val password  = result("Password")
-    val developer = buildDeveloper(emailAddress = result("Email address"), firstName = result("First name"), lastName = result("Last name"))
+    val developer = buildDeveloper(emailAddress = result("Email address").toLaxEmail, firstName = result("First name"), lastName = result("Last name"))
 
     val mfaSetup = result("Mfa Setup")
 
@@ -101,8 +102,8 @@ class LoginSteps extends ScalaDsl with EN with Matchers with NavigationSugar wit
     DeveloperStub.setUpGetCombinedApis()
   }
 
-  Given("""^'(.*)' session is uplifted to LoggedIn$""") { email: LaxEmailAddress =>
-    if (email != TestContext.developer.email) {
+  Given("""^'(.*)' session is uplifted to LoggedIn$""") { email: String =>
+    if (email.toLaxEmail != TestContext.developer.email) {
       throw new IllegalArgumentException(s"Can only know how to uplift ${TestContext.developer.email}'s session")
     }
     MfaStub.setupMfaMandated()
@@ -140,13 +141,13 @@ class LoginSteps extends ScalaDsl with EN with Matchers with NavigationSugar wit
     }
   }
 
-  Then("""^I should be sent an email with a link to reset for '(.*)'$""") { email: LaxEmailAddress =>
-    DeveloperStub.verifyResetPassword(PasswordResetRequest(email))
+  Then("""^I should be sent an email with a link to reset for '(.*)'$""") { email: String =>
+    DeveloperStub.verifyResetPassword(PasswordResetRequest(email.toLaxEmail))
   }
 
   Given("""^I click on a valid password reset link for code '(.*)'$""") { resetPwdCode: String =>
     val email = "bob@example.com"
-    DeveloperStub.stubResetPasswordJourney(email, resetPwdCode)
+    DeveloperStub.stubResetPasswordJourney(email.toLaxEmail, resetPwdCode)
 
     webDriver.manage().deleteAllCookies()
     goTo(s"http://localhost:${Env.port}/developer/reset-password-link?code='$resetPwdCode'")

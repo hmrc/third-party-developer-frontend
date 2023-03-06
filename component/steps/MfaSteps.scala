@@ -31,7 +31,7 @@ import uk.gov.hmrc.apiplatform.modules.mfa.utils.MfaDetailHelper
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.connectors.{LoginRequest, UserAuthenticationResponse}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.{Developer, LoggedInState, Session}
 import utils.MfaData
-
+import uk.gov.hmrc.apiplatform.modules.common.domain.models.LaxEmailAddress.StringSyntax
 import java.util.UUID
 
 class MfaSteps extends ScalaDsl with EN with Matchers with NavigationSugar with PageSugar
@@ -109,7 +109,7 @@ class MfaSteps extends ScalaDsl with EN with Matchers with NavigationSugar with 
 
     val password = result("Password")
 
-    val developer = buildDeveloper(emailAddress = result("Email address"), firstName = result("First name"), lastName = result("Last name"), mfaDetails = List(smsMfaDetails))
+    val developer = buildDeveloper(emailAddress = result("Email address").toLaxEmail, firstName = result("First name"), lastName = result("Last name"), mfaDetails = List(smsMfaDetails))
 
     setUpDeveloperStub(developer, smsMfaId, password, None, deviceSessionFound = false)
 
@@ -124,7 +124,7 @@ class MfaSteps extends ScalaDsl with EN with Matchers with NavigationSugar with 
     val password = result("Password")
 
     val developer =
-      buildDeveloper(emailAddress = result("Email address"), firstName = result("First name"), lastName = result("Last name"), mfaDetails = List(authenticatorAppMfaDetails))
+      buildDeveloper(emailAddress = result("Email address").toLaxEmail, firstName = result("First name"), lastName = result("Last name"), mfaDetails = List(authenticatorAppMfaDetails))
 
     setUpDeveloperStub(developer, authAppMfaId, password, None, deviceSessionFound = false)
 
@@ -136,7 +136,7 @@ class MfaSteps extends ScalaDsl with EN with Matchers with NavigationSugar with 
     val password = result("Password")
 
     val developer =
-      buildDeveloper(emailAddress = result("Email address"), firstName = result("First name"), lastName = result("Last name"), mfaDetails = List(authenticatorAppMfaDetails))
+      buildDeveloper(emailAddress = result("Email address").toLaxEmail, firstName = result("First name"), lastName = result("Last name"), mfaDetails = List(authenticatorAppMfaDetails))
 
     setUpDeveloperStub(developer, authAppMfaId, password, Some(DeviceSessionStub.staticDeviceSessionId), true)
 
