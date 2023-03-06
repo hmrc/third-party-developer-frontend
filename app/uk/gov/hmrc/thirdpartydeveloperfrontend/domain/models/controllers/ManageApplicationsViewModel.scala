@@ -20,13 +20,15 @@ import java.time.Instant
 
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.{ApplicationId, CollaboratorRole}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.connectors.TermsOfUseInvitation
+import uk.gov.hmrc.apiplatform.modules.submissions.domain.models.Submission
 
 case class ManageApplicationsViewModel(
     sandboxApplicationSummaries: Seq[ApplicationSummary],
     productionApplicationSummaries: Seq[ApplicationSummary],
     upliftableApplicationIds: Set[ApplicationId],
     hasAppsThatCannotBeUplifted: Boolean,
-    termsOfUseInvitations: List[TermsOfUseInvitation]
+    termsOfUseInvitations: List[TermsOfUseInvitation],
+    productionApplicationSubmissions: List[Submission]
   ) {
   lazy val hasPriviledgedApplications = sandboxApplicationSummaries.exists(_.accessType.isPriviledged) || productionApplicationSummaries.exists(_.accessType.isPriviledged)
   lazy val hasAppsThatCanBeUplifted   = upliftableApplicationIds.nonEmpty
@@ -38,10 +40,27 @@ case class ManageApplicationsViewModel(
 
   lazy val hasNoLiveProductionApplications = liveProductionApplications.isEmpty
 
-  lazy val applicationsThatHaveTermOfUseInvitatations =
+  lazy val applicationsThatHaveTermOfUseInvitatationsOutstanding =
     liveProductionApplications
       .filter(app => app.role == CollaboratorRole.ADMINISTRATOR)
       .filter(app => termsOfUseInvitations.exists(app.id == _.applicationId))
+      .filter(app => 
+        !productionApplicationSubmissions.exists(sub => app.id == sub.applicationId) ||
+        productionApplicationSubmissions.exists(sub => app.id == sub.applicationId && sub.status.isOpenToAnswers)
+      )
+      .map(applicationSummary =>
+        TermsOfUseInvitationViewModel(applicationSummary.id, applicationSummary.name, termsOfUseInvitations.find(_.applicationId == applicationSummary.id).get.dueBy)
+      )
+
+  lazy val applicationsThatHaveTermOfUseInvitatationsSubmitted =
+    liveProductionApplications
+      .filter(app => app.role == CollaboratorRole.ADMINISTRATOR)
+      .filter(app => termsOfUseInvitations.exists(app.id == _.applicationId))
+      .filter(app => 
+        productionApplicationSubmissions.exists(sub => 
+          app.id == sub.applicationId && (sub.status.isFailed || sub.status.isWarnings || sub.status.isPendingResponsibleIndividual || sub.status.isSubmitted)
+        )
+      )
       .map(applicationSummary =>
         TermsOfUseInvitationViewModel(applicationSummary.id, applicationSummary.name, termsOfUseInvitations.find(_.applicationId == applicationSummary.id).get.dueBy)
       )

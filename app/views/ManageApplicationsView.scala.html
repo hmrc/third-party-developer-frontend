@@ -48,10 +48,10 @@
   leftNav = Some(leftHandNav(None, Option(navSection), flags)),
   developerSession = Some(loggedIn)
 ) {
-  @if(model.applicationsThatHaveTermOfUseInvitatations.nonEmpty) {
-    <div class="govuk-notification-banner" role="region" aria-labelledby="govuk-notification-banner-title" data-module="govuk-notification-banner">
+  @if(model.applicationsThatHaveTermOfUseInvitatationsOutstanding.nonEmpty) {
+    <div class="govuk-notification-banner" role="region" aria-labelledby="govuk-notification-banner-title-important" data-module="govuk-notification-banner">
       <div class="govuk-notification-banner__header">
-        <h2 class="govuk-notification-banner__title" id="govuk-notification-banner-title">
+        <h2 class="govuk-notification-banner__title" id="govuk-notification-banner-title-important">
           Important
         </h2>
       </div>
@@ -59,9 +59,27 @@
         <h3 class="govuk-notification-banner__heading">
           Our terms of use have changed. 
         </h3>
-        @for(viewModel <- model.applicationsThatHaveTermOfUseInvitatations) {
+        @for(viewModel <- model.applicationsThatHaveTermOfUseInvitatationsOutstanding) {
           <p class="govuk-body"><a class="govuk-notification-banner__link" href="@uk.gov.hmrc.apiplatform.modules.uplift.controllers.routes.UpliftJourneyController.agreeNewTermsOfUse(viewModel.applicationId)">Agree to version 2 of the terms of use</a> for @{viewModel.name} by @{DateTimeFormatter.ofPattern("dd MMMM yyyy").withZone(ZoneId.systemDefault()).format(viewModel.dueBy)}.</p>
         } 
+      </div>
+    </div>
+  }
+
+  @if(model.applicationsThatHaveTermOfUseInvitatationsSubmitted.nonEmpty) {
+    <div class="govuk-notification-banner govuk-notification-banner--success" role="alert" aria-labelledby="govuk-notification-banner-title-terms-of-use" data-module="govuk-notification-banner" data-disable-auto-focus="true">
+      <div class="govuk-notification-banner__header">
+        <h2 class="govuk-notification-banner__title" id="govuk-notification-banner-title-terms-of-use">
+          Terms of use
+        </h2>
+      </div>
+      <div class="govuk-notification-banner__content">
+        <h3 class="govuk-notification-banner__heading">
+          We are checking your answers to version 2 of the terms of use.
+        </h3>
+        @for(viewModel <- model.applicationsThatHaveTermOfUseInvitatationsSubmitted) {
+          <p class="govuk-body"><a class="govuk-notification-banner__link" href="@uk.gov.hmrc.apiplatform.modules.uplift.controllers.routes.UpliftJourneyController.agreeNewTermsOfUse(viewModel.applicationId)">Review your answers</a> for @{viewModel.name}.</p>
+        }
       </div>
     </div>
   }
