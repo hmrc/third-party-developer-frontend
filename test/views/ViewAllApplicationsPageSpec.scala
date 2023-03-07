@@ -30,13 +30,14 @@ import uk.gov.hmrc.thirdpartydeveloperfrontend.builder.{DeveloperBuilder, Develo
 import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.addapplication.routes.{AddApplication => AddApplicationRoutes}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.apidefinitions.AccessType
 import uk.gov.hmrc.apiplatform.modules.applications.domain.models.ApplicationId
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.{CollaboratorRole, Environment, State, TermsOfUseStatus}
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.{Environment, State, TermsOfUseStatus}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.controllers.{ApplicationSummary, ManageApplicationsViewModel}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.LoggedInState
 import uk.gov.hmrc.thirdpartydeveloperfrontend.helpers.DateFormatter
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.ViewHelpers.{elementExistsByText, elementIdentifiedByAttrContainsText}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.{LocalUserIdTracker, WithCSRFAddToken}
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.LaxEmailAddress.StringSyntax
+import uk.gov.hmrc.apiplatform.modules.applications.domain.models.Collaborator
 
 class ViewAllApplicationsPageSpec extends CommonViewSpec
     with WithCSRFAddToken
@@ -137,7 +138,7 @@ class ViewAllApplicationsPageSpec extends CommonViewSpec
 
     val applicationId = ApplicationId.random
     val appName       = "App name 1"
-    val appUserRole   = CollaboratorRole.ADMINISTRATOR
+    val appUserRole   = Collaborator.Roles.ADMINISTRATOR
     val appCreatedOn  = LocalDateTime.now(ZoneOffset.UTC).minusDays(1)
     val appLastAccess = Some(appCreatedOn)
 

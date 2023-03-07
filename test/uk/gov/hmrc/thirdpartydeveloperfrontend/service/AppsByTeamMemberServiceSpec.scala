@@ -35,6 +35,7 @@ import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.{AsyncHmrcSpec, LocalUserId
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.LaxEmailAddress.StringSyntax
 import uk.gov.hmrc.apiplatform.modules.applications.domain.models.ClientId
 import uk.gov.hmrc.apiplatform.modules.applications.domain.models.ApplicationId
+import uk.gov.hmrc.apiplatform.modules.applications.domain.models.Collaborators
 
 class AppsByTeamMemberServiceSpec extends AsyncHmrcSpec with SubscriptionsBuilder with ApplicationBuilder with LocalUserIdTracker {
 
@@ -80,7 +81,7 @@ class AppsByTeamMemberServiceSpec extends AsyncHmrcSpec with SubscriptionsBuilde
       None,
       grantLength,
       Environment.PRODUCTION,
-      collaborators = Set(Collaborator(email, CollaboratorRole.ADMINISTRATOR, userId))
+      collaborators = Set(Collaborators.Administrator(userId, email))
     )
     val sandboxApp1    = ApplicationWithSubscriptionIds(
       ApplicationId.random,
@@ -91,7 +92,7 @@ class AppsByTeamMemberServiceSpec extends AsyncHmrcSpec with SubscriptionsBuilde
       None,
       grantLength,
       Environment.SANDBOX,
-      collaborators = Set(Collaborator(email, CollaboratorRole.ADMINISTRATOR, userId))
+      collaborators = Set(Collaborators.Administrator(userId, email))
     )
     val productionApp2 = ApplicationWithSubscriptionIds(
       ApplicationId.random,
@@ -102,7 +103,7 @@ class AppsByTeamMemberServiceSpec extends AsyncHmrcSpec with SubscriptionsBuilde
       None,
       grantLength,
       Environment.PRODUCTION,
-      collaborators = Set(Collaborator(email, CollaboratorRole.ADMINISTRATOR, userId))
+      collaborators = Set(Collaborators.Administrator(userId, email))
     )
 
     val productionApps = Seq(productionApp1, productionApp2)

@@ -34,6 +34,7 @@ import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.{LocalUserIdTracker, WithCS
 import uk.gov.hmrc.thirdpartydeveloperfrontend.builder._
 import uk.gov.hmrc.apiplatform.modules.applications.domain.models.ClientId
 import uk.gov.hmrc.apiplatform.modules.applications.domain.models.ApplicationId
+import uk.gov.hmrc.apiplatform.modules.applications.domain.models.Collaborator
 
 class ManageTeamViewSpec extends CommonViewSpec with WithCSRFAddToken with LocalUserIdTracker with DeveloperSessionBuilder with DeveloperTestData {
 
@@ -61,7 +62,7 @@ class ManageTeamViewSpec extends CommonViewSpec with WithCSRFAddToken with Local
   "manageTeam view" should {
     val manageTeamView = app.injector.instanceOf[ManageTeamView]
 
-    def renderPage(role: CollaboratorRole, form: Form[AddTeamMemberForm] = AddTeamMemberForm.form) = {
+    def renderPage(role: Collaborator.Role, form: Form[AddTeamMemberForm] = AddTeamMemberForm.form) = {
       val request = FakeRequest().withCSRFToken
 
       manageTeamView.render(
@@ -78,7 +79,7 @@ class ManageTeamViewSpec extends CommonViewSpec with WithCSRFAddToken with Local
     }
 
     "show Add and Remove buttons for Admin" in {
-      val document = Jsoup.parse(renderPage(role = CollaboratorRole.ADMINISTRATOR).body)
+      val document = Jsoup.parse(renderPage(role = Collaborator.Roles.ADMINISTRATOR).body)
 
       elementExistsByText(document, "h1", "Manage team members") shouldBe true
       elementExistsByText(document, "a", "Add a team member") shouldBe true
@@ -89,7 +90,7 @@ class ManageTeamViewSpec extends CommonViewSpec with WithCSRFAddToken with Local
     }
 
     "not show Add and Remove buttons for Developer" in {
-      val document = Jsoup.parse(renderPage(role = CollaboratorRole.DEVELOPER).body)
+      val document = Jsoup.parse(renderPage(role = Collaborator.Roles.DEVELOPER).body)
 
       elementExistsByText(document, "h1", "Manage team members") shouldBe true
       elementExistsByText(document, "a", "Add a team member") shouldBe false

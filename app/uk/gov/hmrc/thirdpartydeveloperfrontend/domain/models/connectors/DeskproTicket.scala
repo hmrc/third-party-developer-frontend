@@ -23,7 +23,8 @@ import uk.gov.hmrc.apiplatform.modules.common.domain.models.LaxEmailAddress.Stri
 import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.apidefinitions.ApiVersion
 import uk.gov.hmrc.apiplatform.modules.applications.domain.models.ApplicationId
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.{CollaboratorRole, Environment}
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.{Environment}
+import uk.gov.hmrc.apiplatform.modules.applications.domain.models.Collaborator
 
 case class DeskproTicket(
                           name: String,
@@ -110,14 +111,14 @@ object DeskproTicket extends FieldTransformer {
   def createForPrincipalApplicationDeletion(
       name: String,
       requestedByEmail: LaxEmailAddress,
-      role: CollaboratorRole,
+      role: Collaborator.Role,
       environment: Environment,
       applicationName: String,
       applicationId: ApplicationId
     ): DeskproTicket = {
 
     val actor = role match {
-      case CollaboratorRole.ADMINISTRATOR => "an administrator"
+      case Collaborator.Roles.ADMINISTRATOR => "an administrator"
       case _                              => "a developer"
     }
 

@@ -21,7 +21,6 @@ import uk.gov.hmrc.apiplatform.modules.common.domain.models.LaxEmailAddress
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.apidefinitions.AccessType.STANDARD
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.apidefinitions.ApiIdentifier
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.Capabilities.{ChangeClientSecret, SupportsDetails, ViewPushSecret}
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.CollaboratorRole.ADMINISTRATOR
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.Environment._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.Permissions.{ProductionAndAdmin, ProductionAndDeveloper, SandboxOnly, SandboxOrAdmin}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.State.{PENDING_GATEKEEPER_APPROVAL, PENDING_REQUESTER_VERIFICATION, TESTING}
@@ -32,6 +31,7 @@ import uk.gov.hmrc.apiplatform.modules.developers.domain.models.UserId
 import uk.gov.hmrc.apiplatform.modules.applications.domain.models.{ApplicationId, ClientId}
 import play.api.libs.json.OFormat
 import play.api.libs.json.Reads
+import uk.gov.hmrc.apiplatform.modules.applications.domain.models.Collaborator
 
 trait BaseApplication {
   val defaultGrantLengthDays = 547
@@ -51,12 +51,13 @@ trait BaseApplication {
   def checkInformation: Option[CheckInformation]
   def ipAllowlist: IpAllowlist
 
-  def role(email: LaxEmailAddress): Option[CollaboratorRole]                 = collaborators.find(_.emailAddress == email).map(_.role)
-  def roleForCollaborator(userId: UserId): Option[CollaboratorRole] = collaborators.find(_.userId == userId).map(_.role)
+  def role(email: LaxEmailAddress): Option[Collaborator.Role] = collaborators.find(_.emailAddress == email).map(_.role)
+  
+  def roleForCollaborator(userId: UserId): Option[Collaborator.Role] = collaborators.find(_.userId == userId).map(_.role)
 
-  def isUserACollaboratorOfRole(userId: UserId, requiredRole: CollaboratorRole): Boolean = roleForCollaborator(userId).fold(false)(_ == requiredRole)
+  def isUserACollaboratorOfRole(userId: UserId, requiredRole: Collaborator.Role): Boolean = roleForCollaborator(userId).fold(false)(_ == requiredRole)
 
-  def adminEmails: Set[LaxEmailAddress] = collaborators.filter(_.role.isAdministrator).map(_.emailAddress)
+  def adminEmails: Set[LaxEmailAddress] = collaborators.filter(_.isAdministrator).map(_.emailAddress)
 
   def termsOfUseAgreements: List[TermsOfUseAgreement] = checkInformation.map(_.termsOfUseAgreements).getOrElse(List.empty)
 
@@ -112,6 +113,8 @@ trait BaseApplication {
   def canChangeClientCredentials(developer: Developer): Boolean = allows(ChangeClientSecret, developer, SandboxOrAdmin)
 
   def canPerformApprovalProcess(developer: Developer): Boolean = {
+    import Collaborator.Roles._
+
     (deployedTo, access.accessType, state.name, role(developer.email)) match {
       case (SANDBOX, _, _, _)                                                          => false
       case (PRODUCTION, STANDARD, TESTING, Some(ADMINISTRATOR))                        => true
@@ -122,6 +125,8 @@ trait BaseApplication {
   }
 
   def canViewServerToken(developer: Developer): Boolean = {
+    import Collaborator.Roles._ 
+
     (deployedTo, access.accessType, state.name, role(developer.email)) match {
       case (SANDBOX, STANDARD, State.PRODUCTION, _)                      => true
       case (PRODUCTION, STANDARD, State.PRODUCTION, Some(ADMINISTRATOR)) => true

@@ -30,6 +30,7 @@ import uk.gov.hmrc.apiplatform.modules.common.domain.models.LaxEmailAddress.Stri
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.LaxEmailAddress
 import uk.gov.hmrc.apiplatform.modules.applications.domain.models.ClientId
 import uk.gov.hmrc.apiplatform.modules.applications.domain.models.ApplicationId
+import uk.gov.hmrc.apiplatform.modules.applications.domain.models.Collaborator
 
 trait TestApplications {
   self: CollaboratorTracker =>
@@ -123,7 +124,7 @@ trait TestApplications {
 
     final def withDescription(description: Option[String]): Application = app.copy(description = description)
 
-    final def withTeamMember(email: LaxEmailAddress, userRole: CollaboratorRole): Application = app.copy(collaborators = app.collaborators + Collaborator(email, userRole, UserId.random))
+    final def withTeamMember(email: LaxEmailAddress, userRole: Collaborator.Role): Application = app.copy(collaborators = app.collaborators + Collaborator(email, userRole, UserId.random))
 
     final def withTeamMembers(teamMembers: Set[Collaborator]): Application = app.copy(collaborators = teamMembers)
 

@@ -17,15 +17,15 @@
 @import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.views.SubscriptionRedirect
 @import views.helper.IdFormatter
 @import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.apidefinitions.APIAccessType
-@import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.CollaboratorRole
 @import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.Application
 @import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.apidefinitions.ApiContext
 @import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.subscriptions.ApiData
+@import uk.gov.hmrc.apiplatform.modules.applications.domain.models.Collaborator
 
 @this()
 
 @(
-  role: CollaboratorRole,
+  role: Collaborator.Role,
   app: Application,
   openAccessApis: Map[ApiContext, ApiData]
 )(

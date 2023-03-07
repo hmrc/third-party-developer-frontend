@@ -29,6 +29,7 @@ import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.apidefinitions.{
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.DeveloperSession
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.subscriptions.ApiData
+import uk.gov.hmrc.apiplatform.modules.applications.domain.models.Collaborator
 
 class UserRequest[A](val developerSession: DeveloperSession, val msgRequest: MessagesRequest[A]) extends MessagesRequest[A](msgRequest, msgRequest.messagesApi) {
   lazy val userId    = developerSession.developer.userId
@@ -46,7 +47,7 @@ class ApplicationRequest[A](
     val deployedTo: Environment,
     val subscriptions: List[APISubscriptionStatus],
     val openAccessApis: Map[ApiContext, ApiData],
-    val role: CollaboratorRole,
+    val role: Collaborator.Role,
     val userRequest: UserRequest[A]
   ) extends UserRequest[A](userRequest.developerSession, userRequest.msgRequest) with HasApplication {
 

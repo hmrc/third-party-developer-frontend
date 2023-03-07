@@ -35,6 +35,7 @@ import uk.gov.hmrc.apiplatform.modules.common.domain.models.LaxEmailAddress.Stri
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.{CollaboratorTracker, LocalUserIdTracker, WithCSRFAddToken}
 import uk.gov.hmrc.apiplatform.modules.applications.domain.models.ClientId
 import uk.gov.hmrc.apiplatform.modules.applications.domain.models.ApplicationId
+import uk.gov.hmrc.apiplatform.modules.applications.domain.models.Collaborator
 
 class SubscriptionsGroupSpec
     extends CommonViewSpec
@@ -64,7 +65,7 @@ class SubscriptionsGroupSpec
 
   val subscriptionsGroup = app.injector.instanceOf[SubscriptionsGroup]
 
-  case class Page(role: CollaboratorRole, environment: Environment, state: ApplicationState) {
+  case class Page(role: Collaborator.Role, environment: Environment, state: ApplicationState) {
 
     lazy val body: Document = {
       val application = Application(
@@ -105,7 +106,7 @@ class SubscriptionsGroupSpec
 
   "subscriptionsGroup" when {
     "logged in as a developer" should {
-      val role = CollaboratorRole.DEVELOPER
+      val role = Collaborator.Roles.DEVELOPER
 
       "render enabled toggles for a sandbox app" in {
         val page = Page(role, Environment.SANDBOX, ApplicationState.production(loggedInDeveloper.email.text, loggedInDeveloper.displayedName, ""))
@@ -144,7 +145,7 @@ class SubscriptionsGroupSpec
     }
 
     "logged in as an administrator" should {
-      val role = CollaboratorRole.ADMINISTRATOR
+      val role = Collaborator.Roles.ADMINISTRATOR
 
       "render enabled toggles for a sandbox app" in {
         val page = Page(role, Environment.SANDBOX, ApplicationState.production(loggedInDeveloper.email.text, loggedInDeveloper.displayedName, ""))

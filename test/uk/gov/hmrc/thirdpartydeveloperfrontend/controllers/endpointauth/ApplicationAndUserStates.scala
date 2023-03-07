@@ -43,6 +43,7 @@ import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.subscriptions._
 import uk.gov.hmrc.apiplatform.modules.developers.domain.models.UserId
 import uk.gov.hmrc.apiplatform.modules.applications.domain.models.ClientId
 import uk.gov.hmrc.apiplatform.modules.applications.domain.models.ApplicationId
+import uk.gov.hmrc.apiplatform.modules.applications.domain.models.Collaborator
 
 trait HasApplication extends HasAppDeploymentEnvironment with HasUserWithRole with HasAppState with MfaDetailBuilder {
   val applicationId   = ApplicationId.random
@@ -245,16 +246,16 @@ trait UserIsTeamMember extends HasUserWithRole with HasApplication {
 
 trait UserIsAdmin extends UserIsTeamMember {
   def describeUserRole  = "The user is an Admin on the application team"
-  def maybeCollaborator = Some(Collaborator(userEmail, CollaboratorRole.ADMINISTRATOR, userId))
+  def maybeCollaborator = Some(Collaborator(userEmail, Collaborator.Roles.ADMINISTRATOR, userId))
 }
 
 trait UserIsDeveloper extends UserIsTeamMember {
   def describeUserRole  = "The user is a Developer on the application team"
-  def maybeCollaborator = Some(Collaborator(userEmail, CollaboratorRole.DEVELOPER, userId))
+  def maybeCollaborator = Some(Collaborator(userEmail, Collaborator.Roles.DEVELOPER, userId))
 }
 
 trait UserIsNotOnApplicationTeam extends HasUserWithRole with HasApplication {
-  val otherApp            = application.copy(id = ApplicationId.random, collaborators = Set(Collaborator(userEmail, CollaboratorRole.DEVELOPER, userId)))
+  val otherApp            = application.copy(id = ApplicationId.random, collaborators = Set(Collaborator(userEmail, Collaborator.Roles.DEVELOPER, userId)))
   val otherAppWithSubsIds = ApplicationWithSubscriptionIds.from(otherApp).copy(subscriptions = Set(apiIdentifier))
   when(tpaProductionConnector.fetchByTeamMember(*[UserId])(*)).thenReturn(Future.successful(List(otherAppWithSubsIds)))
   when(tpaSandboxConnector.fetchByTeamMember(*[UserId])(*)).thenReturn(Future.successful(List(otherAppWithSubsIds)))

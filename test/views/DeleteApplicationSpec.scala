@@ -25,7 +25,6 @@ import views.html.DeleteApplicationView
 import play.api.test.FakeRequest
 
 import uk.gov.hmrc.thirdpartydeveloperfrontend.builder._
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.CollaboratorRole.{ADMINISTRATOR, DEVELOPER}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.LoggedInState
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.ViewHelpers._
@@ -33,6 +32,7 @@ import uk.gov.hmrc.thirdpartydeveloperfrontend.utils._
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.LaxEmailAddress.StringSyntax
 import uk.gov.hmrc.apiplatform.modules.applications.domain.models.ClientId
 import uk.gov.hmrc.apiplatform.modules.applications.domain.models.ApplicationId
+import uk.gov.hmrc.apiplatform.modules.applications.domain.models.Collaborator
 
 class DeleteApplicationSpec extends CommonViewSpec with WithCSRFAddToken with CollaboratorTracker with LocalUserIdTracker
     with DeveloperSessionBuilder
@@ -67,7 +67,7 @@ class DeleteApplicationSpec extends CommonViewSpec with WithCSRFAddToken with Co
       "on Production" in {
         val request = FakeRequest().withCSRFToken
 
-        val page = deleteApplicationView.render(prodApp, ADMINISTRATOR, request, loggedInDeveloper, messagesProvider, appConfig)
+        val page = deleteApplicationView.render(prodApp, Collaborator.Roles.ADMINISTRATOR, request, loggedInDeveloper, messagesProvider, appConfig)
 
         page.contentType should include("text/html")
         val document = Jsoup.parse(page.body)
@@ -79,7 +79,7 @@ class DeleteApplicationSpec extends CommonViewSpec with WithCSRFAddToken with Co
       "on Sandbox" in {
         val request = FakeRequest().withCSRFToken
 
-        val page = deleteApplicationView.render(sandboxApp, ADMINISTRATOR, request, loggedInDeveloper, messagesProvider, appConfig)
+        val page = deleteApplicationView.render(sandboxApp, Collaborator.Roles.ADMINISTRATOR, request, loggedInDeveloper, messagesProvider, appConfig)
 
         page.contentType should include("text/html")
         val document = Jsoup.parse(page.body)
@@ -93,7 +93,7 @@ class DeleteApplicationSpec extends CommonViewSpec with WithCSRFAddToken with Co
         Seq(prodApp, sandboxApp) foreach { application =>
           val request = FakeRequest().withCSRFToken
 
-          val page = deleteApplicationView.render(application, DEVELOPER, request, loggedInDeveloper, messagesProvider, appConfig)
+          val page = deleteApplicationView.render(application, Collaborator.Roles.DEVELOPER, request, loggedInDeveloper, messagesProvider, appConfig)
 
           page.contentType should include("text/html")
           val document = Jsoup.parse(page.body)
@@ -111,7 +111,7 @@ class DeleteApplicationSpec extends CommonViewSpec with WithCSRFAddToken with Co
           .foreach { application =>
             val request = FakeRequest().withCSRFToken
 
-            val page = deleteApplicationView.render(application, DEVELOPER, request, loggedInDeveloper, messagesProvider, appConfig)
+            val page = deleteApplicationView.render(application, Collaborator.Roles.DEVELOPER, request, loggedInDeveloper, messagesProvider, appConfig)
 
             page.contentType should include("text/html")
             val document = Jsoup.parse(page.body)

@@ -38,7 +38,6 @@ import uk.gov.hmrc.thirdpartydeveloperfrontend.builder._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.checkpages.ApplicationCheck
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.ApplicationUpliftSuccessful
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.apidefinitions._
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.CollaboratorRole.{ADMINISTRATOR, DEVELOPER}
 import uk.gov.hmrc.apiplatform.modules.applications.domain.models.ApplicationId
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.{_}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.DeveloperSession
@@ -49,6 +48,7 @@ import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.{LocalUserIdTracker, WithCS
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.LaxEmailAddress.StringSyntax
 import uk.gov.hmrc.apiplatform.modules.applications.domain.models.ClientId
 import uk.gov.hmrc.apiplatform.modules.applications.domain.models.ApplicationId
+import uk.gov.hmrc.apiplatform.modules.applications.domain.models.Collaborator
 
 class ApplicationCheckSpec
     extends BaseControllerSpec
@@ -158,14 +158,14 @@ class ApplicationCheckSpec
   def createPartiallyConfigurableApplication(
       appId: ApplicationId = appId,
       clientId: ClientId = clientId,
-      userRole: CollaboratorRole = ADMINISTRATOR,
+      userRole: Collaborator.Role = Collaborator.Roles.ADMINISTRATOR,
       state: ApplicationState = testing,
       checkInformation: Option[CheckInformation] = None,
       access: Access = Standard()
     ): Application = {
 
     // this is to ensure we always have one ADMINISTRATOR
-    val anotherRole = if (userRole.isAdministrator) DEVELOPER else ADMINISTRATOR
+    val anotherRole = if (userRole.isAdministrator) Collaborator.Roles.DEVELOPER else Collaborator.Roles.ADMINISTRATOR
 
     val collaborators = Set(
       loggedInDeveloper.email.asCollaborator(userRole),
@@ -182,8 +182,8 @@ class ApplicationCheckSpec
     ): Application = {
 
     val collaborators = Set(
-      loggedInDeveloper.email.asCollaborator(ADMINISTRATOR),
-      anotherCollaboratorEmail.asCollaborator(DEVELOPER)
+      loggedInDeveloper.email.asCollaborator(Collaborator.Roles.ADMINISTRATOR),
+      anotherCollaboratorEmail.asCollaborator(Collaborator.Roles.DEVELOPER)
     )
 
     Application(
@@ -353,7 +353,7 @@ class ApplicationCheckSpec
     }
 
     "return forbidden when accessed without being an admin" in new Setup {
-      def createApplication() = createPartiallyConfigurableApplication(userRole = DEVELOPER)
+      def createApplication() = createPartiallyConfigurableApplication(userRole = Collaborator.Roles.DEVELOPER)
 
       private val result = addToken(underTest.requestCheckPage(appId))(loggedInRequest)
 
@@ -522,7 +522,7 @@ class ApplicationCheckSpec
     }
 
     "return forbidden when accessing action without being an admin" in new Setup {
-      def createApplication() = createPartiallyConfigurableApplication(userRole = DEVELOPER)
+      def createApplication() = createPartiallyConfigurableApplication(userRole = Collaborator.Roles.DEVELOPER)
 
       private val result = addToken(underTest.requestCheckAction(appId))(loggedInRequestWithFormBody)
 
@@ -597,7 +597,7 @@ class ApplicationCheckSpec
     }
 
     "return forbidden when accessed without being an admin" in new Setup {
-      def createApplication() = createPartiallyConfigurableApplication(userRole = DEVELOPER)
+      def createApplication() = createPartiallyConfigurableApplication(userRole = Collaborator.Roles.DEVELOPER)
 
       private val result = addToken(underTest.apiSubscriptionsAction(appId))(loggedInRequestWithFormBody)
 
@@ -686,7 +686,7 @@ class ApplicationCheckSpec
     }
 
     "return forbidden when accessing the action without being an admin" in new Setup {
-      def createApplication() = createPartiallyConfigurableApplication(userRole = DEVELOPER)
+      def createApplication() = createPartiallyConfigurableApplication(userRole = Collaborator.Roles.DEVELOPER)
 
       private val result = addToken(underTest.contactAction(appId))(loggedInRequestWithFormBody)
 
@@ -694,7 +694,7 @@ class ApplicationCheckSpec
     }
 
     "return forbidden when accessing the page without being an admin" in new Setup {
-      def createApplication() = createPartiallyConfigurableApplication(userRole = DEVELOPER)
+      def createApplication() = createPartiallyConfigurableApplication(userRole = Collaborator.Roles.DEVELOPER)
 
       private val result = addToken(underTest.contactPage(appId))(loggedInRequestWithFormBody)
 
@@ -828,7 +828,7 @@ class ApplicationCheckSpec
     }
 
     "return forbidden when accessing the action without being an admin" in new Setup {
-      def createApplication() = createPartiallyConfigurableApplication(userRole = DEVELOPER)
+      def createApplication() = createPartiallyConfigurableApplication(userRole = Collaborator.Roles.DEVELOPER)
 
       private val result = addToken(underTest.nameAction(appId))(loggedInRequestWithFormBody)
 
@@ -836,7 +836,7 @@ class ApplicationCheckSpec
     }
 
     "return forbidden when accessing the page without being an admin" in new Setup {
-      def createApplication() = createPartiallyConfigurableApplication(userRole = DEVELOPER)
+      def createApplication() = createPartiallyConfigurableApplication(userRole = Collaborator.Roles.DEVELOPER)
 
       private val result = addToken(underTest.namePage(appId))(loggedInRequestWithFormBody)
 
@@ -980,7 +980,7 @@ class ApplicationCheckSpec
     }
 
     "return forbidden when accessing the action without being an admin" in new Setup {
-      def createApplication() = createPartiallyConfigurableApplication(userRole = DEVELOPER)
+      def createApplication() = createPartiallyConfigurableApplication(userRole = Collaborator.Roles.DEVELOPER)
 
       private val result = addToken(underTest.privacyPolicyAction(appId))(loggedInRequestWithFormBody)
 
@@ -988,7 +988,7 @@ class ApplicationCheckSpec
     }
 
     "return forbidden when accessing the page without being an admin" in new Setup {
-      def createApplication() = createPartiallyConfigurableApplication(userRole = DEVELOPER)
+      def createApplication() = createPartiallyConfigurableApplication(userRole = Collaborator.Roles.DEVELOPER)
 
       private val result = addToken(underTest.privacyPolicyPage(appId))(loggedInRequestWithFormBody)
 
@@ -1133,7 +1133,7 @@ class ApplicationCheckSpec
     }
 
     "action unavailable when accessed without being an admin" in new Setup {
-      def createApplication() = createPartiallyConfigurableApplication(userRole = DEVELOPER)
+      def createApplication() = createPartiallyConfigurableApplication(userRole = Collaborator.Roles.DEVELOPER)
 
       private val result = addToken(underTest.termsAndConditionsAction(appId))(loggedInRequestWithFormBody)
 
@@ -1141,7 +1141,7 @@ class ApplicationCheckSpec
     }
 
     "page unavailable when accessed without being an admin" in new Setup {
-      def createApplication() = createPartiallyConfigurableApplication(userRole = DEVELOPER)
+      def createApplication() = createPartiallyConfigurableApplication(userRole = Collaborator.Roles.DEVELOPER)
 
       private val result = addToken(underTest.termsAndConditionsPage(appId))(loggedInRequestWithFormBody)
 
@@ -1193,7 +1193,7 @@ class ApplicationCheckSpec
     }
 
     "be forbidden when accessed without being an admin" in new Setup {
-      def createApplication() = createPartiallyConfigurableApplication(userRole = DEVELOPER)
+      def createApplication() = createPartiallyConfigurableApplication(userRole = Collaborator.Roles.DEVELOPER)
 
       private val result = addToken(underTest.termsOfUsePage(appId))(loggedInRequest)
 
@@ -1201,7 +1201,7 @@ class ApplicationCheckSpec
     }
 
     "action is forbidden when accessed without being an admin" in new Setup {
-      def createApplication() = createPartiallyConfigurableApplication(userRole = DEVELOPER)
+      def createApplication() = createPartiallyConfigurableApplication(userRole = Collaborator.Roles.DEVELOPER)
 
       private val result = addToken(underTest.termsOfUseAction(appId))(loggedInRequestWithFormBody)
 
@@ -1374,7 +1374,7 @@ class ApplicationCheckSpec
     }
 
     "return unauthorised App details page with one Admin" in new Setup {
-      def createApplication() = createPartiallyConfigurableApplication(userRole = DEVELOPER)
+      def createApplication() = createPartiallyConfigurableApplication(userRole = Collaborator.Roles.DEVELOPER)
 
       private val result = addToken(underTest.unauthorisedAppDetails(appId))(loggedInRequest)
 

@@ -35,7 +35,9 @@ import uk.gov.hmrc.thirdpartydeveloperfrontend.service.AuditAction.{AccountDelet
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.Actors
 import uk.gov.hmrc.apiplatform.modules.developers.domain.models.UserId
 import uk.gov.hmrc.apiplatform.modules.applications.domain.models.ApplicationId
+import uk.gov.hmrc.apiplatform.modules.applications.domain.models.Collaborator
 
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.AddCollaborator
 @Singleton
 class ApplicationService @Inject() (
     apmConnector: ApmConnector,
@@ -180,7 +182,7 @@ class ApplicationService @Inject() (
     val reasons        = "Subordinate application deleted by DevHub user"
     val instigator     = requester.developer.userId
 
-    if (environment == Environment.SANDBOX && requesterRole == CollaboratorRole.ADMINISTRATOR && application.access.accessType == AccessType.STANDARD) {
+    if (environment == Environment.SANDBOX && requesterRole == Collaborator.Roles.ADMINISTRATOR && application.access.accessType == AccessType.STANDARD) {
 
       val deleteRequest = DeleteApplicationByCollaborator(instigator, reasons, LocalDateTime.now(clock))
       applicationConnectorFor(application).applicationUpdate(application.id, deleteRequest)

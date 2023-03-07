@@ -38,7 +38,6 @@ import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.thirdpartydeveloperfrontend.builder._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.checkpages.{ApplicationCheck, CheckYourAnswers}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.apidefinitions._
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.CollaboratorRole.{ADMINISTRATOR, DEVELOPER}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.DeveloperSession
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.{ApplicationAlreadyExists, ApplicationUpliftSuccessful, DeskproTicketCreationFailed}
@@ -49,6 +48,7 @@ import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.{LocalUserIdTracker, WithCS
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.LaxEmailAddress.StringSyntax
 import uk.gov.hmrc.apiplatform.modules.applications.domain.models.ClientId
 import uk.gov.hmrc.apiplatform.modules.applications.domain.models.ApplicationId
+import uk.gov.hmrc.apiplatform.modules.applications.domain.models.Collaborator
 
 class CheckYourAnswersSpec
     extends BaseControllerSpec
@@ -209,7 +209,7 @@ class CheckYourAnswersSpec
     def givenApplicationExists(
         appId: ApplicationId = appId,
         clientId: ClientId = clientId,
-        userRole: CollaboratorRole = ADMINISTRATOR,
+        userRole: Collaborator.Role = Collaborator.Roles.ADMINISTRATOR,
         state: ApplicationState = testing,
         checkInformation: Option[CheckInformation] = None,
         access: Access = Standard()
@@ -343,7 +343,7 @@ class CheckYourAnswersSpec
     }
 
     "return forbidden when accessed without being an admin" in new Setup {
-      givenApplicationExists(userRole = DEVELOPER)
+      givenApplicationExists(userRole = Collaborator.Roles.DEVELOPER)
 
       private val result = addToken(underTest.answersPage(appId))(loggedInRequest)
 
@@ -370,7 +370,7 @@ class CheckYourAnswersSpec
     }
 
     "return forbidden when accessing action without being an admin" in new Setup {
-      givenApplicationExists(userRole = DEVELOPER)
+      givenApplicationExists(userRole = Collaborator.Roles.DEVELOPER)
 
       private val result = addToken(underTest.answersPageAction(appId))(loggedInRequestWithFormBody)
 

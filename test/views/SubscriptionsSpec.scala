@@ -34,6 +34,7 @@ import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.LoggedIn
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils._
 import uk.gov.hmrc.apiplatform.modules.applications.domain.models.ClientId
 import uk.gov.hmrc.apiplatform.modules.applications.domain.models.ApplicationId
+import uk.gov.hmrc.apiplatform.modules.applications.domain.models.Collaborator
 
 class SubscriptionsSpec extends CommonViewSpec
     with WithCSRFAddToken
@@ -79,7 +80,7 @@ class SubscriptionsSpec extends CommonViewSpec
 
     val sandboxApplicationTesting = buildApplication(ApplicationState.testing, Environment.SANDBOX)
 
-    def renderPageForApplicationAndRole(application: Application, role: CollaboratorRole, pageData: PageData, request: FakeRequest[AnyContentAsEmpty.type]) = {
+    def renderPageForApplicationAndRole(application: Application, role: Collaborator.Role, pageData: PageData, request: FakeRequest[AnyContentAsEmpty.type]) = {
       manageSubscriptions.render(
         role,
         pageData,
@@ -102,7 +103,7 @@ class SubscriptionsSpec extends CommonViewSpec
 
       val pageData: PageData = PageData(productionApplication, None, Map.empty)
 
-      val page: Html = renderPageForApplicationAndRole(productionApplication, CollaboratorRole.ADMINISTRATOR, pageData, request)
+      val page: Html = renderPageForApplicationAndRole(productionApplication, Collaborator.Roles.ADMINISTRATOR, pageData, request)
 
       page.contentType should include("text/html")
       page.body should include("For security reasons we must review any API subscription changes.")
@@ -117,7 +118,7 @@ class SubscriptionsSpec extends CommonViewSpec
 
       val pageData: PageData = PageData(productionApplication, None, Map.empty)
 
-      val page: Html = renderPageForApplicationAndRole(productionApplication, CollaboratorRole.DEVELOPER, pageData, request)
+      val page: Html = renderPageForApplicationAndRole(productionApplication, Collaborator.Roles.DEVELOPER, pageData, request)
 
       page.contentType should include("text/html")
       page.body should include("You need admin rights to make API subscription changes.")
@@ -132,7 +133,7 @@ class SubscriptionsSpec extends CommonViewSpec
 
       val pageData: PageData = PageData(productionApplicationTesting, None, Map.empty)
 
-      val page: Html = renderPageForApplicationAndRole(productionApplicationTesting, CollaboratorRole.ADMINISTRATOR, pageData, request)
+      val page: Html = renderPageForApplicationAndRole(productionApplicationTesting, Collaborator.Roles.ADMINISTRATOR, pageData, request)
 
       page.contentType should include("text/html")
       page.body shouldNot include("For security reasons we must review any API subscription changes.")
@@ -147,7 +148,7 @@ class SubscriptionsSpec extends CommonViewSpec
 
       val pageData: PageData = PageData(productionApplicationTesting, None, Map.empty)
 
-      val page: Html = renderPageForApplicationAndRole(productionApplicationTesting, CollaboratorRole.DEVELOPER, pageData, request)
+      val page: Html = renderPageForApplicationAndRole(productionApplicationTesting, Collaborator.Roles.DEVELOPER, pageData, request)
 
       page.contentType should include("text/html")
       page.body shouldNot include("For security reasons we must review any API subscription changes.")
@@ -162,7 +163,7 @@ class SubscriptionsSpec extends CommonViewSpec
 
       val pageData: PageData = PageData(productionApplicationPendingGatekeeperApproval, None, Map.empty)
 
-      val page: Html = renderPageForApplicationAndRole(productionApplicationPendingGatekeeperApproval, CollaboratorRole.ADMINISTRATOR, pageData, request)
+      val page: Html = renderPageForApplicationAndRole(productionApplicationPendingGatekeeperApproval, Collaborator.Roles.ADMINISTRATOR, pageData, request)
 
       page.contentType should include("text/html")
       page.body should include("For security reasons we must review any API subscription changes.")
@@ -177,7 +178,7 @@ class SubscriptionsSpec extends CommonViewSpec
 
       val pageData: PageData = PageData(productionApplicationPendingRequesterVerification, None, Map.empty)
 
-      val page: Html = renderPageForApplicationAndRole(productionApplicationPendingRequesterVerification, CollaboratorRole.ADMINISTRATOR, pageData, request)
+      val page: Html = renderPageForApplicationAndRole(productionApplicationPendingRequesterVerification, Collaborator.Roles.ADMINISTRATOR, pageData, request)
 
       page.contentType should include("text/html")
       page.body should include("For security reasons we must review any API subscription changes.")
@@ -192,7 +193,7 @@ class SubscriptionsSpec extends CommonViewSpec
 
       val pageData: PageData = PageData(sandboxApplicationTesting, None, Map.empty)
 
-      val page: Html = renderPageForApplicationAndRole(sandboxApplicationTesting, CollaboratorRole.ADMINISTRATOR, pageData, request)
+      val page: Html = renderPageForApplicationAndRole(sandboxApplicationTesting, Collaborator.Roles.ADMINISTRATOR, pageData, request)
 
       page.contentType should include("text/html")
       page.body shouldNot include("For security reasons we must review any API subscription changes.")
@@ -207,7 +208,7 @@ class SubscriptionsSpec extends CommonViewSpec
 
       val pageData: PageData = PageData(sandboxApplicationTesting, None, Map.empty)
 
-      val page: Html = renderPageForApplicationAndRole(sandboxApplicationTesting, CollaboratorRole.DEVELOPER, pageData, request)
+      val page: Html = renderPageForApplicationAndRole(sandboxApplicationTesting, Collaborator.Roles.DEVELOPER, pageData, request)
 
       page.contentType should include("text/html")
       page.body shouldNot include("For security reasons we must review any API subscription changes.")

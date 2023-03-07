@@ -22,6 +22,7 @@ import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.apidefinitions.ApiIdentifier
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.DeveloperSession
 import uk.gov.hmrc.apiplatform.modules.applications.domain.models.ApplicationId
+import uk.gov.hmrc.apiplatform.modules.applications.domain.models.Collaborator
 
 case class UpliftData(
     sellResellOrDistribute: SellResellOrDistribute,
@@ -54,7 +55,7 @@ object CreateApplicationRequest extends ApplicationRequest {
     name = form.applicationName.trim,
     environment = environment,
     description = None,
-    collaborators = List(Collaborator(user.email, CollaboratorRole.ADMINISTRATOR, user.developer.userId))
+    collaborators = List(Collaborator(user.email, Collaborator.Roles.ADMINISTRATOR, user.developer.userId))
   )
 }
 

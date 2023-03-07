@@ -38,6 +38,7 @@ import uk.gov.hmrc.thirdpartydeveloperfrontend.service.PushPullNotificationsServ
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.AsyncHmrcSpec
 import uk.gov.hmrc.apiplatform.modules.applications.domain.models.ClientId
 import uk.gov.hmrc.apiplatform.modules.applications.domain.models.ApplicationId
+import uk.gov.hmrc.apiplatform.modules.applications.domain.models.Collaborator
 
 class SubscriptionFieldsServiceSpec extends AsyncHmrcSpec with SubscriptionsBuilder {
 
@@ -81,7 +82,7 @@ class SubscriptionFieldsServiceSpec extends AsyncHmrcSpec with SubscriptionsBuil
 
   "saveFieldsValues" should {
     "save the fields" in new Setup {
-      val developerRole = CollaboratorRole.DEVELOPER
+      val developerRole = Collaborator.Roles.DEVELOPER
 
       val access = AccessRequirements.Default
 
@@ -116,7 +117,7 @@ class SubscriptionFieldsServiceSpec extends AsyncHmrcSpec with SubscriptionsBuil
 
     "save the fields fails with write access denied" in new Setup {
 
-      val developerRole = CollaboratorRole.DEVELOPER
+      val developerRole = Collaborator.Roles.DEVELOPER
 
       val access = AccessRequirements(devhub = DevhubAccessRequirements(NoOne, NoOne))
 

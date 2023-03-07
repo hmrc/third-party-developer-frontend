@@ -17,9 +17,9 @@
 package uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.connectors
 
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.LaxEmailAddress
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.CollaboratorRole
+import uk.gov.hmrc.apiplatform.modules.applications.domain.models._
 
-case class AddTeamMemberRequest(email: LaxEmailAddress, role: CollaboratorRole, requestingEmail: Option[LaxEmailAddress])
+case class AddTeamMemberRequest(email: LaxEmailAddress, role: Collaborator.Role, requestingEmail: Option[LaxEmailAddress])
 
 object AddTeamMemberRequest {
   import play.api.libs.json._

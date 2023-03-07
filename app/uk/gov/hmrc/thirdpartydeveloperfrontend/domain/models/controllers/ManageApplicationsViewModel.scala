@@ -18,8 +18,7 @@ package uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.controllers
 
 import java.time.Instant
 
-import uk.gov.hmrc.apiplatform.modules.applications.domain.models.ApplicationId
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.{CollaboratorRole}
+import uk.gov.hmrc.apiplatform.modules.applications.domain.models._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.connectors.TermsOfUseInvitation
 
 case class ManageApplicationsViewModel(
@@ -41,7 +40,7 @@ case class ManageApplicationsViewModel(
 
   lazy val applicationsThatHaveTermOfUseInvitatations =
     liveProductionApplications
-      .filter(app => app.role == CollaboratorRole.ADMINISTRATOR)
+      .filter(app => app.role == Collaborator.Roles.ADMINISTRATOR)
       .filter(app => termsOfUseInvitations.exists(app.id == _.applicationId))
       .map(applicationSummary =>
         TermsOfUseInvitationViewModel(applicationSummary.id, applicationSummary.name, termsOfUseInvitations.find(_.applicationId == applicationSummary.id).get.dueBy)

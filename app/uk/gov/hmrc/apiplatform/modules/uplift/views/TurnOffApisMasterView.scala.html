@@ -23,14 +23,12 @@
 @import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.apidefinitions.APIAccessType
 @import include._
 @import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.APISubscriptions
-@import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.CollaboratorRole
-@import uk.gov.hmrc.apiplatform.modules.applications.domain.models.ApplicationId
-@import uk.gov.hmrc.apiplatform.modules.applications.domain.models.ApplicationId
+@import uk.gov.hmrc.apiplatform.modules.applications.domain.models._
 
 @this(devMain: DevMainWithFormErrors)
 @(
     applicationId: ApplicationId,
-    role: CollaboratorRole,
+    role: Collaborator.Role,
     subscriptions: List[APISubscriptions],
     errorForm: Form[DummySubscriptionsForm]
 )(

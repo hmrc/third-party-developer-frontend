@@ -26,8 +26,8 @@ import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.apidefinitions.{
   ApiContext,
   ApiVersion
 }
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.CollaboratorRole
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.subscriptions.{DevhubAccessLevel, FieldName, FieldValue}
+import uk.gov.hmrc.apiplatform.modules.applications.domain.models.Collaborator
 
 object EditManageSubscription {
 
@@ -62,7 +62,7 @@ object EditManageSubscription {
 
     def toViewModel(
         apiSubscription: APISubscriptionStatusWithSubscriptionFields,
-        role: CollaboratorRole,
+        role: Collaborator.Role,
         formErrors: Seq[FormError],
         postedFormValues: Map[FieldName, FieldValue]
       ): EditApiConfigurationViewModel = {
@@ -97,7 +97,7 @@ object EditManageSubscription {
 
     def toViewModel(
         apiSubscription: APISubscriptionStatusWithWritableSubscriptionField,
-        role: CollaboratorRole,
+        role: Collaborator.Role,
         formErrors: Seq[FormError],
         postedFormValues: Map[FieldName, FieldValue]
       ): EditApiConfigurationFieldViewModel = {

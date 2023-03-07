@@ -46,6 +46,7 @@ import uk.gov.hmrc.thirdpartydeveloperfrontend.service.{AuditService, Subscripti
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.WithLoggedInSession._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.{LocalUserIdTracker, TestApplications, WithCSRFAddToken}
 import uk.gov.hmrc.apiplatform.modules.applications.domain.models.ApplicationId
+import uk.gov.hmrc.apiplatform.modules.applications.domain.models.Collaborator
 
 class ManageSubscriptionsSpec
     extends BaseControllerSpec
@@ -64,7 +65,7 @@ class ManageSubscriptionsSpec
 
   implicit val hc: HeaderCarrier = HeaderCarrier()
 
-  val role = CollaboratorRole.ADMINISTRATOR
+  val role = Collaborator.Roles.ADMINISTRATOR
 
   val application: Application = Application(
     appId,

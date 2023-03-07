@@ -94,7 +94,7 @@ class ManageResponsibleIndividualController @Inject() (
         val environment                       = request.application.deployedTo.toString().toLowerCase().capitalize
         val responsibleIndividualHistoryItems = buildResponsibleIndividualHistoryItems(termsOfUseAcceptances).reverse
         val allowChanges                      = request.role.isAdministrator
-        val adminEmails                       = request.application.collaborators.filter(_.role.isAdministrator).map(_.emailAddress.text).toList
+        val adminEmails                       = request.application.collaborators.filter(_.isAdministrator).map(_.emailAddress.text).toList
         val userIsResponsibleIndividual       = request.developerSession.email == responsibleIndividual.emailAddress
         val viewModel                         = ViewModel(environment, responsibleIndividual.fullName.value, responsibleIndividualHistoryItems, allowChanges, adminEmails, userIsResponsibleIndividual)
         successful(Ok(responsibleIndividualDetailsView(request.application, viewModel)))

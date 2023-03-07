@@ -25,7 +25,8 @@
 @import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.{PrivacyPolicyLocation,TermsAndConditionsLocation}
 @import java.time.format.DateTimeFormatter
 @import java.time.Clock
-@import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.{CollaboratorRole, PrivacyPolicyLocation,TermsAndConditionsLocation}
+@import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.{PrivacyPolicyLocation,TermsAndConditionsLocation}
+@import uk.gov.hmrc.apiplatform.modules.applications.domain.models._
 
 @this(devMain: DevMain, leftHandNav: LeftHandNav, clock: Clock)
 
@@ -161,7 +162,7 @@
         <p class="govuk-body">Only admins can change application details. If you want to make changes, email:</p>
 
         <ul class="govuk-list" id="changingAppDetailsAdminList">
-          @for(adminEmail <- app.collaborators.filter(_.role == CollaboratorRole.ADMINISTRATOR).map(_.emailAddress)) {
+          @for(adminEmail <- app.collaborators.filter(_.role == Collaborator.Roles.ADMINISTRATOR).map(_.emailAddress)) {
             <li><a href="mailto:@adminEmail" class="govuk-link">@adminEmail</a></li>
           }
         </ul>

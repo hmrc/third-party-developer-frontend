@@ -18,7 +18,6 @@
 @import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.controllers.Crumb
 @import include._
 @import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.controllers.ApplicationViewModel
-@import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.CollaboratorRole
 @import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.DeveloperSession
 @import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.Application
 @import uk.gov.hmrc.apiplatform.modules.applications.domain.models.ApplicationId
@@ -26,11 +25,12 @@
 @import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.apidefinitions.ApiContext
 @import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.subscriptions.ApiData
 @import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers._
+@import uk.gov.hmrc.apiplatform.modules.applications.domain.models.Collaborator
 
 @this(devMain: DevMain, subscriptionGroups: SubscriptionGroups, leftHandNav: LeftHandNav)
 
 @(
-  role: CollaboratorRole,
+  role: Collaborator.Role,
   data: PageData, 
   form: Form[uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.EditApplicationForm], 
   applicationView: ApplicationViewModel, 
