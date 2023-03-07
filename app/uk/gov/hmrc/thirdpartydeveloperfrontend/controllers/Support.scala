@@ -18,14 +18,13 @@ package uk.gov.hmrc.thirdpartydeveloperfrontend.controllers
 
 import javax.inject.{Inject, Singleton}
 import scala.concurrent.{ExecutionContext, Future}
-
 import views.html.{SupportEnquiryView, SupportThankyouView}
-
-import play.api.data.Form
+import play.api.data.{Form, FormError}
 import play.api.libs.crypto.CookieSigner
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
-
+import uk.gov.hmrc.apiplatform.modules.common.services.ApplicationLogger
 import uk.gov.hmrc.thirdpartydeveloperfrontend.config.{ApplicationConfig, ErrorHandler}
+import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.FormKeys.commentsSpamKey
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.{DeveloperSession, UserId}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.service.{DeskproService, SessionService}
 
@@ -40,7 +39,7 @@ class Support @Inject() (
     supportThankyouView: SupportThankyouView
   )(implicit val ec: ExecutionContext,
     val appConfig: ApplicationConfig
-  ) extends BaseController(mcc) {
+  ) extends BaseController(mcc) with ApplicationLogger {
 
   val supportForm: Form[SupportEnquiryForm] = SupportEnquiryForm.form
 
@@ -62,9 +61,20 @@ class Support @Inject() (
     val userId      = fullyloggedInDeveloper.map(_.developer.userId).getOrElse(UserId.unknown)
 
     requestForm.fold(
-      formWithErrors => Future.successful(BadRequest(supportEnquiryView(displayName, formWithErrors))),
+      formWithErrors => {
+        logSpamSupportRequest(formWithErrors)
+        Future.successful(BadRequest(supportEnquiryView(displayName, formWithErrors)))
+      },
       formData => deskproService.submitSupportEnquiry(userId, formData).map { _ => Redirect(routes.Support.thankyou.url, SEE_OTHER) }
     )
+  }
+
+  private def logSpamSupportRequest(form: Form[SupportEnquiryForm]) = {
+      form.errors("comments").map((formError: FormError) => {
+      if(formError.message == commentsSpamKey) {
+        logger.info("Spam support request attempted")
+      }
+    })
   }
 
   def thankyou = maybeAtLeastPartLoggedInEnablingMfa { implicit request =>

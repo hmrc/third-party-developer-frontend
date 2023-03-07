@@ -58,7 +58,7 @@ class SupportSpec extends BaseControllerSpec with WithCSRFAddToken with Develope
     val sessionId                            = "sessionId"
   }
 
-  "suppport" should {
+  "support" should {
 
     "support form is prepopulated when user logged in" in new Setup {
       val request = FakeRequest()
@@ -109,6 +109,23 @@ class SupportSpec extends BaseControllerSpec with WithCSRFAddToken with Develope
 
       status(result) shouldBe 303
       redirectLocation(result) shouldBe Some("/developer/support/submitted")
+    }
+
+    "submit request with name, email and invalid comments returns BAD_REQUEST" in new Setup {
+      val request = FakeRequest()
+        .withSession(sessionParams: _*)
+        .withFormUrlEncodedBody(
+          "fullname" -> "Peter Smith",
+          "emailaddress" -> "peter@example.com",
+          "comments" -> "A+++, good como  puedo iniciar, would buy again"
+        )
+
+      when(underTest.deskproService.submitSupportEnquiry(*[UserId], *)(any[Request[AnyRef]], *)).thenReturn(successful(TicketCreated))
+
+      val result = addToken(underTest.submitSupportEnquiry())(request)
+
+      status(result) shouldBe 400
+
     }
 
     "submit request with incomplete form results in BAD_REQUEST" in new Setup {
