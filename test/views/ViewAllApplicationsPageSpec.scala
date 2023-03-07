@@ -38,12 +38,17 @@ import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.ViewHelpers.{elementExistsB
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.{LocalUserIdTracker, WithCSRFAddToken}
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.LaxEmailAddress.StringSyntax
 import uk.gov.hmrc.apiplatform.modules.applications.domain.models.Collaborator
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.connectors.TermsOfUseInvitation
+import uk.gov.hmrc.apiplatform.modules.submissions.domain.models.Submission
+import java.time.Instant
+import uk.gov.hmrc.apiplatform.modules.submissions.SubmissionsTestData
 
 class ViewAllApplicationsPageSpec extends CommonViewSpec
     with WithCSRFAddToken
     with LocalUserIdTracker
     with DeveloperSessionBuilder
-    with DeveloperBuilder {
+    with DeveloperBuilder
+    with SubmissionsTestData {
 
   def isGreenAddProductionApplicationButtonVisible(document: Document): Boolean = {
     val href = AddApplicationRoutes.addApplicationPrincipal.url
@@ -90,6 +95,18 @@ class ViewAllApplicationsPageSpec extends CommonViewSpec
     def showsPrincipalAppsHeading()(implicit document: Document) =
       elementExistsByText(document, "th", s"$principalCapitalized applications") shouldBe true
 
+    def showsTermsOfUseOutstandingBox()(implicit document: Document) =
+      elementExistsByText(document, "h2", "Important") shouldBe true
+
+    def hidesTermsOfUseOutstandingBox()(implicit document: Document) =
+      elementExistsByText(document, "h2", "Important") shouldBe false
+
+    def showsTermsOfUseReviewBox()(implicit document: Document) =
+      elementExistsByText(document, "h2", "Terms of use") shouldBe true
+
+    def hidesTermsOfUseReviewBox()(implicit document: Document) =
+      elementExistsByText(document, "h2", "Terms of use") shouldBe false
+
     def hidesSubordinateAppsHeading()(implicit document: Document) =
       elementExistsByText(document, "th", s"$subordinateCapitalized applications") shouldBe false
 
@@ -120,13 +137,19 @@ class ViewAllApplicationsPageSpec extends CommonViewSpec
 
   "view all applications page" can {
 
-    def renderPage(sandboxAppSummaries: Seq[ApplicationSummary], productionAppSummaries: Seq[ApplicationSummary], upliftableApplicationIds: Set[ApplicationId]) = {
+    def renderPage(
+      sandboxAppSummaries: Seq[ApplicationSummary],
+      productionAppSummaries: Seq[ApplicationSummary],
+      upliftableApplicationIds: Set[ApplicationId],
+      termsOfUseInvitations: List[TermsOfUseInvitation] = List.empty,
+      productionApplicationSubmissions: List[Submission] = List.empty
+    ) = {
       val request                = FakeRequest()
       val loggedIn               = buildDeveloperWithRandomId("developer@example.com".toLaxEmail, "firstName", "lastname").loggedIn
       val manageApplicationsView = app.injector.instanceOf[ManageApplicationsView]
 
       manageApplicationsView.render(
-        ManageApplicationsViewModel(sandboxAppSummaries, productionAppSummaries, upliftableApplicationIds, false, List.empty),
+        ManageApplicationsViewModel(sandboxAppSummaries, productionAppSummaries, upliftableApplicationIds, false, termsOfUseInvitations, productionApplicationSubmissions),
         request,
         loggedIn,
         messagesProvider,
@@ -136,7 +159,6 @@ class ViewAllApplicationsPageSpec extends CommonViewSpec
       )
     }
 
-    val applicationId = ApplicationId.random
     val appName       = "App name 1"
     val appUserRole   = Collaborator.Roles.ADMINISTRATOR
     val appCreatedOn  = LocalDateTime.now(ZoneOffset.UTC).minusDays(1)
@@ -177,7 +199,6 @@ class ViewAllApplicationsPageSpec extends CommonViewSpec
     )
 
     "show the application page when an application exists" should {
-
       "show the heading when there is a sandbox app" in new ProdAndET with Setup {
         implicit val document = Jsoup.parse(renderPage(sandboxAppSummaries, Seq.empty, Set(applicationId)).body)
 
@@ -222,6 +243,72 @@ class ViewAllApplicationsPageSpec extends CommonViewSpec
         showsAppName(appName)
         showsSubordinateAppsHeading()
         showsPrincipalAppsHeading()
+      }
+    }
+
+    "show the applications page with outstanding terms of use box" should {
+      "work in Qa/Dev with invites to display" in new QaAndDev with Setup {
+        val invites = List(TermsOfUseInvitation(applicationId, Instant.now(), Instant.now(), Instant.now()))
+        
+        implicit val document = Jsoup.parse(renderPage(sandboxAppSummaries, productionAppSummaries, Set(applicationId), invites).body)
+
+        showsAppName(appName)
+        showsSubordinateAppsHeading()
+        showsPrincipalAppsHeading()
+        showsTermsOfUseOutstandingBox()
+        hidesTermsOfUseReviewBox()
+      }
+
+      "work in Qa/Dev with no invites to display" in new QaAndDev with Setup {
+        implicit val document = Jsoup.parse(renderPage(sandboxAppSummaries, productionAppSummaries, Set(applicationId), List.empty).body)
+
+        showsAppName(appName)
+        showsSubordinateAppsHeading()
+        showsPrincipalAppsHeading()
+        hidesTermsOfUseOutstandingBox()
+        hidesTermsOfUseReviewBox()
+      }
+    }
+
+    "show the applications page with no outstanding terms of use box" should {
+      "work in Qa/Dev with an invite that has granted submissions" in new QaAndDev with Setup {
+        val invites = List(TermsOfUseInvitation(applicationId, Instant.now(), Instant.now(), Instant.now()))
+        val submissions = List(grantedSubmission)
+
+        implicit val document = Jsoup.parse(renderPage(sandboxAppSummaries, productionAppSummaries, Set(applicationId), invites, submissions).body)
+
+        showsAppName(appName)
+        showsSubordinateAppsHeading()
+        showsPrincipalAppsHeading()
+        hidesTermsOfUseOutstandingBox()
+        hidesTermsOfUseReviewBox()
+      }
+    }
+
+    "show the applications page with review terms of use box" should {
+      "work in Qa/Dev with submissions in review" in new QaAndDev with Setup {
+        val invites = List(TermsOfUseInvitation(applicationId, Instant.now(), Instant.now(), Instant.now()))
+        val submissions = List(submittedSubmission)
+        
+        implicit val document = Jsoup.parse(renderPage(sandboxAppSummaries, productionAppSummaries, Set(applicationId), invites, submissions).body)
+
+        showsAppName(appName)
+        showsSubordinateAppsHeading()
+        showsPrincipalAppsHeading()
+        hidesTermsOfUseOutstandingBox()
+        showsTermsOfUseReviewBox()
+      }
+
+      "work in Qa/Dev with no submissions in review" in new QaAndDev with Setup {
+        val invites = List(TermsOfUseInvitation(applicationId, Instant.now(), Instant.now(), Instant.now()))
+        
+        implicit val document = Jsoup.parse(renderPage(sandboxAppSummaries, productionAppSummaries, Set(applicationId), invites, List.empty).body)
+
+        showsAppName(appName)
+        showsSubordinateAppsHeading()
+        showsPrincipalAppsHeading()
+        showsTermsOfUseOutstandingBox()
+        hidesTermsOfUseReviewBox()
       }
     }
 

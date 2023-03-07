@@ -37,6 +37,7 @@ import uk.gov.hmrc.thirdpartydeveloperfrontend.mocks.connectors.ApmConnectorMock
 import uk.gov.hmrc.thirdpartydeveloperfrontend.mocks.service._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.WithLoggedInSession._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.{LocalUserIdTracker, WithCSRFAddToken}
+import uk.gov.hmrc.apiplatform.modules.submissions.services.mocks.SubmissionServiceMockModule
 
 class ManageApplicationsSpec
     extends BaseControllerSpec
@@ -53,7 +54,7 @@ class ManageApplicationsSpec
   private val sessionParams = Seq("csrfToken" -> app.injector.instanceOf[TokenProvider].generateToken)
 
   trait Setup extends UpliftLogicMock with AppsByTeamMemberServiceMock with ApplicationServiceMock with ApmConnectorMockModule with SessionServiceMock
-      with TermsOfUseInvitationServiceMockModule {
+      with TermsOfUseInvitationServiceMockModule with SubmissionServiceMockModule {
     val manageApplicationsView = app.injector.instanceOf[ManageApplicationsView]
 
     implicit val environmentNameService = new EnvironmentNameService(appConfig)
@@ -66,7 +67,8 @@ class ManageApplicationsSpec
       upliftLogicMock,
       manageApplicationsView,
       mcc,
-      TermsOfUseInvitationServiceMock.aMock
+      TermsOfUseInvitationServiceMock.aMock,
+      SubmissionServiceMock.aMock
     )
 
     fetchSessionByIdReturns(sessionId, session)
@@ -88,7 +90,9 @@ class ManageApplicationsSpec
       aUsersUplfitableAndNotUpliftableAppsReturns(List.empty, List.empty, List.empty)
       fetchProductionSummariesByTeamMemberReturns(List(prodSummary))
 
-      TermsOfUseInvitationServiceMock.FetchTermsOfUseInvitations.thenReturnEmptyList()
+      TermsOfUseInvitationServiceMock.FetchTermsOfUseInvitation.thenReturnNone()
+
+      SubmissionServiceMock.FetchLatestSubmission.thenReturnsNone()
 
       private val result = manageApplicationsController.manageApps()(loggedInRequest)
 
@@ -103,7 +107,7 @@ class ManageApplicationsSpec
       aUsersUplfitableAndNotUpliftableAppsReturns(List.empty, List.empty, List.empty)
       fetchProductionSummariesByTeamMemberReturns(List.empty)
 
-      TermsOfUseInvitationServiceMock.FetchTermsOfUseInvitations.thenReturnEmptyList()
+      TermsOfUseInvitationServiceMock.FetchTermsOfUseInvitation.thenReturnNone()
 
       private val result = manageApplicationsController.manageApps()(loggedInRequest)
 
