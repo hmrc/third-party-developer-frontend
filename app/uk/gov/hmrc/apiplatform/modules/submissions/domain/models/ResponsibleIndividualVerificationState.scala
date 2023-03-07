@@ -21,7 +21,7 @@ import uk.gov.hmrc.apiplatform.modules.submissions.domain.utils.EnumJson
 object ResponsibleIndividualVerificationState extends Enumeration {
   type ResponsibleIndividualVerificationState = Value
 
-  val INITIAL, REMINDERS_SENT, ADMIN_REQUESTED_CHANGE = Value
+  val INITIAL, REMINDERS_SENT = Value
 
   implicit val format = EnumJson.enumFormat(ResponsibleIndividualVerificationState)
 }

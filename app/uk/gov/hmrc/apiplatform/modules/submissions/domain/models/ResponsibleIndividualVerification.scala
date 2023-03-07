@@ -52,6 +52,16 @@ case class ResponsibleIndividualToUVerification(
     state: ResponsibleIndividualVerificationState
   ) extends ResponsibleIndividualVerification
 
+case class ResponsibleIndividualTouUpliftVerification(
+    id: ResponsibleIndividualVerificationId,
+    applicationId: ApplicationId,
+    submissionId: Submission.Id,
+    submissionInstance: Int,
+    applicationName: String,
+    createdOn: LocalDateTime,
+    state: ResponsibleIndividualVerificationState
+  ) extends ResponsibleIndividualVerification
+
 case class ResponsibleIndividualUpdateVerification(
     id: ResponsibleIndividualVerificationId,
     applicationId: ApplicationId,
@@ -70,18 +80,21 @@ object ResponsibleIndividualVerification extends LocalDateTimeFormatters {
   import uk.gov.hmrc.play.json.Union
   implicit val utcReads = DefaultLocalDateTimeReads
 
-  implicit val responsibleIndividualVerificationFormat       = Json.format[ResponsibleIndividualToUVerification]
-  implicit val responsibleIndividualUpdateVerificationFormat = Json.format[ResponsibleIndividualUpdateVerification]
+  implicit val responsibleIndividualVerificationFormat          = Json.format[ResponsibleIndividualToUVerification]
+  implicit val responsibleIndividualTouUpliftVerificationFormat = Json.format[ResponsibleIndividualTouUpliftVerification]
+  implicit val responsibleIndividualUpdateVerificationFormat    = Json.format[ResponsibleIndividualUpdateVerification]
 
   implicit val jsonFormatResponsibleIndividualVerification = Union.from[ResponsibleIndividualVerification]("verificationType")
     .and[ResponsibleIndividualToUVerification]("termsOfUse")
+    .and[ResponsibleIndividualTouUpliftVerification]("termsOfUseUplift")
     .and[ResponsibleIndividualUpdateVerification]("adminUpdate")
     .format
 
   def getVerificationType(riVerification: ResponsibleIndividualVerification): String = {
     riVerification match {
-      case ritouv: ResponsibleIndividualToUVerification  => "termsOfUse"
-      case riuv: ResponsibleIndividualUpdateVerification => "adminUpdate"
+      case ritouv: ResponsibleIndividualToUVerification         => "termsOfUse"
+      case ritouuv: ResponsibleIndividualTouUpliftVerification  => "termsOfUseUplift"
+      case riuv: ResponsibleIndividualUpdateVerification        => "adminUpdate"
     }
   }
 }
