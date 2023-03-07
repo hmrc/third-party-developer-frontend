@@ -17,10 +17,8 @@
 package uk.gov.hmrc.thirdpartydeveloperfrontend.domain
 
 import java.time.{LocalDateTime, Period}
-
 import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
-
 import uk.gov.hmrc.apiplatform.modules.submissions.domain.models.Submission
 import uk.gov.hmrc.thirdpartydeveloperfrontend.builder.DeveloperTestData
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.Capabilities.{ChangeClientSecret, ViewCredentials}
@@ -30,8 +28,7 @@ import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.Develope
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.LocalUserIdTracker
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.LaxEmailAddress.StringSyntax
 import uk.gov.hmrc.thirdpartydeveloperfrontend.helpers.string._
-import uk.gov.hmrc.apiplatform.modules.applications.domain.models.ClientId
-import uk.gov.hmrc.apiplatform.modules.applications.domain.models.ApplicationId
+import uk.gov.hmrc.apiplatform.modules.applications.domain.models.{ApplicationId, ClientId, PrivacyPolicyLocations, TermsAndConditionsLocations}
 
 class ApplicationSpec extends AnyFunSpec with Matchers with DeveloperTestData with LocalUserIdTracker {
 
@@ -47,8 +44,8 @@ class ApplicationSpec extends AnyFunSpec with Matchers with DeveloperTestData wi
     Some("http://example.com"),
     responsibleIndividual,
     Set(ServerLocation.InUK),
-    TermsAndConditionsLocation.InDesktopSoftware,
-    PrivacyPolicyLocation.InDesktopSoftware,
+    TermsAndConditionsLocations.InDesktopSoftware,
+    PrivacyPolicyLocations.InDesktopSoftware,
     List(TermsOfUseAcceptance(responsibleIndividual, LocalDateTime.now().minusYears(1), Submission.Id.random, 0))
   )
 

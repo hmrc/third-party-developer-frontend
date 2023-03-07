@@ -41,9 +41,7 @@ import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.emailpreferences.Em
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.subscriptions.ApiSubscriptionFields.SubscriptionFieldDefinition
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.subscriptions._
 import uk.gov.hmrc.apiplatform.modules.developers.domain.models.UserId
-import uk.gov.hmrc.apiplatform.modules.applications.domain.models.ClientId
-import uk.gov.hmrc.apiplatform.modules.applications.domain.models.ApplicationId
-import uk.gov.hmrc.apiplatform.modules.applications.domain.models.Collaborator
+import uk.gov.hmrc.apiplatform.modules.applications.domain.models._
 
 trait HasApplication extends HasAppDeploymentEnvironment with HasUserWithRole with HasAppState with MfaDetailBuilder {
   val applicationId   = ApplicationId.random
@@ -201,8 +199,8 @@ trait IsNewJourneyStandardApplication extends HasApplication {
       None,
       responsibleIndividual,
       Set.empty,
-      TermsAndConditionsLocation.Url(termsConditionsUrl),
-      PrivacyPolicyLocation.Url(privacyPolicyUrl),
+      TermsAndConditionsLocations.Url(termsConditionsUrl),
+      PrivacyPolicyLocations.Url(privacyPolicyUrl),
       List.empty
     ))
   )

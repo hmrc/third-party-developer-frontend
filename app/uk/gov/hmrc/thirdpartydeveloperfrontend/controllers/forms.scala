@@ -20,8 +20,9 @@ import play.api.data.Forms._
 import play.api.data.format.Formatter
 import play.api.data.validation.{Constraint, Invalid, Valid, ValidationError}
 import play.api.data.{Form, FormError}
-import uk.gov.hmrc.apiplatform.modules.applications.domain.models.ApplicationId
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.{Application, PrivacyPolicyLocation, TermsAndConditionsLocation}
+import uk.gov.hmrc.apiplatform.modules.applications.domain.models.{ApplicationId, PrivacyPolicyLocation, PrivacyPolicyLocations, TermsAndConditionsLocation, TermsAndConditionsLocations}
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.Application
+
 import java.util.UUID
 
 // scalastyle:off number.of.types
@@ -277,11 +278,11 @@ object EditApplicationForm {
 
   def withData(app: Application) = {
     val privacyPolicyUrl      = app.privacyPolicyLocation match {
-      case PrivacyPolicyLocation.Url(url) => Some(url)
+      case PrivacyPolicyLocations.Url(url) => Some(url)
       case _                              => None
     }
     val termsAndConditionsUrl = app.termsAndConditionsLocation match {
-      case TermsAndConditionsLocation.Url(url) => Some(url)
+      case TermsAndConditionsLocations.Url(url) => Some(url)
       case _                                   => None
     }
     form.fillAndValidate(
@@ -572,9 +573,9 @@ object ChangeOfApplicationNameForm {
 case class ChangeOfPrivacyPolicyLocationForm(privacyPolicyUrl: String, isInDesktop: Boolean, isNewJourney: Boolean) {
 
   def toLocation: PrivacyPolicyLocation = isInDesktop match {
-    case true                               => PrivacyPolicyLocation.InDesktopSoftware
-    case false if !privacyPolicyUrl.isEmpty => PrivacyPolicyLocation.Url(privacyPolicyUrl)
-    case _                                  => PrivacyPolicyLocation.NoneProvided
+    case true                               => PrivacyPolicyLocations.InDesktopSoftware
+    case false if privacyPolicyUrl.nonEmpty => PrivacyPolicyLocations.Url(privacyPolicyUrl)
+    case _                                  => PrivacyPolicyLocations.NoneProvided
   }
 }
 
@@ -599,11 +600,11 @@ object ChangeOfPrivacyPolicyLocationForm {
 
   def withNewJourneyData(privacyPolicyLocation: PrivacyPolicyLocation) = {
     val privacyPolicyUrl = privacyPolicyLocation match {
-      case PrivacyPolicyLocation.Url(value) => value
+      case PrivacyPolicyLocations.Url(value) => value
       case _                                => ""
     }
     val isInDesktop      = privacyPolicyLocation match {
-      case PrivacyPolicyLocation.InDesktopSoftware => true
+      case PrivacyPolicyLocations.InDesktopSoftware => true
       case _                                       => false
     }
     form.fillAndValidate(
@@ -621,9 +622,9 @@ object ChangeOfPrivacyPolicyLocationForm {
 case class ChangeOfTermsAndConditionsLocationForm(termsAndConditionsUrl: String, isInDesktop: Boolean, isNewJourney: Boolean) {
 
   def toLocation: TermsAndConditionsLocation = isInDesktop match {
-    case true                                    => TermsAndConditionsLocation.InDesktopSoftware
-    case false if !termsAndConditionsUrl.isEmpty => TermsAndConditionsLocation.Url(termsAndConditionsUrl)
-    case _                                       => TermsAndConditionsLocation.NoneProvided
+    case true                                    => TermsAndConditionsLocations.InDesktopSoftware
+    case false if !termsAndConditionsUrl.isEmpty => TermsAndConditionsLocations.Url(termsAndConditionsUrl)
+    case _                                       => TermsAndConditionsLocations.NoneProvided
   }
 }
 
@@ -648,11 +649,11 @@ object ChangeOfTermsAndConditionsLocationForm {
 
   def withNewJourneyData(termsAndConditionsLocation: TermsAndConditionsLocation) = {
     val termsAndConditionsUrl = termsAndConditionsLocation match {
-      case TermsAndConditionsLocation.Url(value) => value
+      case TermsAndConditionsLocations.Url(value) => value
       case _                                     => ""
     }
     val isInDesktop           = termsAndConditionsLocation match {
-      case TermsAndConditionsLocation.InDesktopSoftware => true
+      case TermsAndConditionsLocations.InDesktopSoftware => true
       case _                                            => false
     }
     form.fillAndValidate(
