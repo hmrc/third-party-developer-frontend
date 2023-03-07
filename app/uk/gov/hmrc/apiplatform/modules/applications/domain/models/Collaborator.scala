@@ -51,12 +51,13 @@ object Collaborator {
 
     private val convert: String => JsResult[Role] = (s) => Role(s).fold[JsResult[Role]](JsError(s"$s is not a role"))(role => JsSuccess(role))
 
-    implicit val reads: Reads[Role] = __.read[String].flatMapResult(convert(_))
+    implicit val reads: Reads[Role] = (JsPath.read[String]).flatMapResult(convert(_))
     
-    implicit val writes: Writes[Role] = __.write[String].contramap(_.toString)
+    implicit val writes: Writes[Role] = Writes[Role](role => JsString(role.toString))
 
     implicit val format = Format(reads, writes)
   }
+
   object Roles {
     case object ADMINISTRATOR extends Role { val isAdministrator = true }
     case object DEVELOPER     extends Role { val isAdministrator = false }
