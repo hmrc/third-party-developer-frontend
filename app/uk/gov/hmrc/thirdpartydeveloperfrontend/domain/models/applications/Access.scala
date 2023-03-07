@@ -17,7 +17,7 @@
 package uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications
 
 import play.api.libs.json.Json
-import uk.gov.hmrc.apiplatform.modules.applications.domain.models.PrivacyPolicyLocation
+import uk.gov.hmrc.apiplatform.modules.applications.domain.models.{PrivacyPolicyLocation, TermsAndConditionsLocation}
 import uk.gov.hmrc.play.json.Union
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.apidefinitions.AccessType
 

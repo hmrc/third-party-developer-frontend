@@ -29,7 +29,7 @@ import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.controllers.Applica
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.LoggedInState
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.ViewHelpers.{elementExistsByText, elementIdentifiedByAttrContainsText, textareaExistsWithText}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.{LocalUserIdTracker, WithCSRFAddToken}
-import uk.gov.hmrc.apiplatform.modules.applications.domain.models.{ApplicationId, ClientId, PrivacyPolicyLocations}
+import uk.gov.hmrc.apiplatform.modules.applications.domain.models.{ApplicationId, ClientId, PrivacyPolicyLocations, TermsAndConditionsLocations}
 
 class ChangeApplicationDetailsSpec extends CommonViewSpec
     with WithCSRFAddToken
@@ -52,7 +52,7 @@ class ChangeApplicationDetailsSpec extends CommonViewSpec
         case _                              => None
       }
       val termsAndConditionsUrl = application.termsAndConditionsLocation match {
-        case TermsAndConditionsLocation.Url(url) => Some(url)
+        case TermsAndConditionsLocations.Url(url) => Some(url)
         case _                                   => None
       }
 

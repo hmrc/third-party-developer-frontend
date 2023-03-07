@@ -46,7 +46,7 @@ import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.subscriptions.Devhu
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.services.TermsOfUseService
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.services.TermsOfUseService.TermsOfUseAgreementDetails
 import uk.gov.hmrc.thirdpartydeveloperfrontend.service._
-import uk.gov.hmrc.apiplatform.modules.applications.domain.models.{ApplicationId, PrivacyPolicyLocations}
+import uk.gov.hmrc.apiplatform.modules.applications.domain.models.{ApplicationId, PrivacyPolicyLocations, TermsAndConditionsLocations}
 
 object Details {
   case class Agreement(who: String, when: LocalDateTime)
@@ -275,7 +275,7 @@ class Details @Inject() (
 
       val oldLocation = application.access match {
         case Standard(_, _, _, _, _, Some(ImportantSubmissionData(_, _, _, termsAndConditionsLocation, _, _))) => termsAndConditionsLocation
-        case Standard(_, Some(termsAndConditionsUrl), _, _, _, None)                                           => TermsAndConditionsLocation.Url(termsAndConditionsUrl)
+        case Standard(_, Some(termsAndConditionsUrl), _, _, _, None)                                           => TermsAndConditionsLocations.Url(termsAndConditionsUrl)
         case _                                                                                                 => PrivacyPolicyLocations.NoneProvided
       }
       val newLocation = form.toLocation

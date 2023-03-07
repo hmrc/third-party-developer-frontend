@@ -41,7 +41,7 @@ import uk.gov.hmrc.thirdpartydeveloperfrontend.service.PushPullNotificationsServ
 import uk.gov.hmrc.thirdpartydeveloperfrontend.service.SubscriptionFieldsService.SubscriptionFieldsConnector
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.{AsyncHmrcSpec, FixedClock, LocalUserIdTracker}
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.LaxEmailAddress.StringSyntax
-import uk.gov.hmrc.apiplatform.modules.applications.domain.models.{ApplicationId, ClientId, PrivacyPolicyLocations}
+import uk.gov.hmrc.apiplatform.modules.applications.domain.models.{ApplicationId, ClientId, PrivacyPolicyLocations, TermsAndConditionsLocations}
 
 class ApplicationServiceSpec extends AsyncHmrcSpec
     with SubscriptionsBuilder
@@ -258,7 +258,7 @@ class ApplicationServiceSpec extends AsyncHmrcSpec
   "Update Terms and Conditions Location" should {
     "call the TPA connector correctly" in new Setup {
       val userId            = UserId.random
-      val newLocation       = TermsAndConditionsLocation.Url("http://example.com")
+      val newLocation       = TermsAndConditionsLocations.Url("http://example.com")
       val applicationUpdate = ChangeProductionApplicationTermsAndConditionsLocation(userId, LocalDateTime.now(clock), newLocation)
       when(mockProductionApplicationConnector.applicationUpdate(productionApplicationId, applicationUpdate)).thenReturn(Future.successful(ApplicationUpdateSuccessful))
 

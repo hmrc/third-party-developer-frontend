@@ -25,7 +25,7 @@ import play.api.test.FakeRequest
 import play.api.test.Helpers._
 import play.filters.csrf.CSRF.TokenProvider
 import play.twirl.api.HtmlFormat
-import uk.gov.hmrc.apiplatform.modules.applications.domain.models.PrivacyPolicyLocations
+import uk.gov.hmrc.apiplatform.modules.applications.domain.models.{PrivacyPolicyLocations, TermsAndConditionsLocations}
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.LaxEmailAddress
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.apiplatform.modules.submissions.domain.models.Submission
@@ -109,7 +109,7 @@ class ManageResponsibleIndividualControllerSpec
             None,
             responsibleIndividual,
             Set.empty,
-            TermsAndConditionsLocation.InDesktopSoftware,
+            TermsAndConditionsLocations.InDesktopSoftware,
             PrivacyPolicyLocations.InDesktopSoftware,
             touAcceptances
           ))

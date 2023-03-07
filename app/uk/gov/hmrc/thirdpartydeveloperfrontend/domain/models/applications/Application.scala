@@ -29,7 +29,7 @@ import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.Develope
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.services.LocalDateTimeFormatters
 import uk.gov.hmrc.thirdpartydeveloperfrontend.helpers.string.Digest
 import uk.gov.hmrc.apiplatform.modules.developers.domain.models.UserId
-import uk.gov.hmrc.apiplatform.modules.applications.domain.models.{ApplicationId, ClientId, PrivacyPolicyLocations}
+import uk.gov.hmrc.apiplatform.modules.applications.domain.models.{ApplicationId, ClientId, PrivacyPolicyLocations, TermsAndConditionsLocations}
 import play.api.libs.json.OFormat
 import play.api.libs.json.Reads
 
@@ -95,8 +95,8 @@ trait BaseApplication {
 
   def termsAndConditionsLocation = access match {
     case Standard(_, _, _, _, _, Some(ImportantSubmissionData(_, _, _, termsAndConditionsLocation, _, _))) => termsAndConditionsLocation
-    case Standard(_, Some(url), _, _, _, None)                                                             => TermsAndConditionsLocation.Url(url)
-    case _                                                                                                 => TermsAndConditionsLocation.NoneProvided
+    case Standard(_, Some(url), _, _, _, None)                                                             => TermsAndConditionsLocations.Url(url)
+    case _                                                                                                 => TermsAndConditionsLocations.NoneProvided
   }
 
   def isPermittedToEditAppDetails(developer: Developer): Boolean = allows(SupportsDetails, developer, SandboxOnly)

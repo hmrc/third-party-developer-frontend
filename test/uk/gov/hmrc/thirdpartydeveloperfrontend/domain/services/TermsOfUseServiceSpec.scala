@@ -22,7 +22,7 @@ import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.services.TermsOfUseService.TermsOfUseAgreementDetails
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.HmrcSpec
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.LaxEmailAddress.StringSyntax
-import uk.gov.hmrc.apiplatform.modules.applications.domain.models.{ApplicationId, ClientId, PrivacyPolicyLocations}
+import uk.gov.hmrc.apiplatform.modules.applications.domain.models.{ApplicationId, ClientId, PrivacyPolicyLocations, TermsAndConditionsLocations}
 
 class TermsOfUseServiceSpec extends HmrcSpec {
 
@@ -44,7 +44,7 @@ class TermsOfUseServiceSpec extends HmrcSpec {
           Some("http://example.com"),
           responsibleIndividual,
           Set.empty,
-          TermsAndConditionsLocation.InDesktopSoftware,
+          TermsAndConditionsLocations.InDesktopSoftware,
           PrivacyPolicyLocations.InDesktopSoftware,
           standardAppAgreements
         )

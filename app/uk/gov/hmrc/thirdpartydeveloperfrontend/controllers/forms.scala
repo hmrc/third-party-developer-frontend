@@ -20,8 +20,8 @@ import play.api.data.Forms._
 import play.api.data.format.Formatter
 import play.api.data.validation.{Constraint, Invalid, Valid, ValidationError}
 import play.api.data.{Form, FormError}
-import uk.gov.hmrc.apiplatform.modules.applications.domain.models.{ApplicationId, PrivacyPolicyLocation, PrivacyPolicyLocations}
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.{Application, TermsAndConditionsLocation}
+import uk.gov.hmrc.apiplatform.modules.applications.domain.models.{ApplicationId, PrivacyPolicyLocation, PrivacyPolicyLocations, TermsAndConditionsLocation, TermsAndConditionsLocations}
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.Application
 
 import java.util.UUID
 
@@ -282,7 +282,7 @@ object EditApplicationForm {
       case _                              => None
     }
     val termsAndConditionsUrl = app.termsAndConditionsLocation match {
-      case TermsAndConditionsLocation.Url(url) => Some(url)
+      case TermsAndConditionsLocations.Url(url) => Some(url)
       case _                                   => None
     }
     form.fillAndValidate(
@@ -622,9 +622,9 @@ object ChangeOfPrivacyPolicyLocationForm {
 case class ChangeOfTermsAndConditionsLocationForm(termsAndConditionsUrl: String, isInDesktop: Boolean, isNewJourney: Boolean) {
 
   def toLocation: TermsAndConditionsLocation = isInDesktop match {
-    case true                                    => TermsAndConditionsLocation.InDesktopSoftware
-    case false if !termsAndConditionsUrl.isEmpty => TermsAndConditionsLocation.Url(termsAndConditionsUrl)
-    case _                                       => TermsAndConditionsLocation.NoneProvided
+    case true                                    => TermsAndConditionsLocations.InDesktopSoftware
+    case false if !termsAndConditionsUrl.isEmpty => TermsAndConditionsLocations.Url(termsAndConditionsUrl)
+    case _                                       => TermsAndConditionsLocations.NoneProvided
   }
 }
 
@@ -649,11 +649,11 @@ object ChangeOfTermsAndConditionsLocationForm {
 
   def withNewJourneyData(termsAndConditionsLocation: TermsAndConditionsLocation) = {
     val termsAndConditionsUrl = termsAndConditionsLocation match {
-      case TermsAndConditionsLocation.Url(value) => value
+      case TermsAndConditionsLocations.Url(value) => value
       case _                                     => ""
     }
     val isInDesktop           = termsAndConditionsLocation match {
-      case TermsAndConditionsLocation.InDesktopSoftware => true
+      case TermsAndConditionsLocations.InDesktopSoftware => true
       case _                                            => false
     }
     form.fillAndValidate(

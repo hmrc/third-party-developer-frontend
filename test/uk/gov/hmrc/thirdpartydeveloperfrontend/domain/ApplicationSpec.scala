@@ -28,7 +28,7 @@ import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.Develope
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.LocalUserIdTracker
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.LaxEmailAddress.StringSyntax
 import uk.gov.hmrc.thirdpartydeveloperfrontend.helpers.string._
-import uk.gov.hmrc.apiplatform.modules.applications.domain.models.{ApplicationId, ClientId, PrivacyPolicyLocations}
+import uk.gov.hmrc.apiplatform.modules.applications.domain.models.{ApplicationId, ClientId, PrivacyPolicyLocations, TermsAndConditionsLocations}
 
 class ApplicationSpec extends AnyFunSpec with Matchers with DeveloperTestData with LocalUserIdTracker {
 
@@ -44,7 +44,7 @@ class ApplicationSpec extends AnyFunSpec with Matchers with DeveloperTestData wi
     Some("http://example.com"),
     responsibleIndividual,
     Set(ServerLocation.InUK),
-    TermsAndConditionsLocation.InDesktopSoftware,
+    TermsAndConditionsLocations.InDesktopSoftware,
     PrivacyPolicyLocations.InDesktopSoftware,
     List(TermsOfUseAcceptance(responsibleIndividual, LocalDateTime.now().minusYears(1), Submission.Id.random, 0))
   )

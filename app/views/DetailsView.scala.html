@@ -22,10 +22,9 @@
 @import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.DeveloperSession
 @import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.routes
 @import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.Details.TermsOfUseViewModel
-@import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.{TermsAndConditionsLocation}
 @import java.time.format.DateTimeFormatter
 @import java.time.Clock
-@import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.{CollaboratorRole,TermsAndConditionsLocation}
+@import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.{CollaboratorRole}
 @import uk.gov.hmrc.apiplatform.modules.applications.domain.models.PrivacyPolicyLocations
 
 @this(devMain: DevMain, leftHandNav: LeftHandNav, clock: Clock)
@@ -133,7 +132,7 @@
       </tr>
       <tr class="govuk-table__row">
         <th scope="row" class="govuk-table__header">Terms and conditions URL</th>
-        <td class="govuk-table__cell" id="termsAndConditionsUrl">@{TermsAndConditionsLocation.asText(app.termsAndConditionsLocation)}</td>
+        <td class="govuk-table__cell" id="termsAndConditionsUrl">@{app.termsAndConditionsLocation.describe}</td>
         <td class="govuk-table__cell">
         @if(app.isPermittedToEditProductionAppDetails(loggedIn.developer)) {
           <a id="changeTermsAndConditionsLocation" class="govuk-link govuk-link--no-visited-state" href="@routes.Details.updateTermsAndConditionsLocation(app.id)">Change <span class="govuk-visually-hidden">terms and conditions location details</span></a>
