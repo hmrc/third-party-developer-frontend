@@ -29,7 +29,7 @@ import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.Develope
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.services.LocalDateTimeFormatters
 import uk.gov.hmrc.thirdpartydeveloperfrontend.helpers.string.Digest
 import uk.gov.hmrc.apiplatform.modules.developers.domain.models.UserId
-import uk.gov.hmrc.apiplatform.modules.applications.domain.models.{ApplicationId, ClientId}
+import uk.gov.hmrc.apiplatform.modules.applications.domain.models.{ApplicationId, ClientId, PrivacyPolicyLocations}
 import play.api.libs.json.OFormat
 import play.api.libs.json.Reads
 
@@ -89,8 +89,8 @@ trait BaseApplication {
 
   def privacyPolicyLocation = access match {
     case Standard(_, _, _, _, _, Some(ImportantSubmissionData(_, _, _, _, privacyPolicyLocation, _))) => privacyPolicyLocation
-    case Standard(_, _, Some(url), _, _, None)                                                        => PrivacyPolicyLocation.Url(url)
-    case _                                                                                            => PrivacyPolicyLocation.NoneProvided
+    case Standard(_, _, Some(url), _, _, None)                                                        => PrivacyPolicyLocations.Url(url)
+    case _                                                                                            => PrivacyPolicyLocations.NoneProvided
   }
 
   def termsAndConditionsLocation = access match {

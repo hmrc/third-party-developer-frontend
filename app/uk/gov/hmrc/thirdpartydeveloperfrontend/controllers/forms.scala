@@ -20,8 +20,9 @@ import play.api.data.Forms._
 import play.api.data.format.Formatter
 import play.api.data.validation.{Constraint, Invalid, Valid, ValidationError}
 import play.api.data.{Form, FormError}
-import uk.gov.hmrc.apiplatform.modules.applications.domain.models.ApplicationId
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.{Application, PrivacyPolicyLocation, TermsAndConditionsLocation}
+import uk.gov.hmrc.apiplatform.modules.applications.domain.models.{ApplicationId, PrivacyPolicyLocation, PrivacyPolicyLocations}
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.{Application, TermsAndConditionsLocation}
+
 import java.util.UUID
 
 // scalastyle:off number.of.types
@@ -277,7 +278,7 @@ object EditApplicationForm {
 
   def withData(app: Application) = {
     val privacyPolicyUrl      = app.privacyPolicyLocation match {
-      case PrivacyPolicyLocation.Url(url) => Some(url)
+      case PrivacyPolicyLocations.Url(url) => Some(url)
       case _                              => None
     }
     val termsAndConditionsUrl = app.termsAndConditionsLocation match {
@@ -572,9 +573,9 @@ object ChangeOfApplicationNameForm {
 case class ChangeOfPrivacyPolicyLocationForm(privacyPolicyUrl: String, isInDesktop: Boolean, isNewJourney: Boolean) {
 
   def toLocation: PrivacyPolicyLocation = isInDesktop match {
-    case true                               => PrivacyPolicyLocation.InDesktopSoftware
-    case false if !privacyPolicyUrl.isEmpty => PrivacyPolicyLocation.Url(privacyPolicyUrl)
-    case _                                  => PrivacyPolicyLocation.NoneProvided
+    case true                               => PrivacyPolicyLocations.InDesktopSoftware
+    case false if privacyPolicyUrl.nonEmpty => PrivacyPolicyLocations.Url(privacyPolicyUrl)
+    case _                                  => PrivacyPolicyLocations.NoneProvided
   }
 }
 
@@ -599,11 +600,11 @@ object ChangeOfPrivacyPolicyLocationForm {
 
   def withNewJourneyData(privacyPolicyLocation: PrivacyPolicyLocation) = {
     val privacyPolicyUrl = privacyPolicyLocation match {
-      case PrivacyPolicyLocation.Url(value) => value
+      case PrivacyPolicyLocations.Url(value) => value
       case _                                => ""
     }
     val isInDesktop      = privacyPolicyLocation match {
-      case PrivacyPolicyLocation.InDesktopSoftware => true
+      case PrivacyPolicyLocations.InDesktopSoftware => true
       case _                                       => false
     }
     form.fillAndValidate(

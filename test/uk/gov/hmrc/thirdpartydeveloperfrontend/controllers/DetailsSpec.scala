@@ -30,6 +30,7 @@ import play.api.mvc.Result
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
 import play.filters.csrf.CSRF.TokenProvider
+import uk.gov.hmrc.apiplatform.modules.applications.domain.models.{PrivacyPolicyLocation, PrivacyPolicyLocations}
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.LaxEmailAddress
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.LaxEmailAddress.StringSyntax
 import uk.gov.hmrc.http.HeaderCarrier
@@ -484,7 +485,7 @@ class DetailsSpec
       val newPrivacyPolicyUrl  = "http://example.com/new-priv-policy"
       val appWithPrivPolicyUrl = legacyAppWithPrivacyPolicyLocation(Some(privacyPolicyUrl))
       givenApplicationAction(appWithPrivPolicyUrl, loggedInAdmin)
-      when(applicationServiceMock.updatePrivacyPolicyLocation(eqTo(appWithPrivPolicyUrl), *[UserId], eqTo(PrivacyPolicyLocation.Url(newPrivacyPolicyUrl)))(*))
+      when(applicationServiceMock.updatePrivacyPolicyLocation(eqTo(appWithPrivPolicyUrl), *[UserId], eqTo(PrivacyPolicyLocations.Url(newPrivacyPolicyUrl)))(*))
         .thenReturn(Future.successful(ApplicationUpdateSuccessful))
 
       val form   = ChangeOfPrivacyPolicyLocationForm(newPrivacyPolicyUrl, false, false)
@@ -520,7 +521,7 @@ class DetailsSpec
     implicit val writeChangeOfPrivacyPolicyLocationForm = Json.writes[ChangeOfPrivacyPolicyLocationForm]
 
     "display update page with 'in desktop' radio selected" in new Setup {
-      val appWithPrivPolicyInDesktop = appWithPrivacyPolicyLocation(PrivacyPolicyLocation.InDesktopSoftware)
+      val appWithPrivPolicyInDesktop = appWithPrivacyPolicyLocation(PrivacyPolicyLocations.InDesktopSoftware)
       givenApplicationAction(appWithPrivPolicyInDesktop, loggedInAdmin)
 
       val result = addToken(underTest.updatePrivacyPolicyLocation(appWithPrivPolicyInDesktop.id))(loggedInAdminRequest)
@@ -532,7 +533,7 @@ class DetailsSpec
     }
 
     "display update page with 'url' radio selected" in new Setup {
-      val appWithPrivPolicyUrl = appWithPrivacyPolicyLocation(PrivacyPolicyLocation.Url(privacyPolicyUrl))
+      val appWithPrivPolicyUrl = appWithPrivacyPolicyLocation(PrivacyPolicyLocations.Url(privacyPolicyUrl))
       givenApplicationAction(appWithPrivPolicyUrl, loggedInAdmin)
 
       val result = addToken(underTest.updatePrivacyPolicyLocation(appWithPrivPolicyUrl.id))(loggedInAdminRequest)
@@ -545,7 +546,7 @@ class DetailsSpec
     }
 
     "return Not Found error if application cannot be retrieved" in new Setup {
-      val appWithPrivPolicyInDesktop = appWithPrivacyPolicyLocation(PrivacyPolicyLocation.InDesktopSoftware)
+      val appWithPrivPolicyInDesktop = appWithPrivacyPolicyLocation(PrivacyPolicyLocations.InDesktopSoftware)
       givenApplicationActionReturnsNotFound(appWithPrivPolicyInDesktop.id)
 
       val result = addToken(underTest.updatePrivacyPolicyLocation(appWithPrivPolicyInDesktop.id))(loggedInAdminRequest)
@@ -554,7 +555,7 @@ class DetailsSpec
     }
 
     "return bad request if privacy policy location has not changed" in new Setup {
-      val appWithPrivPolicyInDesktop = appWithPrivacyPolicyLocation(PrivacyPolicyLocation.InDesktopSoftware)
+      val appWithPrivPolicyInDesktop = appWithPrivacyPolicyLocation(PrivacyPolicyLocations.InDesktopSoftware)
       givenApplicationAction(appWithPrivPolicyInDesktop, loggedInAdmin)
 
       val form   = ChangeOfPrivacyPolicyLocationForm("", true, true)
@@ -564,7 +565,7 @@ class DetailsSpec
     }
 
     "return bad request if form data is invalid" in new Setup {
-      val appWithPrivPolicyInDesktop = appWithPrivacyPolicyLocation(PrivacyPolicyLocation.InDesktopSoftware)
+      val appWithPrivPolicyInDesktop = appWithPrivacyPolicyLocation(PrivacyPolicyLocations.InDesktopSoftware)
       givenApplicationAction(appWithPrivPolicyInDesktop, loggedInAdmin)
 
       val form   = ChangeOfPrivacyPolicyLocationForm("", false, true)
@@ -574,9 +575,9 @@ class DetailsSpec
     }
 
     "update location if form data is valid and return to app details page" in new Setup {
-      val appWithPrivPolicyInDesktop = appWithPrivacyPolicyLocation(PrivacyPolicyLocation.InDesktopSoftware)
+      val appWithPrivPolicyInDesktop = appWithPrivacyPolicyLocation(PrivacyPolicyLocations.InDesktopSoftware)
       givenApplicationAction(appWithPrivPolicyInDesktop, loggedInAdmin)
-      when(applicationServiceMock.updatePrivacyPolicyLocation(eqTo(appWithPrivPolicyInDesktop), *[UserId], eqTo(PrivacyPolicyLocation.Url(privacyPolicyUrl)))(*))
+      when(applicationServiceMock.updatePrivacyPolicyLocation(eqTo(appWithPrivPolicyInDesktop), *[UserId], eqTo(PrivacyPolicyLocations.Url(privacyPolicyUrl)))(*))
         .thenReturn(Future.successful(ApplicationUpdateSuccessful))
 
       val form   = ChangeOfPrivacyPolicyLocationForm(privacyPolicyUrl, false, true)
@@ -649,7 +650,7 @@ class DetailsSpec
             ResponsibleIndividual.build("bob example", "bob@example.com".toLaxEmail),
             Set.empty,
             termsAndConditionsLocation,
-            PrivacyPolicyLocation.InDesktopSoftware,
+            PrivacyPolicyLocations.InDesktopSoftware,
             List.empty
           )
         )
@@ -822,7 +823,7 @@ class DetailsSpec
       elementIdentifiedByIdContainsText(doc, "applicationId", application.id.text) shouldBe true
       elementIdentifiedByIdContainsText(doc, "applicationName", application.name) shouldBe true
       elementIdentifiedByIdContainsText(doc, "description", application.description.getOrElse("None")) shouldBe true
-      elementIdentifiedByIdContainsText(doc, "privacyPolicyUrl", PrivacyPolicyLocation.asText(application.privacyPolicyLocation)) shouldBe true
+      elementIdentifiedByIdContainsText(doc, "privacyPolicyUrl", application.privacyPolicyLocation.describe) shouldBe true
       elementIdentifiedByIdContainsText(doc, "termsAndConditionsUrl", TermsAndConditionsLocation.asText(application.termsAndConditionsLocation)) shouldBe true
       elementExistsContainsText(doc, "td", "Agreed by test@example.com") shouldBe hasTermsOfUseAgreement
     }
@@ -843,7 +844,7 @@ class DetailsSpec
         inputExistsWithValue(doc, "applicationName", "hidden", application.name) shouldBe true
       }
       textareaExistsWithText(doc, "description", application.description.getOrElse("None")) shouldBe true
-      inputExistsWithValue(doc, "privacyPolicyUrl", "text", PrivacyPolicyLocation.asText(application.privacyPolicyLocation)) shouldBe true
+      inputExistsWithValue(doc, "privacyPolicyUrl", "text", application.privacyPolicyLocation.describe) shouldBe true
       inputExistsWithValue(doc, "termsAndConditionsUrl", "text", TermsAndConditionsLocation.asText(application.termsAndConditionsLocation)) shouldBe true
     }
 

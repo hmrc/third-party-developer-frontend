@@ -30,8 +30,7 @@ import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.controllers.ApplicationViewModel
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.LoggedInState
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.{CollaboratorTracker, LocalUserIdTracker}
-import uk.gov.hmrc.apiplatform.modules.applications.domain.models.ClientId
-import uk.gov.hmrc.apiplatform.modules.applications.domain.models.ApplicationId
+import uk.gov.hmrc.apiplatform.modules.applications.domain.models.{ApplicationId, ClientId, PrivacyPolicyLocations}
 
 class LeftHandNavSpec extends CommonViewSpec with CollaboratorTracker with LocalUserIdTracker with DeveloperSessionBuilder with DeveloperBuilder {
 
@@ -143,7 +142,7 @@ class LeftHandNavSpec extends CommonViewSpec with CollaboratorTracker with Local
         responsibleIndividual,
         Set.empty,
         TermsAndConditionsLocation.InDesktopSoftware,
-        PrivacyPolicyLocation.InDesktopSoftware,
+        PrivacyPolicyLocations.InDesktopSoftware,
         List.empty
       )
 

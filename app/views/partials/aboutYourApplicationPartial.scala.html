@@ -17,7 +17,8 @@
 @import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.checkpages.{CheckYourAnswersData, DummyCheckYourAnswersForm}
 @import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.controllers.SaveSubsFieldsPageMode
 @import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers
-@import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.{PrivacyPolicyLocation, TermsAndConditionsLocation}
+@import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.TermsAndConditionsLocation
+@import uk.gov.hmrc.apiplatform.modules.applications.domain.models.PrivacyPolicyLocations
 
 @(data: CheckYourAnswersData, form: Form[DummyCheckYourAnswersForm], editable: Boolean)(implicit request: play.api.mvc.Request[Any], messages: Messages, applicationConfig: ApplicationConfig)
 
@@ -157,7 +158,7 @@
           <span class="govuk-!-font-weight-bold">Privacy policy</span>
         </th>
         <td class="govuk-table__cell">
-          @{PrivacyPolicyLocation.asText(data.privacyPolicyLocation)}
+          @{data.privacyPolicyLocation.describe}
         </td>
         @if(editable) {
           <td class="govuk-table__cell">

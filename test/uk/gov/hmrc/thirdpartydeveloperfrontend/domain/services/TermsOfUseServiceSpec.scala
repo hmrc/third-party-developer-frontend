@@ -17,14 +17,12 @@
 package uk.gov.hmrc.thirdpartydeveloperfrontend.domain.services
 
 import java.time.{LocalDateTime, Period, ZoneOffset}
-
 import uk.gov.hmrc.apiplatform.modules.submissions.domain.models.Submission
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.services.TermsOfUseService.TermsOfUseAgreementDetails
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.HmrcSpec
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.LaxEmailAddress.StringSyntax
-import uk.gov.hmrc.apiplatform.modules.applications.domain.models.ClientId
-import uk.gov.hmrc.apiplatform.modules.applications.domain.models.ApplicationId
+import uk.gov.hmrc.apiplatform.modules.applications.domain.models.{ApplicationId, ClientId, PrivacyPolicyLocations}
 
 class TermsOfUseServiceSpec extends HmrcSpec {
 
@@ -47,7 +45,7 @@ class TermsOfUseServiceSpec extends HmrcSpec {
           responsibleIndividual,
           Set.empty,
           TermsAndConditionsLocation.InDesktopSoftware,
-          PrivacyPolicyLocation.InDesktopSoftware,
+          PrivacyPolicyLocations.InDesktopSoftware,
           standardAppAgreements
         )
       )
