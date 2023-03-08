@@ -76,10 +76,7 @@ trait ApplicationServiceMock extends MockitoSugar with ArgumentMatchersSugar wit
   def givenApplicationUpdateSucceeds() =
     when(applicationServiceMock.update(any[UpdateApplicationRequest])(*)).thenReturn(successful(ApplicationUpdateSuccessful))
 
-  def givenRemoveTeamMemberSucceeds(loggedInDeveloper:
-                                    DeveloperSession) =
-    when(applicationServiceMock.removeTeamMember(*, *[LaxEmailAddress], eqTo(loggedInDeveloper.email))(*))
-      .thenReturn(successful(ApplicationUpdateSuccessful))
+
 
   def givenUpdateCheckInformationSucceeds(app: Application) =
     when(applicationServiceMock.updateCheckInformation(eqTo(app), *)(*))

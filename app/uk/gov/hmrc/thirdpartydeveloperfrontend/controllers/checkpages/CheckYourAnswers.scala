@@ -42,11 +42,13 @@ import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.{ApplicationAlreadyExists,
 import uk.gov.hmrc.thirdpartydeveloperfrontend.service.{ApplicationActionService, ApplicationService, SessionService, TermsOfUseVersionService}
 import uk.gov.hmrc.apiplatform.modules.applications.domain.models.{ApplicationId, PrivacyPolicyLocation, TermsAndConditionsLocation}
 import uk.gov.hmrc.apiplatform.modules.apis.domain.models._
+import uk.gov.hmrc.apiplatform.modules.applications.services.CollaboratorService
 
 @Singleton
 class CheckYourAnswers @Inject() (
     val errorHandler: ErrorHandler,
     val applicationService: ApplicationService,
+    val collaboratorService: CollaboratorService,
     val applicationActionService: ApplicationActionService,
     val applicationCheck: ApplicationCheck,
     val sessionService: SessionService,
@@ -140,8 +142,7 @@ class CheckYourAnswers @Inject() (
 
   def teamMemberRemoveAction(appId: ApplicationId): Action[AnyContent] = canUseChecksAction(appId) { implicit request =>
     def handleValidForm(form: RemoveTeamMemberCheckPageConfirmationForm): Future[Result] = {
-      applicationService
-        .removeTeamMember(request.application, form.email.toLaxEmail, request.developerSession.email)
+      collaboratorService.removeTeamMember(request.application, form.email.toLaxEmail, request.developerSession.email)
         .map(_ => Redirect(routes.CheckYourAnswers.team(appId)))
     }
 

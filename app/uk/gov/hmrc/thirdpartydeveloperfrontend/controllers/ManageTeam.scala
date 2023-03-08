@@ -19,16 +19,13 @@ package uk.gov.hmrc.thirdpartydeveloperfrontend.controllers
 import javax.inject.{Inject, Singleton}
 import scala.concurrent.Future.successful
 import scala.concurrent.{ExecutionContext, Future}
-
 import views.html.checkpages.applicationcheck.team.TeamMemberAddView
 import views.html.manageTeamViews.{AddTeamMemberView, ManageTeamView, RemoveTeamMemberView}
-
 import play.api.data.Form
 import play.api.libs.crypto.CookieSigner
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents, Result}
 import play.twirl.api.Html
 import uk.gov.hmrc.play.bootstrap.controller.WithUnsafeDefaultFormBinding
-
 import uk.gov.hmrc.thirdpartydeveloperfrontend.config.{ApplicationConfig, ErrorHandler, FraudPreventionConfig}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.fraudprevention.FraudPreventionNavLinkHelper
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain._
@@ -43,6 +40,7 @@ import uk.gov.hmrc.thirdpartydeveloperfrontend.service._
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.LaxEmailAddress.StringSyntax
 import uk.gov.hmrc.apiplatform.modules.applications.domain.models._
 import uk.gov.hmrc.apiplatform.modules.applications.domain.models.Collaborator
+import uk.gov.hmrc.apiplatform.modules.applications.services.CollaboratorService
 
 @Singleton
 class ManageTeam @Inject() (
@@ -50,6 +48,7 @@ class ManageTeam @Inject() (
     val auditService: AuditService,
     val errorHandler: ErrorHandler,
     val applicationService: ApplicationService,
+    val collaboratorService: CollaboratorService,
     val applicationActionService: ApplicationActionService,
     mcc: MessagesControllerComponents,
     val cookieSigner: CookieSigner,
@@ -111,7 +110,7 @@ class ManageTeam @Inject() (
       }
 
       def handleValidForm(form: AddTeamMemberForm) = {
-        applicationService
+        collaboratorService
           .addTeamMember(request.application, request.developerSession.email, AddCollaborator(form.email.toLaxEmail, form.role.flatMap(Collaborator.Role(_)).getOrElse(Collaborator.Roles.DEVELOPER)))
           .map(_ => Redirect(successRedirect)) recover {
           case _: ApplicationNotFound     => NotFound(errorHandler.notFoundTemplate)
@@ -140,7 +139,7 @@ class ManageTeam @Inject() (
     def handleValidForm(form: RemoveTeamMemberConfirmationForm) = {
       form.confirm match {
         case Some("Yes") =>
-          applicationService
+          collaboratorService
             .removeTeamMember(request.application, form.email.toLaxEmail, request.developerSession.email)
             .map(_ => Redirect(routes.ManageTeam.manageTeam(applicationId, None)))
         case _           => successful(Redirect(routes.ManageTeam.manageTeam(applicationId, None)))

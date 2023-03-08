@@ -16,11 +16,10 @@
 
 package uk.gov.hmrc.thirdpartydeveloperfrontend.service
 
-import uk.gov.hmrc.apiplatform.modules.common.domain.models.LaxEmailAddress
-
-import java.time.{Clock, LocalDateTime}
-import javax.inject.{Inject, Singleton}
-import scala.concurrent.{ExecutionContext, Future}
+import uk.gov.hmrc.apiplatform.modules.apis.domain.models._
+import uk.gov.hmrc.apiplatform.modules.applications.domain.models._
+import uk.gov.hmrc.apiplatform.modules.common.domain.models.{Actors, LaxEmailAddress}
+import uk.gov.hmrc.apiplatform.modules.developers.domain.models.UserId
 import uk.gov.hmrc.http.{ForbiddenException, HeaderCarrier}
 import uk.gov.hmrc.play.audit.http.connector.AuditResult
 import uk.gov.hmrc.thirdpartydeveloperfrontend.connectors._
@@ -28,16 +27,14 @@ import uk.gov.hmrc.thirdpartydeveloperfrontend.domain._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.apidefinitions._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.Environment.{PRODUCTION, SANDBOX}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications._
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.connectors.{AddTeamMemberRequest, DeskproTicket, TicketResult}
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.connectors.{DeskproTicket, TicketResult}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.DeveloperSession
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.subscriptions._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.service.AuditAction.{AccountDeletionRequested, ApplicationDeletionRequested, Remove2SVRequested, UserLogoutSurveyCompleted}
-import uk.gov.hmrc.apiplatform.modules.common.domain.models.Actors
-import uk.gov.hmrc.apiplatform.modules.developers.domain.models.UserId
-import uk.gov.hmrc.apiplatform.modules.applications.domain.models._
-import uk.gov.hmrc.apiplatform.modules.apis.domain.models._
 
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.AddCollaborator
+import java.time.{Clock, LocalDateTime}
+import javax.inject.{Inject, Singleton}
+import scala.concurrent.{ExecutionContext, Future}
 @Singleton
 class ApplicationService @Inject() (
     apmConnector: ApmConnector,
@@ -197,26 +194,6 @@ class ApplicationService @Inject() (
 
   def verify(verificationCode: String)(implicit hc: HeaderCarrier): Future[ApplicationVerificationResponse] = {
     connectorWrapper.productionApplicationConnector.verify(verificationCode)
-  }
-
-  def addTeamMember(app: Application, requestingEmail: LaxEmailAddress, teamMember: AddCollaborator)(implicit hc: HeaderCarrier): Future[Unit] = {
-    val request = AddTeamMemberRequest(teamMember.emailAddress, teamMember.role, Some(requestingEmail))
-    apmConnector.addTeamMember(app.id, request)
-  }
-
-  def removeTeamMember(app: Application, teamMemberToRemove: LaxEmailAddress, requestingEmail: LaxEmailAddress)(implicit hc: HeaderCarrier): Future[ApplicationUpdateSuccessful] = {
-    val otherAdminEmails = app.collaborators
-      .filter(_.role.isAdministrator)
-      .map(_.emailAddress)
-      .filterNot(_ == requestingEmail)
-      .filterNot(_ == teamMemberToRemove)
-
-    for {
-      otherAdmins  <- developerConnector.fetchByEmails(otherAdminEmails)
-      adminsToEmail = otherAdmins.filter(_.verified.contains(true)).map(_.email).toSet
-      connectors    = connectorWrapper.forEnvironment(app.deployedTo)
-      response     <- connectors.thirdPartyApplicationConnector.removeTeamMember(app.id, teamMemberToRemove, requestingEmail, adminsToEmail)
-    } yield response
   }
 
   def requestDeveloperAccountDeletion(userId: UserId, name: String, email: LaxEmailAddress)(implicit hc: HeaderCarrier): Future[TicketResult] = {

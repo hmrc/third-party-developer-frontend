@@ -203,7 +203,7 @@ class ApplicationCheckSpec
     )
   }
 
-  trait BaseSetup extends ApplicationServiceMock with ApplicationActionServiceMock with SessionServiceMock with ApplicationProvider with TermsOfUseVersionServiceMock {
+  trait BaseSetup extends ApplicationServiceMock with ApplicationActionServiceMock with CollaboratorServiceMock with SessionServiceMock with ApplicationProvider with TermsOfUseVersionServiceMock {
     val landingPageView                  = app.injector.instanceOf[LandingPageView]
     val unauthorisedAppDetailsView       = app.injector.instanceOf[UnauthorisedAppDetailsView]
     val nameSubmittedView                = app.injector.instanceOf[NameSubmittedView]
@@ -223,6 +223,7 @@ class ApplicationCheckSpec
     val underTest = new ApplicationCheck(
       mockErrorHandler,
       applicationServiceMock,
+      collaboratorServiceMock,
       applicationActionServiceMock,
       sessionServiceMock,
       mcc,
@@ -1348,7 +1349,7 @@ class ApplicationCheckSpec
 
       redirectLocation(result) shouldBe Some(s"/developer/applications/${appId.text}/request-check/team")
 
-      verify(underTest.applicationService).removeTeamMember(eqTo(application), eqTo(anotherCollaboratorEmail), eqTo(loggedInDeveloper.email))(*)
+      verify(underTest.collaboratorService).removeTeamMember(eqTo(application), eqTo(anotherCollaboratorEmail), eqTo(loggedInDeveloper.email))(*)
     }
 
     "team post redirect to check landing page when no check information on application" in new Setup {

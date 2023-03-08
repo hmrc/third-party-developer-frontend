@@ -84,7 +84,6 @@ class SandboxApplicationCommandConnector @Inject() (val httpClient: HttpClient,
 
   val apiKey         = appConfig.thirdPartyApplicationSandboxApiKey
 
-//TODO GKFE has bearer token header included here. do we need it here too ??
   val http: HttpClient = if (useProxy) proxiedHttpClient.withHeaders(apiKey) else httpClient
 }
 
@@ -94,8 +93,5 @@ class ProductionApplicationCommandConnector @Inject() (val httpClient: HttpClien
                                                           val appConfig: ApplicationConfig)(implicit override val ec: ExecutionContext) extends ApplicationCommandConnector {
   val environment    = Environment.PRODUCTION
   val serviceBaseUrl = appConfig.thirdPartyApplicationProductionUrl
-  val useProxy       = appConfig.thirdPartyApplicationProductionUseProxy
-  val apiKey         = appConfig.thirdPartyApplicationProductionApiKey
-
   val http = httpClient
 }
