@@ -36,6 +36,7 @@ import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.{CollaboratorTracker, Local
 import uk.gov.hmrc.apiplatform.modules.applications.domain.models.ClientId
 import uk.gov.hmrc.apiplatform.modules.applications.domain.models.ApplicationId
 import uk.gov.hmrc.apiplatform.modules.applications.domain.models.Collaborator
+import uk.gov.hmrc.apiplatform.modules.apis.domain.models._
 
 class SubscriptionsGroupSpec
     extends CommonViewSpec

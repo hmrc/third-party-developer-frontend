@@ -19,7 +19,7 @@ package uk.gov.hmrc.thirdpartydeveloperfrontend.domain
 import play.api.test.FakeRequest
 
 import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.SupportEnquiryForm
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.apidefinitions.ApiVersion
+import uk.gov.hmrc.apiplatform.modules.apis.domain.models.ApiVersion
 import uk.gov.hmrc.apiplatform.modules.applications.domain.models.ApplicationId
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.connectors.DeskproTicket
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.AsyncHmrcSpec

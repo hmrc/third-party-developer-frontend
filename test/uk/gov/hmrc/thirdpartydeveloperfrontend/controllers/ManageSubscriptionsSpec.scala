@@ -35,7 +35,8 @@ import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.thirdpartydeveloperfrontend.builder.{DeveloperBuilder, _}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.config.ErrorHandler
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.ApplicationNotFound
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.apidefinitions.{APISubscriptionStatus, ApiContext, ApiVersion}
+import uk.gov.hmrc.apiplatform.modules.apis.domain.models.{ApiContext, ApiVersion}
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.apidefinitions.APISubscriptionStatus
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.{CheckInformation, Privileged, Standard, _}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.controllers.SaveSubsFieldsPageMode
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.subscriptions.ApiSubscriptionFields._

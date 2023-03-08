@@ -25,7 +25,7 @@ import play.api.mvc.{Action, AnyContent, Call}
 
 import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.{APISubscriptions, ApplicationController, ApplicationRequest}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.apidefinitions.ApiContext
+import uk.gov.hmrc.apiplatform.modules.apis.domain.models.ApiContext
 import uk.gov.hmrc.apiplatform.modules.applications.domain.models.ApplicationId
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.{Application, CheckInformation}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.controllers.SubscriptionData

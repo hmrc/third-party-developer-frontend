@@ -42,6 +42,7 @@ import uk.gov.hmrc.thirdpartydeveloperfrontend.service.SubscriptionFieldsService
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.{AsyncHmrcSpec, FixedClock, LocalUserIdTracker}
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.LaxEmailAddress.StringSyntax
 import uk.gov.hmrc.apiplatform.modules.applications.domain.models.{ApplicationId, ClientId, PrivacyPolicyLocations, TermsAndConditionsLocations}
+import uk.gov.hmrc.apiplatform.modules.apis.domain.models._
 
 class ApplicationServiceSpec extends AsyncHmrcSpec
     with SubscriptionsBuilder

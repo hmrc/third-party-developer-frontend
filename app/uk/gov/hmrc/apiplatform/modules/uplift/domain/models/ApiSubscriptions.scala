@@ -18,7 +18,7 @@ package uk.gov.hmrc.apiplatform.modules.uplift.domain.models
 
 import play.api.libs.json.{Format, Json, _}
 
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.apidefinitions.{ApiContext, ApiIdentifier, ApiVersion}
+import uk.gov.hmrc.apiplatform.modules.apis.domain.models.{ApiContext, ApiIdentifier, ApiVersion}
 
 case class ApiSubscriptions(subscriptions: Map[ApiIdentifier, Boolean] = Map.empty[ApiIdentifier, Boolean]) {
   def isSelected(id: ApiIdentifier): Boolean = subscriptions.get(id).getOrElse(false)

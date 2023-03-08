@@ -22,7 +22,7 @@ import scala.concurrent.Future.{failed, successful}
 import org.mockito.{ArgumentMatchersSugar, MockitoSugar}
 
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain._
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.apidefinitions.ApiIdentifier
+import uk.gov.hmrc.apiplatform.modules.apis.domain.models.ApiIdentifier
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.DeveloperSession
 import uk.gov.hmrc.thirdpartydeveloperfrontend.service.ApplicationService

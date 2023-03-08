@@ -25,7 +25,7 @@ import views.html.UnsubscribeRequestSubmittedView
 import play.api.test.FakeRequest
 
 import uk.gov.hmrc.thirdpartydeveloperfrontend.builder.{DeveloperBuilder, DeveloperSessionBuilder}
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.apidefinitions.ApiVersion
+import uk.gov.hmrc.apiplatform.modules.apis.domain.models.ApiVersion
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.controllers.ApplicationViewModel
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.LoggedInState

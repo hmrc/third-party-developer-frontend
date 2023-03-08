@@ -41,6 +41,7 @@ import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.subscriptions.Devhu
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.{ApplicationAlreadyExists, DeskproTicketCreationFailed}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.service.{ApplicationActionService, ApplicationService, SessionService, TermsOfUseVersionService}
 import uk.gov.hmrc.apiplatform.modules.applications.domain.models.{ApplicationId, PrivacyPolicyLocation, TermsAndConditionsLocation}
+import uk.gov.hmrc.apiplatform.modules.apis.domain.models._
 
 @Singleton
 class CheckYourAnswers @Inject() (

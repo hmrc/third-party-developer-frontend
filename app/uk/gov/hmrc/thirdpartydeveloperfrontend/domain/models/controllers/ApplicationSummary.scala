@@ -20,7 +20,8 @@ import java.time.{LocalDateTime, Period}
 
 import uk.gov.hmrc.http.NotFoundException
 
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.apidefinitions.{AccessType, ApiIdentifier}
+import uk.gov.hmrc.apiplatform.modules.apis.domain.models.{ApiIdentifier}
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.apidefinitions.{AccessType}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications._
 import uk.gov.hmrc.apiplatform.modules.developers.domain.models.UserId
 import uk.gov.hmrc.apiplatform.modules.applications.domain.models.ApplicationId

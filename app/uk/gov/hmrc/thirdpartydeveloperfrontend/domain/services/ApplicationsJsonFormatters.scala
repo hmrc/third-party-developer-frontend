@@ -17,6 +17,7 @@
 package uk.gov.hmrc.thirdpartydeveloperfrontend.domain.services
 
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.subscriptions.{FieldName, FieldValue}
+import uk.gov.hmrc.apiplatform.modules.apis.domain.models._
 
 trait ApplicationsJsonFormatters extends ApiDefinitionsJsonFormatters with LocalDateTimeFormatters {
   import play.api.libs.json._

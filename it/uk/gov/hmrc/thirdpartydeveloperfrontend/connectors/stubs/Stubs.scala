@@ -19,7 +19,7 @@ package uk.gov.hmrc.thirdpartydeveloperfrontend.connectors.stubs
 import java.net.URLEncoder
 import com.github.tomakehurst.wiremock.client.WireMock._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.connectors.EncryptedJson
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.apidefinitions.{ApiContext, ApiIdentifier, ApiVersion}
+import uk.gov.hmrc.apiplatform.modules.apis.domain.models.{ApiContext, ApiIdentifier, ApiVersion}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.ApplicationNameValidationJson.ApplicationNameValidationResult
 import uk.gov.hmrc.apiplatform.modules.applications.domain.models.ApplicationId
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.{Application, ApplicationToken, ApplicationWithSubscriptionData, Environment}

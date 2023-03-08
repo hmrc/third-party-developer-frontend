@@ -22,7 +22,8 @@ import scala.concurrent.{ExecutionContext, Future}
 import uk.gov.hmrc.http.HeaderCarrier
 
 import uk.gov.hmrc.thirdpartydeveloperfrontend.connectors.{ApmConnector, ThirdPartyApplicationSandboxConnector}
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.apidefinitions.{APIStatus, ApiContext, ApiIdentifier}
+import uk.gov.hmrc.apiplatform.modules.apis.domain.models.{ApiContext, ApiIdentifier}
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.apidefinitions.{APIStatus}
 import uk.gov.hmrc.apiplatform.modules.applications.domain.models.ApplicationId
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.{Environment}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.controllers.ApplicationSummary

@@ -29,9 +29,9 @@ import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.emailpreferences.AP
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.WireMockExtensions
 import uk.gov.hmrc.apiplatform.modules.applications.domain.models.ApplicationId
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.{Application, ApplicationWithSubscriptionData, Environment}
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.apidefinitions.ApiIdentifier
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.apidefinitions.ApiContext
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.apidefinitions.ApiVersion
+import uk.gov.hmrc.apiplatform.modules.apis.domain.models.ApiIdentifier
+import uk.gov.hmrc.apiplatform.modules.apis.domain.models.ApiContext
+import uk.gov.hmrc.apiplatform.modules.apis.domain.models.ApiVersion
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.ApplicationUpdateSuccessful
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.ApplicationNotFound
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.connectors.ApiType.REST_API

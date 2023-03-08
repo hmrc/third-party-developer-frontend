@@ -19,7 +19,7 @@ package uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications
 import java.time.{LocalDateTime, Period}
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.LaxEmailAddress
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.apidefinitions.AccessType.STANDARD
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.apidefinitions.ApiIdentifier
+import uk.gov.hmrc.apiplatform.modules.apis.domain.models.ApiIdentifier
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.Capabilities.{ChangeClientSecret, SupportsDetails, ViewPushSecret}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.Environment._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.Permissions.{ProductionAndAdmin, ProductionAndDeveloper, SandboxOnly, SandboxOrAdmin}

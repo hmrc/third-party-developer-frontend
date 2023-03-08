@@ -21,7 +21,7 @@ import java.util.UUID
 import play.api.mvc.{PathBindable, QueryStringBindable}
 
 import uk.gov.hmrc.apiplatform.modules.mfa.models.{MfaAction, MfaId, MfaType}
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.apidefinitions.{ApiContext, ApiVersion}
+import uk.gov.hmrc.apiplatform.modules.apis.domain.models.{ApiContext, ApiVersion}
 import uk.gov.hmrc.apiplatform.modules.applications.domain.models.ApplicationId
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.{Environment}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.controllers.{AddTeamMemberPageMode, SaveSubsFieldsPageMode}

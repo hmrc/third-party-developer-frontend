@@ -36,6 +36,7 @@ import uk.gov.hmrc.thirdpartydeveloperfrontend.mocks.connectors.ApmConnectorMock
 import uk.gov.hmrc.thirdpartydeveloperfrontend.mocks.service.{ApplicationActionServiceMock, ApplicationServiceMock, SessionServiceMock}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.{AsyncHmrcSpec, LocalUserIdTracker}
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.LaxEmailAddress.StringSyntax
+import uk.gov.hmrc.apiplatform.modules.apis.domain.models._
 
 class UpliftJourneyServiceSpec
     extends AsyncHmrcSpec

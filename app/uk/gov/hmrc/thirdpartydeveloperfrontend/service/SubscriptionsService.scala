@@ -23,12 +23,15 @@ import scala.concurrent.{ExecutionContext, Future}
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.thirdpartydeveloperfrontend.connectors.{ApmConnector, DeskproConnector}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.ApplicationUpdateSuccessful
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.apidefinitions.{ApiVersion, _}
+import uk.gov.hmrc.apiplatform.modules.apis.domain.models.{ApiVersion, _}
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.apidefinitions._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.Application
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.connectors.{DeskproTicket, TicketResult}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.DeveloperSession
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.subscriptions.FieldName
 import uk.gov.hmrc.apiplatform.modules.applications.domain.models.ApplicationId
+import uk.gov.hmrc.apiplatform.modules.apis.domain.models._
+
 
 @Singleton
 class SubscriptionsService @Inject() (

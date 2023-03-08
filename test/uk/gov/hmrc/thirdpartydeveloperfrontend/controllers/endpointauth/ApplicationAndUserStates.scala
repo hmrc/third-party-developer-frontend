@@ -33,7 +33,8 @@ import uk.gov.hmrc.thirdpartydeveloperfrontend.builder.MfaDetailBuilder
 import uk.gov.hmrc.thirdpartydeveloperfrontend.connectors.ThirdPartyDeveloperConnector.CoreUserDetails
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.apidefinitions.APIAccessType.PUBLIC
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.apidefinitions.APIStatus.STABLE
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.apidefinitions.{APIAccess, ApiContext, ApiIdentifier, ApiVersion}
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.apidefinitions.{APIAccess}
+import uk.gov.hmrc.apiplatform.modules.apis.domain.models.{ApiContext, ApiIdentifier, ApiVersion}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.Environment.{PRODUCTION, SANDBOX}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers._

@@ -20,11 +20,13 @@ import cats.data.NonEmptyList
 
 import play.api.mvc._
 
+import uk.gov.hmrc.apiplatform.modules.apis.domain.models.{
+  ApiContext
+}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.apidefinitions.{
   APISubscriptionStatus,
   APISubscriptionStatusWithSubscriptionFields,
-  APISubscriptionStatusWithWritableSubscriptionField,
-  ApiContext
+  APISubscriptionStatusWithWritableSubscriptionField
 }
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.DeveloperSession

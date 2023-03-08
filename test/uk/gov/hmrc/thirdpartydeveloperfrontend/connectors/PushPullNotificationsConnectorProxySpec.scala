@@ -26,7 +26,7 @@ import org.scalatestplus.play.guice.GuiceOneAppPerSuite
 import uk.gov.hmrc.http.{HttpClient, _}
 
 import uk.gov.hmrc.thirdpartydeveloperfrontend.config.ApplicationConfig
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.apidefinitions.{ApiContext, ApiVersion}
+import uk.gov.hmrc.apiplatform.modules.apis.domain.models.{ApiContext, ApiVersion}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.{Environment}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.helpers.FutureTimeoutSupportImpl
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.AsyncHmrcSpec

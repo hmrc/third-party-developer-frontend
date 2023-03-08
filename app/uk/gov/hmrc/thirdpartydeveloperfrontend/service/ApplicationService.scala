@@ -35,6 +35,7 @@ import uk.gov.hmrc.thirdpartydeveloperfrontend.service.AuditAction.{AccountDelet
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.Actors
 import uk.gov.hmrc.apiplatform.modules.developers.domain.models.UserId
 import uk.gov.hmrc.apiplatform.modules.applications.domain.models._
+import uk.gov.hmrc.apiplatform.modules.apis.domain.models._
 
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.AddCollaborator
 @Singleton

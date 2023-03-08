@@ -24,7 +24,7 @@ import uk.gov.hmrc.http.HeaderCarrier
 
 import uk.gov.hmrc.thirdpartydeveloperfrontend.builder.SubscriptionsBuilder
 import uk.gov.hmrc.thirdpartydeveloperfrontend.connectors.{ApmConnector, ThirdPartyApplicationConnector}
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.apidefinitions.{ApiContext, ApiVersion}
+import uk.gov.hmrc.apiplatform.modules.apis.domain.models.{ApiContext, ApiVersion}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.subscriptions.ApiSubscriptionFields.{
   SaveSubscriptionFieldsAccessDeniedResponse,

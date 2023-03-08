@@ -31,11 +31,13 @@ import uk.gov.hmrc.http.HeaderCarrier
 
 import uk.gov.hmrc.thirdpartydeveloperfrontend.config.{ApplicationConfig, ErrorHandler}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.actions.SubscriptionFieldsActions
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.apidefinitions.{
-  APISubscriptionStatusWithSubscriptionFields,
-  APISubscriptionStatusWithWritableSubscriptionField,
+import uk.gov.hmrc.apiplatform.modules.apis.domain.models.{
   ApiContext,
   ApiVersion
+}
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.apidefinitions.{
+  APISubscriptionStatusWithSubscriptionFields,
+  APISubscriptionStatusWithWritableSubscriptionField
 }
 import uk.gov.hmrc.apiplatform.modules.applications.domain.models.ApplicationId
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.{Application, CheckInformation}

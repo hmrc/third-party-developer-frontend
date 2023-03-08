@@ -19,9 +19,9 @@ package uk.gov.hmrc.thirdpartydeveloperfrontend.connectors
 import uk.gov.hmrc.thirdpartydeveloperfrontend.builder.SubscriptionsBuilder
 import com.github.tomakehurst.wiremock.client.WireMock._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.connectors.SubscriptionFieldsConnectorDomain._
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.apidefinitions.ApiContext
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.apidefinitions.ApiIdentifier
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.apidefinitions.ApiVersion
+import uk.gov.hmrc.apiplatform.modules.apis.domain.models.ApiContext
+import uk.gov.hmrc.apiplatform.modules.apis.domain.models.ApiIdentifier
+import uk.gov.hmrc.apiplatform.modules.apis.domain.models.ApiVersion
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.subscriptions.AccessRequirements
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.subscriptions.ApiSubscriptionFields._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.subscriptions.FieldName

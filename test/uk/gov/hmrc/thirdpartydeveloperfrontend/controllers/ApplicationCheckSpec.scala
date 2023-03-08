@@ -49,6 +49,7 @@ import uk.gov.hmrc.apiplatform.modules.common.domain.models.LaxEmailAddress.Stri
 import uk.gov.hmrc.apiplatform.modules.applications.domain.models.ClientId
 import uk.gov.hmrc.apiplatform.modules.applications.domain.models.ApplicationId
 import uk.gov.hmrc.apiplatform.modules.applications.domain.models.Collaborator
+import uk.gov.hmrc.apiplatform.modules.apis.domain.models._
 
 class ApplicationCheckSpec
     extends BaseControllerSpec

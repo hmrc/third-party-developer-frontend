@@ -37,7 +37,7 @@ import uk.gov.hmrc.thirdpartydeveloperfrontend.config.ApplicationConfig
 import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.addapplication.routes.{AddApplication => AddApplicationRoutes}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.profile.EmailPreferencesController
 import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.profile.routes.{EmailPreferencesController => EmailPreferencesControllerRoutes}
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.apidefinitions.ApiContext
+import uk.gov.hmrc.apiplatform.modules.apis.domain.models.ApiContext
 import uk.gov.hmrc.apiplatform.modules.applications.domain.models.ApplicationId
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.connectors.ApiType.REST_API
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.connectors.{ApiDefinition, CombinedApi, CombinedApiCategory}

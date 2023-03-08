@@ -27,7 +27,7 @@ import uk.gov.hmrc.http.HttpReads.Implicits._
 import uk.gov.hmrc.http.{HeaderCarrier, HttpClient, UpstreamErrorResponse}
 import uk.gov.hmrc.play.http.metrics.common.API
 
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.apidefinitions.{ApiContext, ApiIdentifier, ApiVersion}
+import uk.gov.hmrc.apiplatform.modules.apis.domain.models.{ApiContext, ApiIdentifier, ApiVersion}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.connectors.{AddTeamMemberRequest, ApiDefinition, CombinedApi, ExtendedApiDefinition}
 import uk.gov.hmrc.apiplatform.modules.developers.domain.models.UserId
@@ -38,6 +38,7 @@ import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.{ApplicationNotFound, Appl
 import uk.gov.hmrc.thirdpartydeveloperfrontend.service.OpenAccessApiService.OpenAccessApisConnector
 import uk.gov.hmrc.thirdpartydeveloperfrontend.service.SubscriptionsService.SubscriptionsConnector
 import uk.gov.hmrc.apiplatform.modules.applications.domain.models.ApplicationId
+import uk.gov.hmrc.apiplatform.modules.apis.domain.models._
 
 object ApmConnector {
   case class Config(serviceBaseUrl: String)
@@ -45,8 +46,6 @@ object ApmConnector {
   case class RequestUpliftV1(subscriptions: Set[ApiIdentifier])
 
   case class RequestUpliftV2(upliftRequest: UpliftData)
-
-  import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.services.ApiDefinitionsJsonFormatters._
 
   implicit val writesV1 = play.api.libs.json.Json.writes[RequestUpliftV1]
   implicit val writesV2 = play.api.libs.json.Json.writes[RequestUpliftV2]

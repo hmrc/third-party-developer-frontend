@@ -14,13 +14,20 @@
  * limitations under the License.
  */
 
-package uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.apidefinitions
+package uk.gov.hmrc.apiplatform.modules.apis.domain.models
 
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.connectors.ApiDefinition
-import uk.gov.hmrc.apiplatform.modules.apis.domain.models.ApiContext
 
-trait ApiDefinitionTestDataHelper {
-  def apiDefinition(name: String): ApiDefinition = apiDefinition(name, List("category"))
+import play.api.libs.json.Json
+import scala.util.Random
 
-  def apiDefinition(name: String, categories: List[String]) = ApiDefinition(name, name, name, ApiContext(name), categories)
+case class ApiContext(value: String) extends AnyVal
+
+object ApiContext {
+  implicit val apiContextFormat = Json.valueFormat[ApiContext]
+
+  implicit val ordering: Ordering[ApiContext] = new Ordering[ApiContext] {
+    override def compare(x: ApiContext, y: ApiContext): Int = x.value.compareTo(y.value)
+  }
+
+  def random = ApiContext(Random.alphanumeric.take(10).mkString)
 }

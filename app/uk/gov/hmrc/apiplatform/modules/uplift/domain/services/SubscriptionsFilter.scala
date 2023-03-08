@@ -17,7 +17,8 @@
 package uk.gov.hmrc.apiplatform.modules.uplift.domain.services
 
 import uk.gov.hmrc.apiplatform.modules.uplift.domain.models.ApiSubscriptions
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.apidefinitions.{APISubscriptionStatus, ApiIdentifier}
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.apidefinitions.APISubscriptionStatus
+import uk.gov.hmrc.apiplatform.modules.apis.domain.models._
 
 object SubscriptionsFilter {
 

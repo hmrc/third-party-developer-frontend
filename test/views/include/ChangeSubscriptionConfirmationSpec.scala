@@ -28,7 +28,7 @@ import play.api.test.FakeRequest
 
 import uk.gov.hmrc.thirdpartydeveloperfrontend.builder.{DeveloperTestData, DeveloperSessionBuilder}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.ChangeSubscriptionConfirmationForm
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.apidefinitions.{ApiContext, ApiVersion}
+import uk.gov.hmrc.apiplatform.modules.apis.domain.models.{ApiContext, ApiVersion}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.controllers.ApplicationViewModel
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.LoggedInState

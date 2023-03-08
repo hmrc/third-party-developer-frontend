@@ -25,6 +25,8 @@ import uk.gov.hmrc.thirdpartydeveloperfrontend.connectors.ApmConnector
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.apidefinitions._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.subscriptions.ApiData
+import uk.gov.hmrc.apiplatform.modules.apis.domain.models._
+
 
 @Singleton
 class OpenAccessApiService @Inject() (openAccessApisConnector: ApmConnector)(implicit val ec: ExecutionContext) {
