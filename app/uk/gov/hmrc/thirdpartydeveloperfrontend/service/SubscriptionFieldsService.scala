@@ -24,16 +24,19 @@ import cats.implicits._
 import uk.gov.hmrc.http.HeaderCarrier
 
 import uk.gov.hmrc.thirdpartydeveloperfrontend.connectors.ApmConnector
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.apidefinitions.{ApiContext, ApiIdentifier, ApiVersion}
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.{Application, ApplicationId, ClientId, CollaboratorRole, Environment}
+import uk.gov.hmrc.apiplatform.modules.apis.domain.models.{ApiContext, ApiIdentifier, ApiVersion}
+import uk.gov.hmrc.apiplatform.modules.applications.domain.models.ApplicationId
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.{Application, Environment}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.subscriptions.ApiSubscriptionFields._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.subscriptions.{ApiData, DevhubAccessLevel, FieldName, FieldValue, Fields}
+import uk.gov.hmrc.apiplatform.modules.applications.domain.models._
+import uk.gov.hmrc.apiplatform.modules.applications.domain.models.Collaborator
 
 @Singleton
 class SubscriptionFieldsService @Inject() (connectorsWrapper: ConnectorsWrapper, apmConnector: ApmConnector)(implicit val ec: ExecutionContext) {
 
   def saveFieldValues(
-      role: CollaboratorRole,
+      role: Collaborator.Role,
       application: Application,
       apiContext: ApiContext,
       apiVersion: ApiVersion,
@@ -118,6 +121,6 @@ object SubscriptionFieldsService {
   }
 
   sealed trait AccessValidation
-  case class ValidateAgainstRole(role: CollaboratorRole) extends AccessValidation
+  case class ValidateAgainstRole(role: Collaborator.Role) extends AccessValidation
   case object SkipRoleValidation                         extends AccessValidation
 }

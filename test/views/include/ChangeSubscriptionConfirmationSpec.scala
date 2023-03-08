@@ -26,26 +26,29 @@ import play.api.data.Form
 import play.api.mvc.Call
 import play.api.test.FakeRequest
 
-import uk.gov.hmrc.thirdpartydeveloperfrontend.builder.{DeveloperBuilder, DeveloperSessionBuilder}
+import uk.gov.hmrc.thirdpartydeveloperfrontend.builder.{DeveloperTestData, DeveloperSessionBuilder}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.ChangeSubscriptionConfirmationForm
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.apidefinitions.{ApiContext, ApiVersion}
+import uk.gov.hmrc.apiplatform.modules.apis.domain.models.{ApiContext, ApiVersion}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.controllers.ApplicationViewModel
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.LoggedInState
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.views.SubscriptionRedirect
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.ViewHelpers.elementExistsByText
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils._
+import uk.gov.hmrc.apiplatform.modules.common.domain.models.LaxEmailAddress.StringSyntax
+import uk.gov.hmrc.apiplatform.modules.applications.domain.models.ClientId
+import uk.gov.hmrc.apiplatform.modules.applications.domain.models.ApplicationId
 
 class ChangeSubscriptionConfirmationSpec extends CommonViewSpec
     with WithCSRFAddToken
     with CollaboratorTracker
     with LocalUserIdTracker
     with DeveloperSessionBuilder
-    with DeveloperBuilder {
+    with DeveloperTestData{
 
   val request = FakeRequest().withCSRFToken
 
-  val applicationId   = ApplicationId("1234")
+  val applicationId   = ApplicationId.random
   val clientId        = ClientId("clientId123")
   val applicationName = "Test Application"
   val apiName         = "Test API"
@@ -53,7 +56,7 @@ class ChangeSubscriptionConfirmationSpec extends CommonViewSpec
   val apiVersion      = ApiVersion("1.0")
   val callMock        = mock[Call]
 
-  val loggedInDeveloper = buildDeveloperSession(loggedInState = LoggedInState.LOGGED_IN, buildDeveloper("givenname.familyname@example.com", "Givenname", "Familyname"))
+  val loggedInDeveloper = standardDeveloper.loggedIn
 
   val application = Application(
     applicationId,
@@ -66,7 +69,7 @@ class ChangeSubscriptionConfirmationSpec extends CommonViewSpec
     Environment.PRODUCTION,
     Some("Description 1"),
     Set(loggedInDeveloper.email.asAdministratorCollaborator),
-    state = ApplicationState.production(loggedInDeveloper.email, loggedInDeveloper.displayedName, ""),
+    state = ApplicationState.production(loggedInDeveloper.email.text, loggedInDeveloper.displayedName, ""),
     access = Standard(redirectUris = List("https://red1", "https://red2"), termsAndConditionsUrl = Some("http://tnc-url.com"))
   )
 

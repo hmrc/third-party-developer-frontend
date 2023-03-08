@@ -16,22 +16,13 @@
 
 package uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications
 
-import enumeratum.{EnumEntry, PlayEnum}
+import uk.gov.hmrc.apiplatform.modules.common.domain.models.LaxEmailAddress
+import uk.gov.hmrc.apiplatform.modules.applications.domain.models.Collaborator
 
-sealed trait CollaboratorRole extends EnumEntry {
-  def isDeveloper: Boolean        = this == CollaboratorRole.DEVELOPER
-  def isAdministrator: Boolean    = this == CollaboratorRole.ADMINISTRATOR
-  def is(other: CollaboratorRole) = this == other
-}
+case class AddCollaborator(emailAddress: LaxEmailAddress, role: Collaborator.Role)
 
-object CollaboratorRole extends PlayEnum[CollaboratorRole] {
-  val values = findValues
+object AddCollaborator {
+  import play.api.libs.json.Json
 
-  final case object DEVELOPER     extends CollaboratorRole
-  final case object ADMINISTRATOR extends CollaboratorRole
-
-  def from(role: Option[String]) = role match {
-    case Some(r) => values.find(e => e.toString == r.toUpperCase)
-    case _       => Some(CollaboratorRole.DEVELOPER)
-  }
+  implicit val format = Json.format[AddCollaborator]
 }

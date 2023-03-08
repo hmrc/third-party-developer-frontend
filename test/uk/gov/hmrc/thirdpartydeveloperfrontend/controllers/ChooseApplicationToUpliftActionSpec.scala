@@ -36,13 +36,13 @@ import uk.gov.hmrc.apiplatform.modules.uplift.views.html.BeforeYouStartView
 import uk.gov.hmrc.thirdpartydeveloperfrontend.builder.{ApplicationBuilder, DeveloperBuilder, _}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.config.{ErrorHandler, UpliftJourneyConfig}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.addapplication.AddApplication
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.controllers.ApplicationSummary
 import uk.gov.hmrc.thirdpartydeveloperfrontend.mocks.connectors.ApmConnectorMockModule
 import uk.gov.hmrc.thirdpartydeveloperfrontend.mocks.service._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.service.AuditService
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.WithLoggedInSession._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.{LocalUserIdTracker, _}
+import uk.gov.hmrc.apiplatform.modules.applications.domain.models.Collaborator
 
 class ChooseApplicationToUpliftActionSpec
     extends BaseControllerSpec
@@ -169,7 +169,7 @@ class ChooseApplicationToUpliftActionSpec
       aUsersUplfitableAndNotUpliftableAppsReturns(summaries, summaries.map(_.id), List.empty)
       when(flowServiceMock.storeApiSubscriptions(*, *)).thenReturn(Future.successful(GetProductionCredentialsFlow("", None, None)))
 
-      val result = underTest.chooseApplicationToUpliftAction()(loggedInRequest.withFormUrlEncodedBody(("applicationId" -> sandboxAppId.value)))
+      val result = underTest.chooseApplicationToUpliftAction()(loggedInRequest.withFormUrlEncodedBody(("applicationId" -> sandboxAppId.text)))
 
       status(result) shouldBe SEE_OTHER
       redirectLocation(result).value shouldBe uk.gov.hmrc.apiplatform.modules.uplift.controllers.routes.UpliftJourneyController.confirmApiSubscriptionsAction(sandboxAppId).toString

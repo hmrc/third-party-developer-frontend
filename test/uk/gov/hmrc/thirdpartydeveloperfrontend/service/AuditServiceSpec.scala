@@ -27,18 +27,18 @@ import uk.gov.hmrc.play.audit.model.DataEvent
 
 import uk.gov.hmrc.thirdpartydeveloperfrontend.builder._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.config.ApplicationConfig
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.{DeveloperSession, LoggedInState}
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.DeveloperSession
 import uk.gov.hmrc.thirdpartydeveloperfrontend.service.AuditAction.{ApplicationUpliftRequestDeniedDueToInvalidCredentials, PasswordChangeFailedDueToInvalidCredentials}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.{AsyncHmrcSpec, LocalUserIdTracker}
 
-class AuditServiceSpec extends AsyncHmrcSpec with LocalUserIdTracker with DeveloperSessionBuilder with DeveloperBuilder {
+class AuditServiceSpec extends AsyncHmrcSpec with LocalUserIdTracker with DeveloperSessionBuilder with DeveloperTestData {
 
-  val developer: DeveloperSession = buildDeveloperSession(loggedInState = LoggedInState.LOGGED_IN, buildDeveloper("email@example.com", "Paul", "Smith", None))
+  val developer: DeveloperSession = standardDeveloper.loggedIn
 
   trait Setup {
 
     implicit val hc = HeaderCarrier().withExtraHeaders(
-      "X-email-address" -> developer.email,
+      "X-email-address" -> developer.email.text,
       "X-name"          -> developer.displayedName
     )
 
@@ -73,7 +73,7 @@ class AuditServiceSpec extends AsyncHmrcSpec with LocalUserIdTracker with Develo
         tags = Map(
           "transactionName"   -> "Application uplift to production request has been denied, due to invalid credentials",
           "developerFullName" -> developer.displayedName,
-          "developerEmail"    -> developer.email
+          "developerEmail"    -> developer.email.text
         ),
         detail = Map(
           "applicationId" -> "123456"
@@ -89,14 +89,14 @@ class AuditServiceSpec extends AsyncHmrcSpec with LocalUserIdTracker with Develo
 
     "send an event when the password change fails due to invalid credentials for a user who is logged in" in new Setup {
 
-      verifyPasswordChangeFailedAuditEventSent(tags = Map("developerEmail" -> developer.email, "developerFullName" -> developer.displayedName))
+      verifyPasswordChangeFailedAuditEventSent(tags = Map("developerEmail" -> developer.email.text, "developerFullName" -> developer.displayedName))
     }
 
     "send an event when the password change fails due to invalid credentials for a user who is not logged in" in new Setup {
 
       override implicit val hc = HeaderCarrier()
 
-      verifyPasswordChangeFailedAuditEventSent(tags = Map("developerEmail" -> developer.email))
+      verifyPasswordChangeFailedAuditEventSent(tags = Map("developerEmail" -> developer.email.text))
     }
   }
 

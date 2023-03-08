@@ -31,7 +31,7 @@ trait HeaderEnricher {
     }
 
   def enrichHeaders(hc: HeaderCarrier, user: DeveloperSession): HeaderCarrier =
-    hc.withExtraHeaders("X-email-address" -> user.email, "X-name" -> user.displayedNameEncoded)
+    hc.withExtraHeaders("X-email-address" -> user.email.text, "X-name" -> user.displayedNameEncoded)
 
   implicit class RequestWithAjaxSupport(h: Headers) {
     def isAjaxRequest: Boolean = h.get("X-Requested-With").contains("XMLHttpRequest")

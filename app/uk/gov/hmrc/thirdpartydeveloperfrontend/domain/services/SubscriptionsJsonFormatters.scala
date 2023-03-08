@@ -17,6 +17,7 @@
 package uk.gov.hmrc.thirdpartydeveloperfrontend.domain.services
 
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.subscriptions.ApiSubscriptionFields._
+import uk.gov.hmrc.apiplatform.modules.apis.domain.models._
 
 trait AccessRequirementsJsonFormatters {
   import play.api.libs.json._
@@ -24,6 +25,7 @@ trait AccessRequirementsJsonFormatters {
   import play.api.libs.json.Json.JsValueWrapper
   import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.subscriptions._
   import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.subscriptions.DevhubAccessRequirement._
+
 
   def ignoreDefaultField[T](value: T, default: T, jsonFieldName: String)(implicit w: Writes[T]) =
     if (value == default) None else Some((jsonFieldName, Json.toJsFieldJsValueWrapper(value)))

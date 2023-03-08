@@ -33,10 +33,12 @@ import uk.gov.hmrc.thirdpartydeveloperfrontend.builder._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.LoggedInState
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils._
+import uk.gov.hmrc.apiplatform.modules.applications.domain.models.ClientId
+import uk.gov.hmrc.apiplatform.modules.applications.domain.models.ApplicationId
 
 class ClientSecretsSpec extends CommonViewSpec with WithCSRFAddToken with CollaboratorTracker with LocalUserIdTracker
     with DeveloperSessionBuilder
-    with DeveloperBuilder {
+    with DeveloperTestData {
 
   trait Setup {
     val clientSecretsView          = app.injector.instanceOf[ClientSecretsView]
@@ -55,7 +57,7 @@ class ClientSecretsSpec extends CommonViewSpec with WithCSRFAddToken with Collab
 
   "Client secrets page" should {
     val request   = FakeRequest().withCSRFToken
-    val developer = buildDeveloperSession(loggedInState = LoggedInState.LOGGED_IN, buildDeveloper("Test", "Test", "Test", None))
+    val developer = standardDeveloper.loggedIn
 
     val clientSecret1 = ClientSecret(randomUUID.toString, "", LocalDateTime.now(ZoneOffset.UTC))
     val clientSecret2 = ClientSecret(randomUUID.toString, "", LocalDateTime.now(ZoneOffset.UTC))
@@ -64,7 +66,7 @@ class ClientSecretsSpec extends CommonViewSpec with WithCSRFAddToken with Collab
     val clientSecret5 = ClientSecret(randomUUID.toString, "", LocalDateTime.now(ZoneOffset.UTC))
 
     val application = Application(
-      ApplicationId(UUID.randomUUID().toString),
+      ApplicationId(UUID.randomUUID()),
       ClientId("Test Application Client ID"),
       "Test Application",
       LocalDateTime.now(),

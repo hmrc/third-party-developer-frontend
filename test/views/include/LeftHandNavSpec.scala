@@ -26,31 +26,34 @@ import views.html.include.LeftHandNav
 import play.api.test.FakeRequest
 import play.twirl.api.Html
 
-import uk.gov.hmrc.thirdpartydeveloperfrontend.builder.{DeveloperBuilder, DeveloperSessionBuilder}
+import uk.gov.hmrc.thirdpartydeveloperfrontend.builder.{DeveloperTestData, DeveloperSessionBuilder}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.Credentials.serverTokenCutoffDate
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.controllers.{ApplicationViewModel, FraudPreventionNavLinkViewModel, LeftHandNavFlags}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.LoggedInState
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.ViewHelpers._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils._
+import uk.gov.hmrc.apiplatform.modules.common.domain.models.LaxEmailAddress.StringSyntax
+import uk.gov.hmrc.apiplatform.modules.applications.domain.models.ClientId
+import uk.gov.hmrc.apiplatform.modules.applications.domain.models.ApplicationId
 
 class LeftHandNavSpec extends CommonViewSpec
     with WithCSRFAddToken
     with CollaboratorTracker
     with LocalUserIdTracker
     with DeveloperSessionBuilder
-    with DeveloperBuilder {
+    with DeveloperTestData {
 
   trait Setup {
     val leftHandNavView = app.injector.instanceOf[LeftHandNav]
 
     val request = FakeRequest().withCSRFToken
 
-    val applicationId   = ApplicationId("1234")
+    val applicationId   = ApplicationId.random
     val clientId        = ClientId("clientId123")
     val applicationName = "Test Application"
 
-    val loggedInDeveloper = buildDeveloperSession(loggedInState = LoggedInState.LOGGED_IN, buildDeveloper("givenname.familyname@example.com", "Givenname", "Familyname"))
+    val loggedInDeveloper = standardDeveloper.loggedIn
 
     val application = Application(
       applicationId,
@@ -63,7 +66,7 @@ class LeftHandNavSpec extends CommonViewSpec
       Environment.PRODUCTION,
       Some("Description 1"),
       Set(loggedInDeveloper.email.asAdministratorCollaborator),
-      state = ApplicationState.production(loggedInDeveloper.email, loggedInDeveloper.displayedName, ""),
+      state = ApplicationState.production(loggedInDeveloper.email.text, loggedInDeveloper.displayedName, ""),
       access = Standard(redirectUris = List("https://red1", "https://red2"), termsAndConditionsUrl = Some("http://tnc-url.com"))
     )
 

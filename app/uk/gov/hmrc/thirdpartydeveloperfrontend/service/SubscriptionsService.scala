@@ -16,18 +16,22 @@
 
 package uk.gov.hmrc.thirdpartydeveloperfrontend.service
 
+import uk.gov.hmrc.apiplatform.modules.common.domain.models.LaxEmailAddress
+
 import javax.inject.{Inject, Singleton}
 import scala.concurrent.{ExecutionContext, Future}
-
 import uk.gov.hmrc.http.HeaderCarrier
-
 import uk.gov.hmrc.thirdpartydeveloperfrontend.connectors.{ApmConnector, DeskproConnector}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.ApplicationUpdateSuccessful
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.apidefinitions.{ApiVersion, _}
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.{Application, ApplicationId}
+import uk.gov.hmrc.apiplatform.modules.apis.domain.models.{ApiVersion, _}
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.apidefinitions._
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.Application
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.connectors.{DeskproTicket, TicketResult}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.DeveloperSession
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.subscriptions.FieldName
+import uk.gov.hmrc.apiplatform.modules.applications.domain.models.ApplicationId
+import uk.gov.hmrc.apiplatform.modules.apis.domain.models._
+
 
 @Singleton
 class SubscriptionsService @Inject() (
@@ -44,7 +48,7 @@ class SubscriptionsService @Inject() (
       apiName: String,
       apiVersion: ApiVersion
     )(
-      f: (String, String, String, ApplicationId, String, ApiVersion) => DeskproTicket
+      f: (String, LaxEmailAddress, String, ApplicationId, String, ApiVersion) => DeskproTicket
     ) = {
     f(requester.displayedName, requester.email, application.name, application.id, apiName, apiVersion)
   }

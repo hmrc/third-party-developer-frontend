@@ -19,10 +19,9 @@ package uk.gov.hmrc.thirdpartydeveloperfrontend.connectors
 import uk.gov.hmrc.thirdpartydeveloperfrontend.builder.SubscriptionsBuilder
 import com.github.tomakehurst.wiremock.client.WireMock._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.connectors.SubscriptionFieldsConnectorDomain._
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.apidefinitions.ApiContext
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.apidefinitions.ApiIdentifier
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.apidefinitions.ApiVersion
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.ClientId
+import uk.gov.hmrc.apiplatform.modules.apis.domain.models.ApiContext
+import uk.gov.hmrc.apiplatform.modules.apis.domain.models.ApiIdentifier
+import uk.gov.hmrc.apiplatform.modules.apis.domain.models.ApiVersion
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.subscriptions.AccessRequirements
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.subscriptions.ApiSubscriptionFields._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.subscriptions.FieldName
@@ -42,11 +41,12 @@ import play.api.libs.json.Writes
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.http._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.WireMockExtensions
-
+import uk.gov.hmrc.apiplatform.modules.applications.domain.models.ClientId
 import java.util.UUID
 
 import SubscriptionFieldsConnectorJsonFormatters._
 
+import uk.gov.hmrc.apiplatform.modules.applications.domain.models.ClientId
 class SubscriptionFieldsConnectorSpec extends BaseConnectorIntegrationSpec with GuiceOneAppPerSuite with WireMockExtensions with SubscriptionsBuilder {
   private val apiKey: String = UUID.randomUUID().toString
   private val clientId       = ClientId(UUID.randomUUID().toString)

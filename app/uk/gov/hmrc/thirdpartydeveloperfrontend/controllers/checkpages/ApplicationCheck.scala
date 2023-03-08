@@ -20,24 +20,23 @@ import java.time.Clock
 import javax.inject.{Inject, Singleton}
 import scala.concurrent.Future.successful
 import scala.concurrent.{ExecutionContext, Future}
-
 import uk.gov.voa.play.form.ConditionalMappings._
 import views.html.checkpages._
 import views.html.checkpages.applicationcheck.team.{TeamMemberAddView, TeamMemberRemoveConfirmationView, TeamView}
 import views.html.checkpages.applicationcheck.{LandingPageView, UnauthorisedAppDetailsView}
 import views.html.editapplication.NameSubmittedView
-
 import play.api.data.Form
 import play.api.data.Forms.{boolean, mapping, optional, text}
 import play.api.libs.crypto.CookieSigner
 import play.api.mvc._
-
 import uk.gov.hmrc.thirdpartydeveloperfrontend.config.{ApplicationConfig, ErrorHandler}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.FormKeys._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers._
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.{ApplicationId, CheckInformation}
+import uk.gov.hmrc.apiplatform.modules.applications.domain.models.ApplicationId
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.{CheckInformation}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.views.CheckInformationForm
 import uk.gov.hmrc.thirdpartydeveloperfrontend.service.{ApplicationActionService, ApplicationService, SessionService, TermsOfUseVersionService}
+import uk.gov.hmrc.apiplatform.modules.common.domain.models.LaxEmailAddress.StringSyntax
 
 @Singleton
 class ApplicationCheck @Inject() (
@@ -134,7 +133,7 @@ class ApplicationCheck @Inject() (
   def teamMemberRemoveAction(appId: ApplicationId): Action[AnyContent] = canUseChecksAction(appId) { implicit request =>
     def handleValidForm(form: RemoveTeamMemberCheckPageConfirmationForm): Future[Result] = {
       applicationService
-        .removeTeamMember(request.application, form.email, request.developerSession.email)
+        .removeTeamMember(request.application, form.email.toLaxEmail, request.developerSession.email)
         .map(_ => Redirect(routes.ApplicationCheck.team(appId)))
     }
 

@@ -16,14 +16,15 @@
 
 package uk.gov.hmrc.thirdpartydeveloperfrontend.domain.services
 
+import uk.gov.hmrc.apiplatform.modules.common.domain.models.LaxEmailAddress
+
 import java.time.LocalDateTime
 import javax.inject.Singleton
-
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.{Application, CheckInformation, Standard, TermsOfUseAcceptance, TermsOfUseAgreement}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.services.TermsOfUseService.TermsOfUseAgreementDetails
 
 object TermsOfUseService {
-  case class TermsOfUseAgreementDetails(emailAddress: String, name: Option[String], date: LocalDateTime, version: Option[String])
+  case class TermsOfUseAgreementDetails(emailAddress: LaxEmailAddress, name: Option[String], date: LocalDateTime, version: Option[String])
 }
 
 @Singleton
@@ -37,7 +38,7 @@ class TermsOfUseService {
     std.importantSubmissionData.fold[List[TermsOfUseAgreementDetails]](List.empty)(isd =>
       isd.termsOfUseAcceptances
         .map((toua: TermsOfUseAcceptance) =>
-          TermsOfUseAgreementDetails(toua.responsibleIndividual.emailAddress.value, Some(toua.responsibleIndividual.fullName.value), toua.dateTime, None)
+          TermsOfUseAgreementDetails(toua.responsibleIndividual.emailAddress, Some(toua.responsibleIndividual.fullName.value), toua.dateTime, None)
         )
     )
   }

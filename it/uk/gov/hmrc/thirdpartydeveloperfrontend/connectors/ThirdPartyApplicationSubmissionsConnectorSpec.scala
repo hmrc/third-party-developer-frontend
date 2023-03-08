@@ -41,8 +41,10 @@ import uk.gov.hmrc.apiplatform.modules.submissions.domain.models.{
   Submission
 }
 import uk.gov.hmrc.apiplatform.modules.submissions.SubmissionsTestData
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.{ApplicationId, ResponsibleIndividual}
+import uk.gov.hmrc.apiplatform.modules.applications.domain.models.ApplicationId
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.{ResponsibleIndividual}
 import java.time.{LocalDateTime, ZoneOffset}
+import uk.gov.hmrc.apiplatform.modules.common.domain.models.LaxEmailAddress.StringSyntax
 
 class ThirdPartyApplicationSubmissionsConnectorSpec
     extends BaseConnectorIntegrationSpec
@@ -84,8 +86,8 @@ class ThirdPartyApplicationSubmissionsConnectorSpec
       LocalDateTime.now(ZoneOffset.UTC),
       ResponsibleIndividualVerificationState.INITIAL
     )
-    val responsibleIndividual                             = ResponsibleIndividual.build("bob example", "bob@example.com")
-    val riVerificationWithDetails                         = ResponsibleIndividualVerificationWithDetails(riVerification, responsibleIndividual, "Rick Deckard", "rick@submitter.com")
+    val responsibleIndividual                             = ResponsibleIndividual.build("bob example", "bob@example.com".toLaxEmail)
+    val riVerificationWithDetails                         = ResponsibleIndividualVerificationWithDetails(riVerification, responsibleIndividual, "Rick Deckard", "rick@submitter.com".toLaxEmail)
 
     val extendedSubmission = answeringSubmission.withIncompleteProgress
   }
@@ -162,7 +164,7 @@ class ThirdPartyApplicationSubmissionsConnectorSpec
   }
 
   "fetchLatestSubmission" should {
-    val url = s"/submissions/application/${applicationId.value}"
+    val url = s"/submissions/application/${applicationId.text}"
 
     "return NOT FOUND with empty response body" in new Setup {
       stubFor(
@@ -196,7 +198,7 @@ class ThirdPartyApplicationSubmissionsConnectorSpec
 
   "createSubmission" should {
     val app   = aStandardApplication
-    val email = "bob@example.com"
+    val email = "bob@example.com".toLaxEmail
     val url   = s"/submissions/application/${app.id.value}"
 
     "return successfully if TPA returns OK" in new Setup {
@@ -217,7 +219,7 @@ class ThirdPartyApplicationSubmissionsConnectorSpec
   }
 
   "fetchLatestExtendedSubmission" should {
-    val url = s"/submissions/application/${applicationId.value}/extended"
+    val url = s"/submissions/application/${applicationId.text}/extended"
 
     "return NOT FOUND with empty response body" in new Setup {
       stubFor(
@@ -251,7 +253,7 @@ class ThirdPartyApplicationSubmissionsConnectorSpec
 
   "confirmSetupComplete" should {
     val app   = aStandardApplication
-    val email = "bob@example.com"
+    val email = "bob@example.com".toLaxEmail
     val url   = s"/application/${app.id.value}/confirm-setup-complete"
 
     "return successfully if TPA returns OK" in new Setup {
@@ -289,7 +291,7 @@ class ThirdPartyApplicationSubmissionsConnectorSpec
     val app   = aStandardApplication
     val url   = s"/approvals/application/${app.id.value}/request"
     val name  = "bob example"
-    val email = "bob@spongepants.com"
+    val email = "bob@spongepants.com".toLaxEmail
 
     "return application with OK" in new Setup {
       stubFor(

@@ -19,10 +19,13 @@ package uk.gov.hmrc.thirdpartydeveloperfrontend.controllers
 import uk.gov.hmrc.thirdpartydeveloperfrontend.builder._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.apidefinitions.APIStatus._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.apidefinitions._
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.{Application, ApplicationId, ClientId}
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.{Application}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.subscriptions.ApiSubscriptionFields.{SubscriptionFieldDefinition, SubscriptionFieldValue, SubscriptionFieldsWrapper}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.subscriptions.{FieldName, FieldValue}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.AsyncHmrcSpec
+import uk.gov.hmrc.apiplatform.modules.applications.domain.models.ClientId
+import uk.gov.hmrc.apiplatform.modules.applications.domain.models.ApplicationId
+import uk.gov.hmrc.apiplatform.modules.apis.domain.models._
 
 trait SubscriptionTestHelperSugar extends SubscriptionsBuilder {
   self: AsyncHmrcSpec with SampleApplication =>
@@ -111,7 +114,7 @@ trait SubscriptionTestHelperSugar extends SubscriptionsBuilder {
     val fields = (1 to count).map(i => generateFieldValue(prefix, i)).toList
 
     SubscriptionFieldsWrapper(
-      applicationId = ApplicationId(WHO_CARES),
+      applicationId = ApplicationId.random,
       clientId = ClientId(WHO_CARES),
       apiContext = ApiContext(WHO_CARES),
       apiVersion = ApiVersion(WHO_CARES),

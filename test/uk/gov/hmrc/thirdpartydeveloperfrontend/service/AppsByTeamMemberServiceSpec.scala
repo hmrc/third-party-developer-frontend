@@ -25,13 +25,17 @@ import uk.gov.hmrc.http.{HeaderCarrier, UpstreamErrorResponse}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.builder._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.config.ApplicationConfig
 import uk.gov.hmrc.thirdpartydeveloperfrontend.connectors._
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.apidefinitions._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.controllers.ApplicationSummary
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.UserId
+import uk.gov.hmrc.apiplatform.modules.developers.domain.models.UserId
 import uk.gov.hmrc.thirdpartydeveloperfrontend.service.PushPullNotificationsService.PushPullNotificationsConnector
 import uk.gov.hmrc.thirdpartydeveloperfrontend.service.SubscriptionFieldsService.SubscriptionFieldsConnector
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.{AsyncHmrcSpec, LocalUserIdTracker}
+import uk.gov.hmrc.apiplatform.modules.common.domain.models.LaxEmailAddress.StringSyntax
+import uk.gov.hmrc.apiplatform.modules.applications.domain.models.ClientId
+import uk.gov.hmrc.apiplatform.modules.applications.domain.models.ApplicationId
+import uk.gov.hmrc.apiplatform.modules.applications.domain.models.Collaborators
+import uk.gov.hmrc.apiplatform.modules.apis.domain.models._
 
 class AppsByTeamMemberServiceSpec extends AsyncHmrcSpec with SubscriptionsBuilder with ApplicationBuilder with LocalUserIdTracker {
 
@@ -66,10 +70,10 @@ class AppsByTeamMemberServiceSpec extends AsyncHmrcSpec with SubscriptionsBuilde
 
   "Fetch by teamMember" should {
     val userId         = UserId.random
-    val email          = "bob@example.com"
+    val email          = "bob@example.com".toLaxEmail
     val grantLength    = Period.ofDays(547)
     val productionApp1 = ApplicationWithSubscriptionIds(
-      ApplicationId("id1"),
+      ApplicationId.random,
       ClientId("cl-id1"),
       "zapplication",
       LocalDateTime.now,
@@ -77,10 +81,10 @@ class AppsByTeamMemberServiceSpec extends AsyncHmrcSpec with SubscriptionsBuilde
       None,
       grantLength,
       Environment.PRODUCTION,
-      collaborators = Set(Collaborator(email, CollaboratorRole.ADMINISTRATOR, userId))
+      collaborators = Set(Collaborators.Administrator(userId, email))
     )
     val sandboxApp1    = ApplicationWithSubscriptionIds(
-      ApplicationId("id2"),
+      ApplicationId.random,
       ClientId("cl-id2"),
       "application",
       LocalDateTime.now,
@@ -88,10 +92,10 @@ class AppsByTeamMemberServiceSpec extends AsyncHmrcSpec with SubscriptionsBuilde
       None,
       grantLength,
       Environment.SANDBOX,
-      collaborators = Set(Collaborator(email, CollaboratorRole.ADMINISTRATOR, userId))
+      collaborators = Set(Collaborators.Administrator(userId, email))
     )
     val productionApp2 = ApplicationWithSubscriptionIds(
-      ApplicationId("id3"),
+      ApplicationId.random,
       ClientId("cl-id3"),
       "4pplication",
       LocalDateTime.now,
@@ -99,7 +103,7 @@ class AppsByTeamMemberServiceSpec extends AsyncHmrcSpec with SubscriptionsBuilde
       None,
       grantLength,
       Environment.PRODUCTION,
-      collaborators = Set(Collaborator(email, CollaboratorRole.ADMINISTRATOR, userId))
+      collaborators = Set(Collaborators.Administrator(userId, email))
     )
 
     val productionApps = Seq(productionApp1, productionApp2)

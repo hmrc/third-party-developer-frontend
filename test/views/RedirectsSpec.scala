@@ -17,27 +17,27 @@
 package views
 
 import java.time.{LocalDateTime, Period, ZoneOffset}
-
 import org.jsoup.Jsoup
 import views.helper.CommonViewSpec
 import views.html.RedirectsView
-
 import play.api.test.FakeRequest
-
+import uk.gov.hmrc.apiplatform.modules.common.domain.models.LaxEmailAddress.StringSyntax
 import uk.gov.hmrc.thirdpartydeveloperfrontend.builder.{DeveloperBuilder, DeveloperSessionBuilder}
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.CollaboratorRole.{ADMINISTRATOR, DEVELOPER}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.controllers.ApplicationViewModel
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.LoggedInState
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.ViewHelpers._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils._
+import uk.gov.hmrc.apiplatform.modules.applications.domain.models.ClientId
+import uk.gov.hmrc.apiplatform.modules.applications.domain.models.ApplicationId
+import uk.gov.hmrc.apiplatform.modules.applications.domain.models.Collaborator
 
 class RedirectsSpec extends CommonViewSpec with WithCSRFAddToken with CollaboratorTracker with LocalUserIdTracker with DeveloperSessionBuilder with DeveloperBuilder {
 
-  val appId             = ApplicationId("1234")
+  val appId             = ApplicationId.random
   val clientId          = ClientId("clientId123")
-  val loggedInDeveloper = buildDeveloperSession(loggedInState = LoggedInState.LOGGED_IN, buildDeveloperWithRandomId("developer@example.com", "John", "Doe"))
-  val loggedInDev       = buildDeveloperSession(loggedInState = LoggedInState.LOGGED_IN, buildDeveloperWithRandomId("developer2@example.com", "Billy", "Fontaine"))
+  val loggedInDeveloper = buildDeveloperWithRandomId("developer@example.com".toLaxEmail, "John", "Doe").loggedIn
+  val loggedInDev       = buildDeveloperWithRandomId("developer2@example.com".toLaxEmail, "Billy", "Fontaine").loggedIn
 
   val application = Application(
     appId,
@@ -50,14 +50,14 @@ class RedirectsSpec extends CommonViewSpec with WithCSRFAddToken with Collaborat
     Environment.PRODUCTION,
     Some("Description 1"),
     Set(loggedInDeveloper.email.asAdministratorCollaborator, loggedInDev.email.asDeveloperCollaborator),
-    state = ApplicationState.production(loggedInDeveloper.email, loggedInDeveloper.displayedName, ""),
+    state = ApplicationState.production(loggedInDeveloper.email.text, loggedInDeveloper.displayedName, ""),
     access = Standard(redirectUris = List.empty, termsAndConditionsUrl = None)
   )
 
   "redirects page" should {
     val redirectLimit = 5
 
-    def renderPageWithRedirectUris(role: CollaboratorRole, numberOfRedirectUris: Int) = {
+    def renderPageWithRedirectUris(role: Collaborator.Role, numberOfRedirectUris: Int) = {
       val request        = FakeRequest().withCSRFToken
       val redirects      = 1 to numberOfRedirectUris map (num => s"http://localhost:$num")
       val standardAccess = Standard(redirectUris = redirects.toList, termsAndConditionsUrl = None)
@@ -84,11 +84,11 @@ class RedirectsSpec extends CommonViewSpec with WithCSRFAddToken with Collaborat
     }
 
     def renderPageForStandardApplicationAsAdminWithRedirectUris(numberOfRedirectUris: Int) = {
-      renderPageWithRedirectUris(ADMINISTRATOR, numberOfRedirectUris)
+      renderPageWithRedirectUris(Collaborator.Roles.ADMINISTRATOR, numberOfRedirectUris)
     }
 
     def renderPageForStandardApplicationAsDeveloperWithRedirectUris(numberOfRedirectUris: Int) = {
-      renderPageWithRedirectUris(DEVELOPER, numberOfRedirectUris)
+      renderPageWithRedirectUris(Collaborator.Roles.DEVELOPER, numberOfRedirectUris)
     }
 
     "show a button for adding a redirect uri" in {

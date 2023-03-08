@@ -17,8 +17,8 @@
 package uk.gov.hmrc.thirdpartydeveloperfrontend.connectors
 
 import com.github.tomakehurst.wiremock.client.WireMock._
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.ApplicationId
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.connectors.{DeskproTicket, Feedback, TicketCreated, TicketId}
+import uk.gov.hmrc.apiplatform.modules.applications.domain.models.ApplicationId
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.connectors._
 import org.scalatestplus.play.guice.GuiceOneAppPerSuite
 import play.api.inject.bind
 import play.api.inject.guice.GuiceApplicationBuilder
@@ -26,7 +26,8 @@ import play.api.libs.json.Json
 import play.api.{Application, Configuration, Mode}
 import uk.gov.hmrc.http.{HeaderCarrier, UpstreamErrorResponse}
 import uk.gov.hmrc.play.http.metrics.common.API
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.UserId
+import uk.gov.hmrc.apiplatform.modules.developers.domain.models.UserId
+import uk.gov.hmrc.apiplatform.modules.common.domain.models.LaxEmailAddress.StringSyntax
 
 class DeskproConnectorIntegrationSpec extends BaseConnectorIntegrationSpec with GuiceOneAppPerSuite {
   private val stubConfig = Configuration("microservice.services.hmrc-deskpro.port" -> stubPort)
@@ -53,7 +54,7 @@ class DeskproConnectorIntegrationSpec extends BaseConnectorIntegrationSpec with 
   "DeskproConnector" when {
 
     "Creating a Deskpro ticket" should {
-      val ticket       = DeskproTicket.createForUplift("Joe Bloggs", "joe.bloggs@example.com", "Test App", ApplicationId("appId"))
+      val ticket       = DeskproTicket.createForUplift("Joe Bloggs", "joe.bloggs@example.com".toLaxEmail, "Test App", ApplicationId.random)
       val ticketPath   = "/deskpro/ticket"
       val expectedBody = Json.toJson(ticket).toString()
 
@@ -76,7 +77,7 @@ class DeskproConnectorIntegrationSpec extends BaseConnectorIntegrationSpec with 
 
       val feedback = Feedback(
         name = "Test",
-        email = "Test@example.com",
+        email = "Test@example.com".toLaxEmail,
         subject = "subject",
         rating = "5",
         message = "Test feedback",

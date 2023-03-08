@@ -34,6 +34,8 @@ import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.{Develop
 import uk.gov.hmrc.thirdpartydeveloperfrontend.mocks.service._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.WithLoggedInSession._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.{LocalUserIdTracker, TestApplications, WithCSRFAddToken}
+import uk.gov.hmrc.apiplatform.modules.applications.domain.models.ClientId
+import uk.gov.hmrc.apiplatform.modules.applications.domain.models.ApplicationId
 
 class DeletePrincipalApplicationSpec
     extends BaseControllerSpec
@@ -64,7 +66,7 @@ class DeletePrincipalApplicationSpec
       deleteSubordinateApplicationCompleteView
     )
 
-    val appId           = ApplicationId("1234")
+    val appId           = ApplicationId.random
     val clientId        = ClientId("clientIdzzz")
     val appName: String = "Application Name"
 
@@ -87,7 +89,7 @@ class DeletePrincipalApplicationSpec
       Environment.PRODUCTION,
       Some("Description 1"),
       Set(loggedInDeveloper.email.asAdministratorCollaborator),
-      state = ApplicationState.production(loggedInDeveloper.email, loggedInDeveloper.displayedName, ""),
+      state = ApplicationState.production(loggedInDeveloper.email.text, loggedInDeveloper.displayedName, ""),
       access = Standard(redirectUris = List("https://red1", "https://red2"), termsAndConditionsUrl = Some("http://tnc-url.com"))
     )
 
@@ -151,7 +153,7 @@ class DeletePrincipalApplicationSpec
 
       status(result) shouldBe SEE_OTHER
 
-      redirectLocation(result) shouldBe Some(s"/developer/applications/${appId.value}/details")
+      redirectLocation(result) shouldBe Some(s"/developer/applications/${appId.text}/details")
     }
   }
 

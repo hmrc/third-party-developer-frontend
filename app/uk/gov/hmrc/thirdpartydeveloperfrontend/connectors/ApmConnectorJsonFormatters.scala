@@ -16,7 +16,7 @@
 
 package uk.gov.hmrc.thirdpartydeveloperfrontend.connectors
 
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.apidefinitions.ApiContext
+import uk.gov.hmrc.apiplatform.modules.apis.domain.models.ApiContext
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.services._
 
 trait ApmConnectorJsonFormatters extends ApiDefinitionsJsonFormatters with ApplicationsJsonFormatters

@@ -19,13 +19,12 @@ package uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.endpointauth
 import java.time.{LocalDateTime, Period}
 import java.util.UUID
 import scala.concurrent.Future
-
 import cats.data.NonEmptyList
-
 import play.api.libs.crypto.CookieSigner
 import play.api.mvc.Cookie
 import play.api.test.FakeRequest
-
+import uk.gov.hmrc.apiplatform.modules.common.domain.models.LaxEmailAddress
+import uk.gov.hmrc.apiplatform.modules.common.domain.models.LaxEmailAddress.StringSyntax
 import uk.gov.hmrc.apiplatform.modules.mfa.connectors.ThirdPartyDeveloperMfaConnector.{RegisterAuthAppResponse, RegisterSmsSuccessResponse}
 import uk.gov.hmrc.apiplatform.modules.submissions.domain.models.ResponsibleIndividualVerificationState.INITIAL
 import uk.gov.hmrc.apiplatform.modules.submissions.domain.models.Submission.Status.Granted
@@ -34,13 +33,16 @@ import uk.gov.hmrc.thirdpartydeveloperfrontend.builder.MfaDetailBuilder
 import uk.gov.hmrc.thirdpartydeveloperfrontend.connectors.ThirdPartyDeveloperConnector.CoreUserDetails
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.apidefinitions.APIAccessType.PUBLIC
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.apidefinitions.APIStatus.STABLE
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.apidefinitions.{APIAccess, ApiContext, ApiIdentifier, ApiVersion}
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.apidefinitions.{APIAccess}
+import uk.gov.hmrc.apiplatform.modules.apis.domain.models.{ApiContext, ApiIdentifier, ApiVersion}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.Environment.{PRODUCTION, SANDBOX}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.emailpreferences.EmailPreferences
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.subscriptions.ApiSubscriptionFields.SubscriptionFieldDefinition
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.subscriptions._
+import uk.gov.hmrc.apiplatform.modules.developers.domain.models.UserId
+import uk.gov.hmrc.apiplatform.modules.applications.domain.models._
 
 trait HasApplication extends HasAppDeploymentEnvironment with HasUserWithRole with HasAppState with MfaDetailBuilder {
   val applicationId   = ApplicationId.random
@@ -142,7 +144,7 @@ trait HasApplication extends HasAppDeploymentEnvironment with HasUserWithRole wi
   lazy val responsibleIndividualVerificationId = ResponsibleIndividualVerificationId(UUID.randomUUID().toString)
   lazy val submissionId                        = Submission.Id.random
   lazy val submissionIndex                     = 1
-  lazy val responsibleIndividual               = ResponsibleIndividual.build("mr responsible", "ri@example.com")
+  lazy val responsibleIndividual               = ResponsibleIndividual.build("mr responsible", "ri@example.com".toLaxEmail)
 
   lazy val responsibleIndividualVerification = ResponsibleIndividualUpdateVerification(
     responsibleIndividualVerificationId,
@@ -153,7 +155,7 @@ trait HasApplication extends HasAppDeploymentEnvironment with HasUserWithRole wi
     createdOn,
     responsibleIndividual,
     "admin@example.com",
-    "Mr Admin",
+    "Mr Admin".toLaxEmail,
     INITIAL
   )
 
@@ -161,7 +163,7 @@ trait HasApplication extends HasAppDeploymentEnvironment with HasUserWithRole wi
     responsibleIndividualVerification,
     responsibleIndividual,
     "mr submitter",
-    "submitter@example.com"
+    "submitter@example.com".toLaxEmail
   )
   lazy val authAppMfaId                                 = verifiedAuthenticatorAppMfaDetail.id
   lazy val smsMfaId                                     = verifiedSmsMfaDetail.id
@@ -198,8 +200,8 @@ trait IsNewJourneyStandardApplication extends HasApplication {
       None,
       responsibleIndividual,
       Set.empty,
-      TermsAndConditionsLocation.Url(termsConditionsUrl),
-      PrivacyPolicyLocation.Url(privacyPolicyUrl),
+      TermsAndConditionsLocations.Url(termsConditionsUrl),
+      PrivacyPolicyLocations.Url(privacyPolicyUrl),
       List.empty
     ))
   )
@@ -213,7 +215,7 @@ trait IsNewJourneyStandardApplicationWithoutSubmission extends HasApplication {
 }
 
 trait HasUserWithRole extends MockConnectors with MfaDetailBuilder {
-  lazy val userEmail     = "user@example.com"
+  lazy val userEmail: LaxEmailAddress     = "user@example.com".toLaxEmail
   lazy val userId        = UserId.random
   lazy val userFirstName = "Bob"
   lazy val userLastName  = "Example"
@@ -243,16 +245,16 @@ trait UserIsTeamMember extends HasUserWithRole with HasApplication {
 
 trait UserIsAdmin extends UserIsTeamMember {
   def describeUserRole  = "The user is an Admin on the application team"
-  def maybeCollaborator = Some(Collaborator(userEmail, CollaboratorRole.ADMINISTRATOR, userId))
+  def maybeCollaborator = Some(Collaborator(userEmail, Collaborator.Roles.ADMINISTRATOR, userId))
 }
 
 trait UserIsDeveloper extends UserIsTeamMember {
   def describeUserRole  = "The user is a Developer on the application team"
-  def maybeCollaborator = Some(Collaborator(userEmail, CollaboratorRole.DEVELOPER, userId))
+  def maybeCollaborator = Some(Collaborator(userEmail, Collaborator.Roles.DEVELOPER, userId))
 }
 
 trait UserIsNotOnApplicationTeam extends HasUserWithRole with HasApplication {
-  val otherApp            = application.copy(id = ApplicationId.random, collaborators = Set(Collaborator(userEmail, CollaboratorRole.DEVELOPER, userId)))
+  val otherApp            = application.copy(id = ApplicationId.random, collaborators = Set(Collaborator(userEmail, Collaborator.Roles.DEVELOPER, userId)))
   val otherAppWithSubsIds = ApplicationWithSubscriptionIds.from(otherApp).copy(subscriptions = Set(apiIdentifier))
   when(tpaProductionConnector.fetchByTeamMember(*[UserId])(*)).thenReturn(Future.successful(List(otherAppWithSubsIds)))
   when(tpaSandboxConnector.fetchByTeamMember(*[UserId])(*)).thenReturn(Future.successful(List(otherAppWithSubsIds)))
@@ -272,7 +274,7 @@ trait UserIsAuthenticated extends HasUserSession with UpdatesRequest {
   def loggedInState               = LoggedInState.LOGGED_IN
 
   when(tpdConnector.register(*)(*)).thenReturn(Future.successful(EmailAlreadyInUse))
-  when(tpdConnector.findUserId(*)(*)).thenReturn(Future.successful(Some(CoreUserDetails(userEmail, userId))))
+  when(tpdConnector.findUserId(*[LaxEmailAddress])(*)).thenReturn(Future.successful(Some(CoreUserDetails(userEmail, userId))))
 
   implicit val cookieSigner: CookieSigner
 
@@ -280,8 +282,8 @@ trait UserIsAuthenticated extends HasUserSession with UpdatesRequest {
     request.withCookies(
       Cookie("PLAY2AUTH_SESS_ID", cookieSigner.sign(sessionId) + sessionId, None, "path", None, false, false)
     ).withSession(
-      ("email", userEmail),
-      ("emailAddress", userEmail),
+      ("email", userEmail.text),
+      ("emailAddress", userEmail.text),
       ("nonce", "123"),
       ("userId", developer.userId.value.toString)
     )
@@ -293,7 +295,7 @@ trait UserIsNotAuthenticated extends HasUserSession {
   def loggedInState               = LoggedInState.PART_LOGGED_IN_ENABLING_MFA
 
   when(tpdConnector.register(*)(*)).thenReturn(Future.successful(RegistrationSuccessful))
-  when(tpdConnector.findUserId(*)(*)).thenReturn(Future.successful(None))
+  when(tpdConnector.findUserId(*[LaxEmailAddress])(*)).thenReturn(Future.successful(None))
 }
 
 trait HasAppDeploymentEnvironment {

@@ -29,6 +29,7 @@ import play.api.{Application, Configuration, Mode}
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.WireMockExtensions
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.EmailAlreadyInUse
+import uk.gov.hmrc.apiplatform.modules.common.domain.models.LaxEmailAddress.StringSyntax
 
 class ThirdPartyDeveloperConnectorEncryptionSpec extends BaseConnectorIntegrationSpec with GuiceOneAppPerSuite with WireMockExtensions {
 
@@ -36,6 +37,8 @@ class ThirdPartyDeveloperConnectorEncryptionSpec extends BaseConnectorIntegratio
     "microservice.services.third-party-developer.port" -> stubPort,
     "json.encryption.key"                              -> "czV2OHkvQj9FKEgrTWJQZVNoVm1ZcTN0Nnc5eiRDJkY="
   )
+
+  val testEmail = "email@example.com".toLaxEmail
 
   override def fakeApplication(): Application =
     GuiceApplicationBuilder()
@@ -59,7 +62,7 @@ class ThirdPartyDeveloperConnectorEncryptionSpec extends BaseConnectorIntegratio
               .withHeader("Content-Type", "application/json")
           )
       )
-      await(underTest.register(new Registration("first", "last", "email@example.com", "password")))
+      await(underTest.register(new Registration("first", "last", testEmail, "password")))
       verify(
         1,
         postRequestedFor(urlMatching("/developer"))
@@ -70,7 +73,7 @@ class ThirdPartyDeveloperConnectorEncryptionSpec extends BaseConnectorIntegratio
     }
 
     "fail to register a developer when the email address is already in use" in new Setup {
-      val registrationToTest = Registration("first", "last", "email@example.com", "password")
+      val registrationToTest = Registration("first", "last", testEmail, "password")
       val secretPayload      = SecretRequest("yLR5YLduz4B2c79v3eSrnUuk71jBNoOOytn5CgYL/JbxxGVgD/JJVZAwF5fm/z3LTxtUsa9G6WSLb9F5Sh4YNTQuTO4Cm+8EtimKAMofV6BnHESgQTR9x1Ebgznq7UM9")
 
       stubFor(
@@ -95,7 +98,7 @@ class ThirdPartyDeveloperConnectorEncryptionSpec extends BaseConnectorIntegratio
               .withHeader("Content-Type", "application/json")
           )
       )
-      await(underTest.createUnregisteredUser("email@example.com"))
+      await(underTest.createUnregisteredUser(testEmail))
       verify(
         1,
         postRequestedFor(urlMatching("/unregistered-developer"))
@@ -114,7 +117,7 @@ class ThirdPartyDeveloperConnectorEncryptionSpec extends BaseConnectorIntegratio
               .withHeader("Content-Type", "application/json")
           )
       )
-      await(underTest.reset(new PasswordReset("email@example.com", "newPassword")))
+      await(underTest.reset(new PasswordReset(testEmail, "newPassword")))
       verify(
         1,
         postRequestedFor(urlMatching("/reset-password"))
@@ -133,7 +136,7 @@ class ThirdPartyDeveloperConnectorEncryptionSpec extends BaseConnectorIntegratio
               .withHeader("Content-Type", "application/json")
           )
       )
-      await(underTest.changePassword(new ChangePassword("email@example.com", "oldPassword", "newPassword")))
+      await(underTest.changePassword(new ChangePassword(testEmail, "oldPassword", "newPassword")))
       verify(
         1,
         postRequestedFor(urlMatching("/change-password"))
@@ -153,7 +156,7 @@ class ThirdPartyDeveloperConnectorEncryptionSpec extends BaseConnectorIntegratio
       )
 
       intercept[LockedAccount] {
-        await(underTest.changePassword(ChangePassword("email@email.com", "oldPassword", "newPassword")))
+        await(underTest.changePassword(ChangePassword(testEmail, "oldPassword", "newPassword")))
       }
     }
 
@@ -167,7 +170,7 @@ class ThirdPartyDeveloperConnectorEncryptionSpec extends BaseConnectorIntegratio
       )
 
       intercept[UnverifiedAccount] {
-        await(underTest.changePassword(ChangePassword("email@email.com", "oldPassword", "newPassword")))
+        await(underTest.changePassword(ChangePassword(testEmail, "oldPassword", "newPassword")))
       }
     }
 
@@ -181,7 +184,7 @@ class ThirdPartyDeveloperConnectorEncryptionSpec extends BaseConnectorIntegratio
       )
 
       intercept[InvalidCredentials] {
-        await(underTest.changePassword(ChangePassword("email@email.com", "oldPassword", "newPassword")))
+        await(underTest.changePassword(ChangePassword(testEmail, "oldPassword", "newPassword")))
       }
     }
   }

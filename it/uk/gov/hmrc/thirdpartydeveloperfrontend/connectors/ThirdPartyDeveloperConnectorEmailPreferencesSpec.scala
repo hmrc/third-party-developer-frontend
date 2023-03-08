@@ -32,8 +32,9 @@ import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.connectors.LoginReq
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.connectors.AccessCodeAuthenticationRequest
 import play.api.http.HeaderNames
 import uk.gov.hmrc.apiplatform.modules.mfa.models.MfaId
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.UserId
+import uk.gov.hmrc.apiplatform.modules.developers.domain.models.UserId
 import uk.gov.hmrc.thirdpartydeveloperfrontend.connectors.ThirdPartyDeveloperConnector.FindUserIdResponse
+import uk.gov.hmrc.apiplatform.modules.common.domain.models.LaxEmailAddress.StringSyntax
 
 class ThirdPartyDeveloperConnectorEmailPreferencesSpec extends BaseConnectorIntegrationSpec with GuiceOneAppPerSuite {
 
@@ -52,7 +53,7 @@ class ThirdPartyDeveloperConnectorEmailPreferencesSpec extends BaseConnectorInte
   trait Setup {
     implicit val hc: HeaderCarrier = HeaderCarrier()
 
-    val userEmail                 = "thirdpartydeveloper@example.com"
+    val userEmail                 = "thirdpartydeveloper@example.com".toLaxEmail
     val userPassword              = "password1!"
     val sessionId                 = "sessionId"
     val loginRequest              = LoginRequest(userEmail, userPassword, mfaMandatedForUser = false, None)
@@ -69,7 +70,7 @@ class ThirdPartyDeveloperConnectorEmailPreferencesSpec extends BaseConnectorInte
 
   "resendVerificationEmail" should {
     "return" in new Setup {
-      val email  = "foo@bar.com"
+      val email  = "foo@bar.com".toLaxEmail
       val userId = UserId.random
 
       implicit val writes = Json.writes[FindUserIdResponse]

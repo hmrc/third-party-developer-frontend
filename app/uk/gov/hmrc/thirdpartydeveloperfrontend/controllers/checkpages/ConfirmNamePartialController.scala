@@ -26,6 +26,7 @@ import play.api.mvc.{Action, AnyContent, Call, Result}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.ApplicationController
 import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.FormKeys.appNameField
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications._
+import uk.gov.hmrc.apiplatform.modules.applications.domain.models.ApplicationId
 
 trait ConfirmNamePartialController {
   self: ApplicationController with CanUseCheckActions =>

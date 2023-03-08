@@ -23,6 +23,7 @@ import play.api.mvc.{Action, AnyContent, MessagesControllerComponents, Result}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.controllers.ApplicationViewModel
 import uk.gov.hmrc.thirdpartydeveloperfrontend.service.ApplicationService
+import uk.gov.hmrc.apiplatform.modules.applications.domain.models.ApplicationId
 
 abstract class ApplicationController(mcc: MessagesControllerComponents)
     extends LoggedInController(mcc)

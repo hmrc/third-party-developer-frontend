@@ -18,7 +18,7 @@ package uk.gov.hmrc.thirdpartydeveloperfrontend.controllers
 
 import play.api.data.{Form, FormError}
 
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.ApplicationId
+import uk.gov.hmrc.apiplatform.modules.applications.domain.models.ApplicationId
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.AsyncHmrcSpec
 
 class FormValidationSpec extends AsyncHmrcSpec {
@@ -225,7 +225,7 @@ class FormValidationSpec extends AsyncHmrcSpec {
 
   "EditApplicationForm " should {
     val validEditApplicationForm = Map(
-      "applicationId"           -> "Application ID",
+      "applicationId"           -> java.util.UUID.randomUUID.toString,
       "applicationName"         -> "Application name",
       "originalApplicationName" -> "Application name",
       "description"             -> "Application description",
@@ -458,7 +458,7 @@ class FormValidationSpec extends AsyncHmrcSpec {
   "SelectApisFromSubscriptionsForm" should {
     def validateNoErrors = buildValidateNoErrors(SelectApisFromSubscriptionsForm.form.bind) _
 
-    val validFormData = Map("selectedApi[0]" -> "", "applicationId" -> ApplicationId.random.value)
+    val validFormData = Map("selectedApi[0]" -> "", "applicationId" -> ApplicationId.random.text)
 
     "accept valid form" in {
       validateNoErrors(validFormData)
@@ -472,14 +472,14 @@ class FormValidationSpec extends AsyncHmrcSpec {
   "SelectTopicsFromSubscriptionsForm" should {
     def validateNoErrors = buildValidateNoErrors(SelectTopicsFromSubscriptionsForm.form.bind) _
 
-    val validFormData = Map("topic[0]" -> "TopicOne", "applicationId" -> ApplicationId.random.value)
+    val validFormData = Map("topic[0]" -> "TopicOne", "applicationId" -> ApplicationId.random.text)
 
     "accept valid form" in {
       validateNoErrors(validFormData)
     }
 
     "reject a form when now topic is supplied" in {
-      val formDataWithoutTopic = Map("applicationId" -> ApplicationId.random.value)
+      val formDataWithoutTopic = Map("applicationId" -> ApplicationId.random.text)
       val boundForm            = SelectTopicsFromSubscriptionsForm.form.bind(formDataWithoutTopic)
       val err                  = boundForm.errors.head
       err.key shouldBe "topic"

@@ -36,6 +36,7 @@ import uk.gov.hmrc.thirdpartydeveloperfrontend.mocks.service.{ApplicationActionS
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.ViewHelpers._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.WithLoggedInSession._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils._
+import uk.gov.hmrc.apiplatform.modules.applications.domain.models.ClientId
 
 class RedirectsSpec
     extends BaseControllerSpec

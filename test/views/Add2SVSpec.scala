@@ -26,11 +26,11 @@ import uk.gov.hmrc.thirdpartydeveloperfrontend.builder._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.{DeveloperSession, LoggedInState, Session}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.{LocalUserIdTracker, WithCSRFAddToken}
 
-class Add2SVSpec extends CommonViewSpec with WithCSRFAddToken with DeveloperBuilder with DeveloperSessionBuilder with LocalUserIdTracker {
+class Add2SVSpec extends CommonViewSpec with WithCSRFAddToken with DeveloperBuilder with DeveloperSessionBuilder with LocalUserIdTracker with DeveloperTestData {
 
   val add2SVView = app.injector.instanceOf[Add2SVView]
 
-  implicit val loggedInDeveloper = buildDeveloperSession(loggedInState = LoggedInState.LOGGED_IN, buildDeveloper("admin@example.com", "firstName1", "lastName1", None))
+  implicit val loggedInDeveloper = adminDeveloper.loggedIn
   implicit val request           = FakeRequest().withCSRFToken
 
   val developer                 = buildDeveloper()

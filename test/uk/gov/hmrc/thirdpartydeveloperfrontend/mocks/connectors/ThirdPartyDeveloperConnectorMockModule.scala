@@ -17,11 +17,11 @@
 package uk.gov.hmrc.thirdpartydeveloperfrontend.mocks.connectors
 
 import scala.concurrent.Future.successful
-
 import org.mockito.{ArgumentMatchersSugar, MockitoSugar}
-
+import uk.gov.hmrc.apiplatform.modules.common.domain.models.LaxEmailAddress
 import uk.gov.hmrc.thirdpartydeveloperfrontend.connectors.ThirdPartyDeveloperConnector
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.{Developer, UserId}
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.Developer
+import uk.gov.hmrc.apiplatform.modules.developers.domain.models.UserId
 
 trait ThirdPartyDeveloperConnectorMockModule extends MockitoSugar with ArgumentMatchersSugar {
 
@@ -30,7 +30,7 @@ trait ThirdPartyDeveloperConnectorMockModule extends MockitoSugar with ArgumentM
 
     object FindUserId {
 
-      def thenReturn(email: String)(userId: UserId) =
+      def thenReturn(email: LaxEmailAddress)(userId: UserId) =
         when(aMock.findUserId(eqTo(email))(*)).thenReturn(successful(Some(ThirdPartyDeveloperConnector.CoreUserDetails(email, userId))))
     }
 

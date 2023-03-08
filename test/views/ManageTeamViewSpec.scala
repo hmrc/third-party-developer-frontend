@@ -17,14 +17,12 @@
 package views
 
 import java.time.{LocalDateTime, ZoneOffset}
-
 import org.jsoup.Jsoup
 import views.helper.CommonViewSpec
 import views.html.manageTeamViews.ManageTeamView
-
 import play.api.data.Form
 import play.api.test.FakeRequest
-
+import uk.gov.hmrc.apiplatform.modules.common.domain.models.LaxEmailAddress.StringSyntax
 import uk.gov.hmrc.thirdpartydeveloperfrontend.builder.{DeveloperBuilder, DeveloperSessionBuilder}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.AddTeamMemberForm
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications._
@@ -33,13 +31,17 @@ import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.LoggedIn
 import uk.gov.hmrc.thirdpartydeveloperfrontend.helpers.string._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.ViewHelpers.{elementExistsByText, linkExistsWithHref}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.{LocalUserIdTracker, WithCSRFAddToken}
+import uk.gov.hmrc.thirdpartydeveloperfrontend.builder._
+import uk.gov.hmrc.apiplatform.modules.applications.domain.models.ClientId
+import uk.gov.hmrc.apiplatform.modules.applications.domain.models.ApplicationId
+import uk.gov.hmrc.apiplatform.modules.applications.domain.models.Collaborator
 
-class ManageTeamViewSpec extends CommonViewSpec with WithCSRFAddToken with DeveloperBuilder with LocalUserIdTracker with DeveloperSessionBuilder {
+class ManageTeamViewSpec extends CommonViewSpec with WithCSRFAddToken with LocalUserIdTracker with DeveloperSessionBuilder with DeveloperTestData {
 
-  val appId             = ApplicationId("1234")
+  val appId             = ApplicationId.random
   val clientId          = ClientId("clientId123")
-  val loggedInDeveloper = buildDeveloperSession(loggedInState = LoggedInState.LOGGED_IN, buildDeveloper("admin@example.com", "firstName1", "lastName1"))
-  val collaborator      = buildDeveloperSession(loggedInState = LoggedInState.LOGGED_IN, buildDeveloper("developer@example.com", "firstName2", "lastName2"))
+  val loggedInDeveloper = adminDeveloper.loggedIn
+  val collaborator      = standardDeveloper.loggedIn
   val collaborators     = Set(loggedInDeveloper.email.asAdministratorCollaborator, collaborator.email.asDeveloperCollaborator)
 
   val application = Application(
@@ -53,14 +55,14 @@ class ManageTeamViewSpec extends CommonViewSpec with WithCSRFAddToken with Devel
     Environment.PRODUCTION,
     Some("Description 1"),
     collaborators,
-    state = ApplicationState.production(loggedInDeveloper.email, loggedInDeveloper.displayedName, ""),
+    state = ApplicationState.production(loggedInDeveloper.email.text, loggedInDeveloper.displayedName, ""),
     access = Standard(redirectUris = List("https://red1", "https://red2"), termsAndConditionsUrl = Some("http://tnc-url.com"))
   )
 
   "manageTeam view" should {
     val manageTeamView = app.injector.instanceOf[ManageTeamView]
 
-    def renderPage(role: CollaboratorRole, form: Form[AddTeamMemberForm] = AddTeamMemberForm.form) = {
+    def renderPage(role: Collaborator.Role, form: Form[AddTeamMemberForm] = AddTeamMemberForm.form) = {
       val request = FakeRequest().withCSRFToken
 
       manageTeamView.render(
@@ -77,25 +79,25 @@ class ManageTeamViewSpec extends CommonViewSpec with WithCSRFAddToken with Devel
     }
 
     "show Add and Remove buttons for Admin" in {
-      val document = Jsoup.parse(renderPage(role = CollaboratorRole.ADMINISTRATOR).body)
+      val document = Jsoup.parse(renderPage(role = Collaborator.Roles.ADMINISTRATOR).body)
 
       elementExistsByText(document, "h1", "Manage team members") shouldBe true
       elementExistsByText(document, "a", "Add a team member") shouldBe true
       elementExistsByText(document, "strong", "Warning You need admin rights to add or remove team members.") shouldBe false
-      elementExistsByText(document, "td", loggedInDeveloper.email) shouldBe true
-      elementExistsByText(document, "td", collaborator.email) shouldBe true
-      linkExistsWithHref(document, uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.routes.ManageTeam.removeTeamMember(appId, collaborator.email.toSha256).url) shouldBe true
+      elementExistsByText(document, "td", loggedInDeveloper.email.text) shouldBe true
+      elementExistsByText(document, "td", collaborator.email.text) shouldBe true
+      linkExistsWithHref(document, uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.routes.ManageTeam.removeTeamMember(appId, collaborator.email.text.toSha256).url) shouldBe true
     }
 
     "not show Add and Remove buttons for Developer" in {
-      val document = Jsoup.parse(renderPage(role = CollaboratorRole.DEVELOPER).body)
+      val document = Jsoup.parse(renderPage(role = Collaborator.Roles.DEVELOPER).body)
 
       elementExistsByText(document, "h1", "Manage team members") shouldBe true
       elementExistsByText(document, "a", "Add a team member") shouldBe false
       elementExistsByText(document, "strong", "Warning You need admin rights to add or remove team members.") shouldBe true
-      elementExistsByText(document, "td", loggedInDeveloper.email) shouldBe true
-      elementExistsByText(document, "td", collaborator.email) shouldBe true
-      linkExistsWithHref(document, uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.routes.ManageTeam.removeTeamMember(appId, collaborator.email.toSha256).url) shouldBe false
+      elementExistsByText(document, "td", loggedInDeveloper.email.text) shouldBe true
+      elementExistsByText(document, "td", collaborator.email.text) shouldBe true
+      linkExistsWithHref(document, uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.routes.ManageTeam.removeTeamMember(appId, collaborator.email.text.toSha256).url) shouldBe false
     }
   }
 }

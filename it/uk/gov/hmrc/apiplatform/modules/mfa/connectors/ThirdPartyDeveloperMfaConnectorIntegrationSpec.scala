@@ -30,6 +30,7 @@ import uk.gov.hmrc.thirdpartydeveloperfrontend.builder.DeveloperBuilder
 import uk.gov.hmrc.thirdpartydeveloperfrontend.connectors._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.connectors._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.{LocalUserIdTracker, WireMockExtensions}
+import uk.gov.hmrc.apiplatform.modules.common.domain.models.LaxEmailAddress.StringSyntax
 
 import java.util.UUID
 
@@ -51,7 +52,7 @@ class ThirdPartyDeveloperMfaConnectorIntegrationSpec extends BaseConnectorIntegr
   trait Setup {
     implicit val hc: HeaderCarrier = HeaderCarrier()
 
-    val userEmail = "thirdpartydeveloper@example.com"
+    val userEmail = "thirdpartydeveloper@example.com".toLaxEmail
     val userId    = idOf(userEmail)
     val mfaId     = MfaId.random
 

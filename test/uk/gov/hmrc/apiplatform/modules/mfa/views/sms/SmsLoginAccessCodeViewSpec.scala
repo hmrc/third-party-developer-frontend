@@ -32,8 +32,7 @@ import uk.gov.hmrc.thirdpartydeveloperfrontend.builder.{DeveloperBuilder, Develo
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.{LocalUserIdTracker, WithCSRFAddToken}
 
 class SmsLoginAccessCodeViewSpec extends CommonViewSpec
-    with WithCSRFAddToken with DeveloperSessionBuilder
-    with DeveloperBuilder with LocalUserIdTracker with StubMessagesFactory {
+    with WithCSRFAddToken with StubMessagesFactory {
 
   implicit val flash: Flash                                 = Flash(Map("mobileNumber" -> "0123456789"))
   implicit val request: FakeRequest[AnyContentAsEmpty.type] = FakeRequest()

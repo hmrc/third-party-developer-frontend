@@ -26,11 +26,14 @@ import org.mockito.{ArgumentMatchersSugar, MockitoSugar}
 import uk.gov.hmrc.http.HeaderCarrier
 
 import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.{ApplicationRequest, UserRequest}
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.apidefinitions.{APISubscriptionStatus, ApiContext}
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.{Application, ApplicationId, ApplicationWithSubscriptionData}
+import uk.gov.hmrc.apiplatform.modules.apis.domain.models.{ApiContext}
+import uk.gov.hmrc.apiplatform.modules.applications.domain.models.ApplicationId
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.{Application, ApplicationWithSubscriptionData}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.DeveloperSession
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.subscriptions.ApiData
 import uk.gov.hmrc.thirdpartydeveloperfrontend.service.ApplicationActionService
+import org.mockito.quality.Strictness
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.apidefinitions.APISubscriptionStatus
 
 trait ApplicationActionServiceMock extends MockitoSugar with ArgumentMatchersSugar {
   val applicationActionServiceMock = mock[ApplicationActionService]
@@ -77,6 +80,6 @@ trait ApplicationActionServiceMockModule extends MockitoSugar with ArgumentMatch
   }
 
   object ApplicationActionServiceMock extends BaseApplicationActionServiceMock {
-    val aMock = mock[ApplicationActionService](withSettings.lenient())
+    val aMock = mock[ApplicationActionService](withSettings.strictness(Strictness.LENIENT))
   }
 }

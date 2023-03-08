@@ -17,8 +17,6 @@
 package uk.gov.hmrc.thirdpartydeveloperfrontend.connectors
 
 import java.time.{LocalDateTime, Period, ZoneOffset}
-import java.util.UUID
-import java.util.UUID.randomUUID
 import com.github.tomakehurst.wiremock.client.WireMock._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.connectors.ThirdPartyApplicationConnectorDomain._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain._
@@ -35,18 +33,22 @@ import play.api.inject.bind
 import play.api.Mode
 import play.api.libs.json.Json
 import play.api.{Application => PlayApplication}
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.apidefinitions.ApiContext
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.apidefinitions.ApiVersion
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.apidefinitions.ApiIdentifier
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.UserId
+import uk.gov.hmrc.apiplatform.modules.apis.domain.models.ApiContext
+import uk.gov.hmrc.apiplatform.modules.apis.domain.models.ApiVersion
+import uk.gov.hmrc.apiplatform.modules.apis.domain.models.ApiIdentifier
+import uk.gov.hmrc.apiplatform.modules.developers.domain.models.UserId
+import uk.gov.hmrc.apiplatform.modules.common.domain.models.LaxEmailAddress.StringSyntax
+import uk.gov.hmrc.apiplatform.modules.common.domain.models.Actors
+import uk.gov.hmrc.apiplatform.modules.applications.domain.models.{ApplicationId, ClientId, PrivacyPolicyLocations}
+
+import java.util.UUID
 
 class ThirdPartyApplicationConnectorSpec extends BaseConnectorIntegrationSpec with GuiceOneAppPerSuite with WireMockExtensions
     with CollaboratorTracker with LocalUserIdTracker with FixedClock {
 
   private val apiKey: String = UUID.randomUUID().toString
   private val clientId       = ClientId(UUID.randomUUID().toString)
-  private val applicationId  = ApplicationId("applicationId")
-
+  private val applicationId  = ApplicationId.random
   private val stubConfig = Configuration(
     "microservice.services.third-party-application-production.port"      -> stubPort,
     "microservice.services.third-party-application-production.use-proxy" -> false,
@@ -74,7 +76,7 @@ class ThirdPartyApplicationConnectorSpec extends BaseConnectorIntegrationSpec wi
     def connector: ThirdPartyApplicationConnector
 
     lazy val updateApplicationRequest = new UpdateApplicationRequest(
-      ApplicationId("My Id"),
+      ApplicationId.random,
       connector.environment,
       "My Application",
       Some("Description"),
@@ -85,7 +87,7 @@ class ThirdPartyApplicationConnectorSpec extends BaseConnectorIntegrationSpec wi
       "My Application",
       connector.environment,
       Some("Description"),
-      List("admin@example.com".asAdministratorCollaborator),
+      List("admin@example.com".toLaxEmail.asAdministratorCollaborator),
       Standard(List("http://example.com/redirect"), Some("http://example.com/terms"), Some("http://example.com/privacy"))
     )
 
@@ -99,7 +101,7 @@ class ThirdPartyApplicationConnectorSpec extends BaseConnectorIntegrationSpec wi
       Period.ofDays(547),
       connector.environment,
       Some("Description"),
-      Set("john@example.com".asAdministratorCollaborator),
+      Set("john@example.com".toLaxEmail.asAdministratorCollaborator),
       Standard(List("http://example.com/redirect"), Some("http://example.com/terms"), Some("http://example.com/privacy")),
       state = ApplicationState(State.PENDING_GATEKEEPER_APPROVAL, Some("john@example.com"), Some("John Dory"))
     )
@@ -143,7 +145,7 @@ class ThirdPartyApplicationConnectorSpec extends BaseConnectorIntegrationSpec wi
   }
 
   "update application" should {
-    val url = s"/application/${applicationId.value}"
+    val url = s"/application/${applicationId.text}"
 
     "successfully update an application" in new Setup {
 
@@ -163,8 +165,8 @@ class ThirdPartyApplicationConnectorSpec extends BaseConnectorIntegrationSpec wi
   }
 
   "applicationUpdate" should {
-    val url           = s"/application/${applicationId.value}"
-    val updateRequest = ChangeProductionApplicationPrivacyPolicyLocation(UserId.random, LocalDateTime.now, PrivacyPolicyLocation.Url("http://example.com"))
+    val url           = s"/application/${applicationId.text}"
+    val updateRequest = ChangeProductionApplicationPrivacyPolicyLocation(UserId.random, LocalDateTime.now, PrivacyPolicyLocations.Url("http://example.com"))
     "successfully update an application using the PATCH endpoint" in new Setup {
       stubFor(
         patch(urlEqualTo(url))
@@ -182,7 +184,7 @@ class ThirdPartyApplicationConnectorSpec extends BaseConnectorIntegrationSpec wi
   }
 
   "fetch application by id" should {
-    val url     = s"/application/${applicationId.value}"
+    val url     = s"/application/${applicationId.text}"
     val appName = "app name"
 
     "return an application" in new Setup {
@@ -237,7 +239,7 @@ class ThirdPartyApplicationConnectorSpec extends BaseConnectorIntegrationSpec wi
 
   "fetch credentials for application" should {
     val tokens = ApplicationToken(List(aClientSecret()), "pToken")
-    val url    = s"/application/${applicationId.value}/credentials"
+    val url    = s"/application/${applicationId.text}/credentials"
 
     "return credentials" in new Setup {
       stubFor(
@@ -271,7 +273,7 @@ class ThirdPartyApplicationConnectorSpec extends BaseConnectorIntegrationSpec wi
     val context       = ApiContext("app1")
     val version       = ApiVersion("2.0")
     val apiIdentifier = ApiIdentifier(context, version)
-    val url           = s"/application/${applicationId.value}/subscription?context=${context.value}&version=${version.value}"
+    val url           = s"/application/${applicationId.text}/subscription?context=${context.value}&version=${version.value}"
 
     "unsubscribe application from an api" in new Setup {
       stubFor(
@@ -333,9 +335,9 @@ class ThirdPartyApplicationConnectorSpec extends BaseConnectorIntegrationSpec wi
 
   "requestUplift" should {
     val applicationName = "applicationName"
-    val email           = "john.requestor@example.com"
+    val email           = "john.requestor@example.com".toLaxEmail
     val upliftRequest   = UpliftRequest(applicationName, email)
-    val url             = s"/application/${applicationId.value}/request-uplift"
+    val url             = s"/application/${applicationId.text}/request-uplift"
 
     "return success response in case of a 204 NO CONTENT on backend " in new Setup {
       stubFor(
@@ -381,8 +383,8 @@ class ThirdPartyApplicationConnectorSpec extends BaseConnectorIntegrationSpec wi
   }
 
   "updateApproval" should {
-    val updateRequest = CheckInformation(contactDetails = Some(ContactDetails("name", "email", "telephone")))
-    val url           = s"/application/${applicationId.value}/check-information"
+    val updateRequest = CheckInformation(contactDetails = Some(ContactDetails("name", "email".toLaxEmail, "telephone")))
+    val url           = s"/application/${applicationId.text}/check-information"
 
     "return success response in case of a 204 on backend " in new Setup {
       stubFor(
@@ -413,10 +415,10 @@ class ThirdPartyApplicationConnectorSpec extends BaseConnectorIntegrationSpec wi
   }
 
   "removeTeamMember" should {
-    val email         = "john.bloggs@example.com"
-    val admin         = "admin@example.com"
-    val adminsToEmail = Set("otheradmin@example.com", "anotheradmin@example.com")
-    val url           = s"/application/${applicationId.value}/collaborator/delete"
+    val email         = "john.bloggs@example.com".toLaxEmail
+    val admin         = "admin@example.com".toLaxEmail
+    val adminsToEmail = Set("otheradmin@example.com".toLaxEmail, "anotheradmin@example.com".toLaxEmail)
+    val url           = s"/application/${applicationId.text}/collaborator/delete"
 
     "return success" in new Setup {
       stubFor(
@@ -469,10 +471,10 @@ class ThirdPartyApplicationConnectorSpec extends BaseConnectorIntegrationSpec wi
     def tpaClientSecret(clientSecretId: String, clientSecretValue: Option[String] = None): TPAClientSecret =
       TPAClientSecret(clientSecretId, "secret-name", clientSecretValue, LocalDateTime.now(ZoneOffset.UTC), None)
 
-    val actor               = CollaboratorActor("john.requestor@example.com")
+    val actor               = Actors.AppCollaborator("john.requestor@example.com".toLaxEmail)
     val timestamp           = LocalDateTime.now(clock)
     val clientSecretRequest = ClientSecretRequest(actor, timestamp)
-    val url                 = s"/application/${applicationId.value}/client-secret"
+    val url                 = s"/application/${applicationId.text}/client-secret"
 
     "generate the client secret" in new Setup {
       val newClientSecretId    = UUID.randomUUID().toString
@@ -534,7 +536,7 @@ class ThirdPartyApplicationConnectorSpec extends BaseConnectorIntegrationSpec wi
 
     "returns a valid response" in new Setup {
       val applicationName = "my valid application name"
-      val appId           = ApplicationId(randomUUID().toString)
+      val appId           = ApplicationId.random
       val expectedRequest = ApplicationNameValidationJson.ApplicationNameValidationRequest(applicationName, Some(appId))
 
       stubFor(
@@ -573,7 +575,7 @@ class ThirdPartyApplicationConnectorSpec extends BaseConnectorIntegrationSpec wi
   "updateIpAllowlist" should {
     val allowlist     = Set("1.1.1.1/24")
     val updateRequest = UpdateIpAllowlistRequest(required = false, allowlist)
-    val url           = s"/application/${applicationId.value}/ipAllowlist"
+    val url           = s"/application/${applicationId.text}/ipAllowlist"
 
     "return success response in case of a 204 on backend " in new Setup {
       stubFor(
@@ -603,5 +605,5 @@ class ThirdPartyApplicationConnectorSpec extends BaseConnectorIntegrationSpec wi
     }
   }
 
-  private def aClientSecret() = ClientSecret(randomUUID.toString, randomUUID.toString, LocalDateTime.now())
+  private def aClientSecret() = ClientSecret(UUID.randomUUID.toString, UUID.randomUUID.toString, LocalDateTime.now())
 }

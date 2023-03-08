@@ -30,7 +30,7 @@ import uk.gov.hmrc.apiplatform.modules.mfa.views.html.SecurityPreferencesItemsVi
 import uk.gov.hmrc.thirdpartydeveloperfrontend.builder.DeveloperBuilder
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.{LocalUserIdTracker, WithCSRFAddToken}
 
-class SecurityPreferencesItemsViewSpec extends CommonViewSpec with WithCSRFAddToken with DeveloperBuilder with LocalUserIdTracker {
+class SecurityPreferencesItemsViewSpec extends CommonViewSpec with WithCSRFAddToken {
   implicit val request             = FakeRequest()
   val securityPreferencesItemsView = app.injector.instanceOf[SecurityPreferencesItemsView]
   val authAppMfaDetail             = AuthenticatorAppMfaDetailSummary(MfaId(java.util.UUID.randomUUID()), "name", LocalDateTime.of(2022, 9, 1, 0, 0), verified = true)

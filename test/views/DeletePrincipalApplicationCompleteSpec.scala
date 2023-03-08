@@ -29,10 +29,11 @@ import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.LoggedInState
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.ViewHelpers.elementExistsByText
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.{LocalUserIdTracker, WithCSRFAddToken}
+import uk.gov.hmrc.apiplatform.modules.applications.domain.models.ClientId
+import uk.gov.hmrc.apiplatform.modules.applications.domain.models.ApplicationId
 
-class DeletePrincipalApplicationCompleteSpec extends CommonViewSpec with WithCSRFAddToken with DeveloperBuilder
-    with LocalUserIdTracker
-    with DeveloperSessionBuilder {
+class DeletePrincipalApplicationCompleteSpec extends CommonViewSpec with WithCSRFAddToken with DeveloperSessionBuilder with DeveloperTestData
+    with LocalUserIdTracker {
 
   val deletePrincipalApplicationCompleteView = app.injector.instanceOf[DeletePrincipalApplicationCompleteView]
 
@@ -41,9 +42,9 @@ class DeletePrincipalApplicationCompleteSpec extends CommonViewSpec with WithCSR
 
       val request = FakeRequest().withCSRFToken
 
-      val appId             = ApplicationId("1234")
+      val appId             = ApplicationId.random
       val clientId          = ClientId("clientId123")
-      val loggedInDeveloper = buildDeveloperSession(loggedInState = LoggedInState.LOGGED_IN, buildDeveloper("developer@example.com", "John", "Doe", None))
+      val loggedInDeveloper = standardDeveloper.loggedIn
       val application       = Application(
         appId,
         clientId,
@@ -55,7 +56,7 @@ class DeletePrincipalApplicationCompleteSpec extends CommonViewSpec with WithCSR
         Environment.PRODUCTION,
         Some("Description 1"),
         Set(loggedInDeveloper.email.asAdministratorCollaborator),
-        state = ApplicationState.production(loggedInDeveloper.email, loggedInDeveloper.displayedName, ""),
+        state = ApplicationState.production(loggedInDeveloper.email.text, loggedInDeveloper.displayedName, ""),
         access = Standard(redirectUris = List("https://red1", "https://red2"), termsAndConditionsUrl = Some("http://tnc-url.com"))
       )
 

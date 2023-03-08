@@ -17,6 +17,7 @@
 package uk.gov.hmrc.thirdpartydeveloperfrontend.domain.services
 
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.subscriptions.{FieldName, FieldValue}
+import uk.gov.hmrc.apiplatform.modules.apis.domain.models._
 
 trait ApplicationsJsonFormatters extends ApiDefinitionsJsonFormatters with LocalDateTimeFormatters {
   import play.api.libs.json._
@@ -51,8 +52,6 @@ trait ApplicationsJsonFormatters extends ApiDefinitionsJsonFormatters with Local
   }
 
   implicit val formatTermsOfUseAgreement = TOUAHelper.formatTOUA
-
-  implicit val formatCollaborator = Json.format[Collaborator]
 
   implicit val formatContactDetails = Json.format[ContactDetails]
 

@@ -34,7 +34,7 @@ import uk.gov.hmrc.play.bootstrap.controller.WithUnsafeDefaultFormBinding
 import uk.gov.hmrc.thirdpartydeveloperfrontend.config.{ApplicationConfig, ErrorHandler, FraudPreventionConfig}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.connectors.ThirdPartyDeveloperConnector
 import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.fraudprevention.FraudPreventionNavLinkHelper
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.apidefinitions.{ApiContext, ApiIdentifier, ApiVersion}
+import uk.gov.hmrc.apiplatform.modules.apis.domain.models.{ApiContext, ApiIdentifier, ApiVersion}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.Capabilities.{ManageLockedSubscriptions, SupportsSubscriptions}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.Permissions.{AdministratorOnly, TeamMembersOnly}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications._
@@ -42,6 +42,7 @@ import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.Develope
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.views.SubscriptionRedirect
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.views.SubscriptionRedirect._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.service._
+import uk.gov.hmrc.apiplatform.modules.applications.domain.models._
 
 @Singleton
 class SubscriptionsController @Inject() (
@@ -79,7 +80,7 @@ class SubscriptionsController @Inject() (
     renderSubscriptions(
       request.application,
       request.developerSession,
-      (role: CollaboratorRole, data: PageData, form: Form[EditApplicationForm]) => {
+      (role: Collaborator.Role, data: PageData, form: Form[EditApplicationForm]) => {
         manageSubscriptionsView(
           role,
           data,
@@ -98,7 +99,7 @@ class SubscriptionsController @Inject() (
     renderSubscriptions(
       request.application,
       request.developerSession,
-      (role: CollaboratorRole, data: PageData, form: Form[EditApplicationForm]) => {
+      (role: Collaborator.Role, data: PageData, form: Form[EditApplicationForm]) => {
         addAppSubscriptionsView(role, data, form, request.application, request.application.deployedTo, data.subscriptions, data.openAccessApis)
       }
     )
@@ -107,7 +108,7 @@ class SubscriptionsController @Inject() (
   def renderSubscriptions(
       application: Application,
       user: DeveloperSession,
-      renderHtml: (CollaboratorRole, PageData, Form[EditApplicationForm]) => Html
+      renderHtml: (Collaborator.Role, PageData, Form[EditApplicationForm]) => Html
     )(implicit request: ApplicationRequest[AnyContent]
     ): Future[Result] = {
     val subsData = APISubscriptions.groupSubscriptions(request.subscriptions)

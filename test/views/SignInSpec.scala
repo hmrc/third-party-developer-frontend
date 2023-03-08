@@ -19,10 +19,9 @@ package views
 import org.jsoup.Jsoup
 import views.helper.CommonViewSpec
 import views.html.SignInView
-
 import play.api.data.Form
 import play.api.test.FakeRequest
-
+import uk.gov.hmrc.apiplatform.modules.common.domain.models.LaxEmailAddress.StringSyntax
 import uk.gov.hmrc.thirdpartydeveloperfrontend.builder.{DeveloperBuilder, DeveloperSessionBuilder}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.LoginForm
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.LoggedInState
@@ -37,7 +36,7 @@ class SignInSpec extends CommonViewSpec
 
   val signInView = app.injector.instanceOf[SignInView]
 
-  val loggedInDeveloper = buildDeveloperSession(loggedInState = LoggedInState.LOGGED_IN, buildDeveloperWithRandomId("admin@example.com", "firstName1", "lastName1"))
+  val loggedInDeveloper = buildDeveloperWithRandomId("admin@example.com".toLaxEmail, "firstName1", "lastName1").loggedIn
 
   "Sign in page" should {
     def renderPage(form: Form[LoginForm]) = {

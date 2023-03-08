@@ -16,43 +16,29 @@
 
 package uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers
 
-import java.{util => ju}
-
 import play.api.libs.functional.syntax._
 import play.api.libs.json.{Format, JsPath, Json, Reads}
-
+import uk.gov.hmrc.apiplatform.modules.common.domain.models.LaxEmailAddress
 import uk.gov.hmrc.apiplatform.modules.mfa.models.MfaDetail
 import uk.gov.hmrc.apiplatform.modules.mfa.models.MfaDetailFormats._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.emailpreferences.EmailPreferences
-
-case class UserId(value: ju.UUID) extends AnyVal {
-  def asText = value.toString
-}
-
-object UserId {
-  import play.api.libs.json.Json
-  implicit val developerIdFormat = Json.valueFormat[UserId]
-
-  def random: UserId  = UserId(ju.UUID.randomUUID())
-  // The unknown userId is used when the user is not logged in and is raising a support ticket
-  def unknown: UserId = UserId(ju.UUID.fromString("00000000-0000-0000-0000-000000000000"))
-}
+import uk.gov.hmrc.apiplatform.modules.developers.domain.models.UserId
 
 case class Developer(
-    userId: UserId,
-    email: String,
-    firstName: String,
-    lastName: String,
-    organisation: Option[String] = None,
-    mfaDetails: List[MfaDetail] = List.empty,
-    emailPreferences: EmailPreferences = EmailPreferences.noPreferences
+                      userId: UserId,
+                      email: LaxEmailAddress,
+                      firstName: String,
+                      lastName: String,
+                      organisation: Option[String] = None,
+                      mfaDetails: List[MfaDetail] = List.empty,
+                      emailPreferences: EmailPreferences = EmailPreferences.noPreferences
   )
 
 object Developer {
 
   val developerReads: Reads[Developer] = (
     (JsPath \ "userId").read[UserId] and
-      (JsPath \ "email").read[String] and
+      (JsPath \ "email").read[LaxEmailAddress] and
       (JsPath \ "firstName").read[String] and
       (JsPath \ "lastName").read[String] and
       (JsPath \ "organisation").readNullable[String] and

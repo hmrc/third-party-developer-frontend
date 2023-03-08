@@ -25,10 +25,12 @@ import uk.gov.hmrc.http.{HeaderCarrier, UpstreamErrorResponse}
 
 import uk.gov.hmrc.thirdpartydeveloperfrontend.connectors.ThirdPartyApplicationConnector
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.Environment.PRODUCTION
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.{Application, ApplicationId, ClientId}
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.{Application}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.service.PushPullNotificationsService.PushPullNotificationsConnector
 import uk.gov.hmrc.thirdpartydeveloperfrontend.service.SubscriptionFieldsService.SubscriptionFieldsConnector
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.AsyncHmrcSpec
+import uk.gov.hmrc.apiplatform.modules.applications.domain.models.ClientId
+import uk.gov.hmrc.apiplatform.modules.applications.domain.models.ApplicationId
 
 class PushPullNotificationsServiceSpec extends AsyncHmrcSpec {
 
@@ -38,7 +40,7 @@ class PushPullNotificationsServiceSpec extends AsyncHmrcSpec {
     val grantLength: Period        = Period.ofDays(547)
 
     val anApplication: Application                                     = Application(
-      ApplicationId("appId"),
+      ApplicationId.random,
       clientId,
       "App name 1",
       LocalDateTime.now(ZoneOffset.UTC),

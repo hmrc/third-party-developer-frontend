@@ -20,8 +20,10 @@ import play.api.data.Forms._
 import play.api.data.format.Formatter
 import play.api.data.validation.{Constraint, Invalid, Valid, ValidationError}
 import play.api.data.{Form, FormError}
+import uk.gov.hmrc.apiplatform.modules.applications.domain.models.{ApplicationId, PrivacyPolicyLocation, PrivacyPolicyLocations, TermsAndConditionsLocation, TermsAndConditionsLocations}
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.Application
 
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.{Application, ApplicationId, PrivacyPolicyLocation, TermsAndConditionsLocation}
+import java.util.UUID
 
 // scalastyle:off number.of.types
 
@@ -234,8 +236,8 @@ object ChooseApplicationToUpliftForm {
   val form: Form[ChooseApplicationToUpliftForm] = Form(
     mapping(
       "applicationId" -> optional(text).verifying("choose.application.to.uplift.error", s => s.isDefined && !s.get.isEmpty()).transform[ApplicationId](
-        s => ApplicationId(s.get),
-        id => Some(id.value)
+        s => ApplicationId(UUID.fromString(s.get)),
+        id => Some(id.value.toString)
       )
     )(ChooseApplicationToUpliftForm.apply)(ChooseApplicationToUpliftForm.unapply)
   )
@@ -265,7 +267,7 @@ object EditApplicationForm {
 
   val form: Form[EditApplicationForm] = Form(
     mapping(
-      "applicationId"         -> nonEmptyText.transform[ApplicationId](ApplicationId(_), id => id.value),
+      "applicationId"         -> nonEmptyText.transform[ApplicationId](text => ApplicationId(java.util.UUID.fromString(text)), id => id.text),
       "applicationName"       -> applicationNameValidator,
       "description"           -> optional(text),
       "privacyPolicyUrl"      -> optional(privacyPolicyUrlValidator),
@@ -276,11 +278,11 @@ object EditApplicationForm {
 
   def withData(app: Application) = {
     val privacyPolicyUrl      = app.privacyPolicyLocation match {
-      case PrivacyPolicyLocation.Url(url) => Some(url)
+      case PrivacyPolicyLocations.Url(url) => Some(url)
       case _                              => None
     }
     val termsAndConditionsUrl = app.termsAndConditionsLocation match {
-      case TermsAndConditionsLocation.Url(url) => Some(url)
+      case TermsAndConditionsLocations.Url(url) => Some(url)
       case _                                   => None
     }
     form.fillAndValidate(
@@ -507,7 +509,7 @@ object SelectApisFromSubscriptionsForm {
 
   implicit def applicationIdFormat: Formatter[ApplicationId] = new Formatter[ApplicationId] {
     override val format                                       = Some(("format.uuid", Nil))
-    override def bind(key: String, data: Map[String, String]) = data.get(key).map(ApplicationId(_)).toRight(Seq(FormError(key, "error.required", Nil)))
+    override def bind(key: String, data: Map[String, String]) = data.get(key).map(text => ApplicationId(UUID.fromString(text))).toRight(Seq(FormError(key, "error.required", Nil)))
     override def unbind(key: String, value: ApplicationId)    = Map(key -> value.toString)
   }
 
@@ -533,8 +535,8 @@ object SelectTopicsFromSubscriptionsForm {
 
   implicit def applicationIdFormat: Formatter[ApplicationId] = new Formatter[ApplicationId] {
     override val format                                       = Some(("format.uuid", Nil))
-    override def bind(key: String, data: Map[String, String]) = data.get(key).map(ApplicationId(_)).toRight(Seq(FormError(key, "error.required", Nil)))
-    override def unbind(key: String, value: ApplicationId)    = Map(key -> value.toString)
+    override def bind(key: String, data: Map[String, String]) = data.get(key).map(text => ApplicationId(UUID.fromString(text))).toRight(Seq(FormError(key, "error.required", Nil)))
+    override def unbind(key: String, value: ApplicationId)    = Map(key -> value.text)
   }
 
   def nonEmptyList: Constraint[Seq[String]] = Constraint[Seq[String]]("constraint.required") { o =>
@@ -571,9 +573,9 @@ object ChangeOfApplicationNameForm {
 case class ChangeOfPrivacyPolicyLocationForm(privacyPolicyUrl: String, isInDesktop: Boolean, isNewJourney: Boolean) {
 
   def toLocation: PrivacyPolicyLocation = isInDesktop match {
-    case true                               => PrivacyPolicyLocation.InDesktopSoftware
-    case false if !privacyPolicyUrl.isEmpty => PrivacyPolicyLocation.Url(privacyPolicyUrl)
-    case _                                  => PrivacyPolicyLocation.NoneProvided
+    case true                               => PrivacyPolicyLocations.InDesktopSoftware
+    case false if privacyPolicyUrl.nonEmpty => PrivacyPolicyLocations.Url(privacyPolicyUrl)
+    case _                                  => PrivacyPolicyLocations.NoneProvided
   }
 }
 
@@ -598,11 +600,11 @@ object ChangeOfPrivacyPolicyLocationForm {
 
   def withNewJourneyData(privacyPolicyLocation: PrivacyPolicyLocation) = {
     val privacyPolicyUrl = privacyPolicyLocation match {
-      case PrivacyPolicyLocation.Url(value) => value
+      case PrivacyPolicyLocations.Url(value) => value
       case _                                => ""
     }
     val isInDesktop      = privacyPolicyLocation match {
-      case PrivacyPolicyLocation.InDesktopSoftware => true
+      case PrivacyPolicyLocations.InDesktopSoftware => true
       case _                                       => false
     }
     form.fillAndValidate(
@@ -620,9 +622,9 @@ object ChangeOfPrivacyPolicyLocationForm {
 case class ChangeOfTermsAndConditionsLocationForm(termsAndConditionsUrl: String, isInDesktop: Boolean, isNewJourney: Boolean) {
 
   def toLocation: TermsAndConditionsLocation = isInDesktop match {
-    case true                                    => TermsAndConditionsLocation.InDesktopSoftware
-    case false if !termsAndConditionsUrl.isEmpty => TermsAndConditionsLocation.Url(termsAndConditionsUrl)
-    case _                                       => TermsAndConditionsLocation.NoneProvided
+    case true                                    => TermsAndConditionsLocations.InDesktopSoftware
+    case false if !termsAndConditionsUrl.isEmpty => TermsAndConditionsLocations.Url(termsAndConditionsUrl)
+    case _                                       => TermsAndConditionsLocations.NoneProvided
   }
 }
 
@@ -647,11 +649,11 @@ object ChangeOfTermsAndConditionsLocationForm {
 
   def withNewJourneyData(termsAndConditionsLocation: TermsAndConditionsLocation) = {
     val termsAndConditionsUrl = termsAndConditionsLocation match {
-      case TermsAndConditionsLocation.Url(value) => value
+      case TermsAndConditionsLocations.Url(value) => value
       case _                                     => ""
     }
     val isInDesktop           = termsAndConditionsLocation match {
-      case TermsAndConditionsLocation.InDesktopSoftware => true
+      case TermsAndConditionsLocations.InDesktopSoftware => true
       case _                                            => false
     }
     form.fillAndValidate(

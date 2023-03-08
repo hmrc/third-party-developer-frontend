@@ -18,21 +18,21 @@
 @import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.controllers.Crumb
 @import include._
 @import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.Environment.PRODUCTION
-@import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.CollaboratorRole
 @import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.Environment
 @import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.Application
 @import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.DeveloperSession
-@import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.apidefinitions.ApiContext
+@import uk.gov.hmrc.apiplatform.modules.apis.domain.models.ApiContext
 @import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.subscriptions.ApiData
 @import views.helper.EnvironmentNameService
 @import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers
 @import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.PageData
 @import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.GroupedSubscriptions
+@import uk.gov.hmrc.apiplatform.modules.applications.domain.models.Collaborator
 
 @this(devMain: DevMain, subscriptionGroups: SubscriptionGroups, hmrcNewTabLink: HmrcNewTabLink)
 
 @(
-    role: CollaboratorRole, 
+    role: Collaborator.Role, 
     data: PageData, 
     form: Form[uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.EditApplicationForm], 
     app: Application, 

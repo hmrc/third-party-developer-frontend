@@ -25,7 +25,8 @@ import play.api.test.FakeRequest
 
 import uk.gov.hmrc.thirdpartydeveloperfrontend.builder._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.AddApplicationNameForm
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.{ApplicationId, Environment}
+import uk.gov.hmrc.apiplatform.modules.applications.domain.models.ApplicationId
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.{Environment}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.LoggedInState
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.ViewHelpers._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.{LocalUserIdTracker, WithCSRFAddToken}
@@ -34,12 +35,12 @@ class AddApplicationNameSpec extends CommonViewSpec
     with WithCSRFAddToken
     with LocalUserIdTracker
     with DeveloperSessionBuilder
-    with DeveloperBuilder {
+    with DeveloperTestData {
 
   val addApplicationNameView = app.injector.instanceOf[AddApplicationNameView]
-  val loggedInDeveloper      = buildDeveloperSession(loggedInState = LoggedInState.LOGGED_IN, buildDeveloper("admin@example.com", "firstName1", "lastName1", None))
+  val loggedInDeveloper      = adminDeveloper.loggedIn
   val subordinateEnvironment = Environment.SANDBOX
-  val appId                  = ApplicationId("1234")
+  val appId                  = ApplicationId.random
   val principalEnvironment   = Environment.PRODUCTION
 
   "Add application page in subordinate" should {

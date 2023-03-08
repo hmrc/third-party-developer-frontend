@@ -25,12 +25,15 @@ import views.html.UnsubscribeRequestSubmittedView
 import play.api.test.FakeRequest
 
 import uk.gov.hmrc.thirdpartydeveloperfrontend.builder.{DeveloperBuilder, DeveloperSessionBuilder}
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.apidefinitions.ApiVersion
+import uk.gov.hmrc.apiplatform.modules.apis.domain.models.ApiVersion
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.controllers.ApplicationViewModel
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.LoggedInState
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.ViewHelpers._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils._
+import uk.gov.hmrc.apiplatform.modules.common.domain.models.LaxEmailAddress.StringSyntax
+import uk.gov.hmrc.apiplatform.modules.applications.domain.models.ClientId
+import uk.gov.hmrc.apiplatform.modules.applications.domain.models.ApplicationId
 
 class UnsubscribeRequestSubmittedSpec extends CommonViewSpec with WithCSRFAddToken with CollaboratorTracker with LocalUserIdTracker with DeveloperSessionBuilder
     with DeveloperBuilder {
@@ -39,11 +42,11 @@ class UnsubscribeRequestSubmittedSpec extends CommonViewSpec with WithCSRFAddTok
 
       val request = FakeRequest().withCSRFToken
 
-      val appId       = ApplicationId("1234")
+      val appId       = ApplicationId.random
       val apiName     = "Test API"
       val apiVersion  = ApiVersion("1.0")
       val clientId    = ClientId("clientId123")
-      val developer   = buildDeveloperSession(loggedInState = LoggedInState.LOGGED_IN, buildDeveloperWithRandomId("email@example.com", "First Name", "Last Name", None))
+      val developer   =  buildDeveloperWithRandomId("email@example.com".toLaxEmail, "First Name", "Last Name", None).loggedIn
       val application = Application(
         appId,
         clientId,
@@ -55,7 +58,7 @@ class UnsubscribeRequestSubmittedSpec extends CommonViewSpec with WithCSRFAddTok
         Environment.PRODUCTION,
         Some("Test Application Description"),
         Set(developer.email.asAdministratorCollaborator),
-        state = ApplicationState.production(developer.email, developer.displayedName, ""),
+        state = ApplicationState.production(developer.email.text, developer.displayedName, ""),
         access = Standard(redirectUris = List("https://red1", "https://red2"), termsAndConditionsUrl = Some("http://tnc-url.com"))
       )
 

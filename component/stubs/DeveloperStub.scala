@@ -19,12 +19,14 @@ package stubs
 import com.github.tomakehurst.wiremock.client.WireMock.{aResponse, equalTo, equalToJson, get, post, postRequestedFor, stubFor, urlEqualTo, urlMatching, urlPathEqualTo, verify}
 import play.api.http.Status.{BAD_REQUEST, OK}
 import play.api.libs.json.Json
+import uk.gov.hmrc.apiplatform.modules.common.domain.models.LaxEmailAddress
 import uk.gov.hmrc.thirdpartydeveloperfrontend.connectors.EncryptedJson
 import uk.gov.hmrc.thirdpartydeveloperfrontend.connectors.ThirdPartyDeveloperConnector.{FindUserIdRequest, FindUserIdResponse}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.connectors.ThirdPartyDeveloperConnector.JsonFormatters.FindUserIdRequestWrites
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.connectors.PasswordResetRequest
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.{Developer, Registration, UpdateProfileRequest, UserId}
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.{Developer, Registration, UpdateProfileRequest}
 import utils.ComponentTestDeveloperBuilder
+import uk.gov.hmrc.apiplatform.modules.developers.domain.models.UserId
 
 object DeveloperStub extends ComponentTestDeveloperBuilder {
 
@@ -42,7 +44,7 @@ object DeveloperStub extends ComponentTestDeveloperBuilder {
         .willReturn(aResponse().withStatus(status))
     )
 
-  def setupResend(email: String, status: Int) = {
+  def setupResend(email: LaxEmailAddress, status: Int) = {
     val userId = staticUserId
 
     implicit val writes = Json.writes[FindUserIdResponse]
@@ -67,7 +69,7 @@ object DeveloperStub extends ComponentTestDeveloperBuilder {
     verify(1, postRequestedFor(urlPathEqualTo("/password-reset-request")).withRequestBody(equalToJson(Json.toJson(request).toString())))
   }
 
-  def findUserIdByEmailAddress(emailAddress: String) = {
+  def findUserIdByEmailAddress(emailAddress: LaxEmailAddress) = {
 
     stubFor(
       post(urlEqualTo("/developers/find-user-id"))
@@ -80,7 +82,7 @@ object DeveloperStub extends ComponentTestDeveloperBuilder {
     )
   }
 
-  def stubResetPasswordJourney(email: String, code: String) {
+  def stubResetPasswordJourney(email: LaxEmailAddress, code: String) {
     fetchEmailForResetCode(email, code)
     resetPassword()
   }
@@ -110,7 +112,7 @@ object DeveloperStub extends ComponentTestDeveloperBuilder {
         .withBody("[]")))
   }
 
-  def fetchEmailForResetCode(email: String, code: String) = {
+  def fetchEmailForResetCode(email: LaxEmailAddress, code: String) = {
     stubFor(
       get(urlPathEqualTo("/reset-password"))
         .willReturn(

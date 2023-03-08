@@ -24,22 +24,24 @@ import views.html.DeleteSubordinateApplicationConfirmView
 
 import play.api.test.FakeRequest
 
-import uk.gov.hmrc.thirdpartydeveloperfrontend.builder.{DeveloperBuilder, DeveloperSessionBuilder}
+import uk.gov.hmrc.thirdpartydeveloperfrontend.builder._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.LoggedInState
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.ViewHelpers.elementExistsByText
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.{LocalUserIdTracker, WithCSRFAddToken}
+import uk.gov.hmrc.apiplatform.modules.applications.domain.models.ClientId
+import uk.gov.hmrc.apiplatform.modules.applications.domain.models.ApplicationId
 
-class DeleteSubordinateApplicationConfirmSpec extends CommonViewSpec with WithCSRFAddToken with DeveloperBuilder with LocalUserIdTracker with DeveloperSessionBuilder {
+class DeleteSubordinateApplicationConfirmSpec extends CommonViewSpec with WithCSRFAddToken with LocalUserIdTracker with DeveloperSessionBuilder with DeveloperTestData{
 
   val deleteSubordinateApplicationConfirmView = app.injector.instanceOf[DeleteSubordinateApplicationConfirmView]
 
   "delete application confirm page" should {
 
     val request           = FakeRequest().withCSRFToken
-    val appId             = ApplicationId("1234")
+    val appId             = ApplicationId.random
     val clientId          = ClientId("clientId123")
-    val loggedInDeveloper = buildDeveloperSession(loggedInState = LoggedInState.LOGGED_IN, buildDeveloper("developer@example.com", "John", "Doe"))
+    val loggedInDeveloper = standardDeveloper.loggedIn
     val application       = Application(
       appId,
       clientId,
@@ -51,7 +53,7 @@ class DeleteSubordinateApplicationConfirmSpec extends CommonViewSpec with WithCS
       Environment.SANDBOX,
       Some("Description 1"),
       Set(loggedInDeveloper.email.asAdministratorCollaborator),
-      state = ApplicationState.production(loggedInDeveloper.email, loggedInDeveloper.displayedName, ""),
+      state = ApplicationState.production(loggedInDeveloper.email.text, loggedInDeveloper.displayedName, ""),
       access = Standard(redirectUris = List("https://red1", "https://red2"), termsAndConditionsUrl = Some("http://tnc-url.com"))
     )
 

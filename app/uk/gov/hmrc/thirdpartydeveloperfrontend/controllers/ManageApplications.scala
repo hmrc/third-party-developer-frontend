@@ -32,8 +32,8 @@ import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.services.LocalDateTimeForm
 import uk.gov.hmrc.thirdpartydeveloperfrontend.service.{TermsOfUseInvitationService, _}
 import uk.gov.hmrc.apiplatform.modules.submissions.services.SubmissionService
 import scala.concurrent.Future
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.ApplicationId
 import uk.gov.hmrc.apiplatform.modules.submissions.domain.models.Submission
+import uk.gov.hmrc.apiplatform.modules.applications.domain.models.ApplicationId
 
 @Singleton
 class ManageApplications @Inject() (

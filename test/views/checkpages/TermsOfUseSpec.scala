@@ -25,7 +25,7 @@ import views.html.checkpages.TermsOfUseView
 import play.api.mvc.{AnyContentAsEmpty, Call}
 import play.api.test.FakeRequest
 
-import uk.gov.hmrc.thirdpartydeveloperfrontend.builder.{DeveloperBuilder, DeveloperSessionBuilder}
+import uk.gov.hmrc.thirdpartydeveloperfrontend.builder._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.config.ApplicationConfig
 import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.TermsOfUseForm
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.TermsOfUseVersion
@@ -33,15 +33,18 @@ import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.controllers.ApplicationViewModel
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.LoggedInState
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils._
+import uk.gov.hmrc.apiplatform.modules.common.domain.models.LaxEmailAddress.StringSyntax
+import uk.gov.hmrc.apiplatform.modules.applications.domain.models.ClientId
+import uk.gov.hmrc.apiplatform.modules.applications.domain.models.ApplicationId
 
-class TermsOfUseSpec extends CommonViewSpec with WithCSRFAddToken with CollaboratorTracker with LocalUserIdTracker with DeveloperSessionBuilder with DeveloperBuilder {
+class TermsOfUseSpec extends CommonViewSpec with WithCSRFAddToken with CollaboratorTracker with LocalUserIdTracker with DeveloperSessionBuilder with DeveloperTestData {
 
   val termsOfUse = app.injector.instanceOf[TermsOfUseView]
 
   "Terms of use view" must {
     val thirdPartyApplication =
       Application(
-        ApplicationId("APPLICATION_ID"),
+        ApplicationId.random,
         ClientId("CLIENT_ID"),
         "APPLICATION NAME",
         LocalDateTime.now(ZoneOffset.UTC),
@@ -50,7 +53,7 @@ class TermsOfUseSpec extends CommonViewSpec with WithCSRFAddToken with Collabora
         grantLength,
         Environment.PRODUCTION,
         Some("APPLICATION DESCRIPTION"),
-        Set("sample@example.com".asAdministratorCollaborator, "someone@example.com".asDeveloperCollaborator),
+        Set("sample@example.com".toLaxEmail.asAdministratorCollaborator, "someone@example.com".toLaxEmail.asDeveloperCollaborator),
         Standard(),
         ApplicationState(State.TESTING, None, None, None, LocalDateTime.now(ZoneOffset.UTC))
       )
@@ -61,7 +64,7 @@ class TermsOfUseSpec extends CommonViewSpec with WithCSRFAddToken with Collabora
       val checkInformation = CheckInformation()
 
       val termsOfUseForm = TermsOfUseForm.fromCheckInformation(checkInformation)
-      val developer      = buildDeveloperSession(loggedInState = LoggedInState.LOGGED_IN, buildDeveloperWithRandomId("email@example.com", "First Name", "Last Name", None))
+      val developer      = standardDeveloper.loggedIn
 
       val page = termsOfUse.render(
         ApplicationViewModel(thirdPartyApplication, false, false),
@@ -86,12 +89,12 @@ class TermsOfUseSpec extends CommonViewSpec with WithCSRFAddToken with Collabora
       implicit val request: FakeRequest[AnyContentAsEmpty.type] = FakeRequest().withCSRFToken
 
       val appConfigMock       = mock[ApplicationConfig]
-      val termsOfUseAgreement = TermsOfUseAgreement("email@example.com", LocalDateTime.now(ZoneOffset.UTC), "1.0")
+      val termsOfUseAgreement = TermsOfUseAgreement("email@example.com".toLaxEmail, LocalDateTime.now(ZoneOffset.UTC), "1.0")
 
       val checkInformation = CheckInformation(termsOfUseAgreements = List(termsOfUseAgreement))
 
       val termsOfUseForm = TermsOfUseForm.fromCheckInformation(checkInformation)
-      val developer      = buildDeveloperSession(loggedInState = LoggedInState.LOGGED_IN, buildDeveloperWithRandomId("email@example.com", "First Name", "Last Name", None))
+      val developer      = standardDeveloper.loggedIn
 
       val page = termsOfUse.render(
         ApplicationViewModel(thirdPartyApplication.copy(checkInformation = Some(checkInformation)), false, false),

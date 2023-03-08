@@ -24,14 +24,16 @@ import views.html.manageResponsibleIndividual.ResponsibleIndividualDetailsView
 
 import play.api.test.FakeRequest
 
-import uk.gov.hmrc.thirdpartydeveloperfrontend.builder.{DeveloperBuilder, DeveloperSessionBuilder}
+import uk.gov.hmrc.thirdpartydeveloperfrontend.builder._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.ManageResponsibleIndividualController.{ResponsibleIndividualHistoryItem, ViewModel}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.LoggedInState
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.ViewHelpers._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.{LocalUserIdTracker, WithCSRFAddToken}
+import uk.gov.hmrc.apiplatform.modules.applications.domain.models.ClientId
+import uk.gov.hmrc.apiplatform.modules.applications.domain.models.ApplicationId
 
-class ResponsibleIndividualDetailsViewSpec extends CommonViewSpec with WithCSRFAddToken with DeveloperBuilder with LocalUserIdTracker with DeveloperSessionBuilder {
+class ResponsibleIndividualDetailsViewSpec extends CommonViewSpec with WithCSRFAddToken with LocalUserIdTracker with DeveloperTestData with DeveloperSessionBuilder {
 
   val application = Application(
     ApplicationId.random,
@@ -55,7 +57,7 @@ class ResponsibleIndividualDetailsViewSpec extends CommonViewSpec with WithCSRFA
 
     def renderPage(viewModel: ViewModel) = {
       val request = FakeRequest().withCSRFToken
-      val session = buildDeveloperSession(LoggedInState.LOGGED_IN, buildDeveloper("admin@example.com", "firstName1", "lastName1"))
+      val session = adminDeveloper.loggedIn
 
       view.render(application, viewModel, request, session, messagesProvider.messages, appConfig)
     }

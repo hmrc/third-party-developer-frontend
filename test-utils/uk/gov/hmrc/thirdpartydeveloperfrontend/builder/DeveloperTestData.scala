@@ -14,22 +14,15 @@
  * limitations under the License.
  */
 
-package uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications
+package uk.gov.hmrc.thirdpartydeveloperfrontend.builder
 
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.UserId
+import uk.gov.hmrc.apiplatform.modules.common.domain.models.LaxEmailAddress.StringSyntax
+import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.UserIdTracker
 
-case class Collaborator(emailAddress: String, role: CollaboratorRole, userId: UserId)
+trait DeveloperTestData extends DeveloperBuilder {
+  self : UserIdTracker =>
 
-object Collaborator {
-  import play.api.libs.json.Json
-
-  implicit val format = Json.format[Collaborator]
-}
-
-case class AddCollaborator(emailAddress: String, role: CollaboratorRole)
-
-object AddCollaborator {
-  import play.api.libs.json.Json
-
-  implicit val format = Json.format[AddCollaborator]
+  lazy val adminDeveloper = buildDeveloper("admin@example.com".toLaxEmail, "firstName1", "lastName1")
+  lazy val JoeBloggs = buildDeveloper("developer@example.com".toLaxEmail, "Joe", "Bloggs")
+  val standardDeveloper = buildDeveloper("developer@example.com".toLaxEmail, "firstName2", "lastName2")
 }

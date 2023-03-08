@@ -20,32 +20,34 @@ import java.time.LocalDateTime
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 import scala.concurrent.Future._
-
 import org.jsoup.Jsoup
 import org.mockito.captor.ArgCaptor
 import views.html._
 import views.html.application.PendingApprovalView
 import views.html.checkpages.applicationcheck.UnauthorisedAppDetailsView
-
 import play.api.libs.json.Json
 import play.api.mvc.Result
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
 import play.filters.csrf.CSRF.TokenProvider
+import uk.gov.hmrc.apiplatform.modules.applications.domain.models.{PrivacyPolicyLocation, PrivacyPolicyLocations, TermsAndConditionsLocation, TermsAndConditionsLocations}
+import uk.gov.hmrc.apiplatform.modules.common.domain.models.LaxEmailAddress
+import uk.gov.hmrc.apiplatform.modules.common.domain.models.LaxEmailAddress.StringSyntax
 import uk.gov.hmrc.http.HeaderCarrier
-
 import uk.gov.hmrc.apiplatform.modules.submissions.services.mocks.SubmissionServiceMockModule
 import uk.gov.hmrc.thirdpartydeveloperfrontend.builder.DeveloperBuilder
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.connectors.TicketCreated
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.{DeveloperSession, LoggedInState, Session, UserId}
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.{DeveloperSession, LoggedInState, Session}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.services.TermsOfUseService.TermsOfUseAgreementDetails
 import uk.gov.hmrc.thirdpartydeveloperfrontend.mocks.service._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.service.SessionService
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.ViewHelpers._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.WithLoggedInSession._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.{CollaboratorTracker, LocalUserIdTracker, TestApplications, WithCSRFAddToken}
+import uk.gov.hmrc.apiplatform.modules.common.domain.models.LaxEmailAddress.StringSyntax
+import uk.gov.hmrc.apiplatform.modules.developers.domain.models.UserId
 
 class DetailsSpec
     extends BaseControllerSpec
@@ -385,7 +387,7 @@ class DetailsSpec
     "show success page if name changed successfully" in new Setup {
       val approvedApplication = anApplication(adminEmail = loggedInAdmin.email)
       givenApplicationAction(approvedApplication, loggedInAdmin)
-      when(underTest.applicationService.requestProductonApplicationNameChange(*[UserId], *, *, *, *)(*))
+      when(underTest.applicationService.requestProductonApplicationNameChange(*[UserId], *, *, *, *[LaxEmailAddress])(*))
         .thenReturn(Future.successful(TicketCreated))
 
       private val request = loggedInAdminRequest.withFormUrlEncodedBody("applicationName" -> "Legal new app name")
@@ -393,7 +395,7 @@ class DetailsSpec
       val result = addToken(underTest.requestChangeOfAppNameAction(approvedApplication.id))(request)
 
       status(result) shouldBe OK
-      verify(underTest.applicationService).requestProductonApplicationNameChange(*[UserId], *, *, *, *)(*)
+      verify(underTest.applicationService).requestProductonApplicationNameChange(*[UserId], *, *, *, *[LaxEmailAddress])(*)
       contentAsString(result) should include("We have received your request to change the application name to")
     }
 
@@ -483,7 +485,7 @@ class DetailsSpec
       val newPrivacyPolicyUrl  = "http://example.com/new-priv-policy"
       val appWithPrivPolicyUrl = legacyAppWithPrivacyPolicyLocation(Some(privacyPolicyUrl))
       givenApplicationAction(appWithPrivPolicyUrl, loggedInAdmin)
-      when(applicationServiceMock.updatePrivacyPolicyLocation(eqTo(appWithPrivPolicyUrl), *[UserId], eqTo(PrivacyPolicyLocation.Url(newPrivacyPolicyUrl)))(*))
+      when(applicationServiceMock.updatePrivacyPolicyLocation(eqTo(appWithPrivPolicyUrl), *[UserId], eqTo(PrivacyPolicyLocations.Url(newPrivacyPolicyUrl)))(*))
         .thenReturn(Future.successful(ApplicationUpdateSuccessful))
 
       val form   = ChangeOfPrivacyPolicyLocationForm(newPrivacyPolicyUrl, false, false)
@@ -505,9 +507,9 @@ class DetailsSpec
         Some(
           ImportantSubmissionData(
             None,
-            ResponsibleIndividual.build("bob example", "bob@example.com"),
+            ResponsibleIndividual.build("bob example", "bob@example.com".toLaxEmail),
             Set.empty,
-            TermsAndConditionsLocation.InDesktopSoftware,
+            TermsAndConditionsLocations.InDesktopSoftware,
             privacyPolicyLocation,
             List.empty
           )
@@ -519,7 +521,7 @@ class DetailsSpec
     implicit val writeChangeOfPrivacyPolicyLocationForm = Json.writes[ChangeOfPrivacyPolicyLocationForm]
 
     "display update page with 'in desktop' radio selected" in new Setup {
-      val appWithPrivPolicyInDesktop = appWithPrivacyPolicyLocation(PrivacyPolicyLocation.InDesktopSoftware)
+      val appWithPrivPolicyInDesktop = appWithPrivacyPolicyLocation(PrivacyPolicyLocations.InDesktopSoftware)
       givenApplicationAction(appWithPrivPolicyInDesktop, loggedInAdmin)
 
       val result = addToken(underTest.updatePrivacyPolicyLocation(appWithPrivPolicyInDesktop.id))(loggedInAdminRequest)
@@ -531,7 +533,7 @@ class DetailsSpec
     }
 
     "display update page with 'url' radio selected" in new Setup {
-      val appWithPrivPolicyUrl = appWithPrivacyPolicyLocation(PrivacyPolicyLocation.Url(privacyPolicyUrl))
+      val appWithPrivPolicyUrl = appWithPrivacyPolicyLocation(PrivacyPolicyLocations.Url(privacyPolicyUrl))
       givenApplicationAction(appWithPrivPolicyUrl, loggedInAdmin)
 
       val result = addToken(underTest.updatePrivacyPolicyLocation(appWithPrivPolicyUrl.id))(loggedInAdminRequest)
@@ -544,7 +546,7 @@ class DetailsSpec
     }
 
     "return Not Found error if application cannot be retrieved" in new Setup {
-      val appWithPrivPolicyInDesktop = appWithPrivacyPolicyLocation(PrivacyPolicyLocation.InDesktopSoftware)
+      val appWithPrivPolicyInDesktop = appWithPrivacyPolicyLocation(PrivacyPolicyLocations.InDesktopSoftware)
       givenApplicationActionReturnsNotFound(appWithPrivPolicyInDesktop.id)
 
       val result = addToken(underTest.updatePrivacyPolicyLocation(appWithPrivPolicyInDesktop.id))(loggedInAdminRequest)
@@ -553,7 +555,7 @@ class DetailsSpec
     }
 
     "return bad request if privacy policy location has not changed" in new Setup {
-      val appWithPrivPolicyInDesktop = appWithPrivacyPolicyLocation(PrivacyPolicyLocation.InDesktopSoftware)
+      val appWithPrivPolicyInDesktop = appWithPrivacyPolicyLocation(PrivacyPolicyLocations.InDesktopSoftware)
       givenApplicationAction(appWithPrivPolicyInDesktop, loggedInAdmin)
 
       val form   = ChangeOfPrivacyPolicyLocationForm("", true, true)
@@ -563,7 +565,7 @@ class DetailsSpec
     }
 
     "return bad request if form data is invalid" in new Setup {
-      val appWithPrivPolicyInDesktop = appWithPrivacyPolicyLocation(PrivacyPolicyLocation.InDesktopSoftware)
+      val appWithPrivPolicyInDesktop = appWithPrivacyPolicyLocation(PrivacyPolicyLocations.InDesktopSoftware)
       givenApplicationAction(appWithPrivPolicyInDesktop, loggedInAdmin)
 
       val form   = ChangeOfPrivacyPolicyLocationForm("", false, true)
@@ -573,9 +575,9 @@ class DetailsSpec
     }
 
     "update location if form data is valid and return to app details page" in new Setup {
-      val appWithPrivPolicyInDesktop = appWithPrivacyPolicyLocation(PrivacyPolicyLocation.InDesktopSoftware)
+      val appWithPrivPolicyInDesktop = appWithPrivacyPolicyLocation(PrivacyPolicyLocations.InDesktopSoftware)
       givenApplicationAction(appWithPrivPolicyInDesktop, loggedInAdmin)
-      when(applicationServiceMock.updatePrivacyPolicyLocation(eqTo(appWithPrivPolicyInDesktop), *[UserId], eqTo(PrivacyPolicyLocation.Url(privacyPolicyUrl)))(*))
+      when(applicationServiceMock.updatePrivacyPolicyLocation(eqTo(appWithPrivPolicyInDesktop), *[UserId], eqTo(PrivacyPolicyLocations.Url(privacyPolicyUrl)))(*))
         .thenReturn(Future.successful(ApplicationUpdateSuccessful))
 
       val form   = ChangeOfPrivacyPolicyLocationForm(privacyPolicyUrl, false, true)
@@ -623,7 +625,7 @@ class DetailsSpec
       val newTermsAndConditionsUrl     = "http://example.com/new-terms-conds"
       val appWithTermsAndConditionsUrl = legacyAppWithTermsAndConditionsLocation(Some(termsAndConditionsUrl))
       givenApplicationAction(appWithTermsAndConditionsUrl, loggedInAdmin)
-      when(applicationServiceMock.updateTermsConditionsLocation(eqTo(appWithTermsAndConditionsUrl), *[UserId], eqTo(TermsAndConditionsLocation.Url(newTermsAndConditionsUrl)))(*))
+      when(applicationServiceMock.updateTermsConditionsLocation(eqTo(appWithTermsAndConditionsUrl), *[UserId], eqTo(TermsAndConditionsLocations.Url(newTermsAndConditionsUrl)))(*))
         .thenReturn(Future.successful(ApplicationUpdateSuccessful))
 
       val form   = ChangeOfTermsAndConditionsLocationForm(newTermsAndConditionsUrl, false, false)
@@ -645,10 +647,10 @@ class DetailsSpec
         Some(
           ImportantSubmissionData(
             None,
-            ResponsibleIndividual.build("bob example", "bob@example.com"),
+            ResponsibleIndividual.build("bob example", "bob@example.com".toLaxEmail),
             Set.empty,
             termsAndConditionsLocation,
-            PrivacyPolicyLocation.InDesktopSoftware,
+            PrivacyPolicyLocations.InDesktopSoftware,
             List.empty
           )
         )
@@ -659,7 +661,7 @@ class DetailsSpec
     implicit val writeChangeOfTermsAndConditionsForm = Json.writes[ChangeOfTermsAndConditionsLocationForm]
 
     "display update page with 'in desktop' radio selected" in new Setup {
-      val appWithTermsAndConditionsInDesktop = appWithTermsAndConditionsLocation(TermsAndConditionsLocation.InDesktopSoftware)
+      val appWithTermsAndConditionsInDesktop = appWithTermsAndConditionsLocation(TermsAndConditionsLocations.InDesktopSoftware)
       givenApplicationAction(appWithTermsAndConditionsInDesktop, loggedInAdmin)
 
       val result = addToken(underTest.updateTermsAndConditionsLocation(appWithTermsAndConditionsInDesktop.id))(loggedInAdminRequest)
@@ -671,7 +673,7 @@ class DetailsSpec
     }
 
     "display update page with 'url' radio selected" in new Setup {
-      val appWithTermsAndConditionsUrl = appWithTermsAndConditionsLocation(TermsAndConditionsLocation.Url(termsAndConditionsUrl))
+      val appWithTermsAndConditionsUrl = appWithTermsAndConditionsLocation(TermsAndConditionsLocations.Url(termsAndConditionsUrl))
       givenApplicationAction(appWithTermsAndConditionsUrl, loggedInAdmin)
 
       val result = addToken(underTest.updateTermsAndConditionsLocation(appWithTermsAndConditionsUrl.id))(loggedInAdminRequest)
@@ -684,7 +686,7 @@ class DetailsSpec
     }
 
     "return Not Found error if application cannot be retrieved" in new Setup {
-      val appWithTermsAndConditionsInDesktop = appWithTermsAndConditionsLocation(TermsAndConditionsLocation.InDesktopSoftware)
+      val appWithTermsAndConditionsInDesktop = appWithTermsAndConditionsLocation(TermsAndConditionsLocations.InDesktopSoftware)
       givenApplicationActionReturnsNotFound(appWithTermsAndConditionsInDesktop.id)
 
       val result = addToken(underTest.updateTermsAndConditionsLocationAction(appWithTermsAndConditionsInDesktop.id))(loggedInAdminRequest)
@@ -693,7 +695,7 @@ class DetailsSpec
     }
 
     "return bad request if terms and conditions location has not changed" in new Setup {
-      val appWithTermsAndConditionsInDesktop = appWithTermsAndConditionsLocation(TermsAndConditionsLocation.InDesktopSoftware)
+      val appWithTermsAndConditionsInDesktop = appWithTermsAndConditionsLocation(TermsAndConditionsLocations.InDesktopSoftware)
       givenApplicationAction(appWithTermsAndConditionsInDesktop, loggedInAdmin)
 
       val form   = ChangeOfTermsAndConditionsLocationForm("", true, true)
@@ -703,7 +705,7 @@ class DetailsSpec
     }
 
     "return bad request if form data is invalid" in new Setup {
-      val appWithTermsAndConditionsInDesktop = appWithTermsAndConditionsLocation(TermsAndConditionsLocation.InDesktopSoftware)
+      val appWithTermsAndConditionsInDesktop = appWithTermsAndConditionsLocation(TermsAndConditionsLocations.InDesktopSoftware)
       givenApplicationAction(appWithTermsAndConditionsInDesktop, loggedInAdmin)
 
       val form   = ChangeOfTermsAndConditionsLocationForm("", false, true)
@@ -713,9 +715,9 @@ class DetailsSpec
     }
 
     "update location if form data is valid and return to app details page" in new Setup {
-      val appWithTermsAndConditionsInDesktop = appWithTermsAndConditionsLocation(TermsAndConditionsLocation.InDesktopSoftware)
+      val appWithTermsAndConditionsInDesktop = appWithTermsAndConditionsLocation(TermsAndConditionsLocations.InDesktopSoftware)
       givenApplicationAction(appWithTermsAndConditionsInDesktop, loggedInAdmin)
-      when(applicationServiceMock.updateTermsConditionsLocation(eqTo(appWithTermsAndConditionsInDesktop), *[UserId], eqTo(TermsAndConditionsLocation.Url(termsAndConditionsUrl)))(*))
+      when(applicationServiceMock.updateTermsConditionsLocation(eqTo(appWithTermsAndConditionsInDesktop), *[UserId], eqTo(TermsAndConditionsLocations.Url(termsAndConditionsUrl)))(*))
         .thenReturn(Future.successful(ApplicationUpdateSuccessful))
 
       val form   = ChangeOfTermsAndConditionsLocationForm(termsAndConditionsUrl, false, true)
@@ -759,7 +761,7 @@ class DetailsSpec
     implicit val hc: HeaderCarrier = HeaderCarrier()
 
     val developer      = buildDeveloper()
-    val admin          = buildDeveloper(emailAddress = "admin@example.com")
+    val admin          = buildDeveloper(emailAddress = "admin@example.com".toLaxEmail)
     val devSessionId   = "dev sessionId"
     val adminSessionId = "admin sessionId"
     val devSession     = Session(devSessionId, developer, LoggedInState.LOGGED_IN)
@@ -807,7 +809,7 @@ class DetailsSpec
       givenApplicationAction(application, loggedInDeveloper)
 
       if (hasTermsOfUseAgreement) {
-        returnAgreementDetails(TermsOfUseAgreementDetails("test@example.com", None, LocalDateTime.now, Some("1.2")))
+        returnAgreementDetails(TermsOfUseAgreementDetails("test@example.com".toLaxEmail, None, LocalDateTime.now, Some("1.2")))
       } else {
         returnAgreementDetails()
       }
@@ -818,11 +820,11 @@ class DetailsSpec
       val doc = Jsoup.parse(contentAsString(result))
       // APIS-5669 - temporarily removed Change link
       // linkExistsWithHref(doc, routes.Details.changeDetails(application.id).url) shouldBe hasChangeButton
-      elementIdentifiedByIdContainsText(doc, "applicationId", application.id.value) shouldBe true
+      elementIdentifiedByIdContainsText(doc, "applicationId", application.id.text) shouldBe true
       elementIdentifiedByIdContainsText(doc, "applicationName", application.name) shouldBe true
       elementIdentifiedByIdContainsText(doc, "description", application.description.getOrElse("None")) shouldBe true
-      elementIdentifiedByIdContainsText(doc, "privacyPolicyUrl", PrivacyPolicyLocation.asText(application.privacyPolicyLocation)) shouldBe true
-      elementIdentifiedByIdContainsText(doc, "termsAndConditionsUrl", TermsAndConditionsLocation.asText(application.termsAndConditionsLocation)) shouldBe true
+      elementIdentifiedByIdContainsText(doc, "privacyPolicyUrl", application.privacyPolicyLocation.describe) shouldBe true
+      elementIdentifiedByIdContainsText(doc, "termsAndConditionsUrl", application.termsAndConditionsLocation.describe) shouldBe true
       elementExistsContainsText(doc, "td", "Agreed by test@example.com") shouldBe hasTermsOfUseAgreement
     }
 
@@ -835,15 +837,15 @@ class DetailsSpec
       val doc = Jsoup.parse(contentAsString(result))
       formExistsWithAction(doc, routes.Details.changeDetailsAction(application.id).url) shouldBe true
       linkExistsWithHref(doc, routes.Details.details(application.id).url) shouldBe true
-      inputExistsWithValue(doc, "applicationId", "hidden", application.id.value) shouldBe true
+      inputExistsWithValue(doc, "applicationId", "hidden", application.id.text) shouldBe true
       if (application.deployedTo == Environment.SANDBOX || application.state.name == State.TESTING) {
         inputExistsWithValue(doc, "applicationName", "text", application.name) shouldBe true
       } else {
         inputExistsWithValue(doc, "applicationName", "hidden", application.name) shouldBe true
       }
       textareaExistsWithText(doc, "description", application.description.getOrElse("None")) shouldBe true
-      inputExistsWithValue(doc, "privacyPolicyUrl", "text", PrivacyPolicyLocation.asText(application.privacyPolicyLocation)) shouldBe true
-      inputExistsWithValue(doc, "termsAndConditionsUrl", "text", TermsAndConditionsLocation.asText(application.termsAndConditionsLocation)) shouldBe true
+      inputExistsWithValue(doc, "privacyPolicyUrl", "text", application.privacyPolicyLocation.describe) shouldBe true
+      inputExistsWithValue(doc, "termsAndConditionsUrl", "text", application.termsAndConditionsLocation.describe) shouldBe true
     }
 
     def changeDetailsShouldRedirectOnSuccess(application: Application) = {

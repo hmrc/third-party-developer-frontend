@@ -17,28 +17,24 @@
 package uk.gov.hmrc.apiplatform.modules.mfa.views.sms
 
 import java.util.UUID
-
 import org.jsoup.Jsoup
 import org.jsoup.nodes.Document
 import views.helper.CommonViewSpec
-
 import play.api.mvc.Flash
 import play.api.test.{FakeRequest, StubMessagesFactory}
-
 import uk.gov.hmrc.apiplatform.modules.mfa.forms.SmsAccessCodeForm
 import uk.gov.hmrc.apiplatform.modules.mfa.models.{MfaAction, MfaId}
 import uk.gov.hmrc.apiplatform.modules.mfa.views.html.sms.SmsAccessCodeView
-import uk.gov.hmrc.thirdpartydeveloperfrontend.builder.{DeveloperBuilder, DeveloperSessionBuilder}
+import uk.gov.hmrc.thirdpartydeveloperfrontend.builder.{DeveloperTestData, DeveloperSessionBuilder}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.{DeveloperSession, LoggedInState}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.{LocalUserIdTracker, WithCSRFAddToken}
 
 class SmsAccessCodeViewSpec extends CommonViewSpec
-    with WithCSRFAddToken with DeveloperSessionBuilder
-    with DeveloperBuilder with LocalUserIdTracker with StubMessagesFactory {
+    with WithCSRFAddToken with DeveloperTestData with DeveloperSessionBuilder with LocalUserIdTracker with StubMessagesFactory {
 
   implicit val flash                      = Flash(Map("mobileNumber" -> "0123456789"))
   implicit val request                    = FakeRequest()
-  implicit val loggedIn: DeveloperSession = buildDeveloperSession(loggedInState = LoggedInState.LOGGED_IN, buildDeveloper("developer@example.com", "Joe", "Bloggs"))
+  implicit val loggedIn: DeveloperSession = JoeBloggs.loggedIn
   val smsAccessCodeView                   = app.injector.instanceOf[SmsAccessCodeView]
 
   trait Setup {

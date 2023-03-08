@@ -17,14 +17,11 @@
 package views
 
 import java.time.{LocalDateTime, Period, ZoneOffset}
-
 import org.jsoup.Jsoup
 import org.jsoup.nodes.Document
 import views.helper.CommonViewSpec
 import views.html.ChangeDetailsView
-
 import play.api.test.FakeRequest
-
 import uk.gov.hmrc.thirdpartydeveloperfrontend.builder._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.EditApplicationForm
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications._
@@ -32,29 +29,30 @@ import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.controllers.Applica
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.LoggedInState
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.ViewHelpers.{elementExistsByText, elementIdentifiedByAttrContainsText, textareaExistsWithText}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.{LocalUserIdTracker, WithCSRFAddToken}
+import uk.gov.hmrc.apiplatform.modules.applications.domain.models.{ApplicationId, ClientId, PrivacyPolicyLocations, TermsAndConditionsLocations}
 
 class ChangeApplicationDetailsSpec extends CommonViewSpec
     with WithCSRFAddToken
     with LocalUserIdTracker
     with DeveloperSessionBuilder
-    with DeveloperBuilder {
+    with DeveloperTestData {
 
   val changeDetails = app.injector.instanceOf[ChangeDetailsView]
-  val applicationId = ApplicationId("1234")
+  val applicationId = ApplicationId.random
   val clientId      = ClientId("clientId123")
 
   "change application details page" should {
 
     def renderPage(application: Application) = {
 
-      val loggedIn              = buildDeveloperSession(loggedInState = LoggedInState.LOGGED_IN, buildDeveloper("admin@example.com", "firstName1", "lastName1", None))
+      val loggedIn              = adminDeveloper.loggedIn
       val request               = FakeRequest().withCSRFToken
       val privacyPolicyUrl      = application.privacyPolicyLocation match {
-        case PrivacyPolicyLocation.Url(url) => Some(url)
+        case PrivacyPolicyLocations.Url(url) => Some(url)
         case _                              => None
       }
       val termsAndConditionsUrl = application.termsAndConditionsLocation match {
-        case TermsAndConditionsLocation.Url(url) => Some(url)
+        case TermsAndConditionsLocations.Url(url) => Some(url)
         case _                                   => None
       }
 

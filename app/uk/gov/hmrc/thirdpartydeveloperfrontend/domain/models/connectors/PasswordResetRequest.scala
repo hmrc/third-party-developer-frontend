@@ -17,8 +17,9 @@
 package uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.connectors
 
 import play.api.libs.json.Json
+import uk.gov.hmrc.apiplatform.modules.common.domain.models.LaxEmailAddress
 
-final case class PasswordResetRequest(email: String)
+final case class PasswordResetRequest(email: LaxEmailAddress)
 
 object PasswordResetRequest {
   implicit val format = Json.format[PasswordResetRequest]

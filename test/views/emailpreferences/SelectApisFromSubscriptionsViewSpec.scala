@@ -28,9 +28,9 @@ import play.api.mvc.AnyContentAsEmpty
 import play.api.test.FakeRequest
 import play.twirl.api.Html
 
-import uk.gov.hmrc.thirdpartydeveloperfrontend.builder.{DeveloperBuilder, DeveloperSessionBuilder}
+import uk.gov.hmrc.thirdpartydeveloperfrontend.builder._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.{FormKeys, SelectApisFromSubscriptionsForm}
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.ApplicationId
+import uk.gov.hmrc.apiplatform.modules.applications.domain.models.ApplicationId
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.connectors.ApiType.REST_API
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.connectors.{CombinedApi, CombinedApiCategory}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.{DeveloperSession, LoggedInState}
@@ -41,13 +41,11 @@ class SelectApisFromSubscriptionsViewSpec extends CommonViewSpec
     with WithCSRFAddToken
     with LocalUserIdTracker
     with DeveloperSessionBuilder
-    with DeveloperBuilder {
+    with DeveloperTestData {
 
   trait Setup {
 
-    val developerSessionWithoutEmailPreferences: DeveloperSession = {
-      buildDeveloperSession(loggedInState = LoggedInState.LOGGED_IN, buildDeveloper("email@example.com", "First Name", "Last Name", None))
-    }
+    val developerSessionWithoutEmailPreferences: DeveloperSession = standardDeveloper.loggedIn
     val form                                                      = mock[Form[SelectApisFromSubscriptionsForm]]
     val apis                                                      = Set("api1", "api2")
     val applicationId                                             = ApplicationId.random
@@ -86,12 +84,12 @@ class SelectApisFromSubscriptionsViewSpec extends CommonViewSpec
     // Check form is configured correctly
     val form = document.getElementById("emailPreferencesApisForm")
     form.attr("method") should be("POST")
-    form.attr("action") should be(s"/developer/profile/email-preferences/apis-from-subscriptions?context=${applicationId.value}")
+    form.attr("action") should be(s"/developer/profile/email-preferences/apis-from-subscriptions?applicationId=${applicationId.text}")
 
     // check checkboxes are displayed
     validateCheckboxItemsAgainstApis(document, apis)
 
-    document.getElementById("applicationId").`val`() shouldBe applicationId.value
+    document.getElementById("applicationId").`val`() shouldBe applicationId.text
 
     // Check submit button is correct
     document.getElementById("submit").text should be("Continue")

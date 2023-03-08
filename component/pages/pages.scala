@@ -18,6 +18,7 @@ package pages
 
 import org.openqa.selenium.By
 import steps.{Env, Form}
+import uk.gov.hmrc.apiplatform.modules.common.domain.models.LaxEmailAddress
 import uk.gov.hmrc.apiplatform.modules.common.services.ApplicationLogger
 import uk.gov.hmrc.apiplatform.modules.mfa.models.MfaType
 import utils.MfaData
@@ -304,7 +305,7 @@ case object SignOutPage extends WebLink {
   override val url: String = s"${Env.host}/developer/logout"
 }
 
-case class ResendVerificationLink(email: String) extends WebLink {
+case class ResendVerificationLink(email: LaxEmailAddress) extends WebLink {
   override val url: String = s"${Env.host}/developer/resend-verification"
 }
 

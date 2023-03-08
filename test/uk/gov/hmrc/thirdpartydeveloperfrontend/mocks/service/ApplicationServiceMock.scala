@@ -22,11 +22,14 @@ import scala.concurrent.Future.{failed, successful}
 import org.mockito.{ArgumentMatchersSugar, MockitoSugar}
 
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain._
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.apidefinitions.ApiIdentifier
+import uk.gov.hmrc.apiplatform.modules.apis.domain.models.ApiIdentifier
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.DeveloperSession
 import uk.gov.hmrc.thirdpartydeveloperfrontend.service.ApplicationService
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.{CollaboratorTracker, LocalUserIdTracker, TestApplications}
+import uk.gov.hmrc.apiplatform.modules.common.domain.models.LaxEmailAddress
+import uk.gov.hmrc.apiplatform.modules.common.domain.models.Actors
+import uk.gov.hmrc.apiplatform.modules.applications.domain.models.ApplicationId
 
 trait ApplicationServiceMock extends MockitoSugar with ArgumentMatchersSugar with TestApplications with CollaboratorTracker with LocalUserIdTracker {
   val applicationServiceMock = mock[ApplicationService]
@@ -73,8 +76,9 @@ trait ApplicationServiceMock extends MockitoSugar with ArgumentMatchersSugar wit
   def givenApplicationUpdateSucceeds() =
     when(applicationServiceMock.update(any[UpdateApplicationRequest])(*)).thenReturn(successful(ApplicationUpdateSuccessful))
 
-  def givenRemoveTeamMemberSucceeds(loggedInDeveloper: DeveloperSession) =
-    when(applicationServiceMock.removeTeamMember(*, *, eqTo(loggedInDeveloper.email))(*))
+  def givenRemoveTeamMemberSucceeds(loggedInDeveloper:
+                                    DeveloperSession) =
+    when(applicationServiceMock.removeTeamMember(*, *[LaxEmailAddress], eqTo(loggedInDeveloper.email))(*))
       .thenReturn(successful(ApplicationUpdateSuccessful))
 
   def givenUpdateCheckInformationSucceeds(app: Application) =
@@ -85,7 +89,7 @@ trait ApplicationServiceMock extends MockitoSugar with ArgumentMatchersSugar wit
     when(applicationServiceMock.updateCheckInformation(eqTo(app), eqTo(checkInfo))(*))
       .thenReturn(successful(ApplicationUpdateSuccessful))
 
-  def givenAddClientSecretReturns(application: Application, actor: CollaboratorActor) = {
+  def givenAddClientSecretReturns(application: Application, actor: Actors.AppCollaborator) = {
     val newSecretId = UUID.randomUUID().toString
     val newSecret   = UUID.randomUUID().toString
 
@@ -93,12 +97,12 @@ trait ApplicationServiceMock extends MockitoSugar with ArgumentMatchersSugar wit
       .thenReturn(successful((newSecretId, newSecret)))
   }
 
-  def givenAddClientSecretFailsWith(application: Application, actor: CollaboratorActor, exception: Exception) = {
+  def givenAddClientSecretFailsWith(application: Application, actor: Actors.AppCollaborator, exception: Exception) = {
     when(applicationServiceMock.addClientSecret(eqTo(application), eqTo(actor))(*))
       .thenReturn(failed(exception))
   }
 
-  def givenDeleteClientSecretSucceeds(application: Application, actor: CollaboratorActor, clientSecretId: String) = {
+  def givenDeleteClientSecretSucceeds(application: Application, actor: Actors.AppCollaborator, clientSecretId: String) = {
     when(
       applicationServiceMock
         .deleteClientSecret(eqTo(application), eqTo(actor), eqTo(clientSecretId))(*)

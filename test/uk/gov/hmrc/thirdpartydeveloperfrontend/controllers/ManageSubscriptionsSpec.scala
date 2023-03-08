@@ -35,7 +35,8 @@ import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.thirdpartydeveloperfrontend.builder.{DeveloperBuilder, _}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.config.ErrorHandler
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.ApplicationNotFound
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.apidefinitions.{APISubscriptionStatus, ApiContext, ApiVersion}
+import uk.gov.hmrc.apiplatform.modules.apis.domain.models.{ApiContext, ApiVersion}
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.apidefinitions.APISubscriptionStatus
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.{CheckInformation, Privileged, Standard, _}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.controllers.SaveSubsFieldsPageMode
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.subscriptions.ApiSubscriptionFields._
@@ -45,6 +46,8 @@ import uk.gov.hmrc.thirdpartydeveloperfrontend.mocks.service._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.service.{AuditService, SubscriptionFieldsService}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.WithLoggedInSession._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.{LocalUserIdTracker, TestApplications, WithCSRFAddToken}
+import uk.gov.hmrc.apiplatform.modules.applications.domain.models.ApplicationId
+import uk.gov.hmrc.apiplatform.modules.applications.domain.models.Collaborator
 
 class ManageSubscriptionsSpec
     extends BaseControllerSpec
@@ -63,7 +66,7 @@ class ManageSubscriptionsSpec
 
   implicit val hc: HeaderCarrier = HeaderCarrier()
 
-  val role = CollaboratorRole.ADMINISTRATOR
+  val role = Collaborator.Roles.ADMINISTRATOR
 
   val application: Application = Application(
     appId,
@@ -76,16 +79,16 @@ class ManageSubscriptionsSpec
     Environment.SANDBOX,
     Some("Description 1"),
     Set(loggedInDeveloper.email.asCollaborator(role)),
-    state = ApplicationState.production(loggedInDeveloper.email, loggedInDeveloper.displayedName, ""),
+    state = ApplicationState.production(loggedInDeveloper.email.text, loggedInDeveloper.displayedName, ""),
     access = Standard(
       redirectUris = List("https://red1", "https://red2"),
       termsAndConditionsUrl = Some("http://tnc-url.com")
     )
   )
 
-  val productionApplication = application.copy(deployedTo = Environment.PRODUCTION, id = ApplicationId(appId + "_Prod"))
+  val productionApplication = application.copy(deployedTo = Environment.PRODUCTION, id = ApplicationId.random)
 
-  val privilegedApplication: Application = application.copy(id = ApplicationId("456"), access = Privileged())
+  val privilegedApplication: Application = application.copy(id = ApplicationId.random, access = Privileged())
 
   val tokens: ApplicationToken =
     ApplicationToken(List(aClientSecret(), aClientSecret()), "token")
@@ -434,11 +437,11 @@ class ManageSubscriptionsSpec
 
       "the page mode for saveSubscriptionFields action" when {
         "LeftHandNavigation" should {
-          saveSubscriptionFieldsTest(SaveSubsFieldsPageMode.LeftHandNavigation, s"/developer/applications/${appId.value}/api-metadata")
+          saveSubscriptionFieldsTest(SaveSubsFieldsPageMode.LeftHandNavigation, s"/developer/applications/${appId.text}/api-metadata")
         }
 
         "CheckYourAnswers" should {
-          saveSubscriptionFieldsTest(SaveSubsFieldsPageMode.CheckYourAnswers, s"/developer/applications/${appId.value}/check-your-answers#configurations")
+          saveSubscriptionFieldsTest(SaveSubsFieldsPageMode.CheckYourAnswers, s"/developer/applications/${appId.text}/check-your-answers#configurations")
         }
 
         def saveSubscriptionFieldsTest(mode: SaveSubsFieldsPageMode, expectedRedirectUrl: String): Unit = {
@@ -817,7 +820,7 @@ class ManageSubscriptionsSpec
         private val result = manageSubscriptionController.subscriptionConfigurationStart(appId)(loggedInRequest)
 
         status(result) shouldBe SEE_OTHER
-        redirectLocation(result) shouldBe Some(s"/developer/applications/${appId.value}/add/success")
+        redirectLocation(result) shouldBe Some(s"/developer/applications/${appId.text}/add/success")
       }
     }
 

@@ -30,7 +30,9 @@ import uk.gov.hmrc.apiplatform.modules.submissions.domain.models._
 import uk.gov.hmrc.apiplatform.modules.submissions.services.SubmissionService
 import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.{ApplicationActionBuilders, ApplicationRequest, BaseController, HasApplication, UserRequest}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.apidefinitions.APISubscriptionStatus
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.{Application, ApplicationId, CollaboratorRole, State}
+import uk.gov.hmrc.apiplatform.modules.applications.domain.models.ApplicationId
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.{Application, State}
+import uk.gov.hmrc.apiplatform.modules.applications.domain.models.Collaborator
 
 class SubmissionRequest[A](val extSubmission: ExtendedSubmission, val userRequest: UserRequest[A]) extends UserRequest[A](userRequest.developerSession, userRequest.msgRequest) {
   lazy val submission         = extSubmission.submission
@@ -43,7 +45,7 @@ class SubmissionApplicationRequest[A](val application: Application, val submissi
 object SubmissionActionBuilders {
 
   object RoleFilter {
-    type Type = CollaboratorRole => Boolean
+    type Type = Collaborator.Role => Boolean
     val isAdminRole: Type  = _.isAdministrator
     val isTeamMember: Type = _ => true
   }
