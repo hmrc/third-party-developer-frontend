@@ -25,8 +25,8 @@ import uk.gov.hmrc.apiplatform.modules.developers.domain.models.UserId
 
 trait ThirdPartyDeveloperConnectorMockModule extends MockitoSugar with ArgumentMatchersSugar {
 
-  object TPDMock {
-    val aMock = mock[ThirdPartyDeveloperConnector]
+  trait AbstractTPDMock {
+    def aMock: ThirdPartyDeveloperConnector
 
     object FindUserId {
 
@@ -39,5 +39,14 @@ trait ThirdPartyDeveloperConnectorMockModule extends MockitoSugar with ArgumentM
       def thenReturn(userId: UserId)(developer: Option[Developer]) =
         when(aMock.fetchDeveloper(eqTo(userId))(*)).thenReturn(successful(developer))
     }
+
+    object FetchByEmails {
+      def returnsEmptySeq() =
+        when(aMock.fetchByEmails(*)(*)).thenReturn(successful(Seq.empty))
+    }
+  }
+
+  object TPDMock extends AbstractTPDMock {
+    val aMock = mock[ThirdPartyDeveloperConnector]
   }
 }

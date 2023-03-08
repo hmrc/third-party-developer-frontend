@@ -16,7 +16,6 @@
 
 package uk.gov.hmrc.thirdpartydeveloperfrontend.connectors
 
-import akka.pattern.FutureTimeoutSupport
 
 import scala.concurrent.{ExecutionContext, Future}
 import cats.data.NonEmptyList

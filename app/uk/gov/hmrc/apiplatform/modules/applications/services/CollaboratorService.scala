@@ -26,30 +26,36 @@ import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.connectors.AddTeamM
 
 import javax.inject.{Inject, Singleton}
 import scala.concurrent.{ExecutionContext, Future}
+import uk.gov.hmrc.apiplatform.modules.commands.applications.domain.models.RemoveCollaborator
+import uk.gov.hmrc.apiplatform.modules.common.domain.models.Actors
+import java.time.LocalDateTime
+import cats.data.NonEmptyList
+import uk.gov.hmrc.apiplatform.modules.commands.applications.domain.models.CommandFailures
+import uk.gov.hmrc.apiplatform.modules.commands.applications.domain.models.DispatchSuccessResult
+import uk.gov.hmrc.apiplatform.modules.commands.applications.domain.models.CommandFailure
+
 @Singleton
-class CollaboratorService @Inject()(apmConnector: ApmConnector, productionApplicationConnector: ThirdPartyApplicationProductionConnector,
-sandboxApplicationConnector: ThirdPartyApplicationSandboxConnector, developerConnector: ThirdPartyDeveloperConnector)
+class CollaboratorService @Inject()(apmConnector: ApmConnector, applicationCommandConnector: BridgedConnector[ApplicationCommandConnector], developerConnector: ThirdPartyDeveloperConnector)
                                    (implicit val ec: ExecutionContext) {
 
-    val bridgedConnector  = new BridgedConnector[ThirdPartyApplicationConnector](sandboxApplicationConnector, productionApplicationConnector)  
-                                
   def addTeamMember(app: Application, requestingEmail: LaxEmailAddress, teamMember: AddCollaborator)(implicit hc: HeaderCarrier): Future[Unit] = {
     val request = AddTeamMemberRequest(teamMember.emailAddress, teamMember.role, Some(requestingEmail))
     apmConnector.addTeamMember(app.id, request)
   }
 
-  def removeTeamMember(app: Application, teamMemberToRemove: LaxEmailAddress, requestingEmail: LaxEmailAddress)(implicit hc: HeaderCarrier): Future[ApplicationUpdateSuccessful] = {
+  def removeTeamMember(app: Application, teamMemberToRemove: LaxEmailAddress, requestingEmail: LaxEmailAddress)(implicit hc: HeaderCarrier): Future[Either[NonEmptyList[CommandFailure], DispatchSuccessResult]] = {
     val otherAdminEmails = app.collaborators
       .filter(_.role.isAdministrator)
       .map(_.emailAddress)
       .filterNot(_ == requestingEmail)
       .filterNot(_ == teamMemberToRemove)
 
+   val collaboratorToRemove = app.collaborators.filter(_.emailAddress==teamMemberToRemove).head
     for {
       otherAdmins  <- developerConnector.fetchByEmails(otherAdminEmails)
       adminsToEmail = otherAdmins.filter(_.verified.contains(true)).map(_.email).toSet
-      connector     = bridgedConnector.forEnvironment(app.deployedTo)
-      response     <- connector.removeTeamMember(app.id, teamMemberToRemove, requestingEmail, adminsToEmail)
+      removeCommand = RemoveCollaborator(Actors.AppCollaborator(requestingEmail), collaboratorToRemove, LocalDateTime.now())
+      response     <- applicationCommandConnector(app).dispatch(app.id, removeCommand, adminsToEmail)
     } yield response
   }
 

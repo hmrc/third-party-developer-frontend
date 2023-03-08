@@ -18,13 +18,21 @@ package uk.gov.hmrc.thirdpartydeveloperfrontend.connectors
 
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.Environment
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.Environment._
+import com.google.inject.Inject
+import com.google.inject.name.Named
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.Application
 
-class BridgedConnector[T](sandbox: T, production: T) {
 
-   def forEnvironment(environment: Environment): T = {
+case class BridgedConnector[T] @Inject() (@Named("SANDBOX") sandbox: T, @Named("PRODUCTION") production: T) {
+
+  def forEnvironment(environment: Environment): T = {
     environment match {
       case PRODUCTION => production
       case _          => sandbox
     }
+  }
+
+  def apply(application: Application): T = {
+    forEnvironment(application.deployedTo)
   }
 }
