@@ -20,9 +20,9 @@ import uk.gov.hmrc.apiplatform.modules.common.domain.models.LaxEmailAddress.Stri
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.UserIdTracker
 
 trait DeveloperTestData extends DeveloperBuilder {
-  self : UserIdTracker =>
+  self: UserIdTracker =>
 
   lazy val adminDeveloper = buildDeveloper("admin@example.com".toLaxEmail, "firstName1", "lastName1")
-  lazy val JoeBloggs = buildDeveloper("developer@example.com".toLaxEmail, "Joe", "Bloggs")
-  val standardDeveloper = buildDeveloper("developer@example.com".toLaxEmail, "firstName2", "lastName2")
+  lazy val JoeBloggs      = buildDeveloper("developer@example.com".toLaxEmail, "Joe", "Bloggs")
+  val standardDeveloper   = buildDeveloper("developer@example.com".toLaxEmail, "firstName2", "lastName2")
 }

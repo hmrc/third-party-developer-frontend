@@ -17,10 +17,11 @@
 package uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models
 
 import java.time.{LocalDateTime, Period}
+
+import uk.gov.hmrc.apiplatform.modules.applications.domain.models.{ApplicationId, ClientId, PrivacyPolicyLocations, TermsAndConditionsLocations}
+import uk.gov.hmrc.apiplatform.modules.common.domain.models.LaxEmailAddress
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.HmrcSpec
-import uk.gov.hmrc.apiplatform.modules.common.domain.models.LaxEmailAddress
-import uk.gov.hmrc.apiplatform.modules.applications.domain.models.{ApplicationId, ClientId, PrivacyPolicyLocations, TermsAndConditionsLocations}
 
 class ApplicationSpec extends HmrcSpec {
   val url            = "http://example.com"
@@ -57,7 +58,8 @@ class ApplicationSpec extends HmrcSpec {
       application.privacyPolicyLocation shouldBe PrivacyPolicyLocations.Url(url)
     }
     "be correct for new journey app when location was url" in {
-      val application = baseApplication.copy(access = Standard(importantSubmissionData = Some(importantSubmissionData.copy(privacyPolicyLocation = PrivacyPolicyLocations.Url(url)))))
+      val application =
+        baseApplication.copy(access = Standard(importantSubmissionData = Some(importantSubmissionData.copy(privacyPolicyLocation = PrivacyPolicyLocations.Url(url)))))
       application.privacyPolicyLocation shouldBe PrivacyPolicyLocations.Url(url)
     }
     "be correct for new journey app when location was in desktop app" in {
@@ -88,7 +90,9 @@ class ApplicationSpec extends HmrcSpec {
     }
     "be correct for new journey app when location was in desktop app" in {
       val application =
-        baseApplication.copy(access = Standard(importantSubmissionData = Some(importantSubmissionData.copy(termsAndConditionsLocation = TermsAndConditionsLocations.InDesktopSoftware))))
+        baseApplication.copy(access =
+          Standard(importantSubmissionData = Some(importantSubmissionData.copy(termsAndConditionsLocation = TermsAndConditionsLocations.InDesktopSoftware)))
+        )
       application.termsAndConditionsLocation shouldBe TermsAndConditionsLocations.InDesktopSoftware
     }
     "be correct for new journey app when location was not supplied" in {

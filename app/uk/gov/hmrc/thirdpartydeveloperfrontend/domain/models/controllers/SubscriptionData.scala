@@ -16,8 +16,8 @@
 
 package uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.controllers
 
-import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.GroupedSubscriptions
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.{Application}
 import uk.gov.hmrc.apiplatform.modules.applications.domain.models.Collaborator
+import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.GroupedSubscriptions
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.Application
 
 case class SubscriptionData(role: Collaborator.Role, application: Application, subscriptions: Option[GroupedSubscriptions])

@@ -17,6 +17,7 @@
 package uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications
 
 import java.time.LocalDateTime
+
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.Actors
 
 case class ClientSecretRequest(actor: Actors.AppCollaborator, timestamp: LocalDateTime)

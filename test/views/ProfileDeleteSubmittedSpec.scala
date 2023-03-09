@@ -19,7 +19,9 @@ package views
 import org.jsoup.Jsoup
 import views.helper.CommonViewSpec
 import views.html.ProfileDeleteSubmittedView
+
 import play.api.test.FakeRequest
+
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.LaxEmailAddress.StringSyntax
 import uk.gov.hmrc.thirdpartydeveloperfrontend.builder._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.LoggedInState
@@ -38,7 +40,7 @@ class ProfileDeleteSubmittedSpec extends CommonViewSpec
     "render with no errors" in {
       val request = FakeRequest().withCSRFToken
 
-      val developer =  buildDeveloperWithRandomId("Test".toLaxEmail, "Test", "Test", None).loggedIn
+      val developer = buildDeveloperWithRandomId("Test".toLaxEmail, "Test", "Test", None).loggedIn
 
       val page = profileDeleteSubmittedView.render(request, developer, appConfig, messagesProvider, "details")
       page.contentType should include("text/html")

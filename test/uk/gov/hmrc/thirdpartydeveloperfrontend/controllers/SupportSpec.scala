@@ -28,6 +28,8 @@ import play.api.test.FakeRequest
 import play.api.test.Helpers._
 import play.filters.csrf.CSRF.TokenProvider
 
+import uk.gov.hmrc.apiplatform.modules.common.domain.models.LaxEmailAddress.StringSyntax
+import uk.gov.hmrc.apiplatform.modules.developers.domain.models.UserId
 import uk.gov.hmrc.thirdpartydeveloperfrontend.builder.DeveloperBuilder
 import uk.gov.hmrc.thirdpartydeveloperfrontend.config.ErrorHandler
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.connectors.TicketCreated
@@ -36,8 +38,6 @@ import uk.gov.hmrc.thirdpartydeveloperfrontend.mocks.service.SessionServiceMock
 import uk.gov.hmrc.thirdpartydeveloperfrontend.service.DeskproService
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.WithLoggedInSession._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.{LocalUserIdTracker, WithCSRFAddToken}
-import uk.gov.hmrc.apiplatform.modules.common.domain.models.LaxEmailAddress.StringSyntax
-import uk.gov.hmrc.apiplatform.modules.developers.domain.models.UserId
 
 class SupportSpec extends BaseControllerSpec with WithCSRFAddToken with DeveloperBuilder with LocalUserIdTracker {
 
@@ -117,9 +117,9 @@ class SupportSpec extends BaseControllerSpec with WithCSRFAddToken with Develope
       val request = FakeRequest()
         .withSession(sessionParams: _*)
         .withFormUrlEncodedBody(
-          "fullname" -> "Peter Smith",
+          "fullname"     -> "Peter Smith",
           "emailaddress" -> "peter@example.com",
-          "comments" -> "A+++, good como  puedo iniciar, would buy again"
+          "comments"     -> "A+++, good como  puedo iniciar, would buy again"
         )
 
       when(underTest.deskproService.submitSupportEnquiry(*[UserId], *)(any[Request[AnyRef]], *)).thenReturn(successful(TicketCreated))

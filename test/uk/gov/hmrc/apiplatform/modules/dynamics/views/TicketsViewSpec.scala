@@ -18,7 +18,9 @@ package uk.gov.hmrc.apiplatform.modules.dynamics.views
 
 import org.jsoup.Jsoup
 import views.helper.CommonViewSpec
+
 import play.api.test.{FakeRequest, StubMessagesFactory}
+
 import uk.gov.hmrc.apiplatform.modules.dynamics.connectors.Ticket
 import uk.gov.hmrc.apiplatform.modules.dynamics.views.html.TicketsView
 import uk.gov.hmrc.thirdpartydeveloperfrontend.builder.{DeveloperBuilder, DeveloperSessionBuilder}

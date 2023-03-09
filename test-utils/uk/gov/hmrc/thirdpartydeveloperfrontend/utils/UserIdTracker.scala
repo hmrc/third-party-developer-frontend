@@ -16,11 +16,11 @@
 
 package uk.gov.hmrc.thirdpartydeveloperfrontend.utils
 
-import uk.gov.hmrc.apiplatform.modules.common.domain.models.LaxEmailAddress
-
 import scala.collection.mutable
-import uk.gov.hmrc.apiplatform.modules.developers.domain.models.UserId
+
 import uk.gov.hmrc.apiplatform.modules.applications.domain.models.Collaborator
+import uk.gov.hmrc.apiplatform.modules.common.domain.models.LaxEmailAddress
+import uk.gov.hmrc.apiplatform.modules.developers.domain.models.UserId
 
 // Trait allows for mix in of either local or global userIdTracker into things like CollaboratorTracker
 trait UserIdTracker {
@@ -44,8 +44,8 @@ trait CollaboratorTracker {
   def collaboratorOf(email: LaxEmailAddress, role: Collaborator.Role): Collaborator = Collaborator(email, role, idOf(email))
 
   implicit class CollaboratorSyntax(email: LaxEmailAddress) {
-    def asAdministratorCollaborator            = collaboratorOf(email, Collaborator.Roles.ADMINISTRATOR)
-    def asDeveloperCollaborator                = collaboratorOf(email, Collaborator.Roles.DEVELOPER)
+    def asAdministratorCollaborator             = collaboratorOf(email, Collaborator.Roles.ADMINISTRATOR)
+    def asDeveloperCollaborator                 = collaboratorOf(email, Collaborator.Roles.DEVELOPER)
     def asCollaborator(role: Collaborator.Role) = collaboratorOf(email, role)
   }
 }

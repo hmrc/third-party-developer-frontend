@@ -18,11 +18,15 @@ package views
 
 import java.time.format.DateTimeFormatter
 import java.time.{LocalDateTime, Period, ZoneOffset}
+
 import org.jsoup.Jsoup
 import views.helper.CommonViewSpec
 import views.html.TermsOfUseView
+
 import play.api.test.FakeRequest
 import play.twirl.api.HtmlFormat.Appendable
+
+import uk.gov.hmrc.apiplatform.modules.applications.domain.models.{ApplicationId, ClientId}
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.LaxEmailAddress.StringSyntax
 import uk.gov.hmrc.thirdpartydeveloperfrontend.builder.{DeveloperBuilder, DeveloperSessionBuilder}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.TermsOfUseForm
@@ -31,8 +35,6 @@ import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.controllers.ApplicationViewModel
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.LoggedInState
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.{LocalUserIdTracker, WithCSRFAddToken}
-import uk.gov.hmrc.apiplatform.modules.applications.domain.models.ClientId
-import uk.gov.hmrc.apiplatform.modules.applications.domain.models.ApplicationId
 
 class TermsOfUseSpec extends CommonViewSpec
     with WithCSRFAddToken
@@ -53,7 +55,7 @@ class TermsOfUseSpec extends CommonViewSpec
 
   "Terms of use view" when {
     implicit val request    = FakeRequest().withCSRFToken
-    implicit val loggedIn   =  buildDeveloperWithRandomId("developer@example.com".toLaxEmail, "Joe", "Bloggs").loggedIn
+    implicit val loggedIn   = buildDeveloperWithRandomId("developer@example.com".toLaxEmail, "Joe", "Bloggs").loggedIn
     implicit val navSection = "details"
 
     val id          = ApplicationId.random

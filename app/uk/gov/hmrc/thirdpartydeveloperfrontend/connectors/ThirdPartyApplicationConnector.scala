@@ -19,23 +19,25 @@ package uk.gov.hmrc.thirdpartydeveloperfrontend.connectors
 import javax.inject.{Inject, Singleton}
 import scala.concurrent.{ExecutionContext, Future}
 import scala.util.Success
+
 import akka.pattern.FutureTimeoutSupport
+
 import play.api.http.Status._
-import uk.gov.hmrc.apiplatform.modules.common.domain.models.LaxEmailAddress
 import uk.gov.hmrc.http.HttpReads.Implicits._
 import uk.gov.hmrc.http.{HttpClient, _}
 import uk.gov.hmrc.play.http.metrics.common.API
+
+import uk.gov.hmrc.apiplatform.modules.apis.domain.models.ApiIdentifier
+import uk.gov.hmrc.apiplatform.modules.applications.domain.models.{ApplicationId, ClientId}
+import uk.gov.hmrc.apiplatform.modules.common.domain.models.LaxEmailAddress
 import uk.gov.hmrc.apiplatform.modules.common.services.ApplicationLogger
+import uk.gov.hmrc.apiplatform.modules.developers.domain.models.UserId
 import uk.gov.hmrc.thirdpartydeveloperfrontend.config.ApplicationConfig
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain._
-import uk.gov.hmrc.apiplatform.modules.apis.domain.models.ApiIdentifier
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.ApplicationNameValidationJson.{ApplicationNameValidationRequest, ApplicationNameValidationResult}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.connectors.{DeleteCollaboratorRequest, TermsOfUseInvitation}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.service.ApplicationService.ApplicationConnector
-import uk.gov.hmrc.apiplatform.modules.developers.domain.models.UserId
-import uk.gov.hmrc.apiplatform.modules.applications.domain.models.ApplicationId
-import uk.gov.hmrc.apiplatform.modules.applications.domain.models.ClientId
 
 abstract class ThirdPartyApplicationConnector(config: ApplicationConfig, metrics: ConnectorMetrics) extends ApplicationConnector
     with CommonResponseHandlers with ApplicationLogger with HttpErrorFunctions with ApplicationUpdateFormatters {
@@ -90,10 +92,10 @@ abstract class ThirdPartyApplicationConnector(config: ApplicationConfig, metrics
     }
 
   def removeTeamMember(
-                        applicationId: ApplicationId,
-                        teamMemberToDelete: LaxEmailAddress,
-                        requestingEmail: LaxEmailAddress,
-                        adminsToEmail: Set[LaxEmailAddress]
+      applicationId: ApplicationId,
+      teamMemberToDelete: LaxEmailAddress,
+      requestingEmail: LaxEmailAddress,
+      adminsToEmail: Set[LaxEmailAddress]
     )(implicit hc: HeaderCarrier
     ): Future[ApplicationUpdateSuccessful] =
     metrics.record(api) {
@@ -216,7 +218,7 @@ abstract class ThirdPartyApplicationConnector(config: ApplicationConfig, metrics
 }
 
 private[connectors] object ThirdPartyApplicationConnectorDomain {
-  import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.{ClientSecret}
+  import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.ClientSecret
   import java.time.LocalDateTime
 
   def toDomain(tpaClientSecret: TPAClientSecret): ClientSecret =

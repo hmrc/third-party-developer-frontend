@@ -19,16 +19,19 @@ package uk.gov.hmrc.thirdpartydeveloperfrontend.controllers
 import javax.inject.{Inject, Singleton}
 import scala.concurrent.{ExecutionContext, Future}
 import scala.util.control.NonFatal
+
 import views.html._
+
 import play.api.libs.crypto.CookieSigner
 import play.api.mvc.{MessagesControllerComponents, Request}
-import uk.gov.hmrc.apiplatform.modules.common.domain.models.LaxEmailAddress.StringSyntax
 import uk.gov.hmrc.http.{BadRequestException, HeaderCarrier}
 import uk.gov.hmrc.play.bootstrap.controller.WithUnsafeDefaultFormBinding
+
+import uk.gov.hmrc.apiplatform.modules.common.domain.models.LaxEmailAddress.StringSyntax
 import uk.gov.hmrc.apiplatform.modules.common.services.ApplicationLogger
 import uk.gov.hmrc.thirdpartydeveloperfrontend.config.{ApplicationConfig, ErrorHandler}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.connectors.ThirdPartyDeveloperConnector
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.{EmailAlreadyInUse, RegistrationSuccessful, Registration => RegistrationModel}
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.{EmailAlreadyInUse, Registration => RegistrationModel, RegistrationSuccessful}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.service.SessionService
 
 @Singleton

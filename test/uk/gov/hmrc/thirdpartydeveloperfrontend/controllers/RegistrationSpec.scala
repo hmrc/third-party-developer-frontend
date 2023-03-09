@@ -27,11 +27,12 @@ import play.api.test.Helpers._
 import play.filters.csrf.CSRF.TokenProvider
 import uk.gov.hmrc.http.{BadRequestException, UpstreamErrorResponse}
 
+import uk.gov.hmrc.apiplatform.modules.common.domain.models.LaxEmailAddress.StringSyntax
 import uk.gov.hmrc.thirdpartydeveloperfrontend.connectors.ThirdPartyDeveloperConnector
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.RegistrationSuccessful
 import uk.gov.hmrc.thirdpartydeveloperfrontend.mocks.service.SessionServiceMock
-import uk.gov.hmrc.apiplatform.modules.common.domain.models.LaxEmailAddress.StringSyntax
+
 class RegistrationSpec extends BaseControllerSpec {
 
   var userPassword = "Password1!"
@@ -67,7 +68,7 @@ class RegistrationSpec extends BaseControllerSpec {
     val newSessionParams = Seq(("email", email.text), sessionParams.head)
     val request          = FakeRequest().withSession(newSessionParams: _*)
   }
-    
+
   "registration" should {
     "register with normalized firstname, lastname, email and organisation" in new Setup {
       val request = FakeRequest().withSession(sessionParams: _*).withFormUrlEncodedBody(
@@ -131,20 +132,18 @@ class RegistrationSpec extends BaseControllerSpec {
       contentAsString(result) should include("Your account verification link has expired")
     }
 
-    "redirect the user to confirmation page when resending verification" in new Setup  with RequestWithSession{
+    "redirect the user to confirmation page when resending verification" in new Setup with RequestWithSession {
       when(underTest.connector.resendVerificationEmail(eqTo(email))(*)).thenReturn(successful(NO_CONTENT))
 
-      val result           = underTest.resendVerification()(request)
+      val result = underTest.resendVerification()(request)
 
       status(result) shouldBe SEE_OTHER
     }
 
-
-
     "show error page when resending verification fails" in new Setup with RequestWithSession {
       when(underTest.connector.resendVerificationEmail(eqTo(email))(*)).thenReturn(failed(UpstreamErrorResponse("Bang", NOT_FOUND)))
 
-      val result           = underTest.resendVerification()(request)
+      val result = underTest.resendVerification()(request)
 
       status(result) shouldBe NOT_FOUND
     }

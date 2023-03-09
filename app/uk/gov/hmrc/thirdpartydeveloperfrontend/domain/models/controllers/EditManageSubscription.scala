@@ -20,16 +20,10 @@ import org.apache.commons.lang3.StringUtils
 
 import play.api.data.FormError
 
-import uk.gov.hmrc.apiplatform.modules.apis.domain.models.{
-  ApiContext,
-  ApiVersion
-}
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.apidefinitions.{
-  APISubscriptionStatusWithSubscriptionFields,
-  APISubscriptionStatusWithWritableSubscriptionField
-}
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.subscriptions.{DevhubAccessLevel, FieldName, FieldValue}
+import uk.gov.hmrc.apiplatform.modules.apis.domain.models.{ApiContext, ApiVersion}
 import uk.gov.hmrc.apiplatform.modules.applications.domain.models.Collaborator
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.apidefinitions.{APISubscriptionStatusWithSubscriptionFields, APISubscriptionStatusWithWritableSubscriptionField}
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.subscriptions.{DevhubAccessLevel, FieldName, FieldValue}
 
 object EditManageSubscription {
 

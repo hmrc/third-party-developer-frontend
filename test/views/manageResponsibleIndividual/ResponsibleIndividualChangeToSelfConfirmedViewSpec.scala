@@ -24,7 +24,7 @@ import play.api.test.FakeRequest
 
 import uk.gov.hmrc.thirdpartydeveloperfrontend.builder._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.LoggedInState
-import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.{LocalUserIdTracker, CollaboratorTracker, TestApplications, WithCSRFAddToken}
+import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.{CollaboratorTracker, LocalUserIdTracker, TestApplications, WithCSRFAddToken}
 
 class ResponsibleIndividualChangeToSelfConfirmedViewSpec extends CommonViewSpec with WithCSRFAddToken
     with LocalUserIdTracker with CollaboratorTracker with DeveloperTestData with DeveloperSessionBuilder with TestApplications {

@@ -109,7 +109,8 @@ class MfaSteps extends ScalaDsl with EN with Matchers with NavigationSugar with 
 
     val password = result("Password")
 
-    val developer = buildDeveloper(emailAddress = result("Email address").toLaxEmail, firstName = result("First name"), lastName = result("Last name"), mfaDetails = List(smsMfaDetails))
+    val developer =
+      buildDeveloper(emailAddress = result("Email address").toLaxEmail, firstName = result("First name"), lastName = result("Last name"), mfaDetails = List(smsMfaDetails))
 
     setUpDeveloperStub(developer, smsMfaId, password, None, deviceSessionFound = false)
 
@@ -124,7 +125,12 @@ class MfaSteps extends ScalaDsl with EN with Matchers with NavigationSugar with 
     val password = result("Password")
 
     val developer =
-      buildDeveloper(emailAddress = result("Email address").toLaxEmail, firstName = result("First name"), lastName = result("Last name"), mfaDetails = List(authenticatorAppMfaDetails))
+      buildDeveloper(
+        emailAddress = result("Email address").toLaxEmail,
+        firstName = result("First name"),
+        lastName = result("Last name"),
+        mfaDetails = List(authenticatorAppMfaDetails)
+      )
 
     setUpDeveloperStub(developer, authAppMfaId, password, None, deviceSessionFound = false)
 
@@ -136,7 +142,12 @@ class MfaSteps extends ScalaDsl with EN with Matchers with NavigationSugar with 
     val password = result("Password")
 
     val developer =
-      buildDeveloper(emailAddress = result("Email address").toLaxEmail, firstName = result("First name"), lastName = result("Last name"), mfaDetails = List(authenticatorAppMfaDetails))
+      buildDeveloper(
+        emailAddress = result("Email address").toLaxEmail,
+        firstName = result("First name"),
+        lastName = result("Last name"),
+        mfaDetails = List(authenticatorAppMfaDetails)
+      )
 
     setUpDeveloperStub(developer, authAppMfaId, password, Some(DeviceSessionStub.staticDeviceSessionId), true)
 

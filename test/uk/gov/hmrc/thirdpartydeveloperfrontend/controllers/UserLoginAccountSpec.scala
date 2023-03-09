@@ -21,14 +21,19 @@ import java.util.UUID
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 import scala.concurrent.Future._
+
 import _root_.uk.gov.hmrc.thirdpartydeveloperfrontend.mocks.connectors.{ThirdPartyDeveloperConnectorMockModule, ThirdPartyDeveloperMfaConnectorMockModule}
 import views.html.{AccountLockedView, Add2SVView, SelectLoginMfaView, SignInView, UserDidNotAdd2SVView}
+
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
 import play.filters.csrf.CSRF.TokenProvider
+import uk.gov.hmrc.play.audit.http.connector.AuditResult
+
+import uk.gov.hmrc.apiplatform.modules.applications.domain.models.{ApplicationId, ClientId}
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.LaxEmailAddress
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.LaxEmailAddress.StringSyntax
-import uk.gov.hmrc.play.audit.http.connector.AuditResult
+import uk.gov.hmrc.apiplatform.modules.developers.domain.models.UserId
 import uk.gov.hmrc.apiplatform.modules.mfa.models.MfaType.{AUTHENTICATOR_APP, SMS}
 import uk.gov.hmrc.apiplatform.modules.mfa.models.{MfaId, MfaType}
 import uk.gov.hmrc.apiplatform.modules.mfa.views.html.authapp.AuthAppLoginAccessCodeView
@@ -37,7 +42,6 @@ import uk.gov.hmrc.apiplatform.modules.mfa.views.html.{RequestMfaRemovalComplete
 import uk.gov.hmrc.thirdpartydeveloperfrontend.builder.{DeveloperBuilder, MfaDetailBuilder}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.config.ErrorHandler
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain._
-import uk.gov.hmrc.apiplatform.modules.applications.domain.models.ApplicationId
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.{ApplicationWithSubscriptionIds, Environment}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.connectors.{TicketCreated, UserAuthenticationResponse}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.{DeveloperSession, LoggedInState, Session}
@@ -47,9 +51,6 @@ import uk.gov.hmrc.thirdpartydeveloperfrontend.service.AuditAction._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.service._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.WithLoggedInSession._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.{LocalUserIdTracker, WithCSRFAddToken}
-import uk.gov.hmrc.apiplatform.modules.developers.domain.models.UserId
-import uk.gov.hmrc.apiplatform.modules.applications.domain.models.ClientId
-import uk.gov.hmrc.apiplatform.modules.applications.domain.models.ApplicationId
 
 class UserLoginAccountSpec extends BaseControllerSpec with WithCSRFAddToken
     with DeveloperBuilder with LocalUserIdTracker with CookieEncoding with MfaDetailBuilder {
@@ -140,7 +141,7 @@ class UserLoginAccountSpec extends BaseControllerSpec with WithCSRFAddToken
 
     val testRequest = FakeRequest()
       .withSession(sessionParams
-        :+ "userId" -> user.developer.userId.value.toString
+        :+ "userId"       -> user.developer.userId.value.toString
         :+ "emailAddress" -> user.email.text :+ "nonce" -> nonce: _*)
 
     def mockAuthenticate(email: LaxEmailAddress, password: String, result: Future[UserAuthenticationResponse], resultShowAdminMfaMandateMessage: Future[Boolean]): Unit = {
@@ -371,8 +372,7 @@ class UserLoginAccountSpec extends BaseControllerSpec with WithCSRFAddToken
       private val request = FakeRequest()
         .withCookies(deviceSessionCookie)
         .withSession(sessionParams: _*)
-        .withFormUrlEncodedBody((emailFieldName, user.email.text
-        ), (passwordFieldName, userPassword))
+        .withFormUrlEncodedBody((emailFieldName, user.email.text), (passwordFieldName, userPassword))
 
       private val result = addToken(underTest.authenticate())(request)
 

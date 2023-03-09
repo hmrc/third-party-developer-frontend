@@ -16,8 +16,9 @@
 
 package uk.gov.hmrc.apiplatform.modules.apis.domain.models
 
-import play.api.libs.json.Json
 import scala.util.Random
+
+import play.api.libs.json.Json
 
 case class ApiVersion(value: String) extends AnyVal
 

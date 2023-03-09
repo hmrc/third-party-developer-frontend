@@ -19,16 +19,18 @@ package uk.gov.hmrc.apiplatform.modules.submissions.connectors
 import javax.inject.{Inject, Singleton}
 import scala.concurrent.{ExecutionContext, Future}
 import scala.util.{Success, Try}
+
 import play.api.libs.json.{JsValue, Json}
-import uk.gov.hmrc.apiplatform.modules.common.domain.models.LaxEmailAddress
 import uk.gov.hmrc.http.HttpReads.Implicits._
 import uk.gov.hmrc.http.{HeaderCarrier, HttpClient, HttpResponse, UpstreamErrorResponse}
 import uk.gov.hmrc.play.http.metrics.common.API
+
+import uk.gov.hmrc.apiplatform.modules.applications.domain.models.ApplicationId
+import uk.gov.hmrc.apiplatform.modules.common.domain.models.LaxEmailAddress
 import uk.gov.hmrc.apiplatform.modules.submissions.domain.models._
 import uk.gov.hmrc.apiplatform.modules.submissions.domain.services._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.connectors.ConnectorMetrics
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications._
-import uk.gov.hmrc.apiplatform.modules.applications.domain.models.ApplicationId
 
 object ThirdPartyApplicationSubmissionsConnector {
   case class Config(serviceBaseUrl: String, apiKey: String)
@@ -106,7 +108,12 @@ class ThirdPartyApplicationSubmissionsConnector @Inject() (
       http.GET[Option[ResponsibleIndividualVerification]](s"$serviceBaseUrl/approvals/responsible-individual-verification/${code}")
     }
 
-  def requestApproval(applicationId: ApplicationId, requestedByName: String, requestedByEmailAddress: LaxEmailAddress)(implicit hc: HeaderCarrier): Future[Either[ErrorDetails, Application]] =
+  def requestApproval(
+      applicationId: ApplicationId,
+      requestedByName: String,
+      requestedByEmailAddress: LaxEmailAddress
+    )(implicit hc: HeaderCarrier
+    ): Future[Either[ErrorDetails, Application]] =
     metrics.record(api) {
       import play.api.http.Status._
 

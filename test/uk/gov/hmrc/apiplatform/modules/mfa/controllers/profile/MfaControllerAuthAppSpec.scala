@@ -24,9 +24,9 @@ import org.jsoup.Jsoup
 import play.api.http.Status
 import play.api.test.Helpers._
 
+import uk.gov.hmrc.apiplatform.modules.developers.domain.models.UserId
 import uk.gov.hmrc.apiplatform.modules.mfa.models.{MfaAction, MfaId}
 import uk.gov.hmrc.apiplatform.modules.mfa.service.MfaResponse
-import uk.gov.hmrc.apiplatform.modules.developers.domain.models.UserId
 
 class MfaControllerAuthAppSpec extends MfaControllerBaseSpec {
 
