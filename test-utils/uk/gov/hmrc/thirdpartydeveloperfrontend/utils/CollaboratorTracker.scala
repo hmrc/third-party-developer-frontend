@@ -14,15 +14,17 @@
  * limitations under the License.
  */
 
-package uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications
+package uk.gov.hmrc.thirdpartydeveloperfrontend.utils
 
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.LaxEmailAddress
 import uk.gov.hmrc.apiplatform.modules.applications.domain.models.Collaborator
 
-case class AddCollaborator(emailAddress: LaxEmailAddress, role: Collaborator.Role)
+trait CollaboratorTracker extends UserIdTracker {
+  def collaboratorOf(email: LaxEmailAddress, role: Collaborator.Role): Collaborator = Collaborator(email, role, idOf(email))
 
-object AddCollaborator {
-  import play.api.libs.json.Json
-
-  implicit val format = Json.format[AddCollaborator]
+  implicit class CollaboratorSyntax(email: LaxEmailAddress) {
+    def asAdministratorCollaborator            = collaboratorOf(email, Collaborator.Roles.ADMINISTRATOR)
+    def asDeveloperCollaborator                = collaboratorOf(email, Collaborator.Roles.DEVELOPER)
+    def asCollaborator(role: Collaborator.Role) = collaboratorOf(email, role)
+  }
 }

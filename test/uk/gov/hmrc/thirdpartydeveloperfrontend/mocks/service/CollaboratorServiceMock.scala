@@ -19,22 +19,67 @@ package uk.gov.hmrc.thirdpartydeveloperfrontend.mocks.service
 import org.mockito.{ArgumentMatchersSugar, MockitoSugar}
 import uk.gov.hmrc.apiplatform.modules.applications.services.CollaboratorService
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.LaxEmailAddress
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.ApplicationUpdateSuccessful
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.Application
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.DeveloperSession
 
-import scala.concurrent.Future.successful
+import cats.data.NonEmptyList
+import cats.syntax.all._
+import cats.instances.future._
+import uk.gov.hmrc.apiplatform.modules.commands.applications.domain.models.DispatchSuccessResult
+import uk.gov.hmrc.apiplatform.modules.commands.applications.domain.models.CommandFailure
+import scala.concurrent.Future
+import scala.concurrent.ExecutionContext.Implicits.global
+import uk.gov.hmrc.apiplatform.modules.applications.domain.models.Collaborator
+import uk.gov.hmrc.apiplatform.modules.applications.domain.models.ApplicationId
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.TeamMemberAlreadyExists
+import scala.concurrent.Future.failed
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.ApplicationNotFound
 
-trait CollaboratorServiceMock extends MockitoSugar with ArgumentMatchersSugar{
+trait CollaboratorServiceMockModule extends MockitoSugar with ArgumentMatchersSugar {
 
+  type Err = NonEmptyList[CommandFailure]
 
-  val collaboratorServiceMock = mock[CollaboratorService]
+  trait AbstractCollaboratorServiceMock {
+    def aMock: CollaboratorService
 
-  def givenRemoveTeamMemberSucceeds(loggedInDeveloper:
-                                    DeveloperSession) =
-    when(collaboratorServiceMock.removeTeamMember(*, *[LaxEmailAddress], eqTo(loggedInDeveloper.email))(*))
-      .thenReturn(successful(ApplicationUpdateSuccessful))
+    object AddTeamMember {
+      def succeeds() =
+        when(aMock.addTeamMember(*[ApplicationId], *[LaxEmailAddress], *[Collaborator.Role], *[LaxEmailAddress])(*))
+          .thenReturn(().pure[Future])
 
-  def verifyNeverCallRemoveTeamMember() =
-    verify(collaboratorServiceMock, never).removeTeamMember(any[Application], *[LaxEmailAddress], *[LaxEmailAddress])(*)
+      def teamMemberAlreadyExists() =
+        when(aMock.addTeamMember(*[ApplicationId], *[LaxEmailAddress], *[Collaborator.Role], *[LaxEmailAddress])(*))
+          .thenReturn(failed(new TeamMemberAlreadyExists))
+
+      def applicationNotFound() =
+        when(aMock.addTeamMember(*[ApplicationId], *[LaxEmailAddress], *[Collaborator.Role], *[LaxEmailAddress])(*))
+        .thenReturn(failed(new ApplicationNotFound))
+        
+      def verifyCalledFor(appId: ApplicationId, newEmail: LaxEmailAddress, newRole: Collaborator.Role, requestingEmail: LaxEmailAddress) =
+         verify(aMock, atLeastOnce).addTeamMember(eqTo(appId), eqTo(newEmail), eqTo(newRole), eqTo(requestingEmail))(*)
+
+      def verifyNeverCalled() =
+        verify(aMock, never).addTeamMember(*[ApplicationId], *[LaxEmailAddress], *[Collaborator.Role], *[LaxEmailAddress])(*)
+    }
+
+    object RemoveTeamMember {
+      def succeeds(app: Application) =
+        when(aMock.removeTeamMember(*, *[LaxEmailAddress], *[LaxEmailAddress])(*))
+          .thenReturn(DispatchSuccessResult(app).asRight[Err].pure[Future])        
+
+      def thenReturnsSuccessFor(requestingEmail: LaxEmailAddress)(app: Application) =
+        when(aMock.removeTeamMember(*, *[LaxEmailAddress], eqTo(requestingEmail))(*))
+          .thenReturn(DispatchSuccessResult(app).asRight[Err].pure[Future])        
+
+     def verifyCalledFor(app: Application, emailToRemove: LaxEmailAddress, requestingEmail: LaxEmailAddress) =
+         verify(aMock, atLeastOnce).removeTeamMember(eqTo(app), eqTo(emailToRemove), eqTo(requestingEmail))(*)
+
+      def verifyNeverCalled() =
+        verify(aMock, never).removeTeamMember(*, *[LaxEmailAddress], *[LaxEmailAddress])(*)
+    }
+  }
+
+  object CollaboratorServiceMock extends AbstractCollaboratorServiceMock {
+    val aMock = mock[CollaboratorService]
+  }
 }
+

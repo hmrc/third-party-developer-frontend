@@ -32,7 +32,6 @@ import uk.gov.hmrc.thirdpartydeveloperfrontend.domain._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.Capabilities.SupportsTeamMembers
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.Permissions.{AdministratorOnly, TeamMembersOnly}
 import uk.gov.hmrc.apiplatform.modules.applications.domain.models.ApplicationId
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.AddCollaborator
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.controllers.AddTeamMemberPageMode._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.controllers.{AddTeamMemberPageMode, ApplicationViewModel}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.DeveloperSession
@@ -110,12 +109,14 @@ class ManageTeam @Inject() (
       }
 
       def handleValidForm(form: AddTeamMemberForm) = {
+        val role = form.role.flatMap(Collaborator.Role(_)).getOrElse(Collaborator.Roles.DEVELOPER)
+        
         collaboratorService
-          .addTeamMember(request.application, request.developerSession.email, AddCollaborator(form.email.toLaxEmail, form.role.flatMap(Collaborator.Role(_)).getOrElse(Collaborator.Roles.DEVELOPER)))
+          .addTeamMember(applicationId, form.email.toLaxEmail, role, request.developerSession.email)
           .map(_ => Redirect(successRedirect)) recover {
-          case _: ApplicationNotFound     => NotFound(errorHandler.notFoundTemplate)
-          case _: TeamMemberAlreadyExists => createBadRequestResult(AddTeamMemberForm.form.fill(form).withError("email", "team.member.error.emailAddress.already.exists.field"))
-        }
+            case _: ApplicationNotFound     => NotFound(errorHandler.notFoundTemplate)
+            case _: TeamMemberAlreadyExists => createBadRequestResult(AddTeamMemberForm.form.fill(form).withError("email", "team.member.error.emailAddress.already.exists.field"))
+          }
       }
 
       def handleInvalidForm(formWithErrors: Form[AddTeamMemberForm]) = {

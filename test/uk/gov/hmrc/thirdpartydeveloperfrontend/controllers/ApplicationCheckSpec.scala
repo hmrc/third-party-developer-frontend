@@ -203,7 +203,7 @@ class ApplicationCheckSpec
     )
   }
 
-  trait BaseSetup extends ApplicationServiceMock with ApplicationActionServiceMock with CollaboratorServiceMock with SessionServiceMock with ApplicationProvider with TermsOfUseVersionServiceMock {
+  trait BaseSetup extends ApplicationServiceMock with ApplicationActionServiceMock with CollaboratorServiceMockModule with SessionServiceMock with ApplicationProvider with TermsOfUseVersionServiceMock {
     val landingPageView                  = app.injector.instanceOf[LandingPageView]
     val unauthorisedAppDetailsView       = app.injector.instanceOf[UnauthorisedAppDetailsView]
     val nameSubmittedView                = app.injector.instanceOf[NameSubmittedView]
@@ -223,7 +223,7 @@ class ApplicationCheckSpec
     val underTest = new ApplicationCheck(
       mockErrorHandler,
       applicationServiceMock,
-      collaboratorServiceMock,
+      CollaboratorServiceMock.aMock,
       applicationActionServiceMock,
       sessionServiceMock,
       mcc,
@@ -255,7 +255,7 @@ class ApplicationCheckSpec
 
     fetchCredentialsReturns(application, appTokens)
 
-    givenRemoveTeamMemberSucceeds(loggedInDeveloper)
+    CollaboratorServiceMock.RemoveTeamMember.thenReturnsSuccessFor(loggedInDeveloper.email)(application)
 
     givenUpdateCheckInformationSucceeds(application)
 

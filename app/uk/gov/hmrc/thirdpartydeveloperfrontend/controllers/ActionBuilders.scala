@@ -47,7 +47,7 @@ trait ApplicationActionBuilders extends BaseActionBuilders {
       override def refine[A](request: UserRequest[A]): Future[Either[Result, ApplicationRequest[A]]] = {
         implicit val implicitRequest: UserRequest[A] = request
         import cats.implicits._
-
+        
         applicationActionService.process(applicationId, request)
           .toRight(NotFound(errorHandler.notFoundTemplate(Request(request, request.developerSession)))).value
       }

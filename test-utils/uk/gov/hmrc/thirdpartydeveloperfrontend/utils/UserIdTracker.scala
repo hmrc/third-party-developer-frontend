@@ -20,7 +20,6 @@ import uk.gov.hmrc.apiplatform.modules.common.domain.models.LaxEmailAddress
 
 import scala.collection.mutable
 import uk.gov.hmrc.apiplatform.modules.developers.domain.models.UserId
-import uk.gov.hmrc.apiplatform.modules.applications.domain.models.Collaborator
 
 // Trait allows for mix in of either local or global userIdTracker into things like CollaboratorTracker
 trait UserIdTracker {
@@ -38,14 +37,4 @@ trait LocalUserIdTracker extends UserIdTracker {
 // fixture setup is spread over different classes/objects
 object GlobalUserIdTracker extends LocalUserIdTracker
 
-trait CollaboratorTracker {
-  self: UserIdTracker =>
 
-  def collaboratorOf(email: LaxEmailAddress, role: Collaborator.Role): Collaborator = Collaborator(email, role, idOf(email))
-
-  implicit class CollaboratorSyntax(email: LaxEmailAddress) {
-    def asAdministratorCollaborator            = collaboratorOf(email, Collaborator.Roles.ADMINISTRATOR)
-    def asDeveloperCollaborator                = collaboratorOf(email, Collaborator.Roles.DEVELOPER)
-    def asCollaborator(role: Collaborator.Role) = collaboratorOf(email, role)
-  }
-}

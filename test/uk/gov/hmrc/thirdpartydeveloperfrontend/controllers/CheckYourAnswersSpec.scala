@@ -122,7 +122,7 @@ class CheckYourAnswersSpec
 
   val groupedSubsSubscribedToNothing = GroupedSubscriptions(testApis = Seq.empty, apis = Seq.empty, exampleApi = None)
 
-  trait Setup extends ApplicationServiceMock with CollaboratorServiceMock with ApplicationActionServiceMock with SessionServiceMock with TermsOfUseVersionServiceMock {
+  trait Setup extends ApplicationServiceMock with CollaboratorServiceMockModule with ApplicationActionServiceMock with SessionServiceMock with TermsOfUseVersionServiceMock {
     val checkYourAnswersView             = app.injector.instanceOf[CheckYourAnswersView]
     val landingPageView                  = app.injector.instanceOf[LandingPageView]
     val teamView                         = app.injector.instanceOf[TeamView]
@@ -139,7 +139,7 @@ class CheckYourAnswersSpec
     val underTest = new CheckYourAnswers(
       mockErrorHandler,
       applicationServiceMock,
-      collaboratorServiceMock,
+      CollaboratorServiceMock.aMock,
       applicationActionServiceMock,
       mock[ApplicationCheck],
       sessionServiceMock,
@@ -169,7 +169,7 @@ class CheckYourAnswersSpec
 
     fetchCredentialsReturns(sampleApp, appTokens)
 
-    givenRemoveTeamMemberSucceeds(loggedInDeveloper)
+    CollaboratorServiceMock.RemoveTeamMember.thenReturnsSuccessFor(loggedInDeveloper.email)(sampleApp)
 
     givenUpdateCheckInformationSucceeds(sampleApp)
 

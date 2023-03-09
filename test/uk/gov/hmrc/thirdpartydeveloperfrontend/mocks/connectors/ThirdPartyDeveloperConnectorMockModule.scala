@@ -22,6 +22,8 @@ import uk.gov.hmrc.apiplatform.modules.common.domain.models.LaxEmailAddress
 import uk.gov.hmrc.thirdpartydeveloperfrontend.connectors.ThirdPartyDeveloperConnector
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.Developer
 import uk.gov.hmrc.apiplatform.modules.developers.domain.models.UserId
+import uk.gov.hmrc.apiplatform.modules.applications.domain.models.Collaborator
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.User
 
 trait ThirdPartyDeveloperConnectorMockModule extends MockitoSugar with ArgumentMatchersSugar {
 
@@ -43,6 +45,9 @@ trait ThirdPartyDeveloperConnectorMockModule extends MockitoSugar with ArgumentM
     object FetchByEmails {
       def returnsEmptySeq() =
         when(aMock.fetchByEmails(*)(*)).thenReturn(successful(Seq.empty))
+
+      def returnsSuccessFor(in: Set[LaxEmailAddress])(out: Seq[User]) =
+        when(aMock.fetchByEmails(eqTo(in))(*)).thenReturn(successful(out))
     }
   }
 
