@@ -16,10 +16,10 @@
 
 package uk.gov.hmrc.thirdpartydeveloperfrontend.domain.services
 
-import uk.gov.hmrc.apiplatform.modules.common.domain.models.LaxEmailAddress
-
 import java.time.LocalDateTime
 import javax.inject.Singleton
+
+import uk.gov.hmrc.apiplatform.modules.common.domain.models.LaxEmailAddress
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.{Application, CheckInformation, Standard, TermsOfUseAcceptance, TermsOfUseAgreement}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.services.TermsOfUseService.TermsOfUseAgreementDetails
 

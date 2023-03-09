@@ -138,7 +138,7 @@ class QuestionControllerSpec
     "display fail and show error in title when applicable" in new Setup {
       SubmissionServiceMock.Fetch.thenReturns(aSubmission.withIncompleteProgress)
 
-      val result             =
+      val result =
         controller.showQuestion(aSubmission.id, testQuestionIdsOfInterest.responsibleIndividualEmailId, None, Some(ErrorInfo("blah", "message")))(loggedInRequest.withCSRFToken)
 
       status(result) shouldBe BAD_REQUEST

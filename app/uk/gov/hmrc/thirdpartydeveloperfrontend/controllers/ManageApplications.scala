@@ -17,7 +17,7 @@
 package uk.gov.hmrc.thirdpartydeveloperfrontend.controllers
 
 import javax.inject.{Inject, Singleton}
-import scala.concurrent.ExecutionContext
+import scala.concurrent.{ExecutionContext, Future}
 
 import views.helper.EnvironmentNameService
 import views.html._
@@ -25,15 +25,14 @@ import views.html._
 import play.api.libs.crypto.CookieSigner
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
 
+import uk.gov.hmrc.apiplatform.modules.applications.domain.models.ApplicationId
+import uk.gov.hmrc.apiplatform.modules.submissions.domain.models.Submission
+import uk.gov.hmrc.apiplatform.modules.submissions.services.SubmissionService
 import uk.gov.hmrc.apiplatform.modules.uplift.services.UpliftLogic
 import uk.gov.hmrc.thirdpartydeveloperfrontend.config.{ApplicationConfig, ErrorHandler}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.controllers.ManageApplicationsViewModel
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.services.LocalDateTimeFormatters
 import uk.gov.hmrc.thirdpartydeveloperfrontend.service.{TermsOfUseInvitationService, _}
-import uk.gov.hmrc.apiplatform.modules.submissions.services.SubmissionService
-import scala.concurrent.Future
-import uk.gov.hmrc.apiplatform.modules.submissions.domain.models.Submission
-import uk.gov.hmrc.apiplatform.modules.applications.domain.models.ApplicationId
 
 @Singleton
 class ManageApplications @Inject() (
@@ -57,17 +56,24 @@ class ManageApplications @Inject() (
     }
 
     for {
-      upliftData                          <- upliftLogic.aUsersSandboxAdminSummariesAndUpliftIds(request.userId)
-      sandboxApplicationSummaries          = upliftData.sandboxApplicationSummaries
-      upliftableApplicationIds             = upliftData.upliftableApplicationIds
-      productionAppSummaries              <- appsByTeamMember.fetchProductionSummariesByTeamMember(request.userId)
-      termsOfUseInvites                   <- Future.sequence(productionAppSummaries.map(summary => termsOfUseInvitationService.fetchTermsOfUseInvitation(summary.id)).toList).map(_.flatten)
-      productionApplicationSubmissions    <- Future.sequence(termsOfUseInvites.map(invite => getSubmission(invite.applicationId)).toList).map(_.flatten)
+      upliftData                       <- upliftLogic.aUsersSandboxAdminSummariesAndUpliftIds(request.userId)
+      sandboxApplicationSummaries       = upliftData.sandboxApplicationSummaries
+      upliftableApplicationIds          = upliftData.upliftableApplicationIds
+      productionAppSummaries           <- appsByTeamMember.fetchProductionSummariesByTeamMember(request.userId)
+      termsOfUseInvites                <- Future.sequence(productionAppSummaries.map(summary => termsOfUseInvitationService.fetchTermsOfUseInvitation(summary.id)).toList).map(_.flatten)
+      productionApplicationSubmissions <- Future.sequence(termsOfUseInvites.map(invite => getSubmission(invite.applicationId)).toList).map(_.flatten)
     } yield (sandboxApplicationSummaries, productionAppSummaries) match {
       case (Nil, Nil) => Redirect(uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.noapplications.routes.NoApplications.noApplicationsPage)
       case _          => Ok(manageApplicationsView(
-        ManageApplicationsViewModel(sandboxApplicationSummaries, productionAppSummaries, upliftableApplicationIds, upliftData.hasAppsThatCannotBeUplifted, termsOfUseInvites, productionApplicationSubmissions)
-      ))
+          ManageApplicationsViewModel(
+            sandboxApplicationSummaries,
+            productionAppSummaries,
+            upliftableApplicationIds,
+            upliftData.hasAppsThatCannotBeUplifted,
+            termsOfUseInvites,
+            productionApplicationSubmissions
+          )
+        ))
     }
   }
 

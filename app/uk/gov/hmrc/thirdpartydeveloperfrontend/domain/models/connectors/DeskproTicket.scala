@@ -18,25 +18,25 @@ package uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.connectors
 
 import play.api.libs.json.Json
 import play.api.mvc.Request
+
+import uk.gov.hmrc.apiplatform.modules.apis.domain.models.ApiVersion
+import uk.gov.hmrc.apiplatform.modules.applications.domain.models.{ApplicationId, Collaborator}
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.LaxEmailAddress
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.LaxEmailAddress.StringSyntax
 import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers._
-import uk.gov.hmrc.apiplatform.modules.apis.domain.models.ApiVersion
-import uk.gov.hmrc.apiplatform.modules.applications.domain.models.ApplicationId
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.{Environment}
-import uk.gov.hmrc.apiplatform.modules.applications.domain.models.Collaborator
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.Environment
 
 case class DeskproTicket(
-                          name: String,
-                          email: LaxEmailAddress,
-                          subject: String,
-                          message: String,
-                          referrer: String,
-                          userAgent: String = "",
-                          authId: String = "",
-                          areaOfTax: String = "",
-                          sessionId: String = "",
-                          javascriptEnabled: String = ""
+    name: String,
+    email: LaxEmailAddress,
+    subject: String,
+    message: String,
+    referrer: String,
+    userAgent: String = "",
+    authId: String = "",
+    areaOfTax: String = "",
+    sessionId: String = "",
+    javascriptEnabled: String = ""
   )
 
 object DeskproTicket extends FieldTransformer {
@@ -119,7 +119,7 @@ object DeskproTicket extends FieldTransformer {
 
     val actor = role match {
       case Collaborator.Roles.ADMINISTRATOR => "an administrator"
-      case _                              => "a developer"
+      case _                                => "a developer"
     }
 
     val message =

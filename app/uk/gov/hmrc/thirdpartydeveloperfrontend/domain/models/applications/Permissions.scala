@@ -16,8 +16,8 @@
 
 package uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications
 
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.Developer
 import uk.gov.hmrc.apiplatform.modules.applications.domain.models.Collaborator
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.Developer
 
 sealed trait Permission {
   def hasPermissions(app: BaseApplication, developer: Developer): Boolean
@@ -29,9 +29,9 @@ object Permissions {
 
     override def hasPermissions(app: BaseApplication, developer: Developer): Boolean =
       (app.deployedTo, app.role(developer.email)) match {
-        case (Environment.SANDBOX, _)                  => true
+        case (Environment.SANDBOX, _)                    => true
         case (_, Some(Collaborator.Roles.ADMINISTRATOR)) => true
-        case _                                         => false
+        case _                                           => false
       }
   }
 
@@ -40,7 +40,7 @@ object Permissions {
     override def hasPermissions(app: BaseApplication, developer: Developer): Boolean =
       (app.deployedTo, app.role(developer.email)) match {
         case (Environment.PRODUCTION, Some(Collaborator.Roles.ADMINISTRATOR)) => true
-        case _                                                              => false
+        case _                                                                => false
       }
   }
 
@@ -49,7 +49,7 @@ object Permissions {
     override def hasPermissions(app: BaseApplication, developer: Developer): Boolean =
       (app.deployedTo, app.role(developer.email)) match {
         case (Environment.PRODUCTION, Some(Collaborator.Roles.DEVELOPER)) => true
-        case _                                                          => false
+        case _                                                            => false
       }
   }
 

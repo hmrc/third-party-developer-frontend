@@ -17,12 +17,14 @@
 package uk.gov.hmrc.apiplatform.modules.submissions.services.mocks
 
 import scala.concurrent.Future.successful
+
+import org.mockito.quality.Strictness
 import org.mockito.{ArgumentMatchersSugar, MockitoSugar}
+
+import uk.gov.hmrc.apiplatform.modules.applications.domain.models.ApplicationId
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.LaxEmailAddress
 import uk.gov.hmrc.apiplatform.modules.submissions.domain.models._
 import uk.gov.hmrc.apiplatform.modules.submissions.services.SubmissionService
-import uk.gov.hmrc.apiplatform.modules.applications.domain.models.ApplicationId
-import org.mockito.quality.Strictness
 
 trait SubmissionServiceMockModule extends MockitoSugar with ArgumentMatchersSugar {
 

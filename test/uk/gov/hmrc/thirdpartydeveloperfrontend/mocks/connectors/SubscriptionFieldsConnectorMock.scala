@@ -20,10 +20,10 @@ import scala.concurrent.Future
 
 import org.mockito.{ArgumentMatchersSugar, MockitoSugar}
 
-import uk.gov.hmrc.thirdpartydeveloperfrontend.connectors.AbstractSubscriptionFieldsConnector
 import uk.gov.hmrc.apiplatform.modules.apis.domain.models.{ApiContext, ApiVersion}
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.subscriptions.ApiSubscriptionFields.SubscriptionFieldValue
 import uk.gov.hmrc.apiplatform.modules.applications.domain.models.ClientId
+import uk.gov.hmrc.thirdpartydeveloperfrontend.connectors.AbstractSubscriptionFieldsConnector
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.subscriptions.ApiSubscriptionFields.SubscriptionFieldValue
 
 trait SubscriptionFieldsConnectorMock extends MockitoSugar with ArgumentMatchersSugar {
   val mockSubscriptionFieldsConnector = mock[AbstractSubscriptionFieldsConnector]

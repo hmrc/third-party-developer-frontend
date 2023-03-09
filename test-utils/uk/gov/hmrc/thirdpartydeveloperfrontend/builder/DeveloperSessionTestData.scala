@@ -17,11 +17,11 @@
 package uk.gov.hmrc.thirdpartydeveloperfrontend.builder
 
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.LaxEmailAddress.StringSyntax
-import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.UserIdTracker
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.DeveloperSession
+import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.UserIdTracker
 
 trait DeveloperSessionTestData extends DeveloperSessionBuilder with DeveloperTestData {
-  self : UserIdTracker =>
+  self: UserIdTracker =>
 
   val testSessionLoggedIn: DeveloperSession = buildDeveloper("Test".toLaxEmail, "Test", "Test", None).loggedIn
 }

@@ -16,13 +16,12 @@
 
 package uk.gov.hmrc.apiplatform.modules.common.domain.models
 
-
 import play.api.libs.json.Json
 
 /** LaxEmailAddress is a wrapper to string but designed to carry the idea of an email address
- *
- * NO verification takes place !
- */
+  *
+  * NO verification takes place !
+  */
 final case class LaxEmailAddress(text: String) extends AnyVal {
   def normalise(): LaxEmailAddress = this.copy(text = text.toLowerCase())
 

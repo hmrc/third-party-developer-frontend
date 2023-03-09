@@ -19,16 +19,18 @@ package uk.gov.hmrc.apiplatform.modules.mfa.views.sms
 import org.jsoup.Jsoup
 import org.jsoup.nodes.Document
 import views.helper.CommonViewSpec
+
 import play.api.test.{FakeRequest, StubMessagesFactory}
+
+import uk.gov.hmrc.apiplatform.modules.common.domain.models.LaxEmailAddress.StringSyntax
 import uk.gov.hmrc.apiplatform.modules.mfa.forms.MobileNumberForm
 import uk.gov.hmrc.apiplatform.modules.mfa.views.html.sms.MobileNumberView
-import uk.gov.hmrc.thirdpartydeveloperfrontend.builder.{DeveloperSessionBuilder,  DeveloperTestData}
+import uk.gov.hmrc.thirdpartydeveloperfrontend.builder.{DeveloperSessionBuilder, DeveloperTestData}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.{DeveloperSession, LoggedInState}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.{LocalUserIdTracker, WithCSRFAddToken}
-import uk.gov.hmrc.apiplatform.modules.common.domain.models.LaxEmailAddress.StringSyntax
 
 class MobileNumberViewSpec extends CommonViewSpec with WithCSRFAddToken with DeveloperTestData with DeveloperSessionBuilder
-    with LocalUserIdTracker with StubMessagesFactory  {
+    with LocalUserIdTracker with StubMessagesFactory {
 
   implicit val request = FakeRequest()
 

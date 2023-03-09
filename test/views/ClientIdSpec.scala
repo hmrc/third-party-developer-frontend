@@ -27,12 +27,11 @@ import views.html.ClientIdView
 import play.api.test.FakeRequest
 import play.twirl.api.Html
 
+import uk.gov.hmrc.apiplatform.modules.applications.domain.models.{ApplicationId, ClientId}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.builder._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.LoggedInState
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils._
-import uk.gov.hmrc.apiplatform.modules.applications.domain.models.ClientId
-import uk.gov.hmrc.apiplatform.modules.applications.domain.models.ApplicationId
 
 class ClientIdSpec extends CommonViewSpec with WithCSRFAddToken with CollaboratorTracker
     with LocalUserIdTracker
@@ -49,7 +48,7 @@ class ClientIdSpec extends CommonViewSpec with WithCSRFAddToken with Collaborato
 
   "Client ID page" should {
     val request   = FakeRequest().withCSRFToken
-    val developer =standardDeveloper.loggedIn
+    val developer = standardDeveloper.loggedIn
 
     val application = Application(
       ApplicationId.random,

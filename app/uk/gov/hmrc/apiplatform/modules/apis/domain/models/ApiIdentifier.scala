@@ -31,7 +31,6 @@ object ApiIdentifier {
 
   def random = ApiIdentifier(ApiContext.random, ApiVersion.random)
 
-  
   // When we drop 2.12 support we can use : -
   // Ordering.by[ApiIdentifier, String](_.context.value)
   //  .orElseBy(_.version.value)

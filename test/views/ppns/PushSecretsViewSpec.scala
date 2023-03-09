@@ -18,26 +18,28 @@ package views.ppns
 
 import java.time.LocalDateTime
 import scala.collection.JavaConverters._
+
 import cats.data.NonEmptyList
 import org.jsoup.Jsoup
 import org.jsoup.nodes.Document
 import views.helper.CommonViewSpec
 import views.html.ppns.PushSecretsView
+
 import play.api.test.FakeRequest
 import play.twirl.api.Html
+
+import uk.gov.hmrc.apiplatform.modules.applications.domain.models.{ApplicationId, ClientId}
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.LaxEmailAddress.StringSyntax
 import uk.gov.hmrc.thirdpartydeveloperfrontend.builder._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.LoggedInState
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils._
-import uk.gov.hmrc.apiplatform.modules.applications.domain.models.ClientId
-import uk.gov.hmrc.apiplatform.modules.applications.domain.models.ApplicationId
 
 class PushSecretsViewSpec extends CommonViewSpec
     with WithCSRFAddToken
     with CollaboratorTracker
     with LocalUserIdTracker
-    with DeveloperSessionBuilder 
+    with DeveloperSessionBuilder
     with DeveloperTestData {
 
   trait Setup {
@@ -49,7 +51,7 @@ class PushSecretsViewSpec extends CommonViewSpec
   }
 
   "Push secrets page" should {
-    val request   = FakeRequest().withCSRFToken
+    val request = FakeRequest().withCSRFToken
 
     val application                       = Application(
       ApplicationId.random,

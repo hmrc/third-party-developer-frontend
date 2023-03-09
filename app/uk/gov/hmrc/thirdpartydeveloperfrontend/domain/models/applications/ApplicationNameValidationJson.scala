@@ -17,8 +17,8 @@
 package uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications
 
 import play.api.libs.json.{Json, OFormat}
-import uk.gov.hmrc.apiplatform.modules.applications.domain.models.ApplicationId
 
+import uk.gov.hmrc.apiplatform.modules.applications.domain.models.ApplicationId
 
 object ApplicationNameValidationJson {
 

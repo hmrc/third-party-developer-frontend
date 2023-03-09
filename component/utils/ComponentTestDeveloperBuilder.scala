@@ -17,7 +17,7 @@
 package utils
 
 import uk.gov.hmrc.apiplatform.modules.mfa.models.{AuthenticatorAppMfaDetailSummary, MfaDetail, MfaId, SmsMfaDetailSummary}
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.{Developer}
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.Developer
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.emailpreferences.EmailPreferences
 
 import java.time.LocalDateTime
