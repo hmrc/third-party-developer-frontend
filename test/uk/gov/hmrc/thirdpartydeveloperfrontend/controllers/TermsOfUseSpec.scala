@@ -143,7 +143,7 @@ class TermsOfUseSpec
       val result           = addToken(underTest.termsOfUse(appId))(loggedInRequest)
       status(result) shouldBe OK
       contentAsString(result) should include("Terms of use")
-      contentAsString(result) should include(s"Terms of use accepted on $expectedTimeStamp by $email.")
+      contentAsString(result) should include(s"Terms of use accepted on $expectedTimeStamp by ${email.text}.")
     }
 
     "return a bad request for a sandbox app" in new Setup {

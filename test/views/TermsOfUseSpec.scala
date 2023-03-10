@@ -84,7 +84,7 @@ class TermsOfUseSpec extends CommonViewSpec
       }
 
       "show a notice stating when the terms of use were agreed to and by whom" in new Setup {
-        page.alert.text shouldBe s"Terms of use accepted on $expectedTimeStamp by $emailAddress."
+        page.alert.text shouldBe s"Terms of use accepted on $expectedTimeStamp by ${emailAddress.text}."
       }
 
       "render the terms of use" in new Setup {
