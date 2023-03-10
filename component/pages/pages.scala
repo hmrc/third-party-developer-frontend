@@ -74,7 +74,7 @@ object EmailConfirmationPage extends FormPage {
 
 object EmailPreferencesSummaryPage extends FormPage {
   override val url: String = s"${Env.host}/developer/profile/email-preferences"
-  override val pageHeading = "Email preferences"
+  override val pageHeading = "Manage your Developer Hub email preferences"
 }
 
 object ManageProfilePage extends FormPage {
