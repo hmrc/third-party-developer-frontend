@@ -22,7 +22,6 @@ import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.thirdpartydeveloperfrontend.connectors._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications._
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.connectors.AddTeamMemberRequest
 
 import javax.inject.{Inject, Singleton}
 import scala.concurrent.{ExecutionContext, Future}
@@ -30,14 +29,21 @@ import uk.gov.hmrc.apiplatform.modules.commands.applications.domain.models._
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.Actors
 import java.time.LocalDateTime
 import cats.data.NonEmptyList
+import uk.gov.hmrc.apiplatform.modules.developers.domain.models.UserId
 
 @Singleton
 class CollaboratorService @Inject()(apmConnector: ApmConnector, applicationCommandConnector: BridgedConnector[ApplicationCommandConnector], developerConnector: ThirdPartyDeveloperConnector)
                                    (implicit val ec: ExecutionContext) {
 
-  def addTeamMember(appId: ApplicationId, newTeamMemberEmail: LaxEmailAddress, newTeamMemberRole: Collaborator.Role, requestingEmail: LaxEmailAddress)(implicit hc: HeaderCarrier): Future[Unit] = {
-    val request = AddTeamMemberRequest(newTeamMemberEmail, newTeamMemberRole, Some(requestingEmail))
-    apmConnector.addTeamMember(appId, request)
+  def addTeamMember(app: Application, newTeamMemberEmail: LaxEmailAddress, newTeamMemberRole: Collaborator.Role, requestingEmail: LaxEmailAddress)(implicit hc: HeaderCarrier): Future[Either[NonEmptyList[CommandFailure], DispatchSuccessResult]] = {
+    val setOfAdminEmails = app.collaborators.filter(_.isAdministrator).map(_.emailAddress)
+
+    for {
+      adminsAsUsers  <- developerConnector.fetchByEmails(setOfAdminEmails)
+      adminsToEmail   = adminsAsUsers.filter(_.verified.contains(true)).map(_.email).toSet
+      addCommand = AddCollaborator(Actors.AppCollaborator(requestingEmail), Collaborator.apply(newTeamMemberEmail, newTeamMemberRole, UserId.random), LocalDateTime.now())
+      response     <- applicationCommandConnector(app).dispatch(app.id, addCommand, adminsToEmail)
+    } yield response
   }
 
   def determineOtherAdmins(collaborators: Set[Collaborator], removeThese: Set[LaxEmailAddress]): Set[LaxEmailAddress] = {

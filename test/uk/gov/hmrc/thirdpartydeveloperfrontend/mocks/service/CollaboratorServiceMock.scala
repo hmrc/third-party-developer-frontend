@@ -29,10 +29,7 @@ import uk.gov.hmrc.apiplatform.modules.commands.applications.domain.models.Comma
 import scala.concurrent.Future
 import scala.concurrent.ExecutionContext.Implicits.global
 import uk.gov.hmrc.apiplatform.modules.applications.domain.models.Collaborator
-import uk.gov.hmrc.apiplatform.modules.applications.domain.models.ApplicationId
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.TeamMemberAlreadyExists
-import scala.concurrent.Future.failed
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.ApplicationNotFound
+import uk.gov.hmrc.apiplatform.modules.commands.applications.domain.models.CommandFailures
 
 trait CollaboratorServiceMockModule extends MockitoSugar with ArgumentMatchersSugar {
 
@@ -43,22 +40,22 @@ trait CollaboratorServiceMockModule extends MockitoSugar with ArgumentMatchersSu
 
     object AddTeamMember {
       def succeeds() =
-        when(aMock.addTeamMember(*[ApplicationId], *[LaxEmailAddress], *[Collaborator.Role], *[LaxEmailAddress])(*))
-          .thenReturn(().pure[Future])
+        when(aMock.addTeamMember(*, *[LaxEmailAddress], *[Collaborator.Role], *[LaxEmailAddress])(*))
+          .thenReturn(DispatchSuccessResult(mock[Application]).asRight[Err].pure[Future])
 
       def teamMemberAlreadyExists() =
-        when(aMock.addTeamMember(*[ApplicationId], *[LaxEmailAddress], *[Collaborator.Role], *[LaxEmailAddress])(*))
-          .thenReturn(failed(new TeamMemberAlreadyExists))
+        when(aMock.addTeamMember(*, *[LaxEmailAddress], *[Collaborator.Role], *[LaxEmailAddress])(*))
+          .thenReturn(CommandFailures.CollaboratorAlreadyExistsOnApp.leftNel[DispatchSuccessResult].pure[Future])
 
       def applicationNotFound() =
-        when(aMock.addTeamMember(*[ApplicationId], *[LaxEmailAddress], *[Collaborator.Role], *[LaxEmailAddress])(*))
-        .thenReturn(failed(new ApplicationNotFound))
+        when(aMock.addTeamMember(*, *[LaxEmailAddress], *[Collaborator.Role], *[LaxEmailAddress])(*))
+          .thenReturn(CommandFailures.ApplicationNotFound.leftNel[DispatchSuccessResult].pure[Future])
         
-      def verifyCalledFor(appId: ApplicationId, newEmail: LaxEmailAddress, newRole: Collaborator.Role, requestingEmail: LaxEmailAddress) =
-         verify(aMock, atLeastOnce).addTeamMember(eqTo(appId), eqTo(newEmail), eqTo(newRole), eqTo(requestingEmail))(*)
+      def verifyCalledFor(newEmail: LaxEmailAddress, newRole: Collaborator.Role, requestingEmail: LaxEmailAddress) =
+         verify(aMock, atLeastOnce).addTeamMember(*, eqTo(newEmail), eqTo(newRole), eqTo(requestingEmail))(*)
 
       def verifyNeverCalled() =
-        verify(aMock, never).addTeamMember(*[ApplicationId], *[LaxEmailAddress], *[Collaborator.Role], *[LaxEmailAddress])(*)
+        verify(aMock, never).addTeamMember(*, *[LaxEmailAddress], *[Collaborator.Role], *[LaxEmailAddress])(*)
     }
 
     object RemoveTeamMember {

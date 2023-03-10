@@ -40,6 +40,8 @@ import uk.gov.hmrc.apiplatform.modules.common.domain.models.LaxEmailAddress.Stri
 import uk.gov.hmrc.apiplatform.modules.applications.domain.models._
 import uk.gov.hmrc.apiplatform.modules.applications.domain.models.Collaborator
 import uk.gov.hmrc.apiplatform.modules.applications.services.CollaboratorService
+import uk.gov.hmrc.apiplatform.modules.commands.applications.domain.models.CommandFailures
+import cats.data.NonEmptyList
 
 @Singleton
 class ManageTeam @Inject() (
@@ -112,10 +114,13 @@ class ManageTeam @Inject() (
         val role = form.role.flatMap(Collaborator.Role(_)).getOrElse(Collaborator.Roles.DEVELOPER)
         
         collaboratorService
-          .addTeamMember(applicationId, form.email.toLaxEmail, role, request.developerSession.email)
-          .map(_ => Redirect(successRedirect)) recover {
-            case _: ApplicationNotFound     => NotFound(errorHandler.notFoundTemplate)
-            case _: TeamMemberAlreadyExists => createBadRequestResult(AddTeamMemberForm.form.fill(form).withError("email", "team.member.error.emailAddress.already.exists.field"))
+          .addTeamMember(request.application, form.email.toLaxEmail, role, request.developerSession.email)
+          .map {
+            //Check if returned app has new collaborator in it?
+            case Right(_)                                                                => Redirect(successRedirect)
+            case Left(NonEmptyList(CommandFailures.CollaboratorAlreadyExistsOnApp, Nil)) => createBadRequestResult(AddTeamMemberForm.form.fill(form).withError("email", "team.member.error.emailAddress.already.exists.field"))
+            case Left(NonEmptyList(CommandFailures.ApplicationNotFound, Nil))            => NotFound(errorHandler.notFoundTemplate)
+            case _                                                                       => InternalServerError("Action failed")
           }
       }
 

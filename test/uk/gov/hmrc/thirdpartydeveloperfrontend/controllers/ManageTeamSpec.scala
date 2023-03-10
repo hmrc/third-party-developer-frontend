@@ -168,12 +168,13 @@ class ManageTeamSpec
 
     "add a team member when logged in as an admin" in new Setup {
       givenTheApplicationExistWithUserRole(appId, Collaborator.Roles.ADMINISTRATOR)
+
       val result = underTest.addTeamMemberAction(appId, ManageTeamMembers)(loggedInRequest.withCSRFToken.withFormUrlEncodedBody("email" -> email.text, "role" -> role.toString))
 
       status(result) shouldBe SEE_OTHER
       redirectLocation(result) shouldBe Some(routes.ManageTeam.manageTeam(appId, None).url)
       
-      CollaboratorServiceMock.AddTeamMember.verifyCalledFor(appId, email, role, loggedInDeveloper.email)
+      CollaboratorServiceMock.AddTeamMember.verifyCalledFor(email, role, loggedInDeveloper.email)
     }
 
     "check if team member already exists on the application" in new Setup {
@@ -184,7 +185,7 @@ class ManageTeamSpec
 
       status(result) shouldBe BAD_REQUEST
 
-      CollaboratorServiceMock.AddTeamMember.verifyCalledFor(appId, email, role, loggedInDeveloper.email)
+      CollaboratorServiceMock.AddTeamMember.verifyCalledFor(email, role, loggedInDeveloper.email)
     }
 
     "check if application exists" in new Setup {
@@ -195,7 +196,7 @@ class ManageTeamSpec
 
       status(result) shouldBe NOT_FOUND
 
-      CollaboratorServiceMock.AddTeamMember.verifyCalledFor(appId, email, role, loggedInDeveloper.email)
+      CollaboratorServiceMock.AddTeamMember.verifyCalledFor(email, role, loggedInDeveloper.email)
     }
 
     "reject invalid email address" in new Setup {
