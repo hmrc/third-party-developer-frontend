@@ -16,28 +16,10 @@
 
 package uk.gov.hmrc.thirdpartydeveloperfrontend.utils
 
-import scala.collection.mutable
-
 import uk.gov.hmrc.apiplatform.modules.applications.domain.models.Collaborator
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.LaxEmailAddress
-import uk.gov.hmrc.apiplatform.modules.developers.domain.models.UserId
 
-// Trait allows for mix in of either local or global userIdTracker into things like CollaboratorTracker
-trait UserIdTracker {
-  def idOf(email: LaxEmailAddress): UserId
-}
-
-// Use this tracker for unit tests and those where there is no need for a shared map across many specs/features
-trait LocalUserIdTracker extends UserIdTracker {
-  private lazy val idsByEmail = mutable.Map[LaxEmailAddress, UserId]()
-
-  def idOf(email: LaxEmailAddress): UserId = idsByEmail.getOrElseUpdate(email, UserId.random)
-}
-
-// Use this when you want to share the map across files like component tests where
-// fixture setup is spread over different classes/objects
-object GlobalUserIdTracker extends LocalUserIdTracker {
-
+trait CollaboratorTracker extends UserIdTracker {
   def collaboratorOf(email: LaxEmailAddress, role: Collaborator.Role): Collaborator = Collaborator(email, role, idOf(email))
 
   implicit class CollaboratorSyntax(email: LaxEmailAddress) {

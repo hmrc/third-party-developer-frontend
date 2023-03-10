@@ -32,13 +32,7 @@ import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.Develope
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.subscriptions.FieldName
 
 @Singleton
-class SubscriptionsService @Inject() (
-    deskproConnector: DeskproConnector,
-    apmConnector: ApmConnector,
-    subscriptionFieldsService: SubscriptionFieldsService,
-    auditService: AuditService
-  )(implicit ec: ExecutionContext
-  ) {
+class SubscriptionsService @Inject() (deskproConnector: DeskproConnector, apmConnector: ApmConnector)(implicit ec: ExecutionContext) {
 
   private def doRequest(
       requester: DeveloperSession,

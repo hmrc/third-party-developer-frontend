@@ -32,6 +32,7 @@ import play.api.test.{CSRFTokenHelper, FakeRequest, Writeables}
 
 import uk.gov.hmrc.apiplatform.modules.apis.domain.models.{ApiContext, ApiIdentifier, ApiVersion}
 import uk.gov.hmrc.apiplatform.modules.applications.domain.models.{ApplicationId, ClientId}
+import uk.gov.hmrc.apiplatform.modules.commands.applications.domain.models.DispatchSuccessResult
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.LaxEmailAddress
 import uk.gov.hmrc.apiplatform.modules.developers.domain.models.UserId
 import uk.gov.hmrc.apiplatform.modules.dynamics.connectors.ThirdPartyDeveloperDynamicsConnector
@@ -90,6 +91,8 @@ abstract class EndpointScenarioSpec extends AsyncHmrcSpec with GuiceOneAppPerSui
       .overrides(bind[ThirdPartyApplicationSubmissionsConnector].toInstance(thirdPartyApplicationSubmissionsConnector))
       .overrides(bind[ThirdPartyDeveloperMfaConnector].toInstance(thirdPartyDeveloperMfaConnector))
       .overrides(bind[ThirdPartyDeveloperDynamicsConnector].toInstance(thirdPartyDeveloperDynamicsConnector))
+      .overrides(bind[ProductionApplicationCommandConnector].toInstance(cmdProductionConnector))
+      .overrides(bind[SandboxApplicationCommandConnector].toInstance(cmdSandboxConnector))
       .in(Mode.Test)
       .build()
   }
@@ -110,9 +113,6 @@ abstract class EndpointScenarioSpec extends AsyncHmrcSpec with GuiceOneAppPerSui
   when(sandboxPushPullNotificationsConnector.fetchPushSecrets(*[ClientId])(*)).thenReturn(Future.successful(List("secret1")))
   when(productionPushPullNotificationsConnector.fetchPushSecrets(*[ClientId])(*)).thenReturn(Future.successful(List("secret1")))
   when(tpdConnector.fetchByEmails(*[Set[LaxEmailAddress]])(*)).thenReturn(Future.successful(List(User(userEmail, Some(true)))))
-  when(tpaSandboxConnector.removeTeamMember(*[ApplicationId], *[LaxEmailAddress], *[LaxEmailAddress], *[Set[LaxEmailAddress]])(*)).thenReturn(Future.successful(
-    ApplicationUpdateSuccessful
-  ))
   when(tpaProductionConnector.validateName(*[String], *[Option[ApplicationId]])(*)).thenReturn(Future.successful(Valid))
   when(tpaProductionConnector.applicationUpdate(*[ApplicationId], *[ApplicationUpdate])(*)).thenReturn(Future.successful(ApplicationUpdateSuccessful))
   when(tpaSandboxConnector.applicationUpdate(*[ApplicationId], *[ApplicationUpdate])(*)).thenReturn(Future.successful(ApplicationUpdateSuccessful))
@@ -133,7 +133,8 @@ abstract class EndpointScenarioSpec extends AsyncHmrcSpec with GuiceOneAppPerSui
     Instant.now
   ))))
 
-  when(apmConnector.addTeamMember(*[ApplicationId], *[AddTeamMemberRequest])(*)).thenReturn(Future.successful(()))
+  when(cmdProductionConnector.dispatch(*[ApplicationId], *, *)(*)).thenReturn(Future.successful(Right(DispatchSuccessResult(mock[Application]))))
+  when(cmdSandboxConnector.dispatch(*[ApplicationId], *, *)(*)).thenReturn(Future.successful(Right(DispatchSuccessResult(mock[Application]))))
   when(apmConnector.subscribeToApi(*[ApplicationId], *[ApiIdentifier])(*)).thenReturn(Future.successful(ApplicationUpdateSuccessful))
   when(productionSubsFieldsConnector.saveFieldValues(*[ClientId], *[ApiContext], *[ApiVersion], *[Fields.Alias])(*)).thenReturn(Future.successful(
     SaveSubscriptionFieldsSuccessResponse

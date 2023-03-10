@@ -35,10 +35,9 @@ class AddTeamMemberRequestSpec extends HmrcSpec with JsonFormattersSpec {
     }
 
     "read role" in {
-      val role: Collaborator.Role = Collaborator.Roles.DEVELOPER
       Json.fromJson[Collaborator.Role](JsString("ADMINISTRATOR")) shouldBe JsSuccess(Collaborator.Roles.ADMINISTRATOR)
-
     }
+
     "write to json" in {
       testToJson(request)("email" -> "bob@example.com", "role" -> "DEVELOPER")
     }

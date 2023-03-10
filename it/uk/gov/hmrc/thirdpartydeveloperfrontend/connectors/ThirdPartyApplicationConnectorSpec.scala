@@ -50,7 +50,7 @@ class ThirdPartyApplicationConnectorSpec extends BaseConnectorIntegrationSpec wi
   private val clientId       = ClientId(UUID.randomUUID().toString)
   private val applicationId  = ApplicationId.random
 
-  private val stubConfig     = Configuration(
+  private val stubConfig = Configuration(
     "microservice.services.third-party-application-production.port"      -> stubPort,
     "microservice.services.third-party-application-production.use-proxy" -> false,
     "microservice.services.third-party-application-production.api-key"   -> "",

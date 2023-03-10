@@ -120,7 +120,7 @@ class CheckYourAnswersSpec
 
   val groupedSubsSubscribedToNothing = GroupedSubscriptions(testApis = Seq.empty, apis = Seq.empty, exampleApi = None)
 
-  trait Setup extends ApplicationServiceMock with ApplicationActionServiceMock with SessionServiceMock with TermsOfUseVersionServiceMock {
+  trait Setup extends ApplicationServiceMock with CollaboratorServiceMockModule with ApplicationActionServiceMock with SessionServiceMock with TermsOfUseVersionServiceMock {
     val checkYourAnswersView             = app.injector.instanceOf[CheckYourAnswersView]
     val landingPageView                  = app.injector.instanceOf[LandingPageView]
     val teamView                         = app.injector.instanceOf[TeamView]
@@ -137,6 +137,7 @@ class CheckYourAnswersSpec
     val underTest = new CheckYourAnswers(
       mockErrorHandler,
       applicationServiceMock,
+      CollaboratorServiceMock.aMock,
       applicationActionServiceMock,
       mock[ApplicationCheck],
       sessionServiceMock,
@@ -166,7 +167,7 @@ class CheckYourAnswersSpec
 
     fetchCredentialsReturns(sampleApp, appTokens)
 
-    givenRemoveTeamMemberSucceeds(loggedInDeveloper)
+    CollaboratorServiceMock.RemoveTeamMember.thenReturnsSuccessFor(loggedInDeveloper.email)(sampleApp)
 
     givenUpdateCheckInformationSucceeds(sampleApp)
 
@@ -501,7 +502,7 @@ class CheckYourAnswersSpec
 
       redirectLocation(result) shouldBe Some(s"/developer/applications/${appId.text}/check-your-answers/team")
 
-      verify(underTest.applicationService).removeTeamMember(eqTo(application), eqTo(anotherCollaboratorEmail), eqTo(loggedInDeveloper.email))(*)
+      verify(underTest.collaboratorService).removeTeamMember(eqTo(application), eqTo(anotherCollaboratorEmail), eqTo(loggedInDeveloper.email))(*)
     }
 
     "team post redirect to check landing page when no check information on application" in new Setup {

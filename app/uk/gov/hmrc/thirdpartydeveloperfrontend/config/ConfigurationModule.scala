@@ -45,6 +45,13 @@ class ConfigurationModule extends AbstractModule {
       .annotatedWith(named("PRODUCTION"))
       .to(classOf[ProductionSubscriptionFieldsConnector])
 
+    bind(classOf[ApplicationCommandConnector])
+      .annotatedWith(named("SANDBOX"))
+      .to(classOf[SandboxApplicationCommandConnector])
+    bind(classOf[ApplicationCommandConnector])
+      .annotatedWith(named("PRODUCTION"))
+      .to(classOf[ProductionApplicationCommandConnector])
+
     bind(classOf[PushPullNotificationsConnector])
       .annotatedWith(named("PPNS-SANDBOX"))
       .to(classOf[SandboxPushPullNotificationsConnector])

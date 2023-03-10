@@ -63,8 +63,8 @@ object SubmissionActionBuilders {
 
   object SubmissionStatusFilter {
     type Type = Status => Boolean
-    val answeredCompletely: Type         = _.isAnsweredCompletely
-    val submitted: Type                  = _.isSubmitted
+    val answeredCompletely: Type = _.isAnsweredCompletely
+    val submitted: Type          = _.isSubmitted
 
     val submittedGrantedOrDeclined: Type = status =>
       status.isSubmitted || status.isGranted || status.isGrantedWithWarnings || status.isDeclined || status.isFailed || status.isWarnings || status.isPendingResponsibleIndividual
