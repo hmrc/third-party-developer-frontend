@@ -20,14 +20,18 @@ import java.util.UUID
 import javax.inject.{Inject, Singleton}
 import scala.concurrent.Future.successful
 import scala.concurrent.{ExecutionContext, Future}
+
 import views.html._
+
 import play.api.libs.crypto.CookieSigner
 import play.api.mvc.{Session => PlaySession, _}
-import uk.gov.hmrc.apiplatform.modules.common.domain.models.LaxEmailAddress
-import uk.gov.hmrc.apiplatform.modules.common.domain.models.LaxEmailAddress.StringSyntax
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.play.audit.http.connector.AuditResult
+
+import uk.gov.hmrc.apiplatform.modules.common.domain.models.LaxEmailAddress
+import uk.gov.hmrc.apiplatform.modules.common.domain.models.LaxEmailAddress.StringSyntax
 import uk.gov.hmrc.apiplatform.modules.common.services.ApplicationLogger
+import uk.gov.hmrc.apiplatform.modules.developers.domain.models.UserId
 import uk.gov.hmrc.apiplatform.modules.mfa.connectors.ThirdPartyDeveloperMfaConnector
 import uk.gov.hmrc.apiplatform.modules.mfa.forms.{MfaAccessCodeForm, SelectLoginMfaForm}
 import uk.gov.hmrc.apiplatform.modules.mfa.models.MfaType.{AUTHENTICATOR_APP, SMS}
@@ -44,7 +48,6 @@ import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.connectors.UserAuth
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.{Developer, DeveloperSession, Session}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.service.AuditAction._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.service._
-import uk.gov.hmrc.apiplatform.modules.developers.domain.models.UserId
 
 trait Auditing {
   val auditService: AuditService
@@ -378,7 +381,7 @@ class UserLoginAccount @Inject() (
   def confirm2SVHelp(): Action[AnyContent] = loggedOutAction { implicit request =>
     import cats.data.OptionT
     import cats.implicits._
-    
+
     val email = request.session.get("emailAddress").getOrElse("").toLaxEmail
 
     def findDeveloper = {

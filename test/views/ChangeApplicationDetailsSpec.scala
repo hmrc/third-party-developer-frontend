@@ -17,11 +17,15 @@
 package views
 
 import java.time.{LocalDateTime, Period, ZoneOffset}
+
 import org.jsoup.Jsoup
 import org.jsoup.nodes.Document
 import views.helper.CommonViewSpec
 import views.html.ChangeDetailsView
+
 import play.api.test.FakeRequest
+
+import uk.gov.hmrc.apiplatform.modules.applications.domain.models.{ApplicationId, ClientId, PrivacyPolicyLocations, TermsAndConditionsLocations}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.builder._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.EditApplicationForm
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications._
@@ -29,7 +33,6 @@ import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.controllers.Applica
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.LoggedInState
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.ViewHelpers.{elementExistsByText, elementIdentifiedByAttrContainsText, textareaExistsWithText}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.{LocalUserIdTracker, WithCSRFAddToken}
-import uk.gov.hmrc.apiplatform.modules.applications.domain.models.{ApplicationId, ClientId, PrivacyPolicyLocations, TermsAndConditionsLocations}
 
 class ChangeApplicationDetailsSpec extends CommonViewSpec
     with WithCSRFAddToken
@@ -49,11 +52,11 @@ class ChangeApplicationDetailsSpec extends CommonViewSpec
       val request               = FakeRequest().withCSRFToken
       val privacyPolicyUrl      = application.privacyPolicyLocation match {
         case PrivacyPolicyLocations.Url(url) => Some(url)
-        case _                              => None
+        case _                               => None
       }
       val termsAndConditionsUrl = application.termsAndConditionsLocation match {
         case TermsAndConditionsLocations.Url(url) => Some(url)
-        case _                                   => None
+        case _                                    => None
       }
 
       val form = EditApplicationForm.form.fill(

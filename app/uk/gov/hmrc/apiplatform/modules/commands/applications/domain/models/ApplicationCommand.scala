@@ -16,12 +16,13 @@
 
 package uk.gov.hmrc.apiplatform.modules.commands.applications.domain.models
 
+import java.time.LocalDateTime
+
 import play.api.libs.json.Json
-import uk.gov.hmrc.apiplatform.modules.applications.domain.models.Collaborator
-import uk.gov.hmrc.apiplatform.modules.common.domain.models.Actor
 import uk.gov.hmrc.play.json.Union
 
-import java.time.LocalDateTime
+import uk.gov.hmrc.apiplatform.modules.applications.domain.models.Collaborator
+import uk.gov.hmrc.apiplatform.modules.common.domain.models.Actor
 
 sealed trait ApplicationCommand {
   def actor: Actor

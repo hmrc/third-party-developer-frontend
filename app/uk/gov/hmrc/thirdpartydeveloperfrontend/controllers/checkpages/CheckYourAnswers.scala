@@ -20,29 +20,32 @@ import java.time.Clock
 import javax.inject.{Inject, Singleton}
 import scala.concurrent.Future.successful
 import scala.concurrent.{ExecutionContext, Future}
+
 import views.html.checkpages._
 import views.html.checkpages.applicationcheck.LandingPageView
 import views.html.checkpages.applicationcheck.team.{TeamMemberAddView, TeamMemberRemoveConfirmationView}
 import views.html.checkpages.checkyouranswers.CheckYourAnswersView
 import views.html.checkpages.checkyouranswers.team.TeamView
+
 import play.api.data.Form
 import play.api.libs.crypto.CookieSigner
 import play.api.mvc._
+
+import uk.gov.hmrc.apiplatform.modules.apis.domain.models._
+import uk.gov.hmrc.apiplatform.modules.applications.domain.models.{ApplicationId, PrivacyPolicyLocation, TermsAndConditionsLocation}
+import uk.gov.hmrc.apiplatform.modules.applications.services.CollaboratorService
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.LaxEmailAddress
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.LaxEmailAddress.StringSyntax
 import uk.gov.hmrc.thirdpartydeveloperfrontend.config.{ApplicationConfig, ErrorHandler}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.FormKeys.applicationNameAlreadyExistsKey
 import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.ManageSubscriptions.Field
 import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers._
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.apidefinitions.{APISubscriptionStatus, _}
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.apidefinitions.APISubscriptionStatus
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.controllers.ApplicationViewModel
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.subscriptions.DevhubAccessLevel
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.{ApplicationAlreadyExists, DeskproTicketCreationFailed}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.service.{ApplicationActionService, ApplicationService, SessionService, TermsOfUseVersionService}
-import uk.gov.hmrc.apiplatform.modules.applications.domain.models.{ApplicationId, PrivacyPolicyLocation, TermsAndConditionsLocation}
-import uk.gov.hmrc.apiplatform.modules.apis.domain.models._
-import uk.gov.hmrc.apiplatform.modules.applications.services.CollaboratorService
 
 @Singleton
 class CheckYourAnswers @Inject() (
@@ -179,16 +182,16 @@ case class CheckYourSubscriptionData(
   )
 
 case class CheckYourAnswersData(
-                                 appId: ApplicationId,
-                                 softwareName: String,
-                                 fullName: Option[String],
-                                 email: Option[LaxEmailAddress],
-                                 telephoneNumber: Option[String],
-                                 teamMembers: Set[LaxEmailAddress],
-                                 privacyPolicyLocation: PrivacyPolicyLocation,
-                                 termsAndConditionsLocation: TermsAndConditionsLocation,
-                                 acceptedTermsOfUse: Boolean,
-                                 subscriptions: Seq[CheckYourSubscriptionData]
+    appId: ApplicationId,
+    softwareName: String,
+    fullName: Option[String],
+    email: Option[LaxEmailAddress],
+    telephoneNumber: Option[String],
+    teamMembers: Set[LaxEmailAddress],
+    privacyPolicyLocation: PrivacyPolicyLocation,
+    termsAndConditionsLocation: TermsAndConditionsLocation,
+    acceptedTermsOfUse: Boolean,
+    subscriptions: Seq[CheckYourSubscriptionData]
   )
 
 object CheckYourAnswersData {

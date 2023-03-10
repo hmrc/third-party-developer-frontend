@@ -19,7 +19,9 @@ package views
 import org.jsoup.Jsoup
 import views.helper.CommonViewSpec
 import views.html.{ChangeProfileView, ProfileView}
+
 import play.api.test.FakeRequest
+
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.LaxEmailAddress.StringSyntax
 import uk.gov.hmrc.thirdpartydeveloperfrontend.builder.{DeveloperBuilder, DeveloperSessionBuilder}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.ProfileForm

@@ -17,8 +17,8 @@
 package uk.gov.hmrc.thirdpartydeveloperfrontend.mocks.connectors
 
 import org.mockito.{ArgumentMatchersSugar, MockitoSugar}
-import uk.gov.hmrc.thirdpartydeveloperfrontend.connectors.ThirdPartyApplicationConnector
-import uk.gov.hmrc.thirdpartydeveloperfrontend.connectors.BridgedConnector
+
+import uk.gov.hmrc.thirdpartydeveloperfrontend.connectors.{BridgedConnector, ThirdPartyApplicationConnector}
 
 trait ThirdPartyApplicationConnectorMockModule extends MockitoSugar with ArgumentMatchersSugar {
 

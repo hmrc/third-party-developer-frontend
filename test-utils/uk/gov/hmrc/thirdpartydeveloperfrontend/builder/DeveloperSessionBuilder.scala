@@ -23,7 +23,7 @@ import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.{Develop
 trait DeveloperSessionBuilder {
 
   implicit class DeveloperSyntax(developer: Developer) {
-    def loggedIn: DeveloperSession = buildDeveloperSession(LoggedInState.LOGGED_IN, developer)
+    def loggedIn: DeveloperSession                = buildDeveloperSession(LoggedInState.LOGGED_IN, developer)
     def partLoggedInEnablingMFA: DeveloperSession = buildDeveloperSession(LoggedInState.PART_LOGGED_IN_ENABLING_MFA, developer)
   }
 

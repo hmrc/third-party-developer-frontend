@@ -19,13 +19,16 @@ package uk.gov.hmrc.thirdpartydeveloperfrontend.controllers
 import java.util.UUID
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
+
 import views.html.{LogoutConfirmationView, SignoutSurveyView}
+
 import play.api.mvc.Request
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
 import play.filters.csrf.CSRF._
-import uk.gov.hmrc.apiplatform.modules.common.domain.models.LaxEmailAddress
 import uk.gov.hmrc.play.audit.http.connector.AuditResult.Success
+
+import uk.gov.hmrc.apiplatform.modules.common.domain.models.LaxEmailAddress
 import uk.gov.hmrc.thirdpartydeveloperfrontend.builder.DeveloperBuilder
 import uk.gov.hmrc.thirdpartydeveloperfrontend.config.ErrorHandler
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.connectors.TicketId
@@ -151,7 +154,13 @@ class UserLogoutAccountSpec extends BaseControllerSpec with WithCSRFAddToken wit
         .thenReturn(Future.successful(Success))
 
       val form    =
-        SignOutSurveyForm(Some(2), "no suggestions", s"${developerSession.developer.firstName} ${developerSession.developer.lastName}", developerSession.email.text, isJavascript = true)
+        SignOutSurveyForm(
+          Some(2),
+          "no suggestions",
+          s"${developerSession.developer.firstName} ${developerSession.developer.lastName}",
+          developerSession.email.text,
+          isJavascript = true
+        )
       val request = loggedInRequestWithCsrfToken.withFormUrlEncodedBody(
         "rating"                 -> form.rating.get.toString,
         "email"                  -> form.email,

@@ -21,13 +21,12 @@ import java.time.{LocalDateTime, Period}
 import org.scalatest.matchers.should.Matchers
 import org.scalatest.wordspec.AnyWordSpec
 
+import uk.gov.hmrc.apiplatform.modules.applications.domain.models.{ApplicationId, ClientId}
+import uk.gov.hmrc.apiplatform.modules.common.domain.models.LaxEmailAddress.StringSyntax
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.Environment.{PRODUCTION, SANDBOX}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.controllers.ApplicationSummary
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils._
-import uk.gov.hmrc.apiplatform.modules.common.domain.models.LaxEmailAddress.StringSyntax
-import uk.gov.hmrc.apiplatform.modules.applications.domain.models.ClientId
-import uk.gov.hmrc.apiplatform.modules.applications.domain.models.ApplicationId
 
 class ApplicationSummaryTest extends AnyWordSpec with Matchers with CollaboratorTracker with LocalUserIdTracker {
 
@@ -47,7 +46,17 @@ class ApplicationSummaryTest extends AnyWordSpec with Matchers with Collaborator
         collaborators = Set(user)
       )
     val noServerTokenApplication =
-      new Application(ApplicationId.random, ClientId(""), "", LocalDateTime.now, Some(LocalDateTime.now), None, grantLength = Period.ofDays(547), PRODUCTION, collaborators = Set(user))
+      new Application(
+        ApplicationId.random,
+        ClientId(""),
+        "",
+        LocalDateTime.now,
+        Some(LocalDateTime.now),
+        None,
+        grantLength = Period.ofDays(547),
+        PRODUCTION,
+        collaborators = Set(user)
+      )
 
     "set serverTokenUsed if application has a date set for lastAccessTokenUsage" in {
       val summary = ApplicationSummary.from(serverTokenApplication.copy(deployedTo = SANDBOX), user.userId)

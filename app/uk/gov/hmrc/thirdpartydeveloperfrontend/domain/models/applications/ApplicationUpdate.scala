@@ -17,12 +17,13 @@
 package uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications
 
 import java.time.LocalDateTime
-import uk.gov.hmrc.apiplatform.modules.common.domain.models.LaxEmailAddress
-import uk.gov.hmrc.play.json.Union
-import uk.gov.hmrc.apiplatform.modules.developers.domain.models.UserId
-import uk.gov.hmrc.apiplatform.modules.common.domain.models.Actors
+
 import play.api.libs.json.Json
+import uk.gov.hmrc.play.json.Union
+
 import uk.gov.hmrc.apiplatform.modules.applications.domain.models.{PrivacyPolicyLocation, TermsAndConditionsLocation}
+import uk.gov.hmrc.apiplatform.modules.common.domain.models.{Actors, LaxEmailAddress}
+import uk.gov.hmrc.apiplatform.modules.developers.domain.models.UserId
 
 trait ApplicationUpdate {
   def timestamp: LocalDateTime

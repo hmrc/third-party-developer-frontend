@@ -28,6 +28,8 @@ import play.api.test.Helpers._
 import play.filters.csrf.CSRF.TokenProvider
 import uk.gov.hmrc.http.HeaderCarrier
 
+import uk.gov.hmrc.apiplatform.modules.apis.domain.models._
+import uk.gov.hmrc.apiplatform.modules.applications.domain.models.ApplicationId
 import uk.gov.hmrc.apiplatform.modules.submissions.SubmissionsTestData
 import uk.gov.hmrc.apiplatform.modules.submissions.services.mocks.SubmissionServiceMockModule
 import uk.gov.hmrc.apiplatform.modules.uplift.domain.models._
@@ -37,15 +39,13 @@ import uk.gov.hmrc.thirdpartydeveloperfrontend.builder._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.config.{On, UpliftJourneyConfig}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.{BaseControllerSpec, SubscriptionTestHelperSugar}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.apidefinitions._
-import uk.gov.hmrc.apiplatform.modules.applications.domain.models.ApplicationId
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.{ApplicationState, ApplicationWithSubscriptionData, SellResellOrDistribute, Environment}
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.{ApplicationState, ApplicationWithSubscriptionData, Environment, SellResellOrDistribute}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.{DeveloperSession, LoggedInState, Session}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.subscriptions.{ApiCategory, ApiData, VersionData}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.mocks.connectors.ApmConnectorMockModule
 import uk.gov.hmrc.thirdpartydeveloperfrontend.mocks.service.{ApplicationActionServiceMock, ApplicationServiceMock, SessionServiceMock, TermsOfUseInvitationServiceMockModule}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.WithLoggedInSession._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.{LocalUserIdTracker, WithCSRFAddToken}
-import uk.gov.hmrc.apiplatform.modules.apis.domain.models._
 
 class UpliftJourneyControllerSpec extends BaseControllerSpec
     with SampleSession
@@ -419,8 +419,8 @@ class UpliftJourneyControllerSpec extends BaseControllerSpec
     }
 
     "redirect to the 'sell resell or distribute' page if a prod app" in new Setup {
-      val prodAppId                  = ApplicationId.random
-      val prodApp                    = sampleApp.copy(id = prodAppId)
+      val prodAppId = ApplicationId.random
+      val prodApp   = sampleApp.copy(id = prodAppId)
       fetchByApplicationIdReturns(prodAppId, prodApp)
       givenApplicationAction(
         ApplicationWithSubscriptionData(prodApp, asSubscriptions(List(testAPISubscriptionStatus1)), asFields(List.empty)),

@@ -21,9 +21,9 @@ import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.CollaboratorTracker
 
 trait CollaboratorsTestData extends CommonTestData with CollaboratorTracker {
 
-  val adminAsCollaborator = administratorEmail.asAdministratorCollaborator
-  val developerAsCollaborator = developerEmail.asDeveloperCollaborator
-  val unverifiedUserAsCollaborator = unverifiedUser.asDeveloperCollaborator
+  val adminAsCollaborator           = administratorEmail.asAdministratorCollaborator
+  val developerAsCollaborator       = developerEmail.asDeveloperCollaborator
+  val unverifiedUserAsCollaborator  = unverifiedUser.asDeveloperCollaborator
   val unverifiedAdminAsCollaborator = unverifiedUser.asAdministratorCollaborator
 
   val mixOfAllTypesOfCollaborators: Set[Collaborator] = Set(

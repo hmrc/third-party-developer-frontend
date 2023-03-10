@@ -19,29 +19,29 @@ package uk.gov.hmrc.thirdpartydeveloperfrontend.controllers
 import javax.inject.{Inject, Singleton}
 import scala.concurrent.Future.successful
 import scala.concurrent.{ExecutionContext, Future}
+
+import cats.data.NonEmptyList
 import views.html.checkpages.applicationcheck.team.TeamMemberAddView
 import views.html.manageTeamViews.{AddTeamMemberView, ManageTeamView, RemoveTeamMemberView}
+
 import play.api.data.Form
 import play.api.libs.crypto.CookieSigner
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents, Result}
 import play.twirl.api.Html
 import uk.gov.hmrc.play.bootstrap.controller.WithUnsafeDefaultFormBinding
+
+import uk.gov.hmrc.apiplatform.modules.applications.domain.models._
+import uk.gov.hmrc.apiplatform.modules.applications.services.CollaboratorService
+import uk.gov.hmrc.apiplatform.modules.commands.applications.domain.models.CommandFailures
+import uk.gov.hmrc.apiplatform.modules.common.domain.models.LaxEmailAddress.StringSyntax
 import uk.gov.hmrc.thirdpartydeveloperfrontend.config.{ApplicationConfig, ErrorHandler, FraudPreventionConfig}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.fraudprevention.FraudPreventionNavLinkHelper
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.Capabilities.SupportsTeamMembers
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.Permissions.{AdministratorOnly, TeamMembersOnly}
-import uk.gov.hmrc.apiplatform.modules.applications.domain.models.ApplicationId
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.controllers.AddTeamMemberPageMode._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.controllers.{AddTeamMemberPageMode, ApplicationViewModel}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.DeveloperSession
 import uk.gov.hmrc.thirdpartydeveloperfrontend.service._
-import uk.gov.hmrc.apiplatform.modules.common.domain.models.LaxEmailAddress.StringSyntax
-import uk.gov.hmrc.apiplatform.modules.applications.domain.models._
-import uk.gov.hmrc.apiplatform.modules.applications.domain.models.Collaborator
-import uk.gov.hmrc.apiplatform.modules.applications.services.CollaboratorService
-import uk.gov.hmrc.apiplatform.modules.commands.applications.domain.models.CommandFailures
-import cats.data.NonEmptyList
 
 @Singleton
 class ManageTeam @Inject() (
@@ -112,13 +112,14 @@ class ManageTeam @Inject() (
 
       def handleValidForm(form: AddTeamMemberForm) = {
         val role = form.role.flatMap(Collaborator.Role(_)).getOrElse(Collaborator.Roles.DEVELOPER)
-        
+
         collaboratorService
           .addTeamMember(request.application, form.email.toLaxEmail, role, request.developerSession.email)
           .map {
-            //Check if returned app has new collaborator in it?
+            // Check if returned app has new collaborator in it?
             case Right(_)                                                                => Redirect(successRedirect)
-            case Left(NonEmptyList(CommandFailures.CollaboratorAlreadyExistsOnApp, Nil)) => createBadRequestResult(AddTeamMemberForm.form.fill(form).withError("email", "team.member.error.emailAddress.already.exists.field"))
+            case Left(NonEmptyList(CommandFailures.CollaboratorAlreadyExistsOnApp, Nil)) =>
+              createBadRequestResult(AddTeamMemberForm.form.fill(form).withError("email", "team.member.error.emailAddress.already.exists.field"))
             case Left(NonEmptyList(CommandFailures.ApplicationNotFound, Nil))            => NotFound(errorHandler.notFoundTemplate)
             case _                                                                       => InternalServerError("Action failed")
           }

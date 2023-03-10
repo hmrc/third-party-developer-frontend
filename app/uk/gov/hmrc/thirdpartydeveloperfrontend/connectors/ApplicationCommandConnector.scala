@@ -16,11 +16,13 @@
 
 package uk.gov.hmrc.thirdpartydeveloperfrontend.connectors
 
-
 import scala.concurrent.{ExecutionContext, Future}
+
 import cats.data.NonEmptyList
 import com.google.inject.{Inject, Singleton}
+
 import uk.gov.hmrc.http.{HeaderCarrier, HttpClient, HttpResponse, InternalServerException}
+
 import uk.gov.hmrc.apiplatform.modules.applications.domain.models.ApplicationId
 import uk.gov.hmrc.apiplatform.modules.commands.applications.domain.models.{ApplicationCommand, CommandFailure, DispatchRequest, DispatchSuccessResult}
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.LaxEmailAddress
@@ -34,11 +36,11 @@ abstract class ApplicationCommandConnector(implicit val ec: ExecutionContext) {
   val http: HttpClient
 
   def dispatch(
-                applicationId: ApplicationId,
-                command: ApplicationCommand,
-                adminsToEmail: Set[LaxEmailAddress]
-              )(implicit hc: HeaderCarrier
-              ): Future[Either[NonEmptyList[CommandFailure], DispatchSuccessResult]] = {
+      applicationId: ApplicationId,
+      command: ApplicationCommand,
+      adminsToEmail: Set[LaxEmailAddress]
+    )(implicit hc: HeaderCarrier
+    ): Future[Either[NonEmptyList[CommandFailure], DispatchSuccessResult]] = {
 
     import uk.gov.hmrc.apiplatform.modules.commands.applications.domain.models.CommandFailureJsonFormatters._
     import uk.gov.hmrc.apiplatform.modules.common.services.NonEmptyListFormatters._
@@ -73,24 +75,30 @@ abstract class ApplicationCommandConnector(implicit val ec: ExecutionContext) {
 }
 
 @Singleton
-class SandboxApplicationCommandConnector @Inject() (val httpClient: HttpClient,
-                                                    val proxiedHttpClient: ProxiedHttpClient,
-                                                    val appConfig: ApplicationConfig)(implicit override val ec: ExecutionContext) extends ApplicationCommandConnector {
+class SandboxApplicationCommandConnector @Inject() (
+    val httpClient: HttpClient,
+    val proxiedHttpClient: ProxiedHttpClient,
+    val appConfig: ApplicationConfig
+  )(implicit override val ec: ExecutionContext
+  ) extends ApplicationCommandConnector {
 
   val environment    = Environment.SANDBOX
   val serviceBaseUrl = appConfig.thirdPartyApplicationSandboxUrl
   val useProxy       = appConfig.thirdPartyApplicationSandboxUseProxy
 
-  val apiKey         = appConfig.thirdPartyApplicationSandboxApiKey
+  val apiKey = appConfig.thirdPartyApplicationSandboxApiKey
 
   val http: HttpClient = if (useProxy) proxiedHttpClient.withHeaders(apiKey) else httpClient
 }
 
 @Singleton
-class ProductionApplicationCommandConnector @Inject() (val httpClient: HttpClient,
-                                                          val proxiedHttpClient: ProxiedHttpClient,
-                                                          val appConfig: ApplicationConfig)(implicit override val ec: ExecutionContext) extends ApplicationCommandConnector {
+class ProductionApplicationCommandConnector @Inject() (
+    val httpClient: HttpClient,
+    val proxiedHttpClient: ProxiedHttpClient,
+    val appConfig: ApplicationConfig
+  )(implicit override val ec: ExecutionContext
+  ) extends ApplicationCommandConnector {
   val environment    = Environment.PRODUCTION
   val serviceBaseUrl = appConfig.thirdPartyApplicationProductionUrl
-  val http = httpClient
+  val http           = httpClient
 }

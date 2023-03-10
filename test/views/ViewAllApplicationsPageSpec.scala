@@ -16,7 +16,7 @@
 
 package views
 
-import java.time.{LocalDateTime, ZoneOffset}
+import java.time.{Instant, LocalDateTime, ZoneOffset}
 
 import org.jsoup.Jsoup
 import org.jsoup.nodes.Document
@@ -26,22 +26,20 @@ import views.html.noapplications.StartUsingRestApisView
 
 import play.api.test.FakeRequest
 
+import uk.gov.hmrc.apiplatform.modules.applications.domain.models.{ApplicationId, Collaborator}
+import uk.gov.hmrc.apiplatform.modules.common.domain.models.LaxEmailAddress.StringSyntax
+import uk.gov.hmrc.apiplatform.modules.submissions.SubmissionsTestData
+import uk.gov.hmrc.apiplatform.modules.submissions.domain.models.Submission
 import uk.gov.hmrc.thirdpartydeveloperfrontend.builder.{DeveloperBuilder, DeveloperSessionBuilder}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.addapplication.routes.{AddApplication => AddApplicationRoutes}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.apidefinitions.AccessType
-import uk.gov.hmrc.apiplatform.modules.applications.domain.models.ApplicationId
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.{Environment, State, TermsOfUseStatus}
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.connectors.TermsOfUseInvitation
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.controllers.{ApplicationSummary, ManageApplicationsViewModel}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.LoggedInState
 import uk.gov.hmrc.thirdpartydeveloperfrontend.helpers.DateFormatter
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.ViewHelpers.{elementExistsByText, elementIdentifiedByAttrContainsText}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.{LocalUserIdTracker, WithCSRFAddToken}
-import uk.gov.hmrc.apiplatform.modules.common.domain.models.LaxEmailAddress.StringSyntax
-import uk.gov.hmrc.apiplatform.modules.applications.domain.models.Collaborator
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.connectors.TermsOfUseInvitation
-import uk.gov.hmrc.apiplatform.modules.submissions.domain.models.Submission
-import java.time.Instant
-import uk.gov.hmrc.apiplatform.modules.submissions.SubmissionsTestData
 
 class ViewAllApplicationsPageSpec extends CommonViewSpec
     with WithCSRFAddToken
@@ -138,12 +136,12 @@ class ViewAllApplicationsPageSpec extends CommonViewSpec
   "view all applications page" can {
 
     def renderPage(
-      sandboxAppSummaries: Seq[ApplicationSummary],
-      productionAppSummaries: Seq[ApplicationSummary],
-      upliftableApplicationIds: Set[ApplicationId],
-      termsOfUseInvitations: List[TermsOfUseInvitation] = List.empty,
-      productionApplicationSubmissions: List[Submission] = List.empty
-    ) = {
+        sandboxAppSummaries: Seq[ApplicationSummary],
+        productionAppSummaries: Seq[ApplicationSummary],
+        upliftableApplicationIds: Set[ApplicationId],
+        termsOfUseInvitations: List[TermsOfUseInvitation] = List.empty,
+        productionApplicationSubmissions: List[Submission] = List.empty
+      ) = {
       val request                = FakeRequest()
       val loggedIn               = buildDeveloperWithRandomId("developer@example.com".toLaxEmail, "firstName", "lastname").loggedIn
       val manageApplicationsView = app.injector.instanceOf[ManageApplicationsView]
@@ -249,7 +247,7 @@ class ViewAllApplicationsPageSpec extends CommonViewSpec
     "show the applications page with outstanding terms of use box" should {
       "work in Qa/Dev with invites to display" in new QaAndDev with Setup {
         val invites = List(TermsOfUseInvitation(applicationId, Instant.now(), Instant.now(), Instant.now()))
-        
+
         implicit val document = Jsoup.parse(renderPage(sandboxAppSummaries, productionAppSummaries, Set(applicationId), invites).body)
 
         showsAppName(appName)
@@ -272,7 +270,7 @@ class ViewAllApplicationsPageSpec extends CommonViewSpec
 
     "show the applications page with no outstanding terms of use box" should {
       "work in Qa/Dev with an invite that has granted submissions" in new QaAndDev with Setup {
-        val invites = List(TermsOfUseInvitation(applicationId, Instant.now(), Instant.now(), Instant.now()))
+        val invites     = List(TermsOfUseInvitation(applicationId, Instant.now(), Instant.now(), Instant.now()))
         val submissions = List(grantedSubmission)
 
         implicit val document = Jsoup.parse(renderPage(sandboxAppSummaries, productionAppSummaries, Set(applicationId), invites, submissions).body)
@@ -287,9 +285,9 @@ class ViewAllApplicationsPageSpec extends CommonViewSpec
 
     "show the applications page with review terms of use box" should {
       "work in Qa/Dev with submissions in review" in new QaAndDev with Setup {
-        val invites = List(TermsOfUseInvitation(applicationId, Instant.now(), Instant.now(), Instant.now()))
+        val invites     = List(TermsOfUseInvitation(applicationId, Instant.now(), Instant.now(), Instant.now()))
         val submissions = List(submittedSubmission)
-        
+
         implicit val document = Jsoup.parse(renderPage(sandboxAppSummaries, productionAppSummaries, Set(applicationId), invites, submissions).body)
 
         showsAppName(appName)
@@ -301,7 +299,7 @@ class ViewAllApplicationsPageSpec extends CommonViewSpec
 
       "work in Qa/Dev with no submissions in review" in new QaAndDev with Setup {
         val invites = List(TermsOfUseInvitation(applicationId, Instant.now(), Instant.now(), Instant.now()))
-        
+
         implicit val document = Jsoup.parse(renderPage(sandboxAppSummaries, productionAppSummaries, Set(applicationId), invites, List.empty).body)
 
         showsAppName(appName)
@@ -383,7 +381,7 @@ class ViewAllApplicationsPageSpec extends CommonViewSpec
 
     def renderPage(appSummaries: Seq[ApplicationSummary]) = {
       val request                                = FakeRequest().withCSRFToken
-      val loggedIn                               =  buildDeveloperWithRandomId("developer@example.com".toLaxEmail, "firstName", "lastname").loggedIn
+      val loggedIn                               = buildDeveloperWithRandomId("developer@example.com".toLaxEmail, "firstName", "lastname").loggedIn
       val addApplicationSubordinateEmptyNestView = app.injector.instanceOf[StartUsingRestApisView]
 
       addApplicationSubordinateEmptyNestView.render(request, loggedIn, messagesProvider, appConfig, "nav-section", environmentNameService)

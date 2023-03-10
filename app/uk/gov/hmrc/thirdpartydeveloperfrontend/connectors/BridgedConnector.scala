@@ -16,12 +16,11 @@
 
 package uk.gov.hmrc.thirdpartydeveloperfrontend.connectors
 
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.Environment
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.Environment._
 import com.google.inject.Inject
 import com.google.inject.name.Named
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.Application
 
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.Environment._
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.{Application, Environment}
 
 case class BridgedConnector[T] @Inject() (@Named("SANDBOX") sandbox: T, @Named("PRODUCTION") production: T) {
 

@@ -25,7 +25,6 @@ object PrivacyPolicyLocations {
   case object InDesktopSoftware extends PrivacyPolicyLocation
   case class Url(value: String) extends PrivacyPolicyLocation
 
-
   def describe(privacyPolicyLocation: PrivacyPolicyLocation): String = {
     privacyPolicyLocation match {
       case InDesktopSoftware => "In desktop software"

@@ -16,20 +16,19 @@
 
 package uk.gov.hmrc.thirdpartydeveloperfrontend.mocks.service
 
-import org.mockito.{ArgumentMatchersSugar, MockitoSugar}
-import uk.gov.hmrc.apiplatform.modules.applications.services.CollaboratorService
-import uk.gov.hmrc.apiplatform.modules.common.domain.models.LaxEmailAddress
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.Application
+import scala.concurrent.ExecutionContext.Implicits.global
+import scala.concurrent.Future
 
 import cats.data.NonEmptyList
-import cats.syntax.all._
 import cats.instances.future._
-import uk.gov.hmrc.apiplatform.modules.commands.applications.domain.models.DispatchSuccessResult
-import uk.gov.hmrc.apiplatform.modules.commands.applications.domain.models.CommandFailure
-import scala.concurrent.Future
-import scala.concurrent.ExecutionContext.Implicits.global
+import cats.syntax.all._
+import org.mockito.{ArgumentMatchersSugar, MockitoSugar}
+
 import uk.gov.hmrc.apiplatform.modules.applications.domain.models.Collaborator
-import uk.gov.hmrc.apiplatform.modules.commands.applications.domain.models.CommandFailures
+import uk.gov.hmrc.apiplatform.modules.applications.services.CollaboratorService
+import uk.gov.hmrc.apiplatform.modules.commands.applications.domain.models.{CommandFailure, CommandFailures, DispatchSuccessResult}
+import uk.gov.hmrc.apiplatform.modules.common.domain.models.LaxEmailAddress
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.Application
 
 trait CollaboratorServiceMockModule extends MockitoSugar with ArgumentMatchersSugar {
 
@@ -39,6 +38,7 @@ trait CollaboratorServiceMockModule extends MockitoSugar with ArgumentMatchersSu
     def aMock: CollaboratorService
 
     object AddTeamMember {
+
       def succeeds() =
         when(aMock.addTeamMember(*, *[LaxEmailAddress], *[Collaborator.Role], *[LaxEmailAddress])(*))
           .thenReturn(DispatchSuccessResult(mock[Application]).asRight[Err].pure[Future])
@@ -50,25 +50,26 @@ trait CollaboratorServiceMockModule extends MockitoSugar with ArgumentMatchersSu
       def applicationNotFound() =
         when(aMock.addTeamMember(*, *[LaxEmailAddress], *[Collaborator.Role], *[LaxEmailAddress])(*))
           .thenReturn(CommandFailures.ApplicationNotFound.leftNel[DispatchSuccessResult].pure[Future])
-        
+
       def verifyCalledFor(newEmail: LaxEmailAddress, newRole: Collaborator.Role, requestingEmail: LaxEmailAddress) =
-         verify(aMock, atLeastOnce).addTeamMember(*, eqTo(newEmail), eqTo(newRole), eqTo(requestingEmail))(*)
+        verify(aMock, atLeastOnce).addTeamMember(*, eqTo(newEmail), eqTo(newRole), eqTo(requestingEmail))(*)
 
       def verifyNeverCalled() =
         verify(aMock, never).addTeamMember(*, *[LaxEmailAddress], *[Collaborator.Role], *[LaxEmailAddress])(*)
     }
 
     object RemoveTeamMember {
+
       def succeeds(app: Application) =
         when(aMock.removeTeamMember(*, *[LaxEmailAddress], *[LaxEmailAddress])(*))
-          .thenReturn(DispatchSuccessResult(app).asRight[Err].pure[Future])        
+          .thenReturn(DispatchSuccessResult(app).asRight[Err].pure[Future])
 
       def thenReturnsSuccessFor(requestingEmail: LaxEmailAddress)(app: Application) =
         when(aMock.removeTeamMember(*, *[LaxEmailAddress], eqTo(requestingEmail))(*))
-          .thenReturn(DispatchSuccessResult(app).asRight[Err].pure[Future])        
+          .thenReturn(DispatchSuccessResult(app).asRight[Err].pure[Future])
 
-     def verifyCalledFor(app: Application, emailToRemove: LaxEmailAddress, requestingEmail: LaxEmailAddress) =
-         verify(aMock, atLeastOnce).removeTeamMember(eqTo(app), eqTo(emailToRemove), eqTo(requestingEmail))(*)
+      def verifyCalledFor(app: Application, emailToRemove: LaxEmailAddress, requestingEmail: LaxEmailAddress) =
+        verify(aMock, atLeastOnce).removeTeamMember(eqTo(app), eqTo(emailToRemove), eqTo(requestingEmail))(*)
 
       def verifyNeverCalled() =
         verify(aMock, never).removeTeamMember(*, *[LaxEmailAddress], *[LaxEmailAddress])(*)
@@ -79,4 +80,3 @@ trait CollaboratorServiceMockModule extends MockitoSugar with ArgumentMatchersSu
     val aMock = mock[CollaboratorService]
   }
 }
-

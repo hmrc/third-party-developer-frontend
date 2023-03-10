@@ -18,12 +18,14 @@ package uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers
 
 import java.net.URLEncoder
 import java.nio.charset.StandardCharsets
+
 import play.api.libs.json.{Format, Json}
+
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.LaxEmailAddress
 
 case class DeveloperSession(session: Session) {
   val developer: Developer         = session.developer
-  val email: LaxEmailAddress = developer.email
+  val email: LaxEmailAddress       = developer.email
   val loggedInState: LoggedInState = session.loggedInState
 
   val displayedName: String = s"${developer.firstName} ${developer.lastName}"

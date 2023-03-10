@@ -16,9 +16,9 @@
 
 package uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.apidefinitions
 
+import uk.gov.hmrc.apiplatform.modules.apis.domain.models.ApiContext
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.connectors.ApiType.REST_API
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.connectors.{CombinedApi, CombinedApiCategory, ExtendedApiDefinition}
-import uk.gov.hmrc.apiplatform.modules.apis.domain.models.ApiContext
 
 trait ExtendedApiDefinitionTestDataHelper {
   def extendedApiDefinition(name: String): ExtendedApiDefinition = extendedApiDefinition(name, List("category"))

@@ -16,21 +16,20 @@
 
 package uk.gov.hmrc.thirdpartydeveloperfrontend.mocks.connectors
 
-import org.mockito.{ArgumentMatchersSugar, MockitoSugar}
-import uk.gov.hmrc.thirdpartydeveloperfrontend.connectors.ApplicationCommandConnector
-import uk.gov.hmrc.thirdpartydeveloperfrontend.connectors.BridgedConnector
-import uk.gov.hmrc.apiplatform.modules.applications.domain.models.ApplicationId
-import uk.gov.hmrc.apiplatform.modules.commands.applications.domain.models.DispatchSuccessResult
-import scala.concurrent.Future
-import cats.data.NonEmptyList
-import cats.syntax.all._
-import cats.instances.future._
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.Application
-import uk.gov.hmrc.apiplatform.modules.commands.applications.domain.models.CommandFailure
 import scala.concurrent.ExecutionContext.Implicits.global
-import uk.gov.hmrc.apiplatform.modules.commands.applications.domain.models.ApplicationCommand
+import scala.concurrent.Future
+
+import cats.data.NonEmptyList
+import cats.instances.future._
+import cats.syntax.all._
 import org.mockito.captor.ArgCaptor
+import org.mockito.{ArgumentMatchersSugar, MockitoSugar}
+
+import uk.gov.hmrc.apiplatform.modules.applications.domain.models.ApplicationId
+import uk.gov.hmrc.apiplatform.modules.commands.applications.domain.models.{ApplicationCommand, CommandFailure, DispatchSuccessResult}
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.LaxEmailAddress
+import uk.gov.hmrc.thirdpartydeveloperfrontend.connectors.{ApplicationCommandConnector, BridgedConnector}
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.Application
 
 trait ApplicationCommandConnectorMockModule extends MockitoSugar with ArgumentMatchersSugar {
 
@@ -40,10 +39,12 @@ trait ApplicationCommandConnectorMockModule extends MockitoSugar with ArgumentMa
     def aMock: ApplicationCommandConnector
 
     object Dispatch {
+
       def thenReturnsSuccess(app: Application) {
         when(aMock.dispatch(*[ApplicationId], *, *)(*))
           .thenReturn(DispatchSuccessResult(app).asRight[Err].pure[Future])
       }
+
       def thenReturnsSuccessFor(command: ApplicationCommand)(app: Application) {
         when(aMock.dispatch(*[ApplicationId], eqTo(command), *)(*))
           .thenReturn(DispatchSuccessResult(app).asRight[Err].pure[Future])
@@ -53,7 +54,7 @@ trait ApplicationCommandConnectorMockModule extends MockitoSugar with ArgumentMa
         val captor = ArgCaptor[Set[LaxEmailAddress]]
         verify(aMock).dispatch(*[ApplicationId], *, captor)(*)
         captor.value
-      }        
+      }
 
       def verifyCommand() = {
         val captor = ArgCaptor[ApplicationCommand]

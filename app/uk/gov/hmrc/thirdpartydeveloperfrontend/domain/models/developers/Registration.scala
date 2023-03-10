@@ -17,6 +17,7 @@
 package uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers
 
 import play.api.libs.json._
+
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.LaxEmailAddress
 
 case class Registration(firstName: String, lastName: String, email: LaxEmailAddress, password: String, organisation: Option[String] = None)

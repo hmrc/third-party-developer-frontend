@@ -16,9 +16,15 @@
 
 package uk.gov.hmrc.thirdpartydeveloperfrontend.connectors
 
+import java.time.{LocalDateTime, Period}
+import scala.concurrent.ExecutionContext.Implicits.global
+
 import com.github.tomakehurst.wiremock.client.WireMock._
 import org.scalatestplus.play.guice.GuiceOneAppPerSuite
+
 import play.api.test.Helpers._
+import uk.gov.hmrc.http.{HeaderCarrier, HttpClient}
+
 import uk.gov.hmrc.apiplatform.modules.apis.domain.models._
 import uk.gov.hmrc.apiplatform.modules.applications.domain.models.Collaborators.Administrator
 import uk.gov.hmrc.apiplatform.modules.applications.domain.models.{ApplicationId, ClientId, Collaborators}
@@ -26,19 +32,16 @@ import uk.gov.hmrc.apiplatform.modules.commands.applications.domain.models.{Disp
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.Actors
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.LaxEmailAddress.StringSyntax
 import uk.gov.hmrc.apiplatform.modules.developers.domain.models.UserId
-import uk.gov.hmrc.http.{HeaderCarrier, HttpClient}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.config.ApplicationConfig
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.{Application, ApplicationState, Environment, IpAllowlist, Privileged, State}
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.{AsyncHmrcSpec, WireMockSugar}
 
-import java.time.{LocalDateTime, Period}
-import scala.concurrent.ExecutionContext.Implicits.global
 class ApplicationCommandConnectorSpec
     extends AsyncHmrcSpec
     with WireMockSugar
     with GuiceOneAppPerSuite {
 
-  def anApplicationResponse(createdOn: LocalDateTime = LocalDateTime.now(), lastAccess: LocalDateTime = LocalDateTime.now()): Application= {
+  def anApplicationResponse(createdOn: LocalDateTime = LocalDateTime.now(), lastAccess: LocalDateTime = LocalDateTime.now()): Application = {
     Application(
       ApplicationId.random,
       ClientId("clientid"),
@@ -67,8 +70,8 @@ class ApplicationCommandConnectorSpec
 
   class Setup(proxyEnabled: Boolean = false) {
 
-    val httpClient               = app.injector.instanceOf[HttpClient]
-    val proxiedHttpClient               = app.injector.instanceOf[ProxiedHttpClient]
+    val httpClient        = app.injector.instanceOf[HttpClient]
+    val proxiedHttpClient = app.injector.instanceOf[ProxiedHttpClient]
 
     val mockAppConfig: ApplicationConfig = mock[ApplicationConfig]
     when(mockAppConfig.thirdPartyApplicationProductionUrl).thenReturn(wireMockUrl)

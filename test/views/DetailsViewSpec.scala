@@ -18,15 +18,18 @@ package views
 
 import java.time.format.DateTimeFormatter
 import java.time.{LocalDateTime, ZoneOffset}
+
 import org.jsoup.Jsoup
 import org.jsoup.nodes.{Document, Element}
 import views.helper.CommonViewSpec
 import views.html.DetailsView
+
 import play.api.mvc.AnyContentAsEmpty
 import play.api.test.FakeRequest
 import play.twirl.api.HtmlFormat.Appendable
+
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.LaxEmailAddress.StringSyntax
-import uk.gov.hmrc.thirdpartydeveloperfrontend.builder.{DeveloperSessionBuilder, DeveloperTestData}
+import uk.gov.hmrc.thirdpartydeveloperfrontend.builder.{DeveloperSessionBuilder, DeveloperTestData, _}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.Details.{Agreement, TermsOfUseViewModel}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.routes
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications
@@ -34,7 +37,6 @@ import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.controllers.ApplicationViewModel
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.{DeveloperSession, LoggedInState}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.{TestApplications, WithCSRFAddToken, _}
-import uk.gov.hmrc.thirdpartydeveloperfrontend.builder._
 
 class DetailsViewSpec
     extends CommonViewSpec
@@ -42,7 +44,7 @@ class DetailsViewSpec
     with CollaboratorTracker
     with LocalUserIdTracker
     with WithCSRFAddToken
-    with DeveloperSessionBuilder 
+    with DeveloperSessionBuilder
     with DeveloperTestData {
 
   val detailsView = app.injector.instanceOf[DetailsView]

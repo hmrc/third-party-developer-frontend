@@ -16,12 +16,17 @@
 
 package uk.gov.hmrc.thirdpartydeveloperfrontend.service
 
+import java.time.{Clock, LocalDateTime}
+import javax.inject.{Inject, Singleton}
+import scala.concurrent.{ExecutionContext, Future}
+
+import uk.gov.hmrc.http.{ForbiddenException, HeaderCarrier}
+import uk.gov.hmrc.play.audit.http.connector.AuditResult
+
 import uk.gov.hmrc.apiplatform.modules.apis.domain.models._
 import uk.gov.hmrc.apiplatform.modules.applications.domain.models._
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.{Actors, LaxEmailAddress}
 import uk.gov.hmrc.apiplatform.modules.developers.domain.models.UserId
-import uk.gov.hmrc.http.{ForbiddenException, HeaderCarrier}
-import uk.gov.hmrc.play.audit.http.connector.AuditResult
 import uk.gov.hmrc.thirdpartydeveloperfrontend.connectors._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.apidefinitions._
@@ -32,9 +37,6 @@ import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.Develope
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.subscriptions._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.service.AuditAction.{AccountDeletionRequested, ApplicationDeletionRequested, Remove2SVRequested, UserLogoutSurveyCompleted}
 
-import java.time.{Clock, LocalDateTime}
-import javax.inject.{Inject, Singleton}
-import scala.concurrent.{ExecutionContext, Future}
 @Singleton
 class ApplicationService @Inject() (
     apmConnector: ApmConnector,
@@ -61,7 +63,13 @@ class ApplicationService @Inject() (
     connectorWrapper.forEnvironment(application.deployedTo).thirdPartyApplicationConnector.applicationUpdate(application.id, request)
   }
 
-  def updateResponsibleIndividual(application: Application, userId: UserId, fullName: String, emailAddress: LaxEmailAddress)(implicit hc: HeaderCarrier): Future[ApplicationUpdateSuccessful] = {
+  def updateResponsibleIndividual(
+      application: Application,
+      userId: UserId,
+      fullName: String,
+      emailAddress: LaxEmailAddress
+    )(implicit hc: HeaderCarrier
+    ): Future[ApplicationUpdateSuccessful] = {
     val request = ChangeResponsibleIndividualToSelf(userId, LocalDateTime.now(clock), fullName, emailAddress)
     connectorWrapper.forEnvironment(application.deployedTo).thirdPartyApplicationConnector.applicationUpdate(application.id, request)
   }

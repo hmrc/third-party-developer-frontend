@@ -16,21 +16,16 @@
 
 package uk.gov.hmrc.thirdpartydeveloperfrontend.utils
 
-import uk.gov.hmrc.apiplatform.modules.common.domain.models.LaxEmailAddress
-
-import uk.gov.hmrc.apiplatform.modules.common.domain.models.LaxEmailAddress.StringSyntax
-
 import java.time.{LocalDateTime, Period, ZoneOffset}
 import java.util.UUID.randomUUID
 import scala.util.Random
+
+import uk.gov.hmrc.apiplatform.modules.applications.domain.models.{ApplicationId, ClientId, Collaborator}
+import uk.gov.hmrc.apiplatform.modules.common.domain.models.LaxEmailAddress
+import uk.gov.hmrc.apiplatform.modules.common.domain.models.LaxEmailAddress.StringSyntax
+import uk.gov.hmrc.apiplatform.modules.developers.domain.models.UserId
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.apidefinitions.AccessType
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications._
-import uk.gov.hmrc.apiplatform.modules.developers.domain.models.UserId
-import uk.gov.hmrc.apiplatform.modules.common.domain.models.LaxEmailAddress.StringSyntax
-import uk.gov.hmrc.apiplatform.modules.common.domain.models.LaxEmailAddress
-import uk.gov.hmrc.apiplatform.modules.applications.domain.models.ClientId
-import uk.gov.hmrc.apiplatform.modules.applications.domain.models.ApplicationId
-import uk.gov.hmrc.apiplatform.modules.applications.domain.models.Collaborator
 
 trait TestApplications {
   self: CollaboratorTracker =>
@@ -124,7 +119,8 @@ trait TestApplications {
 
     final def withDescription(description: Option[String]): Application = app.copy(description = description)
 
-    final def withTeamMember(email: LaxEmailAddress, userRole: Collaborator.Role): Application = app.copy(collaborators = app.collaborators + Collaborator(email, userRole, UserId.random))
+    final def withTeamMember(email: LaxEmailAddress, userRole: Collaborator.Role): Application =
+      app.copy(collaborators = app.collaborators + Collaborator(email, userRole, UserId.random))
 
     final def withTeamMembers(teamMembers: Set[Collaborator]): Application = app.copy(collaborators = teamMembers)
 

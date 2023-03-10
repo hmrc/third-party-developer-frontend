@@ -23,8 +23,8 @@ import play.api.mvc._
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.play.http.HeaderCarrierConverter
 
-import uk.gov.hmrc.thirdpartydeveloperfrontend.config.{ApplicationConfig, ErrorHandler}
 import uk.gov.hmrc.apiplatform.modules.applications.domain.models.ApplicationId
+import uk.gov.hmrc.thirdpartydeveloperfrontend.config.{ApplicationConfig, ErrorHandler}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.{Capability, Permission, State}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.service.ApplicationActionService
 
@@ -47,7 +47,7 @@ trait ApplicationActionBuilders extends BaseActionBuilders {
       override def refine[A](request: UserRequest[A]): Future[Either[Result, ApplicationRequest[A]]] = {
         implicit val implicitRequest: UserRequest[A] = request
         import cats.implicits._
-        
+
         applicationActionService.process(applicationId, request)
           .toRight(NotFound(errorHandler.notFoundTemplate(Request(request, request.developerSession)))).value
       }

@@ -23,9 +23,9 @@ case class ResponsibleIndividual(fullName: ResponsibleIndividual.Name, emailAddr
 object ResponsibleIndividual {
   import play.api.libs.json.{Format, Json}
 
-  case class Name(value: String)         extends AnyVal
+  case class Name(value: String) extends AnyVal
 
-  implicit val nameFormat         = Json.valueFormat[Name]
+  implicit val nameFormat = Json.valueFormat[Name]
 
   implicit val format: Format[ResponsibleIndividual] = Json.format[ResponsibleIndividual]
 

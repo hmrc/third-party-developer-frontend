@@ -16,14 +16,15 @@
 
 package uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.connectors
 
-import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.HmrcSpec
-import uk.gov.hmrc.apiplatform.modules.common.domain.models.LaxEmailAddress
-import uk.gov.hmrc.apiplatform.modules.applications.domain.models.Collaborator
-import uk.gov.hmrc.apiplatform.modules.common.utils.JsonFormattersSpec
 import play.api.libs.json._
 
+import uk.gov.hmrc.apiplatform.modules.applications.domain.models.Collaborator
+import uk.gov.hmrc.apiplatform.modules.common.domain.models.LaxEmailAddress
+import uk.gov.hmrc.apiplatform.modules.common.utils.JsonFormattersSpec
+import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.HmrcSpec
+
 class AddTeamMemberRequestSpec extends HmrcSpec with JsonFormattersSpec {
-  
+
   "AddTeamMemberRequest" should {
     val request = AddTeamMemberRequest(LaxEmailAddress("bob@example.com"), Collaborator.Roles.DEVELOPER, None)
 
@@ -32,7 +33,7 @@ class AddTeamMemberRequestSpec extends HmrcSpec with JsonFormattersSpec {
       Json.toJson(role) shouldBe JsString("DEVELOPER")
 
     }
-  
+
     "read role" in {
       Json.fromJson[Collaborator.Role](JsString("ADMINISTRATOR")) shouldBe JsSuccess(Collaborator.Roles.ADMINISTRATOR)
     }

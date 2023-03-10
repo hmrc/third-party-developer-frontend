@@ -17,9 +17,14 @@
 package uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications
 
 import java.time.{LocalDateTime, Period}
-import uk.gov.hmrc.apiplatform.modules.common.domain.models.LaxEmailAddress
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.apidefinitions.AccessType.STANDARD
+
+import play.api.libs.json.{OFormat, Reads}
+
 import uk.gov.hmrc.apiplatform.modules.apis.domain.models.ApiIdentifier
+import uk.gov.hmrc.apiplatform.modules.applications.domain.models.{ApplicationId, ClientId, Collaborator, PrivacyPolicyLocations, TermsAndConditionsLocations}
+import uk.gov.hmrc.apiplatform.modules.common.domain.models.LaxEmailAddress
+import uk.gov.hmrc.apiplatform.modules.developers.domain.models.UserId
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.apidefinitions.AccessType.STANDARD
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.Capabilities.{ChangeClientSecret, SupportsDetails, ViewPushSecret}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.Environment._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.Permissions.{ProductionAndAdmin, ProductionAndDeveloper, SandboxOnly, SandboxOrAdmin}
@@ -27,11 +32,6 @@ import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.State.
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.Developer
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.services.LocalDateTimeFormatters
 import uk.gov.hmrc.thirdpartydeveloperfrontend.helpers.string.Digest
-import uk.gov.hmrc.apiplatform.modules.developers.domain.models.UserId
-import uk.gov.hmrc.apiplatform.modules.applications.domain.models.{ApplicationId, ClientId, PrivacyPolicyLocations, TermsAndConditionsLocations}
-import play.api.libs.json.OFormat
-import play.api.libs.json.Reads
-import uk.gov.hmrc.apiplatform.modules.applications.domain.models.Collaborator
 
 trait BaseApplication {
   val defaultGrantLengthDays = 547
@@ -52,7 +52,7 @@ trait BaseApplication {
   def ipAllowlist: IpAllowlist
 
   def role(email: LaxEmailAddress): Option[Collaborator.Role] = collaborators.find(_.emailAddress == email).map(_.role)
-  
+
   def roleForCollaborator(userId: UserId): Option[Collaborator.Role] = collaborators.find(_.userId == userId).map(_.role)
 
   def isUserACollaboratorOfRole(userId: UserId, requiredRole: Collaborator.Role): Boolean = roleForCollaborator(userId).fold(false)(_ == requiredRole)
@@ -125,7 +125,7 @@ trait BaseApplication {
   }
 
   def canViewServerToken(developer: Developer): Boolean = {
-    import Collaborator.Roles._ 
+    import Collaborator.Roles._
 
     (deployedTo, access.accessType, state.name, role(developer.email)) match {
       case (SANDBOX, STANDARD, State.PRODUCTION, _)                      => true

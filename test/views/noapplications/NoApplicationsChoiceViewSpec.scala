@@ -19,8 +19,10 @@ package views.noapplications
 import org.jsoup.Jsoup
 import views.helper.CommonViewSpec
 import views.html.noapplications.NoApplicationsChoiceView
+
 import play.api.mvc.AnyContentAsEmpty
 import play.api.test.FakeRequest
+
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.LaxEmailAddress.StringSyntax
 import uk.gov.hmrc.thirdpartydeveloperfrontend.builder._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.noapplications.NoApplications.NoApplicationsChoiceForm

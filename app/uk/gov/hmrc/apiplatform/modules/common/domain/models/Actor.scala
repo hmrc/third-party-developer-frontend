@@ -16,12 +16,9 @@
 
 package uk.gov.hmrc.apiplatform.modules.common.domain.models
 
-
-
 /** Actor refers to actors that triggered an event
- */
+  */
 sealed trait Actor
-
 
 object Actors {
 
@@ -55,9 +52,9 @@ object Actors {
 object Actor {
   import play.api.libs.json._
   import uk.gov.hmrc.play.json.Union
-  
+
   private sealed trait ActorType
-  
+
   private object ActorTypes {
     case object COLLABORATOR  extends ActorType
     case object GATEKEEPER    extends ActorType
@@ -65,18 +62,19 @@ object Actor {
     case object UNKNOWN       extends ActorType
   }
 
-  implicit val actorsCollaboratorWrites = Json.writes[Actors.AppCollaborator]
+  implicit val actorsCollaboratorWrites   = Json.writes[Actors.AppCollaborator]
   implicit val actorsGatekeeerpUserWrites = Json.writes[Actors.GatekeeperUser]
-  implicit val actorsScheduledJobWrites = Json.writes[Actors.ScheduledJob]
-  
+  implicit val actorsScheduledJobWrites   = Json.writes[Actors.ScheduledJob]
+
   import play.api.libs.functional.syntax._
   import play.api.libs.json.Reads._
 
-  implicit val actorsCollaboratorReads: Reads[Actors.AppCollaborator] = ((JsPath \ "id").read[String] or (JsPath \ "email").read[String]).map(s => Actors.AppCollaborator(LaxEmailAddress(s)))
+  implicit val actorsCollaboratorReads: Reads[Actors.AppCollaborator]  =
+    ((JsPath \ "id").read[String] or (JsPath \ "email").read[String]).map(s => Actors.AppCollaborator(LaxEmailAddress(s)))
   implicit val actorsGatekeeerpUserReads: Reads[Actors.GatekeeperUser] = ((JsPath \ "id").read[String] or (JsPath \ "user").read[String]).map(Actors.GatekeeperUser(_))
-  implicit val actorsScheduledJobReads: Reads[Actors.ScheduledJob] = ((JsPath \ "id").read[String] or (JsPath \ "jobId").read[String]).map(Actors.ScheduledJob(_))
+  implicit val actorsScheduledJobReads: Reads[Actors.ScheduledJob]     = ((JsPath \ "id").read[String] or (JsPath \ "jobId").read[String]).map(Actors.ScheduledJob(_))
 
-  implicit val actorsUnknownJF        = Json.format[Actors.Unknown.type]
+  implicit val actorsUnknownJF = Json.format[Actors.Unknown.type]
 
   implicit val formatNewStyleActor: OFormat[Actor] = Union.from[Actor]("actorType")
     .and[Actors.AppCollaborator](ActorTypes.COLLABORATOR.toString)

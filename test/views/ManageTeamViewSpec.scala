@@ -17,13 +17,17 @@
 package views
 
 import java.time.{LocalDateTime, ZoneOffset}
+
 import org.jsoup.Jsoup
 import views.helper.CommonViewSpec
 import views.html.manageTeamViews.ManageTeamView
+
 import play.api.data.Form
 import play.api.test.FakeRequest
+
+import uk.gov.hmrc.apiplatform.modules.applications.domain.models.{ApplicationId, ClientId, Collaborator}
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.LaxEmailAddress.StringSyntax
-import uk.gov.hmrc.thirdpartydeveloperfrontend.builder.{DeveloperBuilder, DeveloperSessionBuilder}
+import uk.gov.hmrc.thirdpartydeveloperfrontend.builder.{DeveloperBuilder, DeveloperSessionBuilder, _}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.AddTeamMemberForm
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.controllers.ApplicationViewModel
@@ -31,10 +35,6 @@ import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.LoggedIn
 import uk.gov.hmrc.thirdpartydeveloperfrontend.helpers.string._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.ViewHelpers.{elementExistsByText, linkExistsWithHref}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.{LocalUserIdTracker, WithCSRFAddToken}
-import uk.gov.hmrc.thirdpartydeveloperfrontend.builder._
-import uk.gov.hmrc.apiplatform.modules.applications.domain.models.ClientId
-import uk.gov.hmrc.apiplatform.modules.applications.domain.models.ApplicationId
-import uk.gov.hmrc.apiplatform.modules.applications.domain.models.Collaborator
 
 class ManageTeamViewSpec extends CommonViewSpec with WithCSRFAddToken with LocalUserIdTracker with DeveloperSessionBuilder with DeveloperTestData {
 
@@ -86,7 +86,10 @@ class ManageTeamViewSpec extends CommonViewSpec with WithCSRFAddToken with Local
       elementExistsByText(document, "strong", "Warning You need admin rights to add or remove team members.") shouldBe false
       elementExistsByText(document, "td", loggedInDeveloper.email.text) shouldBe true
       elementExistsByText(document, "td", collaborator.email.text) shouldBe true
-      linkExistsWithHref(document, uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.routes.ManageTeam.removeTeamMember(appId, collaborator.email.text.toSha256).url) shouldBe true
+      linkExistsWithHref(
+        document,
+        uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.routes.ManageTeam.removeTeamMember(appId, collaborator.email.text.toSha256).url
+      ) shouldBe true
     }
 
     "not show Add and Remove buttons for Developer" in {
@@ -97,7 +100,10 @@ class ManageTeamViewSpec extends CommonViewSpec with WithCSRFAddToken with Local
       elementExistsByText(document, "strong", "Warning You need admin rights to add or remove team members.") shouldBe true
       elementExistsByText(document, "td", loggedInDeveloper.email.text) shouldBe true
       elementExistsByText(document, "td", collaborator.email.text) shouldBe true
-      linkExistsWithHref(document, uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.routes.ManageTeam.removeTeamMember(appId, collaborator.email.text.toSha256).url) shouldBe false
+      linkExistsWithHref(
+        document,
+        uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.routes.ManageTeam.removeTeamMember(appId, collaborator.email.text.toSha256).url
+      ) shouldBe false
     }
   }
 }

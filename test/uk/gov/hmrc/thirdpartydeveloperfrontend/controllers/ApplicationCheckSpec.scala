@@ -34,22 +34,19 @@ import play.api.test.Helpers.{redirectLocation, _}
 import play.filters.csrf.CSRF.TokenProvider
 import uk.gov.hmrc.http.HeaderCarrier
 
+import uk.gov.hmrc.apiplatform.modules.apis.domain.models._
+import uk.gov.hmrc.apiplatform.modules.applications.domain.models.{ApplicationId, ClientId, Collaborator}
+import uk.gov.hmrc.apiplatform.modules.common.domain.models.LaxEmailAddress.StringSyntax
 import uk.gov.hmrc.thirdpartydeveloperfrontend.builder._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.checkpages.ApplicationCheck
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.ApplicationUpliftSuccessful
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.apidefinitions._
-import uk.gov.hmrc.apiplatform.modules.applications.domain.models.ApplicationId
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.{_}
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.DeveloperSession
 import uk.gov.hmrc.thirdpartydeveloperfrontend.helpers.string._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.mocks.service._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.WithLoggedInSession._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.{LocalUserIdTracker, WithCSRFAddToken}
-import uk.gov.hmrc.apiplatform.modules.common.domain.models.LaxEmailAddress.StringSyntax
-import uk.gov.hmrc.apiplatform.modules.applications.domain.models.ClientId
-import uk.gov.hmrc.apiplatform.modules.applications.domain.models.ApplicationId
-import uk.gov.hmrc.apiplatform.modules.applications.domain.models.Collaborator
-import uk.gov.hmrc.apiplatform.modules.apis.domain.models._
 
 class ApplicationCheckSpec
     extends BaseControllerSpec
@@ -203,7 +200,8 @@ class ApplicationCheckSpec
     )
   }
 
-  trait BaseSetup extends ApplicationServiceMock with ApplicationActionServiceMock with CollaboratorServiceMockModule with SessionServiceMock with ApplicationProvider with TermsOfUseVersionServiceMock {
+  trait BaseSetup extends ApplicationServiceMock with ApplicationActionServiceMock with CollaboratorServiceMockModule with SessionServiceMock with ApplicationProvider
+      with TermsOfUseVersionServiceMock {
     val landingPageView                  = app.injector.instanceOf[LandingPageView]
     val unauthorisedAppDetailsView       = app.injector.instanceOf[UnauthorisedAppDetailsView]
     val nameSubmittedView                = app.injector.instanceOf[NameSubmittedView]

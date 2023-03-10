@@ -18,7 +18,9 @@ package uk.gov.hmrc.apiplatform.modules.dynamics.views
 
 import org.jsoup.Jsoup
 import views.helper.CommonViewSpec
+
 import play.api.test.{FakeRequest, StubMessagesFactory}
+
 import uk.gov.hmrc.apiplatform.modules.dynamics.model.AddTicketForm
 import uk.gov.hmrc.apiplatform.modules.dynamics.views.html.AddTicketView
 import uk.gov.hmrc.thirdpartydeveloperfrontend.builder.{DeveloperBuilder, DeveloperSessionBuilder}
@@ -26,7 +28,7 @@ import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.{Develop
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.{LocalUserIdTracker, WithCSRFAddToken}
 
 class AddTicketViewSpec extends CommonViewSpec with DeveloperBuilder with DeveloperSessionBuilder with WithCSRFAddToken
-  with LocalUserIdTracker with StubMessagesFactory {
+    with LocalUserIdTracker with StubMessagesFactory {
 
   trait Setup {
     val addTicketView = app.injector.instanceOf[AddTicketView]

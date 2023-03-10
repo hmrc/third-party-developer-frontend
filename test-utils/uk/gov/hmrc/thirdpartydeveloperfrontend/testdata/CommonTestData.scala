@@ -32,9 +32,9 @@ trait CommonTestData {
   val pendingApprovalApplicationName = "Application requiring approval"
 
   val administratorEmail = "admin@example.com".toLaxEmail
-  val unverifiedUser = "iamunverified@example.com".toLaxEmail
-  val unverifiedAdmin = "unverified_admin@example.com".toLaxEmail
-    
+  val unverifiedUser     = "iamunverified@example.com".toLaxEmail
+  val unverifiedAdmin    = "unverified_admin@example.com".toLaxEmail
+
   val developerEmail     = "purnima.fakename@example.com".toLaxEmail
   val developerFirstName = "Purnima"
   val developerLastName  = "Fakename"

@@ -30,6 +30,11 @@ import play.api.libs.crypto.CookieSigner
 import play.api.test.Helpers.{redirectLocation, route, status}
 import play.api.test.{CSRFTokenHelper, FakeRequest, Writeables}
 
+import uk.gov.hmrc.apiplatform.modules.apis.domain.models.{ApiContext, ApiIdentifier, ApiVersion}
+import uk.gov.hmrc.apiplatform.modules.applications.domain.models.{ApplicationId, ClientId}
+import uk.gov.hmrc.apiplatform.modules.commands.applications.domain.models.DispatchSuccessResult
+import uk.gov.hmrc.apiplatform.modules.common.domain.models.LaxEmailAddress
+import uk.gov.hmrc.apiplatform.modules.developers.domain.models.UserId
 import uk.gov.hmrc.apiplatform.modules.dynamics.connectors.ThirdPartyDeveloperDynamicsConnector
 import uk.gov.hmrc.apiplatform.modules.mfa.connectors.ThirdPartyDeveloperMfaConnector
 import uk.gov.hmrc.apiplatform.modules.mfa.models.{MfaAction, MfaId, MfaType}
@@ -37,7 +42,6 @@ import uk.gov.hmrc.apiplatform.modules.submissions.connectors.ThirdPartyApplicat
 import uk.gov.hmrc.apiplatform.modules.submissions.domain.models.{Question, ResponsibleIndividualVerificationId, Submission}
 import uk.gov.hmrc.apiplatform.modules.uplift.domain.models.{ApiSubscriptions, GetProductionCredentialsFlow}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.connectors._
-import uk.gov.hmrc.apiplatform.modules.apis.domain.models.{ApiContext, ApiIdentifier, ApiVersion}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.ApplicationNameValidationJson.ApplicationNameValidationResult
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.connectors.ApiType.REST_API
@@ -50,11 +54,6 @@ import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.{ApplicationUpdateSuccessf
 import uk.gov.hmrc.thirdpartydeveloperfrontend.helpers.ExcludeFromCoverage
 import uk.gov.hmrc.thirdpartydeveloperfrontend.repositories.FlowRepository
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.AsyncHmrcSpec
-import uk.gov.hmrc.apiplatform.modules.common.domain.models.LaxEmailAddress
-import uk.gov.hmrc.apiplatform.modules.developers.domain.models.UserId
-import uk.gov.hmrc.apiplatform.modules.applications.domain.models.ClientId
-import uk.gov.hmrc.apiplatform.modules.applications.domain.models.ApplicationId
-import uk.gov.hmrc.apiplatform.modules.commands.applications.domain.models.DispatchSuccessResult
 
 object EndpointScenarioSpec {
 
@@ -495,7 +494,8 @@ abstract class EndpointScenarioSpec extends AsyncHmrcSpec with GuiceOneAppPerSui
       case Endpoint("POST", "/developer/applications/:id/request-check/team/remove", _)                                                => Redirect(s"/developer/applications/${applicationId.text}/request-check/team")
       case Endpoint("POST", "/developer/applications/:id/request-check/terms-of-use", _)                                               => Redirect(s"/developer/applications/${applicationId.text}/request-check")
       case Endpoint("POST", "/developer/applications/:id/details/change", _)                                                           => Redirect(s"/developer/applications/${applicationId.text}/details")
-      case Endpoint("GET", "/developer/applications/:id/add/success", _)                                                               => Redirect(s"/developer/profile/email-preferences/apis-from-subscriptions?applicationId=${applicationId.text}")
+      case Endpoint("GET", "/developer/applications/:id/add/success", _)                                                               =>
+        Redirect(s"/developer/profile/email-preferences/apis-from-subscriptions?applicationId=${applicationId.text}")
       case Endpoint("GET", "/developer/applications/add/:id", _)                                                                       => Redirect(s"/developer/applications/${applicationId.text}/before-you-start")
       case Endpoint("GET", "/developer/applications/add/production", _)                                                                => Redirect(s"/developer/applications/${applicationId.text}/before-you-start")
       case Endpoint(_, "/developer/applications/add/switch", _)                                                                        => Redirect(s"/developer/applications/${applicationId.text}/before-you-start")

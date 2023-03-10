@@ -18,8 +18,10 @@ package uk.gov.hmrc.apiplatform.modules.mfa.views.sms
 
 import org.jsoup.Jsoup
 import views.helper.CommonViewSpec
+
 import play.api.mvc.AnyContentAsEmpty
 import play.api.test.{FakeRequest, StubMessagesFactory}
+
 import uk.gov.hmrc.apiplatform.modules.mfa.views.html.sms.SmsSetupCompletedView
 import uk.gov.hmrc.thirdpartydeveloperfrontend.builder.{DeveloperSessionBuilder, DeveloperTestData}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.{DeveloperSession, LoggedInState}

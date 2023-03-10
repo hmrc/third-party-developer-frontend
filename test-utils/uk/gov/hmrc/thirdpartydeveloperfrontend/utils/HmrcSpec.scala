@@ -19,7 +19,7 @@ package uk.gov.hmrc.thirdpartydeveloperfrontend.utils
 import org.mockito.{ArgumentMatchersSugar, MockitoSugar}
 import org.scalatest.matchers.should.Matchers
 import org.scalatest.wordspec.AnyWordSpec
-import org.scalatest.{EitherValues, OptionValues, Inside}
+import org.scalatest.{EitherValues, Inside, OptionValues}
 import org.scalatestplus.play.WsScalaTestClient
 
 import play.api.test.{DefaultAwaitTimeout, FutureAwaits}
