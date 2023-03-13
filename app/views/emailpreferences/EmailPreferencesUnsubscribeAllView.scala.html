@@ -34,7 +34,7 @@
     developerSession = Some(loggedIn)
   ) {
 
-  <h2 id="pageHeading" class="govuk-heading-l">@pageHeading</h2>
+  <h1 id="pageHeading" class="govuk-heading-l">@pageHeading</h1>
   @EmailPrefsBulletInfoView()
   @helper.form(action = routes.EmailPreferencesController.unsubscribeAllAction, 'class -> "form", 'id -> "unsubscribeForm") {
     @helper.CSRF.formField

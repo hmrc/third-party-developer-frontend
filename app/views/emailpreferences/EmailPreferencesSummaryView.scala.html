@@ -16,8 +16,6 @@
 
 @import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.views.BackButtonWithJavaScript
 @import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.DeveloperSession
-@import include._
-@import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.controllers.Crumb
 @import views.emailpreferences.EmailPreferencesSummaryViewData
 @import views.html.include.DevMain
 @import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers
@@ -27,7 +25,7 @@
 @(viewData: EmailPreferencesSummaryViewData)(implicit messages: Messages, loggedIn: DeveloperSession, request: play.api.mvc.Request[Any], appConfig: ApplicationConfig)
 
 @pageHeading = @{
-  if(viewData.unsubscribed) "You are unsubscribed" else "Email preferences"
+  if(viewData.unsubscribed) "You are unsubscribed" else "Manage your Developer Hub email preferences"
 }
 
 @userHasEmailPreferences = @{
@@ -50,34 +48,35 @@
   }
 
   @if(userHasEmailPreferences) {
-    <p class="govuk-body" id="first-line">You will receive emails about these APIs and topics.</p>
+    <p class="govuk-body" id="first-line">Preferences for <span class="govuk-!-font-weight-bold">@loggedIn.developer.email.text</span></p>
     @for(taxRegimeInterest <- loggedIn.developer.emailPreferences.interests.sortBy(_.regime).zipWithIndex) {
-      <h2 class="govuk-heading-m govuk-!-margin-bottom-2" id="category-heading-@taxRegimeInterest._1.regime">@viewData.taxRegimeDisplayName(taxRegimeInterest._1.regime)</h2>
-
+      <h2 class="govuk-heading-s govuk-!-margin-top-0 govuk-!-margin-bottom-1" id="category-heading-@taxRegimeInterest._1.regime">@viewData.taxRegimeDisplayName(taxRegimeInterest._1.regime)</h2>
       @if(taxRegimeInterest._1.services.isEmpty) {
         <p class="govuk-body govuk-!-margin-bottom-2" id="all-api-@taxRegimeInterest._1.regime">
           All @viewData.taxRegimeDisplayName(taxRegimeInterest._1.regime) APIs
         </p>
       } else {
+        <ul class="govuk-list govuk-!-margin-bottom-2">
         @for(selectedAPI <- taxRegimeInterest._1.services.toList.sorted) {
-          <p class="govuk-body govuk-!-margin-bottom-2" id="@selectedAPI">@viewData.apiDisplayName(selectedAPI) </p>
+          <li id="@selectedAPI">@viewData.apiDisplayName(selectedAPI)</li>
         }
+        </ul>
       }
     }
-    <br />
-    <p class="govuk-body">
-      <a class="govuk-link govuk-link--no-visited-state" id="change-apis-link" href="@controllers.profile.routes.EmailPreferencesController.flowSelectCategoriesPage">Edit your preferences or get emails about other APIs</a>
-    </p>
+    <ul class="govuk-list govuk-!-margin-top-4">
+      <li><a class="govuk-link govuk-link--no-visited-state" id="change-apis-link" href="@controllers.profile.routes.EmailPreferencesController.flowSelectCategoriesPage">Edit your preferences or get emails about other APIs</a></li>
+      <li><a class="govuk-link govuk-link--no-visited-state" id="unsubscribe-link" href="@controllers.profile.routes.EmailPreferencesController.unsubscribeAllPage">Unsubscribe from Developer Hub emails</a></li>
+    </ul>
 
-    <hr class="govuk-section-break govuk-section-break--m govuk-section-break--visible" />
-
-    <h2 class="govuk-heading-m govuk-!-margin-bottom-2" id="topics-heading">Topics</h2>
-
+    <hr class="govuk-section-break govuk-section-break--m govuk-section-break--visible">
+    
+    <h2 class="govuk-heading-s govuk-!-margin-bottom-1 govuk-!-margin-top-1" id="topics-heading">Topics</h2>
+    <ul class="govuk-list govuk-!-margin-bottom-2">
     @for(topic <- loggedIn.developer.emailPreferences.topics.toList.sortBy(_.displayOrder)) {
-      <p class="govuk-body govuk-!-margin-bottom-1" id="@topic.value">@topic.displayName</p>
+      <li id="@topic.value">@topic.displayName</li>
     }
-    <br />
-    <p class="govuk-body">
+    </ul>
+    <p class="govuk-body govuk-!-margin-top-4">
       <a class="govuk-link govuk-link--no-visited-state" id="change-topics-link" href="@controllers.profile.routes.EmailPreferencesController.flowSelectTopicsPage">
         Change the topics you are interested in
       </a>
@@ -97,14 +96,6 @@
   <p class="govuk-body">
     Check the <a class="govuk-link" id="status-page-link" href="https://api-platform-status.production.tax.service.gov.uk/" target="_blank">service availability page for information about live incidents (opens in new tab)</a>.
   </p>
-
-  @if(userHasEmailPreferences) {
-    <p class="govuk-body">
-      <a class="govuk-link govuk-link--no-visited-state" id="unsubscribe-link" href="@controllers.profile.routes.EmailPreferencesController.unsubscribeAllPage">
-        Unsubscribe from Developer Hub emails
-      </a>
-    </p>
-  }
 
   <p class="govuk-body">
     <a class="govuk-link govuk-link--no-visited-state" id="view-all-applications-link" href="@controllers.routes.ManageApplications.manageApps">View all applications</a>
