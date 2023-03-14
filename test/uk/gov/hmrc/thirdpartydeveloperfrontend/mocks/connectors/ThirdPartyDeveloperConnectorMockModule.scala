@@ -50,6 +50,12 @@ trait ThirdPartyDeveloperConnectorMockModule extends MockitoSugar with ArgumentM
       def returnsSuccessFor(in: Set[LaxEmailAddress])(out: Seq[User]) =
         when(aMock.fetchByEmails(eqTo(in))(*)).thenReturn(successful(out))
     }
+
+    object GetOrCreateUser {
+      def succeeds() = succeedsWith(UserId.random)
+      def succeedsWith(userId: UserId) = 
+        when(aMock.getOrCreateUserId(*[LaxEmailAddress])(*)).thenReturn(successful(userId))
+    }
   }
 
   object TPDMock extends AbstractTPDMock {

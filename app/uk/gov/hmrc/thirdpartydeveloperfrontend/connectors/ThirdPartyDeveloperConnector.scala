@@ -44,10 +44,15 @@ object ThirdPartyDeveloperConnector {
 
   case class CoreUserDetails(email: LaxEmailAddress, id: UserId)
 
+  case class GetOrCreateUserIdRequest(email: LaxEmailAddress)
+  case class GetOrCreateUserIdResponse(userId: UserId)
+
   object JsonFormatters {
     implicit val formatUnregisteredUserCreationRequest: Format[UnregisteredUserCreationRequest] = Json.format[UnregisteredUserCreationRequest]
     implicit val FindUserIdRequestWrites                                                        = Json.writes[FindUserIdRequest]
     implicit val FindUserIdResponseReads                                                        = Json.reads[FindUserIdResponse]
+    implicit val getOrCreateUserIdRequestFormat                                                 = Json.format[GetOrCreateUserIdRequest]
+    implicit val getOrCreateUserIdResponseFormat                                                = Json.format[GetOrCreateUserIdResponse]
   }
 }
 
@@ -286,5 +291,9 @@ class ThirdPartyDeveloperConnector @Inject() (
         case Left(UpstreamErrorResponse(_, NOT_FOUND, _, _)) => throw new InvalidEmail
         case Left(err)                                       => throw err
       }
+  }
+
+  def getOrCreateUserId(emailAddress: LaxEmailAddress)(implicit hc: HeaderCarrier): Future[UserId] = {
+    http.POST[GetOrCreateUserIdRequest, GetOrCreateUserIdResponse](s"$serviceBaseUrl/developers/user-id", GetOrCreateUserIdRequest(emailAddress)).map(_.userId)
   }
 }
