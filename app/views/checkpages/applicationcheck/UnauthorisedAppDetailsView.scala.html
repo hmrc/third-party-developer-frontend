@@ -45,7 +45,7 @@
 
   @if(adminEmails.size == 1){
     <p class="govuk-body">
-      Ask the administrator <a class="govuk-link" href="mailto:@{adminEmails.head}">@{adminEmails.head}</a> to remove you from the application and add you as an administrator.
+      Ask the administrator <a class="govuk-link" href="mailto:@{adminEmails.head.text}">@{adminEmails.head.text}</a> to remove you from the application and add you as an administrator.
     </p>
   } else {
     <p class="govuk-body">
