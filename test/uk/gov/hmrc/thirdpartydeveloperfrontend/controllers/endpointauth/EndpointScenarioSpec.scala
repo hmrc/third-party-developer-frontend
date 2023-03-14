@@ -190,6 +190,7 @@ abstract class EndpointScenarioSpec extends AsyncHmrcSpec with GuiceOneAppPerSui
   )))
   when(tpdConnector.fetchEmailForResetCode(*)(*)).thenReturn(Future.successful(userEmail))
   when(tpdConnector.requestReset(*[LaxEmailAddress])(*)).thenReturn(Future.successful(OK))
+  when(tpdConnector.getOrCreateUserId(*[LaxEmailAddress])(*)).thenReturn(Future.successful(UserId.random))
   when(tpdConnector.reset(*)(*)).thenReturn(Future.successful(OK))
   when(tpdConnector.authenticate(*)(*)).thenReturn(Future.successful(UserAuthenticationResponse(false, false, None, Some(session))))
   when(tpdConnector.fetchSession(eqTo(sessionId))(*)).thenReturn(Future.successful(session))
