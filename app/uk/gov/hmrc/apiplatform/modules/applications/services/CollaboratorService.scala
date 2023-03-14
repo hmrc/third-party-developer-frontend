@@ -27,7 +27,6 @@ import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.apiplatform.modules.applications.domain.models._
 import uk.gov.hmrc.apiplatform.modules.commands.applications.domain.models._
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.{Actors, LaxEmailAddress}
-import uk.gov.hmrc.apiplatform.modules.developers.domain.models.UserId
 import uk.gov.hmrc.thirdpartydeveloperfrontend.connectors._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications._
@@ -52,7 +51,8 @@ class CollaboratorService @Inject() (
     for {
       adminsAsUsers <- developerConnector.fetchByEmails(setOfAdminEmails)
       adminsToEmail  = adminsAsUsers.filter(_.verified.contains(true)).map(_.email).toSet
-      addCommand     = AddCollaborator(Actors.AppCollaborator(requestingEmail), Collaborator.apply(newTeamMemberEmail, newTeamMemberRole, UserId.random), LocalDateTime.now())
+      userId        <- developerConnector.getOrCreateUserId(newTeamMemberEmail)
+      addCommand     = AddCollaborator(Actors.AppCollaborator(requestingEmail), Collaborator.apply(newTeamMemberEmail, newTeamMemberRole, userId), LocalDateTime.now())
       response      <- applicationCommandConnector(app).dispatch(app.id, addCommand, adminsToEmail)
     } yield response
   }

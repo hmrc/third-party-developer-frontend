@@ -36,6 +36,8 @@ import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.subscriptions.Versi
 import uk.gov.hmrc.thirdpartydeveloperfrontend.mocks.connectors._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.testdata.CollaboratorsTestData
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.{AsyncHmrcSpec, FixedClock, LocalUserIdTracker}
+import uk.gov.hmrc.apiplatform.modules.applications.domain.models.Collaborator
+import uk.gov.hmrc.apiplatform.modules.commands.applications.domain.models.AddCollaborator
 
 class CollaboratorServiceSpec extends AsyncHmrcSpec
     with SubscriptionsBuilder
@@ -51,7 +53,9 @@ class CollaboratorServiceSpec extends AsyncHmrcSpec
 
   trait Setup
       extends FixedClock
-      with ThirdPartyDeveloperConnectorMockModule with ApplicationCommandConnectorMockModule {
+      with ThirdPartyDeveloperConnectorMockModule
+      with ApplicationCommandConnectorMockModule {
+    
     implicit val hc: HeaderCarrier = HeaderCarrier()
 
     val mockDeskproConnector: DeskproConnector = mock[DeskproConnector]
@@ -84,6 +88,29 @@ class CollaboratorServiceSpec extends AsyncHmrcSpec
       mixOfAllTypesOfCollaborators
     )
 
+  "add teamMember" should {
+    "add teamMember successful" in new Setup {
+      TPDMock.FetchByEmails.returnsEmptySeq()
+      TPDMock.GetOrCreateUser.succeedsWith(developerAsCollaborator.userId)
+      
+      val mockResponse = mock[Application]
+
+      PrincipalAppCommandConnector.Dispatch.thenReturnsSuccess(mockResponse)
+
+      val result = await(collaboratorService.addTeamMember(productionApplication, developerEmail, Collaborator.Roles.DEVELOPER, administratorEmail))
+      result shouldBe 'Right
+
+      inside(result.right.value) {
+        case DispatchSuccessResult(response) =>
+          response shouldBe mockResponse
+          inside(PrincipalAppCommandConnector.Dispatch.verifyCommand()) {
+            case AddCollaborator(actor, collaborator, _) =>
+              actor shouldBe Actors.AppCollaborator(administratorEmail)
+              collaborator shouldBe developerAsCollaborator
+          }
+      }
+    }
+  }
   "remove teamMember" should {
     "remove teamMember successfully from production" in new Setup {
       TPDMock.FetchByEmails.returnsEmptySeq
