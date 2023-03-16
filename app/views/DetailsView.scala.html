@@ -22,10 +22,10 @@
 @import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.DeveloperSession
 @import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.routes
 @import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.Details.TermsOfUseViewModel
-@import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.{PrivacyPolicyLocation,TermsAndConditionsLocation}
 @import java.time.format.DateTimeFormatter
 @import java.time.Clock
-@import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.{CollaboratorRole, PrivacyPolicyLocation,TermsAndConditionsLocation}
+@import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications._
+@import uk.gov.hmrc.apiplatform.modules.applications.domain.models._
 
 @this(devMain: DevMain, leftHandNav: LeftHandNav, clock: Clock)
 
@@ -123,7 +123,7 @@
       </tr>
       <tr class="govuk-table__row">
         <th scope="row" class="govuk-table__header">Privacy policy URL</th>
-        <td class="govuk-table__cell" id="privacyPolicyUrl">@{PrivacyPolicyLocation.asText(app.privacyPolicyLocation)}</td>
+        <td class="govuk-table__cell" id="privacyPolicyUrl">@{app.privacyPolicyLocation.describe}</td>
         <td class="govuk-table__cell">
         @if(app.isPermittedToEditProductionAppDetails(loggedIn.developer)) {
           <a id="changePrivacyPolicyLocation" class="govuk-link govuk-link--no-visited-state" href="@routes.Details.updatePrivacyPolicyLocation(app.id)">Change <span class="govuk-visually-hidden">privacy policy location details</span></a>
@@ -132,7 +132,7 @@
       </tr>
       <tr class="govuk-table__row">
         <th scope="row" class="govuk-table__header">Terms and conditions URL</th>
-        <td class="govuk-table__cell" id="termsAndConditionsUrl">@{TermsAndConditionsLocation.asText(app.termsAndConditionsLocation)}</td>
+        <td class="govuk-table__cell" id="termsAndConditionsUrl">@{app.termsAndConditionsLocation.describe}</td>
         <td class="govuk-table__cell">
         @if(app.isPermittedToEditProductionAppDetails(loggedIn.developer)) {
           <a id="changeTermsAndConditionsLocation" class="govuk-link govuk-link--no-visited-state" href="@routes.Details.updateTermsAndConditionsLocation(app.id)">Change <span class="govuk-visually-hidden">terms and conditions location details</span></a>
@@ -161,7 +161,7 @@
         <p class="govuk-body">Only admins can change application details. If you want to make changes, email:</p>
 
         <ul class="govuk-list" id="changingAppDetailsAdminList">
-          @for(adminEmail <- app.collaborators.filter(_.role == CollaboratorRole.ADMINISTRATOR).map(_.emailAddress)) {
+          @for(adminEmail <- app.collaborators.filter(_.role == Collaborator.Roles.ADMINISTRATOR).map(_.emailAddress.text)) {
             <li><a href="mailto:@adminEmail" class="govuk-link">@adminEmail</a></li>
           }
         </ul>

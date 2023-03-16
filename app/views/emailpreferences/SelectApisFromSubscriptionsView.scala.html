@@ -18,7 +18,7 @@
 @import include._
 @import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.connectors.{ApiDefinition, CombinedApi}
 @import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.views.BackButtonWithJavaScript
-@import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.ApplicationId
+@import uk.gov.hmrc.apiplatform.modules.applications.domain.models.ApplicationId
 @import views.html.include.DevMain
 @import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.profile.routes
 @import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.SelectApisFromSubscriptionsForm
@@ -59,7 +59,7 @@
               <label class="govuk-label govuk-checkboxes__label" for="@api.serviceName">@api.displayName</label>
             </div>
           }
-          <input type="hidden" class="govuk-visually-hidden" value="@applicationId.value" name="applicationId" id="applicationId"/>
+          <input type="hidden" class="govuk-visually-hidden" value="@applicationId.text" name="applicationId" id="applicationId"/>
         </div>
         <br />
         <br />

@@ -21,7 +21,7 @@ import java.util.UUID
 
 import cats.data.NonEmptyList
 
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.ApplicationId
+import uk.gov.hmrc.apiplatform.modules.applications.domain.models.ApplicationId
 
 sealed trait QuestionnaireState
 

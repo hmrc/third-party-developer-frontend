@@ -22,13 +22,13 @@ import views.html.manageResponsibleIndividual.ResponsibleIndividualChangeToOther
 
 import play.api.test.FakeRequest
 
-import uk.gov.hmrc.thirdpartydeveloperfrontend.builder.{DeveloperBuilder, DeveloperSessionBuilder}
+import uk.gov.hmrc.thirdpartydeveloperfrontend.builder.{DeveloperSessionTestData, _}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.LoggedInState
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.ViewHelpers.elementIdentifiedByIdContainsText
-import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.{LocalUserIdTracker, TestApplications, WithCSRFAddToken}
+import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.{CollaboratorTracker, LocalUserIdTracker, TestApplications, WithCSRFAddToken}
 
 class ResponsibleIndividualChangeToOtherRequestedViewSpec extends CommonViewSpec with WithCSRFAddToken
-    with DeveloperBuilder with LocalUserIdTracker with DeveloperSessionBuilder with TestApplications {
+    with LocalUserIdTracker with DeveloperSessionBuilder with TestApplications with CollaboratorTracker with DeveloperTestData {
 
   "Responsible Individual Change To Other Requested View" should {
     val application = anApplication()
@@ -37,9 +37,8 @@ class ResponsibleIndividualChangeToOtherRequestedViewSpec extends CommonViewSpec
 
     def renderPage() = {
       val request = FakeRequest().withCSRFToken
-      val session = buildDeveloperSession(LoggedInState.LOGGED_IN, buildDeveloper("admin@example.com", "firstName1", "lastName1"))
 
-      view.render(application, Some(newRiName), request, session, messagesProvider.messages, appConfig)
+      view.render(application, Some(newRiName), request, standardDeveloper.loggedIn, messagesProvider.messages, appConfig)
     }
 
     "RI and application name are displayed correctly" in {

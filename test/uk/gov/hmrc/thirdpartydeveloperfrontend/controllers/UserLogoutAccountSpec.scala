@@ -28,6 +28,7 @@ import play.api.test.Helpers._
 import play.filters.csrf.CSRF._
 import uk.gov.hmrc.play.audit.http.connector.AuditResult.Success
 
+import uk.gov.hmrc.apiplatform.modules.common.domain.models.LaxEmailAddress
 import uk.gov.hmrc.thirdpartydeveloperfrontend.builder.DeveloperBuilder
 import uk.gov.hmrc.thirdpartydeveloperfrontend.config.ErrorHandler
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.connectors.TicketId
@@ -149,11 +150,17 @@ class UserLogoutAccountSpec extends BaseControllerSpec with WithCSRFAddToken wit
       when(underTest.deskproService.submitSurvey(*)(any[Request[AnyRef]], *))
         .thenReturn(Future.successful(TicketId(123)))
 
-      when(underTest.applicationService.userLogoutSurveyCompleted(*, *, *, *)(*))
+      when(underTest.applicationService.userLogoutSurveyCompleted(*[LaxEmailAddress], *, *, *)(*))
         .thenReturn(Future.successful(Success))
 
       val form    =
-        SignOutSurveyForm(Some(2), "no suggestions", s"${developerSession.developer.firstName} ${developerSession.developer.lastName}", developerSession.email, isJavascript = true)
+        SignOutSurveyForm(
+          Some(2),
+          "no suggestions",
+          s"${developerSession.developer.firstName} ${developerSession.developer.lastName}",
+          developerSession.email.text,
+          isJavascript = true
+        )
       val request = loggedInRequestWithCsrfToken.withFormUrlEncodedBody(
         "rating"                 -> form.rating.get.toString,
         "email"                  -> form.email,
@@ -179,14 +186,14 @@ class UserLogoutAccountSpec extends BaseControllerSpec with WithCSRFAddToken wit
       when(underTest.deskproService.submitSurvey(*)(any[Request[AnyRef]], *))
         .thenReturn(Future.successful(TicketId(123)))
 
-      when(underTest.applicationService.userLogoutSurveyCompleted(*, *, *, *)(*))
+      when(underTest.applicationService.userLogoutSurveyCompleted(*[LaxEmailAddress], *, *, *)(*))
         .thenReturn(Future.successful(Success))
 
       val form    = SignOutSurveyForm(
         None,
         "no suggestions",
         s"${developerSession.developer.firstName} ${developerSession.developer.lastName}",
-        developerSession.developer.email,
+        developerSession.developer.email.text,
         isJavascript = true
       )
       val request = loggedInRequestWithCsrfToken.withFormUrlEncodedBody(

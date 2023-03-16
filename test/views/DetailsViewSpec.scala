@@ -28,7 +28,8 @@ import play.api.mvc.AnyContentAsEmpty
 import play.api.test.FakeRequest
 import play.twirl.api.HtmlFormat.Appendable
 
-import uk.gov.hmrc.thirdpartydeveloperfrontend.builder.{DeveloperBuilder, DeveloperSessionBuilder}
+import uk.gov.hmrc.apiplatform.modules.common.domain.models.LaxEmailAddress.StringSyntax
+import uk.gov.hmrc.thirdpartydeveloperfrontend.builder.{DeveloperSessionBuilder, DeveloperTestData, _}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.Details.{Agreement, TermsOfUseViewModel}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.routes
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications
@@ -44,7 +45,7 @@ class DetailsViewSpec
     with LocalUserIdTracker
     with WithCSRFAddToken
     with DeveloperSessionBuilder
-    with DeveloperBuilder {
+    with DeveloperTestData {
 
   val detailsView = app.injector.instanceOf[DetailsView]
 
@@ -61,12 +62,12 @@ class DetailsViewSpec
   }
 
   val termsOfUseViewModel = TermsOfUseViewModel(true, true, Some(Agreement("user@example.com", LocalDateTime.now)))
-  val adminEmail          = "admin@example.com"
+  val adminEmail          = "admin@example.com".toLaxEmail
 
-  implicit val loggedIn: DeveloperSession = buildDeveloperSession(loggedInState = LoggedInState.LOGGED_IN, buildDeveloper("developer@example.com", "Joe", "Bloggs"))
+  implicit val loggedIn: DeveloperSession = JoeBloggs.loggedIn
 
   trait LoggedInUserIsAdmin {
-    implicit val loggedIn: DeveloperSession = buildDeveloperSession(loggedInState = LoggedInState.LOGGED_IN, buildDeveloper(adminEmail, "Joe", "Bloggs"))
+    implicit val loggedIn: DeveloperSession = adminDeveloper.loggedIn
   }
 
   "Application details view" when {
@@ -242,7 +243,7 @@ class DetailsViewSpec
             }
 
             "show agreement details and have no link to read when the terms of use have been agreed" in {
-              val emailAddress      = "user@example.com"
+              val emailAddress      = "user@example.com".toLaxEmail
               val timeStamp         = LocalDateTime.now(ZoneOffset.UTC)
               val expectedTimeStamp = DateTimeFormatter.ofPattern("dd MMMM yyyy").format(timeStamp)
               val version           = "1.0"
@@ -253,7 +254,7 @@ class DetailsViewSpec
 
               val page = Page(detailsView(ApplicationViewModel(application, hasSubscriptionsFields = false, hasPpnsFields = false), termsOfUseViewModel))
 
-              page.agreementDetails.text shouldBe s"Agreed by $emailAddress on $expectedTimeStamp"
+              page.agreementDetails.text shouldBe s"Agreed by ${emailAddress.text} on $expectedTimeStamp"
               page.readLink shouldBe null
             }
           }
@@ -276,7 +277,7 @@ class DetailsViewSpec
             }
 
             "show agreement details, have a link to read and not show a warning when the terms of use have been agreed" in new LoggedInUserIsAdmin {
-              val emailAddress      = "user@example.com"
+              val emailAddress      = "user@example.com".toLaxEmail
               val timeStamp         = LocalDateTime.now(ZoneOffset.UTC)
               val expectedTimeStamp = DateTimeFormatter.ofPattern("dd MMMM yyyy").format(timeStamp)
               val version           = "1.0"
@@ -287,7 +288,7 @@ class DetailsViewSpec
 
               val page = Page(detailsView(ApplicationViewModel(application, hasSubscriptionsFields = false, hasPpnsFields = false), termsOfUseViewModel))
 
-              page.agreementDetails.text shouldBe s"Agreed by $emailAddress on $expectedTimeStamp"
+              page.agreementDetails.text shouldBe s"Agreed by ${emailAddress.text} on $expectedTimeStamp"
               page.readLink.text shouldBe "Read"
               page.readLink.attributes.get("href") shouldBe routes.TermsOfUse.termsOfUse(application.id).url
               page.warning shouldBe null
@@ -326,7 +327,7 @@ class DetailsViewSpec
 
           val page = Page(detailsView(ApplicationViewModel(application, hasSubscriptionsFields = false, hasPpnsFields = false), termsOfUseViewModel))
 
-          page.changingAppDetailsAdminList.text should include(adminEmail)
+          page.changingAppDetailsAdminList.text should include(adminEmail.text)
         }
 
         "show nothing when an admin" in new LoggedInUserIsAdmin {

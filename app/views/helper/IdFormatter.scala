@@ -16,7 +16,7 @@
 
 package views.helper
 
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.apidefinitions.{ApiContext, ApiIdentifier, ApiVersion}
+import uk.gov.hmrc.apiplatform.modules.apis.domain.models.{ApiContext, ApiIdentifier, ApiVersion}
 
 object IdFormatter {
   def replaceNonAlphaNumeric(str: String, replacement: String = "_") = { str.replaceAll("\\W", replacement) }

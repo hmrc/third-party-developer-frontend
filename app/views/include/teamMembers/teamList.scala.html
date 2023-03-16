@@ -14,15 +14,17 @@
  * limitations under the License.
  *@
 
-@import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.{ApplicationId, CollaboratorRole}
+@import uk.gov.hmrc.apiplatform.modules.applications.domain.models.ApplicationId
 @import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.views.{AnchorStyle, Button}
 @import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.DeveloperSession
-@import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.ApplicationId
+@import uk.gov.hmrc.apiplatform.modules.applications.domain.models.ApplicationId
 @import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.Application
 @import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.SpliceCSRFToken
 @import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.routes
+@import uk.gov.hmrc.apiplatform.modules.common.domain.models.LaxEmailAddress
+@import uk.gov.hmrc.apiplatform.modules.applications.domain.models.Collaborator
 
-@(app: Application,role: CollaboratorRole, loggedIn: DeveloperSession, addTeamMemberUrl: Call, addMemberStyle: AnchorStyle, createRemoveLink : (ApplicationId, String) => Call)(implicit request: play.api.mvc.Request[Any])
+@(app: Application,role: Collaborator.Role, loggedIn: DeveloperSession, addTeamMemberUrl: Call, addMemberStyle: AnchorStyle, createRemoveLink : (ApplicationId, LaxEmailAddress) => Call)(implicit request: play.api.mvc.Request[Any])
 
 @if(role.isDeveloper) {
  <div class="govuk-warning-text">
@@ -55,9 +57,9 @@
     data-teamMember-remove-url="@SpliceCSRFToken(routes.ManageTeam.removeTeamMemberAction(app.id))"
     class="govuk-table__body"
   >
-    @for((teamMember, index) <- app.collaborators.toSeq.sortBy(_.emailAddress).zipWithIndex) {
-      <tr class="govuk-table__row" data-teamMember-row="@teamMember.emailAddress">
-        <td class="govuk-table__cell center-table-text">@teamMember.emailAddress</td>
+    @for((teamMember, index) <- app.collaborators.toSeq.sortBy(_.emailAddress.text).zipWithIndex) {
+      <tr class="govuk-table__row" data-teamMember-row="@teamMember.emailAddress.text">
+        <td class="govuk-table__cell center-table-text">@teamMember.emailAddress.text</td>
         <td class="govuk-table__cell center-table-text">
           @if(teamMember.role.isAdministrator) {
             <span>Admin</span>
@@ -69,7 +71,7 @@
         @if(role.isAdministrator && (teamMember.role.isDeveloper || teamMember.emailAddress != loggedIn.email)) {
           <td class="govuk-table__cell center-table-text">
             <a class="govuk-button govuk-button--secondary govuk-!-margin-0" href="@createRemoveLink(app.id, teamMember.emailAddress).url">
-              Remove <span class="govuk-visually-hidden">@teamMember.emailAddress</span>
+              Remove <span class="govuk-visually-hidden">@teamMember.emailAddress.text</span>
             </a>
           </td>
         } else {

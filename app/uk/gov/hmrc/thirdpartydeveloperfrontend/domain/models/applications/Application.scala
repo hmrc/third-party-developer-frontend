@@ -17,38 +17,21 @@
 package uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications
 
 import java.time.{LocalDateTime, Period}
-import java.util.UUID
 
-import play.api.libs.json.{Format, OFormat, Reads}
+import play.api.libs.json.{OFormat, Reads}
 
+import uk.gov.hmrc.apiplatform.modules.apis.domain.models.ApiIdentifier
+import uk.gov.hmrc.apiplatform.modules.applications.domain.models.{ApplicationId, ClientId, Collaborator, PrivacyPolicyLocations, TermsAndConditionsLocations}
+import uk.gov.hmrc.apiplatform.modules.common.domain.models.LaxEmailAddress
+import uk.gov.hmrc.apiplatform.modules.developers.domain.models.UserId
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.apidefinitions.AccessType.STANDARD
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.apidefinitions.ApiIdentifier
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.Capabilities.{ChangeClientSecret, SupportsDetails, ViewPushSecret}
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.CollaboratorRole.ADMINISTRATOR
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.Environment._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.Permissions.{ProductionAndAdmin, ProductionAndDeveloper, SandboxOnly, SandboxOrAdmin}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.State.{PENDING_GATEKEEPER_APPROVAL, PENDING_REQUESTER_VERIFICATION, TESTING}
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.{Developer, UserId}
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.Developer
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.services.LocalDateTimeFormatters
 import uk.gov.hmrc.thirdpartydeveloperfrontend.helpers.string.Digest
-
-case class ApplicationId(value: String) extends AnyVal
-
-object ApplicationId {
-  import play.api.libs.json.Json
-  implicit val applicationIdFormat: Format[ApplicationId] = Json.valueFormat[ApplicationId]
-
-  def random: ApplicationId = ApplicationId(UUID.randomUUID().toString)
-}
-
-case class ClientId(value: String) extends AnyVal
-
-object ClientId {
-  import play.api.libs.json.Json
-  implicit val clientIdFormat: Format[ClientId] = Json.valueFormat[ClientId]
-
-  def random: ClientId = ClientId(UUID.randomUUID().toString)
-}
 
 trait BaseApplication {
   val defaultGrantLengthDays = 547
@@ -68,12 +51,13 @@ trait BaseApplication {
   def checkInformation: Option[CheckInformation]
   def ipAllowlist: IpAllowlist
 
-  def role(email: String): Option[CollaboratorRole]                 = collaborators.find(_.emailAddress == email).map(_.role)
-  def roleForCollaborator(userId: UserId): Option[CollaboratorRole] = collaborators.find(_.userId == userId).map(_.role)
+  def role(email: LaxEmailAddress): Option[Collaborator.Role] = collaborators.find(_.emailAddress == email).map(_.role)
 
-  def isUserACollaboratorOfRole(userId: UserId, requiredRole: CollaboratorRole): Boolean = roleForCollaborator(userId).fold(false)(_ == requiredRole)
+  def roleForCollaborator(userId: UserId): Option[Collaborator.Role] = collaborators.find(_.userId == userId).map(_.role)
 
-  def adminEmails: Set[String] = collaborators.filter(_.role.isAdministrator).map(_.emailAddress)
+  def isUserACollaboratorOfRole(userId: UserId, requiredRole: Collaborator.Role): Boolean = roleForCollaborator(userId).fold(false)(_ == requiredRole)
+
+  def adminEmails: Set[LaxEmailAddress] = collaborators.filter(_.isAdministrator).map(_.emailAddress)
 
   def termsOfUseAgreements: List[TermsOfUseAgreement] = checkInformation.map(_.termsOfUseAgreements).getOrElse(List.empty)
 
@@ -106,14 +90,14 @@ trait BaseApplication {
 
   def privacyPolicyLocation = access match {
     case Standard(_, _, _, _, _, Some(ImportantSubmissionData(_, _, _, _, privacyPolicyLocation, _))) => privacyPolicyLocation
-    case Standard(_, _, Some(url), _, _, None)                                                        => PrivacyPolicyLocation.Url(url)
-    case _                                                                                            => PrivacyPolicyLocation.NoneProvided
+    case Standard(_, _, Some(url), _, _, None)                                                        => PrivacyPolicyLocations.Url(url)
+    case _                                                                                            => PrivacyPolicyLocations.NoneProvided
   }
 
   def termsAndConditionsLocation = access match {
     case Standard(_, _, _, _, _, Some(ImportantSubmissionData(_, _, _, termsAndConditionsLocation, _, _))) => termsAndConditionsLocation
-    case Standard(_, Some(url), _, _, _, None)                                                             => TermsAndConditionsLocation.Url(url)
-    case _                                                                                                 => TermsAndConditionsLocation.NoneProvided
+    case Standard(_, Some(url), _, _, _, None)                                                             => TermsAndConditionsLocations.Url(url)
+    case _                                                                                                 => TermsAndConditionsLocations.NoneProvided
   }
 
   def isPermittedToEditAppDetails(developer: Developer): Boolean = allows(SupportsDetails, developer, SandboxOnly)
@@ -129,6 +113,8 @@ trait BaseApplication {
   def canChangeClientCredentials(developer: Developer): Boolean = allows(ChangeClientSecret, developer, SandboxOrAdmin)
 
   def canPerformApprovalProcess(developer: Developer): Boolean = {
+    import Collaborator.Roles._
+
     (deployedTo, access.accessType, state.name, role(developer.email)) match {
       case (SANDBOX, _, _, _)                                                          => false
       case (PRODUCTION, STANDARD, TESTING, Some(ADMINISTRATOR))                        => true
@@ -139,6 +125,8 @@ trait BaseApplication {
   }
 
   def canViewServerToken(developer: Developer): Boolean = {
+    import Collaborator.Roles._
+
     (deployedTo, access.accessType, state.name, role(developer.email)) match {
       case (SANDBOX, STANDARD, State.PRODUCTION, _)                      => true
       case (PRODUCTION, STANDARD, State.PRODUCTION, Some(ADMINISTRATOR)) => true
@@ -168,7 +156,7 @@ trait BaseApplication {
   def hasLockedSubscriptions = deployedTo.isProduction && !isInTesting
 
   def findCollaboratorByHash(teamMemberHash: String): Option[Collaborator] = {
-    collaborators.find(c => c.emailAddress.toSha256 == teamMemberHash)
+    collaborators.find(c => c.emailAddress.text.toSha256 == teamMemberHash)
   }
 
   // scalastyle:off cyclomatic.complexity

@@ -23,7 +23,8 @@ import views.html.emailpreferences.EmailPreferencesUnsubscribeAllView
 import play.api.mvc.AnyContentAsEmpty
 import play.api.test.FakeRequest
 
-import uk.gov.hmrc.thirdpartydeveloperfrontend.builder.{DeveloperBuilder, DeveloperSessionBuilder}
+import uk.gov.hmrc.apiplatform.modules.common.domain.models.LaxEmailAddress.StringSyntax
+import uk.gov.hmrc.thirdpartydeveloperfrontend.builder.{DeveloperSessionBuilder, DeveloperTestData}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.LoggedInState
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.{LocalUserIdTracker, WithCSRFAddToken}
 
@@ -31,11 +32,11 @@ class EmailPreferencesUnsubscribeAllViewSpec extends CommonViewSpec
     with WithCSRFAddToken
     with LocalUserIdTracker
     with DeveloperSessionBuilder
-    with DeveloperBuilder {
+    with DeveloperTestData {
 
   trait Setup {
     implicit val request: FakeRequest[AnyContentAsEmpty.type] = FakeRequest().withCSRFToken
-    val developerSession                                      = buildDeveloperSession(loggedInState = LoggedInState.LOGGED_IN, buildDeveloper("email@example.com", "First Name", "Last Name", None))
+    val developerSession                                      = standardDeveloper.loggedIn
 
     val emailPreferencesUnsubscribeAllView = app.injector.instanceOf[EmailPreferencesUnsubscribeAllView]
   }

@@ -27,14 +27,14 @@ import uk.gov.hmrc.thirdpartydeveloperfrontend.builder.{DeveloperBuilder, Develo
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.{DeveloperSession, LoggedInState}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.{LocalUserIdTracker, WithCSRFAddToken}
 
-class AddTicketViewSpec extends CommonViewSpec with DeveloperSessionBuilder with WithCSRFAddToken
-    with DeveloperBuilder with LocalUserIdTracker with StubMessagesFactory {
+class AddTicketViewSpec extends CommonViewSpec with DeveloperBuilder with DeveloperSessionBuilder with WithCSRFAddToken
+    with LocalUserIdTracker with StubMessagesFactory {
 
   trait Setup {
     val addTicketView = app.injector.instanceOf[AddTicketView]
 
     implicit val request                    = FakeRequest().withCSRFToken
-    implicit val loggedIn: DeveloperSession = buildDeveloperSession(LoggedInState.LOGGED_IN, buildDeveloper())
+    implicit val loggedIn: DeveloperSession = buildDeveloper().loggedIn
     implicit val messages                   = stubMessages()
   }
 

@@ -24,8 +24,9 @@ import org.scalatestplus.play.guice.GuiceOneServerPerSuite
 import play.api.test.Helpers.{contentAsString, contentType}
 import play.twirl.api.Html
 
+import uk.gov.hmrc.apiplatform.modules.applications.domain.models.{ApplicationId, ClientId}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.config.ApplicationConfig
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.{Application, ApplicationId, ClientId, Environment}
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.{Application, Environment}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.controllers.Crumb
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.{AsyncHmrcSpec, SharedMetricsClearDown}
 
@@ -38,7 +39,7 @@ class BreadcrumbsSpec extends AsyncHmrcSpec with GuiceOneServerPerSuite with Sha
 
       val applicationName = "An Application Name"
       val application     = Application(
-        ApplicationId("appId123"),
+        ApplicationId.random,
         ClientId("clientId123"),
         applicationName,
         LocalDateTime.now(ZoneOffset.UTC),

@@ -16,6 +16,7 @@
 
 package uk.gov.hmrc.thirdpartydeveloperfrontend.controllers
 
+import uk.gov.hmrc.apiplatform.modules.apis.domain.models._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.builder._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.apidefinitions.APIStatus.{BETA, STABLE}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.apidefinitions._

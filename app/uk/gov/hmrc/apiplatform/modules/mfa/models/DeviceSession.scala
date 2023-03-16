@@ -20,7 +20,7 @@ import java.util.UUID
 
 import play.api.libs.json.Json
 
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.UserId
+import uk.gov.hmrc.apiplatform.modules.developers.domain.models.UserId
 
 case class DeviceSession(deviceSessionId: UUID, userId: UserId)
 

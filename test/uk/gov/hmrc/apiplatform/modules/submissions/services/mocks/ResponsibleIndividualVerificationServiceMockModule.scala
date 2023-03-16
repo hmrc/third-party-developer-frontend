@@ -18,6 +18,7 @@ package uk.gov.hmrc.apiplatform.modules.submissions.services.mocks
 
 import scala.concurrent.Future.successful
 
+import org.mockito.quality.Strictness
 import org.mockito.{ArgumentMatchersSugar, MockitoSugar}
 
 import uk.gov.hmrc.apiplatform.modules.submissions.domain.models._
@@ -60,6 +61,6 @@ trait ResponsibleIndividualVerificationServiceMockModule extends MockitoSugar wi
   }
 
   object ResponsibleIndividualVerificationServiceMock extends BaseResponsibleIndividualVerificationServiceMock {
-    val aMock = mock[ResponsibleIndividualVerificationService](withSettings.lenient())
+    val aMock = mock[ResponsibleIndividualVerificationService](withSettings.strictness(Strictness.LENIENT))
   }
 }

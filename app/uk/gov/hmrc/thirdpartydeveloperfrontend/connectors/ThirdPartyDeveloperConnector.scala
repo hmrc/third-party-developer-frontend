@@ -26,6 +26,8 @@ import uk.gov.hmrc.http.HttpReads.Implicits._
 import uk.gov.hmrc.http.{HttpClient, _}
 import uk.gov.hmrc.play.http.metrics.common.API
 
+import uk.gov.hmrc.apiplatform.modules.common.domain.models.LaxEmailAddress
+import uk.gov.hmrc.apiplatform.modules.developers.domain.models.UserId
 import uk.gov.hmrc.thirdpartydeveloperfrontend.config.ApplicationConfig
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.connectors._
@@ -33,19 +35,24 @@ import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.emailpreferences.EmailPreferences
 
 object ThirdPartyDeveloperConnector {
-  private[connectors] case class UnregisteredUserCreationRequest(email: String)
+  private[connectors] case class UnregisteredUserCreationRequest(email: LaxEmailAddress)
 
-  case class EmailForResetResponse(email: String)
+  case class EmailForResetResponse(email: LaxEmailAddress)
 
-  case class FindUserIdRequest(email: String)
+  case class FindUserIdRequest(email: LaxEmailAddress)
   case class FindUserIdResponse(userId: UserId)
 
-  case class CoreUserDetails(email: String, id: UserId)
+  case class CoreUserDetails(email: LaxEmailAddress, id: UserId)
+
+  case class GetOrCreateUserIdRequest(email: LaxEmailAddress)
+  case class GetOrCreateUserIdResponse(userId: UserId)
 
   object JsonFormatters {
     implicit val formatUnregisteredUserCreationRequest: Format[UnregisteredUserCreationRequest] = Json.format[UnregisteredUserCreationRequest]
     implicit val FindUserIdRequestWrites                                                        = Json.writes[FindUserIdRequest]
     implicit val FindUserIdResponseReads                                                        = Json.reads[FindUserIdResponse]
+    implicit val getOrCreateUserIdRequestFormat                                                 = Json.format[GetOrCreateUserIdRequest]
+    implicit val getOrCreateUserIdResponseFormat                                                = Json.format[GetOrCreateUserIdResponse]
   }
 }
 
@@ -109,7 +116,7 @@ class ThirdPartyDeveloperConnector @Inject() (
     )
   }
 
-  def createUnregisteredUser(email: String)(implicit hc: HeaderCarrier): Future[Int] = metrics.record(api) {
+  def createUnregisteredUser(email: LaxEmailAddress)(implicit hc: HeaderCarrier): Future[Int] = metrics.record(api) {
     encryptedJson.secretRequest(
       UnregisteredUserCreationRequest(email),
       http.POST[SecretRequest, ErrorOr[HttpResponse]](s"$serviceBaseUrl/unregistered-developer", _)
@@ -146,7 +153,7 @@ class ThirdPartyDeveloperConnector @Inject() (
     )
   }
 
-  def requestReset(email: String)(implicit hc: HeaderCarrier): Future[Int] = metrics.record(api) {
+  def requestReset(email: LaxEmailAddress)(implicit hc: HeaderCarrier): Future[Int] = metrics.record(api) {
     http.POST[PasswordResetRequest, Either[UpstreamErrorResponse, HttpResponse]](s"$serviceBaseUrl/password-reset-request", PasswordResetRequest(email))
       .map {
         case Right(response)                                 => response.status
@@ -163,7 +170,7 @@ class ThirdPartyDeveloperConnector @Inject() (
       }
   }
 
-  def fetchEmailForResetCode(code: String)(implicit hc: HeaderCarrier): Future[String] = {
+  def fetchEmailForResetCode(code: String)(implicit hc: HeaderCarrier): Future[LaxEmailAddress] = {
     implicit val EmailForResetResponseReads = Json.reads[EmailForResetResponse]
 
     metrics.record(api) {
@@ -185,7 +192,7 @@ class ThirdPartyDeveloperConnector @Inject() (
       }
   }
 
-  def findUserId(email: String)(implicit hc: HeaderCarrier): Future[Option[CoreUserDetails]] = {
+  def findUserId(email: LaxEmailAddress)(implicit hc: HeaderCarrier): Future[Option[CoreUserDetails]] = {
     http.POST[FindUserIdRequest, Option[FindUserIdResponse]](s"$serviceBaseUrl/developers/find-user-id", FindUserIdRequest(email))
       .map {
         case Some(response) => Some(CoreUserDetails(email, response.userId))
@@ -193,12 +200,12 @@ class ThirdPartyDeveloperConnector @Inject() (
       }
   }
 
-  def fetchUserId(email: String)(implicit hc: HeaderCarrier): Future[CoreUserDetails] = {
+  def fetchUserId(email: LaxEmailAddress)(implicit hc: HeaderCarrier): Future[CoreUserDetails] = {
     http.POST[FindUserIdRequest, FindUserIdResponse](s"$serviceBaseUrl/developers/find-user-id", FindUserIdRequest(email))
       .map(response => CoreUserDetails(email, response.userId))
   }
 
-  def resendVerificationEmail(email: String)(implicit hc: HeaderCarrier): Future[Int] = metrics.record(api) {
+  def resendVerificationEmail(email: LaxEmailAddress)(implicit hc: HeaderCarrier): Future[Int] = metrics.record(api) {
     for {
       coreUserDetails <- fetchUserId(email)
       userId           = coreUserDetails.id.value
@@ -262,8 +269,8 @@ class ThirdPartyDeveloperConnector @Inject() (
     }
   }
 
-  def fetchByEmails(emails: Set[String])(implicit hc: HeaderCarrier): Future[Seq[User]] = {
-    http.POST[Set[String], Seq[User]](s"$serviceBaseUrl/developers/get-by-emails", emails)
+  def fetchByEmails(emails: Set[LaxEmailAddress])(implicit hc: HeaderCarrier): Future[Seq[User]] = {
+    http.POST[Set[LaxEmailAddress], Seq[User]](s"$serviceBaseUrl/developers/get-by-emails", emails)
   }
 
   def removeEmailPreferences(userId: UserId)(implicit hc: HeaderCarrier): Future[Boolean] = metrics.record(api) {
@@ -284,5 +291,9 @@ class ThirdPartyDeveloperConnector @Inject() (
         case Left(UpstreamErrorResponse(_, NOT_FOUND, _, _)) => throw new InvalidEmail
         case Left(err)                                       => throw err
       }
+  }
+
+  def getOrCreateUserId(emailAddress: LaxEmailAddress)(implicit hc: HeaderCarrier): Future[UserId] = {
+    http.POST[GetOrCreateUserIdRequest, GetOrCreateUserIdResponse](s"$serviceBaseUrl/developers/user-id", GetOrCreateUserIdRequest(emailAddress)).map(_.userId)
   }
 }

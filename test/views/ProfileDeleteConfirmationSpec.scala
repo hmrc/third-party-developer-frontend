@@ -22,6 +22,7 @@ import views.html.ProfileDeleteConfirmationView
 
 import play.api.test.FakeRequest
 
+import uk.gov.hmrc.apiplatform.modules.common.domain.models.LaxEmailAddress.StringSyntax
 import uk.gov.hmrc.thirdpartydeveloperfrontend.builder.{DeveloperBuilder, DeveloperSessionBuilder}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.DeleteProfileForm
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.LoggedInState
@@ -37,8 +38,8 @@ class ProfileDeleteConfirmationSpec extends CommonViewSpec
   val profileDeleteConfirmation = app.injector.instanceOf[ProfileDeleteConfirmationView]
 
   "Profile delete confirmation page" should {
-    val developer        = buildDeveloper("Test", "Test", "Test", None)
-    val developerSession = buildDeveloperSession(loggedInState = LoggedInState.LOGGED_IN, developer)
+    val developer        = buildDeveloper("Test".toLaxEmail, "Test", "Test", None)
+    val developerSession = developer.loggedIn
 
     "render with no errors" in {
       val request = FakeRequest().withCSRFToken

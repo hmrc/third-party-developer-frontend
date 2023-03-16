@@ -16,8 +16,11 @@
 
 package uk.gov.hmrc.thirdpartydeveloperfrontend.builder
 
+import uk.gov.hmrc.apiplatform.modules.common.domain.models.LaxEmailAddress
+import uk.gov.hmrc.apiplatform.modules.common.domain.models.LaxEmailAddress.StringSyntax
+import uk.gov.hmrc.apiplatform.modules.developers.domain.models.UserId
 import uk.gov.hmrc.apiplatform.modules.mfa.models.MfaDetail
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.{Developer, UserId}
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.Developer
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.emailpreferences.EmailPreferences
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.{CollaboratorTracker, UserIdTracker}
 
@@ -25,7 +28,7 @@ trait DeveloperBuilder extends CollaboratorTracker {
   self: UserIdTracker =>
 
   def buildDeveloperWithRandomId(
-      emailAddress: String = "something@example.com",
+      emailAddress: LaxEmailAddress = "something@example.com".toLaxEmail,
       firstName: String = "John",
       lastName: String = "Doe",
       organisation: Option[String] = None,
@@ -36,7 +39,7 @@ trait DeveloperBuilder extends CollaboratorTracker {
   }
 
   def buildDeveloper(
-      emailAddress: String = "something@example.com",
+      emailAddress: LaxEmailAddress = "something@example.com".toLaxEmail,
       firstName: String = "John",
       lastName: String = "Doe",
       organisation: Option[String] = None,

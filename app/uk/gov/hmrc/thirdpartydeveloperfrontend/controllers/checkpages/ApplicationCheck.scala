@@ -32,10 +32,13 @@ import play.api.data.Forms.{boolean, mapping, optional, text}
 import play.api.libs.crypto.CookieSigner
 import play.api.mvc._
 
+import uk.gov.hmrc.apiplatform.modules.applications.domain.models.ApplicationId
+import uk.gov.hmrc.apiplatform.modules.applications.services.CollaboratorService
+import uk.gov.hmrc.apiplatform.modules.common.domain.models.LaxEmailAddress.StringSyntax
 import uk.gov.hmrc.thirdpartydeveloperfrontend.config.{ApplicationConfig, ErrorHandler}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.FormKeys._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers._
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.{ApplicationId, CheckInformation}
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.CheckInformation
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.views.CheckInformationForm
 import uk.gov.hmrc.thirdpartydeveloperfrontend.service.{ApplicationActionService, ApplicationService, SessionService, TermsOfUseVersionService}
 
@@ -43,6 +46,7 @@ import uk.gov.hmrc.thirdpartydeveloperfrontend.service.{ApplicationActionService
 class ApplicationCheck @Inject() (
     val errorHandler: ErrorHandler,
     val applicationService: ApplicationService,
+    val collaboratorService: CollaboratorService,
     val applicationActionService: ApplicationActionService,
     val sessionService: SessionService,
     mcc: MessagesControllerComponents,
@@ -133,8 +137,8 @@ class ApplicationCheck @Inject() (
 
   def teamMemberRemoveAction(appId: ApplicationId): Action[AnyContent] = canUseChecksAction(appId) { implicit request =>
     def handleValidForm(form: RemoveTeamMemberCheckPageConfirmationForm): Future[Result] = {
-      applicationService
-        .removeTeamMember(request.application, form.email, request.developerSession.email)
+      collaboratorService
+        .removeTeamMember(request.application, form.email.toLaxEmail, request.developerSession.email)
         .map(_ => Redirect(routes.ApplicationCheck.team(appId)))
     }
 

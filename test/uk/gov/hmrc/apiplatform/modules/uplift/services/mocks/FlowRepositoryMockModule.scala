@@ -19,6 +19,7 @@ package uk.gov.hmrc.apiplatform.modules.uplift.services.mocks
 import scala.concurrent.Future.successful
 import scala.reflect.runtime.universe._
 
+import org.mockito.quality.Strictness
 import org.mockito.{ArgumentMatchersSugar, MockitoSugar}
 
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.flows.{Flow, FlowType}
@@ -61,6 +62,6 @@ trait FlowRepositoryMockModule extends MockitoSugar with ArgumentMatchersSugar {
   }
 
   object FlowRepositoryMock extends BaseFlowRepositoryMock {
-    val aMock = mock[FlowRepository](withSettings.lenient())
+    val aMock = mock[FlowRepository](withSettings.strictness(Strictness.LENIENT))
   }
 }

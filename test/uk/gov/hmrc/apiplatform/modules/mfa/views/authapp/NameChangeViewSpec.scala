@@ -26,15 +26,15 @@ import play.api.test.{FakeRequest, StubMessagesFactory}
 import uk.gov.hmrc.apiplatform.modules.mfa.forms.MfaNameChangeForm
 import uk.gov.hmrc.apiplatform.modules.mfa.models.MfaId
 import uk.gov.hmrc.apiplatform.modules.mfa.views.html.authapp.NameChangeView
-import uk.gov.hmrc.thirdpartydeveloperfrontend.builder.{DeveloperBuilder, DeveloperSessionBuilder}
+import uk.gov.hmrc.thirdpartydeveloperfrontend.builder.{DeveloperSessionBuilder, DeveloperTestData}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.{DeveloperSession, LoggedInState}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.{LocalUserIdTracker, WithCSRFAddToken}
 
-class NameChangeViewSpec extends CommonViewSpec with WithCSRFAddToken with DeveloperSessionBuilder
-    with DeveloperBuilder with LocalUserIdTracker with StubMessagesFactory {
+class NameChangeViewSpec extends CommonViewSpec with WithCSRFAddToken with DeveloperTestData with DeveloperSessionBuilder with LocalUserIdTracker with StubMessagesFactory {
+
   implicit val request                    = FakeRequest()
   val nameChangeView                      = app.injector.instanceOf[NameChangeView]
-  implicit val loggedIn: DeveloperSession = buildDeveloperSession(loggedInState = LoggedInState.LOGGED_IN, buildDeveloper("developer@example.com", "Joe", "Bloggs"))
+  implicit val loggedIn: DeveloperSession = JoeBloggs.loggedIn
 
   "NameChangeView view" should {
     "render correctly when form is valid" in {

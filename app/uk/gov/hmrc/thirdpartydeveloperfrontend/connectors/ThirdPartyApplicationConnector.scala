@@ -20,7 +20,6 @@ import javax.inject.{Inject, Singleton}
 import scala.concurrent.{ExecutionContext, Future}
 import scala.util.Success
 
-import akka.actor.ActorSystem
 import akka.pattern.FutureTimeoutSupport
 
 import play.api.http.Status._
@@ -28,14 +27,16 @@ import uk.gov.hmrc.http.HttpReads.Implicits._
 import uk.gov.hmrc.http.{HttpClient, _}
 import uk.gov.hmrc.play.http.metrics.common.API
 
+import uk.gov.hmrc.apiplatform.modules.apis.domain.models.ApiIdentifier
+import uk.gov.hmrc.apiplatform.modules.applications.domain.models.{ApplicationId, ClientId}
+import uk.gov.hmrc.apiplatform.modules.common.domain.models.LaxEmailAddress
 import uk.gov.hmrc.apiplatform.modules.common.services.ApplicationLogger
+import uk.gov.hmrc.apiplatform.modules.developers.domain.models.UserId
 import uk.gov.hmrc.thirdpartydeveloperfrontend.config.ApplicationConfig
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain._
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.apidefinitions.ApiIdentifier
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.ApplicationNameValidationJson.{ApplicationNameValidationRequest, ApplicationNameValidationResult}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.connectors.{DeleteCollaboratorRequest, TermsOfUseInvitation}
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.UserId
 import uk.gov.hmrc.thirdpartydeveloperfrontend.service.ApplicationService.ApplicationConnector
 
 abstract class ThirdPartyApplicationConnector(config: ApplicationConfig, metrics: ConnectorMetrics) extends ApplicationConnector
@@ -63,11 +64,11 @@ abstract class ThirdPartyApplicationConnector(config: ApplicationConfig, metrics
     }
 
   def update(applicationId: ApplicationId, request: UpdateApplicationRequest)(implicit hc: HeaderCarrier): Future[ApplicationUpdateSuccessful] = metrics.record(api) {
-    http.POST[UpdateApplicationRequest, ErrorOrUnit](s"$serviceBaseUrl/application/${applicationId.value}", request).map(throwOr(ApplicationUpdateSuccessful))
+    http.POST[UpdateApplicationRequest, ErrorOrUnit](s"$serviceBaseUrl/application/${applicationId.text}", request).map(throwOr(ApplicationUpdateSuccessful))
   }
 
   def applicationUpdate(applicationId: ApplicationId, request: ApplicationUpdate)(implicit hc: HeaderCarrier): Future[ApplicationUpdateSuccessful] = metrics.record(api) {
-    http.PATCH[ApplicationUpdate, ErrorOrUnit](s"$serviceBaseUrl/application/${applicationId.value}", request).map(throwOr(ApplicationUpdateSuccessful))
+    http.PATCH[ApplicationUpdate, ErrorOrUnit](s"$serviceBaseUrl/application/${applicationId.text}", request).map(throwOr(ApplicationUpdateSuccessful))
   }
 
   def fetchByTeamMember(userId: UserId)(implicit hc: HeaderCarrier): Future[Seq[ApplicationWithSubscriptionIds]] =
@@ -92,13 +93,13 @@ abstract class ThirdPartyApplicationConnector(config: ApplicationConfig, metrics
 
   def removeTeamMember(
       applicationId: ApplicationId,
-      teamMemberToDelete: String,
-      requestingEmail: String,
-      adminsToEmail: Set[String]
+      teamMemberToDelete: LaxEmailAddress,
+      requestingEmail: LaxEmailAddress,
+      adminsToEmail: Set[LaxEmailAddress]
     )(implicit hc: HeaderCarrier
     ): Future[ApplicationUpdateSuccessful] =
     metrics.record(api) {
-      val url     = s"$serviceBaseUrl/application/${applicationId.value}/collaborator/delete"
+      val url     = s"$serviceBaseUrl/application/${applicationId.text}/collaborator/delete"
       val request = DeleteCollaboratorRequest(teamMemberToDelete, adminsToEmail, true)
 
       http.POST[DeleteCollaboratorRequest, ErrorOrUnit](url, request)
@@ -121,7 +122,7 @@ abstract class ThirdPartyApplicationConnector(config: ApplicationConfig, metrics
 
   def unsubscribeFromApi(applicationId: ApplicationId, apiIdentifier: ApiIdentifier)(implicit hc: HeaderCarrier): Future[ApplicationUpdateSuccessful] =
     metrics.record(api) {
-      http.DELETE[ErrorOrUnit](s"$serviceBaseUrl/application/${applicationId.value}/subscription?context=${apiIdentifier.context.value}&version=${apiIdentifier.version.value}")
+      http.DELETE[ErrorOrUnit](s"$serviceBaseUrl/application/${applicationId.text}/subscription?context=${apiIdentifier.context.value}&version=${apiIdentifier.version.value}")
         .map(throwOrOptionOf)
         .map {
           case Some(_) => ApplicationUpdateSuccessful
@@ -138,7 +139,7 @@ abstract class ThirdPartyApplicationConnector(config: ApplicationConfig, metrics
   }
 
   def requestUplift(applicationId: ApplicationId, upliftRequest: UpliftRequest)(implicit hc: HeaderCarrier): Future[ApplicationUpliftSuccessful] = metrics.record(api) {
-    http.POST[UpliftRequest, ErrorOrUnit](s"$serviceBaseUrl/application/${applicationId.value}/request-uplift", upliftRequest)
+    http.POST[UpliftRequest, ErrorOrUnit](s"$serviceBaseUrl/application/${applicationId.text}/request-uplift", upliftRequest)
       .map {
         case Right(_)                                        => ApplicationUpliftSuccessful
         case Left(UpstreamErrorResponse(_, CONFLICT, _, _))  => throw new ApplicationAlreadyExists
@@ -191,7 +192,7 @@ abstract class ThirdPartyApplicationConnector(config: ApplicationConfig, metrics
 
   def updateIpAllowlist(applicationId: ApplicationId, required: Boolean, ipAllowlist: Set[String])(implicit hc: HeaderCarrier): Future[ApplicationUpdateSuccessful] =
     metrics.record(api) {
-      http.PUT[UpdateIpAllowlistRequest, ErrorOrUnit](s"$serviceBaseUrl/application/${applicationId.value}/ipAllowlist", UpdateIpAllowlistRequest(required, ipAllowlist))
+      http.PUT[UpdateIpAllowlistRequest, ErrorOrUnit](s"$serviceBaseUrl/application/${applicationId.text}/ipAllowlist", UpdateIpAllowlistRequest(required, ipAllowlist))
         .map(throwOrOptionOf)
         .map {
           case Some(_) => ApplicationUpdateSuccessful
@@ -200,7 +201,7 @@ abstract class ThirdPartyApplicationConnector(config: ApplicationConfig, metrics
     }
 
   def fetchSubscription(applicationId: ApplicationId)(implicit hc: HeaderCarrier): Future[Set[ApiIdentifier]] = {
-    http.GET[Set[ApiIdentifier]](s"$serviceBaseUrl/application/${applicationId.value}/subscription")
+    http.GET[Set[ApiIdentifier]](s"$serviceBaseUrl/application/${applicationId.text}/subscription")
   }
 
   def fetchTermsOfUseInvitations()(implicit hc: HeaderCarrier): Future[List[TermsOfUseInvitation]] = {
@@ -211,13 +212,13 @@ abstract class ThirdPartyApplicationConnector(config: ApplicationConfig, metrics
 
   def fetchTermsOfUseInvitation(applicationId: ApplicationId)(implicit hc: HeaderCarrier): Future[Option[TermsOfUseInvitation]] = {
     metrics.record(api) {
-      http.GET[Option[TermsOfUseInvitation]](s"$serviceBaseUrl/terms-of-use/application/${applicationId.value}")
+      http.GET[Option[TermsOfUseInvitation]](s"$serviceBaseUrl/terms-of-use/application/${applicationId.text}")
     }
   }
 }
 
 private[connectors] object ThirdPartyApplicationConnectorDomain {
-  import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.{ClientId, ClientSecret}
+  import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.ClientSecret
   import java.time.LocalDateTime
 
   def toDomain(tpaClientSecret: TPAClientSecret): ClientSecret =
@@ -234,7 +235,6 @@ private[connectors] object ThirdPartyApplicationConnectorDomain {
 class ThirdPartyApplicationSandboxConnector @Inject() (
     val httpClient: HttpClient,
     val proxiedHttpClient: ProxiedHttpClient,
-    val actorSystem: ActorSystem,
     val futureTimeout: FutureTimeoutSupport,
     val appConfig: ApplicationConfig,
     val metrics: ConnectorMetrics
@@ -253,7 +253,6 @@ class ThirdPartyApplicationSandboxConnector @Inject() (
 class ThirdPartyApplicationProductionConnector @Inject() (
     val httpClient: HttpClient,
     val proxiedHttpClient: ProxiedHttpClient,
-    val actorSystem: ActorSystem,
     val futureTimeout: FutureTimeoutSupport,
     val appConfig: ApplicationConfig,
     val metrics: ConnectorMetrics

@@ -22,7 +22,12 @@ import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.{Develop
 
 trait DeveloperSessionBuilder {
 
-  def buildDeveloperSession(loggedInState: LoggedInState, developer: Developer): DeveloperSession = {
+  implicit class DeveloperSyntax(developer: Developer) {
+    def loggedIn: DeveloperSession                = buildDeveloperSession(LoggedInState.LOGGED_IN, developer)
+    def partLoggedInEnablingMFA: DeveloperSession = buildDeveloperSession(LoggedInState.PART_LOGGED_IN_ENABLING_MFA, developer)
+  }
+
+  private def buildDeveloperSession(loggedInState: LoggedInState, developer: Developer): DeveloperSession = {
 
     val sessionId: String = UUID.randomUUID().toString
 

@@ -18,18 +18,6 @@ package steps
 
 import java.util.UUID.randomUUID
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.Environment.PRODUCTION
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.{
-  Application,
-  ApplicationState,
-  ApplicationToken,
-  ClientSecret,
-  Collaborator,
-  CollaboratorRole,
-  Environment,
-  Privileged,
-  ROPC,
-  Standard
-}
 import io.cucumber.datatable.DataTable
 import io.cucumber.scala.{EN, ScalaDsl}
 import io.cucumber.scala.Implicits._
@@ -40,13 +28,18 @@ import play.api.http.Status._
 import play.api.libs.json.Json
 import stubs._
 import stubs.ApplicationStub.configureUserApplications
+
 import java.time.{LocalDateTime, ZoneOffset}
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.ApplicationId
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.ClientId
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.UserId
+import uk.gov.hmrc.apiplatform.modules.applications.domain.models.ApplicationId
+import uk.gov.hmrc.apiplatform.modules.developers.domain.models.UserId
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.ApplicationWithSubscriptionIds
 import org.scalatest.matchers.should.Matchers
+import uk.gov.hmrc.apiplatform.modules.common.domain.models.LaxEmailAddress
+import uk.gov.hmrc.apiplatform.modules.common.domain.models.LaxEmailAddress.StringSyntax
 import utils.ComponentTestDeveloperBuilder
+import uk.gov.hmrc.apiplatform.modules.applications.domain.models._
+import java.util.UUID
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications._
 
 object AppWorld {
   var userApplicationsOnBackend: List[Application] = Nil
@@ -59,10 +52,10 @@ class ApplicationsSteps extends ScalaDsl with EN with Matchers with NavigationSu
 
   implicit val webDriver = Env.driver
 
-  val applicationId = ApplicationId("applicationId")
+  val applicationId = ApplicationId.random
   val clientId      = ClientId("clientId")
 
-  val collaboratorEmail = "john.smith@example.com"
+  val collaboratorEmail = "john.smith@example.com".toLaxEmail
 
   private def defaultApp(name: String, environment: String) = Application(
     id = applicationId,
@@ -74,7 +67,7 @@ class ApplicationsSteps extends ScalaDsl with EN with Matchers with NavigationSu
     Period.ofDays(547),
     Environment.from(environment).getOrElse(PRODUCTION),
     description = None,
-    collaborators = Set(Collaborator(collaboratorEmail, CollaboratorRole.ADMINISTRATOR, staticUserId))
+    collaborators = Set(Collaborator(collaboratorEmail, Collaborator.Roles.ADMINISTRATOR, staticUserId))
   )
 
   Given("""^application with name '(.*)' can be created$""") { (name: String) =>
@@ -96,7 +89,7 @@ class ApplicationsSteps extends ScalaDsl with EN with Matchers with NavigationSu
     link.getAttribute("href") shouldBe s"${Env.host}/developer/applications/$applicationId/request-check"
   }
 
-  Given("""^I have no application assigned to my email '(.*)'$""") { (email: String) =>
+  Given("""^I have no application assigned to my email '(.*)'$""") { (unusedEmail: String) =>
     ApplicationStub.configureUserApplications(staticUserId)
     AppWorld.userApplicationsOnBackend = Nil
   }
@@ -110,7 +103,7 @@ class ApplicationsSteps extends ScalaDsl with EN with Matchers with NavigationSu
 
   def splitToSecrets(input: String): List[ClientSecret] = input.split(",").map(_.trim).toList.map(s => ClientSecret(randomUUID.toString, s, LocalDateTime.now(ZoneOffset.UTC)))
 
-  Given("""^I have the following applications assigned to my email '(.*)':$""") { (email: String, name: String, data: DataTable) =>
+  Given("""^I have the following applications assigned to my email '(.*)':$""") { (email: LaxEmailAddress, name: String, data: DataTable) =>
     val applications = data.asScalaRawMaps[String, String].toList
 
     val verificationCode = "aVerificationCode"
@@ -118,9 +111,9 @@ class ApplicationsSteps extends ScalaDsl with EN with Matchers with NavigationSu
     AppWorld.userApplicationsOnBackend = applications map { app: Map[String, String] =>
       val applicationState = app.getOrElse("state", "TESTING") match {
         case "TESTING"                        => ApplicationState.testing
-        case "PRODUCTION"                     => ApplicationState.production(email, name, verificationCode)
-        case "PENDING_GATEKEEPER_APPROVAL"    => ApplicationState.pendingGatekeeperApproval(email, name)
-        case "PENDING_REQUESTER_VERIFICATION" => ApplicationState.pendingRequesterVerification(email, name, verificationCode)
+        case "PRODUCTION"                     => ApplicationState.production(email.text, name, verificationCode)
+        case "PENDING_GATEKEEPER_APPROVAL"    => ApplicationState.pendingGatekeeperApproval(email.text, name)
+        case "PENDING_REQUESTER_VERIFICATION" => ApplicationState.pendingRequesterVerification(email.text, name, verificationCode)
         case unknownState: String             => fail(s"Unknown state '$unknownState'")
       }
       val access           = app.getOrElse("accessType", "STANDARD") match {
@@ -134,8 +127,10 @@ class ApplicationsSteps extends ScalaDsl with EN with Matchers with NavigationSu
         case "SANDBOX"    => Environment.SANDBOX
       }
 
+      val role = app.get("role").flatMap(Collaborator.Role(_)).getOrElse(Collaborator.Roles.ADMINISTRATOR)
+
       Application(
-        ApplicationId(app.getOrElse("id", s"autogenerated-${randomUUID().toString}")),
+        app.get("id").map(text => ApplicationId(UUID.fromString(text))).getOrElse(ApplicationId.random),
         ClientId(app.getOrElse("clientId", s"autogenerated-${randomUUID().toString}")),
         app("name"),
         LocalDateTime.now(ZoneOffset.UTC),
@@ -144,7 +139,7 @@ class ApplicationsSteps extends ScalaDsl with EN with Matchers with NavigationSu
         Period.ofDays(547),
         environment,
         app.get("description"),
-        Set(Collaborator(email, CollaboratorRole.withName(app.getOrElse("role", "ADMINISTRATOR")), UserId.random)),
+        Set(Collaborator(email, role, UserId.random)),
         access,
         state = applicationState
       )
@@ -153,7 +148,7 @@ class ApplicationsSteps extends ScalaDsl with EN with Matchers with NavigationSu
     configureStubsForApplications(email, AppWorld.userApplicationsOnBackend)
   }
 
-  def configureStubsForApplications(email: String, applications: List[Application]) = {
+  def configureStubsForApplications(email: LaxEmailAddress, applications: List[Application]) = {
 
     ApplicationStub.configureUserApplications(staticUserId, applications.map(ApplicationWithSubscriptionIds.from))
     for (app <- applications) {

@@ -32,10 +32,11 @@ import play.api.test.Helpers._
 import play.filters.csrf.CSRF.TokenProvider
 import uk.gov.hmrc.http.HeaderCarrier
 
+import uk.gov.hmrc.apiplatform.modules.apis.domain.models.{ApiContext, ApiIdentifier, ApiVersion}
+import uk.gov.hmrc.apiplatform.modules.common.domain.models.LaxEmailAddress.StringSyntax
 import uk.gov.hmrc.thirdpartydeveloperfrontend.builder.{DeveloperBuilder, _}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.config.FraudPreventionConfig
 import uk.gov.hmrc.thirdpartydeveloperfrontend.connectors.ThirdPartyDeveloperConnector
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.apidefinitions.{ApiContext, ApiIdentifier, ApiVersion}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.connectors.TicketResult
 import uk.gov.hmrc.thirdpartydeveloperfrontend.mocks.service.{ApplicationActionServiceMock, ApplicationServiceMock, SessionServiceMock}
@@ -558,7 +559,7 @@ class SubscriptionsSpec extends BaseControllerSpec with WithCSRFAddToken with Lo
     val apiAccessType = "PUBLIC"
 
     "unauthorized user should get 404 Not Found on unsubscribe to an API" in new Setup {
-      val alteredActiveApplication = activeApplication.copy(collaborators = Set("randomEmail".asAdministratorCollaborator))
+      val alteredActiveApplication = activeApplication.copy(collaborators = Set("randomEmail".toLaxEmail.asAdministratorCollaborator))
 
       when(underTest.sessionService.fetch(eqTo(sessionId))(*)).thenReturn(successful(Some(session)))
       fetchByApplicationIdReturns(appId, alteredActiveApplication)

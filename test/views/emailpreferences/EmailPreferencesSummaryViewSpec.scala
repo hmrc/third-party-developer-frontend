@@ -24,7 +24,8 @@ import views.html.emailpreferences.EmailPreferencesSummaryView
 import play.api.mvc.AnyContentAsEmpty
 import play.api.test.FakeRequest
 
-import uk.gov.hmrc.thirdpartydeveloperfrontend.builder.{DeveloperBuilder, DeveloperSessionBuilder}
+import uk.gov.hmrc.apiplatform.modules.common.domain.models.LaxEmailAddress.StringSyntax
+import uk.gov.hmrc.thirdpartydeveloperfrontend.builder.{DeveloperSessionBuilder, DeveloperTestData}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.LoggedInState
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.emailpreferences.{APICategoryDisplayDetails, EmailPreferences, EmailTopic, TaxRegimeInterests}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.{LocalUserIdTracker, WithCSRFAddToken}
@@ -33,7 +34,7 @@ class EmailPreferencesSummaryViewSpec extends CommonViewSpec
     with WithCSRFAddToken
     with LocalUserIdTracker
     with DeveloperSessionBuilder
-    with DeveloperBuilder {
+    with DeveloperTestData {
 
   trait Setup {
 
@@ -51,14 +52,8 @@ class EmailPreferencesSummaryViewSpec extends CommonViewSpec
         Set(EmailTopic.TECHNICAL, EmailTopic.BUSINESS_AND_POLICY)
       )
 
-    val developerSession =
-      buildDeveloperSession(
-        loggedInState = LoggedInState.LOGGED_IN,
-        buildDeveloperWithRandomId("email@example.com", "First Name", "Last Name", None, emailPreferences = emailPreferences)
-      )
-
-    val developerSessionWithoutEmailPreferences               =
-      buildDeveloperSession(loggedInState = LoggedInState.LOGGED_IN, buildDeveloperWithRandomId("email@example.com", "First Name", "Last Name", None))
+    val developerSession                                      = standardDeveloper.copy(emailPreferences = emailPreferences).loggedIn
+    val developerSessionWithoutEmailPreferences               = standardDeveloper.loggedIn
     implicit val request: FakeRequest[AnyContentAsEmpty.type] = FakeRequest().withCSRFToken
 
     val emailPreferencesSummaryView = app.injector.instanceOf[EmailPreferencesSummaryView]

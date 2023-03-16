@@ -34,12 +34,14 @@ import play.api.test.Helpers.{redirectLocation, _}
 import play.filters.csrf.CSRF.TokenProvider
 import uk.gov.hmrc.http.HeaderCarrier
 
+import uk.gov.hmrc.apiplatform.modules.apis.domain.models._
+import uk.gov.hmrc.apiplatform.modules.applications.domain.models.{ApplicationId, ClientId, Collaborator}
+import uk.gov.hmrc.apiplatform.modules.common.domain.models.LaxEmailAddress.StringSyntax
 import uk.gov.hmrc.thirdpartydeveloperfrontend.builder._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.checkpages.ApplicationCheck
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.ApplicationUpliftSuccessful
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.apidefinitions._
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.CollaboratorRole.{ADMINISTRATOR, DEVELOPER}
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.{ApplicationId, _}
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.DeveloperSession
 import uk.gov.hmrc.thirdpartydeveloperfrontend.helpers.string._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.mocks.service._
@@ -56,15 +58,15 @@ class ApplicationCheckSpec
     with SubscriptionTestHelperSugar
     with SubscriptionsBuilder {
 
-  override val appId = ApplicationId("1234")
+  override val appId = ApplicationId.random
 
   val appName: String = "app"
 
   val exampleContext = ApiContext("exampleContext")
   val version        = ApiVersion("version")
 
-  val anotherCollaboratorEmail    = "collaborator@example.com"
-  val yetAnotherCollaboratorEmail = "collaborator2@example.com"
+  val anotherCollaboratorEmail    = "collaborator@example.com".toLaxEmail
+  val yetAnotherCollaboratorEmail = "collaborator2@example.com".toLaxEmail
 
   val testing: ApplicationState         = ApplicationState.testing.copy(updatedOn = LocalDateTime.now(ZoneOffset.UTC).minusMinutes(1))
   val production: ApplicationState      = ApplicationState.production("thirdpartydeveloper@example.com", "thirdpartydeveloper", "ABCD")
@@ -93,7 +95,7 @@ class ApplicationCheckSpec
     )
   )
 
-  val defaultCheckInformation: CheckInformation = CheckInformation(contactDetails = Some(ContactDetails("Tester", "tester@example.com", "12345678")))
+  val defaultCheckInformation: CheckInformation = CheckInformation(contactDetails = Some(ContactDetails("Tester", "tester@example.com".toLaxEmail, "12345678")))
 
   val groupedSubsSubscribedToExampleOnly: GroupedSubscriptions = GroupedSubscriptions(testApis = List.empty, apis = List.empty, exampleApi = exampleApiSubscription)
 
@@ -118,7 +120,7 @@ class ApplicationCheckSpec
         Environment.PRODUCTION,
         Some("Description 1"),
         Set(loggedInDeveloper.email.asAdministratorCollaborator),
-        state = ApplicationState.production(loggedInDeveloper.email, loggedInDeveloper.displayedName, ""),
+        state = ApplicationState.production(loggedInDeveloper.email.text, loggedInDeveloper.displayedName, ""),
         access = Standard(
           redirectUris = List("https://red1", "https://red2"),
           termsAndConditionsUrl = Some("http://tnc-url.com")
@@ -154,14 +156,14 @@ class ApplicationCheckSpec
   def createPartiallyConfigurableApplication(
       appId: ApplicationId = appId,
       clientId: ClientId = clientId,
-      userRole: CollaboratorRole = ADMINISTRATOR,
+      userRole: Collaborator.Role = Collaborator.Roles.ADMINISTRATOR,
       state: ApplicationState = testing,
       checkInformation: Option[CheckInformation] = None,
       access: Access = Standard()
     ): Application = {
 
     // this is to ensure we always have one ADMINISTRATOR
-    val anotherRole = if (userRole.isAdministrator) DEVELOPER else ADMINISTRATOR
+    val anotherRole = if (userRole.isAdministrator) Collaborator.Roles.DEVELOPER else Collaborator.Roles.ADMINISTRATOR
 
     val collaborators = Set(
       loggedInDeveloper.email.asCollaborator(userRole),
@@ -178,8 +180,8 @@ class ApplicationCheckSpec
     ): Application = {
 
     val collaborators = Set(
-      loggedInDeveloper.email.asCollaborator(ADMINISTRATOR),
-      anotherCollaboratorEmail.asCollaborator(DEVELOPER)
+      loggedInDeveloper.email.asCollaborator(Collaborator.Roles.ADMINISTRATOR),
+      anotherCollaboratorEmail.asCollaborator(Collaborator.Roles.DEVELOPER)
     )
 
     Application(
@@ -198,7 +200,8 @@ class ApplicationCheckSpec
     )
   }
 
-  trait BaseSetup extends ApplicationServiceMock with ApplicationActionServiceMock with SessionServiceMock with ApplicationProvider with TermsOfUseVersionServiceMock {
+  trait BaseSetup extends ApplicationServiceMock with ApplicationActionServiceMock with CollaboratorServiceMockModule with SessionServiceMock with ApplicationProvider
+      with TermsOfUseVersionServiceMock {
     val landingPageView                  = app.injector.instanceOf[LandingPageView]
     val unauthorisedAppDetailsView       = app.injector.instanceOf[UnauthorisedAppDetailsView]
     val nameSubmittedView                = app.injector.instanceOf[NameSubmittedView]
@@ -218,6 +221,7 @@ class ApplicationCheckSpec
     val underTest = new ApplicationCheck(
       mockErrorHandler,
       applicationServiceMock,
+      CollaboratorServiceMock.aMock,
       applicationActionServiceMock,
       sessionServiceMock,
       mcc,
@@ -249,7 +253,7 @@ class ApplicationCheckSpec
 
     fetchCredentialsReturns(application, appTokens)
 
-    givenRemoveTeamMemberSucceeds(loggedInDeveloper)
+    CollaboratorServiceMock.RemoveTeamMember.thenReturnsSuccessFor(loggedInDeveloper.email)(application)
 
     givenUpdateCheckInformationSucceeds(application)
 
@@ -349,7 +353,7 @@ class ApplicationCheckSpec
     }
 
     "return forbidden when accessed without being an admin" in new Setup {
-      def createApplication() = createPartiallyConfigurableApplication(userRole = DEVELOPER)
+      def createApplication() = createPartiallyConfigurableApplication(userRole = Collaborator.Roles.DEVELOPER)
 
       private val result = addToken(underTest.requestCheckPage(appId))(loggedInRequest)
 
@@ -397,7 +401,7 @@ class ApplicationCheckSpec
 
     "show contact details step as complete when it has been done" in new Setup {
       def createApplication() = createPartiallyConfigurableApplication(
-        checkInformation = Some(CheckInformation(contactDetails = Some(ContactDetails("Tester", "tester@example.com", "12345678"))))
+        checkInformation = Some(CheckInformation(contactDetails = Some(ContactDetails("Tester", "tester@example.com".toLaxEmail, "12345678"))))
       )
 
       private val result = addToken(underTest.requestCheckPage(appId))(loggedInRequest)
@@ -428,7 +432,7 @@ class ApplicationCheckSpec
     "show agree to terms of use step as complete when it has been done" in new Setup {
       def createApplication() =
         createPartiallyConfigurableApplication(
-          checkInformation = Some(CheckInformation(termsOfUseAgreements = List(TermsOfUseAgreement("test@example.com", LocalDateTime.now(ZoneOffset.UTC), "1.0"))))
+          checkInformation = Some(CheckInformation(termsOfUseAgreements = List(TermsOfUseAgreement("test@example.com".toLaxEmail, LocalDateTime.now(ZoneOffset.UTC), "1.0"))))
         )
 
       private val result = addToken(underTest.requestCheckPage(appId))(loggedInRequest)
@@ -465,11 +469,11 @@ class ApplicationCheckSpec
               confirmedName = true,
               apiSubscriptionsConfirmed = true,
               apiSubscriptionConfigurationsConfirmed = true,
-              Some(ContactDetails("Example Name", "name@example.com", "012346789")),
+              Some(ContactDetails("Example Name", "name@example.com".toLaxEmail, "012346789")),
               providedPrivacyPolicyURL = true,
               providedTermsAndConditionsURL = true,
               teamConfirmed = true,
-              List(TermsOfUseAgreement("test@example.com", LocalDateTime.now(ZoneOffset.UTC), "1.0"))
+              List(TermsOfUseAgreement("test@example.com".toLaxEmail, LocalDateTime.now(ZoneOffset.UTC), "1.0"))
             )
           )
         )
@@ -480,7 +484,7 @@ class ApplicationCheckSpec
       private val result = addToken(underTest.requestCheckAction(appId))(loggedInRequestWithFormBody)
 
       status(result) shouldBe SEE_OTHER
-      redirectLocation(result) shouldBe Some(s"/developer/applications/${appId.value}/check-your-answers")
+      redirectLocation(result) shouldBe Some(s"/developer/applications/${appId.text}/check-your-answers")
     }
 
     "successful submit action should take you to the check-your-answers page when no configurations confirmed because none required" in new Setup {
@@ -491,11 +495,11 @@ class ApplicationCheckSpec
               confirmedName = true,
               apiSubscriptionsConfirmed = true,
               apiSubscriptionConfigurationsConfirmed = false,
-              Some(ContactDetails("Example Name", "name@example.com", "012346789")),
+              Some(ContactDetails("Example Name", "name@example.com".toLaxEmail, "012346789")),
               providedPrivacyPolicyURL = true,
               providedTermsAndConditionsURL = true,
               teamConfirmed = true,
-              List(TermsOfUseAgreement("test@example.com", LocalDateTime.now(ZoneOffset.UTC), "1.0"))
+              List(TermsOfUseAgreement("test@example.com".toLaxEmail, LocalDateTime.now(ZoneOffset.UTC), "1.0"))
             )
           )
         )
@@ -506,7 +510,7 @@ class ApplicationCheckSpec
       private val result = addToken(underTest.requestCheckAction(appId))(loggedInRequestWithFormBody)
 
       status(result) shouldBe SEE_OTHER
-      redirectLocation(result) shouldBe Some(s"/developer/applications/${appId.value}/check-your-answers")
+      redirectLocation(result) shouldBe Some(s"/developer/applications/${appId.text}/check-your-answers")
     }
 
     "validation failure submit action" in new Setup {
@@ -518,7 +522,7 @@ class ApplicationCheckSpec
     }
 
     "return forbidden when accessing action without being an admin" in new Setup {
-      def createApplication() = createPartiallyConfigurableApplication(userRole = DEVELOPER)
+      def createApplication() = createPartiallyConfigurableApplication(userRole = Collaborator.Roles.DEVELOPER)
 
       private val result = addToken(underTest.requestCheckAction(appId))(loggedInRequestWithFormBody)
 
@@ -589,11 +593,11 @@ class ApplicationCheckSpec
       private val result = addToken(underTest.apiSubscriptionsAction(appId))(loggedInRequestWithFormBody)
 
       status(result) shouldBe SEE_OTHER
-      redirectLocation(result) shouldBe Some("/developer/applications/1234/request-check")
+      redirectLocation(result) shouldBe Some(s"/developer/applications/${application.id.text}/request-check")
     }
 
     "return forbidden when accessed without being an admin" in new Setup {
-      def createApplication() = createPartiallyConfigurableApplication(userRole = DEVELOPER)
+      def createApplication() = createPartiallyConfigurableApplication(userRole = Collaborator.Roles.DEVELOPER)
 
       private val result = addToken(underTest.apiSubscriptionsAction(appId))(loggedInRequestWithFormBody)
 
@@ -670,7 +674,7 @@ class ApplicationCheckSpec
       private val result = addToken(underTest.contactAction(appId))(requestWithFormBody)
 
       status(result) shouldBe SEE_OTHER
-      redirectLocation(result) shouldBe Some("/developer/applications/1234/request-check")
+      redirectLocation(result) shouldBe Some(s"/developer/applications/${application.id.text}/request-check")
     }
 
     "Validation failure contact action" in new Setup {
@@ -682,7 +686,7 @@ class ApplicationCheckSpec
     }
 
     "return forbidden when accessing the action without being an admin" in new Setup {
-      def createApplication() = createPartiallyConfigurableApplication(userRole = DEVELOPER)
+      def createApplication() = createPartiallyConfigurableApplication(userRole = Collaborator.Roles.DEVELOPER)
 
       private val result = addToken(underTest.contactAction(appId))(loggedInRequestWithFormBody)
 
@@ -690,7 +694,7 @@ class ApplicationCheckSpec
     }
 
     "return forbidden when accessing the page without being an admin" in new Setup {
-      def createApplication() = createPartiallyConfigurableApplication(userRole = DEVELOPER)
+      def createApplication() = createPartiallyConfigurableApplication(userRole = Collaborator.Roles.DEVELOPER)
 
       private val result = addToken(underTest.contactPage(appId))(loggedInRequestWithFormBody)
 
@@ -753,7 +757,7 @@ class ApplicationCheckSpec
       verify(underTest.applicationService).update(eqTo(expectedUpdateRequest))(*)
       verify(underTest.applicationService).updateCheckInformation(eqTo(application), eqTo(defaultCheckInformation.copy(confirmedName = true)))(*)
       status(result) shouldBe SEE_OTHER
-      redirectLocation(result) shouldBe Some("/developer/applications/1234/request-check")
+      redirectLocation(result) shouldBe Some(s"/developer/applications/${application.id.text}/request-check")
     }
 
     "successful name action same names" in new Setup {
@@ -771,7 +775,7 @@ class ApplicationCheckSpec
       verify(underTest.applicationService)
         .updateCheckInformation(eqTo(application), eqTo(defaultCheckInformation.copy(confirmedName = true)))(*)
       status(result) shouldBe SEE_OTHER
-      redirectLocation(result) shouldBe Some("/developer/applications/1234/request-check")
+      redirectLocation(result) shouldBe Some(s"/developer/applications/${application.id.text}/request-check")
     }
 
     "Validation failure name is blank action" in new Setup {
@@ -824,7 +828,7 @@ class ApplicationCheckSpec
     }
 
     "return forbidden when accessing the action without being an admin" in new Setup {
-      def createApplication() = createPartiallyConfigurableApplication(userRole = DEVELOPER)
+      def createApplication() = createPartiallyConfigurableApplication(userRole = Collaborator.Roles.DEVELOPER)
 
       private val result = addToken(underTest.nameAction(appId))(loggedInRequestWithFormBody)
 
@@ -832,7 +836,7 @@ class ApplicationCheckSpec
     }
 
     "return forbidden when accessing the page without being an admin" in new Setup {
-      def createApplication() = createPartiallyConfigurableApplication(userRole = DEVELOPER)
+      def createApplication() = createPartiallyConfigurableApplication(userRole = Collaborator.Roles.DEVELOPER)
 
       private val result = addToken(underTest.namePage(appId))(loggedInRequestWithFormBody)
 
@@ -938,7 +942,7 @@ class ApplicationCheckSpec
       verify(underTest.applicationService)
         .updateCheckInformation(eqTo(application), eqTo(defaultCheckInformation.copy(providedPrivacyPolicyURL = true)))(*)
       status(result) shouldBe SEE_OTHER
-      redirectLocation(result) shouldBe Some("/developer/applications/1234/request-check")
+      redirectLocation(result) shouldBe Some(s"/developer/applications/${application.id.text}/request-check")
     }
     "successfully process when no URL" in new Setup {
       def createApplication() = createPartiallyConfigurableApplication(checkInformation = Some(defaultCheckInformation))
@@ -956,7 +960,7 @@ class ApplicationCheckSpec
       verify(underTest.applicationService)
         .updateCheckInformation(eqTo(application), eqTo(defaultCheckInformation.copy(providedPrivacyPolicyURL = true)))(*)
       status(result) shouldBe SEE_OTHER
-      redirectLocation(result) shouldBe Some("/developer/applications/1234/request-check")
+      redirectLocation(result) shouldBe Some(s"/developer/applications/${application.id.text}/request-check")
     }
 
     "fail validation when privacy policy url is invalid" in new Setup {
@@ -976,7 +980,7 @@ class ApplicationCheckSpec
     }
 
     "return forbidden when accessing the action without being an admin" in new Setup {
-      def createApplication() = createPartiallyConfigurableApplication(userRole = DEVELOPER)
+      def createApplication() = createPartiallyConfigurableApplication(userRole = Collaborator.Roles.DEVELOPER)
 
       private val result = addToken(underTest.privacyPolicyAction(appId))(loggedInRequestWithFormBody)
 
@@ -984,7 +988,7 @@ class ApplicationCheckSpec
     }
 
     "return forbidden when accessing the page without being an admin" in new Setup {
-      def createApplication() = createPartiallyConfigurableApplication(userRole = DEVELOPER)
+      def createApplication() = createPartiallyConfigurableApplication(userRole = Collaborator.Roles.DEVELOPER)
 
       private val result = addToken(underTest.privacyPolicyPage(appId))(loggedInRequestWithFormBody)
 
@@ -1091,7 +1095,7 @@ class ApplicationCheckSpec
       verify(underTest.applicationService)
         .updateCheckInformation(eqTo(application), eqTo(defaultCheckInformation.copy(providedTermsAndConditionsURL = true)))(*)
       status(result) shouldBe SEE_OTHER
-      redirectLocation(result) shouldBe Some("/developer/applications/1234/request-check")
+      redirectLocation(result) shouldBe Some(s"/developer/applications/${application.id.text}/request-check")
     }
 
     "successfully process when doesn't have url" in new Setup {
@@ -1109,7 +1113,7 @@ class ApplicationCheckSpec
       verify(underTest.applicationService)
         .updateCheckInformation(eqTo(application), eqTo(defaultCheckInformation.copy(providedTermsAndConditionsURL = true)))(*)
       status(result) shouldBe SEE_OTHER
-      redirectLocation(result) shouldBe Some("/developer/applications/1234/request-check")
+      redirectLocation(result) shouldBe Some(s"/developer/applications/${application.id.text}/request-check")
     }
 
     "fail validation when terms and conditions url is invalid but hasUrl true" in new Setup {
@@ -1129,7 +1133,7 @@ class ApplicationCheckSpec
     }
 
     "action unavailable when accessed without being an admin" in new Setup {
-      def createApplication() = createPartiallyConfigurableApplication(userRole = DEVELOPER)
+      def createApplication() = createPartiallyConfigurableApplication(userRole = Collaborator.Roles.DEVELOPER)
 
       private val result = addToken(underTest.termsAndConditionsAction(appId))(loggedInRequestWithFormBody)
 
@@ -1137,7 +1141,7 @@ class ApplicationCheckSpec
     }
 
     "page unavailable when accessed without being an admin" in new Setup {
-      def createApplication() = createPartiallyConfigurableApplication(userRole = DEVELOPER)
+      def createApplication() = createPartiallyConfigurableApplication(userRole = Collaborator.Roles.DEVELOPER)
 
       private val result = addToken(underTest.termsAndConditionsPage(appId))(loggedInRequestWithFormBody)
 
@@ -1189,7 +1193,7 @@ class ApplicationCheckSpec
     }
 
     "be forbidden when accessed without being an admin" in new Setup {
-      def createApplication() = createPartiallyConfigurableApplication(userRole = DEVELOPER)
+      def createApplication() = createPartiallyConfigurableApplication(userRole = Collaborator.Roles.DEVELOPER)
 
       private val result = addToken(underTest.termsOfUsePage(appId))(loggedInRequest)
 
@@ -1197,7 +1201,7 @@ class ApplicationCheckSpec
     }
 
     "action is forbidden when accessed without being an admin" in new Setup {
-      def createApplication() = createPartiallyConfigurableApplication(userRole = DEVELOPER)
+      def createApplication() = createPartiallyConfigurableApplication(userRole = Collaborator.Roles.DEVELOPER)
 
       private val result = addToken(underTest.termsOfUseAction(appId))(loggedInRequestWithFormBody)
 
@@ -1243,7 +1247,7 @@ class ApplicationCheckSpec
       private val result = addToken(underTest.termsOfUseAction(appId))(requestWithFormBody)
 
       status(result) shouldBe SEE_OTHER
-      redirectLocation(result) shouldBe Some("/developer/applications/1234/request-check")
+      redirectLocation(result) shouldBe Some(s"/developer/applications/${application.id.text}/request-check")
 
     }
   }
@@ -1257,7 +1261,7 @@ class ApplicationCheckSpec
       status(result) shouldBe OK
 
       contentAsString(result) should include("Add members of your organisation and give them permissions to access this application")
-      contentAsString(result) should include(developer.email)
+      contentAsString(result) should include(developer.email.text)
     }
 
     "not return the manage team list page when not logged in" in new Setup {
@@ -1275,7 +1279,7 @@ class ApplicationCheckSpec
       private val result = addToken(underTest.teamAction(appId))(loggedInRequest)
 
       status(result) shouldBe SEE_OTHER
-      redirectLocation(result) shouldBe Some(s"/developer/applications/${appId.value}/request-check")
+      redirectLocation(result) shouldBe Some(s"/developer/applications/${appId.text}/request-check")
 
       private val expectedCheckInformation = CheckInformation(teamConfirmed = true)
       verify(underTest.applicationService).updateCheckInformation(eqTo(application), eqTo(expectedCheckInformation))(*)
@@ -1309,7 +1313,7 @@ class ApplicationCheckSpec
       redirectLocation(result) shouldBe Some(s"/developer/login")
     }
 
-    val hashedAnotherCollaboratorEmail: String = anotherCollaboratorEmail.toSha256
+    val hashedAnotherCollaboratorEmail: String = anotherCollaboratorEmail.text.toSha256
 
     "return remove team member confirmation page when navigated to" in new Setup {
       def createApplication() = createPartiallyConfigurableApplication()
@@ -1320,7 +1324,7 @@ class ApplicationCheckSpec
 
       contentAsString(result) should include("Are you sure you want to remove this team member from your application?")
 
-      contentAsString(result) should include(anotherCollaboratorEmail)
+      contentAsString(result) should include(anotherCollaboratorEmail.text)
     }
 
     "not return the remove team member confirmation page when not logged in" in new Setup {
@@ -1335,15 +1339,15 @@ class ApplicationCheckSpec
     "redirect to the team member list when the remove confirmation post is executed" in new Setup {
       def createApplication() = createPartiallyConfigurableApplication()
 
-      val request = loggedInRequest.withFormUrlEncodedBody("email" -> anotherCollaboratorEmail)
+      val request = loggedInRequest.withFormUrlEncodedBody("email" -> anotherCollaboratorEmail.text)
 
       private val result = addToken(underTest.teamMemberRemoveAction(appId))(request)
 
       status(result) shouldBe SEE_OTHER
 
-      redirectLocation(result) shouldBe Some(s"/developer/applications/${appId.value}/request-check/team")
+      redirectLocation(result) shouldBe Some(s"/developer/applications/${appId.text}/request-check/team")
 
-      verify(underTest.applicationService).removeTeamMember(eqTo(application), eqTo(anotherCollaboratorEmail), eqTo(loggedInDeveloper.email))(*)
+      verify(underTest.collaboratorService).removeTeamMember(eqTo(application), eqTo(anotherCollaboratorEmail), eqTo(loggedInDeveloper.email))(*)
     }
 
     "team post redirect to check landing page when no check information on application" in new Setup {
@@ -1352,7 +1356,7 @@ class ApplicationCheckSpec
       private val result = addToken(underTest.teamAction(appId))(loggedInRequest)
 
       status(result) shouldBe SEE_OTHER
-      redirectLocation(result) shouldBe Some(s"/developer/applications/${appId.value}/request-check")
+      redirectLocation(result) shouldBe Some(s"/developer/applications/${appId.text}/request-check")
 
       private val expectedCheckInformation = CheckInformation(teamConfirmed = true)
       verify(underTest.applicationService).updateCheckInformation(eqTo(application), eqTo(expectedCheckInformation))(*)
@@ -1366,11 +1370,11 @@ class ApplicationCheckSpec
       private val result = addToken(underTest.unauthorisedAppDetails(appId))(loggedInRequest)
 
       status(result) shouldBe SEE_OTHER
-      redirectLocation(result) shouldBe Some(s"/developer/applications/${appId.value}/request-check")
+      redirectLocation(result) shouldBe Some(s"/developer/applications/${appId.text}/request-check")
     }
 
     "return unauthorised App details page with one Admin" in new Setup {
-      def createApplication() = createPartiallyConfigurableApplication(userRole = DEVELOPER)
+      def createApplication() = createPartiallyConfigurableApplication(userRole = Collaborator.Roles.DEVELOPER)
 
       private val result = addToken(underTest.unauthorisedAppDetails(appId))(loggedInRequest)
 
@@ -1380,7 +1384,7 @@ class ApplicationCheckSpec
       body should include("Production application")
       body should include("You cannot view this application because you're not an administrator.")
       body should include("Ask the administrator")
-      body should include(anotherCollaboratorEmail)
+      body should include(anotherCollaboratorEmail.text)
     }
 
     "return unauthorised App details page with 2 Admins " in new Setup {
@@ -1400,8 +1404,8 @@ class ApplicationCheckSpec
       body should include("Production application")
       body should include("You cannot view this application because you're not an administrator.")
       body should include("Ask an administrator")
-      body should include(anotherCollaboratorEmail)
-      body should include(yetAnotherCollaboratorEmail)
+      body should include(anotherCollaboratorEmail.text)
+      body should include(yetAnotherCollaboratorEmail.text)
     }
   }
 

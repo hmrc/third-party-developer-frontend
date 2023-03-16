@@ -33,8 +33,6 @@ import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.{LocalUserIdTracker, WithCS
 
 class AuthAppLoginAccessCodeViewSpec extends CommonViewSpec
     with WithCSRFAddToken
-    with DeveloperSessionBuilder
-    with DeveloperBuilder
     with LocalUserIdTracker
     with StubMessagesFactory {
 

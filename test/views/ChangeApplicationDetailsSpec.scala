@@ -25,6 +25,7 @@ import views.html.ChangeDetailsView
 
 import play.api.test.FakeRequest
 
+import uk.gov.hmrc.apiplatform.modules.applications.domain.models.{ApplicationId, ClientId, PrivacyPolicyLocations, TermsAndConditionsLocations}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.builder._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.EditApplicationForm
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications._
@@ -37,25 +38,25 @@ class ChangeApplicationDetailsSpec extends CommonViewSpec
     with WithCSRFAddToken
     with LocalUserIdTracker
     with DeveloperSessionBuilder
-    with DeveloperBuilder {
+    with DeveloperTestData {
 
   val changeDetails = app.injector.instanceOf[ChangeDetailsView]
-  val applicationId = ApplicationId("1234")
+  val applicationId = ApplicationId.random
   val clientId      = ClientId("clientId123")
 
   "change application details page" should {
 
     def renderPage(application: Application) = {
 
-      val loggedIn              = buildDeveloperSession(loggedInState = LoggedInState.LOGGED_IN, buildDeveloper("admin@example.com", "firstName1", "lastName1", None))
+      val loggedIn              = adminDeveloper.loggedIn
       val request               = FakeRequest().withCSRFToken
       val privacyPolicyUrl      = application.privacyPolicyLocation match {
-        case PrivacyPolicyLocation.Url(url) => Some(url)
-        case _                              => None
+        case PrivacyPolicyLocations.Url(url) => Some(url)
+        case _                               => None
       }
       val termsAndConditionsUrl = application.termsAndConditionsLocation match {
-        case TermsAndConditionsLocation.Url(url) => Some(url)
-        case _                                   => None
+        case TermsAndConditionsLocations.Url(url) => Some(url)
+        case _                                    => None
       }
 
       val form = EditApplicationForm.form.fill(

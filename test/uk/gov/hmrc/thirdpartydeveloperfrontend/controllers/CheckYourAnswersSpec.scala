@@ -35,10 +35,12 @@ import play.api.test.Helpers.{redirectLocation, _}
 import play.filters.csrf.CSRF.TokenProvider
 import uk.gov.hmrc.http.HeaderCarrier
 
+import uk.gov.hmrc.apiplatform.modules.apis.domain.models._
+import uk.gov.hmrc.apiplatform.modules.applications.domain.models.{ApplicationId, ClientId, Collaborator}
+import uk.gov.hmrc.apiplatform.modules.common.domain.models.LaxEmailAddress.StringSyntax
 import uk.gov.hmrc.thirdpartydeveloperfrontend.builder._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.checkpages.{ApplicationCheck, CheckYourAnswers}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.apidefinitions._
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.CollaboratorRole.{ADMINISTRATOR, DEVELOPER}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.DeveloperSession
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.{ApplicationAlreadyExists, ApplicationUpliftSuccessful, DeskproTicketCreationFailed}
@@ -62,8 +64,8 @@ class CheckYourAnswersSpec
   val appName: String = "app"
   val apiVersion      = ApiVersion("version")
 
-  val anotherCollaboratorEmail               = "collaborator@example.com"
-  val hashedAnotherCollaboratorEmail: String = anotherCollaboratorEmail.toSha256
+  val anotherCollaboratorEmail               = "collaborator@example.com".toLaxEmail
+  val hashedAnotherCollaboratorEmail: String = anotherCollaboratorEmail.text.toSha256
 
   val testing: ApplicationState         = ApplicationState.testing.copy(updatedOn = LocalDateTime.now.minusMinutes(1))
   val production: ApplicationState      = ApplicationState.production("thirdpartydeveloper@example.com", "thirdpartydeveloper", "ABCD")
@@ -118,7 +120,7 @@ class CheckYourAnswersSpec
 
   val groupedSubsSubscribedToNothing = GroupedSubscriptions(testApis = Seq.empty, apis = Seq.empty, exampleApi = None)
 
-  trait Setup extends ApplicationServiceMock with ApplicationActionServiceMock with SessionServiceMock with TermsOfUseVersionServiceMock {
+  trait Setup extends ApplicationServiceMock with CollaboratorServiceMockModule with ApplicationActionServiceMock with SessionServiceMock with TermsOfUseVersionServiceMock {
     val checkYourAnswersView             = app.injector.instanceOf[CheckYourAnswersView]
     val landingPageView                  = app.injector.instanceOf[LandingPageView]
     val teamView                         = app.injector.instanceOf[TeamView]
@@ -135,6 +137,7 @@ class CheckYourAnswersSpec
     val underTest = new CheckYourAnswers(
       mockErrorHandler,
       applicationServiceMock,
+      CollaboratorServiceMock.aMock,
       applicationActionServiceMock,
       mock[ApplicationCheck],
       sessionServiceMock,
@@ -164,7 +167,7 @@ class CheckYourAnswersSpec
 
     fetchCredentialsReturns(sampleApp, appTokens)
 
-    givenRemoveTeamMemberSucceeds(loggedInDeveloper)
+    CollaboratorServiceMock.RemoveTeamMember.thenReturnsSuccessFor(loggedInDeveloper.email)(sampleApp)
 
     givenUpdateCheckInformationSucceeds(sampleApp)
 
@@ -201,12 +204,12 @@ class CheckYourAnswersSpec
     val loggedInRequest: FakeRequest[AnyContentAsEmpty.type]  = FakeRequest().withLoggedIn(underTest, implicitly)(sessionId).withSession(sessionParams: _*)
     val loggedInRequestWithFormBody                           = loggedInRequest.withFormUrlEncodedBody()
 
-    val defaultCheckInformation = CheckInformation(contactDetails = Some(ContactDetails("Tester", "tester@example.com", "12345678")))
+    val defaultCheckInformation = CheckInformation(contactDetails = Some(ContactDetails("Tester", "tester@example.com".toLaxEmail, "12345678")))
 
     def givenApplicationExists(
         appId: ApplicationId = appId,
         clientId: ClientId = clientId,
-        userRole: CollaboratorRole = ADMINISTRATOR,
+        userRole: Collaborator.Role = Collaborator.Roles.ADMINISTRATOR,
         state: ApplicationState = testing,
         checkInformation: Option[CheckInformation] = None,
         access: Access = Standard()
@@ -259,11 +262,11 @@ class CheckYourAnswersSpec
           confirmedName = true,
           apiSubscriptionsConfirmed = true,
           apiSubscriptionConfigurationsConfirmed = true,
-          Some(ContactDetails("Example Name", "name@example.com", "012346789")),
+          Some(ContactDetails("Example Name", "name@example.com".toLaxEmail, "012346789")),
           providedPrivacyPolicyURL = true,
           providedTermsAndConditionsURL = true,
           teamConfirmed = true,
-          List(TermsOfUseAgreement("test@example.com", LocalDateTime.now(ZoneOffset.UTC), "1.0"))
+          List(TermsOfUseAgreement("test@example.com".toLaxEmail, LocalDateTime.now(ZoneOffset.UTC), "1.0"))
         )
       )
     )
@@ -340,7 +343,7 @@ class CheckYourAnswersSpec
     }
 
     "return forbidden when accessed without being an admin" in new Setup {
-      givenApplicationExists(userRole = DEVELOPER)
+      givenApplicationExists(userRole = Collaborator.Roles.DEVELOPER)
 
       private val result = addToken(underTest.answersPage(appId))(loggedInRequest)
 
@@ -367,7 +370,7 @@ class CheckYourAnswersSpec
     }
 
     "return forbidden when accessing action without being an admin" in new Setup {
-      givenApplicationExists(userRole = DEVELOPER)
+      givenApplicationExists(userRole = Collaborator.Roles.DEVELOPER)
 
       private val result = addToken(underTest.answersPageAction(appId))(loggedInRequestWithFormBody)
 
@@ -415,7 +418,7 @@ class CheckYourAnswersSpec
       status(result) shouldBe OK
 
       contentAsString(result) should include("Add members of your organisation and give them permissions to access this application")
-      contentAsString(result) should include(developer.email)
+      contentAsString(result) should include(developer.email.text)
     }
 
     "not return the manage team list page when not logged in" in new Setup {
@@ -433,7 +436,7 @@ class CheckYourAnswersSpec
       private val result = addToken(underTest.teamAction(appId))(loggedInRequest)
 
       status(result) shouldBe SEE_OTHER
-      redirectLocation(result) shouldBe Some(s"/developer/applications/${appId.value}/check-your-answers")
+      redirectLocation(result) shouldBe Some(s"/developer/applications/${appId.text}/check-your-answers")
 
       private val expectedCheckInformation = CheckInformation(teamConfirmed = true)
       verify(underTest.applicationService).updateCheckInformation(eqTo(application), eqTo(expectedCheckInformation))(*)
@@ -476,7 +479,7 @@ class CheckYourAnswersSpec
 
       contentAsString(result) should include("Are you sure you want to remove this team member from your application?")
 
-      contentAsString(result) should include(anotherCollaboratorEmail)
+      contentAsString(result) should include(anotherCollaboratorEmail.text)
     }
 
     "not return the remove team member confirmation page when not logged in" in new Setup {
@@ -491,15 +494,15 @@ class CheckYourAnswersSpec
     "redirect to the team member list when the remove confirmation post is executed" in new Setup {
       val application = givenApplicationExists()
 
-      val request = loggedInRequest.withFormUrlEncodedBody("email" -> anotherCollaboratorEmail)
+      val request = loggedInRequest.withFormUrlEncodedBody("email" -> anotherCollaboratorEmail.text)
 
       private val result = addToken(underTest.teamMemberRemoveAction(appId))(request)
 
       status(result) shouldBe SEE_OTHER
 
-      redirectLocation(result) shouldBe Some(s"/developer/applications/${appId.value}/check-your-answers/team")
+      redirectLocation(result) shouldBe Some(s"/developer/applications/${appId.text}/check-your-answers/team")
 
-      verify(underTest.applicationService).removeTeamMember(eqTo(application), eqTo(anotherCollaboratorEmail), eqTo(loggedInDeveloper.email))(*)
+      verify(underTest.collaboratorService).removeTeamMember(eqTo(application), eqTo(anotherCollaboratorEmail), eqTo(loggedInDeveloper.email))(*)
     }
 
     "team post redirect to check landing page when no check information on application" in new Setup {
@@ -508,7 +511,7 @@ class CheckYourAnswersSpec
       private val result = addToken(underTest.teamAction(appId))(loggedInRequest)
 
       status(result) shouldBe SEE_OTHER
-      redirectLocation(result) shouldBe Some(s"/developer/applications/${appId.value}/check-your-answers")
+      redirectLocation(result) shouldBe Some(s"/developer/applications/${appId.text}/check-your-answers")
 
       private val expectedCheckInformation = CheckInformation(teamConfirmed = true)
       verify(underTest.applicationService).updateCheckInformation(eqTo(application), eqTo(expectedCheckInformation))(*)

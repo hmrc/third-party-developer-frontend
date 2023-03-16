@@ -16,6 +16,7 @@
 
 package uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications
 
+import uk.gov.hmrc.apiplatform.modules.applications.domain.models.Collaborator
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.Developer
 
 sealed trait Permission {
@@ -28,9 +29,9 @@ object Permissions {
 
     override def hasPermissions(app: BaseApplication, developer: Developer): Boolean =
       (app.deployedTo, app.role(developer.email)) match {
-        case (Environment.SANDBOX, _)                  => true
-        case (_, Some(CollaboratorRole.ADMINISTRATOR)) => true
-        case _                                         => false
+        case (Environment.SANDBOX, _)                    => true
+        case (_, Some(Collaborator.Roles.ADMINISTRATOR)) => true
+        case _                                           => false
       }
   }
 
@@ -38,8 +39,8 @@ object Permissions {
 
     override def hasPermissions(app: BaseApplication, developer: Developer): Boolean =
       (app.deployedTo, app.role(developer.email)) match {
-        case (Environment.PRODUCTION, Some(CollaboratorRole.ADMINISTRATOR)) => true
-        case _                                                              => false
+        case (Environment.PRODUCTION, Some(Collaborator.Roles.ADMINISTRATOR)) => true
+        case _                                                                => false
       }
   }
 
@@ -47,8 +48,8 @@ object Permissions {
 
     override def hasPermissions(app: BaseApplication, developer: Developer): Boolean =
       (app.deployedTo, app.role(developer.email)) match {
-        case (Environment.PRODUCTION, Some(CollaboratorRole.DEVELOPER)) => true
-        case _                                                          => false
+        case (Environment.PRODUCTION, Some(Collaborator.Roles.DEVELOPER)) => true
+        case _                                                            => false
       }
   }
 
@@ -64,7 +65,7 @@ object Permissions {
   case object AdministratorOnly extends Permission {
 
     override def hasPermissions(app: BaseApplication, developer: Developer): Boolean =
-      app.role(developer.email).contains(CollaboratorRole.ADMINISTRATOR)
+      app.role(developer.email).contains(Collaborator.Roles.ADMINISTRATOR)
   }
 
   case object TeamMembersOnly extends Permission {

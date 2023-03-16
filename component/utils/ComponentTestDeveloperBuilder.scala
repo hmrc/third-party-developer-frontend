@@ -17,11 +17,14 @@
 package utils
 
 import uk.gov.hmrc.apiplatform.modules.mfa.models.{AuthenticatorAppMfaDetailSummary, MfaDetail, MfaId, SmsMfaDetailSummary}
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.{Developer, UserId}
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.Developer
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.emailpreferences.EmailPreferences
 
 import java.time.LocalDateTime
 import java.util.UUID
+import uk.gov.hmrc.apiplatform.modules.common.domain.models.LaxEmailAddress
+import uk.gov.hmrc.apiplatform.modules.common.domain.models.LaxEmailAddress.StringSyntax
+import uk.gov.hmrc.apiplatform.modules.developers.domain.models.UserId
 
 trait ComponentTestDeveloperBuilder {
   val staticUserId               = UserId(UUID.fromString("11edcde7-c619-4bc1-bb6a-84dc14ea25cd"))
@@ -29,7 +32,7 @@ trait ComponentTestDeveloperBuilder {
   val smsMfaDetails              = SmsMfaDetailSummary(MfaId(UUID.fromString("6a3b98f1-a2c0-488b-bf0b-cfc86ccfe24d")), "name", LocalDateTime.now, "+447890123456", verified = true)
 
   def buildDeveloper(
-      emailAddress: String = "something@example.com",
+      emailAddress: LaxEmailAddress = "something@example.com".toLaxEmail,
       firstName: String = "John",
       lastName: String = "Doe",
       organisation: Option[String] = None,

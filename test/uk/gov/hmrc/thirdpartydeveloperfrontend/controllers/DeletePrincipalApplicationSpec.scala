@@ -27,6 +27,7 @@ import play.api.test.Helpers._
 import play.filters.csrf.CSRF.TokenProvider
 import uk.gov.hmrc.http.HeaderCarrier
 
+import uk.gov.hmrc.apiplatform.modules.applications.domain.models.{ApplicationId, ClientId}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.builder.DeveloperBuilder
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.connectors.TicketCreated
@@ -64,7 +65,7 @@ class DeletePrincipalApplicationSpec
       deleteSubordinateApplicationCompleteView
     )
 
-    val appId           = ApplicationId("1234")
+    val appId           = ApplicationId.random
     val clientId        = ClientId("clientIdzzz")
     val appName: String = "Application Name"
 
@@ -87,7 +88,7 @@ class DeletePrincipalApplicationSpec
       Environment.PRODUCTION,
       Some("Description 1"),
       Set(loggedInDeveloper.email.asAdministratorCollaborator),
-      state = ApplicationState.production(loggedInDeveloper.email, loggedInDeveloper.displayedName, ""),
+      state = ApplicationState.production(loggedInDeveloper.email.text, loggedInDeveloper.displayedName, ""),
       access = Standard(redirectUris = List("https://red1", "https://red2"), termsAndConditionsUrl = Some("http://tnc-url.com"))
     )
 
@@ -151,7 +152,7 @@ class DeletePrincipalApplicationSpec
 
       status(result) shouldBe SEE_OTHER
 
-      redirectLocation(result) shouldBe Some(s"/developer/applications/${appId.value}/details")
+      redirectLocation(result) shouldBe Some(s"/developer/applications/${appId.text}/details")
     }
   }
 

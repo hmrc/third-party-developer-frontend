@@ -23,8 +23,9 @@ import play.api.mvc._
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.play.http.HeaderCarrierConverter
 
+import uk.gov.hmrc.apiplatform.modules.applications.domain.models.ApplicationId
 import uk.gov.hmrc.thirdpartydeveloperfrontend.config.{ApplicationConfig, ErrorHandler}
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.{ApplicationId, Capability, Permission, State}
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.{Capability, Permission, State}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.service.ApplicationActionService
 
 trait BaseActionBuilders {

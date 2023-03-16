@@ -25,6 +25,8 @@ import uk.gov.hmrc.http.HttpReads.Implicits._
 import uk.gov.hmrc.http.{HeaderCarrier, HttpClient, HttpResponse, UpstreamErrorResponse}
 import uk.gov.hmrc.play.http.metrics.common.API
 
+import uk.gov.hmrc.apiplatform.modules.applications.domain.models.ApplicationId
+import uk.gov.hmrc.apiplatform.modules.common.domain.models.LaxEmailAddress
 import uk.gov.hmrc.apiplatform.modules.submissions.domain.models._
 import uk.gov.hmrc.apiplatform.modules.submissions.domain.services._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.connectors.ConnectorMetrics
@@ -36,16 +38,16 @@ object ThirdPartyApplicationSubmissionsConnector {
   case class OutboundRecordAnswersRequest(answers: List[String])
   implicit val writesOutboundRecordAnswersRequest = Json.writes[OutboundRecordAnswersRequest]
 
-  case class ApprovalsRequest(requestedByName: String, requestedByEmailAddress: String)
+  case class ApprovalsRequest(requestedByName: String, requestedByEmailAddress: LaxEmailAddress)
   implicit val writesApprovalsRequest = Json.writes[ApprovalsRequest]
 
   case class ResponsibleIndividualVerificationRequest(code: String)
   implicit val writesResponsibleIndividualVerificationRequest = Json.writes[ResponsibleIndividualVerificationRequest]
 
-  case class ConfirmSetupCompleteRequest(requesterEmailAddress: String)
+  case class ConfirmSetupCompleteRequest(requesterEmailAddress: LaxEmailAddress)
   implicit val writesConfirmSetupCompleteRequest = Json.writes[ConfirmSetupCompleteRequest]
 
-  case class CreateSubmissionRequest(requestedBy: String)
+  case class CreateSubmissionRequest(requestedBy: LaxEmailAddress)
   implicit val readsCreateSubmissionRequest = Json.writes[CreateSubmissionRequest]
 }
 
@@ -79,19 +81,19 @@ class ThirdPartyApplicationSubmissionsConnector @Inject() (
 
   def fetchLatestSubmission(applicationId: ApplicationId)(implicit hc: HeaderCarrier): Future[Option[Submission]] = {
     metrics.record(api) {
-      http.GET[Option[Submission]](s"$serviceBaseUrl/submissions/application/${applicationId.value}")
+      http.GET[Option[Submission]](s"$serviceBaseUrl/submissions/application/${applicationId.text}")
     }
   }
 
-  def createSubmission(applicationId: ApplicationId, requestedBy: String)(implicit hc: HeaderCarrier): Future[Option[Submission]] = {
+  def createSubmission(applicationId: ApplicationId, requestedBy: LaxEmailAddress)(implicit hc: HeaderCarrier): Future[Option[Submission]] = {
     metrics.record(api) {
-      http.POST[CreateSubmissionRequest, Option[Submission]](s"$serviceBaseUrl/submissions/application/${applicationId.value}", CreateSubmissionRequest(requestedBy))
+      http.POST[CreateSubmissionRequest, Option[Submission]](s"$serviceBaseUrl/submissions/application/${applicationId.text}", CreateSubmissionRequest(requestedBy))
     }
   }
 
   def fetchLatestExtendedSubmission(applicationId: ApplicationId)(implicit hc: HeaderCarrier): Future[Option[ExtendedSubmission]] = {
     metrics.record(api) {
-      http.GET[Option[ExtendedSubmission]](s"$serviceBaseUrl/submissions/application/${applicationId.value}/extended")
+      http.GET[Option[ExtendedSubmission]](s"$serviceBaseUrl/submissions/application/${applicationId.text}/extended")
     }
   }
 
@@ -106,11 +108,16 @@ class ThirdPartyApplicationSubmissionsConnector @Inject() (
       http.GET[Option[ResponsibleIndividualVerification]](s"$serviceBaseUrl/approvals/responsible-individual-verification/${code}")
     }
 
-  def requestApproval(applicationId: ApplicationId, requestedByName: String, requestedByEmailAddress: String)(implicit hc: HeaderCarrier): Future[Either[ErrorDetails, Application]] =
+  def requestApproval(
+      applicationId: ApplicationId,
+      requestedByName: String,
+      requestedByEmailAddress: LaxEmailAddress
+    )(implicit hc: HeaderCarrier
+    ): Future[Either[ErrorDetails, Application]] =
     metrics.record(api) {
       import play.api.http.Status._
 
-      val url = s"$serviceBaseUrl/approvals/application/${applicationId.value}/request"
+      val url = s"$serviceBaseUrl/approvals/application/${applicationId.text}/request"
 
       http.POST[ApprovalsRequest, HttpResponse](url, ApprovalsRequest(requestedByName, requestedByEmailAddress)).map { response =>
         val jsValue: Try[JsValue] = Try(response.json)
@@ -125,11 +132,11 @@ class ThirdPartyApplicationSubmissionsConnector @Inject() (
       }
     }
 
-  def confirmSetupComplete(applicationId: ApplicationId, userEmailAddress: String)(implicit hc: HeaderCarrier): Future[Either[String, Unit]] = metrics.record(api) {
+  def confirmSetupComplete(applicationId: ApplicationId, userEmailAddress: LaxEmailAddress)(implicit hc: HeaderCarrier): Future[Either[String, Unit]] = metrics.record(api) {
     import cats.implicits._
 
-    val url    = s"$serviceBaseUrl/application/${applicationId.value}/confirm-setup-complete"
-    val failed = (err: UpstreamErrorResponse) => s"Failed to confirm setup complete for application ${applicationId.value}"
+    val url    = s"$serviceBaseUrl/application/${applicationId.text}/confirm-setup-complete"
+    val failed = (err: UpstreamErrorResponse) => s"Failed to confirm setup complete for application ${applicationId.text}"
 
     http.POST[ConfirmSetupCompleteRequest, Either[UpstreamErrorResponse, Unit]](url, ConfirmSetupCompleteRequest(userEmailAddress)).map(_.leftMap(failed))
   }

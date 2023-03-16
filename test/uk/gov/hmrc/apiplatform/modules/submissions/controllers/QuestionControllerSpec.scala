@@ -138,8 +138,7 @@ class QuestionControllerSpec
     "display fail and show error in title when applicable" in new Setup {
       SubmissionServiceMock.Fetch.thenReturns(aSubmission.withIncompleteProgress)
 
-      val formSubmissionLink = s"${aSubmission.id.value}/question/${testQuestionIdsOfInterest.responsibleIndividualEmailId.value}"
-      val result             =
+      val result =
         controller.showQuestion(aSubmission.id, testQuestionIdsOfInterest.responsibleIndividualEmailId, None, Some(ErrorInfo("blah", "message")))(loggedInRequest.withCSRFToken)
 
       status(result) shouldBe BAD_REQUEST
@@ -264,7 +263,7 @@ class QuestionControllerSpec
       val result = controller.updateAnswer(aSubmission.id, questionId)(request.withCSRFToken)
 
       status(result) shouldBe SEE_OTHER
-      redirectLocation(result) shouldBe Some(s"/developer/submissions/application/${applicationId.value}/check-answers")
+      redirectLocation(result) shouldBe Some(s"/developer/submissions/application/${applicationId.text}/check-answers")
     }
 
     "succeed when given an answer and redirect to the next question to answer" in new Setup {

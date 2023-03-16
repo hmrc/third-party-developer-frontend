@@ -20,7 +20,9 @@ import java.util.UUID
 
 import play.api.libs.json.Json
 
-case class LoginRequest(email: String, password: String, mfaMandatedForUser: Boolean, deviceSessionId: Option[UUID])
+import uk.gov.hmrc.apiplatform.modules.common.domain.models.LaxEmailAddress
+
+case class LoginRequest(email: LaxEmailAddress, password: String, mfaMandatedForUser: Boolean, deviceSessionId: Option[UUID])
 
 object LoginRequest {
   implicit val format = Json.format[LoginRequest]

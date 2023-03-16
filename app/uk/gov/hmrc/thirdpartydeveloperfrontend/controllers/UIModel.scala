@@ -20,6 +20,7 @@ import scala.collection.SortedMap
 
 import play.api.libs.json.Json
 
+import uk.gov.hmrc.apiplatform.modules.apis.domain.models._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.APISubscriptions.subscriptionNumberLabel
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.apidefinitions.APIGroup._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.apidefinitions._

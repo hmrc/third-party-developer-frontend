@@ -21,6 +21,8 @@ import scala.concurrent.{ExecutionContext, Future}
 
 import uk.gov.hmrc.http.HeaderCarrier
 
+import uk.gov.hmrc.apiplatform.modules.common.domain.models.LaxEmailAddress
+import uk.gov.hmrc.apiplatform.modules.common.domain.models.LaxEmailAddress.StringSyntax
 import uk.gov.hmrc.apiplatform.modules.common.services.EitherTHelper
 import uk.gov.hmrc.apiplatform.modules.submissions.connectors.ThirdPartyApplicationSubmissionsConnector
 import uk.gov.hmrc.apiplatform.modules.submissions.domain.models.{ErrorDetails, ResponsibleIndividualToUVerification, ResponsibleIndividualVerification}
@@ -54,7 +56,11 @@ class ResponsibleIndividualVerificationService @Inject() (
                             ErrorDetails("riverification002", s"No application record found for ${riVerification.applicationId}")
                           )
         _              <- ET.liftF(applicationService.acceptResponsibleIndividualVerification(riVerification.applicationId, code))
-        _              <- ET.liftF(sendDeskproTicketForTermsOfUse(riVerification, application.application.state.requestedByName, application.application.state.requestedByEmailAddress))
+        _              <- ET.liftF(sendDeskproTicketForTermsOfUse(
+                            riVerification,
+                            application.application.state.requestedByName,
+                            application.application.state.requestedByEmailAddress.map(_.toLaxEmail)
+                          ))
       } yield riVerification
     )
       .value
@@ -76,16 +82,16 @@ class ResponsibleIndividualVerificationService @Inject() (
   private def sendDeskproTicketForTermsOfUse(
       riVerification: ResponsibleIndividualVerification,
       submitterName: Option[String],
-      submitterEmail: Option[String]
+      submitterEmail: Option[LaxEmailAddress]
     )(implicit hc: HeaderCarrier
     ) = {
     riVerification match {
       // Only send deskpro ticket for a ResponsibleIndividualVerification of type 'terms of use'
       case riv: ResponsibleIndividualToUVerification => {
-        val appName                = riVerification.applicationName
-        val appId                  = riVerification.applicationId
-        val requesterName: String  = submitterName.getOrElse(throw new RuntimeException("requestedByName not found"))
-        val requesterEmail: String = submitterEmail.getOrElse(throw new RuntimeException("requestedByEmailAddress not found"))
+        val appName                         = riVerification.applicationName
+        val appId                           = riVerification.applicationId
+        val requesterName: String           = submitterName.getOrElse(throw new RuntimeException("requestedByName not found"))
+        val requesterEmail: LaxEmailAddress = submitterEmail.getOrElse(throw new RuntimeException("requestedByEmailAddress not found"))
 
         val ticket = DeskproTicket.createForRequestProductionCredentials(requesterName, requesterEmail, appName, appId)
         deskproConnector.createTicket(riVerification.id, ticket).map(Some(_))

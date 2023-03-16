@@ -26,6 +26,8 @@ import views.html.TermsOfUseView
 import play.api.test.FakeRequest
 import play.twirl.api.HtmlFormat.Appendable
 
+import uk.gov.hmrc.apiplatform.modules.applications.domain.models.{ApplicationId, ClientId}
+import uk.gov.hmrc.apiplatform.modules.common.domain.models.LaxEmailAddress.StringSyntax
 import uk.gov.hmrc.thirdpartydeveloperfrontend.builder.{DeveloperBuilder, DeveloperSessionBuilder}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.TermsOfUseForm
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.TermsOfUseVersion
@@ -53,10 +55,10 @@ class TermsOfUseSpec extends CommonViewSpec
 
   "Terms of use view" when {
     implicit val request    = FakeRequest().withCSRFToken
-    implicit val loggedIn   = buildDeveloperSession(loggedInState = LoggedInState.LOGGED_IN, buildDeveloperWithRandomId("developer@example.com", "Joe", "Bloggs"))
+    implicit val loggedIn   = buildDeveloperWithRandomId("developer@example.com".toLaxEmail, "Joe", "Bloggs").loggedIn
     implicit val navSection = "details"
 
-    val id          = ApplicationId("id")
+    val id          = ApplicationId.random
     val clientId    = ClientId("clientId")
     val appName     = "an application"
     val createdOn   = LocalDateTime.now(ZoneOffset.UTC)
@@ -66,7 +68,7 @@ class TermsOfUseSpec extends CommonViewSpec
 
     "viewing an agreed application" should {
       trait Setup {
-        val emailAddress      = "email@example.com"
+        val emailAddress      = "email@example.com".toLaxEmail
         val timeStamp         = LocalDateTime.now(ZoneOffset.UTC)
         val expectedTimeStamp = DateTimeFormatter.ofPattern("dd MMMM yyyy").format(timeStamp)
         val version           = "1.0"
@@ -82,7 +84,7 @@ class TermsOfUseSpec extends CommonViewSpec
       }
 
       "show a notice stating when the terms of use were agreed to and by whom" in new Setup {
-        page.alert.text shouldBe s"Terms of use accepted on $expectedTimeStamp by $emailAddress."
+        page.alert.text shouldBe s"Terms of use accepted on $expectedTimeStamp by ${emailAddress.text}."
       }
 
       "render the terms of use" in new Setup {

@@ -23,26 +23,26 @@ import views.html.noapplications.NoApplicationsChoiceView
 import play.api.mvc.AnyContentAsEmpty
 import play.api.test.FakeRequest
 
-import uk.gov.hmrc.thirdpartydeveloperfrontend.builder.{DeveloperBuilder, DeveloperSessionBuilder}
+import uk.gov.hmrc.apiplatform.modules.common.domain.models.LaxEmailAddress.StringSyntax
+import uk.gov.hmrc.thirdpartydeveloperfrontend.builder._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.noapplications.NoApplications.NoApplicationsChoiceForm
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.LoggedInState
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.ViewHelpers._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.{LocalUserIdTracker, WithCSRFAddToken}
 
-class NoApplicationsChoiceViewSpec extends CommonViewSpec with WithCSRFAddToken with LocalUserIdTracker with DeveloperSessionBuilder with DeveloperBuilder {
+class NoApplicationsChoiceViewSpec extends CommonViewSpec with WithCSRFAddToken with LocalUserIdTracker with DeveloperSessionBuilder with DeveloperTestData {
 
   trait Setup {
     implicit val request: FakeRequest[AnyContentAsEmpty.type] = FakeRequest().withCSRFToken
 
     val noApplicationsChoiceView: NoApplicationsChoiceView = app.injector.instanceOf[NoApplicationsChoiceView]
-    val developerSession                                   = buildDeveloperSession(loggedInState = LoggedInState.LOGGED_IN, buildDeveloper("email@example.com", "Joe", "Bloggs", None))
 
   }
 
   "No application page" should {
 
     "render with no errors" in new Setup {
-      val page = noApplicationsChoiceView.render(NoApplicationsChoiceForm.form, request, developerSession, messagesProvider, appConfig)
+      val page = noApplicationsChoiceView.render(NoApplicationsChoiceForm.form, request, JoeBloggs.loggedIn, messagesProvider, appConfig)
 
       page.contentType should include("text/html")
 
@@ -65,7 +65,7 @@ class NoApplicationsChoiceViewSpec extends CommonViewSpec with WithCSRFAddToken 
 
     "render with errors" in new Setup {
       val formWithErrors = NoApplicationsChoiceForm.form.withError("no.applications.choice.error.required.field", "Please select an option")
-      val page           = noApplicationsChoiceView.render(formWithErrors, request, developerSession, messagesProvider, appConfig)
+      val page           = noApplicationsChoiceView.render(formWithErrors, request, JoeBloggs.loggedIn, messagesProvider, appConfig)
 
       page.contentType should include("text/html")
 

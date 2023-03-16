@@ -19,20 +19,22 @@ package uk.gov.hmrc.thirdpartydeveloperfrontend.service
 import java.time.{LocalDateTime, Period, ZoneOffset}
 import java.util.UUID.randomUUID
 import scala.concurrent.ExecutionContext.Implicits.global
-import scala.concurrent.Future.{failed, successful}
+import scala.concurrent.Future.successful
 
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.play.audit.http.connector.AuditResult.Success
 
+import uk.gov.hmrc.apiplatform.modules.apis.domain.models.{ApiContext, ApiVersion}
+import uk.gov.hmrc.apiplatform.modules.applications.domain.models.{ApplicationId, ClientId}
+import uk.gov.hmrc.apiplatform.modules.common.domain.models.LaxEmailAddress.StringSyntax
+import uk.gov.hmrc.apiplatform.modules.developers.domain.models.UserId
 import uk.gov.hmrc.thirdpartydeveloperfrontend.builder._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.config.ApplicationConfig
 import uk.gov.hmrc.thirdpartydeveloperfrontend.connectors._
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.apidefinitions.APIStatus._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.apidefinitions._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.connectors.{DeskproTicket, TicketCreated}
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.{User, UserId}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.subscriptions.ApiSubscriptionFields._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.subscriptions.VersionSubscription
 import uk.gov.hmrc.thirdpartydeveloperfrontend.service.PushPullNotificationsService.PushPullNotificationsConnector
@@ -99,7 +101,7 @@ class ApplicationServiceTeamMembersSpec extends AsyncHmrcSpec with Subscriptions
   def version(version: ApiVersion, status: APIStatus, subscribed: Boolean): VersionSubscription =
     VersionSubscription(ApiVersionDefinition(version, status), subscribed)
 
-  val productionApplicationId = ApplicationId("Application ID")
+  val productionApplicationId = ApplicationId.random
   val productionClientId      = ClientId(s"client-id-${randomUUID().toString}")
 
   val productionApplication: Application =
@@ -115,7 +117,7 @@ class ApplicationServiceTeamMembersSpec extends AsyncHmrcSpec with Subscriptions
       Some("description"),
       Set()
     )
-  val sandboxApplicationId               = ApplicationId("Application ID")
+  val sandboxApplicationId               = ApplicationId.random
   val sandboxClientId                    = ClientId("Client ID")
 
   val sandboxApplication: Application =
@@ -173,94 +175,9 @@ class ApplicationServiceTeamMembersSpec extends AsyncHmrcSpec with Subscriptions
     )
   }
 
-  "remove teamMember" should {
-    val email         = "john.bloggs@example.com"
-    val admin         = "admin@example.com"
-    val adminsToEmail = Set.empty[String]
-
-    "remove teamMember successfully from production" in new Setup {
-      when(mockDeveloperConnector.fetchByEmails(*)(*)).thenReturn(successful(Seq.empty))
-      theProductionConnectorthenReturnTheApplication(productionApplicationId, productionApplication)
-      when(mockProductionApplicationConnector.removeTeamMember(productionApplicationId, email, admin, adminsToEmail))
-        .thenReturn(successful(ApplicationUpdateSuccessful))
-      await(applicationService.removeTeamMember(productionApplication, email, admin)) shouldBe ApplicationUpdateSuccessful
-    }
-
-    "propagate ApplicationNeedsAdmin from connector from production" in new Setup {
-      when(mockDeveloperConnector.fetchByEmails(*)(*)).thenReturn(successful(Seq.empty))
-      theProductionConnectorthenReturnTheApplication(productionApplicationId, productionApplication)
-      when(mockProductionApplicationConnector.removeTeamMember(productionApplicationId, email, admin, adminsToEmail))
-        .thenReturn(failed(new ApplicationNeedsAdmin))
-      intercept[ApplicationNeedsAdmin](await(applicationService.removeTeamMember(productionApplication, email, admin)))
-    }
-
-    "propagate ApplicationNotFound from connector from production" in new Setup {
-      when(mockDeveloperConnector.fetchByEmails(*)(*)).thenReturn(successful(Seq.empty))
-      theProductionConnectorthenReturnTheApplication(productionApplicationId, productionApplication)
-      when(mockProductionApplicationConnector.removeTeamMember(productionApplicationId, email, admin, adminsToEmail))
-        .thenReturn(failed(new ApplicationNotFound))
-      intercept[ApplicationNotFound](await(applicationService.removeTeamMember(productionApplication, email, admin)))
-    }
-
-    "remove teamMember successfully from sandbox" in new Setup {
-      when(mockDeveloperConnector.fetchByEmails(*)(*)).thenReturn(successful(Seq.empty))
-      theSandboxConnectorthenReturnTheApplication(sandboxApplicationId, sandboxApplication)
-      when(mockSandboxApplicationConnector.removeTeamMember(sandboxApplicationId, email, admin, adminsToEmail))
-        .thenReturn(successful(ApplicationUpdateSuccessful))
-      await(applicationService.removeTeamMember(sandboxApplication, email, admin)) shouldBe ApplicationUpdateSuccessful
-    }
-
-    "propagate ApplicationNeedsAdmin from connector from sandbox" in new Setup {
-      when(mockDeveloperConnector.fetchByEmails(*)(*)).thenReturn(successful(Seq.empty))
-      theSandboxConnectorthenReturnTheApplication(sandboxApplicationId, sandboxApplication)
-      when(mockSandboxApplicationConnector.removeTeamMember(sandboxApplicationId, email, admin, adminsToEmail))
-        .thenReturn(failed(new ApplicationNeedsAdmin))
-      intercept[ApplicationNeedsAdmin](await(applicationService.removeTeamMember(sandboxApplication, email, admin)))
-    }
-
-    "propagate ApplicationNotFound from connector from sandbox" in new Setup {
-      when(mockDeveloperConnector.fetchByEmails(*)(*)).thenReturn(successful(Seq.empty))
-      theSandboxConnectorthenReturnTheApplication(sandboxApplicationId, sandboxApplication)
-      when(mockSandboxApplicationConnector.removeTeamMember(sandboxApplicationId, email, admin, adminsToEmail))
-        .thenReturn(failed(new ApplicationNotFound))
-      intercept[ApplicationNotFound](await(applicationService.removeTeamMember(sandboxApplication, email, admin)))
-    }
-
-    "include correct set of admins to email" in new Setup {
-
-      private val verifiedAdmin      = "verified@example.com".asAdministratorCollaborator
-      private val unverifiedAdmin    = "unverified@example.com".asAdministratorCollaborator
-      private val removerAdmin       = "admin.email@example.com".asAdministratorCollaborator
-      private val verifiedDeveloper  = "developer@example.com".asDeveloperCollaborator
-      private val teamMemberToRemove = "to.remove@example.com".asAdministratorCollaborator
-
-      val nonRemoverAdmins = Seq(
-        User("verified@example.com", Some(true)),
-        User("unverified@example.com", Some(false))
-      )
-
-      private val application = productionApplication.copy(collaborators = Set(verifiedAdmin, unverifiedAdmin, removerAdmin, verifiedDeveloper, teamMemberToRemove))
-
-      private val response = ApplicationUpdateSuccessful
-
-      when(mockDeveloperConnector.fetchByEmails(eqTo(Set("verified@example.com", "unverified@example.com")))(*))
-        .thenReturn(successful(nonRemoverAdmins))
-      theProductionConnectorthenReturnTheApplication(productionApplicationId, application)
-      when(mockProductionApplicationConnector.removeTeamMember(*[ApplicationId], *, *, *)(*)).thenReturn(successful(response))
-
-      await(applicationService.removeTeamMember(application, teamMemberToRemove.emailAddress, removerAdmin.emailAddress)) shouldBe response
-      verify(mockProductionApplicationConnector).removeTeamMember(
-        eqTo(productionApplicationId),
-        eqTo(teamMemberToRemove.emailAddress),
-        eqTo(removerAdmin.emailAddress),
-        eqTo(Set(verifiedAdmin.emailAddress))
-      )(*)
-    }
-  }
-
   "request delete developer" should {
     val developerName   = "Testy McTester"
-    val developerEmail  = "testy@example.com"
+    val developerEmail  = "testy@example.com".toLaxEmail
     val developerUserId = UserId.random
 
     "correctly create a deskpro ticket and audit record" in new Setup {

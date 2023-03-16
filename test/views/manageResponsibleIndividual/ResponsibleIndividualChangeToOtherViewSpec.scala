@@ -22,14 +22,14 @@ import views.html.manageResponsibleIndividual.ResponsibleIndividualChangeToOther
 
 import play.api.test.FakeRequest
 
-import uk.gov.hmrc.thirdpartydeveloperfrontend.builder.{DeveloperBuilder, DeveloperSessionBuilder}
+import uk.gov.hmrc.thirdpartydeveloperfrontend.builder._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.ResponsibleIndividualChangeToOtherForm
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.LoggedInState
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.ViewHelpers.{elementExistsByText, linkExistsWithHref}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.{LocalUserIdTracker, TestApplications, WithCSRFAddToken}
 
 class ResponsibleIndividualChangeToOtherViewSpec extends CommonViewSpec with WithCSRFAddToken
-    with DeveloperBuilder with LocalUserIdTracker with DeveloperSessionBuilder with TestApplications {
+    with LocalUserIdTracker with DeveloperSessionBuilder with TestApplications with DeveloperTestData {
 
   "Responsible Individual Change To Other View" should {
     val application = anApplication()
@@ -40,9 +40,7 @@ class ResponsibleIndividualChangeToOtherViewSpec extends CommonViewSpec with Wit
     def renderPage() = {
       val request = FakeRequest().withCSRFToken
       val form    = ResponsibleIndividualChangeToOtherForm.form().fill(ResponsibleIndividualChangeToOtherForm(riName, riEmail))
-      val session = buildDeveloperSession(LoggedInState.LOGGED_IN, buildDeveloper("admin@example.com", "firstName1", "lastName1"))
-
-      view.render(application, form, request, session, messagesProvider.messages, appConfig)
+      view.render(application, form, request, adminDeveloper.loggedIn, messagesProvider.messages, appConfig)
     }
 
     "display entered values correctly" in {

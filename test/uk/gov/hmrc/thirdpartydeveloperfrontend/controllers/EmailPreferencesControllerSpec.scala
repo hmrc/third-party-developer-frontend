@@ -32,13 +32,14 @@ import play.api.test.FakeRequest
 import play.api.test.Helpers._
 import play.filters.csrf.CSRF.TokenProvider
 
+import uk.gov.hmrc.apiplatform.modules.apis.domain.models.ApiContext
+import uk.gov.hmrc.apiplatform.modules.applications.domain.models.ApplicationId
+import uk.gov.hmrc.apiplatform.modules.developers.domain.models.UserId
 import uk.gov.hmrc.thirdpartydeveloperfrontend.builder.DeveloperBuilder
 import uk.gov.hmrc.thirdpartydeveloperfrontend.config.ApplicationConfig
 import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.addapplication.routes.{AddApplication => AddApplicationRoutes}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.profile.EmailPreferencesController
 import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.profile.routes.{EmailPreferencesController => EmailPreferencesControllerRoutes}
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.apidefinitions.ApiContext
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.ApplicationId
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.connectors.ApiType.REST_API
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.connectors.{ApiDefinition, CombinedApi, CombinedApiCategory}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers._
@@ -594,7 +595,7 @@ class EmailPreferencesControllerSpec
       updateUserFlowSessionsReturnsSuccessfully(sessionId)
 
       val requestWithForm: FakeRequest[AnyContentAsFormUrlEncoded] = loggedInRequest
-        .withFormUrlEncodedBody("selectedApi[0]" -> "a1", "selectedApi[1]" -> "a2", "applicationId" -> applicationId.value)
+        .withFormUrlEncodedBody("selectedApi[0]" -> "a1", "selectedApi[1]" -> "a2", "applicationId" -> applicationId.text)
 
       when(mockEmailPreferencesService.updateNewApplicationSelectedApis(*, *[ApplicationId], *)(*)).thenReturn(Future.successful(mock[NewApplicationEmailPreferencesFlowV2]))
 
@@ -652,7 +653,7 @@ class EmailPreferencesControllerSpec
       updateUserFlowSessionsReturnsSuccessfully(sessionId)
 
       val requestWithForm: FakeRequest[AnyContentAsFormUrlEncoded] = loggedInRequest
-        .withFormUrlEncodedBody("topic[0]" -> "a1", "applicationId" -> applicationId.value)
+        .withFormUrlEncodedBody("topic[0]" -> "a1", "applicationId" -> applicationId.text)
 
       when(mockEmailPreferencesService.fetchNewApplicationEmailPreferencesFlow(*, *[ApplicationId])).thenReturn(Future.successful(newApplicationEmailPreferencesFlow))
       when(mockEmailPreferencesService.updateEmailPreferences(*[UserId], *)(*)).thenReturn(Future.successful(true))

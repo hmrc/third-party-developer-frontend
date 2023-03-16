@@ -26,6 +26,7 @@ import uk.gov.hmrc.apiplatform.modules.mfa.models.MfaId
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.connectors.{AccessCodeAuthenticationRequest, VerifyMfaRequest}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.{Developer, LoggedInState, Session}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.connectors.EncryptedJson
+import uk.gov.hmrc.apiplatform.modules.common.domain.models.LaxEmailAddress.StringSyntax
 
 object MfaStub {
 
@@ -37,7 +38,7 @@ object MfaStub {
 
     stubFor(
       post(urlEqualTo("/authenticate-mfa"))
-        .withRequestBody(equalToJson(encryptedJson.toSecretRequestJson(AccessCodeAuthenticationRequest("john.smith@example.com", accessCode, nonce, mfaId)).toString()))
+        .withRequestBody(equalToJson(encryptedJson.toSecretRequestJson(AccessCodeAuthenticationRequest("john.smith@example.com".toLaxEmail, accessCode, nonce, mfaId)).toString()))
         .willReturn(
           aResponse()
             .withStatus(OK)

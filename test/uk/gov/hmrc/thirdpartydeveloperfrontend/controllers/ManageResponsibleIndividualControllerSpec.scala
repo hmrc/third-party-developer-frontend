@@ -29,13 +29,16 @@ import play.filters.csrf.CSRF.TokenProvider
 import play.twirl.api.HtmlFormat
 import uk.gov.hmrc.http.HeaderCarrier
 
+import uk.gov.hmrc.apiplatform.modules.applications.domain.models.{Collaborator, PrivacyPolicyLocations, TermsAndConditionsLocations}
+import uk.gov.hmrc.apiplatform.modules.common.domain.models.LaxEmailAddress
+import uk.gov.hmrc.apiplatform.modules.common.domain.models.LaxEmailAddress.StringSyntax
+import uk.gov.hmrc.apiplatform.modules.developers.domain.models.UserId
 import uk.gov.hmrc.apiplatform.modules.submissions.domain.models.Submission
 import uk.gov.hmrc.thirdpartydeveloperfrontend.builder._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.ManageResponsibleIndividualController.{ResponsibleIndividualHistoryItem, ViewModel}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.ApplicationUpdateSuccessful
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.CollaboratorRole.{ADMINISTRATOR, DEVELOPER}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications._
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.{DeveloperSession, LoggedInState, Session, UserId}
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.{DeveloperSession, LoggedInState, Session}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.mocks.service.{ApplicationActionServiceMock, ApplicationServiceMock, SessionServiceMock}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.service.AuditService
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.WithLoggedInSession._
@@ -96,7 +99,7 @@ class ManageResponsibleIndividualControllerSpec
     val sessionParams         = Seq("csrfToken" -> app.injector.instanceOf[TokenProvider].generateToken)
     val loggedOutRequest      = FakeRequest().withSession(sessionParams: _*)
     val loggedInRequest       = FakeRequest().withLoggedIn(underTest, implicitly)(sessionId).withSession(sessionParams: _*)
-    val responsibleIndividual = ResponsibleIndividual.build("Bob Responsible", "bob@example.com")
+    val responsibleIndividual = ResponsibleIndividual.build("Bob Responsible", "bob@example.com".toLaxEmail)
 
     implicit val hc = HeaderCarrier()
 
@@ -108,8 +111,8 @@ class ManageResponsibleIndividualControllerSpec
             None,
             responsibleIndividual,
             Set.empty,
-            TermsAndConditionsLocation.InDesktopSoftware,
-            PrivacyPolicyLocation.InDesktopSoftware,
+            TermsAndConditionsLocations.InDesktopSoftware,
+            PrivacyPolicyLocations.InDesktopSoftware,
             touAcceptances
           ))
         ),
@@ -128,12 +131,12 @@ class ManageResponsibleIndividualControllerSpec
   "showResponsibleIndividualDetails" should {
     "show the manage RI page with all correct details if user is a team member" in new Setup {
       val captor: ArgumentCaptor[ViewModel] = ArgumentCaptor.forClass(classOf[ViewModel])
-      val user                              = developerSession.email.asCollaborator(ADMINISTRATOR)
+      val user                              = developerSession.email.asCollaborator(Collaborator.Roles.ADMINISTRATOR)
 
       givenTheApplicationExistWithUserRole(
         List(user),
         List(
-          TermsOfUseAcceptance(ResponsibleIndividual.build("Old RI", "oldri@example.com"), LocalDateTime.parse("2022-05-01T12:00:00"), Submission.Id.random, 0),
+          TermsOfUseAcceptance(ResponsibleIndividual.build("Old RI", "oldri@example.com".toLaxEmail), LocalDateTime.parse("2022-05-01T12:00:00"), Submission.Id.random, 0),
           TermsOfUseAcceptance(responsibleIndividual, LocalDateTime.parse("2022-07-01T12:00:00"), Submission.Id.random, 0)
         )
       )
@@ -145,7 +148,7 @@ class ManageResponsibleIndividualControllerSpec
       val viewModel = captor.getValue
       viewModel.environment shouldBe "Production"
       viewModel.responsibleIndividualName shouldBe responsibleIndividual.fullName.value
-      viewModel.adminEmails shouldBe List(developer.email)
+      viewModel.adminEmails shouldBe List(developer.email.text)
       viewModel.history shouldBe List(
         ResponsibleIndividualHistoryItem(responsibleIndividual.fullName.value, "1 July 2022", "Present"),
         ResponsibleIndividualHistoryItem("Old RI", "1 May 2022", "1 July 2022")
@@ -154,7 +157,7 @@ class ManageResponsibleIndividualControllerSpec
 
     "allow changes if user is an admin" in new Setup {
       val captor: ArgumentCaptor[ViewModel] = ArgumentCaptor.forClass(classOf[ViewModel])
-      val user                              = developerSession.email.asCollaborator(ADMINISTRATOR)
+      val user                              = developerSession.email.asCollaborator(Collaborator.Roles.ADMINISTRATOR)
 
       givenTheApplicationExistWithUserRole(List(user), List.empty)
 
@@ -168,7 +171,7 @@ class ManageResponsibleIndividualControllerSpec
 
     "don't allow changes if user is not an admin" in new Setup {
       val captor: ArgumentCaptor[ViewModel] = ArgumentCaptor.forClass(classOf[ViewModel])
-      val user                              = developerSession.email.asCollaborator(DEVELOPER)
+      val user                              = developerSession.email.asCollaborator(Collaborator.Roles.DEVELOPER)
 
       givenTheApplicationExistWithUserRole(List(user), List.empty)
 
@@ -181,7 +184,7 @@ class ManageResponsibleIndividualControllerSpec
     }
 
     "return an error if user is not a team member" in new Setup {
-      givenTheApplicationExistWithUserRole(List("other@example.com".asCollaborator(ADMINISTRATOR)), List.empty)
+      givenTheApplicationExistWithUserRole(List("other@example.com".toLaxEmail.asAdministratorCollaborator), List.empty)
 
       val result = underTest.showResponsibleIndividualDetails(appId)(loggedInRequest.withCSRFToken)
 
@@ -191,7 +194,7 @@ class ManageResponsibleIndividualControllerSpec
 
   "showResponsibleIndividualChangeToSelfOrOther" should {
     "return success if user is an admin" in new Setup {
-      val user = developerSession.email.asCollaborator(ADMINISTRATOR)
+      val user = developerSession.email.asCollaborator(Collaborator.Roles.ADMINISTRATOR)
 
       givenTheApplicationExistWithUserRole(List(user), List.empty)
 
@@ -200,7 +203,7 @@ class ManageResponsibleIndividualControllerSpec
       status(result) shouldBe OK
     }
     "return error if user is not an admin" in new Setup {
-      val user = developerSession.email.asCollaborator(DEVELOPER)
+      val user = developerSession.email.asCollaborator(Collaborator.Roles.DEVELOPER)
 
       givenTheApplicationExistWithUserRole(List(user), List.empty)
 
@@ -212,7 +215,7 @@ class ManageResponsibleIndividualControllerSpec
 
   "responsibleIndividualChangeToSelfOrOtherAction" should {
     "redirect to correct page if user selects 'self'" in new Setup {
-      val user = developerSession.email.asCollaborator(ADMINISTRATOR)
+      val user = developerSession.email.asCollaborator(Collaborator.Roles.ADMINISTRATOR)
 
       givenTheApplicationExistWithUserRole(List(user), List.empty)
 
@@ -220,11 +223,11 @@ class ManageResponsibleIndividualControllerSpec
       val result  = underTest.responsibleIndividualChangeToSelfOrOtherAction(appId)(request)
 
       status(result) shouldBe SEE_OTHER
-      redirectLocation(result) shouldBe Some(s"/developer/applications/${appId.value}/responsible-individual/change/self")
+      redirectLocation(result) shouldBe Some(s"/developer/applications/${appId.text}/responsible-individual/change/self")
     }
 
     "redirect to correct page if user selects 'other'" in new Setup {
-      val user = developerSession.email.asCollaborator(ADMINISTRATOR)
+      val user = developerSession.email.asCollaborator(Collaborator.Roles.ADMINISTRATOR)
 
       givenTheApplicationExistWithUserRole(List(user), List.empty)
 
@@ -232,11 +235,11 @@ class ManageResponsibleIndividualControllerSpec
       val result  = underTest.responsibleIndividualChangeToSelfOrOtherAction(appId)(request)
 
       status(result) shouldBe SEE_OTHER
-      redirectLocation(result) shouldBe Some(s"/developer/applications/${appId.value}/responsible-individual/change/other")
+      redirectLocation(result) shouldBe Some(s"/developer/applications/${appId.text}/responsible-individual/change/other")
     }
 
     "return error if no choice selected" in new Setup {
-      val user = developerSession.email.asCollaborator(ADMINISTRATOR)
+      val user = developerSession.email.asCollaborator(Collaborator.Roles.ADMINISTRATOR)
 
       givenTheApplicationExistWithUserRole(List(user), List.empty)
 
@@ -246,7 +249,7 @@ class ManageResponsibleIndividualControllerSpec
       status(result) shouldBe BAD_REQUEST
     }
     "return error if user is not an admin" in new Setup {
-      val user = developerSession.email.asCollaborator(DEVELOPER)
+      val user = developerSession.email.asCollaborator(Collaborator.Roles.DEVELOPER)
 
       givenTheApplicationExistWithUserRole(List(user), List.empty)
 
@@ -259,7 +262,7 @@ class ManageResponsibleIndividualControllerSpec
 
   "showResponsibleIndividualChangeToSelf" should {
     "return success if user is an admin" in new Setup {
-      val user = developerSession.email.asCollaborator(ADMINISTRATOR)
+      val user = developerSession.email.asCollaborator(Collaborator.Roles.ADMINISTRATOR)
 
       givenTheApplicationExistWithUserRole(List(user), List.empty)
 
@@ -269,7 +272,7 @@ class ManageResponsibleIndividualControllerSpec
     }
 
     "return error if user is not an admin" in new Setup {
-      val user = developerSession.email.asCollaborator(DEVELOPER)
+      val user = developerSession.email.asCollaborator(Collaborator.Roles.DEVELOPER)
 
       givenTheApplicationExistWithUserRole(List(user), List.empty)
 
@@ -282,19 +285,19 @@ class ManageResponsibleIndividualControllerSpec
 
   "responsibleIndividualChangeToSelfAction" should {
     "save current users details as the RI" in new Setup {
-      when(applicationServiceMock.updateResponsibleIndividual(*[Application], *[UserId], *, *)(*)).thenReturn(successful(ApplicationUpdateSuccessful))
-      val user = developerSession.email.asCollaborator(ADMINISTRATOR)
+      when(applicationServiceMock.updateResponsibleIndividual(*[Application], *[UserId], *, *[LaxEmailAddress])(*)).thenReturn(successful(ApplicationUpdateSuccessful))
+      val user = developerSession.email.asCollaborator(Collaborator.Roles.ADMINISTRATOR)
 
       givenTheApplicationExistWithUserRole(List(user), List.empty)
 
       val result = underTest.responsibleIndividualChangeToSelfAction(appId)(loggedInRequest.withCSRFToken)
 
       status(result) shouldBe SEE_OTHER
-      redirectLocation(result) shouldBe Some(s"/developer/applications/${appId.value}/responsible-individual/change/self/confirmed")
+      redirectLocation(result) shouldBe Some(s"/developer/applications/${appId.text}/responsible-individual/change/self/confirmed")
     }
 
     "return error if user is not an admin" in new Setup {
-      val user = developerSession.email.asCollaborator(DEVELOPER)
+      val user = developerSession.email.asCollaborator(Collaborator.Roles.DEVELOPER)
 
       givenTheApplicationExistWithUserRole(List(user), List.empty)
 
@@ -307,7 +310,7 @@ class ManageResponsibleIndividualControllerSpec
 
   "showResponsibleIndividualChangeToSelfConfirmed" should {
     "return success if user is an admin" in new Setup {
-      val user = developerSession.email.asCollaborator(ADMINISTRATOR)
+      val user = developerSession.email.asCollaborator(Collaborator.Roles.ADMINISTRATOR)
 
       givenTheApplicationExistWithUserRole(List(user), List.empty)
 
@@ -317,7 +320,7 @@ class ManageResponsibleIndividualControllerSpec
     }
 
     "return error if user is not an admin" in new Setup {
-      val user = developerSession.email.asCollaborator(DEVELOPER)
+      val user = developerSession.email.asCollaborator(Collaborator.Roles.DEVELOPER)
 
       givenTheApplicationExistWithUserRole(List(user), List.empty)
 
@@ -329,7 +332,7 @@ class ManageResponsibleIndividualControllerSpec
 
   "showResponsibleIndividualChangeToOther" should {
     "return success if user is an admin" in new Setup {
-      val user = developerSession.email.asCollaborator(ADMINISTRATOR)
+      val user = developerSession.email.asCollaborator(Collaborator.Roles.ADMINISTRATOR)
 
       givenTheApplicationExistWithUserRole(List(user), List.empty)
 
@@ -339,7 +342,7 @@ class ManageResponsibleIndividualControllerSpec
     }
 
     "return error if user is not an admin" in new Setup {
-      val user = developerSession.email.asCollaborator(DEVELOPER)
+      val user = developerSession.email.asCollaborator(Collaborator.Roles.DEVELOPER)
 
       givenTheApplicationExistWithUserRole(List(user), List.empty)
 
@@ -352,35 +355,35 @@ class ManageResponsibleIndividualControllerSpec
   "responsibleIndividualChangeToOtherAction" should {
     "update responsible individual with new details correctly" in new Setup {
       val name          = "bob"
-      val email         = "bob@example.com"
+      val email         = "bob@example.com".toLaxEmail
       val requesterName = developerSession.displayedName
       when(applicationServiceMock.verifyResponsibleIndividual(*[Application], *[UserId], eqTo(requesterName), eqTo(name), eqTo(email))(*)).thenReturn(successful(
         ApplicationUpdateSuccessful
       ))
-      val user          = developerSession.email.asCollaborator(ADMINISTRATOR)
+      val user          = developerSession.email.asCollaborator(Collaborator.Roles.ADMINISTRATOR)
 
       givenTheApplicationExistWithUserRole(List(user), List.empty)
 
-      val request = loggedInRequest.withCSRFToken.withFormUrlEncodedBody("name" -> name, "email" -> email)
+      val request = loggedInRequest.withCSRFToken.withFormUrlEncodedBody("name" -> name, "email" -> email.text)
       val result  = underTest.responsibleIndividualChangeToOtherAction(appId)(request)
 
       status(result) shouldBe SEE_OTHER
-      redirectLocation(result) shouldBe Some(s"/developer/applications/${appId.value}/responsible-individual/change/other/requested")
+      redirectLocation(result) shouldBe Some(s"/developer/applications/${appId.text}/responsible-individual/change/other/requested")
     }
 
     "return an error if responsible individual details are not new" in new Setup {
-      val user = developerSession.email.asCollaborator(ADMINISTRATOR)
+      val user = developerSession.email.asCollaborator(Collaborator.Roles.ADMINISTRATOR)
 
       givenTheApplicationExistWithUserRole(List(user), List.empty)
 
-      val request = loggedInRequest.withCSRFToken.withFormUrlEncodedBody("name" -> responsibleIndividual.fullName.value, "email" -> responsibleIndividual.emailAddress.value)
+      val request = loggedInRequest.withCSRFToken.withFormUrlEncodedBody("name" -> responsibleIndividual.fullName.value, "email" -> responsibleIndividual.emailAddress.text)
       val result  = underTest.responsibleIndividualChangeToOtherAction(appId)(request)
 
       status(result) shouldBe BAD_REQUEST
     }
 
     "return an error if responsible individual details are missing" in new Setup {
-      val user = developerSession.email.asCollaborator(ADMINISTRATOR)
+      val user = developerSession.email.asCollaborator(Collaborator.Roles.ADMINISTRATOR)
 
       givenTheApplicationExistWithUserRole(List(user), List.empty)
 
@@ -391,7 +394,7 @@ class ManageResponsibleIndividualControllerSpec
     }
 
     "return error if user is not an admin" in new Setup {
-      val user = developerSession.email.asCollaborator(DEVELOPER)
+      val user = developerSession.email.asCollaborator(Collaborator.Roles.DEVELOPER)
 
       givenTheApplicationExistWithUserRole(List(user), List.empty)
 
@@ -403,7 +406,7 @@ class ManageResponsibleIndividualControllerSpec
 
   "showResponsibleIndividualChangeToOtherRequested" should {
     "return success if user is an admin" in new Setup {
-      val user = developerSession.email.asCollaborator(ADMINISTRATOR)
+      val user = developerSession.email.asCollaborator(Collaborator.Roles.ADMINISTRATOR)
 
       givenTheApplicationExistWithUserRole(List(user), List.empty)
 
@@ -413,7 +416,7 @@ class ManageResponsibleIndividualControllerSpec
     }
 
     "return error if user is not an admin" in new Setup {
-      val user = developerSession.email.asCollaborator(DEVELOPER)
+      val user = developerSession.email.asCollaborator(Collaborator.Roles.DEVELOPER)
 
       givenTheApplicationExistWithUserRole(List(user), List.empty)
 

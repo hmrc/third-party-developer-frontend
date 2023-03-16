@@ -28,6 +28,10 @@ import org.mockito.captor.ArgCaptor
 import uk.gov.hmrc.http.{ForbiddenException, HeaderCarrier}
 import uk.gov.hmrc.play.audit.http.connector.AuditResult.Success
 
+import uk.gov.hmrc.apiplatform.modules.apis.domain.models._
+import uk.gov.hmrc.apiplatform.modules.applications.domain.models.{ApplicationId, ClientId, PrivacyPolicyLocations, TermsAndConditionsLocations}
+import uk.gov.hmrc.apiplatform.modules.common.domain.models.LaxEmailAddress.StringSyntax
+import uk.gov.hmrc.apiplatform.modules.developers.domain.models.UserId
 import uk.gov.hmrc.thirdpartydeveloperfrontend.builder._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.config.ApplicationConfig
 import uk.gov.hmrc.thirdpartydeveloperfrontend.connectors._
@@ -37,7 +41,6 @@ import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.apidefinitions.APIS
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.apidefinitions._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.connectors.{DeskproTicket, TicketCreated}
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.{LoggedInState, UserId}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.subscriptions.ApiSubscriptionFields._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.subscriptions.VersionSubscription
 import uk.gov.hmrc.thirdpartydeveloperfrontend.service.PushPullNotificationsService.PushPullNotificationsConnector
@@ -49,7 +52,7 @@ class ApplicationServiceSpec extends AsyncHmrcSpec
     with ApplicationBuilder
     with LocalUserIdTracker
     with DeveloperSessionBuilder
-    with DeveloperBuilder {
+    with DeveloperTestData {
 
   val versionOne  = ApiVersion("1.0")
   val versionTwo  = ApiVersion("2.0")
@@ -118,7 +121,7 @@ class ApplicationServiceSpec extends AsyncHmrcSpec
   def version(version: ApiVersion, status: APIStatus, subscribed: Boolean): VersionSubscription =
     VersionSubscription(ApiVersionDefinition(version, status), subscribed)
 
-  val productionApplicationId = ApplicationId("Application ID")
+  val productionApplicationId = ApplicationId.random
   val productionClientId      = ClientId(s"client-id-${randomUUID().toString}")
 
   val productionApplication: Application =
@@ -134,7 +137,7 @@ class ApplicationServiceSpec extends AsyncHmrcSpec
       Some("description"),
       Set()
     )
-  val sandboxApplicationId               = ApplicationId("Application ID")
+  val sandboxApplicationId               = ApplicationId.random
   val sandboxClientId                    = ClientId("Client ID")
 
   val sandboxApplication: Application =
@@ -209,7 +212,7 @@ class ApplicationServiceSpec extends AsyncHmrcSpec
   }
 
   "Update" should {
-    val applicationId   = ApplicationId("applicationId")
+    val applicationId   = ApplicationId.random
     val clientId        = ClientId("clientId")
     val applicationName = "applicationName"
     val application     = Application(
@@ -246,7 +249,7 @@ class ApplicationServiceSpec extends AsyncHmrcSpec
   "Update Privacy Policy Location" should {
     "call the TPA connector correctly" in new Setup {
       val userId            = UserId.random
-      val newLocation       = PrivacyPolicyLocation.Url("http://example.com")
+      val newLocation       = PrivacyPolicyLocations.Url("http://example.com")
       val applicationUpdate = ChangeProductionApplicationPrivacyPolicyLocation(userId, LocalDateTime.now(clock), newLocation)
       when(mockProductionApplicationConnector.applicationUpdate(productionApplicationId, applicationUpdate)).thenReturn(Future.successful(ApplicationUpdateSuccessful))
 
@@ -259,7 +262,7 @@ class ApplicationServiceSpec extends AsyncHmrcSpec
   "Update Terms and Conditions Location" should {
     "call the TPA connector correctly" in new Setup {
       val userId            = UserId.random
-      val newLocation       = TermsAndConditionsLocation.Url("http://example.com")
+      val newLocation       = TermsAndConditionsLocations.Url("http://example.com")
       val applicationUpdate = ChangeProductionApplicationTermsAndConditionsLocation(userId, LocalDateTime.now(clock), newLocation)
       when(mockProductionApplicationConnector.applicationUpdate(productionApplicationId, applicationUpdate)).thenReturn(Future.successful(ApplicationUpdateSuccessful))
 
@@ -273,7 +276,7 @@ class ApplicationServiceSpec extends AsyncHmrcSpec
     "call the TPA connector correctly" in new Setup {
       val userId            = UserId.random
       val riName            = "ri name"
-      val riEmail           = "ri@example.com"
+      val riEmail           = "ri@example.com".toLaxEmail
       val requesterName     = "ms admin"
       val applicationUpdate = VerifyResponsibleIndividual(userId, LocalDateTime.now(clock), requesterName, riName, riEmail)
       when(mockProductionApplicationConnector.applicationUpdate(productionApplicationId, applicationUpdate)).thenReturn(Future.successful(ApplicationUpdateSuccessful))
@@ -286,10 +289,10 @@ class ApplicationServiceSpec extends AsyncHmrcSpec
 
   "request application deletion" should {
 
-    val adminEmail                            = "admin@example.com"
-    val adminRequester                        = buildDeveloperSession(loggedInState = LoggedInState.LOGGED_IN, buildDeveloper(adminEmail, "firstname", "lastname", None))
-    val developerEmail                        = "developer@example.com"
-    val developerRequester                    = buildDeveloperSession(loggedInState = LoggedInState.LOGGED_IN, buildDeveloper(developerEmail, "firstname", "lastname", None))
+    val adminEmail                            = "admin@example.com".toLaxEmail
+    val adminRequester                        = adminDeveloper.loggedIn
+    val developerEmail                        = "developer@example.com".toLaxEmail
+    val developerRequester                    = standardDeveloper.loggedIn
     val teamMembers                           = Set(adminEmail.asAdministratorCollaborator, developerEmail.asDeveloperCollaborator)
     val sandboxApp                            = sandboxApplication.copy(collaborators = teamMembers)
     val productionApp                         = productionApplication.copy(collaborators = teamMembers)
@@ -346,10 +349,10 @@ class ApplicationServiceSpec extends AsyncHmrcSpec
 
   "delete subordinate application" should {
 
-    val adminEmail         = "admin@example.com"
-    val adminRequester     = buildDeveloperSession(loggedInState = LoggedInState.LOGGED_IN, buildDeveloper(adminEmail, "firstname", "lastname", None))
-    val developerEmail     = "developer@example.com"
-    val developerRequester = buildDeveloperSession(loggedInState = LoggedInState.LOGGED_IN, buildDeveloper(developerEmail, "firstname", "lastname", None))
+    val adminEmail         = "admin@example.com".toLaxEmail
+    val adminRequester     = adminDeveloper.loggedIn
+    val developerEmail     = "developer@example.com".toLaxEmail
+    val developerRequester = standardDeveloper.loggedIn
     val teamMembers        = Set(adminEmail.asAdministratorCollaborator, developerEmail.asDeveloperCollaborator)
     val sandboxApp         = sandboxApplication.copy(collaborators = teamMembers)
     val invalidROPCApp     = sandboxApplication.copy(collaborators = teamMembers, access = ROPC())
@@ -396,7 +399,7 @@ class ApplicationServiceSpec extends AsyncHmrcSpec
 
   "request 2SV removal" should {
 
-    val email  = "testy@example.com"
+    val email  = "testy@example.com".toLaxEmail
     val name   = "Bob"
     val userId = UserId.random
 
@@ -419,7 +422,7 @@ class ApplicationServiceSpec extends AsyncHmrcSpec
 
   "userLogoutSurveyCompleted" should {
 
-    val email                  = "testy@example.com"
+    val email                  = "testy@example.com".toLaxEmail
     val name                   = "John Smith"
     val rating                 = "5"
     val improvementSuggestions = "Test"
@@ -437,7 +440,7 @@ class ApplicationServiceSpec extends AsyncHmrcSpec
   "validate application name" should {
     "call the application connector validate method in sandbox" in new Setup {
       private val applicationName = "applicationName"
-      private val applicationId   = ApplicationId(randomUUID().toString)
+      private val applicationId   = ApplicationId.random
 
       when(mockSandboxApplicationConnector.validateName(*, *[Option[ApplicationId]])(*))
         .thenReturn(successful(Valid))
@@ -452,7 +455,7 @@ class ApplicationServiceSpec extends AsyncHmrcSpec
 
     "call the application connector validate method in production" in new Setup {
       private val applicationName = "applicationName"
-      private val applicationId   = ApplicationId(randomUUID().toString)
+      private val applicationId   = ApplicationId.random
 
       when(mockProductionApplicationConnector.validateName(*, *[Option[ApplicationId]])(*))
         .thenReturn(successful(Valid))
@@ -469,9 +472,7 @@ class ApplicationServiceSpec extends AsyncHmrcSpec
   }
 
   "requestProductionApplicationNameChange" should {
-
-    val adminEmail     = "admin@example.com"
-    val adminRequester = buildDeveloperSession(loggedInState = LoggedInState.LOGGED_IN, buildDeveloper(adminEmail, "firstname", "lastname", None))
+    val adminRequester = adminDeveloper.loggedIn
 
     "correctly create a deskpro ticket" in new Setup {
       private val applicationName = "applicationName"
@@ -496,7 +497,7 @@ class ApplicationServiceSpec extends AsyncHmrcSpec
     "call the TPA connector correctly" in new Setup {
       val userId            = UserId.random
       val riName            = "Mr Responsible"
-      val riEmail           = "ri@example.com"
+      val riEmail           = "ri@example.com".toLaxEmail
       val applicationUpdate = ChangeResponsibleIndividualToSelf(userId, LocalDateTime.now(clock), riName, riEmail)
       when(mockProductionApplicationConnector.applicationUpdate(productionApplicationId, applicationUpdate)).thenReturn(Future.successful(ApplicationUpdateSuccessful))
 

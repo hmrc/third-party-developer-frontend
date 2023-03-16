@@ -27,23 +27,19 @@ import play.api.test.{FakeRequest, StubMessagesFactory}
 import uk.gov.hmrc.apiplatform.modules.mfa.forms.SelectMfaForm
 import uk.gov.hmrc.apiplatform.modules.mfa.models.MfaAction
 import uk.gov.hmrc.apiplatform.modules.mfa.views.html.SelectMfaView
-import uk.gov.hmrc.thirdpartydeveloperfrontend.builder.{DeveloperBuilder, DeveloperSessionBuilder}
+import uk.gov.hmrc.thirdpartydeveloperfrontend.builder.{DeveloperSessionBuilder, DeveloperTestData}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.{DeveloperSession, LoggedInState}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.{LocalUserIdTracker, WithCSRFAddToken}
 
 class SelectMfaViewSpec extends CommonViewSpec
     with WithCSRFAddToken
+    with DeveloperTestData
     with DeveloperSessionBuilder
-    with DeveloperBuilder
     with LocalUserIdTracker with StubMessagesFactory {
 
   implicit val request: FakeRequest[AnyContentAsEmpty.type] = FakeRequest()
 
-  implicit val loggedIn: DeveloperSession = buildDeveloperSession(
-    loggedInState =
-      LoggedInState.LOGGED_IN,
-    buildDeveloper("developer@example.com", "Joe", "Bloggs")
-  )
+  implicit val loggedIn: DeveloperSession = JoeBloggs.loggedIn
   val selectMfaViewView: SelectMfaView    = app.injector.instanceOf[SelectMfaView]
 
   "SelectMfaView" should {

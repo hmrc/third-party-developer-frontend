@@ -28,6 +28,7 @@ import play.api.test.FakeRequest
 import play.api.test.Helpers._
 import uk.gov.hmrc.http.{ForbiddenException, HeaderCarrier}
 
+import uk.gov.hmrc.apiplatform.modules.common.domain.models.LaxEmailAddress.StringSyntax
 import uk.gov.hmrc.thirdpartydeveloperfrontend.builder.DeveloperBuilder
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.ApplicationUpdateSuccessful
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.{Application, IpAllowlist}
@@ -74,8 +75,8 @@ class IpAllowListControllerSpec
     val sessionId       = "sessionId"
     val loggedInRequest = FakeRequest().withLoggedIn(underTest, implicitly)(sessionId)
 
-    val admin: Developer     = buildDeveloper(emailAddress = "admin@example.com")
-    val developer: Developer = buildDeveloper(emailAddress = "developer@example.com")
+    val admin: Developer     = buildDeveloper(emailAddress = "admin@example.com".toLaxEmail)
+    val developer: Developer = buildDeveloper(emailAddress = "developer@example.com".toLaxEmail)
 
     val anApplicationWithoutIpAllowlist: Application = anApplication(adminEmail = admin.email, developerEmail = developer.email)
     val anApplicationWithIpAllowlist: Application    = anApplicationWithoutIpAllowlist.copy(ipAllowlist = IpAllowlist(allowlist = Set("1.1.1.0/24")))

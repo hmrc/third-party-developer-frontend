@@ -18,14 +18,18 @@ package uk.gov.hmrc.thirdpartydeveloperfrontend.controllers
 
 import javax.inject.{Inject, Singleton}
 import scala.concurrent.{ExecutionContext, Future}
+
 import views.html.{SupportEnquiryView, SupportThankyouView}
+
 import play.api.data.{Form, FormError}
 import play.api.libs.crypto.CookieSigner
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
+
 import uk.gov.hmrc.apiplatform.modules.common.services.ApplicationLogger
+import uk.gov.hmrc.apiplatform.modules.developers.domain.models.UserId
 import uk.gov.hmrc.thirdpartydeveloperfrontend.config.{ApplicationConfig, ErrorHandler}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.FormKeys.commentsSpamKey
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.{DeveloperSession, UserId}
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.DeveloperSession
 import uk.gov.hmrc.thirdpartydeveloperfrontend.service.{DeskproService, SessionService}
 
 @Singleton
@@ -49,7 +53,7 @@ class Support @Inject() (
   def raiseSupportEnquiry: Action[AnyContent] = maybeAtLeastPartLoggedInEnablingMfa { implicit request =>
     val prefilledForm = fullyloggedInDeveloper
       .fold(supportForm) { user =>
-        supportForm.bind(Map("fullname" -> user.displayedName, "emailaddress" -> user.email)).discardingErrors
+        supportForm.bind(Map("fullname" -> user.displayedName, "emailaddress" -> user.email.text)).discardingErrors
       }
     Future.successful(Ok(supportEnquiryView(fullyloggedInDeveloper.map(_.displayedName), prefilledForm)))
 
@@ -70,8 +74,8 @@ class Support @Inject() (
   }
 
   private def logSpamSupportRequest(form: Form[SupportEnquiryForm]) = {
-      form.errors("comments").map((formError: FormError) => {
-      if(formError.message == commentsSpamKey) {
+    form.errors("comments").map((formError: FormError) => {
+      if (formError.message == commentsSpamKey) {
         logger.info("Spam support request attempted")
       }
     })

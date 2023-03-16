@@ -22,9 +22,10 @@ import scala.concurrent.Future
 
 import uk.gov.hmrc.http.HeaderCarrier
 
+import uk.gov.hmrc.apiplatform.modules.apis.domain.models.{ApiContext, ApiVersion}
+import uk.gov.hmrc.apiplatform.modules.applications.domain.models.{ApplicationId, ClientId, Collaborator}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.builder.SubscriptionsBuilder
 import uk.gov.hmrc.thirdpartydeveloperfrontend.connectors.{ApmConnector, ThirdPartyApplicationConnector}
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.apidefinitions.{ApiContext, ApiVersion}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.subscriptions.ApiSubscriptionFields.{
   SaveSubscriptionFieldsAccessDeniedResponse,
@@ -43,7 +44,7 @@ class SubscriptionFieldsServiceSpec extends AsyncHmrcSpec with SubscriptionsBuil
   val apiVersion: ApiVersion       = ApiVersion("1.0")
   val versionOne: ApiVersion       = ApiVersion("version-1")
   val applicationName: String      = "third-party-application"
-  val applicationId: ApplicationId = ApplicationId("application-id")
+  val applicationId: ApplicationId = ApplicationId.random
   val clientId                     = ClientId("clientId")
 
   val application =
@@ -79,7 +80,7 @@ class SubscriptionFieldsServiceSpec extends AsyncHmrcSpec with SubscriptionsBuil
 
   "saveFieldsValues" should {
     "save the fields" in new Setup {
-      val developerRole = CollaboratorRole.DEVELOPER
+      val developerRole = Collaborator.Roles.DEVELOPER
 
       val access = AccessRequirements.Default
 
@@ -114,7 +115,7 @@ class SubscriptionFieldsServiceSpec extends AsyncHmrcSpec with SubscriptionsBuil
 
     "save the fields fails with write access denied" in new Setup {
 
-      val developerRole = CollaboratorRole.DEVELOPER
+      val developerRole = Collaborator.Roles.DEVELOPER
 
       val access = AccessRequirements(devhub = DevhubAccessRequirements(NoOne, NoOne))
 

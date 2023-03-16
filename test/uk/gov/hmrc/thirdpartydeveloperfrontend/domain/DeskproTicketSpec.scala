@@ -18,9 +18,10 @@ package uk.gov.hmrc.thirdpartydeveloperfrontend.domain
 
 import play.api.test.FakeRequest
 
+import uk.gov.hmrc.apiplatform.modules.apis.domain.models.ApiVersion
+import uk.gov.hmrc.apiplatform.modules.applications.domain.models.ApplicationId
+import uk.gov.hmrc.apiplatform.modules.common.domain.models.LaxEmailAddress.StringSyntax
 import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.SupportEnquiryForm
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.apidefinitions.ApiVersion
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.ApplicationId
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.connectors.DeskproTicket
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.AsyncHmrcSpec
 
@@ -29,7 +30,7 @@ class DeskproTicketSpec extends AsyncHmrcSpec {
   implicit val fakeRequest = FakeRequest()
 
   val requestorName   = "bob example"
-  val requestorEmail  = "bob@example.com"
+  val requestorEmail  = "bob@example.com".toLaxEmail
   val applicationName = "my app"
   val applicationId   = ApplicationId.random
   val apiName         = "my api"
@@ -44,14 +45,14 @@ class DeskproTicketSpec extends AsyncHmrcSpec {
 
   "A DeskproTicket created from a support enquiry" should {
     "have the correct details populated" in {
-      val form = SupportEnquiryForm(requestorName, requestorEmail, comments)
+      val form = SupportEnquiryForm(requestorName, requestorEmail.text, comments)
 
       val ticket = DeskproTicket.createFromSupportEnquiry(form, applicationName)
 
       checkDeskproTicket(
         ticket,
         s"$applicationName: Support Enquiry",
-        s"$requestorEmail has submitted the following support enquiry: $comments Please send them a response within 2 working days. HMRC Developer Hub"
+        s"${requestorEmail.text} has submitted the following support enquiry: $comments Please send them a response within 2 working days. HMRC Developer Hub"
       )
     }
   }
@@ -63,7 +64,7 @@ class DeskproTicketSpec extends AsyncHmrcSpec {
       checkDeskproTicket(
         ticket,
         "Request to subscribe to an API",
-        s"I '$requestorEmail' want my application '$applicationName' identified by '${applicationId.value}' to be subscribed to the API '$apiName' with version '${apiVersion.value}'"
+        s"I '${requestorEmail.text}' want my application '$applicationName' identified by '${applicationId.text}' to be subscribed to the API '$apiName' with version '${apiVersion.value}'"
       )
     }
   }
@@ -75,7 +76,7 @@ class DeskproTicketSpec extends AsyncHmrcSpec {
       checkDeskproTicket(
         ticket,
         "Request to unsubscribe from an API",
-        s"I '$requestorEmail' want my application '$applicationName' identified by '${applicationId.value}' to be unsubscribed from the API '$apiName' with version '${apiVersion.value}'"
+        s"I '${requestorEmail.text}' want my application '$applicationName' identified by '${applicationId.text}' to be unsubscribed from the API '$apiName' with version '${apiVersion.value}'"
       )
     }
   }

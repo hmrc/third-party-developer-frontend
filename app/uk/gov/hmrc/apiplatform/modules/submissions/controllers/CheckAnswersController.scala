@@ -23,6 +23,7 @@ import scala.concurrent.Future.successful
 import play.api.libs.crypto.CookieSigner
 import play.api.mvc.MessagesControllerComponents
 
+import uk.gov.hmrc.apiplatform.modules.applications.domain.models.ApplicationId
 import uk.gov.hmrc.apiplatform.modules.common.services.EitherTHelper
 import uk.gov.hmrc.apiplatform.modules.submissions.controllers.CheckAnswersController.ProdCredsRequestReceivedViewModel
 import uk.gov.hmrc.apiplatform.modules.submissions.controllers.SubmissionActionBuilders.SubmissionStatusFilter
@@ -34,7 +35,6 @@ import uk.gov.hmrc.thirdpartydeveloperfrontend.config.{ApplicationConfig, ErrorH
 import uk.gov.hmrc.thirdpartydeveloperfrontend.connectors.ApmConnector
 import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.ApplicationController
 import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.checkpages.CanUseCheckActions
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.ApplicationId
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.controllers.BadRequestWithErrorMessage
 import uk.gov.hmrc.thirdpartydeveloperfrontend.service.{ApplicationActionService, ApplicationService, SessionService}
 
@@ -88,7 +88,7 @@ class CheckAnswersController @Inject() (
     RoleFilter.isAdminRole,
     SubmissionStatusFilter.answeredCompletely
   )(redirectToGetProdCreds(productionAppId))(productionAppId) { implicit request =>
-    val requesterIsResponsibleIndividual   = isRequesterResponsibleIndividual(request.submission)
+    val requesterIsResponsibleIndividual = isRequesterResponsibleIndividual(request.submission)
     requestProductionCredentials
       .requestProductionCredentials(productionAppId, request.developerSession, requesterIsResponsibleIndividual)
       .map(_ match {
@@ -107,11 +107,13 @@ class CheckAnswersController @Inject() (
     }
   }
 
-  def requestReceivedPage(productionAppId: ApplicationId) = withApplicationSubmission(ApplicationStateFilter.pendingApprovalOrProduction, RoleFilter.isAdminRole)(productionAppId) { implicit request =>
-    val requesterIsResponsibleIndividual   = isRequesterResponsibleIndividual(request.submission)
-    val isNewTouUplift = request.submission.context.getOrElse(AskWhen.Context.Keys.NEW_TERMS_OF_USE_UPLIFT, "No") == "Yes"
-    val isGranted = request.submission.status.isGranted
-    val viewModel = ProdCredsRequestReceivedViewModel(productionAppId, requesterIsResponsibleIndividual, isNewTouUplift, isGranted)
+  def requestReceivedPage(
+      productionAppId: ApplicationId
+    ) = withApplicationSubmission(ApplicationStateFilter.pendingApprovalOrProduction, RoleFilter.isAdminRole)(productionAppId) { implicit request =>
+    val requesterIsResponsibleIndividual = isRequesterResponsibleIndividual(request.submission)
+    val isNewTouUplift                   = request.submission.context.getOrElse(AskWhen.Context.Keys.NEW_TERMS_OF_USE_UPLIFT, "No") == "Yes"
+    val isGranted                        = request.submission.status.isGranted
+    val viewModel                        = ProdCredsRequestReceivedViewModel(productionAppId, requesterIsResponsibleIndividual, isNewTouUplift, isGranted)
     successful(Ok(prodCredsRequestReceivedView(viewModel)))
   }
 }

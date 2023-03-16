@@ -16,18 +16,18 @@
 
 package uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications
 
-case class ResponsibleIndividual(fullName: ResponsibleIndividual.Name, emailAddress: ResponsibleIndividual.EmailAddress)
+import uk.gov.hmrc.apiplatform.modules.common.domain.models.LaxEmailAddress
+
+case class ResponsibleIndividual(fullName: ResponsibleIndividual.Name, emailAddress: LaxEmailAddress)
 
 object ResponsibleIndividual {
   import play.api.libs.json.{Format, Json}
 
-  case class Name(value: String)         extends AnyVal
-  case class EmailAddress(value: String) extends AnyVal
+  case class Name(value: String) extends AnyVal
 
-  implicit val nameFormat         = Json.valueFormat[Name]
-  implicit val emailAddressFormat = Json.valueFormat[EmailAddress]
+  implicit val nameFormat = Json.valueFormat[Name]
 
   implicit val format: Format[ResponsibleIndividual] = Json.format[ResponsibleIndividual]
 
-  def build(name: String, email: String) = ResponsibleIndividual(Name(name), EmailAddress(email))
+  def build(name: String, email: LaxEmailAddress) = ResponsibleIndividual(Name(name), email)
 }

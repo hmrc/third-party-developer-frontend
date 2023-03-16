@@ -16,8 +16,10 @@
 
 package uk.gov.hmrc.thirdpartydeveloperfrontend.builder
 
+import uk.gov.hmrc.apiplatform.modules.apis.domain.models._
+import uk.gov.hmrc.apiplatform.modules.applications.domain.models.{ApplicationId, ClientId}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.apidefinitions._
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.{Application, ApplicationId, ClientId}
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.Application
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.subscriptions.ApiSubscriptionFields.{SubscriptionFieldDefinition, SubscriptionFieldValue, SubscriptionFieldsWrapper}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.subscriptions.{AccessRequirements, FieldName, FieldValue}
 
@@ -28,7 +30,7 @@ trait SubscriptionsBuilder {
     val contextName = context.getOrElse(ApiContext(s"context-$name"))
     val version     = ApiVersionDefinition(ApiVersion("version"), APIStatus.STABLE)
 
-    val f = fields.getOrElse(SubscriptionFieldsWrapper(ApplicationId("fake-appId"), ClientId("fake-clientId"), contextName, version.version, List.empty))
+    val f = fields.getOrElse(SubscriptionFieldsWrapper(ApplicationId.random, ClientId("fake-clientId"), contextName, version.version, List.empty))
 
     APISubscriptionStatus(name, s"serviceName-$name", contextName, version, subscribed = true, requiresTrust = false, fields = f, isTestSupport = false)
   }

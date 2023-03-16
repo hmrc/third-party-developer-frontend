@@ -20,6 +20,7 @@ import javax.inject.{Inject, Singleton}
 import scala.concurrent.Future.successful
 import scala.concurrent.{ExecutionContext, Future}
 
+import cats.data.NonEmptyList
 import views.html.checkpages.applicationcheck.team.TeamMemberAddView
 import views.html.manageTeamViews.{AddTeamMemberView, ManageTeamView, RemoveTeamMemberView}
 
@@ -29,12 +30,14 @@ import play.api.mvc.{Action, AnyContent, MessagesControllerComponents, Result}
 import play.twirl.api.Html
 import uk.gov.hmrc.play.bootstrap.controller.WithUnsafeDefaultFormBinding
 
+import uk.gov.hmrc.apiplatform.modules.applications.domain.models._
+import uk.gov.hmrc.apiplatform.modules.applications.services.CollaboratorService
+import uk.gov.hmrc.apiplatform.modules.commands.applications.domain.models.CommandFailures
+import uk.gov.hmrc.apiplatform.modules.common.domain.models.LaxEmailAddress.StringSyntax
 import uk.gov.hmrc.thirdpartydeveloperfrontend.config.{ApplicationConfig, ErrorHandler, FraudPreventionConfig}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.fraudprevention.FraudPreventionNavLinkHelper
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.Capabilities.SupportsTeamMembers
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.Permissions.{AdministratorOnly, TeamMembersOnly}
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.{AddCollaborator, ApplicationId, CollaboratorRole}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.controllers.AddTeamMemberPageMode._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.controllers.{AddTeamMemberPageMode, ApplicationViewModel}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.DeveloperSession
@@ -46,6 +49,7 @@ class ManageTeam @Inject() (
     val auditService: AuditService,
     val errorHandler: ErrorHandler,
     val applicationService: ApplicationService,
+    val collaboratorService: CollaboratorService,
     val applicationActionService: ApplicationActionService,
     mcc: MessagesControllerComponents,
     val cookieSigner: CookieSigner,
@@ -107,12 +111,18 @@ class ManageTeam @Inject() (
       }
 
       def handleValidForm(form: AddTeamMemberForm) = {
-        applicationService
-          .addTeamMember(request.application, request.developerSession.email, AddCollaborator(form.email, CollaboratorRole.from(form.role).getOrElse(CollaboratorRole.DEVELOPER)))
-          .map(_ => Redirect(successRedirect)) recover {
-          case _: ApplicationNotFound     => NotFound(errorHandler.notFoundTemplate)
-          case _: TeamMemberAlreadyExists => createBadRequestResult(AddTeamMemberForm.form.fill(form).withError("email", "team.member.error.emailAddress.already.exists.field"))
-        }
+        val role = form.role.flatMap(Collaborator.Role(_)).getOrElse(Collaborator.Roles.DEVELOPER)
+
+        collaboratorService
+          .addTeamMember(request.application, form.email.toLaxEmail, role, request.developerSession.email)
+          .map {
+            // Check if returned app has new collaborator in it?
+            case Right(_)                                                                => Redirect(successRedirect)
+            case Left(NonEmptyList(CommandFailures.CollaboratorAlreadyExistsOnApp, Nil)) =>
+              createBadRequestResult(AddTeamMemberForm.form.fill(form).withError("email", "team.member.error.emailAddress.already.exists.field"))
+            case Left(NonEmptyList(CommandFailures.ApplicationNotFound, Nil))            => NotFound(errorHandler.notFoundTemplate)
+            case _                                                                       => InternalServerError("Action failed")
+          }
       }
 
       def handleInvalidForm(formWithErrors: Form[AddTeamMemberForm]) = {
@@ -127,7 +137,7 @@ class ManageTeam @Inject() (
 
     application.findCollaboratorByHash(teamMemberHash) match {
       case Some(collaborator) =>
-        successful(Ok(removeTeamMemberView(applicationViewModelFromApplicationRequest, RemoveTeamMemberConfirmationForm.form, collaborator.emailAddress)))
+        successful(Ok(removeTeamMemberView(applicationViewModelFromApplicationRequest, RemoveTeamMemberConfirmationForm.form, collaborator.emailAddress.text)))
       case None               => successful(Redirect(routes.ManageTeam.manageTeam(applicationId, None)))
     }
   }
@@ -136,8 +146,8 @@ class ManageTeam @Inject() (
     def handleValidForm(form: RemoveTeamMemberConfirmationForm) = {
       form.confirm match {
         case Some("Yes") =>
-          applicationService
-            .removeTeamMember(request.application, form.email, request.developerSession.email)
+          collaboratorService
+            .removeTeamMember(request.application, form.email.toLaxEmail, request.developerSession.email)
             .map(_ => Redirect(routes.ManageTeam.manageTeam(applicationId, None)))
         case _           => successful(Redirect(routes.ManageTeam.manageTeam(applicationId, None)))
       }

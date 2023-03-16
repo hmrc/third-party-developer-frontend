@@ -30,9 +30,10 @@ import play.api.test.Helpers._
 import play.filters.csrf.CSRF.TokenProvider
 import uk.gov.hmrc.http.HeaderCarrier
 
+import uk.gov.hmrc.apiplatform.modules.applications.domain.models.{ApplicationId, ClientId, Collaborator}
+import uk.gov.hmrc.apiplatform.modules.common.domain.models.LaxEmailAddress.StringSyntax
 import uk.gov.hmrc.thirdpartydeveloperfrontend.builder.DeveloperBuilder
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.ApplicationUpdateSuccessful
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.CollaboratorRole.ADMINISTRATOR
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.Environment.{PRODUCTION, SANDBOX}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.{DeveloperSession, LoggedInState, Session}
@@ -71,12 +72,12 @@ class TermsOfUseSpec
     val loggedOutRequest = FakeRequest().withSession(sessionParams: _*)
     val loggedInRequest  = FakeRequest().withLoggedIn(underTest, implicitly)(sessionId).withSession(sessionParams: _*)
 
-    val appId = ApplicationId("1234")
+    val appId = ApplicationId.random
 
     implicit val hc = HeaderCarrier()
 
     def givenApplicationExists(
-        userRole: CollaboratorRole = ADMINISTRATOR,
+        userRole: Collaborator.Role = Collaborator.Roles.ADMINISTRATOR,
         environment: Environment = PRODUCTION,
         checkInformation: Option[CheckInformation] = None,
         access: Access = Standard()
@@ -131,7 +132,7 @@ class TermsOfUseSpec
     }
 
     "render the page for an administrator on a standard production app when the ToU have been agreed" in new Setup {
-      val email             = "email@exmaple.com"
+      val email             = "email@exmaple.com".toLaxEmail
       val timeStamp         = LocalDateTime.now(ZoneOffset.UTC)
       val expectedTimeStamp = DateTimeFormatter.ofPattern("dd MMMM yyyy").format(timeStamp)
       val version           = "1.0"
@@ -142,7 +143,7 @@ class TermsOfUseSpec
       val result           = addToken(underTest.termsOfUse(appId))(loggedInRequest)
       status(result) shouldBe OK
       contentAsString(result) should include("Terms of use")
-      contentAsString(result) should include(s"Terms of use accepted on $expectedTimeStamp by $email.")
+      contentAsString(result) should include(s"Terms of use accepted on $expectedTimeStamp by ${email.text}.")
     }
 
     "return a bad request for a sandbox app" in new Setup {
@@ -175,7 +176,7 @@ class TermsOfUseSpec
       val request = loggedInRequest.withFormUrlEncodedBody("termsOfUseAgreed" -> "true")
       val result  = addToken(underTest.agreeTermsOfUse(appId))(request)
       status(result) shouldBe SEE_OTHER
-      redirectLocation(result) shouldBe Some("/developer/applications/1234/details")
+      redirectLocation(result) shouldBe Some(s"/developer/applications/${application.id.text}/details")
 
       val termsOfUseAgreement = captor.getValue.termsOfUseAgreements.head
       termsOfUseAgreement.emailAddress shouldBe loggedInDeveloper.email
@@ -191,7 +192,7 @@ class TermsOfUseSpec
     }
 
     "return a bad request if the app already has terms of use agreed" in new Setup {
-      val checkInformation = CheckInformation(termsOfUseAgreements = List(applications.TermsOfUseAgreement("bob@example.com", LocalDateTime.now(ZoneOffset.UTC), "1.0")))
+      val checkInformation = CheckInformation(termsOfUseAgreements = List(applications.TermsOfUseAgreement("bob@example.com".toLaxEmail, LocalDateTime.now(ZoneOffset.UTC), "1.0")))
       givenApplicationExists(checkInformation = Some(checkInformation))
 
       val request = loggedInRequest.withFormUrlEncodedBody("termsOfUseAgreed" -> "true")

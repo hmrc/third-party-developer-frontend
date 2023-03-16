@@ -26,6 +26,7 @@ import uk.gov.hmrc.play.audit.AuditExtensions.auditHeaderCarrier
 import uk.gov.hmrc.play.audit.http.connector.{AuditConnector, AuditResult}
 import uk.gov.hmrc.play.audit.model.DataEvent
 
+import uk.gov.hmrc.apiplatform.modules.common.domain.models.LaxEmailAddress
 import uk.gov.hmrc.thirdpartydeveloperfrontend.config.ApplicationConfig
 
 @Singleton
@@ -70,12 +71,12 @@ object AuditAction {
     )
   }
 
-  case class PasswordChangeFailedDueToInvalidCredentials(email: String) extends AuditAction {
+  case class PasswordChangeFailedDueToInvalidCredentials(email: LaxEmailAddress) extends AuditAction {
     val name      = "Password change request has been denied, due to invalid credentials"
     val auditType = "PasswordChangeFailedDueToInvalidCredentials"
 
     override val tags = Map(
-      "developerEmail" -> email
+      "developerEmail" -> email.text
     )
   }
 

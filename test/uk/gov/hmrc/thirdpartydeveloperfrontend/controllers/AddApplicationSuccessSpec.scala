@@ -65,7 +65,7 @@ class AddApplicationSuccessSpec
     Environment.PRODUCTION,
     Some("Description 1"),
     Set(loggedInDeveloper.email.asAdministratorCollaborator),
-    state = ApplicationState.production(loggedInDeveloper.email, loggedInDeveloper.displayedName, ""),
+    state = ApplicationState.production(loggedInDeveloper.email.text, loggedInDeveloper.displayedName, ""),
     access = Standard(redirectUris = List("https://red1", "https://red2"), termsAndConditionsUrl = Some("http://tnc-url.com"))
   )
 
@@ -80,7 +80,7 @@ class AddApplicationSuccessSpec
     Environment.SANDBOX,
     Some("Description 2"),
     Set(loggedInDeveloper.email.asAdministratorCollaborator),
-    state = ApplicationState.production(loggedInDeveloper.email, loggedInDeveloper.displayedName, ""),
+    state = ApplicationState.production(loggedInDeveloper.email.text, loggedInDeveloper.displayedName, ""),
     access = Standard(redirectUris = List("https://red3", "https://red4"), termsAndConditionsUrl = Some("http://tnc-url.com"))
   )
 

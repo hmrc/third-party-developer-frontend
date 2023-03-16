@@ -24,13 +24,14 @@ import cats.instances.future.catsStdInstancesForFuture
 
 import play.api.mvc.{ActionRefiner, _}
 
+import uk.gov.hmrc.apiplatform.modules.applications.domain.models.{ApplicationId, Collaborator}
 import uk.gov.hmrc.apiplatform.modules.common.services.EitherTHelper
 import uk.gov.hmrc.apiplatform.modules.submissions.domain.models.Submission.Status
 import uk.gov.hmrc.apiplatform.modules.submissions.domain.models._
 import uk.gov.hmrc.apiplatform.modules.submissions.services.SubmissionService
 import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.{ApplicationActionBuilders, ApplicationRequest, BaseController, HasApplication, UserRequest}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.apidefinitions.APISubscriptionStatus
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.{Application, ApplicationId, CollaboratorRole, State}
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.{Application, State}
 
 class SubmissionRequest[A](val extSubmission: ExtendedSubmission, val userRequest: UserRequest[A]) extends UserRequest[A](userRequest.developerSession, userRequest.msgRequest) {
   lazy val submission         = extSubmission.submission
@@ -43,7 +44,7 @@ class SubmissionApplicationRequest[A](val application: Application, val submissi
 object SubmissionActionBuilders {
 
   object RoleFilter {
-    type Type = CollaboratorRole => Boolean
+    type Type = Collaborator.Role => Boolean
     val isAdminRole: Type  = _.isAdministrator
     val isTeamMember: Type = _ => true
   }
@@ -62,9 +63,11 @@ object SubmissionActionBuilders {
 
   object SubmissionStatusFilter {
     type Type = Status => Boolean
-    val answeredCompletely: Type         = _.isAnsweredCompletely
-    val submitted: Type                  = _.isSubmitted
-    val submittedGrantedOrDeclined: Type = status => status.isSubmitted || status.isGranted || status.isGrantedWithWarnings || status.isDeclined || status.isFailed || status.isWarnings || status.isPendingResponsibleIndividual
+    val answeredCompletely: Type = _.isAnsweredCompletely
+    val submitted: Type          = _.isSubmitted
+
+    val submittedGrantedOrDeclined: Type = status =>
+      status.isSubmitted || status.isGranted || status.isGrantedWithWarnings || status.isDeclined || status.isFailed || status.isWarnings || status.isPendingResponsibleIndividual
     val granted: Type                    = status => status.isGranted || status.isGrantedWithWarnings
     val allAllowed: Type                 = _ => true
   }

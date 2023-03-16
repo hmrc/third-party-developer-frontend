@@ -16,6 +16,7 @@
 
 package uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.apidefinitions
 
+import uk.gov.hmrc.apiplatform.modules.apis.domain.models.ApiContext
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.connectors.ApiDefinition
 
 trait ApiDefinitionTestDataHelper {

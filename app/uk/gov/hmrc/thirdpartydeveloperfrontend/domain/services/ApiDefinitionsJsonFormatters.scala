@@ -16,6 +16,8 @@
 
 package uk.gov.hmrc.thirdpartydeveloperfrontend.domain.services
 
+import uk.gov.hmrc.apiplatform.modules.apis.domain.models._
+
 trait ApiDefinitionsJsonFormatters {
   import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.apidefinitions._
   import play.api.libs.json._

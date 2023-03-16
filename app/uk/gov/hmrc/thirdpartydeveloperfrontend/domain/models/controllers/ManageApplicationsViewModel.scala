@@ -18,9 +18,9 @@ package uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.controllers
 
 import java.time.Instant
 
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.{ApplicationId, CollaboratorRole}
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.connectors.TermsOfUseInvitation
+import uk.gov.hmrc.apiplatform.modules.applications.domain.models._
 import uk.gov.hmrc.apiplatform.modules.submissions.domain.models.Submission
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.connectors.TermsOfUseInvitation
 
 case class ManageApplicationsViewModel(
     sandboxApplicationSummaries: Seq[ApplicationSummary],
@@ -42,11 +42,11 @@ case class ManageApplicationsViewModel(
 
   lazy val applicationsThatHaveTermOfUseInvitatationsOutstanding =
     liveProductionApplications
-      .filter(app => app.role == CollaboratorRole.ADMINISTRATOR)
+      .filter(app => app.role == Collaborator.Roles.ADMINISTRATOR)
       .filter(app => termsOfUseInvitations.exists(app.id == _.applicationId))
-      .filter(app => 
+      .filter(app =>
         !productionApplicationSubmissions.exists(sub => app.id == sub.applicationId) ||
-        productionApplicationSubmissions.exists(sub => app.id == sub.applicationId && sub.status.isOpenToAnswers)
+          productionApplicationSubmissions.exists(sub => app.id == sub.applicationId && sub.status.isOpenToAnswers)
       )
       .map(applicationSummary =>
         TermsOfUseInvitationViewModel(applicationSummary.id, applicationSummary.name, termsOfUseInvitations.find(_.applicationId == applicationSummary.id).get.dueBy)
@@ -54,10 +54,10 @@ case class ManageApplicationsViewModel(
 
   lazy val applicationsThatHaveTermOfUseInvitatationsSubmitted =
     liveProductionApplications
-      .filter(app => app.role == CollaboratorRole.ADMINISTRATOR)
+      .filter(app => app.role == Collaborator.Roles.ADMINISTRATOR)
       .filter(app => termsOfUseInvitations.exists(app.id == _.applicationId))
-      .filter(app => 
-        productionApplicationSubmissions.exists(sub => 
+      .filter(app =>
+        productionApplicationSubmissions.exists(sub =>
           app.id == sub.applicationId && (sub.status.isFailed || sub.status.isWarnings || sub.status.isPendingResponsibleIndividual || sub.status.isSubmitted)
         )
       )

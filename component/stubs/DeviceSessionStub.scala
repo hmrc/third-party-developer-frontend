@@ -22,7 +22,7 @@ import play.api.libs.json.Json
 import uk.gov.hmrc.apiplatform.modules.mfa.models.DeviceSession
 
 import java.util.UUID
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.UserId
+import uk.gov.hmrc.apiplatform.modules.developers.domain.models.UserId
 
 object DeviceSessionStub {
   val staticDeviceSessionId = UUID.fromString("69fc10f6-9193-42b4-97f2-87886c972ad4")

@@ -14,22 +14,15 @@
  * limitations under the License.
  */
 
-package uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications
+package uk.gov.hmrc.apiplatform.modules.commands.applications.domain.models
 
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.UserId
+import play.api.libs.json.Json
 
-case class Collaborator(emailAddress: String, role: CollaboratorRole, userId: UserId)
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.Application
 
-object Collaborator {
-  import play.api.libs.json.Json
+case class DispatchSuccessResult(applicationResponse: Application)
 
-  implicit val format = Json.format[Collaborator]
-}
+object DispatchSuccessResult {
 
-case class AddCollaborator(emailAddress: String, role: CollaboratorRole)
-
-object AddCollaborator {
-  import play.api.libs.json.Json
-
-  implicit val format = Json.format[AddCollaborator]
+  implicit val format = Json.format[DispatchSuccessResult]
 }

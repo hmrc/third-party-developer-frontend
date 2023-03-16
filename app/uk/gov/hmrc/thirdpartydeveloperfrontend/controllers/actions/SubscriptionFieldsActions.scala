@@ -22,6 +22,8 @@ import cats.data.NonEmptyList
 
 import play.api.mvc.{Action, ActionRefiner, AnyContent, Result}
 
+import uk.gov.hmrc.apiplatform.modules.apis.domain.models._
+import uk.gov.hmrc.apiplatform.modules.applications.domain.models.ApplicationId
 import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.ManageSubscriptions.toDetails
 import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.{ApplicationRequest, _}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.apidefinitions._

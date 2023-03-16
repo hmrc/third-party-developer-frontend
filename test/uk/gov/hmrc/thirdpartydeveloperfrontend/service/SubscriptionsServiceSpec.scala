@@ -23,10 +23,12 @@ import scala.concurrent.Future.successful
 
 import uk.gov.hmrc.http.HeaderCarrier
 
+import uk.gov.hmrc.apiplatform.modules.apis.domain.models._
+import uk.gov.hmrc.apiplatform.modules.applications.domain.models.{ApplicationId, ClientId}
+import uk.gov.hmrc.apiplatform.modules.common.domain.models.LaxEmailAddress.StringSyntax
 import uk.gov.hmrc.thirdpartydeveloperfrontend.builder._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.connectors._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain._
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.apidefinitions._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.service.PushPullNotificationsService.PushPullNotificationsConnector
 import uk.gov.hmrc.thirdpartydeveloperfrontend.service.SubscriptionFieldsService.SubscriptionFieldsConnector
@@ -54,15 +56,12 @@ class SubscriptionsServiceSpec extends AsyncHmrcSpec with SubscriptionsBuilder w
 
     val mockAuditService: AuditService = mock[AuditService]
 
-    val mockSubscriptionFieldsService: SubscriptionFieldsService = mock[SubscriptionFieldsService]
-    val mockDeskproConnector: DeskproConnector                   = mock[DeskproConnector]
-    val mockApmConnector: ApmConnector                           = mock[ApmConnector]
+    val mockDeskproConnector: DeskproConnector = mock[DeskproConnector]
+    val mockApmConnector: ApmConnector         = mock[ApmConnector]
 
     val subscriptionsService = new SubscriptionsService(
       mockDeskproConnector,
-      mockApmConnector,
-      mockSubscriptionFieldsService,
-      mockAuditService
+      mockApmConnector
     )
 
     def theProductionConnectorthenReturnTheApplication(applicationId: ApplicationId, application: Application): Unit = {
@@ -73,7 +72,7 @@ class SubscriptionsServiceSpec extends AsyncHmrcSpec with SubscriptionsBuilder w
 
   }
 
-  val productionApplicationId = ApplicationId("Application ID")
+  val productionApplicationId = ApplicationId.random
   val productionClientId      = ClientId(s"client-id-${randomUUID().toString}")
 
   val productionApplication: Application =
@@ -95,7 +94,7 @@ class SubscriptionsServiceSpec extends AsyncHmrcSpec with SubscriptionsBuilder w
       ApiIdentifier(ApiContext("first context"), versionOne),
       ApiIdentifier(ApiContext("second context"), versionOne)
     )
-    val appWithData   = ApplicationWithSubscriptionData(buildApplication("email@example.com"), subscriptions)
+    val appWithData   = ApplicationWithSubscriptionData(buildApplication("email@example.com".toLaxEmail), subscriptions)
 
     "return false when the application has no subscriptions to the requested api version" in new Setup {
       val apiContext   = ApiContext("third context")

@@ -18,6 +18,7 @@ package uk.gov.hmrc.apiplatform.modules.submissions.domain.models
 
 import play.api.libs.json.Json
 
+import uk.gov.hmrc.apiplatform.modules.common.domain.models.LaxEmailAddress
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.ResponsibleIndividual
 
 object ResponsibleIndividualVerificationWithDetails {
@@ -28,5 +29,5 @@ case class ResponsibleIndividualVerificationWithDetails(
     verification: ResponsibleIndividualVerification,
     responsibleIndividual: ResponsibleIndividual,
     submitterName: String,
-    submitterEmail: String
+    submitterEmail: LaxEmailAddress
   )

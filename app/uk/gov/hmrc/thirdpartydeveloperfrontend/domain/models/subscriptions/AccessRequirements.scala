@@ -16,7 +16,7 @@
 
 package uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.subscriptions
 
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.CollaboratorRole
+import uk.gov.hmrc.apiplatform.modules.applications.domain.models.Collaborator
 
 sealed trait DevhubAccessRequirement
 
@@ -61,9 +61,9 @@ sealed trait DevhubAccessLevel {
 
 object DevhubAccessLevel {
 
-  def fromRole(role: CollaboratorRole): DevhubAccessLevel = role match {
-    case CollaboratorRole.ADMINISTRATOR => DevhubAccessLevel.Admininstator
-    case CollaboratorRole.DEVELOPER     => DevhubAccessLevel.Developer
+  def fromRole(role: Collaborator.Role): DevhubAccessLevel = role match {
+    case Collaborator.Roles.ADMINISTRATOR => DevhubAccessLevel.Admininstator
+    case Collaborator.Roles.DEVELOPER     => DevhubAccessLevel.Developer
   }
 
   case object Developer     extends DevhubAccessLevel

@@ -24,6 +24,8 @@ import org.mockito.captor.ArgCaptor
 
 import uk.gov.hmrc.http.HeaderCarrier
 
+import uk.gov.hmrc.apiplatform.modules.applications.domain.models.ApplicationId
+import uk.gov.hmrc.apiplatform.modules.common.domain.models.LaxEmailAddress.StringSyntax
 import uk.gov.hmrc.apiplatform.modules.submissions.connectors.ThirdPartyApplicationSubmissionsConnector
 import uk.gov.hmrc.apiplatform.modules.submissions.domain.models.{
   ResponsibleIndividualToUVerification,
@@ -33,7 +35,7 @@ import uk.gov.hmrc.apiplatform.modules.submissions.domain.models.{
   Submission
 }
 import uk.gov.hmrc.thirdpartydeveloperfrontend.connectors.DeskproConnector
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.{ApplicationId, ResponsibleIndividual}
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.ResponsibleIndividual
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.connectors.{DeskproTicket, TicketCreated}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.mocks.service.ApplicationServiceMock
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.{AsyncHmrcSpec, CollaboratorTracker, LocalUserIdTracker, TestApplications}
@@ -59,7 +61,7 @@ class ResponsibleIndividualVerificationServiceSpec extends AsyncHmrcSpec
       LocalDateTime.now(ZoneOffset.UTC),
       ResponsibleIndividualVerificationState.INITIAL
     )
-    val responsibleIndividual = ResponsibleIndividual.build("bob example", "bob@example.com")
+    val responsibleIndividual = ResponsibleIndividual.build("bob example", "bob@example.com".toLaxEmail)
 
     val mockSubmissionsConnector: ThirdPartyApplicationSubmissionsConnector = mock[ThirdPartyApplicationSubmissionsConnector]
     val mockDeskproConnector                                                = mock[DeskproConnector]
@@ -102,7 +104,7 @@ class ResponsibleIndividualVerificationServiceSpec extends AsyncHmrcSpec
       val deskproTicket = ticketCapture.value
       deskproTicket.subject shouldBe "New application submitted for checking"
       deskproTicket.name shouldBe application.state.requestedByName.get
-      deskproTicket.email shouldBe application.state.requestedByEmailAddress.get
+      deskproTicket.email.text shouldBe application.state.requestedByEmailAddress.get
       deskproTicket.message should include(riVerification.applicationName)
       deskproTicket.referrer should include(s"/application/${riVerification.applicationId.value}/check-answers")
     }
@@ -117,7 +119,7 @@ class ResponsibleIndividualVerificationServiceSpec extends AsyncHmrcSpec
         LocalDateTime.now(ZoneOffset.UTC),
         responsibleIndividual,
         "Mr Admin",
-        "admin@example.com",
+        "admin@example.com".toLaxEmail,
         ResponsibleIndividualVerificationState.INITIAL
       )
 

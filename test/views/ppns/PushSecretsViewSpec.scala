@@ -28,7 +28,9 @@ import views.html.ppns.PushSecretsView
 import play.api.test.FakeRequest
 import play.twirl.api.Html
 
-import uk.gov.hmrc.thirdpartydeveloperfrontend.builder.{DeveloperBuilder, DeveloperSessionBuilder}
+import uk.gov.hmrc.apiplatform.modules.applications.domain.models.{ApplicationId, ClientId}
+import uk.gov.hmrc.apiplatform.modules.common.domain.models.LaxEmailAddress.StringSyntax
+import uk.gov.hmrc.thirdpartydeveloperfrontend.builder._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.LoggedInState
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils._
@@ -38,7 +40,7 @@ class PushSecretsViewSpec extends CommonViewSpec
     with CollaboratorTracker
     with LocalUserIdTracker
     with DeveloperSessionBuilder
-    with DeveloperBuilder {
+    with DeveloperTestData {
 
   trait Setup {
     val pushSecretsView: PushSecretsView = app.injector.instanceOf[PushSecretsView]
@@ -49,11 +51,10 @@ class PushSecretsViewSpec extends CommonViewSpec
   }
 
   "Push secrets page" should {
-    val request   = FakeRequest().withCSRFToken
-    val developer = buildDeveloperSession(loggedInState = LoggedInState.LOGGED_IN, buildDeveloper("Test", "Test", "Test", None))
+    val request = FakeRequest().withCSRFToken
 
     val application                       = Application(
-      ApplicationId("Test Application ID"),
+      ApplicationId.random,
       ClientId("Test Application Client ID"),
       "Test Application",
       LocalDateTime.now(),
@@ -62,7 +63,7 @@ class PushSecretsViewSpec extends CommonViewSpec
       grantLength,
       Environment.PRODUCTION,
       Some("Test Application"),
-      collaborators = Set(developer.email.asAdministratorCollaborator),
+      collaborators = Set(standardDeveloper.email.asAdministratorCollaborator),
       access = Standard(),
       state = ApplicationState.testing,
       checkInformation = None
@@ -70,7 +71,7 @@ class PushSecretsViewSpec extends CommonViewSpec
     val pushSecrets: NonEmptyList[String] = NonEmptyList.one("the secret")
 
     "render" in new Setup {
-      val page: Html = pushSecretsView.render(application, pushSecrets, request, developer, messagesProvider, appConfig)
+      val page: Html = pushSecretsView.render(application, pushSecrets, request, standardDeveloper.loggedIn, messagesProvider, appConfig)
 
       page.contentType should include("text/html")
       val document: Document = Jsoup.parse(page.body)

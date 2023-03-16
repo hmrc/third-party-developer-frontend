@@ -21,6 +21,8 @@ import scala.concurrent.{ExecutionContext, Future}
 
 import uk.gov.hmrc.http.HeaderCarrier
 
+import uk.gov.hmrc.apiplatform.modules.apis.domain.models.ApiContext
+import uk.gov.hmrc.apiplatform.modules.applications.domain.models.ApplicationId
 import uk.gov.hmrc.apiplatform.modules.common.services.EitherTHelper
 import uk.gov.hmrc.apiplatform.modules.submissions.connectors.ThirdPartyApplicationSubmissionsConnector
 import uk.gov.hmrc.apiplatform.modules.submissions.domain.models.Submission
@@ -28,11 +30,10 @@ import uk.gov.hmrc.apiplatform.modules.uplift.domain.models.ApiSubscriptions
 import uk.gov.hmrc.apiplatform.modules.uplift.domain.services._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.connectors.ApmConnector
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.ApplicationUpdateSuccessful
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.apidefinitions.{APISubscriptionStatus, ApiContext}
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.{ApplicationId, UpliftData, Application, UpdateApplicationRequest, Access, Standard}
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.apidefinitions.APISubscriptionStatus
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.DeveloperSession
 import uk.gov.hmrc.thirdpartydeveloperfrontend.service.ApplicationService
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.SellResellOrDistribute
 
 @Singleton
 class UpliftJourneyService @Inject() (
@@ -136,38 +137,39 @@ class UpliftJourneyService @Inject() (
 
         // Need to update the application with possible new value of sellResellOrDistribute,
         // but don't change app apart from that.
-        _                      <- liftF(updateSellResellOrDistributeIfNeeded(application, sellResellOrDistribute))
+        _ <- liftF(updateSellResellOrDistributeIfNeeded(application, sellResellOrDistribute))
 
         submission <- fromOptionF(thirdPartyApplicationSubmissionsConnector.createSubmission(appId, developerSession.email), "No submission returned")
       } yield submission
     )
       .value
+  }
+
+  private def updateSellResellOrDistributeIfNeeded(application: Application, sellResellOrDistribute: SellResellOrDistribute)(implicit hc: HeaderCarrier) = {
+    def updatedAccess(existing: Application, sellResell: SellResellOrDistribute): Access =
+      existing.access match {
+        case stdAccess: Standard => stdAccess.copy(sellResellOrDistribute = Some(sellResell))
+        case _                   => existing.access
+      }
+
+    def createUpdateApplicationRequest(app: Application, sellResell: SellResellOrDistribute) = UpdateApplicationRequest(
+      app.id,
+      app.deployedTo,
+      app.name,
+      app.description,
+      updatedAccess(app, sellResell)
+    )
+
+    def existingSellResellOrDistribute = application.access match {
+      case Standard(_, _, _, _, sellResellOrDistribute, _) => sellResellOrDistribute
+      case _                                               => None
     }
 
-    private def updateSellResellOrDistributeIfNeeded(application: Application, sellResellOrDistribute: SellResellOrDistribute)(implicit hc: HeaderCarrier) = {
-      def updatedAccess(existing: Application, sellResell: SellResellOrDistribute): Access =
-        existing.access match {
-          case stdAccess: Standard => stdAccess.copy(sellResellOrDistribute = Some(sellResell))
-          case _                   => existing.access
-      }
-      
-      def createUpdateApplicationRequest(app: Application, sellResell: SellResellOrDistribute) = UpdateApplicationRequest(
-        app.id,
-        app.deployedTo,
-        app.name,
-        app.description,
-        updatedAccess(app, sellResell))
-
-      def existingSellResellOrDistribute = application.access match {
-        case Standard(_, _, _, _, sellResellOrDistribute, _) => sellResellOrDistribute
-        case _                                               => None
-      }
-
-      // Only save if the value is different
-      if (Some(sellResellOrDistribute) != existingSellResellOrDistribute) {
-        applicationService.update(createUpdateApplicationRequest(application, sellResellOrDistribute))
-      } else {
-        Future.successful(ApplicationUpdateSuccessful)
-      }
+    // Only save if the value is different
+    if (Some(sellResellOrDistribute) != existingSellResellOrDistribute) {
+      applicationService.update(createUpdateApplicationRequest(application, sellResellOrDistribute))
+    } else {
+      Future.successful(ApplicationUpdateSuccessful)
     }
+  }
 }

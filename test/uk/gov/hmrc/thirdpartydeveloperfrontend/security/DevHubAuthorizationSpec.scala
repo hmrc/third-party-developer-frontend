@@ -32,13 +32,13 @@ import play.api.test.Helpers._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.builder._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.config.{ApplicationConfig, ErrorHandler}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.{BaseController, BaseControllerSpec, routes}
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.{DeveloperSession, LoggedInState}
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.DeveloperSession
 import uk.gov.hmrc.thirdpartydeveloperfrontend.service.SessionService
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.LocalUserIdTracker
 
 class DevHubAuthorizationSpec extends BaseControllerSpec with Matchers with LocalUserIdTracker
-    with DeveloperSessionBuilder
-    with DeveloperBuilder {
+    with DeveloperTestData
+    with DeveloperSessionBuilder {
 
   class TestDevHubAuthorization(mcc: MessagesControllerComponents)(implicit val appConfig: ApplicationConfig, val ec: ExecutionContext)
       extends BaseController(mcc)
@@ -67,8 +67,8 @@ class DevHubAuthorizationSpec extends BaseControllerSpec with Matchers with Loca
     when(underTest.sessionService.updateUserFlowSessions(*)).thenReturn(successful(()))
   }
 
-  val loggedInDeveloperSession     = buildDeveloperSession(loggedInState = LoggedInState.LOGGED_IN, buildDeveloper("Email", "firstName", "lastName"))
-  val partLoggedInDeveloperSession = buildDeveloperSession(loggedInState = LoggedInState.PART_LOGGED_IN_ENABLING_MFA, buildDeveloper("Email", "firstName", "lastName"))
+  val loggedInDeveloperSession     = standardDeveloper.loggedIn
+  val partLoggedInDeveloperSession = standardDeveloper.partLoggedInEnablingMFA
 
   "DebHubAuthWrapper" when {
     "the user is logged in and" when {

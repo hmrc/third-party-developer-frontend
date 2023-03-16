@@ -24,6 +24,10 @@ import scala.concurrent.Future.{failed, successful}
 
 import uk.gov.hmrc.http.HeaderCarrier
 
+import uk.gov.hmrc.apiplatform.modules.apis.domain.models.ApiVersion
+import uk.gov.hmrc.apiplatform.modules.applications.domain.models.{ApplicationId, ClientId}
+import uk.gov.hmrc.apiplatform.modules.common.domain.models.Actors
+import uk.gov.hmrc.apiplatform.modules.common.domain.models.LaxEmailAddress.StringSyntax
 import uk.gov.hmrc.thirdpartydeveloperfrontend.builder._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.config.ApplicationConfig
 import uk.gov.hmrc.thirdpartydeveloperfrontend.connectors._
@@ -104,7 +108,7 @@ class ApplicationServiceClientSecretSpec extends AsyncHmrcSpec with Subscription
   def version(version: ApiVersion, status: APIStatus, subscribed: Boolean): VersionSubscription =
     VersionSubscription(ApiVersionDefinition(version, status), subscribed)
 
-  val productionApplicationId = ApplicationId("Application ID")
+  val productionApplicationId = ApplicationId.random
   val productionClientId      = ClientId(s"client-id-${randomUUID().toString}")
 
   val productionApplication: Application =
@@ -124,7 +128,7 @@ class ApplicationServiceClientSecretSpec extends AsyncHmrcSpec with Subscription
   "addClientSecret" should {
     val newClientSecretId = UUID.randomUUID().toString
     val newClientSecret   = UUID.randomUUID().toString
-    val actor             = CollaboratorActor("john.requestor@example.com")
+    val actor             = Actors.AppCollaborator("john.requestor@example.com".toLaxEmail)
     val timestamp         = LocalDateTime.now(clock)
 
     "add a client secret for app in production environment" in new Setup {
@@ -155,7 +159,7 @@ class ApplicationServiceClientSecretSpec extends AsyncHmrcSpec with Subscription
 
   "deleteClientSecret" should {
     val applicationId  = ApplicationId.random
-    val actor          = CollaboratorActor("john.requestor@example.com")
+    val actor          = Actors.AppCollaborator("john.requestor@example.com".toLaxEmail)
     val secretToDelete = UUID.randomUUID().toString
     val timestamp      = LocalDateTime.now(clock)
 

@@ -24,6 +24,7 @@ import play.api.mvc._
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.play.bootstrap.controller.WithUnsafeDefaultFormBinding
 
+import uk.gov.hmrc.apiplatform.modules.developers.domain.models.UserId
 import uk.gov.hmrc.apiplatform.modules.mfa.connectors.ThirdPartyDeveloperMfaConnector
 import uk.gov.hmrc.apiplatform.modules.mfa.connectors.ThirdPartyDeveloperMfaConnector.{RegisterSmsFailureResponse, RegisterSmsSuccessResponse}
 import uk.gov.hmrc.apiplatform.modules.mfa.forms._
@@ -31,7 +32,6 @@ import uk.gov.hmrc.apiplatform.modules.mfa.models.MfaAction.{CREATE, REMOVE}
 import uk.gov.hmrc.apiplatform.modules.mfa.models.MfaType.{AUTHENTICATOR_APP, SMS}
 import uk.gov.hmrc.apiplatform.modules.mfa.models.{MfaAction, MfaId, MfaType}
 import uk.gov.hmrc.apiplatform.modules.mfa.service.{MfaResponse, MfaService}
-import uk.gov.hmrc.apiplatform.modules.mfa.utils.MfaDetailHelper
 import uk.gov.hmrc.apiplatform.modules.mfa.utils.MfaDetailHelper._
 import uk.gov.hmrc.apiplatform.modules.mfa.views.html.authapp._
 import uk.gov.hmrc.apiplatform.modules.mfa.views.html.sms._
@@ -40,7 +40,7 @@ import uk.gov.hmrc.thirdpartydeveloperfrontend.config.{ApplicationConfig, ErrorH
 import uk.gov.hmrc.thirdpartydeveloperfrontend.connectors.ThirdPartyDeveloperConnector
 import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.LoggedInController
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.connectors.UpdateLoggedInStateRequest
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.{Developer, DeveloperSession, LoggedInState, UserId}
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.{Developer, DeveloperSession, LoggedInState}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.qr.{OtpAuthUri, QRCode}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.service.SessionService
 
@@ -133,7 +133,7 @@ class MfaController @Inject() (
 
   def setupAuthApp: Action[AnyContent] = atLeastPartLoggedInEnablingMfaAction { implicit request =>
     thirdPartyDeveloperMfaConnector.createMfaAuthApp(request.userId).map(registerAuthAppResponse => {
-      val uri   = otpAuthUri(registerAuthAppResponse.secret.toLowerCase, "HMRC Developer Hub", request.developerSession.email)
+      val uri   = otpAuthUri(registerAuthAppResponse.secret.toLowerCase, "HMRC Developer Hub", request.developerSession.email.text)
       val qrImg = qrCode.generateDataImageBase64(uri.toString)
       Ok(qrCodeView(registerAuthAppResponse.secret.toLowerCase().grouped(4).mkString(" "), qrImg, registerAuthAppResponse.mfaId))
     })
@@ -282,10 +282,6 @@ class MfaController @Inject() (
 
   def removeMfaCompletedPage(): Action[AnyContent] = atLeastPartLoggedInEnablingMfaAction { implicit request =>
     Future.successful(Ok(removeMfaCompletedView()))
-  }
-
-  private def hasMultipleMfaMethods(developer: Developer): Boolean = {
-    MfaDetailHelper.hasVerifiedSmsAndAuthApp(developer.mfaDetails)
   }
 
   private def removeMfaUserWithOneMfaMethod(mfaId: MfaId, mfaType: MfaType, userId: UserId)(implicit hc: HeaderCarrier, request: Request[_]): Future[Result] = {

@@ -20,9 +20,12 @@ import java.time.{LocalDateTime, Period, ZoneOffset}
 import java.util.UUID.randomUUID
 import scala.util.Random
 
+import uk.gov.hmrc.apiplatform.modules.applications.domain.models.{ApplicationId, ClientId, Collaborator}
+import uk.gov.hmrc.apiplatform.modules.common.domain.models.LaxEmailAddress
+import uk.gov.hmrc.apiplatform.modules.common.domain.models.LaxEmailAddress.StringSyntax
+import uk.gov.hmrc.apiplatform.modules.developers.domain.models.UserId
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.apidefinitions.AccessType
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications._
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.UserId
 
 trait TestApplications {
   self: CollaboratorTracker =>
@@ -30,10 +33,10 @@ trait TestApplications {
   private def randomString(length: Int) = Random.alphanumeric.take(length).mkString
 
   def aSandboxApplication(
-      appId: ApplicationId = ApplicationId(randomUUID().toString),
+      appId: ApplicationId = ApplicationId.random,
       clientId: ClientId = ClientId(randomString(28)),
-      adminEmail: String = "admin@example.com",
-      developerEmail: String = "developer@example.com"
+      adminEmail: LaxEmailAddress = "admin@example.com".toLaxEmail,
+      developerEmail: LaxEmailAddress = "developer@example.com".toLaxEmail
     ): Application = {
 
     anApplication(
@@ -47,13 +50,13 @@ trait TestApplications {
   }
 
   def anApplication(
-      appId: ApplicationId = ApplicationId(randomUUID().toString),
+      appId: ApplicationId = ApplicationId.random,
       clientId: ClientId = ClientId(randomString(28)),
       grantLength: Period = Period.ofDays(547),
       environment: Environment = Environment.PRODUCTION,
       state: ApplicationState = ApplicationState.production("test@test.com", "test name", "test"),
-      adminEmail: String = "admin@example.com",
-      developerEmail: String = "developer@example.com",
+      adminEmail: LaxEmailAddress = "admin@example.com".toLaxEmail,
+      developerEmail: LaxEmailAddress = "developer@example.com".toLaxEmail,
       access: Access = standardAccess(),
       ipAllowlist: IpAllowlist = IpAllowlist()
     ): Application = {
@@ -78,13 +81,13 @@ trait TestApplications {
 
   def aStandardApprovedApplication: Application = aStandardApplication
 
-  def aStandardNonApprovedApplication(adminEmail: String = "admin@example.com"): Application =
+  def aStandardNonApprovedApplication(adminEmail: LaxEmailAddress = "admin@example.com".toLaxEmail): Application =
     anApplication(adminEmail = adminEmail).withState(ApplicationState.testing)
 
-  def aStandardPendingApprovalApplication(adminEmail: String = "admin@example.com"): Application =
+  def aStandardPendingApprovalApplication(adminEmail: LaxEmailAddress = "admin@example.com".toLaxEmail): Application =
     anApplication(adminEmail = adminEmail).withState(ApplicationState.pendingRequesterVerification("test@test.com", "test name", "test"))
 
-  def aStandardPendingResponsibleIndividualVerificationApplication(adminEmail: String = "admin@example.com"): Application =
+  def aStandardPendingResponsibleIndividualVerificationApplication(adminEmail: LaxEmailAddress = "admin@example.com".toLaxEmail): Application =
     anApplication(adminEmail = adminEmail).withState(ApplicationState.pendingResponsibleIndividualVerification("admin@example.com", "admin name"))
 
   def standardAccess(
@@ -116,7 +119,8 @@ trait TestApplications {
 
     final def withDescription(description: Option[String]): Application = app.copy(description = description)
 
-    final def withTeamMember(email: String, userRole: CollaboratorRole): Application = app.copy(collaborators = app.collaborators + Collaborator(email, userRole, UserId.random))
+    final def withTeamMember(email: LaxEmailAddress, userRole: Collaborator.Role): Application =
+      app.copy(collaborators = app.collaborators + Collaborator(email, userRole, UserId.random))
 
     final def withTeamMembers(teamMembers: Set[Collaborator]): Application = app.copy(collaborators = teamMembers)
 

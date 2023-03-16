@@ -18,12 +18,13 @@ package uk.gov.hmrc.thirdpartydeveloperfrontend.domain
 
 import java.util.UUID
 
+import uk.gov.hmrc.apiplatform.modules.common.domain.models.LaxEmailAddress.StringSyntax
 import uk.gov.hmrc.thirdpartydeveloperfrontend.builder.DeveloperBuilder
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.{DeveloperSession, LoggedInState, Session}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.{AsyncHmrcSpec, LocalUserIdTracker}
 
 class DevelopersSessionSpec extends AsyncHmrcSpec with DeveloperBuilder with LocalUserIdTracker {
-  val email     = "thirdpartydeveloper@example.com"
+  val email     = "thirdpartydeveloper@example.com".toLaxEmail
   val firstName = "John"
   val lastName  = "Doe"
   val developer = buildDeveloper(emailAddress = email, firstName = firstName, lastName = lastName)

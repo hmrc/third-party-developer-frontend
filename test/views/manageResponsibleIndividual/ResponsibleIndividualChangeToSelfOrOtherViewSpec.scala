@@ -22,14 +22,14 @@ import views.html.manageResponsibleIndividual.ResponsibleIndividualChangeToSelfO
 
 import play.api.test.FakeRequest
 
-import uk.gov.hmrc.thirdpartydeveloperfrontend.builder.{DeveloperBuilder, DeveloperSessionBuilder}
+import uk.gov.hmrc.thirdpartydeveloperfrontend.builder._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.ResponsibleIndividualChangeToSelfOrOtherForm
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.LoggedInState
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.ViewHelpers.inputExistsWithValue
-import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.{LocalUserIdTracker, TestApplications, WithCSRFAddToken}
+import uk.gov.hmrc.thirdpartydeveloperfrontend.utils._
 
 class ResponsibleIndividualChangeToSelfOrOtherViewSpec extends CommonViewSpec with WithCSRFAddToken
-    with DeveloperBuilder with LocalUserIdTracker with DeveloperSessionBuilder with TestApplications {
+    with LocalUserIdTracker with CollaboratorTracker with DeveloperSessionBuilder with TestApplications with DeveloperTestData {
 
   "Responsible Individual Change To Self or Other View" should {
     val application = anApplication()
@@ -37,9 +37,8 @@ class ResponsibleIndividualChangeToSelfOrOtherViewSpec extends CommonViewSpec wi
 
     def renderPage() = {
       val request = FakeRequest().withCSRFToken
-      val session = buildDeveloperSession(LoggedInState.LOGGED_IN, buildDeveloper("admin@example.com", "firstName1", "lastName1"))
       val form    = ResponsibleIndividualChangeToSelfOrOtherForm.form()
-      view.render(application, form, request, session, messagesProvider.messages, appConfig)
+      view.render(application, form, request, adminDeveloper.loggedIn, messagesProvider.messages, appConfig)
     }
 
     "display correct radio button inputs" in {

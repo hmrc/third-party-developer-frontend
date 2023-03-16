@@ -16,6 +16,7 @@
 
 package uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.subscriptions
 
+import uk.gov.hmrc.apiplatform.modules.apis.domain.models._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.apidefinitions._
 
 case class ApiCategory(value: String) extends AnyVal

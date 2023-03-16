@@ -14,7 +14,9 @@
  * limitations under the License.
  *@
 
-@(applicationName:String, upliftRequestedByEmail: String)
+@import uk.gov.hmrc.apiplatform.modules.common.domain.models.LaxEmailAddress
+
+@(applicationName:String, upliftRequestedByEmail: LaxEmailAddress)
 
 <p>We checked <strong class="bold">@applicationName</strong>.</p>
 <p>We sent a verification link to <strong class="bold">@upliftRequestedByEmail</strong>.</p>

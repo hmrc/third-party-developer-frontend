@@ -20,13 +20,9 @@ import org.apache.commons.lang3.StringUtils
 
 import play.api.data.FormError
 
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.apidefinitions.{
-  APISubscriptionStatusWithSubscriptionFields,
-  APISubscriptionStatusWithWritableSubscriptionField,
-  ApiContext,
-  ApiVersion
-}
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.CollaboratorRole
+import uk.gov.hmrc.apiplatform.modules.apis.domain.models.{ApiContext, ApiVersion}
+import uk.gov.hmrc.apiplatform.modules.applications.domain.models.Collaborator
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.apidefinitions.{APISubscriptionStatusWithSubscriptionFields, APISubscriptionStatusWithWritableSubscriptionField}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.subscriptions.{DevhubAccessLevel, FieldName, FieldValue}
 
 object EditManageSubscription {
@@ -62,7 +58,7 @@ object EditManageSubscription {
 
     def toViewModel(
         apiSubscription: APISubscriptionStatusWithSubscriptionFields,
-        role: CollaboratorRole,
+        role: Collaborator.Role,
         formErrors: Seq[FormError],
         postedFormValues: Map[FieldName, FieldValue]
       ): EditApiConfigurationViewModel = {
@@ -97,7 +93,7 @@ object EditManageSubscription {
 
     def toViewModel(
         apiSubscription: APISubscriptionStatusWithWritableSubscriptionField,
-        role: CollaboratorRole,
+        role: Collaborator.Role,
         formErrors: Seq[FormError],
         postedFormValues: Map[FieldName, FieldValue]
       ): EditApiConfigurationFieldViewModel = {

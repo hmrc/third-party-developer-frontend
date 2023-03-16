@@ -18,6 +18,7 @@ package uk.gov.hmrc.apiplatform.modules.uplift.services.mocks
 
 import scala.concurrent.Future.{failed, successful}
 
+import org.mockito.quality.Strictness
 import org.mockito.verification.VerificationMode
 import org.mockito.{ArgumentMatchersSugar, MockitoSugar}
 
@@ -82,6 +83,6 @@ trait GetProductionCredentialsFlowServiceMockModule extends MockitoSugar with Ar
   }
 
   object GPCFlowServiceMock extends BaseGetProductionCredentialsFlowServiceMock {
-    val aMock = mock[GetProductionCredentialsFlowService](withSettings.lenient())
+    val aMock = mock[GetProductionCredentialsFlowService](withSettings.strictness(Strictness.LENIENT))
   }
 }

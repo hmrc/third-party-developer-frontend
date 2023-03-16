@@ -22,13 +22,13 @@ import views.html.manageResponsibleIndividual.ResponsibleIndividualChangeToSelfV
 
 import play.api.test.FakeRequest
 
-import uk.gov.hmrc.thirdpartydeveloperfrontend.builder.{DeveloperBuilder, DeveloperSessionBuilder}
+import uk.gov.hmrc.thirdpartydeveloperfrontend.builder._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.LoggedInState
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.ViewHelpers.{elementExistsByText, linkExistsWithHref}
-import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.{LocalUserIdTracker, TestApplications, WithCSRFAddToken}
+import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.{CollaboratorTracker, LocalUserIdTracker, TestApplications, WithCSRFAddToken}
 
 class ResponsibleIndividualChangeToSelfViewSpec extends CommonViewSpec with WithCSRFAddToken
-    with DeveloperBuilder with LocalUserIdTracker with DeveloperSessionBuilder with TestApplications {
+    with LocalUserIdTracker with CollaboratorTracker with DeveloperSessionBuilder with TestApplications with DeveloperTestData {
 
   "Responsible Individual Change To Self View" should {
     val application = anApplication()
@@ -36,7 +36,7 @@ class ResponsibleIndividualChangeToSelfViewSpec extends CommonViewSpec with With
 
     def renderPage() = {
       val request = FakeRequest().withCSRFToken
-      val session = buildDeveloperSession(LoggedInState.LOGGED_IN, buildDeveloper("admin@example.com", "firstName1", "lastName1"))
+      val session = adminDeveloper.loggedIn
       view.render(application, request, session, messagesProvider.messages, appConfig)
     }
 

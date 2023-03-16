@@ -26,6 +26,8 @@ import views.html.include.LeftHandNav
 
 import play.api.test.FakeRequest
 
+import uk.gov.hmrc.apiplatform.modules.applications.domain.models.{ApplicationId, ClientId, PrivacyPolicyLocations, TermsAndConditionsLocations}
+import uk.gov.hmrc.apiplatform.modules.common.domain.models.LaxEmailAddress.StringSyntax
 import uk.gov.hmrc.thirdpartydeveloperfrontend.builder.{DeveloperBuilder, DeveloperSessionBuilder}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.Environment.PRODUCTION
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications._
@@ -39,10 +41,10 @@ class LeftHandNavSpec extends CommonViewSpec with CollaboratorTracker with Local
 
   trait Setup {
     val now                   = LocalDateTime.now(ZoneOffset.UTC)
-    val applicationId         = ApplicationId("std-app-id")
+    val applicationId         = ApplicationId.random
     val clientId              = ClientId("std-client-id")
     implicit val request      = FakeRequest()
-    implicit val loggedIn     = buildDeveloperSession(loggedInState = LoggedInState.LOGGED_IN, buildDeveloperWithRandomId("user@example.com", "Test", "Test", None))
+    implicit val loggedIn     = buildDeveloperWithRandomId("user@example.com".toLaxEmail, "Test", "Test", None).loggedIn
     val standardApplication   = Application(applicationId, clientId, "name", now, Some(now), None, Period.ofDays(547), PRODUCTION, access = Standard())
     val privilegedApplication = Application(applicationId, clientId, "name", now, Some(now), None, Period.ofDays(547), PRODUCTION, access = Privileged())
     val ropcApplication       = Application(applicationId, clientId, "name", now, Some(now), None, Period.ofDays(547), PRODUCTION, access = ROPC())
@@ -137,13 +139,13 @@ class LeftHandNavSpec extends CommonViewSpec with CollaboratorTracker with Local
     }
 
     "include links to manage Responsible Individual if the app is approved and has a RI" in new Setup {
-      val responsibleIndividual   = ResponsibleIndividual.build("Mr Responsible", "ri@example.com")
+      val responsibleIndividual   = ResponsibleIndividual.build("Mr Responsible", "ri@example.com".toLaxEmail)
       val importantSubmissionData = ImportantSubmissionData(
         None,
         responsibleIndividual,
         Set.empty,
-        TermsAndConditionsLocation.InDesktopSoftware,
-        PrivacyPolicyLocation.InDesktopSoftware,
+        TermsAndConditionsLocations.InDesktopSoftware,
+        PrivacyPolicyLocations.InDesktopSoftware,
         List.empty
       )
 

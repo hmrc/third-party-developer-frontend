@@ -20,8 +20,10 @@ import java.time.LocalDateTime
 
 import play.api.libs.json.Format
 
+import uk.gov.hmrc.apiplatform.modules.applications.domain.models.ApplicationId
+import uk.gov.hmrc.apiplatform.modules.common.domain.models.LaxEmailAddress
 import uk.gov.hmrc.apiplatform.modules.submissions.domain.models.ResponsibleIndividualVerificationState.ResponsibleIndividualVerificationState
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.{ApplicationId, ResponsibleIndividual}
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.ResponsibleIndividual
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.services.LocalDateTimeFormatters
 
 case class ResponsibleIndividualVerificationId(value: String) extends AnyVal
@@ -71,7 +73,7 @@ case class ResponsibleIndividualUpdateVerification(
     createdOn: LocalDateTime,
     responsibleIndividual: ResponsibleIndividual,
     requestingAdminName: String,
-    requestingAdminEmail: String,
+    requestingAdminEmail: LaxEmailAddress,
     state: ResponsibleIndividualVerificationState
   ) extends ResponsibleIndividualVerification
 

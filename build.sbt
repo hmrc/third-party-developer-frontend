@@ -3,28 +3,25 @@ import com.typesafe.sbt.uglify.Import._
 import com.typesafe.sbt.web.Import._
 import net.ground5hark.sbt.concat.Import._
 import org.scalafmt.sbt.ScalafmtPlugin
-import play.sbt.routes.RoutesKeys.routesGenerator
 import sbt.Keys._
 import sbt.{Resolver, _}
 import uk.gov.hmrc.DefaultBuildSettings
 import uk.gov.hmrc.DefaultBuildSettings._
-import uk.gov.hmrc.SbtAutoBuildPlugin
 import uk.gov.hmrc.sbtdistributables.SbtDistributablesPlugin
-import uk.gov.hmrc.sbtdistributables.SbtDistributablesPlugin._
 import bloop.integrations.sbt.BloopDefaults
 
 Global / bloopAggregateSourceDependencies := true
 
 lazy val appName = "third-party-developer-frontend"
 
-lazy val plugins: Seq[Plugins] = Seq(PlayScala, SbtAutoBuildPlugin, SbtDistributablesPlugin)
+lazy val plugins: Seq[Plugins] = Seq(PlayScala, SbtDistributablesPlugin)
 lazy val playSettings: Seq[Setting[_]] = Seq.empty
 
 ThisBuild / scalafixDependencies += "com.github.liancheng" %% "organize-imports" % "0.6.0"
 
 inThisBuild(
   List(
-    scalaVersion := "2.13.8",
+    scalaVersion := "2.12.15",
     semanticdbEnabled := true,
     semanticdbVersion := scalafixSemanticdb.revision
   )
@@ -56,7 +53,7 @@ lazy val microservice = Project(appName, file("."))
   .settings(
     libraryDependencies ++= AppDependencies(),
     retrieveManaged := true,
-    routesGenerator := InjectedRoutesGenerator,
+//    routesGenerator := InjectedRoutesGenerator,
     scalaVersion := "2.12.15"
   )
   .settings(
@@ -70,7 +67,6 @@ lazy val microservice = Project(appName, file("."))
   )
   .configs(IntegrationTest)
   .settings(DefaultBuildSettings.integrationTestSettings())
-  .settings(inConfig(IntegrationTest)(BloopDefaults.configSettings))
   .settings(
     IntegrationTest / testOptions := Seq(Tests.Argument(TestFrameworks.ScalaTest, "-eT")),
     IntegrationTest / unmanagedSourceDirectories ++= Seq(baseDirectory.value / "it", baseDirectory.value / "test-utils"),
@@ -78,13 +74,14 @@ lazy val microservice = Project(appName, file("."))
     IntegrationTest / parallelExecution := false
   )
   .configs(ComponentTest)
+  .settings(inConfig(ComponentTest)(BloopDefaults.configSettings))
   .settings(inConfig(ComponentTest)(Defaults.testSettings ++ BloopDefaults.configSettings ++ ScalafmtPlugin.scalafmtConfigSettings))
   .settings(headerSettings(ComponentTest) ++ automateHeaderSettings(ComponentTest))
   .settings(
     ComponentTest / testOptions := Seq(Tests.Argument(TestFrameworks.ScalaTest, "-eT")),
     ComponentTest / unmanagedSourceDirectories ++= Seq(baseDirectory.value / "component", baseDirectory.value / "test-utils"),
     ComponentTest / unmanagedResourceDirectories += baseDirectory.value / "test",
-    ComponentTest / unmanagedResourceDirectories += baseDirectory.value / "target" / "web" / "public" / "test",
+    // ComponentTest / unmanagedResourceDirectories += baseDirectory.value / "target" / "web" / "public" / "test",
     ComponentTest / parallelExecution := false
   )
   .settings(majorVersion := 0)
@@ -97,7 +94,8 @@ lazy val microservice = Project(appName, file("."))
         "uk.gov.hmrc.apiplatform.modules.submissions.domain.models._",
         "uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.controllers._",
         "uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications._",
-        "uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.apidefinitions._"
+        "uk.gov.hmrc.apiplatform.modules.apis.domain.models._",
+        "uk.gov.hmrc.apiplatform.modules.applications.domain.models._"
     )
   )
   .settings(
@@ -116,6 +114,6 @@ lazy val microservice = Project(appName, file("."))
     "-Wconf:cat=unused&src=.*ReverseRoutes\\.scala:s"
     )
   )
-
 lazy val ComponentTest = config("component") extend Test
+
 lazy val TemplateTest = config("tt") extend Test

@@ -20,12 +20,12 @@ import scala.concurrent.ExecutionContext.Implicits.global
 
 import org.mockito.MockitoSugar
 
+import uk.gov.hmrc.apiplatform.modules.common.domain.models.LaxEmailAddress.StringSyntax
 import uk.gov.hmrc.apiplatform.modules.uplift.domain.models._
 import uk.gov.hmrc.apiplatform.modules.uplift.services.mocks.FlowRepositoryMockModule
 import uk.gov.hmrc.thirdpartydeveloperfrontend.builder._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.SubscriptionTestHelperSugar
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.{ResponsibleIndividual, SellResellOrDistribute}
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.LoggedInState
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.flows.FlowType
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.{AsyncHmrcSpec, LocalUserIdTracker}
 
@@ -36,18 +36,18 @@ class GetProductionCredentialsFlowServiceSpec
     with SubscriptionTestHelperSugar
     with SubscriptionsBuilder
     with FlowRepositoryMockModule
-    with LocalUserIdTracker with DeveloperSessionBuilder with DeveloperBuilder {
+    with LocalUserIdTracker with DeveloperSessionBuilder with DeveloperTestData {
 
   trait Setup extends MockitoSugar {
-    val loggedInDeveloper        = buildDeveloperSession(loggedInState = LoggedInState.LOGGED_IN, buildDeveloperWithRandomId("dev@example.com", "firstName", "lastName"))
+    val loggedInDeveloper        = standardDeveloper.loggedIn
     val underTest                = new GetProductionCredentialsFlowService(FlowRepositoryMock.aMock)
     val sessionId                = "sessionId"
     val sellResellOrDistribute   = SellResellOrDistribute("answer")
-    val responsibleIndividual    = ResponsibleIndividual(ResponsibleIndividual.Name("oldname"), ResponsibleIndividual.EmailAddress("old@example.com"))
+    val responsibleIndividual    = ResponsibleIndividual(ResponsibleIndividual.Name("oldname"), "old@example.com".toLaxEmail)
     val apiSubscriptions         = ApiSubscriptions()
     val flow                     = GetProductionCredentialsFlow(sessionId, Some(sellResellOrDistribute), Some(apiSubscriptions))
     val flowType                 = FlowType.GET_PRODUCTION_CREDENTIALS
-    val newResponsibleIndividual = ResponsibleIndividual(ResponsibleIndividual.Name("newname"), ResponsibleIndividual.EmailAddress("new@example.com"))
+    val newResponsibleIndividual = ResponsibleIndividual(ResponsibleIndividual.Name("newname"), "new@example.com".toLaxEmail)
   }
 
   "fetchFlow" should {

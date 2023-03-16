@@ -24,8 +24,9 @@ import views.html.DeleteApplicationView
 
 import play.api.test.FakeRequest
 
+import uk.gov.hmrc.apiplatform.modules.applications.domain.models.{ApplicationId, ClientId, Collaborator}
+import uk.gov.hmrc.apiplatform.modules.common.domain.models.LaxEmailAddress.StringSyntax
 import uk.gov.hmrc.thirdpartydeveloperfrontend.builder._
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.CollaboratorRole.{ADMINISTRATOR, DEVELOPER}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.LoggedInState
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.ViewHelpers._
@@ -33,12 +34,12 @@ import uk.gov.hmrc.thirdpartydeveloperfrontend.utils._
 
 class DeleteApplicationSpec extends CommonViewSpec with WithCSRFAddToken with CollaboratorTracker with LocalUserIdTracker
     with DeveloperSessionBuilder
-    with DeveloperBuilder {
+    with DeveloperTestData {
 
   val deleteApplicationView = app.injector.instanceOf[DeleteApplicationView]
-  val appId                 = ApplicationId("1234")
+  val appId                 = ApplicationId.random
   val clientId              = ClientId("clientId123")
-  val loggedInDeveloper     = buildDeveloperSession(loggedInState = LoggedInState.LOGGED_IN, buildDeveloper("developer@example.com", "John", "Doe", None))
+  val loggedInDeveloper     = JoeBloggs.loggedIn
 
   val application             = Application(
     appId,
@@ -51,11 +52,11 @@ class DeleteApplicationSpec extends CommonViewSpec with WithCSRFAddToken with Co
     Environment.PRODUCTION,
     Some("Description 1"),
     Set(loggedInDeveloper.email.asAdministratorCollaborator),
-    state = ApplicationState.production(loggedInDeveloper.email, loggedInDeveloper.displayedName, ""),
+    state = ApplicationState.production(loggedInDeveloper.email.text, loggedInDeveloper.displayedName, ""),
     access = Standard(redirectUris = List("https://red1", "https://red2"), termsAndConditionsUrl = Some("http://tnc-url.com"))
   )
-  val prodAppId               = ApplicationId("prod123")
-  val sandboxAppId            = ApplicationId("sand123")
+  val prodAppId               = ApplicationId.random
+  val sandboxAppId            = ApplicationId.random
   val prodApp: Application    = application.copy(id = prodAppId)
   val sandboxApp: Application = application.copy(id = sandboxAppId, deployedTo = Environment.SANDBOX)
 
@@ -64,7 +65,7 @@ class DeleteApplicationSpec extends CommonViewSpec with WithCSRFAddToken with Co
       "on Production" in {
         val request = FakeRequest().withCSRFToken
 
-        val page = deleteApplicationView.render(prodApp, ADMINISTRATOR, request, loggedInDeveloper, messagesProvider, appConfig)
+        val page = deleteApplicationView.render(prodApp, Collaborator.Roles.ADMINISTRATOR, request, loggedInDeveloper, messagesProvider, appConfig)
 
         page.contentType should include("text/html")
         val document = Jsoup.parse(page.body)
@@ -76,7 +77,7 @@ class DeleteApplicationSpec extends CommonViewSpec with WithCSRFAddToken with Co
       "on Sandbox" in {
         val request = FakeRequest().withCSRFToken
 
-        val page = deleteApplicationView.render(sandboxApp, ADMINISTRATOR, request, loggedInDeveloper, messagesProvider, appConfig)
+        val page = deleteApplicationView.render(sandboxApp, Collaborator.Roles.ADMINISTRATOR, request, loggedInDeveloper, messagesProvider, appConfig)
 
         page.contentType should include("text/html")
         val document = Jsoup.parse(page.body)
@@ -90,7 +91,7 @@ class DeleteApplicationSpec extends CommonViewSpec with WithCSRFAddToken with Co
         Seq(prodApp, sandboxApp) foreach { application =>
           val request = FakeRequest().withCSRFToken
 
-          val page = deleteApplicationView.render(application, DEVELOPER, request, loggedInDeveloper, messagesProvider, appConfig)
+          val page = deleteApplicationView.render(application, Collaborator.Roles.DEVELOPER, request, loggedInDeveloper, messagesProvider, appConfig)
 
           page.contentType should include("text/html")
           val document = Jsoup.parse(page.body)
@@ -98,17 +99,17 @@ class DeleteApplicationSpec extends CommonViewSpec with WithCSRFAddToken with Co
           elementIdentifiedByAttrWithValueContainsText(document, "a", "class", "button", "Request deletion") shouldBe false
           elementIdentifiedByAttrWithValueContainsText(document, "a", "class", "button", "Continue") shouldBe false
           elementExistsByText(document, "div", "You cannot delete this application because you're not an administrator.") shouldBe true
-          elementExistsByText(document, "p", s"Ask the administrator ${loggedInDeveloper.email} to delete it.") shouldBe true
+          elementExistsByText(document, "p", s"Ask the administrator ${loggedInDeveloper.email.text} to delete it.") shouldBe true
         }
       }
 
       "there are multiple administrators" in {
-        val extraAdmin = "admin@test.com".asAdministratorCollaborator
+        val extraAdmin = "admin@test.com".toLaxEmail.asAdministratorCollaborator
         Seq(prodApp.copy(collaborators = prodApp.collaborators + extraAdmin), sandboxApp.copy(collaborators = sandboxApp.collaborators + extraAdmin))
           .foreach { application =>
             val request = FakeRequest().withCSRFToken
 
-            val page = deleteApplicationView.render(application, DEVELOPER, request, loggedInDeveloper, messagesProvider, appConfig)
+            val page = deleteApplicationView.render(application, Collaborator.Roles.DEVELOPER, request, loggedInDeveloper, messagesProvider, appConfig)
 
             page.contentType should include("text/html")
             val document = Jsoup.parse(page.body)
@@ -117,7 +118,7 @@ class DeleteApplicationSpec extends CommonViewSpec with WithCSRFAddToken with Co
             elementIdentifiedByAttrWithValueContainsText(document, "a", "class", "button", "Continue") shouldBe false
             elementExistsByText(document, "div", "You cannot delete this application because you're not an administrator.") shouldBe true
             elementExistsByText(document, "p", "Ask one of these administrators to delete it:") shouldBe true
-            application.collaborators foreach { admin => elementExistsByText(document, "li", admin.emailAddress) shouldBe true }
+            application.collaborators foreach { admin => elementExistsByText(document, "li", admin.emailAddress.text) shouldBe true }
           }
       }
     }

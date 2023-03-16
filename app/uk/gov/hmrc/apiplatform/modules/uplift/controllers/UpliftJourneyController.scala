@@ -16,9 +16,9 @@
 
 package uk.gov.hmrc.apiplatform.modules.uplift.controllers
 
-import java.time.format.DateTimeFormatter
 import java.time.ZoneId
-
+import java.time.format.DateTimeFormatter
+import java.util.UUID
 import javax.inject.{Inject, Singleton}
 import scala.concurrent.Future.successful
 import scala.concurrent.{ExecutionContext, Future}
@@ -33,6 +33,7 @@ import play.api.libs.crypto.CookieSigner
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents, Request, Result}
 import uk.gov.hmrc.play.bootstrap.controller.WithUnsafeDefaultFormBinding
 
+import uk.gov.hmrc.apiplatform.modules.applications.domain.models.ApplicationId
 import uk.gov.hmrc.apiplatform.modules.common.services.EitherTHelper
 import uk.gov.hmrc.apiplatform.modules.submissions.domain.models.Submission
 import uk.gov.hmrc.apiplatform.modules.submissions.services.SubmissionService
@@ -44,7 +45,7 @@ import uk.gov.hmrc.thirdpartydeveloperfrontend.connectors.ApmConnector
 import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.checkpages.{CanUseCheckActions, DummySubscriptionsForm}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.{APISubscriptions, ApplicationController, FormKeys, checkpages}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.apidefinitions.APISubscriptionStatus
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.{ApplicationId, SellResellOrDistribute, Environment}
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.{Environment, SellResellOrDistribute}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.connectors.TermsOfUseInvitation
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.controllers.BadRequestWithErrorMessage
 import uk.gov.hmrc.thirdpartydeveloperfrontend.service.{ApplicationActionService, ApplicationService, SessionService, TermsOfUseInvitationService}
@@ -57,7 +58,7 @@ object UpliftJourneyController {
 
     val form: Form[ChooseApplicationToUpliftForm] = Form(
       mapping(
-        "applicationId" -> nonEmptyText.transform[ApplicationId](ApplicationId(_), id => id.value)
+        "applicationId" -> nonEmptyText.transform[ApplicationId](text => ApplicationId(UUID.fromString(text)), id => id.text)
       )(ChooseApplicationToUpliftForm.apply)(ChooseApplicationToUpliftForm.unapply)
     )
   }
@@ -247,13 +248,14 @@ class UpliftJourneyController @Inject() (
         submission <- ET.fromOptionF(submissionService.fetchLatestSubmission(appId), showBeforeYouStart(invitation))
       } yield submission
     )
-    .fold[Result](identity, showSubmission)
+      .fold[Result](identity, showSubmission)
   }
 
   def weWillCheckYourAnswers(appId: ApplicationId): Action[AnyContent] = whenTeamMemberOnApp(appId) { implicit request =>
     request.application.deployedTo match {
       case Environment.SANDBOX    => successful(Ok(weWillCheckYourAnswersView(appId)))
-      case Environment.PRODUCTION => successful(Redirect(uk.gov.hmrc.apiplatform.modules.uplift.controllers.routes.UpliftJourneyController.sellResellOrDistributeYourSoftware(appId)))
+      case Environment.PRODUCTION =>
+        successful(Redirect(uk.gov.hmrc.apiplatform.modules.uplift.controllers.routes.UpliftJourneyController.sellResellOrDistributeYourSoftware(appId)))
     }
   }
 }

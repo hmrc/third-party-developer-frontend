@@ -25,6 +25,7 @@ import views.html.{LogoutConfirmationView, SignoutSurveyView}
 import play.api.libs.crypto.CookieSigner
 import play.api.mvc.{AnyContent, MessagesControllerComponents, MessagesRequest}
 
+import uk.gov.hmrc.apiplatform.modules.common.domain.models.LaxEmailAddress.StringSyntax
 import uk.gov.hmrc.apiplatform.modules.common.services.ApplicationLogger
 import uk.gov.hmrc.thirdpartydeveloperfrontend.config.{ApplicationConfig, ErrorHandler}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.connectors.TicketId
@@ -63,7 +64,7 @@ class UserLogoutAccount @Inject() (
         }
 
         applicationService
-          .userLogoutSurveyCompleted(form.email, form.name, form.rating.getOrElse("").toString, form.improvementSuggestions)
+          .userLogoutSurveyCompleted(form.email.toLaxEmail, form.name, form.rating.getOrElse("").toString, form.improvementSuggestions)
           .flatMap(_ => {
             Future.successful(Redirect(routes.UserLogoutAccount.logout))
           })

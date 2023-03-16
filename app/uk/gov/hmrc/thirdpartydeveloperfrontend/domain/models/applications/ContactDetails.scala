@@ -16,7 +16,9 @@
 
 package uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications
 
-case class ContactDetails(fullname: String, email: String, telephoneNumber: String)
+import uk.gov.hmrc.apiplatform.modules.common.domain.models.LaxEmailAddress
+
+case class ContactDetails(fullname: String, email: LaxEmailAddress, telephoneNumber: String)
 
 object ContactDetails {
   import play.api.libs.json.Json

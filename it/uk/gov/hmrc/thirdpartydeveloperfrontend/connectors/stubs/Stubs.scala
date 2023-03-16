@@ -19,19 +19,24 @@ package uk.gov.hmrc.thirdpartydeveloperfrontend.connectors.stubs
 import java.net.URLEncoder
 import com.github.tomakehurst.wiremock.client.WireMock._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.connectors.EncryptedJson
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.apidefinitions.{ApiContext, ApiIdentifier, ApiVersion}
+import uk.gov.hmrc.apiplatform.modules.apis.domain.models.{ApiContext, ApiIdentifier, ApiVersion}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.ApplicationNameValidationJson.ApplicationNameValidationResult
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.{Application, ApplicationId, ApplicationToken, ApplicationWithSubscriptionData, ClientId, Environment}
+import uk.gov.hmrc.apiplatform.modules.applications.domain.models.ApplicationId
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.{Application, ApplicationToken, ApplicationWithSubscriptionData, Environment}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.connectors.{PasswordResetRequest, UserAuthenticationResponse}
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.{Developer, Registration, Session, UpdateProfileRequest, UserId}
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.{Developer, Registration, Session, UpdateProfileRequest}
 import play.api.http.Status._
 import play.api.libs.json.{Json, Writes}
 import uk.gov.hmrc.apiplatform.modules.common.services.ApplicationLogger
 import org.scalatest.matchers.should.Matchers
+import uk.gov.hmrc.apiplatform.modules.common.domain.models.LaxEmailAddress
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.emailpreferences.APICategoryDisplayDetails
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.services.ApiDefinitionsJsonFormatters._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.services.ApplicationsJsonFormatters._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.WireMockExtensions.withJsonRequestBodySyntax
+import uk.gov.hmrc.apiplatform.modules.developers.domain.models.UserId
+import uk.gov.hmrc.apiplatform.modules.applications.domain.models.ClientId
+import uk.gov.hmrc.apiplatform.modules.applications.domain.models.ApplicationId
 
 object Stubs extends ApplicationLogger {
 
@@ -86,21 +91,21 @@ object DeveloperStub {
         .willReturn(aResponse().withStatus(status))
     )
 
-  def update(email: String, profile: UpdateProfileRequest, status: Int) =
+  def update(email: LaxEmailAddress, profile: UpdateProfileRequest, status: Int) =
     stubFor(
       post(urlMatching(s"/developer/$email"))
         .withRequestBody(equalToJson(Json.toJson(profile).toString()))
         .willReturn(aResponse().withStatus(status))
     )
 
-  def setupResend(email: String, status: Int) = {
+  def setupResend(email: LaxEmailAddress, status: Int) = {
     stubFor(
       post(urlPathEqualTo(s"/$email/resend-verification"))
         .willReturn(aResponse().withStatus(status))
     )
   }
 
-  def verifyResetPassword(email: String, request: PasswordResetRequest) = {
+  def verifyResetPassword(email: LaxEmailAddress, request: PasswordResetRequest) = {
     verify(1, postRequestedFor(urlPathEqualTo("/password-reset-request")).withRequestBody(matching(Json.toJson(request).toString())))
   }
 }
@@ -151,8 +156,8 @@ object ApplicationStub {
     )
   }
 
-  def configureUserApplications(email: String, applications: List[Application] = Nil, status: Int = OK) = {
-    val encodedEmail = URLEncoder.encode(email, "UTF-8")
+  def configureUserApplications(email: LaxEmailAddress, applications: List[Application] = Nil, status: Int = OK) = {
+    val encodedEmail = URLEncoder.encode(email.text, "UTF-8")
 
     def stubResponse(environment: Environment, applications: List[Application]) = {
       stubFor(
@@ -272,7 +277,7 @@ object ApiPlatformMicroserviceStub {
 
   def stubFetchAllPossibleSubscriptions(applicationId: ApplicationId, body: String) = {
     stubFor(
-      get(urlEqualTo(s"/api-definitions?applicationId=${applicationId.value}"))
+      get(urlEqualTo(s"/api-definitions?applicationId=${applicationId.text}"))
         .willReturn(
           aResponse()
             .withStatus(OK)
@@ -284,7 +289,7 @@ object ApiPlatformMicroserviceStub {
 
   def stubFetchAllPossibleSubscriptionsFailure(applicationId: ApplicationId) = {
     stubFor(
-      get(urlEqualTo(s"/api-definitions?applicationId=${applicationId.value}"))
+      get(urlEqualTo(s"/api-definitions?applicationId=${applicationId.text}"))
         .willReturn(
           aResponse()
             .withStatus(INTERNAL_SERVER_ERROR)
@@ -294,7 +299,7 @@ object ApiPlatformMicroserviceStub {
 
   def stubFetchApplicationById(applicationId: ApplicationId, data: ApplicationWithSubscriptionData) = {
     stubFor(
-      get(urlEqualTo(s"/applications/${applicationId.value}"))
+      get(urlEqualTo(s"/applications/${applicationId.text}"))
         .willReturn(
           aResponse()
             .withStatus(OK)
@@ -306,7 +311,7 @@ object ApiPlatformMicroserviceStub {
 
   def stubFetchApplicationByIdFailure(applicationId: ApplicationId) = {
     stubFor(
-      get(urlEqualTo(s"/applications/${applicationId.value}"))
+      get(urlEqualTo(s"/applications/${applicationId.text}"))
         .willReturn(
           aResponse()
             .withStatus(NOT_FOUND)
@@ -376,7 +381,7 @@ object ApiPlatformMicroserviceStub {
 
   def stubSubscribeToApi(applicationId: ApplicationId, apiIdentifier: ApiIdentifier) = {
     stubFor(
-      post(urlPathEqualTo(s"/applications/${applicationId.value}/subscriptions"))
+      post(urlPathEqualTo(s"/applications/${applicationId.text}/subscriptions"))
         .withJsonRequestBody(apiIdentifier)
         .willReturn(
           aResponse()
@@ -387,7 +392,7 @@ object ApiPlatformMicroserviceStub {
 
   def stubSubscribeToApiFailure(applicationId: ApplicationId, apiIdentifier: ApiIdentifier) = {
     stubFor(
-      post(urlPathEqualTo(s"/applications/${applicationId.value}/subscriptions"))
+      post(urlPathEqualTo(s"/applications/${applicationId.text}/subscriptions"))
         .withJsonRequestBody(apiIdentifier)
         .willReturn(
           aResponse()

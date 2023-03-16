@@ -21,6 +21,10 @@ import scala.concurrent.Future.successful
 
 import uk.gov.hmrc.http.HeaderCarrier
 
+import uk.gov.hmrc.apiplatform.modules.apis.domain.models._
+import uk.gov.hmrc.apiplatform.modules.applications.domain.models.ApplicationId
+import uk.gov.hmrc.apiplatform.modules.common.domain.models.LaxEmailAddress
+import uk.gov.hmrc.apiplatform.modules.common.domain.models.LaxEmailAddress.StringSyntax
 import uk.gov.hmrc.apiplatform.modules.submissions.SubmissionsTestData
 import uk.gov.hmrc.apiplatform.modules.submissions.connectors.ThirdPartyApplicationSubmissionsConnector
 import uk.gov.hmrc.apiplatform.modules.uplift.domain.models._
@@ -28,7 +32,7 @@ import uk.gov.hmrc.apiplatform.modules.uplift.services.mocks._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.builder._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.SubscriptionTestHelperSugar
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.apidefinitions._
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.{ApplicationId, ResponsibleIndividual, SellResellOrDistribute}
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.{ResponsibleIndividual, SellResellOrDistribute}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.{DeveloperSession, LoggedInState, Session}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.subscriptions.{ApiCategory, ApiData, VersionData}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.mocks.connectors.ApmConnectorMockModule
@@ -54,7 +58,7 @@ class UpliftJourneyServiceSpec
       with SessionServiceMock {
 
     val sandboxAppId = ApplicationId.random
-    val prodAppId = ApplicationId.random
+    val prodAppId    = ApplicationId.random
 
     implicit val hc = HeaderCarrier()
 
@@ -151,7 +155,7 @@ class UpliftJourneyServiceSpec
 
     ApmConnectorMock.FetchAllApis.willReturn(singleApi)
 
-    val aResponsibleIndividual      = ResponsibleIndividual(ResponsibleIndividual.Name("test full name"), ResponsibleIndividual.EmailAddress("test email address"))
+    val aResponsibleIndividual      = ResponsibleIndividual(ResponsibleIndividual.Name("test full name"), "test email address".toLaxEmail)
     val sellResellOrDistribute      = SellResellOrDistribute("Yes")
     val doNotSellResellOrDistribute = SellResellOrDistribute("No")
     val aListOfSubscriptions        = ApiSubscriptions(toIdentifiers(multipleApis).map(id => id -> true).toMap)
@@ -248,7 +252,7 @@ class UpliftJourneyServiceSpec
       val productionAppId = ApplicationId.random
       GPCFlowServiceMock.FetchFlow.thenReturns(GetProductionCredentialsFlow("", Some(sellResellOrDistribute), Some(aListOfSubscriptions)))
       ApplicationServiceMock.updateApplicationSuccessful
-      when(mockSubmissionsConnector.createSubmission(*[ApplicationId], *)(*)).thenReturn(successful(Some(aSubmission)))
+      when(mockSubmissionsConnector.createSubmission(*[ApplicationId], *[LaxEmailAddress])(*)).thenReturn(successful(Some(aSubmission)))
 
       private val result = await(underTest.createNewSubmission(productionAppId, sampleApp, loggedInDeveloper))
 

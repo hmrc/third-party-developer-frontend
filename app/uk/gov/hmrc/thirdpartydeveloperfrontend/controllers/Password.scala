@@ -29,6 +29,8 @@ import uk.gov.hmrc.http.{HeaderCarrier, UpstreamErrorResponse}
 import uk.gov.hmrc.play.bootstrap.controller.WithUnsafeDefaultFormBinding
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendBaseController
 
+import uk.gov.hmrc.apiplatform.modules.common.domain.models.LaxEmailAddress
+import uk.gov.hmrc.apiplatform.modules.common.domain.models.LaxEmailAddress.StringSyntax
 import uk.gov.hmrc.apiplatform.modules.common.services.ApplicationLogger
 import uk.gov.hmrc.thirdpartydeveloperfrontend.config.{ApplicationConfig, ErrorHandler}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.connectors.ThirdPartyDeveloperConnector
@@ -67,19 +69,19 @@ class Password @Inject() (
       formWithErrors => {
         Future.successful(BadRequest(forgotPasswordView(formWithErrors.emailaddressGlobal())))
       },
-      data =>
-        connector.requestReset(data.emailaddress) map {
-          _ => Ok(checkEmailView(data.emailaddress))
+      passwordForm =>
+        connector.requestReset(passwordForm.emailaddress.toLaxEmail) map {
+          _ => Ok(checkEmailView(passwordForm.emailaddress.toLaxEmail))
         } recover {
-          case _: UnverifiedAccount                      => Forbidden(forgotPasswordView(ForgotPasswordForm.accountUnverified(requestForm, data.emailaddress)))
-          case UpstreamErrorResponse(_, NOT_FOUND, _, _) => Ok(checkEmailView(data.emailaddress))
+          case _: UnverifiedAccount                      => Forbidden(forgotPasswordView(ForgotPasswordForm.accountUnverified(requestForm, passwordForm.emailaddress)))
+          case UpstreamErrorResponse(_, NOT_FOUND, _, _) => Ok(checkEmailView(passwordForm.emailaddress.toLaxEmail))
         }
     )
   }
 
   def validateReset(code: String) = Action.async { implicit request =>
     connector.fetchEmailForResetCode(code) map {
-      email => Redirect(routes.Password.resetPasswordChange).addingToSession("email" -> email)
+      email => Redirect(routes.Password.resetPasswordChange).addingToSession("email" -> email.text)
     } recover {
       case _: InvalidResetCode  => Redirect(routes.Password.resetPasswordError).flashing(
           "error" -> "InvalidResetCode"
@@ -117,7 +119,7 @@ class Password @Inject() (
         Future.successful(BadRequest(resetView(formWithErrors.passwordGlobal().passwordNoMatchField()))),
       data => {
         val email = request.session.get("email").getOrElse(throw new RuntimeException("email not found in session"))
-        connector.reset(PasswordReset(email, data.password)) map {
+        connector.reset(PasswordReset(email.toLaxEmail, data.password)) map {
           _ => Ok(signInView("You have reset your password", LoginForm.form, endOfJourney = true))
         } recover {
           case _: UnverifiedAccount => Forbidden(resetView(PasswordResetForm.accountUnverified(PasswordResetForm.form, email)))
@@ -137,7 +139,7 @@ trait PasswordChange {
   val auditService: AuditService
 
   def processPasswordChange(
-      email: String,
+      email: LaxEmailAddress,
       success: Result,
       error: Form[ChangePasswordForm] => HtmlFormat.Appendable
     )(implicit request: Request[_],
@@ -151,8 +153,8 @@ trait PasswordChange {
         connector.changePassword(payload) map {
           _ => success
         } recover {
-          case _: UnverifiedAccount  => Forbidden(error(ChangePasswordForm.accountUnverified(ChangePasswordForm.form, email)))
-              .withSession("email" -> email)
+          case _: UnverifiedAccount  => Forbidden(error(ChangePasswordForm.accountUnverified(ChangePasswordForm.form, email.text)))
+              .withSession("email" -> email.text)
           case _: InvalidCredentials =>
             auditService.audit(PasswordChangeFailedDueToInvalidCredentials(email))
             Unauthorized(error(ChangePasswordForm.invalidCredentials(ChangePasswordForm.form)))

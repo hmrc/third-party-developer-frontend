@@ -16,10 +16,9 @@
 
 package uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.apidefinitions
 
-import scala.util.{Random, Try}
+import scala.util.Try
 
-import play.api.libs.json.Json
-
+import uk.gov.hmrc.apiplatform.modules.apis.domain.models._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.apidefinitions.APIAccessType.{PRIVATE, PUBLIC}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.subscriptions.ApiSubscriptionFields.{SubscriptionFieldValue, SubscriptionFieldsWrapper}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.subscriptions.VersionSubscription
@@ -51,38 +50,6 @@ case class ApiVersionDefinition(version: ApiVersion, status: APIStatus, access: 
 }
 
 case class APIAccess(`type`: APIAccessType)
-
-case class ApiContext(value: String) extends AnyVal
-
-object ApiContext {
-
-  implicit val formatApiContext = Json.valueFormat[ApiContext]
-
-  implicit val ordering: Ordering[ApiContext] = new Ordering[ApiContext] {
-    override def compare(x: ApiContext, y: ApiContext): Int = x.value.compareTo(y.value)
-  }
-
-  def random = ApiContext(Random.alphanumeric.take(10).mkString)
-}
-
-case class ApiVersion(value: String) extends AnyVal
-
-object ApiVersion {
-
-  implicit val formatApiVersion = Json.valueFormat[ApiVersion]
-
-  implicit val ordering: Ordering[ApiVersion] = new Ordering[ApiVersion] {
-    override def compare(x: ApiVersion, y: ApiVersion): Int = x.value.compareTo(y.value)
-  }
-
-  def random = ApiVersion(Random.nextDouble().toString)
-}
-
-trait HasApiIdentifier {
-  def apiIdentifier: ApiIdentifier
-}
-
-case class ApiIdentifier(context: ApiContext, version: ApiVersion)
 
 // TODO - 5090 - Add new open access class
 case class APISubscriptionStatus(

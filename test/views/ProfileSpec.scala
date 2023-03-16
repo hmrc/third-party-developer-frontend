@@ -22,6 +22,7 @@ import views.html.{ChangeProfileView, ProfileView}
 
 import play.api.test.FakeRequest
 
+import uk.gov.hmrc.apiplatform.modules.common.domain.models.LaxEmailAddress.StringSyntax
 import uk.gov.hmrc.thirdpartydeveloperfrontend.builder.{DeveloperBuilder, DeveloperSessionBuilder}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.ProfileForm
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.LoggedInState
@@ -36,8 +37,7 @@ class ProfileSpec extends CommonViewSpec
 
   private val request = FakeRequest().withCSRFToken
 
-  val developer =
-    buildDeveloperSession(loggedInState = LoggedInState.LOGGED_IN, buildDeveloperWithRandomId("developer@example.com", "FirstName", "LastName", Some("TestOrganisation")))
+  val developer = buildDeveloperWithRandomId("developer@example.com".toLaxEmail, "FirstName", "LastName", Some("TestOrganisation")).loggedIn
 
   "Profile page" should {
     val profileView = app.injector.instanceOf[ProfileView]

@@ -26,24 +26,21 @@ import play.api.test.{FakeRequest, StubMessagesFactory}
 import uk.gov.hmrc.apiplatform.modules.mfa.forms.MfaAccessCodeForm
 import uk.gov.hmrc.apiplatform.modules.mfa.models.{MfaAction, MfaId}
 import uk.gov.hmrc.apiplatform.modules.mfa.views.html.authapp.AuthAppAccessCodeView
-import uk.gov.hmrc.thirdpartydeveloperfrontend.builder.{DeveloperBuilder, DeveloperSessionBuilder}
+import uk.gov.hmrc.thirdpartydeveloperfrontend.builder.{DeveloperSessionBuilder, DeveloperTestData}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.{DeveloperSession, LoggedInState}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.{LocalUserIdTracker, WithCSRFAddToken}
 
 class AuthAppAccessCodeViewSpec extends CommonViewSpec
     with WithCSRFAddToken
+    with DeveloperTestData
     with DeveloperSessionBuilder
-    with DeveloperBuilder
     with LocalUserIdTracker
     with StubMessagesFactory {
 
   implicit val request      = FakeRequest()
   val authAppAccessCodeView = app.injector.instanceOf[AuthAppAccessCodeView]
 
-  implicit val loggedIn: DeveloperSession = buildDeveloperSession(
-    loggedInState = LoggedInState.LOGGED_IN,
-    buildDeveloper("developer@example.com", "Joe", "Bloggs")
-  )
+  implicit val loggedIn: DeveloperSession = JoeBloggs.loggedIn
 
   "AuthAppAccessCodeView view" should {
     "render correctly when form is valid" in {

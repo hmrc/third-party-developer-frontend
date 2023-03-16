@@ -142,7 +142,7 @@ class CheckAnswersControllerSpec
       val result = underTest.checkAnswersPage(applicationId)(loggedInRequest.withCSRFToken)
 
       status(result) shouldBe SEE_OTHER
-      redirectLocation(result) shouldBe Some(s"/developer/submissions/application/${applicationId.value}/production-credentials-checklist")
+      redirectLocation(result) shouldBe Some(s"/developer/submissions/application/${applicationId.text}/production-credentials-checklist")
     }
 
     "return an error when submission is not found" in new Setup {
@@ -177,7 +177,7 @@ class CheckAnswersControllerSpec
       val result = underTest.checkAnswersAction(applicationId)(loggedInRequest.withCSRFToken)
 
       status(result) shouldBe SEE_OTHER
-      redirectLocation(result) shouldBe Some(s"/developer/submissions/application/${applicationId.value}/request-received")
+      redirectLocation(result) shouldBe Some(s"/developer/submissions/application/${applicationId.text}/request-received")
     }
 
     "fail when production credentials are not requested successfully" in new Setup {
@@ -186,7 +186,7 @@ class CheckAnswersControllerSpec
 
       val result = underTest.checkAnswersAction(applicationId)(loggedInRequest.withCSRFToken)
       status(result) shouldBe SEE_OTHER
-      redirectLocation(result) shouldBe Some(s"/developer/submissions/application/${applicationId.value}/production-credentials-checklist")
+      redirectLocation(result) shouldBe Some(s"/developer/submissions/application/${applicationId.text}/production-credentials-checklist")
     }
 
     "don't display verification email text if requester is the Responsible Individual" in new Setup {
@@ -198,7 +198,7 @@ class CheckAnswersControllerSpec
       val result = underTest.checkAnswersAction(applicationId)(loggedInRequest.withCSRFToken)
 
       status(result) shouldBe SEE_OTHER
-      redirectLocation(result) shouldBe Some(s"/developer/submissions/application/${applicationId.value}/request-received")
+      redirectLocation(result) shouldBe Some(s"/developer/submissions/application/${applicationId.text}/request-received")
     }
 
     "do display verification email text if requester is not the Responsible Individual" in new Setup {
@@ -210,7 +210,7 @@ class CheckAnswersControllerSpec
       val result = underTest.checkAnswersAction(applicationId)(loggedInRequest.withCSRFToken)
 
       status(result) shouldBe SEE_OTHER
-      redirectLocation(result) shouldBe Some(s"/developer/submissions/application/${applicationId.value}/request-received")
+      redirectLocation(result) shouldBe Some(s"/developer/submissions/application/${applicationId.text}/request-received")
     }
 
     "don't display verification email text if requester is Responsible Individual question not answered" in new Setup {
@@ -222,7 +222,7 @@ class CheckAnswersControllerSpec
       val result = underTest.checkAnswersAction(applicationId)(loggedInRequest.withCSRFToken)
 
       status(result) shouldBe SEE_OTHER
-      redirectLocation(result) shouldBe Some(s"/developer/submissions/application/${applicationId.value}/request-received")
+      redirectLocation(result) shouldBe Some(s"/developer/submissions/application/${applicationId.text}/request-received")
     }
   }
 

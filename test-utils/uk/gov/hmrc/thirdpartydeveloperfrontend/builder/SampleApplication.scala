@@ -18,13 +18,14 @@ package uk.gov.hmrc.thirdpartydeveloperfrontend.builder
 
 import java.time.{LocalDateTime, Period, ZoneOffset}
 
+import uk.gov.hmrc.apiplatform.modules.applications.domain.models.{ApplicationId, ClientId}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.CollaboratorTracker
 
 trait SampleApplication {
   self: SampleSession with CollaboratorTracker =>
 
-  val appId    = ApplicationId("myAppId")
+  val appId    = ApplicationId.random
   val clientId = ClientId("myClientId")
 
   val sampleApp: Application = Application(
@@ -38,7 +39,7 @@ trait SampleApplication {
     Environment.PRODUCTION,
     Some("Description 1"),
     Set(loggedInDeveloper.email.asAdministratorCollaborator),
-    state = ApplicationState.production(loggedInDeveloper.email, loggedInDeveloper.displayedName, ""),
+    state = ApplicationState.production(loggedInDeveloper.email.text, loggedInDeveloper.displayedName, ""),
     access = Standard(redirectUris = List("https://red1", "https://red2"), termsAndConditionsUrl = Some("http://tnc-url.com"))
   )
 

@@ -21,6 +21,7 @@ import java.time.LocalDateTime
 import play.api.test.FakeRequest
 import uk.gov.hmrc.http.HeaderCarrier
 
+import uk.gov.hmrc.apiplatform.modules.common.domain.models.LaxEmailAddress.StringSyntax
 import uk.gov.hmrc.apiplatform.modules.uplift.controllers.UpliftJourneySwitch
 import uk.gov.hmrc.thirdpartydeveloperfrontend.builder.ApplicationBuilder
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.TermsOfUseVersion
@@ -35,7 +36,7 @@ class TermsOfUseVersionServiceSpec extends HmrcSpec with ApplicationBuilder with
 
     val upliftJourneySwitch = mock[UpliftJourneySwitch]
     val request             = FakeRequest()
-    val email               = "test@example.com"
+    val email               = "test@example.com".toLaxEmail
     val application         = buildApplication(email)
     val underTest           = new TermsOfUseVersionService(upliftJourneySwitch, termsOfUseServiceMock)
 

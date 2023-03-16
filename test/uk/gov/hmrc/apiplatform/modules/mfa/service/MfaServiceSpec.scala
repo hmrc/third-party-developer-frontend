@@ -22,9 +22,9 @@ import scala.concurrent.Future.{failed, successful}
 import play.api.http.Status.INTERNAL_SERVER_ERROR
 import uk.gov.hmrc.http.{HeaderCarrier, UpstreamErrorResponse}
 
+import uk.gov.hmrc.apiplatform.modules.developers.domain.models.UserId
 import uk.gov.hmrc.apiplatform.modules.mfa.connectors.ThirdPartyDeveloperMfaConnector
 import uk.gov.hmrc.apiplatform.modules.mfa.models.MfaId
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.UserId
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.AsyncHmrcSpec
 
 class MfaServiceSpec extends AsyncHmrcSpec {
