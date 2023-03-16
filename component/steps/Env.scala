@@ -98,6 +98,7 @@ trait Env extends ScalaDsl with EN with Matchers with ApplicationLogger {
     options.addArguments("--headless")
     options.addArguments("--proxy-server='direct://'")
     options.addArguments("--proxy-bypass-list=*")
+    options.addArguments("--remote-allow-origins=*")
     new ChromeDriver(options)
   }
 
