@@ -29,6 +29,11 @@ Feature: Sign in
       | email address          | password         |
       | john.smith@example.com | StrongPassword1! |
     When I click on the button with id 'submit'
+    Then I am on the 'Recommend Mfa' page
+    When I click on the button with id 'submit'
+    Then I am on the 'Select MFA' page
+    Then I click on the radio button with id 'auth-app-mfa'
+    When I click on the button with id 'submit'
     Then I am on the 'Authenticator App Start Page' page
     When I click on the button with id 'submit'
     Then I am on the 'Setup 2SV QR' page
