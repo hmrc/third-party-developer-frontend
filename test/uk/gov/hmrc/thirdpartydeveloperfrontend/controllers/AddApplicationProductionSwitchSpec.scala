@@ -35,7 +35,7 @@ import uk.gov.hmrc.apiplatform.modules.uplift.services.GetProductionCredentialsF
 import uk.gov.hmrc.apiplatform.modules.uplift.services.mocks.UpliftLogicMock
 import uk.gov.hmrc.apiplatform.modules.uplift.views.html.BeforeYouStartView
 import uk.gov.hmrc.thirdpartydeveloperfrontend.builder.{DeveloperBuilder, _}
-import uk.gov.hmrc.thirdpartydeveloperfrontend.config.{ErrorHandler, UpliftJourneyConfig}
+import uk.gov.hmrc.thirdpartydeveloperfrontend.config.{ErrorHandler, Off, UpliftJourneyConfig}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.addapplication.AddApplication
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.controllers.ApplicationSummary
 import uk.gov.hmrc.thirdpartydeveloperfrontend.mocks.connectors.ApmConnectorMockModule
@@ -119,6 +119,7 @@ class AddApplicationProductionSwitchSpec
 
     when(appConfig.nameOfPrincipalEnvironment).thenReturn("Production")
     when(appConfig.nameOfSubordinateEnvironment).thenReturn("Sandbox")
+    when(mockUpliftJourneyConfig.status).thenReturn(Off)
 
     def shouldShowWhichAppMessage()(implicit results: Future[Result]) = {
       contentAsString(results) should include("Which application do you want production credentials for?")
