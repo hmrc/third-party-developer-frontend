@@ -94,9 +94,9 @@ object ResponsibleIndividualVerification extends LocalDateTimeFormatters {
 
   def getVerificationType(riVerification: ResponsibleIndividualVerification): String = {
     riVerification match {
-      case ritouv: ResponsibleIndividualToUVerification         => "termsOfUse"
-      case ritouuv: ResponsibleIndividualTouUpliftVerification  => "termsOfUseUplift"
-      case riuv: ResponsibleIndividualUpdateVerification        => "adminUpdate"
+      case ritouv: ResponsibleIndividualToUVerification        => "termsOfUse"
+      case ritouuv: ResponsibleIndividualTouUpliftVerification => "termsOfUseUplift"
+      case riuv: ResponsibleIndividualUpdateVerification       => "adminUpdate"
     }
   }
 }

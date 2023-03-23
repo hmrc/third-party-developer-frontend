@@ -23,8 +23,8 @@ import scala.concurrent.ExecutionContext.Implicits.global
 import uk.gov.hmrc.http.HeaderCarrier
 
 import uk.gov.hmrc.apiplatform.modules.apis.domain.models._
-import uk.gov.hmrc.apiplatform.modules.applications.domain.models.{ApplicationId, ClientId}
-import uk.gov.hmrc.apiplatform.modules.commands.applications.domain.models.{DispatchSuccessResult, RemoveCollaborator}
+import uk.gov.hmrc.apiplatform.modules.applications.domain.models.{ApplicationId, ClientId, Collaborator}
+import uk.gov.hmrc.apiplatform.modules.commands.applications.domain.models.{AddCollaborator, DispatchSuccessResult, RemoveCollaborator}
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.Actors
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.LaxEmailAddress.StringSyntax
 import uk.gov.hmrc.thirdpartydeveloperfrontend.builder._
@@ -36,8 +36,6 @@ import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.subscriptions.Versi
 import uk.gov.hmrc.thirdpartydeveloperfrontend.mocks.connectors._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.testdata.CollaboratorsTestData
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.{AsyncHmrcSpec, FixedClock, LocalUserIdTracker}
-import uk.gov.hmrc.apiplatform.modules.applications.domain.models.Collaborator
-import uk.gov.hmrc.apiplatform.modules.commands.applications.domain.models.AddCollaborator
 
 class CollaboratorServiceSpec extends AsyncHmrcSpec
     with SubscriptionsBuilder
@@ -55,7 +53,7 @@ class CollaboratorServiceSpec extends AsyncHmrcSpec
       extends FixedClock
       with ThirdPartyDeveloperConnectorMockModule
       with ApplicationCommandConnectorMockModule {
-    
+
     implicit val hc: HeaderCarrier = HeaderCarrier()
 
     val mockDeskproConnector: DeskproConnector = mock[DeskproConnector]
@@ -92,7 +90,7 @@ class CollaboratorServiceSpec extends AsyncHmrcSpec
     "add teamMember successful" in new Setup {
       TPDMock.FetchByEmails.returnsEmptySeq()
       TPDMock.GetOrCreateUser.succeedsWith(developerAsCollaborator.userId)
-      
+
       val mockResponse = mock[Application]
 
       PrincipalAppCommandConnector.Dispatch.thenReturnsSuccess(mockResponse)

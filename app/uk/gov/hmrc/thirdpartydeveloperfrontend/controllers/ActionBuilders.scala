@@ -37,7 +37,7 @@ trait ApplicationActionBuilders extends BaseActionBuilders {
 
   implicit val appConfig: ApplicationConfig
 
-  private implicit def hc(implicit request: Request[_]): HeaderCarrier =
+  implicit private def hc(implicit request: Request[_]): HeaderCarrier =
     HeaderCarrierConverter.fromRequestAndSession(request, request.session)
 
   def applicationRequestRefiner(applicationId: ApplicationId)(implicit ec: ExecutionContext): ActionRefiner[UserRequest, ApplicationRequest] =
