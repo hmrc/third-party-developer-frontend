@@ -902,7 +902,7 @@ class DetailsSpec
 
       final def callChangeDetailsActionNotLoggedIn: Future[Result] = callChangeDetailsAction(loggedOutRequest)
 
-      private final def callChangeDetailsAction[T](request: FakeRequest[T]): Future[Result] = {
+      final private def callChangeDetailsAction[T](request: FakeRequest[T]): Future[Result] = {
         addToken(underTest.changeDetailsAction(app.id))(request.withJsonBody(Json.toJson(app.toForm)))
       }
     }

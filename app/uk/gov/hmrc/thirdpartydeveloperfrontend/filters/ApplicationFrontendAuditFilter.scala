@@ -34,8 +34,7 @@ class ApplicationFrontendAuditFilter @Inject() (
     override val mat: Materializer,
     @Named("appName") appName: String,
     requestHeaderAuditing: RequestHeaderAuditing
-  )(
-    override implicit val ec: ExecutionContext
+  )(implicit override val ec: ExecutionContext
   ) extends DefaultFrontendAuditFilter(configuration, controllerConfigs, auditConnector, auditEvent, requestHeaderAuditing, mat) {
 
   override def controllerNeedsAuditing(controllerName: String): Boolean =
