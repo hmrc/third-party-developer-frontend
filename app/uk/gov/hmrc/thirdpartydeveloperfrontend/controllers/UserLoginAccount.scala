@@ -148,7 +148,7 @@ class UserLoginAccount @Inject() (
       case (Some(session), false) if session.loggedInState.isPartLoggedInEnablingMFA =>
         successful(
           withSessionCookie(
-            Redirect(uk.gov.hmrc.apiplatform.modules.mfa.controllers.profile.routes.MfaController.authAppStart.url).withSession(playSession),
+            Redirect(routes.UserLoginAccount.get2svRecommendationPage, SEE_OTHER).withSession(playSession),
             session.sessionId
           )
         )

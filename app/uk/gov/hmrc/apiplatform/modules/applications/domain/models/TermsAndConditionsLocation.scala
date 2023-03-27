@@ -38,9 +38,9 @@ object TermsAndConditionsLocation {
   import play.api.libs.json.Json
   import uk.gov.hmrc.play.json.Union
 
-  private implicit val noneProvidedFormat      = Json.format[TermsAndConditionsLocations.NoneProvided.type]
-  private implicit val inDesktopSoftwareFormat = Json.format[TermsAndConditionsLocations.InDesktopSoftware.type]
-  private implicit val urlFormat               = Json.format[TermsAndConditionsLocations.Url]
+  implicit private val noneProvidedFormat      = Json.format[TermsAndConditionsLocations.NoneProvided.type]
+  implicit private val inDesktopSoftwareFormat = Json.format[TermsAndConditionsLocations.InDesktopSoftware.type]
+  implicit private val urlFormat               = Json.format[TermsAndConditionsLocations.Url]
 
   implicit val termsAndConditionsLocationFormat = Union.from[TermsAndConditionsLocation]("termsAndConditionsType")
     .and[TermsAndConditionsLocations.NoneProvided.type]("noneProvided")

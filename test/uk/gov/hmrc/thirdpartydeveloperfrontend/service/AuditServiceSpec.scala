@@ -94,7 +94,7 @@ class AuditServiceSpec extends AsyncHmrcSpec with LocalUserIdTracker with Develo
 
     "send an event when the password change fails due to invalid credentials for a user who is not logged in" in new Setup {
 
-      override implicit val hc = HeaderCarrier()
+      implicit override val hc = HeaderCarrier()
 
       verifyPasswordChangeFailedAuditEventSent(tags = Map("developerEmail" -> developer.email.text))
     }

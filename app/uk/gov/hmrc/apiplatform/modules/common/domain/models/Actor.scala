@@ -53,7 +53,7 @@ object Actor {
   import play.api.libs.json._
   import uk.gov.hmrc.play.json.Union
 
-  private sealed trait ActorType
+  sealed private trait ActorType
 
   private object ActorTypes {
     case object COLLABORATOR  extends ActorType
