@@ -40,7 +40,7 @@ import uk.gov.hmrc.apiplatform.modules.submissions.services.SubmissionService
 import uk.gov.hmrc.apiplatform.modules.uplift.domain.models.ApiSubscriptions
 import uk.gov.hmrc.apiplatform.modules.uplift.services.{GetProductionCredentialsFlowService, UpliftJourneyService}
 import uk.gov.hmrc.apiplatform.modules.uplift.views.html._
-import uk.gov.hmrc.thirdpartydeveloperfrontend.config.{ApplicationConfig, ErrorHandler, On, OnDemand, UpliftJourneyConfig}
+import uk.gov.hmrc.thirdpartydeveloperfrontend.config.{ApplicationConfig, ErrorHandler, Off, OnDemand, UpliftJourneyConfig}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.connectors.ApmConnector
 import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.checkpages.{CanUseCheckActions, DummySubscriptionsForm}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.{APISubscriptions, ApplicationController, FormKeys, checkpages}
@@ -263,16 +263,16 @@ class UpliftJourneyController @Inject() (
 @Singleton
 class UpliftJourneySwitch @Inject() (upliftJourneyConfig: UpliftJourneyConfig) {
 
-  private def upliftJourneyTurnedOnInRequestHeader(implicit request: Request[_]): Boolean =
-    request.headers.get("useNewUpliftJourney").fold(false) { setting =>
+  private def upliftJourneyUseOldJourneyInRequestHeader(implicit request: Request[_]): Boolean =
+    request.headers.get("useOldUpliftJourney").fold(false) { setting =>
       Try(setting.toBoolean).getOrElse(false)
     }
 
   def shouldUseV2(implicit request: Request[_]): Boolean =
     upliftJourneyConfig.status match {
-      case On                                               => true
-      case OnDemand if upliftJourneyTurnedOnInRequestHeader => true
-      case _                                                => false
+      case Off                                                   => false
+      case OnDemand if upliftJourneyUseOldJourneyInRequestHeader => false
+      case _                                                     => true
     }
 
   def performSwitch(newUpliftPath: => Future[Result], existingUpliftPath: => Future[Result])(implicit request: Request[_]): Future[Result] =

@@ -117,6 +117,7 @@ class AddApplicationStartSpec
     "return the add applications page with the user logged in when the environment is Production" in new Setup {
       when(appConfig.nameOfPrincipalEnvironment).thenReturn("Production")
       when(appConfig.nameOfSubordinateEnvironment).thenReturn("Sandbox")
+      when(upliftJourneyConfigMock.status).thenReturn(Off)
 
       private val result = underTest.addApplicationSubordinate()(loggedInRequest)
 
@@ -160,6 +161,8 @@ class AddApplicationStartSpec
     "return the add applications page with the user logged in when the environment is Production" in new Setup {
       when(appConfig.nameOfPrincipalEnvironment).thenReturn("Production")
       when(appConfig.nameOfSubordinateEnvironment).thenReturn("Sandbox")
+      when(upliftJourneyConfigMock.status).thenReturn(Off)
+
       private val result = underTest.addApplicationPrincipal()(loggedInRequest)
 
       status(result) shouldBe OK
@@ -173,6 +176,8 @@ class AddApplicationStartSpec
     "return the add applications page with the user logged in when the environment is QA" in new Setup {
       when(appConfig.nameOfPrincipalEnvironment).thenReturn("QA")
       when(appConfig.nameOfSubordinateEnvironment).thenReturn("Development")
+      when(upliftJourneyConfigMock.status).thenReturn(Off)
+
       private val result = underTest.addApplicationPrincipal()(loggedInRequest)
 
       status(result) shouldBe OK
@@ -219,26 +224,27 @@ class AddApplicationStartSpec
       }
 
     "return the add applications page when the UpliftJourneyConfig " +
-      "returns OnDemand and request header does not contain the uplift journey flag" in new Setup {
+      "returns OnDemand and request header does contain the old uplift journey flag" in new Setup {
         when(appConfig.nameOfPrincipalEnvironment).thenReturn("QA")
         when(appConfig.nameOfSubordinateEnvironment).thenReturn("Development")
 
         when(upliftJourneyConfigMock.status).thenReturn(OnDemand)
+        val loggedInRequestWithFlag = loggedInRequest.withHeaders(Headers("useOldUpliftJourney" -> "true"))
 
-        private val result = underTest.addApplicationPrincipal()(loggedInRequest)
+        private val result = underTest.addApplicationPrincipal()(loggedInRequestWithFlag)
 
         status(result) shouldBe OK
         contentAsString(result) should include("Add an application to QA")
       }
 
     "return the add applications page when the UpliftJourneyConfig " +
-      "returns OnDemand and request header contains the uplift journey flag set to false" in new Setup {
+      "returns OnDemand and request header contains the old uplift journey flag set to true" in new Setup {
         when(appConfig.nameOfPrincipalEnvironment).thenReturn("QA")
         when(appConfig.nameOfSubordinateEnvironment).thenReturn("Development")
 
         when(upliftJourneyConfigMock.status).thenReturn(OnDemand)
 
-        val loggedInRequestWithFlag = loggedInRequest.withHeaders(Headers("useNewUpliftJourney" -> "false"))
+        val loggedInRequestWithFlag = loggedInRequest.withHeaders(Headers("useOldUpliftJourney" -> "true"))
 
         private val result = underTest.addApplicationPrincipal()(loggedInRequestWithFlag)
 
@@ -247,7 +253,7 @@ class AddApplicationStartSpec
       }
 
     "return the uplift journey 'before you start' page when the UpliftJourneyConfig " +
-      "returns OnDemand and request header contains the uplift journey flag set to true" in new Setup {
+      "returns OnDemand and request header contains the old uplift journey flag set to false" in new Setup {
         when(appConfig.nameOfPrincipalEnvironment).thenReturn("QA")
         when(appConfig.nameOfSubordinateEnvironment).thenReturn("Development")
         when(flowServiceMock.resetFlow(*)).thenReturn(Future.successful(GetProductionCredentialsFlow("", None, None)))
@@ -258,7 +264,7 @@ class AddApplicationStartSpec
 
         when(upliftJourneyConfigMock.status).thenReturn(OnDemand)
 
-        val loggedInRequestWithFlag = loggedInRequest.withHeaders(Headers("useNewUpliftJourney" -> "true"))
+        val loggedInRequestWithFlag = loggedInRequest.withHeaders(Headers("useOldUpliftJourney" -> "false"))
 
         private val result = underTest.addApplicationPrincipal()(loggedInRequestWithFlag)
 
@@ -267,13 +273,13 @@ class AddApplicationStartSpec
       }
 
     "return the add applications page when the UpliftJourneyConfig " +
-      "returns Off and request header contains the uplift journey flag set to true" in new Setup {
+      "returns Off and request header contains the old uplift journey flag set to false" in new Setup {
         when(appConfig.nameOfPrincipalEnvironment).thenReturn("QA")
         when(appConfig.nameOfSubordinateEnvironment).thenReturn("Development")
 
         when(upliftJourneyConfigMock.status).thenReturn(Off)
 
-        val loggedInRequestWithFlag = loggedInRequest.withHeaders(Headers("useNewUpliftJourney" -> "true"))
+        val loggedInRequestWithFlag = loggedInRequest.withHeaders(Headers("useOldUpliftJourney" -> "false"))
 
         private val result = underTest.addApplicationPrincipal()(loggedInRequestWithFlag)
 
