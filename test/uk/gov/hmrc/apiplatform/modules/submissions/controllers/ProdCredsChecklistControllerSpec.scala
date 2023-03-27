@@ -18,15 +18,11 @@ package uk.gov.hmrc.apiplatform.modules.submissions.controllers
 
 import scala.concurrent.ExecutionContext.Implicits.global
 
-import org.mockito.captor.ArgCaptor
-
-import play.api.data.Form
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
 import play.filters.csrf.CSRF
 
 import uk.gov.hmrc.apiplatform.modules.submissions.SubmissionsTestData
-import uk.gov.hmrc.apiplatform.modules.submissions.controllers.ProdCredsChecklistController.{DummyForm, ViewModel}
 import uk.gov.hmrc.apiplatform.modules.submissions.services.mocks.SubmissionServiceMockModule
 import uk.gov.hmrc.apiplatform.modules.submissions.views.html.ProductionCredentialsChecklistView
 import uk.gov.hmrc.thirdpartydeveloperfrontend.builder.{DeveloperBuilder, SampleApplication, SampleSession}
@@ -81,11 +77,9 @@ class ProdCredsChecklistControllerSpec
       with SubmissionServiceMockModule
       with HasSessionDeveloperFlow
       with HasSubscriptions
-      with HasAppInTestingState
       with SubmissionsTestData {
 
-    val productionCredentialsChecklistView = mock[ProductionCredentialsChecklistView]
-    when(productionCredentialsChecklistView.apply(*[ViewModel], *)(*, *, *, *)).thenReturn(play.twirl.api.HtmlFormat.empty)
+    val productionCredentialsChecklistView = app.injector.instanceOf[ProductionCredentialsChecklistView]
 
     val controller = new ProdCredsChecklistController(
       mockErrorHandler,
@@ -119,7 +113,7 @@ class ProdCredsChecklistControllerSpec
   }
 
   "productionCredentialsChecklist" should {
-    "fail with NOT FOUND" in new Setup {
+    "fail with NOT FOUND" in new Setup with HasAppInTestingState {
       SubmissionServiceMock.FetchLatestExtendedSubmission.thenReturnsNone()
 
       val result = controller.productionCredentialsChecklistPage(appId)(loggedInRequest.withCSRFToken)
@@ -127,32 +121,40 @@ class ProdCredsChecklistControllerSpec
       status(result) shouldBe NOT_FOUND
     }
 
-    "succeed" in new Setup {
+    "succeed with app in testing state" in new Setup with HasAppInTestingState {
       SubmissionServiceMock.FetchLatestExtendedSubmission.thenReturns(answeredSubmission.withCompletedProgress)
 
       val result = controller.productionCredentialsChecklistPage(appId)(loggedInRequest.withCSRFToken)
 
       status(result) shouldBe OK
+      contentAsString(result) should include("Terms of use checklist")
+      contentAsString(result) shouldNot include("App name 1")
+    }
+
+    "succeed with app in production state" in new Setup with HasAppInProductionState {
+      SubmissionServiceMock.FetchLatestExtendedSubmission.thenReturns(answeredSubmission.withCompletedProgress)
+
+      val result = controller.productionCredentialsChecklistPage(appId)(loggedInRequest.withCSRFToken)
+
+      status(result) shouldBe OK
+      contentAsString(result) should include("Agree to version 2 of the terms of use")
+      contentAsString(result) should include("App name 1")
     }
   }
 
   "productionCredentialsChecklistAction" should {
-    "return success when form is valid and incomplete" in new Setup {
+    "return success when form is valid and incomplete" in new Setup with HasAppInTestingState {
       SubmissionServiceMock.FetchLatestExtendedSubmission.thenReturns(answeringSubmission.withIncompleteProgress)
-      val formCaptor = ArgCaptor[Form[DummyForm]]
       val result     = controller.productionCredentialsChecklistAction(appId)(loggedInRequest.withCSRFToken)
 
       status(result) shouldBe OK
 
-      verify(productionCredentialsChecklistView).apply(*, formCaptor.capture)(*, *, *, *)
-      val form = formCaptor.value
-      form.errors.size shouldBe 3
-      form.errors("development practices").head.messages shouldBe Seq("Complete the development practices section")
-      form.errors("customers authorising your software").head.messages shouldBe Seq("Complete the customers authorising your software section")
-      form.errors("organisation details").head.messages shouldBe Seq("Complete the organisation details section")
+      contentAsString(result) should include("Complete the development practices section")
+      contentAsString(result) should include("Complete the customers authorising your software section")
+      contentAsString(result) should include("Complete the organisation details section")
     }
 
-    "redirect when when form is valid and complete" in new Setup {
+    "redirect when when form is valid and complete" in new Setup with HasAppInTestingState {
       SubmissionServiceMock.FetchLatestExtendedSubmission.thenReturns(answeredSubmission.withCompletedProgress)
 
       val result = controller.productionCredentialsChecklistAction(appId)(loggedInRequest.withCSRFToken)
@@ -160,6 +162,5 @@ class ProdCredsChecklistControllerSpec
       status(result) shouldBe SEE_OTHER
       redirectLocation(result) shouldBe Some(uk.gov.hmrc.apiplatform.modules.submissions.controllers.routes.CheckAnswersController.checkAnswersPage(appId).url)
     }
-
   }
 }
