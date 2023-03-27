@@ -811,7 +811,7 @@ class DetailsSpec
       givenApplicationAction(application, loggedInDeveloper)
 
       if (hasTermsOfUseAgreement) {
-        returnAgreementDetails(TermsOfUseAgreementDetails("test@example.com".toLaxEmail, None, LocalDateTime.now, Some("1.2")))
+        returnAgreementDetails(TermsOfUseAgreementDetails("test@example.com".toLaxEmail, None, LocalDateTime.now, None))
       } else {
         returnAgreementDetails()
       }
@@ -827,7 +827,7 @@ class DetailsSpec
       elementIdentifiedByIdContainsText(doc, "description", application.description.getOrElse("None")) shouldBe true
       elementIdentifiedByIdContainsText(doc, "privacyPolicyUrl", application.privacyPolicyLocation.describe) shouldBe true
       elementIdentifiedByIdContainsText(doc, "termsAndConditionsUrl", application.termsAndConditionsLocation.describe) shouldBe true
-      elementExistsContainsText(doc, "td", "Agreed by test@example.com") shouldBe hasTermsOfUseAgreement
+      elementExistsContainsText(doc, "p", "test@example.com agreed to version 2 of the terms of use on") shouldBe hasTermsOfUseAgreement
     }
 
     def changeDetailsShouldRenderThePage(application: Application) = {
