@@ -27,7 +27,6 @@ import uk.gov.hmrc.apiplatform.modules.applications.domain.models._
 import uk.gov.hmrc.apiplatform.modules.commands.applications.domain.models._
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.{Actors, LaxEmailAddress}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.connectors._
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications._
 import java.time.Clock
 import uk.gov.hmrc.apiplatform.modules.common.domain.services.ClockNow
@@ -54,7 +53,7 @@ class CollaboratorService @Inject() (
       adminsAsUsers <- developerConnector.fetchByEmails(setOfAdminEmails)
       adminsToEmail  = adminsAsUsers.filter(_.verified.contains(true)).map(_.email).toSet
       userId        <- developerConnector.getOrCreateUserId(newTeamMemberEmail)
-      addCommand     = AddCollaborator(Actors.AppCollaborator(requestingEmail), Collaborator.apply(newTeamMemberEmail, newTeamMemberRole, userId), now())
+      addCommand     = ApplicationCommands.AddCollaborator(Actors.AppCollaborator(requestingEmail), Collaborator.apply(newTeamMemberEmail, newTeamMemberRole, userId), now())
       response      <- applicationCommandConnector(app).dispatch(app.id, addCommand, adminsToEmail)
     } yield response
   }
@@ -78,20 +77,8 @@ class CollaboratorService @Inject() (
     for {
       otherAdmins  <- developerConnector.fetchByEmails(otherAdminEmails)
       adminsToEmail = otherAdmins.filter(_.verified.contains(true)).map(_.email).toSet
-      removeCommand = RemoveCollaborator(Actors.AppCollaborator(requestingEmail), collaboratorToRemove, now())
+      removeCommand = ApplicationCommands.RemoveCollaborator(Actors.AppCollaborator(requestingEmail), collaboratorToRemove, now())
       response     <- applicationCommandConnector(app).dispatch(app.id, removeCommand, adminsToEmail)
     } yield response
-  }
-
-  trait ApplicationConnector {
-
-    def removeTeamMember(
-        applicationId: ApplicationId,
-        teamMemberToDelete: LaxEmailAddress,
-        requestingEmail: LaxEmailAddress,
-        adminsToEmail: Set[LaxEmailAddress]
-      )(implicit hc: HeaderCarrier
-      ): Future[ApplicationUpdateSuccessful]
-
   }
 }

@@ -24,7 +24,8 @@ import uk.gov.hmrc.http.HeaderCarrier
 
 import uk.gov.hmrc.apiplatform.modules.apis.domain.models._
 import uk.gov.hmrc.apiplatform.modules.applications.domain.models.{ApplicationId, ClientId, Collaborator}
-import uk.gov.hmrc.apiplatform.modules.commands.applications.domain.models.{AddCollaborator, DispatchSuccessResult, RemoveCollaborator}
+import uk.gov.hmrc.apiplatform.modules.commands.applications.domain.models.DispatchSuccessResult
+import uk.gov.hmrc.apiplatform.modules.commands.applications.domain.models.ApplicationCommands
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.Actors
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.LaxEmailAddress.StringSyntax
 import uk.gov.hmrc.thirdpartydeveloperfrontend.builder._
@@ -104,7 +105,7 @@ class CollaboratorServiceSpec extends AsyncHmrcSpec
         case DispatchSuccessResult(response) =>
           response shouldBe mockResponse
           inside(PrincipalAppCommandConnector.Dispatch.verifyCommand()) {
-            case AddCollaborator(actor, collaborator, _) =>
+            case ApplicationCommands.AddCollaborator(actor, collaborator, _) =>
               actor shouldBe Actors.AppCollaborator(administratorEmail)
               collaborator shouldBe developerAsCollaborator
           }
@@ -126,7 +127,7 @@ class CollaboratorServiceSpec extends AsyncHmrcSpec
         case DispatchSuccessResult(response) =>
           response shouldBe mockResponse
           inside(PrincipalAppCommandConnector.Dispatch.verifyCommand()) {
-            case RemoveCollaborator(actor, collaborator, _) =>
+            case ApplicationCommands.RemoveCollaborator(actor, collaborator, _) =>
               actor shouldBe Actors.AppCollaborator(administratorEmail)
               collaborator shouldBe developerAsCollaborator
           }
