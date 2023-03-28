@@ -65,13 +65,13 @@ class RequestProductionCredentialsSpec extends AsyncHmrcSpec
     "successfully create a ticket if requester is responsible individual" in new Setup {
       val app    = anApplication(developerEmail = email)
       when(mockSubmissionsConnector.requestApproval(eqTo(applicationId), eqTo(name), eqTo(email))(*)).thenReturn(successful(Right(app)))
-      when(mockDeskproConnector.createTicket(*[UserId], *)(*)).thenReturn(successful(TicketCreated))
+      when(mockDeskproConnector.createTicket(*[Option[UserId]], *)(*)).thenReturn(successful(TicketCreated))
       val result = await(underTest.requestProductionCredentials(applicationId, developerSession, true))
 
       result.right.value shouldBe app
 
       val ticketCapture = ArgCaptor[DeskproTicket]
-      verify(mockDeskproConnector).createTicket(*[UserId], ticketCapture.capture)(*)
+      verify(mockDeskproConnector).createTicket(*[Option[UserId]], ticketCapture.capture)(*)
       ticketCapture.value.subject shouldBe "New application submitted for checking"
     }
 

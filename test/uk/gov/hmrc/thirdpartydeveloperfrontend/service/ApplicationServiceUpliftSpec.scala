@@ -23,6 +23,7 @@ import uk.gov.hmrc.http.HeaderCarrier
 
 import uk.gov.hmrc.apiplatform.modules.apis.domain.models.{ApiContext, ApiIdentifier, ApiVersion}
 import uk.gov.hmrc.apiplatform.modules.applications.domain.models.ApplicationId
+import uk.gov.hmrc.apiplatform.modules.common.utils.FixedClock
 import uk.gov.hmrc.apiplatform.modules.developers.domain.models.UserId
 import uk.gov.hmrc.thirdpartydeveloperfrontend.builder._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.config.ApplicationConfig
@@ -38,7 +39,7 @@ import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.connectors.{Deskpro
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.{ApplicationAlreadyExists, ApplicationNotFound, ApplicationUpliftSuccessful}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.service.PushPullNotificationsService.PushPullNotificationsConnector
 import uk.gov.hmrc.thirdpartydeveloperfrontend.service.SubscriptionFieldsService.SubscriptionFieldsConnector
-import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.{AsyncHmrcSpec, FixedClock, LocalUserIdTracker}
+import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.{AsyncHmrcSpec, LocalUserIdTracker}
 
 class ApplicationServiceUpliftSpec extends AsyncHmrcSpec with LocalUserIdTracker with DeveloperSessionBuilder with DeveloperTestData {
 
@@ -124,7 +125,7 @@ class ApplicationServiceUpliftSpec extends AsyncHmrcSpec with LocalUserIdTracker
     val user = standardDeveloper.loggedIn
 
     "request uplift" in new Setup {
-      when(mockDeskproConnector.createTicket(any[UserId], any[DeskproTicket])(eqTo(hc))).thenReturn(successful(TicketCreated))
+      when(mockDeskproConnector.createTicket(any[Option[UserId]], any[DeskproTicket])(eqTo(hc))).thenReturn(successful(TicketCreated))
       when(mockProductionApplicationConnector.requestUplift(applicationId, UpliftRequest(applicationName, user.email)))
         .thenReturn(successful(ApplicationUpliftSuccessful))
       await(applicationService.requestUplift(applicationId, applicationName, user)) shouldBe ApplicationUpliftSuccessful
@@ -134,13 +135,13 @@ class ApplicationServiceUpliftSpec extends AsyncHmrcSpec with LocalUserIdTracker
       val testError = new scala.RuntimeException("deskpro error")
       when(mockProductionApplicationConnector.requestUplift(applicationId, UpliftRequest(applicationName, user.email)))
         .thenReturn(successful(ApplicationUpliftSuccessful))
-      when(mockDeskproConnector.createTicket(any[UserId], any[DeskproTicket])(eqTo(hc))).thenReturn(failed(testError))
+      when(mockDeskproConnector.createTicket(any[Option[UserId]], any[DeskproTicket])(eqTo(hc))).thenReturn(failed(testError))
 
       await(applicationService.requestUplift(applicationId, applicationName, user)) shouldBe ApplicationUpliftSuccessful
     }
 
     "propagate ApplicationAlreadyExistsResponse from connector" in new Setup {
-      when(mockDeskproConnector.createTicket(any[UserId], any[DeskproTicket])(eqTo(hc)))
+      when(mockDeskproConnector.createTicket(any[Option[UserId]], any[DeskproTicket])(eqTo(hc)))
         .thenReturn(successful(TicketCreated))
       when(mockProductionApplicationConnector.requestUplift(applicationId, UpliftRequest(applicationName, user.email)))
         .thenReturn(failed(new ApplicationAlreadyExists))
@@ -153,7 +154,7 @@ class ApplicationServiceUpliftSpec extends AsyncHmrcSpec with LocalUserIdTracker
     }
 
     "propagate ApplicationNotFound from connector" in new Setup {
-      when(mockDeskproConnector.createTicket(any[UserId], any[DeskproTicket])(eqTo(hc)))
+      when(mockDeskproConnector.createTicket(*[Option[UserId]], any[DeskproTicket])(eqTo(hc)))
         .thenReturn(successful(TicketCreated))
       when(mockProductionApplicationConnector.requestUplift(applicationId, UpliftRequest(applicationName, user.email)))
         .thenReturn(failed(new ApplicationNotFound))
@@ -182,5 +183,4 @@ class ApplicationServiceUpliftSpec extends AsyncHmrcSpec with LocalUserIdTracker
       await(applicationService.verify(verificationCode)) shouldBe ApplicationVerificationFailed
     }
   }
-
 }

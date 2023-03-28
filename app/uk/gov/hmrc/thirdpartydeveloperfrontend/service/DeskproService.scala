@@ -36,7 +36,7 @@ class DeskproService @Inject() (val deskproConnector: DeskproConnector, val appC
     deskproConnector.createFeedback(feedback)
   }
 
-  def submitSupportEnquiry(userId: UserId, supportEnquiry: SupportEnquiryForm)(implicit request: Request[AnyRef], hc: HeaderCarrier): Future[TicketResult] = {
+  def submitSupportEnquiry(userId: Option[UserId], supportEnquiry: SupportEnquiryForm)(implicit request: Request[AnyRef], hc: HeaderCarrier): Future[TicketResult] = {
     val ticket = DeskproTicket.createFromSupportEnquiry(supportEnquiry, appConfig.title)
     deskproConnector.createTicket(userId, ticket)
   }

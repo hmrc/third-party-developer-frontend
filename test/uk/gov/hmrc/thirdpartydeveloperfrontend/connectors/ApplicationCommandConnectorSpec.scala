@@ -28,7 +28,7 @@ import uk.gov.hmrc.http.{HeaderCarrier, HttpClient}
 import uk.gov.hmrc.apiplatform.modules.apis.domain.models._
 import uk.gov.hmrc.apiplatform.modules.applications.domain.models.Collaborators.Administrator
 import uk.gov.hmrc.apiplatform.modules.applications.domain.models.{ApplicationId, ClientId, Collaborators}
-import uk.gov.hmrc.apiplatform.modules.commands.applications.domain.models.{DispatchRequest, DispatchSuccessResult, RemoveCollaborator}
+import uk.gov.hmrc.apiplatform.modules.commands.applications.domain.models.{ApplicationCommands, DispatchRequest, DispatchSuccessResult}
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.Actors
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.LaxEmailAddress.StringSyntax
 import uk.gov.hmrc.apiplatform.modules.developers.domain.models.UserId
@@ -84,7 +84,7 @@ class ApplicationCommandConnectorSpec
     val emailAddressToRemove = "toRemove@example.com".toLaxEmail
     val gatekeeperUserName   = "maxpower"
     val collaborator         = Collaborators.Administrator(UserId.random, emailAddressToRemove)
-    val command              = RemoveCollaborator(Actors.GatekeeperUser(gatekeeperUserName), collaborator, LocalDateTime.now())
+    val command              = ApplicationCommands.RemoveCollaborator(Actors.GatekeeperUser(gatekeeperUserName), collaborator, LocalDateTime.now())
 
     val adminsToEmail = Set("admin1@example.com", "admin2@example.com").map(_.toLaxEmail)
     val url           = s"/application/${applicationId.value.toString()}/dispatch"

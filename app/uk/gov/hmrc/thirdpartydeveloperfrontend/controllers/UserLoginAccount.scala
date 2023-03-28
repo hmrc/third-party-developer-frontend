@@ -395,7 +395,7 @@ class UserLoginAccount @Inject() (
 
     for {
       developer <- findDeveloper
-      userId     = developer.map(d => d.userId).getOrElse(UserId.unknown)
+      userId     = developer.map(d => d.userId)
       fullName   = getFullName(developer)
       _         <- applicationService.request2SVRemoval(
                      userId,

@@ -29,6 +29,7 @@ import play.api.test.FakeRequest
 import play.api.test.Helpers._
 import uk.gov.hmrc.http.HeaderCarrier
 
+import uk.gov.hmrc.apiplatform.modules.applications.domain.models.ClientSecret
 import uk.gov.hmrc.apiplatform.modules.uplift.controllers.UpliftJourneySwitch
 import uk.gov.hmrc.apiplatform.modules.uplift.services.GetProductionCredentialsFlowService
 import uk.gov.hmrc.apiplatform.modules.uplift.services.mocks._

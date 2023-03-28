@@ -25,7 +25,8 @@ import play.api.http.Status._
 import uk.gov.hmrc.http._
 import uk.gov.hmrc.play.http.metrics.common.API
 import ThirdPartyApplicationConnectorJsonFormatters._
-import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.{CollaboratorTracker, FixedClock, LocalUserIdTracker, WireMockExtensions}
+import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.{CollaboratorTracker, LocalUserIdTracker, WireMockExtensions}
+import uk.gov.hmrc.apiplatform.modules.common.utils.FixedClock
 import org.scalatestplus.play.guice.GuiceOneAppPerSuite
 import play.api.Configuration
 import play.api.inject.guice.GuiceApplicationBuilder
@@ -42,6 +43,7 @@ import uk.gov.hmrc.apiplatform.modules.common.domain.models.Actors
 import uk.gov.hmrc.apiplatform.modules.applications.domain.models.{ApplicationId, ClientId, PrivacyPolicyLocations}
 
 import java.util.UUID
+import uk.gov.hmrc.apiplatform.modules.applications.domain.models.ClientSecret
 
 class ThirdPartyApplicationConnectorSpec extends BaseConnectorIntegrationSpec with GuiceOneAppPerSuite with WireMockExtensions
     with CollaboratorTracker with LocalUserIdTracker with FixedClock {
@@ -415,59 +417,6 @@ class ThirdPartyApplicationConnectorSpec extends BaseConnectorIntegrationSpec wi
     }
   }
 
-  "removeTeamMember" should {
-    val email         = "john.bloggs@example.com".toLaxEmail
-    val admin         = "admin@example.com".toLaxEmail
-    val adminsToEmail = Set("otheradmin@example.com".toLaxEmail, "anotheradmin@example.com".toLaxEmail)
-    val url           = s"/application/${applicationId.text}/collaborator/delete"
-
-    "return success" in new Setup {
-      stubFor(
-        post(urlEqualTo(url))
-          .willReturn(
-            aResponse()
-              .withStatus(OK)
-          )
-      )
-
-      val result = await(connector.removeTeamMember(applicationId, email, admin, adminsToEmail))
-      result shouldEqual ApplicationUpdateSuccessful
-    }
-
-    "return application needs administrator response" in new Setup {
-      stubFor(
-        post(urlEqualTo(url))
-          .willReturn(
-            aResponse()
-              .withStatus(FORBIDDEN)
-          )
-      )
-      intercept[ApplicationNeedsAdmin](await(connector.removeTeamMember(applicationId, email, admin, adminsToEmail)))
-    }
-
-    "return application not found response" in new Setup {
-      stubFor(
-        post(urlEqualTo(url))
-          .willReturn(
-            aResponse()
-              .withStatus(NOT_FOUND)
-          )
-      )
-      intercept[ApplicationNotFound](await(connector.removeTeamMember(applicationId, email, admin, adminsToEmail)))
-    }
-
-    "other upstream error response should be rethrown" in new Setup {
-      stubFor(
-        post(urlEqualTo(url))
-          .willReturn(
-            aResponse()
-              .withStatus(INTERNAL_SERVER_ERROR)
-          )
-      )
-      intercept[Exception](await(connector.removeTeamMember(applicationId, email, admin, adminsToEmail)))
-    }
-  }
-
   "addClientSecret" should {
     def tpaClientSecret(clientSecretId: String, clientSecretValue: Option[String] = None): TPAClientSecret =
       TPAClientSecret(clientSecretId, "secret-name", clientSecretValue, LocalDateTime.now(ZoneOffset.UTC), None)
@@ -606,5 +555,5 @@ class ThirdPartyApplicationConnectorSpec extends BaseConnectorIntegrationSpec wi
     }
   }
 
-  private def aClientSecret() = ClientSecret(UUID.randomUUID.toString, UUID.randomUUID.toString, LocalDateTime.now())
+  private def aClientSecret() = ClientSecret(UUID.randomUUID.toString, UUID.randomUUID.toString, FixedClock.now())
 }

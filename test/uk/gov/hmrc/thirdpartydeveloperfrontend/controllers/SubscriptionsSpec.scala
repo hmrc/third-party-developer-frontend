@@ -33,6 +33,7 @@ import play.filters.csrf.CSRF.TokenProvider
 import uk.gov.hmrc.http.HeaderCarrier
 
 import uk.gov.hmrc.apiplatform.modules.apis.domain.models.{ApiContext, ApiIdentifier, ApiVersion}
+import uk.gov.hmrc.apiplatform.modules.applications.domain.models.ClientSecret
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.LaxEmailAddress.StringSyntax
 import uk.gov.hmrc.thirdpartydeveloperfrontend.builder.{DeveloperBuilder, _}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.config.FraudPreventionConfig

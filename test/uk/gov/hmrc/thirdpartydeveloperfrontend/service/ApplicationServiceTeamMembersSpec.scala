@@ -27,6 +27,7 @@ import uk.gov.hmrc.play.audit.http.connector.AuditResult.Success
 import uk.gov.hmrc.apiplatform.modules.apis.domain.models.{ApiContext, ApiVersion}
 import uk.gov.hmrc.apiplatform.modules.applications.domain.models.{ApplicationId, ClientId}
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.LaxEmailAddress.StringSyntax
+import uk.gov.hmrc.apiplatform.modules.common.utils.FixedClock
 import uk.gov.hmrc.apiplatform.modules.developers.domain.models.UserId
 import uk.gov.hmrc.thirdpartydeveloperfrontend.builder._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.config.ApplicationConfig
@@ -39,7 +40,7 @@ import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.subscriptions.ApiSu
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.subscriptions.VersionSubscription
 import uk.gov.hmrc.thirdpartydeveloperfrontend.service.PushPullNotificationsService.PushPullNotificationsConnector
 import uk.gov.hmrc.thirdpartydeveloperfrontend.service.SubscriptionFieldsService.SubscriptionFieldsConnector
-import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.{AsyncHmrcSpec, FixedClock, LocalUserIdTracker}
+import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.{AsyncHmrcSpec, LocalUserIdTracker}
 
 class ApplicationServiceTeamMembersSpec extends AsyncHmrcSpec with SubscriptionsBuilder with ApplicationBuilder with LocalUserIdTracker {
 
@@ -181,14 +182,14 @@ class ApplicationServiceTeamMembersSpec extends AsyncHmrcSpec with Subscriptions
     val developerUserId = UserId.random
 
     "correctly create a deskpro ticket and audit record" in new Setup {
-      when(mockDeskproConnector.createTicket(any[UserId], any[DeskproTicket])(eqTo(hc)))
+      when(mockDeskproConnector.createTicket(any[Option[UserId]], any[DeskproTicket])(eqTo(hc)))
         .thenReturn(successful(TicketCreated))
       when(mockAuditService.audit(any[AuditAction], any[Map[String, String]])(eqTo(hc)))
         .thenReturn(successful(Success))
 
       await(applicationService.requestDeveloperAccountDeletion(developerUserId, developerName, developerEmail))
 
-      verify(mockDeskproConnector, times(1)).createTicket(any[UserId], any[DeskproTicket])(eqTo(hc))
+      verify(mockDeskproConnector, times(1)).createTicket(any[Option[UserId]], any[DeskproTicket])(eqTo(hc))
       verify(mockAuditService, times(1)).audit(any[AuditAction], any[Map[String, String]])(eqTo(hc))
     }
   }

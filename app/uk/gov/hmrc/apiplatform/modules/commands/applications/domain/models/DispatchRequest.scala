@@ -20,11 +20,10 @@ import uk.gov.hmrc.apiplatform.modules.common.domain.models.LaxEmailAddress
 case class DispatchRequest(command: ApplicationCommand, verifiedCollaboratorsToNotify: Set[LaxEmailAddress])
 
 object DispatchRequest {
-  import ApplicationCommandFormatters._
   import play.api.libs.json._
 
   val readsExactDispatchRequest: Reads[DispatchRequest] = Json.reads[DispatchRequest]
-  val readsExactCommand: Reads[DispatchRequest]         = applicationCommandsFormatter.map(cmd => DispatchRequest(cmd, Set.empty))
+  val readsExactCommand: Reads[DispatchRequest]         = ApplicationCommand.formatter.map(cmd => DispatchRequest(cmd, Set.empty))
 
   implicit val readsDispatchRequest: Reads[DispatchRequest] = readsExactDispatchRequest orElse readsExactCommand
 

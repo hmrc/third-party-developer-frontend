@@ -105,7 +105,7 @@ class SupportSpec extends BaseControllerSpec with WithCSRFAddToken with Develope
           "comments"     -> "A+++, good seller, would buy again"
         )
 
-      when(underTest.deskproService.submitSupportEnquiry(*[UserId], *)(any[Request[AnyRef]], *)).thenReturn(successful(TicketCreated))
+      when(underTest.deskproService.submitSupportEnquiry(*[Option[UserId]], *)(any[Request[AnyRef]], *)).thenReturn(successful(TicketCreated))
 
       val result = addToken(underTest.submitSupportEnquiry())(request)
 
@@ -122,7 +122,7 @@ class SupportSpec extends BaseControllerSpec with WithCSRFAddToken with Develope
           "comments"     -> "A+++, good como  puedo iniciar, would buy again"
         )
 
-      when(underTest.deskproService.submitSupportEnquiry(*[UserId], *)(any[Request[AnyRef]], *)).thenReturn(successful(TicketCreated))
+      when(underTest.deskproService.submitSupportEnquiry(*[Option[UserId]], *)(any[Request[AnyRef]], *)).thenReturn(successful(TicketCreated))
 
       val result = addToken(underTest.submitSupportEnquiry())(request)
 

@@ -147,7 +147,7 @@ class ApplicationService @Inject() (
     for {
       result      <- connectorWrapper.productionApplicationConnector.requestUplift(applicationId, UpliftRequest(applicationName, requestedBy.email))
       upliftTicket = DeskproTicket.createForUplift(requestedBy.displayedName, requestedBy.email, applicationName, applicationId)
-      _            = deskproConnector.createTicket(requestedBy.developer.userId, upliftTicket)
+      _            = deskproConnector.createTicket(Some(requestedBy.developer.userId), upliftTicket)
     } yield result
   }
 
@@ -163,7 +163,7 @@ class ApplicationService @Inject() (
       val deskproTicket = DeskproTicket.createForPrincipalApplicationDeletion(requesterName, requesterEmail, requesterRole, environment, application.name, appId)
 
       for {
-        ticketResponse <- deskproConnector.createTicket(requester.developer.userId, deskproTicket)
+        ticketResponse <- deskproConnector.createTicket(Some(requester.developer.userId), deskproTicket)
         _              <- auditService.audit(
                             ApplicationDeletionRequested,
                             Map(
@@ -208,12 +208,12 @@ class ApplicationService @Inject() (
     val deleteDeveloperTicket = DeskproTicket.deleteDeveloperAccount(name, email)
 
     for {
-      ticketResponse <- deskproConnector.createTicket(userId, deleteDeveloperTicket)
+      ticketResponse <- deskproConnector.createTicket(Some(userId), deleteDeveloperTicket)
       _              <- auditService.audit(AccountDeletionRequested, Map("requestedByName" -> name, "requestedByEmailAddress" -> email.text, "timestamp" -> LocalDateTime.now(clock).toString))
     } yield ticketResponse
   }
 
-  def request2SVRemoval(userId: UserId, name: String, email: LaxEmailAddress)(implicit hc: HeaderCarrier): Future[TicketResult] = {
+  def request2SVRemoval(userId: Option[UserId], name: String, email: LaxEmailAddress)(implicit hc: HeaderCarrier): Future[TicketResult] = {
     val remove2SVTicket = DeskproTicket.removeDeveloper2SV(name, email)
 
     for {
@@ -260,7 +260,7 @@ class ApplicationService @Inject() (
     }
 
     val ticket = createDeskproTicket(application, newApplicationName, requesterName, requesterEmail)
-    deskproConnector.createTicket(userId, ticket)
+    deskproConnector.createTicket(Some(userId), ticket)
   }
 
   def applicationConnectorFor(application: Application): ThirdPartyApplicationConnector = applicationConnectorFor(Some(application.deployedTo))
@@ -306,14 +306,6 @@ object ApplicationService {
     def create(request: CreateApplicationRequest)(implicit hc: HeaderCarrier): Future[ApplicationCreatedResponse]
     def update(applicationId: ApplicationId, request: UpdateApplicationRequest)(implicit hc: HeaderCarrier): Future[ApplicationUpdateSuccessful]
     def fetchByTeamMember(userId: UserId)(implicit hc: HeaderCarrier): Future[Seq[ApplicationWithSubscriptionIds]]
-
-    def removeTeamMember(
-        applicationId: ApplicationId,
-        teamMemberToDelete: LaxEmailAddress,
-        requestingEmail: LaxEmailAddress,
-        adminsToEmail: Set[LaxEmailAddress]
-      )(implicit hc: HeaderCarrier
-      ): Future[ApplicationUpdateSuccessful]
     def fetchApplicationById(id: ApplicationId)(implicit hc: HeaderCarrier): Future[Option[Application]]
     def fetchCredentials(id: ApplicationId)(implicit hc: HeaderCarrier): Future[ApplicationToken]
     def requestUplift(applicationId: ApplicationId, upliftRequest: UpliftRequest)(implicit hc: HeaderCarrier): Future[ApplicationUpliftSuccessful]

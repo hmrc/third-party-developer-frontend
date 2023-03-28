@@ -61,7 +61,7 @@ case class APISubscriptionStatus(
     requiresTrust: Boolean,
     fields: SubscriptionFieldsWrapper,
     isTestSupport: Boolean = false
-  ) extends HasApiIdentifier {
+  ) {
 
   def isPrivate: Boolean = {
     apiVersion.accessType match {

@@ -28,15 +28,14 @@ import uk.gov.hmrc.http.{HttpClient, _}
 import uk.gov.hmrc.play.http.metrics.common.API
 
 import uk.gov.hmrc.apiplatform.modules.apis.domain.models.ApiIdentifier
-import uk.gov.hmrc.apiplatform.modules.applications.domain.models.{ApplicationId, ClientId}
-import uk.gov.hmrc.apiplatform.modules.common.domain.models.LaxEmailAddress
+import uk.gov.hmrc.apiplatform.modules.applications.domain.models.{ApplicationId, ClientId, ClientSecret}
 import uk.gov.hmrc.apiplatform.modules.common.services.ApplicationLogger
 import uk.gov.hmrc.apiplatform.modules.developers.domain.models.UserId
 import uk.gov.hmrc.thirdpartydeveloperfrontend.config.ApplicationConfig
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.ApplicationNameValidationJson.{ApplicationNameValidationRequest, ApplicationNameValidationResult}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications._
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.connectors.{DeleteCollaboratorRequest, TermsOfUseInvitation}
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.connectors.TermsOfUseInvitation
 import uk.gov.hmrc.thirdpartydeveloperfrontend.service.ApplicationService.ApplicationConnector
 
 abstract class ThirdPartyApplicationConnector(config: ApplicationConfig, metrics: ConnectorMetrics) extends ApplicationConnector
@@ -89,26 +88,6 @@ abstract class ThirdPartyApplicationConnector(config: ApplicationConfig, metrics
       }
     } else {
       Future.successful(Seq.empty)
-    }
-
-  def removeTeamMember(
-      applicationId: ApplicationId,
-      teamMemberToDelete: LaxEmailAddress,
-      requestingEmail: LaxEmailAddress,
-      adminsToEmail: Set[LaxEmailAddress]
-    )(implicit hc: HeaderCarrier
-    ): Future[ApplicationUpdateSuccessful] =
-    metrics.record(api) {
-      val url     = s"$serviceBaseUrl/application/${applicationId.text}/collaborator/delete"
-      val request = DeleteCollaboratorRequest(teamMemberToDelete, adminsToEmail, true)
-
-      http.POST[DeleteCollaboratorRequest, ErrorOrUnit](url, request)
-        .map {
-          case Right(_)                                        => ApplicationUpdateSuccessful
-          case Left(UpstreamErrorResponse(_, FORBIDDEN, _, _)) => throw new ApplicationNeedsAdmin
-          case Left(UpstreamErrorResponse(_, NOT_FOUND, _, _)) => throw new ApplicationNotFound
-          case Left(err)                                       => throw err
-        }
     }
 
   def fetchApplicationById(id: ApplicationId)(implicit hc: HeaderCarrier): Future[Option[Application]] =
@@ -218,7 +197,6 @@ abstract class ThirdPartyApplicationConnector(config: ApplicationConfig, metrics
 }
 
 private[connectors] object ThirdPartyApplicationConnectorDomain {
-  import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.ClientSecret
   import java.time.LocalDateTime
 
   def toDomain(tpaClientSecret: TPAClientSecret): ClientSecret =

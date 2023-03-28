@@ -31,7 +31,7 @@ import play.api.test.Helpers._
 import play.filters.csrf.CSRF.TokenProvider
 import uk.gov.hmrc.http.HeaderCarrier
 
-import uk.gov.hmrc.apiplatform.modules.applications.domain.models.{ApplicationId, Collaborator}
+import uk.gov.hmrc.apiplatform.modules.applications.domain.models.{ApplicationId, ClientSecret, Collaborator}
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.Actors
 import uk.gov.hmrc.thirdpartydeveloperfrontend.builder.{DeveloperBuilder, _}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.connectors.ThirdPartyDeveloperConnector

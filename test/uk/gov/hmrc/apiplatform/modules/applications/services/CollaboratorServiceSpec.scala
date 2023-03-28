@@ -24,9 +24,10 @@ import uk.gov.hmrc.http.HeaderCarrier
 
 import uk.gov.hmrc.apiplatform.modules.apis.domain.models._
 import uk.gov.hmrc.apiplatform.modules.applications.domain.models.{ApplicationId, ClientId, Collaborator}
-import uk.gov.hmrc.apiplatform.modules.commands.applications.domain.models.{AddCollaborator, DispatchSuccessResult, RemoveCollaborator}
+import uk.gov.hmrc.apiplatform.modules.commands.applications.domain.models.{ApplicationCommands, DispatchSuccessResult}
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.Actors
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.LaxEmailAddress.StringSyntax
+import uk.gov.hmrc.apiplatform.modules.common.utils.FixedClock
 import uk.gov.hmrc.thirdpartydeveloperfrontend.builder._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.connectors._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.apidefinitions._
@@ -35,7 +36,7 @@ import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.User
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.subscriptions.VersionSubscription
 import uk.gov.hmrc.thirdpartydeveloperfrontend.mocks.connectors._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.testdata.CollaboratorsTestData
-import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.{AsyncHmrcSpec, FixedClock, LocalUserIdTracker}
+import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.{AsyncHmrcSpec, LocalUserIdTracker}
 
 class CollaboratorServiceSpec extends AsyncHmrcSpec
     with SubscriptionsBuilder
@@ -62,7 +63,8 @@ class CollaboratorServiceSpec extends AsyncHmrcSpec
     val collaboratorService = new CollaboratorService(
       mockApmConnector,
       BridgedAppCommandConnector.connector,
-      TPDMock.aMock
+      TPDMock.aMock,
+      FixedClock.clock
     )
   }
 
@@ -102,7 +104,7 @@ class CollaboratorServiceSpec extends AsyncHmrcSpec
         case DispatchSuccessResult(response) =>
           response shouldBe mockResponse
           inside(PrincipalAppCommandConnector.Dispatch.verifyCommand()) {
-            case AddCollaborator(actor, collaborator, _) =>
+            case ApplicationCommands.AddCollaborator(actor, collaborator, _) =>
               actor shouldBe Actors.AppCollaborator(administratorEmail)
               collaborator shouldBe developerAsCollaborator
           }
@@ -124,7 +126,7 @@ class CollaboratorServiceSpec extends AsyncHmrcSpec
         case DispatchSuccessResult(response) =>
           response shouldBe mockResponse
           inside(PrincipalAppCommandConnector.Dispatch.verifyCommand()) {
-            case RemoveCollaborator(actor, collaborator, _) =>
+            case ApplicationCommands.RemoveCollaborator(actor, collaborator, _) =>
               actor shouldBe Actors.AppCollaborator(administratorEmail)
               collaborator shouldBe developerAsCollaborator
           }

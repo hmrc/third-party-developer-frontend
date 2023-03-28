@@ -38,6 +38,7 @@ import uk.gov.hmrc.apiplatform.modules.common.domain.models.LaxEmailAddress
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.LaxEmailAddress.StringSyntax
 import utils.ComponentTestDeveloperBuilder
 import uk.gov.hmrc.apiplatform.modules.applications.domain.models._
+
 import java.util.UUID
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications._
 

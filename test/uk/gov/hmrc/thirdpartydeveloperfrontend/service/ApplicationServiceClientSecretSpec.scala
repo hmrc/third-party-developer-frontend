@@ -28,6 +28,7 @@ import uk.gov.hmrc.apiplatform.modules.apis.domain.models.ApiVersion
 import uk.gov.hmrc.apiplatform.modules.applications.domain.models.{ApplicationId, ClientId}
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.Actors
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.LaxEmailAddress.StringSyntax
+import uk.gov.hmrc.apiplatform.modules.common.utils.FixedClock
 import uk.gov.hmrc.thirdpartydeveloperfrontend.builder._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.config.ApplicationConfig
 import uk.gov.hmrc.thirdpartydeveloperfrontend.connectors._
@@ -37,7 +38,7 @@ import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.subscriptions.VersionSubscription
 import uk.gov.hmrc.thirdpartydeveloperfrontend.service.PushPullNotificationsService.PushPullNotificationsConnector
 import uk.gov.hmrc.thirdpartydeveloperfrontend.service.SubscriptionFieldsService.SubscriptionFieldsConnector
-import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.{AsyncHmrcSpec, FixedClock, LocalUserIdTracker}
+import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.{AsyncHmrcSpec, LocalUserIdTracker}
 
 class ApplicationServiceClientSecretSpec extends AsyncHmrcSpec with SubscriptionsBuilder with ApplicationBuilder with LocalUserIdTracker with FixedClock {
 

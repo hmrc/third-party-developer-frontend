@@ -33,7 +33,7 @@ import play.filters.csrf.CSRF.TokenProvider
 import uk.gov.hmrc.http.HeaderCarrier
 
 import uk.gov.hmrc.apiplatform.modules.apis.domain.models.{ApiContext, ApiVersion}
-import uk.gov.hmrc.apiplatform.modules.applications.domain.models.{ApplicationId, Collaborator}
+import uk.gov.hmrc.apiplatform.modules.applications.domain.models.{ApplicationId, ClientSecret, Collaborator}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.builder.{DeveloperBuilder, _}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.config.ErrorHandler
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.ApplicationNotFound

@@ -20,7 +20,7 @@ import java.time.{LocalDateTime, Period, ZoneOffset}
 import java.util.UUID.randomUUID
 import scala.util.Random
 
-import uk.gov.hmrc.apiplatform.modules.applications.domain.models.{ApplicationId, ClientId, Collaborator}
+import uk.gov.hmrc.apiplatform.modules.applications.domain.models.{ApplicationId, ClientId, ClientSecret, Collaborator}
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.LaxEmailAddress
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.LaxEmailAddress.StringSyntax
 import uk.gov.hmrc.apiplatform.modules.developers.domain.models.UserId
