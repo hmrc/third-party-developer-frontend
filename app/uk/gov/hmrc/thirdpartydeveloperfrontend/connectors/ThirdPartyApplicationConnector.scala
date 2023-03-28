@@ -38,7 +38,6 @@ import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.connectors.TermsOfUseInvitation
 import uk.gov.hmrc.thirdpartydeveloperfrontend.service.ApplicationService.ApplicationConnector
 
-
 abstract class ThirdPartyApplicationConnector(config: ApplicationConfig, metrics: ConnectorMetrics) extends ApplicationConnector
     with CommonResponseHandlers with ApplicationLogger with HttpErrorFunctions with ApplicationUpdateFormatters {
 

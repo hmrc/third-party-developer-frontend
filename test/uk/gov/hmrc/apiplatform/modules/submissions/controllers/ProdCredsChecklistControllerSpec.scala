@@ -145,7 +145,7 @@ class ProdCredsChecklistControllerSpec
   "productionCredentialsChecklistAction" should {
     "return success when form is valid and incomplete" in new Setup with HasAppInTestingState {
       SubmissionServiceMock.FetchLatestExtendedSubmission.thenReturns(answeringSubmission.withIncompleteProgress)
-      val result     = controller.productionCredentialsChecklistAction(appId)(loggedInRequest.withCSRFToken)
+      val result = controller.productionCredentialsChecklistAction(appId)(loggedInRequest.withCSRFToken)
 
       status(result) shouldBe OK
 

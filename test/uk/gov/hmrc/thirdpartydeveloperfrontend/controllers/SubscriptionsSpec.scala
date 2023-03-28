@@ -33,6 +33,7 @@ import play.filters.csrf.CSRF.TokenProvider
 import uk.gov.hmrc.http.HeaderCarrier
 
 import uk.gov.hmrc.apiplatform.modules.apis.domain.models.{ApiContext, ApiIdentifier, ApiVersion}
+import uk.gov.hmrc.apiplatform.modules.applications.domain.models.ClientSecret
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.LaxEmailAddress.StringSyntax
 import uk.gov.hmrc.thirdpartydeveloperfrontend.builder.{DeveloperBuilder, _}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.config.FraudPreventionConfig
@@ -43,7 +44,6 @@ import uk.gov.hmrc.thirdpartydeveloperfrontend.mocks.service.{ApplicationActionS
 import uk.gov.hmrc.thirdpartydeveloperfrontend.service._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.WithLoggedInSession._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.{WithCSRFAddToken, _}
-import uk.gov.hmrc.apiplatform.modules.applications.domain.models.ClientSecret
 
 class SubscriptionsSpec extends BaseControllerSpec with WithCSRFAddToken with LocalUserIdTracker with DeveloperBuilder with SampleSession with SampleApplications
     with SubscriptionTestHelperSugar {

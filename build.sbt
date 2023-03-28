@@ -10,6 +10,8 @@ import uk.gov.hmrc.DefaultBuildSettings._
 import uk.gov.hmrc.sbtdistributables.SbtDistributablesPlugin
 import bloop.integrations.sbt.BloopDefaults
 
+val scalaVersion2 = "2.12.15"
+
 Global / bloopAggregateSourceDependencies := true
 
 lazy val appName = "third-party-developer-frontend"
@@ -18,14 +20,9 @@ lazy val plugins: Seq[Plugins] = Seq(PlayScala, SbtDistributablesPlugin)
 lazy val playSettings: Seq[Setting[_]] = Seq.empty
 
 ThisBuild / scalafixDependencies += "com.github.liancheng" %% "organize-imports" % "0.6.0"
-
-inThisBuild(
-  List(
-    scalaVersion := "2.12.15",
-    semanticdbEnabled := true,
-    semanticdbVersion := scalafixSemanticdb.revision
-  )
-)
+ThisBuild / scalaVersion := scalaVersion2
+ThisBuild / semanticdbEnabled := true
+ThisBuild / semanticdbVersion := scalafixSemanticdb.revision
 
 lazy val microservice = Project(appName, file("."))
   .enablePlugins(plugins: _*)
@@ -53,8 +50,7 @@ lazy val microservice = Project(appName, file("."))
   .settings(
     libraryDependencies ++= AppDependencies(),
     retrieveManaged := true,
-//    routesGenerator := InjectedRoutesGenerator,
-    scalaVersion := "2.12.15"
+    scalaVersion := scalaVersion2
   )
   .settings(
     resolvers += Resolver.typesafeRepo("releases")
@@ -74,14 +70,12 @@ lazy val microservice = Project(appName, file("."))
     IntegrationTest / parallelExecution := false
   )
   .configs(ComponentTest)
-  .settings(inConfig(ComponentTest)(BloopDefaults.configSettings))
   .settings(inConfig(ComponentTest)(Defaults.testSettings ++ BloopDefaults.configSettings ++ ScalafmtPlugin.scalafmtConfigSettings))
   .settings(headerSettings(ComponentTest) ++ automateHeaderSettings(ComponentTest))
   .settings(
     ComponentTest / testOptions := Seq(Tests.Argument(TestFrameworks.ScalaTest, "-eT")),
     ComponentTest / unmanagedSourceDirectories ++= Seq(baseDirectory.value / "component", baseDirectory.value / "test-utils"),
     ComponentTest / unmanagedResourceDirectories += baseDirectory.value / "test",
-    // ComponentTest / unmanagedResourceDirectories += baseDirectory.value / "target" / "web" / "public" / "test",
     ComponentTest / parallelExecution := false
   )
   .settings(majorVersion := 0)
@@ -116,4 +110,3 @@ lazy val microservice = Project(appName, file("."))
   )
 lazy val ComponentTest = config("component") extend Test
 
-lazy val TemplateTest = config("tt") extend Test
