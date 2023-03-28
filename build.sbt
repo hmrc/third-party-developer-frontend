@@ -10,8 +10,6 @@ import uk.gov.hmrc.DefaultBuildSettings._
 import uk.gov.hmrc.sbtdistributables.SbtDistributablesPlugin
 import bloop.integrations.sbt.BloopDefaults
 
-val scalaVersion2 = "2.12.15"
-
 Global / bloopAggregateSourceDependencies := true
 
 lazy val appName = "third-party-developer-frontend"
@@ -20,7 +18,7 @@ lazy val plugins: Seq[Plugins] = Seq(PlayScala, SbtDistributablesPlugin)
 lazy val playSettings: Seq[Setting[_]] = Seq.empty
 
 ThisBuild / scalafixDependencies += "com.github.liancheng" %% "organize-imports" % "0.6.0"
-ThisBuild / scalaVersion := scalaVersion2
+scalaVersion := "2.12.15"
 ThisBuild / semanticdbEnabled := true
 ThisBuild / semanticdbVersion := scalafixSemanticdb.revision
 
@@ -49,8 +47,7 @@ lazy val microservice = Project(appName, file("."))
   .settings(ScoverageSettings(): _*)
   .settings(
     libraryDependencies ++= AppDependencies(),
-    retrieveManaged := true,
-    scalaVersion := scalaVersion2
+    retrieveManaged := true
   )
   .settings(
     resolvers += Resolver.typesafeRepo("releases")
