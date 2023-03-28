@@ -14,18 +14,22 @@
  * limitations under the License.
  */
 
-package uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications
+package uk.gov.hmrc.apiplatform.modules.common.utils
 
-import java.time.LocalDateTime
+import java.time.temporal.ChronoUnit
+import java.time.{Clock, LocalDateTime, ZoneOffset}
 
-import play.api.libs.json.OFormat
+import uk.gov.hmrc.apiplatform.modules.common.domain.services.ClockNow
 
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.services.LocalDateTimeFormatters
+trait FixedClock extends ClockNow {
 
-case class ClientSecret(id: String, name: String, createdOn: LocalDateTime, lastAccess: Option[LocalDateTime] = None)
+  private val utc: ZoneOffset = ZoneOffset.UTC
 
-object ClientSecret extends LocalDateTimeFormatters {
-  import play.api.libs.json.Json
+  private val pointInTime: LocalDateTime = LocalDateTime.of(2020, 1, 2, 3, 4, 5, 6 * 1000 * 1000).truncatedTo(ChronoUnit.MILLIS)
+  
+  val clock: Clock = Clock.fixed(pointInTime.toInstant(utc), utc)
 
-  implicit val format: OFormat[ClientSecret] = Json.format[ClientSecret]
+  val nowAsText: String = "2020-01-02T03:04:05.006Z"
 }
+
+object FixedClock extends FixedClock

@@ -54,6 +54,7 @@ import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.{ApplicationUpdateSuccessf
 import uk.gov.hmrc.thirdpartydeveloperfrontend.helpers.ExcludeFromCoverage
 import uk.gov.hmrc.thirdpartydeveloperfrontend.repositories.FlowRepository
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.AsyncHmrcSpec
+import uk.gov.hmrc.apiplatform.modules.applications.domain.models.ClientSecret
 
 object EndpointScenarioSpec {
 

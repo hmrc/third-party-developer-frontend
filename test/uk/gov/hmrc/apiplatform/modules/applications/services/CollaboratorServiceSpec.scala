@@ -35,7 +35,8 @@ import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.User
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.subscriptions.VersionSubscription
 import uk.gov.hmrc.thirdpartydeveloperfrontend.mocks.connectors._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.testdata.CollaboratorsTestData
-import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.{AsyncHmrcSpec, FixedClock, LocalUserIdTracker}
+import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.{AsyncHmrcSpec, LocalUserIdTracker}
+import uk.gov.hmrc.apiplatform.modules.common.utils.FixedClock
 
 class CollaboratorServiceSpec extends AsyncHmrcSpec
     with SubscriptionsBuilder
@@ -62,7 +63,8 @@ class CollaboratorServiceSpec extends AsyncHmrcSpec
     val collaboratorService = new CollaboratorService(
       mockApmConnector,
       BridgedAppCommandConnector.connector,
-      TPDMock.aMock
+      TPDMock.aMock,
+      FixedClock.clock
     )
   }
 

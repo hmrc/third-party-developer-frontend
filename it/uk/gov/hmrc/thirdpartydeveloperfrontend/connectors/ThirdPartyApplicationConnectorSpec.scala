@@ -25,7 +25,8 @@ import play.api.http.Status._
 import uk.gov.hmrc.http._
 import uk.gov.hmrc.play.http.metrics.common.API
 import ThirdPartyApplicationConnectorJsonFormatters._
-import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.{CollaboratorTracker, FixedClock, LocalUserIdTracker, WireMockExtensions}
+import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.{CollaboratorTracker, LocalUserIdTracker, WireMockExtensions}
+import uk.gov.hmrc.apiplatform.modules.common.utils.FixedClock
 import org.scalatestplus.play.guice.GuiceOneAppPerSuite
 import play.api.Configuration
 import play.api.inject.guice.GuiceApplicationBuilder
@@ -42,6 +43,7 @@ import uk.gov.hmrc.apiplatform.modules.common.domain.models.Actors
 import uk.gov.hmrc.apiplatform.modules.applications.domain.models.{ApplicationId, ClientId, PrivacyPolicyLocations}
 
 import java.util.UUID
+import uk.gov.hmrc.apiplatform.modules.applications.domain.models.ClientSecret
 
 class ThirdPartyApplicationConnectorSpec extends BaseConnectorIntegrationSpec with GuiceOneAppPerSuite with WireMockExtensions
     with CollaboratorTracker with LocalUserIdTracker with FixedClock {
@@ -606,5 +608,5 @@ class ThirdPartyApplicationConnectorSpec extends BaseConnectorIntegrationSpec wi
     }
   }
 
-  private def aClientSecret() = ClientSecret(UUID.randomUUID.toString, UUID.randomUUID.toString, LocalDateTime.now())
+  private def aClientSecret() = ClientSecret(UUID.randomUUID.toString, UUID.randomUUID.toString, FixedClock.now())
 }

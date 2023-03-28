@@ -18,9 +18,9 @@ package uk.gov.hmrc.thirdpartydeveloperfrontend.utils
 
 import java.time.{Clock, Instant, ZoneOffset}
 
-trait FixedClock {
+// trait FixedClock {
 
-  val utc = ZoneOffset.UTC
+//   val utc = ZoneOffset.UTC
 
-  final val clock = Clock.fixed(Instant.ofEpochMilli(1650878658447L), utc)
-}
+//   final val clock = Clock.fixed(Instant.ofEpochMilli(1650878658447L), utc)
+// }

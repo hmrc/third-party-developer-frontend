@@ -16,7 +16,6 @@
 
 package uk.gov.hmrc.apiplatform.modules.applications.services
 
-import java.time.LocalDateTime
 import javax.inject.{Inject, Singleton}
 import scala.concurrent.{ExecutionContext, Future}
 
@@ -30,14 +29,17 @@ import uk.gov.hmrc.apiplatform.modules.common.domain.models.{Actors, LaxEmailAdd
 import uk.gov.hmrc.thirdpartydeveloperfrontend.connectors._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications._
+import java.time.Clock
+import uk.gov.hmrc.apiplatform.modules.common.domain.services.ClockNow
 
 @Singleton
 class CollaboratorService @Inject() (
     apmConnector: ApmConnector,
     applicationCommandConnector: BridgedConnector[ApplicationCommandConnector],
-    developerConnector: ThirdPartyDeveloperConnector
+    developerConnector: ThirdPartyDeveloperConnector,
+    val clock: Clock
   )(implicit val ec: ExecutionContext
-  ) {
+  ) extends ClockNow {
 
   def addTeamMember(
       app: Application,
@@ -52,7 +54,7 @@ class CollaboratorService @Inject() (
       adminsAsUsers <- developerConnector.fetchByEmails(setOfAdminEmails)
       adminsToEmail  = adminsAsUsers.filter(_.verified.contains(true)).map(_.email).toSet
       userId        <- developerConnector.getOrCreateUserId(newTeamMemberEmail)
-      addCommand     = AddCollaborator(Actors.AppCollaborator(requestingEmail), Collaborator.apply(newTeamMemberEmail, newTeamMemberRole, userId), LocalDateTime.now())
+      addCommand     = AddCollaborator(Actors.AppCollaborator(requestingEmail), Collaborator.apply(newTeamMemberEmail, newTeamMemberRole, userId), now())
       response      <- applicationCommandConnector(app).dispatch(app.id, addCommand, adminsToEmail)
     } yield response
   }
@@ -76,7 +78,7 @@ class CollaboratorService @Inject() (
     for {
       otherAdmins  <- developerConnector.fetchByEmails(otherAdminEmails)
       adminsToEmail = otherAdmins.filter(_.verified.contains(true)).map(_.email).toSet
-      removeCommand = RemoveCollaborator(Actors.AppCollaborator(requestingEmail), collaboratorToRemove, LocalDateTime.now())
+      removeCommand = RemoveCollaborator(Actors.AppCollaborator(requestingEmail), collaboratorToRemove, now())
       response     <- applicationCommandConnector(app).dispatch(app.id, removeCommand, adminsToEmail)
     } yield response
   }
