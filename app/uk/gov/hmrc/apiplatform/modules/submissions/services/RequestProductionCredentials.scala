@@ -62,7 +62,7 @@ class RequestProductionCredentials @Inject() (
     ): Future[Option[TicketResult]] = {
     if (requesterIsResponsibleIndividual) {
       val ticket = DeskproTicket.createForRequestProductionCredentials(requestedBy.displayedName, requestedBy.email, app.name, app.id)
-      deskproConnector.createTicket(requestedBy.developer.userId, ticket).map(Some(_))
+      deskproConnector.createTicket(Some(requestedBy.developer.userId), ticket).map(Some(_))
     } else {
       Future.successful(None)
     }

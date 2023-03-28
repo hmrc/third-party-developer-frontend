@@ -35,5 +35,4 @@ class NewJourneyNotOnAppTeamProdStatusProductionEndpointScenarioSpec extends End
       case _                                                                                              => getEndpointSuccessResponse(endpoint)
     }
   }
-
 }

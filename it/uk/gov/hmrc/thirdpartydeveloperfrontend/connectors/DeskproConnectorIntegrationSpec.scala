@@ -68,7 +68,7 @@ class DeskproConnectorIntegrationSpec extends BaseConnectorIntegrationSpec with 
           )
         )
 
-        await(connector.createTicket(UserId.random, ticket))
+        await(connector.createTicket(Some(UserId.random), ticket))
         verify(1, postRequestedFor(urlEqualTo(ticketPath)).withRequestBody(equalTo(expectedBody)))
       }
     }

@@ -31,6 +31,7 @@ import uk.gov.hmrc.apiplatform.modules.submissions.domain.models.ResponsibleIndi
 import uk.gov.hmrc.thirdpartydeveloperfrontend.config.ApplicationConfig
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.connectors._
+import java.{util => ju}
 
 @Singleton
 class DeskproConnector @Inject() (http: HttpClient, config: ApplicationConfig, metrics: ConnectorMetrics)(implicit val ec: ExecutionContext)
@@ -39,7 +40,13 @@ class DeskproConnector @Inject() (http: HttpClient, config: ApplicationConfig, m
   lazy val serviceBaseUrl: String = config.deskproUrl
   val api                         = API("deskpro")
 
-  def createTicket(userId: UserId, deskproTicket: DeskproTicket)(implicit hc: HeaderCarrier): Future[TicketResult] = metrics.record(api) {
+  def unknownUserId: UserId = UserId(ju.UUID.fromString("00000000-0000-0000-0000-000000000000"))
+
+  def createTicket(userId: Option[UserId], deskproTicket: DeskproTicket)(implicit hc: HeaderCarrier): Future[TicketResult] = metrics.record(api) {
+    createTicket(userId.getOrElse(unknownUserId), deskproTicket)
+  }
+
+  private def createTicket(userId: UserId, deskproTicket: DeskproTicket)(implicit hc: HeaderCarrier): Future[TicketResult] = metrics.record(api) {
     createTicket(userId.asText, "userId", deskproTicket)
   }
 
