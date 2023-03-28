@@ -35,6 +35,7 @@ import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.addapplication.routes
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.apidefinitions.AccessType
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.{Environment, State, TermsOfUseStatus}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.connectors.TermsOfUseInvitation
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.connectors.TermsOfUseInvitationState.EMAIL_SENT
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.controllers.{ApplicationSummary, ManageApplicationsViewModel}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.LoggedInState
 import uk.gov.hmrc.thirdpartydeveloperfrontend.helpers.DateFormatter
@@ -246,7 +247,7 @@ class ViewAllApplicationsPageSpec extends CommonViewSpec
 
     "show the applications page with outstanding terms of use box" should {
       "work in Qa/Dev with invites to display" in new QaAndDev with Setup {
-        val invites = List(TermsOfUseInvitation(applicationId, Instant.now(), Instant.now(), Instant.now()))
+        val invites = List(TermsOfUseInvitation(applicationId, Instant.now(), Instant.now(), Instant.now(), None, EMAIL_SENT))
 
         implicit val document = Jsoup.parse(renderPage(sandboxAppSummaries, productionAppSummaries, Set(applicationId), invites).body)
 
@@ -270,7 +271,7 @@ class ViewAllApplicationsPageSpec extends CommonViewSpec
 
     "show the applications page with no outstanding terms of use box" should {
       "work in Qa/Dev with an invite that has granted submissions" in new QaAndDev with Setup {
-        val invites     = List(TermsOfUseInvitation(applicationId, Instant.now(), Instant.now(), Instant.now()))
+        val invites     = List(TermsOfUseInvitation(applicationId, Instant.now(), Instant.now(), Instant.now(), None, EMAIL_SENT))
         val submissions = List(grantedSubmission)
 
         implicit val document = Jsoup.parse(renderPage(sandboxAppSummaries, productionAppSummaries, Set(applicationId), invites, submissions).body)
@@ -285,7 +286,7 @@ class ViewAllApplicationsPageSpec extends CommonViewSpec
 
     "show the applications page with review terms of use box" should {
       "work in Qa/Dev with submissions in review" in new QaAndDev with Setup {
-        val invites     = List(TermsOfUseInvitation(applicationId, Instant.now(), Instant.now(), Instant.now()))
+        val invites     = List(TermsOfUseInvitation(applicationId, Instant.now(), Instant.now(), Instant.now(), None, EMAIL_SENT))
         val submissions = List(submittedSubmission)
 
         implicit val document = Jsoup.parse(renderPage(sandboxAppSummaries, productionAppSummaries, Set(applicationId), invites, submissions).body)
@@ -298,7 +299,7 @@ class ViewAllApplicationsPageSpec extends CommonViewSpec
       }
 
       "work in Qa/Dev with no submissions in review" in new QaAndDev with Setup {
-        val invites = List(TermsOfUseInvitation(applicationId, Instant.now(), Instant.now(), Instant.now()))
+        val invites = List(TermsOfUseInvitation(applicationId, Instant.now(), Instant.now(), Instant.now(), None, EMAIL_SENT))
 
         implicit val document = Jsoup.parse(renderPage(sandboxAppSummaries, productionAppSummaries, Set(applicationId), invites, List.empty).body)
 
