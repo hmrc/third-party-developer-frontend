@@ -23,6 +23,7 @@ import org.mockito.{ArgumentMatchersSugar, MockitoSugar}
 
 import uk.gov.hmrc.apiplatform.modules.applications.domain.models.ApplicationId
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.connectors.TermsOfUseInvitation
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.connectors.TermsOfUseInvitationState.EMAIL_SENT
 import uk.gov.hmrc.thirdpartydeveloperfrontend.service.TermsOfUseInvitationService
 
 trait TermsOfUseInvitationServiceMockModule extends MockitoSugar with ArgumentMatchersSugar {
@@ -37,7 +38,7 @@ trait TermsOfUseInvitationServiceMockModule extends MockitoSugar with ArgumentMa
     object FetchTermsOfUseInvitation {
 
       def thenReturn() =
-        when(aMock.fetchTermsOfUseInvitation(*[ApplicationId])(*)).thenAnswer(successful(Some(TermsOfUseInvitation(ApplicationId.random, Instant.now, Instant.now, Instant.now))))
+        when(aMock.fetchTermsOfUseInvitation(*[ApplicationId])(*)).thenAnswer(successful(Some(TermsOfUseInvitation(ApplicationId.random, Instant.now, Instant.now, Instant.now, None, EMAIL_SENT))))
 
       def thenReturnNone() = when(aMock.fetchTermsOfUseInvitation(*[ApplicationId])(*)).thenAnswer(successful(None))
     }
