@@ -42,7 +42,6 @@ abstract class ApplicationCommandConnector(implicit val ec: ExecutionContext) {
     )(implicit hc: HeaderCarrier
     ): Future[Either[NonEmptyList[CommandFailure], DispatchSuccessResult]] = {
 
-    import uk.gov.hmrc.apiplatform.modules.commands.applications.domain.models.CommandFailureJsonFormatters._
     import uk.gov.hmrc.apiplatform.modules.common.services.NonEmptyListFormatters._
     import play.api.libs.json._
     import uk.gov.hmrc.http.HttpReads.Implicits._
