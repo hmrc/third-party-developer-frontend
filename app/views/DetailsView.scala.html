@@ -218,7 +218,7 @@
       <h2 class="govuk-heading-s govuk-!-margin-top-7 govuk-!-margin-bottom-2">Terms of use</h2>
       @termsOfUse.agreement match {
         case Some(agreement) => {
-          <p class="govuk-body govuk-!-margin-bottom-1" id="termsOfUseAgreementDetails">@agreement.who verified @{app.name} will conform to our terms of use on @{agreement.when.format(DateTimeFormatter.ofPattern("dd MMMM yyyy"))}. </p>
+          <p class="govuk-body govuk-!-margin-bottom-1" id="termsOfUseAgreementDetails">@agreement.who agreed to version 2 of the terms of use on @{agreement.when.format(DateTimeFormatter.ofPattern("dd MMMM yyyy"))}. </p>
           <p class="govuk-body"><a class="govuk-link govuk-link--no-visited-state" href="@uk.gov.hmrc.apiplatform.modules.submissions.controllers.routes.TermsOfUseResponsesController.termsOfUseResponsesPage(app.id)">Review the terms of use responses for @{app.name}</a></p>
         }
         case None => { <p class="govuk-body" id="termsOfUseAgreementDetails">Not agreed</p> }
