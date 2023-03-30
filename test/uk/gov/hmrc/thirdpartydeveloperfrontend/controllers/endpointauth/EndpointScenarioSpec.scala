@@ -92,8 +92,7 @@ abstract class EndpointScenarioSpec extends AsyncHmrcSpec with GuiceOneAppPerSui
       .overrides(bind[ThirdPartyApplicationSubmissionsConnector].toInstance(thirdPartyApplicationSubmissionsConnector))
       .overrides(bind[ThirdPartyDeveloperMfaConnector].toInstance(thirdPartyDeveloperMfaConnector))
       .overrides(bind[ThirdPartyDeveloperDynamicsConnector].toInstance(thirdPartyDeveloperDynamicsConnector))
-      .overrides(bind[ProductionApplicationCommandConnector].toInstance(cmdProductionConnector))
-      .overrides(bind[SandboxApplicationCommandConnector].toInstance(cmdSandboxConnector))
+      .overrides(bind[ApplicationCommandConnector].toInstance(cmdConnector))
       .in(Mode.Test)
       .build()
   }
@@ -136,8 +135,7 @@ abstract class EndpointScenarioSpec extends AsyncHmrcSpec with GuiceOneAppPerSui
     EMAIL_SENT
   ))))
 
-  when(cmdProductionConnector.dispatch(*[ApplicationId], *, *)(*)).thenReturn(Future.successful(Right(DispatchSuccessResult(mock[Application]))))
-  when(cmdSandboxConnector.dispatch(*[ApplicationId], *, *)(*)).thenReturn(Future.successful(Right(DispatchSuccessResult(mock[Application]))))
+  when(cmdConnector.dispatch(*[ApplicationId], *, *)(*)).thenReturn(Future.successful(Right(DispatchSuccessResult(mock[Application]))))
   when(apmConnector.subscribeToApi(*[ApplicationId], *[ApiIdentifier])(*)).thenReturn(Future.successful(ApplicationUpdateSuccessful))
   when(productionSubsFieldsConnector.saveFieldValues(*[ClientId], *[ApiContext], *[ApiVersion], *[Fields.Alias])(*)).thenReturn(Future.successful(
     SaveSubscriptionFieldsSuccessResponse

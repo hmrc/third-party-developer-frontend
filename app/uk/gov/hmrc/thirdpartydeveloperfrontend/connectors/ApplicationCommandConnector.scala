@@ -26,14 +26,13 @@ import uk.gov.hmrc.http.{HeaderCarrier, HttpClient, HttpResponse, InternalServer
 import uk.gov.hmrc.apiplatform.modules.applications.domain.models.ApplicationId
 import uk.gov.hmrc.apiplatform.modules.commands.applications.domain.models.{ApplicationCommand, CommandFailure, DispatchRequest, DispatchSuccessResult}
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.LaxEmailAddress
-import uk.gov.hmrc.thirdpartydeveloperfrontend.config.ApplicationConfig
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.Environment
+import uk.gov.hmrc.apiplatform.modules.common.services.ApplicationLogger
 
-abstract class ApplicationCommandConnector(implicit val ec: ExecutionContext) {
-
-  val environment: Environment
-  val serviceBaseUrl: String
-  val http: HttpClient
+@Singleton
+class ApplicationCommandConnector @Inject() (
+    val http: HttpClient,
+    val config: ApmConnector.Config)
+(implicit val ec: ExecutionContext) extends ApplicationLogger {
 
   def dispatch(
       applicationId: ApplicationId,
@@ -47,57 +46,31 @@ abstract class ApplicationCommandConnector(implicit val ec: ExecutionContext) {
     import uk.gov.hmrc.http.HttpReads.Implicits._
     import play.api.http.Status._
 
-    def baseApplicationUrl(applicationId: ApplicationId) = s"$serviceBaseUrl/application/${applicationId.value.toString()}"
+    val serviceBaseUrl = config.serviceBaseUrl
 
-    def parseSuccessResponse(responseBody: String): DispatchSuccessResult =
-      Json.parse(responseBody).asOpt[DispatchSuccessResult]
-        .fold(throw new InternalServerException("Failed parsing success response to dispatch"))(identity)
+    def baseApplicationUrl(applicationId: ApplicationId) = s"$serviceBaseUrl/applications/${applicationId.value.toString()}"
 
-    def parseErrorResponse(responseBody: String): NonEmptyList[CommandFailure] =
-      Json.parse(responseBody).asOpt[NonEmptyList[CommandFailure]]
-        .fold(throw new InternalServerException("Failed parsing error response to dispatch"))(identity)
-
+    def parseWithLogAndThrow[T](input: String)(implicit reads: Reads[T]): T = {
+      Json.parse(input).validate[T] match {
+        case JsSuccess(t, _) => t
+        case JsError(err) =>
+          logger.error(s"Failed to parse >>$input<< due to errors $err")
+          throw new InternalServerException("Failed parsing response to dispatch")
+      }
+    }
     val url          = s"${baseApplicationUrl(applicationId)}/dispatch"
     val request      = DispatchRequest(command, adminsToEmail)
     val extraHeaders = Seq.empty[(String, String)]
     import cats.syntax.either._
 
+    println("URL "+url)
     http.PATCH[DispatchRequest, HttpResponse](url, request, extraHeaders)
       .map(response =>
         response.status match {
-          case OK          => parseSuccessResponse(response.body).asRight[NonEmptyList[CommandFailure]]
-          case BAD_REQUEST => parseErrorResponse(response.body).asLeft[DispatchSuccessResult]
-          case status      => throw new InternalServerException("Failed calling dispatch")
-        }
-      )
+          case OK          => parseWithLogAndThrow[DispatchSuccessResult](response.body).asRight[NonEmptyList[CommandFailure]]
+          case BAD_REQUEST => parseWithLogAndThrow[NonEmptyList[CommandFailure]](response.body).asLeft[DispatchSuccessResult]
+          case status      => logger.error(s"Dispatch failed with status code: $status")
+                              throw new InternalServerException(s"Failed calling dispatch $status")
+      })
   }
-}
-
-@Singleton
-class SandboxApplicationCommandConnector @Inject() (
-    val httpClient: HttpClient,
-    val proxiedHttpClient: ProxiedHttpClient,
-    val appConfig: ApplicationConfig
-  )(implicit override val ec: ExecutionContext
-  ) extends ApplicationCommandConnector {
-
-  val environment    = Environment.SANDBOX
-  val serviceBaseUrl = appConfig.thirdPartyApplicationSandboxUrl
-  val useProxy       = appConfig.thirdPartyApplicationSandboxUseProxy
-
-  val apiKey = appConfig.thirdPartyApplicationSandboxApiKey
-
-  val http: HttpClient = if (useProxy) proxiedHttpClient.withHeaders(apiKey) else httpClient
-}
-
-@Singleton
-class ProductionApplicationCommandConnector @Inject() (
-    val httpClient: HttpClient,
-    val proxiedHttpClient: ProxiedHttpClient,
-    val appConfig: ApplicationConfig
-  )(implicit override val ec: ExecutionContext
-  ) extends ApplicationCommandConnector {
-  val environment    = Environment.PRODUCTION
-  val serviceBaseUrl = appConfig.thirdPartyApplicationProductionUrl
-  val http           = httpClient
 }
