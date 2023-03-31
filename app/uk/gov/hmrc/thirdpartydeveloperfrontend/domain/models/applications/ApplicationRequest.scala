@@ -91,43 +91,4 @@ object UpdateApplicationRequest extends ApplicationRequest {
       )
     )
   }
-
-  def from(application: Application, form: AddRedirectForm): UpdateApplicationRequest = {
-    val access = application.access.asInstanceOf[Standard]
-
-    UpdateApplicationRequest(
-      application.id,
-      application.deployedTo,
-      application.name,
-      normalizeDescription(application.description),
-      access.copy(redirectUris = (access.redirectUris ++ List(form.redirectUri)).distinct)
-    )
-  }
-
-  def from(application: Application, form: DeleteRedirectConfirmationForm): UpdateApplicationRequest = {
-    val access = application.access.asInstanceOf[Standard]
-
-    UpdateApplicationRequest(
-      application.id,
-      application.deployedTo,
-      application.name,
-      normalizeDescription(application.description),
-      access.copy(redirectUris = access.redirectUris.filter(uri => uri != form.redirectUri))
-    )
-  }
-
-  def from(application: Application, form: ChangeRedirectForm): UpdateApplicationRequest = {
-    val access = application.access.asInstanceOf[Standard]
-
-    UpdateApplicationRequest(
-      application.id,
-      application.deployedTo,
-      application.name,
-      normalizeDescription(application.description),
-      access.copy(redirectUris = access.redirectUris.map {
-        case form.originalRedirectUri => form.newRedirectUri
-        case s                        => s
-      })
-    )
-  }
 }

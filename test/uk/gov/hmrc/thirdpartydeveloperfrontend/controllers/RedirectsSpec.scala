@@ -20,7 +20,6 @@ import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 
 import org.jsoup.Jsoup
-import org.mockito.ArgumentCaptor
 import views.html.{AddRedirectView, ChangeRedirectView, DeleteRedirectConfirmationView, RedirectsView}
 
 import play.api.mvc.Result
@@ -37,6 +36,7 @@ import uk.gov.hmrc.thirdpartydeveloperfrontend.mocks.service.{ApplicationActionS
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.ViewHelpers._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.WithLoggedInSession._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils._
+import uk.gov.hmrc.thirdpartydeveloperfrontend.mocks.service.RedirectsServiceMockModule
 
 class RedirectsSpec
     extends BaseControllerSpec
@@ -46,7 +46,7 @@ class RedirectsSpec
     with DeveloperBuilder
     with LocalUserIdTracker {
 
-  trait Setup extends ApplicationServiceMock with SessionServiceMock with ApplicationActionServiceMock {
+  trait Setup extends ApplicationServiceMock with SessionServiceMock with ApplicationActionServiceMock with RedirectsServiceMockModule {
     val applicationId = "1234"
     val clientId      = ClientId("clientId123")
 
@@ -74,7 +74,8 @@ class RedirectsSpec
       addRedirectView,
       deleteRedirectConfirmationView,
       changeRedirectView,
-      fraudPreventionConfig
+      fraudPreventionConfig,
+      RedirectsServiceMock.aMock      
     )
 
     implicit val hc = HeaderCarrier()
@@ -88,7 +89,6 @@ class RedirectsSpec
 
     override def givenApplicationExists(application: Application): Unit = {
       givenApplicationAction(application, loggedInDeveloper)
-      givenApplicationUpdateSucceeds()
     }
 
     def redirectsShouldRenderThePage(application: Application, shouldShowDeleteButton: Boolean) = {
@@ -144,18 +144,14 @@ class RedirectsSpec
 
     def addRedirectActionShouldRenderRedirectsPageAfterAddingTheRedirectUri(application: Application, redirectUriToAdd: String) = {
       givenApplicationExists(application)
+      RedirectsServiceMock.AddRedirect.succeedsWith(redirectUriToAdd)
 
       val request = loggedInRequest.withCSRFToken.withFormUrlEncodedBody("redirectUri" -> redirectUriToAdd)
       val result  = underTest.addRedirectAction(application.id)(request)
 
-      val argument: ArgumentCaptor[UpdateApplicationRequest] = ArgumentCaptor.forClass(classOf[UpdateApplicationRequest])
-
       status(result) shouldBe SEE_OTHER
       headers(result)
       headers(result).apply(LOCATION) shouldBe s"/developer/applications/${application.id.value}/redirect-uris"
-
-      verify(underTest.applicationService).update(argument.capture())(*)
-      argument.getValue.access.asInstanceOf[Standard].redirectUris.contains(redirectUriToAdd) shouldBe true
     }
 
     def deleteRedirectsShouldRenderThePage(application: Application, resultStatus: Int, shouldShowDeleteControls: Boolean, redirectUriToDelete: String) = {
@@ -188,17 +184,13 @@ class RedirectsSpec
 
     def deleteRedirectsActionShouldRedirectToTheRedirectsPageWhenSuccessful(application: Application, resultStatus: Int, redirectUriToDelete: String) = {
       givenApplicationExists(application)
-
+      RedirectsServiceMock.DeleteRedirect.succeedsWith(redirectUriToDelete)
+      
       val result =
         underTest.deleteRedirectAction(application.id)(loggedInRequest.withCSRFToken.withFormUrlEncodedBody("redirectUri" -> redirectUriToDelete, "deleteRedirectConfirm" -> "Yes"))
 
-      val argument: ArgumentCaptor[UpdateApplicationRequest] = ArgumentCaptor.forClass(classOf[UpdateApplicationRequest])
-
       status(result) shouldBe resultStatus
       headers(result).apply(LOCATION) shouldBe s"/developer/applications/${application.id.value}/redirect-uris"
-
-      verify(underTest.applicationService).update(argument.capture())(*)
-      argument.getValue.access.asInstanceOf[Standard].redirectUris.contains(redirectUriToDelete) shouldBe false
     }
 
     def deleteRedirectsActionShouldRedirectToTheRedirectsPageWhenUserChoosesNotToDelete(application: Application, resultStatus: Int, redirectUriToDelete: String) = {
@@ -430,18 +422,13 @@ class RedirectsSpec
       val originalRedirectUri = redirectUris.head
       val newRedirectUri      = "https://localhost:1111"
       givenApplicationExists(application)
+      RedirectsServiceMock.ChangeRedirect.succeedsWith(originalRedirectUri, newRedirectUri)
 
       val result                                             = underTest.changeRedirectAction(application.id)(
         loggedInRequest.withCSRFToken.withFormUrlEncodedBody("originalRedirectUri" -> originalRedirectUri, "newRedirectUri" -> newRedirectUri)
       )
-      val argument: ArgumentCaptor[UpdateApplicationRequest] = ArgumentCaptor.forClass(classOf[UpdateApplicationRequest])
-
       status(result) shouldBe SEE_OTHER
       headers(result).apply(LOCATION) shouldBe s"/developer/applications/${application.id.value}/redirect-uris"
-
-      verify(underTest.applicationService).update(argument.capture())(*)
-      argument.getValue.access.asInstanceOf[Standard].redirectUris.contains(originalRedirectUri) shouldBe false
-      argument.getValue.access.asInstanceOf[Standard].redirectUris.contains(newRedirectUri) shouldBe true
     }
 
     "return the change redirect page for an admin with a production application when submitted a duplicate uri" in new Setup {
