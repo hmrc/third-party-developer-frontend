@@ -31,8 +31,9 @@ import uk.gov.hmrc.apiplatform.modules.common.services.ApplicationLogger
 @Singleton
 class ApplicationCommandConnector @Inject() (
     val http: HttpClient,
-    val config: ApmConnector.Config)
-(implicit val ec: ExecutionContext) extends ApplicationLogger {
+    val config: ApmConnector.Config
+  )(implicit val ec: ExecutionContext
+  ) extends ApplicationLogger {
 
   def dispatch(
       applicationId: ApplicationId,
@@ -53,24 +54,25 @@ class ApplicationCommandConnector @Inject() (
     def parseWithLogAndThrow[T](input: String)(implicit reads: Reads[T]): T = {
       Json.parse(input).validate[T] match {
         case JsSuccess(t, _) => t
-        case JsError(err) =>
+        case JsError(err)    =>
           logger.error(s"Failed to parse >>$input<< due to errors $err")
           throw new InternalServerException("Failed parsing response to dispatch")
       }
     }
-    val url          = s"${baseApplicationUrl(applicationId)}/dispatch"
-    val request      = DispatchRequest(command, adminsToEmail)
-    val extraHeaders = Seq.empty[(String, String)]
+    val url                                                                 = s"${baseApplicationUrl(applicationId)}/dispatch"
+    val request                                                             = DispatchRequest(command, adminsToEmail)
+    val extraHeaders                                                        = Seq.empty[(String, String)]
     import cats.syntax.either._
 
-    println("URL "+url)
     http.PATCH[DispatchRequest, HttpResponse](url, request, extraHeaders)
       .map(response =>
         response.status match {
           case OK          => parseWithLogAndThrow[DispatchSuccessResult](response.body).asRight[NonEmptyList[CommandFailure]]
           case BAD_REQUEST => parseWithLogAndThrow[NonEmptyList[CommandFailure]](response.body).asLeft[DispatchSuccessResult]
-          case status      => logger.error(s"Dispatch failed with status code: $status")
-                              throw new InternalServerException(s"Failed calling dispatch $status")
-      })
+          case status      =>
+            logger.error(s"Dispatch failed with status code: $status")
+            throw new InternalServerException(s"Failed calling dispatch $status")
+        }
+      )
   }
 }

@@ -69,9 +69,9 @@ class ApplicationCommandConnectorSpec
 
   class Setup(proxyEnabled: Boolean = false) {
 
-    val httpClient        = app.injector.instanceOf[HttpClient]
+    val httpClient = app.injector.instanceOf[HttpClient]
 
-    val config = ApmConnector.Config(wireMockUrl)
+    val config    = ApmConnector.Config(wireMockUrl)
     val connector = new ApplicationCommandConnector(httpClient, config) {}
 
   }

@@ -28,7 +28,7 @@ import org.mockito.{ArgumentMatchersSugar, MockitoSugar}
 import uk.gov.hmrc.apiplatform.modules.applications.domain.models.ApplicationId
 import uk.gov.hmrc.apiplatform.modules.commands.applications.domain.models.{ApplicationCommand, CommandFailure, DispatchSuccessResult}
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.LaxEmailAddress
-import uk.gov.hmrc.thirdpartydeveloperfrontend.connectors.{ApplicationCommandConnector}
+import uk.gov.hmrc.thirdpartydeveloperfrontend.connectors.ApplicationCommandConnector
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.Application
 
 trait ApplicationCommandConnectorMockModule extends MockitoSugar with ArgumentMatchersSugar {

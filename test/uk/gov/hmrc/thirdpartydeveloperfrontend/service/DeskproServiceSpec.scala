@@ -92,7 +92,7 @@ class DeskproServiceSpec extends AsyncHmrcSpec {
       }
 
       "Convert the SupportEnquiryForm into a DeskproTicket and sends it to Deskpro with fake user id" in {
-        val title  = "Title"
+        val title = "Title"
         when(underTest.appConfig.title).thenReturn(title)
         when(underTest.deskproConnector.createTicket(*[Option[UserId]], *)(*)).thenReturn(Future(TicketCreated))
 
