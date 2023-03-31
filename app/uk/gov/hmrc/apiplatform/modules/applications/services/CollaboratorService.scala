@@ -34,7 +34,7 @@ import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications._
 @Singleton
 class CollaboratorService @Inject() (
     apmConnector: ApmConnector,
-    applicationCommandConnector: BridgedConnector[ApplicationCommandConnector],
+    applicationCommandConnector: ApplicationCommandConnector,
     developerConnector: ThirdPartyDeveloperConnector,
     val clock: Clock
   )(implicit val ec: ExecutionContext
@@ -54,7 +54,7 @@ class CollaboratorService @Inject() (
       adminsToEmail  = adminsAsUsers.filter(_.verified.contains(true)).map(_.email).toSet
       userId        <- developerConnector.getOrCreateUserId(newTeamMemberEmail)
       addCommand     = ApplicationCommands.AddCollaborator(Actors.AppCollaborator(requestingEmail), Collaborator.apply(newTeamMemberEmail, newTeamMemberRole, userId), now())
-      response      <- applicationCommandConnector(app).dispatch(app.id, addCommand, adminsToEmail)
+      response      <- applicationCommandConnector.dispatch(app.id, addCommand, adminsToEmail)
     } yield response
   }
 
@@ -78,7 +78,7 @@ class CollaboratorService @Inject() (
       otherAdmins  <- developerConnector.fetchByEmails(otherAdminEmails)
       adminsToEmail = otherAdmins.filter(_.verified.contains(true)).map(_.email).toSet
       removeCommand = ApplicationCommands.RemoveCollaborator(Actors.AppCollaborator(requestingEmail), collaboratorToRemove, now())
-      response     <- applicationCommandConnector(app).dispatch(app.id, removeCommand, adminsToEmail)
+      response     <- applicationCommandConnector.dispatch(app.id, removeCommand, adminsToEmail)
     } yield response
   }
 }

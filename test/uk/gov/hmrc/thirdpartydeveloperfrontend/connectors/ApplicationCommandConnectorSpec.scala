@@ -32,7 +32,6 @@ import uk.gov.hmrc.apiplatform.modules.commands.applications.domain.models.{Appl
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.Actors
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.LaxEmailAddress.StringSyntax
 import uk.gov.hmrc.apiplatform.modules.developers.domain.models.UserId
-import uk.gov.hmrc.thirdpartydeveloperfrontend.config.ApplicationConfig
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.{AsyncHmrcSpec, WireMockSugar}
 
@@ -70,13 +69,10 @@ class ApplicationCommandConnectorSpec
 
   class Setup(proxyEnabled: Boolean = false) {
 
-    val httpClient        = app.injector.instanceOf[HttpClient]
-    val proxiedHttpClient = app.injector.instanceOf[ProxiedHttpClient]
+    val httpClient = app.injector.instanceOf[HttpClient]
 
-    val mockAppConfig: ApplicationConfig = mock[ApplicationConfig]
-    when(mockAppConfig.thirdPartyApplicationProductionUrl).thenReturn(wireMockUrl)
-
-    val connector = new ProductionApplicationCommandConnector(httpClient, proxiedHttpClient, mockAppConfig) {}
+    val config    = ApmConnector.Config(wireMockUrl)
+    val connector = new ApplicationCommandConnector(httpClient, config) {}
 
   }
 
@@ -87,7 +83,7 @@ class ApplicationCommandConnectorSpec
     val command              = ApplicationCommands.RemoveCollaborator(Actors.GatekeeperUser(gatekeeperUserName), collaborator, LocalDateTime.now())
 
     val adminsToEmail = Set("admin1@example.com", "admin2@example.com").map(_.toLaxEmail)
-    val url           = s"/application/${applicationId.value.toString()}/dispatch"
+    val url           = s"/applications/${applicationId.value.toString()}/dispatch"
 
     "send a correct command" in new Setup {
       stubFor(

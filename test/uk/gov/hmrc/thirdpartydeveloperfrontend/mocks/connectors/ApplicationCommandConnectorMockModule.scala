@@ -28,15 +28,15 @@ import org.mockito.{ArgumentMatchersSugar, MockitoSugar}
 import uk.gov.hmrc.apiplatform.modules.applications.domain.models.ApplicationId
 import uk.gov.hmrc.apiplatform.modules.commands.applications.domain.models.{ApplicationCommand, CommandFailure, DispatchSuccessResult}
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.LaxEmailAddress
-import uk.gov.hmrc.thirdpartydeveloperfrontend.connectors.{ApplicationCommandConnector, BridgedConnector}
+import uk.gov.hmrc.thirdpartydeveloperfrontend.connectors.ApplicationCommandConnector
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.Application
 
 trait ApplicationCommandConnectorMockModule extends MockitoSugar with ArgumentMatchersSugar {
 
   type Err = NonEmptyList[CommandFailure]
 
-  trait AbstractApplicationCommandConnectorMock {
-    def aMock: ApplicationCommandConnector
+  object ApplicationCommandConnectorMock {
+    val aMock: ApplicationCommandConnector = mock[ApplicationCommandConnector]
 
     object Dispatch {
 
@@ -62,17 +62,5 @@ trait ApplicationCommandConnectorMockModule extends MockitoSugar with ArgumentMa
         captor.value
       }
     }
-  }
-
-  object PrincipalAppCommandConnector extends AbstractApplicationCommandConnectorMock {
-    val aMock = mock[ApplicationCommandConnector]
-  }
-
-  object SubordinateAppCommandConnector extends AbstractApplicationCommandConnectorMock {
-    val aMock = mock[ApplicationCommandConnector]
-  }
-
-  object BridgedAppCommandConnector {
-    lazy val connector = BridgedConnector[ApplicationCommandConnector](SubordinateAppCommandConnector.aMock, PrincipalAppCommandConnector.aMock)
   }
 }
