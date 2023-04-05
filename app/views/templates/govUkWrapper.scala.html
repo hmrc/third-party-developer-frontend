@@ -17,7 +17,6 @@
 @import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.views.{BackButton, BackButtonToUrl, BackButtonWithJavaScript, FeedbackBanner, NoBackButton}
 @import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.controllers.Crumb
 @import play.twirl.api.HtmlFormat
-@import views.html.include.FeedbackBannerView
 @import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.DeveloperSession
 @import uk.gov.hmrc.hmrcfrontend.views.html.helpers.HmrcTrackingConsentSnippet
 
@@ -39,7 +38,6 @@
   hmrcHeader: HmrcHeader,
   hmrcFooter: HmrcFooter,
   applicationConfig: ApplicationConfig,
-  feedbackBannerView: FeedbackBannerView,
   hmrcTimeoutDialog: HmrcTimeoutDialog,
   hmrcTrackingConsentSnippet: HmrcTrackingConsentSnippet
 )
@@ -101,7 +99,23 @@
   }
 }
 
+@feedbackBannerBlock = {
+  @feedbackBanner match {
+    case Some(fb) => {
+      <div id="feedback-banner" class="govuk-phase-banner">
+        <p id="feedback-title" class="govuk-phase-banner__content">
+          <span class="govuk-phase-banner__text">
+            Your <a class="govuk-link" href="@{applicationConfig.getString(fb.surveyUrlKey)}" target="_blank">feedback (opens in new tab)</a> will help us to improve this service.
+          </span>
+        </p>
+      </div>
+    }
+    case _ => {}
+  }
+}
+
 @beforeContentBlock = {
+  @feedbackBannerBlock
   <div class="before-content-banner">
     @include.breadcrumbs(breadcrumbs: _*)
     @backLink
@@ -196,19 +210,6 @@
   ), language = En))
 }
 
-@footerBlock = {
-  <div class="govuk-!-margin-top-8">
-    @feedbackBanner match {
-      case Some(fb) => {
-        @feedbackBannerView(fb)
-      }
-      case _ => {}
-    }
-  </div>
-  @siteFooter
-}
-
-
 @govukLayout(
   pageTitle = Some(title),
   headBlock = Some(head),
@@ -224,7 +225,7 @@
   ))),
   beforeContentBlock = Some(beforeContentBlock),
   mainContentLayout = None,
-  footerBlock = Some(footerBlock),
+  footerBlock = Some(siteFooter),
   bodyEndBlock = Some(bodyEndDefault),
   scriptsBlock = Some(scripts)
 )(mainContentDefault)

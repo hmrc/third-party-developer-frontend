@@ -17,11 +17,9 @@
 package uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.views
 
 sealed trait FeedbackBanner {
-  val description: String
   val surveyUrlKey: String
 }
 
 case object GenericFeedbackBanner extends FeedbackBanner {
-  override val description: String  = "Take our survey and answer questions about Developer Hub."
   override val surveyUrlKey: String = "feedbackBanner.generic.surveyUrl"
 }
