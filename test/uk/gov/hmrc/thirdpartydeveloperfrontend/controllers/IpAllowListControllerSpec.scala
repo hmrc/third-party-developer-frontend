@@ -89,7 +89,7 @@ class IpAllowListControllerSpec
     }
 
     def verifyIpAllowlistSurveyIsPresent(body: String): Assertion = {
-      body should include("Take our survey and answer questions about Developer Hub.")
+      body should include("will help us to improve this service.")
     }
   }
 

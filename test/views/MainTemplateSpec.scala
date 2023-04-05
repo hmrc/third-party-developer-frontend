@@ -62,8 +62,8 @@ class MainTemplateSpec extends CommonViewSpec with DeveloperBuilder with LocalUs
 
       val document = Jsoup.parse(view.body)
 
-      elementExistsById(document, "feedback") shouldBe true
-      document.getElementById("feedback-title").text() shouldBe "Your feedback helps us improve our service"
+      elementExistsById(document, "feedback-banner") shouldBe true
+      document.getElementById("feedback-title").text() shouldBe "Your feedback (opens in new tab) will help us to improve this service."
     }
   }
 }
