@@ -29,7 +29,9 @@ import scala.concurrent.ExecutionContext.Implicits.global
 class SubscriptionsServiceMockModule extends MockitoSugar with ArgumentMatchersSugar {
 
   trait AbstractSubscriptionsServiceMock {
-    import Types._
+    val CHT = new CommandHandlerTypes[DispatchSuccessResult] {}
+
+    import CHT.Implicits._
 
     def aMock: SubscriptionsService
 

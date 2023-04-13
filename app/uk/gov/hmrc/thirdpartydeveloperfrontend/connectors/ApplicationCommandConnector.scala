@@ -18,14 +18,12 @@ package uk.gov.hmrc.thirdpartydeveloperfrontend.connectors
 
 import scala.concurrent.{ExecutionContext}
 
-import cats.data.NonEmptyChain
 import com.google.inject.{Inject, Singleton}
 
 import uk.gov.hmrc.http.{HeaderCarrier, HttpClient, HttpResponse, InternalServerException}
 
 import uk.gov.hmrc.apiplatform.modules.applications.domain.models.ApplicationId
-import uk.gov.hmrc.apiplatform.modules.commands.applications.domain.models.{ApplicationCommand, CommandFailure, DispatchRequest}
-import uk.gov.hmrc.apiplatform.modules.commands.applications.domain.models.DispatchSuccessResult
+import uk.gov.hmrc.apiplatform.modules.commands.applications.domain.models._
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.LaxEmailAddress
 import uk.gov.hmrc.apiplatform.modules.common.services.ApplicationLogger
 import uk.gov.hmrc.apiplatform.modules.commands.applications.domain.models.CommandHandlerTypes
@@ -45,7 +43,7 @@ class ApplicationCommandConnector @Inject() (
     )(implicit hc: HeaderCarrier
     ): Result = {
 
-    import uk.gov.hmrc.apiplatform.modules.common.services.NonEmptyChainFormatters._
+    import uk.gov.hmrc.apiplatform.modules.common.domain.services.NonEmptyListFormatters._
     import play.api.libs.json._
     import uk.gov.hmrc.http.HttpReads.Implicits._
     import play.api.http.Status._
@@ -71,7 +69,7 @@ class ApplicationCommandConnector @Inject() (
       .map(response =>
         response.status match {
           case OK          => parseWithLogAndThrow[DispatchSuccessResult](response.body).asRight[Failures]
-          case BAD_REQUEST => parseWithLogAndThrow[NonEmptyChain[CommandFailure]](response.body).asLeft[DispatchSuccessResult]
+          case BAD_REQUEST => parseWithLogAndThrow[Failures](response.body).asLeft[DispatchSuccessResult]
           case status      =>
             logger.error(s"Dispatch failed with status code: $status")
             throw new InternalServerException(s"Failed calling dispatch $status")

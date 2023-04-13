@@ -29,7 +29,9 @@ import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.Applic
 trait ApplicationCommandConnectorMockModule extends MockitoSugar with ArgumentMatchersSugar {
 
   object ApplicationCommandConnectorMock {
-    import Types._
+    val CHT = new CommandHandlerTypes[DispatchSuccessResult] {}
+
+    import CHT.Implicits._
 
     val aMock: ApplicationCommandConnector = mock[ApplicationCommandConnector]
 

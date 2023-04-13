@@ -25,7 +25,7 @@ import views.html.manageTeamViews.{AddTeamMemberView, ManageTeamView, RemoveTeam
 
 import play.api.data.Form
 import play.api.libs.crypto.CookieSigner
-import play.api.mvc.{Action, AnyContent, MessagesControllerComponents, Result}
+import play.api.mvc.{Action, AnyContent, MessagesControllerComponents, Result => PlayResult}
 import play.twirl.api.Html
 import uk.gov.hmrc.play.bootstrap.controller.WithUnsafeDefaultFormBinding
 
@@ -41,8 +41,8 @@ import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.controllers.AddTeam
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.controllers.{AddTeamMemberPageMode, ApplicationViewModel}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.DeveloperSession
 import uk.gov.hmrc.thirdpartydeveloperfrontend.service._
-import cats.data.NonEmptyChainImpl
-import uk.gov.hmrc.apiplatform.modules.commands.applications.domain.models.CommandFailure
+import uk.gov.hmrc.apiplatform.modules.commands.applications.domain.models.CommandHandlerTypes
+import uk.gov.hmrc.apiplatform.modules.commands.applications.domain.models.DispatchSuccessResult
 
 @Singleton
 class ManageTeam @Inject() (
@@ -61,12 +61,15 @@ class ManageTeam @Inject() (
     val fraudPreventionConfig: FraudPreventionConfig
   )(implicit val ec: ExecutionContext,
     val appConfig: ApplicationConfig
-  ) extends ApplicationController(mcc) with FraudPreventionNavLinkHelper with WithUnsafeDefaultFormBinding {
+  ) extends ApplicationController(mcc)
+    with CommandHandlerTypes[DispatchSuccessResult]
+    with FraudPreventionNavLinkHelper
+    with WithUnsafeDefaultFormBinding {
 
-  private def whenAppSupportsTeamMembers(applicationId: ApplicationId)(fun: ApplicationRequest[AnyContent] => Future[Result]): Action[AnyContent] =
+  private def whenAppSupportsTeamMembers(applicationId: ApplicationId)(fun: ApplicationRequest[AnyContent] => Future[PlayResult]): Action[AnyContent] =
     checkActionForApprovedApps(SupportsTeamMembers, TeamMembersOnly)(applicationId)(fun)
 
-  private def canEditTeamMembers(applicationId: ApplicationId, alsoAllowTestingState: Boolean = false)(fun: ApplicationRequest[AnyContent] => Future[Result]): Action[AnyContent] =
+  private def canEditTeamMembers(applicationId: ApplicationId, alsoAllowTestingState: Boolean = false)(fun: ApplicationRequest[AnyContent] => Future[PlayResult]): Action[AnyContent] =
     if (alsoAllowTestingState) {
       checkActionForApprovedOrTestingApps(SupportsTeamMembers, AdministratorOnly)(applicationId)(fun)
     } else {
@@ -94,7 +97,7 @@ class ManageTeam @Inject() (
         addTeamMemberView.apply(a, f, ds, createFraudNavModel(fraudPreventionConfig))
       }
 
-      def createBadRequestResult(formWithErrors: Form[AddTeamMemberForm]): Result = {
+      def createBadRequestResult(formWithErrors: Form[AddTeamMemberForm]): PlayResult = {
         val viewFunction: (ApplicationViewModel, Form[AddTeamMemberForm], DeveloperSession) => Html = addTeamMemberPageMode match {
           case ManageTeamMembers => handleAddTeamMemberView
           case ApplicationCheck  => teamMemberAddView.apply
@@ -113,9 +116,8 @@ class ManageTeam @Inject() (
 
       def handleValidForm(form: AddTeamMemberForm) = {
         val role = form.role.flatMap(Collaborator.Role(_)).getOrElse(Collaborator.Roles.DEVELOPER)
-          import cats.data.NonEmptyChain
 
-        val handleFailure: NonEmptyChain[CommandFailure] => Result = (fails) =>
+        val handleFailure: Failures => PlayResult = (fails) =>
           fails.head match {
             case CommandFailures.CollaboratorAlreadyExistsOnApp => createBadRequestResult(AddTeamMemberForm.form.fill(form).withError("email", "team.member.error.emailAddress.already.exists.field"))
             case CommandFailures.ApplicationNotFound            => NotFound(errorHandler.notFoundTemplate)

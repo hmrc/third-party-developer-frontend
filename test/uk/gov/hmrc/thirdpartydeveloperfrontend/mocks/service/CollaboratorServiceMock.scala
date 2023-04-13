@@ -29,7 +29,9 @@ import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.Applic
 trait CollaboratorServiceMockModule extends MockitoSugar with ArgumentMatchersSugar {
 
   trait AbstractCollaboratorServiceMock {
-    import Types._
+    val CHT = new CommandHandlerTypes[DispatchSuccessResult] {}
+
+    import CHT.Implicits._
 
     def aMock: CollaboratorService
 
