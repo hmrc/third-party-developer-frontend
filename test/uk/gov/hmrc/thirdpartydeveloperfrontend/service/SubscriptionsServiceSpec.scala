@@ -25,17 +25,17 @@ import uk.gov.hmrc.http.HeaderCarrier
 
 import uk.gov.hmrc.apiplatform.modules.apis.domain.models._
 import uk.gov.hmrc.apiplatform.modules.applications.domain.models.{ApplicationId, ClientId}
+import uk.gov.hmrc.apiplatform.modules.commands.applications.domain.models.DispatchSuccessResult
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.LaxEmailAddress.StringSyntax
+import uk.gov.hmrc.apiplatform.modules.common.utils.FixedClock
 import uk.gov.hmrc.thirdpartydeveloperfrontend.builder._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.connectors._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications._
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.subscriptions.ApiSubscriptionFields._
+import uk.gov.hmrc.thirdpartydeveloperfrontend.mocks.connectors.ApplicationCommandConnectorMockModule
 import uk.gov.hmrc.thirdpartydeveloperfrontend.service.PushPullNotificationsService.PushPullNotificationsConnector
 import uk.gov.hmrc.thirdpartydeveloperfrontend.service.SubscriptionFieldsService.SubscriptionFieldsConnector
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.{AsyncHmrcSpec, LocalUserIdTracker}
-import uk.gov.hmrc.thirdpartydeveloperfrontend.mocks.connectors.ApplicationCommandConnectorMockModule
-import uk.gov.hmrc.apiplatform.modules.common.utils.FixedClock
-import uk.gov.hmrc.apiplatform.modules.commands.applications.domain.models.DispatchSuccessResult
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.subscriptions.ApiSubscriptionFields._
 
 class SubscriptionsServiceSpec extends AsyncHmrcSpec with SubscriptionsBuilder with ApplicationBuilder with LocalUserIdTracker {
 
@@ -143,7 +143,7 @@ class SubscriptionsServiceSpec extends AsyncHmrcSpec with SubscriptionsBuilder w
 
       ApplicationCommandConnectorMock.Dispatch.thenReturnsSuccess(productionApplication)
 
-      await(subscriptionsService.subscribeToApi(productionApplication, subscription, email)).right.value shouldBe DispatchSuccessResult(productionApplication) 
+      await(subscriptionsService.subscribeToApi(productionApplication, subscription, email)).right.value shouldBe DispatchSuccessResult(productionApplication)
     }
   }
 
@@ -160,7 +160,7 @@ class SubscriptionsServiceSpec extends AsyncHmrcSpec with SubscriptionsBuilder w
       when(mockProductionSubscriptionFieldsConnector.deleteFieldValues(productionClientId, context, version))
         .thenReturn(successful(FieldsDeleteSuccessResult))
 
-      await(subscriptionsService.unsubscribeFromApi(productionApplication, apiIdentifier, email)).right.value shouldBe DispatchSuccessResult(productionApplication) 
+      await(subscriptionsService.unsubscribeFromApi(productionApplication, apiIdentifier, email)).right.value shouldBe DispatchSuccessResult(productionApplication)
     }
   }
 }

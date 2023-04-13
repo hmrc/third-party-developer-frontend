@@ -16,20 +16,19 @@
 
 package uk.gov.hmrc.thirdpartydeveloperfrontend.service
 
-import javax.inject._
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.Application
-import uk.gov.hmrc.apiplatform.modules.common.domain.models.Actor
-import uk.gov.hmrc.http.HeaderCarrier
-import uk.gov.hmrc.apiplatform.modules.commands.applications.domain.models.DispatchSuccessResult
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.Standard
-import uk.gov.hmrc.thirdpartydeveloperfrontend.connectors.ApplicationCommandConnector
 import java.time.Clock
+import javax.inject._
+
+import uk.gov.hmrc.http.HeaderCarrier
+
+import uk.gov.hmrc.apiplatform.modules.commands.applications.domain.models.{ApplicationCommands, CommandHandlerTypes, DispatchSuccessResult}
+import uk.gov.hmrc.apiplatform.modules.common.domain.models.Actor
 import uk.gov.hmrc.apiplatform.modules.common.domain.services.ClockNow
-import uk.gov.hmrc.apiplatform.modules.commands.applications.domain.models.ApplicationCommands
-import uk.gov.hmrc.apiplatform.modules.commands.applications.domain.models.CommandHandlerTypes
+import uk.gov.hmrc.thirdpartydeveloperfrontend.connectors.ApplicationCommandConnector
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.{Application, Standard}
 
 @Singleton
-class RedirectsService @Inject()(
+class RedirectsService @Inject() (
     applicationCmdConnector: ApplicationCommandConnector,
     val clock: Clock
   ) extends CommandHandlerTypes[DispatchSuccessResult]
@@ -40,33 +39,36 @@ class RedirectsService @Inject()(
   private def issueCommand(actor: Actor, application: Application, fn: List[String] => List[String])(implicit hc: HeaderCarrier): Result = {
     val oldRedirectUris = application.access match {
       case Standard(redirectUris, _, _, _, _, _) => redirectUris
-      case _ => List.empty
+      case _                                     => List.empty
     }
     val newRedirectUris = fn(oldRedirectUris)
-    val cmd = ApplicationCommands.UpdateRedirectUris(actor, oldRedirectUris, newRedirectUris, now())
+    val cmd             = ApplicationCommands.UpdateRedirectUris(actor, oldRedirectUris, newRedirectUris, now())
     applicationCmdConnector.dispatch(application.id, cmd, Set.empty)
   }
 
-  def addRedirect(actor: Actor, application: Application, newRedirectUri: String)(implicit hc: HeaderCarrier) = {
+  def addRedirect(actor: Actor, application: Application, newRedirectUri: String)(implicit hc: HeaderCarrier)                                 = {
     issueCommand(actor, application, addRedirectUris(newRedirectUri))
   }
+
   def changeRedirect(actor: Actor, application: Application, originalRedirectUri: String, newRedirectUri: String)(implicit hc: HeaderCarrier) = {
     issueCommand(actor, application, changeRedirectUris(originalRedirectUri, newRedirectUri))
   }
-  def deleteRedirect(actor: Actor, application: Application, redirectUriToDelete: String)(implicit hc: HeaderCarrier) = {
+
+  def deleteRedirect(actor: Actor, application: Application, redirectUriToDelete: String)(implicit hc: HeaderCarrier)                         = {
     issueCommand(actor, application, deleteRedirectUris(redirectUriToDelete))
   }
 }
 
 object RedirectsService {
+
   def addRedirectUris(newRedirectUri: String): List[String] => List[String] = (redirectUris) => {
-     (redirectUris ++ List(newRedirectUri)).distinct
+    (redirectUris ++ List(newRedirectUri)).distinct
   }
 
   def changeRedirectUris(originalRedirectUri: String, newRedirectUri: String): List[String] => List[String] = (redirectUris) => {
     redirectUris.map {
       case `originalRedirectUri` => newRedirectUri
-      case s                   => s
+      case s                     => s
     }
   }
 

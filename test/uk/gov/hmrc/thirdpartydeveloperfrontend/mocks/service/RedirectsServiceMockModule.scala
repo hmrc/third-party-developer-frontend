@@ -16,11 +16,12 @@
 
 package uk.gov.hmrc.thirdpartydeveloperfrontend.mocks.service
 
-import uk.gov.hmrc.thirdpartydeveloperfrontend.service.RedirectsService
 import scala.concurrent.Future.successful
-import org.mockito.ArgumentMatchersSugar
-import org.mockito.MockitoSugar
+
+import org.mockito.{ArgumentMatchersSugar, MockitoSugar}
+
 import uk.gov.hmrc.apiplatform.modules.commands.applications.domain.models.DispatchSuccessResult
+import uk.gov.hmrc.thirdpartydeveloperfrontend.service.RedirectsService
 
 trait RedirectsServiceMockModule extends MockitoSugar with ArgumentMatchersSugar {
 
@@ -30,20 +31,23 @@ trait RedirectsServiceMockModule extends MockitoSugar with ArgumentMatchersSugar
     val mockDispatchSuccessResult = mock[DispatchSuccessResult]
 
     object AddRedirect {
+
       def succeedsWith(uri: String) = {
-        when(aMock.addRedirect(*,*,eqTo(uri))(*)).thenReturn(successful(Right(mockDispatchSuccessResult)))
+        when(aMock.addRedirect(*, *, eqTo(uri))(*)).thenReturn(successful(Right(mockDispatchSuccessResult)))
       }
     }
 
     object ChangeRedirect {
+
       def succeedsWith(from: String, to: String) = {
-        when(aMock.changeRedirect(*,*,eqTo(from),eqTo(to))(*)).thenReturn(successful(Right(mockDispatchSuccessResult)))
+        when(aMock.changeRedirect(*, *, eqTo(from), eqTo(to))(*)).thenReturn(successful(Right(mockDispatchSuccessResult)))
       }
     }
 
     object DeleteRedirect {
+
       def succeedsWith(uri: String) = {
-        when(aMock.deleteRedirect(*,*,eqTo(uri))(*)).thenReturn(successful(Right(mockDispatchSuccessResult)))
+        when(aMock.deleteRedirect(*, *, eqTo(uri))(*)).thenReturn(successful(Right(mockDispatchSuccessResult)))
       }
     }
   }

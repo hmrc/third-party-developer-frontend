@@ -16,17 +16,16 @@
 
 package uk.gov.hmrc.thirdpartydeveloperfrontend.connectors
 
-import scala.concurrent.{ExecutionContext}
+import scala.concurrent.ExecutionContext
 
 import com.google.inject.{Inject, Singleton}
 
 import uk.gov.hmrc.http.{HeaderCarrier, HttpClient, HttpResponse, InternalServerException}
 
 import uk.gov.hmrc.apiplatform.modules.applications.domain.models.ApplicationId
-import uk.gov.hmrc.apiplatform.modules.commands.applications.domain.models._
+import uk.gov.hmrc.apiplatform.modules.commands.applications.domain.models.{CommandHandlerTypes, _}
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.LaxEmailAddress
 import uk.gov.hmrc.apiplatform.modules.common.services.ApplicationLogger
-import uk.gov.hmrc.apiplatform.modules.commands.applications.domain.models.CommandHandlerTypes
 
 @Singleton
 class ApplicationCommandConnector @Inject() (

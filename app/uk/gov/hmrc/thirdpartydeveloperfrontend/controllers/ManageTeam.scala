@@ -31,7 +31,7 @@ import uk.gov.hmrc.play.bootstrap.controller.WithUnsafeDefaultFormBinding
 
 import uk.gov.hmrc.apiplatform.modules.applications.domain.models._
 import uk.gov.hmrc.apiplatform.modules.applications.services.CollaboratorService
-import uk.gov.hmrc.apiplatform.modules.commands.applications.domain.models.CommandFailures
+import uk.gov.hmrc.apiplatform.modules.commands.applications.domain.models.{CommandFailures, CommandHandlerTypes, DispatchSuccessResult}
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.LaxEmailAddress.StringSyntax
 import uk.gov.hmrc.thirdpartydeveloperfrontend.config.{ApplicationConfig, ErrorHandler, FraudPreventionConfig}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.fraudprevention.FraudPreventionNavLinkHelper
@@ -41,8 +41,6 @@ import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.controllers.AddTeam
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.controllers.{AddTeamMemberPageMode, ApplicationViewModel}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.DeveloperSession
 import uk.gov.hmrc.thirdpartydeveloperfrontend.service._
-import uk.gov.hmrc.apiplatform.modules.commands.applications.domain.models.CommandHandlerTypes
-import uk.gov.hmrc.apiplatform.modules.commands.applications.domain.models.DispatchSuccessResult
 
 @Singleton
 class ManageTeam @Inject() (
@@ -119,9 +117,10 @@ class ManageTeam @Inject() (
 
         val handleFailure: Failures => PlayResult = (fails) =>
           fails.head match {
-            case CommandFailures.CollaboratorAlreadyExistsOnApp => createBadRequestResult(AddTeamMemberForm.form.fill(form).withError("email", "team.member.error.emailAddress.already.exists.field"))
+            case CommandFailures.CollaboratorAlreadyExistsOnApp =>
+              createBadRequestResult(AddTeamMemberForm.form.fill(form).withError("email", "team.member.error.emailAddress.already.exists.field"))
             case CommandFailures.ApplicationNotFound            => NotFound(errorHandler.notFoundTemplate)
-            case _ => InternalServerError("Action failed")
+            case _                                              => InternalServerError("Action failed")
           }
 
         collaboratorService
