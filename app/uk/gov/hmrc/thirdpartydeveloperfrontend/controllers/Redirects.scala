@@ -28,14 +28,13 @@ import play.api.mvc.{Action, AnyContent, MessagesControllerComponents, Result}
 import uk.gov.hmrc.play.bootstrap.controller.WithUnsafeDefaultFormBinding
 
 import uk.gov.hmrc.apiplatform.modules.applications.domain.models.ApplicationId
+import uk.gov.hmrc.apiplatform.modules.common.domain.models.Actors
 import uk.gov.hmrc.thirdpartydeveloperfrontend.config.{ApplicationConfig, ErrorHandler, FraudPreventionConfig}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.fraudprevention.FraudPreventionNavLinkHelper
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.Capabilities.SupportsRedirects
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.Permissions.{SandboxOrAdmin, TeamMembersOnly}
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.{Standard}
-import uk.gov.hmrc.thirdpartydeveloperfrontend.service.{ApplicationActionService, ApplicationService, SessionService}
-import uk.gov.hmrc.apiplatform.modules.common.domain.models.Actors
-import uk.gov.hmrc.thirdpartydeveloperfrontend.service.RedirectsService
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.Standard
+import uk.gov.hmrc.thirdpartydeveloperfrontend.service.{ApplicationActionService, ApplicationService, RedirectsService, SessionService}
 
 @Singleton
 class Redirects @Inject() (
@@ -73,14 +72,14 @@ class Redirects @Inject() (
 
   def addRedirectAction(applicationId: ApplicationId) = canChangeRedirectInformationAction(applicationId) { implicit request =>
     val application = request.application
-    val actor = Actors.AppCollaborator(request.developerSession.email)
+    val actor       = Actors.AppCollaborator(request.developerSession.email)
 
     def handleValidForm(form: AddRedirectForm) = {
       if (application.hasRedirectUri(form.redirectUri)) {
         successful(BadRequest(addRedirectView(applicationViewModelFromApplicationRequest, AddRedirectForm.form.fill(form).withError("redirectUri", "redirect.uri.duplicate"))))
       } else {
         redirectsService.addRedirect(actor, application, form.redirectUri)
-        .map(_ => Redirect(routes.Redirects.redirects(applicationId)))
+          .map(_ => Redirect(routes.Redirects.redirects(applicationId)))
       }
     }
 
@@ -105,11 +104,11 @@ class Redirects @Inject() (
 
   def deleteRedirectAction(applicationId: ApplicationId) = canChangeRedirectInformationAction(applicationId) { implicit request =>
     val application = request.application
-    val actor = Actors.AppCollaborator(request.developerSession.email)
+    val actor       = Actors.AppCollaborator(request.developerSession.email)
 
     def handleValidForm(form: DeleteRedirectConfirmationForm) = {
       form.deleteRedirectConfirm match {
-        case Some("Yes") => 
+        case Some("Yes") =>
           redirectsService.deleteRedirect(actor, application, form.redirectUri)
             .map(_ => Redirect(routes.Redirects.redirects(applicationId)))
         case _           => successful(Redirect(routes.Redirects.redirects(application.id)))
@@ -123,15 +122,16 @@ class Redirects @Inject() (
     DeleteRedirectConfirmationForm.form.bindFromRequest.fold(handleInvalidForm, handleValidForm)
   }
 
-  def changeRedirect(applicationId: ApplicationId) = canChangeRedirectInformationAction(applicationId) { implicit request =>
+  def changeRedirect(applicationId: ApplicationId)       = canChangeRedirectInformationAction(applicationId) { implicit request =>
     successful(Ok(changeRedirectView(applicationViewModelFromApplicationRequest, ChangeRedirectForm.form.bindFromRequest())))
   }
+
   def changeRedirectAction(applicationId: ApplicationId) = canChangeRedirectInformationAction(applicationId) { implicit request =>
     val application = request.application
-    val actor = Actors.AppCollaborator(request.developerSession.email)
+    val actor       = Actors.AppCollaborator(request.developerSession.email)
 
     def handleValidForm(form: ChangeRedirectForm) = {
-      
+
       if (form.originalRedirectUri == form.newRedirectUri) successful(Redirect(routes.Redirects.redirects(applicationId)))
       else {
         application.access match {

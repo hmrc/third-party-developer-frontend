@@ -32,11 +32,10 @@ import uk.gov.hmrc.apiplatform.modules.applications.domain.models.ClientId
 import uk.gov.hmrc.thirdpartydeveloperfrontend.builder.DeveloperBuilder
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.{DeveloperSession, LoggedInState, Session}
-import uk.gov.hmrc.thirdpartydeveloperfrontend.mocks.service.{ApplicationActionServiceMock, ApplicationServiceMock, SessionServiceMock}
+import uk.gov.hmrc.thirdpartydeveloperfrontend.mocks.service.{ApplicationActionServiceMock, ApplicationServiceMock, RedirectsServiceMockModule, SessionServiceMock}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.ViewHelpers._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.WithLoggedInSession._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils._
-import uk.gov.hmrc.thirdpartydeveloperfrontend.mocks.service.RedirectsServiceMockModule
 
 class RedirectsSpec
     extends BaseControllerSpec
@@ -75,7 +74,7 @@ class RedirectsSpec
       deleteRedirectConfirmationView,
       changeRedirectView,
       fraudPreventionConfig,
-      RedirectsServiceMock.aMock      
+      RedirectsServiceMock.aMock
     )
 
     implicit val hc = HeaderCarrier()
@@ -185,7 +184,7 @@ class RedirectsSpec
     def deleteRedirectsActionShouldRedirectToTheRedirectsPageWhenSuccessful(application: Application, resultStatus: Int, redirectUriToDelete: String) = {
       givenApplicationExists(application)
       RedirectsServiceMock.DeleteRedirect.succeedsWith(redirectUriToDelete)
-      
+
       val result =
         underTest.deleteRedirectAction(application.id)(loggedInRequest.withCSRFToken.withFormUrlEncodedBody("redirectUri" -> redirectUriToDelete, "deleteRedirectConfirm" -> "Yes"))
 
@@ -424,7 +423,7 @@ class RedirectsSpec
       givenApplicationExists(application)
       RedirectsServiceMock.ChangeRedirect.succeedsWith(originalRedirectUri, newRedirectUri)
 
-      val result                                             = underTest.changeRedirectAction(application.id)(
+      val result = underTest.changeRedirectAction(application.id)(
         loggedInRequest.withCSRFToken.withFormUrlEncodedBody("originalRedirectUri" -> originalRedirectUri, "newRedirectUri" -> newRedirectUri)
       )
       status(result) shouldBe SEE_OTHER

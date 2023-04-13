@@ -16,7 +16,7 @@
 
 package uk.gov.hmrc.apiplatform.modules.submissions.domain.services
 
-import uk.gov.hmrc.apiplatform.modules.common.services.NonEmptyListFormatters
+import uk.gov.hmrc.apiplatform.modules.common.domain.services.NonEmptyListFormatters
 
 trait StatementJsonFormatters extends NonEmptyListFormatters {
   import uk.gov.hmrc.apiplatform.modules.submissions.domain.models._

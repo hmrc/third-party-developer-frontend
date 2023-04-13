@@ -18,14 +18,12 @@ package uk.gov.hmrc.apiplatform.modules.applications.services
 
 import java.time.Clock
 import javax.inject.{Inject, Singleton}
-import scala.concurrent.{ExecutionContext, Future}
-
-import cats.data.NonEmptyList
+import scala.concurrent.ExecutionContext
 
 import uk.gov.hmrc.http.HeaderCarrier
 
 import uk.gov.hmrc.apiplatform.modules.applications.domain.models._
-import uk.gov.hmrc.apiplatform.modules.commands.applications.domain.models._
+import uk.gov.hmrc.apiplatform.modules.commands.applications.domain.models.{DispatchSuccessResult, _}
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.{Actors, LaxEmailAddress}
 import uk.gov.hmrc.apiplatform.modules.common.domain.services.ClockNow
 import uk.gov.hmrc.thirdpartydeveloperfrontend.connectors._
@@ -38,7 +36,8 @@ class CollaboratorService @Inject() (
     developerConnector: ThirdPartyDeveloperConnector,
     val clock: Clock
   )(implicit val ec: ExecutionContext
-  ) extends ClockNow {
+  ) extends CommandHandlerTypes[DispatchSuccessResult]
+    with ClockNow {
 
   def addTeamMember(
       app: Application,
@@ -46,7 +45,7 @@ class CollaboratorService @Inject() (
       newTeamMemberRole: Collaborator.Role,
       requestingEmail: LaxEmailAddress
     )(implicit hc: HeaderCarrier
-    ): Future[Either[NonEmptyList[CommandFailure], DispatchSuccessResult]] = {
+    ): Result = {
     val setOfAdminEmails = app.collaborators.filter(_.isAdministrator).map(_.emailAddress)
 
     for {
@@ -70,7 +69,7 @@ class CollaboratorService @Inject() (
       teamMemberToRemove: LaxEmailAddress,
       requestingEmail: LaxEmailAddress
     )(implicit hc: HeaderCarrier
-    ): Future[Either[NonEmptyList[CommandFailure], DispatchSuccessResult]] = {
+    ): Result = {
     val otherAdminEmails = determineOtherAdmins(app.collaborators, Set(requestingEmail, teamMemberToRemove))
 
     val collaboratorToRemove = app.collaborators.filter(_.emailAddress == teamMemberToRemove).head

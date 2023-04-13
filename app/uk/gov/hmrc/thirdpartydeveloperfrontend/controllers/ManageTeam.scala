@@ -20,19 +20,18 @@ import javax.inject.{Inject, Singleton}
 import scala.concurrent.Future.successful
 import scala.concurrent.{ExecutionContext, Future}
 
-import cats.data.NonEmptyList
 import views.html.checkpages.applicationcheck.team.TeamMemberAddView
 import views.html.manageTeamViews.{AddTeamMemberView, ManageTeamView, RemoveTeamMemberView}
 
 import play.api.data.Form
 import play.api.libs.crypto.CookieSigner
-import play.api.mvc.{Action, AnyContent, MessagesControllerComponents, Result}
+import play.api.mvc.{Action, AnyContent, MessagesControllerComponents, Result => PlayResult}
 import play.twirl.api.Html
 import uk.gov.hmrc.play.bootstrap.controller.WithUnsafeDefaultFormBinding
 
 import uk.gov.hmrc.apiplatform.modules.applications.domain.models._
 import uk.gov.hmrc.apiplatform.modules.applications.services.CollaboratorService
-import uk.gov.hmrc.apiplatform.modules.commands.applications.domain.models.CommandFailures
+import uk.gov.hmrc.apiplatform.modules.commands.applications.domain.models.{CommandFailures, CommandHandlerTypes, DispatchSuccessResult}
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.LaxEmailAddress.StringSyntax
 import uk.gov.hmrc.thirdpartydeveloperfrontend.config.{ApplicationConfig, ErrorHandler, FraudPreventionConfig}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.fraudprevention.FraudPreventionNavLinkHelper
@@ -60,12 +59,15 @@ class ManageTeam @Inject() (
     val fraudPreventionConfig: FraudPreventionConfig
   )(implicit val ec: ExecutionContext,
     val appConfig: ApplicationConfig
-  ) extends ApplicationController(mcc) with FraudPreventionNavLinkHelper with WithUnsafeDefaultFormBinding {
+  ) extends ApplicationController(mcc)
+    with CommandHandlerTypes[DispatchSuccessResult]
+    with FraudPreventionNavLinkHelper
+    with WithUnsafeDefaultFormBinding {
 
-  private def whenAppSupportsTeamMembers(applicationId: ApplicationId)(fun: ApplicationRequest[AnyContent] => Future[Result]): Action[AnyContent] =
+  private def whenAppSupportsTeamMembers(applicationId: ApplicationId)(fun: ApplicationRequest[AnyContent] => Future[PlayResult]): Action[AnyContent] =
     checkActionForApprovedApps(SupportsTeamMembers, TeamMembersOnly)(applicationId)(fun)
 
-  private def canEditTeamMembers(applicationId: ApplicationId, alsoAllowTestingState: Boolean = false)(fun: ApplicationRequest[AnyContent] => Future[Result]): Action[AnyContent] =
+  private def canEditTeamMembers(applicationId: ApplicationId, alsoAllowTestingState: Boolean = false)(fun: ApplicationRequest[AnyContent] => Future[PlayResult]): Action[AnyContent] =
     if (alsoAllowTestingState) {
       checkActionForApprovedOrTestingApps(SupportsTeamMembers, AdministratorOnly)(applicationId)(fun)
     } else {
@@ -93,7 +95,7 @@ class ManageTeam @Inject() (
         addTeamMemberView.apply(a, f, ds, createFraudNavModel(fraudPreventionConfig))
       }
 
-      def createBadRequestResult(formWithErrors: Form[AddTeamMemberForm]): Result = {
+      def createBadRequestResult(formWithErrors: Form[AddTeamMemberForm]): PlayResult = {
         val viewFunction: (ApplicationViewModel, Form[AddTeamMemberForm], DeveloperSession) => Html = addTeamMemberPageMode match {
           case ManageTeamMembers => handleAddTeamMemberView
           case ApplicationCheck  => teamMemberAddView.apply
@@ -113,15 +115,18 @@ class ManageTeam @Inject() (
       def handleValidForm(form: AddTeamMemberForm) = {
         val role = form.role.flatMap(Collaborator.Role(_)).getOrElse(Collaborator.Roles.DEVELOPER)
 
+        val handleFailure: Failures => PlayResult = (fails) =>
+          fails.head match {
+            case CommandFailures.CollaboratorAlreadyExistsOnApp =>
+              createBadRequestResult(AddTeamMemberForm.form.fill(form).withError("email", "team.member.error.emailAddress.already.exists.field"))
+            case CommandFailures.ApplicationNotFound            => NotFound(errorHandler.notFoundTemplate)
+            case _                                              => InternalServerError("Action failed")
+          }
+
         collaboratorService
           .addTeamMember(request.application, form.email.toLaxEmail, role, request.developerSession.email)
           .map {
-            // Check if returned app has new collaborator in it?
-            case Right(_)                                                                => Redirect(successRedirect)
-            case Left(NonEmptyList(CommandFailures.CollaboratorAlreadyExistsOnApp, Nil)) =>
-              createBadRequestResult(AddTeamMemberForm.form.fill(form).withError("email", "team.member.error.emailAddress.already.exists.field"))
-            case Left(NonEmptyList(CommandFailures.ApplicationNotFound, Nil))            => NotFound(errorHandler.notFoundTemplate)
-            case _                                                                       => InternalServerError("Action failed")
+            _.fold(handleFailure, _ => Redirect(successRedirect))
           }
       }
 

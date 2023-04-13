@@ -16,6 +16,7 @@
 
 package uk.gov.hmrc.thirdpartydeveloperfrontend.service
 
+import java.time.Clock
 import javax.inject.{Inject, Singleton}
 import scala.concurrent.{ExecutionContext, Future}
 
@@ -23,16 +24,24 @@ import uk.gov.hmrc.http.HeaderCarrier
 
 import uk.gov.hmrc.apiplatform.modules.apis.domain.models.{ApiVersion, _}
 import uk.gov.hmrc.apiplatform.modules.applications.domain.models.ApplicationId
-import uk.gov.hmrc.apiplatform.modules.common.domain.models.LaxEmailAddress
-import uk.gov.hmrc.thirdpartydeveloperfrontend.connectors.{ApmConnector, DeskproConnector}
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.ApplicationUpdateSuccessful
+import uk.gov.hmrc.apiplatform.modules.commands.applications.domain.models.{ApplicationCommands, CommandHandlerTypes, DispatchSuccessResult}
+import uk.gov.hmrc.apiplatform.modules.common.domain.models.{Actors, LaxEmailAddress}
+import uk.gov.hmrc.apiplatform.modules.common.domain.services.ClockNow
+import uk.gov.hmrc.thirdpartydeveloperfrontend.connectors.{ApmConnector, ApplicationCommandConnector, DeskproConnector}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.Application
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.connectors.{DeskproTicket, TicketResult}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.DeveloperSession
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.subscriptions.FieldName
 
 @Singleton
-class SubscriptionsService @Inject() (deskproConnector: DeskproConnector, apmConnector: ApmConnector)(implicit ec: ExecutionContext) {
+class SubscriptionsService @Inject() (
+    deskproConnector: DeskproConnector,
+    apmConnector: ApmConnector,
+    applicationCommandConnector: ApplicationCommandConnector,
+    val clock: Clock
+  )(implicit ec: ExecutionContext
+  ) extends CommandHandlerTypes[DispatchSuccessResult]
+    with ClockNow {
 
   private def doRequest(
       requester: DeveloperSession,
@@ -56,10 +65,6 @@ class SubscriptionsService @Inject() (deskproConnector: DeskproConnector, apmCon
   type ApiMap[V]   = Map[ApiContext, Map[ApiVersion, V]]
   type FieldMap[V] = ApiMap[Map[FieldName, V]]
 
-  def subscribeToApi(application: Application, apiIdentifier: ApiIdentifier)(implicit hc: HeaderCarrier): Future[ApplicationUpdateSuccessful] = {
-    apmConnector.subscribeToApi(application.id, apiIdentifier)
-  }
-
   def isSubscribedToApi(applicationId: ApplicationId, apiIdentifier: ApiIdentifier)(implicit hc: HeaderCarrier): Future[Boolean] = {
     for {
       app <- apmConnector.fetchApplicationById(applicationId)
@@ -67,11 +72,13 @@ class SubscriptionsService @Inject() (deskproConnector: DeskproConnector, apmCon
     } yield subs.contains(apiIdentifier)
   }
 
-}
+  def subscribeToApi(application: Application, apiIdentifier: ApiIdentifier, requestingEmail: LaxEmailAddress)(implicit hc: HeaderCarrier): Result = {
+    val cmd = ApplicationCommands.SubscribeToApi(Actors.AppCollaborator(requestingEmail), apiIdentifier, true, now)
+    applicationCommandConnector.dispatch(application.id, cmd, Set.empty)
+  }
 
-object SubscriptionsService {
-
-  trait SubscriptionsConnector {
-    def subscribeToApi(applicationId: ApplicationId, apiIdentifier: ApiIdentifier)(implicit hc: HeaderCarrier): Future[ApplicationUpdateSuccessful]
+  def unsubscribeFromApi(application: Application, apiIdentifier: ApiIdentifier, requestingEmail: LaxEmailAddress)(implicit hc: HeaderCarrier): Result = {
+    val cmd = ApplicationCommands.UnsubscribeFromApi(Actors.AppCollaborator(requestingEmail), apiIdentifier, now)
+    applicationCommandConnector.dispatch(application.id, cmd, Set.empty)
   }
 }

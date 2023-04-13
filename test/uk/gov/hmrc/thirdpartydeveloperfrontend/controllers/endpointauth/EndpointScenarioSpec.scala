@@ -136,7 +136,6 @@ abstract class EndpointScenarioSpec extends AsyncHmrcSpec with GuiceOneAppPerSui
   ))))
 
   when(cmdConnector.dispatch(*[ApplicationId], *, *)(*)).thenReturn(Future.successful(Right(DispatchSuccessResult(mock[Application]))))
-  when(apmConnector.subscribeToApi(*[ApplicationId], *[ApiIdentifier])(*)).thenReturn(Future.successful(ApplicationUpdateSuccessful))
   when(productionSubsFieldsConnector.saveFieldValues(*[ClientId], *[ApiContext], *[ApiVersion], *[Fields.Alias])(*)).thenReturn(Future.successful(
     SaveSubscriptionFieldsSuccessResponse
   ))

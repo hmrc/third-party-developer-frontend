@@ -116,19 +116,6 @@ class ApplicationService @Inject() (
   type ApiMap[V]   = Map[ApiContext, Map[ApiVersion, V]]
   type FieldMap[V] = ApiMap[Map[FieldName, V]]
 
-  def subscribeToApi(application: Application, apiIdentifier: ApiIdentifier)(implicit hc: HeaderCarrier): Future[ApplicationUpdateSuccessful] = {
-    subscriptionService.subscribeToApi(application, apiIdentifier)
-  }
-
-  def unsubscribeFromApi(application: Application, apiIdentifier: ApiIdentifier)(implicit hc: HeaderCarrier): Future[ApplicationUpdateSuccessful] = {
-    val connectors = connectorWrapper.forEnvironment(application.deployedTo)
-    connectors.thirdPartyApplicationConnector.unsubscribeFromApi(application.id, apiIdentifier)
-  }
-
-  def isSubscribedToApi(applicationId: ApplicationId, apiIdentifier: ApiIdentifier)(implicit hc: HeaderCarrier): Future[Boolean] = {
-    subscriptionService.isSubscribedToApi(applicationId, apiIdentifier)
-  }
-
   def addClientSecret(application: Application, actor: Actors.AppCollaborator)(implicit hc: HeaderCarrier): Future[(String, String)] = {
     connectorWrapper.forEnvironment(application.deployedTo).thirdPartyApplicationConnector.addClientSecrets(application.id, ClientSecretRequest(actor, LocalDateTime.now(clock)))
   }
