@@ -20,32 +20,31 @@ import javax.inject._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.Application
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.Actor
 import uk.gov.hmrc.http.HeaderCarrier
-import scala.concurrent.Future
-import cats.data.NonEmptyList
-import uk.gov.hmrc.apiplatform.modules.commands.applications.domain.models.CommandFailure
 import uk.gov.hmrc.apiplatform.modules.commands.applications.domain.models.DispatchSuccessResult
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.Standard
 import uk.gov.hmrc.thirdpartydeveloperfrontend.connectors.ApplicationCommandConnector
 import java.time.Clock
 import uk.gov.hmrc.apiplatform.modules.common.domain.services.ClockNow
 import uk.gov.hmrc.apiplatform.modules.commands.applications.domain.models.ApplicationCommands
+import uk.gov.hmrc.apiplatform.modules.commands.applications.domain.models.CommandHandlerTypes
 
 @Singleton
 class RedirectsService @Inject()(
     applicationCmdConnector: ApplicationCommandConnector,
     val clock: Clock
-  ) extends ClockNow {
+  ) extends CommandHandlerTypes[DispatchSuccessResult]
+    with ClockNow {
 
   import RedirectsService._
 
-  private def issueCommand(actor: Actor, application: Application, fn: List[String] => List[String])(implicit hc: HeaderCarrier): Future[Either[NonEmptyList[CommandFailure], DispatchSuccessResult]] = {
+  private def issueCommand(actor: Actor, application: Application, fn: List[String] => List[String])(implicit hc: HeaderCarrier): Result = {
     val oldRedirectUris = application.access match {
       case Standard(redirectUris, _, _, _, _, _) => redirectUris
       case _ => List.empty
     }
     val newRedirectUris = fn(oldRedirectUris)
     val cmd = ApplicationCommands.UpdateRedirectUris(actor, oldRedirectUris, newRedirectUris, now())
-        applicationCmdConnector.dispatch(application.id, cmd, Set.empty)
+    applicationCmdConnector.dispatch(application.id, cmd, Set.empty)
   }
 
   def addRedirect(actor: Actor, application: Application, newRedirectUri: String)(implicit hc: HeaderCarrier) = {

@@ -20,8 +20,6 @@ import javax.inject.{Inject, Singleton}
 import scala.concurrent.{ExecutionContext, Future}
 import scala.util.control.NonFatal
 
-import play.api.http.ContentTypes.JSON
-import play.api.http.HeaderNames.CONTENT_TYPE
 import uk.gov.hmrc.http.HttpReads.Implicits._
 import uk.gov.hmrc.http.{HeaderCarrier, HttpClient}
 import uk.gov.hmrc.play.http.metrics.common.API
@@ -34,9 +32,7 @@ import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.connectors.{ApiDefi
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.emailpreferences.APICategoryDisplayDetails
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.subscriptions.ApiSubscriptionFields.SubscriptionFieldDefinition
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.subscriptions.{ApiData, FieldName}
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.{ApplicationNotFound, ApplicationUpdateSuccessful}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.service.OpenAccessApiService.OpenAccessApisConnector
-import uk.gov.hmrc.thirdpartydeveloperfrontend.service.SubscriptionsService.SubscriptionsConnector
 
 object ApmConnector {
   case class Config(serviceBaseUrl: String)
@@ -51,8 +47,7 @@ object ApmConnector {
 
 @Singleton
 class ApmConnector @Inject() (http: HttpClient, config: ApmConnector.Config, metrics: ConnectorMetrics)(implicit ec: ExecutionContext)
-    extends SubscriptionsConnector
-    with OpenAccessApisConnector
+    extends OpenAccessApisConnector
     with CommonResponseHandlers {
 
   import ApmConnector._
@@ -105,15 +100,6 @@ class ApmConnector @Inject() (http: HttpClient, config: ApmConnector.Config, met
       .recover {
         case NonFatal(e) => Left(e)
       }
-
-  def subscribeToApi(applicationId: ApplicationId, apiIdentifier: ApiIdentifier)(implicit hc: HeaderCarrier): Future[ApplicationUpdateSuccessful] = metrics.record(api) {
-    http.POST[ApiIdentifier, ErrorOrUnit](s"${config.serviceBaseUrl}/applications/${applicationId.text}/subscriptions", apiIdentifier, Seq(CONTENT_TYPE -> JSON))
-      .map(throwOrOptionOf)
-      .map {
-        case Some(_) => ApplicationUpdateSuccessful
-        case None    => throw new ApplicationNotFound
-      }
-  }
 
   def fetchUpliftableApiIdentifiers(implicit hc: HeaderCarrier): Future[Set[ApiIdentifier]] =
     metrics.record(api) {

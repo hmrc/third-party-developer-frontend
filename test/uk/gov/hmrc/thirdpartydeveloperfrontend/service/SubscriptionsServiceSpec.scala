@@ -28,11 +28,14 @@ import uk.gov.hmrc.apiplatform.modules.applications.domain.models.{ApplicationId
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.LaxEmailAddress.StringSyntax
 import uk.gov.hmrc.thirdpartydeveloperfrontend.builder._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.connectors._
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.service.PushPullNotificationsService.PushPullNotificationsConnector
 import uk.gov.hmrc.thirdpartydeveloperfrontend.service.SubscriptionFieldsService.SubscriptionFieldsConnector
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.{AsyncHmrcSpec, LocalUserIdTracker}
+import uk.gov.hmrc.thirdpartydeveloperfrontend.mocks.connectors.ApplicationCommandConnectorMockModule
+import uk.gov.hmrc.apiplatform.modules.common.utils.FixedClock
+import uk.gov.hmrc.apiplatform.modules.commands.applications.domain.models.DispatchSuccessResult
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.subscriptions.ApiSubscriptionFields._
 
 class SubscriptionsServiceSpec extends AsyncHmrcSpec with SubscriptionsBuilder with ApplicationBuilder with LocalUserIdTracker {
 
@@ -40,7 +43,10 @@ class SubscriptionsServiceSpec extends AsyncHmrcSpec with SubscriptionsBuilder w
   val versionTwo          = ApiVersion("2.0")
   val grantLength: Period = Period.ofDays(547)
 
-  trait Setup {
+  val email = "bob@example.com".toLaxEmail
+
+  trait Setup
+      extends ApplicationCommandConnectorMockModule {
     implicit val hc: HeaderCarrier = HeaderCarrier()
 
     val mockProductionApplicationConnector: ThirdPartyApplicationProductionConnector =
@@ -61,7 +67,9 @@ class SubscriptionsServiceSpec extends AsyncHmrcSpec with SubscriptionsBuilder w
 
     val subscriptionsService = new SubscriptionsService(
       mockDeskproConnector,
-      mockApmConnector
+      mockApmConnector,
+      ApplicationCommandConnectorMock.aMock,
+      FixedClock.clock
     )
 
     def theProductionConnectorthenReturnTheApplication(applicationId: ApplicationId, application: Application): Unit = {
@@ -133,12 +141,26 @@ class SubscriptionsServiceSpec extends AsyncHmrcSpec with SubscriptionsBuilder w
 
       theProductionConnectorthenReturnTheApplication(productionApplicationId, productionApplication)
 
-      when(mockApmConnector.subscribeToApi(eqTo(productionApplicationId), eqTo(subscription))(*))
-        .thenReturn(successful(ApplicationUpdateSuccessful))
+      ApplicationCommandConnectorMock.Dispatch.thenReturnsSuccess(productionApplication)
 
-      await(subscriptionsService.subscribeToApi(productionApplication, subscription)) shouldBe ApplicationUpdateSuccessful
+      await(subscriptionsService.subscribeToApi(productionApplication, subscription, email)).right.value shouldBe DispatchSuccessResult(productionApplication) 
+    }
+  }
 
-      verify(mockApmConnector).subscribeToApi(eqTo(productionApplicationId), eqTo(subscription))(*)
+  "Unsubscribe from API" should {
+    "unsubscribe application from an API version" in new Setup {
+      private val context       = ApiContext("api1")
+      private val version       = versionOne
+      private val apiIdentifier = ApiIdentifier(context, version)
+
+      theProductionConnectorthenReturnTheApplication(productionApplicationId, productionApplication)
+
+      ApplicationCommandConnectorMock.Dispatch.thenReturnsSuccess(productionApplication)
+
+      when(mockProductionSubscriptionFieldsConnector.deleteFieldValues(productionClientId, context, version))
+        .thenReturn(successful(FieldsDeleteSuccessResult))
+
+      await(subscriptionsService.unsubscribeFromApi(productionApplication, apiIdentifier, email)).right.value shouldBe DispatchSuccessResult(productionApplication) 
     }
   }
 }

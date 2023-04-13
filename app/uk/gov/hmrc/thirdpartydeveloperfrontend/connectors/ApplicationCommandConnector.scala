@@ -16,33 +16,36 @@
 
 package uk.gov.hmrc.thirdpartydeveloperfrontend.connectors
 
-import scala.concurrent.{ExecutionContext, Future}
+import scala.concurrent.{ExecutionContext}
 
-import cats.data.NonEmptyList
+import cats.data.NonEmptyChain
 import com.google.inject.{Inject, Singleton}
 
 import uk.gov.hmrc.http.{HeaderCarrier, HttpClient, HttpResponse, InternalServerException}
 
 import uk.gov.hmrc.apiplatform.modules.applications.domain.models.ApplicationId
-import uk.gov.hmrc.apiplatform.modules.commands.applications.domain.models.{ApplicationCommand, CommandFailure, DispatchRequest, DispatchSuccessResult}
+import uk.gov.hmrc.apiplatform.modules.commands.applications.domain.models.{ApplicationCommand, CommandFailure, DispatchRequest}
+import uk.gov.hmrc.apiplatform.modules.commands.applications.domain.models.DispatchSuccessResult
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.LaxEmailAddress
 import uk.gov.hmrc.apiplatform.modules.common.services.ApplicationLogger
+import uk.gov.hmrc.apiplatform.modules.commands.applications.domain.models.CommandHandlerTypes
 
 @Singleton
 class ApplicationCommandConnector @Inject() (
     val http: HttpClient,
     val config: ApmConnector.Config
   )(implicit val ec: ExecutionContext
-  ) extends ApplicationLogger {
+  ) extends CommandHandlerTypes[DispatchSuccessResult]
+    with ApplicationLogger {
 
   def dispatch(
       applicationId: ApplicationId,
       command: ApplicationCommand,
       adminsToEmail: Set[LaxEmailAddress]
     )(implicit hc: HeaderCarrier
-    ): Future[Either[NonEmptyList[CommandFailure], DispatchSuccessResult]] = {
+    ): Result = {
 
-    import uk.gov.hmrc.apiplatform.modules.common.services.NonEmptyListFormatters._
+    import uk.gov.hmrc.apiplatform.modules.common.services.NonEmptyChainFormatters._
     import play.api.libs.json._
     import uk.gov.hmrc.http.HttpReads.Implicits._
     import play.api.http.Status._
@@ -67,8 +70,8 @@ class ApplicationCommandConnector @Inject() (
     http.PATCH[DispatchRequest, HttpResponse](url, request, extraHeaders)
       .map(response =>
         response.status match {
-          case OK          => parseWithLogAndThrow[DispatchSuccessResult](response.body).asRight[NonEmptyList[CommandFailure]]
-          case BAD_REQUEST => parseWithLogAndThrow[NonEmptyList[CommandFailure]](response.body).asLeft[DispatchSuccessResult]
+          case OK          => parseWithLogAndThrow[DispatchSuccessResult](response.body).asRight[Failures]
+          case BAD_REQUEST => parseWithLogAndThrow[NonEmptyChain[CommandFailure]](response.body).asLeft[DispatchSuccessResult]
           case status      =>
             logger.error(s"Dispatch failed with status code: $status")
             throw new InternalServerException(s"Failed calling dispatch $status")

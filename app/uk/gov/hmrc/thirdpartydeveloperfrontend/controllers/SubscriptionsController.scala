@@ -43,6 +43,7 @@ import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.Develope
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.views.SubscriptionRedirect
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.views.SubscriptionRedirect._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.service._
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.ApplicationUpdateSuccessful
 
 @Singleton
 class SubscriptionsController @Inject() (
@@ -129,14 +130,15 @@ class SubscriptionsController @Inject() (
   def changeApiSubscription(applicationId: ApplicationId, apiContext: ApiContext, apiVersion: ApiVersion, redirectTo: String): Action[AnyContent] =
     whenTeamMemberOnApp(applicationId) { implicit request =>
       val apiIdentifier = ApiIdentifier(apiContext, apiVersion)
+      val requestingEmail = request.developerSession.email
 
       def updateSubscription(form: ChangeSubscriptionForm) = form.subscribed match {
         case Some(subscribe) =>
-          def service = if (subscribe) applicationService.subscribeToApi _ else applicationService.unsubscribeFromApi _
+          def service = if (subscribe) subscriptionsService.subscribeToApi _ else subscriptionsService.unsubscribeFromApi _
 
-          service(request.application, apiIdentifier) andThen { case _ => updateCheckInformation(request.application) }
+          service(request.application, apiIdentifier, requestingEmail) andThen { case _ => updateCheckInformation(request.application) }
         case _               =>
-          Future.successful(redirect(redirectTo, applicationId))
+          Future.successful(ApplicationUpdateSuccessful)
       }
 
       def handleValidForm(form: ChangeSubscriptionForm) =
@@ -164,7 +166,7 @@ class SubscriptionsController @Inject() (
       val apiIdentifier = ApiIdentifier(apiContext, apiVersion)
       implicit val r    = request
 
-      applicationService
+      subscriptionsService
         .isSubscribedToApi(request.application.id, apiIdentifier)
         .map(subscribed =>
           Ok(
@@ -240,7 +242,7 @@ class SubscriptionsController @Inject() (
           )
         )
 
-      applicationService
+      subscriptionsService
         .isSubscribedToApi(request.application.id, apiIdentifier)
         .flatMap(subscribed => ChangeSubscriptionConfirmationForm.form.bindFromRequest.fold(handleInvalidForm(subscribed), handleValidForm(subscribed)))
     }
@@ -257,11 +259,11 @@ class SubscriptionsController @Inject() (
       requestChangeApiSubscriptionAction(applicationId, apiName, apiContext, apiVersion, redirectTo, call)
     }
 
-  private def updateCheckInformation(app: Application)(implicit hc: HeaderCarrier): Future[Any] = {
+  private def updateCheckInformation(app: Application)(implicit hc: HeaderCarrier): Future[ApplicationUpdateSuccessful] = {
     app.deployedTo match {
       case Environment.PRODUCTION =>
         applicationService.updateCheckInformation(app, app.checkInformation.getOrElse(CheckInformation()).copy(apiSubscriptionsConfirmed = false))
-      case _                      => Future.successful(())
+      case _                      => Future.successful(ApplicationUpdateSuccessful)
     }
   }
 }

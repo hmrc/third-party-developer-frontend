@@ -20,7 +20,6 @@ import javax.inject.{Inject, Singleton}
 import scala.concurrent.Future.successful
 import scala.concurrent.{ExecutionContext, Future}
 
-import cats.data.NonEmptyList
 import views.html.checkpages.applicationcheck.team.TeamMemberAddView
 import views.html.manageTeamViews.{AddTeamMemberView, ManageTeamView, RemoveTeamMemberView}
 
@@ -42,6 +41,8 @@ import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.controllers.AddTeam
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.controllers.{AddTeamMemberPageMode, ApplicationViewModel}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.DeveloperSession
 import uk.gov.hmrc.thirdpartydeveloperfrontend.service._
+import cats.data.NonEmptyChainImpl
+import uk.gov.hmrc.apiplatform.modules.commands.applications.domain.models.CommandFailure
 
 @Singleton
 class ManageTeam @Inject() (
@@ -112,16 +113,19 @@ class ManageTeam @Inject() (
 
       def handleValidForm(form: AddTeamMemberForm) = {
         val role = form.role.flatMap(Collaborator.Role(_)).getOrElse(Collaborator.Roles.DEVELOPER)
+          import cats.data.NonEmptyChain
+
+        val handleFailure: NonEmptyChain[CommandFailure] => Result = (fails) =>
+          fails.head match {
+            case CommandFailures.CollaboratorAlreadyExistsOnApp => createBadRequestResult(AddTeamMemberForm.form.fill(form).withError("email", "team.member.error.emailAddress.already.exists.field"))
+            case CommandFailures.ApplicationNotFound            => NotFound(errorHandler.notFoundTemplate)
+            case _ => InternalServerError("Action failed")
+          }
 
         collaboratorService
           .addTeamMember(request.application, form.email.toLaxEmail, role, request.developerSession.email)
           .map {
-            // Check if returned app has new collaborator in it?
-            case Right(_)                                                                => Redirect(successRedirect)
-            case Left(NonEmptyList(CommandFailures.CollaboratorAlreadyExistsOnApp, Nil)) =>
-              createBadRequestResult(AddTeamMemberForm.form.fill(form).withError("email", "team.member.error.emailAddress.already.exists.field"))
-            case Left(NonEmptyList(CommandFailures.ApplicationNotFound, Nil))            => NotFound(errorHandler.notFoundTemplate)
-            case _                                                                       => InternalServerError("Action failed")
+            _.fold(handleFailure, _ => Redirect(successRedirect))
           }
       }
 

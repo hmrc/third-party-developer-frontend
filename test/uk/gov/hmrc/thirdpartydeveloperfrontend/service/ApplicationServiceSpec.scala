@@ -196,22 +196,6 @@ class ApplicationServiceSpec extends AsyncHmrcSpec
     )
   }
 
-  "Unsubscribe from API" should {
-    "unsubscribe application from an API version" in new Setup {
-      private val context       = ApiContext("api1")
-      private val version       = versionOne
-      private val apiIdentifier = ApiIdentifier(context, version)
-
-      theProductionConnectorthenReturnTheApplication(productionApplicationId, productionApplication)
-      when(mockProductionApplicationConnector.unsubscribeFromApi(productionApplicationId, apiIdentifier))
-        .thenReturn(successful(ApplicationUpdateSuccessful))
-      when(mockProductionSubscriptionFieldsConnector.deleteFieldValues(productionClientId, context, version))
-        .thenReturn(successful(FieldsDeleteSuccessResult))
-
-      await(applicationService.unsubscribeFromApi(productionApplication, apiIdentifier)) shouldBe ApplicationUpdateSuccessful
-    }
-  }
-
   "Update" should {
     val applicationId   = ApplicationId.random
     val clientId        = ClientId("clientId")

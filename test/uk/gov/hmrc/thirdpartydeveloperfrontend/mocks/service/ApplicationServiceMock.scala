@@ -21,7 +21,6 @@ import scala.concurrent.Future.{failed, successful}
 
 import org.mockito.{ArgumentMatchersSugar, MockitoSugar}
 
-import uk.gov.hmrc.apiplatform.modules.apis.domain.models.ApiIdentifier
 import uk.gov.hmrc.apiplatform.modules.applications.domain.models.ApplicationId
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.Actors
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain._
@@ -49,21 +48,6 @@ trait ApplicationServiceMock extends MockitoSugar with ArgumentMatchersSugar wit
 
   def fetchCredentialsReturns(application: Application, tokens: ApplicationToken): Unit =
     when(applicationServiceMock.fetchCredentials(eqTo(application))(*)).thenReturn(successful(tokens))
-
-  def givenSubscribeToApiSucceeds(app: Application, apiIdentifier: ApiIdentifier) =
-    when(applicationServiceMock.subscribeToApi(eqTo(app), eqTo(apiIdentifier))(*)).thenReturn(successful(ApplicationUpdateSuccessful))
-
-  def givenSubscribeToApiSucceeds() =
-    when(applicationServiceMock.subscribeToApi(*, *)(*)).thenReturn(successful(ApplicationUpdateSuccessful))
-
-  def ungivenSubscribeToApiSucceeds(app: Application, apiIdentifier: ApiIdentifier) =
-    when(applicationServiceMock.unsubscribeFromApi(eqTo(app), eqTo(apiIdentifier))(*)).thenReturn(successful(ApplicationUpdateSuccessful))
-
-  def givenAppIsSubscribedToApi(appId: ApplicationId, apiIdentifier: ApiIdentifier) =
-    when(applicationServiceMock.isSubscribedToApi(eqTo(appId), eqTo(apiIdentifier))(*)).thenReturn(successful(true))
-
-  def givenAppIsNotSubscribedToApi(appId: ApplicationId, apiIdentifier: ApiIdentifier) =
-    when(applicationServiceMock.isSubscribedToApi(eqTo(appId), eqTo(apiIdentifier))(*)).thenReturn(successful(false))
 
   def givenApplicationNameIsValid() =
     when(applicationServiceMock.isApplicationNameValid(*, *, *[Option[ApplicationId]])(*)).thenReturn(successful(Valid))
