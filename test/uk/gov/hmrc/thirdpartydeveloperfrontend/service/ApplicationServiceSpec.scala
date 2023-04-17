@@ -69,7 +69,6 @@ class ApplicationServiceSpec extends AsyncHmrcSpec
 
     val mockSandboxApplicationConnector: ThirdPartyApplicationSandboxConnector =
       mock[ThirdPartyApplicationSandboxConnector]
-    val mockSubscriptionsService: SubscriptionsService                         = mock[SubscriptionsService]
 
     val mockProductionSubscriptionFieldsConnector: SubscriptionFieldsConnector = mock[SubscriptionFieldsConnector]
     val mockSandboxSubscriptionFieldsConnector: SubscriptionFieldsConnector    = mock[SubscriptionFieldsConnector]
@@ -97,7 +96,6 @@ class ApplicationServiceSpec extends AsyncHmrcSpec
       mockApmConnector,
       connectorsWrapper,
       mockSubscriptionFieldsService,
-      mockSubscriptionsService,
       mockDeskproConnector,
       mockDeveloperConnector,
       mockSandboxApplicationConnector,
