@@ -53,8 +53,6 @@ class ApplicationServiceUpliftSpec extends AsyncHmrcSpec with LocalUserIdTracker
     val mockProductionApplicationConnector: ThirdPartyApplicationProductionConnector = mock[ThirdPartyApplicationProductionConnector]
     val mockSandboxApplicationConnector: ThirdPartyApplicationSandboxConnector       = mock[ThirdPartyApplicationSandboxConnector]
 
-    val mockSubscriptionsService: SubscriptionsService = mock[SubscriptionsService]
-
     val mockProductionSubscriptionFieldsConnector: SubscriptionFieldsConnector = mock[SubscriptionFieldsConnector]
     val mockSandboxSubscriptionFieldsConnector: SubscriptionFieldsConnector    = mock[SubscriptionFieldsConnector]
     val mockPushPullNotificationsConnector: PushPullNotificationsConnector     = mock[PushPullNotificationsConnector]
@@ -80,7 +78,6 @@ class ApplicationServiceUpliftSpec extends AsyncHmrcSpec with LocalUserIdTracker
       mockApmConnector,
       connectorsWrapper,
       mockSubscriptionFieldsService,
-      mockSubscriptionsService,
       mockDeskproConnector,
       mockDeveloperConnector,
       mockSandboxApplicationConnector,

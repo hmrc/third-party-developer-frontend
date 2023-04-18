@@ -26,8 +26,12 @@ import uk.gov.hmrc.apiplatform.modules.applications.domain.models.ApplicationId
 import uk.gov.hmrc.apiplatform.modules.commands.applications.domain.models._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.service.SubscriptionsService
+import uk.gov.hmrc.apiplatform.modules.common.domain.models.LaxEmailAddress
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.connectors.TicketResult
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.DeveloperSession
+import uk.gov.hmrc.apiplatform.modules.apis.domain.models.ApiVersion
 
-class SubscriptionsServiceMockModule extends MockitoSugar with ArgumentMatchersSugar {
+trait SubscriptionsServiceMockModule extends MockitoSugar with ArgumentMatchersSugar {
 
   trait AbstractSubscriptionsServiceMock {
     val CHT = new CommandHandlerTypes[DispatchSuccessResult] {}
@@ -39,18 +43,18 @@ class SubscriptionsServiceMockModule extends MockitoSugar with ArgumentMatchersS
     object SubscribeToApi {
 
       def succeeds(app: Application, apiIdentifier: ApiIdentifier) =
-        when(aMock.subscribeToApi(eqTo(app), eqTo(apiIdentifier), *)(*)).thenReturn(DispatchSuccessResult(app).asSuccess)
+        when(aMock.subscribeToApi(eqTo(app), eqTo(apiIdentifier), *[LaxEmailAddress])(*)).thenReturn(DispatchSuccessResult(app).asSuccess)
 
       def succeeds() = {
         val mockApp = mock[Application]
-        when(aMock.subscribeToApi(*, *, *)(*)).thenReturn(DispatchSuccessResult(mockApp).asSuccess)
+        when(aMock.subscribeToApi(*, *, *[LaxEmailAddress])(*)).thenReturn(DispatchSuccessResult(mockApp).asSuccess)
       }
     }
 
     object UnsubscribeFromApi {
 
       def succeeds(app: Application, apiIdentifier: ApiIdentifier) =
-        when(aMock.unsubscribeFromApi(eqTo(app), eqTo(apiIdentifier), *)(*)).thenReturn(DispatchSuccessResult(app).asSuccess)
+        when(aMock.unsubscribeFromApi(eqTo(app), eqTo(apiIdentifier), *[LaxEmailAddress])(*)).thenReturn(DispatchSuccessResult(app).asSuccess)
     }
 
     object IsSubscribedToApi {
@@ -60,7 +64,22 @@ class SubscriptionsServiceMockModule extends MockitoSugar with ArgumentMatchersS
 
       def isFalse(appId: ApplicationId, apiIdentifier: ApiIdentifier) =
         when(aMock.isSubscribedToApi(eqTo(appId), eqTo(apiIdentifier))(*)).thenReturn(successful(false))
+
+      def verifyNotCalled() =
+        verify(aMock, never).isSubscribedToApi(*[ApplicationId], *)(*)
     }
+
+    object RequestApiSubscription {
+      def succeedsFor(loggedInDeveloper: DeveloperSession, app: Application, apiName: String, apiVersion: ApiVersion) =
+        when(aMock.requestApiSubscription(eqTo(loggedInDeveloper), eqTo(app), eqTo(apiName), eqTo(apiVersion))(*))
+          .thenReturn(successful(mock[TicketResult]))            
+    }
+    object RequestApiUnsubscribe {
+      def succeedsFor(loggedInDeveloper: DeveloperSession, app: Application, apiName: String, apiVersion: ApiVersion) =
+        when(aMock.requestApiUnsubscribe(eqTo(loggedInDeveloper), eqTo(app), eqTo(apiName), eqTo(apiVersion))(*))
+          .thenReturn(successful(mock[TicketResult]))            
+    }
+    // 
   }
 
   object SubscriptionsServiceMock extends AbstractSubscriptionsServiceMock {

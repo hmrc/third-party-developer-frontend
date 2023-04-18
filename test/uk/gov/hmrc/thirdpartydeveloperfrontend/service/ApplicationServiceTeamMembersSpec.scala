@@ -77,7 +77,6 @@ class ApplicationServiceTeamMembersSpec extends AsyncHmrcSpec with Subscriptions
       mock[ApmConnector],
       connectorsWrapper,
       mockSubscriptionFieldsService,
-      mock[SubscriptionsService],
       mockDeskproConnector,
       mockDeveloperConnector,
       mockSandboxApplicationConnector,
