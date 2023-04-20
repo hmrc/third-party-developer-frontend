@@ -66,7 +66,7 @@ class RequestProductionCredentialsSpec extends AsyncHmrcSpec
       val app    = anApplication(developerEmail = email)
       when(mockSubmissionsConnector.requestApproval(eqTo(applicationId), eqTo(name), eqTo(email))(*)).thenReturn(successful(Right(app)))
       when(mockDeskproConnector.createTicket(*[Option[UserId]], *)(*)).thenReturn(successful(TicketCreated))
-      val result = await(underTest.requestProductionCredentials(applicationId, developerSession, true))
+      val result = await(underTest.requestProductionCredentials(applicationId, developerSession, true, false))
 
       result.right.value shouldBe app
 
@@ -78,7 +78,7 @@ class RequestProductionCredentialsSpec extends AsyncHmrcSpec
     "not create a ticket if requester is not responsible individual" in new Setup {
       val app    = anApplication(developerEmail = email)
       when(mockSubmissionsConnector.requestApproval(eqTo(applicationId), eqTo(name), eqTo(email))(*)).thenReturn(successful(Right(app)))
-      val result = await(underTest.requestProductionCredentials(applicationId, developerSession, false))
+      val result = await(underTest.requestProductionCredentials(applicationId, developerSession, false, false))
 
       result.right.value shouldBe app
 
@@ -89,7 +89,7 @@ class RequestProductionCredentialsSpec extends AsyncHmrcSpec
       when(mockSubmissionsConnector.requestApproval(eqTo(applicationId), eqTo(name), eqTo(email))(*)).thenThrow(new ApplicationNotFound())
 
       intercept[ApplicationNotFound] {
-        await(underTest.requestProductionCredentials(applicationId, developerSession, true))
+        await(underTest.requestProductionCredentials(applicationId, developerSession, true, false))
       }
       verify(mockDeskproConnector, never).createTicket(*[ResponsibleIndividualVerificationId], *)(*)
     }
@@ -98,7 +98,7 @@ class RequestProductionCredentialsSpec extends AsyncHmrcSpec
       when(mockSubmissionsConnector.requestApproval(eqTo(applicationId), eqTo(name), eqTo(email))(*)).thenThrow(new ApplicationAlreadyExists())
 
       intercept[ApplicationAlreadyExists] {
-        await(underTest.requestProductionCredentials(applicationId, developerSession, true))
+        await(underTest.requestProductionCredentials(applicationId, developerSession, true, false))
       }
       verify(mockDeskproConnector, never).createTicket(*[ResponsibleIndividualVerificationId], *)(*)
     }

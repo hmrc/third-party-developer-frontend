@@ -59,6 +59,23 @@ object DeskproTicket extends FieldTransformer {
     )
   }
 
+  def createForTermsOfUseUplift(requestorName: String, requestorEmail: LaxEmailAddress, applicationName: String, applicationId: ApplicationId): DeskproTicket = {
+    val message =
+      s"""$requestorEmail has submitted a Terms of Use application that has warnings or fails:
+         |$applicationName
+         |Please check it against our guidelines and send them a response within 2 working days.
+         |HMRC Developer Hub
+         |""".stripMargin
+
+    DeskproTicket(
+      requestorName,
+      requestorEmail,
+      "Terms of use uplift application submitted for checking",
+      message,
+      uk.gov.hmrc.apiplatform.modules.submissions.controllers.routes.CheckAnswersController.checkAnswersPage(applicationId).url
+    )
+  }
+
   def createForUplift(requestorName: String, requestorEmail: LaxEmailAddress, applicationName: String, applicationId: ApplicationId): DeskproTicket = {
     val message =
       s"""$requestorEmail submitted the following application for production use on the Developer Hub:
