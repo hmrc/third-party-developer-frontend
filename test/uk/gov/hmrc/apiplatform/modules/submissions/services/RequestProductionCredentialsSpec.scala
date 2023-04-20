@@ -28,6 +28,7 @@ import uk.gov.hmrc.apiplatform.modules.common.domain.models.LaxEmailAddress.Stri
 import uk.gov.hmrc.apiplatform.modules.developers.domain.models.UserId
 import uk.gov.hmrc.apiplatform.modules.submissions.connectors.ThirdPartyApplicationSubmissionsConnector
 import uk.gov.hmrc.apiplatform.modules.submissions.domain.models.ResponsibleIndividualVerificationId
+import uk.gov.hmrc.apiplatform.modules.submissions.SubmissionsTestData
 import uk.gov.hmrc.thirdpartydeveloperfrontend.connectors.DeskproConnector
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.connectors.{DeskproTicket, TicketCreated}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.{Developer, DeveloperSession}
@@ -37,7 +38,8 @@ import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.{AsyncHmrcSpec, Collaborato
 class RequestProductionCredentialsSpec extends AsyncHmrcSpec
     with CollaboratorTracker
     with LocalUserIdTracker
-    with TestApplications {
+    with TestApplications
+    with SubmissionsTestData {
 
   trait Setup {
     implicit val hc                                                         = HeaderCarrier()
@@ -65,6 +67,7 @@ class RequestProductionCredentialsSpec extends AsyncHmrcSpec
     "successfully create a ticket if requester is responsible individual" in new Setup {
       val app    = anApplication(developerEmail = email)
       when(mockSubmissionsConnector.requestApproval(eqTo(applicationId), eqTo(name), eqTo(email))(*)).thenReturn(successful(Right(app)))
+      when(mockSubmissionsConnector.fetchLatestSubmission(eqTo(applicationId))(*)).thenReturn(successful(Some(aSubmission)))
       when(mockDeskproConnector.createTicket(*[Option[UserId]], *)(*)).thenReturn(successful(TicketCreated))
       val result = await(underTest.requestProductionCredentials(applicationId, developerSession, true, false))
 
@@ -75,9 +78,35 @@ class RequestProductionCredentialsSpec extends AsyncHmrcSpec
       ticketCapture.value.subject shouldBe "New application submitted for checking"
     }
 
+    "successfully create a ticket if terms of use uplift and requester is responsible individual" in new Setup {
+      val app    = anApplication(developerEmail = email)
+      when(mockSubmissionsConnector.requestApproval(eqTo(applicationId), eqTo(name), eqTo(email))(*)).thenReturn(successful(Right(app)))
+      when(mockSubmissionsConnector.fetchLatestSubmission(eqTo(applicationId))(*)).thenReturn(successful(Some(aSubmission)))
+      when(mockDeskproConnector.createTicket(*[Option[UserId]], *)(*)).thenReturn(successful(TicketCreated))
+      val result = await(underTest.requestProductionCredentials(applicationId, developerSession, true, true))
+
+      result.right.value shouldBe app
+
+      val ticketCapture = ArgCaptor[DeskproTicket]
+      verify(mockDeskproConnector).createTicket(*[Option[UserId]], ticketCapture.capture)(*)
+      ticketCapture.value.subject shouldBe "Terms of use uplift application submitted for checking"
+    }
+
+    "not create a ticket if terms of use uplift and requester is responsible individual but submission is passed" in new Setup {
+      val app    = anApplication(developerEmail = email)
+      when(mockSubmissionsConnector.requestApproval(eqTo(applicationId), eqTo(name), eqTo(email))(*)).thenReturn(successful(Right(app)))
+      when(mockSubmissionsConnector.fetchLatestSubmission(eqTo(applicationId))(*)).thenReturn(successful(Some(grantedSubmission)))
+      val result = await(underTest.requestProductionCredentials(applicationId, developerSession, true, true))
+
+      result.right.value shouldBe app
+
+      verify(mockDeskproConnector, never).createTicket(*[ResponsibleIndividualVerificationId], *)(*)
+    }
+
     "not create a ticket if requester is not responsible individual" in new Setup {
       val app    = anApplication(developerEmail = email)
       when(mockSubmissionsConnector.requestApproval(eqTo(applicationId), eqTo(name), eqTo(email))(*)).thenReturn(successful(Right(app)))
+      when(mockSubmissionsConnector.fetchLatestSubmission(eqTo(applicationId))(*)).thenReturn(successful(Some(aSubmission)))
       val result = await(underTest.requestProductionCredentials(applicationId, developerSession, false, false))
 
       result.right.value shouldBe app
