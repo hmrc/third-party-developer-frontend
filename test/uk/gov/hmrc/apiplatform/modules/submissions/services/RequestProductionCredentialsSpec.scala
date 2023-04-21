@@ -26,10 +26,9 @@ import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.apiplatform.modules.applications.domain.models.ApplicationId
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.LaxEmailAddress.StringSyntax
 import uk.gov.hmrc.apiplatform.modules.developers.domain.models.UserId
-import uk.gov.hmrc.apiplatform.modules.submissions.connectors.ThirdPartyApplicationSubmissionsConnector
-import uk.gov.hmrc.apiplatform.modules.submissions.domain.models.ErrorDetails
-import uk.gov.hmrc.apiplatform.modules.submissions.domain.models.ResponsibleIndividualVerificationId
 import uk.gov.hmrc.apiplatform.modules.submissions.SubmissionsTestData
+import uk.gov.hmrc.apiplatform.modules.submissions.connectors.ThirdPartyApplicationSubmissionsConnector
+import uk.gov.hmrc.apiplatform.modules.submissions.domain.models.{ErrorDetails, ResponsibleIndividualVerificationId}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.connectors.DeskproConnector
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.connectors.{DeskproTicket, TicketCreated}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.{Developer, DeveloperSession}
@@ -135,7 +134,7 @@ class RequestProductionCredentialsSpec extends AsyncHmrcSpec
     }
 
     "fails to create a ticket if the submission is not found" in new Setup {
-      val app    = anApplication(appId = applicationId, developerEmail = email)
+      val app = anApplication(appId = applicationId, developerEmail = email)
       when(mockSubmissionsConnector.requestApproval(eqTo(applicationId), eqTo(name), eqTo(email))(*)).thenReturn(successful(Right(app)))
       when(mockSubmissionsConnector.fetchLatestSubmission(eqTo(applicationId))(*)).thenReturn(successful(None))
 

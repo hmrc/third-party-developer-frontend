@@ -25,7 +25,13 @@ import uk.gov.hmrc.apiplatform.modules.common.domain.models.LaxEmailAddress
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.LaxEmailAddress.StringSyntax
 import uk.gov.hmrc.apiplatform.modules.common.services.EitherTHelper
 import uk.gov.hmrc.apiplatform.modules.submissions.connectors.ThirdPartyApplicationSubmissionsConnector
-import uk.gov.hmrc.apiplatform.modules.submissions.domain.models.{ErrorDetails, ResponsibleIndividualToUVerification, ResponsibleIndividualTouUpliftVerification, ResponsibleIndividualVerification, Submission}
+import uk.gov.hmrc.apiplatform.modules.submissions.domain.models.{
+  ErrorDetails,
+  ResponsibleIndividualToUVerification,
+  ResponsibleIndividualTouUpliftVerification,
+  ResponsibleIndividualVerification,
+  Submission
+}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.connectors.DeskproConnector
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.connectors.DeskproTicket
 import uk.gov.hmrc.thirdpartydeveloperfrontend.service.ApplicationService

@@ -21,15 +21,14 @@ import scala.concurrent.Future.successful
 
 import org.mockito.{ArgumentMatchersSugar, MockitoSugar}
 
-import uk.gov.hmrc.apiplatform.modules.apis.domain.models.ApiIdentifier
+import uk.gov.hmrc.apiplatform.modules.apis.domain.models.{ApiIdentifier, ApiVersion}
 import uk.gov.hmrc.apiplatform.modules.applications.domain.models.ApplicationId
 import uk.gov.hmrc.apiplatform.modules.commands.applications.domain.models._
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications._
-import uk.gov.hmrc.thirdpartydeveloperfrontend.service.SubscriptionsService
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.LaxEmailAddress
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.connectors.TicketResult
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.DeveloperSession
-import uk.gov.hmrc.apiplatform.modules.apis.domain.models.ApiVersion
+import uk.gov.hmrc.thirdpartydeveloperfrontend.service.SubscriptionsService
 
 trait SubscriptionsServiceMockModule extends MockitoSugar with ArgumentMatchersSugar {
 
@@ -70,16 +69,19 @@ trait SubscriptionsServiceMockModule extends MockitoSugar with ArgumentMatchersS
     }
 
     object RequestApiSubscription {
+
       def succeedsFor(loggedInDeveloper: DeveloperSession, app: Application, apiName: String, apiVersion: ApiVersion) =
         when(aMock.requestApiSubscription(eqTo(loggedInDeveloper), eqTo(app), eqTo(apiName), eqTo(apiVersion))(*))
-          .thenReturn(successful(mock[TicketResult]))            
+          .thenReturn(successful(mock[TicketResult]))
     }
+
     object RequestApiUnsubscribe {
+
       def succeedsFor(loggedInDeveloper: DeveloperSession, app: Application, apiName: String, apiVersion: ApiVersion) =
         when(aMock.requestApiUnsubscribe(eqTo(loggedInDeveloper), eqTo(app), eqTo(apiName), eqTo(apiVersion))(*))
-          .thenReturn(successful(mock[TicketResult]))            
+          .thenReturn(successful(mock[TicketResult]))
     }
-    // 
+    //
   }
 
   object SubscriptionsServiceMock extends AbstractSubscriptionsServiceMock {

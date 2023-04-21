@@ -122,7 +122,7 @@ class Redirects @Inject() (
     DeleteRedirectConfirmationForm.form.bindFromRequest.fold(handleInvalidForm, handleValidForm)
   }
 
-  def changeRedirect(applicationId: ApplicationId)       = canChangeRedirectInformationAction(applicationId) { implicit request =>
+  def changeRedirect(applicationId: ApplicationId) = canChangeRedirectInformationAction(applicationId) { implicit request =>
     successful(Ok(changeRedirectView(applicationViewModelFromApplicationRequest, ChangeRedirectForm.form.bindFromRequest())))
   }
 

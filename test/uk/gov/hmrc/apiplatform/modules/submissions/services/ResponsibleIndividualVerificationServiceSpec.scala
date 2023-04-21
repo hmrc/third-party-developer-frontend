@@ -28,14 +28,7 @@ import uk.gov.hmrc.apiplatform.modules.applications.domain.models.ApplicationId
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.LaxEmailAddress.StringSyntax
 import uk.gov.hmrc.apiplatform.modules.submissions.SubmissionsTestData
 import uk.gov.hmrc.apiplatform.modules.submissions.connectors.ThirdPartyApplicationSubmissionsConnector
-import uk.gov.hmrc.apiplatform.modules.submissions.domain.models.{
-  ResponsibleIndividualToUVerification,
-  ResponsibleIndividualTouUpliftVerification,
-  ResponsibleIndividualUpdateVerification,
-  ResponsibleIndividualVerificationId,
-  ResponsibleIndividualVerificationState,
-  Submission
-}
+import uk.gov.hmrc.apiplatform.modules.submissions.domain.models._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.connectors.DeskproConnector
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.ResponsibleIndividual
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.connectors.{DeskproTicket, TicketCreated}

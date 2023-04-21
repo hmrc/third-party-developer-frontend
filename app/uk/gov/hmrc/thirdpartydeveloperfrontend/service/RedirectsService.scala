@@ -46,7 +46,7 @@ class RedirectsService @Inject() (
     applicationCmdConnector.dispatch(application.id, cmd, Set.empty)
   }
 
-  def addRedirect(actor: Actor, application: Application, newRedirectUri: String)(implicit hc: HeaderCarrier)                                 = {
+  def addRedirect(actor: Actor, application: Application, newRedirectUri: String)(implicit hc: HeaderCarrier) = {
     issueCommand(actor, application, addRedirectUris(newRedirectUri))
   }
 
@@ -54,7 +54,7 @@ class RedirectsService @Inject() (
     issueCommand(actor, application, changeRedirectUris(originalRedirectUri, newRedirectUri))
   }
 
-  def deleteRedirect(actor: Actor, application: Application, redirectUriToDelete: String)(implicit hc: HeaderCarrier)                         = {
+  def deleteRedirect(actor: Actor, application: Application, redirectUriToDelete: String)(implicit hc: HeaderCarrier) = {
     issueCommand(actor, application, deleteRedirectUris(redirectUriToDelete))
   }
 }
