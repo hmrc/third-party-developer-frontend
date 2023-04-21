@@ -30,6 +30,7 @@ import uk.gov.hmrc.thirdpartydeveloperfrontend.connectors._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.helpers.FutureTimeoutSupportImpl
 import uk.gov.hmrc.thirdpartydeveloperfrontend.service.PushPullNotificationsService.PushPullNotificationsConnector
 import uk.gov.hmrc.thirdpartydeveloperfrontend.service.SubscriptionFieldsService.SubscriptionFieldsConnector
+import uk.gov.hmrc.apiplatform.modules.applications.domain.models.ClientSecretsHashingConfig
 
 class ConfigurationModule extends AbstractModule {
 
@@ -60,6 +61,8 @@ class ConfigurationModule extends AbstractModule {
 
     bind(classOf[ThirdPartyApplicationSubmissionsConnector.Config])
       .toProvider(classOf[ThirdPartyApplicationSubmissionsConnectorConfigProvider])
+
+    bind(classOf[ClientSecretsHashingConfig]).toProvider(classOf[ClientSecretsHashingConfigProvider])
 
     bind(classOf[Clock]).toInstance(Clock.systemUTC())
   }

@@ -68,7 +68,7 @@ class ApplicationCommandConnector @Inject() (
       .map(response =>
         response.status match {
           case OK          => parseWithLogAndThrow[DispatchSuccessResult](response.body).asRight[Failures]
-          case BAD_REQUEST => parseWithLogAndThrow[Failures](response.body).asLeft[DispatchSuccessResult]
+          case BAD_REQUEST => logger.error("BAD REQUEST: "+response.body); parseWithLogAndThrow[Failures](response.body).asLeft[DispatchSuccessResult]
           case status      =>
             logger.error(s"Dispatch failed with status code: $status")
             throw new InternalServerException(s"Failed calling dispatch $status")

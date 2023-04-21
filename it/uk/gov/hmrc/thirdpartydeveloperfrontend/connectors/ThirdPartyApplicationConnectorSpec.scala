@@ -39,7 +39,6 @@ import uk.gov.hmrc.apiplatform.modules.apis.domain.models.ApiVersion
 import uk.gov.hmrc.apiplatform.modules.apis.domain.models.ApiIdentifier
 import uk.gov.hmrc.apiplatform.modules.developers.domain.models.UserId
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.LaxEmailAddress.StringSyntax
-import uk.gov.hmrc.apiplatform.modules.common.domain.models.Actors
 import uk.gov.hmrc.apiplatform.modules.applications.domain.models.{ApplicationId, ClientId, PrivacyPolicyLocations}
 
 import java.util.UUID
@@ -413,70 +412,6 @@ class ThirdPartyApplicationConnectorSpec extends BaseConnectorIntegrationSpec wi
       )
       intercept[ApplicationNotFound] {
         await(connector.updateApproval(applicationId, updateRequest))
-      }
-    }
-  }
-
-  "addClientSecret" should {
-    def tpaClientSecret(clientSecretId: String, clientSecretValue: Option[String] = None): TPAClientSecret =
-      TPAClientSecret(clientSecretId, "secret-name", clientSecretValue, LocalDateTime.now(ZoneOffset.UTC), None)
-
-    val actor               = Actors.AppCollaborator("john.requestor@example.com".toLaxEmail)
-    val timestamp           = LocalDateTime.now(clock)
-    val clientSecretRequest = ClientSecretRequest(actor, timestamp)
-    val url                 = s"/application/${applicationId.text}/client-secret"
-
-    "generate the client secret" in new Setup {
-      val newClientSecretId    = UUID.randomUUID().toString
-      val newClientSecretValue = UUID.randomUUID().toString
-      val newClientSecret      = tpaClientSecret(newClientSecretId, Some(newClientSecretValue))
-      val response             =
-        AddClientSecretResponse(
-          ClientId(UUID.randomUUID().toString),
-          UUID.randomUUID().toString,
-          List(tpaClientSecret("old-secret-1"), tpaClientSecret("old-secret-2"), newClientSecret)
-        )
-
-      stubFor(
-        patch(urlEqualTo(url))
-          .withJsonRequestBody(clientSecretRequest)
-          .willReturn(
-            aResponse()
-              .withStatus(OK)
-              .withJsonBody(response)
-          )
-      )
-      val result = await(connector.addClientSecrets(applicationId, clientSecretRequest))
-
-      result._1 shouldEqual newClientSecretId
-      result._2 shouldEqual newClientSecretValue
-    }
-
-    "throw an ApplicationNotFound exception when the application does not exist" in new Setup {
-      stubFor(
-        patch(urlEqualTo(url))
-          .withJsonRequestBody(clientSecretRequest)
-          .willReturn(
-            aResponse()
-              .withStatus(NOT_FOUND)
-          )
-      )
-      intercept[ApplicationNotFound] {
-        await(connector.addClientSecrets(applicationId, clientSecretRequest))
-      }
-    }
-
-    "throw a ClientSecretLimitExceeded exception when the max number of client secret has been exceeded" in new Setup {
-      stubFor(
-        patch(urlEqualTo(url))
-          .withJsonRequestBody(clientSecretRequest)
-          .willReturn(
-            aResponse()
-              .withStatus(FORBIDDEN)
-          )
-      )
-      intercept[ClientSecretLimitExceeded] {
-        await(connector.addClientSecrets(applicationId, clientSecretRequest))
       }
     }
   }

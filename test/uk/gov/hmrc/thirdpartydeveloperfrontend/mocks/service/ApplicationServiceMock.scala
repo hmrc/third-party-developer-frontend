@@ -66,19 +66,6 @@ trait ApplicationServiceMock extends MockitoSugar with ArgumentMatchersSugar wit
     when(applicationServiceMock.updateCheckInformation(eqTo(app), eqTo(checkInfo))(*))
       .thenReturn(successful(ApplicationUpdateSuccessful))
 
-  def givenAddClientSecretReturns(application: Application, actor: Actors.AppCollaborator) = {
-    val newSecretId = UUID.randomUUID().toString
-    val newSecret   = UUID.randomUUID().toString
-
-    when(applicationServiceMock.addClientSecret(eqTo(application), eqTo(actor))(*))
-      .thenReturn(successful((newSecretId, newSecret)))
-  }
-
-  def givenAddClientSecretFailsWith(application: Application, actor: Actors.AppCollaborator, exception: Exception) = {
-    when(applicationServiceMock.addClientSecret(eqTo(application), eqTo(actor))(*))
-      .thenReturn(failed(exception))
-  }
-
   def givenDeleteClientSecretSucceeds(application: Application, actor: Actors.AppCollaborator, clientSecretId: String) = {
     when(
       applicationServiceMock

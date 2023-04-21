@@ -124,38 +124,6 @@ class ApplicationServiceClientSecretSpec extends AsyncHmrcSpec with Subscription
       Set()
     )
 
-  "addClientSecret" should {
-    val newClientSecretId = UUID.randomUUID().toString
-    val newClientSecret   = UUID.randomUUID().toString
-    val actor             = Actors.AppCollaborator("john.requestor@example.com".toLaxEmail)
-    val timestamp         = LocalDateTime.now(clock)
-
-    "add a client secret for app in production environment" in new Setup {
-
-      theProductionConnectorthenReturnTheApplication(productionApplicationId, productionApplication)
-
-      when(mockProductionApplicationConnector.addClientSecrets(productionApplicationId, ClientSecretRequest(actor, timestamp)))
-        .thenReturn(successful((newClientSecretId, newClientSecret)))
-
-      private val updatedToken = await(applicationService.addClientSecret(productionApplication, actor))
-
-      updatedToken._1 shouldBe newClientSecretId
-      updatedToken._2 shouldBe newClientSecret
-    }
-
-    "propagate exceptions from connector" in new Setup {
-
-      theProductionConnectorthenReturnTheApplication(productionApplicationId, productionApplication)
-
-      when(mockProductionApplicationConnector.addClientSecrets(productionApplicationId, ClientSecretRequest(actor, timestamp)))
-        .thenReturn(failed(new ClientSecretLimitExceeded))
-
-      intercept[ClientSecretLimitExceeded] {
-        await(applicationService.addClientSecret(productionApplication, actor))
-      }
-    }
-  }
-
   "deleteClientSecret" should {
     val applicationId  = ApplicationId.random
     val actor          = Actors.AppCollaborator("john.requestor@example.com".toLaxEmail)

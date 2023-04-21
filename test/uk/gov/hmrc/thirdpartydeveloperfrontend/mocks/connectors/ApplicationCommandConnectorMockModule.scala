@@ -46,6 +46,10 @@ trait ApplicationCommandConnectorMockModule extends MockitoSugar with ArgumentMa
         when(aMock.dispatch(*[ApplicationId], eqTo(command), *)(*)).thenReturn(DispatchSuccessResult(app).asSuccess)
       }
 
+      def thenFailsWith(fail: CommandFailure) = {
+        when(aMock.dispatch(*[ApplicationId], *, *)(*)).thenReturn(fail.asFailure)
+      }
+
       def verifyAdminsToEmail() = {
         val captor = ArgCaptor[Set[LaxEmailAddress]]
         verify(aMock).dispatch(*[ApplicationId], *, captor)(*)
@@ -56,6 +60,10 @@ trait ApplicationCommandConnectorMockModule extends MockitoSugar with ArgumentMa
         val captor = ArgCaptor[ApplicationCommand]
         verify(aMock).dispatch(*[ApplicationId], captor, *)(*)
         captor.value
+      }
+
+      def verifyNeverCalled() = {
+        verify(aMock, never).dispatch(*[ApplicationId], *,*)(*)
       }
     }
   }

@@ -25,23 +25,34 @@ import views.html.editapplication.DeleteClientSecretView
 import views.html.{ClientIdView, ClientSecretsGeneratedView, ClientSecretsView, CredentialsView, ServerTokenView}
 
 import play.api.libs.crypto.CookieSigner
-import play.api.mvc.{Action, AnyContent, MessagesControllerComponents, Result}
-import uk.gov.hmrc.http.ForbiddenException
+import play.api.mvc.{Action, AnyContent, MessagesControllerComponents, Result => PlayResult}
 
 import uk.gov.hmrc.apiplatform.modules.applications.domain.models.ApplicationId
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.Actors
 import uk.gov.hmrc.thirdpartydeveloperfrontend.config.{ApplicationConfig, ErrorHandler}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.connectors.ThirdPartyDeveloperConnector
 import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.Credentials.serverTokenCutoffDate
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.Capabilities.{ChangeClientSecret, ViewCredentials}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.Permissions.{SandboxOrAdmin, TeamMembersOnly}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.service._
+import uk.gov.hmrc.apiplatform.modules.commands.applications.domain.models.ApplicationCommands
+import uk.gov.hmrc.apiplatform.modules.applications.domain.models.ClientSecret
+import uk.gov.hmrc.apiplatform.modules.common.domain.services.ClockNow
+import java.time.Clock
+import uk.gov.hmrc.thirdpartydeveloperfrontend.connectors.ApplicationCommandConnector
+import cats.data.NonEmptyList
+import uk.gov.hmrc.apiplatform.modules.commands.applications.domain.models.CommandFailures
+import play.api.libs.json.Json
+import uk.gov.hmrc.apiplatform.modules.commands.applications.domain.models.CommandFailure
+import uk.gov.hmrc.apiplatform.modules.commands.applications.domain.models.CommandHandlerTypes
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.Application
 
 @Singleton
 class Credentials @Inject() (
     val errorHandler: ErrorHandler,
     val applicationService: ApplicationService,
+    clientSecretHashingService: ClientSecretHashingService,
+    appCmdDispatcher: ApplicationCommandConnector,
     val applicationActionService: ApplicationActionService,
     val developerConnector: ThirdPartyDeveloperConnector,
     val auditService: AuditService,
@@ -53,15 +64,18 @@ class Credentials @Inject() (
     clientSecretsView: ClientSecretsView,
     serverTokenView: ServerTokenView,
     deleteClientSecretView: DeleteClientSecretView,
-    clientSecretsGeneratedView: ClientSecretsGeneratedView
+    clientSecretsGeneratedView: ClientSecretsGeneratedView,
+    val clock: Clock
   )(implicit val ec: ExecutionContext,
     val appConfig: ApplicationConfig
-  ) extends ApplicationController(mcc) {
+  ) extends ApplicationController(mcc)
+    with ClockNow
+    with CommandHandlerTypes[Application] {
 
-  private def canViewClientCredentialsPage(applicationId: ApplicationId)(fun: ApplicationRequest[AnyContent] => Future[Result]): Action[AnyContent] =
+  private def canViewClientCredentialsPage(applicationId: ApplicationId)(fun: ApplicationRequest[AnyContent] => Future[PlayResult]): Action[AnyContent] =
     checkActionForApprovedApps(ViewCredentials, TeamMembersOnly)(applicationId)(fun)
 
-  private def canChangeClientSecrets(applicationId: ApplicationId)(fun: ApplicationRequest[AnyContent] => Future[Result]): Action[AnyContent] =
+  private def canChangeClientSecrets(applicationId: ApplicationId)(fun: ApplicationRequest[AnyContent] => Future[PlayResult]): Action[AnyContent] =
     checkActionForApprovedApps(ChangeClientSecret, SandboxOrAdmin)(applicationId)(fun)
 
   def credentials(applicationId: ApplicationId): Action[AnyContent] =
@@ -84,17 +98,49 @@ class Credentials @Inject() (
       }
     }
 
-  def addClientSecret(applicationId: ApplicationId): Action[AnyContent] =
-    canChangeClientSecrets(applicationId) { implicit request =>
-      val developer = request.developerSession.developer
-      applicationService.addClientSecret(request.application, Actors.AppCollaborator(developer.email)).map { response =>
-        Ok(clientSecretsGeneratedView(request.application, applicationId, response._2))
-      } recover {
-        case _: ApplicationNotFound       => NotFound(errorHandler.notFoundTemplate)
-        case _: ForbiddenException        => Forbidden(errorHandler.badRequestTemplate)
-        case _: ClientSecretLimitExceeded => UnprocessableEntity(errorHandler.badRequestTemplate)
+  private def fails(applicationId: ApplicationId)(e: Failures): PlayResult = {
+    import CommandFailures._
+
+    val details = e.toList.map(_ match {
+      case _ @ApplicationNotFound            => "Application not found"
+      case InsufficientPrivileges(text)      => s"Insufficient privileges - $text"
+      case _ @CannotRemoveLastAdmin          => "Cannot remove the last admin from an app"
+      case _ @ActorIsNotACollaboratorOnApp   => "Actor is not a collaborator on the app"
+      case _ @CollaboratorDoesNotExistOnApp  => "Collaborator does not exist on the app"
+      case _ @CollaboratorHasMismatchOnApp   => "Collaborator has mismatched details against the app"
+      case _ @CollaboratorAlreadyExistsOnApp => "Collaborator already exists on the app"
+      case _ @DuplicateSubscription          => "Duplicate subscription"
+      case _ @SubscriptionNotAvailable       => "Subscription not available"
+      case _ @NotSubscribedToApi             => "Not subscribed to API"
+      case _ @ClientSecretLimitExceeded      => "Client Secrets imit exceeded"
+      case GenericFailure(s)                 => s
+    })
+
+    logger.warn(s"Command Process failed for $applicationId because ${details.mkString("[", ",", "]")}")
+    BadRequest(Json.toJson(e.toList))
+  }
+
+  def addClientSecret(applicationId: ApplicationId): Action[AnyContent] = canChangeClientSecrets(applicationId) { implicit request =>
+    val developer = request.developerSession.developer
+    val (secretValue, hashedSecret) = clientSecretHashingService.generateSecretAndHash()
+    val cmd = ApplicationCommands.AddClientSecret(
+      actor = Actors.AppCollaborator(developer.email),
+      name = secretValue.takeRight(4),
+      id = ClientSecret.Id.random,
+      hashedSecret = hashedSecret,
+      now
+    )
+    
+    appCmdDispatcher.dispatch(applicationId, cmd, Set.empty).map { results =>
+      results match {
+        case Right(response) => Ok(clientSecretsGeneratedView(response.applicationResponse, applicationId, secretValue))
+        case Left(NonEmptyList(CommandFailures.ApplicationNotFound, Nil)) => NotFound(errorHandler.notFoundTemplate)
+        case Left(NonEmptyList(CommandFailures. GenericFailure("App is in PRODUCTION so User must be an ADMIN"), Nil)) => Forbidden(errorHandler.badRequestTemplate)
+        case Left(NonEmptyList(CommandFailures.ClientSecretLimitExceeded, Nil)) => UnprocessableEntity(errorHandler.badRequestTemplate)
+        case Left(failures: NonEmptyList[CommandFailure]) => fails(applicationId)(failures)
       }
     }
+  }
 
   def deleteClientSecret(applicationId: ApplicationId, clientSecretId: String): Action[AnyContent] =
     canChangeClientSecrets(applicationId) { implicit request =>
