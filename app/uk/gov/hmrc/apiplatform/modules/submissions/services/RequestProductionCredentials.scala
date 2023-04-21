@@ -78,6 +78,7 @@ class RequestProductionCredentials @Inject() (
         deskproConnector.createTicket(Some(requestedBy.developer.userId), ticket).map(Some(_))
       }
     } else {
+      // Don't create a Deskpro ticket if the requester is not the responsible individual
       Future.successful(None)
     }
   }

@@ -27,6 +27,7 @@ import uk.gov.hmrc.apiplatform.modules.applications.domain.models.ApplicationId
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.LaxEmailAddress.StringSyntax
 import uk.gov.hmrc.apiplatform.modules.developers.domain.models.UserId
 import uk.gov.hmrc.apiplatform.modules.submissions.connectors.ThirdPartyApplicationSubmissionsConnector
+import uk.gov.hmrc.apiplatform.modules.submissions.domain.models.ErrorDetails
 import uk.gov.hmrc.apiplatform.modules.submissions.domain.models.ResponsibleIndividualVerificationId
 import uk.gov.hmrc.apiplatform.modules.submissions.SubmissionsTestData
 import uk.gov.hmrc.thirdpartydeveloperfrontend.connectors.DeskproConnector
@@ -65,7 +66,7 @@ class RequestProductionCredentialsSpec extends AsyncHmrcSpec
 
   "requestProductionCredentials" should {
     "successfully create a ticket if requester is responsible individual" in new Setup {
-      val app    = anApplication(developerEmail = email)
+      val app    = anApplication(appId = applicationId, developerEmail = email)
       when(mockSubmissionsConnector.requestApproval(eqTo(applicationId), eqTo(name), eqTo(email))(*)).thenReturn(successful(Right(app)))
       when(mockSubmissionsConnector.fetchLatestSubmission(eqTo(applicationId))(*)).thenReturn(successful(Some(aSubmission)))
       when(mockDeskproConnector.createTicket(*[Option[UserId]], *)(*)).thenReturn(successful(TicketCreated))
@@ -76,10 +77,15 @@ class RequestProductionCredentialsSpec extends AsyncHmrcSpec
       val ticketCapture = ArgCaptor[DeskproTicket]
       verify(mockDeskproConnector).createTicket(*[Option[UserId]], ticketCapture.capture)(*)
       ticketCapture.value.subject shouldBe "New application submitted for checking"
+      ticketCapture.value.name shouldBe name
+      ticketCapture.value.email shouldBe email
+      ticketCapture.value.message should include(app.name)
+      ticketCapture.value.message should include("submitted the following application for production use on the Developer Hub")
+      ticketCapture.value.referrer should include(s"/application/${app.id.value}/check-answers")
     }
 
     "successfully create a ticket if terms of use uplift and requester is responsible individual" in new Setup {
-      val app    = anApplication(developerEmail = email)
+      val app    = anApplication(appId = applicationId, developerEmail = email)
       when(mockSubmissionsConnector.requestApproval(eqTo(applicationId), eqTo(name), eqTo(email))(*)).thenReturn(successful(Right(app)))
       when(mockSubmissionsConnector.fetchLatestSubmission(eqTo(applicationId))(*)).thenReturn(successful(Some(aSubmission)))
       when(mockDeskproConnector.createTicket(*[Option[UserId]], *)(*)).thenReturn(successful(TicketCreated))
@@ -90,10 +96,15 @@ class RequestProductionCredentialsSpec extends AsyncHmrcSpec
       val ticketCapture = ArgCaptor[DeskproTicket]
       verify(mockDeskproConnector).createTicket(*[Option[UserId]], ticketCapture.capture)(*)
       ticketCapture.value.subject shouldBe "Terms of use uplift application submitted for checking"
+      ticketCapture.value.name shouldBe name
+      ticketCapture.value.email shouldBe email
+      ticketCapture.value.message should include(app.name)
+      ticketCapture.value.message should include("has submitted a Terms of Use application that has warnings or fails")
+      ticketCapture.value.referrer should include(s"/application/${app.id.value}/check-answers")
     }
 
     "not create a ticket if terms of use uplift and requester is responsible individual but submission is passed" in new Setup {
-      val app    = anApplication(developerEmail = email)
+      val app    = anApplication(appId = applicationId, developerEmail = email)
       when(mockSubmissionsConnector.requestApproval(eqTo(applicationId), eqTo(name), eqTo(email))(*)).thenReturn(successful(Right(app)))
       when(mockSubmissionsConnector.fetchLatestSubmission(eqTo(applicationId))(*)).thenReturn(successful(Some(grantedSubmission)))
       val result = await(underTest.requestProductionCredentials(applicationId, developerSession, true, true))
@@ -104,7 +115,7 @@ class RequestProductionCredentialsSpec extends AsyncHmrcSpec
     }
 
     "not create a ticket if requester is not responsible individual" in new Setup {
-      val app    = anApplication(developerEmail = email)
+      val app    = anApplication(appId = applicationId, developerEmail = email)
       when(mockSubmissionsConnector.requestApproval(eqTo(applicationId), eqTo(name), eqTo(email))(*)).thenReturn(successful(Right(app)))
       when(mockSubmissionsConnector.fetchLatestSubmission(eqTo(applicationId))(*)).thenReturn(successful(Some(aSubmission)))
       val result = await(underTest.requestProductionCredentials(applicationId, developerSession, false, false))
@@ -120,6 +131,19 @@ class RequestProductionCredentialsSpec extends AsyncHmrcSpec
       intercept[ApplicationNotFound] {
         await(underTest.requestProductionCredentials(applicationId, developerSession, true, false))
       }
+      verify(mockDeskproConnector, never).createTicket(*[ResponsibleIndividualVerificationId], *)(*)
+    }
+
+    "fails to create a ticket if the submission is not found" in new Setup {
+      val app    = anApplication(appId = applicationId, developerEmail = email)
+      when(mockSubmissionsConnector.requestApproval(eqTo(applicationId), eqTo(name), eqTo(email))(*)).thenReturn(successful(Right(app)))
+      when(mockSubmissionsConnector.fetchLatestSubmission(eqTo(applicationId))(*)).thenReturn(successful(None))
+
+      val result = await(underTest.requestProductionCredentials(applicationId, developerSession, true, false))
+
+      result shouldBe 'Left
+      result.left.value shouldBe ErrorDetails("submitSubmission001", s"No submission record found for ${applicationId}")
+
       verify(mockDeskproConnector, never).createTicket(*[ResponsibleIndividualVerificationId], *)(*)
     }
 
