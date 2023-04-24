@@ -55,6 +55,7 @@ import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.{ApplicationUpdateSuccessf
 import uk.gov.hmrc.thirdpartydeveloperfrontend.helpers.ExcludeFromCoverage
 import uk.gov.hmrc.thirdpartydeveloperfrontend.repositories.FlowRepository
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.AsyncHmrcSpec
+import uk.gov.hmrc.apiplatform.modules.applications.domain.models.ClientSecretResponse
 
 object EndpointScenarioSpec {
 
@@ -75,6 +76,7 @@ abstract class EndpointScenarioSpec extends AsyncHmrcSpec with GuiceOneAppPerSui
   import EndpointScenarioSpec._
 
   implicit val cookieSigner: CookieSigner = app.injector.instanceOf[CookieSigner]
+  val s1Id = ClientSecret.Id.random
 
   override def fakeApplication() = {
     GuiceApplicationBuilder()
@@ -103,11 +105,11 @@ abstract class EndpointScenarioSpec extends AsyncHmrcSpec with GuiceOneAppPerSui
   when(apmConnector.fetchAllPossibleSubscriptions(*[ApplicationId])(*)).thenReturn(Future.successful(allPossibleSubscriptions))
   when(apmConnector.fetchCombinedApi(*[String])(*)).thenReturn(Future.successful(Right(CombinedApi("my service", "my service display name", List.empty, REST_API))))
   when(tpaSandboxConnector.fetchCredentials(*[ApplicationId])(*)).thenReturn(Future.successful(ApplicationToken(
-    List(ClientSecret("s1id", "s1name", LocalDateTime.now(), None)),
+    List(ClientSecretResponse(s1Id, "s1name", LocalDateTime.now(), None)),
     "secret"
   )))
   when(tpaProductionConnector.fetchCredentials(*[ApplicationId])(*)).thenReturn(Future.successful(ApplicationToken(
-    List(ClientSecret("s1id", "s1name", LocalDateTime.now(), None)),
+    List(ClientSecretResponse(s1Id, "s1name", LocalDateTime.now(), None)),
     "secret"
   )))
   when(sandboxPushPullNotificationsConnector.fetchPushSecrets(*[ClientId])(*)).thenReturn(Future.successful(List("secret1")))
@@ -278,7 +280,7 @@ abstract class EndpointScenarioSpec extends AsyncHmrcSpec with GuiceOneAppPerSui
     "addTeamMemberPageMode"  -> "applicationcheck",
     "teamMemberHash"         -> "b4c9a289323b21a01c3e940f150eb9b8c542587f1abfd8f0e1cc1ffc5e475514",
     "file"                   -> "javascripts/subscriptions.js",
-    "clientSecretId"         -> "s1id"
+    "clientSecretId"         -> s1Id.value.toString()
   )
 
   final def getQueryParameterValues(endpoint: Endpoint): Map[String, String] = {

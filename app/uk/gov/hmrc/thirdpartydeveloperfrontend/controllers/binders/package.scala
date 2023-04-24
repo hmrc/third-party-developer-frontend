@@ -26,7 +26,8 @@ import uk.gov.hmrc.apiplatform.modules.applications.domain.models.{ApplicationId
 import uk.gov.hmrc.apiplatform.modules.mfa.models.{MfaAction, MfaId, MfaType}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.Environment
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.controllers.{AddTeamMemberPageMode, SaveSubsFieldsPageMode}
-
+import uk.gov.hmrc.apiplatform.modules.applications.domain.models.ClientSecret
+import java.{util=>ju}
 package object binders {
 
   implicit def clientIdPathBinder(implicit textBinder: PathBindable[String]): PathBindable[ClientId] = new PathBindable[ClientId] {
@@ -88,6 +89,25 @@ package object binders {
 
     override def unbind(key: String, apiVersion: ApiVersion): String = {
       apiVersion.value
+    }
+  }
+
+  
+  private def clientSecretIdFromString(text: String): Either[String, ClientSecret.Id] = {
+    Try(ju.UUID.fromString(text))
+      .toOption
+      .toRight(s"Cannot accept $text as ClientSecret.Id")
+      .map(ClientSecret.Id(_))
+  }
+
+  implicit def clientSecretIdPathBinder(implicit textBinder: PathBindable[String]): PathBindable[ClientSecret.Id] = new PathBindable[ClientSecret.Id] {
+
+    override def bind(key: String, value: String): Either[String, ClientSecret.Id] = {
+      textBinder.bind(key, value).flatMap(clientSecretIdFromString(_))
+    }
+
+    override def unbind(key: String, clientSecretId: ClientSecret.Id): String = {
+      clientSecretId.value.toString()
     }
   }
 

@@ -16,7 +16,6 @@
 
 package uk.gov.hmrc.thirdpartydeveloperfrontend.controllers
 
-import java.time.LocalDateTime
 import java.util.UUID.randomUUID
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
@@ -45,9 +44,18 @@ import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.WithLoggedInSession._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.{WithCSRFAddToken, _}
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.Actors
 import uk.gov.hmrc.thirdpartydeveloperfrontend.mocks.service.SubscriptionsServiceMockModule
+import uk.gov.hmrc.apiplatform.modules.applications.domain.models.ClientSecretResponse
+import uk.gov.hmrc.apiplatform.modules.common.utils.FixedClock
 
-class SubscriptionsSpec extends BaseControllerSpec with WithCSRFAddToken with LocalUserIdTracker with DeveloperBuilder with SampleSession with SampleApplications
-    with SubscriptionTestHelperSugar {
+class SubscriptionsSpec
+    extends BaseControllerSpec
+    with WithCSRFAddToken
+    with LocalUserIdTracker
+    with DeveloperBuilder
+    with SampleSession
+    with SampleApplications
+    with SubscriptionTestHelperSugar
+    with FixedClock {
 
   val apiName       = "api-1"
   val apiVersion    = ApiVersion("1.0")
@@ -550,6 +558,6 @@ class SubscriptionsSpec extends BaseControllerSpec with WithCSRFAddToken with Lo
     title.get
   }
 
-  private def aClientSecret() = ClientSecret(randomUUID.toString, randomUUID.toString, LocalDateTime.now())
+  private def aClientSecret() = ClientSecretResponse(ClientSecret.Id.random, randomUUID.toString, now)
 
 }

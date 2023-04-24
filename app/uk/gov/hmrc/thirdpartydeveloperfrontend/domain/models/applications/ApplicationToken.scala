@@ -16,9 +16,9 @@
 
 package uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications
 
-import uk.gov.hmrc.apiplatform.modules.applications.domain.models.ClientSecret
+import uk.gov.hmrc.apiplatform.modules.applications.domain.models.ClientSecretResponse
 
-case class ApplicationToken(clientSecrets: List[ClientSecret], accessToken: String)
+case class ApplicationToken(clientSecrets: List[ClientSecretResponse], accessToken: String)
 
 object ApplicationToken {
   import play.api.libs.json.Json

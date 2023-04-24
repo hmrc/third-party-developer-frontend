@@ -47,6 +47,8 @@ import uk.gov.hmrc.thirdpartydeveloperfrontend.mocks.service._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.service.{AuditService, SubscriptionFieldsService}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.WithLoggedInSession._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.{LocalUserIdTracker, TestApplications, WithCSRFAddToken}
+import uk.gov.hmrc.apiplatform.modules.common.utils.FixedClock
+import uk.gov.hmrc.apiplatform.modules.applications.domain.models.ClientSecretResponse
 
 class ManageSubscriptionsSpec
     extends BaseControllerSpec
@@ -56,7 +58,8 @@ class ManageSubscriptionsSpec
     with SubscriptionTestHelperSugar
     with TestApplications
     with DeveloperBuilder
-    with LocalUserIdTracker {
+    with LocalUserIdTracker
+    with FixedClock {
 
   val failedNoApp: Future[Nothing] = failed(new ApplicationNotFound)
 
@@ -836,10 +839,5 @@ class ManageSubscriptionsSpec
     }
   }
 
-  private def aClientSecret() =
-    ClientSecret(
-      randomUUID.toString,
-      randomUUID.toString,
-      LocalDateTime.now
-    )
+  private def aClientSecret() = ClientSecretResponse(ClientSecret.Id.random, randomUUID.toString, now)
 }

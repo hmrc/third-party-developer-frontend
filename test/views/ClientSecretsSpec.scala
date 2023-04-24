@@ -34,10 +34,13 @@ import uk.gov.hmrc.thirdpartydeveloperfrontend.builder._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.LoggedInState
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils._
+import uk.gov.hmrc.apiplatform.modules.applications.domain.models.ClientSecretResponse
+import uk.gov.hmrc.apiplatform.modules.common.utils.FixedClock
 
 class ClientSecretsSpec extends CommonViewSpec with WithCSRFAddToken with CollaboratorTracker with LocalUserIdTracker
     with DeveloperSessionBuilder
-    with DeveloperTestData {
+    with DeveloperTestData 
+    with FixedClock {
 
   trait Setup {
     val clientSecretsView          = app.injector.instanceOf[ClientSecretsView]
@@ -58,11 +61,11 @@ class ClientSecretsSpec extends CommonViewSpec with WithCSRFAddToken with Collab
     val request   = FakeRequest().withCSRFToken
     val developer = standardDeveloper.loggedIn
 
-    val clientSecret1 = ClientSecret(randomUUID.toString, "", LocalDateTime.now(ZoneOffset.UTC))
-    val clientSecret2 = ClientSecret(randomUUID.toString, "", LocalDateTime.now(ZoneOffset.UTC))
-    val clientSecret3 = ClientSecret(randomUUID.toString, "", LocalDateTime.now(ZoneOffset.UTC))
-    val clientSecret4 = ClientSecret(randomUUID.toString, "", LocalDateTime.now(ZoneOffset.UTC))
-    val clientSecret5 = ClientSecret(randomUUID.toString, "", LocalDateTime.now(ZoneOffset.UTC))
+    val clientSecret1 = ClientSecretResponse(ClientSecret.Id.random, "", now)
+    val clientSecret2 = ClientSecretResponse(ClientSecret.Id.random, "", now)
+    val clientSecret3 = ClientSecretResponse(ClientSecret.Id.random, "", now)
+    val clientSecret4 = ClientSecretResponse(ClientSecret.Id.random, "", now)
+    val clientSecret5 = ClientSecretResponse(ClientSecret.Id.random, "", now)
 
     val application = Application(
       ApplicationId(UUID.randomUUID()),
@@ -103,7 +106,8 @@ class ClientSecretsSpec extends CommonViewSpec with WithCSRFAddToken with Collab
     }
 
     "show copy button when a new client secret has just been added" in new Setup {
-      val page = clientSecretsGeneratedView.render(application, application.id, clientSecret1.id, request, developer, messagesProvider, appConfig)
+      val aSecret = "SomethingSecret"
+      val page = clientSecretsGeneratedView.render(application, application.id, aSecret, request, developer, messagesProvider, appConfig)
 
       page.contentType should include("text/html")
 

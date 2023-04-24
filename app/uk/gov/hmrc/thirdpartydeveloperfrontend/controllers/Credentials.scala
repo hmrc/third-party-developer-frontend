@@ -99,22 +99,7 @@ class Credentials @Inject() (
     }
 
   private def fails(applicationId: ApplicationId)(e: Failures): PlayResult = {
-    import CommandFailures._
-
-    val details = e.toList.map(_ match {
-      case _ @ApplicationNotFound            => "Application not found"
-      case InsufficientPrivileges(text)      => s"Insufficient privileges - $text"
-      case _ @CannotRemoveLastAdmin          => "Cannot remove the last admin from an app"
-      case _ @ActorIsNotACollaboratorOnApp   => "Actor is not a collaborator on the app"
-      case _ @CollaboratorDoesNotExistOnApp  => "Collaborator does not exist on the app"
-      case _ @CollaboratorHasMismatchOnApp   => "Collaborator has mismatched details against the app"
-      case _ @CollaboratorAlreadyExistsOnApp => "Collaborator already exists on the app"
-      case _ @DuplicateSubscription          => "Duplicate subscription"
-      case _ @SubscriptionNotAvailable       => "Subscription not available"
-      case _ @NotSubscribedToApi             => "Not subscribed to API"
-      case _ @ClientSecretLimitExceeded      => "Client Secrets imit exceeded"
-      case GenericFailure(s)                 => s
-    })
+    val details = e.toList.map(CommandFailures.describe)
 
     logger.warn(s"Command Process failed for $applicationId because ${details.mkString("[", ",", "]")}")
     BadRequest(Json.toJson(e.toList))
@@ -142,7 +127,7 @@ class Credentials @Inject() (
     }
   }
 
-  def deleteClientSecret(applicationId: ApplicationId, clientSecretId: String): Action[AnyContent] =
+  def deleteClientSecret(applicationId: ApplicationId, clientSecretId: ClientSecret.Id): Action[AnyContent] =
     canChangeClientSecrets(applicationId) { implicit request =>
       applicationService.fetchCredentials(request.application).map { tokens =>
         tokens.clientSecrets
@@ -151,11 +136,16 @@ class Credentials @Inject() (
       }
     }
 
-  def deleteClientSecretAction(applicationId: ApplicationId, clientSecretId: String): Action[AnyContent] =
+  def deleteClientSecretAction(applicationId: ApplicationId, clientSecretId: ClientSecret.Id): Action[AnyContent] =
     canChangeClientSecrets(applicationId) { implicit request =>
-      applicationService
-        .deleteClientSecret(request.application, Actors.AppCollaborator(request.developerSession.email), clientSecretId)
-        .map(_ => Redirect(routes.Credentials.clientSecrets(applicationId)))
+    val developer = request.developerSession.developer
+    val cmd = ApplicationCommands.RemoveClientSecret(
+      actor = Actors.AppCollaborator(developer.email),
+      clientSecretId,
+      now
+    ) 
+    appCmdDispatcher.dispatch(applicationId, cmd, Set.empty)
+      .map(_ => Redirect(routes.Credentials.clientSecrets(applicationId)))
     }
 }
 

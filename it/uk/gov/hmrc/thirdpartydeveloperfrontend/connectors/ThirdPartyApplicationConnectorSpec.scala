@@ -43,6 +43,7 @@ import uk.gov.hmrc.apiplatform.modules.applications.domain.models.{ApplicationId
 
 import java.util.UUID
 import uk.gov.hmrc.apiplatform.modules.applications.domain.models.ClientSecret
+import uk.gov.hmrc.apiplatform.modules.applications.domain.models.ClientSecretResponse
 
 class ThirdPartyApplicationConnectorSpec extends BaseConnectorIntegrationSpec with GuiceOneAppPerSuite with WireMockExtensions
     with CollaboratorTracker with LocalUserIdTracker with FixedClock {
@@ -490,5 +491,5 @@ class ThirdPartyApplicationConnectorSpec extends BaseConnectorIntegrationSpec wi
     }
   }
 
-  private def aClientSecret() = ClientSecret(UUID.randomUUID.toString, UUID.randomUUID.toString, FixedClock.now())
+  private def aClientSecret() = ClientSecretResponse(ClientSecret.Id.random, UUID.randomUUID.toString, FixedClock.now())
 }

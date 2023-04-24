@@ -17,7 +17,6 @@
 package uk.gov.hmrc.thirdpartydeveloperfrontend.controllers
 
 import java.time.{Clock, Instant, LocalDateTime, ZoneOffset}
-import java.util.UUID.randomUUID
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 import scala.concurrent.Future.successful
@@ -47,6 +46,8 @@ import uk.gov.hmrc.thirdpartydeveloperfrontend.helpers.string._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.mocks.service._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.WithLoggedInSession._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.{LocalUserIdTracker, WithCSRFAddToken}
+import uk.gov.hmrc.apiplatform.modules.applications.domain.models.ClientSecretResponse
+import uk.gov.hmrc.apiplatform.modules.common.utils.FixedClock
 
 class ApplicationCheckSpec
     extends BaseControllerSpec
@@ -56,7 +57,8 @@ class ApplicationCheckSpec
     with SampleSession
     with SampleApplication
     with SubscriptionTestHelperSugar
-    with SubscriptionsBuilder {
+    with SubscriptionsBuilder 
+    with FixedClock {
 
   override val appId = ApplicationId.random
 
@@ -1409,7 +1411,7 @@ class ApplicationCheckSpec
     }
   }
 
-  private def aClientSecret() = ClientSecret(randomUUID.toString, randomUUID.toString, LocalDateTime.now(ZoneOffset.UTC))
+  private def aClientSecret() = ClientSecretResponse(ClientSecret.Id.random, "name", now)
 
   private def stepRequiredIndication(id: String) = {
     s"""<div id="$id" class="step-status status-incomplete">To do</div>"""

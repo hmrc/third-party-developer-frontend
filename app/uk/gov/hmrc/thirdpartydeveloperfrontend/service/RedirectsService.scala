@@ -36,7 +36,7 @@ class RedirectsService @Inject() (
 
   import RedirectsService._
 
-  private def issueCommand(actor: Actor, application: Application, fn: List[String] => List[String])(implicit hc: HeaderCarrier): Result = {
+  private def issueCommand(actor: Actor, application: Application, fn: List[String] => List[String])(implicit hc: HeaderCarrier): AppCmdResult = {
     val oldRedirectUris = application.access match {
       case Standard(redirectUris, _, _, _, _, _) => redirectUris
       case _                                     => List.empty

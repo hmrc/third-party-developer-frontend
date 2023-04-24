@@ -26,6 +26,7 @@ import uk.gov.hmrc.apiplatform.modules.common.domain.models.LaxEmailAddress.Stri
 import uk.gov.hmrc.apiplatform.modules.developers.domain.models.UserId
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.apidefinitions.AccessType
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications._
+import uk.gov.hmrc.apiplatform.modules.applications.domain.models.ClientSecretResponse
 
 trait TestApplications {
   self: CollaboratorTracker =>
@@ -112,7 +113,7 @@ trait TestApplications {
     ApplicationToken(List(aClientSecret()), accessToken)
   }
 
-  private def aClientSecret() = ClientSecret(randomUUID.toString, randomUUID.toString, LocalDateTime.now())
+  private def aClientSecret() = ClientSecretResponse(ClientSecret.Id.random, randomUUID.toString, LocalDateTime.now())
 
   implicit class AppAugment(val app: Application) {
     final def withName(name: String): Application = app.copy(name = name)

@@ -24,5 +24,7 @@ import uk.gov.hmrc.apiplatform.modules.crypto.services.SecretsHashingService
 
 @Singleton
 class ClientSecretHashingService @Inject() (config: ClientSecretsHashingConfig)
-    extends SecretsHashingService(config) with ApplicationLogger {
+    extends SecretsHashingService with ApplicationLogger {
+
+  val workFactor = config.workFactor
 }

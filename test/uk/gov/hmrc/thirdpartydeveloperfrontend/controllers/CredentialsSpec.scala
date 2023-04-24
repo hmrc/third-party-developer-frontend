@@ -17,8 +17,6 @@
 package uk.gov.hmrc.thirdpartydeveloperfrontend.controllers
 
 import java.time.{LocalDateTime, ZoneOffset}
-import java.util.UUID
-import java.util.UUID.randomUUID
 import scala.concurrent.ExecutionContext.Implicits.global
 
 import views.html.editapplication.DeleteClientSecretView
@@ -45,6 +43,7 @@ import uk.gov.hmrc.thirdpartydeveloperfrontend.service.ClientSecretHashingServic
 import uk.gov.hmrc.thirdpartydeveloperfrontend.mocks.connectors.ApplicationCommandConnectorMockModule
 import uk.gov.hmrc.apiplatform.modules.common.utils.FixedClock
 import uk.gov.hmrc.apiplatform.modules.commands.applications.domain.models.CommandFailures
+import uk.gov.hmrc.apiplatform.modules.applications.domain.models.ClientSecretResponse
 
 class CredentialsSpec
     extends BaseControllerSpec
@@ -331,7 +330,9 @@ class CredentialsSpec
   }
 
   "deleteClientSecret" should {
-    val clientSecretToDelete: ClientSecret = appTokens.clientSecrets.last
+    val clientSecretToDelete: ClientSecretResponse = appTokens.clientSecrets.last
+    val nonExistantClientSecretId: ClientSecret.Id = ClientSecret.Id.random
+
     "return the confirmation page when the selected client secret exists" in new Setup with BasicApplicationProvider {
       val result = underTest.deleteClientSecret(applicationId, clientSecretToDelete.id)(loggedInRequest.withCSRFToken)
 
@@ -341,7 +342,7 @@ class CredentialsSpec
     }
 
     "return 404 when the selected client secret does not exist" in new Setup with BasicApplicationProvider {
-      val result = underTest.deleteClientSecret(applicationId, "wxyz")(loggedInRequest.withCSRFToken)
+      val result = underTest.deleteClientSecret(applicationId, nonExistantClientSecretId)(loggedInRequest.withCSRFToken)
 
       status(result) shouldBe NOT_FOUND
     }
@@ -365,12 +366,13 @@ class CredentialsSpec
 
   "deleteClientSecretAction" should {
     val applicationId          = ApplicationId.random
-    val clientSecretId: String = UUID.randomUUID().toString
+    val clientSecretId = ClientSecret.Id.random
 
     "delete the selected client secret" in new Setup {
       def createApplication() = createConfiguredApplication(applicationId, Collaborator.Roles.ADMINISTRATOR)
 
-      givenDeleteClientSecretSucceeds(application, actor, clientSecretId)
+      ApplicationCommandConnectorMock.Dispatch.thenReturnsSuccess(application)
+      // givenDeleteClientSecretSucceeds(application, actor, clientSecretId)
 
       val result = underTest.deleteClientSecretAction(applicationId, clientSecretId)(loggedInRequest)
 
@@ -395,6 +397,6 @@ class CredentialsSpec
     }
   }
 
-  private def aClientSecret(secretName: String) = ClientSecret(randomUUID.toString, secretName, LocalDateTime.now(ZoneOffset.UTC))
+  private def aClientSecret(secretName: String) = ClientSecretResponse(ClientSecret.Id.random, secretName, LocalDateTime.now(ZoneOffset.UTC))
 
 }
