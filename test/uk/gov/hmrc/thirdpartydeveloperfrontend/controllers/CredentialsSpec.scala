@@ -29,21 +29,19 @@ import play.api.test.Helpers._
 import play.filters.csrf.CSRF.TokenProvider
 import uk.gov.hmrc.http.HeaderCarrier
 
-import uk.gov.hmrc.apiplatform.modules.applications.domain.models.{ApplicationId, ClientSecret, Collaborator}
+import uk.gov.hmrc.apiplatform.modules.applications.domain.models.{ApplicationId, ClientSecret, ClientSecretResponse, Collaborator}
+import uk.gov.hmrc.apiplatform.modules.commands.applications.domain.models.CommandFailures
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.Actors
+import uk.gov.hmrc.apiplatform.modules.common.utils.FixedClock
 import uk.gov.hmrc.thirdpartydeveloperfrontend.builder.{DeveloperBuilder, _}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.connectors.ThirdPartyDeveloperConnector
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.ApplicationState._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications._
+import uk.gov.hmrc.thirdpartydeveloperfrontend.mocks.connectors.ApplicationCommandConnectorMockModule
 import uk.gov.hmrc.thirdpartydeveloperfrontend.mocks.service._
-import uk.gov.hmrc.thirdpartydeveloperfrontend.service.AuditService
+import uk.gov.hmrc.thirdpartydeveloperfrontend.service.{AuditService, ClientSecretHashingService}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.LocalUserIdTracker
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.WithLoggedInSession._
-import uk.gov.hmrc.thirdpartydeveloperfrontend.service.ClientSecretHashingService
-import uk.gov.hmrc.thirdpartydeveloperfrontend.mocks.connectors.ApplicationCommandConnectorMockModule
-import uk.gov.hmrc.apiplatform.modules.common.utils.FixedClock
-import uk.gov.hmrc.apiplatform.modules.commands.applications.domain.models.CommandFailures
-import uk.gov.hmrc.apiplatform.modules.applications.domain.models.ClientSecretResponse
 
 class CredentialsSpec
     extends BaseControllerSpec
@@ -267,7 +265,7 @@ class CredentialsSpec
   "addClientSecret" should {
     "add the client secret" in new Setup {
       def createApplication() = createConfiguredApplication(applicationId, Collaborator.Roles.ADMINISTRATOR)
-      
+
       ApplicationCommandConnectorMock.Dispatch.thenReturnsSuccess(application)
 
       val result = underTest.addClientSecret(applicationId)(loggedInRequest)
@@ -317,7 +315,8 @@ class CredentialsSpec
       val result = (underTest.addClientSecret(applicationId)(loggedInRequest))
 
       status(result) shouldBe BAD_REQUEST
-      ApplicationCommandConnectorMock.Dispatch.verifyNeverCalled()    }
+      ApplicationCommandConnectorMock.Dispatch.verifyNeverCalled()
+    }
 
     "return to the login page when the user is not logged in" in new Setup {
       def createApplication() = createConfiguredApplication(applicationId, Collaborator.Roles.ADMINISTRATOR)
@@ -326,7 +325,8 @@ class CredentialsSpec
 
       status(result) shouldBe SEE_OTHER
       redirectLocation(result) shouldBe Some("/developer/login")
-      ApplicationCommandConnectorMock.Dispatch.verifyNeverCalled()    }
+      ApplicationCommandConnectorMock.Dispatch.verifyNeverCalled()
+    }
   }
 
   "deleteClientSecret" should {
@@ -365,7 +365,7 @@ class CredentialsSpec
   }
 
   "deleteClientSecretAction" should {
-    val applicationId          = ApplicationId.random
+    val applicationId  = ApplicationId.random
     val clientSecretId = ClientSecret.Id.random
 
     "delete the selected client secret" in new Setup {

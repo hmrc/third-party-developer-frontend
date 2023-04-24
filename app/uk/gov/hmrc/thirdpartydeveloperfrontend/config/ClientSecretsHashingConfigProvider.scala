@@ -16,9 +16,11 @@
 
 package uk.gov.hmrc.thirdpartydeveloperfrontend.config
 
+import javax.inject.{Inject, Provider, Singleton}
+
 import play.api.Configuration
 import uk.gov.hmrc.play.bootstrap.config.ServicesConfig
-import javax.inject.{Inject, Provider, Singleton}
+
 import uk.gov.hmrc.apiplatform.modules.applications.domain.models.ClientSecretsHashingConfig
 
 @Singleton

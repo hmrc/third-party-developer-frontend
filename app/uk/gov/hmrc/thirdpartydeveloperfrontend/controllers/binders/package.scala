@@ -17,17 +17,17 @@
 package uk.gov.hmrc.thirdpartydeveloperfrontend.controllers
 
 import java.util.UUID
+import java.{util => ju}
 import scala.util.Try
 
 import play.api.mvc.{PathBindable, QueryStringBindable}
 
 import uk.gov.hmrc.apiplatform.modules.apis.domain.models.{ApiContext, ApiVersion}
-import uk.gov.hmrc.apiplatform.modules.applications.domain.models.{ApplicationId, ClientId}
+import uk.gov.hmrc.apiplatform.modules.applications.domain.models.{ApplicationId, ClientId, ClientSecret}
 import uk.gov.hmrc.apiplatform.modules.mfa.models.{MfaAction, MfaId, MfaType}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.Environment
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.controllers.{AddTeamMemberPageMode, SaveSubsFieldsPageMode}
-import uk.gov.hmrc.apiplatform.modules.applications.domain.models.ClientSecret
-import java.{util=>ju}
+
 package object binders {
 
   implicit def clientIdPathBinder(implicit textBinder: PathBindable[String]): PathBindable[ClientId] = new PathBindable[ClientId] {
@@ -92,7 +92,6 @@ package object binders {
     }
   }
 
-  
   private def clientSecretIdFromString(text: String): Either[String, ClientSecret.Id] = {
     Try(ju.UUID.fromString(text))
       .toOption

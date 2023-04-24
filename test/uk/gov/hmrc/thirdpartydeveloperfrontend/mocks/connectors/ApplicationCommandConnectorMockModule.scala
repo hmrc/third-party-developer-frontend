@@ -63,7 +63,7 @@ trait ApplicationCommandConnectorMockModule extends MockitoSugar with ArgumentMa
       }
 
       def verifyNeverCalled() = {
-        verify(aMock, never).dispatch(*[ApplicationId], *,*)(*)
+        verify(aMock, never).dispatch(*[ApplicationId], *, *)(*)
       }
     }
   }

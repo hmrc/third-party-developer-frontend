@@ -31,7 +31,7 @@ import play.api.test.Helpers.{redirectLocation, route, status}
 import play.api.test.{CSRFTokenHelper, FakeRequest, Writeables}
 
 import uk.gov.hmrc.apiplatform.modules.apis.domain.models.{ApiContext, ApiIdentifier, ApiVersion}
-import uk.gov.hmrc.apiplatform.modules.applications.domain.models.{ApplicationId, ClientId, ClientSecret}
+import uk.gov.hmrc.apiplatform.modules.applications.domain.models.{ApplicationId, ClientId, ClientSecret, ClientSecretResponse}
 import uk.gov.hmrc.apiplatform.modules.commands.applications.domain.models.DispatchSuccessResult
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.LaxEmailAddress
 import uk.gov.hmrc.apiplatform.modules.developers.domain.models.UserId
@@ -55,7 +55,6 @@ import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.{ApplicationUpdateSuccessf
 import uk.gov.hmrc.thirdpartydeveloperfrontend.helpers.ExcludeFromCoverage
 import uk.gov.hmrc.thirdpartydeveloperfrontend.repositories.FlowRepository
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.AsyncHmrcSpec
-import uk.gov.hmrc.apiplatform.modules.applications.domain.models.ClientSecretResponse
 
 object EndpointScenarioSpec {
 
@@ -76,7 +75,7 @@ abstract class EndpointScenarioSpec extends AsyncHmrcSpec with GuiceOneAppPerSui
   import EndpointScenarioSpec._
 
   implicit val cookieSigner: CookieSigner = app.injector.instanceOf[CookieSigner]
-  val s1Id = ClientSecret.Id.random
+  val s1Id                                = ClientSecret.Id.random
 
   override def fakeApplication() = {
     GuiceApplicationBuilder()
