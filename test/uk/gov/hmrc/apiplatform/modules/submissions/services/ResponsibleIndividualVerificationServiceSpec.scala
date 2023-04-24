@@ -43,10 +43,12 @@ class ResponsibleIndividualVerificationServiceSpec extends AsyncHmrcSpec
     with SubmissionsTestData {
 
   trait Setup {
-    implicit val hc   = HeaderCarrier()
-    val applicationId = ApplicationId.random
-    val application   = aStandardPendingResponsibleIndividualVerificationApplication()
-    val code          = "12345678"
+    implicit val hc    = HeaderCarrier()
+    val applicationId  = ApplicationId.random
+    val application    = aStandardPendingResponsibleIndividualVerificationApplication()
+    val code           = "12345678"
+    val requesterName  = "Mr Submitter"
+    val requesterEmail = "submitter@example.com".toLaxEmail
 
     val riVerification        = ResponsibleIndividualToUVerification(
       ResponsibleIndividualVerificationId(code),
@@ -115,6 +117,8 @@ class ResponsibleIndividualVerificationServiceSpec extends AsyncHmrcSpec
         0,
         "App name",
         LocalDateTime.now(ZoneOffset.UTC),
+        requesterName,
+        requesterEmail,
         ResponsibleIndividualVerificationState.INITIAL
       )
 
@@ -133,9 +137,9 @@ class ResponsibleIndividualVerificationServiceSpec extends AsyncHmrcSpec
       verify(mockDeskproConnector).createTicket(eqTo(riVerificationUplift.id), ticketCapture.capture)(*)
       val deskproTicket = ticketCapture.value
       deskproTicket.subject shouldBe "Terms of use uplift application submitted for checking"
-      deskproTicket.name shouldBe application.state.requestedByName.get
-      deskproTicket.email.text shouldBe application.state.requestedByEmailAddress.get
-      deskproTicket.message should include(riVerification.applicationName)
+      deskproTicket.name shouldBe requesterName
+      deskproTicket.email shouldBe requesterEmail
+      deskproTicket.message should include(riVerificationUplift.applicationName)
       deskproTicket.message should include("has submitted a Terms of Use application that has warnings or fails")
       deskproTicket.referrer should include(s"/application/${riVerificationUplift.applicationId.value}/check-answers")
     }
@@ -148,6 +152,8 @@ class ResponsibleIndividualVerificationServiceSpec extends AsyncHmrcSpec
         0,
         "App name",
         LocalDateTime.now(ZoneOffset.UTC),
+        requesterName,
+        requesterEmail,
         ResponsibleIndividualVerificationState.INITIAL
       )
 

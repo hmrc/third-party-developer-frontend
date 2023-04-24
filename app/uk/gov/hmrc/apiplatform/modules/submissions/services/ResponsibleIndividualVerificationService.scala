@@ -103,8 +103,8 @@ class ResponsibleIndividualVerificationService @Inject() (
     ) = {
     riVerification match {
       case riv: ResponsibleIndividualToUVerification        => {
-        val appName                         = riVerification.applicationName
-        val appId                           = riVerification.applicationId
+        val appName                         = riv.applicationName
+        val appId                           = riv.applicationId
         val requesterName: String           = submitterName.getOrElse(throw new RuntimeException("requestedByName not found"))
         val requesterEmail: LaxEmailAddress = submitterEmail.getOrElse(throw new RuntimeException("requestedByEmailAddress not found"))
 
@@ -116,10 +116,10 @@ class ResponsibleIndividualVerificationService @Inject() (
           // Don't create a Deskpro ticket if the submission passed when it was automatically marked
           Future.successful(None)
         } else {
-          val appName                         = riVerification.applicationName
-          val appId                           = riVerification.applicationId
-          val requesterName: String           = submitterName.getOrElse(throw new RuntimeException("requestedByName not found"))
-          val requesterEmail: LaxEmailAddress = submitterEmail.getOrElse(throw new RuntimeException("requestedByEmailAddress not found"))
+          val appName                         = riuv.applicationName
+          val appId                           = riuv.applicationId
+          val requesterName: String           = riuv.requestingAdminName
+          val requesterEmail: LaxEmailAddress = riuv.requestingAdminEmail
 
           val ticket = DeskproTicket.createForTermsOfUseUplift(requesterName, requesterEmail, appName, appId)
           deskproConnector.createTicket(riVerification.id, ticket).map(Some(_))
