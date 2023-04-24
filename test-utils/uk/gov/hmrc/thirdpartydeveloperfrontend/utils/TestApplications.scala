@@ -20,7 +20,7 @@ import java.time.{LocalDateTime, Period, ZoneOffset}
 import java.util.UUID.randomUUID
 import scala.util.Random
 
-import uk.gov.hmrc.apiplatform.modules.applications.domain.models.{ApplicationId, ClientId, ClientSecret, Collaborator}
+import uk.gov.hmrc.apiplatform.modules.applications.domain.models.{ApplicationId, ClientId, ClientSecret, ClientSecretResponse, Collaborator}
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.LaxEmailAddress
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.LaxEmailAddress.StringSyntax
 import uk.gov.hmrc.apiplatform.modules.developers.domain.models.UserId
@@ -112,7 +112,7 @@ trait TestApplications {
     ApplicationToken(List(aClientSecret()), accessToken)
   }
 
-  private def aClientSecret() = ClientSecret(randomUUID.toString, randomUUID.toString, LocalDateTime.now())
+  private def aClientSecret() = ClientSecretResponse(ClientSecret.Id.random, randomUUID.toString, LocalDateTime.now())
 
   implicit class AppAugment(val app: Application) {
     final def withName(name: String): Application = app.copy(name = name)

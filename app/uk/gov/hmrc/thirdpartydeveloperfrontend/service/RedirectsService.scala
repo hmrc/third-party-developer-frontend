@@ -29,21 +29,21 @@ import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.{Appli
 
 @Singleton
 class RedirectsService @Inject() (
-    applicationCmdConnector: ApplicationCommandConnector,
+    applicationCmdDispatcher: ApplicationCommandConnector,
     val clock: Clock
   ) extends CommandHandlerTypes[DispatchSuccessResult]
     with ClockNow {
 
   import RedirectsService._
 
-  private def issueCommand(actor: Actor, application: Application, fn: List[String] => List[String])(implicit hc: HeaderCarrier): Result = {
+  private def issueCommand(actor: Actor, application: Application, fn: List[String] => List[String])(implicit hc: HeaderCarrier): AppCmdResult = {
     val oldRedirectUris = application.access match {
       case Standard(redirectUris, _, _, _, _, _) => redirectUris
       case _                                     => List.empty
     }
     val newRedirectUris = fn(oldRedirectUris)
     val cmd             = ApplicationCommands.UpdateRedirectUris(actor, oldRedirectUris, newRedirectUris, now())
-    applicationCmdConnector.dispatch(application.id, cmd, Set.empty)
+    applicationCmdDispatcher.dispatch(application.id, cmd, Set.empty)
   }
 
   def addRedirect(actor: Actor, application: Application, newRedirectUri: String)(implicit hc: HeaderCarrier) = {

@@ -17,12 +17,13 @@
 package uk.gov.hmrc.thirdpartydeveloperfrontend.controllers
 
 import java.util.UUID
+import java.{util => ju}
 import scala.util.Try
 
 import play.api.mvc.{PathBindable, QueryStringBindable}
 
 import uk.gov.hmrc.apiplatform.modules.apis.domain.models.{ApiContext, ApiVersion}
-import uk.gov.hmrc.apiplatform.modules.applications.domain.models.{ApplicationId, ClientId}
+import uk.gov.hmrc.apiplatform.modules.applications.domain.models.{ApplicationId, ClientId, ClientSecret}
 import uk.gov.hmrc.apiplatform.modules.mfa.models.{MfaAction, MfaId, MfaType}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.Environment
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.controllers.{AddTeamMemberPageMode, SaveSubsFieldsPageMode}
@@ -88,6 +89,24 @@ package object binders {
 
     override def unbind(key: String, apiVersion: ApiVersion): String = {
       apiVersion.value
+    }
+  }
+
+  private def clientSecretIdFromString(text: String): Either[String, ClientSecret.Id] = {
+    Try(ju.UUID.fromString(text))
+      .toOption
+      .toRight(s"Cannot accept $text as ClientSecret.Id")
+      .map(ClientSecret.Id(_))
+  }
+
+  implicit def clientSecretIdPathBinder(implicit textBinder: PathBindable[String]): PathBindable[ClientSecret.Id] = new PathBindable[ClientSecret.Id] {
+
+    override def bind(key: String, value: String): Either[String, ClientSecret.Id] = {
+      textBinder.bind(key, value).flatMap(clientSecretIdFromString(_))
+    }
+
+    override def unbind(key: String, clientSecretId: ClientSecret.Id): String = {
+      clientSecretId.value.toString()
     }
   }
 

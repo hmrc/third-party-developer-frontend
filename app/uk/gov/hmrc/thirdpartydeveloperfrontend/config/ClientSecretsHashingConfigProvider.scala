@@ -14,14 +14,21 @@
  * limitations under the License.
  */
 
-package uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications
+package uk.gov.hmrc.thirdpartydeveloperfrontend.config
 
-import uk.gov.hmrc.apiplatform.modules.applications.domain.models.ClientSecretResponse
+import javax.inject.{Inject, Provider, Singleton}
 
-case class ApplicationToken(clientSecrets: List[ClientSecretResponse], accessToken: String)
+import play.api.Configuration
+import uk.gov.hmrc.play.bootstrap.config.ServicesConfig
 
-object ApplicationToken {
-  import play.api.libs.json.Json
+import uk.gov.hmrc.apiplatform.modules.applications.domain.models.ClientSecretsHashingConfig
 
-  implicit val format = Json.format[ApplicationToken]
+@Singleton
+class ClientSecretsHashingConfigProvider @Inject() (val configuration: Configuration)
+    extends ServicesConfig(configuration)
+    with Provider[ClientSecretsHashingConfig] {
+
+  override def get(): ClientSecretsHashingConfig = {
+    new ClientSecretsHashingConfig(configuration.underlying)
+  }
 }

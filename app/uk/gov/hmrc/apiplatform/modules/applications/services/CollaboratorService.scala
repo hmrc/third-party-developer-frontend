@@ -45,7 +45,7 @@ class CollaboratorService @Inject() (
       newTeamMemberRole: Collaborator.Role,
       requestingEmail: LaxEmailAddress
     )(implicit hc: HeaderCarrier
-    ): Result = {
+    ): AppCmdResult = {
     val setOfAdminEmails = app.collaborators.filter(_.isAdministrator).map(_.emailAddress)
 
     for {
@@ -69,7 +69,7 @@ class CollaboratorService @Inject() (
       teamMemberToRemove: LaxEmailAddress,
       requestingEmail: LaxEmailAddress
     )(implicit hc: HeaderCarrier
-    ): Result = {
+    ): AppCmdResult = {
     val otherAdminEmails = determineOtherAdmins(app.collaborators, Set(requestingEmail, teamMemberToRemove))
 
     val collaboratorToRemove = app.collaborators.filter(_.emailAddress == teamMemberToRemove).head

@@ -17,8 +17,6 @@
 package uk.gov.hmrc.thirdpartydeveloperfrontend.controllers
 
 import java.time.{LocalDateTime, ZoneOffset}
-import java.util.UUID
-import java.util.UUID.randomUUID
 import scala.concurrent.ExecutionContext.Implicits.global
 
 import views.html.editapplication.DeleteClientSecretView
@@ -31,15 +29,17 @@ import play.api.test.Helpers._
 import play.filters.csrf.CSRF.TokenProvider
 import uk.gov.hmrc.http.HeaderCarrier
 
-import uk.gov.hmrc.apiplatform.modules.applications.domain.models.{ApplicationId, ClientSecret, Collaborator}
+import uk.gov.hmrc.apiplatform.modules.applications.domain.models.{ApplicationId, ClientSecret, ClientSecretResponse, Collaborator}
+import uk.gov.hmrc.apiplatform.modules.commands.applications.domain.models.CommandFailures
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.Actors
+import uk.gov.hmrc.apiplatform.modules.common.utils.FixedClock
 import uk.gov.hmrc.thirdpartydeveloperfrontend.builder.{DeveloperBuilder, _}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.connectors.ThirdPartyDeveloperConnector
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.ClientSecretLimitExceeded
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.ApplicationState._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications._
+import uk.gov.hmrc.thirdpartydeveloperfrontend.mocks.connectors.ApplicationCommandConnectorMockModule
 import uk.gov.hmrc.thirdpartydeveloperfrontend.mocks.service._
-import uk.gov.hmrc.thirdpartydeveloperfrontend.service.AuditService
+import uk.gov.hmrc.thirdpartydeveloperfrontend.service.{AuditService, ClientSecretHashingService}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.LocalUserIdTracker
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.WithLoggedInSession._
 
@@ -49,7 +49,8 @@ class CredentialsSpec
     with SampleApplication
     with SubscriptionTestHelperSugar
     with DeveloperBuilder
-    with LocalUserIdTracker {
+    with LocalUserIdTracker
+    with FixedClock {
 
   val applicationId = ApplicationId.random
   val appTokens     = ApplicationToken(List(aClientSecret("secret1"), aClientSecret("secret2")), "token")
@@ -102,17 +103,20 @@ class CredentialsSpec
       access = access
     )
 
-  trait Setup extends ApplicationServiceMock with ApplicationActionServiceMock with SessionServiceMock with ApplicationProvider {
+  trait Setup extends ApplicationServiceMock with ApplicationActionServiceMock with SessionServiceMock with ApplicationProvider with ApplicationCommandConnectorMockModule {
     val credentialsView            = app.injector.instanceOf[CredentialsView]
     val clientIdView               = app.injector.instanceOf[ClientIdView]
     val clientSecretsView          = app.injector.instanceOf[ClientSecretsView]
     val serverTokenView            = app.injector.instanceOf[ServerTokenView]
     val deleteClientSecretView     = app.injector.instanceOf[DeleteClientSecretView]
     val clientSecretsGeneratedView = app.injector.instanceOf[ClientSecretsGeneratedView]
+    val clientSecretHashingService = app.injector.instanceOf[ClientSecretHashingService]
 
     val underTest = new Credentials(
       mockErrorHandler,
       applicationServiceMock,
+      clientSecretHashingService,
+      ApplicationCommandConnectorMock.aMock,
       applicationActionServiceMock,
       mock[ThirdPartyDeveloperConnector],
       mock[AuditService],
@@ -124,7 +128,8 @@ class CredentialsSpec
       clientSecretsView,
       serverTokenView,
       deleteClientSecretView,
-      clientSecretsGeneratedView
+      clientSecretsGeneratedView,
+      FixedClock.clock
     )
 
     val application                     = createApplication()
@@ -260,17 +265,17 @@ class CredentialsSpec
   "addClientSecret" should {
     "add the client secret" in new Setup {
       def createApplication() = createConfiguredApplication(applicationId, Collaborator.Roles.ADMINISTRATOR)
-      givenAddClientSecretReturns(application, actor)
+
+      ApplicationCommandConnectorMock.Dispatch.thenReturnsSuccess(application)
 
       val result = underTest.addClientSecret(applicationId)(loggedInRequest)
 
       status(result) shouldBe OK
-      verify(underTest.applicationService).addClientSecret(eqTo(application), eqTo(actor))(*)
     }
 
     "display the error when the maximum limit of secret has been exceeded in a production app" in new Setup {
       def createApplication() = createConfiguredApplication(applicationId, Collaborator.Roles.ADMINISTRATOR, environment = Environment.PRODUCTION)
-      givenAddClientSecretFailsWith(application, actor, new ClientSecretLimitExceeded)
+      ApplicationCommandConnectorMock.Dispatch.thenFailsWith(CommandFailures.ClientSecretLimitExceeded)
 
       val result = underTest.addClientSecret(applicationId)(loggedInRequest)
 
@@ -279,7 +284,7 @@ class CredentialsSpec
 
     "display the error when the maximum limit of secret has been exceeded for sandbox app" in new Setup {
       def createApplication() = createConfiguredApplication(applicationId, Collaborator.Roles.ADMINISTRATOR, environment = Environment.SANDBOX)
-      givenAddClientSecretFailsWith(application, actor, new ClientSecretLimitExceeded)
+      ApplicationCommandConnectorMock.Dispatch.thenFailsWith(CommandFailures.ClientSecretLimitExceeded)
 
       val result = underTest.addClientSecret(applicationId)(loggedInRequest)
 
@@ -301,7 +306,7 @@ class CredentialsSpec
       val result = underTest.addClientSecret(applicationId)(loggedInRequest)
 
       status(result) shouldBe FORBIDDEN
-      verify(underTest.applicationService, never).addClientSecret(any[Application], any[Actors.AppCollaborator])(*)
+      ApplicationCommandConnectorMock.Dispatch.verifyNeverCalled()
     }
 
     "display the error page when the application has not reached production state" in new Setup {
@@ -310,7 +315,7 @@ class CredentialsSpec
       val result = (underTest.addClientSecret(applicationId)(loggedInRequest))
 
       status(result) shouldBe BAD_REQUEST
-      verify(underTest.applicationService, never).addClientSecret(any[Application], any[Actors.AppCollaborator])(*)
+      ApplicationCommandConnectorMock.Dispatch.verifyNeverCalled()
     }
 
     "return to the login page when the user is not logged in" in new Setup {
@@ -320,12 +325,14 @@ class CredentialsSpec
 
       status(result) shouldBe SEE_OTHER
       redirectLocation(result) shouldBe Some("/developer/login")
-      verify(underTest.applicationService, never).addClientSecret(any[Application], any[Actors.AppCollaborator])(*)
+      ApplicationCommandConnectorMock.Dispatch.verifyNeverCalled()
     }
   }
 
   "deleteClientSecret" should {
-    val clientSecretToDelete: ClientSecret = appTokens.clientSecrets.last
+    val clientSecretToDelete: ClientSecretResponse = appTokens.clientSecrets.last
+    val nonExistantClientSecretId: ClientSecret.Id = ClientSecret.Id.random
+
     "return the confirmation page when the selected client secret exists" in new Setup with BasicApplicationProvider {
       val result = underTest.deleteClientSecret(applicationId, clientSecretToDelete.id)(loggedInRequest.withCSRFToken)
 
@@ -335,7 +342,7 @@ class CredentialsSpec
     }
 
     "return 404 when the selected client secret does not exist" in new Setup with BasicApplicationProvider {
-      val result = underTest.deleteClientSecret(applicationId, "wxyz")(loggedInRequest.withCSRFToken)
+      val result = underTest.deleteClientSecret(applicationId, nonExistantClientSecretId)(loggedInRequest.withCSRFToken)
 
       status(result) shouldBe NOT_FOUND
     }
@@ -358,13 +365,14 @@ class CredentialsSpec
   }
 
   "deleteClientSecretAction" should {
-    val applicationId          = ApplicationId.random
-    val clientSecretId: String = UUID.randomUUID().toString
+    val applicationId  = ApplicationId.random
+    val clientSecretId = ClientSecret.Id.random
 
     "delete the selected client secret" in new Setup {
       def createApplication() = createConfiguredApplication(applicationId, Collaborator.Roles.ADMINISTRATOR)
 
-      givenDeleteClientSecretSucceeds(application, actor, clientSecretId)
+      ApplicationCommandConnectorMock.Dispatch.thenReturnsSuccess(application)
+      // givenDeleteClientSecretSucceeds(application, actor, clientSecretId)
 
       val result = underTest.deleteClientSecretAction(applicationId, clientSecretId)(loggedInRequest)
 
@@ -389,6 +397,6 @@ class CredentialsSpec
     }
   }
 
-  private def aClientSecret(secretName: String) = ClientSecret(randomUUID.toString, secretName, LocalDateTime.now(ZoneOffset.UTC))
+  private def aClientSecret(secretName: String) = ClientSecretResponse(ClientSecret.Id.random, secretName, LocalDateTime.now(ZoneOffset.UTC))
 
 }

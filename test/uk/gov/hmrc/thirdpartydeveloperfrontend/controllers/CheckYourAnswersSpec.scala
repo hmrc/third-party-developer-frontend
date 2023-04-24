@@ -36,8 +36,9 @@ import play.filters.csrf.CSRF.TokenProvider
 import uk.gov.hmrc.http.HeaderCarrier
 
 import uk.gov.hmrc.apiplatform.modules.apis.domain.models._
-import uk.gov.hmrc.apiplatform.modules.applications.domain.models.{ApplicationId, ClientId, ClientSecret, Collaborator}
+import uk.gov.hmrc.apiplatform.modules.applications.domain.models.{ApplicationId, ClientId, ClientSecret, ClientSecretResponse, Collaborator}
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.LaxEmailAddress.StringSyntax
+import uk.gov.hmrc.apiplatform.modules.common.utils.FixedClock
 import uk.gov.hmrc.thirdpartydeveloperfrontend.builder._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.checkpages.{ApplicationCheck, CheckYourAnswers}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.apidefinitions._
@@ -57,9 +58,10 @@ class CheckYourAnswersSpec
     with SampleApplication
     with SubscriptionTestHelperSugar
     with WithCSRFAddToken
-    with SubscriptionsBuilder {
+    with SubscriptionsBuilder
+    with FixedClock {
 
-  private def aClientSecret() = ClientSecret(randomUUID.toString, randomUUID.toString, LocalDateTime.now())
+  private def aClientSecret() = ClientSecretResponse(ClientSecret.Id.random, randomUUID.toString, now)
 
   val appName: String = "app"
   val apiVersion      = ApiVersion("version")

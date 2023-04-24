@@ -16,13 +16,11 @@
 
 package uk.gov.hmrc.thirdpartydeveloperfrontend.mocks.service
 
-import java.util.UUID
-import scala.concurrent.Future.{failed, successful}
+import scala.concurrent.Future.successful
 
 import org.mockito.{ArgumentMatchersSugar, MockitoSugar}
 
 import uk.gov.hmrc.apiplatform.modules.applications.domain.models.ApplicationId
-import uk.gov.hmrc.apiplatform.modules.common.domain.models.Actors
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.service.ApplicationService
@@ -65,26 +63,6 @@ trait ApplicationServiceMock extends MockitoSugar with ArgumentMatchersSugar wit
   def givenUpdateCheckInformationSucceeds(app: Application, checkInfo: CheckInformation) =
     when(applicationServiceMock.updateCheckInformation(eqTo(app), eqTo(checkInfo))(*))
       .thenReturn(successful(ApplicationUpdateSuccessful))
-
-  def givenAddClientSecretReturns(application: Application, actor: Actors.AppCollaborator) = {
-    val newSecretId = UUID.randomUUID().toString
-    val newSecret   = UUID.randomUUID().toString
-
-    when(applicationServiceMock.addClientSecret(eqTo(application), eqTo(actor))(*))
-      .thenReturn(successful((newSecretId, newSecret)))
-  }
-
-  def givenAddClientSecretFailsWith(application: Application, actor: Actors.AppCollaborator, exception: Exception) = {
-    when(applicationServiceMock.addClientSecret(eqTo(application), eqTo(actor))(*))
-      .thenReturn(failed(exception))
-  }
-
-  def givenDeleteClientSecretSucceeds(application: Application, actor: Actors.AppCollaborator, clientSecretId: String) = {
-    when(
-      applicationServiceMock
-        .deleteClientSecret(eqTo(application), eqTo(actor), eqTo(clientSecretId))(*)
-    ).thenReturn(successful(ApplicationUpdateSuccessful))
-  }
 
   def updateApplicationSuccessful() = {
     when(applicationServiceMock.update(any[UpdateApplicationRequest])(*))

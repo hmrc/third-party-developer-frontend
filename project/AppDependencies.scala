@@ -28,7 +28,7 @@ object AppDependencies {
     "com.google.zxing"            %  "core"                               % "3.2.1",
     "com.typesafe.play"           %% "play-json"                          % "2.9.2",
     "commons-validator"           %  "commons-validator"                  % "1.7",
-    "uk.gov.hmrc"                 %% "api-platform-application-commands"  % "0.10.0"
+    "uk.gov.hmrc"                 %% "api-platform-application-commands"  % "0.14.0"
   )
 
   lazy val test =  Seq(

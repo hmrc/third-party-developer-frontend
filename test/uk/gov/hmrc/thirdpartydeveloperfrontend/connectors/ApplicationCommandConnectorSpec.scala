@@ -73,7 +73,6 @@ class ApplicationCommandConnectorSpec
 
     val config    = ApmConnector.Config(wireMockUrl)
     val connector = new ApplicationCommandConnector(httpClient, config) {}
-
   }
 
   "dispatch" should {
