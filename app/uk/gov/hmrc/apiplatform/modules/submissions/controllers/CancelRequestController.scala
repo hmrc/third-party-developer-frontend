@@ -29,11 +29,11 @@ import uk.gov.hmrc.apiplatform.modules.common.services.EitherTHelper
 import uk.gov.hmrc.apiplatform.modules.submissions.services.SubmissionService
 import uk.gov.hmrc.apiplatform.modules.submissions.views.html.{CancelledRequestForProductionCredentialsView, ConfirmCancelRequestForProductionCredentialsView}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.config.{ApplicationConfig, ErrorHandler}
-import uk.gov.hmrc.thirdpartydeveloperfrontend.connectors.ThirdPartyApplicationProductionConnector
 import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.ApplicationController
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.DeleteApplicationByCollaborator
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.controllers.BadRequestWithErrorMessage
 import uk.gov.hmrc.thirdpartydeveloperfrontend.service.{ApplicationActionService, ApplicationService, SessionService}
+import uk.gov.hmrc.apiplatform.modules.commands.applications.domain.models.ApplicationCommands
+import uk.gov.hmrc.thirdpartydeveloperfrontend.connectors.ApplicationCommandConnector
 
 object CancelRequestController {
   case class DummyForm(dummy: String = "dummy")
@@ -60,7 +60,7 @@ class CancelRequestController @Inject() (
     val applicationService: ApplicationService,
     mcc: MessagesControllerComponents,
     val submissionService: SubmissionService,
-    productionApplicationConnector: ThirdPartyApplicationProductionConnector,
+    appCmdConnector: ApplicationCommandConnector,
     confirmCancelRequestForProductionCredentialsView: ConfirmCancelRequestForProductionCredentialsView,
     cancelledRequestForProductionCredentialsView: CancelledRequestForProductionCredentialsView,
     clock: Clock
@@ -94,7 +94,7 @@ class CancelRequestController @Inject() (
     val formValues                         = request.body.asFormUrlEncoded.get.filterNot(_._1 == "csrfToken")
     val reasons                            = "DevHub user cancelled request for production credentials"
     val instigator                         = request.userId
-    val deleteRequest                      = DeleteApplicationByCollaborator(instigator, reasons, LocalDateTime.now(clock))
+    val deleteRequest                      = ApplicationCommands. DeleteApplicationByCollaborator(instigator, reasons, LocalDateTime.now(clock))
 
     val x =
       (
@@ -106,7 +106,7 @@ class CancelRequestController @Inject() (
                             failed("Bad form data")
                           )
           cancelAction <- ET.cond(submitAction == "cancel-request", submitAction, goBackToRegularPage)
-          _            <- ET.liftF(productionApplicationConnector.applicationUpdate(appId, deleteRequest))
+          _            <- ET.liftF(appCmdConnector.dispatchWithThrow(appId, deleteRequest, Set.empty))
         } yield Ok(cancelledRequestForProductionCredentialsView(request.application.name))
       )
     x.fold[Result](identity, identity)

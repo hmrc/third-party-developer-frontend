@@ -17,40 +17,22 @@
 package uk.gov.hmrc.apiplatform.modules.submissions.controllers
 
 import scala.concurrent.ExecutionContext.Implicits.global
-import scala.concurrent.Future.successful
-
-import org.mockito.{ArgumentMatchersSugar, MockitoSugar}
 
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
 import play.filters.csrf.CSRF
 
-import uk.gov.hmrc.apiplatform.modules.applications.domain.models.ApplicationId
 import uk.gov.hmrc.apiplatform.modules.common.utils.FixedClock
 import uk.gov.hmrc.apiplatform.modules.submissions.SubmissionsTestData
 import uk.gov.hmrc.apiplatform.modules.submissions.services.mocks.SubmissionServiceMockModule
 import uk.gov.hmrc.apiplatform.modules.submissions.views.html._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.builder._
-import uk.gov.hmrc.thirdpartydeveloperfrontend.connectors.ThirdPartyApplicationProductionConnector
 import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.{BaseControllerSpec, SubscriptionTestHelperSugar}
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.ApplicationUpdateSuccessful
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.mocks.service.{ApplicationActionServiceMock, ApplicationServiceMock}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.WithLoggedInSession._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.{WithCSRFAddToken, _}
-
-trait TPAProductionConnectorMockModule extends MockitoSugar with ArgumentMatchersSugar {
-
-  object TPAProductionConnectorMock {
-    val aMock = mock[ThirdPartyApplicationProductionConnector]
-
-    object DeleteApplication {
-
-      def willReturn() =
-        when(aMock.applicationUpdate(*[ApplicationId], *)(*)).thenReturn(successful(ApplicationUpdateSuccessful))
-    }
-  }
-}
+import uk.gov.hmrc.thirdpartydeveloperfrontend.mocks.connectors.ApplicationCommandConnectorMockModule
 
 class CancelRequestControllerSpec
     extends BaseControllerSpec
@@ -77,7 +59,7 @@ class CancelRequestControllerSpec
   trait Setup
       extends ApplicationServiceMock
       with ApplicationActionServiceMock
-      with TPAProductionConnectorMockModule
+      with ApplicationCommandConnectorMockModule
       with SubmissionServiceMockModule
       with HasSessionDeveloperFlow
       with HasSubscriptions
@@ -94,7 +76,7 @@ class CancelRequestControllerSpec
       applicationServiceMock,
       mcc,
       SubmissionServiceMock.aMock,
-      TPAProductionConnectorMock.aMock,
+      ApplicationCommandConnectorMock.aMock,
       confirmCancelRequestForProductionCredentialsView,
       cancelledRequestForProductionCredentialsView,
       clock
@@ -166,7 +148,7 @@ class CancelRequestControllerSpec
 
       private val request = loggedInRequest.withFormUrlEncodedBody("submit-action" -> "cancel-request")
 
-      TPAProductionConnectorMock.DeleteApplication.willReturn()
+      ApplicationCommandConnectorMock.DispatchWithThrow.thenReturnsSuccess(mock[Application])
 
       val result = controller.cancelRequestForProductionCredentialsAction(appId)(request.withCSRFToken)
 

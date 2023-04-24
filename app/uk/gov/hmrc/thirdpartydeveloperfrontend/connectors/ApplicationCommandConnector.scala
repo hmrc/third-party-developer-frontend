@@ -26,6 +26,8 @@ import uk.gov.hmrc.apiplatform.modules.applications.domain.models.ApplicationId
 import uk.gov.hmrc.apiplatform.modules.commands.applications.domain.models.{CommandHandlerTypes, _}
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.LaxEmailAddress
 import uk.gov.hmrc.apiplatform.modules.common.services.ApplicationLogger
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.ApplicationUpdateSuccessful
+import scala.concurrent.Future
 
 @Singleton
 class ApplicationCommandConnector @Inject() (
@@ -34,6 +36,19 @@ class ApplicationCommandConnector @Inject() (
   )(implicit val ec: ExecutionContext
   ) extends CommandHandlerTypes[DispatchSuccessResult]
     with ApplicationLogger {
+
+  // TODO - rework code so this is not required
+  def dispatchWithThrow(
+      applicationId: ApplicationId,
+      command: ApplicationCommand,
+      adminsToEmail: Set[LaxEmailAddress]
+    )(implicit hc: HeaderCarrier
+    ): Future[ApplicationUpdateSuccessful] = {
+      dispatch(applicationId, command, adminsToEmail).map(_ match {
+        case Left(errs) => throw new RuntimeException(CommandFailures.describe(errs.head))
+        case Right(_) => ApplicationUpdateSuccessful
+      })
+    }
 
   def dispatch(
       applicationId: ApplicationId,

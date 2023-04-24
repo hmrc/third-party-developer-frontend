@@ -32,14 +32,12 @@ import play.api.Configuration
 import play.api.inject.guice.GuiceApplicationBuilder
 import play.api.inject.bind
 import play.api.Mode
-import play.api.libs.json.Json
 import play.api.{Application => PlayApplication}
 import uk.gov.hmrc.apiplatform.modules.apis.domain.models.ApiContext
 import uk.gov.hmrc.apiplatform.modules.apis.domain.models.ApiVersion
 import uk.gov.hmrc.apiplatform.modules.apis.domain.models.ApiIdentifier
-import uk.gov.hmrc.apiplatform.modules.developers.domain.models.UserId
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.LaxEmailAddress.StringSyntax
-import uk.gov.hmrc.apiplatform.modules.applications.domain.models.{ApplicationId, ClientId, PrivacyPolicyLocations}
+import uk.gov.hmrc.apiplatform.modules.applications.domain.models.{ApplicationId, ClientId}
 
 import java.util.UUID
 import uk.gov.hmrc.apiplatform.modules.applications.domain.models.ClientSecret
@@ -112,7 +110,7 @@ class ThirdPartyApplicationConnectorSpec extends BaseConnectorIntegrationSpec wi
     implicit val hc = HeaderCarrier()
   }
 
-  trait Setup extends BaseSetup with ApplicationUpdateFormatters {
+  trait Setup extends BaseSetup {
     val connector = app.injector.instanceOf[ThirdPartyApplicationProductionConnector]
   }
 
@@ -162,25 +160,6 @@ class ThirdPartyApplicationConnectorSpec extends BaseConnectorIntegrationSpec wi
       )
 
       val result = await(connector.update(applicationId, updateApplicationRequest))
-
-      result shouldBe ApplicationUpdateSuccessful
-    }
-  }
-
-  "applicationUpdate" should {
-    val url           = s"/application/${applicationId.text}"
-    val updateRequest = ChangeProductionApplicationPrivacyPolicyLocation(UserId.random, LocalDateTime.now, PrivacyPolicyLocations.Url("http://example.com"))
-    "successfully update an application using the PATCH endpoint" in new Setup {
-      stubFor(
-        patch(urlEqualTo(url))
-          .withJsonRequestBody(Json.toJsObject(updateRequest) ++ Json.obj("updateType" -> "changeProductionApplicationPrivacyPolicyLocation"))
-          .willReturn(
-            aResponse()
-              .withStatus(OK)
-          )
-      )
-
-      val result = await(connector.applicationUpdate(applicationId, updateRequest))
 
       result shouldBe ApplicationUpdateSuccessful
     }
