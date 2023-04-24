@@ -14,14 +14,17 @@
  * limitations under the License.
  */
 
-package uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications
+package uk.gov.hmrc.thirdpartydeveloperfrontend.service
 
-import uk.gov.hmrc.apiplatform.modules.applications.domain.models.ClientSecretResponse
+import javax.inject.{Inject, Singleton}
 
-case class ApplicationToken(clientSecrets: List[ClientSecretResponse], accessToken: String)
+import uk.gov.hmrc.apiplatform.modules.applications.domain.models.ClientSecretsHashingConfig
+import uk.gov.hmrc.apiplatform.modules.common.services.ApplicationLogger
+import uk.gov.hmrc.apiplatform.modules.crypto.services.SecretsHashingService
 
-object ApplicationToken {
-  import play.api.libs.json.Json
+@Singleton
+class ClientSecretHashingService @Inject() (config: ClientSecretsHashingConfig)
+    extends SecretsHashingService with ApplicationLogger {
 
-  implicit val format = Json.format[ApplicationToken]
+  val workFactor = config.workFactor
 }

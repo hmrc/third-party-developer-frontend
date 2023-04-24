@@ -28,7 +28,7 @@ import uk.gov.hmrc.http.{HttpClient, _}
 import uk.gov.hmrc.play.http.metrics.common.API
 
 import uk.gov.hmrc.apiplatform.modules.apis.domain.models.ApiIdentifier
-import uk.gov.hmrc.apiplatform.modules.applications.domain.models.{ApplicationId, ClientId, ClientSecret}
+import uk.gov.hmrc.apiplatform.modules.applications.domain.models.ApplicationId
 import uk.gov.hmrc.apiplatform.modules.common.services.ApplicationLogger
 import uk.gov.hmrc.apiplatform.modules.developers.domain.models.UserId
 import uk.gov.hmrc.thirdpartydeveloperfrontend.config.ApplicationConfig
@@ -146,19 +146,6 @@ abstract class ThirdPartyApplicationConnector(config: ApplicationConfig, metrics
       }
   }
 
-  def addClientSecrets(id: ApplicationId, clientSecretRequest: ClientSecretRequest)(implicit hc: HeaderCarrier): Future[(String, String)] = metrics.record(api) {
-    http.PATCH[ClientSecretRequest, Either[UpstreamErrorResponse, AddClientSecretResponse]](s"$serviceBaseUrl/application/${id.value}/client-secret", clientSecretRequest)
-      .map {
-        case Right(response)                                 => {
-          val newSecret: TPAClientSecret = response.clientSecrets.last
-          ((newSecret.id, newSecret.secret.get))
-        }
-        case Left(UpstreamErrorResponse(_, FORBIDDEN, _, _)) => throw new ClientSecretLimitExceeded
-        case Left(UpstreamErrorResponse(_, NOT_FOUND, _, _)) => throw new ApplicationNotFound
-        case Left(err)                                       => throw err
-      }
-  }
-
   def validateName(name: String, selfApplicationId: Option[ApplicationId])(implicit hc: HeaderCarrier): Future[ApplicationNameValidation] = {
     val body = ApplicationNameValidationRequest(name, selfApplicationId)
 
@@ -197,15 +184,6 @@ abstract class ThirdPartyApplicationConnector(config: ApplicationConfig, metrics
 }
 
 private[connectors] object ThirdPartyApplicationConnectorDomain {
-  import java.time.LocalDateTime
-
-  def toDomain(tpaClientSecret: TPAClientSecret): ClientSecret =
-    ClientSecret(tpaClientSecret.id, tpaClientSecret.name, tpaClientSecret.createdOn, tpaClientSecret.lastAccess)
-
-  case class AddClientSecretResponse(clientId: ClientId, accessToken: String, clientSecrets: List[TPAClientSecret])
-
-  case class TPAClientSecret(id: String, name: String, secret: Option[String], createdOn: LocalDateTime, lastAccess: Option[LocalDateTime])
-
   case class UpdateIpAllowlistRequest(required: Boolean, allowlist: Set[String])
 }
 

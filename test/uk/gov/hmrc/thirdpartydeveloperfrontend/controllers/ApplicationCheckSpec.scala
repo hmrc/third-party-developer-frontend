@@ -17,7 +17,6 @@
 package uk.gov.hmrc.thirdpartydeveloperfrontend.controllers
 
 import java.time.{Clock, Instant, LocalDateTime, ZoneOffset}
-import java.util.UUID.randomUUID
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 import scala.concurrent.Future.successful
@@ -35,8 +34,9 @@ import play.filters.csrf.CSRF.TokenProvider
 import uk.gov.hmrc.http.HeaderCarrier
 
 import uk.gov.hmrc.apiplatform.modules.apis.domain.models._
-import uk.gov.hmrc.apiplatform.modules.applications.domain.models.{ApplicationId, ClientId, ClientSecret, Collaborator}
+import uk.gov.hmrc.apiplatform.modules.applications.domain.models.{ApplicationId, ClientId, ClientSecret, ClientSecretResponse, Collaborator}
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.LaxEmailAddress.StringSyntax
+import uk.gov.hmrc.apiplatform.modules.common.utils.FixedClock
 import uk.gov.hmrc.thirdpartydeveloperfrontend.builder._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.checkpages.ApplicationCheck
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.ApplicationUpliftSuccessful
@@ -56,7 +56,8 @@ class ApplicationCheckSpec
     with SampleSession
     with SampleApplication
     with SubscriptionTestHelperSugar
-    with SubscriptionsBuilder {
+    with SubscriptionsBuilder
+    with FixedClock {
 
   override val appId = ApplicationId.random
 
@@ -1409,7 +1410,7 @@ class ApplicationCheckSpec
     }
   }
 
-  private def aClientSecret() = ClientSecret(randomUUID.toString, randomUUID.toString, LocalDateTime.now(ZoneOffset.UTC))
+  private def aClientSecret() = ClientSecretResponse(ClientSecret.Id.random, "name", now)
 
   private def stepRequiredIndication(id: String) = {
     s"""<div id="$id" class="step-status status-incomplete">To do</div>"""

@@ -16,7 +16,6 @@
 
 package uk.gov.hmrc.thirdpartydeveloperfrontend.controllers
 
-import java.time.LocalDateTime
 import java.util.UUID.randomUUID
 import scala.concurrent.ExecutionContext.Implicits.global
 
@@ -28,7 +27,8 @@ import play.api.test.FakeRequest
 import play.api.test.Helpers._
 import play.filters.csrf.CSRF.TokenProvider
 
-import uk.gov.hmrc.apiplatform.modules.applications.domain.models.ClientSecret
+import uk.gov.hmrc.apiplatform.modules.applications.domain.models.{ClientSecret, ClientSecretResponse}
+import uk.gov.hmrc.apiplatform.modules.common.utils.FixedClock
 import uk.gov.hmrc.apiplatform.modules.submissions.services.mocks.SubmissionServiceMockModule
 import uk.gov.hmrc.apiplatform.modules.uplift.services.mocks.UpliftLogicMock
 import uk.gov.hmrc.thirdpartydeveloperfrontend.builder.{DeveloperBuilder, _}
@@ -48,7 +48,8 @@ class ManageApplicationsSpec
     with SubscriptionTestHelperSugar
     with WithCSRFAddToken
     with DeveloperBuilder
-    with LocalUserIdTracker {
+    with LocalUserIdTracker
+    with FixedClock {
 
   val tokens = ApplicationToken(List(aClientSecret(), aClientSecret()), "token")
 
@@ -126,5 +127,5 @@ class ManageApplicationsSpec
     }
   }
 
-  private def aClientSecret() = ClientSecret(randomUUID.toString, randomUUID.toString, LocalDateTime.now())
+  private def aClientSecret() = ClientSecretResponse(ClientSecret.Id.random, randomUUID.toString, now)
 }

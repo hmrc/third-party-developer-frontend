@@ -17,12 +17,12 @@
 @import uk.gov.hmrc.thirdpartydeveloperfrontend.helpers.DateFormatter.formatDateWithShortPattern
 @import java.util.UUID
 
-@import uk.gov.hmrc.apiplatform.modules.applications.domain.models.ClientSecret
+@import uk.gov.hmrc.apiplatform.modules.applications.domain.models.ClientSecretResponse
 @import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.Application
 @import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.Developer
 @import _root_.controllers.routes.Assets
 
-@(app: Application, developer: Developer, clientSecrets: Seq[ClientSecret])(
+@(app: Application, developer: Developer, clientSecrets: Seq[ClientSecretResponse])(
   implicit request: play.api.mvc.Request[Any], messages: Messages, applicationConfig: ApplicationConfig, flash: Flash
 )
 

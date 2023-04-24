@@ -40,7 +40,7 @@ class ApplicationCommandConnector @Inject() (
       command: ApplicationCommand,
       adminsToEmail: Set[LaxEmailAddress]
     )(implicit hc: HeaderCarrier
-    ): Result = {
+    ): AppCmdResult = {
 
     import uk.gov.hmrc.apiplatform.modules.common.domain.services.NonEmptyListFormatters._
     import play.api.libs.json._
@@ -68,7 +68,7 @@ class ApplicationCommandConnector @Inject() (
       .map(response =>
         response.status match {
           case OK          => parseWithLogAndThrow[DispatchSuccessResult](response.body).asRight[Failures]
-          case BAD_REQUEST => parseWithLogAndThrow[Failures](response.body).asLeft[DispatchSuccessResult]
+          case BAD_REQUEST => logger.error("BAD REQUEST: " + response.body); parseWithLogAndThrow[Failures](response.body).asLeft[DispatchSuccessResult]
           case status      =>
             logger.error(s"Dispatch failed with status code: $status")
             throw new InternalServerException(s"Failed calling dispatch $status")

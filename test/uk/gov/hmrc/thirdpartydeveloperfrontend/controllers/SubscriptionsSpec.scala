@@ -16,7 +16,6 @@
 
 package uk.gov.hmrc.thirdpartydeveloperfrontend.controllers
 
-import java.time.LocalDateTime
 import java.util.UUID.randomUUID
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
@@ -33,21 +32,28 @@ import play.filters.csrf.CSRF.TokenProvider
 import uk.gov.hmrc.http.HeaderCarrier
 
 import uk.gov.hmrc.apiplatform.modules.apis.domain.models.{ApiContext, ApiIdentifier, ApiVersion}
-import uk.gov.hmrc.apiplatform.modules.applications.domain.models.ClientSecret
+import uk.gov.hmrc.apiplatform.modules.applications.domain.models.{ClientSecret, ClientSecretResponse}
+import uk.gov.hmrc.apiplatform.modules.common.domain.models.Actors
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.LaxEmailAddress.StringSyntax
+import uk.gov.hmrc.apiplatform.modules.common.utils.FixedClock
 import uk.gov.hmrc.thirdpartydeveloperfrontend.builder.{DeveloperBuilder, _}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.config.FraudPreventionConfig
 import uk.gov.hmrc.thirdpartydeveloperfrontend.connectors.ThirdPartyDeveloperConnector
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications._
-import uk.gov.hmrc.thirdpartydeveloperfrontend.mocks.service.{ApplicationActionServiceMock, ApplicationServiceMock, SessionServiceMock}
+import uk.gov.hmrc.thirdpartydeveloperfrontend.mocks.service.{ApplicationActionServiceMock, ApplicationServiceMock, SessionServiceMock, SubscriptionsServiceMockModule}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.service._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.WithLoggedInSession._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.{WithCSRFAddToken, _}
-import uk.gov.hmrc.apiplatform.modules.common.domain.models.Actors
-import uk.gov.hmrc.thirdpartydeveloperfrontend.mocks.service.SubscriptionsServiceMockModule
 
-class SubscriptionsSpec extends BaseControllerSpec with WithCSRFAddToken with LocalUserIdTracker with DeveloperBuilder with SampleSession with SampleApplications
-    with SubscriptionTestHelperSugar {
+class SubscriptionsSpec
+    extends BaseControllerSpec
+    with WithCSRFAddToken
+    with LocalUserIdTracker
+    with DeveloperBuilder
+    with SampleSession
+    with SampleApplications
+    with SubscriptionTestHelperSugar
+    with FixedClock {
 
   val apiName       = "api-1"
   val apiVersion    = ApiVersion("1.0")
@@ -550,6 +556,6 @@ class SubscriptionsSpec extends BaseControllerSpec with WithCSRFAddToken with Lo
     title.get
   }
 
-  private def aClientSecret() = ClientSecret(randomUUID.toString, randomUUID.toString, LocalDateTime.now())
+  private def aClientSecret() = ClientSecretResponse(ClientSecret.Id.random, randomUUID.toString, now)
 
 }

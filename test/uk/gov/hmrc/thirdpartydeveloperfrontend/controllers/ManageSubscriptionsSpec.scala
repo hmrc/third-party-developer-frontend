@@ -33,7 +33,8 @@ import play.filters.csrf.CSRF.TokenProvider
 import uk.gov.hmrc.http.HeaderCarrier
 
 import uk.gov.hmrc.apiplatform.modules.apis.domain.models.{ApiContext, ApiVersion}
-import uk.gov.hmrc.apiplatform.modules.applications.domain.models.{ApplicationId, ClientSecret, Collaborator}
+import uk.gov.hmrc.apiplatform.modules.applications.domain.models.{ApplicationId, ClientSecret, ClientSecretResponse, Collaborator}
+import uk.gov.hmrc.apiplatform.modules.common.utils.FixedClock
 import uk.gov.hmrc.thirdpartydeveloperfrontend.builder.{DeveloperBuilder, _}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.config.ErrorHandler
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.ApplicationNotFound
@@ -56,7 +57,8 @@ class ManageSubscriptionsSpec
     with SubscriptionTestHelperSugar
     with TestApplications
     with DeveloperBuilder
-    with LocalUserIdTracker {
+    with LocalUserIdTracker
+    with FixedClock {
 
   val failedNoApp: Future[Nothing] = failed(new ApplicationNotFound)
 
@@ -836,10 +838,5 @@ class ManageSubscriptionsSpec
     }
   }
 
-  private def aClientSecret() =
-    ClientSecret(
-      randomUUID.toString,
-      randomUUID.toString,
-      LocalDateTime.now
-    )
+  private def aClientSecret() = ClientSecretResponse(ClientSecret.Id.random, randomUUID.toString, now)
 }

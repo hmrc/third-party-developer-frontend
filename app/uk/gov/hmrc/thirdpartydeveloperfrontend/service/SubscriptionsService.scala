@@ -72,12 +72,12 @@ class SubscriptionsService @Inject() (
     } yield subs.contains(apiIdentifier)
   }
 
-  def subscribeToApi(application: Application, apiIdentifier: ApiIdentifier, requestingEmail: LaxEmailAddress)(implicit hc: HeaderCarrier): Result = {
-    val cmd = ApplicationCommands.SubscribeToApi(Actors.AppCollaborator(requestingEmail), apiIdentifier, true, now)
+  def subscribeToApi(application: Application, apiIdentifier: ApiIdentifier, requestingEmail: LaxEmailAddress)(implicit hc: HeaderCarrier): AppCmdResult = {
+    val cmd = ApplicationCommands.SubscribeToApi(Actors.AppCollaborator(requestingEmail), apiIdentifier, now)
     applicationCommandConnector.dispatch(application.id, cmd, Set.empty)
   }
 
-  def unsubscribeFromApi(application: Application, apiIdentifier: ApiIdentifier, requestingEmail: LaxEmailAddress)(implicit hc: HeaderCarrier): Result = {
+  def unsubscribeFromApi(application: Application, apiIdentifier: ApiIdentifier, requestingEmail: LaxEmailAddress)(implicit hc: HeaderCarrier): AppCmdResult = {
     val cmd = ApplicationCommands.UnsubscribeFromApi(Actors.AppCollaborator(requestingEmail), apiIdentifier, now)
     applicationCommandConnector.dispatch(application.id, cmd, Set.empty)
   }

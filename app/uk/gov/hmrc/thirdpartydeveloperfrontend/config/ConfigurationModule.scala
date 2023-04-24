@@ -24,6 +24,7 @@ import com.google.inject.name.Names.named
 
 import uk.gov.hmrc.play.bootstrap.filters.frontend.SessionTimeoutFilter
 
+import uk.gov.hmrc.apiplatform.modules.applications.domain.models.ClientSecretsHashingConfig
 import uk.gov.hmrc.apiplatform.modules.submissions.config.ThirdPartyApplicationSubmissionsConnectorConfigProvider
 import uk.gov.hmrc.apiplatform.modules.submissions.connectors.ThirdPartyApplicationSubmissionsConnector
 import uk.gov.hmrc.thirdpartydeveloperfrontend.connectors._
@@ -60,6 +61,8 @@ class ConfigurationModule extends AbstractModule {
 
     bind(classOf[ThirdPartyApplicationSubmissionsConnector.Config])
       .toProvider(classOf[ThirdPartyApplicationSubmissionsConnectorConfigProvider])
+
+    bind(classOf[ClientSecretsHashingConfig]).toProvider(classOf[ClientSecretsHashingConfigProvider])
 
     bind(classOf[Clock]).toInstance(Clock.systemUTC())
   }
