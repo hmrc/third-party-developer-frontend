@@ -42,13 +42,15 @@ class RequestProductionCredentials @Inject() (
   def requestProductionCredentials(
       applicationId: ApplicationId,
       requestedBy: DeveloperSession,
-      requesterIsResponsibleIndividual: Boolean
+      requesterIsResponsibleIndividual: Boolean,
+      isNewTouUplift: Boolean
     )(implicit hc: HeaderCarrier
     ): Future[Either[ErrorDetails, Application]] = {
     (
       for {
-        app <- ET.fromEitherF(tpaConnector.requestApproval(applicationId, requestedBy.displayedName, requestedBy.email))
-        _   <- ET.liftF(createDeskproTicketIfNeeded(app, requestedBy, requesterIsResponsibleIndividual))
+        app        <- ET.fromEitherF(tpaConnector.requestApproval(applicationId, requestedBy.displayedName, requestedBy.email))
+        submission <- ET.fromOptionF(tpaConnector.fetchLatestSubmission(applicationId), ErrorDetails("submitSubmission001", s"No submission record found for ${applicationId}"))
+        _          <- ET.liftF(createDeskproTicketIfNeeded(app, requestedBy, requesterIsResponsibleIndividual, isNewTouUplift, submission.status.isGranted))
       } yield app
     )
       .value
@@ -57,13 +59,26 @@ class RequestProductionCredentials @Inject() (
   private def createDeskproTicketIfNeeded(
       app: Application,
       requestedBy: DeveloperSession,
-      requesterIsResponsibleIndividual: Boolean
+      requesterIsResponsibleIndividual: Boolean,
+      isNewTouUplift: Boolean,
+      isSubmissionPassed: Boolean
     )(implicit hc: HeaderCarrier
     ): Future[Option[TicketResult]] = {
     if (requesterIsResponsibleIndividual) {
-      val ticket = DeskproTicket.createForRequestProductionCredentials(requestedBy.displayedName, requestedBy.email, app.name, app.id)
-      deskproConnector.createTicket(Some(requestedBy.developer.userId), ticket).map(Some(_))
+      if (isNewTouUplift) {
+        if (isSubmissionPassed) {
+          // Don't create a Deskpro ticket if the submission passed when it was automatically marked
+          Future.successful(None)
+        } else {
+          val ticket = DeskproTicket.createForTermsOfUseUplift(requestedBy.displayedName, requestedBy.email, app.name, app.id)
+          deskproConnector.createTicket(Some(requestedBy.developer.userId), ticket).map(Some(_))
+        }
+      } else {
+        val ticket = DeskproTicket.createForRequestProductionCredentials(requestedBy.displayedName, requestedBy.email, app.name, app.id)
+        deskproConnector.createTicket(Some(requestedBy.developer.userId), ticket).map(Some(_))
+      }
     } else {
+      // Don't create a Deskpro ticket if the requester is not the responsible individual
       Future.successful(None)
     }
   }

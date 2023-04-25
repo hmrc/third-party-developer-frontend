@@ -75,7 +75,7 @@ trait SubscriptionsServiceMockModule extends MockitoSugar with ArgumentMatchersS
           .thenReturn(successful(mock[TicketResult]))
     }
 
-    object RequestApiUnsubscribe  {
+    object RequestApiUnsubscribe {
 
       def succeedsFor(loggedInDeveloper: DeveloperSession, app: Application, apiName: String, apiVersion: ApiVersion) =
         when(aMock.requestApiUnsubscribe(eqTo(loggedInDeveloper), eqTo(app), eqTo(apiName), eqTo(apiVersion))(*))
