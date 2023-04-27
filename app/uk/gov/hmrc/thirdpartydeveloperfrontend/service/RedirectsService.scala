@@ -21,11 +21,12 @@ import javax.inject._
 
 import uk.gov.hmrc.http.HeaderCarrier
 
-import uk.gov.hmrc.apiplatform.modules.commands.applications.domain.models.{ApplicationCommands, CommandHandlerTypes, DispatchSuccessResult}
+import uk.gov.hmrc.apiplatform.modules.applications.domain.models.{ApplicationId, RedirectUri}
+import uk.gov.hmrc.apiplatform.modules.commands.applications.domain.models.{ApplicationCommand, ApplicationCommands, CommandHandlerTypes, DispatchSuccessResult}
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.Actor
 import uk.gov.hmrc.apiplatform.modules.common.domain.services.ClockNow
 import uk.gov.hmrc.thirdpartydeveloperfrontend.connectors.ApplicationCommandConnector
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.{Application, Standard}
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.Application
 
 @Singleton
 class RedirectsService @Inject() (
@@ -34,45 +35,19 @@ class RedirectsService @Inject() (
   ) extends CommandHandlerTypes[DispatchSuccessResult]
     with ClockNow {
 
-  import RedirectsService._
-
-  private def issueCommand(actor: Actor, application: Application, fn: List[String] => List[String])(implicit hc: HeaderCarrier): AppCmdResult = {
-    val oldRedirectUris = application.access match {
-      case Standard(redirectUris, _, _, _, _, _) => redirectUris
-      case _                                     => List.empty
-    }
-    val newRedirectUris = fn(oldRedirectUris)
-    val cmd             = ApplicationCommands.UpdateRedirectUris(actor, oldRedirectUris, newRedirectUris, now())
-    applicationCmdDispatcher.dispatch(application.id, cmd, Set.empty)
+  private def issueCommand(id: ApplicationId, cmd: ApplicationCommand)(implicit hc: HeaderCarrier): AppCmdResult = {
+    applicationCmdDispatcher.dispatch(id, cmd, Set.empty)
   }
 
-  def addRedirect(actor: Actor, application: Application, newRedirectUri: String)(implicit hc: HeaderCarrier) = {
-    issueCommand(actor, application, addRedirectUris(newRedirectUri))
+  def addRedirect(actor: Actor, application: Application, newRedirectUri: RedirectUri)(implicit hc: HeaderCarrier) = {
+    issueCommand(application.id, ApplicationCommands.AddRedirectUri(actor, newRedirectUri, now))
   }
 
-  def changeRedirect(actor: Actor, application: Application, originalRedirectUri: String, newRedirectUri: String)(implicit hc: HeaderCarrier) = {
-    issueCommand(actor, application, changeRedirectUris(originalRedirectUri, newRedirectUri))
+  def changeRedirect(actor: Actor, application: Application, originalRedirectUri: RedirectUri, newRedirectUri: RedirectUri)(implicit hc: HeaderCarrier) = {
+    issueCommand(application.id, ApplicationCommands.ChangeRedirectUri(actor, originalRedirectUri, newRedirectUri, now))
   }
 
-  def deleteRedirect(actor: Actor, application: Application, redirectUriToDelete: String)(implicit hc: HeaderCarrier) = {
-    issueCommand(actor, application, deleteRedirectUris(redirectUriToDelete))
-  }
-}
-
-object RedirectsService {
-
-  def addRedirectUris(newRedirectUri: String): List[String] => List[String] = (redirectUris) => {
-    (redirectUris ++ List(newRedirectUri)).distinct
-  }
-
-  def changeRedirectUris(originalRedirectUri: String, newRedirectUri: String): List[String] => List[String] = (redirectUris) => {
-    redirectUris.map {
-      case `originalRedirectUri` => newRedirectUri
-      case s                     => s
-    }
-  }
-
-  def deleteRedirectUris(redirectUriToDelete: String): List[String] => List[String] = (redirectUris) => {
-    redirectUris.filter(uri => uri != redirectUriToDelete)
+  def deleteRedirect(actor: Actor, application: Application, redirectUriToDelete: RedirectUri)(implicit hc: HeaderCarrier) = {
+    issueCommand(application.id, ApplicationCommands.DeleteRedirectUri(actor, redirectUriToDelete, now))
   }
 }

@@ -26,6 +26,7 @@ import play.api.data.Forms.{optional, text}
 import play.api.data.validation.{Constraint, Invalid, Valid, ValidationError, ValidationResult}
 import uk.gov.hmrc.emailaddress.EmailAddress
 
+import uk.gov.hmrc.apiplatform.modules.applications.domain.models.RedirectUri
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.Environment
 
 package object controllers {
@@ -314,17 +315,16 @@ package object controllers {
     case _                                       => Valid
   }
 
-  def redirectUriValidator = Forms.text.verifying(redirectUriInvalidKey, s => isValidRedirectUri(s))
-
-  private def isValidRedirectUri(s: String): Boolean = {
-    !isBlank(s) && !hasFragment(s) && (isLocalhostUrl(s) || isHttpsUrl(s) || isOutOfBoundsRedirectUrl(s))
-  }
+  def redirectUriValidator = Forms.text.verifying(redirectUriInvalidKey, s => RedirectUri(s).isDefined)
 
   def privacyPolicyUrlValidator = Forms.text.verifying(privacyPolicyUrlInvalidKey, s => isBlank(s) || isValidUrl(s))
 
   def tNcUrlValidator = Forms.text.verifying(tNcUrlInvalidKey, s => isBlank(s) || isValidUrl(s))
 
   def applicationNameValidator = {
+    def isAcceptedAscii(s: String) = {
+      !s.toCharArray.exists(c => 32 > c || c > 126)
+    }
     // This does 1 & 2 above
     Forms.text.verifying(applicationNameInvalidKeyLengthAndCharacters, s => s.length >= 2 && s.length <= 50 && isAcceptedAscii(s))
   }
@@ -335,19 +335,7 @@ package object controllers {
 
   private def isBlank: String => Boolean = s => s.length == 0
 
-  private def hasFragment(s: String) = s.contains("#")
-
   def isValidUrl: String => Boolean = s => Try(new URL(s.trim)).isSuccess
-
-  private def isLocalhostUrl: String => Boolean = s => Try(new URL(s.trim).getHost == "localhost").getOrElse(false)
-
-  private def isHttpsUrl: String => Boolean = s => Try(new URL(s.trim).getProtocol == "https").getOrElse(false)
-
-  private def isOutOfBoundsRedirectUrl: String => Boolean = s => s == "urn:ietf:wg:oauth:2.0:oob:auto" || s == "urn:ietf:wg:oauth:2.0:oob"
-
-  private def isAcceptedAscii(s: String) = {
-    !s.toCharArray.exists(c => 32 > c || c > 126)
-  }
 
   private def isValidEnvironment(s: String) = Environment.from(s).isDefined
 }

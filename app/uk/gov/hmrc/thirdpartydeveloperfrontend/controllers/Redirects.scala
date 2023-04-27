@@ -27,7 +27,7 @@ import play.api.libs.crypto.CookieSigner
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents, Result}
 import uk.gov.hmrc.play.bootstrap.controller.WithUnsafeDefaultFormBinding
 
-import uk.gov.hmrc.apiplatform.modules.applications.domain.models.ApplicationId
+import uk.gov.hmrc.apiplatform.modules.applications.domain.models.{ApplicationId, RedirectUri}
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.Actors
 import uk.gov.hmrc.thirdpartydeveloperfrontend.config.{ApplicationConfig, ErrorHandler, FraudPreventionConfig}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.fraudprevention.FraudPreventionNavLinkHelper
@@ -78,7 +78,7 @@ class Redirects @Inject() (
       if (application.hasRedirectUri(form.redirectUri)) {
         successful(BadRequest(addRedirectView(applicationViewModelFromApplicationRequest, AddRedirectForm.form.fill(form).withError("redirectUri", "redirect.uri.duplicate"))))
       } else {
-        redirectsService.addRedirect(actor, application, form.redirectUri)
+        redirectsService.addRedirect(actor, application, RedirectUri.unsafeApply(form.redirectUri))
           .map(_ => Redirect(routes.Redirects.redirects(applicationId)))
       }
     }
@@ -109,7 +109,7 @@ class Redirects @Inject() (
     def handleValidForm(form: DeleteRedirectConfirmationForm) = {
       form.deleteRedirectConfirm match {
         case Some("Yes") =>
-          redirectsService.deleteRedirect(actor, application, form.redirectUri)
+          redirectsService.deleteRedirect(actor, application, RedirectUri.unsafeApply(form.redirectUri))
             .map(_ => Redirect(routes.Redirects.redirects(applicationId)))
         case _           => successful(Redirect(routes.Redirects.redirects(application.id)))
       }
@@ -143,7 +143,7 @@ class Redirects @Inject() (
                   .withError("newRedirectUri", "redirect.uri.duplicate")
               )
             } else
-              redirectsService.changeRedirect(actor, application, form.originalRedirectUri, form.newRedirectUri)
+              redirectsService.changeRedirect(actor, application, RedirectUri.unsafeApply(form.originalRedirectUri), RedirectUri.unsafeApply(form.newRedirectUri))
                 .map(_ => Redirect(routes.Redirects.redirects(applicationId)))
           case _             => successful(Redirect(routes.Details.details(applicationId)))
         }
