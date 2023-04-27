@@ -26,6 +26,7 @@ import uk.gov.hmrc.apiplatform.modules.common.domain.models.LaxEmailAddress.Stri
 import uk.gov.hmrc.apiplatform.modules.developers.domain.models.UserId
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.apidefinitions.AccessType
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications._
+import uk.gov.hmrc.apiplatform.modules.applications.domain.models.RedirectUri
 
 trait TestApplications {
   self: CollaboratorTracker =>
@@ -136,7 +137,7 @@ trait TestApplications {
       }
     }
 
-    final def withRedirectUris(redirectUris: List[String]): Application = app.copy(access = standardAccess.copy(redirectUris = redirectUris))
+    final def withRedirectUris(redirectUris: List[RedirectUri]): Application = app.copy(access = standardAccess.copy(redirectUris = redirectUris.map(_.uri)))
 
     final def withTermsAndConditionsUrl(url: Option[String]): Application = app.copy(access = standardAccess.copy(termsAndConditionsUrl = url))
 

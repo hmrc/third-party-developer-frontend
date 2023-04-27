@@ -22,6 +22,7 @@ import org.mockito.{ArgumentMatchersSugar, MockitoSugar}
 
 import uk.gov.hmrc.apiplatform.modules.commands.applications.domain.models.DispatchSuccessResult
 import uk.gov.hmrc.thirdpartydeveloperfrontend.service.RedirectsService
+import uk.gov.hmrc.apiplatform.modules.applications.domain.models.RedirectUri
 
 trait RedirectsServiceMockModule extends MockitoSugar with ArgumentMatchersSugar {
 
@@ -32,21 +33,21 @@ trait RedirectsServiceMockModule extends MockitoSugar with ArgumentMatchersSugar
 
     object AddRedirect {
 
-      def succeedsWith(uri: String) = {
+      def succeedsWith(uri: RedirectUri) = {
         when(aMock.addRedirect(*, *, eqTo(uri))(*)).thenReturn(successful(Right(mockDispatchSuccessResult)))
       }
     }
 
     object ChangeRedirect {
 
-      def succeedsWith(from: String, to: String) = {
+      def succeedsWith(from: RedirectUri, to: RedirectUri) = {
         when(aMock.changeRedirect(*, *, eqTo(from), eqTo(to))(*)).thenReturn(successful(Right(mockDispatchSuccessResult)))
       }
     }
 
     object DeleteRedirect {
 
-      def succeedsWith(uri: String) = {
+      def succeedsWith(uri: RedirectUri) = {
         when(aMock.deleteRedirect(*, *, eqTo(uri))(*)).thenReturn(successful(Right(mockDispatchSuccessResult)))
       }
     }

@@ -36,6 +36,7 @@ import uk.gov.hmrc.thirdpartydeveloperfrontend.mocks.service.{ApplicationActionS
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.ViewHelpers._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.WithLoggedInSession._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils._
+import uk.gov.hmrc.apiplatform.modules.applications.domain.models.RedirectUri
 
 class RedirectsSpec
     extends BaseControllerSpec
@@ -55,7 +56,7 @@ class RedirectsSpec
 
     val loggedInDeveloper = DeveloperSession(session)
 
-    val redirectUris = List("https://www.example.com", "https://localhost:8080")
+    val redirectUris = List("https://www.example.com", "https://localhost:8080").map(RedirectUri.unsafeApply)
 
     val redirectsView                  = app.injector.instanceOf[RedirectsView]
     val addRedirectView                = app.injector.instanceOf[AddRedirectView]
@@ -143,7 +144,7 @@ class RedirectsSpec
 
     def addRedirectActionShouldRenderRedirectsPageAfterAddingTheRedirectUri(application: Application, redirectUriToAdd: String) = {
       givenApplicationExists(application)
-      RedirectsServiceMock.AddRedirect.succeedsWith(redirectUriToAdd)
+      RedirectsServiceMock.AddRedirect.succeedsWith(RedirectUri.unsafeApply(redirectUriToAdd))
 
       val request = loggedInRequest.withCSRFToken.withFormUrlEncodedBody("redirectUri" -> redirectUriToAdd)
       val result  = underTest.addRedirectAction(application.id)(request)
@@ -167,36 +168,36 @@ class RedirectsSpec
       elementIdentifiedByIdContainsText(document, "submit", "Submit") shouldBe shouldShowDeleteControls
     }
 
-    def deleteRedirectsActionShouldRenderTheConfirmationPage(application: Application, resultStatus: Int, shouldShowDeleteControls: Boolean, redirectUriToDelete: String) = {
+    def deleteRedirectsActionShouldRenderTheConfirmationPage(application: Application, resultStatus: Int, shouldShowDeleteControls: Boolean, redirectUriToDelete: RedirectUri) = {
       givenApplicationExists(application)
 
-      val result = underTest.deleteRedirectAction(application.id)(loggedInRequest.withCSRFToken.withFormUrlEncodedBody("redirectUri" -> redirectUriToDelete))
+      val result = underTest.deleteRedirectAction(application.id)(loggedInRequest.withCSRFToken.withFormUrlEncodedBody("redirectUri" -> redirectUriToDelete.uri))
 
       status(result) shouldBe resultStatus
 
       val document = Jsoup.parse(contentAsString(result))
 
       elementExistsById(document, "data-field-error-deleteRedirectConfirm") shouldBe true
-      elementIdentifiedByIdContainsText(document, "redirectUriToDelete", redirectUriToDelete) shouldBe shouldShowDeleteControls
+      elementIdentifiedByIdContainsText(document, "redirectUriToDelete", redirectUriToDelete.uri) shouldBe shouldShowDeleteControls
       elementIdentifiedByIdContainsText(document, "submit", "Submit") shouldBe shouldShowDeleteControls
     }
 
-    def deleteRedirectsActionShouldRedirectToTheRedirectsPageWhenSuccessful(application: Application, resultStatus: Int, redirectUriToDelete: String) = {
+    def deleteRedirectsActionShouldRedirectToTheRedirectsPageWhenSuccessful(application: Application, resultStatus: Int, redirectUriToDelete: RedirectUri) = {
       givenApplicationExists(application)
       RedirectsServiceMock.DeleteRedirect.succeedsWith(redirectUriToDelete)
 
       val result =
-        underTest.deleteRedirectAction(application.id)(loggedInRequest.withCSRFToken.withFormUrlEncodedBody("redirectUri" -> redirectUriToDelete, "deleteRedirectConfirm" -> "Yes"))
+        underTest.deleteRedirectAction(application.id)(loggedInRequest.withCSRFToken.withFormUrlEncodedBody("redirectUri" -> redirectUriToDelete.uri, "deleteRedirectConfirm" -> "Yes"))
 
       status(result) shouldBe resultStatus
       headers(result).apply(LOCATION) shouldBe s"/developer/applications/${application.id.value}/redirect-uris"
     }
 
-    def deleteRedirectsActionShouldRedirectToTheRedirectsPageWhenUserChoosesNotToDelete(application: Application, resultStatus: Int, redirectUriToDelete: String) = {
+    def deleteRedirectsActionShouldRedirectToTheRedirectsPageWhenUserChoosesNotToDelete(application: Application, resultStatus: Int, redirectUriToDelete: RedirectUri) = {
       givenApplicationExists(application)
 
       val result =
-        underTest.deleteRedirectAction(application.id)(loggedInRequest.withCSRFToken.withFormUrlEncodedBody("redirectUri" -> redirectUriToDelete, "deleteRedirectConfirm" -> "no"))
+        underTest.deleteRedirectAction(application.id)(loggedInRequest.withCSRFToken.withFormUrlEncodedBody("redirectUri" -> redirectUriToDelete.uri, "deleteRedirectConfirm" -> "no"))
 
       status(result) shouldBe resultStatus
 
@@ -294,7 +295,7 @@ class RedirectsSpec
     "return the redirects page with some redirect URIs for an admin and an application with some redirect URIs" in new Setup {
       redirectsShouldRenderThePage(
         anApplication(adminEmail = loggedInDeveloper.email)
-          .withRedirectUris(List("https://www.example.com", "https://localhost:8080")),
+          .withRedirectUris(redirectUris),
         shouldShowDeleteButton = true
       )
     }
@@ -302,7 +303,7 @@ class RedirectsSpec
     "return the redirects page with some redirect URIs for a developer and an application with some redirect URIs" in new Setup {
       redirectsShouldRenderThePage(
         anApplication(developerEmail = loggedInDeveloper.email)
-          .withRedirectUris(List("https://www.example.com", "https://localhost:8080")),
+          .withRedirectUris(redirectUris),
         shouldShowDeleteButton = false
       )
     }
@@ -347,7 +348,7 @@ class RedirectsSpec
           .withRedirectUris(redirectUris),
         OK,
         shouldShowDeleteControls = true,
-        redirectUris.head
+        redirectUris.head.uri
       )
     }
 
@@ -357,7 +358,7 @@ class RedirectsSpec
           .withRedirectUris(redirectUris),
         OK,
         shouldShowDeleteControls = true,
-        redirectUriToDelete = redirectUris.head
+        redirectUriToDelete = redirectUris.head.uri
       )
     }
 
@@ -367,7 +368,7 @@ class RedirectsSpec
           .withRedirectUris(redirectUris),
         FORBIDDEN,
         shouldShowDeleteControls = false,
-        redirectUris.head
+        redirectUris.head.uri
       )
     }
   }
@@ -408,7 +409,7 @@ class RedirectsSpec
         anApplication(adminEmail = loggedInDeveloper.email)
           .withRedirectUris(redirectUris),
         OK,
-        redirectUris.head,
+        redirectUris.head.uri,
         "https://www.another.example.com"
       )
     }
@@ -419,23 +420,23 @@ class RedirectsSpec
     "return the redirect page for an admin with a production application when submitted a changed uri" in new Setup {
       val application         = anApplication(adminEmail = loggedInDeveloper.email).withRedirectUris(redirectUris)
       val originalRedirectUri = redirectUris.head
-      val newRedirectUri      = "https://localhost:1111"
+      val newRedirectUri      = RedirectUri.unsafeApply("https://localhost:1111")
       givenApplicationExists(application)
       RedirectsServiceMock.ChangeRedirect.succeedsWith(originalRedirectUri, newRedirectUri)
 
       val result = underTest.changeRedirectAction(application.id)(
-        loggedInRequest.withCSRFToken.withFormUrlEncodedBody("originalRedirectUri" -> originalRedirectUri, "newRedirectUri" -> newRedirectUri)
+        loggedInRequest.withCSRFToken.withFormUrlEncodedBody("originalRedirectUri" -> originalRedirectUri.uri, "newRedirectUri" -> newRedirectUri.uri)
       )
       status(result) shouldBe SEE_OTHER
       headers(result).apply(LOCATION) shouldBe s"/developer/applications/${application.id.value}/redirect-uris"
     }
 
     "return the change redirect page for an admin with a production application when submitted a duplicate uri" in new Setup {
-      changeRedirectUriActionShouldRenderError(originalRedirectUri = redirectUris.head, newRedirectUri = redirectUris.last)
+      changeRedirectUriActionShouldRenderError(originalRedirectUri = redirectUris.head.uri, newRedirectUri = redirectUris.last.uri)
     }
 
     "return the change redirect page for an admin with a production application when submitted an invalid uri" in new Setup {
-      changeRedirectUriActionShouldRenderError(originalRedirectUri = redirectUris.head, newRedirectUri = "invalidURI")
+      changeRedirectUriActionShouldRenderError(originalRedirectUri = redirectUris.head.uri, newRedirectUri = "invalidURI")
     }
   }
 }
