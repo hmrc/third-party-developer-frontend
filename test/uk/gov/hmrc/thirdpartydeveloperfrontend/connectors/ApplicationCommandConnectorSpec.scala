@@ -34,6 +34,12 @@ import uk.gov.hmrc.apiplatform.modules.common.domain.models.LaxEmailAddress.Stri
 import uk.gov.hmrc.apiplatform.modules.developers.domain.models.UserId
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.{AsyncHmrcSpec, WireMockSugar}
+import uk.gov.hmrc.apiplatform.modules.commands.applications.domain.models.CommandFailures
+import cats.data.NonEmptyList
+import uk.gov.hmrc.apiplatform.modules.common.domain.services.NonEmptyListFormatters._
+import uk.gov.hmrc.apiplatform.modules.commands.applications.domain.models.CommandFailure
+import uk.gov.hmrc.http.InternalServerException
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.ApplicationUpdateSuccessful
 
 class ApplicationCommandConnectorSpec
     extends AsyncHmrcSpec
@@ -67,6 +73,14 @@ class ApplicationCommandConnectorSpec
   val authToken   = "Bearer Token"
   implicit val hc = HeaderCarrier().withExtraHeaders(("Authorization", authToken))
 
+  val emailAddressToRemove = "toRemove@example.com".toLaxEmail
+  val gatekeeperUserName   = "maxpower"
+  val collaborator         = Collaborators.Administrator(UserId.random, emailAddressToRemove)
+  val command              = ApplicationCommands.RemoveCollaborator(Actors.GatekeeperUser(gatekeeperUserName), collaborator, LocalDateTime.now())
+
+  val adminsToEmail = Set("admin1@example.com", "admin2@example.com").map(_.toLaxEmail)
+  val url           = s"/applications/${applicationId.value.toString()}/dispatch"
+
   class Setup(proxyEnabled: Boolean = false) {
 
     val httpClient = app.injector.instanceOf[HttpClient]
@@ -76,13 +90,6 @@ class ApplicationCommandConnectorSpec
   }
 
   "dispatch" should {
-    val emailAddressToRemove = "toRemove@example.com".toLaxEmail
-    val gatekeeperUserName   = "maxpower"
-    val collaborator         = Collaborators.Administrator(UserId.random, emailAddressToRemove)
-    val command              = ApplicationCommands.RemoveCollaborator(Actors.GatekeeperUser(gatekeeperUserName), collaborator, LocalDateTime.now())
-
-    val adminsToEmail = Set("admin1@example.com", "admin2@example.com").map(_.toLaxEmail)
-    val url           = s"/applications/${applicationId.value.toString()}/dispatch"
 
     "send a correct command" in new Setup {
       stubFor(
@@ -94,7 +101,67 @@ class ApplicationCommandConnectorSpec
               .withStatus(OK)
           )
       )
-      await(connector.dispatch(applicationId, command, adminsToEmail))
+      await(connector.dispatch(applicationId, command, adminsToEmail)).right.value
+    }
+
+    "send a correct command and handle command failure" in new Setup {
+      val failures = NonEmptyList.one[CommandFailure](CommandFailures.ApplicationNotFound)
+      stubFor(
+        patch(urlPathEqualTo(url))
+          .withJsonRequestBody(DispatchRequest(command, adminsToEmail))
+          .willReturn(
+            aResponse()
+              .withJsonBody(failures)
+              .withStatus(BAD_REQUEST)
+          )
+      )
+      await(connector.dispatch(applicationId, command, adminsToEmail)).left.value shouldBe failures
+    }
+
+    "send a correct command and handle general failure" in new Setup {
+      stubFor(
+        patch(urlPathEqualTo(url))
+          .withJsonRequestBody(DispatchRequest(command, adminsToEmail))
+          .willReturn(
+            aResponse()
+              .withStatus(IM_A_TEAPOT)
+          )
+      )
+      intercept[InternalServerException] {
+        await(connector.dispatch(applicationId, command, adminsToEmail))
+      }.message should include(IM_A_TEAPOT.toString)
+    }
+  }
+
+  "dispatchWithThrow" should {
+    "send a correct command" in new Setup {
+      stubFor(
+        patch(urlPathEqualTo(url))
+          .withJsonRequestBody(DispatchRequest(command, adminsToEmail))
+          .willReturn(
+            aResponse()
+              .withJsonBody(DispatchSuccessResult(anApplicationResponse()))
+              .withStatus(OK)
+          )
+      )
+      await(connector.dispatchWithThrow(applicationId, command, adminsToEmail)) shouldBe ApplicationUpdateSuccessful
+    }
+
+    "send a correct command and handle command failure" in new Setup {
+      val failures = NonEmptyList.one[CommandFailure](CommandFailures.ApplicationNotFound)
+      stubFor(
+        patch(urlPathEqualTo(url))
+          .withJsonRequestBody(DispatchRequest(command, adminsToEmail))
+          .willReturn(
+            aResponse()
+              .withJsonBody(failures)
+              .withStatus(BAD_REQUEST)
+          )
+      )
+      
+      intercept[Exception] {
+        await(connector.dispatchWithThrow(applicationId, command, adminsToEmail))
+      }
     }
   }
 }

@@ -28,6 +28,7 @@ import uk.gov.hmrc.apiplatform.modules.common.domain.models.{Actors, LaxEmailAdd
 import uk.gov.hmrc.apiplatform.modules.common.domain.services.ClockNow
 import uk.gov.hmrc.thirdpartydeveloperfrontend.connectors._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications._
+import uk.gov.hmrc.thirdpartydeveloperfrontend.connectors.ApplicationCommandConnector
 
 @Singleton
 class CollaboratorService @Inject() (

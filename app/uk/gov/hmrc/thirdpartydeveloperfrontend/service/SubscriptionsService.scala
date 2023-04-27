@@ -27,7 +27,8 @@ import uk.gov.hmrc.apiplatform.modules.applications.domain.models.ApplicationId
 import uk.gov.hmrc.apiplatform.modules.commands.applications.domain.models.{ApplicationCommands, CommandHandlerTypes, DispatchSuccessResult}
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.{Actors, LaxEmailAddress}
 import uk.gov.hmrc.apiplatform.modules.common.domain.services.ClockNow
-import uk.gov.hmrc.thirdpartydeveloperfrontend.connectors.{ApmConnector, ApplicationCommandConnector, DeskproConnector}
+import uk.gov.hmrc.thirdpartydeveloperfrontend.connectors.{ApmConnector, DeskproConnector}
+import uk.gov.hmrc.thirdpartydeveloperfrontend.connectors.ApplicationCommandConnector
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.Application
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.connectors.{DeskproTicket, TicketResult}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.DeveloperSession

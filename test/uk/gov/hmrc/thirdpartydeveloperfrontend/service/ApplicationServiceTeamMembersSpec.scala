@@ -41,13 +41,14 @@ import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.subscriptions.Versi
 import uk.gov.hmrc.thirdpartydeveloperfrontend.service.PushPullNotificationsService.PushPullNotificationsConnector
 import uk.gov.hmrc.thirdpartydeveloperfrontend.service.SubscriptionFieldsService.SubscriptionFieldsConnector
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.{AsyncHmrcSpec, LocalUserIdTracker}
+import uk.gov.hmrc.thirdpartydeveloperfrontend.mocks.connectors.ApplicationCommandConnectorMockModule
 
 class ApplicationServiceTeamMembersSpec extends AsyncHmrcSpec with SubscriptionsBuilder with ApplicationBuilder with LocalUserIdTracker {
 
   val versionOne = ApiVersion("1.0")
   val versionTwo = ApiVersion("2.0")
 
-  trait Setup extends FixedClock {
+  trait Setup extends FixedClock with ApplicationCommandConnectorMockModule {
     implicit val hc: HeaderCarrier = HeaderCarrier()
 
     val mockProductionApplicationConnector: ThirdPartyApplicationProductionConnector =
@@ -76,6 +77,7 @@ class ApplicationServiceTeamMembersSpec extends AsyncHmrcSpec with Subscriptions
     val applicationService = new ApplicationService(
       mock[ApmConnector],
       connectorsWrapper,
+      ApplicationCommandConnectorMock.aMock,
       mockSubscriptionFieldsService,
       mockDeskproConnector,
       mockDeveloperConnector,

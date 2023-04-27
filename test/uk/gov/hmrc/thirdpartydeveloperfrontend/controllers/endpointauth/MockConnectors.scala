@@ -23,6 +23,7 @@ import uk.gov.hmrc.apiplatform.modules.mfa.connectors.ThirdPartyDeveloperMfaConn
 import uk.gov.hmrc.apiplatform.modules.submissions.connectors.ThirdPartyApplicationSubmissionsConnector
 import uk.gov.hmrc.thirdpartydeveloperfrontend.connectors._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.repositories.FlowRepository
+import uk.gov.hmrc.thirdpartydeveloperfrontend.connectors.ApplicationCommandConnector
 
 trait MockConnectors extends MockitoSugar with ArgumentMatchersSugar {
   val tpdConnector: ThirdPartyDeveloperConnector                                           = mock[ThirdPartyDeveloperConnector]
