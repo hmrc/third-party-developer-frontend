@@ -26,8 +26,8 @@ import play.api.data.Forms.{optional, text}
 import play.api.data.validation.{Constraint, Invalid, Valid, ValidationError, ValidationResult}
 import uk.gov.hmrc.emailaddress.EmailAddress
 
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.Environment
 import uk.gov.hmrc.apiplatform.modules.applications.domain.models.RedirectUri
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.Environment
 
 package object controllers {
 
@@ -336,8 +336,6 @@ package object controllers {
   private def isBlank: String => Boolean = s => s.length == 0
 
   def isValidUrl: String => Boolean = s => Try(new URL(s.trim)).isSuccess
-
-
 
   private def isValidEnvironment(s: String) = Environment.from(s).isDefined
 }

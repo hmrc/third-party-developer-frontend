@@ -28,7 +28,7 @@ import play.api.test.Helpers._
 import play.filters.csrf.CSRF.TokenProvider
 import uk.gov.hmrc.http.HeaderCarrier
 
-import uk.gov.hmrc.apiplatform.modules.applications.domain.models.ClientId
+import uk.gov.hmrc.apiplatform.modules.applications.domain.models.{ClientId, RedirectUri}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.builder.DeveloperBuilder
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.{DeveloperSession, LoggedInState, Session}
@@ -36,7 +36,6 @@ import uk.gov.hmrc.thirdpartydeveloperfrontend.mocks.service.{ApplicationActionS
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.ViewHelpers._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.WithLoggedInSession._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils._
-import uk.gov.hmrc.apiplatform.modules.applications.domain.models.RedirectUri
 
 class RedirectsSpec
     extends BaseControllerSpec
@@ -187,7 +186,10 @@ class RedirectsSpec
       RedirectsServiceMock.DeleteRedirect.succeedsWith(redirectUriToDelete)
 
       val result =
-        underTest.deleteRedirectAction(application.id)(loggedInRequest.withCSRFToken.withFormUrlEncodedBody("redirectUri" -> redirectUriToDelete.uri, "deleteRedirectConfirm" -> "Yes"))
+        underTest.deleteRedirectAction(application.id)(loggedInRequest.withCSRFToken.withFormUrlEncodedBody(
+          "redirectUri"           -> redirectUriToDelete.uri,
+          "deleteRedirectConfirm" -> "Yes"
+        ))
 
       status(result) shouldBe resultStatus
       headers(result).apply(LOCATION) shouldBe s"/developer/applications/${application.id.value}/redirect-uris"
@@ -197,7 +199,10 @@ class RedirectsSpec
       givenApplicationExists(application)
 
       val result =
-        underTest.deleteRedirectAction(application.id)(loggedInRequest.withCSRFToken.withFormUrlEncodedBody("redirectUri" -> redirectUriToDelete.uri, "deleteRedirectConfirm" -> "no"))
+        underTest.deleteRedirectAction(application.id)(loggedInRequest.withCSRFToken.withFormUrlEncodedBody(
+          "redirectUri"           -> redirectUriToDelete.uri,
+          "deleteRedirectConfirm" -> "no"
+        ))
 
       status(result) shouldBe resultStatus
 
