@@ -51,7 +51,7 @@ trait BaseApplication {
   def checkInformation: Option[CheckInformation]
   def ipAllowlist: IpAllowlist
 
-  def role(email: LaxEmailAddress): Option[Collaborator.Role] = collaborators.find(_.emailAddress == email).map(_.role)
+  def role(email: LaxEmailAddress): Option[Collaborator.Role] = collaborators.find(_.emailAddress.equalsIgnoreCase(email)).map(_.role)
 
   def roleForCollaborator(userId: UserId): Option[Collaborator.Role] = collaborators.find(_.userId == userId).map(_.role)
 
