@@ -34,9 +34,9 @@
     userFullName = loggedIn.loggedInName,
     developerSession = Some(loggedIn),
     breadcrumbs = Seq(
-        Crumb("IP allow list"),
         Crumb.application(app),
-        Crumb.viewAllApplications
+        Crumb.viewAllApplications,
+        Crumb.home
     )
 ) {
 

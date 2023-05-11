@@ -31,10 +31,10 @@
 
 @(
   role: Collaborator.Role,
-  data: PageData, 
-  form: Form[uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.EditApplicationForm], 
-  applicationView: ApplicationViewModel, 
-  subscriptions: Option[GroupedSubscriptions], 
+  data: PageData,
+  form: Form[uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.EditApplicationForm],
+  applicationView: ApplicationViewModel,
+  subscriptions: Option[GroupedSubscriptions],
   openAccessApis: Map[ApiContext, ApiData],
   id: ApplicationId,
   fraudPreventionNavLinkViewModel: Option[FraudPreventionNavLinkViewModel]
@@ -56,7 +56,6 @@
     title = "Manage API subscriptions",
     userFullName = loggedIn.loggedInName,
     breadcrumbs = Seq(
-        Crumb("Manage API subscriptions"),
         Crumb.application(app),
         Crumb.viewAllApplications,
         Crumb.home
@@ -67,7 +66,7 @@
     <h1 class="govuk-heading-l">Manage API subscriptions</h1>
 
     @appEnvironment(app)
-    
+
     <hr class="govuk-section-break govuk-section-break--m govuk-section-break--visible">
 
     @subscriptions match {

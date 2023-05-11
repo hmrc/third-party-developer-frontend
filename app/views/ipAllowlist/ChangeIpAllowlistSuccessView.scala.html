@@ -31,7 +31,6 @@ implicit request: play.api.mvc.Request[Any], loggedIn: DeveloperSession, message
   userFullName = loggedIn.loggedInName,
   developerSession = Some(loggedIn),
   breadcrumbs = Seq(
-    Crumb("IP allow list"),
     Crumb.application(app),
     Crumb.viewAllApplications
   )

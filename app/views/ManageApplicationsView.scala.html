@@ -42,7 +42,6 @@
   title = "View all applications",
   userFullName = loggedIn.loggedInName,
   breadcrumbs = Seq(
-    Crumb("View all applications", "", Some("data-breadcrumb-manage-app")),
     Crumb.home
   ),
   leftNav = Some(leftHandNav(None, Option(navSection), flags)),
@@ -57,11 +56,11 @@
       </div>
       <div class="govuk-notification-banner__content">
         <h3 class="govuk-notification-banner__heading">
-          Our terms of use have changed. 
+          Our terms of use have changed.
         </h3>
         @for(viewModel <- model.applicationsThatHaveTermOfUseInvitatationsOutstanding) {
           <p class="govuk-body"><a class="govuk-notification-banner__link" href="@uk.gov.hmrc.apiplatform.modules.uplift.controllers.routes.UpliftJourneyController.agreeNewTermsOfUse(viewModel.applicationId)">Agree to version 2 of the terms of use</a> for @{viewModel.name} by @{DateTimeFormatter.ofPattern("dd MMMM yyyy").withZone(ZoneId.systemDefault()).format(viewModel.dueBy)}.</p>
-        } 
+        }
       </div>
     </div>
   }
@@ -83,7 +82,7 @@
       </div>
     </div>
   }
-  
+
   <h1 class="govuk-heading-l">View all applications</h1>
 
   @applicationList(model)
@@ -107,7 +106,7 @@
     <ul class="govuk-list govuk-list--bullet">
       <li>APIs for testing your service</li>
       <li>Hello World API</li>
-    </ul>  
+    </ul>
   }
 
   @if(model.hasNoLiveProductionApplications && model.hasAppsThatCanBeUplifted ) {
