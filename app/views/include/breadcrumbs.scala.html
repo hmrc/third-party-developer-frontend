@@ -23,7 +23,7 @@
   *@
   <div class="govuk-breadcrumbs">
     <ol class="govuk-breadcrumbs__list">
-      @defining(crumbs.tail) { linkableCrumbs =>
+      @defining(crumbs) { linkableCrumbs =>
         @linkableCrumbs.reverse.map { crumb =>
           <li class="govuk-breadcrumbs__list-item" @if(crumb.url.isEmpty){ @crumb.dataAttribute.getOrElse("") }>
             @if(crumb.url.nonEmpty){
@@ -34,9 +34,6 @@
           </li>
         }
       }
-      <li class="govuk-breadcrumbs__list-item" @if(crumbs.head.dataAttribute.isDefined) {@crumbs.head.dataAttribute.get}>
-        @crumbs.head.name
-      </li>
     </ol>
   </div>
 }

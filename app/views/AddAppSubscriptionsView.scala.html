@@ -15,7 +15,7 @@
  *@
 
 @import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.views.SubscriptionRedirect._
-@import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.controllers.Crumb
+@import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.views.BackButtonWithJavaScript
 @import include._
 @import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.Environment.PRODUCTION
 @import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.Environment
@@ -32,18 +32,18 @@
 @this(devMain: DevMain, subscriptionGroups: SubscriptionGroups, hmrcNewTabLink: HmrcNewTabLink)
 
 @(
-    role: Collaborator.Role, 
-    data: PageData, 
-    form: Form[uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.EditApplicationForm], 
-    app: Application, 
-    environment: Environment, 
+    role: Collaborator.Role,
+    data: PageData,
+    form: Form[uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.EditApplicationForm],
+    app: Application,
+    environment: Environment,
     subscriptions: Option[GroupedSubscriptions],
     openAccessApis: Map[ApiContext, ApiData]
 )(
     implicit request: play.api.mvc.Request[Any],
-    loggedIn: DeveloperSession, 
-    messages: Messages, 
-    applicationConfig: ApplicationConfig, 
+    loggedIn: DeveloperSession,
+    messages: Messages,
+    applicationConfig: ApplicationConfig,
     environmentNameService: EnvironmentNameService
 )
 
@@ -56,11 +56,7 @@
     @devMain(
     title = pageHeading,
     userFullName = loggedIn.loggedInName,
-    breadcrumbs = Seq(
-        Crumb(pageHeading),
-        Crumb.viewAllApplications,
-        Crumb.home
-    ),
+    back = BackButtonWithJavaScript,
     developerSession = Some(loggedIn)
 ) {
 

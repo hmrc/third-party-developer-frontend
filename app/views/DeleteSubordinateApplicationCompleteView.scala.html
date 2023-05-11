@@ -17,6 +17,7 @@
 @import include._
 @import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.Application
 @import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.DeveloperSession
+@import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.controllers.Crumb
 
 @this(devMain: DevMain)
 
@@ -25,9 +26,13 @@
 )
 
 @devMain(
-  title = "Application deleted",
-  userFullName = loggedIn.loggedInName,
-  developerSession = Some(loggedIn)
+    title = "Application deleted",
+    userFullName = loggedIn.loggedInName,
+    breadcrumbs = Seq(
+        Crumb.viewAllApplications,
+        Crumb.home
+    ),
+    developerSession = Some(loggedIn)
 ) {
   <div class="govuk-box-highlight">
     <h1 class="govuk-heading-l govuk-highlight-text">Application deleted</h1>

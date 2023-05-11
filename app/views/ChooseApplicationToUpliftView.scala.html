@@ -20,6 +20,7 @@
 @import include._
 @import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.controllers.Crumb
 @import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.routes
+@import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.views.BackButtonWithJavaScript
 
 @this(devMain: DevMainWithFormErrors)
 
@@ -33,7 +34,7 @@
 
 @invalidAppsSignpost = {
   <p class="govuk-body">
-    Your other sandbox applications subscribe to APIs not available in production. 
+    Your other sandbox applications subscribe to APIs not available in production.
   </p>
   <p class="govuk-body">
     If you want production credentials for a different sandbox application, you need to:
@@ -55,11 +56,7 @@
   form,
   title = pageHeading,
   userFullName = loggedIn.loggedInName,
-  breadcrumbs = Seq(
-    Crumb(pageHeading),
-    Crumb.viewAllApplications,
-    Crumb.home
-  ),
+  back = BackButtonWithJavaScript,
   developerSession = Some(loggedIn)
 ) {
   @if(needToChoose) {
@@ -94,15 +91,15 @@
     }
   } else {
     <h1 class="govuk-heading-l">You are requesting production credentials for</h1>
-    
+
     <p class="govuk-body-l">@{upliftableApps.head.name}</p>
 
     @if(showFluff == true) {
       @invalidAppsSignpost
     }
-    
+
     <p class="govuk-body">
       <a id="continue" href="@controllers.addapplication.routes.AddApplication.soleApplicationToUpliftAction(upliftableApps.head.id)" class="govuk-button">Continue</a>
-    </p>    
+    </p>
   }
 }
