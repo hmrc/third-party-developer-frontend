@@ -30,8 +30,9 @@
   title = "Delete account",
   userFullName = loggedIn.loggedInName,
   breadcrumbs = Seq(
-    Crumb("Delete account"),
-    Crumb.home
+      Crumb.manageProfile,
+      Crumb.viewAllApplications,
+      Crumb.home
   ),
   leftNav = Some(leftHandNav(None, Option(navSection))),
   developerSession = Some(loggedIn)
