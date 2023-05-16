@@ -28,7 +28,6 @@
   title = "Register for a developer account",
   isRegistering = true,
   breadcrumbs = Seq(
-    Crumb("Register"),
     Crumb.home
   ),
   developerSession = None
@@ -52,7 +51,7 @@
       <span id="first-name-error" class="govuk-error-message">
         <span class="govuk-visually-hidden">Error:</span> @fieldError(form.errors, "firstname", true)
       </span>
-      <input 
+      <input
         type="text"
         id="firstname"
         name="firstname"
@@ -71,7 +70,7 @@
       <span id="last-name-error" class="govuk-error-message">
         <span class="govuk-visually-hidden">Error:</span> @fieldError(form.errors, "lastname", true)
       </span>
-      <input 
+      <input
         type="text"
         id="lastname"
         name="lastname"
@@ -90,7 +89,7 @@
       <span id="organisation-name-error" class="govuk-error-message">
         <span class="govuk-visually-hidden">Error:</span> @fieldError(form.errors, "organisation", true)
       </span>
-      <input 
+      <input
         type="text"
         id="organisation"
         name="organisation"
@@ -109,7 +108,7 @@
       <span id="email-address-error" class="govuk-error-message">
         <span class="govuk-visually-hidden">Error:</span> @fieldError(form.errors, "emailaddress", form.error("submissionError").isEmpty)
       </span>
-      <input 
+      <input
         type="text"
         id="emailaddress"
         name="emailaddress"

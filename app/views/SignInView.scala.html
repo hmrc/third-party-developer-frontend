@@ -16,6 +16,7 @@
 
 @import include._
 @import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.routes
+@import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.controllers.Crumb
 
 @this(devMain: DevMainWithFormErrors)
 
@@ -25,6 +26,9 @@
   form,
   title = heading,
   isRegistering = true,
+  breadcrumbs = Seq(
+    Crumb.home
+  ),
   developerSession = None
 ) {
   <h1 class="govuk-heading-l">@heading</h1>
@@ -42,9 +46,9 @@
           <span class="govuk-visually-hidden">Error:</span>
           @fieldError(form.errors, "emailaddress", form.error("submissionError").isEmpty)
         </span>
-        <input 
-          type="text" 
-          autocomplete="off" 
+        <input
+          type="text"
+          autocomplete="off"
           id="emailaddress"
           name="emailaddress"
           value="@form.data.getOrElse("emailaddress", "")"
@@ -59,9 +63,9 @@
           <span class="govuk-visually-hidden">Error:</span>
           @fieldError(form.errors, "password", form.error("submissionError").isEmpty)
         </span>
-        <input 
-          type="password" 
-          autocomplete="off" 
+        <input
+          type="password"
+          autocomplete="off"
           id="password"
           name="password"
           class="govuk-input @if(form.errors("invalidCredentials").nonEmpty || form.errors("password").nonEmpty){govuk-input--error}"
@@ -79,7 +83,7 @@
   }
   @if(!endOfJourney) {
     <p class="govuk-body">
-      Not registered yet? 
+      Not registered yet?
       <a class="govuk-link govuk-link--no-visited-state" href="@routes.Registration.registration">
         Register for an account
       </a>

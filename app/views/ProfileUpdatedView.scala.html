@@ -29,8 +29,8 @@
   title = "Profile updated",
   userFullName = loggedIn.loggedInName,
   breadcrumbs = Seq(
-    Crumb("Manage profile"),
-    Crumb.home
+      Crumb.viewAllApplications,
+      Crumb.home
   ),
   leftNav = Some(leftHandNav(None, Option(navSection))(request, loggedIn, appConfig)),
   developerSession = Some(loggedIn)

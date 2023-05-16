@@ -29,8 +29,8 @@
   title = "Change profile details",
   userFullName = loggedIn.loggedInName,
   breadcrumbs = Seq(
-    Crumb("Manage profile"),
-    Crumb.home
+      Crumb.viewAllApplications,
+      Crumb.home
   ),
   leftNav = Some(leftHandNav(None, Option(navSection))),
   developerSession = Some(loggedIn)
