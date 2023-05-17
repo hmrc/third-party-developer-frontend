@@ -32,10 +32,9 @@ implicit request: play.api.mvc.Request[Any], loggedIn: DeveloperSession, message
     Seq.empty
   } else {
     Seq(
-      Crumb("Review IP allow list"),
-      Crumb.ipAllowlist(app),
       Crumb.application(app),
-      Crumb.viewAllApplications
+      Crumb.viewAllApplications,
+      Crumb.home
     )
   }
 }

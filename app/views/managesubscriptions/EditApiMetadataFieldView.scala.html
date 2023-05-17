@@ -46,9 +46,10 @@
   userFullName = loggedIn.loggedInName,
   developerSession = Some(loggedIn),
   breadcrumbs = Seq(
-    Crumb(pageHeading),
     Crumb.applicationMetadata(app),
-    Crumb.application(app)
+    Crumb.application(app),
+    Crumb.viewAllApplications,
+    Crumb.home
   )
 ) {
 

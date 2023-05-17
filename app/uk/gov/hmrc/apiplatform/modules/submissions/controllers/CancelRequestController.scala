@@ -25,15 +25,15 @@ import play.api.libs.crypto.CookieSigner
 import play.api.mvc.{MessagesControllerComponents, Result}
 
 import uk.gov.hmrc.apiplatform.modules.applications.domain.models.ApplicationId
+import uk.gov.hmrc.apiplatform.modules.commands.applications.domain.models.ApplicationCommands
 import uk.gov.hmrc.apiplatform.modules.common.services.EitherTHelper
 import uk.gov.hmrc.apiplatform.modules.submissions.services.SubmissionService
 import uk.gov.hmrc.apiplatform.modules.submissions.views.html.{CancelledRequestForProductionCredentialsView, ConfirmCancelRequestForProductionCredentialsView}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.config.{ApplicationConfig, ErrorHandler}
+import uk.gov.hmrc.thirdpartydeveloperfrontend.connectors.ApplicationCommandConnector
 import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.ApplicationController
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.controllers.BadRequestWithErrorMessage
 import uk.gov.hmrc.thirdpartydeveloperfrontend.service.{ApplicationActionService, ApplicationService, SessionService}
-import uk.gov.hmrc.apiplatform.modules.commands.applications.domain.models.ApplicationCommands
-import uk.gov.hmrc.thirdpartydeveloperfrontend.connectors.ApplicationCommandConnector
 
 object CancelRequestController {
   case class DummyForm(dummy: String = "dummy")
@@ -94,7 +94,7 @@ class CancelRequestController @Inject() (
     val formValues                         = request.body.asFormUrlEncoded.get.filterNot(_._1 == "csrfToken")
     val reasons                            = "DevHub user cancelled request for production credentials"
     val instigator                         = request.userId
-    val deleteRequest                      = ApplicationCommands. DeleteApplicationByCollaborator(instigator, reasons, LocalDateTime.now(clock))
+    val deleteRequest                      = ApplicationCommands.DeleteApplicationByCollaborator(instigator, reasons, LocalDateTime.now(clock))
 
     val x =
       (

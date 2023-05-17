@@ -26,8 +26,8 @@ import uk.gov.hmrc.apiplatform.modules.applications.domain.models.ApplicationId
 import uk.gov.hmrc.apiplatform.modules.commands.applications.domain.models._
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.LaxEmailAddress
 import uk.gov.hmrc.thirdpartydeveloperfrontend.connectors.ApplicationCommandConnector
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.Application
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.ApplicationUpdateSuccessful
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.Application
 
 trait ApplicationCommandConnectorMockModule extends MockitoSugar with ArgumentMatchersSugar {
 
@@ -39,9 +39,10 @@ trait ApplicationCommandConnectorMockModule extends MockitoSugar with ArgumentMa
     val aMock: ApplicationCommandConnector = mock[ApplicationCommandConnector]
 
     object DispatchWithThrow {
+
       def thenReturnsSuccess(app: Application) = {
         when(aMock.dispatchWithThrow(*[ApplicationId], *, *)(*)).thenReturn(successful(ApplicationUpdateSuccessful))
-      }      
+      }
     }
 
     object Dispatch {

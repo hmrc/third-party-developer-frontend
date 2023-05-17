@@ -33,10 +33,9 @@
     Seq.empty
   } else {
     Seq(
-      Crumb("Edit IP allow list"),
-      Crumb.ipAllowlist(app),
       Crumb.application(app),
-      Crumb.viewAllApplications
+      Crumb.viewAllApplications,
+      Crumb.home
     )
   }
 }

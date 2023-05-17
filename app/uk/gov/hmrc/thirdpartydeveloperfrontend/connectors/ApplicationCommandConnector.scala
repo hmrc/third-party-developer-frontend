@@ -16,7 +16,7 @@
 
 package uk.gov.hmrc.thirdpartydeveloperfrontend.connectors
 
-import scala.concurrent.ExecutionContext
+import scala.concurrent.{ExecutionContext, Future}
 
 import com.google.inject.{Inject, Singleton}
 
@@ -27,7 +27,6 @@ import uk.gov.hmrc.apiplatform.modules.commands.applications.domain.models.{Comm
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.LaxEmailAddress
 import uk.gov.hmrc.apiplatform.modules.common.services.ApplicationLogger
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.ApplicationUpdateSuccessful
-import scala.concurrent.Future
 
 @Singleton
 class ApplicationCommandConnector @Inject() (
@@ -44,11 +43,11 @@ class ApplicationCommandConnector @Inject() (
       adminsToEmail: Set[LaxEmailAddress]
     )(implicit hc: HeaderCarrier
     ): Future[ApplicationUpdateSuccessful] = {
-      dispatch(applicationId, command, adminsToEmail).map(_ match {
-        case Left(errs) => throw new RuntimeException(CommandFailures.describe(errs.head))
-        case Right(_) => ApplicationUpdateSuccessful
-      })
-    }
+    dispatch(applicationId, command, adminsToEmail).map(_ match {
+      case Left(errs) => throw new RuntimeException(CommandFailures.describe(errs.head))
+      case Right(_)   => ApplicationUpdateSuccessful
+    })
+  }
 
   def dispatch(
       applicationId: ApplicationId,
