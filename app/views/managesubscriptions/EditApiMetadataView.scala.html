@@ -39,14 +39,15 @@
 @pageHeading = @{ s"${viewModel.apiName} ${viewModel.apiVersion.value} ${viewModel.displayedStatus}" }
 
 @devMain(
-  title = pageHeading,
-  userFullName = loggedIn.loggedInName,
-  developerSession = Some(loggedIn),
-  breadcrumbs = Seq(
-    Crumb(pageHeading),
-    Crumb.applicationMetadata(app),
-    Crumb.application(app)
-  )
+    title = pageHeading,
+    userFullName = loggedIn.loggedInName,
+    developerSession = Some(loggedIn),
+    breadcrumbs = Seq(
+        Crumb.applicationMetadata(app),
+        Crumb.application(app),
+        Crumb.viewAllApplications,
+        Crumb.home
+    )
 ) {
   @errorSummaryForFormErrors(viewModel.errors)
   <h1 class="govuk-heading-l">@{pageHeading}</h1>

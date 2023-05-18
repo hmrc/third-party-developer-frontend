@@ -14,8 +14,8 @@
  * limitations under the License.
  *@
 
-@import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.views.BackButtonWithJavaScript
 @import include._
+@import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.controllers.Crumb
 @import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.DeveloperSession
 @import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.Application
 @import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.routes
@@ -30,7 +30,11 @@ implicit request: play.api.mvc.Request[Any], loggedIn: DeveloperSession, message
 @devMain(
   title = "IP allow list",
   userFullName = loggedIn.loggedInName,
-  back = BackButtonWithJavaScript,
+  breadcrumbs = Seq(
+      Crumb.application(app),
+      Crumb.viewAllApplications,
+      Crumb.home
+  ),
   developerSession = Some(loggedIn)
 ) {
   <div class="ip-allowlist">
@@ -51,7 +55,7 @@ implicit request: play.api.mvc.Request[Any], loggedIn: DeveloperSession, message
     </div>
 
     <p class="govuk-body">If you have dynamic IP addresses, consider switching to static IP addresses to use the IP allow list.</p>
-    
+
     <p class="govuk-body">The IP allow list limits access to HMRC services to approved IP addresses associated with your application.</p>
 
     @if(sandboxOrAdmin) {

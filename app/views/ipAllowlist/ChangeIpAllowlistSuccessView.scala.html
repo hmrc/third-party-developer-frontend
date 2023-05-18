@@ -27,13 +27,14 @@
 implicit request: play.api.mvc.Request[Any], loggedIn: DeveloperSession, messages: Messages, applicationConfig: ApplicationConfig)
 
 @devMain(
-  title = "IP allow list",
-  userFullName = loggedIn.loggedInName,
-  developerSession = Some(loggedIn),
-  breadcrumbs = Seq(
-    Crumb.application(app),
-    Crumb.viewAllApplications
-  )
+    title = "IP allow list",
+    userFullName = loggedIn.loggedInName,
+    developerSession = Some(loggedIn),
+    breadcrumbs = Seq(
+        Crumb.application(app),
+        Crumb.viewAllApplications,
+        Crumb.home
+    )
 ) {
 
   <div class="ip-allowlist">
