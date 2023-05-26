@@ -39,6 +39,7 @@
 )
 
 @pageHeading = @{ "Turn off API subscriptions you don’t need" }
+@displayableSectionId(apiSub: APISubscriptions) = @{subscriptions.indexOf(apiSub)+1}
 
 @devMain(
   form = errorForm,
@@ -65,17 +66,17 @@
           
           <div class="govuk-accordion" data-module="govuk-accordion" id="accordion-default">
             @subscriptions.map { case apiSubscription =>
-              <div class="govuk-accordion__section" id="@apiSubscription.apiServiceName-accordion-section">
+              <div class="govuk-accordion__section" id="accordion-default-section-@displayableSectionId(apiSubscription)">
                 <div class="govuk-accordion__section-header">
                   <h2 class="govuk-accordion__section-heading">
-                    <span class="govuk-accordion__section-button" id="@apiSubscription.apiServiceName-accordion-heading">
+                    <span class="govuk-accordion__section-button" id="accordion-default-heading-@displayableSectionId(apiSubscription)">
                       @apiSubscription.apiHumanReadableAppName
                     </span>
                   </h2>
-                  <div class="govuk-accordion__section-summary" id="accordion-with-summary-sections-summary-1">
+                  <div class="govuk-accordion__section-summary" id="accordion-default-with-summary-sections-summary-@displayableSectionId(apiSubscription)">
                   </div>
                 </div>
-                <div id="@apiSubscription.apiServiceName-accordion-content" class="govuk-accordion__section-content" aria-labelledby="@apiSubscription.apiServiceName-accordion-heading">
+                <div id="accordion-default-content-@displayableSectionId(apiSubscription)" class="govuk-accordion__section-content" aria-labelledby="accordion-default-heading-@displayableSectionId(apiSubscription)">
                   @apiSubscription.subscriptions.map { case api =>
                     @defining(s"${apiSubscription.apiHumanReadableAppName} ${api.apiVersion.version.value} (${api.apiVersion.displayedStatus})") { apiVersionFullName =>
                       <div class="govuk-grid-row">
