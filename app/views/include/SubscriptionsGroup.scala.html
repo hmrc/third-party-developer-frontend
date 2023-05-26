@@ -37,20 +37,24 @@
   request: play.api.mvc.Request[Any]
 )
 
-<div class="govuk-accordion" data-module="govuk-accordion" id="@{group.toLowerCase}-accordion">
+@displayableAccordionId() = @{s"${group.toLowerCase}-accordion"}
+@displayableSectionId(apiSub: APISubscriptions) = @{apisSubscriptions.indexOf(apiSub)+1}
+
+<div class="govuk-accordion" data-module="govuk-accordion" id="@displayableAccordionId()">
   @apisSubscriptions.map { case apiSubscription =>
-    <div class="govuk-accordion__section @if(apiSubscription.hasSubscriptions) {govuk-accordion__section--expanded}" id="@apiSubscription.apiServiceName-accordion-section">
+
+    <div class="govuk-accordion__section @if(apiSubscription.hasSubscriptions) {govuk-accordion__section--expanded}" id="@displayableAccordionId()-section-@displayableSectionId(apiSubscription)">
       <div class="govuk-accordion__section-header">
         <h2 class="govuk-accordion__section-heading">
-          <span class="govuk-accordion__section-button" id="@{group.toLowerCase}-accordion-@apiSubscription.apiServiceName-heading">
+          <span class="govuk-accordion__section-button" id="@displayableAccordionId()-heading-@displayableSectionId(apiSubscription)">
             @apiSubscription.apiHumanReadableAppName
           </span>
         </h2>
-        <div class="govuk-accordion__section-summary subscription-count govuk-body" id="accordion-with-summary-sections-summary-1">
+        <div class="govuk-accordion__section-summary subscription-count govuk-body" id="@displayableAccordionId()-with-summary-sections-summary-@displayableSectionId(apiSubscription)">
           @apiSubscription.subscriptionNumberText
         </div>
       </div>
-      <div id="@{group.toLowerCase}-accordion-@apiSubscription.apiServiceName-content" class="govuk-accordion__section-content" aria-labelledby="@{group.toLowerCase}-accordion-@apiSubscription.apiServiceName-heading">
+      <div id="@displayableAccordionId()-content-@displayableSectionId(apiSubscription)" class="govuk-accordion__section-content" aria-labelledby="@displayableAccordionId()-heading-@displayableSectionId(apiSubscription)">
         @apiSubscription.subscriptions.map { case api =>
           @defining(s"${apiSubscription.apiHumanReadableAppName} ${api.apiVersion.version.value} (${api.apiVersion.displayedStatus})") { apiVersionFullName =>
             <div class="govuk-grid-row">
