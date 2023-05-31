@@ -373,6 +373,7 @@ class DetailsSpec
       val result = addToken(underTest.requestChangeOfAppName(approvedApplication.id))(loggedInAdminRequest)
 
       status(result) shouldBe OK
+      contentAsString(result) should include("Application name")
     }
 
     "return forbidden when not an admin" in new Setup {
