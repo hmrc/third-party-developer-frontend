@@ -42,7 +42,7 @@
 
 @helper.form(action = controllers.routes.Details.updatePrivacyPolicyLocationAction(appId), 'class -> "form") {
 @helper.CSRF.formField
-
+  <fieldset class="govuk-fieldset">
     <legend class="govuk-fieldset__legend govuk-fieldset__legend--l">
         <h1 class="govuk-fieldset__heading">
             Change the privacy policy URL
@@ -86,13 +86,15 @@
     </div>
     }
 
-    <div class="govuk-button-group">
-        <button id="submit-ok" class="govuk-button" type="submit" data-module="govuk-button" name="submit-action" value="save-and-continue">
-            Save and continue
-        </button>
+  </fieldset>
+  
+  <div class="govuk-button-group">
+      <button id="submit-ok" class="govuk-button" type="submit" data-module="govuk-button" name="submit-action" value="save-and-continue">
+          Save and continue
+      </button>
 
-        <a class="govuk-link govuk-link--no-visited-state" href="@routes.Details.details(appId)">Cancel</a>
-    </div>
+      <a class="govuk-link govuk-link--no-visited-state" href="@routes.Details.details(appId)">Cancel</a>
+  </div>
 
-    }
+  }
 }
