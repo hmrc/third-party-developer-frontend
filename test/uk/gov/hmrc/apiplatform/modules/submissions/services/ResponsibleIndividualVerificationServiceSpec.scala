@@ -141,7 +141,7 @@ class ResponsibleIndividualVerificationServiceSpec extends AsyncHmrcSpec
       deskproTicket.email shouldBe requesterEmail
       deskproTicket.message should include(riVerificationUplift.applicationName)
       deskproTicket.message should include("has submitted a Terms of Use application that has warnings or fails")
-      deskproTicket.referrer should include(s"/application/${riVerificationUplift.applicationId.value}/check-answers")
+      deskproTicket.referrer should include("https://admin.tax.service.gov.uk/api-gatekeeper/terms-of-use")
     }
 
     "successfully return a riVerification record for accept but don't create a deskpro ticket for a terms of use uplift where the submission status is passed" in new Setup {

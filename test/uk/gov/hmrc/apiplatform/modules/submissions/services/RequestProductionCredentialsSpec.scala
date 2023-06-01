@@ -99,7 +99,7 @@ class RequestProductionCredentialsSpec extends AsyncHmrcSpec
       ticketCapture.value.email shouldBe email
       ticketCapture.value.message should include(app.name)
       ticketCapture.value.message should include("has submitted a Terms of Use application that has warnings or fails")
-      ticketCapture.value.referrer should include(s"/application/${app.id.value}/check-answers")
+      ticketCapture.value.referrer should include("https://admin.tax.service.gov.uk/api-gatekeeper/terms-of-use")
     }
 
     "not create a ticket if terms of use uplift and requester is responsible individual but submission is passed" in new Setup {

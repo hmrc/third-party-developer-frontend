@@ -72,7 +72,7 @@ object DeskproTicket extends FieldTransformer {
       requestorEmail,
       "Terms of use uplift application submitted for checking",
       message,
-      uk.gov.hmrc.apiplatform.modules.submissions.controllers.routes.CheckAnswersController.checkAnswersPage(applicationId).url
+      "https://admin.tax.service.gov.uk/api-gatekeeper/terms-of-use"
     )
   }
 
