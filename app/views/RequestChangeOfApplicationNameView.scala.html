@@ -35,28 +35,28 @@
   developerSession = Some(loggedIn)
 ) {
 
+
+  <h1 class="govuk-heading-l">Request a change to the application name</h1>
+
+  <p class="govuk-body">Call the application something recognisable, like the name of your organisation.</p>
+
+  <p class="govuk-body">If you have customers, we show the application name when they grant authority.</p>
+
+  <p class="govuk-body">Check if the application name follows our <a class="govuk-link govuk-link--no-visited-state" target="_blank" href="/api-documentation/docs/using-the-hub/name-guidelines">naming guidelines (opens in new tab)</a>.</p>
+
+  <p class="govuk-body">Previous application names will become available for others to use.</p>
+
   @helper.form(action = controllers.routes.Details.requestChangeOfAppNameAction(model.application.id), 'class -> "form") {
     @helper.CSRF.formField
-
-      <h1 class="govuk-heading-l">Request a change to the application name</h1>
-
-      <p class="govuk-body">Call the application something recognisable, like the name of your organisation.</p>
-
-      <p class="govuk-body">If you have customers, we show the application name when they grant authority.</p>
-
-      <p class="govuk-body">Check if the application name follows our <a class="govuk-link govuk-link--no-visited-state" target="_blank" href="/api-documentation/docs/using-the-hub/name-guidelines">naming guidelines (opens in new tab)</a>.</p>
-
-      <p class="govuk-body">Previous application names will become available for others to use.</p>
-
+    
       <div class="govuk-form-group @if(form.errors("applicationName").nonEmpty) {govuk-form-group--error}">
 
         <p id="verified-error" class="govuk-error-message">
           <span class="govuk-visually-hidden">Error: </span> @fieldError(form.errors, "applicationName", form.error("submissionError").isEmpty)
         </p>
 
-        <p class="govuk-body">
-          <input class="govuk-input govuk-input--width-20" id="applicationName" name="applicationName" type="text" value="@form.data("applicationName")">
-        </p>
+        <label class="govuk-label govuk-label--s" for="applicationName">Application name</label>
+        <input class="govuk-input govuk-input--width-20" id="applicationName" name="applicationName" type="text" value="@form.data("applicationName")">
 
       </div>
 
