@@ -55,7 +55,7 @@ class UserLogoutAccount @Inject() (
   }
 
   def logoutSurveyAction = atLeastPartLoggedInEnablingMfaAction { implicit request =>
-    SignOutSurveyForm.form.bindFromRequest.value match {
+    SignOutSurveyForm.form.bindFromRequest().value match {
       case Some(form) =>
         val res: Future[TicketId] = deskproService.submitSurvey(form)
         res.onComplete {

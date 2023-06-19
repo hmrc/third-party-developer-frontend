@@ -51,7 +51,7 @@ trait ContactDetailsPartialController {
   }
 
   def contactAction(appId: ApplicationId): Action[AnyContent] = canUseChecksAction(appId) { implicit request =>
-    val requestForm = ContactForm.form.bindFromRequest
+    val requestForm = ContactForm.form.bindFromRequest()
     val app         = request.application
 
     def withFormErrors(form: Form[ContactForm]) = {

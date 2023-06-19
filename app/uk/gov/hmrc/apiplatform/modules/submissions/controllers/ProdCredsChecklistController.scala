@@ -161,6 +161,6 @@ class ProdCredsChecklistController @Inject() (
     def handleInvalidForm(formWithErrors: Form[DummyForm]) =
       throw new AssertionError("DummyForm has no validation rules and so can never be invalid")
 
-    DummyForm.form.bindFromRequest.fold(handleInvalidForm, handleValidForm)
+    DummyForm.form.bindFromRequest().fold(handleInvalidForm, handleValidForm)
   }
 }

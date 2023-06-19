@@ -84,7 +84,7 @@ class DeleteApplication @Inject() (
       }
     }
 
-    DeletePrincipalApplicationForm.form.bindFromRequest.fold(handleInvalidForm, handleValidForm)
+    DeletePrincipalApplicationForm.form.bindFromRequest().fold(handleInvalidForm, handleValidForm)
   }
 
   def deleteSubordinateApplicationConfirm(applicationId: ApplicationId) = canDeleteApplicationAction(applicationId) { implicit request =>

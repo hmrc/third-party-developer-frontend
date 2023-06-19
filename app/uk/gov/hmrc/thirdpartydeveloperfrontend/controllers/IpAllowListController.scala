@@ -102,7 +102,7 @@ class IpAllowListController @Inject() (
       }
     }
 
-    AddAnotherCidrBlockConfirmForm.form.bindFromRequest.fold(handleInvalidForm, handleValidForm)
+    AddAnotherCidrBlockConfirmForm.form.bindFromRequest().fold(handleInvalidForm, handleValidForm)
   }
 
   def addCidrBlock(applicationId: ApplicationId): Action[AnyContent] = canEditIpAllowlistAction(applicationId) { implicit request =>
@@ -124,7 +124,7 @@ class IpAllowListController @Inject() (
       }
     }
 
-    AddCidrBlockForm.form.bindFromRequest.fold(handleInvalidForm, handleValidForm)
+    AddCidrBlockForm.form.bindFromRequest().fold(handleInvalidForm, handleValidForm)
   }
 
   def removeCidrBlock(applicationId: ApplicationId, cidrBlock: String): Action[AnyContent] = canEditIpAllowlistAction(applicationId) { implicit request =>

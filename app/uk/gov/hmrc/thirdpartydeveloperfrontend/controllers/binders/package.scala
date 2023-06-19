@@ -222,7 +222,7 @@ package object binders {
     }
 
     override def unbind(key: String, applicationId: ApplicationId): String = {
-      applicationId.text
+      applicationId.text()
     }
   }
 

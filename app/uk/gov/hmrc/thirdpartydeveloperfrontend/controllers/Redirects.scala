@@ -87,7 +87,7 @@ class Redirects @Inject() (
       successful(BadRequest(addRedirectView(applicationViewModelFromApplicationRequest, formWithErrors)))
     }
 
-    AddRedirectForm.form.bindFromRequest.fold(handleInvalidForm, handleValidForm)
+    AddRedirectForm.form.bindFromRequest().fold(handleInvalidForm, handleValidForm)
   }
 
   def deleteRedirect(applicationId: ApplicationId) = canChangeRedirectInformationAction(applicationId) { implicit request =>
@@ -99,7 +99,7 @@ class Redirects @Inject() (
       successful(Redirect(routes.Redirects.redirects(applicationId)))
     }
 
-    DeleteRedirectForm.form.bindFromRequest.fold(handleInvalidForm, handleValidForm)
+    DeleteRedirectForm.form.bindFromRequest().fold(handleInvalidForm, handleValidForm)
   }
 
   def deleteRedirectAction(applicationId: ApplicationId) = canChangeRedirectInformationAction(applicationId) { implicit request =>
@@ -119,7 +119,7 @@ class Redirects @Inject() (
       successful(BadRequest(deleteRedirectConfirmationView(applicationViewModelFromApplicationRequest, form, form("redirectUri").value.getOrElse(""))))
     }
 
-    DeleteRedirectConfirmationForm.form.bindFromRequest.fold(handleInvalidForm, handleValidForm)
+    DeleteRedirectConfirmationForm.form.bindFromRequest().fold(handleInvalidForm, handleValidForm)
   }
 
   def changeRedirect(applicationId: ApplicationId) = canChangeRedirectInformationAction(applicationId) { implicit request =>
@@ -154,6 +154,6 @@ class Redirects @Inject() (
       successful(BadRequest(changeRedirectView(applicationViewModelFromApplicationRequest, formWithErrors)))
     }
 
-    ChangeRedirectForm.form.bindFromRequest.fold(handleInvalidForm, handleValidForm)
+    ChangeRedirectForm.form.bindFromRequest().fold(handleInvalidForm, handleValidForm)
   }
 }

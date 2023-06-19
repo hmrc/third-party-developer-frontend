@@ -180,7 +180,7 @@ class AddApplication @Inject() (
   }
 
   def editApplicationNameAction(environment: Environment): Action[AnyContent] = loggedInAction { implicit request =>
-    val requestForm: Form[AddApplicationNameForm] = AddApplicationNameForm.form.bindFromRequest
+    val requestForm: Form[AddApplicationNameForm] = AddApplicationNameForm.form.bindFromRequest()
 
     def nameApplicationWithErrors(errors: Form[AddApplicationNameForm], environment: Environment) =
       successful(Ok(addApplicationNameView(errors, environment)))

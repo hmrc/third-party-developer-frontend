@@ -71,7 +71,7 @@ class EmailPreferencesController @Inject() (
   }
 
   def flowSelectCategoriesAction: Action[AnyContent] = loggedInAction { implicit request =>
-    val form = TaxRegimeEmailPreferencesForm.form.bindFromRequest
+    val form = TaxRegimeEmailPreferencesForm.form.bindFromRequest()
     form.fold(
       formWithErrors => {
         flowShowSelectCategoriesView(formWithErrors).map(BadRequest(_))
@@ -119,7 +119,7 @@ class EmailPreferencesController @Inject() (
       }
     }
 
-    val form = SelectedApisEmailPreferencesForm.form.bindFromRequest
+    val form = SelectedApisEmailPreferencesForm.form.bindFromRequest()
     form.fold(
       formWithErrors => {
         flowSelectApisView(formWithErrors, form.data.getOrElse("currentCategory", "")).map(BadRequest(_))
@@ -159,7 +159,7 @@ class EmailPreferencesController @Inject() (
     successful(flowSelectTopicsView.apply(form, selectedTopics))
 
   def flowSelectTopicsAction: Action[AnyContent] = loggedInAction { implicit request =>
-    val form = SelectedTopicsEmailPreferencesForm.form.bindFromRequest
+    val form = SelectedTopicsEmailPreferencesForm.form.bindFromRequest()
 
     form.fold(
       formWithErrors => {
@@ -263,7 +263,7 @@ class EmailPreferencesController @Inject() (
     selectApisFromSubscriptionsView(form, flow.missingSubscriptions.toList.sortBy(_.serviceName), flow.applicationId, flow.selectedApis.map(_.serviceName))
 
   def selectApisFromSubscriptionsAction(applicationId: ApplicationId): Action[AnyContent] = loggedInAction { implicit request =>
-    val form = SelectApisFromSubscriptionsForm.form.bindFromRequest
+    val form = SelectApisFromSubscriptionsForm.form.bindFromRequest()
 
     form.fold(
       formWithErrors => {
@@ -296,7 +296,7 @@ class EmailPreferencesController @Inject() (
     selectTopicsFromSubscriptionsView.apply(form, flow.selectedTopics, flow.applicationId)
 
   def selectTopicsFromSubscriptionsAction(applicationId: ApplicationId): Action[AnyContent] = loggedInAction { implicit request =>
-    val form = SelectTopicsFromSubscriptionsForm.form.bindFromRequest
+    val form = SelectTopicsFromSubscriptionsForm.form.bindFromRequest()
 
     form.fold(
       formWithErrors => {

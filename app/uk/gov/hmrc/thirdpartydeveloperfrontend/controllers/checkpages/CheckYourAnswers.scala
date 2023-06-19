@@ -131,7 +131,7 @@ class CheckYourAnswers @Inject() (
   }
 
   def teamAddMember(appId: ApplicationId): Action[AnyContent] = canUseChecksAction(appId) { implicit request =>
-    Future.successful(Ok(teamMemberAddView(applicationViewModelFromApplicationRequest, AddTeamMemberForm.form, request.developerSession)))
+    Future.successful(Ok(teamMemberAddView(applicationViewModelFromApplicationRequest(), AddTeamMemberForm.form, request.developerSession)))
   }
 
   def teamMemberRemoveConfirmation(appId: ApplicationId, teamMemberHash: String): Action[AnyContent] = canUseChecksAction(appId) { implicit request =>
@@ -153,7 +153,7 @@ class CheckYourAnswers @Inject() (
       successful(BadRequest)
     }
 
-    RemoveTeamMemberCheckPageConfirmationForm.form.bindFromRequest.fold(handleInvalidForm, handleValidForm)
+    RemoveTeamMemberCheckPageConfirmationForm.form.bindFromRequest().fold(handleInvalidForm, handleValidForm)
   }
 
   protected def landingPageRoute(appId: ApplicationId): Call = routes.CheckYourAnswers.answersPage(appId)

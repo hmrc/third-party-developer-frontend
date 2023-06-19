@@ -57,9 +57,9 @@ object APISubscriptions {
   }
 
   def groupSubscriptionsByServiceName(subscriptions: Seq[APISubscriptionStatus]): List[APISubscriptions] = {
-    SortedMap(subscriptions.groupBy(_.serviceName).toSeq: _*) map {
+    SortedMap(subscriptions.groupBy(_.serviceName).toSeq: _*).map({
       case (serviceName, subscriptionsForAPI) => new APISubscriptions(subscriptionsForAPI.head.name, serviceName, subscriptionsForAPI.head.context, subscriptionsForAPI)
-    } toList
+    }).toList
   }
 
   def subscriptionNumberLabel(subscriptions: Seq[APISubscriptionStatus]) = subscriptions.count(_.subscribed) match {

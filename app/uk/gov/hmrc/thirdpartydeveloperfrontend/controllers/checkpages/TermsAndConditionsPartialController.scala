@@ -45,7 +45,7 @@ trait TermsAndConditionsPartialController {
   }
 
   def termsAndConditionsAction(appId: ApplicationId): Action[AnyContent] = canUseChecksAction(appId) { implicit request =>
-    val requestForm = TermsAndConditionsForm.form.bindFromRequest
+    val requestForm = TermsAndConditionsForm.form.bindFromRequest()
     val app         = request.application
 
     def withFormErrors(form: Form[TermsAndConditionsForm]) = {

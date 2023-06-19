@@ -146,7 +146,7 @@ class ApplicationCheck @Inject() (
       successful(BadRequest)
     }
 
-    RemoveTeamMemberCheckPageConfirmationForm.form.bindFromRequest.fold(handleInvalidForm, handleValidForm)
+    RemoveTeamMemberCheckPageConfirmationForm.form.bindFromRequest().fold(handleInvalidForm, handleValidForm)
   }
 
   protected def landingPageRoute(appId: ApplicationId): Call              = routes.ApplicationCheck.requestCheckPage(appId)

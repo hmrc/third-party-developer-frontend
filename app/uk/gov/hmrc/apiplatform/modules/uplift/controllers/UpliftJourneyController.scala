@@ -58,7 +58,7 @@ object UpliftJourneyController {
 
     val form: Form[ChooseApplicationToUpliftForm] = Form(
       mapping(
-        "applicationId" -> nonEmptyText.transform[ApplicationId](text => ApplicationId(UUID.fromString(text)), id => id.text)
+        "applicationId" -> nonEmptyText.transform[ApplicationId](text => ApplicationId(UUID.fromString(text)), id => id.text())
       )(ChooseApplicationToUpliftForm.apply)(ChooseApplicationToUpliftForm.unapply)
     )
   }
@@ -143,7 +143,7 @@ class UpliftJourneyController @Inject() (
     lazy val formSubmittedSubscriptions: Map[String, Boolean] =
       request.body.asFormUrlEncoded.get
         .filter(_._1.contains("subscribed"))
-        .mapValues(_.head == "true")
+        .view.mapValues(_.head == "true").toMap
         .map {
           case (name, isSubscribed) => (name.replace("-subscribed", "") -> isSubscribed)
         }
@@ -210,7 +210,7 @@ class UpliftJourneyController @Inject() (
       }
     }
 
-    sellResellOrDistributeForm.bindFromRequest.fold(handleInvalidForm, handleValidForm)
+    sellResellOrDistributeForm.bindFromRequest().fold(handleInvalidForm, handleValidForm)
   }
 
   def beforeYouStart(sandboxAppId: ApplicationId): Action[AnyContent] = whenTeamMemberOnApp(sandboxAppId) { implicit request =>

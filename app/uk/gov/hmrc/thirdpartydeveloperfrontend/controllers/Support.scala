@@ -59,7 +59,7 @@ class Support @Inject() (
   }
 
   def submitSupportEnquiry = maybeAtLeastPartLoggedInEnablingMfa { implicit request =>
-    val requestForm = supportForm.bindFromRequest
+    val requestForm = supportForm.bindFromRequest()
     val displayName = fullyloggedInDeveloper.map(_.displayedName)
     val userId      = fullyloggedInDeveloper.map(_.developer.userId)
 

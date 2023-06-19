@@ -74,7 +74,7 @@ class Profile @Inject() (
   }
 
   def updateProfile(): Action[AnyContent] = loggedInAction { implicit request =>
-    val requestForm = profileForm.bindFromRequest
+    val requestForm = profileForm.bindFromRequest()
     requestForm.fold(
       formWithErrors => {
         Future.successful(BadRequest(changeProfileViewTemplate(formWithErrors.firstnameGlobal().lastnameGlobal())))
@@ -113,7 +113,7 @@ class Profile @Inject() (
   }
 
   def deleteAccount(): Action[AnyContent] = loggedInAction { implicit request =>
-    val form = deleteProfileForm.bindFromRequest
+    val form = deleteProfileForm.bindFromRequest()
 
     form.fold(
       invalidForm => {

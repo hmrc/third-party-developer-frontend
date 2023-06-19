@@ -56,7 +56,7 @@ class ApmConnector @Inject() (http: HttpClient, config: ApmConnector.Config, met
   val api = API("api-platform-microservice")
 
   def fetchApplicationById(applicationId: ApplicationId)(implicit hc: HeaderCarrier): Future[Option[ApplicationWithSubscriptionData]] =
-    http.GET[Option[ApplicationWithSubscriptionData]](s"${config.serviceBaseUrl}/applications/${applicationId.text}")
+    http.GET[Option[ApplicationWithSubscriptionData]](s"${config.serviceBaseUrl}/applications/${applicationId.text()}")
 
   def getAllFieldDefinitions(environment: Environment)(implicit hc: HeaderCarrier): Future[Map[ApiContext, Map[ApiVersion, Map[FieldName, SubscriptionFieldDefinition]]]] = {
 
@@ -67,7 +67,7 @@ class ApmConnector @Inject() (http: HttpClient, config: ApmConnector.Config, met
   }
 
   def fetchAllPossibleSubscriptions(applicationId: ApplicationId)(implicit hc: HeaderCarrier): Future[Map[ApiContext, ApiData]] = {
-    http.GET[Map[ApiContext, ApiData]](s"${config.serviceBaseUrl}/api-definitions", Seq("applicationId" -> applicationId.text))
+    http.GET[Map[ApiContext, ApiData]](s"${config.serviceBaseUrl}/api-definitions", Seq("applicationId" -> applicationId.text()))
   }
 
   def fetchAllOpenAccessApis(environment: Environment)(implicit hc: HeaderCarrier): Future[Map[ApiContext, ApiData]] = {
@@ -108,7 +108,7 @@ class ApmConnector @Inject() (http: HttpClient, config: ApmConnector.Config, met
 
   def fetchUpliftableSubscriptions(applicationId: ApplicationId)(implicit hc: HeaderCarrier): Future[Set[ApiIdentifier]] =
     metrics.record(api) {
-      http.GET[Set[ApiIdentifier]](s"${config.serviceBaseUrl}/applications/${applicationId.text}/upliftableSubscriptions")
+      http.GET[Set[ApiIdentifier]](s"${config.serviceBaseUrl}/applications/${applicationId.text()}/upliftableSubscriptions")
     }
 
   def fetchAllApis(environment: Environment)(implicit hc: HeaderCarrier): Future[Map[ApiContext, ApiData]] =
@@ -117,10 +117,10 @@ class ApmConnector @Inject() (http: HttpClient, config: ApmConnector.Config, met
     }
 
   def upliftApplicationV1(applicationId: ApplicationId, subs: Set[ApiIdentifier])(implicit hc: HeaderCarrier): Future[ApplicationId] = metrics.record(api) {
-    http.POST[RequestUpliftV1, ApplicationId](s"${config.serviceBaseUrl}/applications/${applicationId.text}/uplift", RequestUpliftV1(subs))
+    http.POST[RequestUpliftV1, ApplicationId](s"${config.serviceBaseUrl}/applications/${applicationId.text()}/uplift", RequestUpliftV1(subs))
   }
 
   def upliftApplicationV2(applicationId: ApplicationId, upliftData: UpliftData)(implicit hc: HeaderCarrier): Future[ApplicationId] = metrics.record(api) {
-    http.POST[RequestUpliftV2, ApplicationId](s"${config.serviceBaseUrl}/applications/${applicationId.text}/uplift", RequestUpliftV2(upliftData))
+    http.POST[RequestUpliftV2, ApplicationId](s"${config.serviceBaseUrl}/applications/${applicationId.text()}/uplift", RequestUpliftV2(upliftData))
   }
 }

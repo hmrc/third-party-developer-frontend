@@ -134,7 +134,7 @@ class ManageTeam @Inject() (
         successful(createBadRequestResult(formWithErrors))
       }
 
-      AddTeamMemberForm.form.bindFromRequest.fold(handleInvalidForm, handleValidForm)
+      AddTeamMemberForm.form.bindFromRequest().fold(handleInvalidForm, handleValidForm)
     }
 
   def removeTeamMember(applicationId: ApplicationId, teamMemberHash: String) = whenAppSupportsTeamMembers(applicationId) { implicit request =>
@@ -161,6 +161,6 @@ class ManageTeam @Inject() (
     def handleInvalidForm(form: Form[RemoveTeamMemberConfirmationForm]) =
       successful(BadRequest(removeTeamMemberView(applicationViewModelFromApplicationRequest, form, form("email").value.getOrElse(""))))
 
-    RemoveTeamMemberConfirmationForm.form.bindFromRequest.fold(handleInvalidForm, handleValidForm)
+    RemoveTeamMemberConfirmationForm.form.bindFromRequest().fold(handleInvalidForm, handleValidForm)
   }
 }

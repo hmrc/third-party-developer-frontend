@@ -59,7 +59,7 @@ trait TermsOfUsePartialController {
     val version = termsOfUseVersionService.getLatest().toString
     val app     = request.application
 
-    val requestForm = TermsOfUseForm.form.bindFromRequest
+    val requestForm = TermsOfUseForm.form.bindFromRequest()
 
     def withFormErrors(form: Form[TermsOfUseForm]) = {
       Future.successful(BadRequest(createTermsOfUse(applicationViewModelFromApplicationRequest, form)))

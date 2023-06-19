@@ -40,7 +40,7 @@ trait ConfirmNamePartialController {
   }
 
   def nameAction(appId: ApplicationId): Action[AnyContent] = canUseChecksAction(appId) { implicit request =>
-    val requestForm = NameForm.form.bindFromRequest
+    val requestForm = NameForm.form.bindFromRequest()
     val app         = request.application
 
     def withFormErrors(form: Form[NameForm]) = {

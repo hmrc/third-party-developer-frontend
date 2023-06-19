@@ -28,6 +28,7 @@ import play.api.mvc.{Action, AnyContent, MessagesControllerComponents, Result}
 
 import uk.gov.hmrc.apiplatform.modules.applications.domain.models.ApplicationId
 import uk.gov.hmrc.thirdpartydeveloperfrontend.config.{ApplicationConfig, ErrorHandler}
+import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.ApplicationRequest
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.Capabilities.SupportsTermsOfUse
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.Permissions.SandboxOrAdmin
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications._
@@ -61,7 +62,7 @@ class TermsOfUse @Inject() (
       Future.successful(BadRequest(errorHandler.badRequestTemplate))
     } else {
       val termsOfUse = termsOfUseVersionService.getForApplication(request.application)
-      Future.successful(Ok(termsOfUseView(applicationViewModelFromApplicationRequest, TermsOfUseForm.form, termsOfUse)))
+      Future.successful(Ok(termsOfUseView(applicationViewModelFromApplicationRequest(), TermsOfUseForm.form, termsOfUse)))
     }
   }
 
@@ -87,8 +88,8 @@ class TermsOfUse @Inject() (
       Future.successful(BadRequest(termsOfUseView(applicationViewModel, form, termsOfUse)))
     }
 
-    TermsOfUseForm.form.bindFromRequest
-      .fold(invalidForm => handleInvalidForm(applicationViewModelFromApplicationRequest, invalidForm), validForm => handleValidForm(request.application, validForm))
+    TermsOfUseForm.form.bindFromRequest()
+      .fold(invalidForm => handleInvalidForm(applicationViewModelFromApplicationRequest(), invalidForm), validForm => handleValidForm(request.application, validForm))
   }
 
 }

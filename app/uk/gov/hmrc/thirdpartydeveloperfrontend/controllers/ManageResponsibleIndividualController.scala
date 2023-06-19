@@ -122,7 +122,7 @@ class ManageResponsibleIndividualController @Inject() (
       }))
     }
 
-    ResponsibleIndividualChangeToSelfOrOtherForm.form.bindFromRequest.fold(handleInvalidForm, handleValidForm)
+    ResponsibleIndividualChangeToSelfOrOtherForm.form.bindFromRequest().fold(handleInvalidForm, handleValidForm)
   }
 
   def showResponsibleIndividualChangeToSelf(applicationId: ApplicationId) = canUpdateResponsibleIndividualDetailsAction(applicationId) { implicit request =>
@@ -167,7 +167,7 @@ class ManageResponsibleIndividualController @Inject() (
       }
     }
 
-    ResponsibleIndividualChangeToOtherForm.form.bindFromRequest.fold(handleInvalidForm, handleValidForm)
+    ResponsibleIndividualChangeToOtherForm.form.bindFromRequest().fold(handleInvalidForm, handleValidForm)
   }
 
   def showResponsibleIndividualChangeToOtherRequested(applicationId: ApplicationId) = canUpdateResponsibleIndividualDetailsAction(applicationId) { implicit request =>
