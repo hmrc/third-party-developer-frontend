@@ -56,7 +56,7 @@ class ConnectorMetricsImpl @Inject() (metrics: Metrics) extends ConnectorMetrics
     val context = metrics.defaultRegistry.timer(api.name ++ "-timer").time()
 
     new Timer {
-      def stop: Unit = context.stop()
+      def stop(): Unit = context.stop()
     }
   }
 }

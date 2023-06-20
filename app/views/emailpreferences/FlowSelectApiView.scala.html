@@ -41,7 +41,7 @@
   back = BackButtonWithJavaScript,
   developerSession = Some(loggedIn)
 ) {
-  @helper.form(action = routes.EmailPreferencesController.flowSelectApisAction, 'class -> "form", 'id -> "emailPreferencesApisForm") {
+  @helper.form(action = routes.EmailPreferencesController.flowSelectApisAction, Symbol("class") -> "form", Symbol("id") -> "emailPreferencesApisForm") {
     @helper.CSRF.formField
     <a name="apiRadio"></a>
     <div class="govuk-form-group @if(form.errors("apiRadio").nonEmpty || form.errors.map(_.message).contains(FormKeys.selectedApisNonSelectedGlobalKey)) {govuk-form-group--error}">

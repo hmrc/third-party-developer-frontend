@@ -39,7 +39,7 @@
 ) {
   <h1 class="govuk-heading-l">Delete account</h1>
 
-  @helper.form(action = controllers.profile.routes.Profile.deleteAccount) {
+  @helper.form(action = controllers.profile.routes.Profile.deleteAccount()) {
     @helper.CSRF.formField
 
     <div class="govuk-form-group @if(form.errors("confirmation").nonEmpty) {govuk-form-group--error}">
@@ -63,7 +63,7 @@
 
     <div class="govuk-button-group">
       <button id="submit" class="govuk-button" type="submit">Continue</button>
-      <a id="cancel" href="@controllers.profile.routes.Profile.showProfile" class="govuk-link govuk-link--no-visited-state">Cancel</a>
+      <a id="cancel" href="@controllers.profile.routes.Profile.showProfile()" class="govuk-link govuk-link--no-visited-state">Cancel</a>
     </div>
   }
 }

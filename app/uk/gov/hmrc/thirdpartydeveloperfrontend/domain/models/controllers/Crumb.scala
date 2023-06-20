@@ -46,11 +46,11 @@ object Crumb {
   def applicationMetadata(application: Application) =
     Crumb("Subscription configuration", s"${routes.ManageSubscriptions.listApiSubscriptions(application.id)}", Some("data-breadcrumb-app-metadata"))
 
-  def manageProfile = Crumb("Manage profile", s"${profile.routes.Profile.showProfile}", Some("data-breadcrumb-manage-profile"))
+  def manageProfile = Crumb("Manage profile", s"${profile.routes.Profile.showProfile()}", Some("data-breadcrumb-manage-profile"))
 
-  def changePassword = Crumb("Change password", s"${profile.routes.Profile.showPasswordPage}", Some("data-breadcrumb-change-password"))
+  def changePassword = Crumb("Change password", s"${profile.routes.Profile.showPasswordPage()}", Some("data-breadcrumb-change-password"))
 
-  def emailPreferences = Crumb("Email preferences", s"${profile.routes.EmailPreferencesController.emailPreferencesSummaryPage}", Some("data-breadcrumb-email-preferences"))
+  def emailPreferences = Crumb("Email preferences", s"${profile.routes.EmailPreferencesController.emailPreferencesSummaryPage()}", Some("data-breadcrumb-email-preferences"))
 
   def ipAllowlist(application: Application) = Crumb("IP allow list", s"${routes.IpAllowListController.viewIpAllowlist(application.id)}", Some("data-breadcrumb-ip-allowlist"))
 }

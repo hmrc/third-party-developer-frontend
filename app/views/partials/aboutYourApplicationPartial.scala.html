@@ -25,7 +25,7 @@
 @addApplicationToEnv = @{s"to add your application to ${applicationConfig.nameOfPrincipalEnvironment}"}
 @principalWording = @{if(applicationConfig.nameOfPrincipalEnvironment == "Production") {requestProductionCredentials} else addApplicationToEnv}
 
-@helper.form(action = controllers.checkpages.routes.CheckYourAnswers.answersPageAction(data.appId), 'class -> "form") {
+@helper.form(action = controllers.checkpages.routes.CheckYourAnswers.answersPageAction(data.appId), Symbol("class") -> "form") {
   @helper.CSRF.formField
   <h2 class="govuk-heading-m">About your application</h2>
   <table class="govuk-table">
@@ -157,7 +157,7 @@
           <span class="govuk-!-font-weight-bold">Privacy policy</span>
         </th>
         <td class="govuk-table__cell">
-          @{data.privacyPolicyLocation.describe}
+          @{data.privacyPolicyLocation.describe()}
         </td>
         @if(editable) {
           <td class="govuk-table__cell">
@@ -172,7 +172,7 @@
           <th scope="row" class="govuk-table__header">
             <span class="govuk-!-font-weight-bold">Terms and conditions</span>
           </th>
-          <td class="govuk-table__cell">@{data.termsAndConditionsLocation.describe}</td>
+          <td class="govuk-table__cell">@{data.termsAndConditionsLocation.describe()}</td>
           @if(editable) {
             <td class="govuk-table__cell">
                 <div align="right">

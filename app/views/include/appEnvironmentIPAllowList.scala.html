@@ -20,7 +20,7 @@
 @(app: Application)(implicit appConfig: ApplicationConfig)
 @principalEnvName = @{appConfig.nameOfPrincipalEnvironment}
 @subordinateEnvName = @{appConfig.nameOfSubordinateEnvironment}
-@envName = @{ if(app.deployedTo.isProduction) {principalEnvName} else subordinateEnvName}
+@envName = @{ if(app.deployedTo.isProduction()) {principalEnvName} else subordinateEnvName}
 
 @if(app.access.accessType.isNotStandard) {
   <p class="govuk-body">This application is @applicationType() application.</p>

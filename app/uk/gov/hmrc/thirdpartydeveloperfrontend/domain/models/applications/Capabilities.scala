@@ -67,7 +67,7 @@ object Capabilities {
   }
 
   case object SupportChangingAppDetails extends Capability {
-    def hasCapability(app: BaseApplication): Boolean = app.isInTesting || app.deployedTo.isSandbox
+    def hasCapability(app: BaseApplication): Boolean = app.isInTesting || app.deployedTo.isSandbox()
   }
 
   case object SupportsIpAllowlist extends Capability {

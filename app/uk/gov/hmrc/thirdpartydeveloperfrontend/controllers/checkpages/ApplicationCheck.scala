@@ -123,7 +123,7 @@ class ApplicationCheck @Inject() (
   }
 
   def teamAddMember(appId: ApplicationId): Action[AnyContent] = canUseChecksAction(appId) { implicit request =>
-    Future.successful(Ok(teamMemberAddView(applicationViewModelFromApplicationRequest, AddTeamMemberForm.form, request.developerSession)))
+    Future.successful(Ok(teamMemberAddView(applicationViewModelFromApplicationRequest(), AddTeamMemberForm.form, request.developerSession)))
   }
 
   def teamMemberRemoveConfirmation(appId: ApplicationId, teamMemberHash: String): Action[AnyContent] = canUseChecksAction(appId) { implicit request =>

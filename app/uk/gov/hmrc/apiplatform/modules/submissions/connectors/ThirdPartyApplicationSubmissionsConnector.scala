@@ -135,7 +135,7 @@ class ThirdPartyApplicationSubmissionsConnector @Inject() (
   def confirmSetupComplete(applicationId: ApplicationId, userEmailAddress: LaxEmailAddress)(implicit hc: HeaderCarrier): Future[Either[String, Unit]] = metrics.record(api) {
     import cats.implicits._
 
-    val url    = s"$serviceBaseUrl/application/${applicationId.text}/confirm-setup-complete"
+    val url    = s"$serviceBaseUrl/application/${applicationId.text()}/confirm-setup-complete"
     val failed = (err: UpstreamErrorResponse) => s"Failed to confirm setup complete for application ${applicationId.text()}"
 
     http.POST[ConfirmSetupCompleteRequest, Either[UpstreamErrorResponse, Unit]](url, ConfirmSetupCompleteRequest(userEmailAddress)).map(_.leftMap(failed))

@@ -61,7 +61,7 @@ abstract class AbstractSubscriptionFieldsConnector(implicit ec: ExecutionContext
 
     def getDefinitions() = Future.successful(definitionsCache.getOrElse(apiIdentifier, Seq.empty))
 
-    internalFetchFieldValues(getDefinitions)(clientId, apiIdentifier)
+    internalFetchFieldValues(() => getDefinitions())(clientId, apiIdentifier)
   }
 
   def fetchFieldValues(
@@ -73,7 +73,7 @@ abstract class AbstractSubscriptionFieldsConnector(implicit ec: ExecutionContext
 
     def getDefinitions() = fetchFieldDefinitions(context, version)
 
-    internalFetchFieldValues(getDefinitions)(clientId, ApiIdentifier(context, version))
+    internalFetchFieldValues(() => getDefinitions())(clientId, ApiIdentifier(context, version))
   }
 
   private def internalFetchFieldValues(

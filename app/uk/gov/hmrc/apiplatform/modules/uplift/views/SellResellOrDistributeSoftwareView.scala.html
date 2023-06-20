@@ -35,7 +35,7 @@
   back = BackButtonWithJavaScript,
   developerSession = Some(loggedIn)
 ) {
-  @helper.form(action = uk.gov.hmrc.apiplatform.modules.uplift.controllers.routes.UpliftJourneyController.sellResellOrDistributeYourSoftwareAction(applicationId), 'class -> "form") {
+  @helper.form(action = uk.gov.hmrc.apiplatform.modules.uplift.controllers.routes.UpliftJourneyController.sellResellOrDistributeYourSoftwareAction(applicationId), Symbol("class") -> "form") {
     <div class="govuk-form-group @if(form.errors("answer").nonEmpty) {govuk-form-group--error}">
         <fieldset id="answer-fieldset" class="govuk-fieldset" role="group" aria-describedby="answer-error">
             <legend class="govuk-fieldset__legend govuk-fieldset__legend--l">

@@ -51,7 +51,7 @@
       />
 
       <p class="govuk-body">
-        <a class="govuk-link" id="help-page-link" href="@routes.UserLoginAccount.get2SVHelpConfirmationPage">I cannot get an access code</a>
+        <a class="govuk-link" id="help-page-link" href="@routes.UserLoginAccount.get2SVHelpConfirmationPage()">I cannot get an access code</a>
       </p>
 
         <div class="govuk-checkboxes" data-module="govuk-checkboxes">
@@ -66,7 +66,7 @@
         </div>
     </div>
       @if(userHasMultipleMfa){
-          <p class="govuk-body" id="try-another-option">Problems receiving this code? <a href="@routes.UserLoginAccount.tryAnotherOption">Try another option</a></p>
+          <p class="govuk-body" id="try-another-option">Problems receiving this code? <a href="@routes.UserLoginAccount.tryAnotherOption()">Try another option</a></p>
       }
     <button id="submit" class="govuk-button" type="submit">Continue</button>
   }

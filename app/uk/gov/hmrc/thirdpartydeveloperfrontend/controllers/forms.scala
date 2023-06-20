@@ -274,7 +274,7 @@ object EditApplicationForm {
 
   val form: Form[EditApplicationForm] = Form(
     mapping(
-      "applicationId"         -> nonEmptyText.transform[ApplicationId](text => ApplicationId(java.util.UUID.fromString(text)), id => id.text),
+      "applicationId"         -> nonEmptyText.transform[ApplicationId](text => ApplicationId(java.util.UUID.fromString(text)), id => id.text()),
       "applicationName"       -> applicationNameValidator,
       "description"           -> optional(text),
       "privacyPolicyUrl"      -> optional(privacyPolicyUrlValidator),
@@ -299,7 +299,7 @@ object EditApplicationForm {
         app.description,
         privacyPolicyUrl,
         termsAndConditionsUrl,
-        app.grantLengthDisplayValue
+        app.grantLengthDisplayValue()
       )
     )
   }
@@ -543,7 +543,7 @@ object SelectTopicsFromSubscriptionsForm {
   implicit def applicationIdFormat: Formatter[ApplicationId] = new Formatter[ApplicationId] {
     override val format                                       = Some(("format.uuid", Nil))
     override def bind(key: String, data: Map[String, String]) = data.get(key).map(text => ApplicationId(UUID.fromString(text))).toRight(Seq(FormError(key, "error.required", Nil)))
-    override def unbind(key: String, value: ApplicationId)    = Map(key -> value.text)
+    override def unbind(key: String, value: ApplicationId)    = Map(key -> value.text())
   }
 
   def nonEmptyList: Constraint[Seq[String]] = Constraint[Seq[String]]("constraint.required") { o =>

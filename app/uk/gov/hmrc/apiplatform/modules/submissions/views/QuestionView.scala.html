@@ -271,7 +271,7 @@
 
   @renderMaybeStatement(question.statement)
 
-  @helper.form(action = submitAction, 'class -> "form") {
+  @helper.form(action = submitAction, Symbol("class") -> "form") {
     @helper.CSRF.formField
 
     @renderQuestionType(question)

@@ -46,7 +46,7 @@
 
   <p class="govuk-body">Previous application names will become available for others to use.</p>
 
-  @helper.form(action = controllers.routes.Details.requestChangeOfAppNameAction(model.application.id), 'class -> "form") {
+  @helper.form(action = controllers.routes.Details.requestChangeOfAppNameAction(model.application.id), Symbol("class") -> "form") {
     @helper.CSRF.formField
     
       <div class="govuk-form-group @if(form.errors("applicationName").nonEmpty) {govuk-form-group--error}">

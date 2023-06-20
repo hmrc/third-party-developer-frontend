@@ -38,7 +38,7 @@
 
   <h1 class="govuk-heading-l">Change profile details</h1>
 
-  @helper.form(action = controllers.profile.routes.Profile.updateProfile) {
+  @helper.form(action = controllers.profile.routes.Profile.updateProfile()) {
     @helper.CSRF.formField
     <div class="govuk-form-group @if(form.errors("firstname").nonEmpty) {govuk-form-group--error}">
         <label class="govuk-label govuk-!-font-weight-bold" for="firstname" id="firstname-label">First name</label>

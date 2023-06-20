@@ -64,7 +64,7 @@
     For security reasons we must approve any API subscription changes. This takes up to 2 working days.
   </div>
 
-  @helper.form(action = formAction, 'class -> "no-fields-subscription") {
+  @helper.form(action = formAction, Symbol("class") -> "no-fields-subscription") {
     <div class="govuk-form-group @if(form.errors("confirm").nonEmpty) {form-group-error}">
       <fieldset class="govuk-fieldset">
         <legend class="govuk-fieldset__legend govuk-fieldset__legend--m">

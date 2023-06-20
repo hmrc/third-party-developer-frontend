@@ -48,7 +48,7 @@
 )
 
 @isPendingOrActiveProductionApplication(application: Application) = @{
-    application.deployedTo.isProduction && !application.isInTesting
+    application.deployedTo.isProduction() && !application.isInTesting
 }
 
 @pageHeading = @{"Which APIs do you want to use?"}

@@ -72,7 +72,7 @@ trait BaseApplication {
   }
 
   def termsOfUseStatus: TermsOfUseStatus = {
-    if (deployedTo.isSandbox || access.accessType.isNotStandard) {
+    if (deployedTo.isSandbox() || access.accessType.isNotStandard) {
       TermsOfUseStatus.NOT_APPLICABLE
     } else if (termsOfUseAgreements.isEmpty) {
       TermsOfUseStatus.AGREEMENT_REQUIRED
@@ -153,7 +153,7 @@ trait BaseApplication {
   def isInTesting            = state.isInTesting
   def isPendingApproval      = state.isPendingApproval
   def isApproved             = state.isApproved
-  def hasLockedSubscriptions = deployedTo.isProduction && !isInTesting
+  def hasLockedSubscriptions = deployedTo.isProduction() && !isInTesting
 
   def findCollaboratorByHash(teamMemberHash: String): Option[Collaborator] = {
     collaborators.find(c => c.emailAddress.text.toSha256 == teamMemberHash)
@@ -171,7 +171,7 @@ trait BaseApplication {
       case GrantLength.FIVE_YEARS      => "5 years"
       case GrantLength.TEN_YEARS       => "10 years"
       case GrantLength.HUNDRED_YEARS   => "100 years"
-      case _                           => s"${Math.round(grantLength.getDays / 30)} months"
+      case _                           => s"${Math.round(grantLength.getDays.toFloat / 30)} months"
     }
   }
   // scalastyle:on cyclomatic.complexity

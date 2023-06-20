@@ -274,7 +274,7 @@ class ManageSubscriptions @Inject() (
 
   def subscriptionConfigurationStepPage(applicationId: ApplicationId, pageNumber: Int): Action[AnyContent] = {
     def doEndOfJourneyRedirect(application: Application)(implicit hc: HeaderCarrier) = {
-      if (application.deployedTo.isSandbox) {
+      if (application.deployedTo.isSandbox()) {
         Future.successful(Redirect(addapplication.routes.AddApplication.addApplicationSuccess(application.id)))
       } else {
         val information = application.checkInformation.getOrElse(CheckInformation()).copy(apiSubscriptionConfigurationsConfirmed = true)

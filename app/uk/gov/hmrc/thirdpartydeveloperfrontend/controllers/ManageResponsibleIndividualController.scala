@@ -122,7 +122,7 @@ class ManageResponsibleIndividualController @Inject() (
       }))
     }
 
-    ResponsibleIndividualChangeToSelfOrOtherForm.form.bindFromRequest().fold(handleInvalidForm, handleValidForm)
+    ResponsibleIndividualChangeToSelfOrOtherForm.form().bindFromRequest().fold(handleInvalidForm, handleValidForm)
   }
 
   def showResponsibleIndividualChangeToSelf(applicationId: ApplicationId) = canUpdateResponsibleIndividualDetailsAction(applicationId) { implicit request =>
@@ -155,7 +155,7 @@ class ManageResponsibleIndividualController @Inject() (
           if (isAlreadyResponsibleIndividual) {
             successful(BadRequest(responsibleIndividualChangeToOtherView(
               request.application,
-              ResponsibleIndividualChangeToOtherForm.form.fill(form).withGlobalError("responsible_individual.error.nochange")
+              ResponsibleIndividualChangeToOtherForm.form().fill(form).withGlobalError("responsible_individual.error.nochange")
             )))
           } else {
             applicationService.verifyResponsibleIndividual(request.application, request.userId, request.developerSession.displayedName, form.name, form.email.toLaxEmail)
@@ -167,7 +167,7 @@ class ManageResponsibleIndividualController @Inject() (
       }
     }
 
-    ResponsibleIndividualChangeToOtherForm.form.bindFromRequest().fold(handleInvalidForm, handleValidForm)
+    ResponsibleIndividualChangeToOtherForm.form().bindFromRequest().fold(handleInvalidForm, handleValidForm)
   }
 
   def showResponsibleIndividualChangeToOtherRequested(applicationId: ApplicationId) = canUpdateResponsibleIndividualDetailsAction(applicationId) { implicit request =>

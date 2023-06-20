@@ -103,7 +103,7 @@
             case Some(fraudPreventionViewModel) if(fraudPreventionViewModel.isVisible) =>{
 
             <li class="side-nav__list @if(section == "fraud-prevention") { side-nav__list--selected }">
-              <a id="nav-fraud-prevention" class="side-nav__link" href="@fraudPreventionViewModel.generateLink(app.id.text)">
+              <a id="nav-fraud-prevention" class="side-nav__link" href="@fraudPreventionViewModel.generateLink(app.id.text())">
                         Fraud prevention
               </a>
             </li>
@@ -136,9 +136,9 @@
     <div class="side-nav" role="navigation" aria-labelledby="nav3">
       <h2 class="govuk-heading-s govuk-!-margin-bottom-1 govuk-!-margin-top-2" id="nav3">Manage account</h2>
       <ul class="side-nav__component">
-        <li class="side-nav__list @if(section == "manage-profile") { side-nav__list--selected }"><a class="side-nav__link" href="@controllers.profile.routes.Profile.showProfile">Manage profile</a></li>
-        <li class="side-nav__list @if(section == "email-preferences") { side-nav__list--selected }"><a class="side-nav__link" href="@controllers.profile.routes.EmailPreferencesController.emailPreferencesSummaryPage">Email preferences</a></li>
-        <li class="side-nav__list @if(section == "change-password") { side-nav__list--selected }"><a class="side-nav__link" href="@controllers.profile.routes.Profile.showPasswordPage">Change password</a></li>
+        <li class="side-nav__list @if(section == "manage-profile") { side-nav__list--selected }"><a class="side-nav__link" href="@controllers.profile.routes.Profile.showProfile()">Manage profile</a></li>
+        <li class="side-nav__list @if(section == "email-preferences") { side-nav__list--selected }"><a class="side-nav__link" href="@controllers.profile.routes.EmailPreferencesController.emailPreferencesSummaryPage()">Email preferences</a></li>
+        <li class="side-nav__list @if(section == "change-password") { side-nav__list--selected }"><a class="side-nav__link" href="@controllers.profile.routes.Profile.showPasswordPage()">Change password</a></li>
         <li class="side-nav__list @if(section == "security-preferences") { side-nav__list--selected }"><a class="side-nav__link" href="@uk.gov.hmrc.apiplatform.modules.mfa.controllers.profile.routes.MfaController.securityPreferences">Security preferences</a></li>
       </ul>
     </div>
@@ -148,12 +148,12 @@
       <h2 class="govuk-heading-s govuk-!-margin-bottom-1 govuk-!-margin-top-2" id="nav2">Manage applications</h2>
       <ul class="side-nav__component">
         <li class="side-nav__list @if(section == "manage-applications") { side-nav__list--selected }"><a class="side-nav__link" href="@controllers.routes.ManageApplications.manageApps">View all applications</a></li>
-        <li class="side-nav__list"><a class="side-nav__link" href="@controllers.addapplication.routes.AddApplication.addApplicationSubordinate">Add an application to @subordinateWording</a></li>
+        <li class="side-nav__list"><a class="side-nav__link" href="@controllers.addapplication.routes.AddApplication.addApplicationSubordinate()">Add an application to @subordinateWording</a></li>
         @if(isGetProductionCredentialsEnabled) {
           @if(appConfig.nameOfPrincipalEnvironment == "Production") {
-            <li class="side-nav__list"><a class="side-nav__link" href="@controllers.addapplication.routes.AddApplication.addApplicationPrincipal">Get production credentials</a></li>
+            <li class="side-nav__list"><a class="side-nav__link" href="@controllers.addapplication.routes.AddApplication.addApplicationPrincipal()">Get production credentials</a></li>
           } else {
-            <li class="side-nav__list"><a class="side-nav__link" href="@controllers.addapplication.routes.AddApplication.addApplicationPrincipal">Add an application to @{appConfig.nameOfPrincipalEnvironment}</a></li>
+            <li class="side-nav__list"><a class="side-nav__link" href="@controllers.addapplication.routes.AddApplication.addApplicationPrincipal()">Add an application to @{appConfig.nameOfPrincipalEnvironment}</a></li>
           }
         }
       </ul>
@@ -162,9 +162,9 @@
     <div class="side-nav" role="navigation" aria-labelledby="nav3">
       <h2 class="govuk-heading-s govuk-!-margin-bottom-1 govuk-!-margin-top-2" id="nav3">Manage account</h2>
       <ul class="side-nav__component">
-        <li class="side-nav__list @if(section == "manage-profile") { side-nav__list--selected }"><a class="side-nav__link" href="@controllers.profile.routes.Profile.showProfile">Manage profile</a></li>
-        <li class="side-nav__list @if(section == "email-preferences") { side-nav__list--selected }"><a class="side-nav__link" href="@controllers.profile.routes.EmailPreferencesController.emailPreferencesSummaryPage">Email preferences</a></li>
-        <li class="side-nav__list @if(section == "change-password") { side-nav__list--selected }"><a class="side-nav__link" href="@controllers.profile.routes.Profile.showPasswordPage">Change password</a></li>
+        <li class="side-nav__list @if(section == "manage-profile") { side-nav__list--selected }"><a class="side-nav__link" href="@controllers.profile.routes.Profile.showProfile()">Manage profile</a></li>
+        <li class="side-nav__list @if(section == "email-preferences") { side-nav__list--selected }"><a class="side-nav__link" href="@controllers.profile.routes.EmailPreferencesController.emailPreferencesSummaryPage()">Email preferences</a></li>
+        <li class="side-nav__list @if(section == "change-password") { side-nav__list--selected }"><a class="side-nav__link" href="@controllers.profile.routes.Profile.showPasswordPage()">Change password</a></li>
         <li class="side-nav__list @if(section == "security-preferences") { side-nav__list--selected }"><a class="side-nav__link" href="@uk.gov.hmrc.apiplatform.modules.mfa.controllers.profile.routes.MfaController.securityPreferences">Security preferences</a></li>
       </ul>
     </div>

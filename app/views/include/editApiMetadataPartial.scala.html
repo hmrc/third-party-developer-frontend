@@ -29,7 +29,7 @@
 
 @helper.form(
   action = formPostUrl,
-  'class -> "fields-subscription"
+  Symbol("class") -> "fields-subscription"
 ) {
 
   @helper.CSRF.formField

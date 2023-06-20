@@ -60,14 +60,14 @@ class Redirects @Inject() (
   def redirects(applicationId: ApplicationId) = checkActionForApprovedApps(SupportsRedirects, TeamMembersOnly)(applicationId) { implicit request =>
     val appAccess = request.application.access.asInstanceOf[Standard]
     successful(Ok(redirectsView(
-      applicationViewModelFromApplicationRequest,
+      applicationViewModelFromApplicationRequest(),
       appAccess.redirectUris,
       createOptionalFraudPreventionNavLinkViewModel(request.application, request.subscriptions, fraudPreventionConfig)
     )))
   }
 
   def addRedirect(applicationId: ApplicationId) = canChangeRedirectInformationAction(applicationId) { implicit request =>
-    successful(Ok(addRedirectView(applicationViewModelFromApplicationRequest, AddRedirectForm.form)))
+    successful(Ok(addRedirectView(applicationViewModelFromApplicationRequest(), AddRedirectForm.form)))
   }
 
   def addRedirectAction(applicationId: ApplicationId) = canChangeRedirectInformationAction(applicationId) { implicit request =>
@@ -76,7 +76,7 @@ class Redirects @Inject() (
 
     def handleValidForm(form: AddRedirectForm) = {
       if (application.hasRedirectUri(form.redirectUri)) {
-        successful(BadRequest(addRedirectView(applicationViewModelFromApplicationRequest, AddRedirectForm.form.fill(form).withError("redirectUri", "redirect.uri.duplicate"))))
+        successful(BadRequest(addRedirectView(applicationViewModelFromApplicationRequest(), AddRedirectForm.form.fill(form).withError("redirectUri", "redirect.uri.duplicate"))))
       } else {
         redirectsService.addRedirect(actor, application, RedirectUri.unsafeApply(form.redirectUri))
           .map(_ => Redirect(routes.Redirects.redirects(applicationId)))
@@ -84,7 +84,7 @@ class Redirects @Inject() (
     }
 
     def handleInvalidForm(formWithErrors: Form[AddRedirectForm]) = {
-      successful(BadRequest(addRedirectView(applicationViewModelFromApplicationRequest, formWithErrors)))
+      successful(BadRequest(addRedirectView(applicationViewModelFromApplicationRequest(), formWithErrors)))
     }
 
     AddRedirectForm.form.bindFromRequest().fold(handleInvalidForm, handleValidForm)
@@ -92,7 +92,7 @@ class Redirects @Inject() (
 
   def deleteRedirect(applicationId: ApplicationId) = canChangeRedirectInformationAction(applicationId) { implicit request =>
     def handleValidForm(form: DeleteRedirectForm) = {
-      successful(Ok(deleteRedirectConfirmationView(applicationViewModelFromApplicationRequest, DeleteRedirectConfirmationForm.form, form.redirectUri)))
+      successful(Ok(deleteRedirectConfirmationView(applicationViewModelFromApplicationRequest(), DeleteRedirectConfirmationForm.form, form.redirectUri)))
     }
 
     def handleInvalidForm(formWithErrors: Form[DeleteRedirectForm]) = {
@@ -116,14 +116,14 @@ class Redirects @Inject() (
     }
 
     def handleInvalidForm(form: Form[DeleteRedirectConfirmationForm]) = {
-      successful(BadRequest(deleteRedirectConfirmationView(applicationViewModelFromApplicationRequest, form, form("redirectUri").value.getOrElse(""))))
+      successful(BadRequest(deleteRedirectConfirmationView(applicationViewModelFromApplicationRequest(), form, form("redirectUri").value.getOrElse(""))))
     }
 
     DeleteRedirectConfirmationForm.form.bindFromRequest().fold(handleInvalidForm, handleValidForm)
   }
 
   def changeRedirect(applicationId: ApplicationId) = canChangeRedirectInformationAction(applicationId) { implicit request =>
-    successful(Ok(changeRedirectView(applicationViewModelFromApplicationRequest, ChangeRedirectForm.form.bindFromRequest())))
+    successful(Ok(changeRedirectView(applicationViewModelFromApplicationRequest(), ChangeRedirectForm.form.bindFromRequest())))
   }
 
   def changeRedirectAction(applicationId: ApplicationId) = canChangeRedirectInformationAction(applicationId) { implicit request =>
@@ -151,7 +151,7 @@ class Redirects @Inject() (
     }
 
     def handleInvalidForm(formWithErrors: Form[ChangeRedirectForm]) = {
-      successful(BadRequest(changeRedirectView(applicationViewModelFromApplicationRequest, formWithErrors)))
+      successful(BadRequest(changeRedirectView(applicationViewModelFromApplicationRequest(), formWithErrors)))
     }
 
     ChangeRedirectForm.form.bindFromRequest().fold(handleInvalidForm, handleValidForm)

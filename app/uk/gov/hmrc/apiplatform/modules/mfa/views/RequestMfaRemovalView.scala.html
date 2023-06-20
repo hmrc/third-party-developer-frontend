@@ -35,7 +35,7 @@
   <p class="govuk-body">We'll email you within 2 working days.</p>
   <p class="govuk-body">In the meantime, if you can get an access code you can still <a class="govuk-link" href="@routes.UserLoginAccount.login">sign in</a> to your account.</p>
 
-  @helper.form(action = routes.UserLoginAccount.confirm2SVHelp, 'class -> "form") {
+  @helper.form(action = routes.UserLoginAccount.confirm2SVHelp(), Symbol("class") -> "form") {
     @helper.CSRF.formField
     <div class="govuk-button-group">
       <button id="submit" class="govuk-button" type="submit">Continue</button>

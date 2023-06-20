@@ -92,7 +92,7 @@
               </div>
               <div class="govuk-grid-column-one-quarter govuk-!-text-align-right govuk-!-padding-0">
                 <div class="govuk-form-group govuk-!-margin-bottom-0">
-                  @helper.form(action = controllers.routes.SubscriptionsController.changeApiSubscription(app.id, api.context, api.apiVersion.version, afterSubscriptionRedirectTo.toString), 'class -> "slider") {
+                  @helper.form(action = controllers.routes.SubscriptionsController.changeApiSubscription(app.id, api.context, api.apiVersion.version, afterSubscriptionRedirectTo.toString), Symbol("class") -> "slider") {
                     @helper.CSRF.formField
                     <fieldset id="@IdFormatter.identifier(api.context, api.apiVersion.version)-toggle" @if(app.hasLockedSubscriptions || api.isPrivate) { disabled } aria-live="assertive">
                       <div class="slider__radios slider__radios--font-fix">

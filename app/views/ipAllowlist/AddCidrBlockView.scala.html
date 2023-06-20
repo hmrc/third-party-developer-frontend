@@ -89,7 +89,7 @@
       </div>
     </details>
 
-    @helper.form(action = routes.IpAllowListController.addCidrBlockAction(app.id), 'class -> "form") {
+    @helper.form(action = routes.IpAllowListController.addCidrBlockAction(app.id), Symbol("class") -> "form") {
       @helper.CSRF.formField
       <div class="govuk-form-group @if(form.errors("ipAddress").nonEmpty) {govuk-form-group--error}">
         <label class="govuk-label" for="ipAddress">IP address</label>

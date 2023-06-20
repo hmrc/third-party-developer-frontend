@@ -36,7 +36,7 @@
     <p class="govuk-body">Use a client secret together with your <a id="client-id" class="govuk-link" href="@controllers.routes.Credentials.clientId(app.id)">client ID</a> to test your application in the sandbox.</p>
   }
 @if(clientSecrets.isEmpty) {
-  @helper.form(action = controllers.routes.Credentials.addClientSecret(app.id), 'class -> "form") {
+  @helper.form(action = controllers.routes.Credentials.addClientSecret(app.id), Symbol("class") -> "form") {
     @helper.CSRF.formField
     <button id="submit" class="govuk-button" type="submit">Generate a client secret</button>
   }
@@ -121,7 +121,7 @@
 
         <p class="govuk-body">You can have up to 5 client secrets at any time.</p>
         <div>
-          @helper.form(action = controllers.routes.Credentials.addClientSecret(app.id), 'class -> "form") {
+          @helper.form(action = controllers.routes.Credentials.addClientSecret(app.id), Symbol("class") -> "form") {
             @helper.CSRF.formField
             <button id="generate-another-client-secret" class="govuk-button" type="submit">
               Generate another client secret

@@ -351,7 +351,7 @@ class Details @Inject() (
     def handleInvalidForm(formWithErrors: Form[ChangeOfApplicationNameForm]): Future[Result] =
       Future.successful(BadRequest(requestChangeOfApplicationNameView(formWithErrors, ApplicationNameModel(request.application))))
 
-    ChangeOfApplicationNameForm.form.bindFromRequest.fold(handleInvalidForm, handleValidForm)
+    ChangeOfApplicationNameForm.form.bindFromRequest().fold(handleInvalidForm, handleValidForm)
   }
 
 }

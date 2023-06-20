@@ -44,7 +44,7 @@
   </p>
   <br>
 
-  @helper.form(action = submitAction, 'class -> "form") {
+  @helper.form(action = submitAction, Symbol("class") -> "form") {
     @helper.CSRF.formField
 
     <div class="govuk-form-group @if(form.errors("applicationName").nonEmpty){govuk-form-group--error}">
