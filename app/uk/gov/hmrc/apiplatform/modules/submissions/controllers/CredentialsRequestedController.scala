@@ -70,7 +70,6 @@ class CredentialsRequestedController @Inject() (
     with SubmissionActionBuilders {
 
   import SubmissionActionBuilders.{ApplicationStateFilter, RoleFilter}
-  import cats.implicits._
   import cats.instances.future.catsStdInstancesForFuture
   import CredentialsRequestedController.CredentialsRequestedViewModel
 

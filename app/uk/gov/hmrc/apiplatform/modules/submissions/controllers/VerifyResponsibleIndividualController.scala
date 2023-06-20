@@ -75,7 +75,6 @@ class VerifyResponsibleIndividualController @Inject() (
     with EitherTHelper[String]
     with WithUnsafeDefaultFormBinding {
 
-  import cats.implicits._
   import cats.instances.future.catsStdInstancesForFuture
 
   private val exec                        = ec

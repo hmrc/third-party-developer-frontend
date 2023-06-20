@@ -70,7 +70,6 @@ class CancelRequestController @Inject() (
     with EitherTHelper[String]
     with SubmissionActionBuilders {
 
-  import cats.implicits._
   import cats.instances.future.catsStdInstancesForFuture
   import SubmissionActionBuilders.ApplicationStateFilter
 
