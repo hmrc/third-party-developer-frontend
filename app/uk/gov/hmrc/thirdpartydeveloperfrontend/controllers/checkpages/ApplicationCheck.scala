@@ -87,7 +87,7 @@ class ApplicationCheck @Inject() (
     val application = request.application
 
     if (request.role.isAdministrator) {
-      Future.successful(Redirect(routes.ApplicationCheck.requestCheckPage(appId)))
+      Future.successful(Redirect(checkpages.routes.ApplicationCheck.requestCheckPage(appId)))
     } else {
       Future.successful(Ok(unauthorisedAppDetailsView(application.name, application.adminEmails)))
     }
@@ -99,7 +99,7 @@ class ApplicationCheck @Inject() (
     }
 
     def withValidForm(form: CheckInformationForm): Future[Result] = {
-      Future.successful(Redirect(routes.CheckYourAnswers.answersPage(appId)))
+      Future.successful(Redirect(checkpages.routes.CheckYourAnswers.answersPage(appId)))
     }
 
     val requestForm = validateCheckFormForApplication(request)
@@ -119,7 +119,7 @@ class ApplicationCheck @Inject() (
     val information = request.application.checkInformation.getOrElse(CheckInformation())
     for {
       _ <- applicationService.updateCheckInformation(request.application, information.copy(teamConfirmed = true))
-    } yield Redirect(routes.ApplicationCheck.requestCheckPage(appId))
+    } yield Redirect(checkpages.routes.ApplicationCheck.requestCheckPage(appId))
   }
 
   def teamAddMember(appId: ApplicationId): Action[AnyContent] = canUseChecksAction(appId) { implicit request =>
@@ -131,7 +131,7 @@ class ApplicationCheck @Inject() (
       request.application
         .findCollaboratorByHash(teamMemberHash)
         .map(collaborator => Ok(teamMemberRemoveConfirmationView(request.application, request.developerSession, collaborator.emailAddress)))
-        .getOrElse(Redirect(routes.ApplicationCheck.team(appId)))
+        .getOrElse(Redirect(checkpages.routes.ApplicationCheck.team(appId)))
     )
   }
 
@@ -139,7 +139,7 @@ class ApplicationCheck @Inject() (
     def handleValidForm(form: RemoveTeamMemberCheckPageConfirmationForm): Future[Result] = {
       collaboratorService
         .removeTeamMember(request.application, form.email.toLaxEmail, request.developerSession.email)
-        .map(_ => Redirect(routes.ApplicationCheck.team(appId)))
+        .map(_ => Redirect(checkpages.routes.ApplicationCheck.team(appId)))
     }
 
     def handleInvalidForm(form: Form[RemoveTeamMemberCheckPageConfirmationForm]): Future[Result] = {
@@ -149,13 +149,13 @@ class ApplicationCheck @Inject() (
     RemoveTeamMemberCheckPageConfirmationForm.form.bindFromRequest().fold(handleInvalidForm, handleValidForm)
   }
 
-  protected def landingPageRoute(appId: ApplicationId): Call              = routes.ApplicationCheck.requestCheckPage(appId)
-  protected def nameActionRoute(appId: ApplicationId): Call               = routes.ApplicationCheck.nameAction(appId)
-  protected def contactActionRoute(appId: ApplicationId): Call            = routes.ApplicationCheck.contactAction(appId)
-  protected def apiSubscriptionsActionRoute(appId: ApplicationId): Call   = routes.ApplicationCheck.apiSubscriptionsAction(appId)
-  protected def privacyPolicyActionRoute(appId: ApplicationId): Call      = routes.ApplicationCheck.privacyPolicyAction(appId)
-  protected def termsAndConditionsActionRoute(appId: ApplicationId): Call = routes.ApplicationCheck.termsAndConditionsAction(appId)
-  protected def termsOfUseActionRoute(appId: ApplicationId): Call         = routes.ApplicationCheck.termsOfUseAction(appId)
+  protected def landingPageRoute(appId: ApplicationId): Call              = checkpages.routes.ApplicationCheck.requestCheckPage(appId)
+  protected def nameActionRoute(appId: ApplicationId): Call               = checkpages.routes.ApplicationCheck.nameAction(appId)
+  protected def contactActionRoute(appId: ApplicationId): Call            = checkpages.routes.ApplicationCheck.contactAction(appId)
+  protected def apiSubscriptionsActionRoute(appId: ApplicationId): Call   = checkpages.routes.ApplicationCheck.apiSubscriptionsAction(appId)
+  protected def privacyPolicyActionRoute(appId: ApplicationId): Call      = checkpages.routes.ApplicationCheck.privacyPolicyAction(appId)
+  protected def termsAndConditionsActionRoute(appId: ApplicationId): Call = checkpages.routes.ApplicationCheck.termsAndConditionsAction(appId)
+  protected def termsOfUseActionRoute(appId: ApplicationId): Call         = checkpages.routes.ApplicationCheck.termsOfUseAction(appId)
   protected def submitButtonLabel                                         = "Save and return"
 }
 

@@ -42,7 +42,7 @@ object ErrorFormBuilder {
     def currentPasswordGlobal() = buildGlobal(currentPasswordField)
 
     def passwordNoMatchField(): Form[T] = {
-      val errors = form.globalErrors.filter(_.messages.last == passwordNoMatchGlobalKey).seq
+      val errors = form.globalErrors.filter(_.messages.last == passwordNoMatchGlobalKey)
       errors match {
         case _ :: Nil => form.withError(passwordField, passwordNoMatchKey).withError(confirmapasswordField, passwordNoMatchKey)
         case _        => form
@@ -50,7 +50,7 @@ object ErrorFormBuilder {
     }
 
     private def buildGlobal(field: String) = {
-      val errors: Seq[FormError] = form.errors.filter(_.key == field).seq
+      val errors: Seq[FormError] = form.errors.filter(_.key == field)
       errors match {
         case s if s.nonEmpty => formKeysMap.get(s.last.message).map(form.withGlobalError(_)).getOrElse(form)
         case _               => form

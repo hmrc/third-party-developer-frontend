@@ -306,7 +306,7 @@ class MfaController @Inject() (
     mfaIdForRemoval match {
       case Some(mfaId) =>
         mfaService.removeMfaById(userId, mfaIdToVerify, accessCode, mfaId) map {
-          case MfaResponse(true)  => Redirect(routes.MfaController.removeMfaCompletedPage)
+          case MfaResponse(true)  => Redirect(routes.MfaController.removeMfaCompletedPage())
           case MfaResponse(false) => internalServerErrorTemplate("Unable to verify access code")
         }
       case None        => Future.successful(internalServerErrorTemplate("Unable to find Mfa to remove"))
