@@ -146,7 +146,7 @@ class EmailPreferencesServiceSpec extends AsyncHmrcSpec {
         val result = await(underTest.fetchAllAPICategoryDetails())
 
         result.size should be(2)
-        result should contain only (category1, category2)
+        result should contain theSameElementsAs List(category1, category2)
 
         verify(mockApmConnector).fetchAllCombinedAPICategories()(*)
       }
@@ -166,7 +166,7 @@ class EmailPreferencesServiceSpec extends AsyncHmrcSpec {
         val result = await(underTest.fetchAPIDetails(Set(apiServiceName1, apiServiceName2)))
 
         result.size should be(2)
-        result should contain only (apiDetails1, apiDetails2)
+        result should contain theSameElementsAs List(apiDetails1, apiDetails2)
 
         verify(mockApmConnector).fetchCombinedApi(eqTo(apiServiceName1))(*)
         verify(mockApmConnector).fetchCombinedApi(eqTo(apiServiceName2))(*)

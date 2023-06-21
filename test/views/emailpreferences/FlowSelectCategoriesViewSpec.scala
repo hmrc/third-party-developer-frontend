@@ -16,7 +16,7 @@
 
 package views.emailpreferences
 
-import scala.collection.JavaConverters._
+import scala.jdk.CollectionConverters._
 
 import org.jsoup.Jsoup
 import org.jsoup.nodes.Document
@@ -75,7 +75,7 @@ class FlowSelectCategoriesViewSpec extends CommonViewSpec
     })
   }
 
-  def validateStaticElements(document: Document, categories: List[APICategoryDisplayDetails]) {
+  def validateStaticElements(document: Document, categories: List[APICategoryDisplayDetails]): Unit = {
 
     document.getElementById("pageHeading").text() should be("Which API categories are you interested in?")
     // Check form is configured correctly

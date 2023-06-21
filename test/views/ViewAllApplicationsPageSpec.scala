@@ -50,7 +50,7 @@ class ViewAllApplicationsPageSpec extends CommonViewSpec
     with SubmissionsTestData {
 
   def isGreenAddProductionApplicationButtonVisible(document: Document): Boolean = {
-    val href = AddApplicationRoutes.addApplicationPrincipal.url
+    val href = AddApplicationRoutes.addApplicationPrincipal().url
 
     val greenButtons = document.select(s"a[href=$href][class=govuk-button]")
 

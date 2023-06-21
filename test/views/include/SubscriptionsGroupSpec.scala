@@ -164,21 +164,21 @@ class SubscriptionsGroupSpec
         val page = Page(role, Environment.PRODUCTION, ApplicationState.pendingGatekeeperApproval(loggedInDeveloper.email.text, loggedInDeveloper.displayedName))
 
         page.toggle.hasAttr("disabled") shouldBe true
-        page.requestChangeLink shouldBe 'defined
+        page.requestChangeLink.isDefined shouldBe true
       }
 
       "render disabled toggles for a pending-requester-verification production app with a link to request change" in {
         val page = Page(role, Environment.PRODUCTION, ApplicationState.pendingRequesterVerification(loggedInDeveloper.email.text, loggedInDeveloper.displayedName, ""))
 
         page.toggle.hasAttr("disabled") shouldBe true
-        page.requestChangeLink shouldBe 'defined
+        page.requestChangeLink.isDefined shouldBe true
       }
 
       "render disabled toggles for a checked production app with a link to request change" in {
         val page = Page(role, Environment.PRODUCTION, ApplicationState.production(loggedInDeveloper.email.text, loggedInDeveloper.displayedName, ""))
 
         page.toggle.hasAttr("disabled") shouldBe true
-        page.requestChangeLink shouldBe 'defined
+        page.requestChangeLink.isDefined shouldBe true
       }
     }
   }

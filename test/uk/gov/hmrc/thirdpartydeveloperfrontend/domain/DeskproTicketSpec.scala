@@ -64,7 +64,7 @@ class DeskproTicketSpec extends AsyncHmrcSpec {
       checkDeskproTicket(
         ticket,
         "Request to subscribe to an API",
-        s"I '${requestorEmail.text}' want my application '$applicationName' identified by '${applicationId.text}' to be subscribed to the API '$apiName' with version '${apiVersion.value}'"
+        s"I '${requestorEmail.text}' want my application '$applicationName' identified by '${applicationId.text()}' to be subscribed to the API '$apiName' with version '${apiVersion.value}'"
       )
     }
   }
@@ -76,7 +76,7 @@ class DeskproTicketSpec extends AsyncHmrcSpec {
       checkDeskproTicket(
         ticket,
         "Request to unsubscribe from an API",
-        s"I '${requestorEmail.text}' want my application '$applicationName' identified by '${applicationId.text}' to be unsubscribed from the API '$apiName' with version '${apiVersion.value}'"
+        s"I '${requestorEmail.text}' want my application '$applicationName' identified by '${applicationId.text()}' to be unsubscribed from the API '$apiName' with version '${apiVersion.value}'"
       )
     }
   }

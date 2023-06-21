@@ -98,11 +98,11 @@ class ApplicationServiceUpliftSpec extends AsyncHmrcSpec with LocalUserIdTracker
     val app1                      = ApplicationId.random
     val app2                      = ApplicationId.random
     val appWithNothingButTestApis = ApplicationId.random
-    val apiOk1a                   = "ok1".asIdentifier
+    val apiOk1a                   = "ok1".asIdentifier()
     val apiOk1b                   = "ok1".asIdentifier("2.0")
-    val apiOk2a                   = "ok2".asIdentifier
+    val apiOk2a                   = "ok2".asIdentifier()
     val apiOk2b                   = "ok2".asIdentifier("2.0")
-    val apiUnavailableInProd      = "bad21".asIdentifier
+    val apiUnavailableInProd      = "bad21".asIdentifier()
 
     "Do not match apps with apis that cannot be uplifted" in new Setup {
       val appsToApis = Map(

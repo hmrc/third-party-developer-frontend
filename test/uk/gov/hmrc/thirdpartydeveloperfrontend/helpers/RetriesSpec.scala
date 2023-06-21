@@ -61,7 +61,7 @@ class RetriesSpec extends AsyncHmrcSpec with GuiceOneAppPerTest {
 
     "wait for the configured delay before retrying" in new Setup {
       when(mockAppConfig.retryCount).thenReturn(1)
-      private val expectedDelayMilliseconds = Random.nextInt
+      private val expectedDelayMilliseconds = Random.nextInt()
       private val expectedDelay             = FiniteDuration(expectedDelayMilliseconds, TimeUnit.MILLISECONDS)
       when(mockAppConfig.retryDelayMilliseconds).thenReturn(expectedDelayMilliseconds)
 

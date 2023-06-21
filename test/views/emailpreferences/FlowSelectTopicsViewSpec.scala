@@ -16,7 +16,7 @@
 
 package views.emailpreferences
 
-import scala.collection.JavaConverters._
+import scala.jdk.CollectionConverters._
 
 import org.jsoup.Jsoup
 import org.jsoup.nodes.Document
@@ -47,7 +47,7 @@ class FlowSelectTopicsViewSpec extends CommonViewSpec
     val flowSelectTopicsView = app.injector.instanceOf[FlowSelectTopicsView]
   }
 
-  def validateStaticElements(document: Document) {
+  def validateStaticElements(document: Document): Unit = {
 
     document.getElementById("pageHeading").text() should be("Which topics do you want to receive information about?")
     // Check form is configured correctly
