@@ -97,11 +97,11 @@ class CheckAnswersControllerSpec
     val mockRequestProdCreds = mock[RequestProductionCredentials]
 
     val completedProgress           = List(DevelopmentPractices.questionnaire, CustomersAuthorisingYourSoftware.questionnaire, OrganisationDetails.questionnaire)
-      .map(q => q.id -> QuestionnaireProgress(Completed, q.questions.asIds)).toMap
+      .map(q => q.id -> QuestionnaireProgress(Completed, q.questions.asIds())).toMap
     val completedExtendedSubmission = ExtendedSubmission(aSubmission, completedProgress)
 
     val incompleteProgress           = List(DevelopmentPractices.questionnaire, CustomersAuthorisingYourSoftware.questionnaire, OrganisationDetails.questionnaire)
-      .map(q => q.id -> QuestionnaireProgress(InProgress, q.questions.asIds)).toMap
+      .map(q => q.id -> QuestionnaireProgress(InProgress, q.questions.asIds())).toMap
     val incompleteExtendedSubmission = ExtendedSubmission(aSubmission, incompleteProgress)
 
     val checkAnswersView                         = mock[CheckAnswersView]
@@ -129,7 +129,7 @@ class CheckAnswersControllerSpec
 
   "checkAnswersPage" should {
     "succeed when submission is complete" in new Setup {
-      SubmissionServiceMock.FetchLatestExtendedSubmission.thenReturns(answeredSubmission.withCompletedProgress)
+      SubmissionServiceMock.FetchLatestExtendedSubmission.thenReturns(answeredSubmission.withCompletedProgress())
 
       val result = underTest.checkAnswersPage(applicationId)(loggedInRequest.withCSRFToken)
 
@@ -137,12 +137,12 @@ class CheckAnswersControllerSpec
     }
 
     "redirect when submission is incomplete" in new Setup {
-      SubmissionServiceMock.FetchLatestExtendedSubmission.thenReturns(aSubmission.withIncompleteProgress)
+      SubmissionServiceMock.FetchLatestExtendedSubmission.thenReturns(aSubmission.withIncompleteProgress())
 
       val result = underTest.checkAnswersPage(applicationId)(loggedInRequest.withCSRFToken)
 
       status(result) shouldBe SEE_OTHER
-      redirectLocation(result) shouldBe Some(s"/developer/submissions/application/${applicationId.text}/production-credentials-checklist")
+      redirectLocation(result) shouldBe Some(s"/developer/submissions/application/${applicationId.text()}/production-credentials-checklist")
     }
 
     "return an error when submission is not found" in new Setup {
@@ -154,14 +154,14 @@ class CheckAnswersControllerSpec
     }
 
     "show submission declined text when previous submission was declined" in new Setup {
-      SubmissionServiceMock.FetchLatestExtendedSubmission.thenReturns(declinedSubmission.withCompletedProgress)
+      SubmissionServiceMock.FetchLatestExtendedSubmission.thenReturns(declinedSubmission.withCompletedProgress())
 
       await(underTest.checkAnswersPage(applicationId)(loggedInRequest.withCSRFToken))
 
       verify(checkAnswersView).apply(*, eqTo(true), *, *)(*, *, *, *)
     }
     "don't show submission declined text when previous submission was not declined" in new Setup {
-      SubmissionServiceMock.FetchLatestExtendedSubmission.thenReturns(answeredSubmission.withCompletedProgress)
+      SubmissionServiceMock.FetchLatestExtendedSubmission.thenReturns(answeredSubmission.withCompletedProgress())
 
       await(underTest.checkAnswersPage(applicationId)(loggedInRequest.withCSRFToken))
 
@@ -172,21 +172,21 @@ class CheckAnswersControllerSpec
   "checkAnswersAction" should {
     "succeed when production credentials are requested successfully" in new Setup {
       when(mockRequestProdCreds.requestProductionCredentials(eqTo(applicationId), *[DeveloperSession], *, *)(*)).thenReturn(successful(Right(sampleApp)))
-      SubmissionServiceMock.FetchLatestExtendedSubmission.thenReturns(answeredSubmission.withCompletedProgress)
+      SubmissionServiceMock.FetchLatestExtendedSubmission.thenReturns(answeredSubmission.withCompletedProgress())
 
       val result = underTest.checkAnswersAction(applicationId)(loggedInRequest.withCSRFToken)
 
       status(result) shouldBe SEE_OTHER
-      redirectLocation(result) shouldBe Some(s"/developer/submissions/application/${applicationId.text}/request-received")
+      redirectLocation(result) shouldBe Some(s"/developer/submissions/application/${applicationId.text()}/request-received")
     }
 
     "fail when production credentials are not requested successfully" in new Setup {
       when(mockRequestProdCreds.requestProductionCredentials(eqTo(applicationId), *[DeveloperSession], *, *)(*)).thenReturn(failed(new ApplicationNotFound))
-      SubmissionServiceMock.FetchLatestExtendedSubmission.thenReturns(answeringSubmission.withIncompleteProgress)
+      SubmissionServiceMock.FetchLatestExtendedSubmission.thenReturns(answeringSubmission.withIncompleteProgress())
 
       val result = underTest.checkAnswersAction(applicationId)(loggedInRequest.withCSRFToken)
       status(result) shouldBe SEE_OTHER
-      redirectLocation(result) shouldBe Some(s"/developer/submissions/application/${applicationId.text}/production-credentials-checklist")
+      redirectLocation(result) shouldBe Some(s"/developer/submissions/application/${applicationId.text()}/production-credentials-checklist")
     }
 
     "don't display verification email text if requester is the Responsible Individual" in new Setup {
@@ -198,7 +198,7 @@ class CheckAnswersControllerSpec
       val result = underTest.checkAnswersAction(applicationId)(loggedInRequest.withCSRFToken)
 
       status(result) shouldBe SEE_OTHER
-      redirectLocation(result) shouldBe Some(s"/developer/submissions/application/${applicationId.text}/request-received")
+      redirectLocation(result) shouldBe Some(s"/developer/submissions/application/${applicationId.text()}/request-received")
     }
 
     "do display verification email text if requester is not the Responsible Individual" in new Setup {
@@ -210,7 +210,7 @@ class CheckAnswersControllerSpec
       val result = underTest.checkAnswersAction(applicationId)(loggedInRequest.withCSRFToken)
 
       status(result) shouldBe SEE_OTHER
-      redirectLocation(result) shouldBe Some(s"/developer/submissions/application/${applicationId.text}/request-received")
+      redirectLocation(result) shouldBe Some(s"/developer/submissions/application/${applicationId.text()}/request-received")
     }
 
     "don't display verification email text if requester is Responsible Individual question not answered" in new Setup {
@@ -222,7 +222,7 @@ class CheckAnswersControllerSpec
       val result = underTest.checkAnswersAction(applicationId)(loggedInRequest.withCSRFToken)
 
       status(result) shouldBe SEE_OTHER
-      redirectLocation(result) shouldBe Some(s"/developer/submissions/application/${applicationId.text}/request-received")
+      redirectLocation(result) shouldBe Some(s"/developer/submissions/application/${applicationId.text()}/request-received")
     }
   }
 

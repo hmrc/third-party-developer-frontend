@@ -176,7 +176,7 @@ class TermsOfUseSpec
       val request = loggedInRequest.withFormUrlEncodedBody("termsOfUseAgreed" -> "true")
       val result  = addToken(underTest.agreeTermsOfUse(appId))(request)
       status(result) shouldBe SEE_OTHER
-      redirectLocation(result) shouldBe Some(s"/developer/applications/${application.id.text}/details")
+      redirectLocation(result) shouldBe Some(s"/developer/applications/${application.id.text()}/details")
 
       val termsOfUseAgreement = captor.getValue.termsOfUseAgreements.head
       termsOfUseAgreement.emailAddress shouldBe loggedInDeveloper.email

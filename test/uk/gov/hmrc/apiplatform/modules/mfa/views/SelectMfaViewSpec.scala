@@ -16,7 +16,7 @@
 
 package uk.gov.hmrc.apiplatform.modules.mfa.views
 
-import scala.collection.JavaConverters._
+import scala.jdk.CollectionConverters._
 
 import org.jsoup.Jsoup
 import views.helper.CommonViewSpec

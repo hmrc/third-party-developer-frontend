@@ -456,7 +456,7 @@ class DetailsSpec
     def legacyAppWithPrivacyPolicyLocation(maybePrivacyPolicyUrl: Option[String]) = anApplication(access = Standard(List.empty, None, maybePrivacyPolicyUrl, Set.empty, None, None))
     val privacyPolicyUrl                                                          = "http://example.com/priv-policy"
 
-    implicit val writeChangeOfPrivacyPolicyLocationForm = Json.writes[ChangeOfPrivacyPolicyLocationForm]
+    implicit val writeChangeOfPrivacyPolicyLocationForm = Json.format[ChangeOfPrivacyPolicyLocationForm]
 
     "display update page with url field populated" in new Setup {
       val appWithPrivPolicyUrl = legacyAppWithPrivacyPolicyLocation(Some(privacyPolicyUrl))
@@ -492,7 +492,23 @@ class DetailsSpec
         .thenReturn(Future.successful(ApplicationUpdateSuccessful))
 
       val form   = ChangeOfPrivacyPolicyLocationForm(newPrivacyPolicyUrl, false, false)
-      val result = addToken(underTest.updatePrivacyPolicyLocationAction(appWithPrivPolicyUrl.id))(loggedInAdminRequest.withJsonBody(Json.toJson(form)))
+      private val request = loggedInAdminRequest.withJsonBody(Json.toJson(form))
+      val result = addToken(underTest.updatePrivacyPolicyLocationAction(appWithPrivPolicyUrl.id))(request)
+
+      status(result) shouldBe SEE_OTHER
+      redirectLocation(result) shouldBe Some(routes.Details.details(appWithPrivPolicyUrl.id).url)
+    }
+
+    "update location if form data is valid and return to app details page2" in new Setup {
+      val newPrivacyPolicyUrl  = "http://example.com/new-priv-policy"
+      val appWithPrivPolicyUrl = legacyAppWithPrivacyPolicyLocation(Some(privacyPolicyUrl))
+      givenApplicationAction(appWithPrivPolicyUrl, loggedInAdmin)
+      when(applicationServiceMock.updatePrivacyPolicyLocation(eqTo(appWithPrivPolicyUrl), *[UserId], eqTo(PrivacyPolicyLocations.Url(newPrivacyPolicyUrl)))(*))
+        .thenReturn(Future.successful(ApplicationUpdateSuccessful))
+
+      private val request = loggedInAdminRequest.withFormUrlEncodedBody("privacyPolicyUrl" -> newPrivacyPolicyUrl, "isInDesktop" -> "false", "isNewJourney" -> "false")
+
+      val result = addToken(underTest.updatePrivacyPolicyLocationAction(appWithPrivPolicyUrl.id))(request)
 
       status(result) shouldBe SEE_OTHER
       redirectLocation(result) shouldBe Some(routes.Details.details(appWithPrivPolicyUrl.id).url)
@@ -823,11 +839,11 @@ class DetailsSpec
       val doc = Jsoup.parse(contentAsString(result))
       // APIS-5669 - temporarily removed Change link
       // linkExistsWithHref(doc, routes.Details.changeDetails(application.id).url) shouldBe hasChangeButton
-      elementIdentifiedByIdContainsText(doc, "applicationId", application.id.text) shouldBe true
+      elementIdentifiedByIdContainsText(doc, "applicationId", application.id.text()) shouldBe true
       elementIdentifiedByIdContainsText(doc, "applicationName", application.name) shouldBe true
       elementIdentifiedByIdContainsText(doc, "description", application.description.getOrElse("None")) shouldBe true
-      elementIdentifiedByIdContainsText(doc, "privacyPolicyUrl", application.privacyPolicyLocation.describe) shouldBe true
-      elementIdentifiedByIdContainsText(doc, "termsAndConditionsUrl", application.termsAndConditionsLocation.describe) shouldBe true
+      elementIdentifiedByIdContainsText(doc, "privacyPolicyUrl", application.privacyPolicyLocation.describe()) shouldBe true
+      elementIdentifiedByIdContainsText(doc, "termsAndConditionsUrl", application.termsAndConditionsLocation.describe()) shouldBe true
       elementExistsContainsText(doc, "p", "Timmy Test agreed to version 2 of the terms of use on") shouldBe hasTermsOfUseAgreement
     }
 
@@ -840,15 +856,15 @@ class DetailsSpec
       val doc = Jsoup.parse(contentAsString(result))
       formExistsWithAction(doc, routes.Details.changeDetailsAction(application.id).url) shouldBe true
       linkExistsWithHref(doc, routes.Details.details(application.id).url) shouldBe true
-      inputExistsWithValue(doc, "applicationId", "hidden", application.id.text) shouldBe true
+      inputExistsWithValue(doc, "applicationId", "hidden", application.id.text()) shouldBe true
       if (application.deployedTo == Environment.SANDBOX || application.state.name == State.TESTING) {
         inputExistsWithValue(doc, "applicationName", "text", application.name) shouldBe true
       } else {
         inputExistsWithValue(doc, "applicationName", "hidden", application.name) shouldBe true
       }
       textareaExistsWithText(doc, "description", application.description.getOrElse("None")) shouldBe true
-      inputExistsWithValue(doc, "privacyPolicyUrl", "text", application.privacyPolicyLocation.describe) shouldBe true
-      inputExistsWithValue(doc, "termsAndConditionsUrl", "text", application.termsAndConditionsLocation.describe) shouldBe true
+      inputExistsWithValue(doc, "privacyPolicyUrl", "text", application.privacyPolicyLocation.describe()) shouldBe true
+      inputExistsWithValue(doc, "termsAndConditionsUrl", "text", application.termsAndConditionsLocation.describe()) shouldBe true
     }
 
     def changeDetailsShouldRedirectOnSuccess(application: Application) = {
@@ -889,7 +905,7 @@ class DetailsSpec
     implicit class ChangeDetailsAppAugment(val app: Application) {
       private val appAccess = app.access.asInstanceOf[Standard]
 
-      final def toForm = EditApplicationForm(app.id, app.name, app.description, appAccess.privacyPolicyUrl, appAccess.termsAndConditionsUrl, app.grantLengthDisplayValue)
+      final def toForm = EditApplicationForm(app.id, app.name, app.description, appAccess.privacyPolicyUrl, appAccess.termsAndConditionsUrl, app.grantLengthDisplayValue())
 
       final def callDetails: Future[Result] = underTest.details(app.id)(loggedInDevRequest)
 

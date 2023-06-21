@@ -109,7 +109,7 @@ class QuestionControllerSpec
 
   "showQuestion" should {
     "succeed" in new Setup {
-      SubmissionServiceMock.Fetch.thenReturns(aSubmission.withIncompleteProgress)
+      SubmissionServiceMock.Fetch.thenReturns(aSubmission.withIncompleteProgress())
 
       val formSubmissionLink = s"${aSubmission.id.value}/question/${questionId.value}"
       val result             = controller.showQuestion(aSubmission.id, questionId)(loggedInRequest.withCSRFToken)
@@ -119,7 +119,7 @@ class QuestionControllerSpec
     }
 
     "succeed and check for label, hintText and afterStatement" in new Setup {
-      SubmissionServiceMock.Fetch.thenReturns(aSubmission.withIncompleteProgress)
+      SubmissionServiceMock.Fetch.thenReturns(aSubmission.withIncompleteProgress())
 
       val formSubmissionLink = s"${aSubmission.id.value}/question/${testQuestionIdsOfInterest.responsibleIndividualEmailId.value}"
       val result             = controller.showQuestion(aSubmission.id, testQuestionIdsOfInterest.responsibleIndividualEmailId)(loggedInRequest.withCSRFToken)
@@ -136,7 +136,7 @@ class QuestionControllerSpec
     }
 
     "display fail and show error in title when applicable" in new Setup {
-      SubmissionServiceMock.Fetch.thenReturns(aSubmission.withIncompleteProgress)
+      SubmissionServiceMock.Fetch.thenReturns(aSubmission.withIncompleteProgress())
 
       val result =
         controller.showQuestion(aSubmission.id, testQuestionIdsOfInterest.responsibleIndividualEmailId, None, Some(ErrorInfo("blah", "message")))(loggedInRequest.withCSRFToken)
@@ -146,7 +146,7 @@ class QuestionControllerSpec
     }
 
     "fail with a BAD REQUEST for an invalid questionId" in new Setup {
-      SubmissionServiceMock.Fetch.thenReturns(aSubmission.withIncompleteProgress)
+      SubmissionServiceMock.Fetch.thenReturns(aSubmission.withIncompleteProgress())
 
       val result = controller.showQuestion(aSubmission.id, Question.Id("BAD_ID"))(loggedInRequest.withCSRFToken)
 
@@ -157,7 +157,7 @@ class QuestionControllerSpec
 
   "updateQuestion" should {
     "succeed" in new Setup {
-      SubmissionServiceMock.Fetch.thenReturns(aSubmission.withIncompleteProgress)
+      SubmissionServiceMock.Fetch.thenReturns(aSubmission.withIncompleteProgress())
 
       val formSubmissionLink = s"${aSubmission.id.value}/question/${questionId.value}/update"
       val result             = controller.updateQuestion(aSubmission.id, questionId)(loggedInRequest.withCSRFToken)
@@ -167,7 +167,7 @@ class QuestionControllerSpec
     }
 
     "fail with a BAD REQUEST for an invalid questionId" in new Setup {
-      SubmissionServiceMock.Fetch.thenReturns(aSubmission.withIncompleteProgress)
+      SubmissionServiceMock.Fetch.thenReturns(aSubmission.withIncompleteProgress())
 
       val result = controller.updateQuestion(aSubmission.id, Question.Id("BAD_ID"))(loggedInRequest.withCSRFToken)
 
@@ -177,8 +177,8 @@ class QuestionControllerSpec
 
   "recordAnswer" should {
     "succeed when answer given" in new Setup {
-      SubmissionServiceMock.Fetch.thenReturns(aSubmission.withIncompleteProgress)
-      SubmissionServiceMock.RecordAnswer.thenReturns(aSubmission.withIncompleteProgress)
+      SubmissionServiceMock.Fetch.thenReturns(aSubmission.withIncompleteProgress())
+      SubmissionServiceMock.RecordAnswer.thenReturns(aSubmission.withIncompleteProgress())
       private val answer1 = "Yes"
       private val request = loggedInRequest.withFormUrlEncodedBody("answer" -> answer1, "submit-action" -> "save")
 
@@ -189,7 +189,7 @@ class QuestionControllerSpec
     }
 
     "fail if invalid answer provided and returns custom error message" in new Setup {
-      SubmissionServiceMock.Fetch.thenReturns(aSubmission.withIncompleteProgress)
+      SubmissionServiceMock.Fetch.thenReturns(aSubmission.withIncompleteProgress())
       SubmissionServiceMock.RecordAnswer.thenReturnsNone()
       private val invalidEmailAnswer = "bob"
       private val request            = loggedInRequest.withFormUrlEncodedBody("answer" -> invalidEmailAnswer, "submit-action" -> "save")
@@ -210,7 +210,7 @@ class QuestionControllerSpec
     }
 
     "fail if no answer provided and returns custom error message" in new Setup {
-      SubmissionServiceMock.Fetch.thenReturns(aSubmission.withIncompleteProgress)
+      SubmissionServiceMock.Fetch.thenReturns(aSubmission.withIncompleteProgress())
       SubmissionServiceMock.RecordAnswer.thenReturnsNone()
       private val blankAnswer = ""
       private val request     = loggedInRequest.withFormUrlEncodedBody("answer" -> blankAnswer, "submit-action" -> "save")
@@ -231,7 +231,7 @@ class QuestionControllerSpec
     }
 
     "fail if no answer field in form" in new Setup {
-      SubmissionServiceMock.Fetch.thenReturns(aSubmission.withIncompleteProgress)
+      SubmissionServiceMock.Fetch.thenReturns(aSubmission.withIncompleteProgress())
       private val request = loggedInRequest.withFormUrlEncodedBody("submit-action" -> "save")
 
       val result = controller.recordAnswer(aSubmission.id, questionId)(request.withCSRFToken)
@@ -252,7 +252,7 @@ class QuestionControllerSpec
         standardContext
       )
         .hasCompletelyAnsweredWith(completeAnswersToQuestions)
-        .withCompletedProgress
+        .withCompletedProgress()
 
       SubmissionServiceMock.Fetch.thenReturns(fullyAnsweredSubmission)
       SubmissionServiceMock.RecordAnswer.thenReturns(fullyAnsweredSubmission)
@@ -263,7 +263,7 @@ class QuestionControllerSpec
       val result = controller.updateAnswer(aSubmission.id, questionId)(request.withCSRFToken)
 
       status(result) shouldBe SEE_OTHER
-      redirectLocation(result) shouldBe Some(s"/developer/submissions/application/${applicationId.text}/check-answers")
+      redirectLocation(result) shouldBe Some(s"/developer/submissions/application/${applicationId.text()}/check-answers")
     }
 
     "succeed when given an answer and redirect to the next question to answer" in new Setup {
@@ -277,7 +277,7 @@ class QuestionControllerSpec
         standardContext
       )
         .hasCompletelyAnsweredWith(completeAnswersToQuestions)
-        .withCompletedProgress
+        .withCompletedProgress()
 
       val modifiedAnswersToQuestions = fullyAnsweredSubmission.submission.latestInstance.answersToQuestions -
         OrganisationDetails.question2c.id ++ Map(

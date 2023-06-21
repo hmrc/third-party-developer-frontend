@@ -74,7 +74,7 @@ class NavigationSpec extends BaseControllerSpec with DeveloperBuilder with Local
       }
 
       "return a register link" in new Setup(loggedInState = None) {
-        links.head shouldBe NavLink("Register", routes.Registration.register.url)
+        links.head shouldBe NavLink("Register", routes.Registration.register().url)
       }
 
       "return a sign in link" in new Setup(loggedInState = None) {
@@ -89,7 +89,7 @@ class NavigationSpec extends BaseControllerSpec with DeveloperBuilder with Local
       }
 
       "return the user's profile link" in new Setup(loggedInState = Some(LoggedInState.LOGGED_IN)) {
-        links.head shouldBe NavLink("John Doe", Profile.showProfile.url, isSensitive = true)
+        links.head shouldBe NavLink("John Doe", Profile.showProfile().url, isSensitive = true)
       }
 
       "return a sign-out link" in new Setup(loggedInState = Some(LoggedInState.LOGGED_IN)) {
@@ -104,7 +104,7 @@ class NavigationSpec extends BaseControllerSpec with DeveloperBuilder with Local
       }
 
       "return the user's profile link" in new Setup(loggedInState = Some(LoggedInState.PART_LOGGED_IN_ENABLING_MFA)) {
-        links.head shouldBe NavLink("Register", routes.Registration.register.url)
+        links.head shouldBe NavLink("Register", routes.Registration.register().url)
       }
 
       "return a sign-out link" in new Setup(loggedInState = Some(LoggedInState.PART_LOGGED_IN_ENABLING_MFA)) {

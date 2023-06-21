@@ -243,7 +243,7 @@ class UpliftJourneyControllerSpec extends BaseControllerSpec
       ))
 
       status(result) shouldBe SEE_OTHER
-      redirectLocation(result) shouldBe Some(s"/developer/applications/${appId.text}/confirm-subscriptions")
+      redirectLocation(result) shouldBe Some(s"/developer/applications/${appId.text()}/confirm-subscriptions")
     }
 
     "An error screen is shown when all APIs are turned off on the 'Turn off API subscriptions you don’t need' view and 'save and continue' clicked" in new Setup {
@@ -269,7 +269,7 @@ class UpliftJourneyControllerSpec extends BaseControllerSpec
       private val result = controller.confirmApiSubscriptionsAction(appId)(loggedInRequest.withCSRFToken)
 
       status(result) shouldBe SEE_OTHER
-      redirectLocation(result) shouldBe Some(s"/developer/submissions/application/${appId.text}/production-credentials-checklist")
+      redirectLocation(result) shouldBe Some(s"/developer/submissions/application/${appId.text()}/production-credentials-checklist")
     }
 
     "The selected apis are not save when 'save and continue' clicked but uplift fails" in new Setup {
@@ -299,7 +299,7 @@ class UpliftJourneyControllerSpec extends BaseControllerSpec
   "sellResellOrDistributeYourSoftware" should {
 
     "initially render the 'sell resell or distribute your software view' with choices unselected" in new Setup {
-      GPCFlowServiceMock.FindSellResellOrDistribute.thenReturnsNone
+      GPCFlowServiceMock.FindSellResellOrDistribute.thenReturnsNone()
 
       private val result = controller.sellResellOrDistributeYourSoftware(appId)(loggedInRequest.withCSRFToken)
 
@@ -311,7 +311,7 @@ class UpliftJourneyControllerSpec extends BaseControllerSpec
     }
 
     "render the 'sell resell or distribute your software view' with the answer 'Yes' selected" in new Setup {
-      GPCFlowServiceMock.FindSellResellOrDistribute.thenReturnsYes
+      GPCFlowServiceMock.FindSellResellOrDistribute.thenReturnsYes()
 
       private val result = controller.sellResellOrDistributeYourSoftware(appId)(loggedInRequest.withCSRFToken)
 
@@ -325,7 +325,7 @@ class UpliftJourneyControllerSpec extends BaseControllerSpec
     }
 
     "render the 'sell resell or distribute your software view' with the answer 'No' selected" in new Setup {
-      GPCFlowServiceMock.FindSellResellOrDistribute.thenReturnsNo
+      GPCFlowServiceMock.FindSellResellOrDistribute.thenReturnsNo()
 
       private val result = controller.sellResellOrDistributeYourSoftware(appId)(loggedInRequest.withCSRFToken)
 
@@ -364,7 +364,7 @@ class UpliftJourneyControllerSpec extends BaseControllerSpec
       ))
 
       status(result) shouldBe SEE_OTHER
-      redirectLocation(result) shouldBe Some(s"/developer/applications/${appId.text}/confirm-subscriptions")
+      redirectLocation(result) shouldBe Some(s"/developer/applications/${appId.text()}/confirm-subscriptions")
     }
 
     "store the answer 'No' from the 'sell resell or distribute your software view' and redirect to next page" in new Setup {
@@ -379,7 +379,7 @@ class UpliftJourneyControllerSpec extends BaseControllerSpec
       ))
 
       status(result) shouldBe SEE_OTHER
-      redirectLocation(result) shouldBe Some(s"/developer/applications/${appId.text}/confirm-subscriptions")
+      redirectLocation(result) shouldBe Some(s"/developer/applications/${appId.text()}/confirm-subscriptions")
     }
 
     "store the answer 'Yes' from the 'sell resell or distribute your software view' and redirect to questionnaire when application is Production" in new Setup {
@@ -453,8 +453,8 @@ class UpliftJourneyControllerSpec extends BaseControllerSpec
 
     "render the before you start page if no existing submission found" in new Setup {
 
-      TermsOfUseInvitationServiceMock.FetchTermsOfUseInvitation.thenReturn
-      SubmissionServiceMock.FetchLatestSubmission.thenReturnsNone
+      TermsOfUseInvitationServiceMock.FetchTermsOfUseInvitation.thenReturn()
+      SubmissionServiceMock.FetchLatestSubmission.thenReturnsNone()
 
       private val result = controller.agreeNewTermsOfUse(appId)(loggedInRequest.withCSRFToken)
 
@@ -468,18 +468,18 @@ class UpliftJourneyControllerSpec extends BaseControllerSpec
 
     "render the before you start page if an existing submission found" in new Setup {
 
-      TermsOfUseInvitationServiceMock.FetchTermsOfUseInvitation.thenReturn
+      TermsOfUseInvitationServiceMock.FetchTermsOfUseInvitation.thenReturn()
       SubmissionServiceMock.FetchLatestSubmission.thenReturns(aSubmission)
 
       private val result = controller.agreeNewTermsOfUse(appId)(loggedInRequest.withCSRFToken)
 
       status(result) shouldBe SEE_OTHER
-      redirectLocation(result) shouldBe Some(s"/developer/submissions/application/${appId.text}/production-credentials-checklist")
+      redirectLocation(result) shouldBe Some(s"/developer/submissions/application/${appId.text()}/production-credentials-checklist")
     }
 
     "return bad request if not invited" in new Setup {
 
-      TermsOfUseInvitationServiceMock.FetchTermsOfUseInvitation.thenReturnNone
+      TermsOfUseInvitationServiceMock.FetchTermsOfUseInvitation.thenReturnNone()
 
       private val result = controller.agreeNewTermsOfUse(appId)(loggedInRequest.withCSRFToken)
 

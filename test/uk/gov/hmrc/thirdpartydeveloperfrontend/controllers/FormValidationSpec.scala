@@ -249,10 +249,10 @@ class FormValidationSpec extends AsyncHmrcSpec {
 
     "validate a valid form with empty optional fields" in {
       val boundForm = EditApplicationForm.form.bind(
-        validEditApplicationForm +
-          ("description"          -> "",
-          "privacyPolicyUrl"      -> "",
-          "termsAndConditionsUrl" -> "")
+        validEditApplicationForm ++
+          Map("description"           -> "",
+              "privacyPolicyUrl"      -> "",
+              "termsAndConditionsUrl" -> "")
       )
       boundForm.errors shouldBe List()
       boundForm.globalErrors shouldBe List()
@@ -458,7 +458,7 @@ class FormValidationSpec extends AsyncHmrcSpec {
   "SelectApisFromSubscriptionsForm" should {
     def validateNoErrors = buildValidateNoErrors(SelectApisFromSubscriptionsForm.form.bind) _
 
-    val validFormData = Map("selectedApi[0]" -> "", "applicationId" -> ApplicationId.random.text)
+    val validFormData = Map("selectedApi[0]" -> "", "applicationId" -> ApplicationId.random.text())
 
     "accept valid form" in {
       validateNoErrors(validFormData)
@@ -472,14 +472,14 @@ class FormValidationSpec extends AsyncHmrcSpec {
   "SelectTopicsFromSubscriptionsForm" should {
     def validateNoErrors = buildValidateNoErrors(SelectTopicsFromSubscriptionsForm.form.bind) _
 
-    val validFormData = Map("topic[0]" -> "TopicOne", "applicationId" -> ApplicationId.random.text)
+    val validFormData = Map("topic[0]" -> "TopicOne", "applicationId" -> ApplicationId.random.text())
 
     "accept valid form" in {
       validateNoErrors(validFormData)
     }
 
     "reject a form when now topic is supplied" in {
-      val formDataWithoutTopic = Map("applicationId" -> ApplicationId.random.text)
+      val formDataWithoutTopic = Map("applicationId" -> ApplicationId.random.text())
       val boundForm            = SelectTopicsFromSubscriptionsForm.form.bind(formDataWithoutTopic)
       val err                  = boundForm.errors.head
       err.key shouldBe "topic"
@@ -530,7 +530,7 @@ class FormValidationSpec extends AsyncHmrcSpec {
   }
 
   "ResponsibleIndividualChangeToSelfOrOtherForm" should {
-    def validateNoErrors = buildValidateNoErrors(ResponsibleIndividualChangeToSelfOrOtherForm.form.bind) _
+    def validateNoErrors = buildValidateNoErrors(ResponsibleIndividualChangeToSelfOrOtherForm.form().bind) _
 
     "accept valid form with 'who' value of 'self'" in {
       validateNoErrors(Map("who" -> "self"))
@@ -539,12 +539,12 @@ class FormValidationSpec extends AsyncHmrcSpec {
       validateNoErrors(Map("who" -> "other"))
     }
     "not accept form with 'who' value of something else" in {
-      val boundForm = ResponsibleIndividualChangeToSelfOrOtherForm.form.bind(Map("who" -> "him over there"))
+      val boundForm = ResponsibleIndividualChangeToSelfOrOtherForm.form().bind(Map("who" -> "him over there"))
       boundForm.errors.head.key shouldBe "who"
       boundForm.errors.head.messages shouldBe List("error.unknown")
     }
     "not accept form with missing 'who' value" in {
-      val boundForm = ResponsibleIndividualChangeToSelfOrOtherForm.form.bind(Map("name" -> "bob"))
+      val boundForm = ResponsibleIndividualChangeToSelfOrOtherForm.form().bind(Map("name" -> "bob"))
       boundForm.errors.head.key shouldBe "who"
       boundForm.errors.head.messages shouldBe List("error.required")
     }

@@ -171,7 +171,8 @@ class UpliftJourneyServiceSpec
 
       private val result = await(underTest.confirmAndUplift(sandboxAppId, loggedInDeveloper, false))
 
-      result.right.value shouldBe productionAppId
+      result.isRight shouldBe true
+      result shouldBe Right(productionAppId)
     }
 
     "fail when missing sell resell..." in new Setup {
@@ -251,12 +252,13 @@ class UpliftJourneyServiceSpec
     "return the new submission when everything is good" in new Setup {
       val productionAppId = ApplicationId.random
       GPCFlowServiceMock.FetchFlow.thenReturns(GetProductionCredentialsFlow("", Some(sellResellOrDistribute), Some(aListOfSubscriptions)))
-      ApplicationServiceMock.updateApplicationSuccessful
+      ApplicationServiceMock.updateApplicationSuccessful()
       when(mockSubmissionsConnector.createSubmission(*[ApplicationId], *[LaxEmailAddress])(*)).thenReturn(successful(Some(aSubmission)))
 
       private val result = await(underTest.createNewSubmission(productionAppId, sampleApp, loggedInDeveloper))
 
-      result.right.value shouldBe aSubmission
+      result.isRight shouldBe true
+      result shouldBe Right(aSubmission)
     }
   }
 }

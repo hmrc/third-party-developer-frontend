@@ -98,10 +98,10 @@ class CollaboratorServiceSpec extends AsyncHmrcSpec
       ApplicationCommandConnectorMock.Dispatch.thenReturnsSuccess(mockResponse)
 
       val result = await(collaboratorService.addTeamMember(productionApplication, developerEmail, Collaborator.Roles.DEVELOPER, administratorEmail))
-      result shouldBe 'Right
+      result.isRight shouldBe true
 
-      inside(result.right.value) {
-        case DispatchSuccessResult(response) =>
+      inside(result) {
+        case Right(DispatchSuccessResult(response)) =>
           response shouldBe mockResponse
           inside(ApplicationCommandConnectorMock.Dispatch.verifyCommand()) {
             case ApplicationCommands.AddCollaborator(actor, collaborator, _) =>
@@ -113,17 +113,17 @@ class CollaboratorServiceSpec extends AsyncHmrcSpec
   }
   "remove teamMember" should {
     "remove teamMember successfully from production" in new Setup {
-      TPDMock.FetchByEmails.returnsEmptySeq
+      TPDMock.FetchByEmails.returnsEmptySeq()
 
       val mockResponse = mock[Application]
 
       ApplicationCommandConnectorMock.Dispatch.thenReturnsSuccess(mockResponse) // .thenReturnsSuccessFor(command)(productionApplication)
 
       val result = await(collaboratorService.removeTeamMember(productionApplication, developerEmail, administratorEmail))
-      result shouldBe 'Right
+      result.isRight shouldBe true
 
-      inside(result.right.value) {
-        case DispatchSuccessResult(response) =>
+      inside(result) {
+        case Right(DispatchSuccessResult(response)) =>
           response shouldBe mockResponse
           inside(ApplicationCommandConnectorMock.Dispatch.verifyCommand()) {
             case ApplicationCommands.RemoveCollaborator(actor, collaborator, _) =>
@@ -150,7 +150,7 @@ class CollaboratorServiceSpec extends AsyncHmrcSpec
       ApplicationCommandConnectorMock.Dispatch.thenReturnsSuccess(mockResponse) // .thenReturnsSuccessFor(command)(productionApplication)
 
       val result = await(collaboratorService.removeTeamMember(application, teamMemberToRemove.emailAddress, removerAdmin.emailAddress))
-      result shouldBe 'Right
+      result.isRight shouldBe true
 
       ApplicationCommandConnectorMock.Dispatch.verifyAdminsToEmail() shouldBe Set(verifiedAdmin.emailAddress)
     }

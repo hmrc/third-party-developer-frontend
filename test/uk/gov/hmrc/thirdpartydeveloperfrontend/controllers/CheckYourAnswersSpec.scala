@@ -61,7 +61,7 @@ class CheckYourAnswersSpec
     with SubscriptionsBuilder
     with FixedClock {
 
-  private def aClientSecret() = ClientSecretResponse(ClientSecret.Id.random, randomUUID.toString, now)
+  private def aClientSecret() = ClientSecretResponse(ClientSecret.Id.random, randomUUID.toString, now())
 
   val appName: String = "app"
   val apiVersion      = ApiVersion("version")
@@ -244,12 +244,12 @@ class CheckYourAnswersSpec
       application
     }
 
-    def mockRequestUplift() {
+    def mockRequestUplift(): Unit = {
       when(underTest.applicationService.requestUplift(eqTo(appId), any[String], any[DeveloperSession])(*))
         .thenReturn(successful(ApplicationUpliftSuccessful))
     }
 
-    def failedToCreateDeskproTicket() {
+    def failedToCreateDeskproTicket(): Unit = {
       when(underTest.applicationService.requestUplift(eqTo(appId), any[String], any[DeveloperSession])(*))
         .thenReturn(failed(new DeskproTicketCreationFailed("Failed")))
     }
@@ -438,7 +438,7 @@ class CheckYourAnswersSpec
       private val result = addToken(underTest.teamAction(appId))(loggedInRequest)
 
       status(result) shouldBe SEE_OTHER
-      redirectLocation(result) shouldBe Some(s"/developer/applications/${appId.text}/check-your-answers")
+      redirectLocation(result) shouldBe Some(s"/developer/applications/${appId.text()}/check-your-answers")
 
       private val expectedCheckInformation = CheckInformation(teamConfirmed = true)
       verify(underTest.applicationService).updateCheckInformation(eqTo(application), eqTo(expectedCheckInformation))(*)
@@ -502,7 +502,7 @@ class CheckYourAnswersSpec
 
       status(result) shouldBe SEE_OTHER
 
-      redirectLocation(result) shouldBe Some(s"/developer/applications/${appId.text}/check-your-answers/team")
+      redirectLocation(result) shouldBe Some(s"/developer/applications/${appId.text()}/check-your-answers/team")
 
       verify(underTest.collaboratorService).removeTeamMember(eqTo(application), eqTo(anotherCollaboratorEmail), eqTo(loggedInDeveloper.email))(*)
     }
@@ -513,7 +513,7 @@ class CheckYourAnswersSpec
       private val result = addToken(underTest.teamAction(appId))(loggedInRequest)
 
       status(result) shouldBe SEE_OTHER
-      redirectLocation(result) shouldBe Some(s"/developer/applications/${appId.text}/check-your-answers")
+      redirectLocation(result) shouldBe Some(s"/developer/applications/${appId.text()}/check-your-answers")
 
       private val expectedCheckInformation = CheckInformation(teamConfirmed = true)
       verify(underTest.applicationService).updateCheckInformation(eqTo(application), eqTo(expectedCheckInformation))(*)

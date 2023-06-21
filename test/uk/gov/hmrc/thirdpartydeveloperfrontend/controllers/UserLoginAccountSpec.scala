@@ -185,7 +185,7 @@ class UserLoginAccountSpec extends BaseControllerSpec with WithCSRFAddToken
 
       status(result) shouldBe SEE_OTHER
 
-      redirectLocation(result) shouldBe Some(routes.UserLoginAccount.get2svRecommendationPage.url)
+      redirectLocation(result) shouldBe Some(routes.UserLoginAccount.get2svRecommendationPage().url)
 
       verify(underTest.auditService, times(1)).audit(
         eqTo(LoginSucceeded),
@@ -279,7 +279,7 @@ class UserLoginAccountSpec extends BaseControllerSpec with WithCSRFAddToken
 
       status(result) shouldBe SEE_OTHER
 
-      redirectLocation(result) shouldBe Some(routes.UserLoginAccount.get2svRecommendationPage.url)
+      redirectLocation(result) shouldBe Some(routes.UserLoginAccount.get2svRecommendationPage().url)
     }
 
     "display the enter access code page after successfully logging in with MFA configured as AUTHENTICATOR_APP" in new SetupWithUserAuthRespRequiringMfaAccessCode {

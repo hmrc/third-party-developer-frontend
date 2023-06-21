@@ -377,7 +377,7 @@ class CredentialsSpec
       val result = underTest.deleteClientSecretAction(applicationId, clientSecretId)(loggedInRequest)
 
       status(result) shouldBe SEE_OTHER
-      redirectLocation(result) shouldBe Some(s"/developer/applications/${applicationId.text}/client-secrets")
+      redirectLocation(result) shouldBe Some(s"/developer/applications/${applicationId.text()}/client-secrets")
     }
 
     "return 403 when a user with developer role tries do delete production secrets" in new Setup {

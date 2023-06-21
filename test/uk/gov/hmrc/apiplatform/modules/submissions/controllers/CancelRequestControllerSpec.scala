@@ -84,7 +84,7 @@ class CancelRequestControllerSpec
 
     val loggedInRequest = FakeRequest().withLoggedIn(controller, implicitly)(sessionId).withSession(sessionParams: _*)
 
-    val extendedSubmission = aSubmission.withIncompleteProgress
+    val extendedSubmission = aSubmission.withIncompleteProgress()
   }
 
   trait HasAppInProductionState {
@@ -174,7 +174,7 @@ class CancelRequestControllerSpec
       val result = controller.cancelRequestForProductionCredentialsAction(appId)(request.withCSRFToken)
 
       status(result) shouldBe SEE_OTHER
-      redirectLocation(result).value shouldBe s"/developer/submissions/application/${appId.text}/production-credentials-checklist"
+      redirectLocation(result).value shouldBe s"/developer/submissions/application/${appId.text()}/production-credentials-checklist"
     }
   }
 }
