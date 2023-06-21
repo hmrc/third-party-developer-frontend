@@ -27,6 +27,7 @@ import pages._
 import scala.jdk.CollectionConverters._
 import scala.collection.mutable
 import scala.concurrent.duration._
+import scala.language.postfixOps
 import org.scalatest.matchers.should.Matchers
 
 object TableMisuseAdapters {

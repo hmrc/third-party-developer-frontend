@@ -51,7 +51,7 @@ class FlowRepositoryISpec extends AnyWordSpec
   private val flowRepository = app.injector.instanceOf[FlowRepository]
 
   override protected def beforeEach(): Unit = {
-    await(flowRepository.collection.drop.toFuture())
+    await(flowRepository.collection.drop().toFuture())
     await(flowRepository.ensureIndexes)
   }
 
@@ -100,7 +100,7 @@ class FlowRepositoryISpec extends AnyWordSpec
             savedFlow.sessionId shouldBe currentSession
             savedFlow.flowType shouldBe IP_ALLOW_LIST
             savedFlow.allowlist shouldBe Set("ip1", "ip2")
-          case _                                => fail
+          case _                                => fail()
         }
 
       }
@@ -116,7 +116,7 @@ class FlowRepositoryISpec extends AnyWordSpec
 
         await(flowRepository.saveFlow(flow))
 
-        val result: Flow = await(flowRepository.collection.find(Filters.equal("sessionId", Codecs.toBson(currentSession))).first.toFuture())
+        val result: Flow = await(flowRepository.collection.find(Filters.equal("sessionId", Codecs.toBson(currentSession))).first().toFuture())
         val castResult   = result.asInstanceOf[EmailPreferencesFlowV2]
         castResult.sessionId shouldBe currentSession
         castResult.flowType shouldBe EMAIL_PREFERENCES_V2

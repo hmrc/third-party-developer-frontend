@@ -78,12 +78,12 @@ class LoginCSRFIntegrationSpec extends BaseConnectorIntegrationSpec with GuiceOn
   private val contentType                = "Content-Type"
   private val contentTypeApplicationJson = "application/json"
 
-  override def beforeEach() {
+  override def beforeEach(): Unit = {
     wireMockServer.start()
     WireMock.configureFor(stubHost, stubPort)
   }
 
-  override def afterEach() {
+  override def afterEach(): Unit = {
     wireMockServer.resetMappings()
     wireMockServer.stop()
   }
@@ -166,7 +166,7 @@ class LoginCSRFIntegrationSpec extends BaseConnectorIntegrationSpec with GuiceOn
         private val result = route(app, request).get
 
         status(result) shouldBe SEE_OTHER
-        redirectLocation(result) shouldBe Some(routes.UserLoginAccount.get2svRecommendationPage.url)
+        redirectLocation(result) shouldBe Some(routes.UserLoginAccount.get2svRecommendationPage().url)
 
         verify(1, postRequestedFor(urlMatching("/authenticate")))
       }

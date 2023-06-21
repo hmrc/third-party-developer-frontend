@@ -33,7 +33,6 @@ import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.connectors.ApiType.
 import play.api.libs.json.Json
 import uk.gov.hmrc.thirdpartydeveloperfrontend.connectors.stubs.ApiPlatformMicroserviceStub
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.subscriptions.ApiData
-import uk.gov.hmrc.apiplatform.modules.applications.domain.models.ClientId
 
 import java.time.{LocalDateTime, Period}
 
@@ -91,7 +90,7 @@ class ApmConnectorIntegrationSpec extends BaseConnectorIntegrationSpec with Guic
       result match {
         case Right(x) =>
           x.size should be(2)
-          x should contain only (category1, category2)
+          x should contain theSameElementsAs List(category1, category2)
         case _        => fail()
       }
 

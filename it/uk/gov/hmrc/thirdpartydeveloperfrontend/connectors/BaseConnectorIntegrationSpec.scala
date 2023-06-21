@@ -39,18 +39,25 @@ trait BaseConnectorIntegrationSpec
   val wireMockUrl    = s"http://$stubHost:$stubPort"
   val wireMockServer = new WireMockServer(wireMockConfig().port(stubPort))
 
-  override def beforeAll() {
+  override def beforeAll(): Unit = {
+    super.beforeAll()
     wireMockServer.start()
     WireMock.configureFor(stubHost, stubPort)
   }
 
-  override def afterAll() {
+  override def afterAll(): Unit = {
     wireMockServer.stop()
+    super.afterAll()
   }
 
-  override def beforeEach() {
+  override def beforeEach(): Unit = {
+    super.beforeEach()
     wireMockServer.resetMappings()
     wireMockServer.resetRequests()
   }
 
+  override def afterEach(): Unit = {
+    wireMockServer.resetMappings()
+    super.afterEach()
+  }
 }

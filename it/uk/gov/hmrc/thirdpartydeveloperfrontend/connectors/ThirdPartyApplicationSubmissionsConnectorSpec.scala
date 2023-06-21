@@ -89,7 +89,7 @@ class ThirdPartyApplicationSubmissionsConnectorSpec
     val responsibleIndividual                             = ResponsibleIndividual.build("bob example", "bob@example.com".toLaxEmail)
     val riVerificationWithDetails                         = ResponsibleIndividualVerificationWithDetails(riVerification, responsibleIndividual, "Rick Deckard", "rick@submitter.com".toLaxEmail)
 
-    val extendedSubmission = answeringSubmission.withIncompleteProgress
+    val extendedSubmission = answeringSubmission.withIncompleteProgress()
   }
 
   "recordAnswer" should {
@@ -108,7 +108,7 @@ class ThirdPartyApplicationSubmissionsConnectorSpec
 
       val result = await(connector.recordAnswer(submissionId, questionId, answers))
 
-      result shouldBe 'Left
+      result.isLeft shouldBe true
     }
 
     "return OK with the submission" in new Setup {
@@ -124,9 +124,8 @@ class ThirdPartyApplicationSubmissionsConnectorSpec
 
       val result = await(connector.recordAnswer(submissionId, questionId, answers))
 
-      result shouldBe 'Right
-
-      result.right.get shouldBe extendedSubmission
+      result.isRight shouldBe true
+      result shouldBe Right(extendedSubmission)
     }
   }
 
@@ -164,7 +163,7 @@ class ThirdPartyApplicationSubmissionsConnectorSpec
   }
 
   "fetchLatestSubmission" should {
-    val url = s"/submissions/application/${applicationId.text}"
+    val url = s"/submissions/application/${applicationId.text()}"
 
     "return NOT FOUND with empty response body" in new Setup {
       stubFor(
@@ -219,7 +218,7 @@ class ThirdPartyApplicationSubmissionsConnectorSpec
   }
 
   "fetchLatestExtendedSubmission" should {
-    val url = s"/submissions/application/${applicationId.text}/extended"
+    val url = s"/submissions/application/${applicationId.text()}/extended"
 
     "return NOT FOUND with empty response body" in new Setup {
       stubFor(
@@ -268,7 +267,7 @@ class ThirdPartyApplicationSubmissionsConnectorSpec
 
       val result = await(connector.confirmSetupComplete(app.id, email))
 
-      result shouldBe 'Right
+      result.isRight shouldBe true
     }
 
     "return an error if TPA returns error" in new Setup {
@@ -306,8 +305,8 @@ class ThirdPartyApplicationSubmissionsConnectorSpec
 
       val result = await(connector.requestApproval(app.id, name, email))
 
-      result shouldBe 'Right
-      result.right.get.name shouldBe app.name
+      result.isRight shouldBe true
+      result.toOption.get.name shouldBe app.name
     }
 
     "return with a PRECONDITION_FAILED error" in new Setup {
@@ -325,8 +324,8 @@ class ThirdPartyApplicationSubmissionsConnectorSpec
 
       val result = await(connector.requestApproval(app.id, name, email))
 
-      result shouldBe 'Left
-      result.left.get.message shouldBe msg
+      result.isLeft shouldBe true
+      result.left.toOption.get.message shouldBe msg
     }
 
     "return with a CONFLICT error" in new Setup {
@@ -344,8 +343,8 @@ class ThirdPartyApplicationSubmissionsConnectorSpec
 
       val result = await(connector.requestApproval(app.id, name, email))
 
-      result shouldBe 'Left
-      result.left.get.message shouldBe msg
+      result.isLeft shouldBe true
+      result.left.toOption.get.message shouldBe msg
     }
 
     "return with a BAD_REQUEST error" in new Setup {

@@ -21,7 +21,6 @@ import com.github.tomakehurst.wiremock.client.WireMock._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.connectors.EncryptedJson
 import uk.gov.hmrc.apiplatform.modules.apis.domain.models.{ApiContext, ApiIdentifier, ApiVersion}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.ApplicationNameValidationJson.ApplicationNameValidationResult
-import uk.gov.hmrc.apiplatform.modules.applications.domain.models.ApplicationId
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.{Application, ApplicationToken, ApplicationWithSubscriptionData, Environment}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.connectors.{PasswordResetRequest, UserAuthenticationResponse}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.{Developer, Registration, Session, UpdateProfileRequest}
@@ -277,7 +276,7 @@ object ApiPlatformMicroserviceStub {
 
   def stubFetchAllPossibleSubscriptions(applicationId: ApplicationId, body: String) = {
     stubFor(
-      get(urlEqualTo(s"/api-definitions?applicationId=${applicationId.text}"))
+      get(urlEqualTo(s"/api-definitions?applicationId=${applicationId.text()}"))
         .willReturn(
           aResponse()
             .withStatus(OK)
@@ -289,7 +288,7 @@ object ApiPlatformMicroserviceStub {
 
   def stubFetchAllPossibleSubscriptionsFailure(applicationId: ApplicationId) = {
     stubFor(
-      get(urlEqualTo(s"/api-definitions?applicationId=${applicationId.text}"))
+      get(urlEqualTo(s"/api-definitions?applicationId=${applicationId.text()}"))
         .willReturn(
           aResponse()
             .withStatus(INTERNAL_SERVER_ERROR)
@@ -299,7 +298,7 @@ object ApiPlatformMicroserviceStub {
 
   def stubFetchApplicationById(applicationId: ApplicationId, data: ApplicationWithSubscriptionData) = {
     stubFor(
-      get(urlEqualTo(s"/applications/${applicationId.text}"))
+      get(urlEqualTo(s"/applications/${applicationId.text()}"))
         .willReturn(
           aResponse()
             .withStatus(OK)
@@ -311,7 +310,7 @@ object ApiPlatformMicroserviceStub {
 
   def stubFetchApplicationByIdFailure(applicationId: ApplicationId) = {
     stubFor(
-      get(urlEqualTo(s"/applications/${applicationId.text}"))
+      get(urlEqualTo(s"/applications/${applicationId.text()}"))
         .willReturn(
           aResponse()
             .withStatus(NOT_FOUND)
@@ -381,7 +380,7 @@ object ApiPlatformMicroserviceStub {
 
   def stubSubscribeToApi(applicationId: ApplicationId, apiIdentifier: ApiIdentifier) = {
     stubFor(
-      post(urlPathEqualTo(s"/applications/${applicationId.text}/subscriptions"))
+      post(urlPathEqualTo(s"/applications/${applicationId.text()}/subscriptions"))
         .withJsonRequestBody(apiIdentifier)
         .willReturn(
           aResponse()
@@ -392,7 +391,7 @@ object ApiPlatformMicroserviceStub {
 
   def stubSubscribeToApiFailure(applicationId: ApplicationId, apiIdentifier: ApiIdentifier) = {
     stubFor(
-      post(urlPathEqualTo(s"/applications/${applicationId.text}/subscriptions"))
+      post(urlPathEqualTo(s"/applications/${applicationId.text()}/subscriptions"))
         .withJsonRequestBody(apiIdentifier)
         .willReturn(
           aResponse()
