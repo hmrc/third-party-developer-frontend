@@ -21,7 +21,7 @@ object AppDependencies {
     "uk.gov.hmrc"                 %% "http-metrics"                       % "2.7.0",
     "uk.gov.hmrc"                 %% "json-encryption"                    % "5.1.0-play-28",
     "uk.gov.hmrc"                 %% "emailaddress"                       % "3.7.0",
-    "uk.gov.hmrc"                 %% "play-conditional-form-mapping"      % "1.13.0-play-28",
+    "uk.gov.hmrc"                 %% "play-conditional-form-mapping"      % "1.12.0-play-28",
     "commons-net"                 %  "commons-net"                        % "3.6",
     "com.beachape"                %% "enumeratum"                         % enumeratumVersion,
     "com.beachape"                %% "enumeratum-play"                    % enumeratumVersion,

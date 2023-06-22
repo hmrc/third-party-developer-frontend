@@ -456,8 +456,6 @@ class DetailsSpec
     def legacyAppWithPrivacyPolicyLocation(maybePrivacyPolicyUrl: Option[String]) = anApplication(access = Standard(List.empty, None, maybePrivacyPolicyUrl, Set.empty, None, None))
     val privacyPolicyUrl                                                          = "http://example.com/priv-policy"
 
-    implicit val writeChangeOfPrivacyPolicyLocationForm = Json.format[ChangeOfPrivacyPolicyLocationForm]
-
     "display update page with url field populated" in new Setup {
       val appWithPrivPolicyUrl = legacyAppWithPrivacyPolicyLocation(Some(privacyPolicyUrl))
       givenApplicationAction(appWithPrivPolicyUrl, loggedInAdmin)
@@ -485,21 +483,6 @@ class DetailsSpec
     }
 
     "update location if form data is valid and return to app details page" in new Setup {
-      val newPrivacyPolicyUrl  = "http://example.com/new-priv-policy"
-      val appWithPrivPolicyUrl = legacyAppWithPrivacyPolicyLocation(Some(privacyPolicyUrl))
-      givenApplicationAction(appWithPrivPolicyUrl, loggedInAdmin)
-      when(applicationServiceMock.updatePrivacyPolicyLocation(eqTo(appWithPrivPolicyUrl), *[UserId], eqTo(PrivacyPolicyLocations.Url(newPrivacyPolicyUrl)))(*))
-        .thenReturn(Future.successful(ApplicationUpdateSuccessful))
-
-      val form   = ChangeOfPrivacyPolicyLocationForm(newPrivacyPolicyUrl, false, false)
-      private val request = loggedInAdminRequest.withJsonBody(Json.toJson(form))
-      val result = addToken(underTest.updatePrivacyPolicyLocationAction(appWithPrivPolicyUrl.id))(request)
-
-      status(result) shouldBe SEE_OTHER
-      redirectLocation(result) shouldBe Some(routes.Details.details(appWithPrivPolicyUrl.id).url)
-    }
-
-    "update location if form data is valid and return to app details page2" in new Setup {
       val newPrivacyPolicyUrl  = "http://example.com/new-priv-policy"
       val appWithPrivPolicyUrl = legacyAppWithPrivacyPolicyLocation(Some(privacyPolicyUrl))
       givenApplicationAction(appWithPrivPolicyUrl, loggedInAdmin)
@@ -536,8 +519,6 @@ class DetailsSpec
       )
     )
     val privacyPolicyUrl                                                           = "http://example.com/priv-policy"
-
-    implicit val writeChangeOfPrivacyPolicyLocationForm = Json.writes[ChangeOfPrivacyPolicyLocationForm]
 
     "display update page with 'in desktop' radio selected" in new Setup {
       val appWithPrivPolicyInDesktop = appWithPrivacyPolicyLocation(PrivacyPolicyLocations.InDesktopSoftware)
@@ -577,8 +558,8 @@ class DetailsSpec
       val appWithPrivPolicyInDesktop = appWithPrivacyPolicyLocation(PrivacyPolicyLocations.InDesktopSoftware)
       givenApplicationAction(appWithPrivPolicyInDesktop, loggedInAdmin)
 
-      val form   = ChangeOfPrivacyPolicyLocationForm("", true, true)
-      val result = addToken(underTest.updatePrivacyPolicyLocationAction(appWithPrivPolicyInDesktop.id))(loggedInAdminRequest.withJsonBody(Json.toJson(form)))
+      private val request = loggedInAdminRequest.withFormUrlEncodedBody("privacyPolicyUrl" -> "", "isInDesktop" -> "true", "isNewJourney" -> "true")
+      val result = addToken(underTest.updatePrivacyPolicyLocationAction(appWithPrivPolicyInDesktop.id))(request)
 
       status(result) shouldBe BAD_REQUEST
     }
@@ -587,8 +568,8 @@ class DetailsSpec
       val appWithPrivPolicyInDesktop = appWithPrivacyPolicyLocation(PrivacyPolicyLocations.InDesktopSoftware)
       givenApplicationAction(appWithPrivPolicyInDesktop, loggedInAdmin)
 
-      val form   = ChangeOfPrivacyPolicyLocationForm("", false, true)
-      val result = addToken(underTest.updatePrivacyPolicyLocationAction(appWithPrivPolicyInDesktop.id))(loggedInAdminRequest.withJsonBody(Json.toJson(form)))
+      private val request = loggedInAdminRequest.withFormUrlEncodedBody("privacyPolicyUrl" -> "", "isInDesktop" -> "false", "isNewJourney" -> "true")
+      val result = addToken(underTest.updatePrivacyPolicyLocationAction(appWithPrivPolicyInDesktop.id))(request)
 
       status(result) shouldBe BAD_REQUEST
     }
@@ -599,8 +580,8 @@ class DetailsSpec
       when(applicationServiceMock.updatePrivacyPolicyLocation(eqTo(appWithPrivPolicyInDesktop), *[UserId], eqTo(PrivacyPolicyLocations.Url(privacyPolicyUrl)))(*))
         .thenReturn(Future.successful(ApplicationUpdateSuccessful))
 
-      val form   = ChangeOfPrivacyPolicyLocationForm(privacyPolicyUrl, false, true)
-      val result = addToken(underTest.updatePrivacyPolicyLocationAction(appWithPrivPolicyInDesktop.id))(loggedInAdminRequest.withJsonBody(Json.toJson(form)))
+      private val request = loggedInAdminRequest.withFormUrlEncodedBody("privacyPolicyUrl" -> privacyPolicyUrl, "isInDesktop" -> "false", "isNewJourney" -> "true")
+      val result = addToken(underTest.updatePrivacyPolicyLocationAction(appWithPrivPolicyInDesktop.id))(request)
 
       status(result) shouldBe SEE_OTHER
       redirectLocation(result) shouldBe Some(routes.Details.details(appWithPrivPolicyInDesktop.id).url)
@@ -611,8 +592,6 @@ class DetailsSpec
     def legacyAppWithTermsAndConditionsLocation(maybeTermsAndConditionsUrl: Option[String]) =
       anApplication(access = Standard(List.empty, maybeTermsAndConditionsUrl, None, Set.empty, None, None))
     val termsAndConditionsUrl                                                               = "http://example.com/terms-conds"
-
-    implicit val writeChangeOfTermsAndConditionsForm = Json.writes[ChangeOfTermsAndConditionsLocationForm]
 
     "display update page with url field populated" in new Setup {
       val appWithTermsAndConditionsUrl = legacyAppWithTermsAndConditionsLocation(Some(termsAndConditionsUrl))
@@ -647,8 +626,8 @@ class DetailsSpec
       when(applicationServiceMock.updateTermsConditionsLocation(eqTo(appWithTermsAndConditionsUrl), *[UserId], eqTo(TermsAndConditionsLocations.Url(newTermsAndConditionsUrl)))(*))
         .thenReturn(Future.successful(ApplicationUpdateSuccessful))
 
-      val form   = ChangeOfTermsAndConditionsLocationForm(newTermsAndConditionsUrl, false, false)
-      val result = addToken(underTest.updateTermsAndConditionsLocationAction(appWithTermsAndConditionsUrl.id))(loggedInAdminRequest.withJsonBody(Json.toJson(form)))
+      private val request = loggedInAdminRequest.withFormUrlEncodedBody("termsAndConditionsUrl" -> newTermsAndConditionsUrl, "isInDesktop" -> "false", "isNewJourney" -> "false")
+      val result = addToken(underTest.updateTermsAndConditionsLocationAction(appWithTermsAndConditionsUrl.id))(request)
 
       status(result) shouldBe SEE_OTHER
       redirectLocation(result) shouldBe Some(routes.Details.details(appWithTermsAndConditionsUrl.id).url)
@@ -676,8 +655,6 @@ class DetailsSpec
       )
     )
     val termsAndConditionsUrl                                                                     = "http://example.com/terms-conds"
-
-    implicit val writeChangeOfTermsAndConditionsForm = Json.writes[ChangeOfTermsAndConditionsLocationForm]
 
     "display update page with 'in desktop' radio selected" in new Setup {
       val appWithTermsAndConditionsInDesktop = appWithTermsAndConditionsLocation(TermsAndConditionsLocations.InDesktopSoftware)
@@ -717,8 +694,8 @@ class DetailsSpec
       val appWithTermsAndConditionsInDesktop = appWithTermsAndConditionsLocation(TermsAndConditionsLocations.InDesktopSoftware)
       givenApplicationAction(appWithTermsAndConditionsInDesktop, loggedInAdmin)
 
-      val form   = ChangeOfTermsAndConditionsLocationForm("", true, true)
-      val result = addToken(underTest.updateTermsAndConditionsLocationAction(appWithTermsAndConditionsInDesktop.id))(loggedInAdminRequest.withJsonBody(Json.toJson(form)))
+      private val request = loggedInAdminRequest.withFormUrlEncodedBody("termsAndConditionsUrl" -> "", "isInDesktop" -> "true", "isNewJourney" -> "true")
+      val result = addToken(underTest.updateTermsAndConditionsLocationAction(appWithTermsAndConditionsInDesktop.id))(request)
 
       status(result) shouldBe BAD_REQUEST
     }
@@ -727,8 +704,8 @@ class DetailsSpec
       val appWithTermsAndConditionsInDesktop = appWithTermsAndConditionsLocation(TermsAndConditionsLocations.InDesktopSoftware)
       givenApplicationAction(appWithTermsAndConditionsInDesktop, loggedInAdmin)
 
-      val form   = ChangeOfTermsAndConditionsLocationForm("", false, true)
-      val result = addToken(underTest.updatePrivacyPolicyLocationAction(appWithTermsAndConditionsInDesktop.id))(loggedInAdminRequest.withJsonBody(Json.toJson(form)))
+      private val request = loggedInAdminRequest.withFormUrlEncodedBody("termsAndConditionsUrl" -> "", "isInDesktop" -> "false", "isNewJourney" -> "true")
+      val result = addToken(underTest.updatePrivacyPolicyLocationAction(appWithTermsAndConditionsInDesktop.id))(request)
 
       status(result) shouldBe BAD_REQUEST
     }
@@ -739,8 +716,8 @@ class DetailsSpec
       when(applicationServiceMock.updateTermsConditionsLocation(eqTo(appWithTermsAndConditionsInDesktop), *[UserId], eqTo(TermsAndConditionsLocations.Url(termsAndConditionsUrl)))(*))
         .thenReturn(Future.successful(ApplicationUpdateSuccessful))
 
-      val form   = ChangeOfTermsAndConditionsLocationForm(termsAndConditionsUrl, false, true)
-      val result = addToken(underTest.updateTermsAndConditionsLocationAction(appWithTermsAndConditionsInDesktop.id))(loggedInAdminRequest.withJsonBody(Json.toJson(form)))
+      private val request = loggedInAdminRequest.withFormUrlEncodedBody("termsAndConditionsUrl" -> termsAndConditionsUrl, "isInDesktop" -> "false", "isNewJourney" -> "true")
+      val result = addToken(underTest.updateTermsAndConditionsLocationAction(appWithTermsAndConditionsInDesktop.id))(request)
 
       status(result) shouldBe SEE_OTHER
       redirectLocation(result) shouldBe Some(routes.Details.details(appWithTermsAndConditionsInDesktop.id).url)
