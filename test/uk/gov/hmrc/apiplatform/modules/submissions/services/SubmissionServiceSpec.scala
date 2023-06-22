@@ -45,7 +45,7 @@ class SubmissionServiceSpec extends AsyncHmrcSpec {
 
       val result = await(underTest.fetch(completelyAnswerExtendedSubmission.submission.id))
 
-      result.isDefined shouldBe true
+      result shouldBe defined
       result.get.submission.id shouldBe completelyAnswerExtendedSubmission.submission.id
     }
 
@@ -54,7 +54,7 @@ class SubmissionServiceSpec extends AsyncHmrcSpec {
 
       val result = await(underTest.fetchLatestSubmission(aSubmission.applicationId))
 
-      result.isDefined shouldBe true
+      result shouldBe defined
       result.get.id shouldBe aSubmission.id
     }
 
@@ -63,7 +63,7 @@ class SubmissionServiceSpec extends AsyncHmrcSpec {
 
       val result = await(underTest.fetchLatestExtendedSubmission(completelyAnswerExtendedSubmission.submission.applicationId))
 
-      result.isDefined shouldBe true
+      result shouldBe defined
       result.get.submission.id shouldBe completelyAnswerExtendedSubmission.submission.id
     }
 
