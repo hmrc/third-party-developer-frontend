@@ -559,7 +559,7 @@ class DetailsSpec
       givenApplicationAction(appWithPrivPolicyInDesktop, loggedInAdmin)
 
       private val request = loggedInAdminRequest.withFormUrlEncodedBody("privacyPolicyUrl" -> "", "isInDesktop" -> "true", "isNewJourney" -> "true")
-      val result = addToken(underTest.updatePrivacyPolicyLocationAction(appWithPrivPolicyInDesktop.id))(request)
+      val result          = addToken(underTest.updatePrivacyPolicyLocationAction(appWithPrivPolicyInDesktop.id))(request)
 
       status(result) shouldBe BAD_REQUEST
     }
@@ -569,7 +569,7 @@ class DetailsSpec
       givenApplicationAction(appWithPrivPolicyInDesktop, loggedInAdmin)
 
       private val request = loggedInAdminRequest.withFormUrlEncodedBody("privacyPolicyUrl" -> "", "isInDesktop" -> "false", "isNewJourney" -> "true")
-      val result = addToken(underTest.updatePrivacyPolicyLocationAction(appWithPrivPolicyInDesktop.id))(request)
+      val result          = addToken(underTest.updatePrivacyPolicyLocationAction(appWithPrivPolicyInDesktop.id))(request)
 
       status(result) shouldBe BAD_REQUEST
     }
@@ -581,7 +581,7 @@ class DetailsSpec
         .thenReturn(Future.successful(ApplicationUpdateSuccessful))
 
       private val request = loggedInAdminRequest.withFormUrlEncodedBody("privacyPolicyUrl" -> privacyPolicyUrl, "isInDesktop" -> "false", "isNewJourney" -> "true")
-      val result = addToken(underTest.updatePrivacyPolicyLocationAction(appWithPrivPolicyInDesktop.id))(request)
+      val result          = addToken(underTest.updatePrivacyPolicyLocationAction(appWithPrivPolicyInDesktop.id))(request)
 
       status(result) shouldBe SEE_OTHER
       redirectLocation(result) shouldBe Some(routes.Details.details(appWithPrivPolicyInDesktop.id).url)
@@ -627,7 +627,7 @@ class DetailsSpec
         .thenReturn(Future.successful(ApplicationUpdateSuccessful))
 
       private val request = loggedInAdminRequest.withFormUrlEncodedBody("termsAndConditionsUrl" -> newTermsAndConditionsUrl, "isInDesktop" -> "false", "isNewJourney" -> "false")
-      val result = addToken(underTest.updateTermsAndConditionsLocationAction(appWithTermsAndConditionsUrl.id))(request)
+      val result          = addToken(underTest.updateTermsAndConditionsLocationAction(appWithTermsAndConditionsUrl.id))(request)
 
       status(result) shouldBe SEE_OTHER
       redirectLocation(result) shouldBe Some(routes.Details.details(appWithTermsAndConditionsUrl.id).url)
@@ -695,7 +695,7 @@ class DetailsSpec
       givenApplicationAction(appWithTermsAndConditionsInDesktop, loggedInAdmin)
 
       private val request = loggedInAdminRequest.withFormUrlEncodedBody("termsAndConditionsUrl" -> "", "isInDesktop" -> "true", "isNewJourney" -> "true")
-      val result = addToken(underTest.updateTermsAndConditionsLocationAction(appWithTermsAndConditionsInDesktop.id))(request)
+      val result          = addToken(underTest.updateTermsAndConditionsLocationAction(appWithTermsAndConditionsInDesktop.id))(request)
 
       status(result) shouldBe BAD_REQUEST
     }
@@ -705,7 +705,7 @@ class DetailsSpec
       givenApplicationAction(appWithTermsAndConditionsInDesktop, loggedInAdmin)
 
       private val request = loggedInAdminRequest.withFormUrlEncodedBody("termsAndConditionsUrl" -> "", "isInDesktop" -> "false", "isNewJourney" -> "true")
-      val result = addToken(underTest.updatePrivacyPolicyLocationAction(appWithTermsAndConditionsInDesktop.id))(request)
+      val result          = addToken(underTest.updatePrivacyPolicyLocationAction(appWithTermsAndConditionsInDesktop.id))(request)
 
       status(result) shouldBe BAD_REQUEST
     }
@@ -717,7 +717,7 @@ class DetailsSpec
         .thenReturn(Future.successful(ApplicationUpdateSuccessful))
 
       private val request = loggedInAdminRequest.withFormUrlEncodedBody("termsAndConditionsUrl" -> termsAndConditionsUrl, "isInDesktop" -> "false", "isNewJourney" -> "true")
-      val result = addToken(underTest.updateTermsAndConditionsLocationAction(appWithTermsAndConditionsInDesktop.id))(request)
+      val result          = addToken(underTest.updateTermsAndConditionsLocationAction(appWithTermsAndConditionsInDesktop.id))(request)
 
       status(result) shouldBe SEE_OTHER
       redirectLocation(result) shouldBe Some(routes.Details.details(appWithTermsAndConditionsInDesktop.id).url)

@@ -144,7 +144,7 @@ class SubscriptionsServiceSpec extends AsyncHmrcSpec with SubscriptionsBuilder w
 
       private val result =
         await(subscriptionsService.subscribeToApi(productionApplication, subscription, email))
-        
+
       result.isRight shouldBe true
       result shouldBe Right(DispatchSuccessResult(productionApplication))
     }
@@ -165,7 +165,7 @@ class SubscriptionsServiceSpec extends AsyncHmrcSpec with SubscriptionsBuilder w
 
       private val result =
         await(subscriptionsService.unsubscribeFromApi(productionApplication, apiIdentifier, email))
-        
+
       result.isRight shouldBe true
       result shouldBe Right(DispatchSuccessResult(productionApplication))
     }

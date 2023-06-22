@@ -250,9 +250,7 @@ class FormValidationSpec extends AsyncHmrcSpec {
     "validate a valid form with empty optional fields" in {
       val boundForm = EditApplicationForm.form.bind(
         validEditApplicationForm ++
-          Map("description"           -> "",
-              "privacyPolicyUrl"      -> "",
-              "termsAndConditionsUrl" -> "")
+          Map("description" -> "", "privacyPolicyUrl" -> "", "termsAndConditionsUrl" -> "")
       )
       boundForm.errors shouldBe List()
       boundForm.globalErrors shouldBe List()
