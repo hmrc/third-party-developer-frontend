@@ -142,7 +142,11 @@ class SubscriptionsServiceSpec extends AsyncHmrcSpec with SubscriptionsBuilder w
 
       ApplicationCommandConnectorMock.Dispatch.thenReturnsSuccess(productionApplication)
 
-      await(subscriptionsService.subscribeToApi(productionApplication, subscription, email)).right.value shouldBe DispatchSuccessResult(productionApplication)
+      private val result =
+        await(subscriptionsService.subscribeToApi(productionApplication, subscription, email))
+
+      result.isRight shouldBe true
+      result shouldBe Right(DispatchSuccessResult(productionApplication))
     }
   }
 
@@ -159,7 +163,11 @@ class SubscriptionsServiceSpec extends AsyncHmrcSpec with SubscriptionsBuilder w
       when(mockProductionSubscriptionFieldsConnector.deleteFieldValues(productionClientId, context, version))
         .thenReturn(successful(FieldsDeleteSuccessResult))
 
-      await(subscriptionsService.unsubscribeFromApi(productionApplication, apiIdentifier, email)).right.value shouldBe DispatchSuccessResult(productionApplication)
+      private val result =
+        await(subscriptionsService.unsubscribeFromApi(productionApplication, apiIdentifier, email))
+
+      result.isRight shouldBe true
+      result shouldBe Right(DispatchSuccessResult(productionApplication))
     }
   }
 }

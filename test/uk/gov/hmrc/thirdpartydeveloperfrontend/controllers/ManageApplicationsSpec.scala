@@ -127,5 +127,5 @@ class ManageApplicationsSpec
     }
   }
 
-  private def aClientSecret() = ClientSecretResponse(ClientSecret.Id.random, randomUUID.toString, now)
+  private def aClientSecret() = ClientSecretResponse(ClientSecret.Id.random, randomUUID.toString, now())
 }

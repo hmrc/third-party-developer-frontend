@@ -62,7 +62,7 @@ class Registration @Inject() (
 
   def register() = Action.async {
     implicit request =>
-      val requestForm: Form[RegisterForm] = regForm.bindFromRequest
+      val requestForm: Form[RegisterForm] = regForm.bindFromRequest()
       requestForm.fold(
         formWithErrors => {
           Future.successful(BadRequest(registrationView(

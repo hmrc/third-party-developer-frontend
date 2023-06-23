@@ -18,7 +18,7 @@ lazy val plugins: Seq[Plugins] = Seq(PlayScala, SbtDistributablesPlugin)
 lazy val playSettings: Seq[Setting[_]] = Seq.empty
 
 ThisBuild / scalafixDependencies += "com.github.liancheng" %% "organize-imports" % "0.6.0"
-scalaVersion := "2.12.15"
+scalaVersion := "2.13.8"
 ThisBuild / semanticdbEnabled := true
 ThisBuild / semanticdbVersion := scalafixSemanticdb.revision
 
@@ -76,7 +76,6 @@ lazy val microservice = Project(appName, file("."))
     ComponentTest / parallelExecution := false
   )
   .settings(majorVersion := 0)
-  .settings(scalacOptions ++= Seq("-Ypartial-unification"))
   .settings(
       routesImport ++= Seq(
         "uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.binders._",

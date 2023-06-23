@@ -71,7 +71,7 @@ class EmailPreferencesController @Inject() (
   }
 
   def flowSelectCategoriesAction: Action[AnyContent] = loggedInAction { implicit request =>
-    val form = TaxRegimeEmailPreferencesForm.form.bindFromRequest
+    val form = TaxRegimeEmailPreferencesForm.form.bindFromRequest()
     form.fold(
       formWithErrors => {
         flowShowSelectCategoriesView(formWithErrors).map(BadRequest(_))
@@ -85,13 +85,13 @@ class EmailPreferencesController @Inject() (
 
   def flowSelectNoCategoriesAction: Action[AnyContent] = loggedInAction { implicit request =>
     emailPreferencesService.updateCategories(request.developerSession, List.empty[String])
-      .map(_ => Redirect(profile.routes.EmailPreferencesController.flowSelectTopicsPage))
+      .map(_ => Redirect(profile.routes.EmailPreferencesController.flowSelectTopicsPage()))
   }
 
   def flowSelectApisPage(category: String): Action[AnyContent] = loggedInAction { implicit request =>
     val form = SelectedApisEmailPreferencesForm.form
     if (category.isEmpty) {
-      Future.successful(Redirect(profile.routes.EmailPreferencesController.emailPreferencesSummaryPage))
+      Future.successful(Redirect(profile.routes.EmailPreferencesController.emailPreferencesSummaryPage()))
     } else {
       flowSelectApisView(form, category).map(Ok(_))
     }
@@ -113,13 +113,13 @@ class EmailPreferencesController @Inject() (
     def handleNextPage(sortedCategories: List[String], currentCategory: String): Result = {
       val currentCategoryIndex = sortedCategories.indexOf(currentCategory)
       if (sortedCategories.size == currentCategoryIndex + 1) {
-        Redirect(profile.routes.EmailPreferencesController.flowSelectTopicsPage)
+        Redirect(profile.routes.EmailPreferencesController.flowSelectTopicsPage())
       } else {
         Redirect(profile.routes.EmailPreferencesController.flowSelectApisPage(sortedCategories(currentCategoryIndex + 1)))
       }
     }
 
-    val form = SelectedApisEmailPreferencesForm.form.bindFromRequest
+    val form = SelectedApisEmailPreferencesForm.form.bindFromRequest()
     form.fold(
       formWithErrors => {
         flowSelectApisView(formWithErrors, form.data.getOrElse("currentCategory", "")).map(BadRequest(_))
@@ -159,7 +159,7 @@ class EmailPreferencesController @Inject() (
     successful(flowSelectTopicsView.apply(form, selectedTopics))
 
   def flowSelectTopicsAction: Action[AnyContent] = loggedInAction { implicit request =>
-    val form = SelectedTopicsEmailPreferencesForm.form.bindFromRequest
+    val form = SelectedTopicsEmailPreferencesForm.form.bindFromRequest()
 
     form.fold(
       formWithErrors => {
@@ -173,8 +173,8 @@ class EmailPreferencesController @Inject() (
                               .updateEmailPreferences(request.userId, flow.copy(selectedTopics = selectedTopicsForm.topic.toSet))
             _             = if (updateResult) emailPreferencesService.deleteFlow(request.sessionId, FlowType.EMAIL_PREFERENCES_V2)
           } yield
-            if (updateResult) Redirect(profile.routes.EmailPreferencesController.emailPreferencesSummaryPage)
-            else Redirect(profile.routes.EmailPreferencesController.flowSelectTopicsPage)
+            if (updateResult) Redirect(profile.routes.EmailPreferencesController.emailPreferencesSummaryPage())
+            else Redirect(profile.routes.EmailPreferencesController.flowSelectTopicsPage())
       }
     )
   }
@@ -199,8 +199,8 @@ class EmailPreferencesController @Inject() (
 
   def unsubscribeAllAction: Action[AnyContent] = loggedInAction { implicit request =>
     emailPreferencesService.removeEmailPreferences(request.developerSession.developer.userId).map {
-      case true  => Redirect(profile.routes.EmailPreferencesController.emailPreferencesSummaryPage).flashing("unsubscribed" -> "true")
-      case false => Redirect(profile.routes.EmailPreferencesController.emailPreferencesSummaryPage)
+      case true  => Redirect(profile.routes.EmailPreferencesController.emailPreferencesSummaryPage()).flashing("unsubscribed" -> "true")
+      case false => Redirect(profile.routes.EmailPreferencesController.emailPreferencesSummaryPage())
     }
   }
 
@@ -263,7 +263,7 @@ class EmailPreferencesController @Inject() (
     selectApisFromSubscriptionsView(form, flow.missingSubscriptions.toList.sortBy(_.serviceName), flow.applicationId, flow.selectedApis.map(_.serviceName))
 
   def selectApisFromSubscriptionsAction(applicationId: ApplicationId): Action[AnyContent] = loggedInAction { implicit request =>
-    val form = SelectApisFromSubscriptionsForm.form.bindFromRequest
+    val form = SelectApisFromSubscriptionsForm.form.bindFromRequest()
 
     form.fold(
       formWithErrors => {
@@ -296,7 +296,7 @@ class EmailPreferencesController @Inject() (
     selectTopicsFromSubscriptionsView.apply(form, flow.selectedTopics, flow.applicationId)
 
   def selectTopicsFromSubscriptionsAction(applicationId: ApplicationId): Action[AnyContent] = loggedInAction { implicit request =>
-    val form = SelectTopicsFromSubscriptionsForm.form.bindFromRequest
+    val form = SelectTopicsFromSubscriptionsForm.form.bindFromRequest()
 
     form.fold(
       formWithErrors => {

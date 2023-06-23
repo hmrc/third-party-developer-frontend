@@ -75,7 +75,6 @@ class VerifyResponsibleIndividualController @Inject() (
     with EitherTHelper[String]
     with WithUnsafeDefaultFormBinding {
 
-  import cats.implicits._
   import cats.instances.future.catsStdInstancesForFuture
 
   private val exec                        = ec
@@ -139,6 +138,6 @@ class VerifyResponsibleIndividualController @Inject() (
       ).fold(identity(_), identity(_))
     }
 
-    VerifyResponsibleIndividualController.hasVerifiedForm.bindFromRequest.fold(handleInvalidForm, handleValidForm)
+    VerifyResponsibleIndividualController.hasVerifiedForm.bindFromRequest().fold(handleInvalidForm, handleValidForm)
   }
 }

@@ -17,7 +17,7 @@
 package views
 
 import java.time.LocalDateTime
-import scala.collection.JavaConverters._
+import scala.jdk.CollectionConverters._
 
 import org.jsoup.Jsoup
 import org.jsoup.nodes.Document

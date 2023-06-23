@@ -107,7 +107,7 @@ class Credentials @Inject() (
       name = secretValue.takeRight(4),
       id = ClientSecret.Id.random,
       hashedSecret = hashedSecret,
-      now
+      now()
     )
 
     appCmdDispatcher.dispatch(applicationId, cmd, Set.empty).map { results =>
@@ -136,7 +136,7 @@ class Credentials @Inject() (
       val cmd       = ApplicationCommands.RemoveClientSecret(
         actor = Actors.AppCollaborator(developer.email),
         clientSecretId,
-        now
+        now()
       )
       appCmdDispatcher.dispatch(applicationId, cmd, Set.empty)
         .map(_ => Redirect(routes.Credentials.clientSecrets(applicationId)))

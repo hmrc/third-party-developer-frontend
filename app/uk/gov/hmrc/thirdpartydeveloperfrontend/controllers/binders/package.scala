@@ -132,8 +132,8 @@ package object binders {
 
     override def bind(key: String, value: String): Either[String, Environment] = {
       for {
-        text <- textBinder.bind(key, value).right
-        env  <- Environment.from(text).toRight("Not a valid environment").right
+        text <- textBinder.bind(key, value)
+        env  <- Environment.from(text).toRight("Not a valid environment")
       } yield env
     }
 
@@ -147,8 +147,8 @@ package object binders {
 
       override def bind(key: String, value: String): Either[String, AddTeamMemberPageMode] = {
         for {
-          text <- textBinder.bind(key, value).right
-          mode <- AddTeamMemberPageMode.from(text).toRight("Not a valid AddTeamMemberPageMode").right
+          text <- textBinder.bind(key, value)
+          mode <- AddTeamMemberPageMode.from(text).toRight("Not a valid AddTeamMemberPageMode")
         } yield mode
       }
 
@@ -162,8 +162,8 @@ package object binders {
 
       override def bind(key: String, value: String): Either[String, SaveSubsFieldsPageMode] = {
         for {
-          text <- textBinder.bind(key, value).right
-          mode <- SaveSubsFieldsPageMode.from(text).toRight("Not a valid SaveSubsFieldsPageMode").right
+          text <- textBinder.bind(key, value)
+          mode <- SaveSubsFieldsPageMode.from(text).toRight("Not a valid SaveSubsFieldsPageMode")
         } yield mode
       }
 
@@ -222,7 +222,7 @@ package object binders {
     }
 
     override def unbind(key: String, applicationId: ApplicationId): String = {
-      applicationId.text
+      applicationId.text()
     }
   }
 

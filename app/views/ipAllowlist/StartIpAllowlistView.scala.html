@@ -25,7 +25,7 @@
 
 @(app: Application, roleOfLoggedIn: Collaborator.Role)(
 implicit request: play.api.mvc.Request[Any], loggedIn: DeveloperSession, messages: Messages, applicationConfig: ApplicationConfig)
-@sandboxOrAdmin = @{app.deployedTo.isSandbox || roleOfLoggedIn.isAdministrator}
+@sandboxOrAdmin = @{app.deployedTo.isSandbox() || roleOfLoggedIn.isAdministrator}
 
 @devMain(
   title = "IP allow list",

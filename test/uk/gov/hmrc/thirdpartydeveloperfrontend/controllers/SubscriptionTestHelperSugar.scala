@@ -86,7 +86,7 @@ trait SubscriptionTestHelperSugar extends SubscriptionsBuilder {
       expectedApiHumanReadableAppName: String,
       expectedApiServiceName: String,
       expectedVersions: List[ApiVersionDefinition]
-    ) {
+    ): Unit = {
     applicationSubscription.apiHumanReadableAppName shouldBe expectedApiHumanReadableAppName
     applicationSubscription.apiServiceName shouldBe expectedApiServiceName
     applicationSubscription.subscriptions.map(_.apiVersion) shouldBe expectedVersions

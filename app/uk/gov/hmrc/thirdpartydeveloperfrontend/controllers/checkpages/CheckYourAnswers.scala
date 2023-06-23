@@ -100,7 +100,7 @@ class CheckYourAnswers @Inject() (
 
     (for {
       _ <- applicationService.requestUplift(appId, application.name, request.developerSession)
-    } yield Redirect(routes.ApplicationCheck.credentialsRequested(appId)))
+    } yield Redirect(checkpages.routes.ApplicationCheck.credentialsRequested(appId)))
       .recover {
         case e: DeskproTicketCreationFailed =>
           val checkYourAnswersData = CheckYourAnswersData(accessLevel, request.application, request.subscriptions)
@@ -127,11 +127,11 @@ class CheckYourAnswers @Inject() (
     val information = request.application.checkInformation.getOrElse(CheckInformation())
     for {
       _ <- applicationService.updateCheckInformation(request.application, information.copy(teamConfirmed = true))
-    } yield Redirect(routes.CheckYourAnswers.answersPage(appId))
+    } yield Redirect(checkpages.routes.CheckYourAnswers.answersPage(appId))
   }
 
   def teamAddMember(appId: ApplicationId): Action[AnyContent] = canUseChecksAction(appId) { implicit request =>
-    Future.successful(Ok(teamMemberAddView(applicationViewModelFromApplicationRequest, AddTeamMemberForm.form, request.developerSession)))
+    Future.successful(Ok(teamMemberAddView(applicationViewModelFromApplicationRequest(), AddTeamMemberForm.form, request.developerSession)))
   }
 
   def teamMemberRemoveConfirmation(appId: ApplicationId, teamMemberHash: String): Action[AnyContent] = canUseChecksAction(appId) { implicit request =>
@@ -139,36 +139,36 @@ class CheckYourAnswers @Inject() (
       request.application
         .findCollaboratorByHash(teamMemberHash)
         .map(collaborator => Ok(teamMemberRemoveConfirmationView(request.application, request.developerSession, collaborator.emailAddress)))
-        .getOrElse(Redirect(routes.CheckYourAnswers.team(appId)))
+        .getOrElse(Redirect(checkpages.routes.CheckYourAnswers.team(appId)))
     )
   }
 
   def teamMemberRemoveAction(appId: ApplicationId): Action[AnyContent] = canUseChecksAction(appId) { implicit request =>
     def handleValidForm(form: RemoveTeamMemberCheckPageConfirmationForm): Future[Result] = {
       collaboratorService.removeTeamMember(request.application, form.email.toLaxEmail, request.developerSession.email)
-        .map(_ => Redirect(routes.CheckYourAnswers.team(appId)))
+        .map(_ => Redirect(checkpages.routes.CheckYourAnswers.team(appId)))
     }
 
     def handleInvalidForm(form: Form[RemoveTeamMemberCheckPageConfirmationForm]): Future[Result] = {
       successful(BadRequest)
     }
 
-    RemoveTeamMemberCheckPageConfirmationForm.form.bindFromRequest.fold(handleInvalidForm, handleValidForm)
+    RemoveTeamMemberCheckPageConfirmationForm.form.bindFromRequest().fold(handleInvalidForm, handleValidForm)
   }
 
-  protected def landingPageRoute(appId: ApplicationId): Call = routes.CheckYourAnswers.answersPage(appId)
+  protected def landingPageRoute(appId: ApplicationId): Call = checkpages.routes.CheckYourAnswers.answersPage(appId)
 
-  protected def nameActionRoute(appId: ApplicationId): Call = routes.CheckYourAnswers.nameAction(appId)
+  protected def nameActionRoute(appId: ApplicationId): Call = checkpages.routes.CheckYourAnswers.nameAction(appId)
 
-  protected def contactActionRoute(appId: ApplicationId): Call = routes.CheckYourAnswers.contactAction(appId)
+  protected def contactActionRoute(appId: ApplicationId): Call = checkpages.routes.CheckYourAnswers.contactAction(appId)
 
-  protected def apiSubscriptionsActionRoute(appId: ApplicationId): Call = routes.CheckYourAnswers.apiSubscriptionsAction(appId)
+  protected def apiSubscriptionsActionRoute(appId: ApplicationId): Call = checkpages.routes.CheckYourAnswers.apiSubscriptionsAction(appId)
 
-  protected def privacyPolicyActionRoute(appId: ApplicationId): Call = routes.CheckYourAnswers.privacyPolicyAction(appId)
+  protected def privacyPolicyActionRoute(appId: ApplicationId): Call = checkpages.routes.CheckYourAnswers.privacyPolicyAction(appId)
 
-  protected def termsAndConditionsActionRoute(appId: ApplicationId): Call = routes.CheckYourAnswers.termsAndConditionsAction(appId)
+  protected def termsAndConditionsActionRoute(appId: ApplicationId): Call = checkpages.routes.CheckYourAnswers.termsAndConditionsAction(appId)
 
-  protected def termsOfUseActionRoute(appId: ApplicationId): Call = routes.CheckYourAnswers.termsOfUseAction(appId)
+  protected def termsOfUseActionRoute(appId: ApplicationId): Call = checkpages.routes.CheckYourAnswers.termsOfUseAction(appId)
 
   protected def submitButtonLabel = "Continue"
 }

@@ -23,15 +23,15 @@ class InvalidEnumException(className: String, input: String)
 
 object EnumJson {
 
-  def enumReads[E <: Enumeration](enum: E): Reads[E#Value] = new Reads[E#Value] {
+  def enumReads[E <: Enumeration](enumValue: E): Reads[E#Value] = new Reads[E#Value] {
 
     def reads(json: JsValue): JsResult[E#Value] = json match {
       case JsString(s) =>
         try {
-          JsSuccess(enum.withName(s))
+          JsSuccess(enumValue.withName(s))
         } catch {
           case _: NoSuchElementException =>
-            throw new InvalidEnumException(enum.getClass.getSimpleName, s)
+            throw new InvalidEnumException(enumValue.getClass.getSimpleName, s)
         }
       case _           => JsError("String value expected")
     }
@@ -43,8 +43,8 @@ object EnumJson {
 
   import scala.language.implicitConversions
 
-  implicit def enumFormat[E <: Enumeration](enum: E): Format[E#Value] = {
-    Format(enumReads(enum), enumWrites)
+  implicit def enumFormat[E <: Enumeration](enumValue: E): Format[E#Value] = {
+    Format(enumReads(enumValue), enumWrites)
   }
 
 }

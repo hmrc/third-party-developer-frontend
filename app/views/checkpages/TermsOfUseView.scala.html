@@ -36,7 +36,7 @@
   back = BackButtonWithJavaScript,
   developerSession = Some(loggedIn)
 ) {
-  @helper.form(action = submitAction, 'class -> "form") {
+  @helper.form(action = submitAction, Symbol("class") -> "form") {
     @helper.CSRF.formField
 
     <h1 class="govuk-heading-l">Agree to our terms of use</h1>

@@ -438,11 +438,11 @@ class ManageSubscriptionsSpec
 
       "the page mode for saveSubscriptionFields action" when {
         "LeftHandNavigation" should {
-          saveSubscriptionFieldsTest(SaveSubsFieldsPageMode.LeftHandNavigation, s"/developer/applications/${appId.text}/api-metadata")
+          saveSubscriptionFieldsTest(SaveSubsFieldsPageMode.LeftHandNavigation, s"/developer/applications/${appId.text()}/api-metadata")
         }
 
         "CheckYourAnswers" should {
-          saveSubscriptionFieldsTest(SaveSubsFieldsPageMode.CheckYourAnswers, s"/developer/applications/${appId.text}/check-your-answers#configurations")
+          saveSubscriptionFieldsTest(SaveSubsFieldsPageMode.CheckYourAnswers, s"/developer/applications/${appId.text()}/check-your-answers#configurations")
         }
 
         def saveSubscriptionFieldsTest(mode: SaveSubsFieldsPageMode, expectedRedirectUrl: String): Unit = {
@@ -821,7 +821,7 @@ class ManageSubscriptionsSpec
         private val result = manageSubscriptionController.subscriptionConfigurationStart(appId)(loggedInRequest)
 
         status(result) shouldBe SEE_OTHER
-        redirectLocation(result) shouldBe Some(s"/developer/applications/${appId.text}/add/success")
+        redirectLocation(result) shouldBe Some(s"/developer/applications/${appId.text()}/add/success")
       }
     }
 
@@ -838,5 +838,5 @@ class ManageSubscriptionsSpec
     }
   }
 
-  private def aClientSecret() = ClientSecretResponse(ClientSecret.Id.random, randomUUID.toString, now)
+  private def aClientSecret() = ClientSecretResponse(ClientSecret.Id.random, randomUUID.toString, now())
 }

@@ -36,6 +36,7 @@ import uk.gov.hmrc.apiplatform.modules.applications.domain.models.{ApplicationId
 import uk.gov.hmrc.apiplatform.modules.submissions.domain.models.Submission
 import uk.gov.hmrc.apiplatform.modules.submissions.services.SubmissionService
 import uk.gov.hmrc.thirdpartydeveloperfrontend.config.{ApplicationConfig, ErrorHandler, FraudPreventionConfig}
+import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.ApplicationRequest
 import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.Details.{Agreement, ApplicationNameModel, TermsOfUseViewModel}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.FormKeys.appNameField
 import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.checkpages.{CheckYourAnswersData, CheckYourAnswersForm, DummyCheckYourAnswersForm}
@@ -99,8 +100,8 @@ class Details @Inject() (
     val checkYourAnswersData = CheckYourAnswersData(accessLevel, request.application, request.subscriptions)
     def appDetailsPage       = Ok(
       detailsView(
-        applicationViewModelFromApplicationRequest,
-        buildTermsOfUseViewModel,
+        applicationViewModelFromApplicationRequest(),
+        buildTermsOfUseViewModel(),
         createOptionalFraudPreventionNavLinkViewModel(
           request.application,
           request.subscriptions,
@@ -166,7 +167,7 @@ class Details @Inject() (
 
     val latestTermsOfUseAgreementDetails = termsOfUseService.getAgreementDetails(application).lastOption
 
-    val hasTermsOfUse = !application.deployedTo.isSandbox && application.access.accessType.isStandard
+    val hasTermsOfUse = !application.deployedTo.isSandbox() && application.access.accessType.isStandard
     latestTermsOfUseAgreementDetails match {
       case Some(TermsOfUseAgreementDetails(emailAddress, maybeName, date, maybeVersionString)) => {
         val maybeVersion = maybeVersionString.flatMap(TermsOfUseVersion.fromVersionString(_))
@@ -177,7 +178,7 @@ class Details @Inject() (
   }
 
   def changeDetails(applicationId: ApplicationId): Action[AnyContent] = canChangeDetailsAndIsApprovedAction(applicationId) { implicit request =>
-    Future.successful(Ok(changeDetailsView(EditApplicationForm.withData(request.application), applicationViewModelFromApplicationRequest)))
+    Future.successful(Ok(changeDetailsView(EditApplicationForm.withData(request.application), applicationViewModelFromApplicationRequest())))
   }
 
   private def updateApplication(updateRequest: UpdateApplicationRequest)(implicit request: ApplicationRequest[AnyContent]): Future[ApplicationUpdateSuccessful] = {
@@ -189,7 +190,7 @@ class Details @Inject() (
       val application = request.application
 
       def handleValidForm(form: EditApplicationForm): Future[Result] = {
-        val requestForm = EditApplicationForm.form.bindFromRequest
+        val requestForm = EditApplicationForm.form.bindFromRequest()
 
         applicationService
           .isApplicationNameValid(form.applicationName, application.deployedTo, Some(applicationId))
@@ -205,14 +206,14 @@ class Details @Inject() (
               def invalidNameCheckForm: Form[EditApplicationForm] =
                 requestForm.withError(appNameField, invalid.validationErrorMessageKey)
 
-              Future.successful(BadRequest(changeDetailsView(invalidNameCheckForm, applicationViewModelFromApplicationRequest)))
+              Future.successful(BadRequest(changeDetailsView(invalidNameCheckForm, applicationViewModelFromApplicationRequest())))
           })
       }
 
       def handleInvalidForm(formWithErrors: Form[EditApplicationForm]): Future[Result] =
-        errorView(application.id, formWithErrors, applicationViewModelFromApplicationRequest)
+        errorView(application.id, formWithErrors, applicationViewModelFromApplicationRequest())
 
-      EditApplicationForm.form.bindFromRequest.fold(handleInvalidForm, handleValidForm)
+      EditApplicationForm.form.bindFromRequest().fold(handleInvalidForm, handleValidForm)
     }
 
   def canChangeProductionDetailsAndIsApprovedAction(applicationId: ApplicationId)(fun: ApplicationRequest[AnyContent] => Future[Result]): Action[AnyContent] =
@@ -233,7 +234,7 @@ class Details @Inject() (
     val application = request.application
 
     def handleValidForm(form: ChangeOfPrivacyPolicyLocationForm): Future[Result] = {
-      val requestForm = ChangeOfPrivacyPolicyLocationForm.form.bindFromRequest
+      val requestForm = ChangeOfPrivacyPolicyLocationForm.form.bindFromRequest()
 
       val oldLocation = application.access match {
         case Standard(_, _, _, _, _, Some(ImportantSubmissionData(_, _, _, _, privacyPolicyLocation, _))) => privacyPolicyLocation
@@ -256,7 +257,7 @@ class Details @Inject() (
       Future.successful(BadRequest(updatePrivacyPolicyLocationView(formWithErrors, applicationId)))
     }
 
-    ChangeOfPrivacyPolicyLocationForm.form.bindFromRequest.fold(handleInvalidForm, handleValidForm)
+    ChangeOfPrivacyPolicyLocationForm.form.bindFromRequest().fold(handleInvalidForm, handleValidForm)
   }
 
   def updateTermsAndConditionsLocation(applicationId: ApplicationId): Action[AnyContent] = canChangeProductionDetailsAndIsApprovedAction(applicationId) { implicit request =>
@@ -274,7 +275,7 @@ class Details @Inject() (
     val application = request.application
 
     def handleValidForm(form: ChangeOfTermsAndConditionsLocationForm): Future[Result] = {
-      val requestForm = ChangeOfTermsAndConditionsLocationForm.form.bindFromRequest
+      val requestForm = ChangeOfTermsAndConditionsLocationForm.form.bindFromRequest()
 
       val oldLocation = application.access match {
         case Standard(_, _, _, _, _, Some(ImportantSubmissionData(_, _, _, termsAndConditionsLocation, _, _))) => termsAndConditionsLocation
@@ -297,7 +298,7 @@ class Details @Inject() (
       Future.successful(BadRequest(updateTermsAndConditionsLocationView(formWithErrors, applicationId)))
     }
 
-    ChangeOfTermsAndConditionsLocationForm.form.bindFromRequest.fold(handleInvalidForm, handleValidForm)
+    ChangeOfTermsAndConditionsLocationForm.form.bindFromRequest().fold(handleInvalidForm, handleValidForm)
   }
 
   private def errorView(id: ApplicationId, form: Form[EditApplicationForm], applicationViewModel: ApplicationViewModel)(implicit request: ApplicationRequest[_]): Future[Result] =
@@ -311,7 +312,7 @@ class Details @Inject() (
     val application = request.application
 
     def handleValidForm(form: ChangeOfApplicationNameForm): Future[Result] = {
-      val requestForm        = ChangeOfApplicationNameForm.form.bindFromRequest
+      val requestForm        = ChangeOfApplicationNameForm.form.bindFromRequest()
       val newApplicationName = form.applicationName.trim()
 
       if (newApplicationName.equalsIgnoreCase(application.name)) {
@@ -350,7 +351,7 @@ class Details @Inject() (
     def handleInvalidForm(formWithErrors: Form[ChangeOfApplicationNameForm]): Future[Result] =
       Future.successful(BadRequest(requestChangeOfApplicationNameView(formWithErrors, ApplicationNameModel(request.application))))
 
-    ChangeOfApplicationNameForm.form.bindFromRequest.fold(handleInvalidForm, handleValidForm)
+    ChangeOfApplicationNameForm.form.bindFromRequest().fold(handleInvalidForm, handleValidForm)
   }
 
 }

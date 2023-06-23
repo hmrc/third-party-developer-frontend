@@ -57,7 +57,7 @@
       </div>
     }
     case _ => {
-      @helper.form(action = uk.gov.hmrc.apiplatform.modules.uplift.controllers.routes.UpliftJourneyController.saveApiSubscriptionsSubmit(applicationId), 'class -> "form") {
+      @helper.form(action = uk.gov.hmrc.apiplatform.modules.uplift.controllers.routes.UpliftJourneyController.saveApiSubscriptionsSubmit(applicationId), Symbol("class") -> "form") {
         @helper.CSRF.formField
         <div class="form-group @if(errorForm.errors("apiSubscriptions").nonEmpty){form-group-error}">
           <h1 class="govuk-heading-l">@pageHeading</h1>

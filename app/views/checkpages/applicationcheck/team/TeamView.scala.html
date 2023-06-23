@@ -55,7 +55,7 @@
 
   </br>
 
-  @helper.form(action = routes.ApplicationCheck.teamAction(app.id), 'class -> "form") {
+  @helper.form(action = routes.ApplicationCheck.teamAction(app.id), Symbol("class") -> "form") {
   @helper.CSRF.formField
 
   <button id="submit" class="govuk-button" type="submit">Save and return</button>

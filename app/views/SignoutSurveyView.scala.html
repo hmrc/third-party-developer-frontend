@@ -37,7 +37,7 @@
 
   <h2 class="govuk-heading-m">Feedback survey</h2>
 
-  @helper.form(action = routes.UserLogoutAccount.logoutSurveyAction,'class -> "form", 'id -> "feedbackForm") {
+  @helper.form(action = routes.UserLogoutAccount.logoutSurveyAction, Symbol("class") -> "form", Symbol("id") -> "feedbackForm") {
     @helper.CSRF.formField
 
     <p class="govuk-body">

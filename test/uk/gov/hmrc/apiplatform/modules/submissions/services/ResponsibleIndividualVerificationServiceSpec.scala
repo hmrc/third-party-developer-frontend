@@ -95,8 +95,8 @@ class ResponsibleIndividualVerificationServiceSpec extends AsyncHmrcSpec
 
       val result = await(underTest.accept(code))
 
-      result shouldBe 'Right
-      result.right.value shouldBe riVerification
+      result.isRight shouldBe true
+      result shouldBe Right(riVerification)
 
       val ticketCapture = ArgCaptor[DeskproTicket]
       verify(mockDeskproConnector).createTicket(eqTo(riVerification.id), ticketCapture.capture)(*)
@@ -130,8 +130,8 @@ class ResponsibleIndividualVerificationServiceSpec extends AsyncHmrcSpec
 
       val result = await(underTest.accept(code))
 
-      result shouldBe 'Right
-      result.right.value shouldBe riVerificationUplift
+      result.isRight shouldBe true
+      result shouldBe Right(riVerificationUplift)
 
       val ticketCapture = ArgCaptor[DeskproTicket]
       verify(mockDeskproConnector).createTicket(eqTo(riVerificationUplift.id), ticketCapture.capture)(*)
@@ -165,8 +165,8 @@ class ResponsibleIndividualVerificationServiceSpec extends AsyncHmrcSpec
 
       val result = await(underTest.accept(code))
 
-      result shouldBe 'Right
-      result.right.value shouldBe riVerificationUplift
+      result.isRight shouldBe true
+      result shouldBe Right(riVerificationUplift)
       verify(mockDeskproConnector, never).createTicket(*[ResponsibleIndividualVerificationId], *)(*)
     }
 
@@ -191,8 +191,8 @@ class ResponsibleIndividualVerificationServiceSpec extends AsyncHmrcSpec
 
       val result = await(underTest.accept(code))
 
-      result shouldBe 'Right
-      result.right.value shouldBe riUpdateVerification
+      result.isRight shouldBe true
+      result shouldBe Right(riUpdateVerification)
       verify(mockDeskproConnector, never).createTicket(*[ResponsibleIndividualVerificationId], *)(*)
     }
   }
@@ -204,8 +204,8 @@ class ResponsibleIndividualVerificationServiceSpec extends AsyncHmrcSpec
 
       val result = await(underTest.decline(code))
 
-      result shouldBe 'Right
-      result.right.value shouldBe riVerification
+      result.isRight shouldBe true
+      result shouldBe Right(riVerification)
       verify(mockDeskproConnector, never).createTicket(*[ResponsibleIndividualVerificationId], *)(*)
     }
   }

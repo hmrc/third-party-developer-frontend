@@ -32,7 +32,7 @@
     developerSession = Some(loggedIn),
     back = BackButtonToUrl(routes.ManageResponsibleIndividualController.showResponsibleIndividualDetails(app.id).url)
 ) {
-    @helper.form(action = routes.ManageResponsibleIndividualController.responsibleIndividualChangeToSelfOrOtherAction(app.id), 'class -> "form") {
+    @helper.form(action = routes.ManageResponsibleIndividualController.responsibleIndividualChangeToSelfOrOtherAction(app.id), Symbol("class") -> "form") {
         @helper.CSRF.formField
 
         <div class="govuk-form-group">

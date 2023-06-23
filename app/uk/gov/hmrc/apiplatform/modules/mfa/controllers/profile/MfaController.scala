@@ -87,7 +87,7 @@ class MfaController @Inject() (
   }
 
   def selectMfaAction(mfaId: Option[MfaId] = None, mfaAction: MfaAction): Action[AnyContent] = atLeastPartLoggedInEnablingMfaAction { implicit request =>
-    SelectMfaForm.form.bindFromRequest.fold(
+    SelectMfaForm.form.bindFromRequest().fold(
       form => Future.successful(BadRequest(selectMfaView(form, mfaAction, mfaId))),
       form => {
         mfaAction match {
@@ -162,7 +162,7 @@ class MfaController @Inject() (
         BadRequest(authAppAccessCodeView(mfaAccessCodeForm, mfaId, mfaAction, mfaIdForRemoval))
       }
 
-      MfaAccessCodeForm.form.bindFromRequest.fold(
+      MfaAccessCodeForm.form.bindFromRequest().fold(
         form => Future.successful(BadRequest(authAppAccessCodeView(form, mfaId, mfaAction, mfaIdForRemoval))),
         form =>
           mfaAction match {
@@ -180,7 +180,7 @@ class MfaController @Inject() (
   }
 
   def nameChangeAction(mfaId: MfaId): Action[AnyContent] = atLeastPartLoggedInEnablingMfaAction { implicit request =>
-    MfaNameChangeForm.form.bindFromRequest.fold(
+    MfaNameChangeForm.form.bindFromRequest().fold(
       form => Future.successful(BadRequest(nameChangeView(form, mfaId))),
       form => {
         thirdPartyDeveloperMfaConnector.changeName(request.userId, mfaId, form.name) map {
@@ -219,7 +219,7 @@ class MfaController @Inject() (
   }
 
   def setupSmsAction: Action[AnyContent] = atLeastPartLoggedInEnablingMfaAction { implicit request =>
-    MobileNumberForm.form.bindFromRequest.fold(
+    MobileNumberForm.form.bindFromRequest().fold(
       form => Future.successful(BadRequest(mobileNumberView(form))),
       form =>
         thirdPartyDeveloperMfaConnector.createMfaSms(request.userId, form.mobileNumber)
@@ -248,7 +248,7 @@ class MfaController @Inject() (
         Redirect(routes.MfaController.smsSetupCompletedPage)
       }
 
-      SmsAccessCodeForm.form.bindFromRequest.fold(
+      SmsAccessCodeForm.form.bindFromRequest().fold(
         form => Future.successful(BadRequest(smsAccessCodeView(form, mfaId, mfaAction, mfaIdForRemoval))),
         form =>
           mfaAction match {
@@ -306,7 +306,7 @@ class MfaController @Inject() (
     mfaIdForRemoval match {
       case Some(mfaId) =>
         mfaService.removeMfaById(userId, mfaIdToVerify, accessCode, mfaId) map {
-          case MfaResponse(true)  => Redirect(routes.MfaController.removeMfaCompletedPage)
+          case MfaResponse(true)  => Redirect(routes.MfaController.removeMfaCompletedPage())
           case MfaResponse(false) => internalServerErrorTemplate("Unable to verify access code")
         }
       case None        => Future.successful(internalServerErrorTemplate("Unable to find Mfa to remove"))

@@ -107,7 +107,7 @@ class CredentialsRequestedControllerSpec
     }
 
     "succeed" in new Setup {
-      SubmissionServiceMock.FetchLatestExtendedSubmission.thenReturns(submittedSubmission.withCompletedProgress)
+      SubmissionServiceMock.FetchLatestExtendedSubmission.thenReturns(submittedSubmission.withCompletedProgress())
 
       val result = controller.credentialsRequestedPage(appId)(loggedInRequest.withCSRFToken)
 

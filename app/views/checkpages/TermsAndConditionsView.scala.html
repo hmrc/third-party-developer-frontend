@@ -40,7 +40,7 @@
 
   <p class="govuk-body">You can change this at any time.</p>
 
-  @helper.form(action = submitAction, 'class -> "form") {
+  @helper.form(action = submitAction, Symbol("class") -> "form") {
     @helper.CSRF.formField
     <div class="govuk-form-group">
       <fieldset class="govuk-fieldset" aria-describedby="terms-conditions-hint">

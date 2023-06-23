@@ -139,7 +139,7 @@ class UserLoginAccount @Inject() (
         } else {
           successful(
             withSessionCookie(
-              Redirect(routes.UserLoginAccount.get2svRecommendationPage, SEE_OTHER).withSession(playSession),
+              Redirect(routes.UserLoginAccount.get2svRecommendationPage(), SEE_OTHER).withSession(playSession),
               session.sessionId
             )
           )
@@ -148,7 +148,7 @@ class UserLoginAccount @Inject() (
       case (Some(session), false) if session.loggedInState.isPartLoggedInEnablingMFA =>
         successful(
           withSessionCookie(
-            Redirect(routes.UserLoginAccount.get2svRecommendationPage, SEE_OTHER).withSession(playSession),
+            Redirect(routes.UserLoginAccount.get2svRecommendationPage(), SEE_OTHER).withSession(playSession),
             session.sessionId
           )
         )
@@ -221,14 +221,14 @@ class UserLoginAccount @Inject() (
       }
     }
 
-    SelectLoginMfaForm.form.bindFromRequest.fold(
+    SelectLoginMfaForm.form.bindFromRequest().fold(
       hasErrors => successful(BadRequest(s"Error while selecting mfaId: ${hasErrors.errors.toString()}")),
       form => handleMfaLogin(form)
     )
   }
 
   def authenticate: Action[AnyContent] = Action.async { implicit request =>
-    val requestForm = loginForm.bindFromRequest
+    val requestForm = loginForm.bindFromRequest()
 
     requestForm.fold(
       errors => successful(BadRequest(signInView("Sign in", errors))),
@@ -363,7 +363,7 @@ class UserLoginAccount @Inject() (
       }
     }
 
-    MfaAccessCodeForm.form.bindFromRequest.fold(
+    MfaAccessCodeForm.form.bindFromRequest().fold(
       errors => successful(handleFormWithErrors(errors, mfaId, mfaType, userHasMultipleMfa)),
       validForm => handleAuthentication(email, validForm, mfaType, userHasMultipleMfa)
     )

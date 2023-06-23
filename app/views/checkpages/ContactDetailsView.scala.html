@@ -35,7 +35,7 @@
 ) {
   <h1 class="govuk-heading-l">@pageHeading</h1>
 
-  @helper.form(action = action, 'class -> "form") {
+  @helper.form(action = action, Symbol("class") -> "form") {
     @helper.CSRF.formField
 
     <p class="govuk-body">This should be the person in your organisation who can answer questions about how your software is built.</p>

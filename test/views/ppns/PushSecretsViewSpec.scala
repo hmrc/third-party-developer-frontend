@@ -17,7 +17,7 @@
 package views.ppns
 
 import java.time.LocalDateTime
-import scala.collection.JavaConverters._
+import scala.jdk.CollectionConverters._
 
 import cats.data.NonEmptyList
 import org.jsoup.Jsoup

@@ -43,7 +43,7 @@
   @appEnvironment(application)
   <br>
 
-  @helper.form(action = controllers.routes.Redirects.changeRedirectAction(application.id), 'class -> "form") {
+  @helper.form(action = controllers.routes.Redirects.changeRedirectAction(application.id), Symbol("class") -> "form") {
     @helper.CSRF.formField
     <div class="govuk-form-group @if(form.errors("newRedirectUri").nonEmpty) {govuk-form-group--error}">
       <label class="govuk-label govuk-!-font-weight-bold" for="newRedirectUri">Redirect URI</label>

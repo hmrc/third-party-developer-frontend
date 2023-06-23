@@ -34,7 +34,7 @@ class FieldSpec extends HmrcSpec {
       val alice = FieldName("Alice")
       val bob   = FieldName("Bob")
 
-      List(bob, alice).sorted should contain inOrder (alice, bob)
+      List(bob, alice).sorted should contain theSameElementsInOrderAs List(alice, bob)
     }
   }
 

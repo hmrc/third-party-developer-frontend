@@ -60,7 +60,7 @@
 
   @helper.form(
     action = routes.ManageSubscriptions.saveApiMetadataFieldPage(app.id, viewModel.apiContext, viewModel.apiVersion, viewModel.field.name.value, mode),
-    'class -> "fields-subscription") {
+    Symbol("class") -> "fields-subscription") {
 
     @helper.CSRF.formField
 

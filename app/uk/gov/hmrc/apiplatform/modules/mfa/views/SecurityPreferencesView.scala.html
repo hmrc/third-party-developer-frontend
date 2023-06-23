@@ -41,7 +41,7 @@
 
     @if(mfaDetails.nonEmpty) {
 
-        @itemsView(mfaDetails)
+        @itemsView(mfaDetails)()
         @if(isAuthAppMfaVerified(mfaDetails) && !isSmsMfaVerified(mfaDetails)){<p class="govuk-body" id="no-sms-mfa"><a href="@routes.MfaController.setupSms" class="govuk-link">Get access codes by text message</a></p>}
         @if(isSmsMfaVerified(mfaDetails) && !isAuthAppMfaVerified(mfaDetails)){<p class="govuk-body" id="no-auth-app-mfa"><a href="@routes.MfaController.authAppStart" class="govuk-link">Get access codes by an authenticator app</a></p>}
 

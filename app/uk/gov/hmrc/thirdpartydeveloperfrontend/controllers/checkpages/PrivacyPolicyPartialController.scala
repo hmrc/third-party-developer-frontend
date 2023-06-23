@@ -46,7 +46,7 @@ trait PrivacyPolicyPartialController extends WithUnsafeDefaultFormBinding {
   }
 
   def privacyPolicyAction(appId: ApplicationId): Action[AnyContent] = canUseChecksAction(appId) { implicit request =>
-    val requestForm = PrivacyPolicyForm.form.bindFromRequest
+    val requestForm = PrivacyPolicyForm.form.bindFromRequest()
     val app         = request.application
 
     def withFormErrors(form: Form[PrivacyPolicyForm]) = {

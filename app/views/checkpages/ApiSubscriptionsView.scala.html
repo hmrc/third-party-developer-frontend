@@ -73,7 +73,7 @@
             @subscriptionGroups(role: Collaborator.Role, groupedSubscriptions, openAccessApis, app, APPLICATION_CHECK_PAGE, true)
             <br/>
             <br/>
-            @helper.form(action = submitAction, 'class -> "form") {
+            @helper.form(action = submitAction, Symbol("class") -> "form") {
                 @helper.CSRF.formField
                 <div class="form-group">
                   <button class="govuk-button" data-module="govuk-button" type="submit">

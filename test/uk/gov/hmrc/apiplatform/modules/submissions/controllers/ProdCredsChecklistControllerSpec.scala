@@ -122,7 +122,7 @@ class ProdCredsChecklistControllerSpec
     }
 
     "succeed with app in testing state" in new Setup with HasAppInTestingState {
-      SubmissionServiceMock.FetchLatestExtendedSubmission.thenReturns(answeredSubmission.withCompletedProgress)
+      SubmissionServiceMock.FetchLatestExtendedSubmission.thenReturns(answeredSubmission.withCompletedProgress())
 
       val result = controller.productionCredentialsChecklistPage(appId)(loggedInRequest.withCSRFToken)
 
@@ -132,7 +132,7 @@ class ProdCredsChecklistControllerSpec
     }
 
     "succeed with app in production state" in new Setup with HasAppInProductionState {
-      SubmissionServiceMock.FetchLatestExtendedSubmission.thenReturns(answeredSubmission.withCompletedProgress)
+      SubmissionServiceMock.FetchLatestExtendedSubmission.thenReturns(answeredSubmission.withCompletedProgress())
 
       val result = controller.productionCredentialsChecklistPage(appId)(loggedInRequest.withCSRFToken)
 
@@ -144,7 +144,7 @@ class ProdCredsChecklistControllerSpec
 
   "productionCredentialsChecklistAction" should {
     "return success when form is valid and incomplete" in new Setup with HasAppInTestingState {
-      SubmissionServiceMock.FetchLatestExtendedSubmission.thenReturns(answeringSubmission.withIncompleteProgress)
+      SubmissionServiceMock.FetchLatestExtendedSubmission.thenReturns(answeringSubmission.withIncompleteProgress())
       val result = controller.productionCredentialsChecklistAction(appId)(loggedInRequest.withCSRFToken)
 
       status(result) shouldBe OK
@@ -155,7 +155,7 @@ class ProdCredsChecklistControllerSpec
     }
 
     "redirect when when form is valid and complete" in new Setup with HasAppInTestingState {
-      SubmissionServiceMock.FetchLatestExtendedSubmission.thenReturns(answeredSubmission.withCompletedProgress)
+      SubmissionServiceMock.FetchLatestExtendedSubmission.thenReturns(answeredSubmission.withCompletedProgress())
 
       val result = controller.productionCredentialsChecklistAction(appId)(loggedInRequest.withCSRFToken)
 

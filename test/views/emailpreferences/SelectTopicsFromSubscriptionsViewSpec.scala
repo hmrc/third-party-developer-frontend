@@ -16,7 +16,7 @@
 
 package views.emailpreferences
 
-import scala.collection.JavaConverters._
+import scala.jdk.CollectionConverters._
 
 import org.jsoup.Jsoup
 import org.jsoup.nodes.Document
@@ -50,12 +50,12 @@ class SelectTopicsFromSubscriptionsViewSpec extends CommonViewSpec
     val viewUnderTest = app.injector.instanceOf[SelectTopicsFromSubscriptionsView]
   }
 
-  def validateStaticElements(document: Document, applicationId: ApplicationId) {
+  def validateStaticElements(document: Document, applicationId: ApplicationId): Unit = {
     document.getElementById("pageHeading").text() should be("Which topics do you want to receive information about?")
     // Check form is configured correctly
     val form = document.getElementById("emailPreferencesTopicsForm")
     form.attr("method") should be("POST")
-    form.attr("action") should be(s"/developer/profile/email-preferences/topics-from-subscriptions?applicationId=${applicationId.text}")
+    form.attr("action") should be(s"/developer/profile/email-preferences/topics-from-subscriptions?applicationId=${applicationId.text()}")
 
     // check checkboxes are displayed
     validateCheckboxItemsAgainstTopics(document)

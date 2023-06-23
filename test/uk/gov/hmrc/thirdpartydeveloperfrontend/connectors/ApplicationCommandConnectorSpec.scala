@@ -98,7 +98,7 @@ class ApplicationCommandConnectorSpec
               .withStatus(OK)
           )
       )
-      await(connector.dispatch(applicationId, command, adminsToEmail)).right.value
+      await(connector.dispatch(applicationId, command, adminsToEmail)).isRight shouldBe true
     }
 
     "send a correct command and handle command failure" in new Setup {

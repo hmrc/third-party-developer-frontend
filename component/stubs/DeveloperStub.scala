@@ -82,12 +82,12 @@ object DeveloperStub extends ComponentTestDeveloperBuilder {
     )
   }
 
-  def stubResetPasswordJourney(email: LaxEmailAddress, code: String) {
+  def stubResetPasswordJourney(email: LaxEmailAddress, code: String): Unit = {
     fetchEmailForResetCode(email, code)
     resetPassword()
   }
 
-  def stubResetPasswordJourneyFail() {
+  def stubResetPasswordJourneyFail(): Unit = {
     stubFor(
       get(urlPathEqualTo("/reset-password"))
         .willReturn(

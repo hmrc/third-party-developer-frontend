@@ -24,9 +24,10 @@ import org.openqa.selenium.{By, WebDriver, WebElement}
 import org.openqa.selenium.interactions.Actions
 import pages._
 
-import scala.collection.JavaConverters._
+import scala.jdk.CollectionConverters._
 import scala.collection.mutable
 import scala.concurrent.duration._
+import scala.language.postfixOps
 import org.scalatest.matchers.should.Matchers
 
 object TableMisuseAdapters {

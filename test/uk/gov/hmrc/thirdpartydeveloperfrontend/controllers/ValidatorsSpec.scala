@@ -16,7 +16,7 @@
 
 package uk.gov.hmrc.thirdpartydeveloperfrontend.controllers
 
-import scala.collection.JavaConverters._
+import scala.jdk.CollectionConverters._
 
 import org.scalacheck.Gen
 import org.scalatest.matchers.should.Matchers

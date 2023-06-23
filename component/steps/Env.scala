@@ -62,7 +62,7 @@ trait Env extends ScalaDsl with EN with Matchers with ApplicationLogger {
 
   Runtime.getRuntime addShutdownHook new Thread {
 
-    override def run() {
+    override def run(): Unit = {
       shutdown()
     }
   }
@@ -163,7 +163,7 @@ trait Env extends ScalaDsl with EN with Matchers with ApplicationLogger {
     logger.info("*******************************************************************************************************\n")
   }
 
-  def startServer() {
+  def startServer(): Unit = {
     val application =
       GuiceApplicationBuilder()
         .configure(

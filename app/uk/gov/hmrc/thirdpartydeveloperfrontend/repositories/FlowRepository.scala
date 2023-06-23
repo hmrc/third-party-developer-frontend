@@ -65,7 +65,7 @@ class FlowRepository @Inject() (mongo: MongoComponent, appConfig: ApplicationCon
   def saveFlow[A <: Flow](flow: A): Future[A] = {
     val query = and(equal("sessionId", flow.sessionId), equal("flowType", Codecs.toBson(flow.flowType)))
 
-    collection.find(query).headOption flatMap {
+    collection.find(query).headOption() flatMap {
       case Some(_: Flow) =>
         for {
           updatedFlow <- collection.replaceOne(

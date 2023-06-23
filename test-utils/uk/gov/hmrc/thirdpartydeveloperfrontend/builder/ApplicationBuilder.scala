@@ -39,7 +39,7 @@ trait ApplicationBuilder extends CollaboratorTracker {
     Application(
       appId,
       clientId,
-      s"${appId.text}-name",
+      s"${appId.text()}-name",
       LocalDateTime.now(ZoneOffset.UTC),
       Some(LocalDateTime.now(ZoneOffset.UTC)),
       None,

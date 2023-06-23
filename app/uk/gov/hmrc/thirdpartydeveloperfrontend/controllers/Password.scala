@@ -64,7 +64,7 @@ class Password @Inject() (
   }
 
   def requestReset() = Action.async { implicit request =>
-    val requestForm = ForgotPasswordForm.form.bindFromRequest
+    val requestForm = ForgotPasswordForm.form.bindFromRequest()
     requestForm.fold(
       formWithErrors => {
         Future.successful(BadRequest(forgotPasswordView(formWithErrors.emailaddressGlobal())))
@@ -114,7 +114,7 @@ class Password @Inject() (
   )
 
   def resetPassword = Action.async { implicit request =>
-    PasswordResetForm.form.bindFromRequest.fold(
+    PasswordResetForm.form.bindFromRequest().fold(
       formWithErrors =>
         Future.successful(BadRequest(resetView(formWithErrors.passwordGlobal().passwordNoMatchField()))),
       data => {
@@ -146,7 +146,7 @@ trait PasswordChange {
       hc: HeaderCarrier,
       ec: ExecutionContext
     ) = {
-    ChangePasswordForm.form.bindFromRequest.fold(
+    ChangePasswordForm.form.bindFromRequest().fold(
       errors => Future.successful(BadRequest(error(errors.currentPasswordGlobal().passwordGlobal().passwordNoMatchField()))),
       data => {
         val payload = ChangePassword(email, data.currentPassword, data.password)

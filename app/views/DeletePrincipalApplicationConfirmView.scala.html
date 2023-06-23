@@ -38,7 +38,7 @@
   @appEnvironment(app)
   <br>
   <br>
-  @helper.form(action = routes.DeleteApplication.requestDeletePrincipalApplicationAction(app.id), 'class -> "form") {
+  @helper.form(action = routes.DeleteApplication.requestDeletePrincipalApplicationAction(app.id), Symbol("class") -> "form") {
     <div class="govuk-form-group @if(form.errors("deleteConfirm").nonEmpty) {govuk-form-group--erro}">
       <fieldset id="deleteConfirm-fieldSet" class="govuk-fieldset" role="group">
         <legend class="govuk-fieldset__legend govuk-fieldset__legend--m">

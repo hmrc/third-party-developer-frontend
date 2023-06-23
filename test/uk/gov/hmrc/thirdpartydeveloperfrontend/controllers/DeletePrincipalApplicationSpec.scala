@@ -152,7 +152,7 @@ class DeletePrincipalApplicationSpec
 
       status(result) shouldBe SEE_OTHER
 
-      redirectLocation(result) shouldBe Some(s"/developer/applications/${appId.text}/details")
+      redirectLocation(result) shouldBe Some(s"/developer/applications/${appId.text()}/details")
     }
   }
 

@@ -55,7 +55,7 @@ class DynamicsController @Inject() (
   }
 
   def addTicketAction(): Action[AnyContent] = loggedInAction { implicit request =>
-    AddTicketForm.form.bindFromRequest.fold(
+    AddTicketForm.form.bindFromRequest().fold(
       form => Future.successful(BadRequest(addTicketView(form))),
       form => {
         thirdPartyDeveloperDynamicsConnector.createTicket(form.customerId, form.title, form.description).map {

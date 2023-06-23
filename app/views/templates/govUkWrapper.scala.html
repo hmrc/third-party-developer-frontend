@@ -70,7 +70,7 @@
       TimeoutDialog(
         timeout = Some(applicationConfig.sessionTimeout),
         countdown = Some(applicationConfig.sessionCountdown),
-        keepAliveUrl = Some(uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.routes.SessionController.keepAlive.url),
+        keepAliveUrl = Some(uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.routes.SessionController.keepAlive().url),
         signOutUrl = Some(uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.routes.UserLogoutAccount.logout.url),
         language = Some("en")
       )

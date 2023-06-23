@@ -19,7 +19,7 @@ package views
 import java.time.{LocalDateTime, Period, ZoneOffset}
 import java.util.UUID
 import java.util.UUID.randomUUID
-import scala.collection.JavaConverters._
+import scala.jdk.CollectionConverters._
 
 import org.jsoup.Jsoup
 import org.jsoup.nodes.Document
@@ -60,11 +60,11 @@ class ClientSecretsSpec extends CommonViewSpec with WithCSRFAddToken with Collab
     val request   = FakeRequest().withCSRFToken
     val developer = standardDeveloper.loggedIn
 
-    val clientSecret1 = ClientSecretResponse(ClientSecret.Id.random, "", now)
-    val clientSecret2 = ClientSecretResponse(ClientSecret.Id.random, "", now)
-    val clientSecret3 = ClientSecretResponse(ClientSecret.Id.random, "", now)
-    val clientSecret4 = ClientSecretResponse(ClientSecret.Id.random, "", now)
-    val clientSecret5 = ClientSecretResponse(ClientSecret.Id.random, "", now)
+    val clientSecret1 = ClientSecretResponse(ClientSecret.Id.random, "", now())
+    val clientSecret2 = ClientSecretResponse(ClientSecret.Id.random, "", now())
+    val clientSecret3 = ClientSecretResponse(ClientSecret.Id.random, "", now())
+    val clientSecret4 = ClientSecretResponse(ClientSecret.Id.random, "", now())
+    val clientSecret5 = ClientSecretResponse(ClientSecret.Id.random, "", now())
 
     val application = Application(
       ApplicationId(UUID.randomUUID()),

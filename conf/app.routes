@@ -2,8 +2,8 @@
 
 # microservice specific routes
 
-GET         /registration                                                                                uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.Registration.registration
-POST        /registration                                                                                uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.Registration.register
+GET         /registration                                                                                uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.Registration.registration()
+POST        /registration                                                                                uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.Registration.register()
 GET         /confirmation                                                                                uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.Registration.confirmation
 
 GET         /verification                                                                                uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.Registration.verify(code: String)
@@ -11,17 +11,17 @@ GET         /resend-verification                                                
 GET         /resend-confirmation                                                                         uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.Registration.resendConfirmation
 
 GET         /login                                                                                       uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.UserLoginAccount.login
-GET         /login/2sv-recommendation                                                                    uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.UserLoginAccount.get2svRecommendationPage
+GET         /login/2sv-recommendation                                                                    uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.UserLoginAccount.get2svRecommendationPage()
 POST        /login                                                                                       uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.UserLoginAccount.authenticate
-GET         /login/2SV-help                                                                              uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.UserLoginAccount.get2SVHelpConfirmationPage
-POST        /login/2SV-help                                                                              uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.UserLoginAccount.confirm2SVHelp
-GET         /login/2SV-help/complete                                                                     uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.UserLoginAccount.get2SVHelpCompletionPage
+GET         /login/2SV-help                                                                              uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.UserLoginAccount.get2SVHelpConfirmationPage()
+POST        /login/2SV-help                                                                              uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.UserLoginAccount.confirm2SVHelp()
+GET         /login/2SV-help/complete                                                                     uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.UserLoginAccount.get2SVHelpCompletionPage()
 GET         /login/select-mfa                                                                            uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.UserLoginAccount.selectLoginMfaPage(authAppMfaId: uk.gov.hmrc.apiplatform.modules.mfa.models.MfaId, smsMfaId: uk.gov.hmrc.apiplatform.modules.mfa.models.MfaId)
-POST        /login/select-mfa                                                                            uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.UserLoginAccount.selectLoginMfaAction
-GET         /login/select-mfa/try-another-option                                                         uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.UserLoginAccount.tryAnotherOption
+POST        /login/select-mfa                                                                            uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.UserLoginAccount.selectLoginMfaAction()
+GET         /login/select-mfa/try-another-option                                                         uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.UserLoginAccount.tryAnotherOption()
 GET         /login-mfa                                                                                   uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.UserLoginAccount.loginAccessCodePage(mfaId: uk.gov.hmrc.apiplatform.modules.mfa.models.MfaId, mfaType: uk.gov.hmrc.apiplatform.modules.mfa.models.MfaType)
 POST        /login-mfa                                                                                   uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.UserLoginAccount.authenticateAccessCode(mfaId: uk.gov.hmrc.apiplatform.modules.mfa.models.MfaId, mfaType: uk.gov.hmrc.apiplatform.modules.mfa.models.MfaType, userHasMultipleMfa: Boolean)
-GET         /login/2SV-not-set                                                                           uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.UserLoginAccount.get2SVNotSetPage
+GET         /login/2SV-not-set                                                                           uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.UserLoginAccount.get2SVNotSetPage()
 
 GET         /logout                                                                                      uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.UserLogoutAccount.logout
 
@@ -34,8 +34,8 @@ GET         /support/submitted                                                  
 
 GET         /locked                                                                                      uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.UserLoginAccount.accountLocked
 
-GET         /forgot-password                                                                             uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.Password.showForgotPassword
-POST        /forgot-password                                                                             uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.Password.requestReset
+GET         /forgot-password                                                                             uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.Password.showForgotPassword()
+POST        /forgot-password                                                                             uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.Password.requestReset()
 
 GET         /reset-password-link                                                                         uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.Password.validateReset(code: String)
 
@@ -48,13 +48,13 @@ GET         /applications                                                       
 GET         /applications/using-privileged-application-credentials                                       uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.addapplication.AddApplication.usingPrivilegedApplicationCredentialsPage()
 GET         /applications/access-token                                                                   uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.addapplication.AddApplication.accessTokenSwitchPage()
 
-GET         /applications/add/production/10-days                                                         uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.addapplication.AddApplication.tenDaysWarning
+GET         /applications/add/production/10-days                                                         uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.addapplication.AddApplication.tenDaysWarning()
 
-GET         /applications/add/sandbox                                                                    uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.addapplication.AddApplication.addApplicationSubordinate
-GET         /applications/add/production                                                                 uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.addapplication.AddApplication.addApplicationPrincipal
-GET         /applications/add/switch                                                                     uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.addapplication.AddApplication.addApplicationProductionSwitch
+GET         /applications/add/sandbox                                                                    uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.addapplication.AddApplication.addApplicationSubordinate()
+GET         /applications/add/production                                                                 uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.addapplication.AddApplication.addApplicationPrincipal()
+GET         /applications/add/switch                                                                     uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.addapplication.AddApplication.addApplicationProductionSwitch()
 GET         /applications/add/:id                                                                        uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.addapplication.AddApplication.soleApplicationToUpliftAction(id: ApplicationId)
-POST        /applications/add/switch                                                                     uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.addapplication.AddApplication.chooseApplicationToUpliftAction
+POST        /applications/add/switch                                                                     uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.addapplication.AddApplication.chooseApplicationToUpliftAction()
 
 
 GET         /applications/add/:environment/name                                                          uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.addapplication.AddApplication.addApplicationName(environment: Environment)
@@ -203,7 +203,7 @@ GET         /applications/:id/add/subscriptions                                 
 GET         /application-verification                                                                    uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.ApplicationVerification.verifyUplift(code: String)
 GET         /user-navlinks                                                                               uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.Navigation.navLinks
 
-GET         /partials/terms-of-use                                                                       uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.TermsOfUse.termsOfUsePartial
+GET         /partials/terms-of-use                                                                       uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.TermsOfUse.termsOfUsePartial()
 
 GET         /assets/*file                                                                                @controllers.Assets.versioned(path="/public", file: Asset)
 
@@ -227,7 +227,7 @@ GET         /applications/:id/we-will-check-your-answers                        
 GET         /applications/:id/agree-new-terms-of-use                                                     uk.gov.hmrc.apiplatform.modules.uplift.controllers.UpliftJourneyController.agreeNewTermsOfUse(id: ApplicationId)
 
 GET         /poc-dynamics/tickets                                                                        uk.gov.hmrc.apiplatform.modules.dynamics.controllers.DynamicsController.tickets
-GET         /poc-dynamics/tickets/add                                                                    uk.gov.hmrc.apiplatform.modules.dynamics.controllers.DynamicsController.addTicket
-POST        /poc-dynamics/tickets/add                                                                    uk.gov.hmrc.apiplatform.modules.dynamics.controllers.DynamicsController.addTicketAction
+GET         /poc-dynamics/tickets/add                                                                    uk.gov.hmrc.apiplatform.modules.dynamics.controllers.DynamicsController.addTicket()
+POST        /poc-dynamics/tickets/add                                                                    uk.gov.hmrc.apiplatform.modules.dynamics.controllers.DynamicsController.addTicketAction()
 
 ->          /hmrc-frontend        hmrcfrontend.Routes

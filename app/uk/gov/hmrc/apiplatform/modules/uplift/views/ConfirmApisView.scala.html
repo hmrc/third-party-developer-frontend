@@ -64,7 +64,7 @@
             If you subscribe to APIs your software does not use, you will not get production credentials.
         </strong>
     </div>
-    @helper.form(action = uk.gov.hmrc.apiplatform.modules.uplift.controllers.routes.UpliftJourneyController.confirmApiSubscriptionsAction(applicationId), 'class -> "form") {
+    @helper.form(action = uk.gov.hmrc.apiplatform.modules.uplift.controllers.routes.UpliftJourneyController.confirmApiSubscriptionsAction(applicationId), Symbol("class") -> "form") {
         @helper.CSRF.formField
         <div class="govuk-button-group">
             <button class="govuk-button" id="submit" type="submit" href="@uk.gov.hmrc.apiplatform.modules.uplift.controllers.routes.UpliftJourneyController.confirmApiSubscriptionsAction(applicationId)">

@@ -22,7 +22,7 @@ import akka.pattern.FutureTimeoutSupport
 import com.google.inject.AbstractModule
 import com.google.inject.name.Names.named
 
-import uk.gov.hmrc.play.bootstrap.filters.frontend.SessionTimeoutFilter
+import uk.gov.hmrc.play.bootstrap.frontend.filters.SessionTimeoutFilter
 
 import uk.gov.hmrc.apiplatform.modules.applications.domain.models.ClientSecretsHashingConfig
 import uk.gov.hmrc.apiplatform.modules.submissions.config.ThirdPartyApplicationSubmissionsConnectorConfigProvider

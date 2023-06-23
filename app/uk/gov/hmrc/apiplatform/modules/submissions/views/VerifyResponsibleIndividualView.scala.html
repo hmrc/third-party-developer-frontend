@@ -37,7 +37,7 @@
   ),
   developerSession = None
 ) {
-  @helper.form(action = uk.gov.hmrc.apiplatform.modules.submissions.controllers.routes.VerifyResponsibleIndividualController.verifyAction(model.code), 'class -> "form") {
+  @helper.form(action = uk.gov.hmrc.apiplatform.modules.submissions.controllers.routes.VerifyResponsibleIndividualController.verifyAction(model.code), Symbol("class") -> "form") {
     @helper.CSRF.formField
 
     <div class="govuk-form-group @if(form.errors("verified").nonEmpty) {govuk-form-group--error}">

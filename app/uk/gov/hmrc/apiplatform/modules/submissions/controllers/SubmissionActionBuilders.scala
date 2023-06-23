@@ -19,7 +19,6 @@ package uk.gov.hmrc.apiplatform.modules.submissions.controllers
 import scala.concurrent.Future.successful
 import scala.concurrent.{ExecutionContext, Future}
 
-import cats.implicits._
 import cats.instances.future.catsStdInstancesForFuture
 
 import play.api.mvc.{ActionRefiner, _}

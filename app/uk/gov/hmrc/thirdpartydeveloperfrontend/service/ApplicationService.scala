@@ -141,7 +141,7 @@ class ApplicationService @Inject() (
     val requesterRole  = roleForApplication(application, requesterEmail)
     val appId          = application.id
 
-    if (environment.isSandbox || requesterRole.isAdministrator) {
+    if (environment.isSandbox() || requesterRole.isAdministrator) {
       val deskproTicket = DeskproTicket.createForPrincipalApplicationDeletion(requesterName, requesterEmail, requesterRole, environment, application.name, appId)
 
       for {
@@ -149,7 +149,7 @@ class ApplicationService @Inject() (
         _              <- auditService.audit(
                             ApplicationDeletionRequested,
                             Map(
-                              "appId"                   -> appId.text,
+                              "appId"                   -> appId.text(),
                               "requestedByName"         -> requesterName,
                               "requestedByEmailAddress" -> requesterEmail.text,
                               "timestamp"               -> LocalDateTime.now(clock).toString
@@ -262,7 +262,7 @@ object ApplicationService {
       (appSubscriptions) =>
         appSubscriptions
           // All non-test non-example subscribed apis are upliftable AND at least one subscribed apis is present
-          .mapValues(apis => apis.subsetOf(upliftableApiIdentifiers) && apis.nonEmpty)
+          .view.mapValues(apis => apis.subsetOf(upliftableApiIdentifiers) && apis.nonEmpty).toMap
           .filter { case (_, isUpliftable) => isUpliftable }
           .keySet
 

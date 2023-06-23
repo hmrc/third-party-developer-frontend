@@ -35,6 +35,7 @@ import uk.gov.hmrc.apiplatform.modules.apis.domain.models.{ApiContext, ApiIdenti
 import uk.gov.hmrc.apiplatform.modules.applications.domain.models._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.config.{ApplicationConfig, ErrorHandler, FraudPreventionConfig}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.connectors.ThirdPartyDeveloperConnector
+import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.ApplicationRequest
 import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.fraudprevention.FraudPreventionNavLinkHelper
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.ApplicationUpdateSuccessful
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.Capabilities.{ManageLockedSubscriptions, SupportsSubscriptions}
@@ -86,7 +87,7 @@ class SubscriptionsController @Inject() (
           role,
           data,
           form,
-          applicationViewModelFromApplicationRequest,
+          applicationViewModelFromApplicationRequest(),
           data.subscriptions,
           data.openAccessApis,
           data.app.id,
@@ -151,7 +152,7 @@ class SubscriptionsController @Inject() (
 
       def handleInvalidForm(formWithErrors: Form[ChangeSubscriptionForm]) = Future.successful(BadRequest(errorHandler.badRequestTemplate))
 
-      ChangeSubscriptionForm.form.bindFromRequest.fold(handleInvalidForm, handleValidForm);
+      ChangeSubscriptionForm.form.bindFromRequest().fold(handleInvalidForm, handleValidForm);
     }
 
   def requestChangeApiSubscription(
@@ -171,7 +172,7 @@ class SubscriptionsController @Inject() (
         .map(subscribed =>
           Ok(
             changeSubscriptionConfirmationView(
-              applicationViewModelFromApplicationRequest,
+              applicationViewModelFromApplicationRequest(),
               ChangeSubscriptionConfirmationForm.form,
               apiName,
               apiContext,
@@ -213,11 +214,11 @@ class SubscriptionsController @Inject() (
         if (subscribed) {
           subscriptionsService
             .requestApiUnsubscribe(request.developerSession, request.application, apiName, apiVersion)
-            .map(_ => Ok(unsubscribeRequestSubmittedView(applicationViewModelFromApplicationRequest, apiName, apiVersion)))
+            .map(_ => Ok(unsubscribeRequestSubmittedView(applicationViewModelFromApplicationRequest(), apiName, apiVersion)))
         } else {
           subscriptionsService
             .requestApiSubscription(request.developerSession, request.application, apiName, apiVersion)
-            .map(_ => Ok(subscribeRequestSubmittedView(applicationViewModelFromApplicationRequest, apiName, apiVersion)))
+            .map(_ => Ok(subscribeRequestSubmittedView(applicationViewModelFromApplicationRequest(), apiName, apiVersion)))
         }
       }
 
@@ -230,7 +231,7 @@ class SubscriptionsController @Inject() (
         Future.successful(
           BadRequest(
             changeSubscriptionConfirmationView(
-              applicationViewModelFromApplicationRequest,
+              applicationViewModelFromApplicationRequest(),
               formWithErrors,
               apiName,
               apiContext,
@@ -244,7 +245,7 @@ class SubscriptionsController @Inject() (
 
       subscriptionsService
         .isSubscribedToApi(request.application.id, apiIdentifier)
-        .flatMap(subscribed => ChangeSubscriptionConfirmationForm.form.bindFromRequest.fold(handleInvalidForm(subscribed), handleValidForm(subscribed)))
+        .flatMap(subscribed => ChangeSubscriptionConfirmationForm.form.bindFromRequest().fold(handleInvalidForm(subscribed), handleValidForm(subscribed)))
     }
 
   def changeLockedApiSubscriptionAction(applicationId: ApplicationId, apiName: String, apiContext: ApiContext, apiVersion: ApiVersion, redirectTo: String): Action[AnyContent] =

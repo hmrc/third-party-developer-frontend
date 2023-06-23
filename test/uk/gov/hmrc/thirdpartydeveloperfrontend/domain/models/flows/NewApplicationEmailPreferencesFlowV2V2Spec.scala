@@ -60,8 +60,8 @@ class NewApplicationEmailPreferencesFlowV2V2Spec extends AnyWordSpec with Matche
         val mappedPreferences: EmailPreferences = flow.toEmailPreferences
 
         mappedPreferences.interests.length shouldBe 3
-        mappedPreferences.interests.find(_.regime == category1).get.services should contain only ("api1", "api2", "new-api")
-        mappedPreferences.interests.find(_.regime == category2).get.services should contain only ("api2", "api3", "api4")
+        mappedPreferences.interests.find(_.regime == category1).get.services should contain theSameElementsAs List("api1", "api2", "new-api")
+        mappedPreferences.interests.find(_.regime == category2).get.services should contain theSameElementsAs List("api2", "api3", "api4")
         mappedPreferences.interests.find(_.regime == "CATEGORY_3").get.services should contain only ("new-api-2")
         mappedPreferences.topics shouldBe selectedTopics
       }

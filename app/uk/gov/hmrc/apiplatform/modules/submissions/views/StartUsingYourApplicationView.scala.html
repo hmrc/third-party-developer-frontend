@@ -59,7 +59,7 @@
         <li><a class="govuk-link govuk-link--no-visited-state" href="@uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.routes.Redirects.redirects(model.appId).url">add a redirect URI</a></li>
     </ol>
 
-    @helper.form(action = uk.gov.hmrc.apiplatform.modules.submissions.controllers.routes.StartUsingYourApplicationController.startUsingYourApplicationAction(model.appId), 'class -> "form") {
+    @helper.form(action = uk.gov.hmrc.apiplatform.modules.submissions.controllers.routes.StartUsingYourApplicationController.startUsingYourApplicationAction(model.appId), Symbol("class") -> "form") {
         @helper.CSRF.formField
         <div class="govuk-button-group">
             <button id="submit-ok" class="govuk-button govuk-!-margin-top-3 govuk-!-margin-bottom-7" data-module="govuk-button" type="submit">I have finished</button>
@@ -77,7 +77,7 @@
         <li><a class="govuk-link govuk-link--no-visited-state" href="@uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.routes.Details.details(model.appId).url?forceAppDetails">check your application details</a></li>
         <li><a class="govuk-link govuk-link--no-visited-state" href="@uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.routes.ManageTeam.manageTeam(model.appId, None).url">add team members</a> and give others access to the application</li>
         <li><a class="govuk-link govuk-link--no-visited-state" href="@uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.routes.IpAllowListController.viewIpAllowlist(model.appId).url">set up an IP allow list</a></li>
-        <li><a class="govuk-link govuk-link--no-visited-state" href="@uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.profile.routes.EmailPreferencesController.emailPreferencesSummaryPage.url">change your email preferences</a> and get emails about the APIs you use</li>
+        <li><a class="govuk-link govuk-link--no-visited-state" href="@uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.profile.routes.EmailPreferencesController.emailPreferencesSummaryPage().url">change your email preferences</a> and get emails about the APIs you use</li>
     </ol>
 
 }

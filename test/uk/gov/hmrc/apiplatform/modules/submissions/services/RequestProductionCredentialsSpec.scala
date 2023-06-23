@@ -71,7 +71,8 @@ class RequestProductionCredentialsSpec extends AsyncHmrcSpec
       when(mockDeskproConnector.createTicket(*[Option[UserId]], *)(*)).thenReturn(successful(TicketCreated))
       val result = await(underTest.requestProductionCredentials(applicationId, developerSession, true, false))
 
-      result.right.value shouldBe app
+      result.isRight shouldBe true
+      result shouldBe Right(app)
 
       val ticketCapture = ArgCaptor[DeskproTicket]
       verify(mockDeskproConnector).createTicket(*[Option[UserId]], ticketCapture.capture)(*)
@@ -90,7 +91,8 @@ class RequestProductionCredentialsSpec extends AsyncHmrcSpec
       when(mockDeskproConnector.createTicket(*[Option[UserId]], *)(*)).thenReturn(successful(TicketCreated))
       val result = await(underTest.requestProductionCredentials(applicationId, developerSession, true, true))
 
-      result.right.value shouldBe app
+      result.isRight shouldBe true
+      result shouldBe Right(app)
 
       val ticketCapture = ArgCaptor[DeskproTicket]
       verify(mockDeskproConnector).createTicket(*[Option[UserId]], ticketCapture.capture)(*)
@@ -108,7 +110,8 @@ class RequestProductionCredentialsSpec extends AsyncHmrcSpec
       when(mockSubmissionsConnector.fetchLatestSubmission(eqTo(applicationId))(*)).thenReturn(successful(Some(grantedSubmission)))
       val result = await(underTest.requestProductionCredentials(applicationId, developerSession, true, true))
 
-      result.right.value shouldBe app
+      result.isRight shouldBe true
+      result shouldBe Right(app)
 
       verify(mockDeskproConnector, never).createTicket(*[ResponsibleIndividualVerificationId], *)(*)
     }
@@ -119,7 +122,8 @@ class RequestProductionCredentialsSpec extends AsyncHmrcSpec
       when(mockSubmissionsConnector.fetchLatestSubmission(eqTo(applicationId))(*)).thenReturn(successful(Some(aSubmission)))
       val result = await(underTest.requestProductionCredentials(applicationId, developerSession, false, false))
 
-      result.right.value shouldBe app
+      result.isRight shouldBe true
+      result shouldBe Right(app)
 
       verify(mockDeskproConnector, never).createTicket(*[ResponsibleIndividualVerificationId], *)(*)
     }
@@ -140,7 +144,7 @@ class RequestProductionCredentialsSpec extends AsyncHmrcSpec
 
       val result = await(underTest.requestProductionCredentials(applicationId, developerSession, true, false))
 
-      result shouldBe 'Left
+      result.isLeft shouldBe true
       result.left.value shouldBe ErrorDetails("submitSubmission001", s"No submission record found for ${applicationId}")
 
       verify(mockDeskproConnector, never).createTicket(*[ResponsibleIndividualVerificationId], *)(*)

@@ -73,7 +73,7 @@
           aria-labelledby="login-password-error"
         />
         <p class="govuk-body">
-          <a id="forgottenPassword" class="govuk-link govuk-link--no-visited-state" href="@routes.Password.showForgotPassword">
+          <a id="forgottenPassword" class="govuk-link govuk-link--no-visited-state" href="@routes.Password.showForgotPassword()">
             I've forgotten my password
           </a>
         </p>
@@ -84,7 +84,7 @@
   @if(!endOfJourney) {
     <p class="govuk-body">
       Not registered yet?
-      <a class="govuk-link govuk-link--no-visited-state" href="@routes.Registration.registration">
+      <a class="govuk-link govuk-link--no-visited-state" href="@routes.Registration.registration()">
         Register for an account
       </a>
     </p>

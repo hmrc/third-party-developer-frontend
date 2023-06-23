@@ -16,7 +16,7 @@
 
 package views.emailpreferences
 
-import scala.collection.JavaConverters._
+import scala.jdk.CollectionConverters._
 
 import org.jsoup.Jsoup
 import org.jsoup.nodes.{Document, Element}
@@ -77,19 +77,19 @@ class SelectApisFromSubscriptionsViewSpec extends CommonViewSpec
     })
   }
 
-  def validateStaticElements(document: Document, apis: List[CombinedApi], applicationId: ApplicationId) {
+  def validateStaticElements(document: Document, apis: List[CombinedApi], applicationId: ApplicationId): Unit = {
     document.getElementById("pageHeading").text() should be("Do you want to receive emails about the APIs you have subscribed to?")
     document.getElementById("select-all-description").text() should be("Select all that apply.")
 
     // Check form is configured correctly
     val form = document.getElementById("emailPreferencesApisForm")
     form.attr("method") should be("POST")
-    form.attr("action") should be(s"/developer/profile/email-preferences/apis-from-subscriptions?applicationId=${applicationId.text}")
+    form.attr("action") should be(s"/developer/profile/email-preferences/apis-from-subscriptions?applicationId=${applicationId.text()}")
 
     // check checkboxes are displayed
     validateCheckboxItemsAgainstApis(document, apis)
 
-    document.getElementById("applicationId").`val`() shouldBe applicationId.text
+    document.getElementById("applicationId").`val`() shouldBe applicationId.text()
 
     // Check submit button is correct
     document.getElementById("submit").text should be("Continue")

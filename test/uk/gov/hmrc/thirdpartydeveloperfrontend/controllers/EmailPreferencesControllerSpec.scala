@@ -211,7 +211,7 @@ class EmailPreferencesControllerSpec
       val result: Future[Result] = controllerUnderTest.unsubscribeAllAction()(loggedInRequest)
       status(result) mustBe SEE_OTHER
 
-      redirectLocation(result) mustBe Some(EmailPreferencesControllerRoutes.emailPreferencesSummaryPage.url)
+      redirectLocation(result) mustBe Some(EmailPreferencesControllerRoutes.emailPreferencesSummaryPage().url)
       flash(result).get("unsubscribed") mustBe Some("true")
     }
 
@@ -336,7 +336,7 @@ class EmailPreferencesControllerSpec
       val result: Future[Result] = controllerUnderTest.flowSelectNoCategoriesAction()(loggedInRequest)
 
       status(result) mustBe SEE_OTHER
-      redirectLocation(result) mustBe Some(EmailPreferencesControllerRoutes.flowSelectTopicsPage.url)
+      redirectLocation(result) mustBe Some(EmailPreferencesControllerRoutes.flowSelectTopicsPage().url)
 
     }
 
@@ -380,7 +380,7 @@ class EmailPreferencesControllerSpec
       val result: Future[Result] = controllerUnderTest.flowSelectApisPage("")(loggedInRequest)
 
       status(result) mustBe SEE_OTHER
-      redirectLocation(result) mustBe Some(EmailPreferencesControllerRoutes.emailPreferencesSummaryPage.url)
+      redirectLocation(result) mustBe Some(EmailPreferencesControllerRoutes.emailPreferencesSummaryPage().url)
       verifyZeroInteractions(mockEmailPreferencesSelectApiView)
     }
 
@@ -435,7 +435,7 @@ class EmailPreferencesControllerSpec
 
       val result: Future[Result] = controllerUnderTest.flowSelectApisAction()(requestWithForm)
       status(result) mustBe SEE_OTHER
-      redirectLocation(result) mustBe Some(EmailPreferencesControllerRoutes.flowSelectTopicsPage.url)
+      redirectLocation(result) mustBe Some(EmailPreferencesControllerRoutes.flowSelectTopicsPage().url)
     }
 
     "return 400 when form has missing elements" in new Setup {
@@ -510,7 +510,7 @@ class EmailPreferencesControllerSpec
       val result: Future[Result] = controllerUnderTest.flowSelectTopicsAction()(requestWithForm)
 
       status(result) mustBe SEE_OTHER
-      redirectLocation(result) mustBe Some(EmailPreferencesControllerRoutes.emailPreferencesSummaryPage.url)
+      redirectLocation(result) mustBe Some(EmailPreferencesControllerRoutes.emailPreferencesSummaryPage().url)
 
       verify(mockEmailPreferencesService).fetchEmailPreferencesFlow(eqTo(loggedInDeveloper))
       verify(mockEmailPreferencesService).updateEmailPreferences(eqTo(developer.userId), eqTo(emailFlow.copy(selectedTopics = Set("TECHNICAL"))))(*)
@@ -529,7 +529,7 @@ class EmailPreferencesControllerSpec
       val result: Future[Result] = controllerUnderTest.flowSelectTopicsAction()(requestWithForm)
 
       status(result) mustBe SEE_OTHER
-      redirectLocation(result) mustBe Some(EmailPreferencesControllerRoutes.flowSelectTopicsPage.url)
+      redirectLocation(result) mustBe Some(EmailPreferencesControllerRoutes.flowSelectTopicsPage().url)
 
       verify(mockEmailPreferencesService).fetchEmailPreferencesFlow(eqTo(loggedInDeveloper))
       verify(mockEmailPreferencesService).updateEmailPreferences(eqTo(developer.userId), eqTo(emailFlow.copy(selectedTopics = Set("TECHNICAL"))))(*)
@@ -595,7 +595,7 @@ class EmailPreferencesControllerSpec
       updateUserFlowSessionsReturnsSuccessfully(sessionId)
 
       val requestWithForm: FakeRequest[AnyContentAsFormUrlEncoded] = loggedInRequest
-        .withFormUrlEncodedBody("selectedApi[0]" -> "a1", "selectedApi[1]" -> "a2", "applicationId" -> applicationId.text)
+        .withFormUrlEncodedBody("selectedApi[0]" -> "a1", "selectedApi[1]" -> "a2", "applicationId" -> applicationId.text())
 
       when(mockEmailPreferencesService.updateNewApplicationSelectedApis(*, *[ApplicationId], *)(*)).thenReturn(Future.successful(mock[NewApplicationEmailPreferencesFlowV2]))
 
@@ -653,7 +653,7 @@ class EmailPreferencesControllerSpec
       updateUserFlowSessionsReturnsSuccessfully(sessionId)
 
       val requestWithForm: FakeRequest[AnyContentAsFormUrlEncoded] = loggedInRequest
-        .withFormUrlEncodedBody("topic[0]" -> "a1", "applicationId" -> applicationId.text)
+        .withFormUrlEncodedBody("topic[0]" -> "a1", "applicationId" -> applicationId.text())
 
       when(mockEmailPreferencesService.fetchNewApplicationEmailPreferencesFlow(*, *[ApplicationId])).thenReturn(Future.successful(newApplicationEmailPreferencesFlow))
       when(mockEmailPreferencesService.updateEmailPreferences(*[UserId], *)(*)).thenReturn(Future.successful(true))

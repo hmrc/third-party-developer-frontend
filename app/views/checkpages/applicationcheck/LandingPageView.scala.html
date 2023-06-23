@@ -43,7 +43,7 @@
     @pageHeading
   </h1>
 
-  @helper.form(action = controllers.checkpages.routes.ApplicationCheck.requestCheckAction(app.id), 'class -> "form") {
+  @helper.form(action = controllers.checkpages.routes.ApplicationCheck.requestCheckAction(app.id), Symbol("class") -> "form") {
     @helper.CSRF.formField
     <div class="form-group">
       <h2 class="govuk-heading-m govuk-!-margin-bottom-0">About your application</h2>

@@ -102,7 +102,7 @@ object DeskproTicket extends FieldTransformer {
       apiVersion: ApiVersion
     ): DeskproTicket = {
     val message = s"""I '${requestorEmail.text}' want my application '$applicationName'
-                     |identified by '${applicationId.text}'
+                     |identified by '${applicationId.text()}'
                      |to be subscribed to the API '$apiName'
                      |with version '${apiVersion.value}'""".stripMargin
 
@@ -118,7 +118,7 @@ object DeskproTicket extends FieldTransformer {
       apiVersion: ApiVersion
     ): DeskproTicket = {
     val message = s"""I '${requestorEmail.text}' want my application '$applicationName'
-                     |identified by '${applicationId.text}'
+                     |identified by '${applicationId.text()}'
                      |to be unsubscribed from the API '$apiName'
                      |with version '${apiVersion.value}'""".stripMargin
 
@@ -141,7 +141,7 @@ object DeskproTicket extends FieldTransformer {
 
     val message =
       s"""I am $actor on the following ${environment.toString.toLowerCase} application '$applicationName'
-         |and the application id is '${applicationId.text}'. I want it to be deleted from the Developer Hub.""".stripMargin
+         |and the application id is '${applicationId.text()}'. I want it to be deleted from the Developer Hub.""".stripMargin
 
     DeskproTicket(name, requestedByEmail, "Request to delete an application", message, routes.DeleteApplication.deleteApplication(applicationId, None).url)
   }
@@ -169,14 +169,14 @@ object DeskproTicket extends FieldTransformer {
     val message =
       s"""I '${email.text}' want my Developer Hub account to be deleted"""
 
-    DeskproTicket(name, email, "Request for developer account to be deleted", message, profile.routes.Profile.deleteAccount.url)
+    DeskproTicket(name, email, "Request for developer account to be deleted", message, profile.routes.Profile.deleteAccount().url)
   }
 
   def removeDeveloper2SV(name: String, email: LaxEmailAddress): DeskproTicket = {
     val message =
       s"""I '${email.text}' want my 2SV to be removed"""
 
-    DeskproTicket(name, email, "Request for 2SV to be removed", message, routes.UserLoginAccount.confirm2SVHelp.url)
+    DeskproTicket(name, email, "Request for 2SV to be removed", message, routes.UserLoginAccount.confirm2SVHelp().url)
   }
 
   def createForRequestChangeOfProductionApplicationName(

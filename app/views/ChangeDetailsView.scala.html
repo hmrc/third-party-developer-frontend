@@ -49,7 +49,7 @@
 
   <br>
 
-  @helper.form(action = routes.Details.changeDetailsAction(app.id), 'class -> "form") {
+  @helper.form(action = routes.Details.changeDetailsAction(app.id), Symbol("class") -> "form") {
     @helper.CSRF.formField
     <input type="hidden" id="applicationId" name="applicationId" value="@form.data("applicationId")"/>
     @if(app.hasCapability(SupportChangingAppDetails)) {

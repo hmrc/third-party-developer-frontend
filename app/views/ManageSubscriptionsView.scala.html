@@ -49,7 +49,7 @@
 @app = @{applicationView.application}
 
 @isPendingOrActiveProductionApplication(application: Application) = @{
-    application.deployedTo.isProduction && !application.isInTesting
+    application.deployedTo.isProduction() && !application.isInTesting
 }
 
 @devMain(
