@@ -46,8 +46,6 @@ class GetProductionCredentialsFlowService @Inject() (
       existingFlow <- fetchFlow(developerSession)
       savedFlow    <- flowRepository.saveFlow[GetProductionCredentialsFlow](existingFlow.copy(sellResellOrDistribute = Some(sellResellOrDistribute)))
     } yield savedFlow
-
-
   }
 
   def findSellResellOrDistribute(developerSession: DeveloperSession): Future[Option[SellResellOrDistribute]] =
