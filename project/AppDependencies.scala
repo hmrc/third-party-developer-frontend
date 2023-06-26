@@ -7,7 +7,7 @@ object AppDependencies {
 
   lazy val cucumberVersion = "6.2.2"
   lazy val seleniumVersion = "4.2.0"
-  lazy val enumeratumVersion = "1.7.2"
+  lazy val enumeratumVersion = "1.7.0"
   lazy val bootstrapVersion = "7.15.0"
   lazy val mongoVersion = "0.74.0"
 

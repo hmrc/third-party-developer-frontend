@@ -26,15 +26,12 @@ import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.SellRe
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.DeveloperSession
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.flows.FlowType
 import uk.gov.hmrc.thirdpartydeveloperfrontend.repositories.FlowRepository
-import uk.gov.hmrc.apiplatform.modules.common.services.ApplicationLogger
-
-import play.api.libs.json._
 
 @Singleton
 class GetProductionCredentialsFlowService @Inject() (
     val flowRepository: FlowRepository
   )(implicit val ec: ExecutionContext
-  ) extends ApplicationLogger {
+  ) {
 
   def fetchFlow(developerSession: DeveloperSession): Future[GetProductionCredentialsFlow] =
     flowRepository.fetchBySessionIdAndFlowType[GetProductionCredentialsFlow](developerSession.session.sessionId) flatMap {
@@ -45,15 +42,9 @@ class GetProductionCredentialsFlowService @Inject() (
     }
 
   def storeSellResellOrDistribute(sellResellOrDistribute: SellResellOrDistribute, developerSession: DeveloperSession): Future[GetProductionCredentialsFlow] = {
-
-logger.warn("****** Fetching flow...")
-
     for {
       existingFlow <- fetchFlow(developerSession)
-      _ = logger.warn(s"****** Saving flow...$existingFlow")
-
       savedFlow    <- flowRepository.saveFlow[GetProductionCredentialsFlow](existingFlow.copy(sellResellOrDistribute = Some(sellResellOrDistribute)))
-      _ = logger.warn("****** Done saving flow...")
     } yield savedFlow
 
 
@@ -63,20 +54,9 @@ logger.warn("****** Fetching flow...")
     fetchFlow(developerSession).map(_.sellResellOrDistribute)
 
   def storeApiSubscriptions(apiSubscriptions: ApiSubscriptions, developerSession: DeveloperSession): Future[GetProductionCredentialsFlow] = {
-
-logger.warn("****** Storing flow...")
-
     for {
       existingFlow <- fetchFlow(developerSession)
-
-      newFlow = existingFlow.copy(apiSubscriptions = Some(apiSubscriptions))
-
-      _ = logger.warn(s"****** Existing flow...$existingFlow")
-      _ = logger.warn(s"****** New flow...$newFlow")
-      _ = logger.warn(s"****** New flow...${Json.toJson(newFlow)}")
-
-      savedFlow    <- flowRepository.saveFlow[GetProductionCredentialsFlow](newFlow)
-      _ = logger.warn("****** Done saving flow...")
+      savedFlow    <- flowRepository.saveFlow[GetProductionCredentialsFlow](existingFlow.copy(apiSubscriptions = Some(apiSubscriptions)))
     } yield savedFlow
   }
 
