@@ -34,6 +34,7 @@ import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.apidefinitions.APIS
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.DeveloperSession
 import uk.gov.hmrc.thirdpartydeveloperfrontend.service.ApplicationService
+import uk.gov.hmrc.apiplatform.modules.common.services.ApplicationLogger
 
 @Singleton
 class UpliftJourneyService @Inject() (
@@ -42,7 +43,7 @@ class UpliftJourneyService @Inject() (
     apmConnector: ApmConnector,
     thirdPartyApplicationSubmissionsConnector: ThirdPartyApplicationSubmissionsConnector
   )(implicit val ec: ExecutionContext
-  ) extends EitherTHelper[String] {
+  ) extends EitherTHelper[String] with ApplicationLogger {
   import cats.instances.future.catsStdInstancesForFuture
 
   def confirmAndUplift(sandboxAppId: ApplicationId, developerSession: DeveloperSession, useV2: Boolean)(implicit hc: HeaderCarrier): Future[Either[String, ApplicationId]] =
@@ -92,12 +93,17 @@ class UpliftJourneyService @Inject() (
       } yield subscriptionsWithFlowAdjusted
     )
 
-  def storeDefaultSubscriptionsInFlow(sandboxAppId: ApplicationId, developerSession: DeveloperSession)(implicit hc: HeaderCarrier): Future[ApiSubscriptions] =
+  def storeDefaultSubscriptionsInFlow(sandboxAppId: ApplicationId, developerSession: DeveloperSession)(implicit hc: HeaderCarrier): Future[ApiSubscriptions] = {
+
+logger.warn("####### Store default subscriptions in flow")
+
     for {
       upliftableSubscriptions <- apmConnector.fetchUpliftableSubscriptions(sandboxAppId)
       apiSubscriptions         = ApiSubscriptions(upliftableSubscriptions.map(id => (id, true)).toMap)
+      _ = logger.warn(s"####### Store API subscriptions in flow $apiSubscriptions")
       _                       <- flowService.storeApiSubscriptions(apiSubscriptions, developerSession)
     } yield apiSubscriptions
+  }
 
   def apiSubscriptionData(
       sandboxAppId: ApplicationId,

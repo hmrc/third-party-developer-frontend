@@ -16,7 +16,6 @@
 
 package uk.gov.hmrc.apiplatform.modules.common.services
 
-import scala.collection.Seq
 import scala.collection.immutable.ListMap
 
 import play.api.libs.json._
@@ -48,11 +47,11 @@ trait MapJsonFormatters {
           case (acc, JsObject(fs)) => (acc, process(fs.toMap)) match {
               case (Right(vs), JsSuccess(v, _)) => keyReads.readKey(fs.keySet.head) match {
                   case JsSuccess(key, _) => Right(vs + (key -> v))
-                  case JsError(e)        => Left(locate(e, fs.keySet.head))
+                  case JsError(e)        => Left(locate(e.map(err => (err._1, err._2.toSeq)).toSeq, fs.keySet.head))
                 }
-              case (Right(_), JsError(e))       => Left(locate(e, fs.keySet.head))
+              case (Right(_), JsError(e))       => Left(locate(e.map(err => (err._1, err._2.toSeq)).toSeq, fs.keySet.head))
               case (Left(e), _: JsSuccess[_])   => Left(e)
-              case (Left(e1), JsError(e2))      => Left(e1 ++ locate(e2, fs.keySet.head))
+              case (Left(e1), JsError(e2))      => Left(e1 ++ locate(e2.map(err => (err._1, err._2.toSeq)).toSeq, fs.keySet.head))
             }
 
           case (acc, _) => Left(Seq(JsPath() -> Seq(JsonValidationError("error.expected.jsobject"))))
