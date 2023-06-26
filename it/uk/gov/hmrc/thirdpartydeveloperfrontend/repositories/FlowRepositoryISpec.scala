@@ -23,6 +23,10 @@ import org.mongodb.scala.model.Projections.fields
 import org.scalatest.{BeforeAndAfterEach, OptionValues}
 import org.scalatest.matchers.should.Matchers
 import org.scalatest.wordspec.AnyWordSpec
+import uk.gov.hmrc.apiplatform.modules.apis.domain.models.{ApiContext, ApiIdentifier, ApiVersion}
+import uk.gov.hmrc.apiplatform.modules.uplift.domain.models.ApiSubscriptions
+import uk.gov.hmrc.apiplatform.modules.uplift.domain.models.GetProductionCredentialsFlow
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.SellResellOrDistribute
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.connectors.ApiType.REST_API
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.connectors.{CombinedApi, CombinedApiCategory}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.emailpreferences.EmailTopic
@@ -122,6 +126,29 @@ class FlowRepositoryISpec extends AnyWordSpec
         castResult.flowType shouldBe EMAIL_PREFERENCES_V2
         castResult.selectedTopics shouldBe Set(EmailTopic.BUSINESS_AND_POLICY.toString, EmailTopic.EVENT_INVITES.toString)
         castResult.visibleApis should contain only (CombinedApi("api1ServiceName", "api1DisplayName", List(CombinedApiCategory("VAT"), CombinedApiCategory("AGENT")), REST_API))
+      }
+
+      "save prod creds preferences" in {
+        val flow = GetProductionCredentialsFlow(
+          currentSession,
+          Some(SellResellOrDistribute("Yes")),
+          Some(ApiSubscriptions(Map(
+            ApiIdentifier(ApiContext("individual-benefits"), ApiVersion("1.1")) -> true,
+            ApiIdentifier(ApiContext("marriage-allowance"), ApiVersion("1.0")) -> true
+            )))
+        )
+
+        await(flowRepository.saveFlow(flow))
+
+        val result: Flow = await(flowRepository.collection.find(Filters.equal("sessionId", Codecs.toBson(currentSession))).first().toFuture())
+        val castResult   = result.asInstanceOf[GetProductionCredentialsFlow]
+        castResult.sessionId shouldBe currentSession
+        castResult.flowType shouldBe GET_PRODUCTION_CREDENTIALS
+        castResult.sellResellOrDistribute shouldBe Some(SellResellOrDistribute("Yes"))
+        castResult.apiSubscriptions shouldBe Some(ApiSubscriptions(Map(
+            ApiIdentifier(ApiContext("individual-benefits"), ApiVersion("1.1")) -> true,
+            ApiIdentifier(ApiContext("marriage-allowance"), ApiVersion("1.0")) -> true
+            )))
       }
 
       "update the flow when it already exists" in new PopulatedSetup {
