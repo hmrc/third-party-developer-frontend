@@ -116,7 +116,7 @@ trait HasApplication extends HasAppDeploymentEnvironment with HasUserWithRole wi
   )
   lazy val groupOfQuestionnaires = GroupOfQuestionnaires("heading", NonEmptyList.one(questionnaire))
   lazy val answersToQuestions    = Map(question.id -> TextAnswer("yes"))
-  lazy val submissionInstance    = Submission.Instance(submissionIndex, answersToQuestions, NonEmptyList.one(Granted(LocalDateTime.now, "mr jones")))
+  lazy val submissionInstance    = Submission.Instance(submissionIndex, answersToQuestions, NonEmptyList.one(Granted(LocalDateTime.now, "mr jones", None)))
 
   lazy val submission            = Submission(
     submissionId,
