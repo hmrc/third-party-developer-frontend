@@ -163,6 +163,9 @@ delete.redirect.confirmation.no.choice.field = Tell us if you want to delete thi
 accessCode.invalid.number.field = You have entered an invalid access code
 accessCode.invalid.number.global = You have entered an invalid access code
 
+accessCode.error.field = Unable to verify SMS access code
+accessCode.error.global = Unable to verify SMS access code
+
 mfaName.invalid.name.field = The name must be more than 3 characters in length
 mfaName.invalid.name.global = The name must be more than 3 characters in length
 

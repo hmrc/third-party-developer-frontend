@@ -223,14 +223,17 @@ class MfaControllerSmsSpec extends MfaControllerBaseSpec {
       verifyZeroInteractions(underTest.thirdPartyDeveloperMfaConnector)
     }
 
-    "return error page when user is Logged in and form is valid and call to connector returns false" in
+    "return Bad Request when user is Logged in and form is valid and call to connector returns false" in
       new SetupAuthAppSecurityPreferences with LoggedIn {
         when(underTest.thirdPartyDeveloperMfaConnector.verifyMfa(*[UserId], eqTo(smsMfaId), eqTo(correctCode))(*))
           .thenReturn(Future.successful(false))
 
         private val result = underTest.smsAccessCodeAction(smsMfaId, MfaAction.CREATE, None)(smsAccessCodeRequest(correctCode))
+        status(result) shouldBe BAD_REQUEST
+        val doc            = Jsoup.parse(contentAsString(result))
+        validateSmsAccessCodeView(doc)
+        doc.getElementById("data-field-error-accessCode").text() shouldBe "Error: Unable to verify SMS access code"
 
-        validateErrorTemplateView(result, "Unable to verify SMS access code")
         verify(underTest.thirdPartyDeveloperMfaConnector).verifyMfa(*[UserId], eqTo(smsMfaId), eqTo(correctCode))(*)
       }
   }

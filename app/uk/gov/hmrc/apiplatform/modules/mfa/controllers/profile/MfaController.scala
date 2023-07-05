@@ -18,12 +18,10 @@ package uk.gov.hmrc.apiplatform.modules.mfa.controllers.profile
 
 import javax.inject.{Inject, Singleton}
 import scala.concurrent.{ExecutionContext, Future}
-
 import play.api.libs.crypto.CookieSigner
 import play.api.mvc._
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.play.bootstrap.controller.WithUnsafeDefaultFormBinding
-
 import uk.gov.hmrc.apiplatform.modules.developers.domain.models.UserId
 import uk.gov.hmrc.apiplatform.modules.mfa.connectors.ThirdPartyDeveloperMfaConnector
 import uk.gov.hmrc.apiplatform.modules.mfa.connectors.ThirdPartyDeveloperMfaConnector.{RegisterSmsFailureResponse, RegisterSmsSuccessResponse}
@@ -38,7 +36,7 @@ import uk.gov.hmrc.apiplatform.modules.mfa.views.html.sms._
 import uk.gov.hmrc.apiplatform.modules.mfa.views.html.{RemoveMfaCompletedView, SecurityPreferencesView, SelectMfaView}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.config.{ApplicationConfig, ErrorHandler}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.connectors.ThirdPartyDeveloperConnector
-import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.LoggedInController
+import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.{FormKeys, LoggedInController}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.connectors.UpdateLoggedInStateRequest
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.{Developer, DeveloperSession, LoggedInState}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.qr.{OtpAuthUri, QRCode}
@@ -248,13 +246,18 @@ class MfaController @Inject() (
         Redirect(routes.MfaController.smsSetupCompletedPage)
       }
 
+      def invalidSmsCode(form: SmsAccessCodeForm): Result = {
+        val smsForm = SmsAccessCodeForm.form.fill(form).withError(key = "accessCode", message = FormKeys.accessCodeErrorKey)
+        BadRequest(smsAccessCodeView(smsForm, mfaId, mfaAction, mfaIdForRemoval))
+      }
+
       SmsAccessCodeForm.form.bindFromRequest().fold(
         form => Future.successful(BadRequest(smsAccessCodeView(form, mfaId, mfaAction, mfaIdForRemoval))),
         form =>
           mfaAction match {
             case CREATE => thirdPartyDeveloperMfaConnector.verifyMfa(request.userId, mfaId, form.accessCode) map {
                 case true  => logonAndComplete()
-                case false => internalServerErrorTemplate("Unable to verify SMS access code")
+                case false => invalidSmsCode(form)
               }
             case REMOVE => handleRemoveMfa(request.userId, form.accessCode, mfaId, mfaIdForRemoval)
           }
