@@ -151,6 +151,9 @@ package object controllers {
     val accessCodeInvalidKey       = "accessCode.invalid.number.field"
     val accessCodeInvalidGlobalKey = "accessCode.invalid.number.global"
 
+    val accessCodeErrorKey       = "accessCode.error.field"
+    val accessCodeErrorGlobalKey = "accessCode.error.global"
+
     val selectMfaInvalidKey       = "selectMfa.invalid.mfaType.field"
     val selectMfaInvalidGlobalKey = "selectMfa.invalid.mfaType.global"
 
@@ -203,6 +206,7 @@ package object controllers {
       tNcUrlInvalidKey               -> tNcUrlInvalidGlobalKey,
       termsOfUseAgreeKey             -> termsOfUseAgreeGlobalKey,
       accessCodeInvalidKey           -> accessCodeInvalidGlobalKey,
+      accessCodeErrorKey             -> accessCodeErrorGlobalKey,
       selectedCategoryNonSelectedKey -> selectedCategoryNonSelectedGlobalKey,
       selectedApisNonSelectedKey     -> selectedApisNonSelectedGlobalKey,
       selectedApiRadioKey            -> selectedApiRadioGlobalKey,
