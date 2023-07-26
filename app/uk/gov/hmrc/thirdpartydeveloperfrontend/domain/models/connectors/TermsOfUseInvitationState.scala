@@ -21,7 +21,7 @@ import uk.gov.hmrc.apiplatform.modules.submissions.domain.utils.EnumJson
 object TermsOfUseInvitationState extends Enumeration {
   type TermsOfUseInvitationState = Value
 
-  val EMAIL_SENT, WARNINGS, FAILED, TERMS_OF_USE_V2_WITH_WARNINGS, TERMS_OF_USE_V2 = Value
+  val EMAIL_SENT, REMINDER_EMAIL_SENT, OVERDUE, WARNINGS, FAILED, TERMS_OF_USE_V2_WITH_WARNINGS, TERMS_OF_USE_V2 = Value
 
   implicit val format = EnumJson.enumFormat(TermsOfUseInvitationState)
 }
