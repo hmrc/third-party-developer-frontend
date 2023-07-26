@@ -33,11 +33,14 @@
 @import uk.gov.hmrc.govukfrontend.views.html.components.GovukLayout
 @import uk.gov.hmrc.govukfrontend.views.html.components.Text
 @import views.html.helper.CSPNonce
+@import uk.gov.hmrc.govukfrontend.views.html.components.GovukBackLink
+@import uk.gov.hmrc.govukfrontend.views.viewmodels.backlink.BackLink
 
 @this(
   govukLayout: GovukLayout,
   hmrcHeader: HmrcHeader,
   hmrcFooter: HmrcFooter,
+  govukBackLink: GovukBackLink,
   applicationConfig: ApplicationConfig,
   hmrcTimeoutDialog: HmrcTimeoutDialog,
   hmrcTrackingConsentSnippet: HmrcTrackingConsentSnippet
@@ -94,7 +97,7 @@
       <a href="@url" class="govuk-back-link">Back</a>
     }
     case  BackButtonWithJavaScript => {
-      <a href="javascript:history.back()" class="govuk-back-link">Back</a>
+      @govukBackLink(BackLink.mimicsBrowserBackButtonViaJavaScript)
     }
     case  NoBackButton => {}
   }
