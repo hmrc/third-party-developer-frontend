@@ -19,6 +19,7 @@
 @import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.controllers.Crumb
 @import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.DeveloperSession
 @import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.views.GenericFeedbackBanner
+@import views.html.helper.CSPNonce
 
 @import templates._
 
@@ -46,8 +47,8 @@
 )
 
 @scripts = {
-  <script src='@routes.Assets.versioned("lib/govuk-frontend/govuk/all.js")'></script>
-  <script>window.GOVUKFrontend.initAll();</script>
+  <script @CSPNonce.attr src='@routes.Assets.versioned("lib/govuk-frontend/govuk/all.js")'></script>
+  <script @CSPNonce.attr>window.GOVUKFrontend.initAll();</script>
   @hmrcTrackingConsentSnippet()
 }
 

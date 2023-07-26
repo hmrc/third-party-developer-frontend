@@ -8,7 +8,7 @@ object AppDependencies {
   lazy val cucumberVersion = "6.2.2"
   lazy val seleniumVersion = "4.2.0"
   lazy val enumeratumVersion = "1.7.0"
-  lazy val bootstrapVersion = "7.15.0"
+  lazy val bootstrapVersion = "7.19.0"
   lazy val mongoVersion = "0.74.0"
 
   val testScope = "test, it, component"
@@ -16,7 +16,7 @@ object AppDependencies {
   lazy val compile = Seq(
     ws,
     "uk.gov.hmrc"                 %% "bootstrap-frontend-play-28"         % bootstrapVersion,
-    "uk.gov.hmrc"                 %% "play-frontend-hmrc"                 % "6.2.0-play-28",
+    "uk.gov.hmrc"                 %% "play-frontend-hmrc"                 % "7.14.0-play-28",
     "uk.gov.hmrc.mongo"           %% "hmrc-mongo-play-28"                 % mongoVersion,
     "uk.gov.hmrc"                 %% "http-metrics"                       % "2.7.0",
     "uk.gov.hmrc"                 %% "json-encryption"                    % "5.1.0-play-28",

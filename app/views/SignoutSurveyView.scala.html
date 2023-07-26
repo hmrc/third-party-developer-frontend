@@ -17,6 +17,7 @@
 @import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.DeveloperSession
 @import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.routes
 @import include._
+@import views.html.helper.CSPNonce
 
 @this(devMain: DevMain)
 
@@ -72,7 +73,7 @@
 
       <input type="hidden" class="govuk-visually-hidden" name="name" value='@loggedIn.displayedName'>
 
-      <script>
+      <script @CSPNonce.attr>
         document.forms['myform_id'];
       </script>
 
@@ -92,7 +93,7 @@
     <button class="govuk-button" type="submit">Submit and sign out</button>
   }
 
-  <script language="JavaScript">
+  <script @CSPNonce.attr type="text/javascript">
     var feedbackForm = document.forms['feedbackForm'];
     feedbackForm.elements["isJavascript"].value = "true";
   </script>

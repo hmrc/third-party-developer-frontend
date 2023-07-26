@@ -32,6 +32,7 @@
 
 @import uk.gov.hmrc.govukfrontend.views.html.components.GovukLayout
 @import uk.gov.hmrc.govukfrontend.views.html.components.Text
+@import views.html.helper.CSPNonce
 
 @this(
   govukLayout: GovukLayout,
@@ -171,12 +172,12 @@
 }
 
 @scripts = {
-  <script src='@routes.Assets.versioned("lib/govuk-frontend/govuk/all.js")'></script>
-  <script src='@routes.Assets.versioned("lib/hmrc-frontend/hmrc/all.js")'></script>
-  <script src='@routes.Assets.versioned("javascripts/subscriptions.js")' type="text/javascript"></script> 
-  <script>window.GOVUKFrontend.initAll();</script>
-  <script>window.HMRCFrontend.initAll();</script>
-  <script src='@routes.Assets.versioned("javascripts/feedback.js")' type="text/javascript"></script>
+  <script @CSPNonce.attr src='@routes.Assets.versioned("lib/govuk-frontend/govuk/all.js")'></script>
+  <script @CSPNonce.attr src='@routes.Assets.versioned("lib/hmrc-frontend/hmrc/all.js")'></script>
+  <script @CSPNonce.attr src='@routes.Assets.versioned("javascripts/subscriptions.js")' type="text/javascript"></script> 
+  <script @CSPNonce.attr>window.GOVUKFrontend.initAll();</script>
+  <script @CSPNonce.attr>window.HMRCFrontend.initAll();</script>
+  <script @CSPNonce.attr src='@routes.Assets.versioned("javascripts/feedback.js")' type="text/javascript"></script>
 
   @additionalScriptsBlock
 }
