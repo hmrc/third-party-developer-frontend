@@ -95,6 +95,7 @@
                   @helper.form(action = controllers.routes.SubscriptionsController.changeApiSubscription(app.id, api.context, api.apiVersion.version, afterSubscriptionRedirectTo.toString), Symbol("class") -> "slider") {
                     @helper.CSRF.formField
                     <fieldset id="@IdFormatter.identifier(api.context, api.apiVersion.version)-toggle" @if(app.hasLockedSubscriptions || api.isPrivate) { disabled } aria-live="assertive">
+                      <legend class="govuk-visually-hidden">subscribe to @{api.name} @{api.apiVersion.version.value} (@{api.apiVersion.displayedStatus})</legend>
                       <div class="slider__radios slider__radios--font-fix">
                         <input class="slider__on slider__on-submit" id="@IdFormatter.identifier(api.context, api.apiVersion.version)-on" name="subscribed" type="radio" value="true" @if(api.subscribed) {checked} else {}>
                         <label class="govuk-label govuk-radios__label slider__on--label" for="@IdFormatter.identifier(api.context, api.apiVersion.version)-on">Yes</label>
