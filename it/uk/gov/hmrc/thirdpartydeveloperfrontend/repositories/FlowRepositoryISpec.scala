@@ -134,8 +134,8 @@ class FlowRepositoryISpec extends AnyWordSpec
           Some(SellResellOrDistribute("Yes")),
           Some(ApiSubscriptions(Map(
             ApiIdentifier(ApiContext("individual-benefits"), ApiVersion("1.1")) -> true,
-            ApiIdentifier(ApiContext("marriage-allowance"), ApiVersion("1.0")) -> true
-            )))
+            ApiIdentifier(ApiContext("marriage-allowance"), ApiVersion("1.0"))  -> true
+          )))
         )
 
         await(flowRepository.saveFlow(flow))
@@ -146,9 +146,9 @@ class FlowRepositoryISpec extends AnyWordSpec
         castResult.flowType shouldBe GET_PRODUCTION_CREDENTIALS
         castResult.sellResellOrDistribute shouldBe Some(SellResellOrDistribute("Yes"))
         castResult.apiSubscriptions shouldBe Some(ApiSubscriptions(Map(
-            ApiIdentifier(ApiContext("individual-benefits"), ApiVersion("1.1")) -> true,
-            ApiIdentifier(ApiContext("marriage-allowance"), ApiVersion("1.0")) -> true
-            )))
+          ApiIdentifier(ApiContext("individual-benefits"), ApiVersion("1.1")) -> true,
+          ApiIdentifier(ApiContext("marriage-allowance"), ApiVersion("1.0"))  -> true
+        )))
       }
 
       "update the flow when it already exists" in new PopulatedSetup {
