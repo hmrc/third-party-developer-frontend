@@ -21,6 +21,7 @@
 @import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.Application
 @import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.Developer
 @import _root_.controllers.routes.Assets
+@import views.html.helper.CSPNonce
 
 @(app: Application, developer: Developer, clientSecrets: Seq[ClientSecretResponse])(
   implicit request: play.api.mvc.Request[Any], messages: Messages, applicationConfig: ApplicationConfig, flash: Flash
@@ -133,4 +134,4 @@
       }
       <p class="govuk-body"><a class="govuk-link" href="@controllers.routes.Details.details(app.id)">View your application details</a></p>
 }
-<script src='@Assets.versioned("javascripts/copy-button.js")' type="text/javascript"></script> 
+<script @CSPNonce.attr src='@Assets.versioned("javascripts/copy-button.js")' type="text/javascript"></script> 

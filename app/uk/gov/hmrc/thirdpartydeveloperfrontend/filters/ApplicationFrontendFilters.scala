@@ -23,6 +23,7 @@ import com.kenshoo.play.metrics.MetricsFilter
 import play.api.Configuration
 import play.api.http.HttpFilters
 import play.api.mvc.EssentialFilter
+import play.filters.csp.CSPFilter
 import play.filters.csrf.CSRFFilter
 import play.filters.headers.SecurityHeadersFilter
 import uk.gov.hmrc.play.bootstrap.filters.{CacheControlFilter, LoggingFilter, MDCFilter}
@@ -43,7 +44,8 @@ class ApplicationFrontendFilters @Inject() (
     cookieCryptoFilter: SessionCookieCryptoFilter,
     sessionTimeoutFilter: SessionTimeoutFilter,
     cacheControlFilter: CacheControlFilter,
-    mdcFilter: MDCFilter
+    mdcFilter: MDCFilter,
+    cspFilter: CSPFilter
   ) extends HttpFilters {
 
   val frontendFilters: Seq[EssentialFilter] = Seq(
@@ -56,7 +58,8 @@ class ApplicationFrontendFilters @Inject() (
     sessionTimeoutFilter,
     csrfFilter,
     cacheControlFilter,
-    mdcFilter
+    mdcFilter,
+    cspFilter
   )
 
   lazy val enableSecurityHeaderFilter: Boolean =

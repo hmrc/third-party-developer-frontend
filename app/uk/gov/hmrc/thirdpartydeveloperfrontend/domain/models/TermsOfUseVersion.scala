@@ -18,6 +18,8 @@ package uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models
 
 import _root_.views.html.partials
 
+import play.api.mvc.Request
+
 import uk.gov.hmrc.thirdpartydeveloperfrontend.config.ApplicationConfig
 
 object TermsOfUseVersion {
@@ -39,7 +41,7 @@ object TermsOfUseVersion {
 sealed abstract class TermsOfUseVersion {
   import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.TermsOfUseVersion._
 
-  def getTermsOfUseAsHtml()(implicit applicationConfig: ApplicationConfig) = this match {
+  def getTermsOfUseAsHtml()(implicit applicationConfig: ApplicationConfig, request: Request[Any]) = this match {
     case OLD_JOURNEY => partials.termsOfUse_v12()
     case NEW_JOURNEY => partials.termsOfUse_v20()
   }
