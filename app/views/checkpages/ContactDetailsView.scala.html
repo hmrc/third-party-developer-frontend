@@ -19,6 +19,7 @@
 @import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.views.BackButtonWithJavaScript
 @import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.Application
 @import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.DeveloperSession
+@import views.html.helper.CSPNonce
 
 @this(devMain: DevMainWithFormErrors)
 
@@ -101,7 +102,7 @@
 
     <button id="submit" class="govuk-button" type="submit">Save and continue</button>
 
-    <script type="text/javascript">
+    <script @CSPNonce.attr type="text/javascript">
       function checkboxChange(){
         let checkbox = document.getElementById('useregistered')
         if (checkbox.checked){

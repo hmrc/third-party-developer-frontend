@@ -16,6 +16,10 @@
 
 package uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models
 
+import play.api.mvc.Request
+import play.api.test.FakeRequest
+import play.api.test.Helpers.GET
+
 import uk.gov.hmrc.thirdpartydeveloperfrontend.config.ApplicationConfig
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.HmrcSpec
 
@@ -43,13 +47,14 @@ class TermsOfUseVersionSpec extends HmrcSpec {
 
   "getTermsOfUseAsHtml" should {
     "return old content for OLD_JOURNEY" in {
-      TermsOfUseVersion.OLD_JOURNEY.getTermsOfUseAsHtml()(mock[ApplicationConfig]).toString() should include(
+      TermsOfUseVersion.OLD_JOURNEY.getTermsOfUseAsHtml()(mock[ApplicationConfig], mock[Request[Any]]).toString() should include(
         "These terms of use explain what you can expect from us and what we expect from you"
       )
     }
     "return new content for NEW_JOURNEY" in {
       TermsOfUseVersion.NEW_JOURNEY.getTermsOfUseAsHtml()(
-        mock[ApplicationConfig]
+        mock[ApplicationConfig],
+        FakeRequest(GET, "/")
       ).toString() should not include "These terms of use explain what you can expect from us and what we expect from you"
     }
   }
