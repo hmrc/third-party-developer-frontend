@@ -16,7 +16,7 @@
 
 @import views.html.helper.CSPNonce
 
-@()(implicit request: play.api.mvc.Request[Any])
+@()(implicit request: play.api.mvc.Request[Any], appConfig: ApplicationConfig)
 
 <div class="govuk-grid-column-one-half">
   <ul class="govuk-list">
@@ -59,7 +59,7 @@
 
   <p class="govuk-body govuk-!-margin-top-6 govuk-!-margin-bottom-2">Share the terms of use with your colleagues.
   </p>
-  <span id="copy-to-clip" value='@{if (request.secure) "https" else "http"}://@request.host@request.uri'></span>
+  <span id="copy-to-clip" value='@{appConfig.thirdPartyDeveloperFrontendUrl}@request.uri'></span>
   <button id="copy-to-clip-button" class="govuk-button govuk-button--secondary" data-module="govuk-button">
           Copy link to clipboard
   </button>
