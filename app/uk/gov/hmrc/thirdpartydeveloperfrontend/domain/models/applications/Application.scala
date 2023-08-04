@@ -32,9 +32,11 @@ import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.State.
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.Developer
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.services.LocalDateTimeFormatters
 import uk.gov.hmrc.thirdpartydeveloperfrontend.helpers.string.Digest
+import uk.gov.hmrc.apiplatform.modules.applications.domain.models.GrantLength
 
 trait BaseApplication {
   val defaultGrantLengthDays = 547
+  
   def id: ApplicationId
   def clientId: ClientId
   def name: String
@@ -159,22 +161,8 @@ trait BaseApplication {
     collaborators.find(c => c.emailAddress.text.toSha256 == teamMemberHash)
   }
 
-  // scalastyle:off cyclomatic.complexity
-  def grantLengthDisplayValue(): String = {
-    grantLength match {
-      case GrantLength.MONTH           => "1 month"
-      case GrantLength.THREE_MONTHS    => "3 months"
-      case GrantLength.SIX_MONTHS      => "6 months"
-      case GrantLength.ONE_YEAR        => "1 year"
-      case GrantLength.EIGHTEEN_MONTHS => "18 months"
-      case GrantLength.THREE_YEARS     => "3 years"
-      case GrantLength.FIVE_YEARS      => "5 years"
-      case GrantLength.TEN_YEARS       => "10 years"
-      case GrantLength.HUNDRED_YEARS   => "100 years"
-      case _                           => s"${Math.round(grantLength.getDays.toFloat / 30)} months"
-    }
-  }
-  // scalastyle:on cyclomatic.complexity
+  def grantLengthDisplayValue(): String = 
+    GrantLength.apply(grantLength.getDays).fold(s"${Math.round(grantLength.getDays.toFloat / 30)} months")(_.toString)
 }
 
 case class Application(
