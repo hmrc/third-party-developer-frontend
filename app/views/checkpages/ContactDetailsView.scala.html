@@ -53,7 +53,7 @@
         </div>
         <div class="govuk-checkboxes" data-module="govuk-checkboxes">
           <div class="govuk-checkboxes__item">
-            <input class="govuk-checkboxes__input" id="useregistered" type="checkbox" name="useregistered" value="useregistered" onchange="checkboxChange()">
+            <input class="govuk-checkboxes__input" id="useregistered" type="checkbox" name="useregistered" value="useregistered">
             <label class="govuk-label govuk-checkboxes__label" for="useregistered">Use my details</label>
           </div>
         </div>
@@ -102,14 +102,17 @@
 
     <button id="submit" class="govuk-button" type="submit">Save and continue</button>
 
-    <script @CSPNonce.attr type="text/javascript">
-      function checkboxChange(){
-        let checkbox = document.getElementById('useregistered')
-        if (checkbox.checked){
-          document.getElementById("fullname").value = "@loggedIn.loggedInName";
-          document.getElementById("email").value = "@loggedIn.email.text";
-        }
-      }
-    </script>
+    @views.html.helper.script(args = Symbol("type") -> "module") {
+      document.getElementById("useregistered").addEventListener(
+        'change',
+        function () {
+          if (this.checked){
+            document.getElementById("fullname").value = "@loggedIn.loggedInName";
+            document.getElementById("email").value = "@loggedIn.email.text";
+          }
+        },
+        false
+      )
+    }
   }
 }
