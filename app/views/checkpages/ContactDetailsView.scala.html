@@ -102,14 +102,17 @@
 
     <button id="submit" class="govuk-button" type="submit">Save and continue</button>
 
-    <script @CSPNonce.attr type="text/javascript">
-      function checkboxChange(){
-        let checkbox = document.getElementById('useregistered')
-        if (checkbox.checked){
-          document.getElementById("fullname").value = "@loggedIn.loggedInName";
-          document.getElementById("email").value = "@loggedIn.email.text";
-        }
-      }
-    </script>
+    @views.html.helper.script(args = Symbol("type") -> "module") {
+      document.getElementById("useregistered").addEventListener(
+        'change',
+        function () {
+          if (this.checked){
+            document.getElementById("fullname").value = "@loggedIn.loggedInName";
+            document.getElementById("email").value = "@loggedIn.email.text";
+          }
+        },
+        false
+      )
+    }
   }
 }
