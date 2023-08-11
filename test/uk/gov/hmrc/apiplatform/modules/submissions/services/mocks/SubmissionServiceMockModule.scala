@@ -68,6 +68,10 @@ trait SubmissionServiceMockModule extends MockitoSugar with ArgumentMatchersSuga
         when(aMock.recordAnswer(*[Submission.Id], *[Question.Id], *)(*)).thenReturn(successful(Right(out)))
       }
 
+      def thenReturnsForAnswer(answer: List[String], out: ExtendedSubmission) = {
+        when(aMock.recordAnswer(*[Submission.Id], *[Question.Id], eqTo(answer))(*)).thenReturn(successful(Right(out)))
+      }
+
       def thenReturnsNone() = {
         when(aMock.recordAnswer(*[Submission.Id], *[Question.Id], *)(*)).thenReturn(successful(Left("Failed to record answer for submission")))
       }
