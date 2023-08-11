@@ -21,7 +21,7 @@ import java.time.{LocalDateTime, Period}
 import play.api.libs.json.{OFormat, Reads}
 
 import uk.gov.hmrc.apiplatform.modules.apis.domain.models.ApiIdentifier
-import uk.gov.hmrc.apiplatform.modules.applications.domain.models.{ApplicationId, ClientId, Collaborator, PrivacyPolicyLocations, TermsAndConditionsLocations}
+import uk.gov.hmrc.apiplatform.modules.applications.domain.models._
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.LaxEmailAddress
 import uk.gov.hmrc.apiplatform.modules.developers.domain.models.UserId
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.apidefinitions.AccessType.STANDARD
@@ -32,11 +32,10 @@ import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.State.
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.Developer
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.services.LocalDateTimeFormatters
 import uk.gov.hmrc.thirdpartydeveloperfrontend.helpers.string.Digest
-import uk.gov.hmrc.apiplatform.modules.applications.domain.models.GrantLength
 
 trait BaseApplication {
   val defaultGrantLengthDays = 547
-  
+
   def id: ApplicationId
   def clientId: ClientId
   def name: String
@@ -161,7 +160,7 @@ trait BaseApplication {
     collaborators.find(c => c.emailAddress.text.toSha256 == teamMemberHash)
   }
 
-  def grantLengthDisplayValue(): String = 
+  def grantLengthDisplayValue(): String =
     GrantLength.apply(grantLength.getDays).fold(s"${Math.round(grantLength.getDays.toFloat / 30)} months")(_.toString)
 }
 
