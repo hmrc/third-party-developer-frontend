@@ -144,7 +144,8 @@ class QuestionsController @Inject() (
 
     val formValues   = request.body.asFormUrlEncoded.get.filterNot(_._1 == "csrfToken")
     val submitAction = formValues.get("submit-action").flatMap(_.headOption)
-    val answers      = formValues.get("answer").fold(List.empty[String])(_.toList.filter(_.nonEmpty))
+    val rawAnswers   = formValues.get("answer").fold(List.empty[String])(_.toList.filter(_.nonEmpty))
+    val answers      = rawAnswers.map(a => a.trim())
 
     import cats.implicits._
     import cats.instances.future.catsStdInstancesForFuture
@@ -153,6 +154,7 @@ class QuestionsController @Inject() (
       case (Some("acknowledgement"), Nil) => Either.right(Nil)
       case (Some("acknowledgement"), _)   => Either.left("Bad request - values for acknowledgement")
       case (Some("save"), Nil)            => Either.left("save action requires values")
+      case (Some("save"), List(""))       => Either.left("save action requires non blank values")
       case (Some("save"), _)              => Either.right(answers)
       case (Some("no-answer"), _)         => Either.right(Nil)
       case (None, _)                      => Either.left("Bad request - no action")

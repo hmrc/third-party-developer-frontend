@@ -188,6 +188,19 @@ class QuestionControllerSpec
       redirectLocation(result) shouldBe Some(s"/developer/submissions/${aSubmission.id.value}/question/${question2Id.value}")
     }
 
+    "succeed when answer given and trim answer" in new Setup {
+      private val answer1 = "  Bob's application  "
+      private val request = loggedInRequest.withFormUrlEncodedBody("answer" -> answer1, "submit-action" -> "save")
+
+      SubmissionServiceMock.Fetch.thenReturns(aSubmission.withIncompleteProgress())
+      SubmissionServiceMock.RecordAnswer.thenReturnsForAnswer(List(answer1.trim()), aSubmission.withIncompleteProgress())
+
+      val result = controller.recordAnswer(aSubmission.id, questionId)(request.withCSRFToken)
+
+      status(result) shouldBe SEE_OTHER
+      redirectLocation(result) shouldBe Some(s"/developer/submissions/${aSubmission.id.value}/question/${question2Id.value}")
+    }
+
     "fail if invalid answer provided and returns custom error message" in new Setup {
       SubmissionServiceMock.Fetch.thenReturns(aSubmission.withIncompleteProgress())
       SubmissionServiceMock.RecordAnswer.thenReturnsNone()
@@ -211,8 +224,27 @@ class QuestionControllerSpec
 
     "fail if no answer provided and returns custom error message" in new Setup {
       SubmissionServiceMock.Fetch.thenReturns(aSubmission.withIncompleteProgress())
-      SubmissionServiceMock.RecordAnswer.thenReturnsNone()
       private val blankAnswer = ""
+      private val request     = loggedInRequest.withFormUrlEncodedBody("answer" -> blankAnswer, "submit-action" -> "save")
+
+      val result = controller.recordAnswer(aSubmission.id, OrganisationDetails.questionRI1.id)(request.withCSRFToken)
+
+      status(result) shouldBe BAD_REQUEST
+
+      val body = contentAsString(result)
+
+      val errorInfo = OrganisationDetails.questionRI1.errorInfo.get
+
+      val expectedErrorSummary = errorInfo.summary
+      body should include(expectedErrorSummary)
+
+      val expectedErrorMessage = errorInfo.message.getOrElse(errorInfo.summary)
+      body should include(expectedErrorMessage)
+    }
+
+    "fail if just spaces provided and returns custom error message" in new Setup {
+      SubmissionServiceMock.Fetch.thenReturns(aSubmission.withIncompleteProgress())
+      private val blankAnswer = " "
       private val request     = loggedInRequest.withFormUrlEncodedBody("answer" -> blankAnswer, "submit-action" -> "save")
 
       val result = controller.recordAnswer(aSubmission.id, OrganisationDetails.questionRI1.id)(request.withCSRFToken)
