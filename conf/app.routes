@@ -226,8 +226,4 @@ GET         /applications/:id/before-you-start                                  
 GET         /applications/:id/we-will-check-your-answers                                                 uk.gov.hmrc.apiplatform.modules.uplift.controllers.UpliftJourneyController.weWillCheckYourAnswers(id: ApplicationId)
 GET         /applications/:id/agree-new-terms-of-use                                                     uk.gov.hmrc.apiplatform.modules.uplift.controllers.UpliftJourneyController.agreeNewTermsOfUse(id: ApplicationId)
 
-GET         /poc-dynamics/tickets                                                                        uk.gov.hmrc.apiplatform.modules.dynamics.controllers.DynamicsController.tickets
-GET         /poc-dynamics/tickets/add                                                                    uk.gov.hmrc.apiplatform.modules.dynamics.controllers.DynamicsController.addTicket()
-POST        /poc-dynamics/tickets/add                                                                    uk.gov.hmrc.apiplatform.modules.dynamics.controllers.DynamicsController.addTicketAction()
-
 ->          /hmrc-frontend        hmrcfrontend.Routes

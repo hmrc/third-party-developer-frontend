@@ -35,7 +35,6 @@ import uk.gov.hmrc.apiplatform.modules.applications.domain.models.{ApplicationId
 import uk.gov.hmrc.apiplatform.modules.commands.applications.domain.models.DispatchSuccessResult
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.LaxEmailAddress
 import uk.gov.hmrc.apiplatform.modules.developers.domain.models.UserId
-import uk.gov.hmrc.apiplatform.modules.dynamics.connectors.ThirdPartyDeveloperDynamicsConnector
 import uk.gov.hmrc.apiplatform.modules.mfa.connectors.ThirdPartyDeveloperMfaConnector
 import uk.gov.hmrc.apiplatform.modules.mfa.models.{MfaAction, MfaId, MfaType}
 import uk.gov.hmrc.apiplatform.modules.submissions.connectors.ThirdPartyApplicationSubmissionsConnector
@@ -92,7 +91,6 @@ abstract class EndpointScenarioSpec extends AsyncHmrcSpec with GuiceOneAppPerSui
       .overrides(bind[ProductionPushPullNotificationsConnector].toInstance(productionPushPullNotificationsConnector))
       .overrides(bind[ThirdPartyApplicationSubmissionsConnector].toInstance(thirdPartyApplicationSubmissionsConnector))
       .overrides(bind[ThirdPartyDeveloperMfaConnector].toInstance(thirdPartyDeveloperMfaConnector))
-      .overrides(bind[ThirdPartyDeveloperDynamicsConnector].toInstance(thirdPartyDeveloperDynamicsConnector))
       .overrides(bind[ApplicationCommandConnector].toInstance(cmdConnector))
       .in(Mode.Test)
       .build()
@@ -216,8 +214,6 @@ abstract class EndpointScenarioSpec extends AsyncHmrcSpec with GuiceOneAppPerSui
   when(thirdPartyDeveloperMfaConnector.changeName(*[UserId], *[MfaId], *[String])(*)).thenReturn(Future.successful(true))
   when(thirdPartyDeveloperMfaConnector.createMfaSms(*[UserId], *[String])(*)).thenReturn(Future.successful(registerSmsResponse))
   when(thirdPartyDeveloperMfaConnector.sendSms(*[UserId], *[MfaId])(*)).thenReturn(Future.successful(true))
-  when(thirdPartyDeveloperDynamicsConnector.getTickets()(*)).thenReturn(Future.successful(List.empty))
-  when(thirdPartyDeveloperDynamicsConnector.createTicket(*[String], *[String], *[String])(*)).thenReturn(Future.successful(Right(())))
 
   private def populatePathTemplateWithValues(pathTemplate: String, values: Map[String, String]): String = {
     // TODO fail test if path contains parameters that aren't supplied by the values map
@@ -412,7 +408,6 @@ abstract class EndpointScenarioSpec extends AsyncHmrcSpec with GuiceOneAppPerSui
       case Endpoint("POST", "/developer/profile/security-preferences/auth-app/name", _)                                                => Map("name" -> "appName")
       case Endpoint("POST", "/developer/profile/security-preferences/sms/setup", _)                                                    => Map("mobileNumber" -> "0123456789")
       case Endpoint("POST", "/developer/profile/security-preferences/sms/access-code", _)                                              => Map("accessCode" -> "123456", "mobileNumber" -> "0123456789")
-      case Endpoint("POST", "/developer/poc-dynamics/tickets/add", _)                                                                  => Map("customerId" -> "11111111-1111-1111-1111-111111111111", "title" -> "title", "description" -> "desc")
       case Endpoint("POST", "/developer/login/select-mfa", _)                                                                          => Map("mfaId" -> authAppMfaId.value.toString)
       case _                                                                                                                           => Map.empty
     }
@@ -520,7 +515,6 @@ abstract class EndpointScenarioSpec extends AsyncHmrcSpec with GuiceOneAppPerSui
       case Endpoint("POST", "/developer/profile/security-preferences/sms/access-code", _)                                              => Redirect(s"/developer/profile/security-preferences/sms/setup/complete")
       case Endpoint("GET", "/developer/profile/security-preferences/remove-mfa", _)                                                    =>
         Redirect(s"/developer/profile/security-preferences/auth-app/access-code?mfaId=${authAppMfaId.value.toString}&mfaAction=REMOVE&mfaIdForRemoval=${authAppMfaId.value.toString}")
-      case Endpoint("POST", "/developer/poc-dynamics/tickets/add", _)                                                                  => Redirect("/developer/poc-dynamics/tickets")
       case Endpoint("POST", "/developer/login/select-mfa", _)                                                                          => Redirect(s"/developer/login-mfa?mfaId=${authAppMfaId.value.toString}&mfaType=${MfaType.AUTHENTICATOR_APP.toString}")
       case Endpoint("GET", "/developer/login/select-mfa/try-another-option", _)                                                        => Unexpected(500)
       case Endpoint("GET", "/developer/applications/terms-of-use", _)                                                                  => Success()
