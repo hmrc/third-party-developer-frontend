@@ -37,7 +37,7 @@ import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.apiplatform.modules.applications.domain.models.{PrivacyPolicyLocation, PrivacyPolicyLocations, TermsAndConditionsLocation, TermsAndConditionsLocations}
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.LaxEmailAddress
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.LaxEmailAddress.StringSyntax
-import uk.gov.hmrc.apiplatform.modules.developers.domain.models.UserId
+import uk.gov.hmrc.apiplatform.modules.common.domain.models.UserId
 import uk.gov.hmrc.apiplatform.modules.submissions.services.mocks.SubmissionServiceMockModule
 import uk.gov.hmrc.thirdpartydeveloperfrontend.builder.DeveloperBuilder
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain._
@@ -50,6 +50,7 @@ import uk.gov.hmrc.thirdpartydeveloperfrontend.service.SessionService
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.ViewHelpers._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.WithLoggedInSession._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.{CollaboratorTracker, LocalUserIdTracker, TestApplications, WithCSRFAddToken}
+import uk.gov.hmrc.apiplatform.modules.common.domain.models.Environment
 
 class DetailsSpec
     extends BaseControllerSpec
@@ -816,7 +817,7 @@ class DetailsSpec
       val doc = Jsoup.parse(contentAsString(result))
       // APIS-5669 - temporarily removed Change link
       // linkExistsWithHref(doc, routes.Details.changeDetails(application.id).url) shouldBe hasChangeButton
-      elementIdentifiedByIdContainsText(doc, "applicationId", application.id.text()) shouldBe true
+      elementIdentifiedByIdContainsText(doc, "applicationId", application.id.toString()) shouldBe true
       elementIdentifiedByIdContainsText(doc, "applicationName", application.name) shouldBe true
       elementIdentifiedByIdContainsText(doc, "description", application.description.getOrElse("None")) shouldBe true
       elementIdentifiedByIdContainsText(doc, "privacyPolicyUrl", application.privacyPolicyLocation.describe()) shouldBe true
@@ -833,7 +834,7 @@ class DetailsSpec
       val doc = Jsoup.parse(contentAsString(result))
       formExistsWithAction(doc, routes.Details.changeDetailsAction(application.id).url) shouldBe true
       linkExistsWithHref(doc, routes.Details.details(application.id).url) shouldBe true
-      inputExistsWithValue(doc, "applicationId", "hidden", application.id.text()) shouldBe true
+      inputExistsWithValue(doc, "applicationId", "hidden", application.id.toString()) shouldBe true
       if (application.deployedTo == Environment.SANDBOX || application.state.name == State.TESTING) {
         inputExistsWithValue(doc, "applicationName", "text", application.name) shouldBe true
       } else {

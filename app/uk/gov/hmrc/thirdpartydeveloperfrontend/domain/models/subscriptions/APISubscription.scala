@@ -16,24 +16,20 @@
 
 package uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.subscriptions
 
+import uk.gov.hmrc.apiplatform.modules.common.domain.models._
 import uk.gov.hmrc.apiplatform.modules.apis.domain.models._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.apidefinitions._
 
-case class ApiCategory(value: String) extends AnyVal
-
-object ApiCategory {
-  val EXAMPLE = ApiCategory("EXAMPLE")
-}
 
 case class VersionSubscription(version: ApiVersionDefinition, subscribed: Boolean)
 
-case class VersionData(status: APIStatus, access: APIAccess)
+case class VersionData(status: ApiStatus, access: ApiAccess)
 
 case class ApiData(
     serviceName: String,
     name: String,
     isTestSupport: Boolean,
-    versions: Map[ApiVersion, VersionData],
+    versions: Map[ApiVersionNbr, VersionData],
     categories: List[ApiCategory]
   )
 
@@ -46,7 +42,7 @@ object ApiData {
   }
 
   def filterApis(contextFilter: ApiData => Boolean, versionFilter: VersionData => Boolean)(in: Map[ApiContext, ApiData]): Map[ApiContext, ApiData] = {
-    def filterVersions(in: Map[ApiVersion, VersionData]): Map[ApiVersion, VersionData] = {
+    def filterVersions(in: Map[ApiVersionNbr, VersionData]): Map[ApiVersionNbr, VersionData] = {
       in.filter {
         case (v, d) => versionFilter(d)
       }

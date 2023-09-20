@@ -30,11 +30,11 @@ import play.api.test.Helpers._
 import play.filters.csrf.CSRF.TokenProvider
 import uk.gov.hmrc.http.HeaderCarrier
 
-import uk.gov.hmrc.apiplatform.modules.applications.domain.models.{ApplicationId, ClientId, Collaborator}
+import uk.gov.hmrc.apiplatform.modules.applications.domain.models.{Collaborator}
+import uk.gov.hmrc.apiplatform.modules.common.domain.models._
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.LaxEmailAddress.StringSyntax
 import uk.gov.hmrc.thirdpartydeveloperfrontend.builder.DeveloperBuilder
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.ApplicationUpdateSuccessful
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.Environment.{PRODUCTION, SANDBOX}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.{DeveloperSession, LoggedInState, Session}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.{TermsOfUseVersion, applications}
@@ -78,7 +78,7 @@ class TermsOfUseSpec
 
     def givenApplicationExists(
         userRole: Collaborator.Role = Collaborator.Roles.ADMINISTRATOR,
-        environment: Environment = PRODUCTION,
+        environment: Environment = Environment.PRODUCTION,
         checkInformation: Option[CheckInformation] = None,
         access: Access = Standard()
       ) = {
@@ -147,7 +147,7 @@ class TermsOfUseSpec
     }
 
     "return a bad request for a sandbox app" in new Setup {
-      givenApplicationExists(environment = SANDBOX)
+      givenApplicationExists(environment = Environment.SANDBOX)
       val result = addToken(underTest.termsOfUse(appId))(loggedInRequest)
       status(result) shouldBe BAD_REQUEST
     }
@@ -176,7 +176,7 @@ class TermsOfUseSpec
       val request = loggedInRequest.withFormUrlEncodedBody("termsOfUseAgreed" -> "true")
       val result  = addToken(underTest.agreeTermsOfUse(appId))(request)
       status(result) shouldBe SEE_OTHER
-      redirectLocation(result) shouldBe Some(s"/developer/applications/${application.id.text()}/details")
+      redirectLocation(result) shouldBe Some(s"/developer/applications/${application.id}/details")
 
       val termsOfUseAgreement = captor.getValue.termsOfUseAgreements.head
       termsOfUseAgreement.emailAddress shouldBe loggedInDeveloper.email

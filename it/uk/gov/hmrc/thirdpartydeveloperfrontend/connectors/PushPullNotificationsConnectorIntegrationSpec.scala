@@ -27,7 +27,7 @@ import play.api.inject.guice.GuiceApplicationBuilder
 import play.api.{Application, Configuration, Mode}
 import uk.gov.hmrc.http.{HeaderCarrier, UpstreamErrorResponse}
 import uk.gov.hmrc.play.http.metrics.common.API
-import uk.gov.hmrc.apiplatform.modules.applications.domain.models.ClientId
+import uk.gov.hmrc.apiplatform.modules.common.domain.models.ClientId
 
 class PushPullNotificationsConnectorIntegrationSpec extends BaseConnectorIntegrationSpec with GuiceOneAppPerSuite {
   private val authorizationKey = randomUUID.toString
@@ -57,7 +57,7 @@ class PushPullNotificationsConnectorIntegrationSpec extends BaseConnectorIntegra
   }
 
   "PushPullNotificationsConnector" when {
-    val clientId = ClientId(randomUUID.toString)
+    val clientId = ClientId.random
 
     "Fetching push secrets" should {
       val fetchPushSecretsPath = s"/client/${clientId.value}/secrets"

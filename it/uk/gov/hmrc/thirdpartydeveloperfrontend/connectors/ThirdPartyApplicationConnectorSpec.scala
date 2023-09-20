@@ -33,11 +33,8 @@ import play.api.inject.guice.GuiceApplicationBuilder
 import play.api.inject.bind
 import play.api.Mode
 import play.api.{Application => PlayApplication}
-import uk.gov.hmrc.apiplatform.modules.apis.domain.models.ApiContext
-import uk.gov.hmrc.apiplatform.modules.apis.domain.models.ApiVersion
-import uk.gov.hmrc.apiplatform.modules.apis.domain.models.ApiIdentifier
+import uk.gov.hmrc.apiplatform.modules.common.domain.models._
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.LaxEmailAddress.StringSyntax
-import uk.gov.hmrc.apiplatform.modules.applications.domain.models.{ApplicationId, ClientId}
 
 import java.util.UUID
 import uk.gov.hmrc.apiplatform.modules.applications.domain.models.ClientSecret
@@ -146,7 +143,7 @@ class ThirdPartyApplicationConnectorSpec extends BaseConnectorIntegrationSpec wi
   }
 
   "update application" should {
-    val url = s"/application/${applicationId.text()}"
+    val url = s"/application/${applicationId}"
 
     "successfully update an application" in new Setup {
 
@@ -166,7 +163,7 @@ class ThirdPartyApplicationConnectorSpec extends BaseConnectorIntegrationSpec wi
   }
 
   "fetch application by id" should {
-    val url     = s"/application/${applicationId.text()}"
+    val url     = s"/application/${applicationId}"
     val appName = "app name"
 
     "return an application" in new Setup {
@@ -221,7 +218,7 @@ class ThirdPartyApplicationConnectorSpec extends BaseConnectorIntegrationSpec wi
 
   "fetch credentials for application" should {
     val tokens = ApplicationToken(List(aClientSecret()), "pToken")
-    val url    = s"/application/${applicationId.text()}/credentials"
+    val url    = s"/application/${applicationId}/credentials"
 
     "return credentials" in new Setup {
       stubFor(
@@ -253,9 +250,9 @@ class ThirdPartyApplicationConnectorSpec extends BaseConnectorIntegrationSpec wi
 
   "unsubscribe from api" should {
     val context       = ApiContext("app1")
-    val version       = ApiVersion("2.0")
+    val version       = ApiVersionNbr("2.0")
     val apiIdentifier = ApiIdentifier(context, version)
-    val url           = s"/application/${applicationId.text()}/subscription?context=${context.value}&version=${version.value}"
+    val url           = s"/application/${applicationId}/subscription?context=${context.value}&version=${version.value}"
 
     "unsubscribe application from an api" in new Setup {
       stubFor(
@@ -319,7 +316,7 @@ class ThirdPartyApplicationConnectorSpec extends BaseConnectorIntegrationSpec wi
     val applicationName = "applicationName"
     val email           = "john.requestor@example.com".toLaxEmail
     val upliftRequest   = UpliftRequest(applicationName, email)
-    val url             = s"/application/${applicationId.text()}/request-uplift"
+    val url             = s"/application/${applicationId}/request-uplift"
 
     "return success response in case of a 204 NO CONTENT on backend " in new Setup {
       stubFor(
@@ -366,7 +363,7 @@ class ThirdPartyApplicationConnectorSpec extends BaseConnectorIntegrationSpec wi
 
   "updateApproval" should {
     val updateRequest = CheckInformation(contactDetails = Some(ContactDetails("name", "email".toLaxEmail, "telephone")))
-    val url           = s"/application/${applicationId.text()}/check-information"
+    val url           = s"/application/${applicationId}/check-information"
 
     "return success response in case of a 204 on backend " in new Setup {
       stubFor(
@@ -440,7 +437,7 @@ class ThirdPartyApplicationConnectorSpec extends BaseConnectorIntegrationSpec wi
   "updateIpAllowlist" should {
     val allowlist     = Set("1.1.1.1/24")
     val updateRequest = UpdateIpAllowlistRequest(required = false, allowlist)
-    val url           = s"/application/${applicationId.text()}/ipAllowlist"
+    val url           = s"/application/${applicationId}/ipAllowlist"
 
     "return success response in case of a 204 on backend " in new Setup {
       stubFor(

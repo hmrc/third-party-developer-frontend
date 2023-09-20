@@ -16,21 +16,11 @@
 
 package uk.gov.hmrc.thirdpartydeveloperfrontend.domain.services
 
-import uk.gov.hmrc.apiplatform.modules.apis.domain.models._
-
 trait ApiDefinitionsJsonFormatters {
   import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.apidefinitions._
   import play.api.libs.json._
 
-  implicit val keyReadsApiContext: KeyReads[ApiContext]   = key => JsSuccess(ApiContext(key))
-  implicit val keyWritesApiContext: KeyWrites[ApiContext] = _.value
-
-  implicit val keyReadsApiVersion: KeyReads[ApiVersion]   = key => JsSuccess(ApiVersion(key))
-  implicit val keyWritesApiVersion: KeyWrites[ApiVersion] = _.value
-
-  implicit val formatAPIAccess            = Json.format[APIAccess]
   implicit val formatApiVersionDefinition = Json.format[ApiVersionDefinition]
-  implicit val formatApiIdentifier        = Json.format[ApiIdentifier]
 }
 
 object ApiDefinitionsJsonFormatters extends ApiDefinitionsJsonFormatters

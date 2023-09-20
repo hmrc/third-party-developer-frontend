@@ -14,11 +14,11 @@
  * limitations under the License.
  *@
 
-@import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.Environment
+@import uk.gov.hmrc.apiplatform.modules.common.domain.models.Environment
 @import include._
 @import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.controllers.Crumb
 @import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.DeveloperSession
-@import uk.gov.hmrc.apiplatform.modules.applications.domain.models.ApplicationId
+@import uk.gov.hmrc.apiplatform.modules.common.domain.models.UserId
 
 @this(devMain: DevMain, leftHandNav: LeftHandNav)
 
@@ -37,7 +37,7 @@
   developerSession = Some(loggedIn)
 ){
   <h1 class="govuk-heading-l" data-journey="application:added">You added @applicationName</h1>
-  @if(environment.isProduction()) {
+  @if(environment.isProduction) {
     <p class="govuk-body">You have admin rights over this production application.</p>
 
     <h2 class="govuk-heading-m">Before you can get production credentials</h2>

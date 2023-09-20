@@ -20,10 +20,10 @@
 @import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.views.BackButtonWithJavaScript
 @import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.views.SubscriptionRedirect._
 @import views.helper.IdFormatter
-@import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.apidefinitions.APIAccessType
 @import include._
 @import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.APISubscriptions
 @import uk.gov.hmrc.apiplatform.modules.applications.domain.models._
+@import uk.gov.hmrc.apiplatform.modules.apis.domain.models._
 
 @this(devMain: DevMainWithFormErrors)
 @(
@@ -88,7 +88,7 @@
                                   <span>@{api.apiVersion.version.value} (@{api.apiVersion.displayedStatus})</span>
                                 } else {
                                   <a href="@applicationConfig.apiDocumentationFrontendUrl/api-documentation/docs/api/service/@api.serviceName/@api.apiVersion.version.value" aria-label="@apiVersionFullName. You are @if(!api.subscribed) {not} subscribed" data-api-link>
-                                  @if(api.apiVersion.accessType == APIAccessType.PRIVATE) {
+                                  @if(api.apiVersion.accessType == ApiAccessType.PRIVATE) {
                                     <span>
                                         <span>@api.apiVersion.version.value</span><span style="width: 60%;display: inline-block;">(@api.apiVersion.displayedAccessType @api.apiVersion.displayedStatus)</span>
                                     </span>

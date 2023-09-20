@@ -200,7 +200,7 @@ class ThirdPartyDeveloperConnectorIntegrationSpec extends BaseConnectorIntegrati
 
     "update profile" in new Setup {
       val updateProfileRequest = UpdateProfileRequest("First", "Last")
-      val url                  = s"/developer/${userId.asText}"
+      val url                  = s"/developer/${userId}"
 
       stubFor(
         post(urlEqualTo(url))

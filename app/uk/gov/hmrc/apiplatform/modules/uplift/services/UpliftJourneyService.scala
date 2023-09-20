@@ -21,8 +21,7 @@ import scala.concurrent.{ExecutionContext, Future}
 
 import uk.gov.hmrc.http.HeaderCarrier
 
-import uk.gov.hmrc.apiplatform.modules.apis.domain.models.ApiContext
-import uk.gov.hmrc.apiplatform.modules.applications.domain.models.ApplicationId
+import uk.gov.hmrc.apiplatform.modules.common.domain.models._
 import uk.gov.hmrc.apiplatform.modules.common.services.EitherTHelper
 import uk.gov.hmrc.apiplatform.modules.submissions.connectors.ThirdPartyApplicationSubmissionsConnector
 import uk.gov.hmrc.apiplatform.modules.submissions.domain.models.Submission
@@ -121,7 +120,7 @@ class UpliftJourneyService @Inject() (
             subscription <- upliftableApiIds.filter(subscriptionFlow.isSelected)
             name         <- getApiNameForContext(subscription.context)
           } yield {
-            s"$name - ${subscription.version.value}"
+            s"$name - ${subscription.versionNbr}"
           }
         )
 

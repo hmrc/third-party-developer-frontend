@@ -27,7 +27,7 @@ import play.api.data.validation.{Constraint, Invalid, Valid, ValidationError, Va
 import uk.gov.hmrc.emailaddress.EmailAddress
 
 import uk.gov.hmrc.apiplatform.modules.applications.domain.models.RedirectUri
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.Environment
+import uk.gov.hmrc.apiplatform.modules.common.domain.models.Environment
 
 package object controllers {
 
@@ -341,5 +341,5 @@ package object controllers {
 
   def isValidUrl: String => Boolean = s => Try(new URL(s.trim)).isSuccess
 
-  private def isValidEnvironment(s: String) = Environment.from(s).isDefined
+  private def isValidEnvironment(s: String) = Environment.apply(s).isDefined
 }

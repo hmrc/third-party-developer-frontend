@@ -32,8 +32,8 @@ import play.api.test.Helpers._
 import play.filters.csrf.CSRF.TokenProvider
 import uk.gov.hmrc.http.HeaderCarrier
 
-import uk.gov.hmrc.apiplatform.modules.apis.domain.models.{ApiContext, ApiVersion}
-import uk.gov.hmrc.apiplatform.modules.applications.domain.models.{ApplicationId, ClientSecret, ClientSecretResponse, Collaborator}
+import uk.gov.hmrc.apiplatform.modules.common.domain.models._
+import uk.gov.hmrc.apiplatform.modules.applications.domain.models.{ClientSecret, ClientSecretResponse, Collaborator}
 import uk.gov.hmrc.apiplatform.modules.common.utils.FixedClock
 import uk.gov.hmrc.thirdpartydeveloperfrontend.builder.{DeveloperBuilder, _}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.config.ErrorHandler
@@ -63,7 +63,7 @@ class ManageSubscriptionsSpec
   val failedNoApp: Future[Nothing] = failed(new ApplicationNotFound)
 
   val apiContext = ApiContext("test")
-  val apiVersion = ApiVersion("1.0")
+  val apiVersion = ApiVersionNbr("1.0")
 
   implicit val hc: HeaderCarrier = HeaderCarrier()
 
@@ -325,7 +325,7 @@ class ManageSubscriptionsSpec
           givenApplicationAction(ApplicationWithSubscriptionData(application, asSubscriptions(subsData), asFields(subsData)), loggedInDeveloper, subsData)
 
           private val result =
-            addToken(manageSubscriptionController.editApiMetadataPage(appId, ApiContext("/api1-api"), ApiVersion("1.0"), SaveSubsFieldsPageMode.LeftHandNavigation))(
+            addToken(manageSubscriptionController.editApiMetadataPage(appId, ApiContext("/api1-api"), ApiVersionNbr("1.0"), SaveSubsFieldsPageMode.LeftHandNavigation))(
               loggedInRequest
             )
 
@@ -351,7 +351,7 @@ class ManageSubscriptionsSpec
           givenApplicationAction(ApplicationWithSubscriptionData(application, asSubscriptions(subsData), asFields(subsData)), loggedInDeveloper, subsData)
 
           private val result =
-            addToken(manageSubscriptionController.editApiMetadataFieldPage(appId, ApiContext("/api1-api"), ApiVersion("1.0"), fieldName, SaveSubsFieldsPageMode.LeftHandNavigation))(
+            addToken(manageSubscriptionController.editApiMetadataFieldPage(appId, ApiContext("/api1-api"), ApiVersionNbr("1.0"), fieldName, SaveSubsFieldsPageMode.LeftHandNavigation))(
               loggedInRequest
             )
 
@@ -379,7 +379,7 @@ class ManageSubscriptionsSpec
           givenApplicationAction(ApplicationWithSubscriptionData(application, asSubscriptions(subsData), asFields(subsData)), loggedInDeveloper, subsData)
 
           private val result =
-            addToken(manageSubscriptionController.editApiMetadataFieldPage(appId, ApiContext("/api1-api"), ApiVersion("1.0"), fieldName, SaveSubsFieldsPageMode.LeftHandNavigation))(
+            addToken(manageSubscriptionController.editApiMetadataFieldPage(appId, ApiContext("/api1-api"), ApiVersionNbr("1.0"), fieldName, SaveSubsFieldsPageMode.LeftHandNavigation))(
               loggedInRequest
             )
 
@@ -404,7 +404,7 @@ class ManageSubscriptionsSpec
             addToken(manageSubscriptionController.editApiMetadataFieldPage(
               appId,
               ApiContext("/api1-api"),
-              ApiVersion("1.0"),
+              ApiVersionNbr("1.0"),
               "invalid-field-name",
               SaveSubsFieldsPageMode.CheckYourAnswers
             ))(
@@ -428,7 +428,7 @@ class ManageSubscriptionsSpec
           givenApplicationAction(ApplicationWithSubscriptionData(application, asSubscriptions(subsData), asFields(subsData)), loggedInDeveloper, subsData)
 
           private val result =
-            addToken(manageSubscriptionController.editApiMetadataFieldPage(appId, ApiContext("/api1-api"), ApiVersion("1.0"), fieldName, SaveSubsFieldsPageMode.CheckYourAnswers))(
+            addToken(manageSubscriptionController.editApiMetadataFieldPage(appId, ApiContext("/api1-api"), ApiVersionNbr("1.0"), fieldName, SaveSubsFieldsPageMode.CheckYourAnswers))(
               loggedInRequest
             )
 
@@ -438,11 +438,11 @@ class ManageSubscriptionsSpec
 
       "the page mode for saveSubscriptionFields action" when {
         "LeftHandNavigation" should {
-          saveSubscriptionFieldsTest(SaveSubsFieldsPageMode.LeftHandNavigation, s"/developer/applications/${appId.text()}/api-metadata")
+          saveSubscriptionFieldsTest(SaveSubsFieldsPageMode.LeftHandNavigation, s"/developer/applications/${appId}/api-metadata")
         }
 
         "CheckYourAnswers" should {
-          saveSubscriptionFieldsTest(SaveSubsFieldsPageMode.CheckYourAnswers, s"/developer/applications/${appId.text()}/check-your-answers#configurations")
+          saveSubscriptionFieldsTest(SaveSubsFieldsPageMode.CheckYourAnswers, s"/developer/applications/${appId}/check-your-answers#configurations")
         }
 
         def saveSubscriptionFieldsTest(mode: SaveSubsFieldsPageMode, expectedRedirectUrl: String): Unit = {
@@ -454,7 +454,7 @@ class ManageSubscriptionsSpec
             val subsData = List(apiSubscriptionStatus)
             givenApplicationAction(ApplicationWithSubscriptionData(application, asSubscriptions(subsData), asFields(subsData)), loggedInDeveloper, subsData)
 
-            when(mockSubscriptionFieldsService.saveFieldValues(*, *, *[ApiContext], *[ApiVersion], *, *)(*))
+            when(mockSubscriptionFieldsService.saveFieldValues(*, *, *[ApiContext], *[ApiVersionNbr], *, *)(*))
               .thenReturn(successful(SaveSubscriptionFieldsSuccessResponse))
 
             private val loggedInWithFormValues = editFormPostRequest(subSubscriptionValue.definition.name, FieldValue(newSubscriptionValue))
@@ -488,7 +488,7 @@ class ManageSubscriptionsSpec
             val subsData = List(apiSubscriptionStatus)
             givenApplicationAction(ApplicationWithSubscriptionData(application, asSubscriptions(subsData), asFields(subsData)), loggedInDeveloper, subsData)
 
-            when(mockSubscriptionFieldsService.saveFieldValues(*, *, *[ApiContext], *[ApiVersion], *, *)(*))
+            when(mockSubscriptionFieldsService.saveFieldValues(*, *, *[ApiContext], *[ApiVersionNbr], *, *)(*))
               .thenReturn(Future.successful(SaveSubscriptionFieldsSuccessResponse))
 
             val newSubscriptionValue = "new value"
@@ -531,7 +531,7 @@ class ManageSubscriptionsSpec
             val subsData = List(apiSubscriptionStatus)
             givenApplicationAction(ApplicationWithSubscriptionData(application, asSubscriptions(subsData), asFields(subsData)), loggedInDeveloper, subsData)
 
-            when(mockSubscriptionFieldsService.saveFieldValues(*, *, *[ApiContext], *[ApiVersion], *, *)(*))
+            when(mockSubscriptionFieldsService.saveFieldValues(*, *, *[ApiContext], *[ApiVersionNbr], *, *)(*))
               .thenReturn(Future.successful(SaveSubscriptionFieldsAccessDeniedResponse))
 
             val newSubscriptionValue = "illegal new value"
@@ -556,7 +556,7 @@ class ManageSubscriptionsSpec
             val subsData = List(apiSubscriptionStatus)
             givenApplicationAction(ApplicationWithSubscriptionData(application, asSubscriptions(subsData), asFields(subsData)), loggedInDeveloper, subsData)
 
-            when(mockSubscriptionFieldsService.saveFieldValues(*, *, *[ApiContext], *[ApiVersion], *, *)(*))
+            when(mockSubscriptionFieldsService.saveFieldValues(*, *, *[ApiContext], *[ApiVersionNbr], *, *)(*))
               .thenReturn(Future.successful(SaveSubscriptionFieldsFailureResponse(fieldErrors)))
 
             private val subSubscriptionValue = apiSubscriptionStatus.fields.fields.head
@@ -582,7 +582,7 @@ class ManageSubscriptionsSpec
             val subsData = List(apiSubscriptionStatus)
             givenApplicationAction(ApplicationWithSubscriptionData(application, asSubscriptions(subsData), asFields(subsData)), loggedInDeveloper, subsData)
 
-            when(mockSubscriptionFieldsService.saveFieldValues(*, *, *[ApiContext], *[ApiVersion], *, *)(*))
+            when(mockSubscriptionFieldsService.saveFieldValues(*, *, *[ApiContext], *[ApiVersionNbr], *, *)(*))
               .thenReturn(Future.successful(SaveSubscriptionFieldsAccessDeniedResponse))
 
             private val subSubscriptionValue = apiSubscriptionStatus.fields.fields.head
@@ -602,7 +602,7 @@ class ManageSubscriptionsSpec
             val request: FakeRequest[AnyContentAsEmpty.type] = FakeRequest()
 
             val fakeContext = ApiContext("FAKE")
-            val fakeVersion = ApiVersion("1.0")
+            val fakeVersion = ApiVersionNbr("1.0")
 
             private val result =
               manageSubscriptionController.editApiMetadataPage(appId, fakeContext, fakeVersion, mode)(request)
@@ -635,7 +635,7 @@ class ManageSubscriptionsSpec
           val subsData = List(apiSubscriptionStatus)
           givenApplicationAction(ApplicationWithSubscriptionData(application, asSubscriptions(subsData), asFields(subsData)), loggedInDeveloper, subsData)
 
-          when(mockSubscriptionFieldsService.saveFieldValues(*, *, *[ApiContext], *[ApiVersion], *, *)(*))
+          when(mockSubscriptionFieldsService.saveFieldValues(*, *, *[ApiContext], *[ApiVersionNbr], *, *)(*))
             .thenReturn(Future.successful(SaveSubscriptionFieldsFailureResponse(fieldErrors)))
 
           private val subSubscriptionValue = apiSubscriptionStatus.fields.fields.head
@@ -659,7 +659,7 @@ class ManageSubscriptionsSpec
           val subsData = List(apiSubscriptionStatus)
           givenApplicationAction(ApplicationWithSubscriptionData(application, asSubscriptions(subsData), asFields(subsData)), loggedInDeveloper, subsData)
 
-          when(mockSubscriptionFieldsService.saveFieldValues(*, *, *[ApiContext], *[ApiVersion], *, *)(*))
+          when(mockSubscriptionFieldsService.saveFieldValues(*, *, *[ApiContext], *[ApiVersionNbr], *, *)(*))
             .thenReturn(successful(SaveSubscriptionFieldsAccessDeniedResponse))
 
           private val subSubscriptionValue = apiSubscriptionStatus.fields.fields.head
@@ -821,7 +821,7 @@ class ManageSubscriptionsSpec
         private val result = manageSubscriptionController.subscriptionConfigurationStart(appId)(loggedInRequest)
 
         status(result) shouldBe SEE_OTHER
-        redirectLocation(result) shouldBe Some(s"/developer/applications/${appId.text()}/add/success")
+        redirectLocation(result) shouldBe Some(s"/developer/applications/${appId}/add/success")
       }
     }
 

@@ -35,8 +35,9 @@ import play.api.test.Helpers.{redirectLocation, _}
 import play.filters.csrf.CSRF.TokenProvider
 import uk.gov.hmrc.http.HeaderCarrier
 
+import uk.gov.hmrc.apiplatform.modules.common.domain.models._
 import uk.gov.hmrc.apiplatform.modules.apis.domain.models._
-import uk.gov.hmrc.apiplatform.modules.applications.domain.models.{ApplicationId, ClientId, ClientSecret, ClientSecretResponse, Collaborator}
+import uk.gov.hmrc.apiplatform.modules.applications.domain.models.{ClientSecret, ClientSecretResponse, Collaborator}
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.LaxEmailAddress.StringSyntax
 import uk.gov.hmrc.apiplatform.modules.common.utils.FixedClock
 import uk.gov.hmrc.thirdpartydeveloperfrontend.builder._
@@ -64,7 +65,7 @@ class CheckYourAnswersSpec
   private def aClientSecret() = ClientSecretResponse(ClientSecret.Id.random, randomUUID.toString, now())
 
   val appName: String = "app"
-  val apiVersion      = ApiVersion("version")
+  val apiVersion      = ApiVersionNbr("version")
 
   val anotherCollaboratorEmail               = "collaborator@example.com".toLaxEmail
   val hashedAnotherCollaboratorEmail: String = anotherCollaboratorEmail.text.toSha256
@@ -87,7 +88,7 @@ class CheckYourAnswersSpec
           "API1",
           "api-example-microservice",
           ApiContext("exampleContext"),
-          ApiVersionDefinition(apiVersion, APIStatus.STABLE),
+          ApiVersionDefinition(apiVersion, ApiStatus.STABLE),
           subscribed = true,
           requiresTrust = false,
           fields = emptyFields
@@ -108,7 +109,7 @@ class CheckYourAnswersSpec
             "API1",
             "subscriptionServiceName",
             ApiContext("context"),
-            ApiVersionDefinition(apiVersion, APIStatus.STABLE),
+            ApiVersionDefinition(apiVersion, ApiStatus.STABLE),
             subscribed = true,
             requiresTrust = false,
             fields = emptyFields
@@ -186,7 +187,7 @@ class CheckYourAnswersSpec
             "API1",
             "subscriptionServiceName",
             context,
-            ApiVersionDefinition(apiVersion, APIStatus.STABLE),
+            ApiVersionDefinition(apiVersion, ApiStatus.STABLE),
             subscribed = true,
             requiresTrust = false,
             fields = emptyFields
@@ -438,7 +439,7 @@ class CheckYourAnswersSpec
       private val result = addToken(underTest.teamAction(appId))(loggedInRequest)
 
       status(result) shouldBe SEE_OTHER
-      redirectLocation(result) shouldBe Some(s"/developer/applications/${appId.text()}/check-your-answers")
+      redirectLocation(result) shouldBe Some(s"/developer/applications/${appId}/check-your-answers")
 
       private val expectedCheckInformation = CheckInformation(teamConfirmed = true)
       verify(underTest.applicationService).updateCheckInformation(eqTo(application), eqTo(expectedCheckInformation))(*)
@@ -502,7 +503,7 @@ class CheckYourAnswersSpec
 
       status(result) shouldBe SEE_OTHER
 
-      redirectLocation(result) shouldBe Some(s"/developer/applications/${appId.text()}/check-your-answers/team")
+      redirectLocation(result) shouldBe Some(s"/developer/applications/${appId}/check-your-answers/team")
 
       verify(underTest.collaboratorService).removeTeamMember(eqTo(application), eqTo(anotherCollaboratorEmail), eqTo(loggedInDeveloper.email))(*)
     }
@@ -513,7 +514,7 @@ class CheckYourAnswersSpec
       private val result = addToken(underTest.teamAction(appId))(loggedInRequest)
 
       status(result) shouldBe SEE_OTHER
-      redirectLocation(result) shouldBe Some(s"/developer/applications/${appId.text()}/check-your-answers")
+      redirectLocation(result) shouldBe Some(s"/developer/applications/${appId}/check-your-answers")
 
       private val expectedCheckInformation = CheckInformation(teamConfirmed = true)
       verify(underTest.applicationService).updateCheckInformation(eqTo(application), eqTo(expectedCheckInformation))(*)

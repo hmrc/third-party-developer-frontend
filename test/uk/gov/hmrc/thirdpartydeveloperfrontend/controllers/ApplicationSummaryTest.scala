@@ -21,9 +21,8 @@ import java.time.{LocalDateTime, Period}
 import org.scalatest.matchers.should.Matchers
 import org.scalatest.wordspec.AnyWordSpec
 
-import uk.gov.hmrc.apiplatform.modules.applications.domain.models.{ApplicationId, ClientId}
+import uk.gov.hmrc.apiplatform.modules.common.domain.models.{ApplicationId, ClientId, Environment}
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.LaxEmailAddress.StringSyntax
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.Environment.{PRODUCTION, SANDBOX}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.controllers.ApplicationSummary
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils._
@@ -42,7 +41,7 @@ class ApplicationSummaryTest extends AnyWordSpec with Matchers with Collaborator
         Some(LocalDateTime.now),
         Some(LocalDateTime.now),
         grantLength = Period.ofDays(547),
-        PRODUCTION,
+        Environment.PRODUCTION,
         collaborators = Set(user)
       )
     val noServerTokenApplication =
@@ -54,18 +53,18 @@ class ApplicationSummaryTest extends AnyWordSpec with Matchers with Collaborator
         Some(LocalDateTime.now),
         None,
         grantLength = Period.ofDays(547),
-        PRODUCTION,
+        Environment.PRODUCTION,
         collaborators = Set(user)
       )
 
     "set serverTokenUsed if application has a date set for lastAccessTokenUsage" in {
-      val summary = ApplicationSummary.from(serverTokenApplication.copy(deployedTo = SANDBOX), user.userId)
+      val summary = ApplicationSummary.from(serverTokenApplication.copy(deployedTo = Environment.SANDBOX), user.userId)
 
       summary.serverTokenUsed shouldBe (true)
     }
 
     "not set serverTokenUsed if application does not have a date set for lastAccessTokenUsage" in {
-      val summary = ApplicationSummary.from(noServerTokenApplication.copy(deployedTo = SANDBOX), user.userId)
+      val summary = ApplicationSummary.from(noServerTokenApplication.copy(deployedTo = Environment.SANDBOX), user.userId)
 
       summary.serverTokenUsed shouldBe (false)
     }

@@ -16,7 +16,7 @@
 
 package uk.gov.hmrc.apiplatform.modules.uplift.domain.models
 
-import uk.gov.hmrc.apiplatform.modules.apis.domain.models.ApiIdentifier
+import uk.gov.hmrc.apiplatform.modules.common.domain.models.ApiIdentifier
 
 case class ApiSubscriptionsFlow(subscriptions: Map[ApiIdentifier, Boolean]) {
 

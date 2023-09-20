@@ -16,26 +16,26 @@
 
 package uk.gov.hmrc.thirdpartydeveloperfrontend.builder
 
-import uk.gov.hmrc.apiplatform.modules.apis.domain.models._
-import uk.gov.hmrc.apiplatform.modules.applications.domain.models.{ApplicationId, ClientId}
+import uk.gov.hmrc.apiplatform.modules.common.domain.models._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.apidefinitions._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.Application
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.subscriptions.ApiSubscriptionFields.{SubscriptionFieldDefinition, SubscriptionFieldValue, SubscriptionFieldsWrapper}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.subscriptions.{AccessRequirements, FieldName, FieldValue}
+import uk.gov.hmrc.apiplatform.modules.apis.domain.models.ApiStatus
 
 trait SubscriptionsBuilder {
 
   def buildAPISubscriptionStatus(name: String, context: Option[ApiContext] = None, fields: Option[SubscriptionFieldsWrapper] = None): APISubscriptionStatus = {
 
     val contextName = context.getOrElse(ApiContext(s"context-$name"))
-    val version     = ApiVersionDefinition(ApiVersion("version"), APIStatus.STABLE)
+    val version     = ApiVersionDefinition(ApiVersionNbr("version"), ApiStatus.STABLE)
 
     val f = fields.getOrElse(SubscriptionFieldsWrapper(ApplicationId.random, ClientId("fake-clientId"), contextName, version.version, List.empty))
 
     APISubscriptionStatus(name, s"serviceName-$name", contextName, version, subscribed = true, requiresTrust = false, fields = f, isTestSupport = false)
   }
 
-  def emptySubscriptionFieldsWrapper(applicationId: ApplicationId, clientId: ClientId, context: ApiContext, version: ApiVersion) = {
+  def emptySubscriptionFieldsWrapper(applicationId: ApplicationId, clientId: ClientId, context: ApiContext, version: ApiVersionNbr) = {
     SubscriptionFieldsWrapper(applicationId, clientId, context, version, List.empty)
   }
 
@@ -47,7 +47,7 @@ trait SubscriptionsBuilder {
       applicationId,
       ClientId(s"clientId-$applicationId"),
       ApiContext(s"context-$applicationId"),
-      ApiVersion(s"version-$applicationId"),
+      ApiVersionNbr(s"version-$applicationId"),
       fields = fields
     )
   }

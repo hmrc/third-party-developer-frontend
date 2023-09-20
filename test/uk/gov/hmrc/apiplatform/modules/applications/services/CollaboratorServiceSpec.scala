@@ -22,10 +22,9 @@ import scala.concurrent.ExecutionContext.Implicits.global
 
 import uk.gov.hmrc.http.HeaderCarrier
 
-import uk.gov.hmrc.apiplatform.modules.apis.domain.models._
-import uk.gov.hmrc.apiplatform.modules.applications.domain.models.{ApplicationId, ClientId, Collaborator}
+import uk.gov.hmrc.apiplatform.modules.common.domain.models._
+import uk.gov.hmrc.apiplatform.modules.applications.domain.models.{Collaborator}
 import uk.gov.hmrc.apiplatform.modules.commands.applications.domain.models.{ApplicationCommands, DispatchSuccessResult}
-import uk.gov.hmrc.apiplatform.modules.common.domain.models.Actors
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.LaxEmailAddress.StringSyntax
 import uk.gov.hmrc.apiplatform.modules.common.utils.FixedClock
 import uk.gov.hmrc.thirdpartydeveloperfrontend.builder._
@@ -37,6 +36,7 @@ import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.subscriptions.Versi
 import uk.gov.hmrc.thirdpartydeveloperfrontend.mocks.connectors._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.testdata.CollaboratorsTestData
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.{AsyncHmrcSpec, LocalUserIdTracker}
+import uk.gov.hmrc.apiplatform.modules.apis.domain.models.ApiStatus
 
 class CollaboratorServiceSpec extends AsyncHmrcSpec
     with SubscriptionsBuilder
@@ -46,8 +46,8 @@ class CollaboratorServiceSpec extends AsyncHmrcSpec
     with DeveloperTestData
     with CollaboratorsTestData {
 
-  val versionOne  = ApiVersion("1.0")
-  val versionTwo  = ApiVersion("2.0")
+  val versionOne  = ApiVersionNbr("1.0")
+  val versionTwo  = ApiVersionNbr("2.0")
   val grantLength = Period.ofDays(547)
 
   trait Setup
@@ -68,7 +68,7 @@ class CollaboratorServiceSpec extends AsyncHmrcSpec
     )
   }
 
-  def version(version: ApiVersion, status: APIStatus, subscribed: Boolean): VersionSubscription =
+  def version(version: ApiVersionNbr, status: ApiStatus, subscribed: Boolean): VersionSubscription =
     VersionSubscription(ApiVersionDefinition(version, status), subscribed)
 
   val productionApplicationId = ApplicationId.random

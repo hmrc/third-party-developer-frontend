@@ -29,3 +29,15 @@ object ApiType extends Enum[ApiType] with PlayJsonEnum[ApiType] {
 }
 
 case class CombinedApi(serviceName: String, displayName: String, categories: List[CombinedApiCategory], apiType: ApiType)
+
+/*
+sealed trait ApiType extends EnumEntry
+
+object ApiType extends Enum[ApiType] with PlayJsonEnum[ApiType] {
+  val values = findValues
+  case object REST_API extends ApiType
+  case object XML_API  extends ApiType
+}
+
+case class CombinedApi(displayName: String, serviceName: String, categories: List[ApiCategory], apiType: ApiType, accessType: ApiAccessType)
+*/

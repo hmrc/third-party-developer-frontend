@@ -32,7 +32,7 @@ import play.api.libs.crypto.CookieSigner
 import play.api.mvc._
 import uk.gov.hmrc.play.bootstrap.controller.WithUnsafeDefaultFormBinding
 
-import uk.gov.hmrc.apiplatform.modules.applications.domain.models.{ApplicationId, PrivacyPolicyLocations, TermsAndConditionsLocations}
+import uk.gov.hmrc.apiplatform.modules.applications.domain.models.{ PrivacyPolicyLocations, TermsAndConditionsLocations}
 import uk.gov.hmrc.apiplatform.modules.submissions.domain.models.Submission
 import uk.gov.hmrc.apiplatform.modules.submissions.services.SubmissionService
 import uk.gov.hmrc.thirdpartydeveloperfrontend.config.{ApplicationConfig, ErrorHandler, FraudPreventionConfig}
@@ -51,6 +51,7 @@ import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.subscriptions.Devhu
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.services.TermsOfUseService
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.services.TermsOfUseService.TermsOfUseAgreementDetails
 import uk.gov.hmrc.thirdpartydeveloperfrontend.service._
+import uk.gov.hmrc.apiplatform.modules.common.domain.models.ApplicationId
 
 object Details {
   case class Agreement(who: String, when: LocalDateTime)
@@ -167,7 +168,7 @@ class Details @Inject() (
 
     val latestTermsOfUseAgreementDetails = termsOfUseService.getAgreementDetails(application).lastOption
 
-    val hasTermsOfUse = !application.deployedTo.isSandbox() && application.access.accessType.isStandard
+    val hasTermsOfUse = !application.deployedTo.isSandbox && application.access.accessType.isStandard
     latestTermsOfUseAgreementDetails match {
       case Some(TermsOfUseAgreementDetails(emailAddress, maybeName, date, maybeVersionString)) => {
         val maybeVersion = maybeVersionString.flatMap(TermsOfUseVersion.fromVersionString(_))

@@ -16,7 +16,6 @@
 
 package uk.gov.hmrc.thirdpartydeveloperfrontend.connectors
 
-import uk.gov.hmrc.apiplatform.modules.apis.domain.models.ApiContext
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.services._
 
 trait ApmConnectorJsonFormatters extends ApiDefinitionsJsonFormatters with ApplicationsJsonFormatters
@@ -25,9 +24,8 @@ trait ApmConnectorJsonFormatters extends ApiDefinitionsJsonFormatters with Appli
   import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.subscriptions._
   import play.api.libs.json._
 
-  implicit val apiCategoryFormat = Json.valueFormat[ApiCategory]
+
   implicit val versionDataFormat = Json.format[VersionData]
-  implicit val apiContextFormat  = Json.format[ApiContext]
   implicit val apiDataFormat     = Json.format[ApiData]
 
 }

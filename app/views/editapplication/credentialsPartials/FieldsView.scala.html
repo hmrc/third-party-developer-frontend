@@ -33,7 +33,7 @@
 
   <p class="govuk-body">Your client secret is a unique passphrase that you generate to authorise your application.</p>
 
-@if(app.deployedTo.isSandbox()) {
+@if(app.deployedTo.isSandbox) {
     <p class="govuk-body">Use a client secret together with your <a id="client-id" class="govuk-link" href="@controllers.routes.Credentials.clientId(app.id)">client ID</a> to test your application in the sandbox.</p>
   }
 @if(clientSecrets.isEmpty) {

@@ -174,7 +174,7 @@ class CancelRequestControllerSpec
       val result = controller.cancelRequestForProductionCredentialsAction(appId)(request.withCSRFToken)
 
       status(result) shouldBe SEE_OTHER
-      redirectLocation(result).value shouldBe s"/developer/submissions/application/${appId.text()}/production-credentials-checklist"
+      redirectLocation(result).value shouldBe s"/developer/submissions/application/${appId}/production-credentials-checklist"
     }
   }
 }

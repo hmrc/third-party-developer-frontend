@@ -21,9 +21,7 @@ import scala.concurrent.Future.successful
 
 import uk.gov.hmrc.http.HeaderCarrier
 
-import uk.gov.hmrc.apiplatform.modules.apis.domain.models._
-import uk.gov.hmrc.apiplatform.modules.applications.domain.models.ApplicationId
-import uk.gov.hmrc.apiplatform.modules.common.domain.models.LaxEmailAddress
+import uk.gov.hmrc.apiplatform.modules.common.domain.models._
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.LaxEmailAddress.StringSyntax
 import uk.gov.hmrc.apiplatform.modules.submissions.SubmissionsTestData
 import uk.gov.hmrc.apiplatform.modules.submissions.connectors.ThirdPartyApplicationSubmissionsConnector
@@ -34,10 +32,13 @@ import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.SubscriptionTestHelpe
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.apidefinitions._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.{ResponsibleIndividual, SellResellOrDistribute}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.{DeveloperSession, LoggedInState, Session}
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.subscriptions.{ApiCategory, ApiData, VersionData}
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.subscriptions.{ApiData, VersionData}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.mocks.connectors.ApmConnectorMockModule
 import uk.gov.hmrc.thirdpartydeveloperfrontend.mocks.service.{ApplicationActionServiceMock, ApplicationServiceMock, SessionServiceMock}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.{AsyncHmrcSpec, LocalUserIdTracker}
+import uk.gov.hmrc.apiplatform.modules.apis.domain.models.ApiStatus
+import uk.gov.hmrc.apiplatform.modules.apis.domain.models.ApiAccess
+import uk.gov.hmrc.apiplatform.modules.apis.domain.models.ApiCategory
 
 class UpliftJourneyServiceSpec
     extends AsyncHmrcSpec
@@ -72,7 +73,7 @@ class UpliftJourneyServiceSpec
     )
 
     val appName: String = "app"
-    val apiVersion      = ApiVersion("version")
+    val apiVersion      = ApiVersionNbr("version")
 
     val developer = buildDeveloper()
     val sessionId = "sessionId"
@@ -80,16 +81,16 @@ class UpliftJourneyServiceSpec
 
     val loggedInDeveloper = DeveloperSession(session)
 
-    val apiIdentifier1 = ApiIdentifier(ApiContext("test-api-context-1"), ApiVersion("1.0"))
-    val apiIdentifier2 = ApiIdentifier(ApiContext("test-api-context-2"), ApiVersion("1.0"))
+    val apiIdentifier1 = ApiIdentifier(ApiContext("test-api-context-1"), ApiVersionNbr("1.0"))
+    val apiIdentifier2 = ApiIdentifier(ApiContext("test-api-context-2"), ApiVersionNbr("1.0"))
 
-    val emptyFields = emptySubscriptionFieldsWrapper(appId, clientId, apiIdentifier1.context, apiIdentifier1.version)
+    val emptyFields = emptySubscriptionFieldsWrapper(appId, clientId, apiIdentifier1.context, apiIdentifier1.versionNbr)
 
     val testAPISubscriptionStatus1 = APISubscriptionStatus(
       "test-api-1",
       "api-example-microservice",
       apiIdentifier1.context,
-      ApiVersionDefinition(apiIdentifier1.version, APIStatus.STABLE),
+      ApiVersionDefinition(apiIdentifier1.versionNbr, ApiStatus.STABLE),
       subscribed = true,
       requiresTrust = false,
       fields = emptyFields
@@ -99,7 +100,7 @@ class UpliftJourneyServiceSpec
       "test-api-2",
       "api-example-microservice",
       apiIdentifier2.context,
-      ApiVersionDefinition(apiIdentifier2.version, APIStatus.STABLE),
+      ApiVersionDefinition(apiIdentifier2.versionNbr, ApiStatus.STABLE),
       subscribed = true,
       requiresTrust = false,
       fields = emptyFields
@@ -109,7 +110,7 @@ class UpliftJourneyServiceSpec
       "test-api-3",
       "api-example-microservice",
       ApiContext("test-api-context-3"),
-      ApiVersionDefinition(apiIdentifier2.version, APIStatus.STABLE),
+      ApiVersionDefinition(apiIdentifier2.versionNbr, ApiStatus.STABLE),
       subscribed = true,
       requiresTrust = false,
       fields = emptyFields
@@ -121,8 +122,8 @@ class UpliftJourneyServiceSpec
           "test-api-context-1",
           "test-api-context-1",
           true,
-          Map(ApiVersion("1.0") ->
-            VersionData(APIStatus.STABLE, APIAccess(APIAccessType.PUBLIC))),
+          Map(ApiVersionNbr("1.0") ->
+            VersionData(ApiStatus.STABLE, ApiAccess.PUBLIC)),
           List(ApiCategory.EXAMPLE)
         )
     )
@@ -133,8 +134,8 @@ class UpliftJourneyServiceSpec
           "test-api-context-1",
           "test-api-context-1",
           true,
-          Map(ApiVersion("1.0") ->
-            VersionData(APIStatus.STABLE, APIAccess(APIAccessType.PUBLIC))),
+          Map(ApiVersionNbr("1.0") ->
+            VersionData(ApiStatus.STABLE, ApiAccess.PUBLIC)),
           List(ApiCategory.EXAMPLE)
         ),
       ApiContext("test-api-context-2") ->
@@ -142,8 +143,8 @@ class UpliftJourneyServiceSpec
           "test-api-context-2",
           "test-api-context-2",
           true,
-          Map(ApiVersion("1.0") ->
-            VersionData(APIStatus.STABLE, APIAccess(APIAccessType.PUBLIC))),
+          Map(ApiVersionNbr("1.0") ->
+            VersionData(ApiStatus.STABLE, ApiAccess.PUBLIC)),
           List(ApiCategory.EXAMPLE)
         )
     )

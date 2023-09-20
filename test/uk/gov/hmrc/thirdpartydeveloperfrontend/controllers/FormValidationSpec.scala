@@ -18,7 +18,7 @@ package uk.gov.hmrc.thirdpartydeveloperfrontend.controllers
 
 import play.api.data.{Form, FormError}
 
-import uk.gov.hmrc.apiplatform.modules.applications.domain.models.ApplicationId
+import uk.gov.hmrc.apiplatform.modules.common.domain.models.ApplicationId
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.AsyncHmrcSpec
 
 class FormValidationSpec extends AsyncHmrcSpec {
@@ -456,7 +456,7 @@ class FormValidationSpec extends AsyncHmrcSpec {
   "SelectApisFromSubscriptionsForm" should {
     def validateNoErrors = buildValidateNoErrors(SelectApisFromSubscriptionsForm.form.bind) _
 
-    val validFormData = Map("selectedApi[0]" -> "", "applicationId" -> ApplicationId.random.text())
+    val validFormData = Map("selectedApi[0]" -> "", "applicationId" -> ApplicationId.random.toString())
 
     "accept valid form" in {
       validateNoErrors(validFormData)
@@ -470,14 +470,14 @@ class FormValidationSpec extends AsyncHmrcSpec {
   "SelectTopicsFromSubscriptionsForm" should {
     def validateNoErrors = buildValidateNoErrors(SelectTopicsFromSubscriptionsForm.form.bind) _
 
-    val validFormData = Map("topic[0]" -> "TopicOne", "applicationId" -> ApplicationId.random.text())
+    val validFormData = Map("topic[0]" -> "TopicOne", "applicationId" -> ApplicationId.random.toString())
 
     "accept valid form" in {
       validateNoErrors(validFormData)
     }
 
     "reject a form when now topic is supplied" in {
-      val formDataWithoutTopic = Map("applicationId" -> ApplicationId.random.text())
+      val formDataWithoutTopic = Map("applicationId" -> ApplicationId.random.toString())
       val boundForm            = SelectTopicsFromSubscriptionsForm.form.bind(formDataWithoutTopic)
       val err                  = boundForm.errors.head
       err.key shouldBe "topic"

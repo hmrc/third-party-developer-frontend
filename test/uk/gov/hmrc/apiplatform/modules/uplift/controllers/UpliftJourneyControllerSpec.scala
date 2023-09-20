@@ -28,8 +28,7 @@ import play.api.test.Helpers._
 import play.filters.csrf.CSRF.TokenProvider
 import uk.gov.hmrc.http.HeaderCarrier
 
-import uk.gov.hmrc.apiplatform.modules.apis.domain.models._
-import uk.gov.hmrc.apiplatform.modules.applications.domain.models.ApplicationId
+import uk.gov.hmrc.apiplatform.modules.common.domain.models._
 import uk.gov.hmrc.apiplatform.modules.submissions.SubmissionsTestData
 import uk.gov.hmrc.apiplatform.modules.submissions.services.mocks.SubmissionServiceMockModule
 import uk.gov.hmrc.apiplatform.modules.uplift.domain.models._
@@ -39,13 +38,14 @@ import uk.gov.hmrc.thirdpartydeveloperfrontend.builder._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.config.{On, UpliftJourneyConfig}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.{BaseControllerSpec, SubscriptionTestHelperSugar}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.apidefinitions._
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.{ApplicationState, ApplicationWithSubscriptionData, Environment, SellResellOrDistribute}
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.{ApplicationState, ApplicationWithSubscriptionData, SellResellOrDistribute}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.{DeveloperSession, LoggedInState, Session}
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.subscriptions.{ApiCategory, ApiData, VersionData}
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.subscriptions.{ApiData, VersionData}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.mocks.connectors.ApmConnectorMockModule
 import uk.gov.hmrc.thirdpartydeveloperfrontend.mocks.service.{ApplicationActionServiceMock, ApplicationServiceMock, SessionServiceMock, TermsOfUseInvitationServiceMockModule}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.WithLoggedInSession._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.{LocalUserIdTracker, WithCSRFAddToken}
+import uk.gov.hmrc.apiplatform.modules.apis.domain.models._
 
 class UpliftJourneyControllerSpec extends BaseControllerSpec
     with SampleSession
@@ -108,7 +108,7 @@ class UpliftJourneyControllerSpec extends BaseControllerSpec
     )
 
     val appName: String = "app"
-    val apiVersion      = ApiVersion("version")
+    val apiVersion      = ApiVersionNbr("version")
 
     val developer = buildDeveloper()
     val sessionId = "sessionId"
@@ -124,16 +124,16 @@ class UpliftJourneyControllerSpec extends BaseControllerSpec
     val loggedOutRequest = FakeRequest().withSession(sessionParams: _*)
     val loggedInRequest  = FakeRequest().withLoggedIn(controller, implicitly)(sessionId).withSession(sessionParams: _*)
 
-    val apiIdentifier1 = ApiIdentifier(ApiContext("test-api-context-1"), ApiVersion("1.0"))
-    val apiIdentifier2 = ApiIdentifier(ApiContext("test-api-context-2"), ApiVersion("1.0"))
+    val apiIdentifier1 = ApiIdentifier(ApiContext("test-api-context-1"), ApiVersionNbr("1.0"))
+    val apiIdentifier2 = ApiIdentifier(ApiContext("test-api-context-2"), ApiVersionNbr("1.0"))
 
-    val emptyFields = emptySubscriptionFieldsWrapper(appId, clientId, apiIdentifier1.context, apiIdentifier1.version)
+    val emptyFields = emptySubscriptionFieldsWrapper(appId, clientId, apiIdentifier1.context, apiIdentifier1.versionNbr)
 
     val testAPISubscriptionStatus1 = APISubscriptionStatus(
       "test-api-1",
       "api-example-microservice",
       apiIdentifier1.context,
-      ApiVersionDefinition(apiIdentifier1.version, APIStatus.STABLE),
+      ApiVersionDefinition(apiIdentifier1.versionNbr, ApiStatus.STABLE),
       subscribed = true,
       requiresTrust = false,
       fields = emptyFields
@@ -143,7 +143,7 @@ class UpliftJourneyControllerSpec extends BaseControllerSpec
       "test-api-2",
       "api-example-microservice",
       apiIdentifier2.context,
-      ApiVersionDefinition(apiIdentifier2.version, APIStatus.STABLE),
+      ApiVersionDefinition(apiIdentifier2.versionNbr, ApiStatus.STABLE),
       subscribed = true,
       requiresTrust = false,
       fields = emptyFields
@@ -155,8 +155,8 @@ class UpliftJourneyControllerSpec extends BaseControllerSpec
           "test-api-context-1",
           "test-api-context-1",
           true,
-          Map(ApiVersion("1.0") ->
-            VersionData(APIStatus.STABLE, APIAccess(APIAccessType.PUBLIC))),
+          Map(ApiVersionNbr("1.0") ->
+            VersionData(ApiStatus.STABLE, ApiAccess.PUBLIC)),
           List(ApiCategory.EXAMPLE)
         )
     )
@@ -167,8 +167,8 @@ class UpliftJourneyControllerSpec extends BaseControllerSpec
           "test-api-context-1",
           "test-api-context-1",
           true,
-          Map(ApiVersion("1.0") ->
-            VersionData(APIStatus.STABLE, APIAccess(APIAccessType.PUBLIC))),
+          Map(ApiVersionNbr("1.0") ->
+            VersionData(ApiStatus.STABLE, ApiAccess.PUBLIC)),
           List(ApiCategory.EXAMPLE)
         ),
       ApiContext("test-api-context-2") ->
@@ -176,8 +176,8 @@ class UpliftJourneyControllerSpec extends BaseControllerSpec
           "test-api-context-2",
           "test-api-context-2",
           true,
-          Map(ApiVersion("1.0") ->
-            VersionData(APIStatus.STABLE, APIAccess(APIAccessType.PUBLIC))),
+          Map(ApiVersionNbr("1.0") ->
+            VersionData(ApiStatus.STABLE, ApiAccess.PUBLIC)),
           List(ApiCategory.EXAMPLE)
         )
     )
@@ -230,7 +230,7 @@ class UpliftJourneyControllerSpec extends BaseControllerSpec
     "The selected apis are saved on the 'Turn off API subscriptions you don’t need' view and 'save and continue' clicked" in new Setup {
 
       val apiIdentifiers = Set(
-        ApiIdentifier(ApiContext("test-api-context-1"), ApiVersion("1.0"))
+        ApiIdentifier(ApiContext("test-api-context-1"), ApiVersionNbr("1.0"))
       )
 
       UpliftJourneyServiceMock.ConfirmAndUplift.thenReturns(appId)
@@ -243,7 +243,7 @@ class UpliftJourneyControllerSpec extends BaseControllerSpec
       ))
 
       status(result) shouldBe SEE_OTHER
-      redirectLocation(result) shouldBe Some(s"/developer/applications/${appId.text()}/confirm-subscriptions")
+      redirectLocation(result) shouldBe Some(s"/developer/applications/${appId}/confirm-subscriptions")
     }
 
     "An error screen is shown when all APIs are turned off on the 'Turn off API subscriptions you don’t need' view and 'save and continue' clicked" in new Setup {
@@ -269,7 +269,7 @@ class UpliftJourneyControllerSpec extends BaseControllerSpec
       private val result = controller.confirmApiSubscriptionsAction(appId)(loggedInRequest.withCSRFToken)
 
       status(result) shouldBe SEE_OTHER
-      redirectLocation(result) shouldBe Some(s"/developer/submissions/application/${appId.text()}/production-credentials-checklist")
+      redirectLocation(result) shouldBe Some(s"/developer/submissions/application/${appId}/production-credentials-checklist")
     }
 
     "The selected apis are not save when 'save and continue' clicked but uplift fails" in new Setup {
@@ -364,7 +364,7 @@ class UpliftJourneyControllerSpec extends BaseControllerSpec
       ))
 
       status(result) shouldBe SEE_OTHER
-      redirectLocation(result) shouldBe Some(s"/developer/applications/${appId.text()}/confirm-subscriptions")
+      redirectLocation(result) shouldBe Some(s"/developer/applications/${appId}/confirm-subscriptions")
     }
 
     "store the answer 'No' from the 'sell resell or distribute your software view' and redirect to next page" in new Setup {
@@ -379,7 +379,7 @@ class UpliftJourneyControllerSpec extends BaseControllerSpec
       ))
 
       status(result) shouldBe SEE_OTHER
-      redirectLocation(result) shouldBe Some(s"/developer/applications/${appId.text()}/confirm-subscriptions")
+      redirectLocation(result) shouldBe Some(s"/developer/applications/${appId}/confirm-subscriptions")
     }
 
     "store the answer 'Yes' from the 'sell resell or distribute your software view' and redirect to questionnaire when application is Production" in new Setup {
@@ -474,7 +474,7 @@ class UpliftJourneyControllerSpec extends BaseControllerSpec
       private val result = controller.agreeNewTermsOfUse(appId)(loggedInRequest.withCSRFToken)
 
       status(result) shouldBe SEE_OTHER
-      redirectLocation(result) shouldBe Some(s"/developer/submissions/application/${appId.text()}/production-credentials-checklist")
+      redirectLocation(result) shouldBe Some(s"/developer/submissions/application/${appId}/production-credentials-checklist")
     }
 
     "return bad request if not invited" in new Setup {

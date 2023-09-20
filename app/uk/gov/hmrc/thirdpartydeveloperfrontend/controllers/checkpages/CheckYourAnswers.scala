@@ -31,8 +31,8 @@ import play.api.data.Form
 import play.api.libs.crypto.CookieSigner
 import play.api.mvc._
 
-import uk.gov.hmrc.apiplatform.modules.apis.domain.models._
-import uk.gov.hmrc.apiplatform.modules.applications.domain.models.{ApplicationId, PrivacyPolicyLocation, TermsAndConditionsLocation}
+import uk.gov.hmrc.apiplatform.modules.common.domain.models.{ApiContext, ApiVersionNbr, ApplicationId}
+import uk.gov.hmrc.apiplatform.modules.applications.domain.models.{PrivacyPolicyLocation, TermsAndConditionsLocation}
 import uk.gov.hmrc.apiplatform.modules.applications.services.CollaboratorService
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.LaxEmailAddress
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.LaxEmailAddress.StringSyntax
@@ -176,7 +176,7 @@ class CheckYourAnswers @Inject() (
 case class CheckYourSubscriptionData(
     name: String,
     apiContext: ApiContext,
-    apiVersion: ApiVersion,
+    apiVersion: ApiVersionNbr,
     displayedStatus: String,
     fields: Seq[Field]
   )

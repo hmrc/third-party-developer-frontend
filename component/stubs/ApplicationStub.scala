@@ -19,12 +19,10 @@ package stubs
 import com.github.tomakehurst.wiremock.client.WireMock.{aResponse, delete, equalTo, equalToJson, get, post, stubFor, urlEqualTo, urlPathEqualTo}
 import play.api.http.Status.OK
 import play.api.libs.json.Json
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.services.ApiDefinitionsJsonFormatters._
-import uk.gov.hmrc.apiplatform.modules.apis.domain.models.{ApiContext, ApiIdentifier, ApiVersion}
+import uk.gov.hmrc.apiplatform.modules.common.domain.models.{ApplicationId, ApiContext, ApiIdentifier, ApiVersionNbr, Environment}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.ApplicationNameValidationJson.ApplicationNameValidationResult
-import uk.gov.hmrc.apiplatform.modules.applications.domain.models.ApplicationId
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.{ApplicationToken, ApplicationWithSubscriptionIds, Environment}
-import uk.gov.hmrc.apiplatform.modules.developers.domain.models.UserId
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.{ApplicationToken, ApplicationWithSubscriptionIds}
+import uk.gov.hmrc.apiplatform.modules.common.domain.models.UserId
 
 object ApplicationStub {
 
@@ -48,14 +46,14 @@ object ApplicationStub {
     )
   }
 
-  def setUpDeleteSubscription(id: ApplicationId, api: String, version: ApiVersion, status: Int) = {
+  def setUpDeleteSubscription(id: ApplicationId, api: String, version: ApiVersionNbr, status: Int) = {
     stubFor(
       delete(urlEqualTo(s"/application/${id.value}/subscription?context=$api&version=${version.value}"))
         .willReturn(aResponse().withStatus(status))
     )
   }
 
-  def setUpExecuteSubscription(id: ApplicationId, api: String, version: ApiVersion, status: Int) = {
+  def setUpExecuteSubscription(id: ApplicationId, api: String, version: ApiVersionNbr, status: Int) = {
     stubFor(
       post(urlEqualTo(s"/application/${id.value}/subscription"))
         .withRequestBody(equalToJson(Json.toJson(ApiIdentifier(ApiContext(api), version)).toString()))
@@ -73,14 +71,12 @@ object ApplicationStub {
   def configureUserApplications(userId: UserId, applications: List[ApplicationWithSubscriptionIds] = Nil, status: Int = OK) = {
     import play.api.libs.json.Json
 
-    import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.services.ApiDefinitionsJsonFormatters._
-
     implicit val writes = Json.writes[ApplicationWithSubscriptionIds]
 
     def stubResponse(environment: Environment, applications: List[ApplicationWithSubscriptionIds]) = {
       stubFor(
         get(urlPathEqualTo("/developer/applications"))
-          .withQueryParam("userId", equalTo(userId.asText))
+          .withQueryParam("userId", equalTo(userId.toString()))
           .withQueryParam("environment", equalTo(environment.toString))
           .willReturn(
             aResponse()

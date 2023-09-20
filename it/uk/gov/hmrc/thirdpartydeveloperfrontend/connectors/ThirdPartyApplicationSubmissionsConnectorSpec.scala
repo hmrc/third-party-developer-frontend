@@ -41,10 +41,10 @@ import uk.gov.hmrc.apiplatform.modules.submissions.domain.models.{
   Submission
 }
 import uk.gov.hmrc.apiplatform.modules.submissions.SubmissionsTestData
-import uk.gov.hmrc.apiplatform.modules.applications.domain.models.ApplicationId
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.ResponsibleIndividual
 import java.time.{LocalDateTime, ZoneOffset}
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.LaxEmailAddress.StringSyntax
+import uk.gov.hmrc.apiplatform.modules.common.domain.models.ApplicationId
 
 class ThirdPartyApplicationSubmissionsConnectorSpec
     extends BaseConnectorIntegrationSpec
@@ -163,7 +163,7 @@ class ThirdPartyApplicationSubmissionsConnectorSpec
   }
 
   "fetchLatestSubmission" should {
-    val url = s"/submissions/application/${applicationId.text()}"
+    val url = s"/submissions/application/${applicationId}"
 
     "return NOT FOUND with empty response body" in new Setup {
       stubFor(
@@ -218,7 +218,7 @@ class ThirdPartyApplicationSubmissionsConnectorSpec
   }
 
   "fetchLatestExtendedSubmission" should {
-    val url = s"/submissions/application/${applicationId.text()}/extended"
+    val url = s"/submissions/application/${applicationId}/extended"
 
     "return NOT FOUND with empty response body" in new Setup {
       stubFor(

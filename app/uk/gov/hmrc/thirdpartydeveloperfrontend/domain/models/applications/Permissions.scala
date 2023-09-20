@@ -18,6 +18,7 @@ package uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications
 
 import uk.gov.hmrc.apiplatform.modules.applications.domain.models.Collaborator
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.Developer
+import uk.gov.hmrc.apiplatform.modules.common.domain.models.Environment
 
 sealed trait Permission {
   def hasPermissions(app: BaseApplication, developer: Developer): Boolean

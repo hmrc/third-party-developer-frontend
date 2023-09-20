@@ -23,11 +23,10 @@ import com.google.inject.name.Named
 
 import uk.gov.hmrc.http.HeaderCarrier
 
-import uk.gov.hmrc.apiplatform.modules.applications.domain.models.ApplicationId
+import uk.gov.hmrc.apiplatform.modules.common.domain.models._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.config.ApplicationConfig
 import uk.gov.hmrc.thirdpartydeveloperfrontend.connectors._
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.Environment.PRODUCTION
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.{Application, Environment}
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.Application
 import uk.gov.hmrc.thirdpartydeveloperfrontend.service.PushPullNotificationsService.PushPullNotificationsConnector
 import uk.gov.hmrc.thirdpartydeveloperfrontend.service.SubscriptionFieldsService.SubscriptionFieldsConnector
 
@@ -45,8 +44,8 @@ class ConnectorsWrapper @Inject() (
 
   def forEnvironment(environment: Environment): Connectors = {
     environment match {
-      case PRODUCTION => Connectors(productionApplicationConnector, productionSubscriptionFieldsConnector, productionPushPullNotificationsConnector)
-      case _          => Connectors(sandboxApplicationConnector, sandboxSubscriptionFieldsConnector, sandboxPushPullNotificationsConnector)
+      case Environment.PRODUCTION => Connectors(productionApplicationConnector, productionSubscriptionFieldsConnector, productionPushPullNotificationsConnector)
+      case _                      => Connectors(sandboxApplicationConnector, sandboxSubscriptionFieldsConnector, sandboxPushPullNotificationsConnector)
     }
   }
 

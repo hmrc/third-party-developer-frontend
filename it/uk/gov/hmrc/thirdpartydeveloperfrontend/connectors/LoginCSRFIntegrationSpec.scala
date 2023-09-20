@@ -32,7 +32,7 @@ import play.api.test.FakeRequest
 import play.api.test.Helpers._
 import play.api.{Application, Configuration, Mode}
 import play.filters.csrf.CSRF
-import uk.gov.hmrc.apiplatform.modules.developers.domain.models.UserId
+import uk.gov.hmrc.apiplatform.modules.common.domain.models.UserId
 import uk.gov.hmrc.thirdpartydeveloperfrontend.connectors.ThirdPartyDeveloperConnector.FindUserIdRequest
 import uk.gov.hmrc.thirdpartydeveloperfrontend.connectors.ThirdPartyDeveloperConnector.JsonFormatters.FindUserIdRequestWrites
 import play.api.libs.json.Json
@@ -209,14 +209,14 @@ class LoginCSRFIntegrationSpec extends BaseConnectorIntegrationSpec with GuiceOn
         .willReturn(
           aResponse()
             .withStatus(OK)
-            .withBody(s"""{"userId":"${userId.asText}"}""")
+            .withBody(s"""{"userId":"${userId.toString()}"}""")
         )
     )
   }
 
   private def setupThirdPartyApplicationSearchApplicationByUserIdStub(userId: UserId): Unit = {
     stubFor(
-      get(urlEqualTo(s"/developer/applications?userId=${userId.asText}&environment=PRODUCTION"))
+      get(urlEqualTo(s"/developer/applications?userId=${userId.toString()}&environment=PRODUCTION"))
         .willReturn(
           aResponse()
             .withStatus(OK)

@@ -31,7 +31,7 @@ import play.twirl.api.Html
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.play.bootstrap.controller.WithUnsafeDefaultFormBinding
 
-import uk.gov.hmrc.apiplatform.modules.apis.domain.models.{ApiContext, ApiIdentifier, ApiVersion}
+import uk.gov.hmrc.apiplatform.modules.common.domain.models._
 import uk.gov.hmrc.apiplatform.modules.applications.domain.models._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.config.{ApplicationConfig, ErrorHandler, FraudPreventionConfig}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.connectors.ThirdPartyDeveloperConnector
@@ -128,7 +128,7 @@ class SubscriptionsController @Inject() (
     case None                         => Redirect(routes.Details.details(applicationId))
   }
 
-  def changeApiSubscription(applicationId: ApplicationId, apiContext: ApiContext, apiVersion: ApiVersion, redirectTo: String): Action[AnyContent] =
+  def changeApiSubscription(applicationId: ApplicationId, apiContext: ApiContext, apiVersion: ApiVersionNbr, redirectTo: String): Action[AnyContent] =
     whenTeamMemberOnApp(applicationId) { implicit request =>
       val apiIdentifier   = ApiIdentifier(apiContext, apiVersion)
       val requestingEmail = request.developerSession.email
@@ -159,7 +159,7 @@ class SubscriptionsController @Inject() (
       applicationId: ApplicationId,
       apiName: String,
       apiContext: ApiContext,
-      apiVersion: ApiVersion,
+      apiVersion: ApiVersionNbr,
       redirectTo: String,
       call: Call
     ): ApplicationRequest[AnyContent] => Future[Result] =
@@ -185,13 +185,13 @@ class SubscriptionsController @Inject() (
         )
     }
 
-  def changeLockedApiSubscription(applicationId: ApplicationId, apiName: String, apiContext: ApiContext, apiVersion: ApiVersion, redirectTo: String): Action[AnyContent] =
+  def changeLockedApiSubscription(applicationId: ApplicationId, apiName: String, apiContext: ApiContext, apiVersion: ApiVersionNbr, redirectTo: String): Action[AnyContent] =
     canManageLockedApiSubscriptionsAction(applicationId) {
       val call: Call = routes.SubscriptionsController.changeLockedApiSubscriptionAction(applicationId, apiName, apiContext, apiVersion, redirectTo.toString)
       requestChangeApiSubscription(applicationId, apiName, apiContext, apiVersion, redirectTo, call)
     }
 
-  def changePrivateApiSubscription(applicationId: ApplicationId, apiName: String, apiContext: ApiContext, apiVersion: ApiVersion, redirectTo: String): Action[AnyContent] =
+  def changePrivateApiSubscription(applicationId: ApplicationId, apiName: String, apiContext: ApiContext, apiVersion: ApiVersionNbr, redirectTo: String): Action[AnyContent] =
     canManagePrivateApiSubscriptionsAction(applicationId) {
       val call: Call = routes.SubscriptionsController.changePrivateApiSubscriptionAction(applicationId, apiName, apiContext, apiVersion, redirectTo)
       requestChangeApiSubscription(applicationId, apiName, apiContext, apiVersion, redirectTo, call)
@@ -201,7 +201,7 @@ class SubscriptionsController @Inject() (
       applicationId: ApplicationId,
       apiName: String,
       apiContext: ApiContext,
-      apiVersion: ApiVersion,
+      apiVersion: ApiVersionNbr,
       redirectTo: String,
       call: Call
     ): ApplicationRequest[AnyContent] => Future[Result] =
@@ -248,13 +248,13 @@ class SubscriptionsController @Inject() (
         .flatMap(subscribed => ChangeSubscriptionConfirmationForm.form.bindFromRequest().fold(handleInvalidForm(subscribed), handleValidForm(subscribed)))
     }
 
-  def changeLockedApiSubscriptionAction(applicationId: ApplicationId, apiName: String, apiContext: ApiContext, apiVersion: ApiVersion, redirectTo: String): Action[AnyContent] =
+  def changeLockedApiSubscriptionAction(applicationId: ApplicationId, apiName: String, apiContext: ApiContext, apiVersion: ApiVersionNbr, redirectTo: String): Action[AnyContent] =
     canManageLockedApiSubscriptionsAction(applicationId) {
       val call: Call = routes.SubscriptionsController.changeLockedApiSubscriptionAction(applicationId, apiName, apiContext, apiVersion, redirectTo)
       requestChangeApiSubscriptionAction(applicationId, apiName, apiContext, apiVersion, redirectTo, call)
     }
 
-  def changePrivateApiSubscriptionAction(applicationId: ApplicationId, apiName: String, apiContext: ApiContext, apiVersion: ApiVersion, redirectTo: String): Action[AnyContent] =
+  def changePrivateApiSubscriptionAction(applicationId: ApplicationId, apiName: String, apiContext: ApiContext, apiVersion: ApiVersionNbr, redirectTo: String): Action[AnyContent] =
     canManagePrivateApiSubscriptionsAction(applicationId) {
       val call: Call = routes.SubscriptionsController.changePrivateApiSubscriptionAction(applicationId, apiName, apiContext, apiVersion, redirectTo)
       requestChangeApiSubscriptionAction(applicationId, apiName, apiContext, apiVersion, redirectTo, call)

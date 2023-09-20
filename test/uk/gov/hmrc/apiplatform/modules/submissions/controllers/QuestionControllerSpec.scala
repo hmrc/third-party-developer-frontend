@@ -295,7 +295,7 @@ class QuestionControllerSpec
       val result = controller.updateAnswer(aSubmission.id, questionId)(request.withCSRFToken)
 
       status(result) shouldBe SEE_OTHER
-      redirectLocation(result) shouldBe Some(s"/developer/submissions/application/${applicationId.text()}/check-answers")
+      redirectLocation(result) shouldBe Some(s"/developer/submissions/application/${applicationId}/check-answers")
     }
 
     "succeed when given an answer and redirect to the next question to answer" in new Setup {

@@ -32,9 +32,9 @@ import play.api.test.FakeRequest
 import play.api.test.Helpers._
 import play.filters.csrf.CSRF.TokenProvider
 
-import uk.gov.hmrc.apiplatform.modules.apis.domain.models.ApiContext
-import uk.gov.hmrc.apiplatform.modules.applications.domain.models.ApplicationId
-import uk.gov.hmrc.apiplatform.modules.developers.domain.models.UserId
+import uk.gov.hmrc.apiplatform.modules.common.domain.models.ApiContext
+import uk.gov.hmrc.apiplatform.modules.common.domain.models.ApplicationId
+import uk.gov.hmrc.apiplatform.modules.common.domain.models.UserId
 import uk.gov.hmrc.thirdpartydeveloperfrontend.builder.DeveloperBuilder
 import uk.gov.hmrc.thirdpartydeveloperfrontend.config.ApplicationConfig
 import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.addapplication.routes.{AddApplication => AddApplicationRoutes}
@@ -49,6 +49,7 @@ import uk.gov.hmrc.thirdpartydeveloperfrontend.mocks.service.{ErrorHandlerMock, 
 import uk.gov.hmrc.thirdpartydeveloperfrontend.service.EmailPreferencesService
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.LocalUserIdTracker
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.WithLoggedInSession._
+import uk.gov.hmrc.apiplatform.modules.apis.domain.models.ApiCategory
 
 class EmailPreferencesControllerSpec
     extends PlaySpec
@@ -123,11 +124,11 @@ class EmailPreferencesControllerSpec
     val mockCategory1: APICategoryDisplayDetails            = APICategoryDisplayDetails("CATEGORY_1", "Category 1")
     val mockCategory2: APICategoryDisplayDetails            = APICategoryDisplayDetails("CATEGORY_2", "Category 2")
     val apiCategoryDetails: List[APICategoryDisplayDetails] = List(mockCategory1, mockCategory2)
-    val api1: ApiDefinition                                 = ApiDefinition("api1", "API 1", "desc", ApiContext("CATEGORY_1"), List("INCOME_TAX"))
-    val api2: ApiDefinition                                 = ApiDefinition("api2", "API 2", "desc2", ApiContext("CATEGORY_1"), List("VAT"))
+    val api1: ApiDefinition                                 = ApiDefinition("api1", "API 1", "desc", ApiContext("CATEGORY_1"), List(ApiCategory.INCOME_TAX_MTD))
+    val api2: ApiDefinition                                 = ApiDefinition("api2", "API 2", "desc2", ApiContext("CATEGORY_1"), List(ApiCategory.VAT))
     val apis: Set[String]                                   = Set(api1.serviceName, api2.serviceName)
 
-    val extendedApiOne: CombinedApi    = CombinedApi("api1", "API 1", List(CombinedApiCategory("INCOME_TAX")), REST_API)
+    val extendedApiOne: CombinedApi    = CombinedApi("api1", "API 1", List(CombinedApiCategory("INCOME_TAX_MTD")), REST_API)
     val extendedApiTwo: CombinedApi    = CombinedApi("api2", "API 2", List(CombinedApiCategory("VAT")), REST_API)
     val fetchedAPis: List[CombinedApi] = List(extendedApiOne, extendedApiTwo)
 
@@ -595,7 +596,7 @@ class EmailPreferencesControllerSpec
       updateUserFlowSessionsReturnsSuccessfully(sessionId)
 
       val requestWithForm: FakeRequest[AnyContentAsFormUrlEncoded] = loggedInRequest
-        .withFormUrlEncodedBody("selectedApi[0]" -> "a1", "selectedApi[1]" -> "a2", "applicationId" -> applicationId.text())
+        .withFormUrlEncodedBody("selectedApi[0]" -> "a1", "selectedApi[1]" -> "a2", "applicationId" -> applicationId.toString())
 
       when(mockEmailPreferencesService.updateNewApplicationSelectedApis(*, *[ApplicationId], *)(*)).thenReturn(Future.successful(mock[NewApplicationEmailPreferencesFlowV2]))
 
@@ -653,7 +654,7 @@ class EmailPreferencesControllerSpec
       updateUserFlowSessionsReturnsSuccessfully(sessionId)
 
       val requestWithForm: FakeRequest[AnyContentAsFormUrlEncoded] = loggedInRequest
-        .withFormUrlEncodedBody("topic[0]" -> "a1", "applicationId" -> applicationId.text())
+        .withFormUrlEncodedBody("topic[0]" -> "a1", "applicationId" -> applicationId.toString())
 
       when(mockEmailPreferencesService.fetchNewApplicationEmailPreferencesFlow(*, *[ApplicationId])).thenReturn(Future.successful(newApplicationEmailPreferencesFlow))
       when(mockEmailPreferencesService.updateEmailPreferences(*[UserId], *)(*)).thenReturn(Future.successful(true))

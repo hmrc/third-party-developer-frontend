@@ -29,7 +29,7 @@ import play.api.libs.json.Json
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
 import uk.gov.hmrc.http.HeaderCarrier
 
-import uk.gov.hmrc.apiplatform.modules.applications.domain.models.ApplicationId
+import uk.gov.hmrc.apiplatform.modules.common.domain.models.{ApplicationId, Environment}
 import uk.gov.hmrc.apiplatform.modules.uplift.controllers.UpliftJourneySwitch
 import uk.gov.hmrc.apiplatform.modules.uplift.domain.models._
 import uk.gov.hmrc.apiplatform.modules.uplift.services._
@@ -42,7 +42,6 @@ import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.{checkpages => contro
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.ApplicationCreatedResponse
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.Error._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.apidefinitions.APISubscriptionStatus
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.Environment.{PRODUCTION, SANDBOX}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.controllers.ApplicationSummary
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.emailpreferences.EmailPreferences
@@ -196,8 +195,8 @@ class AddApplication @Inject() (
           case Valid =>
             addApplication(formThatPassesSimpleValidation).map(applicationCreatedResponse =>
               environment match {
-                case PRODUCTION => Redirect(controllercheckpages.routes.ApplicationCheck.requestCheckPage(applicationCreatedResponse.id))
-                case SANDBOX    => Redirect(uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.routes.SubscriptionsController.addAppSubscriptions(applicationCreatedResponse.id))
+                case Environment.PRODUCTION => Redirect(controllercheckpages.routes.ApplicationCheck.requestCheckPage(applicationCreatedResponse.id))
+                case Environment.SANDBOX    => Redirect(uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.routes.SubscriptionsController.addAppSubscriptions(applicationCreatedResponse.id))
               }
             )
 
@@ -228,7 +227,7 @@ class AddApplication @Inject() (
       import appRequest._
 
       deployedTo match {
-        case SANDBOX    => {
+        case Environment.SANDBOX    => {
           val alreadySelectedEmailPreferences: Boolean = appRequest.flash.get("emailPreferencesSelected").contains("true")
           subscriptionsNotInUserEmailPreferences(subscriptions.filter(_.subscribed), developerSession.developer.emailPreferences) map { missingSubscriptions =>
             if (alreadySelectedEmailPreferences || missingSubscriptions.isEmpty) {
@@ -239,7 +238,7 @@ class AddApplication @Inject() (
             }
           }
         }
-        case PRODUCTION => successful(NotFound(errorHandler.notFoundTemplate(appRequest)))
+        case Environment.PRODUCTION => successful(NotFound(errorHandler.notFoundTemplate(appRequest)))
       }
     }
   }

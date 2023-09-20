@@ -26,14 +26,14 @@ import org.scalatestplus.play.guice.GuiceOneAppPerSuite
 import play.api.test.Helpers._
 import uk.gov.hmrc.http.{HeaderCarrier, HttpClient, InternalServerException}
 
-import uk.gov.hmrc.apiplatform.modules.apis.domain.models._
+import uk.gov.hmrc.apiplatform.modules.common.domain.models._
 import uk.gov.hmrc.apiplatform.modules.applications.domain.models.Collaborators.Administrator
-import uk.gov.hmrc.apiplatform.modules.applications.domain.models.{ApplicationId, ClientId, Collaborators}
+import uk.gov.hmrc.apiplatform.modules.applications.domain.models.{Collaborators}
 import uk.gov.hmrc.apiplatform.modules.commands.applications.domain.models.{ApplicationCommands, CommandFailure, CommandFailures, DispatchRequest, DispatchSuccessResult}
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.Actors
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.LaxEmailAddress.StringSyntax
 import uk.gov.hmrc.apiplatform.modules.common.domain.services.NonEmptyListFormatters._
-import uk.gov.hmrc.apiplatform.modules.developers.domain.models.UserId
+import uk.gov.hmrc.apiplatform.modules.common.domain.models.UserId
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.ApplicationUpdateSuccessful
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.{AsyncHmrcSpec, WireMockSugar}
@@ -62,7 +62,7 @@ class ApplicationCommandConnectorSpec
     )
   }
 
-  val apiVersion1   = ApiVersion.random
+  val apiVersion1   = ApiVersionNbr.random
   val applicationId = ApplicationId.random
   val administrator = Administrator(UserId.random, "sample@example.com".toLaxEmail)
   val developer     = Collaborators.Developer(UserId.random, "someone@example.com".toLaxEmail)
@@ -76,7 +76,7 @@ class ApplicationCommandConnectorSpec
   val command              = ApplicationCommands.RemoveCollaborator(Actors.GatekeeperUser(gatekeeperUserName), collaborator, LocalDateTime.now())
 
   val adminsToEmail = Set("admin1@example.com", "admin2@example.com").map(_.toLaxEmail)
-  val url           = s"/applications/${applicationId.value.toString()}/dispatch"
+  val url           = s"/applications/${applicationId}/dispatch"
 
   class Setup(proxyEnabled: Boolean = false) {
 

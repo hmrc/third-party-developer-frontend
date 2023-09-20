@@ -28,12 +28,10 @@ import play.api.http.Status.{BAD_REQUEST, CREATED, NOT_FOUND, NO_CONTENT, OK}
 import play.api.libs.json.{JsSuccess, Json}
 import uk.gov.hmrc.http.{HeaderCarrier, HttpClient, HttpResponse, UpstreamErrorResponse}
 
-import uk.gov.hmrc.apiplatform.modules.apis.domain.models.{ApiContext, ApiIdentifier, ApiVersion}
-import uk.gov.hmrc.apiplatform.modules.applications.domain.models.ClientId
+import uk.gov.hmrc.apiplatform.modules.common.domain.models._
 import uk.gov.hmrc.apiplatform.modules.common.services.ApplicationLogger
 import uk.gov.hmrc.thirdpartydeveloperfrontend.config.ApplicationConfig
 import uk.gov.hmrc.thirdpartydeveloperfrontend.connectors.SubscriptionFieldsConnectorDomain._
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.Environment
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.subscriptions.ApiSubscriptionFields._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.subscriptions._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.helpers.Retries
@@ -67,7 +65,7 @@ abstract class AbstractSubscriptionFieldsConnector(implicit ec: ExecutionContext
   def fetchFieldValues(
       clientId: ClientId,
       context: ApiContext,
-      version: ApiVersion
+      version: ApiVersionNbr
     )(implicit hc: HeaderCarrier
     ): Future[Seq[SubscriptionFieldValue]] = {
 
@@ -97,7 +95,7 @@ abstract class AbstractSubscriptionFieldsConnector(implicit ec: ExecutionContext
       if (definitions.isEmpty) {
         Future.successful(None)
       } else {
-        fetchApplicationApiValues(clientId, apiIdentifier.context, apiIdentifier.version)
+        fetchApplicationApiValues(clientId, apiIdentifier.context, apiIdentifier.versionNbr)
       }
     }
 
@@ -112,7 +110,7 @@ abstract class AbstractSubscriptionFieldsConnector(implicit ec: ExecutionContext
 
   def fetchFieldDefinitions(
       apiContext: ApiContext,
-      apiVersion: ApiVersion
+      apiVersion: ApiVersionNbr
     )(implicit hc: HeaderCarrier
     ): Future[Seq[SubscriptionFieldDefinition]] = {
     val url = urlSubscriptionFieldDefinition(apiContext, apiVersion)
@@ -136,7 +134,7 @@ abstract class AbstractSubscriptionFieldsConnector(implicit ec: ExecutionContext
   def saveFieldValues(
       clientId: ClientId,
       apiContext: ApiContext,
-      apiVersion: ApiVersion,
+      apiVersion: ApiVersionNbr,
       fields: Fields.Alias
     )(implicit hc: HeaderCarrier
     ): Future[ConnectorSaveSubscriptionFieldsResponse] = {
@@ -158,7 +156,7 @@ abstract class AbstractSubscriptionFieldsConnector(implicit ec: ExecutionContext
   def deleteFieldValues(
       clientId: ClientId,
       apiContext: ApiContext,
-      apiVersion: ApiVersion
+      apiVersion: ApiVersionNbr
     )(implicit hc: HeaderCarrier
     ): Future[FieldsDeleteResult] = {
     val url = urlSubscriptionFieldValues(clientId, apiContext, apiVersion)
@@ -174,7 +172,7 @@ abstract class AbstractSubscriptionFieldsConnector(implicit ec: ExecutionContext
   private def fetchApplicationApiValues(
       clientId: ClientId,
       apiContext: ApiContext,
-      apiVersion: ApiVersion
+      apiVersion: ApiVersionNbr
     )(implicit hc: HeaderCarrier
     ): Future[Option[ApplicationApiFieldValues]] = {
     val url = urlSubscriptionFieldValues(clientId, apiContext, apiVersion)
@@ -183,10 +181,10 @@ abstract class AbstractSubscriptionFieldsConnector(implicit ec: ExecutionContext
 
   private def urlEncode(str: String, encoding: String = "UTF-8") = encode(str, encoding)
 
-  private def urlSubscriptionFieldValues(clientId: ClientId, apiContext: ApiContext, apiVersion: ApiVersion) =
+  private def urlSubscriptionFieldValues(clientId: ClientId, apiContext: ApiContext, apiVersion: ApiVersionNbr) =
     s"$serviceBaseUrl/field/application/${urlEncode(clientId.value)}/context/${urlEncode(apiContext.value)}/version/${urlEncode(apiVersion.value)}"
 
-  private def urlSubscriptionFieldDefinition(apiContext: ApiContext, apiVersion: ApiVersion) =
+  private def urlSubscriptionFieldDefinition(apiContext: ApiContext, apiVersion: ApiVersionNbr) =
     s"$serviceBaseUrl/definition/context/${urlEncode(apiContext.value)}/version/${urlEncode(apiVersion.value)}"
 }
 
@@ -212,7 +210,7 @@ private[connectors] object SubscriptionFieldsConnectorDomain {
   case class ApplicationApiFieldValues(
       clientId: ClientId,
       apiContext: ApiContext,
-      apiVersion: ApiVersion,
+      apiVersion: ApiVersionNbr,
       fieldsId: UUID,
       fields: Map[FieldName, FieldValue]
     )
@@ -228,7 +226,7 @@ private[connectors] object SubscriptionFieldsConnectorDomain {
 
   case class ApiFieldDefinitions(
       apiContext: ApiContext,
-      apiVersion: ApiVersion,
+      apiVersion: ApiVersionNbr,
       fieldDefinitions: List[FieldDefinition]
     )
 
@@ -237,7 +235,7 @@ private[connectors] object SubscriptionFieldsConnectorDomain {
   case class SubscriptionFieldsPutRequest(
       clientId: ClientId,
       apiContext: ApiContext,
-      apiVersion: ApiVersion,
+      apiVersion: ApiVersionNbr,
       fields: Fields.Alias
     )
 

@@ -24,9 +24,8 @@ import cats.data.NonEmptyList
 
 import uk.gov.hmrc.http.HeaderCarrier
 
-import uk.gov.hmrc.apiplatform.modules.applications.domain.models.ApplicationId
+import uk.gov.hmrc.apiplatform.modules.common.domain.models.ApplicationId
 import uk.gov.hmrc.apiplatform.modules.common.services.ApplicationLogger
-import uk.gov.hmrc.apiplatform.modules.developers.domain.models.UserId
 import uk.gov.hmrc.thirdpartydeveloperfrontend.connectors.{ApmConnector, ThirdPartyDeveloperConnector}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.connectors.ApiType.REST_API
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.connectors.{CombinedApi, CombinedApiCategory}
@@ -34,6 +33,7 @@ import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.Develope
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.emailpreferences.APICategoryDisplayDetails
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.flows.{EmailPreferencesFlowV2, EmailPreferencesProducer, FlowType, NewApplicationEmailPreferencesFlowV2}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.repositories.FlowRepository
+import uk.gov.hmrc.apiplatform.modules.common.domain.models.UserId
 
 @Singleton
 class EmailPreferencesService @Inject() (
@@ -56,7 +56,7 @@ class EmailPreferencesService @Inject() (
         .flatMap {
           case Right(x) => successful(x)
           case Left(_)  => apmConnector.fetchApiDefinitionsVisibleToUser(developerSession.developer.userId).map(_.map(y =>
-              CombinedApi(y.serviceName, y.name, y.categories.map(CombinedApiCategory), REST_API)
+              CombinedApi(y.serviceName, y.name, y.categories.map(a => CombinedApiCategory(a.toString())), REST_API)
             ))
         }
       updateVisibleApis(developerSession, visibleApis)
@@ -79,7 +79,7 @@ class EmailPreferencesService @Inject() (
   private def handleGettingApiDetails(serviceName: String)(implicit hc: HeaderCarrier): Future[CombinedApi] = {
     apmConnector.fetchCombinedApi(serviceName).flatMap {
       case Right(x) => successful(x)
-      case Left(_)  => apmConnector.fetchAPIDefinition(serviceName).map(y => CombinedApi(y.serviceName, y.name, y.categories.map(CombinedApiCategory), REST_API))
+      case Left(_)  => apmConnector.fetchAPIDefinition(serviceName).map(y => CombinedApi(y.serviceName, y.name, y.categories.map(a => CombinedApiCategory(a.toString())), REST_API))
     }
   }
 

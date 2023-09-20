@@ -24,13 +24,13 @@ import play.api.data.validation.{Constraint, Invalid, Valid, ValidationError}
 import play.api.data.{Form, FormError}
 
 import uk.gov.hmrc.apiplatform.modules.applications.domain.models.{
-  ApplicationId,
   PrivacyPolicyLocation,
   PrivacyPolicyLocations,
   TermsAndConditionsLocation,
   TermsAndConditionsLocations
 }
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.Application
+import uk.gov.hmrc.apiplatform.modules.common.domain.models.ApplicationId
 
 // scalastyle:off number.of.types
 
@@ -274,7 +274,7 @@ object EditApplicationForm {
 
   val form: Form[EditApplicationForm] = Form(
     mapping(
-      "applicationId"         -> nonEmptyText.transform[ApplicationId](text => ApplicationId(java.util.UUID.fromString(text)), id => id.text()),
+      "applicationId"         -> nonEmptyText.transform[ApplicationId](text => ApplicationId(java.util.UUID.fromString(text)), id => id.toString()),
       "applicationName"       -> applicationNameValidator,
       "description"           -> optional(text),
       "privacyPolicyUrl"      -> optional(privacyPolicyUrlValidator),
@@ -543,7 +543,7 @@ object SelectTopicsFromSubscriptionsForm {
   implicit def applicationIdFormat: Formatter[ApplicationId] = new Formatter[ApplicationId] {
     override val format                                       = Some(("format.uuid", Nil))
     override def bind(key: String, data: Map[String, String]) = data.get(key).map(text => ApplicationId(UUID.fromString(text))).toRight(Seq(FormError(key, "error.required", Nil)))
-    override def unbind(key: String, value: ApplicationId)    = Map(key -> value.text())
+    override def unbind(key: String, value: ApplicationId)    = Map(key -> value.toString())
   }
 
   def nonEmptyList: Constraint[Seq[String]] = Constraint[Seq[String]]("constraint.required") { o =>

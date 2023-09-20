@@ -17,11 +17,9 @@
 @import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.views.SubscriptionRedirect._
 @import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.views.BackButtonWithJavaScript
 @import include._
-@import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.Environment.PRODUCTION
-@import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.Environment
+@import uk.gov.hmrc.apiplatform.modules.common.domain.models._
 @import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.Application
 @import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.DeveloperSession
-@import uk.gov.hmrc.apiplatform.modules.apis.domain.models.ApiContext
 @import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.subscriptions.ApiData
 @import views.helper.EnvironmentNameService
 @import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers
@@ -48,7 +46,7 @@
 )
 
 @isPendingOrActiveProductionApplication(application: Application) = @{
-    application.deployedTo.isProduction() && !application.isInTesting
+    application.deployedTo.isProduction && !application.isInTesting
 }
 
 @pageHeading = @{"Which APIs do you want to use?"}
@@ -81,7 +79,7 @@
         <p class="panel panel-border-wide">You need admin rights to make API subscription changes.</p>
       }
 
-      @subscriptionGroups(role, groupedSubscriptions, openAccessApis, app, API_SUBSCRIPTIONS_PAGE, app.deployedTo == PRODUCTION)
+      @subscriptionGroups(role, groupedSubscriptions, openAccessApis, app, API_SUBSCRIPTIONS_PAGE, app.deployedTo.isProduction)
     }
 
     case _ => {
@@ -94,7 +92,7 @@
   </br>
 
   <div>
-    @if(app.deployedTo == Environment.PRODUCTION){
+    @if(app.deployedTo.isProduction){
       <a class="govuk-button" data-module="govuk-button" href="@{controllers.addapplication.routes.AddApplication.addApplicationSuccess(app.id)}">Add your application</a>
     } else {
       <a class="govuk-button" data-module="govuk-button" href="@{controllers.routes.ManageSubscriptions.subscriptionConfigurationStart(app.id).url}">Add your application</a>

@@ -23,20 +23,20 @@ import scala.concurrent.{ExecutionContext, Future}
 import uk.gov.hmrc.http.{ForbiddenException, HeaderCarrier}
 import uk.gov.hmrc.play.audit.http.connector.AuditResult
 
-import uk.gov.hmrc.apiplatform.modules.apis.domain.models._
+import uk.gov.hmrc.apiplatform.modules.common.domain.models._
 import uk.gov.hmrc.apiplatform.modules.applications.domain.models._
 import uk.gov.hmrc.apiplatform.modules.commands.applications.domain.models.{ApplicationCommand, ApplicationCommands}
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.LaxEmailAddress
-import uk.gov.hmrc.apiplatform.modules.developers.domain.models.UserId
+import uk.gov.hmrc.apiplatform.modules.common.domain.models.UserId
 import uk.gov.hmrc.thirdpartydeveloperfrontend.connectors.{ApplicationCommandConnector, _}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.apidefinitions._
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.Environment.{PRODUCTION, SANDBOX}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.connectors.{DeskproTicket, TicketResult}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.DeveloperSession
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.subscriptions._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.service.AuditAction.{AccountDeletionRequested, ApplicationDeletionRequested, Remove2SVRequested, UserLogoutSurveyCompleted}
+import uk.gov.hmrc.apiplatform.modules.apis.domain.models.ApiCategory
 
 @Singleton
 class ApplicationService @Inject() (
@@ -118,7 +118,7 @@ class ApplicationService @Inject() (
   def fetchCredentials(application: Application)(implicit hc: HeaderCarrier): Future[ApplicationToken] =
     connectorWrapper.forEnvironment(application.deployedTo).thirdPartyApplicationConnector.fetchCredentials(application.id)
 
-  type ApiMap[V]   = Map[ApiContext, Map[ApiVersion, V]]
+  type ApiMap[V]   = Map[ApiContext, Map[ApiVersionNbr, V]]
   type FieldMap[V] = ApiMap[Map[FieldName, V]]
 
   def updateCheckInformation(application: Application, checkInformation: CheckInformation)(implicit hc: HeaderCarrier): Future[ApplicationUpdateSuccessful] = {
@@ -141,7 +141,7 @@ class ApplicationService @Inject() (
     val requesterRole  = roleForApplication(application, requesterEmail)
     val appId          = application.id
 
-    if (environment.isSandbox() || requesterRole.isAdministrator) {
+    if (environment.isSandbox || requesterRole.isAdministrator) {
       val deskproTicket = DeskproTicket.createForPrincipalApplicationDeletion(requesterName, requesterEmail, requesterRole, environment, application.name, appId)
 
       for {
@@ -149,7 +149,7 @@ class ApplicationService @Inject() (
         _              <- auditService.audit(
                             ApplicationDeletionRequested,
                             Map(
-                              "appId"                   -> appId.text(),
+                              "appId"                   -> appId.toString(),
                               "requestedByName"         -> requesterName,
                               "requestedByEmailAddress" -> requesterEmail.text,
                               "timestamp"               -> LocalDateTime.now(clock).toString
@@ -206,8 +206,8 @@ class ApplicationService @Inject() (
 
   def isApplicationNameValid(name: String, environment: Environment, selfApplicationId: Option[ApplicationId])(implicit hc: HeaderCarrier): Future[ApplicationNameValidation] = {
     environment match {
-      case PRODUCTION => connectorWrapper.productionApplicationConnector.validateName(name, selfApplicationId)
-      case SANDBOX    => connectorWrapper.sandboxApplicationConnector.validateName(name, selfApplicationId)
+      case Environment.PRODUCTION => connectorWrapper.productionApplicationConnector.validateName(name, selfApplicationId)
+      case Environment.SANDBOX    => connectorWrapper.sandboxApplicationConnector.validateName(name, selfApplicationId)
     }
   }
 
@@ -248,7 +248,7 @@ class ApplicationService @Inject() (
   def applicationConnectorFor(application: Application): ThirdPartyApplicationConnector = applicationConnectorFor(Some(application.deployedTo))
 
   def applicationConnectorFor(environment: Option[Environment]): ThirdPartyApplicationConnector =
-    if (environment.contains(PRODUCTION)) {
+    if (environment.contains(Environment.PRODUCTION)) {
       productionApplicationConnector
     } else {
       sandboxApplicationConnector

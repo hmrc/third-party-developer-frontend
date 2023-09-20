@@ -23,8 +23,7 @@ import cats.data.OptionT
 
 import uk.gov.hmrc.http.HeaderCarrier
 
-import uk.gov.hmrc.apiplatform.modules.apis.domain.models._
-import uk.gov.hmrc.apiplatform.modules.applications.domain.models.ApplicationId
+import uk.gov.hmrc.apiplatform.modules.common.domain.models._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.{ApplicationRequest, UserRequest}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.apidefinitions._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications._
@@ -56,12 +55,12 @@ class ApplicationActionService @Inject() (
 
   def toApiSubscriptionStatusList(
       application: ApplicationWithSubscriptionData,
-      subscriptionFieldDefinitions: Map[ApiContext, Map[ApiVersion, Map[FieldName, SubscriptionFieldDefinition]]],
+      subscriptionFieldDefinitions: Map[ApiContext, Map[ApiVersionNbr, Map[FieldName, SubscriptionFieldDefinition]]],
       summaryApiDefinitions: Map[ApiContext, ApiData]
     ): List[APISubscriptionStatus] = {
 
     def handleContext(context: ApiContext, cdata: ApiData): List[APISubscriptionStatus] = {
-      def handleVersion(version: ApiVersion, vdata: VersionData): APISubscriptionStatus = {
+      def handleVersion(version: ApiVersionNbr, vdata: VersionData): APISubscriptionStatus = {
         def zipDefinitionsAndValues(): List[SubscriptionFieldValue] = {
           val fieldNameToDefinition = subscriptionFieldDefinitions.getOrElse(context, Map.empty).getOrElse(version, Map.empty)
           val fieldNameToValue      = application.subscriptionFieldValues.getOrElse(context, Map.empty).getOrElse(version, Map.empty)
@@ -78,7 +77,7 @@ class ApplicationActionService @Inject() (
           apiVersion = ApiVersionDefinition(
             version,
             status = vdata.status,
-            access = Some(vdata.access)
+            access = vdata.access
           ),
           subscribed = application.subscriptions.contains(ApiIdentifier(context, version)),
           requiresTrust = false, // Because these are filtered out
@@ -93,7 +92,7 @@ class ApplicationActionService @Inject() (
         )
       }
 
-      val orderDescending: Ordering[ApiVersion] = (x: ApiVersion, y: ApiVersion) => y.value.compareTo(x.value)
+      val orderDescending: Ordering[ApiVersionNbr] = (x: ApiVersionNbr, y: ApiVersionNbr) => y.value.compareTo(x.value)
 
       cdata.versions.toList.sortBy(_._1)(orderDescending).map {
         case (k, v) => handleVersion(k, v)

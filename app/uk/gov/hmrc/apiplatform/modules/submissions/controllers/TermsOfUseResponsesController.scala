@@ -22,7 +22,7 @@ import scala.concurrent.ExecutionContext
 import play.api.libs.crypto.CookieSigner
 import play.api.mvc.{MessagesControllerComponents, Result}
 
-import uk.gov.hmrc.apiplatform.modules.applications.domain.models.ApplicationId
+import uk.gov.hmrc.apiplatform.modules.common.domain.models._
 import uk.gov.hmrc.apiplatform.modules.common.services.EitherTHelper
 import uk.gov.hmrc.apiplatform.modules.submissions.controllers.models.AnswersViewModel._
 import uk.gov.hmrc.apiplatform.modules.submissions.services.SubmissionService

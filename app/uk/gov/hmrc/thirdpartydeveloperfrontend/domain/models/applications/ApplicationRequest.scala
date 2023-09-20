@@ -18,8 +18,8 @@ package uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications
 
 import play.api.libs.json.Json
 
-import uk.gov.hmrc.apiplatform.modules.apis.domain.models.ApiIdentifier
-import uk.gov.hmrc.apiplatform.modules.applications.domain.models.{ApplicationId, Collaborator}
+import uk.gov.hmrc.apiplatform.modules.common.domain.models._
+import uk.gov.hmrc.apiplatform.modules.applications.domain.models.Collaborator
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.LaxEmailAddress
 import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.DeveloperSession
@@ -72,7 +72,7 @@ object UpdateApplicationRequest extends ApplicationRequest {
   implicit val format = Json.format[UpdateApplicationRequest]
 
   def from(form: EditApplicationForm, application: Application) = {
-    val name = if (application.isInTesting || application.deployedTo.isSandbox()) {
+    val name = if (application.isInTesting || application.deployedTo.isSandbox) {
       form.applicationName.trim
     } else {
       application.name

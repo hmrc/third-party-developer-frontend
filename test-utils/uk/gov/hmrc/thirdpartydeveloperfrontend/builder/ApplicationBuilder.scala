@@ -19,8 +19,8 @@ package uk.gov.hmrc.thirdpartydeveloperfrontend.builder
 import java.time.{LocalDateTime, Period, ZoneOffset}
 import java.util.UUID.randomUUID
 
-import uk.gov.hmrc.apiplatform.modules.apis.domain.models._
-import uk.gov.hmrc.apiplatform.modules.applications.domain.models.{ApplicationId, ClientId, Collaborator}
+import uk.gov.hmrc.apiplatform.modules.common.domain.models._
+import uk.gov.hmrc.apiplatform.modules.applications.domain.models.{Collaborator}
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.LaxEmailAddress
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.LaxEmailAddress.StringSyntax
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications._
@@ -39,7 +39,7 @@ trait ApplicationBuilder extends CollaboratorTracker {
     Application(
       appId,
       clientId,
-      s"${appId.text()}-name",
+      s"${appId.toString()}-name",
       LocalDateTime.now(ZoneOffset.UTC),
       Some(LocalDateTime.now(ZoneOffset.UTC)),
       None,
@@ -65,18 +65,18 @@ trait ApplicationBuilder extends CollaboratorTracker {
     ApplicationWithSubscriptionData(application)
   }
 
-  def buildSubscriptions(apiContext: ApiContext, apiVersion: ApiVersion): Set[ApiIdentifier] =
+  def buildSubscriptions(apiContext: ApiContext, apiVersion: ApiVersionNbr): Set[ApiIdentifier] =
     Set(
       ApiIdentifier(apiContext, apiVersion)
     )
 
-  def buildSubscriptionFieldValues(apiContext: ApiContext, apiVersion: ApiVersion, fields: Fields.Alias): Map[ApiContext, Map[ApiVersion, Fields.Alias]] = {
+  def buildSubscriptionFieldValues(apiContext: ApiContext, apiVersion: ApiVersionNbr, fields: Fields.Alias): Map[ApiContext, Map[ApiVersionNbr, Fields.Alias]] = {
     Map(apiContext -> Map(apiVersion -> fields))
   }
 
   def buildApplicationWithSubscriptionData(
       apiContext: ApiContext = ApiContext.random,
-      apiVersion: ApiVersion = ApiVersion.random,
+      apiVersion: ApiVersionNbr = ApiVersionNbr.random,
       fields: Fields.Alias = Map(FieldName.random -> FieldValue.random, FieldName.random -> FieldValue.random)
     ): ApplicationWithSubscriptionData = {
     ApplicationWithSubscriptionData(

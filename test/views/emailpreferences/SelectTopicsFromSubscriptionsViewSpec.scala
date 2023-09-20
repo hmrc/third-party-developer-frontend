@@ -26,7 +26,7 @@ import views.html.emailpreferences.SelectTopicsFromSubscriptionsView
 import play.api.mvc.AnyContentAsEmpty
 import play.api.test.FakeRequest
 
-import uk.gov.hmrc.apiplatform.modules.applications.domain.models.ApplicationId
+import uk.gov.hmrc.apiplatform.modules.common.domain.models._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.builder._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.SelectTopicsFromSubscriptionsForm
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.LoggedInState
@@ -55,7 +55,7 @@ class SelectTopicsFromSubscriptionsViewSpec extends CommonViewSpec
     // Check form is configured correctly
     val form = document.getElementById("emailPreferencesTopicsForm")
     form.attr("method") should be("POST")
-    form.attr("action") should be(s"/developer/profile/email-preferences/topics-from-subscriptions?applicationId=${applicationId.text()}")
+    form.attr("action") should be(s"/developer/profile/email-preferences/topics-from-subscriptions?applicationId=${applicationId}")
 
     // check checkboxes are displayed
     validateCheckboxItemsAgainstTopics(document)

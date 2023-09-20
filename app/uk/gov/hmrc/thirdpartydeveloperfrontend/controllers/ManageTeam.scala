@@ -41,6 +41,7 @@ import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.controllers.AddTeam
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.controllers.{AddTeamMemberPageMode, ApplicationViewModel}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.DeveloperSession
 import uk.gov.hmrc.thirdpartydeveloperfrontend.service._
+import uk.gov.hmrc.apiplatform.modules.common.domain.models.ApplicationId
 
 @Singleton
 class ManageTeam @Inject() (

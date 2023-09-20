@@ -23,7 +23,7 @@ import scala.concurrent.Future.successful
 import play.api.libs.crypto.CookieSigner
 import play.api.mvc.MessagesControllerComponents
 
-import uk.gov.hmrc.apiplatform.modules.applications.domain.models.ApplicationId
+import uk.gov.hmrc.apiplatform.modules.common.domain.models._
 import uk.gov.hmrc.apiplatform.modules.common.services.EitherTHelper
 import uk.gov.hmrc.apiplatform.modules.submissions.controllers.StartUsingYourApplicationController.ViewModel
 import uk.gov.hmrc.apiplatform.modules.submissions.services.SubmissionService

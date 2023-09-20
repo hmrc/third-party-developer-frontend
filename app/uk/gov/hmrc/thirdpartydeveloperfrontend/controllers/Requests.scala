@@ -20,7 +20,7 @@ import cats.data.NonEmptyList
 
 import play.api.mvc._
 
-import uk.gov.hmrc.apiplatform.modules.apis.domain.models.ApiContext
+import uk.gov.hmrc.apiplatform.modules.common.domain.models._
 import uk.gov.hmrc.apiplatform.modules.applications.domain.models.Collaborator
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.apidefinitions.{
   APISubscriptionStatus,

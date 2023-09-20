@@ -26,8 +26,7 @@ import play.api.data.Form
 import play.api.mvc.Call
 import play.api.test.FakeRequest
 
-import uk.gov.hmrc.apiplatform.modules.apis.domain.models.{ApiContext, ApiVersion}
-import uk.gov.hmrc.apiplatform.modules.applications.domain.models.{ApplicationId, ClientId}
+import uk.gov.hmrc.apiplatform.modules.common.domain.models.{ApiContext, ApiVersionNbr, ApplicationId, ClientId, Environment}
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.LaxEmailAddress.StringSyntax
 import uk.gov.hmrc.thirdpartydeveloperfrontend.builder.{DeveloperSessionBuilder, DeveloperTestData}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.ChangeSubscriptionConfirmationForm
@@ -52,7 +51,7 @@ class ChangeSubscriptionConfirmationSpec extends CommonViewSpec
   val applicationName = "Test Application"
   val apiName         = "Test API"
   val apiContext      = ApiContext("test")
-  val apiVersion      = ApiVersion("1.0")
+  val apiVersion      = ApiVersionNbr("1.0")
   val callMock        = mock[Call]
 
   val loggedInDeveloper = standardDeveloper.loggedIn

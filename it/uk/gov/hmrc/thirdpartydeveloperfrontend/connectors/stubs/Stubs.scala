@@ -19,9 +19,9 @@ package uk.gov.hmrc.thirdpartydeveloperfrontend.connectors.stubs
 import java.net.URLEncoder
 import com.github.tomakehurst.wiremock.client.WireMock._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.connectors.EncryptedJson
-import uk.gov.hmrc.apiplatform.modules.apis.domain.models.{ApiContext, ApiIdentifier, ApiVersion}
+import uk.gov.hmrc.apiplatform.modules.common.domain.models._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.ApplicationNameValidationJson.ApplicationNameValidationResult
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.{Application, ApplicationToken, ApplicationWithSubscriptionData, Environment}
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.{ApplicationToken, ApplicationWithSubscriptionData}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.connectors.{PasswordResetRequest, UserAuthenticationResponse}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.{Developer, Registration, Session, UpdateProfileRequest}
 import play.api.http.Status._
@@ -33,9 +33,7 @@ import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.emailpreferences.AP
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.services.ApiDefinitionsJsonFormatters._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.services.ApplicationsJsonFormatters._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.WireMockExtensions.withJsonRequestBodySyntax
-import uk.gov.hmrc.apiplatform.modules.developers.domain.models.UserId
-import uk.gov.hmrc.apiplatform.modules.applications.domain.models.ClientId
-import uk.gov.hmrc.apiplatform.modules.applications.domain.models.ApplicationId
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.Application
 
 object Stubs extends ApplicationLogger {
 
@@ -133,14 +131,14 @@ object ApplicationStub {
     )
   }
 
-  def setUpDeleteSubscription(id: String, api: String, version: ApiVersion, status: Int) = {
+  def setUpDeleteSubscription(id: String, api: String, version: ApiVersionNbr, status: Int) = {
     stubFor(
       delete(urlEqualTo(s"/application/$id/subscription?context=$api&version=${version.value}"))
         .willReturn(aResponse().withStatus(status))
     )
   }
 
-  def setUpExecuteSubscription(id: String, api: String, version: ApiVersion, status: Int) = {
+  def setUpExecuteSubscription(id: String, api: String, version: ApiVersionNbr, status: Int) = {
     stubFor(
       post(urlEqualTo(s"/application/$id/subscription"))
         .withRequestBody(equalToJson(Json.toJson(ApiIdentifier(ApiContext(api), version)).toString()))
@@ -237,7 +235,7 @@ object ThirdPartyDeveloperStub {
   def fetchDeveloper(developer: Developer) = {
     stubFor(
       get(urlPathEqualTo("/developer"))
-        .withQueryParam("developerId", equalTo(developer.userId.asText))
+        .withQueryParam("developerId", equalTo(developer.userId.toString()))
         .willReturn(
           aResponse()
             .withStatus(OK)
@@ -250,22 +248,22 @@ object ThirdPartyDeveloperStub {
 
 object ApiSubscriptionFieldsStub {
 
-  def setUpDeleteSubscriptionFields(clientId: ClientId, apiContext: ApiContext, apiVersion: ApiVersion) = {
+  def setUpDeleteSubscriptionFields(clientId: ClientId, apiContext: ApiContext, apiVersion: ApiVersionNbr) = {
     stubFor(
       delete(urlEqualTo(fieldValuesUrl(clientId, apiContext, apiVersion)))
         .willReturn(aResponse().withStatus(NO_CONTENT))
     )
   }
 
-  private def fieldValuesUrl(clientId: ClientId, apiContext: ApiContext, apiVersion: ApiVersion) = {
+  private def fieldValuesUrl(clientId: ClientId, apiContext: ApiContext, apiVersion: ApiVersionNbr) = {
     s"/field/application/${clientId.value}/context/${apiContext.value}/version/${apiVersion.value}"
   }
 
-  def noSubscriptionFields(apiContext: ApiContext, version: ApiVersion): Any = {
+  def noSubscriptionFields(apiContext: ApiContext, version: ApiVersionNbr): Any = {
     stubFor(get(urlEqualTo(fieldDefinitionsUrl(apiContext, version))).willReturn(aResponse().withStatus(NOT_FOUND)))
   }
 
-  private def fieldDefinitionsUrl(apiContext: ApiContext, version: ApiVersion) = {
+  private def fieldDefinitionsUrl(apiContext: ApiContext, version: ApiVersionNbr) = {
     s"/definition/context/${apiContext.value}/version/${version.value}"
   }
 }
@@ -276,7 +274,7 @@ object ApiPlatformMicroserviceStub {
 
   def stubFetchAllPossibleSubscriptions(applicationId: ApplicationId, body: String) = {
     stubFor(
-      get(urlEqualTo(s"/api-definitions?applicationId=${applicationId.text()}"))
+      get(urlEqualTo(s"/api-definitions?applicationId=${applicationId}"))
         .willReturn(
           aResponse()
             .withStatus(OK)
@@ -288,7 +286,7 @@ object ApiPlatformMicroserviceStub {
 
   def stubFetchAllPossibleSubscriptionsFailure(applicationId: ApplicationId) = {
     stubFor(
-      get(urlEqualTo(s"/api-definitions?applicationId=${applicationId.text()}"))
+      get(urlEqualTo(s"/api-definitions?applicationId=${applicationId}"))
         .willReturn(
           aResponse()
             .withStatus(INTERNAL_SERVER_ERROR)
@@ -298,7 +296,7 @@ object ApiPlatformMicroserviceStub {
 
   def stubFetchApplicationById(applicationId: ApplicationId, data: ApplicationWithSubscriptionData) = {
     stubFor(
-      get(urlEqualTo(s"/applications/${applicationId.text()}"))
+      get(urlEqualTo(s"/applications/${applicationId}"))
         .willReturn(
           aResponse()
             .withStatus(OK)
@@ -310,7 +308,7 @@ object ApiPlatformMicroserviceStub {
 
   def stubFetchApplicationByIdFailure(applicationId: ApplicationId) = {
     stubFor(
-      get(urlEqualTo(s"/applications/${applicationId.text()}"))
+      get(urlEqualTo(s"/applications/${applicationId}"))
         .willReturn(
           aResponse()
             .withStatus(NOT_FOUND)
@@ -358,7 +356,7 @@ object ApiPlatformMicroserviceStub {
 
   def stubFetchApiDefinitionsVisibleToUserFailure(userId: UserId) = {
     stubFor(
-      get(urlEqualTo(s"/combined-api-definitions?developerId=${userId.asText}"))
+      get(urlEqualTo(s"/combined-api-definitions?developerId=${userId.toString()}"))
         .willReturn(
           aResponse()
             .withStatus(INTERNAL_SERVER_ERROR)
@@ -368,7 +366,7 @@ object ApiPlatformMicroserviceStub {
 
   def stubFetchApiDefinitionsVisibleToUser(userId: UserId, body: String) = {
     stubFor(
-      get(urlEqualTo(s"/combined-api-definitions?developerId=${userId.asText}"))
+      get(urlEqualTo(s"/combined-api-definitions?developerId=${userId.toString()}"))
         .willReturn(
           aResponse()
             .withStatus(OK)
@@ -380,7 +378,7 @@ object ApiPlatformMicroserviceStub {
 
   def stubSubscribeToApi(applicationId: ApplicationId, apiIdentifier: ApiIdentifier) = {
     stubFor(
-      post(urlPathEqualTo(s"/applications/${applicationId.text()}/subscriptions"))
+      post(urlPathEqualTo(s"/applications/${applicationId}/subscriptions"))
         .withJsonRequestBody(apiIdentifier)
         .willReturn(
           aResponse()
@@ -391,7 +389,7 @@ object ApiPlatformMicroserviceStub {
 
   def stubSubscribeToApiFailure(applicationId: ApplicationId, apiIdentifier: ApiIdentifier) = {
     stubFor(
-      post(urlPathEqualTo(s"/applications/${applicationId.text()}/subscriptions"))
+      post(urlPathEqualTo(s"/applications/${applicationId}/subscriptions"))
         .withJsonRequestBody(apiIdentifier)
         .willReturn(
           aResponse()
