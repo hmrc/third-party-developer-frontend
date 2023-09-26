@@ -30,11 +30,9 @@ import play.api.libs.crypto.CookieSigner
 import play.api.test.Helpers.{redirectLocation, route, status}
 import play.api.test.{CSRFTokenHelper, FakeRequest, Writeables}
 
-import uk.gov.hmrc.apiplatform.modules.common.domain.models.{ApplicationId, ClientId, ApiContext, ApiIdentifier, ApiVersionNbr}
 import uk.gov.hmrc.apiplatform.modules.applications.domain.models.{ClientSecret, ClientSecretResponse}
 import uk.gov.hmrc.apiplatform.modules.commands.applications.domain.models.DispatchSuccessResult
-import uk.gov.hmrc.apiplatform.modules.common.domain.models.LaxEmailAddress
-import uk.gov.hmrc.apiplatform.modules.common.domain.models.UserId
+import uk.gov.hmrc.apiplatform.modules.common.domain.models._
 import uk.gov.hmrc.apiplatform.modules.dynamics.connectors.ThirdPartyDeveloperDynamicsConnector
 import uk.gov.hmrc.apiplatform.modules.mfa.connectors.ThirdPartyDeveloperMfaConnector
 import uk.gov.hmrc.apiplatform.modules.mfa.models.{MfaAction, MfaId, MfaType}
@@ -55,7 +53,6 @@ import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.{ApplicationUpdateSuccessf
 import uk.gov.hmrc.thirdpartydeveloperfrontend.helpers.ExcludeFromCoverage
 import uk.gov.hmrc.thirdpartydeveloperfrontend.repositories.FlowRepository
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.AsyncHmrcSpec
-import uk.gov.hmrc.apiplatform.modules.common.domain.models.Environment
 
 object EndpointScenarioSpec {
 
@@ -138,7 +135,9 @@ abstract class EndpointScenarioSpec extends AsyncHmrcSpec with GuiceOneAppPerSui
   when(productionSubsFieldsConnector.saveFieldValues(*[ClientId], *[ApiContext], *[ApiVersionNbr], *[Fields.Alias])(*)).thenReturn(Future.successful(
     SaveSubscriptionFieldsSuccessResponse
   ))
-  when(sandboxSubsFieldsConnector.saveFieldValues(*[ClientId], *[ApiContext], *[ApiVersionNbr], *[Fields.Alias])(*)).thenReturn(Future.successful(SaveSubscriptionFieldsSuccessResponse))
+  when(sandboxSubsFieldsConnector.saveFieldValues(*[ClientId], *[ApiContext], *[ApiVersionNbr], *[Fields.Alias])(*)).thenReturn(Future.successful(
+    SaveSubscriptionFieldsSuccessResponse
+  ))
   when(tpaSandboxConnector.validateName(*[String], *[Option[ApplicationId]])(*)).thenReturn(Future.successful(ApplicationNameValidation(ApplicationNameValidationResult(None))))
   when(apmConnector.upliftApplicationV2(*[ApplicationId], *[UpliftData])(*)).thenAnswer((appId: ApplicationId, _: UpliftData) => Future.successful(appId))
   when(apmConnector.fetchUpliftableApiIdentifiers(*)).thenReturn(Future.successful(Set(apiIdentifier)))
@@ -395,7 +394,8 @@ abstract class EndpointScenarioSpec extends AsyncHmrcSpec with GuiceOneAppPerSui
           "grantLength"           -> "1"
         )
       case Endpoint("POST", "/developer/applications/add/switch", _)                                                                   => Map("applicationId" -> applicationId.toString())
-      case Endpoint("POST", "/developer/profile/email-preferences/topics-from-subscriptions", _)                                       => Map("topic[]" -> "BUSINESS_AND_POLICY", "applicationId" -> applicationId.toString())
+      case Endpoint("POST", "/developer/profile/email-preferences/topics-from-subscriptions", _)                                       =>
+        Map("topic[]" -> "BUSINESS_AND_POLICY", "applicationId" -> applicationId.toString())
       case Endpoint("POST", "/developer/submissions/responsible-individual-verification", _)                                           => Map("verified" -> "yes")
       case Endpoint("POST", "/developer/profile/delete", _)                                                                            => Map("confirmation" -> "true")
       case Endpoint("POST", "/developer/profile/email-preferences/topics", _)                                                          => Map("topic[]" -> "BUSINESS_AND_POLICY")

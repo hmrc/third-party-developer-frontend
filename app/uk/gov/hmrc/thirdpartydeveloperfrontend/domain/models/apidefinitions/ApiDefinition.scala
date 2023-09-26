@@ -18,10 +18,10 @@ package uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.apidefinitions
 
 import scala.util.Try
 
+import uk.gov.hmrc.apiplatform.modules.apis.domain.models._
 import uk.gov.hmrc.apiplatform.modules.common.domain.models._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.subscriptions.ApiSubscriptionFields.{SubscriptionFieldValue, SubscriptionFieldsWrapper}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.subscriptions.VersionSubscription
-import uk.gov.hmrc.apiplatform.modules.apis.domain.models._
 
 object APIDefinition {
   private val nonNumericOrPeriodRegex = "[^\\d^.]*"

@@ -22,9 +22,8 @@ import scala.concurrent.{ExecutionContext, Future}
 
 import uk.gov.hmrc.http.HeaderCarrier
 
-import uk.gov.hmrc.apiplatform.modules.common.domain.models.{ApiContext, ApiIdentifier, ApiVersionNbr, ApplicationId}
 import uk.gov.hmrc.apiplatform.modules.commands.applications.domain.models.{ApplicationCommands, CommandHandlerTypes, DispatchSuccessResult}
-import uk.gov.hmrc.apiplatform.modules.common.domain.models.{Actors, LaxEmailAddress}
+import uk.gov.hmrc.apiplatform.modules.common.domain.models._
 import uk.gov.hmrc.apiplatform.modules.common.services.ClockNow
 import uk.gov.hmrc.thirdpartydeveloperfrontend.connectors.{ApmConnector, ApplicationCommandConnector, DeskproConnector}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.Application
@@ -53,7 +52,13 @@ class SubscriptionsService @Inject() (
     f(requester.displayedName, requester.email, application.name, application.id, apiName, apiVersion)
   }
 
-  def requestApiSubscription(requester: DeveloperSession, application: Application, apiName: String, apiVersion: ApiVersionNbr)(implicit hc: HeaderCarrier): Future[TicketResult] = {
+  def requestApiSubscription(
+      requester: DeveloperSession,
+      application: Application,
+      apiName: String,
+      apiVersion: ApiVersionNbr
+    )(implicit hc: HeaderCarrier
+    ): Future[TicketResult] = {
     deskproConnector.createTicket(Some(requester.developer.userId), doRequest(requester, application, apiName, apiVersion)(DeskproTicket.createForApiSubscribe))
   }
 

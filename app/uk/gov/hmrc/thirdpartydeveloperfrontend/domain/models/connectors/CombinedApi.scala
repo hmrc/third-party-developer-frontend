@@ -40,4 +40,4 @@ object ApiType extends Enum[ApiType] with PlayJsonEnum[ApiType] {
 }
 
 case class CombinedApi(displayName: String, serviceName: String, categories: List[ApiCategory], apiType: ApiType, accessType: ApiAccessType)
-*/
+ */

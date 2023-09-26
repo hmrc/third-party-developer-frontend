@@ -32,8 +32,8 @@ import play.api.test.Helpers._
 import play.filters.csrf.CSRF.TokenProvider
 import uk.gov.hmrc.http.HeaderCarrier
 
-import uk.gov.hmrc.apiplatform.modules.common.domain.models._
 import uk.gov.hmrc.apiplatform.modules.applications.domain.models.{ClientSecret, ClientSecretResponse, Collaborator}
+import uk.gov.hmrc.apiplatform.modules.common.domain.models._
 import uk.gov.hmrc.apiplatform.modules.common.utils.FixedClock
 import uk.gov.hmrc.thirdpartydeveloperfrontend.builder.{DeveloperBuilder, _}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.config.ErrorHandler
@@ -351,7 +351,13 @@ class ManageSubscriptionsSpec
           givenApplicationAction(ApplicationWithSubscriptionData(application, asSubscriptions(subsData), asFields(subsData)), loggedInDeveloper, subsData)
 
           private val result =
-            addToken(manageSubscriptionController.editApiMetadataFieldPage(appId, ApiContext("/api1-api"), ApiVersionNbr("1.0"), fieldName, SaveSubsFieldsPageMode.LeftHandNavigation))(
+            addToken(manageSubscriptionController.editApiMetadataFieldPage(
+              appId,
+              ApiContext("/api1-api"),
+              ApiVersionNbr("1.0"),
+              fieldName,
+              SaveSubsFieldsPageMode.LeftHandNavigation
+            ))(
               loggedInRequest
             )
 
@@ -379,7 +385,13 @@ class ManageSubscriptionsSpec
           givenApplicationAction(ApplicationWithSubscriptionData(application, asSubscriptions(subsData), asFields(subsData)), loggedInDeveloper, subsData)
 
           private val result =
-            addToken(manageSubscriptionController.editApiMetadataFieldPage(appId, ApiContext("/api1-api"), ApiVersionNbr("1.0"), fieldName, SaveSubsFieldsPageMode.LeftHandNavigation))(
+            addToken(manageSubscriptionController.editApiMetadataFieldPage(
+              appId,
+              ApiContext("/api1-api"),
+              ApiVersionNbr("1.0"),
+              fieldName,
+              SaveSubsFieldsPageMode.LeftHandNavigation
+            ))(
               loggedInRequest
             )
 

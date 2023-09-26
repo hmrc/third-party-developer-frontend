@@ -37,7 +37,7 @@ class PushPullNotificationsConnectorProxySpec extends AsyncHmrcSpec with BeforeA
   implicit val hc                  = HeaderCarrier()
   val clientId: ClientId           = ClientId(UUID.randomUUID().toString)
   val apiContext: ApiContext       = ApiContext("i-am-a-test")
-  val apiVersion: ApiVersionNbr       = ApiVersionNbr("1.0")
+  val apiVersion: ApiVersionNbr    = ApiVersionNbr("1.0")
   private val futureTimeoutSupport = new FutureTimeoutSupportImpl
 
   class Setup(proxyEnabled: Boolean = false) {

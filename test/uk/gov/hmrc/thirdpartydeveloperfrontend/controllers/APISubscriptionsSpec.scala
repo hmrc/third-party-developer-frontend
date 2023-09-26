@@ -17,11 +17,10 @@
 package uk.gov.hmrc.thirdpartydeveloperfrontend.controllers
 
 import uk.gov.hmrc.apiplatform.modules.apis.domain.models._
+import uk.gov.hmrc.apiplatform.modules.common.domain.models.{ApiContext, ApiVersionNbr}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.builder._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.apidefinitions._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils._
-import uk.gov.hmrc.apiplatform.modules.common.domain.models.ApiVersionNbr
-import uk.gov.hmrc.apiplatform.modules.common.domain.models.ApiContext
 
 class APISubscriptionsSpec
     extends AsyncHmrcSpec
@@ -70,7 +69,7 @@ class APISubscriptionsSpec
         .groupSubscriptions(
           List(
             subscriptionStatus("Individual Employment", "individual-employment", employmentContext, versionOne, ApiStatus.STABLE, subscribed = true),
-            subscriptionStatus("Individual Employment", "individual-employment", employmentContext, versionTwo,ApiStatus. BETA),
+            subscriptionStatus("Individual Employment", "individual-employment", employmentContext, versionTwo, ApiStatus.BETA),
             subscriptionStatus("Individual Tax", "individual-tax", taxContext, versionOne, ApiStatus.STABLE)
           )
         )

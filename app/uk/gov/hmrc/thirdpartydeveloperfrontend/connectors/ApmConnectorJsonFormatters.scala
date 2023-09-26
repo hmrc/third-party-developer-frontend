@@ -24,7 +24,6 @@ trait ApmConnectorJsonFormatters extends ApiDefinitionsJsonFormatters with Appli
   import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.subscriptions._
   import play.api.libs.json._
 
-
   implicit val versionDataFormat = Json.format[VersionData]
   implicit val apiDataFormat     = Json.format[ApiData]
 

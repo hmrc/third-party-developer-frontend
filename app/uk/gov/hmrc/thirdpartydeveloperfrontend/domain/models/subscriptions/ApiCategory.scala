@@ -16,7 +16,6 @@
 
 package uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.subscriptions
 
-
 case class ApiCategoryTPA(value: String) extends AnyVal
 
 object ApiCategoryTPA {

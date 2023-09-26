@@ -22,8 +22,8 @@ import scala.concurrent.Future
 
 import uk.gov.hmrc.http.HeaderCarrier
 
+import uk.gov.hmrc.apiplatform.modules.applications.domain.models.Collaborator
 import uk.gov.hmrc.apiplatform.modules.common.domain.models._
-import uk.gov.hmrc.apiplatform.modules.applications.domain.models.{Collaborator}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.builder.SubscriptionsBuilder
 import uk.gov.hmrc.thirdpartydeveloperfrontend.connectors.{ApmConnector, ThirdPartyApplicationConnector}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications._
@@ -41,8 +41,8 @@ import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.AsyncHmrcSpec
 class SubscriptionFieldsServiceSpec extends AsyncHmrcSpec with SubscriptionsBuilder {
 
   val apiContext: ApiContext       = ApiContext("sub-ser-test")
-  val apiVersion: ApiVersionNbr       = ApiVersionNbr("1.0")
-  val versionOne: ApiVersionNbr       = ApiVersionNbr("version-1")
+  val apiVersion: ApiVersionNbr    = ApiVersionNbr("1.0")
+  val versionOne: ApiVersionNbr    = ApiVersionNbr("version-1")
   val applicationName: String      = "third-party-application"
   val applicationId: ApplicationId = ApplicationId.random
   val clientId                     = ClientId("clientId")

@@ -19,7 +19,7 @@ package stubs
 import com.github.tomakehurst.wiremock.client.WireMock.{aResponse, delete, equalTo, equalToJson, get, post, stubFor, urlEqualTo, urlPathEqualTo}
 import play.api.http.Status.OK
 import play.api.libs.json.Json
-import uk.gov.hmrc.apiplatform.modules.common.domain.models.{ApplicationId, ApiContext, ApiIdentifier, ApiVersionNbr, Environment}
+import uk.gov.hmrc.apiplatform.modules.common.domain.models.{ApiContext, ApiIdentifier, ApiVersionNbr, ApplicationId, Environment}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.ApplicationNameValidationJson.ApplicationNameValidationResult
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.{ApplicationToken, ApplicationWithSubscriptionIds}
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.UserId

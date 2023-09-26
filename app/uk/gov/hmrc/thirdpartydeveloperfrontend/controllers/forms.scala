@@ -23,14 +23,9 @@ import play.api.data.format.Formatter
 import play.api.data.validation.{Constraint, Invalid, Valid, ValidationError}
 import play.api.data.{Form, FormError}
 
-import uk.gov.hmrc.apiplatform.modules.applications.domain.models.{
-  PrivacyPolicyLocation,
-  PrivacyPolicyLocations,
-  TermsAndConditionsLocation,
-  TermsAndConditionsLocations
-}
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.Application
+import uk.gov.hmrc.apiplatform.modules.applications.domain.models.{PrivacyPolicyLocation, PrivacyPolicyLocations, TermsAndConditionsLocation, TermsAndConditionsLocations}
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.ApplicationId
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.Application
 
 // scalastyle:off number.of.types
 

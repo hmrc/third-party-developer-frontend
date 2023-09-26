@@ -16,9 +16,9 @@
 
 package uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.apidefinitions
 
+import uk.gov.hmrc.apiplatform.modules.apis.domain.models.ApiCategory
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.ApiContext
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.connectors.ApiDefinition
-import uk.gov.hmrc.apiplatform.modules.apis.domain.models.ApiCategory
 
 trait ApiDefinitionTestDataHelper {
   def apiDefinition(name: String): ApiDefinition = apiDefinition(name, List[ApiCategory](ApiCategory.EXAMPLE))

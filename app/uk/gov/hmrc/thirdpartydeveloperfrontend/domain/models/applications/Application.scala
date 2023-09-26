@@ -20,8 +20,8 @@ import java.time.{LocalDateTime, Period}
 
 import play.api.libs.json.{OFormat, Reads}
 
-import uk.gov.hmrc.apiplatform.modules.common.domain.models._
 import uk.gov.hmrc.apiplatform.modules.applications.domain.models._
+import uk.gov.hmrc.apiplatform.modules.common.domain.models._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.apidefinitions.AccessType.STANDARD
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.Capabilities.{ChangeClientSecret, SupportsDetails, ViewPushSecret}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.Permissions.{ProductionAndAdmin, ProductionAndDeveloper, SandboxOnly, SandboxOrAdmin}
@@ -118,7 +118,7 @@ trait BaseApplication {
       case (Environment.PRODUCTION, STANDARD, TESTING, Some(ADMINISTRATOR))                        => true
       case (Environment.PRODUCTION, STANDARD, PENDING_GATEKEEPER_APPROVAL, Some(ADMINISTRATOR))    => true
       case (Environment.PRODUCTION, STANDARD, PENDING_REQUESTER_VERIFICATION, Some(ADMINISTRATOR)) => true
-      case _                                                                           => false
+      case _                                                                                       => false
     }
   }
 
@@ -128,7 +128,7 @@ trait BaseApplication {
     (deployedTo, access.accessType, state.name, role(developer.email)) match {
       case (Environment.SANDBOX, STANDARD, State.PRODUCTION, _)                      => true
       case (Environment.PRODUCTION, STANDARD, State.PRODUCTION, Some(ADMINISTRATOR)) => true
-      case _                                                             => false
+      case _                                                                         => false
     }
   }
 

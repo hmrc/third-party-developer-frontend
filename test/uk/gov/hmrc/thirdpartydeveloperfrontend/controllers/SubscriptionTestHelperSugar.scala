@@ -76,7 +76,15 @@ trait SubscriptionTestHelperSugar extends SubscriptionsBuilder {
     val subscriptionFieldsWrapper = SubscriptionFieldsWrapper(application.id, application.clientId, employmentContext, versionOne, List(sfv))
 
     List(
-      subscriptionStatus("Individual Employment 2", "individual-employment-2", employmentContext, versionOne, ApiStatus.STABLE, subscribed = true, fields = Some(subscriptionFieldsWrapper))
+      subscriptionStatus(
+        "Individual Employment 2",
+        "individual-employment-2",
+        employmentContext,
+        versionOne,
+        ApiStatus.STABLE,
+        subscribed = true,
+        fields = Some(subscriptionFieldsWrapper)
+      )
     )
   }
 

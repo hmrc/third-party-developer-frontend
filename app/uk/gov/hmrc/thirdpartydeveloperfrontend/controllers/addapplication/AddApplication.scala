@@ -196,7 +196,8 @@ class AddApplication @Inject() (
             addApplication(formThatPassesSimpleValidation).map(applicationCreatedResponse =>
               environment match {
                 case Environment.PRODUCTION => Redirect(controllercheckpages.routes.ApplicationCheck.requestCheckPage(applicationCreatedResponse.id))
-                case Environment.SANDBOX    => Redirect(uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.routes.SubscriptionsController.addAppSubscriptions(applicationCreatedResponse.id))
+                case Environment.SANDBOX    =>
+                  Redirect(uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.routes.SubscriptionsController.addAppSubscriptions(applicationCreatedResponse.id))
               }
             )
 
