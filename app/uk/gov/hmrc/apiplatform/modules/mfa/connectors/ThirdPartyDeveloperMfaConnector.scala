@@ -54,20 +54,20 @@ class ThirdPartyDeveloperMfaConnector @Inject() (http: HttpClient, config: Appli
 
   def createMfaAuthApp(userId: UserId)(implicit hc: HeaderCarrier): Future[RegisterAuthAppResponse] = {
     metrics.record(api) {
-      http.POSTEmpty[RegisterAuthAppResponse](s"$serviceBaseUrl/developer/${userId.value}/mfa/auth-app")
+      http.POSTEmpty[RegisterAuthAppResponse](s"$serviceBaseUrl/developer/$userId/mfa/auth-app")
     }
   }
 
   def createMfaSms(userId: UserId, mobileNumber: String)(implicit hc: HeaderCarrier): Future[RegisterSmsResponse] = {
     metrics.record(api) {
-      http.POST[CreateMfaSmsRequest, RegisterSmsSuccessResponse](s"$serviceBaseUrl/developer/${userId.value}/mfa/sms", CreateMfaSmsRequest(mobileNumber))
+      http.POST[CreateMfaSmsRequest, RegisterSmsSuccessResponse](s"$serviceBaseUrl/developer/$userId/mfa/sms", CreateMfaSmsRequest(mobileNumber))
         .recover { case _ => RegisterSmsFailureResponse() }
     }
   }
 
   def verifyMfa(userId: UserId, mfaId: MfaId, code: String)(implicit hc: HeaderCarrier): Future[Boolean] = {
     metrics.record(api) {
-      http.POST[VerifyMfaRequest, ErrorOrUnit](s"$serviceBaseUrl/developer/${userId.value}/mfa/${mfaId.value}/verification", VerifyMfaRequest(code))
+      http.POST[VerifyMfaRequest, ErrorOrUnit](s"$serviceBaseUrl/developer/$userId/mfa/$mfaId/verification", VerifyMfaRequest(code))
         .map {
           case Right(())                                         => true
           case Left(UpstreamErrorResponse(_, BAD_REQUEST, _, _)) => false
@@ -78,7 +78,7 @@ class ThirdPartyDeveloperMfaConnector @Inject() (http: HttpClient, config: Appli
 
   def sendSms(userId: UserId, mfaId: MfaId)(implicit hc: HeaderCarrier): Future[Boolean] = {
     metrics.record(api) {
-      http.POSTEmpty[ErrorOrUnit](s"$serviceBaseUrl/developer/${userId.value}/mfa/${mfaId.value}/send-sms")
+      http.POSTEmpty[ErrorOrUnit](s"$serviceBaseUrl/developer/$userId/mfa/$mfaId/send-sms")
         .map {
           case Right(())                                         => true
           case Left(UpstreamErrorResponse(_, BAD_REQUEST, _, _)) => false
@@ -89,14 +89,14 @@ class ThirdPartyDeveloperMfaConnector @Inject() (http: HttpClient, config: Appli
 
   def removeMfaById(userId: UserId, mfaId: MfaId)(implicit hc: HeaderCarrier): Future[Unit] = {
     metrics.record(api) {
-      http.DELETE[ErrorOrUnit](s"$serviceBaseUrl/developer/${userId.value}/mfa/${mfaId.value}")
+      http.DELETE[ErrorOrUnit](s"$serviceBaseUrl/developer/$userId/mfa/$mfaId")
         .map(throwOrUnit)
     }
   }
 
   def changeName(userId: UserId, mfaId: MfaId, updatedName: String)(implicit hc: HeaderCarrier): Future[Boolean] = {
     metrics.record(api) {
-      http.POST[ChangeMfaNameRequest, ErrorOrUnit](s"$serviceBaseUrl/developer/${userId.value}/mfa/${mfaId.value}/name", ChangeMfaNameRequest(updatedName))
+      http.POST[ChangeMfaNameRequest, ErrorOrUnit](s"$serviceBaseUrl/developer/$userId/mfa/$mfaId/name", ChangeMfaNameRequest(updatedName))
         .map {
           case Right(())                                         => true
           case Left(UpstreamErrorResponse(_, BAD_REQUEST, _, _)) => false
@@ -106,7 +106,7 @@ class ThirdPartyDeveloperMfaConnector @Inject() (http: HttpClient, config: Appli
   }
 
   def createDeviceSession(userId: UserId)(implicit hc: HeaderCarrier): Future[Option[DeviceSession]] = metrics.record(api) {
-    http.POST[String, ErrorOr[DeviceSession]](s"$serviceBaseUrl/device-session/user/${userId.value}", "")
+    http.POST[String, ErrorOr[DeviceSession]](s"$serviceBaseUrl/device-session/user/$userId", "")
       .map {
         case Right(response)                                 => Some(response)
         // treat session not found as successfully destroyed
@@ -122,7 +122,7 @@ class ThirdPartyDeveloperMfaConnector @Inject() (http: HttpClient, config: Appli
   }
 
   def fetchDeviceSession(deviceSessionId: String, userId: UserId)(implicit hc: HeaderCarrier): Future[DeviceSession] = metrics.record(api) {
-    http.GET[Option[DeviceSession]](s"$serviceBaseUrl/device-session/$deviceSessionId/user/${userId.value}")
+    http.GET[Option[DeviceSession]](s"$serviceBaseUrl/device-session/$deviceSessionId/user/$userId")
       .map {
         case Some(deviceSession) => deviceSession
         case None                => throw new DeviceSessionInvalid

@@ -68,11 +68,11 @@ class ThirdPartyApplicationSubmissionsConnector @Inject() (
 
   def recordAnswer(submissionId: Submission.Id, questionId: Question.Id, rawAnswers: List[String])(implicit hc: HeaderCarrier): Future[Either[String, ExtendedSubmission]] = {
     import cats.implicits._
-    val failed = (err: UpstreamErrorResponse) => s"Failed to record answer for submission ${submissionId.value} and question ${questionId.value}"
+    val failed = (err: UpstreamErrorResponse) => s"Failed to record answer for submission $submissionId and question ${questionId.value}"
 
     metrics.record(api) {
       http.POST[OutboundRecordAnswersRequest, Either[UpstreamErrorResponse, ExtendedSubmission]](
-        s"$serviceBaseUrl/submissions/${submissionId.value}/question/${questionId.value}",
+        s"$serviceBaseUrl/submissions/$submissionId/question/${questionId.value}",
         OutboundRecordAnswersRequest(rawAnswers)
       )
         .map(_.leftMap(failed))

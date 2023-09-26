@@ -63,7 +63,9 @@ case class QuestionIdsOfInterest(
 object Submission {
   type AnswersToQuestions = Map[Question.Id, ActualAnswer]
 
-  case class Id(value: String) extends AnyVal
+  case class Id(value: String) extends AnyVal {
+    override def toString(): String = value
+  }
 
   object Id {
     implicit val format = play.api.libs.json.Json.valueFormat[Id]

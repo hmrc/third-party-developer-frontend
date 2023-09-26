@@ -93,7 +93,7 @@ class ThirdPartyApplicationSubmissionsConnectorSpec
   }
 
   "recordAnswer" should {
-    val url     = s"/submissions/${submissionId.value}/question/${questionId.value}"
+    val url     = s"/submissions/$submissionId/question/${questionId.value}"
     val answers = List("Yes")
 
     "return with an error" in new Setup {
@@ -130,7 +130,7 @@ class ThirdPartyApplicationSubmissionsConnectorSpec
   }
 
   "fetchSubmission" should {
-    val url = s"/submissions/${submissionId.value}"
+    val url = s"/submissions/$submissionId"
 
     "return NOT FOUND with empty response body" in new Setup {
       stubFor(

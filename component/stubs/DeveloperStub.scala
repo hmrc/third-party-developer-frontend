@@ -39,7 +39,7 @@ object DeveloperStub extends ComponentTestDeveloperBuilder {
 
   def update(userId: UserId, profile: UpdateProfileRequest, status: Int) =
     stubFor(
-      post(urlMatching(s"/developer/${userId.value}"))
+      post(urlMatching(s"/developer/$userId"))
         .withRequestBody(equalToJson(Json.toJson(profile).toString()))
         .willReturn(aResponse().withStatus(status))
     )
@@ -60,7 +60,7 @@ object DeveloperStub extends ComponentTestDeveloperBuilder {
     )
 
     stubFor(
-      post(urlPathEqualTo(s"/${userId.value}/resend-verification"))
+      post(urlPathEqualTo(s"/$userId/resend-verification"))
         .willReturn(aResponse().withStatus(status))
     )
   }

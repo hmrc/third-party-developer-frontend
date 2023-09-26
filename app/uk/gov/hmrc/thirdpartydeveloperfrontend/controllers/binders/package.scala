@@ -80,7 +80,7 @@ package object binders {
     }
   }
 
-  implicit def apiVersionPathBinder(implicit textBinder: PathBindable[String]): PathBindable[ApiVersionNbr] = new PathBindable[ApiVersionNbr] {
+  implicit def apiVersionNbrPathBinder(implicit textBinder: PathBindable[String]): PathBindable[ApiVersionNbr] = new PathBindable[ApiVersionNbr] {
 
     override def bind(key: String, value: String): Either[String, ApiVersionNbr] = {
       textBinder.bind(key, value).map(ApiVersionNbr(_))
@@ -208,10 +208,7 @@ package object binders {
   }
 
   private def applicationIdFromString(text: String): Either[String, ApplicationId] = {
-    Try(java.util.UUID.fromString(text))
-      .toOption
-      .toRight(s"Cannot accept $text as ApplicationId")
-      .map(ApplicationId(_))
+    ApplicationId.apply(text).toRight(s"Cannot accept $text as ApplicationId")
   }
 
   implicit def applicationIdPathBinder(implicit textBinder: PathBindable[String]): PathBindable[ApplicationId] = new PathBindable[ApplicationId] {

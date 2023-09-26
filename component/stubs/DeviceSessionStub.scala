@@ -29,7 +29,7 @@ object DeviceSessionStub {
 
   def getDeviceSessionForSessionIdAndUserId(userId: UserId): Any = {
     stubFor(
-      get(urlMatching(s"/device-session/$staticDeviceSessionId/user/${userId.value}"))
+      get(urlMatching(s"/device-session/$staticDeviceSessionId/user/$userId"))
         .willReturn(
           aResponse()
             .withStatus(OK)
@@ -40,7 +40,7 @@ object DeviceSessionStub {
 
   def getDeviceSessionNotFound(userId: UserId): Any = {
     stubFor(
-      get(urlMatching(s"/device-session/$staticDeviceSessionId/user/${userId.value}"))
+      get(urlMatching(s"/device-session/$staticDeviceSessionId/user/$userId"))
         .willReturn(
           aResponse()
             .withStatus(NOT_FOUND)
@@ -50,7 +50,7 @@ object DeviceSessionStub {
 
   def createDeviceSession(userId: UserId, status: Int) =
     stubFor(
-      post(urlMatching(s"/device-session/user/${userId.value}"))
+      post(urlMatching(s"/device-session/user/$userId"))
         .willReturn(aResponse()
           .withBody(Json.toJson(DeviceSession(deviceSessionId = staticDeviceSessionId, userId)).toString())
           .withStatus(status))

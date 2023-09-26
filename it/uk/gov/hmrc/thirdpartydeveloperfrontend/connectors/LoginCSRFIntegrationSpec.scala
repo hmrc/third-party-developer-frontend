@@ -147,7 +147,7 @@ class LoginCSRFIntegrationSpec extends BaseConnectorIntegrationSpec with GuiceOn
                              |    "sessionId": "$sessionId",
                              |    "loggedInState": "LOGGED_IN",
                              |    "developer": {
-                             |      "userId":"${userId.value}",
+                             |      "userId":"$userId",
                              |      "email":"$userEmail",
                              |      "firstName":"John",
                              |      "lastName": "Doe",

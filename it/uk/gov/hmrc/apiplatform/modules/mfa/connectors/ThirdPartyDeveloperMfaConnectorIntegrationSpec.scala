@@ -61,8 +61,8 @@ class ThirdPartyDeveloperMfaConnectorIntegrationSpec extends BaseConnectorIntegr
     val loginRequest           = LoginRequest(userEmail, userPassword, mfaMandatedForUser = false, None)
     val deviceSessionId        = UUID.randomUUID()
     val deviceSession          = DeviceSession(deviceSessionId, userId)
-    val createDeviceSessionUrl = s"/device-session/user/${userId.value}"
-    val fetchDeviceSessionUrl  = s"/device-session/$deviceSessionId/user/${userId.value}"
+    val createDeviceSessionUrl = s"/device-session/user/$userId"
+    val fetchDeviceSessionUrl  = s"/device-session/$deviceSessionId/user/$userId"
     val deleteDeviceSessionUrl = s"/device-session/$deviceSessionId"
 
     val underTest: ThirdPartyDeveloperMfaConnector = app.injector.instanceOf[ThirdPartyDeveloperMfaConnector]
@@ -83,7 +83,7 @@ class ThirdPartyDeveloperMfaConnectorIntegrationSpec extends BaseConnectorIntegr
               .withBody(
                 s"""{
                    |  "deviceSessionId": "$deviceSessionId",
-                   |  "userId": "${userId.value}"
+                   |  "userId": "$userId"
                    |}""".stripMargin
               )
           )
@@ -134,7 +134,7 @@ class ThirdPartyDeveloperMfaConnectorIntegrationSpec extends BaseConnectorIntegr
               .withBody(
                 s"""{
                    |  "deviceSessionId": "$deviceSessionId",
-                   |  "userId": "${userId.value}"
+                   |  "userId": "$userId"
                    |}""".stripMargin
               )
           )
@@ -200,7 +200,7 @@ class ThirdPartyDeveloperMfaConnectorIntegrationSpec extends BaseConnectorIntegr
 
   "createMfaAuthApp" should {
     "return 201 with RegisterAuthAppResponse" in new Setup {
-      val url      = s"/developer/${userId.value}/mfa/auth-app"
+      val url      = s"/developer/$userId/mfa/auth-app"
       val response = RegisterAuthAppResponse(mfaId, "secret")
 
       stubFor(
@@ -215,7 +215,7 @@ class ThirdPartyDeveloperMfaConnectorIntegrationSpec extends BaseConnectorIntegr
     }
 
     "return 404 with RegisterAuthAppResponse" in new Setup {
-      val url = s"/developer/${userId.value}/mfa/auth-app"
+      val url = s"/developer/$userId/mfa/auth-app"
       stubFor(
         post(urlPathEqualTo(url))
           .willReturn(
@@ -234,7 +234,7 @@ class ThirdPartyDeveloperMfaConnectorIntegrationSpec extends BaseConnectorIntegr
     val failureResponse = RegisterSmsFailureResponse()
 
     "return 201 with RegisterSmsSuccessResponse" in new Setup {
-      val url = s"/developer/${userId.value}/mfa/sms"
+      val url = s"/developer/$userId/mfa/sms"
       stubFor(
         post(urlPathEqualTo(url))
           .withJsonRequestBody(request)
@@ -248,7 +248,7 @@ class ThirdPartyDeveloperMfaConnectorIntegrationSpec extends BaseConnectorIntegr
     }
 
     "return 400 when invalid number is passed to TPD" in new Setup {
-      val url = s"/developer/${userId.value}/mfa/sms"
+      val url = s"/developer/$userId/mfa/sms"
       stubFor(
         post(urlPathEqualTo(url))
           .withJsonRequestBody(request)
@@ -262,7 +262,7 @@ class ThirdPartyDeveloperMfaConnectorIntegrationSpec extends BaseConnectorIntegr
 
     "return 500 with RegisterSmsFailureResponse when invalid number provided for access codes" in new Setup {
       val badMobileNumber = "05555555555"
-      val url             = s"/developer/${userId.value}/mfa/sms"
+      val url             = s"/developer/$userId/mfa/sms"
       stubFor(
         post(urlPathEqualTo(url))
           .withJsonRequestBody(CreateMfaSmsRequest(badMobileNumber))
@@ -275,7 +275,7 @@ class ThirdPartyDeveloperMfaConnectorIntegrationSpec extends BaseConnectorIntegr
     }
 
     "return 404 when user is not found" in new Setup {
-      val url = s"/developer/${userId.value}/mfa/sms"
+      val url = s"/developer/$userId/mfa/sms"
       stubFor(
         post(urlPathEqualTo(url))
           .withJsonRequestBody(request)
@@ -293,7 +293,7 @@ class ThirdPartyDeveloperMfaConnectorIntegrationSpec extends BaseConnectorIntegr
     val verifyMfaRequest = VerifyMfaRequest(code)
 
     "return false if verification fails due to InvalidCode" in new Setup {
-      val url = s"/developer/${userId.value}/mfa/${mfaId.value}/verification"
+      val url = s"/developer/$userId/mfa/$mfaId/verification"
 
       stubFor(
         post(urlPathEqualTo(url))
@@ -307,7 +307,7 @@ class ThirdPartyDeveloperMfaConnectorIntegrationSpec extends BaseConnectorIntegr
     }
 
     "return true if verification is successful" in new Setup {
-      val url = s"/developer/${userId.value}/mfa/${mfaId.value}/verification"
+      val url = s"/developer/$userId/mfa/$mfaId/verification"
 
       stubFor(
         post(urlPathEqualTo(url))
@@ -321,7 +321,7 @@ class ThirdPartyDeveloperMfaConnectorIntegrationSpec extends BaseConnectorIntegr
     }
 
     "throw if verification fails due to error in backend" in new Setup {
-      val url = s"/developer/${userId.value}/mfa/${mfaId.value}/verification"
+      val url = s"/developer/$userId/mfa/$mfaId/verification"
 
       stubFor(
         post(urlPathEqualTo(url))
@@ -339,7 +339,7 @@ class ThirdPartyDeveloperMfaConnectorIntegrationSpec extends BaseConnectorIntegr
 
   "sendSms" should {
     "return false if it fails to send sms" in new Setup {
-      val url = s"/developer/${userId.value}/mfa/${mfaId.value}/send-sms"
+      val url = s"/developer/$userId/mfa/$mfaId/send-sms"
 
       stubFor(
         post(urlPathEqualTo(url))
@@ -352,7 +352,7 @@ class ThirdPartyDeveloperMfaConnectorIntegrationSpec extends BaseConnectorIntegr
     }
 
     "return true when sms is successfully sent" in new Setup {
-      val url = s"/developer/${userId.value}/mfa/${mfaId.value}/send-sms"
+      val url = s"/developer/$userId/mfa/$mfaId/send-sms"
 
       stubFor(
         post(urlPathEqualTo(url))
@@ -365,7 +365,7 @@ class ThirdPartyDeveloperMfaConnectorIntegrationSpec extends BaseConnectorIntegr
     }
 
     "throw if it fails to send sms due to error in backend" in new Setup {
-      val url = s"/developer/${userId.value}/mfa/${mfaId.value}/send-sms"
+      val url = s"/developer/$userId/mfa/$mfaId/send-sms"
 
       stubFor(
         post(urlPathEqualTo(url))
@@ -382,21 +382,21 @@ class ThirdPartyDeveloperMfaConnectorIntegrationSpec extends BaseConnectorIntegr
 
   "removeMfaById" should {
     "return OK on successful removal" in new Setup {
-      stubFor(delete(urlPathEqualTo(s"/developer/${userId.value}/mfa/${mfaId.value}"))
+      stubFor(delete(urlPathEqualTo(s"/developer/$userId/mfa/$mfaId"))
         .willReturn(aResponse().withStatus(OK)))
 
       await(underTest.removeMfaById(userId, mfaId))
     }
 
     "throw UpstreamErrorResponse with status of 404 if user not found" in new Setup {
-      stubFor(delete(urlPathEqualTo(s"/developer/${userId.value}/mfa/${mfaId.value}"))
+      stubFor(delete(urlPathEqualTo(s"/developer/$userId/mfa/$mfaId"))
         .willReturn(aResponse().withStatus(NOT_FOUND)))
 
       intercept[UpstreamErrorResponse](await(underTest.removeMfaById(userId, mfaId))).statusCode shouldBe NOT_FOUND
     }
 
     "throw UpstreamErrorResponse with status of 500 if it failed to remove MFA" in new Setup {
-      stubFor(delete(urlPathEqualTo(s"/developer/${userId.value}/mfa/${mfaId.value}"))
+      stubFor(delete(urlPathEqualTo(s"/developer/$userId/mfa/$mfaId"))
         .willReturn(aResponse().withStatus(INTERNAL_SERVER_ERROR)))
 
       intercept[UpstreamErrorResponse](await(underTest.removeMfaById(userId, mfaId))).statusCode shouldBe INTERNAL_SERVER_ERROR
@@ -408,7 +408,7 @@ class ThirdPartyDeveloperMfaConnectorIntegrationSpec extends BaseConnectorIntegr
     val changeMfaNameRequest = ChangeMfaNameRequest(updatedName)
 
     "return true if call to backend is successful" in new Setup {
-      val url = s"/developer/${userId.value}/mfa/${mfaId.value}/name"
+      val url = s"/developer/$userId/mfa/$mfaId/name"
 
       stubFor(
         post(urlPathEqualTo(url))
@@ -422,7 +422,7 @@ class ThirdPartyDeveloperMfaConnectorIntegrationSpec extends BaseConnectorIntegr
     }
 
     "return false if call to backend returns Bad Request" in new Setup {
-      val url = s"/developer/${userId.value}/mfa/${mfaId.value}/name"
+      val url = s"/developer/$userId/mfa/$mfaId/name"
 
       stubFor(
         post(urlPathEqualTo(url))
@@ -436,7 +436,7 @@ class ThirdPartyDeveloperMfaConnectorIntegrationSpec extends BaseConnectorIntegr
     }
 
     "throw UpstreamErrorResponse if call to backend returns error" in new Setup {
-      val url = s"/developer/${userId.value}/mfa/${mfaId.value}/name"
+      val url = s"/developer/$userId/mfa/$mfaId/name"
 
       stubFor(
         post(urlPathEqualTo(url))

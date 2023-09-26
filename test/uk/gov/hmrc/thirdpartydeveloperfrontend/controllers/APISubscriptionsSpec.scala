@@ -33,7 +33,7 @@ class APISubscriptionsSpec
 
   "groupSubscriptions" should {
     val publicAccess  = ApiAccess.PUBLIC
-    val privateAccess = ApiAccess.Private(Nil, false)
+    val privateAccess = ApiAccess.Private(false)
 
     "split Private Beta APIs from public APIs " in {
       val groupedSubscriptions = APISubscriptions
@@ -191,7 +191,7 @@ class APISubscriptionsSpec
       val subscriptions = List(
         subscriptionStatus(api1Name, api1Service, api1Context, versionOne, ApiStatus.STABLE, subscribed = true),
         subscriptionStatus(api1Name, api1Service, api1Context, versionTwo, ApiStatus.BETA, subscribed = true, access = ApiAccess.PUBLIC),
-        subscriptionStatus(api1Name, api1Service, api1Context, versionThree, ApiStatus.STABLE, subscribed = true, access = ApiAccess.Private(Nil, false)),
+        subscriptionStatus(api1Name, api1Service, api1Context, versionThree, ApiStatus.STABLE, subscribed = true, access = ApiAccess.Private(false)),
         subscriptionStatus(api2Name, api2Service, api2Context, versionOne, ApiStatus.STABLE, subscribed = true),
         subscriptionStatus(api2Name, api2Service, api2Context, versionTwo, ApiStatus.BETA, subscribed = false),
         subscriptionStatus(api2Name, api2Service, api2Context, versionThree, ApiStatus.STABLE, subscribed = true)
@@ -206,7 +206,7 @@ class APISubscriptionsSpec
       val subscriptions = List(
         subscriptionStatus(api1Name, api1Service, api1Context, versionOne, ApiStatus.STABLE, subscribed = true),
         subscriptionStatus(api1Name, api1Service, api1Context, versionTwo, ApiStatus.BETA, subscribed = true, access = ApiAccess.PUBLIC),
-        subscriptionStatus(api1Name, api1Service, api1Context, versionThree, ApiStatus.STABLE, subscribed = true, access = ApiAccess.Private(Nil, false)),
+        subscriptionStatus(api1Name, api1Service, api1Context, versionThree, ApiStatus.STABLE, subscribed = true, access = ApiAccess.Private(false)),
         subscriptionStatus(api2Name, api2Service, api2Context, versionOne, ApiStatus.STABLE, subscribed = true),
         subscriptionStatus(api2Name, api2Service, api2Context, versionTwo, ApiStatus.BETA, subscribed = false),
         subscriptionStatus(api2Name, api2Service, api2Context, versionThree, ApiStatus.STABLE, subscribed = true)
