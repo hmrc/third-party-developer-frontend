@@ -23,10 +23,9 @@ import scala.concurrent.Future.successful
 
 import uk.gov.hmrc.http.HeaderCarrier
 
-import uk.gov.hmrc.apiplatform.modules.apis.domain.models._
-import uk.gov.hmrc.apiplatform.modules.applications.domain.models.{ApplicationId, ClientId}
 import uk.gov.hmrc.apiplatform.modules.commands.applications.domain.models.DispatchSuccessResult
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.LaxEmailAddress.StringSyntax
+import uk.gov.hmrc.apiplatform.modules.common.domain.models._
 import uk.gov.hmrc.apiplatform.modules.common.utils.FixedClock
 import uk.gov.hmrc.thirdpartydeveloperfrontend.builder._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.connectors._
@@ -39,8 +38,8 @@ import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.{AsyncHmrcSpec, LocalUserId
 
 class SubscriptionsServiceSpec extends AsyncHmrcSpec with SubscriptionsBuilder with ApplicationBuilder with LocalUserIdTracker {
 
-  val versionOne          = ApiVersion("1.0")
-  val versionTwo          = ApiVersion("2.0")
+  val versionOne          = ApiVersionNbr("1.0")
+  val versionTwo          = ApiVersionNbr("2.0")
   val grantLength: Period = Period.ofDays(547)
 
   val email = "bob@example.com".toLaxEmail
@@ -105,7 +104,7 @@ class SubscriptionsServiceSpec extends AsyncHmrcSpec with SubscriptionsBuilder w
 
     "return false when the application has no subscriptions to the requested api version" in new Setup {
       val apiContext   = ApiContext("third context")
-      val apiVersion   = ApiVersion("3.0")
+      val apiVersion   = ApiVersionNbr("3.0")
       val subscription = ApiIdentifier(apiContext, apiVersion)
 
       when(mockApmConnector.fetchApplicationById(*[ApplicationId])(*)).thenReturn(successful(Some(appWithData)))

@@ -16,18 +16,21 @@
 
 package uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.apidefinitions
 
-import uk.gov.hmrc.apiplatform.modules.apis.domain.models.ApiContext
+import uk.gov.hmrc.apiplatform.modules.common.domain.models.ApiContext
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.connectors.ApiType.REST_API
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.connectors.{CombinedApi, CombinedApiCategory, ExtendedApiDefinition}
+
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.connectors.{CombinedApi, ExtendedApiDefinition}
+import uk.gov.hmrc.apiplatform.modules.apis.domain.models.ApiCategory
+
 
 trait ExtendedApiDefinitionTestDataHelper {
-  def extendedApiDefinition(name: String): ExtendedApiDefinition = extendedApiDefinition(name, List("category"))
+  def extendedApiDefinition(name: String): ExtendedApiDefinition = extendedApiDefinition(name, List(ApiCategory.OTHER))
 
-  def extendedApiDefinition(name: String, categories: List[String]) = ExtendedApiDefinition(name, name, name, ApiContext(name), categories)
+  def extendedApiDefinition(name: String, categories: List[ApiCategory]) = ExtendedApiDefinition(name, name, name, ApiContext(name), categories)
 }
 
 trait CombinedApiTestDataHelper {
-  def combinedApi(name: String): CombinedApi = combinedApi(name, List(CombinedApiCategory("category")))
+  def combinedApi(name: String): CombinedApi = combinedApi(name, List(ApiCategory.VAT))
 
-  def combinedApi(name: String, categories: List[CombinedApiCategory]) = CombinedApi(name, name, categories, REST_API)
+  def combinedApi(name: String, categories: List[ApiCategory]) = CombinedApi(name, name, categories, REST_API)
 }

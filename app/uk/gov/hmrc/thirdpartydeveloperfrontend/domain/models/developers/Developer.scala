@@ -19,8 +19,7 @@ package uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers
 import play.api.libs.functional.syntax._
 import play.api.libs.json.{Format, JsPath, Json, Reads}
 
-import uk.gov.hmrc.apiplatform.modules.common.domain.models.LaxEmailAddress
-import uk.gov.hmrc.apiplatform.modules.developers.domain.models.UserId
+import uk.gov.hmrc.apiplatform.modules.common.domain.models.{LaxEmailAddress, UserId}
 import uk.gov.hmrc.apiplatform.modules.mfa.models.MfaDetail
 import uk.gov.hmrc.apiplatform.modules.mfa.models.MfaDetailFormats._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.emailpreferences.EmailPreferences

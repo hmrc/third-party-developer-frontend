@@ -18,7 +18,7 @@ package uk.gov.hmrc.apiplatform.modules.uplift.domain.models
 
 import play.api.libs.json.{Format, Json, _}
 
-import uk.gov.hmrc.apiplatform.modules.apis.domain.models.{ApiContext, ApiIdentifier, ApiVersion}
+import uk.gov.hmrc.apiplatform.modules.common.domain.models.{ApiContext, ApiIdentifier, ApiVersionNbr}
 
 case class ApiSubscriptions(subscriptions: Map[ApiIdentifier, Boolean] = Map.empty[ApiIdentifier, Boolean]) {
   def isSelected(id: ApiIdentifier): Boolean = subscriptions.get(id).getOrElse(false)
@@ -28,11 +28,11 @@ object ApiSubscriptions {
 
   implicit val keyReadsApiIdentifier: KeyReads[ApiIdentifier] = key =>
     key.split("###").toList match {
-      case c :: v :: tail => JsSuccess(ApiIdentifier(ApiContext(c), ApiVersion(v.replace("_", "."))))
+      case c :: v :: tail => JsSuccess(ApiIdentifier(ApiContext(c), ApiVersionNbr(v.replace("_", "."))))
       case _              => JsError(s"Cannot raise $key to an ApiIdentifier")
     }
 
-  implicit val keyWritesApiIdentifier: KeyWrites[ApiIdentifier] = { id => s"${id.context.value}###${id.version.value.replace(".", "_")}" }
+  implicit val keyWritesApiIdentifier: KeyWrites[ApiIdentifier] = { id => s"${id.context.value}###${id.versionNbr.value.replace(".", "_")}" }
 
   implicit val format: Format[ApiSubscriptions] = Json.format[ApiSubscriptions]
 }

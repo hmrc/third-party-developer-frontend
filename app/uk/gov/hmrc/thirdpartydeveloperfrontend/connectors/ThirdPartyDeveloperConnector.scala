@@ -26,8 +26,7 @@ import uk.gov.hmrc.http.HttpReads.Implicits._
 import uk.gov.hmrc.http.{HttpClient, _}
 import uk.gov.hmrc.play.http.metrics.common.API
 
-import uk.gov.hmrc.apiplatform.modules.common.domain.models.LaxEmailAddress
-import uk.gov.hmrc.apiplatform.modules.developers.domain.models.UserId
+import uk.gov.hmrc.apiplatform.modules.common.domain.models.{LaxEmailAddress, UserId}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.config.ApplicationConfig
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.connectors._
@@ -185,7 +184,7 @@ class ThirdPartyDeveloperConnector @Inject() (
   }
 
   def updateProfile(userId: UserId, profile: UpdateProfileRequest)(implicit hc: HeaderCarrier): Future[Int] = metrics.record(api) {
-    http.POST[UpdateProfileRequest, ErrorOr[HttpResponse]](s"$serviceBaseUrl/developer/${userId.asText}", profile)
+    http.POST[UpdateProfileRequest, ErrorOr[HttpResponse]](s"$serviceBaseUrl/developer/$userId", profile)
       .map {
         case Right(response) => response.status
         case Left(err)       => throw err
@@ -245,27 +244,27 @@ class ThirdPartyDeveloperConnector @Inject() (
 
   def updateRoles(userId: UserId, roles: AccountSetupRequest)(implicit hc: HeaderCarrier): Future[Developer] =
     metrics.record(api) {
-      http.PUT[AccountSetupRequest, Developer](s"$serviceBaseUrl/developer/account-setup/${userId.value}/roles", roles)
+      http.PUT[AccountSetupRequest, Developer](s"$serviceBaseUrl/developer/account-setup/$userId/roles", roles)
     }
 
   def updateServices(userId: UserId, services: AccountSetupRequest)(implicit hc: HeaderCarrier): Future[Developer] =
     metrics.record(api) {
-      http.PUT[AccountSetupRequest, Developer](s"$serviceBaseUrl/developer/account-setup/${userId.value}/services", services)
+      http.PUT[AccountSetupRequest, Developer](s"$serviceBaseUrl/developer/account-setup/$userId/services", services)
     }
 
   def updateTargets(userId: UserId, targets: AccountSetupRequest)(implicit hc: HeaderCarrier): Future[Developer] =
     metrics.record(api) {
-      http.PUT[AccountSetupRequest, Developer](s"$serviceBaseUrl/developer/account-setup/${userId.value}/targets", targets)
+      http.PUT[AccountSetupRequest, Developer](s"$serviceBaseUrl/developer/account-setup/$userId/targets", targets)
     }
 
   def completeAccountSetup(userId: UserId)(implicit hc: HeaderCarrier): Future[Developer] =
     metrics.record(api) {
-      http.POSTEmpty[Developer](s"$serviceBaseUrl/developer/account-setup/${userId.value}/complete")
+      http.POSTEmpty[Developer](s"$serviceBaseUrl/developer/account-setup/$userId/complete")
     }
 
   def fetchDeveloper(id: UserId)(implicit hc: HeaderCarrier): Future[Option[Developer]] = {
     metrics.record(api) {
-      http.GET[Option[Developer]](s"$serviceBaseUrl/developer", Seq("developerId" -> id.asText))
+      http.GET[Option[Developer]](s"$serviceBaseUrl/developer", Seq("developerId" -> id.toString()))
     }
   }
 
@@ -274,7 +273,7 @@ class ThirdPartyDeveloperConnector @Inject() (
   }
 
   def removeEmailPreferences(userId: UserId)(implicit hc: HeaderCarrier): Future[Boolean] = metrics.record(api) {
-    http.DELETE[ErrorOrUnit](s"$serviceBaseUrl/developer/${userId.value}/email-preferences")
+    http.DELETE[ErrorOrUnit](s"$serviceBaseUrl/developer/$userId/email-preferences")
       .map(throwOrOptionOf)
       .map {
         case Some(_) => true
@@ -283,7 +282,7 @@ class ThirdPartyDeveloperConnector @Inject() (
   }
 
   def updateEmailPreferences(userId: UserId, emailPreferences: EmailPreferences)(implicit hc: HeaderCarrier): Future[Boolean] = metrics.record(api) {
-    val url = s"$serviceBaseUrl/developer/${userId.value}/email-preferences"
+    val url = s"$serviceBaseUrl/developer/$userId/email-preferences"
 
     http.PUT[EmailPreferences, ErrorOrUnit](url, emailPreferences)
       .map {

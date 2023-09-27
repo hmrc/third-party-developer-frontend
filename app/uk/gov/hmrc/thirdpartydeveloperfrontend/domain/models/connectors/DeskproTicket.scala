@@ -19,12 +19,10 @@ package uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.connectors
 import play.api.libs.json.Json
 import play.api.mvc.Request
 
-import uk.gov.hmrc.apiplatform.modules.apis.domain.models.ApiVersion
-import uk.gov.hmrc.apiplatform.modules.applications.domain.models.{ApplicationId, Collaborator}
-import uk.gov.hmrc.apiplatform.modules.common.domain.models.LaxEmailAddress
+import uk.gov.hmrc.apiplatform.modules.applications.domain.models.Collaborator
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.LaxEmailAddress.StringSyntax
+import uk.gov.hmrc.apiplatform.modules.common.domain.models.{LaxEmailAddress, _}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers._
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.Environment
 
 case class DeskproTicket(
     name: String,
@@ -99,10 +97,10 @@ object DeskproTicket extends FieldTransformer {
       applicationName: String,
       applicationId: ApplicationId,
       apiName: String,
-      apiVersion: ApiVersion
+      apiVersion: ApiVersionNbr
     ): DeskproTicket = {
     val message = s"""I '${requestorEmail.text}' want my application '$applicationName'
-                     |identified by '${applicationId.text()}'
+                     |identified by '${applicationId}'
                      |to be subscribed to the API '$apiName'
                      |with version '${apiVersion.value}'""".stripMargin
 
@@ -115,10 +113,10 @@ object DeskproTicket extends FieldTransformer {
       applicationName: String,
       applicationId: ApplicationId,
       apiName: String,
-      apiVersion: ApiVersion
+      apiVersion: ApiVersionNbr
     ): DeskproTicket = {
     val message = s"""I '${requestorEmail.text}' want my application '$applicationName'
-                     |identified by '${applicationId.text()}'
+                     |identified by '${applicationId}'
                      |to be unsubscribed from the API '$apiName'
                      |with version '${apiVersion.value}'""".stripMargin
 
@@ -141,7 +139,7 @@ object DeskproTicket extends FieldTransformer {
 
     val message =
       s"""I am $actor on the following ${environment.toString.toLowerCase} application '$applicationName'
-         |and the application id is '${applicationId.text()}'. I want it to be deleted from the Developer Hub.""".stripMargin
+         |and the application id is '${applicationId}'. I want it to be deleted from the Developer Hub.""".stripMargin
 
     DeskproTicket(name, requestedByEmail, "Request to delete an application", message, routes.DeleteApplication.deleteApplication(applicationId, None).url)
   }

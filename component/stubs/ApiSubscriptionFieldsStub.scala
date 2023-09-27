@@ -18,27 +18,26 @@ package stubs
 
 import com.github.tomakehurst.wiremock.client.WireMock.{aResponse, delete, get, stubFor, urlEqualTo}
 import play.api.http.Status.{NOT_FOUND, NO_CONTENT}
-import uk.gov.hmrc.apiplatform.modules.apis.domain.models.{ApiContext, ApiVersion}
-import uk.gov.hmrc.apiplatform.modules.applications.domain.models.ClientId
+import uk.gov.hmrc.apiplatform.modules.common.domain.models._
 
 object ApiSubscriptionFieldsStub {
 
-  def setUpDeleteSubscriptionFields(clientId: ClientId, apiContext: ApiContext, apiVersion: ApiVersion) = {
+  def setUpDeleteSubscriptionFields(clientId: ClientId, apiContext: ApiContext, apiVersion: ApiVersionNbr) = {
     stubFor(
       delete(urlEqualTo(fieldValuesUrl(clientId, apiContext, apiVersion)))
         .willReturn(aResponse().withStatus(NO_CONTENT))
     )
   }
 
-  private def fieldValuesUrl(clientId: ClientId, apiContext: ApiContext, apiVersion: ApiVersion) = {
+  private def fieldValuesUrl(clientId: ClientId, apiContext: ApiContext, apiVersion: ApiVersionNbr) = {
     s"/field/application/${clientId.value}/context/${apiContext.value}/version/${apiVersion.value}"
   }
 
-  def noSubscriptionFields(apiContext: ApiContext, version: ApiVersion): Any = {
+  def noSubscriptionFields(apiContext: ApiContext, version: ApiVersionNbr): Any = {
     stubFor(get(urlEqualTo(fieldDefinitionsUrl(apiContext, version))).willReturn(aResponse().withStatus(NOT_FOUND)))
   }
 
-  private def fieldDefinitionsUrl(apiContext: ApiContext, version: ApiVersion) = {
+  private def fieldDefinitionsUrl(apiContext: ApiContext, version: ApiVersionNbr) = {
     s"/definition/context/${apiContext.value}/version/${version.value}"
   }
 }

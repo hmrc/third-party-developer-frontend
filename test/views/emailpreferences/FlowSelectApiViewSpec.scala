@@ -31,11 +31,12 @@ import play.twirl.api.Html
 import uk.gov.hmrc.thirdpartydeveloperfrontend.builder._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.{FormKeys, SelectedApisEmailPreferencesForm}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.connectors.ApiType.REST_API
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.connectors.{ApiType, CombinedApi, CombinedApiCategory}
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.connectors.{ApiType, CombinedApi}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.{DeveloperSession, LoggedInState}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.emailpreferences.APICategoryDisplayDetails
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.flows.EmailPreferencesFlowV2
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.{LocalUserIdTracker, WithCSRFAddToken}
+import uk.gov.hmrc.apiplatform.modules.apis.domain.models.ApiCategory
 
 class FlowSelectApiViewSpec extends CommonViewSpec
     with WithCSRFAddToken
@@ -43,11 +44,16 @@ class FlowSelectApiViewSpec extends CommonViewSpec
     with DeveloperSessionBuilder
     with DeveloperTestData {
 
+
+   val category1 = ApiCategory.AGENTS
+  val category2 = ApiCategory.BUSINESS_RATES
+  val category3 = ApiCategory.EXAMPLE
+  val category4 = ApiCategory.NATIONAL_INSURANCE
   trait Setup {
 
     val developerSessionWithoutEmailPreferences: DeveloperSession = standardDeveloper.loggedIn
     val form                                                      = mock[Form[SelectedApisEmailPreferencesForm]]
-    val currentCategory                                           = APICategoryDisplayDetails("CATEGORY1", "Category 1")
+    val currentCategory                                           = APICategoryDisplayDetails("AGENTS", "Agents")
     val apis                                                      = Set("api1", "api2")
 
     val emailpreferencesFlow: EmailPreferencesFlowV2          =
@@ -102,11 +108,12 @@ class FlowSelectApiViewSpec extends CommonViewSpec
     document.getElementById("submit").text should be("Continue")
   }
 
+
   "Email Preferences Select Api view page" should {
     val apiList  = List(
-      CombinedApi("api1", "Api One", List(CombinedApiCategory("category1"), CombinedApiCategory("category1")), REST_API),
-      CombinedApi("api2", "Api Two", List(CombinedApiCategory("category2"), CombinedApiCategory("category4")), REST_API),
-      CombinedApi("api3", "Api Three", List(CombinedApiCategory("category3"), CombinedApiCategory("category2")), REST_API)
+      CombinedApi("api1", "Api One", List(category1, category1), REST_API),
+      CombinedApi("api2", "Api Two", List(category2, category4), REST_API),
+      CombinedApi("api3", "Api Three", List(category3, category2), REST_API)
     )
     val userApis = Set("api1", "api2")
 

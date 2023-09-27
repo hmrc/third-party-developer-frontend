@@ -24,20 +24,18 @@ import play.api.inject.guice.GuiceApplicationBuilder
 import play.api.{Application => PlayApplication, Configuration, Mode}
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.http.UpstreamErrorResponse
-import uk.gov.hmrc.apiplatform.modules.developers.domain.models.UserId
+import uk.gov.hmrc.apiplatform.modules.common.domain.models._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.emailpreferences.APICategoryDisplayDetails
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.WireMockExtensions
-import uk.gov.hmrc.apiplatform.modules.applications.domain.models.ApplicationId
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.{Application, ApplicationWithSubscriptionData, Environment}
+import uk.gov.hmrc.apiplatform.modules.common.domain.models.UserId
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.{Application, ApplicationWithSubscriptionData}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.connectors.ApiType.REST_API
 import play.api.libs.json.Json
 import uk.gov.hmrc.thirdpartydeveloperfrontend.connectors.stubs.ApiPlatformMicroserviceStub
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.subscriptions.ApiData
 
 import java.time.{LocalDateTime, Period}
-
-import uk.gov.hmrc.apiplatform.modules.applications.domain.models.ClientId
-import uk.gov.hmrc.apiplatform.modules.apis.domain.models.ApiContext
+import uk.gov.hmrc.apiplatform.modules.apis.domain.models.ApiCategory
 
 class ApmConnectorIntegrationSpec extends BaseConnectorIntegrationSpec with GuiceOneAppPerSuite with WireMockExtensions with ApmConnectorJsonFormatters {
 
@@ -101,7 +99,7 @@ class ApmConnectorIntegrationSpec extends BaseConnectorIntegrationSpec with Guic
     "retrieve an CombinedApi based on a serviceName" in new Setup {
       val serviceName                            = "api1"
       val displayName                            = "API 1"
-      val expectedApi                            = CombinedApi(serviceName, displayName, List(CombinedApiCategory("VAT")), REST_API)
+      val expectedApi                            = CombinedApi(serviceName, displayName, List(ApiCategory.VAT), REST_API)
       ApiPlatformMicroserviceStub
         .stubCombinedApiByServiceName(serviceName, Json.toJson(expectedApi).toString())
       val result: Either[Throwable, CombinedApi] = await(underTest.fetchCombinedApi("api1"))
@@ -164,7 +162,7 @@ class ApmConnectorIntegrationSpec extends BaseConnectorIntegrationSpec with Guic
       ApiPlatformMicroserviceStub
         .stubFetchApiDefinitionsVisibleToUser(
           userId,
-          s"""[{ "serviceName": "$serviceName", "name": "$name", "description": "", "context": "context", "categories": ["AGENT", "VAT"] }]"""
+          s"""[{ "serviceName": "$serviceName", "name": "$name", "description": "", "context": "context", "categories": ["AGENTS", "VAT"] }]"""
         )
       val result: Seq[ApiDefinition] = await(underTest.fetchApiDefinitionsVisibleToUser(userId))
       result.head.serviceName shouldBe serviceName

@@ -95,7 +95,7 @@ class ThirdPartyDeveloperConnectorIntegrationSpec extends BaseConnectorIntegrati
                            |  "sessionId": "$sessionId",
                            |  "loggedInState": "LOGGED_IN",
                            |  "developer": {
-                           |    "userId":"${userId.value}",
+                           |    "userId":"$userId",
                            |    "email":"${userEmail.text}",
                            |    "firstName":"John",
                            |    "lastName": "Doe",
@@ -200,7 +200,7 @@ class ThirdPartyDeveloperConnectorIntegrationSpec extends BaseConnectorIntegrati
 
     "update profile" in new Setup {
       val updateProfileRequest = UpdateProfileRequest("First", "Last")
-      val url                  = s"/developer/${userId.asText}"
+      val url                  = s"/developer/${userId}"
 
       stubFor(
         post(urlEqualTo(url))
@@ -230,7 +230,7 @@ class ThirdPartyDeveloperConnectorIntegrationSpec extends BaseConnectorIntegrati
           )
       )
       stubFor(
-        post(urlEqualTo(s"/${userId.value}/resend-verification"))
+        post(urlEqualTo(s"/$userId/resend-verification"))
           .willReturn(
             aResponse()
               .withStatus(OK)
@@ -429,7 +429,7 @@ class ThirdPartyDeveloperConnectorIntegrationSpec extends BaseConnectorIntegrati
                            |    "sessionId": "$sessionId",
                            |    "loggedInState": "LOGGED_IN",
                            |    "developer": {
-                           |      "userId":"${userId.value}",
+                           |      "userId":"$userId",
                            |      "email":"${userEmail.text}",
                            |      "firstName":"John",
                            |      "lastName": "Doe",
@@ -550,7 +550,7 @@ class ThirdPartyDeveloperConnectorIntegrationSpec extends BaseConnectorIntegrati
                            |  "sessionId": "$sessionId",
                            |  "loggedInState": "LOGGED_IN",
                            |  "developer": {
-                           |    "userId":"${userId.value}",
+                           |    "userId":"$userId",
                            |    "email":"${userEmail.text}",
                            |    "firstName":"John",
                            |    "lastName": "Doe",

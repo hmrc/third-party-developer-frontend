@@ -20,13 +20,10 @@ import java.time.{LocalDateTime, Period}
 
 import play.api.libs.json.{OFormat, Reads}
 
-import uk.gov.hmrc.apiplatform.modules.apis.domain.models.ApiIdentifier
 import uk.gov.hmrc.apiplatform.modules.applications.domain.models._
-import uk.gov.hmrc.apiplatform.modules.common.domain.models.LaxEmailAddress
-import uk.gov.hmrc.apiplatform.modules.developers.domain.models.UserId
+import uk.gov.hmrc.apiplatform.modules.common.domain.models._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.apidefinitions.AccessType.STANDARD
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.Capabilities.{ChangeClientSecret, SupportsDetails, ViewPushSecret}
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.Environment._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.Permissions.{ProductionAndAdmin, ProductionAndDeveloper, SandboxOnly, SandboxOrAdmin}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.State.{PENDING_GATEKEEPER_APPROVAL, PENDING_REQUESTER_VERIFICATION, TESTING}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.Developer
@@ -73,7 +70,7 @@ trait BaseApplication {
   }
 
   def termsOfUseStatus: TermsOfUseStatus = {
-    if (deployedTo.isSandbox() || access.accessType.isNotStandard) {
+    if (deployedTo.isSandbox || access.accessType.isNotStandard) {
       TermsOfUseStatus.NOT_APPLICABLE
     } else if (termsOfUseAgreements.isEmpty) {
       TermsOfUseStatus.AGREEMENT_REQUIRED
@@ -117,11 +114,11 @@ trait BaseApplication {
     import Collaborator.Roles._
 
     (deployedTo, access.accessType, state.name, role(developer.email)) match {
-      case (SANDBOX, _, _, _)                                                          => false
-      case (PRODUCTION, STANDARD, TESTING, Some(ADMINISTRATOR))                        => true
-      case (PRODUCTION, STANDARD, PENDING_GATEKEEPER_APPROVAL, Some(ADMINISTRATOR))    => true
-      case (PRODUCTION, STANDARD, PENDING_REQUESTER_VERIFICATION, Some(ADMINISTRATOR)) => true
-      case _                                                                           => false
+      case (Environment.SANDBOX, _, _, _)                                                          => false
+      case (Environment.PRODUCTION, STANDARD, TESTING, Some(ADMINISTRATOR))                        => true
+      case (Environment.PRODUCTION, STANDARD, PENDING_GATEKEEPER_APPROVAL, Some(ADMINISTRATOR))    => true
+      case (Environment.PRODUCTION, STANDARD, PENDING_REQUESTER_VERIFICATION, Some(ADMINISTRATOR)) => true
+      case _                                                                                       => false
     }
   }
 
@@ -129,9 +126,9 @@ trait BaseApplication {
     import Collaborator.Roles._
 
     (deployedTo, access.accessType, state.name, role(developer.email)) match {
-      case (SANDBOX, STANDARD, State.PRODUCTION, _)                      => true
-      case (PRODUCTION, STANDARD, State.PRODUCTION, Some(ADMINISTRATOR)) => true
-      case _                                                             => false
+      case (Environment.SANDBOX, STANDARD, State.PRODUCTION, _)                      => true
+      case (Environment.PRODUCTION, STANDARD, State.PRODUCTION, Some(ADMINISTRATOR)) => true
+      case _                                                                         => false
     }
   }
 
@@ -154,7 +151,7 @@ trait BaseApplication {
   def isInTesting            = state.isInTesting
   def isPendingApproval      = state.isPendingApproval
   def isApproved             = state.isApproved
-  def hasLockedSubscriptions = deployedTo.isProduction() && !isInTesting
+  def hasLockedSubscriptions = deployedTo.isProduction && !isInTesting
 
   def findCollaboratorByHash(teamMemberHash: String): Option[Collaborator] = {
     collaborators.find(c => c.emailAddress.text.toSha256 == teamMemberHash)
@@ -208,7 +205,6 @@ case class ApplicationWithSubscriptionIds(
 
 object ApplicationWithSubscriptionIds extends LocalDateTimeFormatters {
   import play.api.libs.json.Json
-  import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.services.ApiDefinitionsJsonFormatters._
 
   implicit val applicationWithSubsIdsReads: Reads[ApplicationWithSubscriptionIds] = Json.reads[ApplicationWithSubscriptionIds]
   implicit val ordering: Ordering[ApplicationWithSubscriptionIds]                 = Ordering.by(_.name)

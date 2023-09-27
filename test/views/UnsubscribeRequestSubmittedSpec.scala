@@ -24,9 +24,8 @@ import views.html.UnsubscribeRequestSubmittedView
 
 import play.api.test.FakeRequest
 
-import uk.gov.hmrc.apiplatform.modules.apis.domain.models.ApiVersion
-import uk.gov.hmrc.apiplatform.modules.applications.domain.models.{ApplicationId, ClientId}
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.LaxEmailAddress.StringSyntax
+import uk.gov.hmrc.apiplatform.modules.common.domain.models.{ApiVersionNbr, ApplicationId, ClientId, Environment}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.builder.{DeveloperBuilder, DeveloperSessionBuilder}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.controllers.ApplicationViewModel
@@ -43,7 +42,7 @@ class UnsubscribeRequestSubmittedSpec extends CommonViewSpec with WithCSRFAddTok
 
       val appId       = ApplicationId.random
       val apiName     = "Test API"
-      val apiVersion  = ApiVersion("1.0")
+      val apiVersion  = ApiVersionNbr("1.0")
       val clientId    = ClientId("clientId123")
       val developer   = buildDeveloperWithRandomId("email@example.com".toLaxEmail, "First Name", "Last Name", None).loggedIn
       val application = Application(

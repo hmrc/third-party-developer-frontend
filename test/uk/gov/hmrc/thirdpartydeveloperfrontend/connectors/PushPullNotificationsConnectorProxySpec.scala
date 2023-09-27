@@ -25,10 +25,8 @@ import org.scalatestplus.play.guice.GuiceOneAppPerSuite
 
 import uk.gov.hmrc.http.{HttpClient, _}
 
-import uk.gov.hmrc.apiplatform.modules.apis.domain.models.{ApiContext, ApiVersion}
-import uk.gov.hmrc.apiplatform.modules.applications.domain.models.ClientId
+import uk.gov.hmrc.apiplatform.modules.common.domain.models._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.config.ApplicationConfig
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.Environment
 import uk.gov.hmrc.thirdpartydeveloperfrontend.helpers.FutureTimeoutSupportImpl
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.AsyncHmrcSpec
 
@@ -39,7 +37,7 @@ class PushPullNotificationsConnectorProxySpec extends AsyncHmrcSpec with BeforeA
   implicit val hc                  = HeaderCarrier()
   val clientId: ClientId           = ClientId(UUID.randomUUID().toString)
   val apiContext: ApiContext       = ApiContext("i-am-a-test")
-  val apiVersion: ApiVersion       = ApiVersion("1.0")
+  val apiVersion: ApiVersionNbr    = ApiVersionNbr("1.0")
   private val futureTimeoutSupport = new FutureTimeoutSupportImpl
 
   class Setup(proxyEnabled: Boolean = false) {

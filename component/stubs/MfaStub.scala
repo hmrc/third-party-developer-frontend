@@ -49,7 +49,7 @@ object MfaStub {
 
   def stubMfaAuthAppNameChange(developer: Developer, mfaId: MfaId, authAppName: String): Unit = {
     stubFor(
-      post(urlPathEqualTo(s"/developer/${developer.userId.value}/mfa/${mfaId.value}/name"))
+      post(urlPathEqualTo(s"/developer/${developer.userId.value}/mfa/$mfaId/name"))
         .withRequestBody(equalTo(Json.toJson(ChangeMfaNameRequest(authAppName)).toString()))
         .willReturn(aResponse()
           .withStatus(NO_CONTENT))
@@ -58,7 +58,7 @@ object MfaStub {
 
   def setupVerificationOfAccessCode(developer: Developer, mfaId: MfaId): Unit = {
     stubFor(
-      post(urlPathEqualTo(s"/developer/${developer.userId.value}/mfa/${mfaId.value}/verification"))
+      post(urlPathEqualTo(s"/developer/${developer.userId.value}/mfa/$mfaId/verification"))
         .withRequestBody(equalTo(Json.toJson(VerifyMfaRequest(accessCode)).toString()))
         .willReturn(aResponse()
           .withStatus(NO_CONTENT))
@@ -67,7 +67,7 @@ object MfaStub {
 
   def stubRemoveMfaById(developer: Developer, mfaId: MfaId): Unit = {
     stubFor(
-      delete(urlPathEqualTo(s"/developer/${developer.userId.value}/mfa/${mfaId.value}"))
+      delete(urlPathEqualTo(s"/developer/${developer.userId.value}/mfa/$mfaId"))
         .willReturn(aResponse()
           .withStatus(NO_CONTENT))
     )
@@ -75,7 +75,7 @@ object MfaStub {
 
   def stubSendSms(developer: Developer, mfaId: MfaId): Unit = {
     stubFor(
-      post(urlEqualTo(s"/developer/${developer.userId.value}/mfa/${mfaId.value}/send-sms"))
+      post(urlEqualTo(s"/developer/${developer.userId.value}/mfa/$mfaId/send-sms"))
         .willReturn(aResponse()
           .withStatus(OK))
     )

@@ -30,9 +30,8 @@ import play.twirl.api.HtmlFormat
 import uk.gov.hmrc.http.HeaderCarrier
 
 import uk.gov.hmrc.apiplatform.modules.applications.domain.models.{Collaborator, PrivacyPolicyLocations, TermsAndConditionsLocations}
-import uk.gov.hmrc.apiplatform.modules.common.domain.models.LaxEmailAddress
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.LaxEmailAddress.StringSyntax
-import uk.gov.hmrc.apiplatform.modules.developers.domain.models.UserId
+import uk.gov.hmrc.apiplatform.modules.common.domain.models.{LaxEmailAddress, UserId}
 import uk.gov.hmrc.apiplatform.modules.submissions.domain.models.Submission
 import uk.gov.hmrc.thirdpartydeveloperfrontend.builder._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.ManageResponsibleIndividualController.{ResponsibleIndividualHistoryItem, ViewModel}
@@ -223,7 +222,7 @@ class ManageResponsibleIndividualControllerSpec
       val result  = underTest.responsibleIndividualChangeToSelfOrOtherAction(appId)(request)
 
       status(result) shouldBe SEE_OTHER
-      redirectLocation(result) shouldBe Some(s"/developer/applications/${appId.text()}/responsible-individual/change/self")
+      redirectLocation(result) shouldBe Some(s"/developer/applications/${appId}/responsible-individual/change/self")
     }
 
     "redirect to correct page if user selects 'other'" in new Setup {
@@ -235,7 +234,7 @@ class ManageResponsibleIndividualControllerSpec
       val result  = underTest.responsibleIndividualChangeToSelfOrOtherAction(appId)(request)
 
       status(result) shouldBe SEE_OTHER
-      redirectLocation(result) shouldBe Some(s"/developer/applications/${appId.text()}/responsible-individual/change/other")
+      redirectLocation(result) shouldBe Some(s"/developer/applications/${appId}/responsible-individual/change/other")
     }
 
     "return error if no choice selected" in new Setup {
@@ -293,7 +292,7 @@ class ManageResponsibleIndividualControllerSpec
       val result = underTest.responsibleIndividualChangeToSelfAction(appId)(loggedInRequest.withCSRFToken)
 
       status(result) shouldBe SEE_OTHER
-      redirectLocation(result) shouldBe Some(s"/developer/applications/${appId.text()}/responsible-individual/change/self/confirmed")
+      redirectLocation(result) shouldBe Some(s"/developer/applications/${appId}/responsible-individual/change/self/confirmed")
     }
 
     "return error if user is not an admin" in new Setup {
@@ -368,7 +367,7 @@ class ManageResponsibleIndividualControllerSpec
       val result  = underTest.responsibleIndividualChangeToOtherAction(appId)(request)
 
       status(result) shouldBe SEE_OTHER
-      redirectLocation(result) shouldBe Some(s"/developer/applications/${appId.text()}/responsible-individual/change/other/requested")
+      redirectLocation(result) shouldBe Some(s"/developer/applications/${appId}/responsible-individual/change/other/requested")
     }
 
     "return an error if responsible individual details are not new" in new Setup {

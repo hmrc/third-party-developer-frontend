@@ -24,7 +24,7 @@ import java.time.LocalDateTime
 import java.util.UUID
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.LaxEmailAddress
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.LaxEmailAddress.StringSyntax
-import uk.gov.hmrc.apiplatform.modules.developers.domain.models.UserId
+import uk.gov.hmrc.apiplatform.modules.common.domain.models.UserId
 
 trait ComponentTestDeveloperBuilder {
   val staticUserId               = UserId(UUID.fromString("11edcde7-c619-4bc1-bb6a-84dc14ea25cd"))

@@ -21,14 +21,11 @@ import scala.concurrent.{ExecutionContext, Future}
 
 import uk.gov.hmrc.http.HeaderCarrier
 
-import uk.gov.hmrc.apiplatform.modules.apis.domain.models.{ApiContext, ApiIdentifier}
-import uk.gov.hmrc.apiplatform.modules.applications.domain.models.ApplicationId
-import uk.gov.hmrc.apiplatform.modules.developers.domain.models.UserId
+import uk.gov.hmrc.apiplatform.modules.apis.domain.models._
+import uk.gov.hmrc.apiplatform.modules.common.domain.models._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.connectors.{ApmConnector, ThirdPartyApplicationSandboxConnector}
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.apidefinitions.APIStatus
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.Environment
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.controllers.ApplicationSummary
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.subscriptions.{ApiCategory, ApiData}
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.subscriptions.ApiData
 import uk.gov.hmrc.thirdpartydeveloperfrontend.service.AppsByTeamMemberService
 
 @Singleton
@@ -82,7 +79,7 @@ object UpliftLogic {
   }
 
   def apiIdentifiersOfRetiredApis(apis: Map[ApiContext, ApiData]): Set[ApiIdentifier] = {
-    (ApiData.filterApis(_ => true, v => v.status == APIStatus.RETIRED) _ andThen ApiData.toApiIdentifiers)(apis)
+    (ApiData.filterApis(_ => true, v => v.status == ApiStatus.RETIRED) _ andThen ApiData.toApiIdentifiers)(apis)
   }
 
   def filterAppsHavingRealAndAvailableSubscriptions(

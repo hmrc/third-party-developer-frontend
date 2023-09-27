@@ -23,9 +23,8 @@ import scala.util.control.NonFatal
 import uk.gov.hmrc.http.HeaderCarrier
 
 import uk.gov.hmrc.apiplatform.modules.applications.domain.models.Collaborator
-import uk.gov.hmrc.apiplatform.modules.developers.domain.models.UserId
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.Environment._
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.{ApplicationWithSubscriptionIds, Environment}
+import uk.gov.hmrc.apiplatform.modules.common.domain.models.{Environment, UserId}
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.ApplicationWithSubscriptionIds
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.controllers.ApplicationSummary
 
 @Singleton
@@ -51,13 +50,13 @@ class AppsByTeamMemberService @Inject() (
     }
 
   def fetchProductionSummariesByTeamMember(userId: UserId)(implicit hc: HeaderCarrier): Future[Seq[ApplicationSummary]] =
-    fetchAppsByTeamMember(PRODUCTION)(userId).map(_.sorted.map(ApplicationSummary.from(_, userId)))
+    fetchAppsByTeamMember(Environment.PRODUCTION)(userId).map(_.sorted.map(ApplicationSummary.from(_, userId)))
 
   def fetchProductionSummariesByAdmin(userId: UserId)(implicit hc: HeaderCarrier): Future[Seq[ApplicationWithSubscriptionIds]] =
-    fetchByTeamMemberWithRole(PRODUCTION)(Collaborator.Roles.ADMINISTRATOR)(userId: UserId)
+    fetchByTeamMemberWithRole(Environment.PRODUCTION)(Collaborator.Roles.ADMINISTRATOR)(userId: UserId)
 
   def fetchSandboxAppsByTeamMember(userId: UserId)(implicit hc: HeaderCarrier): Future[Seq[ApplicationWithSubscriptionIds]] =
-    fetchAppsByTeamMember(SANDBOX)(userId) recover { case NonFatal(_) => Seq.empty }
+    fetchAppsByTeamMember(Environment.SANDBOX)(userId) recover { case NonFatal(_) => Seq.empty }
 
   def fetchSandboxSummariesByTeamMember(userId: UserId)(implicit hc: HeaderCarrier): Future[Seq[ApplicationSummary]] =
     fetchSandboxAppsByTeamMember(userId).map(_.sorted.map(ApplicationSummary.from(_, userId)))

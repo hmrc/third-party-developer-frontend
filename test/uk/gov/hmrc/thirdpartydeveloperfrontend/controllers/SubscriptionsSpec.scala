@@ -31,10 +31,9 @@ import play.api.test.Helpers._
 import play.filters.csrf.CSRF.TokenProvider
 import uk.gov.hmrc.http.HeaderCarrier
 
-import uk.gov.hmrc.apiplatform.modules.apis.domain.models.{ApiContext, ApiIdentifier, ApiVersion}
 import uk.gov.hmrc.apiplatform.modules.applications.domain.models.{ClientSecret, ClientSecretResponse}
-import uk.gov.hmrc.apiplatform.modules.common.domain.models.Actors
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.LaxEmailAddress.StringSyntax
+import uk.gov.hmrc.apiplatform.modules.common.domain.models.{Actors, ApiContext, ApiIdentifier, ApiVersionNbr}
 import uk.gov.hmrc.apiplatform.modules.common.utils.FixedClock
 import uk.gov.hmrc.thirdpartydeveloperfrontend.builder.{DeveloperBuilder, _}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.config.FraudPreventionConfig
@@ -56,7 +55,7 @@ class SubscriptionsSpec
     with FixedClock {
 
   val apiName       = "api-1"
-  val apiVersion    = ApiVersion("1.0")
+  val apiVersion    = ApiVersionNbr("1.0")
   val apiContext    = ApiContext("Context")
   val apiIdentifier = ApiIdentifier(apiContext, apiVersion)
   val displayStatus = "Status"
@@ -529,7 +528,7 @@ class SubscriptionsSpec
 
   "Authorization" should {
     val apiContext    = ApiContext("api/test")
-    val apiVersion    = ApiVersion("1.0")
+    val apiVersion    = ApiVersionNbr("1.0")
     val apiAccessType = "PUBLIC"
 
     "unauthorized user should get 404 Not Found on unsubscribe to an API" in new Setup {

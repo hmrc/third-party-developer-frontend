@@ -18,9 +18,8 @@ package uk.gov.hmrc.thirdpartydeveloperfrontend.domain
 
 import play.api.test.FakeRequest
 
-import uk.gov.hmrc.apiplatform.modules.apis.domain.models.ApiVersion
-import uk.gov.hmrc.apiplatform.modules.applications.domain.models.ApplicationId
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.LaxEmailAddress.StringSyntax
+import uk.gov.hmrc.apiplatform.modules.common.domain.models._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.SupportEnquiryForm
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.connectors.DeskproTicket
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.AsyncHmrcSpec
@@ -34,7 +33,7 @@ class DeskproTicketSpec extends AsyncHmrcSpec {
   val applicationName = "my app"
   val applicationId   = ApplicationId.random
   val apiName         = "my api"
-  val apiVersion      = ApiVersion.random
+  val apiVersion      = ApiVersionNbr.random
   val comments        = "very nice"
 
   def checkDeskproTicket(ticket: DeskproTicket, expectedSubject: String, expectedMsg: String) = {
@@ -64,7 +63,7 @@ class DeskproTicketSpec extends AsyncHmrcSpec {
       checkDeskproTicket(
         ticket,
         "Request to subscribe to an API",
-        s"I '${requestorEmail.text}' want my application '$applicationName' identified by '${applicationId.text()}' to be subscribed to the API '$apiName' with version '${apiVersion.value}'"
+        s"I '${requestorEmail.text}' want my application '$applicationName' identified by '${applicationId}' to be subscribed to the API '$apiName' with version '${apiVersion.value}'"
       )
     }
   }
@@ -76,7 +75,7 @@ class DeskproTicketSpec extends AsyncHmrcSpec {
       checkDeskproTicket(
         ticket,
         "Request to unsubscribe from an API",
-        s"I '${requestorEmail.text}' want my application '$applicationName' identified by '${applicationId.text()}' to be unsubscribed from the API '$apiName' with version '${apiVersion.value}'"
+        s"I '${requestorEmail.text}' want my application '$applicationName' identified by '${applicationId}' to be unsubscribed from the API '$apiName' with version '${apiVersion.value}'"
       )
     }
   }

@@ -25,7 +25,9 @@ import enumeratum.{Enum, EnumEntry, PlayJsonEnum}
 import play.api.libs.json.{Json, OFormat}
 import uk.gov.hmrc.play.json.Union
 
-case class MfaId(value: UUID) extends AnyVal
+case class MfaId(value: UUID) extends AnyVal {
+  override def toString(): String = value.toString()
+}
 
 object MfaId {
   def random: MfaId = MfaId(UUID.randomUUID())

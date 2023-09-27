@@ -32,7 +32,7 @@ import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.connectors.LoginReq
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.connectors.AccessCodeAuthenticationRequest
 import play.api.http.HeaderNames
 import uk.gov.hmrc.apiplatform.modules.mfa.models.MfaId
-import uk.gov.hmrc.apiplatform.modules.developers.domain.models.UserId
+import uk.gov.hmrc.apiplatform.modules.common.domain.models.UserId
 import uk.gov.hmrc.thirdpartydeveloperfrontend.connectors.ThirdPartyDeveloperConnector.FindUserIdResponse
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.LaxEmailAddress.StringSyntax
 
@@ -86,7 +86,7 @@ class ThirdPartyDeveloperConnectorEmailPreferencesSpec extends BaseConnectorInte
       )
 
       stubFor(
-        post(urlEqualTo(s"/${userId.value}/resend-verification"))
+        post(urlEqualTo(s"/$userId/resend-verification"))
           .willReturn(
             aResponse()
               .withStatus(NO_CONTENT)
@@ -98,7 +98,7 @@ class ThirdPartyDeveloperConnectorEmailPreferencesSpec extends BaseConnectorInte
 
       verify(
         1,
-        postRequestedFor(urlMatching(s"/${userId.value}/resend-verification"))
+        postRequestedFor(urlMatching(s"/$userId/resend-verification"))
           .withHeader(HeaderNames.CONTENT_LENGTH, equalTo("0"))
       )
     }
@@ -109,7 +109,7 @@ class ThirdPartyDeveloperConnectorEmailPreferencesSpec extends BaseConnectorInte
 
     "return true when NO_CONTENT is returned" in new Setup {
       stubFor(
-        delete(urlEqualTo(s"/developer/${userId.value}/email-preferences"))
+        delete(urlEqualTo(s"/developer/$userId/email-preferences"))
           .willReturn(
             aResponse()
               .withStatus(NO_CONTENT)
@@ -122,7 +122,7 @@ class ThirdPartyDeveloperConnectorEmailPreferencesSpec extends BaseConnectorInte
 
     "throw InvalidEmail when the email is not found" in new Setup {
       stubFor(
-        delete(urlEqualTo(s"/developer/${userId.value}/email-preferences"))
+        delete(urlEqualTo(s"/developer/$userId/email-preferences"))
           .willReturn(
             aResponse()
               .withStatus(NOT_FOUND)
@@ -142,7 +142,7 @@ class ThirdPartyDeveloperConnectorEmailPreferencesSpec extends BaseConnectorInte
       val userId = UserId.random
 
       stubFor(
-        put(urlEqualTo(s"/developer/${userId.value}/email-preferences"))
+        put(urlEqualTo(s"/developer/$userId/email-preferences"))
           .withRequestBody(equalToJson(Json.toJson(emailPreferences).toString()))
           .willReturn(
             aResponse()
@@ -158,7 +158,7 @@ class ThirdPartyDeveloperConnectorEmailPreferencesSpec extends BaseConnectorInte
       val userId = UserId.random
 
       stubFor(
-        put(urlEqualTo(s"/developer/${userId.value}/email-preferences"))
+        put(urlEqualTo(s"/developer/$userId/email-preferences"))
           .withRequestBody(equalToJson(Json.toJson(emailPreferences).toString()))
           .willReturn(
             aResponse()

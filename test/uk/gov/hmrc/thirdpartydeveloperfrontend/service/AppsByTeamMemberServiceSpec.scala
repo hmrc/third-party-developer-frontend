@@ -22,10 +22,9 @@ import scala.concurrent.Future.{failed, successful}
 
 import uk.gov.hmrc.http.{HeaderCarrier, UpstreamErrorResponse}
 
-import uk.gov.hmrc.apiplatform.modules.apis.domain.models._
-import uk.gov.hmrc.apiplatform.modules.applications.domain.models.{ApplicationId, ClientId, Collaborators}
+import uk.gov.hmrc.apiplatform.modules.applications.domain.models.Collaborators
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.LaxEmailAddress.StringSyntax
-import uk.gov.hmrc.apiplatform.modules.developers.domain.models.UserId
+import uk.gov.hmrc.apiplatform.modules.common.domain.models._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.builder._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.config.ApplicationConfig
 import uk.gov.hmrc.thirdpartydeveloperfrontend.connectors._
@@ -41,8 +40,8 @@ class AppsByTeamMemberServiceSpec extends AsyncHmrcSpec with SubscriptionsBuilde
     def asAppWithSubIds(apis: ApiIdentifier*): ApplicationWithSubscriptionIds = ApplicationWithSubscriptionIds.from(application).copy(subscriptions = apis.toSet)
     def asAppWithSubIds(): ApplicationWithSubscriptionIds                     = ApplicationWithSubscriptionIds.from(application)
   }
-  val versionOne = ApiVersion("1.0")
-  val versionTwo = ApiVersion("2.0")
+  val versionOne = ApiVersionNbr("1.0")
+  val versionTwo = ApiVersionNbr("2.0")
 
   trait Setup {
     implicit val hc: HeaderCarrier = HeaderCarrier()

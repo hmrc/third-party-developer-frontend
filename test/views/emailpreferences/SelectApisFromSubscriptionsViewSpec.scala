@@ -28,14 +28,15 @@ import play.api.mvc.AnyContentAsEmpty
 import play.api.test.FakeRequest
 import play.twirl.api.Html
 
-import uk.gov.hmrc.apiplatform.modules.applications.domain.models.ApplicationId
+import uk.gov.hmrc.apiplatform.modules.common.domain.models.ApplicationId
 import uk.gov.hmrc.thirdpartydeveloperfrontend.builder._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.{FormKeys, SelectApisFromSubscriptionsForm}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.connectors.ApiType.REST_API
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.connectors.{CombinedApi, CombinedApiCategory}
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.connectors.CombinedApi
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.{DeveloperSession, LoggedInState}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.flows.NewApplicationEmailPreferencesFlowV2
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.{LocalUserIdTracker, WithCSRFAddToken}
+import uk.gov.hmrc.apiplatform.modules.apis.domain.models.ApiCategory
 
 class SelectApisFromSubscriptionsViewSpec extends CommonViewSpec
     with WithCSRFAddToken
@@ -43,6 +44,11 @@ class SelectApisFromSubscriptionsViewSpec extends CommonViewSpec
     with DeveloperSessionBuilder
     with DeveloperTestData {
 
+
+  val category1 = ApiCategory.AGENTS
+  val category2 = ApiCategory.BUSINESS_RATES
+  val category3 = ApiCategory.EXAMPLE
+  val category4 = ApiCategory.NATIONAL_INSURANCE
   trait Setup {
 
     val developerSessionWithoutEmailPreferences: DeveloperSession = standardDeveloper.loggedIn
@@ -84,12 +90,12 @@ class SelectApisFromSubscriptionsViewSpec extends CommonViewSpec
     // Check form is configured correctly
     val form = document.getElementById("emailPreferencesApisForm")
     form.attr("method") should be("POST")
-    form.attr("action") should be(s"/developer/profile/email-preferences/apis-from-subscriptions?applicationId=${applicationId.text()}")
+    form.attr("action") should be(s"/developer/profile/email-preferences/apis-from-subscriptions?applicationId=${applicationId}")
 
     // check checkboxes are displayed
     validateCheckboxItemsAgainstApis(document, apis)
 
-    document.getElementById("applicationId").`val`() shouldBe applicationId.text()
+    document.getElementById("applicationId").`val`() shouldBe applicationId.toString()
 
     // Check submit button is correct
     document.getElementById("submit").text should be("Continue")
@@ -97,9 +103,9 @@ class SelectApisFromSubscriptionsViewSpec extends CommonViewSpec
 
   "New Application Email Preferences Select Api view page" should {
     val missingAPIs = List(
-      CombinedApi("api1", "Api One", List(CombinedApiCategory("category1"), CombinedApiCategory("category2")), REST_API),
-      CombinedApi("api2", "Api Two", List(CombinedApiCategory("category2"), CombinedApiCategory("category4")), REST_API),
-      CombinedApi("api3", "Api Three", List(CombinedApiCategory("category3"), CombinedApiCategory("category2")), REST_API)
+      CombinedApi("api1", "Api One", List(category1, category2), REST_API),
+      CombinedApi("api2", "Api Two", List(category2, category4), REST_API),
+      CombinedApi("api3", "Api Three", List(category3, category2), REST_API)
     )
 
     "render the api selection page with APIs that are missing from user's email preferences" in new Setup {

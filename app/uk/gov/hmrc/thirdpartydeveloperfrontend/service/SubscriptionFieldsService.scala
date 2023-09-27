@@ -23,10 +23,10 @@ import cats.implicits._
 
 import uk.gov.hmrc.http.HeaderCarrier
 
-import uk.gov.hmrc.apiplatform.modules.apis.domain.models.{ApiContext, ApiIdentifier, ApiVersion}
-import uk.gov.hmrc.apiplatform.modules.applications.domain.models.{ApplicationId, Collaborator, _}
+import uk.gov.hmrc.apiplatform.modules.applications.domain.models.Collaborator
+import uk.gov.hmrc.apiplatform.modules.common.domain.models._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.connectors.ApmConnector
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.{Application, Environment}
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.Application
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.subscriptions.ApiSubscriptionFields._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.subscriptions.{ApiData, DevhubAccessLevel, FieldName, FieldValue, Fields}
 
@@ -37,7 +37,7 @@ class SubscriptionFieldsService @Inject() (connectorsWrapper: ConnectorsWrapper,
       role: Collaborator.Role,
       application: Application,
       apiContext: ApiContext,
-      apiVersion: ApiVersion,
+      apiVersion: ApiVersionNbr,
       oldValues: Seq[SubscriptionFieldValue],
       newValues: Fields.Alias
     )(implicit hc: HeaderCarrier
@@ -80,7 +80,7 @@ class SubscriptionFieldsService @Inject() (connectorsWrapper: ConnectorsWrapper,
     apmConnector.fetchAllPossibleSubscriptions(applicationId)
   }
 
-  def fetchAllFieldDefinitions(environment: Environment)(implicit hc: HeaderCarrier): Future[Map[ApiContext, Map[ApiVersion, Map[FieldName, SubscriptionFieldDefinition]]]] = {
+  def fetchAllFieldDefinitions(environment: Environment)(implicit hc: HeaderCarrier): Future[Map[ApiContext, Map[ApiVersionNbr, Map[FieldName, SubscriptionFieldDefinition]]]] = {
     apmConnector.getAllFieldDefinitions(environment)
   }
 }
@@ -88,7 +88,7 @@ class SubscriptionFieldsService @Inject() (connectorsWrapper: ConnectorsWrapper,
 object SubscriptionFieldsService {
 
   trait SubscriptionFieldsConnector {
-    def fetchFieldValues(clientId: ClientId, context: ApiContext, version: ApiVersion)(implicit hc: HeaderCarrier): Future[Seq[SubscriptionFieldValue]]
+    def fetchFieldValues(clientId: ClientId, context: ApiContext, version: ApiVersionNbr)(implicit hc: HeaderCarrier): Future[Seq[SubscriptionFieldValue]]
 
     def fetchFieldsValuesWithPrefetchedDefinitions(
         clientId: ClientId,
@@ -99,17 +99,17 @@ object SubscriptionFieldsService {
 
     def fetchAllFieldDefinitions()(implicit hc: HeaderCarrier): Future[DefinitionsByApiVersion]
 
-    def fetchFieldDefinitions(apiContext: ApiContext, apiVersion: ApiVersion)(implicit hc: HeaderCarrier): Future[Seq[SubscriptionFieldDefinition]]
+    def fetchFieldDefinitions(apiContext: ApiContext, apiVersion: ApiVersionNbr)(implicit hc: HeaderCarrier): Future[Seq[SubscriptionFieldDefinition]]
 
     def saveFieldValues(
         clientId: ClientId,
         apiContext: ApiContext,
-        apiVersion: ApiVersion,
+        apiVersion: ApiVersionNbr,
         fields: Fields.Alias
       )(implicit hc: HeaderCarrier
       ): Future[ConnectorSaveSubscriptionFieldsResponse]
 
-    def deleteFieldValues(clientId: ClientId, apiContext: ApiContext, apiVersion: ApiVersion)(implicit hc: HeaderCarrier): Future[FieldsDeleteResult]
+    def deleteFieldValues(clientId: ClientId, apiContext: ApiContext, apiVersion: ApiVersionNbr)(implicit hc: HeaderCarrier): Future[FieldsDeleteResult]
   }
 
   type DefinitionsByApiVersion = Map[ApiIdentifier, Seq[SubscriptionFieldDefinition]]

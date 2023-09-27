@@ -18,7 +18,7 @@ package uk.gov.hmrc.apiplatform.modules.submissions.controllers.models
 
 import cats.data.NonEmptyList
 
-import uk.gov.hmrc.apiplatform.modules.applications.domain.models.ApplicationId
+import uk.gov.hmrc.apiplatform.modules.common.domain.models.ApplicationId
 import uk.gov.hmrc.apiplatform.modules.submissions.domain.models._
 
 object AnswersViewModel {

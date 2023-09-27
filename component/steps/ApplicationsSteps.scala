@@ -17,7 +17,6 @@
 package steps
 
 import java.util.UUID.randomUUID
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.Environment.PRODUCTION
 import io.cucumber.datatable.DataTable
 import io.cucumber.scala.{EN, ScalaDsl}
 import io.cucumber.scala.Implicits._
@@ -30,11 +29,9 @@ import stubs._
 import stubs.ApplicationStub.configureUserApplications
 
 import java.time.{LocalDateTime, ZoneOffset}
-import uk.gov.hmrc.apiplatform.modules.applications.domain.models.ApplicationId
-import uk.gov.hmrc.apiplatform.modules.developers.domain.models.UserId
+import uk.gov.hmrc.apiplatform.modules.common.domain.models._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.ApplicationWithSubscriptionIds
 import org.scalatest.matchers.should.Matchers
-import uk.gov.hmrc.apiplatform.modules.common.domain.models.LaxEmailAddress
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.LaxEmailAddress.StringSyntax
 import utils.ComponentTestDeveloperBuilder
 import uk.gov.hmrc.apiplatform.modules.applications.domain.models._
@@ -66,7 +63,7 @@ class ApplicationsSteps extends ScalaDsl with EN with Matchers with NavigationSu
     lastAccess = Some(LocalDateTime.now(ZoneOffset.UTC)),
     lastAccessTokenUsage = None,
     Period.ofDays(547),
-    Environment.from(environment).getOrElse(PRODUCTION),
+    Environment.apply(environment).getOrElse(Environment.PRODUCTION),
     description = None,
     collaborators = Set(Collaborator(collaboratorEmail, Collaborator.Roles.ADMINISTRATOR, staticUserId))
   )

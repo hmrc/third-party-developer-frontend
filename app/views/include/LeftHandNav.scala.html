@@ -103,7 +103,7 @@
             case Some(fraudPreventionViewModel) if(fraudPreventionViewModel.isVisible) =>{
 
             <li class="side-nav__list @if(section == "fraud-prevention") { side-nav__list--selected }">
-              <a id="nav-fraud-prevention" class="side-nav__link" href="@fraudPreventionViewModel.generateLink(app.id.text())">
+              <a id="nav-fraud-prevention" class="side-nav__link" href="@fraudPreventionViewModel.generateLink(app.id.toString()))">
                         Fraud prevention
               </a>
             </li>

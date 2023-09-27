@@ -18,7 +18,7 @@ package uk.gov.hmrc.thirdpartydeveloperfrontend.testdata
 
 import java.util.UUID
 
-import uk.gov.hmrc.apiplatform.modules.applications.domain.models.ApplicationId
+import uk.gov.hmrc.apiplatform.modules.common.domain.models.ApplicationId
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.LaxEmailAddress.StringSyntax
 
 trait CommonTestData {

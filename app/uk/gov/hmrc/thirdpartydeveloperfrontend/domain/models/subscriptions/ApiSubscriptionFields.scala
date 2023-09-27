@@ -16,8 +16,7 @@
 
 package uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.subscriptions
 
-import uk.gov.hmrc.apiplatform.modules.apis.domain.models.{ApiContext, ApiVersion}
-import uk.gov.hmrc.apiplatform.modules.applications.domain.models.{ApplicationId, ClientId}
+import uk.gov.hmrc.apiplatform.modules.common.domain.models._
 
 object ApiSubscriptionFields {
 
@@ -42,7 +41,7 @@ object ApiSubscriptionFields {
       applicationId: ApplicationId,
       clientId: ClientId,
       apiContext: ApiContext,
-      apiVersion: ApiVersion,
+      apiVersion: ApiVersionNbr,
       fields: List[SubscriptionFieldValue]
     )
 

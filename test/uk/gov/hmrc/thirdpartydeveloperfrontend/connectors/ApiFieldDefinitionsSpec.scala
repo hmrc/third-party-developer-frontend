@@ -18,7 +18,7 @@ package uk.gov.hmrc.thirdpartydeveloperfrontend.connectors
 
 import play.api.libs.json.{JsSuccess, Json}
 
-import uk.gov.hmrc.apiplatform.modules.apis.domain.models.{ApiContext, ApiVersion}
+import uk.gov.hmrc.apiplatform.modules.common.domain.models.{ApiContext, ApiVersionNbr}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.connectors.SubscriptionFieldsConnectorDomain.{ApiFieldDefinitions, FieldDefinition}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.subscriptions.DevhubAccessRequirement.NoOne
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.subscriptions.{AccessRequirements, DevhubAccessRequirements, FieldName}
@@ -45,7 +45,7 @@ class ApiFieldDefinitionsSpec extends AsyncHmrcSpec {
   private val basicFieldDefinition: ApiFieldDefinitions = {
     ApiFieldDefinitions(
       ApiContext("my-context"),
-      ApiVersion("1.0"),
+      ApiVersionNbr("1.0"),
       List(FieldDefinition(FieldName("field-name"), "my-description", "my-shortDescription", "my-hint", "STRING", AccessRequirements.Default))
     )
   }
@@ -81,7 +81,7 @@ class ApiFieldDefinitionsSpec extends AsyncHmrcSpec {
       val apiFieldDefinitionsWithAccess: ApiFieldDefinitions = {
         ApiFieldDefinitions(
           ApiContext("my-context"),
-          ApiVersion("1.0"),
+          ApiVersionNbr("1.0"),
           List(
             FieldDefinition(
               name = FieldName("field-name"),

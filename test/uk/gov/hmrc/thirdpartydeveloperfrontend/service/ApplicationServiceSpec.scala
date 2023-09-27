@@ -28,17 +28,16 @@ import uk.gov.hmrc.http.{ForbiddenException, HeaderCarrier}
 import uk.gov.hmrc.play.audit.http.connector.AuditResult.Success
 
 import uk.gov.hmrc.apiplatform.modules.apis.domain.models._
-import uk.gov.hmrc.apiplatform.modules.applications.domain.models.{ApplicationId, ClientId, PrivacyPolicyLocations, TermsAndConditionsLocations}
+import uk.gov.hmrc.apiplatform.modules.applications.domain.models.{PrivacyPolicyLocations, TermsAndConditionsLocations}
 import uk.gov.hmrc.apiplatform.modules.commands.applications.domain.models.ApplicationCommands
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.LaxEmailAddress.StringSyntax
+import uk.gov.hmrc.apiplatform.modules.common.domain.models.{UserId, _}
 import uk.gov.hmrc.apiplatform.modules.common.utils.FixedClock
-import uk.gov.hmrc.apiplatform.modules.developers.domain.models.UserId
 import uk.gov.hmrc.thirdpartydeveloperfrontend.builder._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.config.ApplicationConfig
 import uk.gov.hmrc.thirdpartydeveloperfrontend.connectors._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.EditApplicationForm
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain._
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.apidefinitions.APIStatus._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.apidefinitions._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.connectors.{DeskproTicket, TicketCreated}
@@ -56,8 +55,8 @@ class ApplicationServiceSpec extends AsyncHmrcSpec
     with DeveloperSessionBuilder
     with DeveloperTestData {
 
-  val versionOne  = ApiVersion("1.0")
-  val versionTwo  = ApiVersion("2.0")
+  val versionOne  = ApiVersionNbr("1.0")
+  val versionTwo  = ApiVersionNbr("2.0")
   val grantLength = Period.ofDays(547)
 
   trait Setup extends FixedClock with ApplicationCommandConnectorMockModule {
@@ -119,7 +118,7 @@ class ApplicationServiceSpec extends AsyncHmrcSpec
     }
   }
 
-  def version(version: ApiVersion, status: APIStatus, subscribed: Boolean): VersionSubscription =
+  def version(version: ApiVersionNbr, status: ApiStatus, subscribed: Boolean): VersionSubscription =
     VersionSubscription(ApiVersionDefinition(version, status), subscribed)
 
   val productionApplicationId = ApplicationId.random
@@ -159,8 +158,8 @@ class ApplicationServiceSpec extends AsyncHmrcSpec
       clientId: ClientId,
       name: String,
       context: ApiContext,
-      version: ApiVersion,
-      status: APIStatus = STABLE,
+      version: ApiVersionNbr,
+      status: ApiStatus = ApiStatus.STABLE,
       subscribed: Boolean = false,
       requiresTrust: Boolean = false
     ): APISubscriptionStatus =
@@ -179,8 +178,8 @@ class ApplicationServiceSpec extends AsyncHmrcSpec
       clientId: ClientId,
       name: String,
       context: String,
-      version: ApiVersion,
-      status: APIStatus = STABLE,
+      version: ApiVersionNbr,
+      status: ApiStatus = ApiStatus.STABLE,
       subscribed: Boolean = false,
       requiresTrust: Boolean = false,
       subscriptionFieldWithValues: List[SubscriptionFieldValue] = List.empty

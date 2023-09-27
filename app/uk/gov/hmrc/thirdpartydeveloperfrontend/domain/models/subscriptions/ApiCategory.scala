@@ -14,15 +14,10 @@
  * limitations under the License.
  */
 
-package uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.apidefinitions
+package uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.subscriptions
 
-import enumeratum.{EnumEntry, PlayEnum}
+case class ApiCategoryTPA(value: String) extends AnyVal
 
-sealed trait APIAccessType extends EnumEntry
-
-object APIAccessType extends PlayEnum[APIAccessType] {
-  val values = findValues
-
-  final case object PRIVATE extends APIAccessType
-  final case object PUBLIC  extends APIAccessType
+object ApiCategoryTPA {
+  val EXAMPLE = ApiCategoryTPA("EXAMPLE")
 }

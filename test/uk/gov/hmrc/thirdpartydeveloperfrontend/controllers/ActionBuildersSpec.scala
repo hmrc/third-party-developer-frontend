@@ -24,7 +24,7 @@ import play.api.libs.crypto.CookieSigner
 import play.api.mvc.{AnyContent, MessagesControllerComponents}
 import play.api.test.Helpers._
 
-import uk.gov.hmrc.apiplatform.modules.apis.domain.models.{ApiContext, ApiVersion}
+import uk.gov.hmrc.apiplatform.modules.common.domain.models._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.builder._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.config.{ApplicationConfig, ErrorHandler}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.actions.SubscriptionFieldsActions
@@ -69,7 +69,7 @@ class ActionBuildersSpec extends BaseControllerSpec
 
     fetchByApplicationIdReturns(applicationWithSubscriptionData)
 
-    def runTestAction(context: ApiContext, version: ApiVersion, expectedStatus: Int) = {
+    def runTestAction(context: ApiContext, version: ApiVersionNbr, expectedStatus: Int) = {
       val testResultBody = "was called"
 
       val result = underTest.subFieldsDefinitionsExistActionByApi(applicationWithSubscriptionData.application.id, context, version) {
@@ -100,7 +100,7 @@ class ActionBuildersSpec extends BaseControllerSpec
     "Wrong version" in new Setup {
       givenApplicationAction(applicationWithSubscriptionData, loggedInDeveloper, List(subscriptionWithSubFields))
 
-      runTestAction(subscriptionWithSubFields.context, ApiVersion("wrong-version"), NOT_FOUND)
+      runTestAction(subscriptionWithSubFields.context, ApiVersionNbr("wrong-version"), NOT_FOUND)
     }
 
     "Subscription with no fields" in new Setup {

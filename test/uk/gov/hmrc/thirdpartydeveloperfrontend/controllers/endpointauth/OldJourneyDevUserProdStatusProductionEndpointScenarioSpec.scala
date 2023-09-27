@@ -27,16 +27,16 @@ class OldJourneyDevUserProdStatusProductionEndpointScenarioSpec extends Endpoint
     endpoint match {
       case Endpoint("GET", "/developer/applications", _)                                                     => Success()
       case Endpoint("GET", "/developer/applications/:id/add/subscription-configuration-step/:pageNumber", _) =>
-        Redirect(s"/developer/applications/${applicationId.text()}/request-check")
+        Redirect(s"/developer/applications/${applicationId}/request-check")
       case Endpoint("GET", "/developer/applications/:id/request-check/submitted", _)                         => getEndpointSuccessResponse(endpoint)
       case Endpoint("GET", "/developer/applications/:id/request-check/appDetails", _)                        => Success()
       case Endpoint("GET", "/developer/registration", _)                                                     => Redirect("/developer/applications")
       case Endpoint("POST", "/developer/registration", _)                                                    => BadRequest()
       case Endpoint("GET", "/developer/reset-password/error", _)                                             => BadRequest()
       case Endpoint("GET", "/developer/applications/:id/we-will-check-your-answers", _)                      =>
-        Redirect(s"/developer/applications/${applicationId.text()}/sell-resell-or-distribute-your-software")
+        Redirect(s"/developer/applications/${applicationId}/sell-resell-or-distribute-your-software")
       case Endpoint("POST", "/developer/applications/:id/sell-resell-or-distribute-your-software", _)        =>
-        Redirect(s"/developer/submissions/application/${applicationId.text()}/production-credentials-checklist")
+        Redirect(s"/developer/submissions/application/${applicationId}/production-credentials-checklist")
       case Endpoint(_, "/developer/submissions/application/:aid/production-credentials-checklist", _)        => BadRequest() // must be in 'testing' state
       case Endpoint(_, "/developer/submissions/application/:aid/cancel-request", _)                          => BadRequest() // must not be in production state
       case Endpoint("GET", "/developer/submissions/application/:aid/check-answers", _)                       => BadRequest() // must be in testing state

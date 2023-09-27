@@ -19,7 +19,7 @@ package uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.apidefinitions
 import scala.util.Try
 
 import uk.gov.hmrc.apiplatform.modules.apis.domain.models._
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.apidefinitions.APIAccessType.{PRIVATE, PUBLIC}
+import uk.gov.hmrc.apiplatform.modules.common.domain.models._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.subscriptions.ApiSubscriptionFields.{SubscriptionFieldValue, SubscriptionFieldsWrapper}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.subscriptions.VersionSubscription
 
@@ -41,15 +41,13 @@ object APIDefinition {
   }
 }
 
-case class ApiVersionDefinition(version: ApiVersion, status: APIStatus, access: Option[APIAccess] = None) {
-  val displayedStatus = status.displayedStatus
+case class ApiVersionDefinition(version: ApiVersionNbr, status: ApiStatus, access: ApiAccess = ApiAccess.PUBLIC) {
+  val displayedStatus = status.displayText
 
-  val accessType = access.map(_.`type`).getOrElse(APIAccessType.PUBLIC)
+  val accessType = access.accessType
 
   val displayedAccessType = accessType.toString().toLowerCase().capitalize
 }
-
-case class APIAccess(`type`: APIAccessType)
 
 // TODO - 5090 - Add new open access class
 case class APISubscriptionStatus(
@@ -65,8 +63,8 @@ case class APISubscriptionStatus(
 
   def isPrivate: Boolean = {
     apiVersion.accessType match {
-      case PRIVATE => true
-      case PUBLIC  => false
+      case ApiAccessType.PRIVATE => true
+      case ApiAccessType.PUBLIC  => false
     }
   }
 

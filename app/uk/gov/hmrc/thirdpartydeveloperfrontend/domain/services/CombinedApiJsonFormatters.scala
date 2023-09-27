@@ -18,10 +18,8 @@ package uk.gov.hmrc.thirdpartydeveloperfrontend.domain.services
 
 import play.api.libs.json.{Format, Json}
 
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.connectors.{CombinedApi, CombinedApiCategory}
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.connectors.CombinedApi
 
 trait CombinedApiJsonFormatters {
-
-  implicit val categoryFormat: Format[CombinedApiCategory] = Json.format[CombinedApiCategory]
   implicit val combinedApiFormat: Format[CombinedApi]      = Json.format[CombinedApi]
 }

@@ -26,8 +26,9 @@ import views.html.include.SubscriptionsGroup
 import play.api.test.FakeRequest
 
 import uk.gov.hmrc.apiplatform.modules.apis.domain.models._
-import uk.gov.hmrc.apiplatform.modules.applications.domain.models.{ApplicationId, ClientId, Collaborator}
+import uk.gov.hmrc.apiplatform.modules.applications.domain.models.Collaborator
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.LaxEmailAddress.StringSyntax
+import uk.gov.hmrc.apiplatform.modules.common.domain.models.{ApiContext, ApiVersionNbr, ApplicationId, ClientId, Environment}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.builder.{DeveloperBuilder, DeveloperSessionBuilder, SubscriptionsBuilder}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.APISubscriptions
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.apidefinitions._
@@ -54,11 +55,11 @@ class SubscriptionsGroupSpec
   val applicationName = "Test Application"
   val apiName         = "Test API"
   val apiContext      = ApiContext("test")
-  val apiVersion      = ApiVersion("1.0")
+  val apiVersion      = ApiVersionNbr("1.0")
 
   val emptyFields = emptySubscriptionFieldsWrapper(applicationId, clientId, apiContext, apiVersion)
 
-  val subscriptionStatus = APISubscriptionStatus(apiName, apiName, apiContext, ApiVersionDefinition(apiVersion, APIStatus.STABLE, None), false, false, fields = emptyFields)
+  val subscriptionStatus = APISubscriptionStatus(apiName, apiName, apiContext, ApiVersionDefinition(apiVersion, ApiStatus.STABLE), false, false, fields = emptyFields)
 
   val apiSubscriptions = Seq(APISubscriptions(apiName, apiName, apiContext, Seq(subscriptionStatus)))
 

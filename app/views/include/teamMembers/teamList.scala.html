@@ -14,14 +14,11 @@
  * limitations under the License.
  *@
 
-@import uk.gov.hmrc.apiplatform.modules.applications.domain.models.ApplicationId
 @import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.views.{AnchorStyle, Button}
 @import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.DeveloperSession
-@import uk.gov.hmrc.apiplatform.modules.applications.domain.models.ApplicationId
 @import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.Application
 @import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.SpliceCSRFToken
 @import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.routes
-@import uk.gov.hmrc.apiplatform.modules.common.domain.models.LaxEmailAddress
 @import uk.gov.hmrc.apiplatform.modules.applications.domain.models.Collaborator
 
 @(app: Application,role: Collaborator.Role, loggedIn: DeveloperSession, addTeamMemberUrl: Call, addMemberStyle: AnchorStyle, createRemoveLink : (ApplicationId, LaxEmailAddress) => Call)(implicit request: play.api.mvc.Request[Any])

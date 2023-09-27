@@ -26,7 +26,7 @@ import uk.gov.hmrc.thirdpartydeveloperfrontend.connectors.ThirdPartyDeveloperCon
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.connectors.PasswordResetRequest
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.{Developer, Registration, UpdateProfileRequest}
 import utils.ComponentTestDeveloperBuilder
-import uk.gov.hmrc.apiplatform.modules.developers.domain.models.UserId
+import uk.gov.hmrc.apiplatform.modules.common.domain.models.UserId
 
 object DeveloperStub extends ComponentTestDeveloperBuilder {
 
@@ -39,7 +39,7 @@ object DeveloperStub extends ComponentTestDeveloperBuilder {
 
   def update(userId: UserId, profile: UpdateProfileRequest, status: Int) =
     stubFor(
-      post(urlMatching(s"/developer/${userId.value}"))
+      post(urlMatching(s"/developer/$userId"))
         .withRequestBody(equalToJson(Json.toJson(profile).toString()))
         .willReturn(aResponse().withStatus(status))
     )
@@ -60,7 +60,7 @@ object DeveloperStub extends ComponentTestDeveloperBuilder {
     )
 
     stubFor(
-      post(urlPathEqualTo(s"/${userId.value}/resend-verification"))
+      post(urlPathEqualTo(s"/$userId/resend-verification"))
         .willReturn(aResponse().withStatus(status))
     )
   }
@@ -77,7 +77,7 @@ object DeveloperStub extends ComponentTestDeveloperBuilder {
         .willReturn(
           aResponse()
             .withStatus(OK)
-            .withBody(s"""{"userId":"${staticUserId.asText}"}""")
+            .withBody(s"""{"userId":"${staticUserId.toString()}"}""")
         )
     )
   }
@@ -99,7 +99,7 @@ object DeveloperStub extends ComponentTestDeveloperBuilder {
 
   def setupGettingDeveloperByUserId(developer: Developer): Unit = {
     stubFor(get(urlPathEqualTo("/developer"))
-      .withQueryParam("developerId", equalTo(developer.userId.asText))
+      .withQueryParam("developerId", equalTo(developer.userId.toString()))
       .willReturn(aResponse()
         .withStatus(OK)
         .withBody(Json.toJson(developer).toString())))

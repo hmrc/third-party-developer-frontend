@@ -27,10 +27,8 @@ import uk.gov.hmrc.http.HttpReads.Implicits._
 import uk.gov.hmrc.http.{HttpClient, _}
 import uk.gov.hmrc.play.http.metrics.common.API
 
-import uk.gov.hmrc.apiplatform.modules.apis.domain.models.ApiIdentifier
-import uk.gov.hmrc.apiplatform.modules.applications.domain.models.ApplicationId
+import uk.gov.hmrc.apiplatform.modules.common.domain.models.{UserId, _}
 import uk.gov.hmrc.apiplatform.modules.common.services.ApplicationLogger
-import uk.gov.hmrc.apiplatform.modules.developers.domain.models.UserId
 import uk.gov.hmrc.thirdpartydeveloperfrontend.config.ApplicationConfig
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.ApplicationNameValidationJson.{ApplicationNameValidationRequest, ApplicationNameValidationResult}
@@ -63,7 +61,7 @@ abstract class ThirdPartyApplicationConnector(config: ApplicationConfig, metrics
     }
 
   def update(applicationId: ApplicationId, request: UpdateApplicationRequest)(implicit hc: HeaderCarrier): Future[ApplicationUpdateSuccessful] = metrics.record(api) {
-    http.POST[UpdateApplicationRequest, ErrorOrUnit](s"$serviceBaseUrl/application/${applicationId.text()}", request).map(throwOr(ApplicationUpdateSuccessful))
+    http.POST[UpdateApplicationRequest, ErrorOrUnit](s"$serviceBaseUrl/application/${applicationId}", request).map(throwOr(ApplicationUpdateSuccessful))
   }
 
   def fetchByTeamMember(userId: UserId)(implicit hc: HeaderCarrier): Future[Seq[ApplicationWithSubscriptionIds]] =
@@ -74,7 +72,7 @@ abstract class ThirdPartyApplicationConnector(config: ApplicationConfig, metrics
         logger.info(s"fetchByTeamMember() - About to call $url for $userId in ${environment.toString}")
 
         http
-          .GET[Seq[ApplicationWithSubscriptionIds]](url, Seq("userId" -> userId.asText, "environment" -> environment.toString))
+          .GET[Seq[ApplicationWithSubscriptionIds]](url, Seq("userId" -> userId.toString(), "environment" -> environment.toString))
           .andThen {
             case Success(_) =>
               logger.debug(s"fetchByTeamMember() - done call to $url for $userId in ${environment.toString}")
@@ -97,7 +95,7 @@ abstract class ThirdPartyApplicationConnector(config: ApplicationConfig, metrics
 
   def unsubscribeFromApi(applicationId: ApplicationId, apiIdentifier: ApiIdentifier)(implicit hc: HeaderCarrier): Future[ApplicationUpdateSuccessful] =
     metrics.record(api) {
-      http.DELETE[ErrorOrUnit](s"$serviceBaseUrl/application/${applicationId.text()}/subscription?context=${apiIdentifier.context.value}&version=${apiIdentifier.version.value}")
+      http.DELETE[ErrorOrUnit](s"$serviceBaseUrl/application/${applicationId}/subscription?context=${apiIdentifier.context.value}&version=${apiIdentifier.versionNbr.value}")
         .map(throwOrOptionOf)
         .map {
           case Some(_) => ApplicationUpdateSuccessful
@@ -114,7 +112,7 @@ abstract class ThirdPartyApplicationConnector(config: ApplicationConfig, metrics
   }
 
   def requestUplift(applicationId: ApplicationId, upliftRequest: UpliftRequest)(implicit hc: HeaderCarrier): Future[ApplicationUpliftSuccessful] = metrics.record(api) {
-    http.POST[UpliftRequest, ErrorOrUnit](s"$serviceBaseUrl/application/${applicationId.text()}/request-uplift", upliftRequest)
+    http.POST[UpliftRequest, ErrorOrUnit](s"$serviceBaseUrl/application/${applicationId}/request-uplift", upliftRequest)
       .map {
         case Right(_)                                        => ApplicationUpliftSuccessful
         case Left(UpstreamErrorResponse(_, CONFLICT, _, _))  => throw new ApplicationAlreadyExists
@@ -154,7 +152,7 @@ abstract class ThirdPartyApplicationConnector(config: ApplicationConfig, metrics
 
   def updateIpAllowlist(applicationId: ApplicationId, required: Boolean, ipAllowlist: Set[String])(implicit hc: HeaderCarrier): Future[ApplicationUpdateSuccessful] =
     metrics.record(api) {
-      http.PUT[UpdateIpAllowlistRequest, ErrorOrUnit](s"$serviceBaseUrl/application/${applicationId.text()}/ipAllowlist", UpdateIpAllowlistRequest(required, ipAllowlist))
+      http.PUT[UpdateIpAllowlistRequest, ErrorOrUnit](s"$serviceBaseUrl/application/${applicationId}/ipAllowlist", UpdateIpAllowlistRequest(required, ipAllowlist))
         .map(throwOrOptionOf)
         .map {
           case Some(_) => ApplicationUpdateSuccessful
@@ -163,7 +161,7 @@ abstract class ThirdPartyApplicationConnector(config: ApplicationConfig, metrics
     }
 
   def fetchSubscription(applicationId: ApplicationId)(implicit hc: HeaderCarrier): Future[Set[ApiIdentifier]] = {
-    http.GET[Set[ApiIdentifier]](s"$serviceBaseUrl/application/${applicationId.text()}/subscription")
+    http.GET[Set[ApiIdentifier]](s"$serviceBaseUrl/application/${applicationId}/subscription")
   }
 
   def fetchTermsOfUseInvitations()(implicit hc: HeaderCarrier): Future[List[TermsOfUseInvitation]] = {
@@ -174,7 +172,7 @@ abstract class ThirdPartyApplicationConnector(config: ApplicationConfig, metrics
 
   def fetchTermsOfUseInvitation(applicationId: ApplicationId)(implicit hc: HeaderCarrier): Future[Option[TermsOfUseInvitation]] = {
     metrics.record(api) {
-      http.GET[Option[TermsOfUseInvitation]](s"$serviceBaseUrl/terms-of-use/application/${applicationId.text()}")
+      http.GET[Option[TermsOfUseInvitation]](s"$serviceBaseUrl/terms-of-use/application/${applicationId}")
     }
   }
 }

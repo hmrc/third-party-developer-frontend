@@ -24,9 +24,7 @@ import uk.gov.hmrc.http.HttpReads.Implicits._
 import uk.gov.hmrc.http.{HeaderCarrier, HttpClient}
 import uk.gov.hmrc.play.http.metrics.common.API
 
-import uk.gov.hmrc.apiplatform.modules.apis.domain.models.{ApiContext, ApiIdentifier, ApiVersion}
-import uk.gov.hmrc.apiplatform.modules.applications.domain.models.ApplicationId
-import uk.gov.hmrc.apiplatform.modules.developers.domain.models.UserId
+import uk.gov.hmrc.apiplatform.modules.common.domain.models._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.connectors.{ApiDefinition, CombinedApi, ExtendedApiDefinition}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.emailpreferences.APICategoryDisplayDetails
@@ -56,18 +54,18 @@ class ApmConnector @Inject() (http: HttpClient, config: ApmConnector.Config, met
   val api = API("api-platform-microservice")
 
   def fetchApplicationById(applicationId: ApplicationId)(implicit hc: HeaderCarrier): Future[Option[ApplicationWithSubscriptionData]] =
-    http.GET[Option[ApplicationWithSubscriptionData]](s"${config.serviceBaseUrl}/applications/${applicationId.text()}")
+    http.GET[Option[ApplicationWithSubscriptionData]](s"${config.serviceBaseUrl}/applications/${applicationId}")
 
-  def getAllFieldDefinitions(environment: Environment)(implicit hc: HeaderCarrier): Future[Map[ApiContext, Map[ApiVersion, Map[FieldName, SubscriptionFieldDefinition]]]] = {
+  def getAllFieldDefinitions(environment: Environment)(implicit hc: HeaderCarrier): Future[Map[ApiContext, Map[ApiVersionNbr, Map[FieldName, SubscriptionFieldDefinition]]]] = {
 
-    http.GET[Map[ApiContext, Map[ApiVersion, Map[FieldName, SubscriptionFieldDefinition]]]](
+    http.GET[Map[ApiContext, Map[ApiVersionNbr, Map[FieldName, SubscriptionFieldDefinition]]]](
       s"${config.serviceBaseUrl}/subscription-fields",
       Seq("environment" -> environment.toString)
     )
   }
 
   def fetchAllPossibleSubscriptions(applicationId: ApplicationId)(implicit hc: HeaderCarrier): Future[Map[ApiContext, ApiData]] = {
-    http.GET[Map[ApiContext, ApiData]](s"${config.serviceBaseUrl}/api-definitions", Seq("applicationId" -> applicationId.text()))
+    http.GET[Map[ApiContext, ApiData]](s"${config.serviceBaseUrl}/api-definitions", Seq("applicationId" -> applicationId.toString()))
   }
 
   def fetchAllOpenAccessApis(environment: Environment)(implicit hc: HeaderCarrier): Future[Map[ApiContext, ApiData]] = {
@@ -92,10 +90,10 @@ class ApmConnector @Inject() (http: HttpClient, config: ApmConnector.Config, met
       }
 
   def fetchApiDefinitionsVisibleToUser(userId: UserId)(implicit hc: HeaderCarrier): Future[List[ApiDefinition]] =
-    http.GET[List[ApiDefinition]](s"${config.serviceBaseUrl}/combined-api-definitions", Seq("developerId" -> userId.asText))
+    http.GET[List[ApiDefinition]](s"${config.serviceBaseUrl}/combined-api-definitions", Seq("developerId" -> userId.toString()))
 
   def fetchCombinedApisVisibleToUser(userId: UserId)(implicit hc: HeaderCarrier): Future[Either[Throwable, List[CombinedApi]]] =
-    http.GET[List[CombinedApi]](s"${config.serviceBaseUrl}/combined-rest-xml-apis/developer", Seq("developerId" -> userId.asText))
+    http.GET[List[CombinedApi]](s"${config.serviceBaseUrl}/combined-rest-xml-apis/developer", Seq("developerId" -> userId.toString()))
       .map(Right(_))
       .recover {
         case NonFatal(e) => Left(e)
@@ -108,7 +106,7 @@ class ApmConnector @Inject() (http: HttpClient, config: ApmConnector.Config, met
 
   def fetchUpliftableSubscriptions(applicationId: ApplicationId)(implicit hc: HeaderCarrier): Future[Set[ApiIdentifier]] =
     metrics.record(api) {
-      http.GET[Set[ApiIdentifier]](s"${config.serviceBaseUrl}/applications/${applicationId.text()}/upliftableSubscriptions")
+      http.GET[Set[ApiIdentifier]](s"${config.serviceBaseUrl}/applications/${applicationId.toString()}/upliftableSubscriptions")
     }
 
   def fetchAllApis(environment: Environment)(implicit hc: HeaderCarrier): Future[Map[ApiContext, ApiData]] =
@@ -117,10 +115,10 @@ class ApmConnector @Inject() (http: HttpClient, config: ApmConnector.Config, met
     }
 
   def upliftApplicationV1(applicationId: ApplicationId, subs: Set[ApiIdentifier])(implicit hc: HeaderCarrier): Future[ApplicationId] = metrics.record(api) {
-    http.POST[RequestUpliftV1, ApplicationId](s"${config.serviceBaseUrl}/applications/${applicationId.text()}/uplift", RequestUpliftV1(subs))
+    http.POST[RequestUpliftV1, ApplicationId](s"${config.serviceBaseUrl}/applications/${applicationId.toString()}/uplift", RequestUpliftV1(subs))
   }
 
   def upliftApplicationV2(applicationId: ApplicationId, upliftData: UpliftData)(implicit hc: HeaderCarrier): Future[ApplicationId] = metrics.record(api) {
-    http.POST[RequestUpliftV2, ApplicationId](s"${config.serviceBaseUrl}/applications/${applicationId.text()}/uplift", RequestUpliftV2(upliftData))
+    http.POST[RequestUpliftV2, ApplicationId](s"${config.serviceBaseUrl}/applications/${applicationId.toString()}/uplift", RequestUpliftV2(upliftData))
   }
 }

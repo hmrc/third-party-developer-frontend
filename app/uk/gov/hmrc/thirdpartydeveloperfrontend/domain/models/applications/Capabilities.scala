@@ -16,6 +16,8 @@
 
 package uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications
 
+import uk.gov.hmrc.apiplatform.modules.common.domain.models.Environment
+
 sealed trait Capability {
   def hasCapability(app: BaseApplication): Boolean
 }
@@ -67,7 +69,7 @@ object Capabilities {
   }
 
   case object SupportChangingAppDetails extends Capability {
-    def hasCapability(app: BaseApplication): Boolean = app.isInTesting || app.deployedTo.isSandbox()
+    def hasCapability(app: BaseApplication): Boolean = app.isInTesting || app.deployedTo.isSandbox
   }
 
   case object SupportsIpAllowlist extends Capability {

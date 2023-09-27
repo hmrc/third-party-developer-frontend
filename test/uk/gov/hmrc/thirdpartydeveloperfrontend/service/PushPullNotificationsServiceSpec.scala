@@ -23,10 +23,9 @@ import scala.concurrent.Future.{failed, successful}
 import play.api.http.Status.INTERNAL_SERVER_ERROR
 import uk.gov.hmrc.http.{HeaderCarrier, UpstreamErrorResponse}
 
-import uk.gov.hmrc.apiplatform.modules.applications.domain.models.{ApplicationId, ClientId}
+import uk.gov.hmrc.apiplatform.modules.common.domain.models._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.connectors.ThirdPartyApplicationConnector
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.Application
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.Environment.PRODUCTION
 import uk.gov.hmrc.thirdpartydeveloperfrontend.service.PushPullNotificationsService.PushPullNotificationsConnector
 import uk.gov.hmrc.thirdpartydeveloperfrontend.service.SubscriptionFieldsService.SubscriptionFieldsConnector
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.AsyncHmrcSpec
@@ -46,7 +45,7 @@ class PushPullNotificationsServiceSpec extends AsyncHmrcSpec {
       Some(LocalDateTime.now(ZoneOffset.UTC)),
       None,
       grantLength,
-      deployedTo = PRODUCTION
+      deployedTo = Environment.PRODUCTION
     )
     val pushPullNotificationsConnector: PushPullNotificationsConnector = mock[PushPullNotificationsConnector]
     val mockConnectorsWrapper: ConnectorsWrapper                       = mock[ConnectorsWrapper]

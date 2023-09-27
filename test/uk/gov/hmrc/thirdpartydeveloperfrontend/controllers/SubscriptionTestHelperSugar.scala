@@ -17,9 +17,8 @@
 package uk.gov.hmrc.thirdpartydeveloperfrontend.controllers
 
 import uk.gov.hmrc.apiplatform.modules.apis.domain.models._
-import uk.gov.hmrc.apiplatform.modules.applications.domain.models.{ApplicationId, ClientId}
+import uk.gov.hmrc.apiplatform.modules.common.domain.models._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.builder._
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.apidefinitions.APIStatus._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.apidefinitions._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.Application
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.subscriptions.ApiSubscriptionFields.{SubscriptionFieldDefinition, SubscriptionFieldValue, SubscriptionFieldsWrapper}
@@ -31,19 +30,19 @@ trait SubscriptionTestHelperSugar extends SubscriptionsBuilder {
 
   val employmentContext = ApiContext("individual-employment-context")
   val taxContext        = ApiContext("individual-tax-context")
-  val versionOne        = ApiVersion("1.0")
-  val versionTwo        = ApiVersion("2.0")
-  val versionThree      = ApiVersion("3.0")
+  val versionOne        = ApiVersionNbr("1.0")
+  val versionTwo        = ApiVersionNbr("2.0")
+  val versionThree      = ApiVersionNbr("3.0")
 
   def subscriptionStatus(
       apiName: String,
       serviceName: String,
       context: ApiContext,
-      version: ApiVersion,
-      status: APIStatus = STABLE,
+      version: ApiVersionNbr,
+      status: ApiStatus = ApiStatus.STABLE,
       subscribed: Boolean = false,
       requiresTrust: Boolean = false,
-      access: Option[APIAccess] = None,
+      access: ApiAccess = ApiAccess.PUBLIC,
       isTestSupport: Boolean = false,
       fields: Option[SubscriptionFieldsWrapper] = None
     ) = {
@@ -64,10 +63,10 @@ trait SubscriptionTestHelperSugar extends SubscriptionsBuilder {
 
   val sampleSubscriptions: List[APISubscriptionStatus] = {
     List(
-      subscriptionStatus("Individual Employment", "individual-employment", employmentContext, versionOne, STABLE, subscribed = true),
-      subscriptionStatus("Individual Employment", "individual-employment", employmentContext, versionTwo, BETA),
-      subscriptionStatus("Individual Tax", "individual-tax", taxContext, versionOne, STABLE),
-      subscriptionStatus("Individual Tax", "individual-tax", taxContext, versionTwo, BETA)
+      subscriptionStatus("Individual Employment", "individual-employment", employmentContext, versionOne, ApiStatus.STABLE, subscribed = true),
+      subscriptionStatus("Individual Employment", "individual-employment", employmentContext, versionTwo, ApiStatus.BETA),
+      subscriptionStatus("Individual Tax", "individual-tax", taxContext, versionOne, ApiStatus.STABLE),
+      subscriptionStatus("Individual Tax", "individual-tax", taxContext, versionTwo, ApiStatus.BETA)
     )
   }
 
@@ -77,7 +76,15 @@ trait SubscriptionTestHelperSugar extends SubscriptionsBuilder {
     val subscriptionFieldsWrapper = SubscriptionFieldsWrapper(application.id, application.clientId, employmentContext, versionOne, List(sfv))
 
     List(
-      subscriptionStatus("Individual Employment 2", "individual-employment-2", employmentContext, versionOne, STABLE, subscribed = true, fields = Some(subscriptionFieldsWrapper))
+      subscriptionStatus(
+        "Individual Employment 2",
+        "individual-employment-2",
+        employmentContext,
+        versionOne,
+        ApiStatus.STABLE,
+        subscribed = true,
+        fields = Some(subscriptionFieldsWrapper)
+      )
     )
   }
 
@@ -116,14 +123,14 @@ trait SubscriptionTestHelperSugar extends SubscriptionsBuilder {
       applicationId = ApplicationId.random,
       clientId = ClientId(WHO_CARES),
       apiContext = ApiContext(WHO_CARES),
-      apiVersion = ApiVersion(WHO_CARES),
+      apiVersion = ApiVersionNbr(WHO_CARES),
       fields = fields
     )
   }
 
   val onlyApiExampleMicroserviceSubscribedTo: APISubscriptionStatus = {
     val context     = ApiContext("example-api")
-    val version     = ApiVersionDefinition(versionOne, APIStatus.STABLE)
+    val version     = ApiVersionDefinition(versionOne, ApiStatus.STABLE)
     val emptyFields = emptySubscriptionFieldsWrapper(appId, clientId, context, version.version)
 
     APISubscriptionStatus(
@@ -140,7 +147,7 @@ trait SubscriptionTestHelperSugar extends SubscriptionsBuilder {
 
   def exampleSubscriptionWithoutFields(prefix: String): APISubscriptionStatus = {
     val context     = ApiContext(s"/$prefix-api")
-    val version     = ApiVersionDefinition(versionOne, APIStatus.STABLE)
+    val version     = ApiVersionDefinition(versionOne, ApiStatus.STABLE)
     val emptyFields = emptySubscriptionFieldsWrapper(appId, clientId, context, version.version)
 
     val subscriptinFieldInxed = 1
@@ -170,10 +177,10 @@ trait SubscriptionTestHelperSugar extends SubscriptionsBuilder {
     in.fields.map(sfv => sfv.definition.name -> sfv.value).toMap
   }
 
-  def asFields(subscriptions: Seq[APISubscriptionStatus]): Map[ApiContext, Map[ApiVersion, Map[FieldName, FieldValue]]] = {
+  def asFields(subscriptions: Seq[APISubscriptionStatus]): Map[ApiContext, Map[ApiVersionNbr, Map[FieldName, FieldValue]]] = {
     import cats._
     import cats.implicits._
-    type MapType = Map[ApiVersion, Map[FieldName, FieldValue]]
+    type MapType = Map[ApiVersionNbr, Map[FieldName, FieldValue]]
 
     // Shortcut combining as we know there will never be records for the same version for the same context
     implicit def monoidVersions: Monoid[MapType] =

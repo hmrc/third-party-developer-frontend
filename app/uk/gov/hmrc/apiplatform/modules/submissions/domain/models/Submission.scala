@@ -21,7 +21,7 @@ import java.util.UUID
 
 import cats.data.NonEmptyList
 
-import uk.gov.hmrc.apiplatform.modules.applications.domain.models.ApplicationId
+import uk.gov.hmrc.apiplatform.modules.common.domain.models.ApplicationId
 
 sealed trait QuestionnaireState
 
@@ -63,7 +63,9 @@ case class QuestionIdsOfInterest(
 object Submission {
   type AnswersToQuestions = Map[Question.Id, ActualAnswer]
 
-  case class Id(value: String) extends AnyVal
+  case class Id(value: String) extends AnyVal {
+    override def toString(): String = value
+  }
 
   object Id {
     implicit val format = play.api.libs.json.Json.valueFormat[Id]
@@ -119,7 +121,8 @@ object Submission {
     addDeclinedStatus andThen addNewlyAnsweringInstance
   }
 
-  val grant: (LocalDateTime, String, Option[String], Option[String]) => Submission => Submission = (timestamp, name, comments, escalatedTo) => addStatusHistory(Status.Granted(timestamp, name, comments, escalatedTo))
+  val grant: (LocalDateTime, String, Option[String], Option[String]) => Submission => Submission =
+    (timestamp, name, comments, escalatedTo) => addStatusHistory(Status.Granted(timestamp, name, comments, escalatedTo))
 
   val grantWithWarnings: (LocalDateTime, String, String, Option[String]) => Submission => Submission = (timestamp, name, warnings, escalatedTo) => {
     addStatusHistory(Status.GrantedWithWarnings(timestamp, name, warnings, escalatedTo))

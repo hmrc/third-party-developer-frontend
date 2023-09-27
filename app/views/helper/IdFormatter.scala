@@ -16,14 +16,14 @@
 
 package views.helper
 
-import uk.gov.hmrc.apiplatform.modules.apis.domain.models.{ApiContext, ApiIdentifier, ApiVersion}
+import uk.gov.hmrc.apiplatform.modules.common.domain.models.{ApiContext, ApiIdentifier, ApiVersionNbr}
 
 object IdFormatter {
   def replaceNonAlphaNumeric(str: String, replacement: String = "_") = { str.replaceAll("\\W", replacement) }
 
-  def identifier(apiIdentifier: ApiIdentifier): String = identifier(apiIdentifier.context, apiIdentifier.version)
+  def identifier(apiIdentifier: ApiIdentifier): String = identifier(apiIdentifier.context, apiIdentifier.versionNbr)
 
-  def identifier(context: ApiContext, apiVersion: ApiVersion): String = contextSuffix(context, apiVersion.value)
+  def identifier(context: ApiContext, apiVersion: ApiVersionNbr): String = contextSuffix(context, apiVersion.value)
 
   def context(context: ApiContext) = { s"${replaceNonAlphaNumeric(context.value)}" }
 

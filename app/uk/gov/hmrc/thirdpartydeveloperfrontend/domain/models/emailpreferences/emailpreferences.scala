@@ -20,7 +20,7 @@ import enumeratum.values.{StringEnum, StringEnumEntry, StringPlayJsonValueEnum}
 
 import play.api.libs.json.Json
 
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.subscriptions.ApiCategory
+import uk.gov.hmrc.apiplatform.modules.apis.domain.models.ApiCategory
 
 case class TaxRegimeInterests(regime: String, services: Set[String]) {
   def addService(serviceName: String): TaxRegimeInterests = copy(services = services ++ Set(serviceName))
@@ -67,10 +67,12 @@ object EmailTopic extends StringEnum[EmailTopic] with StringPlayJsonValueEnum[Em
 case class APICategoryDisplayDetails(category: String, name: String) {
 
   def toAPICategory(): ApiCategory = {
-    ApiCategory(category)
+    ApiCategory.unsafeApply(category)
   }
 }
 
 object APICategoryDisplayDetails {
   implicit val formatApiCategory = Json.format[APICategoryDisplayDetails]
+
+  def from(category: ApiCategory) = APICategoryDisplayDetails(category.toString, category.displayText)
 }

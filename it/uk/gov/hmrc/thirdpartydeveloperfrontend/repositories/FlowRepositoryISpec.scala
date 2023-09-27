@@ -23,12 +23,12 @@ import org.mongodb.scala.model.Projections.fields
 import org.scalatest.{BeforeAndAfterEach, OptionValues}
 import org.scalatest.matchers.should.Matchers
 import org.scalatest.wordspec.AnyWordSpec
-import uk.gov.hmrc.apiplatform.modules.apis.domain.models.{ApiContext, ApiIdentifier, ApiVersion}
+import uk.gov.hmrc.apiplatform.modules.common.domain.models.{ApiContext, ApiIdentifier, ApiVersionNbr}
 import uk.gov.hmrc.apiplatform.modules.uplift.domain.models.ApiSubscriptions
 import uk.gov.hmrc.apiplatform.modules.uplift.domain.models.GetProductionCredentialsFlow
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.SellResellOrDistribute
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.connectors.ApiType.REST_API
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.connectors.{CombinedApi, CombinedApiCategory}
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.connectors.CombinedApi
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.emailpreferences.EmailTopic
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.flows.FlowType._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.flows.{EmailPreferencesFlowV2, Flow, FlowType, IpAllowlistFlow}
@@ -40,6 +40,7 @@ import uk.gov.hmrc.mongo.play.json.Codecs
 import java.time.LocalDateTime
 import scala.concurrent.ExecutionContext.Implicits.global
 import uk.gov.hmrc.mongo.play.json.formats.MongoJavatimeFormats
+import uk.gov.hmrc.apiplatform.modules.apis.domain.models.ApiCategory
 
 class FlowRepositoryISpec extends AnyWordSpec
     with GuiceOneAppPerSuite
@@ -65,10 +66,10 @@ class FlowRepositoryISpec extends AnyWordSpec
 
     val flowOfDifferentType: EmailPreferencesFlowV2 = EmailPreferencesFlowV2(
       currentSession,
-      selectedCategories = Set("category1", "category2"),
-      selectedAPIs = Map("category1" -> Set("qwqw", "asass")),
+      selectedCategories = Set(ApiCategory.VAT.toString(), ApiCategory.AGENTS.toString()),
+      selectedAPIs = Map(ApiCategory.VAT.toString() -> Set("qwqw", "asass")),
       selectedTopics = Set("BUSINESS_AND_POLICY"),
-      visibleApis = List(CombinedApi("api1ServiceName", "api1Name", List(CombinedApiCategory("VAT"), CombinedApiCategory("AGENT")), REST_API))
+      visibleApis = List(CombinedApi("api1ServiceName", "api1Name", List(ApiCategory.VAT, ApiCategory.AGENTS), REST_API))
     )
 
     await(flowRepository.saveFlow(currentFlow))
@@ -112,10 +113,10 @@ class FlowRepositoryISpec extends AnyWordSpec
       "save email preferences" in {
         val flow = EmailPreferencesFlowV2(
           currentSession,
-          selectedCategories = Set("category1", "category2"),
-          selectedAPIs = Map("category1" -> Set("qwqw", "asass")),
+          selectedCategories = Set(ApiCategory.VAT.toString(), ApiCategory.AGENTS.toString()),
+          selectedAPIs = Map(ApiCategory.VAT.toString() -> Set("qwqw", "asass")),
           selectedTopics = Set("BUSINESS_AND_POLICY", "EVENT_INVITES"),
-          visibleApis = List(CombinedApi("api1ServiceName", "api1DisplayName", List(CombinedApiCategory("VAT"), CombinedApiCategory("AGENT")), REST_API))
+          visibleApis = List(CombinedApi("api1ServiceName", "api1DisplayName", List(ApiCategory.VAT, ApiCategory.AGENTS), REST_API))
         )
 
         await(flowRepository.saveFlow(flow))
@@ -125,7 +126,7 @@ class FlowRepositoryISpec extends AnyWordSpec
         castResult.sessionId shouldBe currentSession
         castResult.flowType shouldBe EMAIL_PREFERENCES_V2
         castResult.selectedTopics shouldBe Set(EmailTopic.BUSINESS_AND_POLICY.toString, EmailTopic.EVENT_INVITES.toString)
-        castResult.visibleApis should contain only (CombinedApi("api1ServiceName", "api1DisplayName", List(CombinedApiCategory("VAT"), CombinedApiCategory("AGENT")), REST_API))
+        castResult.visibleApis should contain only (CombinedApi("api1ServiceName", "api1DisplayName", List(ApiCategory.VAT, ApiCategory.AGENTS), REST_API))
       }
 
       "save prod creds preferences" in {
@@ -133,8 +134,8 @@ class FlowRepositoryISpec extends AnyWordSpec
           currentSession,
           Some(SellResellOrDistribute("Yes")),
           Some(ApiSubscriptions(Map(
-            ApiIdentifier(ApiContext("individual-benefits"), ApiVersion("1.1")) -> true,
-            ApiIdentifier(ApiContext("marriage-allowance"), ApiVersion("1.0"))  -> true
+            ApiIdentifier(ApiContext("individual-benefits"), ApiVersionNbr("1.1")) -> true,
+            ApiIdentifier(ApiContext("marriage-allowance"), ApiVersionNbr("1.0"))  -> true
           )))
         )
 
@@ -146,8 +147,8 @@ class FlowRepositoryISpec extends AnyWordSpec
         castResult.flowType shouldBe GET_PRODUCTION_CREDENTIALS
         castResult.sellResellOrDistribute shouldBe Some(SellResellOrDistribute("Yes"))
         castResult.apiSubscriptions shouldBe Some(ApiSubscriptions(Map(
-          ApiIdentifier(ApiContext("individual-benefits"), ApiVersion("1.1")) -> true,
-          ApiIdentifier(ApiContext("marriage-allowance"), ApiVersion("1.0"))  -> true
+          ApiIdentifier(ApiContext("individual-benefits"), ApiVersionNbr("1.1")) -> true,
+          ApiIdentifier(ApiContext("marriage-allowance"), ApiVersionNbr("1.0"))  -> true
         )))
       }
 

@@ -18,13 +18,14 @@ package uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.connectors
 
 import play.api.libs.json.Json
 
-import uk.gov.hmrc.apiplatform.modules.apis.domain.models.ApiContext
+import uk.gov.hmrc.apiplatform.modules.apis.domain.models.ApiCategory
+import uk.gov.hmrc.apiplatform.modules.common.domain.models.ApiContext
 
 /*
  * requiresTrust, isTestSupport and versions fields have been deliberately left out as they are not currently required. Adding them back in here should mean
  * they are automatically deserialised as part of the call to api-platform-microservice.
  */
-case class ExtendedApiDefinition(serviceName: String, name: String, description: String, context: ApiContext, categories: List[String])
+case class ExtendedApiDefinition(serviceName: String, name: String, description: String, context: ApiContext, categories: List[ApiCategory])
 
 object ExtendedApiDefinition {
   implicit val formatExtendedApiDefinition = Json.format[ExtendedApiDefinition]
@@ -33,7 +34,7 @@ object ExtendedApiDefinition {
     ApiDefinition(apiDefinition.serviceName, apiDefinition.name, apiDefinition.description, apiDefinition.context, apiDefinition.categories)
   }
 }
-case class ApiDefinition(serviceName: String, name: String, description: String, context: ApiContext, categories: List[String])
+case class ApiDefinition(serviceName: String, name: String, description: String, context: ApiContext, categories: List[ApiCategory])
 
 object ApiDefinition {
   implicit val formatApiDefinition = Json.format[ApiDefinition]

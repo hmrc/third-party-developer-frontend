@@ -26,21 +26,16 @@ import play.api.libs.crypto.CookieSigner
 import play.api.mvc.Cookie
 import play.api.test.FakeRequest
 
-import uk.gov.hmrc.apiplatform.modules.apis.domain.models.{ApiContext, ApiIdentifier, ApiVersion}
+import uk.gov.hmrc.apiplatform.modules.apis.domain.models.{ApiAccess, ApiCategory, ApiStatus}
 import uk.gov.hmrc.apiplatform.modules.applications.domain.models._
-import uk.gov.hmrc.apiplatform.modules.common.domain.models.LaxEmailAddress
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.LaxEmailAddress.StringSyntax
-import uk.gov.hmrc.apiplatform.modules.developers.domain.models.UserId
+import uk.gov.hmrc.apiplatform.modules.common.domain.models.{LaxEmailAddress, UserId, _}
 import uk.gov.hmrc.apiplatform.modules.mfa.connectors.ThirdPartyDeveloperMfaConnector.{RegisterAuthAppResponse, RegisterSmsSuccessResponse}
 import uk.gov.hmrc.apiplatform.modules.submissions.domain.models.ResponsibleIndividualVerificationState.INITIAL
 import uk.gov.hmrc.apiplatform.modules.submissions.domain.models.Submission.Status.Granted
 import uk.gov.hmrc.apiplatform.modules.submissions.domain.models._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.builder.MfaDetailBuilder
 import uk.gov.hmrc.thirdpartydeveloperfrontend.connectors.ThirdPartyDeveloperConnector.CoreUserDetails
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.apidefinitions.APIAccess
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.apidefinitions.APIAccessType.PUBLIC
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.apidefinitions.APIStatus.STABLE
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.Environment.{PRODUCTION, SANDBOX}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.emailpreferences.EmailPreferences
@@ -78,7 +73,7 @@ trait HasApplication extends HasAppDeploymentEnvironment with HasUserWithRole wi
   )
   lazy val redirectUrl        = "https://example.com/redirect-here"
   lazy val apiContext         = ApiContext("ctx")
-  lazy val apiVersion         = ApiVersion("1.0")
+  lazy val apiVersion         = ApiVersionNbr("1.0")
   lazy val apiIdentifier      = ApiIdentifier(apiContext, apiVersion)
   lazy val apiFieldName       = FieldName("my_field")
   lazy val apiFieldValue      = FieldValue("my value")
@@ -93,7 +88,7 @@ trait HasApplication extends HasAppDeploymentEnvironment with HasUserWithRole wi
     application,
     Set(apiIdentifier),
     Map(
-      apiContext -> Map(ApiVersion("1.0") -> Map(apiFieldName -> apiFieldValue, apiPpnsFieldName -> apiPpnsFieldValue))
+      apiContext -> Map(ApiVersionNbr("1.0") -> Map(apiFieldName -> apiFieldValue, apiPpnsFieldName -> apiPpnsFieldValue))
     )
   )
   lazy val questionnaireId = Questionnaire.Id.random
@@ -142,7 +137,7 @@ trait HasApplication extends HasAppDeploymentEnvironment with HasUserWithRole wi
   )
 
   lazy val allPossibleSubscriptions            = Map(
-    apiContext -> ApiData("service name", "api name", false, Map(apiVersion -> VersionData(STABLE, APIAccess(PUBLIC))), List(ApiCategory("category")))
+    apiContext -> ApiData("service name", "api name", false, Map(apiVersion -> VersionData(ApiStatus.STABLE, ApiAccess.PUBLIC)), List(ApiCategory.OTHER))
   )
   lazy val responsibleIndividualVerificationId = ResponsibleIndividualVerificationId(UUID.randomUUID().toString)
   lazy val submissionId                        = Submission.Id.random
@@ -307,11 +302,11 @@ trait HasAppDeploymentEnvironment {
 }
 
 trait AppDeployedToProductionEnvironment extends HasAppDeploymentEnvironment {
-  def environment = PRODUCTION
+  def environment = Environment.PRODUCTION
 }
 
 trait AppDeployedToSandboxEnvironment extends HasAppDeploymentEnvironment {
-  def environment = SANDBOX
+  def environment = Environment.SANDBOX
 }
 
 trait HasAppState {

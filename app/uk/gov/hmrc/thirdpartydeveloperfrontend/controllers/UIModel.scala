@@ -20,7 +20,7 @@ import scala.collection.SortedMap
 
 import play.api.libs.json.Json
 
-import uk.gov.hmrc.apiplatform.modules.apis.domain.models._
+import uk.gov.hmrc.apiplatform.modules.common.domain.models._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.APISubscriptions.subscriptionNumberLabel
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.apidefinitions.APIGroup._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.apidefinitions._
@@ -73,7 +73,7 @@ case class AjaxSubscriptionResponse(apiName: ApiContext, group: String, numberOf
 object AjaxSubscriptionResponse {
   implicit val format = Json.format[AjaxSubscriptionResponse]
 
-  def from(context: ApiContext, version: ApiVersion, subscriptions: Seq[APISubscriptionStatus]): AjaxSubscriptionResponse = {
+  def from(context: ApiContext, version: ApiVersionNbr, subscriptions: Seq[APISubscriptionStatus]): AjaxSubscriptionResponse = {
     val versionAccessType = subscriptions
       .find(s => s.context == context && s.apiVersion.version == version)
       .map(_.apiVersion.accessType)

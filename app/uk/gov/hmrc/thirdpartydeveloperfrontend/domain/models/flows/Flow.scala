@@ -23,9 +23,9 @@ import cats.Semigroup
 import cats.implicits._
 import enumeratum.{Enum, EnumEntry, PlayJsonEnum}
 
-import uk.gov.hmrc.apiplatform.modules.applications.domain.models.ApplicationId
+import uk.gov.hmrc.apiplatform.modules.common.domain.models.ApplicationId
 import uk.gov.hmrc.apiplatform.modules.uplift.domain.models.GetProductionCredentialsFlow
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.connectors.{CombinedApi, CombinedApiCategory}
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.connectors.CombinedApi
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.DeveloperSession
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.emailpreferences.{EmailPreferences, EmailTopic, TaxRegimeInterests}
 
@@ -72,8 +72,8 @@ case class EmailPreferencesFlowV2(
   override val flowType: FlowType = FlowType.EMAIL_PREFERENCES_V2
 
   def categoriesInOrder: List[String] = selectedCategories.toList.sorted
-
-  def visibleApisByCategory(category: String): List[CombinedApi] = visibleApis.filter(_.categories.contains(CombinedApiCategory(category))).sortBy(_.displayName)
+// testng for a string against list of apicatrgories/// amazed it doesn't complain about type - how String <: ApiCategory is beyond me...
+  def visibleApisByCategory(category: String): List[CombinedApi] = visibleApis.filter(_.categories.map(_.toString()).contains(category)).sortBy(_.displayName)
 
   def selectedApisByCategory(category: String): Set[String] = selectedAPIs.getOrElse(category, Set.empty)
 
@@ -139,7 +139,7 @@ case class NewApplicationEmailPreferencesFlowV2(
         .foldLeft(Map.empty[String, Set[String]])(_ ++ _)
 
     // Map[ServiceName -> Set[Category]]
-    val selectedApisCategories: Map[String, Set[String]] = selectedApis.map(api => (api.serviceName -> api.categories.map(_.value).toSet)).toMap
+    val selectedApisCategories: Map[String, Set[String]] = selectedApis.map(api => (api.serviceName -> api.categories.map(_.toString()).toSet)).toMap
 
     // Map[Category -> Set.empty[ServiceName]]
     val invertedSelectedApisCategories: Map[String, Set[String]] = selectedApisCategories.values.flatten.map(c => c -> Set.empty[String]).toMap
