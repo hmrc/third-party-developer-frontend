@@ -73,4 +73,6 @@ case class APICategoryDisplayDetails(category: String, name: String) {
 
 object APICategoryDisplayDetails {
   implicit val formatApiCategory = Json.format[APICategoryDisplayDetails]
+
+  def from(category: ApiCategory) = APICategoryDisplayDetails(category.toString, category.displayText)
 }
