@@ -45,7 +45,7 @@ class EmailPreferencesService @Inject() (
   def fetchCategoriesVisibleToUser(developerSession: DeveloperSession, existingFlow: EmailPreferencesFlowV2)(implicit hc: HeaderCarrier): Future[List[APICategoryDisplayDetails]] =
     for {
       apis                <- getOrUpdateFlowWithVisibleApis(existingFlow, developerSession)
-      visibleCategoryNames = apis.map(_.categories).reduce(_ ++ _).distinct
+      visibleCategoryNames = apis.map(_.categories).reduce(_ ++ _).distinct.map(_.toString())
       categories          <- fetchAllAPICategoryDetails().map(_.filter(x => visibleCategoryNames.contains(x.category)))
     } yield categories.distinct.sortBy(_.category)
 
