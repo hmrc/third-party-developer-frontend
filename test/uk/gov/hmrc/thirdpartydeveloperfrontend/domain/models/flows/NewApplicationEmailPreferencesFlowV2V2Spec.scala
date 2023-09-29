@@ -35,7 +35,7 @@ class NewApplicationEmailPreferencesFlowV2V2Spec extends AnyWordSpec with Matche
   val category3 = ApiCategory.CHARITIES
   val category1Apis    = Set("api1", "api2")
   val category2Apis    = Set("api3", "api2", "api4")
-  val emailPreferences = EmailPreferences(List(TaxRegimeInterests(category1.toString, category1Apis), TaxRegimeInterests(category2.toString, category2Apis)), Set(EmailTopic.TECHNICAL))
+  val emailPreferences = EmailPreferences(List(TaxRegimeInterests(category1, category1Apis), TaxRegimeInterests(category2, category2Apis)), Set(EmailTopic.TECHNICAL))
 
   val applicationId = ApplicationId.random
   val sessionId     = "sessionId"
@@ -62,9 +62,9 @@ class NewApplicationEmailPreferencesFlowV2V2Spec extends AnyWordSpec with Matche
         val mappedPreferences: EmailPreferences = flow.toEmailPreferences
 
         mappedPreferences.interests.length shouldBe 3
-        mappedPreferences.interests.find(category1.toString == _.regime).get.services should contain theSameElementsAs List("api1", "api2", "new-api")
-        mappedPreferences.interests.find(category2.toString == _.regime).get.services should contain theSameElementsAs List("api2", "api3", "api4")
-        mappedPreferences.interests.find(category3.toString == _.regime).get.services should contain only ("new-api-2")
+        mappedPreferences.interests.find(category1 == _.regime).get.services should contain theSameElementsAs List("api1", "api2", "new-api")
+        mappedPreferences.interests.find(category2 == _.regime).get.services should contain theSameElementsAs List("api2", "api3", "api4")
+        mappedPreferences.interests.find(category3 == _.regime).get.services should contain only ("new-api-2")
         mappedPreferences.topics shouldBe selectedTopics
       }
     }

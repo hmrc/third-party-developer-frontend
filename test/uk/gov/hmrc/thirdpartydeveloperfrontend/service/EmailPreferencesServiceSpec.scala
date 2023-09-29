@@ -28,16 +28,18 @@ import uk.gov.hmrc.thirdpartydeveloperfrontend.connectors.{ApmConnector, ThirdPa
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.apidefinitions.CombinedApiTestDataHelper
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.connectors.CombinedApi
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers._
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.emailpreferences.{APICategoryDisplayDetails, EmailPreferences, EmailTopic, TaxRegimeInterests}
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.emailpreferences.{EmailPreferences, EmailTopic, TaxRegimeInterests}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.flows.{EmailPreferencesFlowV2, FlowType, NewApplicationEmailPreferencesFlowV2}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.{AsyncHmrcSpec, LocalUserIdTracker}
+import uk.gov.hmrc.apiplatform.modules.apis.domain.models.ApiCategory
 
 class EmailPreferencesServiceSpec extends AsyncHmrcSpec {
 
   trait SetUp extends CombinedApiTestDataHelper with FlowRepositoryMockModule with DeveloperBuilder with LocalUserIdTracker {
     implicit val hc: HeaderCarrier = HeaderCarrier()
-
-    val emailPreferences                       = EmailPreferences(List(TaxRegimeInterests("CATEGORY_1", Set("api1", "api2"))), Set(EmailTopic.TECHNICAL))
+    val category1 = ApiCategory.AGENTS
+    
+    val emailPreferences                       = EmailPreferences(List(TaxRegimeInterests(category1, Set("api1", "api2"))), Set(EmailTopic.TECHNICAL))
     val developer: Developer                   = buildDeveloper()
     val developerWithEmailPrefences: Developer = developer.copy(emailPreferences = emailPreferences)
     val sessionId                              = "sessionId"
@@ -67,7 +69,7 @@ class EmailPreferencesServiceSpec extends AsyncHmrcSpec {
       "return true when connector is called correctly and true" in new SetUp {
         when(mockThirdPartyDeveloperConnector.updateEmailPreferences(*[UserId], *)(*)).thenReturn(Future.successful(true))
         val userId             = UserId.random
-        val expectedFlowObject = EmailPreferencesFlowV2(sessionId, Set("CATEGORY_1"), Map("CATEGORY_1" -> Set("api1", "api2")), Set("TECHNICAL"), List.empty)
+        val expectedFlowObject = EmailPreferencesFlowV2(sessionId, Set(category1), Map(category1 -> Set("api1", "api2")), Set("TECHNICAL"), List.empty)
 
         val result = await(underTest.updateEmailPreferences(userId, expectedFlowObject))
 
@@ -78,7 +80,7 @@ class EmailPreferencesServiceSpec extends AsyncHmrcSpec {
 
     "fetchEmailPreferencesFlow" should {
       "call the flow repository correctly and return flow when repository returns data" in new SetUp {
-        val flowObject = EmailPreferencesFlowV2(sessionId, Set("category1", "category1"), Map("category1" -> Set("api1", "api2")), Set("TECHNICAL"), List.empty)
+        val flowObject = EmailPreferencesFlowV2(sessionId, Set(category1, category1), Map(category1 -> Set("api1", "api2")), Set("TECHNICAL"), List.empty)
         FlowRepositoryMock.FetchBySessionIdAndFlowType.thenReturn[EmailPreferencesFlowV2](sessionId)(flowObject)
         val result     = await(underTest.fetchEmailPreferencesFlow(loggedInDeveloper))
         result shouldBe flowObject
@@ -95,7 +97,7 @@ class EmailPreferencesServiceSpec extends AsyncHmrcSpec {
       }
 
       "call the flow repository correctly and copy existing email preferences to flow object when nothing in cache" in new SetUp {
-        val expectedFlowObject = EmailPreferencesFlowV2(sessionId, Set("CATEGORY_1"), Map("CATEGORY_1" -> Set("api1", "api2")), Set("TECHNICAL"), List.empty)
+        val expectedFlowObject = EmailPreferencesFlowV2(sessionId, Set(category1), Map(category1 -> Set("api1", "api2")), Set("TECHNICAL"), List.empty)
         FlowRepositoryMock.FetchBySessionIdAndFlowType.thenReturnNothing[EmailPreferencesFlowV2](sessionId)
         val result             = await(underTest.fetchEmailPreferencesFlow(loggedInDeveloper))
 
@@ -132,22 +134,6 @@ class EmailPreferencesServiceSpec extends AsyncHmrcSpec {
 
         result shouldBe true
         FlowRepositoryMock.DeleteBySessionIdAndFlowType.verifyCalledWith(sessionId, FlowType.EMAIL_PREFERENCES_V2)
-      }
-    }
-
-    "fetchAllAPICategoryDetails" should {
-      val category1 = mock[APICategoryDisplayDetails]
-      val category2 = mock[APICategoryDisplayDetails]
-
-      "return all APICategoryDetails objects from connector" in new SetUp {
-        when(mockApmConnector.fetchAllCombinedAPICategories()(*)).thenReturn(Future.successful(Right(List(category1, category2))))
-
-        val result = await(underTest.fetchAllAPICategoryDetails())
-
-        result.size should be(2)
-        result should contain theSameElementsAs List(category1, category2)
-
-        verify(mockApmConnector).fetchAllCombinedAPICategories()(*)
       }
     }
 

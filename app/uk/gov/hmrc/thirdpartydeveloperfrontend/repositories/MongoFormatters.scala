@@ -18,19 +18,23 @@ package uk.gov.hmrc.thirdpartydeveloperfrontend.repositories
 
 import java.time.LocalDateTime
 
-import play.api.libs.json.{Format, Json, OFormat}
+import play.api.libs.json._
 import uk.gov.hmrc.mongo.play.json.formats.MongoJavatimeFormats
 import uk.gov.hmrc.play.json.Union
 
 import uk.gov.hmrc.apiplatform.modules.uplift.domain.models.GetProductionCredentialsFlow
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.flows._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.services.CombinedApiJsonFormatters
+import uk.gov.hmrc.apiplatform.modules.apis.domain.models.ApiCategory
+import play.api.libs.json.JsSuccess
 
 object MongoFormatters extends CombinedApiJsonFormatters {
 
   implicit val dateFormat: Format[LocalDateTime]               = MongoJavatimeFormats.localDateTimeFormat
   implicit val formatIpAllowlistFlow: OFormat[IpAllowlistFlow] = Json.format[IpAllowlistFlow]
-
+  implicit val apicategoryFormat: Format[ApiCategory] = ApiCategory.formatApiCategory
+  implicit val keyReadsApiCategory: KeyReads[ApiCategory] = key => JsSuccess(ApiCategory.unsafeApply(key))
+  implicit val keyWritesApiCategory: KeyWrites[ApiCategory] = _.toString
   implicit val formatEmailPreferencesFlow: OFormat[EmailPreferencesFlowV2]                             = Json.format[EmailPreferencesFlowV2]
   implicit val formatNewApplicationEmailPreferencesFlow: OFormat[NewApplicationEmailPreferencesFlowV2] = Json.format[NewApplicationEmailPreferencesFlowV2]
   implicit val formatGetProdCredsFlow: OFormat[GetProductionCredentialsFlow]                           = Json.format[GetProductionCredentialsFlow]

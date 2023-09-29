@@ -66,8 +66,8 @@ class FlowRepositoryISpec extends AnyWordSpec
 
     val flowOfDifferentType: EmailPreferencesFlowV2 = EmailPreferencesFlowV2(
       currentSession,
-      selectedCategories = Set(ApiCategory.VAT.toString(), ApiCategory.AGENTS.toString()),
-      selectedAPIs = Map(ApiCategory.VAT.toString() -> Set("qwqw", "asass")),
+      selectedCategories = Set(ApiCategory.VAT, ApiCategory.AGENTS),
+      selectedAPIs = Map(ApiCategory.VAT -> Set("qwqw", "asass")),
       selectedTopics = Set("BUSINESS_AND_POLICY"),
       visibleApis = List(CombinedApi("api1ServiceName", "api1Name", List(ApiCategory.VAT, ApiCategory.AGENTS), REST_API))
     )
@@ -113,8 +113,8 @@ class FlowRepositoryISpec extends AnyWordSpec
       "save email preferences" in {
         val flow = EmailPreferencesFlowV2(
           currentSession,
-          selectedCategories = Set(ApiCategory.VAT.toString(), ApiCategory.AGENTS.toString()),
-          selectedAPIs = Map(ApiCategory.VAT.toString() -> Set("qwqw", "asass")),
+          selectedCategories = Set(ApiCategory.VAT, ApiCategory.AGENTS),
+          selectedAPIs = Map(ApiCategory.VAT -> Set("qwqw", "asass")),
           selectedTopics = Set("BUSINESS_AND_POLICY", "EVENT_INVITES"),
           visibleApis = List(CombinedApi("api1ServiceName", "api1DisplayName", List(ApiCategory.VAT, ApiCategory.AGENTS), REST_API))
         )

@@ -28,6 +28,7 @@ import uk.gov.hmrc.apiplatform.modules.uplift.domain.models.GetProductionCredent
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.connectors.CombinedApi
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.DeveloperSession
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.emailpreferences.{EmailPreferences, EmailTopic, TaxRegimeInterests}
+import uk.gov.hmrc.apiplatform.modules.apis.domain.models.ApiCategory
 
 sealed trait FlowType extends EnumEntry
 
@@ -64,18 +65,18 @@ case class IpAllowlistFlow(override val sessionId: String, allowlist: Set[String
 
 case class EmailPreferencesFlowV2(
     override val sessionId: String,
-    selectedCategories: Set[String],
-    selectedAPIs: Map[String, Set[String]],
+    selectedCategories: Set[ApiCategory],
+    selectedAPIs: Map[ApiCategory, Set[String]],
     selectedTopics: Set[String],
     visibleApis: List[CombinedApi]
   ) extends Flow with EmailPreferencesProducer {
   override val flowType: FlowType = FlowType.EMAIL_PREFERENCES_V2
 
-  def categoriesInOrder: List[String] = selectedCategories.toList.sorted
+  def categoriesInOrder: List[ApiCategory] = selectedCategories.toList.sortBy(_.displayText)
 // testng for a string against list of apicatrgories/// amazed it doesn't complain about type - how String <: ApiCategory is beyond me...
-  def visibleApisByCategory(category: String): List[CombinedApi] = visibleApis.filter(_.categories.map(_.toString()).contains(category)).sortBy(_.displayName)
+  def visibleApisByCategory(category: ApiCategory): List[CombinedApi] = visibleApis.filter(_.categories.contains(category)).sortBy(_.displayName)
 
-  def selectedApisByCategory(category: String): Set[String] = selectedAPIs.getOrElse(category, Set.empty)
+  def selectedApisByCategory(category: ApiCategory): Set[String] = selectedAPIs.getOrElse(category, Set.empty)
 
   def handleAllApis(apis: Set[String]): Set[String] = {
     if (apis.contains("ALL_APIS")) Set.empty[String] else apis
@@ -107,7 +108,7 @@ object EmailPreferencesFlowV2 {
     }
   }
 
-  def taxRegimeInterestsToCategoryServicesMap(interests: List[TaxRegimeInterests]): Map[String, Set[String]] = {
+  def taxRegimeInterestsToCategoryServicesMap(interests: List[TaxRegimeInterests]): Map[ApiCategory, Set[String]] = {
     interests.map(i => {
       val services = if (i.services.isEmpty) Set("ALL_APIS") else i.services
       (i.regime, services)
@@ -133,25 +134,25 @@ case class NewApplicationEmailPreferencesFlowV2(
     }
 
   override def toEmailPreferences: EmailPreferences = {
-    val existingInterests: Map[String, Set[String]] =
+    val existingInterests: Map[ApiCategory, Set[String]] =
       existingEmailPreferences.interests
         .map(interests => Map(interests.regime -> interests.services))
-        .foldLeft(Map.empty[String, Set[String]])(_ ++ _)
+        .foldLeft(Map.empty[ApiCategory, Set[String]])(_ ++ _)
 
     // Map[ServiceName -> Set[Category]]
-    val selectedApisCategories: Map[String, Set[String]] = selectedApis.map(api => (api.serviceName -> api.categories.map(_.toString()).toSet)).toMap
+    val selectedApisCategories: Map[String, Set[ApiCategory]] = selectedApis.map(api => (api.serviceName -> api.categories.toSet)).toMap
 
     // Map[Category -> Set.empty[ServiceName]]
-    val invertedSelectedApisCategories: Map[String, Set[String]] = selectedApisCategories.values.flatten.map(c => c -> Set.empty[String]).toMap
+    val invertedSelectedApisCategories: Map[ApiCategory, Set[String]] = selectedApisCategories.values.flatten.map(c => c -> Set.empty[String]).toMap
 
-    val newInterests: Map[String, Set[String]] = invertedSelectedApisCategories.map(p => {
+    val newInterests: Map[ApiCategory, Set[String]] = invertedSelectedApisCategories.map(p => {
       val serviceNames    = selectedApisCategories.filter(p2 => p2._2.contains(p._1)).keys
       val newServiceNames = p._2 ++ serviceNames
 
       p._1 -> newServiceNames
     })
 
-    val combinedInterests: Map[String, Set[String]] = mergeMap(existingInterests, newInterests)
+    val combinedInterests: Map[ApiCategory, Set[String]] = mergeMap(existingInterests, newInterests)
 
     val updatedTaxRegimeInterests = combinedInterests.map(i => TaxRegimeInterests(i._1, i._2)).toList
 

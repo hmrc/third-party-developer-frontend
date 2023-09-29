@@ -27,8 +27,9 @@ import play.api.test.FakeRequest
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.LaxEmailAddress.StringSyntax
 import uk.gov.hmrc.thirdpartydeveloperfrontend.builder.{DeveloperSessionBuilder, DeveloperTestData}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.LoggedInState
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.emailpreferences.{APICategoryDisplayDetails, EmailPreferences, EmailTopic, TaxRegimeInterests}
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.emailpreferences.{EmailPreferences, EmailTopic, TaxRegimeInterests}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.{LocalUserIdTracker, WithCSRFAddToken}
+import uk.gov.hmrc.apiplatform.modules.apis.domain.models.ApiCategory
 
 class EmailPreferencesSummaryViewSpec extends CommonViewSpec
     with WithCSRFAddToken
@@ -36,11 +37,13 @@ class EmailPreferencesSummaryViewSpec extends CommonViewSpec
     with DeveloperSessionBuilder
     with DeveloperTestData {
 
+
+   val category1 = ApiCategory.INCOME_TAX_MTD   
+   val category2 = ApiCategory.VAT   
   trait Setup {
 
-    val apiCategoryDetails: Seq[APICategoryDisplayDetails] =
-      Seq(APICategoryDisplayDetails("VAT", "VAT"), APICategoryDisplayDetails("INCOME_TAX_MTD", "Income Tax (Making Tax Digital)"))
-    val apiCategoryDetailsMap                              = Map("VAT" -> "VAT", "INCOME_TAX_MTD" -> "Income Tax (Making Tax Digital)")
+    val apiCategoryDetails: Seq[ApiCategory] = Seq(category1, category2)
+
 
     val api1                   = "income-tax-mtd-api-1"
     val api2                   = "income-tax-mtd-api-2"
@@ -48,7 +51,7 @@ class EmailPreferencesSummaryViewSpec extends CommonViewSpec
 
     val emailPreferences =
       EmailPreferences(
-        List(TaxRegimeInterests("VAT", Set.empty), TaxRegimeInterests("INCOME_TAX_MTD", Set(api1, api2))),
+        List(TaxRegimeInterests(category2, Set.empty), TaxRegimeInterests(category1, Set(api1, api2))),
         Set(EmailTopic.TECHNICAL, EmailTopic.BUSINESS_AND_POLICY)
       )
 
@@ -83,11 +86,11 @@ class EmailPreferencesSummaryViewSpec extends CommonViewSpec
   def checkEmailPreferencesApisSection(
       document: Document,
       emailPreferences: EmailPreferences,
-      apiCategoryDetails: Seq[APICategoryDisplayDetails],
+      apiCategoryDetails: Seq[ApiCategory],
       extendedServiceDetails: Map[String, String]
     ): Unit = {
 
-    for (interest <- emailPreferences.interests.sortBy(_.regime)) {
+    for (interest <- emailPreferences.interests.sortBy(_.regime.toString())) {
       val textRegimeDisplayNameVal = taxRegimeDisplayName(apiCategoryDetails, interest.regime)
       val categoryHeading          = document.getElementById(s"category-heading-${interest.regime}")
       categoryHeading.text shouldBe textRegimeDisplayNameVal
@@ -118,8 +121,8 @@ class EmailPreferencesSummaryViewSpec extends CommonViewSpec
     checkLink(document, "unsubscribe-link", "Unsubscribe from Developer Hub emails", "/developer/profile/email-preferences/unsubscribe")
   }
 
-  def taxRegimeDisplayName(apiCategoryDetails: Seq[APICategoryDisplayDetails], taxRegime: String): String = {
-    apiCategoryDetails.find(_.category == taxRegime).fold("Unknown")(_.name)
+  def taxRegimeDisplayName(apiCategoryDetails: Seq[ApiCategory], taxRegime: ApiCategory): String = {
+    apiCategoryDetails.find(_ == taxRegime).fold("Unknown")(_.displayText)
   }
 
   def checkNoEmailPreferencesPageElements(document: Document): Unit = {
@@ -140,7 +143,7 @@ class EmailPreferencesSummaryViewSpec extends CommonViewSpec
 
       val page     =
         emailPreferencesSummaryView.render(
-          EmailPreferencesSummaryViewData(apiCategoryDetailsMap, extendedServiceDetails),
+          EmailPreferencesSummaryViewData(apiCategoryDetails.toSet, extendedServiceDetails),
           messagesProvider.messages,
           developerSession,
           request,
@@ -156,7 +159,7 @@ class EmailPreferencesSummaryViewSpec extends CommonViewSpec
     "display 'no email preferences selected' page for users that have not yet selected any" in new Setup {
       val page =
         emailPreferencesSummaryView.render(
-          EmailPreferencesSummaryViewData(apiCategoryDetailsMap, Map.empty),
+          EmailPreferencesSummaryViewData(apiCategoryDetails.toSet, Map.empty),
           messagesProvider.messages,
           developerSessionWithoutEmailPreferences,
           request,
@@ -171,7 +174,7 @@ class EmailPreferencesSummaryViewSpec extends CommonViewSpec
     "display 'unsubscribed' elements when user has unsubscribed" in new Setup {
       val page =
         emailPreferencesSummaryView.render(
-          EmailPreferencesSummaryViewData(apiCategoryDetailsMap, Map.empty, unsubscribed = true),
+          EmailPreferencesSummaryViewData(apiCategoryDetails.toSet, Map.empty, unsubscribed = true),
           messagesProvider.messages,
           developerSessionWithoutEmailPreferences,
           request,

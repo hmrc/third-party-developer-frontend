@@ -20,9 +20,10 @@ import org.scalatest.matchers.should.Matchers
 import org.scalatest.wordspec.AnyWordSpec
 
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.emailpreferences.TaxRegimeInterests
+import uk.gov.hmrc.apiplatform.modules.apis.domain.models.ApiCategory
 
 class TaxRegimeInterestsSpec extends AnyWordSpec with Matchers {
-  val regime = "A Regime"
+  val regime = ApiCategory.AGENTS
 
   "tax regime interests add works" in {
     val tri = TaxRegimeInterests(regime, Set("a", "b", "c"))

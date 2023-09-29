@@ -18,14 +18,18 @@ package uk.gov.hmrc.thirdpartydeveloperfrontend.controllers
 
 import java.util.UUID
 
+
+import play.api.data.format.Formats._
 import play.api.data.Forms._
 import play.api.data.format.Formatter
 import play.api.data.validation.{Constraint, Invalid, Valid, ValidationError}
-import play.api.data.{Form, FormError}
 
 import uk.gov.hmrc.apiplatform.modules.applications.domain.models.{PrivacyPolicyLocation, PrivacyPolicyLocations, TermsAndConditionsLocation, TermsAndConditionsLocations}
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.ApplicationId
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.Application
+import uk.gov.hmrc.apiplatform.modules.apis.domain.models.ApiCategory
+import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.FormKeys
+import play.api.data.Form
 
 // scalastyle:off number.of.types
 
@@ -39,6 +43,23 @@ trait PasswordConfirmation {
 }
 
 case class LoginForm(emailaddress: String, password: String)
+
+
+object Formatters {
+  implicit val apiCategoryFormatter: Formatter[ApiCategory] = new Formatter[ApiCategory] {
+    override val format = Some(("format.apicategory", Nil))
+
+    override def bind(key: String, data: Map[String, String]) = parsing(ApiCategory.unsafeApply, "error.required", Nil)(key, data)
+
+    override def unbind(key: String, value: ApiCategory) = Map(key -> value.toString)
+  }
+
+  implicit def applicationIdFormatter: Formatter[ApplicationId] = new Formatter[ApplicationId] {
+    override val format                                       = Some(("format.uuid", Nil))
+    override def bind(key: String, data: Map[String, String]) = parsing(ApplicationId.unsafeApply, "error.required", Nil)(key,data)
+    override def unbind(key: String, value: ApplicationId)    = Map(key -> value.toString())
+  }
+}
 
 object LoginForm {
 
@@ -456,31 +477,27 @@ object AddCidrBlockForm {
   )
 }
 
-final case class TaxRegimeEmailPreferencesForm(taxRegime: List[String])
+final case class TaxRegimeEmailPreferencesForm(taxRegime: List[ApiCategory])
 
 object TaxRegimeEmailPreferencesForm {
-
-  def nonEmptyList: Constraint[Seq[String]] = Constraint[Seq[String]]("constraint.required") { o =>
+  import Formatters._
+    def nonEmptyList: Constraint[List[ApiCategory]] = Constraint[List[ApiCategory]]("constraint.required") { o =>
     if (o.nonEmpty) Valid else Invalid(ValidationError(FormKeys.selectedCategoryNonSelectedKey))
   }
 
-  val form: Form[TaxRegimeEmailPreferencesForm] =
-    Form(mapping("taxRegime" -> list(text).verifying(nonEmptyList))(TaxRegimeEmailPreferencesForm.apply)(TaxRegimeEmailPreferencesForm.unapply))
+  val form: Form[TaxRegimeEmailPreferencesForm] = Form(mapping("taxRegime" -> list(of[ApiCategory]).verifying(nonEmptyList))(TaxRegimeEmailPreferencesForm.apply)(TaxRegimeEmailPreferencesForm.unapply))
 }
 
-final case class SelectedApisEmailPreferencesForm(apiRadio: Option[String] = Some(""), selectedApi: Seq[String], currentCategory: String)
+final case class SelectedApisEmailPreferencesForm(apiRadio: Option[String] = Some(""), selectedApi: Seq[String], currentCategory: ApiCategory)
 
 object SelectedApisEmailPreferencesForm {
-
-  def nonEmpty(message: String): Constraint[String] = Constraint[String] { s: String =>
-    if (Option(s).isDefined) Invalid(message) else Valid
-  }
+  import Formatters._
 
   def form: Form[SelectedApisEmailPreferencesForm] = Form(mapping(
     "apiRadio"        -> optional(text)
       .verifying(FormKeys.selectedApiRadioGlobalKey, s => s.isDefined),
     "selectedApi"     -> seq(text),
-    "currentCategory" -> text
+    "currentCategory" -> of[ApiCategory]
   )(SelectedApisEmailPreferencesForm.apply)(SelectedApisEmailPreferencesForm.unapply)
     .verifying(
       FormKeys.selectedApisNonSelectedGlobalKey,
@@ -495,7 +512,6 @@ object SelectedApisEmailPreferencesForm {
 final case class SelectedTopicsEmailPreferencesForm(topic: Seq[String])
 
 object SelectedTopicsEmailPreferencesForm {
-
   def nonEmptyList: Constraint[Seq[String]] = Constraint[Seq[String]]("constraint.required") { o =>
     if (o.nonEmpty) Valid else Invalid(ValidationError(FormKeys.selectedTopicsNonSelectedKey))
   }
@@ -508,12 +524,7 @@ object SelectedTopicsEmailPreferencesForm {
 final case class SelectApisFromSubscriptionsForm(selectedApi: Seq[String], applicationId: ApplicationId)
 
 object SelectApisFromSubscriptionsForm {
-
-  implicit def applicationIdFormat: Formatter[ApplicationId] = new Formatter[ApplicationId] {
-    override val format                                       = Some(("format.uuid", Nil))
-    override def bind(key: String, data: Map[String, String]) = data.get(key).map(text => ApplicationId(UUID.fromString(text))).toRight(Seq(FormError(key, "error.required", Nil)))
-    override def unbind(key: String, value: ApplicationId)    = Map(key -> value.toString)
-  }
+  import Formatters._
 
   def nonEmpty(message: String): Constraint[String] = Constraint[String] { s: String =>
     if (Option(s).isDefined) Invalid(message) else Valid
@@ -535,11 +546,7 @@ final case class SelectTopicsFromSubscriptionsForm(topic: Seq[String], applicati
 
 object SelectTopicsFromSubscriptionsForm {
 
-  implicit def applicationIdFormat: Formatter[ApplicationId] = new Formatter[ApplicationId] {
-    override val format                                       = Some(("format.uuid", Nil))
-    override def bind(key: String, data: Map[String, String]) = data.get(key).map(text => ApplicationId(UUID.fromString(text))).toRight(Seq(FormError(key, "error.required", Nil)))
-    override def unbind(key: String, value: ApplicationId)    = Map(key -> value.toString())
-  }
+  import Formatters._
 
   def nonEmptyList: Constraint[Seq[String]] = Constraint[Seq[String]]("constraint.required") { o =>
     if (o.nonEmpty) Valid else Invalid(ValidationError(FormKeys.selectedTopicsNonSelectedKey))

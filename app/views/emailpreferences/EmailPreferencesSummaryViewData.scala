@@ -16,7 +16,8 @@
 
 package views.emailpreferences
 
-final case class EmailPreferencesSummaryViewData(taxRegimeDisplayNames: Map[String, String], apiDisplayNames: Map[String, String], unsubscribed: Boolean = false) {
-  def taxRegimeDisplayName(taxRegime: String): String = taxRegimeDisplayNames.getOrElse(taxRegime, taxRegime)
+import uk.gov.hmrc.apiplatform.modules.apis.domain.models.ApiCategory
+
+final case class EmailPreferencesSummaryViewData(categories: Set[ApiCategory], apiDisplayNames: Map[String, String], unsubscribed: Boolean = false) {
   def apiDisplayName(serviceName: String): String     = apiDisplayNames.getOrElse(serviceName, serviceName)
 }

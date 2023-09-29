@@ -32,9 +32,10 @@ import uk.gov.hmrc.apiplatform.modules.common.domain.models.ApplicationId
 import uk.gov.hmrc.thirdpartydeveloperfrontend.config.{ApplicationConfig, ErrorHandler}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.connectors.{ApiType, CombinedApi}
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.emailpreferences.{APICategoryDisplayDetails, EmailPreferences}
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.emailpreferences.EmailPreferences
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.flows.{FlowType, NewApplicationEmailPreferencesFlowV2}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.service.{EmailPreferencesService, SessionService}
+import uk.gov.hmrc.apiplatform.modules.apis.domain.models.ApiCategory
 
 class EmailPreferencesController @Inject() (
     val sessionService: SessionService,
@@ -66,7 +67,7 @@ class EmailPreferencesController @Inject() (
     for {
       flow              <- emailPreferencesService.fetchEmailPreferencesFlow(request.developerSession)
       visibleCategories <- emailPreferencesService.fetchCategoriesVisibleToUser(request.developerSession, flow)
-      selectedCategories = if (form.hasErrors) Set.empty[String] else flow.selectedCategories
+      selectedCategories = if (form.hasErrors) Set.empty[ApiCategory] else flow.selectedCategories
     } yield flowSelectCategoriesView(form, visibleCategories.toList, selectedCategories)
   }
 
@@ -84,33 +85,27 @@ class EmailPreferencesController @Inject() (
   }
 
   def flowSelectNoCategoriesAction: Action[AnyContent] = loggedInAction { implicit request =>
-    emailPreferencesService.updateCategories(request.developerSession, List.empty[String])
+    emailPreferencesService.updateCategories(request.developerSession, List.empty[ApiCategory])
       .map(_ => Redirect(profile.routes.EmailPreferencesController.flowSelectTopicsPage()))
   }
 
-  def flowSelectApisPage(category: String): Action[AnyContent] = loggedInAction { implicit request =>
-    val form = SelectedApisEmailPreferencesForm.form
-    if (category.isEmpty) {
-      Future.successful(Redirect(profile.routes.EmailPreferencesController.emailPreferencesSummaryPage()))
-    } else {
-      flowSelectApisView(form, category).map(Ok(_))
-    }
+  def flowSelectApisPage(category: ApiCategory): Action[AnyContent] = loggedInAction { implicit request =>
+      flowSelectApisView( SelectedApisEmailPreferencesForm.form, category).map(Ok(_))
   }
 
-  private def flowSelectApisView(form: Form[SelectedApisEmailPreferencesForm], category: String)(implicit request: UserRequest[AnyContent]): Future[Html] = {
+  private def flowSelectApisView(form: Form[SelectedApisEmailPreferencesForm], category: ApiCategory)(implicit request: UserRequest[AnyContent]): Future[Html] = {
     for {
-      categoryDetails <- emailPreferencesService.apiCategoryDetails(category)
       flow            <- emailPreferencesService.fetchEmailPreferencesFlow(request.developerSession)
     } yield flowSelectApiView(
       form,
-      categoryDetails.getOrElse(APICategoryDisplayDetails(category, category)),
+      category,
       flow.visibleApisByCategory(category),
       flow.selectedApisByCategory(category)
     )
   }
 
   def flowSelectApisAction: Action[AnyContent] = loggedInAction { implicit request =>
-    def handleNextPage(sortedCategories: List[String], currentCategory: String): Result = {
+    def handleNextPage(sortedCategories: List[ApiCategory], currentCategory: ApiCategory): Result = {
       val currentCategoryIndex = sortedCategories.indexOf(currentCategory)
       if (sortedCategories.size == currentCategoryIndex + 1) {
         Redirect(profile.routes.EmailPreferencesController.flowSelectTopicsPage())
@@ -119,10 +114,11 @@ class EmailPreferencesController @Inject() (
       }
     }
 
-    val form = SelectedApisEmailPreferencesForm.form.bindFromRequest()
+    val form: Form[SelectedApisEmailPreferencesForm] = SelectedApisEmailPreferencesForm.form.bindFromRequest()
     form.fold(
       formWithErrors => {
-        flowSelectApisView(formWithErrors, form.data.getOrElse("currentCategory", "")).map(BadRequest(_))
+        val category = ApiCategory.unsafeApply(form.data("currentCategory"))    // Should never get here without a category
+        flowSelectApisView(formWithErrors, category).map(BadRequest(_))
       },
       {
         form =>
@@ -188,9 +184,8 @@ class EmailPreferencesController @Inject() (
     val emailPreferences          = request.developerSession.developer.emailPreferences
     val userServices: Set[String] = emailPreferences.interests.flatMap(_.services).toSet
     for {
-      apiCategoryDetails <- emailPreferencesService.fetchAllAPICategoryDetails()
       apiNames           <- emailPreferencesService.fetchAPIDetails(userServices)
-    } yield Ok(emailPreferencesSummaryView(toDataObject(emailPreferences, apiNames, apiCategoryDetails, unsubscribed)))
+    } yield Ok(emailPreferencesSummaryView(toDataObject(emailPreferences, apiNames, ApiCategory.values, unsubscribed)))
   }
 
   def unsubscribeAllPage: Action[AnyContent] = loggedInAction { implicit request =>
@@ -207,7 +202,7 @@ class EmailPreferencesController @Inject() (
   def toDataObject(
       emailPreferences: EmailPreferences,
       filteredAPIs: Seq[CombinedApi],
-      categories: Seq[APICategoryDisplayDetails],
+      categories: Set[ApiCategory],
       unsubscribed: Boolean
     ): EmailPreferencesSummaryViewData = {
 
@@ -217,18 +212,14 @@ class EmailPreferencesController @Inject() (
     }
 
     EmailPreferencesSummaryViewData(
-      createCategoryMap(categories, emailPreferences.interests.map(_.regime)),
+      filterCategories(categories, emailPreferences.interests.map(_.regime).toSet),
       filteredAPIs.map(a => (a.serviceName, decorateXmlApiDisplayName(a))).toMap,
       unsubscribed
     )
   }
 
-  def createCategoryMap(apisCategories: Seq[APICategoryDisplayDetails], usersCategories: Seq[String]): Map[String, String] = {
-    apisCategories
-      .filter(category => usersCategories.contains(category.category))
-      .map(c => (c.category, c.name))
-      .toMap
-  }
+  def filterCategories(apisCategories: Set[ApiCategory], usersCategories: Set[ApiCategory]): Set[ApiCategory] = apisCategories.union(usersCategories)
+  
 
   /*
    * Page displayed as part of 'Add new Sandbox Application' flow. Allows users to add newly-subscribed APIs to their Email Preferences. Any APIs they already

@@ -26,6 +26,7 @@ import uk.gov.hmrc.apiplatform.modules.applications.domain.models.ClientSecret
 import uk.gov.hmrc.apiplatform.modules.common.domain.models._
 import uk.gov.hmrc.apiplatform.modules.mfa.models.{MfaAction, MfaId, MfaType}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.controllers.{AddTeamMemberPageMode, SaveSubsFieldsPageMode}
+import uk.gov.hmrc.apiplatform.modules.apis.domain.models.ApiCategory
 
 package object binders {
 
@@ -232,4 +233,32 @@ package object binders {
       textBinder.unbind(key, applicationId.value.toString())
     }
   }
+
+  
+  private def apiCategoryFromString(text: String): Either[String, ApiCategory] = {
+    ApiCategory(text).toRight(s"Cannot accept $text as ApiCategoryId")
+  }
+
+  implicit def apiCategoryPathBinder(implicit textBinder: PathBindable[String]): PathBindable[ApiCategory] = new PathBindable[ApiCategory] {
+
+    override def bind(key: String, value: String): Either[String, ApiCategory] = {
+      textBinder.bind(key, value).flatMap(apiCategoryFromString)
+    }
+
+    override def unbind(key: String, apiCategory: ApiCategory): String = {
+      apiCategory.toString()
+    }
+  }
+
+  implicit def apiCategoryQueryStringBindable(implicit textBinder: QueryStringBindable[String]) = new QueryStringBindable[ApiCategory] {
+
+    override def bind(key: String, params: Map[String, Seq[String]]): Option[Either[String, ApiCategory]] = {
+      textBinder.bind(key, params).map(_.flatMap(apiCategoryFromString))
+    }
+
+    override def unbind(key: String, apiCategory: ApiCategory): String = {
+      textBinder.unbind(key, apiCategory.toString())
+    }
+  }
+
 }

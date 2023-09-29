@@ -82,7 +82,7 @@ trait HasApplication extends HasAppDeploymentEnvironment with HasUserWithRole wi
   lazy val appWithSubsIds     = ApplicationWithSubscriptionIds.from(application).copy(subscriptions = Set(apiIdentifier))
   lazy val privacyPolicyUrl   = "http://example.com/priv"
   lazy val termsConditionsUrl = "http://example.com/tcs"
-  lazy val category           = "category1"
+  lazy val category           = ApiCategory.AGENTS
 
   lazy val appWithSubsData = ApplicationWithSubscriptionData(
     application,

@@ -33,7 +33,6 @@ import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.{FormKeys, SelectedAp
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.connectors.ApiType.REST_API
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.connectors.{ApiType, CombinedApi}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.{DeveloperSession, LoggedInState}
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.emailpreferences.APICategoryDisplayDetails
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.flows.EmailPreferencesFlowV2
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.{LocalUserIdTracker, WithCSRFAddToken}
 import uk.gov.hmrc.apiplatform.modules.apis.domain.models.ApiCategory
@@ -53,11 +52,11 @@ class FlowSelectApiViewSpec extends CommonViewSpec
 
     val developerSessionWithoutEmailPreferences: DeveloperSession = standardDeveloper.loggedIn
     val form                                                      = mock[Form[SelectedApisEmailPreferencesForm]]
-    val currentCategory                                           = APICategoryDisplayDetails("AGENTS", "Agents")
+    val currentCategory                                           = ApiCategory.AGENTS
     val apis                                                      = Set("api1", "api2")
 
     val emailpreferencesFlow: EmailPreferencesFlowV2          =
-      EmailPreferencesFlowV2(developerSessionWithoutEmailPreferences.session.sessionId, apis, Map(currentCategory.category -> apis), Set.empty, List.empty)
+      EmailPreferencesFlowV2(developerSessionWithoutEmailPreferences.session.sessionId, Set(currentCategory), Map(currentCategory -> apis), Set.empty, List.empty)
     implicit val request: FakeRequest[AnyContentAsEmpty.type] = FakeRequest().withCSRFToken
 
     val flowSelectApiView: FlowSelectApiView = app.injector.instanceOf[FlowSelectApiView]
@@ -88,9 +87,9 @@ class FlowSelectApiViewSpec extends CommonViewSpec
     })
   }
 
-  def validateStaticElements(document: Document, apis: List[CombinedApi], expectedCategory: APICategoryDisplayDetails): Unit = {
+  def validateStaticElements(document: Document, apis: List[CombinedApi], expectedCategory: ApiCategory): Unit = {
 
-    document.getElementById("pageHeading").text() should be(s"Which ${expectedCategory.name} APIs are you interested in?")
+    document.getElementById("pageHeading").text() should be(s"Which ${expectedCategory.displayText} APIs are you interested in?")
     document.getElementById("select-all-description").text() should be("Select all that apply.")
 
     // Check form is configured correctly
@@ -99,10 +98,10 @@ class FlowSelectApiViewSpec extends CommonViewSpec
     form.attr("action") should be("/developer/profile/email-preferences/apis")
 
     // check checkboxes are displayed
-    validateCheckboxItemsAgainstApis(document, apis, expectedCategory.name)
+    validateCheckboxItemsAgainstApis(document, apis, expectedCategory.displayText)
 
     // check category hidden field and value
-    document.getElementById("current-category").`val`() shouldBe expectedCategory.category
+    document.getElementById("current-category").`val`() shouldBe expectedCategory.toString()
 
     // Check submit button is correct
     document.getElementById("submit").text should be("Continue")
@@ -133,7 +132,7 @@ class FlowSelectApiViewSpec extends CommonViewSpec
       when(form.errors).thenReturn(Seq.empty)
       when(form.errors(any[String])).thenReturn(Seq.empty)
 
-      val selectedApis = emailpreferencesFlow.selectedAPIs.getOrElse(currentCategory.category, Set.empty)
+      val selectedApis = emailpreferencesFlow.selectedAPIs.getOrElse(currentCategory, Set.empty)
 
       val page: Html = flowSelectApiView.render(form, currentCategory, apiList, selectedApis, messagesProvider.messages, developerSessionWithoutEmailPreferences, request, appConfig)
 
@@ -165,7 +164,7 @@ class FlowSelectApiViewSpec extends CommonViewSpec
       when(form.errors).thenReturn(Seq(FormError.apply(FormKeys.selectedApisNonSelectedKey, "message")))
       when(form.errors(any[String])).thenReturn(Seq(FormError.apply(FormKeys.selectedApisNonSelectedKey, "message")))
 
-      val selectedApis = emailpreferencesFlow.selectedAPIs.getOrElse(currentCategory.category, Set.empty)
+      val selectedApis = emailpreferencesFlow.selectedAPIs.getOrElse(currentCategory, Set.empty)
 
       val page: Html = flowSelectApiView.render(form, currentCategory, apiList, selectedApis, messagesProvider.messages, developerSessionWithoutEmailPreferences, request, appConfig)
 

@@ -15,7 +15,6 @@
  *@
 
 @import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.DeveloperSession
-@import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.emailpreferences.APICategoryDisplayDetails
 @import include._
 @import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.views.BackButtonWithJavaScript
 @import views.html.include.DevMain
@@ -25,7 +24,7 @@
 
 @this(devMain: DevMainWithFormErrors)
 
-@(form: Form[TaxRegimeEmailPreferencesForm], categories: List[APICategoryDisplayDetails], selectedCategories: Set[String])(implicit messages: Messages, loggedIn: DeveloperSession, request: play.api.mvc.Request[Any], appConfig: ApplicationConfig)
+@(form: Form[TaxRegimeEmailPreferencesForm], visibleCategories: List[ApiCategory], selectedCategories: Set[ApiCategory])(implicit messages: Messages, loggedIn: DeveloperSession, request: play.api.mvc.Request[Any], appConfig: ApplicationConfig)
 
 @pageHeading = @{
   "Which API categories are you interested in?"
@@ -53,11 +52,11 @@
         </div>
         @fieldError(form.errors, "taxRegime")
         <div class="govuk-checkboxes" data-module="govuk-checkboxes">
-          @for(category <- categories){
+          @for(category <- visibleCategories.sortBy(_.displayText)){
             <div class="govuk-checkboxes__item">
-              <input class="govuk-checkboxes__input" id="@category.category" type="checkbox" name="taxRegime[]" value="@category.category" @if(selectedCategories.contains(category.category)){checked}>
-              <label class="govuk-label govuk-checkboxes__label" for="@category.category">
-                @category.name
+              <input class="govuk-checkboxes__input" id="@category.toString()" type="checkbox" name="taxRegime[]" value="@category.toString" @if(selectedCategories.contains(category)){checked}>
+              <label class="govuk-label govuk-checkboxes__label" for="@category.toString()">
+                @category.displayText
               </label>
             </div>
           }

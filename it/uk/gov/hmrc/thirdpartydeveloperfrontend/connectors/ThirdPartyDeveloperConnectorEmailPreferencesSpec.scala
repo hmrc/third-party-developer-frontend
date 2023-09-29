@@ -35,6 +35,7 @@ import uk.gov.hmrc.apiplatform.modules.mfa.models.MfaId
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.UserId
 import uk.gov.hmrc.thirdpartydeveloperfrontend.connectors.ThirdPartyDeveloperConnector.FindUserIdResponse
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.LaxEmailAddress.StringSyntax
+import uk.gov.hmrc.apiplatform.modules.apis.domain.models.ApiCategory
 
 class ThirdPartyDeveloperConnectorEmailPreferencesSpec extends BaseConnectorIntegrationSpec with GuiceOneAppPerSuite {
 
@@ -136,7 +137,7 @@ class ThirdPartyDeveloperConnectorEmailPreferencesSpec extends BaseConnectorInte
   }
 
   "updateEmailPreferences" should {
-    val emailPreferences = EmailPreferences(List(TaxRegimeInterests("VAT", Set("API1", "API2"))), Set(BUSINESS_AND_POLICY))
+    val emailPreferences = EmailPreferences(List(TaxRegimeInterests(ApiCategory.VAT, Set("API1", "API2"))), Set(BUSINESS_AND_POLICY))
 
     "return true when NO_CONTENT is returned" in new Setup {
       val userId = UserId.random

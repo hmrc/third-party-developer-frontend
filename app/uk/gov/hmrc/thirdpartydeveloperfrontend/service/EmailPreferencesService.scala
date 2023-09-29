@@ -30,9 +30,10 @@ import uk.gov.hmrc.thirdpartydeveloperfrontend.connectors.{ApmConnector, ThirdPa
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.connectors.ApiType.REST_API
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.connectors.{CombinedApi}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.DeveloperSession
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.emailpreferences.APICategoryDisplayDetails
+
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.flows.{EmailPreferencesFlowV2, EmailPreferencesProducer, FlowType, NewApplicationEmailPreferencesFlowV2}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.repositories.FlowRepository
+import uk.gov.hmrc.apiplatform.modules.apis.domain.models.ApiCategory
 
 @Singleton
 class EmailPreferencesService @Inject() (
@@ -42,12 +43,11 @@ class EmailPreferencesService @Inject() (
   )(implicit val ec: ExecutionContext
   ) extends ApplicationLogger {
 
-  def fetchCategoriesVisibleToUser(developerSession: DeveloperSession, existingFlow: EmailPreferencesFlowV2)(implicit hc: HeaderCarrier): Future[List[APICategoryDisplayDetails]] =
+  def fetchCategoriesVisibleToUser(developerSession: DeveloperSession, existingFlow: EmailPreferencesFlowV2)(implicit hc: HeaderCarrier): Future[List[ApiCategory]] =
     for {
       apis                <- getOrUpdateFlowWithVisibleApis(existingFlow, developerSession)
-      visibleCategoryNames = apis.map(_.categories).reduce(_ ++ _).distinct.map(_.toString())
-      categories          <- fetchAllAPICategoryDetails().map(_.filter(x => visibleCategoryNames.contains(x.category)))
-    } yield categories.distinct.sortBy(_.category)
+      visibleCategories = apis.map(_.categories).reduce(_ ++ _).distinct
+    } yield visibleCategories
 
   private def getOrUpdateFlowWithVisibleApis(existingFlow: EmailPreferencesFlowV2, developerSession: DeveloperSession)(implicit hc: HeaderCarrier): Future[List[CombinedApi]] = {
     NonEmptyList.fromList(existingFlow.visibleApis.toList).fold({
@@ -62,18 +62,6 @@ class EmailPreferencesService @Inject() (
       visibleApis
     }) { x => Future.successful(x.toList) }
   }
-
-  def fetchAllAPICategoryDetails()(implicit hc: HeaderCarrier): Future[List[APICategoryDisplayDetails]] = {
-    apmConnector.fetchAllCombinedAPICategories().flatMap {
-      case Right(x)           => successful(x)
-      case Left(e: Throwable) =>
-        logger.error(s"fetchAllAPICategoryDetails failed: ${e.getMessage}")
-        successful(List.empty)
-    }
-  }
-
-  def apiCategoryDetails(category: String)(implicit hc: HeaderCarrier): Future[Option[APICategoryDisplayDetails]] =
-    fetchAllAPICategoryDetails().map(_.find(_.category == category))
 
   private def handleGettingApiDetails(serviceName: String)(implicit hc: HeaderCarrier): Future[CombinedApi] = {
     apmConnector.fetchCombinedApi(serviceName).flatMap {
@@ -116,7 +104,7 @@ class EmailPreferencesService @Inject() (
 
   def deleteFlow(sessionId: String, flowType: FlowType): Future[Boolean] = flowRepository.deleteBySessionIdAndFlowType(sessionId, flowType)
 
-  def updateCategories(developerSession: DeveloperSession, categoriesToAdd: List[String]): Future[EmailPreferencesFlowV2] = {
+  def updateCategories(developerSession: DeveloperSession, categoriesToAdd: List[ApiCategory]): Future[EmailPreferencesFlowV2] = {
     for {
       existingFlow <- fetchEmailPreferencesFlow(developerSession)
       savedFlow    <- flowRepository.saveFlow[EmailPreferencesFlowV2](existingFlow.copy(
@@ -134,7 +122,7 @@ class EmailPreferencesService @Inject() (
     } yield savedFlow
   }
 
-  def updateSelectedApis(developerSession: DeveloperSession, currentCategory: String, selectedApis: List[String]): Future[EmailPreferencesFlowV2] = {
+  def updateSelectedApis(developerSession: DeveloperSession, currentCategory: ApiCategory, selectedApis: List[String]): Future[EmailPreferencesFlowV2] = {
     for {
       existingFlow <- fetchEmailPreferencesFlow(developerSession)
       updatedApis   = existingFlow.selectedAPIs ++ Map(currentCategory -> selectedApis.toSet)

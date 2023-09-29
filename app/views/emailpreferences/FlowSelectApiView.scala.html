@@ -18,7 +18,6 @@
 @import include._
 @import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.controllers.Crumb
 @import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.connectors.CombinedApi
-@import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.emailpreferences.APICategoryDisplayDetails
 @import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.views.BackButtonWithJavaScript
 @import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.connectors.ApiType.XML_API
 @import views.html.include.DevMain
@@ -28,10 +27,10 @@
 
 @this(devMain: DevMainWithFormErrors)
 
-@(form: Form[SelectedApisEmailPreferencesForm], currentCategory: APICategoryDisplayDetails, apis: List[CombinedApi], selectedApis: Set[String])(implicit messages: Messages, loggedIn: DeveloperSession, request: play.api.mvc.Request[Any], appConfig: ApplicationConfig)
+@(form: Form[SelectedApisEmailPreferencesForm], currentCategory: ApiCategory, apis: List[CombinedApi], selectedApis: Set[String])(implicit messages: Messages, loggedIn: DeveloperSession, request: play.api.mvc.Request[Any], appConfig: ApplicationConfig)
 
 @pageHeading = @{
-  s"Which ${currentCategory.name} APIs are you interested in?"
+  s"Which ${currentCategory.displayText} APIs are you interested in?"
 }
 
 @devMain(
@@ -62,9 +61,9 @@
           <div class="govuk-radios__item">
             <input class="govuk-radios__input" id="all-apis" type="radio" name="apiRadio" value="ALL_APIS" @if(selectedApis.contains("ALL_APIS")) {checked}/>
             <label class="govuk-label govuk-radios__label" for="all-apis">
-              All @currentCategory.name APIs
+              All @currentCategory.displayText APIs
               <span id="all-apis-description" class="govuk-hint">
-                You will be subscribed automatically to emails about new @currentCategory.name APIs
+                You will be subscribed automatically to emails about new @currentCategory.displayText APIs
               </span>
             </label>
           </div>
@@ -74,9 +73,9 @@
           <div class="govuk-radios__item">
           <input class="govuk-radios__input" id="individual-apis" type="radio" name="apiRadio" value="SOME_APIS" @if(!selectedApis.contains("ALL_APIS") &&  !selectedApis.isEmpty) {checked}/>
           <label class="govuk-label govuk-radios__label" for="individual-apis">
-            Specific @currentCategory.name APIs
+            Specific @currentCategory.displayText APIs
             <span id="individual-api-description" class="govuk-hint">
-              Select specific APIs. You will not get emails about new @currentCategory.name APIs
+              Select specific APIs. You will not get emails about new @currentCategory.displayText APIs
             </span>
           </label>
 
@@ -95,7 +94,7 @@
 
     <br/>
 
-    <input class="govuk-visually-hidden" id="current-category" type="hidden" name="currentCategory" value="@currentCategory.category" />
+    <input class="govuk-visually-hidden" id="current-category" type="hidden" name="currentCategory" value="@currentCategory.toString" />
     <button id="submit" class="govuk-button" type="submit">Continue</button>
   }
 }

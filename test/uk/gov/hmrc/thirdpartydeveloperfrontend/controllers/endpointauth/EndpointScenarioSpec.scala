@@ -47,13 +47,14 @@ import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.connectors.ApiType.
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.connectors.TermsOfUseInvitationState.EMAIL_SENT
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.connectors._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.{UpdateProfileRequest, User}
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.emailpreferences.{APICategoryDisplayDetails, EmailPreferences}
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.emailpreferences.EmailPreferences
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.subscriptions.ApiSubscriptionFields.SaveSubscriptionFieldsSuccessResponse
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.subscriptions.Fields
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.{ApplicationUpdateSuccessful, ApplicationUpliftSuccessful}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.helpers.ExcludeFromCoverage
 import uk.gov.hmrc.thirdpartydeveloperfrontend.repositories.FlowRepository
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.AsyncHmrcSpec
+import uk.gov.hmrc.apiplatform.modules.apis.domain.models.ApiCategory
 
 object EndpointScenarioSpec {
 
@@ -203,7 +204,6 @@ abstract class EndpointScenarioSpec extends AsyncHmrcSpec with GuiceOneAppPerSui
   when(thirdPartyApplicationSubmissionsConnector.fetchLatestSubmission(*[ApplicationId])(*)).thenReturn(Future.successful(Some(submission)))
   when(thirdPartyApplicationSubmissionsConnector.recordAnswer(*[Submission.Id], *[Question.Id], *[List[String]])(*)).thenReturn(Future.successful(Right(extendedSubmission)))
   when(thirdPartyApplicationSubmissionsConnector.createSubmission(*[ApplicationId], *[LaxEmailAddress])(*)).thenReturn(Future.successful(Some(submission)))
-  when(apmConnector.fetchAllCombinedAPICategories()(*)).thenReturn(Future.successful(Right(List(APICategoryDisplayDetails("category", "name")))))
   when(tpdConnector.fetchDeveloper(*[UserId])(*)).thenReturn(Future.successful(Some(developer)))
   when(tpdConnector.updateProfile(*[UserId], *[UpdateProfileRequest])(*)).thenReturn(Future.successful(1))
   when(tpdConnector.updateEmailPreferences(*[UserId], *[EmailPreferences])(*)).thenReturn(Future.successful(true))
@@ -401,8 +401,8 @@ abstract class EndpointScenarioSpec extends AsyncHmrcSpec with GuiceOneAppPerSui
       case Endpoint("POST", "/developer/profile/email-preferences/apis-from-subscriptions", _)                                         => Map("selectedApi[]" -> "my api", "applicationId" -> applicationId.toString())
       case Endpoint("POST", "/developer/profile/password", _)                                                                          =>
         Map("currentpassword" -> userPassword, "password" -> (userPassword + "new"), "confirmpassword" -> (userPassword + "new"))
-      case Endpoint("POST", "/developer/profile/email-preferences/apis", _)                                                            => Map("apiRadio" -> "1", "selectedApi" -> "api1", "currentCategory" -> category)
-      case Endpoint("POST", "/developer/profile/email-preferences/categories", _)                                                      => Map("taxRegime[]" -> "1")
+      case Endpoint("POST", "/developer/profile/email-preferences/apis", _)                                                            => Map("apiRadio" -> "1", "selectedApi" -> "api1", "currentCategory" -> category.toString)
+      case Endpoint("POST", "/developer/profile/email-preferences/categories", _)                                                      => Map("taxRegime[]" -> ApiCategory.AGENTS.toString)
       case Endpoint("POST", "/developer/submissions/:sid/question/:qid", _)                                                            => Map("submit-action" -> "acknowledgement")
       case Endpoint("POST", "/developer/submissions/:sid/question/:qid/update", _)                                                     => Map("submit-action" -> "acknowledgement")
       case Endpoint("POST", "/developer/submissions/application/:aid/cancel-request", _)                                               => Map("submit-action" -> "cancel-request")

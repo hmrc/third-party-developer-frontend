@@ -23,10 +23,11 @@ import uk.gov.hmrc.thirdpartydeveloperfrontend.builder.DeveloperBuilder
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.{Developer, DeveloperSession, LoggedInState, Session}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.emailpreferences.{EmailPreferences, EmailTopic, TaxRegimeInterests}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.LocalUserIdTracker
+import uk.gov.hmrc.apiplatform.modules.apis.domain.models.ApiCategory
 
 class EmailPreferencesFlowV2Spec extends AnyWordSpec with Matchers with DeveloperBuilder with LocalUserIdTracker {
-  val category1                   = "CATEGORY_1"
-  val category2                   = "CATEGORY_2"
+  val category1                   = ApiCategory.AGENTS
+  val category2                   = ApiCategory.BUSINESS_RATES
   val category1Apis               = Set("api1", "api2")
   val category2Apis               = Set("api3", "api2", "api4")
   val emailPreferences            = EmailPreferences(List(TaxRegimeInterests(category1, category1Apis), TaxRegimeInterests(category2, category2Apis)), Set(EmailTopic.TECHNICAL))
@@ -40,7 +41,7 @@ class EmailPreferencesFlowV2Spec extends AnyWordSpec with Matchers with Develope
     DeveloperSession(session)
   }
 
-  def emailPreferencesFlow(selectedCategories: Set[String], selectedAPIs: Map[String, Set[String]], selectedTopics: Set[String]): EmailPreferencesFlowV2 = {
+  def emailPreferencesFlow(selectedCategories: Set[ApiCategory], selectedAPIs: Map[ApiCategory, Set[String]], selectedTopics: Set[String]): EmailPreferencesFlowV2 = {
     EmailPreferencesFlowV2(sessionId, selectedCategories, selectedAPIs, selectedTopics, List.empty)
   }
 

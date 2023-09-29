@@ -31,10 +31,11 @@ import play.twirl.api.Html
 import uk.gov.hmrc.thirdpartydeveloperfrontend.builder._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.TaxRegimeEmailPreferencesForm
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.LoggedInState
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.emailpreferences.APICategoryDisplayDetails
+
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.flows.EmailPreferencesFlowV2
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.ViewHelpers._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.{LocalUserIdTracker, WithCSRFAddToken}
+import uk.gov.hmrc.apiplatform.modules.apis.domain.models.ApiCategory
 
 class FlowSelectCategoriesViewSpec extends CommonViewSpec
     with WithCSRFAddToken
@@ -42,13 +43,16 @@ class FlowSelectCategoriesViewSpec extends CommonViewSpec
     with DeveloperSessionBuilder
     with DeveloperTestData {
 
+      val category1 = ApiCategory.AGENTS
+      val category2 = ApiCategory.EXAMPLE
+      val category3 = ApiCategory.VAT
   trait Setup {
     val form = mock[Form[TaxRegimeEmailPreferencesForm]]
 
     val developerSessionWithoutEmailPreferences = standardDeveloper.loggedIn
 
     val emailPreferencesFlow                                  =
-      EmailPreferencesFlowV2(developerSessionWithoutEmailPreferences.session.sessionId, Set("api1", "api2"), Map.empty, Set.empty, List.empty)
+      EmailPreferencesFlowV2(developerSessionWithoutEmailPreferences.session.sessionId, Set(category1, category2), Map.empty, Set.empty, List.empty)
     implicit val request: FakeRequest[AnyContentAsEmpty.type] = FakeRequest().withCSRFToken
 
     val flowSelectCategoriesView = app.injector.instanceOf[FlowSelectCategoriesView]
@@ -61,13 +65,13 @@ class FlowSelectCategoriesViewSpec extends CommonViewSpec
     document.getElementById(id).attr("href") shouldBe linkVal
   }
 
-  def validateCheckboxItemsAgainstCategories(document: Document, categories: List[APICategoryDisplayDetails]) = {
+  def validateCheckboxItemsAgainstCategories(document: Document, categories: List[ApiCategory]) = {
     categories.foreach(category => {
-      val checkbox = document.getElementById(category.category)
+      val checkbox = document.getElementById(category.toString())
       checkbox.attr("name") shouldBe "taxRegime[]"
-      checkbox.`val`() shouldBe category.category
+      checkbox.`val`() shouldBe category.toString()
 
-      document.select(s"label[for=${category.category}]").text shouldBe category.name
+      document.select(s"label[for=${category.toString()}]").text shouldBe category.displayText
 
       withClue("Expected number of checkboxes differs from number of categories sent to view") {
         document.select("input[type=checkbox]").size shouldBe categories.size
@@ -75,7 +79,7 @@ class FlowSelectCategoriesViewSpec extends CommonViewSpec
     })
   }
 
-  def validateStaticElements(document: Document, categories: List[APICategoryDisplayDetails]): Unit = {
+  def validateStaticElements(document: Document, categories: List[ApiCategory]): Unit = {
 
     document.getElementById("pageHeading").text() should be("Which API categories are you interested in?")
     // Check form is configured correctly
@@ -91,8 +95,8 @@ class FlowSelectCategoriesViewSpec extends CommonViewSpec
   }
 
   "Email Preferences Select Categories view page" should {
-    val categoriesFromAPM = List(APICategoryDisplayDetails("api1", "Api One"), APICategoryDisplayDetails("api2", "Api Two"), APICategoryDisplayDetails("api3", "Api Three"))
-    val usersCategories   = Set("api1", "api2")
+    val categoriesFromAPM = List(category1, category2, category3)
+    val usersCategories   = Set(category1.toString(), category2.toString())
 
     "render the api categories selection Page with no check boxes selected when no user selected categories passed into the view" in new Setup {
       override val request = FakeRequest().withCSRFToken

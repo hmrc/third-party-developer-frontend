@@ -52,11 +52,11 @@
 
   @if(userHasEmailPreferences) {
     <p class="govuk-body" id="first-line">Preferences for <span class="govuk-!-font-weight-bold">@loggedIn.developer.email.text</span></p>
-    @for(taxRegimeInterest <- loggedIn.developer.emailPreferences.interests.sortBy(_.regime).zipWithIndex) {
-      <h2 class="govuk-heading-s govuk-!-margin-top-0 govuk-!-margin-bottom-1" id="category-heading-@taxRegimeInterest._1.regime">@viewData.taxRegimeDisplayName(taxRegimeInterest._1.regime)</h2>
+    @for(taxRegimeInterest <- loggedIn.developer.emailPreferences.interests.sortBy(_.regime.toString).zipWithIndex) {
+      <h2 class="govuk-heading-s govuk-!-margin-top-0 govuk-!-margin-bottom-1" id="category-heading-@taxRegimeInterest._1.regime.toString()">@taxRegimeInterest._1.regime.displayText</h2>
       @if(taxRegimeInterest._1.services.isEmpty) {
-        <p class="govuk-body govuk-!-margin-bottom-2" id="all-api-@taxRegimeInterest._1.regime">
-          All @viewData.taxRegimeDisplayName(taxRegimeInterest._1.regime) APIs
+        <p class="govuk-body govuk-!-margin-bottom-2" id="all-api-@taxRegimeInterest._1.regime.toString()">
+          All @taxRegimeInterest._1.regime.displayText APIs
         </p>
       } else {
         <ul class="govuk-list govuk-!-margin-bottom-2">
