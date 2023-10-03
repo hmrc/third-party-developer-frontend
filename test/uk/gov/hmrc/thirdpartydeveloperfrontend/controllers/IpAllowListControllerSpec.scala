@@ -40,6 +40,7 @@ import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.{LocalUserIdTracker, TestAp
 import uk.gov.hmrc.apiplatform.modules.commands.applications.domain.models.DispatchSuccessResult
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.LaxEmailAddress
 import uk.gov.hmrc.apiplatform.modules.commands.applications.domain.models.CommandHandlerTypes
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.ApplicationUpdateSuccessful
 
 class IpAllowListControllerSpec
     extends BaseControllerSpec
@@ -475,15 +476,12 @@ class IpAllowListControllerSpec
   }
 
   "activateIpAllowlist" should {
-    val CHT = new CommandHandlerTypes[DispatchSuccessResult] {}
-    import CHT.Implicits._
-
     "activate the IP allowlist and return the success page" in new Setup {
       givenApplicationAction(anApplicationWithoutIpAllowlist, givenTheUserIsLoggedInAs(admin))
       when(mockIpAllowlistService.getIpAllowlistFlow(anApplicationWithoutIpAllowlist, sessionId))
         .thenReturn(successful(IpAllowlistFlow(sessionId, Set("2.2.2.0/24"))))
       when(mockIpAllowlistService.activateIpAllowlist(eqTo(anApplicationWithoutIpAllowlist), eqTo(sessionId), *[LaxEmailAddress])(*))
-        .thenReturn(DispatchSuccessResult(mock[Application]).asSuccess)
+        .thenReturn(successful(ApplicationUpdateSuccessful))
 
       val result: Future[Result] = underTest.activateIpAllowlist(anApplicationWithoutIpAllowlist.id)(loggedInRequest)
 
@@ -536,13 +534,10 @@ class IpAllowListControllerSpec
   }
 
   "removeIpAllowlistAction" should {
-    val CHT = new CommandHandlerTypes[DispatchSuccessResult] {}
-    import CHT.Implicits._
-    
     "deactivate the IP allowlist and return the success page" in new Setup {
       givenApplicationAction(anApplicationWithoutIpAllowlist, givenTheUserIsLoggedInAs(admin))
       when(mockIpAllowlistService.deactivateIpAllowlist(eqTo(anApplicationWithoutIpAllowlist), eqTo(sessionId), *[LaxEmailAddress])(*))
-        .thenReturn(DispatchSuccessResult(mock[Application]).asSuccess)
+        .thenReturn(successful(ApplicationUpdateSuccessful))
 
       val result: Future[Result] = underTest.removeIpAllowlistAction(anApplicationWithoutIpAllowlist.id)(loggedInRequest)
 

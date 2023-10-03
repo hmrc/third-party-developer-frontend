@@ -183,18 +183,14 @@ class IpAllowlistServiceSpec
 
       val result = await(underTest.activateIpAllowlist(app, sessionId, standardDeveloper.email))
 
-      result.isRight shouldBe true
-      inside(result) {
-        case Right(DispatchSuccessResult(response)) => 
-          response shouldBe app
+      result shouldBe ApplicationUpdateSuccessful
 
-          inside(ApplicationCommandConnectorMock.Dispatch.verifyCommand()) {
-            case ApplicationCommands.ChangeIpAllowlist(actor, _, required, oldIpAllowlist, newIpAllowlist) =>
-              actor shouldBe Actors.AppCollaborator(standardDeveloper.email)
-              required shouldBe true
-              oldIpAllowlist shouldBe List(CidrBlock("1.1.1.1/24"))
-              newIpAllowlist shouldBe List(CidrBlock("1.1.1.1/24"), CidrBlock("2.2.2.2/24"))
-          }
+      inside(ApplicationCommandConnectorMock.Dispatch.verifyCommand()) {
+        case ApplicationCommands.ChangeIpAllowlist(actor, _, required, oldIpAllowlist, newIpAllowlist) =>
+          actor shouldBe Actors.AppCollaborator(standardDeveloper.email)
+          required shouldBe true
+          oldIpAllowlist shouldBe List(CidrBlock("1.1.1.1/24"))
+          newIpAllowlist shouldBe List(CidrBlock("1.1.1.1/24"), CidrBlock("2.2.2.2/24"))
       }
 
       FlowRepositoryMock.DeleteBySessionIdAndFlowType.verifyCalledWith(sessionId, IP_ALLOW_LIST)
@@ -249,18 +245,14 @@ class IpAllowlistServiceSpec
 
       val result = await(underTest.deactivateIpAllowlist(app, sessionId, standardDeveloper.email))
 
-      result.isRight shouldBe true
-      inside(result) {
-        case Right(DispatchSuccessResult(response)) => 
-          response shouldBe app
+      result shouldBe ApplicationUpdateSuccessful
 
-          inside(ApplicationCommandConnectorMock.Dispatch.verifyCommand()) {
-            case ApplicationCommands.ChangeIpAllowlist(actor, _, required, oldIpAllowlist, newIpAllowlist) =>
-              actor shouldBe Actors.AppCollaborator(standardDeveloper.email)
-              required shouldBe false
-              oldIpAllowlist shouldBe List(CidrBlock("1.1.1.1/24"))
-              newIpAllowlist shouldBe List.empty
-          }
+      inside(ApplicationCommandConnectorMock.Dispatch.verifyCommand()) {
+        case ApplicationCommands.ChangeIpAllowlist(actor, _, required, oldIpAllowlist, newIpAllowlist) =>
+          actor shouldBe Actors.AppCollaborator(standardDeveloper.email)
+          required shouldBe false
+          oldIpAllowlist shouldBe List(CidrBlock("1.1.1.1/24"))
+          newIpAllowlist shouldBe List.empty
       }
     }
 

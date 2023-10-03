@@ -34,6 +34,7 @@ import uk.gov.hmrc.apiplatform.modules.common.services.ClockNow
 import java.time.Clock
 import uk.gov.hmrc.apiplatform.modules.applications.domain.models.CidrBlock
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.LaxEmailAddress
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.ApplicationUpdateSuccessful
 
 @Singleton
 class IpAllowlistService @Inject() (
@@ -82,24 +83,24 @@ class IpAllowlistService @Inject() (
     } yield savedFlow
   }
 
-  def activateIpAllowlist(app: Application, sessionId: String, requestingEmail: LaxEmailAddress)(implicit hc: HeaderCarrier): AppCmdResult = {
+  def activateIpAllowlist(app: Application, sessionId: String, requestingEmail: LaxEmailAddress)(implicit hc: HeaderCarrier): Future[ApplicationUpdateSuccessful] = {
     for {
       flow      <- fetchIpAllowListFlow(sessionId, None, createIfNotFound = false)
       _         = if (flow.allowlist.isEmpty) throw new ForbiddenException(s"IP allowlist for session ID $sessionId cannot be activated because it is empty")
       command   = ApplicationCommands.ChangeIpAllowlist(Actors.AppCollaborator(requestingEmail), now(), app.ipAllowlist.required, app.ipAllowlist.allowlist.map(CidrBlock(_)).toList, flow.allowlist.map(CidrBlock(_)).toList)
-      response  <- applicationCommandConnector.dispatch(app.id, command, Set.empty)
+      response  <- applicationCommandConnector.dispatch(app.id, command, Set.empty).map(_ => ApplicationUpdateSuccessful)
       _         <- flowRepository.deleteBySessionIdAndFlowType(sessionId, IP_ALLOW_LIST)
     } yield response
   }
 
-  def deactivateIpAllowlist(app: Application, sessionId: String, requestingEmail: LaxEmailAddress)(implicit hc: HeaderCarrier): AppCmdResult = {
+  def deactivateIpAllowlist(app: Application, sessionId: String, requestingEmail: LaxEmailAddress)(implicit hc: HeaderCarrier): Future[ApplicationUpdateSuccessful]  = {
     if (app.ipAllowlist.required) {
       Future.failed(new ForbiddenException(s"IP allowlist for session ID $sessionId cannot be deactivated because it is required"))
     } else {
       val command = ApplicationCommands.ChangeIpAllowlist(Actors.AppCollaborator(requestingEmail), now(), app.ipAllowlist.required, app.ipAllowlist.allowlist.map(CidrBlock(_)).toList, List.empty)
 
       for {
-        response  <- applicationCommandConnector.dispatch(app.id, command, Set.empty)
+        response  <- applicationCommandConnector.dispatch(app.id, command, Set.empty).map(_ => ApplicationUpdateSuccessful)
         _         <- flowRepository.deleteBySessionIdAndFlowType(sessionId, IP_ALLOW_LIST)
       } yield response
     }
