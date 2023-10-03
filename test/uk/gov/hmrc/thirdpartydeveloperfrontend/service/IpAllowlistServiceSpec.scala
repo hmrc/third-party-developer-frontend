@@ -34,16 +34,28 @@ import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.flows.IpAllowlistFl
 import uk.gov.hmrc.thirdpartydeveloperfrontend.service.PushPullNotificationsService.PushPullNotificationsConnector
 import uk.gov.hmrc.thirdpartydeveloperfrontend.service.SubscriptionFieldsService.SubscriptionFieldsConnector
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils._
+import uk.gov.hmrc.thirdpartydeveloperfrontend.mocks.connectors.ApplicationCommandConnectorMockModule
+import uk.gov.hmrc.apiplatform.modules.common.utils.FixedClock
+import uk.gov.hmrc.apiplatform.modules.commands.applications.domain.models.ApplicationCommands
+import uk.gov.hmrc.apiplatform.modules.common.domain.models.LaxEmailAddress.StringSyntax
+import uk.gov.hmrc.apiplatform.modules.commands.applications.domain.models.DispatchSuccessResult
+import uk.gov.hmrc.apiplatform.modules.common.domain.models.Actors
+import uk.gov.hmrc.apiplatform.modules.applications.domain.models.CidrBlock
+import uk.gov.hmrc.thirdpartydeveloperfrontend.builder.DeveloperTestData
 
 class IpAllowlistServiceSpec
     extends AsyncHmrcSpec
     with Matchers
     with TestApplications
     with CollaboratorTracker
+    with DeveloperTestData
     with DeveloperBuilder
     with LocalUserIdTracker {
 
-  trait Setup extends FlowRepositoryMockModule {
+  trait Setup extends FlowRepositoryMockModule
+    with FixedClock
+    with ApplicationCommandConnectorMockModule {
+
     implicit val hc: HeaderCarrier = HeaderCarrier()
     val sessionId: String          = randomUUID.toString
 
@@ -52,7 +64,12 @@ class IpAllowlistServiceSpec
     when(mockConnectorsWrapper.forEnvironment(*))
       .thenReturn(Connectors(mockThirdPartyApplicationConnector, mock[SubscriptionFieldsConnector], mock[PushPullNotificationsConnector]))
 
-    val underTest = new IpAllowlistService(FlowRepositoryMock.aMock, mockConnectorsWrapper)
+    val underTest = new IpAllowlistService(
+      FlowRepositoryMock.aMock,
+      mockConnectorsWrapper,
+      ApplicationCommandConnectorMock.aMock,
+      clock
+    )
   }
 
   "getIpAllowlistFlow" should {
@@ -141,18 +158,45 @@ class IpAllowlistServiceSpec
   }
 
   "activateIpAllowlist" should {
-    "save the allowlist in TPA" in new Setup {
-      val app: Application              = anApplication()
-      val existingFlow: IpAllowlistFlow = IpAllowlistFlow(sessionId, Set("1.1.1.1/24"))
+    "successfully dispatch a command to change ip allowlist" in new Setup {
+      val app = anApplication(
+        developerEmail = standardDeveloper.email,
+        ipAllowlist = IpAllowlist(
+          required = true,
+          allowlist = Set("1.1.1.1/24")
+        )
+      )
+
+      val existingFlow = IpAllowlistFlow(sessionId, Set("1.1.1.1/24", "2.2.2.2/24"))
       FlowRepositoryMock.FetchBySessionIdAndFlowType.thenReturn[IpAllowlistFlow](sessionId)(existingFlow)
-      when(mockThirdPartyApplicationConnector.updateIpAllowlist(app.id, app.ipAllowlist.required, existingFlow.allowlist))
-        .thenReturn(successful(ApplicationUpdateSuccessful))
+
+      val cmd = ApplicationCommands.ChangeIpAllowlist(
+        Actors.AppCollaborator(standardDeveloper.email), 
+        now(), 
+        true, 
+        List(CidrBlock("1.1.1.1/24")), 
+        List(CidrBlock("1.1.1.1/24"), CidrBlock("2.2.2.2/24"))
+      )
+
+      ApplicationCommandConnectorMock.Dispatch.thenReturnsSuccessFor(cmd)(app)
       FlowRepositoryMock.DeleteBySessionIdAndFlowType.thenReturnSuccess(sessionId, IP_ALLOW_LIST)
 
-      val result: ApplicationUpdateSuccessful = await(underTest.activateIpAllowlist(app, sessionId))
+      val result = await(underTest.activateIpAllowlist(app, sessionId, standardDeveloper.email))
 
-      result shouldBe ApplicationUpdateSuccessful
-      verify(mockThirdPartyApplicationConnector).updateIpAllowlist(app.id, app.ipAllowlist.required, existingFlow.allowlist)
+      result.isRight shouldBe true
+      inside(result) {
+        case Right(DispatchSuccessResult(response)) => 
+          response shouldBe app
+
+          inside(ApplicationCommandConnectorMock.Dispatch.verifyCommand()) {
+            case ApplicationCommands.ChangeIpAllowlist(actor, _, required, oldIpAllowlist, newIpAllowlist) =>
+              actor shouldBe Actors.AppCollaborator(standardDeveloper.email)
+              required shouldBe true
+              oldIpAllowlist shouldBe List(CidrBlock("1.1.1.1/24"))
+              newIpAllowlist shouldBe List(CidrBlock("1.1.1.1/24"), CidrBlock("2.2.2.2/24"))
+          }
+      }
+
       FlowRepositoryMock.DeleteBySessionIdAndFlowType.verifyCalledWith(sessionId, IP_ALLOW_LIST)
     }
 
@@ -161,7 +205,7 @@ class IpAllowlistServiceSpec
       FlowRepositoryMock.FetchBySessionIdAndFlowType.thenReturn[IpAllowlistFlow](sessionId)(existingFlow)
 
       val expectedException: ForbiddenException = intercept[ForbiddenException] {
-        await(underTest.activateIpAllowlist(anApplication(), sessionId))
+        await(underTest.activateIpAllowlist(anApplication(), sessionId, standardDeveloper.email))
       }
 
       expectedException.getMessage shouldBe s"IP allowlist for session ID $sessionId cannot be activated because it is empty"
@@ -172,7 +216,7 @@ class IpAllowlistServiceSpec
       FlowRepositoryMock.FetchBySessionIdAndFlowType.thenReturnNothing[IpAllowlistFlow](sessionId)
 
       val expectedException: IllegalStateException = intercept[IllegalStateException] {
-        await(underTest.activateIpAllowlist(anApplication(), sessionId))
+        await(underTest.activateIpAllowlist(anApplication(), sessionId, standardDeveloper.email))
       }
 
       expectedException.getMessage shouldBe s"No IP allowlist flow exists for session ID $sessionId"
@@ -182,22 +226,51 @@ class IpAllowlistServiceSpec
 
   "deactivateIpAllowlist" should {
     "update the allowlist in TPA with an empty set" in new Setup {
-      val app: Application = anApplication()
-      when(mockThirdPartyApplicationConnector.updateIpAllowlist(app.id, app.ipAllowlist.required, Set.empty))
-        .thenReturn(successful(ApplicationUpdateSuccessful))
+      val app: Application = anApplication(
+        developerEmail = standardDeveloper.email,
+        ipAllowlist = IpAllowlist(
+          required = false,
+          allowlist = Set("1.1.1.1/24")
+        )
+      )
+
+      val existingFlow = IpAllowlistFlow(sessionId, Set("1.1.1.1/24", "2.2.2.2/24"))
+      FlowRepositoryMock.FetchBySessionIdAndFlowType.thenReturn[IpAllowlistFlow](sessionId)(existingFlow)
+
+      val cmd = ApplicationCommands.ChangeIpAllowlist(
+        Actors.AppCollaborator(standardDeveloper.email), 
+        now(), 
+        false, 
+        List(CidrBlock("1.1.1.1/24")), 
+        List.empty
+      )
+      ApplicationCommandConnectorMock.Dispatch.thenReturnsSuccessFor(cmd)(app)
       FlowRepositoryMock.DeleteBySessionIdAndFlowType.thenReturnSuccess(sessionId, IP_ALLOW_LIST)
 
-      val result: ApplicationUpdateSuccessful = await(underTest.deactivateIpAllowlist(app, sessionId))
+      val result = await(underTest.deactivateIpAllowlist(app, sessionId, standardDeveloper.email))
 
-      result shouldBe ApplicationUpdateSuccessful
-      verify(mockThirdPartyApplicationConnector).updateIpAllowlist(app.id, app.ipAllowlist.required, Set.empty)
+      result.isRight shouldBe true
+      inside(result) {
+        case Right(DispatchSuccessResult(response)) => 
+          response shouldBe app
+
+          inside(ApplicationCommandConnectorMock.Dispatch.verifyCommand()) {
+            case ApplicationCommands.ChangeIpAllowlist(actor, _, required, oldIpAllowlist, newIpAllowlist) =>
+              actor shouldBe Actors.AppCollaborator(standardDeveloper.email)
+              required shouldBe false
+              oldIpAllowlist shouldBe List(CidrBlock("1.1.1.1/24"))
+              newIpAllowlist shouldBe List.empty
+          }
+      }
     }
 
     "fail when the IP allowlist is required" in new Setup {
-      val app: Application = anApplication(ipAllowlist = IpAllowlist(required = true))
+      val app: Application = anApplication(
+        ipAllowlist = IpAllowlist(required = true)
+      )
 
       val expectedException: ForbiddenException = intercept[ForbiddenException] {
-        await(underTest.deactivateIpAllowlist(app, sessionId))
+        await(underTest.deactivateIpAllowlist(app, sessionId, standardDeveloper.email))
       }
 
       expectedException.getMessage shouldBe s"IP allowlist for session ID $sessionId cannot be deactivated because it is required"
