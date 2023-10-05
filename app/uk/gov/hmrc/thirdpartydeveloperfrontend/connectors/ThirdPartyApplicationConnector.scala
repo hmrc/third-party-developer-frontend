@@ -150,16 +150,6 @@ abstract class ThirdPartyApplicationConnector(config: ApplicationConfig, metrics
       }
   }
 
-  def updateIpAllowlist(applicationId: ApplicationId, required: Boolean, ipAllowlist: Set[String])(implicit hc: HeaderCarrier): Future[ApplicationUpdateSuccessful] =
-    metrics.record(api) {
-      http.PUT[UpdateIpAllowlistRequest, ErrorOrUnit](s"$serviceBaseUrl/application/${applicationId}/ipAllowlist", UpdateIpAllowlistRequest(required, ipAllowlist))
-        .map(throwOrOptionOf)
-        .map {
-          case Some(_) => ApplicationUpdateSuccessful
-          case None    => throw new ApplicationNotFound
-        }
-    }
-
   def fetchSubscription(applicationId: ApplicationId)(implicit hc: HeaderCarrier): Future[Set[ApiIdentifier]] = {
     http.GET[Set[ApiIdentifier]](s"$serviceBaseUrl/application/${applicationId}/subscription")
   }
