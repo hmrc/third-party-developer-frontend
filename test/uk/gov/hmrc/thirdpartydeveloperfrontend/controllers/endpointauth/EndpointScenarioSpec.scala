@@ -117,8 +117,6 @@ abstract class EndpointScenarioSpec extends AsyncHmrcSpec with GuiceOneAppPerSui
   when(tpaProductionConnector.updateApproval(*[ApplicationId], *[CheckInformation])(*)).thenReturn(Future.successful(ApplicationUpdateSuccessful))
   when(tpaSandboxConnector.update(*[ApplicationId], *[UpdateApplicationRequest])(*)).thenReturn(Future.successful(ApplicationUpdateSuccessful))
   when(tpaProductionConnector.update(*[ApplicationId], *[UpdateApplicationRequest])(*)).thenReturn(Future.successful(ApplicationUpdateSuccessful))
-  when(tpaSandboxConnector.updateIpAllowlist(*[ApplicationId], *[Boolean], *[Set[String]])(*)).thenReturn(Future.successful(ApplicationUpdateSuccessful))
-  when(tpaProductionConnector.updateIpAllowlist(*[ApplicationId], *[Boolean], *[Set[String]])(*)).thenReturn(Future.successful(ApplicationUpdateSuccessful))
 
   when(tpaProductionConnector.fetchTermsOfUseInvitations()(*)).thenReturn(Future.successful(List.empty))
   when(tpaProductionConnector.fetchTermsOfUseInvitation(*[ApplicationId])(*)).thenReturn(Future.successful(Some(TermsOfUseInvitation(

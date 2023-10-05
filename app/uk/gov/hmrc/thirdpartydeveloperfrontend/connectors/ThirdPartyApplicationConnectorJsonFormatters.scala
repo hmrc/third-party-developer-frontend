@@ -16,14 +16,8 @@
 
 package uk.gov.hmrc.thirdpartydeveloperfrontend.connectors
 
-import play.api.libs.json.{Format, Json}
-
-import uk.gov.hmrc.thirdpartydeveloperfrontend.connectors.ThirdPartyApplicationConnectorDomain.UpdateIpAllowlistRequest
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.services.{ApiDefinitionsJsonFormatters, SubscriptionsJsonFormatters}
 
 private[connectors] object ThirdPartyApplicationConnectorJsonFormatters
     extends SubscriptionsJsonFormatters
-    with ApiDefinitionsJsonFormatters {
-
-  implicit val formatUpdateIpAllowlistRequest: Format[UpdateIpAllowlistRequest] = Json.format[UpdateIpAllowlistRequest]
-}
+    with ApiDefinitionsJsonFormatters
