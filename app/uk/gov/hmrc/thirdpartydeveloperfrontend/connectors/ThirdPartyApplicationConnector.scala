@@ -39,7 +39,6 @@ import uk.gov.hmrc.thirdpartydeveloperfrontend.service.ApplicationService.Applic
 abstract class ThirdPartyApplicationConnector(config: ApplicationConfig, metrics: ConnectorMetrics) extends ApplicationConnector
     with CommonResponseHandlers with ApplicationLogger with HttpErrorFunctions {
 
-  import ThirdPartyApplicationConnectorDomain._
   import ThirdPartyApplicationConnectorJsonFormatters._
 
   protected val httpClient: HttpClient
@@ -165,10 +164,6 @@ abstract class ThirdPartyApplicationConnector(config: ApplicationConfig, metrics
       http.GET[Option[TermsOfUseInvitation]](s"$serviceBaseUrl/terms-of-use/application/${applicationId}")
     }
   }
-}
-
-private[connectors] object ThirdPartyApplicationConnectorDomain {
-  case class UpdateIpAllowlistRequest(required: Boolean, allowlist: Set[String])
 }
 
 @Singleton

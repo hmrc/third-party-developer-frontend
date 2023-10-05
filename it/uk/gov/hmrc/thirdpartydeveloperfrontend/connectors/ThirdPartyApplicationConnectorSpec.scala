@@ -18,7 +18,6 @@ package uk.gov.hmrc.thirdpartydeveloperfrontend.connectors
 
 import java.time.{LocalDateTime, Period, ZoneOffset}
 import com.github.tomakehurst.wiremock.client.WireMock._
-import uk.gov.hmrc.thirdpartydeveloperfrontend.connectors.ThirdPartyApplicationConnectorDomain._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications._
 import play.api.http.Status._
