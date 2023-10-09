@@ -30,7 +30,6 @@ import uk.gov.hmrc.http.{ForbiddenException, HeaderCarrier}
 
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.LaxEmailAddress.StringSyntax
 import uk.gov.hmrc.thirdpartydeveloperfrontend.builder.DeveloperBuilder
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.ApplicationUpdateSuccessful
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.{Application, IpAllowlist}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.{Developer, DeveloperSession, LoggedInState, Session}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.flows.IpAllowlistFlow
@@ -38,6 +37,10 @@ import uk.gov.hmrc.thirdpartydeveloperfrontend.mocks.service._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.service.IpAllowlistService
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.WithLoggedInSession._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.{LocalUserIdTracker, TestApplications, WithCSRFAddToken}
+import uk.gov.hmrc.apiplatform.modules.commands.applications.domain.models.DispatchSuccessResult
+import uk.gov.hmrc.apiplatform.modules.common.domain.models.LaxEmailAddress
+import uk.gov.hmrc.apiplatform.modules.commands.applications.domain.models.CommandHandlerTypes
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.ApplicationUpdateSuccessful
 
 class IpAllowListControllerSpec
     extends BaseControllerSpec
@@ -477,22 +480,22 @@ class IpAllowListControllerSpec
       givenApplicationAction(anApplicationWithoutIpAllowlist, givenTheUserIsLoggedInAs(admin))
       when(mockIpAllowlistService.getIpAllowlistFlow(anApplicationWithoutIpAllowlist, sessionId))
         .thenReturn(successful(IpAllowlistFlow(sessionId, Set("2.2.2.0/24"))))
-      when(mockIpAllowlistService.activateIpAllowlist(eqTo(anApplicationWithoutIpAllowlist), eqTo(sessionId))(*))
+      when(mockIpAllowlistService.activateIpAllowlist(eqTo(anApplicationWithoutIpAllowlist), eqTo(sessionId), *[LaxEmailAddress])(*))
         .thenReturn(successful(ApplicationUpdateSuccessful))
 
       val result: Future[Result] = underTest.activateIpAllowlist(anApplicationWithoutIpAllowlist.id)(loggedInRequest)
 
       status(result) shouldBe OK
-      val body: String = contentAsString(result)
+      val body = contentAsString(result)
       body should include("Your IP allow list is active")
-      verify(mockIpAllowlistService).activateIpAllowlist(eqTo(anApplicationWithoutIpAllowlist), eqTo(sessionId))(*)
+      verify(mockIpAllowlistService).activateIpAllowlist(eqTo(anApplicationWithoutIpAllowlist), eqTo(sessionId), eqTo(admin.email))(*)
       verifyIpAllowlistSurveyIsPresent(body)
     }
 
     "return 403 when the service throws a forbidden exception" in new Setup {
       givenApplicationAction(anApplicationWithoutIpAllowlist, givenTheUserIsLoggedInAs(admin))
       when(mockIpAllowlistService.getIpAllowlistFlow(anApplicationWithoutIpAllowlist, sessionId)).thenReturn(successful(IpAllowlistFlow(sessionId, Set())))
-      when(mockIpAllowlistService.activateIpAllowlist(eqTo(anApplicationWithoutIpAllowlist), eqTo(sessionId))(*))
+      when(mockIpAllowlistService.activateIpAllowlist(eqTo(anApplicationWithoutIpAllowlist), eqTo(sessionId), *[LaxEmailAddress])(*))
         .thenReturn(failed(new ForbiddenException("forbidden")))
 
       val result: Future[Result] = underTest.activateIpAllowlist(anApplicationWithoutIpAllowlist.id)(loggedInRequest)
@@ -533,20 +536,21 @@ class IpAllowListControllerSpec
   "removeIpAllowlistAction" should {
     "deactivate the IP allowlist and return the success page" in new Setup {
       givenApplicationAction(anApplicationWithoutIpAllowlist, givenTheUserIsLoggedInAs(admin))
-      when(mockIpAllowlistService.deactivateIpAllowlist(eqTo(anApplicationWithoutIpAllowlist), eqTo(sessionId))(*)).thenReturn(successful(ApplicationUpdateSuccessful))
+      when(mockIpAllowlistService.deactivateIpAllowlist(eqTo(anApplicationWithoutIpAllowlist), eqTo(sessionId), *[LaxEmailAddress])(*))
+        .thenReturn(successful(ApplicationUpdateSuccessful))
 
       val result: Future[Result] = underTest.removeIpAllowlistAction(anApplicationWithoutIpAllowlist.id)(loggedInRequest)
 
       status(result) shouldBe OK
       val body: String = contentAsString(result)
       body should include("IP allow list removed")
-      verify(mockIpAllowlistService).deactivateIpAllowlist(eqTo(anApplicationWithoutIpAllowlist), eqTo(sessionId))(*)
+      verify(mockIpAllowlistService).deactivateIpAllowlist(eqTo(anApplicationWithoutIpAllowlist), eqTo(sessionId), eqTo(admin.email))(*)
       verifyIpAllowlistSurveyIsPresent(body)
     }
 
     "return 403 when the service throws a forbidden exception" in new Setup {
       givenApplicationAction(anApplicationWithoutIpAllowlist, givenTheUserIsLoggedInAs(admin))
-      when(mockIpAllowlistService.deactivateIpAllowlist(eqTo(anApplicationWithoutIpAllowlist), eqTo(sessionId))(*))
+      when(mockIpAllowlistService.deactivateIpAllowlist(eqTo(anApplicationWithoutIpAllowlist), eqTo(sessionId), *[LaxEmailAddress])(*))
         .thenReturn(failed(new ForbiddenException("forbidden")))
 
       val result: Future[Result] = underTest.removeIpAllowlistAction(anApplicationWithoutIpAllowlist.id)(loggedInRequest)

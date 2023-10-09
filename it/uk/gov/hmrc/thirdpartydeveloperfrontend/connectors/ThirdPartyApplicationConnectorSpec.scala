@@ -18,7 +18,6 @@ package uk.gov.hmrc.thirdpartydeveloperfrontend.connectors
 
 import java.time.{LocalDateTime, Period, ZoneOffset}
 import com.github.tomakehurst.wiremock.client.WireMock._
-import uk.gov.hmrc.thirdpartydeveloperfrontend.connectors.ThirdPartyApplicationConnectorDomain._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications._
 import play.api.http.Status._
@@ -432,39 +431,6 @@ class ThirdPartyApplicationConnectorSpec extends BaseConnectorIntegrationSpec wi
       result shouldBe Invalid(invalidName = true, duplicateName = false)
     }
 
-  }
-
-  "updateIpAllowlist" should {
-    val allowlist     = Set("1.1.1.1/24")
-    val updateRequest = UpdateIpAllowlistRequest(required = false, allowlist)
-    val url           = s"/application/${applicationId}/ipAllowlist"
-
-    "return success response in case of a 204 on backend " in new Setup {
-      stubFor(
-        put(urlEqualTo(url))
-          .withJsonRequestBody(updateRequest)
-          .willReturn(
-            aResponse()
-              .withStatus(OK)
-          )
-      )
-      val result: ApplicationUpdateSuccessful = await(connector.updateIpAllowlist(applicationId, required = false, allowlist))
-      result shouldEqual ApplicationUpdateSuccessful
-    }
-
-    "return ApplicationNotFound response in case of a 404 on backend " in new Setup {
-      stubFor(
-        put(urlEqualTo(url))
-          .withJsonRequestBody(updateRequest)
-          .willReturn(
-            aResponse()
-              .withStatus(NOT_FOUND)
-          )
-      )
-      intercept[ApplicationNotFound] {
-        await(connector.updateIpAllowlist(applicationId, required = false, allowlist))
-      }
-    }
   }
 
   private def aClientSecret() = ClientSecretResponse(ClientSecret.Id.random, UUID.randomUUID.toString, FixedClock.now())
