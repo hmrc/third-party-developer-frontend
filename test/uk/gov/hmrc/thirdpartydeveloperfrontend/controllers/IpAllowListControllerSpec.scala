@@ -28,8 +28,10 @@ import play.api.test.FakeRequest
 import play.api.test.Helpers._
 import uk.gov.hmrc.http.{ForbiddenException, HeaderCarrier}
 
+import uk.gov.hmrc.apiplatform.modules.common.domain.models.LaxEmailAddress
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.LaxEmailAddress.StringSyntax
 import uk.gov.hmrc.thirdpartydeveloperfrontend.builder.DeveloperBuilder
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.ApplicationUpdateSuccessful
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.{Application, IpAllowlist}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.{Developer, DeveloperSession, LoggedInState, Session}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.flows.IpAllowlistFlow
@@ -37,10 +39,6 @@ import uk.gov.hmrc.thirdpartydeveloperfrontend.mocks.service._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.service.IpAllowlistService
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.WithLoggedInSession._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.{LocalUserIdTracker, TestApplications, WithCSRFAddToken}
-import uk.gov.hmrc.apiplatform.modules.commands.applications.domain.models.DispatchSuccessResult
-import uk.gov.hmrc.apiplatform.modules.common.domain.models.LaxEmailAddress
-import uk.gov.hmrc.apiplatform.modules.commands.applications.domain.models.CommandHandlerTypes
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.ApplicationUpdateSuccessful
 
 class IpAllowListControllerSpec
     extends BaseControllerSpec

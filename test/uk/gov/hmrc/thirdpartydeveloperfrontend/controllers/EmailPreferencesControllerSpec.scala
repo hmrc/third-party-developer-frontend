@@ -57,8 +57,8 @@ class EmailPreferencesControllerSpec
     with DeveloperBuilder
     with LocalUserIdTracker {
 
-      val category1 = ApiCategory.INCOME_TAX_MTD
-      val category2 = ApiCategory.VAT
+  val category1 = ApiCategory.INCOME_TAX_MTD
+  val category2 = ApiCategory.VAT
 
   trait Setup {
     val mockEmailPreferencesService: EmailPreferencesService = mock[EmailPreferencesService]
@@ -109,8 +109,7 @@ class EmailPreferencesControllerSpec
         mockSelectApisFromSubscriptionsView,
         mockSelectTopicsFromSubscriptionsView
       )
-  
-    
+
     val emailPreferences: EmailPreferences                   = EmailPreferences(List(TaxRegimeInterests(category1.toString, Set("api1", "api2"))), Set.empty)
     val developer: Developer                                 = buildDeveloper()
     val developerWithEmailPrefences: Developer               = developer.copy(emailPreferences = emailPreferences)
@@ -122,7 +121,6 @@ class EmailPreferencesControllerSpec
     val loggedInRequest: FakeRequest[AnyContentAsEmpty.type] = FakeRequest().withLoggedIn(controllerUnderTest, implicitly)(sessionId).withSession(sessionParams: _*)
   }
 
-      
   "emailPreferencesSummaryPage" should {
     val mockCategory1: APICategoryDisplayDetails            = APICategoryDisplayDetails.from(category1)
     val mockCategory2: APICategoryDisplayDetails            = APICategoryDisplayDetails.from(category2)
@@ -404,7 +402,7 @@ class EmailPreferencesControllerSpec
   "flowSelectApiAction" should {
 
     val visibleApis  = List(CombinedApi("nameApi1", "serviceNameApi1", List(category2, category1), REST_API))
-    val apiCategory1  = APICategoryDisplayDetails(category1.toString(), category1.displayText)
+    val apiCategory1 = APICategoryDisplayDetails(category1.toString(), category1.displayText)
     val apiCategory2 = APICategoryDisplayDetails(category2.toString(), category2.displayText)
 
     "redirect to the next category page" in new Setup {
@@ -444,7 +442,7 @@ class EmailPreferencesControllerSpec
     }
 
     "return 400 when form has missing elements" in new Setup {
-      val requestWithForm: FakeRequest[AnyContentAsFormUrlEncoded] = loggedInRequest.withFormUrlEncodedBody("currentCategory" -> category2.toString() )
+      val requestWithForm: FakeRequest[AnyContentAsFormUrlEncoded] = loggedInRequest.withFormUrlEncodedBody("currentCategory" -> category2.toString())
       val emailFlow: EmailPreferencesFlowV2                        = EmailPreferencesFlowV2.fromDeveloperSession(loggedInDeveloper)
         .copy(selectedCategories = Set(apiCategory1.category, apiCategory2.category), visibleApis = visibleApis)
 

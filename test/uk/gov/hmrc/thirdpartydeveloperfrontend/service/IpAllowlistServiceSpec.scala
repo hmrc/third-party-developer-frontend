@@ -18,30 +18,26 @@ package uk.gov.hmrc.thirdpartydeveloperfrontend.service
 
 import java.util.UUID.randomUUID
 import scala.concurrent.ExecutionContext.Implicits.global
-import scala.concurrent.Future.successful
 
 import org.scalatest.matchers.should.Matchers
 
 import uk.gov.hmrc.http.{ForbiddenException, HeaderCarrier}
 
+import uk.gov.hmrc.apiplatform.modules.applications.domain.models.CidrBlock
+import uk.gov.hmrc.apiplatform.modules.commands.applications.domain.models.ApplicationCommands
+import uk.gov.hmrc.apiplatform.modules.common.domain.models.Actors
+import uk.gov.hmrc.apiplatform.modules.common.utils.FixedClock
 import uk.gov.hmrc.apiplatform.modules.uplift.services.mocks.FlowRepositoryMockModule
-import uk.gov.hmrc.thirdpartydeveloperfrontend.builder.DeveloperBuilder
+import uk.gov.hmrc.thirdpartydeveloperfrontend.builder.{DeveloperBuilder, DeveloperTestData}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.connectors.ThirdPartyApplicationConnector
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.ApplicationUpdateSuccessful
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.{Application, IpAllowlist}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.flows.FlowType.IP_ALLOW_LIST
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.flows.IpAllowlistFlow
+import uk.gov.hmrc.thirdpartydeveloperfrontend.mocks.connectors.ApplicationCommandConnectorMockModule
 import uk.gov.hmrc.thirdpartydeveloperfrontend.service.PushPullNotificationsService.PushPullNotificationsConnector
 import uk.gov.hmrc.thirdpartydeveloperfrontend.service.SubscriptionFieldsService.SubscriptionFieldsConnector
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils._
-import uk.gov.hmrc.thirdpartydeveloperfrontend.mocks.connectors.ApplicationCommandConnectorMockModule
-import uk.gov.hmrc.apiplatform.modules.common.utils.FixedClock
-import uk.gov.hmrc.apiplatform.modules.commands.applications.domain.models.ApplicationCommands
-import uk.gov.hmrc.apiplatform.modules.common.domain.models.LaxEmailAddress.StringSyntax
-import uk.gov.hmrc.apiplatform.modules.commands.applications.domain.models.DispatchSuccessResult
-import uk.gov.hmrc.apiplatform.modules.common.domain.models.Actors
-import uk.gov.hmrc.apiplatform.modules.applications.domain.models.CidrBlock
-import uk.gov.hmrc.thirdpartydeveloperfrontend.builder.DeveloperTestData
 
 class IpAllowlistServiceSpec
     extends AsyncHmrcSpec
@@ -53,8 +49,8 @@ class IpAllowlistServiceSpec
     with LocalUserIdTracker {
 
   trait Setup extends FlowRepositoryMockModule
-    with FixedClock
-    with ApplicationCommandConnectorMockModule {
+      with FixedClock
+      with ApplicationCommandConnectorMockModule {
 
     implicit val hc: HeaderCarrier = HeaderCarrier()
     val sessionId: String          = randomUUID.toString
@@ -171,10 +167,10 @@ class IpAllowlistServiceSpec
       FlowRepositoryMock.FetchBySessionIdAndFlowType.thenReturn[IpAllowlistFlow](sessionId)(existingFlow)
 
       val cmd = ApplicationCommands.ChangeIpAllowlist(
-        Actors.AppCollaborator(standardDeveloper.email), 
-        now(), 
-        true, 
-        List(CidrBlock("1.1.1.1/24")), 
+        Actors.AppCollaborator(standardDeveloper.email),
+        now(),
+        true,
+        List(CidrBlock("1.1.1.1/24")),
         List(CidrBlock("1.1.1.1/24"), CidrBlock("2.2.2.2/24"))
       )
 
@@ -234,10 +230,10 @@ class IpAllowlistServiceSpec
       FlowRepositoryMock.FetchBySessionIdAndFlowType.thenReturn[IpAllowlistFlow](sessionId)(existingFlow)
 
       val cmd = ApplicationCommands.ChangeIpAllowlist(
-        Actors.AppCollaborator(standardDeveloper.email), 
-        now(), 
-        false, 
-        List(CidrBlock("1.1.1.1/24")), 
+        Actors.AppCollaborator(standardDeveloper.email),
+        now(),
+        false,
+        List(CidrBlock("1.1.1.1/24")),
         List.empty
       )
       ApplicationCommandConnectorMock.Dispatch.thenReturnsSuccessFor(cmd)(app)

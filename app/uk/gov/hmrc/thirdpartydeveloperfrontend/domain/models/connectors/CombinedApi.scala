@@ -17,6 +17,7 @@
 package uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.connectors
 
 import enumeratum.{Enum, EnumEntry, PlayJsonEnum}
+
 import uk.gov.hmrc.apiplatform.modules.apis.domain.models.ApiCategory
 
 sealed trait ApiType extends EnumEntry

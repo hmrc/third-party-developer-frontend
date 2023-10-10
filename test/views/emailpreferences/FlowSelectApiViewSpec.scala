@@ -28,6 +28,7 @@ import play.api.mvc.AnyContentAsEmpty
 import play.api.test.FakeRequest
 import play.twirl.api.Html
 
+import uk.gov.hmrc.apiplatform.modules.apis.domain.models.ApiCategory
 import uk.gov.hmrc.thirdpartydeveloperfrontend.builder._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.{FormKeys, SelectedApisEmailPreferencesForm}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.connectors.ApiType.REST_API
@@ -36,7 +37,6 @@ import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.{Develop
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.emailpreferences.APICategoryDisplayDetails
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.flows.EmailPreferencesFlowV2
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.{LocalUserIdTracker, WithCSRFAddToken}
-import uk.gov.hmrc.apiplatform.modules.apis.domain.models.ApiCategory
 
 class FlowSelectApiViewSpec extends CommonViewSpec
     with WithCSRFAddToken
@@ -44,11 +44,11 @@ class FlowSelectApiViewSpec extends CommonViewSpec
     with DeveloperSessionBuilder
     with DeveloperTestData {
 
-
-   val category1 = ApiCategory.AGENTS
+  val category1 = ApiCategory.AGENTS
   val category2 = ApiCategory.BUSINESS_RATES
   val category3 = ApiCategory.EXAMPLE
   val category4 = ApiCategory.NATIONAL_INSURANCE
+
   trait Setup {
 
     val developerSessionWithoutEmailPreferences: DeveloperSession = standardDeveloper.loggedIn
@@ -107,7 +107,6 @@ class FlowSelectApiViewSpec extends CommonViewSpec
     // Check submit button is correct
     document.getElementById("submit").text should be("Continue")
   }
-
 
   "Email Preferences Select Api view page" should {
     val apiList  = List(

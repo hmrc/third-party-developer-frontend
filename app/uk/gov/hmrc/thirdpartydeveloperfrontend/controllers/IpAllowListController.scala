@@ -25,6 +25,7 @@ import views.html.ipAllowlist._
 import play.api.data.Form
 import play.api.libs.crypto.CookieSigner
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents, Result}
+import uk.gov.hmrc.http.ForbiddenException
 import uk.gov.hmrc.play.bootstrap.controller.WithUnsafeDefaultFormBinding
 
 import uk.gov.hmrc.apiplatform.modules.common.domain.models._
@@ -32,7 +33,6 @@ import uk.gov.hmrc.thirdpartydeveloperfrontend.config.{ApplicationConfig, ErrorH
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.Capabilities.SupportsIpAllowlist
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.Permissions.{SandboxOrAdmin, TeamMembersOnly}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.service._
-import uk.gov.hmrc.http.ForbiddenException
 
 @Singleton
 class IpAllowListController @Inject() (
@@ -150,7 +150,7 @@ class IpAllowListController @Inject() (
   def activateIpAllowlist(applicationId: ApplicationId): Action[AnyContent] = canEditIpAllowlistAction(applicationId) { implicit request =>
     ipAllowlistService.getIpAllowlistFlow(request.application, request.sessionId) flatMap { flow =>
       ipAllowlistService.activateIpAllowlist(request.application, request.sessionId, request.developerSession.email).map {
-         _ => Ok(changeIpAllowlistSuccessView(request.application, flow))
+        _ => Ok(changeIpAllowlistSuccessView(request.application, flow))
       } recover {
         case _: ForbiddenException => Forbidden(errorHandler.forbiddenTemplate)
       }
