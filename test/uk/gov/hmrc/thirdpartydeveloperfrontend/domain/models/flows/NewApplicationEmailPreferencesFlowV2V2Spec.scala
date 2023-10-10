@@ -19,6 +19,7 @@ package uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.flows
 import org.scalatest.matchers.should.Matchers
 import org.scalatest.wordspec.AnyWordSpec
 
+import uk.gov.hmrc.apiplatform.modules.apis.domain.models.ApiCategory
 import uk.gov.hmrc.apiplatform.modules.common.domain.models._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.builder.DeveloperBuilder
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.apidefinitions.CombinedApiTestDataHelper
@@ -26,16 +27,17 @@ import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.connectors.Combined
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.{Developer, DeveloperSession, LoggedInState, Session}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.emailpreferences.{EmailPreferences, EmailTopic, TaxRegimeInterests}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.LocalUserIdTracker
-import uk.gov.hmrc.apiplatform.modules.apis.domain.models.ApiCategory
 
 class NewApplicationEmailPreferencesFlowV2V2Spec extends AnyWordSpec with Matchers with CombinedApiTestDataHelper with DeveloperBuilder with LocalUserIdTracker {
 
-  val category1 = ApiCategory.AGENTS
-  val category2 = ApiCategory.BUSINESS_RATES
-  val category3 = ApiCategory.CHARITIES
-  val category1Apis    = Set("api1", "api2")
-  val category2Apis    = Set("api3", "api2", "api4")
-  val emailPreferences = EmailPreferences(List(TaxRegimeInterests(category1.toString, category1Apis), TaxRegimeInterests(category2.toString, category2Apis)), Set(EmailTopic.TECHNICAL))
+  val category1     = ApiCategory.AGENTS
+  val category2     = ApiCategory.BUSINESS_RATES
+  val category3     = ApiCategory.CHARITIES
+  val category1Apis = Set("api1", "api2")
+  val category2Apis = Set("api3", "api2", "api4")
+
+  val emailPreferences =
+    EmailPreferences(List(TaxRegimeInterests(category1.toString, category1Apis), TaxRegimeInterests(category2.toString, category2Apis)), Set(EmailTopic.TECHNICAL))
 
   val applicationId = ApplicationId.random
   val sessionId     = "sessionId"

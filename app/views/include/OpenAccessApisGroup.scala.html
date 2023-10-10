@@ -46,7 +46,7 @@
         </h2>
       </div>
 
-      <div id="accordion-open-access-content-@displayableSectionId(apiContext, apiData)" class="govuk-accordion__section-content" aria-labelledby="accordion-open-access-heading-@displayableSectionId(apiContext, apiData)">
+      <div id="accordion-open-access-content-@displayableSectionId(apiContext, apiData)" class="govuk-accordion__section-content" role="region" aria-labelledby="accordion-open-access-heading-@displayableSectionId(apiContext, apiData)">
         @apiData.versions.toList.map { case (apiVersion, versionData) =>
           @defining(s"${apiData.name} ${apiVersion.value} (${versionData.status.displayText})") { apiVersionFullName =>
             <div class="govuk-grid-row">

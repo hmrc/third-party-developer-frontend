@@ -28,6 +28,7 @@ import play.api.mvc.AnyContentAsEmpty
 import play.api.test.FakeRequest
 import play.twirl.api.Html
 
+import uk.gov.hmrc.apiplatform.modules.apis.domain.models.ApiCategory
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.ApplicationId
 import uk.gov.hmrc.thirdpartydeveloperfrontend.builder._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.{FormKeys, SelectApisFromSubscriptionsForm}
@@ -36,7 +37,6 @@ import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.connectors.Combined
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.{DeveloperSession, LoggedInState}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.flows.NewApplicationEmailPreferencesFlowV2
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.{LocalUserIdTracker, WithCSRFAddToken}
-import uk.gov.hmrc.apiplatform.modules.apis.domain.models.ApiCategory
 
 class SelectApisFromSubscriptionsViewSpec extends CommonViewSpec
     with WithCSRFAddToken
@@ -44,11 +44,11 @@ class SelectApisFromSubscriptionsViewSpec extends CommonViewSpec
     with DeveloperSessionBuilder
     with DeveloperTestData {
 
-
   val category1 = ApiCategory.AGENTS
   val category2 = ApiCategory.BUSINESS_RATES
   val category3 = ApiCategory.EXAMPLE
   val category4 = ApiCategory.NATIONAL_INSURANCE
+
   trait Setup {
 
     val developerSessionWithoutEmailPreferences: DeveloperSession = standardDeveloper.loggedIn

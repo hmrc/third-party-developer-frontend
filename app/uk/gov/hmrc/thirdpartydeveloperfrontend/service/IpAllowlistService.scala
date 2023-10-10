@@ -16,34 +16,31 @@
 
 package uk.gov.hmrc.thirdpartydeveloperfrontend.service
 
+import java.time.Clock
 import javax.inject.{Inject, Singleton}
 import scala.concurrent.{ExecutionContext, Future}
 
 import uk.gov.hmrc.http.{ForbiddenException, HeaderCarrier}
 
+import uk.gov.hmrc.apiplatform.modules.applications.domain.models.CidrBlock
+import uk.gov.hmrc.apiplatform.modules.commands.applications.domain.models.{ApplicationCommands, CommandHandlerTypes, DispatchSuccessResult}
+import uk.gov.hmrc.apiplatform.modules.common.domain.models.{Actors, LaxEmailAddress}
+import uk.gov.hmrc.apiplatform.modules.common.services.ClockNow
+import uk.gov.hmrc.thirdpartydeveloperfrontend.connectors.ApplicationCommandConnector
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.ApplicationUpdateSuccessful
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.Application
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.flows.FlowType.IP_ALLOW_LIST
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.flows.IpAllowlistFlow
 import uk.gov.hmrc.thirdpartydeveloperfrontend.repositories.FlowRepository
-import uk.gov.hmrc.thirdpartydeveloperfrontend.connectors.ApplicationCommandConnector
-import uk.gov.hmrc.apiplatform.modules.commands.applications.domain.models.ApplicationCommands
-import uk.gov.hmrc.apiplatform.modules.common.domain.models.Actors
-import uk.gov.hmrc.apiplatform.modules.commands.applications.domain.models.CommandHandlerTypes
-import uk.gov.hmrc.apiplatform.modules.commands.applications.domain.models.DispatchSuccessResult
-import uk.gov.hmrc.apiplatform.modules.common.services.ClockNow
-import java.time.Clock
-import uk.gov.hmrc.apiplatform.modules.applications.domain.models.CidrBlock
-import uk.gov.hmrc.apiplatform.modules.common.domain.models.LaxEmailAddress
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.ApplicationUpdateSuccessful
 
 @Singleton
 class IpAllowlistService @Inject() (
-  flowRepository: FlowRepository,
-  connectorWrapper: ConnectorsWrapper,
-  applicationCommandConnector: ApplicationCommandConnector,
-  val clock: Clock
-)(implicit val ec: ExecutionContext)
-  extends CommandHandlerTypes[DispatchSuccessResult]
+    flowRepository: FlowRepository,
+    connectorWrapper: ConnectorsWrapper,
+    applicationCommandConnector: ApplicationCommandConnector,
+    val clock: Clock
+  )(implicit val ec: ExecutionContext
+  ) extends CommandHandlerTypes[DispatchSuccessResult]
     with ClockNow {
 
   private def fetchIpAllowListFlow(sessionId: String, app: Option[Application], createIfNotFound: Boolean = true): Future[IpAllowlistFlow] = {
@@ -85,23 +82,35 @@ class IpAllowlistService @Inject() (
 
   def activateIpAllowlist(app: Application, sessionId: String, requestingEmail: LaxEmailAddress)(implicit hc: HeaderCarrier): Future[ApplicationUpdateSuccessful] = {
     for {
-      flow      <- fetchIpAllowListFlow(sessionId, None, createIfNotFound = false)
+      flow     <- fetchIpAllowListFlow(sessionId, None, createIfNotFound = false)
       _         = if (flow.allowlist.isEmpty) throw new ForbiddenException(s"IP allowlist for session ID $sessionId cannot be activated because it is empty")
-      command   = ApplicationCommands.ChangeIpAllowlist(Actors.AppCollaborator(requestingEmail), now(), app.ipAllowlist.required, app.ipAllowlist.allowlist.map(CidrBlock(_)).toList, flow.allowlist.map(CidrBlock(_)).toList)
-      response  <- applicationCommandConnector.dispatch(app.id, command, Set.empty).map(_ => ApplicationUpdateSuccessful)
-      _         <- flowRepository.deleteBySessionIdAndFlowType(sessionId, IP_ALLOW_LIST)
+      command   = ApplicationCommands.ChangeIpAllowlist(
+                    Actors.AppCollaborator(requestingEmail),
+                    now(),
+                    app.ipAllowlist.required,
+                    app.ipAllowlist.allowlist.map(CidrBlock(_)).toList,
+                    flow.allowlist.map(CidrBlock(_)).toList
+                  )
+      response <- applicationCommandConnector.dispatch(app.id, command, Set.empty).map(_ => ApplicationUpdateSuccessful)
+      _        <- flowRepository.deleteBySessionIdAndFlowType(sessionId, IP_ALLOW_LIST)
     } yield response
   }
 
-  def deactivateIpAllowlist(app: Application, sessionId: String, requestingEmail: LaxEmailAddress)(implicit hc: HeaderCarrier): Future[ApplicationUpdateSuccessful]  = {
+  def deactivateIpAllowlist(app: Application, sessionId: String, requestingEmail: LaxEmailAddress)(implicit hc: HeaderCarrier): Future[ApplicationUpdateSuccessful] = {
     if (app.ipAllowlist.required) {
       Future.failed(new ForbiddenException(s"IP allowlist for session ID $sessionId cannot be deactivated because it is required"))
     } else {
-      val command = ApplicationCommands.ChangeIpAllowlist(Actors.AppCollaborator(requestingEmail), now(), app.ipAllowlist.required, app.ipAllowlist.allowlist.map(CidrBlock(_)).toList, List.empty)
+      val command = ApplicationCommands.ChangeIpAllowlist(
+        Actors.AppCollaborator(requestingEmail),
+        now(),
+        app.ipAllowlist.required,
+        app.ipAllowlist.allowlist.map(CidrBlock(_)).toList,
+        List.empty
+      )
 
       for {
-        response  <- applicationCommandConnector.dispatch(app.id, command, Set.empty).map(_ => ApplicationUpdateSuccessful)
-        _         <- flowRepository.deleteBySessionIdAndFlowType(sessionId, IP_ALLOW_LIST)
+        response <- applicationCommandConnector.dispatch(app.id, command, Set.empty).map(_ => ApplicationUpdateSuccessful)
+        _        <- flowRepository.deleteBySessionIdAndFlowType(sessionId, IP_ALLOW_LIST)
       } yield response
     }
   }

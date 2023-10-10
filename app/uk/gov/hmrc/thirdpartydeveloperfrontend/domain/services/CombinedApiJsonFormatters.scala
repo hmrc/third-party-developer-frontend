@@ -21,5 +21,5 @@ import play.api.libs.json.{Format, Json}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.connectors.CombinedApi
 
 trait CombinedApiJsonFormatters {
-  implicit val combinedApiFormat: Format[CombinedApi]      = Json.format[CombinedApi]
+  implicit val combinedApiFormat: Format[CombinedApi] = Json.format[CombinedApi]
 }

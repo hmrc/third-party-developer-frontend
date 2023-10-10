@@ -32,9 +32,7 @@ import play.api.test.{CSRFTokenHelper, FakeRequest, Writeables}
 
 import uk.gov.hmrc.apiplatform.modules.applications.domain.models.{ClientSecret, ClientSecretResponse}
 import uk.gov.hmrc.apiplatform.modules.commands.applications.domain.models.DispatchSuccessResult
-
 import uk.gov.hmrc.apiplatform.modules.common.domain.models._
-
 import uk.gov.hmrc.apiplatform.modules.mfa.connectors.ThirdPartyDeveloperMfaConnector
 import uk.gov.hmrc.apiplatform.modules.mfa.models.{MfaAction, MfaId, MfaType}
 import uk.gov.hmrc.apiplatform.modules.submissions.connectors.ThirdPartyApplicationSubmissionsConnector

@@ -76,7 +76,7 @@
                   <div class="govuk-accordion__section-summary" id="accordion-default-with-summary-sections-summary-@displayableSectionId(apiSubscription)">
                   </div>
                 </div>
-                <div id="accordion-default-content-@displayableSectionId(apiSubscription)" class="govuk-accordion__section-content" aria-labelledby="accordion-default-heading-@displayableSectionId(apiSubscription)">
+                <div id="accordion-default-content-@displayableSectionId(apiSubscription)" class="govuk-accordion__section-content" role="region" aria-labelledby="accordion-default-heading-@displayableSectionId(apiSubscription)">
                   @apiSubscription.subscriptions.map { case api =>
                     @defining(s"${apiSubscription.apiHumanReadableAppName} ${api.apiVersion.version.value} (${api.apiVersion.displayedStatus})") { apiVersionFullName =>
                       <div class="govuk-grid-row">

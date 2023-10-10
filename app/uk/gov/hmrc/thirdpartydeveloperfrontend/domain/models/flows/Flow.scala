@@ -71,7 +71,7 @@ case class EmailPreferencesFlowV2(
   ) extends Flow with EmailPreferencesProducer {
   override val flowType: FlowType = FlowType.EMAIL_PREFERENCES_V2
 
-  def categoriesInOrder: List[String] = selectedCategories.toList.sorted
+  def categoriesInOrder: List[String]                            = selectedCategories.toList.sorted
 // testng for a string against list of apicatrgories/// amazed it doesn't complain about type - how String <: ApiCategory is beyond me...
   def visibleApisByCategory(category: String): List[CombinedApi] = visibleApis.filter(_.categories.map(_.toString()).contains(category)).sortBy(_.displayName)
 
