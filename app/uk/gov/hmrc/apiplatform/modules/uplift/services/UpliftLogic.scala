@@ -25,7 +25,6 @@ import uk.gov.hmrc.apiplatform.modules.apis.domain.models._
 import uk.gov.hmrc.apiplatform.modules.common.domain.models._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.connectors.{ApmConnector, ThirdPartyApplicationSandboxConnector}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.controllers.ApplicationSummary
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.subscriptions.ApiData
 import uk.gov.hmrc.thirdpartydeveloperfrontend.service.AppsByTeamMemberService
 
 @Singleton
@@ -74,12 +73,12 @@ object UpliftLogic {
   }
 
   def contextsOfTestSupportAndExampleApis(apis: Map[ApiContext, ApiData]): Set[ApiContext] = {
-    ApiData.filterApis(d => d.isTestSupport || d.categories.contains(ApiCategory.EXAMPLE))(apis)
+    filterApis(d => d.isTestSupport || d.categories.contains(ApiCategory.EXAMPLE))(apis)
       .keySet
   }
 
   def apiIdentifiersOfRetiredApis(apis: Map[ApiContext, ApiData]): Set[ApiIdentifier] = {
-    (ApiData.filterApis(_ => true, v => v.status == ApiStatus.RETIRED) _ andThen ApiData.toApiIdentifiers)(apis)
+    (filterApis(_ => true, v => v.status == ApiStatus.RETIRED) _ andThen toApiIdentifiers)(apis)
   }
 
   def filterAppsHavingRealAndAvailableSubscriptions(
@@ -101,5 +100,37 @@ object UpliftLogic {
           Map.empty[ApplicationId, Set[ApiIdentifier]]
         }
     }
+  }
+
+  private def filterApis(contextFilter: ApiData => Boolean)(in: Map[ApiContext, ApiData]): Map[ApiContext, ApiData] = {
+    in.filter {
+      case (c, d) => contextFilter(d)
+    }
+  }
+
+  private def filterApis(contextFilter: ApiData => Boolean, versionFilter: ApiVersion => Boolean)(in: Map[ApiContext, ApiData]): Map[ApiContext, ApiData] = {
+    def filterVersions(in: Map[ApiVersionNbr, ApiVersion]): Map[ApiVersionNbr, ApiVersion] = {
+      in.filter {
+        case (v, d) => versionFilter(d)
+      }
+    }
+
+    val empty = Map.empty[ApiContext, ApiData]
+
+    in.flatMap {
+      case (c, d) =>
+        val filteredVersions = filterVersions(d.versions)
+        if (contextFilter(d) && filteredVersions.nonEmpty) {
+          Map(c -> d.copy(versions = filteredVersions))
+        } else {
+          empty
+        }
+    }
+  }
+
+  private def toApiIdentifiers(in: Map[ApiContext, ApiData]): Set[ApiIdentifier] = {
+    in.flatMap {
+      case (c, d) => d.versions.keySet.map(v => ApiIdentifier(c, v))
+    }.toSet
   }
 }

@@ -24,15 +24,14 @@ import play.api.inject.guice.GuiceApplicationBuilder
 import play.api.{Application => PlayApplication, Configuration, Mode}
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.http.UpstreamErrorResponse
+import uk.gov.hmrc.apiplatform.modules.apis.domain.models.{ApiAccess, ApiData, ApiStatus, ApiVersion, ServiceName}
 import uk.gov.hmrc.apiplatform.modules.common.domain.models._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.emailpreferences.APICategoryDisplayDetails
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.WireMockExtensions
-import uk.gov.hmrc.apiplatform.modules.common.domain.models.UserId
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.{Application, ApplicationWithSubscriptionData}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.connectors.ApiType.REST_API
 import play.api.libs.json.Json
 import uk.gov.hmrc.thirdpartydeveloperfrontend.connectors.stubs.ApiPlatformMicroserviceStub
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.subscriptions.ApiData
 
 import java.time.{LocalDateTime, Period}
 import uk.gov.hmrc.apiplatform.modules.apis.domain.models.ApiCategory
@@ -138,7 +137,18 @@ class ApmConnectorIntegrationSpec extends BaseConnectorIntegrationSpec with Guic
     val applicationId = ApplicationId.random
 
     "return api data when successful" in new Setup {
-      val response                         = Map(ApiContext.random -> ApiData("serviceName", "name", isTestSupport = false, Map.empty, List.empty))
+      val apiData = ApiData(
+          serviceName = ServiceName("serviceName"),
+          serviceBaseUrl = "http://serviceBaseUrl",
+          name = "name",
+          description = "Description",
+          context = ApiContext("test-api-context-1"),
+          versions = Map(ApiVersionNbr("1.0") ->
+            ApiVersion(ApiVersionNbr("1.0"), ApiStatus.STABLE, ApiAccess.PUBLIC, List.empty)),
+          isTestSupport = false,
+          categories = List(ApiCategory.EXAMPLE)
+        )      
+      val response                         = Map(ApiContext.random -> apiData)
       ApiPlatformMicroserviceStub.stubFetchAllPossibleSubscriptions(applicationId, Json.toJson(response).toString())
       val result: Map[ApiContext, ApiData] = await(underTest.fetchAllPossibleSubscriptions(applicationId))
       result shouldBe response

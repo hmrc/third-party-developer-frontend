@@ -20,18 +20,18 @@ import scala.collection.SortedMap
 
 import play.api.libs.json.Json
 
+import uk.gov.hmrc.apiplatform.modules.apis.domain.models.{ApiData, ServiceName}
 import uk.gov.hmrc.apiplatform.modules.common.domain.models._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.APISubscriptions.subscriptionNumberLabel
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.apidefinitions.APIGroup._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.apidefinitions._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications._
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.subscriptions._
 
 case class PageData(app: Application, subscriptions: Option[GroupedSubscriptions], openAccessApis: Map[ApiContext, ApiData])
 
 case class GroupedSubscriptions(testApis: Seq[APISubscriptions], apis: Seq[APISubscriptions], exampleApi: Option[APISubscriptions] = None)
 
-case class APISubscriptions(apiHumanReadableAppName: String, apiServiceName: String, apiContext: ApiContext, subscriptions: Seq[APISubscriptionStatus]) {
+case class APISubscriptions(apiHumanReadableAppName: String, apiServiceName: ServiceName, apiContext: ApiContext, subscriptions: Seq[APISubscriptionStatus]) {
 
   lazy val subscriptionNumberText = subscriptionNumberLabel(subscriptions)
 
@@ -49,8 +49,8 @@ object APISubscriptions {
       val subscriptionGroups = subscriptions.groupBy(_.isTestSupport)
       val testApis           = subscriptionGroups.get(true).map(groupSubscriptionsByServiceName).getOrElse(Seq.empty).sortBy(_.apiHumanReadableAppName)
       val apis               = subscriptionGroups.get(false).map(groupSubscriptionsByServiceName).getOrElse(Seq.empty).sortBy(_.apiHumanReadableAppName)
-      val exampleApis        = apis.find(sub => sub.apiServiceName == EXAMPLE_API_NAME)
-      Some(GroupedSubscriptions(testApis, apis.filter(sub => sub.apiServiceName != EXAMPLE_API_NAME), exampleApis))
+      val exampleApis        = apis.find(sub => sub.apiServiceName.value == EXAMPLE_API_NAME)
+      Some(GroupedSubscriptions(testApis, apis.filter(sub => sub.apiServiceName.value != EXAMPLE_API_NAME), exampleApis))
     } else {
       None
     }

@@ -23,6 +23,7 @@ import cats.data.OptionT
 
 import uk.gov.hmrc.http.HeaderCarrier
 
+import uk.gov.hmrc.apiplatform.modules.apis.domain.models.{ApiData, ApiVersion}
 import uk.gov.hmrc.apiplatform.modules.common.domain.models._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.{ApplicationRequest, UserRequest}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.apidefinitions._
@@ -60,7 +61,7 @@ class ApplicationActionService @Inject() (
     ): List[APISubscriptionStatus] = {
 
     def handleContext(context: ApiContext, cdata: ApiData): List[APISubscriptionStatus] = {
-      def handleVersion(version: ApiVersionNbr, vdata: VersionData): APISubscriptionStatus = {
+      def handleVersion(version: ApiVersionNbr, vdata: ApiVersion): APISubscriptionStatus = {
         def zipDefinitionsAndValues(): List[SubscriptionFieldValue] = {
           val fieldNameToDefinition = subscriptionFieldDefinitions.getOrElse(context, Map.empty).getOrElse(version, Map.empty)
           val fieldNameToValue      = application.subscriptionFieldValues.getOrElse(context, Map.empty).getOrElse(version, Map.empty)

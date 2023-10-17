@@ -27,7 +27,7 @@ object AppDependencies {
     "com.beachape"                %% "enumeratum-play"                    % enumeratumVersion,
     "com.google.zxing"            %  "core"                               % "3.2.1",
     "commons-validator"           %  "commons-validator"                  % "1.7",
-    "uk.gov.hmrc"                 %% "api-platform-api-domain"            % "0.5.0",
+    "uk.gov.hmrc"                 %% "api-platform-api-domain"            % "0.6.0",
     "uk.gov.hmrc"                 %% "api-platform-application-domain"    % "0.21.0"
   )
 

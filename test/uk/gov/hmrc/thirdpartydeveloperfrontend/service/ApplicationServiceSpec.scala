@@ -165,7 +165,7 @@ class ApplicationServiceSpec extends AsyncHmrcSpec
     ): APISubscriptionStatus =
     APISubscriptionStatus(
       name = name,
-      serviceName = name,
+      serviceName = ServiceName(name),
       context = context,
       apiVersion = ApiVersionDefinition(version, status),
       subscribed = subscribed,
@@ -186,7 +186,7 @@ class ApplicationServiceSpec extends AsyncHmrcSpec
     ): APISubscriptionStatus = {
     APISubscriptionStatus(
       name = name,
-      serviceName = name,
+      serviceName = ServiceName(name),
       context = ApiContext(context),
       apiVersion = ApiVersionDefinition(version, status),
       subscribed = subscribed,

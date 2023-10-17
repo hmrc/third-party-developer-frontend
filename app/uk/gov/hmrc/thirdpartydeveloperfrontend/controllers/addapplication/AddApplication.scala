@@ -217,7 +217,7 @@ class AddApplication @Inject() (
         userEmailPreferences: EmailPreferences
       )(implicit hc: HeaderCarrier
       ): Future[Set[String]] = {
-      emailPreferencesService.fetchAPIDetails(applicationSubscriptions.map(_.serviceName).toSet) map { apiDetails =>
+      emailPreferencesService.fetchAPIDetails(applicationSubscriptions.map(_.serviceName.value).toSet) map { apiDetails =>
         val allInCategories = userEmailPreferences.interests.filter(i => i.services.isEmpty).map(_.regime)
         val filteredApis    = apiDetails.filter(api => api.categories.intersect(allInCategories).isEmpty)
         filteredApis.map(_.serviceName).diff(userEmailPreferences.interests.flatMap(_.services)).toSet

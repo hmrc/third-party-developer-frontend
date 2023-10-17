@@ -41,7 +41,6 @@ import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.{BaseControllerSpec, 
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.apidefinitions._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.{ApplicationState, ApplicationWithSubscriptionData, SellResellOrDistribute}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.{DeveloperSession, LoggedInState, Session}
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.subscriptions.{ApiData, VersionData}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.mocks.connectors.ApmConnectorMockModule
 import uk.gov.hmrc.thirdpartydeveloperfrontend.mocks.service.{ApplicationActionServiceMock, ApplicationServiceMock, SessionServiceMock, TermsOfUseInvitationServiceMockModule}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.WithLoggedInSession._
@@ -131,7 +130,7 @@ class UpliftJourneyControllerSpec extends BaseControllerSpec
 
     val testAPISubscriptionStatus1 = APISubscriptionStatus(
       "test-api-1",
-      "api-example-microservice",
+      ServiceName("api-example-microservice"),
       apiIdentifier1.context,
       ApiVersionDefinition(apiIdentifier1.versionNbr, ApiStatus.STABLE),
       subscribed = true,
@@ -141,7 +140,7 @@ class UpliftJourneyControllerSpec extends BaseControllerSpec
 
     val testAPISubscriptionStatus2 = APISubscriptionStatus(
       "test-api-2",
-      "api-example-microservice",
+      ServiceName("api-example-microservice"),
       apiIdentifier2.context,
       ApiVersionDefinition(apiIdentifier2.versionNbr, ApiStatus.STABLE),
       subscribed = true,
@@ -152,33 +151,42 @@ class UpliftJourneyControllerSpec extends BaseControllerSpec
     val singleApi: Map[ApiContext, ApiData] = Map(
       ApiContext("test-api-context-1") ->
         ApiData(
-          "test-api-context-1",
-          "test-api-context-1",
-          true,
-          Map(ApiVersionNbr("1.0") ->
-            VersionData(ApiStatus.STABLE, ApiAccess.PUBLIC)),
-          List(ApiCategory.EXAMPLE)
+          serviceName = ServiceName("test-api-context-1"),
+          serviceBaseUrl = "http://serviceBaseUrl",
+          name = "test-api-context-1",
+          description = "Description",
+          context = ApiContext("context/name"),
+          versions = Map(ApiVersionNbr("1.0") ->
+            ApiVersion(ApiVersionNbr("1.0"), ApiStatus.STABLE, ApiAccess.PUBLIC, List.empty)),
+          isTestSupport = false,
+          categories = List(ApiCategory.EXAMPLE)
         )
     )
 
     val multipleApis: Map[ApiContext, ApiData] = Map(
       ApiContext("test-api-context-1") ->
         ApiData(
-          "test-api-context-1",
-          "test-api-context-1",
-          true,
-          Map(ApiVersionNbr("1.0") ->
-            VersionData(ApiStatus.STABLE, ApiAccess.PUBLIC)),
-          List(ApiCategory.EXAMPLE)
+          serviceName = ServiceName("test-api-context-1"),
+          serviceBaseUrl = "http://serviceBaseUrl",
+          name = "test-api-context-1",
+          description = "Description",
+          context = ApiContext("test-api-context-1"),
+          versions = Map(ApiVersionNbr("1.0") ->
+            ApiVersion(ApiVersionNbr("1.0"), ApiStatus.STABLE, ApiAccess.PUBLIC, List.empty)),
+          isTestSupport = false,
+          categories = List(ApiCategory.EXAMPLE)
         ),
       ApiContext("test-api-context-2") ->
         ApiData(
-          "test-api-context-2",
-          "test-api-context-2",
-          true,
-          Map(ApiVersionNbr("1.0") ->
-            VersionData(ApiStatus.STABLE, ApiAccess.PUBLIC)),
-          List(ApiCategory.EXAMPLE)
+          serviceName = ServiceName("test-api-context-2"),
+          serviceBaseUrl = "http://serviceBaseUrl",
+          name = "test-api-context-2",
+          description = "Description",
+          context = ApiContext("test-api-context-2"),
+          versions = Map(ApiVersionNbr("1.0") ->
+            ApiVersion(ApiVersionNbr("1.0"), ApiStatus.STABLE, ApiAccess.PUBLIC, List.empty)),
+          isTestSupport = false,
+          categories = List(ApiCategory.EXAMPLE)
         )
     )
 

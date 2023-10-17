@@ -288,5 +288,5 @@ class APISubscriptionsSpec
   }
 
   def apiSubscription(apiName: String, serviceName: String, context: ApiContext, subscriptions: List[APISubscriptionStatus]) =
-    APISubscriptions(apiName, serviceName, context, subscriptions)
+    APISubscriptions(apiName, ServiceName(serviceName), context, subscriptions)
 }

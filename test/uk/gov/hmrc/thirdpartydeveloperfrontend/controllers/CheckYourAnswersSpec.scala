@@ -81,12 +81,12 @@ class CheckYourAnswersSpec
   val exampleApiSubscription = Some(
     APISubscriptions(
       "Example API",
-      "api-example-microservice",
+      ServiceName("api-example-microservice"),
       ApiContext("exampleContext"),
       Seq(
         APISubscriptionStatus(
           "API1",
-          "api-example-microservice",
+          ServiceName("api-example-microservice"),
           ApiContext("exampleContext"),
           ApiVersionDefinition(apiVersion, ApiStatus.STABLE),
           subscribed = true,
@@ -102,12 +102,12 @@ class CheckYourAnswersSpec
     Seq(
       APISubscriptions(
         "ServiceName",
-        "apiContent",
+        ServiceName("apiContent"),
         ApiContext("context"),
         Seq(
           APISubscriptionStatus(
             "API1",
-            "subscriptionServiceName",
+            ServiceName("subscriptionServiceName"),
             ApiContext("context"),
             ApiVersionDefinition(apiVersion, ApiStatus.STABLE),
             subscribed = true,
@@ -180,12 +180,12 @@ class CheckYourAnswersSpec
     val subscriptions = Seq(
       APISubscriptions(
         "API1",
-        "ServiceName",
+        ServiceName("ServiceName"),
         context,
         Seq(
           APISubscriptionStatus(
             "API1",
-            "subscriptionServiceName",
+            ServiceName("subscriptionServiceName"),
             context,
             ApiVersionDefinition(apiVersion, ApiStatus.STABLE),
             subscribed = true,

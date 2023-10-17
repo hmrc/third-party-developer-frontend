@@ -81,12 +81,12 @@ class ApplicationCheckSpec
   val exampleApiSubscription: Some[APISubscriptions] = Some(
     APISubscriptions(
       "Example API",
-      "api-example-microservice",
+      ServiceName("api-example-microservice"),
       exampleContext,
       List(
         APISubscriptionStatus(
           "API1",
-          "api-example-microservice",
+          ServiceName("api-example-microservice"),
           exampleContext,
           ApiVersionDefinition(version, ApiStatus.STABLE),
           subscribed = true,

@@ -51,7 +51,7 @@ trait SubscriptionTestHelperSugar extends SubscriptionsBuilder {
 
     APISubscriptionStatus(
       apiName,
-      serviceName,
+      ServiceName(serviceName),
       context,
       ApiVersionDefinition(version, status, access),
       subscribed,
@@ -95,7 +95,7 @@ trait SubscriptionTestHelperSugar extends SubscriptionsBuilder {
       expectedVersions: List[ApiVersionDefinition]
     ): Unit = {
     applicationSubscription.apiHumanReadableAppName shouldBe expectedApiHumanReadableAppName
-    applicationSubscription.apiServiceName shouldBe expectedApiServiceName
+    applicationSubscription.apiServiceName.value shouldBe expectedApiServiceName
     applicationSubscription.subscriptions.map(_.apiVersion) shouldBe expectedVersions
   }
 
@@ -135,7 +135,7 @@ trait SubscriptionTestHelperSugar extends SubscriptionsBuilder {
 
     APISubscriptionStatus(
       name = "api-example-microservice",
-      serviceName = "api-example-microservice",
+      serviceName = ServiceName("api-example-microservice"),
       context = context,
       apiVersion = version,
       subscribed = true,
@@ -153,7 +153,7 @@ trait SubscriptionTestHelperSugar extends SubscriptionsBuilder {
     val subscriptinFieldInxed = 1
     APISubscriptionStatus(
       name = generateName(prefix, subscriptinFieldInxed),
-      serviceName = s"$prefix-api",
+      serviceName = ServiceName(s"$prefix-api"),
       context = context,
       apiVersion = version,
       subscribed = true,
