@@ -32,7 +32,7 @@ import play.api.test.FakeRequest
 import play.api.test.Helpers._
 import play.filters.csrf.CSRF.TokenProvider
 
-import uk.gov.hmrc.apiplatform.modules.apis.domain.models.ApiCategory
+import uk.gov.hmrc.apiplatform.modules.apis.domain.models.{ApiCategory, ApiDefinition, ServiceName}
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.{ApiContext, ApplicationId, UserId}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.builder.DeveloperBuilder
 import uk.gov.hmrc.thirdpartydeveloperfrontend.config.ApplicationConfig
@@ -40,7 +40,7 @@ import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.addapplication.routes
 import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.profile.EmailPreferencesController
 import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.profile.routes.{EmailPreferencesController => EmailPreferencesControllerRoutes}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.connectors.ApiType.REST_API
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.connectors.{ApiDefinition, CombinedApi}
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.connectors.CombinedApi
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.emailpreferences._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.flows.{EmailPreferencesFlowV2, FlowType, NewApplicationEmailPreferencesFlowV2}
@@ -125,12 +125,14 @@ class EmailPreferencesControllerSpec
     val mockCategory1: APICategoryDisplayDetails            = APICategoryDisplayDetails.from(category1)
     val mockCategory2: APICategoryDisplayDetails            = APICategoryDisplayDetails.from(category2)
     val apiCategoryDetails: List[APICategoryDisplayDetails] = List(mockCategory1, mockCategory2)
-    val api1: ApiDefinition                                 = ApiDefinition("api1", "API 1", "desc", ApiContext("CATEGORY_1"), List(ApiCategory.INCOME_TAX_MTD))
-    val api2: ApiDefinition                                 = ApiDefinition("api2", "API 2", "desc2", ApiContext("CATEGORY_1"), List(ApiCategory.VAT))
-    val apis: Set[String]                                   = Set(api1.serviceName, api2.serviceName)
+    val api1: ApiDefinition                                 =
+      ApiDefinition(ServiceName("api1"), "http://serviceBaseUrl", "API 1", "desc", ApiContext("CATEGORY_1"), List.empty, false, false, None, List(ApiCategory.INCOME_TAX_MTD))
+    val api2: ApiDefinition                                 =
+      ApiDefinition(ServiceName("api2"), "http://serviceBaseUrl", "API 2", "desc2", ApiContext("CATEGORY_1"), List.empty, false, false, None, List(ApiCategory.VAT))
+    val apis: Set[ServiceName]                              = Set(api1.serviceName, api2.serviceName)
 
-    val extendedApiOne: CombinedApi    = CombinedApi("api1", "API 1", List(ApiCategory.INCOME_TAX_MTD), REST_API)
-    val extendedApiTwo: CombinedApi    = CombinedApi("api2", "API 2", List(ApiCategory.VAT), REST_API)
+    val extendedApiOne: CombinedApi    = CombinedApi(ServiceName("api1"), "API 1", List(ApiCategory.INCOME_TAX_MTD), REST_API)
+    val extendedApiTwo: CombinedApi    = CombinedApi(ServiceName("api2"), "API 2", List(ApiCategory.VAT), REST_API)
     val fetchedAPis: List[CombinedApi] = List(extendedApiOne, extendedApiTwo)
 
     "return emailPreferencesSummaryView page for logged in user" in new Setup {
@@ -139,7 +141,8 @@ class EmailPreferencesControllerSpec
       updateUserFlowSessionsReturnsSuccessfully(sessionId)
 
       // val expectedAPIDisplayNames: Map[String, String] = Map(api1.serviceName -> api1.name, api2.serviceName -> api2.name)
-      val expectedAPIDisplayNames: Map[String, String] = Map(extendedApiOne.serviceName -> extendedApiOne.displayName, extendedApiTwo.serviceName -> extendedApiTwo.displayName)
+      val expectedAPIDisplayNames: Map[String, String] =
+        Map(extendedApiOne.serviceName.value -> extendedApiOne.displayName, extendedApiTwo.serviceName.value -> extendedApiTwo.displayName)
 
       when(mockEmailPreferencesService.fetchAllAPICategoryDetails()(*)).thenReturn(Future.successful(apiCategoryDetails))
       when(mockEmailPreferencesService.fetchAPIDetails(eqTo(apis))(*)).thenReturn(Future.successful(fetchedAPis))
@@ -356,7 +359,7 @@ class EmailPreferencesControllerSpec
 
   "flowSelectApisPage" should {
     val apiCategory = APICategoryDisplayDetails("OTHER", "Other")
-    val visibleApis = List(CombinedApi("nameApi1", "serviceNameApi1", List(ApiCategory.EXAMPLE, ApiCategory.OTHER), REST_API))
+    val visibleApis = List(CombinedApi(ServiceName("nameApi1"), "serviceNameApi1", List(ApiCategory.EXAMPLE, ApiCategory.OTHER), REST_API))
 
     // category passed to route
     // category is missing from route
@@ -401,7 +404,7 @@ class EmailPreferencesControllerSpec
 
   "flowSelectApiAction" should {
 
-    val visibleApis  = List(CombinedApi("nameApi1", "serviceNameApi1", List(category2, category1), REST_API))
+    val visibleApis  = List(CombinedApi(ServiceName("nameApi1"), "serviceNameApi1", List(category2, category1), REST_API))
     val apiCategory1 = APICategoryDisplayDetails(category1.toString(), category1.displayText)
     val apiCategory2 = APICategoryDisplayDetails(category2.toString(), category2.displayText)
 
@@ -606,7 +609,7 @@ class EmailPreferencesControllerSpec
       status(result) mustBe SEE_OTHER
       redirectLocation(result) mustBe Some(EmailPreferencesControllerRoutes.selectTopicsFromSubscriptionsPage(applicationId).url)
 
-      verify(mockEmailPreferencesService).updateNewApplicationSelectedApis(eqTo(loggedInDeveloper), eqTo(applicationId), eqTo(Set("a1", "a2")))(*)
+      verify(mockEmailPreferencesService).updateNewApplicationSelectedApis(eqTo(loggedInDeveloper), eqTo(applicationId), eqTo(Set(ServiceName("a1"), ServiceName("a2"))))(*)
     }
   }
 

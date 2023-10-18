@@ -24,7 +24,7 @@ import play.api.inject.guice.GuiceApplicationBuilder
 import play.api.{Application => PlayApplication, Configuration, Mode}
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.http.UpstreamErrorResponse
-import uk.gov.hmrc.apiplatform.modules.apis.domain.models.{ApiAccess, ApiData, ApiStatus, ApiVersion, ServiceName}
+import uk.gov.hmrc.apiplatform.modules.apis.domain.models.{ApiAccess, ApiData, ApiDefinition, ApiStatus, ApiVersion, ServiceName}
 import uk.gov.hmrc.apiplatform.modules.common.domain.models._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.emailpreferences.APICategoryDisplayDetails
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.WireMockExtensions
@@ -96,12 +96,12 @@ class ApmConnectorIntegrationSpec extends BaseConnectorIntegrationSpec with Guic
 
   "fetchCombinedApi" should {
     "retrieve an CombinedApi based on a serviceName" in new Setup {
-      val serviceName                            = "api1"
+      val serviceName                            = ServiceName("api1")
       val displayName                            = "API 1"
       val expectedApi                            = CombinedApi(serviceName, displayName, List(ApiCategory.VAT), REST_API)
       ApiPlatformMicroserviceStub
-        .stubCombinedApiByServiceName(serviceName, Json.toJson(expectedApi).toString())
-      val result: Either[Throwable, CombinedApi] = await(underTest.fetchCombinedApi("api1"))
+        .stubCombinedApiByServiceName(serviceName.value, Json.toJson(expectedApi).toString())
+      val result: Either[Throwable, CombinedApi] = await(underTest.fetchCombinedApi(ServiceName("api1")))
       result match {
         case Right(x) =>
           x.serviceName shouldBe serviceName
@@ -114,7 +114,7 @@ class ApmConnectorIntegrationSpec extends BaseConnectorIntegrationSpec with Guic
     "fail on Upstream5xxResponse when the call return a 500" in new Setup {
       ApiPlatformMicroserviceStub.stubCombinedApiByServiceNameFailure(INTERNAL_SERVER_ERROR)
 
-      val result = await(underTest.fetchCombinedApi("api1"))
+      val result = await(underTest.fetchCombinedApi(ServiceName("api1")))
       result match {
         case Left(_: UpstreamErrorResponse) => succeed
         case _                              => fail()
@@ -124,7 +124,7 @@ class ApmConnectorIntegrationSpec extends BaseConnectorIntegrationSpec with Guic
     "throw notfound when the api is not found" in new Setup {
       ApiPlatformMicroserviceStub.stubCombinedApiByServiceNameFailure(NOT_FOUND)
 
-      val result = await(underTest.fetchCombinedApi("api1"))
+      val result = await(underTest.fetchCombinedApi(ServiceName("api1")))
       result match {
         case Left(e: UpstreamErrorResponse) => e.statusCode shouldBe NOT_FOUND
         case _                              => fail()
@@ -167,12 +167,12 @@ class ApmConnectorIntegrationSpec extends BaseConnectorIntegrationSpec with Guic
 
     "retrieve a list of service a user can see" in new Setup {
       val userId                     = UserId.random
-      val serviceName                = "api1"
+      val serviceName                = ServiceName("api1")
       val name                       = "API 1"
       ApiPlatformMicroserviceStub
         .stubFetchApiDefinitionsVisibleToUser(
           userId,
-          s"""[{ "serviceName": "$serviceName", "name": "$name", "description": "", "context": "context", "categories": ["AGENTS", "VAT"] }]"""
+          s"""[{ "serviceName": "$serviceName", "serviceBaseUrl": "http://serviceBaseUrl", "name": "$name", "description": "", "context": "context", "versions": [], "categories": ["AGENTS", "VAT"] }]"""
         )
       val result: Seq[ApiDefinition] = await(underTest.fetchApiDefinitionsVisibleToUser(userId))
       result.head.serviceName shouldBe serviceName

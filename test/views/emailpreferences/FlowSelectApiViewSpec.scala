@@ -28,7 +28,7 @@ import play.api.mvc.AnyContentAsEmpty
 import play.api.test.FakeRequest
 import play.twirl.api.Html
 
-import uk.gov.hmrc.apiplatform.modules.apis.domain.models.ApiCategory
+import uk.gov.hmrc.apiplatform.modules.apis.domain.models.{ApiCategory, ServiceName}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.builder._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.{FormKeys, SelectedApisEmailPreferencesForm}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.connectors.ApiType.REST_API
@@ -73,9 +73,9 @@ class FlowSelectApiViewSpec extends CommonViewSpec
     document.getElementById("individual-api-description").text() shouldBe s"Select specific APIs. You will not get emails about new $currentCategory APIs"
 
     apis.foreach(api => {
-      val checkbox = document.getElementById(api.serviceName)
+      val checkbox = document.getElementById(api.serviceName.value)
       checkbox.attr("name") shouldBe "selectedApi[]"
-      checkbox.`val`() shouldBe api.serviceName
+      checkbox.`val`() shouldBe api.serviceName.value
 
       val expectedText = if (api.apiType == ApiType.XML_API) { s"${api.displayName} - XML API" }
       else s"${api.displayName}"
@@ -110,9 +110,9 @@ class FlowSelectApiViewSpec extends CommonViewSpec
 
   "Email Preferences Select Api view page" should {
     val apiList  = List(
-      CombinedApi("api1", "Api One", List(category1, category1), REST_API),
-      CombinedApi("api2", "Api Two", List(category2, category4), REST_API),
-      CombinedApi("api3", "Api Three", List(category3, category2), REST_API)
+      CombinedApi(ServiceName("api1"), "Api One", List(category1, category1), REST_API),
+      CombinedApi(ServiceName("api2"), "Api Two", List(category2, category4), REST_API),
+      CombinedApi(ServiceName("api3"), "Api Three", List(category3, category2), REST_API)
     )
     val userApis = Set("api1", "api2")
 

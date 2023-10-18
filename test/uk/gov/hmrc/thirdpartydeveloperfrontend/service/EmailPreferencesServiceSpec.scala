@@ -21,6 +21,7 @@ import scala.concurrent.Future
 
 import uk.gov.hmrc.http.HeaderCarrier
 
+import uk.gov.hmrc.apiplatform.modules.apis.domain.models.ServiceName
 import uk.gov.hmrc.apiplatform.modules.common.domain.models._
 import uk.gov.hmrc.apiplatform.modules.uplift.services.mocks.FlowRepositoryMockModule
 import uk.gov.hmrc.thirdpartydeveloperfrontend.builder.DeveloperBuilder
@@ -152,8 +153,8 @@ class EmailPreferencesServiceSpec extends AsyncHmrcSpec {
     }
 
     "fetchAPIDetails" should {
-      val apiServiceName1 = "service-1"
-      val apiServiceName2 = "service-2"
+      val apiServiceName1 = ServiceName("service-1")
+      val apiServiceName2 = ServiceName("service-2")
 
       val apiDetails1 = mock[CombinedApi]
       val apiDetails2 = mock[CombinedApi]
@@ -174,9 +175,9 @@ class EmailPreferencesServiceSpec extends AsyncHmrcSpec {
 
     "updateNewApplicationSelectedApis" should {
       "persist changes to flow object" in new SetUp {
-        val api1Name = "first-api"
+        val api1Name = ServiceName("first-api")
         val api1     = mock[CombinedApi]
-        val api2Name = "second-api"
+        val api2Name = ServiceName("second-api")
         val api2     = mock[CombinedApi]
 
         val existingFlowObject =
