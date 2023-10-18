@@ -144,7 +144,7 @@ class EmailPreferencesControllerSpec
       val expectedAPIDisplayNames: Map[String, String] =
         Map(extendedApiOne.serviceName.value -> extendedApiOne.displayName, extendedApiTwo.serviceName.value -> extendedApiTwo.displayName)
 
-      when(mockEmailPreferencesService.fetchAllAPICategoryDetails()(*)).thenReturn(Future.successful(apiCategoryDetails))
+      when(mockEmailPreferencesService.fetchAllAPICategoryDetails()).thenReturn(Future.successful(apiCategoryDetails))
       when(mockEmailPreferencesService.fetchAPIDetails(eqTo(apis))(*)).thenReturn(Future.successful(fetchedAPis))
 
       val result: Future[Result] = controllerUnderTest.emailPreferencesSummaryPage()(loggedInRequest)
@@ -157,7 +157,7 @@ class EmailPreferencesControllerSpec
     "return emailPreferencesSummaryView page and set the view data correctly when the flash data value `unsubscribed` is true" in new Setup {
       fetchSessionByIdReturns(sessionId, sessionNoEMailPrefences)
 
-      when(mockEmailPreferencesService.fetchAllAPICategoryDetails()(*)).thenReturn(Future.successful(apiCategoryDetails))
+      when(mockEmailPreferencesService.fetchAllAPICategoryDetails()).thenReturn(Future.successful(apiCategoryDetails))
       when(mockEmailPreferencesService.fetchAPIDetails(eqTo(Set.empty))(*)).thenReturn(Future.successful(List.empty))
 
       val result: Future[Result] = controllerUnderTest.emailPreferencesSummaryPage()(loggedInRequest.withFlash("unsubscribed" -> "true"))
@@ -369,7 +369,7 @@ class EmailPreferencesControllerSpec
       fetchSessionByIdReturns(sessionId, session)
       updateUserFlowSessionsReturnsSuccessfully(sessionId)
       val emailFlow: EmailPreferencesFlowV2 = EmailPreferencesFlowV2.fromDeveloperSession(loggedInDeveloper).copy(visibleApis = visibleApis)
-      when(mockEmailPreferencesService.apiCategoryDetails(eqTo(apiCategory.category))(*)).thenReturn(Future.successful(Some(apiCategory)))
+      when(mockEmailPreferencesService.apiCategoryDetails(eqTo(apiCategory.category))).thenReturn(Future.successful(Some(apiCategory)))
       when(mockEmailPreferencesService.fetchEmailPreferencesFlow(*)).thenReturn(Future.successful(emailFlow))
 
       val result: Future[Result] = controllerUnderTest.flowSelectApisPage(apiCategory.category)(loggedInRequest)
@@ -418,7 +418,7 @@ class EmailPreferencesControllerSpec
       val emailFlow: EmailPreferencesFlowV2 = EmailPreferencesFlowV2.fromDeveloperSession(loggedInDeveloper)
         .copy(selectedCategories = Set(category1.toString(), category2.toString()), visibleApis = visibleApis)
       when(mockEmailPreferencesService.fetchEmailPreferencesFlow(*)).thenReturn(Future.successful(emailFlow))
-      when(mockEmailPreferencesService.apiCategoryDetails(*)(*)).thenReturn(Future.successful(Some(apiCategory1)))
+      when(mockEmailPreferencesService.apiCategoryDetails(*)).thenReturn(Future.successful(Some(apiCategory1)))
       when(mockEmailPreferencesService.updateSelectedApis(*, eqTo(category1.toString()), eqTo(List("a1", "a2")))).thenReturn(Future.successful(emailFlow))
 
       val result: Future[Result] = controllerUnderTest.flowSelectApisAction()(requestWithForm)
@@ -436,7 +436,7 @@ class EmailPreferencesControllerSpec
       val emailFlow: EmailPreferencesFlowV2 = EmailPreferencesFlowV2.fromDeveloperSession(loggedInDeveloper)
         .copy(selectedCategories = Set(category1.toString(), category2.toString()), visibleApis = visibleApis)
       when(mockEmailPreferencesService.fetchEmailPreferencesFlow(*)).thenReturn(Future.successful(emailFlow))
-      when(mockEmailPreferencesService.apiCategoryDetails(*)(*)).thenReturn(Future.successful(Some(apiCategory1)))
+      when(mockEmailPreferencesService.apiCategoryDetails(*)).thenReturn(Future.successful(Some(apiCategory1)))
       when(mockEmailPreferencesService.updateSelectedApis(*, eqTo(category2.toString()), eqTo(List("a1", "a2")))).thenReturn(Future.successful(emailFlow))
 
       val result: Future[Result] = controllerUnderTest.flowSelectApisAction()(requestWithForm)
@@ -451,7 +451,7 @@ class EmailPreferencesControllerSpec
 
       fetchSessionByIdReturns(sessionId, session)
       when(mockEmailPreferencesService.fetchEmailPreferencesFlow(*)).thenReturn(Future.successful(emailFlow))
-      when(mockEmailPreferencesService.apiCategoryDetails(*)(*)).thenReturn(Future.successful(Some(apiCategory1)))
+      when(mockEmailPreferencesService.apiCategoryDetails(*)).thenReturn(Future.successful(Some(apiCategory1)))
 
       val result: Future[Result] = controllerUnderTest.flowSelectApisAction()(requestWithForm)
 

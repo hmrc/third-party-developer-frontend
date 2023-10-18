@@ -26,7 +26,6 @@ import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.http.UpstreamErrorResponse
 import uk.gov.hmrc.apiplatform.modules.apis.domain.models.{ApiAccess, ApiData, ApiDefinition, ApiStatus, ApiVersion, ServiceName}
 import uk.gov.hmrc.apiplatform.modules.common.domain.models._
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.emailpreferences.APICategoryDisplayDetails
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.WireMockExtensions
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.{Application, ApplicationWithSubscriptionData}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.connectors.ApiType.REST_API
@@ -73,24 +72,6 @@ class ApmConnectorIntegrationSpec extends BaseConnectorIntegrationSpec with Guic
       ApiPlatformMicroserviceStub.stubFetchApplicationByIdFailure(applicationId)
       val result: Option[ApplicationWithSubscriptionData] = await(underTest.fetchApplicationById(applicationId))
       result shouldBe None
-    }
-  }
-
-  "fetchAllCombinedAPICategories" should {
-    val category1 = APICategoryDisplayDetails("CATEGORY_1", "Category 1")
-    val category2 = APICategoryDisplayDetails("CATEGORY_2", "Category 2")
-
-    "return all API Category details" in new Setup {
-      ApiPlatformMicroserviceStub.stubFetchAllCombinedAPICategories(List(category1, category2))
-
-      val result: Either[Throwable, List[APICategoryDisplayDetails]] = await(underTest.fetchAllCombinedAPICategories())
-      result match {
-        case Right(x) =>
-          x.size should be(2)
-          x should contain theSameElementsAs List(category1, category2)
-        case _        => fail()
-      }
-
     }
   }
 

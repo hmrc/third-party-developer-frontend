@@ -28,7 +28,6 @@ import uk.gov.hmrc.apiplatform.modules.apis.domain.models.{ApiData, ApiDefinitio
 import uk.gov.hmrc.apiplatform.modules.common.domain.models._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.connectors.CombinedApi
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.emailpreferences.APICategoryDisplayDetails
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.subscriptions.ApiSubscriptionFields.SubscriptionFieldDefinition
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.subscriptions.FieldName
 import uk.gov.hmrc.thirdpartydeveloperfrontend.service.OpenAccessApiService.OpenAccessApisConnector
@@ -72,13 +71,6 @@ class ApmConnector @Inject() (http: HttpClient, config: ApmConnector.Config, met
   def fetchAllOpenAccessApis(environment: Environment)(implicit hc: HeaderCarrier): Future[Map[ApiContext, ApiData]] = {
     http.GET[Map[ApiContext, ApiData]](s"${config.serviceBaseUrl}/api-definitions/open", Seq("environment" -> environment.toString))
   }
-
-  def fetchAllCombinedAPICategories()(implicit hc: HeaderCarrier): Future[Either[Throwable, List[APICategoryDisplayDetails]]] =
-    http.GET[List[APICategoryDisplayDetails]](s"${config.serviceBaseUrl}/api-categories/combined")
-      .map(Right(_))
-      .recover {
-        case NonFatal(e) => Left(e)
-      }
 
   def fetchAPIDefinition(serviceName: ServiceName)(implicit hc: HeaderCarrier): Future[ApiDefinition] =
     http.GET[ApiDefinition](s"${config.serviceBaseUrl}/combined-api-definitions/$serviceName")

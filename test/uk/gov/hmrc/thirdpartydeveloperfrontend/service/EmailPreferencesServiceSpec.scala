@@ -21,7 +21,7 @@ import scala.concurrent.Future
 
 import uk.gov.hmrc.http.HeaderCarrier
 
-import uk.gov.hmrc.apiplatform.modules.apis.domain.models.ServiceName
+import uk.gov.hmrc.apiplatform.modules.apis.domain.models.{ApiCategory, ServiceName}
 import uk.gov.hmrc.apiplatform.modules.common.domain.models._
 import uk.gov.hmrc.apiplatform.modules.uplift.services.mocks.FlowRepositoryMockModule
 import uk.gov.hmrc.thirdpartydeveloperfrontend.builder.DeveloperBuilder
@@ -137,18 +137,14 @@ class EmailPreferencesServiceSpec extends AsyncHmrcSpec {
     }
 
     "fetchAllAPICategoryDetails" should {
-      val category1 = mock[APICategoryDisplayDetails]
-      val category2 = mock[APICategoryDisplayDetails]
+      val categoryDisplayDetails = APICategoryDisplayDetails("SELF_ASSESSMENT", ApiCategory.SELF_ASSESSMENT.displayText)
 
-      "return all APICategoryDetails objects from connector" in new SetUp {
-        when(mockApmConnector.fetchAllCombinedAPICategories()(*)).thenReturn(Future.successful(Right(List(category1, category2))))
-
+      "return all APICategoryDetails objects from the library type ApiCategory" in new SetUp {
         val result = await(underTest.fetchAllAPICategoryDetails())
 
-        result.size should be(2)
-        result should contain theSameElementsAs List(category1, category2)
-
-        verify(mockApmConnector).fetchAllCombinedAPICategories()(*)
+        result.size should be(ApiCategory.values.size)
+        System.out.println(result.head.category)
+        result.find(_.category == categoryDisplayDetails.category) should be(Some(categoryDisplayDetails))
       }
     }
 

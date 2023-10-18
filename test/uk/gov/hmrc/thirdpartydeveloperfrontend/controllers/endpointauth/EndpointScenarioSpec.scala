@@ -46,7 +46,7 @@ import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.connectors.ApiType.
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.connectors.TermsOfUseInvitationState.EMAIL_SENT
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.connectors._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.{UpdateProfileRequest, User}
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.emailpreferences.{APICategoryDisplayDetails, EmailPreferences}
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.emailpreferences.EmailPreferences
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.subscriptions.ApiSubscriptionFields.SaveSubscriptionFieldsSuccessResponse
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.subscriptions.Fields
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.{ApplicationUpdateSuccessful, ApplicationUpliftSuccessful}
@@ -200,7 +200,6 @@ abstract class EndpointScenarioSpec extends AsyncHmrcSpec with GuiceOneAppPerSui
   when(thirdPartyApplicationSubmissionsConnector.fetchLatestSubmission(*[ApplicationId])(*)).thenReturn(Future.successful(Some(submission)))
   when(thirdPartyApplicationSubmissionsConnector.recordAnswer(*[Submission.Id], *[Question.Id], *[List[String]])(*)).thenReturn(Future.successful(Right(extendedSubmission)))
   when(thirdPartyApplicationSubmissionsConnector.createSubmission(*[ApplicationId], *[LaxEmailAddress])(*)).thenReturn(Future.successful(Some(submission)))
-  when(apmConnector.fetchAllCombinedAPICategories()(*)).thenReturn(Future.successful(Right(List(APICategoryDisplayDetails("category", "name")))))
   when(tpdConnector.fetchDeveloper(*[UserId])(*)).thenReturn(Future.successful(Some(developer)))
   when(tpdConnector.updateProfile(*[UserId], *[UpdateProfileRequest])(*)).thenReturn(Future.successful(1))
   when(tpdConnector.updateEmailPreferences(*[UserId], *[EmailPreferences])(*)).thenReturn(Future.successful(true))

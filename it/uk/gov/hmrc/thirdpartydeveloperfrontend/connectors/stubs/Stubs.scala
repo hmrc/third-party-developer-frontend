@@ -315,17 +315,6 @@ object ApiPlatformMicroserviceStub {
     )
   }
 
-  def stubFetchAllCombinedAPICategories(categories: List[APICategoryDisplayDetails]) = {
-    stubFor(
-      get(urlEqualTo("/api-categories/combined"))
-        .willReturn(
-          aResponse()
-            .withStatus(OK)
-            .withBody(Json.toJson(categories).toString())
-        )
-    )
-  }
-
   def stubCombinedApiByServiceName(serviceName: String, body: String) = {
     stubFor(
       get(urlEqualTo(s"/combined-rest-xml-apis/$serviceName"))
