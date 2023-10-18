@@ -37,7 +37,7 @@ trait FraudPreventionNavLinkHelper {
     if (fraudPreventionConfig.enabled) {
       val apis            = fraudPreventionConfig.apisWithFraudPrevention
       val isProduction    = application.deployedTo == Environment.PRODUCTION
-      val shouldBeVisible = subscriptions.exists(x => apis.contains(x.serviceName.value) && x.subscribed && isProduction)
+      val shouldBeVisible = subscriptions.exists(x => apis.contains(x.serviceName) && x.subscribed && isProduction)
       Some(FraudPreventionNavLinkViewModel(shouldBeVisible, fraudPreventionConfig.uri))
     } else {
       None
