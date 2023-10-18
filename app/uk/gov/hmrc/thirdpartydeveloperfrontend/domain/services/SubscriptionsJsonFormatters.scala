@@ -69,7 +69,7 @@ trait AccessRequirementsJsonFormatters {
 
 object AccessRequirementsJsonFormatters extends AccessRequirementsJsonFormatters
 
-trait SubscriptionsJsonFormatters extends ApiDefinitionsJsonFormatters with ApplicationsJsonFormatters with AccessRequirementsJsonFormatters {
+trait SubscriptionsJsonFormatters extends ApplicationsJsonFormatters with AccessRequirementsJsonFormatters {
   import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.subscriptions._
   import play.api.libs.json._
   import play.api.libs.functional.syntax._

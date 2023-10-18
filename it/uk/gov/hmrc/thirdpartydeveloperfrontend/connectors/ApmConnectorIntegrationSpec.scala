@@ -137,17 +137,17 @@ class ApmConnectorIntegrationSpec extends BaseConnectorIntegrationSpec with Guic
     val applicationId = ApplicationId.random
 
     "return api data when successful" in new Setup {
-      val apiData = ApiData(
-          serviceName = ServiceName("serviceName"),
-          serviceBaseUrl = "http://serviceBaseUrl",
-          name = "name",
-          description = "Description",
-          context = ApiContext("test-api-context-1"),
-          versions = Map(ApiVersionNbr("1.0") ->
-            ApiVersion(ApiVersionNbr("1.0"), ApiStatus.STABLE, ApiAccess.PUBLIC, List.empty)),
-          isTestSupport = false,
-          categories = List(ApiCategory.EXAMPLE)
-        )      
+      val apiData                          = ApiData(
+        serviceName = ServiceName("serviceName"),
+        serviceBaseUrl = "http://serviceBaseUrl",
+        name = "name",
+        description = "Description",
+        context = ApiContext("test-api-context-1"),
+        versions = Map(ApiVersionNbr("1.0") ->
+          ApiVersion(ApiVersionNbr("1.0"), ApiStatus.STABLE, ApiAccess.PUBLIC, List.empty)),
+        isTestSupport = false,
+        categories = List(ApiCategory.EXAMPLE)
+      )
       val response                         = Map(ApiContext.random -> apiData)
       ApiPlatformMicroserviceStub.stubFetchAllPossibleSubscriptions(applicationId, Json.toJson(response).toString())
       val result: Map[ApiContext, ApiData] = await(underTest.fetchAllPossibleSubscriptions(applicationId))

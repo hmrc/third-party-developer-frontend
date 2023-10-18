@@ -58,8 +58,8 @@ object ManageSubscriptions {
     ApiDetails(
       name = in.name,
       context = in.context,
-      version = in.apiVersion.version,
-      displayedStatus = in.apiVersion.displayedStatus,
+      version = in.apiVersion.versionNbr,
+      displayedStatus = in.apiVersion.status.displayText,
       subsValues = in.fields.fields.map(toFieldValue(accessLevel))
     )
   }

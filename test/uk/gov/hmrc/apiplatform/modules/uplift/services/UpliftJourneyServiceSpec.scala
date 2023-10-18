@@ -21,7 +21,7 @@ import scala.concurrent.Future.successful
 
 import uk.gov.hmrc.http.HeaderCarrier
 
-import uk.gov.hmrc.apiplatform.modules.apis.domain.models.{ApiAccess, ApiCategory, ApiData, ApiStatus, ApiVersion, ServiceName}
+import uk.gov.hmrc.apiplatform.modules.apis.domain.models._
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.LaxEmailAddress.StringSyntax
 import uk.gov.hmrc.apiplatform.modules.common.domain.models._
 import uk.gov.hmrc.apiplatform.modules.submissions.SubmissionsTestData
@@ -87,7 +87,7 @@ class UpliftJourneyServiceSpec
       "test-api-1",
       ServiceName("api-example-microservice"),
       apiIdentifier1.context,
-      ApiVersionDefinition(apiIdentifier1.versionNbr, ApiStatus.STABLE),
+      ApiVersion(apiIdentifier1.versionNbr, ApiStatus.STABLE, ApiAccess.PUBLIC, List.empty),
       subscribed = true,
       requiresTrust = false,
       fields = emptyFields
@@ -97,7 +97,7 @@ class UpliftJourneyServiceSpec
       "test-api-2",
       ServiceName("api-example-microservice"),
       apiIdentifier2.context,
-      ApiVersionDefinition(apiIdentifier2.versionNbr, ApiStatus.STABLE),
+      ApiVersion(apiIdentifier2.versionNbr, ApiStatus.STABLE, ApiAccess.PUBLIC, List.empty),
       subscribed = true,
       requiresTrust = false,
       fields = emptyFields
@@ -107,7 +107,7 @@ class UpliftJourneyServiceSpec
       "test-api-3",
       ServiceName("api-example-microservice"),
       ApiContext("test-api-context-3"),
-      ApiVersionDefinition(apiIdentifier2.versionNbr, ApiStatus.STABLE),
+      ApiVersion(apiIdentifier2.versionNbr, ApiStatus.STABLE, ApiAccess.PUBLIC, List.empty),
       subscribed = true,
       requiresTrust = false,
       fields = emptyFields

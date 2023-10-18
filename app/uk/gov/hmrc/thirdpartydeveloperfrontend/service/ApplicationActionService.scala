@@ -74,12 +74,8 @@ class ApplicationActionService @Inject() (
         APISubscriptionStatus(
           name = cdata.name,
           serviceName = cdata.serviceName,
-          context,
-          apiVersion = ApiVersionDefinition(
-            version,
-            status = vdata.status,
-            access = vdata.access
-          ),
+          context = context,
+          apiVersion = vdata,
           subscribed = application.subscriptions.contains(ApiIdentifier(context, version)),
           requiresTrust = false, // Because these are filtered out
           fields = SubscriptionFieldsWrapper(

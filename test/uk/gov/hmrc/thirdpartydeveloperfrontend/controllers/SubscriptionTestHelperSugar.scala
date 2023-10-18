@@ -53,7 +53,7 @@ trait SubscriptionTestHelperSugar extends SubscriptionsBuilder {
       apiName,
       ServiceName(serviceName),
       context,
-      ApiVersionDefinition(version, status, access),
+      ApiVersion(version, status, access, List.empty),
       subscribed,
       requiresTrust,
       isTestSupport = isTestSupport,
@@ -92,7 +92,7 @@ trait SubscriptionTestHelperSugar extends SubscriptionsBuilder {
       applicationSubscription: APISubscriptions,
       expectedApiHumanReadableAppName: String,
       expectedApiServiceName: String,
-      expectedVersions: List[ApiVersionDefinition]
+      expectedVersions: List[ApiVersion]
     ): Unit = {
     applicationSubscription.apiHumanReadableAppName shouldBe expectedApiHumanReadableAppName
     applicationSubscription.apiServiceName.value shouldBe expectedApiServiceName
@@ -130,8 +130,8 @@ trait SubscriptionTestHelperSugar extends SubscriptionsBuilder {
 
   val onlyApiExampleMicroserviceSubscribedTo: APISubscriptionStatus = {
     val context     = ApiContext("example-api")
-    val version     = ApiVersionDefinition(versionOne, ApiStatus.STABLE)
-    val emptyFields = emptySubscriptionFieldsWrapper(appId, clientId, context, version.version)
+    val version     = ApiVersion(versionOne, ApiStatus.STABLE, ApiAccess.PUBLIC, List.empty)
+    val emptyFields = emptySubscriptionFieldsWrapper(appId, clientId, context, version.versionNbr)
 
     APISubscriptionStatus(
       name = "api-example-microservice",
@@ -147,8 +147,8 @@ trait SubscriptionTestHelperSugar extends SubscriptionsBuilder {
 
   def exampleSubscriptionWithoutFields(prefix: String): APISubscriptionStatus = {
     val context     = ApiContext(s"/$prefix-api")
-    val version     = ApiVersionDefinition(versionOne, ApiStatus.STABLE)
-    val emptyFields = emptySubscriptionFieldsWrapper(appId, clientId, context, version.version)
+    val version     = ApiVersion(versionOne, ApiStatus.STABLE, ApiAccess.PUBLIC, List.empty)
+    val emptyFields = emptySubscriptionFieldsWrapper(appId, clientId, context, version.versionNbr)
 
     val subscriptinFieldInxed = 1
     APISubscriptionStatus(
@@ -168,7 +168,7 @@ trait SubscriptionTestHelperSugar extends SubscriptionsBuilder {
 
   def asSubscriptions(in: Seq[APISubscriptionStatus]): Set[ApiIdentifier] = {
     in.filter(_.subscribed).map(ass => {
-      ApiIdentifier(ass.context, ass.apiVersion.version)
+      ApiIdentifier(ass.context, ass.apiVersion.versionNbr)
     })
       .toSet
   }
@@ -192,7 +192,7 @@ trait SubscriptionTestHelperSugar extends SubscriptionsBuilder {
       }
 
     Monoid.combineAll(
-      subscriptions.filter(_.subscribed).toList.map(s => Map(s.context -> Map(s.apiVersion.version -> asFields(s.fields))))
+      subscriptions.filter(_.subscribed).toList.map(s => Map(s.context -> Map(s.apiVersion.versionNbr -> asFields(s.fields))))
     )
   }
 

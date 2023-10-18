@@ -132,7 +132,7 @@ class UpliftJourneyControllerSpec extends BaseControllerSpec
       "test-api-1",
       ServiceName("api-example-microservice"),
       apiIdentifier1.context,
-      ApiVersionDefinition(apiIdentifier1.versionNbr, ApiStatus.STABLE),
+      ApiVersion(apiIdentifier1.versionNbr, ApiStatus.STABLE, ApiAccess.PUBLIC, List.empty),
       subscribed = true,
       requiresTrust = false,
       fields = emptyFields
@@ -142,7 +142,7 @@ class UpliftJourneyControllerSpec extends BaseControllerSpec
       "test-api-2",
       ServiceName("api-example-microservice"),
       apiIdentifier2.context,
-      ApiVersionDefinition(apiIdentifier2.versionNbr, ApiStatus.STABLE),
+      ApiVersion(apiIdentifier2.versionNbr, ApiStatus.STABLE, ApiAccess.PUBLIC, List.empty),
       subscribed = true,
       requiresTrust = false,
       fields = emptyFields

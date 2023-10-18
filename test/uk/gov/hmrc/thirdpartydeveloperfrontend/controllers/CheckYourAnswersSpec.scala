@@ -88,7 +88,7 @@ class CheckYourAnswersSpec
           "API1",
           ServiceName("api-example-microservice"),
           ApiContext("exampleContext"),
-          ApiVersionDefinition(apiVersion, ApiStatus.STABLE),
+          ApiVersion(apiVersion, ApiStatus.STABLE, ApiAccess.PUBLIC, List.empty),
           subscribed = true,
           requiresTrust = false,
           fields = emptyFields
@@ -109,7 +109,7 @@ class CheckYourAnswersSpec
             "API1",
             ServiceName("subscriptionServiceName"),
             ApiContext("context"),
-            ApiVersionDefinition(apiVersion, ApiStatus.STABLE),
+            ApiVersion(apiVersion, ApiStatus.STABLE, ApiAccess.PUBLIC, List.empty),
             subscribed = true,
             requiresTrust = false,
             fields = emptyFields
@@ -187,7 +187,7 @@ class CheckYourAnswersSpec
             "API1",
             ServiceName("subscriptionServiceName"),
             context,
-            ApiVersionDefinition(apiVersion, ApiStatus.STABLE),
+            ApiVersion(apiVersion, ApiStatus.STABLE, ApiAccess.PUBLIC, List.empty),
             subscribed = true,
             requiresTrust = false,
             fields = emptyFields

@@ -164,7 +164,7 @@ trait SubscriptionFieldsActions {
       def refine[A](request: ApplicationWithFieldDefinitionsRequest[A]): Future[Either[Result, ApplicationWithSubscriptionFieldsRequest[A]]] = {
 
         Future.successful({
-          val apiSubscription = request.fieldDefinitions.filter(d => { d.context == context && d.apiVersion.version == version })
+          val apiSubscription = request.fieldDefinitions.filter(d => { d.context == context && d.apiVersion.versionNbr == version })
 
           apiSubscription match {
             case Nil               => Left(NotFound(errorHandler.notFoundTemplate(request)))

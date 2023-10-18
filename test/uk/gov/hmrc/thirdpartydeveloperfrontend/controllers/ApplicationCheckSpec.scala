@@ -88,7 +88,7 @@ class ApplicationCheckSpec
           "API1",
           ServiceName("api-example-microservice"),
           exampleContext,
-          ApiVersionDefinition(version, ApiStatus.STABLE),
+          ApiVersion(version, ApiStatus.STABLE, ApiAccess.PUBLIC, List.empty),
           subscribed = true,
           requiresTrust = false,
           fields = emptyFields

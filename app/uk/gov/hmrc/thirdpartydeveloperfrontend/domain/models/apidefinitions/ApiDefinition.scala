@@ -20,20 +20,12 @@ import uk.gov.hmrc.apiplatform.modules.apis.domain.models._
 import uk.gov.hmrc.apiplatform.modules.common.domain.models._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.subscriptions.ApiSubscriptionFields.{SubscriptionFieldValue, SubscriptionFieldsWrapper}
 
-case class ApiVersionDefinition(version: ApiVersionNbr, status: ApiStatus, access: ApiAccess = ApiAccess.PUBLIC) {
-  val displayedStatus = status.displayText
-
-  val accessType = access.accessType
-
-  val displayedAccessType = accessType.toString().toLowerCase().capitalize
-}
-
 // TODO - 5090 - Add new open access class
 case class APISubscriptionStatus(
     name: String,
     serviceName: ServiceName,
     context: ApiContext,
-    apiVersion: ApiVersionDefinition,
+    apiVersion: ApiVersion,
     subscribed: Boolean,
     requiresTrust: Boolean,
     fields: SubscriptionFieldsWrapper,
@@ -41,21 +33,26 @@ case class APISubscriptionStatus(
   ) {
 
   def isPrivate: Boolean = {
-    apiVersion.accessType match {
+    apiVersion.access.accessType match {
       case ApiAccessType.PRIVATE => true
       case ApiAccessType.PUBLIC  => false
     }
   }
 
-  lazy val apiIdentifier = ApiIdentifier(context, apiVersion.version)
+  lazy val apiIdentifier = ApiIdentifier(context, apiVersion.versionNbr)
 }
 
-case class APISubscriptionStatusWithSubscriptionFields(name: String, context: ApiContext, apiVersion: ApiVersionDefinition, fields: SubscriptionFieldsWrapper)
+case class APISubscriptionStatusWithSubscriptionFields(
+    name: String,
+    context: ApiContext,
+    apiVersion: ApiVersion,
+    fields: SubscriptionFieldsWrapper
+  )
 
 case class APISubscriptionStatusWithWritableSubscriptionField(
     name: String,
     context: ApiContext,
-    apiVersion: ApiVersionDefinition,
+    apiVersion: ApiVersion,
     subscriptionFieldValue: SubscriptionFieldValue,
     oldValues: SubscriptionFieldsWrapper
   )

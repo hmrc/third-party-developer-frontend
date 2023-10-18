@@ -80,9 +80,9 @@ object EditManageSubscription {
 
       EditApiConfigurationViewModel(
         apiSubscription.name,
-        apiSubscription.apiVersion.version,
+        apiSubscription.apiVersion.versionNbr,
         apiSubscription.context,
-        apiSubscription.apiVersion.displayedStatus,
+        apiSubscription.apiVersion.status.displayText,
         fieldsViewModel,
         formErrors
       )
@@ -125,9 +125,9 @@ object EditManageSubscription {
 
       EditApiConfigurationFieldViewModel(
         apiSubscription.name,
-        apiSubscription.apiVersion.version,
+        apiSubscription.apiVersion.versionNbr,
         apiSubscription.context,
-        apiSubscription.apiVersion.displayedStatus,
+        apiSubscription.apiVersion.status.displayText,
         subscriptionFieldViewModel,
         formErrors
       )
