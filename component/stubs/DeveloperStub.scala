@@ -105,13 +105,6 @@ object DeveloperStub extends ComponentTestDeveloperBuilder {
         .withBody(Json.toJson(developer).toString())))
   }
 
-  def setUpGetCombinedApis(): Unit = {
-    stubFor(get(urlPathEqualTo("/api-categories/combined"))
-      .willReturn(aResponse()
-        .withStatus(OK)
-        .withBody("[]")))
-  }
-
   def fetchEmailForResetCode(email: LaxEmailAddress, code: String) = {
     stubFor(
       get(urlPathEqualTo("/reset-password"))

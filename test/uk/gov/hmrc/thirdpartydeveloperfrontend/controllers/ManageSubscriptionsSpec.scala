@@ -150,7 +150,7 @@ class ManageSubscriptionsSpec
       status(result) shouldBe OK
 
       contentAsString(result) should include(apiSubscriptionStatus.name)
-      contentAsString(result) should include(apiSubscriptionStatus.apiVersion.version.value)
+      contentAsString(result) should include(apiSubscriptionStatus.apiVersion.versionNbr.value)
 
       val fields = apiSubscriptionStatus.fields.fields.toList
 
@@ -224,13 +224,15 @@ class ManageSubscriptionsSpec
       "return a bad request for editApiMetadataPage action" in new PendingApprovalReturnsBadRequest {
         def executeAction =
           () =>
-            manageSubscriptionController.editApiMetadataPage(app.id, apiVersion.context, apiVersion.apiVersion.version, SaveSubsFieldsPageMode.CheckYourAnswers)(loggedInRequest)
+            manageSubscriptionController.editApiMetadataPage(app.id, apiVersion.context, apiVersion.apiVersion.versionNbr, SaveSubsFieldsPageMode.CheckYourAnswers)(loggedInRequest)
       }
 
       "return a bad request for saveSubscriptionFields action" in new PendingApprovalReturnsBadRequest {
         def executeAction =
           () =>
-            manageSubscriptionController.saveSubscriptionFields(app.id, apiVersion.context, apiVersion.apiVersion.version, SaveSubsFieldsPageMode.CheckYourAnswers)(loggedInRequest)
+            manageSubscriptionController.saveSubscriptionFields(app.id, apiVersion.context, apiVersion.apiVersion.versionNbr, SaveSubsFieldsPageMode.CheckYourAnswers)(
+              loggedInRequest
+            )
       }
     }
 
@@ -364,7 +366,7 @@ class ManageSubscriptionsSpec
           status(result) shouldBe OK
 
           contentAsString(result) should include(apiSubscriptionStatus.name)
-          contentAsString(result) should include(apiSubscriptionStatus.apiVersion.version.value)
+          contentAsString(result) should include(apiSubscriptionStatus.apiVersion.versionNbr.value)
 
           contentAsString(result) should include(field.definition.description)
           contentAsString(result) should include(field.definition.hint)
@@ -472,7 +474,7 @@ class ManageSubscriptionsSpec
             private val loggedInWithFormValues = editFormPostRequest(subSubscriptionValue.definition.name, FieldValue(newSubscriptionValue))
 
             private val result =
-              addToken(manageSubscriptionController.saveSubscriptionFields(appId, apiSubscriptionStatus.context, apiSubscriptionStatus.apiVersion.version, mode))(
+              addToken(manageSubscriptionController.saveSubscriptionFields(appId, apiSubscriptionStatus.context, apiSubscriptionStatus.apiVersion.versionNbr, mode))(
                 loggedInWithFormValues
               )
 
@@ -486,7 +488,7 @@ class ManageSubscriptionsSpec
                 eqTo(role),
                 eqTo(application),
                 eqTo(apiSubscriptionStatus.context),
-                eqTo(apiSubscriptionStatus.apiVersion.version),
+                eqTo(apiSubscriptionStatus.apiVersion.versionNbr),
                 eqTo(apiSubscriptionStatus.fields.fields),
                 eqTo(expectedFields)
               )(*)
@@ -510,7 +512,7 @@ class ManageSubscriptionsSpec
             )
 
             private val result =
-              addToken(manageSubscriptionController.saveSubscriptionFields(appId, apiSubscriptionStatus.context, apiSubscriptionStatus.apiVersion.version, mode))(
+              addToken(manageSubscriptionController.saveSubscriptionFields(appId, apiSubscriptionStatus.context, apiSubscriptionStatus.apiVersion.versionNbr, mode))(
                 loggedInWithFormValues
               )
 
@@ -524,7 +526,7 @@ class ManageSubscriptionsSpec
                 eqTo(role),
                 eqTo(application),
                 eqTo(apiSubscriptionStatus.context),
-                eqTo(apiSubscriptionStatus.apiVersion.version),
+                eqTo(apiSubscriptionStatus.apiVersion.versionNbr),
                 eqTo(apiSubscriptionStatus.fields.fields),
                 eqTo(expectedFields)
               )(*)
@@ -553,7 +555,7 @@ class ManageSubscriptionsSpec
             )
 
             private val result =
-              addToken(manageSubscriptionController.saveSubscriptionFields(appId, apiSubscriptionStatus.context, apiSubscriptionStatus.apiVersion.version, mode))(
+              addToken(manageSubscriptionController.saveSubscriptionFields(appId, apiSubscriptionStatus.context, apiSubscriptionStatus.apiVersion.versionNbr, mode))(
                 loggedInWithFormValues
               )
 
@@ -576,7 +578,7 @@ class ManageSubscriptionsSpec
             private val loggedInWithFormValues = editFormPostRequest(subSubscriptionValue.definition.name, FieldValue(newSubscriptionValue))
 
             private val result =
-              addToken(manageSubscriptionController.saveSubscriptionFields(appId, apiSubscriptionStatus.context, apiSubscriptionStatus.apiVersion.version, mode))(
+              addToken(manageSubscriptionController.saveSubscriptionFields(appId, apiSubscriptionStatus.context, apiSubscriptionStatus.apiVersion.versionNbr, mode))(
                 loggedInWithFormValues
               )
 
@@ -602,7 +604,7 @@ class ManageSubscriptionsSpec
             private val loggedInWithFormValues = editFormPostRequest(subSubscriptionValue.definition.name, FieldValue(newSubscriptionValue))
 
             private val result =
-              addToken(manageSubscriptionController.saveSubscriptionFields(appId, apiSubscriptionStatus.context, apiSubscriptionStatus.apiVersion.version, mode))(
+              addToken(manageSubscriptionController.saveSubscriptionFields(appId, apiSubscriptionStatus.context, apiSubscriptionStatus.apiVersion.versionNbr, mode))(
                 loggedInWithFormValues
               )
 

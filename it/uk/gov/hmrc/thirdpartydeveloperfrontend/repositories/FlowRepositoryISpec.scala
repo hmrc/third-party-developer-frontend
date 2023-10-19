@@ -23,6 +23,7 @@ import org.mongodb.scala.model.Projections.fields
 import org.scalatest.{BeforeAndAfterEach, OptionValues}
 import org.scalatest.matchers.should.Matchers
 import org.scalatest.wordspec.AnyWordSpec
+import uk.gov.hmrc.apiplatform.modules.apis.domain.models.ServiceName
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.{ApiContext, ApiIdentifier, ApiVersionNbr}
 import uk.gov.hmrc.apiplatform.modules.uplift.domain.models.ApiSubscriptions
 import uk.gov.hmrc.apiplatform.modules.uplift.domain.models.GetProductionCredentialsFlow
@@ -69,7 +70,7 @@ class FlowRepositoryISpec extends AnyWordSpec
       selectedCategories = Set(ApiCategory.VAT.toString(), ApiCategory.AGENTS.toString()),
       selectedAPIs = Map(ApiCategory.VAT.toString() -> Set("qwqw", "asass")),
       selectedTopics = Set("BUSINESS_AND_POLICY"),
-      visibleApis = List(CombinedApi("api1ServiceName", "api1Name", List(ApiCategory.VAT, ApiCategory.AGENTS), REST_API))
+      visibleApis = List(CombinedApi(ServiceName("api1ServiceName"), "api1Name", List(ApiCategory.VAT, ApiCategory.AGENTS), REST_API))
     )
 
     await(flowRepository.saveFlow(currentFlow))
@@ -116,7 +117,7 @@ class FlowRepositoryISpec extends AnyWordSpec
           selectedCategories = Set(ApiCategory.VAT.toString(), ApiCategory.AGENTS.toString()),
           selectedAPIs = Map(ApiCategory.VAT.toString() -> Set("qwqw", "asass")),
           selectedTopics = Set("BUSINESS_AND_POLICY", "EVENT_INVITES"),
-          visibleApis = List(CombinedApi("api1ServiceName", "api1DisplayName", List(ApiCategory.VAT, ApiCategory.AGENTS), REST_API))
+          visibleApis = List(CombinedApi(ServiceName("api1ServiceName"), "api1DisplayName", List(ApiCategory.VAT, ApiCategory.AGENTS), REST_API))
         )
 
         await(flowRepository.saveFlow(flow))
@@ -126,7 +127,7 @@ class FlowRepositoryISpec extends AnyWordSpec
         castResult.sessionId shouldBe currentSession
         castResult.flowType shouldBe EMAIL_PREFERENCES_V2
         castResult.selectedTopics shouldBe Set(EmailTopic.BUSINESS_AND_POLICY.toString, EmailTopic.EVENT_INVITES.toString)
-        castResult.visibleApis should contain only (CombinedApi("api1ServiceName", "api1DisplayName", List(ApiCategory.VAT, ApiCategory.AGENTS), REST_API))
+        castResult.visibleApis should contain only (CombinedApi(ServiceName("api1ServiceName"), "api1DisplayName", List(ApiCategory.VAT, ApiCategory.AGENTS), REST_API))
       }
 
       "save prod creds preferences" in {

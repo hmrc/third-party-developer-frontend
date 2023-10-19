@@ -16,8 +16,7 @@
 
 package uk.gov.hmrc.thirdpartydeveloperfrontend.connectors
 
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.services.{ApiDefinitionsJsonFormatters, SubscriptionsJsonFormatters}
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.services.SubscriptionsJsonFormatters
 
 private[connectors] object ThirdPartyApplicationConnectorJsonFormatters
     extends SubscriptionsJsonFormatters
-    with ApiDefinitionsJsonFormatters

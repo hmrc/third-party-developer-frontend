@@ -30,7 +30,6 @@ import uk.gov.hmrc.apiplatform.modules.common.services.ApplicationLogger
 import org.scalatest.matchers.should.Matchers
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.LaxEmailAddress
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.emailpreferences.APICategoryDisplayDetails
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.services.ApiDefinitionsJsonFormatters._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.services.ApplicationsJsonFormatters._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.WireMockExtensions.withJsonRequestBodySyntax
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.Application
@@ -312,17 +311,6 @@ object ApiPlatformMicroserviceStub {
         .willReturn(
           aResponse()
             .withStatus(NOT_FOUND)
-        )
-    )
-  }
-
-  def stubFetchAllCombinedAPICategories(categories: List[APICategoryDisplayDetails]) = {
-    stubFor(
-      get(urlEqualTo("/api-categories/combined"))
-        .willReturn(
-          aResponse()
-            .withStatus(OK)
-            .withBody(Json.toJson(categories).toString())
         )
     )
   }

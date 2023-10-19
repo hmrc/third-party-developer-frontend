@@ -28,7 +28,7 @@ import play.api.mvc.AnyContentAsEmpty
 import play.api.test.FakeRequest
 import play.twirl.api.Html
 
-import uk.gov.hmrc.apiplatform.modules.apis.domain.models.ApiCategory
+import uk.gov.hmrc.apiplatform.modules.apis.domain.models.{ApiCategory, ServiceName}
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.ApplicationId
 import uk.gov.hmrc.thirdpartydeveloperfrontend.builder._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.{FormKeys, SelectApisFromSubscriptionsForm}
@@ -71,9 +71,9 @@ class SelectApisFromSubscriptionsViewSpec extends CommonViewSpec
 
   private def validateCheckboxItemsAgainstApis(document: Document, apis: List[CombinedApi]) = {
     apis.foreach(api => {
-      val checkbox = document.getElementById(api.serviceName)
+      val checkbox = document.getElementById(api.serviceName.value)
       checkbox.attr("name") shouldBe "selectedApi[]"
-      checkbox.`val`() shouldBe api.serviceName
+      checkbox.`val`() shouldBe api.serviceName.value
 
       document.select(s"label[for=${api.serviceName}]").text shouldBe api.displayName
 
@@ -103,9 +103,9 @@ class SelectApisFromSubscriptionsViewSpec extends CommonViewSpec
 
   "New Application Email Preferences Select Api view page" should {
     val missingAPIs = List(
-      CombinedApi("api1", "Api One", List(category1, category2), REST_API),
-      CombinedApi("api2", "Api Two", List(category2, category4), REST_API),
-      CombinedApi("api3", "Api Three", List(category3, category2), REST_API)
+      CombinedApi(ServiceName("api1"), "Api One", List(category1, category2), REST_API),
+      CombinedApi(ServiceName("api2"), "Api Two", List(category2, category4), REST_API),
+      CombinedApi(ServiceName("api3"), "Api Three", List(category3, category2), REST_API)
     )
 
     "render the api selection page with APIs that are missing from user's email preferences" in new Setup {

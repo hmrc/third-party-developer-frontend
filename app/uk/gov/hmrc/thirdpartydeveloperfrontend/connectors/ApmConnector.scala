@@ -24,12 +24,12 @@ import uk.gov.hmrc.http.HttpReads.Implicits._
 import uk.gov.hmrc.http.{HeaderCarrier, HttpClient}
 import uk.gov.hmrc.play.http.metrics.common.API
 
+import uk.gov.hmrc.apiplatform.modules.apis.domain.models.{ApiData, ApiDefinition, ServiceName}
 import uk.gov.hmrc.apiplatform.modules.common.domain.models._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications._
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.connectors.{ApiDefinition, CombinedApi, ExtendedApiDefinition}
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.emailpreferences.APICategoryDisplayDetails
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.connectors.CombinedApi
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.subscriptions.ApiSubscriptionFields.SubscriptionFieldDefinition
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.subscriptions.{ApiData, FieldName}
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.subscriptions.FieldName
 import uk.gov.hmrc.thirdpartydeveloperfrontend.service.OpenAccessApiService.OpenAccessApisConnector
 
 object ApmConnector {
@@ -72,17 +72,10 @@ class ApmConnector @Inject() (http: HttpClient, config: ApmConnector.Config, met
     http.GET[Map[ApiContext, ApiData]](s"${config.serviceBaseUrl}/api-definitions/open", Seq("environment" -> environment.toString))
   }
 
-  def fetchAllCombinedAPICategories()(implicit hc: HeaderCarrier): Future[Either[Throwable, List[APICategoryDisplayDetails]]] =
-    http.GET[List[APICategoryDisplayDetails]](s"${config.serviceBaseUrl}/api-categories/combined")
-      .map(Right(_))
-      .recover {
-        case NonFatal(e) => Left(e)
-      }
+  def fetchAPIDefinition(serviceName: ServiceName)(implicit hc: HeaderCarrier): Future[ApiDefinition] =
+    http.GET[ApiDefinition](s"${config.serviceBaseUrl}/combined-api-definitions/$serviceName")
 
-  def fetchAPIDefinition(serviceName: String)(implicit hc: HeaderCarrier): Future[ExtendedApiDefinition] =
-    http.GET[ExtendedApiDefinition](s"${config.serviceBaseUrl}/combined-api-definitions/$serviceName")
-
-  def fetchCombinedApi(serviceName: String)(implicit hc: HeaderCarrier): Future[Either[Throwable, CombinedApi]] =
+  def fetchCombinedApi(serviceName: ServiceName)(implicit hc: HeaderCarrier): Future[Either[Throwable, CombinedApi]] =
     http.GET[CombinedApi](s"${config.serviceBaseUrl}/combined-rest-xml-apis/$serviceName")
       .map(Right(_))
       .recover {

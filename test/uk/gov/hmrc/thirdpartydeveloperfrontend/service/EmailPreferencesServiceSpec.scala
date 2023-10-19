@@ -21,6 +21,7 @@ import scala.concurrent.Future
 
 import uk.gov.hmrc.http.HeaderCarrier
 
+import uk.gov.hmrc.apiplatform.modules.apis.domain.models.{ApiCategory, ServiceName}
 import uk.gov.hmrc.apiplatform.modules.common.domain.models._
 import uk.gov.hmrc.apiplatform.modules.uplift.services.mocks.FlowRepositoryMockModule
 import uk.gov.hmrc.thirdpartydeveloperfrontend.builder.DeveloperBuilder
@@ -136,24 +137,20 @@ class EmailPreferencesServiceSpec extends AsyncHmrcSpec {
     }
 
     "fetchAllAPICategoryDetails" should {
-      val category1 = mock[APICategoryDisplayDetails]
-      val category2 = mock[APICategoryDisplayDetails]
+      val categoryDisplayDetails = APICategoryDisplayDetails("SELF_ASSESSMENT", ApiCategory.SELF_ASSESSMENT.displayText)
 
-      "return all APICategoryDetails objects from connector" in new SetUp {
-        when(mockApmConnector.fetchAllCombinedAPICategories()(*)).thenReturn(Future.successful(Right(List(category1, category2))))
-
+      "return all APICategoryDetails objects from the library type ApiCategory" in new SetUp {
         val result = await(underTest.fetchAllAPICategoryDetails())
 
-        result.size should be(2)
-        result should contain theSameElementsAs List(category1, category2)
-
-        verify(mockApmConnector).fetchAllCombinedAPICategories()(*)
+        result.size should be(ApiCategory.values.size)
+        System.out.println(result.head.category)
+        result.find(_.category == categoryDisplayDetails.category) should be(Some(categoryDisplayDetails))
       }
     }
 
     "fetchAPIDetails" should {
-      val apiServiceName1 = "service-1"
-      val apiServiceName2 = "service-2"
+      val apiServiceName1 = ServiceName("service-1")
+      val apiServiceName2 = ServiceName("service-2")
 
       val apiDetails1 = mock[CombinedApi]
       val apiDetails2 = mock[CombinedApi]
@@ -174,9 +171,9 @@ class EmailPreferencesServiceSpec extends AsyncHmrcSpec {
 
     "updateNewApplicationSelectedApis" should {
       "persist changes to flow object" in new SetUp {
-        val api1Name = "first-api"
+        val api1Name = ServiceName("first-api")
         val api1     = mock[CombinedApi]
-        val api2Name = "second-api"
+        val api2Name = ServiceName("second-api")
         val api2     = mock[CombinedApi]
 
         val existingFlowObject =

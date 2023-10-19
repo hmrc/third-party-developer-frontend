@@ -97,8 +97,6 @@ class LoginSteps extends ScalaDsl with EN with Matchers with NavigationSugar wit
     TestContext.sessionIdForMfaMandatingUser = setupLoggedOrPartLoggedInDeveloper(developer, password, LoggedInState.PART_LOGGED_IN_ENABLING_MFA)
 
     DeveloperStub.setupGettingDeveloperByUserId(developer)
-
-    DeveloperStub.setUpGetCombinedApis()
   }
 
   Given("""^'(.*)' session is uplifted to LoggedIn$""") { email: String =>

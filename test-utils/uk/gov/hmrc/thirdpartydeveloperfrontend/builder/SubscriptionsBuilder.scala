@@ -16,7 +16,7 @@
 
 package uk.gov.hmrc.thirdpartydeveloperfrontend.builder
 
-import uk.gov.hmrc.apiplatform.modules.apis.domain.models.ApiStatus
+import uk.gov.hmrc.apiplatform.modules.apis.domain.models.{ApiAccess, ApiStatus, ApiVersion, ServiceName}
 import uk.gov.hmrc.apiplatform.modules.common.domain.models._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.apidefinitions._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.Application
@@ -28,11 +28,11 @@ trait SubscriptionsBuilder {
   def buildAPISubscriptionStatus(name: String, context: Option[ApiContext] = None, fields: Option[SubscriptionFieldsWrapper] = None): APISubscriptionStatus = {
 
     val contextName = context.getOrElse(ApiContext(s"context-$name"))
-    val version     = ApiVersionDefinition(ApiVersionNbr("version"), ApiStatus.STABLE)
+    val version     = ApiVersion(ApiVersionNbr("version"), ApiStatus.STABLE, ApiAccess.PUBLIC, List.empty)
 
-    val f = fields.getOrElse(SubscriptionFieldsWrapper(ApplicationId.random, ClientId("fake-clientId"), contextName, version.version, List.empty))
+    val f = fields.getOrElse(SubscriptionFieldsWrapper(ApplicationId.random, ClientId("fake-clientId"), contextName, version.versionNbr, List.empty))
 
-    APISubscriptionStatus(name, s"serviceName-$name", contextName, version, subscribed = true, requiresTrust = false, fields = f, isTestSupport = false)
+    APISubscriptionStatus(name, ServiceName(s"serviceName-$name"), contextName, version, subscribed = true, requiresTrust = false, fields = f, isTestSupport = false)
   }
 
   def emptySubscriptionFieldsWrapper(applicationId: ApplicationId, clientId: ClientId, context: ApiContext, version: ApiVersionNbr) = {

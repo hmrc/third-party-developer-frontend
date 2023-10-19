@@ -139,7 +139,7 @@ case class NewApplicationEmailPreferencesFlowV2(
         .foldLeft(Map.empty[String, Set[String]])(_ ++ _)
 
     // Map[ServiceName -> Set[Category]]
-    val selectedApisCategories: Map[String, Set[String]] = selectedApis.map(api => (api.serviceName -> api.categories.map(_.toString()).toSet)).toMap
+    val selectedApisCategories: Map[String, Set[String]] = selectedApis.map(api => (api.serviceName.value -> api.categories.map(_.toString()).toSet)).toMap
 
     // Map[Category -> Set.empty[ServiceName]]
     val invertedSelectedApisCategories: Map[String, Set[String]] = selectedApisCategories.values.flatten.map(c => c -> Set.empty[String]).toMap

@@ -220,7 +220,7 @@ class AddApplication @Inject() (
       emailPreferencesService.fetchAPIDetails(applicationSubscriptions.map(_.serviceName).toSet) map { apiDetails =>
         val allInCategories = userEmailPreferences.interests.filter(i => i.services.isEmpty).map(_.regime)
         val filteredApis    = apiDetails.filter(api => api.categories.intersect(allInCategories).isEmpty)
-        filteredApis.map(_.serviceName).diff(userEmailPreferences.interests.flatMap(_.services)).toSet
+        filteredApis.map(_.serviceName.value).diff(userEmailPreferences.interests.flatMap(_.services)).toSet
       }
     }
 

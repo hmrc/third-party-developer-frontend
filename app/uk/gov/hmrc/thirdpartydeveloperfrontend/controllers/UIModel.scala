@@ -20,18 +20,18 @@ import scala.collection.SortedMap
 
 import play.api.libs.json.Json
 
+import uk.gov.hmrc.apiplatform.modules.apis.domain.models.{ApiData, ServiceName}
 import uk.gov.hmrc.apiplatform.modules.common.domain.models._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.APISubscriptions.subscriptionNumberLabel
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.apidefinitions.APIGroup._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.apidefinitions._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications._
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.subscriptions._
 
 case class PageData(app: Application, subscriptions: Option[GroupedSubscriptions], openAccessApis: Map[ApiContext, ApiData])
 
 case class GroupedSubscriptions(testApis: Seq[APISubscriptions], apis: Seq[APISubscriptions], exampleApi: Option[APISubscriptions] = None)
 
-case class APISubscriptions(apiHumanReadableAppName: String, apiServiceName: String, apiContext: ApiContext, subscriptions: Seq[APISubscriptionStatus]) {
+case class APISubscriptions(apiHumanReadableAppName: String, apiServiceName: ServiceName, apiContext: ApiContext, subscriptions: Seq[APISubscriptionStatus]) {
 
   lazy val subscriptionNumberText = subscriptionNumberLabel(subscriptions)
 
@@ -43,7 +43,7 @@ case class APISubscriptions(apiHumanReadableAppName: String, apiServiceName: Str
 object APISubscriptions {
 
   def groupSubscriptions(subscriptions: Seq[APISubscriptionStatus]): Option[GroupedSubscriptions] = {
-    val EXAMPLE_API_NAME = "api-example-microservice"
+    val EXAMPLE_API_NAME = ServiceName("api-example-microservice")
 
     if (subscriptions.nonEmpty) {
       val subscriptionGroups = subscriptions.groupBy(_.isTestSupport)
@@ -75,12 +75,12 @@ object AjaxSubscriptionResponse {
 
   def from(context: ApiContext, version: ApiVersionNbr, subscriptions: Seq[APISubscriptionStatus]): AjaxSubscriptionResponse = {
     val versionAccessType = subscriptions
-      .find(s => s.context == context && s.apiVersion.version == version)
-      .map(_.apiVersion.accessType)
+      .find(s => s.context == context && s.apiVersion.versionNbr == version)
+      .map(_.apiVersion.access.accessType)
       .getOrElse(throw new IllegalStateException(s"subscription should exist for ${context.value} ${version.value}"))
 
     val group = subscriptions
-      .find(s => s.context == context && s.apiVersion.version == version)
+      .find(s => s.context == context && s.apiVersion.versionNbr == version)
       .map(sub =>
         if (sub.context.value == "hello") EXAMPLE
         else if (sub.isTestSupport) TEST_API
@@ -88,7 +88,7 @@ object AjaxSubscriptionResponse {
       )
       .getOrElse(throw new IllegalStateException(s"subscription should exist for ${context.value} ${version.value}"))
 
-    val apiSubscriptions = subscriptions.filter(s => s.context == context && s.apiVersion.accessType == versionAccessType)
+    val apiSubscriptions = subscriptions.filter(s => s.context == context && s.apiVersion.access.accessType == versionAccessType)
 
     AjaxSubscriptionResponse(context, group.toString, subscriptionNumberLabel(apiSubscriptions))
   }

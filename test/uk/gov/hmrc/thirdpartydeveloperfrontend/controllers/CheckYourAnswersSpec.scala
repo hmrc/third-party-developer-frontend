@@ -81,14 +81,14 @@ class CheckYourAnswersSpec
   val exampleApiSubscription = Some(
     APISubscriptions(
       "Example API",
-      "api-example-microservice",
+      ServiceName("api-example-microservice"),
       ApiContext("exampleContext"),
       Seq(
         APISubscriptionStatus(
           "API1",
-          "api-example-microservice",
+          ServiceName("api-example-microservice"),
           ApiContext("exampleContext"),
-          ApiVersionDefinition(apiVersion, ApiStatus.STABLE),
+          ApiVersion(apiVersion, ApiStatus.STABLE, ApiAccess.PUBLIC, List.empty),
           subscribed = true,
           requiresTrust = false,
           fields = emptyFields
@@ -102,14 +102,14 @@ class CheckYourAnswersSpec
     Seq(
       APISubscriptions(
         "ServiceName",
-        "apiContent",
+        ServiceName("apiContent"),
         ApiContext("context"),
         Seq(
           APISubscriptionStatus(
             "API1",
-            "subscriptionServiceName",
+            ServiceName("subscriptionServiceName"),
             ApiContext("context"),
-            ApiVersionDefinition(apiVersion, ApiStatus.STABLE),
+            ApiVersion(apiVersion, ApiStatus.STABLE, ApiAccess.PUBLIC, List.empty),
             subscribed = true,
             requiresTrust = false,
             fields = emptyFields
@@ -180,14 +180,14 @@ class CheckYourAnswersSpec
     val subscriptions = Seq(
       APISubscriptions(
         "API1",
-        "ServiceName",
+        ServiceName("ServiceName"),
         context,
         Seq(
           APISubscriptionStatus(
             "API1",
-            "subscriptionServiceName",
+            ServiceName("subscriptionServiceName"),
             context,
-            ApiVersionDefinition(apiVersion, ApiStatus.STABLE),
+            ApiVersion(apiVersion, ApiStatus.STABLE, ApiAccess.PUBLIC, List.empty),
             subscribed = true,
             requiresTrust = false,
             fields = emptyFields

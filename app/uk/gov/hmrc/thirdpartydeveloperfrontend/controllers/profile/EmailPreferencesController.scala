@@ -28,6 +28,7 @@ import play.api.libs.crypto.CookieSigner
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents, Result}
 import play.twirl.api.Html
 
+import uk.gov.hmrc.apiplatform.modules.apis.domain.models.ServiceName
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.ApplicationId
 import uk.gov.hmrc.thirdpartydeveloperfrontend.config.{ApplicationConfig, ErrorHandler}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers._
@@ -185,8 +186,8 @@ class EmailPreferencesController @Inject() (
       case _            => false
     }
 
-    val emailPreferences          = request.developerSession.developer.emailPreferences
-    val userServices: Set[String] = emailPreferences.interests.flatMap(_.services).toSet
+    val emailPreferences               = request.developerSession.developer.emailPreferences
+    val userServices: Set[ServiceName] = emailPreferences.interests.flatMap(_.services).map(ServiceName(_)).toSet
     for {
       apiCategoryDetails <- emailPreferencesService.fetchAllAPICategoryDetails()
       apiNames           <- emailPreferencesService.fetchAPIDetails(userServices)
@@ -218,7 +219,7 @@ class EmailPreferencesController @Inject() (
 
     EmailPreferencesSummaryViewData(
       createCategoryMap(categories, emailPreferences.interests.map(_.regime)),
-      filteredAPIs.map(a => (a.serviceName, decorateXmlApiDisplayName(a))).toMap,
+      filteredAPIs.map(a => (a.serviceName.value, decorateXmlApiDisplayName(a))).toMap,
       unsubscribed
     )
   }
@@ -239,7 +240,7 @@ class EmailPreferencesController @Inject() (
       request.flash.data.get("missingSubscriptions").fold[Future[Seq[CombinedApi]]](
         successful(Seq.empty)
       )(missingSubscriptionsCSV =>
-        emailPreferencesService.fetchAPIDetails(missingSubscriptionsCSV.split(",").toSet)
+        emailPreferencesService.fetchAPIDetails(missingSubscriptionsCSV.split(",").toSet.map(ServiceName(_)))
       )
     }
 
@@ -260,7 +261,7 @@ class EmailPreferencesController @Inject() (
       flow: NewApplicationEmailPreferencesFlowV2
     )(implicit request: UserRequest[AnyContent]
     ): Html =
-    selectApisFromSubscriptionsView(form, flow.missingSubscriptions.toList.sortBy(_.serviceName), flow.applicationId, flow.selectedApis.map(_.serviceName))
+    selectApisFromSubscriptionsView(form, flow.missingSubscriptions.toList.sortBy(_.serviceName), flow.applicationId, flow.selectedApis.map(_.serviceName.value))
 
   def selectApisFromSubscriptionsAction(applicationId: ApplicationId): Action[AnyContent] = loggedInAction { implicit request =>
     val form = SelectApisFromSubscriptionsForm.form.bindFromRequest()
@@ -273,7 +274,7 @@ class EmailPreferencesController @Inject() (
       },
       {
         selectedApisForm =>
-          emailPreferencesService.updateNewApplicationSelectedApis(request.developerSession, applicationId, selectedApisForm.selectedApi.toSet)
+          emailPreferencesService.updateNewApplicationSelectedApis(request.developerSession, applicationId, selectedApisForm.selectedApi.map(ServiceName(_)).toSet)
             .map(_ => Redirect(profile.routes.EmailPreferencesController.selectTopicsFromSubscriptionsPage(applicationId)))
       }
     )

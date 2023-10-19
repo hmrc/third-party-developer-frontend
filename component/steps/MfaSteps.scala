@@ -179,8 +179,6 @@ class MfaSteps extends ScalaDsl with EN with Matchers with NavigationSugar with 
     TestContext.developer = developer
 
     DeveloperStub.setupGettingDeveloperByUserId(developer)
-
-    DeveloperStub.setUpGetCombinedApis()
   }
 
   Given("""^I already have a device cookie$""") {
