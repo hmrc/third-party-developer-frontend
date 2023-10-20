@@ -18,6 +18,7 @@ package uk.gov.hmrc.thirdpartydeveloperfrontend.config
 
 import play.api.Configuration
 
+import uk.gov.hmrc.apiplatform.modules.apis.domain.models.ServiceName
 import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.BaseControllerSpec
 
 class FraudPreventionConfigProviderSpec extends BaseControllerSpec {
@@ -43,7 +44,7 @@ class FraudPreventionConfigProviderSpec extends BaseControllerSpec {
       val underTest = new FraudPreventionConfigProvider(testConfig).get()
 
       underTest.enabled shouldBe false
-      underTest.apisWithFraudPrevention shouldBe fraudPreventionApis
+      underTest.apisWithFraudPrevention shouldBe fraudPreventionApis.map(ServiceName(_))
       underTest.uri shouldBe uri
     }
 

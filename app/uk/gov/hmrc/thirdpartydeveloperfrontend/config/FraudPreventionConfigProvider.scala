@@ -23,7 +23,9 @@ import com.google.inject.Provider
 
 import play.api.Configuration
 
-case class FraudPreventionConfig(enabled: Boolean, apisWithFraudPrevention: List[String], uri: String)
+import uk.gov.hmrc.apiplatform.modules.apis.domain.models.ServiceName
+
+case class FraudPreventionConfig(enabled: Boolean, apisWithFraudPrevention: List[ServiceName], uri: String)
 
 @Singleton
 class FraudPreventionConfigProvider @Inject() (config: Configuration) extends Provider[FraudPreventionConfig] {
@@ -34,7 +36,7 @@ class FraudPreventionConfigProvider @Inject() (config: Configuration) extends Pr
     val apisWithFraudPrevention: List[String] = config.underlying.getStringList("fraudPreventionLink.apisWithFraudPrevention").asScala.toList
     val uri: String                           = config.underlying.getString("fraudPreventionLink.uri")
 
-    val result = FraudPreventionConfig(enabled, apisWithFraudPrevention, uri)
+    val result = FraudPreventionConfig(enabled, apisWithFraudPrevention.map(ServiceName(_)), uri)
     result
   }
 }
