@@ -16,17 +16,18 @@
 
 package stubs
 
-import com.github.tomakehurst.wiremock.client.WireMock.{aResponse, equalTo, equalToJson, get, post, postRequestedFor, stubFor, urlEqualTo, urlMatching, urlPathEqualTo, verify}
+import com.github.tomakehurst.wiremock.client.WireMock._
+import utils.ComponentTestDeveloperBuilder
+
 import play.api.http.Status.{BAD_REQUEST, OK}
 import play.api.libs.json.Json
-import uk.gov.hmrc.apiplatform.modules.common.domain.models.LaxEmailAddress
+
+import uk.gov.hmrc.apiplatform.modules.common.domain.models.{LaxEmailAddress, UserId}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.connectors.EncryptedJson
-import uk.gov.hmrc.thirdpartydeveloperfrontend.connectors.ThirdPartyDeveloperConnector.{FindUserIdRequest, FindUserIdResponse}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.connectors.ThirdPartyDeveloperConnector.JsonFormatters.FindUserIdRequestWrites
+import uk.gov.hmrc.thirdpartydeveloperfrontend.connectors.ThirdPartyDeveloperConnector.{FindUserIdRequest, FindUserIdResponse}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.connectors.PasswordResetRequest
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.{Developer, Registration, UpdateProfileRequest}
-import utils.ComponentTestDeveloperBuilder
-import uk.gov.hmrc.apiplatform.modules.common.domain.models.UserId
 
 object DeveloperStub extends ComponentTestDeveloperBuilder {
 

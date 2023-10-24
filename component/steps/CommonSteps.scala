@@ -16,19 +16,19 @@
 
 package steps
 
-import io.cucumber.datatable.DataTable
-import io.cucumber.scala.{EN, ScalaDsl}
-import io.cucumber.scala.Implicits._
-import matchers.CustomMatchers
-import org.openqa.selenium.{By, WebDriver, WebElement}
-import org.openqa.selenium.interactions.Actions
-import pages._
-
-import scala.jdk.CollectionConverters._
 import scala.collection.mutable
 import scala.concurrent.duration._
+import scala.jdk.CollectionConverters._
 import scala.language.postfixOps
+
+import io.cucumber.datatable.DataTable
+import io.cucumber.scala.Implicits._
+import io.cucumber.scala.{EN, ScalaDsl}
+import matchers.CustomMatchers
+import org.openqa.selenium.interactions.Actions
+import org.openqa.selenium.{By, WebDriver, WebElement}
 import org.scalatest.matchers.should.Matchers
+import pages._
 
 object TableMisuseAdapters {
 

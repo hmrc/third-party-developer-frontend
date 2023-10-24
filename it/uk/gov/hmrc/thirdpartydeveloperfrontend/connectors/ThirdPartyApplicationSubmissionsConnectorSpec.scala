@@ -16,35 +16,28 @@
 
 package uk.gov.hmrc.thirdpartydeveloperfrontend.connectors
 
+import java.time.{LocalDateTime, ZoneOffset}
 import java.util.UUID
-import org.scalatestplus.play.guice.GuiceOneAppPerSuite
-import uk.gov.hmrc.thirdpartydeveloperfrontend.utils._
-import play.api.Configuration
-import play.api.inject.guice.GuiceApplicationBuilder
-import play.api.inject.bind
-import play.api.Mode
-import play.api.{Application => PlayApplication}
+
 import com.github.tomakehurst.wiremock.client.WireMock._
+import org.scalatestplus.play.guice.GuiceOneAppPerSuite
+
 import play.api.http.Status._
+import play.api.inject.bind
+import play.api.inject.guice.GuiceApplicationBuilder
+import play.api.{Application => PlayApplication, Configuration, Mode}
+import uk.gov.hmrc.http.HeaderCarrier
+
+import uk.gov.hmrc.apiplatform.modules.common.domain.models.ApplicationId
+import uk.gov.hmrc.apiplatform.modules.common.domain.models.LaxEmailAddress.StringSyntax
+import uk.gov.hmrc.apiplatform.modules.submissions.SubmissionsTestData
 import uk.gov.hmrc.apiplatform.modules.submissions.connectors.ThirdPartyApplicationSubmissionsConnector
 import uk.gov.hmrc.apiplatform.modules.submissions.connectors.ThirdPartyApplicationSubmissionsConnector._
-import uk.gov.hmrc.http.HeaderCarrier
+import uk.gov.hmrc.apiplatform.modules.submissions.domain.models._
 import uk.gov.hmrc.apiplatform.modules.submissions.domain.services.SubmissionsFrontendJsonFormatters
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.services.ApplicationsJsonFormatters
-import uk.gov.hmrc.apiplatform.modules.submissions.domain.models.{
-  ErrorDetails,
-  ResponsibleIndividualToUVerification,
-  ResponsibleIndividualVerification,
-  ResponsibleIndividualVerificationId,
-  ResponsibleIndividualVerificationState,
-  ResponsibleIndividualVerificationWithDetails,
-  Submission
-}
-import uk.gov.hmrc.apiplatform.modules.submissions.SubmissionsTestData
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.ResponsibleIndividual
-import java.time.{LocalDateTime, ZoneOffset}
-import uk.gov.hmrc.apiplatform.modules.common.domain.models.LaxEmailAddress.StringSyntax
-import uk.gov.hmrc.apiplatform.modules.common.domain.models.ApplicationId
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.services.ApplicationsJsonFormatters
+import uk.gov.hmrc.thirdpartydeveloperfrontend.utils._
 
 class ThirdPartyApplicationSubmissionsConnectorSpec
     extends BaseConnectorIntegrationSpec

@@ -16,28 +16,28 @@
 
 package steps
 
+import java.time.{LocalDateTime, ZoneOffset}
+import java.util.UUID
 import java.util.UUID.randomUUID
+
 import io.cucumber.datatable.DataTable
-import io.cucumber.scala.{EN, ScalaDsl}
 import io.cucumber.scala.Implicits._
+import io.cucumber.scala.{EN, ScalaDsl}
 import matchers.CustomMatchers
 import org.openqa.selenium.By
+import org.scalatest.matchers.should.Matchers
 import pages._
+import stubs.ApplicationStub.configureUserApplications
+import stubs._
+import utils.ComponentTestDeveloperBuilder
+
 import play.api.http.Status._
 import play.api.libs.json.Json
-import stubs._
-import stubs.ApplicationStub.configureUserApplications
 
-import java.time.{LocalDateTime, ZoneOffset}
-import uk.gov.hmrc.apiplatform.modules.common.domain.models._
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.ApplicationWithSubscriptionIds
-import org.scalatest.matchers.should.Matchers
-import uk.gov.hmrc.apiplatform.modules.common.domain.models.LaxEmailAddress.StringSyntax
-import utils.ComponentTestDeveloperBuilder
 import uk.gov.hmrc.apiplatform.modules.applications.domain.models._
-
-import java.util.UUID
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications._
+import uk.gov.hmrc.apiplatform.modules.common.domain.models.LaxEmailAddress.StringSyntax
+import uk.gov.hmrc.apiplatform.modules.common.domain.models._
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.{ApplicationWithSubscriptionIds, _}
 
 object AppWorld {
   var userApplicationsOnBackend: List[Application] = Nil

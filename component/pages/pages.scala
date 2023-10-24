@@ -18,10 +18,11 @@ package pages
 
 import org.openqa.selenium.By
 import steps.{Env, Form}
+import utils.MfaData
+
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.LaxEmailAddress
 import uk.gov.hmrc.apiplatform.modules.common.services.ApplicationLogger
 import uk.gov.hmrc.apiplatform.modules.mfa.models.MfaType
-import utils.MfaData
 
 trait FormPage extends WebPage with ApplicationLogger {
   val pageHeading: String
