@@ -23,10 +23,9 @@
 @import views.html.helper.CSPNonce
 
 @(app: Application, developer: Developer, clientSecrets: Seq[ClientSecretResponse])(
-  implicit request: play.api.mvc.Request[Any], messages: Messages, applicationConfig: ApplicationConfig, flash: Flash
+  implicit request: play.api.mvc.Request[Any], messages: Messages, applicationConfig: ApplicationConfig
 )
 
-@isNewSecret = @{flash.get("newSecret").isDefined}
 @allowDeletion = @{clientSecrets.size > 1}
 
 
@@ -41,12 +40,6 @@
     <button id="submit" class="govuk-button" type="submit">Generate a client secret</button>
   }
 } else {
-  @if(isNewSecret) {
-    <div class="govuk-inset-text">
-      We only show you a new client secret once to help keep your data secure.<br>
-      Copy the client secret immediately.
-    </div>
-  }
   <table class="govuk-table">
     <caption class="govuk-visually-hidden">Client secrets table</caption>
     <thead class="govuk-table__head">
@@ -63,11 +56,7 @@
         @defining(s"client secret ending with ${secret.name.takeRight(4)}") { accessibleText =>
           <tr class="govuk-table__row">
             <td aria-label="@accessibleText" class="govuk-table__cell center-table-text">
-              @if(isNewSecret && secret.id.value.toString == flash.get("newSecretId").getOrElse("")){
-                <span id="copy-to-clip" value="@{flash.get("newSecret").get}">@{flash.get("newSecret").get}</span>
-              } else {
-                ••••••••••••••••••••••••••••••••@{secret.name.takeRight(4)}
-              }
+              ••••••••••••••••••••••••••••••••@{secret.name.takeRight(4)}
             </td>
               <td class="govuk-table__cell center-table-text"></td>
             <td class="govuk-table__cell center-table-text">
@@ -91,7 +80,7 @@
     </tbody>
   </table>
 
-    @if(!isNewSecret && clientSecrets.size == 1) {
+    @if(clientSecrets.size == 1) {
           <br>
           <p class="govuk-body">Your application must have at least one client secret. If you need to, you can generate a new client secret and delete old ones.</p>
         }
