@@ -23,11 +23,11 @@ import scala.concurrent.{ExecutionContext, Future}
 import uk.gov.hmrc.http.{ForbiddenException, HeaderCarrier}
 import uk.gov.hmrc.play.audit.http.connector.AuditResult
 
-import uk.gov.hmrc.apiplatform.modules.apis.domain.models.{ApiCategory, ApiData}
+import uk.gov.hmrc.apiplatform.modules.apis.domain.models.{ApiCategory, ApiDefinition}
 import uk.gov.hmrc.apiplatform.modules.applications.domain.models._
 import uk.gov.hmrc.apiplatform.modules.commands.applications.domain.models.{ApplicationCommand, ApplicationCommands}
-import uk.gov.hmrc.apiplatform.modules.common.domain.models.{LaxEmailAddress, UserId, _}
-import uk.gov.hmrc.thirdpartydeveloperfrontend.connectors.{ApplicationCommandConnector, _}
+import uk.gov.hmrc.apiplatform.modules.common.domain.models._
+import uk.gov.hmrc.thirdpartydeveloperfrontend.connectors._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.apidefinitions._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications._
@@ -256,28 +256,28 @@ class ApplicationService @Inject() (
 object ApplicationService {
 
   val filterSubscriptionsForUplift: (Set[ApiIdentifier]) => (Map[ApplicationId, Set[ApiIdentifier]]) => Set[ApplicationId] =
-    (upliftableApiIdentifiers) =>
-      (appSubscriptions) =>
+    upliftableApiIdentifiers =>
+      appSubscriptions =>
         appSubscriptions
           // All non-test non-example subscribed apis are upliftable AND at least one subscribed apis is present
           .view.mapValues(apis => apis.subsetOf(upliftableApiIdentifiers) && apis.nonEmpty).toMap
           .filter { case (_, isUpliftable) => isUpliftable }
           .keySet
 
-  val isTestSupportOrExample: (Map[ApiContext, ApiData]) => (ApiIdentifier) => Boolean =
-    (apis) =>
-      (id) =>
-        apis.get(id.context) match {
+  val isTestSupportOrExample: (List[ApiDefinition]) => (ApiIdentifier) => Boolean =
+    apiDefinitions =>
+      apiIdentifier =>
+        apiDefinitions.find(_.context == apiIdentifier.context) match {
           case None      => false
           case Some(api) => api.isTestSupport || api.categories.contains(ApiCategory.EXAMPLE)
         }
 
-  val filterSubscriptionsToRemoveTestAndExampleApis: (Map[ApiContext, ApiData]) => (Map[ApplicationId, Set[ApiIdentifier]]) => Map[ApplicationId, Set[ApiIdentifier]] =
-    (apis) =>
-      (subscriptionsByApplication) => {
+  val filterSubscriptionsToRemoveTestAndExampleApis: (List[ApiDefinition]) => (Map[ApplicationId, Set[ApiIdentifier]]) => Map[ApplicationId, Set[ApiIdentifier]] =
+    apiDefinitions =>
+      (subscriptionsByApplication: Map[ApplicationId, Set[ApiIdentifier]]) => {
         subscriptionsByApplication.flatMap {
           case (id, subs) =>
-            val filteredSubs = subs.filterNot(isTestSupportOrExample(apis))
+            val filteredSubs = subs.filterNot(isTestSupportOrExample(apiDefinitions))
             if (filteredSubs.isEmpty) Map.empty[ApplicationId, Set[ApiIdentifier]] else Map(id -> filteredSubs)
         }
       }

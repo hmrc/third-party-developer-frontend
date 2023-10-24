@@ -20,14 +20,14 @@ import scala.collection.SortedMap
 
 import play.api.libs.json.Json
 
-import uk.gov.hmrc.apiplatform.modules.apis.domain.models.{ApiData, ServiceName}
+import uk.gov.hmrc.apiplatform.modules.apis.domain.models.{ApiDefinition, ServiceName}
 import uk.gov.hmrc.apiplatform.modules.common.domain.models._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.APISubscriptions.subscriptionNumberLabel
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.apidefinitions.APIGroup._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.apidefinitions._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications._
 
-case class PageData(app: Application, subscriptions: Option[GroupedSubscriptions], openAccessApis: Map[ApiContext, ApiData])
+case class PageData(app: Application, subscriptions: Option[GroupedSubscriptions], openAccessApis: List[ApiDefinition])
 
 case class GroupedSubscriptions(testApis: Seq[APISubscriptions], apis: Seq[APISubscriptions], exampleApi: Option[APISubscriptions] = None)
 

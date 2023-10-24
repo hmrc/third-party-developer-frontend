@@ -126,9 +126,9 @@ class EmailPreferencesControllerSpec
     val mockCategory2: APICategoryDisplayDetails            = APICategoryDisplayDetails.from(category2)
     val apiCategoryDetails: List[APICategoryDisplayDetails] = List(mockCategory1, mockCategory2)
     val api1: ApiDefinition                                 =
-      ApiDefinition(ServiceName("api1"), "http://serviceBaseUrl", "API 1", "desc", ApiContext("CATEGORY_1"), List.empty, false, false, None, List(ApiCategory.INCOME_TAX_MTD))
+      ApiDefinition(ServiceName("api1"), "http://serviceBaseUrl", "API 1", "desc", ApiContext("CATEGORY_1"), Map.empty, false, false, None, List(ApiCategory.INCOME_TAX_MTD))
     val api2: ApiDefinition                                 =
-      ApiDefinition(ServiceName("api2"), "http://serviceBaseUrl", "API 2", "desc2", ApiContext("CATEGORY_1"), List.empty, false, false, None, List(ApiCategory.VAT))
+      ApiDefinition(ServiceName("api2"), "http://serviceBaseUrl", "API 2", "desc2", ApiContext("CATEGORY_1"), Map.empty, false, false, None, List(ApiCategory.VAT))
     val apis: Set[ServiceName]                              = Set(api1.serviceName, api2.serviceName)
 
     val extendedApiOne: CombinedApi    = CombinedApi(ServiceName("api1"), "API 1", List(ApiCategory.INCOME_TAX_MTD), REST_API)

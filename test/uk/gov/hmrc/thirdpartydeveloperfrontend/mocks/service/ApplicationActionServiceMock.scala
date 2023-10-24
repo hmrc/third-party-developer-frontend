@@ -26,7 +26,7 @@ import org.mockito.{ArgumentMatchersSugar, MockitoSugar}
 
 import uk.gov.hmrc.http.HeaderCarrier
 
-import uk.gov.hmrc.apiplatform.modules.apis.domain.models.ApiData
+import uk.gov.hmrc.apiplatform.modules.apis.domain.models.ApiDefinition
 import uk.gov.hmrc.apiplatform.modules.common.domain.models._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.{ApplicationRequest, UserRequest}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.apidefinitions.APISubscriptionStatus
@@ -48,7 +48,7 @@ trait ApplicationActionServiceMock extends MockitoSugar with ArgumentMatchersSug
       appData: ApplicationWithSubscriptionData,
       developerSession: DeveloperSession,
       subscriptions: List[APISubscriptionStatus] = List.empty,
-      openAccessApis: Map[ApiContext, ApiData] = Map.empty
+      openAccessApis: List[ApiDefinition] = List.empty
     ): Unit = {
 
     def createReturn(req: UserRequest[A]): OptionT[Future, ApplicationRequest[A]] = {

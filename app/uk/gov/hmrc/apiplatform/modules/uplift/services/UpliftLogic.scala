@@ -72,17 +72,18 @@ object UpliftLogic {
     lazy val hasAppsThatCannotBeUplifted = notUpliftableApplicationIds.nonEmpty
   }
 
-  def contextsOfTestSupportAndExampleApis(apis: Map[ApiContext, ApiData]): Set[ApiContext] = {
+  def contextsOfTestSupportAndExampleApis(apis: List[ApiDefinition]): Set[ApiContext] = {
     filterApis(d => d.isTestSupport || d.categories.contains(ApiCategory.EXAMPLE))(apis)
-      .keySet
+      .map(_.context)
+      .toSet
   }
 
-  def apiIdentifiersOfRetiredApis(apis: Map[ApiContext, ApiData]): Set[ApiIdentifier] = {
+  def apiIdentifiersOfRetiredApis(apis: List[ApiDefinition]): Set[ApiIdentifier] = {
     (filterApis(_ => true, v => v.status == ApiStatus.RETIRED) _ andThen toApiIdentifiers)(apis)
   }
 
   def filterAppsHavingRealAndAvailableSubscriptions(
-      sandboxApis: Map[ApiContext, ApiData],
+      sandboxApis: List[ApiDefinition],
       apisAvailableInProd: Set[ApiIdentifier],
       subscriptionsByApplication: Map[ApplicationId, Set[ApiIdentifier]]
     ): Map[ApplicationId, Set[ApiIdentifier]] = {
@@ -102,35 +103,33 @@ object UpliftLogic {
     }
   }
 
-  private def filterApis(contextFilter: ApiData => Boolean)(in: Map[ApiContext, ApiData]): Map[ApiContext, ApiData] = {
-    in.filter {
-      case (c, d) => contextFilter(d)
-    }
+  private def filterApis(contextFilter: ApiDefinition => Boolean)(in: List[ApiDefinition]): List[ApiDefinition] = {
+    in.filter(contextFilter)
   }
 
-  private def filterApis(contextFilter: ApiData => Boolean, versionFilter: ApiVersion => Boolean)(in: Map[ApiContext, ApiData]): Map[ApiContext, ApiData] = {
+  private def filterApis(contextFilter: ApiDefinition => Boolean, versionFilter: ApiVersion => Boolean)(in: List[ApiDefinition]): List[ApiDefinition] = {
     def filterVersions(in: Map[ApiVersionNbr, ApiVersion]): Map[ApiVersionNbr, ApiVersion] = {
       in.filter {
-        case (v, d) => versionFilter(d)
+        case (_, apiVersion) => versionFilter(apiVersion)
       }
     }
 
-    val empty = Map.empty[ApiContext, ApiData]
+    val empty = List.empty[ApiDefinition]
 
     in.flatMap {
-      case (c, d) =>
-        val filteredVersions = filterVersions(d.versions)
-        if (contextFilter(d) && filteredVersions.nonEmpty) {
-          Map(c -> d.copy(versions = filteredVersions))
+      apiDefinition =>
+        val filteredVersions = filterVersions(apiDefinition.versions)
+        if (contextFilter(apiDefinition) && filteredVersions.nonEmpty) {
+          List(apiDefinition.copy(versions = filteredVersions))
         } else {
           empty
         }
     }
   }
 
-  private def toApiIdentifiers(in: Map[ApiContext, ApiData]): Set[ApiIdentifier] = {
+  private def toApiIdentifiers(in: List[ApiDefinition]): Set[ApiIdentifier] = {
     in.flatMap {
-      case (c, d) => d.versions.keySet.map(v => ApiIdentifier(c, v))
+      apiDefinition => apiDefinition.versions.keySet.map(v => ApiIdentifier(apiDefinition.context, v))
     }.toSet
   }
 }

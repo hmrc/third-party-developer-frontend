@@ -15,7 +15,6 @@
  *@
 
 @import uk.gov.hmrc.thirdpartydeveloperfrontend.helpers.DateFormatter.formatDateWithShortPattern
-@import java.util.UUID
 
 @import uk.gov.hmrc.apiplatform.modules.applications.domain.models.ClientSecretResponse
 @import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.Application
@@ -64,7 +63,7 @@
         @defining(s"client secret ending with ${secret.name.takeRight(4)}") { accessibleText =>
           <tr class="govuk-table__row">
             <td aria-label="@accessibleText" class="govuk-table__cell center-table-text">
-              @if(isNewSecret && secret.id == flash.get("newSecretId").getOrElse("")){
+              @if(isNewSecret && secret.id.value.toString == flash.get("newSecretId").getOrElse("")){
                 <span id="copy-to-clip" value="@{flash.get("newSecret").get}">@{flash.get("newSecret").get}</span>
               } else {
                 ••••••••••••••••••••••••••••••••@{secret.name.takeRight(4)}
