@@ -138,18 +138,18 @@ trait HasApplication extends HasAppDeploymentEnvironment with HasUserWithRole wi
 
   lazy val defaultApiVersion = ApiVersion(ApiVersionNbr("1.0"), ApiStatus.STABLE, ApiAccess.PUBLIC, List.empty)
 
-  lazy val defaultApiData = ApiDefinition(
+  lazy val defaultApiDefinition = ApiDefinition(
     serviceName = ServiceName("service name"),
     serviceBaseUrl = "http://serviceBaseURL",
     name = "api name",
     description = "api description",
-    context = ApiContext("context/name"),
+    context = apiContext,
     versions = Map(apiVersion -> defaultApiVersion),
     isTestSupport = false,
     categories = List.empty
   )
 
-  lazy val allPossibleSubscriptions            = List(defaultApiData)
+  lazy val allPossibleSubscriptions            = List(defaultApiDefinition)
   lazy val responsibleIndividualVerificationId = ResponsibleIndividualVerificationId(UUID.randomUUID().toString)
   lazy val submissionId                        = Submission.Id.random
   lazy val submissionIndex                     = 1
