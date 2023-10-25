@@ -19,29 +19,27 @@ package steps
 import java.io.{File, IOException}
 import java.net.URL
 import java.util.Calendar
+import scala.util.{Properties, Try}
 
 import com.github.tomakehurst.wiremock.WireMockServer
 import com.github.tomakehurst.wiremock.client.WireMock
 import com.github.tomakehurst.wiremock.core.WireMockConfiguration._
 import io.cucumber.scala.{EN, ScalaDsl, Scenario}
-import org.scalatest.matchers.should.Matchers
 import org.apache.commons.io.FileUtils
+import org.openqa.selenium.chrome.{ChromeDriver, ChromeOptions}
+import org.openqa.selenium.firefox.{FirefoxDriver, FirefoxOptions}
+import org.openqa.selenium.remote.RemoteWebDriver
 import org.openqa.selenium.{Dimension, OutputType, TakesScreenshot, WebDriver}
+import org.scalatest.matchers.should.Matchers
+import stubs.AuditStub
+
 import play.api.Mode
 import play.api.inject.guice.GuiceApplicationBuilder
 import play.api.test.TestServer
 import play.core.server.ServerConfig
-import stubs.AuditStub
-
-import scala.util.{Properties, Try}
-import uk.gov.hmrc.apiplatform.modules.common.services.ApplicationLogger
-
-import org.openqa.selenium.chrome.ChromeOptions
 import uk.gov.hmrc.webdriver.SingletonDriver
-import org.openqa.selenium.chrome.ChromeDriver
-import org.openqa.selenium.firefox.FirefoxDriver
-import org.openqa.selenium.firefox.FirefoxOptions
-import org.openqa.selenium.remote.RemoteWebDriver
+
+import uk.gov.hmrc.apiplatform.modules.common.services.ApplicationLogger
 
 trait Env extends ScalaDsl with EN with Matchers with ApplicationLogger {
   var passedTestCount: Int = 0

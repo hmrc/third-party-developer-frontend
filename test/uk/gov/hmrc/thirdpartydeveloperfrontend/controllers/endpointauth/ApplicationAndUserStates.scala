@@ -26,10 +26,10 @@ import play.api.libs.crypto.CookieSigner
 import play.api.mvc.Cookie
 import play.api.test.FakeRequest
 
-import uk.gov.hmrc.apiplatform.modules.apis.domain.models.{ApiAccess, ApiData, ApiStatus, ApiVersion, ServiceName}
+import uk.gov.hmrc.apiplatform.modules.apis.domain.models._
 import uk.gov.hmrc.apiplatform.modules.applications.domain.models._
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.LaxEmailAddress.StringSyntax
-import uk.gov.hmrc.apiplatform.modules.common.domain.models.{LaxEmailAddress, UserId, _}
+import uk.gov.hmrc.apiplatform.modules.common.domain.models._
 import uk.gov.hmrc.apiplatform.modules.mfa.connectors.ThirdPartyDeveloperMfaConnector.{RegisterAuthAppResponse, RegisterSmsSuccessResponse}
 import uk.gov.hmrc.apiplatform.modules.submissions.domain.models.ResponsibleIndividualVerificationState.INITIAL
 import uk.gov.hmrc.apiplatform.modules.submissions.domain.models.Submission.Status.Granted
@@ -138,20 +138,18 @@ trait HasApplication extends HasAppDeploymentEnvironment with HasUserWithRole wi
 
   lazy val defaultApiVersion = ApiVersion(ApiVersionNbr("1.0"), ApiStatus.STABLE, ApiAccess.PUBLIC, List.empty)
 
-  lazy val defaultApiData = ApiData(
+  lazy val defaultApiDefinition = ApiDefinition(
     serviceName = ServiceName("service name"),
     serviceBaseUrl = "http://serviceBaseURL",
     name = "api name",
     description = "api description",
-    context = ApiContext("context/name"),
+    context = apiContext,
     versions = Map(apiVersion -> defaultApiVersion),
     isTestSupport = false,
     categories = List.empty
   )
 
-  lazy val allPossibleSubscriptions            = Map(
-    apiContext -> defaultApiData
-  )
+  lazy val allPossibleSubscriptions            = List(defaultApiDefinition)
   lazy val responsibleIndividualVerificationId = ResponsibleIndividualVerificationId(UUID.randomUUID().toString)
   lazy val submissionId                        = Submission.Id.random
   lazy val submissionIndex                     = 1

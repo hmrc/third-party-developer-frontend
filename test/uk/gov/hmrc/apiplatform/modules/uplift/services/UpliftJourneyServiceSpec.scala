@@ -113,51 +113,48 @@ class UpliftJourneyServiceSpec
       fields = emptyFields
     )
 
-    val singleApi: Map[ApiContext, ApiData] = Map(
-      ApiContext("test-api-context-1") ->
-        ApiData(
-          serviceName = ServiceName("test-api-context-1"),
-          serviceBaseUrl = "http://serviceBaseUrl",
-          name = "test-api-context-1",
-          description = "Description",
-          context = ApiContext("test-api-context-1"),
-          versions = Map(ApiVersionNbr("1.0") ->
-            ApiVersion(ApiVersionNbr("1.0"), ApiStatus.STABLE, ApiAccess.PUBLIC, List.empty)),
-          isTestSupport = false,
-          categories = List(ApiCategory.EXAMPLE)
-        )
+    val singleApi: List[ApiDefinition] = List(
+      ApiDefinition(
+        serviceName = ServiceName("test-api-context-1"),
+        serviceBaseUrl = "http://serviceBaseUrl",
+        name = "test-api-context-1",
+        description = "Description",
+        context = ApiContext("test-api-context-1"),
+        versions = Map(ApiVersionNbr("1.0") ->
+          ApiVersion(ApiVersionNbr("1.0"), ApiStatus.STABLE, ApiAccess.PUBLIC, List.empty)),
+        isTestSupport = false,
+        categories = List(ApiCategory.EXAMPLE)
+      )
     )
 
-    val multipleApis: Map[ApiContext, ApiData] = Map(
-      ApiContext("test-api-context-1") ->
-        ApiData(
-          serviceName = ServiceName("test-api-context-1"),
-          serviceBaseUrl = "http://serviceBaseUrl",
-          name = "test-api-context-1",
-          description = "Description",
-          context = ApiContext("test-api-context-1"),
-          versions = Map(ApiVersionNbr("1.0") ->
-            ApiVersion(ApiVersionNbr("1.0"), ApiStatus.STABLE, ApiAccess.PUBLIC, List.empty)),
-          isTestSupport = false,
-          categories = List(ApiCategory.EXAMPLE)
-        ),
-      ApiContext("test-api-context-2") ->
-        ApiData(
-          serviceName = ServiceName("test-api-context-2"),
-          serviceBaseUrl = "http://serviceBaseUrl",
-          name = "test-api-context-2",
-          description = "Description",
-          context = ApiContext("test-api-context-2"),
-          versions = Map(ApiVersionNbr("1.0") ->
-            ApiVersion(ApiVersionNbr("1.0"), ApiStatus.STABLE, ApiAccess.PUBLIC, List.empty)),
-          isTestSupport = false,
-          categories = List(ApiCategory.EXAMPLE)
-        )
+    val multipleApis: List[ApiDefinition] = List(
+      ApiDefinition(
+        serviceName = ServiceName("test-api-context-1"),
+        serviceBaseUrl = "http://serviceBaseUrl",
+        name = "test-api-context-1",
+        description = "Description",
+        context = ApiContext("test-api-context-1"),
+        versions = Map(ApiVersionNbr("1.0") ->
+          ApiVersion(ApiVersionNbr("1.0"), ApiStatus.STABLE, ApiAccess.PUBLIC, List.empty)),
+        isTestSupport = false,
+        categories = List(ApiCategory.EXAMPLE)
+      ),
+      ApiDefinition(
+        serviceName = ServiceName("test-api-context-2"),
+        serviceBaseUrl = "http://serviceBaseUrl",
+        name = "test-api-context-2",
+        description = "Description",
+        context = ApiContext("test-api-context-2"),
+        versions = Map(ApiVersionNbr("1.0") ->
+          ApiVersion(ApiVersionNbr("1.0"), ApiStatus.STABLE, ApiAccess.PUBLIC, List.empty)),
+        isTestSupport = false,
+        categories = List(ApiCategory.EXAMPLE)
+      )
     )
 
-    def toIdentifiers(apis: Map[ApiContext, ApiData]): Set[ApiIdentifier] =
+    def toIdentifiers(apis: List[ApiDefinition]): Set[ApiIdentifier] =
       apis.flatMap {
-        case (context, data) => data.versions.keySet.map(version => ApiIdentifier(context, version))
+        definition => definition.versions.keySet.map(version => ApiIdentifier(definition.context, version))
       }.toSet
 
     ApmConnectorMock.FetchAllApis.willReturn(singleApi)

@@ -16,18 +16,20 @@
 
 package steps
 
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.Registration
 import io.cucumber.datatable.DataTable
 import io.cucumber.scala.{EN, ScalaDsl}
 import matchers.CustomMatchers
-import org.openqa.selenium.{By, WebDriver}
 import org.openqa.selenium.interactions.Actions
+import org.openqa.selenium.{By, WebDriver}
+import org.scalatest.matchers.should.Matchers
 import org.scalatestplus.selenium.WebBrowser
 import pages._
-import play.api.http.Status
 import stubs.DeveloperStub
-import org.scalatest.matchers.should.Matchers
+
+import play.api.http.Status
+
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.LaxEmailAddress.StringSyntax
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.Registration
 
 object Form extends WebBrowser {
 

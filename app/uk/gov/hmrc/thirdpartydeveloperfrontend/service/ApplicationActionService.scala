@@ -23,7 +23,7 @@ import cats.data.OptionT
 
 import uk.gov.hmrc.http.HeaderCarrier
 
-import uk.gov.hmrc.apiplatform.modules.apis.domain.models.{ApiData, ApiVersion}
+import uk.gov.hmrc.apiplatform.modules.apis.domain.models.{ApiDefinition, ApiVersion}
 import uk.gov.hmrc.apiplatform.modules.common.domain.models._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.{ApplicationRequest, UserRequest}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.apidefinitions._
@@ -57,14 +57,18 @@ class ApplicationActionService @Inject() (
   def toApiSubscriptionStatusList(
       application: ApplicationWithSubscriptionData,
       subscriptionFieldDefinitions: Map[ApiContext, Map[ApiVersionNbr, Map[FieldName, SubscriptionFieldDefinition]]],
-      summaryApiDefinitions: Map[ApiContext, ApiData]
+      summaryApiDefinitions: List[ApiDefinition]
     ): List[APISubscriptionStatus] = {
 
-    def handleContext(context: ApiContext, cdata: ApiData): List[APISubscriptionStatus] = {
-      def handleVersion(version: ApiVersionNbr, vdata: ApiVersion): APISubscriptionStatus = {
+    def handleContext(apiDefinition: ApiDefinition): List[APISubscriptionStatus] = {
+      val context = apiDefinition.context
+
+      def handleVersion(apiVersion: ApiVersion): APISubscriptionStatus = {
+        val apiVersionNbr = apiVersion.versionNbr
+
         def zipDefinitionsAndValues(): List[SubscriptionFieldValue] = {
-          val fieldNameToDefinition = subscriptionFieldDefinitions.getOrElse(context, Map.empty).getOrElse(version, Map.empty)
-          val fieldNameToValue      = application.subscriptionFieldValues.getOrElse(context, Map.empty).getOrElse(version, Map.empty)
+          val fieldNameToDefinition = subscriptionFieldDefinitions.getOrElse(context, Map.empty).getOrElse(apiVersionNbr, Map.empty)
+          val fieldNameToValue      = application.subscriptionFieldValues.getOrElse(context, Map.empty).getOrElse(apiVersionNbr, Map.empty)
 
           fieldNameToDefinition.toList.map {
             case (n, d) => SubscriptionFieldValue(d, fieldNameToValue.getOrElse(n, FieldValue.empty))
@@ -72,33 +76,27 @@ class ApplicationActionService @Inject() (
         }
 
         APISubscriptionStatus(
-          name = cdata.name,
-          serviceName = cdata.serviceName,
+          name = apiDefinition.name,
+          serviceName = apiDefinition.serviceName,
           context = context,
-          apiVersion = vdata,
-          subscribed = application.subscriptions.contains(ApiIdentifier(context, version)),
+          apiVersion = apiVersion,
+          subscribed = application.subscriptions.contains(ApiIdentifier(context, apiVersionNbr)),
           requiresTrust = false, // Because these are filtered out
           fields = SubscriptionFieldsWrapper(
             applicationId = application.application.id,
             clientId = application.application.clientId,
             apiContext = context,
-            apiVersion = version,
+            apiVersion = apiVersionNbr,
             fields = zipDefinitionsAndValues()
           ),
-          isTestSupport = cdata.isTestSupport
+          isTestSupport = apiDefinition.isTestSupport
         )
       }
 
-      val orderDescending: Ordering[ApiVersionNbr] = (x: ApiVersionNbr, y: ApiVersionNbr) => y.value.compareTo(x.value)
-
-      cdata.versions.toList.sortBy(_._1)(orderDescending).map {
-        case (k, v) => handleVersion(k, v)
-      }
+      apiDefinition.versionsAsList.sorted.reverse.map(handleVersion)
     }
 
-    summaryApiDefinitions.toList.flatMap {
-      case (k, v) => handleContext(k, v)
-    }
+    summaryApiDefinitions.flatMap(handleContext)
   }
 
 }

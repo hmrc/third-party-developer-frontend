@@ -17,7 +17,9 @@
 package stubs
 
 import com.github.tomakehurst.wiremock.client.WireMock.{aResponse, delete, get, stubFor, urlEqualTo}
+
 import play.api.http.Status.{NOT_FOUND, NO_CONTENT}
+
 import uk.gov.hmrc.apiplatform.modules.common.domain.models._
 
 object ApiSubscriptionFieldsStub {

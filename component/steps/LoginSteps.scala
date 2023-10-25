@@ -23,13 +23,15 @@ import matchers.CustomMatchers
 import org.openqa.selenium.{By, WebDriver}
 import org.scalatest.matchers.should.Matchers
 import pages._
+import stubs.{DeveloperStub, MfaStub, Stubs}
+import utils.ComponentTestDeveloperBuilder
+
 import play.api.http.Status._
 import play.api.libs.json.{Format, Json}
-import stubs.{DeveloperStub, MfaStub, Stubs}
+
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.LaxEmailAddress.StringSyntax
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.connectors.{LoginRequest, PasswordResetRequest, UserAuthenticationResponse}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.{Developer, LoggedInState, Session}
-import utils.ComponentTestDeveloperBuilder
 
 case class MfaSecret(secret: String)
 

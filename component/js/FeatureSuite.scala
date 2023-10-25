@@ -16,10 +16,10 @@
 
 package js
 
-import io.cucumber.junit.{Cucumber, CucumberOptions}
 import io.cucumber.junit.CucumberOptions.SnippetType.CAMELCASE
-import org.junit.{AfterClass, BeforeClass}
+import io.cucumber.junit.{Cucumber, CucumberOptions}
 import org.junit.runner.RunWith
+import org.junit.{AfterClass, BeforeClass}
 import steps.Env
 
 @RunWith(classOf[Cucumber])

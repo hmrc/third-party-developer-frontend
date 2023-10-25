@@ -20,7 +20,7 @@ import scala.concurrent.Future.{failed, successful}
 
 import org.mockito.{ArgumentMatchersSugar, MockitoSugar}
 
-import uk.gov.hmrc.apiplatform.modules.apis.domain.models.ApiData
+import uk.gov.hmrc.apiplatform.modules.apis.domain.models.ApiDefinition
 import uk.gov.hmrc.apiplatform.modules.common.domain.models._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.connectors.ApmConnector
 
@@ -49,7 +49,7 @@ trait ApmConnectorMockModule extends MockitoSugar with ArgumentMatchersSugar {
 
     object FetchAllApis {
 
-      def willReturn(apis: Map[ApiContext, ApiData]) =
+      def willReturn(apis: List[ApiDefinition]) =
         when(aMock.fetchAllApis(*)(*)).thenReturn(successful(apis))
 
       def willFailWith(exception: Exception) =
