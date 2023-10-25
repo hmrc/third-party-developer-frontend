@@ -61,10 +61,14 @@ class ApplicationActionService @Inject() (
     ): List[APISubscriptionStatus] = {
 
     def handleContext(apiDefinition: ApiDefinition): List[APISubscriptionStatus] = {
-      def handleVersion(apiVersionNbr: ApiVersionNbr, apiVersion: ApiVersion): APISubscriptionStatus = {
+      val context = apiDefinition.context
+
+      def handleVersion(apiVersion: ApiVersion): APISubscriptionStatus = {
+        val apiVersionNbr = apiVersion.versionNbr
+
         def zipDefinitionsAndValues(): List[SubscriptionFieldValue] = {
-          val fieldNameToDefinition = subscriptionFieldDefinitions.getOrElse(apiDefinition.context, Map.empty).getOrElse(apiVersionNbr, Map.empty)
-          val fieldNameToValue      = application.subscriptionFieldValues.getOrElse(apiDefinition.context, Map.empty).getOrElse(apiVersionNbr, Map.empty)
+          val fieldNameToDefinition = subscriptionFieldDefinitions.getOrElse(context, Map.empty).getOrElse(apiVersionNbr, Map.empty)
+          val fieldNameToValue      = application.subscriptionFieldValues.getOrElse(context, Map.empty).getOrElse(apiVersionNbr, Map.empty)
 
           fieldNameToDefinition.toList.map {
             case (n, d) => SubscriptionFieldValue(d, fieldNameToValue.getOrElse(n, FieldValue.empty))
@@ -74,14 +78,14 @@ class ApplicationActionService @Inject() (
         APISubscriptionStatus(
           name = apiDefinition.name,
           serviceName = apiDefinition.serviceName,
-          context = apiDefinition.context,
+          context = context,
           apiVersion = apiVersion,
-          subscribed = application.subscriptions.contains(ApiIdentifier(apiDefinition.context, apiVersionNbr)),
+          subscribed = application.subscriptions.contains(ApiIdentifier(context, apiVersionNbr)),
           requiresTrust = false, // Because these are filtered out
           fields = SubscriptionFieldsWrapper(
             applicationId = application.application.id,
             clientId = application.application.clientId,
-            apiContext = apiDefinition.context,
+            apiContext = context,
             apiVersion = apiVersionNbr,
             fields = zipDefinitionsAndValues()
           ),
@@ -89,11 +93,7 @@ class ApplicationActionService @Inject() (
         )
       }
 
-      val orderDescending: Ordering[ApiVersionNbr] = (x: ApiVersionNbr, y: ApiVersionNbr) => y.value.compareTo(x.value)
-
-      apiDefinition.versions.toList.sortBy(_._1)(orderDescending).map {
-        case (versionNbr, apiVersion) => handleVersion(versionNbr, apiVersion)
-      }
+      apiDefinition.versionsAsList.sorted.reverse.map(handleVersion)
     }
 
     summaryApiDefinitions.flatMap(handleContext)

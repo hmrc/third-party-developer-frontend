@@ -46,7 +46,7 @@
 
       <div id="accordion-open-access-content-@displayableSectionId(apiDefinition)" class="govuk-accordion__section-content" role="region" aria-labelledby="accordion-open-access-heading-@displayableSectionId(apiDefinition)">
         @apiDefinition.versions.toList.map { case (apiVersionNbr, apiVersion) =>
-          @defining(s"${apiDefinition.name} ${apiVersionNbr.value} (${apiVersion.status.displayText})") { apiVersionFullName =>
+          @defining(s"${apiDefinition.name} $apiVersionNbr (${apiVersion.status.displayText})") { apiVersionFullName =>
             <div class="govuk-grid-row">
               <div class="govuk-grid-column-one-half">
                 <div class="govuk-form-group govuk-!-margin-bottom-0">

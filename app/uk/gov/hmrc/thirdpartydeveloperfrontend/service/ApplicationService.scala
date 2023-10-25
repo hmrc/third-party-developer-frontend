@@ -272,9 +272,9 @@ object ApplicationService {
           case Some(api) => api.isTestSupport || api.categories.contains(ApiCategory.EXAMPLE)
         }
 
-  val filterSubscriptionsToRemoveTestAndExampleApis: (List[ApiDefinition]) => (Map[ApplicationId, Set[ApiIdentifier]]) => Map[ApplicationId, Set[ApiIdentifier]] =
+  val filterSubscriptionsToRemoveTestAndExampleApis: List[ApiDefinition] => Map[ApplicationId, Set[ApiIdentifier]] => Map[ApplicationId, Set[ApiIdentifier]] =
     apiDefinitions =>
-      (subscriptionsByApplication: Map[ApplicationId, Set[ApiIdentifier]]) => {
+      subscriptionsByApplication => {
         subscriptionsByApplication.flatMap {
           case (id, subs) =>
             val filteredSubs = subs.filterNot(isTestSupportOrExample(apiDefinitions))

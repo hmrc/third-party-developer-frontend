@@ -108,23 +108,7 @@ object UpliftLogic {
   }
 
   private def filterApis(contextFilter: ApiDefinition => Boolean, versionFilter: ApiVersion => Boolean)(in: List[ApiDefinition]): List[ApiDefinition] = {
-    def filterVersions(in: Map[ApiVersionNbr, ApiVersion]): Map[ApiVersionNbr, ApiVersion] = {
-      in.filter {
-        case (_, apiVersion) => versionFilter(apiVersion)
-      }
-    }
-
-    val empty = List.empty[ApiDefinition]
-
-    in.flatMap {
-      apiDefinition =>
-        val filteredVersions = filterVersions(apiDefinition.versions)
-        if (contextFilter(apiDefinition) && filteredVersions.nonEmpty) {
-          List(apiDefinition.copy(versions = filteredVersions))
-        } else {
-          empty
-        }
-    }
+    in.filter(contextFilter).flatMap(_.filterVersions(versionFilter))
   }
 
   private def toApiIdentifiers(in: List[ApiDefinition]): Set[ApiIdentifier] = {
