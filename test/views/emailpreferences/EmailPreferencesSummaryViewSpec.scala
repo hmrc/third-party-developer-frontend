@@ -97,7 +97,7 @@ class EmailPreferencesSummaryViewSpec extends CommonViewSpec
         document.getElementById(s"all-api-${interest.regime}").text() shouldBe s"All $textRegimeDisplayNameVal APIs"
       } else {
         for (service <- services) {
-          document.getElementById(s"$service").text() shouldBe extendedServiceDetails.getOrElse(service, "")
+          document.getElementById(s"selected-$service").text() shouldBe extendedServiceDetails.getOrElse(service, "")
         }
       }
 
@@ -110,7 +110,7 @@ class EmailPreferencesSummaryViewSpec extends CommonViewSpec
     val topicsHeading = document.getElementById("topics-heading")
     topicsHeading.text shouldBe "Topics"
     for (topic <- emailPreferences.topics) {
-      val selectedTopicsCell = document.getElementById(topic.value)
+      val selectedTopicsCell = document.getElementById(s"topic-${topic.value}")
       selectedTopicsCell.text shouldBe topic.displayName
     }
 
