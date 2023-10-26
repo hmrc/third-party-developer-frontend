@@ -369,9 +369,11 @@ class ApplicationCheckSpec
 
       private val body = contentAsString(result)
       body should include(stepRequiredIndication("app-name-status"))
+      body should include(stepRequiredIndication("team-confirmed-status"))
       body should include(stepRequiredIndication("api-subscriptions-status"))
       body should include(stepRequiredIndication("contact-details-status"))
-      body should include(stepRequiredIndication("urls-status"))
+      body should include(stepRequiredIndication("policy-urls-status"))
+      body should include(stepRequiredIndication("terms-urls-status"))
       body should include(stepRequiredIndication("agree-terms-status"))
     }
 
@@ -382,9 +384,11 @@ class ApplicationCheckSpec
 
       private val body = contentAsString(result)
       body should include(stepCompleteIndication("app-name-status"))
+      body should include(stepRequiredIndication("team-confirmed-status"))
       body should include(stepRequiredIndication("api-subscriptions-status"))
       body should include(stepRequiredIndication("contact-details-status"))
-      body should include(stepRequiredIndication("urls-status"))
+      body should include(stepRequiredIndication("policy-urls-status"))
+      body should include(stepRequiredIndication("terms-urls-status"))
       body should include(stepRequiredIndication("agree-terms-status"))
     }
 
@@ -395,9 +399,11 @@ class ApplicationCheckSpec
 
       private val body = contentAsString(result)
       body should include(stepRequiredIndication("app-name-status"))
+      body should include(stepRequiredIndication("team-confirmed-status"))
       body should include(stepCompleteIndication("api-subscriptions-status"))
       body should include(stepRequiredIndication("contact-details-status"))
-      body should include(stepRequiredIndication("urls-status"))
+      body should include(stepRequiredIndication("policy-urls-status"))
+      body should include(stepRequiredIndication("terms-urls-status"))
       body should include(stepRequiredIndication("agree-terms-status"))
     }
 
@@ -410,9 +416,11 @@ class ApplicationCheckSpec
 
       private val body = contentAsString(result)
       body should include(stepRequiredIndication("app-name-status"))
+      body should include(stepRequiredIndication("team-confirmed-status"))
       body should include(stepRequiredIndication("api-subscriptions-status"))
       body should include(stepCompleteIndication("contact-details-status"))
-      body should include(stepRequiredIndication("urls-status"))
+      body should include(stepRequiredIndication("policy-urls-status"))
+      body should include(stepRequiredIndication("terms-urls-status"))
       body should include(stepRequiredIndication("agree-terms-status"))
     }
 
@@ -425,9 +433,11 @@ class ApplicationCheckSpec
 
       private val body = contentAsString(result)
       body should include(stepRequiredIndication("app-name-status"))
+      body should include(stepRequiredIndication("team-confirmed-status"))
       body should include(stepRequiredIndication("api-subscriptions-status"))
       body should include(stepRequiredIndication("contact-details-status"))
-      body should include(stepCompleteIndication("urls-status"))
+      body should include(stepCompleteIndication("policy-urls-status"))
+      body should include(stepCompleteIndication("terms-urls-status"))
       body should include(stepRequiredIndication("agree-terms-status"))
     }
 
@@ -440,10 +450,11 @@ class ApplicationCheckSpec
       private val result = addToken(underTest.requestCheckPage(appId))(loggedInRequest)
 
       private val body = contentAsString(result)
-      body should include(stepRequiredIndication("app-name-status"))
+      body should include(stepRequiredIndication("team-confirmed-status"))
       body should include(stepRequiredIndication("api-subscriptions-status"))
       body should include(stepRequiredIndication("contact-details-status"))
-      body should include(stepRequiredIndication("urls-status"))
+      body should include(stepRequiredIndication("terms-urls-status"))
+      body should include(stepRequiredIndication("policy-urls-status"))
       body should include(stepCompleteIndication("agree-terms-status"))
     }
 
@@ -455,10 +466,11 @@ class ApplicationCheckSpec
       private val result = addToken(underTest.requestCheckPage(appId))(loggedInRequest)
 
       private val body = contentAsString(result)
-      body should include(stepRequiredIndication("app-name-status"))
+      body should include(stepRequiredIndication("team-confirmed-status"))
       body should include(stepRequiredIndication("api-subscriptions-status"))
       body should include(stepRequiredIndication("contact-details-status"))
-      body should include(stepRequiredIndication("urls-status"))
+      body should include(stepRequiredIndication("terms-urls-status"))
+      body should include(stepRequiredIndication("policy-urls-status"))
       body should include(stepRequiredIndication("agree-terms-status"))
       body should include(stepCompleteIndication("api-subscription-configurations-status"))
     }
