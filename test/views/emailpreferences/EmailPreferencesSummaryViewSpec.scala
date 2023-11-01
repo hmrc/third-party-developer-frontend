@@ -97,7 +97,7 @@ class EmailPreferencesSummaryViewSpec extends CommonViewSpec
         document.getElementById(s"all-api-${interest.regime}").text() shouldBe s"All $textRegimeDisplayNameVal APIs"
       } else {
         for (service <- services) {
-          document.getElementById(s"selected-$service").text() shouldBe extendedServiceDetails.getOrElse(service, "")
+          document.getElementById(s"api-preference-${interest.regime}-$service").text() shouldBe extendedServiceDetails.getOrElse(service, "")
         }
       }
 
