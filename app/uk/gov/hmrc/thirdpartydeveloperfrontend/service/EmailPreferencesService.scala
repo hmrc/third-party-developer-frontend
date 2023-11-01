@@ -24,6 +24,7 @@ import cats.data.NonEmptyList
 
 import uk.gov.hmrc.http.HeaderCarrier
 
+import uk.gov.hmrc.apiplatform.modules.apis.domain.models.{ApiCategory, ServiceName}
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.{ApplicationId, UserId}
 import uk.gov.hmrc.apiplatform.modules.common.services.ApplicationLogger
 import uk.gov.hmrc.thirdpartydeveloperfrontend.connectors.{ApmConnector, ThirdPartyDeveloperConnector}
@@ -63,26 +64,22 @@ class EmailPreferencesService @Inject() (
     }) { x => Future.successful(x.toList) }
   }
 
-  def fetchAllAPICategoryDetails()(implicit hc: HeaderCarrier): Future[List[APICategoryDisplayDetails]] = {
-    apmConnector.fetchAllCombinedAPICategories().flatMap {
-      case Right(x)           => successful(x)
-      case Left(e: Throwable) =>
-        logger.error(s"fetchAllAPICategoryDetails failed: ${e.getMessage}")
-        successful(List.empty)
-    }
+  def fetchAllAPICategoryDetails(): Future[List[APICategoryDisplayDetails]] = {
+    val categories = ApiCategory.values
+    successful(categories.map(c => APICategoryDisplayDetails(c.toString(), c.displayText)).toList)
   }
 
-  def apiCategoryDetails(category: String)(implicit hc: HeaderCarrier): Future[Option[APICategoryDisplayDetails]] =
+  def apiCategoryDetails(category: String): Future[Option[APICategoryDisplayDetails]] =
     fetchAllAPICategoryDetails().map(_.find(_.category == category))
 
-  private def handleGettingApiDetails(serviceName: String)(implicit hc: HeaderCarrier): Future[CombinedApi] = {
+  private def handleGettingApiDetails(serviceName: ServiceName)(implicit hc: HeaderCarrier): Future[CombinedApi] = {
     apmConnector.fetchCombinedApi(serviceName).flatMap {
       case Right(x) => successful(x)
       case Left(_)  => apmConnector.fetchAPIDefinition(serviceName).map(y => CombinedApi(y.serviceName, y.name, y.categories, REST_API))
     }
   }
 
-  def fetchAPIDetails(apiServiceNames: Set[String])(implicit hc: HeaderCarrier): Future[List[CombinedApi]] =
+  def fetchAPIDetails(apiServiceNames: Set[ServiceName])(implicit hc: HeaderCarrier): Future[List[CombinedApi]] =
     Future.sequence(
       apiServiceNames
         .map(handleGettingApiDetails(_))
@@ -153,7 +150,7 @@ class EmailPreferencesService @Inject() (
     } yield savedFlow
   }
 
-  def updateNewApplicationSelectedApis(developerSession: DeveloperSession, applicationId: ApplicationId, selectedApis: Set[String])(implicit hc: HeaderCarrier) = {
+  def updateNewApplicationSelectedApis(developerSession: DeveloperSession, applicationId: ApplicationId, selectedApis: Set[ServiceName])(implicit hc: HeaderCarrier) = {
     for {
       apis         <- fetchAPIDetails(selectedApis)
       existingFlow <- fetchNewApplicationEmailPreferencesFlow(developerSession, applicationId)

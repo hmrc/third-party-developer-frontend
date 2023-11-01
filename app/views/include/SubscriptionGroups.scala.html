@@ -16,16 +16,16 @@
 
 @import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.views.SubscriptionRedirect
 @import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.Application
-@import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.subscriptions.ApiData
 @import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers._
 @import uk.gov.hmrc.apiplatform.modules.applications.domain.models.Collaborator
+@import uk.gov.hmrc.apiplatform.modules.apis.domain.models.ApiDefinition
 
 @this(subscriptionsGroup: SubscriptionsGroup, openAccessApisGroup: OpenAccessApisGroup)
 
 @(
   role: Collaborator.Role,
   subscriptions: GroupedSubscriptions,
-  openAccessApis: Map[ApiContext, ApiData],
+  openAccessApis: List[ApiDefinition],
   app: Application,
   afterUnsubscribeRedirectTo: SubscriptionRedirect,
   showSubscriptionFields: Boolean,

@@ -14,18 +14,16 @@
  * limitations under the License.
  *@
 
-@import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.views.SubscriptionRedirect
-@import views.helper.IdFormatter
 @import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.Application
-@import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.subscriptions.ApiData
 @import uk.gov.hmrc.apiplatform.modules.applications.domain.models.Collaborator
+@import uk.gov.hmrc.apiplatform.modules.apis.domain.models.ApiDefinition
 
 @this() 
 
 @(
   role: Collaborator.Role,
   app: Application,
-  openAccessApis: Map[ApiContext, ApiData]
+  openAccessApis: List[ApiDefinition]
 )(
   implicit messagesProvider: MessagesProvider,
   applicationConfig: ApplicationConfig,
@@ -33,28 +31,28 @@
 )
 
 @displayableContextName(apiContext: ApiContext) = @{apiContext.value.substring(apiContext.value.lastIndexOf('/')+1)}
-@displayableSectionId(apiContext: ApiContext, apiData: ApiData) = @{openAccessApis.toList.indexOf((apiContext, apiData))+1}
+@displayableSectionId(apiDefinition: ApiDefinition) = @{openAccessApis.indexOf(apiDefinition)+1}
 
 <div class="govuk-accordion" data-module="govuk-accordion" id="accordion-open-access">
-  @openAccessApis.toList.map { case (apiContext, apiData) =>
-    <div class="govuk-accordion__section" id="@displayableContextName(apiContext)-accordion-section">
+  @openAccessApis.map { apiDefinition =>
+    <div class="govuk-accordion__section" id="@displayableContextName(apiDefinition.context)-accordion-section">
       <div class="govuk-accordion__section-header">
         <h2 class="govuk-accordion__section-heading">
-          <span class="govuk-accordion__section-button" id="accordion-open-access-heading-@displayableSectionId(apiContext, apiData)">
-            @apiData.name
+          <span class="govuk-accordion__section-button" id="accordion-open-access-heading-@displayableSectionId(apiDefinition)">
+            @apiDefinition.name
           </span>
         </h2>
       </div>
 
-      <div id="accordion-open-access-content-@displayableSectionId(apiContext, apiData)" class="govuk-accordion__section-content" role="region" aria-labelledby="accordion-open-access-heading-@displayableSectionId(apiContext, apiData)">
-        @apiData.versions.toList.map { case (apiVersion, versionData) =>
-          @defining(s"${apiData.name} ${apiVersion.value} (${versionData.status.displayText})") { apiVersionFullName =>
+      <div id="accordion-open-access-content-@displayableSectionId(apiDefinition)" class="govuk-accordion__section-content" role="region" aria-labelledby="accordion-open-access-heading-@displayableSectionId(apiDefinition)">
+        @apiDefinition.versions.toList.map { case (apiVersionNbr, apiVersion) =>
+          @defining(s"${apiDefinition.name} $apiVersionNbr (${apiVersion.status.displayText})") { apiVersionFullName =>
             <div class="govuk-grid-row">
               <div class="govuk-grid-column-one-half">
                 <div class="govuk-form-group govuk-!-margin-bottom-0">
                   <p class='govuk-body govuk-!-padding-top-2'>
-                    <a href="@applicationConfig.apiDocumentationFrontendUrl/api-documentation/docs/api/service/@apiData.serviceName/@apiVersion.value"" aria-label="@apiVersionFullName." data-api-link>
-                      @{apiVersion.value} (@versionData.status.displayText)
+                    <a href="@applicationConfig.apiDocumentationFrontendUrl/api-documentation/docs/api/service/@apiDefinition.serviceName/@apiVersionNbr.value" aria-label="@apiVersionFullName." data-api-link>
+                      @{apiVersionNbr.value} (@apiVersion.status.displayText)
                     </a>
                   </p>
                 </div>

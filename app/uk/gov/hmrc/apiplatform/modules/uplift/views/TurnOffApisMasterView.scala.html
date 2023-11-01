@@ -78,23 +78,23 @@
                 </div>
                 <div id="accordion-default-content-@displayableSectionId(apiSubscription)" class="govuk-accordion__section-content" role="region" aria-labelledby="accordion-default-heading-@displayableSectionId(apiSubscription)">
                   @apiSubscription.subscriptions.map { case api =>
-                    @defining(s"${apiSubscription.apiHumanReadableAppName} ${api.apiVersion.version.value} (${api.apiVersion.displayedStatus})") { apiVersionFullName =>
+                    @defining(s"${apiSubscription.apiHumanReadableAppName} ${api.apiVersion.versionNbr} (${api.apiVersion.status.displayText})") { apiVersionFullName =>
                       <div class="govuk-grid-row">
                         <div class="govuk-grid-column-one-half">
                           <div class="govuk-form-group govuk-!-margin-bottom-0">
                             <p class='govuk-body govuk-!-padding-top-2'>
-                              <a href="@applicationConfig.apiDocumentationFrontendUrl/api-documentation/docs/api/service/@api.serviceName/@api.apiVersion.version.value" aria-label="@apiVersionFullName. You are @if(!api.subscribed) {not} subscribed" data-api-link>
+                              <a href="@applicationConfig.apiDocumentationFrontendUrl/api-documentation/docs/api/service/@api.serviceName/@api.apiVersion.versionNbr" aria-label="@apiVersionFullName. You are @if(!api.subscribed) {not} subscribed" data-api-link>
                                 @if(api.requiresTrust) {
-                                  <span>@{api.apiVersion.version.value} (@{api.apiVersion.displayedStatus})</span>
+                                  <span>@{api.apiVersion.versionNbr} (@{api.apiVersion.status.displayText})</span>
                                 } else {
-                                  <a href="@applicationConfig.apiDocumentationFrontendUrl/api-documentation/docs/api/service/@api.serviceName/@api.apiVersion.version.value" aria-label="@apiVersionFullName. You are @if(!api.subscribed) {not} subscribed" data-api-link>
-                                  @if(api.apiVersion.accessType == ApiAccessType.PRIVATE) {
+                                  <a href="@applicationConfig.apiDocumentationFrontendUrl/api-documentation/docs/api/service/@api.serviceName/@api.apiVersion.versionNbr" aria-label="@apiVersionFullName. You are @if(!api.subscribed) {not} subscribed" data-api-link>
+                                  @if(api.apiVersion.access.accessType == ApiAccessType.PRIVATE) {
                                     <span>
-                                        <span>@api.apiVersion.version.value</span><span style="width: 60%;display: inline-block;">(@api.apiVersion.displayedAccessType @api.apiVersion.displayedStatus)</span>
+                                        <span>@api.apiVersion.versionNbr</span><span style="width: 60%;display: inline-block;">(@api.apiVersion.access.displayText @api.apiVersion.status.displayText)</span>
                                     </span>
                                   } else {
                                     <span>
-                                      <span>@api.apiVersion.version.value</span><span style="width: 60%;display: inline-block;">(@api.apiVersion.displayedStatus)</span>
+                                      <span>@api.apiVersion.versionNbr</span><span style="width: 60%;display: inline-block;">(@api.apiVersion.status.displayText)</span>
                                     </span>
                                   }
                                   </a>
@@ -107,7 +107,7 @@
                             <p class='govuk-body govuk-!-padding-top-2'></p>
                         </div>
                         <div class="govuk-grid-column-one-quarter govuk-!-text-align-right govuk-!-padding-0">
-                          @defining(IdFormatter.identifier(api.context, api.apiVersion.version)) { apiLabel => 
+                          @defining(IdFormatter.identifier(api.context, api.apiVersion.versionNbr)) { apiLabel => 
                             <div class="govuk-form-group govuk-!-margin-bottom-0">
                               <div class="slider">
                                 <fieldset id="@apiLabel-toggle" aria-live="assertive">

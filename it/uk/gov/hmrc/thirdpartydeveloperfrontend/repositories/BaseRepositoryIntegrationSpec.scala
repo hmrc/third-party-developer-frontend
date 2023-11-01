@@ -16,10 +16,11 @@
 
 package uk.gov.hmrc.thirdpartydeveloperfrontend.repositories
 
-import play.api.test.{DefaultAwaitTimeout, FutureAwaits}
+import org.scalatest.matchers.should.Matchers
 import org.scalatest.wordspec.AnyWordSpec
 import org.scalatest.{BeforeAndAfterAll, BeforeAndAfterEach, OptionValues}
-import org.scalatest.matchers.should.Matchers
+
+import play.api.test.{DefaultAwaitTimeout, FutureAwaits}
 
 trait BaseRepositoryIntegrationSpec
     extends AnyWordSpec

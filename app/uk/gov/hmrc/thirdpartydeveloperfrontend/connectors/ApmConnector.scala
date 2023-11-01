@@ -24,12 +24,12 @@ import uk.gov.hmrc.http.HttpReads.Implicits._
 import uk.gov.hmrc.http.{HeaderCarrier, HttpClient}
 import uk.gov.hmrc.play.http.metrics.common.API
 
+import uk.gov.hmrc.apiplatform.modules.apis.domain.models.{ApiDefinition, MappedApiDefinitions, ServiceName}
 import uk.gov.hmrc.apiplatform.modules.common.domain.models._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications._
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.connectors.{ApiDefinition, CombinedApi, ExtendedApiDefinition}
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.emailpreferences.APICategoryDisplayDetails
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.connectors.CombinedApi
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.subscriptions.ApiSubscriptionFields.SubscriptionFieldDefinition
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.subscriptions.{ApiData, FieldName}
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.subscriptions.FieldName
 import uk.gov.hmrc.thirdpartydeveloperfrontend.service.OpenAccessApiService.OpenAccessApisConnector
 
 object ApmConnector {
@@ -64,25 +64,20 @@ class ApmConnector @Inject() (http: HttpClient, config: ApmConnector.Config, met
     )
   }
 
-  def fetchAllPossibleSubscriptions(applicationId: ApplicationId)(implicit hc: HeaderCarrier): Future[Map[ApiContext, ApiData]] = {
-    http.GET[Map[ApiContext, ApiData]](s"${config.serviceBaseUrl}/api-definitions", Seq("applicationId" -> applicationId.toString()))
+  def fetchAllPossibleSubscriptions(applicationId: ApplicationId)(implicit hc: HeaderCarrier): Future[List[ApiDefinition]] = {
+    http.GET[MappedApiDefinitions](s"${config.serviceBaseUrl}/api-definitions", Seq("applicationId" -> applicationId.toString))
+      .map(_.wrapped.values.toList)
   }
 
-  def fetchAllOpenAccessApis(environment: Environment)(implicit hc: HeaderCarrier): Future[Map[ApiContext, ApiData]] = {
-    http.GET[Map[ApiContext, ApiData]](s"${config.serviceBaseUrl}/api-definitions/open", Seq("environment" -> environment.toString))
+  def fetchAllOpenAccessApis(environment: Environment)(implicit hc: HeaderCarrier): Future[List[ApiDefinition]] = {
+    http.GET[MappedApiDefinitions](s"${config.serviceBaseUrl}/api-definitions/open", Seq("environment" -> environment.toString))
+      .map(_.wrapped.values.toList)
   }
 
-  def fetchAllCombinedAPICategories()(implicit hc: HeaderCarrier): Future[Either[Throwable, List[APICategoryDisplayDetails]]] =
-    http.GET[List[APICategoryDisplayDetails]](s"${config.serviceBaseUrl}/api-categories/combined")
-      .map(Right(_))
-      .recover {
-        case NonFatal(e) => Left(e)
-      }
+  def fetchAPIDefinition(serviceName: ServiceName)(implicit hc: HeaderCarrier): Future[ApiDefinition] =
+    http.GET[ApiDefinition](s"${config.serviceBaseUrl}/combined-api-definitions/$serviceName")
 
-  def fetchAPIDefinition(serviceName: String)(implicit hc: HeaderCarrier): Future[ExtendedApiDefinition] =
-    http.GET[ExtendedApiDefinition](s"${config.serviceBaseUrl}/combined-api-definitions/$serviceName")
-
-  def fetchCombinedApi(serviceName: String)(implicit hc: HeaderCarrier): Future[Either[Throwable, CombinedApi]] =
+  def fetchCombinedApi(serviceName: ServiceName)(implicit hc: HeaderCarrier): Future[Either[Throwable, CombinedApi]] =
     http.GET[CombinedApi](s"${config.serviceBaseUrl}/combined-rest-xml-apis/$serviceName")
       .map(Right(_))
       .recover {
@@ -109,9 +104,10 @@ class ApmConnector @Inject() (http: HttpClient, config: ApmConnector.Config, met
       http.GET[Set[ApiIdentifier]](s"${config.serviceBaseUrl}/applications/${applicationId.toString()}/upliftableSubscriptions")
     }
 
-  def fetchAllApis(environment: Environment)(implicit hc: HeaderCarrier): Future[Map[ApiContext, ApiData]] =
+  def fetchAllApis(environment: Environment)(implicit hc: HeaderCarrier): Future[List[ApiDefinition]] =
     metrics.record(api) {
-      http.GET[Map[ApiContext, ApiData]](s"${config.serviceBaseUrl}/api-definitions/all", Seq("environment" -> environment.toString()))
+      http.GET[MappedApiDefinitions](s"${config.serviceBaseUrl}/api-definitions/all", Seq("environment" -> environment.toString))
+        .map(_.wrapped.values.toList)
     }
 
   def upliftApplicationV1(applicationId: ApplicationId, subs: Set[ApiIdentifier])(implicit hc: HeaderCarrier): Future[ApplicationId] = metrics.record(api) {

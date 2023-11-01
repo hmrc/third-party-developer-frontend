@@ -20,6 +20,7 @@ import cats.data.NonEmptyList
 
 import play.api.mvc._
 
+import uk.gov.hmrc.apiplatform.modules.apis.domain.models.ApiDefinition
 import uk.gov.hmrc.apiplatform.modules.applications.domain.models.Collaborator
 import uk.gov.hmrc.apiplatform.modules.common.domain.models._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.apidefinitions.{
@@ -29,7 +30,6 @@ import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.apidefinitions.{
 }
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.DeveloperSession
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.subscriptions.ApiData
 
 class UserRequest[A](val developerSession: DeveloperSession, val msgRequest: MessagesRequest[A]) extends MessagesRequest[A](msgRequest, msgRequest.messagesApi) {
   lazy val userId    = developerSession.developer.userId
@@ -46,7 +46,7 @@ class ApplicationRequest[A](
     val application: Application,
     val deployedTo: Environment,
     val subscriptions: List[APISubscriptionStatus],
-    val openAccessApis: Map[ApiContext, ApiData],
+    val openAccessApis: List[ApiDefinition],
     val role: Collaborator.Role,
     val userRequest: UserRequest[A]
   ) extends UserRequest[A](userRequest.developerSession, userRequest.msgRequest) with HasApplication {

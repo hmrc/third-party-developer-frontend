@@ -22,17 +22,17 @@
 @import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.checkpages.DummySubscriptionsForm
 @import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.views.BackButtonWithJavaScript
 @import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.DeveloperSession
-@import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.subscriptions.ApiData
 @import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.checkpages.routes
 @import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.GroupedSubscriptions
 @import uk.gov.hmrc.apiplatform.modules.applications.domain.models.Collaborator
+@import uk.gov.hmrc.apiplatform.modules.apis.domain.models.ApiDefinition
 
 @this(devMain: DevMain, subscriptionGroups: SubscriptionGroups)
 @(
     app: Application, 
     role: Collaborator.Role,
-    subscriptions: Option[GroupedSubscriptions], 
-    openAccessApis: Map[ApiContext, ApiData],
+    subscriptions: Option[GroupedSubscriptions],
+    openAccessApis: List[ApiDefinition],
     id: ApplicationId, 
     submitAction: Call, 
     errorForm: Option[Form[DummySubscriptionsForm]] = None

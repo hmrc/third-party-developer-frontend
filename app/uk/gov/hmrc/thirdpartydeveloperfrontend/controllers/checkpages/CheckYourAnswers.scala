@@ -202,8 +202,8 @@ object CheckYourAnswersData {
       CheckYourSubscriptionData(
         name = in.name,
         apiContext = in.context,
-        apiVersion = in.apiVersion.version,
-        displayedStatus = in.apiVersion.displayedStatus,
+        apiVersion = in.apiVersion.versionNbr,
+        displayedStatus = in.apiVersion.status.displayText,
         fields = in.fields.fields.map(ManageSubscriptions.toFieldValue(accessLevel))
       )
     }

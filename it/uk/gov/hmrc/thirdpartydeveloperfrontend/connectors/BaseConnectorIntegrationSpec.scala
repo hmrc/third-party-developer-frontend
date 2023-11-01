@@ -19,11 +19,12 @@ package uk.gov.hmrc.thirdpartydeveloperfrontend.connectors
 import com.github.tomakehurst.wiremock.WireMockServer
 import com.github.tomakehurst.wiremock.client.WireMock
 import com.github.tomakehurst.wiremock.core.WireMockConfiguration.wireMockConfig
-import org.scalatestplus.play.WsScalaTestClient
-import play.api.test.{DefaultAwaitTimeout, FutureAwaits}
-import org.scalatest.wordspec.AnyWordSpec
 import org.scalatest.matchers.should.Matchers
+import org.scalatest.wordspec.AnyWordSpec
 import org.scalatest.{BeforeAndAfterAll, BeforeAndAfterEach, OptionValues}
+import org.scalatestplus.play.WsScalaTestClient
+
+import play.api.test.{DefaultAwaitTimeout, FutureAwaits}
 
 trait BaseConnectorIntegrationSpec
     extends AnyWordSpec

@@ -60,6 +60,7 @@ lazy val microservice = Project(appName, file("."))
   )
   .configs(IntegrationTest)
   .settings(DefaultBuildSettings.integrationTestSettings())
+  .settings(inConfig(IntegrationTest)(scalafixConfigSettings(IntegrationTest)))
   .settings(
     IntegrationTest / testOptions := Seq(Tests.Argument(TestFrameworks.ScalaTest, "-eT")),
     IntegrationTest / unmanagedSourceDirectories ++= Seq(baseDirectory.value / "it", baseDirectory.value / "test-utils"),
@@ -67,7 +68,7 @@ lazy val microservice = Project(appName, file("."))
     IntegrationTest / parallelExecution := false
   )
   .configs(ComponentTest)
-  .settings(inConfig(ComponentTest)(Defaults.testSettings ++ BloopDefaults.configSettings ++ ScalafmtPlugin.scalafmtConfigSettings))
+  .settings(inConfig(ComponentTest)(Defaults.testSettings ++ BloopDefaults.configSettings ++ ScalafmtPlugin.scalafmtConfigSettings) ++ scalafixConfigSettings(ComponentTest))
   .settings(headerSettings(ComponentTest) ++ automateHeaderSettings(ComponentTest))
   .settings(
     ComponentTest / testOptions := Seq(Tests.Argument(TestFrameworks.ScalaTest, "-eT")),
@@ -96,6 +97,7 @@ lazy val microservice = Project(appName, file("."))
       "uk.gov.hmrc.thirdpartydeveloperfrontend.controllers",
       "uk.gov.hmrc.thirdpartydeveloperfrontend.config.ApplicationConfig",
       "uk.gov.hmrc.apiplatform.modules.applications.domain.models.ClientSecret.Id",
+      "uk.gov.hmrc.apiplatform.modules.apis.domain.models._",
       "uk.gov.hmrc.apiplatform.modules.common.domain.models._"
     )
   )
@@ -115,6 +117,6 @@ commands ++= Seq(
   Command.command("clean-and-test") { state => "clean" :: "compile" :: "run-all-tests" :: state },
 
   // Coverage does not need compile !
-  Command.command("pre-commit") { state => "scalafmtAll" :: "scalafixAll" :: "clean" :: "coverage" :: "testOnly * -- -l ExcludeFromCoverage" :: "it:test" :: "component:test" :: "coverageOff" :: "testOnly * -- -n ExcludeFromCoverage" :: "coverageReport" :: state }
+  Command.command("pre-commit") { state => "clean" :: "scalafmtAll" :: "scalafixAll" :: "coverage" :: "testOnly * -- -l ExcludeFromCoverage" :: "it:test" :: "component:test" :: "coverageOff" :: "testOnly * -- -n ExcludeFromCoverage" :: "coverageReport" :: state }
 
   )

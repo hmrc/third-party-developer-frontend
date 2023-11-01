@@ -119,7 +119,7 @@ class ApplicationServiceSpec extends AsyncHmrcSpec
   }
 
   def version(version: ApiVersionNbr, status: ApiStatus, subscribed: Boolean): VersionSubscription =
-    VersionSubscription(ApiVersionDefinition(version, status), subscribed)
+    VersionSubscription(ApiVersion(version, status, ApiAccess.PUBLIC, List.empty), subscribed)
 
   val productionApplicationId = ApplicationId.random
   val productionClientId      = ClientId(s"client-id-${randomUUID().toString}")
@@ -165,9 +165,9 @@ class ApplicationServiceSpec extends AsyncHmrcSpec
     ): APISubscriptionStatus =
     APISubscriptionStatus(
       name = name,
-      serviceName = name,
+      serviceName = ServiceName(name),
       context = context,
-      apiVersion = ApiVersionDefinition(version, status),
+      apiVersion = ApiVersion(version, status, ApiAccess.PUBLIC, List.empty),
       subscribed = subscribed,
       requiresTrust = requiresTrust,
       fields = emptySubscriptionFieldsWrapper(appId, clientId, context, version)
@@ -186,9 +186,9 @@ class ApplicationServiceSpec extends AsyncHmrcSpec
     ): APISubscriptionStatus = {
     APISubscriptionStatus(
       name = name,
-      serviceName = name,
+      serviceName = ServiceName(name),
       context = ApiContext(context),
-      apiVersion = ApiVersionDefinition(version, status),
+      apiVersion = ApiVersion(version, status, ApiAccess.PUBLIC, List.empty),
       subscribed = subscribed,
       requiresTrust = requiresTrust,
       fields = SubscriptionFieldsWrapper(appId, clientId, ApiContext(context), version, subscriptionFieldWithValues)

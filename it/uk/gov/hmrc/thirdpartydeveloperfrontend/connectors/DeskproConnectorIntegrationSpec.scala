@@ -17,16 +17,18 @@
 package uk.gov.hmrc.thirdpartydeveloperfrontend.connectors
 
 import com.github.tomakehurst.wiremock.client.WireMock._
-import uk.gov.hmrc.apiplatform.modules.common.domain.models._
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.connectors._
 import org.scalatestplus.play.guice.GuiceOneAppPerSuite
+
 import play.api.inject.bind
 import play.api.inject.guice.GuiceApplicationBuilder
 import play.api.libs.json.Json
 import play.api.{Application, Configuration, Mode}
 import uk.gov.hmrc.http.{HeaderCarrier, UpstreamErrorResponse}
 import uk.gov.hmrc.play.http.metrics.common.API
+
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.LaxEmailAddress.StringSyntax
+import uk.gov.hmrc.apiplatform.modules.common.domain.models._
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.connectors._
 
 class DeskproConnectorIntegrationSpec extends BaseConnectorIntegrationSpec with GuiceOneAppPerSuite {
   private val stubConfig = Configuration("microservice.services.hmrc-deskpro.port" -> stubPort)

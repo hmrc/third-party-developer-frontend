@@ -16,6 +16,8 @@
 
 package steps
 
+import java.util.UUID
+
 import io.cucumber.datatable.DataTable
 import io.cucumber.scala.Implicits._
 import io.cucumber.scala.{EN, ScalaDsl}
@@ -23,16 +25,17 @@ import matchers.CustomMatchers
 import org.openqa.selenium.{Cookie => SCookie, WebDriver}
 import org.scalatest.matchers.should.Matchers
 import pages._
+import stubs.{DeveloperStub, DeviceSessionStub, MfaStub, Stubs}
+import utils.MfaData
+
 import play.api.http.Status._
 import play.api.libs.json.Json
-import stubs.{DeveloperStub, DeviceSessionStub, MfaStub, Stubs}
+
+import uk.gov.hmrc.apiplatform.modules.common.domain.models.LaxEmailAddress.StringSyntax
 import uk.gov.hmrc.apiplatform.modules.mfa.models.MfaId
 import uk.gov.hmrc.apiplatform.modules.mfa.utils.MfaDetailHelper
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.connectors.{LoginRequest, UserAuthenticationResponse}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.{Developer, LoggedInState, Session}
-import utils.MfaData
-import uk.gov.hmrc.apiplatform.modules.common.domain.models.LaxEmailAddress.StringSyntax
-import java.util.UUID
 
 class MfaSteps extends ScalaDsl with EN with Matchers with NavigationSugar with PageSugar
     with CustomMatchers with MfaData {
@@ -179,8 +182,6 @@ class MfaSteps extends ScalaDsl with EN with Matchers with NavigationSugar with 
     TestContext.developer = developer
 
     DeveloperStub.setupGettingDeveloperByUserId(developer)
-
-    DeveloperStub.setUpGetCombinedApis()
   }
 
   Given("""^I already have a device cookie$""") {

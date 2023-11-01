@@ -23,13 +23,15 @@ import matchers.CustomMatchers
 import org.openqa.selenium.{By, WebDriver}
 import org.scalatest.matchers.should.Matchers
 import pages._
+import stubs.{DeveloperStub, MfaStub, Stubs}
+import utils.ComponentTestDeveloperBuilder
+
 import play.api.http.Status._
 import play.api.libs.json.{Format, Json}
-import stubs.{DeveloperStub, MfaStub, Stubs}
+
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.LaxEmailAddress.StringSyntax
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.connectors.{LoginRequest, PasswordResetRequest, UserAuthenticationResponse}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.{Developer, LoggedInState, Session}
-import utils.ComponentTestDeveloperBuilder
 
 case class MfaSecret(secret: String)
 
@@ -97,8 +99,6 @@ class LoginSteps extends ScalaDsl with EN with Matchers with NavigationSugar wit
     TestContext.sessionIdForMfaMandatingUser = setupLoggedOrPartLoggedInDeveloper(developer, password, LoggedInState.PART_LOGGED_IN_ENABLING_MFA)
 
     DeveloperStub.setupGettingDeveloperByUserId(developer)
-
-    DeveloperStub.setUpGetCombinedApis()
   }
 
   Given("""^'(.*)' session is uplifted to LoggedIn$""") { email: String =>

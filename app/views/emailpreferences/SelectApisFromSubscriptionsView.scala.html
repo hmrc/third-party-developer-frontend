@@ -54,7 +54,7 @@
           @for(api <- apis) {
             <div class="govuk-checkboxes__item">
               <input class="govuk-checkboxes__input" id="@api.serviceName" type="checkbox" name="selectedApi[]" value="@api.serviceName"
-              @if(selectedApis.contains(api.serviceName)) {checked} />
+              @if(selectedApis.contains(api.serviceName.value)) {checked} />
               <label class="govuk-label govuk-checkboxes__label" for="@api.serviceName">@api.displayName</label>
             </div>
           }

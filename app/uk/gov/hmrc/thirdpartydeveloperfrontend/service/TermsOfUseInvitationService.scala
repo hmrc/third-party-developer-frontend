@@ -17,7 +17,7 @@
 package uk.gov.hmrc.thirdpartydeveloperfrontend.service
 
 import javax.inject.{Inject, Singleton}
-import scala.concurrent.{ExecutionContext, Future}
+import scala.concurrent.Future
 
 import uk.gov.hmrc.http.HeaderCarrier
 
@@ -27,7 +27,6 @@ import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.connectors.TermsOfU
 @Singleton
 class TermsOfUseInvitationService @Inject() (
     connectorWrapper: ConnectorsWrapper
-  )(implicit ec: ExecutionContext
   ) {
 
   def fetchTermsOfUseInvitations()(implicit hc: HeaderCarrier): Future[List[TermsOfUseInvitation]] = {

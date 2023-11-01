@@ -88,13 +88,13 @@ class ActionBuildersSpec extends BaseControllerSpec
     "Found one" in new Setup {
       givenApplicationAction(applicationWithSubscriptionData, loggedInDeveloper, List(subscriptionWithSubFields))
 
-      runTestAction(subscriptionWithSubFields.context, subscriptionWithSubFields.apiVersion.version, OK)
+      runTestAction(subscriptionWithSubFields.context, subscriptionWithSubFields.apiVersion.versionNbr, OK)
     }
 
     "Wrong context" in new Setup {
       givenApplicationAction(applicationWithSubscriptionData, loggedInDeveloper, List(subscriptionWithSubFields))
 
-      runTestAction(ApiContext("wrong-context"), subscriptionWithSubFields.apiVersion.version, NOT_FOUND)
+      runTestAction(ApiContext("wrong-context"), subscriptionWithSubFields.apiVersion.versionNbr, NOT_FOUND)
     }
 
     "Wrong version" in new Setup {
@@ -106,7 +106,7 @@ class ActionBuildersSpec extends BaseControllerSpec
     "Subscription with no fields" in new Setup {
       givenApplicationAction(applicationWithSubscriptionData, loggedInDeveloper, List(subscriptionWithoutSubFields))
 
-      runTestAction(subscriptionWithSubFields.context, subscriptionWithSubFields.apiVersion.version, NOT_FOUND)
+      runTestAction(subscriptionWithSubFields.context, subscriptionWithSubFields.apiVersion.versionNbr, NOT_FOUND)
     }
   }
 }

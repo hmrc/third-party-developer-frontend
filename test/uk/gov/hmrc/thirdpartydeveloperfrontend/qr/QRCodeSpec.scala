@@ -57,7 +57,6 @@ class QRCodeSpec extends AsyncHmrcSpec {
       val httpImgData = QRCode().generateDataImageBase64("Test")
 
       val prefix :: imageInBase64 :: Nil = httpImgData.split(",", 2).toList
-      println(s"******** imageInBase64 = ${imageInBase64}")
       prefix shouldBe "data:image/png;base64"
       testQrCodeImages(imageInBase64, "/qrCodeImages/Small_QR_Code.png")
     }

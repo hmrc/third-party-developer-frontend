@@ -17,22 +17,22 @@
 package uk.gov.hmrc.thirdpartydeveloperfrontend.connectors.stubs
 
 import java.net.URLEncoder
+
 import com.github.tomakehurst.wiremock.client.WireMock._
-import uk.gov.hmrc.thirdpartydeveloperfrontend.connectors.EncryptedJson
-import uk.gov.hmrc.apiplatform.modules.common.domain.models._
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.ApplicationNameValidationJson.ApplicationNameValidationResult
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.{ApplicationToken, ApplicationWithSubscriptionData}
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.connectors.{PasswordResetRequest, UserAuthenticationResponse}
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.{Developer, Registration, Session, UpdateProfileRequest}
+import org.scalatest.matchers.should.Matchers
+
 import play.api.http.Status._
 import play.api.libs.json.{Json, Writes}
+
+import uk.gov.hmrc.apiplatform.modules.common.domain.models.{LaxEmailAddress, _}
 import uk.gov.hmrc.apiplatform.modules.common.services.ApplicationLogger
-import org.scalatest.matchers.should.Matchers
-import uk.gov.hmrc.apiplatform.modules.common.domain.models.LaxEmailAddress
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.emailpreferences.APICategoryDisplayDetails
+import uk.gov.hmrc.thirdpartydeveloperfrontend.connectors.EncryptedJson
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.ApplicationNameValidationJson.ApplicationNameValidationResult
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.{Application, ApplicationToken, ApplicationWithSubscriptionData}
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.connectors.{PasswordResetRequest, UserAuthenticationResponse}
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.{Developer, Registration, Session, UpdateProfileRequest}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.services.ApplicationsJsonFormatters._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.WireMockExtensions.withJsonRequestBodySyntax
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.Application
 
 object Stubs extends ApplicationLogger {
 
@@ -311,17 +311,6 @@ object ApiPlatformMicroserviceStub {
         .willReturn(
           aResponse()
             .withStatus(NOT_FOUND)
-        )
-    )
-  }
-
-  def stubFetchAllCombinedAPICategories(categories: List[APICategoryDisplayDetails]) = {
-    stubFor(
-      get(urlEqualTo("/api-categories/combined"))
-        .willReturn(
-          aResponse()
-            .withStatus(OK)
-            .withBody(Json.toJson(categories).toString())
         )
     )
   }

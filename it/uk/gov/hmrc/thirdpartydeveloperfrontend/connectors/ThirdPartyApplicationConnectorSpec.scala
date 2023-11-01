@@ -17,27 +17,26 @@
 package uk.gov.hmrc.thirdpartydeveloperfrontend.connectors
 
 import java.time.{LocalDateTime, Period, ZoneOffset}
+import java.util.UUID
+
 import com.github.tomakehurst.wiremock.client.WireMock._
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain._
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications._
+import org.scalatestplus.play.guice.GuiceOneAppPerSuite
+
 import play.api.http.Status._
+import play.api.inject.bind
+import play.api.inject.guice.GuiceApplicationBuilder
+import play.api.{Application => PlayApplication, Configuration, Mode}
 import uk.gov.hmrc.http._
 import uk.gov.hmrc.play.http.metrics.common.API
-import ThirdPartyApplicationConnectorJsonFormatters._
-import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.{CollaboratorTracker, LocalUserIdTracker, WireMockExtensions}
-import uk.gov.hmrc.apiplatform.modules.common.utils.FixedClock
-import org.scalatestplus.play.guice.GuiceOneAppPerSuite
-import play.api.Configuration
-import play.api.inject.guice.GuiceApplicationBuilder
-import play.api.inject.bind
-import play.api.Mode
-import play.api.{Application => PlayApplication}
-import uk.gov.hmrc.apiplatform.modules.common.domain.models._
-import uk.gov.hmrc.apiplatform.modules.common.domain.models.LaxEmailAddress.StringSyntax
 
-import java.util.UUID
-import uk.gov.hmrc.apiplatform.modules.applications.domain.models.ClientSecret
-import uk.gov.hmrc.apiplatform.modules.applications.domain.models.ClientSecretResponse
+import uk.gov.hmrc.apiplatform.modules.applications.domain.models.{ClientSecret, ClientSecretResponse}
+import uk.gov.hmrc.apiplatform.modules.common.domain.models.LaxEmailAddress.StringSyntax
+import uk.gov.hmrc.apiplatform.modules.common.domain.models._
+import uk.gov.hmrc.apiplatform.modules.common.utils.FixedClock
+import uk.gov.hmrc.thirdpartydeveloperfrontend.connectors.ThirdPartyApplicationConnectorJsonFormatters._
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain._
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications._
+import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.{CollaboratorTracker, LocalUserIdTracker, WireMockExtensions}
 
 class ThirdPartyApplicationConnectorSpec extends BaseConnectorIntegrationSpec with GuiceOneAppPerSuite with WireMockExtensions
     with CollaboratorTracker with LocalUserIdTracker with FixedClock {

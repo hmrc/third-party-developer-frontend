@@ -18,7 +18,7 @@ package uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.connectors
 
 import enumeratum.{Enum, EnumEntry, PlayJsonEnum}
 
-import uk.gov.hmrc.apiplatform.modules.apis.domain.models.ApiCategory
+import uk.gov.hmrc.apiplatform.modules.apis.domain.models.{ApiCategory, ServiceName}
 
 sealed trait ApiType extends EnumEntry
 
@@ -28,16 +28,4 @@ object ApiType extends Enum[ApiType] with PlayJsonEnum[ApiType] {
   case object XML_API  extends ApiType
 }
 
-case class CombinedApi(serviceName: String, displayName: String, categories: List[ApiCategory], apiType: ApiType)
-
-/*
-sealed trait ApiType extends EnumEntry
-
-object ApiType extends Enum[ApiType] with PlayJsonEnum[ApiType] {
-  val values = findValues
-  case object REST_API extends ApiType
-  case object XML_API  extends ApiType
-}
-
-case class CombinedApi(displayName: String, serviceName: String, categories: List[ApiCategory], apiType: ApiType, accessType: ApiAccessType)
- */
+case class CombinedApi(serviceName: ServiceName, displayName: String, categories: List[ApiCategory], apiType: ApiType)

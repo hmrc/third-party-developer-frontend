@@ -55,13 +55,18 @@ class APISubscriptionsSpec
         "Individual Employment",
         "individual-employment",
         List(
-          ApiVersionDefinition(versionOne, ApiStatus.STABLE),
-          ApiVersionDefinition(versionTwo, ApiStatus.BETA, publicAccess),
-          ApiVersionDefinition(versionThree, ApiStatus.BETA, privateAccess),
-          ApiVersionDefinition(ApiVersionNbr("4.0"), ApiStatus.BETA, privateAccess)
+          ApiVersion(versionOne, ApiStatus.STABLE, ApiAccess.PUBLIC, List.empty),
+          ApiVersion(versionTwo, ApiStatus.BETA, publicAccess, List.empty),
+          ApiVersion(versionThree, ApiStatus.BETA, privateAccess, List.empty),
+          ApiVersion(ApiVersionNbr("4.0"), ApiStatus.BETA, privateAccess, List.empty)
         )
       )
-      verifyApplicationSubscription(groupedSubscriptions.testApis.head, "Individual Tax", "individual-tax", List(ApiVersionDefinition(versionOne, ApiStatus.STABLE)))
+      verifyApplicationSubscription(
+        groupedSubscriptions.testApis.head,
+        "Individual Tax",
+        "individual-tax",
+        List(ApiVersion(versionOne, ApiStatus.STABLE, ApiAccess.PUBLIC, List.empty))
+      )
     }
 
     "group subscriptions based on api service-name" in {
@@ -82,9 +87,9 @@ class APISubscriptionsSpec
         groupedSubscriptions.apis.head,
         "Individual Employment",
         "individual-employment",
-        List(ApiVersionDefinition(versionOne, ApiStatus.STABLE), ApiVersionDefinition(versionTwo, ApiStatus.BETA))
+        List(ApiVersion(versionOne, ApiStatus.STABLE, ApiAccess.PUBLIC, List.empty), ApiVersion(versionTwo, ApiStatus.BETA, ApiAccess.PUBLIC, List.empty))
       )
-      verifyApplicationSubscription(groupedSubscriptions.apis(1), "Individual Tax", "individual-tax", List(ApiVersionDefinition(versionOne, ApiStatus.STABLE)))
+      verifyApplicationSubscription(groupedSubscriptions.apis(1), "Individual Tax", "individual-tax", List(ApiVersion(versionOne, ApiStatus.STABLE, ApiAccess.PUBLIC, List.empty)))
     }
 
     "take first app name if it is different" in {
@@ -104,7 +109,7 @@ class APISubscriptionsSpec
         groupedSubscriptions.apis.head,
         "Individual Employment",
         "individual-employment",
-        List(ApiVersionDefinition(versionOne, ApiStatus.STABLE), ApiVersionDefinition(versionTwo, ApiStatus.BETA))
+        List(ApiVersion(versionOne, ApiStatus.STABLE, ApiAccess.PUBLIC, List.empty), ApiVersion(versionTwo, ApiStatus.BETA, ApiAccess.PUBLIC, List.empty))
       )
     }
 
@@ -126,7 +131,12 @@ class APISubscriptionsSpec
       groupedSubscriptions.testApis.size shouldBe 0
       groupedSubscriptions.apis.size shouldBe 0
       groupedSubscriptions.exampleApi.isDefined shouldBe true
-      verifyApplicationSubscription(groupedSubscriptions.exampleApi.get, "Hello World", "api-example-microservice", List(ApiVersionDefinition(versionOne, ApiStatus.STABLE)))
+      verifyApplicationSubscription(
+        groupedSubscriptions.exampleApi.get,
+        "Hello World",
+        "api-example-microservice",
+        List(ApiVersion(versionOne, ApiStatus.STABLE, ApiAccess.PUBLIC, List.empty))
+      )
     }
   }
 
@@ -288,5 +298,5 @@ class APISubscriptionsSpec
   }
 
   def apiSubscription(apiName: String, serviceName: String, context: ApiContext, subscriptions: List[APISubscriptionStatus]) =
-    APISubscriptions(apiName, serviceName, context, subscriptions)
+    APISubscriptions(apiName, ServiceName(serviceName), context, subscriptions)
 }

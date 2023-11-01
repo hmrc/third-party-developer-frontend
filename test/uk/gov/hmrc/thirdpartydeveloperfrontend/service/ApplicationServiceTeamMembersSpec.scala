@@ -24,7 +24,7 @@ import scala.concurrent.Future.successful
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.play.audit.http.connector.AuditResult.Success
 
-import uk.gov.hmrc.apiplatform.modules.apis.domain.models.ApiStatus
+import uk.gov.hmrc.apiplatform.modules.apis.domain.models.{ApiAccess, ApiStatus, ApiVersion, ServiceName}
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.LaxEmailAddress.StringSyntax
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.{UserId, _}
 import uk.gov.hmrc.apiplatform.modules.common.utils.FixedClock
@@ -99,7 +99,7 @@ class ApplicationServiceTeamMembersSpec extends AsyncHmrcSpec with Subscriptions
   }
 
   def version(version: ApiVersionNbr, status: ApiStatus, subscribed: Boolean): VersionSubscription =
-    VersionSubscription(ApiVersionDefinition(version, status), subscribed)
+    VersionSubscription(ApiVersion(version, status, ApiAccess.PUBLIC, List.empty), subscribed)
 
   val productionApplicationId = ApplicationId.random
   val productionClientId      = ClientId(s"client-id-${randomUUID().toString}")
@@ -145,9 +145,9 @@ class ApplicationServiceTeamMembersSpec extends AsyncHmrcSpec with Subscriptions
     ): APISubscriptionStatus =
     APISubscriptionStatus(
       name = name,
-      serviceName = name,
+      serviceName = ServiceName(name),
       context = context,
-      apiVersion = ApiVersionDefinition(version, status),
+      apiVersion = ApiVersion(version, status, ApiAccess.PUBLIC, List.empty),
       subscribed = subscribed,
       requiresTrust = requiresTrust,
       fields = emptySubscriptionFieldsWrapper(appId, clientId, context, version)
@@ -166,9 +166,9 @@ class ApplicationServiceTeamMembersSpec extends AsyncHmrcSpec with Subscriptions
     ): APISubscriptionStatus = {
     APISubscriptionStatus(
       name = name,
-      serviceName = name,
+      serviceName = ServiceName(name),
       context = ApiContext(context),
-      apiVersion = ApiVersionDefinition(version, status),
+      apiVersion = ApiVersion(version, status, ApiAccess.PUBLIC, List.empty),
       subscribed = subscribed,
       requiresTrust = requiresTrust,
       fields = SubscriptionFieldsWrapper(appId, clientId, ApiContext(context), version, subscriptionFieldWithValues)
