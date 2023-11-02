@@ -52,16 +52,16 @@
 
   @if(userHasEmailPreferences) {
     <p class="govuk-body" id="first-line">Preferences for <span class="govuk-!-font-weight-bold">@loggedIn.developer.email.text</span></p>
-    @for(taxRegimeInterest <- loggedIn.developer.emailPreferences.interests.sortBy(_.regime).zipWithIndex) {
-      <h2 class="govuk-heading-s govuk-!-margin-top-0 govuk-!-margin-bottom-1" id="category-heading-@taxRegimeInterest._1.regime">@viewData.taxRegimeDisplayName(taxRegimeInterest._1.regime)</h2>
-      @if(taxRegimeInterest._1.services.isEmpty) {
-        <p class="govuk-body govuk-!-margin-bottom-2" id="all-api-@taxRegimeInterest._1.regime">
-          All @viewData.taxRegimeDisplayName(taxRegimeInterest._1.regime) APIs
+    @for(taxRegimeInterest <- loggedIn.developer.emailPreferences.interests.sortBy(_.regime)) {
+      <h2 class="govuk-heading-s govuk-!-margin-top-0 govuk-!-margin-bottom-1" id="category-heading-@taxRegimeInterest.regime">@viewData.taxRegimeDisplayName(taxRegimeInterest.regime)</h2>
+      @if(taxRegimeInterest.services.isEmpty) {
+        <p class="govuk-body govuk-!-margin-bottom-2" id="all-api-@taxRegimeInterest.regime">
+          All @viewData.taxRegimeDisplayName(taxRegimeInterest.regime) APIs
         </p>
       } else {
         <ul class="govuk-list govuk-!-margin-bottom-2">
-        @for(selectedAPI <- taxRegimeInterest._1.services.toList.distinct.sorted) {
-          <li id="selected-@selectedAPI">@viewData.apiDisplayName(selectedAPI)</li>
+        @for(selectedAPI <- taxRegimeInterest.services.toList.sorted) {
+          <li id="api-preference-@taxRegimeInterest.regime-@selectedAPI">@viewData.apiDisplayName(selectedAPI)</li>
         }
         </ul>
       }
