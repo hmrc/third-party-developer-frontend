@@ -111,3 +111,12 @@ lazy val microservice = Project(appName, file("."))
   )
 lazy val ComponentTest = config("component") extend Test
 
+commands ++= Seq(
+  Command.command("run-all-tests") { state => "test" :: "it:test" :: "component:test" :: state },
+
+  Command.command("clean-and-test") { state => "clean" :: "compile" :: "run-all-tests" :: state },
+
+  // Coverage does not need compile !
+  Command.command("pre-commit") { state => "clean" :: "scalafmtAll" :: "scalafixAll" :: "coverage" :: "testOnly * -- -l ExcludeFromCoverage" :: "it:test" :: "component:test" :: "coverageOff" :: "testOnly * -- -n ExcludeFromCoverage" :: "coverageReport" :: state }
+
+  )

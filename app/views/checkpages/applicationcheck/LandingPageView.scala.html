@@ -119,9 +119,9 @@
             </td>
             <td class="govuk-table__cell align-right">
               @if(form("teamConfirmedCompleted").value.contains("true")) {
-                <div id="app-name-status" class="step-status status-completed">Complete</div>
+                <div id="team-confirmed-status" class="step-status status-completed">Complete</div>
               } else {
-                <div id="app-name-status" class="step-status status-incomplete">To do</div>
+                <div id="team-confirmed-status" class="step-status status-incomplete">To do</div>
               }
             </td>
           </tr>
@@ -170,9 +170,9 @@
             </td>
             <td class="govuk-table__cell align-right">
               @if(form("providedPolicyURLCompleted").value.contains("true")) {
-                <div id="urls-status" class="step-status status-completed">Complete</div>
+                <div id="policy-urls-status" class="step-status status-completed">Complete</div>
               } else {
-                <div id="urls-status" class="step-status status-incomplete">To do</div>
+                <div id="policy-urls-status" class="step-status status-incomplete">To do</div>
               }
             </td>
           </tr>
@@ -186,9 +186,9 @@
             </td>
             <td class="govuk-table__cell align-right">
               @if(form("providedTermsAndConditionsURLCompleted").value.contains("true")) {
-                <div id="urls-status" class="step-status status-completed">Complete</div>
+                <div id="terms-urls-status" class="step-status status-completed">Complete</div>
               } else {
-                <div id="urls-status" class="step-status status-incomplete">To do</div>
+                <div id="terms-urls-status" class="step-status status-incomplete">To do</div>
               }
             </td>
           </tr>
