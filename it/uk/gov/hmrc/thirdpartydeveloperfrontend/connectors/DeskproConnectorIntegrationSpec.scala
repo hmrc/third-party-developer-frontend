@@ -31,7 +31,7 @@ import uk.gov.hmrc.apiplatform.modules.common.domain.models._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.connectors._
 
 class DeskproConnectorIntegrationSpec extends BaseConnectorIntegrationSpec with GuiceOneAppPerSuite {
-  private val stubConfig = Configuration("microservice.services.hmrc-deskpro.port" -> stubPort)
+  private val stubConfig = Configuration("microservice.services.deskpro-ticket-queue.port" -> stubPort)
 
   override def fakeApplication(): Application =
     GuiceApplicationBuilder()

@@ -55,7 +55,7 @@ class LoginCSRFIntegrationSpec extends BaseConnectorIntegrationSpec with GuiceOn
     "microservice.services.api-definition.port"                         -> stubPort,
     "microservice.services.api-documentation-frontend.port"             -> stubPort,
     "microservice.services.third-party-developer-frontend.port"         -> 9685,
-    "microservice.services.hmrc-deskpro.port"                           -> stubPort,
+    "microservice.services.deskpro-ticket-queue.port"                           -> stubPort,
     "microservice.services.api-subscription-fields-production.port"     -> stubPort,
     "microservice.services.api-subscription-fields-sandbox.port"        -> stubPort,
     "microservice.services.api-platform-microservice.port"              -> stubPort,
